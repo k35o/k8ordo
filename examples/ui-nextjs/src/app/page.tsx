@@ -1,5 +1,5 @@
 import { catalog } from '@k8ordo/ui/json-render';
-import type { ArteSpec } from '@k8ordo/ui/json-render';
+import type { UISpec } from '@k8ordo/ui/json-render';
 
 import { GenUiClient } from './gen-ui-client';
 
@@ -55,7 +55,7 @@ const spec = {
       children: [],
     },
   },
-} satisfies ArteSpec;
+} satisfies UISpec;
 
 export default function Home() {
   const systemPrompt = catalog.prompt();

@@ -16,7 +16,7 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
 
 - [Components](references/components.md): full component list, import paths, props, and i18n — component wording comes from a dictionary that defaults to Japanese; `@k8ordo/ui/i18n` exports `ja` / `en` / the `Messages` type for `<UIProvider messages={...}>` (per-component wording props win over the dictionary).
 - [AI chat](references/ai-chat.md): AI chat components from `@k8ordo/ui/ai` (Conversation / Message / PromptInput / Reasoning / Suggestion / ToolInvocation), streaming Markdown `Response` from `@k8ordo/ui/ai/response` (optional peer `streamdown`), and `mapMessageParts` from `@k8ordo/ui/ai-sdk` to render AI SDK `UIMessage.parts` (optional peer `ai`).
-- [Generative UI](references/generative-ui.md): use json-render / OpenUI to make an LLM generate UIs — `catalog.prompt()` (server-safe), `<JsonRenderUI spec={spec} />` (client), `validateGeneratedSpec()` (validate/repair LLM output), `satisfies ArteSpec` (typed specs), and `@k8ordo/ui/openui/prompt`.
+- [Generative UI](references/generative-ui.md): use json-render / OpenUI to make an LLM generate UIs — `catalog.prompt()` (server-safe), `<JsonRenderUI spec={spec} />` (client), `validateGeneratedSpec()` (validate/repair LLM output), `satisfies UISpec` (typed specs), and `@k8ordo/ui/openui/prompt`.
 - [Typography](references/typography.md): type scale and usage.
 - [Color](references/color.md): semantic token system and dark mode.
 - [Spacing & layout](references/spatial-design.md): spacing scale and layout patterns.

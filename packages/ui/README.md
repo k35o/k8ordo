@@ -453,11 +453,11 @@ The catalog (schemas / prompt) and the registry (rendering) are split so the cat
 
 ```tsx
 // Server Component: prompt generation
-import { catalog, arteOdysseyRules } from '@k8ordo/ui/json-render';
+import { catalog, uiRules } from '@k8ordo/ui/json-render';
 
 // `customRules` injects cross-cutting constraints the model tends to break
 // (Table cell counts match columns, href format, text-only Tabs/Accordion content).
-const systemPrompt = catalog.prompt({ customRules: [...arteOdysseyRules] });
+const systemPrompt = catalog.prompt({ customRules: [...uiRules] });
 ```
 
 ```tsx
@@ -484,10 +484,10 @@ if (result.ok) {
 const retried = await llm(result.repairPrompt); // ask the model to fix, then retry
 ```
 
-Hand-written or LLM specs can be typed with `satisfies ArteSpec` so component names and props are checked at compile time (no `as unknown as Spec`):
+Hand-written or LLM specs can be typed with `satisfies UISpec` so component names and props are checked at compile time (no `as unknown as Spec`):
 
 ```tsx
-import type { ArteSpec } from '@k8ordo/ui/json-render';
+import type { UISpec } from '@k8ordo/ui/json-render';
 
 const spec = {
   root: 'root',
@@ -495,15 +495,15 @@ const spec = {
     root: { type: 'Stack', props: { direction: 'column' }, children: ['ok'] },
     ok: { type: 'Button', props: { label: 'OK' } }, // typo in `type`/props → compile error
   },
-} satisfies ArteSpec;
+} satisfies UISpec;
 ```
 
 For advanced setups (custom `navigate` / `handlers` / `validationFunctions`), pass the lower-level `registry` to `JSONUIProvider` and `Renderer` from `@json-render/react` directly.
 
-| Export                            | Side           | Contents                                                                                                                             |
-| --------------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `@k8ordo/ui/json-render`          | server-safe    | `catalog` (schemas + `prompt()`), `validateGeneratedSpec`, `arteOdysseyRules`, types (`ArteSpec`, `ComponentName`, `ComponentProps`) |
-| `@k8ordo/ui/json-render/registry` | `'use client'` | `JsonRenderUI` (pre-wired), `registry` (low-level)                                                                                   |
+| Export                            | Side           | Contents                                                                                                                  |
+| --------------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `@k8ordo/ui/json-render`          | server-safe    | `catalog` (schemas + `prompt()`), `validateGeneratedSpec`, `uiRules`, types (`UISpec`, `ComponentName`, `ComponentProps`) |
+| `@k8ordo/ui/json-render/registry` | `'use client'` | `JsonRenderUI` (pre-wired), `registry` (low-level)                                                                        |
 
 ### OpenUI
 

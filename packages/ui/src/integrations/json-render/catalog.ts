@@ -222,9 +222,9 @@ export const catalog = defineCatalog(schema, {
  * 横断ルール集。json-render のシステムプロンプト本文に追記される。
  *
  * @example
- * const systemPrompt = catalog.prompt({ customRules: [...arteOdysseyRules] });
+ * const systemPrompt = catalog.prompt({ customRules: [...uiRules] });
  */
-export const arteOdysseyRules: readonly string[] = [
+export const uiRules: readonly string[] = [
   'Table の rows は各行のセル数を columns の数と必ず一致させる。',
   'href は https:// もしくは http:// で始まる絶対 URL か、/ で始まるパスのみ。',
   'Tabs と Accordion の content はプレーンテキストのみ。コンポーネントは入れ子にできない。',
@@ -242,7 +242,7 @@ export type ComponentProps<K extends ComponentName> = z.infer<
  * @k8ordo/ui のコンポーネントだけで構成された型付き spec の要素。
  * `type` と `props` がコンポーネントごとに検査される。
  */
-export type ArteSpecElement = {
+export type UISpecElement = {
   [K in ComponentName]: Omit<UIElement, 'type' | 'props'> & {
     type: K;
     props: ComponentProps<K>;
@@ -251,7 +251,7 @@ export type ArteSpecElement = {
 
 /**
  * @k8ordo/ui のコンポーネントだけで構成された型付き spec。
- * `satisfies ArteSpec` で書くと component 名・props の typo がコンパイルエラーに
+ * `satisfies UISpec` で書くと component 名・props の typo がコンパイルエラーに
  * なり、エディタ補完も効く。上流の `Spec` へキャストなしで代入できる。
  *
  * @example
@@ -261,11 +261,11 @@ export type ArteSpecElement = {
  *     root: { type: 'Stack', props: { direction: 'column' }, children: ['b'] },
  *     b: { type: 'Button', props: { label: 'OK' } },
  *   },
- * } satisfies ArteSpec;
+ * } satisfies UISpec;
  */
-export type ArteSpec = {
+export type UISpec = {
   root: string;
-  elements: Record<string, ArteSpecElement>;
+  elements: Record<string, UISpecElement>;
   state?: Spec['state'];
 };
 
@@ -277,7 +277,7 @@ export type GeneratedSpecIssue = {
 };
 
 export type ValidateGeneratedSpecResult =
-  | { ok: true; spec: ArteSpec; fixes: string[] }
+  | { ok: true; spec: UISpec; fixes: string[] }
   | { ok: false; issues: GeneratedSpecIssue[]; repairPrompt: string };
 
 const buildRepairPrompt = (issues: GeneratedSpecIssue[]): string =>
@@ -382,7 +382,7 @@ export const validateGeneratedSpec = (
   }
 
   if (issues.length === 0) {
-    return { ok: true, spec: spec as ArteSpec, fixes };
+    return { ok: true, spec: spec as UISpec, fixes };
   }
   return { ok: false, issues, repairPrompt: buildRepairPrompt(issues) };
 };

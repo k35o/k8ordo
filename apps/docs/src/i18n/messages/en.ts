@@ -77,7 +77,7 @@ export const en = {
     'k8ordo UI ships official adapters so an LLM can generate UIs constrained to these components, via json-render or OpenUI. Generate the prompt on the server, validate the output, and render it on the client.',
   'generativeUi.promptTitle': 'Generate the prompt (server)',
   'generativeUi.promptDescription':
-    'The catalog is server-safe. Generate the system prompt in a Server Component, and inject cross-cutting rules with `arteOdysseyRules`.',
+    'The catalog is server-safe. Generate the system prompt in a Server Component, and inject cross-cutting rules with `uiRules`.',
   'generativeUi.renderTitle': 'Render (client)',
   'generativeUi.renderDescription':
     '`JsonRenderUI` wires the provider, renderer, and registry for you — just pass a spec.',
@@ -86,7 +86,7 @@ export const en = {
     '`validateGeneratedSpec` auto-fixes, checks structure, and validates props per component, returning a ready-to-resend repair prompt on failure.',
   'generativeUi.typedTitle': 'Typed specs',
   'generativeUi.typedDescription':
-    'Write specs with `satisfies ArteSpec` so component names and props are checked at compile time.',
+    'Write specs with `satisfies UISpec` so component names and props are checked at compile time.',
   'aiChat.introduction':
     'Presentational building blocks for AI chat UIs. They hold no fetching or message state — you pass data in and compose them with `messages.map()`, so they connect to the AI SDK or your own backend. Import from `@k8ordo/ui/ai`.',
   'aiChat.demoTitle': 'Demo',

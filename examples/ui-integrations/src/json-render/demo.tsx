@@ -1,4 +1,4 @@
-import type { ArteSpec } from '@k8ordo/ui/json-render';
+import type { UISpec } from '@k8ordo/ui/json-render';
 import { JsonRenderUI } from '@k8ordo/ui/json-render/registry';
 
 export const jsonRenderSpec = {
@@ -290,7 +290,7 @@ export const jsonRenderSpec = {
       children: [],
     },
   },
-} satisfies ArteSpec;
+} satisfies UISpec;
 
 export function JsonRenderDemo() {
   return <JsonRenderUI spec={jsonRenderSpec} />;

@@ -76,7 +76,7 @@ export const ja = {
     'k8ordo UI は、LLM が k8ordo UI コンポーネントだけで UI を生成できる公式アダプタ（json-render / OpenUI）を同梱しています。プロンプトはサーバーで生成し、出力を検証してからクライアントで描画します。',
   'generativeUi.promptTitle': 'プロンプトを生成（サーバー）',
   'generativeUi.promptDescription':
-    'catalog はサーバー安全です。Server Component でシステムプロンプトを生成し、`arteOdysseyRules` で横断ルールを注入します。',
+    'catalog はサーバー安全です。Server Component でシステムプロンプトを生成し、`uiRules` で横断ルールを注入します。',
   'generativeUi.renderTitle': '描画（クライアント）',
   'generativeUi.renderDescription':
     '`JsonRenderUI` がプロバイダー・レンダラー・registry を内部結線済みなので、spec を渡すだけで描画できます。',
@@ -85,7 +85,7 @@ export const ja = {
     '`validateGeneratedSpec` が機械修正・構造検証・コンポーネントごとの props 検証を行い、失敗時はそのまま投げ返せる修復プロンプトを返します。',
   'generativeUi.typedTitle': '型付き spec',
   'generativeUi.typedDescription':
-    '`satisfies ArteSpec` で書くと、component 名・props の typo がコンパイル時に検出されます。',
+    '`satisfies UISpec` で書くと、component 名・props の typo がコンパイル時に検出されます。',
   'generativeUi.openuiTitle': 'OpenUI',
   'generativeUi.openuiDescription':
     'OpenUI は DSL 文字列を `library` で描画します。プロンプトは専用の `openui/prompt` エントリでサーバー生成できます。',

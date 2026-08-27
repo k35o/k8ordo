@@ -7,7 +7,7 @@ This example demonstrates k8ordo UI's **generative UI adapters** in a Vite + Rea
 This example showcases:
 
 - k8ordo UI setup in a Vite project (Vite+ / `vp` toolchain)
-- **json-render**: a typed `ArteSpec` rendered with the pre-wired `<JsonRenderUI />`
+- **json-render**: a typed `UISpec` rendered with the pre-wired `<JsonRenderUI />`
 - **OpenUI**: an OpenUI-Lang DSL string rendered with `library` + `Renderer`
 - Tailwind CSS 4 integration and TypeScript
 
@@ -42,7 +42,7 @@ examples/vite/
 ├── src/
 │   ├── app.tsx              # Hosts the json-render and OpenUI demos
 │   ├── json-render/
-│   │   └── demo.tsx         # Typed ArteSpec rendered with <JsonRenderUI />
+│   │   └── demo.tsx         # Typed UISpec rendered with <JsonRenderUI />
 │   ├── openui/
 │   │   └── demo.tsx         # OpenUI-Lang DSL rendered with library + Renderer
 │   ├── main.tsx             # Application entry point
@@ -57,14 +57,14 @@ examples/vite/
 
 ### json-render demo (`src/json-render/demo.tsx`)
 
-A hand-written UI tree is typed with `satisfies ArteSpec` (so a typo in a component
+A hand-written UI tree is typed with `satisfies UISpec` (so a typo in a component
 name or prop is a compile error) and rendered with the pre-wired client component:
 
 ```tsx
-import type { ArteSpec } from '@k8ordo/ui/json-render';
+import type { UISpec } from '@k8ordo/ui/json-render';
 import { JsonRenderUI } from '@k8ordo/ui/json-render/registry';
 
-const spec = {/* ... */} satisfies ArteSpec;
+const spec = {/* ... */} satisfies UISpec;
 
 export function JsonRenderDemo() {
   return <JsonRenderUI spec={spec} />;

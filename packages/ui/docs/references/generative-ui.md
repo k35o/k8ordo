@@ -20,11 +20,11 @@ catalog（スキーマ・プロンプト）と registry（描画）が分かれ�
 ### 1. サーバーでプロンプトを生成する
 
 ```tsx
-import { catalog, arteOdysseyRules } from '@k8ordo/ui/json-render';
+import { catalog, uiRules } from '@k8ordo/ui/json-render';
 
 // customRules は LLM が破りやすい横断制約を注入する
 // （Table のセル数を columns に一致 / href の形式 / Tabs・Accordion の content はテキストのみ）。
-const systemPrompt = catalog.prompt({ customRules: [...arteOdysseyRules] });
+const systemPrompt = catalog.prompt({ customRules: [...uiRules] });
 ```
 
 ### 2. クライアントで描画する
@@ -60,10 +60,10 @@ const retried = await llm(result.repairPrompt);
 
 ### 4. 型付き spec（任意）
 
-`satisfies ArteSpec` で書くと、component 名・props の typo がコンパイルエラーになり、`as unknown as Spec` が不要になる。
+`satisfies UISpec` で書くと、component 名・props の typo がコンパイルエラーになり、`as unknown as Spec` が不要になる。
 
 ```tsx
-import type { ArteSpec } from '@k8ordo/ui/json-render';
+import type { UISpec } from '@k8ordo/ui/json-render';
 
 const spec = {
   root: 'root',
@@ -71,7 +71,7 @@ const spec = {
     root: { type: 'Stack', props: { direction: 'column' }, children: ['ok'] },
     ok: { type: 'Button', props: { label: 'OK' } },
   },
-} satisfies ArteSpec;
+} satisfies UISpec;
 ```
 
 `ComponentName` / `ComponentProps<K>` も export されており、特定コンポーネントの props 型を取り出せる。
@@ -102,11 +102,11 @@ OpenUI では `Stack` / `Grid` の直下に `Stack` / `Grid` / `Card` を置け�
 
 ## エクスポート早見表
 
-| エクスポート                      | 区分           | 内容                                                                          |
-| --------------------------------- | -------------- | ----------------------------------------------------------------------------- |
-| `@k8ordo/ui/json-render`          | サーバー安全   | `catalog`, `validateGeneratedSpec`, `arteOdysseyRules`, 型（`ArteSpec` など） |
-| `@k8ordo/ui/json-render/registry` | `'use client'` | `JsonRenderUI`（事前結線）, `registry`（低レベル）                            |
-| `@k8ordo/ui/openui`               | `'use client'` | `library`（描画）                                                             |
-| `@k8ordo/ui/openui/prompt`        | サーバー安全   | `prompt()`（プロンプト生成）                                                  |
+| エクスポート                      | 区分           | 内容                                                               |
+| --------------------------------- | -------------- | ------------------------------------------------------------------ |
+| `@k8ordo/ui/json-render`          | サーバー安全   | `catalog`, `validateGeneratedSpec`, `uiRules`, 型（`UISpec` など） |
+| `@k8ordo/ui/json-render/registry` | `'use client'` | `JsonRenderUI`（事前結線）, `registry`（低レベル）                 |
+| `@k8ordo/ui/openui`               | `'use client'` | `library`（描画）                                                  |
+| `@k8ordo/ui/openui/prompt`        | サーバー安全   | `prompt()`（プロンプト生成）                                       |
 
 > いずれも `@k8ordo/ui/styles.css`（Tailwind CSS 4 のプロジェクトは代わりに `@k8ordo/ui/tailwind.css`）の読み込みと `UIProvider` でのラップが前提。

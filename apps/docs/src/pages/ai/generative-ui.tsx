@@ -24,10 +24,10 @@ export function GenerativeUi() {
           <T k="generativeUi.promptDescription" />
         </p>
         <CodeBlock
-          code={`import { catalog, arteOdysseyRules } from '@k8ordo/ui/json-render';
+          code={`import { catalog, uiRules } from '@k8ordo/ui/json-render';
 
 // Runs on the server. customRules injects constraints the model tends to break.
-const systemPrompt = catalog.prompt({ customRules: [...arteOdysseyRules] });`}
+const systemPrompt = catalog.prompt({ customRules: [...uiRules] });`}
           lang="tsx"
         />
       </section>
@@ -83,7 +83,7 @@ const retried = await llm(result.repairPrompt); // fix and retry`}
           <T k="generativeUi.typedDescription" />
         </p>
         <CodeBlock
-          code={`import type { ArteSpec } from '@k8ordo/ui/json-render';
+          code={`import type { UISpec } from '@k8ordo/ui/json-render';
 
 const spec = {
   root: 'root',
@@ -91,7 +91,7 @@ const spec = {
     root: { type: 'Stack', props: { direction: 'column' }, children: ['ok'] },
     ok: { type: 'Button', props: { label: 'OK' } },
   },
-} satisfies ArteSpec;`}
+} satisfies UISpec;`}
           lang="tsx"
         />
       </section>
