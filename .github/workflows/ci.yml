@@ -26,7 +26,7 @@ jobs:
         run: pnpm exec playwright install
 
       - name: Run tests
-        run: pnpm --filter @k8o/arte-odyssey test
+        run: pnpm --filter @k8ordo/ui test
 
   lint:
     name: Lint
@@ -74,12 +74,12 @@ jobs:
         uses: ./.github/composite-actions/install
 
       - name: Build package
-        run: pnpm --filter @k8o/arte-odyssey build
+        run: pnpm --filter @k8ordo/ui build
 
       # Validate the publishable artifact: publint checks packaging metadata,
       # attw checks that types resolve under every module-resolution mode.
       - name: Check packaging
-        run: pnpm --filter @k8o/arte-odyssey check:package
+        run: pnpm --filter @k8ordo/ui check:package
 
   examples:
     name: Examples
@@ -119,12 +119,12 @@ jobs:
 
       # Re-extract tokens from index.css and fail if the committed
       # tokens.generated.ts is stale (CSS edit, Tailwind bump, or tool update).
-      # Fix with: pnpm --filter @k8o/arte-odyssey generate:tokens
+      # Fix with: pnpm --filter @k8ordo/ui generate:tokens
       - name: Check design tokens are in sync with CSS
-        run: pnpm --filter @k8o/arte-odyssey check:tokens
+        run: pnpm --filter @k8ordo/ui check:tokens
 
       # Re-extract component props from the types and fail if the committed
       # props.generated.json is stale (a prop added, renamed, or retyped).
-      # Fix with: pnpm --filter @k8o/arte-odyssey generate:props
+      # Fix with: pnpm --filter @k8ordo/ui generate:props
       - name: Check component props are in sync with types
-        run: pnpm --filter @k8o/arte-odyssey check:props
+        run: pnpm --filter @k8ordo/ui check:props

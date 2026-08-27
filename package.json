@@ -1,12 +1,12 @@
 {
-  "name": "arte-odyssey",
+  "name": "k8ordo",
   "private": true,
   "description": "k8o's react ui library",
   "license": "MIT",
   "author": "k8o",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/k35o/arte-odyssey.git"
+    "url": "git+https://github.com/k35o/k8ordo.git"
   },
   "type": "module",
   "scripts": {

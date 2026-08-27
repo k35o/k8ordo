@@ -1,4 +1,4 @@
-# ArteOdyssey
+# k8ordo UI
 
 A modern, TypeScript-first React UI component library built with performance and developer experience in mind.
 
@@ -9,23 +9,23 @@ A modern, TypeScript-first React UI component library built with performance and
 - **Performant**: Optimized bundle size with tree-shakeable components
 - **Developer Friendly**: Comprehensive TypeScript support and Storybook documentation
 - **Customizable**: Semantic design tokens for easy theming — works from prebuilt CSS alone, with an optional Tailwind CSS 4 entry
-- **Generative UI Ready**: Official [json-render](https://json-render.dev) and [OpenUI](https://www.openui.com) adapters let an LLM generate on-brand UIs from these components — `validateGeneratedSpec()` validates/repairs LLM output and `<JsonRenderUI spec={spec} />` renders it in one line. See [Generative UI integrations](packages/arte-odyssey/README.md#generative-ui-integrations).
+- **Generative UI Ready**: Official [json-render](https://json-render.dev) and [OpenUI](https://www.openui.com) adapters let an LLM generate on-brand UIs from these components — `validateGeneratedSpec()` validates/repairs LLM output and `<JsonRenderUI spec={spec} />` renders it in one line. See [Generative UI integrations](packages/ui/README.md#generative-ui-integrations).
 
 ## Installation
 
 ```bash
-npm install @k8o/arte-odyssey
+npm install @k8ordo/ui
 # or
-pnpm add @k8o/arte-odyssey
+pnpm add @k8ordo/ui
 # or
-yarn add @k8o/arte-odyssey
+yarn add @k8ordo/ui
 ```
 
 ## AI Agent Documentation
 
 The design guide ships inside the published npm package, so an agent reads the
 version you actually installed. Paste the snippet from
-[AI Agent Documentation](packages/arte-odyssey/README.md#ai-agent-documentation)
+[AI Agent Documentation](packages/ui/README.md#ai-agent-documentation)
 into your project's `CLAUDE.md` / `AGENTS.md` — that section also lists the
 `llms.txt`, generated token spec, and Storybook MCP endpoints.
 
@@ -63,11 +63,11 @@ pnpm check:write
 apps/
   docs/                  # Documentation site (Vite + @funstack/router)
 packages/
-  arte-odyssey/          # Main UI library package
+  ui/                    # Main UI library package
 examples/
-  vite/                  # Vite example application
-  nextjs/                # Next.js example application
-  css-modules/           # Prebuilt-CSS example (no Tailwind)
+  ui-integrations/       # Generative UI adapters example (Vite)
+  ui-nextjs/             # Next.js example application
+  ui-css-modules/        # Prebuilt-CSS example (no Tailwind)
 ```
 
 ### Available Scripts
@@ -86,9 +86,9 @@ examples/
 Per-story VRT runs on [storybook-addon-vrt](https://github.com/k35o/storybook-addon-vrt).
 
 ```bash
-pnpm --filter @k8o/arte-odyssey test:vrt          # capture story screenshots
-pnpm --filter @k8o/arte-odyssey exec svrt compare # compare against the baseline
-pnpm --filter @k8o/arte-odyssey exec svrt approve # accept changes as the new baseline
+pnpm --filter @k8ordo/ui test:vrt          # capture story screenshots
+pnpm --filter @k8ordo/ui exec svrt compare # compare against the baseline
+pnpm --filter @k8ordo/ui exec svrt approve # accept changes as the new baseline
 ```
 
 On CI, every pull request is compared against the latest baseline captured on
@@ -97,10 +97,10 @@ comment. Merging the pull request makes its screenshots the next baseline.
 
 ## Documentation
 
-- [Official documentation site](https://arte-odyssey.k8o.me)
+- [Official documentation site](https://ordo.k8o.me)
 - [Storybook](https://main--687a213c85e2e4589d8db1bb.chromatic.com)
-- [Component Documentation](packages/arte-odyssey/README.md)
-- [Generative UI integrations (json-render / OpenUI)](packages/arte-odyssey/README.md#generative-ui-integrations)
+- [Component Documentation](packages/ui/README.md)
+- [Generative UI integrations (json-render / OpenUI)](packages/ui/README.md#generative-ui-integrations)
 
 ## Contributing
 

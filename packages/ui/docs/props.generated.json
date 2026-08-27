@@ -1,0 +1,3519 @@
+{
+  "components": [
+    {
+      "name": "AccessibilityIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "Accordion.Button",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "Accordion.Item",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "defaultOpen",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "isOpen",
+          "types": ["boolean"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "types": ["(isOpen: boolean) => void"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "Accordion.Panel",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "Accordion.Root",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "AIIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "Alert",
+      "props": [
+        {
+          "name": "message",
+          "types": ["string", "string[]"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "tone",
+          "types": ["Status"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "action",
+          "types": ["AlertAction"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "closeLabel",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "onClose",
+          "types": ["() => void"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": "HTMLAttributes<HTMLDivElement>"
+    },
+    {
+      "name": "AlertIcon",
+      "props": [
+        {
+          "name": "status",
+          "types": ["Status"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "Anchor",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "href",
+          "types": ["T"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "openInNewTab",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "renderAnchor",
+          "types": ["(props: RenderAnchorProps<T>) => ReactNode"],
+          "defaultValue": "defaultRenderAnchor",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "AssistantIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "AtomIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "Autocomplete",
+      "props": [
+        {
+          "name": "id",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "options",
+          "types": ["readonly Option[]"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "defaultValue",
+          "types": ["never"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "invalid",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "types": ["(value: string[]) => void"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "ref",
+          "types": ["Ref<HTMLInputElement>"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "value",
+          "types": ["string[]"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "Avatar",
+      "props": [
+        {
+          "name": "alt",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "color",
+          "types": ["'base'", "'primary'", "'secondary'"],
+          "defaultValue": "'base'",
+          "required": false
+        },
+        {
+          "name": "fallback",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "icon",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "name",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "size",
+          "types": ["'sm'", "'md'", "'lg'"],
+          "defaultValue": "'md'",
+          "required": false
+        },
+        {
+          "name": "src",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": "HTMLAttributes<HTMLSpanElement>"
+    },
+    {
+      "name": "Badge",
+      "props": [
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "interactive",
+          "types": ["true"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "size",
+          "types": ["Size"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "tone",
+          "types": ["Tone"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "variant",
+          "types": ["Variant"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "BadIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "BlogIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "BoringIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "Breadcrumb.Item",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "Breadcrumb.Link",
+      "props": [
+        {
+          "name": "href",
+          "types": ["T"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "current",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "renderAnchor",
+          "types": ["(props: RenderBreadcrumbAnchorProps<T>) => ReactNode"],
+          "defaultValue": "defaultRenderBreadcrumbAnchor",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "Breadcrumb.List",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "size",
+          "types": ["'sm'", "'md'", "'lg'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "Breadcrumb.Separator",
+      "props": [],
+      "inherits": null
+    },
+    {
+      "name": "Button",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "color",
+          "types": ["'primary'", "'secondary'", "'base'"],
+          "defaultValue": "'primary'",
+          "required": false
+        },
+        {
+          "name": "endIcon",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "fullWidth",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "isActive",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "onAction",
+          "types": ["() => void | Promise<void>"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "renderItem",
+          "types": [
+            "(props: { className: string; children: ReactNode }) => ReactNode"
+          ],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "size",
+          "types": ["'sm'", "'md'", "'lg'"],
+          "defaultValue": "'md'",
+          "required": false
+        },
+        {
+          "name": "startIcon",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "type",
+          "types": ["'button'", "'submit'"],
+          "defaultValue": "'button'",
+          "required": false
+        },
+        {
+          "name": "variant",
+          "types": ["'solid'", "'outline'", "'skeleton'"],
+          "defaultValue": "'solid'",
+          "required": false
+        }
+      ],
+      "inherits": "ComponentPropsWithRef<'button'>"
+    },
+    {
+      "name": "Card",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "interactive",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "variant",
+          "types": ["'shadow'", "'outline'"],
+          "defaultValue": "'shadow'",
+          "required": false
+        },
+        {
+          "name": "width",
+          "types": ["'full'", "'fit'"],
+          "defaultValue": "'full'",
+          "required": false
+        }
+      ],
+      "inherits": "HTMLAttributes<HTMLDivElement>"
+    },
+    {
+      "name": "Checkbox",
+      "props": [
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "checked",
+          "types": ["boolean"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "defaultChecked",
+          "types": ["never"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "itemValue",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "types": [
+            "(checked: boolean, event: ChangeEvent<HTMLInputElement>) => void"
+          ],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "ref",
+          "types": ["Ref<HTMLInputElement>"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "CheckboxCard",
+      "props": [
+        {
+          "name": "aria-labelledby",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "options",
+          "types": ["readonly CheckboxCardOption[]"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "defaultValue",
+          "types": ["never"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "invalid",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "types": ["(value: string[]) => void"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "ref",
+          "types": ["Ref<HTMLFieldSetElement>"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "value",
+          "types": ["string[]"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "CheckboxGroup.Item",
+      "props": [
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "checked",
+          "types": ["boolean"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "defaultChecked",
+          "types": ["never"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "itemValue",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "types": [
+            "(checked: boolean, event: ChangeEvent<HTMLInputElement>) => void"
+          ],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "ref",
+          "types": ["Ref<HTMLInputElement>"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "CheckboxGroup.Root",
+      "props": [
+        {
+          "name": "aria-labelledby",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "name",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "defaultValue",
+          "types": ["never"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "invalid",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "types": ["(value: string[]) => void"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "ref",
+          "types": ["Ref<HTMLFieldSetElement>"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "value",
+          "types": ["string[]"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "CheckIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "ChevronIcon",
+      "props": [
+        {
+          "name": "direction",
+          "types": ["Direction"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "ChromeIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "CloseIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "Code",
+      "props": [
+        {
+          "name": "children",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        }
+      ],
+      "inherits": "HTMLAttributes<HTMLElement>"
+    },
+    {
+      "name": "CodeXmlIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "ColorContrastIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "ColorInfoIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "ColorScaleIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "Conversation.Messages",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "isStreaming",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "Conversation.Root",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": true
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "Conversation.ScrollButton",
+      "props": [
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "CopyIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "DarkModeIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "Dialog.Content",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "Dialog.Header",
+      "props": [
+        {
+          "name": "onClose",
+          "types": ["() => void"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "title",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": true
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "Dialog.Root",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "id",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "ref",
+          "types": ["Ref<HTMLElement>"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "role",
+          "types": ["'dialog'", "'alertdialog'"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "tabIndex",
+          "types": ["number"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "DifficultIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "Drawer",
+      "props": [
+        {
+          "name": "title",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "defaultOpen",
+          "types": ["boolean"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "isOpen",
+          "types": ["boolean"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "onClose",
+          "types": ["() => void"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "side",
+          "types": ["DrawerSide"],
+          "defaultValue": "'right'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "DropdownMenu.Content",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "DropdownMenu.IconTrigger",
+      "props": [
+        {
+          "name": "icon",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "DropdownMenu.Item",
+      "props": [
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "onAction",
+          "types": ["() => void"],
+          "defaultValue": null,
+          "required": true
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "DropdownMenu.Root",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "defaultOpen",
+          "types": ["boolean"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "isOpen",
+          "types": ["boolean"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "types": ["(isOpen: boolean) => void"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "placement",
+          "types": ["Placement"],
+          "defaultValue": "'bottom-start'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "DropdownMenu.SubMenu",
+      "props": [
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "DropdownMenu.Trigger",
+      "props": [
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "size",
+          "types": ["ComponentProps<typeof Button>['size']"],
+          "defaultValue": "'md'",
+          "required": false
+        },
+        {
+          "name": "variant",
+          "types": ["ComponentProps<typeof Button>['variant']"],
+          "defaultValue": "'solid'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "EasyIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "EdgeIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "ExternalLinkIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "FileField.ItemList",
+      "props": [
+        {
+          "name": "clearable",
+          "types": ["boolean"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "showWebkitRelativePath",
+          "types": ["boolean"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "FileField.Root",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "defaultValue",
+          "types": ["File[]"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "invalid",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "maxFiles",
+          "types": ["number"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "types": [
+            "(files: FileList | null, event?: ChangeEvent<HTMLInputElement>) => void"
+          ],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "ref",
+          "types": ["Ref<HTMLInputElement>"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "webkitDirectory",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        }
+      ],
+      "inherits": "InputHTMLAttributes<HTMLInputElement>"
+    },
+    {
+      "name": "FileField.Trigger",
+      "props": [
+        {
+          "name": "renderItem",
+          "types": [
+            "(props: { onClick: () => void; disabled: boolean; invalid: boolean; }) => ReactElement"
+          ],
+          "defaultValue": null,
+          "required": true
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "FirefoxIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "FlaskIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "ForkIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "Form",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "action",
+          "types": ["((formData: FormData) => void | Promise<void>)", "string"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": "FormHTMLAttributes<HTMLFormElement>"
+    },
+    {
+      "name": "FormControl",
+      "props": [
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "renderInput",
+          "types": [
+            "(props: { id: string; 'aria-describedby': string | undefined; 'aria-labelledby': string; disabled: boolean; invalid: boolean; required: boolean; }) => ReactElement"
+          ],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "disabled",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "errorText",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "helpText",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "invalid",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "labelAs",
+          "types": ["'label'", "'legend'"],
+          "defaultValue": "'label'",
+          "required": false
+        },
+        {
+          "name": "ref",
+          "types": ["Ref<HTMLElement>"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "required",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        }
+      ],
+      "inherits": "HTMLAttributes<HTMLElement>"
+    },
+    {
+      "name": "FormIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "FullscreenIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "GitHubIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "GoodIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "Grid",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "cols",
+          "types": ["1", "2", "3", "4", "5", "6", "'auto-fill'", "'auto-fit'"],
+          "defaultValue": "'auto-fill'",
+          "required": false
+        },
+        {
+          "name": "gap",
+          "types": ["GapSize"],
+          "defaultValue": "'md'",
+          "required": false
+        },
+        {
+          "name": "minItemSize",
+          "types": ["24", "32", "40", "48", "64", "80"],
+          "defaultValue": "48",
+          "required": false
+        }
+      ],
+      "inherits": "HTMLAttributes<HTMLDivElement>"
+    },
+    {
+      "name": "Heading",
+      "props": [
+        {
+          "name": "level",
+          "types": ["'h1'", "'h2'", "'h3'", "'h4'", "'h5'", "'h6'"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "lineClamp",
+          "types": ["1", "2", "3", "4", "5", "6"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": "HTMLAttributes<HTMLHeadingElement>"
+    },
+    {
+      "name": "HistoryIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "HorizontalWritingIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "IconButton",
+      "props": [
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "color",
+          "types": ["'transparent'", "'base'", "'primary'", "'secondary'"],
+          "defaultValue": "'transparent'",
+          "required": false
+        },
+        {
+          "name": "onAction",
+          "types": ["() => void | Promise<void>"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "renderItem",
+          "types": [
+            "(props: { className: string; children: ReactNode; 'aria-label': string; triggerProps: IconButtonTriggerProps; }) => ReactNode"
+          ],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "size",
+          "types": ["'sm'", "'md'", "'lg'"],
+          "defaultValue": "'md'",
+          "required": false
+        },
+        {
+          "name": "tooltipDisabled",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "tooltipPlacement",
+          "types": ["Placement"],
+          "defaultValue": "'top'",
+          "required": false
+        }
+      ],
+      "inherits": "ComponentPropsWithRef<'button'>"
+    },
+    {
+      "name": "InformativeIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "InterestingIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "LightModeIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "LinkIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "ListBox.Content",
+      "props": [
+        {
+          "name": "helpContent",
+          "types": ["ReactElement"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "ListBox.IconTrigger",
+      "props": [
+        {
+          "name": "icon",
+          "types": ["ReactElement"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "size",
+          "types": ["ComponentProps<typeof Button>['size']"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "ListBox.Root",
+      "props": [
+        {
+          "name": "options",
+          "types": ["readonly Option[]"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "defaultValue",
+          "types": ["Option['value']"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "types": ["(value: Option['value']) => void"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "placement",
+          "types": ["Placement"],
+          "defaultValue": "'bottom'",
+          "required": false
+        },
+        {
+          "name": "value",
+          "types": ["Option['value']"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "ListBox.Trigger",
+      "props": [
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "size",
+          "types": ["ComponentProps<typeof Button>['size']"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "ListIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "LocationIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "LockIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "LockOpenIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "Logo",
+      "props": [
+        {
+          "name": "aria-hidden",
+          "types": ["true"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "className",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "focusable",
+          "types": ["'false'"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "LogoIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "MailIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "Message.Content",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "isStreaming",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        }
+      ],
+      "inherits": "HTMLAttributes<HTMLDivElement>"
+    },
+    {
+      "name": "Message.Root",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "from",
+          "types": ["MessageRole"],
+          "defaultValue": null,
+          "required": true
+        }
+      ],
+      "inherits": "HTMLAttributes<HTMLDivElement>"
+    },
+    {
+      "name": "MinusIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "MixedColorIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "Modal",
+      "props": [
+        {
+          "name": "aria-describedby",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "aria-label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "aria-labelledby",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "defaultOpen",
+          "types": ["boolean"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "isOpen",
+          "types": ["boolean"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "onClose",
+          "types": ["() => void"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "ref",
+          "types": ["Ref<HTMLDialogElement>"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "side",
+          "types": ["ModalSide"],
+          "defaultValue": "'center'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "NavigationMenuIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "NewsIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "NumberField",
+      "props": [
+        {
+          "name": "defaultValue",
+          "types": ["never"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "invalid",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "max",
+          "types": ["number"],
+          "defaultValue": "9_007_199_254_740_991",
+          "required": false
+        },
+        {
+          "name": "min",
+          "types": ["number"],
+          "defaultValue": "-9_007_199_254_740_991",
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "types": ["(value: number) => void"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "precision",
+          "types": ["number"],
+          "defaultValue": "0",
+          "required": false
+        },
+        {
+          "name": "ref",
+          "types": ["Ref<HTMLInputElement>"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "step",
+          "types": ["number"],
+          "defaultValue": "1",
+          "required": false
+        },
+        {
+          "name": "value",
+          "types": ["number"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "PackageIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "Pagination",
+      "props": [
+        {
+          "name": "currentPage",
+          "types": ["number"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "onChange",
+          "types": ["(page: number) => void"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "totalPages",
+          "types": ["number"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "aria-label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "disabled",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "nextLabel",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "prevLabel",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "ref",
+          "types": ["Ref<HTMLElement>"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": "HTMLAttributes<HTMLElement>"
+    },
+    {
+      "name": "PaletteIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "PasswordInput",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "hideLabel",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "invalid",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "ref",
+          "types": ["Ref<HTMLInputElement>"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "showLabel",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": "InputHTMLAttributes<HTMLInputElement>"
+    },
+    {
+      "name": "PlusIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "Popover.Content",
+      "props": [
+        {
+          "name": "renderItem",
+          "types": ["(props: PopoverContentProps) => ReactElement"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "animation",
+          "types": ["'scale'", "'fade'"],
+          "defaultValue": "'scale'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "Popover.Root",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "closeOnClickAway",
+          "types": ["boolean"],
+          "defaultValue": "true",
+          "required": false
+        },
+        {
+          "name": "defaultOpen",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "flipDisabled",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "isOpen",
+          "types": ["boolean"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "types": ["(isOpen: boolean) => void"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "placement",
+          "types": ["Placement"],
+          "defaultValue": "'bottom-start'",
+          "required": false
+        },
+        {
+          "name": "role",
+          "types": ["'dialog'", "'menu'", "'listbox'"],
+          "defaultValue": "'menu'",
+          "required": false
+        },
+        {
+          "name": "trapFocus",
+          "types": ["boolean"],
+          "defaultValue": "true",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "Popover.Trigger",
+      "props": [
+        {
+          "name": "renderItem",
+          "types": ["(props: PopoverTriggerProps) => ReactElement"],
+          "defaultValue": null,
+          "required": true
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "PortalRootProvider",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "value",
+          "types": ["RefObject<HTMLElement | null>"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "PrepareIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "Progress",
+      "props": [
+        {
+          "name": "max",
+          "types": ["number"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "value",
+          "types": ["number"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "min",
+          "types": ["number"],
+          "defaultValue": "0",
+          "required": false
+        }
+      ],
+      "inherits": "HTMLAttributes<HTMLDivElement>"
+    },
+    {
+      "name": "PromptInput.Root",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "defaultValue",
+          "types": ["string"],
+          "defaultValue": "''",
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "types": ["(value: string) => void"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "onStop",
+          "types": ["() => void"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "onSubmit",
+          "types": ["(message: string) => void"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "status",
+          "types": ["ChatStatus"],
+          "defaultValue": "'ready'",
+          "required": false
+        },
+        {
+          "name": "value",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "PromptInput.Submit",
+      "props": [
+        {
+          "name": "sendLabel",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "stopLabel",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "PromptInput.Textarea",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "placeholder",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "ref",
+          "types": ["Ref<HTMLTextAreaElement>"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": "TextareaHTMLAttributes<HTMLTextAreaElement>"
+    },
+    {
+      "name": "PublishDateIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "QiitaIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "Radio",
+      "props": [
+        {
+          "name": "aria-labelledby",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "options",
+          "types": ["readonly Option[]"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "disabled",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "name",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "types": [
+            "(value: string, event: ChangeEvent<HTMLInputElement>) => void"
+          ],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "ref",
+          "types": ["Ref<HTMLDivElement>"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "value",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "RadioCard",
+      "props": [
+        {
+          "name": "aria-labelledby",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "options",
+          "types": ["readonly RadioCardOption[]"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "defaultValue",
+          "types": ["never"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "invalid",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "types": ["(value: string) => void"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "ref",
+          "types": ["Ref<HTMLFieldSetElement>"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "value",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "Reasoning",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "defaultOpen",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "isOpen",
+          "types": ["boolean"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "isStreaming",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "types": ["(isOpen: boolean) => void"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "RefreshIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "Response",
+      "props": [
+        {
+          "name": "children",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "isStreaming",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        }
+      ],
+      "inherits": "StreamdownProps"
+    },
+    {
+      "name": "RSSIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "SafariIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "ScrollLinked",
+      "props": [
+        {
+          "name": "container",
+          "types": ["RefObject<HTMLElement | null>"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "Select",
+      "props": [
+        {
+          "name": "options",
+          "types": ["readonly Option[]"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "invalid",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "ref",
+          "types": ["Ref<HTMLSelectElement>"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": "SelectHTMLAttributes<HTMLSelectElement>"
+    },
+    {
+      "name": "SendIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "Separator",
+      "props": [
+        {
+          "name": "color",
+          "types": ["'base'", "'mute'", "'subtle'"],
+          "defaultValue": "'base'",
+          "required": false
+        },
+        {
+          "name": "orientation",
+          "types": ["'horizontal'", "'vertical'"],
+          "defaultValue": "'horizontal'",
+          "required": false
+        }
+      ],
+      "inherits": "HTMLAttributes<HTMLSpanElement>"
+    },
+    {
+      "name": "ShallowIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "ShieldCheckIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "Skeleton",
+      "props": [
+        {
+          "name": "animate",
+          "types": ["boolean"],
+          "defaultValue": "true",
+          "required": false
+        },
+        {
+          "name": "shape",
+          "types": ["'rect'", "'circle'"],
+          "defaultValue": "'rect'",
+          "required": false
+        },
+        {
+          "name": "size",
+          "types": ["'sm'", "'md'", "'lg'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": "HTMLAttributes<HTMLDivElement>"
+    },
+    {
+      "name": "SlideIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "Slider",
+      "props": [
+        {
+          "name": "defaultValue",
+          "types": ["never"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "invalid",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "max",
+          "types": ["number"],
+          "defaultValue": "100",
+          "required": false
+        },
+        {
+          "name": "min",
+          "types": ["number"],
+          "defaultValue": "0",
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "types": ["(value: number) => void"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "ref",
+          "types": ["Ref<HTMLInputElement>"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "step",
+          "types": ["number"],
+          "defaultValue": "1",
+          "required": false
+        },
+        {
+          "name": "value",
+          "types": ["number"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "SparklesIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "Spinner",
+      "props": [
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "size",
+          "types": ["'sm'", "'md'", "'lg'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": "OutputHTMLAttributes<HTMLOutputElement>"
+    },
+    {
+      "name": "SquircleIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "Stack",
+      "props": [
+        {
+          "name": "align",
+          "types": ["'start'", "'center'", "'end'", "'stretch'"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "direction",
+          "types": ["'row'", "'column'"],
+          "defaultValue": "'column'",
+          "required": false
+        },
+        {
+          "name": "gap",
+          "types": ["GapSize"],
+          "defaultValue": "'md'",
+          "required": false
+        },
+        {
+          "name": "justify",
+          "types": ["'start'", "'center'", "'end'", "'between'"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "padding",
+          "types": ["PaddingSize"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": "HTMLAttributes<HTMLDivElement>"
+    },
+    {
+      "name": "SubscribeIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "Suggestion.Item",
+      "props": [
+        {
+          "name": "value",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "onSelect",
+          "types": ["(value: string) => void"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "Suggestion.List",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "Switch",
+      "props": [
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "checked",
+          "types": ["boolean"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "defaultChecked",
+          "types": ["never"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "invalid",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "types": [
+            "(checked: boolean, event: ChangeEvent<HTMLInputElement>) => void"
+          ],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "ref",
+          "types": ["Ref<HTMLInputElement>"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "Table.Body",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": "HTMLAttributes<HTMLTableSectionElement>"
+    },
+    {
+      "name": "Table.Caption",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": "HTMLAttributes<HTMLTableCaptionElement>"
+    },
+    {
+      "name": "Table.Cell",
+      "props": [
+        {
+          "name": "align",
+          "types": ["CellAlign"],
+          "defaultValue": "'left'",
+          "required": false
+        },
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "color",
+          "types": ["'base'", "'mute'"],
+          "defaultValue": "'base'",
+          "required": false
+        }
+      ],
+      "inherits": "TdHTMLAttributes<HTMLTableCellElement>"
+    },
+    {
+      "name": "Table.EmptyState",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "colSpan",
+          "types": ["number"],
+          "defaultValue": null,
+          "required": true
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "Table.Head",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": "HTMLAttributes<HTMLTableSectionElement>"
+    },
+    {
+      "name": "Table.HeaderCell",
+      "props": [
+        {
+          "name": "align",
+          "types": ["CellAlign"],
+          "defaultValue": "'left'",
+          "required": false
+        },
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "scope",
+          "types": ["'col'", "'row'", "'colgroup'", "'rowgroup'"],
+          "defaultValue": "'col'",
+          "required": false
+        }
+      ],
+      "inherits": "ThHTMLAttributes<HTMLTableCellElement>"
+    },
+    {
+      "name": "Table.Root",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": "TableHTMLAttributes<HTMLTableElement>"
+    },
+    {
+      "name": "Table.Row",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "interactive",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        }
+      ],
+      "inherits": "HTMLAttributes<HTMLTableRowElement>"
+    },
+    {
+      "name": "TableIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "Tabs.List",
+      "props": [
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "Tabs.Panel",
+      "props": [
+        {
+          "name": "id",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "Tabs.Root",
+      "props": [
+        {
+          "name": "ids",
+          "types": ["[string, ...string[]]"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "defaultSelectedId",
+          "types": ["string", "null"],
+          "defaultValue": "null",
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "types": ["(id: string) => void"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "selectedId",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "Tabs.Tab",
+      "props": [
+        {
+          "name": "id",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "TagIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "Textarea",
+      "props": [
+        {
+          "name": "autoResize",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "fullHeight",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "invalid",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "ref",
+          "types": ["Ref<HTMLTextAreaElement>"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": "TextareaHTMLAttributes<HTMLTextAreaElement>"
+    },
+    {
+      "name": "TextField",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "invalid",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "ref",
+          "types": ["Ref<HTMLInputElement>"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "type",
+          "types": ["TextInputType"],
+          "defaultValue": "'text'",
+          "required": false
+        }
+      ],
+      "inherits": "InputHTMLAttributes<HTMLInputElement>"
+    },
+    {
+      "name": "ToastProvider",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "portalRef",
+          "types": ["RefObject<HTMLElement | null>"],
+          "defaultValue": "null",
+          "required": false
+        },
+        {
+          "name": "position",
+          "types": ["'fixed'", "'absolute'"],
+          "defaultValue": "'fixed'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "ToolInvocation",
+      "props": [
+        {
+          "name": "name",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "state",
+          "types": ["ToolState"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "defaultOpen",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "deniedReason",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "errorText",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "input",
+          "types": ["unknown"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "isOpen",
+          "types": ["boolean"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "types": ["(isOpen: boolean) => void"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "output",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "Tooltip.Content",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "Tooltip.Root",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "closeDelay",
+          "types": ["number"],
+          "defaultValue": "150",
+          "required": false
+        },
+        {
+          "name": "defaultOpen",
+          "types": ["boolean"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "isOpen",
+          "types": ["boolean"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "types": ["(isOpen: boolean) => void"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "openDelay",
+          "types": ["number"],
+          "defaultValue": "0",
+          "required": false
+        },
+        {
+          "name": "placement",
+          "types": ["Placement"],
+          "defaultValue": "'bottom'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "Tooltip.Trigger",
+      "props": [
+        {
+          "name": "renderItem",
+          "types": ["(props: TooltipTriggerProps) => ReactElement"],
+          "defaultValue": null,
+          "required": true
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "TwitterIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "UIProvider",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "messages",
+          "types": ["Partial<Messages>"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "UpdateDateIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "VerticalWritingIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "ViewIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
+      "name": "ViewOffIcon",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null
+    }
+  ]
+}
