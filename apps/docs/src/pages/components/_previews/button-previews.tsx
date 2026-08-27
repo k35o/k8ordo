@@ -1,6 +1,6 @@
 'use client';
 
-import { Button } from '@k8o/arte-odyssey';
+import { Button } from '@k8ordo/ui';
 
 export function ButtonAsLinkPreview() {
   return (

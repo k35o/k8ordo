@@ -1,6 +1,6 @@
 'use client';
 
-import { CloseIcon, IconButton } from '@k8o/arte-odyssey';
+import { CloseIcon, IconButton } from '@k8ordo/ui';
 
 export function IconButtonAsLinkPreview() {
   return (

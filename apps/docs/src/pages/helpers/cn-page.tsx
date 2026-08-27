@@ -1,4 +1,4 @@
-import { Heading, Separator } from '@k8o/arte-odyssey';
+import { Heading, Separator } from '@k8ordo/ui';
 
 import { CodeBlock } from '../../components/code-block';
 import { ComponentPreview } from '../../components/component-preview';
@@ -38,7 +38,7 @@ export function CnPage() {
         <Heading level="h2">
           <T k="helpers.common.importTitle" />
         </Heading>
-        <CodeBlock code="import { cn } from '@k8o/arte-odyssey';" lang="ts" />
+        <CodeBlock code="import { cn } from '@k8ordo/ui';" lang="ts" />
       </section>
       <Separator color="mute" />
 

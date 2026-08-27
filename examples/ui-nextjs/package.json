@@ -1,0 +1,30 @@
+{
+  "name": "example-ui-nextjs",
+  "version": "0.1.13",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build --turbopack",
+    "start": "next start",
+    "typecheck": "next typegen && tsc --noEmit",
+    "check": "vp check",
+    "check:write": "vp check --fix"
+  },
+  "dependencies": {
+    "@json-render/core": "0.19.0",
+    "@json-render/react": "0.19.0",
+    "@k8ordo/ui": "workspace:^",
+    "@openuidev/react-lang": "0.2.6",
+    "next": "16.3.0",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "tailwindcss": "catalog:"
+  }
+}

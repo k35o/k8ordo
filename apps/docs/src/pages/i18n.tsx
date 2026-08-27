@@ -1,6 +1,6 @@
-import { Code, Heading, Separator } from '@k8o/arte-odyssey';
-import { en, ja } from '@k8o/arte-odyssey/i18n';
-import type { Messages } from '@k8o/arte-odyssey/i18n';
+import { Code, Heading, Separator } from '@k8ordo/ui';
+import { en, ja } from '@k8ordo/ui/i18n';
+import type { Messages } from '@k8ordo/ui/i18n';
 
 import { CodeBlock } from '../components/code-block';
 import { T } from '../components/t';
@@ -105,10 +105,10 @@ export function I18n() {
           <T k="i18n.defaultDescription" />
         </p>
         <CodeBlock
-          code={`import { ArteOdysseyProvider } from '@k8o/arte-odyssey';
+          code={`import { UIProvider } from '@k8ordo/ui';
 
 function App({ children }) {
-  return <ArteOdysseyProvider>{children}</ArteOdysseyProvider>;
+  return <UIProvider>{children}</UIProvider>;
 }`}
           lang="tsx"
         />
@@ -124,14 +124,14 @@ function App({ children }) {
           <T k="i18n.englishDescription" />
         </p>
         <CodeBlock
-          code={`import { ArteOdysseyProvider } from '@k8o/arte-odyssey';
-import { en } from '@k8o/arte-odyssey/i18n';
+          code={`import { UIProvider } from '@k8ordo/ui';
+import { en } from '@k8ordo/ui/i18n';
 
 function App({ children }) {
   return (
-    <ArteOdysseyProvider messages={en}>
+    <UIProvider messages={en}>
       {children}
-    </ArteOdysseyProvider>
+    </UIProvider>
   );
 }`}
           lang="tsx"
@@ -148,15 +148,15 @@ function App({ children }) {
           <T k="i18n.overrideDescription" />
         </p>
         <CodeBlock
-          code={`import { en } from '@k8o/arte-odyssey/i18n';
+          code={`import { en } from '@k8ordo/ui/i18n';
 
-<ArteOdysseyProvider messages={{ close: '閉じる (Esc)' }}>
+<UIProvider messages={{ close: '閉じる (Esc)' }}>
   {children}
-</ArteOdysseyProvider>
+</UIProvider>
 
-<ArteOdysseyProvider messages={{ ...en, autocompleteEmpty: 'No matches' }}>
+<UIProvider messages={{ ...en, autocompleteEmpty: 'No matches' }}>
   {children}
-</ArteOdysseyProvider>`}
+</UIProvider>`}
           lang="tsx"
         />
       </section>
@@ -176,9 +176,9 @@ function App({ children }) {
 // -> 送信中
 
 // 2. messages
-<ArteOdysseyProvider messages={en}>
+<UIProvider messages={en}>
   <Spinner />
-</ArteOdysseyProvider>
+</UIProvider>
 // -> Loading
 
 // 3. default
@@ -198,7 +198,7 @@ function App({ children }) {
           <T k="i18n.customDescription" />
         </p>
         <CodeBlock
-          code={`import type { Messages } from '@k8o/arte-odyssey/i18n';
+          code={`import type { Messages } from '@k8ordo/ui/i18n';
 
 const fr: Messages = {
   close: 'Fermer',
@@ -209,7 +209,7 @@ const fr: Messages = {
   // ...
 };
 
-<ArteOdysseyProvider messages={fr}>{children}</ArteOdysseyProvider>`}
+<UIProvider messages={fr}>{children}</UIProvider>`}
           lang="tsx"
         />
       </section>

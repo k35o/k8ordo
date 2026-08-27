@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Form, FormControl, TextField } from '@k8o/arte-odyssey';
+import { Button, Form, FormControl, TextField } from '@k8ordo/ui';
 import { useActionState, useState } from 'react';
 
 const sleep = (ms: number) =>

@@ -1,6 +1,6 @@
 'use client';
 
-import { Code } from '@k8o/arte-odyssey';
+import { Code } from '@k8ordo/ui';
 import type { FC } from 'react';
 
 import type { MessageKey } from '../i18n';

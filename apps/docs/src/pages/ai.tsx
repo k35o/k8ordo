@@ -1,6 +1,6 @@
 'use client';
 
-import { Heading } from '@k8o/arte-odyssey';
+import { Heading } from '@k8ordo/ui';
 
 import { aiPreviews } from '../components/ai-previews';
 import { CatalogCard } from '../components/catalog-card';

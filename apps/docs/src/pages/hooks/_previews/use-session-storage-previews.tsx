@@ -1,6 +1,6 @@
 'use client';
 
-import { useSessionStorage } from '@k8o/arte-odyssey';
+import { useSessionStorage } from '@k8ordo/ui';
 
 export function UseSessionStorageBasicPreview() {
   const [value, setValue] = useSessionStorage('demo-session-count', 0);
@@ -26,7 +26,7 @@ export function UseSessionStorageBasicPreview() {
 export function UseSessionStorageRemovePreview() {
   const [value, setValue, handleRemove] = useSessionStorage(
     'demo-session-name',
-    'ArteOdyssey',
+    'k8ordo UI',
   );
 
   return (

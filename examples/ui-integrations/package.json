@@ -1,0 +1,32 @@
+{
+  "name": "example-ui-integrations",
+  "version": "0.1.13",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vp dev",
+    "build": "vp build",
+    "test": "vp test",
+    "typecheck": "tsc -b",
+    "check": "vp check",
+    "check:write": "vp check --fix"
+  },
+  "dependencies": {
+    "@json-render/core": "0.19.0",
+    "@json-render/react": "0.19.0",
+    "@k8ordo/ui": "workspace:^",
+    "@openuidev/react-lang": "0.2.6",
+    "@tailwindcss/vite": "catalog:",
+    "tailwindcss": "catalog:",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@vitejs/plugin-react": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "vite": "catalog:",
+    "vite-plus": "catalog:"
+  }
+}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useScrollDirection } from '@k8o/arte-odyssey';
+import { useScrollDirection } from '@k8ordo/ui';
 import { useRef } from 'react';
 
 export function UseScrollDirectionPreview() {

@@ -1,6 +1,6 @@
 'use client';
 
-import { Anchor } from '@k8o/arte-odyssey';
+import { Anchor } from '@k8ordo/ui';
 import type { FC, MouseEventHandler, PropsWithChildren } from 'react';
 
 import { localizeHref, useLocale } from '../i18n';

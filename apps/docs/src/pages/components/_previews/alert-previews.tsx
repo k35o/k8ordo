@@ -1,6 +1,6 @@
 'use client';
 
-import { Alert, Anchor, Button } from '@k8o/arte-odyssey';
+import { Alert, Anchor, Button } from '@k8ordo/ui';
 import { useState } from 'react';
 
 export function AlertActionLinkPreview() {

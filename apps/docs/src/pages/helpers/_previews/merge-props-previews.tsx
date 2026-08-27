@@ -1,6 +1,6 @@
 'use client';
 
-import { mergeProps } from '@k8o/arte-odyssey';
+import { mergeProps } from '@k8ordo/ui';
 import { useState } from 'react';
 
 export function MergePropsPreview() {

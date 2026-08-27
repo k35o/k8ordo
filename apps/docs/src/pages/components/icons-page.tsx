@@ -3,7 +3,6 @@ import {
   AccessibilityIcon,
   AlertIcon,
   Anchor,
-  ArteOdyssey,
   AtomIcon,
   BadIcon,
   BlogIcon,
@@ -56,7 +55,7 @@ import {
   UpdateDateIcon,
   ViewIcon,
   ViewOffIcon,
-} from '@k8o/arte-odyssey';
+} from '@k8ordo/ui';
 import type { ReactNode } from 'react';
 
 import { CodeBlock } from '../../components/code-block';
@@ -102,7 +101,7 @@ export function IconsPage() {
           <T k="components.common.importTitle" />
         </Heading>
         <CodeBlock
-          code="import { CloseIcon, CheckIcon } from '@k8o/arte-odyssey';"
+          code="import { CloseIcon, CheckIcon } from '@k8ordo/ui';"
           lang="ts"
         />
       </section>
@@ -142,9 +141,6 @@ export function IconsPage() {
         <div className="grid-cols-auto-fit-28 grid gap-4">
           <IconCard name="LogoIcon">
             <LogoIcon />
-          </IconCard>
-          <IconCard name="ArteOdyssey">
-            <ArteOdyssey />
           </IconCard>
           <IconCard name="CloseIcon">
             <CloseIcon />

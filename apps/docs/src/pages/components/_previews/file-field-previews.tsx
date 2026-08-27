@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, FileField } from '@k8o/arte-odyssey';
+import { Button, FileField } from '@k8ordo/ui';
 
 export function FileFieldBasicPreview() {
   return (

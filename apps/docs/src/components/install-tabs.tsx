@@ -1,6 +1,6 @@
 'use client';
 
-import { Tabs } from '@k8o/arte-odyssey';
+import { Tabs } from '@k8ordo/ui';
 import type { FC, ReactNode } from 'react';
 
 import { useTranslation } from '../i18n';

@@ -1,4 +1,4 @@
-import { Anchor, Heading, Separator } from '@k8o/arte-odyssey';
+import { Anchor, Heading, Separator } from '@k8ordo/ui';
 
 import { CodeBlock } from '../../components/code-block';
 import { ComponentPreview } from '../../components/component-preview';
@@ -36,8 +36,8 @@ export function DialogPage() {
           <T k="components.common.importTitle" />
         </Heading>
         <CodeBlock
-          code={`import { Dialog } from '@k8o/arte-odyssey';
-import { Modal } from '@k8o/arte-odyssey';`}
+          code={`import { Dialog } from '@k8ordo/ui';
+import { Modal } from '@k8ordo/ui';`}
           lang="ts"
         />
       </section>

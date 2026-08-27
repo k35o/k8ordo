@@ -1,4 +1,4 @@
-import { Anchor, Heading, RadioCard, Separator } from '@k8o/arte-odyssey';
+import { Anchor, Heading, RadioCard, Separator } from '@k8ordo/ui';
 
 import { CodeBlock } from '../../components/code-block';
 import { ComponentPreview } from '../../components/component-preview';
@@ -52,10 +52,7 @@ export function RadioCardPage() {
         <Heading level="h2">
           <T k="components.common.importTitle" />
         </Heading>
-        <CodeBlock
-          code="import { RadioCard } from '@k8o/arte-odyssey';"
-          lang="ts"
-        />
+        <CodeBlock code="import { RadioCard } from '@k8ordo/ui';" lang="ts" />
       </section>
       <Separator color="mute" />
 
@@ -65,7 +62,7 @@ export function RadioCardPage() {
             <T k="components.common.usageTitle" />
           </Heading>
           <ComponentPreview
-            code={`import { RadioCard } from '@k8o/arte-odyssey';
+            code={`import { RadioCard } from '@k8ordo/ui';
 import { useState } from 'react';
 
 const options = [

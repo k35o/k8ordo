@@ -1,6 +1,6 @@
 'use client';
 
-import { Card } from '@k8o/arte-odyssey';
+import { Card } from '@k8ordo/ui';
 
 import { useTranslation } from '../i18n';
 import type { MessageKey } from '../i18n/types';

@@ -1,4 +1,4 @@
-import { Anchor, Heading, Separator } from '@k8o/arte-odyssey';
+import { Anchor, Heading, Separator } from '@k8ordo/ui';
 
 import { CodeBlock } from '../../components/code-block';
 import { ComponentPreview } from '../../components/component-preview';
@@ -35,10 +35,7 @@ export function ModalPage() {
         <Heading level="h2">
           <T k="components.common.importTitle" />
         </Heading>
-        <CodeBlock
-          code="import { Modal } from '@k8o/arte-odyssey';"
-          lang="ts"
-        />
+        <CodeBlock code="import { Modal } from '@k8ordo/ui';" lang="ts" />
       </section>
       <Separator color="mute" />
 
@@ -144,7 +141,7 @@ export function ModalPage() {
           <T k="components.modal.portalRootDescription" />
         </p>
         <CodeBlock
-          code={`import { usePortalRoot } from '@k8o/arte-odyssey';
+          code={`import { usePortalRoot } from '@k8ordo/ui';
 import { createPortal } from 'react-dom';
 
 function FloatingLayer({ children }) {

@@ -1,4 +1,4 @@
-import { Heading, Separator } from '@k8o/arte-odyssey';
+import { Heading, Separator } from '@k8ordo/ui';
 
 import { CodeBlock } from '../../components/code-block';
 import { ComponentPreview } from '../../components/component-preview';
@@ -57,7 +57,7 @@ export function UseLocalStoragePage() {
           <T k="hooks.common.importTitle" />
         </Heading>
         <CodeBlock
-          code="import { useLocalStorage } from '@k8o/arte-odyssey';"
+          code="import { useLocalStorage } from '@k8ordo/ui';"
           lang="ts"
         />
       </section>
@@ -95,7 +95,7 @@ return (
           <ComponentPreview
             code={`const [value, setValue, handleRemove] = useLocalStorage(
   'demo-name',
-  'ArteOdyssey',
+  'k8ordo UI',
 );
 
 return (

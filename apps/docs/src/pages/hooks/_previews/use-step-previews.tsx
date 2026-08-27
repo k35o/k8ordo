@@ -1,6 +1,6 @@
 'use client';
 
-import { useStep } from '@k8o/arte-odyssey';
+import { useStep } from '@k8ordo/ui';
 
 export function UseStepPreview() {
   const { count, back, next, isDisabledBack, isDisabledNext } = useStep({

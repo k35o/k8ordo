@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Popover } from '@k8o/arte-odyssey';
+import { Button, Popover } from '@k8ordo/ui';
 
 export function PopoverBasicPreview() {
   return (

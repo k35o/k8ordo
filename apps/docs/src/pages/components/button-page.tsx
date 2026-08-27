@@ -5,7 +5,7 @@ import {
   Heading,
   MailIcon,
   Separator,
-} from '@k8o/arte-odyssey';
+} from '@k8ordo/ui';
 
 import { CodeBlock } from '../../components/code-block';
 import { ComponentPreview } from '../../components/component-preview';
@@ -38,10 +38,7 @@ export function ButtonPage() {
         <Heading level="h2">
           <T k="components.common.importTitle" />
         </Heading>
-        <CodeBlock
-          code="import { Button } from '@k8o/arte-odyssey';"
-          lang="ts"
-        />
+        <CodeBlock code="import { Button } from '@k8ordo/ui';" lang="ts" />
       </section>
       <Separator color="mute" />
 
@@ -111,7 +108,7 @@ export function ButtonPage() {
             <T k="components.button.iconsTitle" />
           </Heading>
           <ComponentPreview
-            code={`import { MailIcon, ChevronIcon } from '@k8o/arte-odyssey';
+            code={`import { MailIcon, ChevronIcon } from '@k8ordo/ui';
 
 <Button startIcon={<MailIcon size="sm" />}>
   Send Email

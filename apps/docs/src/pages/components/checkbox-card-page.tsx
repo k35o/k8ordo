@@ -1,4 +1,4 @@
-import { Anchor, CheckboxCard, Heading, Separator } from '@k8o/arte-odyssey';
+import { Anchor, CheckboxCard, Heading, Separator } from '@k8ordo/ui';
 
 import { CodeBlock } from '../../components/code-block';
 import { ComponentPreview } from '../../components/component-preview';
@@ -50,7 +50,7 @@ export function CheckboxCardPage() {
           <T k="components.common.importTitle" />
         </Heading>
         <CodeBlock
-          code="import { CheckboxCard } from '@k8o/arte-odyssey';"
+          code="import { CheckboxCard } from '@k8ordo/ui';"
           lang="ts"
         />
       </section>
@@ -62,7 +62,7 @@ export function CheckboxCardPage() {
             <T k="components.common.usageTitle" />
           </Heading>
           <ComponentPreview
-            code={`import { CheckboxCard } from '@k8o/arte-odyssey';
+            code={`import { CheckboxCard } from '@k8ordo/ui';
 import { useState } from 'react';
 
 const options = [

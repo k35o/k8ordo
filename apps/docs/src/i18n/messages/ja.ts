@@ -10,7 +10,7 @@ export const ja = {
   'nav.helpers': 'Helpers',
   'nav.generativeUi': 'Generative UI',
   'nav.aiChat': 'AI チャット',
-  'home.title': 'ArteOdyssey',
+  'home.title': 'k8ordo',
   'home.description':
     '穏やかだけど退屈じゃないUIを作るためのReactコンポーネントライブラリ',
   'home.getStarted': 'はじめる',
@@ -45,15 +45,15 @@ export const ja = {
   'nav.ai': 'AI',
   'nav.aiAgents': 'AI エージェント',
   'ai.description':
-    'ArteOdyssey は AI プロダクトのための面を揃えています。チャット画面を組み立てる UI 部品、LLM に ArteOdyssey の UI を生成させるアダプタ、そして AI コーディングエージェントに読ませるドキュメントの3つです。',
+    'k8ordo UI は AI プロダクトのための面を揃えています。チャット画面を組み立てる UI 部品、LLM に k8ordo UI の UI を生成させるアダプタ、そして AI コーディングエージェントに読ませるドキュメントの3つです。',
   'ai.chatSummary':
     'Conversation・Message・PromptInput でチャット画面を組み立てる presentational な部品集。',
   'ai.generativeUiSummary':
-    'LLM が ArteOdyssey コンポーネントだけで UI を生成するための json-render / OpenUI アダプタ。',
+    'LLM が k8ordo UI コンポーネントだけで UI を生成するための json-render / OpenUI アダプタ。',
   'ai.agentsSummary':
     '設計指針・リファレンス・props を AI コーディングエージェントに読ませるためのドキュメント面。',
   'aiAgents.introduction':
-    'ArteOdyssey は、AI コーディングエージェントが読むための面を用意しています。設計指針・コンポーネントのリファレンス・トークン・props を、いずれも実装から生成した形で配っています。',
+    'k8ordo UI は、AI コーディングエージェントが読むための面を用意しています。設計指針・コンポーネントのリファレンス・トークン・props を、いずれも実装から生成した形で配っています。',
   'aiAgents.setupTitle': 'エージェントに読ませる',
   'aiAgents.setupDescription':
     'ドキュメントは npm パッケージに同梱されているので、参照先はインストール済みのバージョンに固定されます。プロジェクトの CLAUDE.md / AGENTS.md に次を貼るだけで設定は終わりです。',
@@ -73,10 +73,10 @@ export const ja = {
   'aiAgents.generatedDescription':
     'props はコンポーネントの型から、トークンは CSS から抽出しています。CI が実装との差分を検出するため、ドキュメントだけが古くなることはありません。',
   'generativeUi.introduction':
-    'ArteOdyssey は、LLM が ArteOdyssey コンポーネントだけで UI を生成できる公式アダプタ（json-render / OpenUI）を同梱しています。プロンプトはサーバーで生成し、出力を検証してからクライアントで描画します。',
+    'k8ordo UI は、LLM が k8ordo UI コンポーネントだけで UI を生成できる公式アダプタ（json-render / OpenUI）を同梱しています。プロンプトはサーバーで生成し、出力を検証してからクライアントで描画します。',
   'generativeUi.promptTitle': 'プロンプトを生成（サーバー）',
   'generativeUi.promptDescription':
-    'catalog はサーバー安全です。Server Component でシステムプロンプトを生成し、`arteOdysseyRules` で横断ルールを注入します。',
+    'catalog はサーバー安全です。Server Component でシステムプロンプトを生成し、`uiRules` で横断ルールを注入します。',
   'generativeUi.renderTitle': '描画（クライアント）',
   'generativeUi.renderDescription':
     '`JsonRenderUI` がプロバイダー・レンダラー・registry を内部結線済みなので、spec を渡すだけで描画できます。',
@@ -85,12 +85,12 @@ export const ja = {
     '`validateGeneratedSpec` が機械修正・構造検証・コンポーネントごとの props 検証を行い、失敗時はそのまま投げ返せる修復プロンプトを返します。',
   'generativeUi.typedTitle': '型付き spec',
   'generativeUi.typedDescription':
-    '`satisfies ArteSpec` で書くと、component 名・props の typo がコンパイル時に検出されます。',
+    '`satisfies UISpec` で書くと、component 名・props の typo がコンパイル時に検出されます。',
   'generativeUi.openuiTitle': 'OpenUI',
   'generativeUi.openuiDescription':
     'OpenUI は DSL 文字列を `library` で描画します。プロンプトは専用の `openui/prompt` エントリでサーバー生成できます。',
   'aiChat.introduction':
-    'AI チャット UI のための presentational な部品です。通信やメッセージの状態は持たず、データを渡して `messages.map()` で組み立てるだけ。AI SDK でも自前のバックエンドでも接続できます。`@k8o/arte-odyssey/ai` から import します。',
+    'AI チャット UI のための presentational な部品です。通信やメッセージの状態は持たず、データを渡して `messages.map()` で組み立てるだけ。AI SDK でも自前のバックエンドでも接続できます。`@k8ordo/ui/ai` から import します。',
   'aiChat.demoTitle': 'デモ',
   'aiChat.demoDescription':
     '実際のチャット画面です。サジェスチョンを選ぶか、メッセージを入力して送信すると、吹き出しが会話に積まれていきます。思考過程やツール呼び出しは折りたたみで確認できます。',
@@ -111,14 +111,14 @@ export const ja = {
     '`ToolInvocation` と `Reasoning` はツールの実行や思考過程を折りたたみで表示します。`state` の語彙は AI SDK のツールパートの状態に揃えています。',
   'aiChat.aiSdkTitle': 'AI SDK 連携',
   'aiChat.aiSdkDescription':
-    '`mapMessageParts`（`@k8o/arte-odyssey/ai-sdk`）は AI SDK の `UIMessage.parts` を、自分で描画しやすい素朴な配列に変換します。optional peer の `ai` が必要です。',
+    '`mapMessageParts`（`@k8ordo/ui/ai-sdk`）は AI SDK の `UIMessage.parts` を、自分で描画しやすい素朴な配列に変換します。optional peer の `ai` が必要です。',
   'aiChat.jsonRenderTitle': '吹き出しの中に Generative UI',
   'aiChat.jsonRenderDescription':
     'Message.Content は任意の children を取れるので、json-render の registry を使って LLM が生成した UI spec を吹き出しの中に描画できます。会話の中へそのまま Generative UI を届けられます。',
   'aiChat.propsDescription':
     'コンポーネントの型から生成した props の一覧です。開閉を持つコンポーネント（Reasoning / ToolInvocation）は isOpen / defaultOpen / onChange の controlled / uncontrolled 両対応です。',
   'aiChat.demo.greeting':
-    'こんにちは。ArteOdyssey の AI チャットについて、何でも聞いてください。',
+    'こんにちは。k8ordo UI の AI チャットについて、何でも聞いてください。',
   'aiChat.demo.seedQuestion':
     'React で AI チャットを作るとき、何から始めればいい？',
   'aiChat.demo.seedReasoning':
@@ -133,7 +133,7 @@ export const ja = {
   'aiChat.demo.suggestionTool': 'ツール呼び出しの表示例',
   'aiChat.demo.placeholder': 'メッセージを入力…',
   'getStarted.introduction':
-    'ArteOdysseyは、React 19で構築されたUIコンポーネントライブラリです。フォームやカードなどユーザーが操作する要素は丸みと余白で親しみやすく、情報を伝える要素はシャープさを保って明確に。穏やかだけど退屈じゃないUIを実現します。',
+    'k8ordo UIは、React 19で構築されたUIコンポーネントライブラリです。フォームやカードなどユーザーが操作する要素は丸みと余白で親しみやすく、情報を伝える要素はシャープさを保って明確に。穏やかだけど退屈じゃないUIを実現します。',
   'getStarted.installationTitle': 'インストール',
   'getStarted.installationDescription':
     'お好みのパッケージマネージャーでインストールしてください。',
@@ -145,13 +145,13 @@ export const ja = {
   'getStarted.setupCssTailwindDescription':
     'Tailwind CSS 4を使うプロジェクトは、代わりにソース版をインポートすると、デザイントークンを自分のマークアップのTailwindクラスとしても使えます。',
   'getStarted.setupProviderDescription':
-    'ArteOdysseyProviderでアプリケーションをラップしてください。',
+    'UIProviderでアプリケーションをラップしてください。',
   'getStarted.usageTitle': '使い方',
   'getStarted.usageDescription':
     'セットアップが完了したら、コンポーネントをインポートして使用できます。',
   'getStarted.requirementsTitle': '動作要件',
   'getStarted.requirementsDescription':
-    'ArteOdysseyを使用するには、以下のピア依存関係が必要です。',
+    'k8ordo UIを使用するには、以下のピア依存関係が必要です。',
   'getStarted.nextStepsTitle': '次のステップ',
   'getStarted.nextStepsComponents':
     'コンポーネント一覧を確認して、使用できるUIパーツを探す',
@@ -162,7 +162,7 @@ export const ja = {
   'getStarted.packageManagerLabel': 'パッケージマネージャー',
   'catalog.searchPlaceholder': '名前や説明で絞り込む',
   'catalog.noResults': '一致する項目はありませんでした。',
-  'components.description': 'ArteOdysseyが提供するUIコンポーネントの一覧です。',
+  'components.description': 'k8ordo UIが提供するUIコンポーネントの一覧です。',
   'components.categoryButtons': 'Buttons',
   'components.categoryNavigation': 'Navigation',
   'components.categoryForms': 'Forms',
@@ -331,7 +331,7 @@ export const ja = {
   'components.pagination.disabledTitle': '無効',
   'components.scrollLinked.description':
     'スクロール位置に連動するプログレスバー',
-  'components.icons.description': 'ArteOdysseyが提供するアイコン一覧',
+  'components.icons.description': 'k8ordo UIが提供するアイコン一覧',
   'components.icons.sizesTitle': 'サイズ',
   'components.icons.propsDescription':
     'すべてのアイコンは共通で `size` を受け取ります。向きを持つ `ChevronIcon` と、ステータスを表す `AlertIcon` だけは追加の props があります。',
@@ -355,7 +355,7 @@ export const ja = {
   'components.breadcrumb.currentPageTitle': '現在のページ',
   'components.toast.closeAllTitle': 'すべて閉じる',
   'components.scrollLinked.windowScrollTitle': 'ウィンドウスクロール',
-  'hooks.description': 'ArteOdysseyが提供するカスタムフックの一覧です。',
+  'hooks.description': 'k8ordo UIが提供するカスタムフックの一覧です。',
   'hooks.categoryDomInteraction': 'DOM操作',
   'hooks.categoryStateStorage': '状態・ストレージ',
   'hooks.categoryTiming': 'タイミング',
@@ -411,7 +411,7 @@ export const ja = {
     'controlled/uncontrolledの状態を管理するフック',
   'hooks.useWritingMode.description':
     '要素のwriting-modeを監視しhorizontal/verticalを返すフック',
-  'helpers.description': 'ArteOdysseyが提供するヘルパー関数の一覧です。',
+  'helpers.description': 'k8ordo UIが提供するヘルパー関数の一覧です。',
   'helpers.categoryStyling': 'スタイリング',
   'helpers.categoryReact': 'React',
   'helpers.common.importTitle': 'インポート',
@@ -430,7 +430,7 @@ export const ja = {
   'helpers.createSafeContext.description':
     'Provider外アクセス時に明確にthrowするContextを作るユーティリティ',
   'theming.introduction':
-    'ArteOdysseyは、CSS変数ベースのデザイントークンシステムを使用しています。ライトモードとダークモードの両方に対応し、カスタマイズが容易です。',
+    'k8ordo UIは、CSS変数ベースのデザイントークンシステムを使用しています。ライトモードとダークモードの両方に対応し、カスタマイズが容易です。',
   'theming.colorPaletteTitle': 'カラーパレット',
   'theming.colorPaletteDescription':
     '10色のベースカラーファミリーがあり、各色に50〜950の11段階のシェードが用意されています。',
@@ -503,7 +503,7 @@ export const ja = {
     'ルート要素にdarkクラスを追加することで、ダークモードが有効になります。セマンティックカラートークンは自動的にダークモード用の値に切り替わります。',
   'theming.customizeTitle': 'トークンを上書きする',
   'theming.customizeDescription':
-    'すべてのトークンはCSS変数なので、ArteOdysseyのスタイルシートより後に読み込むCSSで同名の変数を再定義すれば上書きできます。ベースカラーの変数（`--purple-200`など）も定義済みなので、参照を差し替えるだけでブランドカラーを丸ごと切り替えられます。ダークモードの値は`.dark`側で再定義します。',
+    'すべてのトークンはCSS変数なので、k8ordo UIのスタイルシートより後に読み込むCSSで同名の変数を再定義すれば上書きできます。ベースカラーの変数（`--purple-200`など）も定義済みなので、参照を差し替えるだけでブランドカラーを丸ごと切り替えられます。ダークモードの値は`.dark`側で再定義します。',
   'theming.customizeValueDescription':
     'シェードの参照ではなく、値そのものを直接指定することもできます。',
   'theming.spacingTitle': 'スペーシング',
@@ -518,10 +518,10 @@ export const ja = {
     'コンポーネントが自前で描画する文言（閉じるボタンのラベル、必須バッジ、読み込み中の読み上げなど）は文言辞書から引かれます。辞書を差し替えれば、アプリのコードを変えずに言語や語彙を切り替えられます。',
   'i18n.defaultTitle': '既定は日本語',
   'i18n.defaultDescription':
-    '設定は不要です。ArteOdysseyProvider を置くだけで日本語の辞書が使われ、Provider を置いていない場合も同じ日本語にフォールバックします。',
+    '設定は不要です。UIProvider を置くだけで日本語の辞書が使われ、Provider を置いていない場合も同じ日本語にフォールバックします。',
   'i18n.englishTitle': '英語に切り替える',
   'i18n.englishDescription':
-    '@k8o/arte-odyssey/i18n から en を読み込み、messages に渡します。ja も同じ場所から読み込めます。',
+    '@k8ordo/ui/i18n から en を読み込み、messages に渡します。ja も同じ場所から読み込めます。',
   'i18n.overrideTitle': '一部だけ差し替える',
   'i18n.overrideDescription':
     'messages は Partial<Messages> です。渡したキーだけが上書きされ、残りは日本語の既定辞書で埋まります。英語をベースに一部だけ変えたいときは en を展開してから重ねます。',

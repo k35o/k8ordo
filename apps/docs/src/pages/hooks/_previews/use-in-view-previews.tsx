@@ -1,6 +1,6 @@
 'use client';
 
-import { useInView } from '@k8o/arte-odyssey';
+import { useInView } from '@k8ordo/ui';
 import { useRef } from 'react';
 
 export function UseInViewPreview() {

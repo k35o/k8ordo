@@ -53,7 +53,7 @@ function useScrollToTopOnNavigate(): void {
   }, []);
 }
 
-// ArteOdysseyProvider はここではなく locale-layout に置く。組み込み文言の辞書が
+// UIProvider はここではなく locale-layout に置く。組み込み文言の辞書が
 // URL のロケールで決まるため、ロケールが分かる層でしか正しく渡せない。
 export const Router: FC<RouterProps> = (props) => {
   useScrollToTopOnNavigate();

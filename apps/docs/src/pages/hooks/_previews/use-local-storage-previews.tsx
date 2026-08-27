@@ -1,6 +1,6 @@
 'use client';
 
-import { useLocalStorage } from '@k8o/arte-odyssey';
+import { useLocalStorage } from '@k8ordo/ui';
 
 export function UseLocalStorageBasicPreview() {
   const [value, setValue] = useLocalStorage('demo-count', 0);
@@ -26,7 +26,7 @@ export function UseLocalStorageBasicPreview() {
 export function UseLocalStorageRemovePreview() {
   const [value, setValue, handleRemove] = useLocalStorage(
     'demo-name',
-    'ArteOdyssey',
+    'k8ordo UI',
   );
 
   return (

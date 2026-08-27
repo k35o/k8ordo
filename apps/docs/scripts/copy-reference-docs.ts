@@ -3,7 +3,7 @@
  * serves them verbatim as markdown twins of the HTML pages.
  *
  * Single source of truth:
- *   packages/arte-odyssey/docs/**\/*.md ──(this)──► public/docs/**\/*.md
+ *   packages/ui/docs/**\/*.md ──(this)──► public/docs/**\/*.md
  *
  * The copies are generated, never committed (see the root `.gitignore`). Links
  * inside the docs are package-relative (`references/typography.md`), and they
@@ -15,7 +15,7 @@ import { cp, mkdir, readdir, rm } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 
 const SRC_DIR = fileURLToPath(
-  new URL('../../../packages/arte-odyssey/docs/', import.meta.url),
+  new URL('../../../packages/ui/docs/', import.meta.url),
 );
 const OUT_DIR = fileURLToPath(new URL('../public/docs/', import.meta.url));
 

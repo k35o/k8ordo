@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronIcon } from '@k8o/arte-odyssey';
+import { ChevronIcon } from '@k8ordo/ui';
 import type { FC, ReactNode } from 'react';
 
 import type { NavItem } from '../data/nav-types';

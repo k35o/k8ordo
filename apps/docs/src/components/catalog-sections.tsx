@@ -1,6 +1,6 @@
 'use client';
 
-import { Heading, TextField } from '@k8o/arte-odyssey';
+import { Heading, TextField } from '@k8ordo/ui';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
 

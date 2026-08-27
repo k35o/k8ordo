@@ -1,4 +1,4 @@
-# Contributing to ArteOdyssey
+# Contributing to k8ordo UI
 
 Thanks for your interest in contributing! This document explains how to set up the repository, the development workflow, and how changes get released.
 
@@ -28,7 +28,7 @@ pnpm check       # Lint/format check (Oxlint/Oxfmt via vp)
 pnpm check:write # Lint/format check with auto-fix
 ```
 
-Inside `packages/arte-odyssey`, useful extras:
+Inside `packages/ui`, useful extras:
 
 ```bash
 pnpm storybook                     # Storybook dev server on port 6006
@@ -39,7 +39,7 @@ pnpm test -- --project=components  # Component tests only (Storybook stories)
 
 ## Adding a component
 
-Components live under a category directory (`buttons`, `form`, `overlays`, …) in `packages/arte-odyssey/src/components/` and follow a 3-file pattern:
+Components live under a category directory (`buttons`, `form`, `overlays`, …) in `packages/ui/src/components/` and follow a 3-file pattern:
 
 ```
 src/components/<category>/<name>/
@@ -64,15 +64,15 @@ The prop schemas under `src/integrations/_shared/schemas.ts` are not just valida
 
 ### Documentation ships with the package
 
-`packages/arte-odyssey/docs/**` is published to npm (see `files` in the package manifest) and is read by AI coding assistants out of `node_modules/@k8o/arte-odyssey/docs/`. Stale examples there are shipped defects, not just documentation debt.
+`packages/ui/docs/**` is published to npm (see `files` in the package manifest) and is read by AI coding assistants out of `node_modules/@k8ordo/ui/docs/`. Stale examples there are shipped defects, not just documentation debt.
 
 Any pull request that changes the public API must update, **in the same PR**:
 
-- `packages/arte-odyssey/README.md`
-- `packages/arte-odyssey/docs/GUIDE.md`
-- `packages/arte-odyssey/docs/references/*.md`
-- `packages/arte-odyssey/docs/llms.txt`
-- `.claude/skills/arte-odyssey-design/` (SKILL.md and its `references/`, which mirror the shipped examples)
+- `packages/ui/README.md`
+- `packages/ui/docs/GUIDE.md`
+- `packages/ui/docs/references/*.md`
+- `packages/ui/docs/llms.txt`
+- `.claude/skills/ui-design/` (SKILL.md and its `references/`, which mirror the shipped examples)
 
 ## Testing: writing a story is writing a test
 
@@ -89,9 +89,9 @@ Per-story VRT runs on [storybook-addon-vrt](https://github.com/k35o/storybook-ad
 Local commands:
 
 ```bash
-pnpm --filter @k8o/arte-odyssey test:vrt          # capture story screenshots
-pnpm --filter @k8o/arte-odyssey exec svrt compare # compare against the baseline
-pnpm --filter @k8o/arte-odyssey exec svrt approve # accept changes as the new baseline
+pnpm --filter @k8ordo/ui test:vrt          # capture story screenshots
+pnpm --filter @k8ordo/ui exec svrt compare # compare against the baseline
+pnpm --filter @k8ordo/ui exec svrt approve # accept changes as the new baseline
 ```
 
 Approval flow on CI ([`.github/workflows/vrt.yml`](.github/workflows/vrt.yml)):

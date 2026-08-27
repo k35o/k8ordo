@@ -1,6 +1,6 @@
 'use client';
 
-import { Avatar, AssistantIcon } from '@k8o/arte-odyssey';
+import { Avatar, AssistantIcon } from '@k8ordo/ui';
 import {
   Conversation,
   Message,
@@ -8,7 +8,7 @@ import {
   Reasoning,
   Suggestion,
   ToolInvocation,
-} from '@k8o/arte-odyssey/ai';
+} from '@k8ordo/ui/ai';
 import { useRef, useState } from 'react';
 import type { FC, ReactNode } from 'react';
 
@@ -67,7 +67,7 @@ export function ChatDemo() {
           <AssistantRow>
             <Reasoning>{t('aiChat.demo.seedReasoning')}</Reasoning>
             <ToolInvocation
-              input={{ query: 'ArteOdyssey ai getting started' }}
+              input={{ query: 'k8ordo UI ai getting started' }}
               name="search_docs"
               output={t('aiChat.demo.seedToolOutput')}
               state="output-available"

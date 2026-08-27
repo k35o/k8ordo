@@ -10,7 +10,7 @@ export const en = {
   'nav.helpers': 'Helpers',
   'nav.generativeUi': 'Generative UI',
   'nav.aiChat': 'AI Chat',
-  'home.title': 'ArteOdyssey',
+  'home.title': 'k8ordo',
   'home.description':
     'A React component library for UI that is calm but never boring',
   'home.getStarted': 'Get Started',
@@ -45,15 +45,15 @@ export const en = {
   'nav.ai': 'AI',
   'nav.aiAgents': 'AI Agents',
   'ai.description':
-    'ArteOdyssey ships three surfaces for AI products: UI parts for composing chat screens, adapters that let LLMs generate UI constrained to ArteOdyssey components, and documentation surfaces for AI coding agents.',
+    'k8ordo UI ships three surfaces for AI products: UI parts for composing chat screens, adapters that let LLMs generate UI constrained to k8ordo UI components, and documentation surfaces for AI coding agents.',
   'ai.chatSummary':
     'Presentational parts — Conversation, Message and PromptInput — for composing chat screens.',
   'ai.generativeUiSummary':
-    'json-render / OpenUI adapters that let LLMs generate UI using only ArteOdyssey components.',
+    'json-render / OpenUI adapters that let LLMs generate UI using only k8ordo UI components.',
   'ai.agentsSummary':
     'Documentation surfaces that feed the design guide, references and props to AI coding agents.',
   'aiAgents.introduction':
-    'ArteOdyssey ships surfaces meant for AI coding agents: the design guide, the component reference, the tokens and the props — each generated from the implementation.',
+    'k8ordo UI ships surfaces meant for AI coding agents: the design guide, the component reference, the tokens and the props — each generated from the implementation.',
   'aiAgents.setupTitle': 'Point your agent at the docs',
   'aiAgents.setupDescription':
     'The docs ship inside the npm package, so an agent always reads the version you installed. Paste this into your project’s CLAUDE.md / AGENTS.md and the setup is done.',
@@ -74,10 +74,10 @@ export const en = {
   'aiAgents.generatedDescription':
     'Props come from the component types and tokens from the CSS. CI fails when either drifts from the implementation, so the docs cannot quietly rot.',
   'generativeUi.introduction':
-    'ArteOdyssey ships official adapters so an LLM can generate UIs constrained to these components, via json-render or OpenUI. Generate the prompt on the server, validate the output, and render it on the client.',
+    'k8ordo UI ships official adapters so an LLM can generate UIs constrained to these components, via json-render or OpenUI. Generate the prompt on the server, validate the output, and render it on the client.',
   'generativeUi.promptTitle': 'Generate the prompt (server)',
   'generativeUi.promptDescription':
-    'The catalog is server-safe. Generate the system prompt in a Server Component, and inject cross-cutting rules with `arteOdysseyRules`.',
+    'The catalog is server-safe. Generate the system prompt in a Server Component, and inject cross-cutting rules with `uiRules`.',
   'generativeUi.renderTitle': 'Render (client)',
   'generativeUi.renderDescription':
     '`JsonRenderUI` wires the provider, renderer, and registry for you — just pass a spec.',
@@ -86,9 +86,9 @@ export const en = {
     '`validateGeneratedSpec` auto-fixes, checks structure, and validates props per component, returning a ready-to-resend repair prompt on failure.',
   'generativeUi.typedTitle': 'Typed specs',
   'generativeUi.typedDescription':
-    'Write specs with `satisfies ArteSpec` so component names and props are checked at compile time.',
+    'Write specs with `satisfies UISpec` so component names and props are checked at compile time.',
   'aiChat.introduction':
-    'Presentational building blocks for AI chat UIs. They hold no fetching or message state — you pass data in and compose them with `messages.map()`, so they connect to the AI SDK or your own backend. Import from `@k8o/arte-odyssey/ai`.',
+    'Presentational building blocks for AI chat UIs. They hold no fetching or message state — you pass data in and compose them with `messages.map()`, so they connect to the AI SDK or your own backend. Import from `@k8ordo/ui/ai`.',
   'aiChat.demoTitle': 'Demo',
   'aiChat.demoDescription':
     'A working chat screen. Pick a suggestion or type a message and send it — bubbles stack up in the conversation, and reasoning and tool calls fold into collapsible blocks.',
@@ -109,14 +109,14 @@ export const en = {
     '`ToolInvocation` and `Reasoning` show collapsible tool activity and thinking. Their `state` vocabulary matches the AI SDK tool part states.',
   'aiChat.aiSdkTitle': 'AI SDK integration',
   'aiChat.aiSdkDescription':
-    '`mapMessageParts` (from `@k8o/arte-odyssey/ai-sdk`) turns an AI SDK `UIMessage.parts` array into a flat list you render yourself. It needs the `ai` optional peer.',
+    '`mapMessageParts` (from `@k8ordo/ui/ai-sdk`) turns an AI SDK `UIMessage.parts` array into a flat list you render yourself. It needs the `ai` optional peer.',
   'aiChat.jsonRenderTitle': 'Generative UI inside a bubble',
   'aiChat.jsonRenderDescription':
     'Because Message.Content takes any children, you can render an LLM-generated UI spec inside a bubble with the json-render registry — generative UI delivered straight into the conversation.',
   'aiChat.propsDescription':
     'Props generated from the component types. Collapsible components (Reasoning / ToolInvocation) support both controlled and uncontrolled usage via isOpen / defaultOpen / onChange.',
   'aiChat.demo.greeting':
-    'Hi! Ask me anything about the ArteOdyssey AI chat components.',
+    'Hi! Ask me anything about the k8ordo UI AI chat components.',
   'aiChat.demo.seedQuestion':
     'Where should I start when building an AI chat in React?',
   'aiChat.demo.seedReasoning':
@@ -134,7 +134,7 @@ export const en = {
   'generativeUi.openuiDescription':
     'OpenUI renders a DSL string with the `library`. Generate the prompt on the server with the dedicated `openui/prompt` entry.',
   'getStarted.introduction':
-    'ArteOdyssey is a UI component library built with React 19. Interactive elements like forms and cards feel approachable with rounded shapes and generous spacing, while informational elements stay crisp and clear. Calm but never boring UI.',
+    'k8ordo UI is a UI component library built with React 19. Interactive elements like forms and cards feel approachable with rounded shapes and generous spacing, while informational elements stay crisp and clear. Calm but never boring UI.',
   'getStarted.installationTitle': 'Installation',
   'getStarted.installationDescription':
     'Install with your preferred package manager.',
@@ -146,13 +146,13 @@ export const en = {
   'getStarted.setupCssTailwindDescription':
     'Projects using Tailwind CSS 4 can import the source entry instead, which also makes the design tokens available as Tailwind classes in your own markup.',
   'getStarted.setupProviderDescription':
-    'Wrap your application with ArteOdysseyProvider.',
+    'Wrap your application with UIProvider.',
   'getStarted.usageTitle': 'Usage',
   'getStarted.usageDescription':
     'Once setup is complete, you can import and use components.',
   'getStarted.requirementsTitle': 'Requirements',
   'getStarted.requirementsDescription':
-    'ArteOdyssey requires the following peer dependencies.',
+    'k8ordo UI requires the following peer dependencies.',
   'getStarted.nextStepsTitle': 'Next Steps',
   'getStarted.nextStepsComponents':
     'Browse the component catalog to discover available UI parts',
@@ -164,8 +164,7 @@ export const en = {
   'getStarted.packageManagerLabel': 'Package manager',
   'catalog.searchPlaceholder': 'Filter by name or description',
   'catalog.noResults': 'No matching items.',
-  'components.description':
-    'A catalog of UI components provided by ArteOdyssey.',
+  'components.description': 'A catalog of UI components provided by k8ordo UI.',
   'components.categoryButtons': 'Buttons',
   'components.categoryNavigation': 'Navigation',
   'components.categoryForms': 'Forms',
@@ -345,7 +344,7 @@ export const en = {
   'components.scrollLinked.description':
     'A progress bar linked to scroll position.',
   'components.icons.description':
-    'A catalog of icon components provided by ArteOdyssey.',
+    'A catalog of icon components provided by k8ordo UI.',
   'components.icons.sizesTitle': 'Sizes',
   'components.icons.propsDescription':
     'Every icon accepts a shared `size` prop. Only `ChevronIcon` (direction) and `AlertIcon` (status) take additional props.',
@@ -369,7 +368,7 @@ export const en = {
   'components.breadcrumb.currentPageTitle': 'Current Page',
   'components.toast.closeAllTitle': 'Close All',
   'components.scrollLinked.windowScrollTitle': 'Window Scroll',
-  'hooks.description': 'A catalog of custom hooks provided by ArteOdyssey.',
+  'hooks.description': 'A catalog of custom hooks provided by k8ordo UI.',
   'hooks.categoryDomInteraction': 'DOM Interaction',
   'hooks.categoryStateStorage': 'State & Storage',
   'hooks.categoryTiming': 'Timing',
@@ -434,8 +433,7 @@ export const en = {
     'A hook that manages controlled/uncontrolled component state.',
   'hooks.useWritingMode.description':
     "A hook that observes an element's writing-mode and returns either horizontal or vertical.",
-  'helpers.description':
-    'A catalog of helper functions provided by ArteOdyssey.',
+  'helpers.description': 'A catalog of helper functions provided by k8ordo UI.',
   'helpers.categoryStyling': 'Styling',
   'helpers.categoryReact': 'React',
   'helpers.common.importTitle': 'Import',
@@ -454,7 +452,7 @@ export const en = {
   'helpers.createSafeContext.description':
     'A utility that creates a Context that throws clearly when accessed outside its Provider.',
   'theming.introduction':
-    'ArteOdyssey uses a CSS variable-based design token system. It supports both light and dark modes and is easy to customize.',
+    'k8ordo UI uses a CSS variable-based design token system. It supports both light and dark modes and is easy to customize.',
   'theming.colorPaletteTitle': 'Color Palette',
   'theming.colorPaletteDescription':
     'There are 10 base color families, each with 11 shades from 50 to 950.',
@@ -530,7 +528,7 @@ export const en = {
     'Add the dark class to the root element to enable dark mode. Semantic color tokens automatically switch to their dark mode values.',
   'theming.customizeTitle': 'Overriding Tokens',
   'theming.customizeDescription':
-    'Every token is a CSS variable, so redefining the same variable in CSS loaded after the ArteOdyssey stylesheet overrides it. The base color variables (such as `--purple-200`) are also defined, so swapping the references switches the whole brand color at once. Redefine the dark mode values under `.dark`.',
+    'Every token is a CSS variable, so redefining the same variable in CSS loaded after the k8ordo UI stylesheet overrides it. The base color variables (such as `--purple-200`) are also defined, so swapping the references switches the whole brand color at once. Redefine the dark mode values under `.dark`.',
   'theming.customizeValueDescription':
     'You can also assign a raw value directly instead of referencing a shade.',
   'theming.spacingTitle': 'Spacing',
@@ -545,10 +543,10 @@ export const en = {
     'Wording the components render on their own — close button labels, the required badge, the loading announcement — comes from a message dictionary. Replace the dictionary and the language changes without touching your own code.',
   'i18n.defaultTitle': 'Japanese by default',
   'i18n.defaultDescription':
-    'No setup required. ArteOdysseyProvider uses the Japanese dictionary, and components fall back to the same Japanese wording even without a provider.',
+    'No setup required. UIProvider uses the Japanese dictionary, and components fall back to the same Japanese wording even without a provider.',
   'i18n.englishTitle': 'Switching to English',
   'i18n.englishDescription':
-    'Import en from @k8o/arte-odyssey/i18n and pass it to messages. ja ships from the same entry point.',
+    'Import en from @k8ordo/ui/i18n and pass it to messages. ja ships from the same entry point.',
   'i18n.overrideTitle': 'Overriding part of a dictionary',
   'i18n.overrideDescription':
     'messages is a Partial<Messages>. Only the keys you pass are replaced; the rest fall back to the Japanese defaults. To start from English instead, spread en first and layer your changes on top.',

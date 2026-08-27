@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, useDisclosure } from '@k8o/arte-odyssey';
+import { Button, useDisclosure } from '@k8ordo/ui';
 
 export function UseDisclosurePreview() {
   const { isOpen, open, close, toggle } = useDisclosure();

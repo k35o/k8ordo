@@ -43,7 +43,7 @@ import {
   TextField,
   Textarea,
   Tooltip,
-} from '@k8o/arte-odyssey';
+} from '@k8ordo/ui';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
 
@@ -231,7 +231,7 @@ export const componentPreviews: Record<string, ReactNode> = {
       <Accordion.Root>
         <Accordion.Item>
           <h3>
-            <Accordion.Button>What is ArteOdyssey?</Accordion.Button>
+            <Accordion.Button>What is k8ordo UI?</Accordion.Button>
           </h3>
           <Accordion.Panel>
             <p>A React UI component library.</p>
@@ -240,7 +240,7 @@ export const componentPreviews: Record<string, ReactNode> = {
       </Accordion.Root>
     </div>
   ),
-  Avatar: <Avatar name="Arte Odyssey" />,
+  Avatar: <Avatar name="k8ordo UI" />,
   Badge: (
     <div className="flex gap-2">
       <Badge label="New" tone="info" />

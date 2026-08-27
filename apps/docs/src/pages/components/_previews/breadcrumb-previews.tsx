@@ -1,6 +1,6 @@
 'use client';
 
-import { Breadcrumb } from '@k8o/arte-odyssey';
+import { Breadcrumb } from '@k8ordo/ui';
 
 export function BreadcrumbBasicPreview() {
   return (

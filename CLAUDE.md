@@ -1,6 +1,6 @@
-# Agent guide — arte-odyssey
+# Agent guide — k8ordo
 
-ArteOdyssey is a monorepo for `@k8o/arte-odyssey` (React UI library) and its docs site. Vite+ (`vp`) is the unified toolchain — dev, build, test, lint/format (Oxlint/Oxfmt) — with Tailwind CSS 4 driven by semantic design tokens.
+k8ordo is a monorepo for `@k8ordo/ui` (React UI library) and its docs site. Vite+ (`vp`) is the unified toolchain — dev, build, test, lint/format (Oxlint/Oxfmt) — with Tailwind CSS 4 driven by semantic design tokens.
 
 ## Commands
 
@@ -13,7 +13,7 @@ pnpm check              # lint/format check (pnpm check:write to auto-fix)
 
 ## Gotchas
 
-- Run `pnpm build` before `pnpm check` / `pnpm typecheck` on a fresh checkout or worktree: docs/examples resolve `@k8o/arte-odyssey` types from `dist/`, so without it type-aware lint reports bogus `no-unsafe-*` errors (and parallel checks can die with exit 137). CI builds in the install action.
+- Run `pnpm build` before `pnpm check` / `pnpm typecheck` on a fresh checkout or worktree: docs/examples resolve `@k8ordo/ui` types from `dist/`, so without it type-aware lint reports bogus `no-unsafe-*` errors (and parallel checks can die with exit 137). CI builds in the install action.
 - Use `type`, not `interface`.
 - No `@ts-ignore` — use `@ts-expect-error` with an explanation.
 - No skipped tests (`test.skip`, `describe.skip`).

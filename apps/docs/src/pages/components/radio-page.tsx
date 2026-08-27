@@ -1,4 +1,4 @@
-import { Anchor, Heading, Radio, Separator } from '@k8o/arte-odyssey';
+import { Anchor, Heading, Radio, Separator } from '@k8ordo/ui';
 
 import { CodeBlock } from '../../components/code-block';
 import { ComponentPreview } from '../../components/component-preview';
@@ -37,10 +37,7 @@ export function RadioPage() {
         <Heading level="h2">
           <T k="components.common.importTitle" />
         </Heading>
-        <CodeBlock
-          code="import { Radio } from '@k8o/arte-odyssey';"
-          lang="ts"
-        />
+        <CodeBlock code="import { Radio } from '@k8ordo/ui';" lang="ts" />
       </section>
       <Separator color="mute" />
 
@@ -50,7 +47,7 @@ export function RadioPage() {
             <T k="components.common.usageTitle" />
           </Heading>
           <ComponentPreview
-            code={`import { Radio } from '@k8o/arte-odyssey';
+            code={`import { Radio } from '@k8ordo/ui';
 
 const options = [
   { label: 'React', value: 'react' },

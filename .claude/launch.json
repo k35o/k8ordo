@@ -11,7 +11,7 @@
     {
       "name": "css-modules-example",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["--filter", "example-css-modules", "dev"],
+      "runtimeArgs": ["--filter", "example-ui-css-modules", "dev"],
       "port": 5173,
       "autoPort": true
     },
@@ -24,7 +24,7 @@
     {
       "name": "storybook",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["--filter", "@k8o/arte-odyssey", "storybook"],
+      "runtimeArgs": ["--filter", "@k8ordo/ui", "storybook"],
       "port": 6006
     },
     {
@@ -32,7 +32,7 @@
       "runtimeExecutable": "pnpm",
       "runtimeArgs": [
         "--filter",
-        "@k8o/arte-odyssey",
+        "@k8ordo/ui",
         "exec",
         "storybook",
         "dev",

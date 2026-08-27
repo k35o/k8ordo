@@ -1,6 +1,6 @@
 # Agent guide — apps/docs
 
-Documentation site for `@k8o/arte-odyssey`, built with Vite and `@funstack/router`.
+Documentation site for `@k8ordo/ui`, built with Vite and `@funstack/router`.
 
 ## Commands
 
@@ -16,15 +16,15 @@ pnpm check:write       # Oxlint/Oxfmt lint/format auto-fix
 
 - **Routing**: `@funstack/router` with `@funstack/static` for SSG
 - **i18n**: Custom i18n system in `src/i18n/` with locale-based routing (`/ja/`, `/en/`)
-- **Styling**: Tailwind CSS 4, uses `@k8o/arte-odyssey` design tokens
-- **Root provider**: `ArteOdysseyProvider` wraps each locale subtree in `src/layouts/locale-layout.tsx`, passing the `en` dictionary on `/en/` so component built-in strings follow the site locale
+- **Styling**: Tailwind CSS 4, uses `@k8ordo/ui` design tokens
+- **Root provider**: `UIProvider` wraps each locale subtree in `src/layouts/locale-layout.tsx`, passing the `en` dictionary on `/en/` so component built-in strings follow the site locale
 
 ### Directory Structure
 
 ```
 src/
   app.tsx              # App entry with route definitions
-  router.tsx           # Router wrapper with ArteOdysseyProvider
+  router.tsx           # Router wrapper with UIProvider
   constants.ts         # Shared constants (e.g. STORYBOOK_URL)
   components/          # Shared doc components (CodeBlock, PropsTable, etc.)
   data/                # Navigation data (components-nav, helpers-nav, hooks-nav)
@@ -97,7 +97,7 @@ node_modules/@funstack/router/dist/docs/index.md
 ## Key Dependencies
 
 - **@funstack/router** + **@funstack/static** for routing and SSG
-- **@k8o/arte-odyssey** (workspace) for UI components
+- **@k8ordo/ui** (workspace) for UI components
 - **shiki** for syntax highlighting
 - **motion** for animations
 - **react-error-boundary** for error handling

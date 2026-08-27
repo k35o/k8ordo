@@ -1,7 +1,7 @@
 'use client';
 
-import { Button, ChevronIcon, Code } from '@k8o/arte-odyssey';
-import { Message } from '@k8o/arte-odyssey/ai';
+import { Button, ChevronIcon, Code } from '@k8ordo/ui';
+import { Message } from '@k8ordo/ui/ai';
 import type { ReactNode } from 'react';
 
 export const aiPreviews: Record<string, ReactNode> = {

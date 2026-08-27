@@ -1,4 +1,4 @@
-import { Anchor, Heading, Separator, Switch } from '@k8o/arte-odyssey';
+import { Anchor, Heading, Separator, Switch } from '@k8ordo/ui';
 
 import { CodeBlock } from '../../components/code-block';
 import { ComponentPreview } from '../../components/component-preview';
@@ -31,10 +31,7 @@ export function SwitchPage() {
         <Heading level="h2">
           <T k="components.common.importTitle" />
         </Heading>
-        <CodeBlock
-          code="import { Switch } from '@k8o/arte-odyssey';"
-          lang="ts"
-        />
+        <CodeBlock code="import { Switch } from '@k8ordo/ui';" lang="ts" />
       </section>
       <Separator color="mute" />
 

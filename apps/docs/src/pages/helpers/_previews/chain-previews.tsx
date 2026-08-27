@@ -1,6 +1,6 @@
 'use client';
 
-import { chain } from '@k8o/arte-odyssey';
+import { chain } from '@k8ordo/ui';
 import { useState } from 'react';
 
 export function ChainPreview() {

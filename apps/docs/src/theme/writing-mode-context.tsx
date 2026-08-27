@@ -1,6 +1,6 @@
 'use client';
 
-import { useLocalStorage } from '@k8o/arte-odyssey';
+import { useLocalStorage } from '@k8ordo/ui';
 import { createContext, use, useCallback, useMemo } from 'react';
 import type { ReactNode } from 'react';
 
@@ -13,7 +13,7 @@ type WritingModeContextValue = {
 
 const WritingModeContext = createContext<WritingModeContextValue | null>(null);
 
-const STORAGE_KEY = 'arte-odyssey-writing-mode';
+const STORAGE_KEY = 'k8ordo-writing-mode';
 
 export function WritingModeProvider({ children }: { children: ReactNode }) {
   const [storedMode, setStoredMode] = useLocalStorage<WritingMode>(

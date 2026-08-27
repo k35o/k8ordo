@@ -1,4 +1,4 @@
-import { Anchor, Heading, Separator } from '@k8o/arte-odyssey';
+import { Anchor, Heading, Separator } from '@k8ordo/ui';
 
 import { CodeBlock } from '../components/code-block';
 import { InstallTabs } from '../components/install-tabs';
@@ -27,9 +27,9 @@ export function GetStarted() {
           <T k="getStarted.installationDescription" />
         </p>
         <InstallTabs
-          npm={<CodeBlock code="npm install @k8o/arte-odyssey" lang="bash" />}
-          pnpm={<CodeBlock code="pnpm add @k8o/arte-odyssey" lang="bash" />}
-          yarn={<CodeBlock code="yarn add @k8o/arte-odyssey" lang="bash" />}
+          npm={<CodeBlock code="npm install @k8ordo/ui" lang="bash" />}
+          pnpm={<CodeBlock code="pnpm add @k8ordo/ui" lang="bash" />}
+          yarn={<CodeBlock code="yarn add @k8ordo/ui" lang="bash" />}
         />
       </section>
 
@@ -48,14 +48,11 @@ export function GetStarted() {
           <p className="text-fg-mute">
             <T k="getStarted.setupCssDescription" />
           </p>
-          <CodeBlock code="import '@k8o/arte-odyssey/styles.css';" lang="tsx" />
+          <CodeBlock code="import '@k8ordo/ui/styles.css';" lang="tsx" />
           <p className="text-fg-mute">
             <T k="getStarted.setupCssTailwindDescription" />
           </p>
-          <CodeBlock
-            code="import '@k8o/arte-odyssey/tailwind.css';"
-            lang="tsx"
-          />
+          <CodeBlock code="import '@k8ordo/ui/tailwind.css';" lang="tsx" />
         </div>
 
         <div className="flex flex-col gap-2">
@@ -64,13 +61,13 @@ export function GetStarted() {
             <T k="getStarted.setupProviderDescription" />
           </p>
           <CodeBlock
-            code={`import { ArteOdysseyProvider } from '@k8o/arte-odyssey';
+            code={`import { UIProvider } from '@k8ordo/ui';
 
 function App({ children }) {
   return (
-    <ArteOdysseyProvider>
+    <UIProvider>
       {children}
-    </ArteOdysseyProvider>
+    </UIProvider>
   );
 }`}
             lang="tsx"
@@ -88,12 +85,12 @@ function App({ children }) {
           <T k="getStarted.usageDescription" />
         </p>
         <CodeBlock
-          code={`import { Button, Heading } from '@k8o/arte-odyssey';
+          code={`import { Button, Heading } from '@k8ordo/ui';
 
 function MyComponent() {
   return (
     <div>
-      <Heading level="h1">Hello ArteOdyssey</Heading>
+      <Heading level="h1">Hello k8ordo UI</Heading>
       <Button variant="solid">Click me</Button>
     </div>
   );

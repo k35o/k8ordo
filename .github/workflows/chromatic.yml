@@ -23,4 +23,4 @@ jobs:
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
           onlyChanged: true
           skip: 'renovate/**'
-          workingDir: packages/arte-odyssey
+          workingDir: packages/ui

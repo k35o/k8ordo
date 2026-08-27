@@ -1,4 +1,4 @@
-import { Heading, Separator } from '@k8o/arte-odyssey';
+import { Heading, Separator } from '@k8ordo/ui';
 
 import { CodeBlock } from '../../components/code-block';
 import type { PropItem } from '../../components/props-table';
@@ -62,7 +62,7 @@ export function UseIntersectionObserverPage() {
           <T k="hooks.common.importTitle" />
         </Heading>
         <CodeBlock
-          code="import { useIntersectionObserver } from '@k8o/arte-odyssey';"
+          code="import { useIntersectionObserver } from '@k8ordo/ui';"
           lang="ts"
         />
       </section>

@@ -1,5 +1,5 @@
 @import 'tailwindcss';
-@import '../../../../packages/arte-odyssey/src/styles/index.css';
+@import '../../../../packages/ui/src/styles/index.css';
 
 /*
  * Background shared by the live preview area and the Shiki code block so they

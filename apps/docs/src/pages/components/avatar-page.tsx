@@ -1,4 +1,4 @@
-import { Anchor, Avatar, Heading, Separator } from '@k8o/arte-odyssey';
+import { Anchor, Avatar, Heading, Separator } from '@k8ordo/ui';
 
 import { CodeBlock } from '../../components/code-block';
 import { ComponentPreview } from '../../components/component-preview';
@@ -30,10 +30,7 @@ export function AvatarPage() {
         <Heading level="h2">
           <T k="components.common.importTitle" />
         </Heading>
-        <CodeBlock
-          code="import { Avatar } from '@k8o/arte-odyssey';"
-          lang="ts"
-        />
+        <CodeBlock code="import { Avatar } from '@k8ordo/ui';" lang="ts" />
       </section>
       <Separator color="mute" />
 
@@ -42,8 +39,8 @@ export function AvatarPage() {
           <Heading level="h2">
             <T k="components.common.usageTitle" />
           </Heading>
-          <ComponentPreview code='<Avatar name="Arte Odyssey" />'>
-            <Avatar name="Arte Odyssey" />
+          <ComponentPreview code='<Avatar name="Ada Lovelace" />'>
+            <Avatar name="Ada Lovelace" />
           </ComponentPreview>
         </div>
 
@@ -53,12 +50,12 @@ export function AvatarPage() {
           </Heading>
           <ComponentPreview
             code={`<Avatar
-  alt="Arte Odyssey"
+  alt="Ada Lovelace"
   src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80"
 />`}
           >
             <Avatar
-              alt="Arte Odyssey"
+              alt="Ada Lovelace"
               src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80"
             />
           </ComponentPreview>

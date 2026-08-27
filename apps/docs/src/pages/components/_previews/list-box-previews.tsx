@@ -1,7 +1,7 @@
 'use client';
 
-import { ListBox, ListIcon } from '@k8o/arte-odyssey';
-import type { Option } from '@k8o/arte-odyssey';
+import { ListBox, ListIcon } from '@k8ordo/ui';
+import type { Option } from '@k8ordo/ui';
 import { useState } from 'react';
 
 const OPTIONS: readonly Option[] = [

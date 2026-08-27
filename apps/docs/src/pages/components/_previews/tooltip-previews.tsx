@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Tooltip } from '@k8o/arte-odyssey';
+import { Button, Tooltip } from '@k8ordo/ui';
 
 export function TooltipBasicPreview() {
   return (

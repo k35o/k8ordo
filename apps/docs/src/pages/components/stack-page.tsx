@@ -1,4 +1,4 @@
-import { Anchor, Badge, Heading, Separator, Stack } from '@k8o/arte-odyssey';
+import { Anchor, Badge, Heading, Separator, Stack } from '@k8ordo/ui';
 
 import { CodeBlock } from '../../components/code-block';
 import { ComponentPreview } from '../../components/component-preview';
@@ -33,10 +33,7 @@ export function StackPage() {
         <Heading level="h2">
           <T k="components.common.importTitle" />
         </Heading>
-        <CodeBlock
-          code="import { Stack } from '@k8o/arte-odyssey';"
-          lang="ts"
-        />
+        <CodeBlock code="import { Stack } from '@k8ordo/ui';" lang="ts" />
       </section>
       <Separator color="mute" />
 

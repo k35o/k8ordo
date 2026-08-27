@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Form, RadioCard } from '@k8o/arte-odyssey';
+import { Button, Form, RadioCard } from '@k8ordo/ui';
 import { useState } from 'react';
 
 const options = [

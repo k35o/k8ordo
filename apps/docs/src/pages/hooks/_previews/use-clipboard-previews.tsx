@@ -1,6 +1,6 @@
 'use client';
 
-import { useClipboard } from '@k8o/arte-odyssey';
+import { useClipboard } from '@k8ordo/ui';
 import { useState } from 'react';
 
 export function UseClipboardPreview() {
@@ -8,7 +8,7 @@ export function UseClipboardPreview() {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
-    await writeClipboard('Hello from ArteOdyssey!');
+    await writeClipboard('Hello from k8ordo UI!');
     setCopied(true);
     setTimeout(() => {
       setCopied(false);

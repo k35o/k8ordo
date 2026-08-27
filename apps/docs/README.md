@@ -1,7 +1,7 @@
 # docs
 
-ArteOdyssey コンポーネントライブラリのドキュメントサイトです。
-<https://arte-odyssey.k8o.me> で公開しています。
+k8ordo UI コンポーネントライブラリのドキュメントサイトです。
+<https://ordo.k8o.me> で公開しています。
 
 ## 技術スタック
 

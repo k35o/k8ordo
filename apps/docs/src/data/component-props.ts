@@ -1,4 +1,4 @@
-import generated from '@k8o/arte-odyssey/props.json';
+import generated from '@k8ordo/ui/props.json';
 
 import type { PropItem } from '../components/props-table';
 
@@ -15,7 +15,7 @@ const byName = new Map(
 
 /**
  * Props of a component, extracted from its types by
- * `packages/arte-odyssey/scripts/extract-props.ts`.
+ * `packages/ui/scripts/extract-props.ts`.
  *
  * Throws on an unknown name so a renamed or removed component fails the docs
  * build instead of silently rendering an empty table.
@@ -24,7 +24,7 @@ export const propsOf = (name: string): readonly PropItem[] => {
   const component = byName.get(name);
   if (!component) {
     throw new Error(
-      `No generated props for "${name}". Run \`pnpm --filter @k8o/arte-odyssey generate:props\`.`,
+      `No generated props for "${name}". Run \`pnpm --filter @k8ordo/ui generate:props\`.`,
     );
   }
   return component.props.map((prop: GeneratedProp) => ({

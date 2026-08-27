@@ -1,6 +1,6 @@
 /**
  * Generates `apps/docs/public/design.md` — the machine-readable design-system
- * spec served at `https://arte-odyssey.k8o.me/design.md`.
+ * spec served at `https://ordo.k8o.me/design.md`.
  *
  * Single source of truth:
  *   index.css ──tailwind-token-extractor──► tokens.generated.ts ──(this)──► design.md
@@ -16,7 +16,7 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 
-import { tokens } from '../../../packages/arte-odyssey/src/styles/tokens.generated.ts';
+import { tokens } from '../../../packages/ui/src/styles/tokens.generated.ts';
 
 const OUT_PATH = fileURLToPath(new URL('../public/design.md', import.meta.url));
 
@@ -201,13 +201,13 @@ function build(): string {
      Token values come from the design-system SSOT (tokens.generated.ts ← index.css).
      Regenerate: pnpm --filter docs generate:design -->`,
 
-    `# ArteOdyssey Design System`,
+    `# k8ordo UI Design System`,
 
-    `\`@k8o/arte-odyssey\` のデザインシステム仕様。デザイントークン・タイポグラフィ・コンポーネントの単一の参照元です。人間にも LLM／エージェントにも読めるよう、\`https://arte-odyssey.k8o.me/design\` の Markdown 版として配信しています。
+    `\`@k8ordo/ui\` のデザインシステム仕様。デザイントークン・タイポグラフィ・コンポーネントの単一の参照元です。人間にも LLM／エージェントにも読めるよう、\`https://ordo.k8o.me/design\` の Markdown 版として配信しています。
 
-- パッケージ: \`@k8o/arte-odyssey\`（npm, public）
+- パッケージ: \`@k8ordo/ui\`（npm, public）
 - スタック: React + Tailwind CSS 4 + OKLCH カラー
-- トークン定義の実体: \`packages/arte-odyssey/src/styles/{tokens,base,utilities}.css\`
+- トークン定義の実体: \`packages/ui/src/styles/{tokens,base,utilities}.css\`
 
 > 生のカラー値（\`bg-teal-500\` 等）は使わず、常にセマンティックトークン（\`bg-primary-bg\` 等）を使います。トークンはダークモードで自動的に再マッピングされます。`,
 
@@ -399,17 +399,17 @@ font-family: 'Noto Sans JP', 'M PLUS 2', sans-serif;
 
     `## コンポーネント
 
-\`@k8o/arte-odyssey\` から名前付きエクスポート。スタイルシートとプロバイダーが必要。
+\`@k8ordo/ui\` から名前付きエクスポート。スタイルシートとプロバイダーが必要。
 このガイドのトークンを自分のマークアップで使うには Tailwind ソース版の \`tailwind.css\` を
 import する（Tailwind を持たないプロジェクトはビルド済みの \`styles.css\`）:
 
 \`\`\`tsx
-import '@k8o/arte-odyssey/tailwind.css';
-import { ArteOdysseyProvider, Button, Card } from '@k8o/arte-odyssey';
+import '@k8ordo/ui/tailwind.css';
+import { UIProvider, Button, Card } from '@k8ordo/ui';
 
-<ArteOdysseyProvider>
+<UIProvider>
   <App />
-</ArteOdysseyProvider>;
+</UIProvider>;
 \`\`\`
 
 ### Buttons
@@ -482,7 +482,7 @@ import { ArteOdysseyProvider, Button, Card } from '@k8o/arte-odyssey';
 
 ### Providers
 
-- **ArteOdysseyProvider** — アプリルートで 1 回
+- **UIProvider** — アプリルートで 1 回
 - **PortalRootProvider** / **usePortalRoot** — ポータルのルート指定`,
 
     `## ボイス
@@ -494,19 +494,19 @@ import { ArteOdysseyProvider, Button, Card } from '@k8o/arte-odyssey';
     `## インストール
 
 \`\`\`bash
-npm install @k8o/arte-odyssey
+npm install @k8ordo/ui
 \`\`\`
 
 \`\`\`tsx
 // Tailwind CSS 4 のプロジェクト（トークンを自分のマークアップでも使える）
-import '@k8o/arte-odyssey/tailwind.css';
+import '@k8ordo/ui/tailwind.css';
 // Tailwind を持たないプロジェクトはビルド済み CSS を使う
-// import '@k8o/arte-odyssey/styles.css';
-import { ArteOdysseyProvider } from '@k8o/arte-odyssey';
+// import '@k8ordo/ui/styles.css';
+import { UIProvider } from '@k8ordo/ui';
 \`\`\`
 
-- Docs: <https://arte-odyssey.k8o.me>
-- npm: \`@k8o/arte-odyssey\``,
+- Docs: <https://ordo.k8o.me>
+- npm: \`@k8ordo/ui\``,
   ].join('\n\n')}\n`;
 }
 

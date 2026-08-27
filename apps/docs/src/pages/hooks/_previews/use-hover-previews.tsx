@@ -1,6 +1,6 @@
 'use client';
 
-import { useHover } from '@k8o/arte-odyssey';
+import { useHover } from '@k8ordo/ui';
 
 export function UseHoverPreview() {
   const { isHovered, hoverProps } = useHover();
