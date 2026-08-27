@@ -1,6 +1,6 @@
 'use client';
 
-import { useLocalStorage } from '@k8o/arte-odyssey';
+import { useLocalStorage } from '@k8ordo/ui';
 import {
   createContext,
   use,
@@ -20,7 +20,7 @@ type ThemeContextValue = {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
-const STORAGE_KEY = 'arte-odyssey-theme';
+const STORAGE_KEY = 'k8ordo-theme';
 
 const subscribeMediaQuery = (cb: () => void) => {
   const mq = window.matchMedia('(prefers-color-scheme: dark)');

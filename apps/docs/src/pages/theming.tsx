@@ -1,4 +1,4 @@
-import { Card, Heading, Separator } from '@k8o/arte-odyssey';
+import { Card, Heading, Separator } from '@k8ordo/ui';
 
 import { CodeBlock } from '../components/code-block';
 import { T } from '../components/t';
@@ -196,7 +196,7 @@ export function Theming() {
                       className="min-w-0 truncate"
                       style={{ fontSize: size.fontSize, lineHeight: ratio }}
                     >
-                      ArteOdyssey
+                      k8ordo
                     </span>
                     <span className="text-fg-subtle ml-auto shrink-0 text-xs">
                       {size.fontSize} / {Number(ratio.toFixed(3))}
@@ -223,7 +223,7 @@ export function Theming() {
                     className="text-lg"
                     style={{ fontWeight: weight.value }}
                   >
-                    ArteOdyssey
+                    k8ordo
                   </span>
                   <span className="text-fg-subtle ml-auto shrink-0 text-xs">
                     {weight.value}
@@ -246,7 +246,7 @@ export function Theming() {
                     {ls.name}
                   </code>
                   <span className="text-lg" style={{ letterSpacing: ls.value }}>
-                    ArteOdyssey
+                    k8ordo
                   </span>
                   <span className="text-fg-subtle ml-auto shrink-0 text-xs">
                     {ls.value}
@@ -439,7 +439,7 @@ document.documentElement.classList.remove('dark');`}
           <T k="theming.customizeDescription" />
         </p>
         <CodeBlock
-          code={`/* app.css — import after the ArteOdyssey stylesheet */
+          code={`/* app.css — import after the k8ordo UI stylesheet */
 :root {
   --primary-fg: var(--purple-800);
   --primary-bg: var(--purple-200);

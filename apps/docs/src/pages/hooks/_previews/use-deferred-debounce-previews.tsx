@@ -1,6 +1,6 @@
 'use client';
 
-import { TextField, useDeferredDebounce } from '@k8o/arte-odyssey';
+import { TextField, useDeferredDebounce } from '@k8ordo/ui';
 import { useMemo, useState } from 'react';
 
 const WORDS = [

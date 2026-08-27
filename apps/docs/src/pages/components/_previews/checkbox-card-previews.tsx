@@ -1,6 +1,6 @@
 'use client';
 
-import { CheckboxCard } from '@k8o/arte-odyssey';
+import { CheckboxCard } from '@k8ordo/ui';
 import { useState } from 'react';
 
 const options = [

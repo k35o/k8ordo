@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, useScrollLock } from '@k8o/arte-odyssey';
+import { Button, useScrollLock } from '@k8ordo/ui';
 import { useRef } from 'react';
 
 export function UseScrollLockPreview() {

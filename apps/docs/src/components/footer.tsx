@@ -18,9 +18,9 @@ const DOC_LINKS: Array<{ path: string; labelKey: MessageKey }> = [
 ];
 
 const RESOURCE_LINKS = [
-  { href: 'https://github.com/k35o/arte-odyssey', label: 'GitHub' },
+  { href: 'https://github.com/k35o/k8ordo', label: 'GitHub' },
   { href: STORYBOOK_URL, label: 'Storybook' },
-  { href: 'https://www.npmjs.com/package/@k8o/arte-odyssey', label: 'npm' },
+  { href: 'https://www.npmjs.com/package/@k8ordo/ui', label: 'npm' },
 ];
 
 const linkClass =
@@ -35,7 +35,7 @@ export function Footer() {
         <div className="flex flex-col gap-4">
           <span className="flex items-baseline gap-1">
             <span className="font-m-plus-2 font-palt text-fg-base text-lg font-bold">
-              ArteOdyssey
+              k8ordo
             </span>
             <span
               aria-hidden

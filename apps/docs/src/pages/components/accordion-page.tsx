@@ -1,4 +1,4 @@
-import { Accordion, Anchor, Heading, Separator } from '@k8o/arte-odyssey';
+import { Accordion, Anchor, Heading, Separator } from '@k8ordo/ui';
 
 import { CodeBlock } from '../../components/code-block';
 import { ComponentPreview } from '../../components/component-preview';
@@ -30,10 +30,7 @@ export function AccordionPage() {
         <Heading level="h2">
           <T k="components.common.importTitle" />
         </Heading>
-        <CodeBlock
-          code="import { Accordion } from '@k8o/arte-odyssey';"
-          lang="ts"
-        />
+        <CodeBlock code="import { Accordion } from '@k8ordo/ui';" lang="ts" />
       </section>
       <Separator color="mute" />
 
@@ -46,10 +43,10 @@ export function AccordionPage() {
             code={`<Accordion.Root>
   <Accordion.Item>
     <h3>
-      <Accordion.Button>What is ArteOdyssey?</Accordion.Button>
+      <Accordion.Button>What is k8ordo UI?</Accordion.Button>
     </h3>
     <Accordion.Panel>
-      <p>ArteOdyssey is a React UI component library.</p>
+      <p>k8ordo UI is a React UI component library.</p>
     </Accordion.Panel>
   </Accordion.Item>
   <Accordion.Item>
@@ -74,10 +71,10 @@ export function AccordionPage() {
               <Accordion.Root>
                 <Accordion.Item>
                   <h3>
-                    <Accordion.Button>What is ArteOdyssey?</Accordion.Button>
+                    <Accordion.Button>What is k8ordo UI?</Accordion.Button>
                   </h3>
                   <Accordion.Panel>
-                    <p>ArteOdyssey is a React UI component library.</p>
+                    <p>k8ordo UI is a React UI component library.</p>
                   </Accordion.Panel>
                 </Accordion.Item>
                 <Accordion.Item>

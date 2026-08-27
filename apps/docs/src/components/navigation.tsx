@@ -1,7 +1,7 @@
 'use client';
 
 import { useLocation } from '@funstack/router';
-import { DropdownMenu, NavigationMenuIcon } from '@k8o/arte-odyssey';
+import { DropdownMenu, NavigationMenuIcon } from '@k8ordo/ui';
 
 import type { MessageKey } from '../i18n';
 import { localizeHref, useTranslation } from '../i18n';
@@ -34,7 +34,7 @@ export function Navigation() {
           unstyled
         >
           <span className="font-m-plus-2 font-palt text-fg-base text-lg font-bold whitespace-nowrap">
-            ArteOdyssey
+            k8ordo
           </span>
           <span
             aria-hidden

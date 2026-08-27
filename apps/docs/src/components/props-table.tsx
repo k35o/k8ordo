@@ -1,4 +1,4 @@
-import { Code } from '@k8o/arte-odyssey';
+import { Code } from '@k8ordo/ui';
 import type { FC } from 'react';
 
 import { LocaleAnchor } from './locale-anchor';

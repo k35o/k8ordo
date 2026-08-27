@@ -16,7 +16,7 @@
   "dependencies": {
     "@funstack/router": "1.2.0",
     "@funstack/static": "1.2.0",
-    "@k8o/arte-odyssey": "workspace:^",
+    "@k8ordo/ui": "workspace:^",
     "@tailwindcss/vite": "catalog:",
     "react-error-boundary": "6.1.2",
     "shiki": "4.4.3",

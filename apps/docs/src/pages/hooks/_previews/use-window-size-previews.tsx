@@ -1,6 +1,6 @@
 'use client';
 
-import { useWindowSize } from '@k8o/arte-odyssey';
+import { useWindowSize } from '@k8ordo/ui';
 
 export function UseWindowSizePreview() {
   const { width, height } = useWindowSize();

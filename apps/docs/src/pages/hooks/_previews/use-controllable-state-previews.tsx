@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, useControllableState } from '@k8o/arte-odyssey';
+import { Button, useControllableState } from '@k8ordo/ui';
 
 export function UseControllableStatePreview() {
   const [count, setCount] = useControllableState({ defaultValue: 0 });

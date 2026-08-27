@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Dialog, Modal } from '@k8o/arte-odyssey';
+import { Button, Dialog, Modal } from '@k8ordo/ui';
 import { useState } from 'react';
 
 export function DialogBasicPreview() {

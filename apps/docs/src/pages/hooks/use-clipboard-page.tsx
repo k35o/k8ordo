@@ -1,4 +1,4 @@
-import { Heading, Separator } from '@k8o/arte-odyssey';
+import { Heading, Separator } from '@k8ordo/ui';
 
 import { CodeBlock } from '../../components/code-block';
 import { ComponentPreview } from '../../components/component-preview';
@@ -36,7 +36,7 @@ export function UseClipboardPage() {
           <T k="hooks.common.importTitle" />
         </Heading>
         <CodeBlock
-          code="import { useClipboard } from '@k8o/arte-odyssey';"
+          code="import { useClipboard } from '@k8ordo/ui';"
           lang="ts"
         />
       </section>
@@ -55,7 +55,7 @@ export function UseClipboardPage() {
 const [copied, setCopied] = useState(false);
 
 const handleCopy = async () => {
-  await writeClipboard('Hello from ArteOdyssey!');
+  await writeClipboard('Hello from k8ordo UI!');
   setCopied(true);
   setTimeout(() => setCopied(false), 2000);
 };

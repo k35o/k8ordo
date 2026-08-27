@@ -4,7 +4,7 @@ import {
   HorizontalWritingIcon,
   IconButton,
   VerticalWritingIcon,
-} from '@k8o/arte-odyssey';
+} from '@k8ordo/ui';
 
 import { useTranslation } from '../i18n';
 import { useWritingMode } from '../theme/writing-mode-context';

@@ -1,6 +1,6 @@
 'use client';
 
-import { Checkbox, CheckboxGroup } from '@k8o/arte-odyssey';
+import { Checkbox, CheckboxGroup } from '@k8ordo/ui';
 import { useState } from 'react';
 
 export function CheckboxGroupControlledPreview() {

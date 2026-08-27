@@ -1,6 +1,6 @@
 'use client';
 
-import { DarkModeIcon, IconButton, LightModeIcon } from '@k8o/arte-odyssey';
+import { DarkModeIcon, IconButton, LightModeIcon } from '@k8ordo/ui';
 
 import { useTranslation } from '../i18n';
 import { useTheme } from '../theme/context';

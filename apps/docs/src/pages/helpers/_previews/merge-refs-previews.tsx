@@ -1,6 +1,6 @@
 'use client';
 
-import { mergeRefs } from '@k8o/arte-odyssey';
+import { mergeRefs } from '@k8ordo/ui';
 import { useEffect, useRef, useState } from 'react';
 
 export function MergeRefsPreview() {

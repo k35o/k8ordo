@@ -1,6 +1,6 @@
 'use client';
 
-import { Autocomplete } from '@k8o/arte-odyssey';
+import { Autocomplete } from '@k8ordo/ui';
 import { useState } from 'react';
 
 const options = [

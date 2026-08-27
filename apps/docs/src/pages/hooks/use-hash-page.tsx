@@ -1,4 +1,4 @@
-import { Heading, Separator } from '@k8o/arte-odyssey';
+import { Heading, Separator } from '@k8ordo/ui';
 
 import { CodeBlock } from '../../components/code-block';
 import type { PropItem } from '../../components/props-table';
@@ -28,10 +28,7 @@ export function UseHashPage() {
         <Heading level="h2">
           <T k="hooks.common.importTitle" />
         </Heading>
-        <CodeBlock
-          code="import { useHash } from '@k8o/arte-odyssey';"
-          lang="ts"
-        />
+        <CodeBlock code="import { useHash } from '@k8ordo/ui';" lang="ts" />
       </section>
       <Separator color="mute" />
 

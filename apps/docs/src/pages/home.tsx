@@ -10,7 +10,7 @@ import {
   ShieldCheckIcon,
   SparklesIcon,
   VerticalWritingIcon,
-} from '@k8o/arte-odyssey';
+} from '@k8ordo/ui';
 import type { ReactNode } from 'react';
 
 import { T } from '../components/t';
@@ -64,10 +64,10 @@ export function Home() {
       <section className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-12 px-6 py-20 md:grid-cols-[1fr_auto] md:gap-16 md:px-8 md:py-28">
         <div className="flex max-w-xl flex-col justify-center gap-8">
           {/* Heading は className を受けないため、ヒーローのみ生 h1（サイト内この1箇所限定） */}
-          {/* 320px級の画面でも1語の "ArteOdyssey" がはみ出さないよう、
+          {/* 320px級の画面でも1語の "k8ordo" がはみ出さないよう、
               sm未満のみ 3xl〜emphasize の範囲で流動サイズにする */}
           <h1 className="font-m-plus-2 font-palt text-fg-base sm:text-emphasize text-[clamp(1.875rem,12vw,3rem)] leading-none font-bold">
-            ArteOdyssey
+            k8ordo
             <span
               aria-hidden
               className="bg-primary-border ml-1.5 inline-block size-3 rounded-full"
@@ -118,7 +118,7 @@ export function Home() {
               renderItem={({ className, children }) => (
                 <a
                   className={className}
-                  href="https://github.com/k35o/arte-odyssey"
+                  href="https://github.com/k35o/k8ordo"
                   rel="noopener noreferrer"
                   target="_blank"
                 >

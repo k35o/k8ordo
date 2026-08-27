@@ -1,4 +1,4 @@
-import { Heading, Separator } from '@k8o/arte-odyssey';
+import { Heading, Separator } from '@k8ordo/ui';
 
 import { CodeBlock } from '../../components/code-block';
 import { T } from '../../components/t';
@@ -24,7 +24,7 @@ export function GenerativeUi() {
           <T k="generativeUi.promptDescription" />
         </p>
         <CodeBlock
-          code={`import { catalog, arteOdysseyRules } from '@k8o/arte-odyssey/json-render';
+          code={`import { catalog, arteOdysseyRules } from '@k8ordo/ui/json-render';
 
 // Runs on the server. customRules injects constraints the model tends to break.
 const systemPrompt = catalog.prompt({ customRules: [...arteOdysseyRules] });`}
@@ -43,7 +43,7 @@ const systemPrompt = catalog.prompt({ customRules: [...arteOdysseyRules] });`}
         </p>
         <CodeBlock
           code={`'use client';
-import { JsonRenderUI } from '@k8o/arte-odyssey/json-render/registry';
+import { JsonRenderUI } from '@k8ordo/ui/json-render/registry';
 
 export function GenUi({ spec }: { spec: unknown }) {
   return <JsonRenderUI spec={spec} />;
@@ -62,7 +62,7 @@ export function GenUi({ spec }: { spec: unknown }) {
           <T k="generativeUi.validateDescription" />
         </p>
         <CodeBlock
-          code={`import { validateGeneratedSpec } from '@k8o/arte-odyssey/json-render';
+          code={`import { validateGeneratedSpec } from '@k8ordo/ui/json-render';
 
 const result = validateGeneratedSpec(JSON.parse(llmOutput));
 if (result.ok) {
@@ -83,7 +83,7 @@ const retried = await llm(result.repairPrompt); // fix and retry`}
           <T k="generativeUi.typedDescription" />
         </p>
         <CodeBlock
-          code={`import type { ArteSpec } from '@k8o/arte-odyssey/json-render';
+          code={`import type { ArteSpec } from '@k8ordo/ui/json-render';
 
 const spec = {
   root: 'root',
@@ -107,7 +107,7 @@ const spec = {
         </p>
         <CodeBlock
           code={`'use client';
-import { library } from '@k8o/arte-odyssey/openui';
+import { library } from '@k8ordo/ui/openui';
 import { Renderer } from '@openuidev/react-lang';
 
 export function GenUi({ response }: { response: string }) {
@@ -117,7 +117,7 @@ export function GenUi({ response }: { response: string }) {
         />
         <CodeBlock
           code={`// Server-safe prompt generation (symmetric with catalog.prompt()).
-import { prompt } from '@k8o/arte-odyssey/openui/prompt';
+import { prompt } from '@k8ordo/ui/openui/prompt';
 
 const systemPrompt = prompt();`}
           lang="tsx"

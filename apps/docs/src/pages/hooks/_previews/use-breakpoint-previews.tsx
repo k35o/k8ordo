@@ -1,6 +1,6 @@
 'use client';
 
-import { useBreakpoint } from '@k8o/arte-odyssey';
+import { useBreakpoint } from '@k8ordo/ui';
 
 export function UseBreakpointPreview() {
   const isSm = useBreakpoint('sm');

@@ -1,6 +1,6 @@
 'use client';
 
-import { AlertIcon, Button, Heading } from '@k8o/arte-odyssey';
+import { AlertIcon, Button, Heading } from '@k8ordo/ui';
 import type { FC } from 'react';
 
 import type { Locale } from '../i18n';

@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, ToastProvider, useToast } from '@k8o/arte-odyssey';
+import { Button, ToastProvider, useToast } from '@k8ordo/ui';
 
 function ToastDemo() {
   const { open } = useToast();

@@ -1,6 +1,6 @@
 'use client';
 
-import { TextField, useDebouncedTransition } from '@k8o/arte-odyssey';
+import { TextField, useDebouncedTransition } from '@k8ordo/ui';
 import { useState } from 'react';
 
 const toAbortError = (reason: unknown): Error =>

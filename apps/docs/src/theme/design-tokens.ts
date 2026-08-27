@@ -1,7 +1,7 @@
 /**
  * Docs-only design-token view.
  *
- * Everything derivable comes from `@k8o/arte-odyssey/tokens` (extracted from the
+ * Everything derivable comes from `@k8ordo/ui/tokens` (extracted from the
  * design system's CSS by `tailwind-token-extractor`):
  *   - palette families / shades / hue ← `tokens.vars` (`teal-500` keys, oklch hue)
  *   - semantic → palette mappings     ← `tokens.refs` (the symbolic var() targets)
@@ -11,7 +11,7 @@
  * descriptions (design rationale, not in CSS) and the spacing display scale
  * (a multiplicative view of the single `--spacing` unit).
  */
-import { tokens } from '@k8o/arte-odyssey/tokens';
+import { tokens } from '@k8ordo/ui/tokens';
 
 export type Shade = number;
 

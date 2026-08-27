@@ -1,6 +1,6 @@
 'use client';
 
-import { ScrollLinked } from '@k8o/arte-odyssey';
+import { ScrollLinked } from '@k8ordo/ui';
 import { useRef } from 'react';
 
 export function ScrollLinkedBasicPreview() {

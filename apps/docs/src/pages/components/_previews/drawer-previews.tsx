@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Drawer } from '@k8o/arte-odyssey';
+import { Button, Drawer } from '@k8ordo/ui';
 import { useState } from 'react';
 
 export function DrawerBasicPreview() {

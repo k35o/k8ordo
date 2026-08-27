@@ -1,6 +1,6 @@
 'use client';
 
-import { FormControl, TextField } from '@k8o/arte-odyssey';
+import { FormControl, TextField } from '@k8ordo/ui';
 
 export function FormControlBasicPreview() {
   return (

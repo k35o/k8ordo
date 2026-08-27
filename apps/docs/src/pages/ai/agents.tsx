@@ -1,4 +1,4 @@
-import { Anchor, Code, Heading, Separator } from '@k8o/arte-odyssey';
+import { Anchor, Code, Heading, Separator } from '@k8ordo/ui';
 import type { FC } from 'react';
 
 import { CodeBlock } from '../../components/code-block';
@@ -34,7 +34,7 @@ const SURFACES: Array<{
     descKey: 'aiAgents.surfaceTokens',
   },
   {
-    path: '@k8o/arte-odyssey/props.json',
+    path: '@k8ordo/ui/props.json',
     href: '/docs/references/components.md',
     descKey: 'aiAgents.surfaceProps',
   },
@@ -78,8 +78,8 @@ export function AiAgents() {
           <T k="aiAgents.setupDescription" />
         </p>
         <CodeBlock
-          code={`Use \`@k8o/arte-odyssey\` for UI. Before writing or changing UI, read
-\`node_modules/@k8o/arte-odyssey/docs/GUIDE.md\`, then follow only the
+          code={`Use \`@k8ordo/ui\` for UI. Before writing or changing UI, read
+\`node_modules/@k8ordo/ui/docs/GUIDE.md\`, then follow only the
 \`docs/references/*.md\` links it lists that the task actually needs.
 Colors, spacing, radii and font weights go through semantic tokens —
 never raw values such as \`bg-teal-500\` or \`font-semibold\`.
@@ -125,7 +125,7 @@ recalling them; a component that is not listed there does not exist.`}
         <CodeBlock
           code={`{
   "mcpServers": {
-    "arte-odyssey": {
+    "k8ordo": {
       "type": "http",
       "url": "${MCP_URL}"
     }

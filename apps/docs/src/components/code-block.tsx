@@ -1,4 +1,4 @@
-import { cn } from '@k8o/arte-odyssey';
+import { cn } from '@k8ordo/ui';
 import type { FC } from 'react';
 import { codeToHtml } from 'shiki';
 

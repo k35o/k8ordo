@@ -1,4 +1,4 @@
-import { Heading, Separator } from '@k8o/arte-odyssey';
+import { Heading, Separator } from '@k8ordo/ui';
 
 import { CodeBlock } from '../../components/code-block';
 import { ComponentPreview } from '../../components/component-preview';
@@ -29,13 +29,13 @@ export function AiChat() {
         </p>
         <ComponentPreview
           code={`'use client';
-import { Avatar, AssistantIcon } from '@k8o/arte-odyssey';
+import { Avatar, AssistantIcon } from '@k8ordo/ui';
 import {
   Conversation,
   Message,
   PromptInput,
   Suggestion,
-} from '@k8o/arte-odyssey/ai';
+} from '@k8ordo/ui/ai';
 
 export function Chat({ messages, send }: Props) {
   return (
@@ -80,8 +80,8 @@ export function Chat({ messages, send }: Props) {
         </p>
         <CodeBlock
           code={`'use client';
-import { Avatar, AssistantIcon } from '@k8o/arte-odyssey';
-import { Conversation, Message, PromptInput } from '@k8o/arte-odyssey/ai';
+import { Avatar, AssistantIcon } from '@k8ordo/ui';
+import { Conversation, Message, PromptInput } from '@k8ordo/ui/ai';
 import { useChat } from '@ai-sdk/react';
 
 export function Chat() {
@@ -148,7 +148,7 @@ export function Chat() {
           <T k="aiChat.suggestionDescription" />
         </p>
         <CodeBlock
-          code={`import { Suggestion } from '@k8o/arte-odyssey/ai';
+          code={`import { Suggestion } from '@k8ordo/ui/ai';
 
 <Suggestion.List>
   {suggestions.map((s) => (
@@ -170,7 +170,7 @@ export function Chat() {
         </p>
         <CodeBlock
           code={`// pnpm add streamdown
-import { Response } from '@k8o/arte-odyssey/ai/response';
+import { Response } from '@k8ordo/ui/ai/response';
 import 'streamdown/styles.css';
 
 <Message.Content>
@@ -190,14 +190,14 @@ import 'streamdown/styles.css';
           <T k="aiChat.toolDescription" />
         </p>
         <CodeBlock
-          code={`import { Reasoning, ToolInvocation } from '@k8o/arte-odyssey/ai';
+          code={`import { Reasoning, ToolInvocation } from '@k8ordo/ui/ai';
 
 <Reasoning isStreaming={isThinking}>{reasoningText}</Reasoning>
 
 <ToolInvocation
   name="search_web"
   state="output-available" // 'input-streaming' | 'input-available' | 'output-available' | 'output-error'
-  input={{ query: 'ArteOdyssey' }}
+  input={{ query: 'k8ordo UI' }}
   output="…"
 />`}
           lang="tsx"
@@ -214,9 +214,9 @@ import 'streamdown/styles.css';
           <T k="aiChat.aiSdkDescription" />
         </p>
         <CodeBlock
-          code={`import { mapMessageParts } from '@k8o/arte-odyssey/ai-sdk';
-import { Reasoning, ToolInvocation } from '@k8o/arte-odyssey/ai';
-import { Response } from '@k8o/arte-odyssey/ai/response';
+          code={`import { mapMessageParts } from '@k8ordo/ui/ai-sdk';
+import { Reasoning, ToolInvocation } from '@k8ordo/ui/ai';
+import { Response } from '@k8ordo/ui/ai/response';
 
 <Message.Content>
   {mapMessageParts(message).map((part, i) => {
@@ -240,8 +240,8 @@ import { Response } from '@k8o/arte-odyssey/ai/response';
         </p>
         <CodeBlock
           code={`'use client';
-import { Message } from '@k8o/arte-odyssey/ai';
-import { JsonRenderUI } from '@k8o/arte-odyssey/json-render/registry';
+import { Message } from '@k8ordo/ui/ai';
+import { JsonRenderUI } from '@k8ordo/ui/json-render/registry';
 
 // An LLM returned a UI spec as a tool result — render it inside the bubble.
 <Message.Root from="assistant">

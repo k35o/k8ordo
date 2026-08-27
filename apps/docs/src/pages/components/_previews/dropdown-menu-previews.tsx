@@ -1,6 +1,6 @@
 'use client';
 
-import { DarkModeIcon, DropdownMenu } from '@k8o/arte-odyssey';
+import { DarkModeIcon, DropdownMenu } from '@k8ordo/ui';
 
 export function DropdownMenuBasicPreview() {
   return (
