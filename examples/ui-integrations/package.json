@@ -1,5 +1,5 @@
 {
-  "name": "example-vite",
+  "name": "example-ui-integrations",
   "version": "0.1.13",
   "private": true,
   "type": "module",
@@ -14,7 +14,7 @@
   "dependencies": {
     "@json-render/core": "0.19.0",
     "@json-render/react": "0.19.0",
-    "@k8o/arte-odyssey": "workspace:^",
+    "@k8ordo/ui": "workspace:^",
     "@openuidev/react-lang": "0.2.6",
     "@tailwindcss/vite": "catalog:",
     "tailwindcss": "catalog:",

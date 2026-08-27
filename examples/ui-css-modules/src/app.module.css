@@ -1,5 +1,5 @@
 /*
- * ページ固有のスタイルは CSS Modules に書く。色は @k8o/arte-odyssey/styles.css
+ * ページ固有のスタイルは CSS Modules に書く。色は @k8ordo/ui/styles.css
  * が :root / .dark に定義するトークン（CSS カスタムプロパティ）を参照する。
  * ライブラリ側のルールはすべて @layer 内、ここはレイヤー外なので、
  * カスケードでは常にこちらが優先される。

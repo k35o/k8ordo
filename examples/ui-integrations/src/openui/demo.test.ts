@@ -1,4 +1,4 @@
-import { library } from '@k8o/arte-odyssey/openui';
+import { library } from '@k8ordo/ui/openui';
 import { createParser } from '@openuidev/react-lang';
 
 import { openUiResponse } from './demo';

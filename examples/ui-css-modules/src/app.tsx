@@ -1,4 +1,4 @@
-import { Badge, Button, Card, Heading, Switch } from '@k8o/arte-odyssey';
+import { Badge, Button, Card, Heading, Switch } from '@k8ordo/ui';
 import { useState } from 'react';
 
 import styles from './app.module.css';
@@ -10,7 +10,7 @@ function App() {
     <div className={styles.page}>
       <main className={styles.content}>
         <header className={styles.header}>
-          <Heading level="h1">arte-odyssey × CSS Modules</Heading>
+          <Heading level="h1">k8ordo UI × CSS Modules</Heading>
           <Switch
             label="ダークモード"
             onChange={(checked) => {
@@ -21,7 +21,7 @@ function App() {
 
         <p className={styles.lead}>
           この example の依存に Tailwind CSS は存在しません。ビルド済みの
-          <code className={styles.token}>@k8o/arte-odyssey/styles.css</code>
+          <code className={styles.token}>@k8ordo/ui/styles.css</code>
           を1回読み込むだけで、コンポーネントはそのまま動きます。
         </p>
 

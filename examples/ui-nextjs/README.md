@@ -1,15 +1,15 @@
-# Next.js Example - ArteOdyssey
+# Next.js Example - k8ordo UI
 
-This example demonstrates ArteOdyssey's **generative UI adapter** in a Next.js App Router app: the system prompt is generated on the **server** with the server-safe `catalog`, and a spec is rendered on the **client** with the pre-wired `<JsonRenderUI />`.
+This example demonstrates k8ordo UI's **generative UI adapter** in a Next.js App Router app: the system prompt is generated on the **server** with the server-safe `catalog`, and a spec is rendered on the **client** with the pre-wired `<JsonRenderUI />`.
 
 ## Overview
 
 This example showcases:
 
-- ArteOdyssey setup in a Next.js project (App Router)
+- k8ordo UI setup in a Next.js project (App Router)
 - **RSC-safe prompt generation**: `catalog.prompt()` runs in a Server Component
 - **Client rendering**: `<JsonRenderUI spec={spec} />` renders the spec
-- The server/client split of `@k8o/arte-odyssey/json-render` (catalog) vs `@k8o/arte-odyssey/json-render/registry` (registry)
+- The server/client split of `@k8ordo/ui/json-render` (catalog) vs `@k8ordo/ui/json-render/registry` (registry)
 - Tailwind CSS 4 with PostCSS, TypeScript, and Turbopack
 
 ## Getting Started
@@ -21,7 +21,7 @@ This example showcases:
 
 ### Installation & Setup
 
-From the root of the ArteOdyssey monorepo:
+From the root of the k8ordo UI monorepo:
 
 ```bash
 # Install dependencies
@@ -42,7 +42,7 @@ The application will be available at `http://localhost:3000`.
 examples/nextjs/
 ├── src/
 │   └── app/
-│       ├── globals.css        # Imports @k8o/arte-odyssey/tailwind.css
+│       ├── globals.css        # Imports @k8ordo/ui/tailwind.css
 │       ├── layout.tsx         # Root layout component
 │       ├── page.tsx           # Server Component: generates the prompt with catalog.prompt()
 │       └── gen-ui-client.tsx  # Client Component: renders the spec with <JsonRenderUI />
@@ -57,11 +57,11 @@ examples/nextjs/
 
 ### Server Component (`src/app/page.tsx`)
 
-`@k8o/arte-odyssey/json-render` is server-safe, so the system prompt is generated on the
+`@k8ordo/ui/json-render` is server-safe, so the system prompt is generated on the
 server — proof that the catalog has no client-only dependencies:
 
 ```tsx
-import { catalog } from '@k8o/arte-odyssey/json-render';
+import { catalog } from '@k8ordo/ui/json-render';
 
 import { GenUiClient } from './gen-ui-client';
 
@@ -75,13 +75,13 @@ export default function Home() {
 
 ### Client Component (`src/app/gen-ui-client.tsx`)
 
-`@k8o/arte-odyssey/json-render/registry` is `'use client'`. `JsonRenderUI` wires the
+`@k8ordo/ui/json-render/registry` is `'use client'`. `JsonRenderUI` wires the
 provider, renderer, and registry, so the boundary file is a one-liner:
 
 ```tsx
 'use client';
 import type { Spec } from '@json-render/core';
-import { JsonRenderUI } from '@k8o/arte-odyssey/json-render/registry';
+import { JsonRenderUI } from '@k8ordo/ui/json-render/registry';
 
 export function GenUiClient({ spec }: { spec: unknown }) {
   return <JsonRenderUI spec={spec as Spec} />;
@@ -90,7 +90,7 @@ export function GenUiClient({ spec }: { spec: unknown }) {
 
 ### Dependencies
 
-- `@k8o/arte-odyssey` (workspace)
+- `@k8ordo/ui` (workspace)
 - `@json-render/core`, `@json-render/react`, `zod` (json-render adapter)
 
 ## Available Scripts
@@ -110,26 +110,26 @@ The project uses Next.js 16.2.6 with Turbopack, the App Router, and Next.js type
 
 ### Tailwind CSS
 
-Tailwind CSS 4 is configured with PostCSS. ArteOdyssey's tokens are loaded in
+Tailwind CSS 4 is configured with PostCSS. k8ordo UI's tokens are loaded in
 `src/app/globals.css` with a single import (no `@tailwind` directives needed):
 
 ```css
-@import '@k8o/arte-odyssey/tailwind.css';
+@import '@k8ordo/ui/tailwind.css';
 ```
 
 This is the Tailwind source entry, so the design tokens stay usable in this
 app's own markup. Projects without Tailwind import the prebuilt
-`@k8o/arte-odyssey/styles.css` instead — see `examples/css-modules`.
+`@k8ordo/ui/styles.css` instead — see `examples/css-modules`.
 
 ### Client vs Server Components
 
-- The **catalog** (`@k8o/arte-odyssey/json-render`) is server-safe — use it in Server Components for prompt generation.
-- The **registry** (`@k8o/arte-odyssey/json-render/registry`) and `JsonRenderUI` are `'use client'` — use them in Client Components for rendering.
+- The **catalog** (`@k8ordo/ui/json-render`) is server-safe — use it in Server Components for prompt generation.
+- The **registry** (`@k8ordo/ui/json-render/registry`) and `JsonRenderUI` are `'use client'` — use them in Client Components for rendering.
 
 ## Related Documentation
 
-- [ArteOdyssey Main Documentation](../../packages/arte-odyssey/README.md)
-- [Generative UI integrations](../../packages/arte-odyssey/README.md#generative-ui-integrations)
+- [k8ordo UI Main Documentation](../../packages/ui/README.md)
+- [Generative UI integrations](../../packages/ui/README.md#generative-ui-integrations)
 - [Next.js Documentation](https://nextjs.org/docs)
 - [Next.js App Router](https://nextjs.org/docs/app)
 - [React Documentation](https://react.dev/)
@@ -137,4 +137,4 @@ app's own markup. Projects without Tailwind import the prebuilt
 
 ---
 
-This example is part of the ArteOdyssey monorepo. See the [main README](../../README.md) for more information about the project.
+This example is part of the k8ordo UI monorepo. See the [main README](../../README.md) for more information about the project.

@@ -24,9 +24,7 @@ function Section({
 function App() {
   return (
     <div className="mx-auto flex min-h-screen max-w-xl flex-col gap-8 p-8">
-      <h1 className="text-2xl font-bold">
-        arte-odyssey × Generative UI アダプタ
-      </h1>
+      <h1 className="text-2xl font-bold">k8ordo UI × Generative UI アダプタ</h1>
 
       <Section
         title="json-render"

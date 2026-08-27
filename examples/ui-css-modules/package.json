@@ -1,5 +1,5 @@
 {
-  "name": "example-css-modules",
+  "name": "example-ui-css-modules",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -12,7 +12,7 @@
     "check:write": "vp check --fix"
   },
   "dependencies": {
-    "@k8o/arte-odyssey": "workspace:^"
+    "@k8ordo/ui": "workspace:^"
   },
   "devDependencies": {
     "@types/node": "24.12.4",

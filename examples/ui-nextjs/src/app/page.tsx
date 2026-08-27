@@ -1,5 +1,5 @@
-import { catalog } from '@k8o/arte-odyssey/json-render';
-import type { ArteSpec } from '@k8o/arte-odyssey/json-render';
+import { catalog } from '@k8ordo/ui/json-render';
+import type { ArteSpec } from '@k8ordo/ui/json-render';
 
 import { GenUiClient } from './gen-ui-client';
 
@@ -64,9 +64,7 @@ export default function Home() {
   return (
     <div className="mx-auto flex min-h-screen max-w-xl flex-col gap-6 p-8">
       <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold">
-          arte-odyssey × json-render（RSC）
-        </h1>
+        <h1 className="text-2xl font-bold">k8ordo UI × json-render（RSC）</h1>
         <p className="text-fg-mute text-sm" data-testid="server-prompt-info">
           サーバーで catalog.prompt() を生成（{promptChars} 文字）。下の UI は
           クライアントの registry で描画。

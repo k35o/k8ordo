@@ -1,5 +1,5 @@
-import type { ArteSpec } from '@k8o/arte-odyssey/json-render';
-import { JsonRenderUI } from '@k8o/arte-odyssey/json-render/registry';
+import type { ArteSpec } from '@k8ordo/ui/json-render';
+import { JsonRenderUI } from '@k8ordo/ui/json-render/registry';
 
 export const jsonRenderSpec = {
   root: 'root',

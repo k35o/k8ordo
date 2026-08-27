@@ -1,4 +1,4 @@
-import { validateGeneratedSpec } from '@k8o/arte-odyssey/json-render';
+import { validateGeneratedSpec } from '@k8ordo/ui/json-render';
 
 import { jsonRenderSpec } from './demo';
 

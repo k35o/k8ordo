@@ -1,12 +1,12 @@
-# Vite Example - ArteOdyssey
+# Vite Example - k8ordo UI
 
-This example demonstrates ArteOdyssey's **generative UI adapters** in a Vite + React app: an LLM-style spec is rendered with ArteOdyssey components via both [json-render](https://json-render.dev) and [OpenUI](https://www.openui.com).
+This example demonstrates k8ordo UI's **generative UI adapters** in a Vite + React app: an LLM-style spec is rendered with k8ordo UI components via both [json-render](https://json-render.dev) and [OpenUI](https://www.openui.com).
 
 ## Overview
 
 This example showcases:
 
-- ArteOdyssey setup in a Vite project (Vite+ / `vp` toolchain)
+- k8ordo UI setup in a Vite project (Vite+ / `vp` toolchain)
 - **json-render**: a typed `ArteSpec` rendered with the pre-wired `<JsonRenderUI />`
 - **OpenUI**: an OpenUI-Lang DSL string rendered with `library` + `Renderer`
 - Tailwind CSS 4 integration and TypeScript
@@ -20,7 +20,7 @@ This example showcases:
 
 ### Installation & Setup
 
-From the root of the ArteOdyssey monorepo:
+From the root of the k8ordo UI monorepo:
 
 ```bash
 # Install dependencies
@@ -61,8 +61,8 @@ A hand-written UI tree is typed with `satisfies ArteSpec` (so a typo in a compon
 name or prop is a compile error) and rendered with the pre-wired client component:
 
 ```tsx
-import type { ArteSpec } from '@k8o/arte-odyssey/json-render';
-import { JsonRenderUI } from '@k8o/arte-odyssey/json-render/registry';
+import type { ArteSpec } from '@k8ordo/ui/json-render';
+import { JsonRenderUI } from '@k8ordo/ui/json-render/registry';
 
 const spec = {/* ... */} satisfies ArteSpec;
 
@@ -73,10 +73,10 @@ export function JsonRenderDemo() {
 
 ### OpenUI demo (`src/openui/demo.tsx`)
 
-An OpenUI-Lang DSL string is rendered with the ArteOdyssey `library`:
+An OpenUI-Lang DSL string is rendered with the k8ordo UI `library`:
 
 ```tsx
-import { library } from '@k8o/arte-odyssey/openui';
+import { library } from '@k8ordo/ui/openui';
 import { Renderer } from '@openuidev/react-lang';
 
 export function OpenUiDemo() {
@@ -86,7 +86,7 @@ export function OpenUiDemo() {
 
 ### Dependencies
 
-- `@k8o/arte-odyssey` (workspace)
+- `@k8ordo/ui` (workspace)
 - `@json-render/core`, `@json-render/react` (json-render demo)
 - `@openuidev/react-lang` (OpenUI demo)
 - `zod` (shared by both adapters)
@@ -106,10 +106,10 @@ The project uses the Vite+ (`vite-plus`) toolchain and `@vitejs/plugin-react`.
 
 ### Tailwind CSS
 
-Tailwind CSS 4 is configured via the `@tailwindcss/vite` plugin. ArteOdyssey's tokens
-are loaded by importing `@k8o/arte-odyssey/tailwind.css` — the Tailwind source entry,
+Tailwind CSS 4 is configured via the `@tailwindcss/vite` plugin. k8ordo UI's tokens
+are loaded by importing `@k8ordo/ui/tailwind.css` — the Tailwind source entry,
 so the design tokens stay usable in this app's own markup. (Projects without
-Tailwind import the prebuilt `@k8o/arte-odyssey/styles.css` instead — see
+Tailwind import the prebuilt `@k8ordo/ui/styles.css` instead — see
 `examples/css-modules`.)
 
 ### TypeScript
@@ -118,12 +118,12 @@ Full TypeScript support with strict configuration for type safety.
 
 ## Related Documentation
 
-- [ArteOdyssey Main Documentation](../../packages/arte-odyssey/README.md)
-- [Generative UI integrations](../../packages/arte-odyssey/README.md#generative-ui-integrations)
+- [k8ordo UI Main Documentation](../../packages/ui/README.md)
+- [Generative UI integrations](../../packages/ui/README.md#generative-ui-integrations)
 - [Vite Documentation](https://vitejs.dev/)
 - [React Documentation](https://react.dev/)
 - [Tailwind CSS Documentation](https://tailwindcss.com/)
 
 ---
 
-This example is part of the ArteOdyssey monorepo. See the [main README](../../README.md) for more information about the project.
+This example is part of the k8ordo UI monorepo. See the [main README](../../README.md) for more information about the project.

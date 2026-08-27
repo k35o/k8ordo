@@ -1,10 +1,10 @@
-# ArteOdyssey × CSS Modules Example
+# k8ordo UI × CSS Modules Example
 
-Tailwind CSS を**一切入れずに** `@k8o/arte-odyssey` を使う example。
+Tailwind CSS を**一切入れずに** `@k8ordo/ui` を使う example。
 セットアップはビルド済み CSS の import 1行だけ。
 
 ```tsx
-import '@k8o/arte-odyssey/styles.css';
+import '@k8ordo/ui/styles.css';
 ```
 
 ## この example が示すこと
@@ -13,7 +13,7 @@ import '@k8o/arte-odyssey/styles.css';
   ビルド済み `styles.css` にすべて含まれている。利用側のビルドに
   Tailwind は不要（このパッケージの依存に `tailwindcss` は存在しない）。
 - **自分の UI は CSS Modules で書く** — ページのレイアウトや文字色は
-  [`src/app.module.css`](src/app.module.css) にある。ArteOdyssey の
+  [`src/app.module.css`](src/app.module.css) にある。k8ordo UI の
   コンポーネントは `className` / `style` を受け取らない閉じたスタイリング API
   なので、カスタム UI は自分のマークアップ側に書く。
 - **デザイントークンはそのまま使える** — トークンは `:root` / `.dark` の
@@ -27,7 +27,7 @@ import '@k8o/arte-odyssey/styles.css';
   （`strong` の太字解除・リストスタイルのリセットなど）。
 
 Tailwind CSS 4 を使うプロジェクトは、代わりにソース版の
-`@k8o/arte-odyssey/tailwind.css` を import すると、デザイントークンを
+`@k8ordo/ui/tailwind.css` を import すると、デザイントークンを
 自分のマークアップの Tailwind クラスとしても使える（`examples/vite` /
 `examples/nextjs` を参照）。
 
@@ -35,8 +35,8 @@ Tailwind CSS 4 を使うプロジェクトは、代わりにソース版の
 
 ```bash
 pnpm install
-pnpm --filter @k8o/arte-odyssey build # ワークスペース内では先にライブラリをビルド
-pnpm --filter example-css-modules dev
+pnpm --filter @k8ordo/ui build # ワークスペース内では先にライブラリをビルド
+pnpm --filter example-ui-css-modules dev
 ```
 
 ## Scripts

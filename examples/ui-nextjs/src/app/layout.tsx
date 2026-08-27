@@ -1,4 +1,4 @@
-import { ArteOdysseyProvider } from '@k8o/arte-odyssey';
+import { UIProvider } from '@k8ordo/ui';
 import { Noto_Sans_JP } from 'next/font/google';
 
 import './globals.css';
@@ -15,7 +15,7 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <body className={notoSansJP.className}>
-        <ArteOdysseyProvider>{children}</ArteOdysseyProvider>
+        <UIProvider>{children}</UIProvider>
       </body>
     </html>
   );

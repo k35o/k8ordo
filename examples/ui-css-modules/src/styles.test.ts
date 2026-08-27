@@ -5,10 +5,7 @@ import { createRequire } from 'node:module';
 // import や ?raw だと vitest の CSS スタブに潰されて中身が届かないため、
 // createRequire で実ファイルパスに解決してから読む。
 const require = createRequire(import.meta.url);
-const css = readFileSync(
-  require.resolve('@k8o/arte-odyssey/styles.css'),
-  'utf8',
-);
+const css = readFileSync(require.resolve('@k8ordo/ui/styles.css'), 'utf8');
 
 // トップレベル（どの @layer にも属さない）ブロックのうち、@ルールでも
 // トークン変数ブロック（:root / .dark。利用側が上書きして勝てる）でもない
