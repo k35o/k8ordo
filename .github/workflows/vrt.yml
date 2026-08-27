@@ -35,7 +35,7 @@ jobs:
         run: pnpm exec playwright install --with-deps chromium
 
       - name: Capture story screenshots
-        run: pnpm --filter @k8o/arte-odyssey test:vrt
+        run: pnpm --filter @k8ordo/ui test:vrt
 
       # main: 撮影結果を次回のPR比較用ベースラインとして保存する
       - name: Upload baseline
@@ -43,7 +43,7 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: vrt-baseline
-          path: packages/arte-odyssey/.vrt/actual
+          path: packages/ui/.vrt/actual
           retention-days: 30
 
       # PR: mainの最新ベースラインを取得する（無ければ比較をスキップ）
@@ -55,7 +55,7 @@ jobs:
           REPO: ${{ github.repository }}
         run: |
           run_id=$(gh api "repos/$REPO/actions/workflows/vrt.yml/runs?branch=main&status=success&per_page=1" --jq '.workflow_runs[0].id // empty')
-          if [ -n "$run_id" ] && gh run download "$run_id" --name vrt-baseline --dir packages/arte-odyssey/.vrt/expected --repo "$REPO"; then
+          if [ -n "$run_id" ] && gh run download "$run_id" --name vrt-baseline --dir packages/ui/.vrt/expected --repo "$REPO"; then
             echo "found=true" >> "$GITHUB_OUTPUT"
           else
             echo "found=false" >> "$GITHUB_OUTPUT"
@@ -65,7 +65,7 @@ jobs:
         if: github.event_name == 'pull_request' && steps.baseline.outputs.found == 'true'
         id: compare
         continue-on-error: true
-        working-directory: packages/arte-odyssey
+        working-directory: packages/ui
         run: pnpm exec svrt compare
 
       - name: Upload report
@@ -73,7 +73,7 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: vrt-report
-          path: packages/arte-odyssey/.vrt
+          path: packages/ui/.vrt
           retention-days: 14
 
       - name: Publish report to Cloudflare Pages
@@ -89,16 +89,16 @@ jobs:
             echo 'CLOUDFLARE_API_TOKEN が未登録のためPagesへの公開をスキップ'
             exit 0
           fi
-          pnpm exec wrangler pages project create arte-odyssey-vrt --production-branch=main 2>/dev/null || true
-          pnpm exec wrangler pages deploy packages/arte-odyssey/.vrt --project-name=arte-odyssey-vrt --branch="pr-$PR_NUMBER" --commit-dirty=true
+          pnpm exec wrangler pages project create k8ordo-vrt --production-branch=main 2>/dev/null || true
+          pnpm exec wrangler pages deploy packages/ui/.vrt --project-name=k8ordo-vrt --branch="pr-$PR_NUMBER" --commit-dirty=true
           # svrt comment は base URL に report.html と画像パスを自分で連結する
-          echo "url=https://pr-$PR_NUMBER.arte-odyssey-vrt.pages.dev" >> "$GITHUB_OUTPUT"
+          echo "url=https://pr-$PR_NUMBER.k8ordo-vrt.pages.dev" >> "$GITHUB_OUTPUT"
 
       # sticky コメントの upsert は svrt comment 本体がやる（marker 検索 → PATCH/POST、
       # 差分ゼロかつ既存コメント無しなら投稿しない）。Pages 未公開時は縮退サマリになる。
       - name: Comment summary on PR
         if: github.event_name == 'pull_request' && steps.baseline.outputs.found == 'true'
-        working-directory: packages/arte-odyssey
+        working-directory: packages/ui
         env:
           GITHUB_TOKEN: ${{ github.token }}
           REPORT_URL: ${{ steps.pages.outputs.url }}

@@ -15,7 +15,7 @@ dist-ssr
 # Generated at build from the design-token SSOT (apps/docs/scripts/generate-design-md.ts)
 apps/docs/public/design.md
 
-# Copied at build from packages/arte-odyssey/docs (apps/docs/scripts/copy-reference-docs.ts)
+# Copied at build from packages/ui/docs (apps/docs/scripts/copy-reference-docs.ts)
 apps/docs/public/docs/
 
 # Testing
