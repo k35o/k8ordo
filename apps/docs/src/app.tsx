@@ -88,6 +88,7 @@ import { UseWritingModePage } from './pages/hooks/use-writing-mode-page';
 import { I18n } from './pages/i18n';
 import { RootRedirect } from './pages/root-redirect';
 import { Theming } from './pages/theming';
+import { UiRedirect } from './pages/ui-redirect';
 import { Router } from './router';
 
 const routes: RouteDefinition[] = [
@@ -104,339 +105,343 @@ const routes: RouteDefinition[] = [
         component: <Home />,
       }),
       route({
-        path: '/get-started',
+        path: '/ui',
+        component: <UiRedirect />,
+      }),
+      route({
+        path: '/ui/get-started',
         component: <GetStarted />,
       }),
       route({
-        path: '/ai',
+        path: '/ui/ai',
         component: <Ai />,
       }),
       route({
-        path: '/ai/chat',
+        path: '/ui/ai/chat',
         component: <AiChat />,
       }),
       route({
-        path: '/ai/generative-ui',
+        path: '/ui/ai/generative-ui',
         component: <GenerativeUi />,
       }),
       route({
-        path: '/ai/agents',
+        path: '/ui/ai/agents',
         component: <AiAgents />,
       }),
       route({
-        path: '/components',
+        path: '/ui/components',
         component: <Components />,
       }),
       route({
-        path: '/components/button',
+        path: '/ui/components/button',
         component: <ButtonPage />,
       }),
       route({
-        path: '/components/icon-button',
+        path: '/ui/components/icon-button',
         component: <IconButtonPage />,
       }),
       route({
-        path: '/components/anchor',
+        path: '/ui/components/anchor',
         component: <AnchorPage />,
       }),
       route({
-        path: '/components/text-field',
+        path: '/ui/components/text-field',
         component: <TextFieldPage />,
       }),
       route({
-        path: '/components/textarea',
+        path: '/ui/components/textarea',
         component: <TextareaPage />,
       }),
       route({
-        path: '/components/number-field',
+        path: '/ui/components/number-field',
         component: <NumberFieldPage />,
       }),
       route({
-        path: '/components/select',
+        path: '/ui/components/select',
         component: <SelectPage />,
       }),
       route({
-        path: '/components/checkbox',
+        path: '/ui/components/checkbox',
         component: <CheckboxPage />,
       }),
       route({
-        path: '/components/checkbox-card',
+        path: '/ui/components/checkbox-card',
         component: <CheckboxCardPage />,
       }),
       route({
-        path: '/components/checkbox-group',
+        path: '/ui/components/checkbox-group',
         component: <CheckboxGroupPage />,
       }),
       route({
-        path: '/components/switch',
+        path: '/ui/components/switch',
         component: <SwitchPage />,
       }),
       route({
-        path: '/components/password-input',
+        path: '/ui/components/password-input',
         component: <PasswordInputPage />,
       }),
       route({
-        path: '/components/radio',
+        path: '/ui/components/radio',
         component: <RadioPage />,
       }),
       route({
-        path: '/components/radio-card',
+        path: '/ui/components/radio-card',
         component: <RadioCardPage />,
       }),
       route({
-        path: '/components/autocomplete',
+        path: '/ui/components/autocomplete',
         component: <AutocompletePage />,
       }),
       route({
-        path: '/components/slider',
+        path: '/ui/components/slider',
         component: <SliderPage />,
       }),
       route({
-        path: '/components/file-field',
+        path: '/ui/components/file-field',
         component: <FileFieldPage />,
       }),
       route({
-        path: '/components/form-control',
+        path: '/ui/components/form-control',
         component: <FormControlPage />,
       }),
       route({
-        path: '/components/form',
+        path: '/ui/components/form',
         component: <FormPage />,
       }),
       route({
-        path: '/components/accordion',
+        path: '/ui/components/accordion',
         component: <AccordionPage />,
       }),
       route({
-        path: '/components/avatar',
+        path: '/ui/components/avatar',
         component: <AvatarPage />,
       }),
       route({
-        path: '/components/badge',
+        path: '/ui/components/badge',
         component: <BadgePage />,
       }),
       route({
-        path: '/components/card',
+        path: '/ui/components/card',
         component: <CardPage />,
       }),
       route({
-        path: '/components/code',
+        path: '/ui/components/code',
         component: <CodePage />,
       }),
       route({
-        path: '/components/table',
+        path: '/ui/components/table',
         component: <TablePage />,
       }),
       route({
-        path: '/components/list-box',
+        path: '/ui/components/list-box',
         component: <ListBoxPage />,
       }),
       route({
-        path: '/components/progress',
+        path: '/ui/components/progress',
         component: <ProgressPage />,
       }),
       route({
-        path: '/components/heading',
+        path: '/ui/components/heading',
         component: <HeadingPage />,
       }),
       route({
-        path: '/components/alert',
+        path: '/ui/components/alert',
         component: <AlertPage />,
       }),
       route({
-        path: '/components/skeleton',
+        path: '/ui/components/skeleton',
         component: <SkeletonPage />,
       }),
       route({
-        path: '/components/spinner',
+        path: '/ui/components/spinner',
         component: <SpinnerPage />,
       }),
       route({
-        path: '/components/toast',
+        path: '/ui/components/toast',
         component: <ToastPage />,
       }),
       route({
-        path: '/components/tooltip',
+        path: '/ui/components/tooltip',
         component: <TooltipPage />,
       }),
       route({
-        path: '/components/dialog',
+        path: '/ui/components/dialog',
         component: <DialogPage />,
       }),
       route({
-        path: '/components/drawer',
+        path: '/ui/components/drawer',
         component: <DrawerPage />,
       }),
       route({
-        path: '/components/modal',
+        path: '/ui/components/modal',
         component: <ModalPage />,
       }),
       route({
-        path: '/components/popover',
+        path: '/ui/components/popover',
         component: <PopoverPage />,
       }),
       route({
-        path: '/components/dropdown-menu',
+        path: '/ui/components/dropdown-menu',
         component: <DropdownMenuPage />,
       }),
       route({
-        path: '/components/separator',
+        path: '/ui/components/separator',
         component: <SeparatorPage />,
       }),
       route({
-        path: '/components/stack',
+        path: '/ui/components/stack',
         component: <StackPage />,
       }),
       route({
-        path: '/components/grid',
+        path: '/ui/components/grid',
         component: <GridPage />,
       }),
       route({
-        path: '/components/tabs',
+        path: '/ui/components/tabs',
         component: <TabsPage />,
       }),
       route({
-        path: '/components/breadcrumb',
+        path: '/ui/components/breadcrumb',
         component: <BreadcrumbPage />,
       }),
       route({
-        path: '/components/pagination',
+        path: '/ui/components/pagination',
         component: <PaginationPage />,
       }),
       route({
-        path: '/components/scroll-linked',
+        path: '/ui/components/scroll-linked',
         component: <ScrollLinkedPage />,
       }),
       route({
-        path: '/components/icons',
+        path: '/ui/components/icons',
         component: <IconsPage />,
       }),
       route({
-        path: '/theming',
+        path: '/ui/theming',
         component: <Theming />,
       }),
       route({
-        path: '/i18n',
+        path: '/ui/i18n',
         component: <I18n />,
       }),
       route({
-        path: '/hooks',
+        path: '/ui/hooks',
         component: <HooksPage />,
       }),
       route({
-        path: '/hooks/use-breakpoint',
+        path: '/ui/hooks/use-breakpoint',
         component: <UseBreakpointPage />,
       }),
       route({
-        path: '/hooks/use-click-away',
+        path: '/ui/hooks/use-click-away',
         component: <UseClickAwayPage />,
       }),
       route({
-        path: '/hooks/use-client',
+        path: '/ui/hooks/use-client',
         component: <UseClientPage />,
       }),
       route({
-        path: '/hooks/use-clipboard',
+        path: '/ui/hooks/use-clipboard',
         component: <UseClipboardPage />,
       }),
       route({
-        path: '/hooks/use-debounced-transition',
+        path: '/ui/hooks/use-debounced-transition',
         component: <UseDebouncedTransitionPage />,
       }),
       route({
-        path: '/hooks/use-deferred-debounce',
+        path: '/ui/hooks/use-deferred-debounce',
         component: <UseDeferredDebouncePage />,
       }),
       route({
-        path: '/hooks/use-disclosure',
+        path: '/ui/hooks/use-disclosure',
         component: <UseDisclosurePage />,
       }),
       route({
-        path: '/hooks/use-hash',
+        path: '/ui/hooks/use-hash',
         component: <UseHashPage />,
       }),
       route({
-        path: '/hooks/use-in-view',
+        path: '/ui/hooks/use-in-view',
         component: <UseInViewPage />,
       }),
       route({
-        path: '/hooks/use-intersection-observer',
+        path: '/ui/hooks/use-intersection-observer',
         component: <UseIntersectionObserverPage />,
       }),
       route({
-        path: '/hooks/use-interval',
+        path: '/ui/hooks/use-interval',
         component: <UseIntervalPage />,
       }),
       route({
-        path: '/hooks/use-local-storage',
+        path: '/ui/hooks/use-local-storage',
         component: <UseLocalStoragePage />,
       }),
       route({
-        path: '/hooks/use-session-storage',
+        path: '/ui/hooks/use-session-storage',
         component: <UseSessionStoragePage />,
       }),
       route({
-        path: '/hooks/use-resize',
+        path: '/ui/hooks/use-resize',
         component: <UseResizePage />,
       }),
       route({
-        path: '/hooks/use-scroll-direction',
+        path: '/ui/hooks/use-scroll-direction',
         component: <UseScrollDirectionPage />,
       }),
       route({
-        path: '/hooks/use-step',
+        path: '/ui/hooks/use-step',
         component: <UseStepPage />,
       }),
       route({
-        path: '/hooks/use-timeout',
+        path: '/ui/hooks/use-timeout',
         component: <UseTimeoutPage />,
       }),
       route({
-        path: '/hooks/use-window-resize',
+        path: '/ui/hooks/use-window-resize',
         component: <UseWindowResizePage />,
       }),
       route({
-        path: '/hooks/use-scroll-lock',
+        path: '/ui/hooks/use-scroll-lock',
         component: <UseScrollLockPage />,
       }),
       route({
-        path: '/hooks/use-hover',
+        path: '/ui/hooks/use-hover',
         component: <UseHoverPage />,
       }),
       route({
-        path: '/hooks/use-controllable-state',
+        path: '/ui/hooks/use-controllable-state',
         component: <UseControllableStatePage />,
       }),
       route({
-        path: '/hooks/use-window-size',
+        path: '/ui/hooks/use-window-size',
         component: <UseWindowSizePage />,
       }),
       route({
-        path: '/hooks/use-writing-mode',
+        path: '/ui/hooks/use-writing-mode',
         component: <UseWritingModePage />,
       }),
       route({
-        path: '/helpers',
+        path: '/ui/helpers',
         component: <Helpers />,
       }),
       route({
-        path: '/helpers/cn',
+        path: '/ui/helpers/cn',
         component: <CnPage />,
       }),
       route({
-        path: '/helpers/merge-refs',
+        path: '/ui/helpers/merge-refs',
         component: <MergeRefsPage />,
       }),
       route({
-        path: '/helpers/merge-props',
+        path: '/ui/helpers/merge-props',
         component: <MergePropsPage />,
       }),
       route({
-        path: '/helpers/chain',
+        path: '/ui/helpers/chain',
         component: <ChainPage />,
       }),
       route({
-        path: '/helpers/create-safe-context',
+        path: '/ui/helpers/create-safe-context',
         component: <CreateSafeContextPage />,
       }),
     ],

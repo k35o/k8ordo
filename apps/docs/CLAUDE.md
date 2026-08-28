@@ -15,6 +15,7 @@ pnpm check:write       # Oxlint/Oxfmt lint/format auto-fix
 ## Architecture
 
 - **Routing**: `@funstack/router` with `@funstack/static` for SSG
+- **URL layout**: package-first. Everything a package documents lives under `/<package>/…` — `@k8ordo/ui` owns `/ui/get-started`, `/ui/components/*`, `/ui/hooks/*`, and so on. Only the landing page (`/`) is family-level. A bare `/<package>` redirects to that package's Get Started (`src/pages/ui-redirect.tsx`). Add a new family member by adding its own `/<package>/…` subtree; never put a package's sections at the top level, where they would sit at the same depth as package names.
 - **i18n**: Custom i18n system in `src/i18n/` with locale-based routing (`/ja/`, `/en/`)
 - **Styling**: Tailwind CSS 4, uses `@k8ordo/ui` design tokens
 - **Root provider**: `UIProvider` wraps each locale subtree in `src/layouts/locale-layout.tsx`, passing the `en` dictionary on `/en/` so component built-in strings follow the site locale

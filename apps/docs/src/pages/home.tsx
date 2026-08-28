@@ -88,7 +88,7 @@ export function Home() {
               renderItem={({ className, children }) => (
                 <a
                   className={className}
-                  href={localizeHref('/get-started', locale)}
+                  href={localizeHref('/ui/get-started', locale)}
                 >
                   {children}
                 </a>
@@ -103,7 +103,7 @@ export function Home() {
               renderItem={({ className, children }) => (
                 <a
                   className={className}
-                  href={localizeHref('/components', locale)}
+                  href={localizeHref('/ui/components', locale)}
                 >
                   {children}
                 </a>

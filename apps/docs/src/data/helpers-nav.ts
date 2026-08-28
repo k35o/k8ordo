@@ -4,7 +4,7 @@ export const helperCategories: NavCategory[] = [
   {
     titleKey: 'helpers.categoryStyling',
     items: [
-      { name: 'cn', path: '/helpers/cn', descKey: 'helpers.cn.description' },
+      { name: 'cn', path: '/ui/helpers/cn', descKey: 'helpers.cn.description' },
     ],
   },
   {
@@ -12,22 +12,22 @@ export const helperCategories: NavCategory[] = [
     items: [
       {
         name: 'mergeRefs',
-        path: '/helpers/merge-refs',
+        path: '/ui/helpers/merge-refs',
         descKey: 'helpers.mergeRefs.description',
       },
       {
         name: 'mergeProps',
-        path: '/helpers/merge-props',
+        path: '/ui/helpers/merge-props',
         descKey: 'helpers.mergeProps.description',
       },
       {
         name: 'chain',
-        path: '/helpers/chain',
+        path: '/ui/helpers/chain',
         descKey: 'helpers.chain.description',
       },
       {
         name: 'createSafeContext',
-        path: '/helpers/create-safe-context',
+        path: '/ui/helpers/create-safe-context',
         descKey: 'helpers.createSafeContext.description',
       },
     ],

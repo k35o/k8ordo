@@ -6,37 +6,37 @@ export const hookCategories: NavCategory[] = [
     items: [
       {
         name: 'useClickAway',
-        path: '/hooks/use-click-away',
+        path: '/ui/hooks/use-click-away',
         descKey: 'hooks.useClickAway.description',
       },
       {
         name: 'useHover',
-        path: '/hooks/use-hover',
+        path: '/ui/hooks/use-hover',
         descKey: 'hooks.useHover.description',
       },
       {
         name: 'useResize',
-        path: '/hooks/use-resize',
+        path: '/ui/hooks/use-resize',
         descKey: 'hooks.useResize.description',
       },
       {
         name: 'useScrollDirection',
-        path: '/hooks/use-scroll-direction',
+        path: '/ui/hooks/use-scroll-direction',
         descKey: 'hooks.useScrollDirection.description',
       },
       {
         name: 'useScrollLock',
-        path: '/hooks/use-scroll-lock',
+        path: '/ui/hooks/use-scroll-lock',
         descKey: 'hooks.useScrollLock.description',
       },
       {
         name: 'useWindowResize',
-        path: '/hooks/use-window-resize',
+        path: '/ui/hooks/use-window-resize',
         descKey: 'hooks.useWindowResize.description',
       },
       {
         name: 'useWritingMode',
-        path: '/hooks/use-writing-mode',
+        path: '/ui/hooks/use-writing-mode',
         descKey: 'hooks.useWritingMode.description',
       },
     ],
@@ -46,27 +46,27 @@ export const hookCategories: NavCategory[] = [
     items: [
       {
         name: 'useClipboard',
-        path: '/hooks/use-clipboard',
+        path: '/ui/hooks/use-clipboard',
         descKey: 'hooks.useClipboard.description',
       },
       {
         name: 'useControllableState',
-        path: '/hooks/use-controllable-state',
+        path: '/ui/hooks/use-controllable-state',
         descKey: 'hooks.useControllableState.description',
       },
       {
         name: 'useLocalStorage',
-        path: '/hooks/use-local-storage',
+        path: '/ui/hooks/use-local-storage',
         descKey: 'hooks.useLocalStorage.description',
       },
       {
         name: 'useSessionStorage',
-        path: '/hooks/use-session-storage',
+        path: '/ui/hooks/use-session-storage',
         descKey: 'hooks.useSessionStorage.description',
       },
       {
         name: 'useHash',
-        path: '/hooks/use-hash',
+        path: '/ui/hooks/use-hash',
         descKey: 'hooks.useHash.description',
       },
     ],
@@ -76,22 +76,22 @@ export const hookCategories: NavCategory[] = [
     items: [
       {
         name: 'useDebouncedTransition',
-        path: '/hooks/use-debounced-transition',
+        path: '/ui/hooks/use-debounced-transition',
         descKey: 'hooks.useDebouncedTransition.description',
       },
       {
         name: 'useDeferredDebounce',
-        path: '/hooks/use-deferred-debounce',
+        path: '/ui/hooks/use-deferred-debounce',
         descKey: 'hooks.useDeferredDebounce.description',
       },
       {
         name: 'useInterval',
-        path: '/hooks/use-interval',
+        path: '/ui/hooks/use-interval',
         descKey: 'hooks.useInterval.description',
       },
       {
         name: 'useTimeout',
-        path: '/hooks/use-timeout',
+        path: '/ui/hooks/use-timeout',
         descKey: 'hooks.useTimeout.description',
       },
     ],
@@ -101,27 +101,27 @@ export const hookCategories: NavCategory[] = [
     items: [
       {
         name: 'useBreakpoint',
-        path: '/hooks/use-breakpoint',
+        path: '/ui/hooks/use-breakpoint',
         descKey: 'hooks.useBreakpoint.description',
       },
       {
         name: 'useClient',
-        path: '/hooks/use-client',
+        path: '/ui/hooks/use-client',
         descKey: 'hooks.useClient.description',
       },
       {
         name: 'useDisclosure',
-        path: '/hooks/use-disclosure',
+        path: '/ui/hooks/use-disclosure',
         descKey: 'hooks.useDisclosure.description',
       },
       {
         name: 'useStep',
-        path: '/hooks/use-step',
+        path: '/ui/hooks/use-step',
         descKey: 'hooks.useStep.description',
       },
       {
         name: 'useWindowSize',
-        path: '/hooks/use-window-size',
+        path: '/ui/hooks/use-window-size',
         descKey: 'hooks.useWindowSize.description',
       },
     ],
@@ -131,12 +131,12 @@ export const hookCategories: NavCategory[] = [
     items: [
       {
         name: 'useIntersectionObserver',
-        path: '/hooks/use-intersection-observer',
+        path: '/ui/hooks/use-intersection-observer',
         descKey: 'hooks.useIntersectionObserver.description',
       },
       {
         name: 'useInView',
-        path: '/hooks/use-in-view',
+        path: '/ui/hooks/use-in-view',
         descKey: 'hooks.useInView.description',
       },
     ],

@@ -6,15 +6,15 @@ import { useTranslation } from '../i18n';
 import { LocaleAnchor } from './locale-anchor';
 
 const DOC_LINKS: Array<{ path: string; labelKey: MessageKey }> = [
-  { path: '/get-started', labelKey: 'nav.getStarted' },
-  { path: '/theming', labelKey: 'nav.theming' },
-  { path: '/i18n', labelKey: 'nav.i18n' },
-  { path: '/components', labelKey: 'nav.components' },
-  { path: '/hooks', labelKey: 'nav.hooks' },
-  { path: '/helpers', labelKey: 'nav.helpers' },
-  { path: '/ai/chat', labelKey: 'nav.aiChat' },
-  { path: '/ai/generative-ui', labelKey: 'nav.generativeUi' },
-  { path: '/ai/agents', labelKey: 'nav.aiAgents' },
+  { path: '/ui/get-started', labelKey: 'nav.getStarted' },
+  { path: '/ui/theming', labelKey: 'nav.theming' },
+  { path: '/ui/i18n', labelKey: 'nav.i18n' },
+  { path: '/ui/components', labelKey: 'nav.components' },
+  { path: '/ui/hooks', labelKey: 'nav.hooks' },
+  { path: '/ui/helpers', labelKey: 'nav.helpers' },
+  { path: '/ui/ai/chat', labelKey: 'nav.aiChat' },
+  { path: '/ui/ai/generative-ui', labelKey: 'nav.generativeUi' },
+  { path: '/ui/ai/agents', labelKey: 'nav.aiAgents' },
 ];
 
 const RESOURCE_LINKS = [

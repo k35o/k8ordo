@@ -6,12 +6,12 @@ export const componentCategories: NavCategory[] = [
     items: [
       {
         name: 'Button',
-        path: '/components/button',
+        path: '/ui/components/button',
         descKey: 'components.button.description',
       },
       {
         name: 'IconButton',
-        path: '/components/icon-button',
+        path: '/ui/components/icon-button',
         descKey: 'components.iconButton.description',
       },
     ],
@@ -21,22 +21,22 @@ export const componentCategories: NavCategory[] = [
     items: [
       {
         name: 'Anchor',
-        path: '/components/anchor',
+        path: '/ui/components/anchor',
         descKey: 'components.anchor.description',
       },
       {
         name: 'Tabs',
-        path: '/components/tabs',
+        path: '/ui/components/tabs',
         descKey: 'components.tabs.description',
       },
       {
         name: 'Breadcrumb',
-        path: '/components/breadcrumb',
+        path: '/ui/components/breadcrumb',
         descKey: 'components.breadcrumb.description',
       },
       {
         name: 'Pagination',
-        path: '/components/pagination',
+        path: '/ui/components/pagination',
         descKey: 'components.pagination.description',
       },
     ],
@@ -46,82 +46,82 @@ export const componentCategories: NavCategory[] = [
     items: [
       {
         name: 'TextField',
-        path: '/components/text-field',
+        path: '/ui/components/text-field',
         descKey: 'components.textField.description',
       },
       {
         name: 'Textarea',
-        path: '/components/textarea',
+        path: '/ui/components/textarea',
         descKey: 'components.textarea.description',
       },
       {
         name: 'NumberField',
-        path: '/components/number-field',
+        path: '/ui/components/number-field',
         descKey: 'components.numberField.description',
       },
       {
         name: 'Select',
-        path: '/components/select',
+        path: '/ui/components/select',
         descKey: 'components.select.description',
       },
       {
         name: 'Checkbox',
-        path: '/components/checkbox',
+        path: '/ui/components/checkbox',
         descKey: 'components.checkbox.description',
       },
       {
         name: 'CheckboxCard',
-        path: '/components/checkbox-card',
+        path: '/ui/components/checkbox-card',
         descKey: 'components.checkboxCard.description',
       },
       {
         name: 'CheckboxGroup',
-        path: '/components/checkbox-group',
+        path: '/ui/components/checkbox-group',
         descKey: 'components.checkboxGroup.description',
       },
       {
         name: 'Switch',
-        path: '/components/switch',
+        path: '/ui/components/switch',
         descKey: 'components.switch.description',
       },
       {
         name: 'PasswordInput',
-        path: '/components/password-input',
+        path: '/ui/components/password-input',
         descKey: 'components.passwordInput.description',
       },
       {
         name: 'Radio',
-        path: '/components/radio',
+        path: '/ui/components/radio',
         descKey: 'components.radio.description',
       },
       {
         name: 'RadioCard',
-        path: '/components/radio-card',
+        path: '/ui/components/radio-card',
         descKey: 'components.radioCard.description',
       },
       {
         name: 'Autocomplete',
-        path: '/components/autocomplete',
+        path: '/ui/components/autocomplete',
         descKey: 'components.autocomplete.description',
       },
       {
         name: 'Slider',
-        path: '/components/slider',
+        path: '/ui/components/slider',
         descKey: 'components.slider.description',
       },
       {
         name: 'FileField',
-        path: '/components/file-field',
+        path: '/ui/components/file-field',
         descKey: 'components.fileField.description',
       },
       {
         name: 'FormControl',
-        path: '/components/form-control',
+        path: '/ui/components/form-control',
         descKey: 'components.formControl.description',
       },
       {
         name: 'Form',
-        path: '/components/form',
+        path: '/ui/components/form',
         descKey: 'components.form.description',
       },
     ],
@@ -131,37 +131,37 @@ export const componentCategories: NavCategory[] = [
     items: [
       {
         name: 'Accordion',
-        path: '/components/accordion',
+        path: '/ui/components/accordion',
         descKey: 'components.accordion.description',
       },
       {
         name: 'Avatar',
-        path: '/components/avatar',
+        path: '/ui/components/avatar',
         descKey: 'components.avatar.description',
       },
       {
         name: 'Badge',
-        path: '/components/badge',
+        path: '/ui/components/badge',
         descKey: 'components.badge.description',
       },
       {
         name: 'Card',
-        path: '/components/card',
+        path: '/ui/components/card',
         descKey: 'components.card.description',
       },
       {
         name: 'Code',
-        path: '/components/code',
+        path: '/ui/components/code',
         descKey: 'components.code.description',
       },
       {
         name: 'Table',
-        path: '/components/table',
+        path: '/ui/components/table',
         descKey: 'components.table.description',
       },
       {
         name: 'Heading',
-        path: '/components/heading',
+        path: '/ui/components/heading',
         descKey: 'components.heading.description',
       },
     ],
@@ -171,27 +171,27 @@ export const componentCategories: NavCategory[] = [
     items: [
       {
         name: 'Alert',
-        path: '/components/alert',
+        path: '/ui/components/alert',
         descKey: 'components.alert.description',
       },
       {
         name: 'Skeleton',
-        path: '/components/skeleton',
+        path: '/ui/components/skeleton',
         descKey: 'components.skeleton.description',
       },
       {
         name: 'Spinner',
-        path: '/components/spinner',
+        path: '/ui/components/spinner',
         descKey: 'components.spinner.description',
       },
       {
         name: 'Toast',
-        path: '/components/toast',
+        path: '/ui/components/toast',
         descKey: 'components.toast.description',
       },
       {
         name: 'Progress',
-        path: '/components/progress',
+        path: '/ui/components/progress',
         descKey: 'components.progress.description',
       },
     ],
@@ -201,37 +201,37 @@ export const componentCategories: NavCategory[] = [
     items: [
       {
         name: 'Dialog',
-        path: '/components/dialog',
+        path: '/ui/components/dialog',
         descKey: 'components.dialog.description',
       },
       {
         name: 'Drawer',
-        path: '/components/drawer',
+        path: '/ui/components/drawer',
         descKey: 'components.drawer.description',
       },
       {
         name: 'Modal',
-        path: '/components/modal',
+        path: '/ui/components/modal',
         descKey: 'components.modal.description',
       },
       {
         name: 'Popover',
-        path: '/components/popover',
+        path: '/ui/components/popover',
         descKey: 'components.popover.description',
       },
       {
         name: 'DropdownMenu',
-        path: '/components/dropdown-menu',
+        path: '/ui/components/dropdown-menu',
         descKey: 'components.dropdownMenu.description',
       },
       {
         name: 'Tooltip',
-        path: '/components/tooltip',
+        path: '/ui/components/tooltip',
         descKey: 'components.tooltip.description',
       },
       {
         name: 'ListBox',
-        path: '/components/list-box',
+        path: '/ui/components/list-box',
         descKey: 'components.listBox.description',
       },
     ],
@@ -241,22 +241,22 @@ export const componentCategories: NavCategory[] = [
     items: [
       {
         name: 'Stack',
-        path: '/components/stack',
+        path: '/ui/components/stack',
         descKey: 'components.stack.description',
       },
       {
         name: 'Grid',
-        path: '/components/grid',
+        path: '/ui/components/grid',
         descKey: 'components.grid.description',
       },
       {
         name: 'Separator',
-        path: '/components/separator',
+        path: '/ui/components/separator',
         descKey: 'components.separator.description',
       },
       {
         name: 'ScrollLinked',
-        path: '/components/scroll-linked',
+        path: '/ui/components/scroll-linked',
         descKey: 'components.scrollLinked.description',
       },
     ],
@@ -266,7 +266,7 @@ export const componentCategories: NavCategory[] = [
     items: [
       {
         name: 'Icons',
-        path: '/components/icons',
+        path: '/ui/components/icons',
         descKey: 'components.icons.description',
       },
     ],
