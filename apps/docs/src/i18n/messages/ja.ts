@@ -543,6 +543,8 @@ export const ja = {
   'common.switchToLightMode': 'ライトモードに切り替え',
   'common.switchToVerticalWriting': '縦書きプレビューに切り替え',
   'common.switchToHorizontalWriting': '横書きプレビューに切り替え',
+  'notFound.title': 'ページが見つかりません',
+  'notFound.description': 'URL が変わったか、削除された可能性があります。',
   'error.title': '問題が発生しました',
   'error.description': '予期しないエラーが発生しました。',
   'error.retry': '再読み込み',

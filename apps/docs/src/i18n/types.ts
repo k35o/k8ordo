@@ -446,6 +446,8 @@ export const MESSAGE_KEYS = [
   'common.switchToLightMode',
   'common.switchToVerticalWriting',
   'common.switchToHorizontalWriting',
+  'notFound.title',
+  'notFound.description',
   'error.title',
   'error.description',
   'error.retry',

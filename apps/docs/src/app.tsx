@@ -86,6 +86,7 @@ import { UseWindowResizePage } from './pages/hooks/use-window-resize-page';
 import { UseWindowSizePage } from './pages/hooks/use-window-size-page';
 import { UseWritingModePage } from './pages/hooks/use-writing-mode-page';
 import { I18n } from './pages/i18n';
+import { NotFound } from './pages/not-found';
 import { RootRedirect } from './pages/root-redirect';
 import { Theming } from './pages/theming';
 import { UiRedirect } from './pages/ui-redirect';
@@ -443,6 +444,12 @@ const routes: RouteDefinition[] = [
       route({
         path: '/ui/helpers/create-safe-context',
         component: <CreateSafeContextPage />,
+      }),
+      // 直前までのどのパスにも一致しなかったものを受ける。未定義のルートは
+      // 何も描画しない（本文が空のまま）ので、明示的に置かないと白紙になる。
+      route({
+        path: '/*',
+        component: <NotFound />,
       }),
     ],
   }),

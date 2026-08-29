@@ -568,6 +568,9 @@ export const en = {
   'common.switchToLightMode': 'Switch to light mode',
   'common.switchToVerticalWriting': 'Switch to vertical preview',
   'common.switchToHorizontalWriting': 'Switch to horizontal preview',
+  'notFound.title': 'Page not found',
+  'notFound.description':
+    'The URL may have changed, or the page may no longer exist.',
   'error.title': 'Something went wrong',
   'error.description': 'An unexpected error occurred.',
   'error.retry': 'Retry',
