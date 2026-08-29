@@ -1,20 +1,20 @@
-# k8ordo UI コンポーネント一覧
+# @k8ordo/ui component catalog
 
-## インポート方法
+## Importing
 
 ```tsx
-// スタイルシート（必須）。Tailwind CSS 4 のプロジェクトは
-// 代わりに '@k8ordo/ui/tailwind.css' を import する
+// The stylesheet (required). In a Tailwind CSS 4 project,
+// import '@k8ordo/ui/tailwind.css' instead
 import '@k8ordo/ui/styles.css';
 
-// プロバイダー（アプリルートで1回）
+// The provider (once, at the app root)
 import { UIProvider } from '@k8ordo/ui';
 
-// コンポーネント（すべてルートからインポート）
+// Components (all from the root entry)
 import { Button, Card, TextField } from '@k8ordo/ui';
 ```
 
-## ボタン・リンク
+## Buttons and links
 
 ### Button
 
@@ -31,7 +31,7 @@ import { Button } from '@k8ordo/ui';
   disabled={false}
   isActive={false}
 >
-  ボタン
+  Button
 </Button>
 ```
 
@@ -49,7 +49,7 @@ Props:
 - `type`: `'button'` | `'submit'` (default: `'button'`)
 - `variant`: `'solid'` | `'outline'` | `'skeleton'` (default: `'solid'`)
 
-リンクとしてレンダーする場合は `renderItem` prop を使う。Next.js の `<Link>` などにも応用できる。
+Use the `renderItem` prop to render it as a link. The same applies to things like Next.js's `<Link>`.
 
 ```tsx
 <Button
@@ -61,18 +61,18 @@ Props:
     </a>
   )}
 >
-  リンク
+  Link
 </Button>
 ```
 
 ### IconButton
 
-アイコンのみのボタン。`color` prop でスタイルを制御。
+An icon-only button. Styling is controlled by the `color` prop.
 
 ```tsx
 import { IconButton } from '@k8ordo/ui';
 
-<IconButton label="閉じる" color="transparent" size="md">
+<IconButton label="Close" color="transparent" size="md">
   <CloseIcon />
 </IconButton>;
 ```
@@ -88,12 +88,12 @@ Props:
 - `tooltipDisabled`: `boolean` (default: `false`)
 - `tooltipPlacement`: `Placement` (default: `'top'`)
 
-リンクとしてレンダーする場合は `renderItem` prop を使う。`triggerProps` を `<a>` にスプレッドすると hover/focus 時に `label` が Tooltip として表示される。
+Use the `renderItem` prop to render it as a link. Spreading `triggerProps` onto the `<a>` shows `label` as a tooltip on hover and focus.
 
 ```tsx
 <IconButton
   color="base"
-  label="メール"
+  label="Mail"
   renderItem={({
     className,
     children,
@@ -116,14 +116,14 @@ Props:
 
 ### Anchor
 
-テキストリンク。外部リンクには自動で新規タブアイコンが付く。
+A text link. External links automatically get a new-tab icon.
 
 ```tsx
 import { Anchor } from '@k8ordo/ui';
 
-<Anchor href="https://example.com">外部リンク</Anchor>
-<Anchor href="/about">内部リンク</Anchor>
-<Anchor href="/docs" openInNewTab>新規タブで開く</Anchor>
+<Anchor href="https://example.com">External link</Anchor>
+<Anchor href="/about">Internal link</Anchor>
+<Anchor href="/docs" openInNewTab>Open in a new tab</Anchor>
 ```
 
 Props:
@@ -133,19 +133,19 @@ Props:
 - `openInNewTab`: `boolean` (default: `false`)
 - `renderAnchor`: `(props: RenderAnchorProps<T>) => ReactNode` (default: `defaultRenderAnchor`)
 
-## レイアウト・ナビゲーション
+## Layout and navigation
 
 ### Accordion
 
-折りたたみ可能なセクション。Compound component パターン。
+A collapsible section, as a compound component.
 
 ```tsx
 import { Accordion } from '@k8ordo/ui';
 
 <Accordion.Root>
   <Accordion.Item>
-    <Accordion.Button>セクション1</Accordion.Button>
-    <Accordion.Panel>コンテンツ</Accordion.Panel>
+    <Accordion.Button>Section 1</Accordion.Button>
+    <Accordion.Panel>Content</Accordion.Panel>
   </Accordion.Item>
 </Accordion.Root>;
 ```
@@ -171,23 +171,23 @@ Props (Accordion.Root):
 
 ### Breadcrumb
 
-パンくずリスト。Compound component パターン。
+A breadcrumb trail, as a compound component.
 
 ```tsx
 import { Breadcrumb } from '@k8ordo/ui';
 
 <Breadcrumb.List>
   <Breadcrumb.Item>
-    <Breadcrumb.Link href="/">ホーム</Breadcrumb.Link>
+    <Breadcrumb.Link href="/">Home</Breadcrumb.Link>
   </Breadcrumb.Item>
   <Breadcrumb.Separator />
   <Breadcrumb.Item>
-    <Breadcrumb.Link href="/products">製品</Breadcrumb.Link>
+    <Breadcrumb.Link href="/products">Products</Breadcrumb.Link>
   </Breadcrumb.Item>
   <Breadcrumb.Separator />
   <Breadcrumb.Item>
     <Breadcrumb.Link href="/products/1" current>
-      詳細
+      Details
     </Breadcrumb.Link>
   </Breadcrumb.Item>
 </Breadcrumb.List>;
@@ -211,7 +211,7 @@ Props (Breadcrumb.Item):
 
 ### Pagination
 
-ページ送り。前後ボタンと現在ページの表示のみで、ページ番号のリストは持たない。
+Pagination. It shows previous/next buttons and the current page only — there is no list of page numbers.
 
 ```tsx
 import { Pagination } from '@k8ordo/ui';
@@ -232,18 +232,18 @@ Props:
 
 ### Tabs
 
-タブ切り替え。Compound component パターン。
+Tab switching, as a compound component.
 
 ```tsx
 import { Tabs } from '@k8ordo/ui';
 
 <Tabs.Root ids={['tab1', 'tab2']}>
-  <Tabs.List label="タブ">
-    <Tabs.Tab id="tab1">タブ1</Tabs.Tab>
-    <Tabs.Tab id="tab2">タブ2</Tabs.Tab>
+  <Tabs.List label="Tabs">
+    <Tabs.Tab id="tab1">Tab 1</Tabs.Tab>
+    <Tabs.Tab id="tab2">Tab 2</Tabs.Tab>
   </Tabs.List>
-  <Tabs.Panel id="tab1">パネル1</Tabs.Panel>
-  <Tabs.Panel id="tab2">パネル2</Tabs.Panel>
+  <Tabs.Panel id="tab1">Panel 1</Tabs.Panel>
+  <Tabs.Panel id="tab2">Panel 2</Tabs.Panel>
 </Tabs.Root>;
 ```
 
@@ -272,19 +272,19 @@ Props (Tabs.Tab):
 
 ### Card
 
-コンテンツをグループ化するカード。
+A card that groups content.
 
 ```tsx
 import { Card } from '@k8ordo/ui';
 
-// 静的カード
+// Static card
 <Card width="full" variant="shadow">
-  <div className="p-6">コンテンツ</div>
+  <div className="p-6">Content</div>
 </Card>
 
-// クリック可能なカード（hover:scale-[1.02], active:scale-[0.98]）
+// Clickable card (hover:scale-[1.02], active:scale-[0.98])
 <Card variant="outline" interactive>
-  <div className="p-6">コンテンツ</div>
+  <div className="p-6">Content</div>
 </Card>
 ```
 
@@ -297,7 +297,7 @@ Props:
 
 ### Separator
 
-区切り線。
+A dividing rule.
 
 ```tsx
 import { Separator } from '@k8ordo/ui';
@@ -315,7 +315,7 @@ Props:
 
 ### ScrollLinked
 
-スクロール進捗をプログレスバーで表示。
+Shows scroll progress as a progress bar.
 
 ```tsx
 import { ScrollLinked } from '@k8ordo/ui';
@@ -330,7 +330,7 @@ Props:
 
 ### Stack
 
-縦横一方向に並べるレイアウト。`gap` はスペーシングトークンから選ぶ。
+Lays children out along one axis. Pick `gap` from the spacing tokens.
 
 ```tsx
 import { Stack } from '@k8ordo/ui';
@@ -341,8 +341,8 @@ import { Stack } from '@k8ordo/ui';
 </Stack>
 
 <Stack direction="row" justify="between" align="center">
-  <Heading level="h2">タイトル</Heading>
-  <Button>操作</Button>
+  <Heading level="h2">Title</Heading>
+  <Button>Action</Button>
 </Stack>
 ```
 
@@ -357,7 +357,7 @@ Props:
 
 ### Grid
 
-グリッドレイアウト。`cols` に `'auto-fill'` / `'auto-fit'` を渡すと `minItemSize` を下限に折り返す。
+A grid layout. Passing `'auto-fill'` or `'auto-fit'` to `cols` wraps with `minItemSize` as the lower bound.
 
 ```tsx
 import { Grid } from '@k8ordo/ui';
@@ -382,26 +382,26 @@ Props:
 - `gap`: `GapSize` (default: `'md'`)
 - `minItemSize`: `24` | `32` | `40` | `48` | `64` | `80` (default: `48`)
 
-## フォーム
+## Forms
 
-フォームコンポーネントは `FormControl` の `renderInput` パターンと組み合わせて使用する。各フォームコンポーネントは controlled / uncontrolled の両方に対応。
+Form components are used together with `FormControl`'s `renderInput` pattern. Every form component supports both controlled and uncontrolled use.
 
-`ref` は実要素（`input` / `textarea` / `select` / `fieldset`）に届く。内部で ref を使う `Textarea` / `FileField` も内部 ref と合成されるため、`react-hook-form` の `register()` などをそのまま渡せる。`Radio`（複数の input を描くグループ）と `FormControl`（ラッパー）は `ref` を受け取らない。
+`ref` reaches the real element (`input` / `textarea` / `select` / `fieldset`). `Textarea` and `FileField` use a ref internally but compose it with yours, so `react-hook-form`'s `register()` and the like can be passed straight through. `Radio` (a group that renders several inputs) and `FormControl` (a wrapper) do not take a `ref`.
 
 ### Form
 
-`<form>` のラッパー。`action` には Server Action（`(formData) => …`）も URL 文字列も渡せる。
+A wrapper for `<form>`. `action` accepts a Server Action (`(formData) => …`) or a URL string.
 
 ```tsx
 import { Button, Form, FormControl, TextField } from '@k8ordo/ui';
 
 <Form action={submitAction}>
   <FormControl
-    label="メール"
+    label="Email"
     required
     renderInput={(props) => <TextField {...props} name="email" />}
   />
-  <Button type="submit">送信</Button>
+  <Button type="submit">Submit</Button>
 </Form>;
 ```
 
@@ -412,15 +412,15 @@ Props:
 
 ### FormControl
 
-フォームフィールドのラッパー。ラベル・ヘルプテキスト・エラー表示を統一する。
+A wrapper for a form field. It unifies the label, help text, and error display.
 
 ```tsx
 import { FormControl, TextField } from '@k8ordo/ui';
 
 <FormControl
-  label="メールアドレス"
-  errorText="入力してください"
-  helpText="会社のメールアドレスを入力してください"
+  label="Email address"
+  errorText="This field is required"
+  helpText="Enter your work email address"
   required
   renderInput={(props) => (
     <TextField {...props} placeholder="example@mail.com" />
@@ -440,9 +440,9 @@ Props:
 - `ref`: `Ref<HTMLElement>`
 - `required`: `boolean` (default: `false`)
 
-`renderInput` は `{ id, 'aria-describedby', 'aria-labelledby', disabled, invalid, required }` を受け取る。
+`renderInput` receives `{ id, 'aria-describedby', 'aria-labelledby', disabled, invalid, required }`.
 
-ラッパー要素は `labelAs` で変わる。`'label'`（既定）は `<div>` + `<label htmlFor>`、`'legend'` は `<fieldset>` + `<legend>`。単一フィールドを名前の無いグループにしないため、`<fieldset>` は `legend` のときだけ使う。`Radio` / `CheckboxGroup` のようなグループ入力を包むときは `labelAs="legend"` を指定する。
+The wrapper element depends on `labelAs`. `'label'` (the default) gives `<div>` + `<label htmlFor>`; `'legend'` gives `<fieldset>` + `<legend>`. `<fieldset>` is used only for `legend`, so that a single field never becomes an unnamed group. Pass `labelAs="legend"` when wrapping a group input such as `Radio` or `CheckboxGroup`.
 
 ### TextField
 
@@ -457,7 +457,7 @@ import { TextField } from '@k8ordo/ui';
 <TextField id="email" value={value} onChange={onChange}
   invalid={false} disabled={false} required={false} />
 
-// type も渡せる（デフォルト: "text"）
+// type can be passed too (default: "text")
 <TextField id="tel" type="tel" inputMode="numeric" />
 ```
 
@@ -522,7 +522,7 @@ Props:
 
 ### PasswordInput
 
-パスワード入力。表示/非表示トグル付き。
+A password input, with a show/hide toggle.
 
 ```tsx
 import { PasswordInput } from '@k8ordo/ui';
@@ -534,8 +534,8 @@ import { PasswordInput } from '@k8ordo/ui';
   invalid={false}
   disabled={false}
   required={false}
-  showLabel="表示"
-  hideLabel="非表示"
+  showLabel="Show"
+  hideLabel="Hide"
 />;
 ```
 
@@ -555,8 +555,8 @@ import { Select } from '@k8ordo/ui';
 <Select
   id="category"
   options={[
-    { value: '1', label: 'オプション1' },
-    { value: '2', label: 'オプション2' },
+    { value: '1', label: 'Option 1' },
+    { value: '2', label: 'Option 2' },
   ]}
   value={value}
   onChange={onChange}
@@ -575,7 +575,7 @@ Props:
 
 ### Autocomplete
 
-複数選択のオートコンプリート。`value` / `onChange` は `string[]`。
+A multi-select autocomplete. `value` and `onChange` are `string[]`.
 
 ```tsx
 import { Autocomplete } from '@k8ordo/ui';
@@ -603,16 +603,16 @@ Props:
 
 ### Checkbox
 
-ラベルは `label` prop で渡す（children ではない）。`onChange` は `(checked, event)`。
+The label is passed as the `label` prop, not as children. `onChange` is `(checked, event)`.
 
 ```tsx
 import { Checkbox } from '@k8ordo/ui';
 
 // Controlled
-<Checkbox checked={checked} label="同意する" onChange={onChange} />
+<Checkbox checked={checked} label="I agree" onChange={onChange} />
 
 // Uncontrolled
-<Checkbox defaultChecked label="同意する" />
+<Checkbox defaultChecked label="I agree" />
 ```
 
 Props:
@@ -626,24 +626,24 @@ Props:
 
 ### CheckboxGroup
 
-複数チェックボックスのグループ。子は `CheckboxGroup.Item`（= `Checkbox`）で、`itemValue` が必須。
+A group of checkboxes. The children are `CheckboxGroup.Item` (= `Checkbox`), and `itemValue` is required.
 
-グループの選択状態は `value` / `onChange`（`string[]`）で持つ。単体の `Checkbox` が真偽値を `checked` で持つのとは別物なので、混同しないこと。
+The group's selection lives in `value` / `onChange` (`string[]`). That is a different thing from a lone `Checkbox` holding a boolean in `checked` — do not conflate them.
 
-`fieldset[role="group"]` を描くため `aria-labelledby` が必須。必須入力であることは、参照先のラベル要素（`FormControl` の必須表示など）に含めて伝える。`role="group"` は `aria-required` を許可していないので、グループ側には出さない。
+It renders a `fieldset[role="group"]`, so `aria-labelledby` is required. Convey that the group is required through the referenced label element (for example `FormControl`'s required marker). `role="group"` does not allow `aria-required`, so do not put it on the group.
 
 ```tsx
 import { CheckboxGroup } from '@k8ordo/ui';
 
-<p id="interests-label">興味のある分野</p>
+<p id="interests-label">Areas of interest</p>
 <CheckboxGroup.Root
   aria-labelledby="interests-label"
   name="interests"
   value={values}
   onChange={setValues}
 >
-  <CheckboxGroup.Item itemValue="music" label="音楽" />
-  <CheckboxGroup.Item itemValue="movie" label="映画" />
+  <CheckboxGroup.Item itemValue="music" label="Music" />
+  <CheckboxGroup.Item itemValue="movie" label="Film" />
 </CheckboxGroup.Root>;
 ```
 
@@ -669,7 +669,7 @@ Props (CheckboxGroup.Root):
 
 ### CheckboxCard
 
-カードスタイルのチェックボックス。
+A card-styled checkbox.
 
 ```tsx
 import { CheckboxCard } from '@k8ordo/ui';
@@ -678,11 +678,11 @@ import { CheckboxCard } from '@k8ordo/ui';
   name="plan"
   disabled={false}
   options={[
-    { value: 'basic', label: 'ベーシック', description: '月額980円' },
+    { value: 'basic', label: 'Basic', description: '$9 / month' },
     {
       value: 'pro',
-      label: 'プロ',
-      description: '月額1,980円',
+      label: 'Pro',
+      description: '$19 / month',
       visual: <Icon />,
     },
   ]}
@@ -711,8 +711,8 @@ import { Radio } from '@k8ordo/ui';
   name="example"
   onChange={onChange}
   options={[
-    { value: 'a', label: '選択肢A' },
-    { value: 'b', label: '選択肢B' },
+    { value: 'a', label: 'Choice A' },
+    { value: 'b', label: 'Choice B' },
   ]}
   value={value}
 />;
@@ -730,7 +730,7 @@ Props:
 
 ### RadioCard
 
-カードスタイルのラジオボタン。`fieldset[role="radiogroup"]` の中に本物の `input[type="radio"]` を並べるため、矢印キーのローミングと単一選択はブラウザに任せている。テストからは `getByRole('radio', { checked })` で参照する。
+A card-styled radio button. Real `input[type="radio"]` elements sit inside a `fieldset[role="radiogroup"]`, so arrow-key roving and single selection are left to the browser. Reach them from tests with `getByRole('radio', { checked })`.
 
 ```tsx
 import { RadioCard } from '@k8ordo/ui';
@@ -740,11 +740,11 @@ import { RadioCard } from '@k8ordo/ui';
   name="plan"
   disabled={false}
   options={[
-    { value: 'basic', label: 'ベーシック', description: '月額980円' },
+    { value: 'basic', label: 'Basic', description: '$9 / month' },
     {
       value: 'pro',
-      label: 'プロ',
-      description: '月額1,980円',
+      label: 'Pro',
+      description: '$19 / month',
       visual: <Icon />,
     },
   ]}
@@ -765,7 +765,7 @@ Props:
 
 ### Slider
 
-レンジスライダー。
+A range slider.
 
 ```tsx
 import { Slider } from '@k8ordo/ui';
@@ -795,7 +795,7 @@ Props:
 
 ### Switch
 
-トグルスイッチ。
+A toggle switch.
 
 ```tsx
 import { Switch } from '@k8ordo/ui';
@@ -804,7 +804,7 @@ import { Switch } from '@k8ordo/ui';
   checked={checked}
   disabled={false}
   invalid={false}
-  label="通知を有効にする"
+  label="Enable notifications"
   onChange={onChange}
   required={false}
 />;
@@ -821,7 +821,7 @@ Props:
 
 ### FileField
 
-コンポジットパターンのファイルアップロード。
+File upload, as a composite pattern.
 
 ```tsx
 import { FileField } from '@k8ordo/ui';
@@ -830,7 +830,7 @@ import { FileField } from '@k8ordo/ui';
   <FileField.Trigger
     renderItem={({ onClick, disabled }) => (
       <Button onClick={onClick} disabled={disabled}>
-        ファイルを選択
+        Choose files
       </Button>
     )}
   />
@@ -857,18 +857,18 @@ Props (FileField.Trigger):
 
 - `renderItem`: `(props: { onClick: () => void; disabled: boolean; invalid: boolean; }) => ReactElement` (required)
 
-## データ表示
+## Data display
 
 ### Heading
 
-セマンティック見出し。`type` prop で HTML 要素を指定。
+A semantic heading. The `type` prop selects the HTML element.
 
 ```tsx
 import { Heading } from '@k8ordo/ui';
 
-<Heading level="h1">ページタイトル</Heading>
-<Heading level="h2">セクション見出し</Heading>
-<Heading level="h3">サブセクション</Heading>
+<Heading level="h1">Page title</Heading>
+<Heading level="h2">Section heading</Heading>
+<Heading level="h3">Subsection</Heading>
 ```
 
 Props:
@@ -879,13 +879,13 @@ Props:
 
 ### Avatar
 
-ユーザーアバター。
+A user avatar.
 
 ```tsx
 import { Avatar } from '@k8ordo/ui';
 
-<Avatar src="/avatar.jpg" alt="ユーザー名" size="md" />
-<Avatar name="田中太郎" fallback="田" size="lg" />
+<Avatar src="/avatar.jpg" alt="User name" size="md" />
+<Avatar name="Ada Lovelace" fallback="A" size="lg" />
 <Avatar color="primary" icon={<AssistantIcon />} name="AI" size="sm" />
 ```
 
@@ -902,14 +902,14 @@ Props:
 
 ### Badge
 
-ステータスバッジ。
+A status badge.
 
 ```tsx
 import { Badge } from '@k8ordo/ui';
 
-<Badge label="新着" tone="info" variant="solid" />
-<Badge label="完了" tone="success" variant="outline" />
-<Badge label="フィルター" interactive />
+<Badge label="New" tone="info" variant="solid" />
+<Badge label="Done" tone="success" variant="outline" />
+<Badge label="Filter" interactive />
 ```
 
 Props:
@@ -922,7 +922,7 @@ Props:
 
 ### Code
 
-インラインコード表示。
+Inline code.
 
 ```tsx
 import { Code } from '@k8ordo/ui';
@@ -936,7 +936,7 @@ Props:
 
 ### Table
 
-データテーブル。Compound component パターン。
+A data table, as a compound component.
 
 ```tsx
 import { Table } from '@k8ordo/ui';
@@ -944,13 +944,13 @@ import { Table } from '@k8ordo/ui';
 <Table.Root>
   <Table.Head>
     <Table.Row>
-      <Table.HeaderCell>名前</Table.HeaderCell>
-      <Table.HeaderCell align="right">金額</Table.HeaderCell>
+      <Table.HeaderCell>Name</Table.HeaderCell>
+      <Table.HeaderCell align="right">Amount</Table.HeaderCell>
     </Table.Row>
   </Table.Head>
   <Table.Body>
     <Table.Row interactive>
-      <Table.Cell>商品A</Table.Cell>
+      <Table.Cell>Product A</Table.Cell>
       <Table.Cell align="right">¥1,000</Table.Cell>
     </Table.Row>
   </Table.Body>
@@ -995,15 +995,15 @@ Props (Table.Row):
 - `children`: `ReactNode`
 - `interactive`: `boolean` (default: `false`)
 
-## フィードバック
+## Feedback
 
 ### Alert
 
 ```tsx
 import { Alert } from '@k8ordo/ui';
 
-<Alert tone="info" message="情報メッセージ" />
-<Alert tone="error" message={['エラー1', 'エラー2']} />
+<Alert tone="info" message="An informational message" />
+<Alert tone="error" message={['Error 1', 'Error 2']} />
 ```
 
 Props:
@@ -1021,21 +1021,21 @@ import { useToast } from '@k8ordo/ui';
 
 const { open, close, closeAll } = useToast();
 
-open('success', '保存しました');
-open('error', 'エラーが発生しました');
+open('success', 'Saved');
+open('error', 'Something went wrong');
 ```
 
-`ToastProvider` は `UIProvider` に含まれるため、別途ラップ不要。
+`ToastProvider` is already inside `UIProvider`, so no extra wrapper is needed.
 
-`useToast()` の戻り値:
+What `useToast()` returns:
 
-- `open`: `(tone: Status, message: string, options?: ToastOptions) => void`（`ToastOptions` は `{ duration?: number; action?: ToastAction }`）
+- `open`: `(tone: Status, message: string, options?: ToastOptions) => void` (`ToastOptions` is `{ duration?: number; action?: ToastAction }`)
 - `close`: `(id: string) => void`
 - `closeAll`: `() => void`
 
 ### ToastProvider
 
-出す位置や Portal 先を変えたいときだけ、`UIProvider` の内側で明示的にラップする。
+Wrap explicitly inside `UIProvider` only when you want to change where toasts appear or which Portal root they use.
 
 ```tsx
 import { ToastProvider } from '@k8ordo/ui';
@@ -1057,7 +1057,7 @@ Props:
 import { Progress } from '@k8ordo/ui';
 
 <Progress value={50} max={100} />
-<Progress value={50} max={100} min={0} label="進捗" />
+<Progress value={50} max={100} min={0} label="Progress" />
 ```
 
 Props:
@@ -1069,12 +1069,12 @@ Props:
 
 ### Spinner
 
-ローディングスピナー。
+A loading spinner.
 
 ```tsx
 import { Spinner } from '@k8ordo/ui';
 
-<Spinner size="md" label="読み込み中" />;
+<Spinner size="md" label="Loading" />;
 ```
 
 Props:
@@ -1084,7 +1084,7 @@ Props:
 
 ### Skeleton
 
-コンテンツプレースホルダー。
+A content placeholder.
 
 ```tsx
 import { Skeleton } from '@k8ordo/ui';
@@ -1100,17 +1100,17 @@ Props:
 - `shape`: `'rect'` | `'circle'` (default: `'rect'`)
 - `size`: `'sm'` | `'md'` | `'lg'` (default: `'md'`)
 
-## オーバーレイ
+## Overlays
 
 ### Modal
 
-ベースのオーバーレイコンポーネント。`<dialog>` 要素を使用。
+The base overlay component. It uses the `<dialog>` element.
 
 ```tsx
 import { Modal } from '@k8ordo/ui';
 
 <Modal isOpen={open} onClose={onClose} side="center">
-  コンテンツ
+  Content
 </Modal>;
 ```
 
@@ -1126,25 +1126,25 @@ Props:
 - `ref`: `Ref<HTMLDialogElement>`
 - `side`: `ModalSide` (default: `'center'`)
 
-名前の解決順は `aria-label` / `aria-labelledby` > 中の `Dialog.Root` が登録した見出し。どちらも無ければ無名の dialog になるため、`Dialog` を入れずに直接コンテンツを置くときは `aria-label` を渡す。
+Name resolution goes `aria-label` / `aria-labelledby` first, then the heading registered by a `Dialog.Root` inside. With neither, the dialog is unnamed — so pass `aria-label` when you place content directly without a `Dialog`.
 
 ```tsx
-<Modal aria-label="画像プレビュー" isOpen={open} onClose={onClose}>
+<Modal aria-label="Image preview" isOpen={open} onClose={onClose}>
   <img alt="" src={src} />
 </Modal>
 ```
 
 ### Dialog
 
-Compound component パターン。Modal と組み合わせて使用。
+A compound component, used together with Modal.
 
 ```tsx
 import { Modal, Dialog } from '@k8ordo/ui';
 
 <Modal isOpen={open} onClose={onClose}>
   <Dialog.Root>
-    <Dialog.Header title="確認" onClose={onClose} />
-    <Dialog.Content>コンテンツ</Dialog.Content>
+    <Dialog.Header title="Confirm" onClose={onClose} />
+    <Dialog.Content>Content</Dialog.Content>
   </Dialog.Root>
 </Modal>;
 ```
@@ -1168,13 +1168,13 @@ Props (Dialog.Root):
 
 ### Drawer
 
-サイドパネル。内部で Modal を使用。
+A side panel. It uses Modal internally.
 
 ```tsx
 import { Drawer } from '@k8ordo/ui';
 
-<Drawer title="メニュー" isOpen={open} onClose={onClose} side="right">
-  コンテンツ
+<Drawer title="Menu" isOpen={open} onClose={onClose} side="right">
+  Content
 </Drawer>;
 ```
 
@@ -1189,15 +1189,15 @@ Props:
 
 ### Popover
 
-CSS Anchor Positioning ベースのポップオーバー。Compound component パターン。
+A popover built on CSS Anchor Positioning, as a compound component.
 
 ```tsx
 import { Popover } from '@k8ordo/ui';
 
 <Popover.Root placement="bottom">
-  <Popover.Trigger renderItem={(props) => <Button {...props}>開く</Button>} />
+  <Popover.Trigger renderItem={(props) => <Button {...props}>Open</Button>} />
   <Popover.Content
-    renderItem={(props) => <div {...props}>ポップオーバーコンテンツ</div>}
+    renderItem={(props) => <div {...props}>Popover content</div>}
   />
 </Popover.Root>;
 ```
@@ -1214,7 +1214,7 @@ Props (Root):
 - `role`: `'dialog'` | `'menu'` | `'listbox'` (default: `'menu'`)
 - `trapFocus`: `boolean` (default: `true`)
 
-Escape は入れ子のうち**最も内側の 1 枚だけ**を閉じる。
+Escape closes **only the innermost one** when they are nested.
 
 Props (Popover.Content):
 
@@ -1227,14 +1227,14 @@ Props (Popover.Trigger):
 
 ### Tooltip
 
-ツールチップ。Compound component パターン。
+A tooltip, as a compound component.
 
 ```tsx
 import { Tooltip } from '@k8ordo/ui';
 
 <Tooltip.Root placement="top">
-  <Tooltip.Trigger renderItem={(props) => <Button {...props}>ホバー</Button>} />
-  <Tooltip.Content>ヒント</Tooltip.Content>
+  <Tooltip.Trigger renderItem={(props) => <Button {...props}>Hover</Button>} />
+  <Tooltip.Content>A hint</Tooltip.Content>
 </Tooltip.Root>;
 ```
 
@@ -1258,16 +1258,16 @@ Props (Tooltip.Trigger):
 
 ### DropdownMenu
 
-ドロップダウンメニュー。Compound component パターン。
+A dropdown menu, as a compound component.
 
 ```tsx
 import { DropdownMenu } from '@k8ordo/ui';
 
 <DropdownMenu.Root>
-  <DropdownMenu.Trigger label="メニュー" />
+  <DropdownMenu.Trigger label="Menu" />
   <DropdownMenu.Content>
-    <DropdownMenu.Item label="アイテム1" onAction={handleClick} />
-    <DropdownMenu.Item label="アイテム2" onAction={handleClick} />
+    <DropdownMenu.Item label="Item 1" onAction={handleClick} />
+    <DropdownMenu.Item label="Item 2" onAction={handleClick} />
   </DropdownMenu.Content>
 </DropdownMenu.Root>;
 ```
@@ -1280,10 +1280,10 @@ Props (Root):
 - `onChange`: `(isOpen: boolean) => void`
 - `placement`: `Placement` (default: `'bottom-start'`)
 
-Trigger バリアント:
+Trigger variants:
 
-- `DropdownMenu.Trigger`: テキストベース（`label`, `size`, `variant`）
-- `DropdownMenu.IconTrigger`: アイコンベース（`icon`, `label`）
+- `DropdownMenu.Trigger`: text-based (`label`, `size`, `variant`)
+- `DropdownMenu.IconTrigger`: icon-based (`icon`, `label`)
 
 Props (DropdownMenu.Content):
 
@@ -1299,7 +1299,7 @@ Props (DropdownMenu.Item):
 - `label`: `string` (required)
 - `onAction`: `() => void` (required)
 
-`DropdownMenu.SubMenu` は入れ子メニュー。`label` の行をホバーまたはキーボードで開くと、子要素のメニューが右側に開く。
+`DropdownMenu.SubMenu` is a nested menu. Hovering the `label` row, or opening it from the keyboard, opens the child menu to the right.
 
 Props (DropdownMenu.SubMenu):
 
@@ -1314,7 +1314,7 @@ Props (DropdownMenu.Trigger):
 
 ### ListBox
 
-リスト選択。Compound component パターン。選択肢は `Select` と同じ `Option`（`{ value, label }`）。
+List selection, as a compound component. The choices use the same `Option` (`{ value, label }`) as `Select`.
 
 ```tsx
 import { ListBox } from '@k8ordo/ui';
@@ -1322,12 +1322,12 @@ import { ListBox } from '@k8ordo/ui';
 <ListBox.Root
   onChange={onChange}
   options={[
-    { value: '1', label: 'オプション1' },
-    { value: '2', label: 'オプション2' },
+    { value: '1', label: 'Option 1' },
+    { value: '2', label: 'Option 2' },
   ]}
   value={value}
 >
-  <ListBox.Trigger label="表示件数" size="md" />
+  <ListBox.Trigger label="Items per page" size="md" />
   <ListBox.Content />
 </ListBox.Root>;
 ```
@@ -1341,12 +1341,12 @@ Props (Root):
 - `placement`: `Placement` (default: `'bottom'`)
 - `value`: `Option['value']`
 
-Trigger バリアント:
+Trigger variants:
 
-- `ListBox.Trigger`: テキストベース（`size`, `label`）
-- `ListBox.IconTrigger`: アイコンベース（`size`, `icon`, `label`）
+- `ListBox.Trigger`: text-based (`size`, `label`)
+- `ListBox.IconTrigger`: icon-based (`size`, `icon`, `label`)
 
-`label` を渡すとトリガーのアクセシブル名が「ラベル + 現在値」になる。省略すると現在値だけになるため、周囲に見出しが無いときは渡す。
+Passing `label` makes the trigger's accessible name "label + current value". Omit it and only the current value is used, so pass it when there is no heading nearby.
 
 Props (Content):
 
@@ -1363,11 +1363,11 @@ Props (ListBox.Trigger):
 - `label`: `string`
 - `size`: `ComponentProps<typeof Button>['size']` (default: `'md'`)
 
-## プロバイダー
+## Providers
 
 ### UIProvider
 
-アプリのルートで1回ラップする。ToastProvider と文言辞書（下記 i18n）を含む。
+Wrap the app root once. It includes ToastProvider and the message dictionary (i18n, below).
 
 ```tsx
 import { UIProvider } from '@k8ordo/ui';
@@ -1384,7 +1384,7 @@ Props:
 
 ### PortalRootProvider
 
-Portal のルート要素を指定する。
+Sets the root element for portals.
 
 ```tsx
 import { PortalRootProvider, usePortalRoot } from '@k8ordo/ui';
@@ -1397,11 +1397,11 @@ Props:
 - `children`: `ReactNode`
 - `value`: `RefObject<HTMLElement | null>`
 
-## i18n（文言辞書）
+## i18n (message dictionary)
 
-コンポーネントが内部で持つ文言（閉じる、必須、読み込み中 …）は辞書から引く。**既定は日本語**で、Provider を置かなくても、`messages` を渡さなくても日本語で動く。
+The wording components own internally (close, required, loading, …) comes from a dictionary. **It defaults to Japanese**, and works without a provider and without passing `messages`.
 
-英語に切り替えるときは `@k8ordo/ui/i18n` の `en` を渡す。
+To switch to English, pass `en` from `@k8ordo/ui/i18n`.
 
 ```tsx
 import { UIProvider } from '@k8ordo/ui';
@@ -1412,7 +1412,7 @@ import { en } from '@k8ordo/ui/i18n';
 </UIProvider>;
 ```
 
-一部だけ差し替えるときは辞書をスプレッドして上書きする（`Partial<Messages>` なので全キーを埋める必要はない）。
+To replace only part of it, spread the dictionary and override those keys (`Partial<Messages>`, so you need not fill in every key).
 
 ```tsx
 <UIProvider messages={{ ...en, close: 'Dismiss' }}>
@@ -1420,7 +1420,7 @@ import { en } from '@k8ordo/ui/i18n';
 </UIProvider>
 ```
 
-日本語のまま一部だけ変えるなら、そのキーだけ渡せばよい。
+To stay in Japanese and change only one string, pass just that key.
 
 ```tsx
 <UIProvider messages={{ close: '閉じる（Esc）' }}>
@@ -1428,32 +1428,32 @@ import { en } from '@k8ordo/ui/i18n';
 </UIProvider>
 ```
 
-### 優先順位
+### Resolution order
 
-**コンポーネントの prop > Provider に渡した辞書 > 既定（日本語）**。
+**Component prop > the dictionary passed to the provider > the built-in default (Japanese)**.
 
-`Spinner` の `label`、`Alert` の `closeLabel`、`PasswordInput` の `showLabel` / `hideLabel`、`Pagination` の `prevLabel` / `nextLabel` のように個別の文言 prop を持つコンポーネントは、その prop が辞書より優先される。
+A component with a wording prop of its own — `Spinner`'s `label`, `Alert`'s `closeLabel`, `PasswordInput`'s `showLabel` / `hideLabel`, `Pagination`'s `prevLabel` / `nextLabel` — takes that prop over the dictionary.
 
 ```tsx
-// 辞書が en でも、この Spinner だけは「保存中」になる
+// Even with the en dictionary, this one Spinner reads 「保存中」
 <Spinner label="保存中" />
 ```
 
-### エクスポート
+### Exports
 
 ```tsx
 import { en, ja, type Messages } from '@k8ordo/ui/i18n';
 ```
 
-`ja` / `en` は本体のバンドルに載らないよう、ルートではなく `@k8ordo/ui/i18n` サブパスからのみ export される。
+`ja` and `en` are exported only from the `@k8ordo/ui/i18n` subpath, not the root, so the dictionaries stay out of the main bundle.
 
-### キー一覧
+### Key list
 
-`Messages` 型の全キー。値はすべて `string`。
+Every key in the `Messages` type. All values are `string`.
 
-| 分類          | キー                                                                                                                               |
+| Category      | Keys                                                                                                                               |
 | ------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| 共通          | `close`, `required`, `loading`, `avatar`, `color`                                                                                  |
+| Common        | `close`, `required`, `loading`, `avatar`, `color`                                                                                  |
 | Alert         | `alertSuccess`, `alertInfo`, `alertWarning`, `alertError`                                                                          |
 | Toast         | `toastRegion`                                                                                                                      |
 | Autocomplete  | `autocompletePlaceholder`, `autocompleteRemoveTag`, `autocompleteClear`, `autocompleteEmpty`                                       |
@@ -1463,4 +1463,4 @@ import { en, ja, type Messages } from '@k8ordo/ui/i18n';
 | ListBox       | `listBoxPlaceholder`                                                                                                               |
 | Breadcrumb    | `breadcrumb`                                                                                                                       |
 | Pagination    | `paginationLabel`, `paginationPrevious`, `paginationNext`                                                                          |
-| AI チャット   | `chat`, `scrollToLatest`, `reasoning`, `reasoningStreaming`, `suggestions`, `send`, `stop`, `toolInput`, `toolOutput`, `toolError` |
+| AI chat       | `chat`, `scrollToLatest`, `reasoning`, `reasoningStreaming`, `suggestions`, `send`, `stop`, `toolInput`, `toolOutput`, `toolError` |
