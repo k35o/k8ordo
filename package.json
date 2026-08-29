@@ -19,6 +19,7 @@
     "typecheck": "vp run -r typecheck",
     "check": "vp run -r check",
     "check:write": "vp run -r check:write",
+    "check:no-polyfills": "node scripts/check-no-polyfills.mjs",
     "inspect": "vp-inspect"
   },
   "devDependencies": {

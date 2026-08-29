@@ -44,6 +44,11 @@ jobs:
       - name: Run lint and format check
         run: pnpm check
 
+      # 血縁のうち機械的に守れる一点。Baseline 入りだけを前提にする以上、
+      # ポリフィルを依存に足した時点で規律が破れている。
+      - name: Check no polyfills are pulled in
+        run: pnpm check:no-polyfills
+
   types:
     name: TypeScript
     runs-on: ubuntu-latest
