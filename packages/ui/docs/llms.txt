@@ -1,9 +1,13 @@
 # @k8ordo/ui
 
-> k8o's React UI library (React 19, TypeScript, Tailwind CSS 4) with semantic design
-> tokens, dark mode, AI chat components, and official generative UI adapters
-> (json-render & OpenUI) that let an LLM generate, validate, and render on-brand UIs
-> from these components.
+> React components for the k8ordo family, with semantic design tokens, dark mode,
+> built-in Japanese/English wording, AI chat components, and official generative UI
+> adapters (json-render & OpenUI) that let an LLM generate, validate, and render
+> on-brand UIs from these components.
+>
+> Like every k8ordo package it assumes React 19 and Server Components, uses only
+> what has reached Baseline, and ships no polyfills or legacy fallbacks — so
+> nothing here branches for a browser or a framework it does not support.
 
 When installed via npm, these docs live under `node_modules/@k8ordo/ui/docs/`.
 Start with GUIDE.md, then follow the reference most relevant to the task.

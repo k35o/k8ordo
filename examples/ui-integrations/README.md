@@ -1,6 +1,6 @@
-# Vite Example - k8ordo UI
+# @k8ordo/ui × Generative UI adapters
 
-This example demonstrates k8ordo UI's **generative UI adapters** in a Vite + React app: an LLM-style spec is rendered with k8ordo UI components via both [json-render](https://json-render.dev) and [OpenUI](https://www.openui.com).
+This example belongs to `@k8ordo/ui` and exists to exercise its **generative UI adapters**. Vite is just the host. In a Vite + React app: an LLM-style spec is rendered with k8ordo UI components via both [json-render](https://json-render.dev) and [OpenUI](https://www.openui.com).
 
 ## Overview
 

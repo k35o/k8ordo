@@ -1,5 +1,10 @@
 # Agent guide — packages/ui
 
+`@k8ordo/ui` — the k8ordo family's React component library. This file covers the
+package itself. The family's shared discipline (React 19 / RSC assumed,
+Baseline only, no polyfills) and how a new member joins are in the repository
+root's [`CLAUDE.md`](../../CLAUDE.md).
+
 ## Package Commands
 
 All commands run from this directory (`packages/ui`).
@@ -48,7 +53,7 @@ src/components/<name>/
 
 例: `Modal` / `Drawer` は `isOpen?` + `defaultOpen?` + `onClose?`、`Tabs.Root` は `selectedId?` + `defaultSelectedId?` + `onChange?`、`Accordion.Item` は `isOpen?` + `defaultOpen?` + `onChange?`。
 
-### prop 名の語彙（v12 で確定）
+### prop 名の語彙
 
 | prop        | 意味                                   | 値の例                                                                                   |
 | ----------- | -------------------------------------- | ---------------------------------------------------------------------------------------- |
@@ -93,7 +98,7 @@ export const MyComponent: FC<
 };
 ```
 
-基底には要素固有の `*HTMLAttributes` を使う。`HTMLProps` は `AllHTMLAttributes` を継承しており、`href` や `src` のようにその要素に存在しない属性まで型チェックを通してしまう（v12 で Button / IconButton をこの理由で移行した）。`*HTMLAttributes` は `ref` を含まないので、必要なら明示的に足す。
+基底には要素固有の `*HTMLAttributes` を使う。`HTMLProps` は `AllHTMLAttributes` を継承しており、`href` や `src` のようにその要素に存在しない属性まで型チェックを通してしまう（Button / IconButton はこの理由で移行済み）。`*HTMLAttributes` は `ref` を含まないので、必要なら明示的に足す。
 
 ### Compound Component (Dialog, Tabs, FileField pattern)
 

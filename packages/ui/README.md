@@ -1,8 +1,13 @@
 # @k8ordo/ui
 
-A modern React UI component library built with TypeScript, Tailwind CSS, and accessibility in mind.
+React components for the [k8ordo](https://ordo.k8o.me) family — semantic design
+tokens, built-in Japanese/English wording, and adapters that let an LLM generate
+on-brand UIs.
 
-- **Documentation**: https://ordo.k8o.me
+Like every k8ordo package it assumes React 19 and Server Components, uses only
+what has reached Baseline, and ships no polyfills or legacy fallbacks.
+
+- **Documentation**: https://ordo.k8o.me/ui
 - **Storybook**: https://main--687a213c85e2e4589d8db1bb.chromatic.com
 
 ## Installation
@@ -17,17 +22,35 @@ yarn add @k8ordo/ui
 
 ## Peer Dependencies
 
-Make sure you have the following peer dependencies installed:
+Only React is required:
 
 ```bash
-npm install react react-dom typescript
+npm install react react-dom
 ```
 
-Required versions:
+| Package     | Version |
+| ----------- | ------- |
+| `react`     | ≥19.2.6 |
+| `react-dom` | ≥19.2.6 |
 
-- React ≥19.0.0
-- TypeScript ≥6.0.0
-- Tailwind CSS ≥4.0.0 — **optional**, only if you import the `tailwind.css` entry (see below)
+Everything else is an optional peer, needed only for the entry point that uses
+it. Install one when you import the entry it belongs to.
+
+| Package                                   | Version  | Needed for                                                                    |
+| ----------------------------------------- | -------- | ----------------------------------------------------------------------------- |
+| `typescript`                              | ≥7.0.2   | the shipped type declarations                                                 |
+| `@types/react`                            | ≥19.2.18 | the shipped type declarations                                                 |
+| `@types/react-dom`                        | ≥19.2.4  | the shipped type declarations                                                 |
+| `tailwindcss`                             | ≥4.3.3   | the `tailwind.css` entry (see [Imports & Bundle Size](#imports--bundle-size)) |
+| `zod`                                     | ≥4.4.3   | generative-UI schemas                                                         |
+| `@json-render/core`, `@json-render/react` | ≥0.19.0  | `@k8ordo/ui/json-render`                                                      |
+| `@openuidev/lang-core`                    | ≥0.2.10  | `@k8ordo/ui/openui`                                                           |
+| `@openuidev/react-lang`                   | ≥0.2.9   | `@k8ordo/ui/openui`                                                           |
+| `ai`                                      | ≥7.0.51  | `@k8ordo/ui/ai-sdk`                                                           |
+| `streamdown`                              | ≥2.5.0   | `@k8ordo/ui/ai/response`                                                      |
+
+The `styles.css` entry needs no peer at all — it is prebuilt CSS, so CSS Modules
+and plain-CSS projects can use the components without Tailwind.
 
 ## Quick Start
 
