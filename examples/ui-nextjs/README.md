@@ -1,6 +1,6 @@
-# Next.js Example - k8ordo UI
+# @k8ordo/ui × Next.js
 
-This example demonstrates k8ordo UI's **generative UI adapter** in a Next.js App Router app: the system prompt is generated on the **server** with the server-safe `catalog`, and a spec is rendered on the **client** with the pre-wired `<JsonRenderUI />`.
+This example belongs to `@k8ordo/ui` and exists to prove its **generative UI adapter** survives the Next.js App Router boundary: the system prompt is generated on the **server** with the server-safe `catalog`, and a spec is rendered on the **client** with the pre-wired `<JsonRenderUI />`.
 
 ## Overview
 

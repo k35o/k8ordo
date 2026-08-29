@@ -1,4 +1,4 @@
-# k8ordo UI × CSS Modules Example
+# @k8ordo/ui × CSS Modules
 
 Tailwind CSS を**一切入れずに** `@k8ordo/ui` を使う example。
 セットアップはビルド済み CSS の import 1行だけ。

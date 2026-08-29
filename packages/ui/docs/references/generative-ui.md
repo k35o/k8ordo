@@ -1,35 +1,42 @@
-# 生成 UI（json-render / OpenUI）
+# Generative UI (json-render / OpenUI)
 
-k8ordo UI は、LLM が k8ordo UI コンポーネントだけで UI を生成できる公式アダプタを同梱している。生成される UI はデザイントークンに固定され、ブランドから外れない。フレームワークは [json-render](https://json-render.dev) と [OpenUI](https://www.openui.com) の 2 つ。
+`@k8ordo/ui` ships official adapters that let an LLM generate UI out of
+`@k8ordo/ui` components only. The generated UI is pinned to the design tokens,
+so it cannot drift off-brand. Two frameworks are supported:
+[json-render](https://json-render.dev) and [OpenUI](https://www.openui.com).
 
-いずれも optional peer dependency なので、使うフレームワークだけインストールする。
+Both are optional peer dependencies — install only the one you use.
 
 ```bash
 # json-render
 pnpm add @json-render/core @json-render/react zod
 # OpenUI
 pnpm add @openuidev/react-lang zod
-# OpenUI のサーバー安全な prompt エントリを使う場合は追加で:
+# Add this too if you use OpenUI's server-safe prompt entry:
 pnpm add @openuidev/lang-core
 ```
 
 ## json-render
 
-catalog（スキーマ・プロンプト）と registry（描画）が分かれており、catalog は**サーバー安全**。
+The catalog (schemas and prompt) is separate from the registry (rendering), and
+the catalog is **server-safe**.
 
-### 1. サーバーでプロンプトを生成する
+### 1. Generate the prompt on the server
 
 ```tsx
 import { catalog, uiRules } from '@k8ordo/ui/json-render';
 
-// customRules は LLM が破りやすい横断制約を注入する
-// （Table のセル数を columns に一致 / href の形式 / Tabs・Accordion の content はテキストのみ）。
+// customRules injects the cross-cutting constraints an LLM most often breaks
+// (cell count matching columns in Table, href format, text-only content in
+// Tabs and Accordion).
 const systemPrompt = catalog.prompt({ customRules: [...uiRules] });
 ```
 
-### 2. クライアントで描画する
+### 2. Render on the client
 
-`JsonRenderUI` が `JSONUIProvider` + `Renderer` + registry を内部結線済みなので、spec を渡すだけでよい。フォーム値を回収するときは `onStateChange` を渡す。
+`JsonRenderUI` already wires up `JSONUIProvider` + `Renderer` + registry
+internally, so passing the spec is enough. Pass `onStateChange` when you need to
+collect form values.
 
 ```tsx
 'use client';
@@ -40,27 +47,33 @@ export function GenUi({ spec }: { spec: unknown }) {
 }
 ```
 
-高度な構成（独自の `navigate` / `handlers` / `validationFunctions`）が必要なら、低レベルの `registry` を `@json-render/react` の `JSONUIProvider` / `Renderer` に直接渡す。
+For an advanced setup (your own `navigate`, `handlers`, or
+`validationFunctions`), pass the low-level `registry` straight to
+`@json-render/react`'s `JSONUIProvider` / `Renderer`.
 
-### 3. LLM 出力を検証して描画 or 修復する
+### 3. Validate LLM output, then render or repair it
 
-`validateGeneratedSpec` は機械修正 → 構造検証 → コンポーネントごとの props 検証を行い、失敗時はそのまま LLM に投げ返せる修復プロンプトを返す。`catalog.validate()` は現行の上流バージョンで正常 spec を誤って弾くため、こちらを使う。
+`validateGeneratedSpec` applies mechanical fixes, validates the structure, then
+validates props per component. On failure it returns a repair prompt you can
+send straight back to the LLM. Use it instead of `catalog.validate()`, which
+rejects valid specs in the current upstream version.
 
 ```tsx
 import { validateGeneratedSpec } from '@k8ordo/ui/json-render';
 
 const result = validateGeneratedSpec(JSON.parse(llmOutput));
 if (result.ok) {
-  // result.fixes に自動修正の内容
+  // result.fixes lists what was auto-corrected
   return <JsonRenderUI spec={result.spec} />;
 }
-// 壊れていたら修復プロンプトで再生成させる
+// If it is broken, regenerate with the repair prompt
 const retried = await llm(result.repairPrompt);
 ```
 
-### 4. 型付き spec（任意）
+### 4. Typed specs (optional)
 
-`satisfies UISpec` で書くと、component 名・props の typo がコンパイルエラーになり、`as unknown as Spec` が不要になる。
+Writing `satisfies UISpec` turns a typo in a component name or prop into a
+compile error, and removes the need for `as unknown as Spec`.
 
 ```tsx
 import type { UISpec } from '@k8ordo/ui/json-render';
@@ -74,11 +87,13 @@ const spec = {
 } satisfies UISpec;
 ```
 
-`ComponentName` / `ComponentProps<K>` も export されており、特定コンポーネントの props 型を取り出せる。
+`ComponentName` and `ComponentProps<K>` are exported as well, so you can pull
+out the props type of a specific component.
 
 ## OpenUI
 
-子要素を型付きサブコンポーネント（`z.array(Child.ref)`）で表すモデル。描画は `'use client'`。
+A model where children are expressed as typed subcomponents
+(`z.array(Child.ref)`). Rendering is `'use client'`.
 
 ```tsx
 'use client';
@@ -90,23 +105,29 @@ export function GenUi({ response }: { response: string }) {
 }
 ```
 
-システムプロンプトはサーバー安全な専用エントリで生成できる（json-render の `catalog.prompt()` と対称）。
+The system prompt comes from a dedicated server-safe entry, mirroring
+json-render's `catalog.prompt()`.
 
 ```tsx
 import { prompt } from '@k8ordo/ui/openui/prompt';
 
-const systemPrompt = prompt(); // React 非依存。RSC / API ルートから呼べる
+const systemPrompt = prompt(); // No React dependency — callable from RSC or an API route
 ```
 
-OpenUI では `Stack` / `Grid` の直下に `Stack` / `Grid` / `Card` を置けない（自己参照スキーマ非対応）。入れ子レイアウトが必要なら `Card` の中に `Stack` / `Grid` を入れる。json-render は slots ベースで自由に入れ子にできる。
+In OpenUI a `Stack` or `Grid` cannot sit directly inside another `Stack` or
+`Grid` (self-referential schemas are unsupported). When you need nested layout,
+put the `Stack` / `Grid` inside a `Card`. json-render is slot-based and nests
+freely.
 
-## エクスポート早見表
+## Exports at a glance
 
-| エクスポート                      | 区分           | 内容                                                               |
+| Export                            | Kind           | Contents                                                           |
 | --------------------------------- | -------------- | ------------------------------------------------------------------ |
-| `@k8ordo/ui/json-render`          | サーバー安全   | `catalog`, `validateGeneratedSpec`, `uiRules`, 型（`UISpec` など） |
-| `@k8ordo/ui/json-render/registry` | `'use client'` | `JsonRenderUI`（事前結線）, `registry`（低レベル）                 |
-| `@k8ordo/ui/openui`               | `'use client'` | `library`（描画）                                                  |
-| `@k8ordo/ui/openui/prompt`        | サーバー安全   | `prompt()`（プロンプト生成）                                       |
+| `@k8ordo/ui/json-render`          | server-safe    | `catalog`, `validateGeneratedSpec`, `uiRules`, types (`UISpec`, …) |
+| `@k8ordo/ui/json-render/registry` | `'use client'` | `JsonRenderUI` (pre-wired), `registry` (low level)                 |
+| `@k8ordo/ui/openui`               | `'use client'` | `library` (rendering)                                              |
+| `@k8ordo/ui/openui/prompt`        | server-safe    | `prompt()` (prompt generation)                                     |
 
-> いずれも `@k8ordo/ui/styles.css`（Tailwind CSS 4 のプロジェクトは代わりに `@k8ordo/ui/tailwind.css`）の読み込みと `UIProvider` でのラップが前提。
+> All of them assume you have loaded `@k8ordo/ui/styles.css` (or
+> `@k8ordo/ui/tailwind.css` in a Tailwind CSS 4 project) and wrapped the tree in
+> `UIProvider`.

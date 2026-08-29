@@ -10,36 +10,50 @@ export const en = {
   'nav.helpers': 'Helpers',
   'nav.generativeUi': 'Generative UI',
   'nav.aiChat': 'AI Chat',
-  'home.title': 'k8ordo',
   'home.description':
+    'A family of React libraries that assume the platform you already have',
+  'home.exploreUi': 'Explore UI',
+  'home.membersTitle': 'Members',
+  'home.memberUiDescription':
+    'React components with semantic design tokens, i18n, and generative-UI adapters.',
+  'home.disciplineTitle': 'What every member shares',
+  'home.disciplinePlatform': 'Baseline only',
+  'home.disciplinePlatformDescription':
+    'If it has reached Baseline we use it; if it has not, we wait. No polyfills, no fallbacks — nothing in the code branches for a browser we do not support.',
+  'home.disciplineReact': 'React 19 and RSC assumed',
+  'home.disciplineReactDescription':
+    'No framework-agnostic core and no adapter for frameworks we do not use — an indirection nobody pays for is complexity nobody asked for.',
+  'home.disciplinePrimary': 'Primary libraries only',
+  'home.disciplinePrimaryDescription':
+    'Only what an application imports and builds on lives in `@k8ordo/*`. Tools that plug into someone else\u2019s ecosystem live in their own repositories.',
+  'ui.description':
     'A React component library for UI that is calm but never boring',
-  'home.getStarted': 'Get Started',
-  'home.viewComponents': 'Browse Components',
-  'home.github': 'GitHub',
-  'home.storybook': 'Storybook',
-  'home.featuresTitle': 'Features',
-  'home.featureReact': 'React 19',
-  'home.featureReactDescription':
+  'ui.getStarted': 'Get Started',
+  'ui.viewComponents': 'Browse Components',
+  'common.github': 'GitHub',
+  'ui.featuresTitle': 'Features',
+  'ui.featureReact': 'React 19',
+  'ui.featureReactDescription':
     'Built with the latest React 19. Supports modern patterns like Server Components and actions.',
-  'home.featureTokens': 'Design Tokens',
-  'home.featureTokensDescription':
+  'ui.featureTokens': 'Design Tokens',
+  'ui.featureTokensDescription':
     'One prebuilt CSS import and it just works — no Tailwind CSS setup required. Semantic tokens keep colors and spacing consistent, and light and dark modes switch seamlessly.',
-  'home.featureTypeScript': 'TypeScript',
-  'home.featureTypeScriptDescription':
+  'ui.featureTypeScript': 'TypeScript',
+  'ui.featureTypeScriptDescription':
     'Full type definitions included. Develop safely with editor autocompletion and compile-time type checking.',
-  'home.featureAccessible': 'Accessibility',
-  'home.featureAccessibleDescription':
+  'ui.featureAccessible': 'Accessibility',
+  'ui.featureAccessibleDescription':
     'Aiming for components that consider keyboard navigation and screen reader support based on WAI-ARIA patterns.',
-  'home.featureMinimal': 'Soft & Sharp Design',
-  'home.featureMinimalDescription':
+  'ui.featureMinimal': 'Soft & Sharp Design',
+  'ui.featureMinimalDescription':
     'Soft where you touch, sharp where you read. UI that speaks through whitespace and gentle forms.',
-  'home.featureVerticalWriting': 'Vertical Writing Support',
-  'home.featureVerticalWritingDescription':
+  'ui.featureVerticalWriting': 'Vertical Writing Support',
+  'ui.featureVerticalWritingDescription':
     'Switch writing-mode with the `writing-v` utility and every component follows along on a vertical page. Preview the Japanese docs in vertical mode.',
   'common.language': 'Language',
   'footer.docs': 'Documentation',
   'footer.resources': 'Resources',
-  'footer.tagline': 'Soft where you touch, precise where you read.',
+  'footer.tagline': 'Use what the platform has. Add nothing it lacks.',
   'footer.typesetting': 'Typeset in Noto Sans JP & M PLUS 2',
   'nav.openMenu': 'Open menu',
   'nav.ai': 'AI',
@@ -568,6 +582,9 @@ export const en = {
   'common.switchToLightMode': 'Switch to light mode',
   'common.switchToVerticalWriting': 'Switch to vertical preview',
   'common.switchToHorizontalWriting': 'Switch to horizontal preview',
+  'notFound.title': 'Page not found',
+  'notFound.description':
+    'The URL may have changed, or the page may no longer exist.',
   'error.title': 'Something went wrong',
   'error.description': 'An unexpected error occurred.',
   'error.retry': 'Retry',

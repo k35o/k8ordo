@@ -1,6 +1,8 @@
-# Contributing to k8ordo UI
+# Contributing to k8ordo
 
 Thanks for your interest in contributing! This document explains how to set up the repository, the development workflow, and how changes get released.
+
+k8ordo is a family of packages under `@k8ordo/*`; `@k8ordo/ui` is currently the only member, so most of what follows is about it. Adding a *new* member is a different task with its own steps — see [`CLAUDE.md`](CLAUDE.md).
 
 ## Setup
 
@@ -26,7 +28,13 @@ pnpm test        # Run all tests
 pnpm typecheck   # Type check all packages
 pnpm check       # Lint/format check (Oxlint/Oxfmt via vp)
 pnpm check:write # Lint/format check with auto-fix
+pnpm check:no-polyfills # Fail if a polyfill dependency has crept in
 ```
+
+`check:no-polyfills` guards one half of the family's discipline: k8ordo assumes
+Baseline and carries no polyfills. Checking Baseline *usage* would take a linter
+of its own (JS and CSS both), so the dependency check is what CI can enforce
+today.
 
 Inside `packages/ui`, useful extras:
 
@@ -37,7 +45,7 @@ pnpm test -- --project=hooks       # Hook tests only (headless Chromium)
 pnpm test -- --project=components  # Component tests only (Storybook stories)
 ```
 
-## Adding a component
+## Adding a component to `@k8ordo/ui`
 
 Components live under a category directory (`buttons`, `form`, `overlays`, …) in `packages/ui/src/components/` and follow a 3-file pattern:
 
@@ -74,7 +82,7 @@ Any pull request that changes the public API must update, **in the same PR**:
 - `packages/ui/docs/llms.txt`
 - `.claude/skills/ui-design/` (SKILL.md and its `references/`, which mirror the shipped examples)
 
-## Testing: writing a story is writing a test
+## Testing `@k8ordo/ui`: writing a story is writing a test
 
 Component tests use Storybook stories as fixtures via `@storybook/addon-vitest`: every story runs as a Vitest browser-mode test in headless Chromium (the `components` test project). There are no separate component test files — cover the states you want guaranteed with stories, and use `play` functions for interaction behavior.
 
@@ -84,7 +92,7 @@ Hook tests (`src/hooks/**/*.test.tsx`) run in a real browser via `vitest-browser
 
 ## Visual regression testing (VRT)
 
-Per-story VRT runs on [storybook-addon-vrt](https://github.com/k35o/storybook-addon-vrt).
+VRT is specific to `@k8ordo/ui` — it screenshots stories, so it applies to a member that renders. Per-story VRT runs on [storybook-addon-vrt](https://github.com/k35o/storybook-addon-vrt).
 
 Local commands:
 

@@ -36,39 +36,39 @@ function useSideNavConfig(): SideNavConfig | null {
   const location = useLocation();
   const { pathname } = location;
 
-  // /ja/components/button → match, /ja/components → no match
-  if (/^\/[^/]+\/components\/.+/u.test(pathname)) {
+  // /ja/ui/components/button → match, /ja/ui/components → no match
+  if (/^\/[^/]+\/ui\/components\/.+/u.test(pathname)) {
     return {
       categories: componentCategories,
       titleKey: 'nav.components',
-      catalogPath: '/components',
+      catalogPath: '/ui/components',
     };
   }
 
-  // /ja/hooks/use-click-away → match, /ja/hooks → no match
-  if (/^\/[^/]+\/hooks\/.+/u.test(pathname)) {
+  // /ja/ui/hooks/use-click-away → match, /ja/ui/hooks → no match
+  if (/^\/[^/]+\/ui\/hooks\/.+/u.test(pathname)) {
     return {
       categories: hookCategories,
       titleKey: 'nav.hooks',
-      catalogPath: '/hooks',
+      catalogPath: '/ui/hooks',
     };
   }
 
-  // /ja/helpers/cn → match, /ja/helpers → no match
-  if (/^\/[^/]+\/helpers\/.+/u.test(pathname)) {
+  // /ja/ui/helpers/cn → match, /ja/ui/helpers → no match
+  if (/^\/[^/]+\/ui\/helpers\/.+/u.test(pathname)) {
     return {
       categories: helperCategories,
       titleKey: 'nav.helpers',
-      catalogPath: '/helpers',
+      catalogPath: '/ui/helpers',
     };
   }
 
-  // /ja/ai/chat → match, /ja/ai → no match
-  if (/^\/[^/]+\/ai\/.+/u.test(pathname)) {
+  // /ja/ui/ai/chat → match, /ja/ui/ai → no match
+  if (/^\/[^/]+\/ui\/ai\/.+/u.test(pathname)) {
     return {
       categories: aiCategories,
       titleKey: 'nav.ai',
-      catalogPath: '/ai',
+      catalogPath: '/ui/ai',
     };
   }
 

@@ -1,137 +1,139 @@
-# スペーシング・レイアウト
+# Spacing and layout
 
-k8ordo UI は「余白で語る」デザイン。詰め込まず、空間にゆとりを持たせる。
+`@k8ordo/ui` is a design that lets the spacing speak. Do not pack things in;
+leave room.
 
-## スペーシングの原則
+## Spacing principles
 
-4pt ベースのスペーシングシステム。Tailwind の標準スケールを使用。
+A 4pt spacing system, using Tailwind's standard scale.
 
-### コンポーネント内部パディング
+### Padding inside a component
 
-| 用途           | クラス | 値   |
-| -------------- | ------ | ---- |
-| コンパクト     | `p-4`  | 16px |
-| 標準           | `p-6`  | 24px |
-| ゆったり       | `p-8`  | 32px |
-| 大きなカード内 | `p-10` | 40px |
+| Use               | Class  | Value |
+| ----------------- | ------ | ----- |
+| Compact           | `p-4`  | 16px  |
+| Standard          | `p-6`  | 24px  |
+| Generous          | `p-8`  | 32px  |
+| Inside a big card | `p-10` | 40px  |
 
-### テキスト間の余白
+### Spacing between blocks of text
 
-| 関係性         | クラス  | 用途                         |
-| -------------- | ------- | ---------------------------- |
-| 近い要素       | `mt-2`  | 説明テキスト、ヘルプテキスト |
-| 標準           | `mt-4`  | 段落間、フォームフィールド間 |
-| セクション間   | `mt-8`  | セクション区切り             |
-| 大セクション間 | `mt-12` | ページレベルの区切り         |
+| Relationship           | Class   | Use                                     |
+| ---------------------- | ------- | --------------------------------------- |
+| Closely related        | `mt-2`  | Descriptions, help text                 |
+| Standard               | `mt-4`  | Between paragraphs, between form fields |
+| Between sections       | `mt-8`  | A section break                         |
+| Between major sections | `mt-12` | A page-level break                      |
 
-### セクション間の余白
+### Spacing between sections
 
-| 関係性       | クラス              | 用途                       |
-| ------------ | ------------------- | -------------------------- |
-| カード間     | `gap-6`             | 横並びカード（グリッド内） |
-| セクション間 | `gap-8` 〜 `gap-10` | 縦に並ぶセクション         |
+| Relationship     | Class              | Use                            |
+| ---------------- | ------------------ | ------------------------------ |
+| Between cards    | `gap-6`            | Cards side by side (in a grid) |
+| Between sections | `gap-8` – `gap-10` | Sections stacked vertically    |
 
-## 角丸
+## Border radius
 
-**「触れるものは柔らかく、読むものは端正に」**
+**"Soft where you touch, precise where you read."**
 
-要素の性格に応じて角丸を使い分ける。
+Vary the radius with the element's role.
 
-### 触れるもの（柔らかく）
+### Things you touch (soft)
 
-| 用途                          | クラス         | 値     |
-| ----------------------------- | -------------- | ------ |
-| Button                        | `rounded-full` | ピル型 |
-| Input, Textarea, Select       | `rounded-xl`   | 1rem   |
-| Card, CheckboxCard, RadioCard | `rounded-xl`   | 1rem   |
+| Use                           | Class          | Value |
+| ----------------------------- | -------------- | ----- |
+| Button                        | `rounded-full` | Pill  |
+| Input, Textarea, Select       | `rounded-xl`   | 1rem  |
+| Card, CheckboxCard, RadioCard | `rounded-xl`   | 1rem  |
 
-### 読むもの（端正に）
+### Things you read (precise)
 
-| 用途     | クラス         | 値                           |
-| -------- | -------------- | ---------------------------- |
-| Alert    | `rounded-lg`   | 0.75rem                      |
-| Badge    | `rounded-full` | ピル型（小さいので問題ない） |
-| Tabs     | 現行のまま     |                              |
-| Checkbox | `rounded-md`   | 0.5rem                       |
+| Use      | Class          | Value                          |
+| -------- | -------------- | ------------------------------ |
+| Alert    | `rounded-lg`   | 0.75rem                        |
+| Badge    | `rounded-full` | Pill (fine, since it is small) |
+| Tabs     | As-is          |                                |
+| Checkbox | `rounded-md`   | 0.5rem                         |
 
-### その他
+### Everything else
 
-| 用途                               | クラス         |
-| ---------------------------------- | -------------- |
-| Dialog, Modal                      | `rounded-lg`   |
-| Avatar, IconButton, プログレスバー | `rounded-full` |
+| Use                              | Class          |
+| -------------------------------- | -------------- |
+| Dialog, Modal                    | `rounded-lg`   |
+| Avatar, IconButton, progress bar | `rounded-full` |
 
-## シャドウ
+## Shadow
 
-ふんわり柔らかい影で奥行きを表現する。
+Express depth with a soft, gentle shadow.
 
-| 用途                     | スタイル                                                |
-| ------------------------ | ------------------------------------------------------- |
-| Card（デフォルト）       | `shadow-sm`（appearance="shadow" 時）                   |
-| Card（ボーダー）         | `border border-border-mute`（appearance="bordered" 時） |
-| Modal / Dialog / Tooltip | `shadow-md`                                             |
-| Dropdown / ListBox       | `shadow-md`                                             |
-| Button                   | なし                                                    |
+| Use                      | Style                                                      |
+| ------------------------ | ---------------------------------------------------------- |
+| Card (default)           | `shadow-sm` (with `appearance="shadow"`)                   |
+| Card (bordered)          | `border border-border-mute` (with `appearance="bordered"`) |
+| Modal / Dialog / Tooltip | `shadow-md`                                                |
+| Dropdown / ListBox       | `shadow-md`                                                |
+| Button                   | None                                                       |
 
-`shadow-xl` 以上は使わない。
+Never use `shadow-xl` or heavier.
 
-## ページ構造
+## Page structure
 
-### bg-subtle + 白カードの基本パターン
+### The bg-subtle plus white card pattern
 
-ページ背景を `bg-bg-subtle`（薄いグレー）にし、コンテンツを白いカードで浮かせる。
+Make the page background `bg-bg-subtle` (a light grey) and float the content on
+white cards.
 
 ```tsx
-// Good: 灰色背景に白カードが浮く
+// Good: a white card floating on a grey ground
 <div className="bg-bg-subtle min-h-screen">
   <Card appearance="shadow">
-    <div className="p-8">コンテンツ</div>
+    <div className="p-8">Content</div>
   </Card>
 </div>
 ```
 
-### 余白で階層を作る
+### Build hierarchy out of spacing
 
 ```tsx
-// Good: 余白の差で関連度を示す
+// Good: the size of the gap shows how related things are
 <section className="mt-12">
-  <Heading level="h2">セクション</Heading>
-  <p className="mt-2">直接関連する説明</p>
-  <div className="mt-8">やや離れたコンテンツ</div>
+  <Heading level="h2">Section</Heading>
+  <p className="mt-2">A description that belongs to it</p>
+  <div className="mt-8">Content that sits a little apart</div>
 </section>
 
-// Bad: すべて同じ余白
+// Bad: the same gap everywhere
 <section className="mt-4">
-  <Heading level="h2">セクション</Heading>
-  <p className="mt-4">説明</p>
-  <div className="mt-4">コンテンツ</div>
+  <Heading level="h2">Section</Heading>
+  <p className="mt-4">Description</p>
+  <div className="mt-4">Content</div>
 </section>
 ```
 
-### カードは万能ではない
+### A card is not the answer to everything
 
-すべてのコンテンツをカードに入れる必要はない。余白とセパレーターで十分なケースが多い。
+Content does not have to go in a card. Spacing and a separator are often enough.
 
 ```tsx
 import { Separator } from '@k8ordo/ui';
 
-// Good: セパレーターで区切る
+// Good: divide with a separator
 <div>
-  <section>コンテンツA</section>
+  <section>Content A</section>
   <div className="py-8">
     <Separator />
   </div>
-  <section>コンテンツB</section>
+  <section>Content B</section>
 </div>
 
-// 過剰: すべてカードに入れる
-<Card>コンテンツA</Card>
-<Card>コンテンツB</Card>
+// Excessive: everything in a card
+<Card>Content A</Card>
+<Card>Content B</Card>
 ```
 
-## やってはいけないこと
+## What not to do
 
-- `gap-1` や `p-1` のような極端に狭いスペーシング
-- コンテンツの詰め込み（情報密度より余白を優先）
-- ネストされたカード（Card in Card）
-- 12 を超える z-index 値
+- Extremely tight spacing such as `gap-1` or `p-1`
+- Cramming content in (space wins over information density)
+- Nested cards (Card in Card)
+- A z-index above 12

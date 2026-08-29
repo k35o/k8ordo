@@ -126,17 +126,17 @@ function MyComponent() {
         </Heading>
         <ul className="flex flex-col gap-3 pl-6">
           <li className="list-disc">
-            <LocaleAnchor path="/components">
+            <LocaleAnchor path="/ui/components">
               <T k="getStarted.nextStepsComponents" />
             </LocaleAnchor>
           </li>
           <li className="list-disc">
-            <LocaleAnchor path="/theming">
+            <LocaleAnchor path="/ui/theming">
               <T k="getStarted.nextStepsTheming" />
             </LocaleAnchor>
           </li>
           <li className="list-disc">
-            <LocaleAnchor path="/i18n">
+            <LocaleAnchor path="/ui/i18n">
               <T k="getStarted.nextStepsI18n" />
             </LocaleAnchor>
           </li>

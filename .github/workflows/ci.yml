@@ -26,7 +26,7 @@ jobs:
         run: pnpm exec playwright install
 
       - name: Run tests
-        run: pnpm --filter @k8ordo/ui test
+        run: pnpm --filter './packages/*' test
 
   lint:
     name: Lint
@@ -43,6 +43,11 @@ jobs:
 
       - name: Run lint and format check
         run: pnpm check
+
+      # 血縁のうち機械的に守れる一点。Baseline 入りだけを前提にする以上、
+      # ポリフィルを依存に足した時点で規律が破れている。
+      - name: Check no polyfills are pulled in
+        run: pnpm check:no-polyfills
 
   types:
     name: TypeScript
@@ -74,12 +79,12 @@ jobs:
         uses: ./.github/composite-actions/install
 
       - name: Build package
-        run: pnpm --filter @k8ordo/ui build
+        run: pnpm --filter './packages/*' build
 
       # Validate the publishable artifact: publint checks packaging metadata,
       # attw checks that types resolve under every module-resolution mode.
       - name: Check packaging
-        run: pnpm --filter @k8ordo/ui check:package
+        run: pnpm --filter './packages/*' check:package
 
   examples:
     name: Examples

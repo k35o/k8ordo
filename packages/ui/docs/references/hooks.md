@@ -1,16 +1,16 @@
 # Hooks
 
-k8ordo UI が提供するカスタムフック。
+The custom hooks `@k8ordo/ui` provides.
 
 ```tsx
 import { useDisclosure, useDeferredDebounce } from '@k8ordo/ui';
 ```
 
-## 状態管理
+## State
 
 ### useDisclosure
 
-開閉状態のトグル管理。
+Toggles open/closed state.
 
 ```tsx
 const { isOpen, open, close, toggle } = useDisclosure();
@@ -18,7 +18,7 @@ const { isOpen, open, close, toggle } = useDisclosure();
 
 ### useControllableState
 
-Controlled / Uncontrolled を透過的に扱うパターン。
+Handles controlled and uncontrolled use transparently.
 
 ```tsx
 const [value, setValue] = useControllableState({
@@ -30,7 +30,7 @@ const [value, setValue] = useControllableState({
 
 ### useStep
 
-ステップカウンター。進む/戻るの制御。
+A step counter with forward/back control.
 
 ```tsx
 const { count, next, back, isDisabledBack, isDisabledNext } = useStep({
@@ -41,17 +41,17 @@ const { count, next, back, isDisabledBack, isDisabledNext } = useStep({
 
 ### useHash
 
-URL ハッシュの読み取り（読み取り専用）。
+Reads the URL hash (read-only).
 
 ```tsx
 const hash = useHash(); // string | null
 ```
 
-## ストレージ
+## Storage
 
 ### useLocalStorage
 
-LocalStorage と同期した状態。`remove` で削除も可能。
+State kept in sync with LocalStorage. `remove` deletes the entry.
 
 ```tsx
 const [value, setValue, remove] = useLocalStorage<string>('key', 'default');
@@ -59,66 +59,71 @@ const [value, setValue, remove] = useLocalStorage<string>('key', 'default');
 
 ### useSessionStorage
 
-SessionStorage と同期した状態。`remove` で削除も可能。
+State kept in sync with SessionStorage. `remove` deletes the entry.
 
 ```tsx
 const [value, setValue, remove] = useSessionStorage<string>('key', 'default');
 ```
 
-## イベント
+## Events
 
 ### useClickAway
 
-要素外クリックの検知。ref と callback を引数に取る。
+Detects a click outside an element. Takes a ref and a callback.
 
 ```tsx
 const ref = useRef<HTMLDivElement>(null);
 
 useClickAway(ref, (e) => {
-  console.log('外側をクリック');
+  console.log('clicked outside');
 });
 ```
 
-引数:
+Arguments:
 
 - `ref`: `RefObject<T | null>`
 - `callback`: `(e: Event) => void`
-- `enabled`: boolean（デフォルト: `true`）
+- `enabled`: boolean (default: `true`)
 
 ### useHover
 
-ホバー状態の検知。`hoverProps` を要素に spread する。
+Detects the hover state. Spread `hoverProps` onto the element.
 
 ```tsx
 const { isHovered, hoverProps } = useHover();
 
-<div {...hoverProps}>{isHovered ? 'ホバー中' : '通常'}</div>;
+<div {...hoverProps}>{isHovered ? 'hovered' : 'idle'}</div>;
 ```
 
-`hoverProps` は `{ onPointerEnter, onPointerLeave }` を含む。
+`hoverProps` contains `{ onPointerEnter, onPointerLeave }`.
 
-## タイミング
+## Timing
 
-> `useDeferredDebounce` と `useDebouncedTransition` は役割が異なります。
+> `useDeferredDebounce` and `useDebouncedTransition` do different jobs.
 >
-> - **`useDeferredDebounce`**: **描画の遅延**（render defer）。React スケジューラが重い再レンダーを後回しにするだけで、遅延時間の保証はない。副作用（fetch / 外部 API）を間引く用途には使えない。
-> - **`useDebouncedTransition`**: **副作用の間引き**（rate limiting）。指定した `delay` を待ってからアクションを実行し、再呼び出し時には前回の `AbortSignal` を abort する。fetch など「軽々しく連射したくない処理」に使う。
+> - **`useDeferredDebounce`**: **defers rendering**. The React scheduler simply postpones an expensive re-render; there is no guarantee about how long it waits. It cannot be used to throttle side effects (fetch, external APIs).
+> - **`useDebouncedTransition`**: **rate-limits side effects**. It waits for the given `delay` before running the action, and aborts the previous `AbortSignal` when called again. Use it for work you do not want fired in rapid succession, such as fetch.
 
 ### useDeferredDebounce
 
-`useDeferredValue` をラップし、値と「追いついていない」ペンディング状態を返す。入力に応じてリストを絞り込むような **純 UI 用途のみ** 向け。
+Wraps `useDeferredValue` and returns the value plus a pending flag for when it
+has not caught up. **For pure UI purposes only**, such as filtering a list as
+the user types.
 
 ```tsx
 const [deferredValue, isPending] = useDeferredDebounce(inputValue);
 ```
 
-戻り値:
+Returns:
 
 - `[T, boolean]` — `[deferredValue, isPending]`
 
 ### useDebouncedTransition
 
-`startTransition(async)` と `AbortController` を組み合わせ、delay 経過後にアクションを実行する。再呼び出し時は前回のアクションに渡した signal を abort し、action 内が `fetch({ signal })` 等で AbortError を投げても未処理 rejection にはならない。
+Combines `startTransition(async)` with an `AbortController` and runs the action
+once the delay has elapsed. On a repeat call it aborts the signal passed to the
+previous action, so an `AbortError` thrown inside the action by, say,
+`fetch({ signal })` does not become an unhandled rejection.
 
 ```tsx
 const [isPending, run] = useDebouncedTransition(300);
@@ -133,13 +138,13 @@ const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
 };
 ```
 
-戻り値:
+Returns:
 
 - `[boolean, (action: (signal: AbortSignal) => void | Promise<void>) => void]`
 
 ### useInterval
 
-定期実行。
+Runs something on an interval.
 
 ```tsx
 useInterval(() => {
@@ -149,7 +154,7 @@ useInterval(() => {
 
 ### useTimeout
 
-遅延実行。
+Runs something after a delay.
 
 ```tsx
 useTimeout(() => {
@@ -157,11 +162,11 @@ useTimeout(() => {
 }, 3000);
 ```
 
-## DOM・ブラウザ
+## DOM and browser
 
 ### useWindowSize
 
-ウィンドウサイズの取得。
+Reads the window size.
 
 ```tsx
 const { width, height } = useWindowSize();
@@ -169,7 +174,7 @@ const { width, height } = useWindowSize();
 
 ### useWindowResize
 
-ウィンドウリサイズのリスナー。コールバックに `{ width, height }` が渡される。
+Listens for window resizes. The callback receives `{ width, height }`.
 
 ```tsx
 useWindowResize(
@@ -180,14 +185,14 @@ useWindowResize(
 );
 ```
 
-引数:
+Arguments:
 
 - `callback`: `(size: { width: number; height: number }) => void`
 - `options`: `{ enabled?: boolean }`
 
 ### useResize
 
-要素のリサイズ監視（ResizeObserver）。ref を引数に取る。
+Observes an element's size (ResizeObserver). Takes a ref.
 
 ```tsx
 const ref = useRef<HTMLDivElement>(null);
@@ -201,7 +206,7 @@ useResize(
 );
 ```
 
-引数:
+Arguments:
 
 - `ref`: `RefObject<T | null>`
 - `callback`: `(entry: ResizeObserverEntry) => void`
@@ -209,7 +214,7 @@ useResize(
 
 ### useIntersectionObserver
 
-交差オブザーバー。ref を引数に取る。
+An intersection observer. Takes a ref.
 
 ```tsx
 const ref = useRef<HTMLDivElement>(null);
@@ -223,29 +228,29 @@ useIntersectionObserver(
 );
 ```
 
-引数:
+Arguments:
 
 - `ref`: `RefObject<T | null>`
 - `callback`: `(entry: IntersectionObserverEntry) => void`
-- `options`: IntersectionObserver のオプション
+- `options`: IntersectionObserver options
 
 ### useInView
 
-要素の表示状態。ref を引数に取り、boolean を返す。
+Whether an element is in view. Takes a ref and returns a boolean.
 
 ```tsx
 const ref = useRef<HTMLDivElement>(null);
 const isInView = useInView(ref, { threshold: 0.1 });
 ```
 
-引数:
+Arguments:
 
 - `ref`: `RefObject<T | null>`
-- `options`: IntersectionObserver のオプション
+- `options`: IntersectionObserver options
 
 ### useScrollDirection
 
-スクロール方向の検知。X 軸と Y 軸の両方を返す。
+Detects scroll direction, on both axes.
 
 ```tsx
 const { x, y } = useScrollDirection();
@@ -255,48 +260,50 @@ const { x, y } = useScrollDirection();
 
 ### useScrollLock
 
-body のスクロールロック。lock / unlock 関数を返す。
+Locks scrolling on the body. Returns lock and unlock functions.
 
 ```tsx
 const { lock, unlock } = useScrollLock();
 
-// モーダルを開くとき
+// when opening a modal
 lock();
 
-// モーダルを閉じるとき
+// when closing it
 unlock();
 ```
 
 ### useWritingMode
 
-要素の `writing-mode` を検知し、`'horizontal'` または `'vertical'` を返す。`vertical-*` / `sideways-*` はすべて `'vertical'` として正規化される。ResizeObserver で監視し、SSR では `'horizontal'` を返す。
+Detects an element's `writing-mode` and returns `'horizontal'` or `'vertical'`.
+Every `vertical-*` and `sideways-*` value normalizes to `'vertical'`. It
+observes through a ResizeObserver, and returns `'horizontal'` during SSR.
 
 ```tsx
 const ref = useRef<HTMLDivElement>(null);
 const writingMode = useWritingMode(ref); // 'horizontal' | 'vertical'
 ```
 
-引数:
+Arguments:
 
 - `ref`: `RefObject<Element | null>`
 
-戻り値:
+Returns:
 
 - `'horizontal' | 'vertical'`
 
 ### useBreakpoint
 
-Tailwind ブレークポイントの判定。
+Tests a Tailwind breakpoint.
 
 ```tsx
-const isMd = useBreakpoint('md'); // 768px 以上かどうか
+const isMd = useBreakpoint('md'); // whether the viewport is 768px or wider
 ```
 
-## ユーティリティ
+## Utilities
 
 ### useClient
 
-クライアントサイドかどうか。
+Whether we are on the client.
 
 ```tsx
 const isClient = useClient();
@@ -304,11 +311,11 @@ const isClient = useClient();
 
 ### useClipboard
 
-クリップボードの読み書き。
+Reads from and writes to the clipboard.
 
 ```tsx
 const { writeClipboard, readClipboard } = useClipboard();
 
-await writeClipboard('コピーするテキスト');
+await writeClipboard('the text to copy');
 const text = await readClipboard();
 ```

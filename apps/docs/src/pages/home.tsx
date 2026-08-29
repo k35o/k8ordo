@@ -1,58 +1,39 @@
 'use client';
 
-import {
-  AccessibilityIcon,
-  AtomIcon,
-  Button,
-  GitHubIcon,
-  Heading,
-  PaletteIcon,
-  ShieldCheckIcon,
-  SparklesIcon,
-  VerticalWritingIcon,
-} from '@k8ordo/ui';
-import type { ReactNode } from 'react';
+import { Button, GitHubIcon, Heading } from '@k8ordo/ui';
 
 import { T } from '../components/t';
 import { localizeHref, useTranslation } from '../i18n';
 import type { MessageKey } from '../i18n/types';
 
-type Feature = {
-  title: MessageKey;
+type Member = {
+  name: string;
+  path: string;
   description: MessageKey;
-  icon: ReactNode;
 };
 
-const FEATURES: Feature[] = [
+const MEMBERS: Member[] = [
   {
-    title: 'home.featureReact',
-    description: 'home.featureReactDescription',
-    icon: <AtomIcon />,
+    name: '@k8ordo/ui',
+    path: '/ui',
+    description: 'home.memberUiDescription',
+  },
+];
+
+type Discipline = { title: MessageKey; description: MessageKey };
+
+const DISCIPLINES: Discipline[] = [
+  {
+    title: 'home.disciplinePlatform',
+    description: 'home.disciplinePlatformDescription',
   },
   {
-    title: 'home.featureTokens',
-    description: 'home.featureTokensDescription',
-    icon: <PaletteIcon />,
+    title: 'home.disciplineReact',
+    description: 'home.disciplineReactDescription',
   },
   {
-    title: 'home.featureTypeScript',
-    description: 'home.featureTypeScriptDescription',
-    icon: <ShieldCheckIcon />,
-  },
-  {
-    title: 'home.featureAccessible',
-    description: 'home.featureAccessibleDescription',
-    icon: <AccessibilityIcon />,
-  },
-  {
-    title: 'home.featureMinimal',
-    description: 'home.featureMinimalDescription',
-    icon: <SparklesIcon />,
-  },
-  {
-    title: 'home.featureVerticalWriting',
-    description: 'home.featureVerticalWritingDescription',
-    icon: <VerticalWritingIcon />,
+    title: 'home.disciplinePrimary',
+    description: 'home.disciplinePrimaryDescription',
   },
 ];
 
@@ -78,7 +59,7 @@ export function Home() {
             className="font-m-plus-2 font-palt text-fg-base break-phrase text-lg font-medium md:hidden"
             lang="ja"
           >
-            触れるものは柔らかく、読むものは端正に。
+            あるものは使い、ないものは足さない。
           </p>
           <p className="text-fg-mute break-phrase text-lg leading-relaxed">
             {t('home.description')}
@@ -86,32 +67,14 @@ export function Home() {
           <div className="flex flex-wrap items-center gap-4">
             <Button
               renderItem={({ className, children }) => (
-                <a
-                  className={className}
-                  href={localizeHref('/get-started', locale)}
-                >
+                <a className={className} href={localizeHref('/ui', locale)}>
                   {children}
                 </a>
               )}
               size="md"
               variant="solid"
             >
-              {t('home.getStarted')}
-            </Button>
-            <Button
-              color="base"
-              renderItem={({ className, children }) => (
-                <a
-                  className={className}
-                  href={localizeHref('/components', locale)}
-                >
-                  {children}
-                </a>
-              )}
-              size="md"
-              variant="outline"
-            >
-              {t('home.viewComponents')}
+              {t('home.exploreUi')}
             </Button>
             <Button
               color="base"
@@ -129,7 +92,7 @@ export function Home() {
               startIcon={<GitHubIcon />}
               variant="skeleton"
             >
-              {t('home.github')}
+              {t('common.github')}
             </Button>
           </div>
         </div>
@@ -140,29 +103,46 @@ export function Home() {
             className="font-m-plus-2 font-palt writing-v text-fg-base h-104 text-2xl leading-loose font-medium"
             lang="ja"
           >
-            触れるものは柔らかく、
+            あるものは使い、
             <br />
-            読むものは端正に。
+            ないものは足さない。
           </p>
         </div>
       </section>
 
+      <section className="mx-auto w-full max-w-6xl px-6 pb-16 md:px-8">
+        <Heading level="h2">{t('home.membersTitle')}</Heading>
+        <ul className="mt-8 flex flex-col gap-4">
+          {MEMBERS.map((member) => (
+            <li key={member.name}>
+              <a
+                className="border-border-mute hover:bg-bg-mute focus-visible:ring-border-info flex flex-col gap-2 rounded-lg border p-6 transition-colors duration-150 ease-out focus-visible:ring-2 focus-visible:outline-hidden"
+                href={localizeHref(member.path, locale)}
+              >
+                <span className="text-fg-base font-medium">{member.name}</span>
+                <span className="text-fg-mute text-sm leading-relaxed">
+                  <T k={member.description} />
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+
       <section className="mx-auto w-full max-w-6xl px-6 pb-24 md:px-8">
-        <Heading level="h2">{t('home.featuresTitle')}</Heading>
+        <Heading level="h2">{t('home.disciplineTitle')}</Heading>
         <ol className="mt-8">
-          {FEATURES.map((feature) => (
+          {DISCIPLINES.map((discipline) => (
             <li
               className="border-border-mute border-t last:border-b"
-              key={feature.title}
+              key={discipline.title}
             >
-              {/* min-h は py-6(計3rem) + 説明2行分。1行説明の行も同じ高さに揃え、罫線を等間隔に保つ */}
               <div className="grid min-h-24 items-start gap-4 py-6 md:grid-cols-[14rem_1fr] md:gap-8">
-                <p className="text-fg-base flex items-center gap-2 font-medium">
-                  <span className="text-fg-mute">{feature.icon}</span>
-                  {t(feature.title)}
+                <p className="text-fg-base font-medium">
+                  {t(discipline.title)}
                 </p>
                 <p className="text-fg-mute text-sm leading-relaxed">
-                  <T k={feature.description} />
+                  <T k={discipline.description} />
                 </p>
               </div>
             </li>

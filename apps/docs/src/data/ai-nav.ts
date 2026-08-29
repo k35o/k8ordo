@@ -6,17 +6,17 @@ export const aiCategories: NavCategory[] = [
     items: [
       {
         name: 'AI Chat',
-        path: '/ai/chat',
+        path: '/ui/ai/chat',
         descKey: 'ai.chatSummary',
       },
       {
         name: 'Generative UI',
-        path: '/ai/generative-ui',
+        path: '/ui/ai/generative-ui',
         descKey: 'ai.generativeUiSummary',
       },
       {
         name: 'AI Agents',
-        path: '/ai/agents',
+        path: '/ui/ai/agents',
         descKey: 'ai.agentsSummary',
       },
     ],

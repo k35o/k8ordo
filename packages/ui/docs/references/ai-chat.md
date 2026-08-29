@@ -1,11 +1,11 @@
-# k8ordo UI AI チャットコンポーネント
+# @k8ordo/ui AI chat components
 
-AI チャット UI（会話ログ・メッセージ・入力欄・推論表示・ツール実行表示）を構築するコンポーネント群。ルートではなく専用サブパスからインポートする。
+Components for building an AI chat UI: the conversation log, messages, the input box, reasoning display, and tool-invocation display. Import them from their dedicated subpaths rather than from the root.
 
-## インポート方法
+## Importing
 
 ```tsx
-// 基本コンポーネント（追加の依存なし）
+// Core components (no extra dependencies)
 import {
   Conversation,
   Message,
@@ -15,47 +15,47 @@ import {
   ToolInvocation,
 } from '@k8ordo/ui/ai';
 
-// ストリーミング対応 Markdown 描画（optional peer: streamdown）
+// Streaming-aware Markdown rendering (optional peer: streamdown)
 import { Response } from '@k8ordo/ui/ai/response';
 
-// AI SDK 連携（optional peer: ai）
+// AI SDK integration (optional peer: ai)
 import { mapMessageParts } from '@k8ordo/ui/ai-sdk';
 ```
 
-型も `@k8ordo/ui/ai` から export される：
+The types are exported from `@k8ordo/ui/ai` too:
 
-- `ChatStatus`: `'ready' | 'submitted' | 'streaming' | 'error'`（AI SDK の `status` と互換）
-- `ToolState`: `'input-streaming' | 'input-available' | 'approval-requested' | 'approval-responded' | 'output-available' | 'output-error' | 'output-denied'`（AI SDK v7 のツール状態と 1:1）
+- `ChatStatus`: `'ready' | 'submitted' | 'streaming' | 'error'` (compatible with the AI SDK's `status`)
+- `ToolState`: `'input-streaming' | 'input-available' | 'approval-requested' | 'approval-responded' | 'output-available' | 'output-error' | 'output-denied'` (1:1 with the AI SDK v7 tool states)
 
-### optional peer のセットアップ
+### Setting up the optional peers
 
-使うサブパスの分だけインストールする。`@k8ordo/ui/ai` 本体はどちらも不要。
+Install only what the subpaths you use require. `@k8ordo/ui/ai` itself needs neither.
 
 ```bash
-# @k8ordo/ui/ai/response（Response）を使う場合
+# If you use @k8ordo/ui/ai/response (Response)
 pnpm add streamdown
-# @k8ordo/ui/ai-sdk（mapMessageParts）を使う場合
+# If you use @k8ordo/ui/ai-sdk (mapMessageParts)
 pnpm add ai
 ```
 
-`Response` を使う場合は streamdown のスタイルシートの読み込みと、Tailwind の `@source` 設定も必要。streamdown のスタイルはビルド済み `styles.css` には含まれないため、`Response` だけは Tailwind CSS 4 のビルド（`@k8ordo/ui/tailwind.css` エントリ）が前提になる：
+Using `Response` also means loading streamdown's stylesheet and adding a Tailwind `@source` entry. streamdown's styles are not part of the prebuilt `styles.css`, so `Response` alone requires a Tailwind CSS 4 build (the `@k8ordo/ui/tailwind.css` entry):
 
 ```tsx
 import 'streamdown/styles.css';
 ```
 
 ```css
-/* アプリの CSS エントリに追加（パスは CSS ファイルから node_modules への相対） */
+/* Add to your app's CSS entry (the path is relative from the CSS file to node_modules) */
 @source '../node_modules/streamdown/dist/*.js';
 ```
 
-なお本リファレンスの例で使う `useChat` は AI SDK の React バインディング（`pnpm add @ai-sdk/react`）から import する。
+The `useChat` used in the examples below comes from the AI SDK's React bindings (`pnpm add @ai-sdk/react`).
 
-以下に出てくる `label` / `sendLabel` などの「デフォルト」は文言辞書の既定値（日本語）。`<UIProvider messages={en}>` で辞書ごと切り替えられる（[i18n](components.md)）。個別の prop を渡した場合はそちらが辞書より優先される。
+The "default" shown for `label`, `sendLabel`, and similar props below is the message dictionary's default (Japanese). Swap the whole dictionary with `<UIProvider messages={en}>` (see [i18n](components.md)). Passing the prop directly wins over the dictionary.
 
-## 全体像
+## The whole picture
 
-`Conversation`（会話ログ）+ `Message`（吹き出し）+ `PromptInput`（入力欄）が骨組み。`Response` / `Reasoning` / `ToolInvocation` は後から足せる。
+`Conversation` (the log), `Message` (a bubble), and `PromptInput` (the input box) form the skeleton. `Response`, `Reasoning`, and `ToolInvocation` can be added later.
 
 ```tsx
 'use client';
@@ -99,7 +99,7 @@ export function Chat() {
         onSubmit={(text) => sendMessage({ text })}
         status={status}
       >
-        <PromptInput.Textarea placeholder="メッセージを入力" />
+        <PromptInput.Textarea placeholder="Type a message" />
         <PromptInput.Submit />
       </PromptInput.Root>
     </div>
@@ -109,7 +109,7 @@ export function Chat() {
 
 ## Conversation
 
-会話ログのスクロール領域。Compound component パターン。最下部に張り付き、新しいメッセージで自動スクロールする。最下部から離れると `ScrollButton` が現れる。
+The scrolling region for the conversation log, as a compound component. It sticks to the bottom and auto-scrolls on a new message. Once you scroll away from the bottom, a `ScrollButton` appears.
 
 ```tsx
 import { Conversation } from '@k8ordo/ui/ai';
@@ -124,40 +124,40 @@ import { Conversation } from '@k8ordo/ui/ai';
 
 Props (Conversation.Messages):
 
-- `label`: string（デフォルト: `'チャット'`、aria-label として使用）
-- `isStreaming`: boolean（`aria-busy` に反映）
+- `label`: string (default: `'チャット'`, used as the aria-label)
+- `isStreaming`: boolean (reflected in `aria-busy`)
 
 Props (Conversation.ScrollButton):
 
-- `label`: string（デフォルト: `'最新のメッセージへ移動'`）
+- `label`: string (default: `'最新のメッセージへ移動'`)
 
 ## Message
 
-メッセージ 1 件。`from="user"` は右寄せの吹き出し、`from="assistant"` は地の文として描画される。アバターなどは `Message.Root` の子として自由に並べられる。
+A single message. `from="user"` renders as a right-aligned bubble; `from="assistant"` renders as running text. An avatar or anything else can sit freely as a child of `Message.Root`.
 
 ```tsx
 import { Message } from '@k8ordo/ui/ai';
 
 <Message.Root from="user">
-  <Message.Content>こんにちは</Message.Content>
+  <Message.Content>Hello</Message.Content>
 </Message.Root>
 
 <Message.Root from="assistant">
-  <Message.Content isStreaming>生成中の本文…</Message.Content>
+  <Message.Content isStreaming>Text still streaming…</Message.Content>
 </Message.Root>
 ```
 
 Props (Message.Root):
 
-- `from`: `'user'` | `'assistant'`（必須）
+- `from`: `'user'` | `'assistant'` (required)
 
 Props (Message.Content):
 
-- `isStreaming`: boolean（true でストリーミングカーソルを表示）
+- `isStreaming`: boolean (shows the streaming cursor when true)
 
 ## PromptInput
 
-送信フォーム。Enter で送信、Shift+Enter で改行。IME 変換確定の Enter では送信しない。`status` が `'submitted'` / `'streaming'` の間は `Submit` が停止ボタンに切り替わる。本文は trim され、空文字は送信されない。
+The submit form. Enter sends; Shift+Enter inserts a newline; the Enter that commits an IME conversion does not send. While `status` is `'submitted'` or `'streaming'`, `Submit` turns into a stop button. The body is trimmed, and an empty string is never sent.
 
 ```tsx
 import { PromptInput } from '@k8ordo/ui/ai';
@@ -167,30 +167,30 @@ import { PromptInput } from '@k8ordo/ui/ai';
   onSubmit={(message) => send(message)}
   onStop={stop}
 >
-  <PromptInput.Textarea placeholder="メッセージを入力" />
+  <PromptInput.Textarea placeholder="Type a message" />
   <PromptInput.Submit />
 </PromptInput.Root>;
 ```
 
 Props (PromptInput.Root):
 
-- `status`: ChatStatus（デフォルト: `'ready'`）
-- `value` / `defaultValue` / `onChange`: controlled / uncontrolled 両対応（`onChange` は `(value: string) => void`）
-- `onSubmit`: `(message: string) => void`（trim 済みの本文）
-- `onStop`: `() => void`（送信中に停止ボタンを押したとき）
+- `status`: ChatStatus (default: `'ready'`)
+- `value` / `defaultValue` / `onChange`: supports both controlled and uncontrolled use (`onChange` is `(value: string) => void`)
+- `onSubmit`: `(message: string) => void` (the trimmed body)
+- `onStop`: `() => void` (when the stop button is pressed mid-send)
 
 Props (PromptInput.Textarea):
 
-- `placeholder`: string ほか textarea 属性
+- `placeholder`: string, plus the other textarea attributes
 
 Props (PromptInput.Submit):
 
-- `sendLabel`: string（デフォルト: `'送信'`）
-- `stopLabel`: string（デフォルト: `'停止'`）
+- `sendLabel`: string (default: `'送信'`)
+- `stopLabel`: string (default: `'停止'`)
 
 ## Reasoning
 
-推論（思考過程）の折りたたみ表示。ストリーミング中はラベルが「思考中…」になる。
+A collapsible view of the model's reasoning. While streaming, the label reads 「思考中…」.
 
 ```tsx
 import { Reasoning } from '@k8ordo/ui/ai';
@@ -201,11 +201,11 @@ import { Reasoning } from '@k8ordo/ui/ai';
 Props:
 
 - `isStreaming`: boolean
-- `isOpen` / `defaultOpen` / `onChange`: 開閉の controlled / uncontrolled 両対応（`onChange` は `(isOpen: boolean) => void`）
+- `isOpen` / `defaultOpen` / `onChange`: open state, controlled or uncontrolled (`onChange` is `(isOpen: boolean) => void`)
 
 ## Response
 
-ストリーミング対応の Markdown レンダラ。未クローズのコードブロックなど途中の Markdown も破綻なく描画する。optional peer の `streamdown` が必要（[セットアップ](#optional-peer-のセットアップ)参照）。
+A streaming-aware Markdown renderer. It renders half-finished Markdown — an unclosed code block, say — without breaking. Requires the optional peer `streamdown` (see [setup](#setting-up-the-optional-peers)).
 
 ```tsx
 import { Response } from '@k8ordo/ui/ai/response';
@@ -218,47 +218,47 @@ import 'streamdown/styles.css';
 
 Props:
 
-- `children`: string（Markdown 文字列、必須）
+- `children`: string (the Markdown, required)
 - `isStreaming`: boolean
-- 上記以外の streamdown の props（`translations` / `controls` / `linkSafety` / `plugins` / `components` / `urlTransform` / `dir` など）はそのまま透過する。`className` と `mode` はライブラリが握る（`mode` は `isStreaming` から決まる）
+- Every other streamdown prop (`translations`, `controls`, `linkSafety`, `plugins`, `components`, `urlTransform`, `dir`, …) passes straight through. The library owns `className` and `mode` (`mode` is derived from `isStreaming`)
 
-文言は i18n 辞書から引くので、既定では「コードをコピー」「表をダウンロード」などが日本語で出る。個別に変えたいときは `translations` を渡す（prop > 辞書 > streamdown 既定）。
+The wording comes from the i18n dictionary, so by default strings such as 「コードをコピー」 and 「表をダウンロード」 appear in Japanese. Pass `translations` to change individual strings (prop > dictionary > streamdown's own default).
 
-`linkSafety` はライブラリ側で**無効を既定にしている**。streamdown の既定（有効）ではリンクが `<a>` ではなく `<button>` で描画され、⌘クリック・中クリック・リンクアドレスのコピー・支援技術の link ロールが失われるため。確認ダイアログを挟みたい場合は明示的に有効化する:
+The library **defaults `linkSafety` to off**. With streamdown's own default (on), links render as `<button>` rather than `<a>`, which loses ⌘-click, middle-click, copying the link address, and the link role for assistive technology. Turn it on explicitly if you want the confirmation dialog:
 
 ```tsx
 <Response linkSafety={{ enabled: true }}>{markdown}</Response>
 ```
 
-なお `javascript:` のような危険なスキームは `linkSafety` とは無関係に rehype-harden が無効化するので、既定のままでも生きたリンクにはならない。
+Dangerous schemes such as `javascript:` are neutralized by rehype-harden regardless of `linkSafety`, so they never become live links even with the default.
 
 ## Suggestion
 
-候補プロンプトのチップ表示。クリックで `onSelect` に `value` が渡る。
+Suggested prompts shown as chips. Clicking one passes its `value` to `onSelect`.
 
 ```tsx
 import { Suggestion } from '@k8ordo/ui/ai';
 
 <Suggestion.List>
-  <Suggestion.Item onSelect={send} value="IME 対応について教えて" />
+  <Suggestion.Item onSelect={send} value="Tell me about IME support" />
   <Suggestion.Item onSelect={send} value="streaming">
-    ストリーミング表示は？
+    How does streaming display work?
   </Suggestion.Item>
 </Suggestion.List>;
 ```
 
 Props (Suggestion.List):
 
-- `label`: string（デフォルト: `'候補'`、aria-label として使用）
+- `label`: string (default: `'候補'`, used as the aria-label)
 
 Props (Suggestion.Item):
 
-- `value`: string（必須。children 省略時は表示テキストも兼ねる）
+- `value`: string (required; also serves as the visible text when children is omitted)
 - `onSelect`: `(value: string) => void`
 
 ## ToolInvocation
 
-ツール呼び出しの折りたたみ表示。`state` に応じてスピナー / 成功 / エラー / 拒否のアイコンが切り替わる（承認待ち・承認応答・入力中は進行中としてスピナー）。
+A collapsible view of a tool call. The icon switches between spinner, success, error, and denied according to `state` (awaiting approval, approval responded, and input streaming all count as in-progress and show the spinner).
 
 ```tsx
 import { ToolInvocation } from '@k8ordo/ui/ai';
@@ -267,23 +267,23 @@ import { ToolInvocation } from '@k8ordo/ui/ai';
   name="search_web"
   state="output-available"
   input={{ query: 'k8ordo UI' }}
-  output="検索結果…"
+  output="Search results…"
 />;
 ```
 
 Props:
 
-- `name`: string（必須、ツール名）
-- `state`: ToolState（必須）
-- `input`: unknown（文字列以外は JSON 表示）
-- `output`: ReactNode（文字列は `pre` 表示、要素はそのまま描画）
-- `errorText`: string（`state="output-error"` 時の表示。省略時は既定文言）
-- `deniedReason`: string（`state="output-denied"` 時の表示。省略時は既定文言）
-- `isOpen` / `defaultOpen` / `onChange`: 開閉の controlled / uncontrolled 両対応
+- `name`: string (required, the tool name)
+- `state`: ToolState (required)
+- `input`: unknown (anything other than a string is shown as JSON)
+- `output`: ReactNode (a string is shown in a `pre`; an element renders as-is)
+- `errorText`: string (shown when `state="output-error"`; falls back to the default wording)
+- `deniedReason`: string (shown when `state="output-denied"`; falls back to the default wording)
+- `isOpen` / `defaultOpen` / `onChange`: open state, controlled or uncontrolled
 
-## AI SDK 連携（mapMessageParts）
+## AI SDK integration (mapMessageParts)
 
-`@k8ordo/ui/ai-sdk` の `mapMessageParts` は、AI SDK の `UIMessage.parts` を描画しやすい `MappedPart[]` に変換する。React 非依存で、optional peer の `ai`（v7）が必要。
+`mapMessageParts` from `@k8ordo/ui/ai-sdk` converts the AI SDK's `UIMessage.parts` into a `MappedPart[]` that is easy to render. It has no React dependency and requires the optional peer `ai` (v7).
 
 ```ts
 type MappedPart =
@@ -301,7 +301,7 @@ type MappedPart =
     };
 ```
 
-利用側が `kind` で分岐して `Response` / `Reasoning` / `ToolInvocation` を描画する：
+The caller switches on `kind` and renders `Response`, `Reasoning`, or `ToolInvocation`:
 
 ```tsx
 import { mapMessageParts } from '@k8ordo/ui/ai-sdk';
@@ -313,7 +313,7 @@ import { Response } from '@k8ordo/ui/ai/response';
     if (part.kind === 'reasoning')
       return <Reasoning key={i}>{part.text}</Reasoning>;
     if (part.kind === 'tool') {
-      // output は unknown なので、ReactNode に変換してから渡す
+      // output is unknown, so convert it to a ReactNode before passing it on
       return (
         <ToolInvocation
           key={part.toolCallId}
@@ -335,11 +335,11 @@ import { Response } from '@k8ordo/ui/ai/response';
 </Message.Content>;
 ```
 
-`ChatStatus` / `ToolState` 型は `@k8ordo/ui/ai-sdk` からも re-export される。
+The `ChatStatus` and `ToolState` types are re-exported from `@k8ordo/ui/ai-sdk` as well.
 
-## 生成 UI との組み合わせ
+## Combining with generative UI
 
-LLM がツール結果として返した UI spec を、チャットの吹き出し内で描画できる。詳細は [生成 UI リファレンス](generative-ui.md) を参照。
+A UI spec returned by an LLM as a tool result can be rendered inside a chat bubble. See the [generative UI reference](generative-ui.md) for details.
 
 ```tsx
 'use client';

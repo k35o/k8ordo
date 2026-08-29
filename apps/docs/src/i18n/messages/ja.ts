@@ -10,36 +10,50 @@ export const ja = {
   'nav.helpers': 'Helpers',
   'nav.generativeUi': 'Generative UI',
   'nav.aiChat': 'AI チャット',
-  'home.title': 'k8ordo',
   'home.description':
+    'いまのプラットフォームをそのまま前提にする、React ライブラリの家族',
+  'home.exploreUi': 'UI を見る',
+  'home.membersTitle': 'メンバー',
+  'home.memberUiDescription':
+    'セマンティックなデザイントークン・i18n・生成 UI アダプタを備えた React コンポーネント。',
+  'home.disciplineTitle': '全員が守ること',
+  'home.disciplinePlatform': 'Baseline だけ',
+  'home.disciplinePlatformDescription':
+    'Baseline に入った機能は使い、入っていない機能は待つ。ポリフィルもフォールバックも持たないので、古いブラウザのための分岐がコードに現れない。',
+  'home.disciplineReact': 'React 19 と RSC が前提',
+  'home.disciplineReactDescription':
+    'フレームワーク非依存のコアも、他フレームワーク向けのアダプタも作らない。自分たちが使わない間接層は、誰も対価を払わないまま複雑さだけ残す。',
+  'home.disciplinePrimary': '一次ライブラリだけ',
+  'home.disciplinePrimaryDescription':
+    'アプリが直接 import して組み立てるものだけが `@k8ordo/*` に入る。他人のエコシステムに刺さる道具は別のリポジトリで暮らす。',
+  'ui.description':
     '穏やかだけど退屈じゃないUIを作るためのReactコンポーネントライブラリ',
-  'home.getStarted': 'はじめる',
-  'home.viewComponents': 'コンポーネントを見る',
-  'home.github': 'GitHub',
-  'home.storybook': 'Storybook',
-  'home.featuresTitle': '特徴',
-  'home.featureReact': 'React 19',
-  'home.featureReactDescription':
+  'ui.getStarted': 'はじめる',
+  'ui.viewComponents': 'コンポーネントを見る',
+  'common.github': 'GitHub',
+  'ui.featuresTitle': '特徴',
+  'ui.featureReact': 'React 19',
+  'ui.featureReactDescription':
     '最新のReact 19で構築。Server Componentsやアクションなど、モダンなパターンに対応しています。',
-  'home.featureTokens': 'デザイントークン',
-  'home.featureTokensDescription':
+  'ui.featureTokens': 'デザイントークン',
+  'ui.featureTokensDescription':
     'ビルド済みCSSのインポート1行で動き、Tailwind CSSのセットアップは不要。色や余白はセマンティックトークンで統一され、ライトモードとダークモードもシームレスに切り替わります。',
-  'home.featureTypeScript': 'TypeScript',
-  'home.featureTypeScriptDescription':
+  'ui.featureTypeScript': 'TypeScript',
+  'ui.featureTypeScriptDescription':
     '完全な型定義を提供。エディタの補完とコンパイル時の型チェックで安全に開発できます。',
-  'home.featureAccessible': 'アクセシビリティ',
-  'home.featureAccessibleDescription':
+  'ui.featureAccessible': 'アクセシビリティ',
+  'ui.featureAccessibleDescription':
     'WAI-ARIAパターンに基づき、キーボード操作やスクリーンリーダーに配慮したコンポーネントを目指しています。',
-  'home.featureMinimal': '柔と端のデザイン',
-  'home.featureMinimalDescription':
+  'ui.featureMinimal': '柔と端のデザイン',
+  'ui.featureMinimalDescription':
     '触れるものは柔らかく、読むものは端正に。余白と形の柔らかさで魅せるUIを提供します。',
-  'home.featureVerticalWriting': '縦書き対応',
-  'home.featureVerticalWritingDescription':
+  'ui.featureVerticalWriting': '縦書き対応',
+  'ui.featureVerticalWritingDescription':
     '`writing-v` ユーティリティで writing-mode を切り替えると、コンポーネントは縦書きの紙面でも崩れずに追従します。日本語ドキュメントを縦書きで体験できます。',
   'common.language': '言語',
   'footer.docs': 'ドキュメント',
   'footer.resources': 'リソース',
-  'footer.tagline': '触れるものは柔らかく、読むものは端正に。',
+  'footer.tagline': 'あるものは使い、ないものは足さない。',
   'footer.typesetting': '組版 — Noto Sans JP / M PLUS 2',
   'nav.openMenu': 'メニューを開く',
   'nav.ai': 'AI',
@@ -543,6 +557,8 @@ export const ja = {
   'common.switchToLightMode': 'ライトモードに切り替え',
   'common.switchToVerticalWriting': '縦書きプレビューに切り替え',
   'common.switchToHorizontalWriting': '横書きプレビューに切り替え',
+  'notFound.title': 'ページが見つかりません',
+  'notFound.description': 'URL が変わったか、削除された可能性があります。',
   'error.title': '問題が発生しました',
   'error.description': '予期しないエラーが発生しました。',
   'error.retry': '再読み込み',

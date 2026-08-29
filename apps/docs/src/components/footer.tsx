@@ -5,16 +5,25 @@ import type { MessageKey } from '../i18n';
 import { useTranslation } from '../i18n';
 import { LocaleAnchor } from './locale-anchor';
 
-const DOC_LINKS: Array<{ path: string; labelKey: MessageKey }> = [
-  { path: '/get-started', labelKey: 'nav.getStarted' },
-  { path: '/theming', labelKey: 'nav.theming' },
-  { path: '/i18n', labelKey: 'nav.i18n' },
-  { path: '/components', labelKey: 'nav.components' },
-  { path: '/hooks', labelKey: 'nav.hooks' },
-  { path: '/helpers', labelKey: 'nav.helpers' },
-  { path: '/ai/chat', labelKey: 'nav.aiChat' },
-  { path: '/ai/generative-ui', labelKey: 'nav.generativeUi' },
-  { path: '/ai/agents', labelKey: 'nav.aiAgents' },
+/** ドキュメントの列はパッケージごとに立てる。メンバーが増えたら列が増える。 */
+const DOC_GROUPS: Array<{
+  name: string;
+  links: Array<{ path: string; labelKey: MessageKey }>;
+}> = [
+  {
+    name: 'UI',
+    links: [
+      { path: '/ui/get-started', labelKey: 'nav.getStarted' },
+      { path: '/ui/theming', labelKey: 'nav.theming' },
+      { path: '/ui/i18n', labelKey: 'nav.i18n' },
+      { path: '/ui/components', labelKey: 'nav.components' },
+      { path: '/ui/hooks', labelKey: 'nav.hooks' },
+      { path: '/ui/helpers', labelKey: 'nav.helpers' },
+      { path: '/ui/ai/chat', labelKey: 'nav.aiChat' },
+      { path: '/ui/ai/generative-ui', labelKey: 'nav.generativeUi' },
+      { path: '/ui/ai/agents', labelKey: 'nav.aiAgents' },
+    ],
+  },
 ];
 
 const RESOURCE_LINKS = [
@@ -31,7 +40,8 @@ export function Footer() {
 
   return (
     <footer className="border-border-mute bg-bg-base border-t">
-      <div className="mx-auto grid max-w-6xl grid-cols-1 gap-12 px-6 py-16 md:grid-cols-[1fr_auto_auto] md:gap-20 md:px-8">
+      {/* メンバーが増えると列が増えるため、固定のグリッドではなく flex で並べる */}
+      <div className="mx-auto flex max-w-6xl flex-col gap-12 px-6 py-16 md:flex-row md:justify-between md:gap-20 md:px-8">
         <div className="flex flex-col gap-4">
           <span className="flex items-baseline gap-1">
             <span className="font-m-plus-2 font-palt text-fg-base text-lg font-bold">
@@ -46,20 +56,26 @@ export function Footer() {
             {t('footer.tagline')}
           </p>
         </div>
-        <nav aria-label={t('footer.docs')} className="flex flex-col gap-3">
-          <span className="text-fg-subtle text-xs font-bold tracking-normal">
-            {t('footer.docs')}
-          </span>
-          <ul className="flex flex-col gap-2">
-            {DOC_LINKS.map((link) => (
-              <li key={link.path}>
-                <LocaleAnchor className={linkClass} path={link.path} unstyled>
-                  {t(link.labelKey)}
-                </LocaleAnchor>
-              </li>
-            ))}
-          </ul>
-        </nav>
+        {DOC_GROUPS.map((group) => (
+          <nav
+            aria-label={`${group.name} — ${t('footer.docs')}`}
+            className="flex flex-col gap-3"
+            key={group.name}
+          >
+            <span className="text-fg-subtle text-xs font-bold tracking-normal">
+              {group.name}
+            </span>
+            <ul className="flex flex-col gap-2">
+              {group.links.map((link) => (
+                <li key={link.path}>
+                  <LocaleAnchor className={linkClass} path={link.path} unstyled>
+                    {t(link.labelKey)}
+                  </LocaleAnchor>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        ))}
         <nav aria-label={t('footer.resources')} className="flex flex-col gap-3">
           <span className="text-fg-subtle text-xs font-bold tracking-normal">
             {t('footer.resources')}
