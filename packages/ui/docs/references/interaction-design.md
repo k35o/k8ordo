@@ -1,77 +1,77 @@
-# インタラクションデザイン
+# Interaction design
 
-k8ordo UI のインタラクションは「静かな変化」を原則とする。
+Interaction in `@k8ordo/ui` follows one principle: quiet change.
 
-## インタラクティブ状態
+## Interactive states
 
-8つの状態を意識して設計する。
+Design with these eight states in mind.
 
-| 状態     | スタイル                                              |
+| State    | Style                                                 |
 | -------- | ----------------------------------------------------- |
-| Default  | 基本スタイル                                          |
-| Hover    | `hover:bg-bg-mute` — 穏やかな色変化                   |
+| Default  | The base style                                        |
+| Hover    | `hover:bg-bg-mute` — a gentle color shift             |
 | Focus    | `focus-visible:ring-2 focus-visible:ring-border-info` |
 | Active   | `active:bg-bg-emphasize`                              |
 | Disabled | `opacity-50 cursor-not-allowed`                       |
-| Loading  | スピナーまたはスケルトン                              |
+| Loading  | A spinner or a skeleton                               |
 | Selected | `bg-primary-bg-subtle`                                |
 | Error    | `border-border-error` + `text-fg-error`               |
 
-## トランジション
+## Transitions
 
-控えめで自然な動き。
+Restrained, natural motion.
 
-| 用途                 | 推奨設定                                   |
-| -------------------- | ------------------------------------------ |
-| ホバー色変化         | `transition-colors duration-150 ease-out`  |
-| 透過度変化           | `transition-opacity duration-200 ease-out` |
-| サイズ変化を伴う場合 | `transition-all duration-150 ease-out`     |
+| Purpose                        | Recommended setting                        |
+| ------------------------------ | ------------------------------------------ |
+| Hover color change             | `transition-colors duration-150 ease-out`  |
+| Opacity change                 | `transition-opacity duration-200 ease-out` |
+| When size changes are involved | `transition-all duration-150 ease-out`     |
 
-### タイミングの原則
+### Timing principles
 
-- **100ms**: 即時フィードバック（ボタンプレス）
-- **150–200ms**: 標準トランジション（ホバー、フォーカス）
-- **300ms**: 開閉アニメーション（Accordion, Drawer の限度）
-- **300ms を超えない** — 重く感じる
+- **100ms**: immediate feedback (a button press)
+- **150–200ms**: the standard transition (hover, focus)
+- **300ms**: open/close animation (the limit for Accordion, Drawer)
+- **Never exceed 300ms** — it starts to feel heavy
 
-### アニメーションの選択
+### Choosing an animation
 
 ```tsx
-// Good: transition-colors（色だけ変わる）
+// Good: transition-colors (only the color changes)
 className = 'transition-colors hover:bg-bg-mute';
 
-// OK: transition-all（複数のプロパティが変わる場合のみ）
+// OK: transition-all (only when several properties change)
 className = 'transition-all hover:bg-bg-mute hover:scale-[1.02]';
 
-// Bad: bounce, spring 系のイージング
+// Bad: bounce or spring easing
 className = 'animate-bounce';
 ```
 
-## フォーカス管理
+## Focus management
 
-- `focus-visible` を使う（`focus` ではなく）— マウスクリック時にリングが出ない
-- フォーカスリングは `ring-border-info` で統一
-- `outline-hidden` でデフォルトのアウトラインを消してから ring を適用
+- Use `focus-visible`, not `focus` — no ring appears on a mouse click
+- Keep the focus ring consistent with `ring-border-info`
+- Clear the default outline with `outline-hidden` before applying the ring
 
 ```tsx
 className =
   'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-border-info';
 ```
 
-## フォームデザイン
+## Form design
 
-- ラベルは入力の上に配置（左配置は日本語で読みにくい）
-- エラーメッセージは入力の直下に `text-fg-error text-sm`
-- 必須マークは `*` でラベルの後ろに
-- バリデーションは送信時に行う（リアルタイムは控えめに）
-- `FormControl` コンポーネントでラベル・エラー表示を統一
+- Put the label above the input (a left-aligned label reads badly in Japanese)
+- Put the error message directly under the input, as `text-fg-error text-sm`
+- Mark required fields with `*` after the label
+- Validate on submit; keep real-time validation to a minimum
+- Use the `FormControl` component so labels and errors stay consistent
 
 ```tsx
 import { FormControl, TextField } from '@k8ordo/ui';
 
 <FormControl
-  label="メールアドレス"
-  errorText="入力してください"
+  label="Email address"
+  errorText="This field is required"
   required
   renderInput={(props) => (
     <TextField {...props} placeholder="example@mail.com" />
@@ -79,17 +79,17 @@ import { FormControl, TextField } from '@k8ordo/ui';
 />;
 ```
 
-## アクセシビリティ
+## Accessibility
 
-- `aria-label` / `aria-describedby` を適切に設定
-- キーボードナビゲーションを確保（Tab, Enter, Escape, 矢印キー）
-- `prefers-reduced-motion` を考慮 — motion ライブラリが自動対応
-- カラーだけに頼らない状態表現（アイコンやテキストを併用）
+- Set `aria-label` / `aria-describedby` where they belong
+- Guarantee keyboard navigation (Tab, Enter, Escape, arrow keys)
+- Respect `prefers-reduced-motion` — the motion library handles it for you
+- Never signal state with color alone; pair it with an icon or text
 
-## やってはいけないこと
+## What not to do
 
-- bounce / spring 系のイージング
-- 300ms を超えるアニメーション
-- ホバーに強い原色（`bg-primary-bg`）を使う
-- `cursor-pointer` をボタン以外に付ける（リンクにも不要）
-- ダブルクリック防止なしの送信ボタン
+- Bounce or spring easing
+- Animation longer than 300ms
+- A strong primary color (`bg-primary-bg`) on hover
+- `cursor-pointer` on anything that is not a button (links do not need it either)
+- A submit button with no double-click guard

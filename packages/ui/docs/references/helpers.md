@@ -1,29 +1,29 @@
-# ヘルパー・型
+# Helpers and types
 
-k8ordo UI が提供するユーティリティ関数と型定義。
+Utility functions and type definitions that `@k8ordo/ui` provides.
 
 ```tsx
 import { cn, between, commalize, uuidV4 } from '@k8ordo/ui';
 import type { Status, Direction, Option } from '@k8ordo/ui';
 ```
 
-## ヘルパー関数
+## Helper functions
 
 ### cn
 
-Tailwind クラスのマージ（clsx + tailwind-merge）。
+Merges Tailwind classes (clsx + tailwind-merge).
 
 ```tsx
 import { cn } from '@k8ordo/ui';
 
 cn('text-fg-base', isActive && 'bg-primary-bg', className);
-// 重複するクラスを自動的に解決
+// Conflicting classes resolve automatically
 cn('px-4 py-2', 'px-6'); // → 'py-2 px-6'
 ```
 
 ### between
 
-値を範囲内にクランプ。
+Clamps a value to a range.
 
 ```tsx
 import { between } from '@k8ordo/ui';
@@ -35,7 +35,7 @@ between(50, 0, 100); // → 50
 
 ### commalize
 
-数値を3桁区切りでフォーマット。
+Formats a number with thousands separators.
 
 ```tsx
 import { commalize } from '@k8ordo/ui';
@@ -46,7 +46,7 @@ commalize(1234567); // → '1,234,567'
 
 ### toPrecision
 
-指定した小数点以下の精度に丸める。
+Rounds to the given number of decimal places.
 
 ```tsx
 import { toPrecision } from '@k8ordo/ui';
@@ -56,7 +56,7 @@ toPrecision(3.14159, 2); // → 3.14
 
 ### cast
 
-型キャストユーティリティ。
+Type-cast utility.
 
 ```tsx
 import { cast } from '@k8ordo/ui';
@@ -64,7 +64,7 @@ import { cast } from '@k8ordo/ui';
 
 ### isInternalRoute
 
-内部ルートかどうかの判定。
+Tells whether a href points at an internal route.
 
 ```tsx
 import { isInternalRoute } from '@k8ordo/ui';
@@ -75,7 +75,7 @@ isInternalRoute('https://ext.com'); // → false
 
 ### findAllColors
 
-デザイントークンからすべてのカラーを抽出。
+Extracts every color from the design tokens.
 
 ```tsx
 import { findAllColors } from '@k8ordo/ui';
@@ -85,7 +85,7 @@ const colors = findAllColors();
 
 ### uuidV4
 
-UUID v4 の生成。
+Generates a UUID v4.
 
 ```tsx
 import { uuidV4 } from '@k8ordo/ui';
@@ -93,7 +93,7 @@ import { uuidV4 } from '@k8ordo/ui';
 const id = uuidV4(); // → 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'
 ```
 
-## 型定義
+## Type definitions
 
 ### Status
 
@@ -101,7 +101,7 @@ const id = uuidV4(); // → 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'
 type Status = 'success' | 'info' | 'warning' | 'error';
 ```
 
-Alert, Badge, Toast 等のステータス表示に使用。
+Used for the status of Alert, Badge, Toast, and similar components.
 
 ### Direction
 
@@ -109,7 +109,7 @@ Alert, Badge, Toast 等のステータス表示に使用。
 type Direction = 'up' | 'down' | 'right' | 'left';
 ```
 
-ChevronIcon 等の方向指定に使用。
+Used to point ChevronIcon and similar icons.
 
 ### Option
 
@@ -117,4 +117,4 @@ ChevronIcon 等の方向指定に使用。
 type Option = { value: string; label: string };
 ```
 
-Select, Autocomplete 等の選択肢に使用。
+Used for the choices in Select, Autocomplete, and similar components.
