@@ -39,46 +39,59 @@ src/components/<name>/
 
 ### Boolean Props
 
-- **状態を表す boolean** → `is` prefix を付ける: `isOpen`, `isActive`, `isStreaming`
-- **モード・バリアントを表す boolean** → prefix なし: `interactive`, `animate`, `current`, `fullWidth`, `multiple`
-- **ネイティブ HTML 属性 / ARIA 状態に 1:1 対応する boolean** → そのまま: `disabled`, `checked`, `required`, `invalid`（`aria-invalid` にそのまま渡るため `is` prefix を付けない）
+- **A boolean that describes state** → prefix with `is`: `isOpen`, `isActive`, `isStreaming`
+- **A boolean that selects a mode or variant** → no prefix: `interactive`, `animate`, `current`, `fullWidth`, `multiple`
+- **A boolean that maps 1:1 onto a native HTML attribute or ARIA state** → keep the native name: `disabled`, `checked`, `required`, `invalid` (it is forwarded straight to `aria-invalid`, so no `is` prefix)
 
-### Controllable Props（開閉・選択などの状態）
+### Controllable Props (open/closed, selection, and similar state)
 
-開閉・選択といった「制御可能な状態」を持つコンポーネントは、controlled / uncontrolled の両対応（controllable）を基本とし、prop 名を横断で統一する。`useControllableState` を流用する。
+A component that owns state such as open/closed or a selection supports both
+controlled and uncontrolled use, and names those props the same way across the
+library. Reuse `useControllableState`.
 
-- **状態（controlled）**: 真偽の開閉は `isOpen`、選択値は `selectedId` / `value` など意味的な名前。
-- **初期値（uncontrolled）**: `defaultOpen` / `defaultValue` / `defaultSelectedId`。
-- **変更通知**: `onChange?: (next) => void`（開閉専用の閉じ操作は `onClose?`）。
+- **State (controlled)**: `isOpen` for open/closed; a meaningful name such as `selectedId` or `value` for a selection.
+- **Initial value (uncontrolled)**: `defaultOpen` / `defaultValue` / `defaultSelectedId`.
+- **Change notification**: `onChange?: (next) => void` (a close-only action is `onClose?`).
 
-例: `Modal` / `Drawer` は `isOpen?` + `defaultOpen?` + `onClose?`、`Tabs.Root` は `selectedId?` + `defaultSelectedId?` + `onChange?`、`Accordion.Item` は `isOpen?` + `defaultOpen?` + `onChange?`。
+For example: `Modal` and `Drawer` take `isOpen?` + `defaultOpen?` + `onClose?`;
+`Tabs.Root` takes `selectedId?` + `defaultSelectedId?` + `onChange?`;
+`Accordion.Item` takes `isOpen?` + `defaultOpen?` + `onChange?`.
 
-### prop 名の語彙
+### Prop vocabulary
 
-| prop        | 意味                                   | 値の例                                                                                   |
-| ----------- | -------------------------------------- | ---------------------------------------------------------------------------------------- |
-| `variant`   | 見た目のバリアント                     | `solid` / `outline` / `skeleton` / `shadow`                                              |
-| `color`     | 使う色トークン系の選択                 | アクセント系: `primary` / `secondary` / `base`、モノクロ強弱: `base` / `mute` / `subtle` |
-| `tone`      | ステータス意味論（専用）               | `neutral` / `info` / `success` / `warning` / `error`                                     |
-| `size`      | 大きさ                                 | `sm` / `md` / `lg`                                                                       |
-| `label`     | 可視テキスト・アクセシブル名           | —                                                                                        |
-| `role`      | ARIA ロールの選択                      | `dialog` / `menu` / `listbox`                                                            |
-| `side`      | ビューポート端への配置                 | `center` / `bottom` / `right` / `left`                                                   |
-| `placement` | アンカー相対配置（`Placement` 型）     | `bottom-start` など                                                                      |
-| `onAction`  | 項目・ボタンの起動（イベント引数なし） | `() => void`（Button は `Promise` 可）                                                   |
+| prop        | Meaning                                       | Example values                                                                           |
+| ----------- | --------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `variant`   | Visual variant                                | `solid` / `outline` / `skeleton` / `shadow`                                              |
+| `color`     | Which color-token family to use               | Accents: `primary` / `secondary` / `base`; monochrome weight: `base` / `mute` / `subtle` |
+| `tone`      | Status semantics (this prop only)             | `neutral` / `info` / `success` / `warning` / `error`                                     |
+| `size`      | Size                                          | `sm` / `md` / `lg`                                                                       |
+| `label`     | Visible text or accessible name               | —                                                                                        |
+| `role`      | Which ARIA role to use                        | `dialog` / `menu` / `listbox`                                                            |
+| `side`      | Placement against a viewport edge             | `center` / `bottom` / `right` / `left`                                                   |
+| `placement` | Placement relative to an anchor (`Placement`) | `bottom-start`, …                                                                        |
+| `onAction`  | Activating an item or button (no event arg)   | `() => void` (`Button` also accepts a `Promise`)                                         |
 
-`type` は HTML 属性（`button` / `submit`、input の型）にのみ使う。render prop は `renderItem` / `renderAnchor` / `renderInput` の動詞+名詞形。生成 UI スキーマではトリガー文言は `triggerLabel`、本体テキストは `content`。
+`type` is reserved for HTML attributes only (`button` / `submit`, input types).
+Render props take a verb+noun form: `renderItem` / `renderAnchor` / `renderInput`.
+In generative-UI schemas the trigger wording is `triggerLabel` and the body text
+is `content`.
 
-### イベントハンドラの値型
+### Event handler value types
 
-フォーム系コンポーネントの `onChange` は、ネイティブ要素をそのまま薄くラップするもの（`TextField` / `Textarea` / `Select` / `PasswordInput`）を除き、**第1引数にその要素の意味的な値**を取る（イベントオブジェクトではなく値）。実 `<input>` を持つコンポーネントは、汎用性のため**第2引数で本物の DOM イベント**も渡す:
+For form components, `onChange` takes **the element's meaningful value as its
+first argument** — not the event object — except for the thin wrappers around a
+native element (`TextField` / `Textarea` / `Select` / `PasswordInput`). A
+component backed by a real `<input>` also passes **the DOM event as a second
+argument**, so callers that need it are not stuck:
 
 - `Checkbox` / `Switch`: `(checked: boolean, event: ChangeEvent<HTMLInputElement>) => void`
 - `Radio`: `(value: string, event: ChangeEvent<HTMLInputElement>) => void`
-- `FileField`: `(files: FileList | null, event?: ChangeEvent<HTMLInputElement>) => void`（プログラム的削除時は `event` 無し）
-- `RadioCard`（選択肢ごとの input ではなくグループ単位で通知する）/ `ListBox`: 値のみ（どちらも `(value) => void`）
+- `FileField`: `(files: FileList | null, event?: ChangeEvent<HTMLInputElement>) => void` (no `event` when files are cleared programmatically)
+- `RadioCard` (notifies per group rather than per option input) and `ListBox`: value only, both `(value) => void`
 
-第2引数は後方互換に追加でき（`(value) => void` は `(value, event) => void` に代入可能）、利用側は値だけ使うなら第1引数のみ受け取れば良い。
+The second argument can be added without breaking anyone — `(value) => void` is
+assignable to `(value, event) => void` — and a caller that only needs the value
+can keep taking one argument.
 
 ## Component Authoring Patterns
 
@@ -98,7 +111,10 @@ export const MyComponent: FC<
 };
 ```
 
-基底には要素固有の `*HTMLAttributes` を使う。`HTMLProps` は `AllHTMLAttributes` を継承しており、`href` や `src` のようにその要素に存在しない属性まで型チェックを通してしまう（Button / IconButton はこの理由で移行済み）。`*HTMLAttributes` は `ref` を含まないので、必要なら明示的に足す。
+Base the props on the element-specific `*HTMLAttributes`. `HTMLProps` extends
+`AllHTMLAttributes`, so it type-checks attributes the element does not even have,
+such as `href` or `src` (`Button` and `IconButton` were moved for this reason).
+`*HTMLAttributes` does not include `ref`, so add it explicitly when needed.
 
 ### Compound Component (Dialog, Tabs, FileField pattern)
 
@@ -156,7 +172,7 @@ Standard pattern: `focus-visible:border-transparent focus-visible:outline-hidden
 ## Build Pipeline
 
 1. `vp pack` — tsdown bundles `src/index.ts` → ESM with `.d.mts` type declarations
-2. `build:css` (`scripts/build-css.ts`) — copies `src/styles/*.css` → `dist/styles/`（`index.css` は `tailwind.css` に改名）し、dist 側のエントリを Tailwind でコンパイルして `dist/styles/index.css`（ビルド済み CSS）を生成する
+2. `build:css` (`scripts/build-css.ts`) — copies `src/styles/*.css` → `dist/styles/` (`index.css` is renamed to `tailwind.css`), then compiles the `dist` entry with Tailwind to produce `dist/styles/index.css`, the prebuilt stylesheet
 
 ## Export Structure
 
@@ -173,6 +189,6 @@ The authoritative list is the `exports` map in `package.json`.
 @k8ordo/ui/openui              OpenUI component library
 @k8ordo/ui/openui/prompt
 @k8ordo/ui/tokens              design tokens as JS values
-@k8ordo/ui/styles.css          ビルド済み CSS（Tailwind 不要。CSS Modules・素の CSS 向け）
-@k8ordo/ui/tailwind.css        Tailwind ソース版（Tailwind 4 プロジェクト向け。@theme トークンが使える）
+@k8ordo/ui/styles.css          prebuilt CSS (no Tailwind needed — for CSS Modules and plain CSS)
+@k8ordo/ui/tailwind.css        Tailwind source entry (for Tailwind 4 projects; exposes the @theme tokens)
 ```

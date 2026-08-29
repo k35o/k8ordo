@@ -1,36 +1,42 @@
 ---
 name: ui-design
 description: |
-  k8ordo UI デザインシステムに従ったフロントエンドUI作成。
-  「柔らかな余白と静かな洗練」を原則とするミニマルなデザイン。
+  Building front-end UI with the @k8ordo/ui design system.
+  Minimal design built on soft spacing and quiet refinement.
 
   Use when:
-  - k8ordo UI を使った React コンポーネントやページを作成するとき
-  - k8o の Web サイト用の UI を実装するとき
-  - ミニマルで統一感のあるインターフェースが必要なとき
+  - Writing React components or pages with @k8ordo/ui
+  - Implementing UI for k8o's web sites
+  - A minimal, internally consistent interface is called for
 
-  特徴: Teal/Cyan カラー（OKLCH）、控えめなアニメーション、ゆったりした余白、柔らかい角丸、日本語最適化
+  Characteristics: teal/cyan palette (OKLCH), restrained animation, generous
+  spacing, soft radii, tuned for Japanese typography
 ---
 
-# k8ordo UI Design Skill
+# @k8ordo/ui Design Skill
 
-デザインの中身はライブラリが npm で配っている `docs/` が唯一の正本。このスキルは
-その正本へ橋渡しするだけで、指針そのものは持たない。
+The design itself lives in the `docs/` the library ships on npm — that is the
+single source of truth. This skill only bridges to it; it holds no guidance of
+its own.
 
-## 手順
+## Steps
 
-1. **まず読む**: `packages/ui/docs/GUIDE.md`
-   （このリポジトリの外なら `node_modules/@k8ordo/ui/docs/GUIDE.md`）
-2. GUIDE.md 末尾の「詳細リファレンス」から、**いま必要なものだけ**辿る。
-   トークン値・コンポーネントの props・hooks・生成 UI はすべてそこにある。
-3. 迷ったら GUIDE.md の「アンチパターン: 『AI スロップ』を避ける」に照らす。
+1. **Read first**: `packages/ui/docs/GUIDE.md`
+   (outside this repository: `node_modules/@k8ordo/ui/docs/GUIDE.md`)
+2. From the "Detailed reference" list at the end of GUIDE.md, follow **only what
+   the task actually needs**. Token values, component props, hooks, and
+   generative UI all live there.
+3. When unsure, check the work against GUIDE.md's "Anti-patterns: avoiding AI
+   slop".
 
-## このスキルが足すもの
+## What this skill adds
 
-- **既存コンポーネントを先に探す**: 自前で `div` を組む前に `references/components.md`
-  の一覧を引く。無いと判断する前に必ず一覧を見る。
-- **生の値を書かない**: 色・間隔・角丸・フォントウェイトはセマンティックトークン経由。
-  `bg-teal-500` や `font-semibold` のような非トークン値は使わない。
-- **確認は Storybook で**: 実物の挙動は
-  <https://main--687a213c85e2e4589d8db1bb.chromatic.com>（MCP エンドポイントは同 URL の
-  `/mcp`）から引ける。記憶で props を書かない。
+- **Look for an existing component first**: before hand-rolling a `div`, search
+  the catalog in `references/components.md`. Never conclude a component is
+  missing without reading that list.
+- **Never write raw values**: colors, spacing, radii, and font weights all go
+  through semantic tokens. Non-token values such as `bg-teal-500` or
+  `font-semibold` are out.
+- **Verify in Storybook**: real behavior is at
+  <https://main--687a213c85e2e4589d8db1bb.chromatic.com> (its MCP endpoint is
+  the same URL plus `/mcp`). Do not write props from memory.

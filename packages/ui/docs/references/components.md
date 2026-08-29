@@ -38,16 +38,16 @@ import { Button } from '@k8ordo/ui';
 Props:
 
 - `children`: `ReactNode`
-- `color`: `'primary'` | `'secondary'` | `'base'`（既定: `'primary'`）
+- `color`: `'primary'` | `'secondary'` | `'base'` (default: `'primary'`)
 - `endIcon`: `ReactNode`
-- `fullWidth`: `boolean`（既定: `false`）
-- `isActive`: `boolean`（既定: `false`）
+- `fullWidth`: `boolean` (default: `false`)
+- `isActive`: `boolean` (default: `false`)
 - `onAction`: `() => void | Promise<void>`
 - `renderItem`: `(props: { className: string; children: ReactNode }) => ReactNode`
-- `size`: `'sm'` | `'md'` | `'lg'`（既定: `'md'`）
+- `size`: `'sm'` | `'md'` | `'lg'` (default: `'md'`)
 - `startIcon`: `ReactNode`
-- `type`: `'button'` | `'submit'`（既定: `'button'`）
-- `variant`: `'solid'` | `'outline'` | `'skeleton'`（既定: `'solid'`）
+- `type`: `'button'` | `'submit'` (default: `'button'`)
+- `variant`: `'solid'` | `'outline'` | `'skeleton'` (default: `'solid'`)
 
 リンクとしてレンダーする場合は `renderItem` prop を使う。Next.js の `<Link>` などにも応用できる。
 
@@ -79,14 +79,14 @@ import { IconButton } from '@k8ordo/ui';
 
 Props:
 
-- `label`: `string`（必須）
+- `label`: `string` (required)
 - `children`: `ReactNode`
-- `color`: `'transparent'` | `'base'` | `'primary'` | `'secondary'`（既定: `'transparent'`）
+- `color`: `'transparent'` | `'base'` | `'primary'` | `'secondary'` (default: `'transparent'`)
 - `onAction`: `() => void | Promise<void>`
 - `renderItem`: `(props: { className: string; children: ReactNode; 'aria-label': string; triggerProps: IconButtonTriggerProps; }) => ReactNode`
-- `size`: `'sm'` | `'md'` | `'lg'`（既定: `'md'`）
-- `tooltipDisabled`: `boolean`（既定: `false`）
-- `tooltipPlacement`: `Placement`（既定: `'top'`）
+- `size`: `'sm'` | `'md'` | `'lg'` (default: `'md'`)
+- `tooltipDisabled`: `boolean` (default: `false`)
+- `tooltipPlacement`: `Placement` (default: `'top'`)
 
 リンクとしてレンダーする場合は `renderItem` prop を使う。`triggerProps` を `<a>` にスプレッドすると hover/focus 時に `label` が Tooltip として表示される。
 
@@ -128,10 +128,10 @@ import { Anchor } from '@k8ordo/ui';
 
 Props:
 
-- `children`: `ReactNode`（必須）
-- `href`: `T`（必須）
-- `openInNewTab`: `boolean`（既定: `false`）
-- `renderAnchor`: `(props: RenderAnchorProps<T>) => ReactNode`（既定: `defaultRenderAnchor`）
+- `children`: `ReactNode` (required)
+- `href`: `T` (required)
+- `openInNewTab`: `boolean` (default: `false`)
+- `renderAnchor`: `(props: RenderAnchorProps<T>) => ReactNode` (default: `defaultRenderAnchor`)
 
 ## レイアウト・ナビゲーション
 
@@ -157,7 +157,7 @@ Props (Accordion.Button):
 Props (Accordion.Item):
 
 - `children`: `ReactNode`
-- `defaultOpen`: `boolean`（既定: `false`）
+- `defaultOpen`: `boolean` (default: `false`)
 - `isOpen`: `boolean`
 - `onChange`: `(isOpen: boolean) => void`
 
@@ -196,14 +196,14 @@ import { Breadcrumb } from '@k8ordo/ui';
 Props (Breadcrumb.List):
 
 - `children`: `ReactNode`
-- `size`: `'sm'` | `'md'` | `'lg'`（既定: `'md'`）
+- `size`: `'sm'` | `'md'` | `'lg'` (default: `'md'`)
 
 Props (Breadcrumb.Link):
 
-- `href`: `T`（必須）
+- `href`: `T` (required)
 - `children`: `ReactNode`
-- `current`: `boolean`（既定: `false`）
-- `renderAnchor`: `(props: RenderBreadcrumbAnchorProps<T>) => ReactNode`（既定: `defaultRenderBreadcrumbAnchor`）
+- `current`: `boolean` (default: `false`)
+- `renderAnchor`: `(props: RenderBreadcrumbAnchorProps<T>) => ReactNode` (default: `defaultRenderBreadcrumbAnchor`)
 
 Props (Breadcrumb.Item):
 
@@ -221,11 +221,11 @@ import { Pagination } from '@k8ordo/ui';
 
 Props:
 
-- `currentPage`: `number`（必須）
-- `onChange`: `(page: number) => void`（必須）
-- `totalPages`: `number`（必須）
+- `currentPage`: `number` (required)
+- `onChange`: `(page: number) => void` (required)
+- `totalPages`: `number` (required)
 - `aria-label`: `string`
-- `disabled`: `boolean`（既定: `false`）
+- `disabled`: `boolean` (default: `false`)
 - `nextLabel`: `string`
 - `prevLabel`: `string`
 - `ref`: `Ref<HTMLElement>`
@@ -249,25 +249,25 @@ import { Tabs } from '@k8ordo/ui';
 
 Props (Tabs.Root):
 
-- `ids`: `[string, ...string[]]`（必須）
+- `ids`: `[string, ...string[]]` (required)
 - `children`: `ReactNode`
-- `defaultSelectedId`: `string` | `null`（既定: `null`）
+- `defaultSelectedId`: `string` | `null` (default: `null`)
 - `onChange`: `(id: string) => void`
 - `selectedId`: `string`
 
 Props (Tabs.List):
 
-- `label`: `string`（必須）
+- `label`: `string` (required)
 - `children`: `ReactNode`
 
 Props (Tabs.Panel):
 
-- `id`: `string`（必須）
+- `id`: `string` (required)
 - `children`: `ReactNode`
 
 Props (Tabs.Tab):
 
-- `id`: `string`（必須）
+- `id`: `string` (required)
 - `children`: `ReactNode`
 
 ### Card
@@ -291,9 +291,9 @@ import { Card } from '@k8ordo/ui';
 Props:
 
 - `children`: `ReactNode`
-- `interactive`: `boolean`（既定: `false`）
-- `variant`: `'shadow'` | `'outline'`（既定: `'shadow'`）
-- `width`: `'full'` | `'fit'`（既定: `'full'`）
+- `interactive`: `boolean` (default: `false`)
+- `variant`: `'shadow'` | `'outline'` (default: `'shadow'`)
+- `width`: `'full'` | `'fit'` (default: `'full'`)
 
 ### Separator
 
@@ -310,8 +310,8 @@ import { Separator } from '@k8ordo/ui';
 
 Props:
 
-- `color`: `'base'` | `'mute'` | `'subtle'`（既定: `'base'`）
-- `orientation`: `'horizontal'` | `'vertical'`（既定: `'horizontal'`）
+- `color`: `'base'` | `'mute'` | `'subtle'` (default: `'base'`)
+- `orientation`: `'horizontal'` | `'vertical'` (default: `'horizontal'`)
 
 ### ScrollLinked
 
@@ -350,8 +350,8 @@ Props:
 
 - `align`: `'start'` | `'center'` | `'end'` | `'stretch'`
 - `children`: `ReactNode`
-- `direction`: `'row'` | `'column'`（既定: `'column'`）
-- `gap`: `GapSize`（既定: `'md'`）
+- `direction`: `'row'` | `'column'` (default: `'column'`)
+- `gap`: `GapSize` (default: `'md'`)
 - `justify`: `'start'` | `'center'` | `'end'` | `'between'`
 - `padding`: `PaddingSize`
 
@@ -378,9 +378,9 @@ import { Grid } from '@k8ordo/ui';
 Props:
 
 - `children`: `ReactNode`
-- `cols`: `1` | `2` | `3` | `4` | `5` | `6` | `'auto-fill'` | `'auto-fit'`（既定: `'auto-fill'`）
-- `gap`: `GapSize`（既定: `'md'`）
-- `minItemSize`: `24` | `32` | `40` | `48` | `64` | `80`（既定: `48`）
+- `cols`: `1` | `2` | `3` | `4` | `5` | `6` | `'auto-fill'` | `'auto-fit'` (default: `'auto-fill'`)
+- `gap`: `GapSize` (default: `'md'`)
+- `minItemSize`: `24` | `32` | `40` | `48` | `64` | `80` (default: `48`)
 
 ## フォーム
 
@@ -407,7 +407,7 @@ import { Button, Form, FormControl, TextField } from '@k8ordo/ui';
 
 Props:
 
-- `children`: `ReactNode`（必須）
+- `children`: `ReactNode` (required)
 - `action`: `((formData: FormData) => void | Promise<void>)` | `string`
 
 ### FormControl
@@ -430,15 +430,15 @@ import { FormControl, TextField } from '@k8ordo/ui';
 
 Props:
 
-- `label`: `string`（必須）
-- `renderInput`: `(props: { id: string; 'aria-describedby': string | undefined; 'aria-labelledby': string; disabled: boolean; invalid: boolean; required: boolean; }) => ReactElement`（必須）
-- `disabled`: `boolean`（既定: `false`）
+- `label`: `string` (required)
+- `renderInput`: `(props: { id: string; 'aria-describedby': string | undefined; 'aria-labelledby': string; disabled: boolean; invalid: boolean; required: boolean; }) => ReactElement` (required)
+- `disabled`: `boolean` (default: `false`)
 - `errorText`: `string`
 - `helpText`: `string`
-- `invalid`: `boolean`（既定: `false`）
-- `labelAs`: `'label'` | `'legend'`（既定: `'label'`）
+- `invalid`: `boolean` (default: `false`)
+- `labelAs`: `'label'` | `'legend'` (default: `'label'`)
 - `ref`: `Ref<HTMLElement>`
-- `required`: `boolean`（既定: `false`）
+- `required`: `boolean` (default: `false`)
 
 `renderInput` は `{ id, 'aria-describedby', 'aria-labelledby', disabled, invalid, required }` を受け取る。
 
@@ -464,9 +464,9 @@ import { TextField } from '@k8ordo/ui';
 Props:
 
 - `children`: `ReactNode`
-- `invalid`: `boolean`（既定: `false`）
+- `invalid`: `boolean` (default: `false`)
 - `ref`: `Ref<HTMLInputElement>`
-- `type`: `TextInputType`（既定: `'text'`）
+- `type`: `TextInputType` (default: `'text'`)
 
 ### Textarea
 
@@ -485,10 +485,10 @@ import { Textarea } from '@k8ordo/ui';
 
 Props:
 
-- `autoResize`: `boolean`（既定: `false`）
+- `autoResize`: `boolean` (default: `false`)
 - `children`: `ReactNode`
-- `fullHeight`: `boolean`（既定: `false`）
-- `invalid`: `boolean`（既定: `false`）
+- `fullHeight`: `boolean` (default: `false`)
+- `invalid`: `boolean` (default: `false`)
 - `ref`: `Ref<HTMLTextAreaElement>`
 
 ### NumberField
@@ -511,13 +511,13 @@ import { NumberField } from '@k8ordo/ui';
 Props:
 
 - `defaultValue`: `never`
-- `invalid`: `boolean`（既定: `false`）
-- `max`: `number`（既定: `9_007_199_254_740_991`）
-- `min`: `number`（既定: `-9_007_199_254_740_991`）
+- `invalid`: `boolean` (default: `false`)
+- `max`: `number` (default: `9_007_199_254_740_991`)
+- `min`: `number` (default: `-9_007_199_254_740_991`)
 - `onChange`: `(value: number) => void`
-- `precision`: `number`（既定: `0`）
+- `precision`: `number` (default: `0`)
 - `ref`: `Ref<HTMLInputElement>`
-- `step`: `number`（既定: `1`）
+- `step`: `number` (default: `1`)
 - `value`: `number`
 
 ### PasswordInput
@@ -543,7 +543,7 @@ Props:
 
 - `children`: `ReactNode`
 - `hideLabel`: `string`
-- `invalid`: `boolean`（既定: `false`）
+- `invalid`: `boolean` (default: `false`)
 - `ref`: `Ref<HTMLInputElement>`
 - `showLabel`: `string`
 
@@ -568,9 +568,9 @@ import { Select } from '@k8ordo/ui';
 
 Props:
 
-- `options`: `readonly Option[]`（必須）
+- `options`: `readonly Option[]` (required)
 - `children`: `ReactNode`
-- `invalid`: `boolean`（既定: `false`）
+- `invalid`: `boolean` (default: `false`)
 - `ref`: `Ref<HTMLSelectElement>`
 
 ### Autocomplete
@@ -593,10 +593,10 @@ import { Autocomplete } from '@k8ordo/ui';
 
 Props:
 
-- `id`: `string`（必須）
-- `options`: `readonly Option[]`（必須）
+- `id`: `string` (required)
+- `options`: `readonly Option[]` (required)
 - `defaultValue`: `never`
-- `invalid`: `boolean`（既定: `false`）
+- `invalid`: `boolean` (default: `false`)
 - `onChange`: `(value: string[]) => void`
 - `ref`: `Ref<HTMLInputElement>`
 - `value`: `string[]`
@@ -617,7 +617,7 @@ import { Checkbox } from '@k8ordo/ui';
 
 Props:
 
-- `label`: `string`（必須）
+- `label`: `string` (required)
 - `checked`: `boolean`
 - `defaultChecked`: `never`
 - `itemValue`: `string`
@@ -649,7 +649,7 @@ import { CheckboxGroup } from '@k8ordo/ui';
 
 Props (CheckboxGroup.Item):
 
-- `label`: `string`（必須）
+- `label`: `string` (required)
 - `checked`: `boolean`
 - `defaultChecked`: `never`
 - `itemValue`: `string`
@@ -658,11 +658,11 @@ Props (CheckboxGroup.Item):
 
 Props (CheckboxGroup.Root):
 
-- `aria-labelledby`: `string`（必須）
-- `name`: `string`（必須）
+- `aria-labelledby`: `string` (required)
+- `name`: `string` (required)
 - `children`: `ReactNode`
 - `defaultValue`: `never`
-- `invalid`: `boolean`（既定: `false`）
+- `invalid`: `boolean` (default: `false`)
 - `onChange`: `(value: string[]) => void`
 - `ref`: `Ref<HTMLFieldSetElement>`
 - `value`: `string[]`
@@ -693,10 +693,10 @@ import { CheckboxCard } from '@k8ordo/ui';
 
 Props:
 
-- `aria-labelledby`: `string`（必須）
-- `options`: `readonly CheckboxCardOption[]`（必須）
+- `aria-labelledby`: `string` (required)
+- `options`: `readonly CheckboxCardOption[]` (required)
 - `defaultValue`: `never`
-- `invalid`: `boolean`（既定: `false`）
+- `invalid`: `boolean` (default: `false`)
 - `onChange`: `(value: string[]) => void`
 - `ref`: `Ref<HTMLFieldSetElement>`
 - `value`: `string[]`
@@ -720,9 +720,9 @@ import { Radio } from '@k8ordo/ui';
 
 Props:
 
-- `aria-labelledby`: `string`（必須）
-- `options`: `readonly Option[]`（必須）
-- `disabled`: `boolean`（既定: `false`）
+- `aria-labelledby`: `string` (required)
+- `options`: `readonly Option[]` (required)
+- `disabled`: `boolean` (default: `false`)
 - `name`: `string`
 - `onChange`: `(value: string, event: ChangeEvent<HTMLInputElement>) => void`
 - `ref`: `Ref<HTMLDivElement>`
@@ -755,10 +755,10 @@ import { RadioCard } from '@k8ordo/ui';
 
 Props:
 
-- `aria-labelledby`: `string`（必須）
-- `options`: `readonly RadioCardOption[]`（必須）
+- `aria-labelledby`: `string` (required)
+- `options`: `readonly RadioCardOption[]` (required)
 - `defaultValue`: `never`
-- `invalid`: `boolean`（既定: `false`）
+- `invalid`: `boolean` (default: `false`)
 - `onChange`: `(value: string) => void`
 - `ref`: `Ref<HTMLFieldSetElement>`
 - `value`: `string`
@@ -785,12 +785,12 @@ import { Slider } from '@k8ordo/ui';
 Props:
 
 - `defaultValue`: `never`
-- `invalid`: `boolean`（既定: `false`）
-- `max`: `number`（既定: `100`）
-- `min`: `number`（既定: `0`）
+- `invalid`: `boolean` (default: `false`)
+- `max`: `number` (default: `100`)
+- `min`: `number` (default: `0`)
 - `onChange`: `(value: number) => void`
 - `ref`: `Ref<HTMLInputElement>`
-- `step`: `number`（既定: `1`）
+- `step`: `number` (default: `1`)
 - `value`: `number`
 
 ### Switch
@@ -812,10 +812,10 @@ import { Switch } from '@k8ordo/ui';
 
 Props:
 
-- `label`: `string`（必須）
+- `label`: `string` (required)
 - `checked`: `boolean`
 - `defaultChecked`: `never`
-- `invalid`: `boolean`（既定: `false`）
+- `invalid`: `boolean` (default: `false`)
 - `onChange`: `(checked: boolean, event: ChangeEvent<HTMLInputElement>) => void`
 - `ref`: `Ref<HTMLInputElement>`
 
@@ -842,11 +842,11 @@ Props (Root):
 
 - `children`: `ReactNode`
 - `defaultValue`: `File[]`
-- `invalid`: `boolean`（既定: `false`）
+- `invalid`: `boolean` (default: `false`)
 - `maxFiles`: `number`
 - `onChange`: `(files: FileList | null, event?: ChangeEvent<HTMLInputElement>) => void`
 - `ref`: `Ref<HTMLInputElement>`
-- `webkitDirectory`: `boolean`（既定: `false`）
+- `webkitDirectory`: `boolean` (default: `false`)
 
 Props (FileField.ItemList):
 
@@ -855,7 +855,7 @@ Props (FileField.ItemList):
 
 Props (FileField.Trigger):
 
-- `renderItem`: `(props: { onClick: () => void; disabled: boolean; invalid: boolean; }) => ReactElement`（必須）
+- `renderItem`: `(props: { onClick: () => void; disabled: boolean; invalid: boolean; }) => ReactElement` (required)
 
 ## データ表示
 
@@ -873,7 +873,7 @@ import { Heading } from '@k8ordo/ui';
 
 Props:
 
-- `level`: `'h1'` | `'h2'` | `'h3'` | `'h4'` | `'h5'` | `'h6'`（必須）
+- `level`: `'h1'` | `'h2'` | `'h3'` | `'h4'` | `'h5'` | `'h6'` (required)
 - `children`: `ReactNode`
 - `lineClamp`: `1` | `2` | `3` | `4` | `5` | `6`
 
@@ -893,11 +893,11 @@ Props:
 
 - `alt`: `string`
 - `children`: `ReactNode`
-- `color`: `'base'` | `'primary'` | `'secondary'`（既定: `'base'`）
+- `color`: `'base'` | `'primary'` | `'secondary'` (default: `'base'`)
 - `fallback`: `string`
 - `icon`: `ReactNode`
 - `name`: `string`
-- `size`: `'sm'` | `'md'` | `'lg'`（既定: `'md'`）
+- `size`: `'sm'` | `'md'` | `'lg'` (default: `'md'`)
 - `src`: `string`
 
 ### Badge
@@ -914,7 +914,7 @@ import { Badge } from '@k8ordo/ui';
 
 Props:
 
-- `label`: `string`（必須）
+- `label`: `string` (required)
 - `interactive`: `true`
 - `size`: `Size`
 - `tone`: `Tone`
@@ -932,7 +932,7 @@ import { Code } from '@k8ordo/ui';
 
 Props:
 
-- `children`: `string`（必須）
+- `children`: `string` (required)
 
 ### Table
 
@@ -967,14 +967,14 @@ Props (Table.Caption):
 
 Props (Table.Cell):
 
-- `align`: `CellAlign`（既定: `'left'`）
+- `align`: `CellAlign` (default: `'left'`)
 - `children`: `ReactNode`
-- `color`: `'base'` | `'mute'`（既定: `'base'`）
+- `color`: `'base'` | `'mute'` (default: `'base'`)
 
 Props (Table.EmptyState):
 
-- `children`: `ReactNode`（必須）
-- `colSpan`: `number`（必須）
+- `children`: `ReactNode` (required)
+- `colSpan`: `number` (required)
 
 Props (Table.Head):
 
@@ -982,9 +982,9 @@ Props (Table.Head):
 
 Props (Table.HeaderCell):
 
-- `align`: `CellAlign`（既定: `'left'`）
+- `align`: `CellAlign` (default: `'left'`)
 - `children`: `ReactNode`
-- `scope`: `'col'` | `'row'` | `'colgroup'` | `'rowgroup'`（既定: `'col'`）
+- `scope`: `'col'` | `'row'` | `'colgroup'` | `'rowgroup'` (default: `'col'`)
 
 Props (Table.Root):
 
@@ -993,7 +993,7 @@ Props (Table.Root):
 Props (Table.Row):
 
 - `children`: `ReactNode`
-- `interactive`: `boolean`（既定: `false`）
+- `interactive`: `boolean` (default: `false`)
 
 ## フィードバック
 
@@ -1008,8 +1008,8 @@ import { Alert } from '@k8ordo/ui';
 
 Props:
 
-- `message`: `string` | `string[]`（必須）
-- `tone`: `Status`（必須）
+- `message`: `string` | `string[]` (required)
+- `tone`: `Status` (required)
 - `action`: `AlertAction`
 - `closeLabel`: `string`
 - `onClose`: `() => void`
@@ -1048,8 +1048,8 @@ import { ToastProvider } from '@k8ordo/ui';
 Props:
 
 - `children`: `ReactNode`
-- `portalRef`: `RefObject<HTMLElement | null>`（既定: `null`）
-- `position`: `'fixed'` | `'absolute'`（既定: `'fixed'`）
+- `portalRef`: `RefObject<HTMLElement | null>` (default: `null`)
+- `position`: `'fixed'` | `'absolute'` (default: `'fixed'`)
 
 ### Progress
 
@@ -1062,10 +1062,10 @@ import { Progress } from '@k8ordo/ui';
 
 Props:
 
-- `max`: `number`（必須）
-- `value`: `number`（必須）
+- `max`: `number` (required)
+- `value`: `number` (required)
 - `label`: `string`
-- `min`: `number`（既定: `0`）
+- `min`: `number` (default: `0`)
 
 ### Spinner
 
@@ -1080,7 +1080,7 @@ import { Spinner } from '@k8ordo/ui';
 Props:
 
 - `label`: `string`
-- `size`: `'sm'` | `'md'` | `'lg'`（既定: `'md'`）
+- `size`: `'sm'` | `'md'` | `'lg'` (default: `'md'`)
 
 ### Skeleton
 
@@ -1096,9 +1096,9 @@ import { Skeleton } from '@k8ordo/ui';
 
 Props:
 
-- `animate`: `boolean`（既定: `true`）
-- `shape`: `'rect'` | `'circle'`（既定: `'rect'`）
-- `size`: `'sm'` | `'md'` | `'lg'`（既定: `'md'`）
+- `animate`: `boolean` (default: `true`)
+- `shape`: `'rect'` | `'circle'` (default: `'rect'`)
+- `size`: `'sm'` | `'md'` | `'lg'` (default: `'md'`)
 
 ## オーバーレイ
 
@@ -1124,7 +1124,7 @@ Props:
 - `isOpen`: `boolean`
 - `onClose`: `() => void`
 - `ref`: `Ref<HTMLDialogElement>`
-- `side`: `ModalSide`（既定: `'center'`）
+- `side`: `ModalSide` (default: `'center'`)
 
 名前の解決順は `aria-label` / `aria-labelledby` > 中の `Dialog.Root` が登録した見出し。どちらも無ければ無名の dialog になるため、`Dialog` を入れずに直接コンテンツを置くときは `aria-label` を渡す。
 
@@ -1155,8 +1155,8 @@ Props (Dialog.Content):
 
 Props (Dialog.Header):
 
-- `onClose`: `() => void`（必須）
-- `title`: `ReactNode`（必須）
+- `onClose`: `() => void` (required)
+- `title`: `ReactNode` (required)
 
 Props (Dialog.Root):
 
@@ -1180,12 +1180,12 @@ import { Drawer } from '@k8ordo/ui';
 
 Props:
 
-- `title`: `ReactNode`（必須）
+- `title`: `ReactNode` (required)
 - `children`: `ReactNode`
 - `defaultOpen`: `boolean`
 - `isOpen`: `boolean`
 - `onClose`: `() => void`
-- `side`: `DrawerSide`（既定: `'right'`）
+- `side`: `DrawerSide` (default: `'right'`)
 
 ### Popover
 
@@ -1205,25 +1205,25 @@ import { Popover } from '@k8ordo/ui';
 Props (Root):
 
 - `children`: `ReactNode`
-- `closeOnClickAway`: `boolean`（既定: `true`）
-- `defaultOpen`: `boolean`（既定: `false`）
-- `flipDisabled`: `boolean`（既定: `false`）
+- `closeOnClickAway`: `boolean` (default: `true`)
+- `defaultOpen`: `boolean` (default: `false`)
+- `flipDisabled`: `boolean` (default: `false`)
 - `isOpen`: `boolean`
 - `onChange`: `(isOpen: boolean) => void`
-- `placement`: `Placement`（既定: `'bottom-start'`）
-- `role`: `'dialog'` | `'menu'` | `'listbox'`（既定: `'menu'`）
-- `trapFocus`: `boolean`（既定: `true`）
+- `placement`: `Placement` (default: `'bottom-start'`)
+- `role`: `'dialog'` | `'menu'` | `'listbox'` (default: `'menu'`)
+- `trapFocus`: `boolean` (default: `true`)
 
 Escape は入れ子のうち**最も内側の 1 枚だけ**を閉じる。
 
 Props (Popover.Content):
 
-- `renderItem`: `(props: PopoverContentProps) => ReactElement`（必須）
-- `animation`: `'scale'` | `'fade'`（既定: `'scale'`）
+- `renderItem`: `(props: PopoverContentProps) => ReactElement` (required)
+- `animation`: `'scale'` | `'fade'` (default: `'scale'`)
 
 Props (Popover.Trigger):
 
-- `renderItem`: `(props: PopoverTriggerProps) => ReactElement`（必須）
+- `renderItem`: `(props: PopoverTriggerProps) => ReactElement` (required)
 
 ### Tooltip
 
@@ -1241,12 +1241,12 @@ import { Tooltip } from '@k8ordo/ui';
 Props (Root):
 
 - `children`: `ReactNode`
-- `closeDelay`: `number`（既定: `150`）
+- `closeDelay`: `number` (default: `150`)
 - `defaultOpen`: `boolean`
 - `isOpen`: `boolean`
 - `onChange`: `(isOpen: boolean) => void`
-- `openDelay`: `number`（既定: `0`）
-- `placement`: `Placement`（既定: `'bottom'`）
+- `openDelay`: `number` (default: `0`)
+- `placement`: `Placement` (default: `'bottom'`)
 
 Props (Tooltip.Content):
 
@@ -1254,7 +1254,7 @@ Props (Tooltip.Content):
 
 Props (Tooltip.Trigger):
 
-- `renderItem`: `(props: TooltipTriggerProps) => ReactElement`（必須）
+- `renderItem`: `(props: TooltipTriggerProps) => ReactElement` (required)
 
 ### DropdownMenu
 
@@ -1278,7 +1278,7 @@ Props (Root):
 - `defaultOpen`: `boolean`
 - `isOpen`: `boolean`
 - `onChange`: `(isOpen: boolean) => void`
-- `placement`: `Placement`（既定: `'bottom-start'`）
+- `placement`: `Placement` (default: `'bottom-start'`)
 
 Trigger バリアント:
 
@@ -1291,26 +1291,26 @@ Props (DropdownMenu.Content):
 
 Props (DropdownMenu.IconTrigger):
 
-- `icon`: `ReactNode`（必須）
-- `label`: `string`（必須）
+- `icon`: `ReactNode` (required)
+- `label`: `string` (required)
 
 Props (DropdownMenu.Item):
 
-- `label`: `string`（必須）
-- `onAction`: `() => void`（必須）
+- `label`: `string` (required)
+- `onAction`: `() => void` (required)
 
 `DropdownMenu.SubMenu` は入れ子メニュー。`label` の行をホバーまたはキーボードで開くと、子要素のメニューが右側に開く。
 
 Props (DropdownMenu.SubMenu):
 
-- `label`: `string`（必須）
+- `label`: `string` (required)
 - `children`: `ReactNode`
 
 Props (DropdownMenu.Trigger):
 
-- `label`: `string`（必須）
-- `size`: `ComponentProps<typeof Button>['size']`（既定: `'md'`）
-- `variant`: `ComponentProps<typeof Button>['variant']`（既定: `'solid'`）
+- `label`: `string` (required)
+- `size`: `ComponentProps<typeof Button>['size']` (default: `'md'`)
+- `variant`: `ComponentProps<typeof Button>['variant']` (default: `'solid'`)
 
 ### ListBox
 
@@ -1334,11 +1334,11 @@ import { ListBox } from '@k8ordo/ui';
 
 Props (Root):
 
-- `options`: `readonly Option[]`（必須）
+- `options`: `readonly Option[]` (required)
 - `children`: `ReactNode`
 - `defaultValue`: `Option['value']`
 - `onChange`: `(value: Option['value']) => void`
-- `placement`: `Placement`（既定: `'bottom'`）
+- `placement`: `Placement` (default: `'bottom'`)
 - `value`: `Option['value']`
 
 Trigger バリアント:
@@ -1354,14 +1354,14 @@ Props (Content):
 
 Props (ListBox.IconTrigger):
 
-- `icon`: `ReactElement`（必須）
+- `icon`: `ReactElement` (required)
 - `label`: `string`
-- `size`: `ComponentProps<typeof Button>['size']`（既定: `'md'`）
+- `size`: `ComponentProps<typeof Button>['size']` (default: `'md'`)
 
 Props (ListBox.Trigger):
 
 - `label`: `string`
-- `size`: `ComponentProps<typeof Button>['size']`（既定: `'md'`）
+- `size`: `ComponentProps<typeof Button>['size']` (default: `'md'`)
 
 ## プロバイダー
 

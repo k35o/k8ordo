@@ -39,15 +39,15 @@ const iconish = (name: string) => name.endsWith('Icon') || name === 'Logo';
 
 const renderProps = (component: Component): string[] => {
   if (component.props.length === 0) {
-    return ['- （固有の props なし）'];
+    return ['- _No props of its own._'];
   }
   return component.props.map((prop) => {
     const types = prop.types.map((type) => `\`${type}\``).join(' | ');
     const suffix = prop.required
-      ? '（必須）'
+      ? ' (required)'
       : prop.defaultValue === null
         ? ''
-        : `（既定: \`${prop.defaultValue}\`）`;
+        : ` (default: \`${prop.defaultValue}\`)`;
     return `- \`${prop.name}\`: ${types}${suffix}`;
   });
 };

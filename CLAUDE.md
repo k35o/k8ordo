@@ -20,6 +20,21 @@ Every member shares the same discipline:
 4. CI picks the member up automatically for `tests` and `package` (both filter `./packages/*`). The `tokens`, `chromatic`, and `vrt` jobs stay pinned to `@k8ordo/ui` — design tokens, prop extraction, and screenshots are specific to a styled component library.
 5. First publish of a brand-new package name cannot use OIDC: a trusted publisher can only be configured on a package that already exists. Publish once by hand, then register the trusted publisher (`k35o` / `k8ordo` / `release.yml`) and let CI take over.
 
+## Documentation language
+
+**Anything an agent reads is English. Everything else may be Japanese.**
+
+English, because an AI coding assistant consumes it directly:
+
+- `CLAUDE.md` / `AGENTS.md` at every level
+- `packages/ui/docs/**` — shipped inside the npm package and read out of `node_modules/`
+- `.claude/skills/**`
+- Any string a generator writes into those files (see `packages/ui/scripts/generate-components-md.ts`)
+
+Japanese is fine elsewhere: commit messages, PR and issue text, code comments,
+tooling output meant for a developer, and the documentation site's own copy
+(which is bilingual with Japanese as the default locale).
+
 ## Commands
 
 ```bash
