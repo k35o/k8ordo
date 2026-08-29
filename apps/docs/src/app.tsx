@@ -89,7 +89,7 @@ import { I18n } from './pages/i18n';
 import { NotFound } from './pages/not-found';
 import { RootRedirect } from './pages/root-redirect';
 import { Theming } from './pages/theming';
-import { UiRedirect } from './pages/ui-redirect';
+import { Ui } from './pages/ui';
 import { Router } from './router';
 
 const routes: RouteDefinition[] = [
@@ -107,7 +107,7 @@ const routes: RouteDefinition[] = [
       }),
       route({
         path: '/ui',
-        component: <UiRedirect />,
+        component: <Ui />,
       }),
       route({
         path: '/ui/get-started',
