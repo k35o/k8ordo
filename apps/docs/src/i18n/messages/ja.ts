@@ -11,9 +11,9 @@ export const ja = {
   'nav.generativeUi': 'Generative UI',
   'nav.aiChat': 'AI チャット',
   'home.description':
-    'いまのプラットフォームをそのまま前提にする、React ライブラリの家族',
+    'いまのプラットフォームをそのまま前提にする、React のライブラリ群',
   'home.exploreUi': 'UI を見る',
-  'home.membersTitle': 'メンバー',
+  'home.membersTitle': 'パッケージ',
   'home.memberUiDescription':
     'セマンティックなデザイントークン・i18n・生成 UI アダプタを備えた React コンポーネント。',
   'home.disciplineTitle': '共通の前提',
@@ -28,7 +28,7 @@ export const ja = {
     '型は書いたものを後から確かめるためではなく、間違いを書けなくするために使う。ドキュメントも生成物も型から作られるので、実装からずれない。',
   'home.disciplineAgents': 'エージェントが読める',
   'home.disciplineAgentsDescription':
-    'どのメンバーも自分のドキュメントを npm パッケージに同梱する。AI はインストールした版そのものを読むので、写して同期させる手間も、版がずれる事故も起きない。',
+    'どのパッケージも自分のドキュメントを npm パッケージに同梱する。AI はインストールした版そのものを読むので、写して同期させる手間も、版がずれる事故も起きない。',
   'ui.description':
     '穏やかだけど退屈じゃないUIを作るためのReactコンポーネントライブラリ',
   'ui.getStarted': 'はじめる',
@@ -37,13 +37,13 @@ export const ja = {
   'ui.featuresTitle': '特徴',
   'ui.featureReact': 'React 19',
   'ui.featureReactDescription':
-    'Server Components から直接使える。compound コンポーネントも、サーバー境界を越えて壊れないようパーツを個別に export して組み立てている。',
+    'Server Components からそのまま使える。クライアントに送る必要のないものは、サーバーで描いたまま置いておける。',
   'ui.featureTokens': 'デザイントークン',
   'ui.featureTokensDescription':
     'ビルド済みCSSのインポート1行で動き、Tailwind CSSのセットアップは不要。色や余白はセマンティックトークンで統一され、ライトモードとダークモードもシームレスに切り替わります。',
   'ui.featureTypeScript': 'TypeScript',
   'ui.featureTypeScriptDescription':
-    'props のリファレンスは型から生成されるので、ドキュメントが実装からずれない。生成 UI の spec も `satisfies UISpec` で書けば、component 名や props の typo がコンパイル時に落ちる。',
+    'props のリファレンスは型から生成されるので、ドキュメントが実装からずれない。存在しない props を書けば、動かす前にエディタが教えてくれる。',
   'ui.featureAgents': 'エージェント向けの面',
   'ui.featureAgentsDescription':
     '設計ガイドとリファレンスが npm パッケージに同梱される。AI は `node_modules/@k8ordo/ui/docs/` からインストールした版そのものを読む。Storybook の MCP エンドポイントから実物の props も引ける。',
@@ -59,7 +59,8 @@ export const ja = {
   'common.language': '言語',
   'footer.docs': 'ドキュメント',
   'footer.resources': 'リソース',
-  'footer.tagline': 'あるものは使い、ないものは足さない。',
+  'footer.tagline':
+    'いまのプラットフォームをそのまま前提にする React のライブラリ群。',
   'footer.typesetting': '組版 — Noto Sans JP / M PLUS 2',
   'nav.openMenu': 'メニューを開く',
   'nav.ai': 'AI',

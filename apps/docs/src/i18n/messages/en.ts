@@ -11,9 +11,9 @@ export const en = {
   'nav.generativeUi': 'Generative UI',
   'nav.aiChat': 'AI Chat',
   'home.description':
-    'A family of React libraries that assume the platform you already have',
+    'React libraries that assume the platform you already have',
   'home.exploreUi': 'Explore UI',
-  'home.membersTitle': 'Members',
+  'home.membersTitle': 'Packages',
   'home.memberUiDescription':
     'React components with semantic design tokens, i18n, and generative-UI adapters.',
   'home.disciplineTitle': 'Shared commitments',
@@ -28,7 +28,7 @@ export const en = {
     'Types are not there to check what you wrote after the fact — they are there to make the mistake unwritable. Docs and generated artifacts are derived from the types, so they cannot drift from the implementation.',
   'home.disciplineAgents': 'Readable by agents',
   'home.disciplineAgentsDescription':
-    'Every member ships its own documentation inside its npm package, so an agent reads the exact version you installed — nothing to copy, nothing to re-sync, no version drift.',
+    'Every package ships its own documentation inside its npm package, so an agent reads the exact version you installed — nothing to copy, nothing to re-sync, no version drift.',
   'ui.description':
     'A React component library for UI that is calm but never boring',
   'ui.getStarted': 'Get Started',
@@ -37,13 +37,13 @@ export const en = {
   'ui.featuresTitle': 'Features',
   'ui.featureReact': 'React 19',
   'ui.featureReactDescription':
-    'Usable straight from Server Components. Compound components are assembled from separately exported parts so they survive the server boundary.',
+    'Usable straight from Server Components — anything that does not need the client stays rendered on the server.',
   'ui.featureTokens': 'Design Tokens',
   'ui.featureTokensDescription':
     'One prebuilt CSS import and it just works — no Tailwind CSS setup required. Semantic tokens keep colors and spacing consistent, and light and dark modes switch seamlessly.',
   'ui.featureTypeScript': 'TypeScript',
   'ui.featureTypeScriptDescription':
-    'The props reference is generated from the types, so the docs cannot drift from the implementation. Write a generative-UI spec with `satisfies UISpec` and a typo in a component name or prop fails to compile.',
+    'The props reference is generated from the types, so the docs cannot drift from the implementation. Write a prop that does not exist and the editor tells you before you ever run it.',
   'ui.featureAgents': 'A surface for agents',
   'ui.featureAgentsDescription':
     'The design guide and reference ship inside the npm package, so an agent reads the exact version you installed from `node_modules/@k8ordo/ui/docs/`. Real props can also be queried through Storybook\u2019s MCP endpoint.',
@@ -59,7 +59,8 @@ export const en = {
   'common.language': 'Language',
   'footer.docs': 'Documentation',
   'footer.resources': 'Resources',
-  'footer.tagline': 'Use what the platform has. Add nothing it lacks.',
+  'footer.tagline':
+    'React libraries that assume the platform you already have.',
   'footer.typesetting': 'Typeset in Noto Sans JP & M PLUS 2',
   'nav.openMenu': 'Open menu',
   'nav.ai': 'AI',

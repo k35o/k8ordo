@@ -1,9 +1,9 @@
 # docs
 
-k8ordo ファミリーのドキュメントサイト。<https://ordo.k8o.me> で公開している。
+k8ordo のドキュメントサイト。<https://ordo.k8o.me> で公開している。
 
-`/` が家族の入口で、各パッケージは `/<package>` 以下を持つ（現在は `/ui`）。
-URL の構成とメンバーの迎え方は [`CLAUDE.md`](CLAUDE.md) にある。
+`/` が全体の入口で、各パッケージは `/<package>` 以下を持つ（現在は `/ui`）。
+URL の構成とパッケージの増やし方は [`CLAUDE.md`](CLAUDE.md) にある。
 
 ## 技術スタック
 

@@ -15,7 +15,7 @@ pnpm check:write       # Oxlint/Oxfmt lint/format auto-fix
 ## Architecture
 
 - **Routing**: `@funstack/router` with `@funstack/static` for SSG
-- **URL layout**: package-first. Everything a package documents lives under `/<package>/…` — `@k8ordo/ui` owns `/ui/get-started`, `/ui/components/*`, `/ui/hooks/*`, and so on. `/<package>` itself is that package's landing page (`src/pages/ui.tsx`): what it is, what it gives you, where to start. Only `/` is family-level — it introduces the family, lists the members, and states the shared discipline. Add a new member by adding its own `/<package>` landing plus a `/<package>/…` subtree, and a row in `MEMBERS` on the home page; never put a package's sections at the top level, where they would sit at the same depth as package names.
+- **URL layout**: package-first. Everything a package documents lives under `/<package>/…` — `@k8ordo/ui` owns `/ui/get-started`, `/ui/components/*`, `/ui/hooks/*`, and so on. `/<package>` itself is that package's landing page (`src/pages/ui.tsx`): what it is, what it gives you, where to start. Only `/` is shared — it introduces k8ordo, lists the packages, and states what they all commit to. Add a new package by adding its own `/<package>` landing plus a `/<package>/…` subtree, and a row in `PACKAGES` on the home page; never put a package's sections at the top level, where they would sit at the same depth as package names.
 - **Unmatched routes**: the wildcard `path: '/*'` at the end of the `/:locale` children renders `src/pages/not-found.tsx`. Without it an unknown path renders nothing at all — a blank body, not a 404 page.
 - **i18n**: Custom i18n system in `src/i18n/` with locale-based routing (`/ja/`, `/en/`)
 - **Styling**: Tailwind CSS 4, uses `@k8ordo/ui` design tokens

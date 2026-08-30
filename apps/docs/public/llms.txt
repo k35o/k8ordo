@@ -4,7 +4,7 @@
 
 # @k8ordo/ui
 
-> React components for the k8ordo family, with semantic design tokens, dark mode,
+> React components from k8ordo, with semantic design tokens, dark mode,
 > built-in Japanese/English wording, AI chat components, and official generative UI
 > adapters (json-render & OpenUI) that let an LLM generate, validate, and render
 > on-brand UIs from these components.

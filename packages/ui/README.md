@@ -1,6 +1,6 @@
 # @k8ordo/ui
 
-React components for the [k8ordo](https://ordo.k8o.me) family — semantic design
+React components from [k8ordo](https://ordo.k8o.me) — semantic design
 tokens, built-in Japanese/English wording, and adapters that let an LLM generate
 on-brand UIs.
 

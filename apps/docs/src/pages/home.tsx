@@ -6,13 +6,13 @@ import { T } from '../components/t';
 import { localizeHref, useTranslation } from '../i18n';
 import type { MessageKey } from '../i18n/types';
 
-type Member = {
+type Package = {
   name: string;
   path: string;
   description: MessageKey;
 };
 
-const MEMBERS: Member[] = [
+const PACKAGES: Package[] = [
   {
     name: '@k8ordo/ui',
     path: '/ui',
@@ -46,7 +46,7 @@ export function Home() {
 
   return (
     <div className="flex flex-1 flex-col">
-      <section className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-12 px-6 py-20 md:grid-cols-[1fr_auto] md:gap-16 md:px-8 md:py-28">
+      <section className="mx-auto w-full max-w-6xl px-6 py-20 md:px-8 md:py-28">
         <div className="flex max-w-xl flex-col justify-center gap-8">
           {/* Heading は className を受けないため、ヒーローのみ生 h1（サイト内この1箇所限定） */}
           {/* 320px級の画面でも1語の "k8ordo" がはみ出さないよう、
@@ -58,13 +58,6 @@ export function Home() {
               className="bg-primary-border ml-1.5 inline-block size-3 rounded-full"
             />
           </h1>
-          {/* md 以上はタグラインを縦書き短冊が担う */}
-          <p
-            className="font-m-plus-2 font-palt text-fg-base break-phrase text-lg font-medium md:hidden"
-            lang="ja"
-          >
-            あるものは使い、ないものは足さない。
-          </p>
           <p className="text-fg-mute break-phrase text-lg leading-relaxed">
             {t('home.description')}
           </p>
@@ -100,32 +93,20 @@ export function Home() {
             </Button>
           </div>
         </div>
-        {/* 縦組みの短冊（題簽）。ブランド図像として両ロケール共通の日本語。
-            vertical-rl では改行後の行が左に積まれ、右から左へ正しい読み順になる */}
-        <div className="hidden justify-end md:flex">
-          <p
-            className="font-m-plus-2 font-palt writing-v text-fg-base h-104 text-2xl leading-loose font-medium"
-            lang="ja"
-          >
-            あるものは使い、
-            <br />
-            ないものは足さない。
-          </p>
-        </div>
       </section>
 
       <section className="mx-auto w-full max-w-6xl px-6 pb-16 md:px-8">
         <Heading level="h2">{t('home.membersTitle')}</Heading>
         <ul className="mt-8 flex flex-col gap-4">
-          {MEMBERS.map((member) => (
-            <li key={member.name}>
+          {PACKAGES.map((pkg) => (
+            <li key={pkg.name}>
               <a
                 className="border-border-mute hover:bg-bg-mute focus-visible:ring-border-info flex flex-col gap-2 rounded-lg border p-6 transition-colors duration-150 ease-out focus-visible:ring-2 focus-visible:outline-hidden"
-                href={localizeHref(member.path, locale)}
+                href={localizeHref(pkg.path, locale)}
               >
-                <span className="text-fg-base font-medium">{member.name}</span>
+                <span className="text-fg-base font-medium">{pkg.name}</span>
                 <span className="text-fg-mute text-sm leading-relaxed">
-                  <T k={member.description} />
+                  <T k={pkg.description} />
                 </span>
               </a>
             </li>

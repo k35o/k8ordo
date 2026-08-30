@@ -1,13 +1,13 @@
 # k8ordo
 
-A family of React libraries that assume the platform you already have.
+React libraries that assume the platform you already have.
 
-Every member commits to the same four things:
+Every package here commits to the same four things:
 
 - **Baseline only.** If a feature has reached [Baseline](https://web.dev/baseline) we use it; if it has not, we wait. No polyfills, no fallbacks, no legacy branches — nothing here is a compatibility layer for a browser you are not supporting.
 - **Always on the latest React.** React 19 and Server Components are assumed, and each new idiom is adopted as it lands. No compatibility path is kept around, so there is only ever one way to write it.
 - **TypeScript safe.** Types are not there to check what you wrote after the fact — they are there to make the mistake unwritable. Docs and generated artifacts are derived from the types, so they cannot drift from the implementation.
-- **Readable by agents.** Every member ships its own documentation inside its npm package, so an agent reads the exact version you installed — nothing to copy, nothing to re-sync, no version drift.
+- **Readable by agents.** Every package ships its own documentation inside its npm package, so an agent reads the exact version you installed — nothing to copy, nothing to re-sync, no version drift.
 
 ## Members
 
@@ -17,12 +17,12 @@ Every member commits to the same four things:
 
 `@k8ordo/*` holds **primary libraries only** — the ones an application imports
 and builds on. Tools that plug into someone else's ecosystem (lint configs,
-bundler plugins, Storybook addons) are not members and live in their own
+bundler plugins, Storybook addons) do not go here and live in their own
 repositories.
 
 ## Documentation
 
-- [ordo.k8o.me](https://ordo.k8o.me) — the family's documentation site
+- [ordo.k8o.me](https://ordo.k8o.me) — the documentation site
 - [Storybook](https://main--687a213c85e2e4589d8db1bb.chromatic.com) — every `@k8ordo/ui` story
 - [`packages/ui/README.md`](packages/ui/README.md) — installation, API, and generative-UI integrations
 
@@ -55,9 +55,9 @@ examples/
   ui-css-modules/        # @k8ordo/ui with prebuilt CSS, no Tailwind
 ```
 
-Each example belongs to exactly one member and is named for it. An example that
-covers several members at once cannot tell you which package broke the build,
-and it drags one member's dependencies onto everyone.
+Each example belongs to exactly one package and is named for it. An example that
+covers several packages at once cannot tell you which package broke the build,
+and it drags one package's dependencies onto everyone.
 
 | Command | |
 | --- | --- |
@@ -71,7 +71,7 @@ and it drags one member's dependencies onto everyone.
 Run `pnpm build` before `pnpm check` or `pnpm typecheck` on a fresh checkout:
 the docs site and examples resolve `@k8ordo/ui` types from `dist/`.
 
-## Adding a member
+## Adding a package
 
 The intake steps — where the package goes, who owns which example, how the docs
 site is laid out, what CI picks up automatically, and why a brand-new package
