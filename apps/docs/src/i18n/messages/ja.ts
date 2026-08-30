@@ -9,25 +9,25 @@ export const ja = {
   'nav.hooks': 'Hooks',
   'nav.helpers': 'Helpers',
   'nav.generativeUi': 'Generative UI',
-  'nav.aiChat': 'AI チャット',
+  'nav.aiChat': 'AIチャット',
   'home.description': 'Baselineに入った機能を、制限なく使うReactのライブラリ群',
-  'home.exploreUi': 'UI を見る',
+  'home.exploreUi': 'UIを見る',
   'home.membersTitle': 'パッケージ',
   'home.memberUiDescription':
-    'セマンティックなデザイントークン・i18n・生成 UI アダプタを備えた React コンポーネント。',
+    'セマンティックなデザイントークン・i18n・生成UIアダプタを備えたReactコンポーネント。',
   'home.disciplineTitle': '共通の前提',
-  'home.disciplinePlatform': 'Baseline だけ',
+  'home.disciplinePlatform': 'Baselineだけ',
   'home.disciplinePlatformDescription':
-    'コア4ブラウザに載った時点（Baseline newly available）で使う。その30か月後の widely available は待たない。ポリフィルもフォールバックも持たないので、最新のブラウザでしか動かない。古いブラウザを切ったのではなく、最初からそこでは動かない。',
-  'home.disciplineReact': 'React の最新に追従する',
+    'コア4ブラウザに載った時点（Baseline newly available）で使う。その30か月後のwidely availableは待たない。ポリフィルもフォールバックも持たないので、最新のブラウザでしか動かない。古いブラウザを切ったのではなく、最初からそこでは動かない。',
+  'home.disciplineReact': 'Reactの最新に追従する',
   'home.disciplineReactDescription':
-    'React 19 と Server Components を前提にし、新しい記法が出れば追う。互換のための古いパスを残さないので、書き方が一つに保たれる。',
+    'React 19とServer Componentsを前提にし、新しい記法が出れば追う。互換のための古いパスを残さないので、書き方が一つに保たれる。',
   'home.disciplineTypes': 'TypeScript Safe',
   'home.disciplineTypesDescription':
     '型は書いたものを後から確かめるためではなく、間違いを書けなくするために使う。ドキュメントも生成物も型から作られるので、実装からずれない。',
   'home.disciplineAgents': 'エージェントが読める',
   'home.disciplineAgentsDescription':
-    'どのパッケージも自分のドキュメントを npm パッケージに同梱する。AI はインストールした版そのものを読むので、写して同期させる手間も、版がずれる事故も起きない。',
+    'どのパッケージも自分のドキュメントをnpmパッケージに同梱する。AIはインストールした版そのものを読むので、写して同期させる手間も、版がずれる事故も起きない。',
   'ui.description':
     '穏やかだけど退屈じゃないUIを作るためのReactコンポーネントライブラリ',
   'ui.getStarted': 'はじめる',
@@ -36,16 +36,16 @@ export const ja = {
   'ui.featuresTitle': '特徴',
   'ui.featureReact': 'React 19',
   'ui.featureReactDescription':
-    'Server Components からそのまま使える。クライアントに送る必要のないものは、サーバーで描いたまま置いておける。',
+    'Server Componentsからそのまま使える。クライアントに送る必要のないものは、サーバーで描いたまま置いておける。',
   'ui.featureTokens': 'デザイントークン',
   'ui.featureTokensDescription':
     'ビルド済みCSSのインポート1行で動き、Tailwind CSSのセットアップは不要。色や余白はセマンティックトークンで統一され、ライトモードとダークモードもシームレスに切り替わります。',
   'ui.featureTypeScript': 'TypeScript',
   'ui.featureTypeScriptDescription':
-    'props のリファレンスは型から生成されるので、ドキュメントが実装からずれない。存在しない props を書けば、動かす前にエディタが教えてくれる。',
+    'propsのリファレンスは型から生成されるので、ドキュメントが実装からずれない。存在しないpropsを書けば、動かす前にエディタが教えてくれる。',
   'ui.featureAgents': 'エージェント向けの面',
   'ui.featureAgentsDescription':
-    '設計ガイドとリファレンスが npm パッケージに同梱される。AI は `node_modules/@k8ordo/ui/docs/` からインストールした版そのものを読む。Storybook の MCP エンドポイントから実物の props も引ける。',
+    '設計ガイドとリファレンスがnpmパッケージに同梱される。AIは`node_modules/@k8ordo/ui/docs/`からインストールした版そのものを読む。StorybookのMCPエンドポイントから実物のpropsも引ける。',
   'ui.featureAccessible': 'アクセシビリティ',
   'ui.featureAccessibleDescription':
     'WAI-ARIAパターンに基づき、キーボード操作やスクリーンリーダーに配慮したコンポーネントを目指しています。',
@@ -54,7 +54,7 @@ export const ja = {
     '触れるものは柔らかく、読むものは端正に。余白と形の柔らかさで魅せるUIを提供します。',
   'ui.featureVerticalWriting': '縦書き対応',
   'ui.featureVerticalWritingDescription':
-    '`writing-v` ユーティリティで writing-mode を切り替えると、コンポーネントは縦書きの紙面でも崩れずに追従します。日本語ドキュメントを縦書きで体験できます。',
+    '`writing-v`ユーティリティでwriting-modeを切り替えると、コンポーネントは縦書きの紙面でも崩れずに追従します。日本語ドキュメントを縦書きで体験できます。',
   'common.language': '言語',
   'footer.docs': 'ドキュメント',
   'footer.resources': 'リソース',
@@ -62,92 +62,92 @@ export const ja = {
   'footer.typesetting': '組版 — Noto Sans JP / M PLUS 2',
   'nav.openMenu': 'メニューを開く',
   'nav.ai': 'AI',
-  'nav.aiAgents': 'AI エージェント',
+  'nav.aiAgents': 'AIエージェント',
   'ai.description':
-    'k8ordo UI は AI プロダクトのための面を揃えています。チャット画面を組み立てる UI 部品、LLM に k8ordo UI の UI を生成させるアダプタ、そして AI コーディングエージェントに読ませるドキュメントの3つです。',
+    'k8ordo UIはAIプロダクトのための面を揃えています。チャット画面を組み立てるUI部品、LLMにk8ordo UIのUIを生成させるアダプタ、そしてAIコーディングエージェントに読ませるドキュメントの3つです。',
   'ai.chatSummary':
-    'Conversation・Message・PromptInput でチャット画面を組み立てる presentational な部品集。',
+    'Conversation・Message・PromptInputでチャット画面を組み立てるpresentationalな部品集。',
   'ai.generativeUiSummary':
-    'LLM が k8ordo UI コンポーネントだけで UI を生成するための json-render / OpenUI アダプタ。',
+    'LLMがk8ordo UIコンポーネントだけでUIを生成するためのjson-render / OpenUIアダプタ。',
   'ai.agentsSummary':
-    '設計指針・リファレンス・props を AI コーディングエージェントに読ませるためのドキュメント面。',
+    '設計指針・リファレンス・propsをAIコーディングエージェントに読ませるためのドキュメント面。',
   'aiAgents.introduction':
-    'k8ordo UI は、AI コーディングエージェントが読むための面を用意しています。設計指針・コンポーネントのリファレンス・トークン・props を、いずれも実装から生成した形で配っています。',
+    'k8ordo UIは、AIコーディングエージェントが読むための面を用意しています。設計指針・コンポーネントのリファレンス・トークン・propsを、いずれも実装から生成した形で配っています。',
   'aiAgents.setupTitle': 'エージェントに読ませる',
   'aiAgents.setupDescription':
-    'ドキュメントは npm パッケージに同梱されているので、参照先はインストール済みのバージョンに固定されます。プロジェクトの CLAUDE.md / AGENTS.md に次を貼るだけで設定は終わりです。',
+    'ドキュメントはnpmパッケージに同梱されているので、参照先はインストール済みのバージョンに固定されます。プロジェクトのCLAUDE.md / AGENTS.mdに次を貼るだけで設定は終わりです。',
   'aiAgents.surfacesTitle': '公開している面',
   'aiAgents.surfacesDescription':
     'いずれもパッケージ内（node_modules）と、このサイトの両方から取得できます。',
   'aiAgents.surfaceGuide': '設計ガイド。まずここから読む',
-  'aiAgents.surfaceReference': 'コンポーネント・hooks・helpers のリファレンス',
-  'aiAgents.surfaceIndex': 'LLM 向けのドキュメント索引',
-  'aiAgents.surfaceTokens': 'デザイントークンの仕様（CSS から生成）',
-  'aiAgents.surfaceProps': '全コンポーネントの props（型から生成）',
-  'aiAgents.surfaceMcp': '公開 Storybook の MCP エンドポイント',
-  'aiAgents.mcpTitle': 'MCP で Storybook を引く',
+  'aiAgents.surfaceReference': 'コンポーネント・hooks・helpersのリファレンス',
+  'aiAgents.surfaceIndex': 'LLM向けのドキュメント索引',
+  'aiAgents.surfaceTokens': 'デザイントークンの仕様（CSSから生成）',
+  'aiAgents.surfaceProps': '全コンポーネントのprops（型から生成）',
+  'aiAgents.surfaceMcp': '公開StorybookのMCPエンドポイント',
+  'aiAgents.mcpTitle': 'MCPでStorybookを引く',
   'aiAgents.mcpDescription':
-    '記憶で props を書かせず、実際のストーリーと描画結果を引かせるための口です。MCP クライアントの設定に追加します。',
+    '記憶でpropsを書かせず、実際のストーリーと描画結果を引かせるための口です。MCPクライアントの設定に追加します。',
   'aiAgents.generatedTitle': '生成されているもの',
   'aiAgents.generatedDescription':
-    'props はコンポーネントの型から、トークンは CSS から抽出しています。CI が実装との差分を検出するため、ドキュメントだけが古くなることはありません。',
+    'propsはコンポーネントの型から、トークンはCSSから抽出しています。CIが実装との差分を検出するため、ドキュメントだけが古くなることはありません。',
   'generativeUi.introduction':
-    'k8ordo UI は、LLM が k8ordo UI コンポーネントだけで UI を生成できる公式アダプタ（json-render / OpenUI）を同梱しています。プロンプトはサーバーで生成し、出力を検証してからクライアントで描画します。',
+    'k8ordo UIは、LLMがk8ordo UIコンポーネントだけでUIを生成できる公式アダプタ（json-render / OpenUI）を同梱しています。プロンプトはサーバーで生成し、出力を検証してからクライアントで描画します。',
   'generativeUi.promptTitle': 'プロンプトを生成（サーバー）',
   'generativeUi.promptDescription':
-    'catalog はサーバー安全です。Server Component でシステムプロンプトを生成し、`uiRules` で横断ルールを注入します。',
+    'catalogはサーバー安全です。Server Componentでシステムプロンプトを生成し、`uiRules`で横断ルールを注入します。',
   'generativeUi.renderTitle': '描画（クライアント）',
   'generativeUi.renderDescription':
-    '`JsonRenderUI` がプロバイダー・レンダラー・registry を内部結線済みなので、spec を渡すだけで描画できます。',
-  'generativeUi.validateTitle': 'LLM 出力の検証と修復',
+    '`JsonRenderUI`がプロバイダー・レンダラー・registryを内部結線済みなので、specを渡すだけで描画できます。',
+  'generativeUi.validateTitle': 'LLM出力の検証と修復',
   'generativeUi.validateDescription':
-    '`validateGeneratedSpec` が機械修正・構造検証・コンポーネントごとの props 検証を行い、失敗時はそのまま投げ返せる修復プロンプトを返します。',
-  'generativeUi.typedTitle': '型付き spec',
+    '`validateGeneratedSpec`が機械修正・構造検証・コンポーネントごとのprops検証を行い、失敗時はそのまま投げ返せる修復プロンプトを返します。',
+  'generativeUi.typedTitle': '型付きspec',
   'generativeUi.typedDescription':
-    '`satisfies UISpec` で書くと、component 名・props の typo がコンパイル時に検出されます。',
+    '`satisfies UISpec`で書くと、component名・propsのtypoがコンパイル時に検出されます。',
   'generativeUi.openuiTitle': 'OpenUI',
   'generativeUi.openuiDescription':
-    'OpenUI は DSL 文字列を `library` で描画します。プロンプトは専用の `openui/prompt` エントリでサーバー生成できます。',
+    'OpenUIはDSL文字列を`library`で描画します。プロンプトは専用の`openui/prompt`エントリでサーバー生成できます。',
   'aiChat.introduction':
-    'AI チャット UI のための presentational な部品です。通信やメッセージの状態は持たず、データを渡して `messages.map()` で組み立てるだけ。AI SDK でも自前のバックエンドでも接続できます。`@k8ordo/ui/ai` から import します。',
+    'AIチャットUIのためのpresentationalな部品です。通信やメッセージの状態は持たず、データを渡して`messages.map()`で組み立てるだけ。AI SDKでも自前のバックエンドでも接続できます。`@k8ordo/ui/ai`からimportします。',
   'aiChat.demoTitle': 'デモ',
   'aiChat.demoDescription':
     '実際のチャット画面です。サジェスチョンを選ぶか、メッセージを入力して送信すると、吹き出しが会話に積まれていきます。思考過程やツール呼び出しは折りたたみで確認できます。',
   'aiChat.suggestionTitle': 'サジェスチョン',
   'aiChat.suggestionDescription':
-    '`Suggestion` は定型の質問をチップで並べ、選択された値をそのまま送信ハンドラに渡します。',
+    '`Suggestion`は定型の質問をチップで並べ、選択された値をそのまま送信ハンドラに渡します。',
   'aiChat.overviewTitle': '会話を組み立てる',
   'aiChat.overviewDescription':
-    '`Conversation` は stick-to-bottom と「最新へ」ボタン付きのスクロール領域、`Message` は role ごとの吹き出し、`PromptInput` は入力欄です。メッセージ配列は利用側が持ちます。',
-  'aiChat.inputTitle': '入力欄（IME 対応）',
+    '`Conversation`はstick-to-bottomと「最新へ」ボタン付きのスクロール領域、`Message`はroleごとの吹き出し、`PromptInput`は入力欄です。メッセージ配列は利用側が持ちます。',
+  'aiChat.inputTitle': '入力欄（IME対応）',
   'aiChat.inputDescription':
-    'Enter で送信、Shift+Enter で改行、そして IME 変換を確定する Enter では送信しません。`status` に応じて送信 / 停止ボタンが切り替わります。',
-  'aiChat.responseTitle': 'ストリーミング Markdown',
+    'Enterで送信、Shift+Enterで改行、そしてIME変換を確定するEnterでは送信しません。`status`に応じて送信 / 停止ボタンが切り替わります。',
+  'aiChat.responseTitle': 'ストリーミングMarkdown',
   'aiChat.responseDescription':
-    '`Response` はストリーミング中の Markdown を描画し、未クローズのブロックにも耐えます。別サブパスに分かれており、optional peer の `streamdown` とそのスタイルシートが必要です。',
+    '`Response`はストリーミング中のMarkdownを描画し、未クローズのブロックにも耐えます。別サブパスに分かれており、optional peerの`streamdown`とそのスタイルシートが必要です。',
   'aiChat.toolTitle': 'ツール呼び出しと思考',
   'aiChat.toolDescription':
-    '`ToolInvocation` と `Reasoning` はツールの実行や思考過程を折りたたみで表示します。`state` の語彙は AI SDK のツールパートの状態に揃えています。',
-  'aiChat.aiSdkTitle': 'AI SDK 連携',
+    '`ToolInvocation`と`Reasoning`はツールの実行や思考過程を折りたたみで表示します。`state`の語彙はAI SDKのツールパートの状態に揃えています。',
+  'aiChat.aiSdkTitle': 'AI SDK連携',
   'aiChat.aiSdkDescription':
-    '`mapMessageParts`（`@k8ordo/ui/ai-sdk`）は AI SDK の `UIMessage.parts` を、自分で描画しやすい素朴な配列に変換します。optional peer の `ai` が必要です。',
-  'aiChat.jsonRenderTitle': '吹き出しの中に Generative UI',
+    '`mapMessageParts`（`@k8ordo/ui/ai-sdk`）はAI SDKの`UIMessage.parts`を、自分で描画しやすい素朴な配列に変換します。optional peerの`ai`が必要です。',
+  'aiChat.jsonRenderTitle': '吹き出しの中にGenerative UI',
   'aiChat.jsonRenderDescription':
-    'Message.Content は任意の children を取れるので、json-render の registry を使って LLM が生成した UI spec を吹き出しの中に描画できます。会話の中へそのまま Generative UI を届けられます。',
+    'Message.Contentは任意のchildrenを取れるので、json-renderのregistryを使ってLLMが生成したUI specを吹き出しの中に描画できます。会話の中へそのままGenerative UIを届けられます。',
   'aiChat.propsDescription':
-    'コンポーネントの型から生成した props の一覧です。開閉を持つコンポーネント（Reasoning / ToolInvocation）は isOpen / defaultOpen / onChange の controlled / uncontrolled 両対応です。',
+    'コンポーネントの型から生成したpropsの一覧です。開閉を持つコンポーネント（Reasoning / ToolInvocation）はisOpen / defaultOpen / onChangeのcontrolled / uncontrolled両対応です。',
   'aiChat.demo.greeting':
-    'こんにちは。k8ordo UI の AI チャットについて、何でも聞いてください。',
+    'こんにちは。k8ordo UIのAIチャットについて、何でも聞いてください。',
   'aiChat.demo.seedQuestion':
-    'React で AI チャットを作るとき、何から始めればいい？',
+    'ReactでAIチャットを作るとき、何から始めればいい？',
   'aiChat.demo.seedReasoning':
-    'まず会話の器・吹き出し・入力欄の3つが土台。Markdown やツール表示は後段で足せる。',
+    'まず会話の器・吹き出し・入力欄の3つが土台。Markdownやツール表示は後段で足せる。',
   'aiChat.demo.seedToolOutput':
-    'Conversation / Message / PromptInput の3つから始めるのが推奨です。',
+    'Conversation / Message / PromptInputの3つから始めるのが推奨です。',
   'aiChat.demo.seedAnswer':
-    'まずは Conversation・Message・PromptInput の3つで会話の骨組みを作り、そのあと Response（Markdown）や ToolInvocation を足していくのがおすすめです。',
+    'まずはConversation・Message・PromptInputの3つで会話の骨組みを作り、そのあとResponse（Markdown）やToolInvocationを足していくのがおすすめです。',
   'aiChat.demo.reply': 'なるほど。ドキュメントの該当箇所をまとめますね。',
-  'aiChat.demo.suggestionIme': 'IME 対応について教えて',
+  'aiChat.demo.suggestionIme': 'IME対応について教えて',
   'aiChat.demo.suggestionStreaming': 'ストリーミング表示は？',
   'aiChat.demo.suggestionTool': 'ツール呼び出しの表示例',
   'aiChat.demo.placeholder': 'メッセージを入力…',
@@ -195,9 +195,9 @@ export const ja = {
   'components.common.usageTitle': '使い方',
   'components.common.propsTitle': 'Props',
   'components.common.inheritsLabel':
-    '型ベース（内部で固定する一部 attrs は除外）:',
+    '型ベース（内部で固定する一部attrsは除外）:',
   'components.common.messagesNote':
-    'Default が messages.* の props は、未指定のとき文言辞書から解決されます。差し替え方は次を参照してください:',
+    'Defaultがmessages.* のpropsは、未指定のとき文言辞書から解決されます。差し替え方は次を参照してください:',
   'components.button.description': 'ユーザー操作を受け付けるボタン',
   'components.button.variantsTitle': 'バリアント',
   'components.button.colorsTitle': 'カラー',
@@ -213,9 +213,9 @@ export const ja = {
   'components.iconButton.renderItemTitle': 'リンクとしてレンダリング',
   'components.anchor.description': 'テキストリンク',
   'components.anchor.openInNewTabTitle': '新しいタブで開く',
-  'components.anchor.renderAnchorTitle': 'render prop で要素差し替え',
+  'components.anchor.renderAnchorTitle': 'render propで要素差し替え',
   'components.anchor.renderAnchorDescription':
-    'Next.js の Link や react-router の Link など、フレームワーク固有の anchor コンポーネントに差し替えるには renderAnchor を渡してください。受け取った props はすべて差し替え後の要素にスプレッドしてください。',
+    'Next.jsのLinkやreact-routerのLinkなど、フレームワーク固有のanchorコンポーネントに差し替えるにはrenderAnchorを渡してください。受け取ったpropsはすべて差し替え後の要素にスプレッドしてください。',
   'components.textField.description': 'テキスト入力フィールド',
   'components.textField.placeholderTitle': 'プレースホルダー',
   'components.textField.disabledTitle': '無効',
@@ -260,7 +260,7 @@ export const ja = {
   'components.radioCard.defaultValueTitle': 'デフォルト値',
   'components.radioCard.formTitle': 'フォーム連携',
   'components.radioCard.formDescription':
-    '中身は本物の input[type=radio] なので、name を渡せばブラウザが同じ名前のラジオをグループにまとめ、選択値は FormData からそのまま取り出せます。',
+    '中身は本物のinput[type=radio] なので、nameを渡せばブラウザが同じ名前のラジオをグループにまとめ、選択値はFormDataからそのまま取り出せます。',
   'components.autocomplete.description': '入力補完付きの選択フィールド',
   'components.autocomplete.disabledTitle': '無効',
   'components.autocomplete.invalidTitle': 'エラー',
@@ -281,8 +281,8 @@ export const ja = {
   'components.formControl.requiredTitle': '必須',
   'components.formControl.disabledTitle': '無効',
   'components.form.description':
-    'form action パターンで送信を扱うフォームラッパー',
-  'components.form.actionStateTitle': 'useActionState と組み合わせる',
+    'form actionパターンで送信を扱うフォームラッパー',
+  'components.form.actionStateTitle': 'useActionStateと組み合わせる',
   'components.accordion.description': '折りたたみできるコンテンツパネル',
   'components.accordion.defaultOpenTitle': 'デフォルトで開く',
   'components.avatar.description': 'フォールバック付きのプロフィール画像',
@@ -296,7 +296,7 @@ export const ja = {
   'components.card.description': 'コンテンツをまとめるカード',
   'components.card.widthTitle': 'Width',
   'components.card.interactiveDescription':
-    'interactive を付けるとホバー・アクティブ時にスケールする。カード全体をリンクやボタンにする際に使う。',
+    'interactiveを付けるとホバー・アクティブ時にスケールする。カード全体をリンクやボタンにする際に使う。',
   'components.code.description': 'インラインのコード表示',
   'components.code.colorDetectionTitle': 'カラー検出',
   'components.table.description':
@@ -336,11 +336,11 @@ export const ja = {
   'components.stack.gapTitle': '間隔',
   'components.stack.alignTitle': '整列と分配',
   'components.grid.description':
-    'CSS グリッドで子要素を並べるレイアウトプリミティブ。列数固定、auto-fill / auto-fit に対応',
+    'CSSグリッドで子要素を並べるレイアウトプリミティブ。列数固定、auto-fill / auto-fitに対応',
   'components.grid.colsTitle': '列数指定',
   'components.grid.autoFillTitle': 'Auto-fill',
   'components.grid.autoFillDescription':
-    'cols="auto-fill" / "auto-fit" のとき、minItemSize で各セルの最小幅を指定するとグリッドがレスポンシブにリフローする。',
+    'cols="auto-fill" / "auto-fit" のとき、minItemSizeで各セルの最小幅を指定するとグリッドがレスポンシブにリフローする。',
   'components.tabs.description': 'タブ切り替え',
   'components.tabs.defaultSelectedTitle': 'デフォルト選択',
   'components.breadcrumb.description': 'ナビゲーションのパンくずリスト',
@@ -353,7 +353,7 @@ export const ja = {
   'components.icons.description': 'k8ordo UIが提供するアイコン一覧',
   'components.icons.sizesTitle': 'サイズ',
   'components.icons.propsDescription':
-    'すべてのアイコンは共通で `size` を受け取ります。向きを持つ `ChevronIcon` と、ステータスを表す `AlertIcon` だけは追加の props があります。',
+    'すべてのアイコンは共通で`size`を受け取ります。向きを持つ`ChevronIcon`と、ステータスを表す`AlertIcon`だけは追加のpropsがあります。',
   'components.common.basicUsageTitle': '基本的な使い方',
   'components.modal.sideTitle': '配置',
   'components.toast.useToastTitle': 'useToastフック',
@@ -530,29 +530,29 @@ export const ja = {
     'スペーシングスケールです。基本単位は0.25rem（4px）で、p-{n}やgap-{n}はn × 0.25remに計算されます。',
   'theming.breakpointsTitle': 'ブレイクポイント',
   'theming.breakpointsDescription': 'レスポンシブブレイクポイントです。',
-  'theming.zIndexTitle': 'Z-Index レイヤ',
+  'theming.zIndexTitle': 'Z-Indexレイヤ',
   'theming.zIndexDescription':
-    'オーバーレイ系コンポーネントの重なり順を定義する 3 層スケールです。trigger に紐付く浮遊 UI（Popover / DropdownMenu / ListBox / Tooltip）はoverlay、Modal / Drawer はmodal、Toast はtoastに配置されます。',
+    'オーバーレイ系コンポーネントの重なり順を定義する3層スケールです。triggerに紐付く浮遊UI（Popover / DropdownMenu / ListBox / Tooltip）はoverlay、Modal / Drawerはmodal、Toastはtoastに配置されます。',
   'i18n.introduction':
     'コンポーネントが自前で描画する文言（閉じるボタンのラベル、必須バッジ、読み込み中の読み上げなど）は文言辞書から引かれます。辞書を差し替えれば、アプリのコードを変えずに言語や語彙を切り替えられます。',
   'i18n.defaultTitle': '既定は日本語',
   'i18n.defaultDescription':
-    '設定は不要です。UIProvider を置くだけで日本語の辞書が使われ、Provider を置いていない場合も同じ日本語にフォールバックします。',
+    '設定は不要です。UIProviderを置くだけで日本語の辞書が使われ、Providerを置いていない場合も同じ日本語にフォールバックします。',
   'i18n.englishTitle': '英語に切り替える',
   'i18n.englishDescription':
-    '@k8ordo/ui/i18n から en を読み込み、messages に渡します。ja も同じ場所から読み込めます。',
+    '@k8ordo/ui/i18nからenを読み込み、messagesに渡します。jaも同じ場所から読み込めます。',
   'i18n.overrideTitle': '一部だけ差し替える',
   'i18n.overrideDescription':
-    'messages は Partial<Messages> です。渡したキーだけが上書きされ、残りは日本語の既定辞書で埋まります。英語をベースに一部だけ変えたいときは en を展開してから重ねます。',
+    'messagesはPartial<Messages> です。渡したキーだけが上書きされ、残りは日本語の既定辞書で埋まります。英語をベースに一部だけ変えたいときはenを展開してから重ねます。',
   'i18n.priorityTitle': '優先順位',
   'i18n.priorityDescription':
-    '同じ文言を決める経路は 3 つあり、prop > 辞書 > 既定 の順に強くなります。個別の props（Spinner の label など）は常に辞書より優先されるので、1 箇所だけ違う文言にしたいときはそちらを使ってください。',
+    '同じ文言を決める経路は3つあり、prop > 辞書 > 既定 の順に強くなります。個別のprops（Spinnerのlabelなど）は常に辞書より優先されるので、1箇所だけ違う文言にしたいときはそちらを使ってください。',
   'i18n.customTitle': '独自の辞書を作る',
   'i18n.customDescription':
-    'Messages 型を注釈すれば、キーの過不足はコンパイル時に検出されます。ライブラリにキーが増えたときも型エラーで気付けます。',
+    'Messages型を注釈すれば、キーの過不足はコンパイル時に検出されます。ライブラリにキーが増えたときも型エラーで気付けます。',
   'i18n.keysTitle': 'キー一覧',
   'i18n.keysDescription':
-    'Messages が持つキーの全てです。値はライブラリの辞書そのものを読み込んで表示しています。',
+    'Messagesが持つキーの全てです。値はライブラリの辞書そのものを読み込んで表示しています。',
   'i18n.keyColumn': 'キー',
   'i18n.usedByColumn': '使うコンポーネント',
   'i18n.jaColumn': 'ja（既定）',
@@ -563,7 +563,7 @@ export const ja = {
   'common.switchToVerticalWriting': '縦書きプレビューに切り替え',
   'common.switchToHorizontalWriting': '横書きプレビューに切り替え',
   'notFound.title': 'ページが見つかりません',
-  'notFound.description': 'URL が変わったか、削除された可能性があります。',
+  'notFound.description': 'URLが変わったか、削除された可能性があります。',
   'error.title': '問題が発生しました',
   'error.description': '予期しないエラーが発生しました。',
   'error.retry': '再読み込み',
