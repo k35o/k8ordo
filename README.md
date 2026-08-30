@@ -4,7 +4,7 @@ React libraries that assume the platform you already have.
 
 Every package here commits to the same four things:
 
-- **Baseline only.** If a feature has reached [Baseline](https://web.dev/baseline) we use it; if it has not, we wait. No polyfills, no fallbacks, no legacy branches — nothing here is a compatibility layer for a browser you are not supporting.
+- **Baseline only, from the day it lands.** A feature is fair game the moment it reaches [Baseline](https://web.dev/baseline) **newly available** — shipped in all four core browsers — rather than 30 months later at widely available. No polyfills, no fallbacks, no legacy branches. That is a choice you can only make when you pick the browsers you support, so this is not for a project that has to carry older ones.
 - **Always on the latest React.** React 19 and Server Components are assumed, and each new idiom is adopted as it lands. No compatibility path is kept around, so there is only ever one way to write it.
 - **TypeScript safe.** Types are not there to check what you wrote after the fact — they are there to make the mistake unwritable. Docs and generated artifacts are derived from the types, so they cannot drift from the implementation.
 - **Readable by agents.** Every package ships its own documentation inside its npm package, so an agent reads the exact version you installed — nothing to copy, nothing to re-sync, no version drift.

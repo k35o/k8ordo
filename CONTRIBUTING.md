@@ -32,7 +32,7 @@ pnpm check:no-polyfills # Fail if a polyfill dependency has crept in
 ```
 
 `check:no-polyfills` guards one half of the shared discipline: k8ordo assumes
-Baseline and carries no polyfills. Checking Baseline *usage* would take a linter
+Baseline *newly available* and carries no polyfills. Checking Baseline *usage* would take a linter
 of its own (JS and CSS both), so the dependency check is what CI can enforce
 today.
 

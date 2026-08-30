@@ -9,7 +9,7 @@ k8ordo is the monorepo for the `@k8ordo/*` packages. Vite+ (`vp`) is the unified
 Every package here shares the same discipline:
 
 - **React 19 and RSC are assumed.** No framework-agnostic core and no adapter layer for other frameworks — we would never use one, so building it would be an indirection nobody pays for.
-- **Anything in Baseline is fair game, and nothing else is carried.** No polyfills, no fallbacks, no legacy branches. `pnpm check:no-polyfills` enforces the dependency half of this in CI; the rest is on the author, since checking Baseline usage itself (JS *and* CSS) would take a linter of its own.
+- **Anything at Baseline *newly available* is fair game, and nothing else is carried.** Newly available, not widely available: a feature is usable the moment all four core browsers ship it, without waiting the further 30 months. No polyfills, no fallbacks, no legacy branches. This only works because we choose the browsers we support — a library that cannot choose has to carry the compatibility code. `pnpm check:no-polyfills` enforces the dependency half of this in CI; the rest is on the author, since checking Baseline usage itself (JS *and* CSS) would take a linter of its own.
 - **Identifiers name what the package owns, never the scope.** The scope already says `k8ordo`, so `UIProvider`, not `OrdoProvider` — the same reason TanStack ships `QueryClientProvider` and not `TanStackProvider`.
 
 ## Adding a package
