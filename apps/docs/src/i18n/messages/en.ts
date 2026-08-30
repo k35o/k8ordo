@@ -19,7 +19,7 @@ export const en = {
   'home.disciplineTitle': 'Shared commitments',
   'home.disciplinePlatform': 'Baseline only',
   'home.disciplinePlatformDescription':
-    'A feature is fair game the moment it reaches Baseline newly available — shipped in all four core browsers — rather than 30 months later at widely available. No polyfills and no fallbacks, so this is not for a project that has to support older browsers.',
+    'A feature is fair game the moment it reaches Baseline newly available — shipped in all four core browsers — rather than 30 months later at widely available. No polyfills and no fallbacks. Built out of the newest features, it needs the newest browsers — it does not drop old ones, it never ran on them.',
   'home.disciplineReact': 'Always on the latest React',
   'home.disciplineReactDescription':
     'React 19 and Server Components are assumed, and each new idiom is adopted as it lands. No compatibility path is kept around, so there is only ever one way to write it.',

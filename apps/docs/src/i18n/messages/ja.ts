@@ -19,7 +19,7 @@ export const ja = {
   'home.disciplineTitle': '共通の前提',
   'home.disciplinePlatform': 'Baseline だけ',
   'home.disciplinePlatformDescription':
-    'コア4ブラウザに載った時点（Baseline newly available）で使う。その30か月後の widely available は待たない。ポリフィルもフォールバックも持たないので、古いブラウザを支える必要があるプロジェクトには向かない。',
+    'コア4ブラウザに載った時点（Baseline newly available）で使う。その30か月後の widely available は待たない。ポリフィルもフォールバックも持たない。最新の機能で作っている以上、動かすには最新のブラウザが要る。古いブラウザを切っているのではなく、最初からそこでは動かない。',
   'home.disciplineReact': 'React の最新に追従する',
   'home.disciplineReactDescription':
     'React 19 と Server Components を前提にし、新しい記法が出れば追う。互換のための古いパスを残さないので、書き方が一つに保たれる。',
