@@ -11,7 +11,7 @@ export const en = {
   'nav.generativeUi': 'Generative UI',
   'nav.aiChat': 'AI Chat',
   'home.description':
-    'React libraries that assume the platform you already have',
+    'React libraries that use Baseline features without holding back',
   'home.exploreUi': 'Explore UI',
   'home.membersTitle': 'Packages',
   'home.memberUiDescription':
@@ -60,7 +60,7 @@ export const en = {
   'footer.docs': 'Documentation',
   'footer.resources': 'Resources',
   'footer.tagline':
-    'React libraries that assume the platform you already have.',
+    'React libraries that use Baseline features without holding back.',
   'footer.typesetting': 'Typeset in Noto Sans JP & M PLUS 2',
   'nav.openMenu': 'Open menu',
   'nav.ai': 'AI',

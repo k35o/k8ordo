@@ -10,8 +10,7 @@ export const ja = {
   'nav.helpers': 'Helpers',
   'nav.generativeUi': 'Generative UI',
   'nav.aiChat': 'AI チャット',
-  'home.description':
-    'いまのプラットフォームをそのまま前提にする、React のライブラリ群',
+  'home.description': 'Baselineに入った機能を、制限なく使うReactのライブラリ群',
   'home.exploreUi': 'UI を見る',
   'home.membersTitle': 'パッケージ',
   'home.memberUiDescription':
@@ -59,8 +58,7 @@ export const ja = {
   'common.language': '言語',
   'footer.docs': 'ドキュメント',
   'footer.resources': 'リソース',
-  'footer.tagline':
-    'いまのプラットフォームをそのまま前提にする React のライブラリ群。',
+  'footer.tagline': 'Baselineに入った機能を、制限なく使うReactのライブラリ群。',
   'footer.typesetting': '組版 — Noto Sans JP / M PLUS 2',
   'nav.openMenu': 'メニューを開く',
   'nav.ai': 'AI',

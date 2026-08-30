@@ -1,6 +1,6 @@
 # k8ordo
 
-React libraries that assume the platform you already have.
+React libraries that use Baseline features without holding back.
 
 Every package here commits to the same four things:
 
