@@ -32,8 +32,12 @@ const DISCIPLINES: Discipline[] = [
     description: 'home.disciplineReactDescription',
   },
   {
-    title: 'home.disciplinePrimary',
-    description: 'home.disciplinePrimaryDescription',
+    title: 'home.disciplineTypes',
+    description: 'home.disciplineTypesDescription',
+  },
+  {
+    title: 'home.disciplineAgents',
+    description: 'home.disciplineAgentsDescription',
   },
 ];
 

@@ -16,16 +16,19 @@ export const ja = {
   'home.membersTitle': 'メンバー',
   'home.memberUiDescription':
     'セマンティックなデザイントークン・i18n・生成 UI アダプタを備えた React コンポーネント。',
-  'home.disciplineTitle': '全員が守ること',
+  'home.disciplineTitle': '共通の前提',
   'home.disciplinePlatform': 'Baseline だけ',
   'home.disciplinePlatformDescription':
     'Baseline に入った機能は使い、入っていない機能は待つ。ポリフィルもフォールバックも持たないので、古いブラウザのための分岐がコードに現れない。',
-  'home.disciplineReact': 'React 19 と RSC が前提',
+  'home.disciplineReact': 'React の最新に追従する',
   'home.disciplineReactDescription':
-    'フレームワーク非依存のコアも、他フレームワーク向けのアダプタも作らない。自分たちが使わない間接層は、誰も対価を払わないまま複雑さだけ残す。',
-  'home.disciplinePrimary': '一次ライブラリだけ',
-  'home.disciplinePrimaryDescription':
-    'アプリが直接 import して組み立てるものだけが `@k8ordo/*` に入る。他人のエコシステムに刺さる道具は別のリポジトリで暮らす。',
+    'React 19 と Server Components を前提にし、新しい記法が出れば追う。互換のための古いパスを残さないので、書き方が一つに保たれる。',
+  'home.disciplineTypes': 'TypeScript Safe',
+  'home.disciplineTypesDescription':
+    '型が通ることではなく、型が正しさを担保すること。props のリファレンスは型から生成されるのでドキュメントがずれず、LLM が生成した spec も `satisfies` で型検査にかかる。',
+  'home.disciplineAgents': 'エージェントが読める',
+  'home.disciplineAgentsDescription':
+    'ドキュメントは npm パッケージに同梱される。AI は `node_modules` からインストールした版そのものを読むので、写して同期させる手間も、版がずれる事故も起きない。',
   'ui.description':
     '穏やかだけど退屈じゃないUIを作るためのReactコンポーネントライブラリ',
   'ui.getStarted': 'はじめる',

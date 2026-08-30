@@ -2,10 +2,12 @@
 
 A family of React libraries that assume the platform you already have.
 
-k8ordo takes React 19 and Server Components as given, uses anything that has
-reached [Baseline](https://web.dev/baseline), and ships no polyfills, no
-fallbacks, and no legacy branches. Nothing here is a compatibility layer for a
-browser or a framework you are not using.
+Every member commits to the same four things:
+
+- **Baseline only.** If a feature has reached [Baseline](https://web.dev/baseline) we use it; if it has not, we wait. No polyfills, no fallbacks, no legacy branches — nothing here is a compatibility layer for a browser you are not supporting.
+- **Always on the latest React.** React 19 and Server Components are assumed, and each new idiom is adopted as it lands. No compatibility path is kept around, so there is only ever one way to write it.
+- **TypeScript safe.** Not "the types compile" but "the types hold everything honest": the props reference is generated from the types, so the docs cannot drift, and an LLM-generated spec is type-checked with `satisfies`.
+- **Readable by agents.** The documentation ships inside the npm package, so an agent reads the exact version you installed straight from `node_modules` — nothing to copy, nothing to re-sync, no version drift.
 
 ## Members
 

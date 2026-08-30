@@ -16,16 +16,19 @@ export const en = {
   'home.membersTitle': 'Members',
   'home.memberUiDescription':
     'React components with semantic design tokens, i18n, and generative-UI adapters.',
-  'home.disciplineTitle': 'What every member shares',
+  'home.disciplineTitle': 'Shared commitments',
   'home.disciplinePlatform': 'Baseline only',
   'home.disciplinePlatformDescription':
     'If it has reached Baseline we use it; if it has not, we wait. No polyfills, no fallbacks — nothing in the code branches for a browser we do not support.',
-  'home.disciplineReact': 'React 19 and RSC assumed',
+  'home.disciplineReact': 'Always on the latest React',
   'home.disciplineReactDescription':
-    'No framework-agnostic core and no adapter for frameworks we do not use — an indirection nobody pays for is complexity nobody asked for.',
-  'home.disciplinePrimary': 'Primary libraries only',
-  'home.disciplinePrimaryDescription':
-    'Only what an application imports and builds on lives in `@k8ordo/*`. Tools that plug into someone else\u2019s ecosystem live in their own repositories.',
+    'React 19 and Server Components are assumed, and each new idiom is adopted as it lands. No compatibility path is kept around, so there is only ever one way to write it.',
+  'home.disciplineTypes': 'TypeScript safe',
+  'home.disciplineTypesDescription':
+    'Not "the types compile" but "the types hold everything honest." The props reference is generated from the types, so the docs cannot drift, and an LLM-generated spec is type-checked with `satisfies`.',
+  'home.disciplineAgents': 'Readable by agents',
+  'home.disciplineAgentsDescription':
+    'The documentation ships inside the npm package, so an agent reads the exact version you installed straight from `node_modules` — nothing to copy, nothing to re-sync, no version drift.',
   'ui.description':
     'A React component library for UI that is calm but never boring',
   'ui.getStarted': 'Get Started',
