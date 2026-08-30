@@ -25,10 +25,10 @@ export const ja = {
     'React 19 と Server Components を前提にし、新しい記法が出れば追う。互換のための古いパスを残さないので、書き方が一つに保たれる。',
   'home.disciplineTypes': 'TypeScript Safe',
   'home.disciplineTypesDescription':
-    '型が通ることではなく、型が正しさを担保すること。props のリファレンスは型から生成されるのでドキュメントがずれず、LLM が生成した spec も `satisfies` で型検査にかかる。',
+    '型は書いたものを後から確かめるためではなく、間違いを書けなくするために使う。ドキュメントも生成物も型から作られるので、実装からずれない。',
   'home.disciplineAgents': 'エージェントが読める',
   'home.disciplineAgentsDescription':
-    'ドキュメントは npm パッケージに同梱される。AI は `node_modules` からインストールした版そのものを読むので、写して同期させる手間も、版がずれる事故も起きない。',
+    'どのメンバーも自分のドキュメントを npm パッケージに同梱する。AI はインストールした版そのものを読むので、写して同期させる手間も、版がずれる事故も起きない。',
   'ui.description':
     '穏やかだけど退屈じゃないUIを作るためのReactコンポーネントライブラリ',
   'ui.getStarted': 'はじめる',
@@ -37,13 +37,16 @@ export const ja = {
   'ui.featuresTitle': '特徴',
   'ui.featureReact': 'React 19',
   'ui.featureReactDescription':
-    '最新のReact 19で構築。Server Componentsやアクションなど、モダンなパターンに対応しています。',
+    'Server Components から直接使える。compound コンポーネントも、サーバー境界を越えて壊れないようパーツを個別に export して組み立てている。',
   'ui.featureTokens': 'デザイントークン',
   'ui.featureTokensDescription':
     'ビルド済みCSSのインポート1行で動き、Tailwind CSSのセットアップは不要。色や余白はセマンティックトークンで統一され、ライトモードとダークモードもシームレスに切り替わります。',
   'ui.featureTypeScript': 'TypeScript',
   'ui.featureTypeScriptDescription':
-    '完全な型定義を提供。エディタの補完とコンパイル時の型チェックで安全に開発できます。',
+    'props のリファレンスは型から生成されるので、ドキュメントが実装からずれない。生成 UI の spec も `satisfies UISpec` で書けば、component 名や props の typo がコンパイル時に落ちる。',
+  'ui.featureAgents': 'エージェント向けの面',
+  'ui.featureAgentsDescription':
+    '設計ガイドとリファレンスが npm パッケージに同梱される。AI は `node_modules/@k8ordo/ui/docs/` からインストールした版そのものを読む。Storybook の MCP エンドポイントから実物の props も引ける。',
   'ui.featureAccessible': 'アクセシビリティ',
   'ui.featureAccessibleDescription':
     'WAI-ARIAパターンに基づき、キーボード操作やスクリーンリーダーに配慮したコンポーネントを目指しています。',

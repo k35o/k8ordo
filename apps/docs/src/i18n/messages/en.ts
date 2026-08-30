@@ -25,10 +25,10 @@ export const en = {
     'React 19 and Server Components are assumed, and each new idiom is adopted as it lands. No compatibility path is kept around, so there is only ever one way to write it.',
   'home.disciplineTypes': 'TypeScript safe',
   'home.disciplineTypesDescription':
-    'Not "the types compile" but "the types hold everything honest." The props reference is generated from the types, so the docs cannot drift, and an LLM-generated spec is type-checked with `satisfies`.',
+    'Types are not there to check what you wrote after the fact — they are there to make the mistake unwritable. Docs and generated artifacts are derived from the types, so they cannot drift from the implementation.',
   'home.disciplineAgents': 'Readable by agents',
   'home.disciplineAgentsDescription':
-    'The documentation ships inside the npm package, so an agent reads the exact version you installed straight from `node_modules` — nothing to copy, nothing to re-sync, no version drift.',
+    'Every member ships its own documentation inside its npm package, so an agent reads the exact version you installed — nothing to copy, nothing to re-sync, no version drift.',
   'ui.description':
     'A React component library for UI that is calm but never boring',
   'ui.getStarted': 'Get Started',
@@ -37,13 +37,16 @@ export const en = {
   'ui.featuresTitle': 'Features',
   'ui.featureReact': 'React 19',
   'ui.featureReactDescription':
-    'Built with the latest React 19. Supports modern patterns like Server Components and actions.',
+    'Usable straight from Server Components. Compound components are assembled from separately exported parts so they survive the server boundary.',
   'ui.featureTokens': 'Design Tokens',
   'ui.featureTokensDescription':
     'One prebuilt CSS import and it just works — no Tailwind CSS setup required. Semantic tokens keep colors and spacing consistent, and light and dark modes switch seamlessly.',
   'ui.featureTypeScript': 'TypeScript',
   'ui.featureTypeScriptDescription':
-    'Full type definitions included. Develop safely with editor autocompletion and compile-time type checking.',
+    'The props reference is generated from the types, so the docs cannot drift from the implementation. Write a generative-UI spec with `satisfies UISpec` and a typo in a component name or prop fails to compile.',
+  'ui.featureAgents': 'A surface for agents',
+  'ui.featureAgentsDescription':
+    'The design guide and reference ship inside the npm package, so an agent reads the exact version you installed from `node_modules/@k8ordo/ui/docs/`. Real props can also be queried through Storybook\u2019s MCP endpoint.',
   'ui.featureAccessible': 'Accessibility',
   'ui.featureAccessibleDescription':
     'Aiming for components that consider keyboard navigation and screen reader support based on WAI-ARIA patterns.',

@@ -2,6 +2,7 @@
 
 import {
   AccessibilityIcon,
+  AIIcon,
   AtomIcon,
   Button,
   Heading,
@@ -37,6 +38,11 @@ const FEATURES: Feature[] = [
     title: 'ui.featureTypeScript',
     description: 'ui.featureTypeScriptDescription',
     icon: <ShieldCheckIcon />,
+  },
+  {
+    title: 'ui.featureAgents',
+    description: 'ui.featureAgentsDescription',
+    icon: <AIIcon />,
   },
   {
     title: 'ui.featureAccessible',

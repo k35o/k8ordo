@@ -15,10 +15,11 @@ Every member shares the same discipline:
 ## Adding a member
 
 1. `packages/<name>/` with its own `package.json`, `tsconfig.json`, and `vite.config.ts` (the `pack` section defines the publishable build). There is deliberately no template yet — write it once by hand; extract a template when a third member proves what is actually shared.
-2. Examples go to `examples/<name>-<variant>/`, owned by one member. Never bolt a new member onto an existing example: a kitchen-sink example cannot tell you which package broke the build, and it drags one member's dependencies onto everyone.
-3. Docs go under `/<name>/…` on the site. Only `/` is family-level. See `apps/docs/CLAUDE.md`.
-4. CI picks the member up automatically for `tests` and `package` (both filter `./packages/*`). The `tokens`, `chromatic`, and `vrt` jobs stay pinned to `@k8ordo/ui` — design tokens, prop extraction, and screenshots are specific to a styled component library.
-5. First publish of a brand-new package name cannot use OIDC: a trusted publisher can only be configured on a package that already exists. Publish once by hand, then register the trusted publisher (`k35o` / `k8ordo` / `release.yml`) and let CI take over.
+2. **Ship the member's own docs inside the package**: a `docs/` directory listed in `files`, so an agent reads the exact installed version out of `node_modules/@k8ordo/<name>/docs/`. The home page promises this on behalf of every member ("readable by agents"), so a member that does not ship docs makes the family's claim false. `@k8ordo/ui` is the pattern: `GUIDE.md` as the entry point, `references/*.md` behind it, and `llms.txt` as the index.
+3. Examples go to `examples/<name>-<variant>/`, owned by one member. Never bolt a new member onto an existing example: a kitchen-sink example cannot tell you which package broke the build, and it drags one member's dependencies onto everyone.
+4. Docs go under `/<name>/…` on the site. Only `/` is family-level. See `apps/docs/CLAUDE.md`.
+5. CI picks the member up automatically for `tests` and `package` (both filter `./packages/*`). The `tokens`, `chromatic`, and `vrt` jobs stay pinned to `@k8ordo/ui` — design tokens, prop extraction, and screenshots are specific to a styled component library.
+6. First publish of a brand-new package name cannot use OIDC: a trusted publisher can only be configured on a package that already exists. Publish once by hand, then register the trusted publisher (`k35o` / `k8ordo` / `release.yml`) and let CI take over.
 
 ## Documentation language
 

@@ -43,6 +43,8 @@ export const MESSAGE_KEYS = [
   'ui.featureTokensDescription',
   'ui.featureTypeScript',
   'ui.featureTypeScriptDescription',
+  'ui.featureAgents',
+  'ui.featureAgentsDescription',
   'ui.featureAccessible',
   'ui.featureAccessibleDescription',
   'ui.featureMinimal',

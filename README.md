@@ -6,8 +6,8 @@ Every member commits to the same four things:
 
 - **Baseline only.** If a feature has reached [Baseline](https://web.dev/baseline) we use it; if it has not, we wait. No polyfills, no fallbacks, no legacy branches — nothing here is a compatibility layer for a browser you are not supporting.
 - **Always on the latest React.** React 19 and Server Components are assumed, and each new idiom is adopted as it lands. No compatibility path is kept around, so there is only ever one way to write it.
-- **TypeScript safe.** Not "the types compile" but "the types hold everything honest": the props reference is generated from the types, so the docs cannot drift, and an LLM-generated spec is type-checked with `satisfies`.
-- **Readable by agents.** The documentation ships inside the npm package, so an agent reads the exact version you installed straight from `node_modules` — nothing to copy, nothing to re-sync, no version drift.
+- **TypeScript safe.** Types are not there to check what you wrote after the fact — they are there to make the mistake unwritable. Docs and generated artifacts are derived from the types, so they cannot drift from the implementation.
+- **Readable by agents.** Every member ships its own documentation inside its npm package, so an agent reads the exact version you installed — nothing to copy, nothing to re-sync, no version drift.
 
 ## Members
 
