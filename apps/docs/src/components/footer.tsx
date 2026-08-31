@@ -5,7 +5,7 @@ import type { MessageKey } from '../i18n';
 import { useTranslation } from '../i18n';
 import { LocaleAnchor } from './locale-anchor';
 
-/** ドキュメントの列はパッケージごとに立てる。メンバーが増えたら列が増える。 */
+/** ドキュメントの列はパッケージごとに立てる。パッケージが増えたら列が増える。 */
 const DOC_GROUPS: Array<{
   name: string;
   links: Array<{ path: string; labelKey: MessageKey }>;
@@ -40,7 +40,7 @@ export function Footer() {
 
   return (
     <footer className="border-border-mute bg-bg-base border-t">
-      {/* メンバーが増えると列が増えるため、固定のグリッドではなく flex で並べる */}
+      {/* パッケージが増えると列が増えるため、固定のグリッドではなく flex で並べる */}
       <div className="mx-auto flex max-w-6xl flex-col gap-12 px-6 py-16 md:flex-row md:justify-between md:gap-20 md:px-8">
         <div className="flex flex-col gap-4">
           <span className="flex items-baseline gap-1">

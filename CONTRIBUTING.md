@@ -2,7 +2,7 @@
 
 Thanks for your interest in contributing! This document explains how to set up the repository, the development workflow, and how changes get released.
 
-k8ordo is a family of packages under `@k8ordo/*`; `@k8ordo/ui` is currently the only member, so most of what follows is about it. Adding a *new* member is a different task with its own steps — see [`CLAUDE.md`](CLAUDE.md).
+k8ordo is a set of packages under `@k8ordo/*`; `@k8ordo/ui` is currently the only one, so most of what follows is about it. Adding a *new* package is a different task with its own steps — see [`CLAUDE.md`](CLAUDE.md).
 
 ## Setup
 
@@ -31,8 +31,8 @@ pnpm check:write # Lint/format check with auto-fix
 pnpm check:no-polyfills # Fail if a polyfill dependency has crept in
 ```
 
-`check:no-polyfills` guards one half of the family's discipline: k8ordo assumes
-Baseline and carries no polyfills. Checking Baseline *usage* would take a linter
+`check:no-polyfills` guards one half of the shared discipline: k8ordo assumes
+Baseline *newly available* and carries no polyfills. Checking Baseline *usage* would take a linter
 of its own (JS and CSS both), so the dependency check is what CI can enforce
 today.
 
@@ -92,7 +92,7 @@ Hook tests (`src/hooks/**/*.test.tsx`) run in a real browser via `vitest-browser
 
 ## Visual regression testing (VRT)
 
-VRT is specific to `@k8ordo/ui` — it screenshots stories, so it applies to a member that renders. Per-story VRT runs on [storybook-addon-vrt](https://github.com/k35o/storybook-addon-vrt).
+VRT is specific to `@k8ordo/ui` — it screenshots stories, so it applies to a package that renders. Per-story VRT runs on [storybook-addon-vrt](https://github.com/k35o/storybook-addon-vrt).
 
 Local commands:
 

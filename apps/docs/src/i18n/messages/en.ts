@@ -11,21 +11,24 @@ export const en = {
   'nav.generativeUi': 'Generative UI',
   'nav.aiChat': 'AI Chat',
   'home.description':
-    'A family of React libraries that assume the platform you already have',
+    'React libraries that use Baseline features without holding back',
   'home.exploreUi': 'Explore UI',
-  'home.membersTitle': 'Members',
+  'home.membersTitle': 'Packages',
   'home.memberUiDescription':
     'React components with semantic design tokens, i18n, and generative-UI adapters.',
-  'home.disciplineTitle': 'What every member shares',
+  'home.disciplineTitle': 'Shared commitments',
   'home.disciplinePlatform': 'Baseline only',
   'home.disciplinePlatformDescription':
-    'If it has reached Baseline we use it; if it has not, we wait. No polyfills, no fallbacks — nothing in the code branches for a browser we do not support.',
-  'home.disciplineReact': 'React 19 and RSC assumed',
+    'A feature is fair game the moment it reaches Baseline newly available — shipped in all four core browsers — rather than 30 months later at widely available. With no polyfills and no fallbacks it runs only on current browsers — it did not drop the old ones, it never ran on them.',
+  'home.disciplineReact': 'Always on the latest React',
   'home.disciplineReactDescription':
-    'No framework-agnostic core and no adapter for frameworks we do not use — an indirection nobody pays for is complexity nobody asked for.',
-  'home.disciplinePrimary': 'Primary libraries only',
-  'home.disciplinePrimaryDescription':
-    'Only what an application imports and builds on lives in `@k8ordo/*`. Tools that plug into someone else\u2019s ecosystem live in their own repositories.',
+    'React 19 and Server Components are assumed, and each new idiom is adopted as it lands. No compatibility path is kept around, so there is only ever one way to write it.',
+  'home.disciplineTypes': 'TypeScript safe',
+  'home.disciplineTypesDescription':
+    'Types are not there to check what you wrote after the fact — they are there to make the mistake unwritable. Docs and generated artifacts are derived from the types, so they cannot drift from the implementation.',
+  'home.disciplineAgents': 'Readable by agents',
+  'home.disciplineAgentsDescription':
+    'Every package ships its own documentation inside its npm package, so an agent reads the exact version you installed — nothing to copy, nothing to re-sync, no version drift.',
   'ui.description':
     'A React component library for UI that is calm but never boring',
   'ui.getStarted': 'Get Started',
@@ -34,13 +37,16 @@ export const en = {
   'ui.featuresTitle': 'Features',
   'ui.featureReact': 'React 19',
   'ui.featureReactDescription':
-    'Built with the latest React 19. Supports modern patterns like Server Components and actions.',
+    'Usable straight from Server Components — anything that does not need the client stays rendered on the server.',
   'ui.featureTokens': 'Design Tokens',
   'ui.featureTokensDescription':
     'One prebuilt CSS import and it just works — no Tailwind CSS setup required. Semantic tokens keep colors and spacing consistent, and light and dark modes switch seamlessly.',
   'ui.featureTypeScript': 'TypeScript',
   'ui.featureTypeScriptDescription':
-    'Full type definitions included. Develop safely with editor autocompletion and compile-time type checking.',
+    'The props reference is generated from the types, so the docs cannot drift from the implementation. Write a prop that does not exist and the editor tells you before you ever run it.',
+  'ui.featureAgents': 'A surface for agents',
+  'ui.featureAgentsDescription':
+    'The design guide and reference ship inside the npm package, so an agent reads the exact version you installed from `node_modules/@k8ordo/ui/docs/`. Real props can also be queried through Storybook\u2019s MCP endpoint.',
   'ui.featureAccessible': 'Accessibility',
   'ui.featureAccessibleDescription':
     'Aiming for components that consider keyboard navigation and screen reader support based on WAI-ARIA patterns.',
@@ -53,7 +59,8 @@ export const en = {
   'common.language': 'Language',
   'footer.docs': 'Documentation',
   'footer.resources': 'Resources',
-  'footer.tagline': 'Use what the platform has. Add nothing it lacks.',
+  'footer.tagline':
+    'React libraries that use Baseline features without holding back.',
   'footer.typesetting': 'Typeset in Noto Sans JP & M PLUS 2',
   'nav.openMenu': 'Open menu',
   'nav.ai': 'AI',
