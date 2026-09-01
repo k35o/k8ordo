@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { FocusEvent, Ref, SyntheticEvent } from 'react';
 
+import { breachOf } from './rules/rules';
 import type {
   DerivedField,
   FieldInput,
@@ -27,10 +28,30 @@ const FLAGS: ValidityFlag[] = [
 
 type Control = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
 
-const isControl = (target: EventTarget | null): target is Control =>
+const isControl = (target: unknown): target is Control =>
   target instanceof HTMLInputElement ||
   target instanceof HTMLSelectElement ||
   target instanceof HTMLTextAreaElement;
+
+/**
+ * A name shared by several controls — a checkbox group — comes back as a
+ * RadioNodeList. Validity belongs to an element, so the group reports through
+ * its first member.
+ */
+const controlNamed = (
+  form: HTMLFormElement,
+  name: string,
+): Control | undefined => {
+  const found = form.elements.namedItem(name);
+  if (isControl(found)) {
+    return found;
+  }
+  if (found instanceof RadioNodeList) {
+    const first = found.item(0);
+    return isControl(first) ? first : undefined;
+  }
+  return undefined;
+};
 
 /**
  * Pick the message for whichever check the browser says failed. `customError`
@@ -143,11 +164,9 @@ export const useForm = <FieldPath extends string, ArrayPath extends string>(
     // Moving focus to the first rejected field is the only way someone using a
     // screen reader learns the submit failed and where.
     const firstErrored = Object.keys(state.errors ?? {})[0];
-    if (firstErrored !== undefined) {
-      const control = formRef.current?.elements.namedItem(firstErrored);
-      if (control instanceof HTMLElement) {
-        control.focus();
-      }
+    const form = formRef.current;
+    if (firstErrored !== undefined && form !== null) {
+      controlNamed(form, firstErrored)?.focus();
     }
   }, [state]);
 
@@ -156,6 +175,10 @@ export const useForm = <FieldPath extends string, ArrayPath extends string>(
       if (!isControl(target)) {
         return;
       }
+      // Rules run before the message is read, so a field made invalid by
+      // another field's value reports it on the very same pass.
+      applyRules(formRef.current, lookup.rules);
+
       const field = fieldFor(lookup, target.name);
       if (field === undefined) {
         return;
@@ -315,6 +338,30 @@ const fieldFor = (
     }
   }
   return undefined;
+};
+
+/**
+ * Apply the cross-field rules to the live form. `setCustomValidity` is what
+ * makes the result indistinguishable from a built-in check: `:user-invalid`
+ * lights up, `validity.customError` is set, and the message flows through the
+ * same path as every other one.
+ */
+const applyRules = (
+  form: HTMLFormElement | null,
+  rules: FormFields['rules'],
+): void => {
+  if (form === null) {
+    return;
+  }
+  const data = new FormData(form);
+  const values = (name: string): string[] =>
+    data.getAll(name).filter((value) => typeof value === 'string');
+
+  for (const rule of rules) {
+    controlNamed(form, rule.field)?.setCustomValidity(
+      breachOf(rule, values) ?? '',
+    );
+  }
 };
 
 const isFormDirty = (form: HTMLFormElement | null): boolean => {

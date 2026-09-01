@@ -124,13 +124,25 @@ never copies anything into React.
 ```tsx
 const items = form.array('items');
 
-{items.rows.map((row) => (
-  <div key={row.key}>
-    <input {...row.field('name').input} />  {/* name="items[0].name" */}
-    {items.canRemove && <button onClick={row.remove} type="button">削除</button>}
-  </div>
-))}
-{items.canAdd && <button onClick={items.add} type="button">追加</button>}
+{
+  items.rows.map((row) => (
+    <div key={row.key}>
+      <input {...row.field('name').input} /> {/* name="items[0].name" */}
+      {items.canRemove && (
+        <button onClick={row.remove} type="button">
+          削除
+        </button>
+      )}
+    </div>
+  ));
+}
+{
+  items.canAdd && (
+    <button onClick={items.add} type="button">
+      追加
+    </button>
+  );
+}
 ```
 
 `canAdd` and `canRemove` come from the schema's `.min()` / `.max()`, so the
@@ -147,14 +159,42 @@ JavaScript rebuilds the same number of rows.
 a build error rather than something you find by clicking.
 
 ```tsx
-form.field('titel');   // error: not a field in the schema
-form.field('items');   // error: an array, reached through array()
-form.array('user');    // error: an object, not an array
+form.field('titel'); // error: not a field in the schema
+form.field('items'); // error: an array, reached through array()
+form.array('user'); // error: an object, not an array
 ```
+
+## Checks HTML has no attribute for
+
+Password confirmation, "tick at least two", "required only when rejected" —
+none of these map to a constraint attribute, and a `.refine()` cannot cross to
+the client because it is a function. Declare them next to the schema instead:
+
+```ts
+export const signup = defineForm(
+  z.object({
+    password: z.string().min(8),
+    confirm: z.string(),
+  }),
+  [sameAs('confirm', 'password', 'パスワードが一致しません')],
+);
+```
+
+Pass the definition where you passed the schema — `formFields(signup)` and
+`parseForm(signup, formData)`. The rules are plain data, so they travel with
+the fields, and **both sides run the same evaluator**: the browser against the
+live form, the server against the submission. There is no second
+implementation to drift from the first.
+
+On the client a breach is applied with `setCustomValidity`, so it is
+indistinguishable from a built-in check — `:user-invalid` matches and the
+message arrives through the same path as every other one.
+
+Available: `sameAs`, `minChecked`, `requiredWhen`. Anything else stays a
+`.refine()`, runs on the server, and is listed in `dropped`.
 
 ## What it does not do yet
 
-- Serializable cross-field rules; `refine` is server-only for now
 - Asynchronous per-field validation
 - Input masking
 

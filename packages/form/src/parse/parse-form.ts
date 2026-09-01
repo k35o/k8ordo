@@ -1,5 +1,8 @@
 import type { ZodObject } from 'zod';
 
+import { asDefinition } from '../rules/define-form';
+import type { FormDefinition } from '../rules/define-form';
+import { breachOf } from '../rules/rules';
 import { INDEX, schemaMap } from '../schema/walk';
 import type { FormState } from '../types';
 import { nameOf, setPath } from './paths';
@@ -42,9 +45,10 @@ const rowCounts = (
  * actually validates.
  */
 export const parseForm = <Shape extends ZodObject>(
-  schema: Shape,
+  input: FormDefinition<Shape> | Shape,
   formData: FormData,
 ): ParseResult<ReturnType<Shape['parse']>> => {
+  const { schema, rules } = asDefinition(input);
   const map = schemaMap(schema);
   const raw: Record<string, unknown> = {};
   const missing: string[] = [];
@@ -99,6 +103,18 @@ export const parseForm = <Shape extends ZodObject>(
 
   const result = schema.safeParse(raw);
 
+  // Evaluated against the submitted values, exactly as the browser evaluates
+  // them against the live form. Same function, same inputs, same verdict.
+  const breaches: Record<string, string> = {};
+  for (const rule of rules) {
+    const message = breachOf(rule, (name) =>
+      formData.getAll(name).filter((value) => typeof value === 'string'),
+    );
+    if (message !== undefined) {
+      breaches[rule.field] = message;
+    }
+  }
+
   const values: Record<string, string> = {};
   for (const [name, value] of formData.entries()) {
     if (typeof value === 'string' && !secrets.has(name)) {
@@ -106,7 +122,7 @@ export const parseForm = <Shape extends ZodObject>(
     }
   }
 
-  if (result.success) {
+  if (result.success && Object.keys(breaches).length === 0) {
     return {
       success: true,
       data: result.data as ReturnType<Shape['parse']>,
@@ -114,10 +130,10 @@ export const parseForm = <Shape extends ZodObject>(
     };
   }
 
-  const errors: Record<string, string> = {};
+  const errors: Record<string, string> = { ...breaches };
   let formError: string | undefined;
 
-  for (const issue of result.error.issues) {
+  for (const issue of result.error?.issues ?? []) {
     const name = nameOf(issue.path);
     if (name === '') {
       formError ??= issue.message;

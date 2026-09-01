@@ -1,3 +1,5 @@
+import type { Rule } from './rules/rules';
+
 /** ValidityState flags a derived field can report a message for. */
 export type ValidityFlag =
   | 'badInput'
@@ -61,6 +63,8 @@ export type FormFields<
 > = {
   fields: Record<FieldPath, DerivedField>;
   arrays: Record<ArrayPath, DerivedArray>;
+  /** Checks HTML has no attribute for, evaluated identically on both sides. */
+  rules: Rule[];
   /** Checks that HTML cannot express. Reported once, never silently discarded. */
   dropped: DroppedCheck[];
 };

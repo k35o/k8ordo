@@ -1,6 +1,8 @@
 import type { ZodObject } from 'zod';
 
 import type { ArrayPathsOf, FieldPathsOf } from '../paths';
+import { asDefinition } from '../rules/define-form';
+import type { FormDefinition } from '../rules/define-form';
 import { schemaMap } from '../schema/walk';
 import type {
   DerivedArray,
@@ -34,8 +36,9 @@ const objectLevelCheckCount = (schema: ZodObject): number =>
  * enters the bundle.
  */
 export const formFields = <Schema extends ZodObject>(
-  schema: Schema,
+  input: FormDefinition<Schema> | Schema,
 ): FormFields<FieldPathsOf<Schema>, ArrayPathsOf<Schema>> => {
+  const { schema, rules } = asDefinition(input);
   const map = schemaMap(schema);
   const fields: Record<string, DerivedField> = {};
   const arrays: Record<string, DerivedArray> = {};
@@ -83,5 +86,5 @@ export const formFields = <Schema extends ZodObject>(
     });
   }
 
-  return { fields, arrays, dropped };
+  return { fields, arrays, rules, dropped };
 };
