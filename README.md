@@ -14,6 +14,7 @@ Every package here commits to the same four things:
 | Package | What it is |
 | --- | --- |
 | [`@k8ordo/ui`](packages/ui) | React UI components with semantic design tokens, i18n, and generative-UI adapters |
+| [`@k8ordo/form`](packages/form) | HTML constraint attributes, messages, and server-side validation from one zod schema |
 
 `@k8ordo/*` holds **primary libraries only** — the ones an application imports
 and builds on. Tools that plug into someone else's ecosystem (lint configs,

@@ -18,6 +18,11 @@ const PACKAGES: Package[] = [
     path: '/ui',
     description: 'home.memberUiDescription',
   },
+  {
+    name: '@k8ordo/form',
+    path: '/form',
+    description: 'home.memberFormDescription',
+  },
 ];
 
 type Discipline = { title: MessageKey; description: MessageKey };
