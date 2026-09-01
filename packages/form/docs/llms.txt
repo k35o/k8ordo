@@ -1,0 +1,27 @@
+# @k8ordo/form
+
+> Derive HTML constraint attributes, error messages, and server-side validation
+> from one zod schema. The DOM holds the values; React state holds only what the
+> DOM cannot express. Forms work with JavaScript disabled or not yet loaded.
+>
+> Like every k8ordo package it assumes React 19 and Server Components, uses only
+> what has reached Baseline newly available, and ships no polyfills or legacy
+> fallbacks.
+
+When installed via npm, these docs live under `node_modules/@k8ordo/form/docs/`.
+
+## Guide
+
+- [Design Guide](GUIDE.md): the server/client split, writing a form end to end,
+  what the package guarantees, what it does not do yet, and how it pairs with
+  `@k8ordo/ui` without depending on it.
+
+## Entry points
+
+- `@k8ordo/form` — client. `useForm(fields, state)` returns props for the
+  `<form>` element and a `field(name)` accessor giving input attributes, the
+  current error, and `invalid` / `required`.
+- `@k8ordo/form/server` — server. `formFields(schema)` derives serializable
+  fields plus a `dropped` list of checks HTML cannot express;
+  `parseForm(schema, formData)` validates a submission and returns typed data
+  or per-field errors with the submitted values.
