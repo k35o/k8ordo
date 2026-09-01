@@ -1,11 +1,14 @@
+import react from '@vitejs/plugin-react';
+import { playwright } from '@vitest/browser-playwright';
 import { defineConfig } from 'vite-plus';
 
 export default defineConfig({
   staged: {
     '*': 'vp check --fix',
   },
+  plugins: [react()],
   pack: {
-    entry: ['src/**/*.ts', '!src/**/*.test.ts'],
+    entry: ['src/**/*.ts', '!src/**/*.test.ts', '!src/**/*.browser.test.tsx'],
     format: 'esm',
     dts: true,
     outDir: 'dist',
@@ -18,8 +21,24 @@ export default defineConfig({
       {
         extends: true,
         test: {
-          name: { label: 'derive', color: 'blue' },
+          name: { label: 'unit', color: 'blue' },
           include: ['src/**/*.test.ts'],
+        },
+      },
+      {
+        extends: true,
+        test: {
+          name: { label: 'browser', color: 'green' },
+          include: ['src/**/*.browser.test.tsx'],
+          browser: {
+            enabled: true,
+            provider: playwright(),
+            headless: true,
+            screenshotFailures: false,
+            instances: [
+              { browser: 'chromium', context: { reducedMotion: 'reduce' } },
+            ],
+          },
         },
       },
     ],

@@ -149,15 +149,20 @@ export const useForm = <FieldPath extends string, ArrayPath extends string>(
   const [edited, setEdited] = useState<ReadonlySet<string>>(new Set());
   const [isDirty, setIsDirty] = useState(false);
   const [rowKeys, setRowKeys] = useState(() => initialRows(lookup, state));
-  const lastState = useRef(state);
+
+  // Compared by content, not identity. A caller writing `useForm(fields, {})`
+  // hands over a new object on every render, and resetting on identity would
+  // wipe the message the blur just produced.
+  const stateKey = JSON.stringify(state);
+  const lastKey = useRef(stateKey);
 
   // A fresh result from the server supersedes everything the client worked out
   // before the submit, including which fields the person had already fixed.
   useEffect(() => {
-    if (lastState.current === state) {
+    if (lastKey.current === stateKey) {
       return;
     }
-    lastState.current = state;
+    lastKey.current = stateKey;
     setClientErrors({});
     setEdited(new Set());
 
@@ -168,7 +173,7 @@ export const useForm = <FieldPath extends string, ArrayPath extends string>(
     if (firstErrored !== undefined && form !== null) {
       controlNamed(form, firstErrored)?.focus();
     }
-  }, [state]);
+  }, [stateKey, state.errors]);
 
   const evaluate = useCallback(
     (target: EventTarget | null, onlyIfShown: boolean) => {
