@@ -205,7 +205,9 @@ const slug = form.field('slug');
 const taken = useAsyncCheck(checkSlugAvailable); // a Server Action
 
 <input {...slug.input} {...taken.props} />;
-<button disabled={taken.isChecking} type="submit">保存</button>;
+<button disabled={taken.isChecking} type="submit">
+  保存
+</button>;
 ```
 
 ## Components that submit nothing
@@ -236,7 +238,8 @@ Validate one step before advancing by checking only its controls:
 
 ```tsx
 const stepIsValid = [...form.elements].every(
-  (element) => !(element instanceof HTMLInputElement) || element.checkValidity(),
+  (element) =>
+    !(element instanceof HTMLInputElement) || element.checkValidity(),
 );
 ```
 
