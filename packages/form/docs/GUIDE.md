@@ -7,6 +7,20 @@ the DOM cannot express.
 The shared discipline — React 19 / RSC assumed, Baseline newly available only,
 no polyfills — is in the [repository root `CLAUDE.md`](../../../CLAUDE.md).
 
+## zod, or zod/mini
+
+The conversion is taken from zod's shared core, so a schema written with either
+entry works. `zod/mini` is the same validator with a much smaller surface — if
+the schema module is also imported somewhere on the client, that is the one to
+reach for.
+
+```
+zod        63 kB gzipped
+zod/mini   10 kB gzipped
+```
+
+Nothing in this package notices which one you chose.
+
 ## The shape of it
 
 ```

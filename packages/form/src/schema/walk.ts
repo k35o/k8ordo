@@ -1,5 +1,8 @@
-import { toJSONSchema } from 'zod';
 import type { ZodObject, ZodType } from 'zod';
+// From core rather than the classic entry, so a schema written with `zod/mini`
+// works too — same conversion, and the caller is not forced to pull in an API
+// seven times the size of the one they chose.
+import { toJSONSchema } from 'zod/v4/core';
 
 import type { LeafSchema } from '../derive/attributes';
 
@@ -44,8 +47,18 @@ type Node = {
 const shapeOf = (schema: ZodType): Record<string, ZodType> | undefined =>
   (schema as unknown as { shape?: Record<string, ZodType> }).shape;
 
-const elementOf = (schema: ZodType): ZodType | undefined =>
-  (schema as unknown as { element?: ZodType }).element;
+/* oxlint-disable no-underscore-dangle -- `zod/mini` array schemas expose no
+   public `element`; the shared core definition is the only route that works
+   for both entries, and it is the same internal surface the check list already
+   requires. */
+const elementOf = (schema: ZodType): ZodType | undefined => {
+  const candidate = schema as unknown as {
+    element?: ZodType;
+    _zod?: { def?: { element?: ZodType } };
+  };
+  return candidate.element ?? candidate._zod?.def?.element;
+};
+/* oxlint-enable no-underscore-dangle */
 
 /**
  * `required` in JSON Schema means "the key is present", but a form always sends
