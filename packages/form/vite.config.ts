@@ -19,7 +19,7 @@ export default defineConfig({
         extends: true,
         test: {
           name: { label: 'derive', color: 'blue' },
-          include: ['src/derive/**/*.test.ts', 'src/parse/**/*.test.ts'],
+          include: ['src/**/*.test.ts'],
         },
       },
     ],

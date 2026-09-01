@@ -82,7 +82,10 @@ export const attributesFor = (
     input.type = 'number';
     input.step = schema.type === 'integer' ? 1 : (schema.multipleOf ?? 'any');
 
-    if (isFiniteNumber(schema.minimum)) {
+    if (
+      isFiniteNumber(schema.minimum) &&
+      !JS_SAFE_INTEGER_BOUNDS.has(schema.minimum)
+    ) {
       input.min = schema.minimum;
     } else if (isFiniteNumber(schema.exclusiveMinimum)) {
       if (schema.type === 'integer') {

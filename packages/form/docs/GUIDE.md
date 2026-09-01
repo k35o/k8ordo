@@ -104,11 +104,57 @@ filling in the form did.
 retry without JavaScript keeps the input. Fields marked
 `.meta({ input: 'password' })` are excluded automatically.
 
+**`isDirty` costs one boolean.** `form.isDirty` compares each control's value
+with the value it was rendered with, read straight from the DOM. It flips at
+most twice, so it never becomes a per-keystroke re-render.
+
+## Nested objects and repeated rows
+
+A nested field is addressed by its dotted path, which is also the `name` the
+browser submits.
+
+```tsx
+const email = form.field('user.email'); // name="user.email"
+```
+
+A repeated group is reached through `array()`. React state holds only the
+identity of each row — the values stay in the DOM, so adding or removing a row
+never copies anything into React.
+
+```tsx
+const items = form.array('items');
+
+{items.rows.map((row) => (
+  <div key={row.key}>
+    <input {...row.field('name').input} />  {/* name="items[0].name" */}
+    {items.canRemove && <button onClick={row.remove} type="button">削除</button>}
+  </div>
+))}
+{items.canAdd && <button onClick={items.add} type="button">追加</button>}
+```
+
+`canAdd` and `canRemove` come from the schema's `.min()` / `.max()`, so the
+buttons disappear at exactly the bounds the server enforces. For an array of
+scalars (`z.array(z.string())`) the item has a single unnamed field:
+`row.field()`.
+
+`parseForm` reports how many rows arrived in `state.rows`, so a retry without
+JavaScript rebuilds the same number of rows.
+
+## Paths are checked at compile time
+
+`formFields` derives the set of valid paths from the schema type, so a typo is
+a build error rather than something you find by clicking.
+
+```tsx
+form.field('titel');   // error: not a field in the schema
+form.field('items');   // error: an array, reached through array()
+form.array('user');    // error: an object, not an array
+```
+
 ## What it does not do yet
 
-- Nested (`user.email`) and repeated (`items[0].name`) field names
 - Serializable cross-field rules; `refine` is server-only for now
-- `isDirty` / `isTouched` derived from the DOM
 - Asynchronous per-field validation
 - Input masking
 

@@ -1,9 +1,10 @@
 export { useForm } from './use-form';
-export type { FieldView, UseFormReturn } from './use-form';
+export type { ArrayView, FieldView, RowView, UseFormReturn } from './use-form';
 export type {
+  DerivedArray,
   DerivedField,
-  DerivedFields,
   FieldInput,
+  FormFields,
   FormState,
   ValidityFlag,
 } from './types';

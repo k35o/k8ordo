@@ -1,87 +1,93 @@
-import { toJSONSchema } from 'zod';
 import type { ZodObject } from 'zod';
 
+import { INDEX, schemaMap } from '../schema/walk';
 import type { FormState } from '../types';
+import { nameOf, setPath } from './paths';
 
-type Layout = {
-  keys: string[];
-  /** Fields whose absence from FormData is normal: an unchecked checkbox. */
-  booleans: Set<string>;
-  /** Fields that must never be echoed back to the client. */
-  secrets: Set<string>;
-};
+export type ParseResult<Output> =
+  | { success: true; data: Output; state: FormState }
+  | { success: false; data?: undefined; state: FormState };
 
-const layouts = new WeakMap<ZodObject, Layout>();
-
-const layoutOf = (schema: ZodObject): Layout => {
-  const cached = layouts.get(schema);
-  if (cached !== undefined) {
-    return cached;
-  }
-
-  const json = toJSONSchema(schema, {
-    io: 'output',
-    unrepresentable: 'any',
-  }) as {
-    properties?: Record<string, { type?: string; input?: string }>;
-  };
-
-  const layout: Layout = {
-    keys: Object.keys(json.properties ?? {}),
-    booleans: new Set(),
-    secrets: new Set(),
-  };
-
-  for (const [name, leaf] of Object.entries(json.properties ?? {})) {
-    if (leaf.type === 'boolean') {
-      layout.booleans.add(name);
+/** How many rows each array actually received, read from the submitted names. */
+const rowCounts = (
+  formData: FormData,
+  arrays: string[],
+): Record<string, number> => {
+  const counts: Record<string, number> = {};
+  for (const path of arrays) {
+    let highest = -1;
+    for (const key of formData.keys()) {
+      if (!key.startsWith(`${path}[`)) {
+        continue;
+      }
+      const index = Number(
+        key.slice(path.length + 1, key.indexOf(']', path.length)),
+      );
+      if (Number.isInteger(index) && index > highest) {
+        highest = index;
+      }
     }
-    if (leaf.input === 'password') {
-      layout.secrets.add(name);
-    }
+    counts[path] = highest + 1;
   }
-
-  layouts.set(schema, layout);
-  return layout;
+  return counts;
 };
-
-export type ParseResult<Output, Keys extends string> =
-  | { success: true; data: Output; state: FormState<Keys> }
-  | { success: false; data?: undefined; state: FormState<Keys> };
 
 /**
  * Turn FormData into the shape the schema expects, then validate it.
  *
  * Only the structural part happens here — an unchecked checkbox arrives as a
- * missing key rather than `false`, a repeated name arrives as several entries,
- * and everything is a string. Converting `'42'` to `42` stays the schema's job
- * via `z.coerce`, so the schema keeps describing what it actually validates.
+ * missing key, a repeated name arrives as several entries, names carry their
+ * nesting, and everything is a string. Converting `'42'` to `42` stays the
+ * schema's job via `z.coerce`, so the schema keeps describing what it
+ * actually validates.
  */
 export const parseForm = <Shape extends ZodObject>(
   schema: Shape,
   formData: FormData,
-): ParseResult<ReturnType<Shape['parse']>, keyof Shape['shape'] & string> => {
-  type Keys = keyof Shape['shape'] & string;
-
-  const layout = layoutOf(schema);
+): ParseResult<ReturnType<Shape['parse']>> => {
+  const map = schemaMap(schema);
   const raw: Record<string, unknown> = {};
   const missing: string[] = [];
+  const secrets = new Set<string>();
 
-  for (const key of layout.keys) {
-    if (layout.booleans.has(key)) {
-      raw[key] = formData.has(key);
-      continue;
-    }
+  const rows = rowCounts(
+    formData,
+    map.arrays.map((array) => array.path),
+  );
 
-    const entries = formData.getAll(key);
-    if (entries.length === 0) {
-      // A text field left empty still submits ''. An absent key means no input
-      // carried this name at all — the markup and the schema disagree, which is
-      // a wiring mistake rather than something the person filling it in did.
-      missing.push(key);
-      continue;
+  for (const array of map.arrays) {
+    setPath(raw, array.path, Array.from({ length: rows[array.path] ?? 0 }));
+  }
+
+  for (const leaf of map.leaves) {
+    const names =
+      leaf.arrayPath === null
+        ? [leaf.name]
+        : Array.from({ length: rows[leaf.arrayPath] ?? 0 }, (_, index) =>
+            leaf.name.replace(INDEX, String(index)),
+          );
+
+    for (const name of names) {
+      if (leaf.json.input === 'password') {
+        secrets.add(name);
+      }
+
+      if (leaf.json.type === 'boolean') {
+        setPath(raw, name, formData.has(name));
+        continue;
+      }
+
+      const entries = formData.getAll(name);
+      if (entries.length === 0) {
+        // A text field left empty still submits ''. An absent key means no
+        // input carried this name at all — the markup and the schema disagree,
+        // which is a wiring mistake rather than something the person filling it
+        // in did.
+        missing.push(name);
+        continue;
+      }
+      setPath(raw, name, entries.length === 1 ? entries[0] : entries);
     }
-    raw[key] = entries.length === 1 ? entries[0] : entries;
   }
 
   if (missing.length > 0) {
@@ -93,14 +99,10 @@ export const parseForm = <Shape extends ZodObject>(
 
   const result = schema.safeParse(raw);
 
-  const values: Partial<Record<Keys, string>> = {};
-  for (const key of layout.keys) {
-    if (layout.secrets.has(key)) {
-      continue;
-    }
-    const value = raw[key];
-    if (typeof value === 'string') {
-      values[key as Keys] = value;
+  const values: Record<string, string> = {};
+  for (const [name, value] of formData.entries()) {
+    if (typeof value === 'string' && !secrets.has(name)) {
+      values[name] = value;
     }
   }
 
@@ -108,23 +110,23 @@ export const parseForm = <Shape extends ZodObject>(
     return {
       success: true,
       data: result.data as ReturnType<Shape['parse']>,
-      state: { values },
+      state: { values, rows },
     };
   }
 
-  const errors: Partial<Record<Keys, string>> = {};
+  const errors: Record<string, string> = {};
   let formError: string | undefined;
 
   for (const issue of result.error.issues) {
-    const key = issue.path[0];
-    if (typeof key === 'string' && key in schema.shape) {
+    const name = nameOf(issue.path);
+    if (name === '') {
+      formError ??= issue.message;
+    } else {
       // The first issue per field is the one shown; later ones would push the
       // earlier, usually more fundamental, message out of view.
-      errors[key as Keys] ??= issue.message;
-    } else {
-      formError ??= issue.message;
+      errors[name] ??= issue.message;
     }
   }
 
-  return { success: false, state: { errors, values, formError } };
+  return { success: false, state: { errors, values, rows, formError } };
 };

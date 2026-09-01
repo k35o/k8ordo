@@ -1,9 +1,14 @@
-import { toJSONSchema } from 'zod';
-import type { ZodObject, ZodType } from 'zod';
+import type { ZodObject } from 'zod';
 
-import type { DerivedField, DroppedCheck, FormFields } from '../types';
+import type { ArrayPathsOf, FieldPathsOf } from '../paths';
+import { schemaMap } from '../schema/walk';
+import type {
+  DerivedArray,
+  DerivedField,
+  DroppedCheck,
+  FormFields,
+} from '../types';
 import { attributesFor } from './attributes';
-import type { LeafSchema } from './attributes';
 import { messagesFor } from './messages';
 
 /**
@@ -22,53 +27,52 @@ const objectLevelCheckCount = (schema: ZodObject): number =>
 /* oxlint-enable no-underscore-dangle */
 
 /**
- * `required` in JSON Schema means "the key is present", but an HTML form always
- * sends every field, empty ones as ''. Asking the schema what it does with ''
- * is what makes the attribute mean the same thing on both sides: the browser
- * blocks exactly the values the server would have rejected.
- */
-const rejectsEmptyString = (schema: ZodType): boolean =>
-  !schema.safeParse('').success;
-
-/**
  * Derive input attributes and messages from one zod object schema.
  *
  * Call this on the server — in a Server Component or at module scope. The
  * result is plain data, so it crosses to the client as props and zod never
  * enters the bundle.
  */
-export const formFields = <Shape extends ZodObject>(
-  schema: Shape,
-): FormFields<keyof Shape['shape'] & string> => {
-  const json = toJSONSchema(schema, {
-    io: 'output',
-    unrepresentable: 'any',
-  }) as { properties?: Record<string, LeafSchema & { input?: string }> };
-
-  const properties = json.properties ?? {};
+export const formFields = <Schema extends ZodObject>(
+  schema: Schema,
+): FormFields<FieldPathsOf<Schema>, ArrayPathsOf<Schema>> => {
+  const map = schemaMap(schema);
   const fields: Record<string, DerivedField> = {};
+  const arrays: Record<string, DerivedArray> = {};
   const dropped: DroppedCheck[] = [];
 
-  for (const [name, leaf] of Object.entries(properties)) {
-    const fieldSchema = schema.shape[name] as ZodType | undefined;
-    if (fieldSchema === undefined) {
-      continue;
-    }
+  for (const array of map.arrays) {
+    arrays[array.path] = {
+      path: array.path,
+      minItems: array.minItems,
+      maxItems: array.maxItems,
+      item: {},
+    };
+  }
 
-    const required = rejectsEmptyString(fieldSchema);
-    const attributes = attributesFor(name, leaf, required);
-    const secret = leaf.input === 'password';
-
+  for (const leaf of map.leaves) {
+    const attributes = attributesFor(leaf.name, leaf.json, leaf.required);
+    const secret = leaf.json.input === 'password';
     if (secret) {
       attributes.input.type = 'password';
     }
 
-    fields[name] = {
+    const derived: DerivedField = {
       input: attributes.input,
-      messages: messagesFor(fieldSchema, attributes.input, required),
+      messages: messagesFor(leaf.zod, attributes.input, leaf.required),
       secret,
     };
-    dropped.push(...attributes.dropped);
+
+    const array = leaf.arrayPath === null ? undefined : arrays[leaf.arrayPath];
+    if (array === undefined) {
+      fields[leaf.path] = derived;
+    } else {
+      array.item[leaf.itemKey ?? ''] = derived;
+    }
+
+    for (const entry of attributes.dropped) {
+      dropped.push({ ...entry, field: leaf.path });
+    }
   }
 
   const objectChecks = objectLevelCheckCount(schema);
@@ -79,8 +83,5 @@ export const formFields = <Shape extends ZodObject>(
     });
   }
 
-  return {
-    fields: fields as FormFields<keyof Shape['shape'] & string>['fields'],
-    dropped,
-  };
+  return { fields, arrays, dropped };
 };

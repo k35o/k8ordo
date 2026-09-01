@@ -1,6 +1,6 @@
 {
   "name": "@k8ordo/form",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Derive HTML constraint attributes and per-field errors from one zod schema. Works without JavaScript.",
   "keywords": [
     "constraint-validation",
