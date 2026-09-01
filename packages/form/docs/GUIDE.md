@@ -193,10 +193,60 @@ message arrives through the same path as every other one.
 Available: `sameAs`, `minChecked`, `requiredWhen`. Anything else stays a
 `.refine()`, runs on the server, and is listed in `dropped`.
 
+## Asking the server about one field
+
+Whether a name is already taken is something only the server knows. `useAsyncCheck`
+runs on blur, keeps the newest answer when replies arrive out of order, and
+applies the result with `setCustomValidity` — so the answer shows up through the
+same path as every other message.
+
+```tsx
+const slug = form.field('slug');
+const taken = useAsyncCheck(checkSlugAvailable); // a Server Action
+
+<input {...slug.input} {...taken.props} />;
+<button disabled={taken.isChecking} type="submit">保存</button>;
+```
+
+## Components that submit nothing
+
+A rich text editor or a third-party combobox renders no `<input name>`, so
+FormData never sees it. Park its value in a hidden input rather than pulling it
+into React state and pushing it back out at submit:
+
+```tsx
+<Editor onChange={setBody} value={body} />
+<input {...hiddenValue('body', body)} />
+```
+
+This is all `Controller` does in react-hook-form, and it is the one place that
+binding silently breaks there. Here the value is in the form, so it submits
+whether or not anything else works.
+
+## Multi-step forms
+
+Keep every step mounted and hide the ones you are not on. The values stay in
+the DOM, so moving between steps costs nothing and losing a step is impossible:
+
+```tsx
+<div hidden={step !== 1}>{/* … */}</div>
+```
+
+Validate one step before advancing by checking only its controls:
+
+```tsx
+const stepIsValid = [...form.elements].every(
+  (element) => !(element instanceof HTMLInputElement) || element.checkValidity(),
+);
+```
+
+Without JavaScript this degrades to one long form that submits in a single
+request — which is the correct behaviour, not a broken one.
+
 ## What it does not do yet
 
-- Asynchronous per-field validation
-- Input masking
+- Input masking. Rewriting `el.value` on input works with the DOM as the source
+  of truth, but managing the caret is a separate problem from wiring a form.
 
 ## Working with @k8ordo/ui
 
