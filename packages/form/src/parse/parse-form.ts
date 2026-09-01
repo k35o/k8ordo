@@ -1,8 +1,10 @@
-import type { ZodObject } from 'zod';
+import type { output } from 'zod/v4/core';
 
 import { asDefinition } from '../rules/define-form';
 import type { FormDefinition } from '../rules/define-form';
 import { breachOf } from '../rules/rules';
+import { asProbe } from '../schema/object-schema';
+import type { ObjectSchema } from '../schema/object-schema';
 import { INDEX, schemaMap } from '../schema/walk';
 import type { FormState } from '../types';
 import { nameOf, setPath } from './paths';
@@ -44,10 +46,10 @@ const rowCounts = (
  * schema's job via `z.coerce`, so the schema keeps describing what it
  * actually validates.
  */
-export const parseForm = <Shape extends ZodObject>(
+export const parseForm = <Shape extends ObjectSchema>(
   input: FormDefinition<Shape> | Shape,
   formData: FormData,
-): ParseResult<ReturnType<Shape['parse']>> => {
+): ParseResult<output<Shape>> => {
   const { schema, rules } = asDefinition(input);
   const map = schemaMap(schema);
   const raw: Record<string, unknown> = {};
@@ -101,7 +103,7 @@ export const parseForm = <Shape extends ZodObject>(
     );
   }
 
-  const result = schema.safeParse(raw);
+  const result = asProbe(schema).safeParse(raw);
 
   // Evaluated against the submitted values, exactly as the browser evaluates
   // them against the live form. Same function, same inputs, same verdict.
@@ -125,7 +127,7 @@ export const parseForm = <Shape extends ZodObject>(
   if (result.success && Object.keys(breaches).length === 0) {
     return {
       success: true,
-      data: result.data as ReturnType<Shape['parse']>,
+      data: result.data as output<Shape>,
       state: { values, rows },
     };
   }

@@ -19,7 +19,11 @@ zod        63 kB gzipped
 zod/mini   10 kB gzipped
 ```
 
-Nothing in this package notices which one you chose.
+Nothing in this package notices which one you chose. Note that under this
+design the schema is imported only by server code — the Server Component that
+derives the fields, and the Server Action that parses the submission — so zod
+does not reach the browser either way. Reach for `zod/mini` when something on
+the client imports the schema module anyway.
 
 ## The shape of it
 
@@ -115,8 +119,16 @@ Forgetting to spread `input` is a wiring mistake, not something the person
 filling in the form did.
 
 **Secrets are never echoed.** `parseForm` returns the submitted values so a
-retry without JavaScript keeps the input. Fields marked
-`.meta({ input: 'password' })` are excluded automatically.
+retry without JavaScript keeps the input. Fields marked as passwords are
+excluded automatically, and typed as `password` in the markup:
+
+```ts
+z.string().min(8).meta({ input: 'password' }); // zod
+globalRegistry.add(password, { input: 'password' }); // zod or zod/mini
+```
+
+`.meta()` is shorthand for the registry and is not available on `zod/mini`;
+the registry route works with either.
 
 **`isDirty` costs one boolean.** `form.isDirty` compares each control's value
 with the value it was rendered with, read straight from the DOM. It flips at

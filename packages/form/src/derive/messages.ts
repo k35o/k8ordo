@@ -1,5 +1,6 @@
-import type { ZodType } from 'zod';
+import type { $ZodType } from 'zod/v4/core';
 
+import { asProbe } from '../schema/object-schema';
 import type { FieldInput, ValidityFlag } from '../types';
 
 /**
@@ -98,14 +99,14 @@ const probesFor = (input: FieldInput, required: boolean): Probe[] => {
  * and cannot be controlled.
  */
 export const messagesFor = (
-  schema: ZodType,
+  schema: $ZodType,
   input: FieldInput,
   required: boolean,
 ): Partial<Record<ValidityFlag, string>> => {
   const messages: Partial<Record<ValidityFlag, string>> = {};
 
   for (const probe of probesFor(input, required)) {
-    const result = schema.safeParse(probe.value);
+    const result = asProbe(schema).safeParse(probe.value);
     if (result.success) {
       continue;
     }

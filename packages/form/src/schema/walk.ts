@@ -1,10 +1,12 @@
-import type { ZodObject, ZodType } from 'zod';
 // From core rather than the classic entry, so a schema written with `zod/mini`
 // works too — same conversion, and the caller is not forced to pull in an API
 // seven times the size of the one they chose.
 import { toJSONSchema } from 'zod/v4/core';
+import type { $ZodType } from 'zod/v4/core';
 
 import type { LeafSchema } from '../derive/attributes';
+import { asProbe } from './object-schema';
+import type { ObjectSchema } from './object-schema';
 
 /** Placeholder an array item's name carries until a row index is known. */
 export const INDEX = '{index}';
@@ -15,7 +17,7 @@ export type LeafNode = {
   /** The `name` attribute, with {@link INDEX} still in it for array items. */
   name: string;
   json: LeafSchema & { input?: string };
-  zod: ZodType;
+  zod: $ZodType;
   required: boolean;
   /** The array this leaf repeats inside, or null. */
   arrayPath: string | null;
@@ -44,17 +46,17 @@ type Node = {
   maxItems?: number;
 } & LeafSchema & { input?: string };
 
-const shapeOf = (schema: ZodType): Record<string, ZodType> | undefined =>
-  (schema as unknown as { shape?: Record<string, ZodType> }).shape;
+const shapeOf = ($schema: $ZodType): Record<string, $ZodType> | undefined =>
+  ($schema as unknown as { shape?: Record<string, $ZodType> }).shape;
 
 /* oxlint-disable no-underscore-dangle -- `zod/mini` array schemas expose no
-   public `element`; the shared core definition is the only route that works
-   for both entries, and it is the same internal surface the check list already
+   public `element`; the shared core definition is the only route that works for
+   both entries, and it is the same internal surface the check list already
    requires. */
-const elementOf = (schema: ZodType): ZodType | undefined => {
-  const candidate = schema as unknown as {
-    element?: ZodType;
-    _zod?: { def?: { element?: ZodType } };
+const elementOf = ($schema: $ZodType): $ZodType | undefined => {
+  const candidate = $schema as unknown as {
+    element?: $ZodType;
+    _zod?: { def?: { element?: $ZodType } };
   };
   return candidate.element ?? candidate._zod?.def?.element;
 };
@@ -65,12 +67,12 @@ const elementOf = (schema: ZodType): ZodType | undefined => {
  * every field, empty ones as ''. Asking the schema what it does with '' is what
  * makes the attribute mean the same on both sides.
  */
-const rejectsEmptyString = (schema: ZodType): boolean =>
-  !schema.safeParse('').success;
+const rejectsEmptyString = ($schema: $ZodType): boolean =>
+  !asProbe($schema).safeParse('').success;
 
 const walkNode = (
   json: Node,
-  zod: ZodType,
+  zod: $ZodType,
   path: string,
   name: string,
   context: { arrayPath: string | null; itemKey: string | null },
@@ -138,14 +140,14 @@ const walkNode = (
   });
 };
 
-const cache = new WeakMap<ZodObject, SchemaMap>();
+const cache = new WeakMap<object, SchemaMap>();
 
 /**
  * Describe a schema once: every leaf that becomes an input, and every array
  * that becomes a repeatable group. Both the derivation and the parse read this,
  * so the two can never disagree about what the form contains.
  */
-export const schemaMap = (schema: ZodObject): SchemaMap => {
+export const schemaMap = (schema: ObjectSchema): SchemaMap => {
   const cached = cache.get(schema);
   if (cached !== undefined) {
     return cached;

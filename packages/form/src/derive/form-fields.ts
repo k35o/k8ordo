@@ -1,8 +1,9 @@
-import type { ZodObject } from 'zod';
+import type { $ZodType } from 'zod/v4/core';
 
 import type { ArrayPathsOf, FieldPathsOf } from '../paths';
 import { asDefinition } from '../rules/define-form';
 import type { FormDefinition } from '../rules/define-form';
+import type { ObjectSchema } from '../schema/object-schema';
 import { schemaMap } from '../schema/walk';
 import type {
   DerivedArray,
@@ -24,7 +25,7 @@ import { messagesFor } from './messages';
    coupling. If zod moves it the count is wrong; the attributes are not. */
 type ZodInternals = { _zod?: { def?: { checks?: unknown[] } } };
 
-const objectLevelCheckCount = (schema: ZodObject): number =>
+const objectLevelCheckCount = (schema: $ZodType): number =>
   (schema as unknown as ZodInternals)._zod?.def?.checks?.length ?? 0;
 /* oxlint-enable no-underscore-dangle */
 
@@ -35,7 +36,7 @@ const objectLevelCheckCount = (schema: ZodObject): number =>
  * result is plain data, so it crosses to the client as props and zod never
  * enters the bundle.
  */
-export const formFields = <Schema extends ZodObject>(
+export const formFields = <Schema extends ObjectSchema>(
   input: FormDefinition<Schema> | Schema,
 ): FormFields<FieldPathsOf<Schema>, ArrayPathsOf<Schema>> => {
   const { schema, rules } = asDefinition(input);

@@ -1,4 +1,5 @@
 import * as zm from 'zod/mini';
+import { globalRegistry } from 'zod/v4/core';
 
 import { formFields } from './derive/form-fields';
 import { parseForm } from './parse/parse-form';
@@ -25,7 +26,17 @@ describe('a schema written with zod/mini', () => {
     expect(fields.title.messages.valueMissing).toBe(
       'タイトルを入力してください',
     );
-    expect(arrays.items.item.name.input.name).toBe('items[{index}].name');
+    expect(arrays.items.item.name?.input.name).toBe('items[{index}].name');
+  });
+
+  it('marks a secret through the registry, which mini has instead of .meta()', () => {
+    const password = zm.string().check(zm.minLength(8));
+    globalRegistry.add(password, { input: 'password' });
+
+    const { fields } = formFields(zm.object({ password }));
+
+    expect(fields.password.secret).toBe(true);
+    expect(fields.password.input.type).toBe('password');
   });
 
   it('parses a submission the same way', () => {
