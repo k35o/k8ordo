@@ -75,8 +75,11 @@ export type FormFields<
  */
 export type FormState = {
   errors?: Record<string, string>;
-  /** Submitted values for re-render. Secret fields are never included. */
-  values?: Record<string, string>;
+  /**
+   * Submitted values for re-render. Secret fields are never included; a name
+   * several controls share — a checkbox group — echoes as an array.
+   */
+  values?: Record<string, string | string[]>;
   /** How many rows each array had, so a no-JS retry rebuilds them. */
   rows?: Record<string, number>;
   /** An error about the submission as a whole rather than one field. */

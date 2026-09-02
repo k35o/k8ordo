@@ -165,6 +165,21 @@ describe('parseForm', () => {
     expect(first.state.token).not.toBe(second.state.token);
   });
 
+  it('echoes a shared name as an array so a group can be restored', () => {
+    const grouped = z.object({ tags: z.array(z.enum(['a', 'b', 'c'])).min(3) });
+
+    const result = parseForm(
+      grouped,
+      formDataOf([
+        ['tags', 'a'],
+        ['tags', 'b'],
+      ]),
+    );
+
+    expect(result.success).toBe(false);
+    expect(result.state.values?.tags).toStrictEqual(['a', 'b']);
+  });
+
   it('routes an object-level issue to formError, not to a field', () => {
     const paired = z
       .object({

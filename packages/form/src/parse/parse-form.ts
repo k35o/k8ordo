@@ -148,10 +148,18 @@ export const parseForm = <Shape extends ObjectSchema>(
     }
   }
 
-  const values: Record<string, string> = {};
+  const values: Record<string, string | string[]> = {};
   for (const [name, value] of formData.entries()) {
-    if (typeof value === 'string' && !secrets.has(name)) {
+    if (typeof value !== 'string' || secrets.has(name)) {
+      continue;
+    }
+    const existing = values[name];
+    if (existing === undefined) {
       values[name] = value;
+    } else if (typeof existing === 'string') {
+      values[name] = [existing, value];
+    } else {
+      existing.push(value);
     }
   }
 

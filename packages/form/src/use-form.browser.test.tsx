@@ -21,8 +21,13 @@ const derived = formFields(signup);
 
 const NO_STATE: FormState = {};
 
+// Captured on render so a test can assert what the spread would put in the
+// server-rendered markup.
+let signupProps: object = {};
+
 const Signup: FC<{ state?: FormState }> = ({ state = NO_STATE }) => {
   const form = useForm(derived, state);
+  signupProps = form.props;
   const email = form.field('email');
   const password = form.field('password');
   const confirm = form.field('confirm');
@@ -62,6 +67,9 @@ const List: FC = () => {
             aria-label={`name-${String(row.index)}`}
             {...row.field('name').input}
           />
+          <p data-testid={`name-error-${String(row.index)}`}>
+            {row.field('name').error ?? ''}
+          </p>
           <button onClick={row.remove} type="button">
             {`remove-${String(row.index)}`}
           </button>
@@ -89,6 +97,31 @@ const Inline: FC = () => {
       <input aria-label="email" {...email.input} />
       <input aria-label="password" {...form.field('password').input} />
       <p data-testid="email-error">{email.error ?? ''}</p>
+    </form>
+  );
+};
+
+const choiceSchema = z.object({
+  color: z.enum(['red', 'blue']),
+  agree: z.boolean(),
+});
+const choiceFields = formFields(choiceSchema);
+
+const Choice: FC<{ state?: FormState }> = ({ state = NO_STATE }) => {
+  const form = useForm(choiceFields, state);
+
+  return (
+    <form {...form.props}>
+      <select aria-label="color" {...form.field('color').input}>
+        <option value="red">red</option>
+        <option value="blue">blue</option>
+      </select>
+      <input
+        aria-label="agree"
+        type="checkbox"
+        {...form.field('agree').input}
+      />
+      <p data-testid="dirty">{String(form.isDirty)}</p>
     </form>
   );
 };
@@ -216,5 +249,104 @@ describe('useForm in a browser', () => {
     // The second row survives with its value and takes over index 0.
     await expect.element(screen.getByTestId('count')).toHaveTextContent('1');
     await expect.element(screen.getByLabelText('name-0')).toHaveValue('ばね');
+  });
+
+  it('keeps an error attached to its row when an earlier row is removed', async () => {
+    const screen = await render(<List />);
+
+    await screen.getByRole('button', { name: 'add' }).click();
+    await screen.getByRole('button', { name: 'add' }).click();
+    await screen.getByLabelText('name-0').fill('ねじ');
+    // Blur the empty second row so its error is on screen.
+    await screen.getByLabelText('name-1').click();
+    await screen.getByLabelText('name-0').click();
+    await expect
+      .element(screen.getByTestId('name-error-1'))
+      .toHaveTextContent('品名は必須です');
+
+    await screen.getByRole('button', { name: 'remove-0' }).click();
+
+    // The invalid row now renders as index 0 and its message came with it.
+    await expect
+      .element(screen.getByTestId('name-error-0'))
+      .toHaveTextContent('品名は必須です');
+  });
+
+  it('clears a cross-field message when the other field is the one fixed', async () => {
+    const screen = await render(<Signup />);
+
+    await screen.getByLabelText('password').fill('hunter2hunter2');
+    await screen.getByLabelText('confirm').fill('something-else');
+    await screen.getByLabelText('email').click();
+    await expect
+      .element(screen.getByTestId('confirm-error'))
+      .toHaveTextContent('パスワードが一致しません');
+
+    // Fix the mismatch from the password side; confirm is never touched again.
+    await screen.getByLabelText('password').fill('something-else');
+    await expect
+      .element(screen.getByTestId('confirm-error'))
+      .toHaveTextContent('');
+  });
+
+  it('re-shows the errors of an identical second failed submit via the token', async () => {
+    const screen = await render(
+      <Signup
+        state={{ errors: { email: 'すでに登録されています' }, token: '1' }}
+      />,
+    );
+
+    await screen.getByLabelText('email').fill('other@example.com');
+    await expect
+      .element(screen.getByTestId('email-error'))
+      .toHaveTextContent('');
+
+    // Same content, new token: the server did answer again.
+    screen.rerender(
+      <Signup
+        state={{ errors: { email: 'すでに登録されています' }, token: '2' }}
+      />,
+    );
+    await expect
+      .element(screen.getByTestId('email-error'))
+      .toHaveTextContent('すでに登録されています');
+  });
+
+  it('marks the form dirty when a select changes', async () => {
+    const screen = await render(<Choice />);
+
+    await expect
+      .element(screen.getByTestId('dirty'))
+      .toHaveTextContent('false');
+    await screen.getByLabelText('color').selectOptions('blue');
+    await expect.element(screen.getByTestId('dirty')).toHaveTextContent('true');
+  });
+
+  it('restores a checked box from the echo through defaultChecked', async () => {
+    const screen = await render(
+      <Choice state={{ values: { color: 'blue', agree: 'on' } }} />,
+    );
+
+    await expect.element(screen.getByLabelText('agree')).toBeChecked();
+  });
+
+  it('reads a box absent from the echo as unchecked', async () => {
+    const screen = await render(
+      <Choice state={{ values: { color: 'blue' } }} />,
+    );
+
+    await expect.element(screen.getByLabelText('agree')).not.toBeChecked();
+  });
+
+  it('turns native validation off with JavaScript, never in the markup', async () => {
+    const screen = await render(<Signup />);
+    await expect.element(screen.getByLabelText('email')).toBeVisible();
+
+    // Not a rendered prop — the server's HTML carries no novalidate, so a
+    // person without JavaScript keeps the browser's own checks. The hook
+    // takes over through the ref once mounted.
+    expect(Object.keys(signupProps)).not.toContain('noValidate');
+    const email = screen.getByLabelText('email').element() as HTMLInputElement;
+    expect(email.form?.noValidate).toBe(true);
   });
 });
