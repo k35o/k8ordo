@@ -4,14 +4,18 @@
  * the same values — the client reading the live form, the server reading the
  * submission. One declaration, two consumers, no second implementation to
  * drift from the first.
+ *
+ * `Field` is the set of paths the schema actually has: `defineForm` supplies
+ * it, so a typo in a field name fails to compile instead of producing a rule
+ * that never fires.
  */
-export type Rule =
-  | { kind: 'sameAs'; field: string; other: string; message: string }
-  | { kind: 'minChecked'; field: string; min: number; message: string }
+export type Rule<Field extends string = string> =
+  | { kind: 'sameAs'; field: Field; other: Field; message: string }
+  | { kind: 'minChecked'; field: Field; min: number; message: string }
   | {
       kind: 'requiredWhen';
-      field: string;
-      when: string;
+      field: Field;
+      when: Field;
       equals: string;
       message: string;
     };
@@ -20,26 +24,26 @@ export type Rule =
 export type Values = (name: string) => string[];
 
 /** The value must equal another field's. Password confirmation, and the like. */
-export const sameAs = (
-  field: string,
-  other: string,
+export const sameAs = <Field extends string>(
+  field: Field,
+  other: Field,
   message: string,
-): Rule => ({ kind: 'sameAs', field, other, message });
+): Rule<Field> => ({ kind: 'sameAs', field, other, message });
 
 /** At least `min` boxes sharing this name must be checked. */
-export const minChecked = (
-  field: string,
+export const minChecked = <Field extends string>(
+  field: Field,
   min: number,
   message: string,
-): Rule => ({ kind: 'minChecked', field, min, message });
+): Rule<Field> => ({ kind: 'minChecked', field, min, message });
 
 /** Required only while another field holds a particular value. */
-export const requiredWhen = (
-  field: string,
-  when: string,
+export const requiredWhen = <Field extends string>(
+  field: Field,
+  when: Field,
   equals: string,
   message: string,
-): Rule => ({ kind: 'requiredWhen', field, when, equals, message });
+): Rule<Field> => ({ kind: 'requiredWhen', field, when, equals, message });
 
 const first = (values: Values, name: string): string => values(name)[0] ?? '';
 

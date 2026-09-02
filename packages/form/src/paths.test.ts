@@ -1,6 +1,8 @@
 import { z } from 'zod';
 
 import { formFields } from './derive/form-fields';
+import { defineForm } from './rules/define-form';
+import { sameAs } from './rules/rules';
 import { useForm } from './use-form';
 
 const schema = z.object({
@@ -40,6 +42,16 @@ describe('paths are derived from the schema', () => {
     };
 
     expect(useCompileTimeOnly).toBeTypeOf('function');
+  });
+
+  it('rejects a rule naming a field the schema does not have', () => {
+    defineForm(schema, [sameAs('title', 'user.email', '一致しません')]);
+    defineForm(schema, [
+      // @ts-expect-error 'titel' is not a field in the schema
+      sameAs('titel', 'title', '一致しません'),
+    ]);
+
+    expect(defineForm).toBeTypeOf('function');
   });
 
   it('keeps the derived fields addressable without an undefined check', () => {
