@@ -145,6 +145,26 @@ describe('parseForm', () => {
     expect(() => parseForm(listed, forged)).toThrow(/items\[0\]\.name/u);
   });
 
+  it('stamps each parse with its own token so identical results stay distinct', () => {
+    const first = parseForm(
+      schema,
+      formDataOf([
+        ['title', ''],
+        ['blogId', '0'],
+      ]),
+    );
+    const second = parseForm(
+      schema,
+      formDataOf([
+        ['title', ''],
+        ['blogId', '0'],
+      ]),
+    );
+
+    expect(first.state.token).toBeDefined();
+    expect(first.state.token).not.toBe(second.state.token);
+  });
+
   it('routes an object-level issue to formError, not to a field', () => {
     const paired = z
       .object({

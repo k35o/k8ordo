@@ -81,4 +81,9 @@ export type FormState = {
   rows?: Record<string, number>;
   /** An error about the submission as a whole rather than one field. */
   formError?: string;
+  /**
+   * Identity of one parse. Two identical failed submissions must still read
+   * as two on the client — content alone cannot tell them apart.
+   */
+  token?: string;
 };

@@ -22,6 +22,8 @@ export type ParseResult<Output> =
  */
 const MAX_ROWS = 1000;
 
+let parseSeq = 0;
+
 /** How many rows each array actually received, read from the submitted names. */
 const rowCounts = (
   formData: FormData,
@@ -153,11 +155,18 @@ export const parseForm = <Shape extends ObjectSchema>(
     }
   }
 
+  // Two identical submissions must still read as two: the client resets its
+  // "which server errors has the person already addressed" bookkeeping per
+  // response, and content alone cannot tell consecutive responses apart. The
+  // sequence guards against two parses inside one millisecond.
+  parseSeq += 1;
+  const token = `${String(Date.now())}.${String(parseSeq)}`;
+
   if (result.success && Object.keys(breaches).length === 0) {
     return {
       success: true,
       data: result.data as output<Shape>,
-      state: { values, rows },
+      state: { values, rows, token },
     };
   }
 
@@ -175,5 +184,5 @@ export const parseForm = <Shape extends ObjectSchema>(
     }
   }
 
-  return { success: false, state: { errors, values, rows, formError } };
+  return { success: false, state: { errors, values, rows, formError, token } };
 };
