@@ -15,6 +15,8 @@ export const ja = {
   'home.membersTitle': 'パッケージ',
   'home.memberUiDescription':
     'セマンティックなデザイントークン・i18n・生成UIアダプタを備えたReactコンポーネント。',
+  'home.memberFormDescription':
+    'スキーマ1つから HTML の制約属性・メッセージ・サーバー検証を導く。値は DOM が持つので、JavaScript が無くても動く。',
   'home.disciplineTitle': '共通の前提',
   'home.disciplinePlatform': 'Baselineだけ',
   'home.disciplinePlatformDescription':
@@ -58,6 +60,30 @@ export const ja = {
   'common.language': '言語',
   'footer.docs': 'ドキュメント',
   'footer.resources': 'リソース',
+  'form.description':
+    'zodスキーマ1つから、HTMLの制約属性・エラーメッセージ・サーバー検証を導きます。値はDOMが持つので、JavaScriptが落ちていても読み込み前でもフォームは動きます。',
+  'form.featuresTitle': '特徴',
+  'form.featureSchema': '出所はスキーマ1つ',
+  'form.featureSchemaDescription':
+    'required も maxLength も type も、書いたスキーマから降ってきます。JSXとサーバーに同じ制約を二重に書く必要がありません。',
+  'form.featureNoJs': 'JavaScriptが無くても動く',
+  'form.featureNoJsDescription':
+    '送信は Server Action が受けます。エラーはフィールド単位で返り、入力値も戻るので、やり直しで打ち直しになりません。',
+  'form.featureDom': '値はDOMが持つ',
+  'form.featureDomDescription':
+    '入力のたびに再描画が起きません。値がReactのstateに載ることはなく、載るのは表示中のエラーや行の識別子といった、DOMが表現できないものだけです。',
+  'form.featureTypes': 'パスが型で守られる',
+  'form.featureTypesDescription':
+    "`field('titel')` のような打ち間違いは、動かす前にコンパイルが止めます。ネストしたパスも配列との取り違えも同じように落ちます。",
+  'form.featureLoud': '黙って壊れない',
+  'form.featureLoudDescription':
+    'スキーマにある欄が送信されていなければ、検証の失敗ではなく結線の誤りとして知らせます。制約属性に落ちなかった検証も一覧で報告します。',
+  'form.featureSecrets': '秘密は返さない',
+  'form.featureSecretsDescription':
+    'やり直しのために入力値を返しますが、パスワード欄は自動で除きます。属性を生成したのがform自身なので、指定を書き忘れる事故が起きません。',
+  'form.docsTitle': 'ドキュメント',
+  'form.docsDescription':
+    '設計ガイドとリファレンスは npm パッケージに同梱されています。AIコーディングエージェントは `node_modules/@k8ordo/form/docs/` からインストールした版そのものを読みます。',
   'footer.tagline': 'Baselineに入った機能を、制限なく使うReactのライブラリ群。',
   'footer.typesetting': '組版 — Noto Sans JP / M PLUS 2',
   'nav.openMenu': 'メニューを開く',

@@ -17,6 +17,7 @@ apps/docs/public/design.md
 
 # Copied at build from packages/ui/docs (apps/docs/scripts/copy-reference-docs.ts)
 apps/docs/public/docs/
+apps/docs/public/form/
 
 # Testing
 coverage

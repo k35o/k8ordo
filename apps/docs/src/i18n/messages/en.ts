@@ -16,6 +16,8 @@ export const en = {
   'home.membersTitle': 'Packages',
   'home.memberUiDescription':
     'React components with semantic design tokens, i18n, and generative-UI adapters.',
+  'home.memberFormDescription':
+    'Derives HTML constraint attributes, messages, and server-side validation from one zod schema. The DOM holds the values, so it works without JavaScript.',
   'home.disciplineTitle': 'Shared commitments',
   'home.disciplinePlatform': 'Baseline only',
   'home.disciplinePlatformDescription':
@@ -59,6 +61,30 @@ export const en = {
   'common.language': 'Language',
   'footer.docs': 'Documentation',
   'footer.resources': 'Resources',
+  'form.description':
+    'One zod schema produces the HTML constraint attributes, the messages, and the server-side validation. The DOM holds the values, so the form works with JavaScript disabled or not yet loaded.',
+  'form.featuresTitle': 'Features',
+  'form.featureSchema': 'One source: the schema',
+  'form.featureSchemaDescription':
+    'required, maxLength and type all come from the schema you wrote. No writing the same constraint twice, once in JSX and once on the server.',
+  'form.featureNoJs': 'Works without JavaScript',
+  'form.featureNoJsDescription':
+    'A Server Action receives the submission. Errors come back per field and so do the values, so a retry never means typing it all again.',
+  'form.featureDom': 'The DOM holds the values',
+  'form.featureDomDescription':
+    'Typing causes no re-render. Values never enter React state — it carries only what the DOM cannot express, like the messages on screen and the identity of each row.',
+  'form.featureTypes': 'Paths are checked by the compiler',
+  'form.featureTypesDescription':
+    "A typo like `field('titel')` fails the build rather than the click. Nested paths and arrays are distinguished the same way.",
+  'form.featureLoud': 'Never breaks in silence',
+  'form.featureLoudDescription':
+    'A field in the schema that never arrived is reported as a wiring mistake, not a validation failure. Checks that could not become attributes are listed too.',
+  'form.featureSecrets': 'Secrets are never echoed',
+  'form.featureSecretsDescription':
+    'Values come back so a retry keeps the input, with password fields excluded automatically — the library generated the attributes, so it knows which ones they are.',
+  'form.docsTitle': 'Documentation',
+  'form.docsDescription':
+    'The guide and reference ship inside the npm package. An AI coding assistant reads the exact installed version out of `node_modules/@k8ordo/form/docs/`.',
   'footer.tagline':
     'React libraries that use Baseline features without holding back.',
   'footer.typesetting': 'Typeset in Noto Sans JP & M PLUS 2',
