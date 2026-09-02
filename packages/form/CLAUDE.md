@@ -21,10 +21,11 @@ pnpm check         # check:write to auto-fix
 
 **Values live in the DOM. React state holds only what the DOM cannot express.**
 
-Today that is exactly two things: which message to show for a field the browser
-has judged invalid, and which server errors are still current. Anything that
-would mirror a field's value into React state breaks the package — it is the
-mistake Conform spent a major version undoing.
+Today that is exactly four things: which message to show for a field the
+browser has judged invalid, which server errors are still current (the
+`edited` set), the identity of each repeated row, and one dirty flag. Anything
+that would mirror a field's value into React state breaks the package — it is
+the mistake Conform spent a major version undoing.
 
 This is also the test for a new feature. `isDirty` is fine because
 `el.value !== el.defaultValue` reads the DOM and yields one boolean. Input
@@ -52,12 +53,23 @@ src/
 checks (`refine`) vanish from its output without a trace.
 
 - **Messages** are recovered by running the field schema against a probe value
-  chosen to fail one specific check, then taking the issue message. Public API,
-  and it guarantees the client shows the text zod itself would produce.
-- **Dropped checks** cannot be recovered that way. `objectLevelCheckCount` reads
-  `_zod.def.checks`, which is internal. It is the only route, and reporting what
-  the client will not check is worth the coupling — Conform silently discards
-  the same information. If zod moves it, the count is wrong, not the output.
+  chosen to fail one specific check, then taking the issue message. The probe
+  is what the parse would hand the schema for an empty control: `''` for text,
+  `false` for a checkbox. Public API, and it guarantees the client shows the
+  text zod itself would produce.
+- **The internal surface** is `_zod.def`, read in four places: `checks` (the
+  object-level count, and the source RegExp behind a JSON `pattern` string —
+  the JSON loses the flags, and the flags decide whether the browser may see
+  it), `innerType` (peeling `.optional()` / `.default()` wrappers so a wrapped
+  object's subtree pairs with its JSON node), `element` (`zod/mini` arrays),
+  and `entries`-shaped enum detection at the type level. Reporting what the
+  client will not check is worth the coupling — Conform silently discards the
+  same information. If zod moves any of it, the reports degrade; the
+  attributes do not.
+- **A pairing the walk cannot make is a throw, not a skip.** A JSON node with
+  no matching zod node (records, tuples, nullable objects, nested repeats,
+  dotted keys) would parse to silently discarded input, which is the one
+  failure mode this package exists to rule out.
 
 ## Conventions
 

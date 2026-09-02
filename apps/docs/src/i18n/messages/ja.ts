@@ -71,7 +71,7 @@ export const ja = {
     '送信は Server Action が受けます。エラーはフィールド単位で返り、入力値も戻るので、やり直しで打ち直しになりません。',
   'form.featureDom': '値はDOMが持つ',
   'form.featureDomDescription':
-    '入力のたびに再描画が起きません。Reactのstateに載るのはサーバー由来のエラーと、繰り返し行の識別子だけです。',
+    '入力のたびに再描画が起きません。値がReactのstateに載ることはなく、載るのは表示中のエラーや行の識別子といった、DOMが表現できないものだけです。',
   'form.featureTypes': 'パスが型で守られる',
   'form.featureTypesDescription':
     "`field('titel')` のような打ち間違いは、動かす前にコンパイルが止めます。ネストしたパスも配列との取り違えも同じように落ちます。",

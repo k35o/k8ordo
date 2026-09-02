@@ -72,7 +72,7 @@ export const en = {
     'A Server Action receives the submission. Errors come back per field and so do the values, so a retry never means typing it all again.',
   'form.featureDom': 'The DOM holds the values',
   'form.featureDomDescription':
-    'Typing causes no re-render. React state carries only the server errors and the identity of each repeated row.',
+    'Typing causes no re-render. Values never enter React state — it carries only what the DOM cannot express, like the messages on screen and the identity of each row.',
   'form.featureTypes': 'Paths are checked by the compiler',
   'form.featureTypesDescription':
     "A typo like `field('titel')` fails the build rather than the click. Nested paths and arrays are distinguished the same way.",

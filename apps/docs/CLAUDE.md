@@ -1,6 +1,7 @@
 # Agent guide — apps/docs
 
-Documentation site for `@k8ordo/ui`, built with Vite and `@funstack/router`.
+Documentation site for the `@k8ordo/*` packages (`ui`, `form`), built with
+Vite and `@funstack/router`.
 
 ## Commands
 

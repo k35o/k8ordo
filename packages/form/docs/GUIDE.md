@@ -4,8 +4,9 @@ One zod schema produces the HTML constraint attributes, the messages, and the
 server-side validation. The DOM holds the values; React state holds only what
 the DOM cannot express.
 
-The shared discipline — React 19 / RSC assumed, Baseline newly available only,
-no polyfills — is in the [repository root `CLAUDE.md`](../../../CLAUDE.md).
+Like every k8ordo package it assumes React 19 and Server Components, uses only
+what has reached Baseline newly available, and ships no polyfills or legacy
+fallbacks.
 
 ## zod, or zod/mini
 
@@ -57,12 +58,15 @@ That way the schema keeps describing what it actually validates.
 
 ```tsx
 // page.tsx — Server Component
-const { fields } = formFields(talkSchema); // module scope: derived once
+const talkFields = formFields(talkSchema); // module scope: derived once
 
 export default function Page() {
-  return <TalkForm action={createTalk} fields={fields} />;
+  return <TalkForm action={createTalk} fields={talkFields} />;
 }
 ```
+
+`useForm` takes the whole result — fields, arrays, rules, and the `dropped`
+report travel together.
 
 ```tsx
 // talk-form.tsx
@@ -105,18 +109,36 @@ schema against a probe value, so the text shown next to the input is the text
 zod itself produces. A custom `min(1, '…')` reaches both sides.
 
 **`required` means the same thing on both sides.** JSON Schema's `required`
-means "the key is present", but a form always sends every field — an empty one
-as `''`. The attribute is emitted only when the schema rejects `''`, so the
-browser blocks exactly what the server would have rejected.
+means "the key is present", but a form always submits something for every
+control — an empty text field as `''`, an unchecked checkbox as `false` once
+parsed. The attribute is emitted only when the schema rejects that empty
+submission, so the two sides always agree: a plain `z.boolean()` checkbox is
+not required, while `z.literal(true, '…')` — a consent box — is, and shows
+zod's own wording.
 
 **Nothing is dropped in silence.** Checks HTML cannot express — `refine`,
-cross-field rules, an exclusive bound on a float — are returned in `dropped`.
-They still run on the server; you are told they do not run on the client.
+cross-field rules, an exclusive bound on a float, a regex whose flags or
+anchoring the `pattern` attribute would silently reinterpret, a
+`z.iso.datetime()` no `datetime-local` control can ever satisfy — are returned
+in `dropped`. They still run on the server; you are told they do not run on
+the client.
+
+**A schema this package cannot express fails at derive time.** `z.record`,
+tuples, a repeat nested inside a repeat, nullable objects, keys containing
+`.` or brackets — `formFields` throws with the reason, instead of deriving a
+form that would silently misparse what the person typed.
 
 **A missing name is loud.** If the schema has a field that never arrived in the
 FormData, `parseForm` throws instead of reporting it as a validation failure.
 Forgetting to spread `input` is a wiring mistake, not something the person
-filling in the form did.
+filling in the form did. The one exception is an enum field: a radio group
+with nothing selected submits no entry at all — a state the person can reach —
+so it comes back as that field's validation error instead.
+
+**Native validation survives without JavaScript.** `noValidate` is applied
+from JavaScript on mount, never rendered into the markup. With scripts
+disabled or not yet loaded, the browser's own checks stay on; once the hook is
+live, it takes over the message path and the server stays the arbiter.
 
 **Secrets are never echoed.** `parseForm` returns the submitted values so a
 retry without JavaScript keeps the input. Fields marked as passwords are
@@ -130,8 +152,9 @@ globalRegistry.add(password, { input: 'password' }); // zod or zod/mini
 `.meta()` is shorthand for the registry and is not available on `zod/mini`;
 the registry route works with either.
 
-**`isDirty` costs one boolean.** `form.isDirty` compares each control's value
-with the value it was rendered with, read straight from the DOM. It flips at
+**`isDirty` costs one boolean.** `form.isDirty` compares each control — text,
+checkbox, `<select>`, a `HiddenValue` — with the value it was rendered with,
+read straight from the DOM; adding or removing a row counts too. It flips at
 most twice, so it never becomes a per-keystroke re-render.
 
 ## Nested objects and repeated rows
@@ -177,17 +200,53 @@ scalars (`z.array(z.string())`) the item has a single unnamed field:
 `row.field()`.
 
 `parseForm` reports how many rows arrived in `state.rows`, so a retry without
-JavaScript rebuilds the same number of rows.
+JavaScript rebuilds the same number of rows. Row counts are read from the
+submitted names but never trusted beyond the schema's `.max()` (or a hard
+ceiling), so a forged index cannot make the server allocate.
+
+A nested object behind `.optional()` / `.default()` keeps its fields — the
+wrapper is peeled the same way on both sides. A repeat nested inside a repeat
+has no unambiguous name; it is a compile error and a derive-time throw.
+
+## Checkbox groups
+
+An array of enums is a fixed option set the person picks several of — one
+name shared by every box, not repeated rows. It derives as a single field:
+
+```tsx
+const prefs = z.object({ tags: z.array(z.enum(['a', 'b', 'c'])).min(2) });
+
+const tags = form.field('tags');
+
+{
+  ['a', 'b', 'c'].map((option) => (
+    <input key={option} type="checkbox" value={option} {...tags.input} />
+  ));
+}
+```
+
+`parseForm` reads every checked box under the shared name — none checked is
+`[]`, never a wiring error. The `.min(2)` cannot become an HTML attribute (on
+a group, `required` would mean "check every box"), so it is reported in
+`dropped`; declare `minChecked('tags', 2, '…')` to run the same bound in the
+browser. On a no-JS retry the group echoes as an array, so restoring is:
+
+```tsx
+defaultChecked={Array.isArray(state.values?.tags) && state.values.tags.includes(option)}
+```
 
 ## Paths are checked at compile time
 
 `formFields` derives the set of valid paths from the schema type, so a typo is
-a build error rather than something you find by clicking.
+a build error rather than something you find by clicking. Rules are typed
+against the same paths.
 
 ```tsx
 form.field('titel'); // error: not a field in the schema
-form.field('items'); // error: an array, reached through array()
+form.field('items'); // error: an array of objects, reached through array()
 form.array('user'); // error: an object, not an array
+form.array('tags'); // error: a checkbox group is a field
+defineForm(schema, [sameAs('confrim', 'password', '…')]); // error: typo
 ```
 
 ## Checks HTML has no attribute for
@@ -224,7 +283,8 @@ Available: `sameAs`, `minChecked`, `requiredWhen`. Anything else stays a
 Whether a name is already taken is something only the server knows. `useAsyncCheck`
 runs on blur, keeps the newest answer when replies arrive out of order, and
 applies the result with `setCustomValidity` — so the answer shows up through the
-same path as every other message.
+same path as every other message. A blur that leaves the value unchanged does
+not ask again, and emptying the field clears the last answer with it.
 
 ```tsx
 const slug = form.field('slug');
@@ -244,12 +304,15 @@ into React state and pushing it back out at submit:
 
 ```tsx
 <Editor onChange={setBody} value={body} />
-<input {...hiddenValue('body', body)} />
+<HiddenValue name="body" value={body} />
 ```
 
 This is all `Controller` does in react-hook-form, and it is the one place that
 binding silently breaks there. Here the value is in the form, so it submits
-whether or not anything else works.
+whether or not anything else works. `HiddenValue` is a component rather than a
+props helper because React updates a controlled value without any DOM event —
+the component announces each change with one, so cross-field rules and
+`isDirty` hear it like any keystroke.
 
 ## Multi-step forms
 
@@ -257,16 +320,19 @@ Keep every step mounted and hide the ones you are not on. The values stay in
 the DOM, so moving between steps costs nothing and losing a step is impossible:
 
 ```tsx
-<div hidden={step !== 1}>{/* … */}</div>
+<div hidden={step !== 1} ref={stepOne}>
+  {/* … */}
+</div>
 ```
 
-Validate one step before advancing by checking only its controls:
+Validate one step before advancing by checking only the controls inside that
+step's container — the hidden steps are not filled in yet, so checking the
+whole form would always fail:
 
 ```tsx
-const stepIsValid = [...form.elements].every(
-  (element) =>
-    !(element instanceof HTMLInputElement) || element.checkValidity(),
-);
+const stepIsValid = [
+  ...(stepOne.current?.querySelectorAll('input, select, textarea') ?? []),
+].every((control) => (control as HTMLInputElement).checkValidity());
 ```
 
 Without JavaScript this degrades to one long form that submits in a single

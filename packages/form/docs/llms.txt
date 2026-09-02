@@ -18,10 +18,15 @@ When installed via npm, these docs live under `node_modules/@k8ordo/form/docs/`.
 
 ## Entry points
 
-- `@k8ordo/form` — client. `useForm(fields, state)` returns props for the
-  `<form>` element and a `field(name)` accessor giving input attributes, the
-  current error, and `invalid` / `required`.
+- `@k8ordo/form` — client. `useForm(fields, state)` takes the whole
+  `formFields` result and returns props for the `<form>` element, a
+  `field(path)` accessor giving input attributes, the current error, and
+  `invalid` / `required`, an `array(path)` accessor for repeated rows, and
+  `isDirty`. Also `useAsyncCheck` for server-answered per-field checks and
+  `HiddenValue` for components that render no input of their own.
 - `@k8ordo/form/server` — server. `formFields(schema)` derives serializable
-  fields plus a `dropped` list of checks HTML cannot express;
-  `parseForm(schema, formData)` validates a submission and returns typed data
-  or per-field errors with the submitted values.
+  fields plus a `dropped` list of checks HTML cannot express, and throws on a
+  schema no form can represent; `parseForm(schema, formData)` validates a
+  submission and returns typed data or per-field errors with the submitted
+  values. `defineForm(schema, rules)` attaches cross-field rules (`sameAs`,
+  `minChecked`, `requiredWhen`) typed against the schema's paths.
