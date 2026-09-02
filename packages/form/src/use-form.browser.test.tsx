@@ -1,9 +1,11 @@
+import { useState } from 'react';
 import type { FC } from 'react';
 import { render } from 'vitest-browser-react';
 import { z } from 'zod';
 
 import { useAsyncCheck } from './async-check';
 import { formFields } from './derive/form-fields';
+import { HiddenValue } from './hidden-value';
 import { defineForm } from './rules/define-form';
 import { sameAs } from './rules/rules';
 import type { FormState } from './types';
@@ -142,6 +144,29 @@ const AsyncSlug: FC = () => {
       <input aria-label="slug" {...slug.input} {...taken.props} />
       <p data-testid="slug-error">{slug.error ?? ''}</p>
       <button type="button">away</button>
+    </form>
+  );
+};
+
+const editorSchema = z.object({ body: z.string() });
+const editorFields = formFields(editorSchema);
+
+const Editor: FC = () => {
+  const [body, setBody] = useState('初稿');
+  const form = useForm(editorFields, NO_STATE);
+
+  return (
+    <form {...form.props}>
+      <HiddenValue name="body" value={body} />
+      <button
+        onClick={() => {
+          setBody('推敲済み');
+        }}
+        type="button"
+      >
+        edit
+      </button>
+      <p data-testid="dirty">{String(form.isDirty)}</p>
     </form>
   );
 };
@@ -356,6 +381,16 @@ describe('useForm in a browser', () => {
     );
 
     await expect.element(screen.getByLabelText('agree')).not.toBeChecked();
+  });
+
+  it('hears a HiddenValue change for isDirty like any other control', async () => {
+    const screen = await render(<Editor />);
+
+    await expect
+      .element(screen.getByTestId('dirty'))
+      .toHaveTextContent('false');
+    await screen.getByRole('button', { name: 'edit' }).click();
+    await expect.element(screen.getByTestId('dirty')).toHaveTextContent('true');
   });
 
   it('turns native validation off with JavaScript, never in the markup', async () => {

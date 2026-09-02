@@ -8,7 +8,12 @@ export default defineConfig({
   },
   plugins: [react()],
   pack: {
-    entry: ['src/**/*.ts', '!src/**/*.test.ts', '!src/**/*.browser.test.tsx'],
+    entry: [
+      'src/**/*.ts',
+      'src/**/*.tsx',
+      '!src/**/*.test.ts',
+      '!src/**/*.browser.test.tsx',
+    ],
     format: 'esm',
     dts: true,
     outDir: 'dist',
