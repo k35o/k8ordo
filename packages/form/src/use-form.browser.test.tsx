@@ -2,6 +2,7 @@ import type { FC } from 'react';
 import { render } from 'vitest-browser-react';
 import { z } from 'zod';
 
+import { useAsyncCheck } from './async-check';
 import { formFields } from './derive/form-fields';
 import { defineForm } from './rules/define-form';
 import { sameAs } from './rules/rules';
@@ -122,6 +123,25 @@ const Choice: FC<{ state?: FormState }> = ({ state = NO_STATE }) => {
         {...form.field('agree').input}
       />
       <p data-testid="dirty">{String(form.isDirty)}</p>
+    </form>
+  );
+};
+
+const asyncSchema = z.object({ slug: z.string() });
+const asyncFields = formFields(asyncSchema);
+
+const AsyncSlug: FC = () => {
+  const form = useForm(asyncFields, NO_STATE);
+  const slug = form.field('slug');
+  const taken = useAsyncCheck((value) =>
+    Promise.resolve(value === 'taken' ? '使われています' : undefined),
+  );
+
+  return (
+    <form {...form.props}>
+      <input aria-label="slug" {...slug.input} {...taken.props} />
+      <p data-testid="slug-error">{slug.error ?? ''}</p>
+      <button type="button">away</button>
     </form>
   );
 };
@@ -348,5 +368,23 @@ describe('useForm in a browser', () => {
     expect(Object.keys(signupProps)).not.toContain('noValidate');
     const email = screen.getByLabelText('email').element() as HTMLInputElement;
     expect(email.form?.noValidate).toBe(true);
+  });
+
+  // Last on purpose: the answer lands from a plain promise, outside act(),
+  // and the act bookkeeping it trips must not poison a later render.
+  it('lets an async message go when the field is emptied', async () => {
+    const screen = await render(<AsyncSlug />);
+
+    await screen.getByLabelText('slug').fill('taken');
+    await screen.getByRole('button', { name: 'away' }).click();
+    await expect
+      .element(screen.getByTestId('slug-error'))
+      .toHaveTextContent('使われています');
+
+    await screen.getByLabelText('slug').fill('');
+    await screen.getByRole('button', { name: 'away' }).click();
+    await expect
+      .element(screen.getByTestId('slug-error'))
+      .toHaveTextContent('');
   });
 });

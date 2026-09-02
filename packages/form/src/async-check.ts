@@ -23,6 +23,10 @@ export const useAsyncCheck = (
 ): AsyncCheck => {
   const control = useRef<HTMLInputElement | null>(null);
   const latest = useRef(0);
+  // The value the newest answer was about. Applying an answer dispatches a
+  // focusout that re-enters run() on this very input; without this note it
+  // would ask the server about the same value forever.
+  const answered = useRef<string | null>(null);
   const [isChecking, setIsChecking] = useState(false);
 
   useEffect(
@@ -35,26 +39,49 @@ export const useAsyncCheck = (
 
   const run = useCallback(() => {
     const node = control.current;
-    if (node === null || node.value === '') {
+    if (node === null) {
       return;
     }
+    if (node.value === answered.current) {
+      // Same value, same verdict — and this is also what stops the dispatched
+      // focusout below from asking the server in an endless circle.
+      return;
+    }
+    // Whatever was in flight is about an older value now.
     latest.current += 1;
+    if (node.value === '') {
+      // An emptied field no longer holds the value a previous answer was
+      // about; without this, "taken" would outlive the value it described.
+      // The real blur is still bubbling, so the form's own pass reads the
+      // cleared validity — no synthetic event needed here.
+      answered.current = null;
+      node.setCustomValidity('');
+      return;
+    }
     const ticket = latest.current;
+    const issuedFor = node.value;
     setIsChecking(true);
 
     void (async () => {
       try {
-        const message = await check(node.value);
-        // Answers can arrive out of order; only the newest one counts.
+        const message = await check(issuedFor);
+        // Answers can arrive out of order; only the newest one counts — and
+        // only while the field still holds the value it was issued for.
         if (ticket !== latest.current) {
           return;
         }
-        control.current?.setCustomValidity(message ?? '');
+        const { current } = control;
+        if (current === null || current.value !== issuedFor) {
+          return;
+        }
+        answered.current = issuedFor;
+        current.setCustomValidity(message ?? '');
         // React's onBlur listens for focusout, so this is what re-runs the
         // form's own pass and puts the message on screen.
-        control.current?.dispatchEvent(
-          new FocusEvent('focusout', { bubbles: true }),
-        );
+        current.dispatchEvent(new FocusEvent('focusout', { bubbles: true }));
+      } catch {
+        // A failed probe must not fake a verdict either way; the server
+        // re-checks the real submission.
       } finally {
         if (ticket === latest.current) {
           setIsChecking(false);
