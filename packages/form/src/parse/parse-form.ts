@@ -6,6 +6,7 @@ import { breachOf } from '../rules/rules';
 import { asProbe } from '../schema/object-schema';
 import type { ObjectSchema } from '../schema/object-schema';
 import { INDEX, schemaMap } from '../schema/walk';
+import type { ArrayNode } from '../schema/walk';
 import type { FormState } from '../types';
 import { nameOf, setPath } from './paths';
 
@@ -13,28 +14,44 @@ export type ParseResult<Output> =
   | { success: true; data: Output; state: FormState }
   | { success: false; data?: undefined; state: FormState };
 
+/**
+ * The submitted names are the only source for row counts, and anyone can POST
+ * anything: without a ceiling, one forged `items[99999999].name` key makes the
+ * reconstruction allocate an array that long before the schema ever runs.
+ * Arrays with a `.max()` are capped there; this bounds the rest.
+ */
+const MAX_ROWS = 1000;
+
 /** How many rows each array actually received, read from the submitted names. */
 const rowCounts = (
   formData: FormData,
-  arrays: string[],
+  arrays: ArrayNode[],
 ): Record<string, number> => {
   const counts: Record<string, number> = {};
-  for (const path of arrays) {
+  for (const array of arrays) {
+    const cap = Math.min(array.maxItems ?? MAX_ROWS, MAX_ROWS);
     let highest = -1;
     for (const key of formData.keys()) {
-      if (!key.startsWith(`${path}[`)) {
+      if (!key.startsWith(`${array.path}[`)) {
         continue;
       }
       const index = Number(
-        key.slice(path.length + 1, key.indexOf(']', path.length)),
+        key.slice(array.path.length + 1, key.indexOf(']', array.path.length)),
       );
       if (Number.isInteger(index) && index > highest) {
         highest = index;
       }
     }
-    counts[path] = highest + 1;
+    counts[array.path] = Math.min(highest + 1, cap);
   }
   return counts;
+};
+
+const describeMissing = (missing: string[]): string => {
+  const shown = missing.slice(0, 5).join(', ');
+  return missing.length > 5
+    ? `${shown} … ほか${String(missing.length - 5)}件`
+    : shown;
 };
 
 /**
@@ -56,14 +73,14 @@ export const parseForm = <Shape extends ObjectSchema>(
   const missing: string[] = [];
   const secrets = new Set<string>();
 
-  const rows = rowCounts(
-    formData,
-    map.arrays.map((array) => array.path),
-  );
+  const rows = rowCounts(formData, map.arrays);
 
   for (const array of map.arrays) {
     setPath(raw, array.path, Array.from({ length: rows[array.path] ?? 0 }));
   }
+
+  const strings = (name: string): string[] =>
+    formData.getAll(name).filter((value) => typeof value === 'string');
 
   for (const leaf of map.leaves) {
     const names =
@@ -78,6 +95,13 @@ export const parseForm = <Shape extends ObjectSchema>(
         secrets.add(name);
       }
 
+      if (leaf.group !== undefined) {
+        // A checkbox group: every checked box appends one entry under the
+        // shared name, and none checked means no entry at all.
+        setPath(raw, name, strings(name));
+        continue;
+      }
+
       if (leaf.json.type === 'boolean') {
         setPath(raw, name, formData.has(name));
         continue;
@@ -85,6 +109,13 @@ export const parseForm = <Shape extends ObjectSchema>(
 
       const entries = formData.getAll(name);
       if (entries.length === 0) {
+        if (leaf.json.enum !== undefined) {
+          // A radio group with nothing selected submits no entry — a state
+          // the person filling in the form can reach, unlike a text control,
+          // which always submits at least ''. The schema reports it as a
+          // validation error instead.
+          continue;
+        }
         // A text field left empty still submits ''. An absent key means no
         // input carried this name at all — the markup and the schema disagree,
         // which is a wiring mistake rather than something the person filling it
@@ -98,7 +129,7 @@ export const parseForm = <Shape extends ObjectSchema>(
 
   if (missing.length > 0) {
     throw new Error(
-      `[@k8ordo/form] スキーマにあるフィールドが送信されていません: ${missing.join(', ')}\n` +
+      `[@k8ordo/form] スキーマにあるフィールドが送信されていません: ${describeMissing(missing)}\n` +
         'input に name が付いていないか、その入力欄が描画されていない可能性があります。',
     );
   }
@@ -109,9 +140,7 @@ export const parseForm = <Shape extends ObjectSchema>(
   // them against the live form. Same function, same inputs, same verdict.
   const breaches: Record<string, string> = {};
   for (const rule of rules) {
-    const message = breachOf(rule, (name) =>
-      formData.getAll(name).filter((value) => typeof value === 'string'),
-    );
+    const message = breachOf(rule, strings);
     if (message !== undefined) {
       breaches[rule.field] = message;
     }

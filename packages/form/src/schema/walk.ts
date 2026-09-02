@@ -23,6 +23,12 @@ export type LeafNode = {
   arrayPath: string | null;
   /** Key within the array item; '' when the array holds scalars. */
   itemKey: string | null;
+  /**
+   * Present when several same-named controls submit together — a checkbox
+   * group, derived from an array of enums. Carries the bounds the group's
+   * array schema declared, which HTML has no attribute for.
+   */
+  group?: { minItems?: number; maxItems?: number };
 };
 
 export type ArrayNode = {
@@ -44,17 +50,38 @@ type Node = {
   items?: Node;
   minItems?: number;
   maxItems?: number;
+  anyOf?: Node[];
 } & LeafSchema & { input?: string };
 
-const shapeOf = ($schema: $ZodType): Record<string, $ZodType> | undefined =>
-  ($schema as unknown as { shape?: Record<string, $ZodType> }).shape;
-
-/* oxlint-disable no-underscore-dangle -- `zod/mini` array schemas expose no
-   public `element`; the shared core definition is the only route that works for
-   both entries, and it is the same internal surface the check list already
+/* oxlint-disable no-underscore-dangle -- wrappers (`optional`, `nullable`,
+   `default`, …) and `zod/mini` arrays expose neither `shape` nor `element`
+   publicly; the shared core definition is the only route that works for both
+   entries, and it is the same internal surface the check list already
    requires. */
+type Wrapped = {
+  _zod?: { def?: { innerType?: $ZodType; element?: $ZodType } };
+};
+
+/**
+ * Peel wrapper schemas until the node that owns the structure is reached.
+ * `toJSONSchema` flattens `.optional()` / `.default()` into the plain node, so
+ * pairing the two trees requires flattening the zod side the same way.
+ */
+const unwrap = ($schema: $ZodType): $ZodType => {
+  let current = $schema;
+  let inner = (current as Wrapped)._zod?.def?.innerType;
+  while (inner !== undefined) {
+    current = inner;
+    inner = (current as Wrapped)._zod?.def?.innerType;
+  }
+  return current;
+};
+
+const shapeOf = ($schema: $ZodType): Record<string, $ZodType> | undefined =>
+  (unwrap($schema) as unknown as { shape?: Record<string, $ZodType> }).shape;
+
 const elementOf = ($schema: $ZodType): $ZodType | undefined => {
-  const candidate = $schema as unknown as {
+  const candidate = unwrap($schema) as unknown as {
     element?: $ZodType;
     _zod?: { def?: { element?: $ZodType } };
   };
@@ -63,12 +90,25 @@ const elementOf = ($schema: $ZodType): $ZodType | undefined => {
 /* oxlint-enable no-underscore-dangle */
 
 /**
- * `required` in JSON Schema means "the key is present", but a form always sends
- * every field, empty ones as ''. Asking the schema what it does with '' is what
- * makes the attribute mean the same on both sides.
+ * `required` in JSON Schema means "the key is present", but a form always
+ * submits something for every control. What it submits depends on the control:
+ * a text field sends `''`, an unchecked checkbox maps to `false` in the parse.
+ * Asking the schema what it does with that empty submission is what makes the
+ * attribute mean the same on both sides.
  */
-const rejectsEmptyString = ($schema: $ZodType): boolean =>
-  !asProbe($schema).safeParse('').success;
+const rejectsEmptySubmission = (json: Node, $schema: $ZodType): boolean => {
+  const empty = json.type === 'boolean' ? false : '';
+  return !asProbe($schema).safeParse(empty).success;
+};
+
+// The explicit annotation is what lets tsc treat a `fail(...)` call as
+// unreachable-after and narrow the checks above it; an inferred `never` does
+// not participate in control-flow analysis.
+const fail: (path: string, reason: string) => never = (path, reason) => {
+  throw new Error(
+    `[@k8ordo/form] '${path === '' ? '(schema)' : path}': ${reason}`,
+  );
+};
 
 const walkNode = (
   json: Node,
@@ -78,12 +118,30 @@ const walkNode = (
   context: { arrayPath: string | null; itemKey: string | null },
   out: SchemaMap,
 ): void => {
-  if (json.type === 'object' && json.properties !== undefined) {
+  if (json.type === 'object') {
     const shape = shapeOf(zod);
+    if (json.properties === undefined || shape === undefined) {
+      // A record, or a pairing this walk does not understand. Parsing it
+      // anyway would silently discard whatever the person typed, which is the
+      // one failure mode this package exists to rule out.
+      fail(
+        path,
+        'オブジェクトのキー構成を列挙できないため、フォームに展開できません（z.record などは表現できません）',
+      );
+    }
     for (const [key, child] of Object.entries(json.properties)) {
-      const childZod = shape?.[key];
+      if (/[.[\]]/u.test(key)) {
+        fail(
+          path === '' ? key : `${path}.${key}`,
+          "キーに '.' や '[' ']' を含むスキーマは、入力の name と経路の区切りが衝突するため使えません",
+        );
+      }
+      const childZod = shape[key];
       if (childZod === undefined) {
-        continue;
+        fail(
+          path === '' ? key : `${path}.${key}`,
+          'JSON Schema 側にだけ現れるキーです。zod 側と対応が取れないため、フォームに展開できません',
+        );
       }
       walkNode(
         child,
@@ -105,10 +163,45 @@ const walkNode = (
     return;
   }
 
-  if (json.type === 'array' && json.items !== undefined) {
+  if (json.type === 'array') {
+    if (json.items === undefined) {
+      fail(
+        path,
+        'タプルなど要素型が一様でない配列は、繰り返し行として表現できません',
+      );
+    }
+
+    if (json.items.enum !== undefined) {
+      // An array of enums is a fixed option set the person picks several of —
+      // a checkbox group: many controls sharing one name, submitted together.
+      // Rows would make no sense here, so the whole array is a single leaf.
+      const element = elementOf(zod);
+      if (element === undefined) {
+        fail(path, '配列要素のスキーマを取り出せませんでした');
+      }
+      out.leaves.push({
+        path,
+        name,
+        json: json.items,
+        zod: element,
+        required: false,
+        arrayPath: context.arrayPath,
+        itemKey: context.itemKey,
+        group: { minItems: json.minItems, maxItems: json.maxItems },
+      });
+      return;
+    }
+
+    if (context.arrayPath !== null) {
+      fail(
+        path,
+        '繰り返しの中の繰り返しは name の添字が一意に決まらないため表現できません',
+      );
+    }
+
     const element = elementOf(zod);
     if (element === undefined) {
-      return;
+      fail(path, '配列要素のスキーマを取り出せませんでした');
     }
     out.arrays.push({
       path,
@@ -129,12 +222,25 @@ const walkNode = (
     return;
   }
 
+  if (json.anyOf !== undefined) {
+    for (const branch of json.anyOf) {
+      if (branch.type === 'object' || branch.type === 'array') {
+        fail(
+          path,
+          'nullable / union のオブジェクトや配列は、どちらの枝を描画すべきか決まらないため表現できません',
+        );
+      }
+    }
+    // Scalar unions survive as a bare text input; the lost constraints are
+    // reported by the derivation, not here.
+  }
+
   out.leaves.push({
     path,
     name,
     json,
     zod,
-    required: rejectsEmptyString(zod),
+    required: rejectsEmptySubmission(json, zod),
     arrayPath: context.arrayPath,
     itemKey: context.itemKey,
   });
@@ -155,6 +261,9 @@ export const schemaMap = (schema: ObjectSchema): SchemaMap => {
 
   const json = toJSONSchema(schema, {
     io: 'output',
+    // A sub-schema referenced twice would otherwise become a `$ref`, which the
+    // walk cannot pair with a zod node.
+    reused: 'inline',
     unrepresentable: 'any',
   }) as Node;
 

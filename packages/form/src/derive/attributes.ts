@@ -13,6 +13,7 @@ export type LeafSchema = {
   exclusiveMaximum?: number;
   multipleOf?: number;
   enum?: unknown[];
+  anyOf?: unknown[];
 };
 
 /**
@@ -50,21 +51,67 @@ const isFiniteNumber = (value: unknown): value is number =>
   typeof value === 'number' && Number.isFinite(value);
 
 /**
+ * A regex only reaches the markup when the browser will read it the way zod
+ * does. Three things silently change its meaning there: the `pattern`
+ * attribute matches the whole value while a zod regex matches a substring, the
+ * attribute is always case-sensitive, and browsers compile it with the `v`
+ * flag — an expression that fails that compile is not an error but a pattern
+ * the browser ignores wholesale (zod's own email regex is one).
+ */
+const patternVerdict = (
+  source: string,
+  flags: string | undefined,
+): string | undefined => {
+  if (flags !== undefined && flags !== '' && flags !== 'u') {
+    return `フラグ '${flags}' は HTML の pattern に存在しないため、ブラウザ側だけ判定が変わります`;
+  }
+  if (!source.startsWith('^') || !source.endsWith('$')) {
+    return 'HTML の pattern は全体一致、zod の regex は部分一致のため、^…$ で括られていない正規表現は意味が変わります';
+  }
+  const compiles = ((): boolean => {
+    try {
+      return new RegExp(source, 'v').flags === 'v';
+    } catch {
+      return false;
+    }
+  })();
+  return compiles
+    ? undefined
+    : 'ブラウザは pattern を v フラグで解釈し、コンパイルできない正規表現は黙って無視します';
+};
+
+/**
  * Turn one leaf JSON Schema into input attributes, collecting whatever HTML
  * cannot express. Anything not representable is returned rather than dropped,
  * so the caller can report it instead of leaving the author to discover at
  * runtime that a check never ran on the client.
+ *
+ * `patternFlags` are the flags of the source RegExp when the caller could
+ * recover it — the JSON Schema string has already lost them.
  */
 export const attributesFor = (
   name: string,
   schema: LeafSchema,
   required: boolean,
+  patternFlags?: string,
 ): { input: FieldInput; dropped: DroppedCheck[] } => {
   const input: FieldInput = { name };
   const dropped: DroppedCheck[] = [];
 
   if (required) {
     input.required = true;
+  }
+
+  if (schema.anyOf !== undefined) {
+    // A scalar union renders as a plain text input; whatever constraints live
+    // inside the branches cannot be lifted out without picking a branch.
+    input.type = 'text';
+    dropped.push({
+      field: name,
+      reason:
+        'nullable / union の中の制約は、どの枝を検査すべきか決まらないため属性に落ちません',
+    });
+    return { input, dropped };
   }
 
   if (schema.enum !== undefined) {
@@ -80,7 +127,10 @@ export const attributesFor = (
 
   if (schema.type === 'integer' || schema.type === 'number') {
     input.type = 'number';
-    input.step = schema.type === 'integer' ? 1 : (schema.multipleOf ?? 'any');
+    input.step =
+      schema.type === 'integer'
+        ? (schema.multipleOf ?? 1)
+        : (schema.multipleOf ?? 'any');
 
     if (
       isFiniteNumber(schema.minimum) &&
@@ -140,10 +190,12 @@ export const attributesFor = (
         });
       }
     } else {
-      // Kept even alongside type="email": the browser's own email rule accepts
-      // values zod rejects, and emitting the pattern is what makes the client
-      // agree with the server.
-      input.pattern = schema.pattern;
+      const verdict = patternVerdict(schema.pattern, patternFlags);
+      if (verdict === undefined) {
+        input.pattern = schema.pattern;
+      } else {
+        dropped.push({ field: name, reason: verdict });
+      }
     }
   }
 

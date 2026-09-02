@@ -39,6 +39,21 @@ describe('a schema written with zod/mini', () => {
     expect(fields.password.input.type).toBe('password');
   });
 
+  it('derives an array of enums as a checkbox group here too', () => {
+    const grouped = zm.object({ tags: zm.array(zm.enum(['a', 'b'])) });
+
+    const { fields, arrays } = formFields(grouped);
+    expect(arrays).toStrictEqual({});
+    expect(fields.tags.input).toStrictEqual({ name: 'tags' });
+
+    const formData = new FormData();
+    formData.append('tags', 'a');
+    formData.append('tags', 'b');
+    const result = parseForm(grouped, formData);
+    expect(result.success).toBe(true);
+    expect(result.data?.tags).toStrictEqual(['a', 'b']);
+  });
+
   it('parses a submission the same way', () => {
     const formData = new FormData();
     formData.append('title', 'k8ordo');

@@ -7,6 +7,8 @@ const schema = z.object({
   title: z.string(),
   user: z.object({ email: z.email() }),
   items: z.array(z.object({ name: z.string() })),
+  tags: z.array(z.enum(['a', 'b'])),
+  note: z.object({ body: z.string() }).optional(),
 });
 
 const derived = formFields(schema);
@@ -21,14 +23,20 @@ describe('paths are derived from the schema', () => {
 
       form.field('title');
       form.field('user.email');
+      // A wrapped nested object keeps its paths.
+      form.field('note.body');
+      // An array of enums is a checkbox group: one name, so a field.
+      form.field('tags');
       // @ts-expect-error 'titel' is not a field in the schema
       form.field('titel');
-      // @ts-expect-error 'items' is an array, reached through array()
+      // @ts-expect-error 'items' is an array of objects, reached through array()
       form.field('items');
 
       form.array('items');
       // @ts-expect-error 'user' is an object, not an array
       form.array('user');
+      // @ts-expect-error a checkbox group is a field, not repeated rows
+      form.array('tags');
     };
 
     expect(useCompileTimeOnly).toBeTypeOf('function');

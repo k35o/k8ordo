@@ -103,6 +103,48 @@ describe('parseForm', () => {
     );
   });
 
+  it('reads a checkbox group through its shared name, empty included', () => {
+    const grouped = z.object({ tags: z.array(z.enum(['a', 'b', 'c'])).min(2) });
+
+    const two = parseForm(
+      grouped,
+      formDataOf([
+        ['tags', 'a'],
+        ['tags', 'b'],
+      ]),
+    );
+    expect(two.success).toBe(true);
+    expect(two.data?.tags).toStrictEqual(['a', 'b']);
+    // One box checked still parses as an array of one, and the schema's own
+    // bound rejects it — no wiring error for the rest being unchecked.
+    const one = parseForm(grouped, formDataOf([['tags', 'a']]));
+    expect(one.success).toBe(false);
+    expect(one.state.errors?.tags).toBeDefined();
+    const none = parseForm(grouped, formDataOf([]));
+    expect(none.success).toBe(false);
+  });
+
+  it('treats an unselected radio group as a validation error, not a wiring one', () => {
+    // A radio group with nothing selected submits no entry at all — a state
+    // the person can reach, unlike a text control.
+    const withChoice = z.object({ color: z.enum(['red', 'blue']) });
+
+    const result = parseForm(withChoice, formDataOf([]));
+
+    expect(result.success).toBe(false);
+    expect(result.state.errors?.color).toBeDefined();
+  });
+
+  it('caps reconstructed rows instead of allocating what a forged key claims', () => {
+    const listed = z.object({
+      items: z.array(z.object({ name: z.string() })).max(3),
+    });
+    // One forged key must not make the parse allocate 100000001 rows.
+    const forged = formDataOf([['items[100000000].name', 'x']]);
+
+    expect(() => parseForm(listed, forged)).toThrow(/items\[0\]\.name/u);
+  });
+
   it('routes an object-level issue to formError, not to a field', () => {
     const paired = z
       .object({

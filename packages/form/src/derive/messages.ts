@@ -21,14 +21,24 @@ const probesFor = (input: FieldInput, required: boolean): Probe[] => {
   const probes: Probe[] = [];
 
   if (required) {
-    // An HTML form submits an untouched text field as '', never as undefined,
-    // so probing with undefined would report a type error the user can never
-    // actually trigger — and would miss a custom message on `.min(1, '...')`.
-    probes.push({
-      flag: 'valueMissing',
-      value: '',
-      codes: ['too_small', 'invalid_type', 'invalid_format'],
-    });
+    // The probe is what the parse would hand the schema for an untouched
+    // control: '' for a text field (never undefined — a form always submits
+    // something), false for a checkbox. Probing anything else reports a type
+    // error the user can never actually trigger — and misses a custom message
+    // on `.min(1, '...')` or `.literal(true, '...')`.
+    probes.push(
+      input.type === 'checkbox'
+        ? {
+            flag: 'valueMissing',
+            value: false,
+            codes: ['invalid_value', 'invalid_type'],
+          }
+        : {
+            flag: 'valueMissing',
+            value: '',
+            codes: ['too_small', 'invalid_type', 'invalid_format'],
+          },
+    );
   }
 
   if (input.minLength !== undefined) {
@@ -80,11 +90,20 @@ const probesFor = (input: FieldInput, required: boolean): Probe[] => {
         codes: ['too_big'],
       });
     }
-    if (input.step === 1) {
+    if (typeof input.step === 'number') {
+      // The probe must fail the step check and nothing before it: a failed
+      // `.int()` aborts zod's later checks, so for an integer step the probe
+      // stays an integer, just off the grid. Step 1 can only be missed by a
+      // non-integer.
       probes.push({
         flag: 'stepMismatch',
-        value: 0.5,
-        codes: ['invalid_type', 'not_multiple_of'],
+        value:
+          input.step === 1
+            ? 0.5
+            : Number.isInteger(input.step)
+              ? input.step + 1
+              : input.step / 2,
+        codes: ['not_multiple_of', 'invalid_type'],
       });
     }
   }
@@ -110,10 +129,14 @@ export const messagesFor = (
     if (result.success) {
       continue;
     }
+    // A probe can trip several checks at once (2.5 is both a non-integer and
+    // off the multiple-of grid); the codes are listed most-specific first.
     const issue =
-      result.error.issues.find((candidate) =>
-        probe.codes.includes(candidate.code),
-      ) ?? result.error.issues[0];
+      probe.codes
+        .map((code) =>
+          result.error.issues.find((candidate) => candidate.code === code),
+        )
+        .find((found) => found !== undefined) ?? result.error.issues[0];
     if (issue !== undefined) {
       messages[probe.flag] = issue.message;
     }

@@ -125,6 +125,72 @@ describe('nested and repeated fields', () => {
     expect(result.state.rows).toStrictEqual({ items: 2, tags: 2 });
   });
 
+  it('derives the subtree of a wrapped nested object instead of dropping it', () => {
+    // z.object().optional() keeps its shape behind the wrapper; losing the
+    // subtree here would make parseForm silently discard what was typed.
+    const wrapped = z.object({
+      name: z.string(),
+      profile: z.object({ bio: z.string().min(3, '3文字以上') }).optional(),
+    });
+
+    const { fields } = formFields(wrapped);
+    expect(fields['profile.bio'].input.name).toBe('profile.bio');
+
+    const result = parseForm(
+      wrapped,
+      formDataOf([
+        ['name', 'k8o'],
+        ['profile.bio', 'x'],
+      ]),
+    );
+    expect(result.success).toBe(false);
+    expect(result.state.errors?.['profile.bio']).toBe('3文字以上');
+  });
+
+  it('reads a checkbox group inside a repeated row through its row name', () => {
+    const rowsWithGroup = z.object({
+      members: z.array(
+        z.object({
+          name: z.string(),
+          roles: z.array(z.enum(['dev', 'ops'])),
+        }),
+      ),
+    });
+
+    const result = parseForm(
+      rowsWithGroup,
+      formDataOf([
+        ['members[0].name', 'k8o'],
+        ['members[0].roles', 'dev'],
+        ['members[0].roles', 'ops'],
+      ]),
+    );
+
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual({
+      members: [{ name: 'k8o', roles: ['dev', 'ops'] }],
+    });
+  });
+
+  it('refuses a schema it cannot expand rather than parsing it wrong', () => {
+    expect(() =>
+      formFields(z.object({ meta: z.record(z.string(), z.string()) })),
+    ).toThrow(/z\.record/u);
+    expect(() =>
+      formFields(
+        z.object({
+          rows: z.array(z.object({ tags: z.array(z.string()) })),
+        }),
+      ),
+    ).toThrow(/繰り返しの中の繰り返し/u);
+    expect(() => formFields(z.object({ 'a.b': z.string() }))).toThrow(
+      /キーに/u,
+    );
+    expect(() =>
+      formFields(z.object({ status: z.object({ a: z.string() }).nullable() })),
+    ).toThrow(/nullable/u);
+  });
+
   it('accepts an array with no rows without calling it a wiring error', () => {
     const optionalRows = z.object({
       title: z.string(),
