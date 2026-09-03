@@ -50,6 +50,7 @@ apps/
   docs/                  # ordo.k8o.me (Vite + @funstack/router)
 packages/
   ui/                    # @k8ordo/ui
+  form/                  # @k8ordo/form
 examples/
   ui-integrations/       # @k8ordo/ui × generative UI adapters (Vite)
   ui-nextjs/             # @k8ordo/ui × Next.js
