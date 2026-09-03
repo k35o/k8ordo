@@ -15,6 +15,7 @@ Every package here commits to the same four things:
 | --- | --- |
 | [`@k8ordo/ui`](packages/ui) | React UI components with semantic design tokens, i18n, and generative-UI adapters |
 | [`@k8ordo/form`](packages/form) | HTML constraint attributes, messages, and server-side validation from one zod schema |
+| [`@k8ordo/state`](packages/state) | Typed URL search-param state from one zod schema, over the Navigation API |
 
 `@k8ordo/*` holds **primary libraries only** — the ones an application imports
 and builds on. Tools that plug into someone else's ecosystem (lint configs,
@@ -51,6 +52,7 @@ apps/
 packages/
   ui/                    # @k8ordo/ui
   form/                  # @k8ordo/form
+  state/                 # @k8ordo/state
 examples/
   ui-integrations/       # @k8ordo/ui × generative UI adapters (Vite)
   ui-nextjs/             # @k8ordo/ui × Next.js
