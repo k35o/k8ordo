@@ -1,6 +1,6 @@
 'use client';
 
-import { useLocalStorage } from '@k8ordo/ui';
+import { defineLocalState, useAppState } from '@k8ordo/state';
 import {
   createContext,
   use,
@@ -10,6 +10,7 @@ import {
   useSyncExternalStore,
 } from 'react';
 import type { ReactNode } from 'react';
+import * as z from 'zod/mini';
 
 type Theme = 'light' | 'dark';
 
@@ -20,7 +21,14 @@ type ThemeContextValue = {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
-const STORAGE_KEY = 'k8ordo-theme';
+// mode が未設定のあいだはシステム設定に追従する。過去の `sepia` のような
+// 未知の値はスキーマのサルベージが未設定に落とすので、手動の正規化は無い。
+// 保存先は localStorage の `k8ordo-state:theme`（root.tsx の初期化スクリプト
+// と対）。
+const themeState = defineLocalState(
+  'theme',
+  z.object({ mode: z.optional(z.enum(['light', 'dark'])) }),
+);
 
 const subscribeMediaQuery = (cb: () => void) => {
   const mq = window.matchMedia('(prefers-color-scheme: dark)');
@@ -37,8 +45,6 @@ const getServerSystemTheme = (): Theme => 'light';
 
 const applyTheme = (theme: Theme) => {
   const root = document.documentElement;
-  // 過去に保存されていた `sepia` クラスが残っていれば確実に外す
-  root.classList.remove('sepia');
   if (theme === 'dark') {
     root.classList.add('dark');
   } else {
@@ -46,32 +52,22 @@ const applyTheme = (theme: Theme) => {
   }
 };
 
-// localStorage に過去の `sepia` などの未知の値が残っていても安全に扱う
-const normalize = (value: string | null): Theme | null => {
-  if (value === 'light' || value === 'dark') return value;
-  return null;
-};
-
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [storedRaw, setStoredTheme] = useLocalStorage<string | null>(
-    STORAGE_KEY,
-    null,
-  );
+  const [{ mode }, update] = useAppState(themeState);
   const systemTheme = useSyncExternalStore(
     subscribeMediaQuery,
     getSystemTheme,
     getServerSystemTheme,
   );
-  const storedTheme = normalize(storedRaw);
-  const theme: Theme = storedTheme ?? systemTheme;
+  const theme: Theme = mode ?? systemTheme;
 
   useEffect(() => {
     applyTheme(theme);
   }, [theme]);
 
   const toggleTheme = useCallback(() => {
-    setStoredTheme(theme === 'light' ? 'dark' : 'light');
-  }, [setStoredTheme, theme]);
+    update({ mode: theme === 'light' ? 'dark' : 'light' });
+  }, [update, theme]);
 
   const value = useMemo(() => ({ theme, toggleTheme }), [theme, toggleTheme]);
 

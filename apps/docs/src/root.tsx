@@ -24,11 +24,10 @@ export default function Root({ children }: { children: ReactNode }) {
           rel="stylesheet"
         />
         <script>
-          {`const raw = localStorage.getItem('k8ordo-theme');
-let t = null;
-try { t = raw ? JSON.parse(raw) : null; } catch { t = raw; }
-// 旧 sepia 値は廃止されたため light として扱う
-if (t === 'dark' || ((t !== 'light') && matchMedia('(prefers-color-scheme:dark)').matches)) {
+          {`// @k8ordo/state (defineLocalState 'theme') と同じ保存形式を読む
+let mode = null;
+try { mode = JSON.parse(localStorage.getItem('k8ordo-state:theme')).mode; } catch {}
+if (mode === 'dark' || (mode !== 'light' && matchMedia('(prefers-color-scheme:dark)').matches)) {
   document.documentElement.classList.add('dark');
 }`}
         </script>
