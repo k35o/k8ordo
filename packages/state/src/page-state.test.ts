@@ -114,6 +114,39 @@ describe('href and search', () => {
   });
 });
 
+describe('the entry slot', () => {
+  it('rejects a field declared in both url and entry, naming it', () => {
+    expect(() =>
+      definePageState('twice', {
+        url: z.object({ q: z.string().default('') }),
+        // @ts-expect-error q is already a url field
+        entry: z.object({ q: z.string().default('') }),
+      }),
+    ).toThrow(/both url and entry.*q/u);
+  });
+
+  it('rejects a definition with neither slot', () => {
+    // @ts-expect-error at least one slot is required
+    expect(() => definePageState('empty', {})).toThrow(/neither/u);
+  });
+
+  it('applies the absence rule to entry fields too', () => {
+    expect(() =>
+      definePageState('strict-entry', {
+        entry: z.object({ step: z.number() }),
+      }),
+    ).toThrow(/entry fields.*step/u);
+  });
+
+  it('an entry-only definition still builds plain links', () => {
+    const wizard = definePageState('wizard', {
+      entry: z.object({ step: z.number().default(1) }),
+    });
+    expect(wizard.href('/signup')).toBe('/signup');
+    expect(wizard.search()).toBe('');
+  });
+});
+
 describe('a schema written with zod/mini', () => {
   /* oxlint-disable no-underscore-dangle -- `_default` is zod/mini's own
      spelling of `.default()` */

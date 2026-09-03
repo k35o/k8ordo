@@ -3,50 +3,90 @@
 import { useCallback, useMemo, useSyncExternalStore } from 'react';
 import type { output } from 'zod/v4/core';
 
-import type { PageState } from './page-state';
-import { buildInitialSnapshot, pageStoreOf } from './store/page-store';
-import type { UpdateHandle, UpdateOptions } from './store/page-store';
-import type { UrlValues } from './url/codec';
+import type { LocalState } from './local-state';
+import type { MemoryState } from './memory-state';
+import type { OutputOf, PageState } from './page-state';
+import type { StateValues } from './schema/object';
+import type { Patch, Store, UpdateHandle } from './store/core';
+import { localInitialSnapshot, localStoreOf } from './store/local-store';
+import { memoryInitialSnapshot, memoryStoreOf } from './store/memory-store';
+import { pageInitialSnapshot, pageStoreOf } from './store/page-store';
+import type { UpdateOptions } from './store/page-store';
 
-type StateOf<Def> = Def extends PageState<infer Url> ? output<Url> : never;
+export type AnyState = PageState | LocalState | MemoryState;
 
-type UpdateFn<State> = (
-  patch: Readonly<Partial<State>> | ((current: State) => Partial<State>),
-  options?: UpdateOptions,
+type StateOf<Def> =
+  Def extends PageState<infer Url, infer Entry>
+    ? OutputOf<Url> & OutputOf<Entry>
+    : Def extends LocalState<infer Schema>
+      ? output<Schema>
+      : Def extends MemoryState<infer Values>
+        ? Values
+        : never;
+
+type UrlStateOf<Def> = Def extends PageState<infer Url> ? OutputOf<Url> : never;
+
+type UpdateFn<Def> = (
+  patch:
+    | Readonly<Partial<StateOf<Def>>>
+    | ((current: StateOf<Def>) => Partial<StateOf<Def>>),
+  // history:'push'/'replace' is a navigation concept; only the page kind has
+  // a navigation behind it, so only there does the parameter exist at all.
+  ...rest: Def extends PageState ? [options?: UpdateOptions] : []
 ) => UpdateHandle;
 
-type PageOptions<State> = {
-  /**
-   * The RSC-parsed url state, passed down as a prop. It seeds SSR and the
-   * hydration render; without it those two renders see the defaults, which
-   * flashes once the live URL takes over.
-   */
-  initialUrl?: Readonly<State>;
-};
+type OptionsFor<Def> = Def extends PageState
+  ? {
+      /**
+       * The RSC-parsed url state, passed down as a prop. It seeds SSR and
+       * the hydration render; without it those two renders see the defaults,
+       * which flashes once the live URL takes over. The entry slot has no
+       * server-side source, so it always starts from defaults there.
+       */
+      initialUrl?: Readonly<UrlStateOf<Def>>;
+    }
+  : Record<never, never>;
+
+const storeOf = (def: AnyState): Store =>
+  def.kind === 'page'
+    ? pageStoreOf(def)
+    : def.kind === 'local'
+      ? localStoreOf(def)
+      : memoryStoreOf(def);
+
+const initialOf = (
+  def: AnyState,
+  initialUrl: Readonly<StateValues> | undefined,
+): StateValues =>
+  def.kind === 'page'
+    ? pageInitialSnapshot(def, initialUrl)
+    : def.kind === 'local'
+      ? localInitialSnapshot(def)
+      : memoryInitialSnapshot(def);
 
 const FULL = '*';
 
-export function useAppState<Def extends PageState>(
+export function useAppState<Def extends AnyState>(
   def: Def,
-  options?: PageOptions<StateOf<Def>>,
-): [StateOf<Def>, UpdateFn<StateOf<Def>>];
+  options?: OptionsFor<Def>,
+): [StateOf<Def>, UpdateFn<Def>];
 export function useAppState<
-  Def extends PageState,
+  Def extends AnyState,
   const Key extends Extract<keyof StateOf<Def>, string>,
 >(
   def: Def,
   keys: readonly Key[],
-  options?: PageOptions<StateOf<Def>>,
-): [Pick<StateOf<Def>, Key>, UpdateFn<StateOf<Def>>];
+  options?: OptionsFor<Def>,
+): [Pick<StateOf<Def>, Key>, UpdateFn<Def>];
 export function useAppState(
-  def: PageState,
-  keysOrOptions?: readonly string[] | PageOptions<UrlValues>,
-  maybeOptions?: PageOptions<UrlValues>,
-): [UrlValues, UpdateFn<UrlValues>] {
+  def: AnyState,
+  keysOrOptions?: readonly string[] | { initialUrl?: Readonly<StateValues> },
+  maybeOptions?: { initialUrl?: Readonly<StateValues> },
+): [StateValues, (patch: Patch, options?: UpdateOptions) => UpdateHandle] {
   const gotKeys = Array.isArray(keysOrOptions);
   const options = gotKeys
     ? maybeOptions
-    : (keysOrOptions as PageOptions<UrlValues> | undefined);
+    : (keysOrOptions as { initialUrl?: Readonly<StateValues> } | undefined);
   // The signature both normalizes an inline key array (no useMemo required
   // at the call site) and serves as the pick-cache slot in the store.
   const sig = gotKeys
@@ -58,25 +98,35 @@ export function useAppState(
   );
 
   const subscribe = useCallback(
-    (notify: () => void) => pageStoreOf(def).subscribe(keys, notify),
+    (notify: () => void) => storeOf(def).subscribe(keys, notify),
     [def, keys],
   );
   const getSnapshot = useCallback(
-    () => pageStoreOf(def).getSnapshot(sig, keys),
+    () => storeOf(def).getSnapshot(sig, keys),
     [def, sig, keys],
   );
   const initialUrl = options?.initialUrl;
   const getServerSnapshot = useMemo(() => {
-    let cached: UrlValues | undefined;
+    let cached: StateValues | undefined;
     return () => {
-      cached ??= buildInitialSnapshot(def, initialUrl, keys);
+      if (cached === undefined) {
+        const base = initialOf(def, initialUrl);
+        if (keys === null) {
+          cached = base;
+        } else {
+          const pick: StateValues = {};
+          for (const key of keys) pick[key] = base[key];
+          cached = pick;
+        }
+      }
       return cached;
     };
   }, [def, initialUrl, keys]);
 
   const state = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
-  const update = useCallback<UpdateFn<UrlValues>>(
-    (patch, updateOptions) => pageStoreOf(def).update(patch, updateOptions),
+  const update = useCallback(
+    (patch: Patch, updateOptions?: UpdateOptions) =>
+      storeOf(def).update(patch, updateOptions),
     [def],
   );
   return [state, update];

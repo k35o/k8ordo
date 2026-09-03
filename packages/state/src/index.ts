@@ -1,7 +1,14 @@
 export { definePageState } from './page-state';
-export type { PageState, PageStateConfig } from './page-state';
+export type { OutputOf, PageState } from './page-state';
+export { defineLocalState } from './local-state';
+export type { LocalState } from './local-state';
+export { defineMemoryState } from './memory-state';
+export type { MemoryState } from './memory-state';
 export { useAppState } from './use-app-state';
-export type { UpdateHandle, UpdateOptions } from './store/page-store';
+export type { AnyState } from './use-app-state';
+export type { UpdateHandle } from './store/core';
+export type { UpdateOptions } from './store/page-store';
 export { resetStateRegistry } from './store/registry';
 export type { Register, RegisteredPath } from './register';
-export type { UrlInput, UrlSchema } from './url/codec';
+export type { StateSchema } from './schema/object';
+export type { UrlInput } from './url/codec';

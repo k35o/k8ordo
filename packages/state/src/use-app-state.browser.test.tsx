@@ -2,8 +2,10 @@ import type { FC } from 'react';
 import { render } from 'vitest-browser-react';
 import { z } from 'zod';
 
+import { defineLocalState } from './local-state';
+import { defineMemoryState } from './memory-state';
 import { definePageState } from './page-state';
-import type { UpdateHandle } from './store/page-store';
+import type { UpdateHandle } from './store/core';
 import { resetStateRegistry } from './store/registry';
 import { useAppState } from './use-app-state';
 
@@ -41,6 +43,7 @@ afterEach(async () => {
   await navigation.navigate(home, { history: 'replace' }).finished;
   navigation.removeEventListener('navigate', interceptAsRouter);
   resetStateRegistry();
+  localStorage.removeItem('k8ordo-state:prefs');
 });
 
 const renders: Record<string, number> = {};
@@ -93,6 +96,98 @@ const QueryViewer: FC = () => {
   const [{ q }] = useAppState(listState, ['q']);
   renders['query'] = (renders['query'] ?? 0) + 1;
   return <p data-testid="q">{q}</p>;
+};
+
+const panelState = definePageState('panel', {
+  url: z.object({ tab: z.enum(['a', 'b']).default('a') }),
+  entry: z.object({ expanded: z.array(z.string()).default([]) }),
+});
+
+const Panel: FC = () => {
+  const [{ tab, expanded }, update] = useAppState(panelState);
+  return (
+    <>
+      <p data-testid="tab">{tab}</p>
+      <p data-testid="expanded">{expanded.join(',')}</p>
+      <button
+        type="button"
+        onClick={() => {
+          lastHandle = update({ expanded: [...expanded, 'x'] });
+        }}
+      >
+        expand
+      </button>
+      <button
+        type="button"
+        onClick={() => {
+          lastHandle = update(
+            { tab: 'b', expanded: ['y'] },
+            { history: 'push' },
+          );
+        }}
+      >
+        tab and expand
+      </button>
+      <button
+        type="button"
+        onClick={() => {
+          lastHandle = update({ tab: 'b' });
+        }}
+      >
+        tab only
+      </button>
+    </>
+  );
+};
+
+const prefs = defineLocalState(
+  'prefs',
+  z.object({
+    view: z.enum(['grid', 'table']).default('grid'),
+    pageSize: z.number().default(20),
+  }),
+);
+
+const Prefs: FC = () => {
+  const [{ view, pageSize }, update] = useAppState(prefs, ['view', 'pageSize']);
+  return (
+    <>
+      <p data-testid="view">{view}</p>
+      <p data-testid="page-size">{pageSize}</p>
+      <button
+        type="button"
+        onClick={() => {
+          lastHandle = update({ view: 'table' });
+        }}
+      >
+        table
+      </button>
+    </>
+  );
+};
+
+const debugState = defineMemoryState('debug', { open: false, clicks: 0 });
+
+const Debug: FC = () => {
+  const [{ open, clicks }, update] = useAppState(debugState);
+  return (
+    <>
+      <p data-testid="debug">
+        {String(open)}:{clicks}
+      </p>
+      <button
+        type="button"
+        onClick={() => {
+          update((current) => ({
+            open: !current.open,
+            clicks: current.clicks + 1,
+          }));
+        }}
+      >
+        toggle
+      </button>
+    </>
+  );
 };
 
 it('reflects the URL it mounts into', async () => {
@@ -178,6 +273,152 @@ it('settles without navigating when nothing changed', async () => {
 
   await (lastHandle as UpdateHandle).finished;
   expect(navigations - before).toBe(0);
+});
+
+it('an entry-only update writes state without navigating', async () => {
+  const screen = await render(<Panel />);
+  const before = navigations;
+
+  await screen.getByRole('button', { name: 'expand', exact: true }).click();
+
+  await expect.element(screen.getByTestId('expanded')).toHaveTextContent('x');
+  await (lastHandle as UpdateHandle).finished;
+  expect(navigations - before).toBe(0);
+  expect(navigation.currentEntry?.getState()).toStrictEqual({
+    panel: { expanded: ['x'] },
+  });
+});
+
+it('a mixed update is one navigation carrying both faces', async () => {
+  const screen = await render(<Panel />);
+  const before = navigations;
+
+  await screen.getByRole('button', { name: 'tab and expand' }).click();
+
+  await (lastHandle as UpdateHandle).finished;
+  expect(navigations - before).toBe(1);
+  expect(new URL(location.href).searchParams.get('tab')).toBe('b');
+  expect(navigation.currentEntry?.getState()).toStrictEqual({
+    panel: { expanded: ['y'] },
+  });
+});
+
+it('going back restores both faces of the entry', async () => {
+  const screen = await render(<Panel />);
+
+  await screen.getByRole('button', { name: 'tab and expand' }).click();
+  await (lastHandle as UpdateHandle).finished;
+  await expect.element(screen.getByTestId('tab')).toHaveTextContent('b');
+
+  await navigation.back().finished;
+
+  await expect.element(screen.getByTestId('tab')).toHaveTextContent('a');
+  await expect.element(screen.getByTestId('expanded')).toHaveTextContent('');
+});
+
+it('a url-only update carries entry and foreign state forward', async () => {
+  navigation.updateCurrentEntry({ state: { alien: 7 } });
+  const screen = await render(<Panel />);
+
+  await screen.getByRole('button', { name: 'expand', exact: true }).click();
+  await (lastHandle as UpdateHandle).finished;
+  await screen.getByRole('button', { name: 'tab only' }).click();
+  await (lastHandle as UpdateHandle).finished;
+
+  expect(new URL(location.href).searchParams.get('tab')).toBe('b');
+  expect(navigation.currentEntry?.getState()).toStrictEqual({
+    alien: 7,
+    panel: { expanded: ['x'] },
+  });
+});
+
+it('entry state written by an older schema parses to defaults', async () => {
+  navigation.updateCurrentEntry({ state: { panel: { expanded: 'nope' } } });
+
+  const screen = await render(<Panel />);
+
+  await expect.element(screen.getByTestId('expanded')).toHaveTextContent('');
+});
+
+it('local state reads what an earlier session stored', async () => {
+  localStorage.setItem(
+    'k8ordo-state:prefs',
+    JSON.stringify({ view: 'table', pageSize: 50 }),
+  );
+
+  const screen = await render(<Prefs />);
+
+  await expect.element(screen.getByTestId('view')).toHaveTextContent('table');
+  await expect.element(screen.getByTestId('page-size')).toHaveTextContent('50');
+});
+
+it('local state persists an update and settles its handle', async () => {
+  const screen = await render(<Prefs />);
+
+  await screen.getByRole('button', { name: 'table' }).click();
+
+  await expect.element(screen.getByTestId('view')).toHaveTextContent('table');
+  await (lastHandle as UpdateHandle).finished;
+  expect(
+    JSON.parse(localStorage.getItem('k8ordo-state:prefs') as string),
+  ).toStrictEqual({ view: 'table', pageSize: 20 });
+});
+
+it('corrupt localStorage JSON resets to defaults instead of crashing', async () => {
+  localStorage.setItem('k8ordo-state:prefs', '{oops');
+
+  const screen = await render(<Prefs />);
+
+  await expect.element(screen.getByTestId('view')).toHaveTextContent('grid');
+});
+
+it('a field an older schema wrote salvages alone', async () => {
+  localStorage.setItem(
+    'k8ordo-state:prefs',
+    JSON.stringify({ view: 'nope', pageSize: 50 }),
+  );
+
+  const screen = await render(<Prefs />);
+
+  await expect.element(screen.getByTestId('view')).toHaveTextContent('grid');
+  await expect.element(screen.getByTestId('page-size')).toHaveTextContent('50');
+});
+
+it("another tab's write flows in through the storage event", async () => {
+  const screen = await render(<Prefs />);
+  await expect.element(screen.getByTestId('view')).toHaveTextContent('grid');
+
+  localStorage.setItem(
+    'k8ordo-state:prefs',
+    JSON.stringify({ view: 'table', pageSize: 20 }),
+  );
+  window.dispatchEvent(
+    new StorageEvent('storage', {
+      key: 'k8ordo-state:prefs',
+      storageArea: localStorage,
+    }),
+  );
+
+  await expect.element(screen.getByTestId('view')).toHaveTextContent('table');
+});
+
+it('memory state updates through the functional form and stays in memory', async () => {
+  const screen = await render(<Debug />);
+
+  await screen.getByRole('button', { name: 'toggle' }).click();
+  await screen.getByRole('button', { name: 'toggle' }).click();
+
+  await expect
+    .element(screen.getByTestId('debug'))
+    .toHaveTextContent('false:2');
+});
+
+it('memory state starts from its initial values on a fresh registry', async () => {
+  const screen = await render(<Debug />);
+
+  await expect
+    .element(screen.getByTestId('debug'))
+    .toHaveTextContent('false:0');
 });
 
 it('leaves params it does not own untouched', async () => {

@@ -1,26 +1,18 @@
-import { safeParse } from 'zod/v4/core';
-import type { $ZodObject, $ZodShape, $ZodType } from 'zod/v4/core';
+import type { $ZodType } from 'zod/v4/core';
 
-/**
- * The common ground between `zod` and `zod/mini`: both build on the shared
- * core object and both expose `shape`. Accepting this keeps the smaller entry
- * usable without losing the types.
- */
-export type UrlSchema<Shape extends $ZodShape = $ZodShape> =
-  $ZodObject<Shape> & { shape: Shape };
+import { analyzeSchema, parseWithSalvage, sameValue } from '../schema/object';
+import type { StateSchema, StateValues } from '../schema/object';
 
 /** `URLSearchParams`, or the object shape frameworks hand to a page. */
 export type UrlInput =
   | URLSearchParams
   | Readonly<Record<string, string | readonly string[] | undefined>>;
 
-export type UrlValues = Record<string, unknown>;
-
 export type UrlCodec = {
   keys: readonly string[];
-  defaults: Readonly<UrlValues>;
-  parse: (input: UrlInput) => UrlValues;
-  search: (values: Readonly<Partial<UrlValues>>) => string;
+  defaults: Readonly<StateValues>;
+  parse: (input: UrlInput) => StateValues;
+  search: (values: Readonly<Partial<StateValues>>) => string;
 };
 
 type Def = {
@@ -58,17 +50,6 @@ const readAll = (input: UrlInput, key: string): readonly string[] => {
   return typeof value === 'string' ? [value] : value;
 };
 
-/** Scalars compare with `Object.is`; arrays of scalars element-wise. */
-export const sameValue = (a: unknown, b: unknown): boolean => {
-  if (Object.is(a, b)) return true;
-  return (
-    Array.isArray(a) &&
-    Array.isArray(b) &&
-    a.length === b.length &&
-    a.every((value, index) => Object.is(value, b[index]))
-  );
-};
-
 const serializeValue = (key: string, value: unknown): string => {
   if (typeof value === 'string') return value;
   if (
@@ -83,58 +64,24 @@ const serializeValue = (key: string, value: unknown): string => {
   );
 };
 
-export const createCodec = (schema: UrlSchema): UrlCodec => {
-  const shape: Readonly<Record<string, $ZodType>> = schema.shape;
-  const keys = Object.keys(shape);
+export const createUrlCodec = (schema: StateSchema): UrlCodec => {
+  const info = analyzeSchema(schema, 'url');
+  const { keys, defaults } = info;
   const multi = new Set(
-    keys.filter((key) => baseDef(shape[key] as $ZodType).type === 'array'),
+    keys.filter((key) => baseDef(info.shape[key] as $ZodType).type === 'array'),
   );
 
-  // A URL param can always be absent, so every field must already parse from
-  // nothing. Failing at define time turns a guaranteed runtime surprise into
-  // a module-load error with the fix in the message.
-  const empty = safeParse(schema, {});
-  if (!empty.success) {
-    const failing = keys.filter(
-      (key) => !safeParse(shape[key] as $ZodType, undefined).success,
-    );
-    throw new TypeError(
-      `url fields must tolerate absence — add .default() or .optional() to: ${failing.join(', ')}`,
-    );
-  }
-  const defaults: UrlValues = {};
-  for (const key of keys) defaults[key] = (empty.data as UrlValues)[key];
-
-  const complete = (parsed: UrlValues): UrlValues => {
-    const values: UrlValues = {};
-    for (const key of keys) values[key] = parsed[key];
-    return values;
-  };
-
-  const parse = (input: UrlInput): UrlValues => {
-    const raw: UrlValues = {};
+  const parse = (input: UrlInput): StateValues => {
+    const raw: StateValues = {};
     for (const key of keys) {
       const got = readAll(input, key);
       if (got.length === 0) continue;
       raw[key] = multi.has(key) ? got : got[0];
     }
-    const whole = safeParse(schema, raw);
-    if (whole.success) return complete(whole.data);
-    // The URL is user-editable input: one broken param falls back to its own
-    // default instead of taking the whole page state down with it.
-    const salvaged: UrlValues = {};
-    for (const key of keys) {
-      if (key in raw) {
-        const field = safeParse(shape[key] as $ZodType, raw[key]);
-        salvaged[key] = field.success ? field.data : defaults[key];
-      } else {
-        salvaged[key] = defaults[key];
-      }
-    }
-    return salvaged;
+    return parseWithSalvage(info, raw);
   };
 
-  const search = (values: Readonly<Partial<UrlValues>>): string => {
+  const search = (values: Readonly<Partial<StateValues>>): string => {
     const params = new URLSearchParams();
     for (const key of keys) {
       const value = key in values ? values[key] : defaults[key];

@@ -1,8 +1,9 @@
 {
   "name": "@k8ordo/state",
   "version": "0.0.0",
-  "description": "Declare state by where it lives. One zod schema drives the URL search params on both server and client, over the Navigation API.",
+  "description": "Declare state by where it lives — URL search params, history-entry state, localStorage, or memory. One zod schema per place, over the Navigation API.",
   "keywords": [
+    "localstorage",
     "navigation-api",
     "react",
     "search-params",

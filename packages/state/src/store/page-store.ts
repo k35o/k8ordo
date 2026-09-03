@@ -1,20 +1,10 @@
-import { codecOf } from '../page-state';
-import type { PageState } from '../page-state';
-import { sameValue } from '../url/codec';
-import type { UrlValues } from '../url/codec';
+import { internalsOf } from '../page-state';
+import type { PageInternals, PageState } from '../page-state';
+import { isRecord, sameValue } from '../schema/object';
+import type { StateValues } from '../schema/object';
+import { createHandle, createStoreCore, resolvePatch } from './core';
+import type { Handle, Patch, Store, UpdateHandle } from './core';
 import { getOrCreateStore } from './registry';
-
-/**
- * Mirrors `navigation.navigate()`'s own return shape: an object holding the
- * promises rather than a promise, so fire-and-forget callers ignore it
- * without tripping no-floating-promises, and the 5% that await pick a stage.
- */
-export type UpdateHandle = {
-  /** The URL is in the history. */
-  committed: Promise<void>;
-  /** The router's intercept work (fetch, render) is done. */
-  finished: Promise<void>;
-};
 
 export type UpdateOptions = {
   /**
@@ -24,135 +14,106 @@ export type UpdateOptions = {
   history?: 'push' | 'replace';
 };
 
-export type Patch = UrlValues | ((current: UrlValues) => UrlValues);
+const storedEntryState = (): unknown => navigation.currentEntry?.getState();
 
-export type PageStore = {
-  subscribe: (keys: readonly string[] | null, notify: () => void) => () => void;
-  getSnapshot: (sig: string, keys: readonly string[] | null) => UrlValues;
-  update: (patch: Patch, options?: UpdateOptions) => UpdateHandle;
-  dispose: () => void;
+const readLive = (def: PageState, page: PageInternals): StateValues => {
+  const live: StateValues = {};
+  if (page.url !== null) {
+    Object.assign(live, page.url.parse(new URL(location.href).searchParams));
+  }
+  if (page.entry !== null) {
+    const stored = storedEntryState();
+    Object.assign(
+      live,
+      page.entry.parse(isRecord(stored) ? stored[def.key] : undefined),
+    );
+  }
+  return live;
 };
 
-type Handle = {
-  external: UpdateHandle;
-  settle: () => void;
-  fail: (error: unknown) => void;
-  adopt: (result: {
-    committed?: Promise<unknown> | undefined;
-    finished?: Promise<unknown> | undefined;
-  }) => void;
-};
-
-const createHandle = (): Handle => {
-  let resolveCommitted!: () => void;
-  let rejectCommitted!: (error: unknown) => void;
-  let resolveFinished!: () => void;
-  let rejectFinished!: (error: unknown) => void;
-  const committed = new Promise<void>((resolve, reject) => {
-    resolveCommitted = resolve;
-    rejectCommitted = reject;
-  });
-  const finished = new Promise<void>((resolve, reject) => {
-    resolveFinished = resolve;
-    rejectFinished = reject;
-  });
-  // A superseded navigation rejects these; for a fire-and-forget caller that
-  // is the normal course of events, not an unhandled rejection.
-  committed.catch(() => undefined);
-  finished.catch(() => undefined);
-  return {
-    external: { committed, finished },
-    settle: () => {
-      resolveCommitted();
-      resolveFinished();
-    },
-    fail: (error) => {
-      rejectCommitted(error);
-      rejectFinished(error);
-    },
-    adopt: (result) => {
-      // lib.dom marks the pair optional; the spec always returns both, so a
-      // missing promise can only mean "nothing to wait for".
-      if (result.committed === undefined) resolveCommitted();
-      else result.committed.then(() => resolveCommitted(), rejectCommitted);
-      if (result.finished === undefined) resolveFinished();
-      else result.finished.then(() => resolveFinished(), rejectFinished);
-    },
-  };
-};
-
-const createPageStore = (def: PageState): PageStore => {
-  const codec = codecOf(def);
-
-  type Listener = { keys: ReadonlySet<string> | null; notify: () => void };
-  const listeners = new Set<Listener>();
-  const picks = new Map<
-    string,
-    { keys: readonly string[]; value: UrlValues }
-  >();
-
-  let snapshot = codec.parse(new URL(location.href).searchParams);
-
-  const applyNext = (next: UrlValues): void => {
-    const changed: string[] = [];
-    const merged: UrlValues = {};
-    for (const key of codec.keys) {
-      // Unchanged fields keep their previous reference so key-subscribed
-      // picks and downstream memoization stay stable under Object.is.
-      if (sameValue(snapshot[key], next[key])) {
-        merged[key] = snapshot[key];
-      } else {
-        merged[key] = next[key];
-        changed.push(key);
-      }
-    }
-    if (changed.length === 0) return;
-    snapshot = merged;
-    for (const [sig, pick] of picks) {
-      if (changed.some((key) => pick.keys.includes(key))) picks.delete(sig);
-    }
-    for (const listener of listeners) {
-      const subscribed = listener.keys;
-      if (subscribed === null || changed.some((key) => subscribed.has(key))) {
-        listener.notify();
-      }
-    }
-  };
+const createPageStore = (def: PageState): Store => {
+  const page = internalsOf(def);
+  const core = createStoreCore(page.keys, readLive(def, page));
 
   const sync = (): void => {
-    applyNext(codec.parse(new URL(location.href).searchParams));
+    core.applyNext(readLive(def, page));
   };
   navigation.addEventListener('currententrychange', sync);
 
-  let pending: UrlValues | null = null;
+  let pending: StateValues | null = null;
   let pendingPush = false;
   let handle: Handle | null = null;
 
+  /**
+   * The whole navigation state travels with every write we make: the entry
+   * state object is shared ground (the router's own state, other page
+   * states), and a navigate that dropped it would wipe the neighbours.
+   */
+  const carryState = (stored: unknown, target: StateValues): unknown => {
+    if (page.entry === null) return stored;
+    const base: StateValues = isRecord(stored) ? { ...stored } : {};
+    const own: StateValues = {};
+    for (const key of page.entry.keys) own[key] = target[key];
+    base[def.key] = own;
+    return base;
+  };
+
   const flush = (): void => {
-    const target = snapshot;
+    const target = core.snapshot();
     const push = pendingPush;
     const current = handle as Handle;
     pending = null;
     pendingPush = false;
     handle = null;
 
-    const url = new URL(location.href);
     // Parse-level comparison, not string comparison: a batch that ends back
     // where it started must not navigate at all.
-    const live = codec.parse(url.searchParams);
-    if (codec.keys.every((key) => sameValue(live[key], target[key]))) {
+    const url = new URL(location.href);
+    const stored = storedEntryState();
+    const liveUrl = page.url === null ? {} : page.url.parse(url.searchParams);
+    const urlChanged =
+      page.url?.keys.some((key) => !sameValue(liveUrl[key], target[key])) ??
+      false;
+    const liveEntry =
+      page.entry === null
+        ? {}
+        : page.entry.parse(isRecord(stored) ? stored[def.key] : undefined);
+    const entryChanged =
+      page.entry?.keys.some((key) => !sameValue(liveEntry[key], target[key])) ??
+      false;
+
+    if (!urlChanged && !entryChanged) {
       current.settle();
       return;
     }
+
+    const state = carryState(stored, target);
+
+    if (!urlChanged) {
+      // The hidden face alone moved: no navigation, works under any router.
+      try {
+        navigation.updateCurrentEntry({ state });
+        current.settle();
+      } catch (error) {
+        current.fail(error);
+      }
+      return;
+    }
+
     // Only this definition's params are rewritten: the URL is shared ground
     // (other page states, tracking params), not this store's property.
-    for (const key of codec.keys) url.searchParams.delete(key);
-    for (const [key, value] of new URLSearchParams(codec.search(target))) {
-      url.searchParams.append(key, value);
+    if (page.url !== null) {
+      for (const key of page.url.keys) url.searchParams.delete(key);
+      for (const [key, value] of new URLSearchParams(page.url.search(target))) {
+        url.searchParams.append(key, value);
+      }
     }
     try {
       current.adopt(
-        navigation.navigate(url.href, { history: push ? 'push' : 'replace' }),
+        navigation.navigate(url.href, {
+          history: push ? 'push' : 'replace',
+          state,
+        }),
       );
     } catch (error) {
       current.fail(error);
@@ -160,13 +121,7 @@ const createPageStore = (def: PageState): PageStore => {
   };
 
   const update = (patch: Patch, options?: UpdateOptions): UpdateHandle => {
-    const resolved =
-      typeof patch === 'function' ? patch({ ...snapshot }) : patch;
-    for (const key of Object.keys(resolved)) {
-      if (!codec.keys.includes(key)) {
-        throw new TypeError(`"${def.key}" has no url field "${key}"`);
-      }
-    }
+    const resolved = resolvePatch(patch, core.snapshot(), page.keys, def.key);
     if (pending === null) {
       pending = {};
       handle = createHandle();
@@ -177,66 +132,47 @@ const createPageStore = (def: PageState): PageStore => {
     Object.assign(pending, resolved);
     if (options?.history === 'push') pendingPush = true;
     // Synchronous echo: the next render sees the new value. The
-    // currententrychange after the navigation re-parses the URL and settles
-    // any value the schema normalizes differently.
-    applyNext({ ...snapshot, ...pending });
+    // currententrychange after the write re-parses the platform truth and
+    // settles any value the schema normalizes differently.
+    core.applyNext({ ...core.snapshot(), ...pending });
     return (handle as Handle).external;
   };
 
   return {
-    subscribe: (keys, notify) => {
-      const listener: Listener = {
-        keys: keys === null ? null : new Set(keys),
-        notify,
-      };
-      listeners.add(listener);
-      return () => {
-        listeners.delete(listener);
-      };
-    },
-    getSnapshot: (sig, keys) => {
-      if (keys === null) return snapshot;
-      let pick = picks.get(sig);
-      if (pick === undefined) {
-        const value: UrlValues = {};
-        for (const key of keys) value[key] = snapshot[key];
-        pick = { keys, value };
-        picks.set(sig, pick);
-      }
-      return pick.value;
-    },
+    subscribe: core.subscribe,
+    getSnapshot: core.getSnapshot,
     update,
     dispose: () => {
       navigation.removeEventListener('currententrychange', sync);
-      listeners.clear();
-      picks.clear();
+      core.clear();
     },
   };
 };
 
-export const pageStoreOf = (def: PageState): PageStore =>
+export const pageStoreOf = (def: PageState): Store =>
   getOrCreateStore('page', def.key, () => createPageStore(def));
 
 /**
  * What SSR and the hydration render see: the RSC-parsed url when the caller
- * passed one down, defaults otherwise. Pure on purpose — the server must
- * never touch `navigation` or create a store.
+ * passed one down; defaults for everything else — the entry slot never
+ * reaches the server. Pure on purpose: the server must never touch
+ * `navigation` or create a store.
  */
-export const buildInitialSnapshot = (
+export const pageInitialSnapshot = (
   def: PageState,
-  initialUrl: Readonly<UrlValues> | undefined,
-  keys: readonly string[] | null,
-): UrlValues => {
-  const codec = codecOf(def);
-  const base: UrlValues = {};
-  for (const key of codec.keys) {
-    base[key] =
-      initialUrl !== undefined && key in initialUrl
-        ? initialUrl[key]
-        : codec.defaults[key];
+  initialUrl: Readonly<StateValues> | undefined,
+): StateValues => {
+  const page = internalsOf(def);
+  const base: StateValues = {};
+  for (const codec of [page.url, page.entry]) {
+    if (codec !== null) {
+      for (const key of codec.keys) base[key] = codec.defaults[key];
+    }
   }
-  if (keys === null) return base;
-  const pick: UrlValues = {};
-  for (const key of keys) pick[key] = base[key];
-  return pick;
+  if (page.url !== null && initialUrl !== undefined) {
+    for (const key of page.url.keys) {
+      if (key in initialUrl) base[key] = initialUrl[key];
+    }
+  }
+  return base;
 };
