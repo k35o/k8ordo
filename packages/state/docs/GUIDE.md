@@ -239,7 +239,7 @@ the same division `@k8ordo/form` draws.
 ## Typed routes
 
 `href` keeps the path literal alive in the type
-(`'/products' | `/products?${string}``), which is what typed-route checks
+(``'/products' | `/products?${string}` ``), which is what typed-route checks
 strip a query from and verify. To constrain paths app-wide, augment `Register`
 once:
 
