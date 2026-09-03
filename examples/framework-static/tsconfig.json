@@ -1,0 +1,5 @@
+{
+  "extends": "../../tsconfig.json",
+  "include": ["src/**/*.ts", "src/**/*.tsx", ".k8ordo/**/*.ts", "*.ts"],
+  "exclude": ["node_modules", "dist"]
+}

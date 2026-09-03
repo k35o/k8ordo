@@ -16,3 +16,12 @@ export type {
   TableBranch,
   TableNode,
 } from './generate/emit';
+export { generate, scanRoutes } from './generate/write';
+export type { GenerateOptions, GenerateResult } from './generate/write';
+export { engine } from './plugin/core';
+export type { EngineOptions } from './plugin/core';
+export {
+  isPayloadPath,
+  pagePathFor,
+  payloadPathFor,
+} from './runtime/payload-path';

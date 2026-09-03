@@ -1,7 +1,7 @@
 import type { FC } from 'react';
 
 import { defineRoutes } from './define-routes';
-import type { RouteOf } from './define-routes';
+import type { PatternOf, RouteOf } from './define-routes';
 import { href } from './links';
 
 const Home: FC = () => null;
@@ -125,6 +125,36 @@ describe('route groups', () => {
     expect(() => defineRoutes({ '/(oops)': Home })).toThrow(
       /must have children/u,
     );
+  });
+});
+
+describe('patterns under a root layout', () => {
+  // 生成器が出す形: すべてが透過キー '/' の下のブランチに入る
+  const wrapped = defineRoutes({
+    '/': {
+      layout: LocaleLayout,
+      children: {
+        '/': Home,
+        '/products': { children: { '/': ProductList, '/:id': ProductPage } },
+        '/(docs)': { layout: Docs, children: { '/guide': First } },
+      },
+    },
+  });
+
+  it('does not double the leading slash', () => {
+    expect(wrapped.match('/products')?.pattern).toBe('/products');
+    expect(wrapped.match('/products/7')?.params).toStrictEqual({ id: '7' });
+    expect(wrapped.match('/guide')?.stack).toStrictEqual([
+      LocaleLayout,
+      Docs,
+      First,
+    ]);
+  });
+
+  it('says the same thing in the type', () => {
+    expectTypeOf<PatternOf<typeof wrapped.record>>().toEqualTypeOf<
+      '/' | '/products' | '/products/:id' | '/guide'
+    >();
   });
 });
 

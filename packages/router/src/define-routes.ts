@@ -4,19 +4,34 @@ import { isGroupKey, joinPattern, normalizePathname } from './paths';
 import type { Join, PathFor } from './paths';
 
 /**
+ * Any component, whatever props it declares. The table is written once and
+ * rendered by different renderers — a client app renders leaves with no
+ * props, the framework hands server components their `params` and layouts
+ * their `children` — so the stored type has to admit them all. `never` props
+ * is the type-safe spelling of that; each renderer states what it passes.
+ */
+export type RouteComponent = ComponentType<never>;
+
+/**
  * A leaf renders; a branch wraps its children in an optional layout. Lazy
  * components (`React.lazy`) are objects, not functions, so a branch is
  * recognized by its `children` key rather than by `typeof`.
  */
 export type RouteNode =
-  | ComponentType
-  | { layout?: ComponentType; children: RoutesRecord };
+  | RouteComponent
+  | { layout?: RouteComponent; children: RoutesRecord };
 
 export type RoutesRecord = Record<`/${string}`, RouteNode>;
 
+// A branch that landed on the root contributes no prefix of its own, exactly
+// as the runtime walk resets it — otherwise every route under a root layout
+// would come out as `//products`.
+type Below<Prefix extends string, Key extends string> =
+  Join<Prefix, Key> extends '/' ? '' : Join<Prefix, Key>;
+
 type PatternsIn<Record_, Prefix extends string> = {
   [K in keyof Record_ & string]: Record_[K] extends { children: infer C }
-    ? PatternsIn<C, Join<Prefix, K>>
+    ? PatternsIn<C, Below<Prefix, K>>
     : Join<Prefix, K>;
 }[keyof Record_ & string];
 
@@ -41,7 +56,7 @@ export type Match = {
   pattern: string;
   params: Readonly<Record<string, string>>;
   /** Layouts outer-first, the leaf last. */
-  stack: readonly ComponentType[];
+  stack: readonly RouteComponent[];
 };
 
 export type Routes<R extends RoutesRecord = RoutesRecord> = {
@@ -61,12 +76,12 @@ export type Routes<R extends RoutesRecord = RoutesRecord> = {
 type Entry = {
   pattern: string;
   matcher: URLPattern;
-  stack: readonly ComponentType[];
+  stack: readonly RouteComponent[];
 };
 
 const isBranch = (
   node: RouteNode,
-): node is { layout?: ComponentType; children: RoutesRecord } =>
+): node is { layout?: RouteComponent; children: RoutesRecord } =>
   typeof node === 'object' && 'children' in node;
 
 const decode = (value: string): string => {
@@ -84,7 +99,7 @@ export function defineRoutes<R extends RoutesRecord>(record: R): Routes<R> {
   const walk = (
     current: RoutesRecord,
     prefix: string,
-    stack: readonly ComponentType[],
+    stack: readonly RouteComponent[],
   ): void => {
     for (const [key, node] of Object.entries(current)) {
       if (!key.startsWith('/')) {

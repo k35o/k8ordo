@@ -5,12 +5,7 @@ export default defineConfig({
     '*': 'vp check --fix',
   },
   pack: {
-    entry: [
-      'src/**/*.ts',
-      'src/**/*.tsx',
-      '!src/**/*.test.ts',
-      '!src/**/*.d.ts',
-    ],
+    entry: ['src/**/*.ts', '!src/**/*.test.ts'],
     format: 'esm',
     dts: true,
     outDir: 'dist',

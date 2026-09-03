@@ -1,11 +1,13 @@
 {
-  "name": "@k8ordo/framework-engine",
+  "name": "@k8ordo/server",
   "version": "0.0.0",
-  "description": "Internal engine shared by @k8ordo/static and @k8ordo/server. Do not install directly.",
+  "description": "Runs a k8ordo application: RSC rendered per request, with Server Actions.",
   "keywords": [
-    "internal",
     "k8ordo",
+    "react",
     "rsc",
+    "server",
+    "ssr",
     "vite-plugin"
   ],
   "homepage": "https://ordo.k8o.me",
@@ -42,10 +44,11 @@
     "check": "vp check",
     "check:write": "vp check --fix"
   },
+  "dependencies": {
+    "@k8ordo/framework-engine": "workspace:^"
+  },
   "devDependencies": {
     "@k8ordo/router": "workspace:^",
-    "@types/react": "catalog:",
-    "@types/react-dom": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
     "typescript": "7.0.2",
@@ -58,8 +61,5 @@
     "react": ">=19.2.6",
     "react-dom": ">=19.2.6",
     "vite": ">=8.2.1"
-  },
-  "dependencies": {
-    "@vitejs/plugin-rsc": "^0.5.34"
   }
 }

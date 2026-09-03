@@ -1,18 +1,10 @@
 'use client';
 
-import {
-  createContext,
-  startTransition,
-  use,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
-import type { ComponentType, FC, ReactNode } from 'react';
+import { createContext, use, useMemo, useState } from 'react';
+import type { FC, ReactNode } from 'react';
 
-import type { Match, Routes } from './define-routes';
-import { normalizePathname } from './paths';
+import type { Match, RouteComponent, Routes } from './define-routes';
+import { useInterceptedNavigation } from './navigation';
 import type { ParamsOf } from './paths';
 import type { RegisteredPattern } from './register';
 
@@ -24,7 +16,7 @@ type RouterValue = {
 const RouterContext = createContext<RouterValue | null>(null);
 
 type StackValue = {
-  stack: readonly ComponentType[];
+  stack: readonly RouteComponent[];
   index: number;
 };
 
@@ -32,8 +24,11 @@ const StackContext = createContext<StackValue | null>(null);
 
 const RenderStack: FC<StackValue> = ({ stack, index }) => {
   const value = useMemo(() => ({ stack, index: index + 1 }), [stack, index]);
-  const Component = stack[index];
-  if (Component === undefined) return null;
+  const next = stack[index];
+  if (next === undefined) return null;
+  // This renderer passes nothing: a client app reads params from context and
+  // renders the rest of the stack through `<Outlet />`.
+  const Component = next as FC;
   return (
     <StackContext value={value}>
       <Component />
@@ -51,73 +46,24 @@ export const Outlet: FC = () => {
 };
 
 /**
- * Mounts the route table on the Navigation API. Every same-origin
- * navigation — a plain `<a>`, `navigateTo`, a state update, back/forward —
- * arrives as a `navigate` event; matching ones are intercepted and applied
- * inside a React transition. The intercept handler resolves in an effect
- * after the new tree commits, which is what makes `finished` mean
- * "the page is on screen".
+ * Mounts a route table on the Navigation API: every same-origin navigation
+ * that the table claims is handled in the client, and the rest is left to the
+ * server. Layout components render their children through `<Outlet />`.
+ *
+ * This is the whole router for an application that renders on the client.
+ * Under the framework the tree comes from the server instead, and only
+ * `useInterceptedNavigation` is shared.
  */
 export function Router({ routes }: { routes: Routes }): ReactNode {
   const [match, setMatch] = useState<Match | null>(() =>
     routes.match(location.pathname),
   );
-  const commitSignal = useRef<(() => void) | null>(null);
 
-  useEffect(() => {
-    const onNavigate = (event: NavigateEvent): void => {
-      if (
-        !event.canIntercept ||
-        event.hashChange ||
-        event.downloadRequest !== null
-      ) {
-        return;
-      }
-      const url = new URL(event.destination.url);
-      if (
-        normalizePathname(url.pathname) === normalizePathname(location.pathname)
-      ) {
-        // Same pathname — only search or entry state moved. The route tree
-        // stays; no remount, no scroll reset, no focus reset, and finished
-        // settles immediately.
-        event.intercept({ scroll: 'manual', focusReset: 'manual' });
-        return;
-      }
-      const next = routes.match(url.pathname);
-      if (next === null) {
-        // Not in the table: leave the navigation alone. A real document
-        // load — and a real 404 — is the server's answer, not a client one.
-        return;
-      }
-      event.intercept({
-        handler: () =>
-          new Promise<void>((resolve, reject) => {
-            commitSignal.current = resolve;
-            event.signal.addEventListener(
-              'abort',
-              () => {
-                reject(event.signal.reason as Error);
-              },
-              { once: true },
-            );
-            startTransition(() => {
-              setMatch(next);
-            });
-          }),
-      });
-    };
-    navigation.addEventListener('navigate', onNavigate);
-    return () => {
-      navigation.removeEventListener('navigate', onNavigate);
-    };
-  }, [routes]);
-
-  useEffect(() => {
-    // The definition of "committed": this effect runs after React put the
-    // new match on screen, and only then does the intercept handler resolve.
-    commitSignal.current?.();
-    commitSignal.current = null;
-  }, [match]);
+  useInterceptedNavigation<Match>({
+    claim: (url) => routes.match(url.pathname) !== null,
+    load: (url) => routes.match(url.pathname) as Match,
+    apply: setMatch,
+  });
 
   const value = useMemo(() => ({ routes, match }), [routes, match]);
   return (
