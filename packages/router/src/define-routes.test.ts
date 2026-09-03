@@ -12,6 +12,8 @@ const ProductPage: FC = () => null;
 const NotFound: FC = () => null;
 const First: FC = () => null;
 const Second: FC = () => null;
+const Marketing: FC = () => null;
+const Docs: FC = () => null;
 
 const routes = defineRoutes({
   '/': Home,
@@ -79,6 +81,50 @@ describe('match', () => {
   it('returns null when nothing in the table matches', () => {
     const only = defineRoutes({ '/only': Home });
     expect(only.match('/elsewhere')).toBeNull();
+  });
+});
+
+describe('route groups', () => {
+  const grouped = defineRoutes({
+    '/(marketing)': {
+      layout: Marketing,
+      children: { '/': Home, '/pricing': ProductList },
+    },
+    '/(docs)': {
+      layout: Docs,
+      children: { '/guide': ProductPage },
+    },
+  });
+
+  it('structures the table without contributing a URL segment', () => {
+    expect(grouped.match('/')).toStrictEqual({
+      pattern: '/',
+      params: {},
+      stack: [Marketing, Home],
+    });
+    expect(grouped.match('/pricing')?.stack).toStrictEqual([
+      Marketing,
+      ProductList,
+    ]);
+  });
+
+  it('lets sibling groups own different layouts at the same depth', () => {
+    expect(grouped.match('/guide')?.stack).toStrictEqual([Docs, ProductPage]);
+  });
+
+  it('applies inside a nested branch too', () => {
+    const nested = defineRoutes({
+      '/products': {
+        children: { '/(admin)': { layout: Docs, children: { '/new': Home } } },
+      },
+    });
+    expect(nested.match('/products/new')?.stack).toStrictEqual([Docs, Home]);
+  });
+
+  it('rejects a group with no children — it would redeclare the index', () => {
+    expect(() => defineRoutes({ '/(oops)': Home })).toThrow(
+      /must have children/u,
+    );
   });
 });
 

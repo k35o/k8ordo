@@ -1,6 +1,6 @@
 import type { ComponentType } from 'react';
 
-import { joinPattern, normalizePathname } from './paths';
+import { isGroupKey, joinPattern, normalizePathname } from './paths';
 import type { Join, PathFor } from './paths';
 
 /**
@@ -89,6 +89,11 @@ export function defineRoutes<R extends RoutesRecord>(record: R): Routes<R> {
     for (const [key, node] of Object.entries(current)) {
       if (!key.startsWith('/')) {
         throw new TypeError(`route pattern "${key}" must start with "/"`);
+      }
+      if (isGroupKey(key) && !isBranch(node)) {
+        // A group contributes no segment, so a leaf under one would silently
+        // become a second declaration of the parent's own index.
+        throw new TypeError(`route group "${key}" must have children`);
       }
       const pattern = joinPattern(prefix, key);
       if (isBranch(node)) {

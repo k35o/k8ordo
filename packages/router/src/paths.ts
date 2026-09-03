@@ -35,17 +35,32 @@ export type PathFor<Pattern extends string> = Pattern extends `/${infer Rest}`
   : never;
 
 /**
- * Composes a parent prefix with a child key. A child of `'/'` is the parent
- * itself, which is what lets a branch declare its own index page.
+ * Keys that address the parent's own place instead of a place below it:
+ * `'/'` (the branch's index) and `'/(name)'` (a group, which structures the
+ * table — its own layout, its own subtree — without touching the URL).
  */
-export type Join<Prefix extends string, Key extends string> = Key extends '/'
-  ? Prefix extends ''
-    ? '/'
-    : Prefix
-  : `${Prefix}${Key}`;
+type Transparent<Key extends string> = Key extends '/'
+  ? true
+  : Key extends `/(${string})`
+    ? true
+    : false;
+
+/** Composes a parent prefix with a child key. */
+export type Join<Prefix extends string, Key extends string> =
+  Transparent<Key> extends true
+    ? Prefix extends ''
+      ? '/'
+      : Prefix
+    : `${Prefix}${Key}`;
+
+export const isGroupKey = (key: string): boolean => /^\/\([^)]+\)$/u.test(key);
 
 export const joinPattern = (prefix: string, key: string): string =>
-  key === '/' ? (prefix === '' ? '/' : prefix) : `${prefix}${key}`;
+  key === '/' || isGroupKey(key)
+    ? prefix === ''
+      ? '/'
+      : prefix
+    : `${prefix}${key}`;
 
 /**
  * URLPattern treats `/products` and `/products/` as different pathnames; the
