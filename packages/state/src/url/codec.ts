@@ -13,6 +13,8 @@ export type UrlCodec = {
   defaults: Readonly<StateValues>;
   parse: (input: UrlInput) => StateValues;
   search: (values: Readonly<Partial<StateValues>>) => string;
+  /** Runs already-typed values through the schema, salvage included. */
+  salvage: (values: Readonly<StateValues>) => StateValues;
 };
 
 type Def = {
@@ -95,5 +97,13 @@ export const createUrlCodec = (schema: StateSchema): UrlCodec => {
     return params.toString();
   };
 
-  return { keys, defaults, parse, search };
+  const salvage = (values: Readonly<StateValues>): StateValues => {
+    const own: StateValues = {};
+    for (const key of keys) {
+      if (key in values) own[key] = values[key];
+    }
+    return parseWithSalvage(info, own);
+  };
+
+  return { keys, defaults, parse, search, salvage };
 };

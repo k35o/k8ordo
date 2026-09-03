@@ -71,6 +71,34 @@ describe('parseUrl', () => {
 });
 
 describe('definePageState', () => {
+  it('salvage cannot smuggle a combination an object-level refine forbids', () => {
+    const range = definePageState('range', {
+      url: z
+        .object({
+          min: z.coerce.number().default(0),
+          max: z.coerce.number().default(10),
+        })
+        .refine((value) => value.min <= value.max),
+    });
+    // max が壊れて default の 10 に落ちると min=20 が refine に反するので、
+    // 全体が defaults へ落ちる。組み合わせが保てるなら salvage は生きる。
+    expect(range.parseUrl(new URLSearchParams('min=20&max=abc'))).toStrictEqual(
+      { min: 0, max: 10 },
+    );
+    expect(range.parseUrl(new URLSearchParams('min=5&max=abc'))).toStrictEqual({
+      min: 5,
+      max: 10,
+    });
+  });
+
+  it('names the real problem when a refine rejects the defaults', () => {
+    expect(() =>
+      definePageState('bad-refine', {
+        url: z.object({ a: z.string().default('x') }).refine(() => false),
+      }),
+    ).toThrow(/rejects its own defaults/u);
+  });
+
   it('rejects a url field that cannot parse from absence, naming it', () => {
     expect(() =>
       definePageState('broken', { url: z.object({ q: z.string() }) }),

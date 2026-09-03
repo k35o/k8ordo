@@ -35,20 +35,29 @@ const createPageStore = (def: PageState): Store => {
   const page = internalsOf(def);
   const core = createStoreCore(page.keys, readLive(def, page));
 
-  const sync = (): void => {
-    core.applyNext(readLive(def, page));
-  };
-  navigation.addEventListener('currententrychange', sync);
-
   let pending: StateValues | null = null;
   let pendingPush = false;
   let handle: Handle | null = null;
+
+  const sync = (): void => {
+    const live = readLive(def, page);
+    // A concurrent platform event (another store's write landing, a
+    // traversal) must not roll back a batch that has not flushed yet: the
+    // pending patch stays on top of whatever became true.
+    core.applyNext(pending === null ? live : { ...live, ...pending });
+  };
+  navigation.addEventListener('currententrychange', sync);
 
   /**
    * The whole navigation state travels with every write we make: the entry
    * state object is shared ground (the router's own state, other page
    * states), and a navigate that dropped it would wipe the neighbours.
    */
+  const canonical = (values: StateValues): StateValues => ({
+    ...(page.url === null ? {} : page.url.salvage(values)),
+    ...(page.entry === null ? {} : page.entry.salvage(values)),
+  });
+
   const carryState = (stored: unknown, target: StateValues): unknown => {
     if (page.entry === null) return stored;
     const base: StateValues = isRecord(stored) ? { ...stored } : {};
@@ -59,30 +68,34 @@ const createPageStore = (def: PageState): Store => {
   };
 
   const flush = (): void => {
-    const target = core.snapshot();
+    const patch = pending as StateValues;
     const push = pendingPush;
     const current = handle as Handle;
     pending = null;
     pendingPush = false;
     handle = null;
 
+    // The write target is the live values plus this batch's patch — not the
+    // snapshot, which an interleaved currententrychange may have reshaped.
     // Parse-level comparison, not string comparison: a batch that ends back
     // where it started must not navigate at all.
     const url = new URL(location.href);
     const stored = storedEntryState();
     const liveUrl = page.url === null ? {} : page.url.parse(url.searchParams);
-    const urlChanged =
-      page.url?.keys.some((key) => !sameValue(liveUrl[key], target[key])) ??
-      false;
     const liveEntry =
       page.entry === null
         ? {}
         : page.entry.parse(isRecord(stored) ? stored[def.key] : undefined);
+    const target = canonical({ ...liveUrl, ...liveEntry, ...patch });
+    const urlChanged =
+      page.url?.keys.some((key) => !sameValue(liveUrl[key], target[key])) ??
+      false;
     const entryChanged =
       page.entry?.keys.some((key) => !sameValue(liveEntry[key], target[key])) ??
       false;
 
     if (!urlChanged && !entryChanged) {
+      core.applyNext(target);
       current.settle();
       return;
     }
@@ -131,10 +144,13 @@ const createPageStore = (def: PageState): Store => {
     }
     Object.assign(pending, resolved);
     if (options?.history === 'push') pendingPush = true;
-    // Synchronous echo: the next render sees the new value. The
-    // currententrychange after the write re-parses the platform truth and
-    // settles any value the schema normalizes differently.
-    core.applyNext({ ...core.snapshot(), ...pending });
+    // The echo is synchronous AND canonical: the merged state goes through
+    // the schema right here, with the same salvage as a URL arrival, so the
+    // next render never shows a value the schema rejects — update({page: 0})
+    // lands where ?page=0 would.
+    const echoed = canonical({ ...core.snapshot(), ...pending });
+    for (const key of Object.keys(pending)) pending[key] = echoed[key];
+    core.applyNext(echoed);
     return (handle as Handle).external;
   };
 

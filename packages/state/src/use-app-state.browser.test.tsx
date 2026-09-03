@@ -88,6 +88,14 @@ const Pager: FC = () => {
       >
         same
       </button>
+      <button
+        type="button"
+        onClick={() => {
+          lastHandle = update({ page: 0 });
+        }}
+      >
+        zero
+      </button>
     </>
   );
 };
@@ -265,6 +273,19 @@ it('collapses several updates in one handler into one navigation', async () => {
   expect(navigations - before).toBe(1);
 });
 
+it('validates the patch on the spot — the echo never shows a rejected value', async () => {
+  const screen = await render(<Pager />);
+  const before = navigations;
+
+  // min(1) の page に 0 を渡す: ?page=0 に到着したのと同じく default の 1 に
+  // 落ち、結果として何も変わらないので navigate も起きない。
+  await screen.getByRole('button', { name: 'zero' }).click();
+
+  await expect.element(screen.getByTestId('page')).toHaveTextContent('1');
+  await (lastHandle as UpdateHandle).finished;
+  expect(navigations - before).toBe(0);
+});
+
 it('settles without navigating when nothing changed', async () => {
   const screen = await render(<Pager />);
   const before = navigations;
@@ -419,6 +440,54 @@ it('memory state starts from its initial values on a fresh registry', async () =
   await expect
     .element(screen.getByTestId('debug'))
     .toHaveTextContent('false:0');
+});
+
+const Combo: FC = () => {
+  const [, updatePanel] = useAppState(panelState, []);
+  const [{ page }, updateList] = useAppState(listState, ['page']);
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        updatePanel({ expanded: ['x'] });
+        lastHandle = updateList({ page: page + 1 });
+      }}
+    >
+      combo
+    </button>
+  );
+};
+
+it("one store's entry write does not erase another store's batched url write", async () => {
+  const screen = await render(<Combo />);
+
+  // panel の flush(updateCurrentEntry)が同期的に currententrychange を発火
+  // させ、list 側の未 flush バッチを巻き戻していた競合の回帰テスト。
+  await screen.getByRole('button', { name: 'combo' }).click();
+
+  await (lastHandle as UpdateHandle).finished;
+  expect(new URL(location.href).searchParams.get('page')).toBe('2');
+  expect(navigation.currentEntry?.getState()).toStrictEqual({
+    panel: { expanded: ['x'] },
+  });
+});
+
+it('failed persistence rejects the handle but keeps the echo', async () => {
+  const spy = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+    throw new DOMException('quota', 'QuotaExceededError');
+  });
+  try {
+    const screen = await render(<Prefs />);
+
+    await screen.getByRole('button', { name: 'table' }).click();
+
+    await expect.element(screen.getByTestId('view')).toHaveTextContent('table');
+    await expect((lastHandle as UpdateHandle).finished).rejects.toThrow(
+      'quota',
+    );
+  } finally {
+    spy.mockRestore();
+  }
 });
 
 it('leaves params it does not own untouched', async () => {

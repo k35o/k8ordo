@@ -28,13 +28,21 @@ pnpm check         # check:write to auto-fix
   `useAppState`, in a registry keyed by `kind + string key` — that is what
   survives HMR and what `resetStateRegistry()` clears for tests. Nothing in
   the package touches `navigation`/`location`/`localStorage` at import time.
-- **`update()` applies synchronously and writes in a microtask.** The echo
-  makes the next render see the new value; all `update()` calls in one
-  handler share one write and one `{committed, finished}` handle. A batch
-  that lands back where it started must not write. Routing is by field:
-  url+entry changes are one `navigation.navigate()` (atomic), entry-only
-  changes are `updateCurrentEntry()` (no navigation), local is one
-  `setItem`, memory settles on the spot.
+- **`update()` applies synchronously and writes in a microtask.** The echo is
+  canonical — the merged state passes the schema inside `update()` with the
+  same salvage a URL arrival gets, so no render ever shows a value the schema
+  rejects. All `update()` calls in one handler share one write and one
+  `{committed, finished}` handle. A batch that lands back where it started
+  must not write. Routing is by field: url+entry changes are one
+  `navigation.navigate()` (atomic), entry-only changes are
+  `updateCurrentEntry()` (no navigation), local is one `setItem`, memory
+  settles on the spot.
+- **A pending batch survives concurrent events.** `sync`/`onStorage` overlay
+  the unflushed patch on the fresh platform values, and `flush` rebuilds its
+  target from live values + patch — never from the snapshot. Without both, a
+  neighbouring store's synchronous `currententrychange` (from
+  `updateCurrentEntry`) rolls the batch back and the write is silently lost;
+  the "combo" browser test is the regression guard.
 - **Shared ground stays shared.** A page store rewrites only its own URL
   params and only its own namespace in the entry-state object — the rest of
   both travels untouched with every write it makes.
@@ -78,6 +86,10 @@ and same justification as `@k8ordo/form`'s walk. Everything else goes through
 ## Conventions
 
 - `type`, not `interface` — except `Register`, which must merge.
+- Duplicate definition keys within a kind are NOT detected at runtime: an
+  HMR re-evaluation legitimately re-registers the same key, so a warning
+  would cry wolf on every edit. The GUIDE tells users to treat keys as
+  global names; revisit only with a schema-fingerprint comparison.
 - Browser tests play the router themselves: a `navigate` listener that calls
   `event.intercept()`. Without it, `navigation.navigate()` in the test iframe
   would be a cross-document load and kill the runner.

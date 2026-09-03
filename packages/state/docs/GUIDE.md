@@ -52,6 +52,8 @@ export const prefs = defineLocalState(
 
 // A typed shared box. No schema: these values never cross a boundary,
 // so there is nothing to re-validate — the typed update is the only writer.
+// Treat the values as immutable: replace fields through update(); a nested
+// reference mutated in place bypasses change detection.
 export const debugPanel = defineMemoryState('debug-panel', { open: false });
 ```
 
@@ -61,7 +63,10 @@ session restore revived — and every such field must tolerate absence:
 `.default()` (`z._default()` in mini) or `.optional()`. Definitions throw at
 module load naming the fields that do not. The first argument is the state's
 identity: the localStorage key (`k8ordo-state:<key>`), the entry-state
-namespace, and the store-registry slot. Renaming it renames the data.
+namespace, and the store-registry slot. Renaming it renames the data — and
+the key must be app-unique per kind: two definitions of the same kind sharing
+a key silently share one store (and, for local, one storage row). The module
+system cannot enforce this, so treat the key like a global name.
 
 ## zod, or zod/mini
 
@@ -174,6 +179,10 @@ A superseded navigation (the user clicked again) rejects the handle with an
 `AbortError`; unawaited calls never surface it. Updates with no navigation
 behind them — entry-only, local, memory — return the same shape, settled.
 
+- **Patches are validated on the spot.** The merged state passes the schema
+  inside `update()` itself, with the same salvage as a URL arrival:
+  `update({ page: 0 })` on a `min(1)` field lands on the default exactly as
+  `?page=0` would, and the echo never shows a value the schema rejects.
 - **Routing is by field.** One patch may span both faces of a page state:
   url + entry changes travel in a single `navigation.navigate()`, atomically.
   A patch touching only entry fields uses `updateCurrentEntry()` — no
@@ -254,8 +263,11 @@ every consumer.
 
 **Boundary data is input, not trusted state.** A URL param a user edited, a
 localStorage row an older schema wrote, a restored entry state — anything the
-schema rejects falls back to that field's own default, field by field. One
-broken value never takes the rest down, and nothing throws at read time.
+schema rejects falls back to that field's own default, field by field, and a
+combination an object-level `refine` forbids falls back to the defaults as a
+whole. One broken value never takes the rest down, and nothing throws at read
+time. An array field collects repeated params; a repeated param on a scalar
+field takes the first value.
 
 **Canonical URLs.** Serialization omits every field sitting at its default, so
 the same state always produces the same, shortest URL — links, bookmarks and

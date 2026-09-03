@@ -26,28 +26,35 @@ const createLocalStore = (def: LocalState): Store => {
 
   const core = createStoreCore(codec.keys, read());
 
-  // The storage event only fires in *other* tabs; same-tab notification runs
-  // through applyNext directly in update().
-  const onStorage = (event: StorageEvent): void => {
-    if (event.key === storageKey || event.key === null) {
-      core.applyNext(read());
-    }
-  };
-  window.addEventListener('storage', onStorage);
-
   let pending: StateValues | null = null;
   let handle: Handle | null = null;
 
+  // The storage event only fires in *other* tabs; same-tab notification runs
+  // through applyNext directly in update().
+  const onStorage = (event: StorageEvent): void => {
+    if (event.storageArea !== localStorage) return;
+    if (event.key !== storageKey && event.key !== null) return;
+    const fresh = read();
+    // A foreign tab's write must not roll back a batch that has not flushed
+    // yet: the pending patch stays on top.
+    core.applyNext(pending === null ? fresh : { ...fresh, ...pending });
+  };
+  window.addEventListener('storage', onStorage);
+
   const flush = (): void => {
-    const target = core.snapshot();
+    const patch = pending as StateValues;
     const current = handle as Handle;
     pending = null;
     handle = null;
 
+    // Base the write on what storage holds now, not on the snapshot — a
+    // foreign tab may have written between the echo and this flush.
+    const target = codec.salvage({ ...read(), ...patch });
     const values: StateValues = {};
     for (const key of codec.keys) values[key] = target[key];
     try {
       localStorage.setItem(storageKey, JSON.stringify(values));
+      core.applyNext(target);
       current.settle();
     } catch (error) {
       // Quota or serialization failure: the echo already showed the value,
@@ -64,7 +71,11 @@ const createLocalStore = (def: LocalState): Store => {
       queueMicrotask(flush);
     }
     Object.assign(pending, resolved);
-    core.applyNext({ ...core.snapshot(), ...pending });
+    // Canonical echo: the merged state passes the schema right here, so the
+    // next render never shows a value the schema rejects.
+    const echoed = codec.salvage({ ...core.snapshot(), ...pending });
+    for (const key of Object.keys(pending)) pending[key] = echoed[key];
+    core.applyNext(echoed);
     return (handle as Handle).external;
   };
 

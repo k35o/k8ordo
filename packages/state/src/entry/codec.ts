@@ -5,6 +5,8 @@ export type StoredCodec = {
   keys: readonly string[];
   defaults: Readonly<StateValues>;
   parse: (stored: unknown) => StateValues;
+  /** Runs already-typed values through the schema, salvage included. */
+  salvage: (values: Readonly<StateValues>) => StateValues;
 };
 
 /**
@@ -29,5 +31,13 @@ export const createStoredCodec = (
     return parseWithSalvage(info, raw);
   };
 
-  return { keys: info.keys, defaults: info.defaults, parse };
+  const salvage = (values: Readonly<StateValues>): StateValues => {
+    const own: StateValues = {};
+    for (const key of info.keys) {
+      if (key in values) own[key] = values[key];
+    }
+    return parseWithSalvage(info, own);
+  };
+
+  return { keys: info.keys, defaults: info.defaults, parse, salvage };
 };

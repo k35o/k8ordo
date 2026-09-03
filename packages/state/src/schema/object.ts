@@ -18,19 +18,40 @@ export type SchemaInfo = {
   defaults: Readonly<StateValues>;
 };
 
-/** Scalars compare with `Object.is`; arrays of scalars element-wise. */
-export const sameValue = (a: unknown, b: unknown): boolean => {
-  if (Object.is(a, b)) return true;
-  return (
-    Array.isArray(a) &&
-    Array.isArray(b) &&
-    a.length === b.length &&
-    a.every((value, index) => Object.is(value, b[index]))
-  );
-};
-
 export const isRecord = (value: unknown): value is StateValues =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const isPlainRecord = (value: unknown): value is StateValues => {
+  if (typeof value !== 'object' || value === null) return false;
+  const proto: unknown = Object.getPrototypeOf(value);
+  return proto === Object.prototype || proto === null;
+};
+
+/**
+ * Structural equality over what schemas produce: scalars via `Object.is`,
+ * arrays and plain objects recursively. Anything else (Date, Map, class
+ * instances) compares by reference only — conservatively "changed" — because
+ * two structurally silent objects can still differ (a Date's time lives in
+ * an internal slot, not in enumerable keys).
+ */
+export const sameValue = (a: unknown, b: unknown): boolean => {
+  if (Object.is(a, b)) return true;
+  if (Array.isArray(a) && Array.isArray(b)) {
+    return (
+      a.length === b.length &&
+      a.every((value, index) => sameValue(value, b[index]))
+    );
+  }
+  if (isPlainRecord(a) && isPlainRecord(b)) {
+    const aKeys = Object.keys(a);
+    const bKeys = Object.keys(b);
+    return (
+      aKeys.length === bKeys.length &&
+      aKeys.every((key) => key in b && sameValue(a[key], b[key]))
+    );
+  }
+  return false;
+};
 
 export const analyzeSchema = (
   schema: StateSchema,
@@ -49,7 +70,9 @@ export const analyzeSchema = (
       (key) => !safeParse(shape[key] as $ZodType, undefined).success,
     );
     throw new TypeError(
-      `${slot} fields must tolerate absence — add .default() or .optional() to: ${failing.join(', ')}`,
+      failing.length > 0
+        ? `${slot} fields must tolerate absence — add .default() or .optional() to: ${failing.join(', ')}`
+        : `${slot} schema rejects its own defaults — an object-level refine must accept the all-defaults value`,
     );
   }
   const defaults: StateValues = {};
@@ -84,5 +107,10 @@ export const parseWithSalvage = (
       salvaged[key] = info.defaults[key];
     }
   }
-  return salvaged;
+  // Per-field salvage cannot see object-level refines: a combination the
+  // schema forbids falls back to the defaults, which analyzeSchema already
+  // proved valid as a whole. The recheck's own output is discarded so a
+  // non-idempotent pipe is not applied twice.
+  const recheck = safeParse(info.schema, salvaged);
+  return recheck.success ? salvaged : { ...info.defaults };
 };
