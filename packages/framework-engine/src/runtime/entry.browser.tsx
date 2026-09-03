@@ -5,13 +5,9 @@ import { hydrateRoot } from 'react-dom/client';
 import { AppRouter } from './app-router';
 import { payloadPathFor } from './payload-path';
 
-async function start(): Promise<void> {
-  const response = await fetch(payloadPathFor(location.pathname));
-  if (response.body === null) {
-    throw new Error(`no payload for ${location.pathname}`);
-  }
-  const tree = await createFromReadableStream<ReactNode>(response.body);
-  hydrateRoot(document, <AppRouter tree={tree} />);
+const response = await fetch(payloadPathFor(location.pathname));
+if (response.body === null) {
+  throw new Error(`no payload for ${location.pathname}`);
 }
-
-void start();
+const tree = await createFromReadableStream<ReactNode>(response.body);
+hydrateRoot(document, <AppRouter tree={tree} />);

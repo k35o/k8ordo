@@ -1,6 +1,7 @@
 import { renderToReadableStream } from '@vitejs/plugin-rsc/rsc/server';
 import { routes } from 'virtual:k8ordo/routes';
 
+import type * as SsrEntry from './entry.ssr';
 import { isPayloadPath, pagePathFor } from './payload-path';
 import { NotFound, renderMatch } from './render';
 
@@ -27,9 +28,10 @@ export default async function handler(request: Request): Promise<Response> {
     });
   }
 
-  const ssr = await import.meta.viteRsc.loadModule<
-    typeof import('./entry.ssr.tsx')
-  >('ssr', 'index');
+  const ssr = await import.meta.viteRsc.loadModule<typeof SsrEntry>(
+    'ssr',
+    'index',
+  );
   return new Response(await ssr.renderHtml(rscStream), {
     status,
     headers: { 'content-type': 'text/html;charset=utf-8' },

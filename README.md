@@ -16,6 +16,9 @@ Every package here commits to the same four things:
 | [`@k8ordo/ui`](packages/ui) | React UI components with semantic design tokens, i18n, and generative-UI adapters |
 | [`@k8ordo/form`](packages/form) | HTML constraint attributes, messages, and server-side validation from one zod schema |
 | [`@k8ordo/state`](packages/state) | State declared by where it lives — URL, history entry, localStorage, memory — from one zod schema |
+| [`@k8ordo/router`](packages/router) | The URL's pathname axis: one route table, typed paths, over the Navigation API |
+| [`@k8ordo/static`](packages/static) | Builds an application into files — every route rendered ahead of time |
+| [`@k8ordo/server`](packages/server) | Runs an application — RSC per request, with Server Actions |
 
 `@k8ordo/*` holds **primary libraries only** — the ones an application imports
 and builds on. Tools that plug into someone else's ecosystem (lint configs,
@@ -53,10 +56,16 @@ packages/
   ui/                    # @k8ordo/ui
   form/                  # @k8ordo/form
   state/                 # @k8ordo/state
+  router/                # @k8ordo/router
+  framework-engine/      # @k8ordo/framework-engine (internal)
+  static/                # @k8ordo/static
+  server/                # @k8ordo/server
 examples/
   ui-integrations/       # @k8ordo/ui × generative UI adapters (Vite)
   ui-nextjs/             # @k8ordo/ui × Next.js
   ui-css-modules/        # @k8ordo/ui with prebuilt CSS, no Tailwind
+  static-basic/          # @k8ordo/static
+  server-basic/          # @k8ordo/server
 ```
 
 Each example belongs to exactly one package and is named for it. An example that

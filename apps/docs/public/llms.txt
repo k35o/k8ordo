@@ -111,3 +111,111 @@ These docs are served from <https://ordo.k8o.me>.
   page state). `resetStateRegistry()` clears stores between tests. Augment
   `interface Register { path }` to constrain `href` paths to the app's typed
   routes.
+
+---
+
+# @k8ordo/router
+
+> The URL's pathname axis, owned. One `defineRoutes` table is the application's
+> pathname schema: types, matching, links and navigation all come from it, over
+> the Navigation API and URLPattern. Search params and history-entry state are
+> not its business — those belong to `@k8ordo/state`.
+>
+> Like every k8ordo package it assumes React 19 and Server Components, uses
+> only what has reached Baseline newly available, and ships no polyfills or
+> legacy fallbacks.
+
+These docs are served from <https://ordo.k8o.me>.
+
+## Guide
+
+- [Design Guide](https://ordo.k8o.me/router/docs/GUIDE.md): the table's grammar (leaves, branches, params,
+  wildcards, route groups, declaration order), mounting `<Router>` and
+  `<Outlet>`, links without a `<Link>` component, `Register` for checked
+  patterns, what navigation guarantees, and how the framework reuses the
+  navigation half.
+
+## Entry point
+
+- `@k8ordo/router` — `defineRoutes(record)` returns a table whose one operation
+  is `match(pathname)`; `<Router routes>` mounts it on the Navigation API and
+  `<Outlet />` renders the rest of the matched stack. `href(pattern, params?)`
+  and `navigateTo(pattern, params?, options?)` build and perform navigations
+  from the pattern **string** alone — no table import, so no cycle — with
+  params inferred from the literal and the pattern itself checked once
+  `interface Register { routes }` is augmented. `useParams(pattern)` returns
+  typed params and throws if rendered under a different pattern; `useRoute()`
+  is the untyped form. `RouteOf<typeof routes>` is the pathname union to feed
+  `@k8ordo/state`'s `Register`. `useInterceptedNavigation({claim, load, apply})`
+  is the navigation primitive `<Router>` is built on, and the seam the
+  framework uses to render server-produced trees instead.
+
+---
+
+# @k8ordo/static
+
+> Builds a k8ordo application into files: every route rendered ahead of time,
+> output a directory a static host can serve. The mode is the dependency —
+> installing this package means Server Actions and request-time data do not
+> exist as APIs. `src/routes/` is the pathname space (page/layout/not-found,
+> `[param]`, `(group)`, `_private`), boundaries are React's own `'use client'`
+> with `.server` modules barred from the client bundle, and the route table
+> and type wiring are generated rather than hand-written.
+>
+> Like every k8ordo package it assumes React 19 and Server Components, uses
+> only what has reached Baseline newly available, and ships no polyfills or
+> legacy fallbacks.
+
+These docs are served from <https://ordo.k8o.me>.
+
+## Guide
+
+- [Design Guide](https://ordo.k8o.me/static/docs/GUIDE.md): setup, the `routes/` grammar and what it refuses,
+  execution boundaries, the build output, supplying pathnames for
+  parameterised routes, and what static mode cannot do.
+
+## Entry point
+
+- `@k8ordo/static` — `k8ordoStatic(options?)` returns the Vite plugins for a
+  static application. `options.routesDir` moves the route directory (default
+  `src/routes`); `options.paths` supplies concrete pathnames for routes with
+  parameters, and a parameterised route left uncovered fails the build.
+  `planPaths(tree, supplied)` and `patternsOf(tree)` are the pure functions
+  behind that decision, exported for tests and tooling.
+
+---
+
+# @k8ordo/server
+
+> Runs a k8ordo application: pages rendered per request, so they can depend on
+> the request, answer with real HTTP status codes, and receive Server Actions.
+> The mode is the dependency — the alternative is `@k8ordo/static`, which
+> renders every route at build time. `src/routes/` is the pathname space
+> (page/layout/not-found, `[param]`, `(group)`, `_private`), boundaries are
+> React's own `'use client'` with `.server` modules barred from the client
+> bundle, and the route table and type wiring are generated rather than
+> hand-written.
+>
+> Like every k8ordo package it assumes React 19 and Server Components, uses
+> only what has reached Baseline newly available, and ships no polyfills or
+> legacy fallbacks.
+
+These docs are served from <https://ordo.k8o.me>.
+
+## Guide
+
+- [Design Guide](https://ordo.k8o.me/server/docs/GUIDE.md): setup, the `routes/` grammar and what it refuses,
+  execution boundaries, building and running, and what running buys over
+  static.
+
+## Entry point
+
+- `@k8ordo/server` — `k8ordoServer(options?)` returns the Vite plugins for an
+  application that runs; `options.routesDir` moves the route directory
+  (default `src/routes`). `serve({ dist?, port?, host? })` serves a build:
+  the client build's files as they are, everything else through the request
+  handler. The built handler is a plain
+  `(request: Request) => Promise<Response>` default-exported from
+  `dist/rsc/index.js`, so another host can run it directly. `safeJoin(root,
+  pathname)` is the static-file resolution used by `serve`, which never lands
+  outside the build output.

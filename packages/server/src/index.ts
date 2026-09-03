@@ -10,7 +10,7 @@ export type ServerOptions = EngineOptions;
  * `@k8ordo/static` calls at build time — the difference is when, not what.
  */
 export const k8ordoServer = (options: ServerOptions = {}): PluginOption[] =>
-  engine(options);
+  engine(options, { via: '@k8ordo/server' });
 
 export { serve } from './serve';
 export { safeJoin } from './static-file';

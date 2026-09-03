@@ -1,5 +1,5 @@
 {
-  "name": "example-framework-static",
+  "name": "example-static-basic",
   "private": true,
   "type": "module",
   "scripts": {

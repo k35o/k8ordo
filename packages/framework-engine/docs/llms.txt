@@ -1,0 +1,15 @@
+# @k8ordo/framework-engine
+
+> Internal. An application installs `@k8ordo/static` or `@k8ordo/server`, never
+> this package; it is published only so those two can resolve it. It holds
+> what both modes share: the `routes/` grammar, the generator for the route
+> table and the type wiring, the RSC pipeline and its configuration, the
+> execution-boundary enforcement, and the request handler the modes call at
+> different times.
+
+When installed via npm, these docs live under `node_modules/@k8ordo/framework-engine/docs/`.
+
+## Guide
+
+- [Design Guide](GUIDE.md): what lives here and where the application-facing
+  documentation is instead.

@@ -1,0 +1,30 @@
+# @k8ordo/static
+
+> Builds a k8ordo application into files: every route rendered ahead of time,
+> output a directory a static host can serve. The mode is the dependency —
+> installing this package means Server Actions and request-time data do not
+> exist as APIs. `src/routes/` is the pathname space (page/layout/not-found,
+> `[param]`, `(group)`, `_private`), boundaries are React's own `'use client'`
+> with `.server` modules barred from the client bundle, and the route table
+> and type wiring are generated rather than hand-written.
+>
+> Like every k8ordo package it assumes React 19 and Server Components, uses
+> only what has reached Baseline newly available, and ships no polyfills or
+> legacy fallbacks.
+
+When installed via npm, these docs live under `node_modules/@k8ordo/static/docs/`.
+
+## Guide
+
+- [Design Guide](GUIDE.md): setup, the `routes/` grammar and what it refuses,
+  execution boundaries, the build output, supplying pathnames for
+  parameterised routes, and what static mode cannot do.
+
+## Entry point
+
+- `@k8ordo/static` — `k8ordoStatic(options?)` returns the Vite plugins for a
+  static application. `options.routesDir` moves the route directory (default
+  `src/routes`); `options.paths` supplies concrete pathnames for routes with
+  parameters, and a parameterised route left uncovered fails the build.
+  `planPaths(tree, supplied)` and `patternsOf(tree)` are the pure functions
+  behind that decision, exported for tests and tooling.

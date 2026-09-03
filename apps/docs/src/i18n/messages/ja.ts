@@ -117,6 +117,60 @@ export const ja = {
   'state.docsTitle': 'ドキュメント',
   'state.docsDescription':
     '設計ガイドとリファレンスは npm パッケージに同梱されています。AIコーディングエージェントは `node_modules/@k8ordo/state/docs/` からインストールした版そのものを読みます。',
+  'router.description':
+    'URL の pathname 軸を所有します。ルート表がアプリの pathname スキーマそのもので、そこから型・マッチング・リンク・ナビゲーションのすべてが導かれます。search params と履歴エントリの状態は @k8ordo/state の担当で、この境界は URL の "?" と一致します。',
+  'router.featuresTitle': '特徴',
+  'router.featureTable': '表が pathname スキーマ',
+  'router.featureTableDescription':
+    'leaf・branch・`[param]`・ワイルドカード・URL に出ないグループを 1 つの表で書きます。照合は宣言順で先勝ち。特異度ランキングのような、あとから逆算しないと分からない規則を持ちません。',
+  'router.featureTypes': 'パターンから型が生える',
+  'router.featureTypesDescription':
+    'params はパターン文字列から推論され、`Register` を宣言すれば表に無いパターンもコンパイルで落ちます。コード生成はありません。',
+  'router.featureNavigation': 'finished は「画面に出た」',
+  'router.featureNavigationDescription':
+    'intercept のハンドラは React が新しい木を commit した後に解決します。search だけが変わったときはルート木に触れず、スクロールもフォーカスも動かしません。',
+  'router.featureNoLink': 'Link を作らない',
+  'router.featureNoLinkDescription':
+    'Navigation API の下では素の `<a>` がすでにクライアント遷移です。包んでも 2 つ目の書き方が増えるだけなので、型は `href` が守ります。',
+  'router.docsTitle': 'ドキュメント',
+  'router.docsDescription':
+    '設計ガイドは npm パッケージに同梱されています。AIコーディングエージェントは `node_modules/@k8ordo/router/docs/` からインストールした版そのものを読みます。',
+  'static.description':
+    'アプリをファイルに焼きます。すべてのルートを事前に描画し、出力は静的ホスティングに置けるディレクトリだけ。実行時にサーバーはいりません。',
+  'static.featuresTitle': '特徴',
+  'static.featureRoutes': 'routes/ が URL 空間',
+  'static.featureRoutesDescription':
+    'ディレクトリ木がそのまま pathname 空間です。page/layout/not-found・`[param]`・`(group)`・`_` の私物だけを認め、規約から外れたものはビルドを落とします。',
+  'static.featureGenerated': '配線は書かない',
+  'static.featureGeneratedDescription':
+    'ルート表と、router / state への型の配線は生成されます。生成物はルーターの公開 API を使ったただのソースで、diff で読めます。',
+  'static.featureBoundary': '境界は検査される',
+  'static.featureBoundaryDescription':
+    "実行環境は React 自身の `'use client'` で宣言します。`.server` のモジュールがクライアントのバンドルに入った時点でビルドが落ちるので、秘密は間に何段挟まっても渡りません。",
+  'static.featureFiles': 'モードは依存で決まる',
+  'static.featureFilesDescription':
+    'このパッケージを入れることが「静的である」ことです。Server Actions もリクエスト依存も、守るべき規則ではなく存在しない API になります。パラメータ付きルートは列挙必須で、欠けたままビルドは通りません。',
+  'static.docsTitle': 'ドキュメント',
+  'static.docsDescription':
+    '設計ガイドは npm パッケージに同梱されています。AIコーディングエージェントは `node_modules/@k8ordo/static/docs/` からインストールした版そのものを読みます。',
+  'server.description':
+    'アプリを動かします。ページはリクエストごとに描画されるので、リクエストに依存でき、本物の HTTP ステータスを返せ、Server Actions を受け取れます。',
+  'server.featuresTitle': '特徴',
+  'server.featureRequest': 'リクエストに依存できる',
+  'server.featureRequestDescription':
+    'パラメータの値はリクエストと一緒に来るので、事前に列挙する必要がありません。知らない URL には、ホスティングのエラーページではなく自分の not-found を本物の 404 で返します。',
+  'server.featureRoutes': 'routes/ が URL 空間',
+  'server.featureRoutesDescription':
+    'ディレクトリ木がそのまま pathname 空間です。page/layout/not-found・`[param]`・`(group)`・`_` の私物だけを認め、規約から外れたものはビルドを落とします。',
+  'server.featureActions': 'フォームが届く',
+  'server.featureActionsDescription':
+    'Server Actions の宛先があります。@k8ordo/form と組み合わせれば、検証もメッセージも同じ 1 つのスキーマから出ます。',
+  'server.featureSameHandler': 'static と同じハンドラ',
+  'server.featureSameHandlerDescription':
+    'リクエストをページに変える関数は static と同一で、違いは呼ぶ時期だけです。両モードで描画が食い違うなら、それは何かが漏れています。',
+  'server.docsTitle': 'ドキュメント',
+  'server.docsDescription':
+    '設計ガイドは npm パッケージに同梱されています。AIコーディングエージェントは `node_modules/@k8ordo/server/docs/` からインストールした版そのものを読みます。',
   'footer.tagline': 'Baselineに入った機能を、制限なく使うReactのライブラリ群。',
   'footer.typesetting': '組版 — Noto Sans JP / M PLUS 2',
   'nav.openMenu': 'メニューを開く',

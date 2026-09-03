@@ -13,7 +13,7 @@ import { AppRouter } from './app-router';
  * finds is what the server wrote.
  */
 export async function renderHtml(
-  rscStream: ReadableStream,
+  rscStream: ReadableStream<Uint8Array>,
 ): Promise<ReadableStream> {
   const tree = await createFromReadableStream<ReactNode>(rscStream);
   return renderToReadableStream(<AppRouter tree={tree} />, {

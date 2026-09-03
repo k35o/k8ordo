@@ -1,6 +1,6 @@
 {
   "name": "@k8ordo/framework-engine",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Internal engine shared by @k8ordo/static and @k8ordo/server. Do not install directly.",
   "keywords": [
     "internal",
@@ -42,6 +42,9 @@
     "check": "vp check",
     "check:write": "vp check --fix"
   },
+  "dependencies": {
+    "@vitejs/plugin-rsc": "^0.5.34"
+  },
   "devDependencies": {
     "@k8ordo/router": "workspace:^",
     "@types/react": "catalog:",
@@ -58,8 +61,5 @@
     "react": ">=19.2.6",
     "react-dom": ">=19.2.6",
     "vite": ">=8.2.1"
-  },
-  "dependencies": {
-    "@vitejs/plugin-rsc": "^0.5.34"
   }
 }

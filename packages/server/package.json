@@ -1,6 +1,6 @@
 {
   "name": "@k8ordo/server",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Runs a k8ordo application: RSC rendered per request, with Server Actions.",
   "keywords": [
     "k8ordo",

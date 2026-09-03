@@ -1,6 +1,6 @@
 {
   "name": "@k8ordo/static",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Builds a k8ordo application into files: every route rendered ahead of time, no server at run time.",
   "keywords": [
     "k8ordo",

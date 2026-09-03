@@ -19,6 +19,9 @@ apps/docs/public/design.md
 apps/docs/public/docs/
 apps/docs/public/form/
 apps/docs/public/state/
+apps/docs/public/router/
+apps/docs/public/static/
+apps/docs/public/server/
 
 # Testing
 coverage

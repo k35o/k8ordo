@@ -6,6 +6,9 @@
  *   packages/ui/docs/**\/*.md    ──(this)──► public/docs/**\/*.md
  *   packages/form/docs/**\/*.md  ──(this)──► public/form/docs/**\/*.md
  *   packages/state/docs/**\/*.md ──(this)──► public/state/docs/**\/*.md
+ *   packages/router/docs/**\/*.md ─(this)──► public/router/docs/**\/*.md
+ *   packages/static/docs/**\/*.md ─(this)──► public/static/docs/**\/*.md
+ *   packages/server/docs/**\/*.md ─(this)──► public/server/docs/**\/*.md
  *
  * `@k8ordo/ui` predates the package-first URL rule and keeps `/docs/…` so its
  * published links stay alive; every later package lives under `/<package>/…`.
@@ -23,6 +26,9 @@ const MAPPINGS = [
   { out: '../public/docs/', src: '../../../packages/ui/docs/' },
   { out: '../public/form/docs/', src: '../../../packages/form/docs/' },
   { out: '../public/state/docs/', src: '../../../packages/state/docs/' },
+  { out: '../public/router/docs/', src: '../../../packages/router/docs/' },
+  { out: '../public/static/docs/', src: '../../../packages/static/docs/' },
+  { out: '../public/server/docs/', src: '../../../packages/server/docs/' },
 ];
 
 const counts = await Promise.all(

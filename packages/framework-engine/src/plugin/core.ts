@@ -11,6 +11,15 @@ export type EngineOptions = {
   readonly routesDir?: string;
 };
 
+/**
+ * The package the application actually installed. Under a strict node_modules
+ * layout only that name is resolvable from the project root, so anything this
+ * package asks the optimizer to prebundle has to be addressed through it.
+ */
+export type EngineHost = {
+  readonly via: string;
+};
+
 const VIRTUAL_ROUTES = 'virtual:k8ordo/routes';
 const OUT_DIR = '.k8ordo';
 
@@ -40,7 +49,10 @@ const SERVER_ONLY = /\.server(\.[cm]?[jt]sx?)?$/u;
  * table, the RSC pipeline configured, and the execution boundary enforced.
  * `@k8ordo/static` and `@k8ordo/server` add only what makes them different.
  */
-export const engine = (options: EngineOptions = {}): PluginOption[] => {
+export const engine = (
+  options: EngineOptions,
+  host: EngineHost,
+): PluginOption[] => {
   let root = '';
   let routesDir = '';
   let outDir = '';
@@ -93,6 +105,24 @@ export const engine = (options: EngineOptions = {}): PluginOption[] => {
       };
     },
 
+    configEnvironment(_name, config) {
+      // The RSC plugin is this package's dependency, not the application's,
+      // so the entries it asks the optimizer to prebundle cannot be resolved
+      // from the project root. Pointing them through this package is how it
+      // documents framework use.
+      const include = config.optimizeDeps?.include;
+      if (include !== undefined) {
+        config.optimizeDeps = {
+          ...config.optimizeDeps,
+          include: include.map((entry) =>
+            entry.startsWith('@vitejs/plugin-rsc')
+              ? `${host.via} > @k8ordo/framework-engine > ${entry}`
+              : entry,
+          ),
+        };
+      }
+    },
+
     configResolved(config) {
       root = config.root;
       routesDir = path.resolve(root, options.routesDir ?? 'src/routes');
@@ -108,17 +138,23 @@ export const engine = (options: EngineOptions = {}): PluginOption[] => {
 
     configureServer(server) {
       server.watcher.add(routesDir);
-      const regenerate = async (file: string): Promise<void> => {
+      const regenerate = (file: string): void => {
         if (!file.startsWith(routesDir)) return;
-        const { problems } = await generate({ root, routesDir, outDir });
-        for (const problem of problems) {
-          server.config.logger.error(
-            `routes/${problem.path}: ${problem.message}`,
-          );
-        }
+        void (async () => {
+          const { problems } = await generate({ root, routesDir, outDir });
+          for (const problem of problems) {
+            server.config.logger.error(
+              `routes/${problem.path}: ${problem.message}`,
+            );
+          }
+        })();
       };
-      server.watcher.on('add', regenerate);
-      server.watcher.on('unlink', regenerate);
+      server.watcher.on('add', (file: string) => {
+        regenerate(file);
+      });
+      server.watcher.on('unlink', (file: string) => {
+        regenerate(file);
+      });
     },
 
     resolveId(source, importer) {
@@ -142,6 +178,7 @@ export const engine = (options: EngineOptions = {}): PluginOption[] => {
 
     generateBundle(_options, bundle) {
       if (this.environment.name !== 'client') return;
+      const shorten = (file: string): string => path.relative(root, file);
       // The authoritative check. Resolution can be intercepted, and a client
       // component's graph is assembled by the RSC plugin rather than crawled
       // from the client entry — so the promise is kept where nothing is left
@@ -151,11 +188,9 @@ export const engine = (options: EngineOptions = {}): PluginOption[] => {
         for (const id of chunk.moduleIds) {
           if (!SERVER_ONLY.test(id.split('?')[0] as string)) continue;
           const importers = this.getModuleInfo(id)?.importers ?? [];
-          const via = importers
-            .map((importer) => path.relative(root, importer))
-            .join(', ');
+          const via = importers.map((file) => shorten(file)).join(', ');
           this.error(
-            `${path.relative(root, id)} is server-only but reached the client bundle${via === '' ? '' : ` — imported by ${via}`}`,
+            `${shorten(id)} is server-only but reached the client bundle${via === '' ? '' : ` — imported by ${via}`}`,
           );
         }
       }

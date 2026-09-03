@@ -1,0 +1,34 @@
+# @k8ordo/server
+
+> Runs a k8ordo application: pages rendered per request, so they can depend on
+> the request, answer with real HTTP status codes, and receive Server Actions.
+> The mode is the dependency — the alternative is `@k8ordo/static`, which
+> renders every route at build time. `src/routes/` is the pathname space
+> (page/layout/not-found, `[param]`, `(group)`, `_private`), boundaries are
+> React's own `'use client'` with `.server` modules barred from the client
+> bundle, and the route table and type wiring are generated rather than
+> hand-written.
+>
+> Like every k8ordo package it assumes React 19 and Server Components, uses
+> only what has reached Baseline newly available, and ships no polyfills or
+> legacy fallbacks.
+
+When installed via npm, these docs live under `node_modules/@k8ordo/server/docs/`.
+
+## Guide
+
+- [Design Guide](GUIDE.md): setup, the `routes/` grammar and what it refuses,
+  execution boundaries, building and running, and what running buys over
+  static.
+
+## Entry point
+
+- `@k8ordo/server` — `k8ordoServer(options?)` returns the Vite plugins for an
+  application that runs; `options.routesDir` moves the route directory
+  (default `src/routes`). `serve({ dist?, port?, host? })` serves a build:
+  the client build's files as they are, everything else through the request
+  handler. The built handler is a plain
+  `(request: Request) => Promise<Response>` default-exported from
+  `dist/rsc/index.js`, so another host can run it directly. `safeJoin(root,
+  pathname)` is the static-file resolution used by `serve`, which never lands
+  outside the build output.

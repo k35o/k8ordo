@@ -1,7 +1,7 @@
 'use client';
 
-import { createFromReadableStream } from '@vitejs/plugin-rsc/browser';
 import { useInterceptedNavigation } from '@k8ordo/router';
+import { createFromReadableStream } from '@vitejs/plugin-rsc/browser';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 

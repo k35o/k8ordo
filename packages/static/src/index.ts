@@ -91,7 +91,7 @@ export const k8ordoStatic = (options: StaticOptions = {}): PluginOption[] => {
     },
   };
 
-  return [...engine(options), prerender];
+  return [...engine(options, { via: '@k8ordo/static' }), prerender];
 };
 
 const write = async (
