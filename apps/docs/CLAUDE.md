@@ -1,7 +1,10 @@
 # Agent guide — apps/docs
 
-Documentation site for the `@k8ordo/*` packages (`ui`, `form`), built with
-Vite and `@funstack/router`.
+Documentation site for the `@k8ordo/*` packages (`ui`, `form`, `state`),
+built with Vite and `@funstack/router`. The site also dogfoods
+`@k8ordo/state`: the theme preference is a `defineLocalState`
+(`src/theme/context.tsx`, paired with the init script in `src/root.tsx`),
+and `/state`'s live demo is a real `definePageState` on the page's own URL.
 
 ## Commands
 

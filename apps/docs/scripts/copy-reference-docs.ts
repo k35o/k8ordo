@@ -3,8 +3,9 @@
  * serves them verbatim as markdown twins of the HTML pages.
  *
  * Single source of truth, one mapping per package:
- *   packages/ui/docs/**\/*.md   ──(this)──► public/docs/**\/*.md
- *   packages/form/docs/**\/*.md ──(this)──► public/form/docs/**\/*.md
+ *   packages/ui/docs/**\/*.md    ──(this)──► public/docs/**\/*.md
+ *   packages/form/docs/**\/*.md  ──(this)──► public/form/docs/**\/*.md
+ *   packages/state/docs/**\/*.md ──(this)──► public/state/docs/**\/*.md
  *
  * `@k8ordo/ui` predates the package-first URL rule and keeps `/docs/…` so its
  * published links stay alive; every later package lives under `/<package>/…`.
@@ -21,6 +22,7 @@ import { fileURLToPath } from 'node:url';
 const MAPPINGS = [
   { out: '../public/docs/', src: '../../../packages/ui/docs/' },
   { out: '../public/form/docs/', src: '../../../packages/form/docs/' },
+  { out: '../public/state/docs/', src: '../../../packages/state/docs/' },
 ];
 
 const counts = await Promise.all(

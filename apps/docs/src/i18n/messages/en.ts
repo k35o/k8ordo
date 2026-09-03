@@ -18,6 +18,8 @@ export const en = {
     'React components with semantic design tokens, i18n, and generative-UI adapters.',
   'home.memberFormDescription':
     'Derives HTML constraint attributes, messages, and server-side validation from one zod schema. The DOM holds the values, so it works without JavaScript.',
+  'home.memberStateDescription':
+    'Declares state by where it lives — URL, history entry, localStorage, memory — one zod schema each, riding the Navigation API.',
   'home.disciplineTitle': 'Shared commitments',
   'home.disciplinePlatform': 'Baseline only',
   'home.disciplinePlatformDescription':
@@ -85,6 +87,37 @@ export const en = {
   'form.docsTitle': 'Documentation',
   'form.docsDescription':
     'The guide and reference ship inside the npm package. An AI coding assistant reads the exact installed version out of `node_modules/@k8ordo/form/docs/`.',
+  'state.description':
+    'Declare state by where it lives. Four places — URL search params, the history entry, localStorage, memory — each typed by one zod schema, from which the server read, link building and the subscription are all derived.',
+  'state.demoTitle': 'Running on this very page',
+  'state.demoDescription':
+    'The controls below rewrite the real URL: `definePageState` updates flow through this site’s router (@funstack/router, which intercepts the Navigation API). The theme toggle in the header stores through `defineLocalState` — its current value is the theme row.',
+  'state.demoUrlEmpty': 'no query (all defaults)',
+  'state.demoThemeSystem': 'following the system',
+  'state.demoHint':
+    'The page steppers push, so the browser back button rewinds them one by one. The tabs replace, refining the current entry. Copy the URL and the state travels with it. Hand-edit `?page=0` into the URL and the schema drops it to the default.',
+  'state.featuresTitle': 'Features',
+  'state.featurePlaces': 'Declared by where it lives',
+  'state.featurePlacesDescription':
+    'URL, history entry, localStorage, memory. Lifetime and sharing scope are decided by the place you declared, not by how the code happens to be written.',
+  'state.featureSchema': 'One source: the schema',
+  'state.featureSchemaDescription':
+    'parseUrl, link building and the salvage of stale data all derive from the schema you wrote. A search form can share the very same schema with @k8ordo/form.',
+  'state.featureNavigation': 'Rides the Navigation API',
+  'state.featureNavigationDescription':
+    'The URL and the hidden entry state are two faces of one history entry: updated atomically in a single navigate, restored together by the back button.',
+  'state.featureKeys': 'Subscribe per key',
+  'state.featureKeysDescription':
+    'List the keys you read and updates to any other field never re-render you. The schema fixes the key set, so change detection is exact.',
+  'state.featureCanonical': 'Invalid values never render',
+  'state.featureCanonicalDescription':
+    'update passes the schema on the spot, and a hand-edited URL param falls back to its own default, field by field. Defaults are omitted from the query, so the same state always makes the same URL.',
+  'state.featureServer': 'The server can read it',
+  'state.featureServerDescription':
+    'URL state reads typed in an RSC via parseUrl. Links and GET forms work under any router, before JavaScript loads.',
+  'state.docsTitle': 'Documentation',
+  'state.docsDescription':
+    'The guide and reference ship inside the npm package. An AI coding assistant reads the exact installed version out of `node_modules/@k8ordo/state/docs/`.',
   'footer.tagline':
     'React libraries that use Baseline features without holding back.',
   'footer.typesetting': 'Typeset in Noto Sans JP & M PLUS 2',

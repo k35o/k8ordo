@@ -17,6 +17,8 @@ export const ja = {
     'セマンティックなデザイントークン・i18n・生成UIアダプタを備えたReactコンポーネント。',
   'home.memberFormDescription':
     'スキーマ1つから HTML の制約属性・メッセージ・サーバー検証を導く。値は DOM が持つので、JavaScript が無くても動く。',
+  'home.memberStateDescription':
+    '状態を置き場所で宣言する。URL・履歴エントリ・localStorage・メモリを、それぞれスキーマ1つで型付けし、Navigation API に載せる。',
   'home.disciplineTitle': '共通の前提',
   'home.disciplinePlatform': 'Baselineだけ',
   'home.disciplinePlatformDescription':
@@ -84,6 +86,37 @@ export const ja = {
   'form.docsTitle': 'ドキュメント',
   'form.docsDescription':
     '設計ガイドとリファレンスは npm パッケージに同梱されています。AIコーディングエージェントは `node_modules/@k8ordo/form/docs/` からインストールした版そのものを読みます。',
+  'state.description':
+    '状態を「どこに住むか」で宣言します。URLのsearchParams・履歴エントリ・localStorage・メモリの4つの置き場所を、それぞれzodスキーマ1つで型付けし、サーバーの読み取り・リンク生成・購読までそこから導きます。',
+  'state.demoTitle': 'このページで動いています',
+  'state.demoDescription':
+    '下の操作は本物のURLを書き換えます。`definePageState` の update がこのサイトのルーター（Navigation API を intercept する @funstack/router）を通って流れます。ヘッダーのテーマ切り替えの保存先も `defineLocalState` で、その現在値が theme の行です。',
+  'state.demoUrlEmpty': 'クエリなし（すべて default）',
+  'state.demoThemeSystem': 'システムに追従',
+  'state.demoHint':
+    'page の増減は push なので、ブラウザの戻るで1つずつ巻き戻ります。tab は replace で、現在のエントリを書き換えます。URL をコピーすれば、この状態ごと共有できます。URL に `?page=0` と手で書いても、スキーマが default に落とします。',
+  'state.featuresTitle': '特徴',
+  'state.featurePlaces': '置き場所で宣言する',
+  'state.featurePlacesDescription':
+    'URL・履歴エントリ・localStorage・メモリ。状態の寿命と共有範囲を決めるのはコードの書き方ではなく、定義した場所です。',
+  'state.featureSchema': '出所はスキーマ1つ',
+  'state.featureSchemaDescription':
+    'parseUrl・リンク生成・古いデータのサルベージまで、書いたスキーマから導かれます。検索フォームの制約（@k8ordo/form）と同じスキーマを共有できます。',
+  'state.featureNavigation': 'Navigation APIに載る',
+  'state.featureNavigationDescription':
+    'URLと隠れたエントリ状態は、同じ履歴エントリの2つの面です。1回の navigate で原子的に更新され、戻るで両方が一緒に戻ります。',
+  'state.featureKeys': 'キー単位の購読',
+  'state.featureKeysDescription':
+    '購読するキーを列挙すれば、それ以外のフィールドの更新では再レンダーされません。スキーマがキー集合を固定しているので、判定は正確です。',
+  'state.featureCanonical': '不正な値は表示されない',
+  'state.featureCanonicalDescription':
+    'update はその場でスキーマを通り、URL に手で書かれた不正値はフィールド単位で default に落ちます。default の値はクエリから省かれるので、同じ状態は常に同じ URL になります。',
+  'state.featureServer': 'サーバーが読める',
+  'state.featureServerDescription':
+    'URL 状態は RSC が parseUrl で型付きに読めます。リンクと GET フォームはどのルーターでも、JavaScript なしでも動きます。',
+  'state.docsTitle': 'ドキュメント',
+  'state.docsDescription':
+    '設計ガイドとリファレンスは npm パッケージに同梱されています。AIコーディングエージェントは `node_modules/@k8ordo/state/docs/` からインストールした版そのものを読みます。',
   'footer.tagline': 'Baselineに入った機能を、制限なく使うReactのライブラリ群。',
   'footer.typesetting': '組版 — Noto Sans JP / M PLUS 2',
   'nav.openMenu': 'メニューを開く',

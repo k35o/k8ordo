@@ -16,11 +16,13 @@
   "dependencies": {
     "@funstack/router": "1.2.0",
     "@funstack/static": "1.2.0",
+    "@k8ordo/state": "workspace:^",
     "@k8ordo/ui": "workspace:^",
     "@tailwindcss/vite": "catalog:",
     "react-error-boundary": "6.1.2",
     "shiki": "4.4.3",
-    "tailwindcss": "catalog:"
+    "tailwindcss": "catalog:",
+    "zod": "4.4.3"
   },
   "devDependencies": {
     "@types/react": "catalog:",

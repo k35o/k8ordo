@@ -89,6 +89,7 @@ import { UseWritingModePage } from './pages/hooks/use-writing-mode-page';
 import { I18n } from './pages/i18n';
 import { NotFound } from './pages/not-found';
 import { RootRedirect } from './pages/root-redirect';
+import { State } from './pages/state';
 import { Theming } from './pages/theming';
 import { Ui } from './pages/ui';
 import { Router } from './router';
@@ -113,6 +114,10 @@ const routes: RouteDefinition[] = [
       route({
         path: '/form',
         component: <Form />,
+      }),
+      route({
+        path: '/state',
+        component: <State />,
       }),
       route({
         path: '/ui/get-started',

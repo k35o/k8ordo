@@ -1,0 +1,42 @@
+# @k8ordo/state
+
+> Declare state by where it lives: `definePageState` (typed URL search params
+> plus hidden history-entry state — the two faces of one entry, updated
+> atomically over the Navigation API), `defineLocalState` (localStorage,
+> cross-tab), `defineMemoryState` (a typed shared box, resets on reload).
+> One zod schema per place derives the server read, canonical links, salvage
+> of stale data, and a client subscription with exact per-key change
+> detection. Works through links and GET forms before JavaScript loads;
+> imperative url updates ride a Navigation-API-intercepting router.
+>
+> Like every k8ordo package it assumes React 19 and Server Components, uses
+> only what has reached Baseline newly available, and ships no polyfills or
+> legacy fallbacks.
+
+When installed via npm, these docs live under `node_modules/@k8ordo/state/docs/`.
+
+## Guide
+
+- [Design Guide](GUIDE.md): the four places and when each fits, the shared
+  definition module, reading on the server, updating on the client, batching
+  and update handles, subscription granularity, router requirements, typed
+  routes via `Register`, and pairing with `@k8ordo/form` for GET forms.
+
+## Entry point
+
+- `@k8ordo/state` — `definePageState(key, { url?, entry? })` returns a pure
+  definition usable from server and client: `parseUrl(searchParams)` reads
+  the url slot typed with defaults applied and per-field salvage;
+  `href(base, values?)` builds a canonical link keeping the path literal in
+  the type; `search(values?)` returns the query string alone.
+  `defineLocalState(key, schema)` and `defineMemoryState(key, initial)`
+  declare app-scope state. `useAppState(definition, keys?, { initialUrl? })`
+  (client) works on any kind and returns `[state, update]` — state is the
+  flat merge of a page definition's slots; `update(patch)` applies
+  synchronously, batches per handler into one write (url+entry atomically via
+  `navigation.navigate()`, entry-only via `updateCurrentEntry()`, local via
+  one `setItem`), and returns `{ committed, finished }` promise handles
+  (settled for non-navigating kinds; `{ history: 'push' }` exists only on
+  page state). `resetStateRegistry()` clears stores between tests. Augment
+  `interface Register { path }` to constrain `href` paths to the app's typed
+  routes.
