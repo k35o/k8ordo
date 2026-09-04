@@ -11,7 +11,7 @@ import {
 import type { EngineOptions } from '@k8ordo/framework-engine';
 import type { Plugin, PluginOption } from 'vite';
 
-import { catchAllPath, planPaths } from './paths';
+import { catchAllPath, catchAllPatterns, planPaths } from './paths';
 
 export type StaticOptions = EngineOptions & {
   /**
@@ -53,6 +53,17 @@ export const k8ordoStatic = (options: StaticOptions = {}): PluginOption[] => {
         if (plan.unresolved.length > 0) {
           throw new Error(
             `static build needs pathnames for ${plan.unresolved.join(', ')} — supply them with the "paths" option`,
+          );
+        }
+        if (plan.unusable.length > 0) {
+          throw new Error(
+            `the "paths" option supplied pathnames no route wants: ${plan.unusable.join(', ')}`,
+          );
+        }
+        const catchAlls = catchAllPatterns(tree);
+        if (catchAlls.length > 1) {
+          throw new Error(
+            `a static host answers every unknown URL from one file, so only one not-found.tsx can be represented — this table declares ${catchAlls.join(', ')}`,
           );
         }
 
@@ -116,4 +127,4 @@ const write = async (
 };
 
 export type { PathPlan } from './paths';
-export { catchAllPath, patternsOf, planPaths } from './paths';
+export { catchAllPath, catchAllPatterns, patternsOf, planPaths } from './paths';

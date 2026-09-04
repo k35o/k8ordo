@@ -27,20 +27,28 @@ export const isConcrete = (pattern: string): boolean =>
 const SENTINEL = '__k8ordo-not-found__';
 
 /**
+ * Every catch-all the table declares. A static host answers every URL it does
+ * not have from **one** file, so a table with a nested `not-found.tsx` cannot
+ * be represented: whichever one the build picked, the other would never be
+ * served. The build says so rather than choosing.
+ */
+export const catchAllPatterns = (dir: RouteDir): string[] =>
+  patternsOf(dir).filter((pattern) => pattern.endsWith('/*'));
+
+/**
  * A pathname the table can only answer with its catch-all, so the build can
  * render `not-found.tsx` without waiting for a visitor to find it.
  *
  * One segment deeper than the longest concrete pattern, spelled with a
  * segment no literal uses: a pattern of a different length cannot match, and
- * parameters consume exactly one segment each, so nothing but a wildcard is
- * left. Returns null when the table declares no catch-all at all.
+ * parameters consume exactly one segment each, so nothing but the root
+ * wildcard is left. Returns null when the root declares no catch-all.
  */
 export const catchAllPath = (dir: RouteDir): string | null => {
-  const patterns = patternsOf(dir);
-  if (!patterns.some((pattern) => pattern.endsWith('/*'))) return null;
+  if (dir.notFound === null) return null;
   const depth = Math.max(
     1,
-    ...patterns
+    ...patternsOf(dir)
       .filter((pattern) => !pattern.endsWith('/*'))
       .map((pattern) => pattern.split('/').filter(Boolean).length),
   );
@@ -52,12 +60,20 @@ export type PathPlan = {
   readonly paths: readonly string[];
   /** Patterns that need values nobody supplied. */
   readonly unresolved: readonly string[];
+  /** Supplied pathnames no pattern wanted, and any that are not pathnames. */
+  readonly unusable: readonly string[];
 };
 
 /**
  * Static rendering cannot invent parameter values, and quietly shipping a
  * site missing half its pages is worse than refusing to build one. Every
  * parameterised pattern must be covered by a supplied path.
+ *
+ * The other direction counts too: a supplied path nothing matched is a typo
+ * that would cost exactly the page it was meant to add, and a supplied value
+ * that still contains a parameter (`/ja/blog/:slug` — what expanding only one
+ * of two parameters leaves behind) would be written to disk as a directory
+ * literally named `:slug`. URLPattern accepts both, so this has to say no.
  */
 export const planPaths = (
   tree: RouteDir,
@@ -66,17 +82,22 @@ export const planPaths = (
   const patterns = patternsOf(tree);
   const paths = patterns.filter((pattern) => isConcrete(pattern));
   const unresolved: string[] = [];
+  const unusable = supplied.filter((path) => !isConcrete(path));
+  const usable = supplied.filter((path) => isConcrete(path));
+  const used = new Set<string>();
 
   for (const pattern of patterns) {
     if (isConcrete(pattern) || pattern.endsWith('/*')) continue;
     const matcher = new URLPattern({ pathname: pattern });
-    const covered = supplied.filter((path) => matcher.test({ pathname: path }));
+    const covered = usable.filter((path) => matcher.test({ pathname: path }));
     if (covered.length === 0) {
       unresolved.push(pattern);
       continue;
     }
     paths.push(...covered);
+    for (const path of covered) used.add(path);
   }
+  unusable.push(...usable.filter((path) => !used.has(path)));
 
-  return { paths: [...new Set(paths)], unresolved };
+  return { paths: [...new Set(paths)], unresolved, unusable };
 };

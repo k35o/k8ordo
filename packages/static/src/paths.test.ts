@@ -2,7 +2,7 @@ import { parseRouteTree, buildTable } from '@k8ordo/framework-engine';
 import { defineRoutes } from '@k8ordo/router';
 import type { FC } from 'react';
 
-import { catchAllPath, patternsOf, planPaths } from './paths';
+import { catchAllPath, catchAllPatterns, patternsOf, planPaths } from './paths';
 
 const treeOf = (files: readonly string[]) => {
   const { tree, problems } = parseRouteTree(files);
@@ -42,6 +42,25 @@ describe('planPaths', () => {
     expect(plan.unresolved).toStrictEqual([]);
   });
 
+  it('refuses a supplied path no route wants', () => {
+    // 打ち間違いは「そのページが無いサイト」になって出荷される
+    const plan = planPaths(treeOf(['page.tsx', 'products/[id]/page.tsx']), [
+      '/products/1',
+      '/produtcs/2',
+    ]);
+    expect(plan.unusable).toStrictEqual(['/produtcs/2']);
+  });
+
+  it('refuses a supplied path that still holds a parameter', () => {
+    // パラメータが 2 つある表を 1 つだけ展開すると、こういう値が残る
+    const plan = planPaths(
+      treeOf(['page.tsx', '[locale]/blog/[slug]/page.tsx']),
+      ['/ja/blog/:slug'],
+    );
+    expect(plan.unusable).toStrictEqual(['/ja/blog/:slug']);
+    expect(plan.unresolved).toStrictEqual(['/:locale/blog/:slug']);
+  });
+
   it('never renders the catch-all as a page of its own', () => {
     const plan = planPaths(treeOf(['page.tsx', 'not-found.tsx']), []);
     expect(plan.paths).toStrictEqual(['/']);
@@ -49,9 +68,22 @@ describe('planPaths', () => {
   });
 });
 
+describe('catchAllPatterns', () => {
+  it('names every not-found, so the build can refuse to choose between them', () => {
+    const tree = treeOf(['page.tsx', 'not-found.tsx', 'docs/not-found.tsx']);
+    expect(catchAllPatterns(tree)).toStrictEqual(['/*', '/docs/*']);
+  });
+});
+
 describe('catchAllPath', () => {
   it('is nothing when the table declares no catch-all', () => {
     expect(catchAllPath(treeOf(['page.tsx']))).toBeNull();
+  });
+
+  it('is nothing when only a nested directory declares one', () => {
+    // 入れ子の not-found は 404.html にならない。エンジン内蔵の素の 404 が
+    // アプリのものとして書き出される事故を防ぐ。
+    expect(catchAllPath(treeOf(['page.tsx', 'docs/not-found.tsx']))).toBeNull();
   });
 
   it('reaches the catch-all even past parameters at every depth', () => {
