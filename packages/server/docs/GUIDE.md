@@ -68,7 +68,7 @@ export default function HomePage() {
 ```
 
 ```bash
-vite dev     # the same pipeline as production, with HMR
+vite dev     # the same pipeline as production, with Fast Refresh
 vite build   # dist/
 node serve.js
 ```

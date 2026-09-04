@@ -69,6 +69,7 @@ export default function HomePage() {
 
 ```bash
 vite dev     # a real server, so the pages behave as they will in production
+             # (Fast Refresh included — the framework brings React's plugin)
 vite build   # dist/client/ is the site
 ```
 
