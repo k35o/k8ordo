@@ -2,7 +2,12 @@ import { parseRouteTree, buildTable } from '@k8ordo/framework-engine';
 import { defineRoutes } from '@k8ordo/router';
 import type { FC } from 'react';
 
-import { catchAllPath, patternsOf, planPaths } from './paths';
+import {
+  catchAllPath,
+  patternsNeedingPaths,
+  patternsOf,
+  planPaths,
+} from './paths';
 
 const treeOf = (files: readonly string[]) => {
   const { tree, problems } = parseRouteTree(files);
@@ -46,6 +51,22 @@ describe('planPaths', () => {
     const plan = planPaths(treeOf(['page.tsx', 'not-found.tsx']), []);
     expect(plan.paths).toStrictEqual(['/']);
     expect(plan.unresolved).toStrictEqual([]);
+  });
+});
+
+describe('patternsNeedingPaths', () => {
+  it('names the parameterised patterns, catch-all aside', () => {
+    const tree = treeOf([
+      'page.tsx',
+      'not-found.tsx',
+      'products/page.tsx',
+      'products/[id]/page.tsx',
+      '[locale]/page.tsx',
+    ]);
+    expect(patternsNeedingPaths(tree)).toStrictEqual([
+      '/products/:id',
+      '/:locale',
+    ]);
   });
 });
 

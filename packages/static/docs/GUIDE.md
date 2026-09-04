@@ -220,6 +220,19 @@ k8ordoStatic({
 });
 ```
 
+The patterns that still need covering are handed in, so a parameter that takes
+the same values everywhere — a locale segment, say — is expanded rather than
+listed once per page:
+
+```ts
+k8ordoStatic({
+  paths: (patterns) =>
+    patterns.flatMap((pattern) =>
+      ['ja', 'en'].map((locale) => pattern.replace('/:locale', `/${locale}`)),
+    ),
+});
+```
+
 A parameterised route with no path supplied **fails the build**:
 
 ```
