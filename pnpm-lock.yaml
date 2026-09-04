@@ -6,6 +6,9 @@ settings:
 
 catalogs:
   default:
+    '@arethetypeswrong/cli':
+      specifier: 0.18.5
+      version: 0.18.5
     '@tailwindcss/postcss':
       specifier: 4.3.3
       version: 4.3.3
@@ -24,6 +27,9 @@ catalogs:
     postcss:
       specifier: 8.5.26
       version: 8.5.26
+    publint:
+      specifier: 0.3.23
+      version: 0.3.23
     react:
       specifier: 19.2.8
       version: 19.2.8
@@ -121,7 +127,7 @@ importers:
         specifier: 'catalog:'
         version: 19.2.8(react@19.2.8)
       vite:
-        specifier: 8.2.1
+        specifier: 'catalog:'
         version: 8.2.1(@types/node@24.13.3)(esbuild@0.28.2)(jiti@2.7.0)
 
   examples/server-basic:
@@ -129,6 +135,9 @@ importers:
       '@k8ordo/router':
         specifier: workspace:^
         version: link:../../packages/router
+      '@k8ordo/server':
+        specifier: workspace:^
+        version: link:../../packages/server
       react:
         specifier: 'catalog:'
         version: 19.2.8
@@ -139,9 +148,6 @@ importers:
         specifier: 0.0.1
         version: 0.0.1
     devDependencies:
-      '@k8ordo/server':
-        specifier: workspace:^
-        version: link:../../packages/server
       '@types/react':
         specifier: 'catalog:'
         version: 19.2.18
@@ -311,6 +317,9 @@ importers:
 
   packages/form:
     devDependencies:
+      '@arethetypeswrong/cli':
+        specifier: 'catalog:'
+        version: 0.18.5
       '@types/react':
         specifier: 'catalog:'
         version: 19.2.18
@@ -320,6 +329,9 @@ importers:
       '@vitest/browser-playwright':
         specifier: 4.1.10
         version: 4.1.10(playwright@1.62.1)(vite@8.2.1(@types/node@24.13.3)(esbuild@0.28.2)(jiti@2.7.0))(vitest@4.1.10)
+      publint:
+        specifier: 'catalog:'
+        version: 0.3.23
       react:
         specifier: 'catalog:'
         version: 19.2.8
@@ -351,12 +363,15 @@ importers:
         specifier: 'catalog:'
         version: 6.0.5(vite@8.2.1(@types/node@24.13.3)(esbuild@0.28.2)(jiti@2.7.0))
       '@vitejs/plugin-rsc':
-        specifier: ^0.5.34
+        specifier: 0.5.34
         version: 0.5.34(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(vite@8.2.1(@types/node@24.13.3)(esbuild@0.28.2)(jiti@2.7.0))
       rsc-html-stream:
         specifier: 0.0.8
         version: 0.0.8
     devDependencies:
+      '@arethetypeswrong/cli':
+        specifier: 'catalog:'
+        version: 0.18.5
       '@k8ordo/router':
         specifier: workspace:^
         version: link:../router
@@ -366,6 +381,9 @@ importers:
       '@types/react-dom':
         specifier: 'catalog:'
         version: 19.2.4(@types/react@19.2.18)
+      publint:
+        specifier: 'catalog:'
+        version: 0.3.23
       react:
         specifier: 'catalog:'
         version: 19.2.8
@@ -387,6 +405,9 @@ importers:
 
   packages/router:
     devDependencies:
+      '@arethetypeswrong/cli':
+        specifier: 'catalog:'
+        version: 0.18.5
       '@types/react':
         specifier: 'catalog:'
         version: 19.2.18
@@ -396,6 +417,9 @@ importers:
       '@vitest/browser-playwright':
         specifier: 4.1.10
         version: 4.1.10(playwright@1.62.1)(vite@8.2.1(@types/node@24.13.3)(esbuild@0.28.2)(jiti@2.7.0))(vitest@4.1.10)
+      publint:
+        specifier: 'catalog:'
+        version: 0.3.23
       react:
         specifier: 'catalog:'
         version: 19.2.8
@@ -424,9 +448,15 @@ importers:
         specifier: workspace:^
         version: link:../framework-engine
     devDependencies:
+      '@arethetypeswrong/cli':
+        specifier: 'catalog:'
+        version: 0.18.5
       '@k8ordo/router':
         specifier: workspace:^
         version: link:../router
+      publint:
+        specifier: 'catalog:'
+        version: 0.3.23
       react:
         specifier: 'catalog:'
         version: 19.2.8
@@ -448,6 +478,9 @@ importers:
 
   packages/state:
     devDependencies:
+      '@arethetypeswrong/cli':
+        specifier: 'catalog:'
+        version: 0.18.5
       '@types/react':
         specifier: 'catalog:'
         version: 19.2.18
@@ -457,6 +490,9 @@ importers:
       '@vitest/browser-playwright':
         specifier: 4.1.10
         version: 4.1.10(playwright@1.62.1)(vite@8.2.1(@types/node@24.13.3)(esbuild@0.28.2)(jiti@2.7.0))(vitest@4.1.10)
+      publint:
+        specifier: 'catalog:'
+        version: 0.3.23
       react:
         specifier: 'catalog:'
         version: 19.2.8
@@ -488,12 +524,18 @@ importers:
         specifier: workspace:^
         version: link:../framework-engine
     devDependencies:
+      '@arethetypeswrong/cli':
+        specifier: 'catalog:'
+        version: 0.18.5
       '@k8ordo/router':
         specifier: workspace:^
         version: link:../router
       '@types/react':
         specifier: 'catalog:'
         version: 19.2.18
+      publint:
+        specifier: 'catalog:'
+        version: 0.3.23
       react:
         specifier: 'catalog:'
         version: 19.2.8
@@ -526,7 +568,7 @@ importers:
         version: 3.6.0
     devDependencies:
       '@arethetypeswrong/cli':
-        specifier: 0.18.5
+        specifier: 'catalog:'
         version: 0.18.5
       '@chromatic-com/storybook':
         specifier: 5.3.0
@@ -586,7 +628,7 @@ importers:
         specifier: 'catalog:'
         version: 8.5.26
       publint:
-        specifier: 0.3.23
+        specifier: 'catalog:'
         version: 0.3.23
       react:
         specifier: 'catalog:'

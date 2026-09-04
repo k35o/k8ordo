@@ -42,13 +42,16 @@
     "test": "vp test",
     "typecheck": "tsc --noEmit",
     "check": "vp check",
-    "check:write": "vp check --fix"
+    "check:write": "vp check --fix",
+    "check:package": "publint && attw --pack . --profile esm-only"
   },
   "dependencies": {
     "@k8ordo/framework-engine": "workspace:^"
   },
   "devDependencies": {
+    "@arethetypeswrong/cli": "catalog:",
     "@k8ordo/router": "workspace:^",
+    "publint": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
     "typescript": "7.0.2",
@@ -57,9 +60,12 @@
     "vitest": "catalog:"
   },
   "peerDependencies": {
-    "@k8ordo/router": ">=0.1.0",
+    "@k8ordo/router": "workspace:^",
     "react": ">=19.2.6",
     "react-dom": ">=19.2.6",
     "vite": ">=8.2.1"
+  },
+  "engines": {
+    "node": ">=24.0.0"
   }
 }
