@@ -1,0 +1,66 @@
+{
+  "name": "@k8ordo/framework-engine",
+  "version": "0.1.0",
+  "description": "Internal engine shared by @k8ordo/static and @k8ordo/server. Do not install directly.",
+  "keywords": [
+    "internal",
+    "k8ordo",
+    "rsc",
+    "vite-plugin"
+  ],
+  "homepage": "https://ordo.k8o.me",
+  "bugs": {
+    "url": "https://github.com/k35o/k8ordo/issues"
+  },
+  "license": "MIT",
+  "author": "k8o <kosakanoki@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/k35o/k8ordo.git"
+  },
+  "files": [
+    "dist/**",
+    "docs/**"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "default": "./dist/index.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "scripts": {
+    "build": "vp pack",
+    "test": "vp test",
+    "typecheck": "tsc --noEmit",
+    "check": "vp check",
+    "check:write": "vp check --fix"
+  },
+  "dependencies": {
+    "@vitejs/plugin-rsc": "^0.5.34",
+    "rsc-html-stream": "0.0.8"
+  },
+  "devDependencies": {
+    "@k8ordo/router": "workspace:^",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "typescript": "7.0.2",
+    "vite": "catalog:",
+    "vite-plus": "catalog:",
+    "vitest": "catalog:"
+  },
+  "peerDependencies": {
+    "@k8ordo/router": ">=0.1.0",
+    "react": ">=19.2.6",
+    "react-dom": ">=19.2.6",
+    "vite": ">=8.2.1"
+  }
+}

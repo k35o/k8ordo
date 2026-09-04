@@ -71,6 +71,12 @@ export default defineConfig({
       // (コンポーネント定義ではなく描画関数。実コンポーネントの入れ子定義は引き続き検出)。
       'react/no-unstable-nested-components': ['error', { allowAsProps: true }],
       'tailwindcss/no-unknown-classes': ['warn', noUnknownClassesOptions],
+      // `server-only` / `client-only` は値を持たない印で、副作用 import で
+      // あることそのものが意味 (RSC の実行境界を宣言する)。
+      'import/no-unassigned-import': [
+        'error',
+        { allow: ['server-only', 'client-only', '**/*.css'] },
+      ],
     },
     settings: {
       react: { version: '19.2.5' },

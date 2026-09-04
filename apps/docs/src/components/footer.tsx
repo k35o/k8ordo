@@ -5,10 +5,24 @@ import type { MessageKey } from '../i18n';
 import { useTranslation } from '../i18n';
 import { LocaleAnchor } from './locale-anchor';
 
-/** ドキュメントの列はパッケージごとに立てる。パッケージが増えたら列が増える。 */
-const DOC_GROUPS: Array<{
+/** 第一階層はパッケージ。増えたらここに 1 行足す。 */
+const PACKAGE_LINKS = [
+  { path: '/ui', label: '@k8ordo/ui' },
+  { path: '/form', label: '@k8ordo/form' },
+  { path: '/state', label: '@k8ordo/state' },
+  { path: '/router', label: '@k8ordo/router' },
+  { path: '/static', label: '@k8ordo/static' },
+  { path: '/server', label: '@k8ordo/server' },
+];
+
+/**
+ * セクションを持つパッケージは、その列を立てる。今は UI だけで、他のパッケージ
+ * の設計ガイドは npm パッケージに同梱されているのでサイトに列を持たない。
+ */
+const SECTION_GROUPS: Array<{
   name: string;
   links: Array<{ path: string; labelKey: MessageKey }>;
+  external?: Array<{ href: string; label: string }>;
 }> = [
   {
     name: 'UI',
@@ -23,13 +37,13 @@ const DOC_GROUPS: Array<{
       { path: '/ui/ai/generative-ui', labelKey: 'nav.generativeUi' },
       { path: '/ui/ai/agents', labelKey: 'nav.aiAgents' },
     ],
+    external: [{ href: STORYBOOK_URL, label: 'Storybook' }],
   },
 ];
 
 const RESOURCE_LINKS = [
   { href: 'https://github.com/k35o/k8ordo', label: 'GitHub' },
-  { href: STORYBOOK_URL, label: 'Storybook' },
-  { href: 'https://www.npmjs.com/package/@k8ordo/ui', label: 'npm' },
+  { href: 'https://www.npmjs.com/search?q=%40k8ordo', label: 'npm' },
 ];
 
 const linkClass =
@@ -56,7 +70,21 @@ export function Footer() {
             {t('footer.tagline')}
           </p>
         </div>
-        {DOC_GROUPS.map((group) => (
+        <nav aria-label={t('footer.packages')} className="flex flex-col gap-3">
+          <span className="text-fg-subtle text-xs font-bold tracking-normal">
+            {t('footer.packages')}
+          </span>
+          <ul className="flex flex-col gap-2">
+            {PACKAGE_LINKS.map((link) => (
+              <li key={link.path}>
+                <LocaleAnchor className={linkClass} path={link.path} unstyled>
+                  {link.label}
+                </LocaleAnchor>
+              </li>
+            ))}
+          </ul>
+        </nav>
+        {SECTION_GROUPS.map((group) => (
           <nav
             aria-label={`${group.name} — ${t('footer.docs')}`}
             className="flex flex-col gap-3"
@@ -71,6 +99,18 @@ export function Footer() {
                   <LocaleAnchor className={linkClass} path={link.path} unstyled>
                     {t(link.labelKey)}
                   </LocaleAnchor>
+                </li>
+              ))}
+              {group.external?.map((link) => (
+                <li key={link.href}>
+                  <a
+                    className={linkClass}
+                    href={link.href}
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
+                    {link.label}
+                  </a>
                 </li>
               ))}
             </ul>

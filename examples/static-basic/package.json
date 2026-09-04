@@ -1,0 +1,26 @@
+{
+  "name": "example-static-basic",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "typecheck": "tsc --noEmit",
+    "check": "vp check",
+    "check:write": "vp check --fix"
+  },
+  "dependencies": {
+    "@k8ordo/router": "workspace:^",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "server-only": "0.0.1"
+  },
+  "devDependencies": {
+    "@k8ordo/static": "workspace:^",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "typescript": "7.0.2",
+    "vite": "catalog:",
+    "vite-plus": "catalog:"
+  }
+}

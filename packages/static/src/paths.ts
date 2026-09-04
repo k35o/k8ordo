@@ -1,0 +1,124 @@
+import type { RouteDir } from '@k8ordo/framework-engine';
+
+/**
+ * Every pattern the table declares, walked the way the router walks it.
+ * Groups contribute no segment, which is exactly why they cannot separate
+ * two pages that would otherwise share a URL.
+ */
+export const patternsOf = (dir: RouteDir, prefix = ''): string[] => {
+  const here = dir.kind === 'root' ? '' : prefix;
+  const found: string[] = [];
+  if (dir.page !== null) found.push(here === '' ? '/' : here);
+  if (dir.notFound !== null) found.push(`${here}/*`);
+  for (const child of dir.children) {
+    found.push(
+      ...patternsOf(
+        child,
+        child.kind === 'group' ? here : `${here}${child.key}`,
+      ),
+    );
+  }
+  return found;
+};
+
+export const isConcrete = (pattern: string): boolean =>
+  !pattern.includes(':') && !pattern.includes('*');
+
+const trimSlash = (path: string): string => {
+  let end = path.length;
+  while (end > 1 && path.charAt(end - 1) === '/') end -= 1;
+  return path.slice(0, end);
+};
+
+const SENTINEL = '__k8ordo-not-found__';
+
+/**
+ * Every catch-all the table declares. A static host answers every URL it does
+ * not have from **one** file, so a table with a nested `not-found.tsx` cannot
+ * be represented: whichever one the build picked, the other would never be
+ * served. The build says so rather than choosing.
+ */
+export const catchAllPatterns = (dir: RouteDir): string[] =>
+  patternsOf(dir).filter((pattern) => pattern.endsWith('/*'));
+
+/**
+ * A pathname the table can only answer with its catch-all, so the build can
+ * render `not-found.tsx` without waiting for a visitor to find it.
+ *
+ * Built from the catch-all's own prefix — its literal segments kept, its
+ * parameters filled with a segment no literal uses — and then taken one
+ * segment deeper than the longest concrete pattern. Keeping the literals is
+ * what reaches a `not-found.tsx` that sits under a named directory; going
+ * deeper is what stops any real page from answering first, since parameters
+ * consume exactly one segment each. Returns null when there is no catch-all;
+ * which one is never in question, because the build refuses a table with more
+ * than one.
+ */
+export const catchAllPath = (dir: RouteDir): string | null => {
+  const [pattern] = catchAllPatterns(dir);
+  if (pattern === undefined) return null;
+  const prefix = pattern
+    .slice(0, -'/*'.length)
+    .split('/')
+    .filter(Boolean)
+    .map((segment) => (segment.startsWith(':') ? SENTINEL : segment));
+  const depth = Math.max(
+    prefix.length + 1,
+    ...patternsOf(dir)
+      .filter((each) => !each.endsWith('/*'))
+      .map((each) => each.split('/').filter(Boolean).length + 1),
+  );
+  const filler = Array.from({ length: depth - prefix.length }, () => SENTINEL);
+  return `/${[...prefix, ...filler].join('/')}`;
+};
+
+export type PathPlan = {
+  /** Concrete pathnames to render, in table order. */
+  readonly paths: readonly string[];
+  /** Patterns that need values nobody supplied. */
+  readonly unresolved: readonly string[];
+  /** Supplied pathnames no pattern wanted, and any that are not pathnames. */
+  readonly unusable: readonly string[];
+};
+
+/**
+ * Static rendering cannot invent parameter values, and quietly shipping a
+ * site missing half its pages is worse than refusing to build one. Every
+ * parameterised pattern must be covered by a supplied path.
+ *
+ * The other direction counts too: a supplied path nothing matched is a typo
+ * that would cost exactly the page it was meant to add, and a supplied value
+ * that still contains a parameter (`/ja/blog/:slug` — what expanding only one
+ * of two parameters leaves behind) would be written to disk as a directory
+ * literally named `:slug`. URLPattern accepts both, so this has to say no.
+ */
+export const planPaths = (
+  tree: RouteDir,
+  supplied: readonly string[],
+): PathPlan => {
+  const patterns = patternsOf(tree);
+  const paths = patterns.filter((pattern) => isConcrete(pattern));
+  const unresolved: string[] = [];
+  const unusable = supplied.filter((path) => !isConcrete(path));
+  // 末尾スラッシュは同じ pathname。ルーターがそう扱う以上、ビルドも揃える。
+  const usable = supplied
+    .filter((path) => isConcrete(path))
+    .map((path) => trimSlash(path));
+  // 表がそのまま持っているパスを渡してくるのは冗長なだけで、誤りではない。
+  const used = new Set<string>(paths);
+
+  for (const pattern of patterns) {
+    if (isConcrete(pattern) || pattern.endsWith('/*')) continue;
+    const matcher = new URLPattern({ pathname: pattern });
+    const covered = usable.filter((path) => matcher.test({ pathname: path }));
+    if (covered.length === 0) {
+      unresolved.push(pattern);
+      continue;
+    }
+    paths.push(...covered);
+    for (const path of covered) used.add(path);
+  }
+  unusable.push(...usable.filter((path) => !used.has(path)));
+
+  return { paths: [...new Set(paths)], unresolved, unusable };
+};

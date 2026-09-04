@@ -62,6 +62,7 @@ export const en = {
     'Switch writing-mode with the `writing-v` utility and every component follows along on a vertical page. Preview the Japanese docs in vertical mode.',
   'common.language': 'Language',
   'footer.docs': 'Documentation',
+  'footer.packages': 'Packages',
   'footer.resources': 'Resources',
   'form.description':
     'One zod schema produces the HTML constraint attributes, the messages, and the server-side validation. The DOM holds the values, so the form works with JavaScript disabled or not yet loaded.',
@@ -118,6 +119,69 @@ export const en = {
   'state.docsTitle': 'Documentation',
   'state.docsDescription':
     'The guide and reference ship inside the npm package. An AI coding assistant reads the exact installed version out of `node_modules/@k8ordo/state/docs/`.',
+  'router.description':
+    "The URL's pathname axis, owned. The route table is the application's pathname schema, and from it come the types, the matching, the links and the navigation. Search params and history-entry state belong to @k8ordo/state — the division is the URL's own \"?\".",
+  'router.featuresTitle': 'Features',
+  'router.featureTable': 'The table is the schema',
+  'router.featureTableDescription':
+    'Leaves, branches, `[param]`, wildcards and groups that structure without appearing in the URL, all in one table. Matching is in declaration order, first match wins — no specificity ranking to reason backwards from.',
+  'router.featureTypes': 'Types come from the pattern',
+  'router.featureTypesDescription':
+    'Params are inferred from the pattern literal, and once `Register` is declared a pattern the table does not have fails to compile. No code generation.',
+  'router.featureNavigation': 'finished means on screen',
+  'router.featureNavigationDescription':
+    'The intercept handler resolves after React commits the new tree. When only the search moved, the route tree is left alone and neither scroll nor focus is disturbed.',
+  'router.featureNoLink': 'No Link component',
+  'router.featureNoLinkDescription':
+    'Under the Navigation API a plain `<a>` is already a client navigation. Wrapping it would add a second way to write the same thing; `href` is what makes it typed.',
+  'router.exampleTitle': 'The table, and a link',
+  'router.exampleDescription':
+    'The table lives in one place. Pages never import it — a typed link needs only the pattern string.',
+  'router.docsTitle': 'Documentation',
+  'router.docsDescription':
+    'The guide ships inside the npm package. An AI coding assistant reads the exact installed version out of `node_modules/@k8ordo/router/docs/`.',
+  'static.description':
+    'Builds an application into files. Every route is rendered ahead of time, and what ships is a directory a static host can serve — no server at run time.',
+  'static.featuresTitle': 'Features',
+  'static.featureRoutes': 'routes/ is the URL space',
+  'static.featureRoutesDescription':
+    'The directory tree is the pathname space: page/layout/not-found, `[param]`, `(group)`, and `_`-prefixed privates. Anything outside the grammar fails the build.',
+  'static.featureGenerated': 'The wiring is not yours to write',
+  'static.featureGeneratedDescription':
+    'The route table and the typed-path wiring into router and state are generated — as ordinary source using the public API, readable in a diff.',
+  'static.featureBoundary': 'Boundaries are checked',
+  'static.featureBoundaryDescription':
+    "Execution is declared with React's own `'use client'`. The build fails the moment a `server-only` module reaches the client, so secrets cannot cross however many imports sit in between.",
+  'static.featureFiles': 'The mode is the dependency',
+  'static.featureFilesDescription':
+    'Installing this package is what makes the application static: Server Actions and request-time data are not rules to remember but APIs that do not exist. Parameterised routes must be enumerated, or the build stops.',
+  'static.exampleTitle': 'Directories are the URL',
+  'static.exampleDescription':
+    'The routes/ tree is the pathname space; the table and the type wiring are generated from it.',
+  'static.docsTitle': 'Documentation',
+  'static.docsDescription':
+    'The guide ships inside the npm package. An AI coding assistant reads the exact installed version out of `node_modules/@k8ordo/static/docs/`.',
+  'server.description':
+    'Runs an application. Every request is answered by rendering, so route parameters need no list of values, an unknown URL is a real 404, and a form can post to a Server Action.',
+  'server.featuresTitle': 'Features',
+  'server.featureRequest': 'Values arrive with the request',
+  'server.featureRequestDescription':
+    "Parameter values arrive with the request, so nothing has to be enumerated ahead of time. An unknown URL gets your not-found page under a genuine 404 rather than the host's error page.",
+  'server.featureRoutes': 'routes/ is the URL space',
+  'server.featureRoutesDescription':
+    'The directory tree is the pathname space: page/layout/not-found, `[param]`, `(group)`, and `_`-prefixed privates. Anything outside the grammar fails the build.',
+  'server.featureActions': 'Forms have somewhere to arrive',
+  'server.featureActionsDescription':
+    'Server Actions have a destination. Paired with @k8ordo/form, the validation and the messages come from the same single schema.',
+  'server.featureSameHandler': 'The same handler as static',
+  'server.featureSameHandlerDescription':
+    'The function that turns a request into a page is identical; only when it is called differs. If a page renders differently under the two modes, something has leaked.',
+  'server.exampleTitle': 'A Server Action',
+  'server.exampleDescription':
+    'A function marked `use server` is callable from the client, and runs on the server. The same form still works with no JavaScript at all.',
+  'server.docsTitle': 'Documentation',
+  'server.docsDescription':
+    'The guide ships inside the npm package. An AI coding assistant reads the exact installed version out of `node_modules/@k8ordo/server/docs/`.',
   'footer.tagline':
     'React libraries that use Baseline features without holding back.',
   'footer.typesetting': 'Typeset in Noto Sans JP & M PLUS 2',

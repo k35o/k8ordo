@@ -89,7 +89,10 @@ import { UseWritingModePage } from './pages/hooks/use-writing-mode-page';
 import { I18n } from './pages/i18n';
 import { NotFound } from './pages/not-found';
 import { RootRedirect } from './pages/root-redirect';
+import { RouterPage } from './pages/router';
+import { ServerPage } from './pages/server';
 import { State } from './pages/state';
+import { StaticPage } from './pages/static';
 import { Theming } from './pages/theming';
 import { Ui } from './pages/ui';
 import { Router } from './router';
@@ -118,6 +121,18 @@ const routes: RouteDefinition[] = [
       route({
         path: '/state',
         component: <State />,
+      }),
+      route({
+        path: '/router',
+        component: <RouterPage />,
+      }),
+      route({
+        path: '/static',
+        component: <StaticPage />,
+      }),
+      route({
+        path: '/server',
+        component: <ServerPage />,
       }),
       route({
         path: '/ui/get-started',

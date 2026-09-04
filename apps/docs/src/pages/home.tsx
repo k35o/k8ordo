@@ -28,6 +28,21 @@ const PACKAGES: Package[] = [
     path: '/state',
     description: 'home.memberStateDescription',
   },
+  {
+    name: '@k8ordo/router',
+    path: '/router',
+    description: 'router.description',
+  },
+  {
+    name: '@k8ordo/static',
+    path: '/static',
+    description: 'static.description',
+  },
+  {
+    name: '@k8ordo/server',
+    path: '/server',
+    description: 'server.description',
+  },
 ];
 
 type Discipline = { title: MessageKey; description: MessageKey };
