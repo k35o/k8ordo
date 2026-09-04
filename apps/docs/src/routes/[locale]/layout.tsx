@@ -212,6 +212,13 @@ export default function LocaleLayout({
     ? params.locale
     : (localeOf(pathname) ?? DEFAULT_LOCALE);
 
+  // 実ページの lang はルートレイアウトがサーバーで書く。ここで直すのは
+  // 404.html の 1 枚だけで、あれは番兵の URL で描かれているので、読んでいる
+  // 人の URL が分かるのは hydrate した後になる。
+  useEffect(() => {
+    document.documentElement.lang = locale;
+  }, [locale]);
+
   return (
     <ErrorBoundary
       fallbackRender={({ resetErrorBoundary }) => (
