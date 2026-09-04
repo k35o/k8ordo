@@ -1,8 +1,8 @@
 # @k8ordo/server
 
-Runs a k8ordo application. Pages are rendered per request, so they can depend
-on the request, answer with real HTTP status codes, and receive Server
-Actions.
+Runs a k8ordo application. Every request is answered by rendering, which is
+what makes route parameters need no list of values, an unknown URL a real 404,
+and a Server Action something a form can post to.
 
 Like every k8ordo package it assumes React 19 and Server Components, uses only
 what has reached Baseline newly available, and ships no polyfills or legacy
@@ -24,8 +24,8 @@ route instead of once per request.
 ## Getting started
 
 ```bash
-pnpm add @k8ordo/router react react-dom
-pnpm add -D @k8ordo/server vite
+pnpm add @k8ordo/router @k8ordo/server react react-dom server-only
+pnpm add -D vite
 ```
 
 ```ts
@@ -191,25 +191,35 @@ crosses.
 
 ### Server-only modules
 
-A module named `*.server.ts` may never reach the client bundle:
+A module that imports `server-only` may never reach the client:
 
 ```ts
 // src/routes/_data/catalog.server.ts
+import 'server-only';
+
 export const listProducts = () => db.query('select …');
 ```
 
-The build fails when one does — at resolution, and again on what actually made
-it into the output, because a client component's graph is assembled while
+The build fails when one does, and names the whole chain that got it there —
+including through a client component's graph, which is assembled while
 rendering rather than crawled from an entry:
 
 ```
-"../_data/catalog.server" is server-only and cannot be reached from the
-client — imported by src/routes/_parts/counter.tsx
+'server-only' cannot be imported in client build ('ssr' environment):
+ imported by src/routes/_data/catalog.server.ts
+  imported by src/routes/_parts/counter.tsx
+   imported by virtual:vite-rsc/client-references
 ```
 
-Secrets and database clients behind that suffix cannot cross however many
-imports sit in between. Third-party server-only packages can be wrapped in a
-`*.server.ts` re-export to come under the same check.
+Secrets and database clients behind that import cannot cross however many
+modules sit in between. `server-only` is the package React's own ecosystem
+uses for this; the build resolves the specifier itself, and installing it is
+what lets TypeScript resolve it too.
+
+**Name such a file `*.server.ts`.** The guarantee comes from the import; the
+name is so a reader sees it in the directory tree and at every import site,
+without opening the file. A third-party module that does not mark itself can
+be wrapped in one of these to come under the same check.
 
 ## Running the build
 
@@ -281,11 +291,11 @@ export function TalkForm() {
 }
 ```
 
-**`'use server'` and `.server` say different things**, and an actions module
-wants the first only. `'use server'` marks a function the client may _call_,
-which runs on the server; `.server` marks a module the client may never
-_reach_. An actions file named `actions.server.ts` would be claiming both, and
-the second forbids what the first exists for.
+**`'use server'` and `server-only` say different things**, and an actions
+module wants the first only. `'use server'` marks a function the client may
+_call_, which runs on the server; `server-only` marks a module the client may
+never _reach_. An actions file importing `server-only` would be claiming both,
+and the second forbids what the first exists for.
 
 Calling the action re-renders the page and sends both answers back together,
 so the screen is up to date by the time the caller has its value — one round
@@ -299,8 +309,10 @@ both worlds without knowing which one it is in.
 
 ## What running buys over static
 
-A page can read the request; an unknown URL gets a real 404 rather than
-whatever the host would have said; parameterised routes need no list of
-values; and a form can post to a Server Action. If none of that is needed,
+An unknown URL gets a real 404 from the application rather than whatever the
+host would have said; parameterised routes need no list of values, so a
+catalogue that changes does not need a rebuild; and a form can post to a
+Server Action. A page receives its `params` and nothing else of the request —
+there is no headers or cookies API yet. If none of that is needed,
 `@k8ordo/static` renders the same application into files — the same grammar,
 the same boundaries, the same handler, called once per route.

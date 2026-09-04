@@ -5,7 +5,7 @@
 > installing this package means Server Actions and request-time data do not
 > exist as APIs. `src/routes/` is the pathname space (page/layout/not-found,
 > `[param]`, `(group)`, `_private`), boundaries are React's own `'use client'`
-> with `.server` modules barred from the client bundle, and the route table
+> with `server-only` modules barred from the client bundle, and the route table
 > and type wiring are generated rather than hand-written.
 >
 > Like every k8ordo package it assumes React 19 and Server Components, uses

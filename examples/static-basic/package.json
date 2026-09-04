@@ -12,7 +12,8 @@
   "dependencies": {
     "@k8ordo/router": "workspace:^",
     "react": "catalog:",
-    "react-dom": "catalog:"
+    "react-dom": "catalog:",
+    "server-only": "0.0.1"
   },
   "devDependencies": {
     "@k8ordo/static": "workspace:^",

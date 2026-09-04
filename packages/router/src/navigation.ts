@@ -4,6 +4,33 @@ import { startTransition, useEffect, useRef, useState } from 'react';
 
 import { normalizePathname } from './paths';
 
+/**
+ * What the decision below reads. Spelled out rather than taking the event,
+ * because a `NavigateEvent` cannot be constructed in a test — its destination
+ * is not constructible — and this decision is the whole contract with the
+ * platform.
+ */
+export type NavigationFacts = Pick<
+  NavigateEvent,
+  'canIntercept' | 'hashChange' | 'downloadRequest' | 'navigationType'
+> & { readonly formData: FormData | null };
+
+/**
+ * Whether this navigation is the application's to handle at all.
+ *
+ * A reload is a request for a fresh document, and a POST submission carries a
+ * body only the server can act on: intercepting either means silently doing
+ * nothing where the platform would have done the obvious thing. A GET form
+ * has no `formData`, so the search-shaped navigations `@k8ordo/state` builds
+ * still come through here.
+ */
+export const isOurs = (event: NavigationFacts): boolean =>
+  event.canIntercept &&
+  !event.hashChange &&
+  event.downloadRequest === null &&
+  event.navigationType !== 'reload' &&
+  event.formData === null;
+
 export type NavigationHandler<T> = {
   /**
    * Whether this navigation is the application's to handle. Answered
@@ -41,13 +68,7 @@ export function useInterceptedNavigation<T>(
 
   useEffect(() => {
     const onNavigate = (event: NavigateEvent): void => {
-      if (
-        !event.canIntercept ||
-        event.hashChange ||
-        event.downloadRequest !== null
-      ) {
-        return;
-      }
+      if (!isOurs(event)) return;
       const url = new URL(event.destination.url);
       if (
         normalizePathname(url.pathname) === normalizePathname(location.pathname)

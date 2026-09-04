@@ -21,12 +21,30 @@ type Handler = (request: Request) => Promise<Response>;
 const TYPES: Readonly<Record<string, string>> = {
   '.css': 'text/css;charset=utf-8',
   '.html': 'text/html;charset=utf-8',
+  '.ico': 'image/x-icon',
+  '.jpeg': 'image/jpeg',
+  '.jpg': 'image/jpeg',
   '.js': 'text/javascript;charset=utf-8',
   '.json': 'application/json;charset=utf-8',
+  '.map': 'application/json;charset=utf-8',
+  '.png': 'image/png',
   '.rsc': 'text/x-component;charset=utf-8',
   '.svg': 'image/svg+xml',
+  '.txt': 'text/plain;charset=utf-8',
+  '.wasm': 'application/wasm',
+  '.webp': 'image/webp',
   '.woff2': 'font/woff2',
 };
+
+/**
+ * Vite writes the hash of the contents into the name of everything under
+ * `assets/`, so those files can never change under a URL — anything else
+ * might, and says so.
+ */
+const cacheFor = (pathname: string): string =>
+  pathname.startsWith('/assets/')
+    ? 'public, max-age=31536000, immutable'
+    : 'no-cache';
 
 /**
  * The incoming message as the request the handler expects. A Server Action is
@@ -94,15 +112,28 @@ export const serve = async (options: ServeOptions = {}): Promise<void> => {
           response.writeHead(200, {
             'content-type':
               TYPES[path.extname(file)] ?? 'application/octet-stream',
+            'cache-control': cacheFor(url.pathname),
           });
-          createReadStream(file).pipe(response);
+          const stream = createReadStream(file);
+          // 送信開始後に読み取りが失敗しても writeHead は打ち直せない。
+          // 中途半端な本文で繋いだままにするより、接続を切って知らせる。
+          stream.on('error', () => {
+            response.destroy();
+          });
+          stream.pipe(response);
           return;
         }
         const result = await handler(asRequest(incoming, url));
-        response.writeHead(
-          result.status,
-          Object.fromEntries(result.headers.entries()),
-        );
+        // getSetCookie は同名ヘッダを潰さない唯一の読み方。Object.fromEntries
+        // だと Set-Cookie が最後の 1 つに畳まれる。
+        const headers: Array<[string, string | string[]]> = [];
+        for (const [name, value] of result.headers.entries()) {
+          if (name === 'set-cookie') continue;
+          headers.push([name, value]);
+        }
+        const cookies = result.headers.getSetCookie();
+        if (cookies.length > 0) headers.push(['set-cookie', cookies]);
+        response.writeHead(result.status, Object.fromEntries(headers));
         if (result.body === null) {
           response.end();
           return;

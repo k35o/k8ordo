@@ -150,7 +150,7 @@ export const ja = {
     'ルート表と、router / state への型の配線は生成されます。生成物はルーターの公開 API を使ったただのソースで、diff で読めます。',
   'static.featureBoundary': '境界は検査される',
   'static.featureBoundaryDescription':
-    "実行環境は React 自身の `'use client'` で宣言します。`.server` のモジュールがクライアントのバンドルに入った時点でビルドが落ちるので、秘密は間に何段挟まっても渡りません。",
+    "実行環境は React 自身の `'use client'` で宣言します。`server-only` を import したモジュールがクライアントに届いた時点でビルドが落ちるので、秘密は間に何段挟まっても渡りません。",
   'static.featureFiles': 'モードは依存で決まる',
   'static.featureFilesDescription':
     'このパッケージを入れることが「静的である」ことです。Server Actions もリクエスト依存も、守るべき規則ではなく存在しない API になります。パラメータ付きルートは列挙必須で、欠けたままビルドは通りません。',
@@ -161,9 +161,9 @@ export const ja = {
   'static.docsDescription':
     '設計ガイドは npm パッケージに同梱されています。AIコーディングエージェントは `node_modules/@k8ordo/static/docs/` からインストールした版そのものを読みます。',
   'server.description':
-    'アプリを動かします。ページはリクエストごとに描画されるので、リクエストに依存でき、本物の HTTP ステータスを返せ、Server Actions を受け取れます。',
+    'アプリを動かします。リクエストのたびに描画するので、パラメータの値を事前に列挙する必要がなく、知らない URL には本物の 404 を返し、フォームは Server Action に届きます。',
   'server.featuresTitle': '特徴',
-  'server.featureRequest': 'リクエストに依存できる',
+  'server.featureRequest': '値はリクエストと来る',
   'server.featureRequestDescription':
     'パラメータの値はリクエストと一緒に来るので、事前に列挙する必要がありません。知らない URL には、ホスティングのエラーページではなく自分の not-found を本物の 404 で返します。',
   'server.featureRoutes': 'routes/ が URL 空間',

@@ -151,7 +151,7 @@ export const en = {
     'The route table and the typed-path wiring into router and state are generated — as ordinary source using the public API, readable in a diff.',
   'static.featureBoundary': 'Boundaries are checked',
   'static.featureBoundaryDescription':
-    "Execution is declared with React's own `'use client'`. The build fails the moment a `.server` module reaches the client bundle, so secrets cannot cross however many imports sit in between.",
+    "Execution is declared with React's own `'use client'`. The build fails the moment a `server-only` module reaches the client, so secrets cannot cross however many imports sit in between.",
   'static.featureFiles': 'The mode is the dependency',
   'static.featureFilesDescription':
     'Installing this package is what makes the application static: Server Actions and request-time data are not rules to remember but APIs that do not exist. Parameterised routes must be enumerated, or the build stops.',
@@ -162,9 +162,9 @@ export const en = {
   'static.docsDescription':
     'The guide ships inside the npm package. An AI coding assistant reads the exact installed version out of `node_modules/@k8ordo/static/docs/`.',
   'server.description':
-    'Runs an application. Pages are rendered per request, so they can depend on the request, answer with real HTTP status codes, and receive Server Actions.',
+    'Runs an application. Every request is answered by rendering, so route parameters need no list of values, an unknown URL is a real 404, and a form can post to a Server Action.',
   'server.featuresTitle': 'Features',
-  'server.featureRequest': 'The request is available',
+  'server.featureRequest': 'Values arrive with the request',
   'server.featureRequestDescription':
     "Parameter values arrive with the request, so nothing has to be enumerated ahead of time. An unknown URL gets your not-found page under a genuine 404 rather than the host's error page.",
   'server.featureRoutes': 'routes/ is the URL space',

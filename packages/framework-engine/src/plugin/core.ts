@@ -43,8 +43,6 @@ const CLIENT_DEPS = [
   '@k8ordo/router',
 ];
 
-const SERVER_ONLY = /\.server(\.[cm]?[jt]sx?)?$/u;
-
 /**
  * The machinery both modes stand on: the route grammar compiled into a
  * table, the RSC pipeline configured, and the execution boundary enforced.
@@ -60,8 +58,8 @@ export const engine = (
 
   const plugin: Plugin = {
     name: 'k8ordo:engine',
-    // Ahead of the RSC plugin's own resolver, so a server-only import is
-    // refused before anything else gets a chance to accept it.
+    // Ahead of the RSC plugin's own resolver: the virtual routes module has
+    // to resolve to the generated file before anything else claims it.
     enforce: 'pre',
 
     config(_config, env) {
@@ -132,15 +130,22 @@ export const engine = (
 
     async buildStart() {
       const { problems } = await generate({ root, routesDir, outDir });
-      for (const problem of problems) {
-        this.error(`routes/${problem.path}: ${problem.message}`);
+      // this.error は投げるので、1 件ずつ渡すと最初の 1 件しか出ない。文法は
+      // 全部集めて返してくるのだから、全部見せる。
+      if (problems.length > 0) {
+        this.error(
+          `routes/ is not a valid pathname space:\n${problems
+            .map((problem) => `  routes/${problem.path}: ${problem.message}`)
+            .join('\n')}`,
+        );
       }
     },
 
     configureServer(server) {
       server.watcher.add(routesDir);
       const regenerate = (file: string): void => {
-        if (!file.startsWith(routesDir)) return;
+        // `routes` と `routes-x` を取り違えないよう、区切りまで含めて見る
+        if (!file.startsWith(`${routesDir}${path.sep}`)) return;
         void (async () => {
           const { problems } = await generate({ root, routesDir, outDir });
           for (const problem of problems) {
@@ -158,43 +163,14 @@ export const engine = (
       });
     },
 
-    resolveId(source, importer) {
+    resolveId(source) {
       if (source === VIRTUAL_ROUTES) {
         // Resolves to the real generated file rather than an in-memory
         // module, so the table is something a person can open, TypeScript can
         // check, and HMR can invalidate like any other source.
         return path.join(outDir, 'routes.gen.ts');
       }
-      if (
-        this.environment.name === 'client' &&
-        importer !== undefined &&
-        SERVER_ONLY.test(source.split('?')[0] as string)
-      ) {
-        this.error(
-          `"${source}" is server-only and cannot be reached from the client — imported by ${path.relative(root, importer)}`,
-        );
-      }
       return null;
-    },
-
-    generateBundle(_options, bundle) {
-      if (this.environment.name !== 'client') return;
-      const shorten = (file: string): string => path.relative(root, file);
-      // The authoritative check. Resolution can be intercepted, and a client
-      // component's graph is assembled by the RSC plugin rather than crawled
-      // from the client entry — so the promise is kept where nothing is left
-      // to interpret: the modules that actually made it into the bundle.
-      for (const chunk of Object.values(bundle)) {
-        if (chunk.type !== 'chunk') continue;
-        for (const id of chunk.moduleIds) {
-          if (!SERVER_ONLY.test(id.split('?')[0] as string)) continue;
-          const importers = this.getModuleInfo(id)?.importers ?? [];
-          const via = importers.map((file) => shorten(file)).join(', ');
-          this.error(
-            `${shorten(id)} is server-only but reached the client bundle${via === '' ? '' : ` — imported by ${via}`}`,
-          );
-        }
-      }
     },
   };
 

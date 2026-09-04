@@ -14,9 +14,12 @@ checked rather than remembered.
 
 ## The mode is the dependency
 
-Installing this package is what makes an application static. Server Actions and
-request-time data are not rules to remember here: they are APIs that do not
-exist, because the package that provides them is not installed. Choosing the
+Installing this package is what makes an application static. Server Actions
+and request-time data are not rules to remember here: they are APIs that do
+not exist, because the package that provides them is not installed. The one
+seam is `vite dev`, which is a running server and will happily accept an
+action POST that the built files then cannot — so a form that works in dev and
+not in the output is the shape of that mistake. Choosing the
 other mode means installing `@k8ordo/server` instead, and nothing else about
 the application changes — the same route grammar, the same boundaries, the same
 request handler, called once per route instead of once per request.
@@ -24,7 +27,7 @@ request handler, called once per route instead of once per request.
 ## Getting started
 
 ```bash
-pnpm add @k8ordo/router react react-dom
+pnpm add @k8ordo/router react react-dom server-only
 pnpm add -D @k8ordo/static vite
 ```
 
@@ -192,25 +195,35 @@ export default function HomePage() {
 
 ### Server-only modules
 
-A module named `*.server.ts` may never reach the client bundle:
+A module that imports `server-only` may never reach the client:
 
 ```ts
 // src/routes/_data/catalog.server.ts
+import 'server-only';
+
 export const listProducts = () => db.query('select …');
 ```
 
-The build fails when one does — at resolution, and again on what actually made
-it into the output, because a client component's graph is assembled while
+The build fails when one does, and names the whole chain that got it there —
+including through a client component's graph, which is assembled while
 rendering rather than crawled from an entry:
 
 ```
-"../_data/catalog.server" is server-only and cannot be reached from the
-client — imported by src/routes/_parts/counter.tsx
+'server-only' cannot be imported in client build ('ssr' environment):
+ imported by src/routes/_data/catalog.server.ts
+  imported by src/routes/_parts/counter.tsx
+   imported by virtual:vite-rsc/client-references
 ```
 
-Secrets and database clients behind that suffix cannot cross however many
-imports sit in between. Third-party server-only packages can be wrapped in a
-`*.server.ts` re-export to come under the same check.
+Secrets and database clients behind that import cannot cross however many
+modules sit in between. `server-only` is the package React's own ecosystem
+uses for this; the build resolves the specifier itself, and installing it is
+what lets TypeScript resolve it too.
+
+**Name such a file `*.server.ts`.** The guarantee comes from the import; the
+name is so a reader sees it in the directory tree and at every import site,
+without opening the file. A third-party module that does not mark itself can
+be wrapped in one of these to come under the same check.
 
 ## Routes with parameters
 
@@ -264,15 +277,25 @@ dist/
   rsc/  ssr/              the machinery that produced the above
 ```
 
-Serve `dist/client/` with anything. Pages arrive as HTML, interactivity
-hydrates, and a link to another page fetches that page's `index.rsc` instead
-of reloading the document — so navigation stays client-side even though the
-site is a pile of files. The payload lives at a path rather than behind a
-header or a query because static hosting varies on neither.
+Serve `dist/client/` with anything. A page arrives as HTML with the payload
+it was rendered from written into it, so hydration reads what the server read
+rather than asking for the page again. From there, a link to another page
+fetches that page's `index.rsc` instead of reloading the document — navigation
+stays client-side even though the site is a pile of files. The payload lives
+at a path rather than behind a header or a query because static hosting varies
+on neither.
+
+A URL the site does not have is nobody's to render in the browser: the answer
+is not a payload, so the navigation becomes an ordinary document load and the
+host answers it — with `404.html` and a real 404. That is also what happens
+for the files sitting beside the site, so a link to `/robots.txt` fetches the
+file rather than disappearing into the router.
 
 `not-found.tsx` becomes `404.html`, the file most static hosts serve for an
 unknown URL. Declaring a not-found page in this mode therefore means
-something, even though nothing is running to route the request.
+something, even though nothing is running to route the request. Only the root
+one can be represented: a host has one blanket 404, so a table with a nested
+`not-found.tsx` fails the build rather than silently picking one.
 
 ## Alongside the rest of k8ordo
 

@@ -72,3 +72,37 @@ describe('the generated table, given to the router', () => {
     });
   });
 });
+
+describe('literal siblings of a parameter', () => {
+  // ディレクトリはファイル名順で届き、`[` は英小文字より前に来る。素直に
+  // 並べると /:slug が /about を隠して、宣言したページに到達できなくなる。
+  const routes = tableFor([
+    'page.tsx',
+    'about/page.tsx',
+    '[slug]/page.tsx',
+    'blog/[id]/page.tsx',
+    'blog/latest/page.tsx',
+  ]);
+
+  it('reach their own page, not the parameter', () => {
+    expect(routes.match('/about')).toMatchObject({
+      pattern: '/about',
+      stack: [stub('about/page.tsx')],
+    });
+    expect(routes.match('/blog/latest')).toMatchObject({
+      pattern: '/blog/latest',
+      stack: [stub('blog/latest/page.tsx')],
+    });
+  });
+
+  it('leave the parameter everything else', () => {
+    expect(routes.match('/anything')).toMatchObject({
+      pattern: '/:slug',
+      params: { slug: 'anything' },
+    });
+    expect(routes.match('/blog/42')).toMatchObject({
+      pattern: '/blog/:id',
+      params: { id: '42' },
+    });
+  });
+});
