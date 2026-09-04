@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "test": "vp test",
     "typecheck": "tsc --noEmit",
     "check": "vp check",
     "check:write": "vp check --fix",
@@ -12,12 +13,12 @@
   },
   "dependencies": {
     "@k8ordo/router": "workspace:^",
+    "@k8ordo/server": "workspace:^",
     "react": "catalog:",
     "react-dom": "catalog:",
     "server-only": "0.0.1"
   },
   "devDependencies": {
-    "@k8ordo/server": "workspace:^",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "typescript": "7.0.2",

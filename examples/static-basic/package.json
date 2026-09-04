@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "test": "vp test",
     "typecheck": "tsc --noEmit",
     "check": "vp check",
     "check:write": "vp check --fix"
