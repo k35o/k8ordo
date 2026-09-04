@@ -24,7 +24,7 @@ request handler, called once per route instead of once per request.
 ## Getting started
 
 ```bash
-pnpm add @k8ordo/router react react-dom
+pnpm add @k8ordo/router react react-dom server-only
 pnpm add -D @k8ordo/static vite
 ```
 
@@ -187,25 +187,35 @@ export default function HomePage() {
 
 ### Server-only modules
 
-A module named `*.server.ts` may never reach the client bundle:
+A module that imports `server-only` may never reach the client:
 
 ```ts
 // src/routes/_data/catalog.server.ts
+import 'server-only';
+
 export const listProducts = () => db.query('select …');
 ```
 
-The build fails when one does — at resolution, and again on what actually made
-it into the output, because a client component's graph is assembled while
+The build fails when one does, and names the whole chain that got it there —
+including through a client component's graph, which is assembled while
 rendering rather than crawled from an entry:
 
 ```
-"../_data/catalog.server" is server-only and cannot be reached from the
-client — imported by src/routes/_parts/counter.tsx
+'server-only' cannot be imported in client build ('ssr' environment):
+ imported by src/routes/_data/catalog.server.ts
+  imported by src/routes/_parts/counter.tsx
+   imported by virtual:vite-rsc/client-references
 ```
 
-Secrets and database clients behind that suffix cannot cross however many
-imports sit in between. Third-party server-only packages can be wrapped in a
-`*.server.ts` re-export to come under the same check.
+Secrets and database clients behind that import cannot cross however many
+modules sit in between. `server-only` is the package React's own ecosystem
+uses for this; the build resolves the specifier itself, and installing it is
+what lets TypeScript resolve it too.
+
+**Name such a file `*.server.ts`.** The guarantee comes from the import; the
+name is so a reader sees it in the directory tree and at every import site,
+without opening the file. A third-party module that does not mark itself can
+be wrapped in one of these to come under the same check.
 
 ## Routes with parameters
 

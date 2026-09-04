@@ -5,7 +5,7 @@
 > The mode is the dependency — the alternative is `@k8ordo/static`, which
 > renders every route at build time. `src/routes/` is the pathname space
 > (page/layout/not-found, `[param]`, `(group)`, `_private`), boundaries are
-> React's own `'use client'` with `.server` modules barred from the client
+> React's own `'use client'` with `server-only` modules barred from the client
 > bundle, and the route table and type wiring are generated rather than
 > hand-written.
 >

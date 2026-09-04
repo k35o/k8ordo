@@ -150,7 +150,7 @@ export const ja = {
     'ルート表と、router / state への型の配線は生成されます。生成物はルーターの公開 API を使ったただのソースで、diff で読めます。',
   'static.featureBoundary': '境界は検査される',
   'static.featureBoundaryDescription':
-    "実行環境は React 自身の `'use client'` で宣言します。`.server` のモジュールがクライアントのバンドルに入った時点でビルドが落ちるので、秘密は間に何段挟まっても渡りません。",
+    "実行環境は React 自身の `'use client'` で宣言します。`server-only` を import したモジュールがクライアントに届いた時点でビルドが落ちるので、秘密は間に何段挟まっても渡りません。",
   'static.featureFiles': 'モードは依存で決まる',
   'static.featureFilesDescription':
     'このパッケージを入れることが「静的である」ことです。Server Actions もリクエスト依存も、守るべき規則ではなく存在しない API になります。パラメータ付きルートは列挙必須で、欠けたままビルドは通りません。',

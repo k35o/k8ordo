@@ -151,7 +151,7 @@ export const en = {
     'The route table and the typed-path wiring into router and state are generated — as ordinary source using the public API, readable in a diff.',
   'static.featureBoundary': 'Boundaries are checked',
   'static.featureBoundaryDescription':
-    "Execution is declared with React's own `'use client'`. The build fails the moment a `.server` module reaches the client bundle, so secrets cannot cross however many imports sit in between.",
+    "Execution is declared with React's own `'use client'`. The build fails the moment a `server-only` module reaches the client, so secrets cannot cross however many imports sit in between.",
   'static.featureFiles': 'The mode is the dependency',
   'static.featureFilesDescription':
     'Installing this package is what makes the application static: Server Actions and request-time data are not rules to remember but APIs that do not exist. Parameterised routes must be enumerated, or the build stops.',
