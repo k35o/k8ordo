@@ -12,7 +12,10 @@ export const patternsOf = (dir: RouteDir, prefix = ''): string[] => {
   if (dir.notFound !== null) found.push(`${here}/*`);
   for (const child of dir.children) {
     found.push(
-      ...patternsOf(child, child.kind === 'group' ? here : `${here}${child.key}`),
+      ...patternsOf(
+        child,
+        child.kind === 'group' ? here : `${here}${child.key}`,
+      ),
     );
   }
   return found;
@@ -20,6 +23,29 @@ export const patternsOf = (dir: RouteDir, prefix = ''): string[] => {
 
 export const isConcrete = (pattern: string): boolean =>
   !pattern.includes(':') && !pattern.includes('*');
+
+const SENTINEL = '__k8ordo-not-found__';
+
+/**
+ * A pathname the table can only answer with its catch-all, so the build can
+ * render `not-found.tsx` without waiting for a visitor to find it.
+ *
+ * One segment deeper than the longest concrete pattern, spelled with a
+ * segment no literal uses: a pattern of a different length cannot match, and
+ * parameters consume exactly one segment each, so nothing but a wildcard is
+ * left. Returns null when the table declares no catch-all at all.
+ */
+export const catchAllPath = (dir: RouteDir): string | null => {
+  const patterns = patternsOf(dir);
+  if (!patterns.some((pattern) => pattern.endsWith('/*'))) return null;
+  const depth = Math.max(
+    1,
+    ...patterns
+      .filter((pattern) => !pattern.endsWith('/*'))
+      .map((pattern) => pattern.split('/').filter(Boolean).length),
+  );
+  return `/${Array.from({ length: depth + 1 }, () => SENTINEL).join('/')}`;
+};
 
 export type PathPlan = {
   /** Concrete pathnames to render, in table order. */
@@ -44,9 +70,7 @@ export const planPaths = (
   for (const pattern of patterns) {
     if (isConcrete(pattern) || pattern.endsWith('/*')) continue;
     const matcher = new URLPattern({ pathname: pattern });
-    const covered = supplied.filter((path) =>
-      matcher.test({ pathname: path }),
-    );
+    const covered = supplied.filter((path) => matcher.test({ pathname: path }));
     if (covered.length === 0) {
       unresolved.push(pattern);
       continue;

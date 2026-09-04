@@ -482,6 +482,9 @@ importers:
       '@k8ordo/router':
         specifier: workspace:^
         version: link:../router
+      '@types/react':
+        specifier: 'catalog:'
+        version: 19.2.18
       react:
         specifier: 'catalog:'
         version: 19.2.8

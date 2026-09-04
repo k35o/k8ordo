@@ -49,6 +49,7 @@
   },
   "devDependencies": {
     "@k8ordo/router": "workspace:^",
+    "@types/react": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
     "typescript": "7.0.2",

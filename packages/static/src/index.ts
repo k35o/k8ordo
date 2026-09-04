@@ -11,7 +11,7 @@ import {
 import type { EngineOptions } from '@k8ordo/framework-engine';
 import type { Plugin, PluginOption } from 'vite';
 
-import { planPaths } from './paths';
+import { catchAllPath, planPaths } from './paths';
 
 export type StaticOptions = EngineOptions & {
   /**
@@ -40,7 +40,7 @@ export const k8ordoStatic = (options: StaticOptions = {}): PluginOption[] => {
     name: 'k8ordo:static',
 
     configResolved(config) {
-      root = config.root;
+      ({ root } = config);
       routesDir = path.resolve(root, options.routesDir ?? 'src/routes');
     },
 
@@ -65,13 +65,13 @@ export const k8ordoStatic = (options: StaticOptions = {}): PluginOption[] => {
         // outDir はすでに絶対パスのことがあるので resolve で受ける
         const clientDir = path.resolve(root, clientOut);
         const entry = path.resolve(root, rscOut, 'index.js');
-        const module_ = (await import(pathToFileURL(entry).href)) as {
+        const entryModule = (await import(pathToFileURL(entry).href)) as {
           default: Handler;
         };
-        const handler = module_.default;
+        const handler = entryModule.default;
 
-        for (const pathname of plan.paths) {
-          await Promise.all([
+        await Promise.all(
+          plan.paths.flatMap((pathname) => [
             write(
               path.join(clientDir, pathname, 'index.html'),
               handler,
@@ -82,10 +82,21 @@ export const k8ordoStatic = (options: StaticOptions = {}): PluginOption[] => {
               handler,
               `${ORIGIN}${payloadPathFor(pathname)}`,
             ),
-          ]);
+          ]),
+        );
+        // A static host answers an unknown URL from a file, so the
+        // application's own not-found has to be one — otherwise declaring it
+        // would mean nothing in this mode.
+        const unmatched = catchAllPath(tree);
+        if (unmatched !== null) {
+          await write(
+            path.join(clientDir, '404.html'),
+            handler,
+            `${ORIGIN}${unmatched}`,
+          );
         }
         builder.config.logger.info(
-          `k8ordo: wrote ${String(plan.paths.length)} routes`,
+          `k8ordo: wrote ${String(plan.paths.length)} routes${unmatched === null ? '' : ' and 404.html'}`,
         );
       },
     },
@@ -105,4 +116,4 @@ const write = async (
 };
 
 export type { PathPlan } from './paths';
-export { patternsOf, planPaths } from './paths';
+export { catchAllPath, patternsOf, planPaths } from './paths';

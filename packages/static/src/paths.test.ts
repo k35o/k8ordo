@@ -1,6 +1,8 @@
-import { parseRouteTree } from '@k8ordo/framework-engine';
+import { parseRouteTree, buildTable } from '@k8ordo/framework-engine';
+import { defineRoutes } from '@k8ordo/router';
+import type { FC } from 'react';
 
-import { patternsOf, planPaths } from './paths';
+import { catchAllPath, patternsOf, planPaths } from './paths';
 
 const treeOf = (files: readonly string[]) => {
   const { tree, problems } = parseRouteTree(files);
@@ -46,3 +48,28 @@ describe('planPaths', () => {
     expect(plan.unresolved).toStrictEqual([]);
   });
 });
+
+describe('catchAllPath', () => {
+  it('is nothing when the table declares no catch-all', () => {
+    expect(catchAllPath(treeOf(['page.tsx']))).toBeNull();
+  });
+
+  it('reaches the catch-all even past parameters at every depth', () => {
+    // 実際の表に通して、本当に catch-all しか答えられないことを確かめる
+    const files = [
+      'page.tsx',
+      'not-found.tsx',
+      '[a]/page.tsx',
+      '[a]/[b]/page.tsx',
+      'products/[id]/page.tsx',
+    ];
+    const tree = treeOf(files);
+    const path = catchAllPath(tree);
+    expect(path).not.toBeNull();
+
+    const routes = defineRoutes(buildTable(tree, blank));
+    expect(routes.match(path as string)?.pattern).toBe('/*');
+  });
+});
+
+const blank = (): FC => () => null;
