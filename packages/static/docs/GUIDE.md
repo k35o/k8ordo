@@ -43,6 +43,10 @@ export default defineConfig({ plugins: [k8ordoStatic()] });
 }
 ```
 
+`.k8ordo` starts with a dot, and a bare directory entry in `include` silently
+skips it — the glob is what makes the generated types apply. Without it the
+build still works and `href` simply stops being checked against the table.
+
 ```tsx
 // src/routes/layout.tsx — no directive, so this is a Server Component
 import type { ReactNode } from 'react';

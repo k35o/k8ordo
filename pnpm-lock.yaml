@@ -80,12 +80,9 @@ importers:
 
   apps/docs:
     dependencies:
-      '@funstack/router':
-        specifier: 1.2.0
-        version: 1.2.0(react@19.2.8)
-      '@funstack/static':
-        specifier: 1.2.0
-        version: 1.2.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(vite@8.2.1(@types/node@24.13.3)(esbuild@0.28.2)(jiti@2.7.0))
+      '@k8ordo/router':
+        specifier: workspace:^
+        version: link:../../packages/router
       '@k8ordo/state':
         specifier: workspace:^
         version: link:../../packages/state
@@ -108,15 +105,15 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
+      '@k8ordo/static':
+        specifier: workspace:^
+        version: link:../../packages/static
       '@types/react':
         specifier: 'catalog:'
         version: 19.2.18
       '@types/react-dom':
         specifier: 'catalog:'
         version: 19.2.4(@types/react@19.2.18)
-      '@vitejs/plugin-react':
-        specifier: 6.0.5
-        version: 6.0.5(vite@8.2.1(@types/node@24.13.3)(esbuild@0.28.2)(jiti@2.7.0))
       react:
         specifier: 'catalog:'
         version: 19.2.8
@@ -1141,24 +1138,6 @@ packages:
     engines: {node: '>=18'}
     cpu: [x64]
     os: [win32]
-
-  '@funstack/router@1.2.0':
-    resolution: {integrity: sha512-Y2OLyxcqx+TaijRa/MyA2ue7bk5svIPhjx/yvKHeQ1gB6O7gdI+D5gnuWn4W6zLuGmAXeopWd9Qco1AdnPWwQQ==}
-    hasBin: true
-    peerDependencies:
-      react: ^19.2.0
-
-  '@funstack/skill-installer@1.1.0':
-    resolution: {integrity: sha512-reB4V8FE8foqDULiqOhrlMq5ZqrdKpqlM8ulU/gtklf9OW71O4w5z5EZWjzygmIthmTriDo745EcRGm5+DQR1w==}
-    hasBin: true
-
-  '@funstack/static@1.2.0':
-    resolution: {integrity: sha512-oB5BrlwyQt+4GkZriPt7MzaF7Nt1a+A6ttvA+Kgpc2/zkWzr/0l58J0LtMzyap1gor42lSOSrJy5MUIYpw1OWA==}
-    hasBin: true
-    peerDependencies:
-      react: ^19.2.3
-      react-dom: ^19.2.3
-      vite: ^7.0.0 || ^8.0.0
 
   '@iconify/types@2.0.0':
     resolution: {integrity: sha512-+wluvCrRhXrhyOmRDJ3q8mux9JkKy5SJ/v8ol2tu4FVjyYvtEzkc/3pK15ET6RKg4b4w4BmTk1+gsCUhf21Ykg==}
@@ -4638,9 +4617,6 @@ packages:
   roughjs@4.6.6:
     resolution: {integrity: sha512-ZUz/69+SYpFN/g/lUlo2FXcIjRkSu3nDarreVdGGndHEBJ6cXPdKguS8JGxwj5HA5xIbVKSmLgr5b3AWxtRfvQ==}
 
-  rsc-html-stream@0.0.7:
-    resolution: {integrity: sha512-v9+fuY7usTgvXdNl8JmfXCvSsQbq2YMd60kOeeMIqCJFZ69fViuIxztHei7v5mlMMa2h3SqS+v44Gu9i9xANZA==}
-
   run-applescript@7.1.0:
     resolution: {integrity: sha512-DPe5pVFaAsinSaV6QjQ6gdiedWDcRCbUuiQfQa2wmWV7+xC9bGulGI8+TdRmoFkAPaBXk8CrAbnlY2ISniJ47Q==}
     engines: {node: '>=18'}
@@ -4708,11 +4684,6 @@ packages:
 
   sqids@0.3.0:
     resolution: {integrity: sha512-lOQK1ucVg+W6n3FhRwwSeUijxe93b51Bfz5PMRMihVf1iVkl82ePQG7V5vwrhzB11v0NtsR25PSZRGiSomJaJw==}
-
-  srvx@0.11.22:
-    resolution: {integrity: sha512-LqZxxBDMKuMAZzFzJnDCkFOrs9MZQZr0LvHiO/SuSZVdQaXD7xQ5UWTUxheJrQPve1qk9MG2B/yttUvJxw8egQ==}
-    engines: {node: '>=20.16.0'}
-    hasBin: true
 
   srvx@0.12.5:
     resolution: {integrity: sha512-IuvtDNQg5EIwv3c6dleyau7u8hCyGQ7D6+V/QM799Aud07z0wCUcurKLTRfyG33C8oUY+UWcVBFkfHMcbtmRLA==}
@@ -5632,26 +5603,6 @@ snapshots:
 
   '@esbuild/win32-x64@0.28.2':
     optional: true
-
-  '@funstack/router@1.2.0(react@19.2.8)':
-    dependencies:
-      '@funstack/skill-installer': 1.1.0
-      react: 19.2.8
-
-  '@funstack/skill-installer@1.1.0': {}
-
-  '@funstack/static@1.2.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(vite@8.2.1(@types/node@24.13.3)(esbuild@0.28.2)(jiti@2.7.0))':
-    dependencies:
-      '@funstack/skill-installer': 1.1.0
-      '@vitejs/plugin-rsc': 0.5.34(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(vite@8.2.1(@types/node@24.13.3)(esbuild@0.28.2)(jiti@2.7.0))
-      react: 19.2.8
-      react-dom: 19.2.8(react@19.2.8)
-      react-error-boundary: 6.1.2(react@19.2.8)
-      rsc-html-stream: 0.0.7
-      srvx: 0.11.22
-      vite: 8.2.1(@types/node@24.13.3)(esbuild@0.28.2)(jiti@2.7.0)
-    transitivePeerDependencies:
-      - react-server-dom-webpack
 
   '@iconify/types@2.0.0': {}
 
@@ -9098,8 +9049,6 @@ snapshots:
       points-on-curve: 0.2.0
       points-on-path: 0.2.1
 
-  rsc-html-stream@0.0.7: {}
-
   run-applescript@7.1.0: {}
 
   rw@1.3.3: {}
@@ -9212,8 +9161,6 @@ snapshots:
   space-separated-tokens@2.0.2: {}
 
   sqids@0.3.0: {}
-
-  srvx@0.11.22: {}
 
   srvx@0.12.5: {}
 

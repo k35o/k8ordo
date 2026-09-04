@@ -1,6 +1,6 @@
 'use client';
 
-import { useLocation } from '@funstack/router';
+import { usePathname } from '@k8ordo/router';
 import { DropdownMenu } from '@k8ordo/ui';
 
 import type { Locale } from '../i18n';
@@ -13,9 +13,9 @@ const LOCALE_LABELS: Record<Locale, string> = {
 
 export function LanguageSwitcher() {
   const locale = useLocale();
-  const location = useLocation();
+  const pathname = usePathname();
 
-  const { path } = deLocalizeHref(location.pathname);
+  const { path } = deLocalizeHref(pathname);
 
   return (
     <DropdownMenu.Root>

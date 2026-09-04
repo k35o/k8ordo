@@ -1,6 +1,6 @@
 'use client';
 
-import { useLocation } from '@funstack/router';
+import { usePathname } from '@k8ordo/router';
 import { DropdownMenu, NavigationMenuIcon } from '@k8ordo/ui';
 
 import type { MessageKey } from '../i18n';
@@ -53,8 +53,8 @@ const itemClass = (isActive: boolean) =>
 
 export function Navigation() {
   const { t, locale } = useTranslation();
-  const location = useLocation();
-  const current = packageOf(location.pathname);
+  const pathname = usePathname();
+  const current = packageOf(pathname);
 
   /**
    * DropdownMenu.Content は子に index を注入するため Fragment で包めず、平坦な
@@ -92,7 +92,7 @@ export function Navigation() {
             return (
               <li key={pkg.path}>
                 <a
-                  aria-current={location.pathname === href ? 'page' : undefined}
+                  aria-current={pathname === href ? 'page' : undefined}
                   className={itemClass(isHere)}
                   href={href}
                 >
@@ -131,7 +131,7 @@ export function Navigation() {
           <ul className="mx-auto flex max-w-6xl items-center gap-1 px-4 py-2 md:px-8">
             {current.sections.map((item) => {
               const href = localizeHref(item.path, locale);
-              const isActive = location.pathname === href;
+              const isActive = pathname === href;
               return (
                 <li key={item.path}>
                   <a

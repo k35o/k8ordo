@@ -92,7 +92,7 @@ export const en = {
     'Declare state by where it lives. Four places — URL search params, the history entry, localStorage, memory — each typed by one zod schema, from which the server read, link building and the subscription are all derived.',
   'state.demoTitle': 'Running on this very page',
   'state.demoDescription':
-    'The controls below rewrite the real URL: `definePageState` updates flow through this site’s router (@funstack/router, which intercepts the Navigation API). The theme toggle in the header stores through `defineLocalState` — its current value is the theme row.',
+    'The controls below rewrite the real URL: `definePageState` updates flow through this site’s router (@k8ordo/router, which intercepts the Navigation API). The theme toggle in the header stores through `defineLocalState` — its current value is the theme row.',
   'state.demoUrlEmpty': 'no query (all defaults)',
   'state.demoThemeSystem': 'following the system',
   'state.demoHint':

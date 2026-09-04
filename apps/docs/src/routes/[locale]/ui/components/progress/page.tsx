@@ -1,0 +1,98 @@
+import { Anchor, Heading, Progress, Separator } from '@k8ordo/ui';
+
+import { CodeBlock } from '../../../../../components/code-block';
+import { ComponentPreview } from '../../../../../components/component-preview';
+import { PropsTable } from '../../../../../components/props-table';
+import { T } from '../../../../../components/t';
+import { STORYBOOK_URL } from '../../../../../constants';
+import { inheritsOf, propsOf } from '../../../../../data/component-props';
+
+export default function ProgressPage() {
+  return (
+    <div className="mx-auto flex max-w-4xl flex-col gap-8 px-6 py-12 md:px-8">
+      <div className="flex flex-col gap-4">
+        <Heading level="h1">Progress</Heading>
+        <p className="text-fg-mute text-lg">
+          <T k="components.progress.description" />
+        </p>
+        <div>
+          <Anchor
+            href={`${STORYBOOK_URL}/?path=/docs/components-progress--docs`}
+            openInNewTab
+          >
+            <T k="components.common.storybookLink" />
+          </Anchor>
+        </div>
+      </div>
+      <Separator color="mute" />
+
+      <section className="flex flex-col gap-4">
+        <Heading level="h2">
+          <T k="components.common.importTitle" />
+        </Heading>
+        <CodeBlock code="import { Progress } from '@k8ordo/ui';" lang="ts" />
+      </section>
+      <Separator color="mute" />
+
+      <section className="flex flex-col gap-8">
+        <div className="flex flex-col gap-4">
+          <Heading level="h2">
+            <T k="components.common.usageTitle" />
+          </Heading>
+          <ComponentPreview code="<Progress max={100} value={60} />">
+            <div className="w-full">
+              <Progress max={100} value={60} />
+            </div>
+          </ComponentPreview>
+        </div>
+
+        <div className="flex flex-col gap-4">
+          <Heading level="h3">
+            <T k="components.progress.differentValuesTitle" />
+          </Heading>
+          <ComponentPreview
+            code={`<Progress max={100} value={20} />
+<Progress max={100} value={50} />
+<Progress max={100} value={80} />
+<Progress max={100} value={100} />`}
+          >
+            <div className="flex w-full flex-col gap-4">
+              <Progress max={100} value={20} />
+              <Progress max={100} value={50} />
+              <Progress max={100} value={80} />
+              <Progress max={100} value={100} />
+            </div>
+          </ComponentPreview>
+        </div>
+
+        <div className="flex flex-col gap-4">
+          <Heading level="h3">
+            <T k="components.progress.withLabelTitle" />
+          </Heading>
+          <ComponentPreview
+            code={`<Progress
+  label="Upload progress"
+  max={100}
+  value={75}
+/>`}
+          >
+            <div className="w-full">
+              <Progress label="Upload progress" max={100} value={75} />
+            </div>
+          </ComponentPreview>
+        </div>
+      </section>
+      <Separator color="mute" />
+
+      <section className="flex flex-col gap-4">
+        <Heading level="h2">
+          <T k="components.common.propsTitle" />
+        </Heading>
+        <PropsTable
+          inherits={inheritsOf('Progress')}
+          items={propsOf('Progress')}
+        />
+      </section>
+    </div>
+  );
+}
