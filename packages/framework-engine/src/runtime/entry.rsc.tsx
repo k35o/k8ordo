@@ -48,12 +48,40 @@ const runAction = async (
   const formData = await request.formData();
   // React's own type says the decoded action returns nothing; it returns
   // whatever the action returned, and `useActionState` needs that value.
-  const action = (await decodeAction(formData)) as () => Promise<unknown>;
+  // It returns null for a form that carries no action at all — a POST from
+  // somewhere else entirely, which is a request for the page, not a call.
+  const action = (await decodeAction(formData)) as
+    | (() => Promise<unknown>)
+    | null;
+  if (action === null) return {};
   const returnValue: unknown = await action();
   return {
     returnValue,
     formState: await decodeFormState(returnValue, formData),
   };
+};
+
+/**
+ * A Server Action is a function the application exported, reachable by name
+ * from anywhere that can make a POST — including another origin's form, which
+ * the browser sends with the visitor's cookies attached. Nothing in an action
+ * identifies its caller, so the request has to: a cross-site POST does not
+ * carry an `Origin` matching where the page is served from.
+ *
+ * `Origin` is set by the browser on every POST and cannot be forged by page
+ * script, which is what makes it the check rather than a header of our own.
+ */
+const sameOrigin = (request: Request): boolean => {
+  const origin = request.headers.get('origin');
+  if (origin === null) return false;
+  const host =
+    request.headers.get('x-forwarded-host') ?? request.headers.get('host');
+  if (host === null) return false;
+  try {
+    return new URL(origin).host === host;
+  } catch {
+    return false;
+  }
 };
 
 /**
@@ -67,6 +95,9 @@ export default async function handler(request: Request): Promise<Response> {
   const pathname = wantsPayload ? pagePathFor(url.pathname) : url.pathname;
   const isAction = request.method === 'POST';
   const addressed = request.headers.get(ACTION_ID_HEADER) !== null;
+  if (isAction && !sameOrigin(request)) {
+    return new Response('cross-origin action', { status: 403 });
+  }
 
   const temporaryReferences = createTemporaryReferenceSet();
   const action: ActionResult = isAction
