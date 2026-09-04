@@ -105,6 +105,15 @@ export function defineRoutes<R extends RoutesRecord>(record: R): Routes<R> {
       if (!key.startsWith('/')) {
         throw new TypeError(`route pattern "${key}" must start with "/"`);
       }
+      if (key.includes('(') && !isGroupKey(key)) {
+        // URLPattern reads `(…)` as a regex group, so a key like
+        // `/(admin)/new` would quietly match `/admin/new` and capture a
+        // nameless param. The grammar has exactly one meaning for
+        // parentheses, and this is not it.
+        throw new TypeError(
+          `route group "${key}" must be "/(name)" and nothing else — a regular expression is not part of the grammar`,
+        );
+      }
       if (isGroupKey(key) && !isBranch(node)) {
         // A group contributes no segment, so a leaf under one would silently
         // become a second declaration of the parent's own index.

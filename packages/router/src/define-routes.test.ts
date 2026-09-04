@@ -213,7 +213,18 @@ describe('defineRoutes', () => {
   });
 
   it('rejects a pattern URLPattern cannot parse, at definition time', () => {
-    expect(() => defineRoutes({ '/(': Home })).toThrow(TypeError);
+    expect(() => defineRoutes({ '/a{b': Home })).toThrow(TypeError);
+  });
+
+  it('rejects parentheses that are not exactly a group', () => {
+    // URLPattern はこれを正規表現グループとして受け取り、/admin/new に
+    // 一致してしまう。グループの意味は 1 つだけ
+    expect(() => defineRoutes({ '/(admin)/new': Home })).toThrow(
+      /route group/u,
+    );
+    expect(() =>
+      defineRoutes({ '/x': { children: { '/(a)b': Home } } }),
+    ).toThrow(/route group/u);
   });
 
   it('takes a lazy component as a leaf, not as a branch', () => {
