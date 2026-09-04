@@ -64,13 +64,29 @@ export function AppRouter({ tree }: { tree: ReactNode }): ReactNode {
   }, []);
 
   useInterceptedNavigation<ReactNode>({
+    // The browser holds no route table, so this cannot answer "is it mine?"
+    // the way the client router does. It claims every same-origin URL and
+    // finds out from the answer — which is why `load` has somewhere to put
+    // the ones that turn out not to be.
     claim: (url) => url.origin === location.origin,
     load: async (url, signal) => {
       const response = await fetch(payloadPathFor(url.pathname), { signal });
-      if (response.body === null) {
-        throw new Error(`no payload for ${url.pathname}`);
+      const type = response.headers.get('content-type') ?? '';
+      if (!response.ok || !type.startsWith('text/x-component')) {
+        // Not a page of this application: a file the host serves, or a URL
+        // nothing answers. Interception already committed the URL, so
+        // reloading asks the server for exactly what the browser would have
+        // asked for had this never been claimed — including its real status.
+        location.reload();
+        // The document is being replaced; resolving would render into a page
+        // that is on its way out.
+        return new Promise<ReactNode>(() => {
+          /* never settles */
+        });
       }
-      const payload = await createFromReadableStream<Payload>(response.body);
+      const payload = await createFromReadableStream<Payload>(
+        response.body as ReadableStream<Uint8Array>,
+      );
       return payload.tree;
     },
     apply: setCurrent,

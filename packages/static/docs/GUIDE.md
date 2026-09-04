@@ -256,15 +256,25 @@ dist/
   rsc/  ssr/              the machinery that produced the above
 ```
 
-Serve `dist/client/` with anything. Pages arrive as HTML, interactivity
-hydrates, and a link to another page fetches that page's `index.rsc` instead
-of reloading the document — so navigation stays client-side even though the
-site is a pile of files. The payload lives at a path rather than behind a
-header or a query because static hosting varies on neither.
+Serve `dist/client/` with anything. A page arrives as HTML with the payload
+it was rendered from written into it, so hydration reads what the server read
+rather than asking for the page again. From there, a link to another page
+fetches that page's `index.rsc` instead of reloading the document — navigation
+stays client-side even though the site is a pile of files. The payload lives
+at a path rather than behind a header or a query because static hosting varies
+on neither.
+
+A URL the site does not have is nobody's to render in the browser: the answer
+is not a payload, so the navigation becomes an ordinary document load and the
+host answers it — with `404.html` and a real 404. That is also what happens
+for the files sitting beside the site, so a link to `/robots.txt` fetches the
+file rather than disappearing into the router.
 
 `not-found.tsx` becomes `404.html`, the file most static hosts serve for an
 unknown URL. Declaring a not-found page in this mode therefore means
-something, even though nothing is running to route the request.
+something, even though nothing is running to route the request. Only the root
+one can be represented: a host has one blanket 404, so a table with a nested
+`not-found.tsx` fails the build rather than silently picking one.
 
 ## Alongside the rest of k8ordo
 

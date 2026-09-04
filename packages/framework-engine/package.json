@@ -43,7 +43,8 @@
     "check:write": "vp check --fix"
   },
   "dependencies": {
-    "@vitejs/plugin-rsc": "^0.5.34"
+    "@vitejs/plugin-rsc": "^0.5.34",
+    "rsc-html-stream": "0.0.8"
   },
   "devDependencies": {
     "@k8ordo/router": "workspace:^",
