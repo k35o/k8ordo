@@ -81,18 +81,20 @@ export const k8ordoStatic = (options: StaticOptions = {}): PluginOption[] => {
         };
         const handler = entryModule.default;
 
-        await Promise.all(
+        await inParallel(
           plan.paths.flatMap((pathname) => [
-            write(
-              path.join(clientDir, pathname, 'index.html'),
-              handler,
-              `${ORIGIN}${pathname}`,
-            ),
-            write(
-              path.join(clientDir, pathname, 'index.rsc'),
-              handler,
-              `${ORIGIN}${payloadPathFor(pathname)}`,
-            ),
+            () =>
+              write(
+                path.join(clientDir, pathname, 'index.html'),
+                handler,
+                `${ORIGIN}${pathname}`,
+              ),
+            () =>
+              write(
+                path.join(clientDir, pathname, 'index.rsc'),
+                handler,
+                `${ORIGIN}${payloadPathFor(pathname)}`,
+              ),
           ]),
         );
         // A static host answers an unknown URL from a file, so the
@@ -114,6 +116,31 @@ export const k8ordoStatic = (options: StaticOptions = {}): PluginOption[] => {
   };
 
   return [...engine(options, { via: '@k8ordo/static' }), prerender];
+};
+
+/**
+ * A render is a whole page: components, their data, and whatever the app's
+ * own highlighting or markdown does. Starting every one of them at once ties
+ * peak memory to the size of the site, which is the number that grows. A
+ * fixed width keeps the machine's cost flat while still overlapping the
+ * waiting.
+ */
+const WIDTH = 8;
+
+const inParallel = async (
+  tasks: ReadonlyArray<() => Promise<void>>,
+): Promise<void> => {
+  let next = 0;
+  const worker = async (): Promise<void> => {
+    for (let task = tasks[next++]; task !== undefined; task = tasks[next++]) {
+      // A worker is sequential on purpose — that is what bounds the width.
+      // oxlint-disable-next-line eslint/no-await-in-loop
+      await task();
+    }
+  };
+  await Promise.all(
+    Array.from({ length: Math.min(WIDTH, tasks.length) }, worker),
+  );
 };
 
 const write = async (
