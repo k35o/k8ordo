@@ -175,4 +175,20 @@ it('holds the pathname still when only the search moves', async () => {
   await expect
     .element(screen.getByTestId('pathname'))
     .toHaveTextContent('/products');
+
+it('shows the navigation that won, not the one it overtook', async () => {
+  const screen = await render(<Router routes={routes} />);
+  await navigateTo('/', { history: 'replace' }).finished;
+
+  // 追い越された側は abort される。その木が後から画面に出てはいけない。
+  const overtaken = navigateTo('/products');
+  const winner = navigateTo('/products/:id', { id: 'shoes' });
+  await expect(overtaken.finished).rejects.toThrow(/abort/iu);
+  await winner.finished;
+
+  expect(location.pathname).toBe('/products/shoes');
+  await expect
+    .element(screen.getByTestId('detail'))
+    .toHaveTextContent('/products/:id:shoes');
+  expect(document.querySelector('[data-testid="list"]')).toBeNull();
 });

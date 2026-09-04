@@ -78,6 +78,9 @@ export function AppRouter({
     claim: (url) => url.origin === location.origin,
     load: async (url, signal) => {
       const response = await fetch(payloadPathFor(url.pathname), { signal });
+      // A second navigation may have taken over while this was in flight;
+      // reloading then would fetch the URL that already lost.
+      if (signal.aborted) throw signal.reason as Error;
       if (!isPayload(response)) {
         // Not a page of this application: a file the host serves, or a URL
         // nothing answers. Interception already committed the URL, so

@@ -254,6 +254,13 @@ const response = await handler(new Request('https://example.com/products/1'));
 Anything that speaks `(request: Request) => Promise<Response>` can run it —
 which is also exactly what `@k8ordo/static` calls at build time.
 
+**Build the `Request` with the URL the visitor asked for.** A Server Action is
+accepted only when its `Origin` matches that URL's host, which is what stops
+another site's form from calling your functions with your visitor's cookies.
+Behind a proxy that means passing the public host through; `serve` reads it
+from the request's own `Host` header, so a proxy that rewrites it has to say
+where it really came from.
+
 ## Alongside the rest of k8ordo
 
 `@k8ordo/state` owns the search params, and this framework generates its

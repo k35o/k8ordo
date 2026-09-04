@@ -68,17 +68,20 @@ const runAction = async (
  * identifies its caller, so the request has to: a cross-site POST does not
  * carry an `Origin` matching where the page is served from.
  *
- * `Origin` is set by the browser on every POST and cannot be forged by page
- * script, which is what makes it the check rather than a header of our own.
+ * The comparison is against the URL this handler was asked for, not against a
+ * header, so there is one answer to "where am I" and no second one to keep in
+ * step. A deployment behind a proxy is then a matter of handing the handler
+ * the public URL — which whatever adapter builds the `Request` was already
+ * deciding.
+ *
+ * `Origin` is set by the browser on every POST and page script cannot forge
+ * it, which is what makes it the check.
  */
-const sameOrigin = (request: Request): boolean => {
+const sameOrigin = (request: Request, url: URL): boolean => {
   const origin = request.headers.get('origin');
   if (origin === null) return false;
-  const host =
-    request.headers.get('x-forwarded-host') ?? request.headers.get('host');
-  if (host === null) return false;
   try {
-    return new URL(origin).host === host;
+    return new URL(origin).host === url.host;
   } catch {
     return false;
   }
@@ -95,7 +98,7 @@ export default async function handler(request: Request): Promise<Response> {
   const pathname = wantsPayload ? pagePathFor(url.pathname) : url.pathname;
   const isAction = request.method === 'POST';
   const addressed = request.headers.get(ACTION_ID_HEADER) !== null;
-  if (isAction && !sameOrigin(request)) {
+  if (isAction && !sameOrigin(request, url)) {
     return new Response('cross-origin action', { status: 403 });
   }
 
