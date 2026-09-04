@@ -102,10 +102,17 @@ describe('catchAllPath', () => {
     expect(catchAllPath(treeOf(['page.tsx']))).toBeNull();
   });
 
-  it('is nothing when only a nested directory declares one', () => {
-    // 入れ子の not-found は 404.html にならない。エンジン内蔵の素の 404 が
-    // アプリのものとして書き出される事故を防ぐ。
-    expect(catchAllPath(treeOf(['page.tsx', 'docs/not-found.tsx']))).toBeNull();
+  it('reaches the only catch-all wherever it sits', () => {
+    // ロケール区間の下にしか not-found を置かない構成でも、その 1 枚が 404.html。
+    const tree = treeOf([
+      'page.tsx',
+      '[locale]/page.tsx',
+      '[locale]/not-found.tsx',
+    ]);
+    const path = catchAllPath(tree);
+    expect(path).not.toBeNull();
+    const routes = defineRoutes(buildTable(tree, blank));
+    expect(routes.match(path as string)?.pattern).toBe('/:locale/*');
   });
 
   it('reaches the catch-all even past parameters at every depth', () => {

@@ -18,6 +18,7 @@ import { componentCategories } from '../../data/components-nav';
 import { helperCategories } from '../../data/helpers-nav';
 import { hookCategories } from '../../data/hooks-nav';
 import type { NavCategory } from '../../data/nav-types';
+import type { Locale } from '../../i18n';
 import {
   DEFAULT_LOCALE,
   isLocale,
@@ -27,6 +28,12 @@ import {
 } from '../../i18n';
 import { ThemeProvider } from '../../theme/context';
 import { WritingModeProvider } from '../../theme/writing-mode-context';
+
+/** URL の先頭区間。404 の 1 枚がどのロケールで読まれているかはここにしか無い。 */
+const localeOf = (pathname: string): Locale | null => {
+  const first = pathname.split('/')[1] ?? '';
+  return isLocale(first) ? first : null;
+};
 
 type SideNavConfig = {
   categories: NavCategory[];
@@ -198,8 +205,12 @@ export default function LocaleLayout({
 }) {
   const pathname = usePathname();
   // 静的化された 404 は「ロケールを持たない 1 枚」で、そこに渡る :locale は
-  // どのルートにも一致しなかった区間そのもの。既定のロケールで描く。
-  const locale = isLocale(params.locale) ? params.locale : DEFAULT_LOCALE;
+  // ビルドが使った番兵の区間。読んでいる人のロケールは URL にしか無いので、
+  // そこから取り直す。usePathname はサーバーの値で hydrate してからクライアント
+  // の値に切り替わるので、mismatch にはならず 1 度描き直されるだけ。
+  const locale = isLocale(params.locale)
+    ? params.locale
+    : (localeOf(pathname) ?? DEFAULT_LOCALE);
 
   useEffect(() => {
     document.documentElement.lang = locale;

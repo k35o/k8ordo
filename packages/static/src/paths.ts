@@ -41,11 +41,12 @@ export const catchAllPatterns = (dir: RouteDir): string[] =>
  *
  * One segment deeper than the longest concrete pattern, spelled with a
  * segment no literal uses: a pattern of a different length cannot match, and
- * parameters consume exactly one segment each, so nothing but the root
- * wildcard is left. Returns null when the root declares no catch-all.
+ * parameters consume exactly one segment each, so nothing but a wildcard is
+ * left. Which wildcard is not in question — the build refuses a table with
+ * more than one. Returns null when there is no catch-all at all.
  */
 export const catchAllPath = (dir: RouteDir): string | null => {
-  if (dir.notFound === null) return null;
+  if (catchAllPatterns(dir).length === 0) return null;
   const depth = Math.max(
     1,
     ...patternsOf(dir)
