@@ -133,6 +133,9 @@ export const en = {
   'router.featureNoLink': 'No Link component',
   'router.featureNoLinkDescription':
     'Under the Navigation API a plain `<a>` is already a client navigation. Wrapping it would add a second way to write the same thing; `href` is what makes it typed.',
+  'router.exampleTitle': 'The table, and a link',
+  'router.exampleDescription':
+    'The table lives in one place. Pages never import it — a typed link needs only the pattern string.',
   'router.docsTitle': 'Documentation',
   'router.docsDescription':
     'The guide ships inside the npm package. An AI coding assistant reads the exact installed version out of `node_modules/@k8ordo/router/docs/`.',
@@ -151,6 +154,9 @@ export const en = {
   'static.featureFiles': 'The mode is the dependency',
   'static.featureFilesDescription':
     'Installing this package is what makes the application static: Server Actions and request-time data are not rules to remember but APIs that do not exist. Parameterised routes must be enumerated, or the build stops.',
+  'static.exampleTitle': 'Directories are the URL',
+  'static.exampleDescription':
+    'The routes/ tree is the pathname space; the table and the type wiring are generated from it.',
   'static.docsTitle': 'Documentation',
   'static.docsDescription':
     'The guide ships inside the npm package. An AI coding assistant reads the exact installed version out of `node_modules/@k8ordo/static/docs/`.',
@@ -169,6 +175,9 @@ export const en = {
   'server.featureSameHandler': 'The same handler as static',
   'server.featureSameHandlerDescription':
     'The function that turns a request into a page is identical; only when it is called differs. If a page renders differently under the two modes, something has leaked.',
+  'server.exampleTitle': 'A Server Action',
+  'server.exampleDescription':
+    'A function marked `use server` is callable from the client, and runs on the server. The same form still works with no JavaScript at all.',
   'server.docsTitle': 'Documentation',
   'server.docsDescription':
     'The guide ships inside the npm package. An AI coding assistant reads the exact installed version out of `node_modules/@k8ordo/server/docs/`.',

@@ -132,6 +132,9 @@ export const ja = {
   'router.featureNoLink': 'Link を作らない',
   'router.featureNoLinkDescription':
     'Navigation API の下では素の `<a>` がすでにクライアント遷移です。包んでも 2 つ目の書き方が増えるだけなので、型は `href` が守ります。',
+  'router.exampleTitle': '表とリンク',
+  'router.exampleDescription':
+    '表は 1 か所。ページは表を import せず、パターン文字列だけで型付きのリンクを書きます。',
   'router.docsTitle': 'ドキュメント',
   'router.docsDescription':
     '設計ガイドは npm パッケージに同梱されています。AIコーディングエージェントは `node_modules/@k8ordo/router/docs/` からインストールした版そのものを読みます。',
@@ -150,6 +153,9 @@ export const ja = {
   'static.featureFiles': 'モードは依存で決まる',
   'static.featureFilesDescription':
     'このパッケージを入れることが「静的である」ことです。Server Actions もリクエスト依存も、守るべき規則ではなく存在しない API になります。パラメータ付きルートは列挙必須で、欠けたままビルドは通りません。',
+  'static.exampleTitle': 'ディレクトリが URL',
+  'static.exampleDescription':
+    'routes/ の木がそのまま pathname 空間になり、表と型の配線は生成されます。',
   'static.docsTitle': 'ドキュメント',
   'static.docsDescription':
     '設計ガイドは npm パッケージに同梱されています。AIコーディングエージェントは `node_modules/@k8ordo/static/docs/` からインストールした版そのものを読みます。',
@@ -168,6 +174,9 @@ export const ja = {
   'server.featureSameHandler': 'static と同じハンドラ',
   'server.featureSameHandlerDescription':
     'リクエストをページに変える関数は static と同一で、違いは呼ぶ時期だけです。両モードで描画が食い違うなら、それは何かが漏れています。',
+  'server.exampleTitle': 'Server Action',
+  'server.exampleDescription':
+    '`use server` を付けた関数はクライアントから呼べて、実行はサーバーで起きます。JavaScript が無くても、同じフォームがそのまま動きます。',
   'server.docsTitle': 'ドキュメント',
   'server.docsDescription':
     '設計ガイドは npm パッケージに同梱されています。AIコーディングエージェントは `node_modules/@k8ordo/server/docs/` からインストールした版そのものを読みます。',

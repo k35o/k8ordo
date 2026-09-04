@@ -1,7 +1,6 @@
-'use client';
-
 import { AtomIcon, FormIcon, LocationIcon, SendIcon } from '@k8ordo/ui';
 
+import { PackageExample } from '../components/package-example';
 import { PackageLanding } from '../components/package-landing';
 import type { PackageFeature } from '../components/package-landing';
 
@@ -28,6 +27,24 @@ const FEATURES: PackageFeature[] = [
   },
 ];
 
+const EXAMPLE = `// src/routes/_parts/actions.ts
+'use server';
+
+export async function createTalk(_previous: FormState, formData: FormData) {
+  const parsed = parseForm(talkSchema, formData);
+  if (!parsed.success) return parsed.state;
+  await insertTalk(parsed.data);
+  return null;
+}
+
+// src/routes/_parts/talk-form.tsx
+'use client';
+
+export function TalkForm() {
+  const [state, formAction] = useActionState(createTalk, {});
+  return <form action={formAction}>…</form>;
+}`;
+
 export function ServerPage() {
   return (
     <PackageLanding
@@ -38,6 +55,12 @@ export function ServerPage() {
       features={FEATURES}
       featuresTitle="server.featuresTitle"
       name="@k8ordo/server"
-    />
+    >
+      <PackageExample
+        code={EXAMPLE}
+        description="server.exampleDescription"
+        title="server.exampleTitle"
+      />
+    </PackageLanding>
   );
 }

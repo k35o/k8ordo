@@ -28,9 +28,10 @@ pnpm check         # check:write to auto-fix
   page renders differently under the two modes, something has leaked.
 - **An uncovered parameterised route fails the build.** Never warn, never
   skip: a site missing half its pages is worse than a build that stopped.
-- **Prerender runs after every environment is built** (`buildApp`, `order:
-  'post'`), and writes into the client build's own output directory — which
-  Vite may hand over as an absolute path, so resolve it rather than joining.
+- **Prerender runs after every environment is built** — `buildApp` with
+  `order: 'post'` — and writes into the client build's own output directory,
+  which Vite may hand over as an absolute path, so resolve it rather than
+  joining.
 
 ## Layout
 

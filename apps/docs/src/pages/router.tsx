@@ -1,7 +1,6 @@
-'use client';
-
 import { HistoryIcon, LinkIcon, ListIcon, ShieldCheckIcon } from '@k8ordo/ui';
 
+import { PackageExample } from '../components/package-example';
 import { PackageLanding } from '../components/package-landing';
 import type { PackageFeature } from '../components/package-landing';
 
@@ -28,6 +27,21 @@ const FEATURES: PackageFeature[] = [
   },
 ];
 
+const EXAMPLE = `// routes.ts
+export const routes = defineRoutes({
+  '/': Home,
+  '/products': {
+    children: { '/': ProductList, '/:id': ProductPage },
+  },
+  '/(docs)': { layout: DocsLayout, children: { '/guide': Guide } },
+  '/*': NotFound,
+});
+
+// どのページからでも。表は import しない
+<a href={href('/products/:id', { id })}>…</a>;
+
+const { id } = useParams('/products/:id');`;
+
 export function RouterPage() {
   return (
     <PackageLanding
@@ -38,6 +52,12 @@ export function RouterPage() {
       features={FEATURES}
       featuresTitle="router.featuresTitle"
       name="@k8ordo/router"
-    />
+    >
+      <PackageExample
+        code={EXAMPLE}
+        description="router.exampleDescription"
+        title="router.exampleTitle"
+      />
+    </PackageLanding>
   );
 }

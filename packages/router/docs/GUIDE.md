@@ -18,11 +18,40 @@ changes and not otherwise, which is a job for keyed subscriptions, not for a
 router. The division is the URL itself — pathname here, everything after it
 there.
 
+It also does not fetch. There is no loader, no route-level data API, and no
+cache. Data belongs to the component that needs it — `use()` and `<Suspense>`
+in a client app, the server in a framework one — and a router that owned
+fetching would be a second, competing answer to a question React already
+answers.
+
+## The shape of it
+
+```
+routes.ts        defineRoutes({ … })      the pathname schema, one place
+   ↓ mounted once
+<Router routes>  match → stack → render   layouts wrap through <Outlet />
+   ↑ never imported by pages
+pages            href / navigateTo / useParams
+                 take the pattern string; Register supplies the check
+```
+
+The table's value is held by `<Router>` and nothing else. Everything a page
+needs — building a link, going somewhere, reading its own params — works from
+the pattern **string**, so the module that imports the pages is never imported
+back by them.
+
 ## The route table
 
 ```ts
-// routes.ts — imported by whatever mounts the router, and by nothing else
+// routes.ts
 import { defineRoutes } from '@k8ordo/router';
+
+import { DocsLayout } from './docs-layout';
+import { Guide } from './guide';
+import { Home } from './home';
+import { NotFound } from './not-found';
+import { ProductList } from './product-list';
+import { ProductPage } from './product-page';
 
 export const routes = defineRoutes({
   '/': Home,
@@ -42,27 +71,53 @@ export const routes = defineRoutes({
 
 - A **leaf** is the component to render. A **branch** is `{ layout?, children }`,
   and a child key of `'/'` is the branch's own index page.
-- **`/:name`** captures a segment. **`/*`** matches whatever nothing before it
-  did.
+- **`/:name`** captures a segment, decoded. **`/*`** matches whatever nothing
+  before it did.
 - **`/(name)`** is a route group: it structures the table — its own layout, its
   own subtree — without contributing a URL segment. It exists because `'/'` can
   only appear once in an object, so two sections at the same depth could not
   otherwise have different layouts.
-- **Matching is in declaration order, first match wins.** Precedence is what you
-  wrote, not a specificity ranking to reason backwards from. Put `/*` last.
-- A pattern declared twice, a group with no children, or a pattern URLPattern
-  cannot parse fails at module load, not at first navigation.
+- **A trailing slash is the same pathname.** `/products/` matches `/products`.
+
+### Order is the rule
+
+Matching walks the table top to bottom and takes the first pattern that fits.
+Precedence is what you wrote — there is no specificity ranking to reason
+backwards from, which means a table can be read like the code it is.
+
+```ts
+defineRoutes({ '/:slug': Article, '/about': About }); // /about → Article
+defineRoutes({ '/about': About, '/:slug': Article }); // /about → About
+```
+
+Put `/*` last, for the same reason.
+
+### What fails at definition time
+
+A table is checked when the module loads, not when someone first navigates:
+
+| written                                                 | error                                      |
+| ------------------------------------------------------- | ------------------------------------------ |
+| the same full pattern twice, wherever the copies nest   | `route pattern "/x" is declared twice`     |
+| a group with no children (it would redeclare the index) | `route group "/(oops)" must have children` |
+| a key not starting with `/`                             | `route pattern "x" must start with "/"`    |
+| a pattern URLPattern cannot parse                       | URLPattern's own `TypeError`               |
 
 ## Mounting it
 
 ```tsx
 import { Outlet, Router } from '@k8ordo/router';
 
-<Router routes={routes} />;
+import { routes } from './routes';
+
+export function App() {
+  return <Router routes={routes} />;
+}
 
 // a layout renders what it wraps through Outlet
-const DocsLayout = () => (
+export const DocsLayout = () => (
   <section>
+    <nav>…</nav>
     <Outlet />
   </section>
 );
@@ -70,36 +125,63 @@ const DocsLayout = () => (
 
 Every same-origin navigation the table claims is handled in the browser; the
 rest is left alone, so a real document load — and a real 404 — stays the
-server's answer.
+server's answer. A pathname the table does not match renders nothing rather
+than guessing.
+
+A leaf can be `React.lazy(...)`, which the table stores as any other component;
+put a `<Suspense>` in the layout above it so there is somewhere to fall back
+to while the chunk arrives.
 
 ## Links and navigation
 
 ```tsx
-import { href, navigateTo, useParams } from '@k8ordo/router';
+import { href, navigateTo, useParams, useRoute } from '@k8ordo/router';
 
 <a href={href('/products/:id', { id })}>…</a>;
+<a href={href('/products')}>…</a>; // no params, no second argument
 
-navigateTo('/products/:id', { id }); // pushes
-navigateTo('/products', { history: 'replace' }); // replaces
+navigateTo('/products/:id', { id }); // pushes: the back button undoes it
+navigateTo('/products', { history: 'replace' });
 
 const { id } = useParams('/products/:id');
+const { pattern } = useRoute(); // untyped: the winning pattern and its params
 ```
 
 **There is no `<Link>`.** Under the Navigation API a plain `<a>` is already a
 client navigation — the router intercepts the event the browser was going to
 send anyway. A component wrapping it would add a second way to write the same
-thing and nothing else.
+thing and nothing else. An active link is `useRoute().pattern === '/products'`,
+not a prop.
 
-`href`, `navigateTo` and `useParams` take the pattern as a **string** and need
-no route table, which is what keeps pages from importing the module that
-imports them. Params are inferred from the pattern literal, so a missing or
-misspelled one fails to compile. `navigateTo` returns the platform's own
-`{ committed, finished }`.
+`href` refuses a wildcard: `/*` is something to match, never something to link
+to. Param values are URL-encoded on the way in and decoded on the way out.
 
-To have the patterns checked against the app's actual table, augment `Register`
-once:
+`navigateTo` returns the platform's own `{ committed, finished }`, so it
+composes with React 19's async transitions:
+
+```tsx
+const [isPending, startTransition] = useTransition();
+
+startTransition(async () => {
+  await navigateTo('/products/:id', { id }).finished;
+});
+```
+
+Its default is `push`, the opposite of `@k8ordo/state`'s `update()`, and for
+the same reason: going to a page is what the back button should undo, while
+refining what is on the page is not. **Changing pages goes through
+`navigateTo`; changing state goes through `update`.**
+
+## Checking patterns against the real table
+
+Params are inferred from the pattern literal on their own, so a missing or
+misspelled one fails to compile with no setup at all. To have the **pattern**
+checked against the app's actual table as well, augment `Register` once:
 
 ```ts
+// types/k8ordo-router.d.ts
+import type { routes } from '../src/routes';
+
 declare module '@k8ordo/router' {
   interface Register {
     routes: typeof routes;
@@ -107,9 +189,15 @@ declare module '@k8ordo/router' {
 }
 ```
 
-Without it the constraint is any `/`-prefixed string; with it, a pattern the
-table does not declare fails to compile everywhere. Augment only in an
-application — a library doing it would impose its table on every consumer.
+```ts
+href('/products/:id', { id }); // ok
+href('/prodcuts/:id', { id }); // ✗ not a pattern in the table
+href('/products/:id'); // ✗ ":id" is missing
+```
+
+Without the augmentation the constraint is any `/`-prefixed string. Augment
+only in an application — a library doing it would impose its table on every
+consumer.
 
 ## Typed paths for @k8ordo/state
 
@@ -124,6 +212,10 @@ declare module '@k8ordo/state' {
 }
 ```
 
+With that, `listState.href('/products', { q })` is checked against the same
+table this router matches against, and the two packages agree on what a path
+is without either importing the other.
+
 ## What navigation guarantees
 
 **`finished` means the page is on screen.** The intercept handler resolves in
@@ -133,10 +225,34 @@ render, not the URL write.
 
 **A state change is not a page change.** When only the search or the entry
 state moved, the pathname is unchanged: the route tree is left alone, nothing
-remounts, and scroll and focus are not disturbed.
+remounts, and scroll and focus are not disturbed. This is why a search update
+never scrolls the page back to the top.
+
+**Route changes run in a transition.** The new tree is applied inside
+`startTransition`, so React can keep the old page interactive while the new
+one prepares.
 
 **Superseded navigations abort.** A second navigation aborts the first through
-the platform's own signal, which is passed to whatever is loading.
+the platform's own signal, which is handed to whatever is loading — a lazy
+chunk, or a payload fetch under the framework.
+
+## Testing
+
+Nothing here is mocked, so a test needs a browser environment (this package's
+own suite uses Vitest's Chromium browser mode). The one thing to know: a test
+that navigates must intercept, or `navigation.navigate()` is a cross-document
+load that takes the test runner with it.
+
+```tsx
+// a test that mounts <Router> is already intercepting; one that sets up a URL
+// outside the table has to play the router itself
+const interceptEverything = (event: NavigateEvent) => {
+  if (event.canIntercept) event.intercept();
+};
+```
+
+`match` is a pure function and needs no browser: a table's shape, its params
+and its precedence can all be asserted directly.
 
 ## Under the framework
 
@@ -154,4 +270,5 @@ useInterceptedNavigation<Value>({
 });
 ```
 
-`href`, `navigateTo` and `useParams` are the same in both worlds.
+`href`, `navigateTo` and `useParams` are the same in both worlds, which is why
+a page written for one keeps working under the other.
