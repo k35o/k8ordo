@@ -18,10 +18,13 @@ export async function renderHtml(
   rscStream: ReadableStream<Uint8Array>,
 ): Promise<ReadableStream> {
   const payload = await createFromReadableStream<Payload>(rscStream);
-  return renderToReadableStream(<AppRouter tree={payload.tree} />, {
-    bootstrapModules: [getClientEntryUrl()],
-    // Present only when a form was posted without JavaScript: it is how
-    // `useActionState` finds its result in the HTML it comes back to.
-    formState: payload.formState as SsrOptions['formState'],
-  });
+  return renderToReadableStream(
+    <AppRouter pathname={payload.pathname} tree={payload.tree} />,
+    {
+      bootstrapModules: [getClientEntryUrl()],
+      // Present only when a form was posted without JavaScript: it is how
+      // `useActionState` finds its result in the HTML it comes back to.
+      formState: payload.formState as SsrOptions['formState'],
+    },
+  );
 }

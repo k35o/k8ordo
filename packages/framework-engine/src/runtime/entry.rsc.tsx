@@ -78,6 +78,7 @@ export default async function handler(request: Request): Promise<Response> {
   const status = missing ? 404 : 200;
   const payload: Payload = {
     tree: match === null ? <NotFound /> : renderMatch(match),
+    pathname,
     returnValue: action.returnValue,
     formState: action.formState,
   };

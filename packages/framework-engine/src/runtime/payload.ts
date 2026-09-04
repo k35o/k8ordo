@@ -7,6 +7,11 @@ import type { ReactNode } from 'react';
  */
 export type Payload = {
   tree: ReactNode;
+  /**
+   * Where this payload was rendered for. A client component's first render
+   * has no Navigation API to ask, so `usePathname` reads it from here.
+   */
+  pathname: string;
   /** What the action returned, when this response answers one. */
   returnValue?: unknown;
   /**

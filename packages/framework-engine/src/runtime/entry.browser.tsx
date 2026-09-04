@@ -10,4 +10,7 @@ if (response.body === null) {
   throw new Error(`no payload for ${location.pathname}`);
 }
 const payload = await createFromReadableStream<Payload>(response.body);
-hydrateRoot(document, <AppRouter tree={payload.tree} />);
+hydrateRoot(
+  document,
+  <AppRouter pathname={payload.pathname} tree={payload.tree} />,
+);

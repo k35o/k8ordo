@@ -1,6 +1,6 @@
 'use client';
 
-import { useInterceptedNavigation } from '@k8ordo/router';
+import { PathnameProvider, useInterceptedNavigation } from '@k8ordo/router';
 import {
   createFromFetch,
   createFromReadableStream,
@@ -49,7 +49,13 @@ setServerCallback(async (id: string, args: unknown[]) => {
  * A pathname the application does not have is still the server's answer: it
  * renders `not-found.tsx` and this renders whatever came back.
  */
-export function AppRouter({ tree }: { tree: ReactNode }): ReactNode {
+export function AppRouter({
+  pathname,
+  tree,
+}: {
+  pathname: string;
+  tree: ReactNode;
+}): ReactNode {
   const [current, setCurrent] = useState(tree);
 
   useEffect(() => {
@@ -76,5 +82,8 @@ export function AppRouter({ tree }: { tree: ReactNode }): ReactNode {
     apply: setCurrent,
   });
 
-  return current;
+  // The tree comes from the server, so a client component in it cannot ask a
+  // table where it is. The pathname the server rendered for is what seeds
+  // `usePathname` until the browser can answer for itself.
+  return <PathnameProvider pathname={pathname}>{current}</PathnameProvider>;
 }
