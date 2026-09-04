@@ -161,6 +161,19 @@ thing and nothing else. An active link is a comparison you write yourself —
 `useRoute().pattern === '/products'` against the table, or
 `usePathname() === href('/products')` against the URL — not a prop.
 
+**`usePathname` changes when the URL changes, not when the new page appears.**
+Interception commits the URL first and the tree arrives when it has loaded, so
+on a slow navigation a link marks itself active while the previous page is
+still on screen — the same order the browser's own address bar follows. Pair it
+with `useTransition` if the wait needs showing:
+
+```tsx
+const [isPending, startTransition] = useTransition();
+startTransition(async () => {
+  await navigateTo('/products/:id', { id }).finished;
+});
+```
+
 `usePathname` reads the platform rather than the table, which is why it is the
 one that also works under the framework, where the browser holds no table at
 all. It answers _where the URL is_; `useRoute` answers _which route won_, and
