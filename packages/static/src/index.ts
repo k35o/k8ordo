@@ -7,6 +7,7 @@ import {
   parseRouteTree,
   payloadPathFor,
   scanRoutes,
+  serverActionModules,
 } from '@k8ordo/framework-engine';
 import type { EngineOptions } from '@k8ordo/framework-engine';
 import type { Plugin, PluginOption } from 'vite';
@@ -14,6 +15,7 @@ import type { Plugin, PluginOption } from 'vite';
 import {
   catchAllPath,
   catchAllPatterns,
+  dirFor,
   patternsNeedingPaths,
   planPaths,
 } from './paths';
@@ -40,10 +42,14 @@ const ORIGIN = 'http://k8ordo.localhost';
 /**
  * Static mode: the same request handler the server mode runs per request is
  * called once per route at build time, and its answers are written to files.
- * There is no server here — and no Server Actions either, because a file
- * cannot receive one.
+ * There is no server here, and the build refuses a Server Action, because a
+ * file cannot receive one.
+ *
+ * Named for what it brings rather than for the mode, so a `vite.config.ts` is
+ * identical under either package and the mode is only ever the import — which
+ * is what "the mode is the dependency" says.
  */
-export const k8ordoStatic = (options: StaticOptions = {}): PluginOption[] => {
+export const framework = (options: StaticOptions = {}): PluginOption[] => {
   let root = '';
   let routesDir = '';
 
@@ -79,6 +85,18 @@ export const k8ordoStatic = (options: StaticOptions = {}): PluginOption[] => {
           );
         }
 
+        // A file cannot receive a POST. The RSC pipeline compiles an action
+        // in either mode, so the mode's promise only holds if the build says
+        // no — before writing an application whose form posts into nothing.
+        const actions = serverActionModules(builder.config);
+        if (actions.length > 0) {
+          throw new Error(
+            `static build cannot ship Server Actions — a file cannot receive one, and these declare 'use server':\n${actions
+              .map((file) => `  ${file}`)
+              .join('\n')}\nthis application wants @k8ordo/server`,
+          );
+        }
+
         const rscOut = builder.environments['rsc']?.config.build.outDir;
         const clientOut = builder.environments['client']?.config.build.outDir;
         if (rscOut === undefined || clientOut === undefined) {
@@ -94,20 +112,24 @@ export const k8ordoStatic = (options: StaticOptions = {}): PluginOption[] => {
         const handler = entryModule.default;
 
         await inParallel(
-          plan.paths.flatMap((pathname) => [
-            () =>
-              write(
-                path.join(clientDir, pathname, 'index.html'),
-                handler,
-                `${ORIGIN}${pathname}`,
-              ),
-            () =>
-              write(
-                path.join(clientDir, pathname, 'index.rsc'),
-                handler,
-                `${ORIGIN}${payloadPathFor(pathname)}`,
-              ),
-          ]),
+          plan.paths.flatMap((pathname) => {
+            // The URL keeps its escapes; only the file name is decoded.
+            const dir = path.join(clientDir, dirFor(pathname));
+            return [
+              () =>
+                write(
+                  path.join(dir, 'index.html'),
+                  handler,
+                  `${ORIGIN}${pathname}`,
+                ),
+              () =>
+                write(
+                  path.join(dir, 'index.rsc'),
+                  handler,
+                  `${ORIGIN}${payloadPathFor(pathname)}`,
+                ),
+            ];
+          }),
         );
         // A static host answers an unknown URL from a file, so the
         // application's own not-found has to be one — otherwise declaring it
@@ -164,12 +186,3 @@ const write = async (
   await mkdir(path.dirname(file), { recursive: true });
   await writeFile(file, Buffer.from(await response.arrayBuffer()));
 };
-
-export type { PathPlan } from './paths';
-export {
-  catchAllPath,
-  catchAllPatterns,
-  patternsNeedingPaths,
-  patternsOf,
-  planPaths,
-} from './paths';

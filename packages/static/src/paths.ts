@@ -131,3 +131,31 @@ export const planPaths = (
 
   return { paths: [...new Set(paths)], unresolved, unusable };
 };
+
+/**
+ * The directory a rendered pathname is written to. A supplied path is a URL —
+ * `href()` hands back `/products/caf%C3%A9` — so writing it verbatim would
+ * make a directory literally named with the escapes, which no host would then
+ * match. Decoding is also the moment a path that leaves the output directory
+ * has to be refused: `..` is a real URL segment and would otherwise be
+ * resolved by `path.join`.
+ */
+export const dirFor = (pathname: string): string => {
+  let decoded: string;
+  try {
+    decoded = decodeURIComponent(pathname);
+  } catch {
+    throw new Error(
+      `the "paths" option supplied a pathname with a malformed escape: ${pathname}`,
+    );
+  }
+  if (
+    decoded.includes('\0') ||
+    decoded.split('/').some((segment) => segment === '..')
+  ) {
+    throw new Error(
+      `the "paths" option supplied a pathname that leaves the output: ${pathname}`,
+    );
+  }
+  return decoded;
+};

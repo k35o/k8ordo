@@ -148,8 +148,14 @@ export const serve = async (options: ServeOptions = {}): Promise<void> => {
         });
         body.pipe(response);
       })().catch((error: unknown) => {
-        response.writeHead(500, { 'content-type': 'text/plain' });
-        response.end(String(error));
+        // 例外の中身は運用者のもので、訪問者のものではない。パスやスタックが
+        // そのまま本文に出ると、答えられなかった理由まで外に漏れる
+        console.error(
+          `k8ordo: ${incoming.method ?? 'GET'} ${incoming.url ?? '/'} failed`,
+          error,
+        );
+        response.writeHead(500, { 'content-type': 'text/plain;charset=utf-8' });
+        response.end('internal error');
       });
     },
   );

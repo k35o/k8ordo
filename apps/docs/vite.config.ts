@@ -1,4 +1,4 @@
-import { k8ordoStatic } from '@k8ordo/static';
+import { framework } from '@k8ordo/static';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite';
 
@@ -10,7 +10,7 @@ export default defineConfig({
     port: Number(process.env.PORT) || 5173,
   },
   plugins: [
-    k8ordoStatic({
+    framework({
       // ロケールは全ページに掛かる区間なので、埋まっていないパターンを
       // そのままロケールの数だけ展開する
       paths: (patterns) =>

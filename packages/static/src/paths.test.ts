@@ -5,6 +5,7 @@ import type { FC } from 'react';
 import {
   catchAllPath,
   catchAllPatterns,
+  dirFor,
   patternsNeedingPaths,
   patternsOf,
   planPaths,
@@ -163,3 +164,20 @@ describe('catchAllPath', () => {
 });
 
 const blank = (): FC => () => null;
+
+describe('dirFor', () => {
+  it('writes the file under the name the URL stands for', () => {
+    // href() は escape 済みの文字列を返す。そのまま掘ると、どのホストも
+    // 一致させられない名前のディレクトリができる
+    expect(dirFor('/products/caf%C3%A9')).toBe('/products/café');
+    expect(dirFor('/products/1')).toBe('/products/1');
+  });
+
+  it('refuses a pathname that would leave the output directory', () => {
+    expect(() => dirFor('/products/%2e%2e/%2e%2e/etc')).toThrow(/leaves/u);
+  });
+
+  it('refuses a malformed escape instead of writing it verbatim', () => {
+    expect(() => dirFor('/products/%zz')).toThrow(/malformed escape/u);
+  });
+});
