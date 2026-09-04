@@ -175,6 +175,7 @@ it('holds the pathname still when only the search moves', async () => {
   await expect
     .element(screen.getByTestId('pathname'))
     .toHaveTextContent('/products');
+});
 
 it('shows the navigation that won, not the one it overtook', async () => {
   const screen = await render(<Router routes={routes} />);
