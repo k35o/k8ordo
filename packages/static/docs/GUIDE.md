@@ -79,6 +79,12 @@ vite build   # dist/client/ is the site
 The root layout renders `<html>` and `<body>`: the framework has no document
 template of its own, because a template you cannot see is a template you cannot
 change.
+**The root layout is the document, and hydration checks all of it.** Anything
+that rewrites the HTML between the build and the browser — a CDN that inlines
+web fonts, obfuscates email addresses, or defers scripts — changes a tree React
+is about to reconcile, and hydration fails on the difference. The way to be
+unaffected is to give such a service nothing to rewrite: serve the assets from
+the same origin rather than linking them from another one.
 
 ## routes/
 

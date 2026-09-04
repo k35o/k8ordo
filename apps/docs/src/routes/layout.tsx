@@ -27,16 +27,6 @@ export default function Root({
           content="k8ordo - React UI Component Library"
           name="description"
         />
-        <link href="https://fonts.googleapis.com" rel="preconnect" />
-        <link
-          crossOrigin="anonymous"
-          href="https://fonts.gstatic.com"
-          rel="preconnect"
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=M+PLUS+2:wght@400..700&family=Noto+Sans+JP:wght@400..700&display=swap"
-          rel="stylesheet"
-        />
         <script>
           {`// @k8ordo/state (defineLocalState 'theme') と同じ保存形式を読む
 let mode = null;

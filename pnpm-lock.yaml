@@ -80,6 +80,12 @@ importers:
 
   apps/docs:
     dependencies:
+      '@fontsource-variable/m-plus-2':
+        specifier: 5.3.0
+        version: 5.3.0
+      '@fontsource-variable/noto-sans-jp':
+        specifier: 5.3.0
+        version: 5.3.0
       '@k8ordo/router':
         specifier: workspace:^
         version: link:../../packages/router
@@ -1150,6 +1156,12 @@ packages:
     engines: {node: '>=18'}
     cpu: [x64]
     os: [win32]
+
+  '@fontsource-variable/m-plus-2@5.3.0':
+    resolution: {integrity: sha512-Sp0zoiDdITPuGJTAxMMeHXSTg2Cgh2sVHVziX37Z3FCNb08NAqLL5L47wF9sIvjtu/KEropA+sReMpgXJGMy+A==}
+
+  '@fontsource-variable/noto-sans-jp@5.3.0':
+    resolution: {integrity: sha512-XVL9GfGBRjj523v9w3Bctu4mNq7E5rUa+AMZm8DK1EM3LAGlKC3DZMvuqkLn4DB4TwwoAjcsJUCiRpUTDzzOkw==}
 
   '@iconify/types@2.0.0':
     resolution: {integrity: sha512-+wluvCrRhXrhyOmRDJ3q8mux9JkKy5SJ/v8ol2tu4FVjyYvtEzkc/3pK15ET6RKg4b4w4BmTk1+gsCUhf21Ykg==}
@@ -5621,6 +5633,10 @@ snapshots:
 
   '@esbuild/win32-x64@0.28.2':
     optional: true
+
+  '@fontsource-variable/m-plus-2@5.3.0': {}
+
+  '@fontsource-variable/noto-sans-jp@5.3.0': {}
 
   '@iconify/types@2.0.0': {}
 
