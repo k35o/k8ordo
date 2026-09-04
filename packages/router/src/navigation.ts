@@ -63,8 +63,13 @@ export function useInterceptedNavigation<T>(
   const latest = useRef(handler);
   latest.current = handler;
 
-  const commit = useRef<(() => void) | null>(null);
-  const [applied, setApplied] = useState(0);
+  // One resolver per navigation, keyed by which one it belongs to. A single
+  // slot loses the race a rapid second navigation creates: the first one's
+  // commit would resolve whatever resolver happened to be sitting there, and
+  // `finished` would mean "some page is on screen" instead of "this one is".
+  const pending = useRef(new Map<number, () => void>());
+  const count = useRef(0);
+  const [applied, setApplied] = useState(-1);
 
   useEffect(() => {
     const onNavigate = (event: NavigateEvent): void => {
@@ -80,14 +85,21 @@ export function useInterceptedNavigation<T>(
       }
       if (!latest.current.claim(url)) return;
 
+      const id = count.current++;
       event.intercept({
         handler: async () => {
           const value = await latest.current.load(url, event.signal);
+          // A load that ignores the signal can come back after a second
+          // navigation has already taken over. Applying it then would put the
+          // page the visitor left back on screen, and the listener below would
+          // never fire — an abort that already happened does not fire again.
+          if (event.signal.aborted) throw event.signal.reason as Error;
           await new Promise<void>((resolve, reject) => {
-            commit.current = resolve;
+            pending.current.set(id, resolve);
             event.signal.addEventListener(
               'abort',
               () => {
+                pending.current.delete(id);
                 reject(event.signal.reason as Error);
               },
               { once: true },
@@ -95,8 +107,9 @@ export function useInterceptedNavigation<T>(
             startTransition(() => {
               latest.current.apply(value);
               // Rides the same transition as the caller's own update, so the
-              // effect below runs in the commit that puts it on screen.
-              setApplied((n) => n + 1);
+              // effect below runs in the commit that puts it on screen — and
+              // names which navigation that commit belongs to.
+              setApplied(id);
             });
           });
         },
@@ -109,7 +122,9 @@ export function useInterceptedNavigation<T>(
   }, []);
 
   useEffect(() => {
-    commit.current?.();
-    commit.current = null;
+    const resolve = pending.current.get(applied);
+    if (resolve === undefined) return;
+    pending.current.delete(applied);
+    resolve();
   }, [applied]);
 }

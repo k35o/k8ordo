@@ -142,3 +142,20 @@ it('renders nothing when mounted on a pathname outside the table', async () => {
 
   expect(screen.container.textContent).toBe('');
 });
+
+it('shows the navigation that won, not the one it overtook', async () => {
+  const screen = await render(<Router routes={routes} />);
+  await navigateTo('/', { history: 'replace' }).finished;
+
+  // 追い越された側は abort される。その木が後から画面に出てはいけない。
+  const overtaken = navigateTo('/products');
+  const winner = navigateTo('/products/:id', { id: 'shoes' });
+  await expect(overtaken.finished).rejects.toThrow(/abort/iu);
+  await winner.finished;
+
+  expect(location.pathname).toBe('/products/shoes');
+  await expect
+    .element(screen.getByTestId('detail'))
+    .toHaveTextContent('/products/:id:shoes');
+  expect(document.querySelector('[data-testid="list"]')).toBeNull();
+});
