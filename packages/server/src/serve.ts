@@ -28,6 +28,32 @@ const TYPES: Readonly<Record<string, string>> = {
   '.woff2': 'font/woff2',
 };
 
+/**
+ * The incoming message as the request the handler expects. A Server Action is
+ * a POST with a body and a header naming it, so dropping any of the three
+ * would quietly turn every action into a page load.
+ */
+const asRequest = (incoming: IncomingMessage, url: URL): Request => {
+  const headers = new Headers();
+  for (const [name, value] of Object.entries(incoming.headers)) {
+    if (value === undefined) continue;
+    for (const one of Array.isArray(value) ? value : [value]) {
+      headers.append(name, one);
+    }
+  }
+  const method = incoming.method ?? 'GET';
+  const hasBody = method !== 'GET' && method !== 'HEAD';
+  return new Request(url.href, {
+    method,
+    headers,
+    body: hasBody
+      ? (Readable.toWeb(incoming) as unknown as ReadableStream<Uint8Array>)
+      : undefined,
+    // Node requires this to send a request body as a stream.
+    duplex: 'half',
+  } as RequestInit);
+};
+
 const fileFor = async (
   root: string,
   pathname: string,
@@ -58,15 +84,21 @@ export const serve = async (options: ServeOptions = {}): Promise<void> => {
           incoming.url ?? '/',
           `http://${incoming.headers.host ?? 'localhost'}`,
         );
-        const file = await fileFor(clientDir, url.pathname);
+        // Only a read can be answered from a file; a POST is always the
+        // application's to handle.
+        const file =
+          incoming.method === 'GET' || incoming.method === 'HEAD'
+            ? await fileFor(clientDir, url.pathname)
+            : null;
         if (file !== null) {
           response.writeHead(200, {
-            'content-type': TYPES[path.extname(file)] ?? 'application/octet-stream',
+            'content-type':
+              TYPES[path.extname(file)] ?? 'application/octet-stream',
           });
           createReadStream(file).pipe(response);
           return;
         }
-        const result = await handler(new Request(url.href));
+        const result = await handler(asRequest(incoming, url));
         response.writeHead(
           result.status,
           Object.fromEntries(result.headers.entries()),

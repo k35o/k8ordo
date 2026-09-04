@@ -25,3 +25,5 @@ export {
   pagePathFor,
   payloadPathFor,
 } from './runtime/payload-path';
+export { ACTION_ID_HEADER } from './runtime/payload';
+export type { Payload } from './runtime/payload';

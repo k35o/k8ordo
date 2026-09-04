@@ -1,11 +1,43 @@
 'use client';
 
 import { useInterceptedNavigation } from '@k8ordo/router';
-import { createFromReadableStream } from '@vitejs/plugin-rsc/browser';
-import { useState } from 'react';
+import {
+  createFromFetch,
+  createFromReadableStream,
+  createTemporaryReferenceSet,
+  encodeReply,
+  setServerCallback,
+} from '@vitejs/plugin-rsc/browser';
+import { startTransition, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 
+import { ACTION_ID_HEADER } from './payload';
+import type { Payload } from './payload';
 import { payloadPathFor } from './payload-path';
+
+/**
+ * Where a Server Action's answer lands. The callback has to be registered
+ * before any client component can call one, which is earlier than a component
+ * can offer its own setter — so the wiring is here and the mounted router
+ * lends it a way to apply what comes back.
+ */
+let applyPayload: ((payload: Payload) => void) | null = null;
+
+setServerCallback(async (id: string, args: unknown[]) => {
+  const temporaryReferences = createTemporaryReferenceSet();
+  const payload = await createFromFetch<Payload>(
+    fetch(location.href, {
+      method: 'POST',
+      headers: { [ACTION_ID_HEADER]: id },
+      body: await encodeReply(args, { temporaryReferences }),
+    }),
+    { temporaryReferences },
+  );
+  // The action's answer arrives with the page it re-rendered, so the screen
+  // is up to date by the time the caller has its value.
+  applyPayload?.(payload);
+  return payload.returnValue;
+});
 
 /**
  * The client half under the framework: the tree comes from the server, so
@@ -20,6 +52,17 @@ import { payloadPathFor } from './payload-path';
 export function AppRouter({ tree }: { tree: ReactNode }): ReactNode {
   const [current, setCurrent] = useState(tree);
 
+  useEffect(() => {
+    applyPayload = (payload) => {
+      startTransition(() => {
+        setCurrent(payload.tree);
+      });
+    };
+    return () => {
+      applyPayload = null;
+    };
+  }, []);
+
   useInterceptedNavigation<ReactNode>({
     claim: (url) => url.origin === location.origin,
     load: async (url, signal) => {
@@ -27,7 +70,8 @@ export function AppRouter({ tree }: { tree: ReactNode }): ReactNode {
       if (response.body === null) {
         throw new Error(`no payload for ${url.pathname}`);
       }
-      return createFromReadableStream<ReactNode>(response.body);
+      const payload = await createFromReadableStream<Payload>(response.body);
+      return payload.tree;
     },
     apply: setCurrent,
   });
