@@ -86,19 +86,19 @@ export const engine = (
           rsc: {
             resolve: { noExternal: ['@k8ordo/framework-engine'] },
             build: {
-              rollupOptions: { input: { index: runtime('entry.rsc') } },
+              rolldownOptions: { input: { index: runtime('entry.rsc') } },
             },
           },
           ssr: {
             resolve: { noExternal: ['@k8ordo/framework-engine'] },
             build: {
-              rollupOptions: { input: { index: runtime('entry.ssr') } },
+              rolldownOptions: { input: { index: runtime('entry.ssr') } },
             },
           },
           client: {
             optimizeDeps: { include: CLIENT_DEPS },
             build: {
-              rollupOptions: { input: { index: runtime('entry.browser') } },
+              rolldownOptions: { input: { index: runtime('entry.browser') } },
             },
           },
         },
@@ -124,7 +124,7 @@ export const engine = (
     },
 
     configResolved(config) {
-      root = config.root;
+      ({ root } = config);
       routesDir = path.resolve(root, options.routesDir ?? 'src/routes');
       outDir = path.resolve(root, OUT_DIR);
     },

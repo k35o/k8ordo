@@ -4,6 +4,10 @@ import { safeJoin } from './static-file';
 
 const ROOT = path.resolve('/srv/app/dist/client');
 
+/** 判定側に分岐を置いて、テスト本体は結果だけを述べる。 */
+const escapesRoot = (resolved: string | null): boolean =>
+  resolved !== null && !resolved.startsWith(`${ROOT}/`);
+
 describe('safeJoin', () => {
   it('resolves a plain request under the build output', () => {
     expect(safeJoin(ROOT, '/assets/app.js')).toBe(
@@ -20,10 +24,9 @@ describe('safeJoin', () => {
       '/..%2f..%2fsecrets.env',
       '/....//secrets.env',
     ]) {
-      const resolved = safeJoin(ROOT, pathname);
       // `..` は root で打ち止めになるので、脱出ではなく root 内の
       // 存在しないパスに落ちる。求めているのは「外に出ない」こと。
-      expect(resolved === null || resolved.startsWith(`${ROOT}/`)).toBe(true);
+      expect(escapesRoot(safeJoin(ROOT, pathname))).toBe(false);
     }
   });
 

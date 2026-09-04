@@ -1,3 +1,4 @@
+import { lazy } from 'react';
 import type { FC } from 'react';
 
 import { defineRoutes } from './define-routes';
@@ -211,5 +212,16 @@ describe('defineRoutes', () => {
 
   it('rejects a pattern URLPattern cannot parse, at definition time', () => {
     expect(() => defineRoutes({ '/(': Home })).toThrow(TypeError);
+  });
+
+  it('takes a lazy component as a leaf, not as a branch', () => {
+    // React.lazy は関数ではなくオブジェクトを返すので、branch の判定を
+    // typeof ではなく children の有無で行っている。その保証。
+    const Lazy = lazy(() => Promise.resolve({ default: Home }));
+    const lazyRoutes = defineRoutes({ '/late': Lazy });
+    expect(lazyRoutes.match('/late')).toMatchObject({
+      pattern: '/late',
+      stack: [Lazy],
+    });
   });
 });

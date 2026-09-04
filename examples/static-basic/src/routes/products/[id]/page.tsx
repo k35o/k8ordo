@@ -1,10 +1,6 @@
 import { findProduct } from '../../_data/catalog.server';
 
-export default function ProductPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default function ProductPage({ params }: { params: { id: string } }) {
   const product = findProduct(params.id);
   return (
     <>
