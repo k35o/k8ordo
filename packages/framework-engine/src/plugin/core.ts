@@ -27,6 +27,11 @@ const OUT_DIR = '.k8ordo';
 const runtime = (name: string): string =>
   fileURLToPath(new URL(`../runtime/${name}.mjs`, import.meta.url));
 
+/** Vite's own answer, so nothing downstream can disagree with it. */
+const isProduction = (mode: string): boolean =>
+  (process.env['NODE_ENV'] ?? process.env['VITE_USER_NODE_ENV'] ?? mode) ===
+  'production';
+
 /**
  * Client components reach the browser as RSC references, discovered while
  * rendering rather than by crawling the client entry — so React itself is
@@ -69,11 +74,14 @@ export const engine = (
         // and the copy that renders is not always the copy the renderer set
         // its dispatcher on — hooks then fail inside a perfectly ordinary
         // client component.
+        //
+        // 決め打ちではなく Vite と同じ規則で解く。JSX の変換は Vite の
+        // isProduction に従うので、こちらが別の答えを出すと、production の
+        // React に jsxDEV を呼ぶ木が渡って描画ごと落ちる(NODE_ENV=test の
+        // ビルドで実際に踏んだ)
         define: {
           'process.env.NODE_ENV': JSON.stringify(
-            env.command === 'build' && env.mode !== 'development'
-              ? 'production'
-              : 'development',
+            isProduction(env.mode) ? 'production' : 'development',
           ),
         },
         // The engine's runtime lives in node_modules while the application's

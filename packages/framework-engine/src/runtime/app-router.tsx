@@ -8,7 +8,7 @@ import {
   encodeReply,
   setServerCallback,
 } from '@vitejs/plugin-rsc/browser';
-import { startTransition, useEffect, useState } from 'react';
+import { Component, startTransition, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 
 import { isPayload } from './is-payload';
@@ -39,6 +39,50 @@ setServerCallback(async (id: string, args: unknown[]) => {
   applyPayload?.(payload);
   return payload.returnValue;
 });
+
+/**
+ * Whether a client navigation has put a tree on screen yet. Until one has,
+ * the tree being rendered is the one the server sent as HTML.
+ */
+let navigated = false;
+
+/**
+ * Where a page that fails to render goes. A document load of the same URL
+ * shows the server's own answer — its 500, its error page — so a failed
+ * client navigation falls back to exactly that, the way a URL that turns out
+ * not to be a page already does. Left alone, React would unmount the root and
+ * leave a blank document under the new URL, with nothing settling `finished`.
+ *
+ * Hydration is left to fail: a page whose HTML the server already rendered
+ * cannot be made better by asking for it again, and reloading it would loop.
+ */
+class Recover extends Component<{ children: ReactNode }, { failed: boolean }> {
+  override state = { failed: false };
+
+  static getDerivedStateFromError(): { failed: boolean } {
+    return { failed: true };
+  }
+
+  override componentDidCatch(error: unknown): void {
+    if (!navigated) throw error;
+    location.reload();
+  }
+
+  override render(): ReactNode {
+    return this.state.failed ? null : this.props.children;
+  }
+}
+
+/**
+ * The document is being replaced; a value returned now would render into a
+ * page that is on its way out.
+ */
+const reloadInstead = <T,>(): Promise<T> => {
+  location.reload();
+  return new Promise<T>(() => {
+    /* never settles */
+  });
+};
 
 /**
  * The client half under the framework: the tree comes from the server, so
@@ -77,32 +121,43 @@ export function AppRouter({
     // the ones that turn out not to be.
     claim: (url) => url.origin === location.origin,
     load: async (url, signal) => {
-      const response = await fetch(payloadPathFor(url.pathname), { signal });
-      // A second navigation may have taken over while this was in flight;
-      // reloading then would fetch the URL that already lost.
-      if (signal.aborted) throw signal.reason as Error;
-      if (!isPayload(response)) {
-        // Not a page of this application: a file the host serves, or a URL
-        // nothing answers. Interception already committed the URL, so
-        // reloading asks the server for exactly what the browser would have
-        // asked for had this never been claimed — including its real status.
-        location.reload();
-        // The document is being replaced; resolving would render into a page
-        // that is on its way out.
-        return new Promise<ReactNode>(() => {
-          /* never settles */
-        });
+      let payload: Payload;
+      try {
+        const response = await fetch(payloadPathFor(url.pathname), { signal });
+        // A second navigation may have taken over while this was in flight;
+        // reloading then would fetch the URL that already lost.
+        if (signal.aborted) throw signal.reason as Error;
+        if (!isPayload(response)) {
+          // Not a page of this application: a file the host serves, or a URL
+          // nothing answers. Interception already committed the URL, so
+          // reloading asks the server for exactly what the browser would
+          // have asked for had this never been claimed — its real status
+          // included.
+          return await reloadInstead<ReactNode>();
+        }
+        payload = await createFromReadableStream<Payload>(
+          response.body as ReadableStream<Uint8Array>,
+        );
+      } catch (error) {
+        if (signal.aborted) throw error;
+        // The network, or a server that could not answer: the same rule as
+        // a URL that is not a page — the document load shows the truth.
+        return reloadInstead<ReactNode>();
       }
-      const payload = await createFromReadableStream<Payload>(
-        response.body as ReadableStream<Uint8Array>,
-      );
       return payload.tree;
     },
-    apply: setCurrent,
+    apply: (next) => {
+      navigated = true;
+      setCurrent(next);
+    },
   });
 
   // The tree comes from the server, so a client component in it cannot ask a
   // table where it is. The pathname the server rendered for is what seeds
   // `usePathname` until the browser can answer for itself.
-  return <PathnameProvider pathname={pathname}>{current}</PathnameProvider>;
+  return (
+    <PathnameProvider pathname={pathname}>
+      <Recover>{current}</Recover>
+    </PathnameProvider>
+  );
 }
