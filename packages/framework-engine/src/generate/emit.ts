@@ -26,6 +26,22 @@ const isLeaf = (dir: RouteDir): boolean =>
   dir.notFound === null &&
   dir.children.length === 0;
 
+/**
+ * Literal segments before parameters, and otherwise the order the directories
+ * came in. The table matches in declaration order, and the directories arrive
+ * sorted by name — under which `[slug]` precedes `about`, because `[` sorts
+ * before letters. Left alone, the most ordinary layout there is would make
+ * `/about` unreachable behind `/:slug`.
+ *
+ * A directory tree has no order of its own to honour, so the framework has to
+ * choose one; this is the only choice that makes every declared route
+ * reachable.
+ */
+const order = (children: readonly RouteDir[]): readonly RouteDir[] => [
+  ...children.filter((child) => child.kind !== 'param'),
+  ...children.filter((child) => child.kind === 'param'),
+];
+
 export const buildTable = <T>(
   tree: RouteDir,
   resolve: (file: string) => T,
@@ -33,7 +49,7 @@ export const buildTable = <T>(
   const entries = (dir: RouteDir): Record<string, TableNode<T>> => {
     const record: Record<string, TableNode<T>> = {};
     if (dir.page !== null) record['/'] = resolve(dir.page);
-    for (const child of dir.children) record[child.key] = node(child);
+    for (const child of order(dir.children)) record[child.key] = node(child);
     // Last, because the table matches in declaration order: every route the
     // app actually declared out-ranks the catch-all.
     if (dir.notFound !== null) record['/*'] = resolve(dir.notFound);
@@ -176,6 +192,13 @@ export const emitRegisterModule = (options: RegisterOptions): string => {
       '}',
     );
   }
-  lines.push('');
+  lines.push(
+    '',
+    '// The RSC plugin resolves these specifiers itself — nothing to install.',
+    '// Declared here so importing one is not a type error.',
+    "declare module 'server-only' {}",
+    "declare module 'client-only' {}",
+    '',
+  );
   return lines.join('\n');
 };
