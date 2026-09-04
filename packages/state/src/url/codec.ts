@@ -69,9 +69,28 @@ const serializeValue = (key: string, value: unknown): string => {
 export const createUrlCodec = (schema: StateSchema): UrlCodec => {
   const info = analyzeSchema(schema, 'url');
   const { keys, defaults } = info;
-  const multi = new Set(
-    keys.filter((key) => baseDef(info.shape[key] as $ZodType).type === 'array'),
-  );
+  const multi = new Set<string>();
+  for (const key of keys) {
+    const base = baseDef(info.shape[key] as $ZodType).type;
+    // A URL can only say "absent": an empty list and a missing param are the
+    // same string, so a non-empty default would silently take the place of
+    // every [] the app writes. A boolean has the mirror problem — every
+    // string is truthy to coerce, and "false" comes back as true — so the
+    // string-shaped `z.stringbool()` is the only spelling that round-trips.
+    // Both are guaranteed surprises, so both fail at define time.
+    if (base === 'array') {
+      if (!sameValue(defaults[key], [])) {
+        throw new TypeError(
+          `url array fields must default to [] — an absent param and an empty list are the same URL: ${key}`,
+        );
+      }
+      multi.add(key);
+    } else if (base === 'boolean') {
+      throw new TypeError(
+        `url boolean fields must use z.stringbool() — a URL carries strings, and "false" is not false to z.boolean() or z.coerce.boolean(): ${key}`,
+      );
+    }
+  }
 
   const parse = (input: UrlInput): StateValues => {
     const raw: StateValues = {};
@@ -97,13 +116,17 @@ export const createUrlCodec = (schema: StateSchema): UrlCodec => {
     return params.toString();
   };
 
-  const salvage = (values: Readonly<StateValues>): StateValues => {
-    const own: StateValues = {};
-    for (const key of keys) {
-      if (key in values) own[key] = values[key];
-    }
-    return parseWithSalvage(info, own);
-  };
+  /**
+   * The values as they will come back: written to a query string and read
+   * again. Going through the URL rather than handing the typed values
+   * straight to the schema is what makes a one-way spelling work — the
+   * `string → boolean` of `z.stringbool()` never sees a boolean, exactly as
+   * on arrival — and it is the only reading under which `update()` and a
+   * visitor's URL are the same path. A value with no URL spelling throws
+   * here, which is the earliest anyone can be told.
+   */
+  const salvage = (values: Readonly<StateValues>): StateValues =>
+    parse(new URLSearchParams(search(values)));
 
   return { keys, defaults, parse, search, salvage };
 };

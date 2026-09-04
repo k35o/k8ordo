@@ -1,4 +1,5 @@
 import type { FC } from 'react';
+import { useState } from 'react';
 import { render } from 'vitest-browser-react';
 import { z } from 'zod';
 
@@ -502,4 +503,82 @@ it('leaves params it does not own untouched', async () => {
   const params = new URL(location.href).searchParams;
   expect(params.get('other')).toBe('1');
   expect(params.get('page')).toBe('2');
+});
+
+const sinceState = definePageState('since', {
+  url: z.object({ since: z.date().optional() }),
+});
+
+const Since: FC = () => {
+  const [{ since }, update] = useAppState(sinceState);
+  const [refused, setRefused] = useState('');
+  return (
+    <>
+      <p data-testid="since">{since === undefined ? 'none' : 'set'}</p>
+      <p data-testid="refused">{refused}</p>
+      <button
+        type="button"
+        onClick={() => {
+          try {
+            update({ since: new Date(0) });
+          } catch (error) {
+            setRefused(String(error));
+          }
+        }}
+      >
+        set
+      </button>
+    </>
+  );
+};
+
+it('refuses a value the URL cannot carry on the spot, writing nothing', async () => {
+  const screen = await render(<Since />);
+  const before = navigations;
+
+  // スキーマは Date を受けるが URL には書けない。fire-and-forget が普通の
+  // 呼び方である以上、ハンドルの reject では誰も気づかない
+  await screen.getByRole('button', { name: 'set' }).click();
+
+  await expect
+    .element(screen.getByTestId('refused'))
+    .toHaveTextContent('no URL serialization');
+  await expect.element(screen.getByTestId('since')).toHaveTextContent('none');
+  expect(navigations - before).toBe(0);
+});
+
+const flagState = definePageState('flag', {
+  url: z.object({ open: z.stringbool().default(true) }),
+});
+
+const Flag: FC = () => {
+  const [{ open }, update] = useAppState(flagState);
+  return (
+    <>
+      <p data-testid="flag">{String(open)}</p>
+      <button
+        type="button"
+        onClick={() => {
+          lastHandle = update({ open: !open });
+        }}
+      >
+        toggle flag
+      </button>
+    </>
+  );
+};
+
+it('a boolean written by update comes back as the boolean it wrote', async () => {
+  const screen = await render(<Flag />);
+
+  // stringbool は文字列しか受け取らない。echo が typed な値をそのまま
+  // スキーマに渡していた頃は、false を書くと既定値の true に戻っていた
+  await screen.getByRole('button', { name: 'toggle flag' }).click();
+
+  await expect.element(screen.getByTestId('flag')).toHaveTextContent('false');
+  await (lastHandle as UpdateHandle).finished;
+  expect(new URL(location.href).searchParams.get('open')).toBe('false');
+  expect(flagState.parseUrl(new URL(location.href).searchParams).open).toBe(
+    false,
+  );
 });

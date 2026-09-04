@@ -1,7 +1,10 @@
 import { z } from 'zod';
 import * as zm from 'zod/mini';
 
+import { defineLocalState } from './local-state';
+import { defineMemoryState } from './memory-state';
 import { definePageState } from './page-state';
+import { useAppState } from './use-app-state';
 
 const listState = definePageState('list', {
   url: z.object({
@@ -71,6 +74,46 @@ describe('parseUrl', () => {
 });
 
 describe('definePageState', () => {
+  it('rejects a url array field whose default is not [] — [] could never be written', () => {
+    expect(() =>
+      definePageState('tags', {
+        url: z.object({ tags: z.array(z.string()).default(['x']) }),
+      }),
+    ).toThrow(/default to \[\]/u);
+    expect(() =>
+      definePageState('tags-optional', {
+        url: z.object({ tags: z.array(z.string()).optional() }),
+      }),
+    ).toThrow(/default to \[\]/u);
+  });
+
+  it('round-trips an empty array field through the URL', () => {
+    expect(listState.search({ tags: [] })).toBe('');
+    expect(listState.parseUrl(new URLSearchParams()).tags).toStrictEqual([]);
+  });
+
+  it('rejects a url boolean field that is not stringbool — "false" would read as true', () => {
+    expect(() =>
+      definePageState('flag', {
+        url: z.object({ flag: z.coerce.boolean().default(true) }),
+      }),
+    ).toThrow(/stringbool/u);
+    expect(() =>
+      definePageState('flag-plain', {
+        url: z.object({ flag: z.boolean().default(true) }),
+      }),
+    ).toThrow(/stringbool/u);
+  });
+
+  it('round-trips a stringbool field through the URL', () => {
+    const flags = definePageState('flags', {
+      url: z.object({ open: z.stringbool().default(true) }),
+    });
+    expect(flags.search({ open: false })).toBe('open=false');
+    expect(flags.parseUrl(new URLSearchParams('open=false')).open).toBe(false);
+    expect(flags.parseUrl(new URLSearchParams()).open).toBe(true);
+  });
+
   it('salvage cannot smuggle a combination an object-level refine forbids', () => {
     const range = definePageState('range', {
       url: z
@@ -204,3 +247,29 @@ describe('parseUrl type', () => {
     expectTypeOf(parsed.sort).toEqualTypeOf<'new' | 'old' | undefined>();
   });
 });
+
+describe('useAppState options', () => {
+  it('offers initialUrl only where a url slot can seed it', () => {
+    expect(OptionsRejectedByTypes).toBeInstanceOf(Function);
+  });
+});
+
+// 型検査だけが目的で、描画はしない。フックを呼ぶので関数ではなく
+// コンポーネントの形にしてある。initialUrl は url スロットを持つ
+// page state にしか無い
+const OptionsRejectedByTypes = () => {
+  const memory = defineMemoryState('m', { open: false });
+  const local = defineLocalState('l', z.object({ v: z.string().default('') }));
+  const entryOnly = definePageState('e', {
+    entry: z.object({ open: z.boolean().default(false) }),
+  });
+
+  // @ts-expect-error memory state has no url slot to seed
+  useAppState(memory, { initialUrl: { open: true } });
+  // @ts-expect-error local state has no url slot to seed
+  useAppState(local, { initialUrl: { v: 'x' } });
+  // @ts-expect-error an entry-only page state has no url slot to seed
+  useAppState(entryOnly, { initialUrl: {} });
+  // @ts-expect-error the url slot's own fields are still checked
+  useAppState(listState, { initialUrl: { q: 1 } });
+};

@@ -53,6 +53,17 @@ pnpm check         # check:write to auto-fix
   entry state salvage field-by-field to their own defaults — never a throw,
   never a poisoned sibling. Memory has no schema because its values never
   cross a boundary.
+- **A url value is canonicalized by the road it comes back on.** The url
+  codec's `salvage` is `parse(new URLSearchParams(search(values)))`, not a
+  parse of the typed values: a one-way spelling (`z.stringbool()`'s
+  `string → boolean`) must never see its own output, or `update()` lands on
+  the default. Two spellings the round trip cannot hold are refused when the
+  codec is built — a url array whose default is not `[]` (absence and an
+  empty list are the same URL) and any boolean that is not `z.stringbool()`
+  (`"false"` is truthy to `z.coerce.boolean()`). A value with no URL spelling
+  at all throws out of `update()` before the batch is touched, since a
+  rejected handle is invisible to the fire-and-forget caller that is the
+  normal case.
 - **No history-API fallback.** Imperative url updates assume an intercepting
   router; links and GET forms are the path that works everywhere. Entry,
   local and memory updates never navigate, so they work under any router.
