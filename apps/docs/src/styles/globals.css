@@ -23,7 +23,7 @@
  * tokens.css の @theme inline は --font-noto-sans-jp / --font-m-plus-2 を参照
  * するが、フォント変数自体の定義は利用側の責務。ここで定義することで
  * font-noto-sans-jp / font-m-plus-2 ユーティリティが有効になる
- * （フォントは root.tsx で Google Fonts から可変レンジ wght@400..700 を読込）。
+ * （フォントは routes/layout.tsx で Google Fonts から可変レンジ wght@400..700 を読込）。
  */
 :root {
   --font-noto-sans-jp: 'Noto Sans JP', sans-serif;

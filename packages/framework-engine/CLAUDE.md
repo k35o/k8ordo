@@ -38,14 +38,41 @@ pnpm check         # check:write to auto-fix
   directories — reviewable in a diff, with no private hooks into the router.
 - **Declaration order is load-bearing.** `not-found.tsx` is emitted last in
   its branch because the router matches in declaration order; every route the
-  app actually declared has to out-rank the catch-all.
+  app actually declared has to out-rank the catch-all. Literal directories are
+  emitted before parameters for the same reason — a directory tree has no
+  order of its own, and the alphabet would put `[slug]` before `about`.
+- **Shadowing is checked only on a grammatical tree.** `unreachableRoutes`
+  builds URLPatterns from directory names, and a name the grammar rejected is
+  not a pattern — running it on a broken tree throws instead of reporting. So
+  a build with grammar problems names all of those at once, and shadowing on
+  the next run.
+- **The browser holds no route table.** `runtime/app-router.tsx` claims every
+  same-origin URL and learns from the answer; anything that is not a payload
+  (`runtime/is-payload.ts`) becomes a document load, which is also the
+  recovery path when a render fails. The client router's "unmatched pathnames
+  are not intercepted" does not apply here.
+- **Hydration reads the payload the HTML was rendered from.**
+  `runtime/entry.ssr.tsx` injects the RSC stream into the HTML and
+  `runtime/entry.browser.tsx` reads it back; nothing refetches on load, which
+  is what lets a prerendered `404.html` come alive.
+- **A route file's props are checked by the generator.** `routes.gen.ts`
+  emits `satisfies Page<'/products/:id'>` / `satisfies Layout<'/:locale'>`
+  per file, so a mistyped param name fails the build without any route file
+  importing a helper — the layout's pattern is the prefix every route below
+  it shares.
 
 ## Layout
 
 ```
 src/
-  grammar/tree.ts    routes/ の文法: パース + 検証(Problem[])
-  generate/emit.ts   buildTable(構造) + routes.gen / register.gen の描画
+  grammar/tree.ts            the routes/ grammar: parse + validate (Problem[])
+  generate/emit.ts           buildTable (structure) + routes.gen / register.gen
+  generate/write.ts          the filesystem edge: scan, generate, write
+  plugin/core.ts             the Vite plugins: RSC pipeline, virtual routes
+  plugin/server-actions.ts   which modules declared 'use server'
+  runtime/entry.{rsc,ssr,browser}.tsx  the three environments
+  runtime/app-router.tsx     the client half: navigation + payloads
+  runtime/render.tsx         the matched stack, nested through children
   index.ts
 ```
 

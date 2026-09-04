@@ -68,6 +68,23 @@ the key must be app-unique per kind: two definitions of the same kind sharing
 a key silently share one store (and, for local, one storage row). The module
 system cannot enforce this, so treat the key like a global name.
 
+**A boundary schema must also accept what it produces.** `update()` re-reads
+its own values by the road they will come back on, so a field whose input and
+output sides disagree lands on its default instead of the value you wrote. For
+url that road is the query string, which is why two spellings are refused at
+module load rather than at the first click:
+
+| written                                       | use instead      |
+| --------------------------------------------- | ---------------- |
+| `z.boolean()` / `z.coerce.boolean()` in `url` | `z.stringbool()` |
+| a `url` array defaulting to anything but `[]` | `.default([])`   |
+
+A URL carries strings, and `"false"` is not `false` to a boolean schema; an
+absent param and an empty list are the same URL, so an array whose default is
+non-empty could never write `[]`. The same rule holds for values a URL cannot
+spell at all: a `z.date()` url field is refused the moment something writes
+one, naming the field.
+
 ## zod, or zod/mini
 
 Parsing runs on zod's shared core, so a schema written with either entry
@@ -96,6 +113,9 @@ localStorage — so there is nothing to scope.
 
 ## Server — read, and build links
 
+`parseUrl` reads the url slot wherever a router hands a page its search — for
+example Next.js:
+
 ```tsx
 export default async function Page({ searchParams }: PageProps<'/products'>) {
   const url = listState.parseUrl(await searchParams);
@@ -106,19 +126,28 @@ export default async function Page({ searchParams }: PageProps<'/products'>) {
     <>
       <Filters initialUrl={url} />
       <ProductList products={products} />
-      <Link href={listState.href('/products', { ...url, page: url.page + 1 })}>
+      <a href={listState.href('/products', { ...url, page: url.page + 1 })}>
         next
-      </Link>
+      </a>
     </>
   );
 }
 ```
 
+**Under `@k8ordo/static` and `@k8ordo/server` a page never sees the search.**
+Those pages receive `params` and `pathname` — the pathname axis is the
+router's, and the search is read in the browser by `useAppState`. The server
+render therefore shows the url slot's defaults and the live URL takes over one
+render after hydration. That is not a gap to route around: the router
+intercepts a same-pathname navigation without loading anything, so a server
+render keyed on the search would be right on the first load and stale after
+the first `update()`. Building links is unaffected — `href` and `search` are
+pure and run anywhere, including in a Server Component.
+
 `href` and `search` are pure: unspecified fields mean their default, and
 default values are omitted from the query, so every link is canonical and as
 short as it can be. `search` returns the query string alone (no `?`) when the
-path should stay in the caller's hands. Only the url slot exists on the
-server; entry, local and memory state render as their defaults there.
+path should stay in the caller's hands.
 
 ## Client — subscribe and update
 
@@ -162,7 +191,7 @@ returns the Navigation API's own shape, an object holding two promises:
 ```ts
 const { committed, finished } = update({ page: 2 });
 // committed: the write is in its home
-// finished:  the router's intercept work (fetch, render) is done
+// finished:  whatever the router did after the write is done
 ```
 
 Ignoring the handle is the normal case and trips no floating-promise lint.
@@ -179,10 +208,12 @@ A superseded navigation (the user clicked again) rejects the handle with an
 `AbortError`; unawaited calls never surface it. Updates with no navigation
 behind them — entry-only, local, memory — return the same shape, settled.
 
-- **Patches are validated on the spot.** The merged state passes the schema
-  inside `update()` itself, with the same salvage as a URL arrival:
+- **Patches are validated on the spot.** The merged state goes through the
+  schema inside `update()` itself, by the road a URL arrival takes:
   `update({ page: 0 })` on a `min(1)` field lands on the default exactly as
-  `?page=0` would, and the echo never shows a value the schema rejects.
+  `?page=0` would, and the echo never shows a value the schema rejects. A
+  value the URL cannot carry is refused there and then, before anything is
+  written — the call throws rather than rejecting a handle nobody awaits.
 - **Routing is by field.** One patch may span both faces of a page state:
   url + entry changes travel in a single `navigation.navigate()`, atomically.
   A patch touching only entry fields uses `updateCurrentEntry()` — no
@@ -220,15 +251,19 @@ Everything except one operation works under any router:
 
 | operation                          | needs                                       |
 | ---------------------------------- | ------------------------------------------- |
-| `parseUrl` on the server           | nothing                                     |
 | `href` / `search` links, GET forms | nothing — the router handles the click      |
 | entry / local / memory updates     | nothing — no navigation is involved         |
 | url `update()` on the client       | a router that intercepts the Navigation API |
+| `parseUrl` on the server           | a router that hands the page its search     |
 
-A url `update()` calls `navigation.navigate()`. On a router that intercepts
-the `navigate` event, that is a same-document update flowing through the
-router's own pipeline — transitions, scroll handling and all. On a router
-that does not (Next.js today), it is a full document load: use links and GET
+A url `update()` calls `navigation.navigate()`. Under `@k8ordo/router` —
+including a page rendered by `@k8ordo/static` or `@k8ordo/server` — a
+navigation that keeps the pathname is a state change and not a page change:
+the router intercepts it without a load, nothing remounts, and scroll and
+focus stay where they are. `finished` therefore resolves once that navigation
+settles, with no fetch or render behind it, since `update()` already rendered
+the new values. On a router that does not intercept the Navigation API
+(Next.js today), the same call is a full document load: use links and GET
 forms for url changes there, which is this package's preferred grain anyway.
 There is deliberately no history-API fallback.
 
@@ -242,6 +277,11 @@ the same division `@k8ordo/form` draws.
 (``'/products' | `/products?${string}` ``), which is what typed-route checks
 strip a query from and verify. To constrain paths app-wide, augment `Register`
 once:
+
+Under `@k8ordo/static` or `@k8ordo/server` this is generated for you into
+`.k8ordo/` from `routes/`, and hand-writing it is a mistake. Elsewhere, feed
+it your router's own route type — `RouteOf<typeof routes>` from
+`@k8ordo/router`, or `Route` from `next`:
 
 ```ts
 // e.g. types/k8ordo-state.d.ts
@@ -280,10 +320,12 @@ with no library bookkeeping.
 **Tabs agree.** localStorage state propagates across tabs through the
 `storage` event; the same keyed subscription granularity applies.
 
-**SSR sees real url values when you hand them over.** Pass the RSC-parsed url
-as `initialUrl` and the server render and hydration render show the actual
-URL state. Everything else — entry, local, memory — renders its defaults on
-the server by construction: those places do not exist there.
+**SSR sees real url values when your router hands you the search.** Pass the
+RSC-parsed url as `initialUrl` and the server render and the hydration render
+show the actual URL state. Where a page receives no search — `@k8ordo/static`
+and `@k8ordo/server` — the url slot renders its defaults and the live URL
+takes over on hydration. Everything else — entry, local, memory — renders its
+defaults on the server by construction: those places do not exist there.
 
 ## GET forms with @k8ordo/form
 

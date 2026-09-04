@@ -23,9 +23,9 @@ const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 // mode が未設定のあいだはシステム設定に追従する。過去の `sepia` のような
 // 未知の値はスキーマのサルベージが未設定に落とすので、手動の正規化は無い。
-// 保存先は localStorage の `k8ordo-state:theme`（root.tsx の初期化スクリプト
+// 保存先は localStorage の `k8ordo-state:theme`（routes/layout.tsx の初期化スクリプト
 // と対）。
-const themeState = defineLocalState(
+export const themeState = defineLocalState(
   'theme',
   z.object({ mode: z.optional(z.enum(['light', 'dark'])) }),
 );

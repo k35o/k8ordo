@@ -30,9 +30,15 @@ pnpm check         # check:write to auto-fix
 - **`finished` means committed.** The intercept handler resolves in an effect
   after React puts the new tree on screen. `@k8ordo/state`'s
   `update().finished` inherits this, so it is a cross-package contract.
-- **A state change is not a page change.** Same pathname ⇒ intercept with
-  `scroll: 'manual'`, `focusReset: 'manual'`, no load, no apply.
+- **A state change is not a page change.** Same pathname as the tree ON
+  SCREEN ⇒ intercept with `scroll: 'manual'`, `focusReset: 'manual'`, no
+  load, no apply. Not `location.pathname`: interception commits the URL
+  before the tree arrives, so comparing against the address bar makes a
+  state update during a pending load abort that load and strand the old page
+  under the new URL (regression test in `router.browser.test.tsx`).
 - **Unmatched pathnames are not intercepted.** A real 404 is the server's.
+- **Reload, POST, download and hash are not ours.** `isOurs` says no before
+  the table is consulted; a GET form (no `formData`) still comes through.
 - **Declaration order decides.** No specificity ranking, ever — the table
   reads top to bottom like the code it is.
 - **The type mirrors the runtime walk.** `Below` resets a branch that landed
@@ -48,6 +54,7 @@ src/
   links.ts          href / navigateTo(表を必要としない側)
   register.ts       Register(module augmentation)
   navigation.ts     useInterceptedNavigation(intercept と commit 契約)
+  location.tsx      usePathname / PathnameProvider(表を引かない現在地)
   router.tsx        Router / Outlet / useRoute / useParams
 ```
 
