@@ -95,6 +95,19 @@ describe('literal siblings of a parameter', () => {
     });
   });
 
+  it('are not shadowed by a parameter hiding inside a group', () => {
+    // グループは URL を持たないので、中身がそのまま兄弟と並ぶ。順序は
+    // 「そのグループが最初に差し出すもの」で決まる。
+    const grouped = tableFor([
+      'page.tsx',
+      'about/page.tsx',
+      '(marketing)/layout.tsx',
+      '(marketing)/[slug]/page.tsx',
+    ]);
+    expect(grouped.match('/about')?.pattern).toBe('/about');
+    expect(grouped.match('/anything')?.pattern).toBe('/:slug');
+  });
+
   it('leave the parameter everything else', () => {
     expect(routes.match('/anything')).toMatchObject({
       pattern: '/:slug',

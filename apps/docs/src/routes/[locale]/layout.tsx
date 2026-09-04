@@ -212,10 +212,6 @@ export default function LocaleLayout({
     ? params.locale
     : (localeOf(pathname) ?? DEFAULT_LOCALE);
 
-  useEffect(() => {
-    document.documentElement.lang = locale;
-  }, [locale]);
-
   return (
     <ErrorBoundary
       fallbackRender={({ resetErrorBoundary }) => (

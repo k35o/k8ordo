@@ -57,6 +57,21 @@ describe('planPaths', () => {
     expect(plan.unusable).toStrictEqual(['/produtcs/2']);
   });
 
+  it('takes a path the table already has as redundant, not wrong', () => {
+    const plan = planPaths(treeOf(['page.tsx', 'about/page.tsx']), ['/about']);
+    expect(plan.unusable).toStrictEqual([]);
+    expect(plan.paths).toStrictEqual(['/', '/about']);
+  });
+
+  it('reads a trailing slash as the same pathname the router does', () => {
+    const plan = planPaths(treeOf(['page.tsx', 'products/[id]/page.tsx']), [
+      '/products/1/',
+    ]);
+    expect(plan.unusable).toStrictEqual([]);
+    expect(plan.unresolved).toStrictEqual([]);
+    expect(plan.paths).toStrictEqual(['/', '/products/1']);
+  });
+
   it('refuses a supplied path that still holds a parameter', () => {
     // パラメータが 2 つある表を 1 つだけ展開すると、こういう値が残る
     const plan = planPaths(
@@ -100,6 +115,20 @@ describe('catchAllPatterns', () => {
 describe('catchAllPath', () => {
   it('is nothing when the table declares no catch-all', () => {
     expect(catchAllPath(treeOf(['page.tsx']))).toBeNull();
+  });
+
+  it('reaches a catch-all under a named directory', () => {
+    // 番兵だけの深いパスでは `/docs/*` に届かない。前置きの literal は残す。
+    const tree = treeOf([
+      'page.tsx',
+      'docs/page.tsx',
+      'docs/not-found.tsx',
+      'products/[id]/page.tsx',
+    ]);
+    const path = catchAllPath(tree);
+    expect(path).not.toBeNull();
+    const routes = defineRoutes(buildTable(tree, blank));
+    expect(routes.match(path as string)?.pattern).toBe('/docs/*');
   });
 
   it('reaches the only catch-all wherever it sits', () => {

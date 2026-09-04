@@ -30,9 +30,17 @@ pnpm check:write       # Oxlint/Oxfmt lint/format auto-fix
 - **URL layout**: package-first. Everything a package documents lives under `/<package>/…` — `@k8ordo/ui` owns `/ui/get-started`, `/ui/components/*`, `/ui/hooks/*`, and so on. `/<package>` itself is that package's landing page (`src/routes/[locale]/ui/page.tsx`): what it is, what it gives you, where to start. Only `/` is shared — it introduces k8ordo, lists the packages, and states what they all commit to. Add a new package by adding its own `/<package>` landing plus a `/<package>/…` subtree, and a row in `PACKAGES` on the home page; never put a package's sections at the top level, where they would sit at the same depth as package names.
 - **Unmatched routes**: `src/routes/[locale]/not-found.tsx` is rendered into a
   single `404.html`, which a static host serves for anything it does not have.
-  One file for every locale, so it cannot know which one it is under: the layout
-  falls back to `DEFAULT_LOCALE` when `params.locale` is not a real locale (which
-  is what the sentinel segment used to render it looks like).
+  One file for every locale, so the `:locale` it was rendered with is the build's
+  sentinel, not a language. The layout therefore takes the locale from the URL
+  the visitor is actually on (`usePathname`), falling back to `DEFAULT_LOCALE`
+  only when that has none either — which is why the file is Japanese as served
+  and becomes English the moment it hydrates on an `/en/…` URL. A visitor with
+  JavaScript off keeps the Japanese one; one file cannot be both.
+- **An unknown locale is not a 404 here.** `/fr/ui` matches `/:locale/ui`, so a
+  running server would render the default-locale page at that URL with a 200.
+  On the static host it never gets that far — there is no `/fr/ui/index.html`,
+  so `404.html` is served first. Worth knowing before this app is ever put
+  behind `@k8ordo/server`.
 - **i18n**: Custom i18n system in `src/i18n/` with locale-based routing (`/ja/`, `/en/`)
 - **Styling**: Tailwind CSS 4, uses `@k8ordo/ui` design tokens
 - **Root provider**: `UIProvider` wraps each locale subtree in
@@ -55,7 +63,7 @@ src/
       page.tsx         # /:locale
       not-found.tsx    # /:locale/* — becomes 404.html
       ui/components/<name>/page.tsx
-      ui/components/_previews/      # `_` は URL に出ない
+      ui/components/_previews/      # `_` never appears in a URL
   constants.ts         # Shared constants (e.g. STORYBOOK_URL)
   components/          # Shared doc components (CodeBlock, PropsTable, etc.)
   data/                # Navigation data (components-nav, helpers-nav, hooks-nav)

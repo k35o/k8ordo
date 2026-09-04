@@ -1,4 +1,4 @@
-import type { RouteDir } from '../grammar/tree';
+import type { Problem, RouteDir } from '../grammar/tree';
 
 /**
  * The generator writes the route table and the type wiring so an application
@@ -27,6 +27,21 @@ const isLeaf = (dir: RouteDir): boolean =>
   dir.children.length === 0;
 
 /**
+ * What a subtree offers the matcher first: a literal, a parameter, or only a
+ * catch-all. A group contributes its children's URLs rather than one of its
+ * own, so it ranks as whatever the best of them is — otherwise a `[slug]`
+ * tucked inside a group would still be tried before a literal sibling.
+ */
+const rank = (dir: RouteDir): number => {
+  if (dir.kind === 'param') return 1;
+  if (dir.kind !== 'group') return 0;
+  const children = dir.children.map(rank);
+  if (dir.page !== null) children.push(0);
+  if (dir.notFound !== null) children.push(2);
+  return Math.min(...children, 2);
+};
+
+/**
  * Literal segments before parameters, and otherwise the order the directories
  * came in. The table matches in declaration order, and the directories arrive
  * sorted by name — under which `[slug]` precedes `about`, because `[` sorts
@@ -35,12 +50,11 @@ const isLeaf = (dir: RouteDir): boolean =>
  *
  * A directory tree has no order of its own to honour, so the framework has to
  * choose one; this is the only choice that makes every declared route
- * reachable.
+ * reachable. Where it still cannot — a group holding both kinds — the
+ * unreachable route is reported rather than shipped.
  */
-const order = (children: readonly RouteDir[]): readonly RouteDir[] => [
-  ...children.filter((child) => child.kind !== 'param'),
-  ...children.filter((child) => child.kind === 'param'),
-];
+const order = (children: readonly RouteDir[]): readonly RouteDir[] =>
+  children.toSorted((a, b) => rank(a) - rank(b));
 
 export const buildTable = <T>(
   tree: RouteDir,
@@ -66,6 +80,55 @@ export const buildTable = <T>(
   // The root's own layout has to wrap everything, which is what a branch
   // under the transparent '/' key does.
   return tree.layout === null ? entries(tree) : { '/': node(tree) };
+};
+
+type Declared = { readonly pattern: string; readonly file: string };
+
+/** Every pattern the table declares, in the order the matcher will try them. */
+const declared = (dir: RouteDir, prefix = ''): Declared[] => {
+  const here = dir.kind === 'root' ? '' : prefix;
+  const found: Declared[] = [];
+  if (dir.page !== null) {
+    found.push({ pattern: here === '' ? '/' : here, file: dir.page });
+  }
+  for (const child of order(dir.children)) {
+    found.push(
+      ...declared(child, child.kind === 'group' ? here : `${here}${child.key}`),
+    );
+  }
+  if (dir.notFound !== null) {
+    found.push({ pattern: `${here}/*`, file: dir.notFound });
+  }
+  return found;
+};
+
+/**
+ * Routes that exist and can never render, because something declared earlier
+ * answers their URL. Ordering fixes the common shape — a literal beside a
+ * parameter — but a group holds URLs of both kinds under one key, and a table
+ * cannot interleave across it. Where the order cannot be made right, saying so
+ * is the only honest option left: the alternative is a page that is simply
+ * never served, with nothing to see in the directory tree.
+ */
+export const unreachableRoutes = (tree: RouteDir): Problem[] => {
+  const all = declared(tree);
+  const problems: Problem[] = [];
+  for (const [index, route] of all.entries()) {
+    if (route.pattern.includes(':') || route.pattern.includes('*')) continue;
+    const shadow = all.slice(0, index).find(
+      (earlier) =>
+        earlier.pattern !== route.pattern &&
+        new URLPattern({ pathname: earlier.pattern }).test({
+          pathname: route.pattern,
+        }),
+    );
+    if (shadow === undefined) continue;
+    problems.push({
+      path: route.file,
+      message: `"${route.pattern}" can never match — "${shadow.pattern}" (${shadow.file}) is declared first and answers it`,
+    });
+  }
+  return problems;
 };
 
 export type EmitOptions = {
@@ -187,13 +250,6 @@ export const emitRegisterModule = (options: RegisterOptions): string => {
       '}',
     );
   }
-  lines.push(
-    '',
-    '// The RSC plugin resolves these specifiers itself — nothing to install.',
-    '// Declared here so importing one is not a type error.',
-    "declare module 'server-only' {}",
-    "declare module 'client-only' {}",
-    '',
-  );
+  lines.push('');
   return lines.join('\n');
 };

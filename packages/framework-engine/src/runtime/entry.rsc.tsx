@@ -108,7 +108,7 @@ export default async function handler(request: Request): Promise<Response> {
   const missing = match === null || match.pattern.endsWith('/*');
   const status = missing ? 404 : 200;
   const payload: Payload = {
-    tree: match === null ? <NotFound /> : renderMatch(match),
+    tree: match === null ? <NotFound /> : renderMatch(match, pathname),
     pathname,
     returnValue: action.returnValue,
     formState: action.formState,

@@ -1,12 +1,24 @@
 import type { ReactNode } from 'react';
 
+import { DEFAULT_LOCALE, isLocale } from '../i18n';
+
 import '../styles/globals.css';
 
-export default function Root({ children }: { children: ReactNode }) {
+export default function Root({
+  children,
+  pathname,
+}: {
+  children: ReactNode;
+  pathname: string;
+}) {
+  // lang はサーバーが書いた HTML の時点で正しくないと、クローラも読み上げも
+  // 間違ったまま読む。ロケールは URL の先頭区間にしか無い。
+  const first = pathname.split('/')[1] ?? '';
+  const locale = isLocale(first) ? first : DEFAULT_LOCALE;
   return (
     // 下のスクリプトが hydrate 前に dark クラスを付けるので、html の属性だけは
     // サーバーの出力と一致しない。それが目的の差分なので警告を抑える。
-    <html lang="ja" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <head>
         <meta charSet="UTF-8" />
         <meta content="width=device-width, initial-scale=1.0" name="viewport" />

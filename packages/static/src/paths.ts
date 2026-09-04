@@ -24,6 +24,12 @@ export const patternsOf = (dir: RouteDir, prefix = ''): string[] => {
 export const isConcrete = (pattern: string): boolean =>
   !pattern.includes(':') && !pattern.includes('*');
 
+const trimSlash = (path: string): string => {
+  let end = path.length;
+  while (end > 1 && path.charAt(end - 1) === '/') end -= 1;
+  return path.slice(0, end);
+};
+
 const SENTINEL = '__k8ordo-not-found__';
 
 /**
@@ -39,21 +45,31 @@ export const catchAllPatterns = (dir: RouteDir): string[] =>
  * A pathname the table can only answer with its catch-all, so the build can
  * render `not-found.tsx` without waiting for a visitor to find it.
  *
- * One segment deeper than the longest concrete pattern, spelled with a
- * segment no literal uses: a pattern of a different length cannot match, and
- * parameters consume exactly one segment each, so nothing but a wildcard is
- * left. Which wildcard is not in question — the build refuses a table with
- * more than one. Returns null when there is no catch-all at all.
+ * Built from the catch-all's own prefix — its literal segments kept, its
+ * parameters filled with a segment no literal uses — and then taken one
+ * segment deeper than the longest concrete pattern. Keeping the literals is
+ * what reaches a `not-found.tsx` that sits under a named directory; going
+ * deeper is what stops any real page from answering first, since parameters
+ * consume exactly one segment each. Returns null when there is no catch-all;
+ * which one is never in question, because the build refuses a table with more
+ * than one.
  */
 export const catchAllPath = (dir: RouteDir): string | null => {
-  if (catchAllPatterns(dir).length === 0) return null;
+  const [pattern] = catchAllPatterns(dir);
+  if (pattern === undefined) return null;
+  const prefix = pattern
+    .slice(0, -'/*'.length)
+    .split('/')
+    .filter(Boolean)
+    .map((segment) => (segment.startsWith(':') ? SENTINEL : segment));
   const depth = Math.max(
-    1,
+    prefix.length + 1,
     ...patternsOf(dir)
-      .filter((pattern) => !pattern.endsWith('/*'))
-      .map((pattern) => pattern.split('/').filter(Boolean).length),
+      .filter((each) => !each.endsWith('/*'))
+      .map((each) => each.split('/').filter(Boolean).length + 1),
   );
-  return `/${Array.from({ length: depth + 1 }, () => SENTINEL).join('/')}`;
+  const filler = Array.from({ length: depth - prefix.length }, () => SENTINEL);
+  return `/${[...prefix, ...filler].join('/')}`;
 };
 
 /**
@@ -93,8 +109,12 @@ export const planPaths = (
   const paths = patterns.filter((pattern) => isConcrete(pattern));
   const unresolved: string[] = [];
   const unusable = supplied.filter((path) => !isConcrete(path));
-  const usable = supplied.filter((path) => isConcrete(path));
-  const used = new Set<string>();
+  // 末尾スラッシュは同じ pathname。ルーターがそう扱う以上、ビルドも揃える。
+  const usable = supplied
+    .filter((path) => isConcrete(path))
+    .map((path) => trimSlash(path));
+  // 表がそのまま持っているパスを渡してくるのは冗長なだけで、誤りではない。
+  const used = new Set<string>(paths);
 
   for (const pattern of patterns) {
     if (isConcrete(pattern) || pattern.endsWith('/*')) continue;
