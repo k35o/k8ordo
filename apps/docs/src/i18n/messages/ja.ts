@@ -61,6 +61,7 @@ export const ja = {
     '`writing-v`ユーティリティでwriting-modeを切り替えると、コンポーネントは縦書きの紙面でも崩れずに追従します。日本語ドキュメントを縦書きで体験できます。',
   'common.language': '言語',
   'footer.docs': 'ドキュメント',
+  'footer.packages': 'パッケージ',
   'footer.resources': 'リソース',
   'form.description':
     'zodスキーマ1つから、HTMLの制約属性・エラーメッセージ・サーバー検証を導きます。値はDOMが持つので、JavaScriptが落ちていても読み込み前でもフォームは動きます。',

@@ -55,6 +55,7 @@ export const MESSAGE_KEYS = [
   'ui.featureVerticalWritingDescription',
   'common.language',
   'footer.docs',
+  'footer.packages',
   'footer.resources',
   'form.description',
   'form.featuresTitle',

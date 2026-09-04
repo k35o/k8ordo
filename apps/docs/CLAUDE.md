@@ -1,7 +1,9 @@
 # Agent guide — apps/docs
 
-Documentation site for the `@k8ordo/*` packages (`ui`, `form`, `state`),
-built with Vite and `@funstack/router`. The site also dogfoods
+Documentation site for the `@k8ordo/*` packages (`ui`, `form`, `state`,
+`router`, `static`, `server`), built with Vite and `@funstack/router`. The
+`framework-engine` is internal and has no page: an application installs a mode
+package, never the engine. The site also dogfoods
 `@k8ordo/state`: the theme preference is a `defineLocalState`
 (`src/theme/context.tsx`, paired with the init script in `src/root.tsx`),
 and `/state`'s live demo is a real `definePageState` on the page's own URL.
@@ -19,6 +21,7 @@ pnpm check:write       # Oxlint/Oxfmt lint/format auto-fix
 ## Architecture
 
 - **Routing**: `@funstack/router` with `@funstack/static` for SSG
+- **Navigation mirrors the URL layout**: the header's first row is the packages and nothing else; the second row is the sections of the package you are currently in, so it is absent everywhere except under `/ui` (`src/components/navigation.tsx`). The footer is the same rule in columns — one `Packages` column, then a column per package that has sections. Never promote one package's sections to a site-wide row: with a single package it reads as convenience, with six it makes that package look like the site's spine.
 - **URL layout**: package-first. Everything a package documents lives under `/<package>/…` — `@k8ordo/ui` owns `/ui/get-started`, `/ui/components/*`, `/ui/hooks/*`, and so on. `/<package>` itself is that package's landing page (`src/pages/ui.tsx`): what it is, what it gives you, where to start. Only `/` is shared — it introduces k8ordo, lists the packages, and states what they all commit to. Add a new package by adding its own `/<package>` landing plus a `/<package>/…` subtree, and a row in `PACKAGES` on the home page; never put a package's sections at the top level, where they would sit at the same depth as package names.
 - **Unmatched routes**: the wildcard `path: '/*'` at the end of the `/:locale` children renders `src/pages/not-found.tsx`. Without it an unknown path renders nothing at all — a blank body, not a 404 page.
 - **i18n**: Custom i18n system in `src/i18n/` with locale-based routing (`/ja/`, `/en/`)

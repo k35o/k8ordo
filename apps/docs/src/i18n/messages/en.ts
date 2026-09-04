@@ -62,6 +62,7 @@ export const en = {
     'Switch writing-mode with the `writing-v` utility and every component follows along on a vertical page. Preview the Japanese docs in vertical mode.',
   'common.language': 'Language',
   'footer.docs': 'Documentation',
+  'footer.packages': 'Packages',
   'footer.resources': 'Resources',
   'form.description':
     'One zod schema produces the HTML constraint attributes, the messages, and the server-side validation. The DOM holds the values, so the form works with JavaScript disabled or not yet loaded.',
