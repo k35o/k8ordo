@@ -45,8 +45,15 @@ const dependsOnState = async (root: string): Promise<boolean> => {
   try {
     const manifest = JSON.parse(
       await readFile(path.join(root, 'package.json'), 'utf8'),
-    ) as { dependencies?: Record<string, string> };
-    return '@k8ordo/state' in (manifest.dependencies ?? {});
+    ) as {
+      dependencies?: Record<string, string>;
+      devDependencies?: Record<string, string>;
+    };
+    // どちらに置くかはアプリの流儀で、意味は変わらない
+    return (
+      '@k8ordo/state' in (manifest.dependencies ?? {}) ||
+      '@k8ordo/state' in (manifest.devDependencies ?? {})
+    );
   } catch {
     return false;
   }
@@ -62,6 +69,14 @@ export const generate = async (
 ): Promise<GenerateResult> => {
   const files = await scanRoutes(options.routesDir);
   const { tree, problems } = parseRouteTree(files);
+  // 壊れた木から作った表を置いていくと、次のビルドがそれを読んで別の失敗を
+  // する。報告するものがあるうちは何も書かない。
+  if (problems.length > 0) {
+    return {
+      problems,
+      routesModule: path.join(options.outDir, 'routes.gen.ts'),
+    };
+  }
 
   const toRoutes = path
     .relative(options.outDir, options.routesDir)

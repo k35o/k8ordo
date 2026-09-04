@@ -71,8 +71,6 @@ export const buildTable = <T>(
 export type EmitOptions = {
   /** Import specifier prefix for the route files, e.g. `./routes`. */
   readonly importPrefix: string;
-  /** Overridable so examples and tests can point at a local build. */
-  readonly routerModule?: string;
 };
 
 const BANNER =
@@ -131,7 +129,6 @@ export const emitRoutesModule = (
   options: EmitOptions,
 ): string => {
   const namer = createNamer();
-  const router = options.routerModule ?? '@k8ordo/router';
   const table = buildTable(tree, namer.take);
 
   const body = Object.entries(table).map(
@@ -145,7 +142,7 @@ export const emitRoutesModule = (
   return [
     BANNER,
     '',
-    `import { defineRoutes } from '${router}';`,
+    `import { defineRoutes } from '@k8ordo/router';`,
     '',
     ...importLines,
     '',
@@ -159,7 +156,6 @@ export const emitRoutesModule = (
 export type RegisterOptions = {
   /** Import specifier of the generated routes module, e.g. `./routes.gen`. */
   readonly routesModule: string;
-  readonly routerModule?: string;
   /** Present only when the application depends on `@k8ordo/state`. */
   readonly stateModule?: string | null;
 };
@@ -169,14 +165,13 @@ export type RegisterOptions = {
  * the app gets typed paths everywhere without writing the ceremony itself.
  */
 export const emitRegisterModule = (options: RegisterOptions): string => {
-  const router = options.routerModule ?? '@k8ordo/router';
   const lines = [
     BANNER,
     '',
-    `import type { RouteOf } from '${router}';`,
+    `import type { RouteOf } from '@k8ordo/router';`,
     `import type { routes } from '${options.routesModule}';`,
     '',
-    `declare module '${router}' {`,
+    `declare module '@k8ordo/router' {`,
     '  interface Register {',
     '    routes: typeof routes;',
     '  }',

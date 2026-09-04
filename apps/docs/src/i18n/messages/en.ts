@@ -162,9 +162,9 @@ export const en = {
   'static.docsDescription':
     'The guide ships inside the npm package. An AI coding assistant reads the exact installed version out of `node_modules/@k8ordo/static/docs/`.',
   'server.description':
-    'Runs an application. Pages are rendered per request, so they can depend on the request, answer with real HTTP status codes, and receive Server Actions.',
+    'Runs an application. Every request is answered by rendering, so route parameters need no list of values, an unknown URL is a real 404, and a form can post to a Server Action.',
   'server.featuresTitle': 'Features',
-  'server.featureRequest': 'The request is available',
+  'server.featureRequest': 'Values arrive with the request',
   'server.featureRequestDescription':
     "Parameter values arrive with the request, so nothing has to be enumerated ahead of time. An unknown URL gets your not-found page under a genuine 404 rather than the host's error page.",
   'server.featureRoutes': 'routes/ is the URL space',

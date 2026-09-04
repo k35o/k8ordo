@@ -1,8 +1,8 @@
 # @k8ordo/server
 
-Runs a k8ordo application. Pages are rendered per request, so they can depend
-on the request, answer with real HTTP status codes, and receive Server
-Actions.
+Runs a k8ordo application. Every request is answered by rendering, which is
+what makes route parameters need no list of values, an unknown URL a real 404,
+and a Server Action something a form can post to.
 
 Like every k8ordo package it assumes React 19 and Server Components, uses only
 what has reached Baseline newly available, and ships no polyfills or legacy
@@ -24,8 +24,8 @@ route instead of once per request.
 ## Getting started
 
 ```bash
-pnpm add @k8ordo/router react react-dom server-only
-pnpm add -D @k8ordo/server vite
+pnpm add @k8ordo/router @k8ordo/server react react-dom server-only
+pnpm add -D vite
 ```
 
 ```ts
@@ -305,8 +305,10 @@ both worlds without knowing which one it is in.
 
 ## What running buys over static
 
-A page can read the request; an unknown URL gets a real 404 rather than
-whatever the host would have said; parameterised routes need no list of
-values; and a form can post to a Server Action. If none of that is needed,
+An unknown URL gets a real 404 from the application rather than whatever the
+host would have said; parameterised routes need no list of values, so a
+catalogue that changes does not need a rebuild; and a form can post to a
+Server Action. A page receives its `params` and nothing else of the request —
+there is no headers or cookies API yet. If none of that is needed,
 `@k8ordo/static` renders the same application into files — the same grammar,
 the same boundaries, the same handler, called once per route.

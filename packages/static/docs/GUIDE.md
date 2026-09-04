@@ -14,9 +14,12 @@ checked rather than remembered.
 
 ## The mode is the dependency
 
-Installing this package is what makes an application static. Server Actions and
-request-time data are not rules to remember here: they are APIs that do not
-exist, because the package that provides them is not installed. Choosing the
+Installing this package is what makes an application static. Server Actions
+and request-time data are not rules to remember here: they are APIs that do
+not exist, because the package that provides them is not installed. The one
+seam is `vite dev`, which is a running server and will happily accept an
+action POST that the built files then cannot — so a form that works in dev and
+not in the output is the shape of that mistake. Choosing the
 other mode means installing `@k8ordo/server` instead, and nothing else about
 the application changes — the same route grammar, the same boundaries, the same
 request handler, called once per route instead of once per request.

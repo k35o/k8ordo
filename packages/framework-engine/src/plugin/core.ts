@@ -129,15 +129,22 @@ export const engine = (
 
     async buildStart() {
       const { problems } = await generate({ root, routesDir, outDir });
-      for (const problem of problems) {
-        this.error(`routes/${problem.path}: ${problem.message}`);
+      // this.error は投げるので、1 件ずつ渡すと最初の 1 件しか出ない。文法は
+      // 全部集めて返してくるのだから、全部見せる。
+      if (problems.length > 0) {
+        this.error(
+          `routes/ is not a valid pathname space:\n${problems
+            .map((problem) => `  routes/${problem.path}: ${problem.message}`)
+            .join('\n')}`,
+        );
       }
     },
 
     configureServer(server) {
       server.watcher.add(routesDir);
       const regenerate = (file: string): void => {
-        if (!file.startsWith(routesDir)) return;
+        // `routes` と `routes-x` を取り違えないよう、区切りまで含めて見る
+        if (!file.startsWith(`${routesDir}${path.sep}`)) return;
         void (async () => {
           const { problems } = await generate({ root, routesDir, outDir });
           for (const problem of problems) {

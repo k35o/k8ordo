@@ -161,9 +161,9 @@ export const ja = {
   'static.docsDescription':
     '設計ガイドは npm パッケージに同梱されています。AIコーディングエージェントは `node_modules/@k8ordo/static/docs/` からインストールした版そのものを読みます。',
   'server.description':
-    'アプリを動かします。ページはリクエストごとに描画されるので、リクエストに依存でき、本物の HTTP ステータスを返せ、Server Actions を受け取れます。',
+    'アプリを動かします。リクエストのたびに描画するので、パラメータの値を事前に列挙する必要がなく、知らない URL には本物の 404 を返し、フォームは Server Action に届きます。',
   'server.featuresTitle': '特徴',
-  'server.featureRequest': 'リクエストに依存できる',
+  'server.featureRequest': '値はリクエストと来る',
   'server.featureRequestDescription':
     'パラメータの値はリクエストと一緒に来るので、事前に列挙する必要がありません。知らない URL には、ホスティングのエラーページではなく自分の not-found を本物の 404 で返します。',
   'server.featureRoutes': 'routes/ が URL 空間',

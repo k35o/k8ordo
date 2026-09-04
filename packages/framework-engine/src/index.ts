@@ -1,3 +1,8 @@
+/**
+ * What the two mode packages need from the engine, and nothing else. This is
+ * internal: an application installs `@k8ordo/static` or `@k8ordo/server`, and
+ * this package is published only so those two can resolve it.
+ */
 export { parseRouteTree } from './grammar/tree';
 export type {
   ParseResult,
@@ -5,25 +10,9 @@ export type {
   RouteDir,
   RouteDirKind,
 } from './grammar/tree';
-export {
-  buildTable,
-  emitRegisterModule,
-  emitRoutesModule,
-} from './generate/emit';
-export type {
-  EmitOptions,
-  RegisterOptions,
-  TableBranch,
-  TableNode,
-} from './generate/emit';
-export { generate, scanRoutes } from './generate/write';
-export type { GenerateOptions, GenerateResult } from './generate/write';
+export { buildTable } from './generate/emit';
+export type { TableBranch, TableNode } from './generate/emit';
+export { scanRoutes } from './generate/write';
 export { engine } from './plugin/core';
 export type { EngineOptions } from './plugin/core';
-export {
-  isPayloadPath,
-  pagePathFor,
-  payloadPathFor,
-} from './runtime/payload-path';
-export { ACTION_ID_HEADER } from './runtime/payload';
-export type { Payload } from './runtime/payload';
+export { payloadPathFor } from './runtime/payload-path';
