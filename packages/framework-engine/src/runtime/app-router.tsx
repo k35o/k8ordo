@@ -11,6 +11,7 @@ import {
 import { startTransition, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 
+import { isPayload } from './is-payload';
 import { ACTION_ID_HEADER } from './payload';
 import type { Payload } from './payload';
 import { payloadPathFor } from './payload-path';
@@ -71,8 +72,7 @@ export function AppRouter({ tree }: { tree: ReactNode }): ReactNode {
     claim: (url) => url.origin === location.origin,
     load: async (url, signal) => {
       const response = await fetch(payloadPathFor(url.pathname), { signal });
-      const type = response.headers.get('content-type') ?? '';
-      if (!response.ok || !type.startsWith('text/x-component')) {
+      if (!isPayload(response)) {
         // Not a page of this application: a file the host serves, or a URL
         // nothing answers. Interception already committed the URL, so
         // reloading asks the server for exactly what the browser would have

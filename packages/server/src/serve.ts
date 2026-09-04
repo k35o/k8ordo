@@ -139,9 +139,14 @@ export const serve = async (options: ServeOptions = {}): Promise<void> => {
           return;
         }
         // lib.dom と node:stream/web の ReadableStream は同じものの別宣言
-        Readable.fromWeb(result.body as unknown as NodeReadableStream).pipe(
-          response,
+        const body = Readable.fromWeb(
+          result.body as unknown as NodeReadableStream,
         );
+        // 静的ファイルと同じ理由。送信開始後の失敗は writeHead を打ち直せない
+        body.on('error', () => {
+          response.destroy();
+        });
+        body.pipe(response);
       })().catch((error: unknown) => {
         response.writeHead(500, { 'content-type': 'text/plain' });
         response.end(String(error));

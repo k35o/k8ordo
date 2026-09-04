@@ -3,7 +3,11 @@ import path from 'node:path';
 
 import { parseRouteTree } from '../grammar/tree';
 import type { Problem } from '../grammar/tree';
-import { emitRegisterModule, emitRoutesModule } from './emit';
+import {
+  emitRegisterModule,
+  emitRoutesModule,
+  unreachableRoutes,
+} from './emit';
 
 /** The filesystem edge: everything below it is a pure function of this list. */
 export const scanRoutes = async (dir: string): Promise<string[]> => {
@@ -68,7 +72,14 @@ export const generate = async (
   options: GenerateOptions,
 ): Promise<GenerateResult> => {
   const files = await scanRoutes(options.routesDir);
-  const { tree, problems } = parseRouteTree(files);
+  const parsed = parseRouteTree(files);
+  // 文法として正しくても、順序で救えない重なりは残る。表を組んだ後でないと
+  // 分からないので、ここで一緒にする。
+  const problems = [
+    ...parsed.problems,
+    ...(parsed.problems.length > 0 ? [] : unreachableRoutes(parsed.tree)),
+  ];
+  const { tree } = parsed;
   // 壊れた木から作った表を置いていくと、次のビルドがそれを読んで別の失敗を
   // する。報告するものがあるうちは何も書かない。
   if (problems.length > 0) {

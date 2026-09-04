@@ -1,5 +1,9 @@
 import { parseRouteTree } from '../grammar/tree';
-import { emitRegisterModule, emitRoutesModule } from './emit';
+import {
+  emitRegisterModule,
+  emitRoutesModule,
+  unreachableRoutes,
+} from './emit';
 
 const emit = (files: readonly string[]): string => {
   const { tree, problems } = parseRouteTree(files);
@@ -85,5 +89,59 @@ describe('the emitted register', () => {
 
     const without = emitRegisterModule({ routesModule: './routes.gen' });
     expect(without).not.toContain('@k8ordo/state');
+  });
+});
+
+// ディレクトリは名前順で届く。その順序でしか出ない重なりを見たいので、
+// ここでも同じに並べる。
+const treeOf = (files: readonly string[]) => {
+  const { tree, problems } = parseRouteTree(files.toSorted());
+  expect(problems).toStrictEqual([]);
+  return tree;
+};
+
+describe('unreachableRoutes', () => {
+  it('says nothing when every route can be reached', () => {
+    expect(
+      unreachableRoutes(
+        treeOf(['page.tsx', 'about/page.tsx', '[slug]/page.tsx']),
+      ),
+    ).toStrictEqual([]);
+  });
+
+  it('names the route a group makes unreachable, and what took it', () => {
+    // グループは両方の種類の URL を 1 つのキーの下に持つので、順序では
+    // 直せない。ページが黙って出荷されないより、落ちる方がよい。
+    const problems = unreachableRoutes(
+      treeOf([
+        'page.tsx',
+        'about/page.tsx',
+        '(shop)/layout.tsx',
+        '(shop)/sale/page.tsx',
+        '(shop)/[id]/page.tsx',
+      ]),
+    );
+    expect(problems).toStrictEqual([
+      {
+        path: 'about/page.tsx',
+        message:
+          '"/about" can never match — "/:id" ((shop)/[id]/page.tsx) is declared first and answers it',
+      },
+    ]);
+  });
+
+  it('names a route the catch-all above it swallows', () => {
+    const problems = unreachableRoutes(
+      treeOf([
+        'page.tsx',
+        'about/page.tsx',
+        '(shell)/layout.tsx',
+        '(shell)/docs/page.tsx',
+        '(shell)/not-found.tsx',
+      ]),
+    );
+    expect(problems.map((problem) => problem.path)).toStrictEqual([
+      'about/page.tsx',
+    ]);
   });
 });

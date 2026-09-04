@@ -96,7 +96,9 @@ src/routes/
   grammar accepts. Anything else lives under a `_`-prefixed directory, which
   the grammar skips entirely.
 - **A page receives `params`; a layout receives `children`.** Server Components
-  cannot read context, so nesting is by prop.
+  cannot read context, so nesting is by prop. Both also receive `pathname` —
+  the URL this render is for, which is how a component above a parameter can
+  see the value that parameter names.
 - Parameters need no enumeration in this mode — the value arrives with the
   request.
 
