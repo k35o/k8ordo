@@ -1,6 +1,7 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import react from '@vitejs/plugin-react';
 import rsc from '@vitejs/plugin-rsc';
 import type { Plugin, PluginOption } from 'vite';
 
@@ -173,5 +174,8 @@ export const engine = (
     },
   };
 
-  return [rsc(), plugin];
+  // React 自身のプラグインはフレームワークが持つ。無くてもビルドは通るが、
+  // クライアントコンポーネントの編集が Fast Refresh ではなくページ再読み込みに
+  // なる。アプリごとに書き忘れても気づけない類の配線なので、ここに置く。
+  return [react(), rsc(), plugin];
 };

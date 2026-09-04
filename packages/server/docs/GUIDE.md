@@ -43,6 +43,10 @@ export default defineConfig({ plugins: [k8ordoServer()] });
 }
 ```
 
+`.k8ordo` starts with a dot, and a bare directory entry in `include` silently
+skips it — the glob is what makes the generated types apply. Without it the
+build still works and `href` simply stops being checked against the table.
+
 ```tsx
 // src/routes/layout.tsx — no directive, so this is a Server Component
 import type { ReactNode } from 'react';
@@ -64,7 +68,7 @@ export default function HomePage() {
 ```
 
 ```bash
-vite dev     # the same pipeline as production, with HMR
+vite dev     # the same pipeline as production, with Fast Refresh
 vite build   # dist/
 node serve.js
 ```

@@ -4,6 +4,7 @@ import { render } from 'vitest-browser-react';
 
 import { defineRoutes } from './define-routes';
 import { href, navigateTo } from './links';
+import { usePathname } from './location';
 import { Outlet, Router, useParams, useRoute } from './router';
 
 let listMounts = 0;
@@ -19,8 +20,15 @@ const HomePage: FC = () => (
 
 const AboutPage: FC = () => <div data-testid="about">about</div>;
 
+// 表を持たない現在地の読み手。レイアウトに置いて、子のルートが入れ替わっても
+// マウントされたままにする
+const PathnameProbe: FC = () => (
+  <span data-testid="pathname">{usePathname()}</span>
+);
+
 const Shell: FC = () => (
   <section data-testid="shell">
+    <PathnameProbe />
     <Outlet />
   </section>
 );
@@ -141,6 +149,32 @@ it('renders nothing when mounted on a pathname outside the table', async () => {
   const screen = await render(<Router routes={routes} />);
 
   expect(screen.container.textContent).toBe('');
+});
+
+it('reports the pathname the browser is on, without consulting the table', async () => {
+  const screen = await render(<Router routes={routes} />);
+  await navigateTo('/products', { history: 'replace' }).finished;
+  await expect
+    .element(screen.getByTestId('pathname'))
+    .toHaveTextContent('/products');
+
+  await navigateTo('/products/:id', { id: 'shoes' }).finished;
+  await expect
+    .element(screen.getByTestId('pathname'))
+    .toHaveTextContent('/products/shoes');
+});
+
+it('holds the pathname still when only the search moves', async () => {
+  const screen = await render(<Router routes={routes} />);
+  await navigateTo('/products', { history: 'replace' }).finished;
+
+  const url = new URL(location.href);
+  url.searchParams.set('q', 'shoes');
+  await navigation.navigate(url.href, { history: 'replace' }).finished;
+
+  await expect
+    .element(screen.getByTestId('pathname'))
+    .toHaveTextContent('/products');
 });
 
 it('shows the navigation that won, not the one it overtook', async () => {

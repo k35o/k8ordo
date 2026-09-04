@@ -91,7 +91,7 @@ export const ja = {
     '状態を「どこに住むか」で宣言します。URLのsearchParams・履歴エントリ・localStorage・メモリの4つの置き場所を、それぞれzodスキーマ1つで型付けし、サーバーの読み取り・リンク生成・購読までそこから導きます。',
   'state.demoTitle': 'このページで動いています',
   'state.demoDescription':
-    '下の操作は本物のURLを書き換えます。`definePageState` の update がこのサイトのルーター（Navigation API を intercept する @funstack/router）を通って流れます。ヘッダーのテーマ切り替えの保存先も `defineLocalState` で、その現在値が theme の行です。',
+    '下の操作は本物のURLを書き換えます。`definePageState` の update がこのサイトのルーター（Navigation API を intercept する @k8ordo/router）を通って流れます。ヘッダーのテーマ切り替えの保存先も `defineLocalState` で、その現在値が theme の行です。',
   'state.demoUrlEmpty': 'クエリなし（すべて default）',
   'state.demoThemeSystem': 'システムに追従',
   'state.demoHint':

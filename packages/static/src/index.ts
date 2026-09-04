@@ -11,15 +11,26 @@ import {
 import type { EngineOptions } from '@k8ordo/framework-engine';
 import type { Plugin, PluginOption } from 'vite';
 
-import { catchAllPath, catchAllPatterns, planPaths } from './paths';
+import {
+  catchAllPath,
+  catchAllPatterns,
+  patternsNeedingPaths,
+  planPaths,
+} from './paths';
 
 export type StaticOptions = EngineOptions & {
   /**
    * Pathnames for routes with parameters. Static rendering cannot invent
    * them, and a build that quietly skipped half the site would be worse than
    * one that refuses.
+   *
+   * The patterns that need covering are handed in, so a site whose parameter
+   * takes the same values everywhere — a locale segment, say — expands them
+   * rather than listing every page twice.
    */
-  readonly paths?: () => readonly string[] | Promise<readonly string[]>;
+  readonly paths?: (
+    patterns: readonly string[],
+  ) => readonly string[] | Promise<readonly string[]>;
 };
 
 type Handler = (request: Request) => Promise<Response>;
@@ -48,7 +59,8 @@ export const k8ordoStatic = (options: StaticOptions = {}): PluginOption[] => {
       order: 'post',
       async handler(builder) {
         const { tree } = parseRouteTree(await scanRoutes(routesDir));
-        const supplied = (await options.paths?.()) ?? [];
+        const supplied =
+          (await options.paths?.(patternsNeedingPaths(tree))) ?? [];
         const plan = planPaths(tree, supplied);
         if (plan.unresolved.length > 0) {
           throw new Error(
@@ -154,4 +166,10 @@ const write = async (
 };
 
 export type { PathPlan } from './paths';
-export { catchAllPath, catchAllPatterns, patternsOf, planPaths } from './paths';
+export {
+  catchAllPath,
+  catchAllPatterns,
+  patternsNeedingPaths,
+  patternsOf,
+  planPaths,
+} from './paths';

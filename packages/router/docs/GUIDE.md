@@ -135,7 +135,13 @@ to while the chunk arrives.
 ## Links and navigation
 
 ```tsx
-import { href, navigateTo, useParams, useRoute } from '@k8ordo/router';
+import {
+  href,
+  navigateTo,
+  useParams,
+  usePathname,
+  useRoute,
+} from '@k8ordo/router';
 
 <a href={href('/products/:id', { id })}>…</a>;
 <a href={href('/products')}>…</a>; // no params, no second argument
@@ -145,13 +151,36 @@ navigateTo('/products', { history: 'replace' });
 
 const { id } = useParams('/products/:id');
 const { pattern } = useRoute(); // untyped: the winning pattern and its params
+const pathname = usePathname(); // where the browser is, table or no table
 ```
 
 **There is no `<Link>`.** Under the Navigation API a plain `<a>` is already a
 client navigation — the router intercepts the event the browser was going to
 send anyway. A component wrapping it would add a second way to write the same
-thing and nothing else. An active link is `useRoute().pattern === '/products'`,
-not a prop.
+thing and nothing else. An active link is a comparison you write yourself —
+`useRoute().pattern === '/products'` against the table, or
+`usePathname() === href('/products')` against the URL — not a prop.
+
+**`usePathname` changes when the URL changes, not when the new page appears.**
+Interception commits the URL first and the tree arrives when it has loaded, so
+on a slow navigation a link marks itself active while the previous page is
+still on screen — the same order the browser's own address bar follows. Pair it
+with `useTransition` if the wait needs showing:
+
+```tsx
+const [isPending, startTransition] = useTransition();
+startTransition(async () => {
+  await navigateTo('/products/:id', { id }).finished;
+});
+```
+
+`usePathname` reads the platform rather than the table, which is why it is the
+one that also works under the framework, where the browser holds no table at
+all. It answers _where the URL is_; `useRoute` answers _which route won_, and
+only something holding the table can say that. The search string is
+deliberately not on offer here: a component re-rendering on every search change
+would defeat `@k8ordo/state`'s keyed subscriptions, and the split at the `?` is
+the boundary between the two packages.
 
 `href` refuses a wildcard: `/*` is something to match, never something to link
 to. Param values are URL-encoded on the way in and decoded on the way out.
@@ -270,5 +299,8 @@ useInterceptedNavigation<Value>({
 });
 ```
 
-`href`, `navigateTo` and `useParams` are the same in both worlds, which is why
-a page written for one keeps working under the other.
+What carries across unchanged is everything that needs no table: `href`,
+`navigateTo` and `usePathname`. What does not is `useRoute` and `useParams` —
+both read the match from context, and under the framework there is no match in
+the browser to read. A framework page receives its `params` as a prop from the
+server instead, which is the only form Server Components can take them in.

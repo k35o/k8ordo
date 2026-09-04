@@ -1,7 +1,8 @@
-import funstackStatic from '@funstack/static';
+import { k8ordoStatic } from '@k8ordo/static';
 import tailwindcss from '@tailwindcss/vite';
-import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
+
+import { LOCALES } from './src/i18n/types';
 
 export default defineConfig({
   server: {
@@ -9,11 +10,14 @@ export default defineConfig({
     port: Number(process.env.PORT) || 5173,
   },
   plugins: [
-    funstackStatic({
-      root: './src/root.tsx',
-      app: './src/app.tsx',
+    k8ordoStatic({
+      // ロケールは全ページに掛かる区間なので、埋まっていないパターンを
+      // そのままロケールの数だけ展開する
+      paths: (patterns) =>
+        patterns.flatMap((pattern) =>
+          LOCALES.map((locale) => pattern.replace('/:locale', `/${locale}`)),
+        ),
     }),
     tailwindcss(),
-    react(),
   ],
 });

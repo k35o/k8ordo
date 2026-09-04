@@ -72,6 +72,15 @@ export const catchAllPath = (dir: RouteDir): string | null => {
   return `/${[...prefix, ...filler].join('/')}`;
 };
 
+/**
+ * The patterns the build cannot answer on its own. A catch-all is excluded:
+ * it is rendered as the not-found file, never as a page of its own.
+ */
+export const patternsNeedingPaths = (dir: RouteDir): string[] =>
+  patternsOf(dir).filter(
+    (pattern) => !isConcrete(pattern) && !pattern.endsWith('/*'),
+  );
+
 export type PathPlan = {
   /** Concrete pathnames to render, in table order. */
   readonly paths: readonly string[];

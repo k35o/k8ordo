@@ -12,11 +12,14 @@ import type { Payload } from './payload';
 const payload = await createFromReadableStream<Payload>(
   rscStream as ReadableStream<Uint8Array>,
 );
+
 type HydrateOptions = NonNullable<Parameters<typeof hydrateRoot>[2]>;
 
 // Present only when a form was posted without JavaScript. Hydration has to be
 // told, or React discards the result the page came back with and the message
 // the visitor is reading disappears the moment the script loads.
-hydrateRoot(document, <AppRouter tree={payload.tree} />, {
-  formState: payload.formState as HydrateOptions['formState'],
-});
+hydrateRoot(
+  document,
+  <AppRouter pathname={payload.pathname} tree={payload.tree} />,
+  { formState: payload.formState as HydrateOptions['formState'] },
+);

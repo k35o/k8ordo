@@ -4,6 +4,7 @@ import { createContext, use, useMemo, useState } from 'react';
 import type { FC, ReactNode } from 'react';
 
 import type { Match, RouteComponent, Routes } from './define-routes';
+import { PathnameProvider } from './location';
 import { useInterceptedNavigation } from './navigation';
 import type { ParamsOf } from './paths';
 import type { RegisteredPattern } from './register';
@@ -67,9 +68,11 @@ export function Router({ routes }: { routes: Routes }): ReactNode {
 
   const value = useMemo(() => ({ routes, match }), [routes, match]);
   return (
-    <RouterContext value={value}>
-      {match === null ? null : <RenderStack stack={match.stack} index={0} />}
-    </RouterContext>
+    <PathnameProvider pathname={location.pathname}>
+      <RouterContext value={value}>
+        {match === null ? null : <RenderStack stack={match.stack} index={0} />}
+      </RouterContext>
+    </PathnameProvider>
   );
 }
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useLocation } from '@funstack/router';
+import { usePathname } from '@k8ordo/router';
 
 import type { NavCategory } from '../data/nav-types';
 import { localizeHref, useTranslation } from '../i18n';
@@ -13,7 +13,7 @@ type Props = {
 
 export function SideNavigation({ categories, onNavigate }: Props) {
   const { t, locale } = useTranslation();
-  const location = useLocation();
+  const pathname = usePathname();
 
   return (
     <nav className="flex flex-col gap-6 overflow-y-auto py-4">
@@ -26,7 +26,7 @@ export function SideNavigation({ categories, onNavigate }: Props) {
           <ul className="border-border-mute mt-1 ml-3 flex flex-col gap-0.5 border-l">
             {category.items.map((item) => {
               const href = localizeHref(item.path, locale);
-              const isActive = location.pathname === href;
+              const isActive = pathname === href;
               return (
                 <li key={item.path}>
                   <LocaleAnchor

@@ -46,6 +46,10 @@ export default defineConfig({ plugins: [k8ordoStatic()] });
 }
 ```
 
+`.k8ordo` starts with a dot, and a bare directory entry in `include` silently
+skips it — the glob is what makes the generated types apply. Without it the
+build still works and `href` simply stops being checked against the table.
+
 ```tsx
 // src/routes/layout.tsx — no directive, so this is a Server Component
 import type { ReactNode } from 'react';
@@ -68,6 +72,7 @@ export default function HomePage() {
 
 ```bash
 vite dev     # a real server, so the pages behave as they will in production
+             # (Fast Refresh included — the framework brings React's plugin)
 vite build   # dist/client/ is the site
 ```
 
@@ -232,6 +237,19 @@ k8ordoStatic({
     const products = await readCatalog();
     return products.map((product) => `/products/${product.id}`);
   },
+});
+```
+
+The patterns that still need covering are handed in, so a parameter that takes
+the same values everywhere — a locale segment, say — is expanded rather than
+listed once per page:
+
+```ts
+k8ordoStatic({
+  paths: (patterns) =>
+    patterns.flatMap((pattern) =>
+      ['ja', 'en'].map((locale) => pattern.replace('/:locale', `/${locale}`)),
+    ),
 });
 ```
 

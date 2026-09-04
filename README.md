@@ -51,7 +51,7 @@ pnpm build
 
 ```
 apps/
-  docs/                  # ordo.k8o.me (Vite + @funstack/router)
+  docs/                  # ordo.k8o.me (@k8ordo/static でビルドしている)
 packages/
   ui/                    # @k8ordo/ui
   form/                  # @k8ordo/form

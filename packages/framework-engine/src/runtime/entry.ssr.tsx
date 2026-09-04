@@ -23,7 +23,7 @@ export async function renderHtml(
   const [forHtml, forHydration] = rscStream.tee();
   const payload = await createFromReadableStream<Payload>(forHtml);
   const htmlStream = await renderToReadableStream(
-    <AppRouter tree={payload.tree} />,
+    <AppRouter pathname={payload.pathname} tree={payload.tree} />,
     {
       bootstrapModules: [getClientEntryUrl()],
       // Present only when a form was posted without JavaScript: it is how

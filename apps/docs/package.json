@@ -14,8 +14,7 @@
     "check:write": "vp check --fix"
   },
   "dependencies": {
-    "@funstack/router": "1.2.0",
-    "@funstack/static": "1.2.0",
+    "@k8ordo/router": "workspace:^",
     "@k8ordo/state": "workspace:^",
     "@k8ordo/ui": "workspace:^",
     "@tailwindcss/vite": "catalog:",
@@ -25,9 +24,9 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
+    "@k8ordo/static": "workspace:^",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
-    "@vitejs/plugin-react": "6.0.5",
     "react": "catalog:",
     "react-dom": "catalog:",
     "vite": "8.2.1"
