@@ -65,6 +65,8 @@ describe('match', () => {
 
   it('treats a trailing slash as the same pathname', () => {
     expect(routes.match('/ja/products/')?.pattern).toBe('/:locale/products');
+    expect(routes.match('/ja/products///')?.pattern).toBe('/:locale/products');
+    expect(routes.match('///')?.pattern).toBe('/');
   });
 
   it('decodes param values from the pathname', () => {

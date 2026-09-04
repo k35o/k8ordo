@@ -8,8 +8,13 @@
 const SUFFIX = '/index.rsc';
 
 export const payloadPathFor = (pathname: string): string => {
-  const trimmed = pathname.replace(/\/+$/u, '');
-  return `${trimmed}${SUFFIX}`;
+  // 末尾を走査で落とす。`/\/+$/` は「/」だけの長い pathname に対して開始位置
+  // ごとに末尾まで走るので、リクエストから来る入力には二乗の穴になる。
+  let end = pathname.length;
+  while (end > 0 && pathname.charAt(end - 1) === '/') {
+    end -= 1;
+  }
+  return `${pathname.slice(0, end)}${SUFFIX}`;
 };
 
 export const isPayloadPath = (pathname: string): boolean =>

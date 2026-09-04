@@ -68,11 +68,13 @@ export const joinPattern = (prefix: string, key: string): string =>
  * form, root excepted.
  */
 export const normalizePathname = (pathname: string): string => {
-  if (pathname.length > 1 && pathname.endsWith('/')) {
-    const stripped = pathname.replace(/\/+$/u, '');
-    return stripped === '' ? '/' : stripped;
+  // 末尾を走査で落とす。`/\/+$/` は「/」だけの長い pathname に対して
+  // 開始位置ごとに末尾まで走るので、URL から来る入力には二乗の穴になる。
+  let end = pathname.length;
+  while (end > 1 && pathname.charAt(end - 1) === '/') {
+    end -= 1;
   }
-  return pathname;
+  return pathname.slice(0, end);
 };
 
 export const buildHref = (

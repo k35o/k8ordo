@@ -8,6 +8,8 @@ describe('the payload path convention', () => {
 
   it('ignores a trailing slash, like the router does', () => {
     expect(payloadPathFor('/products/')).toBe('/products/index.rsc');
+    expect(payloadPathFor('/products///')).toBe('/products/index.rsc');
+    expect(payloadPathFor('///')).toBe('/index.rsc');
   });
 
   it('round-trips back to the page it belongs to', () => {
