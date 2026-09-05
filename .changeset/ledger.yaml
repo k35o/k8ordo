@@ -1,1 +1,4 @@
-{}
+"@k8ordo/state@0.1.1":
+  dir: packages/state
+  intents:
+    - state-url-round-trip
