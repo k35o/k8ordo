@@ -20,10 +20,10 @@
     "@k8ordo/state": "workspace:^",
     "@k8ordo/ui": "workspace:^",
     "@tailwindcss/vite": "catalog:",
-    "react-error-boundary": "6.1.2",
+    "react-error-boundary": "6.1.3",
     "shiki": "4.4.3",
     "tailwindcss": "catalog:",
-    "zod": "4.4.3"
+    "zod": "4.5.2"
   },
   "devDependencies": {
     "@k8ordo/static": "workspace:^",

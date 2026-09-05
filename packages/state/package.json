@@ -60,7 +60,7 @@
     "vite-plus": "catalog:",
     "vitest": "catalog:",
     "vitest-browser-react": "2.2.0",
-    "zod": "4.4.3"
+    "zod": "4.5.2"
   },
   "peerDependencies": {
     "@types/react": ">=19.2.18",
