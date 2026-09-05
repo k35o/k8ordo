@@ -1,5 +1,13 @@
 @import 'tailwindcss';
 @import '../../../../packages/ui/src/styles/index.css';
+/*
+ * フォントは自前で配る。外部への <link> を置くと、HTML を書き換える経路
+ * （Cloudflare Fonts など）が <head> を差し替えてしまい、document 全体を
+ * hydrate するこの構成では hydration mismatch になる。書き換える材料を
+ * 持たなければ起きない。
+ */
+@import '@fontsource-variable/m-plus-2';
+@import '@fontsource-variable/noto-sans-jp';
 
 /*
  * Background shared by the live preview area and the Shiki code block so they
@@ -22,12 +30,12 @@
 /*
  * tokens.css の @theme inline は --font-noto-sans-jp / --font-m-plus-2 を参照
  * するが、フォント変数自体の定義は利用側の責務。ここで定義することで
- * font-noto-sans-jp / font-m-plus-2 ユーティリティが有効になる
- * （フォントは routes/layout.tsx で Google Fonts から可変レンジ wght@400..700 を読込）。
+ * font-noto-sans-jp / font-m-plus-2 ユーティリティが有効になる。
+ * 名前に Variable が付くのは fontsource の可変フォントの family 名。
  */
 :root {
-  --font-noto-sans-jp: 'Noto Sans JP', sans-serif;
-  --font-m-plus-2: 'M PLUS 2', 'Noto Sans JP', sans-serif;
+  --font-noto-sans-jp: 'Noto Sans JP Variable', sans-serif;
+  --font-m-plus-2: 'M PLUS 2 Variable', 'Noto Sans JP Variable', sans-serif;
 }
 
 @layer base {
