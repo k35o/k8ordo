@@ -51,7 +51,7 @@
     "@arethetypeswrong/cli": "catalog:",
     "@types/react": "catalog:",
     "@vitejs/plugin-react": "catalog:",
-    "@vitest/browser-playwright": "4.1.10",
+    "@vitest/browser-playwright": "4.1.11",
     "publint": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
