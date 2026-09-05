@@ -53,13 +53,15 @@
     "@k8ordo/router": "workspace:^",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
+    "@vitest/browser-playwright": "4.1.10",
     "publint": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
     "typescript": "7.0.2",
     "vite": "catalog:",
     "vite-plus": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "vitest-browser-react": "2.2.0"
   },
   "peerDependencies": {
     "@k8ordo/router": "workspace:^",

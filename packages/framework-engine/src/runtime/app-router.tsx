@@ -8,13 +8,14 @@ import {
   encodeReply,
   setServerCallback,
 } from '@vitejs/plugin-rsc/browser';
-import { Component, startTransition, useEffect, useState } from 'react';
+import { startTransition, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 
 import { isPayload } from './is-payload';
 import { ACTION_ID_HEADER } from './payload';
 import type { Payload } from './payload';
 import { payloadPathFor } from './payload-path';
+import { markNavigated, Recover, reloadInstead } from './recover';
 
 /**
  * Where a Server Action's answer lands. The callback has to be registered
@@ -39,50 +40,6 @@ setServerCallback(async (id: string, args: unknown[]) => {
   applyPayload?.(payload);
   return payload.returnValue;
 });
-
-/**
- * Whether a client navigation has put a tree on screen yet. Until one has,
- * the tree being rendered is the one the server sent as HTML.
- */
-let navigated = false;
-
-/**
- * Where a page that fails to render goes. A document load of the same URL
- * shows the server's own answer — its 500, its error page — so a failed
- * client navigation falls back to exactly that, the way a URL that turns out
- * not to be a page already does. Left alone, React would unmount the root and
- * leave a blank document under the new URL, with nothing settling `finished`.
- *
- * Hydration is left to fail: a page whose HTML the server already rendered
- * cannot be made better by asking for it again, and reloading it would loop.
- */
-class Recover extends Component<{ children: ReactNode }, { failed: boolean }> {
-  override state = { failed: false };
-
-  static getDerivedStateFromError(): { failed: boolean } {
-    return { failed: true };
-  }
-
-  override componentDidCatch(error: unknown): void {
-    if (!navigated) throw error;
-    location.reload();
-  }
-
-  override render(): ReactNode {
-    return this.state.failed ? null : this.props.children;
-  }
-}
-
-/**
- * The document is being replaced; a value returned now would render into a
- * page that is on its way out.
- */
-const reloadInstead = <T,>(): Promise<T> => {
-  location.reload();
-  return new Promise<T>(() => {
-    /* never settles */
-  });
-};
 
 /**
  * The client half under the framework: the tree comes from the server, so
@@ -147,7 +104,7 @@ export function AppRouter({
       return payload.tree;
     },
     apply: (next) => {
-      navigated = true;
+      markNavigated();
       setCurrent(next);
     },
   });
