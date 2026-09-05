@@ -24,12 +24,13 @@ When installed via npm, these docs live under `node_modules/@k8ordo/server/docs/
 
 ## Entry point
 
-- `@k8ordo/server` — `k8ordoServer(options?)` returns the Vite plugins for an
-  application that runs; `options.routesDir` moves the route directory
+- `@k8ordo/server` — `framework(options?)` returns the Vite plugins for an
+  application that runs (the same name `@k8ordo/static` exports, so the mode
+  is the import and nothing else); `options.routesDir` moves the route directory
   (default `src/routes`). `serve({ dist?, port?, host? })` serves a build:
   the client build's files as they are, everything else through the request
   handler. The built handler is a plain
   `(request: Request) => Promise<Response>` default-exported from
-  `dist/rsc/index.js`, so another host can run it directly. `safeJoin(root,
-  pathname)` is the static-file resolution used by `serve`, which never lands
-  outside the build output.
+  `dist/rsc/index.js`, so another host can run it directly. `serve` only ever answers a
+  request from a file inside the client build, whatever the pathname is
+  spelled like.

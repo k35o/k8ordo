@@ -73,8 +73,9 @@ export const generate = async (
 ): Promise<GenerateResult> => {
   const files = await scanRoutes(options.routesDir);
   const parsed = parseRouteTree(files);
-  // 文法として正しくても、順序で救えない重なりは残る。表を組んだ後でないと
-  // 分からないので、ここで一緒にする。
+  // 文法として正しくても、順序で救えない重なりは残る。ただし文法が拒んだ名前
+  // (`(foo` など)は URLPattern にならないので、壊れた木の上で走らせると報告
+  // ではなく例外になる。だから文法が通ってからだけ見る。
   const problems = [
     ...parsed.problems,
     ...(parsed.problems.length > 0 ? [] : unreachableRoutes(parsed.tree)),
@@ -103,8 +104,11 @@ export const generate = async (
   await mkdir(options.outDir, { recursive: true });
   const routesModule = path.join(options.outDir, 'routes.gen.ts');
   await writeIfChanged(routesModule, routesSource);
+  // `.ts`, not `.d.ts`: a declaration file's errors are suppressed by
+  // `skipLibCheck`, so an application that also hand-wrote the augmentation
+  // would silently keep whichever one it liked. This is ordinary source.
   await writeIfChanged(
-    path.join(options.outDir, 'register.d.ts'),
+    path.join(options.outDir, 'register.gen.ts'),
     registerSource,
   );
   await writeIfChanged(

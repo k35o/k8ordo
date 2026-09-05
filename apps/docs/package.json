@@ -29,6 +29,6 @@
     "@types/react-dom": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "vite": "8.2.1"
+    "vite": "catalog:"
   }
 }

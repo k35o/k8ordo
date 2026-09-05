@@ -24,7 +24,7 @@ export default function Root({
         <meta content="width=device-width, initial-scale=1.0" name="viewport" />
         <title>k8ordo</title>
         <meta
-          content="k8ordo - React UI Component Library"
+          content="k8ordo - React libraries that use Baseline features without holding back"
           name="description"
         />
         <link href="https://fonts.googleapis.com" rel="preconnect" />

@@ -75,53 +75,54 @@ const createPageStore = (def: PageState): Store => {
     pendingPush = false;
     handle = null;
 
-    // The write target is the live values plus this batch's patch — not the
-    // snapshot, which an interleaved currententrychange may have reshaped.
-    // Parse-level comparison, not string comparison: a batch that ends back
-    // where it started must not navigate at all.
-    const url = new URL(location.href);
-    const stored = storedEntryState();
-    const liveUrl = page.url === null ? {} : page.url.parse(url.searchParams);
-    const liveEntry =
-      page.entry === null
-        ? {}
-        : page.entry.parse(isRecord(stored) ? stored[def.key] : undefined);
-    const target = canonical({ ...liveUrl, ...liveEntry, ...patch });
-    const urlChanged =
-      page.url?.keys.some((key) => !sameValue(liveUrl[key], target[key])) ??
-      false;
-    const entryChanged =
-      page.entry?.keys.some((key) => !sameValue(liveEntry[key], target[key])) ??
-      false;
+    // 目標の組み立てから書き込みまでを 1 つの try に入れる。ここから先の
+    // 失敗はこのバッチのもので、マイクロタスクの外に投げても誰も受け取れない
+    try {
+      // The write target is the live values plus this batch's patch — not the
+      // snapshot, which an interleaved currententrychange may have reshaped.
+      // Parse-level comparison, not string comparison: a batch that ends back
+      // where it started must not navigate at all.
+      const url = new URL(location.href);
+      const stored = storedEntryState();
+      const liveUrl = page.url === null ? {} : page.url.parse(url.searchParams);
+      const liveEntry =
+        page.entry === null
+          ? {}
+          : page.entry.parse(isRecord(stored) ? stored[def.key] : undefined);
+      const target = canonical({ ...liveUrl, ...liveEntry, ...patch });
+      const urlChanged =
+        page.url?.keys.some((key) => !sameValue(liveUrl[key], target[key])) ??
+        false;
+      const entryChanged =
+        page.entry?.keys.some(
+          (key) => !sameValue(liveEntry[key], target[key]),
+        ) ?? false;
 
-    if (!urlChanged && !entryChanged) {
-      core.applyNext(target);
-      current.settle();
-      return;
-    }
+      if (!urlChanged && !entryChanged) {
+        core.applyNext(target);
+        current.settle();
+        return;
+      }
 
-    const state = carryState(stored, target);
+      const state = carryState(stored, target);
 
-    if (!urlChanged) {
-      // The hidden face alone moved: no navigation, works under any router.
-      try {
+      if (!urlChanged) {
+        // The hidden face alone moved: no navigation, works under any router.
         navigation.updateCurrentEntry({ state });
         current.settle();
-      } catch (error) {
-        current.fail(error);
+        return;
       }
-      return;
-    }
 
-    // Only this definition's params are rewritten: the URL is shared ground
-    // (other page states, tracking params), not this store's property.
-    if (page.url !== null) {
-      for (const key of page.url.keys) url.searchParams.delete(key);
-      for (const [key, value] of new URLSearchParams(page.url.search(target))) {
-        url.searchParams.append(key, value);
+      // Only this definition's params are rewritten: the URL is shared ground
+      // (other page states, tracking params), not this store's property.
+      if (page.url !== null) {
+        for (const key of page.url.keys) url.searchParams.delete(key);
+        for (const [key, value] of new URLSearchParams(
+          page.url.search(target),
+        )) {
+          url.searchParams.append(key, value);
+        }
       }
-    }
-    try {
       current.adopt(
         navigation.navigate(url.href, {
           history: push ? 'push' : 'replace',
@@ -135,6 +136,18 @@ const createPageStore = (def: PageState): Store => {
 
   const update = (patch: Patch, options?: UpdateOptions): UpdateHandle => {
     const resolved = resolvePatch(patch, core.snapshot(), page.keys, def.key);
+    // The echo is synchronous AND canonical: the merged state goes through
+    // the schema right here, by the same road a URL arrival takes, so the
+    // next render never shows a value the schema rejects — update({page: 0})
+    // lands where ?page=0 would.
+    //
+    // バッチに載せる前に組み立てる。載せてから拒まれると、同じ値で次の flush
+    // がもう一度失敗し、呼び出し側は理由を受け取れないまま書き込みだけが消える
+    const echoed = canonical({
+      ...core.snapshot(),
+      ...pending,
+      ...resolved,
+    });
     if (pending === null) {
       pending = {};
       handle = createHandle();
@@ -144,11 +157,6 @@ const createPageStore = (def: PageState): Store => {
     }
     Object.assign(pending, resolved);
     if (options?.history === 'push') pendingPush = true;
-    // The echo is synchronous AND canonical: the merged state goes through
-    // the schema right here, with the same salvage as a URL arrival, so the
-    // next render never shows a value the schema rejects — update({page: 0})
-    // lands where ?page=0 would.
-    const echoed = canonical({ ...core.snapshot(), ...pending });
     for (const key of Object.keys(pending)) pending[key] = echoed[key];
     core.applyNext(echoed);
     return (handle as Handle).external;

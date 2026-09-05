@@ -35,11 +35,15 @@ describe('the emitted table', () => {
 
   it('wraps everything in the root layout through the transparent key', () => {
     expect(source).toContain('export const routes = defineRoutes({');
-    expect(source).toMatch(/'\/': \{\n\s+layout: layout,/u);
+    expect(source).toMatch(
+      /'\/': \{\n\s+layout: layout satisfies Layout<'\/'>,/u,
+    );
   });
 
   it('gives a directory with only a page the component itself', () => {
-    expect(source).toContain("'/:id': products_id_page,");
+    expect(source).toContain(
+      "'/:id': products_id_page satisfies Page<'/products/:id'>,",
+    );
   });
 
   it('gives a directory with children a branch', () => {
@@ -47,7 +51,9 @@ describe('the emitted table', () => {
   });
 
   it('keeps the group key so the layout applies without a URL segment', () => {
-    expect(source).toMatch(/'\/\(docs\)': \{\n\s+layout: docs_layout,/u);
+    expect(source).toMatch(
+      /'\/\(docs\)': \{\n\s+layout: docs_layout satisfies Layout<'\/'>,/u,
+    );
   });
 
   it('places not-found last, where declaration order makes it the fallback', () => {
@@ -67,9 +73,51 @@ describe('naming', () => {
 
   it('emits a flat record when the root has no layout', () => {
     const source = emit(['page.tsx', 'about/page.tsx']);
-    expect(source).toContain("  '/': page,");
-    expect(source).toContain("  '/about': about_page,");
+    expect(source).toContain("  '/': page satisfies Page<'/'>,");
+    expect(source).toContain(
+      "  '/about': about_page satisfies Page<'/about'>,",
+    );
     expect(source).not.toContain('layout');
+    // Layout の別名は使うときだけ出す(未使用のローカル型になるため)
+    expect(source).not.toContain('type Layout<');
+  });
+});
+
+describe('what a route file is promised', () => {
+  it('states each page against its own pattern', () => {
+    const source = emit([
+      'page.tsx',
+      'products/page.tsx',
+      'products/[id]/page.tsx',
+      'not-found.tsx',
+    ]);
+    expect(source).toContain("page satisfies Page<'/'>");
+    expect(source).toContain("products_page satisfies Page<'/products'>");
+    expect(source).toContain(
+      "products_id_page satisfies Page<'/products/:id'>",
+    );
+    expect(source).toContain("not_found satisfies Page<'/*'>");
+  });
+
+  it('states a layout against the prefix every route below it shares', () => {
+    const source = emit([
+      'layout.tsx',
+      'page.tsx',
+      '[locale]/layout.tsx',
+      '[locale]/page.tsx',
+    ]);
+    expect(source).toContain("layout satisfies Layout<'/'>");
+    expect(source).toContain("locale_layout satisfies Layout<'/:locale'>");
+  });
+
+  it('gives a group layout the prefix the group does not add', () => {
+    const source = emit([
+      'page.tsx',
+      '(docs)/layout.tsx',
+      '(docs)/guide/page.tsx',
+    ]);
+    expect(source).toContain("docs_layout satisfies Layout<'/'>");
+    expect(source).toContain("docs_guide_page satisfies Page<'/guide'>");
   });
 });
 
@@ -89,6 +137,9 @@ describe('the emitted register', () => {
 
     const without = emitRegisterModule({ routesModule: './routes.gen' });
     expect(without).not.toContain('@k8ordo/state');
+    // RouteOf は state の augmentation だけが使う。常に import すると
+    // state を使わないアプリで未使用のローカルになる
+    expect(without).not.toContain('RouteOf');
   });
 });
 

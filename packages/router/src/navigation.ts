@@ -71,13 +71,20 @@ export function useInterceptedNavigation<T>(
   const count = useRef(0);
   const [applied, setApplied] = useState(-1);
 
+  // The pathname whose tree is on screen — not `location.pathname`. Under
+  // interception the URL commits before the tree arrives, so while a page is
+  // loading the two differ, and a state update aimed at the new URL is still
+  // a navigation to a page that is not showing yet. Taking the shortcut then
+  // would abort the load and leave the old page under the new URL.
+  const shown = useRef<string | null>(null);
+
   useEffect(() => {
+    shown.current = normalizePathname(location.pathname);
     const onNavigate = (event: NavigateEvent): void => {
       if (!isOurs(event)) return;
       const url = new URL(event.destination.url);
-      if (
-        normalizePathname(url.pathname) === normalizePathname(location.pathname)
-      ) {
+      const pathname = normalizePathname(url.pathname);
+      if (pathname === shown.current) {
         // Same place — only the search or the entry state moved. Nothing to
         // load, nothing to remount, and no scroll or focus to disturb.
         event.intercept({ scroll: 'manual', focusReset: 'manual' });
@@ -105,6 +112,10 @@ export function useInterceptedNavigation<T>(
               { once: true },
             );
             startTransition(() => {
+              // Recorded at apply rather than at commit: an update inside a
+              // transition is never dropped, and a navigation that arrives in
+              // between must see this page as the one showing.
+              shown.current = pathname;
               latest.current.apply(value);
               // Rides the same transition as the caller's own update, so the
               // effect below runs in the commit that puts it on screen — and

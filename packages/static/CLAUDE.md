@@ -27,7 +27,13 @@ pnpm check         # check:write to auto-fix
   `dist/rsc/index.js` request handler `@k8ordo/server` runs per request. If a
   page renders differently under the two modes, something has leaked.
 - **An uncovered parameterised route fails the build.** Never warn, never
-  skip: a site missing half its pages is worse than a build that stopped.
+  skip: a site missing half its pages is worse than a build that stopped. A
+  `'use server'` module fails it for the same reason: the RSC pipeline
+  compiles an action in either mode, so "static has no Server Actions" is
+  only true because the build says no (`serverActionModules`).
+- **The plugin is `framework()`, the same name `@k8ordo/server` exports.**
+  The mode is the import and nothing else, which is what makes a
+  `vite.config.ts` identical under either package.
 - **Prerender runs after every environment is built** — `buildApp` with
   `order: 'post'` — and writes into the client build's own output directory,
   which Vite may hand over as an absolute path, so resolve it rather than
@@ -38,7 +44,7 @@ pnpm check         # check:write to auto-fix
 ```
 src/
   paths.ts   patternsOf / planPaths — 純関数(URLPattern で供給パスを照合)
-  index.ts   k8ordoStatic: engine + prerender(buildApp)
+  index.ts   framework: engine + prerender(buildApp)
 ```
 
 ## Conventions

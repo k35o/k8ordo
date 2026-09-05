@@ -123,7 +123,7 @@ export const ja = {
   'router.featuresTitle': '特徴',
   'router.featureTable': '表が pathname スキーマ',
   'router.featureTableDescription':
-    'leaf・branch・`[param]`・ワイルドカード・URL に出ないグループを 1 つの表で書きます。照合は宣言順で先勝ち。特異度ランキングのような、あとから逆算しないと分からない規則を持ちません。',
+    'leaf・branch・`:param`・ワイルドカード・URL に出ないグループを 1 つの表で書きます。照合は宣言順で先勝ち。特異度ランキングのような、あとから逆算しないと分からない規則を持ちません。',
   'router.featureTypes': 'パターンから型が生える',
   'router.featureTypesDescription':
     'params はパターン文字列から推論され、`Register` を宣言すれば表に無いパターンもコンパイルで落ちます。コード生成はありません。',

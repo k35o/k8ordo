@@ -122,7 +122,9 @@ export default async function handler(request: Request): Promise<Response> {
     // Without this a component that throws simply truncates the stream, and
     // the browser reports a closed connection instead of the actual error.
     onError: (error: unknown) => {
-      console.error(`k8ordo: rendering ${pathname} failed`, error);
+      // pathname は引数として渡す。第 1 引数はフォーマット文字列なので、
+      // `%s` を含む URL を投げられると error が食われて消える
+      console.error('k8ordo: rendering %s failed', pathname, error);
     },
   });
   // An action the client addressed answers in the shape the client already

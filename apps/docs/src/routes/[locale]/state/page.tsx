@@ -1,6 +1,6 @@
 'use client';
 
-import { defineLocalState, definePageState, useAppState } from '@k8ordo/state';
+import { definePageState, useAppState } from '@k8ordo/state';
 import {
   AtomIcon,
   Button,
@@ -21,6 +21,7 @@ import * as z from 'zod/mini';
 import { T } from '../../../components/t';
 import { localizeHref, useTranslation } from '../../../i18n';
 import type { MessageKey } from '../../../i18n/types';
+import { themeState } from '../../../theme/context';
 
 type Feature = {
   title: MessageKey;
@@ -73,13 +74,6 @@ const demoState = definePageState('state-demo', {
   }),
 });
 /* oxlint-enable no-underscore-dangle */
-
-// テーマの保存にもこのパッケージを使っている（src/theme/context.tsx）。
-// ここでは同じ localStorage 状態を購読して現在値を見せるだけにする。
-const themeState = defineLocalState(
-  'theme',
-  z.object({ mode: z.optional(z.enum(['light', 'dark'])) }),
-);
 
 const TABS = ['overview', 'details', 'reviews'] as const;
 

@@ -96,12 +96,13 @@ Put `/*` last, for the same reason.
 
 A table is checked when the module loads, not when someone first navigates:
 
-| written                                                 | error                                      |
-| ------------------------------------------------------- | ------------------------------------------ |
-| the same full pattern twice, wherever the copies nest   | `route pattern "/x" is declared twice`     |
-| a group with no children (it would redeclare the index) | `route group "/(oops)" must have children` |
-| a key not starting with `/`                             | `route pattern "x" must start with "/"`    |
-| a pattern URLPattern cannot parse                       | URLPattern's own `TypeError`               |
+| written                                                   | error                                                           |
+| --------------------------------------------------------- | --------------------------------------------------------------- |
+| the same full pattern twice, wherever the copies nest     | `route pattern "/x" is declared twice`                          |
+| a group with no children (it would redeclare the index)   | `route group "/(oops)" must have children`                      |
+| a key not starting with `/`                               | `route pattern "x" must start with "/"`                         |
+| parentheses that are not exactly a group (`/(admin)/new`) | `route group "/(admin)/new" must be "/(name)" and nothing else` |
+| a pattern URLPattern cannot parse                         | URLPattern's own `TypeError`                                    |
 
 ## Mounting it
 
@@ -123,10 +124,19 @@ export const DocsLayout = () => (
 );
 ```
 
-Every same-origin navigation the table claims is handled in the browser; the
-rest is left alone, so a real document load — and a real 404 — stays the
-server's answer. A pathname the table does not match renders nothing rather
-than guessing.
+Every same-origin link or programmatic navigation the table claims is handled
+in the browser; the rest is left alone, so a real document load — and a real
+404 — stays the server's answer. A pathname the table does not match renders
+nothing rather than guessing.
+
+Four kinds of navigation are never the application's, whatever the table says:
+a reload, a form submitted with a body (POST), a download, and a fragment-only
+change. Intercepting any of them would silently do nothing where the platform
+would have done the obvious thing — a POST body only the server can act on, an
+`F5` that stops reloading. A GET form carries no body, so the search-shaped
+submissions `@k8ordo/state` builds still come through. Mark a link to a file
+the host serves as an attachment with `download`, so the browser tells the
+router before the click rather than after the answer.
 
 A leaf can be `React.lazy(...)`, which the table stores as any other component;
 put a `<Suspense>` in the layout above it so there is somewhere to fall back
@@ -165,14 +175,8 @@ thing and nothing else. An active link is a comparison you write yourself —
 Interception commits the URL first and the tree arrives when it has loaded, so
 on a slow navigation a link marks itself active while the previous page is
 still on screen — the same order the browser's own address bar follows. Pair it
-with `useTransition` if the wait needs showing:
-
-```tsx
-const [isPending, startTransition] = useTransition();
-startTransition(async () => {
-  await navigateTo('/products/:id', { id }).finished;
-});
-```
+with `useTransition` if the wait needs showing — `navigateTo`'s `finished`
+resolves when the tree is on screen (below).
 
 `usePathname` reads the platform rather than the table, which is why it is the
 one that also works under the framework, where the browser holds no table at
@@ -228,6 +232,12 @@ Without the augmentation the constraint is any `/`-prefixed string. Augment
 only in an application — a library doing it would impose its table on every
 consumer.
 
+Under `@k8ordo/static` or `@k8ordo/server` this file is generated into
+`.k8ordo/register.gen.ts` from `routes/` — for `@k8ordo/state` too, when the
+application depends on it — so hand-writing it there is writing a second
+answer to a question already answered. Hand-write it in a client application
+that mounts `<Router>` itself.
+
 ## Typed paths for @k8ordo/state
 
 `RouteOf<typeof routes>` is the app's pathname space as a union, which is what
@@ -253,17 +263,24 @@ promise — including `@k8ordo/state`'s `update().finished` — is awaiting the
 render, not the URL write.
 
 **A state change is not a page change.** When only the search or the entry
-state moved, the pathname is unchanged: the route tree is left alone, nothing
-remounts, and scroll and focus are not disturbed. This is why a search update
-never scrolls the page back to the top.
+state moved, the pathname is the one whose tree is on screen: the route tree
+is left alone, nothing remounts, and scroll and focus are not disturbed. This
+is why a search update never scrolls the page back to the top. The comparison
+is against the page showing, not against the address bar — interception
+commits the URL first, so a state update issued while another page is still
+loading is a page change and lets that page finish arriving.
 
 **Route changes run in a transition.** The new tree is applied inside
 `startTransition`, so React can keep the old page interactive while the new
 one prepares.
 
 **Superseded navigations abort.** A second navigation aborts the first through
-the platform's own signal, which is handed to whatever is loading — a lazy
-chunk, or a payload fetch under the framework.
+the platform's own signal: the overtaken `finished` rejects with the abort
+reason, and its tree never reaches the screen even if its load had already
+come back. `load` receives that signal, so a payload fetch under the framework
+is cancelled outright. A `React.lazy` chunk cannot be — a dynamic import takes
+no signal — so in a client application it finishes in the background and is
+kept for the next visit, while the page it belonged to is never shown.
 
 ## Testing
 
@@ -300,7 +317,12 @@ useInterceptedNavigation<Value>({
 ```
 
 What carries across unchanged is everything that needs no table: `href`,
-`navigateTo` and `usePathname`. What does not is `useRoute` and `useParams` —
+`navigateTo` and `usePathname`. `usePathname` needs one thing on the server,
+where there is no Navigation API to read: the pathname the render is for,
+supplied by `<PathnameProvider pathname>`. `<Router>` mounts one itself and
+both mode runtimes supply it, so an application never writes it — only a host
+building its own seam out of `useInterceptedNavigation` has to. What does not
+carry across is `useRoute` and `useParams` —
 both read the match from context, and under the framework there is no match in
 the browser to read. A framework page receives its `params` as a prop from the
 server instead, which is the only form Server Components can take them in.

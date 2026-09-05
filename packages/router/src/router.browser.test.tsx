@@ -1,10 +1,11 @@
 import type { FC } from 'react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { render } from 'vitest-browser-react';
 
 import { defineRoutes } from './define-routes';
 import { href, navigateTo } from './links';
 import { usePathname } from './location';
+import { useInterceptedNavigation } from './navigation';
 import { Outlet, Router, useParams, useRoute } from './router';
 
 let listMounts = 0;
@@ -192,4 +193,48 @@ it('shows the navigation that won, not the one it overtook', async () => {
     .element(screen.getByTestId('detail'))
     .toHaveTextContent('/products/:id:shoes');
   expect(document.querySelector('[data-testid="list"]')).toBeNull();
+});
+
+// フレームワークの下ではペイロードの fetch が入るので、load は非同期になる。
+// その待ちの間を再現するための、表を持たない最小のホスト
+const DeferredHost: FC<{ gate: Promise<void> }> = ({ gate }) => {
+  const [page, setPage] = useState('start');
+  useInterceptedNavigation<string>({
+    claim: () => true,
+    load: async (url) => {
+      await gate;
+      return url.pathname;
+    },
+    apply: setPage,
+  });
+  return <p data-testid="page">{page}</p>;
+};
+
+it('still loads the page when a state update lands on its URL mid-load', async () => {
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const screen = await render(<DeferredHost gate={gate} />);
+
+  // URL は先に確定し、木はまだ前のページのまま
+  const page = navigation.navigate('/products');
+  await page.committed;
+  expect(location.pathname).toBe('/products');
+  expect(document.querySelector('[data-testid="page"]')?.textContent).toBe(
+    'start',
+  );
+
+  // その URL への state 更新(search だけ動く)。「同じ場所」と見なして
+  // 読み込みを飛ばすと、追い越された読み込みは捨てられて前のページが残る
+  const state = navigation.navigate('/products?q=1', { history: 'replace' });
+  release();
+  await state.finished;
+
+  await expect
+    .element(screen.getByTestId('page'))
+    .toHaveTextContent('/products');
+  expect(location.search).toBe('?q=1');
+  await expect(page.finished).rejects.toThrow(/abort/iu);
+  await screen.unmount();
 });

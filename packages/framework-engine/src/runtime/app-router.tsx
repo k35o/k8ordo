@@ -15,6 +15,7 @@ import { isPayload } from './is-payload';
 import { ACTION_ID_HEADER } from './payload';
 import type { Payload } from './payload';
 import { payloadPathFor } from './payload-path';
+import { markNavigated, Recover, reloadInstead } from './recover';
 
 /**
  * Where a Server Action's answer lands. The callback has to be registered
@@ -77,32 +78,43 @@ export function AppRouter({
     // the ones that turn out not to be.
     claim: (url) => url.origin === location.origin,
     load: async (url, signal) => {
-      const response = await fetch(payloadPathFor(url.pathname), { signal });
-      // A second navigation may have taken over while this was in flight;
-      // reloading then would fetch the URL that already lost.
-      if (signal.aborted) throw signal.reason as Error;
-      if (!isPayload(response)) {
-        // Not a page of this application: a file the host serves, or a URL
-        // nothing answers. Interception already committed the URL, so
-        // reloading asks the server for exactly what the browser would have
-        // asked for had this never been claimed — including its real status.
-        location.reload();
-        // The document is being replaced; resolving would render into a page
-        // that is on its way out.
-        return new Promise<ReactNode>(() => {
-          /* never settles */
-        });
+      let payload: Payload;
+      try {
+        const response = await fetch(payloadPathFor(url.pathname), { signal });
+        // A second navigation may have taken over while this was in flight;
+        // reloading then would fetch the URL that already lost.
+        if (signal.aborted) throw signal.reason as Error;
+        if (!isPayload(response)) {
+          // Not a page of this application: a file the host serves, or a URL
+          // nothing answers. Interception already committed the URL, so
+          // reloading asks the server for exactly what the browser would
+          // have asked for had this never been claimed — its real status
+          // included.
+          return await reloadInstead<ReactNode>();
+        }
+        payload = await createFromReadableStream<Payload>(
+          response.body as ReadableStream<Uint8Array>,
+        );
+      } catch (error) {
+        if (signal.aborted) throw error;
+        // The network, or a server that could not answer: the same rule as
+        // a URL that is not a page — the document load shows the truth.
+        return reloadInstead<ReactNode>();
       }
-      const payload = await createFromReadableStream<Payload>(
-        response.body as ReadableStream<Uint8Array>,
-      );
       return payload.tree;
     },
-    apply: setCurrent,
+    apply: (next) => {
+      markNavigated();
+      setCurrent(next);
+    },
   });
 
   // The tree comes from the server, so a client component in it cannot ask a
   // table where it is. The pathname the server rendered for is what seeds
   // `usePathname` until the browser can answer for itself.
-  return <PathnameProvider pathname={pathname}>{current}</PathnameProvider>;
+  return (
+    <PathnameProvider pathname={pathname}>
+      <Recover>{current}</Recover>
+    </PathnameProvider>
+  );
 }

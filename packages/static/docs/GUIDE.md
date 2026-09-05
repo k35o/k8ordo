@@ -14,15 +14,27 @@ checked rather than remembered.
 
 ## The mode is the dependency
 
-Installing this package is what makes an application static. Server Actions
-and request-time data are not rules to remember here: they are APIs that do
-not exist, because the package that provides them is not installed. The one
-seam is `vite dev`, which is a running server and will happily accept an
-action POST that the built files then cannot — so a form that works in dev and
-not in the output is the shape of that mistake. Choosing the
-other mode means installing `@k8ordo/server` instead, and nothing else about
-the application changes — the same route grammar, the same boundaries, the same
-request handler, called once per route instead of once per request.
+Installing this package is what makes an application static. Request-time data
+is not a rule to remember here: there is no request, so there is nothing to
+read it from. A Server Action is the one thing the underlying RSC pipeline
+would still compile, so the build refuses it by name rather than shipping a
+form that posts into nothing:
+
+```
+static build cannot ship Server Actions — a file cannot receive one, and these declare 'use server':
+  src/routes/_parts/guestbook.ts
+this application wants @k8ordo/server
+```
+
+`vite dev` is a running server and will happily accept that POST, which is why
+the answer is a build that stops rather than a note in a guide.
+
+Choosing the other mode means installing `@k8ordo/server` instead, and nothing
+else about the application changes — the same route grammar, the same
+boundaries, the same request handler, called once per route instead of once
+per request. The plugin is called `framework()` in both packages for that
+reason: the mode is the import, and `vite.config.ts` reads the same either
+way.
 
 ## Getting started
 
@@ -33,10 +45,10 @@ pnpm add -D @k8ordo/static vite
 
 ```ts
 // vite.config.ts
-import { k8ordoStatic } from '@k8ordo/static';
+import { framework } from '@k8ordo/static';
 import { defineConfig } from 'vite';
 
-export default defineConfig({ plugins: [k8ordoStatic()] });
+export default defineConfig({ plugins: [framework()] });
 ```
 
 ```json
@@ -120,14 +132,23 @@ export default function ProductPage({ params }: { params: { id: string } }) {
 
 Every problem is reported, not just the first, and each names the file:
 
-| routes/ contains                      | error                                                                                                       |
-| ------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `products/helper.ts`                  | `routes/ holds only page.tsx, layout.tsx and not-found.tsx — move "helper.ts" under a _-prefixed directory` |
-| `[123]/page.tsx`                      | `"[123]" is not a valid param directory — use [name] with a letter or underscore first`                     |
-| `pro ducts/page.tsx`                  | `"pro ducts" cannot be a URL segment — use letters, digits, . _ ~ or -`                                     |
-| `[id]/things/[id]/page.tsx`           | `":id" is already taken by an ancestor — params must be unique within a path`                               |
-| `orphan/layout.tsx` and no page below | `has a layout but no page.tsx below it, so it can never render`                                             |
-| `(a)/page.tsx` and `(b)/page.tsx`     | `"/" is already declared by (a)/page.tsx — route groups do not separate URLs`                               |
+| routes/ contains                                     | error                                                                                                       |
+| ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `products/helper.ts`                                 | `routes/ holds only page.tsx, layout.tsx and not-found.tsx — move "helper.ts" under a _-prefixed directory` |
+| `[123]/page.tsx`                                     | `"[123]" is not a valid param directory — use [name] with a letter or underscore first`                     |
+| `pro ducts/page.tsx`                                 | `"pro ducts" cannot be a URL segment — use letters, digits, . _ ~ or -`                                     |
+| `[id]/things/[id]/page.tsx`                          | `":id" is already taken by an ancestor — params must be unique within a path`                               |
+| `orphan/layout.tsx` and no page below                | `has a layout but no page.tsx below it, so it can never render`                                             |
+| `(a)/page.tsx` and `(b)/page.tsx`                    | `"/" is already declared by (a)/page.tsx — route groups do not separate URLs`                               |
+| `(docs/page.tsx`                                     | `"(docs" is not a valid route group — use (name)`                                                           |
+| `products/sub/layout.tsx` and no page anywhere below | `declares no route — every directory needs a page.tsx somewhere below it`                                   |
+| `(shop)/[id]/page.tsx` beside `about/page.tsx`       | `"/about" can never match — "/:id" ((shop)/[id]/page.tsx) is declared first and answers it`                 |
+
+The generated table lists literal segments before parameters, so `about/`
+beside `[slug]/` is reachable without saying anything. A route group holds
+both kinds under one key and the table cannot interleave across it, which is
+the one shape where a declared route can still be shadowed — so it is reported
+rather than shipped.
 
 ## The generated files
 
@@ -157,7 +178,7 @@ export const routes = defineRoutes({
 });
 ```
 
-`.k8ordo/register.d.ts` wires that table into `@k8ordo/router` — and into
+`.k8ordo/register.gen.ts` wires that table into `@k8ordo/router` — and into
 `@k8ordo/state` when the application depends on it — so typed paths work
 everywhere without a line of ceremony:
 
@@ -232,7 +253,7 @@ be wrapped in one of these to come under the same check.
 Static rendering cannot invent parameter values, so it asks for them:
 
 ```ts
-k8ordoStatic({
+framework({
   paths: async () => {
     const products = await readCatalog();
     return products.map((product) => `/products/${product.id}`);
@@ -245,7 +266,7 @@ the same values everywhere — a locale segment, say — is expanded rather than
 listed once per page:
 
 ```ts
-k8ordoStatic({
+framework({
   paths: (patterns) =>
     patterns.flatMap((pattern) =>
       ['ja', 'en'].map((locale) => pattern.replace('/:locale', `/${locale}`)),
@@ -261,6 +282,18 @@ static build needs pathnames for /products/:id — supply them with the "paths" 
 
 Shipping a site quietly missing half its pages is worse than not shipping one.
 Parameterless routes need no declaration; they are taken from the table.
+
+The other direction counts too — a supplied pathname nothing matched costs
+exactly the page it was meant to add:
+
+```
+the "paths" option supplied pathnames no route wants: /produtcs/2
+```
+
+which is either a typo or a value that still contains a parameter
+(`/ja/blog/:slug` — what expanding only one of two parameters leaves behind).
+Pathnames are taken as a URL carries them, so `href()` output is accepted as
+is.
 
 ## The output
 
@@ -291,13 +324,30 @@ A URL the site does not have is nobody's to render in the browser: the answer
 is not a payload, so the navigation becomes an ordinary document load and the
 host answers it — with `404.html` and a real 404. That is also what happens
 for the files sitting beside the site, so a link to `/robots.txt` fetches the
-file rather than disappearing into the router.
+file rather than disappearing into the router. Mark a link the host answers
+with a download as `<a href="/report.csv" download>`: the browser tells the
+router before the click, where `Content-Disposition` only arrives with the
+answer, by which time the URL has been committed.
 
 `not-found.tsx` becomes `404.html`, the file most static hosts serve for an
 unknown URL. Declaring a not-found page in this mode therefore means
-something, even though nothing is running to route the request. Only the root
-one can be represented: a host has one blanket 404, so a table with a nested
-`not-found.tsx` fails the build rather than silently picking one.
+something, even though nothing is running to route the request. Only one can
+be represented, wherever it sits — under a locale segment is fine — because a
+host has one blanket 404; a table declaring two fails the build rather than
+silently picking one:
+
+```
+a static host answers every unknown URL from one file, so only one not-found.tsx can be represented — this table declares /*, /:locale/*
+```
+
+That one file is rendered for a pathname the site does not have, which is what
+any 404 is. Its `pathname` is such a URL, and where a parameter sits above
+`not-found.tsx`, that parameter is filled with a segment no route declared —
+so `params.<name>` there is not a value the application named. Treat it as you
+must treat any parameter under a running server, where `/:locale/*` matches
+`/fr/anything` too: validate it, and read what the visitor actually typed from
+`usePathname()` in a client component after hydration. A visitor without
+JavaScript keeps whatever that render produced.
 
 ## Alongside the rest of k8ordo
 
@@ -315,6 +365,11 @@ Changing the search does not change the page: the router leaves the route tree
 alone, nothing remounts, and the scroll position stays where the reader left
 it. `@k8ordo/form` pairs with it for search and filter forms, which are GET
 forms and work before JavaScript loads — a good fit for a static site.
+
+A page never sees the search: `useAppState` reads it in the browser, so a
+server render shows the url slot's defaults and the live URL takes over on
+hydration. That is the same split the router draws at the `?` — the pathname
+is the framework's, everything after it is state's.
 
 ## What static cannot do
 

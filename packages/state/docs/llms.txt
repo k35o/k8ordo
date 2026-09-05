@@ -26,7 +26,10 @@ When installed via npm, these docs live under `node_modules/@k8ordo/state/docs/`
 
 - `@k8ordo/state` — `definePageState(key, { url?, entry? })` returns a pure
   definition usable from server and client: `parseUrl(searchParams)` reads
-  the url slot typed with defaults applied and per-field salvage;
+  the url slot typed with defaults applied and per-field salvage (wherever the
+  router hands a page its search — under `@k8ordo/static` / `@k8ordo/server` a
+  page receives `params` and `pathname` only, and the url slot is read in the
+  browser);
   `href(base, values?)` builds a canonical link keeping the path literal in
   the type; `search(values?)` returns the query string alone.
   `defineLocalState(key, schema)` and `defineMemoryState(key, initial)`

@@ -29,19 +29,21 @@ repositories.
 
 - [ordo.k8o.me](https://ordo.k8o.me) — the documentation site
 - [Storybook](https://main--687a213c85e2e4589d8db1bb.chromatic.com) — every `@k8ordo/ui` story
-- [`packages/ui/README.md`](packages/ui/README.md) — installation, API, and generative-UI integrations
+- `packages/<name>/docs/GUIDE.md` — each package's design guide, with `llms.txt` as its index
 
-The design guide and component reference also ship inside the published npm
-package, so an AI coding assistant reads the version you actually installed.
-See [AI Agent Documentation](packages/ui/README.md#ai-agent-documentation).
+Every package ships its `docs/` inside the published npm package, so an AI
+coding assistant reads the exact version you installed out of
+`node_modules/@k8ordo/<name>/docs/`. `@k8ordo/ui` additionally documents its
+installation, API, and generative-UI integrations in
+[`packages/ui/README.md`](packages/ui/README.md).
 
 ## Development
 
 A pnpm workspace driven by [Vite+](https://vite.plus) (`vp`) — dev, build,
 test, and lint/format all run through it.
 
-Tool versions are pinned in [`mise.toml`](mise.toml): Node.js 24.16.0 and pnpm
-11.15.1. Any Node.js ≥ 24.13.0 works if you do not use mise.
+Tool versions are pinned in [`mise.toml`](mise.toml). Without mise, any Node.js
+that satisfies `engines` in [`package.json`](package.json) works.
 
 ```bash
 mise install

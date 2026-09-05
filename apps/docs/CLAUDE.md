@@ -6,7 +6,7 @@ the family's own framework, so a change to it is felt here first. The
 `framework-engine` is internal and has no page: an application installs a mode
 package, never the engine. The site also dogfoods
 `@k8ordo/state`: the theme preference is a `defineLocalState`
-(`src/theme/context.tsx`, paired with the init script in `src/root.tsx`),
+(`src/theme/context.tsx`, paired with the init script in `src/routes/layout.tsx`),
 and `/state`'s live demo is a real `definePageState` on the page's own URL.
 
 ## Commands
@@ -127,5 +127,4 @@ framework is designed against.
 - **@k8ordo/static** + **@k8ordo/router** (workspace) for the framework itself
 - **@k8ordo/ui** (workspace) for UI components
 - **shiki** for syntax highlighting
-- **motion** for animations
 - **react-error-boundary** for error handling
