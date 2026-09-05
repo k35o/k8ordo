@@ -20,15 +20,15 @@ catalog:
   '@tailwindcss/postcss': 4.3.3
   '@tailwindcss/vite': 4.3.3
   '@types/react': 19.2.18
-  '@types/react-dom': 19.2.4
-  '@vitejs/plugin-react': 6.0.5
+  '@types/react-dom': 19.2.5
+  '@vitejs/plugin-react': 6.1.1
   postcss: 8.5.26
-  publint: 0.3.23
+  publint: 0.3.24
   react: 19.2.8
   react-dom: 19.2.8
   tailwindcss: 4.3.3
-  vite: 8.2.1
-  vite-plus: 0.2.9
+  vite: 8.2.2
+  vite-plus: 0.3.0
   vitest: 4.1.10
 
 minimumReleaseAge: 10080
@@ -38,7 +38,7 @@ minimumReleaseAge: 10080
 # tsc が "Excessive stack depth" を起こして typecheck が落ちる。単一バージョンに
 # 強制して型グラフのコピーを 1 つに保つ (types のみのパッケージでランタイム影響なし)。
 overrides:
-  '@oxc-project/types': 0.144.0
+  '@oxc-project/types': 0.147.0
 
 minimumReleaseAgeExclude:
   - '@k8o/*'
