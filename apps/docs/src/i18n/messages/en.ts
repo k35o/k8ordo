@@ -124,7 +124,7 @@ export const en = {
   'router.featuresTitle': 'Features',
   'router.featureTable': 'The table is the schema',
   'router.featureTableDescription':
-    'Leaves, branches, `[param]`, wildcards and groups that structure without appearing in the URL, all in one table. Matching is in declaration order, first match wins — no specificity ranking to reason backwards from.',
+    'Leaves, branches, `:param` segments, wildcards and groups that structure without appearing in the URL, all in one table. Matching is in declaration order, first match wins — no specificity ranking to reason backwards from.',
   'router.featureTypes': 'Types come from the pattern',
   'router.featureTypesDescription':
     'Params are inferred from the pattern literal, and once `Register` is declared a pattern the table does not have fails to compile. No code generation.',

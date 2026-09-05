@@ -52,8 +52,9 @@ export const Outlet: FC = () => {
  * server. Layout components render their children through `<Outlet />`.
  *
  * This is the whole router for an application that renders on the client.
- * Under the framework the tree comes from the server instead, and only
- * `useInterceptedNavigation` is shared.
+ * Under the framework the tree comes from the server instead, and what is
+ * shared is `useInterceptedNavigation` and the `<PathnameProvider>` this
+ * mounts.
  */
 export function Router({ routes }: { routes: Routes }): ReactNode {
   const [match, setMatch] = useState<Match | null>(() =>

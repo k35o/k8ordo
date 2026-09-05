@@ -2,21 +2,18 @@
 
 Thanks for your interest in contributing! This document explains how to set up the repository, the development workflow, and how changes get released.
 
-k8ordo is a set of packages under `@k8ordo/*`; `@k8ordo/ui` is currently the only one, so most of what follows is about it. Adding a *new* package is a different task with its own steps — see [`CLAUDE.md`](CLAUDE.md).
+k8ordo is a set of packages under `@k8ordo/*` — the table in [`README.md`](README.md) lists them. Setup, commands, documentation, release, and commit conventions below apply to every package; the component workflow, story-based tests, and VRT sections are specific to `@k8ordo/ui`. Adding a *new* package is a different task with its own steps — see [`CLAUDE.md`](CLAUDE.md).
 
 ## Setup
 
 Tool versions are pinned in [`mise.toml`](mise.toml) and managed with [mise](https://mise.jdx.dev/):
-
-- Node.js 24.16.0
-- pnpm 11.15.1
 
 ```bash
 mise install    # installs Node.js and pnpm at the pinned versions
 pnpm install    # installs workspace dependencies
 ```
 
-If you do not use mise, any Node.js ≥ 24.13.0 with pnpm 11.15.1 works (see `engines` / `packageManager` in [`package.json`](package.json)).
+If you do not use mise, use the pnpm named in `packageManager` and any Node.js that satisfies `engines`, both in [`package.json`](package.json).
 
 ## Development commands
 
@@ -72,15 +69,9 @@ The prop schemas under `src/integrations/_shared/schemas.ts` are not just valida
 
 ### Documentation ships with the package
 
-`packages/ui/docs/**` is published to npm (see `files` in the package manifest) and is read by AI coding assistants out of `node_modules/@k8ordo/ui/docs/`. Stale examples there are shipped defects, not just documentation debt.
+Every package's `docs/**` is published to npm (see `files` in its manifest) and is read by AI coding assistants out of `node_modules/@k8ordo/<name>/docs/`. Stale examples there are shipped defects, not just documentation debt.
 
-Any pull request that changes the public API must update, **in the same PR**:
-
-- `packages/ui/README.md`
-- `packages/ui/docs/GUIDE.md`
-- `packages/ui/docs/references/*.md`
-- `packages/ui/docs/llms.txt`
-- `.claude/skills/ui-design/` (SKILL.md and its `references/`, which mirror the shipped examples)
+Any pull request that changes a package's public API must update, **in the same PR**, that package's `docs/GUIDE.md` and `docs/llms.txt` (and, for `@k8ordo/ui`, `packages/ui/README.md`, `docs/references/*.md`, and `.claude/skills/ui-design/`, whose SKILL.md and `references/` mirror the shipped examples), plus its landing page under `apps/docs/src/routes/[locale]/<name>/`.
 
 ## Testing `@k8ordo/ui`: writing a story is writing a test
 

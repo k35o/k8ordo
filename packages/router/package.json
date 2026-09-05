@@ -43,12 +43,15 @@
     "test": "vp test",
     "typecheck": "tsc --noEmit",
     "check": "vp check",
-    "check:write": "vp check --fix"
+    "check:write": "vp check --fix",
+    "check:package": "publint && attw --pack . --profile esm-only"
   },
   "devDependencies": {
+    "@arethetypeswrong/cli": "catalog:",
     "@types/react": "catalog:",
     "@vitejs/plugin-react": "catalog:",
     "@vitest/browser-playwright": "4.1.10",
+    "publint": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
     "typescript": "7.0.2",

@@ -6,7 +6,7 @@ import type { output } from 'zod/v4/core';
 import type { LocalState } from './local-state';
 import type { MemoryState } from './memory-state';
 import type { OutputOf, PageState } from './page-state';
-import type { StateValues } from './schema/object';
+import type { StateSchema, StateValues } from './schema/object';
 import type { Patch, Store, UpdateHandle } from './store/core';
 import { localInitialSnapshot, localStoreOf } from './store/local-store';
 import { memoryInitialSnapshot, memoryStoreOf } from './store/memory-store';
@@ -35,7 +35,10 @@ type UpdateFn<Def> = (
   ...rest: Def extends PageState ? [options?: UpdateOptions] : []
 ) => UpdateHandle;
 
-type OptionsFor<Def> = Def extends PageState
+// `Record<never, never>` would admit any object literal, so a memory or
+// local state would silently accept `{ initialUrl }`. `never` is what says
+// "this kind takes no options".
+type OptionsFor<Def> = Def extends { kind: 'page'; url: StateSchema }
   ? {
       /**
        * The RSC-parsed url state, passed down as a prop. It seeds SSR and
@@ -45,7 +48,7 @@ type OptionsFor<Def> = Def extends PageState
        */
       initialUrl?: Readonly<UrlStateOf<Def>>;
     }
-  : Record<never, never>;
+  : never;
 
 const storeOf = (def: AnyState): Store =>
   def.kind === 'page'

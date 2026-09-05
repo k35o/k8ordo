@@ -30,6 +30,11 @@ When installed via npm, these docs live under `node_modules/@k8ordo/router/docs/
   `interface Register { routes }` is augmented. `useParams(pattern)` returns
   typed params and throws if rendered under a different pattern; `useRoute()`
   is the untyped form. `RouteOf<typeof routes>` is the pathname union to feed
-  `@k8ordo/state`'s `Register`. `useInterceptedNavigation({claim, load, apply})`
-  is the navigation primitive `<Router>` is built on, and the seam the
-  framework uses to render server-produced trees instead.
+  `@k8ordo/state`'s `Register`. `usePathname()` reads the platform's
+  pathname — never the search — so it works with or without a table, which
+  makes it the location hook that also works under the framework;
+  `<PathnameProvider pathname>` seeds it for a server render and hydration,
+  and is mounted by `<Router>` and by both mode runtimes, never by an
+  application. `useInterceptedNavigation({claim, load, apply})` is the
+  navigation primitive `<Router>` is built on, and the seam the framework
+  uses to render server-produced trees instead.

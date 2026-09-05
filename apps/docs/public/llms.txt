@@ -97,7 +97,10 @@ These docs are served from <https://ordo.k8o.me>.
 
 - `@k8ordo/state` — `definePageState(key, { url?, entry? })` returns a pure
   definition usable from server and client: `parseUrl(searchParams)` reads
-  the url slot typed with defaults applied and per-field salvage;
+  the url slot typed with defaults applied and per-field salvage (wherever the
+  router hands a page its search — under `@k8ordo/static` / `@k8ordo/server` a
+  page receives `params` and `pathname` only, and the url slot is read in the
+  browser);
   `href(base, values?)` builds a canonical link keeping the path literal in
   the type; `search(values?)` returns the query string alone.
   `defineLocalState(key, schema)` and `defineMemoryState(key, initial)`
@@ -146,9 +149,14 @@ These docs are served from <https://ordo.k8o.me>.
   `interface Register { routes }` is augmented. `useParams(pattern)` returns
   typed params and throws if rendered under a different pattern; `useRoute()`
   is the untyped form. `RouteOf<typeof routes>` is the pathname union to feed
-  `@k8ordo/state`'s `Register`. `useInterceptedNavigation({claim, load, apply})`
-  is the navigation primitive `<Router>` is built on, and the seam the
-  framework uses to render server-produced trees instead.
+  `@k8ordo/state`'s `Register`. `usePathname()` reads the platform's
+  pathname — never the search — so it works with or without a table, which
+  makes it the location hook that also works under the framework;
+  `<PathnameProvider pathname>` seeds it for a server render and hydration,
+  and is mounted by `<Router>` and by both mode runtimes, never by an
+  application. `useInterceptedNavigation({claim, load, apply})` is the
+  navigation primitive `<Router>` is built on, and the seam the framework
+  uses to render server-produced trees instead.
 
 ---
 
@@ -176,12 +184,13 @@ These docs are served from <https://ordo.k8o.me>.
 
 ## Entry point
 
-- `@k8ordo/static` — `k8ordoStatic(options?)` returns the Vite plugins for a
-  static application. `options.routesDir` moves the route directory (default
+- `@k8ordo/static` — `framework(options?)` returns the Vite plugins for a
+  static application (the same name `@k8ordo/server` exports, so the mode is
+  the import and nothing else). `options.routesDir` moves the route directory (default
   `src/routes`); `options.paths` supplies concrete pathnames for routes with
-  parameters, and a parameterised route left uncovered fails the build.
-  `planPaths(tree, supplied)` and `patternsOf(tree)` are the pure functions
-  behind that decision, exported for tests and tooling.
+  parameters, and a parameterised route left uncovered fails the build. A
+  `'use server'` module fails it too: a file cannot receive a Server Action,
+  so the application wants `@k8ordo/server` instead.
 
 ---
 
@@ -211,12 +220,13 @@ These docs are served from <https://ordo.k8o.me>.
 
 ## Entry point
 
-- `@k8ordo/server` — `k8ordoServer(options?)` returns the Vite plugins for an
-  application that runs; `options.routesDir` moves the route directory
+- `@k8ordo/server` — `framework(options?)` returns the Vite plugins for an
+  application that runs (the same name `@k8ordo/static` exports, so the mode
+  is the import and nothing else); `options.routesDir` moves the route directory
   (default `src/routes`). `serve({ dist?, port?, host? })` serves a build:
   the client build's files as they are, everything else through the request
   handler. The built handler is a plain
   `(request: Request) => Promise<Response>` default-exported from
-  `dist/rsc/index.js`, so another host can run it directly. `safeJoin(root,
-  pathname)` is the static-file resolution used by `serve`, which never lands
-  outside the build output.
+  `dist/rsc/index.js`, so another host can run it directly. `serve` only ever answers a
+  request from a file inside the client build, whatever the pathname is
+  spelled like.

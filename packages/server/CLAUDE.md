@@ -26,6 +26,9 @@ pnpm check         # check:write to auto-fix
 - **The handler is the engine's, not ours.** `serve` loads the same
   `dist/rsc/index.js` that `@k8ordo/static` calls at build time. If a page
   renders differently under the two modes, something has leaked.
+- **The plugin is `framework()`, the same name `@k8ordo/static` exports.**
+  The mode is the import and nothing else, which is what makes a
+  `vite.config.ts` identical under either package.
 - **A request may only name a file inside the client build.** `safeJoin` is
   the only way `serve` turns a pathname into a path, and it is tested against
   the spellings traversal takes.
@@ -36,7 +39,7 @@ pnpm check         # check:write to auto-fix
 src/
   static-file.ts  safeJoin — リクエストパス → ビルド出力内のパス(純関数)
   serve.ts        node:http のサーバー(静的配信 + ハンドラ委譲)
-  index.ts        k8ordoServer: engine そのまま
+  index.ts        framework: engine そのまま
 ```
 
 ## Conventions

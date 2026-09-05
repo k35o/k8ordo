@@ -173,18 +173,56 @@ const pad = (depth: number): string => '  '.repeat(depth);
 const isBranch = (node: TableNode<string>): node is TableBranch<string> =>
   typeof node !== 'string';
 
-const renderNode = (node: TableNode<string>, depth: number): string => {
-  if (!isBranch(node)) return node;
+const renderNode = (
+  node: TableNode<string>,
+  depth: number,
+  asserted: ReadonlyMap<string, string>,
+): string => {
+  if (!isBranch(node)) return believed(node, asserted);
   const lines = ['{'];
   if (node.layout !== undefined) {
-    lines.push(`${pad(depth + 1)}layout: ${node.layout},`);
+    lines.push(`${pad(depth + 1)}layout: ${believed(node.layout, asserted)},`);
   }
   lines.push(`${pad(depth + 1)}children: {`);
   for (const [key, child] of Object.entries(node.children)) {
-    lines.push(`${pad(depth + 2)}'${key}': ${renderNode(child, depth + 2)},`);
+    lines.push(
+      `${pad(depth + 2)}'${key}': ${renderNode(child, depth + 2, asserted)},`,
+    );
   }
   lines.push(`${pad(depth + 1)}},`, `${pad(depth)}}`);
   return lines.join('\n');
+};
+
+const believed = (
+  name: string,
+  asserted: ReadonlyMap<string, string>,
+): string => {
+  const type = asserted.get(name);
+  return type === undefined ? name : `${name} satisfies ${type}`;
+};
+
+/**
+ * What each route file is promised, by the pattern the directories put it
+ * under: a page's own pattern, and for a layout the prefix every route below
+ * it shares. Keyed by file, so the emitter can state the belief where the
+ * component is used and let the compiler check the props the file declared —
+ * the alternative is asking every route file to restate a pattern its own
+ * directory already states.
+ */
+const beliefs = (tree: RouteDir): Map<string, string> => {
+  const found = new Map<string, string>();
+  const walk = (dir: RouteDir, prefix: string): void => {
+    const here = dir.kind === 'root' ? '' : prefix;
+    const own = here === '' ? '/' : here;
+    if (dir.layout !== null) found.set(dir.layout, `Layout<'${own}'>`);
+    if (dir.page !== null) found.set(dir.page, `Page<'${own}'>`);
+    if (dir.notFound !== null) found.set(dir.notFound, `Page<'${here}/*'>`);
+    for (const child of dir.children) {
+      walk(child, child.kind === 'group' ? here : `${here}${child.key}`);
+    }
+  };
+  walk(tree, '');
+  return found;
 };
 
 export const emitRoutesModule = (
@@ -194,20 +232,47 @@ export const emitRoutesModule = (
   const namer = createNamer();
   const table = buildTable(tree, namer.take);
 
+  const byFile = beliefs(tree);
+  const asserted = new Map<string, string>();
+  for (const [file, name] of namer.names) {
+    const belief = byFile.get(file);
+    if (belief !== undefined) asserted.set(name, belief);
+  }
   const body = Object.entries(table).map(
-    ([key, node]) => `${pad(1)}'${key}': ${renderNode(node, 1)},`,
+    ([key, node]) => `${pad(1)}'${key}': ${renderNode(node, 1, asserted)},`,
   );
   const importLines = [...namer.names].map(
     ([file, name]) =>
       `import ${name} from '${options.importPrefix}/${file.replace(/\.[jt]sx?$/u, '')}';`,
+  );
+  const hasLayout = [...asserted.values()].some((type) =>
+    type.startsWith('Layout<'),
   );
 
   return [
     BANNER,
     '',
     `import { defineRoutes } from '@k8ordo/router';`,
+    `import type { ParamsOf } from '@k8ordo/router';`,
+    `import type { ComponentType${hasLayout ? ', ReactNode' : ''} } from 'react';`,
     '',
     ...importLines,
+    '',
+    "// What the renderer passes. `satisfies` below is where a route file's",
+    '// own props are checked against the pattern its directory puts it under.',
+    'type Page<P extends string> = ComponentType<{',
+    '  params: ParamsOf<P>;',
+    '  pathname: string;',
+    '}>;',
+    ...(hasLayout
+      ? [
+          'type Layout<P extends string> = ComponentType<{',
+          '  params: ParamsOf<P>;',
+          '  pathname: string;',
+          '  children: ReactNode;',
+          '}>;',
+        ]
+      : []),
     '',
     'export const routes = defineRoutes({',
     ...body,
@@ -228,10 +293,14 @@ export type RegisterOptions = {
  * the app gets typed paths everywhere without writing the ceremony itself.
  */
 export const emitRegisterModule = (options: RegisterOptions): string => {
+  const wantsState =
+    options.stateModule !== null && options.stateModule !== undefined;
   const lines = [
     BANNER,
     '',
-    `import type { RouteOf } from '@k8ordo/router';`,
+    // `RouteOf` is the state augmentation's alone; imported unconditionally
+    // it is an unused local in every application that does not use state.
+    ...(wantsState ? [`import type { RouteOf } from '@k8ordo/router';`] : []),
     `import type { routes } from '${options.routesModule}';`,
     '',
     `declare module '@k8ordo/router' {`,
@@ -240,7 +309,7 @@ export const emitRegisterModule = (options: RegisterOptions): string => {
     '  }',
     '}',
   ];
-  if (options.stateModule !== null && options.stateModule !== undefined) {
+  if (wantsState) {
     lines.push(
       '',
       `declare module '${options.stateModule}' {`,

@@ -101,12 +101,13 @@ jobs:
 
       # examples は他ジョブが必要としないので composite install の build からは
       # 外したまま、このジョブだけで面倒を見る。ビルドが通るだけでは
-      # 「生成 UI のデモが実は何も描画しない」を検出できないため、デモの
-      # spec / DSL を実パーサに通す test も併せて回す。
+      # 「生成 UI のデモが実は何も描画しない」「フレームワークが 1 枚も
+      # 書き出していない」を検出できないため、デモの spec / DSL を実パーサに
+      # 通し、フレームワークの出力とハンドラを主張する test も併せて回す。
       - name: Build examples
         run: pnpm build:examples
 
-      - name: Verify generative UI demos are renderable
+      - name: Verify examples
         run: pnpm test:examples
 
   tokens:

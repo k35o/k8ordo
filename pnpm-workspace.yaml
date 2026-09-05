@@ -16,12 +16,14 @@ allowBuilds:
 blockExoticSubdeps: true
 
 catalog:
+  '@arethetypeswrong/cli': 0.18.5
   '@tailwindcss/postcss': 4.3.3
   '@tailwindcss/vite': 4.3.3
   '@types/react': 19.2.18
   '@types/react-dom': 19.2.4
   '@vitejs/plugin-react': 6.0.5
   postcss: 8.5.26
+  publint: 0.3.23
   react: 19.2.8
   react-dom: 19.2.8
   tailwindcss: 4.3.3

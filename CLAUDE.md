@@ -16,12 +16,13 @@ Every package here shares the same discipline:
 
 ## Adding a package
 
-1. `packages/<name>/` with its own `package.json`, `tsconfig.json`, and `vite.config.ts` (the `pack` section defines the publishable build). There is deliberately no template yet — write it once by hand; extract a template when a third package proves what is actually shared.
+1. `packages/<name>/` with its own `package.json`, `tsconfig.json`, and `vite.config.ts` (the `pack` section defines the publishable build), plus a `check:package` script (`publint` + `attw`) so CI validates the tarball. There is deliberately no template: each manifest is copied from the nearest sibling and kept small enough to read.
 2. **Ship the package's own docs with it**: a `docs/` directory listed in `files`, so an agent reads the exact installed version out of `node_modules/@k8ordo/<name>/docs/`. The home page promises this on behalf of every package ("readable by agents"), so a package that does not ship docs makes that claim false. `@k8ordo/ui` is the pattern: `GUIDE.md` as the entry point, `references/*.md` behind it, and `llms.txt` as the index.
 3. Examples go to `examples/<name>-<variant>/`, owned by one package. Never bolt a new package onto an existing example: a kitchen-sink example cannot tell you which package broke the build, and it drags one package's dependencies onto everyone.
 4. Docs go under `/<name>/…` on the site. Only `/` is shared. See `apps/docs/CLAUDE.md`.
 5. CI picks the package up automatically for `tests` and `package` (both filter `./packages/*`). The `tokens`, `chromatic`, and `vrt` jobs stay pinned to `@k8ordo/ui` — design tokens, prop extraction, and screenshots are specific to a styled component library.
-6. First publish of a brand-new package name cannot use OIDC: a trusted publisher can only be configured on a package that already exists. Publish once by hand, then register the trusted publisher (`k35o` / `k8ordo` / `release.yml`) and let CI take over.
+6. First publish of a brand-new package name cannot use OIDC: a trusted publisher can only be configured on a package that already exists. Publish once by hand **before** the branch lands on `main` — the merge push itself enters publish mode, and `pnpm publish` E404s on a name npm does not know yet. Publish in dependency order (a package before anything that depends on it), then register the trusted publisher (`k35o` / `k8ordo` / `release.yml`) for each and let CI take over.
+7. **An internal dependency is `workspace:`, in `peerDependencies` too.** pnpm's release plan refuses a plain range there (`Internal dependencies must use the workspace: protocol so that dependency ranges never need rewriting at release time`), and the whole Release job fails before it can open a release PR.
 
 ## Documentation language
 
@@ -30,7 +31,7 @@ Every package here shares the same discipline:
 English, because an AI coding assistant consumes it directly:
 
 - `CLAUDE.md` / `AGENTS.md` at every level
-- `packages/ui/docs/**` — shipped inside the npm package and read out of `node_modules/`
+- `packages/*/docs/**` — shipped inside every npm package and read out of `node_modules/@k8ordo/<name>/docs/`
 - `.claude/skills/**`
 - Any string a generator writes into those files (see `packages/ui/scripts/generate-components-md.ts`)
 
@@ -49,8 +50,8 @@ pnpm check              # lint/format check (pnpm check:write to auto-fix)
 
 ## Gotchas
 
-- Run `pnpm build` before `pnpm check` / `pnpm typecheck` on a fresh checkout or worktree: docs/examples resolve `@k8ordo/ui` types from `dist/`, so without it type-aware lint reports bogus `no-unsafe-*` errors (and parallel checks can die with exit 137). CI builds in the install action.
-- Use `type`, not `interface`.
+- Run `pnpm build` before `pnpm check` / `pnpm typecheck` on a fresh checkout or worktree: docs/examples resolve `@k8ordo/*` types from each package's `dist/`, so without it type-aware lint reports bogus `no-unsafe-*` errors (and parallel checks can die with exit 137). CI builds in the install action.
+- Use `type`, not `interface` — except `Register` (router, state, and the generated `.k8ordo/register.gen.ts`), which exists to be merged.
 - No `@ts-ignore` — use `@ts-expect-error` with an explanation.
 - No skipped tests (`test.skip`, `describe.skip`).
 - The pre-commit hook (`vp staged`) runs `vp check --fix` and auto-stages the fixes.

@@ -1,7 +1,7 @@
 {
   "name": "k8ordo",
   "private": true,
-  "description": "k8o's react ui library",
+  "description": "k8o's React library family",
   "license": "MIT",
   "author": "k8o",
   "repository": {

@@ -19,7 +19,9 @@ Installing this package is what makes an application one that runs. The
 alternative, `@k8ordo/static`, renders every route at build time and ships
 files; nothing else about the application changes between them — the same
 route grammar, the same boundaries, the same request handler, called once per
-route instead of once per request.
+route instead of once per request. The plugin is called `framework()` in both
+packages for that reason: the mode is the import, and `vite.config.ts` reads
+the same either way.
 
 ## Getting started
 
@@ -28,12 +30,16 @@ pnpm add @k8ordo/router @k8ordo/server react react-dom server-only
 pnpm add -D vite
 ```
 
+`@k8ordo/server` is a runtime dependency: `serve` and the built handler are
+what the deployed application runs. `@k8ordo/static` is only ever needed at
+build time, which is why its guide installs it with `-D`.
+
 ```ts
 // vite.config.ts
-import { k8ordoServer } from '@k8ordo/server';
+import { framework } from '@k8ordo/server';
 import { defineConfig } from 'vite';
 
-export default defineConfig({ plugins: [k8ordoServer()] });
+export default defineConfig({ plugins: [framework()] });
 ```
 
 ```json
@@ -131,14 +137,23 @@ export default async function ProductPage({
 
 Every problem is reported, not just the first, and each names the file:
 
-| routes/ contains                      | error                                                                                                       |
-| ------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `products/helper.ts`                  | `routes/ holds only page.tsx, layout.tsx and not-found.tsx — move "helper.ts" under a _-prefixed directory` |
-| `[123]/page.tsx`                      | `"[123]" is not a valid param directory — use [name] with a letter or underscore first`                     |
-| `pro ducts/page.tsx`                  | `"pro ducts" cannot be a URL segment — use letters, digits, . _ ~ or -`                                     |
-| `[id]/things/[id]/page.tsx`           | `":id" is already taken by an ancestor — params must be unique within a path`                               |
-| `orphan/layout.tsx` and no page below | `has a layout but no page.tsx below it, so it can never render`                                             |
-| `(a)/page.tsx` and `(b)/page.tsx`     | `"/" is already declared by (a)/page.tsx — route groups do not separate URLs`                               |
+| routes/ contains                                     | error                                                                                                       |
+| ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `products/helper.ts`                                 | `routes/ holds only page.tsx, layout.tsx and not-found.tsx — move "helper.ts" under a _-prefixed directory` |
+| `[123]/page.tsx`                                     | `"[123]" is not a valid param directory — use [name] with a letter or underscore first`                     |
+| `pro ducts/page.tsx`                                 | `"pro ducts" cannot be a URL segment — use letters, digits, . _ ~ or -`                                     |
+| `[id]/things/[id]/page.tsx`                          | `":id" is already taken by an ancestor — params must be unique within a path`                               |
+| `orphan/layout.tsx` and no page below                | `has a layout but no page.tsx below it, so it can never render`                                             |
+| `(a)/page.tsx` and `(b)/page.tsx`                    | `"/" is already declared by (a)/page.tsx — route groups do not separate URLs`                               |
+| `(docs/page.tsx`                                     | `"(docs" is not a valid route group — use (name)`                                                           |
+| `products/sub/layout.tsx` and no page anywhere below | `declares no route — every directory needs a page.tsx somewhere below it`                                   |
+| `(shop)/[id]/page.tsx` beside `about/page.tsx`       | `"/about" can never match — "/:id" ((shop)/[id]/page.tsx) is declared first and answers it`                 |
+
+The generated table lists literal segments before parameters, so `about/`
+beside `[slug]/` is reachable without saying anything. A route group holds
+both kinds under one key and the table cannot interleave across it, which is
+the one shape where a declared route can still be shadowed — so it is reported
+rather than shipped.
 
 ## The generated files
 
@@ -168,7 +183,7 @@ export const routes = defineRoutes({
 });
 ```
 
-`.k8ordo/register.d.ts` wires that table into `@k8ordo/router` — and into
+`.k8ordo/register.gen.ts` wires that table into `@k8ordo/router` — and into
 `@k8ordo/state` when the application depends on it — so typed paths work
 everywhere without a line of ceremony:
 
@@ -275,6 +290,11 @@ where it really came from.
 search does not change the page: the router leaves the route tree alone,
 nothing remounts, and the scroll position stays where the reader left it.
 
+A page never sees the search: `useAppState` reads it in the browser, so a
+server render shows the url slot's defaults and the live URL takes over on
+hydration. That is the same split the router draws at the `?` — the pathname
+is the framework's, everything after it is state's.
+
 `@k8ordo/form` derives a form's constraint attributes, its messages and its
 server-side validation from one zod schema — and since this mode has Server
 Actions, the submission has somewhere to arrive.
@@ -328,7 +348,7 @@ both worlds without knowing which one it is in.
 An unknown URL gets a real 404 from the application rather than whatever the
 host would have said; parameterised routes need no list of values, so a
 catalogue that changes does not need a rebuild; and a form can post to a
-Server Action. A page receives its `params` and nothing else of the request —
-there is no headers or cookies API yet. If none of that is needed,
+Server Action. A page receives its `params` and its `pathname`, and nothing
+else of the request — there is no headers, cookies or search-params API yet. If none of that is needed,
 `@k8ordo/static` renders the same application into files — the same grammar,
 the same boundaries, the same handler, called once per route.

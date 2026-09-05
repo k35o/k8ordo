@@ -34,7 +34,7 @@ const EXAMPLE = `// src/routes/page.tsx                → /
 // vite.config.ts — 値を持たない区間だけ、ビルドに渡す
 export default defineConfig({
   plugins: [
-    k8ordoStatic({
+    framework({
       paths: async () => {
         const products = await readCatalog();
         return products.map((product) => \`/products/\${product.id}\`);
