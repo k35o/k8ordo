@@ -149,9 +149,13 @@ export const serve = async (options: ServeOptions = {}): Promise<void> => {
         body.pipe(response);
       })().catch((error: unknown) => {
         // 例外の中身は運用者のもので、訪問者のものではない。パスやスタックが
-        // そのまま本文に出ると、答えられなかった理由まで外に漏れる
+        // そのまま本文に出ると、答えられなかった理由まで外に漏れる。
+        // メソッドと URL は引数として渡す。第 1 引数はフォーマット文字列
+        // なので、`%s` を含む URL を投げられると後ろの引数が食われる
         console.error(
-          `k8ordo: ${incoming.method ?? 'GET'} ${incoming.url ?? '/'} failed`,
+          'k8ordo: %s %s failed',
+          incoming.method ?? 'GET',
+          incoming.url ?? '/',
           error,
         );
         response.writeHead(500, { 'content-type': 'text/plain;charset=utf-8' });
