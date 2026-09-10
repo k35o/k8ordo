@@ -1,0 +1,44 @@
+# @k8ordo/i18n
+
+> The locale axis of an application, owned. `defineLocales(['ja', 'en'])`
+> declares the set once and derives membership, negotiation, the URL segment
+> (`localize` / `delocalize`), and the `[locale]` params schema in the shape
+> `@k8ordo/static` / `@k8ordo/server` run. `defineDictionary(locales, { ja,
+> en })` holds the messages — strings, or functions of the values a message
+> needs — typed by the default locale's shape (`Translations<typeof ja>`), so
+> an untranslated key does not compile. `dictionary.translator(locale)` is
+> `t` on the server; `<LocaleProvider locale>` (a string, renderable from a
+> Server Component) and `useTranslation(dictionary)` are the client side.
+>
+> Like every k8ordo package it assumes React 19 and Server Components, uses
+> only what has reached Baseline newly available, and ships no polyfills or
+> legacy fallbacks.
+
+When installed via npm, these docs live under `node_modules/@k8ordo/i18n/docs/`.
+
+## Guide
+
+- [Design Guide](GUIDE.md): what the package owns and does not (the locale
+  segment, not the pathname; no message grammar; no lazy loading), the locale
+  set and negotiation, the dictionary and `Translations`, the server
+  translator, the client provider and hook, where the locale comes from (the
+  URL; `/` redirects by `navigator.languages` or `Accept-Language`), `<html
+  lang>`, static path expansion, and pairing with `@k8ordo/router` /
+  `@k8ordo/ui` / `@k8ordo/form`.
+
+## Entry point
+
+- `@k8ordo/i18n` — `defineLocales(all, { default? })` returns `{ all,
+  default, is, negotiate, localize, delocalize, paramsSchema }`; the first
+  entry is the default unless told otherwise, every tag must be BCP 47, and
+  `negotiate(list)` tries each requested tag in order (exact, then language)
+  before falling back to the default. `parseAcceptLanguage(header)` turns an
+  `Accept-Language` header into that list. `defineDictionary(locales, { …
+  })` returns `{ locales, messages, translator(locale) }`; `translator` is
+  `t(key, ...args)` for one locale and returns the same function for the
+  same locale. `LocaleProvider` (client) carries a string locale;
+  `useLocale()` reads it, `useLocale(locales)` reads it checked and typed;
+  `useTranslation(dictionary)` returns `{ t, locale }`. Types:
+  `Locales`, `LocaleOf`, `Dictionary`, `Translations`, `Translator`,
+  `MessageKeyOf`, `Message`, `Messages`, `Translation`, `Delocalized`,
+  `LocaleParamsSchema`.

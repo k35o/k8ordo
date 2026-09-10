@@ -4,7 +4,7 @@ import { AlertIcon, Button, Heading } from '@k8ordo/ui';
 import type { FC } from 'react';
 
 import type { Locale } from '../i18n';
-import { messages } from '../i18n';
+import { dictionary } from '../i18n';
 
 type ErrorFallbackProps = {
   resetErrorBoundary: () => void;
@@ -17,8 +17,9 @@ export const ErrorFallback: FC<ErrorFallbackProps> = ({
   fullScreen = false,
   locale = 'ja',
 }) => {
-  const t = (key: 'error.title' | 'error.description' | 'error.retry') =>
-    messages[locale][key];
+  // Provider の外（ルートの error.tsx）からも描かれるので、hook ではなく
+  // 辞書から直接引く。
+  const t = dictionary.translator(locale);
 
   return (
     <div

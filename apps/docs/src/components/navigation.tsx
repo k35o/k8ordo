@@ -4,7 +4,7 @@ import { usePathname } from '@k8ordo/router';
 import { DropdownMenu, NavigationMenuIcon } from '@k8ordo/ui';
 
 import type { MessageKey } from '../i18n';
-import { deLocalizeHref, localizeHref, useTranslation } from '../i18n';
+import { locales, useTranslation } from '../i18n';
 import { LanguageSwitcher } from './language-switcher';
 import { LocaleAnchor } from './locale-anchor';
 import { ThemeSwitcher } from './theme-switcher';
@@ -37,10 +37,11 @@ const PACKAGES: PackageNav[] = [
   { name: 'Router', path: '/router', sections: [] },
   { name: 'Static', path: '/static', sections: [] },
   { name: 'Server', path: '/server', sections: [] },
+  { name: 'i18n', path: '/i18n', sections: [] },
 ];
 
 const packageOf = (pathname: string): PackageNav | undefined => {
-  const { path } = deLocalizeHref(pathname);
+  const { pathname: path } = locales.delocalize(pathname);
   return PACKAGES.find(
     (pkg) => path === pkg.path || path.startsWith(`${pkg.path}/`),
   );
@@ -87,7 +88,7 @@ export function Navigation() {
         </LocaleAnchor>
         <ul className="hidden items-center gap-1 md:flex">
           {PACKAGES.map((pkg) => {
-            const href = localizeHref(pkg.path, locale);
+            const href = locales.localize(pkg.path, locale);
             const isHere = pkg === current;
             return (
               <li key={pkg.path}>
@@ -117,7 +118,7 @@ export function Navigation() {
                     key={entry.path}
                     label={entry.label}
                     onAction={() => {
-                      navigation.navigate(localizeHref(entry.path, locale));
+                      navigation.navigate(locales.localize(entry.path, locale));
                     }}
                   />
                 ))}
@@ -130,7 +131,7 @@ export function Navigation() {
         <div className="border-border-subtle hidden border-t md:block">
           <ul className="mx-auto flex max-w-6xl items-center gap-1 px-4 py-2 md:px-8">
             {current.sections.map((item) => {
-              const href = localizeHref(item.path, locale);
+              const href = locales.localize(item.path, locale);
               const isActive = pathname === href;
               return (
                 <li key={item.path}>

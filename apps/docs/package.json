@@ -17,6 +17,7 @@
     "@fontsource-variable/m-plus-2": "5.3.0",
     "@fontsource-variable/noto-sans-jp": "5.3.0",
     "@k8ordo/form": "workspace:^",
+    "@k8ordo/i18n": "workspace:^",
     "@k8ordo/router": "workspace:^",
     "@k8ordo/state": "workspace:^",
     "@k8ordo/ui": "workspace:^",

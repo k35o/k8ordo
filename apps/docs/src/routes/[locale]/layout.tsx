@@ -1,13 +1,13 @@
 import type { ReactNode } from 'react';
-import * as z from 'zod/mini';
 
-import { LOCALES } from '../../i18n';
+import { locales } from '../../i18n/locales';
 import { LocaleShell } from './_parts/locale-shell';
 
 // `/fr/ui` はこのパターンが答えない。スキーマが拒んだ pathname は表の次へ
-// 進み、最後は not-found（404）になる。ビルドが paths で展開するのは LOCALES
-// だけなので、静的化でここが拒む pathname は生成されない。
-export const paramsSchema = z.object({ locale: z.enum(LOCALES) });
+// 進み、最後は not-found（404）になる。ビルドが paths で展開するのは
+// locales.all だけなので、静的化でここが拒む pathname は生成されない。
+// スキーマはロケール集合が自分で出す（Standard Schema）。zod は要らない。
+export const { paramsSchema } = locales;
 
 // スキーマを export するファイルは Server Component でなければならない。
 // `'use client'` のモジュールから export した値は、RSC 側には client reference

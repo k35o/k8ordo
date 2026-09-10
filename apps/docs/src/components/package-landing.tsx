@@ -3,8 +3,8 @@
 import { Button, GitHubIcon, Heading } from '@k8ordo/ui';
 import type { ReactNode } from 'react';
 
-import { localizeHref, useTranslation } from '../i18n';
-import type { MessageKey } from '../i18n/types';
+import { locales, useTranslation } from '../i18n';
+import type { MessageKey } from '../i18n';
 import { PageTitle } from './page-title';
 import { T } from './t';
 
@@ -125,7 +125,7 @@ export function PackageLanding({
           <Button
             color="base"
             renderItem={({ className, children: label }) => (
-              <a className={className} href={localizeHref('/', locale)}>
+              <a className={className} href={locales.localize('/', locale)}>
                 {label}
               </a>
             )}

@@ -15,21 +15,9 @@ import { componentCategories } from '../../../data/components-nav';
 import { helperCategories } from '../../../data/helpers-nav';
 import { hookCategories } from '../../../data/hooks-nav';
 import type { NavCategory } from '../../../data/nav-types';
-import type { Locale } from '../../../i18n';
-import {
-  DEFAULT_LOCALE,
-  isLocale,
-  LocaleProvider,
-  useTranslation,
-} from '../../../i18n';
+import { LocaleProvider, locales, useTranslation } from '../../../i18n';
 import { ThemeProvider } from '../../../theme/context';
 import { WritingModeProvider } from '../../../theme/writing-mode-context';
-
-/** URL の先頭区間。404 の 1 枚がどのロケールで読まれているかはここにしか無い。 */
-const localeOf = (pathname: string): Locale | null => {
-  const first = pathname.split('/')[1] ?? '';
-  return isLocale(first) ? first : null;
-};
 
 type SideNavConfig = {
   categories: NavCategory[];
@@ -198,9 +186,9 @@ export function LocaleShell({
   // ビルドが使った番兵の区間。読んでいる人のロケールは URL にしか無いので、
   // そこから取り直す。usePathname はサーバーの値で hydrate してからクライアント
   // の値に切り替わるので、mismatch にはならず 1 度描き直されるだけ。
-  const locale = isLocale(param)
+  const locale = locales.is(param)
     ? param
-    : (localeOf(pathname) ?? DEFAULT_LOCALE);
+    : (locales.delocalize(pathname).locale ?? locales.default);
 
   // 実ページの lang はルートレイアウトがサーバーで書く。ここで直すのは
   // 404.html の 1 枚だけで、あれは番兵の URL で描かれているので、読んでいる

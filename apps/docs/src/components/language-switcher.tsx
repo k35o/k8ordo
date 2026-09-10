@@ -4,7 +4,7 @@ import { usePathname } from '@k8ordo/router';
 import { DropdownMenu } from '@k8ordo/ui';
 
 import type { Locale } from '../i18n';
-import { deLocalizeHref, LOCALES, localizeHref, useLocale } from '../i18n';
+import { locales, useLocale } from '../i18n';
 
 const LOCALE_LABELS: Record<Locale, string> = {
   ja: '日本語',
@@ -15,7 +15,7 @@ export function LanguageSwitcher() {
   const locale = useLocale();
   const pathname = usePathname();
 
-  const { path } = deLocalizeHref(pathname);
+  const { pathname: path } = locales.delocalize(pathname);
 
   return (
     <DropdownMenu.Root>
@@ -25,12 +25,12 @@ export function LanguageSwitcher() {
         variant="skeleton"
       />
       <DropdownMenu.Content>
-        {LOCALES.map((l) => (
+        {locales.all.map((l) => (
           <DropdownMenu.Item
             key={l}
             label={LOCALE_LABELS[l]}
             onAction={() => {
-              navigation.navigate(localizeHref(path, l));
+              navigation.navigate(locales.localize(path, l));
             }}
           />
         ))}

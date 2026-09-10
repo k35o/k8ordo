@@ -1,0 +1,76 @@
+{
+  "name": "@k8ordo/i18n",
+  "version": "0.0.0",
+  "description": "The locale axis of an application, owned. One locale set derives the URL segment, negotiation, the params schema, and the static paths; one dictionary derives the keys, the server translator, and the client hook.",
+  "keywords": [
+    "i18n",
+    "intl",
+    "locale",
+    "react",
+    "server-components",
+    "translation",
+    "typescript"
+  ],
+  "homepage": "https://ordo.k8o.me",
+  "bugs": {
+    "url": "https://github.com/k35o/k8ordo/issues"
+  },
+  "license": "MIT",
+  "author": "k8o <kosakanoki@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/k35o/k8ordo.git"
+  },
+  "files": [
+    "dist/**",
+    "docs/**"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "default": "./dist/index.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "scripts": {
+    "build": "vp pack",
+    "test": "vp test",
+    "typecheck": "tsc --noEmit",
+    "check": "vp check",
+    "check:write": "vp check --fix",
+    "check:package": "publint && attw --pack . --profile esm-only"
+  },
+  "devDependencies": {
+    "@arethetypeswrong/cli": "catalog:",
+    "@types/react": "catalog:",
+    "@vitejs/plugin-react": "catalog:",
+    "@vitest/browser-playwright": "catalog:",
+    "publint": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "typescript": "7.0.2",
+    "vite": "catalog:",
+    "vite-plus": "catalog:",
+    "vitest": "catalog:",
+    "vitest-browser-react": "catalog:"
+  },
+  "peerDependencies": {
+    "@types/react": ">=19.2.18",
+    "react": ">=19.2.6",
+    "typescript": ">=7.0.2"
+  },
+  "peerDependenciesMeta": {
+    "@types/react": {
+      "optional": true
+    },
+    "typescript": {
+      "optional": true
+    }
+  }
+}

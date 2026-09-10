@@ -1,6 +1,8 @@
-import type { MessageKey } from '../types';
+import type { Translations } from '@k8ordo/i18n';
 
-export const en = {
+import type { ja } from './ja';
+
+export const en: Translations<typeof ja> = {
   'nav.home': 'Home',
   'nav.getStarted': 'Get Started',
   'nav.components': 'Components',
@@ -209,6 +211,42 @@ export const en = {
   'server.docsTitle': 'Documentation',
   'server.docsDescription':
     'The guide ships inside the npm package. An AI coding assistant reads the exact installed version out of `node_modules/@k8ordo/server/docs/`.',
+  'i18n.description':
+    'The locale axis of an application, owned. One locale set derives the URL segment, negotiation, the params schema, and the static paths; one dictionary derives the keys, the server translator, and the client hook. No message grammar: interpolation is a function, plurals are Intl.',
+  'i18n.featuresTitle': 'Features',
+  'i18n.featureLocales': 'Locales in one place',
+  'i18n.featureLocalesDescription':
+    "`defineLocales(['ja', 'en'])` is written once. The default, membership, negotiation, the URL segment, and the `[locale]` schema all come from it, so there is nowhere to copy the list to.",
+  'i18n.featureSegment': 'Owns the first URL segment',
+  'i18n.featureSegmentDescription':
+    'The locale lives in the URL. `localize` / `delocalize` put the segment on and take it off, and `paramsSchema` makes `/fr/…` a real 404. The rest of the pathname belongs to `@k8ordo/router`.',
+  'i18n.featureNegotiate': 'Negotiates over a list',
+  'i18n.featureNegotiateDescription':
+    '`negotiate(navigator.languages)` and `negotiate(parseAcceptLanguage(header))` are the same function: each requested tag in order, exact match, then the same language, then the default.',
+  'i18n.featureDictionary': 'The default locale sets the shape',
+  'i18n.featureDictionaryDescription':
+    'Write `ja`; hold `en` to `Translations<typeof ja>`. Add one key and nothing compiles until it is translated. No separate list of keys to maintain.',
+  'i18n.featureFunctions': 'Functions interpolate, Intl pluralizes',
+  'i18n.featureFunctionsDescription':
+    'A message is a string, or a function of the values it needs. A template literal is the interpolation and `Intl.PluralRules` the plural rule — no grammar of its own, so TypeScript checks the arguments.',
+  'i18n.featureBoundary': 'Only a string crosses the boundary',
+  'i18n.featureBoundaryDescription':
+    '`LocaleProvider` takes a locale string, so a Server Component layout renders it directly. The dictionary is imported by the client module that needs it, never passed as a prop.',
+  'i18n.exampleTitle': 'Usage',
+  'i18n.exampleDescription':
+    'Define the locale set and the dictionary; take `t` from `translator(params.locale)` on the server and from `useTranslation(dictionary)` on the client.',
+  'i18n.demoTitle': 'This site is the demo',
+  'i18n.demoDescription':
+    'Every word from the header to the footer comes from a `@k8ordo/i18n` dictionary. The greeting below is a function message that takes a name.',
+  'i18n.demoLabelName': 'Name',
+  'i18n.demoGreeting': (name) => (name === '' ? 'Hello.' : `Hello, ${name}.`),
+  'i18n.demoPreferred': 'Locale negotiated from your browser languages',
+  'i18n.demoPreferredUnknown': 'detecting',
+  'i18n.demoHint':
+    "The arguments of `t('i18n.demoGreeting', name)` are typed by the function written in `ja`. An `en` written with different parameters does not compile.",
+  'i18n.docsTitle': 'Design guide',
+  'i18n.docsDescription':
+    'The guide ships inside the npm package. An AI coding assistant reads the exact installed version out of `node_modules/@k8ordo/i18n/docs/`.',
   'footer.tagline':
     'React libraries that use Baseline features without holding back.',
   'footer.typesetting': 'Typeset in Noto Sans JP & M PLUS 2',
@@ -702,30 +740,30 @@ export const en = {
   'theming.zIndexTitle': 'Z-Index Layers',
   'theming.zIndexDescription':
     'A three-tier scale that defines stacking order for overlay components. Anchored floating UI (Popover / DropdownMenu / ListBox / Tooltip) sits on overlay, Modal / Drawer on modal, and Toast on toast.',
-  'i18n.introduction':
+  'uiI18n.introduction':
     'Wording the components render on their own — close button labels, the required badge, the loading announcement — comes from a message dictionary. Replace the dictionary and the language changes without touching your own code.',
-  'i18n.defaultTitle': 'Japanese by default',
-  'i18n.defaultDescription':
+  'uiI18n.defaultTitle': 'Japanese by default',
+  'uiI18n.defaultDescription':
     'No setup required. UIProvider uses the Japanese dictionary, and components fall back to the same Japanese wording even without a provider.',
-  'i18n.englishTitle': 'Switching to English',
-  'i18n.englishDescription':
+  'uiI18n.englishTitle': 'Switching to English',
+  'uiI18n.englishDescription':
     'Import en from @k8ordo/ui/i18n and pass it to messages. ja ships from the same entry point.',
-  'i18n.overrideTitle': 'Overriding part of a dictionary',
-  'i18n.overrideDescription':
+  'uiI18n.overrideTitle': 'Overriding part of a dictionary',
+  'uiI18n.overrideDescription':
     'messages is a Partial<Messages>. Only the keys you pass are replaced; the rest fall back to the Japanese defaults. To start from English instead, spread en first and layer your changes on top.',
-  'i18n.priorityTitle': 'Resolution order',
-  'i18n.priorityDescription':
+  'uiI18n.priorityTitle': 'Resolution order',
+  'uiI18n.priorityDescription':
     'Three sources can decide a string, and they win in the order prop > dictionary > default. Per-instance props (such as the Spinner label) always beat the dictionary, so reach for them when only one place should read differently.',
-  'i18n.customTitle': 'Writing your own dictionary',
-  'i18n.customDescription':
+  'uiI18n.customTitle': 'Writing your own dictionary',
+  'uiI18n.customDescription':
     'Annotate with the Messages type and missing or misspelled keys become compile errors — including when the library adds a key.',
-  'i18n.keysTitle': 'Key reference',
-  'i18n.keysDescription':
+  'uiI18n.keysTitle': 'Key reference',
+  'uiI18n.keysDescription':
     'Every key in Messages. The values below are read from the shipped dictionaries themselves.',
-  'i18n.keyColumn': 'Key',
-  'i18n.usedByColumn': 'Used by',
-  'i18n.jaColumn': 'ja (default)',
-  'i18n.enColumn': 'en',
+  'uiI18n.keyColumn': 'Key',
+  'uiI18n.usedByColumn': 'Used by',
+  'uiI18n.jaColumn': 'ja (default)',
+  'uiI18n.enColumn': 'en',
   'sideNav.openNavigation': 'Open navigation',
   'common.switchToDarkMode': 'Switch to dark mode',
   'common.switchToLightMode': 'Switch to light mode',
@@ -737,4 +775,4 @@ export const en = {
   'error.title': 'Something went wrong',
   'error.description': 'An unexpected error occurred.',
   'error.retry': 'Retry',
-} as const satisfies Record<MessageKey, string>;
+};

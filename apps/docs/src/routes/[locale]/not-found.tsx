@@ -3,7 +3,7 @@
 import { Button, Heading } from '@k8ordo/ui';
 
 import { PageTitle } from '../../components/page-title';
-import { localizeHref, useTranslation } from '../../i18n';
+import { locales, useTranslation } from '../../i18n';
 
 export default function NotFound() {
   const { t, locale } = useTranslation();
@@ -18,7 +18,7 @@ export default function NotFound() {
       <div className="flex flex-wrap items-center gap-4">
         <Button
           renderItem={({ className, children }) => (
-            <a className={className} href={localizeHref('/', locale)}>
+            <a className={className} href={locales.localize('/', locale)}>
               {children}
             </a>
           )}
@@ -32,7 +32,7 @@ export default function NotFound() {
           renderItem={({ className, children }) => (
             <a
               className={className}
-              href={localizeHref('/ui/get-started', locale)}
+              href={locales.localize('/ui/get-started', locale)}
             >
               {children}
             </a>

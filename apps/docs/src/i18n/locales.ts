@@ -1,8 +1,8 @@
-import type { Locale } from './types';
-import { LOCALES } from './types';
+import { defineLocales } from '@k8ordo/i18n';
+import type { LocaleOf } from '@k8ordo/i18n';
 
-export const DEFAULT_LOCALE: Locale = 'ja';
+// サイトのロケールはここにしか書かない。`[locale]` の paramsSchema、静的化の
+// パス展開（vite.config.ts）、言語切替、`/` の振り分けは全部この値を読む。
+export const locales = defineLocales(['ja', 'en']);
 
-export function isLocale(value: string): value is Locale {
-  return (LOCALES as readonly string[]).includes(value);
-}
+export type Locale = LocaleOf<typeof locales>;

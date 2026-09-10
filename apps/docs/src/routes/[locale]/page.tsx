@@ -3,8 +3,8 @@
 import { Button, GitHubIcon, Heading } from '@k8ordo/ui';
 
 import { T } from '../../components/t';
-import { localizeHref, useTranslation } from '../../i18n';
-import type { MessageKey } from '../../i18n/types';
+import { locales, useTranslation } from '../../i18n';
+import type { MessageKey } from '../../i18n';
 
 type Package = {
   name: string;
@@ -42,6 +42,11 @@ const PACKAGES: Package[] = [
     name: '@k8ordo/server',
     path: '/server',
     description: 'server.description',
+  },
+  {
+    name: '@k8ordo/i18n',
+    path: '/i18n',
+    description: 'i18n.description',
   },
 ];
 
@@ -91,7 +96,7 @@ export default function Home() {
           <div className="flex flex-wrap items-center gap-4">
             <Button
               renderItem={({ className, children }) => (
-                <a className={className} href={localizeHref('/ui', locale)}>
+                <a className={className} href={locales.localize('/ui', locale)}>
                   {children}
                 </a>
               )}
@@ -129,7 +134,7 @@ export default function Home() {
             <li key={pkg.name}>
               <a
                 className="border-border-mute hover:bg-bg-mute focus-visible:ring-border-info flex flex-col gap-2 rounded-lg border p-6 transition-colors duration-150 ease-out focus-visible:ring-2 focus-visible:outline-hidden"
-                href={localizeHref(pkg.path, locale)}
+                href={locales.localize(pkg.path, locale)}
               >
                 <span className="text-fg-base font-medium">{pkg.name}</span>
                 <span className="text-fg-mute text-sm leading-relaxed">
