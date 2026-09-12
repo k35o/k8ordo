@@ -2,6 +2,11 @@
   dir: packages/form
   intents:
     - form-dropped-warning
+"@k8ordo/form@0.2.0":
+  dir: packages/form
+  intents:
+    - silent-cooks-leave
+    - zod-4-5-iso-formats
 "@k8ordo/router@0.1.0":
   dir: packages/router
   intents:
@@ -25,7 +30,19 @@
     - framework-error-redirect-request
     - framework-params-schema
     - static-server-hardening
+"@k8ordo/static@0.1.1":
+  dir: packages/static
+  intents:
+    - static-dev-refuses-actions
 "@k8ordo/ui@2.0.0":
   dir: packages/ui
   intents:
     - ui-two
+"@k8ordo/ui@3.0.0":
+  dir: packages/ui
+  intents:
+    - button-render-item-passthrough
+    - purple-tools-design
+    - react-compiler-lint-conformance
+    - tough-buses-happen
+    - ui-jsdom-render
