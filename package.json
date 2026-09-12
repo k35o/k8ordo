@@ -28,11 +28,11 @@
     "@oxlint/plugins": "1.81.0",
     "@types/node": "24.13.3",
     "oxlint-tailwindcss": "1.10.2",
-    "playwright": "1.62.1",
+    "playwright": "1.63.0",
     "typescript": "7.0.2",
     "vite-plus": "catalog:",
     "vite-plus-inspector": "0.1.1",
-    "wrangler": "4.128.0"
+    "wrangler": "4.129.0"
   },
   "engines": {
     "node": ">=24.13.0"
