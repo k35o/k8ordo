@@ -22,7 +22,7 @@ catalog:
   '@types/react': 19.2.18
   '@types/react-dom': 19.2.5
   '@vitejs/plugin-react': 6.1.1
-  '@vitest/browser-playwright': 4.1.11
+  '@vitest/browser-playwright': 5.0.0
   postcss: 8.5.26
   publint: 0.3.24
   react: 19.2.8
@@ -30,7 +30,7 @@ catalog:
   tailwindcss: 4.3.3
   vite: 8.2.2
   vite-plus: 0.3.0
-  vitest: 4.1.11
+  vitest: 5.0.0
   vitest-browser-react: 2.2.0
   zod: 4.5.4
 
