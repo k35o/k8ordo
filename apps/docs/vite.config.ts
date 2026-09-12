@@ -2,7 +2,7 @@ import { framework } from '@k8ordo/static';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite';
 
-import { LOCALES } from './src/i18n/types';
+import { locales } from './src/i18n/locales';
 
 export default defineConfig({
   server: {
@@ -17,7 +17,9 @@ export default defineConfig({
       // そのままロケールの数だけ展開する
       paths: (patterns) =>
         patterns.flatMap((pattern) =>
-          LOCALES.map((locale) => pattern.replace('/:locale', `/${locale}`)),
+          locales.all.map((locale) =>
+            pattern.replace('/:locale', `/${locale}`),
+          ),
         ),
     }),
     tailwindcss(),

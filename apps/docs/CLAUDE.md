@@ -1,15 +1,18 @@
 # Agent guide — apps/docs
 
 Documentation site for the `@k8ordo/*` packages (`ui`, `form`, `state`,
-`router`, `static`, `server`), built with `@k8ordo/static` — the site runs on
-the family's own framework, so a change to it is felt here first. The
+`router`, `static`, `server`, `i18n`), built with `@k8ordo/static` — the site
+runs on the family's own framework, so a change to it is felt here first. The
 `framework-engine` is internal and has no page: an application installs a mode
 package, never the engine. The site also dogfoods
-`@k8ordo/state` and `@k8ordo/form`: the theme and writing-mode preferences are
-`defineLocalState`s (`src/theme/state.ts`), `/state`'s live demo is a real
-`definePageState` on the page's own URL, and `/form`'s live demo is a GET
-filter form whose constraints and URL state come from one schema
-(`src/routes/[locale]/form/_parts/`).
+`@k8ordo/state`, `@k8ordo/form`, and `@k8ordo/i18n`: the theme and
+writing-mode preferences are `defineLocalState`s (`src/theme/state.ts`),
+`/state`'s live demo is a real `definePageState` on the page's own URL,
+`/form`'s live demo is a GET filter form whose constraints and URL state come
+from one schema (`src/routes/[locale]/form/_parts/`), and every word on the
+site comes from the `defineDictionary` in `src/i18n/` — the locale set there
+is what the `[locale]` layout's `paramsSchema`, the root layout's `<html
+lang>`, `vite.config.ts`'s path expansion, and the `/` redirect all read.
 
 ## Commands
 
@@ -85,7 +88,18 @@ pnpm check:write       # Oxlint/Oxfmt lint/format auto-fix
   key and the JSON envelope are never spelled out by hand. The `@k8ordo/ui`
   storage hooks (`useLocalStorage`, `useSessionStorage`, `useHash`) no longer
   exist, so neither do their pages.
-- **i18n**: Custom i18n system in `src/i18n/` with locale-based routing (`/ja/`, `/en/`)
+- **i18n**: `@k8ordo/i18n`. `src/i18n/locales.ts` is `defineLocales(['ja',
+'en'])` — the one place the list is spelled — and `src/i18n/dictionary.ts`
+  is `defineDictionary(locales, { ja, en })`; `messages/ja.ts` sets the
+  shape and `messages/en.ts` is `Translations<typeof ja>`, so a key added to
+  one fails to compile until the other has it (there is no separate key
+  list). `src/i18n/client.ts` binds the hooks to this one dictionary so call
+  sites write `useTranslation()`. `MessageKey` is `TextKeyOf` — the keys
+  `t()` takes with no arguments — which is what `<T k>` and the `labelKey`s
+  in `data/` accept; a function message (`i18n.demoGreeting`) is called with
+  its literal key. Locale-prefixed routing (`/ja/`, `/en/`) is
+  `locales.localize` / `locales.delocalize`; the `/` page negotiates with
+  `locales.negotiate(navigator.languages)`.
 - **Styling**: Tailwind CSS 4, uses `@k8ordo/ui` design tokens
 - **Root provider**: `UIProvider` wraps each locale subtree in
   `src/routes/[locale]/_parts/locale-shell.tsx`, passing the `en` dictionary on `/en/` so
@@ -115,7 +129,7 @@ src/
   constants.ts         # Shared constants (e.g. STORYBOOK_URL)
   components/          # Shared doc components (CodeBlock, PropsTable, etc.)
   data/                # Navigation data (components-nav, helpers-nav, hooks-nav)
-  i18n/                # i18n system (context, locales, messages, utils)
+  i18n/                # @k8ordo/i18n wiring (locales, dictionary, client hooks, messages)
   styles/              # CSS entry
   theme/               # state.ts (defineLocalState), theme + writing-mode contexts
 ```

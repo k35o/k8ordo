@@ -1,5 +1,3 @@
-import type { MessageKey } from '../types';
-
 export const ja = {
   'nav.home': 'Home',
   'nav.getStarted': 'Get Started',
@@ -208,6 +206,43 @@ export const ja = {
   'server.docsTitle': 'ドキュメント',
   'server.docsDescription':
     '設計ガイドは npm パッケージに同梱されています。AIコーディングエージェントは `node_modules/@k8ordo/server/docs/` からインストールした版そのものを読みます。',
+  'i18n.description':
+    'アプリケーションのロケール軸を持つ。ロケール集合1つからURLの区間・交渉・paramsSchema・静的化のパス一覧を、辞書1つからキー・サーバーの翻訳関数・クライアントのフックを導く。文言の文法は持たず、補間は関数、複数形はIntl。',
+  'i18n.featuresTitle': '特徴',
+  'i18n.featureLocales': 'ロケールは1か所に',
+  'i18n.featureLocalesDescription':
+    "`defineLocales(['ja', 'en'])` を書くのは1回だけ。既定値・所属判定・交渉・URL区間・`[locale]` のスキーマは全部そこから出るので、一覧を複製する場所が無い。",
+  'i18n.featureSegment': 'URLの先頭区間を持つ',
+  'i18n.featureSegmentDescription':
+    'ロケールはURLに住む。`localize` / `delocalize` が区間の付け外しを、`paramsSchema` が `/fr/…` を本物の404にする。pathname の残りは `@k8ordo/router` のもの。',
+  'i18n.featureNegotiate': '交渉はリストに対して',
+  'i18n.featureNegotiateDescription':
+    '`negotiate(navigator.languages)` も `negotiate(parseAcceptLanguage(header))` も同じ関数。要求の順に、完全一致→同じ言語→既定値で決める。',
+  'i18n.featureDictionary': '既定ロケールが形を決める',
+  'i18n.featureDictionaryDescription':
+    '`ja` を書き、`en` は `Translations<typeof ja>` で縛る。キーを1つ足すと翻訳するまでコンパイルが通らない。キーの一覧を別に保守しない。',
+  'i18n.featureFunctions': '補間は関数、複数形はIntl',
+  'i18n.featureFunctionsDescription':
+    '文言は文字列か、値を受け取る関数。テンプレートリテラルが補間で、`Intl.PluralRules` が複数形。独自の文法を持たないので、引数の型は TypeScript が見る。',
+  'i18n.featureBoundary': '境界を越えるのは文字列だけ',
+  'i18n.featureBoundaryDescription':
+    '`LocaleProvider` が受けるのはロケール文字列で、Server Component のレイアウトからそのまま描ける。辞書は必要なクライアントモジュールが import し、props で渡さない。',
+  'i18n.exampleTitle': '使い方',
+  'i18n.exampleDescription':
+    'ロケール集合と辞書を定義し、サーバーでは `translator(params.locale)`、クライアントでは `useTranslation(dictionary)` から `t` を取る。',
+  'i18n.demoTitle': 'このサイト自身が実演',
+  'i18n.demoDescription':
+    'ヘッダーからフッターまでの文言は `@k8ordo/i18n` の辞書から出ています。下の挨拶は関数の文言で、名前を引数に取ります。',
+  'i18n.demoLabelName': '名前',
+  'i18n.demoGreeting': (name: string) =>
+    name === '' ? 'こんにちは。' : `こんにちは、${name}さん。`,
+  'i18n.demoPreferred': 'ブラウザの言語設定から交渉したロケール',
+  'i18n.demoPreferredUnknown': '判定中',
+  'i18n.demoHint':
+    "`t('i18n.demoGreeting', name)` の引数は、`ja` に書いた関数の引数から型が付きます。`en` 側が別の引数で書くとコンパイルが通りません。",
+  'i18n.docsTitle': '設計ガイド',
+  'i18n.docsDescription':
+    '設計ガイドは npm パッケージに同梱されています。AIコーディングエージェントは `node_modules/@k8ordo/i18n/docs/` からインストールした版そのものを読みます。',
   'footer.tagline': 'Baselineに入った機能を、制限なく使うReactのライブラリ群。',
   'footer.typesetting': '組版 — Noto Sans JP / M PLUS 2',
   'nav.openMenu': 'メニューを開く',
@@ -676,30 +711,30 @@ export const ja = {
   'theming.zIndexTitle': 'Z-Indexレイヤ',
   'theming.zIndexDescription':
     'オーバーレイ系コンポーネントの重なり順を定義する3層スケールです。triggerに紐付く浮遊UI（Popover / DropdownMenu / ListBox / Tooltip）はoverlay、Modal / Drawerはmodal、Toastはtoastに配置されます。',
-  'i18n.introduction':
+  'uiI18n.introduction':
     'コンポーネントが自前で描画する文言（閉じるボタンのラベル、必須バッジ、読み込み中の読み上げなど）は文言辞書から引かれます。辞書を差し替えれば、アプリのコードを変えずに言語や語彙を切り替えられます。',
-  'i18n.defaultTitle': '既定は日本語',
-  'i18n.defaultDescription':
+  'uiI18n.defaultTitle': '既定は日本語',
+  'uiI18n.defaultDescription':
     '設定は不要です。UIProviderを置くだけで日本語の辞書が使われ、Providerを置いていない場合も同じ日本語にフォールバックします。',
-  'i18n.englishTitle': '英語に切り替える',
-  'i18n.englishDescription':
+  'uiI18n.englishTitle': '英語に切り替える',
+  'uiI18n.englishDescription':
     '@k8ordo/ui/i18nからenを読み込み、messagesに渡します。jaも同じ場所から読み込めます。',
-  'i18n.overrideTitle': '一部だけ差し替える',
-  'i18n.overrideDescription':
+  'uiI18n.overrideTitle': '一部だけ差し替える',
+  'uiI18n.overrideDescription':
     'messagesはPartial<Messages> です。渡したキーだけが上書きされ、残りは日本語の既定辞書で埋まります。英語をベースに一部だけ変えたいときはenを展開してから重ねます。',
-  'i18n.priorityTitle': '優先順位',
-  'i18n.priorityDescription':
+  'uiI18n.priorityTitle': '優先順位',
+  'uiI18n.priorityDescription':
     '同じ文言を決める経路は3つあり、prop > 辞書 > 既定 の順に強くなります。個別のprops（Spinnerのlabelなど）は常に辞書より優先されるので、1箇所だけ違う文言にしたいときはそちらを使ってください。',
-  'i18n.customTitle': '独自の辞書を作る',
-  'i18n.customDescription':
+  'uiI18n.customTitle': '独自の辞書を作る',
+  'uiI18n.customDescription':
     'Messages型を注釈すれば、キーの過不足はコンパイル時に検出されます。ライブラリにキーが増えたときも型エラーで気付けます。',
-  'i18n.keysTitle': 'キー一覧',
-  'i18n.keysDescription':
+  'uiI18n.keysTitle': 'キー一覧',
+  'uiI18n.keysDescription':
     'Messagesが持つキーの全てです。値はライブラリの辞書そのものを読み込んで表示しています。',
-  'i18n.keyColumn': 'キー',
-  'i18n.usedByColumn': '使うコンポーネント',
-  'i18n.jaColumn': 'ja（既定）',
-  'i18n.enColumn': 'en',
+  'uiI18n.keyColumn': 'キー',
+  'uiI18n.usedByColumn': '使うコンポーネント',
+  'uiI18n.jaColumn': 'ja（既定）',
+  'uiI18n.enColumn': 'en',
   'sideNav.openNavigation': 'ナビゲーションを開く',
   'common.switchToDarkMode': 'ダークモードに切り替え',
   'common.switchToLightMode': 'ライトモードに切り替え',
@@ -710,4 +745,4 @@ export const ja = {
   'error.title': '問題が発生しました',
   'error.description': '予期しないエラーが発生しました。',
   'error.retry': '再読み込み',
-} as const satisfies Record<MessageKey, string>;
+};

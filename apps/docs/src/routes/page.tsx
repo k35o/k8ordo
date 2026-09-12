@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 
-import { detectLocale } from '../i18n';
+import { locales } from '../i18n/locales';
 
 /**
  * `/` はロケールを持たない唯一の URL で、訪問者の言語に振り分けるためだけに
@@ -11,7 +11,10 @@ import { detectLocale } from '../i18n';
  */
 export default function RootRedirect() {
   useEffect(() => {
-    navigation.navigate(`/${detectLocale()}/`, { history: 'replace' });
+    navigation.navigate(
+      locales.localize('/', locales.negotiate(navigator.languages)),
+      { history: 'replace' },
+    );
   }, []);
 
   // 描画するものは無いが、title だけは持つ。ルートレイアウトが title を

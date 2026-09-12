@@ -94,17 +94,17 @@ export default function I18n() {
           <T k="nav.i18n" />
         </Heading>
         <p className="text-fg-mute text-lg">
-          <T k="i18n.introduction" />
+          <T k="uiI18n.introduction" />
         </p>
       </div>
       <Separator color="mute" />
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="i18n.defaultTitle" />
+          <T k="uiI18n.defaultTitle" />
         </Heading>
         <p className="text-fg-mute">
-          <T k="i18n.defaultDescription" />
+          <T k="uiI18n.defaultDescription" />
         </p>
         <CodeBlock
           code={`import { UIProvider } from '@k8ordo/ui';
@@ -120,10 +120,10 @@ function App({ children }) {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="i18n.englishTitle" />
+          <T k="uiI18n.englishTitle" />
         </Heading>
         <p className="text-fg-mute">
-          <T k="i18n.englishDescription" />
+          <T k="uiI18n.englishDescription" />
         </p>
         <CodeBlock
           code={`import { UIProvider } from '@k8ordo/ui';
@@ -144,10 +144,10 @@ function App({ children }) {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="i18n.overrideTitle" />
+          <T k="uiI18n.overrideTitle" />
         </Heading>
         <p className="text-fg-mute">
-          <T k="i18n.overrideDescription" />
+          <T k="uiI18n.overrideDescription" />
         </p>
         <CodeBlock
           code={`import { en } from '@k8ordo/ui/i18n';
@@ -167,10 +167,10 @@ function App({ children }) {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="i18n.priorityTitle" />
+          <T k="uiI18n.priorityTitle" />
         </Heading>
         <p className="text-fg-mute">
-          <T k="i18n.priorityDescription" />
+          <T k="uiI18n.priorityDescription" />
         </p>
         <CodeBlock
           code={`// 1. prop
@@ -194,10 +194,10 @@ function App({ children }) {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="i18n.customTitle" />
+          <T k="uiI18n.customTitle" />
         </Heading>
         <p className="text-fg-mute">
-          <T k="i18n.customDescription" />
+          <T k="uiI18n.customDescription" />
         </p>
         <CodeBlock
           code={`import type { Messages } from '@k8ordo/ui/i18n';
@@ -220,10 +220,10 @@ const fr: Messages = {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="i18n.keysTitle" />
+          <T k="uiI18n.keysTitle" />
         </Heading>
         <p className="text-fg-mute">
-          <T k="i18n.keysDescription" />
+          <T k="uiI18n.keysDescription" />
         </p>
         <dl className="flex flex-col gap-4 md:hidden">
           {MESSAGE_ROWS.map((row) => (
@@ -236,19 +236,19 @@ const fr: Messages = {
               </dt>
               <dd className="text-fg-mute text-sm">
                 <span className="text-fg-mute/60">
-                  <T k="i18n.usedByColumn" />:{' '}
+                  <T k="uiI18n.usedByColumn" />:{' '}
                 </span>
                 {row.usedBy}
               </dd>
               <dd className="text-fg-mute text-sm">
                 <span className="text-fg-mute/60">
-                  <T k="i18n.jaColumn" />:{' '}
+                  <T k="uiI18n.jaColumn" />:{' '}
                 </span>
                 {row.jaValue}
               </dd>
               <dd className="text-fg-mute text-sm">
                 <span className="text-fg-mute/60">
-                  <T k="i18n.enColumn" />:{' '}
+                  <T k="uiI18n.enColumn" />:{' '}
                 </span>
                 {row.enValue}
               </dd>
@@ -260,16 +260,16 @@ const fr: Messages = {
             <thead>
               <tr className="border-border-mute border-b">
                 <th className="py-3 pr-6 font-medium whitespace-nowrap">
-                  <T k="i18n.keyColumn" />
+                  <T k="uiI18n.keyColumn" />
                 </th>
                 <th className="py-3 pr-6 font-medium whitespace-nowrap">
-                  <T k="i18n.usedByColumn" />
+                  <T k="uiI18n.usedByColumn" />
                 </th>
                 <th className="py-3 pr-6 font-medium whitespace-nowrap">
-                  <T k="i18n.jaColumn" />
+                  <T k="uiI18n.jaColumn" />
                 </th>
                 <th className="py-3 font-medium whitespace-nowrap">
-                  <T k="i18n.enColumn" />
+                  <T k="uiI18n.enColumn" />
                 </th>
               </tr>
             </thead>

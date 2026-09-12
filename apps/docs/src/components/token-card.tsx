@@ -2,16 +2,14 @@
 
 import { Card } from '@k8ordo/ui';
 
-import { useTranslation } from '../i18n';
-import type { MessageKey } from '../i18n/types';
-import { MESSAGE_KEYS } from '../i18n/types';
+import { dictionary, useTranslation } from '../i18n';
+import type { MessageKey } from '../i18n';
 import type { SemanticToken } from '../theme/design-tokens';
 
+// 説明の無いトークンもあるので、既定ロケールの辞書に載っているかで決める。
 const descriptionKey = (name: string): MessageKey | null => {
   const key = `theming.token.${name}`;
-  return (MESSAGE_KEYS as readonly string[]).includes(key)
-    ? (key as MessageKey)
-    : null;
+  return key in dictionary.messages.ja ? (key as MessageKey) : null;
 };
 
 export function TokenCard({

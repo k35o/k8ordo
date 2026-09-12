@@ -13,6 +13,7 @@ const PACKAGE_LINKS = [
   { path: '/router', label: '@k8ordo/router' },
   { path: '/static', label: '@k8ordo/static' },
   { path: '/server', label: '@k8ordo/server' },
+  { path: '/i18n', label: '@k8ordo/i18n' },
 ];
 
 /**

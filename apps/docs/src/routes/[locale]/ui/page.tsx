@@ -15,8 +15,8 @@ import type { ReactNode } from 'react';
 
 import { PageTitle } from '../../../components/page-title';
 import { T } from '../../../components/t';
-import { localizeHref, useTranslation } from '../../../i18n';
-import type { MessageKey } from '../../../i18n/types';
+import { locales, useTranslation } from '../../../i18n';
+import type { MessageKey } from '../../../i18n';
 
 type Feature = {
   title: MessageKey;
@@ -86,7 +86,7 @@ export default function Ui() {
               renderItem={({ className, children }) => (
                 <a
                   className={className}
-                  href={localizeHref('/ui/get-started', locale)}
+                  href={locales.localize('/ui/get-started', locale)}
                 >
                   {children}
                 </a>
@@ -101,7 +101,7 @@ export default function Ui() {
               renderItem={({ className, children }) => (
                 <a
                   className={className}
-                  href={localizeHref('/ui/components', locale)}
+                  href={locales.localize('/ui/components', locale)}
                 >
                   {children}
                 </a>

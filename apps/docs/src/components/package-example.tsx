@@ -1,7 +1,7 @@
 import { Heading } from '@k8ordo/ui';
 import type { ComponentProps, FC } from 'react';
 
-import type { MessageKey } from '../i18n/types';
+import type { MessageKey } from '../i18n';
 import { CodeBlock } from './code-block';
 import { T } from './t';
 
