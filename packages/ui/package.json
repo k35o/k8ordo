@@ -1,6 +1,6 @@
 {
   "name": "@k8ordo/ui",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "k8o's React UI library with built-in generative UI adapters (json-render & OpenUI) for LLM-driven, on-brand interfaces",
   "keywords": [
     "ai",
