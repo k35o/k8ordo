@@ -53,6 +53,16 @@ export default defineConfig({
             provider: playwright(),
             headless: true,
             screenshotFailures: false,
+            // @storybook/addon-vitest はストーリーごとに page.viewport() で
+            // 1200x900 を敷いていた。その実装は `@vitest/browser/context` を
+            // 動的 import して失敗を握り潰す形をしており、vitest 5 では
+            // この import が reject する ("vitest/browser can be imported only
+            // inside the Browser mode") ため、viewport 指定が黙って no-op に
+            // なる (addon の peer も vitest ^3 || ^4 のまま)。放っておくと全
+            // ストーリーが vitest 既定の 414x896、つまりモバイル幅で描かれる
+            // ので、addon が敷いていたのと同じ寸法をこちらで明示する。
+            // addon が vitest 5 に対応したら消してよい。
+            viewport: { width: 1200, height: 900 },
             instances: [
               {
                 browser: 'chromium',
