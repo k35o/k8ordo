@@ -27,6 +27,8 @@ apps/docs/public/server/
 
 # Testing
 coverage
+# vitest 5 のレポート出力先 (html レポータ / blob / attachments)
+.vitest/
 
 # Logs
 logs

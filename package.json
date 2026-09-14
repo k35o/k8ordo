@@ -26,7 +26,8 @@
   "devDependencies": {
     "@k8o/oxc-config": "0.3.0",
     "@oxlint/plugins": "1.81.0",
-    "@types/node": "24.13.3",
+    "@types/node": "catalog:",
+    "@vitest/browser": "catalog:",
     "oxlint-tailwindcss": "1.10.2",
     "playwright": "1.62.1",
     "typescript": "7.0.2",

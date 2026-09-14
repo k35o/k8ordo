@@ -4,5 +4,5 @@ import { defineConfig } from 'vite-plus';
 // 同じ形（plugins だけ）に保ちたいので、混ぜない。ビルド成果物を読むだけの
 // node テストなので、フレームワークのプラグインもここでは要らない
 export default defineConfig({
-  test: { globals: true, include: ['src/**/*.test.ts'] },
+  test: { globals: true, fsModuleCache: true, include: ['src/**/*.test.ts'] },
 });
