@@ -5,7 +5,8 @@ import { ComponentPreview } from '../../../../../components/component-preview';
 import { PageTitle } from '../../../../../components/page-title';
 import type { PropItem } from '../../../../../components/props-table';
 import { PropsTable } from '../../../../../components/props-table';
-import { T } from '../../../../../components/t';
+import { Rich } from '../../../../../components/rich';
+import * as m from '../../../../../messages';
 import { CreateSafeContextPreview } from '../_previews/create-safe-context-previews';
 
 const parameters: PropItem[] = [
@@ -27,14 +28,14 @@ export default function CreateSafeContextPage() {
       <div className="flex flex-col gap-4">
         <Heading level="h1">createSafeContext</Heading>
         <p className="text-fg-mute text-lg">
-          <T k="helpers.createSafeContext.description" />
+          <Rich>{m.helpers.createSafeContext.description()}</Rich>
         </p>
       </div>
       <Separator color="mute" />
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="helpers.common.importTitle" />
+          <Rich>{m.helpers.common.importTitle()}</Rich>
         </Heading>
         <CodeBlock
           code="import { createSafeContext } from '@k8ordo/ui';"
@@ -45,11 +46,11 @@ export default function CreateSafeContextPage() {
 
       <section className="flex flex-col gap-8">
         <Heading level="h2">
-          <T k="helpers.common.usageTitle" />
+          <Rich>{m.helpers.common.usageTitle()}</Rich>
         </Heading>
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="helpers.common.basicUsageTitle" />
+            <Rich>{m.helpers.common.basicUsageTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`const [CounterContext, useCounter] = createSafeContext<CounterValue>(
@@ -74,14 +75,14 @@ const Child = () => {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="helpers.common.parametersTitle" />
+          <Rich>{m.helpers.common.parametersTitle()}</Rich>
         </Heading>
         <PropsTable items={parameters} />
       </section>
       <Separator color="mute" />
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="helpers.common.returnValueTitle" />
+          <Rich>{m.helpers.common.returnValueTitle()}</Rich>
         </Heading>
         <PropsTable items={returnValue} />
       </section>

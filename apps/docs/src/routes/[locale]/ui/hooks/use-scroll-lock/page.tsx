@@ -5,7 +5,8 @@ import { ComponentPreview } from '../../../../../components/component-preview';
 import { PageTitle } from '../../../../../components/page-title';
 import type { PropItem } from '../../../../../components/props-table';
 import { PropsTable } from '../../../../../components/props-table';
-import { T } from '../../../../../components/t';
+import { Rich } from '../../../../../components/rich';
+import * as m from '../../../../../messages';
 import {
   UseScrollLockPreview,
   UseScrollLockTargetPreview,
@@ -39,14 +40,14 @@ export default function UseScrollLockPage() {
       <div className="flex flex-col gap-4">
         <Heading level="h1">useScrollLock</Heading>
         <p className="text-fg-mute text-lg">
-          <T k="hooks.useScrollLock.description" />
+          <Rich>{m.hooks.scrollLock.description()}</Rich>
         </p>
       </div>
       <Separator color="mute" />
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="hooks.common.importTitle" />
+          <Rich>{m.hooks.common.importTitle()}</Rich>
         </Heading>
         <CodeBlock
           code="import { useScrollLock } from '@k8ordo/ui';"
@@ -57,14 +58,14 @@ export default function UseScrollLockPage() {
 
       <section className="flex flex-col gap-8">
         <Heading level="h2">
-          <T k="hooks.common.usageTitle" />
+          <Rich>{m.hooks.common.usageTitle()}</Rich>
         </Heading>
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="hooks.common.basicUsageTitle" />
+            <Rich>{m.hooks.common.basicUsageTitle()}</Rich>
           </Heading>
           <p className="text-fg-mute text-sm">
-            <T k="hooks.useScrollLock.bodyNotScrollableNote" />
+            <Rich>{m.hooks.scrollLock.bodyNotScrollableNote()}</Rich>
           </p>
           <ComponentPreview
             code={`const { lock, unlock } = useScrollLock();
@@ -82,7 +83,7 @@ return (
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="hooks.useScrollLock.targetTitle" />
+            <Rich>{m.hooks.scrollLock.targetTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`const scrollRef = useRef<HTMLDivElement>(null);
@@ -106,7 +107,7 @@ return (
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="hooks.common.parametersTitle" />
+          <Rich>{m.hooks.common.parametersTitle()}</Rich>
         </Heading>
         <PropsTable items={parameters} />
       </section>
@@ -114,7 +115,7 @@ return (
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="hooks.common.returnValueTitle" />
+          <Rich>{m.hooks.common.returnValueTitle()}</Rich>
         </Heading>
         <PropsTable items={returnValue} />
       </section>

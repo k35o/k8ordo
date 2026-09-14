@@ -1,18 +1,16 @@
 'use client';
 
+import type { Message } from '@k8ordo/i18n';
 import { Card } from '@k8ordo/ui';
 
-import { useTranslation } from '../i18n';
-import type { MessageKey } from '../i18n/types';
-import { MESSAGE_KEYS } from '../i18n/types';
+import * as m from '../messages';
 import type { SemanticToken } from '../theme/design-tokens';
 
-const descriptionKey = (name: string): MessageKey | null => {
-  const key = `theming.token.${name}`;
-  return (MESSAGE_KEYS as readonly string[]).includes(key)
-    ? (key as MessageKey)
+// 説明の無いトークンもあるので、文言があるかで決める。
+const descriptionOf = (name: string): Message | null =>
+  Object.hasOwn(m.theming.token, name)
+    ? m.theming.token[name as keyof typeof m.theming.token]
     : null;
-};
 
 export function TokenCard({
   token,
@@ -21,8 +19,7 @@ export function TokenCard({
   token: SemanticToken;
   type?: 'fill' | 'border';
 }) {
-  const { t } = useTranslation();
-  const descKey = descriptionKey(token.name);
+  const description = descriptionOf(token.name);
 
   return (
     <Card variant="shadow">
@@ -42,8 +39,10 @@ export function TokenCard({
             {' · '}
             Dark <span className="text-fg-mute">{token.dark}</span>
           </p>
-          {descKey === null ? null : (
-            <p className="text-fg-mute text-xs leading-relaxed">{t(descKey)}</p>
+          {description === null ? null : (
+            <p className="text-fg-mute text-xs leading-relaxed">
+              {description()}
+            </p>
           )}
         </div>
       </div>

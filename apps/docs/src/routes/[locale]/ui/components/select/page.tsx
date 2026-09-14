@@ -4,9 +4,10 @@ import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';
 import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
-import { T } from '../../../../../components/t';
+import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
+import * as m from '../../../../../messages';
 
 const options = [
   { label: 'Apple', value: 'apple' },
@@ -21,14 +22,14 @@ export default function SelectPage() {
       <div className="flex flex-col gap-4">
         <Heading level="h1">Select</Heading>
         <p className="text-fg-mute text-lg">
-          <T k="components.select.description" />
+          <Rich>{m.components.select.description()}</Rich>
         </p>
         <div>
           <Anchor
             href={`${STORYBOOK_URL}/?path=/docs/components-form-select--docs`}
             openInNewTab
           >
-            <T k="components.common.storybookLink" />
+            <Rich>{m.components.common.storybookLink()}</Rich>
           </Anchor>
         </div>
       </div>
@@ -36,7 +37,7 @@ export default function SelectPage() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.importTitle" />
+          <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
         <CodeBlock code="import { Select } from '@k8ordo/ui';" lang="ts" />
       </section>
@@ -45,7 +46,7 @@ export default function SelectPage() {
       <section className="flex flex-col gap-8">
         <div className="flex flex-col gap-4">
           <Heading level="h2">
-            <T k="components.common.usageTitle" />
+            <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`const options = [
@@ -76,7 +77,7 @@ export default function SelectPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.select.requiredTitle" />
+            <Rich>{m.components.select.requiredTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<Select
@@ -101,7 +102,7 @@ export default function SelectPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.select.defaultValueTitle" />
+            <Rich>{m.components.select.defaultValueTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<Select
@@ -128,7 +129,7 @@ export default function SelectPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.select.disabledTitle" />
+            <Rich>{m.components.select.disabledTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<Select
@@ -153,7 +154,7 @@ export default function SelectPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.select.invalidTitle" />
+            <Rich>{m.components.select.invalidTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<Select
@@ -180,7 +181,7 @@ export default function SelectPage() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.propsTitle" />
+          <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>
         <PropsTable inherits={inheritsOf('Select')} items={propsOf('Select')} />
       </section>

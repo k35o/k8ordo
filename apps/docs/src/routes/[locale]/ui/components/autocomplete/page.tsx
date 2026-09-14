@@ -4,9 +4,10 @@ import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';
 import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
-import { T } from '../../../../../components/t';
+import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
+import * as m from '../../../../../messages';
 import {
   AutocompleteBasicPreview,
   AutocompleteDisabledPreview,
@@ -22,14 +23,14 @@ export default function AutocompletePage() {
       <div className="flex flex-col gap-4">
         <Heading level="h1">Autocomplete</Heading>
         <p className="text-fg-mute text-lg">
-          <T k="components.autocomplete.description" />
+          <Rich>{m.components.autocomplete.description()}</Rich>
         </p>
         <div>
           <Anchor
             href={`${STORYBOOK_URL}/?path=/docs/components-form-autocomplete--docs`}
             openInNewTab
           >
-            <T k="components.common.storybookLink" />
+            <Rich>{m.components.common.storybookLink()}</Rich>
           </Anchor>
         </div>
       </div>
@@ -37,7 +38,7 @@ export default function AutocompletePage() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.importTitle" />
+          <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
         <CodeBlock
           code="import { Autocomplete } from '@k8ordo/ui';"
@@ -49,7 +50,7 @@ export default function AutocompletePage() {
       <section className="flex flex-col gap-8">
         <div className="flex flex-col gap-4">
           <Heading level="h2">
-            <T k="components.common.usageTitle" />
+            <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`const [value, setValue] = useState<string[]>([]);
@@ -79,7 +80,7 @@ const options = [
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.autocomplete.requiredTitle" />
+            <Rich>{m.components.autocomplete.requiredTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<Autocomplete
@@ -99,7 +100,7 @@ const options = [
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.autocomplete.multipleSelectionTitle" />
+            <Rich>{m.components.autocomplete.multipleSelectionTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`const [value, setValue] = useState<string[]>(['apple', 'cherry']);
@@ -121,7 +122,7 @@ const options = [
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.autocomplete.disabledTitle" />
+            <Rich>{m.components.autocomplete.disabledTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<Autocomplete
@@ -141,7 +142,7 @@ const options = [
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.autocomplete.invalidTitle" />
+            <Rich>{m.components.autocomplete.invalidTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<Autocomplete
@@ -163,7 +164,7 @@ const options = [
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.propsTitle" />
+          <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>
         <PropsTable
           inherits={inheritsOf('Autocomplete')}

@@ -5,9 +5,9 @@ import type { ReactNode } from 'react';
 import { useState } from 'react';
 
 import type { NavCategory } from '../data/nav-types';
-import { useTranslation } from '../i18n';
+import * as m from '../messages';
 import { CatalogCard } from './catalog-card';
-import { T } from './t';
+import { Rich } from './rich';
 
 type Props = {
   categories: NavCategory[];
@@ -15,7 +15,6 @@ type Props = {
 };
 
 export function CatalogSections({ categories, previews }: Props) {
-  const { t } = useTranslation();
   const [query, setQuery] = useState('');
   const q = query.trim().toLowerCase();
 
@@ -26,7 +25,7 @@ export function CatalogSections({ categories, previews }: Props) {
         (item) =>
           q === '' ||
           item.name.toLowerCase().includes(q) ||
-          t(item.descKey).toLowerCase().includes(q),
+          item.description().toLowerCase().includes(q),
       ),
     }))
     .filter((category) => category.items.length > 0);
@@ -35,21 +34,21 @@ export function CatalogSections({ categories, previews }: Props) {
     <>
       <search className="max-w-sm">
         <TextField
-          aria-label={t('catalog.searchPlaceholder')}
+          aria-label={m.catalog.searchPlaceholder()}
           onChange={(e) => {
             setQuery(e.target.value);
           }}
-          placeholder={t('catalog.searchPlaceholder')}
+          placeholder={m.catalog.searchPlaceholder()}
           value={query}
         />
       </search>
       {filtered.length === 0 ? (
-        <p className="text-fg-mute">{t('catalog.noResults')}</p>
+        <p className="text-fg-mute">{m.catalog.noResults()}</p>
       ) : (
         filtered.map((category) => (
-          <section className="flex flex-col gap-6" key={category.titleKey}>
+          <section className="flex flex-col gap-6" key={category.title()}>
             <Heading level="h2">
-              <T k={category.titleKey} />
+              <Rich>{category.title()}</Rich>
             </Heading>
             <div className="grid grid-cols-1 items-start gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {category.items.map((item) => (

@@ -10,36 +10,37 @@ import {
 import { PackageExample } from '../../../components/package-example';
 import { PackageLanding } from '../../../components/package-landing';
 import type { PackageFeature } from '../../../components/package-landing';
+import * as m from '../../../messages';
 
 const FEATURES: PackageFeature[] = [
   {
-    title: 'server.featureRequest',
-    description: 'server.featureRequestDescription',
+    title: m.server.featureRequest,
+    description: m.server.featureRequestDescription,
     icon: <SendIcon />,
   },
   {
-    title: 'server.featureRoutes',
-    description: 'server.featureRoutesDescription',
+    title: m.server.featureRoutes,
+    description: m.server.featureRoutesDescription,
     icon: <LocationIcon />,
   },
   {
-    title: 'server.featureActions',
-    description: 'server.featureActionsDescription',
+    title: m.server.featureActions,
+    description: m.server.featureActionsDescription,
     icon: <FormIcon />,
   },
   {
-    title: 'server.featureSameHandler',
-    description: 'server.featureSameHandlerDescription',
+    title: m.server.featureSameHandler,
+    description: m.server.featureSameHandlerDescription,
     icon: <AtomIcon />,
   },
   {
-    title: 'server.featureRouteFiles',
-    description: 'server.featureRouteFilesDescription',
+    title: m.server.featureRouteFiles,
+    description: m.server.featureRouteFilesDescription,
     icon: <RefreshIcon />,
   },
   {
-    title: 'server.featureParams',
-    description: 'server.featureParamsDescription',
+    title: m.server.featureParams,
+    description: m.server.featureParamsDescription,
     icon: <ShieldCheckIcon />,
   },
 ];
@@ -65,18 +66,18 @@ export function TalkForm() {
 export default function ServerPage() {
   return (
     <PackageLanding
-      description="server.description"
+      description={m.server.description}
       directory="server"
-      docsDescription="server.docsDescription"
-      docsTitle="server.docsTitle"
+      docsDescription={m.server.docsDescription}
+      docsTitle={m.server.docsTitle}
       features={FEATURES}
-      featuresTitle="server.featuresTitle"
+      featuresTitle={m.server.featuresTitle}
       name="@k8ordo/server"
     >
       <PackageExample
         code={EXAMPLE}
-        description="server.exampleDescription"
-        title="server.exampleTitle"
+        description={m.server.exampleDescription}
+        title={m.server.exampleTitle}
       />
     </PackageLanding>
   );

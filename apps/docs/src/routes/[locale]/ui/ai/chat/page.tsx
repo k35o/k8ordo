@@ -4,30 +4,31 @@ import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';
 import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
-import { T } from '../../../../../components/t';
+import { Rich } from '../../../../../components/rich';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
+import * as m from '../../../../../messages';
 import { ChatDemo } from '../_previews/chat-demo';
 
 export default function AiChat() {
   return (
     <div className="mx-auto flex max-w-4xl flex-col gap-8 px-6 py-12 md:px-8">
-      <PageTitle k="nav.aiChat" />
+      <PageTitle title={m.nav.aiChat} />
       <div className="flex flex-col gap-4">
         <Heading level="h1">
-          <T k="nav.aiChat" />
+          <Rich>{m.nav.aiChat()}</Rich>
         </Heading>
         <p className="text-fg-mute text-lg">
-          <T k="aiChat.introduction" />
+          <Rich>{m.aiChat.introduction()}</Rich>
         </p>
       </div>
       <Separator color="mute" />
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="aiChat.demoTitle" />
+          <Rich>{m.aiChat.demoTitle()}</Rich>
         </Heading>
         <p className="text-fg-mute">
-          <T k="aiChat.demoDescription" />
+          <Rich>{m.aiChat.demoDescription()}</Rich>
         </p>
         <ComponentPreview
           code={`'use client';
@@ -75,10 +76,10 @@ export function Chat({ messages, send }: Props) {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="aiChat.overviewTitle" />
+          <Rich>{m.aiChat.overviewTitle()}</Rich>
         </Heading>
         <p className="text-fg-mute">
-          <T k="aiChat.overviewDescription" />
+          <Rich>{m.aiChat.overviewDescription()}</Rich>
         </p>
         <CodeBlock
           code={`'use client';
@@ -124,10 +125,10 @@ export function Chat() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="aiChat.inputTitle" />
+          <Rich>{m.aiChat.inputTitle()}</Rich>
         </Heading>
         <p className="text-fg-mute">
-          <T k="aiChat.inputDescription" />
+          <Rich>{m.aiChat.inputDescription()}</Rich>
         </p>
         <CodeBlock
           code={`// Enter to send, Shift+Enter for a newline, IME-confirm Enter never submits.
@@ -144,10 +145,10 @@ export function Chat() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="aiChat.suggestionTitle" />
+          <Rich>{m.aiChat.suggestionTitle()}</Rich>
         </Heading>
         <p className="text-fg-mute">
-          <T k="aiChat.suggestionDescription" />
+          <Rich>{m.aiChat.suggestionDescription()}</Rich>
         </p>
         <CodeBlock
           code={`import { Suggestion } from '@k8ordo/ui/ai';
@@ -165,10 +166,10 @@ export function Chat() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="aiChat.responseTitle" />
+          <Rich>{m.aiChat.responseTitle()}</Rich>
         </Heading>
         <p className="text-fg-mute">
-          <T k="aiChat.responseDescription" />
+          <Rich>{m.aiChat.responseDescription()}</Rich>
         </p>
         <CodeBlock
           code={`// pnpm add streamdown
@@ -186,10 +187,10 @@ import 'streamdown/styles.css';
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="aiChat.toolTitle" />
+          <Rich>{m.aiChat.toolTitle()}</Rich>
         </Heading>
         <p className="text-fg-mute">
-          <T k="aiChat.toolDescription" />
+          <Rich>{m.aiChat.toolDescription()}</Rich>
         </p>
         <CodeBlock
           code={`import { Reasoning, ToolInvocation } from '@k8ordo/ui/ai';
@@ -210,10 +211,10 @@ import 'streamdown/styles.css';
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="aiChat.aiSdkTitle" />
+          <Rich>{m.aiChat.aiSdkTitle()}</Rich>
         </Heading>
         <p className="text-fg-mute">
-          <T k="aiChat.aiSdkDescription" />
+          <Rich>{m.aiChat.aiSdkDescription()}</Rich>
         </p>
         <CodeBlock
           code={`import { mapMessageParts } from '@k8ordo/ui/ai-sdk';
@@ -235,10 +236,10 @@ import { Response } from '@k8ordo/ui/ai/response';
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="aiChat.jsonRenderTitle" />
+          <Rich>{m.aiChat.jsonRenderTitle()}</Rich>
         </Heading>
         <p className="text-fg-mute">
-          <T k="aiChat.jsonRenderDescription" />
+          <Rich>{m.aiChat.jsonRenderDescription()}</Rich>
         </p>
         <CodeBlock
           code={`'use client';
@@ -259,10 +260,10 @@ import { JsonRenderUI } from '@k8ordo/ui/json-render/registry';
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.propsTitle" />
+          <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>
         <p className="text-fg-mute">
-          <T k="aiChat.propsDescription" />
+          <Rich>{m.aiChat.propsDescription()}</Rich>
         </p>
         {(
           [

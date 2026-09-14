@@ -5,7 +5,8 @@ import { ComponentPreview } from '../../../../../components/component-preview';
 import { PageTitle } from '../../../../../components/page-title';
 import type { PropItem } from '../../../../../components/props-table';
 import { PropsTable } from '../../../../../components/props-table';
-import { T } from '../../../../../components/t';
+import { Rich } from '../../../../../components/rich';
+import * as m from '../../../../../messages';
 import { UseControllableStatePreview } from '../_previews/use-controllable-state-previews';
 
 const parameters: PropItem[] = [
@@ -46,14 +47,14 @@ export default function UseControllableStatePage() {
       <div className="flex flex-col gap-4">
         <Heading level="h1">useControllableState</Heading>
         <p className="text-fg-mute text-lg">
-          <T k="hooks.useControllableState.description" />
+          <Rich>{m.hooks.controllableState.description()}</Rich>
         </p>
       </div>
       <Separator color="mute" />
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="hooks.common.importTitle" />
+          <Rich>{m.hooks.common.importTitle()}</Rich>
         </Heading>
         <CodeBlock
           code="import { useControllableState } from '@k8ordo/ui';"
@@ -64,11 +65,11 @@ export default function UseControllableStatePage() {
 
       <section className="flex flex-col gap-8">
         <Heading level="h2">
-          <T k="hooks.common.usageTitle" />
+          <Rich>{m.hooks.common.usageTitle()}</Rich>
         </Heading>
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="hooks.common.basicUsageTitle" />
+            <Rich>{m.hooks.common.basicUsageTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`const [count, setCount] = useControllableState({ defaultValue: 0 });
@@ -89,7 +90,7 @@ return (
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="hooks.common.parametersTitle" />
+          <Rich>{m.hooks.common.parametersTitle()}</Rich>
         </Heading>
         <PropsTable items={parameters} />
       </section>
@@ -97,7 +98,7 @@ return (
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="hooks.common.returnValueTitle" />
+          <Rich>{m.hooks.common.returnValueTitle()}</Rich>
         </Heading>
         <PropsTable items={returnValue} />
       </section>

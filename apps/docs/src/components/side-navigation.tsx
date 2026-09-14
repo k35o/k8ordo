@@ -3,7 +3,7 @@
 import { usePathname } from '@k8ordo/router';
 
 import type { NavCategory } from '../data/nav-types';
-import { localizeHref, useTranslation } from '../i18n';
+import { getLocale, locales } from '../i18n';
 import { LocaleAnchor } from './locale-anchor';
 
 type Props = {
@@ -12,20 +12,20 @@ type Props = {
 };
 
 export function SideNavigation({ categories, onNavigate }: Props) {
-  const { t, locale } = useTranslation();
+  const locale = getLocale();
   const pathname = usePathname();
 
   return (
     <nav className="flex flex-col gap-6 overflow-y-auto py-4">
       {categories.map((category) => (
-        <div className="flex flex-col gap-1" key={category.titleKey}>
+        <div className="flex flex-col gap-1" key={category.title()}>
           <span className="text-fg-subtle px-3 text-xs font-bold tracking-normal">
-            {t(category.titleKey)}
+            {category.title()}
           </span>
           {/* 傍線インデックス: 親罫 border-l に -ml-px のアクティブ罫を重ねる */}
           <ul className="border-border-mute mt-1 ml-3 flex flex-col gap-0.5 border-l">
             {category.items.map((item) => {
-              const href = localizeHref(item.path, locale);
+              const href = locales.localize(item.path, locale);
               const isActive = pathname === href;
               return (
                 <li key={item.path}>

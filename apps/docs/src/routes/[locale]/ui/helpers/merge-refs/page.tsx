@@ -5,7 +5,8 @@ import { ComponentPreview } from '../../../../../components/component-preview';
 import { PageTitle } from '../../../../../components/page-title';
 import type { PropItem } from '../../../../../components/props-table';
 import { PropsTable } from '../../../../../components/props-table';
-import { T } from '../../../../../components/t';
+import { Rich } from '../../../../../components/rich';
+import * as m from '../../../../../messages';
 import { MergeRefsPreview } from '../_previews/merge-refs-previews';
 
 const parameters: PropItem[] = [
@@ -31,14 +32,14 @@ export default function MergeRefsPage() {
       <div className="flex flex-col gap-4">
         <Heading level="h1">mergeRefs</Heading>
         <p className="text-fg-mute text-lg">
-          <T k="helpers.mergeRefs.description" />
+          <Rich>{m.helpers.mergeRefs.description()}</Rich>
         </p>
       </div>
       <Separator color="mute" />
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="helpers.common.importTitle" />
+          <Rich>{m.helpers.common.importTitle()}</Rich>
         </Heading>
         <CodeBlock code="import { mergeRefs } from '@k8ordo/ui';" lang="ts" />
       </section>
@@ -46,11 +47,11 @@ export default function MergeRefsPage() {
 
       <section className="flex flex-col gap-8">
         <Heading level="h2">
-          <T k="helpers.common.usageTitle" />
+          <Rich>{m.helpers.common.usageTitle()}</Rich>
         </Heading>
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="helpers.common.basicUsageTitle" />
+            <Rich>{m.helpers.common.basicUsageTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`const Input: FC<{ ref?: Ref<HTMLInputElement> }> = ({ ref }) => {
@@ -68,14 +69,14 @@ export default function MergeRefsPage() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="helpers.common.parametersTitle" />
+          <Rich>{m.helpers.common.parametersTitle()}</Rich>
         </Heading>
         <PropsTable items={parameters} />
       </section>
       <Separator color="mute" />
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="helpers.common.returnValueTitle" />
+          <Rich>{m.helpers.common.returnValueTitle()}</Rich>
         </Heading>
         <PropsTable items={returnValue} />
       </section>

@@ -24,6 +24,7 @@ apps/docs/public/state/
 apps/docs/public/router/
 apps/docs/public/static/
 apps/docs/public/server/
+apps/docs/public/i18n/
 
 # Testing
 coverage

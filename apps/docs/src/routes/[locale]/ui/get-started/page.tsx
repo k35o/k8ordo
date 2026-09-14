@@ -4,29 +4,30 @@ import { CodeBlock } from '../../../../components/code-block';
 import { InstallTabs } from '../../../../components/install-tabs';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { PageTitle } from '../../../../components/page-title';
-import { T } from '../../../../components/t';
+import { Rich } from '../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../constants';
+import * as m from '../../../../messages';
 
 export default function GetStarted() {
   return (
     <div className="mx-auto flex max-w-4xl flex-col gap-8 px-6 py-12 md:px-8">
-      <PageTitle k="nav.getStarted" />
+      <PageTitle title={m.nav.getStarted} />
       <div className="flex flex-col gap-4">
         <Heading level="h1">
-          <T k="nav.getStarted" />
+          <Rich>{m.nav.getStarted()}</Rich>
         </Heading>
         <p className="text-fg-mute text-lg">
-          <T k="getStarted.introduction" />
+          <Rich>{m.getStarted.introduction()}</Rich>
         </p>
       </div>
       <Separator color="mute" />
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="getStarted.installationTitle" />
+          <Rich>{m.getStarted.installationTitle()}</Rich>
         </Heading>
         <p className="text-fg-mute">
-          <T k="getStarted.installationDescription" />
+          <Rich>{m.getStarted.installationDescription()}</Rich>
         </p>
         <InstallTabs
           npm={<CodeBlock code="npm install @k8ordo/ui" lang="bash" />}
@@ -39,20 +40,20 @@ export default function GetStarted() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="getStarted.setupTitle" />
+          <Rich>{m.getStarted.setupTitle()}</Rich>
         </Heading>
         <p className="text-fg-mute">
-          <T k="getStarted.setupDescription" />
+          <Rich>{m.getStarted.setupDescription()}</Rich>
         </p>
 
         <div className="flex flex-col gap-2">
           <Heading level="h3">1. CSS</Heading>
           <p className="text-fg-mute">
-            <T k="getStarted.setupCssDescription" />
+            <Rich>{m.getStarted.setupCssDescription()}</Rich>
           </p>
           <CodeBlock code="import '@k8ordo/ui/styles.css';" lang="tsx" />
           <p className="text-fg-mute">
-            <T k="getStarted.setupCssTailwindDescription" />
+            <Rich>{m.getStarted.setupCssTailwindDescription()}</Rich>
           </p>
           <CodeBlock code="import '@k8ordo/ui/tailwind.css';" lang="tsx" />
         </div>
@@ -60,7 +61,7 @@ export default function GetStarted() {
         <div className="flex flex-col gap-2">
           <Heading level="h3">2. Provider</Heading>
           <p className="text-fg-mute">
-            <T k="getStarted.setupProviderDescription" />
+            <Rich>{m.getStarted.setupProviderDescription()}</Rich>
           </p>
           <CodeBlock
             code={`import { UIProvider } from '@k8ordo/ui';
@@ -81,10 +82,10 @@ function App({ children }) {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="getStarted.usageTitle" />
+          <Rich>{m.getStarted.usageTitle()}</Rich>
         </Heading>
         <p className="text-fg-mute">
-          <T k="getStarted.usageDescription" />
+          <Rich>{m.getStarted.usageDescription()}</Rich>
         </p>
         <CodeBlock
           code={`import { Button, Heading } from '@k8ordo/ui';
@@ -105,10 +106,10 @@ function MyComponent() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="getStarted.requirementsTitle" />
+          <Rich>{m.getStarted.requirementsTitle()}</Rich>
         </Heading>
         <p className="text-fg-mute">
-          <T k="getStarted.requirementsDescription" />
+          <Rich>{m.getStarted.requirementsDescription()}</Rich>
         </p>
         <ul className="text-fg-mute flex flex-col gap-2 pl-6">
           <li className="list-disc">React &gt;= 19.0.0</li>
@@ -124,27 +125,27 @@ function MyComponent() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="getStarted.nextStepsTitle" />
+          <Rich>{m.getStarted.nextStepsTitle()}</Rich>
         </Heading>
         <ul className="flex flex-col gap-3 pl-6">
           <li className="list-disc">
             <LocaleAnchor path="/ui/components">
-              <T k="getStarted.nextStepsComponents" />
+              <Rich>{m.getStarted.nextStepsComponents()}</Rich>
             </LocaleAnchor>
           </li>
           <li className="list-disc">
             <LocaleAnchor path="/ui/theming">
-              <T k="getStarted.nextStepsTheming" />
+              <Rich>{m.getStarted.nextStepsTheming()}</Rich>
             </LocaleAnchor>
           </li>
           <li className="list-disc">
             <LocaleAnchor path="/ui/i18n">
-              <T k="getStarted.nextStepsI18n" />
+              <Rich>{m.getStarted.nextStepsI18n()}</Rich>
             </LocaleAnchor>
           </li>
           <li className="list-disc">
             <Anchor href={STORYBOOK_URL} openInNewTab>
-              <T k="getStarted.nextStepsStorybook" />
+              <Rich>{m.getStarted.nextStepsStorybook()}</Rich>
             </Anchor>
           </li>
         </ul>

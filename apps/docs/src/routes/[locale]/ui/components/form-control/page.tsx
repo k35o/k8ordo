@@ -4,9 +4,10 @@ import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';
 import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
-import { T } from '../../../../../components/t';
+import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { propsOf } from '../../../../../data/component-props';
+import * as m from '../../../../../messages';
 import {
   FormControlBasicPreview,
   FormControlDisabledPreview,
@@ -22,14 +23,14 @@ export default function FormControlPage() {
       <div className="flex flex-col gap-4">
         <Heading level="h1">FormControl</Heading>
         <p className="text-fg-mute text-lg">
-          <T k="components.formControl.description" />
+          <Rich>{m.components.formControl.description()}</Rich>
         </p>
         <div>
           <Anchor
             href={`${STORYBOOK_URL}/?path=/docs/components-form-form-control--docs`}
             openInNewTab
           >
-            <T k="components.common.storybookLink" />
+            <Rich>{m.components.common.storybookLink()}</Rich>
           </Anchor>
         </div>
       </div>
@@ -37,7 +38,7 @@ export default function FormControlPage() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.importTitle" />
+          <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
         <CodeBlock code="import { FormControl } from '@k8ordo/ui';" lang="ts" />
       </section>
@@ -46,7 +47,7 @@ export default function FormControlPage() {
       <section className="flex flex-col gap-8">
         <div className="flex flex-col gap-4">
           <Heading level="h2">
-            <T k="components.common.usageTitle" />
+            <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<FormControl
@@ -65,7 +66,7 @@ export default function FormControlPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.formControl.helpTextTitle" />
+            <Rich>{m.components.formControl.helpTextTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<FormControl
@@ -85,7 +86,7 @@ export default function FormControlPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.formControl.errorTextTitle" />
+            <Rich>{m.components.formControl.errorTextTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<FormControl
@@ -103,7 +104,7 @@ export default function FormControlPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.formControl.requiredTitle" />
+            <Rich>{m.components.formControl.requiredTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<FormControl
@@ -123,7 +124,7 @@ export default function FormControlPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.formControl.disabledTitle" />
+            <Rich>{m.components.formControl.disabledTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<FormControl
@@ -145,7 +146,7 @@ export default function FormControlPage() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.propsTitle" />
+          <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>
         <PropsTable items={propsOf('FormControl')} />
       </section>

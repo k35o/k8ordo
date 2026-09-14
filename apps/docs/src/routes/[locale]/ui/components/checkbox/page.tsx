@@ -4,9 +4,10 @@ import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';
 import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
-import { T } from '../../../../../components/t';
+import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
+import * as m from '../../../../../messages';
 import {
   CheckboxControlledPreview,
   CheckboxGroupControlledPreview,
@@ -20,14 +21,14 @@ export default function CheckboxPage() {
       <div className="flex flex-col gap-4">
         <Heading level="h1">Checkbox</Heading>
         <p className="text-fg-mute text-lg">
-          <T k="components.checkbox.description" />
+          <Rich>{m.components.checkbox.description()}</Rich>
         </p>
         <div>
           <Anchor
             href={`${STORYBOOK_URL}/?path=/docs/components-form-checkbox--docs`}
             openInNewTab
           >
-            <T k="components.common.storybookLink" />
+            <Rich>{m.components.common.storybookLink()}</Rich>
           </Anchor>
         </div>
       </div>
@@ -35,7 +36,7 @@ export default function CheckboxPage() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.importTitle" />
+          <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
         <CodeBlock code="import { Checkbox } from '@k8ordo/ui';" lang="ts" />
       </section>
@@ -44,7 +45,7 @@ export default function CheckboxPage() {
       <section className="flex flex-col gap-8">
         <div className="flex flex-col gap-4">
           <Heading level="h2">
-            <T k="components.common.usageTitle" />
+            <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
           <ComponentPreview code='<Checkbox label="I agree to the terms" />'>
             <Checkbox label="I agree to the terms" />
@@ -53,7 +54,7 @@ export default function CheckboxPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.checkbox.defaultCheckedTitle" />
+            <Rich>{m.components.checkbox.defaultCheckedTitle()}</Rich>
           </Heading>
           <ComponentPreview code='<Checkbox defaultChecked label="Checked by default" />'>
             <Checkbox defaultChecked label="Checked by default" />
@@ -62,7 +63,7 @@ export default function CheckboxPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.checkbox.controlledTitle" />
+            <Rich>{m.components.checkbox.controlledTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`const [checked, setChecked] = useState(false);
@@ -79,7 +80,7 @@ export default function CheckboxPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.checkbox.disabledTitle" />
+            <Rich>{m.components.checkbox.disabledTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<Checkbox disabled label="Unchecked disabled" />
@@ -132,7 +133,7 @@ export default function CheckboxPage() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.propsTitle" />
+          <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>
         <PropsTable
           inherits={inheritsOf('Checkbox')}

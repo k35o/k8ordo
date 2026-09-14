@@ -1,16 +1,16 @@
-'use client';
-
-import { Button, GitHubIcon, Heading } from '@k8ordo/ui';
+import type { Message } from '@k8ordo/i18n';
+import { GitHubIcon, Heading } from '@k8ordo/ui';
 import type { ReactNode } from 'react';
 
-import { localizeHref, useTranslation } from '../i18n';
-import type { MessageKey } from '../i18n/types';
+import { getLocale, locales } from '../i18n';
+import * as m from '../messages';
+import { LinkButton } from './link-button';
 import { PageTitle } from './page-title';
-import { T } from './t';
+import { Rich } from './rich';
 
 export type PackageFeature = {
-  title: MessageKey;
-  description: MessageKey;
+  title: Message;
+  description: Message;
   icon: ReactNode;
 };
 
@@ -19,11 +19,11 @@ export type PackageLandingProps = {
   name: string;
   /** The directory under `packages/`. */
   directory: string;
-  description: MessageKey;
-  featuresTitle: MessageKey;
+  description: Message;
+  featuresTitle: Message;
   features: readonly PackageFeature[];
-  docsTitle: MessageKey;
-  docsDescription: MessageKey;
+  docsTitle: Message;
+  docsDescription: Message;
   /** Anything the package wants between the hero and its features. */
   children?: ReactNode;
 };
@@ -42,7 +42,7 @@ export function PackageLanding({
   docsDescription,
   children,
 }: PackageLandingProps) {
-  const { t, locale } = useTranslation();
+  const locale = getLocale();
 
   return (
     <div className="flex flex-1 flex-col">
@@ -51,43 +51,24 @@ export function PackageLanding({
         <div className="flex max-w-2xl flex-col justify-center gap-8">
           <Heading level="h1">{name}</Heading>
           <p className="text-fg-mute break-phrase text-lg leading-relaxed">
-            {t(description)}
+            {description()}
           </p>
           <div className="flex flex-wrap items-center gap-4">
-            <Button
-              renderItem={({ className, children: label }) => (
-                <a
-                  className={className}
-                  href={`https://www.npmjs.com/package/${name}`}
-                  rel="noopener noreferrer"
-                  target="_blank"
-                >
-                  {label}
-                </a>
-              )}
-              size="md"
+            <LinkButton
+              external
+              href={`https://www.npmjs.com/package/${name}`}
               variant="solid"
             >
               npm
-            </Button>
-            <Button
+            </LinkButton>
+            <LinkButton
               color="base"
-              renderItem={({ className, children: label }) => (
-                <a
-                  className={className}
-                  href={`https://github.com/k35o/k8ordo/tree/main/packages/${directory}`}
-                  rel="noopener noreferrer"
-                  target="_blank"
-                >
-                  {label}
-                </a>
-              )}
-              size="md"
+              external
+              href={`https://github.com/k35o/k8ordo/tree/main/packages/${directory}`}
               startIcon={<GitHubIcon />}
-              variant="skeleton"
             >
-              {t('common.github')}
-            </Button>
+              {m.common.github()}
+            </LinkButton>
           </div>
         </div>
       </section>
@@ -95,21 +76,21 @@ export function PackageLanding({
       {children}
 
       <section className="mx-auto w-full max-w-6xl px-6 pb-24 md:px-8">
-        <Heading level="h2">{t(featuresTitle)}</Heading>
+        <Heading level="h2">{featuresTitle()}</Heading>
         <ul className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2">
           {features.map((feature) => (
             <li
               className="border-border-mute flex flex-col gap-3 rounded-lg border p-6"
-              key={feature.title}
+              key={feature.title()}
             >
               <span className="text-primary-border flex items-center gap-2">
                 {feature.icon}
                 <span className="text-fg-base font-medium">
-                  {t(feature.title)}
+                  {feature.title()}
                 </span>
               </span>
               <span className="text-fg-mute text-sm leading-relaxed">
-                <T k={feature.description} />
+                <Rich>{feature.description()}</Rich>
               </span>
             </li>
           ))}
@@ -117,23 +98,14 @@ export function PackageLanding({
       </section>
 
       <section className="mx-auto w-full max-w-6xl px-6 pb-24 md:px-8">
-        <Heading level="h2">{t(docsTitle)}</Heading>
+        <Heading level="h2">{docsTitle()}</Heading>
         <p className="text-fg-mute mt-4 max-w-2xl text-sm leading-relaxed">
-          <T k={docsDescription} />
+          <Rich>{docsDescription()}</Rich>
         </p>
         <div className="mt-6">
-          <Button
-            color="base"
-            renderItem={({ className, children: label }) => (
-              <a className={className} href={localizeHref('/', locale)}>
-                {label}
-              </a>
-            )}
-            size="md"
-            variant="skeleton"
-          >
-            {t('nav.home')}
-          </Button>
+          <LinkButton color="base" href={locales.localize('/', locale)}>
+            {m.nav.home()}
+          </LinkButton>
         </div>
       </section>
     </div>

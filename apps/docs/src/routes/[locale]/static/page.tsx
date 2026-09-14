@@ -10,36 +10,37 @@ import {
 import { PackageExample } from '../../../components/package-example';
 import { PackageLanding } from '../../../components/package-landing';
 import type { PackageFeature } from '../../../components/package-landing';
+import * as m from '../../../messages';
 
 const FEATURES: PackageFeature[] = [
   {
-    title: 'static.featureRoutes',
-    description: 'static.featureRoutesDescription',
+    title: m.static.featureRoutes,
+    description: m.static.featureRoutesDescription,
     icon: <LocationIcon />,
   },
   {
-    title: 'static.featureGenerated',
-    description: 'static.featureGeneratedDescription',
+    title: m.static.featureGenerated,
+    description: m.static.featureGeneratedDescription,
     icon: <AtomIcon />,
   },
   {
-    title: 'static.featureBoundary',
-    description: 'static.featureBoundaryDescription',
+    title: m.static.featureBoundary,
+    description: m.static.featureBoundaryDescription,
     icon: <LockIcon />,
   },
   {
-    title: 'static.featureFiles',
-    description: 'static.featureFilesDescription',
+    title: m.static.featureFiles,
+    description: m.static.featureFilesDescription,
     icon: <PackageIcon />,
   },
   {
-    title: 'static.featureRouteFiles',
-    description: 'static.featureRouteFilesDescription',
+    title: m.static.featureRouteFiles,
+    description: m.static.featureRouteFilesDescription,
     icon: <RefreshIcon />,
   },
   {
-    title: 'static.featureParams',
-    description: 'static.featureParamsDescription',
+    title: m.static.featureParams,
+    description: m.static.featureParamsDescription,
     icon: <ShieldCheckIcon />,
   },
 ];
@@ -65,19 +66,19 @@ export default defineConfig({
 export default function StaticPage() {
   return (
     <PackageLanding
-      description="static.description"
+      description={m.static.description}
       directory="static"
-      docsDescription="static.docsDescription"
-      docsTitle="static.docsTitle"
+      docsDescription={m.static.docsDescription}
+      docsTitle={m.static.docsTitle}
       features={FEATURES}
-      featuresTitle="static.featuresTitle"
+      featuresTitle={m.static.featuresTitle}
       name="@k8ordo/static"
     >
       <PackageExample
         code={EXAMPLE}
-        description="static.exampleDescription"
+        description={m.static.exampleDescription}
         lang="ts"
-        title="static.exampleTitle"
+        title={m.static.exampleTitle}
       />
     </PackageLanding>
   );

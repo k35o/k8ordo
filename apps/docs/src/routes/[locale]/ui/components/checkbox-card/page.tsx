@@ -4,9 +4,10 @@ import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';
 import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
-import { T } from '../../../../../components/t';
+import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
+import * as m from '../../../../../messages';
 import { CheckboxCardControlledPreview } from '../_previews/checkbox-card-previews';
 
 const options = [
@@ -34,14 +35,14 @@ export default function CheckboxCardPage() {
       <div className="flex flex-col gap-4">
         <Heading level="h1">CheckboxCard</Heading>
         <p className="text-fg-mute text-lg">
-          <T k="components.checkboxCard.description" />
+          <Rich>{m.components.checkboxCard.description()}</Rich>
         </p>
         <div>
           <Anchor
             href={`${STORYBOOK_URL}/?path=/docs/components-form-checkbox-card--docs`}
             openInNewTab
           >
-            <T k="components.common.storybookLink" />
+            <Rich>{m.components.common.storybookLink()}</Rich>
           </Anchor>
         </div>
       </div>
@@ -49,7 +50,7 @@ export default function CheckboxCardPage() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.importTitle" />
+          <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
         <CodeBlock
           code="import { CheckboxCard } from '@k8ordo/ui';"
@@ -61,7 +62,7 @@ export default function CheckboxCardPage() {
       <section className="flex flex-col gap-8">
         <div className="flex flex-col gap-4">
           <Heading level="h2">
-            <T k="components.common.usageTitle" />
+            <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`import { CheckboxCard } from '@k8ordo/ui';
@@ -103,7 +104,7 @@ const [value, setValue] = useState(['comments']);
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.checkboxCard.defaultValueTitle" />
+            <Rich>{m.components.checkboxCard.defaultValueTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`const options = [
@@ -155,7 +156,7 @@ const [value, setValue] = useState(['comments']);
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.propsTitle" />
+          <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>
         <PropsTable
           inherits={inheritsOf('CheckboxCard')}

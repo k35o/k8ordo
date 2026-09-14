@@ -4,9 +4,10 @@ import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';
 import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
-import { T } from '../../../../../components/t';
+import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
+import * as m from '../../../../../messages';
 import { PasswordInputControlledPreview } from '../_previews/password-input-previews';
 
 export default function PasswordInputPage() {
@@ -16,14 +17,14 @@ export default function PasswordInputPage() {
       <div className="flex flex-col gap-4">
         <Heading level="h1">PasswordInput</Heading>
         <p className="text-fg-mute text-lg">
-          <T k="components.passwordInput.description" />
+          <Rich>{m.components.passwordInput.description()}</Rich>
         </p>
         <div>
           <Anchor
             href={`${STORYBOOK_URL}/?path=/docs/components-form-password-input--docs`}
             openInNewTab
           >
-            <T k="components.common.storybookLink" />
+            <Rich>{m.components.common.storybookLink()}</Rich>
           </Anchor>
         </div>
       </div>
@@ -31,7 +32,7 @@ export default function PasswordInputPage() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.importTitle" />
+          <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
         <CodeBlock
           code="import { PasswordInput } from '@k8ordo/ui';"
@@ -43,7 +44,7 @@ export default function PasswordInputPage() {
       <section className="flex flex-col gap-8">
         <div className="flex flex-col gap-4">
           <Heading level="h2">
-            <T k="components.common.usageTitle" />
+            <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<PasswordInput
@@ -64,7 +65,7 @@ export default function PasswordInputPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.passwordInput.controlledTitle" />
+            <Rich>{m.components.passwordInput.controlledTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`const [value, setValue] = useState('hunter2');
@@ -83,7 +84,7 @@ export default function PasswordInputPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.passwordInput.disabledTitle" />
+            <Rich>{m.components.passwordInput.disabledTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<PasswordInput
@@ -106,7 +107,7 @@ export default function PasswordInputPage() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.propsTitle" />
+          <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>
         <PropsTable
           inherits={inheritsOf('PasswordInput')}

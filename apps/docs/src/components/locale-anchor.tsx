@@ -3,7 +3,7 @@
 import { Anchor } from '@k8ordo/ui';
 import type { FC, MouseEventHandler, PropsWithChildren } from 'react';
 
-import { localizeHref, useLocale } from '../i18n';
+import { getLocale, locales } from '../i18n';
 
 type LocaleAnchorProps = PropsWithChildren<{
   path: string;
@@ -19,8 +19,8 @@ export const LocaleAnchor: FC<LocaleAnchorProps> = ({
   children,
   unstyled = false,
 }) => {
-  const locale = useLocale();
-  const href = localizeHref(path, locale);
+  const locale = getLocale();
+  const href = locales.localize(path, locale);
 
   if (unstyled) {
     return (

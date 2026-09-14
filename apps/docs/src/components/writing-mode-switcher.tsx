@@ -6,12 +6,11 @@ import {
   VerticalWritingIcon,
 } from '@k8ordo/ui';
 
-import { useTranslation } from '../i18n';
+import * as m from '../messages';
 import { useWritingMode } from '../theme/writing-mode-context';
 
 export function WritingModeSwitcher() {
   const { writingMode, toggleWritingMode } = useWritingMode();
-  const { t } = useTranslation();
   const isVertical = writingMode === 'vertical';
 
   return (
@@ -19,8 +18,8 @@ export function WritingModeSwitcher() {
       aria-pressed={isVertical}
       label={
         isVertical
-          ? t('common.switchToHorizontalWriting')
-          : t('common.switchToVerticalWriting')
+          ? m.common.switchToHorizontalWriting()
+          : m.common.switchToVerticalWriting()
       }
       onClick={toggleWritingMode}
     >

@@ -2,28 +2,29 @@ import { Heading, Separator } from '@k8ordo/ui';
 
 import { CodeBlock } from '../../../../../components/code-block';
 import { PageTitle } from '../../../../../components/page-title';
-import { T } from '../../../../../components/t';
+import { Rich } from '../../../../../components/rich';
+import * as m from '../../../../../messages';
 
 export default function GenerativeUi() {
   return (
     <div className="mx-auto flex max-w-4xl flex-col gap-8 px-6 py-12 md:px-8">
-      <PageTitle k="nav.generativeUi" />
+      <PageTitle title={m.nav.generativeUi} />
       <div className="flex flex-col gap-4">
         <Heading level="h1">
-          <T k="nav.generativeUi" />
+          <Rich>{m.nav.generativeUi()}</Rich>
         </Heading>
         <p className="text-fg-mute text-lg">
-          <T k="generativeUi.introduction" />
+          <Rich>{m.generativeUi.introduction()}</Rich>
         </p>
       </div>
       <Separator color="mute" />
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="generativeUi.promptTitle" />
+          <Rich>{m.generativeUi.promptTitle()}</Rich>
         </Heading>
         <p className="text-fg-mute">
-          <T k="generativeUi.promptDescription" />
+          <Rich>{m.generativeUi.promptDescription()}</Rich>
         </p>
         <CodeBlock
           code={`import { catalog, uiRules } from '@k8ordo/ui/json-render';
@@ -38,10 +39,10 @@ const systemPrompt = catalog.prompt({ customRules: [...uiRules] });`}
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="generativeUi.renderTitle" />
+          <Rich>{m.generativeUi.renderTitle()}</Rich>
         </Heading>
         <p className="text-fg-mute">
-          <T k="generativeUi.renderDescription" />
+          <Rich>{m.generativeUi.renderDescription()}</Rich>
         </p>
         <CodeBlock
           code={`'use client';
@@ -58,10 +59,10 @@ export function GenUi({ spec }: { spec: unknown }) {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="generativeUi.validateTitle" />
+          <Rich>{m.generativeUi.validateTitle()}</Rich>
         </Heading>
         <p className="text-fg-mute">
-          <T k="generativeUi.validateDescription" />
+          <Rich>{m.generativeUi.validateDescription()}</Rich>
         </p>
         <CodeBlock
           code={`import { validateGeneratedSpec } from '@k8ordo/ui/json-render';
@@ -79,10 +80,10 @@ const retried = await llm(result.repairPrompt); // fix and retry`}
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="generativeUi.typedTitle" />
+          <Rich>{m.generativeUi.typedTitle()}</Rich>
         </Heading>
         <p className="text-fg-mute">
-          <T k="generativeUi.typedDescription" />
+          <Rich>{m.generativeUi.typedDescription()}</Rich>
         </p>
         <CodeBlock
           code={`import type { UISpec } from '@k8ordo/ui/json-render';
@@ -102,10 +103,10 @@ const spec = {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="generativeUi.openuiTitle" />
+          <Rich>{m.generativeUi.openuiTitle()}</Rich>
         </Heading>
         <p className="text-fg-mute">
-          <T k="generativeUi.openuiDescription" />
+          <Rich>{m.generativeUi.openuiDescription()}</Rich>
         </p>
         <CodeBlock
           code={`'use client';

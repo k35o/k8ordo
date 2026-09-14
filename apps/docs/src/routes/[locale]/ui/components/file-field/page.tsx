@@ -4,9 +4,10 @@ import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';
 import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
-import { T } from '../../../../../components/t';
+import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
+import * as m from '../../../../../messages';
 import {
   FileFieldAcceptTypesPreview,
   FileFieldBasicPreview,
@@ -22,14 +23,14 @@ export default function FileFieldPage() {
       <div className="flex flex-col gap-4">
         <Heading level="h1">FileField</Heading>
         <p className="text-fg-mute text-lg">
-          <T k="components.fileField.description" />
+          <Rich>{m.components.fileField.description()}</Rich>
         </p>
         <div>
           <Anchor
             href={`${STORYBOOK_URL}/?path=/docs/components-form-file-field--docs`}
             openInNewTab
           >
-            <T k="components.common.storybookLink" />
+            <Rich>{m.components.common.storybookLink()}</Rich>
           </Anchor>
         </div>
       </div>
@@ -37,7 +38,7 @@ export default function FileFieldPage() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.importTitle" />
+          <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
         <CodeBlock code="import { FileField } from '@k8ordo/ui';" lang="ts" />
       </section>
@@ -46,7 +47,7 @@ export default function FileFieldPage() {
       <section className="flex flex-col gap-8">
         <div className="flex flex-col gap-4">
           <Heading level="h2">
-            <T k="components.common.usageTitle" />
+            <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<FileField.Root accept="image/*" multiple={false}>
@@ -66,7 +67,7 @@ export default function FileFieldPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.fileField.acceptTypesTitle" />
+            <Rich>{m.components.fileField.acceptTypesTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`{/* Accept only PDF and Word documents */}
@@ -87,7 +88,7 @@ export default function FileFieldPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.fileField.multipleFilesTitle" />
+            <Rich>{m.components.fileField.multipleFilesTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<FileField.Root maxFiles={3} multiple>
@@ -107,7 +108,7 @@ export default function FileFieldPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.fileField.disabledTitle" />
+            <Rich>{m.components.fileField.disabledTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<FileField.Root disabled multiple={false}>
@@ -127,7 +128,7 @@ export default function FileFieldPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.fileField.invalidTitle" />
+            <Rich>{m.components.fileField.invalidTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<FileField.Root invalid multiple={false}>
@@ -149,7 +150,7 @@ export default function FileFieldPage() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.propsTitle" />
+          <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>
         <Heading level="h3">FileField.Root</Heading>
         <PropsTable

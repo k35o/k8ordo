@@ -4,9 +4,10 @@ import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';
 import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
-import { T } from '../../../../../components/t';
+import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
+import * as m from '../../../../../messages';
 
 export default function CodePage() {
   return (
@@ -15,14 +16,14 @@ export default function CodePage() {
       <div className="flex flex-col gap-4">
         <Heading level="h1">Code</Heading>
         <p className="text-fg-mute text-lg">
-          <T k="components.code.description" />
+          <Rich>{m.components.code.description()}</Rich>
         </p>
         <div>
           <Anchor
             href={`${STORYBOOK_URL}/?path=/docs/components-code--docs`}
             openInNewTab
           >
-            <T k="components.common.storybookLink" />
+            <Rich>{m.components.common.storybookLink()}</Rich>
           </Anchor>
         </div>
       </div>
@@ -30,7 +31,7 @@ export default function CodePage() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.importTitle" />
+          <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
         <CodeBlock code="import { Code } from '@k8ordo/ui';" lang="ts" />
       </section>
@@ -39,7 +40,7 @@ export default function CodePage() {
       <section className="flex flex-col gap-8">
         <div className="flex flex-col gap-4">
           <Heading level="h2">
-            <T k="components.common.usageTitle" />
+            <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<p>
@@ -55,7 +56,7 @@ export default function CodePage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.code.colorDetectionTitle" />
+            <Rich>{m.components.code.colorDetectionTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<Code>#ff6347</Code>
@@ -72,7 +73,7 @@ export default function CodePage() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.propsTitle" />
+          <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>
         <PropsTable inherits={inheritsOf('Code')} items={propsOf('Code')} />
       </section>

@@ -1,11 +1,7 @@
-'use client';
-
+import type { Message } from '@k8ordo/i18n';
 import type { FC } from 'react';
 
-import type { MessageKey } from '../i18n';
-import { useTranslation } from '../i18n';
-
-type Props = { name: string } | { k: MessageKey };
+type Props = { name: string } | { title: Message };
 
 /**
  * ページの <title>。React 19 が木のどこにあっても head に持ち上げるので、
@@ -13,7 +9,6 @@ type Props = { name: string } | { k: MessageKey };
  * （同時に画面にあるのは 1 つだけ、が規則）。
  */
 export const PageTitle: FC<Props> = (props) => {
-  const { t } = useTranslation();
-  const name = 'name' in props ? props.name : t(props.k);
+  const name = 'name' in props ? props.name : props.title();
   return <title>{`${name} · k8ordo`}</title>;
 };

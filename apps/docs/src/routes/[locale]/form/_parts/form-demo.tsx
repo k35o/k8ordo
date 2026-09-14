@@ -5,8 +5,8 @@ import type { FormFields, FormState } from '@k8ordo/form';
 import { useAppState } from '@k8ordo/state';
 import { Button, Code, FormControl, TextField } from '@k8ordo/ui';
 
-import { T } from '../../../../components/t';
-import { useTranslation } from '../../../../i18n';
+import { Rich } from '../../../../components/rich';
+import * as m from '../../../../messages';
 import { demoState } from './demo-state';
 
 type Props = {
@@ -25,7 +25,6 @@ const NUMBER_INPUT_CLASS =
   'border-border-base bg-bg-base aria-invalid:border-border-error focus-visible:ring-border-info inline-full rounded-xl border px-3 py-2 focus-visible:border-transparent focus-visible:ring-2 focus-visible:outline-hidden';
 
 export function FormDemo({ fields }: Props) {
-  const { t } = useTranslation();
   const form = useForm(fields, NO_STATE);
   const q = form.field('q');
   const min = form.field('min');
@@ -48,7 +47,7 @@ export function FormDemo({ fields }: Props) {
           <FormControl
             errorText={q.error}
             invalid={q.invalid}
-            label={t('form.demoLabelQ')}
+            label={m.form.demoLabelQ()}
             renderInput={(props) => (
               <TextField
                 {...props}
@@ -64,7 +63,7 @@ export function FormDemo({ fields }: Props) {
           <FormControl
             errorText={min.error}
             invalid={min.invalid}
-            label={t('form.demoLabelMin')}
+            label={m.form.demoLabelMin()}
             renderInput={(props) => (
               <input
                 {...props}
@@ -78,14 +77,14 @@ export function FormDemo({ fields }: Props) {
           />
         </div>
         <Button type="submit" variant="solid">
-          {t('form.demoSubmit')}
+          {m.form.demoSubmit()}
         </Button>
       </form>
       <dl className="flex flex-col gap-1 text-sm">
         <div className="flex gap-3">
           <dt className="text-fg-mute">URL</dt>
           <dd className="break-all">
-            <Code>{search === '' ? t('form.demoUrlEmpty') : `?${search}`}</Code>
+            <Code>{search === '' ? m.form.demoUrlEmpty() : `?${search}`}</Code>
           </dd>
         </div>
         <div className="flex gap-3">
@@ -96,7 +95,7 @@ export function FormDemo({ fields }: Props) {
         </div>
       </dl>
       <p className="text-fg-mute text-sm leading-relaxed">
-        <T k="form.demoHint" />
+        <Rich>{m.form.demoHint()}</Rich>
       </p>
     </div>
   );

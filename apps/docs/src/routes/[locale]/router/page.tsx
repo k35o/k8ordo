@@ -10,36 +10,37 @@ import {
 import { PackageExample } from '../../../components/package-example';
 import { PackageLanding } from '../../../components/package-landing';
 import type { PackageFeature } from '../../../components/package-landing';
+import * as m from '../../../messages';
 
 const FEATURES: PackageFeature[] = [
   {
-    title: 'router.featureTable',
-    description: 'router.featureTableDescription',
+    title: m.router.featureTable,
+    description: m.router.featureTableDescription,
     icon: <ListIcon />,
   },
   {
-    title: 'router.featureTypes',
-    description: 'router.featureTypesDescription',
+    title: m.router.featureTypes,
+    description: m.router.featureTypesDescription,
     icon: <ShieldCheckIcon />,
   },
   {
-    title: 'router.featureNavigation',
-    description: 'router.featureNavigationDescription',
+    title: m.router.featureNavigation,
+    description: m.router.featureNavigationDescription,
     icon: <HistoryIcon />,
   },
   {
-    title: 'router.featureNoLink',
-    description: 'router.featureNoLinkDescription',
+    title: m.router.featureNoLink,
+    description: m.router.featureNoLinkDescription,
     icon: <LinkIcon />,
   },
   {
-    title: 'router.featureMatch',
-    description: 'router.featureMatchDescription',
+    title: m.router.featureMatch,
+    description: m.router.featureMatchDescription,
     icon: <LocationIcon />,
   },
   {
-    title: 'router.featureError',
-    description: 'router.featureErrorDescription',
+    title: m.router.featureError,
+    description: m.router.featureErrorDescription,
     icon: <RefreshIcon />,
   },
 ];
@@ -63,18 +64,18 @@ const inProducts = useMatch('/products/*') !== null; // 表を持たないブラ
 export default function RouterPage() {
   return (
     <PackageLanding
-      description="router.description"
+      description={m.router.description}
       directory="router"
-      docsDescription="router.docsDescription"
-      docsTitle="router.docsTitle"
+      docsDescription={m.router.docsDescription}
+      docsTitle={m.router.docsTitle}
       features={FEATURES}
-      featuresTitle="router.featuresTitle"
+      featuresTitle={m.router.featuresTitle}
       name="@k8ordo/router"
     >
       <PackageExample
         code={EXAMPLE}
-        description="router.exampleDescription"
-        title="router.exampleTitle"
+        description={m.router.exampleDescription}
+        title={m.router.exampleTitle}
       />
     </PackageLanding>
   );

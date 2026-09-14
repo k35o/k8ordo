@@ -1,128 +1,129 @@
+import * as m from '../messages';
 import type { NavCategory } from './nav-types';
 
 export const hookCategories: NavCategory[] = [
   {
-    titleKey: 'hooks.categoryDomInteraction',
+    title: m.hooks.categoryDomInteraction,
     items: [
       {
         name: 'useClickAway',
         path: '/ui/hooks/use-click-away',
-        descKey: 'hooks.useClickAway.description',
+        description: m.hooks.clickAway.description,
       },
       {
         name: 'useHover',
         path: '/ui/hooks/use-hover',
-        descKey: 'hooks.useHover.description',
+        description: m.hooks.hover.description,
       },
       {
         name: 'useResize',
         path: '/ui/hooks/use-resize',
-        descKey: 'hooks.useResize.description',
+        description: m.hooks.resize.description,
       },
       {
         name: 'useScrollDirection',
         path: '/ui/hooks/use-scroll-direction',
-        descKey: 'hooks.useScrollDirection.description',
+        description: m.hooks.scrollDirection.description,
       },
       {
         name: 'useScrollLock',
         path: '/ui/hooks/use-scroll-lock',
-        descKey: 'hooks.useScrollLock.description',
+        description: m.hooks.scrollLock.description,
       },
       {
         name: 'useWindowResize',
         path: '/ui/hooks/use-window-resize',
-        descKey: 'hooks.useWindowResize.description',
+        description: m.hooks.windowResize.description,
       },
       {
         name: 'useWritingMode',
         path: '/ui/hooks/use-writing-mode',
-        descKey: 'hooks.useWritingMode.description',
+        description: m.hooks.writingMode.description,
       },
     ],
   },
   {
-    titleKey: 'hooks.categoryStateStorage',
+    title: m.hooks.categoryStateStorage,
     items: [
       {
         name: 'useClipboard',
         path: '/ui/hooks/use-clipboard',
-        descKey: 'hooks.useClipboard.description',
+        description: m.hooks.clipboard.description,
       },
       {
         name: 'useControllableState',
         path: '/ui/hooks/use-controllable-state',
-        descKey: 'hooks.useControllableState.description',
+        description: m.hooks.controllableState.description,
       },
     ],
   },
   {
-    titleKey: 'hooks.categoryTiming',
+    title: m.hooks.categoryTiming,
     items: [
       {
         name: 'useDebouncedTransition',
         path: '/ui/hooks/use-debounced-transition',
-        descKey: 'hooks.useDebouncedTransition.description',
+        description: m.hooks.debouncedTransition.description,
       },
       {
         name: 'useDeferredDebounce',
         path: '/ui/hooks/use-deferred-debounce',
-        descKey: 'hooks.useDeferredDebounce.description',
+        description: m.hooks.deferredDebounce.description,
       },
       {
         name: 'useInterval',
         path: '/ui/hooks/use-interval',
-        descKey: 'hooks.useInterval.description',
+        description: m.hooks.interval.description,
       },
       {
         name: 'useTimeout',
         path: '/ui/hooks/use-timeout',
-        descKey: 'hooks.useTimeout.description',
+        description: m.hooks.timeout.description,
       },
     ],
   },
   {
-    titleKey: 'hooks.categoryUtility',
+    title: m.hooks.categoryUtility,
     items: [
       {
         name: 'useBreakpoint',
         path: '/ui/hooks/use-breakpoint',
-        descKey: 'hooks.useBreakpoint.description',
+        description: m.hooks.breakpoint.description,
       },
       {
         name: 'useClient',
         path: '/ui/hooks/use-client',
-        descKey: 'hooks.useClient.description',
+        description: m.hooks.client.description,
       },
       {
         name: 'useDisclosure',
         path: '/ui/hooks/use-disclosure',
-        descKey: 'hooks.useDisclosure.description',
+        description: m.hooks.disclosure.description,
       },
       {
         name: 'useStep',
         path: '/ui/hooks/use-step',
-        descKey: 'hooks.useStep.description',
+        description: m.hooks.step.description,
       },
       {
         name: 'useWindowSize',
         path: '/ui/hooks/use-window-size',
-        descKey: 'hooks.useWindowSize.description',
+        description: m.hooks.windowSize.description,
       },
     ],
   },
   {
-    titleKey: 'hooks.categoryObserver',
+    title: m.hooks.categoryObserver,
     items: [
       {
         name: 'useIntersectionObserver',
         path: '/ui/hooks/use-intersection-observer',
-        descKey: 'hooks.useIntersectionObserver.description',
+        description: m.hooks.intersectionObserver.description,
       },
       {
         name: 'useInView',
         path: '/ui/hooks/use-in-view',
-        descKey: 'hooks.useInView.description',
+        description: m.hooks.inView.description,
       },
     ],
   },

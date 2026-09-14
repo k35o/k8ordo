@@ -4,9 +4,10 @@ import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';
 import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
-import { T } from '../../../../../components/t';
+import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
+import * as m from '../../../../../messages';
 
 const sampleItems = ['Active', 'Pending', 'Error'] as const;
 const SAMPLE_TONE = ['success', 'warning', 'error'] as const;
@@ -18,14 +19,14 @@ export default function StackPage() {
       <div className="flex flex-col gap-4">
         <Heading level="h1">Stack</Heading>
         <p className="text-fg-mute text-lg">
-          <T k="components.stack.description" />
+          <Rich>{m.components.stack.description()}</Rich>
         </p>
         <div>
           <Anchor
             href={`${STORYBOOK_URL}/?path=/docs/components-stack--docs`}
             openInNewTab
           >
-            <T k="components.common.storybookLink" />
+            <Rich>{m.components.common.storybookLink()}</Rich>
           </Anchor>
         </div>
       </div>
@@ -33,7 +34,7 @@ export default function StackPage() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.importTitle" />
+          <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
         <CodeBlock code="import { Stack } from '@k8ordo/ui';" lang="ts" />
       </section>
@@ -42,7 +43,7 @@ export default function StackPage() {
       <section className="flex flex-col gap-8">
         <div className="flex flex-col gap-4">
           <Heading level="h2">
-            <T k="components.common.usageTitle" />
+            <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<Stack direction="row" gap="sm">
@@ -61,7 +62,7 @@ export default function StackPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.stack.directionTitle" />
+            <Rich>{m.components.stack.directionTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<Stack direction="column" gap="sm">…</Stack>
@@ -84,7 +85,7 @@ export default function StackPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.stack.gapTitle" />
+            <Rich>{m.components.stack.gapTitle()}</Rich>
           </Heading>
           <ComponentPreview code='<Stack direction="row" gap="none|sm|md|lg|xl">…</Stack>'>
             <Stack direction="column" gap="md">
@@ -102,7 +103,7 @@ export default function StackPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.stack.alignTitle" />
+            <Rich>{m.components.stack.alignTitle()}</Rich>
           </Heading>
           <ComponentPreview code='<Stack direction="row" align="center" justify="between">…</Stack>'>
             <div className="bg-bg-mute rounded-lg p-3">
@@ -119,7 +120,7 @@ export default function StackPage() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.propsTitle" />
+          <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>
         <PropsTable inherits={inheritsOf('Stack')} items={propsOf('Stack')} />
       </section>

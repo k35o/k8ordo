@@ -4,9 +4,10 @@ import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';
 import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
-import { T } from '../../../../../components/t';
+import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
+import * as m from '../../../../../messages';
 import { SwitchControlledPreview } from '../_previews/switch-previews';
 
 export default function SwitchPage() {
@@ -16,14 +17,14 @@ export default function SwitchPage() {
       <div className="flex flex-col gap-4">
         <Heading level="h1">Switch</Heading>
         <p className="text-fg-mute text-lg">
-          <T k="components.switch.description" />
+          <Rich>{m.components.switchInput.description()}</Rich>
         </p>
         <div>
           <Anchor
             href={`${STORYBOOK_URL}/?path=/docs/components-form-switch--docs`}
             openInNewTab
           >
-            <T k="components.common.storybookLink" />
+            <Rich>{m.components.common.storybookLink()}</Rich>
           </Anchor>
         </div>
       </div>
@@ -31,7 +32,7 @@ export default function SwitchPage() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.importTitle" />
+          <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
         <CodeBlock code="import { Switch } from '@k8ordo/ui';" lang="ts" />
       </section>
@@ -40,7 +41,7 @@ export default function SwitchPage() {
       <section className="flex flex-col gap-8">
         <div className="flex flex-col gap-4">
           <Heading level="h2">
-            <T k="components.common.usageTitle" />
+            <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<Switch
@@ -61,7 +62,7 @@ export default function SwitchPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.switch.defaultCheckedTitle" />
+            <Rich>{m.components.switchInput.defaultCheckedTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<Switch
@@ -84,7 +85,7 @@ export default function SwitchPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.switch.controlledTitle" />
+            <Rich>{m.components.switchInput.controlledTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`const [checked, setChecked] = useState(false);
@@ -104,7 +105,7 @@ export default function SwitchPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.switch.disabledTitle" />
+            <Rich>{m.components.switchInput.disabledTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<Switch disabled invalid={false} required={false} label="Airplane mode" />
@@ -130,7 +131,7 @@ export default function SwitchPage() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.propsTitle" />
+          <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>
         <PropsTable inherits={inheritsOf('Switch')} items={propsOf('Switch')} />
       </section>

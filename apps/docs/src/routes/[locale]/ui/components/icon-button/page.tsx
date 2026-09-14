@@ -4,9 +4,10 @@ import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';
 import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
-import { T } from '../../../../../components/t';
+import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
+import * as m from '../../../../../messages';
 import { IconButtonAsLinkPreview } from '../_previews/icon-button-previews';
 
 export default function IconButtonPage() {
@@ -16,14 +17,14 @@ export default function IconButtonPage() {
       <div className="flex flex-col gap-4">
         <Heading level="h1">IconButton</Heading>
         <p className="text-fg-mute text-lg">
-          <T k="components.iconButton.description" />
+          <Rich>{m.components.iconButton.description()}</Rich>
         </p>
         <div>
           <Anchor
             href={`${STORYBOOK_URL}/?path=/docs/components-button-icon-button--docs`}
             openInNewTab
           >
-            <T k="components.common.storybookLink" />
+            <Rich>{m.components.common.storybookLink()}</Rich>
           </Anchor>
         </div>
       </div>
@@ -31,7 +32,7 @@ export default function IconButtonPage() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.importTitle" />
+          <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
         <CodeBlock code="import { IconButton } from '@k8ordo/ui';" lang="ts" />
       </section>
@@ -40,7 +41,7 @@ export default function IconButtonPage() {
       <section className="flex flex-col gap-8">
         <div className="flex flex-col gap-4">
           <Heading level="h2">
-            <T k="components.common.usageTitle" />
+            <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`import { CloseIcon } from '@k8ordo/ui';
@@ -57,7 +58,7 @@ export default function IconButtonPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.iconButton.sizesTitle" />
+            <Rich>{m.components.iconButton.sizesTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<IconButton label="Close" size="sm">
@@ -84,7 +85,7 @@ export default function IconButtonPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.iconButton.backgroundsTitle" />
+            <Rich>{m.components.iconButton.backgroundsTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<IconButton color="transparent" label="Close">
@@ -117,7 +118,7 @@ export default function IconButtonPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.iconButton.disabledTitle" />
+            <Rich>{m.components.iconButton.disabledTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<IconButton disabled label="Close">
@@ -132,7 +133,7 @@ export default function IconButtonPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.iconButton.renderItemTitle" />
+            <Rich>{m.components.iconButton.renderItemTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<IconButton
@@ -160,7 +161,7 @@ export default function IconButtonPage() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.propsTitle" />
+          <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>
         <PropsTable
           inherits={inheritsOf('IconButton')}

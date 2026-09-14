@@ -4,9 +4,10 @@ import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';
 import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
-import { T } from '../../../../../components/t';
+import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
+import * as m from '../../../../../messages';
 
 export default function AvatarPage() {
   return (
@@ -15,14 +16,14 @@ export default function AvatarPage() {
       <div className="flex flex-col gap-4">
         <Heading level="h1">Avatar</Heading>
         <p className="text-fg-mute text-lg">
-          <T k="components.avatar.description" />
+          <Rich>{m.components.avatar.description()}</Rich>
         </p>
         <div>
           <Anchor
             href={`${STORYBOOK_URL}/?path=/docs/components-avatar--docs`}
             openInNewTab
           >
-            <T k="components.common.storybookLink" />
+            <Rich>{m.components.common.storybookLink()}</Rich>
           </Anchor>
         </div>
       </div>
@@ -30,7 +31,7 @@ export default function AvatarPage() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.importTitle" />
+          <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
         <CodeBlock code="import { Avatar } from '@k8ordo/ui';" lang="ts" />
       </section>
@@ -39,7 +40,7 @@ export default function AvatarPage() {
       <section className="flex flex-col gap-8">
         <div className="flex flex-col gap-4">
           <Heading level="h2">
-            <T k="components.common.usageTitle" />
+            <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
           <ComponentPreview code='<Avatar name="Ada Lovelace" />'>
             <Avatar name="Ada Lovelace" />
@@ -48,7 +49,7 @@ export default function AvatarPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.avatar.withImageTitle" />
+            <Rich>{m.components.avatar.withImageTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<Avatar
@@ -65,7 +66,7 @@ export default function AvatarPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.avatar.sizesTitle" />
+            <Rich>{m.components.avatar.sizesTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<Avatar name="Small" size="sm" />
@@ -82,7 +83,7 @@ export default function AvatarPage() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.propsTitle" />
+          <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>
         <PropsTable inherits={inheritsOf('Avatar')} items={propsOf('Avatar')} />
       </section>

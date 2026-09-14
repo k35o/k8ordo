@@ -1,0 +1,44 @@
+# @k8ordo/i18n
+
+> The locale axis of an application, owned. `defineLocales(['ja', 'en'])`
+> declares the set once and derives membership, negotiation, the URL segment
+> (`localize` / `delocalize`), the `[locale]` params schema in the shape
+> `@k8ordo/static` / `@k8ordo/server` run, and the current locale
+> (`getLocale()`). Each message is a function — `message({ ja, en })` — that
+> reads the locale where it is called: on the server the request the schema
+> accepted, in the browser the URL. The same call renders in a Server
+> Component and in a Client Component; there is no provider and no hook; a
+> bundler keeps only the messages a client module names. `Register` carries
+> the app's locale union so a message missing a locale does not compile.
+>
+> Like every k8ordo package it assumes React 19 and Server Components, uses
+> only what has reached Baseline newly available, and ships no polyfills or
+> legacy fallbacks.
+
+When installed via npm, these docs live under `node_modules/@k8ordo/i18n/docs/`.
+
+## Guide
+
+- [Design Guide](GUIDE.md): what the package owns and does not (the locale
+  segment, not the pathname; no message grammar; no loader), the locale set
+  and negotiation, messages as functions and `Register`, the Server
+  Component boundary (a message is called before it is passed to a
+  `'use client'` component), what reaches the browser, where the locale comes
+  from on each side, `/` and `<html lang>`, static path expansion, and
+  pairing with `@k8ordo/router` / `@k8ordo/ui` / `@k8ordo/form`.
+
+## Entry point
+
+- `@k8ordo/i18n` — `defineLocales(all, { default? })` returns `{ all,
+  default, is, negotiate, localize, delocalize, paramsSchema, getLocale,
+  run }`; the first entry is the default unless told otherwise, every tag
+  must be BCP 47, `negotiate(list)` tries each requested tag in order (exact,
+  then language) before falling back to the default, `getLocale()` is the
+  locale of the render in progress (not a hook), and `run(locale, fn)`
+  (server only) runs `fn` under a locale. `parseAcceptLanguage(header)` turns
+  an `Accept-Language` header into a preference list. `message(variants)`
+  declares one message — text in every locale, or a function of the same
+  parameters in every locale — and returns `Message<Args>`, a function that
+  renders the current locale's text. Types: `Locales`, `LocaleOf`, `Message`,
+  `Variants`, `Register`, `RegisteredLocale`, `Delocalized`,
+  `LocaleParamsSchema`, `LocalesOptions`.

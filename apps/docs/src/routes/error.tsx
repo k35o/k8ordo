@@ -1,9 +1,6 @@
 'use client';
 
-import { usePathname } from '@k8ordo/router';
-
 import { ErrorFallback } from '../components/error-fallback';
-import { DEFAULT_LOCALE, isLocale } from '../i18n';
 
 /**
  * ロケールのレイアウト自身（ヘッダーやプロバイダ）が throw したときの最後の
@@ -17,10 +14,5 @@ export default function RootError({
   error: unknown;
   reset: () => void;
 }) {
-  const pathname = usePathname();
-  const first = pathname.split('/')[1] ?? '';
-  const locale = isLocale(first) ? first : DEFAULT_LOCALE;
-  return (
-    <ErrorFallback fullScreen locale={locale} resetErrorBoundary={reset} />
-  );
+  return <ErrorFallback fullScreen resetErrorBoundary={reset} />;
 }

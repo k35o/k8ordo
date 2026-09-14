@@ -4,9 +4,10 @@ import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';
 import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
-import { T } from '../../../../../components/t';
+import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
+import * as m from '../../../../../messages';
 import {
   AlertActionButtonPreview,
   AlertActionLinkPreview,
@@ -21,14 +22,14 @@ export default function AlertPage() {
       <div className="flex flex-col gap-4">
         <Heading level="h1">Alert</Heading>
         <p className="text-fg-mute text-lg">
-          <T k="components.alert.description" />
+          <Rich>{m.components.alert.description()}</Rich>
         </p>
         <div>
           <Anchor
             href={`${STORYBOOK_URL}/?path=/docs/components-alert--docs`}
             openInNewTab
           >
-            <T k="components.common.storybookLink" />
+            <Rich>{m.components.common.storybookLink()}</Rich>
           </Anchor>
         </div>
       </div>
@@ -36,7 +37,7 @@ export default function AlertPage() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.importTitle" />
+          <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
         <CodeBlock code="import { Alert } from '@k8ordo/ui';" lang="ts" />
       </section>
@@ -45,7 +46,7 @@ export default function AlertPage() {
       <section className="flex flex-col gap-8">
         <div className="flex flex-col gap-4">
           <Heading level="h2">
-            <T k="components.common.usageTitle" />
+            <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
           <ComponentPreview code='<Alert message="This is an info alert." tone="info" />'>
             <Alert message="This is an info alert." tone="info" />
@@ -54,7 +55,7 @@ export default function AlertPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.alert.statusesTitle" />
+            <Rich>{m.components.alert.statusesTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<Alert message="Operation completed successfully." tone="success" />
@@ -71,7 +72,7 @@ export default function AlertPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.alert.multipleMessagesTitle" />
+            <Rich>{m.components.alert.multipleMessagesTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<Alert
@@ -96,7 +97,7 @@ export default function AlertPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.alert.actionTitle" />
+            <Rich>{m.components.alert.actionTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`// Navigation link — the consumer owns the element and its style.
@@ -140,7 +141,7 @@ export default function AlertPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.alert.dismissibleTitle" />
+            <Rich>{m.components.alert.dismissibleTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`const [isVisible, setIsVisible] = useState(true);
@@ -176,7 +177,7 @@ export default function AlertPage() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.propsTitle" />
+          <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>
         <PropsTable
           inherits={inheritsOf('Alert')}

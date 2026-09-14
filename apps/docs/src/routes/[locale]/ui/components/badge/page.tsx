@@ -4,9 +4,10 @@ import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';
 import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
-import { T } from '../../../../../components/t';
+import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
+import * as m from '../../../../../messages';
 
 export default function BadgePage() {
   return (
@@ -15,14 +16,14 @@ export default function BadgePage() {
       <div className="flex flex-col gap-4">
         <Heading level="h1">Badge</Heading>
         <p className="text-fg-mute text-lg">
-          <T k="components.badge.description" />
+          <Rich>{m.components.badge.description()}</Rich>
         </p>
         <div>
           <Anchor
             href={`${STORYBOOK_URL}/?path=/docs/components-badge--docs`}
             openInNewTab
           >
-            <T k="components.common.storybookLink" />
+            <Rich>{m.components.common.storybookLink()}</Rich>
           </Anchor>
         </div>
       </div>
@@ -30,7 +31,7 @@ export default function BadgePage() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.importTitle" />
+          <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
         <CodeBlock code="import { Badge } from '@k8ordo/ui';" lang="ts" />
       </section>
@@ -39,7 +40,7 @@ export default function BadgePage() {
       <section className="flex flex-col gap-8">
         <div className="flex flex-col gap-4">
           <Heading level="h2">
-            <T k="components.common.usageTitle" />
+            <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
           <ComponentPreview code='<Badge label="New" />'>
             <Badge label="New" />
@@ -48,7 +49,7 @@ export default function BadgePage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.badge.tonesTitle" />
+            <Rich>{m.components.badge.tonesTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<Badge label="Neutral" />
@@ -67,7 +68,7 @@ export default function BadgePage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.badge.variantsTitle" />
+            <Rich>{m.components.badge.variantsTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<Badge label="Solid" tone="success" />
@@ -80,7 +81,7 @@ export default function BadgePage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.badge.interactiveTitle" />
+            <Rich>{m.components.badge.interactiveTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<Badge interactive label="Neutral Solid" />
@@ -131,7 +132,7 @@ export default function BadgePage() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.propsTitle" />
+          <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>
         <PropsTable inherits={inheritsOf('Badge')} items={propsOf('Badge')} />
       </section>

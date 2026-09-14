@@ -11,9 +11,10 @@ import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';
 import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
-import { T } from '../../../../../components/t';
+import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
+import * as m from '../../../../../messages';
 import { ButtonAsLinkPreview } from '../_previews/button-previews';
 
 export default function ButtonPage() {
@@ -23,14 +24,14 @@ export default function ButtonPage() {
       <div className="flex flex-col gap-4">
         <Heading level="h1">Button</Heading>
         <p className="text-fg-mute text-lg">
-          <T k="components.button.description" />
+          <Rich>{m.components.button.description()}</Rich>
         </p>
         <div>
           <Anchor
             href={`${STORYBOOK_URL}/?path=/docs/components-button--docs`}
             openInNewTab
           >
-            <T k="components.common.storybookLink" />
+            <Rich>{m.components.common.storybookLink()}</Rich>
           </Anchor>
         </div>
       </div>
@@ -38,7 +39,7 @@ export default function ButtonPage() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.importTitle" />
+          <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
         <CodeBlock code="import { Button } from '@k8ordo/ui';" lang="ts" />
       </section>
@@ -47,7 +48,7 @@ export default function ButtonPage() {
       <section className="flex flex-col gap-8">
         <div className="flex flex-col gap-4">
           <Heading level="h2">
-            <T k="components.common.usageTitle" />
+            <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<Button variant="solid" color="primary">
@@ -62,7 +63,7 @@ export default function ButtonPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.button.variantsTitle" />
+            <Rich>{m.components.button.variantsTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<Button variant="solid">Solid</Button>
@@ -77,7 +78,7 @@ export default function ButtonPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.button.colorsTitle" />
+            <Rich>{m.components.button.colorsTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<Button color="primary">Primary</Button>
@@ -92,7 +93,7 @@ export default function ButtonPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.button.sizesTitle" />
+            <Rich>{m.components.button.sizesTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<Button size="sm">Small</Button>
@@ -107,7 +108,7 @@ export default function ButtonPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.button.iconsTitle" />
+            <Rich>{m.components.button.iconsTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`import { MailIcon, ChevronIcon } from '@k8ordo/ui';
@@ -128,7 +129,7 @@ export default function ButtonPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.button.fullWidthTitle" />
+            <Rich>{m.components.button.fullWidthTitle()}</Rich>
           </Heading>
           <ComponentPreview code="<Button fullWidth>Full Width Button</Button>">
             <div className="w-full">
@@ -139,7 +140,7 @@ export default function ButtonPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.button.disabledTitle" />
+            <Rich>{m.components.button.disabledTitle()}</Rich>
           </Heading>
           <ComponentPreview code="<Button disabled>Disabled</Button>">
             <Button disabled>Disabled</Button>
@@ -148,7 +149,7 @@ export default function ButtonPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.button.renderItemTitle" />
+            <Rich>{m.components.button.renderItemTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<Button
@@ -169,7 +170,7 @@ export default function ButtonPage() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.propsTitle" />
+          <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>
         <PropsTable inherits={inheritsOf('Button')} items={propsOf('Button')} />
       </section>

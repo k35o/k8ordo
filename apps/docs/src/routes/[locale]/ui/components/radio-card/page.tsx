@@ -4,9 +4,10 @@ import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';
 import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
-import { T } from '../../../../../components/t';
+import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
+import * as m from '../../../../../messages';
 import {
   RadioCardControlledPreview,
   RadioCardFormPreview,
@@ -37,14 +38,14 @@ export default function RadioCardPage() {
       <div className="flex flex-col gap-4">
         <Heading level="h1">RadioCard</Heading>
         <p className="text-fg-mute text-lg">
-          <T k="components.radioCard.description" />
+          <Rich>{m.components.radioCard.description()}</Rich>
         </p>
         <div>
           <Anchor
             href={`${STORYBOOK_URL}/?path=/docs/components-form-radio-card--docs`}
             openInNewTab
           >
-            <T k="components.common.storybookLink" />
+            <Rich>{m.components.common.storybookLink()}</Rich>
           </Anchor>
         </div>
       </div>
@@ -52,7 +53,7 @@ export default function RadioCardPage() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.importTitle" />
+          <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
         <CodeBlock code="import { RadioCard } from '@k8ordo/ui';" lang="ts" />
       </section>
@@ -61,7 +62,7 @@ export default function RadioCardPage() {
       <section className="flex flex-col gap-8">
         <div className="flex flex-col gap-4">
           <Heading level="h2">
-            <T k="components.common.usageTitle" />
+            <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`import { RadioCard } from '@k8ordo/ui';
@@ -91,7 +92,7 @@ const [value, setValue] = useState('pro');
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.radioCard.defaultValueTitle" />
+            <Rich>{m.components.radioCard.defaultValueTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`const options = [
@@ -129,10 +130,10 @@ const [value, setValue] = useState('pro');
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.radioCard.formTitle" />
+            <Rich>{m.components.radioCard.formTitle()}</Rich>
           </Heading>
           <p className="text-fg-mute text-sm">
-            <T k="components.radioCard.formDescription" />
+            <Rich>{m.components.radioCard.formDescription()}</Rich>
           </p>
           <ComponentPreview
             code={`const [submitted, setSubmitted] = useState<string | null>(null);
@@ -163,7 +164,7 @@ const [value, setValue] = useState('pro');
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.propsTitle" />
+          <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>
         <PropsTable
           inherits={inheritsOf('RadioCard')}

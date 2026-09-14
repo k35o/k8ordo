@@ -2,7 +2,7 @@
 
 import type { FC, ReactNode } from 'react';
 
-import { useLocale } from '../i18n';
+import { getLocale } from '../i18n';
 import { useWritingMode } from '../theme/writing-mode-context';
 import { WritingModeSwitcher } from './writing-mode-switcher';
 
@@ -12,7 +12,7 @@ type Props = {
 
 export const PreviewArea: FC<Props> = ({ children }) => {
   const { writingMode } = useWritingMode();
-  const locale = useLocale();
+  const locale = getLocale();
   const isVertical = locale === 'ja' && writingMode === 'vertical';
   return (
     // bg-preview-bg matches the Shiki code block so the preview and code read

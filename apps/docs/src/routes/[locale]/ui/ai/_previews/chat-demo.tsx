@@ -12,7 +12,7 @@ import {
 import { useRef, useState } from 'react';
 import type { FC, ReactNode } from 'react';
 
-import { useTranslation } from '../../../../../i18n';
+import * as m from '../../../../../messages';
 
 const AssistantRow: FC<{ children: ReactNode }> = ({ children }) => (
   <Message.Root from="assistant">
@@ -30,14 +30,13 @@ const UserRow: FC<{ children: ReactNode }> = ({ children }) => (
 type Msg = { id: string; role: 'user' | 'assistant'; text: string };
 
 export function ChatDemo() {
-  const { t } = useTranslation();
   const idRef = useRef(0);
   const [messages, setMessages] = useState<Msg[]>([]);
 
   const suggestions = [
-    t('aiChat.demo.suggestionIme'),
-    t('aiChat.demo.suggestionStreaming'),
-    t('aiChat.demo.suggestionTool'),
+    m.aiChat.demo.suggestionIme(),
+    m.aiChat.demo.suggestionStreaming(),
+    m.aiChat.demo.suggestionTool(),
   ];
 
   const send = (text: string) => {
@@ -49,7 +48,7 @@ export function ChatDemo() {
       {
         id: `a${aid.toString()}`,
         role: 'assistant',
-        text: t('aiChat.demo.reply'),
+        text: m.aiChat.demo.reply(),
       },
     ]);
   };
@@ -59,28 +58,28 @@ export function ChatDemo() {
       <Conversation.Root>
         <Conversation.Messages>
           <AssistantRow>
-            <Message.Content>{t('aiChat.demo.greeting')}</Message.Content>
+            <Message.Content>{m.aiChat.demo.greeting()}</Message.Content>
           </AssistantRow>
 
-          <UserRow>{t('aiChat.demo.seedQuestion')}</UserRow>
+          <UserRow>{m.aiChat.demo.seedQuestion()}</UserRow>
 
           <AssistantRow>
-            <Reasoning>{t('aiChat.demo.seedReasoning')}</Reasoning>
+            <Reasoning>{m.aiChat.demo.seedReasoning()}</Reasoning>
             <ToolInvocation
               input={{ query: 'k8ordo UI ai getting started' }}
               name="search_docs"
-              output={t('aiChat.demo.seedToolOutput')}
+              output={m.aiChat.demo.seedToolOutput()}
               state="output-available"
             />
-            <Message.Content>{t('aiChat.demo.seedAnswer')}</Message.Content>
+            <Message.Content>{m.aiChat.demo.seedAnswer()}</Message.Content>
           </AssistantRow>
 
-          {messages.map((m) =>
-            m.role === 'user' ? (
-              <UserRow key={m.id}>{m.text}</UserRow>
+          {messages.map((entry) =>
+            entry.role === 'user' ? (
+              <UserRow key={entry.id}>{entry.text}</UserRow>
             ) : (
-              <AssistantRow key={m.id}>
-                <Message.Content>{m.text}</Message.Content>
+              <AssistantRow key={entry.id}>
+                <Message.Content>{entry.text}</Message.Content>
               </AssistantRow>
             ),
           )}
@@ -97,7 +96,7 @@ export function ChatDemo() {
       </Suggestion.List>
 
       <PromptInput.Root onSubmit={send}>
-        <PromptInput.Textarea placeholder={t('aiChat.demo.placeholder')} />
+        <PromptInput.Textarea placeholder={m.aiChat.demo.placeholder()} />
         <PromptInput.Submit />
       </PromptInput.Root>
     </div>
