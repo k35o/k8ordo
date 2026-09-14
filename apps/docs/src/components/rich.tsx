@@ -9,7 +9,9 @@ import type { FC } from 'react';
 export const Rich: FC<{ children: string }> = ({ children: text }) => {
   const parts = text.split(/`([^`]+)`/u);
   if (parts.length === 1) return text;
+  // 一つの文字列を分割した断片で、並び替わることがないので位置が鍵になる
   return parts.map((part, index) =>
+    // oxlint-disable-next-line react/no-array-index-key
     index % 2 === 1 ? <Code key={String(index)}>{part}</Code> : part,
   );
 };
