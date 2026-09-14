@@ -3,8 +3,8 @@
 import { usePathname } from '@k8ordo/router';
 import { DropdownMenu } from '@k8ordo/ui';
 
+import { getLocale, locales } from '../i18n';
 import type { Locale } from '../i18n';
-import { locales, useLocale } from '../i18n';
 
 const LOCALE_LABELS: Record<Locale, string> = {
   ja: '日本語',
@@ -12,7 +12,7 @@ const LOCALE_LABELS: Record<Locale, string> = {
 };
 
 export function LanguageSwitcher() {
-  const locale = useLocale();
+  const locale = getLocale();
   const pathname = usePathname();
 
   const { pathname: path } = locales.delocalize(pathname);

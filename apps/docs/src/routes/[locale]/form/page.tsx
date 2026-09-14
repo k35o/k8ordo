@@ -11,39 +11,40 @@ import {
 
 import { PackageLanding } from '../../../components/package-landing';
 import type { PackageFeature } from '../../../components/package-landing';
-import { T } from '../../../components/t';
+import { Rich } from '../../../components/rich';
+import * as m from '../../../messages';
 import { demoState } from './_parts/demo-state';
 import { FormDemo } from './_parts/form-demo';
 
 const FEATURES: PackageFeature[] = [
   {
-    title: 'form.featureSchema',
-    description: 'form.featureSchemaDescription',
+    title: m.form.featureSchema,
+    description: m.form.featureSchemaDescription,
     icon: <FormIcon />,
   },
   {
-    title: 'form.featureNoJs',
-    description: 'form.featureNoJsDescription',
+    title: m.form.featureNoJs,
+    description: m.form.featureNoJsDescription,
     icon: <SparklesIcon />,
   },
   {
-    title: 'form.featureDom',
-    description: 'form.featureDomDescription',
+    title: m.form.featureDom,
+    description: m.form.featureDomDescription,
     icon: <AtomIcon />,
   },
   {
-    title: 'form.featureTypes',
-    description: 'form.featureTypesDescription',
+    title: m.form.featureTypes,
+    description: m.form.featureTypesDescription,
     icon: <ShieldCheckIcon />,
   },
   {
-    title: 'form.featureLoud',
-    description: 'form.featureLoudDescription',
+    title: m.form.featureLoud,
+    description: m.form.featureLoudDescription,
     icon: <AccessibilityIcon />,
   },
   {
-    title: 'form.featureSecrets',
-    description: 'form.featureSecretsDescription',
+    title: m.form.featureSecrets,
+    description: m.form.featureSecretsDescription,
     icon: <LockIcon />,
   },
 ];
@@ -56,20 +57,20 @@ const demoFields = formFields(demoState.url);
 export default function FormPage() {
   return (
     <PackageLanding
-      description="form.description"
+      description={m.form.description}
       directory="form"
-      docsDescription="form.docsDescription"
-      docsTitle="form.docsTitle"
+      docsDescription={m.form.docsDescription}
+      docsTitle={m.form.docsTitle}
       features={FEATURES}
-      featuresTitle="form.featuresTitle"
+      featuresTitle={m.form.featuresTitle}
       name="@k8ordo/form"
     >
       <section className="mx-auto w-full max-w-6xl px-6 pb-24 md:px-8">
         <Heading level="h2">
-          <T k="form.demoTitle" />
+          <Rich>{m.form.demoTitle()}</Rich>
         </Heading>
         <p className="text-fg-mute mt-4 max-w-2xl text-sm leading-relaxed">
-          <T k="form.demoDescription" />
+          <Rich>{m.form.demoDescription()}</Rich>
         </p>
         <div className="mt-6 max-w-2xl">
           <FormDemo fields={demoFields} />

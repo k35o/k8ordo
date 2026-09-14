@@ -4,9 +4,10 @@ import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';
 import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
-import { T } from '../../../../../components/t';
+import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
+import * as m from '../../../../../messages';
 
 export default function HeadingPage() {
   return (
@@ -15,14 +16,14 @@ export default function HeadingPage() {
       <div className="flex flex-col gap-4">
         <Heading level="h1">Heading</Heading>
         <p className="text-fg-mute text-lg">
-          <T k="components.heading.description" />
+          <Rich>{m.components.heading.description()}</Rich>
         </p>
         <div>
           <Anchor
             href={`${STORYBOOK_URL}/?path=/docs/components-heading--docs`}
             openInNewTab
           >
-            <T k="components.common.storybookLink" />
+            <Rich>{m.components.common.storybookLink()}</Rich>
           </Anchor>
         </div>
       </div>
@@ -30,7 +31,7 @@ export default function HeadingPage() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.importTitle" />
+          <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
         <CodeBlock code="import { Heading } from '@k8ordo/ui';" lang="ts" />
       </section>
@@ -39,7 +40,7 @@ export default function HeadingPage() {
       <section className="flex flex-col gap-8">
         <div className="flex flex-col gap-4">
           <Heading level="h2">
-            <T k="components.common.usageTitle" />
+            <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
           <ComponentPreview code='<Heading level="h2">Section Title</Heading>'>
             <Heading level="h2">Section Title</Heading>
@@ -48,7 +49,7 @@ export default function HeadingPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.heading.typesTitle" />
+            <Rich>{m.components.heading.typesTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<Heading level="h1">Heading 1</Heading>
@@ -71,7 +72,7 @@ export default function HeadingPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.heading.lineClampTitle" />
+            <Rich>{m.components.heading.lineClampTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<Heading lineClamp={1} level="h3">
@@ -92,7 +93,7 @@ export default function HeadingPage() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.propsTitle" />
+          <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>
         <PropsTable
           inherits={inheritsOf('Heading')}

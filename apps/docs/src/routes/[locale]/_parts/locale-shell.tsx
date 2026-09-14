@@ -1,5 +1,6 @@
 'use client';
 
+import type { Message } from '@k8ordo/i18n';
 import { useMatch, usePathname } from '@k8ordo/router';
 import { UIProvider, Drawer, Heading, IconButton, ListIcon } from '@k8ordo/ui';
 import { en } from '@k8ordo/ui/i18n';
@@ -15,13 +16,14 @@ import { componentCategories } from '../../../data/components-nav';
 import { helperCategories } from '../../../data/helpers-nav';
 import { hookCategories } from '../../../data/hooks-nav';
 import type { NavCategory } from '../../../data/nav-types';
-import { LocaleProvider, locales, useTranslation } from '../../../i18n';
+import { locales } from '../../../i18n';
+import * as m from '../../../messages';
 import { ThemeProvider } from '../../../theme/context';
 import { WritingModeProvider } from '../../../theme/writing-mode-context';
 
 type SideNavConfig = {
   categories: NavCategory[];
-  titleKey: 'nav.components' | 'nav.hooks' | 'nav.helpers' | 'nav.ai';
+  title: Message;
   catalogPath: string;
 };
 
@@ -49,28 +51,28 @@ function useSideNavConfig(): SideNavConfig | null {
   if (components) {
     return {
       categories: componentCategories,
-      titleKey: 'nav.components',
+      title: m.nav.components,
       catalogPath: '/ui/components',
     };
   }
   if (hooks) {
     return {
       categories: hookCategories,
-      titleKey: 'nav.hooks',
+      title: m.nav.hooks,
       catalogPath: '/ui/hooks',
     };
   }
   if (helpers) {
     return {
       categories: helperCategories,
-      titleKey: 'nav.helpers',
+      title: m.nav.helpers,
       catalogPath: '/ui/helpers',
     };
   }
   if (ai) {
     return {
       categories: aiCategories,
-      titleKey: 'nav.ai',
+      title: m.nav.ai,
       catalogPath: '/ui/ai',
     };
   }
@@ -79,7 +81,6 @@ function useSideNavConfig(): SideNavConfig | null {
 
 function LayoutContent({ children }: { children: ReactNode }) {
   const sideNavConfig = useSideNavConfig();
-  const { t } = useTranslation();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   // documentをスクローラーにしたため、サイドバーは sticky で固定する。
   // ヘッダー高さはフォント読込やブレークポイントで変動するので実測して追従させる。
@@ -108,7 +109,7 @@ function LayoutContent({ children }: { children: ReactNode }) {
         <div className="lg:hidden">
           <div className="border-border-mute bg-bg-surface flex items-center border-b px-4 py-2">
             <IconButton
-              label={t('sideNav.openNavigation')}
+              label={m.sideNav.openNavigation()}
               onClick={() => {
                 setIsDrawerOpen(true);
               }}
@@ -142,7 +143,7 @@ function LayoutContent({ children }: { children: ReactNode }) {
         title={
           <Heading level="h3">
             <LocaleAnchor path={sideNavConfig.catalogPath}>
-              {t(sideNavConfig.titleKey)}
+              {sideNavConfig.title()}
             </LocaleAnchor>
           </Heading>
         }
@@ -200,16 +201,14 @@ export function LocaleShell({
   // 遷移後にトップ（または #fragment）へ戻すのはルーターの仕事になったので、
   // ここにスクロールの処理は無い。
   return (
-    <LocaleProvider locale={locale}>
-      <UIProvider messages={locale === 'en' ? en : undefined}>
-        <ThemeProvider>
-          <WritingModeProvider>
-            <div className="flex min-h-dvh flex-col">
-              <LayoutContent>{children}</LayoutContent>
-            </div>
-          </WritingModeProvider>
-        </ThemeProvider>
-      </UIProvider>
-    </LocaleProvider>
+    <UIProvider messages={locale === 'en' ? en : undefined}>
+      <ThemeProvider>
+        <WritingModeProvider>
+          <div className="flex min-h-dvh flex-col">
+            <LayoutContent>{children}</LayoutContent>
+          </div>
+        </WritingModeProvider>
+      </ThemeProvider>
+    </UIProvider>
   );
 }

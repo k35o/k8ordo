@@ -12,7 +12,7 @@ export default defineConfig({
       'src/**/*.ts',
       'src/**/*.tsx',
       '!src/**/*.test.ts',
-      '!src/**/*.browser.test.tsx',
+      '!src/**/*.browser.test.ts',
     ],
     format: 'esm',
     dts: true,
@@ -28,13 +28,14 @@ export default defineConfig({
         test: {
           name: { label: 'unit', color: 'blue' },
           include: ['src/**/*.test.ts'],
+          exclude: ['src/**/*.browser.test.ts'],
         },
       },
       {
         extends: true,
         test: {
           name: { label: 'browser', color: 'green' },
-          include: ['src/**/*.browser.test.tsx'],
+          include: ['src/**/*.browser.test.ts'],
           browser: {
             enabled: true,
             provider: playwright(),

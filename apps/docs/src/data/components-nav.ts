@@ -1,273 +1,274 @@
+import * as m from '../messages';
 import type { NavCategory } from './nav-types';
 
 export const componentCategories: NavCategory[] = [
   {
-    titleKey: 'components.categoryButtons',
+    title: m.components.categoryButtons,
     items: [
       {
         name: 'Button',
         path: '/ui/components/button',
-        descKey: 'components.button.description',
+        description: m.components.button.description,
       },
       {
         name: 'IconButton',
         path: '/ui/components/icon-button',
-        descKey: 'components.iconButton.description',
+        description: m.components.iconButton.description,
       },
     ],
   },
   {
-    titleKey: 'components.categoryNavigation',
+    title: m.components.categoryNavigation,
     items: [
       {
         name: 'Anchor',
         path: '/ui/components/anchor',
-        descKey: 'components.anchor.description',
+        description: m.components.anchor.description,
       },
       {
         name: 'Tabs',
         path: '/ui/components/tabs',
-        descKey: 'components.tabs.description',
+        description: m.components.tabs.description,
       },
       {
         name: 'Breadcrumb',
         path: '/ui/components/breadcrumb',
-        descKey: 'components.breadcrumb.description',
+        description: m.components.breadcrumb.description,
       },
       {
         name: 'Pagination',
         path: '/ui/components/pagination',
-        descKey: 'components.pagination.description',
+        description: m.components.pagination.description,
       },
     ],
   },
   {
-    titleKey: 'components.categoryForms',
+    title: m.components.categoryForms,
     items: [
       {
         name: 'TextField',
         path: '/ui/components/text-field',
-        descKey: 'components.textField.description',
+        description: m.components.textField.description,
       },
       {
         name: 'Textarea',
         path: '/ui/components/textarea',
-        descKey: 'components.textarea.description',
+        description: m.components.textarea.description,
       },
       {
         name: 'NumberField',
         path: '/ui/components/number-field',
-        descKey: 'components.numberField.description',
+        description: m.components.numberField.description,
       },
       {
         name: 'Select',
         path: '/ui/components/select',
-        descKey: 'components.select.description',
+        description: m.components.select.description,
       },
       {
         name: 'Checkbox',
         path: '/ui/components/checkbox',
-        descKey: 'components.checkbox.description',
+        description: m.components.checkbox.description,
       },
       {
         name: 'CheckboxCard',
         path: '/ui/components/checkbox-card',
-        descKey: 'components.checkboxCard.description',
+        description: m.components.checkboxCard.description,
       },
       {
         name: 'CheckboxGroup',
         path: '/ui/components/checkbox-group',
-        descKey: 'components.checkboxGroup.description',
+        description: m.components.checkboxGroup.description,
       },
       {
         name: 'Switch',
         path: '/ui/components/switch',
-        descKey: 'components.switch.description',
+        description: m.components.switchInput.description,
       },
       {
         name: 'PasswordInput',
         path: '/ui/components/password-input',
-        descKey: 'components.passwordInput.description',
+        description: m.components.passwordInput.description,
       },
       {
         name: 'Radio',
         path: '/ui/components/radio',
-        descKey: 'components.radio.description',
+        description: m.components.radio.description,
       },
       {
         name: 'RadioCard',
         path: '/ui/components/radio-card',
-        descKey: 'components.radioCard.description',
+        description: m.components.radioCard.description,
       },
       {
         name: 'Autocomplete',
         path: '/ui/components/autocomplete',
-        descKey: 'components.autocomplete.description',
+        description: m.components.autocomplete.description,
       },
       {
         name: 'Slider',
         path: '/ui/components/slider',
-        descKey: 'components.slider.description',
+        description: m.components.slider.description,
       },
       {
         name: 'FileField',
         path: '/ui/components/file-field',
-        descKey: 'components.fileField.description',
+        description: m.components.fileField.description,
       },
       {
         name: 'FormControl',
         path: '/ui/components/form-control',
-        descKey: 'components.formControl.description',
+        description: m.components.formControl.description,
       },
       {
         name: 'Form',
         path: '/ui/components/form',
-        descKey: 'components.form.description',
+        description: m.components.form.description,
       },
     ],
   },
   {
-    titleKey: 'components.categoryDataDisplay',
+    title: m.components.categoryDataDisplay,
     items: [
       {
         name: 'Accordion',
         path: '/ui/components/accordion',
-        descKey: 'components.accordion.description',
+        description: m.components.accordion.description,
       },
       {
         name: 'Avatar',
         path: '/ui/components/avatar',
-        descKey: 'components.avatar.description',
+        description: m.components.avatar.description,
       },
       {
         name: 'Badge',
         path: '/ui/components/badge',
-        descKey: 'components.badge.description',
+        description: m.components.badge.description,
       },
       {
         name: 'Card',
         path: '/ui/components/card',
-        descKey: 'components.card.description',
+        description: m.components.card.description,
       },
       {
         name: 'Code',
         path: '/ui/components/code',
-        descKey: 'components.code.description',
+        description: m.components.code.description,
       },
       {
         name: 'Table',
         path: '/ui/components/table',
-        descKey: 'components.table.description',
+        description: m.components.table.description,
       },
       {
         name: 'Heading',
         path: '/ui/components/heading',
-        descKey: 'components.heading.description',
+        description: m.components.heading.description,
       },
     ],
   },
   {
-    titleKey: 'components.categoryFeedback',
+    title: m.components.categoryFeedback,
     items: [
       {
         name: 'Alert',
         path: '/ui/components/alert',
-        descKey: 'components.alert.description',
+        description: m.components.alert.description,
       },
       {
         name: 'Skeleton',
         path: '/ui/components/skeleton',
-        descKey: 'components.skeleton.description',
+        description: m.components.skeleton.description,
       },
       {
         name: 'Spinner',
         path: '/ui/components/spinner',
-        descKey: 'components.spinner.description',
+        description: m.components.spinner.description,
       },
       {
         name: 'Toast',
         path: '/ui/components/toast',
-        descKey: 'components.toast.description',
+        description: m.components.toast.description,
       },
       {
         name: 'Progress',
         path: '/ui/components/progress',
-        descKey: 'components.progress.description',
+        description: m.components.progress.description,
       },
     ],
   },
   {
-    titleKey: 'components.categoryOverlays',
+    title: m.components.categoryOverlays,
     items: [
       {
         name: 'Dialog',
         path: '/ui/components/dialog',
-        descKey: 'components.dialog.description',
+        description: m.components.dialog.description,
       },
       {
         name: 'Drawer',
         path: '/ui/components/drawer',
-        descKey: 'components.drawer.description',
+        description: m.components.drawer.description,
       },
       {
         name: 'Modal',
         path: '/ui/components/modal',
-        descKey: 'components.modal.description',
+        description: m.components.modal.description,
       },
       {
         name: 'Popover',
         path: '/ui/components/popover',
-        descKey: 'components.popover.description',
+        description: m.components.popover.description,
       },
       {
         name: 'DropdownMenu',
         path: '/ui/components/dropdown-menu',
-        descKey: 'components.dropdownMenu.description',
+        description: m.components.dropdownMenu.description,
       },
       {
         name: 'Tooltip',
         path: '/ui/components/tooltip',
-        descKey: 'components.tooltip.description',
+        description: m.components.tooltip.description,
       },
       {
         name: 'ListBox',
         path: '/ui/components/list-box',
-        descKey: 'components.listBox.description',
+        description: m.components.listBox.description,
       },
     ],
   },
   {
-    titleKey: 'components.categoryLayout',
+    title: m.components.categoryLayout,
     items: [
       {
         name: 'Stack',
         path: '/ui/components/stack',
-        descKey: 'components.stack.description',
+        description: m.components.stack.description,
       },
       {
         name: 'Grid',
         path: '/ui/components/grid',
-        descKey: 'components.grid.description',
+        description: m.components.grid.description,
       },
       {
         name: 'Separator',
         path: '/ui/components/separator',
-        descKey: 'components.separator.description',
+        description: m.components.separator.description,
       },
       {
         name: 'ScrollLinked',
         path: '/ui/components/scroll-linked',
-        descKey: 'components.scrollLinked.description',
+        description: m.components.scrollLinked.description,
       },
     ],
   },
   {
-    titleKey: 'components.categoryMedia',
+    title: m.components.categoryMedia,
     items: [
       {
         name: 'Icons',
         path: '/ui/components/icons',
-        descKey: 'components.icons.description',
+        description: m.components.icons.description,
       },
     ],
   },

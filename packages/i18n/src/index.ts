@@ -6,17 +6,7 @@ export type {
   Locales,
   LocalesOptions,
 } from './locales';
-export { defineDictionary } from './dictionary';
-export type {
-  Dictionary,
-  Message,
-  MessageKeyOf,
-  Messages,
-  TextKeyOf,
-  Translations,
-  Translator,
-} from './dictionary';
+export { message } from './message';
+export type { Message, Variants } from './message';
+export type { Register, RegisteredLocale } from './register';
 export { parseAcceptLanguage } from './accept-language';
-export { LocaleProvider, useLocale } from './provider';
-export { useTranslation } from './use-translation';
-export type { Translation } from './use-translation';

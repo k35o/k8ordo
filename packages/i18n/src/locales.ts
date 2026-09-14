@@ -1,3 +1,5 @@
+import { inBrowser, localeStorage, register } from './current';
+
 /**
  * The one shape every validation library agrees on (Standard Schema), as far
  * as `@k8ordo/static` / `@k8ordo/server` read it for a route's `paramsSchema`.
@@ -33,14 +35,35 @@ export type Delocalized<L extends string> = {
 };
 
 /**
+ * A message: a function of the values its text needs (none for a plain
+ * string), returning the text in the current locale. What a component that
+ * takes a message as a prop should accept.
+ */
+export type Message<A extends readonly unknown[] = []> = (...args: A) => string;
+
+/** One value per locale — every locale, no locale twice. */
+export type Variants<L extends string, V> = Readonly<Record<L, V>>;
+
+/**
+ * Declares one message with its text in every locale. The result reads the
+ * locale where it is called, so the same call renders on the server and in
+ * the browser, and a bundler keeps only the messages a client module names.
+ */
+export type DefineMessage<L extends string> = {
+  (variants: Variants<L, string>): Message;
+  <A extends readonly unknown[]>(
+    variants: Variants<L, (...args: A) => string>,
+  ): Message<A>;
+};
+
+/**
  * An application's locale set. `L` is the union of its tags, `D` the default
- * among them — kept as its own parameter so a dictionary can name which
- * locale's messages set the shape the others must match.
+ * among them.
  */
 export type Locales<L extends string = string, D extends L = L> = {
   /** Every locale, in the order given; the first is the default unless told otherwise. */
   readonly all: readonly L[];
-  /** The locale used when negotiation finds nothing better. */
+  /** The locale used when negotiation finds nothing better, and when nothing names one. */
   readonly default: D;
   /** Membership, as a type guard — the check `params.locale` and a pathname segment go through. */
   readonly is: (value: unknown) => value is L;
@@ -59,9 +82,24 @@ export type Locales<L extends string = string, D extends L = L> = {
   /**
    * A params schema for a `[locale]` route segment, in the shape
    * `@k8ordo/static` / `@k8ordo/server` run: `export const paramsSchema =
-   * locales.paramsSchema` makes `/fr/…` a pathname the pattern does not answer.
+   * locales.paramsSchema` makes `/fr/…` a pathname the pattern does not
+   * answer. Accepting a locale also makes it the current one for the rest of
+   * that request's render, which is how `getLocale()` knows it on the server.
    */
   readonly paramsSchema: LocaleParamsSchema<L>;
+  /**
+   * The locale of the render in progress. In the browser it is the first
+   * segment of `location.pathname`; on the server it is what `paramsSchema`
+   * accepted for this request, or what `run` set. Neither names one → the
+   * default. Not a hook: call it anywhere, including inside a message.
+   */
+  readonly getLocale: () => L;
+  /**
+   * Runs `fn` with `locale` as the current one for everything it starts —
+   * a test, a Server Action, code outside a `[locale]` route. Server only:
+   * in the browser the URL is the locale.
+   */
+  readonly run: <T>(locale: L, fn: () => T) => T;
 };
 
 export type LocalesOptions<D extends string> = {
@@ -92,11 +130,27 @@ const localize = (pathname: string, locale: string): string => {
   return `/${locale}${rest}`;
 };
 
+/** Server only: the browser has no request, and its URL already is the locale. */
+const run = <T>(locale: string, fn: () => T): T => {
+  if (inBrowser) {
+    throw new Error(
+      'locales.run: in the browser the URL is the locale — navigate instead',
+    );
+  }
+  const storage = localeStorage();
+  if (storage === null) {
+    throw new Error(
+      'locales.run: this runtime has no AsyncLocalStorage to scope a locale to',
+    );
+  }
+  return storage.run(locale, fn);
+};
+
 /**
  * Declares the locale set once. Everything that needs to know which locales
  * exist — the params schema of the `[locale]` segment, the static build's
- * path expansion, the language switcher, negotiation for a `/` redirect —
- * reads this value, so the list is spelled in one place.
+ * path expansion, the language switcher, negotiation for a `/` redirect,
+ * every message — reads this value, so the list is spelled in one place.
  *
  * ```ts
  * export const locales = defineLocales(['ja', 'en']);
@@ -164,6 +218,14 @@ export const defineLocales = <
     return { locale: first, pathname: rest === '' ? '/' : rest };
   };
 
+  const getLocale = (): L => {
+    if (inBrowser) {
+      return delocalize(location.pathname).locale ?? fallback;
+    }
+    const current = localeStorage()?.getStore();
+    return is(current) ? current : fallback;
+  };
+
   const paramsSchema: LocaleParamsSchema<L> = {
     '~standard': {
       version: 1,
@@ -173,19 +235,28 @@ export const defineLocales = <
           typeof value === 'object' && value !== null && 'locale' in value
             ? value.locale
             : undefined;
-        return is(locale)
-          ? { value: { locale } }
-          : {
-              issues: [
-                {
-                  message: `expected one of ${JSON.stringify(list)}, received ${JSON.stringify(locale)}`,
-                  path: ['locale'],
-                },
-              ],
-            };
+        if (!is(locale)) {
+          return {
+            issues: [
+              {
+                message: `expected one of ${JSON.stringify(list)}, received ${JSON.stringify(locale)}`,
+                path: ['locale'],
+              },
+            ],
+          };
+        }
+        // 受理はこのリクエストの描画の始まりでもある。ここから先（RSC の
+        // 描画、その HTML 化、その中で走る client component）はすべてこの
+        // 同期区間から派生する非同期処理なので、enterWith で入れた値が届く。
+        localeStorage()?.enterWith(locale);
+        return { value: { locale } };
       },
     },
   };
+
+  // message() は集合を引数に取らない（取ると宣言がバンドラに副作用と映る）
+  // ので、既定値と membership はここで登録して、そちらから読ませる。
+  register({ default: fallback, is });
 
   return {
     all: list,
@@ -195,5 +266,7 @@ export const defineLocales = <
     localize,
     delocalize,
     paramsSchema,
+    getLocale,
+    run,
   };
 };

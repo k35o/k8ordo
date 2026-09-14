@@ -1,34 +1,39 @@
+import * as m from '../messages';
 import type { NavCategory } from './nav-types';
 
 export const helperCategories: NavCategory[] = [
   {
-    titleKey: 'helpers.categoryStyling',
+    title: m.helpers.categoryStyling,
     items: [
-      { name: 'cn', path: '/ui/helpers/cn', descKey: 'helpers.cn.description' },
+      {
+        name: 'cn',
+        path: '/ui/helpers/cn',
+        description: m.helpers.cn.description,
+      },
     ],
   },
   {
-    titleKey: 'helpers.categoryReact',
+    title: m.helpers.categoryReact,
     items: [
       {
         name: 'mergeRefs',
         path: '/ui/helpers/merge-refs',
-        descKey: 'helpers.mergeRefs.description',
+        description: m.helpers.mergeRefs.description,
       },
       {
         name: 'mergeProps',
         path: '/ui/helpers/merge-props',
-        descKey: 'helpers.mergeProps.description',
+        description: m.helpers.mergeProps.description,
       },
       {
         name: 'chain',
         path: '/ui/helpers/chain',
-        descKey: 'helpers.chain.description',
+        description: m.helpers.chain.description,
       },
       {
         name: 'createSafeContext',
         path: '/ui/helpers/create-safe-context',
-        descKey: 'helpers.createSafeContext.description',
+        description: m.helpers.createSafeContext.description,
       },
     ],
   },

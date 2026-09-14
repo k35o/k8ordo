@@ -4,9 +4,10 @@ import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';
 import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
-import { T } from '../../../../../components/t';
+import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
+import * as m from '../../../../../messages';
 import { RadioControlledPreview } from '../_previews/radio-previews';
 
 const options = [
@@ -22,14 +23,14 @@ export default function RadioPage() {
       <div className="flex flex-col gap-4">
         <Heading level="h1">Radio</Heading>
         <p className="text-fg-mute text-lg">
-          <T k="components.radio.description" />
+          <Rich>{m.components.radio.description()}</Rich>
         </p>
         <div>
           <Anchor
             href={`${STORYBOOK_URL}/?path=/docs/components-form-radio--docs`}
             openInNewTab
           >
-            <T k="components.common.storybookLink" />
+            <Rich>{m.components.common.storybookLink()}</Rich>
           </Anchor>
         </div>
       </div>
@@ -37,7 +38,7 @@ export default function RadioPage() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.importTitle" />
+          <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
         <CodeBlock code="import { Radio } from '@k8ordo/ui';" lang="ts" />
       </section>
@@ -46,7 +47,7 @@ export default function RadioPage() {
       <section className="flex flex-col gap-8">
         <div className="flex flex-col gap-4">
           <Heading level="h2">
-            <T k="components.common.usageTitle" />
+            <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`import { Radio } from '@k8ordo/ui';
@@ -81,7 +82,7 @@ const options = [
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.radio.defaultValueTitle" />
+            <Rich>{m.components.radio.defaultValueTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`const [value, setValue] = useState('react');
@@ -101,7 +102,7 @@ const options = [
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.radio.disabledTitle" />
+            <Rich>{m.components.radio.disabledTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<p id="radio-disabled-label">Framework</p>
@@ -133,7 +134,7 @@ const options = [
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.propsTitle" />
+          <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>
         <PropsTable inherits={inheritsOf('Radio')} items={propsOf('Radio')} />
       </section>

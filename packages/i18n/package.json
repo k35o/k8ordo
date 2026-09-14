@@ -1,7 +1,7 @@
 {
   "name": "@k8ordo/i18n",
   "version": "0.0.0",
-  "description": "The locale axis of an application, owned. One locale set derives the URL segment, negotiation, the params schema, and the static paths; one dictionary derives the keys, the server translator, and the client hook.",
+  "description": "The locale axis of an application, owned. One locale set derives the URL segment, negotiation, the params schema, the static paths, and the current locale on either side of the network; each message is a function that reads it, so a bundler keeps only what a page names.",
   "keywords": [
     "i18n",
     "intl",
@@ -61,14 +61,9 @@
     "vitest-browser-react": "catalog:"
   },
   "peerDependencies": {
-    "@types/react": ">=19.2.18",
-    "react": ">=19.2.6",
     "typescript": ">=7.0.2"
   },
   "peerDependenciesMeta": {
-    "@types/react": {
-      "optional": true
-    },
     "typescript": {
       "optional": true
     }

@@ -4,9 +4,10 @@ import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';
 import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
-import { T } from '../../../../../components/t';
+import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
+import * as m from '../../../../../messages';
 
 function Cell({ children }: { children: string }) {
   return (
@@ -23,14 +24,14 @@ export default function GridPage() {
       <div className="flex flex-col gap-4">
         <Heading level="h1">Grid</Heading>
         <p className="text-fg-mute text-lg">
-          <T k="components.grid.description" />
+          <Rich>{m.components.grid.description()}</Rich>
         </p>
         <div>
           <Anchor
             href={`${STORYBOOK_URL}/?path=/docs/components-grid--docs`}
             openInNewTab
           >
-            <T k="components.common.storybookLink" />
+            <Rich>{m.components.common.storybookLink()}</Rich>
           </Anchor>
         </div>
       </div>
@@ -38,7 +39,7 @@ export default function GridPage() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.importTitle" />
+          <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
         <CodeBlock code="import { Grid } from '@k8ordo/ui';" lang="ts" />
       </section>
@@ -47,7 +48,7 @@ export default function GridPage() {
       <section className="flex flex-col gap-8">
         <div className="flex flex-col gap-4">
           <Heading level="h2">
-            <T k="components.common.usageTitle" />
+            <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<Grid cols={3} gap="md">
@@ -64,7 +65,7 @@ export default function GridPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.grid.colsTitle" />
+            <Rich>{m.components.grid.colsTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<Grid cols={2} gap="sm">…</Grid>
@@ -84,10 +85,10 @@ export default function GridPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.grid.autoFillTitle" />
+            <Rich>{m.components.grid.autoFillTitle()}</Rich>
           </Heading>
           <p className="text-fg-mute text-sm">
-            <T k="components.grid.autoFillDescription" />
+            <Rich>{m.components.grid.autoFillDescription()}</Rich>
           </p>
           <ComponentPreview code='<Grid cols="auto-fill" minItemSize={32} gap="md">…</Grid>'>
             <Grid cols="auto-fill" gap="md" minItemSize={32}>
@@ -102,7 +103,7 @@ export default function GridPage() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.propsTitle" />
+          <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>
         <PropsTable inherits={inheritsOf('Grid')} items={propsOf('Grid')} />
       </section>

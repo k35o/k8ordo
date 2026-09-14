@@ -1,4 +1,12 @@
 import { defineLocales } from './locales';
+import { message } from './message';
+
+declare module './register' {
+  // oxlint-disable-next-line typescript/consistent-type-definitions -- augmentation needs a merge-open interface
+  interface Register {
+    locale: 'ja' | 'en';
+  }
+}
 
 const locales = defineLocales(['ja', 'en']);
 
@@ -104,7 +112,9 @@ describe('localize / delocalize', () => {
 describe('paramsSchema', () => {
   it('accepts a listed locale and refuses anything else, in the Standard Schema shape', () => {
     const { validate } = locales.paramsSchema['~standard'];
-    expect(validate({ locale: 'en' })).toStrictEqual({
+    // 受理は enterWith で現在のロケールを置く。この describe の外に漏れない
+    // よう、run の中で走らせる（run のスコープが終われば元に戻る）。
+    expect(locales.run('ja', () => validate({ locale: 'en' }))).toStrictEqual({
       value: { locale: 'en' },
     });
     expect(validate({ locale: 'fr' })).toMatchObject({
@@ -116,8 +126,83 @@ describe('paramsSchema', () => {
 
   it('strips everything but the locale, so sibling params keep their strings', () => {
     const { validate } = locales.paramsSchema['~standard'];
-    expect(validate({ locale: 'ja', slug: 'x' })).toStrictEqual({
+    expect(
+      locales.run('ja', () => validate({ locale: 'ja', slug: 'x' })),
+    ).toStrictEqual({
       value: { locale: 'ja' },
     });
+  });
+});
+
+describe('message', () => {
+  const nav = {
+    home: message({ ja: 'ホーム', en: 'Home' }),
+    greeting: message({
+      ja: (name: string) => `こんにちは、${name}`,
+      en: (name) => `Hello, ${name}`,
+    }),
+  };
+
+  it('renders in the current locale, which is the default when nothing names one', () => {
+    expect(nav.home()).toBe('ホーム');
+    expect(nav.greeting('k8o')).toBe('こんにちは、k8o');
+    expectTypeOf(nav.home).toEqualTypeOf<() => string>();
+    expectTypeOf(nav.greeting).toEqualTypeOf<(name: string) => string>();
+  });
+
+  it('types the arguments from the annotated variant and holds the others to them', () => {
+    expectTypeOf(nav.greeting).parameters.toEqualTypeOf<[name: string]>();
+    // @ts-expect-error -- a plain message takes no arguments
+    nav.home('x');
+    // @ts-expect-error -- the argument is a string
+    nav.greeting(1);
+    message({
+      // @ts-expect-error -- every locale takes the same arguments
+      ja: (count: number) => `${String(count)} 件`,
+      en: (count: string) => `${count} items`,
+    });
+  });
+
+  it('refuses a message that lacks a locale where it is read, not where it is declared', () => {
+    // 宣言時に throw すると、バンドラが宣言を副作用と見なして使われない文言を
+    // 落とせなくなる。だから欠けは描画の瞬間に言う。
+    // @ts-expect-error -- every locale needs a text
+    const partial = message({ ja: 'x' });
+    expect(locales.run('ja', () => partial())).toBe('x');
+    expect(() => locales.run('en', () => partial())).toThrow(
+      /no text for "en"/u,
+    );
+  });
+});
+
+describe('getLocale / run (server)', () => {
+  it('reads what paramsSchema accepted for the rest of that request, and what run set', async () => {
+    expect(locales.getLocale()).toBe('ja');
+    const rendered = await locales.run('en', async () => {
+      await Promise.resolve();
+      return locales.getLocale();
+    });
+    expect(rendered).toBe('en');
+    const viaSchema = await locales.run('ja', async () => {
+      locales.paramsSchema['~standard'].validate({ locale: 'en' });
+      await Promise.resolve();
+      return locales.getLocale();
+    });
+    expect(viaSchema).toBe('en');
+    expect(locales.getLocale()).toBe('ja');
+  });
+
+  it('keeps concurrent renders apart', async () => {
+    const seen = await Promise.all(
+      (['en', 'ja', 'en'] as const).map((locale) =>
+        locales.run(locale, async () => {
+          await new Promise<void>((resolve) => {
+            setTimeout(resolve, 1);
+          });
+          return locales.getLocale();
+        }),
+      ),
+    );
+    expect(seen).toStrictEqual(['en', 'ja', 'en']);
   });
 });

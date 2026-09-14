@@ -3,9 +3,10 @@ import { Anchor, Heading, Separator } from '@k8ordo/ui';
 import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';
 import { PropsTable } from '../../../../../components/props-table';
-import { T } from '../../../../../components/t';
+import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { propsOf } from '../../../../../data/component-props';
+import * as m from '../../../../../messages';
 import {
   BreadcrumbBasicPreview,
   BreadcrumbCurrentPagePreview,
@@ -18,14 +19,14 @@ export default function BreadcrumbPage() {
       <div className="flex flex-col gap-4">
         <Heading level="h1">Breadcrumb</Heading>
         <p className="text-fg-mute text-lg">
-          <T k="components.breadcrumb.description" />
+          <Rich>{m.components.breadcrumb.description()}</Rich>
         </p>
         <div>
           <Anchor
             href={`${STORYBOOK_URL}/?path=/docs/components-breadcrumb--docs`}
             openInNewTab
           >
-            <T k="components.common.storybookLink" />
+            <Rich>{m.components.common.storybookLink()}</Rich>
           </Anchor>
         </div>
       </div>
@@ -33,7 +34,7 @@ export default function BreadcrumbPage() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.importTitle" />
+          <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
         <CodeBlock code="import { Breadcrumb } from '@k8ordo/ui';" lang="ts" />
       </section>
@@ -42,7 +43,7 @@ export default function BreadcrumbPage() {
       <section className="flex flex-col gap-8">
         <div className="flex flex-col gap-4">
           <Heading level="h2">
-            <T k="components.common.usageTitle" />
+            <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<Breadcrumb.List>
@@ -67,7 +68,7 @@ export default function BreadcrumbPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.breadcrumb.currentPageTitle" />
+            <Rich>{m.components.breadcrumb.currentPageTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<Breadcrumb.List>
@@ -92,7 +93,7 @@ export default function BreadcrumbPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.breadcrumb.sizesTitle" />
+            <Rich>{m.components.breadcrumb.sizesTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<Breadcrumb.List size="sm">
@@ -133,7 +134,7 @@ export default function BreadcrumbPage() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.propsTitle" />
+          <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>
         <Heading level="h3">Breadcrumb.List</Heading>
         <PropsTable items={propsOf('Breadcrumb.List')} />

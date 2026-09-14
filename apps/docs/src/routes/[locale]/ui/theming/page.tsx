@@ -2,8 +2,9 @@ import { Card, Heading, Separator } from '@k8ordo/ui';
 
 import { CodeBlock } from '../../../../components/code-block';
 import { PageTitle } from '../../../../components/page-title';
-import { T } from '../../../../components/t';
+import { Rich } from '../../../../components/rich';
 import { TokenCard } from '../../../../components/token-card';
+import * as m from '../../../../messages';
 import {
   BG_TOKENS,
   BORDER_TOKENS,
@@ -34,23 +35,23 @@ const Z_INDEX_USAGE = {
 export default function Theming() {
   return (
     <div className="mx-auto flex max-w-4xl flex-col gap-8 px-6 py-12 md:px-8">
-      <PageTitle k="nav.theming" />
+      <PageTitle title={m.nav.theming} />
       <div className="flex flex-col gap-4">
         <Heading level="h1">
-          <T k="nav.theming" />
+          <Rich>{m.nav.theming()}</Rich>
         </Heading>
         <p className="text-fg-mute text-lg">
-          <T k="theming.introduction" />
+          <Rich>{m.theming.introduction()}</Rich>
         </p>
       </div>
       <Separator color="mute" />
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="theming.colorPaletteTitle" />
+          <Rich>{m.theming.colorPaletteTitle()}</Rich>
         </Heading>
         <p className="text-fg-mute">
-          <T k="theming.colorPaletteDescription" />
+          <Rich>{m.theming.colorPaletteDescription()}</Rich>
         </p>
         <div className="flex flex-col gap-4">
           {PALETTE.map((family) => (
@@ -80,16 +81,16 @@ export default function Theming() {
       <section className="flex flex-col gap-6">
         <div className="flex flex-col gap-4">
           <Heading level="h2">
-            <T k="theming.semanticColorsTitle" />
+            <Rich>{m.theming.semanticColorsTitle()}</Rich>
           </Heading>
           <p className="text-fg-mute">
-            <T k="theming.semanticColorsDescription" />
+            <Rich>{m.theming.semanticColorsDescription()}</Rich>
           </p>
         </div>
 
         <div className="flex flex-col gap-3">
           <Heading level="h3">
-            <T k="theming.foregroundTitle" />
+            <Rich>{m.theming.foregroundTitle()}</Rich>
           </Heading>
           <div className="grid gap-2 sm:grid-cols-2">
             {FG_TOKENS.map((token) => (
@@ -100,7 +101,7 @@ export default function Theming() {
 
         <div className="flex flex-col gap-3">
           <Heading level="h3">
-            <T k="theming.backgroundTitle" />
+            <Rich>{m.theming.backgroundTitle()}</Rich>
           </Heading>
           <div className="grid gap-2 sm:grid-cols-2">
             {BG_TOKENS.map((token) => (
@@ -111,7 +112,7 @@ export default function Theming() {
 
         <div className="flex flex-col gap-3">
           <Heading level="h3">
-            <T k="theming.borderTitle" />
+            <Rich>{m.theming.borderTitle()}</Rich>
           </Heading>
           <div className="grid gap-2 sm:grid-cols-2">
             {BORDER_TOKENS.map((token) => (
@@ -125,10 +126,10 @@ export default function Theming() {
       <section className="flex flex-col gap-6">
         <div className="flex flex-col gap-4">
           <Heading level="h2">
-            <T k="theming.brandColorsTitle" />
+            <Rich>{m.theming.brandColorsTitle()}</Rich>
           </Heading>
           <p className="text-fg-mute">
-            <T k="theming.brandColorsDescription" />
+            <Rich>{m.theming.brandColorsDescription()}</Rich>
           </p>
         </div>
 
@@ -172,16 +173,16 @@ export default function Theming() {
       <section className="flex flex-col gap-6">
         <div className="flex flex-col gap-4">
           <Heading level="h2">
-            <T k="theming.typographyTitle" />
+            <Rich>{m.theming.typographyTitle()}</Rich>
           </Heading>
           <p className="text-fg-mute">
-            <T k="theming.typographyDescription" />
+            <Rich>{m.theming.typographyDescription()}</Rich>
           </p>
         </div>
 
         <div className="flex flex-col gap-3">
           <Heading level="h3">
-            <T k="theming.textSizesTitle" />
+            <Rich>{m.theming.textSizesTitle()}</Rich>
           </Heading>
           <Card>
             <div className="flex flex-col gap-3 p-4">
@@ -212,7 +213,7 @@ export default function Theming() {
 
         <div className="flex flex-col gap-3">
           <Heading level="h3">
-            <T k="theming.fontWeightsTitle" />
+            <Rich>{m.theming.fontWeightsTitle()}</Rich>
           </Heading>
           <Card>
             <div className="flex flex-col gap-3 p-4">
@@ -238,7 +239,7 @@ export default function Theming() {
 
         <div className="flex flex-col gap-3">
           <Heading level="h3">
-            <T k="theming.letterSpacingTitle" />
+            <Rich>{m.theming.letterSpacingTitle()}</Rich>
           </Heading>
           <Card>
             <div className="flex flex-col gap-3 p-4">
@@ -261,7 +262,7 @@ export default function Theming() {
 
         <div className="flex flex-col gap-3">
           <Heading level="h3">
-            <T k="theming.lineHeightTitle" />
+            <Rich>{m.theming.lineHeightTitle()}</Rich>
           </Heading>
           <Card>
             <div className="flex flex-col gap-3 p-4">
@@ -290,10 +291,10 @@ export default function Theming() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="theming.borderRadiusTitle" />
+          <Rich>{m.theming.borderRadiusTitle()}</Rich>
         </Heading>
         <p className="text-fg-mute">
-          <T k="theming.borderRadiusDescription" />
+          <Rich>{m.theming.borderRadiusDescription()}</Rich>
         </p>
         <div className="grid grid-cols-3 gap-4 sm:grid-cols-5 sm:gap-6">
           {RADII.map((radius) => (
@@ -314,10 +315,10 @@ export default function Theming() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="theming.shadowTitle" />
+          <Rich>{m.theming.shadowTitle()}</Rich>
         </Heading>
         <p className="text-fg-mute">
-          <T k="theming.shadowDescription" />
+          <Rich>{m.theming.shadowDescription()}</Rich>
         </p>
         <div className="grid gap-4 sm:grid-cols-2">
           {SHADOWS.map((shadow) => (
@@ -338,10 +339,10 @@ export default function Theming() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="theming.spacingTitle" />
+          <Rich>{m.theming.spacingTitle()}</Rich>
         </Heading>
         <p className="text-fg-mute">
-          <T k="theming.spacingDescription" />
+          <Rich>{m.theming.spacingDescription()}</Rich>
         </p>
         <Card>
           <div className="flex flex-col gap-2 p-4">
@@ -366,10 +367,10 @@ export default function Theming() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="theming.breakpointsTitle" />
+          <Rich>{m.theming.breakpointsTitle()}</Rich>
         </Heading>
         <p className="text-fg-mute">
-          <T k="theming.breakpointsDescription" />
+          <Rich>{m.theming.breakpointsDescription()}</Rich>
         </p>
         <Card>
           <div className="flex flex-col gap-2 p-4">
@@ -390,10 +391,10 @@ export default function Theming() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="theming.zIndexTitle" />
+          <Rich>{m.theming.zIndexTitle()}</Rich>
         </Heading>
         <p className="text-fg-mute">
-          <T k="theming.zIndexDescription" />
+          <Rich>{m.theming.zIndexDescription()}</Rich>
         </p>
         <Card>
           <div className="flex flex-col gap-2 p-4">
@@ -417,10 +418,10 @@ export default function Theming() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="theming.darkModeTitle" />
+          <Rich>{m.theming.darkModeTitle()}</Rich>
         </Heading>
         <p className="text-fg-mute">
-          <T k="theming.darkModeDescription" />
+          <Rich>{m.theming.darkModeDescription()}</Rich>
         </p>
         <CodeBlock
           code={`// Enable dark mode
@@ -435,10 +436,10 @@ document.documentElement.classList.remove('dark');`}
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="theming.customizeTitle" />
+          <Rich>{m.theming.customizeTitle()}</Rich>
         </Heading>
         <p className="text-fg-mute">
-          <T k="theming.customizeDescription" />
+          <Rich>{m.theming.customizeDescription()}</Rich>
         </p>
         <CodeBlock
           code={`/* app.css — import after the k8ordo UI stylesheet */
@@ -462,7 +463,7 @@ document.documentElement.classList.remove('dark');`}
           lang="css"
         />
         <p className="text-fg-mute">
-          <T k="theming.customizeValueDescription" />
+          <Rich>{m.theming.customizeValueDescription()}</Rich>
         </p>
         <CodeBlock
           code={`:root {

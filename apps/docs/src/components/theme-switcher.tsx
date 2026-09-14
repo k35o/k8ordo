@@ -2,19 +2,18 @@
 
 import { DarkModeIcon, IconButton, LightModeIcon } from '@k8ordo/ui';
 
-import { useTranslation } from '../i18n';
+import * as m from '../messages';
 import { useTheme } from '../theme/context';
 
 export function ThemeSwitcher() {
   const { theme, toggleTheme } = useTheme();
-  const { t } = useTranslation();
 
   return (
     <IconButton
       label={
         theme === 'light'
-          ? t('common.switchToDarkMode')
-          : t('common.switchToLightMode')
+          ? m.common.switchToDarkMode()
+          : m.common.switchToLightMode()
       }
       onClick={toggleTheme}
     >

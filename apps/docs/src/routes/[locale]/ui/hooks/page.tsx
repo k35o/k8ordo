@@ -4,20 +4,18 @@ import { Heading } from '@k8ordo/ui';
 
 import { CatalogSections } from '../../../../components/catalog-sections';
 import { PageTitle } from '../../../../components/page-title';
-import { T } from '../../../../components/t';
+import { Rich } from '../../../../components/rich';
 import { hookCategories } from '../../../../data/hooks-nav';
-import { useTranslation } from '../../../../i18n';
+import * as m from '../../../../messages';
 
 export default function HooksPage() {
-  const { t } = useTranslation();
-
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-12 px-6 py-16 md:px-8">
-      <PageTitle k="nav.hooks" />
+      <PageTitle title={m.nav.hooks} />
       <header className="flex flex-col gap-4">
-        <Heading level="h1">{t('nav.hooks')}</Heading>
+        <Heading level="h1">{m.nav.hooks()}</Heading>
         <p className="text-fg-mute max-w-2xl text-lg leading-relaxed">
-          <T k="hooks.description" />
+          <Rich>{m.hooks.description()}</Rich>
         </p>
       </header>
       <CatalogSections categories={hookCategories} />

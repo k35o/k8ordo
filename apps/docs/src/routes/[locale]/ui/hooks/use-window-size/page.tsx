@@ -5,7 +5,8 @@ import { ComponentPreview } from '../../../../../components/component-preview';
 import { PageTitle } from '../../../../../components/page-title';
 import type { PropItem } from '../../../../../components/props-table';
 import { PropsTable } from '../../../../../components/props-table';
-import { T } from '../../../../../components/t';
+import { Rich } from '../../../../../components/rich';
+import * as m from '../../../../../messages';
 import { UseWindowSizePreview } from '../_previews/use-window-size-previews';
 
 const returnValue: PropItem[] = [
@@ -28,14 +29,14 @@ export default function UseWindowSizePage() {
       <div className="flex flex-col gap-4">
         <Heading level="h1">useWindowSize</Heading>
         <p className="text-fg-mute text-lg">
-          <T k="hooks.useWindowSize.description" />
+          <Rich>{m.hooks.windowSize.description()}</Rich>
         </p>
       </div>
       <Separator color="mute" />
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="hooks.common.importTitle" />
+          <Rich>{m.hooks.common.importTitle()}</Rich>
         </Heading>
         <CodeBlock
           code="import { useWindowSize } from '@k8ordo/ui';"
@@ -46,11 +47,11 @@ export default function UseWindowSizePage() {
 
       <section className="flex flex-col gap-8">
         <Heading level="h2">
-          <T k="hooks.common.usageTitle" />
+          <Rich>{m.hooks.common.usageTitle()}</Rich>
         </Heading>
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="hooks.common.basicUsageTitle" />
+            <Rich>{m.hooks.common.basicUsageTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`const { width, height } = useWindowSize();
@@ -70,7 +71,7 @@ return (
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="hooks.common.returnValueTitle" />
+          <Rich>{m.hooks.common.returnValueTitle()}</Rich>
         </Heading>
         <PropsTable items={returnValue} />
       </section>

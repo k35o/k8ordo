@@ -4,9 +4,10 @@ import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';
 import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
-import { T } from '../../../../../components/t';
+import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
+import * as m from '../../../../../messages';
 
 export default function NumberFieldPage() {
   return (
@@ -15,14 +16,14 @@ export default function NumberFieldPage() {
       <div className="flex flex-col gap-4">
         <Heading level="h1">NumberField</Heading>
         <p className="text-fg-mute text-lg">
-          <T k="components.numberField.description" />
+          <Rich>{m.components.numberField.description()}</Rich>
         </p>
         <div>
           <Anchor
             href={`${STORYBOOK_URL}/?path=/docs/components-form-number-field--docs`}
             openInNewTab
           >
-            <T k="components.common.storybookLink" />
+            <Rich>{m.components.common.storybookLink()}</Rich>
           </Anchor>
         </div>
       </div>
@@ -30,7 +31,7 @@ export default function NumberFieldPage() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.importTitle" />
+          <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
         <CodeBlock code="import { NumberField } from '@k8ordo/ui';" lang="ts" />
       </section>
@@ -39,7 +40,7 @@ export default function NumberFieldPage() {
       <section className="flex flex-col gap-8">
         <div className="flex flex-col gap-4">
           <Heading level="h2">
-            <T k="components.common.usageTitle" />
+            <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<NumberField
@@ -54,7 +55,7 @@ export default function NumberFieldPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.numberField.stepPrecisionTitle" />
+            <Rich>{m.components.numberField.stepPrecisionTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<NumberField
@@ -77,7 +78,7 @@ export default function NumberFieldPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.numberField.minMaxTitle" />
+            <Rich>{m.components.numberField.minMaxTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<NumberField
@@ -102,7 +103,7 @@ export default function NumberFieldPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.numberField.disabledTitle" />
+            <Rich>{m.components.numberField.disabledTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<NumberField
@@ -117,7 +118,7 @@ export default function NumberFieldPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.numberField.invalidTitle" />
+            <Rich>{m.components.numberField.invalidTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<NumberField
@@ -134,7 +135,7 @@ export default function NumberFieldPage() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.propsTitle" />
+          <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>
         <PropsTable
           inherits={inheritsOf('NumberField')}

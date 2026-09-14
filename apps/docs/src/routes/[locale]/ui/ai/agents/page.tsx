@@ -1,50 +1,51 @@
+import type { Message } from '@k8ordo/i18n';
 import { Anchor, Code, Heading, Separator } from '@k8ordo/ui';
 import type { FC } from 'react';
 
 import { CodeBlock } from '../../../../../components/code-block';
 import { PageTitle } from '../../../../../components/page-title';
-import { T } from '../../../../../components/t';
+import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
-import type { MessageKey } from '../../../../../i18n';
+import * as m from '../../../../../messages';
 
 const MCP_URL = `${STORYBOOK_URL}/mcp`;
 
 const SURFACES: Array<{
   path: string;
   href: string;
-  descKey: MessageKey;
+  description: Message;
 }> = [
   {
     path: 'docs/GUIDE.md',
     href: '/docs/GUIDE.md',
-    descKey: 'aiAgents.surfaceGuide',
+    description: m.aiAgents.surfaceGuide,
   },
   {
     path: 'docs/references/*.md',
     href: '/docs/references/components.md',
-    descKey: 'aiAgents.surfaceReference',
+    description: m.aiAgents.surfaceReference,
   },
   {
     path: 'llms.txt',
     href: '/llms.txt',
-    descKey: 'aiAgents.surfaceIndex',
+    description: m.aiAgents.surfaceIndex,
   },
   {
     path: 'design.md',
     href: '/design.md',
-    descKey: 'aiAgents.surfaceTokens',
+    description: m.aiAgents.surfaceTokens,
   },
   {
     path: '@k8ordo/ui/props.json',
     href: '/docs/references/components.md',
-    descKey: 'aiAgents.surfaceProps',
+    description: m.aiAgents.surfaceProps,
   },
 ];
 
-const Surface: FC<{ path: string; href: string; descKey: MessageKey }> = ({
+const Surface: FC<{ path: string; href: string; description: Message }> = ({
   path,
   href,
-  descKey,
+  description,
 }) => (
   <div className="border-border-mute flex flex-col gap-1 border-b pb-4">
     <dt>
@@ -53,7 +54,7 @@ const Surface: FC<{ path: string; href: string; descKey: MessageKey }> = ({
       </Anchor>
     </dt>
     <dd className="text-fg-mute text-sm">
-      <T k={descKey} />
+      <Rich>{description()}</Rich>
     </dd>
   </div>
 );
@@ -61,23 +62,23 @@ const Surface: FC<{ path: string; href: string; descKey: MessageKey }> = ({
 export default function AiAgents() {
   return (
     <div className="mx-auto flex max-w-4xl flex-col gap-8 px-6 py-12 md:px-8">
-      <PageTitle k="nav.aiAgents" />
+      <PageTitle title={m.nav.aiAgents} />
       <div className="flex flex-col gap-4">
         <Heading level="h1">
-          <T k="nav.aiAgents" />
+          <Rich>{m.nav.aiAgents()}</Rich>
         </Heading>
         <p className="text-fg-mute text-lg">
-          <T k="aiAgents.introduction" />
+          <Rich>{m.aiAgents.introduction()}</Rich>
         </p>
       </div>
       <Separator color="mute" />
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="aiAgents.setupTitle" />
+          <Rich>{m.aiAgents.setupTitle()}</Rich>
         </Heading>
         <p className="text-fg-mute">
-          <T k="aiAgents.setupDescription" />
+          <Rich>{m.aiAgents.setupDescription()}</Rich>
         </p>
         <CodeBlock
           code={`Use \`@k8ordo/ui\` for UI. Before writing or changing UI, read
@@ -94,10 +95,10 @@ recalling them; a component that is not listed there does not exist.`}
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="aiAgents.surfacesTitle" />
+          <Rich>{m.aiAgents.surfacesTitle()}</Rich>
         </Heading>
         <p className="text-fg-mute">
-          <T k="aiAgents.surfacesDescription" />
+          <Rich>{m.aiAgents.surfacesDescription()}</Rich>
         </p>
         <dl className="flex flex-col gap-4">
           {SURFACES.map((surface) => (
@@ -110,7 +111,7 @@ recalling them; a component that is not listed there does not exist.`}
               </Anchor>
             </dt>
             <dd className="text-fg-mute text-sm">
-              <T k="aiAgents.surfaceMcp" />
+              <Rich>{m.aiAgents.surfaceMcp()}</Rich>
             </dd>
           </div>
         </dl>
@@ -119,10 +120,10 @@ recalling them; a component that is not listed there does not exist.`}
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="aiAgents.mcpTitle" />
+          <Rich>{m.aiAgents.mcpTitle()}</Rich>
         </Heading>
         <p className="text-fg-mute">
-          <T k="aiAgents.mcpDescription" />
+          <Rich>{m.aiAgents.mcpDescription()}</Rich>
         </p>
         <CodeBlock
           code={`{
@@ -140,10 +141,10 @@ recalling them; a component that is not listed there does not exist.`}
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="aiAgents.generatedTitle" />
+          <Rich>{m.aiAgents.generatedTitle()}</Rich>
         </Heading>
         <p className="text-fg-mute">
-          <T k="aiAgents.generatedDescription" />
+          <Rich>{m.aiAgents.generatedDescription()}</Rich>
         </p>
       </section>
     </div>

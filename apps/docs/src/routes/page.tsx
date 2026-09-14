@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 
-import { locales } from '../i18n/locales';
+import { locales } from '../i18n';
 
 /**
  * `/` はロケールを持たない唯一の URL で、訪問者の言語に振り分けるためだけに

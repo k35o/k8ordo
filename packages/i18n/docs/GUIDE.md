@@ -1,320 +1,296 @@
 # @k8ordo/i18n
 
-The locale axis of an application, owned. One locale set says which locales
-exist and which is the default, and from it come the URL segment, the params
-schema, negotiation, and the static build's path list. One dictionary holds
-the messages, and from it come the keys, the server-side translator, and the
-client hook — typed by the default locale's messages, so a key that is not
-translated does not compile.
+The locale axis of an application, owned.
 
-Like every k8ordo package it assumes React 19 and Server Components, uses only
-what has reached Baseline newly available, and ships no polyfills or legacy
-fallbacks. `Intl.Locale`, `Intl.PluralRules`, and the rest of `Intl` are
-treated as simply present, which is why this package brings no formatting
-grammar of its own.
+One locale set declares which locales exist and which is the default, and
+derives everything that depends on the list: the URL segment, the params
+schema of the `[locale]` route, negotiation from `navigator.languages` or
+`Accept-Language`, and the static build's path list. Each message is a
+function — `message({ ja: 'ホーム', en: 'Home' })` — that reads the locale
+where it is called. On the server that is the request the `[locale]` schema
+accepted; in the browser it is the URL. So the same call renders in a Server
+Component and in a Client Component, there is no provider and no hook, and a
+bundler keeps only the messages a client module names.
+
+Like every k8ordo package it assumes React 19 and Server Components, uses
+only what has reached Baseline newly available, and ships no polyfills or
+legacy fallbacks.
 
 ## What it does not own
 
-The pathname belongs to `@k8ordo/router`. This package owns one segment of it
-— how a locale is spelled in a URL, and how to take it back off — and nothing
-past that: no route table, no link builder. With `@k8ordo/router` a locale is
-a route parameter (`/:locale/products`), and `href('/:locale/products', {
-locale })` is the typed link; `localize` / `delocalize` exist for the paths
-that are data rather than patterns (a navigation menu, a language switcher).
-
-It does not own message formatting either. A message is a string, or a
-function of the values the text needs — TypeScript's own template literal is
-the interpolation, and `Intl.PluralRules` / `Intl.NumberFormat` /
-`Intl.DateTimeFormat` are the plural and format rules. An ICU-style message
-grammar would be a second language inside the first, checked by nothing.
-
-It does not load messages lazily. The dictionary is a module; every locale in
-it ships wherever the module is imported. An application that needs one locale
-per bundle splits at the module level, and nothing here stands in the way.
+- **The pathname.** `@k8ordo/router` owns routes; this package owns the
+  locale segment in front of them and nothing after it.
+- **A message grammar.** No placeholder syntax, no ICU. A message with
+  values is a function of those values: interpolation is a template
+  literal, plurals are `Intl.PluralRules`, dates and numbers are `Intl`.
+  TypeScript checks the arguments because they are arguments.
+- **Loading.** Messages are ordinary exports. Which ones reach the browser is
+  decided by the bundler from what each client module imports, not by a
+  loader, a namespace list, or a provider prop.
 
 ## The shape of it
 
-```
-i18n/locales.ts    defineLocales(['ja', 'en'])         the set, imported by everything
-i18n/ja.ts         the default locale's messages        sets the shape
-i18n/en.ts         Translations<typeof ja>              must match it
-i18n/index.ts      defineDictionary(locales, { ja, en })
-
-server    params.locale  →  dictionary.translator(locale)  →  t
-            ↓ <LocaleProvider locale={params.locale}>      a string crosses
-client    useTranslation(dictionary)  →  { t, locale }     the module is imported
-```
-
-The provider carries a **string**. A Server Component layout renders it with
-`params.locale` directly, and nothing that cannot cross the RSC boundary — the
-locale set, the dictionary, a function message — is ever asked to. The client
-component that needs the messages imports the dictionary itself.
-
-## The locale set
-
 ```ts
-// i18n/locales.ts
+// i18n.ts — the one place the list is spelled
 import { defineLocales } from '@k8ordo/i18n';
+import type { LocaleOf } from '@k8ordo/i18n';
 
 export const locales = defineLocales(['ja', 'en']);
-export type Locale = LocaleOf<typeof locales>; // 'ja' | 'en'
-```
 
-The first entry is the default; `defineLocales(['en-US', 'ja'], { default:
-'ja' })` says otherwise. Every entry must be a BCP 47 tag (`Intl.Locale` is
-the judge), listed once, and the default must be one of them — each is refused
-where the set is defined, not where it is first used.
-
-| member         | what it is                                                               |
-| -------------- | ------------------------------------------------------------------------ |
-| `all`          | the locales, in the order given                                          |
-| `default`      | the fallback for everything that finds no better answer                  |
-| `is(value)`    | membership as a type guard — the check for `params.locale` and a segment |
-| `negotiate()`  | the best supported locale for a preference list                          |
-| `localize()`   | `('/ui', 'en')` → `'/en/ui'`; `('/', 'en')` → `'/en'`                    |
-| `delocalize()` | `('/en/ui')` → `{ locale: 'en', pathname: '/ui' }`; no segment → `null`  |
-| `paramsSchema` | the `[locale]` segment's params schema, in the shape the framework runs  |
-
-`delocalize` answers `locale: null` for a pathname whose first segment is not
-a locale, rather than guessing the default: the 404 page and the root layout
-decide what to do with a URL that has none, and they should decide it
-visibly.
-
-### Negotiation
-
-```ts
-locales.negotiate(navigator.languages); // browser
-locales.negotiate(parseAcceptLanguage(request.headers.get('accept-language'))); // server
-```
-
-Each requested tag is tried in order — the exact tag first, then the first
-supported locale that speaks its language — and when nothing matches, the
-default. So with `['ja', 'en']` supported, a browser asking for `en-US` gets
-`en`, one asking for `fr, en-AU, ja` gets `en` (its second choice is spoken;
-its third would have been exact), and one asking for `de` gets `ja`. Tags are
-matched case-insensitively, and a tag that is not BCP 47 is skipped, not
-thrown on: the list is user input. `parseAcceptLanguage` turns a header into
-that list — `q` weights ordered, ties in header order, `q=0` and `*` dropped.
-
-## The dictionary
-
-```ts
-// i18n/ja.ts — the default locale sets the shape
-export const ja = {
-  'nav.home': 'ホーム',
-  greeting: (name: string) => `こんにちは、${name}`,
-  items: (count: number) => `${new Intl.NumberFormat('ja').format(count)} 件`,
-};
-```
-
-```ts
-// i18n/en.ts — every other locale is held to it
-import type { Translations } from '@k8ordo/i18n';
-import type { ja } from './ja';
-
-export const en: Translations<typeof ja> = {
-  'nav.home': 'Home',
-  greeting: (name) => `Hello, ${name}`,
-  items: (count) =>
-    `${new Intl.NumberFormat('en').format(count)} ${new Intl.PluralRules('en').select(count) === 'one' ? 'item' : 'items'}`,
-};
-```
-
-```ts
-// i18n/index.ts
-import { defineDictionary } from '@k8ordo/i18n';
-import { en } from './en';
-import { ja } from './ja';
-import { locales } from './locales';
-
-export const dictionary = defineDictionary(locales, { ja, en });
-export type MessageKey = MessageKeyOf<typeof dictionary>;
-```
-
-`Translations<typeof ja>` is the whole contract: the same keys, a string where
-the default has a string, a function of the same parameters where the default
-has a function. Add a key to `ja` and `en` fails to compile until it carries
-it; give `greeting` a second parameter and every translation must take it too.
-`defineDictionary` checks the same thing again at runtime, for a dictionary
-that reached it through JavaScript or a cast, and refuses to be defined rather
-than answering `undefined` later.
-
-The dictionary knows its locales, so a message file that needs the locale — a
-`NumberFormat`, a `PluralRules` — writes it in, as `ja.ts` and `en.ts` do
-above. A function message is ordinary TypeScript: it can call anything, and
-the caller's arguments are typed by it.
-
-## Server — the translator
-
-```tsx
-// routes/[locale]/products/page.tsx — Server Component
-import { dictionary } from '../../../i18n';
-import { locales } from '../../../i18n/locales';
-
-export const paramsSchema = locales.paramsSchema;
-
-export default function Products({ params }: PageProps<'/:locale/products'>) {
-  const t = dictionary.translator(params.locale);
-  return <h1>{t('nav.home')}</h1>;
+declare module '@k8ordo/i18n' {
+  interface Register {
+    locale: LocaleOf<typeof locales>;
+  }
 }
 ```
 
-`translator(locale)` is `t` for one locale — a key, plus the arguments its
-message takes, none for a plain string. The same locale returns the same
-function, so it is safe to compare and to pass to `useMemo`. A locale outside
-the set throws, which a page under `paramsSchema` never sees: the schema has
-already turned `/fr/products` into a pathname the pattern does not answer.
-
-## Client — the provider and the hook
-
-```tsx
-// routes/[locale]/layout.tsx — Server Component
-import { LocaleProvider } from '@k8ordo/i18n';
-import { locales } from '../../i18n/locales';
-
-export const paramsSchema = locales.paramsSchema;
-
-export default function LocaleLayout({ params, children }: LayoutProps) {
-  return <LocaleProvider locale={params.locale}>{children}</LocaleProvider>;
-}
-```
-
-```tsx
-// components/greeting.tsx
-'use client';
-import { useTranslation } from '@k8ordo/i18n';
-import { dictionary } from '../i18n';
-
-export function Greeting({ name }: { name: string }) {
-  const { t, locale } = useTranslation(dictionary);
-  return <p lang={locale}>{t('greeting', name)}</p>;
-}
-```
-
-`useTranslation(dictionary)` reads the provider's locale, checks it against the
-dictionary's set (a provider carrying `'fr'` throws, rather than rendering
-`undefined` in every string), and returns that locale's `t`. `useLocale()`
-alone gives the string the provider was given; `useLocale(locales)` gives it
-checked and typed.
-
-An application with many call sites binds once:
-
 ```ts
-// i18n/client.ts
-'use client';
-import { useTranslation as useDictionary } from '@k8ordo/i18n';
-import { dictionary } from './index';
+// messages/nav.ts — each message is one export
+import { message } from '@k8ordo/i18n';
 
-export const useTranslation = () => useDictionary(dictionary);
-```
-
-The hook takes the dictionary as an argument rather than reading it from the
-provider for one reason: a provider value would have to be a prop, and the
-dictionary — functions included — cannot be one across the RSC boundary. A
-string can.
-
-## Where the locale comes from
-
-The locale lives in the URL, as its first segment, and nowhere else: a cookie
-or a header would give two visitors different pages for one URL, which is
-what breaks caching, sharing, and a static build alike. What the header and
-`navigator.languages` are for is the one URL that has no locale — `/` — whose
-only job is to send the visitor to one that does.
-
-```tsx
-// routes/page.tsx — under @k8ordo/static, the redirect runs in the browser
-'use client';
-import { useEffect } from 'react';
-import { locales } from '../i18n/locales';
-
-export default function Root() {
-  useEffect(() => {
-    navigation.navigate(
-      locales.localize('/', locales.negotiate(navigator.languages)),
-      {
-        history: 'replace',
-      },
-    );
-  }, []);
-  return <title>…</title>;
-}
-```
-
-Under `@k8ordo/server` the same decision can be made per request, from the
-`Accept-Language` header, and answered with a redirect before anything
-renders.
-
-`<html lang>` has to be right in the HTML the server wrote — a crawler and a
-screen reader read it before any script runs — and the root layout sits above
-the `[locale]` segment, so it reads the locale off the pathname it is given:
-
-```tsx
-// routes/layout.tsx
-export default function Root({ children, pathname }: RootProps) {
-  const { locale } = locales.delocalize(pathname);
-  return <html lang={locale ?? locales.default}>…</html>;
-}
-```
-
-## Static builds
-
-Every pattern under `[locale]` needs pathnames at build time, and the locale
-set is where they come from:
-
-```ts
-// vite.config.ts
-import { framework } from '@k8ordo/static';
-import { locales } from './src/i18n/locales';
-
-export default defineConfig({
-  plugins: [
-    framework({
-      paths: (patterns) =>
-        patterns.flatMap((pattern) =>
-          locales.all.map((locale) =>
-            pattern.replace('/:locale', `/${locale}`),
-          ),
-        ),
-    }),
-  ],
+export const home = message({ ja: 'ホーム', en: 'Home' });
+export const greeting = message({
+  ja: (name: string) => `こんにちは、${name}さん`,
+  en: (name) => `Hello, ${name}`,
 });
 ```
 
-Import the locale set, not the dictionary: the config file runs in Node at
-build time, and it needs the list, not the messages.
+```tsx
+// routes/[locale]/layout.tsx — a Server Component
+import { locales } from '../../i18n';
+
+export const paramsSchema = locales.paramsSchema;
+```
+
+Spell it as that assignment: the framework finds a route's schema by
+reading the file for `export const paramsSchema`, so a destructuring export
+(`export const { paramsSchema } = locales`) would go unnoticed and `/fr/…`
+would render in the default locale. A linter's `prefer-destructuring`
+autofix rewrites it into exactly that, so disable the rule on the line.
+
+```tsx
+// anywhere — a Server Component or a Client Component, the same line
+import * as nav from '../messages/nav';
+
+<h1>{nav.home()}</h1>
+<p>{nav.greeting(name)}</p>
+```
+
+That is the whole surface: `defineLocales`, `Register`, `message`, and
+`paramsSchema` on the `[locale]` segment.
+
+## The locale set
+
+`defineLocales(all, { default? })` returns the set. The first entry is the
+default unless told otherwise; every tag must be BCP 47 (checked with
+`Intl.Locale`); a repeated tag or a default outside the list throws at the
+definition, not later.
+
+| Member            | What it is                                                                        |
+| ----------------- | --------------------------------------------------------------------------------- |
+| `all`             | The tags, in order.                                                               |
+| `default`         | The tag used when nothing names one.                                              |
+| `is(value)`       | Membership as a type guard.                                                       |
+| `negotiate(…)`    | The best supported tag for a preference list.                                     |
+| `localize`        | `'/ui'` → `'/en/ui'`; `'/'` → `'/en'`.                                            |
+| `delocalize`      | `'/en/ui'` → `{ locale: 'en', pathname: '/ui' }`; `'/x'` → `{ locale: null, … }`. |
+| `paramsSchema`    | The `[locale]` segment's schema (Standard Schema; no schema library).             |
+| `getLocale()`     | The locale of the render in progress. Not a hook.                                 |
+| `run(locale, fn)` | Server only: runs `fn` with `locale` current.                                     |
+
+`LocaleOf<typeof locales>` is the tag union. `delocalize` says `null` for a
+first segment that is not a locale rather than guessing the default, so the
+root layout and the 404 page choose the fallback visibly.
+
+### Negotiation
+
+`negotiate` takes the list as the browser or the header gives it and tries
+each requested tag in order — the exact tag, then the first supported locale
+that speaks its language — before falling back to the default. Nothing
+matching across the whole list is the default; a tag that is not BCP 47 is
+skipped, because the list is user input.
+
+```ts
+locales.negotiate(navigator.languages); // in the browser
+locales.negotiate(parseAcceptLanguage(request.headers.get('accept-language')));
+```
+
+`parseAcceptLanguage(header)` turns an `Accept-Language` header into that
+list: `q` weights decide the order, ties keep the header's order, `q=0` and
+`*` are dropped, and a missing header is an empty list.
+
+## Messages
+
+`message(variants)` declares one message with its text in every locale.
+Once `Register` carries the app's locale union, a variant missing for any
+locale is a type error at the declaration — that is the whole "untranslated
+key does not compile" guarantee, per message, with no key list to maintain.
+
+A message is either text in every locale or a function in every locale;
+the two are not mixed within one message. For a function message the
+arguments are typed by the variant you annotate, and every other variant
+is held to the same parameters:
+
+```ts
+export const items = message({
+  ja: (count: number) => `${String(count)} 件`,
+  en: (count) =>
+    `${String(count)} ${new Intl.PluralRules('en').select(count) === 'one' ? 'item' : 'items'}`,
+});
+```
+
+The result is a `Message<Args>`: `() => string` for text, `(…args) =>
+string` for a function. That type is what a component that takes a message
+as a prop should accept —
+
+```tsx
+type NavItem = { path: string; label: Message };
+const items: NavItem[] = [{ path: '/ui', label: nav.ui }];
+…
+<a href={item.path}>{item.label()}</a>
+```
+
+— so data can carry messages without carrying strings, and without any
+component translating on another's behalf.
+
+### Where messages live
+
+Anywhere. A file per area (`messages/nav.ts`, `messages/form.ts`) with a
+barrel that re-exports each as a namespace reads well at the call site:
+
+```ts
+// messages/index.ts
+export * as nav from './nav';
+export * as form from './form';
+```
+
+```tsx
+import * as m from '../messages';
+<h1>{m.nav.home()}</h1>;
+```
+
+A message that belongs to one component can sit next to that component.
+Grouping related messages in an object (`export const button = { label:
+message(…), hint: message(…) }`) is fine too; the bundler then keeps the
+group together.
+
+### Across the Server Component boundary
+
+A message is a function, and a function does not cross from a Server
+Component to a Client Component as a prop. Where a Server Component hands
+text to a `'use client'` component, it calls the message and passes the
+string — `<Dialog title={m.dialog.title()} />` — which is the rule the rest
+of k8ordo already follows: only input crosses the boundary. Nothing further
+down needs the string threaded through it, because any component, on either
+side, can import a message and call it itself.
+
+A component without a directive is shared: rendered by a Server Component it
+runs on the server, rendered by a Client Component it runs in the browser,
+and in both cases a `Message` prop is fine because it never crosses. A
+component that only reads props and messages — a page title, a landing
+layout — is best left without `'use client'` for exactly this reason.
+
+### What reaches the browser
+
+`message()` has no side effect at the declaration — it returns a function
+and touches nothing — so a bundler treats an unreferenced message as dead
+code. What a client bundle carries is therefore exactly the messages that
+`'use client'` modules name, in every locale, and nothing a Server Component
+rendered. This is the reason messages are functions and exports rather than
+entries in a dictionary object: a dictionary is kept or dropped whole.
+
+Keep the rule of thumb in mind: text that a Server Component renders costs
+the client nothing, whichever module declares it. A client component that
+needs text names it and pays for that message alone.
+
+## Where the locale comes from
+
+**On the server**, `paramsSchema` accepting a locale makes it the current
+one for the rest of that request's render — the Server Components, the
+HTML they become, and the client components that run on the server for
+that HTML. Concurrent renders stay apart (`AsyncLocalStorage`). Outside a
+`[locale]` route — a test, code that runs before the route matched — use
+`locales.run(locale, fn)`; and when nothing names a locale, messages render
+in the default.
+
+**In the browser**, the URL is the locale: the first segment of
+`location.pathname`, read when a message is called. Changing locale is a
+navigation to the same pathname under the other segment
+(`locales.localize(locales.delocalize(pathname).pathname, 'en')`), which
+re-renders the page; there is no state to keep in sync.
+
+`locales.getLocale()` reads the same source for code that needs the tag
+itself: `<html lang>`, a language switcher, `Intl` formatters.
+
+### The `/` page
+
+`/` is the one URL without a locale. Render nothing there and redirect from
+an effect:
+
+```tsx
+'use client';
+useEffect(() => {
+  navigation.navigate(
+    locales.localize('/', locales.negotiate(navigator.languages)),
+    { history: 'replace' },
+  );
+}, []);
+```
+
+Under `@k8ordo/server` the same decision can be made on the server with
+`parseAcceptLanguage` and a redirect.
+
+### `<html lang>`
+
+The root layout sits above `[locale]` and receives `pathname`; the schema
+has already run for that request, so `locales.getLocale()` is right, and
+`locales.delocalize(pathname).locale ?? locales.default` says the same thing
+in terms of the URL alone.
+
+## Static builds
+
+`@k8ordo/static` asks for the pathnames of every pattern with a parameter.
+Expand `[locale]` from the set — the list is spelled once:
+
+```ts
+framework({
+  paths: (patterns) =>
+    patterns.flatMap((pattern) =>
+      locales.all.map((locale) => pattern.replace(':locale', locale)),
+    ),
+});
+```
+
+Each path is rendered as its own request, so the schema names the locale
+for each and the messages come out in that locale. The `404.html` a static
+host serves for everything else is rendered once, under the build's
+sentinel locale; a client component on it reads the visitor's URL and
+re-renders in theirs after hydration.
 
 ## Alongside the rest of k8ordo
 
-- **`@k8ordo/router`** types the `:locale` parameter from the route table;
-  `locales.paramsSchema` on the `[locale]` layout is what makes an unknown
-  locale a real 404 instead of a page rendered in no language.
-- **`@k8ordo/ui`** carries its own wording (`close`, `required`, `loading`,
-  …) with Japanese as the default. Hand `UIProvider` the matching dictionary
-  from `@k8ordo/ui/i18n` for the current locale — `messages={locale === 'en'
-? en : undefined}` — from the same client component that renders it.
-- **`@k8ordo/form`** takes its messages from the zod schema; a schema that
-  wants translated wording builds them with `t` from the translator of the
-  locale it is rendered for.
+- **`@k8ordo/router`**: `locales.localize` / `delocalize` are the only
+  things here that touch a pathname. A link component that prefixes the
+  current locale is `href(locales.localize(path, locales.getLocale()))`.
+- **`@k8ordo/ui`**: its own built-in strings take a dictionary prop on
+  `UIProvider`; pass `en` on `/en/…` from `locales.getLocale()`.
+- **`@k8ordo/form`**: constraint messages are messages — `message({ ja:
+(max: number) => …, en: … })` — called where the constraint is declared.
 
 ## What it guarantees
 
-- **A key is a compile error until every locale has it**, and a function
-  message's arguments are typed by the default locale's signature.
-- **A locale outside the set never renders.** The params schema refuses it
-  before the page is chosen, `translator` refuses it on the server, and
-  `useTranslation` refuses it on the client.
-- **The same locale returns the same `t`.** No new function per render; a
-  translator is created once per locale and reused.
-- **Nothing here touches the boundary with a function.** The provider's
-  prop is a string; the dictionary and the locale set are imported, never
-  passed.
-- **No grammar of its own.** Interpolation is a template literal, plurals are
-  `Intl.PluralRules`, formatting is `Intl`, and the set of locales is a list.
+- A locale outside the list never reaches a page: the schema refuses it.
+- A message missing a locale does not compile once `Register` is merged.
+  From JavaScript, or through `as`, it throws where it is read, naming the
+  locale and the variants present — never `undefined`.
+- Arguments to a function message are typed by the function.
+- No render is ever in a locale the URL does not spell (browser) or the
+  request did not accept (server).
 
 ## Testing
 
-`defineLocales`, `defineDictionary`, `translator`, `negotiate`,
-`parseAcceptLanguage`, `localize`, and `delocalize` are pure and run in Node
-with no DOM. `LocaleProvider`, `useLocale`, and `useTranslation` render under
-any React test renderer; a component under test needs only a
-`<LocaleProvider locale="…">` around it.
+Under Node, `locales.run('en', () => nav.home())` renders in `en`; without
+it, the default. The `paramsSchema` sets the locale for the rest of its
+scope too, so wrap a test that validates in `run` to keep tests apart. In a
+browser environment, `history.replaceState(null, '', '/en/…')` is the
+locale.

@@ -1,5 +1,6 @@
 'use client';
 
+import type { Message } from '@k8ordo/i18n';
 import {
   AccessibilityIcon,
   AIIcon,
@@ -14,56 +15,56 @@ import {
 import type { ReactNode } from 'react';
 
 import { PageTitle } from '../../../components/page-title';
-import { T } from '../../../components/t';
-import { locales, useTranslation } from '../../../i18n';
-import type { MessageKey } from '../../../i18n';
+import { Rich } from '../../../components/rich';
+import { getLocale, locales } from '../../../i18n';
+import * as m from '../../../messages';
 
 type Feature = {
-  title: MessageKey;
-  description: MessageKey;
+  title: Message;
+  description: Message;
   icon: ReactNode;
 };
 
 const FEATURES: Feature[] = [
   {
-    title: 'ui.featureReact',
-    description: 'ui.featureReactDescription',
+    title: m.ui.featureReact,
+    description: m.ui.featureReactDescription,
     icon: <AtomIcon />,
   },
   {
-    title: 'ui.featureTokens',
-    description: 'ui.featureTokensDescription',
+    title: m.ui.featureTokens,
+    description: m.ui.featureTokensDescription,
     icon: <PaletteIcon />,
   },
   {
-    title: 'ui.featureTypeScript',
-    description: 'ui.featureTypeScriptDescription',
+    title: m.ui.featureTypeScript,
+    description: m.ui.featureTypeScriptDescription,
     icon: <ShieldCheckIcon />,
   },
   {
-    title: 'ui.featureAgents',
-    description: 'ui.featureAgentsDescription',
+    title: m.ui.featureAgents,
+    description: m.ui.featureAgentsDescription,
     icon: <AIIcon />,
   },
   {
-    title: 'ui.featureAccessible',
-    description: 'ui.featureAccessibleDescription',
+    title: m.ui.featureAccessible,
+    description: m.ui.featureAccessibleDescription,
     icon: <AccessibilityIcon />,
   },
   {
-    title: 'ui.featureMinimal',
-    description: 'ui.featureMinimalDescription',
+    title: m.ui.featureMinimal,
+    description: m.ui.featureMinimalDescription,
     icon: <SparklesIcon />,
   },
   {
-    title: 'ui.featureVerticalWriting',
-    description: 'ui.featureVerticalWritingDescription',
+    title: m.ui.featureVerticalWriting,
+    description: m.ui.featureVerticalWritingDescription,
     icon: <VerticalWritingIcon />,
   },
 ];
 
 export default function Ui() {
-  const { t, locale } = useTranslation();
+  const locale = getLocale();
 
   return (
     <div className="flex flex-1 flex-col">
@@ -79,7 +80,7 @@ export default function Ui() {
             触れるものは柔らかく、読むものは端正に。
           </p>
           <p className="text-fg-mute break-phrase text-lg leading-relaxed">
-            {t('ui.description')}
+            {m.ui.description()}
           </p>
           <div className="flex flex-wrap items-center gap-4">
             <Button
@@ -94,7 +95,7 @@ export default function Ui() {
               size="md"
               variant="solid"
             >
-              {t('ui.getStarted')}
+              {m.ui.getStarted()}
             </Button>
             <Button
               color="base"
@@ -109,7 +110,7 @@ export default function Ui() {
               size="md"
               variant="outline"
             >
-              {t('ui.viewComponents')}
+              {m.ui.viewComponents()}
             </Button>
           </div>
         </div>
@@ -129,21 +130,21 @@ export default function Ui() {
       </section>
 
       <section className="mx-auto w-full max-w-6xl px-6 pb-24 md:px-8">
-        <Heading level="h2">{t('ui.featuresTitle')}</Heading>
+        <Heading level="h2">{m.ui.featuresTitle()}</Heading>
         <ol className="mt-8">
           {FEATURES.map((feature) => (
             <li
               className="border-border-mute border-t last:border-b"
-              key={feature.title}
+              key={feature.title()}
             >
               {/* min-h は py-6(計3rem) + 説明2行分。1行説明の行も同じ高さに揃え、罫線を等間隔に保つ */}
               <div className="grid min-h-24 items-start gap-4 py-6 md:grid-cols-[14rem_1fr] md:gap-8">
                 <p className="text-fg-base flex items-center gap-2 font-medium">
                   <span className="text-fg-mute">{feature.icon}</span>
-                  {t(feature.title)}
+                  {feature.title()}
                 </p>
                 <p className="text-fg-mute text-sm leading-relaxed">
-                  <T k={feature.description} />
+                  <Rich>{feature.description()}</Rich>
                 </p>
               </div>
             </li>

@@ -1,8 +1,9 @@
 import { Code } from '@k8ordo/ui';
 import type { FC } from 'react';
 
+import * as m from '../messages';
 import { LocaleAnchor } from './locale-anchor';
-import { T } from './t';
+import { Rich } from './rich';
 
 export type PropItem = {
   name: string;
@@ -77,14 +78,15 @@ export const PropsTable: FC<{
     </table>
     {inherits !== undefined && inherits !== '' ? (
       <p className="text-fg-mute text-sm">
-        <T k="components.common.inheritsLabel" /> <Code>{inherits}</Code>
+        <Rich>{m.components.common.inheritsLabel()}</Rich>{' '}
+        <Code>{inherits}</Code>
       </p>
     ) : null}
     {messagesNote ? (
       <p className="text-fg-mute text-sm">
-        <T k="components.common.messagesNote" />{' '}
+        <Rich>{m.components.common.messagesNote()}</Rich>{' '}
         <LocaleAnchor path="/ui/i18n">
-          <T k="nav.i18n" />
+          <Rich>{m.nav.i18n()}</Rich>
         </LocaleAnchor>
       </p>
     ) : null}

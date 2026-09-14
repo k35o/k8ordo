@@ -61,9 +61,10 @@ import type { ReactNode } from 'react';
 import { CodeBlock } from '../../../../../components/code-block';
 import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
-import { T } from '../../../../../components/t';
+import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { propsOf } from '../../../../../data/component-props';
+import * as m from '../../../../../messages';
 
 const IconCard = ({
   name,
@@ -85,14 +86,14 @@ export default function IconsPage() {
       <div className="flex flex-col gap-4">
         <Heading level="h1">Icons</Heading>
         <p className="text-fg-mute text-lg">
-          <T k="components.icons.description" />
+          <Rich>{m.components.icons.description()}</Rich>
         </p>
         <div>
           <Anchor
             href={`${STORYBOOK_URL}/?path=/docs/components-icons--docs`}
             openInNewTab
           >
-            <T k="components.common.storybookLink" />
+            <Rich>{m.components.common.storybookLink()}</Rich>
           </Anchor>
         </div>
       </div>
@@ -100,7 +101,7 @@ export default function IconsPage() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.importTitle" />
+          <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
         <CodeBlock
           code="import { CloseIcon, CheckIcon } from '@k8ordo/ui';"
@@ -111,7 +112,7 @@ export default function IconsPage() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.icons.sizesTitle" />
+          <Rich>{m.components.icons.sizesTitle()}</Rich>
         </Heading>
         <div className="flex flex-wrap items-end gap-6">
           {(['xs', 'sm', 'md', 'lg', 'xl', '2xl', '3xl'] as const).map(
@@ -138,7 +139,7 @@ export default function IconsPage() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.usageTitle" />
+          <Rich>{m.components.common.usageTitle()}</Rich>
         </Heading>
         <div className="grid-cols-auto-fit-28 grid gap-4">
           <IconCard name="LogoIcon">
@@ -315,10 +316,10 @@ export default function IconsPage() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.propsTitle" />
+          <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>
         <p className="text-fg-mute text-sm">
-          <T k="components.icons.propsDescription" />
+          <Rich>{m.components.icons.propsDescription()}</Rich>
         </p>
         <PropsTable items={propsOf('CheckIcon')} />
         <Heading level="h3">ChevronIcon</Heading>

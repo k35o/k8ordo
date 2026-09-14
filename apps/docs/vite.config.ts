@@ -2,7 +2,7 @@ import { framework } from '@k8ordo/static';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite';
 
-import { locales } from './src/i18n/locales';
+import { locales } from './src/i18n';
 
 export default defineConfig({
   server: {

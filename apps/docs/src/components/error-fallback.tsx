@@ -3,38 +3,33 @@
 import { AlertIcon, Button, Heading } from '@k8ordo/ui';
 import type { FC } from 'react';
 
-import type { Locale } from '../i18n';
-import { dictionary } from '../i18n';
+import * as m from '../messages';
 
 type ErrorFallbackProps = {
   resetErrorBoundary: () => void;
   fullScreen?: boolean;
-  locale?: Locale;
 };
 
+/**
+ * ルートの error.tsx からも描かれる。文言は URL からロケールを読むので、
+ * Provider の内外を問わず同じに使える。
+ */
 export const ErrorFallback: FC<ErrorFallbackProps> = ({
   resetErrorBoundary,
   fullScreen = false,
-  locale = 'ja',
-}) => {
-  // Provider の外（ルートの error.tsx）からも描かれるので、hook ではなく
-  // 辞書から直接引く。
-  const t = dictionary.translator(locale);
-
-  return (
-    <div
-      className={`flex flex-col items-center justify-center gap-6 p-8 ${fullScreen ? 'h-dvh' : 'h-full'}`}
-    >
-      <div className="text-fg-error">
-        <AlertIcon size="lg" status="error" />
-      </div>
-      <div className="flex flex-col items-center gap-2">
-        <Heading level="h2">{t('error.title')}</Heading>
-        <p className="text-fg-mute text-sm">{t('error.description')}</p>
-      </div>
-      <Button onClick={resetErrorBoundary} variant="outline">
-        {t('error.retry')}
-      </Button>
+}) => (
+  <div
+    className={`flex flex-col items-center justify-center gap-6 p-8 ${fullScreen ? 'h-dvh' : 'h-full'}`}
+  >
+    <div className="text-fg-error">
+      <AlertIcon size="lg" status="error" />
     </div>
-  );
-};
+    <div className="flex flex-col items-center gap-2">
+      <Heading level="h2">{m.error.title()}</Heading>
+      <p className="text-fg-mute text-sm">{m.error.description()}</p>
+    </div>
+    <Button onClick={resetErrorBoundary} variant="outline">
+      {m.error.retry()}
+    </Button>
+  </div>
+);

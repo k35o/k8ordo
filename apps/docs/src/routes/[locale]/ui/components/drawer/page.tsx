@@ -4,9 +4,10 @@ import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';
 import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
-import { T } from '../../../../../components/t';
+import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { propsOf } from '../../../../../data/component-props';
+import * as m from '../../../../../messages';
 import {
   DrawerBasicPreview,
   DrawerCustomContentPreview,
@@ -19,14 +20,14 @@ export default function DrawerPage() {
       <div className="flex flex-col gap-4">
         <Heading level="h1">Drawer</Heading>
         <p className="text-fg-mute text-lg">
-          <T k="components.drawer.description" />
+          <Rich>{m.components.drawer.description()}</Rich>
         </p>
         <div>
           <Anchor
             href={`${STORYBOOK_URL}/?path=/docs/components-drawer--docs`}
             openInNewTab
           >
-            <T k="components.common.storybookLink" />
+            <Rich>{m.components.common.storybookLink()}</Rich>
           </Anchor>
         </div>
       </div>
@@ -34,7 +35,7 @@ export default function DrawerPage() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.importTitle" />
+          <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
         <CodeBlock code="import { Drawer } from '@k8ordo/ui';" lang="ts" />
       </section>
@@ -43,13 +44,13 @@ export default function DrawerPage() {
       <section className="flex flex-col gap-8">
         <div className="flex flex-col gap-4">
           <Heading level="h2">
-            <T k="components.common.usageTitle" />
+            <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
         </div>
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.common.basicUsageTitle" />
+            <Rich>{m.components.common.basicUsageTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`const [isOpen, setIsOpen] = useState(false);
@@ -75,7 +76,7 @@ export default function DrawerPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.drawer.customContentTitle" />
+            <Rich>{m.components.drawer.customContentTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`const [isOpen, setIsOpen] = useState(false);
@@ -116,7 +117,7 @@ export default function DrawerPage() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.propsTitle" />
+          <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>
         <PropsTable items={propsOf('Drawer')} />
       </section>

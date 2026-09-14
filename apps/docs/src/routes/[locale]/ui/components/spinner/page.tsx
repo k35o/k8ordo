@@ -4,9 +4,10 @@ import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';
 import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
-import { T } from '../../../../../components/t';
+import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
+import * as m from '../../../../../messages';
 
 export default function SpinnerPage() {
   return (
@@ -15,14 +16,14 @@ export default function SpinnerPage() {
       <div className="flex flex-col gap-4">
         <Heading level="h1">Spinner</Heading>
         <p className="text-fg-mute text-lg">
-          <T k="components.spinner.description" />
+          <Rich>{m.components.spinner.description()}</Rich>
         </p>
         <div>
           <Anchor
             href={`${STORYBOOK_URL}/?path=/docs/components-spinner--docs`}
             openInNewTab
           >
-            <T k="components.common.storybookLink" />
+            <Rich>{m.components.common.storybookLink()}</Rich>
           </Anchor>
         </div>
       </div>
@@ -30,7 +31,7 @@ export default function SpinnerPage() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.importTitle" />
+          <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
         <CodeBlock code="import { Spinner } from '@k8ordo/ui';" lang="ts" />
       </section>
@@ -39,7 +40,7 @@ export default function SpinnerPage() {
       <section className="flex flex-col gap-8">
         <div className="flex flex-col gap-4">
           <Heading level="h2">
-            <T k="components.common.usageTitle" />
+            <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
           <ComponentPreview code="<Spinner />">
             <Spinner />
@@ -48,7 +49,7 @@ export default function SpinnerPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.spinner.sizesTitle" />
+            <Rich>{m.components.spinner.sizesTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<Spinner size="sm" />
@@ -65,7 +66,7 @@ export default function SpinnerPage() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.propsTitle" />
+          <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>
         <PropsTable
           inherits={inheritsOf('Spinner')}

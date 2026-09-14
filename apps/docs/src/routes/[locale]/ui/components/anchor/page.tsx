@@ -4,9 +4,10 @@ import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';
 import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
-import { T } from '../../../../../components/t';
+import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
+import * as m from '../../../../../messages';
 
 export default function AnchorPage() {
   return (
@@ -15,14 +16,14 @@ export default function AnchorPage() {
       <div className="flex flex-col gap-4">
         <Heading level="h1">Anchor</Heading>
         <p className="text-fg-mute text-lg">
-          <T k="components.anchor.description" />
+          <Rich>{m.components.anchor.description()}</Rich>
         </p>
         <div>
           <Anchor
             href={`${STORYBOOK_URL}/?path=/docs/components-anchor--docs`}
             openInNewTab
           >
-            <T k="components.common.storybookLink" />
+            <Rich>{m.components.common.storybookLink()}</Rich>
           </Anchor>
         </div>
       </div>
@@ -30,7 +31,7 @@ export default function AnchorPage() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.importTitle" />
+          <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
         <CodeBlock code="import { Anchor } from '@k8ordo/ui';" lang="ts" />
       </section>
@@ -39,7 +40,7 @@ export default function AnchorPage() {
       <section className="flex flex-col gap-8">
         <div className="flex flex-col gap-4">
           <Heading level="h2">
-            <T k="components.common.usageTitle" />
+            <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<Anchor href="https://example.com" openInNewTab>
@@ -54,7 +55,7 @@ export default function AnchorPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.anchor.openInNewTabTitle" />
+            <Rich>{m.components.anchor.openInNewTabTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<Anchor href="#">
@@ -73,10 +74,10 @@ export default function AnchorPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.anchor.renderAnchorTitle" />
+            <Rich>{m.components.anchor.renderAnchorTitle()}</Rich>
           </Heading>
           <p className="text-fg-mute text-sm">
-            <T k="components.anchor.renderAnchorDescription" />
+            <Rich>{m.components.anchor.renderAnchorDescription()}</Rich>
           </p>
           <CodeBlock
             code={`// Swap in the Next.js Link
@@ -98,7 +99,7 @@ import Link from 'next/link';
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.propsTitle" />
+          <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>
         <PropsTable inherits={inheritsOf('Anchor')} items={propsOf('Anchor')} />
       </section>

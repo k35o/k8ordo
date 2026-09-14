@@ -4,7 +4,8 @@ import { CodeBlock } from '../../../../../components/code-block';
 import { PageTitle } from '../../../../../components/page-title';
 import type { PropItem } from '../../../../../components/props-table';
 import { PropsTable } from '../../../../../components/props-table';
-import { T } from '../../../../../components/t';
+import { Rich } from '../../../../../components/rich';
+import * as m from '../../../../../messages';
 
 const parameters: PropItem[] = [
   {
@@ -54,14 +55,14 @@ export default function UseIntersectionObserverPage() {
       <div className="flex flex-col gap-4">
         <Heading level="h1">useIntersectionObserver</Heading>
         <p className="text-fg-mute text-lg">
-          <T k="hooks.useIntersectionObserver.description" />
+          <Rich>{m.hooks.intersectionObserver.description()}</Rich>
         </p>
       </div>
       <Separator color="mute" />
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="hooks.common.importTitle" />
+          <Rich>{m.hooks.common.importTitle()}</Rich>
         </Heading>
         <CodeBlock
           code="import { useIntersectionObserver } from '@k8ordo/ui';"
@@ -72,11 +73,11 @@ export default function UseIntersectionObserverPage() {
 
       <section className="flex flex-col gap-8">
         <Heading level="h2">
-          <T k="hooks.common.usageTitle" />
+          <Rich>{m.hooks.common.usageTitle()}</Rich>
         </Heading>
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="hooks.common.basicUsageTitle" />
+            <Rich>{m.hooks.common.basicUsageTitle()}</Rich>
           </Heading>
           <CodeBlock
             code={`const ref = useRef<HTMLDivElement>(null);
@@ -110,7 +111,7 @@ return <div ref={ref}>Lazy loaded content</div>;`}
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="hooks.common.parametersTitle" />
+          <Rich>{m.hooks.common.parametersTitle()}</Rich>
         </Heading>
         <PropsTable items={parameters} />
       </section>
@@ -118,7 +119,7 @@ return <div ref={ref}>Lazy loaded content</div>;`}
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="hooks.common.returnValueTitle" />
+          <Rich>{m.hooks.common.returnValueTitle()}</Rich>
         </Heading>
         <PropsTable items={returnValue} />
       </section>

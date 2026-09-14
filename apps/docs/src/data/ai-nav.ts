@@ -1,23 +1,24 @@
+import * as m from '../messages';
 import type { NavCategory } from './nav-types';
 
 export const aiCategories: NavCategory[] = [
   {
-    titleKey: 'nav.ai',
+    title: m.nav.ai,
     items: [
       {
         name: 'AI Chat',
         path: '/ui/ai/chat',
-        descKey: 'ai.chatSummary',
+        description: m.ai.chatSummary,
       },
       {
         name: 'Generative UI',
         path: '/ui/ai/generative-ui',
-        descKey: 'ai.generativeUiSummary',
+        description: m.ai.generativeUiSummary,
       },
       {
         name: 'AI Agents',
         path: '/ui/ai/agents',
-        descKey: 'ai.agentsSummary',
+        description: m.ai.agentsSummary,
       },
     ],
   },

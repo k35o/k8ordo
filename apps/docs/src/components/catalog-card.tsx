@@ -5,7 +5,7 @@ import type { FC, ReactNode } from 'react';
 
 import type { NavItem } from '../data/nav-types';
 import { LocaleAnchor } from './locale-anchor';
-import { T } from './t';
+import { Rich } from './rich';
 
 const cardClass =
   'group bg-bg-base focus-within:ring-border-info relative flex flex-col overflow-hidden rounded-xl shadow-sm motion-safe:transition-shadow motion-safe:duration-150 motion-safe:ease-out hover:shadow-md focus-within:ring-2';
@@ -44,7 +44,7 @@ export const CatalogCard: FC<{ item: NavItem; preview?: ReactNode }> = ({
         </span>
       </div>
       <p className="text-fg-mute line-clamp-2 h-12 text-sm leading-relaxed">
-        <T k={item.descKey} />
+        <Rich>{item.description()}</Rich>
       </p>
     </div>
   </div>

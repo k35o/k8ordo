@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-import { locales } from '../i18n/locales';
+import { locales } from '../i18n';
 import { themeState } from '../theme/state';
 
 import '../styles/globals.css';

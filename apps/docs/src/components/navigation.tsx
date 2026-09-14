@@ -1,15 +1,16 @@
 'use client';
 
+import type { Message } from '@k8ordo/i18n';
 import { usePathname } from '@k8ordo/router';
 import { DropdownMenu, NavigationMenuIcon } from '@k8ordo/ui';
 
-import type { MessageKey } from '../i18n';
-import { locales, useTranslation } from '../i18n';
+import { getLocale, locales } from '../i18n';
+import * as m from '../messages';
 import { LanguageSwitcher } from './language-switcher';
 import { LocaleAnchor } from './locale-anchor';
 import { ThemeSwitcher } from './theme-switcher';
 
-type NavItem = { path: string; labelKey: MessageKey };
+type NavItem = { path: string; label: Message };
 
 /**
  * 第一階層はパッケージで、セクションはパッケージに属する。だから常に並ぶのは
@@ -23,13 +24,13 @@ const PACKAGES: PackageNav[] = [
     name: 'UI',
     path: '/ui',
     sections: [
-      { path: '/ui/get-started', labelKey: 'nav.getStarted' },
-      { path: '/ui/theming', labelKey: 'nav.theming' },
-      { path: '/ui/i18n', labelKey: 'nav.i18n' },
-      { path: '/ui/components', labelKey: 'nav.components' },
-      { path: '/ui/hooks', labelKey: 'nav.hooks' },
-      { path: '/ui/helpers', labelKey: 'nav.helpers' },
-      { path: '/ui/ai', labelKey: 'nav.ai' },
+      { path: '/ui/get-started', label: m.nav.getStarted },
+      { path: '/ui/theming', label: m.nav.theming },
+      { path: '/ui/i18n', label: m.nav.i18n },
+      { path: '/ui/components', label: m.nav.components },
+      { path: '/ui/hooks', label: m.nav.hooks },
+      { path: '/ui/helpers', label: m.nav.helpers },
+      { path: '/ui/ai', label: m.nav.ai },
     ],
   },
   { name: 'Form', path: '/form', sections: [] },
@@ -53,7 +54,7 @@ const itemClass = (isActive: boolean) =>
     : 'text-fg-mute hover:bg-bg-mute hover:text-fg-base rounded-md px-3 py-1.5 text-sm whitespace-nowrap transition-colors duration-150 ease-out';
 
 export function Navigation() {
-  const { t, locale } = useTranslation();
+  const locale = getLocale();
   const pathname = usePathname();
   const current = packageOf(pathname);
 
@@ -66,7 +67,7 @@ export function Navigation() {
     ...PACKAGES.map((pkg) => ({ path: pkg.path, label: pkg.name })),
     ...(current?.sections ?? []).map((item) => ({
       path: item.path,
-      label: t(item.labelKey),
+      label: item.label(),
     })),
   ];
 
@@ -110,7 +111,7 @@ export function Navigation() {
             <DropdownMenu.Root>
               <DropdownMenu.IconTrigger
                 icon={<NavigationMenuIcon />}
-                label={t('nav.openMenu')}
+                label={m.nav.openMenu()}
               />
               <DropdownMenu.Content>
                 {mobileEntries.map((entry) => (
@@ -140,7 +141,7 @@ export function Navigation() {
                     className={itemClass(isActive)}
                     href={href}
                   >
-                    {t(item.labelKey)}
+                    {item.label()}
                   </a>
                 </li>
               );

@@ -1,8 +1,9 @@
 'use client';
 
+import type { Message } from '@k8ordo/i18n';
+
 import { STORYBOOK_URL } from '../constants';
-import type { MessageKey } from '../i18n';
-import { useTranslation } from '../i18n';
+import * as m from '../messages';
 import { LocaleAnchor } from './locale-anchor';
 
 /** 第一階層はパッケージ。増えたらここに 1 行足す。 */
@@ -22,21 +23,21 @@ const PACKAGE_LINKS = [
  */
 const SECTION_GROUPS: Array<{
   name: string;
-  links: Array<{ path: string; labelKey: MessageKey }>;
+  links: Array<{ path: string; label: Message }>;
   external?: Array<{ href: string; label: string }>;
 }> = [
   {
     name: 'UI',
     links: [
-      { path: '/ui/get-started', labelKey: 'nav.getStarted' },
-      { path: '/ui/theming', labelKey: 'nav.theming' },
-      { path: '/ui/i18n', labelKey: 'nav.i18n' },
-      { path: '/ui/components', labelKey: 'nav.components' },
-      { path: '/ui/hooks', labelKey: 'nav.hooks' },
-      { path: '/ui/helpers', labelKey: 'nav.helpers' },
-      { path: '/ui/ai/chat', labelKey: 'nav.aiChat' },
-      { path: '/ui/ai/generative-ui', labelKey: 'nav.generativeUi' },
-      { path: '/ui/ai/agents', labelKey: 'nav.aiAgents' },
+      { path: '/ui/get-started', label: m.nav.getStarted },
+      { path: '/ui/theming', label: m.nav.theming },
+      { path: '/ui/i18n', label: m.nav.i18n },
+      { path: '/ui/components', label: m.nav.components },
+      { path: '/ui/hooks', label: m.nav.hooks },
+      { path: '/ui/helpers', label: m.nav.helpers },
+      { path: '/ui/ai/chat', label: m.nav.aiChat },
+      { path: '/ui/ai/generative-ui', label: m.nav.generativeUi },
+      { path: '/ui/ai/agents', label: m.nav.aiAgents },
     ],
     external: [{ href: STORYBOOK_URL, label: 'Storybook' }],
   },
@@ -51,8 +52,6 @@ const linkClass =
   'text-fg-mute hover:text-fg-base text-sm transition-colors duration-150 ease-out';
 
 export function Footer() {
-  const { t } = useTranslation();
-
   return (
     <footer className="border-border-mute bg-bg-base border-t">
       {/* パッケージが増えると列が増えるため、固定のグリッドではなく flex で並べる */}
@@ -68,12 +67,12 @@ export function Footer() {
             />
           </span>
           <p className="text-fg-mute break-phrase max-w-xs text-sm leading-relaxed">
-            {t('footer.tagline')}
+            {m.footer.tagline()}
           </p>
         </div>
-        <nav aria-label={t('footer.packages')} className="flex flex-col gap-3">
+        <nav aria-label={m.footer.packages()} className="flex flex-col gap-3">
           <span className="text-fg-subtle text-xs font-bold tracking-normal">
-            {t('footer.packages')}
+            {m.footer.packages()}
           </span>
           <ul className="flex flex-col gap-2">
             {PACKAGE_LINKS.map((link) => (
@@ -87,7 +86,7 @@ export function Footer() {
         </nav>
         {SECTION_GROUPS.map((group) => (
           <nav
-            aria-label={`${group.name} — ${t('footer.docs')}`}
+            aria-label={`${group.name} — ${m.footer.docs()}`}
             className="flex flex-col gap-3"
             key={group.name}
           >
@@ -98,7 +97,7 @@ export function Footer() {
               {group.links.map((link) => (
                 <li key={link.path}>
                   <LocaleAnchor className={linkClass} path={link.path} unstyled>
-                    {t(link.labelKey)}
+                    {link.label()}
                   </LocaleAnchor>
                 </li>
               ))}
@@ -117,9 +116,9 @@ export function Footer() {
             </ul>
           </nav>
         ))}
-        <nav aria-label={t('footer.resources')} className="flex flex-col gap-3">
+        <nav aria-label={m.footer.resources()} className="flex flex-col gap-3">
           <span className="text-fg-subtle text-xs font-bold tracking-normal">
-            {t('footer.resources')}
+            {m.footer.resources()}
           </span>
           <ul className="flex flex-col gap-2">
             {RESOURCE_LINKS.map((link) => (
@@ -142,7 +141,7 @@ export function Footer() {
           <span className="tabular-nums">© 2026</span> k8o — MIT License
         </p>
         <p className="text-fg-subtle text-xs tracking-normal">
-          {t('footer.typesetting')}
+          {m.footer.typesetting()}
         </p>
       </div>
     </footer>

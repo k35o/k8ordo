@@ -5,9 +5,10 @@ import { ComponentPreview } from '../../../../../components/component-preview';
 import { PageTitle } from '../../../../../components/page-title';
 import type { PropItem } from '../../../../../components/props-table';
 import { PropsTable } from '../../../../../components/props-table';
-import { T } from '../../../../../components/t';
+import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
+import * as m from '../../../../../messages';
 import {
   ToastBasicPreview,
   ToastCloseAllPreview,
@@ -39,14 +40,14 @@ export default function ToastPage() {
       <div className="flex flex-col gap-4">
         <Heading level="h1">Toast</Heading>
         <p className="text-fg-mute text-lg">
-          <T k="components.toast.description" />
+          <Rich>{m.components.toast.description()}</Rich>
         </p>
         <div>
           <Anchor
             href={`${STORYBOOK_URL}/?path=/docs/components-toast--docs`}
             openInNewTab
           >
-            <T k="components.common.storybookLink" />
+            <Rich>{m.components.common.storybookLink()}</Rich>
           </Anchor>
         </div>
       </div>
@@ -54,7 +55,7 @@ export default function ToastPage() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.importTitle" />
+          <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
         <CodeBlock
           code="import { ToastProvider, useToast } from '@k8ordo/ui';"
@@ -66,13 +67,13 @@ export default function ToastPage() {
       <section className="flex flex-col gap-8">
         <div className="flex flex-col gap-4">
           <Heading level="h2">
-            <T k="components.common.usageTitle" />
+            <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
         </div>
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.common.basicUsageTitle" />
+            <Rich>{m.components.common.basicUsageTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<ToastProvider>
@@ -106,7 +107,7 @@ function ToastDemo() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.toast.useToastTitle" />
+            <Rich>{m.components.toast.useToastTitle()}</Rich>
           </Heading>
           <CodeBlock
             code={`const { open, close, closeAll } = useToast();
@@ -125,7 +126,7 @@ closeAll();`}
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.toast.closeAllTitle" />
+            <Rich>{m.components.toast.closeAllTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`function CloseAllDemo() {
@@ -152,7 +153,7 @@ closeAll();`}
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.propsTitle" />
+          <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>
         <Heading level="h3">ToastProvider</Heading>
         <PropsTable

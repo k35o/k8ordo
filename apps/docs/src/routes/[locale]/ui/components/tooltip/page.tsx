@@ -4,9 +4,10 @@ import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';
 import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
-import { T } from '../../../../../components/t';
+import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { propsOf } from '../../../../../data/component-props';
+import * as m from '../../../../../messages';
 import {
   TooltipBasicPreview,
   TooltipPlacementPreview,
@@ -19,14 +20,14 @@ export default function TooltipPage() {
       <div className="flex flex-col gap-4">
         <Heading level="h1">Tooltip</Heading>
         <p className="text-fg-mute text-lg">
-          <T k="components.tooltip.description" />
+          <Rich>{m.components.tooltip.description()}</Rich>
         </p>
         <div>
           <Anchor
             href={`${STORYBOOK_URL}/?path=/docs/components-tooltip--docs`}
             openInNewTab
           >
-            <T k="components.common.storybookLink" />
+            <Rich>{m.components.common.storybookLink()}</Rich>
           </Anchor>
         </div>
       </div>
@@ -34,7 +35,7 @@ export default function TooltipPage() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.importTitle" />
+          <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
         <CodeBlock code="import { Tooltip } from '@k8ordo/ui';" lang="ts" />
       </section>
@@ -43,7 +44,7 @@ export default function TooltipPage() {
       <section className="flex flex-col gap-8">
         <div className="flex flex-col gap-4">
           <Heading level="h2">
-            <T k="components.common.usageTitle" />
+            <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<Tooltip.Root placement="bottom-start">
@@ -65,7 +66,7 @@ export default function TooltipPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.tooltip.placementTitle" />
+            <Rich>{m.components.tooltip.placementTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<Tooltip.Root placement="top">
@@ -120,7 +121,7 @@ export default function TooltipPage() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.propsTitle" />
+          <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>
         <Heading level="h3">Tooltip.Root</Heading>
         <PropsTable items={propsOf('Tooltip.Root')} />

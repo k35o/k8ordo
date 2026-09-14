@@ -4,9 +4,10 @@ import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';
 import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
-import { T } from '../../../../../components/t';
+import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { propsOf } from '../../../../../data/component-props';
+import * as m from '../../../../../messages';
 import {
   DefaultOpenPreview,
   ModalBasicPreview,
@@ -20,14 +21,14 @@ export default function ModalPage() {
       <div className="flex flex-col gap-4">
         <Heading level="h1">Modal</Heading>
         <p className="text-fg-mute text-lg">
-          <T k="components.modal.description" />
+          <Rich>{m.components.modal.description()}</Rich>
         </p>
         <div>
           <Anchor
             href={`${STORYBOOK_URL}/?path=/docs/components-modal--docs`}
             openInNewTab
           >
-            <T k="components.common.storybookLink" />
+            <Rich>{m.components.common.storybookLink()}</Rich>
           </Anchor>
         </div>
       </div>
@@ -35,7 +36,7 @@ export default function ModalPage() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.importTitle" />
+          <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
         <CodeBlock code="import { Modal } from '@k8ordo/ui';" lang="ts" />
       </section>
@@ -44,13 +45,13 @@ export default function ModalPage() {
       <section className="flex flex-col gap-8">
         <div className="flex flex-col gap-4">
           <Heading level="h2">
-            <T k="components.common.usageTitle" />
+            <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
         </div>
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.common.basicUsageTitle" />
+            <Rich>{m.components.common.basicUsageTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`const [isOpen, setIsOpen] = useState(false);
@@ -80,7 +81,7 @@ export default function ModalPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.modal.sideTitle" />
+            <Rich>{m.components.modal.sideTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<Button onClick={() => setCenterOpen(true)}>Center</Button>
@@ -114,7 +115,7 @@ export default function ModalPage() {
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <T k="components.modal.defaultOpenTitle" />
+            <Rich>{m.components.modal.defaultOpenTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<Modal defaultOpen side="center">
@@ -137,10 +138,10 @@ export default function ModalPage() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.modal.portalRootTitle" />
+          <Rich>{m.components.modal.portalRootTitle()}</Rich>
         </Heading>
         <p className="text-fg-mute">
-          <T k="components.modal.portalRootDescription" />
+          <Rich>{m.components.modal.portalRootDescription()}</Rich>
         </p>
         <CodeBlock
           code={`import { usePortalRoot } from '@k8ordo/ui';
@@ -158,7 +159,7 @@ function FloatingLayer({ children }) {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <T k="components.common.propsTitle" />
+          <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>
         <PropsTable items={propsOf('Modal')} />
       </section>

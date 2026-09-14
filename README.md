@@ -19,7 +19,7 @@ Every package here commits to the same four things:
 | [`@k8ordo/router`](packages/router) | The URL's pathname axis: one route table, typed paths, over the Navigation API |
 | [`@k8ordo/static`](packages/static) | Builds an application into files — every route rendered ahead of time |
 | [`@k8ordo/server`](packages/server) | Runs an application — RSC per request, with Server Actions |
-| [`@k8ordo/i18n`](packages/i18n) | The locale axis: one locale set for the URL segment, negotiation, and the params schema; one dictionary typed by the default locale |
+| [`@k8ordo/i18n`](packages/i18n) | The locale axis: one locale set for the URL segment, negotiation, and the params schema; each message a function that reads the locale where it is called, on either side of the network |
 
 `@k8ordo/*` holds **primary libraries only** — the ones an application imports
 and builds on. Tools that plug into someone else's ecosystem (lint configs,

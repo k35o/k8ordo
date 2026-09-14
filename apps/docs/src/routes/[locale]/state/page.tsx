@@ -18,39 +18,39 @@ import * as z from 'zod/mini';
 
 import { PackageLanding } from '../../../components/package-landing';
 import type { PackageFeature } from '../../../components/package-landing';
-import { T } from '../../../components/t';
-import { useTranslation } from '../../../i18n';
+import { Rich } from '../../../components/rich';
+import * as m from '../../../messages';
 import { themeState } from '../../../theme/state';
 
 const FEATURES: PackageFeature[] = [
   {
-    title: 'state.featurePlaces',
-    description: 'state.featurePlacesDescription',
+    title: m.state.featurePlaces,
+    description: m.state.featurePlacesDescription,
     icon: <LocationIcon />,
   },
   {
-    title: 'state.featureSchema',
-    description: 'state.featureSchemaDescription',
+    title: m.state.featureSchema,
+    description: m.state.featureSchemaDescription,
     icon: <AtomIcon />,
   },
   {
-    title: 'state.featureNavigation',
-    description: 'state.featureNavigationDescription',
+    title: m.state.featureNavigation,
+    description: m.state.featureNavigationDescription,
     icon: <HistoryIcon />,
   },
   {
-    title: 'state.featureKeys',
-    description: 'state.featureKeysDescription',
+    title: m.state.featureKeys,
+    description: m.state.featureKeysDescription,
     icon: <ListIcon />,
   },
   {
-    title: 'state.featureCanonical',
-    description: 'state.featureCanonicalDescription',
+    title: m.state.featureCanonical,
+    description: m.state.featureCanonicalDescription,
     icon: <ShieldCheckIcon />,
   },
   {
-    title: 'state.featureServer',
-    description: 'state.featureServerDescription',
+    title: m.state.featureServer,
+    description: m.state.featureServerDescription,
     icon: <LinkIcon />,
   },
 ];
@@ -71,7 +71,6 @@ const demoState = definePageState('state-demo', {
 const TABS = ['overview', 'details', 'reviews'] as const;
 
 function Demo() {
-  const { t } = useTranslation();
   const [{ tab, page }, update] = useAppState(demoState);
   const [{ mode }] = useAppState(themeState);
 
@@ -131,20 +130,18 @@ function Demo() {
         <div className="flex gap-3">
           <dt className="text-fg-mute">URL</dt>
           <dd className="break-all">
-            <Code>
-              {search === '' ? t('state.demoUrlEmpty') : `?${search}`}
-            </Code>
+            <Code>{search === '' ? m.state.demoUrlEmpty() : `?${search}`}</Code>
           </dd>
         </div>
         <div className="flex gap-3">
           <dt className="text-fg-mute">theme</dt>
           <dd>
-            <Code>{mode ?? t('state.demoThemeSystem')}</Code>
+            <Code>{mode ?? m.state.demoThemeSystem()}</Code>
           </dd>
         </div>
       </dl>
       <p className="text-fg-mute text-sm leading-relaxed">
-        <T k="state.demoHint" />
+        <Rich>{m.state.demoHint()}</Rich>
       </p>
     </div>
   );
@@ -153,20 +150,20 @@ function Demo() {
 export default function State() {
   return (
     <PackageLanding
-      description="state.description"
+      description={m.state.description}
       directory="state"
-      docsDescription="state.docsDescription"
-      docsTitle="state.docsTitle"
+      docsDescription={m.state.docsDescription}
+      docsTitle={m.state.docsTitle}
       features={FEATURES}
-      featuresTitle="state.featuresTitle"
+      featuresTitle={m.state.featuresTitle}
       name="@k8ordo/state"
     >
       <section className="mx-auto w-full max-w-6xl px-6 pb-24 md:px-8">
         <Heading level="h2">
-          <T k="state.demoTitle" />
+          <Rich>{m.state.demoTitle()}</Rich>
         </Heading>
         <p className="text-fg-mute mt-4 max-w-2xl text-sm leading-relaxed">
-          <T k="state.demoDescription" />
+          <Rich>{m.state.demoDescription()}</Rich>
         </p>
         <div className="mt-6 max-w-2xl">
           <Demo />
