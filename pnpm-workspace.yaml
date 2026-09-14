@@ -17,11 +17,17 @@ blockExoticSubdeps: true
 
 catalog:
   '@arethetypeswrong/cli': 0.18.5
+  # generative-UI アダプタの peer。@k8ordo/ui が開発対象にする版と examples が
+  # 使う版を同じ 1 コピーに保つ (scripts/check-peer-copies.mjs が検査する)。
+  '@json-render/core': 0.20.0
+  '@json-render/react': 0.20.0
+  '@openuidev/lang-core': 0.2.17
+  '@openuidev/react-lang': 0.2.15
   '@tailwindcss/postcss': 4.3.3
   '@tailwindcss/vite': 4.3.3
   '@types/node': 24.13.3
   '@types/react': 19.2.18
-  '@types/react-dom': 19.2.5
+  '@types/react-dom': 19.2.7
   '@vitejs/plugin-react': 6.1.1
   '@vitest/browser': 5.0.0
   '@vitest/browser-playwright': 5.0.0
@@ -34,11 +40,13 @@ catalog:
   '@vitest/spy': 5.0.0
   '@vitest/ui': 5.0.0
   '@vitest/utils': 5.0.0
-  postcss: 8.5.26
+  postcss: 8.5.28
   publint: 0.3.24
   react: 19.2.8
   react-dom: 19.2.8
+  server-only: 0.0.1
   tailwindcss: 4.3.3
+  typescript: 7.0.2
   vite: 8.2.2
   vite-plus: 0.3.0
   vitest: 5.0.0
