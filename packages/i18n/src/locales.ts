@@ -35,28 +35,6 @@ export type Delocalized<L extends string> = {
 };
 
 /**
- * A message: a function of the values its text needs (none for a plain
- * string), returning the text in the current locale. What a component that
- * takes a message as a prop should accept.
- */
-export type Message<A extends readonly unknown[] = []> = (...args: A) => string;
-
-/** One value per locale — every locale, no locale twice. */
-export type Variants<L extends string, V> = Readonly<Record<L, V>>;
-
-/**
- * Declares one message with its text in every locale. The result reads the
- * locale where it is called, so the same call renders on the server and in
- * the browser, and a bundler keeps only the messages a client module names.
- */
-export type DefineMessage<L extends string> = {
-  (variants: Variants<L, string>): Message;
-  <A extends readonly unknown[]>(
-    variants: Variants<L, (...args: A) => string>,
-  ): Message<A>;
-};
-
-/**
  * An application's locale set. `L` is the union of its tags, `D` the default
  * among them.
  */

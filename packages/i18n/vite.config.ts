@@ -1,4 +1,3 @@
-import react from '@vitejs/plugin-react';
 import { playwright } from '@vitest/browser-playwright';
 import { defineConfig } from 'vite-plus';
 
@@ -6,7 +5,6 @@ export default defineConfig({
   staged: {
     '*': 'vp check --fix',
   },
-  plugins: [react()],
   pack: {
     entry: [
       'src/**/*.ts',

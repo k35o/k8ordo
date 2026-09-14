@@ -135,6 +135,12 @@ describe('paramsSchema', () => {
 });
 
 describe('message', () => {
+  // 登録は後勝ちで、上の describe が別の集合を inline で定義しているので、
+  // 文言が読む集合をここで戻す。
+  beforeEach(() => {
+    defineLocales(['ja', 'en']);
+  });
+
   const nav = {
     home: message({ ja: 'ホーム', en: 'Home' }),
     greeting: message({

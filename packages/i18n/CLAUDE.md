@@ -41,11 +41,15 @@ pnpm check         # check:write to auto-fix
   that one synchronous call. In the browser `location.pathname`'s first
   segment is the locale. Do not add a provider or a hook; do not pass the
   locale as a prop.
-- **The first set to define itself is the one messages read.**
-  `defineLocales` registers `{ default, is }` on `globalThis` (first wins)
+- **The last set to define itself is the one messages read.**
+  `defineLocales` registers `{ default, is }` on `globalThis` (last wins, so
+  a dev server re-evaluating `i18n.ts` under HMR is what messages see next)
   so `message()` can tell an unknown segment (`/fr/…` on a 404 page) from a
   locale, and can render the default when nothing names one. An application
-  has one set; tests may define more, and they leave the first alone.
+  has one set; a test that defines others re-defines the one its messages
+  read. Before any set registers (a client graph that never imports the
+  module defining it), a segment no message has text for counts as no
+  locale, so a 404 page does not throw.
 - **Refuse where it is read, name what is missing.** A message lacking the
   named locale throws from the call, listing the variants present. A tag
   that is not BCP 47, a default outside the list, and a repeated locale

@@ -219,6 +219,11 @@ navigation to the same pathname under the other segment
 (`locales.localize(locales.delocalize(pathname).pathname, 'en')`), which
 re-renders the page; there is no state to keep in sync.
 
+A first segment that is not one of the set's locales is no locale, and the
+default applies; before the set has been defined in that environment, a
+segment no message has text for is read the same way, so a 404 page never
+throws on `/fr/…`.
+
 `locales.getLocale()` reads the same source for code that needs the tag
 itself: `<html lang>`, a language switcher, `Intl` formatters.
 

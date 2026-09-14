@@ -1,4 +1,4 @@
-import { currentLocale, registeredDefault } from './current';
+import { currentLocale, registeredDefault, setRegistered } from './current';
 import type { RegisteredLocale } from './register';
 
 /**
@@ -41,7 +41,14 @@ export function message<A extends readonly unknown[]>(
   return (...args: A): string => {
     // 何も指名していないときだけ、書かれた先頭の文言に落ちる。指名された
     // ロケールの文言が無いのは翻訳漏れなので、隠さず言う。
-    const locale = currentLocale() ?? registeredDefault();
+    // 集合が未登録なら（ロケール集合を定義するモジュールがまだ評価されて
+    // いないクライアント側）、URL の区間がロケールかどうかを判定できない。
+    // 文言に無い区間はロケールではないとみなし、先頭の文言に落ちる。
+    const named = currentLocale();
+    const locale =
+      named !== null && (setRegistered() || Object.hasOwn(variants, named))
+        ? named
+        : registeredDefault();
     const variant =
       locale === null
         ? variants[Object.keys(variants)[0] ?? '']

@@ -58,16 +58,20 @@ export const localeStorage = (): LocaleStorage | null => {
 };
 
 /**
- * The first set to define itself is the one messages read; an application
- * has one. Later definitions (a test file's fixtures, say) leave it alone.
+ * The set messages read is the last one defined; an application has one.
+ * Last rather than first so that a dev server re-evaluating the module that
+ * defines the set (a locale added under HMR) is what messages see next.
  */
 export const register = (set: RegisteredSet): void => {
-  global[SET_KEY] ??= set;
+  global[SET_KEY] = set;
 };
 
 /** The first segment of the browser's URL, whatever it spells. */
 const browserSegment = (): string =>
   global.location?.pathname.split('/')[1] ?? '';
+
+/** Whether a set has registered in this environment yet. */
+export const setRegistered = (): boolean => global[SET_KEY] !== undefined;
 
 /**
  * The current locale as a string, or `null` when nothing names one: no

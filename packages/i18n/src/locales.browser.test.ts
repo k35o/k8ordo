@@ -29,6 +29,26 @@ describe('getLocale (browser)', () => {
     }
   });
 
+  it('treats a segment no message has text for as no locale until a set is defined', () => {
+    // ロケール集合を定義するモジュールが client のグラフに無いアプリでは、
+    // 文言が最初に呼ばれる時点で集合が未登録のことがある。404 ページの
+    // `/fr/…` で throw せず、既定（先頭の文言）に落ちること。
+    const key = Symbol.for('@k8ordo/i18n/locales');
+    const registry = globalThis as { [key]?: unknown };
+    const saved = registry[key];
+    const original = location.pathname;
+    try {
+      registry[key] = undefined;
+      history.replaceState(null, '', '/fr/ui');
+      expect(home()).toBe('ホーム');
+      history.replaceState(null, '', '/en/ui');
+      expect(home()).toBe('Home');
+    } finally {
+      registry[key] = saved;
+      history.replaceState(null, '', original);
+    }
+  });
+
   it('refuses run: the URL is the locale here', () => {
     expect(() => locales.run('en', () => 'x')).toThrow(
       /the URL is the locale/u,

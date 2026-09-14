@@ -83,15 +83,21 @@ export const paramsSchema = locales.paramsSchema; // /fr/… is a 404
 And a message is called the same way everywhere:
 
 ```tsx
-import * as nav from '../messages/nav';
+// routes/[locale]/page.tsx — a Server Component
+import * as nav from '../../messages/nav';
 
 export default function Page() {
-  return <h1>{nav.home()}</h1>; // a Server Component …
+  return <h1>{nav.home()}</h1>;
 }
+```
 
-('use client');
+```tsx
+// components/toolbar.tsx — a Client Component, the same line
+'use client';
+import * as nav from '../messages/nav';
+
 export function Toolbar() {
-  return <button>{nav.greeting('k8o')}</button>; // … or a Client Component
+  return <button>{nav.greeting('k8o')}</button>;
 }
 ```
 

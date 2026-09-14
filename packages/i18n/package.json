@@ -48,17 +48,12 @@
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "catalog:",
-    "@types/react": "catalog:",
-    "@vitejs/plugin-react": "catalog:",
     "@vitest/browser-playwright": "catalog:",
     "publint": "catalog:",
-    "react": "catalog:",
-    "react-dom": "catalog:",
     "typescript": "7.0.2",
     "vite": "catalog:",
     "vite-plus": "catalog:",
-    "vitest": "catalog:",
-    "vitest-browser-react": "catalog:"
+    "vitest": "catalog:"
   },
   "peerDependencies": {
     "typescript": ">=7.0.2"
