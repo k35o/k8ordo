@@ -58,7 +58,7 @@ it('delivers the param to the leaf through useParams', async () => {
 
   await expect
     .element(screen.getByTestId('product'))
-    .toHaveTextContent('2:second product');
+    .toMatchTextContent('2:second product');
 });
 
 it('goes to a page through navigateTo from a button', async () => {
@@ -69,7 +69,7 @@ it('goes to a page through navigateTo from a button', async () => {
 
   await expect
     .element(screen.getByTestId('product'))
-    .toHaveTextContent('1:first product');
+    .toMatchTextContent('1:first product');
   expect(location.pathname).toBe('/products/1');
 });
 
@@ -85,7 +85,7 @@ it('shows the error component inside the layout and leaves it behind on navigati
       .toBeInTheDocument();
     await expect
       .element(screen.getByTestId('route-error'))
-      .toHaveTextContent('this product page is broken');
+      .toMatchTextContent('this product page is broken');
 
     await navigateTo('/products').finished;
 
@@ -134,5 +134,5 @@ it('answers a pathname the table does not name with the not-found leaf, inside t
   await expect.element(screen.getByTestId('root-layout')).toBeInTheDocument();
   await expect
     .element(screen.getByTestId('not-found'))
-    .toHaveTextContent('not found: /nowhere');
+    .toMatchTextContent('not found: /nowhere');
 });

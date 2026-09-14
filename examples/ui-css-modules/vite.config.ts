@@ -8,5 +8,6 @@ export default defineConfig({
   plugins: [react()],
   test: {
     globals: true,
+    fsModuleCache: true,
   },
 });

@@ -28,6 +28,7 @@ export default defineConfig({
   },
   test: {
     globals: true,
+    fsModuleCache: true,
     coverage: {
       all: false,
       provider: 'v8',

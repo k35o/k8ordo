@@ -6,6 +6,7 @@ import { defineConfig } from 'vite-plus';
 export default defineConfig({
   test: {
     globals: true,
+    fsModuleCache: true,
     include: ['src/**/*.test.ts'],
     // build.test.ts のビルドも dev.test.ts の dev サーバも、同じ
     // .k8ordo/routes.gen.ts をそれぞれの routesDir から書き直す。並行させると
