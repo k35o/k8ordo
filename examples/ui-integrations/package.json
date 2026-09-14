@@ -12,11 +12,11 @@
     "check:write": "vp check --fix"
   },
   "dependencies": {
-    "@json-render/core": "0.20.0",
-    "@json-render/react": "0.20.0",
+    "@json-render/core": "catalog:",
+    "@json-render/react": "catalog:",
     "@k8ordo/ui": "workspace:^",
-    "@openuidev/lang-core": "0.2.17",
-    "@openuidev/react-lang": "0.2.15",
+    "@openuidev/lang-core": "catalog:",
+    "@openuidev/react-lang": "catalog:",
     "@tailwindcss/vite": "catalog:",
     "tailwindcss": "catalog:",
     "zod": "catalog:"

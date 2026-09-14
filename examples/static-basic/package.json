@@ -14,14 +14,14 @@
     "@k8ordo/router": "workspace:^",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "server-only": "0.0.1",
+    "server-only": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
     "@k8ordo/static": "workspace:^",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
-    "typescript": "7.0.2",
+    "typescript": "catalog:",
     "vite": "catalog:",
     "vite-plus": "catalog:"
   }

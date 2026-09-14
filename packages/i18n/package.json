@@ -50,7 +50,7 @@
     "@arethetypeswrong/cli": "catalog:",
     "@vitest/browser-playwright": "catalog:",
     "publint": "catalog:",
-    "typescript": "7.0.2",
+    "typescript": "catalog:",
     "vite": "catalog:",
     "vite-plus": "catalog:",
     "vitest": "catalog:"
