@@ -28,6 +28,8 @@ apps/docs/public/i18n/
 
 # Testing
 coverage
+# vitest 5 のレポート出力先 (html レポータ / blob / attachments)
+.vitest/
 
 # Logs
 logs

@@ -11,6 +11,7 @@ export default defineConfig({
   // ブラウザ (Chromium) で走らせる。@k8ordo/router 自身のテストと同じ構成
   test: {
     globals: true,
+    fsModuleCache: true,
     include: ['src/**/*.browser.test.tsx'],
     browser: {
       enabled: true,

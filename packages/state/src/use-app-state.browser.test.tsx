@@ -546,7 +546,7 @@ it('refuses a value the URL cannot carry on the spot, writing nothing', async ()
 
   await expect
     .element(screen.getByTestId('refused'))
-    .toHaveTextContent('no URL serialization');
+    .toMatchTextContent('no URL serialization');
   await expect.element(screen.getByTestId('since')).toHaveTextContent('none');
   expect(navigations - before).toBe(0);
 });

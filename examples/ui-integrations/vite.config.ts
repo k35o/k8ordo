@@ -7,6 +7,7 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   test: {
     globals: true,
+    fsModuleCache: true,
     projects: [
       {
         extends: true,

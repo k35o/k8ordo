@@ -25,6 +25,22 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noUncheckedIndexedAccess": true,
-    "types": ["node", "vite-plus/test/globals", "vite-plus/test/importMeta"]
+    // vitest 4 では expect.element と jest-dom マッチャの宣言が vitest 本体の
+    // index.d.ts に入っていたが、v5 で expect が取り込まれた際に
+    // @vitest/browser/matchers へ分かれた。vite-plus の再エクスポート
+    // (vite-plus/test/matchers) は 0.3.0 時点で参照先の jest-dom.d.ts を同梱
+    // しておらず型が欠けるため、上流を直接指す。@vitest/browser はルートの
+    // devDependencies に置いてあり、全ワークスペースから解決できる。
+    // この宣言は `declare module 'vitest'` なので、@vitest/browser が解決する
+    // vitest とテストが解決する vitest が同一実体でないとマージされない。
+    // @types/node の版がワークスペース間でずれると vite 経由で vitest の
+    // peer context が割れて別実体になり、expect.element が生えなくなる
+    // (エラーは型だけに出る)。catalog で 1 本に揃えているのはそのため。
+    "types": [
+      "node",
+      "vite-plus/test/globals",
+      "vite-plus/test/importMeta",
+      "@vitest/browser/matchers"
+    ]
   }
 }
