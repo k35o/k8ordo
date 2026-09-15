@@ -97,7 +97,13 @@ export const TalkForm = ({ action, fields }: TalkFormProps) => {
 ```
 
 `form.props` attaches to the `<form>` and nowhere else. There is no per-field
-registration to forget.
+registration to forget. It also hears the form being reset — by a reset
+button, by `form.reset()`, or by React itself once an action has succeeded —
+and forgets what it knew about the old values: the messages, which server
+errors were still current, the rows that were added, and `isDirty`.
+
+A form with no action behind it — a GET filter, say — calls `useForm(fields)`
+and leaves the state out.
 
 ```ts
 // actions.ts
@@ -174,7 +180,12 @@ the registry route works with either.
 **`isDirty` costs one boolean.** `form.isDirty` compares each control — text,
 checkbox, `<select>`, a `HiddenValue` — with the value it was rendered with,
 read straight from the DOM; adding or removing a row counts too. It flips at
-most twice, so it never becomes a per-keystroke re-render.
+most twice, so it never becomes a per-keystroke re-render. A reset — React's
+own, after a successful action, included — is read from the DOM once it is
+through, so it takes the flag back to `false` for everything the browser
+restores. A `HiddenValue` is not among those: its value is the caller's
+state, which React writes straight back, so a form holding an edited one
+stays dirty until that state is reset too.
 
 ## Nested objects and repeated rows
 

@@ -1341,6 +1341,12 @@
           "types": ["((formData: FormData) => void | Promise<void>)", "string"],
           "defaultValue": null,
           "required": false
+        },
+        {
+          "name": "ref",
+          "types": ["Ref<HTMLFormElement>"],
+          "defaultValue": null,
+          "required": false
         }
       ],
       "inherits": "FormHTMLAttributes<HTMLFormElement>"
@@ -2251,14 +2257,14 @@
       "name": "PortalRootProvider",
       "props": [
         {
-          "name": "children",
-          "types": ["ReactNode"],
-          "defaultValue": null,
-          "required": false
-        },
-        {
           "name": "value",
           "types": ["RefObject<HTMLElement | null>"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "children",
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         }

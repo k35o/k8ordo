@@ -290,9 +290,10 @@ typed-path consumer.
 ## What navigation guarantees
 
 **`finished` means the page is on screen.** The intercept handler resolves in
-an effect after React commits the new tree, so anything awaiting the platform's
-promise — including `@k8ordo/state`'s `update().finished` — is awaiting the
-render, not the URL write.
+a layout effect, once React has committed the new tree and before the browser
+paints it, so anything awaiting the platform's promise — including
+`@k8ordo/state`'s `update().finished` — is awaiting the render, not the URL
+write.
 
 **A state change is not a page change.** When only the search or the entry
 state moved, the pathname is the one whose tree is on screen: the route tree
@@ -304,7 +305,10 @@ loading is a page change and lets that page finish arriving.
 
 **Route changes run in a transition.** The new tree is applied inside
 `startTransition`, so React can keep the old page interactive while the new
-one prepares.
+one prepares. The transition is tagged with `addTransitionType` — `navigation`,
+and one of `navigation-push`, `navigation-replace`, `navigation-traverse` —
+which is what a `<ViewTransition>` reads to animate a page change and nothing
+else (below).
 
 **A new page starts at the top.** Once the new tree is on screen, the
 viewport goes where a document load would have put it: the top, or the
@@ -320,6 +324,60 @@ come back. `load` receives that signal, so a payload fetch under the framework
 is cancelled outright. A `React.lazy` chunk cannot be — a dynamic import takes
 no signal — so in a client application it finishes in the background and is
 kept for the next visit, while the page it belonged to is never shown.
+
+## Animating page changes
+
+A route change is a transition, and React's `<ViewTransition>` animates what
+a transition changes. Put one around the hole the pages render into and key
+it on the router's transition types, so it animates page changes and stays
+out of every other transition — a `Button`'s pending action is one too, and
+must not cross-fade the page:
+
+```tsx
+import { Outlet } from '@k8ordo/router';
+import { ViewTransition } from 'react';
+
+export const RootLayout = () => (
+  <>
+    <nav>…</nav>
+    <ViewTransition
+      default="none"
+      update={{ navigation: 'auto', default: 'none' }}
+    >
+      <Outlet />
+    </ViewTransition>
+  </>
+);
+```
+
+`update`, because the boundary stays and its content changes; `auto` is the
+browser's own cross-fade. The router tags every page change `navigation`,
+plus the kind the platform reported — `navigation-push`,
+`navigation-replace` or `navigation-traverse` — so a back button can slide
+the other way from a link:
+
+```tsx
+<ViewTransition
+  default="none"
+  update={{
+    'navigation-push': 'slide-forward',
+    'navigation-replace': 'slide-forward',
+    'navigation-traverse': 'slide-back',
+    default: 'none',
+  }}
+>
+  <Outlet />
+</ViewTransition>
+```
+
+with each class styled through `::view-transition-old(.slide-back)` and
+`::view-transition-new(.slide-back)`. A state change — `@k8ordo/state`'s
+`update()` — never changes the tree, so it never animates. Under the
+framework the same `<ViewTransition>` goes in a client component of a
+layout, around `children`.
+
+`@k8ordo/ui`'s stylesheet turns view-transition animations off under
+`prefers-reduced-motion`; an application without it adds that rule itself.
 
 ## Testing
 

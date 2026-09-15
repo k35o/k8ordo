@@ -1,10 +1,11 @@
 'use client';
 
-import type { FC, FormHTMLAttributes, ReactNode } from 'react';
+import type { FC, FormHTMLAttributes, ReactNode, Ref } from 'react';
 
 type Props = {
   action?: ((formData: FormData) => void | Promise<void>) | string;
   children: ReactNode;
+  ref?: Ref<HTMLFormElement>;
 } & Omit<
   FormHTMLAttributes<HTMLFormElement>,
   'action' | 'children' | 'className' | 'style'

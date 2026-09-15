@@ -290,6 +290,10 @@ import { Tabs } from '@k8ordo/ui';
 </Tabs.Root>;
 ```
 
+Selecting a tab is a transition: the panels cross-fade through React's
+`<ViewTransition>` (off under `prefers-reduced-motion`), and a panel that
+suspends keeps the current one on screen until it is ready.
+
 Props (Tabs.Root):
 
 - `ids`: `[string, ...string[]]` (required)
@@ -452,6 +456,7 @@ Props:
 
 - `children`: `ReactNode` (required)
 - `action`: `((formData: FormData) => void | Promise<void>)` | `string`
+- `ref`: `Ref<HTMLFormElement>`
 
 ### FormControl
 
@@ -1440,8 +1445,8 @@ import { PortalRootProvider, usePortalRoot } from '@k8ordo/ui';
 
 Props:
 
+- `value`: `RefObject<HTMLElement | null>` (required)
 - `children`: `ReactNode`
-- `value`: `RefObject<HTMLElement | null>`
 
 ## i18n (message dictionary)
 

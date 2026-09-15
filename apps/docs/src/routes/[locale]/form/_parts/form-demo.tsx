@@ -1,7 +1,7 @@
 'use client';
 
 import { useForm } from '@k8ordo/form';
-import type { FormFields, FormState } from '@k8ordo/form';
+import type { FormFields } from '@k8ordo/form';
 import { useAppState } from '@k8ordo/state';
 import { Button, Code, FormControl, TextField } from '@k8ordo/ui';
 
@@ -14,18 +14,14 @@ type Props = {
   fields: FormFields<'q' | 'min', never>;
 };
 
-// Server Action の無いサイトなので、送信結果の state は常に空。毎レンダー
-// 新しい `{}` を渡すと useForm がそれを新しい送信結果として読み直すので、
-// 1 つを使い回す。
-const NO_STATE: FormState = {};
-
 // TextField と同じ見た目。number は TextField の受け付ける type に無いので
 // 素の <input> に、制約属性をそのまま広げる。
 const NUMBER_INPUT_CLASS =
   'border-border-base bg-bg-base aria-invalid:border-border-error focus-visible:ring-border-info inline-full rounded-xl border px-3 py-2 focus-visible:border-transparent focus-visible:ring-2 focus-visible:outline-hidden';
 
 export function FormDemo({ fields }: Props) {
-  const form = useForm(fields, NO_STATE);
+  // Server Action の無いサイトなので、送信結果の state は無い
+  const form = useForm(fields);
   const q = form.field('q');
   const min = form.field('min');
   // フォームが GET で書いた URL を、同じスキーマの state が読み返す

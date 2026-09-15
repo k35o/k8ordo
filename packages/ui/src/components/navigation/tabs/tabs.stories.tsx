@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect } from 'storybook/test';
+import { expect, waitFor } from 'storybook/test';
 
 import { Tabs } from '.';
 
@@ -36,11 +36,16 @@ export const Primary: Story = {
 
     await expect(canvas.getByRole('tabpanel')).toHaveTextContent('概要');
 
+    // 選択は transition なので、パネルの入れ替わりは click の後に commit される
     await userEvent.click(settingsTab);
-    await expect(canvas.getByRole('tabpanel')).toHaveTextContent('設定項目');
+    await waitFor(() => {
+      expect(canvas.getByRole('tabpanel')).toHaveTextContent('設定項目');
+    });
 
     await userEvent.click(historyTab);
-    await expect(canvas.getByRole('tabpanel')).toHaveTextContent('履歴');
+    await waitFor(() => {
+      expect(canvas.getByRole('tabpanel')).toHaveTextContent('履歴');
+    });
   },
 };
 

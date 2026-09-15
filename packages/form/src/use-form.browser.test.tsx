@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useActionState, useEffect, useState } from 'react';
 import type { FC } from 'react';
 import { render } from 'vitest-browser-react';
 import { z } from 'zod';
@@ -173,6 +173,51 @@ const Editor: FC = () => {
   );
 };
 
+// action は毎回同じ内容の state を返す。state の変化では何も戻らないので、
+// React が action の後にフォームを戻すことそのものを useForm が聞いているかが
+// 問われる
+const Submitted: FC = () => {
+  const [state, formAction] = useActionState(
+    (): Promise<FormState> => Promise.resolve({}),
+    {},
+  );
+  const form = useForm(derived, state);
+  const email = form.field('email');
+
+  return (
+    <form {...form.props} action={formAction}>
+      <input aria-label="email" {...email.input} />
+      <p data-testid="email-error">{email.error ?? ''}</p>
+      <p data-testid="dirty">{String(form.isDirty)}</p>
+      <button type="submit">send</button>
+    </form>
+  );
+};
+
+const draftSchema = z.object({ title: z.string(), body: z.string() });
+const draftFields = formFields(draftSchema);
+
+const Draft: FC = () => {
+  const [body, setBody] = useState('初稿');
+  const form = useForm(draftFields);
+
+  return (
+    <form {...form.props}>
+      <input aria-label="title" {...form.field('title').input} />
+      <HiddenValue name="body" value={body} />
+      <button
+        onClick={() => {
+          setBody('推敲済み');
+        }}
+        type="button"
+      >
+        edit
+      </button>
+      <p data-testid="dirty">{String(form.isDirty)}</p>
+    </form>
+  );
+};
+
 describe('useForm in a browser', () => {
   it('spreads the derived attributes onto the real element', async () => {
     const screen = await render(<Signup />);
@@ -266,6 +311,82 @@ describe('useForm in a browser', () => {
       .toHaveTextContent('false');
     await screen.getByLabelText('email').fill('k8o@example.com');
     await expect.element(screen.getByTestId('dirty')).toHaveTextContent('true');
+  });
+
+  it('forgets messages, edits and isDirty when the form is reset', async () => {
+    const screen = await render(
+      <Signup state={{ errors: { email: 'すでに登録されています' } }} />,
+    );
+
+    await screen.getByLabelText('password').fill('short');
+    await screen.getByLabelText('email').click();
+    await expect
+      .element(screen.getByTestId('password-error'))
+      .toHaveTextContent('8文字以上で入力してください');
+    await screen.getByLabelText('email').fill('other@example.com');
+    await expect
+      .element(screen.getByTestId('email-error'))
+      .toHaveTextContent('');
+    await expect.element(screen.getByTestId('dirty')).toHaveTextContent('true');
+
+    (document.querySelector('form') as HTMLFormElement).reset();
+
+    await expect
+      .element(screen.getByTestId('password-error'))
+      .toHaveTextContent('');
+    await expect
+      .element(screen.getByTestId('dirty'))
+      .toHaveTextContent('false');
+    // The edit that hid the server's answer is gone with the value.
+    await expect
+      .element(screen.getByTestId('email-error'))
+      .toHaveTextContent('すでに登録されています');
+  });
+
+  it('stays dirty after a reset while a HiddenValue holds edited state', async () => {
+    const screen = await render(<Draft />);
+
+    await screen.getByLabelText('title').fill('題名');
+    await screen.getByRole('button', { name: 'edit' }).click();
+    await expect.element(screen.getByTestId('dirty')).toHaveTextContent('true');
+
+    (document.querySelector('form') as HTMLFormElement).reset();
+
+    // The browser restores the input; the hidden value is React's to write
+    // back, and it does, so the form is not clean.
+    await expect.element(screen.getByLabelText('title')).toHaveValue('');
+    await expect.element(screen.getByTestId('dirty')).toHaveTextContent('true');
+  });
+
+  it('takes the rows back to the baseline when the form is reset', async () => {
+    const screen = await render(<List />);
+
+    await screen.getByRole('button', { name: 'add' }).click();
+    await screen.getByRole('button', { name: 'add' }).click();
+    await expect.element(screen.getByTestId('count')).toHaveTextContent('2');
+
+    (document.querySelector('form') as HTMLFormElement).reset();
+
+    await expect.element(screen.getByTestId('count')).toHaveTextContent('0');
+  });
+
+  it("hears React's own reset after an action and starts clean", async () => {
+    const screen = await render(<Submitted />);
+
+    await screen.getByLabelText('email').fill('not-an-email');
+    await expect.element(screen.getByTestId('dirty')).toHaveTextContent('true');
+
+    // ボタンをクリックすると blur でメッセージが現れてボタンが下へずれ、
+    // クリックが外れる。送信そのものを主張したいので、DOM から送る
+    (document.querySelector('form') as HTMLFormElement).requestSubmit();
+
+    await expect.element(screen.getByLabelText('email')).toHaveValue('');
+    await expect
+      .element(screen.getByTestId('dirty'))
+      .toHaveTextContent('false');
+    await expect
+      .element(screen.getByTestId('email-error'))
+      .toHaveTextContent('');
   });
 
   it('adds a row, numbers its name, and stops at the schema bound', async () => {

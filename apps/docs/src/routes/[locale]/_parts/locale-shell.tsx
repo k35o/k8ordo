@@ -4,8 +4,8 @@ import type { Message } from '@k8ordo/i18n';
 import { useMatch, usePathname } from '@k8ordo/router';
 import { UIProvider, Drawer, Heading, IconButton, ListIcon } from '@k8ordo/ui';
 import { en } from '@k8ordo/ui/i18n';
-import { useEffect, useRef, useState } from 'react';
-import type { ReactNode } from 'react';
+import { useEffect, useRef, useState, ViewTransition } from 'react';
+import type { FC, ReactNode } from 'react';
 
 import { Footer } from '../../../components/footer';
 import { LocaleAnchor } from '../../../components/locale-anchor';
@@ -79,6 +79,21 @@ function useSideNavConfig(): SideNavConfig | null {
   return null;
 }
 
+/**
+ * ページの差し替えをクロスフェードする。ルーターが付ける `navigation` の型で
+ * 選ぶのは、Button の action も transition だから。型で絞らないと、ボタンを
+ * 1 つ押すたびにページ全体がフェードする。中身の更新（update）を見るのは、
+ * 境界は残ってページだけが入れ替わるため。
+ */
+const PageTransition: FC<{ children: ReactNode }> = ({ children }) => (
+  <ViewTransition
+    default="none"
+    update={{ navigation: 'auto', default: 'none' }}
+  >
+    {children}
+  </ViewTransition>
+);
+
 function LayoutContent({ children }: { children: ReactNode }) {
   const sideNavConfig = useSideNavConfig();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -130,7 +145,9 @@ function LayoutContent({ children }: { children: ReactNode }) {
           <SideNavigation categories={sideNavConfig.categories} />
         </aside>
         <main className="flex min-w-0 flex-1 flex-col">
-          <div className="flex-1">{children}</div>
+          <div className="flex-1">
+            <PageTransition>{children}</PageTransition>
+          </div>
           <Footer />
         </main>
       </div>
@@ -164,7 +181,9 @@ function LayoutContent({ children }: { children: ReactNode }) {
       {/* ラッパーはブロックのまま保つ。flexにするとページ側の mx-auto コンテナが
           flexアイテム化し、stretchが効かず中身のmin-content幅で横にあふれる */}
       <main className="flex min-w-0 flex-1 flex-col">
-        <div className="min-w-0 flex-1">{children}</div>
+        <div className="min-w-0 flex-1">
+          <PageTransition>{children}</PageTransition>
+        </div>
         <Footer />
       </main>
     </>

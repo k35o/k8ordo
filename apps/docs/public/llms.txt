@@ -65,8 +65,10 @@ every submission: `z.number()` and `z.literal(1)` (use `z.coerce.number()`),
 
 ## Entry points
 
-- `@k8ordo/form` — client. `useForm(fields, state)` takes the whole
-  `formFields` result and returns props for the `<form>` element, a
+- `@k8ordo/form` — client. `useForm(fields, state?)` takes the whole
+  `formFields` result (and the action's state, when there is one) and
+  returns props for the `<form>` element — which also hear a reset, React's
+  own after a successful action included — a
   `field(path)` accessor giving input attributes, the current error, and
   `invalid` / `required`, an `array(path)` accessor for repeated rows, and
   `isDirty`. Also `useAsyncCheck` for server-answered per-field checks and
@@ -163,8 +165,9 @@ These docs are served from <https://ordo.k8o.me>.
   wildcards, route groups, declaration order), mounting `<Router>` and
   `<Outlet>`, links without a `<Link>` component, `useMatch` for active
   sections, `Register` for checked patterns, what navigation guarantees
-  (`finished` after commit, scroll to top or fragment on a new page), and
-  how the framework reuses the navigation half.
+  (`finished` after commit, scroll to top or fragment on a new page), how
+  a `<ViewTransition>` animates page changes by the router's transition
+  types, and how the framework reuses the navigation half.
 
 ## Entry point
 
@@ -194,7 +197,11 @@ These docs are served from <https://ordo.k8o.me>.
   own trailing-slash rule;
   `<PathnameProvider pathname>` seeds it for a server render and hydration,
   and is mounted by `<Router>` and by both mode runtimes, never by an
-  application. `useInterceptedNavigation({claim, load, apply})` returns
+  application. Every page change is applied in a transition tagged
+  `navigation` and `navigation-push` / `navigation-replace` /
+  `navigation-traverse` (`addTransitionType`), so a `<ViewTransition
+  update={{ navigation: 'auto', default: 'none' }}>` around the pages'
+  hole animates page changes and no other transition. `useInterceptedNavigation({claim, load, apply})` returns
   `{ generation }` and is the
   navigation primitive `<Router>` is built on, and the seam the framework
   uses to render server-produced trees instead.

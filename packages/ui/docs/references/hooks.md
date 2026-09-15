@@ -144,6 +144,11 @@ useTimeout(() => {
 
 ## DOM and browser
 
+There is no `useClient` and no "mounted" flag: a component that can only
+render in a browser says so with React's own `use(browser())` — `browser`
+from `react-dom` — under a `<Suspense>`, and the server leaves the fallback
+for the browser to fill.
+
 ### useWindowSize
 
 Reads the window size.
@@ -280,14 +285,6 @@ const isMd = useBreakpoint('md'); // whether the viewport is 768px or wider
 ```
 
 ## Utilities
-
-### useClient
-
-Whether we are on the client.
-
-```tsx
-const isClient = useClient();
-```
 
 ### useClipboard
 

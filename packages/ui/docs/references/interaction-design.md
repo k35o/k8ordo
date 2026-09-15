@@ -21,11 +21,12 @@ Design with these eight states in mind.
 
 Restrained, natural motion.
 
-| Purpose                        | Recommended setting                        |
-| ------------------------------ | ------------------------------------------ |
-| Hover color change             | `transition-colors duration-150 ease-out`  |
-| Opacity change                 | `transition-opacity duration-200 ease-out` |
-| When size changes are involved | `transition-all duration-150 ease-out`     |
+| Purpose                        | Recommended setting                           |
+| ------------------------------ | --------------------------------------------- |
+| Hover color change             | `transition-colors duration-150 ease-out`     |
+| Opacity change                 | `transition-opacity duration-200 ease-out`    |
+| When size changes are involved | `transition-all duration-150 ease-out`        |
+| A page or a panel replaced     | `<ViewTransition>` — the browser's cross-fade |
 
 ### Timing principles
 
@@ -83,7 +84,7 @@ import { FormControl, TextField } from '@k8ordo/ui';
 
 - Set `aria-label` / `aria-describedby` where they belong
 - Guarantee keyboard navigation (Tab, Enter, Escape, arrow keys)
-- Respect `prefers-reduced-motion` — the motion library handles it for you
+- Respect `prefers-reduced-motion` — the stylesheet turns the library's own animations and every view transition off under it
 - Never signal state with color alone; pair it with an icon or text
 
 ## What not to do

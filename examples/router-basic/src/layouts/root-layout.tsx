@@ -1,4 +1,5 @@
 import { href, Outlet, useMatch } from '@k8ordo/router';
+import { ViewTransition } from 'react';
 import type { FC, ReactNode } from 'react';
 
 // <Link> はない。Navigation API の下では素の <a> がそのままクライアント遷移
@@ -35,7 +36,15 @@ export const RootLayout: FC = () => {
         </NavLink>
       </nav>
       <main>
-        <Outlet />
+        {/* ページの差し替えだけをクロスフェードする。ルーターが transition に
+            付ける `navigation` の型で選ぶので、ページ内の他の transition では
+            動かない */}
+        <ViewTransition
+          default="none"
+          update={{ navigation: 'auto', default: 'none' }}
+        >
+          <Outlet />
+        </ViewTransition>
       </main>
     </div>
   );

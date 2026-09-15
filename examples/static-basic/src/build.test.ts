@@ -34,6 +34,14 @@ describe('the static build', () => {
     expect(html).toContain('home');
   });
 
+  it("leaves a browser-only component's fallback in the HTML without stopping", () => {
+    // `use(browser())` はビルドの失敗ではない: fallback が書かれ、本体は
+    // ブラウザが hydrate 後に描く
+    const html = read('index.html');
+    expect(html).toContain('time zone: not yet');
+    expect(html).not.toContain('time zone: Asia');
+  });
+
   it('writes the same page as a payload beside it', () => {
     expect(read('index.rsc')).toContain('rendered on the server');
   });

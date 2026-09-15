@@ -79,7 +79,7 @@ export default defineConfig({
       ],
     },
     settings: {
-      react: { version: '19.2.5' },
+      react: { version: '19.3.0' },
       // oxlint-tailwindcss v1 は明示的な Tailwind エントリポイントが必須。
       // @k8ordo/ui は src/styles/index.css が単一ソース。docs / examples は
       // それを取り込んだ各自の globals.css を使う。

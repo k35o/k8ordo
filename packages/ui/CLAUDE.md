@@ -179,6 +179,17 @@ export const MyComponent = { Root, Part } as const;
 - Use `useId()` for accessible `aria-labelledby`/`aria-describedby` connections
 - `'use client'` directive at top when using hooks
 
+### Content that gets replaced
+
+A change that swaps what is on screen (`Tabs`) is applied inside
+`startTransition`, and the swapped element is wrapped in
+`<ViewTransition default="none" enter="auto" exit="auto">`: React animates
+the swap with the platform's own cross-fade, and a panel that suspends keeps
+the current one on screen until it is ready. `default="none"` is what keeps
+an unrelated transition inside the panel — a `Button`'s action — from
+animating it. `base.css` turns every view transition off under
+`prefers-reduced-motion`, so a component never checks it itself.
+
 ## Design Token System
 
 No raw color values — always use semantic tokens in Tailwind classes. The tokens are defined in `src/styles/index.css` via CSS custom properties and mapped to Tailwind's `@theme inline`.

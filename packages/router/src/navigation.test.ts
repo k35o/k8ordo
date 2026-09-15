@@ -1,4 +1,4 @@
-import { isOurs, scrollPlanFor } from './navigation';
+import { isOurs, scrollPlanFor, transitionTypesFor } from './navigation';
 import type { NavigationFacts } from './navigation';
 
 const facts = (overrides: Partial<NavigationFacts> = {}): NavigationFacts => ({
@@ -54,5 +54,22 @@ describe('scrollPlanFor', () => {
   it('leaves a traversal to the browser, which restores the position', () => {
     expect(scrollPlanFor('traverse', '')).toBeNull();
     expect(scrollPlanFor('traverse', '#x')).toBeNull();
+  });
+});
+
+describe('transitionTypesFor', () => {
+  it('names any page change, and the kind the platform reported', () => {
+    expect(transitionTypesFor('push')).toStrictEqual([
+      'navigation',
+      'navigation-push',
+    ]);
+    expect(transitionTypesFor('replace')).toStrictEqual([
+      'navigation',
+      'navigation-replace',
+    ]);
+    expect(transitionTypesFor('traverse')).toStrictEqual([
+      'navigation',
+      'navigation-traverse',
+    ]);
   });
 });

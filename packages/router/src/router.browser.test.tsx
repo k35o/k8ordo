@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, ViewTransition } from 'react';
 import { render } from 'vitest-browser-react';
 
 import { defineRoutes } from './define-routes';
@@ -153,7 +153,10 @@ it('feeds typed params to the leaf and restores them across back', async () => {
 it('leaves the route tree alone when only the search moves', async () => {
   await render(<Router routes={routes} />);
   await navigateTo('/products', { history: 'replace' }).finished;
-  expect(listMounts).toBe(1);
+  // finished は commit で settle し、ページの passive effect はその後に走る
+  await vi.waitFor(() => {
+    expect(listMounts).toBe(1);
+  });
 
   const url = new URL(location.href);
   url.searchParams.set('q', 'shoes');
@@ -339,4 +342,39 @@ it('leaves the failure behind when the pathname changes', async () => {
   } finally {
     consoleError.mockRestore();
   }
+});
+
+it('tags the transition that applies a new tree with the navigation kind', async () => {
+  const seen: string[][] = [];
+  // update を受けるのは「境界の中身が transition の中で変わった」ときなので、
+  // ページの穴をレイアウトの境界で包む
+  const Animated: FC = () => (
+    <ViewTransition
+      default="none"
+      onUpdate={(_instance, types) => {
+        seen.push(types);
+      }}
+      update="auto"
+    >
+      <div data-testid="animated">
+        <Outlet />
+      </div>
+    </ViewTransition>
+  );
+  const animated = defineRoutes({
+    '/': {
+      layout: Animated,
+      children: { '/': HomePage, '/about': AboutPage },
+    },
+  });
+  const screen = await render(<Router routes={animated} />);
+  await navigateTo('/', { history: 'replace' }).finished;
+  await expect.element(screen.getByTestId('home')).toBeInTheDocument();
+
+  await navigateTo('/about').finished;
+
+  await expect.element(screen.getByTestId('about')).toBeInTheDocument();
+  await vi.waitFor(() => {
+    expect(seen.at(-1)).toStrictEqual(['navigation', 'navigation-push']);
+  });
 });
