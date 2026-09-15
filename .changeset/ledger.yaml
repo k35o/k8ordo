@@ -1,19 +1,44 @@
+"@k8ordo/color-scheme@0.0.0":
+  dir: packages/color-scheme
+  intents:
+    - color-scheme-package
 "@k8ordo/form@0.1.1":
   dir: packages/form
   intents:
     - form-dropped-warning
+"@k8ordo/form@0.2.0":
+  dir: packages/form
+  intents:
+    - react-19-3-form
+    - silent-cooks-leave
+    - zod-4-5-iso-formats
+"@k8ordo/i18n@0.0.0":
+  dir: packages/i18n
+  intents:
+    - i18n-package
+    - i18n-paths
 "@k8ordo/router@0.1.0":
   dir: packages/router
   intents:
     - framework-error-redirect-request
     - framework-params-schema
     - router-scroll-and-match
+"@k8ordo/router@0.2.0":
+  dir: packages/router
+  intents:
+    - bind-params-router
+    - react-19-3-router
 "@k8ordo/server@0.1.0":
   dir: packages/server
   intents:
     - framework-error-redirect-request
     - framework-params-schema
     - static-server-hardening
+"@k8ordo/server@0.2.0":
+  dir: packages/server
+  intents:
+    - framework-parse-exports
+    - react-19-3-framework-docs
 "@k8ordo/state@0.2.0":
   dir: packages/state
   intents:
@@ -25,7 +50,30 @@
     - framework-error-redirect-request
     - framework-params-schema
     - static-server-hardening
+"@k8ordo/static@0.2.0":
+  dir: packages/static
+  intents:
+    - framework-parse-exports
+    - react-19-3-framework-docs
+    - static-dev-refuses-actions
 "@k8ordo/ui@2.0.0":
   dir: packages/ui
   intents:
     - ui-two
+"@k8ordo/ui@3.0.0":
+  dir: packages/ui
+  intents:
+    - button-render-item-passthrough
+    - purple-tools-design
+    - react-19-3-ui
+    - react-compiler-lint-conformance
+    - tough-buses-happen
+    - ui-dictionaries
+    - ui-jsdom-render
+docs@0.0.10:
+  dir: apps/docs
+  intents:
+    - docs-color-scheme
+    - docs-i18n
+    - docs-links
+    - react-19-3-docs
