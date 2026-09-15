@@ -30,8 +30,11 @@ export type {
   StandardSchemaLike,
 } from './paths';
 export type {
+  LayoutProps,
+  PageProps,
   Register,
   RegisteredNavigablePattern,
+  RegisteredPageParams,
   RegisteredParams,
   RegisteredPattern,
 } from './register';

@@ -1,3 +1,4 @@
+import type { PageProps } from '@k8ordo/router';
 import * as z from 'zod/mini';
 
 import { findProduct } from '../../_data/catalog.server';
@@ -7,7 +8,8 @@ export const paramsSchema = z.object({
   id: z.coerce.number().check(z.int(), z.positive()),
 });
 
-export default function ProductPage({ params }: { params: { id: number } }) {
+// params はスキーマの出力型: Register 経由で number になる
+export default function ProductPage({ params }: PageProps<'/products/:id'>) {
   const product = findProduct(params.id);
   return (
     <>

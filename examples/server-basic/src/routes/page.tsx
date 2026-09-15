@@ -1,4 +1,5 @@
 import { formFields } from '@k8ordo/form/server';
+import type { PageProps } from '@k8ordo/router';
 
 import { Counter } from './_parts/counter';
 import { listEntries } from './_parts/guestbook';
@@ -10,11 +11,9 @@ import { leave } from './_parts/leave';
 // 一度だけ導き、素の JSON として props でクライアントに渡す
 const guestbookFields = formFields(guestbookSchema);
 
-export default async function HomePage({
-  request,
-}: {
-  request: { headers: Headers; cookies: ReadonlyMap<string, string> };
-}) {
+// request は server モードでだけ生成器が Register に書くので、この型は
+// @k8ordo/static の下では request を持たず、読むページは型で落ちる
+export default async function HomePage({ request }: PageProps<'/'>) {
   // サーバーモードなのでリクエストごとに読み直される
   const entries = await listEntries();
   return (

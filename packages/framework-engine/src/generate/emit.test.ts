@@ -140,6 +140,23 @@ describe('the emitted register', () => {
     expect(without).not.toContain('@k8ordo/state');
   });
 
+  it('hands route files the request under a running server only', () => {
+    const server = emitRegisterModule({
+      routesModule: './routes.gen',
+      via: '@k8ordo/server',
+    });
+    expect(server).toContain(
+      "import type { RouteRequest } from '@k8ordo/server';",
+    );
+    expect(server).toContain('request: RouteRequest;');
+
+    const files = emitRegisterModule({
+      routesModule: './routes.gen',
+      via: '@k8ordo/static',
+    });
+    expect(files).not.toContain('request');
+  });
+
   it('types links by the params schemas the route files declared', () => {
     const source = emitRegisterModule({ routesModule: './routes.gen' });
     expect(source).toContain('params: ParsedParamsMap<typeof paramSchemas>;');
@@ -338,7 +355,9 @@ describe('the request a page receives', () => {
       importPrefix: './routes',
       via: '@k8ordo/server',
     });
-    expect(source).toContain('type RouteRequest = {');
+    expect(source).toContain(
+      "import type { RouteRequest } from '@k8ordo/server';",
+    );
     expect(source).toMatch(/type Page<[\s\S]*?request: RouteRequest;/u);
     expect(source).toMatch(/type Layout<[\s\S]*?request: RouteRequest;/u);
   });

@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react';
+
 import type {
   NavigablePatternOf,
   PatternOf,
@@ -69,3 +71,49 @@ export type RegisteredParams<P extends string> =
       ? Omit<LooseParamsOf<P>, keyof RegisteredParamsMap[P]> &
           RegisteredParamsMap[P]
       : LooseParamsOf<P>;
+
+/**
+ * What a page under this pattern receives as `params`: the schemas' output
+ * where the framework ran one (the registered `params` map, written by the
+ * generator), and the strings the URL carried elsewhere.
+ */
+export type RegisteredPageParams<P extends string> = Register extends {
+  params: infer M;
+}
+  ? P extends keyof M
+    ? M[P]
+    : ParamsOf<P>
+  : ParamsOf<P>;
+
+/**
+ * The request a route file receives — under `@k8ordo/server` only, where the
+ * generated `Register` says so. A build into files has none, and a page that
+ * reads it fails to type-check there rather than at run time.
+ */
+type RequestProps = Register extends { request: infer R }
+  ? { readonly request: R }
+  : Record<never, never>;
+
+/**
+ * The props a `page.tsx` receives under the framework, by the pattern its
+ * directory puts it under: `params` typed by the schemas along its stack,
+ * the `pathname` this render is for, and — under `@k8ordo/server` — the
+ * `request`. The generated table checks the same thing at the import, so a
+ * page may equally declare its props inline; this is the spelling that names
+ * the pattern once and lets the schema say the rest.
+ */
+export type PageProps<P extends RegisteredPattern> = {
+  readonly params: RegisteredPageParams<P>;
+  readonly pathname: string;
+} & RequestProps;
+
+/**
+ * The props a `layout.tsx` receives, by the prefix every route below it
+ * shares. Its params are strings whatever it declared: under `not-found.tsx`
+ * nothing is validated, and a typed value there would be a lie.
+ */
+export type LayoutProps<P extends RegisteredPattern> = {
+  readonly params: ParamsOf<P>;
+  readonly pathname: string;
+  readonly children: ReactNode;
+} & RequestProps;
