@@ -60,13 +60,6 @@ export const clickAway = {
   }),
 };
 
-export const client = {
-  description: message({
-    ja: 'クライアントで実行中かどうかを返すフック',
-    en: 'A hook that returns whether the code is running on the client.',
-  }),
-};
-
 export const clipboard = {
   description: message({
     ja: 'クリップボードの読み書きを提供するフック',

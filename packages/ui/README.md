@@ -574,7 +574,6 @@ The library includes several useful hooks:
 
 - **useBreakpoint** - Tailwind breakpoint matcher
 - **useClickAway** - Detect clicks outside an element
-- **useClient** - Client-side rendering detection
 - **useClipboard** - Clipboard operations
 - **useControllableState** - Controlled/uncontrolled state pattern
 - **useDebouncedTransition** - Rate-limited transition with `AbortSignal`

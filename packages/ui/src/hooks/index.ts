@@ -1,6 +1,5 @@
 export { useBreakpoint } from './breakpoint';
 export { useClickAway } from './click-away';
-export { useClient } from './client';
 export { useClipboard } from './clipboard';
 export { useControllableState } from './controllable-state';
 export {

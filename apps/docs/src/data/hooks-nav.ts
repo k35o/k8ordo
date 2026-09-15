@@ -91,11 +91,6 @@ export const hookCategories: NavCategory[] = [
         description: m.hooks.breakpoint.description,
       },
       {
-        name: 'useClient',
-        path: '/ui/hooks/use-client',
-        description: m.hooks.client.description,
-      },
-      {
         name: 'useDisclosure',
         path: '/ui/hooks/use-disclosure',
         description: m.hooks.disclosure.description,
