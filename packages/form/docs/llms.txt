@@ -29,8 +29,10 @@ every submission: `z.number()` and `z.literal(1)` (use `z.coerce.number()`),
 
 ## Entry points
 
-- `@k8ordo/form` — client. `useForm(fields, state)` takes the whole
-  `formFields` result and returns props for the `<form>` element, a
+- `@k8ordo/form` — client. `useForm(fields, state?)` takes the whole
+  `formFields` result (and the action's state, when there is one) and
+  returns props for the `<form>` element — which also hear a reset, React's
+  own after a successful action included — a
   `field(path)` accessor giving input attributes, the current error, and
   `invalid` / `required`, an `array(path)` accessor for repeated rows, and
   `isDirty`. Also `useAsyncCheck` for server-answered per-field checks and

@@ -109,6 +109,7 @@ export type UseFormReturn<
   props: {
     onBlur: (event: FocusEvent<HTMLFormElement>) => void;
     onInput: (event: SyntheticEvent<HTMLFormElement>) => void;
+    onReset: () => void;
     ref: Ref<HTMLFormElement>;
   };
   field: (path: FieldPath) => FieldView;
@@ -206,7 +207,7 @@ const shiftSet = (
  */
 export const useForm = <FieldPath extends string, ArrayPath extends string>(
   fields: FormFields<FieldPath, ArrayPath>,
-  state: FormState,
+  state: FormState = {},
 ): UseFormReturn<FieldPath, ArrayPath> => {
   const lookup = fields as FormFields;
   const formRef = useRef<HTMLFormElement>(null);
@@ -334,6 +335,33 @@ export const useForm = <FieldPath extends string, ArrayPath extends string>(
     [evaluate],
   );
 
+  // The values go back to what the form was rendered with — a reset button,
+  // `form.reset()`, or React itself once an action has succeeded — so what
+  // the hook remembered about the old values goes with them.
+  const onReset = useCallback(() => {
+    setClientErrors({});
+    setEdited(new Set());
+    const rows = initialRows(lookup, state);
+    setBaselineRows(rowCountsOf(rows));
+    setRowKeys(rows);
+    // A rule's message is not a value, so a reset leaves it on the control.
+    const form = formRef.current;
+    for (const [name, message] of ownedRuleMessages.current) {
+      const control = controlNamed(form, name);
+      if (control?.validationMessage === message) {
+        control.setCustomValidity('');
+      }
+    }
+    ownedRuleMessages.current.clear();
+    // Not assumed clean: the event fires before the browser restores the
+    // controls, and a `HiddenValue` is never restored at all — it is the
+    // caller's state, which React writes straight back. A task later the
+    // reset is through, and the DOM says what is still different.
+    setTimeout(() => {
+      setDomDirty(isFormDirty(formRef.current));
+    }, 0);
+  }, [lookup, state]);
+
   const viewOf = useCallback(
     (field: DerivedField, name: string): FieldView => {
       const serverError = edited.has(name) ? undefined : state.errors?.[name];
@@ -448,8 +476,8 @@ export const useForm = <FieldPath extends string, ArrayPath extends string>(
   }, []);
 
   const props = useMemo(
-    () => ({ onBlur, onInput, ref }),
-    [onBlur, onInput, ref],
+    () => ({ onBlur, onInput, onReset, ref }),
+    [onBlur, onInput, onReset, ref],
   );
 
   const structuralDirty = Object.entries(rowKeys).some(
