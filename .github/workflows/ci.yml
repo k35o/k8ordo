@@ -79,6 +79,12 @@ jobs:
       - name: Install
         uses: ./.github/composite-actions/install
 
+      # route ファイルの型は生成される .k8ordo/ から来る (server-basic の
+      # PageProps は Register の request を読む)。docs も同じ表で SitePath を
+      # 検査するので、フレームワークの上に載っているものは先にビルドする。
+      - name: Generate the route tables of the framework applications
+        run: pnpm --filter docs --filter example-static-basic --filter example-server-basic build
+
       - name: Run typecheck
         run: pnpm typecheck
 
