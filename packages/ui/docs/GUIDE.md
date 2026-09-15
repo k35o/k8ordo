@@ -67,6 +67,15 @@ import { en } from '@k8ordo/ui/i18n';
 </UIProvider>;
 ```
 
+An application that renders in several locales picks the dictionary by the
+locale it is rendering — `dictionaries` holds every built-in one by its tag:
+
+```tsx
+import { dictionaries } from '@k8ordo/ui/i18n';
+
+<UIProvider messages={dictionaries[locale]}>
+```
+
 To replace only some of it, spread the dictionary and override those keys.
 
 ```tsx

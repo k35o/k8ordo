@@ -1463,6 +1463,8 @@ import { en } from '@k8ordo/ui/i18n';
 </UIProvider>;
 ```
 
+`dictionaries` from the same entry holds every built-in dictionary by its tag (`{ ja, en }`), for an application that picks one by the locale it is rendering: `messages={dictionaries[locale]}`.
+
 To replace only part of it, spread the dictionary and override those keys (`Partial<Messages>`, so you need not fill in every key).
 
 ```tsx
