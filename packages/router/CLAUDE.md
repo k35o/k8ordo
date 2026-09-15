@@ -71,6 +71,10 @@ pnpm check         # check:write to auto-fix
   boundary so a server render leaves a throwing subtree to the browser.
 - **Declaration order decides.** No specificity ranking, ever — the table
   reads top to bottom like the code it is.
+- **A bound param is a param, not a concept.** `bindParams` knows a name and
+  a source function; that the name is `locale` and the source is
+  `@k8ordo/i18n` is the application's `links.ts`. Nothing locale-shaped
+  belongs here.
 - **The type mirrors the runtime walk.** `Below` resets a branch that landed
   on the root, exactly as `walk` does; without it every route under a root
   layout types as `//products`. Any change to one has to change the other.
@@ -81,7 +85,7 @@ pnpm check         # check:write to auto-fix
 src/
   paths.ts          型導出(ParamsOf/PathFor/Join)+ 文字列操作
   define-routes.ts  defineRoutes / match / RouteOf
-  links.ts          href / navigateTo(表を必要としない側)
+  links.ts          href / navigateTo / bindParams(表を必要としない側)
   register.ts       Register(module augmentation)
   navigation.ts     useInterceptedNavigation(intercept と commit 契約)
   location.tsx      usePathname / PathnameProvider(表を引かない現在地)

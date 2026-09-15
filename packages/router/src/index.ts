@@ -10,7 +10,8 @@ export type {
   Routes,
   RoutesRecord,
 } from './define-routes';
-export { href, navigateTo } from './links';
+export { bindParams, href, navigateTo } from './links';
+export type { BoundLinks, BoundParams } from './links';
 export { PathnameProvider, usePathname } from './location';
 export { matchPath, useMatch } from './match';
 export type { MatchablePattern } from './match';

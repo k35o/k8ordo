@@ -3,7 +3,7 @@ import { useEffect, useState, ViewTransition } from 'react';
 import { render } from 'vitest-browser-react';
 
 import { defineRoutes } from './define-routes';
-import { href, navigateTo } from './links';
+import { bindParams, href, navigateTo } from './links';
 import { usePathname } from './location';
 import { useMatch } from './match';
 import { useInterceptedNavigation } from './navigation';
@@ -377,4 +377,28 @@ it('tags the transition that applies a new tree with the navigation kind', async
   await vi.waitFor(() => {
     expect(seen.at(-1)).toStrictEqual(['navigation', 'navigation-push']);
   });
+});
+
+it('navigates with a bound param supplied by its source, and honours the options', async () => {
+  const screen = await render(<Router routes={routes} />);
+  await navigateTo('/products', { history: 'replace' }).finished;
+  const bound = bindParams(() => ({ id: 'bound' }));
+
+  await bound.navigateTo('/products/:id').finished;
+
+  await expect
+    .element(screen.getByTestId('detail'))
+    .toHaveTextContent('/products/:id:bound');
+  expect(location.pathname).toBe('/products/bound');
+
+  // Every param is bound, so the options come second, after an omitted
+  // params argument — and are not mistaken for params.
+  const index = navigation.currentEntry?.index;
+  await bound.navigateTo(
+    '/products/:id',
+    { id: 'other' },
+    { history: 'replace' },
+  ).finished;
+  expect(location.pathname).toBe('/products/other');
+  expect(navigation.currentEntry?.index).toBe(index);
 });

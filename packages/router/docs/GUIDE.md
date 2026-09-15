@@ -207,6 +207,31 @@ the boundary between the two packages.
 
 `href` refuses a wildcard: `/*` is something to match, never something to link
 to. Param values are URL-encoded on the way in and decoded on the way out.
+
+**A segment the whole application shares is bound once.** A locale, a tenant —
+a param every link would otherwise have to repeat — is supplied by a function
+instead, through `bindParams`:
+
+```ts
+// links.ts
+import { bindParams } from '@k8ordo/router';
+
+import { locales } from './i18n';
+
+export const { href, navigateTo } = bindParams(() => ({
+  locale: locales.getLocale(),
+}));
+```
+
+```tsx
+href('/:locale/products/:id', { id }); // locale from the source, id as before
+navigateTo('/:locale', { locale: 'en' }, { history: 'replace' }); // or overridden
+```
+
+Patterns keep their full spelling, so the table's types apply unchanged; the
+source is read at each call, so a value that differs per request or per URL
+is read where it is current. Which package supplies the value is the
+application's business — the router knows a param name, nothing more.
 `normalizePathname` is the router's own reading of a pathname — a trailing
 slash dropped, root excepted — for code that compares pathnames the way the
 table does.
