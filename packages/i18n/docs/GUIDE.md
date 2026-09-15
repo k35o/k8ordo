@@ -59,14 +59,8 @@ export const greeting = message({
 // routes/[locale]/layout.tsx — a Server Component
 import { locales } from '../../i18n';
 
-export const paramsSchema = locales.paramsSchema;
+export const { paramsSchema } = locales;
 ```
-
-Spell it as that assignment: the framework finds a route's schema by
-reading the file for `export const paramsSchema`, so a destructuring export
-(`export const { paramsSchema } = locales`) would go unnoticed and `/fr/…`
-would render in the default locale. A linter's `prefer-destructuring`
-autofix rewrites it into exactly that, so disable the rule on the line.
 
 ```tsx
 // anywhere — a Server Component or a Client Component, the same line

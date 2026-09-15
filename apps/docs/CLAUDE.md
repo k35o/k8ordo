@@ -49,12 +49,8 @@ pnpm check:write       # Oxlint/Oxfmt lint/format auto-fix
   and becomes English the moment it hydrates on an `/en/…` URL. A visitor with
   JavaScript off keeps the Japanese one; one file cannot be both.
 - **An unknown locale is a 404.** `src/routes/[locale]/layout.tsx` exports
-  `paramsSchema = locales.paramsSchema` — spelled as that assignment, with
-  `prefer-destructuring` disabled on the line, because the generator finds a
-  schema by reading the file's text for `export const paramsSchema` and the
-  autofixed `export const { paramsSchema } = locales` is invisible to it (the
-  table then has no schema, `/fr/…` renders, and every message falls back to
-  the default locale) — so `/fr/ui` is a
+  `const { paramsSchema } = locales` — the generator parses the file for the
+  export, so any spelling of it counts — so `/fr/ui` is a
   pathname the `/:locale/…` patterns do not answer: the walk falls through to
   `not-found.tsx` under a real 404, under `@k8ordo/server` as much as on the
   static host (where `404.html` was already what got served). The layout

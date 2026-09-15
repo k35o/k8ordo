@@ -64,9 +64,11 @@ pnpm check         # check:write to auto-fix
   `runtime/entry.ssr.tsx` injects the RSC stream into the HTML and
   `runtime/entry.browser.tsx` reads it back; nothing refetches on load, which
   is what lets a prerendered `404.html` come alive.
-- **A `paramsSchema` export is found in the text, run before render.**
-  `generate/write.ts` reads each page/layout and regexes for the export (an
-  import would evaluate the page before anything is compiled); `emit.ts`
+- **A `paramsSchema` export is found by parsing, run before render.**
+  `generate/write.ts` reads each page/layout and asks Vite's parser
+  (`parseSync`, oxc) for the module's exports — an import would evaluate
+  the page before anything is compiled, and a regex over the text mistook a
+  code sample for the export and missed a destructured one; `emit.ts`
   imports it beside the component, checks it with `satisfies
 ParamsSchemaFor<pattern>`, lists per page pattern the schemas along its
   stack in `paramSchemas`, and types the page by them. `runtime/params.ts`

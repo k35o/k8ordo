@@ -1,6 +1,8 @@
 import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
+import { parseSync } from 'vite';
+
 import { parseRouteTree } from '../grammar/tree';
 import type { Problem } from '../grammar/tree';
 import {
@@ -48,19 +50,30 @@ export type GenerateResult = {
 };
 
 /**
- * Whether a route file declares a `paramsSchema`. Read from the text rather
- * than by importing the module — the generator runs before anything is
- * compiled, and an import would evaluate the page. The spellings accepted
- * are the ones a person writes: `export const paramsSchema`, `export let`,
- * `export var`, or `export { paramsSchema }`. Named so rather than `params`
- * because the page's own prop is `params`, and a module-level binding of the
- * same name is a shadow every linter flags.
+ * Whether a route file exports a `paramsSchema`. Read from the module's
+ * syntax rather than by importing it — the generator runs before anything
+ * is compiled, and an import would evaluate the page. Vite's own parser
+ * lists a module's exports the way a person reads the file: `export const
+ * paramsSchema`, `export { paramsSchema }`, and a destructured `export
+ * const { paramsSchema } = locales` are all the export; the same words
+ * inside a string or a comment are not, and `export type paramsSchema` is
+ * a type. Named so rather than `params` because the page's own prop is
+ * `params`, and a module-level binding of the same name is a shadow every
+ * linter flags.
  */
-const PARAMS_EXPORT =
-  /^\s*export\s+(?:(?:const|let|var)\s+paramsSchema\b|\{[^}]*\bparamsSchema\b[^}]*\})/mu;
-
-export const declaresParams = (source: string): boolean =>
-  PARAMS_EXPORT.test(source);
+export const declaresParams = (source: string): boolean => {
+  // A file that does not parse declares nothing; the build reports the
+  // syntax error itself, where it can name the line.
+  const { errors, module } = parseSync('route.tsx', source, {
+    sourceType: 'module',
+  });
+  if (errors.length > 0) return false;
+  return module.staticExports.some((statement) =>
+    statement.entries.some(
+      (entry) => !entry.isType && entry.exportName.name === 'paramsSchema',
+    ),
+  );
+};
 
 const filesDeclaringParams = async (
   routesDir: string,
