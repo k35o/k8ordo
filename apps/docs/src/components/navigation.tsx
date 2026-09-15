@@ -40,6 +40,7 @@ const PACKAGES: PackageNav[] = [
   { name: 'Static', path: '/:locale/static', sections: [] },
   { name: 'Server', path: '/:locale/server', sections: [] },
   { name: 'i18n', path: '/:locale/i18n', sections: [] },
+  { name: 'Color scheme', path: '/:locale/color-scheme', sections: [] },
 ];
 
 // パッケージの区画にいるか: そのランディングか、その下のどこか

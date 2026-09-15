@@ -31,6 +31,10 @@ const MAPPINGS = [
   { out: '../public/static/docs/', src: '../../../packages/static/docs/' },
   { out: '../public/server/docs/', src: '../../../packages/server/docs/' },
   { out: '../public/i18n/docs/', src: '../../../packages/i18n/docs/' },
+  {
+    out: '../public/color-scheme/docs/',
+    src: '../../../packages/color-scheme/docs/',
+  },
 ];
 
 const counts = await Promise.all(

@@ -350,3 +350,43 @@ These docs are served from <https://ordo.k8o.me>.
   renders the current locale's text. Types: `Locales`, `LocaleOf`, `Message`,
   `Variants`, `Register`, `RegisteredLocale`, `Delocalized`,
   `LocaleParamsSchema`, `LocalesOptions`.
+
+---
+
+# @k8ordo/color-scheme
+
+> The colour-scheme axis of an application, owned. The visitor's preference
+> — light, dark, or nothing, which follows the system — lives in
+> localStorage through `@k8ordo/state`; one rule resolves it against
+> `prefers-color-scheme`; the result is the `dark` class on `<html>` (what
+> `@k8ordo/ui` and Tailwind's dark variant read). `<ColorSchemeProvider>` in
+> the root layout renders the inline script that puts the class on before
+> the first paint and keeps it in step afterwards; `useColorScheme()` reads
+> it. The server renders the default.
+>
+> Like every k8ordo package it assumes React 19 and Server Components, uses
+> only what has reached Baseline newly available, and ships no polyfills or
+> legacy fallbacks.
+
+These docs are served from <https://ordo.k8o.me>.
+
+## Guide
+
+- [Design Guide](https://ordo.k8o.me/color-scheme/docs/GUIDE.md): what the package owns and does not (the class,
+  not the colours; the rule, not the storage), placing the provider in the
+  root layout, reading and changing the preference with the hook, what it
+  guarantees, and testing.
+
+## Entry point
+
+- `@k8ordo/color-scheme` — `<ColorSchemeProvider defaultPreference?>`
+  (client; goes inside `<body>` around everything) renders the inline
+  `<script>` that puts `dark` on `<html>` before the first paint from the
+  stored preference, the default (`'system'` unless told otherwise), or the
+  system, and keeps the class in step. `useColorScheme()` returns
+  `{ scheme, preference, setPreference }`: `scheme` is `'light' | 'dark'`
+  on screen, `preference` is `'light' | 'dark' | 'system'`, and
+  `setPreference('system')` clears the stored row. `colorSchemeState` is the
+  `@k8ordo/state` local definition itself (`k8ordo-state:color-scheme`).
+  Types: `ColorScheme`, `ColorSchemePreference`, `ColorSchemeProviderProps`,
+  `UseColorScheme`.

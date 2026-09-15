@@ -1,12 +1,14 @@
 # Agent guide — apps/docs
 
 Documentation site for the `@k8ordo/*` packages (`ui`, `form`, `state`,
-`router`, `static`, `server`, `i18n`), built with `@k8ordo/static` — the site
-runs on the family's own framework, so a change to it is felt here first. The
-`framework-engine` is internal and has no page: an application installs a mode
-package, never the engine. The site also dogfoods
-`@k8ordo/state`, `@k8ordo/form`, and `@k8ordo/i18n`: the theme and
-writing-mode preferences are `defineLocalState`s (`src/theme/state.ts`),
+`router`, `static`, `server`, `i18n`, `color-scheme`), built with
+`@k8ordo/static` — the site runs on the family's own framework, so a change to
+it is felt here first. The `framework-engine` is internal and has no page: an
+application installs a mode package, never the engine. The site also dogfoods
+`@k8ordo/state`, `@k8ordo/form`, `@k8ordo/i18n`, and `@k8ordo/color-scheme`:
+the writing-mode preference is a `defineLocalState` (`src/theme/state.ts`),
+the colour scheme is `@k8ordo/color-scheme`'s (`<ColorSchemeProvider>` in
+the root layout's `<body>`, `useColorScheme()` in the header's switcher),
 `/state`'s live demo is a real `definePageState` on the page's own URL,
 `/form`'s live demo is a GET filter form whose constraints and URL state come
 from one schema (`src/routes/[locale]/form/_parts/`), and every word on the
@@ -83,15 +85,16 @@ pnpm check:write       # Oxlint/Oxfmt lint/format auto-fix
 - **Sitemap**: `framework({ site: 'https://ordo.k8o.me' })` in
   `vite.config.ts` makes the build write `dist/client/sitemap.xml` listing
   every page it rendered. Nothing here maintains a page list by hand.
-- **Preferences live in `@k8ordo/state`**: `src/theme/state.ts` holds
-  `themeState` (`theme`, `mode?: 'light' | 'dark'`) and `writingModeState`
-  (`writing-mode`, `mode?: 'horizontal' | 'vertical'`), both
-  `defineLocalState`. It is a directive-free module because
-  `src/routes/layout.tsx` (a Server Component) needs `themeState.inlineRead()`
-  for the pre-hydration `<script>` that adds the `dark` class — the storage
-  key and the JSON envelope are never spelled out by hand. The `@k8ordo/ui`
-  storage hooks (`useLocalStorage`, `useSessionStorage`, `useHash`) no longer
-  exist, so neither do their pages.
+- **The colour scheme is `@k8ordo/color-scheme`'s.** The root layout wraps
+  everything inside `<body>` in `<ColorSchemeProvider>`, which renders the
+  pre-paint inline script itself, and `src/components/theme-switcher.tsx`
+  calls `useColorScheme()`; there is no theme context and no hand-written
+  inline script here. The writing-mode
+  preference stays the site's own `defineLocalState` in `src/theme/state.ts`
+  (`writing-mode`, `mode?: 'horizontal' | 'vertical'`), a directive-free
+  module so a Server Component could read it. The `@k8ordo/ui` storage hooks
+  (`useLocalStorage`, `useSessionStorage`, `useHash`) no longer exist, so
+  neither do their pages.
 - **i18n**: `@k8ordo/i18n`. `src/i18n.ts` is `defineLocales(['ja', 'en'])`
   — the one place the list is spelled — plus the `Register` augmentation
   that types every message against it, and `getLocale`. Messages live in
@@ -152,7 +155,7 @@ src/
   links.ts             # href / navigateTo with the locale bound; SitePath
   messages/            # message() per export, one file per area, index.ts re-exports namespaces
   styles/              # CSS entry
-  theme/               # state.ts (defineLocalState), theme + writing-mode contexts
+  theme/               # state.ts (writing-mode defineLocalState) + its context
 ```
 
 ## Page Patterns

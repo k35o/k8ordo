@@ -13,6 +13,7 @@ export * as router from './router';
 export * as 'static' from './static';
 export * as server from './server';
 export * as i18n from './i18n';
+export * as colorScheme from './color-scheme';
 export * as ai from './ai';
 export * as aiAgents from './ai-agents';
 export * as generativeUi from './generative-ui';

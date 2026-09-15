@@ -1,0 +1,80 @@
+{
+  "name": "@k8ordo/color-scheme",
+  "version": "0.0.0",
+  "description": "The colour-scheme axis of an application, owned: the visitor's light / dark / system preference, kept in localStorage, resolved against the system, put on <html> before the first paint and kept there.",
+  "keywords": [
+    "color-scheme",
+    "dark-mode",
+    "prefers-color-scheme",
+    "react",
+    "server-components",
+    "theme"
+  ],
+  "homepage": "https://ordo.k8o.me",
+  "bugs": {
+    "url": "https://github.com/k35o/k8ordo/issues"
+  },
+  "license": "MIT",
+  "author": "k8o <kosakanoki@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/k35o/k8ordo.git"
+  },
+  "files": [
+    "dist/**",
+    "docs/**"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "default": "./dist/index.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "scripts": {
+    "build": "vp pack",
+    "test": "vp test",
+    "typecheck": "tsc --noEmit",
+    "check": "vp check",
+    "check:write": "vp check --fix",
+    "check:package": "publint && attw --pack . --profile esm-only"
+  },
+  "devDependencies": {
+    "@arethetypeswrong/cli": "catalog:",
+    "@k8ordo/state": "workspace:^",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@vitejs/plugin-react": "catalog:",
+    "@vitest/browser-playwright": "catalog:",
+    "publint": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vite-plus": "catalog:",
+    "vitest": "catalog:",
+    "vitest-browser-react": "catalog:",
+    "zod": "catalog:"
+  },
+  "peerDependencies": {
+    "@k8ordo/state": "workspace:^",
+    "@types/react": ">=19.3.0",
+    "react": ">=19.3.0",
+    "typescript": ">=7.0.2",
+    "zod": "^4.4.3"
+  },
+  "peerDependenciesMeta": {
+    "@types/react": {
+      "optional": true
+    },
+    "typescript": {
+      "optional": true
+    }
+  }
+}

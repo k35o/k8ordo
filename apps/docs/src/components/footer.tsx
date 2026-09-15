@@ -16,6 +16,7 @@ const PACKAGE_LINKS: Array<{ path: SitePath; label: string }> = [
   { path: '/:locale/static', label: '@k8ordo/static' },
   { path: '/:locale/server', label: '@k8ordo/server' },
   { path: '/:locale/i18n', label: '@k8ordo/i18n' },
+  { path: '/:locale/color-scheme', label: '@k8ordo/color-scheme' },
 ];
 
 /**

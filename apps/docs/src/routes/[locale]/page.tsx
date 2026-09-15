@@ -50,6 +50,11 @@ const PACKAGES: Package[] = [
     path: '/:locale/i18n',
     description: m.i18n.description,
   },
+  {
+    name: '@k8ordo/color-scheme',
+    path: '/:locale/color-scheme',
+    description: m.colorScheme.description,
+  },
 ];
 
 type Discipline = { title: Message; description: Message };

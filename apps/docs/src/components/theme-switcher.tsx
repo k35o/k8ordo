@@ -1,23 +1,25 @@
 'use client';
 
+import { useColorScheme } from '@k8ordo/color-scheme';
 import { DarkModeIcon, IconButton, LightModeIcon } from '@k8ordo/ui';
 
 import * as m from '../messages';
-import { useTheme } from '../theme/context';
 
 export function ThemeSwitcher() {
-  const { theme, toggleTheme } = useTheme();
+  const { scheme, setPreference } = useColorScheme();
 
   return (
     <IconButton
       label={
-        theme === 'light'
+        scheme === 'light'
           ? m.common.switchToDarkMode()
           : m.common.switchToLightMode()
       }
-      onClick={toggleTheme}
+      onClick={() => {
+        setPreference(scheme === 'light' ? 'dark' : 'light');
+      }}
     >
-      {theme === 'light' ? <DarkModeIcon /> : <LightModeIcon />}
+      {scheme === 'light' ? <DarkModeIcon /> : <LightModeIcon />}
     </IconButton>
   );
 }

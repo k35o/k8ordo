@@ -19,7 +19,6 @@ import type { NavCategory } from '../../../data/nav-types';
 import { locales } from '../../../i18n';
 import type { SitePath } from '../../../links';
 import * as m from '../../../messages';
-import { ThemeProvider } from '../../../theme/context';
 import { WritingModeProvider } from '../../../theme/writing-mode-context';
 
 type SideNavConfig = {
@@ -222,13 +221,11 @@ export function LocaleShell({
   // ここにスクロールの処理は無い。
   return (
     <UIProvider messages={dictionaries[locale]}>
-      <ThemeProvider>
-        <WritingModeProvider>
-          <div className="flex min-h-dvh flex-col">
-            <LayoutContent>{children}</LayoutContent>
-          </div>
-        </WritingModeProvider>
-      </ThemeProvider>
+      <WritingModeProvider>
+        <div className="flex min-h-dvh flex-col">
+          <LayoutContent>{children}</LayoutContent>
+        </div>
+      </WritingModeProvider>
     </UIProvider>
   );
 }
