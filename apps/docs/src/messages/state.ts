@@ -11,8 +11,8 @@ export const demoTitle = message({
 });
 
 export const demoDescription = message({
-  ja: '下の操作は本物のURLを書き換えます。`definePageState` の update がこのサイトのルーター（Navigation API を intercept する @k8ordo/router）を通って流れます。ヘッダーのテーマ切り替えの保存先も `defineLocalState` で、その現在値が theme の行です。',
-  en: 'The controls below rewrite the real URL: `definePageState` updates flow through this site’s router (@k8ordo/router, which intercepts the Navigation API). The theme toggle in the header stores through `defineLocalState` — its current value is the theme row.',
+  ja: '下の操作は本物のURLを書き換えます。`definePageState` の update がこのサイトのルーター（Navigation API を intercept する @k8ordo/router）を通って流れます。ヘッダーのテーマ切り替え（`@k8ordo/color-scheme`）の保存先も `defineLocalState` で、その現在値が color-scheme の行です。',
+  en: 'The controls below rewrite the real URL: `definePageState` updates flow through this site’s router (@k8ordo/router, which intercepts the Navigation API). The theme toggle in the header (`@k8ordo/color-scheme`) stores through `defineLocalState` — its current value is the color-scheme row.',
 });
 
 export const demoUrlEmpty = message({

@@ -16,6 +16,7 @@
   "dependencies": {
     "@fontsource-variable/m-plus-2": "5.3.0",
     "@fontsource-variable/noto-sans-jp": "5.3.0",
+    "@k8ordo/color-scheme": "workspace:^",
     "@k8ordo/form": "workspace:^",
     "@k8ordo/i18n": "workspace:^",
     "@k8ordo/router": "workspace:^",

@@ -1,5 +1,6 @@
 'use client';
 
+import { colorSchemeState } from '@k8ordo/color-scheme';
 import { definePageState, useAppState } from '@k8ordo/state';
 import {
   AtomIcon,
@@ -20,7 +21,6 @@ import { PackageLanding } from '../../../components/package-landing';
 import type { PackageFeature } from '../../../components/package-landing';
 import { Rich } from '../../../components/rich';
 import * as m from '../../../messages';
-import { themeState } from '../../../theme/state';
 
 const FEATURES: PackageFeature[] = [
   {
@@ -72,7 +72,9 @@ const TABS = ['overview', 'details', 'reviews'] as const;
 
 function Demo() {
   const [{ tab, page }, update] = useAppState(demoState);
-  const [{ mode }] = useAppState(themeState);
+  // ヘッダーの切替が書く行そのもの。定義は @k8ordo/color-scheme のもので、
+  // ここでは読むだけ
+  const [{ preference }] = useAppState(colorSchemeState);
 
   const search = demoState.search({ tab, page });
 
@@ -134,9 +136,9 @@ function Demo() {
           </dd>
         </div>
         <div className="flex gap-3">
-          <dt className="text-fg-mute">theme</dt>
+          <dt className="text-fg-mute">color-scheme</dt>
           <dd>
-            <Code>{mode ?? m.state.demoThemeSystem()}</Code>
+            <Code>{preference ?? m.state.demoThemeSystem()}</Code>
           </dd>
         </div>
       </dl>
