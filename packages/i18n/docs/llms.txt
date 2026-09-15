@@ -30,8 +30,11 @@ When installed via npm, these docs live under `node_modules/@k8ordo/i18n/docs/`.
 ## Entry point
 
 - `@k8ordo/i18n` — `defineLocales(all, { default? })` returns `{ all,
-  default, is, negotiate, localize, delocalize, paramsSchema, getLocale,
-  run }`; the first entry is the default unless told otherwise, every tag
+  default, is, negotiate, localize, delocalize, paths, paramsSchema,
+  getLocale, run }`; `paths(patterns)` is the static build's `paths` option
+  with `/:locale` expanded to every locale; typed links come from
+  `@k8ordo/router`'s `bindParams(() => ({ locale: locales.getLocale() }))`,
+  written by the application; the first entry is the default unless told otherwise, every tag
   must be BCP 47, `negotiate(list)` tries each requested tag in order (exact,
   then language) before falling back to the default, `getLocale()` is the
   locale of the render in progress (not a hook), and `run(locale, fn)`

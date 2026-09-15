@@ -109,6 +109,28 @@ describe('localize / delocalize', () => {
   });
 });
 
+describe('paths', () => {
+  it('expands the locale segment once per locale and leaves other params to the build', () => {
+    expect(
+      locales.paths([
+        '/:locale',
+        '/:locale/ui/components/:name',
+        '/blog/:slug',
+      ]),
+    ).toStrictEqual([
+      '/ja',
+      '/en',
+      '/ja/ui/components/:name',
+      '/en/ui/components/:name',
+      '/blog/:slug',
+    ]);
+  });
+
+  it('expands the segment, not a param whose name merely starts with it', () => {
+    expect(locales.paths(['/:localeCode/x'])).toStrictEqual(['/:localeCode/x']);
+  });
+});
+
 describe('paramsSchema', () => {
   it('accepts a listed locale and refuses anything else, in the Standard Schema shape', () => {
     const { validate } = locales.paramsSchema['~standard'];
