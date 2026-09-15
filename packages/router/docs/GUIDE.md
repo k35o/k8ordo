@@ -185,10 +185,12 @@ matchPath('/products/:id', pathname); // the same, pure, for a pathname in hand
 `/*` to mean "everything below it" — what a sidebar asks when it wants to
 know which section of the site is open. The pattern's own page is not below
 it: `/products/*` matches `/products/42` and not `/products`, which is
-`useMatch('/products')`; ask both when a section includes its index. It is built on `usePathname`, so it
-re-renders on the pathname and never on the search, and it needs no table in
-the browser — which is what makes it the one of these that also works under
-the framework, where `useRoute` has no match to read.
+`useMatch('/products')`. A section link that wants to be marked on the index
+as much as below it asks `useMatch('/products/*', { inclusive: true })`. It
+is built on `usePathname`, so it re-renders on the pathname and never on the
+search, and it needs no table in the browser — which is what makes it the one
+of these that also works under the framework, where `useRoute` has no match
+to read.
 
 **`usePathname` changes when the URL changes, not when the new page appears.**
 Interception commits the URL first and the tree arrives when it has loaded, so

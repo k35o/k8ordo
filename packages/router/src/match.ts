@@ -23,6 +23,16 @@ const decode = (value: string): string => {
   }
 };
 
+export type MatchOptions = {
+  /**
+   * For a `/*` pattern: count the pattern's own page as well, so `/x/*`
+   * answers `/x` too — what a section link asks when it wants to be marked
+   * on the index as much as below it. Off by default, where `/x/*` is
+   * strictly below.
+   */
+  readonly inclusive?: boolean;
+};
+
 /**
  * Whether a pathname is the one a pattern names, and with which params. Pure
  * and table-free — the pattern is checked against `Register`, the pathname
@@ -32,7 +42,18 @@ const decode = (value: string): string => {
 export const matchPath = <P extends MatchablePattern>(
   pattern: P,
   pathname: string,
+  options?: MatchOptions,
 ): ParamsOf<P> | null => {
+  if (options?.inclusive === true && pattern.endsWith('/*')) {
+    // The index has the same params as the section, minus the wildcard's
+    // anonymous capture — which is dropped below anyway.
+    const own = pattern.slice(0, -'/*'.length);
+    const index = matchPath(
+      (own === '' ? '/' : own) as MatchablePattern,
+      pathname,
+    );
+    if (index !== null) return index as ParamsOf<P>;
+  }
   const result = new URLPattern({ pathname: pattern }).exec({
     pathname: normalizePathname(pathname),
   });
@@ -56,6 +77,7 @@ export const matchPath = <P extends MatchablePattern>(
  */
 export function useMatch<P extends MatchablePattern>(
   pattern: P,
+  options?: MatchOptions,
 ): ParamsOf<P> | null {
-  return matchPath(pattern, usePathname());
+  return matchPath(pattern, usePathname(), options);
 }
