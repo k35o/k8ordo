@@ -108,9 +108,14 @@ pnpm check:write       # Oxlint/Oxfmt lint/format auto-fix
   the text as children and renders its backtick spans as `<Code>`. The
   bundler keeps only the messages a client module names — measure it with
   `grep -c "ja:" dist/client/assets/*.js` after a build; a Server Component's
-  text never reaches the client. Locale-prefixed routing (`/ja/`, `/en/`) is
-  `locales.localize` / `locales.delocalize`; the `/` page negotiates with
-  `locales.negotiate(navigator.languages)`; `switch` is a reserved word, so
+  text never reaches the client. Every link is `href` / `navigateTo` from
+  `src/links.ts` — the router's `bindParams` with the locale supplied by
+  `locales.getLocale()` — so a path is a `/:locale/…` pattern of the
+  generated table (`SitePath` for the ones navigation data may name) and a
+  typo fails to compile; `locales.localize` / `delocalize` remain only for
+  the language switcher, which takes the pathname in hand to another
+  locale. The `/` page negotiates with
+  `locales.negotiate(navigator.languages)` and `navigateTo('/:locale', …)`; `switch` is a reserved word, so
   that one component's group is `switchInput`, and the hook groups drop the
   `use` prefix (`m.hooks.clickAway`) because a `use*` member reads as a hook
   to the linter.
@@ -144,6 +149,7 @@ src/
   components/          # Shared doc components (CodeBlock, PropsTable, etc.)
   data/                # Navigation data (components-nav, helpers-nav, hooks-nav)
   i18n.ts              # defineLocales + Register — the locale set
+  links.ts             # href / navigateTo with the locale bound; SitePath
   messages/            # message() per export, one file per area, index.ts re-exports namespaces
   styles/              # CSS entry
   theme/               # state.ts (defineLocalState), theme + writing-mode contexts

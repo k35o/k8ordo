@@ -195,6 +195,12 @@ These docs are served from <https://ordo.k8o.me>.
   showing, with its params, table-free, so a sidebar can ask which section is
   open under the framework too; `normalizePathname(pathname)` is the router's
   own trailing-slash rule;
+  `bindParams(() => ({ locale }))` returns `{ href, navigateTo }` with those
+  params supplied by the source at each call (still overridable), for a
+  segment every link shares; `useMatch(pattern, { inclusive: true })` counts
+  a `/*` pattern's own index in. `PageProps<P>` / `LayoutProps<P>` type a
+  framework route file's props by its pattern (`params` from the registered
+  schemas, `request` when the generated `Register` says the mode has one).
   `<PathnameProvider pathname>` seeds it for a server render and hydration,
   and is mounted by `<Router>` and by both mode runtimes, never by an
   application. Every page change is applied in a transition tagged
@@ -329,8 +335,11 @@ These docs are served from <https://ordo.k8o.me>.
 ## Entry point
 
 - `@k8ordo/i18n` — `defineLocales(all, { default? })` returns `{ all,
-  default, is, negotiate, localize, delocalize, paramsSchema, getLocale,
-  run }`; the first entry is the default unless told otherwise, every tag
+  default, is, negotiate, localize, delocalize, paths, paramsSchema,
+  getLocale, run }`; `paths(patterns)` is the static build's `paths` option
+  with `/:locale` expanded to every locale; typed links come from
+  `@k8ordo/router`'s `bindParams(() => ({ locale: locales.getLocale() }))`,
+  written by the application; the first entry is the default unless told otherwise, every tag
   must be BCP 47, `negotiate(list)` tries each requested tag in order (exact,
   then language) before falling back to the default, `getLocale()` is the
   locale of the render in progress (not a hook), and `run(locale, fn)`

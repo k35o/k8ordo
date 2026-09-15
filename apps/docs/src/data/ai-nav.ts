@@ -7,17 +7,17 @@ export const aiCategories: NavCategory[] = [
     items: [
       {
         name: 'AI Chat',
-        path: '/ui/ai/chat',
+        path: '/:locale/ui/ai/chat',
         description: m.ai.chatSummary,
       },
       {
         name: 'Generative UI',
-        path: '/ui/ai/generative-ui',
+        path: '/:locale/ui/ai/generative-ui',
         description: m.ai.generativeUiSummary,
       },
       {
         name: 'AI Agents',
-        path: '/ui/ai/agents',
+        path: '/:locale/ui/ai/agents',
         description: m.ai.agentsSummary,
       },
     ],

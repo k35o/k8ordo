@@ -3,7 +3,7 @@
 import type { Message } from '@k8ordo/i18n';
 import { useMatch, usePathname } from '@k8ordo/router';
 import { UIProvider, Drawer, Heading, IconButton, ListIcon } from '@k8ordo/ui';
-import { en } from '@k8ordo/ui/i18n';
+import { dictionaries } from '@k8ordo/ui/i18n';
 import { useEffect, useRef, useState, ViewTransition } from 'react';
 import type { FC, ReactNode } from 'react';
 
@@ -17,6 +17,7 @@ import { helperCategories } from '../../../data/helpers-nav';
 import { hookCategories } from '../../../data/hooks-nav';
 import type { NavCategory } from '../../../data/nav-types';
 import { locales } from '../../../i18n';
+import type { SitePath } from '../../../links';
 import * as m from '../../../messages';
 import { ThemeProvider } from '../../../theme/context';
 import { WritingModeProvider } from '../../../theme/writing-mode-context';
@@ -24,7 +25,7 @@ import { WritingModeProvider } from '../../../theme/writing-mode-context';
 type SideNavConfig = {
   categories: NavCategory[];
   title: Message;
-  catalogPath: string;
+  catalogPath: SitePath;
 };
 
 type Section =
@@ -52,28 +53,28 @@ function useSideNavConfig(): SideNavConfig | null {
     return {
       categories: componentCategories,
       title: m.nav.components,
-      catalogPath: '/ui/components',
+      catalogPath: '/:locale/ui/components',
     };
   }
   if (hooks) {
     return {
       categories: hookCategories,
       title: m.nav.hooks,
-      catalogPath: '/ui/hooks',
+      catalogPath: '/:locale/ui/hooks',
     };
   }
   if (helpers) {
     return {
       categories: helperCategories,
       title: m.nav.helpers,
-      catalogPath: '/ui/helpers',
+      catalogPath: '/:locale/ui/helpers',
     };
   }
   if (ai) {
     return {
       categories: aiCategories,
       title: m.nav.ai,
-      catalogPath: '/ui/ai',
+      catalogPath: '/:locale/ui/ai',
     };
   }
   return null;
@@ -220,7 +221,7 @@ export function LocaleShell({
   // 遷移後にトップ（または #fragment）へ戻すのはルーターの仕事になったので、
   // ここにスクロールの処理は無い。
   return (
-    <UIProvider messages={locale === 'en' ? en : undefined}>
+    <UIProvider messages={dictionaries[locale]}>
       <ThemeProvider>
         <WritingModeProvider>
           <div className="flex min-h-dvh flex-col">

@@ -4,49 +4,50 @@ import type { Message } from '@k8ordo/i18n';
 import { Button, GitHubIcon, Heading } from '@k8ordo/ui';
 
 import { Rich } from '../../components/rich';
-import { getLocale, locales } from '../../i18n';
+import { href } from '../../links';
+import type { SitePath } from '../../links';
 import * as m from '../../messages';
 
 type Package = {
   name: string;
-  path: string;
+  path: SitePath;
   description: Message;
 };
 
 const PACKAGES: Package[] = [
   {
     name: '@k8ordo/ui',
-    path: '/ui',
+    path: '/:locale/ui',
     description: m.home.memberUiDescription,
   },
   {
     name: '@k8ordo/form',
-    path: '/form',
+    path: '/:locale/form',
     description: m.home.memberFormDescription,
   },
   {
     name: '@k8ordo/state',
-    path: '/state',
+    path: '/:locale/state',
     description: m.home.memberStateDescription,
   },
   {
     name: '@k8ordo/router',
-    path: '/router',
+    path: '/:locale/router',
     description: m.router.description,
   },
   {
     name: '@k8ordo/static',
-    path: '/static',
+    path: '/:locale/static',
     description: m.static.description,
   },
   {
     name: '@k8ordo/server',
-    path: '/server',
+    path: '/:locale/server',
     description: m.server.description,
   },
   {
     name: '@k8ordo/i18n',
-    path: '/i18n',
+    path: '/:locale/i18n',
     description: m.i18n.description,
   },
 ];
@@ -73,8 +74,6 @@ const DISCIPLINES: Discipline[] = [
 ];
 
 export default function Home() {
-  const locale = getLocale();
-
   return (
     <div className="flex flex-1 flex-col">
       {/* サイトの表紙だけは「k8ordo · k8ordo」にならないよう素の title */}
@@ -97,7 +96,7 @@ export default function Home() {
           <div className="flex flex-wrap items-center gap-4">
             <Button
               renderItem={({ className, children }) => (
-                <a className={className} href={locales.localize('/ui', locale)}>
+                <a className={className} href={href('/:locale/ui')}>
                   {children}
                 </a>
               )}
@@ -135,7 +134,7 @@ export default function Home() {
             <li key={pkg.name}>
               <a
                 className="border-border-mute hover:bg-bg-mute focus-visible:ring-border-info flex flex-col gap-2 rounded-lg border p-6 transition-colors duration-150 ease-out focus-visible:ring-2 focus-visible:outline-hidden"
-                href={locales.localize(pkg.path, locale)}
+                href={href(pkg.path)}
               >
                 <span className="text-fg-base font-medium">{pkg.name}</span>
                 <span className="text-fg-mute text-sm leading-relaxed">

@@ -1,9 +1,8 @@
 'use client';
 
-import { usePathname } from '@k8ordo/router';
+import { matchPath, usePathname } from '@k8ordo/router';
 
 import type { NavCategory } from '../data/nav-types';
-import { getLocale, locales } from '../i18n';
 import { LocaleAnchor } from './locale-anchor';
 
 type Props = {
@@ -12,7 +11,6 @@ type Props = {
 };
 
 export function SideNavigation({ categories, onNavigate }: Props) {
-  const locale = getLocale();
   const pathname = usePathname();
 
   return (
@@ -25,8 +23,7 @@ export function SideNavigation({ categories, onNavigate }: Props) {
           {/* 傍線インデックス: 親罫 border-l に -ml-px のアクティブ罫を重ねる */}
           <ul className="border-border-mute mt-1 ml-3 flex flex-col gap-0.5 border-l">
             {category.items.map((item) => {
-              const href = locales.localize(item.path, locale);
-              const isActive = pathname === href;
+              const isActive = matchPath(item.path, pathname) !== null;
               return (
                 <li key={item.path}>
                   <LocaleAnchor

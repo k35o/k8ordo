@@ -2,7 +2,7 @@ import type { Message } from '@k8ordo/i18n';
 import { GitHubIcon, Heading } from '@k8ordo/ui';
 import type { ReactNode } from 'react';
 
-import { getLocale, locales } from '../i18n';
+import { href } from '../links';
 import * as m from '../messages';
 import { LinkButton } from './link-button';
 import { PageTitle } from './page-title';
@@ -42,8 +42,6 @@ export function PackageLanding({
   docsDescription,
   children,
 }: PackageLandingProps) {
-  const locale = getLocale();
-
   return (
     <div className="flex flex-1 flex-col">
       <PageTitle name={name} />
@@ -103,7 +101,7 @@ export function PackageLanding({
           <Rich>{docsDescription()}</Rich>
         </p>
         <div className="mt-6">
-          <LinkButton color="base" href={locales.localize('/', locale)}>
+          <LinkButton color="base" href={href('/:locale')}>
             {m.nav.home()}
           </LinkButton>
         </div>
