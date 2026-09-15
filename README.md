@@ -20,6 +20,7 @@ Every package here commits to the same four things:
 | [`@k8ordo/static`](packages/static) | Builds an application into files — every route rendered ahead of time |
 | [`@k8ordo/server`](packages/server) | Runs an application — RSC per request, with Server Actions |
 | [`@k8ordo/i18n`](packages/i18n) | The locale axis: one locale set for the URL segment, negotiation, and the params schema; each message a function that reads the locale where it is called, on either side of the network |
+| [`@k8ordo/color-scheme`](packages/color-scheme) | The colour-scheme axis: the visitor's light / dark / system preference, stored through `@k8ordo/state`, on `<html>` before the first paint |
 
 `@k8ordo/*` holds **primary libraries only** — the ones an application imports
 and builds on. Tools that plug into someone else's ecosystem (lint configs,
@@ -64,6 +65,7 @@ packages/
   static/                # @k8ordo/static
   server/                # @k8ordo/server
   i18n/                  # @k8ordo/i18n
+  color-scheme/          # @k8ordo/color-scheme
 examples/
   ui-integrations/       # @k8ordo/ui × generative UI adapters (Vite)
   ui-nextjs/             # @k8ordo/ui × Next.js
