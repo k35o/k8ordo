@@ -27,9 +27,18 @@ pnpm check         # check:write to auto-fix
   from the pattern string; `Register` supplies the check. Only `<Router>`
   holds the table's value, which is why the routes-module → pages →
   routes-module cycle cannot form. Keep it that way.
-- **`finished` means committed.** The intercept handler resolves in an effect
-  after React puts the new tree on screen. `@k8ordo/state`'s
-  `update().finished` inherits this, so it is a cross-package contract.
+- **`finished` means committed.** The intercept handler resolves in a
+  _layout_ effect, once React has committed the new tree and before it is
+  painted. `@k8ordo/state`'s `update().finished` inherits this, so it is a
+  cross-package contract. Layout, not passive: with a `<ViewTransition>` in
+  the tree React holds the new snapshot until the platform's pending
+  navigation has finished and runs passive effects only after the
+  animation, so a passive resolver would wait on itself.
+- **A page change is tagged.** The tree is applied inside `startTransition`
+  with `addTransitionType('navigation')` and `navigation-<kind>` for the
+  platform's `push` / `replace` / `traverse`, so an application's
+  `<ViewTransition>` can animate page changes and no other transition
+  (`transitionTypesFor` in `navigation.ts`).
 - **A state change is not a page change.** Same pathname as the tree ON
   SCREEN ⇒ intercept with `scroll: 'manual'`, `focusReset: 'manual'`, no
   load, no apply. Not `location.pathname`: interception commits the URL

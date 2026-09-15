@@ -1,10 +1,12 @@
 'use client';
 
 import {
+  addTransitionType,
   createContext,
   startTransition,
   useEffect,
   useEffectEvent,
+  useLayoutEffect,
   useRef,
   useState,
 } from 'react';
@@ -75,6 +77,18 @@ export const scrollPlanFor = (
   }
   return { kind: 'top' };
 };
+
+/**
+ * What a `<ViewTransition>` in the application learns about the navigation
+ * that changed the tree: `navigation` names any page change, and the second
+ * tag carries the kind the platform reported — `push`, `replace` or
+ * `traverse` — so a back button can animate the other way from a link. The
+ * router is the one place these can be said, because it is the one holding
+ * the event when the tree is applied.
+ */
+export const transitionTypesFor = (
+  navigationType: NavigationType,
+): readonly string[] => ['navigation', `navigation-${navigationType}`];
 
 const applyScroll = (plan: ScrollPlan): void => {
   if (plan.kind === 'fragment') {
@@ -188,6 +202,11 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
               { once: true },
             );
             startTransition(() => {
+              // Said inside the transition, which is where a
+              // `<ViewTransition>` reads the types it animates by.
+              for (const type of transitionTypesFor(event.navigationType)) {
+                addTransitionType(type);
+              }
               // Recorded at apply rather than at commit: an update inside a
               // transition is never dropped, and a navigation that arrives in
               // between must see this page as the one showing.
@@ -208,12 +227,17 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
     };
   }, []);
 
-  useEffect(() => {
+  // A layout effect, not a passive one: the tree is committed and not yet
+  // painted, which is when a document load places the viewport — so the new
+  // page never shows at the old position for a frame. It is also the only
+  // effect that can settle the handler at all once a `<ViewTransition>` is
+  // in the tree: React holds the new snapshot until the platform's pending
+  // navigation has finished, and runs passive effects only after the
+  // animation — a passive resolver would be waiting on itself.
+  useLayoutEffect(() => {
     const entry = pending.current.get(applied);
     if (entry === undefined) return;
     pending.current.delete(applied);
-    // The tree is on screen: this is the moment a document load would have
-    // placed the viewport, so it is the moment to place it here.
     if (entry.scroll !== null) applyScroll(entry.scroll);
     entry.resolve();
   }, [applied]);

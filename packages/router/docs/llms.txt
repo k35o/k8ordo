@@ -17,8 +17,9 @@ When installed via npm, these docs live under `node_modules/@k8ordo/router/docs/
   wildcards, route groups, declaration order), mounting `<Router>` and
   `<Outlet>`, links without a `<Link>` component, `useMatch` for active
   sections, `Register` for checked patterns, what navigation guarantees
-  (`finished` after commit, scroll to top or fragment on a new page), and
-  how the framework reuses the navigation half.
+  (`finished` after commit, scroll to top or fragment on a new page), how
+  a `<ViewTransition>` animates page changes by the router's transition
+  types, and how the framework reuses the navigation half.
 
 ## Entry point
 
@@ -48,7 +49,11 @@ When installed via npm, these docs live under `node_modules/@k8ordo/router/docs/
   own trailing-slash rule;
   `<PathnameProvider pathname>` seeds it for a server render and hydration,
   and is mounted by `<Router>` and by both mode runtimes, never by an
-  application. `useInterceptedNavigation({claim, load, apply})` returns
+  application. Every page change is applied in a transition tagged
+  `navigation` and `navigation-push` / `navigation-replace` /
+  `navigation-traverse` (`addTransitionType`), so a `<ViewTransition
+  update={{ navigation: 'auto', default: 'none' }}>` around the pages'
+  hole animates page changes and no other transition. `useInterceptedNavigation({claim, load, apply})` returns
   `{ generation }` and is the
   navigation primitive `<Router>` is built on, and the seam the framework
   uses to render server-produced trees instead.
