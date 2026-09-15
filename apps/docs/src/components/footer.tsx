@@ -3,18 +3,19 @@
 import type { Message } from '@k8ordo/i18n';
 
 import { STORYBOOK_URL } from '../constants';
+import type { SitePath } from '../links';
 import * as m from '../messages';
 import { LocaleAnchor } from './locale-anchor';
 
 /** 第一階層はパッケージ。増えたらここに 1 行足す。 */
-const PACKAGE_LINKS = [
-  { path: '/ui', label: '@k8ordo/ui' },
-  { path: '/form', label: '@k8ordo/form' },
-  { path: '/state', label: '@k8ordo/state' },
-  { path: '/router', label: '@k8ordo/router' },
-  { path: '/static', label: '@k8ordo/static' },
-  { path: '/server', label: '@k8ordo/server' },
-  { path: '/i18n', label: '@k8ordo/i18n' },
+const PACKAGE_LINKS: Array<{ path: SitePath; label: string }> = [
+  { path: '/:locale/ui', label: '@k8ordo/ui' },
+  { path: '/:locale/form', label: '@k8ordo/form' },
+  { path: '/:locale/state', label: '@k8ordo/state' },
+  { path: '/:locale/router', label: '@k8ordo/router' },
+  { path: '/:locale/static', label: '@k8ordo/static' },
+  { path: '/:locale/server', label: '@k8ordo/server' },
+  { path: '/:locale/i18n', label: '@k8ordo/i18n' },
 ];
 
 /**
@@ -23,21 +24,21 @@ const PACKAGE_LINKS = [
  */
 const SECTION_GROUPS: Array<{
   name: string;
-  links: Array<{ path: string; label: Message }>;
+  links: Array<{ path: SitePath; label: Message }>;
   external?: Array<{ href: string; label: string }>;
 }> = [
   {
     name: 'UI',
     links: [
-      { path: '/ui/get-started', label: m.nav.getStarted },
-      { path: '/ui/theming', label: m.nav.theming },
-      { path: '/ui/i18n', label: m.nav.i18n },
-      { path: '/ui/components', label: m.nav.components },
-      { path: '/ui/hooks', label: m.nav.hooks },
-      { path: '/ui/helpers', label: m.nav.helpers },
-      { path: '/ui/ai/chat', label: m.nav.aiChat },
-      { path: '/ui/ai/generative-ui', label: m.nav.generativeUi },
-      { path: '/ui/ai/agents', label: m.nav.aiAgents },
+      { path: '/:locale/ui/get-started', label: m.nav.getStarted },
+      { path: '/:locale/ui/theming', label: m.nav.theming },
+      { path: '/:locale/ui/i18n', label: m.nav.i18n },
+      { path: '/:locale/ui/components', label: m.nav.components },
+      { path: '/:locale/ui/hooks', label: m.nav.hooks },
+      { path: '/:locale/ui/helpers', label: m.nav.helpers },
+      { path: '/:locale/ui/ai/chat', label: m.nav.aiChat },
+      { path: '/:locale/ui/ai/generative-ui', label: m.nav.generativeUi },
+      { path: '/:locale/ui/ai/agents', label: m.nav.aiAgents },
     ],
     external: [{ href: STORYBOOK_URL, label: 'Storybook' }],
   },

@@ -85,7 +85,7 @@ export const PropsTable: FC<{
     {messagesNote ? (
       <p className="text-fg-mute text-sm">
         <Rich>{m.components.common.messagesNote()}</Rich>{' '}
-        <LocaleAnchor path="/ui/i18n">
+        <LocaleAnchor path="/:locale/ui/i18n">
           <Rich>{m.nav.i18n()}</Rich>
         </LocaleAnchor>
       </p>

@@ -13,14 +13,8 @@ export default defineConfig({
     framework({
       // 配信元。これがあるとビルドが sitemap.xml も書く
       site: 'https://ordo.k8o.me',
-      // ロケールは全ページに掛かる区間なので、埋まっていないパターンを
-      // そのままロケールの数だけ展開する
-      paths: (patterns) =>
-        patterns.flatMap((pattern) =>
-          locales.all.map((locale) =>
-            pattern.replace('/:locale', `/${locale}`),
-          ),
-        ),
+      // ロケールは全ページに掛かる区間で、集合が自分で展開する
+      paths: locales.paths,
     }),
     tailwindcss(),
   ],

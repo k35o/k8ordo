@@ -3,12 +3,10 @@
 import { Button, Heading } from '@k8ordo/ui';
 
 import { PageTitle } from '../../components/page-title';
-import { getLocale, locales } from '../../i18n';
+import { href } from '../../links';
 import * as m from '../../messages';
 
 export default function NotFound() {
-  const locale = getLocale();
-
   return (
     <div className="mx-auto flex max-w-4xl flex-col items-start gap-8 px-6 py-12 md:px-8">
       <PageTitle title={m.notFound.title} />
@@ -19,7 +17,7 @@ export default function NotFound() {
       <div className="flex flex-wrap items-center gap-4">
         <Button
           renderItem={({ className, children }) => (
-            <a className={className} href={locales.localize('/', locale)}>
+            <a className={className} href={href('/:locale')}>
               {children}
             </a>
           )}
@@ -31,10 +29,7 @@ export default function NotFound() {
         <Button
           color="base"
           renderItem={({ className, children }) => (
-            <a
-              className={className}
-              href={locales.localize('/ui/get-started', locale)}
-            >
+            <a className={className} href={href('/:locale/ui/get-started')}>
               {children}
             </a>
           )}

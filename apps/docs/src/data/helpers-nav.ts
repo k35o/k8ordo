@@ -7,7 +7,7 @@ export const helperCategories: NavCategory[] = [
     items: [
       {
         name: 'cn',
-        path: '/ui/helpers/cn',
+        path: '/:locale/ui/helpers/cn',
         description: m.helpers.cn.description,
       },
     ],
@@ -17,22 +17,22 @@ export const helperCategories: NavCategory[] = [
     items: [
       {
         name: 'mergeRefs',
-        path: '/ui/helpers/merge-refs',
+        path: '/:locale/ui/helpers/merge-refs',
         description: m.helpers.mergeRefs.description,
       },
       {
         name: 'mergeProps',
-        path: '/ui/helpers/merge-props',
+        path: '/:locale/ui/helpers/merge-props',
         description: m.helpers.mergeProps.description,
       },
       {
         name: 'chain',
-        path: '/ui/helpers/chain',
+        path: '/:locale/ui/helpers/chain',
         description: m.helpers.chain.description,
       },
       {
         name: 'createSafeContext',
-        path: '/ui/helpers/create-safe-context',
+        path: '/:locale/ui/helpers/create-safe-context',
         description: m.helpers.createSafeContext.description,
       },
     ],

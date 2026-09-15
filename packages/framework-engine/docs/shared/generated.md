@@ -28,7 +28,10 @@ export const routes = defineRoutes({
 
 `.k8ordo/register.gen.ts` wires that table into `@k8ordo/router` — and into
 `@k8ordo/state` when the application depends on it — so typed paths work
-everywhere without a line of ceremony:
+everywhere without a line of ceremony. It also says what the mode hands a
+route file: under `@k8ordo/server` it registers the `request`, which is how
+`PageProps` / `LayoutProps` from the router gain that field there and not
+under a build into files:
 
 ```tsx
 import { href } from '@k8ordo/router';

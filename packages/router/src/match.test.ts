@@ -27,3 +27,26 @@ describe('matchPath', () => {
     expect(matchPath('/:locale/ui/*', '/ja/form')).toBeNull();
   });
 });
+
+describe('matchPath with inclusive', () => {
+  it('counts the section index in when asked, and only then', () => {
+    expect(
+      matchPath('/:locale/ui/*', '/ja/ui', { inclusive: true }),
+    ).toStrictEqual({ locale: 'ja' });
+    expect(
+      matchPath('/:locale/ui/*', '/ja/ui/components', { inclusive: true }),
+    ).toStrictEqual({ locale: 'ja' });
+    expect(
+      matchPath('/:locale/ui/*', '/ja/ui', { inclusive: false }),
+    ).toBeNull();
+    expect(
+      matchPath('/:locale/ui/*', '/ja/form', { inclusive: true }),
+    ).toBeNull();
+  });
+
+  it('changes nothing for a pattern without a wildcard', () => {
+    expect(
+      matchPath('/products/:id', '/products/1', { inclusive: true }),
+    ).toStrictEqual({ id: '1' });
+  });
+});

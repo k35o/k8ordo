@@ -16,7 +16,7 @@ import type { ReactNode } from 'react';
 
 import { PageTitle } from '../../../components/page-title';
 import { Rich } from '../../../components/rich';
-import { getLocale, locales } from '../../../i18n';
+import { href } from '../../../links';
 import * as m from '../../../messages';
 
 type Feature = {
@@ -64,8 +64,6 @@ const FEATURES: Feature[] = [
 ];
 
 export default function Ui() {
-  const locale = getLocale();
-
   return (
     <div className="flex flex-1 flex-col">
       <PageTitle name="@k8ordo/ui" />
@@ -85,10 +83,7 @@ export default function Ui() {
           <div className="flex flex-wrap items-center gap-4">
             <Button
               renderItem={({ className, children }) => (
-                <a
-                  className={className}
-                  href={locales.localize('/ui/get-started', locale)}
-                >
+                <a className={className} href={href('/:locale/ui/get-started')}>
                   {children}
                 </a>
               )}
@@ -100,10 +95,7 @@ export default function Ui() {
             <Button
               color="base"
               renderItem={({ className, children }) => (
-                <a
-                  className={className}
-                  href={locales.localize('/ui/components', locale)}
-                >
+                <a className={className} href={href('/:locale/ui/components')}>
                   {children}
                 </a>
               )}

@@ -47,6 +47,12 @@ When installed via npm, these docs live under `node_modules/@k8ordo/router/docs/
   showing, with its params, table-free, so a sidebar can ask which section is
   open under the framework too; `normalizePathname(pathname)` is the router's
   own trailing-slash rule;
+  `bindParams(() => ({ locale }))` returns `{ href, navigateTo }` with those
+  params supplied by the source at each call (still overridable), for a
+  segment every link shares; `useMatch(pattern, { inclusive: true })` counts
+  a `/*` pattern's own index in. `PageProps<P>` / `LayoutProps<P>` type a
+  framework route file's props by its pattern (`params` from the registered
+  schemas, `request` when the generated `Register` says the mode has one).
   `<PathnameProvider pathname>` seeds it for a server render and hydration,
   and is mounted by `<Router>` and by both mode runtimes, never by an
   application. Every page change is applied in a transition tagged

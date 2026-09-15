@@ -185,10 +185,12 @@ matchPath('/products/:id', pathname); // the same, pure, for a pathname in hand
 `/*` to mean "everything below it" — what a sidebar asks when it wants to
 know which section of the site is open. The pattern's own page is not below
 it: `/products/*` matches `/products/42` and not `/products`, which is
-`useMatch('/products')`; ask both when a section includes its index. It is built on `usePathname`, so it
-re-renders on the pathname and never on the search, and it needs no table in
-the browser — which is what makes it the one of these that also works under
-the framework, where `useRoute` has no match to read.
+`useMatch('/products')`. A section link that wants to be marked on the index
+as much as below it asks `useMatch('/products/*', { inclusive: true })`. It
+is built on `usePathname`, so it re-renders on the pathname and never on the
+search, and it needs no table in the browser — which is what makes it the one
+of these that also works under the framework, where `useRoute` has no match
+to read.
 
 **`usePathname` changes when the URL changes, not when the new page appears.**
 Interception commits the URL first and the tree arrives when it has loaded, so
@@ -207,6 +209,31 @@ the boundary between the two packages.
 
 `href` refuses a wildcard: `/*` is something to match, never something to link
 to. Param values are URL-encoded on the way in and decoded on the way out.
+
+**A segment the whole application shares is bound once.** A locale, a tenant —
+a param every link would otherwise have to repeat — is supplied by a function
+instead, through `bindParams`:
+
+```ts
+// links.ts
+import { bindParams } from '@k8ordo/router';
+
+import { locales } from './i18n';
+
+export const { href, navigateTo } = bindParams(() => ({
+  locale: locales.getLocale(),
+}));
+```
+
+```tsx
+href('/:locale/products/:id', { id }); // locale from the source, id as before
+navigateTo('/:locale', { locale: 'en' }, { history: 'replace' }); // or overridden
+```
+
+Patterns keep their full spelling, so the table's types apply unchanged; the
+source is read at each call, so a value that differs per request or per URL
+is read where it is current. Which package supplies the value is the
+application's business — the router knows a param name, nothing more.
 `normalizePathname` is the router's own reading of a pathname — a trailing
 slash dropped, root excepted — for code that compares pathnames the way the
 table does.
@@ -428,3 +455,12 @@ carry across is `useRoute` and `useParams` —
 both read the match from context, and under the framework there is no match in
 the browser to read. A framework page receives its `params` as a prop from the
 server instead, which is the only form Server Components can take them in.
+
+Those props have a type here, by the pattern the directory puts the file
+under: `PageProps<'/products/:id'>` is `{ params, pathname }` with `params`
+typed by the schemas the framework ran (the generated `Register` carries
+them), and `LayoutProps<'/products'>` adds `children`. Under `@k8ordo/server`
+the generated `Register` also carries the `request`, so the same type gains
+`request` there and a page that reads it fails to type-check under a build
+into files. A page may equally declare its props inline — the generated table
+checks them at the import either way.

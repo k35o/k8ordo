@@ -58,6 +58,14 @@ export type Locales<L extends string = string, D extends L = L> = {
   /** The inverse: `'/en/ui'` → `{ locale: 'en', pathname: '/ui' }`, `'/x'` → `{ locale: null, pathname: '/x' }`. */
   readonly delocalize: (pathname: string) => Delocalized<L>;
   /**
+   * The static build's `paths` option: every pattern that has a `/:locale`
+   * segment, once per locale, so `framework({ paths: locales.paths })` is
+   * the whole answer for a site whose only parameter is the locale. A
+   * pattern with another parameter keeps it, and the build then asks for
+   * that one by name.
+   */
+  readonly paths: (patterns: readonly string[]) => string[];
+  /**
    * A params schema for a `[locale]` route segment, in the shape
    * `@k8ordo/static` / `@k8ordo/server` run: `export const paramsSchema =
    * locales.paramsSchema` makes `/fr/…` a pathname the pattern does not
@@ -189,6 +197,18 @@ export const defineLocales = <
     return fallback;
   };
 
+  // By segment, not by substring: `:localeCode` is somebody else's param.
+  const paths = (patterns: readonly string[]): string[] =>
+    patterns.flatMap((pattern) => {
+      const segments = pattern.split('/');
+      if (!segments.includes(':locale')) return [pattern];
+      return list.map((locale) =>
+        segments
+          .map((segment) => (segment === ':locale' ? locale : segment))
+          .join('/'),
+      );
+    });
+
   const delocalize = (pathname: string): Delocalized<L> => {
     const first = pathname.split('/')[1] ?? '';
     if (!is(first)) return { locale: null, pathname };
@@ -243,6 +263,7 @@ export const defineLocales = <
     negotiate,
     localize,
     delocalize,
+    paths,
     paramsSchema,
     getLocale,
     run,

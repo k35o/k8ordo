@@ -16,11 +16,8 @@ const NavLink: FC<{ active: boolean; children: ReactNode; to: string }> = ({
 
 export const RootLayout: FC = () => {
   const atHome = useMatch('/') !== null;
-  // '/products/*' は「/products の下」だけを指すので、index 自身は別に訊く
-  // (hooks なので短絡させず、両方を毎回呼ぶ)
-  const atProductsIndex = useMatch('/products') !== null;
-  const underProducts = useMatch('/products/*') !== null;
-  const inProducts = atProductsIndex || underProducts;
+  // '/products/*' は「/products の下」。index 自身も含めたいので inclusive
+  const inProducts = useMatch('/products/*', { inclusive: true }) !== null;
   const atGuide = useMatch('/guide') !== null;
   return (
     <div data-testid="root-layout">

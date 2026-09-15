@@ -77,7 +77,7 @@ the locale of that render:
 // routes/[locale]/layout.tsx
 import { locales } from '../../i18n';
 
-export const paramsSchema = locales.paramsSchema; // /fr/… is a 404
+export const { paramsSchema } = locales; // /fr/… is a 404
 ```
 
 And a message is called the same way everywhere:
@@ -105,7 +105,9 @@ Where a Server Component hands text to a Client Component as a prop, it calls
 the message and passes the string: a function does not cross that boundary.
 
 `/` negotiates and redirects; `<html lang>` and a language switcher read
-`locales.getLocale()`; a static build expands `[locale]` from `locales.all`.
+`locales.getLocale()`; a static build passes `paths: locales.paths`. Links
+stay `@k8ordo/router`'s: `bindParams(() => ({ locale: locales.getLocale() }))`
+gives an `href` that spells `/:locale/…` patterns without the locale.
 
 ## AI Agent Documentation
 

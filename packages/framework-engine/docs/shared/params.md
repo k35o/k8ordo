@@ -7,13 +7,14 @@ module-level binding of the same name would shadow it):
 
 ```tsx
 // src/routes/products/[id]/page.tsx
+import type { PageProps } from '@k8ordo/router';
 import * as z from 'zod/mini';
 
 export const paramsSchema = z.object({
   id: z.coerce.number().check(z.int(), z.positive()),
 });
 
-export default function ProductPage({ params }: { params: { id: number } }) {
+export default function ProductPage({ params }: PageProps<'/products/:id'>) {
   return <h1>{params.id}</h1>; // a number — the schema said so
 }
 ```
@@ -21,8 +22,14 @@ export default function ProductPage({ params }: { params: { id: number } }) {
 The generator sees the `paramsSchema` export and wires it in: the schemas along a
 page's stack — every layout above it that declared one, then its own — run
 before the page renders, each replacing the strings it names with what it
-produced, and the generated `Page<…>` type is what the file's own props are
-checked against. A schema may name only the params its pattern has; naming
+produced. `PageProps<'/products/:id'>` from `@k8ordo/router` is those props
+by the pattern — `params` typed by the schemas, and `pathname` — read from
+the generated `Register`, so nothing in the page depends on which mode is
+installed; a page may equally declare its props inline (`{ params: { id:
+number } }`), since the generated table checks them at the import either way.
+The export is found by parsing the file, so any spelling of it counts —
+`export const { paramsSchema } = locales` included — and the words inside a
+string or a comment do not. A schema may name only the params its pattern has; naming
 another is a build error where the table is generated. Any library that
 implements Standard Schema works — zod, zod/mini, or another — and the schema
 must be synchronous, because which pattern answers a pathname is decided

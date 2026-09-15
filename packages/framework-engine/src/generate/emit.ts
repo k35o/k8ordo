@@ -405,10 +405,7 @@ export const emitRoutesModule = (
     ...(withRequest
       ? [
           '// What a page may read of the request, under a running server only.',
-          'type RouteRequest = {',
-          '  readonly headers: Headers;',
-          '  readonly cookies: ReadonlyMap<string, string>;',
-          '};',
+          `import type { RouteRequest } from '${options.via ?? DEFAULT_VIA}';`,
           '',
         ]
       : []),
@@ -501,10 +498,17 @@ export type RegisterOptions = {
 export const emitRegisterModule = (options: RegisterOptions): string => {
   const wantsState =
     options.stateModule !== null && options.stateModule !== undefined;
+  // Under a running server a route file also receives the request, and
+  // `PageProps` / `LayoutProps` from the router learn it from here — so a
+  // page that reads it compiles under @k8ordo/server and not under a build
+  // into files.
+  const via = options.via ?? DEFAULT_VIA;
+  const withRequest = via === '@k8ordo/server';
   const lines = [
     banner(options.via),
     '',
     `import type { ParsedParamsMap } from '@k8ordo/router';`,
+    ...(withRequest ? [`import type { RouteRequest } from '${via}';`] : []),
     `import type { paramSchemas, routes } from '${options.routesModule}';`,
     '',
     `declare module '@k8ordo/router' {`,
@@ -512,6 +516,12 @@ export const emitRegisterModule = (options: RegisterOptions): string => {
     '    routes: typeof routes;',
     '    // A link takes a param as the page receives it — typed by its schema.',
     '    params: ParsedParamsMap<typeof paramSchemas>;',
+    ...(withRequest
+      ? [
+          '    // A route file receives the request: this is a running server.',
+          '    request: RouteRequest;',
+        ]
+      : []),
     '  }',
     '}',
   ];

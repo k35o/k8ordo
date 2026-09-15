@@ -3,15 +3,20 @@
 import { Anchor } from '@k8ordo/ui';
 import type { FC, MouseEventHandler, PropsWithChildren } from 'react';
 
-import { getLocale, locales } from '../i18n';
+import { href } from '../links';
+import type { SitePath } from '../links';
 
 type LocaleAnchorProps = PropsWithChildren<{
-  path: string;
+  path: SitePath;
   className?: string;
   onClick?: MouseEventHandler<HTMLAnchorElement>;
   unstyled?: boolean;
 }>;
 
+/**
+ * サイト内リンク。行き先は表のパターンで、ロケールは `links.ts` が束ねた
+ * `href` が今のものを入れる。
+ */
 export const LocaleAnchor: FC<LocaleAnchorProps> = ({
   path,
   className,
@@ -19,12 +24,11 @@ export const LocaleAnchor: FC<LocaleAnchorProps> = ({
   children,
   unstyled = false,
 }) => {
-  const locale = getLocale();
-  const href = locales.localize(path, locale);
+  const target = href(path);
 
   if (unstyled) {
     return (
-      <a className={className} href={href} onClick={onClick}>
+      <a className={className} href={target} onClick={onClick}>
         {children}
       </a>
     );
@@ -32,7 +36,7 @@ export const LocaleAnchor: FC<LocaleAnchorProps> = ({
 
   return (
     <Anchor
-      href={href}
+      href={target}
       renderAnchor={
         onClick !== undefined || className !== undefined
           ? (props) => (

@@ -59,14 +59,8 @@ export const greeting = message({
 // routes/[locale]/layout.tsx — a Server Component
 import { locales } from '../../i18n';
 
-export const paramsSchema = locales.paramsSchema;
+export const { paramsSchema } = locales;
 ```
-
-Spell it as that assignment: the framework finds a route's schema by
-reading the file for `export const paramsSchema`, so a destructuring export
-(`export const { paramsSchema } = locales`) would go unnoticed and `/fr/…`
-would render in the default locale. A linter's `prefer-destructuring`
-autofix rewrites it into exactly that, so disable the rule on the line.
 
 ```tsx
 // anywhere — a Server Component or a Client Component, the same line
@@ -94,6 +88,7 @@ definition, not later.
 | `negotiate(…)`    | The best supported tag for a preference list.                                     |
 | `localize`        | `'/ui'` → `'/en/ui'`; `'/'` → `'/en'`.                                            |
 | `delocalize`      | `'/en/ui'` → `{ locale: 'en', pathname: '/ui' }`; `'/x'` → `{ locale: null, … }`. |
+| `paths`           | The static build's `paths` option: `/:locale` expanded to every locale.           |
 | `paramsSchema`    | The `[locale]` segment's schema (Standard Schema; no schema library).             |
 | `getLocale()`     | The locale of the render in progress. Not a hook.                                 |
 | `run(locale, fn)` | Server only: runs `fn` with `locale` current.                                     |
@@ -230,13 +225,15 @@ itself: `<html lang>`, a language switcher, `Intl` formatters.
 ### The `/` page
 
 `/` is the one URL without a locale. Render nothing there and redirect from
-an effect:
+an effect — through the bound `navigateTo` where the router is
+`@k8ordo/router` (below), or `locales.localize` otherwise:
 
 ```tsx
 'use client';
 useEffect(() => {
-  navigation.navigate(
-    locales.localize('/', locales.negotiate(navigator.languages)),
+  navigateTo(
+    '/:locale',
+    { locale: locales.negotiate(navigator.languages) },
     { history: 'replace' },
   );
 }, []);
@@ -255,16 +252,16 @@ in terms of the URL alone.
 ## Static builds
 
 `@k8ordo/static` asks for the pathnames of every pattern with a parameter.
-Expand `[locale]` from the set — the list is spelled once:
+The set answers for its own segment:
 
 ```ts
-framework({
-  paths: (patterns) =>
-    patterns.flatMap((pattern) =>
-      locales.all.map((locale) => pattern.replace(':locale', locale)),
-    ),
-});
+framework({ paths: locales.paths });
 ```
+
+`/:locale` in every pattern becomes one pathname per locale; a pattern with
+another parameter keeps it, and the build asks for that one by name. A site
+with a second parameter composes: `paths: (patterns) =>
+locales.paths(patterns).flatMap(expandSlug)`.
 
 Each path is rendered as its own request, so the schema names the locale
 for each and the messages come out in that locale. The `404.html` a static
@@ -274,9 +271,24 @@ re-renders in theirs after hydration.
 
 ## Alongside the rest of k8ordo
 
-- **`@k8ordo/router`**: `locales.localize` / `delocalize` are the only
-  things here that touch a pathname. A link component that prefixes the
-  current locale is `href(locales.localize(path, locales.getLocale()))`.
+- **`@k8ordo/router`**: the locale is a param of every pattern
+  (`/:locale/products/:id`), and the router's `bindParams` supplies it from
+  this package once, so links stay typed against the table and never spell
+  the locale:
+
+  ```ts
+  // links.ts
+  export const { href, navigateTo } = bindParams(() => ({
+    locale: locales.getLocale(),
+  }));
+  ```
+
+  `href('/:locale/products/:id', { id })` then reads the current locale;
+  `navigateTo('/:locale', { locale: 'en' }, { history: 'replace' })`
+  overrides it. Neither package imports the other: the line above is the
+  application's. `localize` / `delocalize` remain for a pathname in hand —
+  the language switcher, which takes the page it is on to another locale.
+
 - **`@k8ordo/ui`**: its own built-in strings take a dictionary prop on
   `UIProvider`; pass `en` on `/en/…` from `locales.getLocale()`.
 - **`@k8ordo/form`**: constraint messages are messages — `message({ ja:

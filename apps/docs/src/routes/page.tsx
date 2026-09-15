@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 
 import { locales } from '../i18n';
+import { navigateTo } from '../links';
 
 /**
  * `/` はロケールを持たない唯一の URL で、訪問者の言語に振り分けるためだけに
@@ -11,8 +12,9 @@ import { locales } from '../i18n';
  */
 export default function RootRedirect() {
   useEffect(() => {
-    navigation.navigate(
-      locales.localize('/', locales.negotiate(navigator.languages)),
+    navigateTo(
+      '/:locale',
+      { locale: locales.negotiate(navigator.languages) },
       { history: 'replace' },
     );
   }, []);
