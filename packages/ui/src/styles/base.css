@@ -311,5 +311,13 @@
     .ao-modal::backdrop {
       transition: none;
     }
+    /* React の <ViewTransition>（Tabs のパネル、ルーターのページ切替）も
+       ブラウザ既定のクロスフェードを止める。UA 由来のアニメーションなので
+       layer 内の author style で上書きできる */
+    ::view-transition-group(*),
+    ::view-transition-old(*),
+    ::view-transition-new(*) {
+      animation: none;
+    }
   }
 }

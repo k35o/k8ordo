@@ -290,6 +290,10 @@ import { Tabs } from '@k8ordo/ui';
 </Tabs.Root>;
 ```
 
+Selecting a tab is a transition: the panels cross-fade through React's
+`<ViewTransition>` (off under `prefers-reduced-motion`), and a panel that
+suspends keeps the current one on screen until it is ready.
+
 Props (Tabs.Root):
 
 - `ids`: `[string, ...string[]]` (required)

@@ -1,6 +1,14 @@
 'use client';
 
-import { useEffect, useId, useMemo, useRef } from 'react';
+import {
+  startTransition,
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  ViewTransition,
+} from 'react';
 import type {
   CSSProperties,
   FC,
@@ -50,11 +58,22 @@ export const Root: FC<
     defaultSelectedId !== null && defaultSelectedId !== ''
       ? ids.indexOf(defaultSelectedId)
       : 0;
-  const [currentId, setSelectedId] = useControllableState<string>({
+  const [currentId, setCurrentId] = useControllableState<string>({
     value: selectedId,
     defaultValue: defaultSelectedId ?? ids[defaultIndex] ?? ids[0],
     onChange,
   });
+  // 選択は transition にする。パネルの入れ替わりを <ViewTransition> が
+  // クロスフェードできるのは transition の中の更新だけで、suspend する
+  // パネルは用意できるまで今のパネルを残せる
+  const setSelectedId = useCallback(
+    (id: string) => {
+      startTransition(() => {
+        setCurrentId(id);
+      });
+    },
+    [setCurrentId],
+  );
   const rootId = useId();
   const contextValue = useMemo<TabsContext>(
     () => ({
@@ -199,14 +218,19 @@ export const Panel: FC<PropsWithChildren<{ id: string }>> = ({
     return null;
   }
 
+  // 入退場だけを animate する（default="none"）。パネルの中身の更新まで
+  // 拾うと、パネル内の transition（Button の action など）で毎回
+  // クロスフェードしてしまう
   return (
-    <div
-      aria-labelledby={`${rootId}-tab-${id}`}
-      className={cn('grow rounded-lg p-2', FOCUS_RING)}
-      id={`${rootId}-panel-${id}`}
-      role="tabpanel"
-    >
-      {children}
-    </div>
+    <ViewTransition default="none" enter="auto" exit="auto">
+      <div
+        aria-labelledby={`${rootId}-tab-${id}`}
+        className={cn('grow rounded-lg p-2', FOCUS_RING)}
+        id={`${rootId}-panel-${id}`}
+        role="tabpanel"
+      >
+        {children}
+      </div>
+    </ViewTransition>
   );
 };
