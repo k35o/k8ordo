@@ -26,8 +26,8 @@ catalog:
   '@tailwindcss/postcss': 4.3.3
   '@tailwindcss/vite': 4.3.3
   '@types/node': 24.13.3
-  '@types/react': 19.2.18
-  '@types/react-dom': 19.2.7
+  '@types/react': 19.3.0
+  '@types/react-dom': 19.3.0
   '@vitejs/plugin-react': 6.1.1
   '@vitest/browser': 5.0.0
   '@vitest/browser-playwright': 5.0.0
@@ -42,8 +42,8 @@ catalog:
   '@vitest/utils': 5.0.0
   postcss: 8.5.28
   publint: 0.3.24
-  react: 19.2.8
-  react-dom: 19.2.8
+  react: 19.3.0
+  react-dom: 19.3.0
   server-only: 0.0.1
   tailwindcss: 4.3.3
   typescript: 7.0.2
@@ -89,6 +89,14 @@ overrides:
 
 minimumReleaseAgeExclude:
   - '@k8o/*'
+  # React 19.3.0 (2026-09-09 17:21 UTC 公開) を 7 日の熟成前に取り込むための
+  # 一時除外。版を固定しているので、それ以降の版には効かない。
+  # 2026-09-16 17:21 UTC を過ぎたら、このブロックごと消してよい。
+  - 'react@19.3.0'
+  - 'react-dom@19.3.0'
+  - 'scheduler@0.28.0'
+  - '@types/react@19.3.0'
+  - '@types/react-dom@19.3.0'
   - 'storybook-addon-determinism'
   - 'storybook-addon-vrt'
   - 'tailwind-token-extractor'
