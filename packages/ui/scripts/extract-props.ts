@@ -253,6 +253,13 @@ const resolveDeclaration = (symbol: TsSymbol): Node | undefined => {
   return declaration;
 };
 
+/** A Context exported to be rendered as its own provider. */
+const isContext = (type: Type): boolean =>
+  checker.typeToString(type).startsWith('Context<');
+
+const byRequiredThenName = (a: Prop, b: Prop): number =>
+  Number(b.required) - Number(a.required) || a.name.localeCompare(b.name);
+
 const componentFrom = (name: string, symbol: TsSymbol): Component | null => {
   const declaration = resolveDeclaration(symbol);
   if (!declaration) return null;
@@ -260,6 +267,38 @@ const componentFrom = (name: string, symbol: TsSymbol): Component | null => {
   const type = checker.getTypeOfSymbolAtLocation(symbol, declaration);
   const [signature] = checker.getSignaturesOfType(type, SignatureKind.Call);
   if (!signature) return null;
+
+  // A Context is callable through React's `Provider`, so it is a component
+  // here — but its props are declared in @types/react, which the own-prop
+  // filter below would drop, leaving `<PortalRootProvider value>` documented
+  // with no `value`. Read them as they are: the value, and the children.
+  if (isContext(type)) {
+    const [providerProps] = signature.getParameters();
+    if (!providerProps) return null;
+    const propsType = checker.getTypeOfSymbolAtLocation(
+      providerProps,
+      declaration,
+    );
+    const props = checker
+      .getPropertiesOfType(propsType)
+      .map((prop): Prop => {
+        const propType = checker.getTypeOfSymbolAtLocation(prop, declaration);
+        return {
+          name: prop.name,
+          // `value` is declared as the type parameter, `T`; only the checker
+          // has the Context's argument in its place. `children` is
+          // `ReactNode` as written, which the checker would expand.
+          types:
+            prop.name === 'value'
+              ? typeStrings(propType)
+              : (declaredTypeStrings(prop) ?? typeStrings(propType)),
+          defaultValue: null,
+          required: !(prop.flags & SymbolFlags.Optional),
+        };
+      })
+      .toSorted(byRequiredThenName);
+    return { name, props, inherits: null };
+  }
 
   const [paramSymbol] = signature.getParameters();
   if (!paramSymbol) return { name, props: [], inherits: null };
@@ -280,10 +319,7 @@ const componentFrom = (name: string, symbol: TsSymbol): Component | null => {
       };
     })
     // Required props first — that is the order a reader needs them in.
-    .toSorted(
-      (a, b) =>
-        Number(b.required) - Number(a.required) || a.name.localeCompare(b.name),
-    );
+    .toSorted(byRequiredThenName);
 
   return { name, props, inherits: inheritsOf(declaration) };
 };
@@ -319,6 +355,8 @@ for (const entry of ENTRIES) {
     const declaration = declarationOf(symbol);
     if (!declaration) continue;
     const type = checker.getTypeOfSymbolAtLocation(symbol, declaration);
+    // A Context's `Provider` and `Consumer` are not parts of a compound.
+    if (isContext(type)) continue;
     const parts = checker
       .getPropertiesOfType(type)
       .filter((part) => /^[A-Z]/u.test(part.name))

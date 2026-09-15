@@ -452,6 +452,7 @@ Props:
 
 - `children`: `ReactNode` (required)
 - `action`: `((formData: FormData) => void | Promise<void>)` | `string`
+- `ref`: `Ref<HTMLFormElement>`
 
 ### FormControl
 
@@ -1440,8 +1441,8 @@ import { PortalRootProvider, usePortalRoot } from '@k8ordo/ui';
 
 Props:
 
+- `value`: `RefObject<HTMLElement | null>` (required)
 - `children`: `ReactNode`
-- `value`: `RefObject<HTMLElement | null>`
 
 ## i18n (message dictionary)
 
