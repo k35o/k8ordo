@@ -15,8 +15,6 @@
     "@json-render/core": "catalog:",
     "@json-render/react": "catalog:",
     "@k8ordo/ui": "workspace:^",
-    "@openuidev/lang-core": "catalog:",
-    "@openuidev/react-lang": "catalog:",
     "next": "16.3.3",
     "react": "catalog:",
     "react-dom": "catalog:",

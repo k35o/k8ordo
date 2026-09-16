@@ -253,9 +253,6 @@ importers:
       '@k8o/oxc-config':
         specifier: 0.3.0
         version: 0.3.0(oxfmt@0.64.0(vite-plus@0.3.0(@arethetypeswrong/core@0.18.5)(@types/node@24.13.3)(@vitest/browser-playwright@5.0.0)(@vitest/coverage-v8@5.0.0)(@vitest/ui@5.0.0)(esbuild@0.28.2)(jiti@2.7.0)(jsdom@30.0.1)(publint@0.3.24)(typescript@7.0.2)(vite@8.2.2(@types/node@24.13.3)(esbuild@0.28.2)(jiti@2.7.0))))(oxlint-tailwindcss@1.10.2)(oxlint-tsgolint@7.0.2001)(oxlint@1.79.0(oxlint-tsgolint@7.0.2001)(vite-plus@0.3.0(@arethetypeswrong/core@0.18.5)(@types/node@24.13.3)(@vitest/browser-playwright@5.0.0)(@vitest/coverage-v8@5.0.0)(@vitest/ui@5.0.0)(esbuild@0.28.2)(jiti@2.7.0)(jsdom@30.0.1)(publint@0.3.24)(typescript@7.0.2)(vite@8.2.2(@types/node@24.13.3)(esbuild@0.28.2)(jiti@2.7.0))))
-      '@oxlint/plugins':
-        specifier: 1.81.0
-        version: 1.81.0
       '@types/node':
         specifier: 'catalog:'
         version: 24.13.3
@@ -556,12 +553,6 @@ importers:
       '@k8ordo/ui':
         specifier: workspace:^
         version: link:../../packages/ui
-      '@openuidev/lang-core':
-        specifier: 'catalog:'
-        version: 0.2.17(zod@4.5.4)
-      '@openuidev/react-lang':
-        specifier: 'catalog:'
-        version: 0.2.15(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(zod@4.5.4)
       next:
         specifier: 16.3.3
         version: 16.3.3(@babel/core@7.29.7(supports-color@10.2.2))(@types/node@24.13.3)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
@@ -2624,10 +2615,6 @@ packages:
 
   '@oxlint/plugins@1.79.0':
     resolution: {integrity: sha512-S0uyoxakDINJ4DPgqxGlEEvrdSMeQb7Z2lKVjxoY2gwsbZbfg2Xr8Klfeo5ZeraHmmdBCELFUHkSe6KEmBpMvg==}
-    engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
-
-  '@oxlint/plugins@1.81.0':
-    resolution: {integrity: sha512-HhD8kd3r6XpelZkhxhRty/po8V6yK1VV63Eq4kSsOS2IoHUywG3DV2EX+z/ZHw46aLI74Y6aA604NRiAqLKW9w==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
 
   '@polka/url@1.0.0-next.29':
@@ -6406,8 +6393,6 @@ snapshots:
     optional: true
 
   '@oxlint/plugins@1.79.0': {}
-
-  '@oxlint/plugins@1.81.0': {}
 
   '@polka/url@1.0.0-next.29': {}
 

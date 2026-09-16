@@ -6,9 +6,7 @@ packages:
 allowBuilds:
   '@openuidev/lang-core': false
   '@tailwindcss/oxide': false
-  edgedriver: false
   esbuild: false
-  geckodriver: false
   sharp: false
   # wranglerの依存。pages deployはAPIアップロードのみでworkerd実行は不要
   workerd: false
