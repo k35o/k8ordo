@@ -126,7 +126,6 @@
     "@vitest/coverage-v8": "catalog:",
     "@vitest/ui": "catalog:",
     "ai": "7.0.93",
-    "jsdom": "30.0.1",
     "postcss": "catalog:",
     "publint": "catalog:",
     "react": "catalog:",

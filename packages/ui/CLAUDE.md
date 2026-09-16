@@ -14,7 +14,6 @@ pnpm test                                    # Run all tests
 pnpm test --project=helpers                  # Helper tests only (no browser)
 pnpm test --project=hooks                    # Hook tests only (Playwright)
 pnpm test --project=components               # Component tests only (Storybook + Playwright)
-pnpm test --project=jsdom                    # jsdom mount tests only (no browser)
 pnpm test --project=hooks src/internal/focus-trap.test.tsx # Single test file (needs its project)
 pnpm build                                   # vp pack + CSS copy
 pnpm typecheck                               # Type check (no emit)
@@ -224,7 +223,7 @@ Standard pattern: `focus-visible:border-transparent focus-visible:outline-hidden
 - **Component tests** rely on Storybook stories as test fixtures via `@storybook/addon-vitest`. Writing a story IS writing a test.
 - **Hook tests** use `vitest-browser-react` for rendering hooks in a real browser.
 - **Helper tests** are standard unit tests, no browser needed.
-- **jsdom tests** (`src/**/*.jsdom.test.tsx`) guard what consumers get in their own unit tests: components must mount under jsdom, where `ResizeObserver`, `matchMedia`, `dialog.showModal`, and the Popover API are absent. The project deliberately has no `setupFiles` — stubbing there would hide whether `src/internal/dom-support.ts` is doing its job. The stubs consumers need are documented in `docs/GUIDE.md`.
+- **There is no jsdom project, and components are not written to survive one.** They call `ResizeObserver`, `matchMedia`, `dialog.showModal`, and the Popover API directly — no support checks, no null branches. Consumers are told to test in a real browser (`docs/GUIDE.md`); do not reintroduce a guard layer to make a synthetic DOM work.
 - Storybook preview wraps all stories in `UIProvider` with light/dark theme toggle.
 - a11y addon is configured with `color-contrast` check disabled (trusts design token contrast).
 - Mock date is set to `2023-01-02 12:34:56` in Storybook.

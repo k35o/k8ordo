@@ -3,8 +3,6 @@
 import { useCallback, useSyncExternalStore } from 'react';
 import type { RefObject } from 'react';
 
-import { createResizeObserver } from '../../internal/dom-support';
-
 export type WritingMode = 'horizontal' | 'vertical';
 
 const getServerSnapshot = (): WritingMode => 'horizontal';
@@ -21,8 +19,7 @@ export const useWritingMode = (ref: RefObject<Element | null>): WritingMode => {
       if (!el) return () => {};
       // writing-mode が flip するとインライン/ブロック軸が入れ替わって必ずサイズ変動が起こるため
       // ResizeObserver で十分検知できる。
-      const observer = createResizeObserver(onChange);
-      if (!observer) return () => {};
+      const observer = new ResizeObserver(onChange);
       observer.observe(el);
       return () => {
         observer.disconnect();

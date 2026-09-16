@@ -4,7 +4,6 @@ import { useEffect, useRef } from 'react';
 import type { FC, RefObject } from 'react';
 
 import { cn } from './../../../helpers/cn';
-import { createResizeObserver } from './../../../internal/dom-support';
 
 /**
  * ページ（または container）のスクロール進捗バー。
@@ -55,12 +54,12 @@ export const ScrollLinked: FC<{
       scroller.addEventListener('scroll', update, { passive: true });
       // リサイズやコンテンツ高さの変化でも進捗を再計算する
       // （native の ScrollTimeline はレイアウト変化に自動追従するため合わせる）
-      const observer = createResizeObserver(update);
-      observer?.observe(target ?? document.documentElement);
+      const observer = new ResizeObserver(update);
+      observer.observe(target ?? document.documentElement);
       // コンテンツ高(scrollHeight)の変化は target 自身の box には現れないため
       // 直下の子要素を監視する（バー自身が混ざっても無害）。attach 後に
       // 追加された子までは追わず、次の scroll / resize で追従する
-      if (observer && target) {
+      if (target) {
         for (const child of target.children) {
           observer.observe(child);
         }
@@ -68,7 +67,7 @@ export const ScrollLinked: FC<{
       window.addEventListener('resize', update);
       cleanup = () => {
         scroller.removeEventListener('scroll', update);
-        observer?.disconnect();
+        observer.disconnect();
         window.removeEventListener('resize', update);
       };
     };
