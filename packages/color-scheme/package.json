@@ -1,6 +1,6 @@
 {
   "name": "@k8ordo/color-scheme",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "The colour-scheme axis of an application, owned: the visitor's light / dark / system preference, kept in localStorage, resolved against the system, put on <html> before the first paint and kept there.",
   "keywords": [
     "color-scheme",
