@@ -18,7 +18,7 @@ Start with the Design Guide, then follow the reference most relevant to the task
 
 ## Guide
 
-- [Design Guide](https://ordo.k8o.me/docs/GUIDE.md): setup, i18n (default Japanese, switching to English), design direction, aesthetic guidelines, component usage principles, anti-patterns, implementation principles, testing in jsdom (components mount with no setup; the copy-paste `setupFiles` stubs for `ResizeObserver` / `IntersectionObserver` / `matchMedia` / `showModal` / the Popover API when a test needs to assert on open state).
+- [Design Guide](https://ordo.k8o.me/docs/GUIDE.md): setup, i18n (default Japanese, switching to English), design direction, aesthetic guidelines, component usage principles, anti-patterns, implementation principles, testing (component tests belong in a real browser — Vitest browser mode or Playwright — because the components call browser APIs jsdom does not implement).
 
 ## References
 

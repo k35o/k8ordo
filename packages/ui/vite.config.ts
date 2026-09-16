@@ -102,17 +102,6 @@ export default defineConfig({
       {
         extends: true,
         test: {
-          name: { label: 'jsdom', color: 'yellow' },
-          // 利用者の単体テスト環境（jsdom）で描画できることの回帰テスト。
-          // setupFiles は置かない。スタブを足すと、欠けた API を踏んでいないのか
-          // ガードが効いているのかを区別できなくなる。
-          include: ['src/**/*.jsdom.test.tsx'],
-          environment: 'jsdom',
-        },
-      },
-      {
-        extends: true,
-        test: {
           name: { label: 'helpers', color: 'blue' },
           include: [
             'src/helpers/**/*.test.{ts,tsx}',

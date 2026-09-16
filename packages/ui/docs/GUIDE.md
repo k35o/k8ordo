@@ -340,99 +340,20 @@ Avoid the traits that make a UI recognizably AI-generated at a glance.
 - **Do not forget dark mode**: semantic tokens handle it for you
 - **Accessibility**: `aria-label`, keyboard navigation, and state that does not rely on color alone
 
-## Testing in jsdom
+## Testing
 
-The library's own tests run in a real browser, but an application that unit
-tests its pages usually runs them in jsdom or happy-dom. Every component mounts
-there without any setup: the DOM APIs these test environments leave out
-(`ResizeObserver`, `IntersectionObserver`, `matchMedia`, `HTMLDialogElement`'s
-`showModal` / `close`, and the Popover API) are called through a support check,
-and where one is missing the component falls back to its server snapshot or does
-nothing, so mounting a page built from them does not throw. The one component
-that still needs a stub is `Conversation` — see the end of this section.
+Run component tests in a real browser — Vitest browser mode or Playwright —
+the way this library tests itself. Every interactive component is built
+directly on APIs a browser has and a synthetic DOM (jsdom, happy-dom) does
+not: `ResizeObserver`, `IntersectionObserver`, `matchMedia`,
+`HTMLDialogElement`'s `showModal` / `close`, and the Popover API. None of
+them is called through a support check, so mounting a `Modal`, `Drawer`,
+`Popover`, `Tooltip`, `DropdownMenu`, or `Conversation` under jsdom throws.
 
-What a check cannot do is invent the behavior. Without stubs a `Modal` never
-reports itself as open, a `Popover` never enters the top layer, `useBreakpoint`
-answers `false`, and `useCanHover` answers `true`. To assert on open and closed
-state, add the stubs below; to assert on focus, placement, or anything with a
-layout, use a real browser (Vitest browser mode or Playwright) instead — jsdom
-has no layout engine, so a passing visibility assertion there means little.
-
-```ts
-// vitest.setup.ts
-// vitest.config.ts: test: { environment: 'jsdom', setupFiles: ['./vitest.setup.ts'] }
-
-class ObserverStub {
-  observe(): void {}
-  unobserve(): void {}
-  disconnect(): void {}
-  takeRecords(): [] {
-    return [];
-  }
-}
-
-globalThis.ResizeObserver ??= ObserverStub as unknown as typeof ResizeObserver;
-globalThis.IntersectionObserver ??=
-  ObserverStub as unknown as typeof IntersectionObserver;
-
-window.matchMedia ??= (query: string) =>
-  ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addEventListener: () => {},
-    removeEventListener: () => {},
-    dispatchEvent: () => false,
-  }) as unknown as MediaQueryList;
-
-// <dialog>: jsdom reflects the `open` attribute but ships none of the methods.
-// Modal watches that attribute, so driving `open` is enough to open and close it.
-HTMLDialogElement.prototype.showModal ??= function (this: HTMLDialogElement) {
-  this.open = true;
-};
-HTMLDialogElement.prototype.show ??= function (this: HTMLDialogElement) {
-  this.open = true;
-};
-HTMLDialogElement.prototype.close ??= function (
-  this: HTMLDialogElement,
-  returnValue?: string,
-) {
-  if (returnValue !== undefined) {
-    this.returnValue = returnValue;
-  }
-  this.open = false;
-  this.dispatchEvent(new Event('close'));
-};
-
-// Popover API. Keep the open elements in a set and teach `Element.prototype.matches`
-// about `:popover-open`: a selector engine that does not implement the pseudo-class
-// either rejects it outright or always answers false, and Popover / Tooltip /
-// DropdownMenu ask it on every toggle.
-const openPopovers = new WeakSet<Element>();
-
-HTMLElement.prototype.showPopover ??= function (this: HTMLElement) {
-  openPopovers.add(this);
-};
-HTMLElement.prototype.hidePopover ??= function (this: HTMLElement) {
-  openPopovers.delete(this);
-};
-
-const matches = Element.prototype.matches;
-Element.prototype.matches = function (this: Element, selectors: string) {
-  return selectors === ':popover-open'
-    ? openPopovers.has(this)
-    : matches.call(this, selectors);
-};
-```
-
-Two more, only if your test touches them:
-
-- `Element.prototype.scrollTo` — jsdom does not implement it, and `Conversation`
-  from `@k8ordo/ui/ai` scrolls its viewport to the bottom on mount, so a test that
-  renders one throws without this. Assign a no-op to it.
-- `ResizeObserver` — the stub above never fires. A test that expects a component
-  to react to a size change needs an observer that records its callback and lets
-  the test call it.
+This is not a gap to be stubbed around. jsdom has no layout engine, so even
+with stubs in place a passing assertion about focus, placement, or visibility
+there means very little — the thing you wanted to check is the thing jsdom
+cannot model.
 
 ## Detailed reference
 

@@ -5,7 +5,6 @@ import type { FC, FocusEvent, PropsWithChildren, ReactElement } from 'react';
 
 import { cn } from '../../../helpers';
 import { useControllableState, useWritingMode } from '../../../hooks';
-import { syncPopover } from '../../../internal/dom-support';
 import { useFocusTrap } from '../../../internal/focus-trap';
 import type { Placement } from '../../../types/variables';
 import { getContentAnchorStyle, toAnchorName } from './anchor-positioning';
@@ -133,7 +132,13 @@ export const Content: FC<{
     if (!el) {
       return;
     }
-    syncPopover(el, isOpen);
+    // 現在の表示状態を :popover-open で確かめてから呼ぶ。showPopover /
+    // hidePopover は既にその状態のときに InvalidStateError を投げる。
+    if (isOpen && !el.matches(':popover-open')) {
+      el.showPopover();
+    } else if (!isOpen && el.matches(':popover-open')) {
+      el.hidePopover();
+    }
   }, [isOpen]);
 
   useFocusTrap(contentWrapperRef, triggerRef, isOpen && trapFocus);

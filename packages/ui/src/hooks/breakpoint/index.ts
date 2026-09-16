@@ -2,8 +2,6 @@
 
 import { useCallback, useSyncExternalStore } from 'react';
 
-import { matchMedia } from '../../internal/dom-support';
-
 type Breakpoint = 'sm' | 'md' | 'lg' | 'xl' | '2xl';
 
 const BREAKPOINTS: Record<Breakpoint, string> = {
@@ -19,8 +17,7 @@ export const useBreakpoint = (breakpoint: Breakpoint): boolean => {
 
   const subscribe = useCallback(
     (cb: () => void) => {
-      const mediaQueryList = matchMedia(query);
-      if (!mediaQueryList) return () => {};
+      const mediaQueryList = window.matchMedia(query);
       mediaQueryList.addEventListener('change', cb);
       return () => {
         mediaQueryList.removeEventListener('change', cb);
@@ -29,7 +26,7 @@ export const useBreakpoint = (breakpoint: Breakpoint): boolean => {
     [query],
   );
 
-  const getSnapshot = () => matchMedia(query)?.matches ?? false;
+  const getSnapshot = () => window.matchMedia(query).matches;
 
   return useSyncExternalStore(subscribe, getSnapshot, () => false);
 };
