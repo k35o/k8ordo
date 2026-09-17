@@ -221,6 +221,32 @@ const fr: Messages = {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
+          <Rich>{m.uiI18n.readTitle()}</Rich>
+        </Heading>
+        <p className="text-fg-mute">
+          <Rich>{m.uiI18n.readDescription()}</Rich>
+        </p>
+        <CodeBlock
+          code={`'use client';
+
+import { useMessages } from '@k8ordo/ui/i18n';
+
+function DismissButton({ onDismiss }) {
+  const { close } = useMessages();
+  return (
+    <button aria-label={close} onClick={onDismiss} type="button">
+      ×
+    </button>
+  );
+}`}
+          lang="tsx"
+        />
+      </section>
+
+      <Separator color="mute" />
+
+      <section className="flex flex-col gap-4">
+        <Heading level="h2">
           <Rich>{m.uiI18n.keysTitle()}</Rich>
         </Heading>
         <p className="text-fg-mute">

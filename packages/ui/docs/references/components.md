@@ -1575,10 +1575,35 @@ A component with a wording prop of its own — `Spinner`'s `label`, `Alert`'s `c
 ### Exports
 
 ```tsx
-import { en, ja, type Messages } from '@k8ordo/ui/i18n';
+import {
+  dictionaries,
+  en,
+  ja,
+  useMessages,
+  type Messages,
+} from '@k8ordo/ui/i18n';
 ```
 
 `ja` and `en` are exported only from the `@k8ordo/ui/i18n` subpath, not the root, so the dictionaries stay out of the main bundle.
+
+### Reading the wording in your own elements
+
+`useMessages` returns the wording in effect: the built-in dictionary with whatever you passed to `UIProvider` laid over it. Read from it in an element you draw through `renderItem`, or in a component of your own that sits beside the library, and it follows the same language and overrides as the components do. It is a client hook.
+
+```tsx
+'use client';
+
+import { useMessages } from '@k8ordo/ui/i18n';
+
+function DismissButton({ onDismiss }) {
+  const { close } = useMessages();
+  return (
+    <button aria-label={close} onClick={onDismiss} type="button">
+      ×
+    </button>
+  );
+}
+```
 
 ### Key list
 
