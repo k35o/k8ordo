@@ -459,6 +459,11 @@ import { UIProvider, Button, Card } from '@k8ordo/ui';
 - **Separator** — \`color: 'base'|'mute'|'subtle'\`, \`orientation: 'horizontal'|'vertical'\`
 - **ScrollLinked** — スクロール進捗バー（\`container?\`）
 
+### Observers
+
+- **InView** — 子要素が見えているかを知らせる。\`onChange(isInView)\`, \`root?\`, \`rootMargin?\`, \`threshold?\`, \`once?\`
+- **Resize** — 子要素の大きさが変わると知らせる。\`onChange()\`
+
 ### Navigation
 
 - **Anchor** — テキストリンク。外部リンクに自動で新規タブアイコン。\`href\`, \`openInNewTab?\`, \`renderAnchor?\`

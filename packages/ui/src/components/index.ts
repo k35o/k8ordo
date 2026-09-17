@@ -48,6 +48,8 @@ export { Anchor } from './navigation/anchor';
 export { Breadcrumb } from './navigation/breadcrumb';
 export { Pagination } from './navigation/pagination';
 export { Tabs } from './navigation/tabs';
+export { InView } from './observers/in-view';
+export { Resize } from './observers/resize';
 export { Dialog } from './overlays/dialog';
 export { Drawer } from './overlays/drawer';
 export { DropdownMenu } from './overlays/dropdown-menu';

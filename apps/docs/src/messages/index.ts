@@ -21,8 +21,6 @@ export * as aiChat from './ai-chat';
 export * as getStarted from './get-started';
 export * as catalog from './catalog';
 export * as components from './components';
-export * as hooks from './hooks';
-export * as helpers from './helpers';
 export * as theming from './theming';
 export * as uiI18n from './ui-i18n';
 export * as sideNav from './side-nav';

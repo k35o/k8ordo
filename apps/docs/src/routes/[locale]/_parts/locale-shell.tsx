@@ -13,8 +13,6 @@ import { Navigation } from '../../../components/navigation';
 import { SideNavigation } from '../../../components/side-navigation';
 import { aiCategories } from '../../../data/ai-nav';
 import { componentCategories } from '../../../data/components-nav';
-import { helperCategories } from '../../../data/helpers-nav';
-import { hookCategories } from '../../../data/hooks-nav';
 import type { NavCategory } from '../../../data/nav-types';
 import { locales } from '../../../i18n';
 import type { SitePath } from '../../../links';
@@ -27,11 +25,7 @@ type SideNavConfig = {
   catalogPath: SitePath;
 };
 
-type Section =
-  | '/:locale/ui/components'
-  | '/:locale/ui/hooks'
-  | '/:locale/ui/helpers'
-  | '/:locale/ui/ai';
+type Section = '/:locale/ui/components' | '/:locale/ui/ai';
 
 /**
  * `pattern` の配下のページが開いているか。`/:locale/ui/components/*` は
@@ -44,8 +38,6 @@ const useBelow = (pattern: Section): boolean =>
 
 function useSideNavConfig(): SideNavConfig | null {
   const components = useBelow('/:locale/ui/components');
-  const hooks = useBelow('/:locale/ui/hooks');
-  const helpers = useBelow('/:locale/ui/helpers');
   const ai = useBelow('/:locale/ui/ai');
 
   if (components) {
@@ -53,20 +45,6 @@ function useSideNavConfig(): SideNavConfig | null {
       categories: componentCategories,
       title: m.nav.components,
       catalogPath: '/:locale/ui/components',
-    };
-  }
-  if (hooks) {
-    return {
-      categories: hookCategories,
-      title: m.nav.hooks,
-      catalogPath: '/:locale/ui/hooks',
-    };
-  }
-  if (helpers) {
-    return {
-      categories: helperCategories,
-      title: m.nav.helpers,
-      catalogPath: '/:locale/ui/helpers',
     };
   }
   if (ai) {

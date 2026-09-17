@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
+import type { FC } from 'react';
 import { expect, fn, waitFor } from 'storybook/test';
 
 import { Popover } from '.';
@@ -509,3 +510,70 @@ export const LeftEnd = placementStory('left-end');
 export const Right = placementStory('right');
 export const RightStart = placementStory('right-start');
 export const RightEnd = placementStory('right-end');
+
+// 描画直後の通知はレンダリング更新のあとのタスクで届く。切り替えの前に
+// 2 フレーム待ち、マウント直後の処理を出し切らせてから切り替える。
+const settle = async (): Promise<void> => {
+  await new Promise<void>((resolve) => {
+    requestAnimationFrame(() => {
+      resolve();
+    });
+  });
+  await new Promise<void>((resolve) => {
+    requestAnimationFrame(() => {
+      resolve();
+    });
+  });
+};
+
+const SwitchableWritingModePopover: FC = () => {
+  const [isVertical, setIsVertical] = useState(false);
+  return (
+    <div className="flex flex-col gap-2">
+      <button
+        onClick={() => {
+          setIsVertical(true);
+        }}
+        type="button"
+      >
+        縦書きにする
+      </button>
+      <div className={isVertical ? 'writing-v h-60' : 'h-60'}>
+        <Popover.Root>
+          <Popover.Trigger
+            renderItem={(props) => (
+              <Button {...props} size="md" type="button">
+                メニュー
+              </Button>
+            )}
+          />
+          <Popover.Content
+            renderItem={(props) => (
+              <div className="bg-bg-raised rounded-lg p-4 shadow-md" {...props}>
+                <div role="menuitem">縦書きの内容</div>
+              </div>
+            )}
+          />
+        </Popover.Root>
+      </div>
+    </div>
+  );
+};
+
+// content は top-layer に出るので、trigger が縦書きの中にあれば writing-v を付けて向きを揃える。
+export const FollowsWritingMode: Story = {
+  parameters: { vrt: { skip: true } },
+  render: () => <SwitchableWritingModePopover />,
+  play: async ({ canvas, canvasElement, userEvent }) => {
+    // trigger のボタンは中身に合わせて縮むので、書字方向が変わってもサイズは
+    // 変わらない。落ち着いてから切り替え、サイズの変化に頼らず追従することを確かめる。
+    await settle();
+    await userEvent.click(canvas.getByRole('button', { name: '縦書きにする' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'メニュー' }));
+
+    const content = canvasElement.querySelector('[popover]');
+    await waitFor(() => {
+      expect(content).toHaveClass('writing-v');
+    });
+  },
+};

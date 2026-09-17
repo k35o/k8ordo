@@ -40,6 +40,11 @@ export const categoryLayout = message({
   en: 'Layout',
 });
 
+export const categoryObservers = message({
+  ja: 'Observers',
+  en: 'Observers',
+});
+
 export const categoryMedia = message({
   ja: 'Media',
   en: 'Media',
@@ -833,6 +838,40 @@ export const scrollLinked = {
   windowScrollTitle: message({
     ja: 'ウィンドウスクロール',
     en: 'Window Scroll',
+  }),
+};
+
+export const inView = {
+  description: message({
+    ja: '子要素が画面やスクロール領域に入っているかを知らせるコンポーネント',
+    en: 'Reports whether its children are inside the viewport or a scroll container.',
+  }),
+  onceTitle: message({
+    ja: '一度だけ',
+    en: 'Once',
+  }),
+  onceDescription: message({
+    ja: '`once`を付けると、最初に見えた時点で観測をやめ、その後に外れても`false`を知らせません。',
+    en: 'With `once`, observation stops the first time the children are in view, and leaving afterwards reports nothing.',
+  }),
+  multipleTitle: message({
+    ja: '子要素が複数あるとき',
+    en: 'Multiple Children',
+  }),
+  multipleDescription: message({
+    ja: '要素が複数あるときは、どれか1つでも見えていれば`true`になります。後から増えたり外れたりした要素にも追従し、観測する要素が無い間は`false`です。',
+    en: 'With several elements, it is `true` while any of them is in view, and it follows elements that mount or unmount later. While there is nothing to observe it is `false`.',
+  }),
+};
+
+export const resize = {
+  description: message({
+    ja: '子要素の大きさが変わったときに知らせるコンポーネント',
+    en: 'Calls back when the size of its children changes.',
+  }),
+  initialNotice: message({
+    ja: '`onChange`は観測を始めた時点でも1回呼ばれます。引数は無いので、必要な値はハンドラの中でDOMから読んでください。',
+    en: '`onChange` is also called once when observation starts. It takes no argument; read what you need from the DOM in the handler.',
   }),
 };
 

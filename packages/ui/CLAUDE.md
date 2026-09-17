@@ -238,7 +238,7 @@ Standard pattern: `focus-visible:border-transparent focus-visible:outline-hidden
 The authoritative list is the `exports` map in `package.json`.
 
 ```
-@k8ordo/ui                     all components, hooks, helpers, public types
+@k8ordo/ui                     all components and public types
 @k8ordo/ui/i18n                ja / en dictionaries and the Messages type
 @k8ordo/ui/ai                  AI chat components
 @k8ordo/ui/ai/response         Response renderer only

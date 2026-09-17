@@ -55,6 +55,16 @@ export const customDescription = message({
   en: 'Annotate with the Messages type and missing or misspelled keys become compile errors — including when the library adds a key.',
 });
 
+export const readTitle = message({
+  ja: '自分の要素で文言を読む',
+  en: 'Reading the wording in your own elements',
+});
+
+export const readDescription = message({
+  ja: '`@k8ordo/ui/i18n`の`useMessages`は、既定の辞書に`UIProvider`へ渡した辞書を重ねた、いま有効な文言を返します。`renderItem`で描く要素や、コンポーネントの隣に置く自作の部品でここから読めば、言語も上書きもコンポーネントと揃います。Client Componentから呼んでください。',
+  en: '`useMessages` from `@k8ordo/ui/i18n` returns the wording in effect: the built-in dictionary with whatever you passed to `UIProvider` laid over it. Read from it in an element you draw through `renderItem`, or in a component of your own that sits beside the library, and it follows the same language and overrides as the components do. Call it from a Client Component.',
+});
+
 export const keysTitle = message({
   ja: 'キー一覧',
   en: 'Key reference',

@@ -1,15 +1,15 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { FC, ReactNode, RefObject } from 'react';
+import type { FC, ReactNode } from 'react';
 
 import { cn } from '../../../helpers/cn';
 import { createSafeContext } from '../../../helpers/create-safe-context';
-import { useIntersectionObserver } from '../../../hooks/intersection-observer';
-import { useResize } from '../../../hooks/resize';
 import { useMessages } from '../../../i18n/context';
 import { FOCUS_RING, FOCUS_RING_NO_BORDER } from '../../_internal/focus-ring';
 import { ChevronIcon } from '../../icons';
+import { InView } from '../../observers/in-view';
+import { Resize } from '../../observers/resize';
 
 const prefersReducedMotion = () =>
   window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -17,15 +17,14 @@ const prefersReducedMotion = () =>
 const [ConversationProvider, useConversationContext] = createSafeContext<{
   isAtBottom: boolean;
   scrollToBottom: (behavior?: ScrollBehavior) => void;
+  viewport: HTMLDivElement | null;
   setViewport: (el: HTMLDivElement | null) => void;
-  sentinelRef: RefObject<HTMLDivElement | null>;
-  contentRef: RefObject<HTMLDivElement | null>;
+  updateAtBottom: (next: boolean) => void;
+  followContent: () => void;
 }>('Conversation.* must be used within <Conversation.Root>');
 
 export const Root: FC<{ children: ReactNode }> = ({ children }) => {
   const [viewport, setViewport] = useState<HTMLDivElement | null>(null);
-  const sentinelRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
   const isAtBottomRef = useRef(true);
 
@@ -47,25 +46,11 @@ export const Root: FC<{ children: ReactNode }> = ({ children }) => {
     [viewport],
   );
 
-  const handleIntersect = useCallback(
-    (entry: IntersectionObserverEntry) => {
-      updateAtBottom(entry.isIntersecting);
-    },
-    [updateAtBottom],
-  );
-
-  useIntersectionObserver(sentinelRef, handleIntersect, {
-    root: viewport,
-    rootMargin: '0px 0px 24px 0px',
-  });
-
-  const handleResize = useCallback(() => {
+  const followContent = useCallback(() => {
     if (isAtBottomRef.current && viewport) {
       viewport.scrollTo({ top: viewport.scrollHeight, behavior: 'instant' });
     }
   }, [viewport]);
-
-  useResize(contentRef, handleResize);
 
   useEffect(() => {
     if (viewport) {
@@ -77,11 +62,12 @@ export const Root: FC<{ children: ReactNode }> = ({ children }) => {
     () => ({
       isAtBottom,
       scrollToBottom,
+      viewport,
       setViewport,
-      sentinelRef,
-      contentRef,
+      updateAtBottom,
+      followContent,
     }),
-    [isAtBottom, scrollToBottom],
+    [isAtBottom, scrollToBottom, viewport, updateAtBottom, followContent],
   );
 
   return (
@@ -103,7 +89,8 @@ export const Messages: FC<MessagesProps> = ({
   children,
 }) => {
   const messages = useMessages();
-  const { setViewport, sentinelRef, contentRef } = useConversationContext();
+  const { viewport, setViewport, updateAtBottom, followContent } =
+    useConversationContext();
 
   return (
     <div
@@ -120,10 +107,18 @@ export const Messages: FC<MessagesProps> = ({
       // oxlint-disable-next-line eslint-plugin-jsx-a11y/no-noninteractive-tabindex
       tabIndex={0}
     >
-      <div className="flex flex-col gap-6 p-4" ref={contentRef}>
-        {children}
-        <div aria-hidden className="h-px w-full shrink-0" ref={sentinelRef} />
-      </div>
+      <Resize onChange={followContent}>
+        <div className="flex flex-col gap-6 p-4">
+          {children}
+          <InView
+            onChange={updateAtBottom}
+            root={viewport}
+            rootMargin="0px 0px 24px 0px"
+          >
+            <div aria-hidden className="h-px w-full shrink-0" />
+          </InView>
+        </div>
+      </Resize>
     </div>
   );
 };

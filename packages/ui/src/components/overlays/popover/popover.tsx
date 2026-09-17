@@ -1,10 +1,18 @@
 'use client';
 
-import { useCallback, useEffect, useId, useRef } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 import type { FC, FocusEvent, PropsWithChildren, ReactElement } from 'react';
 
 import { cn } from '../../../helpers';
-import { useControllableState, useWritingMode } from '../../../hooks';
+import { readWritingMode, useControllableState } from '../../../hooks';
+import type { WritingMode } from '../../../hooks';
 import { useFocusTrap } from '../../../internal/focus-trap';
 import type { Placement } from '../../../types/variables';
 import { getContentAnchorStyle, toAnchorName } from './anchor-positioning';
@@ -117,8 +125,15 @@ export const Content: FC<{
 
   // content は popover で top-layer に出すためインライン描画になり、trigger 側の
   // writing-mode を継承する。`vertical:` variant は `.writing-v` 祖先を要求するので、
-  // 縦書きなら class を付与する。
-  const writingMode = useWritingMode(triggerRef);
+  // 縦書きなら class を付与する。trigger は中身に合わせて縮むことが多く、書字方向が
+  // 切り替わってもサイズの変化では検出できないので、開く瞬間に読む。
+  const [writingMode, setWritingMode] = useState<WritingMode>('horizontal');
+  useLayoutEffect(() => {
+    const trigger = triggerRef.current;
+    if (isOpen && trigger) {
+      setWritingMode(readWritingMode(trigger));
+    }
+  }, [isOpen, triggerRef]);
   const writingClass = writingMode === 'vertical' ? 'writing-v' : undefined;
 
   const contentWrapperRef = useRef<HTMLDivElement>(null);

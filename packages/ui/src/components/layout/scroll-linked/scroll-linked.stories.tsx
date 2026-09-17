@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { useRef } from 'react';
+import { useState } from 'react';
 import { expect, waitFor, within } from 'storybook/test';
 
 import { ScrollLinked } from './scroll-linked';
@@ -49,18 +49,18 @@ export const Scroll: Story = {
 export const WithContainer: Story = {
   decorators: [
     (Story) => {
-      const containerRef = useRef<HTMLDivElement>(null);
+      const [container, setContainer] = useState<HTMLElement | null>(null);
       return (
         <div>
           <section
             aria-label="スクロールコンテナの例"
             className="border-border-mute relative h-96 overflow-y-scroll rounded-lg border"
-            ref={containerRef}
+            ref={setContainer}
             // キーボードでもスクロールできるよう section にフォーカスを許可
             // oxlint-disable-next-line eslint-plugin-jsx-a11y/no-noninteractive-tabindex
             tabIndex={0}
           >
-            <Story args={{ container: containerRef }} />
+            <Story args={{ container }} />
             <div className="h-[200vh] p-4">
               <h2 className="mb-4 text-xl font-bold">
                 コンテナ内スクロールの例

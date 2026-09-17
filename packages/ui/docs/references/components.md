@@ -362,18 +362,29 @@ Props:
 
 ### ScrollLinked
 
-Shows scroll progress as a progress bar.
+Shows scroll progress as a progress bar. Tracks the window unless `container`
+names an element to track instead.
 
 ```tsx
 import { ScrollLinked } from '@k8ordo/ui';
 
-<ScrollLinked />
-<ScrollLinked container={containerRef} />
+<ScrollLinked />;
+
+// a scroll container rather than the window
+const [container, setContainer] = useState<HTMLElement | null>(null);
+
+<div ref={setContainer} style={{ overflowY: 'auto' }}>
+  <ScrollLinked container={container} />…
+</div>;
 ```
+
+Hold `container` in state, not a `RefObject`: tracking has to start once the
+element exists. While it is still `null` the bar tracks nothing — it does not
+fall back to the window.
 
 Props:
 
-- `container`: `RefObject<HTMLElement | null>`
+- `container`: `Element` | `null`
 
 ### Stack
 
@@ -1151,6 +1162,75 @@ Props:
 - `shape`: `'rect'` | `'circle'` (default: `'rect'`)
 - `size`: `'sm'` | `'md'` | `'lg'` (default: `'md'`)
 
+## Observers
+
+Components that watch their children and report back without adding a wrapper
+element. They are built on React's Fragment refs, so whatever the children
+render is what gets observed — including host elements that mount later.
+
+### InView
+
+Reports whether its children are inside the viewport, or inside `root`.
+
+```tsx
+import { InView } from '@k8ordo/ui';
+
+const [isInView, setIsInView] = useState(false);
+
+<InView onChange={setIsInView}>
+  <section>…</section>
+</InView>;
+
+// inside a scroll container, and only until it has been seen once
+const [container, setContainer] = useState<HTMLElement | null>(null);
+
+<div ref={setContainer} style={{ overflowY: 'auto' }}>
+  <InView once onChange={reveal} root={container} rootMargin="0px 0px 24px 0px">
+    <img alt="" src="…" />
+  </InView>
+</div>;
+```
+
+- `onChange` reports the state as soon as observation starts, then again each
+  time it flips. The same value is never reported twice in a row, even when
+  `root` changes and the observer is re-created.
+- With several host elements, `isInView` is `true` while **any** of them
+  intersects, and it follows children that mount or unmount later. While there
+  is nothing to observe it is `false`.
+- `once` stops observing after the first `true`.
+- Hold `root` in state, not a `RefObject`: the observer has to be re-created
+  once the element exists.
+
+Props:
+
+- `children`: `ReactNode` (required)
+- `onChange`: `(isInView: boolean) => void` (required)
+- `once`: `boolean` (default: `false`)
+- `root`: `Element` | `null` (default: `null`)
+- `rootMargin`: `string` (default: `'0px'`)
+- `threshold`: `number` (default: `0`)
+
+### Resize
+
+Calls `onChange` when the size of its children changes.
+
+```tsx
+import { Resize } from '@k8ordo/ui';
+
+<Resize onChange={remeasure}>
+  <div>…</div>
+</Resize>;
+```
+
+- `onChange` is also called once when observation starts, as a native
+  `ResizeObserver` is.
+- It takes no argument; read what you need from the DOM in the handler.
+
+Props:
+
+- `children`: `ReactNode` (required)
+- `onChange`: `() => void` (required)
+
 ## Overlays
 
 ### Modal
@@ -1495,10 +1575,35 @@ A component with a wording prop of its own — `Spinner`'s `label`, `Alert`'s `c
 ### Exports
 
 ```tsx
-import { en, ja, type Messages } from '@k8ordo/ui/i18n';
+import {
+  dictionaries,
+  en,
+  ja,
+  useMessages,
+  type Messages,
+} from '@k8ordo/ui/i18n';
 ```
 
 `ja` and `en` are exported only from the `@k8ordo/ui/i18n` subpath, not the root, so the dictionaries stay out of the main bundle.
+
+### Reading the wording in your own elements
+
+`useMessages` returns the wording in effect: the built-in dictionary with whatever you passed to `UIProvider` laid over it. Read from it in an element you draw through `renderItem`, or in a component of your own that sits beside the library, and it follows the same language and overrides as the components do. It is a client hook.
+
+```tsx
+'use client';
+
+import { useMessages } from '@k8ordo/ui/i18n';
+
+function DismissButton({ onDismiss }) {
+  const { close } = useMessages();
+  return (
+    <button aria-label={close} onClick={onDismiss} type="button">
+      ×
+    </button>
+  );
+}
+```
 
 ### Key list
 

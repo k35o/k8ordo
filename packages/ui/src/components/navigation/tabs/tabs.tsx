@@ -7,6 +7,7 @@ import {
   useId,
   useMemo,
   useRef,
+  useState,
   ViewTransition,
 } from 'react';
 import type {
@@ -106,8 +107,8 @@ export const List: FC<
 > = ({ label, children }) => {
   const { rootId } = useTabsState();
   const setFocusRef = useRef<boolean>(false);
-  const listRef = useRef<HTMLDivElement>(null);
-  const writingMode = useWritingMode(listRef);
+  const [tablist, setTablist] = useState<HTMLDivElement | null>(null);
+  const writingMode = useWritingMode(tablist);
   const listContextValue = useMemo(
     () => ({ setFocusRef, writingMode }),
     [writingMode],
@@ -118,7 +119,7 @@ export const List: FC<
       aria-orientation={writingMode === 'vertical' ? 'vertical' : 'horizontal'}
       className="border-border-base vertical:border-b-0 vertical:border-l vertical:overflow-x-hidden vertical:overflow-y-auto relative flex overflow-x-auto overflow-y-hidden border-b p-0.5 wrap-normal"
       id={`${rootId}-tablist`}
-      ref={listRef}
+      ref={setTablist}
       role="tablist"
       style={
         // useId は React ルートを跨ぐと衝突しうるので、anchor 名の解決を
@@ -131,7 +132,9 @@ export const List: FC<
         aria-hidden="true"
         className="ao-tab-indicator bg-primary-border"
         style={
-          { positionAnchor: toAnchorName(rootId) } satisfies AnchorCSSProperties
+          {
+            positionAnchor: toAnchorName(rootId),
+          } satisfies AnchorCSSProperties
         }
       />
     </div>

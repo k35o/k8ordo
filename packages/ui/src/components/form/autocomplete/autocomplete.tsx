@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useDeferredValue, useRef, useState } from 'react';
 import type {
   CSSProperties,
   FC,
@@ -15,8 +15,6 @@ import { useFormStatus } from 'react-dom';
 import {
   useClickAway,
   useControllableState,
-  useDeferredDebounce,
-  useDisclosure,
   useWritingMode,
 } from '../../../hooks';
 import { useMessages } from '../../../i18n/context';
@@ -91,14 +89,15 @@ export const Autocomplete: FC<Props> = ({
   });
 
   const containerRef = useRef<HTMLDivElement>(null);
-  const { isOpen, open, close } = useDisclosure();
+  const [isOpen, setIsOpen] = useState(false);
   const [text, setText] = useState('');
   const [selectIndex, setSelectIndex] = useState<number>();
 
   // リストボックスは CSS Anchor Positioning で入力欄に追従させ、幅は入力欄の inline 寸法に
   // 合わせる。縦書きでは inline 軸が物理 height になるため、書字方向で anchor-size の
   // 物理キーワードを切り替える（論理 inline より広くサポート）。
-  const writingMode = useWritingMode(containerRef);
+  const [container, setContainer] = useState<HTMLDivElement | null>(null);
+  const writingMode = useWritingMode(container);
   const anchorName = `--ao-ac-${id.replaceAll(/[^a-zA-Z0-9_-]/gu, '')}`;
   const listboxStyle: CSSProperties & {
     positionAnchor?: string;
@@ -115,7 +114,8 @@ export const Autocomplete: FC<Props> = ({
     inlineSize: `anchor-size(${writingMode === 'vertical' ? 'height' : 'width'})`,
   };
 
-  const [deferredText, isPending] = useDeferredDebounce(text);
+  const deferredText = useDeferredValue(text);
+  const isPending = !Object.is(deferredText, text);
   const filteredOptions = options.filter((option) =>
     option.label.includes(deferredText),
   );
@@ -132,9 +132,9 @@ export const Autocomplete: FC<Props> = ({
 
   const reset = useCallback(() => {
     setText('');
-    close();
+    setIsOpen(false);
     setSelectIndex(undefined);
-  }, [close]);
+  }, []);
 
   useClickAway(containerRef, reset, isOpen);
 
@@ -145,6 +145,7 @@ export const Autocomplete: FC<Props> = ({
   const setReferenceRef = useCallback(
     (node: HTMLDivElement | null) => {
       containerRef.current = node;
+      setContainer(node);
       if (node) {
         node.style.setProperty('anchor-name', anchorName);
       }
@@ -156,15 +157,15 @@ export const Autocomplete: FC<Props> = ({
     if (e.relatedTarget?.id.startsWith(`${id}_option_`) === true) {
       return;
     }
-    close();
+    setIsOpen(false);
   };
 
   const handleClick: MouseEventHandler<HTMLInputElement> = () => {
     if (isOpen && text.length === 0) {
-      close();
+      setIsOpen(false);
       return;
     }
-    open();
+    setIsOpen(true);
     setSelectIndex(undefined);
   };
 
@@ -177,13 +178,13 @@ export const Autocomplete: FC<Props> = ({
     if (e.key === 'Escape') {
       if (isOpen) {
         e.preventDefault();
-        close();
+        setIsOpen(false);
         setSelectIndex(undefined);
       }
       return;
     }
     if (e.key === 'ArrowDown') {
-      open();
+      setIsOpen(true);
       if (filteredOptions.length === 0) {
         return;
       }
@@ -195,7 +196,7 @@ export const Autocomplete: FC<Props> = ({
       return;
     }
     if (e.key === 'ArrowUp') {
-      open();
+      setIsOpen(true);
       if (filteredOptions.length === 0) {
         return;
       }
@@ -293,7 +294,7 @@ export const Autocomplete: FC<Props> = ({
             id={id}
             onBlur={chain(handleBlur, onBlur)}
             onChange={(e) => {
-              open();
+              setIsOpen(true);
               setText(e.target.value);
               setSelectIndex(undefined);
             }}

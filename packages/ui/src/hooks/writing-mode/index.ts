@@ -1,38 +1,40 @@
 'use client';
 
-import { useCallback, useSyncExternalStore } from 'react';
-import type { RefObject } from 'react';
+import { useEffect, useState } from 'react';
 
 export type WritingMode = 'horizontal' | 'vertical';
 
-const getServerSnapshot = (): WritingMode => 'horizontal';
-
-const resolve = (value: string): WritingMode =>
-  value.startsWith('vertical') || value.startsWith('sideways')
+export const readWritingMode = (element: Element): WritingMode => {
+  const value = getComputedStyle(element).writingMode;
+  return value.startsWith('vertical') || value.startsWith('sideways')
     ? 'vertical'
     : 'horizontal';
+};
 
-export const useWritingMode = (ref: RefObject<Element | null>): WritingMode => {
-  const subscribe = useCallback(
-    (onChange: () => void) => {
-      const el = ref.current;
-      if (!el) return () => {};
-      // writing-mode が flip するとインライン/ブロック軸が入れ替わって必ずサイズ変動が起こるため
-      // ResizeObserver で十分検知できる。
-      const observer = new ResizeObserver(onChange);
-      observer.observe(el);
-      return () => {
-        observer.disconnect();
-      };
-    },
-    [ref],
-  );
+/**
+ * 要素の書字方向を返し、切り替わったら追従する。
+ *
+ * writing-mode の変化を知らせるイベントは無いので、ResizeObserver で要素の
+ * 論理サイズの変化を手がかりにする。これが効くのは inline 軸いっぱいに広がる
+ * 要素だけで、ボタンのように中身に合わせて縮む要素は縦横が入れ替わっても
+ * 論理サイズが変わらず、切り替えを見逃す。そういう要素は使う瞬間に
+ * readWritingMode で読む。
+ */
+export const useWritingMode = (element: Element | null): WritingMode => {
+  const [writingMode, setWritingMode] = useState<WritingMode>('horizontal');
 
-  const getSnapshot = useCallback((): WritingMode => {
-    const el = ref.current;
-    if (!el) return 'horizontal';
-    return resolve(getComputedStyle(el).writingMode);
-  }, [ref]);
+  useEffect(() => {
+    if (!element) {
+      return undefined;
+    }
+    const observer = new ResizeObserver(() => {
+      setWritingMode(readWritingMode(element));
+    });
+    observer.observe(element);
+    return () => {
+      observer.disconnect();
+    };
+  }, [element]);
 
-  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  return writingMode;
 };

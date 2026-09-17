@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import type { FC, RefObject } from 'react';
+import type { FC } from 'react';
 
 import { cn } from './../../../helpers/cn';
 
@@ -13,7 +13,7 @@ import { cn } from './../../../helpers/cn';
  * timeline-scope を任意の外部要素へ配線するより単純で確実なため）。
  */
 export const ScrollLinked: FC<{
-  container?: RefObject<HTMLElement | null>;
+  container?: Element | null;
 }> = ({ container }) => {
   const barRef = useRef<HTMLDivElement>(null);
 
@@ -29,55 +29,42 @@ export const ScrollLinked: FC<{
       return undefined;
     }
 
-    let cleanup: (() => void) | undefined;
-    let retryId: number | undefined;
+    // container を渡されたのに要素がまだ無い間は、window で代用しない。代用すると
+    // 誤ったスクローラーを追い続けるので、要素が来て effect が再実行されるのを待つ。
+    if (container === null) {
+      return undefined;
+    }
 
-    const attach = () => {
-      // container の要素が後からマウントされるケースでは、window に
-      // フォールバックすると誤ったスクローラーを恒久的に追跡してしまう。
-      // ref が解決するまで接続を遅らせる
-      if (container?.current === null) {
-        retryId = window.setTimeout(attach, 50);
-        return;
-      }
-      const target = container?.current ?? null;
-      const scroller: HTMLElement | Window = target ?? window;
-      const update = () => {
-        const scrollTop = target ? target.scrollTop : window.scrollY;
-        const scrollable = target
-          ? target.scrollHeight - target.clientHeight
-          : document.documentElement.scrollHeight - window.innerHeight;
-        const progress = scrollable > 0 ? scrollTop / scrollable : 0;
-        bar.style.scale = `${Math.min(1, Math.max(0, progress)).toString()} 1`;
-      };
-      update();
-      scroller.addEventListener('scroll', update, { passive: true });
-      // リサイズやコンテンツ高さの変化でも進捗を再計算する
-      // （native の ScrollTimeline はレイアウト変化に自動追従するため合わせる）
-      const observer = new ResizeObserver(update);
-      observer.observe(target ?? document.documentElement);
-      // コンテンツ高(scrollHeight)の変化は target 自身の box には現れないため
-      // 直下の子要素を監視する（バー自身が混ざっても無害）。attach 後に
-      // 追加された子までは追わず、次の scroll / resize で追従する
-      if (target) {
-        for (const child of target.children) {
-          observer.observe(child);
-        }
-      }
-      window.addEventListener('resize', update);
-      cleanup = () => {
-        scroller.removeEventListener('scroll', update);
-        observer.disconnect();
-        window.removeEventListener('resize', update);
-      };
+    const target = container ?? null;
+    const scroller: Element | Window = target ?? window;
+    const update = () => {
+      const scrollTop = target ? target.scrollTop : window.scrollY;
+      const scrollable = target
+        ? target.scrollHeight - target.clientHeight
+        : document.documentElement.scrollHeight - window.innerHeight;
+      const progress = scrollable > 0 ? scrollTop / scrollable : 0;
+      bar.style.scale = `${Math.min(1, Math.max(0, progress)).toString()} 1`;
     };
-    attach();
+    update();
+    scroller.addEventListener('scroll', update, { passive: true });
+    // リサイズやコンテンツ高さの変化でも進捗を再計算する
+    // （native の ScrollTimeline はレイアウト変化に自動追従するため合わせる）
+    const observer = new ResizeObserver(update);
+    observer.observe(target ?? document.documentElement);
+    // コンテンツ高(scrollHeight)の変化は target 自身の box には現れないため
+    // 直下の子要素を監視する（バー自身が混ざっても無害）。後から
+    // 追加された子までは追わず、次の scroll / resize で追従する
+    if (target) {
+      for (const child of target.children) {
+        observer.observe(child);
+      }
+    }
+    window.addEventListener('resize', update);
 
     return () => {
-      if (retryId !== undefined) {
-        window.clearTimeout(retryId);
-      }
-      cleanup?.();
+      scroller.removeEventListener('scroll', update);
+      observer.disconnect();
+      window.removeEventListener('resize', update);
     };
   }, [container]);
 
