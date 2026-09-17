@@ -350,18 +350,18 @@ function MyComponent() {
 
 ## Imports & Bundle Size
 
-All components and hooks ship from a single ESM entry point — there are no per-component subpaths. The package is tree-shakeable (`sideEffects` is limited to CSS), so bundlers drop everything you don't import:
+All components ship from a single ESM entry point — there are no per-component subpaths. The package is tree-shakeable (`sideEffects` is limited to CSS), so bundlers drop everything you don't import:
 
 ```tsx
 // Named imports from the root entry — unused exports are tree-shaken away
-import { Button, Card, useClickAway, useDisclosure } from '@k8ordo/ui';
+import { Button, Card, Stack } from '@k8ordo/ui';
 ```
 
 Optional features live behind dedicated subpath exports:
 
 | Subpath                           | Contents                                                        |
 | --------------------------------- | --------------------------------------------------------------- |
-| `@k8ordo/ui`                      | All components and hooks                                        |
+| `@k8ordo/ui`                      | All components, helpers, and types                              |
 | `@k8ordo/ui/tokens`               | Design token definitions                                        |
 | `@k8ordo/ui/i18n`                 | Message dictionaries (`ja` / `en`) and the `Messages` type      |
 | `@k8ordo/ui/ai`                   | AI chat components                                              |
@@ -572,29 +572,6 @@ To generate the prompt inside the client bundle instead, `library.prompt()` stil
 > - Both OpenUI entries need `@openuidev/lang-core` — `openui/prompt` is the React-free one, and `openui` builds its component library with it. Install it alongside `@openuidev/react-lang`: pnpm will not resolve it for you just because `react-lang` depends on it.
 > - `Tabs` panels are text content (`tabs: [{ label, content }]`); rich-component panels are a future enhancement.
 > - In OpenUI, `Card` can contain a `Stack` or `Grid`, but `Stack`/`Grid` cannot directly nest a `Stack`/`Grid`/`Card` (no self-referential schemas) — put nested layout inside a `Card`. json-render nests freely (slots-based).
-
-## Custom Hooks
-
-The library includes several useful hooks:
-
-- **useBreakpoint** - Tailwind breakpoint matcher
-- **useClickAway** - Detect clicks outside an element
-- **useClipboard** - Clipboard operations
-- **useControllableState** - Controlled/uncontrolled state pattern
-- **useDebouncedTransition** - Rate-limited transition with `AbortSignal`
-- **useDeferredDebounce** - `useDeferredValue` with pending flag
-- **useDisclosure** - Open/close/toggle disclosure state
-- **useHover** - Element hover detection
-- **useInterval** - Interval timer management
-- **useScrollDirection** - Scroll direction detection
-- **useScrollLock** - Body/element scroll lock
-- **useStep** - Step-based state management
-- **useTimeout** - Timeout management
-- **useWindowResize** - Window resize events
-- **useWindowSize** - Window size tracking
-- **useWritingMode** - Detect horizontal/vertical `writing-mode`
-
-State that lives in a place — the URL, a history entry, localStorage, memory — is [`@k8ordo/state`](https://www.npmjs.com/package/@k8ordo/state)'s job (`defineLocalState` and friends), not a hook here: a package that owned it twice would give an app two answers.
 
 ## Accessibility
 

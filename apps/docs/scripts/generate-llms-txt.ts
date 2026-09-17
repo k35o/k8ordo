@@ -53,7 +53,6 @@ Start with the Design Guide, then follow the reference most relevant to the task
       'references/color.md': `${SITE_URL}/docs/references/color.md`,
       'references/spatial-design.md': `${SITE_URL}/docs/references/spatial-design.md`,
       'references/interaction-design.md': `${SITE_URL}/docs/references/interaction-design.md`,
-      'references/hooks.md': `${SITE_URL}/docs/references/hooks.md`,
       'references/helpers.md': `${SITE_URL}/docs/references/helpers.md`,
     },
   },

@@ -363,7 +363,6 @@ cannot model.
 - Spacing and layout: [references/spatial-design.md](references/spatial-design.md)
 - Interaction: [references/interaction-design.md](references/interaction-design.md)
 - Component catalog: [references/components.md](references/components.md)
-- Hooks: [references/hooks.md](references/hooks.md)
 - Helpers and types: [references/helpers.md](references/helpers.md)
 - AI chat (Conversation / Message / PromptInput, …): [references/ai-chat.md](references/ai-chat.md)
 - Generative UI (having an LLM generate UI via json-render / OpenUI): [references/generative-ui.md](references/generative-ui.md)

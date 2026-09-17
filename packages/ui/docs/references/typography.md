@@ -96,6 +96,33 @@ inside `.writing-h`. It lets you override a horizontal default declaratively.
 </div>
 ```
 
+### Switching at runtime
+
+There is no JavaScript API for the writing mode. Keep the mode in your own
+state, and put `writing-v` on the container that should turn vertical:
+
+```tsx
+const [mode, setMode] = useState<'horizontal' | 'vertical'>('horizontal');
+
+<article className={mode === 'vertical' ? 'writing-v' : undefined}>
+  <p className="my-4 vertical:my-0">…</p>
+  <pre className="writing-h">…</pre>
+</article>;
+```
+
+- Components follow a `.writing-v` ancestor on their own, with no props.
+  `Tabs` (arrow keys and `aria-orientation`) and `Autocomplete` (the width of
+  its list) also follow a class toggled while they are on screen. `Popover`,
+  `Tooltip`, `DropdownMenu`, and `ListBox` read the writing mode each time
+  they open, so a change made while one is open shows the next time it opens.
+- When your own JavaScript has to branch — hiding a side rail in vertical
+  mode, say — branch on the state you toggle, not on the DOM.
+- To read the mode of an element you do not control, call
+  `getComputedStyle(element).writingMode` at the moment you need it. There is
+  no event to subscribe to, and a `ResizeObserver` does not stand in for one:
+  an element that shrinks to fit its content keeps its logical size when the
+  writing mode flips, so the observer never fires.
+
 ### Caveats
 
 - Replaced elements such as images and iframes may not size as expected under `vertical-rl`. Return the element itself to horizontal, as in `<img className="vertical:writing-h" />`.

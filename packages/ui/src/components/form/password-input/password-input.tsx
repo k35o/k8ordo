@@ -1,10 +1,10 @@
 'use client';
 
+import { useState } from 'react';
 import type { FC, InputHTMLAttributes, Ref } from 'react';
 import { useFormStatus } from 'react-dom';
 
 import { cn } from '../../../helpers/cn';
-import { useDisclosure } from '../../../hooks/disclosure';
 import { useMessages } from '../../../i18n/context';
 import {
   FOCUS_RING_NO_BORDER,
@@ -30,7 +30,7 @@ export const PasswordInput: FC<Props> = ({
   ...rest
 }) => {
   const messages = useMessages();
-  const { isOpen: isVisible, toggle: toggleVisible } = useDisclosure();
+  const [isVisible, setIsVisible] = useState(false);
   const { pending } = useFormStatus();
 
   return (
@@ -70,7 +70,9 @@ export const PasswordInput: FC<Props> = ({
           (disabled || pending) && 'cursor-not-allowed text-fg-mute/70',
         )}
         disabled={disabled || pending}
-        onClick={toggleVisible}
+        onClick={() => {
+          setIsVisible((current) => !current);
+        }}
         type="button"
       >
         {isVisible ? <ViewOffIcon size="sm" /> : <ViewIcon size="sm" />}

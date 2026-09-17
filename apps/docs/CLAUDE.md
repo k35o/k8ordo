@@ -40,8 +40,8 @@ pnpm check:write       # Oxlint/Oxfmt lint/format auto-fix
   now (`useMatch`, `error.tsx`, the router's own scroll handling). When the
   site needs something the packages do not give it, the fix belongs in the
   package, and the site is where the pressure is felt first.
-- **Navigation mirrors the URL layout**: the header's first row is the packages and nothing else; the second row is the sections of the package you are currently in, so it is absent everywhere except under `/ui` (`src/components/navigation.tsx`). The side navigation on catalog pages is decided by `useMatch('/:locale/ui/components/*')` and its three siblings in `src/routes/[locale]/_parts/locale-shell.tsx` — a pattern from the generated table plus `/*`, checked by the generated `Register`, so a renamed section fails to compile rather than silently losing its sidebar. `/*` does not match the index page itself (`/ja/ui/components` has no trailing segment), which is what keeps the catalog pages sidebar-free. The footer is the same rule in columns — one `Packages` column, then a column per package that has sections. Never promote one package's sections to a site-wide row: with a single package it reads as convenience, with six it makes that package look like the site's spine.
-- **URL layout**: package-first. Everything a package documents lives under `/<package>/…` — `@k8ordo/ui` owns `/ui/get-started`, `/ui/components/*`, `/ui/hooks/*`, and so on. `/<package>` itself is that package's landing page (`src/routes/[locale]/ui/page.tsx`): what it is, what it gives you, where to start. Only `/` is shared — it introduces k8ordo, lists the packages, and states what they all commit to. Add a new package by adding its own `/<package>` landing plus a `/<package>/…` subtree, and a row in `PACKAGES` on the home page; never put a package's sections at the top level, where they would sit at the same depth as package names.
+- **Navigation mirrors the URL layout**: the header's first row is the packages and nothing else; the second row is the sections of the package you are currently in, so it is absent everywhere except under `/ui` (`src/components/navigation.tsx`). The side navigation on catalog pages is decided by `useMatch('/:locale/ui/components/*')` and its two siblings in `src/routes/[locale]/_parts/locale-shell.tsx` — a pattern from the generated table plus `/*`, checked by the generated `Register`, so a renamed section fails to compile rather than silently losing its sidebar. `/*` does not match the index page itself (`/ja/ui/components` has no trailing segment), which is what keeps the catalog pages sidebar-free. The footer is the same rule in columns — one `Packages` column, then a column per package that has sections. Never promote one package's sections to a site-wide row: with a single package it reads as convenience, with six it makes that package look like the site's spine.
+- **URL layout**: package-first. Everything a package documents lives under `/<package>/…` — `@k8ordo/ui` owns `/ui/get-started`, `/ui/components/*`, `/ui/helpers/*`, and so on. `/<package>` itself is that package's landing page (`src/routes/[locale]/ui/page.tsx`): what it is, what it gives you, where to start. Only `/` is shared — it introduces k8ordo, lists the packages, and states what they all commit to. Add a new package by adding its own `/<package>` landing plus a `/<package>/…` subtree, and a row in `PACKAGES` on the home page; never put a package's sections at the top level, where they would sit at the same depth as package names.
 - **Unmatched routes**: `src/routes/[locale]/not-found.tsx` is rendered into a
   single `404.html`, which a static host serves for anything it does not have.
   One file for every locale, so the `:locale` it was rendered with is the build's
@@ -74,7 +74,7 @@ pnpm check:write       # Oxlint/Oxfmt lint/format auto-fix
   `react-error-boundary` and no `<ErrorBoundary>` in the layout.
 - **Titles**: every `page.tsx` renders its own `<title>` through
   `src/components/page-title.tsx` (`<PageTitle name="Button" />` or
-  `<PageTitle title={m.nav.hooks} />` → `Button · k8ordo`); `PackageLanding` does it
+  `<PageTitle title={m.nav.theming} />` → `Button · k8ordo`); `PackageLanding` does it
   for the landings, `not-found.tsx` renders its own, and the home page and the
   `/` redirect page write a bare `<title>k8ordo</title>`. The root layout
   renders none — React 19 hoists a `<title>` from anywhere, and two on screen
@@ -119,9 +119,7 @@ pnpm check:write       # Oxlint/Oxfmt lint/format auto-fix
   the language switcher, which takes the pathname in hand to another
   locale. The `/` page negotiates with
   `locales.negotiate(navigator.languages)` and `navigateTo('/:locale', …)`; `switch` is a reserved word, so
-  that one component's group is `switchInput`, and the hook groups drop the
-  `use` prefix (`m.hooks.clickAway`) because a `use*` member reads as a hook
-  to the linter.
+  that one component's group is `switchInput`.
 - **Styling**: Tailwind CSS 4, uses `@k8ordo/ui` design tokens
 - **Root provider**: `UIProvider` wraps each locale subtree in
   `src/routes/[locale]/_parts/locale-shell.tsx`, passing the `en` dictionary on `/en/` so
@@ -150,7 +148,7 @@ src/
       ui/components/_previews/      # `_` never appears in a URL
   constants.ts         # Shared constants (e.g. STORYBOOK_URL)
   components/          # Shared doc components (CodeBlock, PropsTable, etc.)
-  data/                # Navigation data (components-nav, helpers-nav, hooks-nav)
+  data/                # Navigation data (components-nav, helpers-nav, ai-nav)
   i18n.ts              # defineLocales + Register — the locale set
   links.ts             # href / navigateTo with the locale bound; SitePath
   messages/            # message() per export, one file per area, index.ts re-exports namespaces
@@ -162,7 +160,7 @@ src/
 
 ### Component Documentation Page
 
-Each component/helper/hook is a directory under `src/routes/[locale]/ui/…`
+Each component/helper is a directory under `src/routes/[locale]/ui/…`
 whose `page.tsx` default-exports the page, following this structure:
 
 1. **Title**: `<PageTitle name="Button" />` as the first child (see Titles above)

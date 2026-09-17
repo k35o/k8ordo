@@ -29,7 +29,6 @@ Start with the Design Guide, then follow the reference most relevant to the task
 - [Color](https://ordo.k8o.me/docs/references/color.md): semantic token system and dark mode.
 - [Spacing & layout](https://ordo.k8o.me/docs/references/spatial-design.md): spacing scale and layout patterns.
 - [Interaction](https://ordo.k8o.me/docs/references/interaction-design.md): motion and interaction guidelines.
-- [Hooks](https://ordo.k8o.me/docs/references/hooks.md): custom hooks for UI mechanics (disclosure, timing, DOM observation). State that lives in a place (URL, history, localStorage, memory) belongs to `@k8ordo/state`, not to a hook here.
 - [Helpers & types](https://ordo.k8o.me/docs/references/helpers.md): the five helper functions (`chain` / `cn` / `createSafeContext` / `mergeProps` / `mergeRefs`) and the public types (`Status` / `Direction` / `Placement` / `ModalSide` / `DrawerSide` / `Option`).
 
 ---

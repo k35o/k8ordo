@@ -8,4 +8,4 @@
 
 **`autoResize` を付けたときだけ `rows` が効かなくなります。** `field-sizing: content` の下で `rows` は無視されるので、空の `<Textarea autoResize />` はこれまでの 2 行ではなく 1 行の高さから始まり、入力に応じて伸びます。`autoResize` を付けない `Textarea` の `rows` はこれまでどおりです。`PromptInput.Textarea` は元から `rows={1}` と `min-h` で高さを決めていたため見た目は変わりません。
 
-あわせて内部の作りを React Compiler の規則に合わせました。振る舞いは変わりませんが、`useControllableState` が返す更新関数だけは、値が変わったときに参照が変わるようになります（従来は常に同一参照でした）。依存配列に入れている場合はご注意ください。
+あわせて内部の作りを React Compiler の規則に合わせました。振る舞いは変わりません。

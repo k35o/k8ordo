@@ -35,7 +35,6 @@ const SECTION_GROUPS: Array<{
       { path: '/:locale/ui/theming', label: m.nav.theming },
       { path: '/:locale/ui/i18n', label: m.nav.i18n },
       { path: '/:locale/ui/components', label: m.nav.components },
-      { path: '/:locale/ui/hooks', label: m.nav.hooks },
       { path: '/:locale/ui/helpers', label: m.nav.helpers },
       { path: '/:locale/ui/ai/chat', label: m.nav.aiChat },
       { path: '/:locale/ui/ai/generative-ui', label: m.nav.generativeUi },

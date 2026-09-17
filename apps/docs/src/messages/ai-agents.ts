@@ -31,8 +31,8 @@ export const surfaceGuide = message({
 });
 
 export const surfaceReference = message({
-  ja: 'コンポーネント・hooks・helpersのリファレンス',
-  en: 'Reference for components, hooks and helpers',
+  ja: 'コンポーネント・helpersのリファレンス',
+  en: 'Reference for components and helpers',
 });
 
 export const surfaceIndex = message({

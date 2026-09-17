@@ -25,11 +25,6 @@ export const i18n = message({
   en: 'i18n',
 });
 
-export const hooks = message({
-  ja: 'Hooks',
-  en: 'Hooks',
-});
-
 export const helpers = message({
   ja: 'Helpers',
   en: 'Helpers',
