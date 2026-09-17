@@ -1,4 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { useState } from 'react';
+import type { FC } from 'react';
 import { expect, waitFor } from 'storybook/test';
 
 import { Tabs } from '.';
@@ -73,5 +75,75 @@ export const DefaultSelected: Story = {
   ),
   play: async ({ canvas }) => {
     await expect(canvas.getByRole('tabpanel')).toHaveTextContent('設定項目');
+  },
+};
+
+// ResizeObserver の通知はレンダリング更新のあとのタスクで届く。切り替えの前に
+// 2 フレーム待ち、観測を始めた時点の通知を出し切らせてから切り替える。
+const settle = async (): Promise<void> => {
+  await new Promise<void>((resolve) => {
+    requestAnimationFrame(() => {
+      resolve();
+    });
+  });
+  await new Promise<void>((resolve) => {
+    requestAnimationFrame(() => {
+      resolve();
+    });
+  });
+};
+
+const SwitchableWritingModeTabs: FC = () => {
+  const [isVertical, setIsVertical] = useState(false);
+  return (
+    <div className="flex flex-col gap-2">
+      <button
+        onClick={() => {
+          setIsVertical(true);
+        }}
+        type="button"
+      >
+        縦書きにする
+      </button>
+      <div className={isVertical ? 'writing-v h-60' : 'h-60'}>
+        <Tabs.Root ids={['first', 'second']}>
+          <Tabs.List label="縦書きのタブ">
+            <Tabs.Tab id="first">一</Tabs.Tab>
+            <Tabs.Tab id="second">二</Tabs.Tab>
+          </Tabs.List>
+          <Tabs.Panel id="first">
+            <p>一の内容</p>
+          </Tabs.Panel>
+          <Tabs.Panel id="second">
+            <p>二の内容</p>
+          </Tabs.Panel>
+        </Tabs.Root>
+      </div>
+    </div>
+  );
+};
+
+// 置かれている場所が縦書きに切り替わると、tablist の向きと矢印キーの割り当てが追従する。
+export const FollowsWritingMode: Story = {
+  parameters: { vrt: { skip: true } },
+  render: () => <SwitchableWritingModeTabs />,
+  play: async ({ canvas, userEvent }) => {
+    const tablist = canvas.getByRole('tablist');
+    await waitFor(() => {
+      expect(tablist).toHaveAttribute('aria-orientation', 'horizontal');
+    });
+    await settle();
+
+    await userEvent.click(canvas.getByRole('button', { name: '縦書きにする' }));
+    await waitFor(() => {
+      expect(tablist).toHaveAttribute('aria-orientation', 'vertical');
+    });
+
+    const first = canvas.getByRole('tab', { name: '一' });
+    first.focus();
+    await userEvent.keyboard('{ArrowDown}');
+    await waitFor(() => {
+      expect(canvas.getByRole('tab', { name: '二' })).toHaveFocus();
+    });
   },
 };

@@ -252,3 +252,31 @@ export const ActiveDescendant: Story = {
     );
   },
 };
+
+// 縦書きの中で開くと、候補リストの幅を trigger の高さに合わせる。
+export const VerticalWritingMode: Story = {
+  args: {
+    id: 'autocomplete',
+    'aria-describedby': undefined,
+    invalid: false,
+    disabled: false,
+    required: false,
+  },
+  parameters: { vrt: { skip: true } },
+  decorators: [
+    (Story) => (
+      <div className="writing-v h-80">
+        <Story />
+      </div>
+    ),
+  ],
+  play: async ({ canvas, userEvent }) => {
+    await userEvent.type(canvas.getByRole('combobox'), '1');
+    const listbox = await canvas.findByRole('listbox');
+    await waitFor(() => {
+      expect(listbox.parentElement?.style.inlineSize).toBe(
+        'anchor-size(height)',
+      );
+    });
+  },
+};
