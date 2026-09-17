@@ -7,7 +7,9 @@ import { useDisclosure, useDeferredDebounce } from '@k8ordo/ui';
 ```
 
 These hooks cover UI mechanics: disclosure, timing, DOM observation, and the
-like. State that lives in a place — the URL, a history entry, localStorage,
+like. To watch whether elements are in view or have changed size, wrap them in
+the `InView` / `Resize` components instead (see `components.md`): they observe
+their children without a ref passed in or handed back. State that lives in a place — the URL, a history entry, localStorage,
 memory — is `@k8ordo/state`'s job (`defineLocalState` and friends). There is
 deliberately no `useLocalStorage`, `useSessionStorage`, or `useHash` here: a
 package that owned that state twice would give an app two answers.
@@ -174,64 +176,6 @@ Arguments:
 
 - `callback`: `(size: { width: number; height: number }) => void`
 - `options`: `{ enabled?: boolean }`
-
-### useResize
-
-Observes an element's size (ResizeObserver). Takes a ref.
-
-```tsx
-const ref = useRef<HTMLDivElement>(null);
-
-useResize(
-  ref,
-  (entry) => {
-    console.log(entry.contentRect);
-  },
-  { enabled: true },
-);
-```
-
-Arguments:
-
-- `ref`: `RefObject<T | null>`
-- `callback`: `(entry: ResizeObserverEntry) => void`
-- `options`: `{ enabled?: boolean }`
-
-### useIntersectionObserver
-
-An intersection observer. Takes a ref.
-
-```tsx
-const ref = useRef<HTMLDivElement>(null);
-
-useIntersectionObserver(
-  ref,
-  (entry) => {
-    console.log(entry.isIntersecting);
-  },
-  { threshold: 0.5 },
-);
-```
-
-Arguments:
-
-- `ref`: `RefObject<T | null>`
-- `callback`: `(entry: IntersectionObserverEntry) => void`
-- `options`: IntersectionObserver options
-
-### useInView
-
-Whether an element is in view. Takes a ref and returns a boolean.
-
-```tsx
-const ref = useRef<HTMLDivElement>(null);
-const isInView = useInView(ref, { threshold: 0.1 });
-```
-
-Arguments:
-
-- `ref`: `RefObject<T | null>`
-- `options`: IntersectionObserver options
 
 ### useScrollDirection
 

@@ -348,7 +348,8 @@ directly on APIs a browser has and a synthetic DOM (jsdom, happy-dom) does
 not: `ResizeObserver`, `IntersectionObserver`, `matchMedia`,
 `HTMLDialogElement`'s `showModal` / `close`, and the Popover API. None of
 them is called through a support check, so mounting a `Modal`, `Drawer`,
-`Popover`, `Tooltip`, `DropdownMenu`, or `Conversation` under jsdom throws.
+`Popover`, `Tooltip`, `DropdownMenu`, `Tabs`, `Autocomplete`, `InView`,
+`Resize`, or `Conversation` under jsdom throws.
 
 This is not a gap to be stubbed around. jsdom has no layout engine, so even
 with stubs in place a passing assertion about focus, placement, or visibility

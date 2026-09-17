@@ -8,20 +8,23 @@ import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { propsOf } from '../../../../../data/component-props';
 import * as m from '../../../../../messages';
-import { ScrollLinkedBasicPreview } from '../_previews/scroll-linked-previews';
+import {
+  InViewBasicPreview,
+  InViewOncePreview,
+} from '../_previews/in-view-previews';
 
-export default function ScrollLinkedPage() {
+export default function InViewPage() {
   return (
     <div className="mx-auto flex max-w-4xl flex-col gap-8 px-6 py-12 md:px-8">
-      <PageTitle name="ScrollLinked" />
+      <PageTitle name="InView" />
       <div className="flex flex-col gap-4">
-        <Heading level="h1">ScrollLinked</Heading>
+        <Heading level="h1">InView</Heading>
         <p className="text-fg-mute text-lg">
-          <Rich>{m.components.scrollLinked.description()}</Rich>
+          <Rich>{m.components.inView.description()}</Rich>
         </p>
         <div>
           <Anchor
-            href={`${STORYBOOK_URL}/?path=/docs/components-scroll-linked--docs`}
+            href={`${STORYBOOK_URL}/?path=/docs/components-in-view--docs`}
             openInNewTab
           >
             <Rich>{m.components.common.storybookLink()}</Rich>
@@ -34,10 +37,7 @@ export default function ScrollLinkedPage() {
         <Heading level="h2">
           <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
-        <CodeBlock
-          code="import { ScrollLinked } from '@k8ordo/ui';"
-          lang="ts"
-        />
+        <CodeBlock code="import { InView } from '@k8ordo/ui';" lang="ts" />
       </section>
       <Separator color="mute" />
 
@@ -54,30 +54,41 @@ export default function ScrollLinkedPage() {
           </Heading>
           <ComponentPreview
             code={`const [container, setContainer] = useState<HTMLElement | null>(null);
+const [isInView, setIsInView] = useState(false);
 
-<div
-  className="relative h-64 overflow-y-scroll rounded-lg border"
-  ref={setContainer}
->
-  <ScrollLinked container={container} />
-  <div className="h-[800px] p-4">
-    <p>Scroll this container to see the progress bar.</p>
-  </div>
+<div ref={setContainer} className="h-48 overflow-y-auto">
+  <InView onChange={setIsInView} root={container}>
+    <p>Target</p>
+  </InView>
 </div>`}
           >
-            <ScrollLinkedBasicPreview />
+            <InViewBasicPreview />
           </ComponentPreview>
         </div>
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <Rich>{m.components.scrollLinked.windowScrollTitle()}</Rich>
+            <Rich>{m.components.inView.onceTitle()}</Rich>
           </Heading>
-          <CodeBlock
-            code={`// Without a container prop, ScrollLinked tracks the window scroll position.
-<ScrollLinked />`}
-            lang="tsx"
-          />
+          <p className="text-fg-mute">
+            <Rich>{m.components.inView.onceDescription()}</Rich>
+          </p>
+          <ComponentPreview
+            code={`<InView once onChange={setHasBeenSeen} root={container}>
+  <p>Target</p>
+</InView>`}
+          >
+            <InViewOncePreview />
+          </ComponentPreview>
+        </div>
+
+        <div className="flex flex-col gap-4">
+          <Heading level="h3">
+            <Rich>{m.components.inView.multipleTitle()}</Rich>
+          </Heading>
+          <p className="text-fg-mute">
+            <Rich>{m.components.inView.multipleDescription()}</Rich>
+          </p>
         </div>
       </section>
       <Separator color="mute" />
@@ -86,7 +97,7 @@ export default function ScrollLinkedPage() {
         <Heading level="h2">
           <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>
-        <PropsTable items={propsOf('ScrollLinked')} />
+        <PropsTable items={propsOf('InView')} />
       </section>
     </div>
   );

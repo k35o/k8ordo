@@ -259,6 +259,11 @@ stories and rendered props rather than relying on trained knowledge:
 - **ScrollLinked** - Scroll progress indicator
 - **Separator** - Visual content divider
 
+### Observers
+
+- **InView** - Report whether children are in view (the viewport or a scroll container)
+- **Resize** - Report when children change size
+
 ### Utilities
 
 - **UIProvider** - Root provider for the library
@@ -580,9 +585,7 @@ The library includes several useful hooks:
 - **useDeferredDebounce** - `useDeferredValue` with pending flag
 - **useDisclosure** - Open/close/toggle disclosure state
 - **useHover** - Element hover detection
-- **useIntersectionObserver** / **useInView** - Element visibility
 - **useInterval** - Interval timer management
-- **useResize** - Element resize detection (ResizeObserver)
 - **useScrollDirection** - Scroll direction detection
 - **useScrollLock** - Body/element scroll lock
 - **useStep** - Step-based state management

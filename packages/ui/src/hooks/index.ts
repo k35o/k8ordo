@@ -9,9 +9,7 @@ export {
 export { useDeferredDebounce } from './deferred-debounce';
 export { useDisclosure } from './disclosure';
 export { useHover } from './hover';
-export { useIntersectionObserver, useInView } from './intersection-observer';
 export { useInterval } from './interval';
-export { useResize } from './resize';
 export { useScrollDirection } from './scroll-direction';
 export { useScrollLock } from './scroll-lock';
 export { useStep } from './step';

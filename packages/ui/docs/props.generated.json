@@ -1618,6 +1618,48 @@
       "inherits": null
     },
     {
+      "name": "InView",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "onChange",
+          "types": ["(isInView: boolean) => void"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "once",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "root",
+          "types": ["Element", "null"],
+          "defaultValue": "null",
+          "required": false
+        },
+        {
+          "name": "rootMargin",
+          "types": ["string"],
+          "defaultValue": "'0px'",
+          "required": false
+        },
+        {
+          "name": "threshold",
+          "types": ["number"],
+          "defaultValue": "0",
+          "required": false
+        }
+      ],
+      "inherits": null
+    },
+    {
       "name": "LightModeIcon",
       "props": [
         {
@@ -2580,6 +2622,24 @@
       "inherits": null
     },
     {
+      "name": "Resize",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "onChange",
+          "types": ["() => void"],
+          "defaultValue": null,
+          "required": true
+        }
+      ],
+      "inherits": null
+    },
+    {
       "name": "Response",
       "props": [
         {
@@ -2626,7 +2686,7 @@
       "props": [
         {
           "name": "container",
-          "types": ["RefObject<HTMLElement | null>"],
+          "types": ["Element", "null"],
           "defaultValue": null,
           "required": false
         }

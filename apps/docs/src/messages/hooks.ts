@@ -25,11 +25,6 @@ export const categoryUtility = message({
   en: 'Utility',
 });
 
-export const categoryObserver = message({
-  ja: 'オブザーバー',
-  en: 'Observer',
-});
-
 export const common = {
   importTitle: message({
     ja: 'インポート',
@@ -71,13 +66,6 @@ export const interval = {
   description: message({
     ja: '一定間隔でコールバックを実行するフック',
     en: 'A hook that executes a callback at regular intervals.',
-  }),
-};
-
-export const resize = {
-  description: message({
-    ja: 'ResizeObserverで要素のサイズ変更を監視するフック',
-    en: 'A hook that observes element size changes via ResizeObserver.',
   }),
 };
 
@@ -142,20 +130,6 @@ export const disclosure = {
   description: message({
     ja: 'open・close・toggleで開閉状態を管理するフック',
     en: 'A hook for managing open/close state with open, close, and toggle actions.',
-  }),
-};
-
-export const intersectionObserver = {
-  description: message({
-    ja: 'IntersectionObserverで要素の可視状態を監視するフック',
-    en: 'A hook that observes element visibility via IntersectionObserver.',
-  }),
-};
-
-export const inView = {
-  description: message({
-    ja: '要素がビューポート内に表示されているかを返すフック',
-    en: 'A hook that returns whether an element is currently visible in the viewport.',
   }),
 };
 

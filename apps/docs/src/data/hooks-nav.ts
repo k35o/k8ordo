@@ -16,11 +16,6 @@ export const hookCategories: NavCategory[] = [
         description: m.hooks.hover.description,
       },
       {
-        name: 'useResize',
-        path: '/:locale/ui/hooks/use-resize',
-        description: m.hooks.resize.description,
-      },
-      {
         name: 'useScrollDirection',
         path: '/:locale/ui/hooks/use-scroll-direction',
         description: m.hooks.scrollDirection.description,
@@ -104,21 +99,6 @@ export const hookCategories: NavCategory[] = [
         name: 'useWindowSize',
         path: '/:locale/ui/hooks/use-window-size',
         description: m.hooks.windowSize.description,
-      },
-    ],
-  },
-  {
-    title: m.hooks.categoryObserver,
-    items: [
-      {
-        name: 'useIntersectionObserver',
-        path: '/:locale/ui/hooks/use-intersection-observer',
-        description: m.hooks.intersectionObserver.description,
-      },
-      {
-        name: 'useInView',
-        path: '/:locale/ui/hooks/use-in-view',
-        description: m.hooks.inView.description,
       },
     ],
   },

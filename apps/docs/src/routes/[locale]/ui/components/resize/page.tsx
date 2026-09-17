@@ -8,20 +8,20 @@ import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { propsOf } from '../../../../../data/component-props';
 import * as m from '../../../../../messages';
-import { ScrollLinkedBasicPreview } from '../_previews/scroll-linked-previews';
+import { ResizeBasicPreview } from '../_previews/resize-previews';
 
-export default function ScrollLinkedPage() {
+export default function ResizePage() {
   return (
     <div className="mx-auto flex max-w-4xl flex-col gap-8 px-6 py-12 md:px-8">
-      <PageTitle name="ScrollLinked" />
+      <PageTitle name="Resize" />
       <div className="flex flex-col gap-4">
-        <Heading level="h1">ScrollLinked</Heading>
+        <Heading level="h1">Resize</Heading>
         <p className="text-fg-mute text-lg">
-          <Rich>{m.components.scrollLinked.description()}</Rich>
+          <Rich>{m.components.resize.description()}</Rich>
         </p>
         <div>
           <Anchor
-            href={`${STORYBOOK_URL}/?path=/docs/components-scroll-linked--docs`}
+            href={`${STORYBOOK_URL}/?path=/docs/components-resize--docs`}
             openInNewTab
           >
             <Rich>{m.components.common.storybookLink()}</Rich>
@@ -34,10 +34,7 @@ export default function ScrollLinkedPage() {
         <Heading level="h2">
           <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
-        <CodeBlock
-          code="import { ScrollLinked } from '@k8ordo/ui';"
-          lang="ts"
-        />
+        <CodeBlock code="import { Resize } from '@k8ordo/ui';" lang="ts" />
       </section>
       <Separator color="mute" />
 
@@ -46,6 +43,9 @@ export default function ScrollLinkedPage() {
           <Heading level="h2">
             <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
+          <p className="text-fg-mute">
+            <Rich>{m.components.resize.initialNotice()}</Rich>
+          </p>
         </div>
 
         <div className="flex flex-col gap-4">
@@ -53,31 +53,12 @@ export default function ScrollLinkedPage() {
             <Rich>{m.components.common.basicUsageTitle()}</Rich>
           </Heading>
           <ComponentPreview
-            code={`const [container, setContainer] = useState<HTMLElement | null>(null);
-
-<div
-  className="relative h-64 overflow-y-scroll rounded-lg border"
-  ref={setContainer}
->
-  <ScrollLinked container={container} />
-  <div className="h-[800px] p-4">
-    <p>Scroll this container to see the progress bar.</p>
-  </div>
-</div>`}
+            code={`<Resize onChange={remeasure}>
+  <div>…</div>
+</Resize>`}
           >
-            <ScrollLinkedBasicPreview />
+            <ResizeBasicPreview />
           </ComponentPreview>
-        </div>
-
-        <div className="flex flex-col gap-4">
-          <Heading level="h3">
-            <Rich>{m.components.scrollLinked.windowScrollTitle()}</Rich>
-          </Heading>
-          <CodeBlock
-            code={`// Without a container prop, ScrollLinked tracks the window scroll position.
-<ScrollLinked />`}
-            lang="tsx"
-          />
         </div>
       </section>
       <Separator color="mute" />
@@ -86,7 +67,7 @@ export default function ScrollLinkedPage() {
         <Heading level="h2">
           <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>
-        <PropsTable items={propsOf('ScrollLinked')} />
+        <PropsTable items={propsOf('Resize')} />
       </section>
     </div>
   );

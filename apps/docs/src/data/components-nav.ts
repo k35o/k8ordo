@@ -263,6 +263,21 @@ export const componentCategories: NavCategory[] = [
     ],
   },
   {
+    title: m.components.categoryObservers,
+    items: [
+      {
+        name: 'InView',
+        path: '/:locale/ui/components/in-view',
+        description: m.components.inView.description,
+      },
+      {
+        name: 'Resize',
+        path: '/:locale/ui/components/resize',
+        description: m.components.resize.description,
+      },
+    ],
+  },
+  {
     title: m.components.categoryMedia,
     items: [
       {
