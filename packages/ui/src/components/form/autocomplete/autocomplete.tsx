@@ -96,7 +96,8 @@ export const Autocomplete: FC<Props> = ({
   // リストボックスは CSS Anchor Positioning で入力欄に追従させ、幅は入力欄の inline 寸法に
   // 合わせる。縦書きでは inline 軸が物理 height になるため、書字方向で anchor-size の
   // 物理キーワードを切り替える（論理 inline より広くサポート）。
-  const writingMode = useWritingMode(containerRef);
+  const [container, setContainer] = useState<HTMLDivElement | null>(null);
+  const writingMode = useWritingMode(container);
   const anchorName = `--ao-ac-${id.replaceAll(/[^a-zA-Z0-9_-]/gu, '')}`;
   const listboxStyle: CSSProperties & {
     positionAnchor?: string;
@@ -144,6 +145,7 @@ export const Autocomplete: FC<Props> = ({
   const setReferenceRef = useCallback(
     (node: HTMLDivElement | null) => {
       containerRef.current = node;
+      setContainer(node);
       if (node) {
         node.style.setProperty('anchor-name', anchorName);
       }
