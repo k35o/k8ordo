@@ -137,8 +137,8 @@ export const parseForm = <Shape extends ObjectSchema>(
         if (leaf.json.enum !== undefined) {
           // A radio group with nothing selected submits no entry — a state
           // the person filling in the form can reach, unlike a text control,
-          // which always submits at least ''. The schema reports it as a
-          // validation error instead.
+          // which always submits at least ''. The schema decides whether
+          // that is a validation error.
           continue;
         }
         // A text field left empty still submits ''. An absent key means no

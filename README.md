@@ -15,7 +15,7 @@ Every package here commits to the same four things:
 | --- | --- |
 | [`@k8ordo/ui`](packages/ui) | React UI components with semantic design tokens, i18n, and generative-UI adapters |
 | [`@k8ordo/form`](packages/form) | HTML constraint attributes, messages, and server-side validation from one zod schema |
-| [`@k8ordo/state`](packages/state) | State declared by where it lives — URL, history entry, localStorage, memory — from one zod schema |
+| [`@k8ordo/state`](packages/state) | State declared by where it lives — URL, history entry, localStorage (one zod schema each), memory (a typed box) |
 | [`@k8ordo/router`](packages/router) | The URL's pathname axis: one route table, typed paths, over the Navigation API |
 | [`@k8ordo/static`](packages/static) | Builds an application into files — every route rendered ahead of time |
 | [`@k8ordo/server`](packages/server) | Runs an application — RSC per request, with Server Actions |
@@ -89,8 +89,11 @@ already have.
 | `pnpm check:no-polyfills` | Fail if a polyfill dependency has crept in |
 | `pnpm change` | Record a release intent for the changed packages |
 
-Run `pnpm build` before `pnpm check` or `pnpm typecheck` on a fresh checkout:
-the docs site and examples resolve `@k8ordo/ui` types from `dist/`.
+Run `pnpm build` and `pnpm build:examples` before `pnpm check` or
+`pnpm typecheck` on a fresh checkout: the docs site and examples resolve
+`@k8ordo/*` types from each package's `dist/`, and the framework applications
+(`apps/docs`, `examples/static-basic`, `examples/server-basic`) check against
+the `.k8ordo/` route table their own build generates.
 
 ## Adding a package
 

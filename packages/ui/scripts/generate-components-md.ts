@@ -27,7 +27,12 @@ type Prop = {
   defaultValue: string | null;
   required: boolean;
 };
-type Component = { name: string; props: Prop[]; inherits: string | null };
+type Component = {
+  name: string;
+  props: Prop[];
+  inherits: string | null;
+  omitted: string[];
+};
 
 const { components } = JSON.parse(await readFile(PROPS_PATH, 'utf8')) as {
   components: Component[];
@@ -38,10 +43,20 @@ const byName = new Map(components.map((c) => [c.name, c]));
 const iconish = (name: string) => name.endsWith('Icon') || name === 'Logo';
 
 const renderProps = (component: Component): string[] => {
+  const except =
+    component.omitted.length === 0
+      ? ''
+      : `, except ${component.omitted.map((key) => `\`${key}\``).join(' / ')}`;
+  // A bullet rather than a sentence under the list, so the skip below takes it
+  // with the block on the next run instead of leaving a copy behind.
+  const forwarded =
+    component.inherits === null
+      ? []
+      : [`- Other props are forwarded to \`${component.inherits}\`${except}.`];
   if (component.props.length === 0) {
-    return ['- _No props of its own._'];
+    return ['- _No props of its own._', ...forwarded];
   }
-  return component.props.map((prop) => {
+  const own = component.props.map((prop) => {
     const types = prop.types.map((type) => `\`${type}\``).join(' | ');
     const suffix = prop.required
       ? ' (required)'
@@ -50,6 +65,7 @@ const renderProps = (component: Component): string[] => {
         : ` (default: \`${prop.defaultValue}\`)`;
     return `- \`${prop.name}\`: ${types}${suffix}`;
   });
+  return [...own, ...forwarded];
 };
 
 const source = await readFile(DOC_PATH, 'utf8');
@@ -137,7 +153,7 @@ if (misplaced.length > 0) {
 if (process.argv.includes('--check')) {
   if (output !== source) {
     console.error(
-      'docs/references/components.md props are stale. Run `pnpm generate:components-md`.',
+      'docs/references/components.md props are stale. Run `pnpm generate:props`.',
     );
     process.exit(1);
   }

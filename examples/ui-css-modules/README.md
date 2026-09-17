@@ -28,7 +28,7 @@ import '@k8ordo/ui/styles.css';
 
 Tailwind CSS 4 を使うプロジェクトは、代わりにソース版の
 `@k8ordo/ui/tailwind.css` を import すると、デザイントークンを
-自分のマークアップの Tailwind クラスとしても使える（`examples/vite` /
+自分のマークアップの Tailwind クラスとしても使える（`examples/ui-integrations` /
 `examples/ui-nextjs` を参照）。
 
 ## Getting Started
@@ -52,7 +52,7 @@ pnpm --filter example-ui-css-modules dev
 ## Structure
 
 ```
-examples/css-modules/
+examples/ui-css-modules/
 ├── src/
 │   ├── main.tsx           # styles.css の import と Provider
 │   ├── app.tsx            # コンポーネント + CSS Modules の併用デモ

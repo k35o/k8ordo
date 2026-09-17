@@ -44,7 +44,7 @@ export default function ToastPage() {
         </p>
         <div>
           <Anchor
-            href={`${STORYBOOK_URL}/?path=/docs/components-toast--docs`}
+            href={`${STORYBOOK_URL}/?path=/story/components-feedback-toast--primary`}
             openInNewTab
           >
             <Rich>{m.components.common.storybookLink()}</Rich>
@@ -110,13 +110,10 @@ function ToastDemo() {
             <Rich>{m.components.toast.useToastTitle()}</Rich>
           </Heading>
           <CodeBlock
-            code={`const { open, close, closeAll } = useToast();
+            code={`const { open, closeAll } = useToast();
 
 // Show a toast
 open('success', 'Saved successfully');
-
-// Close a specific toast by ID
-close(toastId);
 
 // Close all toasts
 closeAll();`}

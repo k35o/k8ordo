@@ -6,7 +6,7 @@ import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
 import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
-import { propsOf } from '../../../../../data/component-props';
+import { inheritsOf, propsOf } from '../../../../../data/component-props';
 import * as m from '../../../../../messages';
 import {
   FormControlBasicPreview,
@@ -27,7 +27,7 @@ export default function FormControlPage() {
         </p>
         <div>
           <Anchor
-            href={`${STORYBOOK_URL}/?path=/docs/components-form-form-control--docs`}
+            href={`${STORYBOOK_URL}/?path=/story/components-form-form-control--default`}
             openInNewTab
           >
             <Rich>{m.components.common.storybookLink()}</Rich>
@@ -148,7 +148,10 @@ export default function FormControlPage() {
         <Heading level="h2">
           <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>
-        <PropsTable items={propsOf('FormControl')} />
+        <PropsTable
+          inherits={inheritsOf('FormControl')}
+          items={propsOf('FormControl')}
+        />
       </section>
     </div>
   );

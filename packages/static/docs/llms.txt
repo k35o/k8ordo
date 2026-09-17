@@ -2,17 +2,19 @@
 
 > Builds a k8ordo application into files: every route rendered ahead of time,
 > output a directory a static host can serve. The mode is the dependency —
-> installing this package means Server Actions and request-time data do not
-> exist as APIs. `src/routes/` is the pathname space (page/layout/not-found,
-> `[param]`, `(group)`, `_private`), a page or layout may `export const paramsSchema` (any Standard Schema, synchronous)
-> to type its parameters — a refused value makes the pattern not answer, so the
-> walk goes on to `not-found.tsx` — an `error.tsx` shows in place of what
-> throws below it (in the browser; at build time a page that throws stops the
-> build), a `redirect.ts` is written as a page that sends the visitor on, a
-> page renders its own `<title>` (React 19 hoists it), boundaries are React's
-> own `'use client'`
-> with `server-only` modules barred from the client bundle, and the route table
-> and type wiring are generated rather than hand-written.
+> installing this package means request-time data does not exist as an API, and
+> a `'use server'` module, which the RSC pipeline still compiles, is refused by
+> name. `src/routes/` is the pathname space
+> (page/layout/not-found/error/redirect, `[param]`, `(group)`, `_private`), a
+> page or layout may `export const paramsSchema` (any Standard Schema,
+> synchronous) to type its parameters — a refused value makes the pattern not
+> answer, so the walk goes on to `not-found.tsx` — an `error.tsx` shows in place
+> of what throws below it (in the browser; at build time a Server Component that
+> throws stops the build), a `redirect.ts` is written as a page that sends the
+> visitor on, a page renders its own `<title>` (React 19 hoists it), boundaries
+> are React's own `'use client'` with `server-only` modules barred from the
+> client bundle, and the route table and type wiring are generated rather than
+> hand-written.
 >
 > Like every k8ordo package it assumes React 19 and Server Components, uses
 > only what has reached Baseline newly available, and ships no polyfills or
@@ -33,7 +35,8 @@ When installed via npm, these docs live under `node_modules/@k8ordo/static/docs/
   the import and nothing else). `options.routesDir` moves the route directory (default
   `src/routes`); `options.paths` supplies concrete pathnames for routes with
   parameters, and a parameterised route left uncovered fails the build;
-  `options.site` (the origin) makes the build also write `sitemap.xml`. A
+  `options.site` (the origin) makes the build also write `sitemap.xml`;
+  `StaticOptions` is the type of those options. A
   `'use server'` module fails it too — in `vite dev` as well as the build: a
   file cannot receive a Server Action, so the application wants
   `@k8ordo/server` instead.

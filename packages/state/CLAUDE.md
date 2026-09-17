@@ -3,11 +3,12 @@
 `@k8ordo/state` — declare state by where it lives. `definePageState` holds
 the two faces of a history entry (typed URL search params + hidden entry
 state) over the Navigation API; `defineLocalState` is localStorage,
-`defineMemoryState` a typed shared box. One zod schema per place derives the
-server read (`parseUrl`), canonical links (`href`/`search`), stale-data
-salvage, and the client subscription (`useAppState`). The shared discipline
-(React 19 / RSC assumed, Baseline newly available only, no polyfills) and how
-a new package joins are in the repository root's [`CLAUDE.md`](../../CLAUDE.md).
+`defineMemoryState` a typed shared box with no schema. One zod schema per
+boundary place (url, entry, local) derives the server read (`parseUrl`),
+canonical links (`href`/`search`), stale-data salvage, and the client
+subscription (`useAppState`). The shared discipline (React 19 / RSC assumed,
+Baseline newly available only, no polyfills) and how a new package joins are
+in the repository root's [`CLAUDE.md`](../../CLAUDE.md).
 
 User-facing documentation is in [`docs/GUIDE.md`](docs/GUIDE.md), shipped
 inside the npm package.
@@ -24,19 +25,24 @@ pnpm check         # check:write to auto-fix
 ## The invariants
 
 - **Definitions are pure; stores are browser-only.** A definition holds
-  schemas and pure functions. The live store is created lazily by the first
-  `useAppState`, in a registry keyed by `kind + string key` — that is what
-  survives HMR and what `resetStateRegistry()` clears for tests. Nothing in
-  the package touches `navigation`/`location`/`localStorage` at import time.
+  schemas (a memory definition: its initial values) and pure functions. The
+  live store is created lazily by the first `useAppState`, in a registry keyed
+  by `kind + string key` — that is what survives HMR and what
+  `resetStateRegistry()` clears for tests. Nothing in the package touches
+  `navigation`/`location`/`localStorage` at import time.
 - **`update()` applies synchronously and writes in a microtask.** The echo is
   canonical — the merged state passes the schema inside `update()` with the
-  same salvage a URL arrival gets, so no render ever shows a value the schema
-  rejects. All `update()` calls in one handler share one write and one
-  `{committed, finished}` handle. A batch that lands back where it started
-  must not write. Routing is by field: url+entry changes are one
-  `navigation.navigate()` (atomic), entry-only changes are
-  `updateCurrentEntry()` (no navigation), local is one `setItem`, memory
-  settles on the spot.
+  same salvage an arrival gets, so no render ever shows a value the schema
+  rejects. On page and local state, all `update()` calls made synchronously in
+  one handler share one write and one `{committed, finished}` handle (an
+  `await` between calls starts a new batch). A page batch that lands back
+  where it started must not navigate or touch the entry; local has no such
+  check and rewrites its row. Routing is by what changed, compared on
+  live values: url+entry changes are one `navigation.navigate()` (atomic),
+  entry-only changes are `updateCurrentEntry()` (no navigation, so
+  `history: 'push'` has no effect), local is one `setItem`. Memory has
+  neither schema nor write to batch: each call swaps the snapshot and returns
+  its own handle, settled on the spot.
 - **A pending batch survives concurrent events.** `sync`/`onStorage` overlay
   the unflushed patch on the fresh platform values, and `flush` rebuilds its
   target from live values + patch — never from the snapshot. Without both, a
@@ -47,12 +53,14 @@ pnpm check         # check:write to auto-fix
   params and only its own namespace in the entry-state object — the rest of
   both travels untouched with every write it makes.
 - **Change detection is per key and exact** (`store/core.ts`): notification
-  filters on the schema's static key set with `Object.is` (element-wise for
-  arrays); unchanged fields keep their object identity across snapshots.
+  filters on the definition's static key set (the schema's, or memory's
+  initial values) with `sameValue` — `Object.is`, recursing structurally into
+  arrays and plain objects (anything else — Date, Map, class instances —
+  compares by reference); unchanged fields keep their object identity across
+  snapshots.
 - **Boundary data is input.** URL params, localStorage JSON, and restored
   entry state salvage field-by-field to their own defaults — never a throw,
-  never a poisoned sibling. Memory has no schema because its values never
-  cross a boundary.
+  never a poisoned sibling. Memory has no schema because its values never cross a boundary.
 - **A url value is canonicalized by the road it comes back on.** The url
   codec's `salvage` is `parse(new URLSearchParams(search(values)))`, not a
   parse of the typed values: a one-way spelling (`z.stringbool()`'s
@@ -63,10 +71,13 @@ pnpm check         # check:write to auto-fix
   (`"false"` is truthy to `z.coerce.boolean()`). A value with no URL spelling
   at all throws out of `update()` before the batch is touched, since a
   rejected handle is invisible to the fire-and-forget caller that is the
-  normal case.
+  normal case. Entry and local `salvage` hand the typed values straight to the
+  schema — no structured clone, no JSON — so those schemas must accept their
+  own output, and a local value JSON cannot hold (a Date) survives the echo and is lost on the next load.
 - **No history-API fallback.** Imperative url updates assume an intercepting
-  router; links and GET forms are the path that works everywhere. Entry,
-  local and memory updates never navigate, so they work under any router.
+  router; links and GET forms are the path that works everywhere. Updates
+  that change only entry, local or memory values never navigate, so they work
+  under any router.
 
 ## Layout
 

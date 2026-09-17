@@ -3,7 +3,11 @@ import * as z from 'zod/mini';
 
 export type ColorScheme = 'light' | 'dark';
 
-/** What the visitor asked for: a scheme, or to follow the system. */
+/**
+ * A scheme, or `'system'`. As a visitor's preference, `'system'` is nothing
+ * chosen, so the provider's default applies; as that default, it follows the
+ * system.
+ */
 export type ColorSchemePreference = ColorScheme | 'system';
 
 /**
@@ -20,7 +24,10 @@ export const colorSchemeState = defineLocalState(
 /** The media query the system answers through. */
 export const DARK_QUERY = '(prefers-color-scheme: dark)';
 
-/** The class `@k8ordo/ui` — and Tailwind's own dark variant — read on `<html>`. */
+/**
+ * The class `@k8ordo/ui` reads on `<html>` (and Tailwind's `dark:` under a
+ * class-based `@custom-variant dark`).
+ */
 export const DARK_CLASS = 'dark';
 
 /**

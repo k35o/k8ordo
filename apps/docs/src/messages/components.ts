@@ -72,8 +72,8 @@ export const common = {
     en: 'Type base (some attrs are managed internally):',
   }),
   messagesNote: message({
-    ja: 'Defaultがmessages.* のpropsは、未指定のとき文言辞書から解決されます。差し替え方は次を参照してください:',
-    en: 'Props whose default is messages.* fall back to the message dictionary. To change them, see:',
+    ja: 'このコンポーネントが描画する文言（ラベルやプレースホルダーなど）は、propsで指定しないとき文言辞書から解決されます。差し替え方は次を参照してください:',
+    en: 'Wording this component renders (labels, placeholders, and the like) comes from the message dictionary when no prop sets it. To change it, see:',
   }),
   basicUsageTitle: message({
     ja: '基本的な使い方',
@@ -206,7 +206,7 @@ export const numberField = {
     en: 'A number input field.',
   }),
   stepPrecisionTitle: message({
-    ja: 'ステップと有効数字',
+    ja: 'ステップと小数点以下の桁数',
     en: 'Step & Precision',
   }),
   minMaxTitle: message({
@@ -335,9 +335,9 @@ export const radio = {
     ja: '無効',
     en: 'Disabled',
   }),
-  defaultValueTitle: message({
-    ja: 'デフォルト値',
-    en: 'Default Value',
+  controlledTitle: message({
+    ja: '制御モード',
+    en: 'Controlled',
   }),
 };
 
@@ -859,8 +859,8 @@ export const inView = {
     en: 'Multiple Children',
   }),
   multipleDescription: message({
-    ja: '要素が複数あるときは、どれか1つでも見えていれば`true`になります。後から増えたり外れたりした要素にも追従し、観測する要素が無い間は`false`です。',
-    en: 'With several elements, it is `true` while any of them is in view, and it follows elements that mount or unmount later. While there is nothing to observe it is `false`.',
+    ja: '要素が複数あるときは、どれか1つでも見えていれば`true`になります。後から増えたり外れたりした要素にも追従し、見えていた要素が外れて見えているものが無くなれば`false`を知らせます。観測する要素がまだ1つも無い間は`onChange`を呼びません。',
+    en: 'With several elements, it is `true` while any of them is in view, and it follows elements that mount or unmount later: when a visible element unmounts and nothing else is in view, it reports `false`. Until there is an element to observe, `onChange` is not called.',
   }),
 };
 
@@ -885,7 +885,7 @@ export const icons = {
     en: 'Sizes',
   }),
   propsDescription: message({
-    ja: 'すべてのアイコンは共通で`size`を受け取ります。向きを持つ`ChevronIcon`と、ステータスを表す`AlertIcon`だけは追加のpropsがあります。',
-    en: 'Every icon accepts a shared `size` prop. Only `ChevronIcon` (direction) and `AlertIcon` (status) take additional props.',
+    ja: 'アイコンは共通で`size`を受け取ります。向きを持つ`ChevronIcon`と、ステータスを表す`AlertIcon`だけは追加のpropsがあります。`Logo`だけは`size`を持たないSVG本体で、大きさは`className`で決めます。`size`で揃えるときは`LogoIcon`を使ってください。',
+    en: 'Icons share a `size` prop. Only `ChevronIcon` (direction) and `AlertIcon` (status) take additional props. `Logo` alone is the bare SVG without `size`, sized through `className`; use `LogoIcon` to size it like the other icons.',
   }),
 };

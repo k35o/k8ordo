@@ -3,7 +3,8 @@
 Builds a k8ordo application into files. Every route is rendered ahead of time
 — React Server Components at build time — and what ships is a directory a
 static host can serve: HTML per page, its RSC payload beside it for client
-navigation, `404.html`, and a sitemap. No server at run time.
+navigation, `404.html` when there is a `not-found.tsx`, and `sitemap.xml` when
+`site` is set. No server at run time.
 
 Like every [k8ordo](https://ordo.k8o.me) package it assumes React 19 and Server
 Components, uses only what has reached Baseline newly available, and ships no
@@ -60,7 +61,7 @@ src/routes/
 ```
 
 ```bash
-vite dev     # a real server, so the pages behave as they will in production
+vite dev     # renders per request, with Fast Refresh
 vite build   # dist/client/ is the site
 ```
 

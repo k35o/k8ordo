@@ -26,8 +26,8 @@ export const featureRoutes = message({
 });
 
 export const featureRoutesDescription = message({
-  ja: 'ディレクトリ木がそのまま pathname 空間です。page/layout/not-found・`[param]`・`(group)`・`_` の私物だけを認め、規約から外れたものはビルドを落とします。',
-  en: 'The directory tree is the pathname space: page/layout/not-found, `[param]`, `(group)`, and `_`-prefixed privates. Anything outside the grammar fails the build.',
+  ja: 'ディレクトリ木がそのまま pathname 空間です。page/layout/not-found/error/redirect・`[param]`・`(group)`・`_` の私物だけを認め、規約から外れたものはビルドを落とします。',
+  en: 'The directory tree is the pathname space: page/layout/not-found/error/redirect, `[param]`, `(group)`, and `_`-prefixed privates. Anything outside the grammar fails the build.',
 });
 
 export const featureActions = message({
@@ -46,8 +46,8 @@ export const featureSameHandler = message({
 });
 
 export const featureSameHandlerDescription = message({
-  ja: 'リクエストをページに変える関数は static と同一で、違いは呼ぶ時期だけです。両モードで描画が食い違うなら、それは何かが漏れています。',
-  en: 'The function that turns a request into a page is identical; only when it is called differs. If a page renders differently under the two modes, something has leaked.',
+  ja: 'リクエストをページに変える関数は static と同じもので、モードごとにコンパイルされ、違いは主に呼ぶ時期です。両モードで描画が食い違うなら、それは何かが漏れています。',
+  en: 'The function that turns a request into a page is the same one, compiled for each mode; what differs is chiefly when it is called. If a page renders differently under the two modes, something has leaked.',
 });
 
 export const featureRouteFiles = message({

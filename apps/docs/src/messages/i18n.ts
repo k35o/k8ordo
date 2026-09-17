@@ -112,8 +112,8 @@ export const demoPreferredUnknown = message({
 });
 
 export const demoHint = message({
-  ja: '`greeting(name)` の引数は、`ja` に書いた関数の引数から型が付きます。`en` 側を別の引数で書くとコンパイルが通りません。',
-  en: 'The argument of `greeting(name)` is typed by the function written for `ja`. An `en` written with different parameters does not compile.',
+  ja: '`greeting(name)` の引数は、`ja` に書いた関数の引数から型が付きます。`en` 側の引数を別の型で書くとコンパイルが通りません。',
+  en: 'The argument of `greeting(name)` is typed by the function written for `ja`. An `en` whose parameter has another type does not compile.',
 });
 
 export const docsTitle = message({

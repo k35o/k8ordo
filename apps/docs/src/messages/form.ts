@@ -37,7 +37,7 @@ export const featureDom = message({
 
 export const featureDomDescription = message({
   ja: '入力のたびに再描画が起きません。値がReactのstateに載ることはなく、載るのは表示中のエラーや行の識別子といった、DOMが表現できないものだけです。',
-  en: 'Typing causes no re-render. Values never enter React state — it carries only what the DOM cannot express, like the messages on screen and the identity of each row.',
+  en: 'Typing does not re-render on every keystroke. Values never enter React state — it carries only what the DOM cannot express, like the messages on screen and the identity of each row.',
 });
 
 export const featureTypes = message({
@@ -56,8 +56,8 @@ export const featureLoud = message({
 });
 
 export const featureLoudDescription = message({
-  ja: 'スキーマにある欄が送信されていなければ、検証の失敗ではなく結線の誤りとして知らせます。制約属性に落ちなかった検証も一覧で報告します。',
-  en: 'A field in the schema that never arrived is reported as a wiring mistake, not a validation failure. Checks that could not become attributes are listed too.',
+  ja: 'スキーマにある欄が送信されていなければ、検証の失敗ではなく結線の誤りとして知らせます。スキーマ全体に付けた `.refine()` など、制約属性に落ちなかった検証も一覧で報告します。欄・入れ子のオブジェクト・繰り返し行に付けた `.refine()` など、まだ一覧に載らない検証もあります。',
+  en: 'A field in the schema that never arrived is reported as a wiring mistake, not a validation failure. Checks that could not become attributes, such as a `.refine()` on the whole schema, are listed too. Some are not listed yet, such as a `.refine()` on a single field, a nested object or a row.',
 });
 
 export const featureSecrets = message({
@@ -76,8 +76,8 @@ export const docsTitle = message({
 });
 
 export const docsDescription = message({
-  ja: '設計ガイドとリファレンスは npm パッケージに同梱されています。AIコーディングエージェントは `node_modules/@k8ordo/form/docs/` からインストールした版そのものを読みます。',
-  en: 'The guide and reference ship inside the npm package. An AI coding assistant reads the exact installed version out of `node_modules/@k8ordo/form/docs/`.',
+  ja: '設計ガイドは npm パッケージに同梱されています。AIコーディングエージェントは `node_modules/@k8ordo/form/docs/` からインストールした版そのものを読みます。',
+  en: 'The guide ships inside the npm package. An AI coding assistant reads the exact installed version out of `node_modules/@k8ordo/form/docs/`.',
 });
 
 export const demoTitle = message({
@@ -111,6 +111,6 @@ export const demoUrlEmpty = message({
 });
 
 export const demoHint = message({
-  ja: 'このサイトは @k8ordo/static で焼かれているので Server Action はありません。GET フォームは本体を持たないのでルーターが intercept し、同じ pathname への遷移は状態の更新として扱われます。JavaScript を切っても、同じフォームが同じ URL に着きます。`min` に -1 を入れると、ブラウザの制約検証がスキーマと同じ文言で止めます。',
-  en: 'This site is built with @k8ordo/static, so there is no Server Action. A GET form carries no body, so the router intercepts it, and a navigation to the same pathname is a state update. With JavaScript off, the same form lands on the same URL. Type -1 into `min` and the browser’s own constraint validation stops it, in the schema’s own words.',
+  ja: 'このサイトは @k8ordo/static で焼かれているので Server Action はありません。GET フォームは本体を持たないのでルーターが intercept し、同じ pathname への遷移は状態の更新として扱われます。JavaScript を切っても、同じフォームが同じ URL に着きます。`min` に -1 を入れて欄を離れると、スキーマと同じ文言のエラーが出ます。JavaScript が無ければ、ブラウザ自身の制約検証がブラウザの文言で送信を止めます。',
+  en: 'This site is built with @k8ordo/static, so there is no Server Action. A GET form carries no body, so the router intercepts it, and a navigation to the same pathname is a state update. With JavaScript off, the same form lands on the same URL. Type -1 into `min` and leave the field, and the error appears in the schema’s own words. Without JavaScript, the browser’s own constraint validation stops the submission, in the browser’s words.',
 });

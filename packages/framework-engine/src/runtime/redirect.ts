@@ -24,7 +24,6 @@ export class Redirect extends Error {
 }
 
 export type RedirectOptions = {
-  /** `308` instead of `307`, for a move a client may cache. */
   readonly permanent?: boolean;
 };
 

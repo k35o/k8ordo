@@ -21,7 +21,7 @@ export default function ResizePage() {
         </p>
         <div>
           <Anchor
-            href={`${STORYBOOK_URL}/?path=/docs/components-resize--docs`}
+            href={`${STORYBOOK_URL}/?path=/story/components-observers-resize--default`}
             openInNewTab
           >
             <Rich>{m.components.common.storybookLink()}</Rich>

@@ -9,7 +9,7 @@ import * as m from '../../../../messages';
 
 /** 辞書のキーが増減したらここも直すよう、Record で網羅性を型に持たせる */
 const MESSAGE_USAGE = {
-  close: 'Alert / Dialog / Drawer',
+  close: 'Alert / Dialog / Drawer / Response',
   required: 'FormControl',
   loading: 'Spinner',
   avatar: 'Avatar',
@@ -133,6 +133,30 @@ import { en } from '@k8ordo/ui/i18n';
 function App({ children }) {
   return (
     <UIProvider messages={en}>
+      {children}
+    </UIProvider>
+  );
+}`}
+          lang="tsx"
+        />
+      </section>
+
+      <Separator color="mute" />
+
+      <section className="flex flex-col gap-4">
+        <Heading level="h2">
+          <Rich>{m.uiI18n.localeTitle()}</Rich>
+        </Heading>
+        <p className="text-fg-mute">
+          <Rich>{m.uiI18n.localeDescription()}</Rich>
+        </p>
+        <CodeBlock
+          code={`import { UIProvider } from '@k8ordo/ui';
+import { dictionaries } from '@k8ordo/ui/i18n';
+
+function App({ locale, children }) {
+  return (
+    <UIProvider messages={dictionaries[locale]}>
       {children}
     </UIProvider>
   );

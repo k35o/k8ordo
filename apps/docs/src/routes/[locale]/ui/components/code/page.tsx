@@ -20,7 +20,7 @@ export default function CodePage() {
         </p>
         <div>
           <Anchor
-            href={`${STORYBOOK_URL}/?path=/docs/components-code--docs`}
+            href={`${STORYBOOK_URL}/?path=/story/components-data-display-code--default`}
             openInNewTab
           >
             <Rich>{m.components.common.storybookLink()}</Rich>

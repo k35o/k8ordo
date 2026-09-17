@@ -32,8 +32,9 @@ pnpm check:write       # Oxlint/Oxfmt lint/format auto-fix
 - **Routing**: file-based. `src/routes/` _is_ the URL space (`@k8ordo/static`),
   and `.k8ordo/` holds the generated route table and type wiring — generated,
   git-ignored, and readable. Everything sits under `[locale]`, so every pattern
-  needs pathnames at build time; `vite.config.ts` expands the patterns the build
-  hands it across `locales.all` rather than listing pages twice.
+  needs pathnames at build time; `vite.config.ts` passes `paths: locales.paths`,
+  which expands every `/:locale` pattern the build hands it once per locale
+  rather than listing pages twice.
 - **Nothing here works around the framework.** Scroll-to-top after a
   navigation, the error boundary around a page, and "is a page under
   `/ui/components/*` showing" are all the router's and the framework's job
@@ -46,7 +47,7 @@ pnpm check:write       # Oxlint/Oxfmt lint/format auto-fix
   single `404.html`, which a static host serves for anything it does not have.
   One file for every locale, so the `:locale` it was rendered with is the build's
   sentinel, not a language. The layout therefore takes the locale from the URL
-  the visitor is actually on (`usePathname`), falling back to `DEFAULT_LOCALE`
+  the visitor is actually on (`usePathname`), falling back to `locales.default`
   only when that has none either — which is why the file is Japanese as served
   and becomes English the moment it hydrates on an `/en/…` URL. A visitor with
   JavaScript off keeps the Japanese one; one file cannot be both.
@@ -58,7 +59,7 @@ pnpm check:write       # Oxlint/Oxfmt lint/format auto-fix
   static host (where `404.html` was already what got served). The layout
   still receives `params.locale` as a string — a layout's params are never
   typed by its schema, because under `not-found.tsx` nothing is validated —
-  and `vite.config.ts` only ever expands `locales.all`, so the build never asks
+  and `locales.paths` only ever expands the listed locales, so the build never asks
   for a pathname the schema would refuse. The schema lives in a Server
   Component on purpose: a value exported from a `'use client'` module reaches
   the RSC side as a client reference, not a schema, which is why the layout
@@ -115,15 +116,17 @@ pnpm check:write       # Oxlint/Oxfmt lint/format auto-fix
   `src/links.ts` — the router's `bindParams` with the locale supplied by
   `locales.getLocale()` — so a path is a `/:locale/…` pattern of the
   generated table (`SitePath` for the ones navigation data may name) and a
-  typo fails to compile; `locales.localize` / `delocalize` remain only for
-  the language switcher, which takes the pathname in hand to another
-  locale. The `/` page negotiates with
+  typo fails to compile. `locales.localize` remains only for the language
+  switcher, which takes the pathname in hand to another locale;
+  `delocalize` also reads the locale off the URL where no accepted param
+  is in hand — the root layout's `<html lang>` and the 404 shell. The `/` page negotiates with
   `locales.negotiate(navigator.languages)` and `navigateTo('/:locale', …)`; `switch` is a reserved word, so
   that one component's group is `switchInput`.
 - **Styling**: Tailwind CSS 4, uses `@k8ordo/ui` design tokens
 - **Root provider**: `UIProvider` wraps each locale subtree in
-  `src/routes/[locale]/_parts/locale-shell.tsx`, passing the `en` dictionary on `/en/` so
-  component built-in strings follow the site locale
+  `src/routes/[locale]/_parts/locale-shell.tsx`, passing `dictionaries[locale]`
+  from `@k8ordo/ui/i18n` as `messages`, so component built-in strings follow
+  the site locale
 - **Where the browser is**: `usePathname()` from `@k8ordo/router`. Under the
   framework the browser holds no route table, so `useRoute` / `useParams` have
   no match to read — a page receives `params` as a prop, and anything else asks
@@ -167,7 +170,7 @@ whose `page.tsx` default-exports the page, following this structure:
 2. **Header**: `Heading` + description via `<Rich>{m.components.x.description()}</Rich>` + Storybook link
 3. **Import section**: `CodeBlock` showing import statement
 4. **Usage section**: Multiple `ComponentPreview` blocks demonstrating variants, sizes, states, etc.
-5. **Props table**: `PropsTable` with `PropItem[]` array
+5. **Props table**: `<PropsTable items={propsOf('Button')} inherits={inheritsOf('Button')} />` — read from the generated `@k8ordo/ui/props.json` through `src/data/component-props.ts`, never written by hand
 
 ```tsx
 export default function ButtonPage() {
@@ -206,7 +209,8 @@ grammar, which is why previews can live inside `routes/` at all.
 
 `@k8ordo/static` and `@k8ordo/router` live in this repository
 ([packages/static](../../packages/static), [packages/router](../../packages/router)),
-as do `@k8ordo/state` and `@k8ordo/form`, which the site's demos and its own
+as do `@k8ordo/state`, `@k8ordo/form`, `@k8ordo/i18n` and
+`@k8ordo/color-scheme`, which the site's demos, its words and its own
 preferences run on. Their guides are `docs/GUIDE.md` in each package. Being the framework's own
 first application is the point: what the site needs is the pressure the
 framework is designed against.
@@ -217,3 +221,4 @@ framework is designed against.
 - **@k8ordo/ui** (workspace) for UI components
 - **@k8ordo/state** + **@k8ordo/form** (workspace) for the preferences and the live demos
 - **shiki** for syntax highlighting
+- **@k8ordo/i18n** + **@k8ordo/color-scheme** (workspace) for every message and the colour scheme

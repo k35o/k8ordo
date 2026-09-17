@@ -23,16 +23,18 @@ pnpm add @k8ordo/router
 
 Under `@k8ordo/static` or `@k8ordo/server` this package is what the framework
 builds on: the table is generated from `src/routes/`, and what an application
-uses of it is `href`, `usePathname` and `useMatch`. On its own it is the whole
+uses of it is the half that needs no table — `href`, `navigateTo` and
+`bindParams`; `usePathname`, `useMatch` and `matchPath` — plus the route
+files' props types, `PageProps` and `LayoutProps`. On its own it is the whole
 router for an application that renders in the browser.
 
 ## Peer Dependencies
 
-| Package        | Version  | Needed for                    |
-| -------------- | -------- | ----------------------------- |
-| `react`        | ≥19.2.6  | `<Router>` and the hooks      |
-| `typescript`   | ≥7.0.2   | the shipped type declarations |
-| `@types/react` | ≥19.2.18 | the shipped type declarations |
+| Package        | Version | Needed for                    |
+| -------------- | ------- | ----------------------------- |
+| `react`        | ≥19.3.0 | `<Router>` and the hooks      |
+| `typescript`   | ≥7.0.2  | the shipped type declarations |
+| `@types/react` | ≥19.3.0 | the shipped type declarations |
 
 No runtime dependencies. The Navigation API and URLPattern are the platform's.
 

@@ -330,6 +330,6 @@ export const zIndexTitle = message({
 });
 
 export const zIndexDescription = message({
-  ja: 'オーバーレイ系コンポーネントの重なり順を定義する3層スケールです。triggerに紐付く浮遊UI（Popover / DropdownMenu / ListBox / Tooltip）はoverlay、Modal / Drawerはmodal、Toastはtoastに配置されます。',
-  en: 'A three-tier scale that defines stacking order for overlay components. Anchored floating UI (Popover / DropdownMenu / ListBox / Tooltip) sits on overlay, Modal / Drawer on modal, and Toast on toast.',
+  ja: 'オーバーレイ系コンポーネントに付く3層のz-indexスケールです。ただしtriggerに紐付く浮遊UI（Popover / DropdownMenu / ListBox / Tooltip）とModal / Drawerはブラウザのトップレイヤーに表示され、z-indexに関係なく開いた順に重なるため、overlayとmodalはトップレイヤーの中では効きません。toastが効くのは文書内でのToastの重なりだけで、Modalの中のToastはModal自身のToastProviderが`dialog`要素の中に表示します。',
+  en: 'A three-tier z-index scale carried by the overlay components. Anchored floating UI (Popover / DropdownMenu / ListBox / Tooltip) and Modal / Drawer render in the browser top layer, where they stack in the order they opened regardless of z-index, so overlay and modal have no effect there. toast only orders Toast within the document; a Toast inside a Modal is shown within its `dialog` element by the Modal’s own ToastProvider.',
 });

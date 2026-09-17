@@ -46,7 +46,7 @@ tooling output meant for a developer, and the documentation site's own copy
 ## Commands
 
 ```bash
-pnpm build              # build all packages
+pnpm build              # build all packages and apps (the docs site included)
 pnpm typecheck
 pnpm test
 pnpm check              # lint/format check (pnpm check:write to auto-fix)
@@ -55,7 +55,7 @@ pnpm check              # lint/format check (pnpm check:write to auto-fix)
 ## Gotchas
 
 - Run `pnpm build` before `pnpm check` / `pnpm typecheck` on a fresh checkout or worktree: docs/examples resolve `@k8ordo/*` types from each package's `dist/`, so without it type-aware lint reports bogus `no-unsafe-*` errors (and parallel checks can die with exit 137). CI builds in the install action. The framework applications (`apps/docs`, `examples/static-basic`, `examples/server-basic`) also type-check and type-aware-lint against their generated `.k8ordo/`, which only a build of that application writes — `pnpm build` writes the docs one and `pnpm build:examples` the examples', so run them before a typecheck or check there; CI's `types` and `lint` jobs build all three first. Without the table `PageProps` falls back to string params, and lint misreads a needed `String()` as redundant.
-- Use `type`, not `interface` — except `Register` (router, state, and the generated `.k8ordo/register.gen.ts`), which exists to be merged.
+- Use `type`, not `interface` — except `Register` (router, state, i18n, and the generated `.k8ordo/register.gen.ts`), which exists to be merged.
 - No `@ts-ignore` — use `@ts-expect-error` with an explanation.
 - No skipped tests (`test.skip`, `describe.skip`).
 - The pre-commit hook (`vp staged`) runs `vp check --fix` and auto-stages the fixes.

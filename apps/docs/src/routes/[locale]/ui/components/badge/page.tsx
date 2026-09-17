@@ -20,7 +20,7 @@ export default function BadgePage() {
         </p>
         <div>
           <Anchor
-            href={`${STORYBOOK_URL}/?path=/docs/components-badge--docs`}
+            href={`${STORYBOOK_URL}/?path=/story/components-data-display-badge--default`}
             openInNewTab
           >
             <Rich>{m.components.common.storybookLink()}</Rich>

@@ -27,7 +27,7 @@ export default function RadioPage() {
         </p>
         <div>
           <Anchor
-            href={`${STORYBOOK_URL}/?path=/docs/components-form-radio--docs`}
+            href={`${STORYBOOK_URL}/?path=/story/components-form-radio--default`}
             openInNewTab
           >
             <Rich>{m.components.common.storybookLink()}</Rich>
@@ -82,7 +82,7 @@ const options = [
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <Rich>{m.components.radio.defaultValueTitle()}</Rich>
+            <Rich>{m.components.radio.controlledTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`const [value, setValue] = useState('react');

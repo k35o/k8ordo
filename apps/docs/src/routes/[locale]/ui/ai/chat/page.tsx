@@ -199,7 +199,9 @@ import 'streamdown/styles.css';
 
 <ToolInvocation
   name="search_web"
-  state="output-available" // 'input-streaming' | 'input-available' | 'output-available' | 'output-error'
+  // 'input-streaming' | 'input-available' | 'approval-requested' | 'approval-responded'
+  // | 'output-available' | 'output-error' | 'output-denied'
+  state="output-available"
   input={{ query: 'k8ordo UI' }}
   output="…"
 />`}
@@ -224,7 +226,23 @@ import { Response } from '@k8ordo/ui/ai/response';
 <Message.Content>
   {mapMessageParts(message).map((part, i) => {
     if (part.kind === 'reasoning') return <Reasoning key={i}>{part.text}</Reasoning>;
-    if (part.kind === 'tool') return <ToolInvocation key={i} {...part} />;
+    if (part.kind === 'tool') {
+      return (
+        <ToolInvocation
+          key={part.toolCallId}
+          name={part.name}
+          state={part.state}
+          input={part.input}
+          output={
+            typeof part.output === 'string'
+              ? part.output
+              : JSON.stringify(part.output, null, 2)
+          }
+          errorText={part.errorText}
+          deniedReason={part.deniedReason}
+        />
+      );
+    }
     return <Response key={i}>{part.text}</Response>;
   })}
 </Message.Content>`}

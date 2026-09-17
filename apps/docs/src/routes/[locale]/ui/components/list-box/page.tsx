@@ -25,7 +25,7 @@ export default function ListBoxPage() {
         </p>
         <div>
           <Anchor
-            href={`${STORYBOOK_URL}/?path=/docs/components-list-box--docs`}
+            href={`${STORYBOOK_URL}/?path=/story/components-overlays-list-box--default`}
             openInNewTab
           >
             <Rich>{m.components.common.storybookLink()}</Rich>
