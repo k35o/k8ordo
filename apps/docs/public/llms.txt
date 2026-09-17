@@ -29,7 +29,7 @@ Start with the Design Guide, then follow the reference most relevant to the task
 - [Color](https://ordo.k8o.me/docs/references/color.md): semantic token system and dark mode.
 - [Spacing & layout](https://ordo.k8o.me/docs/references/spatial-design.md): spacing scale and layout patterns.
 - [Interaction](https://ordo.k8o.me/docs/references/interaction-design.md): motion and interaction guidelines.
-- [Helpers & types](https://ordo.k8o.me/docs/references/helpers.md): the five helper functions (`chain` / `cn` / `createSafeContext` / `mergeProps` / `mergeRefs`) and the public types (`Status` / `Direction` / `Placement` / `ModalSide` / `DrawerSide` / `Option`).
+- [Types](https://ordo.k8o.me/docs/references/types.md): the shared types for typing component props (`Status` / `Direction` / `Placement` / `ModalSide` / `DrawerSide` / `Option`).
 
 ---
 

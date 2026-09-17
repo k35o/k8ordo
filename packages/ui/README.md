@@ -361,7 +361,7 @@ Optional features live behind dedicated subpath exports:
 
 | Subpath                           | Contents                                                        |
 | --------------------------------- | --------------------------------------------------------------- |
-| `@k8ordo/ui`                      | All components, helpers, and types                              |
+| `@k8ordo/ui`                      | All components and types                                        |
 | `@k8ordo/ui/tokens`               | Design token definitions                                        |
 | `@k8ordo/ui/i18n`                 | Message dictionaries (`ja` / `en`) and the `Messages` type      |
 | `@k8ordo/ui/ai`                   | AI chat components                                              |

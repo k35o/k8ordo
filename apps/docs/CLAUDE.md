@@ -40,8 +40,8 @@ pnpm check:write       # Oxlint/Oxfmt lint/format auto-fix
   now (`useMatch`, `error.tsx`, the router's own scroll handling). When the
   site needs something the packages do not give it, the fix belongs in the
   package, and the site is where the pressure is felt first.
-- **Navigation mirrors the URL layout**: the header's first row is the packages and nothing else; the second row is the sections of the package you are currently in, so it is absent everywhere except under `/ui` (`src/components/navigation.tsx`). The side navigation on catalog pages is decided by `useMatch('/:locale/ui/components/*')` and its two siblings in `src/routes/[locale]/_parts/locale-shell.tsx` — a pattern from the generated table plus `/*`, checked by the generated `Register`, so a renamed section fails to compile rather than silently losing its sidebar. `/*` does not match the index page itself (`/ja/ui/components` has no trailing segment), which is what keeps the catalog pages sidebar-free. The footer is the same rule in columns — one `Packages` column, then a column per package that has sections. Never promote one package's sections to a site-wide row: with a single package it reads as convenience, with six it makes that package look like the site's spine.
-- **URL layout**: package-first. Everything a package documents lives under `/<package>/…` — `@k8ordo/ui` owns `/ui/get-started`, `/ui/components/*`, `/ui/helpers/*`, and so on. `/<package>` itself is that package's landing page (`src/routes/[locale]/ui/page.tsx`): what it is, what it gives you, where to start. Only `/` is shared — it introduces k8ordo, lists the packages, and states what they all commit to. Add a new package by adding its own `/<package>` landing plus a `/<package>/…` subtree, and a row in `PACKAGES` on the home page; never put a package's sections at the top level, where they would sit at the same depth as package names.
+- **Navigation mirrors the URL layout**: the header's first row is the packages and nothing else; the second row is the sections of the package you are currently in, so it is absent everywhere except under `/ui` (`src/components/navigation.tsx`). The side navigation on catalog pages is decided by `useMatch('/:locale/ui/components/*')` and its sibling for `/ui/ai/*` in `src/routes/[locale]/_parts/locale-shell.tsx` — a pattern from the generated table plus `/*`, checked by the generated `Register`, so a renamed section fails to compile rather than silently losing its sidebar. `/*` does not match the index page itself (`/ja/ui/components` has no trailing segment), which is what keeps the catalog pages sidebar-free. The footer is the same rule in columns — one `Packages` column, then a column per package that has sections. Never promote one package's sections to a site-wide row: with a single package it reads as convenience, with six it makes that package look like the site's spine.
+- **URL layout**: package-first. Everything a package documents lives under `/<package>/…` — `@k8ordo/ui` owns `/ui/get-started`, `/ui/components/*`, `/ui/ai/*`, and so on. `/<package>` itself is that package's landing page (`src/routes/[locale]/ui/page.tsx`): what it is, what it gives you, where to start. Only `/` is shared — it introduces k8ordo, lists the packages, and states what they all commit to. Add a new package by adding its own `/<package>` landing plus a `/<package>/…` subtree, and a row in `PACKAGES` on the home page; never put a package's sections at the top level, where they would sit at the same depth as package names.
 - **Unmatched routes**: `src/routes/[locale]/not-found.tsx` is rendered into a
   single `404.html`, which a static host serves for anything it does not have.
   One file for every locale, so the `:locale` it was rendered with is the build's
@@ -148,7 +148,7 @@ src/
       ui/components/_previews/      # `_` never appears in a URL
   constants.ts         # Shared constants (e.g. STORYBOOK_URL)
   components/          # Shared doc components (CodeBlock, PropsTable, etc.)
-  data/                # Navigation data (components-nav, helpers-nav, ai-nav)
+  data/                # Navigation data (components-nav, ai-nav)
   i18n.ts              # defineLocales + Register — the locale set
   links.ts             # href / navigateTo with the locale bound; SitePath
   messages/            # message() per export, one file per area, index.ts re-exports namespaces
@@ -160,7 +160,7 @@ src/
 
 ### Component Documentation Page
 
-Each component/helper is a directory under `src/routes/[locale]/ui/…`
+Each component is a directory under `src/routes/[locale]/ui/components/`
 whose `page.tsx` default-exports the page, following this structure:
 
 1. **Title**: `<PageTitle name="Button" />` as the first child (see Titles above)

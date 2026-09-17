@@ -25,11 +25,6 @@ export const i18n = message({
   en: 'i18n',
 });
 
-export const helpers = message({
-  ja: 'Helpers',
-  en: 'Helpers',
-});
-
 export const generativeUi = message({
   ja: 'Generative UI',
   en: 'Generative UI',
