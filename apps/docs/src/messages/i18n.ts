@@ -125,3 +125,23 @@ export const docsDescription = message({
   ja: '設計ガイドは npm パッケージに同梱されています。AIコーディングエージェントは `node_modules/@k8ordo/i18n/docs/` からインストールした版そのものを読みます。',
   en: 'The guide ships inside the npm package. An AI coding assistant reads the exact installed version out of `node_modules/@k8ordo/i18n/docs/`.',
 });
+
+export const navLocales = message({
+  ja: 'ロケール',
+  en: 'Locales',
+});
+
+export const navMessages = message({
+  ja: 'メッセージ',
+  en: 'Messages',
+});
+
+export const navRouting = message({
+  ja: 'URL とロケール',
+  en: 'URLs & locale',
+});
+
+export const navIntegrations = message({
+  ja: '組み合わせ',
+  en: 'Integrations',
+});

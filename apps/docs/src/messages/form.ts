@@ -114,3 +114,18 @@ export const demoHint = message({
   ja: 'このサイトは @k8ordo/static で焼かれているので Server Action はありません。GET フォームは本体を持たないのでルーターが intercept し、同じ pathname への遷移は状態の更新として扱われます。JavaScript を切っても、同じフォームが同じ URL に着きます。`min` に -1 を入れて欄を離れると、スキーマと同じ文言のエラーが出ます。JavaScript が無ければ、ブラウザ自身の制約検証がブラウザの文言で送信を止めます。',
   en: 'This site is built with @k8ordo/static, so there is no Server Action. A GET form carries no body, so the router intercepts it, and a navigation to the same pathname is a state update. With JavaScript off, the same form lands on the same URL. Type -1 into `min` and leave the field, and the error appears in the schema’s own words. Without JavaScript, the browser’s own constraint validation stops the submission, in the browser’s words.',
 });
+
+export const navFields = message({
+  ja: 'フィールド',
+  en: 'Fields',
+});
+
+export const navValidation = message({
+  ja: 'バリデーション',
+  en: 'Validation',
+});
+
+export const navPatterns = message({
+  ja: 'パターン',
+  en: 'Patterns',
+});

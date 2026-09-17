@@ -104,3 +104,8 @@ export const docsDescription = message({
   ja: '設計ガイドは npm パッケージに同梱されています。AIコーディングエージェントは `node_modules/@k8ordo/color-scheme/docs/` からインストールした版そのものを読みます。',
   en: 'The guide ships inside the npm package. An AI coding assistant reads the exact installed version out of `node_modules/@k8ordo/color-scheme/docs/`.',
 });
+
+export const navHowItWorks = message({
+  ja: '仕組み',
+  en: 'How it works',
+});
