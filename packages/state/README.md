@@ -25,11 +25,11 @@ pnpm add @k8ordo/state zod
 
 | Package          | Version  | Needed for                                               |
 | ---------------- | -------- | -------------------------------------------------------- |
-| `react`          | ≥19.2.6  | `useAppState`                                            |
+| `react`          | ≥19.3.0  | `useAppState`                                            |
 | `zod`            | ^4.4.3   | the schemas (`zod/mini` works, and is the lighter pick)  |
 | `@k8ordo/router` | ^0.1.0   | optional — typed `href` paths from the app's route table |
 | `typescript`     | ≥7.0.2   | the shipped type declarations                            |
-| `@types/react`   | ≥19.2.18 | the shipped type declarations                            |
+| `@types/react`   | ≥19.3.0  | the shipped type declarations                            |
 
 The schema ships to the browser here — the client parses and serializes with
 it — so reach for `zod/mini` unless the app already pays for classic `zod`.

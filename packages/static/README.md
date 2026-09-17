@@ -28,8 +28,8 @@ about the application changes between them.
 | Package          | Version | Needed for                                 |
 | ---------------- | ------- | ------------------------------------------ |
 | `@k8ordo/router` | ^0.1.0  | the route table the framework generates    |
-| `react`          | ≥19.2.6 | rendering                                  |
-| `react-dom`      | ≥19.2.6 | rendering                                  |
+| `react`          | ≥19.3.0 | rendering                                  |
+| `react-dom`      | ≥19.3.0 | rendering                                  |
 | `vite`           | ≥8.2.1  | the build (`framework()` is a Vite plugin) |
 
 ## Quick Start

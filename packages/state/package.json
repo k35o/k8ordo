@@ -65,8 +65,8 @@
   },
   "peerDependencies": {
     "@k8ordo/router": "workspace:^",
-    "@types/react": ">=19.2.18",
-    "react": ">=19.2.6",
+    "@types/react": ">=19.3.0",
+    "react": ">=19.3.0",
     "typescript": ">=7.0.2",
     "zod": "^4.4.3"
   },
