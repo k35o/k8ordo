@@ -70,14 +70,15 @@ examples/
   ui-integrations/       # @k8ordo/ui × generative UI adapters (Vite)
   ui-nextjs/             # @k8ordo/ui × Next.js
   ui-css-modules/        # @k8ordo/ui with prebuilt CSS, no Tailwind
-  router-basic/          # @k8ordo/router, client-rendered
-  static-basic/          # @k8ordo/static
-  server-basic/          # @k8ordo/server
+  static-basic/          # an application on @k8ordo/static
+  server-basic/          # an application on @k8ordo/server, with @k8ordo/form
 ```
 
-Each example belongs to exactly one package and is named for it. An example that
-covers several packages at once cannot tell you which package broke the build,
-and it drags one package's dependencies onto everyone.
+Examples are applications built from k8ordo's own pieces — `@k8ordo/static` or
+`@k8ordo/server`, plus whichever `@k8ordo/*` packages they need. Only
+`@k8ordo/ui` also shows itself inside someone else's framework (Next.js, plain
+Vite), since a component library is what people add to an application they
+already have.
 
 | Command | |
 | --- | --- |
