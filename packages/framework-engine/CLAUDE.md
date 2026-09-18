@@ -86,7 +86,10 @@ ParamsSchemaFor<pattern>`, lists per page pattern the schemas along its
   defined by the host; the handler attaches `request` (headers, cookies) only
   under `@k8ordo/server`, and the generator emits the field only there. Under
   `@k8ordo/static` the handler also buffers the HTML and answers 500 when the
-  render threw, so the build stops naming the page instead of writing it.
+  render threw, so the build stops naming the page instead of writing it, and
+  `renderHtml` writes every Suspense boundary in place — it waits for
+  `allReady` and outlines nothing — so a file never carries a hidden segment
+  for a script to move in after hydration has started.
 - **One pattern walk.** `declaredPatterns(tree)` is the order the matcher
   tries patterns — pages and redirects, literals before params, the
   catch-all last in its branch — and everything that asks "which URLs does
