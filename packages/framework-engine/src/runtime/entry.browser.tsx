@@ -2,7 +2,7 @@ import { createFromReadableStream } from '@vitejs/plugin-rsc/browser';
 import { hydrateRoot } from 'react-dom/client';
 import { rscStream } from 'rsc-html-stream/client';
 
-import { AppRouter } from './app-router';
+import { AppRouter, setDocumentClient } from './app-router';
 import type { Payload } from './payload';
 import { whenRevealed } from './revealed';
 
@@ -13,6 +13,7 @@ import { whenRevealed } from './revealed';
 const payload = await createFromReadableStream<Payload>(
   rscStream as ReadableStream<Uint8Array>,
 );
+setDocumentClient(payload.client);
 
 // Not as soon as the script runs: a boundary the stream has not moved in yet
 // cannot be hydrated, and a context that changes as the page hydrates (a

@@ -34,6 +34,11 @@ export default defineConfig({
       },
       {
         extends: true,
+        // テストはこれを vi.mock で差し替えるが、事前バンドルと先読みの変換は
+        // 差し替えの前に走り、RSC プラグインしか解決できない仮想モジュールの
+        // import で落ちる
+        optimizeDeps: { exclude: ['@vitejs/plugin-rsc/browser'] },
+        server: { preTransformRequests: false },
         test: {
           name: { label: 'browser', color: 'green' },
           include: ['src/**/*.browser.test.tsx'],
