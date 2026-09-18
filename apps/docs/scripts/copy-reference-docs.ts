@@ -10,6 +10,7 @@
  *   packages/static/docs/**\/*.md ─(this)──► public/static/docs/**\/*.md
  *   packages/server/docs/**\/*.md ─(this)──► public/server/docs/**\/*.md
  *   packages/i18n/docs/**\/*.md ──(this)──► public/i18n/docs/**\/*.md
+ *   packages/color-scheme/docs/**\/*.md ─(this)──► public/color-scheme/docs/**\/*.md
  *
  * `@k8ordo/ui` predates the package-first URL rule and keeps `/docs/…` so its
  * published links stay alive; every later package lives under `/<package>/…`.

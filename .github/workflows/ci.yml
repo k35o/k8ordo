@@ -132,7 +132,8 @@ jobs:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
 
-      # router-basic はブラウザモードのテストを持つ
+      # ui-integrations はブラウザモードのテストを、static-basic は書き出した
+      # ページを Chromium で開くテストを持つ
       - name: Install Playwright browsers
         run: pnpm exec playwright install chromium
 

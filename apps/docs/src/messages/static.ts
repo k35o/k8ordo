@@ -16,8 +16,8 @@ export const featureRoutes = message({
 });
 
 export const featureRoutesDescription = message({
-  ja: 'ディレクトリ木がそのまま pathname 空間です。page/layout/not-found・`[param]`・`(group)`・`_` の私物だけを認め、規約から外れたものはビルドを落とします。',
-  en: 'The directory tree is the pathname space: page/layout/not-found, `[param]`, `(group)`, and `_`-prefixed privates. Anything outside the grammar fails the build.',
+  ja: 'ディレクトリ木がそのまま pathname 空間です。page/layout/not-found/error/redirect・`[param]`・`(group)`・`_` の私物だけを認め、規約から外れたものはビルドを落とします。',
+  en: 'The directory tree is the pathname space: page/layout/not-found/error/redirect, `[param]`, `(group)`, and `_`-prefixed privates. Anything outside the grammar fails the build.',
 });
 
 export const featureGenerated = message({
@@ -46,8 +46,8 @@ export const featureFiles = message({
 });
 
 export const featureFilesDescription = message({
-  ja: 'このパッケージを入れることが「静的である」ことです。Server Actions もリクエスト依存も、守るべき規則ではなく存在しない API になります。パラメータ付きルートは列挙必須で、欠けたままビルドは通りません。`site` を渡せば sitemap.xml も書きます。',
-  en: 'Installing this package is what makes the application static: Server Actions and request-time data are not rules to remember but APIs that do not exist. Parameterised routes must be enumerated, or the build stops. Pass `site` and the build writes sitemap.xml too.',
+  ja: 'このパッケージを入れることが「静的である」ことです。リクエスト依存は、守るべき規則ではなく存在しない API です。RSC のパイプラインがそれでもコンパイルする Server Action は、ビルドと `vite dev` が名指しで拒否します。パラメータ付きルートは列挙必須で、欠けたままビルドは通りません。`site` を渡せば sitemap.xml も書きます。',
+  en: 'Installing this package is what makes the application static: request-time data is not a rule to remember but an API that does not exist, and a Server Action, which the RSC pipeline still compiles, is refused by name in the build and in `vite dev`. Parameterised routes must be enumerated, or the build stops. Pass `site` and the build writes sitemap.xml too.',
 });
 
 export const featureRouteFiles = message({
@@ -56,8 +56,8 @@ export const featureRouteFiles = message({
 });
 
 export const featureRouteFilesDescription = message({
-  ja: 'ページが throw したら `error.tsx` が layout の内側に描かれ、枠は残ります。ビルド中に落ちたページはビルドを止めます。移転したディレクトリには `redirect.ts` を 1 行置くだけです。',
-  en: 'When a page throws, `error.tsx` renders inside the layout and the frame survives; a page that throws during the build stops it. A directory that moved keeps a one-line `redirect.ts`.',
+  ja: 'ページが throw したら `error.tsx` が layout の内側に描かれ、枠は残ります。ビルド中に throw した Server Component はビルドを止めます。移転したディレクトリには `redirect.ts` を 1 行置くだけです。',
+  en: 'When a page throws, `error.tsx` renders inside the layout and the frame survives; a Server Component that throws during the build stops it. A directory that moved keeps a one-line `redirect.ts`.',
 });
 
 export const featureParams = message({
@@ -88,4 +88,29 @@ export const docsTitle = message({
 export const docsDescription = message({
   ja: '設計ガイドは npm パッケージに同梱されています。AIコーディングエージェントは `node_modules/@k8ordo/static/docs/` からインストールした版そのものを読みます。',
   en: 'The guide ships inside the npm package. An AI coding assistant reads the exact installed version out of `node_modules/@k8ordo/static/docs/`.',
+});
+
+export const navRouting = message({
+  ja: 'routes/',
+  en: 'routes/',
+});
+
+export const navParams = message({
+  ja: 'パラメータ',
+  en: 'Parameters',
+});
+
+export const navErrors = message({
+  ja: 'エラーとリダイレクト',
+  en: 'Errors & redirects',
+});
+
+export const navBoundaries = message({
+  ja: '実行境界',
+  en: 'Boundaries',
+});
+
+export const navDeploy = message({
+  ja: 'ビルドと配信',
+  en: 'Build & deploy',
 });

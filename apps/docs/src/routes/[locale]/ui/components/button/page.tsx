@@ -28,7 +28,7 @@ export default function ButtonPage() {
         </p>
         <div>
           <Anchor
-            href={`${STORYBOOK_URL}/?path=/docs/components-button--docs`}
+            href={`${STORYBOOK_URL}/?path=/story/components-buttons-button--primary`}
             openInNewTab
           >
             <Rich>{m.components.common.storybookLink()}</Rich>

@@ -27,7 +27,7 @@ export default function FileFieldPage() {
         </p>
         <div>
           <Anchor
-            href={`${STORYBOOK_URL}/?path=/docs/components-form-file-field--docs`}
+            href={`${STORYBOOK_URL}/?path=/story/components-form-file-field--default`}
             openInNewTab
           >
             <Rich>{m.components.common.storybookLink()}</Rich>

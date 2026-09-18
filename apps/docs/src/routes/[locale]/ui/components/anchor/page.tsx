@@ -20,7 +20,7 @@ export default function AnchorPage() {
         </p>
         <div>
           <Anchor
-            href={`${STORYBOOK_URL}/?path=/docs/components-anchor--docs`}
+            href={`${STORYBOOK_URL}/?path=/story/components-navigation-anchor--external`}
             openInNewTab
           >
             <Rich>{m.components.common.storybookLink()}</Rich>

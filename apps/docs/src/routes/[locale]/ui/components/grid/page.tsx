@@ -28,7 +28,7 @@ export default function GridPage() {
         </p>
         <div>
           <Anchor
-            href={`${STORYBOOK_URL}/?path=/docs/components-grid--docs`}
+            href={`${STORYBOOK_URL}/?path=/story/components-layout-grid--default`}
             openInNewTab
           >
             <Rich>{m.components.common.storybookLink()}</Rich>

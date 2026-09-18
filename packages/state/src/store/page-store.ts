@@ -9,7 +9,9 @@ import { getOrCreateStore } from './registry';
 export type UpdateOptions = {
   /**
    * `replace` by default: an update is a refinement of the current entry.
-   * Opt into `push` for the updates the back button should undo.
+   * Opt into `push` for the updates the back button should undo. It applies
+   * only when a url value changes; an entry-only write rewrites the current
+   * entry in place.
    */
   history?: 'push' | 'replace';
 };

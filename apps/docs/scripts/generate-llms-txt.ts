@@ -2,9 +2,8 @@
  * Generates `apps/docs/public/llms.txt` — the LLM-facing docs index served at
  * `https://ordo.k8o.me/llms.txt`.
  *
- * Single source of truth, one section per package:
- *   packages/ui/docs/llms.txt   ─┐
- *   packages/form/docs/llms.txt ─┴──(this)──► public/llms.txt
+ * Single source of truth, one section per package listed in `SOURCES`:
+ *   packages/<name>/docs/llms.txt ──(this)──► public/llms.txt
  *
  * Each npm-shipped index links to files inside its package
  * (`node_modules/@k8ordo/<name>/docs/`). This script rewrites those
@@ -30,9 +29,7 @@ type Source = {
   /**
    * Package-relative link → docs-site URL. `@k8ordo/ui` predates the
    * package-first URL rule and keeps `/docs/…`; later packages live under
-   * `/<package>/docs/…`. The four ui design references all map to
-   * `/design.md` because that single generated file carries their site
-   * version.
+   * `/<package>/docs/…`.
    */
   linkMap: Record<string, string>;
 };

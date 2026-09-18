@@ -26,7 +26,7 @@ export default function AlertPage() {
         </p>
         <div>
           <Anchor
-            href={`${STORYBOOK_URL}/?path=/docs/components-alert--docs`}
+            href={`${STORYBOOK_URL}/?path=/story/components-feedback-alert--success`}
             openInNewTab
           >
             <Rich>{m.components.common.storybookLink()}</Rich>

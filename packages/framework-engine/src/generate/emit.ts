@@ -255,7 +255,7 @@ type Belief = {
  * the alternative is asking every route file to restate a pattern its own
  * directory already states.
  *
- * A page's belief also carries the `params` schemas that run before it
+ * A page's belief also carries the `paramsSchema` exports that run before it
  * renders: every layout's above it that declared one, then its own. A
  * not-found's carries none — a catch-all answers what nothing else did, and
  * its params are never validated.
@@ -374,8 +374,9 @@ export const emitRoutesModule = (
     ({ name }) =>
       `import ${name} from '${options.importPrefix}/${namerFile(namer, name).replace(/\.[jt]sx?$/u, '')}';`,
   );
-  // Each schema is checked against the pattern its file sits under: it may
-  // name only params that pattern has.
+  // Each schema is checked against the pattern its file sits under, loosely:
+  // on a pattern with params it must name at least one of them; a key the
+  // pattern lacks is not refused.
   const schemaChecks = [...namer.names]
     .filter(([file]) => withParams.has(file))
     .map(([file, name]) => {
@@ -411,8 +412,8 @@ export const emitRoutesModule = (
       : []),
     "// What the renderer passes. `satisfies` below is where a route file's",
     '// own props are checked against the pattern its directory puts it under,',
-    '// and where its params take the types the `params` schemas along its',
-    '// stack produce.',
+    '// and where its params take the types the `paramsSchema` exports along',
+    '// its stack produce.',
     'type Page<',
     '  P extends string,',
     '  S extends readonly unknown[] = [],',
@@ -442,7 +443,7 @@ export const emitRoutesModule = (
     '',
     ...(hasSchemas
       ? [
-          '// The `params` schemas the route files declared, each checked against',
+          '// The `paramsSchema` exports the route files declared, each checked against',
           '// the pattern its file sits under.',
           'const schemas = [',
           ...schemaChecks,

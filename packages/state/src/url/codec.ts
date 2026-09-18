@@ -62,7 +62,7 @@ const serializeValue = (key: string, value: unknown): string => {
     return String(value);
   }
   throw new TypeError(
-    `url field "${key}" holds a ${typeof value}, which has no URL serialization`,
+    `url field "${key}" holds a value of type ${typeof value}, which has no URL serialization`,
   );
 };
 

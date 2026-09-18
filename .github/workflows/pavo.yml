@@ -21,7 +21,8 @@ jobs:
       instructions: default,react,typescript
       extra_prompt: |
         @k8ordo/* の React ライブラリ群のモノレポ。ui（コンポーネント、Storybook + Chromatic VRT）、
-        form、state、router、static / server（RSC フレームワーク。framework-engine は
-        両モードに同梱される非公開の共通部）、apps/docs（サイト、@k8ordo/static で構築）。
+        form、state、router、i18n（ロケール軸）、color-scheme（配色の好み、state の上）、
+        static / server（RSC フレームワーク。framework-engine は両モードに同梱される
+        非公開の共通部）、apps/docs（サイト、@k8ordo/static で構築）。
         前提: React 19 + RSC、Baseline newly available のみ、ポリフィルなし。
     secrets: inherit

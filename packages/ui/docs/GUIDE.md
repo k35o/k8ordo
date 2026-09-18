@@ -31,7 +31,7 @@ import { Button, Card } from '@k8ordo/ui';
 
 There are two CSS entries. Pick the one that matches your project:
 
-- **`styles.css` (default)** — prebuilt CSS. Use it if your project has no Tailwind (CSS Modules, plain CSS). A single import is all it takes, and no Tailwind setup is needed. Every library rule sits inside `@layer`, so your own unlayered CSS wins the cascade (the one exception is preflight's `[hidden] { display: none !important }`). Design tokens are readable as CSS custom properties on `:root` / `.dark` (`var(--fg-mute)`, …).
+- **`styles.css` (default)** — prebuilt CSS. Use it if your project has no Tailwind (CSS Modules, plain CSS). A single import is all it takes, and no Tailwind setup is needed. Every library style rule except the token declarations sits inside `@layer`, so your own unlayered CSS wins the cascade (the one exception is preflight's `[hidden] { display: none !important }`). Design tokens are CSS custom properties on `:root` / `.dark` (`var(--fg-mute)`, …), declared outside any layer: to override one, declare it after the stylesheet is loaded, since source order decides between unlayered rules of equal specificity.
 - **`tailwind.css`** — the Tailwind source entry. Import this in a Tailwind CSS 4 project and the design tokens become usable as Tailwind classes (`bg-bg-base`, …) in your own markup too. It contains `@import 'tailwindcss'` internally, so one line is enough for your project's CSS:
 
 ```css
@@ -136,8 +136,8 @@ Soft spacing and quiet refinement. The appeal is in space and shape.
 
 **DO:**
 
-- Use the Japanese fonts (Noto Sans JP, M PLUS 2)
-- Keep to three font weights at most (`font-normal`, `font-medium`, `font-bold`)
+- Use the Japanese fonts (Noto Sans JP, M PLUS 2), which your app loads and sets — the library sets no font of its own, so text stays on preflight's system stack until your app sets one
+- Keep to three weights: 400 (the inherited default, no class), `font-medium`, `font-bold`
 - Lean on `font-medium` being 450 — lighter than the usual 500 — for delicate emphasis
 
 **DON'T:**
@@ -171,7 +171,7 @@ Soft spacing and quiet refinement. The appeal is in space and shape.
 
 **DO:**
 
-- Treat `p-8` as the standard padding (inside forms and cards)
+- Treat `p-6` as the standard padding (inside forms and cards), `p-4` when compact and `p-8` when generous
 - Express relatedness through the size of the gap (`mt-2` close, `mt-4` standard, `mt-8` between sections)
 - Separate sections with Separator
 
@@ -265,12 +265,12 @@ import { Card } from '@k8ordo/ui';
 
 // Static card (floated with a shadow)
 <Card variant="shadow">
-  <div className="p-8">Card content</div>
+  <div className="p-6">Card content</div>
 </Card>
 
 // Clickable card (interactive scales it up on hover)
 <Card variant="shadow" interactive>
-  <div className="p-8">Content</div>
+  <div className="p-6">Content</div>
 </Card>
 ```
 
@@ -344,17 +344,20 @@ Avoid the traits that make a UI recognizably AI-generated at a glance.
 
 Run component tests in a real browser — Vitest browser mode or Playwright —
 the way this library tests itself. Every interactive component is built
-directly on APIs a browser has and a synthetic DOM (jsdom, happy-dom) does
-not: `ResizeObserver`, `IntersectionObserver`, `matchMedia`,
-`HTMLDialogElement`'s `showModal` / `close`, and the Popover API. None of
-them is called through a support check, so mounting a `Modal`, `Drawer`,
-`Popover`, `Tooltip`, `DropdownMenu`, `Tabs`, `Autocomplete`, `InView`,
-`Resize`, or `Conversation` under jsdom throws.
+directly on APIs a browser has and jsdom does not: `ResizeObserver`,
+`IntersectionObserver`, `matchMedia`, `HTMLDialogElement`'s `showModal` /
+`close`, and the Popover API. None of them is called through a support check,
+so under jsdom `Tooltip`, `IconButton` (unless `tooltipDisabled`), `Tabs`,
+`Autocomplete`, `InView`, `Resize`, `Conversation`, and a `ScrollLinked` given
+a `container` throw as soon as they mount; `Modal`, `Drawer`, `Popover`,
+`DropdownMenu`, and `ListBox` throw the moment they open (a `DropdownMenu`
+holding a `SubMenu` already at mount); and a `clearable` `FileField.ItemList`
+throws once it lists a file.
 
-This is not a gap to be stubbed around. jsdom has no layout engine, so even
-with stubs in place a passing assertion about focus, placement, or visibility
-there means very little — the thing you wanted to check is the thing jsdom
-cannot model.
+This is not a gap to be stubbed around. A synthetic DOM (jsdom, happy-dom) has
+no layout engine, so even with stubs in place a passing assertion about focus,
+placement, or visibility there means very little — the thing you wanted to
+check is the thing it cannot model.
 
 ## Detailed reference
 

@@ -60,7 +60,7 @@ minimumReleaseAge: 10080
 overrides:
   '@oxc-project/types': 0.148.0
 
-  # vitest は vite-plus が exact pin (0.3.1 時点で 4.1.11) で連れてくる依存で、
+  # vitest は vite-plus が exact pin (0.3.2 時点でも 4.1.11) で連れてくる依存で、
   # `vp test` が起動するのは常に vite-plus 側の 1 本。catalog だけを 5 に上げても
   # 走るのは 4 のままで、そこへ @vitest/browser-playwright 5 が刺さり、
   # ブラウザモードが `_parentBrowser.spawn is not a function` で落ちる。
@@ -87,14 +87,6 @@ overrides:
 
 minimumReleaseAgeExclude:
   - '@k8o/*'
-  # React 19.3.0 (2026-09-09 17:21 UTC 公開) を 7 日の熟成前に取り込むための
-  # 一時除外。版を固定しているので、それ以降の版には効かない。
-  # 2026-09-16 17:21 UTC を過ぎたら、このブロックごと消してよい。
-  - 'react@19.3.0'
-  - 'react-dom@19.3.0'
-  - 'scheduler@0.28.0'
-  - '@types/react@19.3.0'
-  - '@types/react-dom@19.3.0'
   - 'storybook-addon-determinism'
   - 'storybook-addon-vrt'
   - 'tailwind-token-extractor'

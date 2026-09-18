@@ -1,8 +1,8 @@
 /**
  * What the two mode packages and their tests need from the engine, and
- * nothing else. This is internal: an application installs `@k8ordo/static` or
- * `@k8ordo/server`, and this package is published only so those two can
- * resolve it.
+ * nothing else. This is internal and never published: an application installs
+ * `@k8ordo/static` or `@k8ordo/server`, and each of those bundles this package
+ * at pack time.
  */
 export { parseRouteTree } from './grammar/tree';
 export type { RouteDir } from './grammar/tree';

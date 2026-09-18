@@ -6,7 +6,7 @@ import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
 import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
-import { propsOf } from '../../../../../data/component-props';
+import { inheritsOf, propsOf } from '../../../../../data/component-props';
 import * as m from '../../../../../messages';
 import {
   PaginationDisabledPreview,
@@ -24,7 +24,7 @@ export default function PaginationPage() {
         </p>
         <div>
           <Anchor
-            href={`${STORYBOOK_URL}/?path=/docs/components-navigation-pagination--docs`}
+            href={`${STORYBOOK_URL}/?path=/story/components-navigation-pagination--default`}
             openInNewTab
           >
             <Rich>{m.components.common.storybookLink()}</Rich>
@@ -81,7 +81,11 @@ export default function PaginationPage() {
         <Heading level="h2">
           <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>
-        <PropsTable items={propsOf('Pagination')} messagesNote />
+        <PropsTable
+          inherits={inheritsOf('Pagination')}
+          items={propsOf('Pagination')}
+          messagesNote
+        />
       </section>
     </div>
   );

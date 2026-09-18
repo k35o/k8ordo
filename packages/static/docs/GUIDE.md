@@ -33,10 +33,10 @@ of the two.
 
 Choosing the other mode means installing `@k8ordo/server` instead, and nothing
 else about the application changes — the same route grammar, the same
-boundaries, the same request handler, called once per route instead of once
-per request. The plugin is called `framework()` in both packages for that
-reason: the mode is the import, and `vite.config.ts` reads the same either
-way.
+boundaries, the same request handler, called for each route at build time
+instead of once per request. The plugin is called `framework()` in both
+packages for that reason: the mode is the import, and `vite.config.ts` reads
+the same either way.
 
 ## Getting started
 
@@ -85,10 +85,17 @@ export default function HomePage() {
 ```
 
 ```bash
-vite dev     # a real server, so the pages behave as they will in production
-             # (Fast Refresh included — the framework brings React's plugin)
+vite dev     # renders per request, with Fast Refresh (the framework brings
+             # React's plugin)
 vite build   # dist/client/ is the site
 ```
+
+`vite dev` runs the same handler but writes no files, so it is not the build:
+a param value `paths` does not list still renders, a `redirect.ts` answers
+with a `307` (`308` when `permanent`) rather than a page that sends the
+visitor on, an unknown URL gets the handler's 404 rather than the host's
+`404.html`, and a page whose Server Component throws answers a `500` carrying
+the thrown message, not `error.tsx` — the build would stop there.
 
 `framework()` takes three options: `routesDir` (default `src/routes`),
 `paths` (below, for routes with parameters), and `site` — the origin the
@@ -129,13 +136,14 @@ src/routes/
 
 - `page.tsx`, `layout.tsx`, `not-found.tsx`, `error.tsx` and `redirect.ts`
   are the only filenames the grammar accepts. Anything else lives under a
-  `_`-prefixed directory, which the grammar skips entirely.
+  `_`-prefixed directory. A file or directory whose name starts with `_` or
+  `.` is skipped entirely.
 - **A page receives `params`; a layout receives `children`.** Server Components
   cannot read context, so nesting is by prop. Both also receive `pathname` —
   the URL this render is for, which is how a component above a parameter can
   see the value that parameter names.
 - A directory name is a literal URL segment, `[name]` is a parameter, `(name)`
-  is a group, and `_name` is private.
+  is a group, and `_name` (or `.name`) is private.
 
 ```tsx
 // src/routes/products/[id]/page.tsx
@@ -150,18 +158,18 @@ export default function ProductPage({ params }: { params: { id: string } }) {
 
 Every problem is reported, not just the first, and each names the file:
 
-| routes/ contains                                     | error                                                                                                                            |
-| ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `products/helper.ts`                                 | `routes/ holds only page.tsx, layout.tsx, not-found.tsx, error.tsx, redirect.ts — move "helper.ts" under a _-prefixed directory` |
-| `[123]/page.tsx`                                     | `"[123]" is not a valid param directory — use [name] with a letter or underscore first`                                          |
-| `pro ducts/page.tsx`                                 | `"pro ducts" cannot be a URL segment — use letters, digits, . _ ~ or -`                                                          |
-| `[id]/things/[id]/page.tsx`                          | `":id" is already taken by an ancestor — params must be unique within a path`                                                    |
-| `orphan/layout.tsx` and no page below                | `has a layout but no page.tsx below it, so it can never render`                                                                  |
-| `(a)/page.tsx` and `(b)/page.tsx`                    | `"/" is already declared by (a)/page.tsx — route groups do not separate URLs`                                                    |
-| `(docs/page.tsx`                                     | `"(docs" is not a valid route group — use (name)`                                                                                |
-| `products/sub/layout.tsx` and no page anywhere below | `declares no route — every directory needs a page.tsx somewhere below it`                                                        |
-| `(shop)/[id]/page.tsx` beside `about/page.tsx`       | `"/about" can never match — "/:id" ((shop)/[id]/page.tsx) is declared first and answers it`                                      |
-| `old/page.tsx` and `old/redirect.ts`                 | `"old" cannot both render page.tsx and redirect — keep one`                                                                      |
+| routes/ contains                                                          | error                                                                                                                            |
+| ------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `products/helper.ts`                                                      | `routes/ holds only page.tsx, layout.tsx, not-found.tsx, error.tsx, redirect.ts — move "helper.ts" under a _-prefixed directory` |
+| `[123]/page.tsx`                                                          | `"[123]" is not a valid param directory — use [name] with a letter or underscore first`                                          |
+| `pro ducts/page.tsx`                                                      | `"pro ducts" cannot be a URL segment — use letters, digits, . _ ~ or -`                                                          |
+| `[id]/things/[id]/page.tsx`                                               | `":id" is already taken by an ancestor — params must be unique within a path`                                                    |
+| `orphan/layout.tsx` and no page below                                     | `has a layout but no page.tsx below it, so it can never render`                                                                  |
+| `(a)/page.tsx` and `(b)/page.tsx`                                         | `"/" is already declared by (a)/page.tsx — route groups do not separate URLs`                                                    |
+| `(docs/page.tsx`                                                          | `"(docs" is not a valid route group — use (name)`                                                                                |
+| `empty/error.tsx` and no page or redirect below                           | `declares no route — every directory needs a page.tsx (or redirect.ts) somewhere below it`                                       |
+| `(shop)/sale/page.tsx` and `(shop)/[id]/page.tsx` beside `about/page.tsx` | `"/about" can never match — "/:id" ((shop)/[id]/page.tsx) is declared first and answers it`                                      |
+| `old/page.tsx` and `old/redirect.ts`                                      | `"old" cannot both render page.tsx and redirect — keep one`                                                                      |
 
 The generated table lists literal segments before parameters, so `about/`
 beside `[slug]/` is reachable without saying anything. A route group holds
@@ -182,24 +190,52 @@ source, so it is yours to read:
 ```ts
 // .k8ordo/routes.gen.ts
 import { defineRoutes } from '@k8ordo/router';
+import type { ParamsOf, ParsedParams } from '@k8ordo/router';
+import type { ComponentType, ReactNode } from 'react';
 
-import layout from '../src/routes/layout';
 import page from '../src/routes/page';
-import products_id_page from '../src/routes/products/[id]/page';
 import products_page from '../src/routes/products/page';
+import products_id_page from '../src/routes/products/[id]/page';
+import layout from '../src/routes/layout';
+
+type Page<P extends string, S extends readonly unknown[] = []> = ComponentType<{
+  params: ParsedParams<P, S>;
+  pathname: string;
+}>;
+type Layout<P extends string> = ComponentType<{
+  params: ParamsOf<P>;
+  pathname: string;
+  children: ReactNode;
+}>;
+
+export const paramSchemas = {} as const;
+
+export const redirects = {} as const;
 
 export const routes = defineRoutes({
   '/': {
-    layout: layout,
+    layout: layout satisfies Layout<'/'>,
     children: {
-      '/': page,
+      '/': page satisfies Page<'/'>,
       '/products': {
-        children: { '/': products_page, '/:id': products_id_page },
+        children: {
+          '/': products_page satisfies Page<'/products'>,
+          '/:id': products_id_page satisfies Page<'/products/:id'>,
+        },
       },
     },
   },
 });
 ```
+
+Each `satisfies` checks a route file's props against the pattern its directory
+puts it under — a type check, so `tsc` reports a mismatch and `vite build`,
+which does not type-check, passes. Under `@k8ordo/server` the `Page` and
+`Layout` types also carry `request`. `redirects` is what the request handler
+consults before it walks `routes` — where each `redirect.ts` sends the
+visitor — and `paramSchemas` holds, per page pattern, the schemas it runs when
+the walk reaches that pattern, before the page renders; both are empty here
+because no route file declares either.
 
 `.k8ordo/register.gen.ts` wires that table into `@k8ordo/router` — and into
 `@k8ordo/state` when the application depends on it — so typed paths work
@@ -246,17 +282,22 @@ produced. `PageProps<'/products/:id'>` from `@k8ordo/router` is those props
 by the pattern — `params` typed by the schemas, and `pathname` — read from
 the generated `Register`, so nothing in the page depends on which mode is
 installed; a page may equally declare its props inline (`{ params: { id:
-number } }`), since the generated table checks them at the import either way.
+number } }`), since the generated table checks them where it uses the
+component either way.
 The export is found by parsing the file, so any spelling of it counts —
 `export const { paramsSchema } = locales` included — and the words inside a
-string or a comment do not. A schema may name only the params its pattern has; naming
-another is a build error where the table is generated. Any library that
-implements Standard Schema works — zod, zod/mini, or another — and the schema
-must be synchronous, because which pattern answers a pathname is decided
-before anything renders. The file that exports it must be a Server Component
-file: from a `'use client'` module the export reaches the handler as a client
-reference, not a schema. A layout that has to be a client component keeps its
-schema in a Server Component `layout.tsx` that renders the client shell.
+string or a comment do not. The generated table checks each schema against
+its file's pattern, and only loosely: on a pattern that has params, a schema
+that names none of them is a type error there, which type-checking reports and
+`vite build` does not; anything else passes. A schema that requires a param a
+page's pattern lacks refuses every pathname of that page, so that page never
+answers. Any library that implements Standard Schema works — zod, zod/mini, or
+another — and the schema must be synchronous, because which pattern answers a
+pathname is decided before anything renders. The file that exports it must be
+a Server Component file: from a `'use client'` module the export reaches the
+handler as a client reference, not a schema. A layout that has to be a client
+component keeps its schema in a Server Component `layout.tsx` that renders the
+client shell.
 
 **A refused param is a pathname the pattern does not answer.** `/products/shoes`
 does not become a page that renders with `NaN`; the walk goes on to whatever
@@ -309,22 +350,29 @@ export default function RouteError({
 `reset` renders the subtree again in place; navigating away clears the
 failure on its own. The nearest `error.tsx` above the throw is the one that
 answers, and the root one catches everything below the root layout. Without
-any, a failed client navigation falls back to a document load, so the server's
-own answer — its 500, its error page — is what the visitor sees.
+any, a failed client navigation falls back to a document load, which here
+loads the page's prerendered file — there is no server to answer with a 500
+or an error page of its own.
 
 **A server render has no error boundaries.** What it has is the rule that a
 subtree which throws inside a Suspense boundary is left for the browser to
 render; the boundary here is one, so the HTML arrives with the frame in place
 and a hole where the page was, the browser throws at the same spot, and
-`error.tsx` shows after hydration. In production the error the browser sees
-carries a digest, not the message — the message is in the server's log.
+`error.tsx` shows after hydration.
 
-At build time that rule does not apply: a page that throws while being
-rendered into a file is not a page, and the build stops naming it —
-`static build could not render /broken` — rather than writing an HTML whose
-error shows only once a visitor's browser has rendered it. `error.tsx` under
-this mode is for what fails in the browser: a client component, after
-hydration.
+At build time that rule does not apply to a Server Component: a page whose
+Server Component throws while being rendered into a file is not a page, and
+the build stops rather than writing an HTML whose error shows only once a
+visitor's browser has rendered it. With a Suspense boundary above the throw —
+an `error.tsx` is one — the build ends naming the page,
+`static build could not render /broken — see the error above`; with none, it
+ends with React's production error,
+`An error occurred in the Server Components render…`, and the thrown message
+is only in the `k8ordo: rendering /broken failed` line logged above it. A
+client component that throws while the build renders the HTML is left to the
+browser when a Suspense boundary sits above it, and the file is written; with
+none, it stops the build too. `error.tsx` under this mode is for what fails
+in the browser: a client component, after hydration.
 
 ## Redirects
 
@@ -491,9 +539,15 @@ listed once per page:
 ```ts
 framework({
   paths: (patterns) =>
-    patterns.flatMap((pattern) =>
-      ['ja', 'en'].map((locale) => pattern.replace('/:locale', `/${locale}`)),
-    ),
+    patterns.flatMap((pattern) => {
+      const segments = pattern.split('/');
+      if (!segments.includes(':locale')) return [pattern];
+      return ['ja', 'en'].map((locale) =>
+        segments
+          .map((segment) => (segment === ':locale' ? locale : segment))
+          .join('/'),
+      );
+    }),
 });
 ```
 
@@ -516,7 +570,16 @@ the "paths" option supplied pathnames no route wants: /produtcs/2
 which is either a typo or a value that still contains a parameter
 (`/ja/blog/:slug` — what expanding only one of two parameters leaves behind).
 Pathnames are taken as a URL carries them, so `href()` output is accepted as
-is. A supplied pathname whose page declares a `params` schema that refuses it
+is. Only the file name is decoded, and a pathname whose escapes do not decode,
+or that decodes to a `..` segment, fails the build — neither names a file
+inside the output:
+
+```
+the "paths" option supplied a pathname with a malformed escape: /products/%zz
+the "paths" option supplied a pathname that leaves the output: /products/..%2F..
+```
+
+A supplied pathname that a `paramsSchema` along its route's stack refuses
 fails the build too — it would otherwise be written as a 404 page under a
 URL the site claims to have:
 
@@ -543,21 +606,22 @@ dist/
 ```
 
 Serve `dist/client/` with anything. A page arrives as HTML with the payload
-it was rendered from written into it, so hydration reads what the server read
-rather than asking for the page again. From there, a link to another page
-fetches that page's `index.rsc` instead of reloading the document — navigation
-stays client-side even though the site is a pile of files. The payload lives
-at a path rather than behind a header or a query because static hosting varies
-on neither.
+it was rendered from written into it, so hydration reads what the build
+rendered rather than asking for the page again. From there, a link to another
+page fetches that page's `index.rsc` instead of reloading the document —
+navigation stays client-side even though the site is a pile of files. The
+payload lives at a path rather than behind a header or a query because static
+hosting varies on neither.
 
 A URL the site does not have is nobody's to render in the browser: the answer
 is not a payload, so the navigation becomes an ordinary document load and the
 host answers it — with `404.html` and a real 404. That is also what happens
 for the files sitting beside the site, so a link to `/robots.txt` fetches the
 file rather than disappearing into the router. Mark a link the host answers
-with a download as `<a href="/report.csv" download>`: the browser tells the
-router before the click, where `Content-Disposition` only arrives with the
-answer, by which time the URL has been committed.
+with a download as `<a href="/report.csv" download>`: the navigate event then
+already says it is a download, and the router leaves it to the browser, where
+`Content-Disposition` only arrives with the answer, by which time the URL has
+been committed.
 
 `not-found.tsx` becomes `404.html`, the file most static hosts serve for an
 unknown URL. Declaring a not-found page in this mode therefore means
@@ -567,7 +631,7 @@ host has one blanket 404; a table declaring two fails the build rather than
 silently picking one:
 
 ```
-a static host answers every unknown URL from one file, so only one not-found.tsx can be represented — this table declares /*, /:locale/*
+a static host answers every unknown URL from one file, so only one not-found.tsx can be represented — this table declares /:locale/*, /*
 ```
 
 That one file is rendered for a pathname the site does not have, which is what

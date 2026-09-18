@@ -1,8 +1,8 @@
 # @k8ordo/form
 
 Derive HTML constraint attributes, error messages, and server-side validation
-from one zod schema — forms whose two sides cannot disagree, because the client
-side is derived, never written. Works with JavaScript disabled or not yet
+from one zod schema — the client side is derived, never written, so there is no
+second copy of a constraint to drift. Works with JavaScript disabled or not yet
 loaded.
 
 Like every [k8ordo](https://ordo.k8o.me) package it assumes React 19 and Server
@@ -22,16 +22,16 @@ pnpm add @k8ordo/form zod
 
 ## Peer Dependencies
 
-| Package        | Version  | Needed for                    |
-| -------------- | -------- | ----------------------------- |
-| `react`        | ≥19.2.6  | `useForm` and Server Actions  |
-| `react-dom`    | ≥19.2.6  | rendering                     |
-| `zod`          | ^4.4.3   | the schema (`zod/mini` works) |
-| `typescript`   | ≥7.0.2   | the shipped type declarations |
-| `@types/react` | ≥19.2.18 | the shipped type declarations |
+| Package        | Version | Needed for                    |
+| -------------- | ------- | ----------------------------- |
+| `react`        | ≥19.3.0 | `useForm` and Server Actions  |
+| `react-dom`    | ≥19.3.0 | rendering                     |
+| `zod`          | ^4.4.3  | the schema (`zod/mini` works) |
+| `typescript`   | ≥7.0.2  | the shipped type declarations |
+| `@types/react` | ≥19.3.0 | the shipped type declarations |
 
 zod never reaches the browser: the schema is read on the server and crosses the
-RSC boundary as plain data. The client entry is ~2.7 kB gzipped.
+RSC boundary as plain data. The client entry is ~2.8 kB gzipped.
 
 ## Quick Start
 
@@ -93,14 +93,17 @@ export async function createTalk(_prev: FormState, formData: FormData) {
 The [design guide](docs/GUIDE.md) covers the rest: nested objects and repeated
 rows, checkbox groups, cross-field rules typed against the schema's paths,
 async per-field checks, components that render no input of their own, and what
-the package guarantees (nothing dropped in silence, native validation kept
-without JavaScript, secrets never echoed).
+the package guarantees (checks the client skips are reported, native
+validation kept without JavaScript, secrets never echoed).
 
-A check HTML cannot express — a `refine`, a regex the `pattern` attribute
-would reinterpret — is returned in `dropped` (typed as `DroppedCheck`, exported
-from both entries) and, outside production, logged once per schema with
-`console.warn`, so it is seen without anyone remembering to read it. It still
-runs on the server.
+A check HTML cannot express — a `refine` on the schema as a whole, a regex the
+`pattern` attribute would reinterpret — is returned in `dropped` (typed as
+`DroppedCheck`, exported from both entries) and, outside production, logged
+once per schema with `console.warn`, so it is seen without anyone remembering
+to read it. It still runs on the server. Not reported yet: a `refine` on a
+single field, a nested object, or a row; a `.mime()` check, whose `accept` only
+narrows the file picker; and a string that carries more than one pattern, or
+puts a `.regex()`, `.lowercase()` or `.uppercase()` on a format.
 
 ## AI Agent Documentation
 
