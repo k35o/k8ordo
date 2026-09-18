@@ -266,13 +266,13 @@ export const stateTitle = message({
 });
 
 export const stateErrors = message({
-  ja: '欄の `name` をキーにしたエラー。1 つの欄に複数の問題があれば最初のものだけを入れ、同じ欄にルールの違反があればそちらを入れます。',
-  en: "Errors keyed by the field's `name`. Only the first issue per field is kept, and a rule breach on the same field takes its place.",
+  ja: '欄の `name` をキーにしたエラー。1 つの欄に複数の問題があれば最初のものだけを入れ、同じ欄にルールの違反があればそちらを入れます（違反が複数なら、ブラウザと同じく先に宣言したルールです）。',
+  en: "Errors keyed by the field's `name`. Only the first issue per field is kept, and a rule breach on the same field takes its place (the rule declared first, as in the browser, when several break).",
 });
 
 export const stateValues = message({
-  ja: '送られてきた値。やり直しで入力を戻すためのもので、パスワードとして印を付けた欄とファイルは入りません。同じ名前で複数の値が送られれば配列になります。',
-  en: 'The submitted values, so a retry keeps the input. Fields marked as passwords and files are never included. A name submitted more than once becomes an array.',
+  ja: '送られてきた値。やり直しで入力を戻すためのもので、パスワードとして印を付けた欄とファイルは入りません。チェックボックス群はチェックの数にかかわらず配列で、それ以外でも同じ名前で複数の値が送られれば配列になります。',
+  en: 'The submitted values, so a retry keeps the input. Fields marked as passwords and files are never included. A checkbox group is an array however many boxes were checked, and any other name submitted more than once becomes an array too.',
 });
 
 export const stateRows = message({
@@ -291,13 +291,13 @@ export const stateToken = message({
 });
 
 export const parseThrows = message({
-  ja: '`parseForm` は、スキーマにある欄の名前が FormData に 1 つも無いと例外を投げます。`input` を広げ忘れたか、その欄を描いていないということで、入力した人の誤りではなく結線の誤りだからです。ただし、触られないと何も送らない入力要素は対象外です。何も選ばれていないラジオボタンは値が無いものとしてスキーマに渡り（`undefined` を受け付けない enum なら検証エラー）、チェックされていないチェックボックスは `false`、何もチェックされていないチェックボックス群は `[]` として届くので、これらで広げ忘れても例外にはなりません。',
-  en: '`parseForm` throws when a field in the schema never arrived in the FormData. That means an `input` was not spread or the field was not rendered — a wiring mistake, not something the person filling in the form did. The controls that submit no entry at all when left alone are exempt: a radio group with nothing selected reaches the schema as no value (a validation error unless the enum accepts `undefined`), an unchecked checkbox as `false`, and a checkbox group with nothing checked as `[]`, so a forgotten spread on one of those is not caught.',
+  ja: '`parseForm` は、スキーマにある欄の名前が FormData に 1 つも無いと例外を投げます。`input` を広げ忘れたか、その欄を描いていないということで、入力した人の誤りではなく結線の誤りだからです。ただし、触られないと何も送らない入力要素は対象外です。何も選ばれていないラジオボタンは、プレースホルダーのままの `<select>` と同じく値が無いものとしてスキーマに渡り（`undefined` を受け付けない enum なら検証エラー）、チェックされていないチェックボックスは `false`、何もチェックされていないチェックボックス群は `[]` として届くので、これらで広げ忘れても例外にはなりません。',
+  en: '`parseForm` throws when a field in the schema never arrived in the FormData. That means an `input` was not spread or the field was not rendered — a wiring mistake, not something the person filling in the form did. The controls that submit no entry at all when left alone are exempt: a radio group with nothing selected reaches the schema as no value, like a `<select>` on its placeholder (a validation error unless the enum accepts `undefined`), an unchecked checkbox as `false`, and a checkbox group with nothing checked as `[]`, so a forgotten spread on one of those is not caught.',
 });
 
 export const parseUntouched = message({
-  ja: "触られなかった入力要素がスキーマに何を渡すか（テキストは `''`、チェックボックスは `false`、数値とファイルは何も渡さない）は、フィールドのページの「`required` の決まり方」にまとめています。",
-  en: "What an untouched control hands the schema — `''` for text, `false` for a checkbox, nothing at all for a number or a file — is laid out under “Where `required` comes from” on the Fields page.",
+  ja: "触られなかった入力要素がスキーマに何を渡すか（テキストは `''`、チェックボックスは `false`、数値・`z.coerce.bigint()`・ファイル・選択肢は何も渡さない）は、フィールドのページの「`required` の決まり方」にまとめています。",
+  en: "What an untouched control hands the schema — `''` for text, `false` for a checkbox, nothing at all for a number, a `z.coerce.bigint()`, a file or a choice — is laid out under “Where `required` comes from” on the Fields page.",
 });
 
 export const serverTitle = message({

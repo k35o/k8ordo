@@ -161,8 +161,8 @@ export const mapDatetimeLocal = message({
 });
 
 export const mapDatetime = message({
-  ja: 'タイムゾーンを要求するので、`datetime-local` では満たせません。`type="text"` に落として `dropped` に載せます。',
-  en: 'It demands a timezone, which `datetime-local` cannot submit, so it falls back to `type="text"` and is listed in `dropped`.',
+  ja: 'タイムゾーンを要求するので、`datetime-local` では満たせません。`type="text"` に落として `dropped` に載せ、日時の正規表現を `pattern` にします。',
+  en: 'It demands a timezone, which `datetime-local` cannot submit, so it falls back to `type="text"`, is listed in `dropped`, and carries its datetime regex as `pattern`.',
 });
 
 export const mapFormatText = message({
@@ -200,9 +200,19 @@ export const mapLiteralTrue = message({
   en: "A consent box. It rejects an unchecked box, so it is `required`, in zod's wording.",
 });
 
+export const mapFormatStacked = message({
+  ja: '形式に重ねたチェックがあっても、`type` は形式のものです。重ねた正規表現は、ブラウザが走らせる正規表現がそれ 1 つのとき（`z.url().lowercase()`）だけ `pattern` になり、形式も正規表現を持つときは `dropped` に載ります。',
+  en: "A check stacked on a format keeps the format's `type`. The stacked regex becomes `pattern` only when it is the one regex the browser would run (`z.url().lowercase()`); when the format carries one too, it is listed in `dropped`.",
+});
+
 export const mapEnum = message({
   ja: '`type` を持ちません。`<select>` かラジオボタンで描きます。',
   en: 'No `type`: render it as a `<select>` or a radio group.',
+});
+
+export const mapEnumOptional = message({
+  ja: '未選択を受け付けるので `required` は付きません。`.default()` も同じです。',
+  en: 'Nothing chosen is accepted, so no `required`. `.default()` is the same.',
 });
 
 export const mapGroup = message({
@@ -211,8 +221,8 @@ export const mapGroup = message({
 });
 
 export const mapFile = message({
-  ja: '`.mime()` は `accept` になります。サイズの `.min()` / `.max()` は `dropped` に載ります。',
-  en: '`.mime()` becomes `accept`. Size bounds from `.min()` / `.max()` are listed in `dropped`.',
+  ja: '`.mime()` は `accept` になりますが、ファイル選択の候補を絞るだけでブラウザは種類を検査しないので、`dropped` にも載ります。サイズの `.min()` / `.max()` も `dropped` に載ります。',
+  en: '`.mime()` becomes `accept`, which only narrows the file picker — the browser never checks the type — so it is listed in `dropped` too. Size bounds from `.min()` / `.max()` are listed in `dropped`.',
 });
 
 export const mapFileOptional = message({
@@ -231,8 +241,8 @@ export const mapNullable = message({
 });
 
 export const mapCoerceOther = message({
-  ja: "文字列を読むスキーマなので残りますが、制約は読み取れず `dropped` に載ります。空の欄は `''` として届くので、`z.coerce.bigint()` は空欄を `0n` と読みます。",
-  en: "They read strings, so they are kept, but no constraint can be read from them and they are listed in `dropped`. An empty field arrives as `''`, which `z.coerce.bigint()` reads as `0n`.",
+  ja: '文字列を読むスキーマなので残りますが、制約は読み取れず `dropped` に載ります。空の `z.coerce.bigint()` の欄は数値と同じく未入力として届くので、`0n` にはならず、未入力を拒むスキーマなら `required` になります。',
+  en: 'They read strings, so they are kept, but no constraint can be read from them and they are listed in `dropped`. An empty `z.coerce.bigint()` field arrives as nothing entered, like a number, so it never becomes `0n`, and it is `required` when the schema rejects nothing entered.',
 });
 
 export const mapOpaque = message({
@@ -246,8 +256,8 @@ export const requiredTitle = message({
 });
 
 export const requiredDescription = message({
-  ja: 'JSON Schema の `required` は「キーがある」という意味ですが、フォームはすべての欄について何かを送ります。何を送るかは入力要素で決まるので、`formFields` はその「空の送信」をスキーマに渡してみて、拒まれたときだけ `required` を付けます。`parseForm` もまったく同じ値をスキーマに渡すので、ブラウザとサーバーの判断は食い違いません。ただし例外が 1 つあります。何も選ばれていないラジオボタンは何も送らないので、`.optional()` や `.default()` の enum はブラウザでは `required` になり、`parseForm` は受け付けます。',
-  en: "JSON Schema's `required` means “the key is present”, but a form submits something for every control. What that is depends on the control, so `formFields` hands that empty submission to the schema and emits `required` only when the schema rejects it. `parseForm` hands the schema exactly the same value, so the browser and the server agree — with one exception: a radio group with nothing selected submits no entry, so an `.optional()` or `.default()` enum is `required` in the browser but accepted by `parseForm`.",
+  ja: 'JSON Schema の `required` は「キーがある」という意味ですが、フォームはすべての欄について何かを送ります。何を送るかは入力要素で決まるので、`formFields` はその「空の送信」をスキーマに渡してみて、拒まれたときだけ `required` を付けます。`parseForm` もまったく同じ値をスキーマに渡すので、ブラウザとサーバーの判断は食い違いません。',
+  en: "JSON Schema's `required` means “the key is present”, but a form submits something for every control. What that is depends on the control, so `formFields` hands that empty submission to the schema and emits `required` only when the schema rejects it. `parseForm` hands the schema exactly the same value, so the browser and the server agree.",
 });
 
 export const controlColumn = message({
@@ -271,8 +281,8 @@ export const emptyCheckbox = message({
 });
 
 export const emptyNumber = message({
-  ja: '数値',
-  en: 'Number',
+  ja: '数値（`z.coerce.bigint()` のテキスト欄を含む）',
+  en: 'Number (a `z.coerce.bigint()` text field included)',
 });
 
 export const emptyFile = message({
@@ -306,8 +316,8 @@ export const emptyNothingValue = message({
 });
 
 export const emptyChoiceValue = message({
-  ja: "`<select>` のプレースホルダーは `''`。何も選ばれていないラジオボタンは何も送らず、スキーマはそのキーの値を受け取りません（`undefined` を受け付けない enum なら検証エラー）。",
-  en: "A `<select>` placeholder submits `''`. A radio group with nothing selected submits nothing, so the schema receives no value for the key (a validation error unless the enum accepts `undefined`).",
+  ja: "`undefined`。`<select>` のプレースホルダーが送る `''` も、何も送らない未選択のラジオボタンも「未選択」です（`undefined` を受け付けない enum なら検証エラー）。",
+  en: "`undefined`: the `''` a `<select>` placeholder submits and a radio group with nothing selected, which submits nothing, both mean nothing chosen (a validation error unless the enum accepts `undefined`).",
 });
 
 export const emptyGroupValue = message({
@@ -431,13 +441,13 @@ export const choiceRadio = message({
 });
 
 export const choicePlaceholder = message({
-  ja: "`<option value=\"\">` のプレースホルダーを置くと、選ばれていない `<select>` は `''` を送ります。enum はそれを拒むので欄は `required` になります。JavaScript が無ければブラウザが送信を止めます。JavaScript があれば、選ばれていない `<select>` は欄を離れたときに `valueMissing` としてスキーマの文言を出し、サーバーでは `parseForm` が `''` を拒みます。",
-  en: "With an `<option value=\"\">` placeholder, an unpicked `<select>` submits `''`. The enum rejects it, so the field is `required`: without JavaScript the browser stops the submission; with JavaScript, leaving the unpicked select reports `valueMissing` in the schema's wording, and `parseForm` rejects the `''` on the server.",
+  ja: '`<option value="">` のプレースホルダーを置くと、選ばれていない `<select>` は `\'\'` を送り、スキーマには未選択（`undefined`）として届きます。enum がそれを拒むので欄は `required` になります。JavaScript が無ければブラウザが送信を止めます。JavaScript があれば、選ばれていない `<select>` は欄を離れたときに `valueMissing` としてスキーマの文言を出し、サーバーでは `parseForm` が未選択を拒みます。',
+  en: "With an `<option value=\"\">` placeholder, an unpicked `<select>` submits `''`, which reaches the schema as nothing chosen (`undefined`). The enum rejects it, so the field is `required`: without JavaScript the browser stops the submission; with JavaScript, leaving the unpicked select reports `valueMissing` in the schema's wording, and `parseForm` rejects it on the server.",
 });
 
 export const choiceOptional = message({
-  ja: "`.optional()` や `.default()` の enum も空の送信 `''` を拒むので、`required` になります。何も選ばれていないラジオボタンは何も送らないので `parseForm` はそれを受け付けますが、`required` を渡したラジオボタンはブラウザで必須として扱われます。そうした enum のラジオボタンには `required` を渡しません。",
-  en: "An `.optional()` or `.default()` enum rejects the empty submission `''` too, so it is `required`. A radio group with nothing selected submits nothing, which `parseForm` accepts, but radio buttons given `required` are treated as mandatory in the browser. Leave `required` off the radio buttons of such an enum.",
+  ja: '`.optional()` や `.default()` の enum は未選択を受け付けるので、`required` は付きません。プレースホルダーのままの `<select>` も、何も選ばれていないラジオボタンも、そのままサーバーを通ります（`.default()` ならその値になります）。',
+  en: 'An `.optional()` or `.default()` enum accepts nothing chosen, so it is not `required`. A `<select>` left on its placeholder and a radio group with nothing selected both pass the server (as the default value, for `.default()`).',
 });
 
 export const checkboxTitle = message({
@@ -466,8 +476,8 @@ export const groupMin = message({
 });
 
 export const groupRestore = message({
-  ja: '群のボックスには `name` だけを渡します。`state.values` に返る入力値は、2 つ以上チェックされていれば配列、1 つだけなら文字列なので、両方を配列に揃えてから `defaultChecked` を決めます。1 つだけのときは `input` にも `defaultValue` として入るので、属性を広げるとボックスの `value` とぶつかります。',
-  en: "Give each box only `name`. The echo in `state.values` is an array when two or more boxes were checked and a plain string when one was, so normalise it to an array before deciding `defaultChecked`. With one box, the echo also lands in `input` as `defaultValue`, which would collide with each box's `value` if spread.",
+  ja: "群のボックスには `name` だけを渡します。`state.values` に返る入力値は、チェックが 1 つでも 0 個でも配列（`['a']` / `[]`）なので、そこから各ボックスの `defaultChecked` を決めます。",
+  en: "Give each box only `name`. The echo in `state.values` is an array however many boxes were checked — `['a']` for one, `[]` for none — so each box's `defaultChecked` is read from it.",
 });
 
 export const filesTitle = message({
@@ -476,8 +486,8 @@ export const filesTitle = message({
 });
 
 export const filesDescription = message({
-  ja: '`z.file()` は `type="file"` になり、`.mime([…])` は `accept` になります。`accept` はファイル選択の候補を絞るだけなので、種類を検査するのはサーバーだけです。そのことはまだ `dropped` に載りません。',
-  en: '`z.file()` derives `type="file"`, and `.mime([…])` becomes `accept`, which only narrows the file picker: only the server checks the type, and `dropped` does not say so yet.',
+  ja: '`z.file()` は `type="file"` になり、`.mime([…])` は `accept` になります。`accept` はファイル選択の候補を絞るだけなので、種類を検査するのはサーバーだけで、そのことは `dropped` に載ります。',
+  en: '`z.file()` derives `type="file"`, and `.mime([…])` becomes `accept`, which only narrows the file picker: only the server checks the type, and `dropped` says so.',
 });
 
 export const filesEmpty = message({
@@ -585,9 +595,14 @@ export const droppedRegex = message({
   en: "Regexes not wrapped in `^…$`, carrying a flag other than `u`, or failing to compile under the `v` flag (`z.email()`'s included)",
 });
 
+export const droppedStacked = message({
+  ja: '1 つの文字列に重ねた複数の正規表現（`pattern` 属性は 1 つしか持てません）。`z.email().regex(…)` のように形式が自分の正規表現を持つときも同じです',
+  en: 'Several regexes on one string (the `pattern` attribute holds one), including a format that carries its own, as in `z.email().regex(…)`',
+});
+
 export const droppedIgnoredPattern = message({
-  ja: '`pattern` を読まない `type="time"` に付いた正規表現（`z.iso.time()` を含む）',
-  en: 'A regex on `type="time"`, which ignores `pattern` (`z.iso.time()`\'s included)',
+  ja: '`pattern` を読まない `type="time"` に付いた正規表現（`z.iso.time()` を含む）と、`type="date"` / `datetime-local` に重ねた正規表現',
+  en: 'A regex on `type="time"`, which ignores `pattern` (`z.iso.time()`\'s included), and one stacked on `type="date"` or `datetime-local`',
 });
 
 export const droppedExclusive = message({
@@ -610,14 +625,19 @@ export const droppedOpaque = message({
   en: 'Fields whose constraints became unreadable behind `.transform()`, a `.pipe()` into a type JSON Schema cannot describe, `z.custom()` and the like',
 });
 
+export const droppedMime = message({
+  ja: '`.mime()` の種類の制限（`accept` はファイル選択の候補を絞るだけです）',
+  en: 'The type restriction of `.mime()` (`accept` only narrows the file picker)',
+});
+
 export const droppedGroup = message({
   ja: 'チェックボックス群の個数の制限と、ファイルのサイズの制限',
   en: 'Count bounds on a checkbox group and size bounds on a file',
 });
 
 export const droppedNotListed = message({
-  ja: 'まだ `dropped` に載らないものがあります。1 つの欄、ネストしたオブジェクト、繰り返し行に付けた `.refine()` / `.superRefine()`（数えるのはルートのオブジェクトのチェックだけです）、ファイル選択の候補を絞るだけの `accept` になる `.mime()`、そして 2 つ以上の正規表現を持つ文字列や、形式に `.regex()`・`.lowercase()`・`.uppercase()` を足した文字列です。最後のものは `pattern` や `type` を失い、たとえば `z.email().regex(…)` はただの `type="text"` になります。いずれもサーバーでは検査されます。',
-  en: 'Not listed in `dropped` yet: a `.refine()` / `.superRefine()` on a single field, on a nested object, or on a row (only the root object\'s checks are counted); a `.mime()` check, whose `accept` only narrows the file picker; and a string that carries more than one pattern, or puts a `.regex()`, `.lowercase()` or `.uppercase()` on a format, which loses its `pattern`, its `type`, or both — `z.email().regex(…)` derives a bare `type="text"`. They all still run on the server.',
+  ja: 'まだ `dropped` に載らないものがあります。1 つの欄、ネストしたオブジェクト、繰り返し行に付けた `.refine()` / `.superRefine()` です（数えるのはルートのオブジェクトのチェックだけです）。これもサーバーでは検査されます。',
+  en: "Not listed in `dropped` yet: a `.refine()` / `.superRefine()` on a single field, on a nested object, or on a row (only the root object's checks are counted). It still runs on the server.",
 });
 
 export const droppedReason = message({
@@ -653,6 +673,11 @@ export const refusedNumber = message({
 export const refusedDate = message({
   ja: '`z.date()`・`z.bigint()`・`z.nan()` — 文字列を受け付けません。`z.coerce.date()` と `z.coerce.bigint()` は文字列を読むので残ります。',
   en: '`z.date()`, `z.bigint()` and `z.nan()` — they accept no string. `z.coerce.date()` and `z.coerce.bigint()` read strings and are kept.',
+});
+
+export const refusedStringbool = message({
+  ja: '`z.stringbool()` — チェックボックスとして導かれますが、`parseForm` はチェックボックスを真偽値で渡すので、どんな送信も通りません。`z.boolean()` を使います。',
+  en: "`z.stringbool()` — it would derive a checkbox, but `parseForm` hands a checkbox's schema a boolean, so no submission could pass. Use `z.boolean()`.",
 });
 
 export const refusedRecord = message({
