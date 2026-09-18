@@ -2,7 +2,7 @@
 
 `@k8ordo/framework-engine` — the machinery `@k8ordo/static` and
 `@k8ordo/server` are both built on. **Private**: it is never published. Each
-mode package bundles it into its own `dist/index.mjs` at pack time
+mode package bundles it into its own entries at pack time
 (`deps.alwaysBundle` in the mode's `vite.config.ts`) and copies
 `dist/runtime/` — the three environment entries — beside it, then tells the
 engine where they landed (`EngineHost.runtimeDir`). Nothing outside this

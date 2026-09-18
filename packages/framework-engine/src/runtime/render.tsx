@@ -5,8 +5,9 @@ import type { RouteRequest } from './request';
 
 export type PageProps = {
   /**
-   * The pattern's params, after the schemas the route files declared have
-   * run — a number where a schema said number, a string where none spoke.
+   * The pattern's params: for the page, after the schemas the route files
+   * declared have run — a number where a schema said number, a string where
+   * none spoke — and for a layout, the strings the pathname carried.
    */
   readonly params: Readonly<Record<string, unknown>>;
   /**
@@ -26,6 +27,11 @@ export type PageProps = {
  * receives what it wraps as `children`, because context cannot cross the
  * server boundary. The client router's `<Outlet />` is the same idea for an
  * application that renders entirely in the browser.
+ *
+ * `params` are the page's — what the schemas along its stack produced. Only
+ * the leaf gets them: a layout does not know which page is below it, and
+ * under `not-found.tsx` nothing is validated, so a layout receives the
+ * strings the pathname carried, which is what its type says.
  */
 export const renderMatch = (
   match: Match,
@@ -38,8 +44,9 @@ export const renderMatch = (
     // The table stores components of every shape; this renderer is the one
     // that states what it passes.
     const Component = match.stack[index] as ComponentType<PageProps>;
+    const own = index === match.stack.length - 1 ? params : match.params;
     node = (
-      <Component params={params} pathname={pathname} request={request}>
+      <Component params={own} pathname={pathname} request={request}>
         {node}
       </Component>
     );

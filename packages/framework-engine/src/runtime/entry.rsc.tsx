@@ -14,40 +14,22 @@ import type { ParsedParams } from './params';
 import { ACTION_ID_HEADER } from './payload';
 import type { Payload } from './payload';
 import { isPayloadPath, pagePathFor } from './payload-path';
-import { isRedirect, resolveTarget } from './redirect';
+import { isRedirect, matchRedirects } from './redirect';
 import { NotFound, renderMatch } from './render';
 import { routeRequestOf } from './request';
 
 type ActionResult = {
   returnValue?: unknown;
   formState?: unknown;
-  /** The action ended by sending the visitor elsewhere. */
-  redirect?: { to: string; permanent: boolean };
+  /** Where the action sent the visitor instead of returning. */
+  redirect?: string;
 };
 
 /**
- * The redirects `routes/` declared, matched in declaration order — before
- * the table, since a directory that redirects has no page to render.
+ * Consulted before the table, since a directory that redirects has no page to
+ * render.
  */
-const REDIRECTS = Object.entries(redirects).map(([pattern, target]) => ({
-  matcher: new URLPattern({ pathname: pattern }),
-  target,
-}));
-
-const redirectFor = (
-  pathname: string,
-): { to: string; permanent: boolean } | null => {
-  for (const { matcher, target } of REDIRECTS) {
-    const result = matcher.exec({ pathname });
-    if (result === null) continue;
-    const params: Record<string, string> = {};
-    for (const [name, value] of Object.entries(result.pathname.groups)) {
-      if (!/^\d+$/u.test(name) && value !== undefined) params[name] = value;
-    }
-    return resolveTarget(target, params);
-  }
-  return null;
-};
+const redirectFor = matchRedirects(redirects);
 
 const redirectResponse = (to: string, status: number): Response =>
   new Response(null, { status, headers: { location: to } });
@@ -68,7 +50,7 @@ const runAction = async (
     return await invokeAction(request, temporaryReferences);
   } catch (error) {
     // A redirect is how an action ends, not how it fails.
-    if (isRedirect(error)) return { redirect: error };
+    if (isRedirect(error)) return { redirect: error.to };
     throw error;
   }
 };
@@ -165,7 +147,7 @@ export default async function handler(request: Request): Promise<Response> {
     : {};
   if (action.redirect !== undefined && !addressed) {
     // A form posted without JavaScript: the browser follows a 303 with a GET.
-    return redirectResponse(action.redirect.to, 303);
+    return redirectResponse(action.redirect, 303);
   }
 
   // A param a schema refuses is a pathname the pattern does not answer, so
@@ -210,7 +192,7 @@ export default async function handler(request: Request): Promise<Response> {
     pathname,
     returnValue: action.returnValue,
     formState: action.formState,
-    redirect: action.redirect?.to,
+    redirect: action.redirect,
   };
 
   const failures: unknown[] = [];

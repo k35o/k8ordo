@@ -23,12 +23,12 @@ const OUTPUT = `dist/
     assets/`;
 
 const SERVE = `// serve.js
-import { serve } from '@k8ordo/server';
+import { serve } from '@k8ordo/server/runtime';
 
 await serve({ port: 3000, host: '0.0.0.0' });`;
 
 const SMOKE = `// scripts/smoke.js
-import { serve } from '@k8ordo/server';
+import { serve } from '@k8ordo/server/runtime';
 
 const server = await serve({ dist: 'dist', port: 0 });
 const response = await fetch(\`\${server.url}/products/1\`);

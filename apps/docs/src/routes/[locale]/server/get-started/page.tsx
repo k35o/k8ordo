@@ -21,7 +21,7 @@ vite build
 node serve.js`;
 
 const SERVE = `// serve.js
-import { serve } from '@k8ordo/server';
+import { serve } from '@k8ordo/server/runtime';
 
 await serve({ port: 3000 });`;
 
@@ -37,19 +37,22 @@ export default function ServerGetStartedPage() {
         <InstallTabs
           npm={
             <CodeBlock
-              code="npm install @k8ordo/router @k8ordo/server react react-dom server-only vite"
+              code={`npm install @k8ordo/router @k8ordo/server react react-dom server-only
+npm install -D vite`}
               lang="bash"
             />
           }
           pnpm={
             <CodeBlock
-              code="pnpm add @k8ordo/router @k8ordo/server react react-dom server-only vite"
+              code={`pnpm add @k8ordo/router @k8ordo/server react react-dom server-only
+pnpm add -D vite`}
               lang="bash"
             />
           }
           yarn={
             <CodeBlock
-              code="yarn add @k8ordo/router @k8ordo/server react react-dom server-only vite"
+              code={`yarn add @k8ordo/router @k8ordo/server react react-dom server-only
+yarn add -D vite`}
               lang="bash"
             />
           }

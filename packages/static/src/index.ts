@@ -272,7 +272,7 @@ const escapeXml = (value: string): string =>
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&apos;');
 
-export const sitemap = (site: string, pathnames: readonly string[]): string => {
+const sitemap = (site: string, pathnames: readonly string[]): string => {
   const origin = site.endsWith('/') ? site.slice(0, -1) : site;
   const urls = pathnames
     .toSorted()

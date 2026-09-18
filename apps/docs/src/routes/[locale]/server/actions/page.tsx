@@ -66,7 +66,7 @@ export function TalkForm() {
 const LEAVE = `// src/routes/_parts/leave.ts
 'use server';
 
-import { redirect } from '@k8ordo/server';
+import { redirect } from '@k8ordo/server/runtime';
 
 import { saveTalk } from '../_data/talks.server';
 
@@ -104,7 +104,7 @@ export default function RootLayout({ children, request }: LayoutProps<'/'>) {
 }`;
 
 const REQUEST_PROP = `// src/routes/_parts/greeting.tsx
-import type { RouteRequest } from '@k8ordo/server';
+import type { RouteRequest } from '@k8ordo/server/runtime';
 
 export function Greeting({ request }: { request: RouteRequest }) {
   return <p>{request.cookies.get('name') ?? 'welcome'}</p>;
