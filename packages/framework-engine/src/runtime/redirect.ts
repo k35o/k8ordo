@@ -1,9 +1,9 @@
 /**
  * A redirect thrown from a Server Action. Branded with a registry symbol
- * rather than a class: the mode package bundles this module once into its
- * plugin entry (where `redirect()` is exported from) and once into the
- * runtime it copies beside it (where the handler catches it), and two copies
- * of a class are two classes. `Symbol.for` is the one identity both share.
+ * rather than a class: the mode package bundles this module once into the
+ * entry an application imports `redirect()` from and once into the runtime
+ * it copies beside it (where the handler catches it), and two copies of a
+ * class are two classes. `Symbol.for` is the one identity both share.
  */
 const BRAND = Symbol.for('k8ordo.redirect');
 

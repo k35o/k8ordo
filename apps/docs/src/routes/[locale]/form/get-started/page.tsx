@@ -131,7 +131,7 @@ const EXAMPLE_ACTION = `// src/routes/talks/new/_parts/actions.ts
 
 import { parseForm } from '@k8ordo/form/server';
 import type { FormState } from '@k8ordo/form/server';
-import { redirect } from '@k8ordo/server';
+import { redirect } from '@k8ordo/server/runtime';
 
 import { talkSchema } from './talk-schema';
 import { insertTalk } from './talks.server';

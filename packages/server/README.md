@@ -15,23 +15,26 @@ polyfills or legacy fallbacks.
 ## Installation
 
 ```bash
-pnpm add @k8ordo/router @k8ordo/server react react-dom server-only vite
+pnpm add @k8ordo/router @k8ordo/server react react-dom server-only
+pnpm add -D vite
 ```
 
 The mode is the dependency: installing this package is what makes the
 application one that runs, and `@k8ordo/static` is the other choice. Nothing
-else about the application changes between them. `vite` is a runtime
-dependency here, not a development one: this package's entry, where `serve`
-and `redirect` come from, imports it.
+else about the application changes between them.
+
+`@k8ordo/server` is the Vite plugin; what the application's own code imports
+comes from `@k8ordo/server/runtime`, which does not load Vite — so the built
+application runs from an install without dev dependencies.
 
 ## Peer Dependencies
 
-| Package          | Version | Needed for                              |
-| ---------------- | ------- | --------------------------------------- |
-| `@k8ordo/router` | ^0.1.0  | the route table the framework generates |
-| `react`          | ≥19.3.0 | rendering                               |
-| `react-dom`      | ≥19.3.0 | rendering                               |
-| `vite`           | ≥8.2.1  | the build, and `serve` at run time      |
+| Package          | Version | Needed for                                 |
+| ---------------- | ------- | ------------------------------------------ |
+| `@k8ordo/router` | ^0.1.0  | the route table the framework generates    |
+| `react`          | ≥19.3.0 | rendering                                  |
+| `react-dom`      | ≥19.3.0 | rendering                                  |
+| `vite`           | ≥8.2.1  | the build (`framework()` is a Vite plugin) |
 
 ## Quick Start
 
@@ -55,7 +58,7 @@ src/routes/
 
 ```js
 // serve.js
-import { serve } from '@k8ordo/server';
+import { serve } from '@k8ordo/server/runtime';
 
 const server = await serve({ port: 3000 }); // { port, url, close }
 ```
@@ -64,7 +67,7 @@ const server = await serve({ port: 3000 }); // { port, url, close }
 // src/routes/_parts/actions.ts
 'use server';
 
-import { redirect } from '@k8ordo/server';
+import { redirect } from '@k8ordo/server/runtime';
 
 export async function createTalk(_previous: FormState, formData: FormData) {
   const parsed = parseForm(talkSchema, formData);
@@ -93,7 +96,8 @@ route or a Server Action, read `node_modules/@k8ordo/server/docs/GUIDE.md`.
 `src/routes/` is the pathname space and holds only page.tsx, layout.tsx,
 not-found.tsx, error.tsx and redirect.ts; everything else goes under a
 `_`-prefixed directory. Never edit `.k8ordo/` — it is generated. A Server
-Action ends with `redirect()` from `@k8ordo/server`, not a returned URL.
+Action ends with `redirect()` from `@k8ordo/server/runtime`, not a returned
+URL.
 Build links with `href()` from `@k8ordo/router`; search params are
 `@k8ordo/state`'s.
 ```

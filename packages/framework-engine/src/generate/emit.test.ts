@@ -146,7 +146,7 @@ describe('the emitted register', () => {
       via: '@k8ordo/server',
     });
     expect(server).toContain(
-      "import type { RouteRequest } from '@k8ordo/server';",
+      "import type { RouteRequest } from '@k8ordo/server/runtime';",
     );
     expect(server).toContain('request: RouteRequest;');
 
@@ -356,7 +356,7 @@ describe('the request a page receives', () => {
       via: '@k8ordo/server',
     });
     expect(source).toContain(
-      "import type { RouteRequest } from '@k8ordo/server';",
+      "import type { RouteRequest } from '@k8ordo/server/runtime';",
     );
     expect(source).toMatch(/type Page<[\s\S]*?request: RouteRequest;/u);
     expect(source).toMatch(/type Layout<[\s\S]*?request: RouteRequest;/u);

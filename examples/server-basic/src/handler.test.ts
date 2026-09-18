@@ -33,6 +33,34 @@ const formDataOf = (html: string, testId: string): FormData => {
 const entriesOf = (html: string): string =>
   /<ul[^>]*data-testid="entries"[\s\S]*?<\/ul>/u.exec(html)?.[0] ?? '';
 
+// pnpm install --prod で入れたアプリには、ビルドにしか使わない vite も
+// @vitejs/* も無い。子プロセスでそれらの解決を拒んだうえで、serve に 1 枚返させる
+const WITHOUT_BUILD_TOOLING = `
+import { registerHooks } from 'node:module';
+
+registerHooks({
+  resolve(specifier, context, nextResolve) {
+    if (
+      specifier === 'vite' ||
+      specifier.startsWith('vite/') ||
+      specifier.startsWith('@vitejs/')
+    ) {
+      throw new Error('the deployed application resolved ' + specifier);
+    }
+    return nextResolve(specifier, context);
+  },
+});
+
+const { serve } = await import('@k8ordo/server/runtime');
+const server = await serve({ port: 0 });
+try {
+  const response = await fetch(server.url);
+  process.stdout.write(String(response.status) + '\\n' + (await response.text()));
+} finally {
+  await server.close();
+}
+`;
+
 const root = path.resolve(import.meta.dirname, '..');
 const ORIGIN = 'https://example.test';
 let handler: Handler;
@@ -176,5 +204,18 @@ describe('the built request handler', () => {
     const page = await response.text();
     expect(page).not.toContain('data-testid="error"');
     expect(entriesOf(page)).toContain('<li>k8o</li>');
+  });
+});
+
+describe('the deployed application', () => {
+  it('serves a page with only its production dependencies installed', () => {
+    const output = execFileSync(
+      process.execPath,
+      ['--input-type=module', '--eval', WITHOUT_BUILD_TOOLING],
+      { cwd: root, encoding: 'utf8', stdio: 'pipe' },
+    );
+    const [status, ...body] = output.split('\n');
+    expect(status).toBe('200');
+    expect(body.join('\n')).toContain('rendered on the server');
   });
 });
