@@ -115,17 +115,35 @@ export const ReadOnly: Story = {
   },
 };
 
-const PendingRender = () => (
-  <form
-    action={async () => {
-      // 送信中のまま止めておき、その間のキー操作を見る
-      await new Promise<void>(() => {});
-    }}
-  >
-    <NumberField defaultValue={5} id="number-field-pending" />
-    <button type="submit">送信</button>
-  </form>
-);
+const PendingRender = () => {
+  // 送信中のまま止めておき、その間のキー操作を見る。終わらない action のままに
+  // すると、React が後から始まる action を同じ送信中として束ね、以降のストーリーの
+  // action も完了しなくなるので、見終わったら終わらせる。
+  const finishRef = useRef(() => {});
+
+  return (
+    <form
+      action={async () => {
+        await new Promise<void>((resolve) => {
+          finishRef.current = () => {
+            resolve();
+          };
+        });
+      }}
+    >
+      <NumberField defaultValue={5} id="number-field-pending" />
+      <button type="submit">送信</button>
+      <button
+        onClick={() => {
+          finishRef.current();
+        }}
+        type="button"
+      >
+        送信を終える
+      </button>
+    </form>
+  );
+};
 
 export const IgnoresArrowKeysWhilePending: Story = {
   render: () => <PendingRender />,
@@ -142,6 +160,11 @@ export const IgnoresArrowKeysWhilePending: Story = {
     await userEvent.keyboard('{ArrowDown}');
 
     await expect(input).toHaveValue('5');
+
+    await userEvent.click(canvas.getByRole('button', { name: '送信を終える' }));
+    await waitFor(async () => {
+      await expect(input).not.toHaveAttribute('readonly');
+    });
   },
 };
 
