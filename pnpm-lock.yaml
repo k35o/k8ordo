@@ -197,6 +197,9 @@ catalogs:
     '@vitejs/plugin-react':
       specifier: 6.1.1
       version: 6.1.1
+    playwright:
+      specifier: 1.63.0
+      version: 1.63.0
     postcss:
       specifier: 8.5.28
       version: 8.5.28
@@ -263,7 +266,7 @@ importers:
         specifier: 1.10.2
         version: 1.10.2
       playwright:
-        specifier: 1.63.0
+        specifier: 'catalog:'
         version: 1.63.0
       typescript:
         specifier: 'catalog:'
@@ -366,6 +369,9 @@ importers:
       '@types/react-dom':
         specifier: 'catalog:'
         version: 19.3.0(@types/react@19.3.0)
+      playwright:
+        specifier: 'catalog:'
+        version: 1.63.0
       typescript:
         specifier: 'catalog:'
         version: 7.0.2
@@ -403,6 +409,9 @@ importers:
       '@types/react-dom':
         specifier: 'catalog:'
         version: 19.3.0(@types/react@19.3.0)
+      playwright:
+        specifier: 1.63.0
+        version: 1.63.0
       typescript:
         specifier: 'catalog:'
         version: 7.0.2

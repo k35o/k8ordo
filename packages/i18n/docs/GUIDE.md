@@ -204,12 +204,21 @@ needs text names it and pays for that message alone.
 ## Where the locale comes from
 
 **On the server**, `paramsSchema` accepting a locale makes it the current
-one for the rest of that request's render — the Server Components, the
+one for the render of the page that accepted it — the Server Components, the
 HTML they become, and the client components that run on the server for
-that HTML. Concurrent renders stay apart (`AsyncLocalStorage`). Outside a
-`[locale]` route — a test, code that runs before the route matched — use
-`locales.run(locale, fn)`; and when nothing names a locale, messages render
-in the default.
+that HTML — and for nothing else. Concurrent renders stay apart
+(`AsyncLocalStorage`). An acceptance belongs to the pattern that answered,
+not to the request: when a schema further down the same stack refuses
+(`/en/blog/nope`, where the page's slug schema says no), the pattern does
+not answer and the locale goes with it, so the 404 renders in the default,
+as `/en/nothing` does. Outside a `[locale]` route — a test, code that runs
+before the route matched — use `locales.run(locale, fn)`; and when nothing
+names a locale, messages render in the default.
+
+The server keeps the locale in `AsyncLocalStorage`, reached through
+`process.getBuiltinModule`. A runtime without them throws from
+`paramsSchema` and from `run`, rather than accepting a locale and rendering
+the page in the default.
 
 **In the browser**, the URL is the locale: the first segment of
 `location.pathname`, read when a message is called. Changing locale is a
@@ -253,11 +262,11 @@ in front of `serve`, or a host of your own around the built handler
 ### `<html lang>`
 
 The root layout sits above `[locale]` and receives `pathname`. On a page the
-schema has already run for that request, so `locales.getLocale()` is right,
-and `locales.delocalize(pathname).locale ?? locales.default` says the same
-thing in terms of the URL alone. On a 404 the two can differ: nothing
-validates the catch-all's params, so `getLocale()` there is not tied to the
-URL, while `delocalize` still reads its segment.
+schema has already run for that page, so `locales.getLocale()` is right, and
+`locales.delocalize(pathname).locale ?? locales.default` says the same thing
+in terms of the URL alone. On a 404 the two can differ: nothing validates the
+catch-all's params, so `getLocale()` there is the default, while `delocalize`
+still reads the URL's segment.
 
 ## Static builds
 
@@ -276,11 +285,13 @@ same function: `paths: (patterns) =>
 locales.paths(patterns).flatMap(expandSlug)`.
 
 Each path is rendered as its own request, so the schema names the locale
-for each and the messages come out in that locale. The `404.html` a static
-host serves for everything else is rendered once, under the build's
-sentinel segment, so it cannot follow the visitor's locale; a client
-component on it reads the visitor's URL and re-renders in theirs after
-hydration.
+for each and the messages come out in that locale; the build renders several
+at once, and none lends its locale to another. The `404.html` a static host
+serves for everything else is rendered once, by the catch-all under the
+build's sentinel segment, and no schema runs on a catch-all's params — so it
+is in the default locale whatever the build rendered before it, and cannot
+follow the visitor's. A client component on it reads the visitor's URL and
+re-renders in theirs after hydration.
 
 ## Alongside the rest of k8ordo
 
@@ -334,15 +345,19 @@ hydration.
 - Arguments to a function message are typed by the function.
 - A page under `[locale]` never renders in a locale its URL does not spell:
   on the server its schema accepted that locale, and in the browser the URL
-  is what is read.
+  is what is read. A locale accepted for one page reaches no other page, no
+  404, and nothing rendered after it.
+- On a server runtime without `AsyncLocalStorage`, accepting a locale throws
+  rather than rendering in the default.
 
 ## Testing
 
 Under Node, `locales.run('en', () => nav.home())` renders in `en`; without
-it, the default. The `paramsSchema` sets the locale for the rest of its
-scope too, so wrap a test that validates in `run` to keep tests apart. A
-test that calls `defineLocales` itself replaces the set messages read: the
-last one defined wins. In a browser environment,
-`history.replaceState(null, '', '/en/…')` is the locale and `run` throws;
-an environment that defines `document`, such as jsdom or happy-dom, counts
-as one.
+it, the default. Called directly, `paramsSchema` sets the locale for the
+rest of the caller's async context — the framework gives each pattern's
+schemas a context of their own, a test does not — so wrap a test that
+validates in `run` to keep tests apart. A test that calls `defineLocales`
+itself replaces the set messages read: the last one defined wins. In a
+browser environment, `history.replaceState(null, '', '/en/…')` is the locale
+and `run` throws; an environment that defines `document`, such as jsdom or
+happy-dom, counts as one.

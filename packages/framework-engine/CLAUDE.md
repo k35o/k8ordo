@@ -2,7 +2,7 @@
 
 `@k8ordo/framework-engine` — the machinery `@k8ordo/static` and
 `@k8ordo/server` are both built on. **Private**: it is never published. Each
-mode package bundles it into its own `dist/index.mjs` at pack time
+mode package bundles it into its own entries at pack time
 (`deps.alwaysBundle` in the mode's `vite.config.ts`) and copies
 `dist/runtime/` — the three environment entries — beside it, then tells the
 engine where they landed (`EngineHost.runtimeDir`). Nothing outside this
@@ -75,6 +75,11 @@ ParamsSchemaFor<pattern>`, lists per page pattern the schemas along its
   runs them synchronously inside `routes.match`'s `accept`, so a refused
   value is a pattern that did not match and the catch-all answers under 404.
   A catch-all's own params are never validated; a layout receives strings.
+  Each pattern's schemas run in an async context of their own, and the
+  render starts inside the answering pattern's (`enter`): a schema may write
+  there (`@k8ordo/i18n` records the accepted locale), and neither a refused
+  pattern's write nor any other reaches the handler's caller, which under
+  `@k8ordo/static` is one context for every page.
 - **`error.tsx` is the router's `error`; `redirect.ts` is answered before the
   table.** The generator puts an error file on its branch (a page with an
   error becomes a branch of its own) and lists redirects in `redirects`,
@@ -88,7 +93,10 @@ ParamsSchemaFor<pattern>`, lists per page pattern the schemas along its
   `@k8ordo/static` the handler also buffers the HTML and answers 500 when a
   Server Component threw inside a Suspense boundary, so the build stops naming
   the page instead of writing it; a throw with no boundary above it rejects
-  the HTML render itself, and the build stops on that error.
+  the HTML render itself, and the build stops on that error. `renderHtml`
+  also writes every Suspense boundary in place — it waits for `allReady` and
+  outlines nothing — so a file never carries a hidden segment for a script to
+  move in after hydration has started.
 - **One pattern walk.** `declaredPatterns(tree)` is the order the matcher
   tries patterns — pages and redirects, literals before params, the
   catch-all last in its branch — and everything that asks "which URLs does

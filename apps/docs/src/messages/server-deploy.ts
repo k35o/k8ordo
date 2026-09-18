@@ -16,8 +16,8 @@ export const outputDescription = message({
 });
 
 export const outputDeps = message({
-  ja: 'ハンドラは、アプリの依存を実行時に `node_modules` から import します。サーバーを動かす場所には、アプリの依存をインストールしておきます。`serve()` と `redirect()` の import 元である `@k8ordo/server` の入口が `vite` を import するので、`vite` も実行時の依存に入れておきます。',
-  en: "The handler imports the application's dependencies from `node_modules` at run time, so install them where the server runs — `vite` among them, since `@k8ordo/server`'s entry, where `serve()` and `redirect()` come from, imports it.",
+  ja: 'ハンドラは、アプリの依存を実行時に `node_modules` から import します。サーバーを動かす場所には、アプリの依存をインストールしておきます。`vite` はビルドにしか使わないので、`pnpm install --prod` のように開発時の依存を省いたインストールで動きます。',
+  en: "The handler imports the application's dependencies from `node_modules` at run time, so install them where the server runs. `vite` is only for the build, so an install without dev dependencies (`pnpm install --prod`) is enough.",
 });
 
 export const serveTitle = message({

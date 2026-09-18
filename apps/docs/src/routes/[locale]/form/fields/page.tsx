@@ -94,6 +94,11 @@ const MAPPING: ReadonlyArray<{ schema: string; input: string; note: Message }> =
       note: m.formFields.mapRegex,
     },
     {
+      schema: 'z.email().regex(/^[a-z@.]+$/u)',
+      input: "type: 'email', required: true",
+      note: m.formFields.mapFormatStacked,
+    },
+    {
       schema: 'z.iso.date()',
       input: "type: 'date', required: true",
       note: m.formFields.mapDate,
@@ -110,7 +115,7 @@ const MAPPING: ReadonlyArray<{ schema: string; input: string; note: Message }> =
     },
     {
       schema: 'z.iso.datetime()',
-      input: "type: 'text', required: true",
+      input: "type: 'text', required: true, pattern: '^(…)$'",
       note: m.formFields.mapDatetime,
     },
     {
@@ -154,6 +159,11 @@ const MAPPING: ReadonlyArray<{ schema: string; input: string; note: Message }> =
       note: m.formFields.mapEnum,
     },
     {
+      schema: "z.enum(['free', 'team']).optional()",
+      input: '{}',
+      note: m.formFields.mapEnumOptional,
+    },
+    {
       schema: "z.array(z.enum(['a', 'b']))",
       input: '{}',
       note: m.formFields.mapGroup,
@@ -185,7 +195,7 @@ const MAPPING: ReadonlyArray<{ schema: string; input: string; note: Message }> =
     },
     {
       schema: 'z.coerce.bigint()',
-      input: "type: 'text'",
+      input: "type: 'text', required: true",
       note: m.formFields.mapCoerceOther,
     },
     {
@@ -489,8 +499,8 @@ export function PreferencesForm({ fields }: Props) {
   const newsletter = form.field('newsletter');
   const terms = form.field('terms');
   const topics = form.field('topics');
-  const echoed = state.values?.topics ?? [];
-  const checked = typeof echoed === 'string' ? [echoed] : echoed;
+  const echoed = state.values?.topics;
+  const checked = Array.isArray(echoed) ? echoed : [];
 
   return (
     <form {...form.props} action={formAction}>
@@ -870,6 +880,9 @@ export default function FormFieldsPage() {
             <Rich>{m.formFields.droppedRegex()}</Rich>
           </li>
           <li className="list-disc">
+            <Rich>{m.formFields.droppedStacked()}</Rich>
+          </li>
+          <li className="list-disc">
             <Rich>{m.formFields.droppedIgnoredPattern()}</Rich>
           </li>
           <li className="list-disc">
@@ -883,6 +896,9 @@ export default function FormFieldsPage() {
           </li>
           <li className="list-disc">
             <Rich>{m.formFields.droppedOpaque()}</Rich>
+          </li>
+          <li className="list-disc">
+            <Rich>{m.formFields.droppedMime()}</Rich>
           </li>
           <li className="list-disc">
             <Rich>{m.formFields.droppedGroup()}</Rich>
@@ -912,6 +928,9 @@ export default function FormFieldsPage() {
           </li>
           <li className="list-disc">
             <Rich>{m.formFields.refusedDate()}</Rich>
+          </li>
+          <li className="list-disc">
+            <Rich>{m.formFields.refusedStringbool()}</Rich>
           </li>
           <li className="list-disc">
             <Rich>{m.formFields.refusedRecord()}</Rich>

@@ -85,8 +85,8 @@ export type FormState = {
   errors?: Record<string, string>;
   /**
    * Submitted values for re-render. Secret fields and files are never
-   * included; a name submitted more than once — a checkbox group with several
-   * boxes checked — echoes as an array, and a single entry as a string.
+   * included; a checkbox group echoes as an array however many boxes were
+   * checked, and any other name submitted more than once as an array too.
    */
   values?: Record<string, string | string[]>;
   /** How many rows each array had, so a no-JS retry rebuilds them. */

@@ -398,22 +398,7 @@ export default function FormPatternsPage() {
             <Rich>{m.formPatterns.notYetCustom()}</Rich>
           </li>
           <li className="list-disc">
-            <Rich>{m.formPatterns.notYetSelect()}</Rich>
-          </li>
-          <li className="list-disc">
-            <Rich>{m.formPatterns.notYetBigint()}</Rich>
-          </li>
-          <li className="list-disc">
-            <Rich>{m.formPatterns.notYetStringbool()}</Rich>
-          </li>
-          <li className="list-disc">
             <Rich>{m.formPatterns.notYetRefine()}</Rich>
-          </li>
-          <li className="list-disc">
-            <Rich>{m.formPatterns.notYetMime()}</Rich>
-          </li>
-          <li className="list-disc">
-            <Rich>{m.formPatterns.notYetPatterns()}</Rich>
           </li>
           <li className="list-disc">
             <Rich>{m.formPatterns.notYetRowRules()}</Rich>

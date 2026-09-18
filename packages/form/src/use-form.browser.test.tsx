@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { useAsyncCheck } from './async-check';
 import { formFields } from './derive/form-fields';
 import { HiddenValue } from './hidden-value';
+import { parseForm } from './parse/parse-form';
 import { defineForm } from './rules/define-form';
 import { sameAs } from './rules/rules';
 import type { FormState } from './types';
@@ -127,6 +128,33 @@ const Choice: FC<{ state?: FormState }> = ({ state = NO_STATE }) => {
         {...form.field('agree').input}
       />
       <p data-testid="dirty">{String(form.isDirty)}</p>
+    </form>
+  );
+};
+
+const groupSchema = z.object({ tags: z.array(z.enum(['a', 'b'])) });
+const groupFields = formFields(groupSchema);
+
+const Group: FC<{ state: FormState }> = ({ state }) => {
+  const form = useForm(groupFields, state);
+  const tags = form.field('tags');
+
+  return (
+    <form {...form.props}>
+      {(['a', 'b'] as const).map((option) => (
+        <input
+          aria-label={option}
+          defaultChecked={
+            Array.isArray(state.values?.tags) &&
+            state.values.tags.includes(option)
+          }
+          key={option}
+          type="checkbox"
+          {...tags.input}
+          value={option}
+        />
+      ))}
+      <p data-testid="group-input">{JSON.stringify(tags.input)}</p>
     </form>
   );
 };
@@ -504,6 +532,20 @@ describe('useForm in a browser', () => {
     );
 
     await expect.element(screen.getByLabelText('agree')).not.toBeChecked();
+  });
+
+  it('restores a one-box group per option, never as a value on every box', async () => {
+    const formData = new FormData();
+    formData.append('tags', 'a');
+    const { state } = parseForm(groupSchema, formData);
+
+    const screen = await render(<Group state={state} />);
+
+    await expect.element(screen.getByLabelText('a')).toBeChecked();
+    await expect.element(screen.getByLabelText('b')).not.toBeChecked();
+    await expect
+      .element(screen.getByTestId('group-input'))
+      .toHaveTextContent('{"name":"tags"}');
   });
 
   it('hears a HiddenValue change for isDirty like any other control', async () => {

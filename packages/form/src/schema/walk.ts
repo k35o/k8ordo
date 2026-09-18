@@ -5,7 +5,7 @@ import { toJSONSchema } from 'zod/v4/core';
 import type { $ZodType } from 'zod/v4/core';
 
 import { controlKindOf, emptySubmissionOf } from '../derive/attributes';
-import type { LeafSchema } from '../derive/attributes';
+import type { ControlKind, LeafSchema } from '../derive/attributes';
 import { asProbe } from './object-schema';
 import type { ObjectSchema } from './object-schema';
 
@@ -19,6 +19,7 @@ export type LeafNode = {
   name: string;
   json: LeafSchema & { input?: string };
   zod: $ZodType;
+  kind: ControlKind;
   required: boolean;
   /** The array this leaf repeats inside, or null. */
   arrayPath: string | null;
@@ -60,7 +61,9 @@ type Node = {
    entries, and it is the same internal surface the check list already
    requires. */
 type Wrapped = {
-  _zod?: { def?: { innerType?: $ZodType; element?: $ZodType } };
+  _zod?: {
+    def?: { type?: string; innerType?: $ZodType; element?: $ZodType };
+  };
 };
 
 /**
@@ -68,7 +71,7 @@ type Wrapped = {
  * `toJSONSchema` flattens `.optional()` / `.default()` into the plain node, so
  * pairing the two trees requires flattening the zod side the same way.
  */
-const unwrap = ($schema: $ZodType): $ZodType => {
+export const unwrap = ($schema: $ZodType): $ZodType => {
   let current = $schema;
   let inner = (current as Wrapped)._zod?.def?.innerType;
   while (inner !== undefined) {
@@ -88,6 +91,20 @@ const elementOf = ($schema: $ZodType): $ZodType | undefined => {
   };
   return candidate.element ?? candidate._zod?.def?.element;
 };
+
+/**
+ * BigInt has no JSON Schema form, so its node arrives empty and reads as a
+ * text control. It does render as one, but a blank one is no more a value than
+ * a blank number is — `z.coerce.bigint()` reads `''` as 0n — so its submission
+ * is judged the way a number's is.
+ */
+const kindOf = (json: Node, $schema: $ZodType): ControlKind => {
+  const kind = controlKindOf(json);
+  return kind === 'text' &&
+    (unwrap($schema) as Wrapped)._zod?.def?.type === 'bigint'
+    ? 'number'
+    : kind;
+};
 /* oxlint-enable no-underscore-dangle */
 
 /**
@@ -95,12 +112,12 @@ const elementOf = ($schema: $ZodType): $ZodType | undefined => {
  * submits something for every control, and what that is depends on the control
  * — `emptySubmissionOf` is the one place that decides. Asking the schema what
  * it does with that exact value, which is also what the parse will hand it, is
- * what makes the attribute mean the same on both sides — except for an
- * unpicked radio group, which submits no entry where a choice is probed with
- * the `''` of a `<select>` placeholder.
+ * what makes the attribute mean the same on both sides.
  */
-const rejectsEmptySubmission = (json: Node, $schema: $ZodType): boolean =>
-  !asProbe($schema).safeParse(emptySubmissionOf(json)).success;
+const rejectsEmptySubmission = (
+  kind: ControlKind,
+  $schema: $ZodType,
+): boolean => !asProbe($schema).safeParse(emptySubmissionOf(kind)).success;
 
 /**
  * Strings a text control could plausibly submit. One is never enough: a schema
@@ -119,34 +136,42 @@ const rejectsAsWrongType = ($schema: $ZodType, value: unknown): boolean => {
 };
 
 /**
- * A text or number control can only submit strings, so a leaf that turns every
- * one of them away on type alone can never be satisfied by the control it
- * derives. That is not a check the client skips; it is a form that always
- * fails, so it is refused here rather than shipped. (A checkbox and a file are
- * exempt: the parse hands the schema a boolean and a File, not a string.)
+ * A text or number control can only submit strings, and the parse reads a
+ * checkbox as a boolean, so a leaf that turns every such value away on type
+ * alone can never be satisfied by the control it derives. That is not a check
+ * the client skips; it is a form that always fails, so it is refused here
+ * rather than shipped, with the reason. (A file is exempt: the parse hands the
+ * schema a File, which is what `z.file()` reads.)
  *
  * A constraint is not a refusal: `z.coerce.number().min(100)` rejects the probe
  * with `too_small`, which is the schema doing its job.
  */
-const refusesItsOwnControl = (json: Node, $schema: $ZodType): boolean => {
+const refusalOf = (json: Node, $schema: $ZodType): string | undefined => {
   const kind = controlKindOf(json);
   if (kind === 'number') {
     const asText = asProbe($schema).safeParse('1');
     if (asText.success) {
-      return false;
+      return undefined;
     }
     // `z.literal(1)` reports `invalid_value` rather than `invalid_type`, so
     // the type code alone would miss it: what settles it is that the same
     // value as a number is accepted while its string form is not.
-    return (
-      asProbe($schema).safeParse(1).success ||
+    return asProbe($schema).safeParse(1).success ||
       asText.error.issues.some((issue) => issue.code === 'invalid_type')
-    );
+      ? 'フォームの値は文字列で届くため、このスキーマはどんな入力でも失敗します。z.coerce.number() を使ってください'
+      : undefined;
+  }
+  if (kind === 'checkbox') {
+    return [true, false].every((value) => rejectsAsWrongType($schema, value))
+      ? 'チェックボックスは真偽値として届くため、このスキーマはどんな入力でも失敗します（z.stringbool() などは表現できません）。z.boolean() を使ってください'
+      : undefined;
   }
   if (kind === 'text' && json.type !== 'string') {
-    return TEXT_PROBES.every((probe) => rejectsAsWrongType($schema, probe));
+    return TEXT_PROBES.every((probe) => rejectsAsWrongType($schema, probe))
+      ? 'このスキーマは文字列を受け付けないため、フォームが送信できる値がありません（z.date() や z.bigint() などは表現できません）'
+      : undefined;
   }
-  return false;
+  return undefined;
 };
 
 // The explicit annotation is what lets tsc treat a `fail(...)` call as
@@ -232,6 +257,7 @@ const walkNode = (
         name,
         json: json.items,
         zod: element,
+        kind: controlKindOf(json.items),
         required: false,
         arrayPath: context.arrayPath,
         itemKey: context.itemKey,
@@ -283,21 +309,19 @@ const walkNode = (
     // reported by the derivation, not here.
   }
 
-  if (refusesItsOwnControl(json, zod)) {
-    fail(
-      path,
-      controlKindOf(json) === 'number'
-        ? 'フォームの値は文字列で届くため、このスキーマはどんな入力でも失敗します。z.coerce.number() を使ってください'
-        : 'このスキーマは文字列を受け付けないため、フォームが送信できる値がありません（z.date() や z.bigint() などは表現できません）',
-    );
+  const refusal = refusalOf(json, zod);
+  if (refusal !== undefined) {
+    fail(path, refusal);
   }
 
+  const kind = kindOf(json, zod);
   out.leaves.push({
     path,
     name,
     json,
     zod,
-    required: rejectsEmptySubmission(json, zod),
+    kind,
+    required: rejectsEmptySubmission(kind, zod),
     arrayPath: context.arrayPath,
     itemKey: context.itemKey,
   });

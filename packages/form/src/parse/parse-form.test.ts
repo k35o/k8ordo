@@ -135,6 +135,51 @@ describe('parseForm', () => {
     expect(result.state.errors?.color).toBeDefined();
   });
 
+  it('reads a choice left on nothing as undefined, so an optional one can stay empty', () => {
+    // A radio group with nothing selected submits no entry, and a select left
+    // on its placeholder submits ''. Neither is a choice, and handing '' to an
+    // optional enum would reject the one blank the browser was told to allow.
+    const plans = z.object({
+      optional: z.enum(['free', 'team']).optional(),
+      defaulted: z.enum(['free', 'team']).default('free'),
+    });
+
+    const unselected = parseForm(plans, formDataOf([]));
+    expect(unselected.success).toBe(true);
+    expect(unselected.data).toStrictEqual({
+      optional: undefined,
+      defaulted: 'free',
+    });
+
+    const placeholder = parseForm(
+      plans,
+      formDataOf([
+        ['optional', ''],
+        ['defaulted', ''],
+      ]),
+    );
+    expect(placeholder.success).toBe(true);
+    expect(placeholder.data).toStrictEqual({
+      optional: undefined,
+      defaulted: 'free',
+    });
+  });
+
+  it('rejects a required choice left on its placeholder with the same message as an unselected one', () => {
+    const plans = z.object({
+      plan: z.enum(['free', 'team'], 'プランを選んでください'),
+    });
+
+    expect(
+      parseForm(plans, formDataOf([['plan', '']])).state.errors,
+    ).toStrictEqual({
+      plan: 'プランを選んでください',
+    });
+    expect(parseForm(plans, formDataOf([])).state.errors).toStrictEqual({
+      plan: 'プランを選んでください',
+    });
+  });
+
   it('caps reconstructed rows instead of allocating what a forged key claims', () => {
     const listed = z.object({
       items: z.array(z.object({ name: z.string() })).max(3),
@@ -180,6 +225,21 @@ describe('parseForm', () => {
     expect(result.state.values?.tags).toStrictEqual(['a', 'b']);
   });
 
+  it('echoes a checkbox group as an array however many boxes were checked', () => {
+    // One checked box is still a group: a plain string would read as a single
+    // value and be restored onto every box.
+    const grouped = z.object({ tags: z.array(z.enum(['a', 'b', 'c'])) });
+
+    expect(
+      parseForm(grouped, formDataOf([['tags', 'a']])).state.values,
+    ).toStrictEqual({
+      tags: ['a'],
+    });
+    expect(parseForm(grouped, formDataOf([])).state.values).toStrictEqual({
+      tags: [],
+    });
+  });
+
   it('reads an empty numeric control as nothing entered, never as 0', () => {
     // z.coerce.number() turns '' into 0. Handing it '' would store a number
     // nobody typed, and the same probe told the derivation the field is not
@@ -213,6 +273,33 @@ describe('parseForm', () => {
 
     expect(result.success).toBe(true);
     expect(result.data).toStrictEqual({ optional: undefined, defaulted: 5 });
+  });
+
+  it('reads an empty bigint control as nothing entered, never as 0n', () => {
+    // BigInt('') is 0n, so the blank would become a value nobody typed.
+    const counted = z.object({
+      id: z.coerce.bigint('整数を入力してください'),
+      optional: z.coerce.bigint().optional(),
+    });
+
+    const blank = parseForm(
+      counted,
+      formDataOf([
+        ['id', ''],
+        ['optional', ''],
+      ]),
+    );
+    expect(blank.success).toBe(false);
+    expect(blank.state.errors).toStrictEqual({ id: '整数を入力してください' });
+
+    const typed = parseForm(
+      counted,
+      formDataOf([
+        ['id', '5'],
+        ['optional', ''],
+      ]),
+    );
+    expect(typed.data).toStrictEqual({ id: 5n, optional: undefined });
   });
 
   it('refuses a number no submission could satisfy instead of always failing', () => {

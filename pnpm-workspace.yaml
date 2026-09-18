@@ -38,6 +38,7 @@ catalog:
   '@vitest/spy': 5.0.0
   '@vitest/ui': 5.0.0
   '@vitest/utils': 5.0.0
+  playwright: 1.63.0
   postcss: 8.5.28
   publint: 0.3.24
   react: 19.3.0

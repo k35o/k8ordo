@@ -1,4 +1,6 @@
 import 'server-only';
+import { readFile } from 'node:fs/promises';
+import path from 'node:path';
 
 // `server-only` を import したモジュールはクライアントに届かない。秘密や DB
 // クライアントをここに置けば、間に何段挟まっても渡らない（渡そうとした時点で
@@ -6,12 +8,15 @@ import 'server-only';
 // import 文の上で目に入るようにするための規約。
 export type Product = { id: number; name: string };
 
-const CATALOG: readonly Product[] = [
-  { id: 1, name: 'first product' },
-  { id: 2, name: 'second product' },
-];
+export const listProducts = async (): Promise<readonly Product[]> =>
+  JSON.parse(
+    // import.meta.url はバンドル後の置き場所を指すので、ビルドが走る
+    // プロジェクトのルートから辿る
+    await readFile(
+      path.join(process.cwd(), 'src/routes/_data/catalog.json'),
+      'utf8',
+    ),
+  ) as readonly Product[];
 
-export const listProducts = (): readonly Product[] => CATALOG;
-
-export const findProduct = (id: number): Product | undefined =>
-  CATALOG.find((product) => product.id === id);
+export const findProduct = async (id: number): Promise<Product | undefined> =>
+  (await listProducts()).find((product) => product.id === id);

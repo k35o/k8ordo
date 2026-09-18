@@ -26,13 +26,19 @@ route at build time instead of once per request. The plugin is called
 ## Getting started
 
 ```bash
-pnpm add @k8ordo/router @k8ordo/server react react-dom server-only vite
+pnpm add @k8ordo/router @k8ordo/server react react-dom server-only
+pnpm add -D vite
 ```
 
 `@k8ordo/server` is a runtime dependency: `serve` and the built handler are
-what the deployed application runs. So is `vite`: `@k8ordo/server`'s entry,
-where `serve` and `redirect` come from, imports it. `@k8ordo/static` is only
-ever needed at build time, which is why its guide installs it with `-D`.
+what the deployed application runs. `@k8ordo/static` is only ever needed at
+build time, which is why its guide installs it with `-D`.
+
+The package has two entries, split by where the code runs. `@k8ordo/server`
+is the plugin, for `vite.config.ts`, and loads Vite. What the application's
+own code imports — `serve`, `redirect()`, and the `RedirectTarget` and
+`RouteRequest` types — comes from `@k8ordo/server/runtime`, which does not, so
+the built application runs from an install without dev dependencies.
 
 ```ts
 // vite.config.ts
@@ -366,12 +372,12 @@ ends up right. The generated table checks the default export's shape;
 error where it is written (`export default '/products' satisfies
 RedirectTarget`).
 
-A Server Action ends with `redirect()` from `@k8ordo/server`:
+A Server Action ends with `redirect()` from `@k8ordo/server/runtime`:
 
 ```ts
 'use server';
 
-import { redirect } from '@k8ordo/server';
+import { redirect } from '@k8ordo/server/runtime';
 
 export async function createTalk(_previous: FormState, formData: FormData) {
   const parsed = parseForm(talkSchema, formData);
@@ -513,7 +519,7 @@ vite build
 
 ```js
 // serve.js
-import { serve } from '@k8ordo/server';
+import { serve } from '@k8ordo/server/runtime';
 
 const server = await serve({ port: 3000 });
 // server.url, server.port; await server.close() to stop
@@ -638,8 +644,9 @@ export default function RootLayout({ children, request }: LayoutProps<'/'>) {
 ```
 
 `PageProps` and `LayoutProps` carry `request` because the generated
-`.k8ordo/register.gen.ts` says this mode has one; `RouteRequest` from this
-package is its type, for a component further down that takes it as a prop.
+`.k8ordo/register.gen.ts` says this mode has one; `RouteRequest` from
+`@k8ordo/server/runtime` is its type, for a component further down that takes
+it as a prop.
 
 Nothing lets a page write to the response — no status, no `Set-Cookie` —
 because a page is a render, and a render that answered the request would be

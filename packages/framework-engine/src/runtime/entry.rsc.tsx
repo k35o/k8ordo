@@ -10,43 +10,26 @@ import { paramSchemas, redirects, routes } from 'virtual:k8ordo/routes';
 
 import type * as SsrEntry from './entry.ssr';
 import { parseParams } from './params';
+import type { ParsedParams } from './params';
 import { ACTION_ID_HEADER } from './payload';
 import type { Payload } from './payload';
 import { isPayloadPath, pagePathFor } from './payload-path';
-import { isRedirect, resolveTarget } from './redirect';
+import { isRedirect, matchRedirects } from './redirect';
 import { NotFound, renderMatch } from './render';
 import { routeRequestOf } from './request';
 
 type ActionResult = {
   returnValue?: unknown;
   formState?: unknown;
-  /** The action ended by sending the visitor elsewhere. */
-  redirect?: { to: string; permanent: boolean };
+  /** Where the action sent the visitor instead of returning. */
+  redirect?: string;
 };
 
 /**
- * The redirects `routes/` declared, matched in declaration order — before
- * the table, since a directory that redirects has no page to render.
+ * Consulted before the table, since a directory that redirects has no page to
+ * render.
  */
-const REDIRECTS = Object.entries(redirects).map(([pattern, target]) => ({
-  matcher: new URLPattern({ pathname: pattern }),
-  target,
-}));
-
-const redirectFor = (
-  pathname: string,
-): { to: string; permanent: boolean } | null => {
-  for (const { matcher, target } of REDIRECTS) {
-    const result = matcher.exec({ pathname });
-    if (result === null) continue;
-    const params: Record<string, string> = {};
-    for (const [name, value] of Object.entries(result.pathname.groups)) {
-      if (!/^\d+$/u.test(name) && value !== undefined) params[name] = value;
-    }
-    return resolveTarget(target, params);
-  }
-  return null;
-};
+const redirectFor = matchRedirects(redirects);
 
 const redirectResponse = (to: string, status: number): Response =>
   new Response(null, { status, headers: { location: to } });
@@ -67,7 +50,7 @@ const runAction = async (
     return await invokeAction(request, temporaryReferences);
   } catch (error) {
     // A redirect is how an action ends, not how it fails.
-    if (isRedirect(error)) return { redirect: error };
+    if (isRedirect(error)) return { redirect: error.to };
     throw error;
   }
 };
@@ -164,19 +147,20 @@ export default async function handler(request: Request): Promise<Response> {
     : {};
   if (action.redirect !== undefined && !addressed) {
     // A form posted without JavaScript: the browser follows a 303 with a GET.
-    return redirectResponse(action.redirect.to, 303);
+    return redirectResponse(action.redirect, 303);
   }
 
   // A param a schema refuses is a pathname the pattern does not answer, so
   // the walk goes on to whatever the table declares next — the catch-all in
   // the end. A catch-all's own params are not validated: it answers what
   // nothing else did, and a 404 is already what a refused param means.
-  const parsed: { params: Readonly<Record<string, unknown>> } = {
-    params: {},
-  };
+  // The render starts inside `parsed.enter`, so it sees what the schemas of
+  // the pattern that answered wrote to the async context, and nothing a
+  // refused pattern's did.
+  let parsed: ParsedParams = { params: {}, enter: (fn) => fn() };
   const match = routes.match(pathname, (found) => {
     if (found.pattern.endsWith('/*')) {
-      parsed.params = found.params;
+      parsed = { params: found.params, enter: (fn) => fn() };
       return true;
     }
     const accepted = parseParams(
@@ -184,7 +168,7 @@ export default async function handler(request: Request): Promise<Response> {
       found.params,
     );
     if (accepted === null) return false;
-    parsed.params = accepted;
+    parsed = accepted;
     return true;
   });
   const missing = match === null || match.pattern.endsWith('/*');
@@ -208,21 +192,23 @@ export default async function handler(request: Request): Promise<Response> {
     pathname,
     returnValue: action.returnValue,
     formState: action.formState,
-    redirect: action.redirect?.to,
+    redirect: action.redirect,
   };
 
   const failures: unknown[] = [];
-  const rscStream = renderToReadableStream(payload, {
-    temporaryReferences: isAction ? temporaryReferences : undefined,
-    // Without this a component that throws simply truncates the stream, and
-    // the browser reports a closed connection instead of the actual error.
-    onError: (error: unknown) => {
-      failures.push(error);
-      // pathname は引数として渡す。第 1 引数はフォーマット文字列なので、
-      // `%s` を含む URL を投げられると error が食われて消える
-      console.error('k8ordo: rendering %s failed', pathname, error);
-    },
-  });
+  const rscStream = parsed.enter(() =>
+    renderToReadableStream(payload, {
+      temporaryReferences: isAction ? temporaryReferences : undefined,
+      // Without this a component that throws simply truncates the stream, and
+      // the browser reports a closed connection instead of the actual error.
+      onError: (error: unknown) => {
+        failures.push(error);
+        // pathname は引数として渡す。第 1 引数はフォーマット文字列なので、
+        // `%s` を含む URL を投げられると error が食われて消える
+        console.error('k8ordo: rendering %s failed', pathname, error);
+      },
+    }),
+  );
   // An action the client addressed answers in the shape the client already
   // knows how to read, so applying its result and applying a navigation are
   // the same code path. A form posted without JavaScript gets HTML back,
@@ -238,7 +224,7 @@ export default async function handler(request: Request): Promise<Response> {
     'ssr',
     'index',
   );
-  const html = await ssr.renderHtml(rscStream);
+  const html = await parsed.enter(() => ssr.renderHtml(rscStream));
   if (import.meta.env.K8ORDO_MODE === '@k8ordo/static') {
     // A build into files can afford to wait for the whole page, and has to:
     // a Server Component that threw would otherwise be written as a page whose

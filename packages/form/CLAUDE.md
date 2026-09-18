@@ -66,25 +66,25 @@ checks (`refine`) vanish from its output without a trace.
 
 - **Messages** are recovered by running the field schema against a probe value
   chosen to fail one specific check, then taking the issue message. The probe
-  is what the parse would hand the schema for an empty control: `''` for text
-  and a choice, `false` for a checkbox, and `undefined` for a number or a
-  file. (An unpicked radio group is the one mismatch: it submits no entry, so
-  the parse hands the schema `undefined` where the probe used `''`.) Public
+  is what the parse would hand the schema for an empty control: `''` for text,
+  `false` for a checkbox, `undefined` for a number, a file, or a choice. Public
   API, and it guarantees the client shows the text zod itself would produce.
-- **The internal surface** is `_zod.def`, read in five places: `checks` (the
-  object-level count, and the source RegExp behind a JSON `pattern` string,
-  looked for on the schema's own `pattern` too — the JSON loses the flags, and
-  the flags decide whether the browser may see it), `format` (the JSON carries
-  `z.iso.time()` and `z.iso.datetime({ local: true })` as a bare pattern, so
-  the input type is read back off the check; if it moves, those two fall back
-  to `type="text"`), `innerType` (peeling `.optional()` / `.default()`
-  wrappers so a wrapped object's subtree pairs with its JSON node), `element`
-  (`zod/mini` arrays), and `entries`-shaped enum detection at the type level.
-  Reporting what the client will not check is worth the coupling. If zod moves
-  them, the failures differ: without `checks` the object-level report goes
-  quiet and a flagged regex reaches `pattern` as if it had no flags; without
-  `innerType` or `element` the walk throws on a wrapped object or array, or on
-  any `zod/mini` array.
+- **The internal surface** is `_zod.def`, read in six places: `checks` (the
+  object-level count), `format` / `pattern` on the leaf and on each of its
+  checks (which format picks the control once a stacked check has overwritten
+  or erased the JSON `format`, which regex is the format's own, and the flags
+  the JSON `pattern` string has lost), `innerType` (peeling `.optional()` /
+  `.default()` wrappers so a wrapped leaf or object pairs with its JSON node),
+  `element` (`zod/mini` arrays), `type` (a bigint, which JSON Schema cannot
+  represent, submits a blank the way a number does), and `entries`-shaped enum
+  detection at the type level. Reporting what the client will not check is
+  worth the coupling. If zod moves them, the failures differ: without `checks`
+  the object-level report goes quiet; without `format` / `pattern` the control
+  falls back to whatever `format` the JSON kept (`z.iso.time()` and a local
+  `z.iso.datetime()` to `type="text"`) and a flagged regex reaches `pattern`
+  as if it had no flags; without `innerType` or `element` the walk throws on a
+  wrapped object or array, or on any `zod/mini` array; without `type` a blank
+  bigint reads as 0n again.
 - **A pairing the walk cannot make is a throw, not a skip.** A JSON node with
   no matching zod node (records, tuples, nullable objects, nested repeats,
   dotted keys) would parse to silently discarded input, which is the one

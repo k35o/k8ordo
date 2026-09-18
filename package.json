@@ -28,7 +28,7 @@
     "@types/node": "catalog:",
     "@vitest/browser": "catalog:",
     "oxlint-tailwindcss": "1.10.2",
-    "playwright": "1.63.0",
+    "playwright": "catalog:",
     "typescript": "catalog:",
     "vite-plus": "catalog:",
     "vite-plus-inspector": "0.1.1",

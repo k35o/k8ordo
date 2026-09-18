@@ -1,6 +1,13 @@
 import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
+import { readFile } from 'node:fs/promises';
+import { createServer } from 'node:http';
+import type { Server } from 'node:http';
+import type { AddressInfo } from 'node:net';
 import path from 'node:path';
+
+import { chromium } from 'playwright';
+import type { Browser } from 'playwright';
 
 const root = path.resolve(import.meta.dirname, '..');
 const client = path.join(root, 'dist', 'client');
@@ -88,5 +95,77 @@ describe('the static build', () => {
 
   it('ships the client entry, so the page hydrates', () => {
     expect(read('index.html')).toMatch(/<script[^>]+type="module"/u);
+  });
+});
+
+const CONTENT_TYPES: Readonly<Record<string, string>> = {
+  '.html': 'text/html; charset=utf-8',
+  '.js': 'text/javascript',
+  '.css': 'text/css',
+  '.rsc': 'text/x-component; charset=utf-8',
+};
+
+describe('a written page in the browser', () => {
+  let server: Server;
+  let browser: Browser;
+  let origin = '';
+
+  beforeAll(async () => {
+    // 静的ホストと同じ規則で dist/client を配る: ディレクトリは index.html
+    server = createServer((request, response) => {
+      const { pathname } = new URL(request.url ?? '/', 'http://localhost');
+      const file = path.join(
+        client,
+        path.extname(pathname) === ''
+          ? path.join(pathname, 'index.html')
+          : pathname,
+      );
+      const relative = path.relative(client, file);
+      if (relative.startsWith('..') || path.isAbsolute(relative)) {
+        response.writeHead(404).end();
+        return;
+      }
+      readFile(file).then(
+        (body) =>
+          response
+            .writeHead(200, {
+              'content-type':
+                CONTENT_TYPES[path.extname(file)] ?? 'application/octet-stream',
+            })
+            .end(body),
+        () => response.writeHead(404).end(),
+      );
+    });
+    await new Promise<void>((resolve) => {
+      server.listen(0, '127.0.0.1', resolve);
+    });
+    origin = `http://127.0.0.1:${String((server.address() as AddressInfo).port)}`;
+    browser = await chromium.launch();
+  }, 60_000);
+
+  afterAll(async () => {
+    await browser.close();
+    server.close();
+  });
+
+  it('hydrates in place, leaving no hidden copy of the page and one <title>', async () => {
+    // ダークの訪問者: ルートの SchemeProvider の値が hydrate の直後に変わる
+    const context = await browser.newContext({ colorScheme: 'dark' });
+    const page = await context.newPage();
+    // 裏のタブで開かれたページとして読む。ブラウザはアニメーションフレームを
+    // 回さないので、フレームを待って本文を差し込む HTML なら、それは起きない
+    await page.addInitScript(() => {
+      window.requestAnimationFrame = () => 0;
+    });
+    // 商品ページはディスクを読んで待つので、境界がシェルより遅れて完了する
+    await page.goto(`${origin}/products/1`);
+    await page.getByText('scheme: dark').waitFor();
+
+    expect({
+      hiddenSegments: await page.locator('div[hidden][id^="S:"]').count(),
+      titles: await page.locator('title').count(),
+      headings: await page.getByTestId('title').count(),
+    }).toStrictEqual({ hiddenSegments: 0, titles: 1, headings: 1 });
+    await context.close();
   });
 });

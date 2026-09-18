@@ -61,8 +61,8 @@ export const redirectTitle = message({
 });
 
 export const redirectDescription = message({
-  ja: '`@k8ordo/server` の `redirect(to)` は、訪問者を別の場所へ送ってアクションを終えます。値を返すのではなく throw するので、その後の行は走りません。Server Component が `<form action>` にアクションを直接渡す形なら、クライアントコンポーネントは 1 つも要りません。',
-  en: '`redirect(to)` from `@k8ordo/server` ends an action by sending the visitor elsewhere. It throws rather than returning, so the lines after it never run. A Server Component handing the action straight to `<form action>` needs no client component at all.',
+  ja: '`@k8ordo/server/runtime` の `redirect(to)` は、訪問者を別の場所へ送ってアクションを終えます。値を返すのではなく throw するので、その後の行は走りません。Server Component が `<form action>` にアクションを直接渡す形なら、クライアントコンポーネントは 1 つも要りません。',
+  en: '`redirect(to)` from `@k8ordo/server/runtime` ends an action by sending the visitor elsewhere. It throws rather than returning, so the lines after it never run. A Server Component handing the action straight to `<form action>` needs no client component at all.',
 });
 
 export const redirectAnswers = message({
@@ -105,8 +105,8 @@ export const requestTable = {
 };
 
 export const requestType = message({
-  ja: '`PageProps` と `LayoutProps` が `request` を持つのは、生成された `.k8ordo/register.gen.ts` が、このモードにはリクエストがあると言っているからです。`RouteRequest` はその型で、下のコンポーネントに prop として渡すときに使います。クライアントコンポーネントには丸ごと渡さず、要る値だけを取り出して渡します。`Headers` は境界を越えられません。',
-  en: '`PageProps` and `LayoutProps` carry `request` because the generated `.k8ordo/register.gen.ts` says this mode has one. `RouteRequest` from this package is its type, for a component further down that takes it as a prop. Do not hand it whole to a client component; pass the values it needs — `Headers` does not cross the boundary.',
+  ja: '`PageProps` と `LayoutProps` が `request` を持つのは、生成された `.k8ordo/register.gen.ts` が、このモードにはリクエストがあると言っているからです。`@k8ordo/server/runtime` の `RouteRequest` はその型で、下のコンポーネントに prop として渡すときに使います。クライアントコンポーネントには丸ごと渡さず、要る値だけを取り出して渡します。`Headers` は境界を越えられません。',
+  en: '`PageProps` and `LayoutProps` carry `request` because the generated `.k8ordo/register.gen.ts` says this mode has one. `RouteRequest` from `@k8ordo/server/runtime` is its type, for a component further down that takes it as a prop. Do not hand it whole to a client component; pass the values it needs — `Headers` does not cross the boundary.',
 });
 
 export const requestReadOnly = message({

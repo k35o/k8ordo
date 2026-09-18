@@ -1,7 +1,6 @@
 import type { output } from 'zod/v4/core';
 
-import { controlKindOf } from '../derive/attributes';
-import type { LeafSchema } from '../derive/attributes';
+import type { ControlKind } from '../derive/attributes';
 import { asDefinition } from '../rules/define-form';
 import type { FormDefinition } from '../rules/define-form';
 import { breachOf } from '../rules/rules';
@@ -53,15 +52,15 @@ const rowCounts = (
 
 /**
  * Whether the control submitted its own idea of "nothing". A number control
- * sends `''` and a file control an unnamed empty File — neither is a value
- * anyone entered, and handing either to the schema is how a blank field
- * becomes 0 (`z.coerce.number()` reads `''` as 0) or an empty upload passes for
- * a real one. They arrive as `undefined` instead, which is the same thing the
- * derivation probed when it decided whether the field is required.
+ * sends `''`, a select left on its placeholder sends `''`, and a file control
+ * an unnamed empty File — none is a value anyone entered, and handing one to
+ * the schema is how a blank field becomes 0 (`z.coerce.number()` reads `''` as
+ * 0), an optional choice rejects the blank it allows, or an empty upload passes
+ * for a real one. They arrive as `undefined` instead, which is the same thing
+ * the derivation probed when it decided whether the field is required.
  */
-const isUntouched = (json: LeafSchema, value: unknown): boolean => {
-  const kind = controlKindOf(json);
-  if (kind === 'number') {
+const isUntouched = (kind: ControlKind, value: unknown): boolean => {
+  if (kind === 'number' || kind === 'choice') {
     return value === '';
   }
   return (
@@ -97,6 +96,7 @@ export const parseForm = <Shape extends ObjectSchema>(
   const raw: Record<string, unknown> = {};
   const missing: string[] = [];
   const secrets = new Set<string>();
+  const groups = new Set<string>();
 
   const rows = rowCounts(formData, map.arrays);
 
@@ -123,6 +123,7 @@ export const parseForm = <Shape extends ObjectSchema>(
       if (leaf.group !== undefined) {
         // A checkbox group: every checked box appends one entry under the
         // shared name, and none checked means no entry at all.
+        groups.add(name);
         setPath(raw, name, strings(name));
         continue;
       }
@@ -134,11 +135,12 @@ export const parseForm = <Shape extends ObjectSchema>(
 
       const entries = formData.getAll(name);
       if (entries.length === 0) {
-        if (leaf.json.enum !== undefined) {
+        if (leaf.kind === 'choice') {
           // A radio group with nothing selected submits no entry — a state
           // the person filling in the form can reach, unlike a text control,
-          // which always submits at least ''. The schema decides whether
-          // that is a validation error.
+          // which always submits at least ''. Like a select left on its
+          // placeholder, it has chosen nothing.
+          setPath(raw, name, undefined);
           continue;
         }
         // A text field left empty still submits ''. An absent key means no
@@ -149,7 +151,7 @@ export const parseForm = <Shape extends ObjectSchema>(
         continue;
       }
       const value = entries.length === 1 ? entries[0] : entries;
-      setPath(raw, name, isUntouched(leaf.json, value) ? undefined : value);
+      setPath(raw, name, isUntouched(leaf.kind, value) ? undefined : value);
     }
   }
 
@@ -163,9 +165,13 @@ export const parseForm = <Shape extends ObjectSchema>(
   const result = asProbe(schema).safeParse(raw);
 
   // Evaluated against the submitted values, exactly as the browser evaluates
-  // them against the live form. Same function, same inputs, same verdict.
+  // them against the live form. Same function, same inputs, same verdict —
+  // and the same message when several rules break one field: the first.
   const breaches: Record<string, string> = {};
   for (const rule of rules) {
+    if (Object.hasOwn(breaches, rule.field)) {
+      continue;
+    }
     const message = breachOf(rule, strings);
     if (message !== undefined) {
       breaches[rule.field] = message;
@@ -173,8 +179,14 @@ export const parseForm = <Shape extends ObjectSchema>(
   }
 
   const values: Record<string, string | string[]> = {};
+  // A group echoes as an array however many boxes were checked. Collapsing a
+  // single box into a string would make it indistinguishable from a field
+  // with one value, which the client restores onto every box.
+  for (const name of groups) {
+    values[name] = strings(name);
+  }
   for (const [name, value] of formData.entries()) {
-    if (typeof value !== 'string' || secrets.has(name)) {
+    if (typeof value !== 'string' || secrets.has(name) || groups.has(name)) {
       continue;
     }
     const existing = values[name];

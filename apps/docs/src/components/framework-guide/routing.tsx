@@ -174,7 +174,9 @@ const generatedRegister = (mode: Mode): string => {
   return [
     '// .k8ordo/register.gen.ts',
     "import type { ParsedParamsMap } from '@k8ordo/router';",
-    ...(request ? ["import type { RouteRequest } from '@k8ordo/server';"] : []),
+    ...(request
+      ? ["import type { RouteRequest } from '@k8ordo/server/runtime';"]
+      : []),
     "import type { paramSchemas, routes } from './routes.gen';",
     '',
     "declare module '@k8ordo/router' {",

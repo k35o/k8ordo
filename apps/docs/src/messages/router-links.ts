@@ -81,13 +81,13 @@ export const navigateDefault = message({
 });
 
 export const navigateFinished = message({
-  ja: '`finished` は新しいページが画面に出たときに解決します。移動を待つ間の表示は、普通のイベントハンドラで `finished` を待って作ります。',
-  en: '`finished` resolves once the new page is on screen. To show that a navigation is under way, await it in an ordinary event handler:',
+  ja: '`finished` は新しいページが画面に出たときに解決します。非同期アクションの中で待てば、移動を待つ間は `isPending` が立ちます。',
+  en: '`finished` resolves once the new page is on screen. Await it inside an async action, and `isPending` shows that a navigation is under way:',
 });
 
-export const navigateNoAction = message({
-  ja: '`startTransition` の非同期アクション（`useTransition` や `@k8ordo/ui` の `Button` の `onAction`）の中で `finished` を待ってはいけません。非同期アクションの実行中に始まった transition を、React はそのアクションが終わるまで保留します。ルーターが新しいページを適用する transition もその 1 つなので、ページはアクションの終わりを待ち、アクションはページが出るのを待ち、URL だけが変わったまま止まります。`finished` を待たない場合でも、どこかの非同期アクションが保留中の間に始まったページの切り替えは、そのアクションが終わるまで画面に出ません。',
-  en: 'Do not await `finished` inside an async `startTransition` action — `useTransition`’s, or the `onAction` of `@k8ordo/ui`’s `Button`. React holds every transition started while an async action is pending until that action ends, and the transition in which the router applies the new page is one of them: the page waits for the action, the action waits for the page, and only the URL moves. Even without awaiting it, a page change that starts while any async action is pending does not reach the screen until that action ends.',
+export const navigateInAction = message({
+  ja: 'ページの切り替えはアクションに加わらないので、`@k8ordo/ui` の `Button` の `onAction` や `<form action>` の中で待っても、`finished` はページが画面に出た時点で解決します。無関係な非同期アクションが保留中の間に始まったページの切り替えも、そのアクションを待たずに画面に出ます。イベントハンドラの中で待つこともできます。',
+  en: 'A page change never joins the action, so awaiting `finished` inside `@k8ordo/ui`’s `Button` `onAction` or a `<form action>` settles as soon as the page is on screen. A page change that starts while some unrelated async action is pending reaches the screen without waiting for it. An event handler can await it just the same.',
 });
 
 export const navigateAbort = message({
@@ -215,8 +215,8 @@ export const pathnameNoSearch = message({
 });
 
 export const pathnameTiming = message({
-  ja: '`usePathname` は新しいページが出たときではなく、URL が変わったときに変わります。intercept では URL が先に確定し、木は読み込みが終わってから届くので、遅いナビゲーションではリンクが先に選択状態になり、前のページがまだ画面に残ります。ブラウザのアドレスバーと同じ順序です。待ちを見せたいなら、上のようにイベントハンドラで `navigateTo` の `finished` を待ちます。',
-  en: '`usePathname` changes when the URL changes, not when the new page appears. Interception commits the URL first and the tree arrives once it has loaded, so on a slow navigation a link marks itself active while the previous page is still on screen — the same order as the browser’s own address bar. If the wait needs showing, await `navigateTo`’s `finished` in an event handler, as above.',
+  ja: '`usePathname` は新しいページが出たときではなく、URL が変わったときに変わります。intercept では URL が先に確定し、木は読み込みが終わってから届くので、遅いナビゲーションではリンクが先に選択状態になり、前のページがまだ画面に残ります。ブラウザのアドレスバーと同じ順序です。待ちを見せたいなら、上のように `navigateTo` の `finished` を待ちます。',
+  en: '`usePathname` changes when the URL changes, not when the new page appears. Interception commits the URL first and the tree arrives once it has loaded, so on a slow navigation a link marks itself active while the previous page is still on screen — the same order as the browser’s own address bar. If the wait needs showing, await `navigateTo`’s `finished`, as above.',
 });
 
 export const pathnameRaw = message({

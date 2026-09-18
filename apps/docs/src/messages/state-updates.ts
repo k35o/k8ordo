@@ -204,8 +204,8 @@ export const handleReject = message({
 });
 
 export const handleAwait = message({
-  ja: '書き込みを待つ必要があるときは、イベントハンドラの中で `finished` を待ちます。以下の例は、次のページに移ったあとで見出しにフォーカスを移します。',
-  en: 'Code that has to wait for the write awaits `finished` in an event handler. The example below moves focus to the heading once the next page is in place.',
+  ja: '書き込みを待つ必要があるときは、`finished` を待ちます。以下の例は、次のページに移ったあとで見出しにフォーカスを移します。',
+  en: 'Code that has to wait for the write awaits `finished`. The example below moves focus to the heading once the next page is in place.',
 });
 
 export const handleAbort = message({
@@ -214,8 +214,8 @@ export const handleAbort = message({
 });
 
 export const handleAsyncAction = message({
-  ja: '非同期アクション（`startTransition(async …)`・`useTransition`・`@k8ordo/ui` の `Button` の `onAction`）の中では `finished` を待たないでください。`@k8ordo/router` の下では、別のページの読み込み中に `url` の値を変える更新はページの切り替えになり、非同期アクションの実行中に始まったページの切り替えを、React はそのアクションが終わるまで保留します。アクションは `finished` を、`finished` はページを待つので、どちらも終わりません。',
-  en: 'Do not await `finished` inside an async action — `startTransition(async …)`, `useTransition`’s included, or the `onAction` of `@k8ordo/ui`’s `Button`. Under `@k8ordo/router` an update that changes a `url` value while another page is still loading is a page change, and React holds a page change that starts while an async action is pending until that action ends: the action waits for `finished`, `finished` waits for the page, and neither settles.',
+  ja: '非同期アクション（`startTransition(async …)`・`useTransition`・`@k8ordo/ui` の `Button` の `onAction`）の中でも同じように待てます。`@k8ordo/router` の下では、別のページの読み込み中に `url` の値を変える更新はページの切り替えになりますが、ページの切り替えはアクションに加わらないので、`finished` はそのページが画面に出た時点で解決します。',
+  en: 'An async action — `startTransition(async …)`, `useTransition`’s included, or the `onAction` of `@k8ordo/ui`’s `Button` — can await it the same way. Under `@k8ordo/router` an update that changes a `url` value while another page is still loading is a page change, and a page change never joins the action, so `finished` settles once that page is on screen.',
 });
 
 export const historyTitle = message({

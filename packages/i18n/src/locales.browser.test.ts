@@ -49,6 +49,12 @@ describe('getLocale (browser)', () => {
     }
   });
 
+  it('accepts a locale in paramsSchema without anywhere to keep it: the URL already is the locale', () => {
+    expect(
+      locales.paramsSchema['~standard'].validate({ locale: 'en' }),
+    ).toStrictEqual({ value: { locale: 'en' } });
+  });
+
   it('refuses run: the URL is the locale here', () => {
     expect(() => locales.run('en', () => 'x')).toThrow(
       /the URL is the locale/u,

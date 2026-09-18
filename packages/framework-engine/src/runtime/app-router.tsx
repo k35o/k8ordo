@@ -12,7 +12,7 @@ import {
   encodeReply,
   setServerCallback,
 } from '@vitejs/plugin-rsc/browser';
-import { startTransition, useEffect, useState } from 'react';
+import { startTransition, useDeferredValue, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 
 import { isPayload } from './is-payload';
@@ -54,7 +54,7 @@ setServerCallback(async (id: string, args: unknown[]) => {
 /**
  * The client half under the framework: the tree comes from the server, so
  * there is no route table in the browser at all — only navigation. The
- * router supplies that (interception, transition, and resolving the
+ * router supplies that (interception, a deferred render, and resolving the
  * platform's `finished` once the new tree is on screen); this component
  * supplies what to load, which is the next page's RSC payload.
  *
@@ -68,12 +68,13 @@ export function AppRouter({
   pathname: string;
   tree: ReactNode;
 }): ReactNode {
-  const [current, setCurrent] = useState(tree);
+  const [latest, setLatest] = useState(tree);
+  const current = useDeferredValue(latest);
 
   useEffect(() => {
     applyPayload = (payload) => {
       startTransition(() => {
-        setCurrent(payload.tree);
+        setLatest(payload.tree);
       });
     };
     return () => {
@@ -115,7 +116,7 @@ export function AppRouter({
     },
     apply: (next) => {
       markNavigated();
-      setCurrent(next);
+      setLatest(next);
     },
   });
 

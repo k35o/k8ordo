@@ -9,11 +9,15 @@ export const paramsSchema = z.object({
 });
 
 // params はスキーマの出力型: Register 経由で number になる
-export default function ProductPage({ params }: PageProps<'/products/:id'>) {
-  const product = findProduct(params.id);
+export default async function ProductPage({
+  params,
+}: PageProps<'/products/:id'>) {
+  const product = await findProduct(params.id);
+  const name = product?.name ?? 'unknown product';
   return (
     <>
-      <h1 data-testid="title">{product?.name ?? 'unknown product'}</h1>
+      <title>{name}</title>
+      <h1 data-testid="title">{name}</h1>
       <p data-testid="product-id">{`${typeof params.id}:${String(params.id)}`}</p>
     </>
   );

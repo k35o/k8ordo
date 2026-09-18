@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { useRef } from 'react';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 
 import { Button } from '../../buttons/button';
@@ -161,6 +162,50 @@ export const Persistent: Story = {
     await waitFor(() => {
       expect(body.queryByRole('alert')).not.toBeInTheDocument();
     });
+  },
+};
+
+const CloseByIdRender = () => {
+  const { open, close } = useToast();
+  const pendingIdRef = useRef('');
+  return (
+    <div className="flex gap-2">
+      <Button
+        onClick={() => {
+          pendingIdRef.current = open('info', '同期しています', {
+            duration: Number.POSITIVE_INFINITY,
+          });
+          open('success', '保存しました', {
+            duration: Number.POSITIVE_INFINITY,
+          });
+        }}
+      >
+        同期を始める
+      </Button>
+      <Button
+        onClick={() => {
+          close(pendingIdRef.current);
+        }}
+      >
+        同期を終える
+      </Button>
+    </div>
+  );
+};
+
+export const CloseById: Story = {
+  render: () => <CloseByIdRender />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const body = within(canvasElement.ownerDocument.body);
+    await userEvent.click(canvas.getByRole('button', { name: '同期を始める' }));
+    await expect(await body.findByText('同期しています')).toBeInTheDocument();
+    // open が返した id で、そのトーストだけを閉じられる
+    await userEvent.click(canvas.getByRole('button', { name: '同期を終える' }));
+    await waitFor(() => {
+      expect(body.queryByText('同期しています')).not.toBeInTheDocument();
+    });
+    await expect(body.getByText('保存しました')).toBeInTheDocument();
   },
 };
 
