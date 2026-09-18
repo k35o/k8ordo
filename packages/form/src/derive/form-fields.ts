@@ -5,14 +5,14 @@ import { asDefinition } from '../rules/define-form';
 import type { FormDefinition } from '../rules/define-form';
 import { asProbe } from '../schema/object-schema';
 import type { ObjectSchema } from '../schema/object-schema';
-import { schemaMap } from '../schema/walk';
+import { schemaMap, unwrap } from '../schema/walk';
 import type {
   DerivedArray,
   DerivedField,
   DroppedCheck,
   FormFields,
 } from '../types';
-import { attributesFor, emptySubmissionOf } from './attributes';
+import { attributesFor, emptySubmissionOf, namesAControl } from './attributes';
 import { messagesFor } from './messages';
 
 /**
@@ -25,12 +25,12 @@ import { messagesFor } from './messages';
    check list or to the source RegExp behind a JSON Schema pattern string, and
    reporting what the client will not verify is worth the coupling. If zod
    moves them the reports degrade; the attributes do not. */
+type StringFormat = { format: string; pattern?: RegExp };
+
 type ZodInternals = {
   _zod?: {
-    def?: {
-      checks?: Array<{ _zod?: { def?: { pattern?: RegExp } } }>;
-      pattern?: RegExp;
-      format?: string;
+    def?: Partial<StringFormat> & {
+      checks?: Array<{ _zod?: { def?: Partial<StringFormat> } }>;
     };
   };
 };
@@ -39,45 +39,46 @@ const objectLevelCheckCount = (schema: $ZodType): number =>
   (schema as unknown as ZodInternals)._zod?.def?.checks?.length ?? 0;
 
 /**
- * Recover the flags of the RegExp behind a JSON Schema `pattern` string. The
- * JSON string has already lost them, and whether the browser may see the
- * pattern depends on them (an `i` flag has no HTML equivalent).
+ * The string formats a leaf declares — its own (`z.email()`) first, then the
+ * ones its checks add (`.regex()`, `.lowercase()`) — each with the RegExp
+ * behind it. The JSON Schema cannot stand in: its `pattern` strings have lost
+ * their flags (an `i` has no HTML equivalent), and a later check overwrites
+ * the `format` keyword (`z.url().lowercase()` says `lowercase`) or erases it
+ * (`.regex()`).
  */
-const patternFlags = (schema: $ZodType, source: string): string | undefined => {
-  const def = (schema as unknown as ZodInternals)._zod?.def;
-  if (def?.pattern?.source === source) {
-    return def.pattern.flags;
-  }
-  for (const check of def?.checks ?? []) {
-    const candidate = check._zod?.def?.pattern;
-    if (candidate?.source === source) {
-      return candidate.flags;
-    }
-  }
-  return undefined;
-};
-
-/**
- * zod's JSON Schema conversion emits `format` only when a standard one matches
- * the values it accepts, so `z.iso.time()` and `z.iso.datetime({ local: true })`
- * arrive as a bare pattern. Both name the control that submits exactly their
- * shape, and dropping to `type="text"` would lose a picker the schema asked
- * for, so the format is read back off the check itself. zod's own name for it
- * is not always the JSON one.
- */
-const ZOD_FORMAT_TO_JSON_FORMAT: Record<string, string> = {
-  datetime: 'date-time',
-  time: 'time',
-};
-
-const formatBehindPattern = (schema: $ZodType): string | undefined => {
-  const format = (schema as unknown as ZodInternals)._zod?.def?.format;
-  return format === undefined ? undefined : ZOD_FORMAT_TO_JSON_FORMAT[format];
+const stringFormatsOf = (schema: $ZodType): StringFormat[] => {
+  const def = (unwrap(schema) as unknown as ZodInternals)._zod?.def;
+  return [def, ...(def?.checks ?? []).map((check) => check._zod?.def)].filter(
+    (entry): entry is StringFormat => entry?.format !== undefined,
+  );
 };
 /* oxlint-enable no-underscore-dangle */
 
+/** zod's own name for a format is not always the JSON Schema one. */
+const ZOD_FORMAT_TO_JSON_FORMAT: Record<string, string> = {
+  datetime: 'date-time',
+  guid: 'uuid',
+  url: 'uri',
+};
+
+const jsonFormatOf = (format: string): string =>
+  ZOD_FORMAT_TO_JSON_FORMAT[format] ?? format;
+
 /** What a `datetime-local` control actually submits: no seconds, no zone. */
 const DATETIME_LOCAL_PROBE = '2000-01-01T00:00';
+
+/**
+ * Whether the date-time format itself turns away what a `datetime-local`
+ * control submits. Only the format's own issue counts: a regex stacked on it
+ * that fails the probe is a check the control ignores, not a shape the control
+ * cannot produce.
+ */
+const refusesDatetimeLocal = (schema: $ZodType): boolean =>
+  asProbe(schema)
+    .safeParse(DATETIME_LOCAL_PROBE)
+    .error?.issues.some(
+      (issue) => issue.code === 'invalid_format' && issue.format === 'datetime',
+    ) ?? false;
 
 /**
  * Schemas whose `dropped` list has already been reported. `formFields` is not
@@ -136,35 +137,47 @@ export const formFields = <Schema extends ObjectSchema>(
   }
 
   for (const leaf of map.leaves) {
-    const json =
-      leaf.json.format === undefined
-        ? { ...leaf.json, format: formatBehindPattern(leaf.zod) }
-        : leaf.json;
+    const formats = stringFormatsOf(leaf.zod);
+    // The control follows the format the schema declared, not whatever the
+    // JSON Schema kept: zod emits `format` only when a standard one matches
+    // the values it accepts, so `z.iso.time()` and a local `z.iso.datetime()`
+    // arrive as a bare pattern, and a stacked check replaces or erases it.
+    const own =
+      leaf.json.type === 'string'
+        ? formats.find((entry) => namesAControl(jsonFormatOf(entry.format)))
+        : undefined;
+    let format =
+      own === undefined ? leaf.json.format : jsonFormatOf(own.format);
+    const formatDropped: DroppedCheck[] = [];
+    if (format === 'date-time' && refusesDatetimeLocal(leaf.zod)) {
+      // The control submits neither seconds nor a timezone, so a format that
+      // demands either (zod's default demands a zone) would reject every value
+      // the browser can produce.
+      format = undefined;
+      formatDropped.push({
+        field: leaf.name,
+        reason: `この日時書式は datetime-local が送信する形（${DATETIME_LOCAL_PROBE} のように秒もタイムゾーンも付かない）を受け付けないため、type="text" に落とします（z.iso.datetime({ local: true }) なら datetime-local が使えます）`,
+      });
+    }
+
+    const { pattern } = leaf.json;
     const attributes = attributesFor(
       leaf.name,
-      json,
+      { ...leaf.json, format },
       leaf.required,
-      json.pattern === undefined
-        ? undefined
-        : patternFlags(leaf.zod, json.pattern),
+      {
+        flags:
+          pattern === undefined
+            ? undefined
+            : formats.find((entry) => entry.pattern?.source === pattern)
+                ?.pattern?.flags,
+        ofFormat: format === undefined ? undefined : own?.pattern?.source,
+      },
     );
+    attributes.dropped.unshift(...formatDropped);
     const secret = leaf.json.input === 'password';
     if (secret) {
       attributes.input.type = 'password';
-    }
-
-    if (
-      attributes.input.type === 'datetime-local' &&
-      !asProbe(leaf.zod).safeParse(DATETIME_LOCAL_PROBE).success
-    ) {
-      // The control cannot submit a timezone, so a schema that demands one
-      // (zod's default) would reject every value the browser can produce.
-      attributes.input.type = 'text';
-      attributes.dropped.push({
-        field: leaf.name,
-        reason:
-          'z.iso.datetime() はタイムゾーンを要求しますが、datetime-local はタイムゾーンを送信できません。type="text" に落とします（local: true なら datetime-local が使えます）',
-      });
     }
 
     if (
@@ -184,7 +197,7 @@ export const formFields = <Schema extends ObjectSchema>(
         leaf.zod,
         attributes.input,
         leaf.required,
-        emptySubmissionOf(leaf.json),
+        emptySubmissionOf(leaf.kind),
       ),
       secret,
     };

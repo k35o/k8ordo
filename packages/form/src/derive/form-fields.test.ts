@@ -71,6 +71,23 @@ describe('formFields', () => {
     );
   });
 
+  it('requires a choice only when the schema rejects nothing chosen', () => {
+    // A radio group left unselected and a select on its placeholder both reach
+    // the schema as undefined, so `.optional()` really does allow a blank.
+    const { fields } = formFields(
+      z.object({
+        plan: z.enum(['free', 'team'], 'プランを選んでください'),
+        optional: z.enum(['free', 'team']).optional(),
+        defaulted: z.enum(['free', 'team']).default('free'),
+      }),
+    );
+
+    expect(fields.plan.input.required).toBe(true);
+    expect(fields.plan.messages.valueMissing).toBe('プランを選んでください');
+    expect(fields.optional.input.required).toBeUndefined();
+    expect(fields.defaulted.input.required).toBeUndefined();
+  });
+
   it('reports rather than emits a pattern the browser would silently ignore', () => {
     // zod's default email regex does not compile under the `v` flag browsers
     // use for the pattern attribute — emitted, it would be dead markup.
@@ -100,6 +117,65 @@ describe('formFields', () => {
       'unanchored',
       'flagged',
     ]);
+  });
+
+  it('reports stacked regexes instead of dropping them in silence', () => {
+    // The pattern attribute holds one expression. Emitting one of several
+    // would pass values the server rejects.
+    const { fields, dropped } = formFields(
+      z.object({
+        stacked: z
+          .string()
+          .regex(/^[a-z]+$/u)
+          .regex(/^.{2,}$/u),
+      }),
+    );
+
+    expect(fields.stacked.input.pattern).toBeUndefined();
+    expect(dropped.map((entry) => entry.field)).toStrictEqual(['stacked']);
+  });
+
+  it('keeps the control a format asks for when a check is stacked on it', () => {
+    // A later check overwrites or erases the JSON Schema `format`, so the
+    // control is read from the format itself; the stacked check is reported.
+    const { fields, dropped } = formFields(
+      z.object({
+        email: z.email().regex(/^[a-z@.]+$/u),
+        prefixed: z.email().startsWith('a'),
+        url: z.url().lowercase(),
+        on: z.iso.date().regex(/^2/u),
+      }),
+    );
+
+    expect(fields.email.input.type).toBe('email');
+    expect(fields.prefixed.input.type).toBe('email');
+    expect(fields.url.input.type).toBe('url');
+    expect(fields.on.input.type).toBe('date');
+    expect([...new Set(dropped.map((entry) => entry.field))]).toStrictEqual([
+      'email',
+      'prefixed',
+      'on',
+    ]);
+  });
+
+  it('carries a single stacked regex onto a format control that honours pattern', () => {
+    const { fields, dropped } = formFields(
+      z.object({ url: z.url().lowercase() }),
+    );
+
+    expect(fields.url.input.pattern).toBe('^[^A-Z]*$');
+    expect(dropped).toStrictEqual([]);
+  });
+
+  it('blames a regex, not the timezone, when one is stacked on a local datetime', () => {
+    const { fields, dropped } = formFields(
+      z.object({ at: z.iso.datetime({ local: true }).regex(/^1/u) }),
+    );
+
+    expect(fields.at.input.type).toBe('datetime-local');
+    expect(dropped).toHaveLength(1);
+    expect(dropped[0]?.reason).toContain('pattern');
+    expect(dropped[0]?.reason).not.toContain('タイムゾーン');
   });
 
   it('drops a pattern the browser would ignore rather than emitting it', () => {
@@ -273,6 +349,31 @@ describe('formFields', () => {
     expect(dropped[0]?.reason).toContain('検査されません');
   });
 
+  it('refuses a checkbox whose schema turns away the boolean it submits', () => {
+    // parseForm reads a checkbox as true or false; z.stringbool() wants the
+    // string, so the box could never be satisfied either way.
+    expect(() => formFields(z.object({ agree: z.stringbool() }))).toThrow(
+      /z\.boolean\(\)/u,
+    );
+    expect(() =>
+      formFields(z.object({ agree: z.stringbool().optional() })),
+    ).toThrow(/z\.boolean\(\)/u);
+  });
+
+  it('requires a bigint field whose schema rejects a blank', () => {
+    // BigInt('') is 0n; probing with '' would call a blank acceptable.
+    const { fields } = formFields(
+      z.object({
+        id: z.coerce.bigint('整数を入力してください'),
+        optional: z.coerce.bigint().optional(),
+      }),
+    );
+
+    expect(fields.id.input.required).toBe(true);
+    expect(fields.id.messages.valueMissing).toBe('整数を入力してください');
+    expect(fields.optional.input.required).toBeUndefined();
+  });
+
   it('refuses a leaf no text control can satisfy', () => {
     expect(() => formFields(z.object({ when: z.date() }))).toThrow(
       /文字列を受け付けない/u,
@@ -326,6 +427,18 @@ describe('formFields', () => {
     expect(
       dropped.find((entry) => entry.field === 'attachment')?.reason,
     ).toContain('ファイルサイズ');
+  });
+
+  it('reports that accept only suggests the types the server enforces', () => {
+    // The picker can still be switched to any file, and constraint validation
+    // never reads a file's type.
+    const { fields, dropped } = formFields(
+      z.object({ avatar: z.file().mime(['image/png']) }),
+    );
+
+    expect(fields.avatar.input.accept).toBe('image/png');
+    expect(dropped.map((entry) => entry.field)).toStrictEqual(['avatar']);
+    expect(dropped[0]?.reason).toContain('accept');
   });
 
   it('marks a password field secret and types it', () => {
