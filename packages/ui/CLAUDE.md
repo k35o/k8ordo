@@ -126,7 +126,8 @@ need it are not stuck:
 
 The rest pass the value only, even when a real `<input>` is underneath:
 
-- `Slider` / `NumberField`: `(value: number) => void`
+- `Slider`: `(value: number) => void`
+- `NumberField`: `(value: number | null) => void` (`null` is an empty field)
 - `CheckboxGroup.Root` / `CheckboxCard` / `Autocomplete`: `(value: string[]) => void`
 - `RadioCard` (notifies per group rather than per option input): `(value: string) => void`
 - `ListBox`: `(value) => void`
