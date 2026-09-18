@@ -20,7 +20,7 @@ export default function SpinnerPage() {
         </p>
         <div>
           <Anchor
-            href={`${STORYBOOK_URL}/?path=/docs/components-spinner--docs`}
+            href={`${STORYBOOK_URL}/?path=/story/components-feedback-spinner--default`}
             openInNewTab
           >
             <Rich>{m.components.common.storybookLink()}</Rich>

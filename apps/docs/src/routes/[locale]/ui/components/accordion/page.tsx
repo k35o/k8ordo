@@ -20,7 +20,7 @@ export default function AccordionPage() {
         </p>
         <div>
           <Anchor
-            href={`${STORYBOOK_URL}/?path=/docs/components-accordion--docs`}
+            href={`${STORYBOOK_URL}/?path=/story/components-data-display-accordion--primary`}
             openInNewTab
           >
             <Rich>{m.components.common.storybookLink()}</Rich>

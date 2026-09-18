@@ -54,8 +54,9 @@ export type NavigablePatternOf<R extends RoutesRecord> = Exclude<
 >;
 
 /**
- * The app's pathname space as a type: the union state's `Register` (and any
- * other typed-path consumer) is fed with.
+ * The app's pathname space as a type: the union `@k8ordo/state` derives from
+ * the `routes` its `Register` is given, and what any other typed-path consumer
+ * takes.
  */
 export type RouteOf<D> =
   D extends Routes<infer R> ? PathFor<NavigablePatternOf<R>> : never;

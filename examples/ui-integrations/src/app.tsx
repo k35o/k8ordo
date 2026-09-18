@@ -28,7 +28,7 @@ function App() {
 
       <Section
         title="json-render"
-        description="JSON spec を <Renderer> に渡して描画。3番目は href 付きなので renderItem 経由で <a> になります。"
+        description="JSON spec を <JsonRenderUI> に渡して描画。ボタン行の3番目は href 付きなので renderItem 経由で <a> になります。"
       >
         <JsonRenderDemo />
       </Section>

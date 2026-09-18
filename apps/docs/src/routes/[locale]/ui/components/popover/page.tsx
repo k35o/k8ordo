@@ -24,7 +24,7 @@ export default function PopoverPage() {
         </p>
         <div>
           <Anchor
-            href={`${STORYBOOK_URL}/?path=/docs/components-popover--docs`}
+            href={`${STORYBOOK_URL}/?path=/story/components-overlays-popover--default`}
             openInNewTab
           >
             <Rich>{m.components.common.storybookLink()}</Rich>
@@ -61,7 +61,7 @@ export default function PopoverPage() {
         className="rounded-lg bg-bg-raised p-4 shadow-md"
         {...props}
       >
-        <p>Popover content goes here.</p>
+        <div role="menuitem">Popover content goes here.</div>
       </div>
     )}
   />
@@ -85,7 +85,7 @@ export default function PopoverPage() {
   <Popover.Content
     renderItem={(props) => (
       <div className="rounded-lg bg-bg-raised p-4 shadow-md" {...props}>
-        <p>Top placement</p>
+        <div role="menuitem">Top placement</div>
       </div>
     )}
   />
@@ -100,7 +100,7 @@ export default function PopoverPage() {
   <Popover.Content
     renderItem={(props) => (
       <div className="rounded-lg bg-bg-raised p-4 shadow-md" {...props}>
-        <p>Right placement</p>
+        <div role="menuitem">Right placement</div>
       </div>
     )}
   />
@@ -115,7 +115,7 @@ export default function PopoverPage() {
   <Popover.Content
     renderItem={(props) => (
       <div className="rounded-lg bg-bg-raised p-4 shadow-md" {...props}>
-        <p>Bottom placement</p>
+        <div role="menuitem">Bottom placement</div>
       </div>
     )}
   />
@@ -130,7 +130,7 @@ export default function PopoverPage() {
   <Popover.Content
     renderItem={(props) => (
       <div className="rounded-lg bg-bg-raised p-4 shadow-md" {...props}>
-        <p>Left placement</p>
+        <div role="menuitem">Left placement</div>
       </div>
     )}
   />

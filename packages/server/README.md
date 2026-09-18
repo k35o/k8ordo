@@ -15,22 +15,23 @@ polyfills or legacy fallbacks.
 ## Installation
 
 ```bash
-pnpm add @k8ordo/router @k8ordo/server react react-dom server-only
-pnpm add -D vite
+pnpm add @k8ordo/router @k8ordo/server react react-dom server-only vite
 ```
 
 The mode is the dependency: installing this package is what makes the
 application one that runs, and `@k8ordo/static` is the other choice. Nothing
-else about the application changes between them.
+else about the application changes between them. `vite` is a runtime
+dependency here, not a development one: this package's entry, where `serve`
+and `redirect` come from, imports it.
 
 ## Peer Dependencies
 
-| Package          | Version | Needed for                                 |
-| ---------------- | ------- | ------------------------------------------ |
-| `@k8ordo/router` | ^0.1.0  | the route table the framework generates    |
-| `react`          | ≥19.2.6 | rendering                                  |
-| `react-dom`      | ≥19.2.6 | rendering                                  |
-| `vite`           | ≥8.2.1  | the build (`framework()` is a Vite plugin) |
+| Package          | Version | Needed for                              |
+| ---------------- | ------- | --------------------------------------- |
+| `@k8ordo/router` | ^0.1.0  | the route table the framework generates |
+| `react`          | ≥19.3.0 | rendering                               |
+| `react-dom`      | ≥19.3.0 | rendering                               |
+| `vite`           | ≥8.2.1  | the build, and `serve` at run time      |
 
 ## Quick Start
 

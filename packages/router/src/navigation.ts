@@ -124,7 +124,9 @@ export const NavigationGeneration = createContext(-1);
  * The navigation half of the router, on its own: intercept, load, apply in a
  * transition, and resolve the platform's handler only once the new tree is on
  * screen — which is what makes `navigation.navigate().finished` mean "the
- * page is showing", and what `@k8ordo/state`'s `update().finished` inherits.
+ * page is showing". A navigation that keeps the pathname on screen —
+ * `@k8ordo/state`'s `update()` — is intercepted with no handler, so its
+ * `finished` settles as soon as the navigation commits.
  *
  * What gets loaded is the caller's business: a route table match for a plain
  * client app, an RSC payload under the framework. Neither has to teach this

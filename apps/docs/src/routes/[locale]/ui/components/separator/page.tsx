@@ -20,7 +20,7 @@ export default function SeparatorPage() {
         </p>
         <div>
           <Anchor
-            href={`${STORYBOOK_URL}/?path=/docs/components-separator--docs`}
+            href={`${STORYBOOK_URL}/?path=/story/components-layout-separator--block`}
             openInNewTab
           >
             <Rich>{m.components.common.storybookLink()}</Rich>

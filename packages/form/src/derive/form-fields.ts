@@ -24,7 +24,9 @@ import { messagesFor } from './messages';
 /* oxlint-disable no-underscore-dangle -- zod exposes no public route to its
    check list or to the source RegExp behind a JSON Schema pattern string, and
    reporting what the client will not verify is worth the coupling. If zod
-   moves them the reports degrade; the attributes do not. */
+   moves them the report goes quiet, the control falls back to whatever
+   `format` the JSON Schema kept, and a regex whose flags can no longer be read
+   reaches `pattern` as if it had none. */
 type StringFormat = { format: string; pattern?: RegExp };
 
 type ZodInternals = {
@@ -116,7 +118,8 @@ const warnDropped = (
  *
  * Call this on the server — in a Server Component or at module scope. The
  * result is plain data, so it crosses to the client as props and zod never
- * enters the bundle.
+ * enters the bundle. Messages are read when it runs, so when one follows the
+ * request (its locale, say), call it during the render, not at module scope.
  */
 export const formFields = <Schema extends ObjectSchema>(
   input: FormDefinition<Schema> | Schema,

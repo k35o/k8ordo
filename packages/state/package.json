@@ -1,7 +1,7 @@
 {
   "name": "@k8ordo/state",
   "version": "0.2.0",
-  "description": "Declare state by where it lives — URL search params, history-entry state, localStorage, or memory. One zod schema per place, over the Navigation API.",
+  "description": "Declare state by where it lives — URL search params, history-entry state, localStorage, or memory. One zod schema per boundary place and a typed box for memory, over the Navigation API.",
   "keywords": [
     "localstorage",
     "navigation-api",
@@ -65,8 +65,8 @@
   },
   "peerDependencies": {
     "@k8ordo/router": "workspace:^",
-    "@types/react": ">=19.2.18",
-    "react": ">=19.2.6",
+    "@types/react": ">=19.3.0",
+    "react": ">=19.3.0",
     "typescript": ">=7.0.2",
     "zod": "^4.4.3"
   },

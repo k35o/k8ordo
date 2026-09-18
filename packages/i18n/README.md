@@ -36,7 +36,9 @@ No React import and no schema library: a message is a plain function, and a
 locale set is a list that checks membership itself. `locales.paramsSchema`
 speaks Standard Schema, which is what `@k8ordo/static` and `@k8ordo/server`
 run for a route's params. On a server the current locale rides on
-`AsyncLocalStorage` (Node ≥ 24).
+`AsyncLocalStorage`, reached through `process.getBuiltinModule`, so a server
+runtime has to provide that API; Node 24, which the framework modes require,
+does.
 
 ## Quick Start
 

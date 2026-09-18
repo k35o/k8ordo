@@ -26,17 +26,22 @@ produced. `PageProps<'/products/:id'>` from `@k8ordo/router` is those props
 by the pattern — `params` typed by the schemas, and `pathname` — read from
 the generated `Register`, so nothing in the page depends on which mode is
 installed; a page may equally declare its props inline (`{ params: { id:
-number } }`), since the generated table checks them at the import either way.
+number } }`), since the generated table checks them where it uses the
+component either way.
 The export is found by parsing the file, so any spelling of it counts —
 `export const { paramsSchema } = locales` included — and the words inside a
-string or a comment do not. A schema may name only the params its pattern has; naming
-another is a build error where the table is generated. Any library that
-implements Standard Schema works — zod, zod/mini, or another — and the schema
-must be synchronous, because which pattern answers a pathname is decided
-before anything renders. The file that exports it must be a Server Component
-file: from a `'use client'` module the export reaches the handler as a client
-reference, not a schema. A layout that has to be a client component keeps its
-schema in a Server Component `layout.tsx` that renders the client shell.
+string or a comment do not. The generated table checks each schema against
+its file's pattern, and only loosely: on a pattern that has params, a schema
+that names none of them is a type error there, which type-checking reports and
+`vite build` does not; anything else passes. A schema that requires a param a
+page's pattern lacks refuses every pathname of that page, so that page never
+answers. Any library that implements Standard Schema works — zod, zod/mini, or
+another — and the schema must be synchronous, because which pattern answers a
+pathname is decided before anything renders. The file that exports it must be
+a Server Component file: from a `'use client'` module the export reaches the
+handler as a client reference, not a schema. A layout that has to be a client
+component keeps its schema in a Server Component `layout.tsx` that renders the
+client shell.
 
 **A refused param is a pathname the pattern does not answer.** `/products/shoes`
 does not become a page that renders with `NaN`; the walk goes on to whatever

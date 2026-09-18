@@ -1,8 +1,8 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: 'k8ordo UIは、AIコーディングエージェントが読むための面を用意しています。設計指針・コンポーネントのリファレンス・トークン・propsを、いずれも実装から生成した形で配っています。',
-  en: 'k8ordo UI ships surfaces meant for AI coding agents: the design guide, the component reference, the tokens and the props — each generated from the implementation.',
+  ja: 'k8ordo UIは、AIコーディングエージェントが読むための面を用意しています。設計指針とコンポーネントのリファレンスはパッケージに同梱し、トークンとpropsは実装から生成しています。',
+  en: 'k8ordo UI ships surfaces meant for AI coding agents: the design guide and the component reference come inside the package, and the tokens and the props are generated from the implementation.',
 });
 
 export const setupTitle = message({
@@ -21,8 +21,8 @@ export const surfacesTitle = message({
 });
 
 export const surfacesDescription = message({
-  ja: 'いずれもパッケージ内（node_modules）と、このサイトの両方から取得できます。',
-  en: 'Each is available both inside the package (node_modules) and from this site.',
+  ja: '`GUIDE.md`・リファレンス・`llms.txt`は、パッケージ内（node_modules）とこのサイトの両方から取得できます。`design.md`はこのサイトだけで配信し、`props.json`はパッケージ内にだけあります（サイトでは同じpropsをコンポーネントのリファレンスに載せています）。',
+  en: '`GUIDE.md`, the references and `llms.txt` are available both inside the package (node_modules) and from this site. `design.md` is served only from this site, and `props.json` exists only inside the package — on this site the same props appear in the component reference.',
 });
 
 export const surfaceGuide = message({

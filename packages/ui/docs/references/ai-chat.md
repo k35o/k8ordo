@@ -150,10 +150,12 @@ import { Message } from '@k8ordo/ui/ai';
 Props (Message.Root):
 
 - `from`: `'user'` | `'assistant'` (required)
+- plus the other `div` attributes (`className` and `style` excluded)
 
 Props (Message.Content):
 
 - `isStreaming`: boolean (shows the streaming cursor when true)
+- plus the other `div` attributes (`className` and `style` excluded)
 
 ## PromptInput
 
@@ -335,7 +337,7 @@ import { Response } from '@k8ordo/ui/ai/response';
 </Message.Content>;
 ```
 
-The `ChatStatus` and `ToolState` types are re-exported from `@k8ordo/ui/ai-sdk` as well.
+`@k8ordo/ui/ai-sdk` exports the `MappedPart` type, and re-exports the `ChatStatus` and `ToolState` types as well.
 
 ## Combining with generative UI
 
