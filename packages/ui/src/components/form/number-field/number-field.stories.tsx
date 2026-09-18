@@ -102,6 +102,22 @@ export const PassesThroughHandlers: Story = {
   },
 };
 
+export const RoundsToPrecisionOnBlur: Story = {
+  args: {
+    precision: 0,
+    onChange: fn(),
+  },
+  play: async ({ args, canvas, userEvent }) => {
+    const input = canvas.getByRole('spinbutton');
+    await userEvent.clear(input);
+    await userEvent.type(input, '2.5[Tab]');
+
+    await expect(args.onChange).toHaveBeenLastCalledWith(3);
+    await expect(input).toHaveValue('3');
+    await expect(input).toHaveAttribute('aria-valuenow', '3');
+  },
+};
+
 export const Precision: Story = {
   args: {
     disabled: false,
