@@ -18,8 +18,8 @@ export const Default: Story = {};
 
 export const WithImage: Story = {
   args: {
-    alt: 'Ada Lovelace',
-    src: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80',
+    alt: 'k8o',
+    src: '/k8o.jpg',
   },
 };
 
