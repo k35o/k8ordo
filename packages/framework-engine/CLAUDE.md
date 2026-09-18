@@ -64,6 +64,19 @@ pnpm check         # check:write to auto-fix
   `runtime/entry.ssr.tsx` injects the RSC stream into the HTML and
   `runtime/entry.browser.tsx` reads it back; nothing refetches on load, which
   is what lets a prerendered `404.html` come alive.
+- **A payload names the client it was rendered for.** `Payload.client` is
+  the URL of the script the page's HTML loads (`getClientEntryUrl()`, which
+  the RSC plugin exposes to the SSR environment only, so the RSC entry reads
+  `clientEntry` from the SSR module for every payload, not only for HTML).
+  `entry.browser.tsx` records the hydration payload's as the document's
+  (`setDocumentClient`), and `app-router.tsx` never renders a navigation
+  payload or a Server Action's answer that names another: that comes from a
+  deploy the tab predates, its tree may hold client references the running
+  script has no entry for, and rendering them fails inside the page's
+  `error.tsx`, where `Recover` never sees it. The document is loaded again
+  instead. The URL rather than an id minted per build: its content hash
+  leaves open tabs alone across a deploy that changed nothing in the browser,
+  and the build output stays reproducible.
 - **Hydration starts once the stream is on screen.** `entry.browser.tsx`
   waits for `whenRevealed()` (`runtime/revealed.ts`): no Suspense boundary
   still marked `$?` or `$~` in the document. A boundary hydration meets
@@ -132,8 +145,8 @@ src/
   plugin/core.ts             the Vite plugins: RSC pipeline, virtual routes
   plugin/server-actions.ts   which modules declared 'use server'
   runtime/entry.{rsc,ssr,browser}.tsx  the three environments
-  runtime/app-router.tsx     the client half: navigation + payloads
-  runtime/payload.ts         what a page is on the wire (tree, pathname, action result)
+  runtime/app-router.tsx     the client half: navigation + payloads, and whether this document can render one
+  runtime/payload.ts         what a page is on the wire (tree, pathname, client, action result)
   runtime/payload-path.ts    where a payload lives: /x → /x/index.rsc
   runtime/is-payload.ts      whether an answer is a payload or a document load
   runtime/revealed.ts        when every streamed boundary is on screen
