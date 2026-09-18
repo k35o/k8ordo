@@ -81,6 +81,12 @@ export const analyzeSchema = (
   return { schema, shape, keys, defaults };
 };
 
+const pickKeys = (info: SchemaInfo, data: StateValues): StateValues => {
+  const values: StateValues = {};
+  for (const key of info.keys) values[key] = data[key];
+  return values;
+};
+
 /**
  * Whole-parse first; when that fails, the values are user-editable or stale
  * input, so one broken field falls back to its own default instead of taking
@@ -91,26 +97,25 @@ export const parseWithSalvage = (
   raw: StateValues,
 ): StateValues => {
   const whole = safeParse(info.schema, raw);
-  if (whole.success) {
-    const values: StateValues = {};
-    for (const key of info.keys) {
-      values[key] = (whole.data as StateValues)[key];
-    }
-    return values;
-  }
-  const salvaged: StateValues = {};
+  if (whole.success) return pickKeys(info, whole.data);
+
+  // The fields that parse alone go through the whole schema again as the
+  // input they arrived as, instead of being assembled from their per-field
+  // outputs: object-level refines only run on the whole, and a field's output
+  // is not always an input it accepts (`z.stringbool()`, a type-changing
+  // transform). A combination the refines forbid falls back to the defaults,
+  // which analyzeSchema already proved valid as a whole.
+  const kept: StateValues = {};
   for (const key of info.keys) {
-    if (key in raw) {
-      const field = safeParse(info.shape[key] as $ZodType, raw[key]);
-      salvaged[key] = field.success ? field.data : info.defaults[key];
-    } else {
-      salvaged[key] = info.defaults[key];
+    if (
+      key in raw &&
+      safeParse(info.shape[key] as $ZodType, raw[key]).success
+    ) {
+      kept[key] = raw[key];
     }
   }
-  // Per-field salvage cannot see object-level refines: a combination the
-  // schema forbids falls back to the defaults, which analyzeSchema already
-  // proved valid as a whole. The recheck's own output is discarded so a
-  // non-idempotent pipe is not applied twice.
-  const recheck = safeParse(info.schema, salvaged);
-  return recheck.success ? salvaged : { ...info.defaults };
+  const salvaged = safeParse(info.schema, kept);
+  return salvaged.success
+    ? pickKeys(info, salvaged.data)
+    : { ...info.defaults };
 };
