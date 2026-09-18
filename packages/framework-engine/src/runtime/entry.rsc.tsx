@@ -10,6 +10,7 @@ import { paramSchemas, redirects, routes } from 'virtual:k8ordo/routes';
 
 import type * as SsrEntry from './entry.ssr';
 import { parseParams } from './params';
+import type { ParsedParams } from './params';
 import { ACTION_ID_HEADER } from './payload';
 import type { Payload } from './payload';
 import { isPayloadPath, pagePathFor } from './payload-path';
@@ -171,12 +172,13 @@ export default async function handler(request: Request): Promise<Response> {
   // the walk goes on to whatever the table declares next — the catch-all in
   // the end. A catch-all's own params are not validated: it answers what
   // nothing else did, and a 404 is already what a refused param means.
-  const parsed: { params: Readonly<Record<string, unknown>> } = {
-    params: {},
-  };
+  // The render starts inside `parsed.enter`, so it sees what the schemas of
+  // the pattern that answered wrote to the async context, and nothing a
+  // refused pattern's did.
+  let parsed: ParsedParams = { params: {}, enter: (fn) => fn() };
   const match = routes.match(pathname, (found) => {
     if (found.pattern.endsWith('/*')) {
-      parsed.params = found.params;
+      parsed = { params: found.params, enter: (fn) => fn() };
       return true;
     }
     const accepted = parseParams(
@@ -184,7 +186,7 @@ export default async function handler(request: Request): Promise<Response> {
       found.params,
     );
     if (accepted === null) return false;
-    parsed.params = accepted;
+    parsed = accepted;
     return true;
   });
   const missing = match === null || match.pattern.endsWith('/*');
@@ -212,17 +214,19 @@ export default async function handler(request: Request): Promise<Response> {
   };
 
   const failures: unknown[] = [];
-  const rscStream = renderToReadableStream(payload, {
-    temporaryReferences: isAction ? temporaryReferences : undefined,
-    // Without this a component that throws simply truncates the stream, and
-    // the browser reports a closed connection instead of the actual error.
-    onError: (error: unknown) => {
-      failures.push(error);
-      // pathname は引数として渡す。第 1 引数はフォーマット文字列なので、
-      // `%s` を含む URL を投げられると error が食われて消える
-      console.error('k8ordo: rendering %s failed', pathname, error);
-    },
-  });
+  const rscStream = parsed.enter(() =>
+    renderToReadableStream(payload, {
+      temporaryReferences: isAction ? temporaryReferences : undefined,
+      // Without this a component that throws simply truncates the stream, and
+      // the browser reports a closed connection instead of the actual error.
+      onError: (error: unknown) => {
+        failures.push(error);
+        // pathname は引数として渡す。第 1 引数はフォーマット文字列なので、
+        // `%s` を含む URL を投げられると error が食われて消える
+        console.error('k8ordo: rendering %s failed', pathname, error);
+      },
+    }),
+  );
   // An action the client addressed answers in the shape the client already
   // knows how to read, so applying its result and applying a navigation are
   // the same code path. A form posted without JavaScript gets HTML back,
@@ -238,7 +242,7 @@ export default async function handler(request: Request): Promise<Response> {
     'ssr',
     'index',
   );
-  const html = await ssr.renderHtml(rscStream);
+  const html = await parsed.enter(() => ssr.renderHtml(rscStream));
   if (import.meta.env.K8ORDO_MODE === '@k8ordo/static') {
     // A build into files can afford to wait for the whole page, and has to:
     // a Server Component that threw would otherwise be written as a page whose

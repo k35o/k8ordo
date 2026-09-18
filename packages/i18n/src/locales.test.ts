@@ -220,6 +220,28 @@ describe('getLocale / run (server)', () => {
     expect(locales.getLocale()).toBe('ja');
   });
 
+  it('refuses to accept or run a locale where there is no AsyncLocalStorage to keep it in', () => {
+    const key = Symbol.for('@k8ordo/i18n/storage');
+    const registry = globalThis as { [key]?: unknown };
+    const saved = registry[key];
+    const { getBuiltinModule } = process;
+    try {
+      registry[key] = undefined;
+      Object.assign(process, { getBuiltinModule: undefined });
+      const { validate } = locales.paramsSchema['~standard'];
+      expect(() => validate({ locale: 'en' })).toThrow(/no AsyncLocalStorage/u);
+      expect(() => locales.run('en', () => 'x')).toThrow(
+        /no AsyncLocalStorage/u,
+      );
+      expect(validate({ locale: 'fr' })).toMatchObject({
+        issues: [{ path: ['locale'] }],
+      });
+    } finally {
+      Object.assign(process, { getBuiltinModule });
+      registry[key] = saved;
+    }
+  });
+
   it('keeps concurrent renders apart', async () => {
     const seen = await Promise.all(
       (['en', 'ja', 'en'] as const).map((locale) =>

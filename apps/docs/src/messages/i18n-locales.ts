@@ -93,8 +93,8 @@ export const members = {
     en: "`@k8ordo/static`'s `paths` option: every pattern with a `/:locale` segment, once per locale.",
   }),
   paramsSchema: message({
-    ja: '`[locale]` 区間のスキーマ（Standard Schema）。受理したロケールが、そのリクエストの描画のロケールになります。',
-    en: "The `[locale]` segment's schema (Standard Schema). The locale it accepts becomes the locale of that request's render.",
+    ja: '`[locale]` 区間のスキーマ（Standard Schema）。受理したロケールが、受理したページの描画のロケールになります。',
+    en: "The `[locale]` segment's schema (Standard Schema). The locale it accepts becomes the locale of the render of the page that accepted it.",
   }),
   getLocale: message({
     ja: '描画中のロケール。hook ではないので、どこからでも呼べます。',

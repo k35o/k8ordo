@@ -75,6 +75,11 @@ ParamsSchemaFor<pattern>`, lists per page pattern the schemas along its
   runs them synchronously inside `routes.match`'s `accept`, so a refused
   value is a pattern that did not match and the catch-all answers under 404.
   A catch-all's own params are never validated; a layout receives strings.
+  Each pattern's schemas run in an async context of their own, and the
+  render starts inside the answering pattern's (`enter`): a schema may write
+  there (`@k8ordo/i18n` records the accepted locale), and neither a refused
+  pattern's write nor any other reaches the handler's caller, which under
+  `@k8ordo/static` is one context for every page.
 - **`error.tsx` is the router's `error`; `redirect.ts` is answered before the
   table.** The generator puts an error file on its branch (a page with an
   error becomes a branch of its own) and lists redirects in `redirects`,

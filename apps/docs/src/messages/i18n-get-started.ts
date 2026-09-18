@@ -82,8 +82,8 @@ export const install = {
     en: 'The shipped type declarations (optional)',
   }),
   runtime: message({
-    ja: 'サーバーでは、描画中のロケールを `node:async_hooks` の `AsyncLocalStorage` に載せます。import ではなく `process.getBuiltinModule` で取り出すので、同じビルドがブラウザでもそのまま動きます（フレームワークの 2 つのモードは Node 24 以降を求めます）。`process.getBuiltinModule` の無いランタイムでは、`paramsSchema` はロケールを受理しても描画に結び付けられません。サーバーの描画は既定のロケールになり、`run` は throw します。',
-    en: 'On a server the current locale rides on `AsyncLocalStorage` from `node:async_hooks`. It is reached through `process.getBuiltinModule` rather than an import, so the same build runs unchanged in the browser (the framework modes require Node 24). In a runtime without `process.getBuiltinModule`, `paramsSchema` still accepts the locale but cannot scope it to the render: server renders fall back to the default, and `run` throws.',
+    ja: 'サーバーでは、描画中のロケールを `node:async_hooks` の `AsyncLocalStorage` に載せます。import ではなく `process.getBuiltinModule` で取り出すので、同じビルドがブラウザでもそのまま動きます（フレームワークの 2 つのモードは Node 24 以降を求めます）。`process.getBuiltinModule` の無いランタイムではロケールを描画に結び付けられないので、`paramsSchema` の受理も `run` も throw します。',
+    en: 'On a server the current locale rides on `AsyncLocalStorage` from `node:async_hooks`. It is reached through `process.getBuiltinModule` rather than an import, so the same build runs unchanged in the browser (the framework modes require Node 24). In a runtime without `process.getBuiltinModule` there is nowhere to scope a locale to, so `paramsSchema` throws when it accepts one, and so does `run`.',
   }),
 };
 
@@ -124,8 +124,8 @@ export const segment = {
     en: 'A locale outside the list is refused. `/fr/…` becomes a pathname this pattern does not answer, and in the end `not-found.tsx` answers it under a real 404.',
   }),
   accepts: message({
-    ja: '受理したロケールは、そのリクエストの描画の間ずっと現在のロケールになります。Server Component も、HTML を作るためにサーバーで走る Client Component も、同じロケールで文言を読みます。',
-    en: "The accepted locale becomes the current one for the rest of that request's render: Server Components, and the Client Components that run on the server to produce the HTML, read their messages in it.",
+    ja: '受理したロケールは、受理したページの描画の間ずっと現在のロケールになり、ほかのページや 404 には届きません。Server Component も、HTML を作るためにサーバーで走る Client Component も、同じロケールで文言を読みます。',
+    en: 'The accepted locale becomes the current one for the render of the page that accepted it, and reaches no other page or 404: Server Components, and the Client Components that run on the server to produce the HTML, read their messages in it.',
   }),
   serverFile: message({
     ja: "このファイルに `'use client'` を付けてはいけません。Client モジュールから export した値は、スキーマとしてではなく client reference としてハンドラに届くからです。フックを使う枠が必要なら、`_parts/` の Client Component に分けてレイアウトから描きます。",
