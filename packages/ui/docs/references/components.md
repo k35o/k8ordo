@@ -555,17 +555,37 @@ Props:
 ```tsx
 import { NumberField } from '@k8ordo/ui';
 
+// Uncontrolled: starts empty unless defaultValue is given
+<NumberField
+  id="quantity"
+  name="quantity"
+  min={0}
+  max={100}
+  invalid={false}
+  disabled={false}
+  required={false}
+/>;
+
+// Controlled: null is an empty field
+const [value, setValue] = useState<number | null>(null);
 <NumberField
   id="quantity"
   min={0}
   max={100}
   value={value}
-  onChange={onChange}
+  onChange={setValue}
   invalid={false}
   disabled={false}
   required={false}
 />;
 ```
+
+An empty field is `null`, never `0`. While empty the input submits `''` and
+has no `aria-valuenow`, and leaving it keeps it empty; clearing the field
+reports `null` to `onChange`. The first ArrowUp / ArrowDown or stepper press on
+an empty field fills in `0`, or the nearer of `min` / `max` when `0` is out of
+range. `required` reaches the input itself, so an empty required field fails
+native validation.
 
 Props:
 
@@ -573,11 +593,11 @@ Props:
 - `invalid`: `boolean` (default: `false`)
 - `max`: `number` (default: `9_007_199_254_740_991`)
 - `min`: `number` (default: `-9_007_199_254_740_991`)
-- `onChange`: `(value: number) => void`
+- `onChange`: `(value: number | null) => void`
 - `precision`: `number` (default: `0`)
 - `ref`: `Ref<HTMLInputElement>`
 - `step`: `number` (default: `1`)
-- `value`: `number`
+- `value`: `number` | `null`
 
 ### PasswordInput
 

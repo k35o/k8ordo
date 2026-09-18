@@ -37,18 +37,21 @@ type BaseProps = {
   };
 
 type ControlledProps = {
-  value: number;
-  onChange: (value: number) => void;
+  value: number | null;
+  onChange: (value: number | null) => void;
   defaultValue?: never;
 };
 
 type UncontrolledProps = {
   defaultValue?: number;
   value?: never;
-  onChange?: (value: number) => void;
+  onChange?: (value: number | null) => void;
 };
 
 type Props = BaseProps & (ControlledProps | UncontrolledProps);
+
+const format = (value: number | null, precision: number): string =>
+  value === null ? '' : value.toFixed(precision);
 
 export const NumberField: FC<Props> = ({
   invalid = false,
@@ -67,24 +70,38 @@ export const NumberField: FC<Props> = ({
   ...rest
 }) => {
   const messages = useMessages();
-  const [currentValue, setCurrentValue] = useControllableState<number>({
+  const [currentValue, setCurrentValue] = useControllableState<number | null>({
     value,
-    defaultValue: defaultValue ?? 0,
+    defaultValue: defaultValue ?? null,
     onChange,
   });
   const [displayValue, setDisplayValue] = useState(() =>
-    currentValue.toFixed(precision),
+    format(currentValue, precision),
   );
-  const [prevValue, setPrevValue] = useState(currentValue);
+  // 確定のたびに表示している値も進めておく。親が onChange を採らずに value を
+  // 据え置いたとき（openui は null を受けると defaultValue に戻す）、次の描画で
+  // value との食い違いに気づいて表示を value へ戻せるように。
+  const [shownValue, setShownValue] = useState(currentValue);
   const { pending } = useFormStatus();
 
-  if (currentValue !== prevValue) {
-    setDisplayValue(currentValue.toFixed(precision));
-    setPrevValue(currentValue);
+  if (currentValue !== shownValue) {
+    setDisplayValue(format(currentValue, precision));
+    setShownValue(currentValue);
   }
 
-  const handleChange = (newValue: number) => {
-    setCurrentValue(newValue);
+  const commit = (next: number | null) => {
+    setDisplayValue(format(next, precision));
+    setShownValue(next);
+    setCurrentValue(next);
+  };
+
+  const stepBy = (delta: number) => {
+    const current = cast(displayValue, precision);
+    commit(
+      current === null
+        ? clamp(0, min, max)
+        : clamp(toPrecision(current + delta, precision), min, max),
+    );
   };
 
   return (
@@ -105,7 +122,7 @@ export const NumberField: FC<Props> = ({
         aria-required={required}
         aria-valuemax={max}
         aria-valuemin={min}
-        aria-valuenow={currentValue}
+        aria-valuenow={currentValue ?? undefined}
         className={cn(
           'grow bg-transparent pe-8 ps-3 focus-visible:outline-hidden size-full',
           'disabled:cursor-not-allowed',
@@ -113,10 +130,10 @@ export const NumberField: FC<Props> = ({
         )}
         disabled={disabled}
         readOnly={pending || undefined}
+        required={required}
         onBlur={chain(onBlur, () => {
-          const newValue = clamp(cast(displayValue, precision), min, max);
-          handleChange(newValue);
-          setDisplayValue(newValue.toFixed(precision));
+          const parsed = cast(displayValue, precision);
+          commit(parsed === null ? null : clamp(parsed, min, max));
         })}
         onChange={(e) => {
           if (
@@ -129,22 +146,10 @@ export const NumberField: FC<Props> = ({
         }}
         onKeyDown={chain(onKeyDown, (e) => {
           if (e.key === 'ArrowUp') {
-            const newValue = clamp(
-              toPrecision(cast(displayValue, precision) + step, precision),
-              min,
-              max,
-            );
-            handleChange(newValue);
-            setDisplayValue(newValue.toFixed(precision));
+            stepBy(step);
           }
           if (e.key === 'ArrowDown') {
-            const newValue = clamp(
-              toPrecision(cast(displayValue, precision) - step, precision),
-              min,
-              max,
-            );
-            handleChange(newValue);
-            setDisplayValue(newValue.toFixed(precision));
+            stepBy(-step);
           }
         })}
         pattern="[0-9]*(.[0-9]+)?"
@@ -165,13 +170,7 @@ export const NumberField: FC<Props> = ({
           )}
           disabled={disabled || pending}
           onClick={() => {
-            const newValue = clamp(
-              toPrecision(cast(displayValue, precision) + step, precision),
-              min,
-              max,
-            );
-            handleChange(newValue);
-            setDisplayValue(newValue.toFixed(precision));
+            stepBy(step);
           }}
           tabIndex={-1}
           type="button"
@@ -187,13 +186,7 @@ export const NumberField: FC<Props> = ({
           )}
           disabled={disabled || pending}
           onClick={() => {
-            const newValue = clamp(
-              toPrecision(cast(displayValue, precision) - step, precision),
-              min,
-              max,
-            );
-            handleChange(newValue);
-            setDisplayValue(newValue.toFixed(precision));
+            stepBy(-step);
           }}
           tabIndex={-1}
           type="button"

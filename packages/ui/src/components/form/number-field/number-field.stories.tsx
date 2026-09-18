@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { expect, fn } from 'storybook/test';
 
 import { NumberField } from './number-field';
@@ -10,7 +10,6 @@ const meta: Meta<typeof NumberField> = {
   args: {
     id: 'textfield',
     'aria-describedby': 'numberfield-feedback',
-    defaultValue: 0,
   },
   parameters: {
     a11y: {
@@ -81,6 +80,7 @@ export const Min0Max100: Story = {
 
 export const PassesThroughHandlers: Story = {
   args: {
+    defaultValue: 0,
     disabled: false,
     invalid: false,
     required: false,
@@ -175,5 +175,159 @@ export const RoundsToPrecisionOnBlur: Story = {
 
     await expect(input).toHaveValue('2');
     await expect(args.onChange).toHaveBeenLastCalledWith(2);
+  },
+};
+
+const InFormRender: Story['render'] = (args) => (
+  <form>
+    <NumberField {...args} name="quantity" />
+  </form>
+);
+
+const submittedValue = (input: HTMLInputElement) =>
+  new FormData(input.form ?? undefined).get('quantity');
+
+export const StartsEmptyWithoutDefaultValue: Story = {
+  render: InFormRender,
+  play: async ({ canvas }) => {
+    const input = canvas.getByRole<HTMLInputElement>('spinbutton');
+
+    await expect(input).toHaveValue('');
+    await expect(input).not.toHaveAttribute('aria-valuenow');
+    await expect(submittedValue(input)).toBe('');
+  },
+};
+
+export const StaysEmptyOnBlur: Story = {
+  render: InFormRender,
+  play: async ({ canvas, userEvent }) => {
+    const input = canvas.getByRole<HTMLInputElement>('spinbutton');
+    await userEvent.click(input);
+    await userEvent.tab();
+
+    await expect(input).toHaveValue('');
+    await expect(input).not.toHaveAttribute('aria-valuenow');
+    await expect(submittedValue(input)).toBe('');
+  },
+};
+
+export const ClearingReportsNull: Story = {
+  args: {
+    defaultValue: 3,
+    onChange: fn(),
+  },
+  render: InFormRender,
+  play: async ({ args, canvas, userEvent }) => {
+    const input = canvas.getByRole<HTMLInputElement>('spinbutton');
+    await userEvent.clear(input);
+    await userEvent.tab();
+
+    await expect(args.onChange).toHaveBeenLastCalledWith(null);
+    await expect(input).toHaveValue('');
+    await expect(submittedValue(input)).toBe('');
+  },
+};
+
+export const StepsFromZeroWhenEmpty: Story = {
+  play: async ({ canvas, userEvent }) => {
+    const input = canvas.getByRole('spinbutton');
+    await userEvent.click(input);
+    await userEvent.keyboard('{ArrowDown}');
+
+    await expect(input).toHaveValue('0');
+    await expect(input).toHaveAttribute('aria-valuenow', '0');
+  },
+};
+
+export const StepsFromMinWhenEmptyAndZeroIsBelowMin: Story = {
+  args: {
+    min: 5,
+    max: 10,
+  },
+  play: async ({ canvas, userEvent }) => {
+    const input = canvas.getByRole('spinbutton');
+    await userEvent.click(input);
+    await userEvent.keyboard('{ArrowUp}');
+
+    await expect(input).toHaveValue('5');
+  },
+};
+
+const ControlledRender = () => {
+  const [value, setValue] = useState<number | null>(3);
+
+  return (
+    <div className="flex flex-col items-start gap-2">
+      <NumberField
+        id="number-field-controlled"
+        onChange={setValue}
+        value={value}
+      />
+      <button
+        onClick={() => {
+          setValue(null);
+        }}
+        type="button"
+      >
+        clear
+      </button>
+      <button
+        onClick={() => {
+          setValue(7);
+        }}
+        type="button"
+      >
+        seven
+      </button>
+    </div>
+  );
+};
+
+export const FollowsControlledValue: Story = {
+  render: () => <ControlledRender />,
+  play: async ({ canvas, userEvent }) => {
+    const input = canvas.getByRole('spinbutton');
+
+    await expect(input).toHaveValue('3');
+
+    await userEvent.click(canvas.getByRole('button', { name: 'clear' }));
+
+    await expect(input).toHaveValue('');
+    await expect(input).not.toHaveAttribute('aria-valuenow');
+
+    await userEvent.click(canvas.getByRole('button', { name: 'seven' }));
+
+    await expect(input).toHaveValue('7');
+    await expect(input).toHaveAttribute('aria-valuenow', '7');
+  },
+};
+
+export const ShowsControlledValueWhenParentKeepsIt: Story = {
+  args: {
+    value: 3,
+    onChange: fn(),
+  },
+  play: async ({ args, canvas, userEvent }) => {
+    const input = canvas.getByRole('spinbutton');
+    await userEvent.clear(input);
+    await userEvent.tab();
+
+    await expect(args.onChange).toHaveBeenLastCalledWith(null);
+    await expect(input).toHaveValue('3');
+  },
+};
+
+export const RequiredIsInvalidWhileEmpty: Story = {
+  args: {
+    required: true,
+  },
+  play: async ({ canvas, userEvent }) => {
+    const input = canvas.getByRole('spinbutton');
+
+    await expect(input).toBeInvalid();
+
+    await userEvent.type(input, '1');
+
+    await expect(input).toBeValid();
   },
 };

@@ -61,7 +61,10 @@ export const PasswordInputView: FC<
 export const NumberFieldView: FC<ComponentRenderProps<s.NumberFieldProps>> = ({
   props,
 }) => {
-  const field = useStateField<number>(props.name, props.defaultValue ?? 0);
+  const field = useStateField<number | null>(
+    props.name,
+    props.defaultValue ?? null,
+  );
   return ui.renderNumberField(props, field.value, field.setValue);
 };
 

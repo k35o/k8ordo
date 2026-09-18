@@ -135,10 +135,10 @@ export const { registry } = defineRegistry(catalog, {
     },
 
     NumberField: ({ props, bindings }) => {
-      const [value, setValue] = useBoundOrLocal<number>(
+      const [value, setValue] = useBoundOrLocal<number | null>(
         props.defaultValue,
         bindings?.defaultValue,
-        0,
+        null,
       );
       return ui.renderNumberField(props, value, setValue);
     },
