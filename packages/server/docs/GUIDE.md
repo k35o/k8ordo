@@ -142,6 +142,14 @@ export default async function ProductPage({
 }
 ```
 
+**An async page streams.** The layout above it is on screen first, and the
+page follows in the same response once its data arrives. The browser
+hydrates when the last of it is in place, not before: a boundary still on
+its way cannot be hydrated, and a context that changes as the page hydrates —
+a colour scheme read from the browser — would make React render it again
+beside the copy still streaming in. Until then the page is what it is
+without JavaScript: links load documents and forms post.
+
 <!-- shared:refuses -->
 
 ### What the build refuses

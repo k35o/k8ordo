@@ -2,9 +2,9 @@ import { href } from '@k8ordo/router';
 
 import { listProducts } from '../_data/catalog.server';
 
-export default function ProductsPage() {
+export default async function ProductsPage() {
   // Server Component なので、データは直接読む
-  const products = listProducts();
+  const products = await listProducts();
   return (
     <>
       <h1 data-testid="title">products</h1>

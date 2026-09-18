@@ -64,6 +64,13 @@ pnpm check         # check:write to auto-fix
   `runtime/entry.ssr.tsx` injects the RSC stream into the HTML and
   `runtime/entry.browser.tsx` reads it back; nothing refetches on load, which
   is what lets a prerendered `404.html` come alive.
+- **Hydration starts once the stream is on screen.** `entry.browser.tsx`
+  waits for `whenRevealed()` (`runtime/revealed.ts`): no Suspense boundary
+  still marked `$?` or `$~` in the document. A boundary hydration meets
+  before React has moved it in is one React renders again on the client as
+  soon as a context above it changes, and the server's copy of what it
+  hoisted (a `<title>`) stays behind. The cost is the page responding later
+  than its shell paints, and a background tab hydrating when it is shown.
 - **A `paramsSchema` export is found by parsing, run before render.**
   `generate/write.ts` reads each page/layout and asks Vite's parser
   (`parseSync`, oxc) for the module's exports — an import would evaluate
@@ -129,6 +136,7 @@ src/
   runtime/payload.ts         what a page is on the wire (tree, pathname, action result)
   runtime/payload-path.ts    where a payload lives: /x → /x/index.rsc
   runtime/is-payload.ts      whether an answer is a payload or a document load
+  runtime/revealed.ts        when every streamed boundary is on screen
   runtime/recover.tsx        a failed client render falls back to a document load
   runtime/reload.ts          location.reload, the one seam a test can watch
   runtime/params.ts          runs the paramsSchema exports along a matched stack
