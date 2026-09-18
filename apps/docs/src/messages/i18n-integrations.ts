@@ -23,8 +23,8 @@ export const ui = {
     en: '`dictionaries` holds `ja` and `en`. When the set has other locales (`fr`, or `en-US`), write those dictionaries yourself, annotated with the `Messages` type from `@k8ordo/ui/i18n`, and map locales to dictionaries with a `Variants<Messages>` so a missing one is a type error.',
   }),
   notFound: message({
-    ja: '`not-found.tsx` の下では catch-all の param を検証するものが無いので、そこでの `getLocale()` は URL に結び付いていません。`/en/…` の 404 に英語の辞書が渡るとは限りません。404 を訪問者のロケールで出すには、このサイトの `LocaleShell` のように、Client Component の中で `locales.delocalize(usePathname()).locale` から辞書を選びます。',
-    en: "Under `not-found.tsx` nothing validates the catch-all's params, so `getLocale()` there is not tied to the URL, and a 404 at `/en/…` does not necessarily get the English dictionary. To show a 404 in the visitor's locale, pick the dictionary in a Client Component from `locales.delocalize(usePathname()).locale`, as this site's `LocaleShell` does.",
+    ja: '`not-found.tsx` の下では catch-all の param を検証するものが無いので、そこでの `getLocale()` は URL に関係なく既定のロケールです。`/en/…` の 404 にも既定のロケールの辞書が渡ります。404 を訪問者のロケールで出すには、このサイトの `LocaleShell` のように、Client Component の中で `locales.delocalize(usePathname()).locale` から辞書を選びます。',
+    en: "Under `not-found.tsx` nothing validates the catch-all's params, so `getLocale()` there is the default whatever the URL says, and a 404 at `/en/…` gets the default locale's dictionary too. To show a 404 in the visitor's locale, pick the dictionary in a Client Component from `locales.delocalize(usePathname()).locale`, as this site's `LocaleShell` does.",
   }),
   props: message({
     ja: 'コンポーネントの props に渡すテキストは文字列です。`<Button>{m.form.submit()}</Button>` のように、文言を呼んだ結果を渡します。',

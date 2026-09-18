@@ -86,8 +86,8 @@ export const schema = {
     en: 'The accepted value is `{ locale }` alone; other params keep their strings for the schemas that follow.',
   }),
   current: message({
-    ja: '受理は、そのリクエストの描画の始まりでもあります。受理したロケールは、それ以降の Server Component、それを HTML にする処理、サーバーで走る Client Component に届きます。',
-    en: "Accepting is also where that request's render begins: the accepted locale reaches the Server Components after it, the step that turns them into HTML, and the Client Components that run on the server.",
+    ja: '受理は、そのページの描画の始まりでもあります。受理したロケールは、それ以降の Server Component、それを HTML にする処理、サーバーで走る Client Component に届き、ほかのページや 404 には届きません。同じスタックの後続のスキーマが弾いたとき（`/en/blog/nope`）は、パターンと一緒に受理も捨てられ、404 は `/en/nothing` と同じく既定のロケールで描かれます。`AsyncLocalStorage` を取り出せないランタイムでは、受理の時点で throw します。',
+    en: "Accepting is also where that page's render begins: the accepted locale reaches the Server Components after it, the step that turns them into HTML, and the Client Components that run on the server, and no other page or 404. When a later schema in the same stack refuses (`/en/blog/nope`), the acceptance is dropped with the pattern, and the 404 renders in the default, as `/en/nothing` does. In a runtime with no `AsyncLocalStorage` to offer, accepting throws.",
   }),
   serverFile: message({
     ja: 'スキーマを export するファイルは Server Component でなければなりません。フックを使う枠は `_parts/` の Client Component に分けます。',
@@ -232,8 +232,8 @@ export const staticBuild = {
     en: 'A pattern without `/:locale` comes back as it is. The static build hands `paths` only the patterns that still need pathnames, so a pattern returned unchanged stays unexpanded and stops the build; expand its parameters in the same function.',
   }),
   perRequest: message({
-    ja: '各 pathname はそれぞれ 1 つのリクエストとして描かれるので、ページごとにスキーマがロケールを受理し、文言はそのロケールで出力されます。',
-    en: 'Each pathname is rendered as its own request, so the schema accepts the locale for each page and the messages come out in it.',
+    ja: '各 pathname はそれぞれ 1 つのリクエストとして描かれるので、ページごとにスキーマがロケールを受理し、文言はそのロケールで出力されます。ビルドは複数のページを同時に描きますが、あるページのロケールがほかのページに漏れることはありません。',
+    en: 'Each pathname is rendered as its own request, so the schema accepts the locale for each page and the messages come out in it. The build renders several pages at once, and none lends its locale to another.',
   }),
   secondTitle: message({
     ja: 'ほかの param もあるとき',
@@ -244,8 +244,8 @@ export const staticBuild = {
     en: 'A pattern with another parameter, such as `/:locale/blog/:slug`, still has `:slug` after `locales.paths` (`/ja/blog/:slug`). The static build does not use a pathname that still holds a parameter, so the pattern counts as unexpanded and the build stops with `static build needs pathnames for /:locale/blog/:slug — supply them with the "paths" option`. Expand the remaining parameters in the same function.',
   }),
   notFound: message({
-    ja: '静的ホストが知らない URL すべてに返す `404.html` は、ビルドの番兵の区間で 1 回だけ描かれるので、訪問者のロケールに合わせることはできません。Client Component はハイドレーションの時点で訪問者の URL を読み、そのロケールで描き直されます。このサイトの `not-found.tsx` が Client Component なのはそのためです。',
-    en: "The `404.html` a static host serves for every URL it does not have is rendered once, under the build's sentinel segment, so it cannot follow the visitor's locale. Client Components read the visitor's URL when they hydrate and render again in that locale. That is why this site's `not-found.tsx` is a Client Component.",
+    ja: '静的ホストが知らない URL すべてに返す `404.html` は、ビルドの番兵の区間で 1 回だけ描かれます。その区間を受理するスキーマは無いので文言は既定のロケールで描かれ、訪問者のロケールに合わせることはできません。Client Component はハイドレーションの時点で訪問者の URL を読み、そのロケールで描き直されます。このサイトの `not-found.tsx` が Client Component なのはそのためです。',
+    en: "The `404.html` a static host serves for every URL it does not have is rendered once, under the build's sentinel segment. No schema accepts that segment, so its text is in the default locale and cannot follow the visitor's. Client Components read the visitor's URL when they hydrate and render again in that locale. That is why this site's `not-found.tsx` is a Client Component.",
   }),
 };
 
