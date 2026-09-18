@@ -10,7 +10,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "Accordion.Button",
@@ -22,7 +23,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "Accordion.Item",
@@ -52,7 +54,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "Accordion.Panel",
@@ -64,7 +67,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "Accordion.Root",
@@ -76,7 +80,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "AIIcon",
@@ -88,7 +93,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "Alert",
@@ -124,7 +130,8 @@
           "required": false
         }
       ],
-      "inherits": "HTMLAttributes<HTMLDivElement>"
+      "inherits": "HTMLAttributes<HTMLDivElement>",
+      "omitted": ["children", "role", "className", "style"]
     },
     {
       "name": "AlertIcon",
@@ -142,7 +149,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "Anchor",
@@ -172,7 +180,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": "AnchorHTMLAttributes<HTMLAnchorElement>",
+      "omitted": ["target", "rel", "className", "style"]
     },
     {
       "name": "AssistantIcon",
@@ -184,7 +193,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "AtomIcon",
@@ -196,7 +206,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "Autocomplete",
@@ -215,7 +226,7 @@
         },
         {
           "name": "defaultValue",
-          "types": ["never"],
+          "types": ["string[]"],
           "defaultValue": null,
           "required": false
         },
@@ -244,7 +255,19 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": "InputHTMLAttributes<HTMLInputElement>",
+      "omitted": [
+        "type",
+        "role",
+        "className",
+        "style",
+        "children",
+        "autoComplete",
+        "aria-autocomplete",
+        "aria-controls",
+        "aria-expanded",
+        "aria-activedescendant"
+      ]
     },
     {
       "name": "Avatar",
@@ -298,7 +321,8 @@
           "required": false
         }
       ],
-      "inherits": "HTMLAttributes<HTMLSpanElement>"
+      "inherits": "HTMLAttributes<HTMLSpanElement>",
+      "omitted": ["role", "aria-label", "className", "style"]
     },
     {
       "name": "Badge",
@@ -311,30 +335,31 @@
         },
         {
           "name": "interactive",
-          "types": ["true"],
+          "types": ["boolean"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "size",
-          "types": ["Size"],
+          "types": ["'sm'", "'md'", "'lg'"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "tone",
-          "types": ["Tone"],
+          "types": ["'neutral'", "'info'", "'success'", "'warning'", "'error'"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "variant",
-          "types": ["Variant"],
+          "types": ["'solid'", "'outline'"],
           "defaultValue": null,
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": "ButtonHTMLAttributes<HTMLButtonElement> | HTMLAttributes<HTMLSpanElement>",
+      "omitted": ["children", "className", "style", "type"]
     },
     {
       "name": "BadIcon",
@@ -346,7 +371,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "BlogIcon",
@@ -358,7 +384,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "BoringIcon",
@@ -370,7 +397,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "Breadcrumb.Item",
@@ -382,7 +410,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "Breadcrumb.Link",
@@ -412,7 +441,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "Breadcrumb.List",
@@ -430,12 +460,14 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "Breadcrumb.Separator",
       "props": [],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "Button",
@@ -507,7 +539,8 @@
           "required": false
         }
       ],
-      "inherits": "ComponentPropsWithRef<'button'>"
+      "inherits": "ComponentPropsWithRef<'button'>",
+      "omitted": ["className", "style"]
     },
     {
       "name": "Card",
@@ -537,7 +570,8 @@
           "required": false
         }
       ],
-      "inherits": "HTMLAttributes<HTMLDivElement>"
+      "inherits": "HTMLAttributes<HTMLDivElement>",
+      "omitted": ["className", "style"]
     },
     {
       "name": "Checkbox",
@@ -556,7 +590,7 @@
         },
         {
           "name": "defaultChecked",
-          "types": ["never"],
+          "types": ["boolean"],
           "defaultValue": null,
           "required": false
         },
@@ -587,7 +621,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": "InputHTMLAttributes<HTMLInputElement>",
+      "omitted": ["type", "className", "style", "value", "children"]
     },
     {
       "name": "CheckboxCard",
@@ -606,7 +641,7 @@
         },
         {
           "name": "defaultValue",
-          "types": ["never"],
+          "types": ["string[]"],
           "defaultValue": null,
           "required": false
         },
@@ -635,7 +670,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": "FieldsetHTMLAttributes<HTMLFieldSetElement>",
+      "omitted": ["className", "style", "children", "role"]
     },
     {
       "name": "CheckboxGroup.Item",
@@ -654,7 +690,7 @@
         },
         {
           "name": "defaultChecked",
-          "types": ["never"],
+          "types": ["boolean"],
           "defaultValue": null,
           "required": false
         },
@@ -685,7 +721,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": "InputHTMLAttributes<HTMLInputElement>",
+      "omitted": ["type", "className", "style", "value", "children"]
     },
     {
       "name": "CheckboxGroup.Root",
@@ -710,7 +747,7 @@
         },
         {
           "name": "defaultValue",
-          "types": ["never"],
+          "types": ["string[]"],
           "defaultValue": null,
           "required": false
         },
@@ -739,7 +776,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": "FieldsetHTMLAttributes<HTMLFieldSetElement>",
+      "omitted": ["className", "style", "role"]
     },
     {
       "name": "CheckIcon",
@@ -751,7 +789,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "ChevronIcon",
@@ -769,7 +808,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "ChromeIcon",
@@ -781,7 +821,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "CloseIcon",
@@ -793,7 +834,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "Code",
@@ -805,7 +847,8 @@
           "required": true
         }
       ],
-      "inherits": "HTMLAttributes<HTMLElement>"
+      "inherits": "HTMLAttributes<HTMLElement>",
+      "omitted": ["className", "style"]
     },
     {
       "name": "CodeXmlIcon",
@@ -817,7 +860,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "ColorContrastIcon",
@@ -829,7 +873,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "ColorInfoIcon",
@@ -841,7 +886,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "ColorScaleIcon",
@@ -853,7 +899,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "Conversation.Messages",
@@ -877,7 +924,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "Conversation.Root",
@@ -889,7 +937,8 @@
           "required": true
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "Conversation.ScrollButton",
@@ -901,7 +950,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "CopyIcon",
@@ -913,7 +963,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "DarkModeIcon",
@@ -925,7 +976,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "Dialog.Content",
@@ -937,7 +989,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "Dialog.Header",
@@ -955,7 +1008,8 @@
           "required": true
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "Dialog.Root",
@@ -991,7 +1045,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "DifficultIcon",
@@ -1003,7 +1058,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "Drawer",
@@ -1045,7 +1101,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "DropdownMenu.Content",
@@ -1057,7 +1114,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "DropdownMenu.IconTrigger",
@@ -1075,7 +1133,8 @@
           "required": true
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "DropdownMenu.Item",
@@ -1093,7 +1152,8 @@
           "required": true
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "DropdownMenu.Root",
@@ -1129,7 +1189,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "DropdownMenu.SubMenu",
@@ -1147,7 +1208,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "DropdownMenu.Trigger",
@@ -1171,7 +1233,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "EasyIcon",
@@ -1183,7 +1246,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "EdgeIcon",
@@ -1195,7 +1259,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "ExternalLinkIcon",
@@ -1207,7 +1272,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "FileField.ItemList",
@@ -1225,7 +1291,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "FileField.Root",
@@ -1275,7 +1342,8 @@
           "required": false
         }
       ],
-      "inherits": "InputHTMLAttributes<HTMLInputElement>"
+      "inherits": "InputHTMLAttributes<HTMLInputElement>",
+      "omitted": ["type", "className", "style", "value"]
     },
     {
       "name": "FileField.Trigger",
@@ -1289,7 +1357,8 @@
           "required": true
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "FirefoxIcon",
@@ -1301,7 +1370,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "FlaskIcon",
@@ -1313,7 +1383,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "ForkIcon",
@@ -1325,7 +1396,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "Form",
@@ -1349,7 +1421,8 @@
           "required": false
         }
       ],
-      "inherits": "FormHTMLAttributes<HTMLFormElement>"
+      "inherits": "FormHTMLAttributes<HTMLFormElement>",
+      "omitted": ["className", "style"]
     },
     {
       "name": "FormControl",
@@ -1411,7 +1484,8 @@
           "required": false
         }
       ],
-      "inherits": "HTMLAttributes<HTMLElement>"
+      "inherits": "HTMLAttributes<HTMLElement>",
+      "omitted": ["className", "style", "children"]
     },
     {
       "name": "FormIcon",
@@ -1423,7 +1497,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "FullscreenIcon",
@@ -1435,7 +1510,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "GitHubIcon",
@@ -1447,7 +1523,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "GoodIcon",
@@ -1459,7 +1536,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "Grid",
@@ -1489,7 +1567,8 @@
           "required": false
         }
       ],
-      "inherits": "HTMLAttributes<HTMLDivElement>"
+      "inherits": "HTMLAttributes<HTMLDivElement>",
+      "omitted": ["className", "style"]
     },
     {
       "name": "Heading",
@@ -1513,7 +1592,8 @@
           "required": false
         }
       ],
-      "inherits": "HTMLAttributes<HTMLHeadingElement>"
+      "inherits": "HTMLAttributes<HTMLHeadingElement>",
+      "omitted": ["className", "style"]
     },
     {
       "name": "HistoryIcon",
@@ -1525,7 +1605,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "HorizontalWritingIcon",
@@ -1537,7 +1618,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "IconButton",
@@ -1591,7 +1673,8 @@
           "required": false
         }
       ],
-      "inherits": "ComponentPropsWithRef<'button'>"
+      "inherits": "ComponentPropsWithRef<'button'>",
+      "omitted": ["type", "className", "style"]
     },
     {
       "name": "InformativeIcon",
@@ -1603,7 +1686,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "InterestingIcon",
@@ -1615,7 +1699,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "InView",
@@ -1657,7 +1742,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "LightModeIcon",
@@ -1669,7 +1755,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "LinkIcon",
@@ -1681,7 +1768,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "ListBox.Content",
@@ -1693,7 +1781,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "ListBox.IconTrigger",
@@ -1717,7 +1806,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "ListBox.Root",
@@ -1759,7 +1849,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "ListBox.Trigger",
@@ -1777,7 +1868,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "ListIcon",
@@ -1789,7 +1881,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "LocationIcon",
@@ -1801,7 +1894,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "LockIcon",
@@ -1813,7 +1907,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "LockOpenIcon",
@@ -1825,7 +1920,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "Logo",
@@ -1849,7 +1945,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "LogoIcon",
@@ -1861,7 +1958,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "MailIcon",
@@ -1873,7 +1971,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "Message.Content",
@@ -1891,7 +1990,8 @@
           "required": false
         }
       ],
-      "inherits": "HTMLAttributes<HTMLDivElement>"
+      "inherits": "HTMLAttributes<HTMLDivElement>",
+      "omitted": ["className", "style"]
     },
     {
       "name": "Message.Root",
@@ -1904,12 +2004,13 @@
         },
         {
           "name": "from",
-          "types": ["MessageRole"],
+          "types": ["'user'", "'assistant'"],
           "defaultValue": null,
           "required": true
         }
       ],
-      "inherits": "HTMLAttributes<HTMLDivElement>"
+      "inherits": "HTMLAttributes<HTMLDivElement>",
+      "omitted": ["className", "style"]
     },
     {
       "name": "MinusIcon",
@@ -1921,7 +2022,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "MixedColorIcon",
@@ -1933,7 +2035,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "Modal",
@@ -1993,7 +2096,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "NavigationMenuIcon",
@@ -2005,7 +2109,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "NewsIcon",
@@ -2017,14 +2122,15 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "NumberField",
       "props": [
         {
           "name": "defaultValue",
-          "types": ["never"],
+          "types": ["number"],
           "defaultValue": null,
           "required": false
         },
@@ -2077,7 +2183,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": "InputHTMLAttributes<HTMLInputElement>",
+      "omitted": ["type", "role", "className", "style", "children"]
     },
     {
       "name": "PackageIcon",
@@ -2089,7 +2196,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "Pagination",
@@ -2143,7 +2251,8 @@
           "required": false
         }
       ],
-      "inherits": "HTMLAttributes<HTMLElement>"
+      "inherits": "HTMLAttributes<HTMLElement>",
+      "omitted": ["className", "style", "children"]
     },
     {
       "name": "PaletteIcon",
@@ -2155,7 +2264,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "PasswordInput",
@@ -2191,7 +2301,8 @@
           "required": false
         }
       ],
-      "inherits": "InputHTMLAttributes<HTMLInputElement>"
+      "inherits": "InputHTMLAttributes<HTMLInputElement>",
+      "omitted": ["type", "className", "style"]
     },
     {
       "name": "PlusIcon",
@@ -2203,7 +2314,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "Popover.Content",
@@ -2221,7 +2333,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "Popover.Root",
@@ -2281,7 +2394,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "Popover.Trigger",
@@ -2293,7 +2407,8 @@
           "required": true
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "PortalRootProvider",
@@ -2311,7 +2426,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "PrepareIcon",
@@ -2323,7 +2439,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "Progress",
@@ -2353,7 +2470,8 @@
           "required": false
         }
       ],
-      "inherits": "HTMLAttributes<HTMLDivElement>"
+      "inherits": "HTMLAttributes<HTMLDivElement>",
+      "omitted": ["children", "className", "style"]
     },
     {
       "name": "PromptInput.Root",
@@ -2401,7 +2519,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "PromptInput.Submit",
@@ -2419,7 +2538,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "PromptInput.Textarea",
@@ -2443,7 +2563,15 @@
           "required": false
         }
       ],
-      "inherits": "TextareaHTMLAttributes<HTMLTextAreaElement>"
+      "inherits": "TextareaHTMLAttributes<HTMLTextAreaElement>",
+      "omitted": [
+        "value",
+        "defaultValue",
+        "onChange",
+        "className",
+        "style",
+        "rows"
+      ]
     },
     {
       "name": "PublishDateIcon",
@@ -2455,7 +2583,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "QiitaIcon",
@@ -2467,7 +2596,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "Radio",
@@ -2483,6 +2613,12 @@
           "types": ["readonly Option[]"],
           "defaultValue": null,
           "required": true
+        },
+        {
+          "name": "defaultValue",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
         },
         {
           "name": "disabled",
@@ -2523,7 +2659,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": "HTMLAttributes<HTMLDivElement>",
+      "omitted": ["role", "className", "style", "children"]
     },
     {
       "name": "RadioCard",
@@ -2542,7 +2679,7 @@
         },
         {
           "name": "defaultValue",
-          "types": ["never"],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         },
@@ -2571,7 +2708,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": "FieldsetHTMLAttributes<HTMLFieldSetElement>",
+      "omitted": ["className", "style", "children", "role"]
     },
     {
       "name": "Reasoning",
@@ -2607,7 +2745,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "RefreshIcon",
@@ -2619,7 +2758,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "Resize",
@@ -2637,7 +2777,8 @@
           "required": true
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "Response",
@@ -2655,7 +2796,8 @@
           "required": false
         }
       ],
-      "inherits": "StreamdownProps"
+      "inherits": "StreamdownProps",
+      "omitted": ["className", "mode"]
     },
     {
       "name": "RSSIcon",
@@ -2667,7 +2809,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "SafariIcon",
@@ -2679,7 +2822,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "ScrollLinked",
@@ -2691,7 +2835,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "Select",
@@ -2721,7 +2866,8 @@
           "required": false
         }
       ],
-      "inherits": "SelectHTMLAttributes<HTMLSelectElement>"
+      "inherits": "SelectHTMLAttributes<HTMLSelectElement>",
+      "omitted": ["className", "style"]
     },
     {
       "name": "SendIcon",
@@ -2733,7 +2879,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "Separator",
@@ -2751,7 +2898,8 @@
           "required": false
         }
       ],
-      "inherits": "HTMLAttributes<HTMLSpanElement>"
+      "inherits": "HTMLAttributes<HTMLSpanElement>",
+      "omitted": ["children", "role", "aria-orientation", "className", "style"]
     },
     {
       "name": "ShallowIcon",
@@ -2763,7 +2911,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "ShieldCheckIcon",
@@ -2775,7 +2924,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "Skeleton",
@@ -2799,7 +2949,8 @@
           "required": false
         }
       ],
-      "inherits": "HTMLAttributes<HTMLDivElement>"
+      "inherits": "HTMLAttributes<HTMLDivElement>",
+      "omitted": ["children", "className", "style"]
     },
     {
       "name": "SlideIcon",
@@ -2811,14 +2962,15 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "Slider",
       "props": [
         {
           "name": "defaultValue",
-          "types": ["never"],
+          "types": ["number"],
           "defaultValue": null,
           "required": false
         },
@@ -2865,7 +3017,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": "InputHTMLAttributes<HTMLInputElement>",
+      "omitted": ["type", "className", "style", "children"]
     },
     {
       "name": "SparklesIcon",
@@ -2877,7 +3030,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "Spinner",
@@ -2895,7 +3049,8 @@
           "required": false
         }
       ],
-      "inherits": "OutputHTMLAttributes<HTMLOutputElement>"
+      "inherits": "OutputHTMLAttributes<HTMLOutputElement>",
+      "omitted": ["children", "aria-label", "className", "style"]
     },
     {
       "name": "SquircleIcon",
@@ -2907,7 +3062,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "Stack",
@@ -2949,7 +3105,8 @@
           "required": false
         }
       ],
-      "inherits": "HTMLAttributes<HTMLDivElement>"
+      "inherits": "HTMLAttributes<HTMLDivElement>",
+      "omitted": ["className", "style"]
     },
     {
       "name": "SubscribeIcon",
@@ -2961,7 +3118,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "Suggestion.Item",
@@ -2985,7 +3143,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "Suggestion.List",
@@ -3003,7 +3162,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "Switch",
@@ -3022,7 +3182,7 @@
         },
         {
           "name": "defaultChecked",
-          "types": ["never"],
+          "types": ["boolean"],
           "defaultValue": null,
           "required": false
         },
@@ -3047,7 +3207,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": "InputHTMLAttributes<HTMLInputElement>",
+      "omitted": ["type", "role", "className", "style", "value", "children"]
     },
     {
       "name": "Table.Body",
@@ -3059,7 +3220,8 @@
           "required": false
         }
       ],
-      "inherits": "HTMLAttributes<HTMLTableSectionElement>"
+      "inherits": "HTMLAttributes<HTMLTableSectionElement>",
+      "omitted": ["className", "style"]
     },
     {
       "name": "Table.Caption",
@@ -3071,7 +3233,8 @@
           "required": false
         }
       ],
-      "inherits": "HTMLAttributes<HTMLTableCaptionElement>"
+      "inherits": "HTMLAttributes<HTMLTableCaptionElement>",
+      "omitted": ["className", "style"]
     },
     {
       "name": "Table.Cell",
@@ -3095,7 +3258,8 @@
           "required": false
         }
       ],
-      "inherits": "TdHTMLAttributes<HTMLTableCellElement>"
+      "inherits": "TdHTMLAttributes<HTMLTableCellElement>",
+      "omitted": ["className", "style"]
     },
     {
       "name": "Table.EmptyState",
@@ -3113,7 +3277,8 @@
           "required": true
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "Table.Head",
@@ -3125,7 +3290,8 @@
           "required": false
         }
       ],
-      "inherits": "HTMLAttributes<HTMLTableSectionElement>"
+      "inherits": "HTMLAttributes<HTMLTableSectionElement>",
+      "omitted": ["className", "style"]
     },
     {
       "name": "Table.HeaderCell",
@@ -3149,7 +3315,8 @@
           "required": false
         }
       ],
-      "inherits": "ThHTMLAttributes<HTMLTableCellElement>"
+      "inherits": "ThHTMLAttributes<HTMLTableCellElement>",
+      "omitted": ["className", "style"]
     },
     {
       "name": "Table.Root",
@@ -3161,7 +3328,8 @@
           "required": false
         }
       ],
-      "inherits": "TableHTMLAttributes<HTMLTableElement>"
+      "inherits": "TableHTMLAttributes<HTMLTableElement>",
+      "omitted": ["className", "style"]
     },
     {
       "name": "Table.Row",
@@ -3179,7 +3347,8 @@
           "required": false
         }
       ],
-      "inherits": "HTMLAttributes<HTMLTableRowElement>"
+      "inherits": "HTMLAttributes<HTMLTableRowElement>",
+      "omitted": ["className", "style"]
     },
     {
       "name": "TableIcon",
@@ -3191,7 +3360,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "Tabs.List",
@@ -3209,7 +3379,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "Tabs.Panel",
@@ -3227,7 +3398,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "Tabs.Root",
@@ -3263,7 +3435,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "Tabs.Tab",
@@ -3281,7 +3454,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "TagIcon",
@@ -3293,7 +3467,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "Textarea",
@@ -3329,7 +3504,8 @@
           "required": false
         }
       ],
-      "inherits": "TextareaHTMLAttributes<HTMLTextAreaElement>"
+      "inherits": "TextareaHTMLAttributes<HTMLTextAreaElement>",
+      "omitted": ["className", "style"]
     },
     {
       "name": "TextField",
@@ -3354,12 +3530,13 @@
         },
         {
           "name": "type",
-          "types": ["TextInputType"],
+          "types": ["'email'", "'search'", "'tel'", "'text'", "'url'"],
           "defaultValue": "'text'",
           "required": false
         }
       ],
-      "inherits": "InputHTMLAttributes<HTMLInputElement>"
+      "inherits": "InputHTMLAttributes<HTMLInputElement>",
+      "omitted": ["className", "style"]
     },
     {
       "name": "ToastProvider",
@@ -3383,7 +3560,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "ToolInvocation",
@@ -3443,7 +3621,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "Tooltip.Content",
@@ -3455,7 +3634,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "Tooltip.Root",
@@ -3503,7 +3683,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "Tooltip.Trigger",
@@ -3515,7 +3696,8 @@
           "required": true
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "TwitterIcon",
@@ -3527,7 +3709,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "UIProvider",
@@ -3545,7 +3728,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "UpdateDateIcon",
@@ -3557,7 +3741,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "VerticalWritingIcon",
@@ -3569,7 +3754,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "ViewIcon",
@@ -3581,7 +3767,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "ViewOffIcon",
@@ -3593,7 +3780,8 @@
           "required": false
         }
       ],
-      "inherits": null
+      "inherits": null,
+      "omitted": []
     }
   ]
 }

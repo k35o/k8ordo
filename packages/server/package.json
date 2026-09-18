@@ -31,6 +31,10 @@
       "types": "./dist/index.d.mts",
       "default": "./dist/index.mjs"
     },
+    "./runtime": {
+      "types": "./dist/runtime.d.mts",
+      "default": "./dist/runtime.mjs"
+    },
     "./package.json": "./package.json"
   },
   "publishConfig": {
@@ -64,8 +68,8 @@
   },
   "peerDependencies": {
     "@k8ordo/router": "workspace:^",
-    "react": ">=19.2.6",
-    "react-dom": ">=19.2.6",
+    "react": ">=19.3.0",
+    "react-dom": ">=19.3.0",
     "vite": ">=8.2.1"
   },
   "engines": {

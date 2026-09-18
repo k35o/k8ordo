@@ -20,7 +20,7 @@ export default function AvatarPage() {
         </p>
         <div>
           <Anchor
-            href={`${STORYBOOK_URL}/?path=/docs/components-avatar--docs`}
+            href={`${STORYBOOK_URL}/?path=/story/components-data-display-avatar--default`}
             openInNewTab
           >
             <Rich>{m.components.common.storybookLink()}</Rich>
@@ -51,16 +51,8 @@ export default function AvatarPage() {
           <Heading level="h3">
             <Rich>{m.components.avatar.withImageTitle()}</Rich>
           </Heading>
-          <ComponentPreview
-            code={`<Avatar
-  alt="Ada Lovelace"
-  src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80"
-/>`}
-          >
-            <Avatar
-              alt="Ada Lovelace"
-              src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80"
-            />
+          <ComponentPreview code='<Avatar alt="k8o" src="/k8o.jpg" />'>
+            <Avatar alt="k8o" src="/k8o.jpg" />
           </ComponentPreview>
         </div>
 

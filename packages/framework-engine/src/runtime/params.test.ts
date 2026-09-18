@@ -1,3 +1,5 @@
+import { AsyncLocalStorage } from 'node:async_hooks';
+
 import { parseParams } from './params';
 import type { ParamsSchema } from './params';
 
@@ -24,15 +26,14 @@ const knownLocale = schema((value) =>
 
 describe('parseParams', () => {
   it('replaces the strings a schema names with what it produced', () => {
-    expect(parseParams([numericId], { id: '42', locale: 'ja' })).toStrictEqual({
-      id: 42,
-      locale: 'ja',
-    });
+    expect(
+      parseParams([numericId], { id: '42', locale: 'ja' })?.params,
+    ).toStrictEqual({ id: 42, locale: 'ja' });
   });
 
   it('runs the stack outer-first and lets each schema keep what it did not name', () => {
     expect(
-      parseParams([knownLocale, numericId], { locale: 'en', id: '7' }),
+      parseParams([knownLocale, numericId], { locale: 'en', id: '7' })?.params,
     ).toStrictEqual({ locale: 'en', id: 7 });
   });
 
@@ -44,7 +45,7 @@ describe('parseParams', () => {
   });
 
   it('leaves params untouched when there is no schema', () => {
-    expect(parseParams([], { id: '42' })).toStrictEqual({ id: '42' });
+    expect(parseParams([], { id: '42' })?.params).toStrictEqual({ id: '42' });
   });
 
   it('refuses an asynchronous schema, because matching cannot wait', () => {
@@ -52,5 +53,32 @@ describe('parseParams', () => {
       '~standard': { validate: () => Promise.resolve({ value: {} }) },
     };
     expect(() => parseParams([slow], {})).toThrow(/synchronously/u);
+  });
+
+  it('keeps what the schemas write to the async context for the render of the stack that answered, and from the caller', async () => {
+    const store = new AsyncLocalStorage<string>();
+    const recordsLocale = schema((value) => {
+      store.enterWith(String(value['locale']));
+      return { locale: value['locale'] };
+    });
+
+    expect(
+      parseParams([recordsLocale, numericId], { locale: 'en', id: 'shoes' }),
+    ).toBeNull();
+    expect(store.getStore()).toBeUndefined();
+
+    const accepted = parseParams([recordsLocale, numericId], {
+      locale: 'en',
+      id: '7',
+    });
+    expect(store.getStore()).toBeUndefined();
+    const rendered = accepted?.enter(async () => {
+      await new Promise<void>((resolve) => {
+        setTimeout(resolve, 1);
+      });
+      return store.getStore();
+    });
+    expect(store.getStore()).toBeUndefined();
+    expect(await rendered).toBe('en');
   });
 });

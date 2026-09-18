@@ -5,7 +5,7 @@ export default defineConfig({
     '*': 'vp check --fix',
   },
   pack: {
-    entry: ['src/index.ts'],
+    entry: ['src/index.ts', 'src/runtime.ts'],
     format: 'esm',
     dts: true,
     outDir: 'dist',

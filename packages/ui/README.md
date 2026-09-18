@@ -30,8 +30,8 @@ npm install react react-dom
 
 | Package     | Version |
 | ----------- | ------- |
-| `react`     | ≥19.2.6 |
-| `react-dom` | ≥19.2.6 |
+| `react`     | ≥19.3.0 |
+| `react-dom` | ≥19.3.0 |
 
 Everything else is an optional peer, needed only for the entry point that uses
 it. Install one when you import the entry it belongs to.
@@ -39,12 +39,12 @@ it. Install one when you import the entry it belongs to.
 | Package                                   | Version         | Needed for                                                                    |
 | ----------------------------------------- | --------------- | ----------------------------------------------------------------------------- |
 | `typescript`                              | ≥7.0.2          | the shipped type declarations                                                 |
-| `@types/react`                            | ≥19.2.18        | the shipped type declarations                                                 |
-| `@types/react-dom`                        | ≥19.2.4         | the shipped type declarations                                                 |
+| `@types/react`                            | ≥19.3.0         | the shipped type declarations                                                 |
+| `@types/react-dom`                        | ≥19.3.0         | the shipped type declarations                                                 |
 | `tailwindcss`                             | ≥4.3.3          | the `tailwind.css` entry (see [Imports & Bundle Size](#imports--bundle-size)) |
-| `zod`                                     | ≥4.4.3          | generative-UI schemas                                                         |
+| `zod`                                     | ≥4.4.3 <5.0.0   | generative-UI schemas                                                         |
 | `@json-render/core`, `@json-render/react` | ≥0.20.0 <0.21.0 | `@k8ordo/ui/json-render`                                                      |
-| `@openuidev/lang-core`                    | ≥0.2.10 <0.3.0  | `@k8ordo/ui/openui`                                                           |
+| `@openuidev/lang-core`                    | ≥0.2.10 <0.3.0  | `@k8ordo/ui/openui`, `@k8ordo/ui/openui/prompt`                               |
 | `@openuidev/react-lang`                   | ≥0.2.9 <0.3.0   | `@k8ordo/ui/openui`                                                           |
 | `ai`                                      | ≥7.0.51         | `@k8ordo/ui/ai-sdk`                                                           |
 | `streamdown`                              | ≥2.5.0          | `@k8ordo/ui/ai/response`                                                      |
@@ -64,8 +64,9 @@ and plain-CSS projects can use the components without Tailwind.
 
 **No Tailwind in your project?** Import the prebuilt stylesheet — this single
 line is all you need. It works with CSS Modules or plain CSS: every library
-rule sits in `@layer`, so your own (unlayered) CSS takes precedence, and the
-design tokens are available as CSS custom properties (`var(--fg-mute)`, …).
+rule except the token declarations on `:root` / `.dark` sits in `@layer`, so
+your own (unlayered) CSS takes precedence, and the design tokens are available
+as CSS custom properties (`var(--fg-mute)`, …).
 
 ```css
 @import '@k8ordo/ui/styles.css';
@@ -145,11 +146,19 @@ function App() {
 
 Resolution order is **component prop > provider dictionary > built-in default (Japanese)**. Components that expose a wording prop of their own — `Spinner`'s `label`, `Alert`'s `closeLabel`, `PasswordInput`'s `showLabel` / `hideLabel`, `Pagination`'s `prevLabel` / `nextLabel` — take that prop over the dictionary.
 
-The subpath exports both dictionaries and the type:
+Besides `ja` / `en`, the subpath exports `dictionaries` (both of them keyed by locale, for `messages={dictionaries[locale]}`), `useMessages`, and the type:
 
 ```tsx
-import { en, ja, type Messages } from '@k8ordo/ui/i18n';
+import {
+  dictionaries,
+  en,
+  ja,
+  useMessages,
+  type Messages,
+} from '@k8ordo/ui/i18n';
 ```
+
+`useMessages` is a client hook that returns the wording in effect — the built-in dictionary with whatever you passed to `UIProvider` laid over it — for elements you draw yourself, such as through `renderItem`.
 
 `ja` / `en` live behind `@k8ordo/ui/i18n` rather than the root entry so the dictionaries stay out of the main bundle. See [docs/references/components.md](docs/references/components.md) for the full key list.
 
@@ -267,8 +276,8 @@ stories and rendered props rather than relying on trained knowledge:
 ### Utilities
 
 - **UIProvider** - Root provider for the library
-- **PortalRootProvider** / **usePortalRoot** - Customize the portal mount root
-- **Icons** - Icon component collection
+- **PortalRootProvider** / **usePortalRoot** - Share a portal container with your own `createPortal` calls (`Modal` provides its `<dialog>`; the library's own overlays do not read it)
+- **Icons** - Decorative icon components (`CloseIcon`, `ChevronIcon`, …; listed in `docs/references/components.md`)
 
 ## Usage Examples
 
@@ -350,7 +359,7 @@ function MyComponent() {
 
 ## Imports & Bundle Size
 
-All components ship from a single ESM entry point — there are no per-component subpaths. The package is tree-shakeable (`sideEffects` is limited to CSS), so bundlers drop everything you don't import:
+The core UI components ship from the root entry — there are no per-component subpaths; the AI chat components live under `@k8ordo/ui/ai`, with `Response` under `@k8ordo/ui/ai/response`. The package is tree-shakeable (`sideEffects` is limited to CSS), so bundlers drop everything you don't import:
 
 ```tsx
 // Named imports from the root entry — unused exports are tree-shaken away
@@ -359,20 +368,21 @@ import { Button, Card, Stack } from '@k8ordo/ui';
 
 Optional features live behind dedicated subpath exports:
 
-| Subpath                           | Contents                                                        |
-| --------------------------------- | --------------------------------------------------------------- |
-| `@k8ordo/ui`                      | All components and types                                        |
-| `@k8ordo/ui/tokens`               | Design token definitions                                        |
-| `@k8ordo/ui/i18n`                 | Message dictionaries (`ja` / `en`) and the `Messages` type      |
-| `@k8ordo/ui/ai`                   | AI chat components                                              |
-| `@k8ordo/ui/ai/response`          | `Response` Markdown renderer (needs optional peer `streamdown`) |
-| `@k8ordo/ui/ai-sdk`               | AI SDK adapter (needs optional peer `ai`)                       |
-| `@k8ordo/ui/json-render`          | json-render catalog (server-safe)                               |
-| `@k8ordo/ui/json-render/registry` | json-render registry (`'use client'`)                           |
-| `@k8ordo/ui/openui`               | OpenUI library (`'use client'`)                                 |
-| `@k8ordo/ui/openui/prompt`        | OpenUI prompt generation (server-safe)                          |
-| `@k8ordo/ui/styles.css`           | Prebuilt stylesheet (no Tailwind required)                      |
-| `@k8ordo/ui/tailwind.css`         | Tailwind source entry (requires Tailwind CSS 4)                 |
+| Subpath                           | Contents                                                             |
+| --------------------------------- | -------------------------------------------------------------------- |
+| `@k8ordo/ui`                      | Core UI components, their types, and provider hooks                  |
+| `@k8ordo/ui/tokens`               | Design token definitions                                             |
+| `@k8ordo/ui/props.json`           | Every component's props as JSON, generated from the types            |
+| `@k8ordo/ui/i18n`                 | `ja` / `en` / `dictionaries`, `useMessages`, and the `Messages` type |
+| `@k8ordo/ui/ai`                   | AI chat components                                                   |
+| `@k8ordo/ui/ai/response`          | `Response` Markdown renderer (needs optional peer `streamdown`)      |
+| `@k8ordo/ui/ai-sdk`               | AI SDK adapter (needs optional peer `ai`)                            |
+| `@k8ordo/ui/json-render`          | json-render catalog (server-safe)                                    |
+| `@k8ordo/ui/json-render/registry` | json-render registry (`'use client'`)                                |
+| `@k8ordo/ui/openui`               | OpenUI library (`'use client'`)                                      |
+| `@k8ordo/ui/openui/prompt`        | OpenUI prompt generation (server-safe)                               |
+| `@k8ordo/ui/styles.css`           | Prebuilt stylesheet (no Tailwind required)                           |
+| `@k8ordo/ui/tailwind.css`         | Tailwind source entry (requires Tailwind CSS 4)                      |
 
 ## AI Chat Components
 
@@ -383,7 +393,7 @@ Optional features live behind dedicated subpath exports:
 - **PromptInput** (`Root` / `Textarea` / `Submit`) - Message input form with IME-aware Enter-to-send and a stop button while streaming
 - **Reasoning** - Collapsible display of the model's thinking text
 - **Suggestion** (`List` / `Item`) - Suggested prompt chips
-- **ToolInvocation** - Tool call display with input/output and `state` (`'input-streaming' | 'input-available' | 'output-available' | 'output-error'`)
+- **ToolInvocation** - Tool call display with input/output and `state` (`'input-streaming' | 'input-available' | 'approval-requested' | 'approval-responded' | 'output-available' | 'output-error' | 'output-denied'`); `deniedReason` explains an `output-denied` call
 - **Response** (from `@k8ordo/ui/ai/response`) - Streaming-safe Markdown renderer built on streamdown
 
 Two of these need optional peer dependencies:
@@ -471,7 +481,7 @@ pnpm add @json-render/core @json-render/react zod
 pnpm add @openuidev/react-lang @openuidev/lang-core zod
 ```
 
-Supported components (**all 49**, both frameworks):
+Supported components (**all 48**, both frameworks):
 
 - **Layout / containers**: `Stack`, `Grid`, `Card`, `Form`
 - **Buttons / nav**: `Button`, `IconButton`, `Anchor`, `Breadcrumb`, `Pagination`
@@ -499,9 +509,10 @@ const systemPrompt = catalog.prompt({ customRules: [...uiRules] });
 // `JsonRenderUI` wires JSONUIProvider + Renderer and the registry for you —
 // just pass a spec. Pass `onStateChange` to collect form values.
 'use client';
+import type { UISpec } from '@k8ordo/ui/json-render';
 import { JsonRenderUI } from '@k8ordo/ui/json-render/registry';
 
-export function GenUi({ spec }: { spec: unknown }) {
+export function GenUi({ spec }: { spec: UISpec }) {
   return <JsonRenderUI spec={spec} />;
 }
 ```
@@ -571,7 +582,6 @@ To generate the prompt inside the client bundle instead, `library.prompt()` stil
 > - Make sure `@k8ordo/ui/styles.css` (or `tailwind.css` in Tailwind CSS 4 projects) is loaded and the app is wrapped in `UIProvider`.
 > - Both OpenUI entries need `@openuidev/lang-core` — `openui/prompt` is the React-free one, and `openui` builds its component library with it. Install it alongside `@openuidev/react-lang`: pnpm will not resolve it for you just because `react-lang` depends on it.
 > - `Tabs` panels are text content (`tabs: [{ label, content }]`); rich-component panels are a future enhancement.
-> - In OpenUI, `Card` can contain a `Stack` or `Grid`, but `Stack`/`Grid` cannot directly nest a `Stack`/`Grid`/`Card` (no self-referential schemas) — put nested layout inside a `Card`. json-render nests freely (slots-based).
 
 ## Accessibility
 

@@ -26,12 +26,18 @@ pnpm check         # check:write to auto-fix
 - **The mode is the dependency.** The reason there are two packages instead of
   one option is that a static application must not have this machinery
   available at all. Keep anything request-shaped here.
-- **The handler is the engine's, not ours.** `serve` loads the same
-  `dist/rsc/index.js` that `@k8ordo/static` calls at build time. If a page
+- **The handler is the engine's, not ours.** `serve` loads
+  `dist/rsc/index.js`, the engine's handler — the one `@k8ordo/static` also
+  builds and calls at build time, compiled there for that mode. If a page
   renders differently under the two modes, something has leaked.
 - **The plugin is `framework()`, the same name `@k8ordo/static` exports.**
   The mode is the import and nothing else, which is what makes a
   `vite.config.ts` identical under either package.
+- **The root entry is the plugin; `./runtime` is everything else.** The root
+  loads Vite, which a deployed application does not have installed, so
+  anything the application's own code imports — `serve`, `redirect`, their
+  types — goes in `src/runtime.ts`. `examples/server-basic`'s handler test
+  runs the build with Vite unresolvable to hold that.
 - **A request may only name a file inside the client build.** `safeJoin` is
   the only way `serve` turns a pathname into a path, and it is tested against
   the spellings traversal takes; decoding is the engine's `decodePathname`,
@@ -44,9 +50,10 @@ pnpm check         # check:write to auto-fix
 
 ```
 src/
-  static-file.ts  safeJoin — リクエストパス → ビルド出力内のパス(純関数)
-  serve.ts        node:http のサーバー(静的配信 + ハンドラ委譲)
-  index.ts        framework: engine そのまま
+  static-file.ts  safeJoin — request pathname → path inside the build output (pure)
+  serve.ts        the node:http server (static files + handing off to the handler)
+  runtime.ts      ./runtime: serve, and the engine's redirect and types — no Vite
+  index.ts        framework (the engine as is)
 ```
 
 ## Conventions

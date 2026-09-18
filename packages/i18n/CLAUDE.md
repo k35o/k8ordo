@@ -1,11 +1,12 @@
 # Agent guide — packages/i18n
 
 `@k8ordo/i18n` — the locale axis, owned. `defineLocales` is the set (the
-list, the default, membership, negotiation, the URL segment, the `[locale]`
-params schema, the current locale); `message` is one message as a function
-that reads the current locale where it is called. No provider, no hook. The
-shared discipline (React 19 / RSC assumed, Baseline newly available only, no
-polyfills) and how a new package joins are in the repository root's
+list, the default, membership, negotiation, the URL segment, the static
+build's path expansion (`paths`), the `[locale]` params schema, the current
+locale); `message` is one message as a function that reads the current
+locale where it is called. No provider, no hook. The shared discipline
+(React 19 / RSC assumed, Baseline newly available only, no polyfills) and
+how a new package joins are in the repository root's
 [`CLAUDE.md`](../../CLAUDE.md).
 
 User-facing documentation is in [`docs/GUIDE.md`](docs/GUIDE.md), shipped
@@ -35,12 +36,18 @@ pnpm check         # check:write to auto-fix
   same build runs in a browser) and stored on `globalThis` under
   `Symbol.for('@k8ordo/i18n/storage')`, because the RSC and SSR
   environments are separate module graphs in one process and both must see
-  the value. `paramsSchema.validate` sets it with `enterWith`, which scopes
-  it to the rest of that request's render: the engine matches the route,
-  then renders, then turns the payload into HTML, all as continuations of
-  that one synchronous call. In the browser `location.pathname`'s first
-  segment is the locale. Do not add a provider or a hook; do not pass the
-  locale as a prop.
+  the value. `paramsSchema.validate` sets it with `enterWith`, which writes
+  to whatever async context it runs in; the scope is the framework's side.
+  The engine runs each pattern's schemas in a context of their own and
+  starts the render in the one of the pattern that answered
+  (`packages/framework-engine/src/runtime/params.ts`), so a locale accepted
+  by a pattern a later schema refused is dropped, and a static build
+  rendering many pages from one context lends no page's locale to another or
+  to `404.html`. Outside the browser, a runtime with no `AsyncLocalStorage`
+  makes `validate` throw, as `run` does — accepting a locale `getLocale()`
+  cannot see would silently render the default. In the browser
+  `location.pathname`'s first segment is the locale. Do not add a provider
+  or a hook; do not pass the locale as a prop.
 - **The last set to define itself is the one messages read.**
   `defineLocales` registers `{ default, is }` on `globalThis` (last wins, so
   a dev server re-evaluating `i18n.ts` under HMR is what messages see next)
@@ -69,6 +76,7 @@ pnpm check         # check:write to auto-fix
 ```
 src/
   locales.ts          defineLocales(): the set; negotiate; localize/delocalize;
+                      paths (static path expansion);
                       the Standard Schema for [locale] (no schema library);
                       getLocale / run
   message.ts          message(): one message as a function; Message, Variants

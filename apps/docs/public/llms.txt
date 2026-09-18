@@ -22,7 +22,7 @@ Start with the Design Guide, then follow the reference most relevant to the task
 
 ## References
 
-- [Components](https://ordo.k8o.me/docs/references/components.md): full component list, import paths, props, and i18n — every component, compound ones included (`Dialog.Root`, `Tabs.Root`, …), renders from a Server Component — component wording comes from a dictionary that defaults to Japanese; `@k8ordo/ui/i18n` exports `ja` / `en` / the `Messages` type for `<UIProvider messages={...}>` (per-component wording props win over the dictionary).
+- [Components](https://ordo.k8o.me/docs/references/components.md): full component list, import paths, props, and i18n — every component, compound ones included (`Dialog.Root`, `Tabs.Root`, …), renders from a Server Component — component wording comes from a dictionary that defaults to Japanese; `@k8ordo/ui/i18n` exports `ja` / `en` / `dictionaries` (both keyed by locale) / the `Messages` type for `<UIProvider messages={...}>` (per-component wording props win over the dictionary), and `useMessages` to read the wording in effect in your own elements.
 - [AI chat](https://ordo.k8o.me/docs/references/ai-chat.md): AI chat components from `@k8ordo/ui/ai` (Conversation / Message / PromptInput / Reasoning / Suggestion / ToolInvocation), streaming Markdown `Response` from `@k8ordo/ui/ai/response` (optional peer `streamdown`), and `mapMessageParts` from `@k8ordo/ui/ai-sdk` to render AI SDK `UIMessage.parts` (optional peer `ai`).
 - [Generative UI](https://ordo.k8o.me/docs/references/generative-ui.md): use json-render / OpenUI to make an LLM generate UIs — `catalog.prompt()` (server-safe), `<JsonRenderUI spec={spec} />` (client), `validateGeneratedSpec()` (validate/repair LLM output), `satisfies UISpec` (typed specs), and `@k8ordo/ui/openui/prompt`.
 - [Typography](https://ordo.k8o.me/docs/references/typography.md): type scale and usage.
@@ -30,6 +30,11 @@ Start with the Design Guide, then follow the reference most relevant to the task
 - [Spacing & layout](https://ordo.k8o.me/docs/references/spatial-design.md): spacing scale and layout patterns.
 - [Interaction](https://ordo.k8o.me/docs/references/interaction-design.md): motion and interaction guidelines.
 - [Types](https://ordo.k8o.me/docs/references/types.md): the shared types for typing component props (`Status` / `Direction` / `Placement` / `ModalSide` / `DrawerSide` / `Option`).
+
+## Data exports
+
+- `@k8ordo/ui/tokens`: the design tokens resolved to JS values — `tokens` (`theme` / `vars` / `refs`), `meta`, and key unions such as `ColorToken`.
+- `@k8ordo/ui/props.json`: every component's props as JSON (`docs/props.generated.json`), generated from the types — the same data as the Props blocks in components.md.
 
 ---
 
@@ -53,40 +58,52 @@ These docs are served from <https://ordo.k8o.me>.
 
 ## Not supported
 
-`z.array(z.file())` derives repeated single-file rows, not one `multiple`
-input. Constraints behind a `.transform()` (or a `.pipe()` whose output JSON
-Schema cannot describe) are not derived: the field becomes a bare text input
-and is listed in `dropped`. A `<select>` with a placeholder option behind
-`.optional()` is still marked required. There is no input masking. A schema no
-control could satisfy is refused at derive time rather than left to fail on
-every submission: `z.number()` and `z.literal(1)` (use `z.coerce.number()`),
-`z.date()`, `z.bigint()`.
+`z.array(z.file())` derives repeated single-file rows, not one `multiple` input.
+Constraints behind a `.transform()` (or a `.pipe()` whose output JSON Schema
+cannot describe) are not derived: the field becomes a bare text input and is
+listed in `dropped`. There is no input masking. A schema no control could
+satisfy is refused at derive time rather than left to fail on every
+submission: `z.number()` and `z.literal(1)` (use `z.coerce.number()`),
+`z.date()`, `z.bigint()`, and `z.stringbool()` on a checkbox (use
+`z.boolean()`). A `z.custom()` that rejects strings cannot be refused at derive
+time: it derives as a text input, is listed in `dropped`, and fails on the
+server. Of `.refine()` / `.superRefine()` checks, `dropped` counts only the ones
+on the schema as a whole, not those on a single field, a nested object, or a
+row. Rules cannot target fields inside repeated rows.
 
 ## Entry points
 
 - `@k8ordo/form` — client. `useForm(fields, state?)` takes the whole
   `formFields` result (and the action's state, when there is one) and
   returns props for the `<form>` element — which also hear a reset, React's
-  own after a successful action included — a
+  own after every form action included — a
   `field(path)` accessor giving input attributes, the current error, and
   `invalid` / `required`, an `array(path)` accessor for repeated rows, and
   `isDirty`. Also `useAsyncCheck` for server-answered per-field checks and
   `HiddenValue` for components that render no input of their own. The types
   of the `formFields` result (`FormFields`, `DerivedField`, `DerivedArray`,
-  `DroppedCheck`) are exported here as well, since the result crosses to the
-  client as a prop.
-- `@k8ordo/form/server` — server. `formFields(schema)` derives serializable
-  fields plus a `dropped` list of checks HTML cannot express (outside
-  production the list is also logged once per schema with `console.warn`),
-  and throws on a schema no form can represent (including a leaf that could
-  never accept a submitted string, such as `z.number()`);
-  `parseForm(schema, formData)` validates a
-  submission and returns typed data or per-field errors with the submitted
-  values. An untouched control reaches the schema as what it actually submits:
-  `''` for text, `false` for a checkbox, and nothing at all for a number or a
-  file, so `z.coerce.number()` cannot read a blank field as 0.
+  `DroppedCheck`, `FieldInput`, `ValidityFlag`, `Rule`) are exported here as
+  well, since the result crosses to the client as a prop, and so are
+  `FormState` and the return types (`UseFormReturn`, `FieldView`, `ArrayView`,
+  `RowView`, `AsyncCheck`).
+- `@k8ordo/form/server` — server. `formFields(schemaOrDefinition)` derives
+  serializable fields plus a `dropped` list of checks HTML cannot express
+  (outside production the list is also logged once per schema with
+  `console.warn`), and throws on a schema no form can represent (including a
+  leaf that could never accept a submitted string, such as `z.number()`);
+  `parseForm(schemaOrDefinition, formData)` validates a submission and returns
+  typed data or per-field errors with the submitted values. An untouched
+  control reaches the schema as what it actually submits: `''` for text,
+  `false` for a checkbox, and nothing at all for a number, a
+  `z.coerce.bigint()`, a file, or a choice (a radio group with none selected, a
+  `<select>` on a `value=""` placeholder), so `z.coerce.number()` cannot read a
+  blank field as 0 and `z.enum([…]).optional()` can be left empty. A checkbox
+  group always echoes as an array.
   `defineForm(schema, rules)` attaches cross-field rules (`sameAs`,
-  `minChecked`, `requiredWhen`) typed against the schema's paths.
+  `minChecked`, `requiredWhen`) typed against the schema's paths. Types:
+  `ParseResult`, `FormDefinition`, `Rule`, `FormState`, and the `formFields`
+  result's `FormFields`, `DerivedField`, `DerivedArray`, `DroppedCheck`,
+  `FieldInput`, `ValidityFlag`.
 
 ---
 
@@ -95,11 +112,13 @@ every submission: `z.number()` and `z.literal(1)` (use `z.coerce.number()`),
 > Declare state by where it lives: `definePageState` (typed URL search params
 > plus hidden history-entry state — the two faces of one entry, updated
 > atomically over the Navigation API), `defineLocalState` (localStorage,
-> cross-tab), `defineMemoryState` (a typed shared box, resets on reload).
-> One zod schema per place derives the server read, canonical links, salvage
-> of stale data, and a client subscription with exact per-key change
-> detection. Works through links and GET forms before JavaScript loads;
-> imperative url updates ride a Navigation-API-intercepting router.
+> cross-tab), `defineMemoryState` (a typed shared box with no schema, resets
+> on reload). One zod schema per boundary place (url, entry, local) derives
+> the server read, canonical links, salvage of stale data, and a client
+> subscription with exact per-key change detection. Links and GET forms write
+> the URL before JavaScript loads under any router (the server renders what
+> they wrote wherever it reads the search); imperative url updates ride a
+> Navigation-API-intercepting router.
 >
 > Like every k8ordo package it assumes React 19 and Server Components, uses
 > only what has reached Baseline newly available, and ships no polyfills or
@@ -119,10 +138,11 @@ These docs are served from <https://ordo.k8o.me>.
 
 - `@k8ordo/state` — `definePageState(key, { url?, entry? })` returns a pure
   definition usable from server and client: `parseUrl(searchParams)` reads
-  the url slot typed with defaults applied and per-field salvage (wherever the
-  router hands a page its search — under `@k8ordo/static` / `@k8ordo/server` a
-  page receives `params` and `pathname` only, and the url slot is read in the
-  browser);
+  the url slot typed with defaults applied and invalid values salvaged
+  (wherever the router hands a page its search — under `@k8ordo/static` /
+  `@k8ordo/server` a page receives `params` and `pathname` (plus a
+  headers-and-cookies `request` under `@k8ordo/server`) but never the search,
+  and the url slot is read in the browser);
   `href(base, values?)` builds a canonical link keeping the path literal in
   the type; `search(values?)` returns the query string alone.
   `defineLocalState(key, schema)` and `defineMemoryState(key, initial)`
@@ -133,11 +153,15 @@ These docs are served from <https://ordo.k8o.me>.
   fallback. `useAppState(definition, keys?, { initialUrl? })`
   (client) works on any kind and returns `[state, update]` — state is the
   flat merge of a page definition's slots; `update(patch)` applies
-  synchronously, batches per handler into one write (url+entry atomically via
-  `navigation.navigate()`, entry-only via `updateCurrentEntry()`, local via
-  one `setItem`), and returns `{ committed, finished }` promise handles
-  (settled for non-navigating kinds; `{ history: 'push' }` exists only on
-  page state). `resetStateRegistry()` clears stores between tests. Augment
+  synchronously, batches the calls a handler makes with no `await` between
+  them into one write (url+entry changes atomically via
+  `navigation.navigate()`, entry-only changes via `updateCurrentEntry()`,
+  local via one `setItem`; memory applies per call), and returns
+  `{ committed, finished }` promise handles (for non-navigating kinds they
+  settle once the write lands, and a write localStorage refuses rejects them
+  with its error; `{ history: 'push' }` exists only on page state and takes
+  effect only when a url value changes).
+  `resetStateRegistry()` clears stores between tests. Augment
   `interface Register { routes: typeof routes }` — the same line as for
   `@k8ordo/router` — to constrain `href` paths to the route table's linkable
   paths; a router without a table registers its own path union as
@@ -171,11 +195,13 @@ These docs are served from <https://ordo.k8o.me>.
 ## Entry point
 
 - `@k8ordo/router` — `defineRoutes(record)` returns a table whose one operation
-  is `match(pathname)`; `<Router routes>` mounts it on the Navigation API and
+  is `match(pathname, accept?)` — a match `accept` declines is passed over and
+  the walk goes on to the next pattern, which is how the framework skips a
+  param a schema refused; `<Router routes>` mounts it on the Navigation API and
   `<Outlet />` renders the rest of the matched stack; a branch's `error`
-  component (`{ error, reset }` props, type `ErrorComponent`) renders in the
-  layout's hole when what is below throws, keyed by `NavigationGeneration`
-  so leaving the page clears it. `href(pattern, params?)`
+  component (props `ErrorProps`, `{ error, reset }`; type `ErrorComponent`)
+  renders in the layout's hole when what is below throws, keyed by
+  `NavigationGeneration` so leaving the page clears it. `href(pattern, params?)`
   and `navigateTo(pattern, params?, options?)` build and perform navigations
   from the pattern **string** alone — no table import, so no cycle — with
   params inferred from the literal and the pattern itself checked once
@@ -183,33 +209,53 @@ These docs are served from <https://ordo.k8o.me>.
   typed params and throws if rendered under a different pattern; under the
   framework `Register` also carries `params` — the type each pattern's
   `paramsSchema` produces — so `href` takes a param as the page receives it
-  (`ParsedParams` / `ParsedParamsMap` / `ParamsSchemaFor` are the types the
-  generated code uses); `useRoute()`
-  is the untyped form. `RouteOf<typeof routes>` is the pathname union to feed
-  `@k8ordo/state`'s `Register`. `usePathname()` reads the platform's
+  (`ParsedParams` / `ParsedParamsMap` / `ParamsSchemaFor` / `ParamsOf` /
+  `ErrorComponent` are the types the generated code imports); `useRoute()`
+  is the untyped form.
+  `@k8ordo/state`'s `Register` takes the same `routes: typeof routes`;
+  `RouteOf<typeof routes>` is that pathname space as a union, for any other
+  typed-path consumer. `usePathname()` reads the platform's
   pathname — never the search — so it works with or without a table, which
   makes it the location hook that also works under the framework;
-  `useMatch(pattern)` / `matchPath(pattern, pathname)` answer whether that
-  pattern — or, with a trailing `/*`, anything strictly below it — is the pathname
-  showing, with its params, table-free, so a sidebar can ask which section is
-  open under the framework too; `normalizePathname(pathname)` is the router's
-  own trailing-slash rule;
+  `useMatch(pattern, options?)` / `matchPath(pattern, pathname, options?)`
+  answer whether that pattern — or, with a trailing `/*`, anything strictly
+  below it — is the pathname showing, with its params, table-free, so a
+  sidebar can ask which section is open under the framework too, and
+  `{ inclusive: true }` on either counts a `/*` pattern's own index in;
+  `normalizePathname(pathname)` is the router's own trailing-slash rule;
   `bindParams(() => ({ locale }))` returns `{ href, navigateTo }` with those
   params supplied by the source at each call (still overridable), for a
-  segment every link shares; `useMatch(pattern, { inclusive: true })` counts
-  a `/*` pattern's own index in. `PageProps<P>` / `LayoutProps<P>` type a
-  framework route file's props by its pattern (`params` from the registered
-  schemas, `request` when the generated `Register` says the mode has one).
+  segment every link shares — a pattern that names a param still takes
+  `options` third, after an `undefined` params slot if the source supplies
+  them all. `PageProps<P>` / `LayoutProps<P>` type a framework route file's
+  props by its pattern (`PageProps`' `params` from the registered schemas,
+  `LayoutProps`' `params` always strings and its `P` only a pattern the table
+  has a page at; `request` when the generated `Register` says the mode has
+  one).
   `<PathnameProvider pathname>` seeds it for a server render and hydration,
   and is mounted by `<Router>` and by both mode runtimes, never by an
-  application. Every page change is applied in a transition tagged
+  application. Every page change renders in the background, outside any
+  pending async action (so awaiting `finished` inside one settles), tagged
   `navigation` and `navigation-push` / `navigation-replace` /
   `navigation-traverse` (`addTransitionType`), so a `<ViewTransition
   update={{ navigation: 'auto', default: 'none' }}>` around the pages'
   hole animates page changes and no other transition. `useInterceptedNavigation({claim, load, apply})` returns
   `{ generation }` and is the
   navigation primitive `<Router>` is built on, and the seam the framework
-  uses to render server-produced trees instead.
+  uses to render server-produced trees instead; its host renders what
+  `apply` set through `useDeferredValue`.
+  Exported types, by group — the table: `Routes` (`{ kind, record, match }`),
+  `RoutesRecord`, `RouteNode`, `RouteComponent`, `Match`, `ErrorComponent`,
+  `ErrorProps`; patterns: `PatternOf`, `NavigablePatternOf`, `RouteOf`,
+  `MatchablePattern`; registration: `Register`, `RegisteredPattern`,
+  `RegisteredNavigablePattern`, `RegisteredParams` (what a link takes),
+  `RegisteredPageParams` (what a page receives), `PageProps`, `LayoutProps`;
+  paths and schemas: `ParamsOf`, `PathFor`, `ParamValue`,
+  `StandardSchemaLike`, `SchemaOutput`, `ParamsSchemaFor`, `ParsedParams`,
+  `ParsedParamsMap`; options and handlers: `NavigateToOptions`
+  (`{ history? }`), `MatchOptions` (`{ inclusive? }`), `BoundParams` /
+  `BoundLinks` (what `bindParams`'s source returns / what it returns),
+  `NavigationHandler` (`{ claim, load, apply }`).
 
 ---
 
@@ -217,17 +263,19 @@ These docs are served from <https://ordo.k8o.me>.
 
 > Builds a k8ordo application into files: every route rendered ahead of time,
 > output a directory a static host can serve. The mode is the dependency —
-> installing this package means Server Actions and request-time data do not
-> exist as APIs. `src/routes/` is the pathname space (page/layout/not-found,
-> `[param]`, `(group)`, `_private`), a page or layout may `export const paramsSchema` (any Standard Schema, synchronous)
-> to type its parameters — a refused value makes the pattern not answer, so the
-> walk goes on to `not-found.tsx` — an `error.tsx` shows in place of what
-> throws below it (in the browser; at build time a page that throws stops the
-> build), a `redirect.ts` is written as a page that sends the visitor on, a
-> page renders its own `<title>` (React 19 hoists it), boundaries are React's
-> own `'use client'`
-> with `server-only` modules barred from the client bundle, and the route table
-> and type wiring are generated rather than hand-written.
+> installing this package means request-time data does not exist as an API, and
+> a `'use server'` module, which the RSC pipeline still compiles, is refused by
+> name. `src/routes/` is the pathname space
+> (page/layout/not-found/error/redirect, `[param]`, `(group)`, `_private`), a
+> page or layout may `export const paramsSchema` (any Standard Schema,
+> synchronous) to type its parameters — a refused value makes the pattern not
+> answer, so the walk goes on to `not-found.tsx` — an `error.tsx` shows in place
+> of what throws below it (in the browser; at build time a Server Component that
+> throws stops the build), a `redirect.ts` is written as a page that sends the
+> visitor on, a page renders its own `<title>` (React 19 hoists it), boundaries
+> are React's own `'use client'` with `server-only` modules barred from the
+> client bundle, and the route table and type wiring are generated rather than
+> hand-written.
 >
 > Like every k8ordo package it assumes React 19 and Server Components, uses
 > only what has reached Baseline newly available, and ships no polyfills or
@@ -248,7 +296,8 @@ These docs are served from <https://ordo.k8o.me>.
   the import and nothing else). `options.routesDir` moves the route directory (default
   `src/routes`); `options.paths` supplies concrete pathnames for routes with
   parameters, and a parameterised route left uncovered fails the build;
-  `options.site` (the origin) makes the build also write `sitemap.xml`. A
+  `options.site` (the origin) makes the build also write `sitemap.xml`;
+  `StaticOptions` is the type of those options. A
   `'use server'` module fails it too — in `vite dev` as well as the build: a
   file cannot receive a Server Action, so the application wants
   `@k8ordo/server` instead.
@@ -259,19 +308,18 @@ These docs are served from <https://ordo.k8o.me>.
 
 > Runs a k8ordo application: every request answered by rendering, so route
 > parameters need no list of values, an unknown URL is a real 404, and a form
-> can post to a Server Action.
-> The mode is the dependency — the alternative is `@k8ordo/static`, which
-> renders every route at build time. `src/routes/` is the pathname space
-> (page/layout/not-found, `[param]`, `(group)`, `_private`), a page or layout
-> may `export const paramsSchema` (any Standard Schema, synchronous) to type its
-> parameters — a refused value makes the pattern not answer, so the walk goes
-> on to `not-found.tsx` under a real 404 — an `error.tsx` shows in place of
-> what throws below it, a `redirect.ts` answers 307/308, a Server Action ends
-> with `redirect()` (303 without JavaScript, a navigation with it), a page
-> receives `request` (read-only headers and cookies) and renders its own
-> `<title>` — boundaries are React's own `'use client'` with `server-only`
-> modules barred from the client bundle, and the route table and type wiring are generated rather than
-> hand-written.
+> can post to a Server Action. The mode is the dependency — the alternative is
+> `@k8ordo/static`, which renders every route at build time. `src/routes/` is
+> the pathname space (page/layout/not-found/error/redirect, `[param]`,
+> `(group)`, `_private`), a page or layout may `export const paramsSchema` (any
+> Standard Schema, synchronous) to type its parameters — a refused value makes
+> the pattern not answer, so the walk goes on to `not-found.tsx` under a real
+> 404 — an `error.tsx` shows in place of what throws below it, a `redirect.ts`
+> answers 307/308, a Server Action ends with `redirect()` (303 without
+> JavaScript, a navigation with it), a page receives `request` (read-only
+> headers and cookies) and renders its own `<title>` — boundaries are React's
+> own `'use client'` with `server-only` modules barred from the client bundle,
+> and the route table and type wiring are generated rather than hand-written.
 >
 > Like every k8ordo package it assumes React 19 and Server Components, uses
 > only what has reached Baseline newly available, and ships no polyfills or
@@ -290,15 +338,22 @@ These docs are served from <https://ordo.k8o.me>.
 - `@k8ordo/server` — `framework(options?)` returns the Vite plugins for an
   application that runs (the same name `@k8ordo/static` exports, so the mode
   is the import and nothing else); `options.routesDir` moves the route directory
-  (default `src/routes`). `serve({ dist?, port?, host? })` serves a build and returns
-  `{ port, url, close }` (`port: 0` takes a free port):
+  (default `src/routes`); `ServerOptions` is the type of `options`. This
+  entry loads Vite and is for `vite.config.ts` only.
+- `@k8ordo/server/runtime` — what the application's own code imports, without
+  loading Vite, so the built application runs from an install without dev
+  dependencies. `serve({ dist?, port?, host? })` (`ServeOptions`: `dist`
+  defaults to `dist` under the working directory, `port` to `3000`, `host` to
+  `localhost`) serves a build and returns a `Server`, `{ port, url, close }`
+  (`port: 0` takes a free port):
   the client build's files as they are, everything else through the request
   handler. The built handler is a plain
   `(request: Request) => Promise<Response>` default-exported from
   `dist/rsc/index.js`, so another host can run it directly. `serve` only ever answers a
   request from a file inside the client build, whatever the pathname is
-  spelled like. `redirect(to, { permanent? })` ends a Server Action by sending
-  the visitor to `to`; `RouteRequest` is the type of the `request` prop.
+  spelled like. `redirect(to)` ends a Server Action by sending the visitor to
+  `to`; `RedirectTarget` is the type of what a `redirect.ts` default-exports,
+  and `RouteRequest` the type of the `request` prop.
 
 ---
 
@@ -355,13 +410,14 @@ These docs are served from <https://ordo.k8o.me>.
 # @k8ordo/color-scheme
 
 > The colour-scheme axis of an application, owned. The visitor's preference
-> — light, dark, or nothing, which follows the system — lives in
-> localStorage through `@k8ordo/state`; one rule resolves it against
-> `prefers-color-scheme`; the result is the `dark` class on `<html>` (what
-> `@k8ordo/ui` and Tailwind's dark variant read). `<ColorSchemeProvider>` in
-> the root layout renders the inline script that puts the class on before
-> the first paint and keeps it in step afterwards; `useColorScheme()` reads
-> it. The server renders the default.
+> — light, dark, or nothing, which follows the default (the system unless
+> told otherwise) — lives in localStorage through `@k8ordo/state`; one rule
+> resolves it against `prefers-color-scheme`; the result is the `dark` class
+> on `<html>` (what `@k8ordo/ui` reads, and Tailwind's `dark:` with a
+> class-based `@custom-variant dark`). `<ColorSchemeProvider>` in the root
+> layout renders the inline script that puts the class on before the first
+> paint and keeps it in step afterwards; `useColorScheme()` reads it. The
+> server renders the default (`light` when that default is `'system'`).
 >
 > Like every k8ordo package it assumes React 19 and Server Components, uses
 > only what has reached Baseline newly available, and ships no polyfills or
@@ -385,7 +441,8 @@ These docs are served from <https://ordo.k8o.me>.
   system, and keeps the class in step. `useColorScheme()` returns
   `{ scheme, preference, setPreference }`: `scheme` is `'light' | 'dark'`
   on screen, `preference` is `'light' | 'dark' | 'system'`, and
-  `setPreference('system')` clears the stored row. `colorSchemeState` is the
-  `@k8ordo/state` local definition itself (`k8ordo-state:color-scheme`).
+  `setPreference('system')` clears the stored preference, so the default
+  applies again. `colorSchemeState` is the `@k8ordo/state` local definition
+  itself (`k8ordo-state:color-scheme`).
   Types: `ColorScheme`, `ColorSchemePreference`, `ColorSchemeProviderProps`,
   `UseColorScheme`.

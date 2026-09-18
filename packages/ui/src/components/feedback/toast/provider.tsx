@@ -176,6 +176,7 @@ export const ToastProvider: FC<
             ],
           }),
         );
+        return id;
       },
       close: (id: string) => {
         setState((prev) =>

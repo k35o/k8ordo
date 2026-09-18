@@ -173,7 +173,7 @@ export const engine = (
       server.watcher.on('unlink', (file: string) => {
         regenerate(file);
       });
-      // A file gaining or losing its `params` export changes the table too;
+      // A file gaining or losing its `paramsSchema` export changes the table too;
       // writeIfChanged keeps an edit that changed nothing from restarting HMR.
       server.watcher.on('change', (file: string) => {
         regenerate(file);

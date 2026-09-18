@@ -20,7 +20,7 @@ export default function ProgressPage() {
         </p>
         <div>
           <Anchor
-            href={`${STORYBOOK_URL}/?path=/docs/components-progress--docs`}
+            href={`${STORYBOOK_URL}/?path=/story/components-feedback-progress--primary`}
             openInNewTab
           >
             <Rich>{m.components.common.storybookLink()}</Rich>

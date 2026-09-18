@@ -6,7 +6,8 @@
  * is a field.
  *
  * Wrappers (`.optional()`, `.nullable()`, `.default()`, …) are peeled the same
- * way the runtime walk peels them, so the two advertise the same paths.
+ * way the runtime walk peels them, so the two advertise the same paths — except
+ * where the walk refuses the schema outright, as it does a nullable object.
  */
 
 type Join<Prefix extends string, Key extends string> = Prefix extends ''

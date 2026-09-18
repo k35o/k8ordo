@@ -20,7 +20,7 @@ export default function SkeletonPage() {
         </p>
         <div>
           <Anchor
-            href={`${STORYBOOK_URL}/?path=/docs/components-skeleton--docs`}
+            href={`${STORYBOOK_URL}/?path=/story/components-feedback-skeleton--default`}
             openInNewTab
           >
             <Rich>{m.components.common.storybookLink()}</Rich>

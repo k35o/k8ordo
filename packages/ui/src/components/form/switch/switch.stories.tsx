@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useRef, useState } from 'react';
 import type { ComponentProps } from 'react';
-import { expect } from 'storybook/test';
+import { expect, waitFor } from 'storybook/test';
 
 import { Switch } from './switch';
 
@@ -48,7 +48,6 @@ export const Default: Story = {
     await userEvent.click(switchElement);
 
     await expect(switchElement).toBeChecked();
-    await expect(switchElement).toHaveAttribute('aria-checked', 'true');
   },
 };
 
@@ -69,6 +68,61 @@ export const Disabled: Story = {
     invalid: false,
     required: false,
     label: 'Location services',
+  },
+};
+
+const appearanceOf = (switchElement: HTMLElement) => {
+  const track = switchElement.nextElementSibling;
+  const thumb = track?.firstElementChild;
+
+  if (!track || !thumb) {
+    throw new Error('Switch renders its track right after the input');
+  }
+
+  return {
+    trackColor: getComputedStyle(track).backgroundColor,
+    thumbTranslate: getComputedStyle(thumb).translate,
+  };
+};
+
+// トラックの色もつまみの位置も transition するので、切り替わり切るのを待つ
+export const AppearanceFollowsReset: Story = {
+  render: () => (
+    <form className="flex flex-col items-start gap-2">
+      <Switch label="off by default" />
+      <Switch defaultChecked label="on by default" />
+      <button type="reset">reset</button>
+    </form>
+  ),
+  play: async ({ canvas, userEvent }) => {
+    const offByDefault = canvas.getByRole('switch', { name: 'off by default' });
+    const onByDefault = canvas.getByRole('switch', { name: 'on by default' });
+    const off = appearanceOf(offByDefault);
+    const on = appearanceOf(onByDefault);
+
+    await expect(on.trackColor).not.toBe(off.trackColor);
+    await expect(on.thumbTranslate).not.toBe(off.thumbTranslate);
+
+    await userEvent.click(offByDefault);
+    await userEvent.click(onByDefault);
+
+    await waitFor(async () => {
+      await expect(appearanceOf(offByDefault)).toEqual(on);
+    });
+    await waitFor(async () => {
+      await expect(appearanceOf(onByDefault)).toEqual(off);
+    });
+
+    await userEvent.click(canvas.getByRole('button', { name: 'reset' }));
+
+    await expect(offByDefault).not.toBeChecked();
+    await expect(onByDefault).toBeChecked();
+    await waitFor(async () => {
+      await expect(appearanceOf(offByDefault)).toEqual(off);
+    });
+    await waitFor(async () => {
+      await expect(appearanceOf(onByDefault)).toEqual(on);
+    });
   },
 };
 

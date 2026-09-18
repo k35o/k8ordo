@@ -21,7 +21,7 @@ export default function SwitchPage() {
         </p>
         <div>
           <Anchor
-            href={`${STORYBOOK_URL}/?path=/docs/components-form-switch--docs`}
+            href={`${STORYBOOK_URL}/?path=/story/components-form-switch--default`}
             openInNewTab
           >
             <Rich>{m.components.common.storybookLink()}</Rich>

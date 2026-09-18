@@ -37,7 +37,7 @@ const FEATURES: PackageFeature[] = [
 ];
 
 const EXAMPLE = `// routes/layout.tsx — Provider を body の中で全部に被せる。
-// 先頭にインラインスクリプトを描くので、最初の描画から dark が付いている
+// 先頭に描くインラインスクリプトが、最初の描画の前に dark を付けるかを決める
 import { ColorSchemeProvider } from '@k8ordo/color-scheme';
 
 <html suppressHydrationWarning>
@@ -52,7 +52,7 @@ import { useColorScheme } from '@k8ordo/color-scheme';
 
 const { scheme, preference, setPreference } = useColorScheme();
 setPreference(scheme === 'dark' ? 'light' : 'dark'); // 切り替える
-setPreference('system'); // 保存行を消してシステムに追従する
+setPreference('system'); // 保存した設定を外す
 
 // 訪問者が選ぶまでダークで始めたいなら、1 回だけ言う
 <ColorSchemeProvider defaultPreference="dark">`;

@@ -27,7 +27,7 @@ export default function AutocompletePage() {
         </p>
         <div>
           <Anchor
-            href={`${STORYBOOK_URL}/?path=/docs/components-form-autocomplete--docs`}
+            href={`${STORYBOOK_URL}/?path=/story/components-form-autocomplete--default`}
             openInNewTab
           >
             <Rich>{m.components.common.storybookLink()}</Rich>

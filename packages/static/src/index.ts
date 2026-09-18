@@ -52,7 +52,8 @@ const RUNTIME_DIR = fileURLToPath(new URL('./runtime/', import.meta.url));
 
 /**
  * Static mode: the same request handler the server mode runs per request is
- * called once per route at build time, and its answers are written to files.
+ * called at build time — for each route's HTML and again for its payload —
+ * and its answers are written to files.
  * There is no server here, and the build refuses a Server Action, because a
  * file cannot receive one.
  *
@@ -271,7 +272,7 @@ const escapeXml = (value: string): string =>
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&apos;');
 
-export const sitemap = (site: string, pathnames: readonly string[]): string => {
+const sitemap = (site: string, pathnames: readonly string[]): string => {
   const origin = site.endsWith('/') ? site.slice(0, -1) : site;
   const urls = pathnames
     .toSorted()

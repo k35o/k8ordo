@@ -66,13 +66,13 @@ Vary the radius with the element's role.
 
 Express depth with a soft, gentle shadow.
 
-| Use                      | Style                                                      |
-| ------------------------ | ---------------------------------------------------------- |
-| Card (default)           | `shadow-sm` (with `appearance="shadow"`)                   |
-| Card (bordered)          | `border border-border-mute` (with `appearance="bordered"`) |
-| Modal / Dialog / Tooltip | `shadow-md`                                                |
-| Dropdown / ListBox       | `shadow-md`                                                |
-| Button                   | None                                                       |
+| Use                      | Style                                                  |
+| ------------------------ | ------------------------------------------------------ |
+| Card (default)           | `shadow-sm` (with `variant="shadow"`)                  |
+| Card (outlined)          | `border border-border-mute` (with `variant="outline"`) |
+| Modal / Dialog / Tooltip | `shadow-md`                                            |
+| Dropdown / ListBox       | `shadow-md`                                            |
+| Button                   | None                                                   |
 
 Never use `shadow-xl` or heavier.
 
@@ -86,8 +86,8 @@ white cards.
 ```tsx
 // Good: a white card floating on a grey ground
 <div className="bg-bg-subtle min-h-screen">
-  <Card appearance="shadow">
-    <div className="p-8">Content</div>
+  <Card variant="shadow">
+    <div className="p-6">Content</div>
   </Card>
 </div>
 ```

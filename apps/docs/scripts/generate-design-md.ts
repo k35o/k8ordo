@@ -203,7 +203,7 @@ function build(): string {
 
     `# k8ordo UI Design System`,
 
-    `\`@k8ordo/ui\` のデザインシステム仕様。デザイントークン・タイポグラフィ・コンポーネントの単一の参照元です。人間にも LLM／エージェントにも読めるよう、\`https://ordo.k8o.me/design\` の Markdown 版として配信しています。
+    `\`@k8ordo/ui\` のデザインシステム仕様。デザイントークン・タイポグラフィ・コンポーネントの単一の参照元です。人間にも LLM／エージェントにも読めるよう、\`https://ordo.k8o.me/design.md\` として配信しています（人向けのトークン一覧は \`https://ordo.k8o.me/ja/ui/theming\`）。
 
 - パッケージ: \`@k8ordo/ui\`（npm, public）
 - スタック: React + Tailwind CSS 4 + OKLCH カラー
@@ -378,7 +378,7 @@ font-family: 'Noto Sans JP', 'M PLUS 2', sans-serif;
 
 - 基本は \`transition-colors duration-150 ease-out\`
 - **300ms を超えない。bounce / spring 系のイージングは使わない。**
-- \`prefers-reduced-motion: reduce\` を尊重（Popover アニメーション・motion ライブラリが自動対応）
+- \`prefers-reduced-motion: reduce\` を尊重（アニメーションはすべて CSS で、\`base.css\` の \`@media (prefers-reduced-motion)\` が止める。スクロールに追従する ScrollLinked の進捗バーは機能的な表示なので対象外。Conversation の最下部へのスクロールは JS 側で instant に切り替える）
 - 組み込み: \`ao-anim-scale\`（\`:popover-open\` で 0.18s scale）/ \`ao-anim-fade\`（0.15s opacity）
 
 ### インタラクティブ状態
@@ -414,9 +414,9 @@ import { UIProvider, Button, Card } from '@k8ordo/ui';
 
 ### Buttons
 
-- **Button** — \`size: 'sm'|'md'|'lg'\`, \`color: 'primary'|'gray'\`, \`variant: 'contained'|'outlined'|'skeleton'\`, \`fullWidth\`, \`startIcon\`, \`endIcon\`, \`disabled\`
-- **IconButton** — \`label\`（必須・aria-label）, \`bg: 'transparent'|'base'|'primary'\`, \`size\`
-- **LinkButton** / **IconLink** — Button / IconButton のリンク版。\`href\`, \`openInNewTab?\`, \`renderAnchor?\`
+- **Button** — \`size: 'sm'|'md'|'lg'\`, \`color: 'primary'|'secondary'|'base'\`, \`variant: 'solid'|'outline'|'skeleton'\`, \`fullWidth\`, \`startIcon\`, \`endIcon\`, \`disabled\`
+- **IconButton** — \`label\`（必須・aria-label）, \`color: 'transparent'|'base'|'primary'|'secondary'\`, \`size\`
+- リンクとして描画するときは Button / IconButton に \`renderItem\` を渡す（\`<button>\` 専用の \`disabled\` / \`type\` を外し、残りの props を \`<a>\` などへ展開する。IconButton は tooltip の配線と ref を持つ \`triggerProps\` も展開する）
 
 ### Data display
 
@@ -424,7 +424,7 @@ import { UIProvider, Button, Card } from '@k8ordo/ui';
 - **Avatar** — \`src\` / \`name\`（イニシャル）/ \`fallback\`, \`size\`
 - **Badge** — \`label\`, \`tone: 'neutral'|'info'|'success'|'warning'|'error'\`, \`variant: 'solid'|'outline'\`, \`size\`, \`interactive\`
 - **Card** — \`width: 'full'|'fit'\`, \`variant: 'shadow'|'outline'\`, \`interactive\`
-- **Code** — \`children: string\`（コードブロック）
+- **Code** — \`children: string\`（インラインコード。色文字列には色見本が付く）
 - **Heading** — \`level: 'h1'..'h6'\`（必須）, \`id?\`, \`lineClamp?\`
 - **Table**（compound: \`Root\` / \`Caption\` / \`Head\` / \`Body\` / \`Row\` / \`HeaderCell\` / \`Cell\` / \`EmptyState\`）
 
@@ -434,7 +434,7 @@ import { UIProvider, Button, Card } from '@k8ordo/ui';
 - **Progress** — \`value\`, \`max\`（必須）, \`min?\`, \`label?\`
 - **Skeleton** — \`shape: 'rect'|'circle'\`, \`size\`, \`animate\`
 - **Spinner** — \`size\`, \`label?\`（aria-live）
-- **Toast** — \`ToastProvider\` + \`useToast()\`（\`open(tone, message, options?)\` / \`close(id)\` / \`closeAll()\`）
+- **Toast** — \`ToastProvider\` + \`useToast()\`（\`open(tone, message, options?)\` は id を返す / \`close(id)\` / \`closeAll()\`）
 
 ### Form
 
@@ -476,14 +476,14 @@ import { UIProvider, Button, Card } from '@k8ordo/ui';
 - **Modal** — \`isOpen?\`/\`onClose?\`/\`defaultOpen?\`, \`side: 'center'|'bottom'|'right'|'left'\`（\`ModalSide\`）
 - **Dialog**（compound: \`Root\` / \`Header\` / \`Content\`）
 - **Drawer** — \`title\`, \`isOpen\`, \`onClose\`, \`side: 'left'|'right'\`（\`DrawerSide\`。Modal の \`side\` の部分集合）
-- **Popover**（compound: \`Root\` / \`Trigger\` / \`Content\`、\`placement\`, \`type\`）
+- **Popover**（compound: \`Root\` / \`Trigger\` / \`Content\`、\`placement\`, \`role\`）
 - **Tooltip**（compound: \`Root\` / \`Trigger\` / \`Content\`、\`placement\`）
 - **DropdownMenu**（compound: \`Root\`(\`placement\`) / \`Trigger\`(\`label\`) / \`IconTrigger\`(\`icon\`, \`label\`) / \`Content\` / \`Item\`(\`label\`)）
-- **ListBox**（compound: \`Root\` / \`Trigger\` / \`Content\`、\`options\` / \`value\` / \`onSelect\`）
+- **ListBox**（compound: \`Root\` / \`Trigger\` / \`IconTrigger\` / \`Content\`、\`options\` / \`value\` / \`onChange\`）
 
 ### Icons
 
-すべてのアイコンが \`size\` prop を受け取る（\`'xs'|'sm'|'md'|'lg'|'xl'|'2xl'|'3xl'\`、デフォルト \`md\`）。\`xs\`=12px, \`sm\`=16px, \`md\`=24px, \`lg\`=32px, \`xl\`=40px, \`2xl\`=48px, \`3xl\`=56px。特殊: \`ChevronIcon\`（\`direction\` 必須）, \`AlertIcon\`（\`status\` 必須）。
+アイコンは \`size\` prop を受け取る（\`'xs'|'sm'|'md'|'lg'|'xl'|'2xl'|'3xl'\`、デフォルト \`md\`）。\`xs\`=12px, \`sm\`=16px, \`md\`=24px, \`lg\`=32px, \`xl\`=40px, \`2xl\`=48px, \`3xl\`=56px。特殊: \`ChevronIcon\`（\`direction\` 必須）, \`AlertIcon\`（\`status\` 必須）。\`Logo\` だけは \`size\` を持たない SVG 本体で、大きさは \`className\` で決める（\`size\` で揃えるなら \`LogoIcon\`）。
 
 ### Providers
 

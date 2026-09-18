@@ -2,7 +2,7 @@
 
 `@k8ordo/framework-engine` — the machinery `@k8ordo/static` and
 `@k8ordo/server` are both built on. **Private**: it is never published. Each
-mode package bundles it into its own `dist/index.mjs` at pack time
+mode package bundles it into its own entries at pack time
 (`deps.alwaysBundle` in the mode's `vite.config.ts`) and copies
 `dist/runtime/` — the three environment entries — beside it, then tells the
 engine where they landed (`EngineHost.runtimeDir`). Nothing outside this
@@ -18,7 +18,7 @@ newly available only) is in the repository root's [`CLAUDE.md`](../../CLAUDE.md)
 ## Commands
 
 ```bash
-pnpm test          # unit (node)
+pnpm test          # unit (node) + browser (Chromium via Playwright)
 pnpm build         # vp pack (the mode packages bundle the result)
 pnpm typecheck
 pnpm check         # check:write to auto-fix
@@ -75,6 +75,11 @@ ParamsSchemaFor<pattern>`, lists per page pattern the schemas along its
   runs them synchronously inside `routes.match`'s `accept`, so a refused
   value is a pattern that did not match and the catch-all answers under 404.
   A catch-all's own params are never validated; a layout receives strings.
+  Each pattern's schemas run in an async context of their own, and the
+  render starts inside the answering pattern's (`enter`): a schema may write
+  there (`@k8ordo/i18n` records the accepted locale), and neither a refused
+  pattern's write nor any other reaches the handler's caller, which under
+  `@k8ordo/static` is one context for every page.
 - **`error.tsx` is the router's `error`; `redirect.ts` is answered before the
   table.** The generator puts an error file on its branch (a page with an
   error becomes a branch of its own) and lists redirects in `redirects`,
@@ -85,8 +90,13 @@ ParamsSchemaFor<pattern>`, lists per page pattern the schemas along its
 - **The request reaches a page only under a server.** `K8ORDO_MODE` is
   defined by the host; the handler attaches `request` (headers, cookies) only
   under `@k8ordo/server`, and the generator emits the field only there. Under
-  `@k8ordo/static` the handler also buffers the HTML and answers 500 when the
-  render threw, so the build stops naming the page instead of writing it.
+  `@k8ordo/static` the handler also buffers the HTML and answers 500 when a
+  Server Component threw inside a Suspense boundary, so the build stops naming
+  the page instead of writing it; a throw with no boundary above it rejects
+  the HTML render itself, and the build stops on that error. `renderHtml`
+  also writes every Suspense boundary in place — it waits for `allReady` and
+  outlines nothing — so a file never carries a hidden segment for a script to
+  move in after hydration has started.
 - **One pattern walk.** `declaredPatterns(tree)` is the order the matcher
   tries patterns — pages and redirects, literals before params, the
   catch-all last in its branch — and everything that asks "which URLs does
@@ -98,11 +108,12 @@ ParamsSchemaFor<pattern>`, lists per page pattern the schemas along its
   and `packages/server/docs/GUIDE.md` between `<!-- shared:<name> -->`
   markers by `scripts/sync-guides.ts`; `pnpm check` fails on drift and
   `pnpm check:write` re-syncs. Edit the fragment, never the copy.
-- **A route file's props are checked by the generator.** `routes.gen.ts`
+- **A route file's props are checked in the generated table.** `routes.gen.ts`
   emits `satisfies Page<'/products/:id'>` / `satisfies Layout<'/:locale'>`
-  per file, so a mistyped param name fails the build without any route file
+  per file, so a mistyped param name is a type error without any route file
   importing a helper — the layout's pattern is the prefix every route below
-  it shares.
+  it shares. `tsc` reports it in the generated file; `vite build` does not
+  type-check, so the build itself still passes.
 
 ## Layout
 
@@ -115,10 +126,17 @@ src/
   plugin/server-actions.ts   which modules declared 'use server'
   runtime/entry.{rsc,ssr,browser}.tsx  the three environments
   runtime/app-router.tsx     the client half: navigation + payloads
-  runtime/params.ts          runs the params schemas along a matched stack
+  runtime/payload.ts         what a page is on the wire (tree, pathname, action result)
+  runtime/payload-path.ts    where a payload lives: /x → /x/index.rsc
+  runtime/is-payload.ts      whether an answer is a payload or a document load
+  runtime/recover.tsx        a failed client render falls back to a document load
+  runtime/reload.ts          location.reload, the one seam a test can watch
+  runtime/params.ts          runs the paramsSchema exports along a matched stack
+  runtime/pathname.ts        decodePathname, before a pathname may name a file
   runtime/redirect.ts        redirect() / redirect.ts targets
   runtime/request.ts         the read-only request a page receives
   runtime/render.tsx         the matched stack, nested through children
+  runtime/virtual.d.ts       types of virtual:k8ordo/routes and K8ORDO_MODE
   index.ts
 ```
 

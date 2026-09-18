@@ -16,7 +16,7 @@ This example showcases:
 ### Prerequisites
 
 - Node.js >=24.13.0
-- pnpm 11.x (`pnpm@11.5.0`)
+- pnpm 12.x (`pnpm@12.4.0`)
 
 ### Installation & Setup
 
@@ -26,8 +26,11 @@ From the root of the k8ordo UI monorepo:
 # Install dependencies
 pnpm install
 
+# Build the library first (the example resolves @k8ordo/ui from its dist/)
+pnpm --filter @k8ordo/ui build
+
 # Navigate to this example
-cd examples/vite
+cd examples/ui-integrations
 
 # Start development server (Vite+ / vp)
 pnpm dev
@@ -38,19 +41,24 @@ The application will be available at `http://localhost:5173`.
 ## Project Structure
 
 ```
-examples/vite/
+examples/ui-integrations/
 ├── src/
-│   ├── app.tsx              # Hosts the json-render and OpenUI demos
+│   ├── app.tsx                    # Hosts the json-render and OpenUI demos
 │   ├── json-render/
-│   │   └── demo.tsx         # Typed UISpec rendered with <JsonRenderUI />
+│   │   ├── demo.tsx               # Typed UISpec rendered with <JsonRenderUI />
+│   │   ├── demo.test.ts           # The spec passes validateGeneratedSpec with no fixes
+│   │   └── demo.browser.test.tsx  # The spec renders and keeps form state in Chromium
 │   ├── openui/
-│   │   └── demo.tsx         # OpenUI-Lang DSL rendered with library + Renderer
-│   ├── main.tsx             # Application entry point
-│   └── vite-env.d.ts        # Vite type declarations
-├── index.html               # HTML template
-├── package.json             # Project dependencies and scripts
-├── tsconfig.json            # TypeScript configuration
-└── vite.config.ts           # Vite configuration (vite-plus)
+│   │   ├── demo.tsx               # OpenUI-Lang DSL rendered with library + Renderer
+│   │   ├── demo.test.ts           # The DSL parses and every statement reaches the tree
+│   │   └── demo.browser.test.tsx  # The DSL renders and keeps form state in Chromium
+│   ├── main.tsx                   # Application entry point
+│   └── vite-env.d.ts              # Vite type declarations
+├── index.html                     # HTML template
+├── package.json                   # Project dependencies and scripts
+├── tsconfig.json                  # TypeScript project references
+├── tsconfig.app.json              # TypeScript configuration for src/
+└── vite.config.ts                 # Vite configuration (vite-plus), with the spec / render test projects
 ```
 
 ## What's Included
@@ -88,12 +96,15 @@ export function OpenUiDemo() {
 
 - `@k8ordo/ui` (workspace)
 - `@json-render/core`, `@json-render/react` (json-render demo)
-- `@openuidev/react-lang` (OpenUI demo)
+- `@openuidev/react-lang`, `@openuidev/lang-core` (OpenUI demo)
 - `zod` (shared by both adapters)
+- `tailwindcss`, `@tailwindcss/vite` (Tailwind CSS 4)
 
 ## Available Scripts
 
 - `pnpm dev` - Start the development server (`vp dev`)
+- `pnpm build` - Build for production (`vp build`)
+- `pnpm test` - Run the tests (`vp test`): the `spec` project checks the demo spec and DSL against the adapters, and the `render` project mounts both demos in headless Chromium
 - `pnpm typecheck` - Run TypeScript type checking
 - `pnpm check` - Run Oxlint/Oxfmt linting/formatting checks (`vp check`)
 - `pnpm check:write` - Run `vp check --fix` to auto-fix issues
@@ -110,7 +121,7 @@ Tailwind CSS 4 is configured via the `@tailwindcss/vite` plugin. k8ordo UI's tok
 are loaded by importing `@k8ordo/ui/tailwind.css` — the Tailwind source entry,
 so the design tokens stay usable in this app's own markup. (Projects without
 Tailwind import the prebuilt `@k8ordo/ui/styles.css` instead — see
-`examples/css-modules`.)
+`examples/ui-css-modules`.)
 
 ### TypeScript
 

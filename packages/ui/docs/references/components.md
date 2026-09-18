@@ -28,10 +28,10 @@ source of surprise.
 `renderAnchor` on `Anchor` and `Breadcrumb.Link`. The component computes
 everything and hands back the exact props it would have put on its own element,
 so substituting an `<a>`, a framework `<Link>`, or your own button loses
-nothing: the resolved `className`, the composed `children` (icons and the
-pending spinner included), the click handler, the disabled and pending state,
-the `ref`, and every `aria-*` / `data-*` / native attribute the caller passed
-in. Spread the bag onto whatever you render.
+nothing. For `Button` and `IconButton` that is the resolved `className`, the
+composed `children` (icons and the pending spinner included), the click handler,
+the disabled and pending state, the `ref`, and every `aria-*` / `data-*` /
+native attribute the caller passed in. Spread the bag onto whatever you render.
 
 - Handlers and the `ref` are typed for `HTMLElement` rather than for the
   element the component would have rendered, so the bag spreads onto any tag.
@@ -44,6 +44,18 @@ in. Spread the bag onto whatever you render.
 - Spreading onto a real `<button>` is exact, but write `type` on the element
   anyway: the `button-has-type` lint rule cannot see a `type` that arrives
   through a spread.
+
+The link components own less, so their bags are smaller:
+
+- `Anchor` hands back `href`, `className`, `children` (with the new-tab icon on
+  an external link), `target` / `rel` on an external link, and every other
+  anchor attribute the caller passed, plus `kind` (`'internal'` |
+  `'external'`). `kind` is not an attribute: destructure it away before
+  spreading, or use it to choose between a framework `<Link>` and a plain `<a>`.
+  There is no `ref` and no disabled state.
+- `Breadcrumb.Link` hands back `href`, `className`, and `children` only — it
+  takes no other attributes. A `current` link renders
+  `<span aria-current="page">` and does not call `renderAnchor`.
 
 **Filling a slot** — `renderInput` on `FormControl`, `renderItem` on
 `Popover.Trigger`, `Tooltip.Trigger`, `FileField.Trigger`, and `Alert`'s
@@ -86,6 +98,7 @@ Props:
 - `startIcon`: `ReactNode`
 - `type`: `'button'` | `'submit'` (default: `'button'`)
 - `variant`: `'solid'` | `'outline'` | `'skeleton'` (default: `'solid'`)
+- Other props are forwarded to `ComponentPropsWithRef<'button'>`, except `className` / `style`.
 
 `renderItem` replaces the `<button>`; see [Render props](#render-props) for the
 contract. It receives `className`, the composed `children`, `ref`, `type`,
@@ -129,6 +142,7 @@ Props:
 - `size`: `'sm'` | `'md'` | `'lg'` (default: `'md'`)
 - `tooltipDisabled`: `boolean` (default: `false`)
 - `tooltipPlacement`: `Placement` (default: `'top'`)
+- Other props are forwarded to `ComponentPropsWithRef<'button'>`, except `type` / `className` / `style`.
 
 `renderItem` replaces the `<button>` under the same contract as `Button`'s,
 with one addition: the tooltip wiring is kept in a nested `triggerProps` so it
@@ -175,6 +189,10 @@ Props:
 - `href`: `T` (required)
 - `openInNewTab`: `boolean` (default: `false`)
 - `renderAnchor`: `(props: RenderAnchorProps<T>) => ReactNode` (default: `defaultRenderAnchor`)
+- Other props are forwarded to `AnchorHTMLAttributes<HTMLAnchorElement>`, except `target` / `rel` / `className` / `style`.
+
+`renderAnchor` replaces the `<a>`; its bag is described under
+[Render props](#render-props).
 
 ## Layout and navigation
 
@@ -248,6 +266,9 @@ Props (Breadcrumb.Link):
 - `current`: `boolean` (default: `false`)
 - `renderAnchor`: `(props: RenderBreadcrumbAnchorProps<T>) => ReactNode` (default: `defaultRenderBreadcrumbAnchor`)
 
+`Breadcrumb.Link`'s `renderAnchor` receives `href`, `className`, and `children`;
+see [Render props](#render-props).
+
 Props (Breadcrumb.Item):
 
 - `children`: `ReactNode`
@@ -272,6 +293,7 @@ Props:
 - `nextLabel`: `string`
 - `prevLabel`: `string`
 - `ref`: `Ref<HTMLElement>`
+- Other props are forwarded to `HTMLAttributes<HTMLElement>`, except `className` / `style` / `children`.
 
 ### Tabs
 
@@ -341,6 +363,7 @@ Props:
 - `interactive`: `boolean` (default: `false`)
 - `variant`: `'shadow'` | `'outline'` (default: `'shadow'`)
 - `width`: `'full'` | `'fit'` (default: `'full'`)
+- Other props are forwarded to `HTMLAttributes<HTMLDivElement>`, except `className` / `style`.
 
 ### Separator
 
@@ -359,6 +382,7 @@ Props:
 
 - `color`: `'base'` | `'mute'` | `'subtle'` (default: `'base'`)
 - `orientation`: `'horizontal'` | `'vertical'` (default: `'horizontal'`)
+- Other props are forwarded to `HTMLAttributes<HTMLSpanElement>`, except `children` / `role` / `aria-orientation` / `className` / `style`.
 
 ### ScrollLinked
 
@@ -412,6 +436,7 @@ Props:
 - `gap`: `GapSize` (default: `'md'`)
 - `justify`: `'start'` | `'center'` | `'end'` | `'between'`
 - `padding`: `PaddingSize`
+- Other props are forwarded to `HTMLAttributes<HTMLDivElement>`, except `className` / `style`.
 
 ### Grid
 
@@ -439,12 +464,13 @@ Props:
 - `cols`: `1` | `2` | `3` | `4` | `5` | `6` | `'auto-fill'` | `'auto-fit'` (default: `'auto-fill'`)
 - `gap`: `GapSize` (default: `'md'`)
 - `minItemSize`: `24` | `32` | `40` | `48` | `64` | `80` (default: `48`)
+- Other props are forwarded to `HTMLAttributes<HTMLDivElement>`, except `className` / `style`.
 
 ## Forms
 
-Form components are used together with `FormControl`'s `renderInput` pattern. Every form component supports both controlled and uncontrolled use.
+Form components are used together with `FormControl`'s `renderInput` pattern. Every form component except `FileField` supports both controlled and uncontrolled use; `FileField.Root` takes only `defaultValue` and keeps the selected files itself.
 
-`ref` reaches the real element (`input` / `textarea` / `select` / `fieldset`). `Textarea` and `FileField` use a ref internally but compose it with yours, so the `ref` you pass still reaches the element. `Radio` (a group that renders several inputs) and `FormControl` (a wrapper) do not take a `ref`.
+`ref` reaches the real element (`input` / `textarea` / `select` / `fieldset`). `FileField` uses a ref internally but composes it with yours, so the `ref` you pass still reaches the element. `Radio` (a group that renders several inputs) puts its `ref` on the radiogroup `<div>`, and `FormControl` (a wrapper) on its wrapper element — a `<div>`, or a `<fieldset>` with `labelAs="legend"`.
 
 ### Form
 
@@ -468,6 +494,7 @@ Props:
 - `children`: `ReactNode` (required)
 - `action`: `((formData: FormData) => void | Promise<void>)` | `string`
 - `ref`: `Ref<HTMLFormElement>`
+- Other props are forwarded to `FormHTMLAttributes<HTMLFormElement>`, except `className` / `style`.
 
 ### FormControl
 
@@ -498,6 +525,7 @@ Props:
 - `labelAs`: `'label'` | `'legend'` (default: `'label'`)
 - `ref`: `Ref<HTMLElement>`
 - `required`: `boolean` (default: `false`)
+- Other props are forwarded to `HTMLAttributes<HTMLElement>`, except `className` / `style` / `children`.
 
 `renderInput` receives `{ id, 'aria-describedby', 'aria-labelledby', disabled, invalid, required }`.
 
@@ -525,7 +553,8 @@ Props:
 - `children`: `ReactNode`
 - `invalid`: `boolean` (default: `false`)
 - `ref`: `Ref<HTMLInputElement>`
-- `type`: `TextInputType` (default: `'text'`)
+- `type`: `'email'` | `'search'` | `'tel'` | `'text'` | `'url'` (default: `'text'`)
+- Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `className` / `style`.
 
 ### Textarea
 
@@ -549,6 +578,7 @@ Props:
 - `fullHeight`: `boolean` (default: `false`)
 - `invalid`: `boolean` (default: `false`)
 - `ref`: `Ref<HTMLTextAreaElement>`
+- Other props are forwarded to `TextareaHTMLAttributes<HTMLTextAreaElement>`, except `className` / `style`.
 
 ### NumberField
 
@@ -594,7 +624,7 @@ your own state from the form's `onReset`.
 
 Props:
 
-- `defaultValue`: `never`
+- `defaultValue`: `number`
 - `invalid`: `boolean` (default: `false`)
 - `max`: `number` (default: `9_007_199_254_740_991`)
 - `min`: `number` (default: `-9_007_199_254_740_991`)
@@ -603,6 +633,7 @@ Props:
 - `ref`: `Ref<HTMLInputElement>`
 - `step`: `number` (default: `1`)
 - `value`: `number` | `null`
+- Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `type` / `role` / `className` / `style` / `children`.
 
 ### PasswordInput
 
@@ -630,6 +661,7 @@ Props:
 - `invalid`: `boolean` (default: `false`)
 - `ref`: `Ref<HTMLInputElement>`
 - `showLabel`: `string`
+- Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `type` / `className` / `style`.
 
 ### Select
 
@@ -656,6 +688,7 @@ Props:
 - `children`: `ReactNode`
 - `invalid`: `boolean` (default: `false`)
 - `ref`: `Ref<HTMLSelectElement>`
+- Other props are forwarded to `SelectHTMLAttributes<HTMLSelectElement>`, except `className` / `style`.
 
 ### Autocomplete
 
@@ -679,11 +712,12 @@ Props:
 
 - `id`: `string` (required)
 - `options`: `readonly Option[]` (required)
-- `defaultValue`: `never`
+- `defaultValue`: `string[]`
 - `invalid`: `boolean` (default: `false`)
 - `onChange`: `(value: string[]) => void`
 - `ref`: `Ref<HTMLInputElement>`
 - `value`: `string[]`
+- Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `type` / `role` / `className` / `style` / `children` / `autoComplete` / `aria-autocomplete` / `aria-controls` / `aria-expanded` / `aria-activedescendant`.
 
 ### Checkbox
 
@@ -703,11 +737,12 @@ Props:
 
 - `label`: `string` (required)
 - `checked`: `boolean`
-- `defaultChecked`: `never`
+- `defaultChecked`: `boolean`
 - `invalid`: `boolean` (default: `false`)
 - `itemValue`: `string`
 - `onChange`: `(checked: boolean, event: ChangeEvent<HTMLInputElement>) => void`
 - `ref`: `Ref<HTMLInputElement>`
+- Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `type` / `className` / `style` / `value` / `children`.
 
 ### CheckboxGroup
 
@@ -736,22 +771,24 @@ Props (CheckboxGroup.Item):
 
 - `label`: `string` (required)
 - `checked`: `boolean`
-- `defaultChecked`: `never`
+- `defaultChecked`: `boolean`
 - `invalid`: `boolean` (default: `false`)
 - `itemValue`: `string`
 - `onChange`: `(checked: boolean, event: ChangeEvent<HTMLInputElement>) => void`
 - `ref`: `Ref<HTMLInputElement>`
+- Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `type` / `className` / `style` / `value` / `children`.
 
 Props (CheckboxGroup.Root):
 
 - `aria-labelledby`: `string` (required)
 - `name`: `string` (required)
 - `children`: `ReactNode`
-- `defaultValue`: `never`
+- `defaultValue`: `string[]`
 - `invalid`: `boolean` (default: `false`)
 - `onChange`: `(value: string[]) => void`
 - `ref`: `Ref<HTMLFieldSetElement>`
 - `value`: `string[]`
+- Other props are forwarded to `FieldsetHTMLAttributes<HTMLFieldSetElement>`, except `className` / `style` / `role`.
 
 ### CheckboxCard
 
@@ -761,6 +798,7 @@ A card-styled checkbox.
 import { CheckboxCard } from '@k8ordo/ui';
 
 <CheckboxCard
+  aria-labelledby="plan-checkbox"
   name="plan"
   disabled={false}
   options={[
@@ -781,11 +819,12 @@ Props:
 
 - `aria-labelledby`: `string` (required)
 - `options`: `readonly CheckboxCardOption[]` (required)
-- `defaultValue`: `never`
+- `defaultValue`: `string[]`
 - `invalid`: `boolean` (default: `false`)
 - `onChange`: `(value: string[]) => void`
 - `ref`: `Ref<HTMLFieldSetElement>`
 - `value`: `string[]`
+- Other props are forwarded to `FieldsetHTMLAttributes<HTMLFieldSetElement>`, except `className` / `style` / `children` / `role`.
 
 ### Radio
 
@@ -808,12 +847,14 @@ Props:
 
 - `aria-labelledby`: `string` (required)
 - `options`: `readonly Option[]` (required)
+- `defaultValue`: `string`
 - `disabled`: `boolean` (default: `false`)
 - `invalid`: `boolean` (default: `false`)
 - `name`: `string`
 - `onChange`: `(value: string, event: ChangeEvent<HTMLInputElement>) => void`
 - `ref`: `Ref<HTMLDivElement>`
 - `value`: `string`
+- Other props are forwarded to `HTMLAttributes<HTMLDivElement>`, except `role` / `className` / `style` / `children`.
 
 ### RadioCard
 
@@ -844,11 +885,12 @@ Props:
 
 - `aria-labelledby`: `string` (required)
 - `options`: `readonly RadioCardOption[]` (required)
-- `defaultValue`: `never`
+- `defaultValue`: `string`
 - `invalid`: `boolean` (default: `false`)
 - `onChange`: `(value: string) => void`
 - `ref`: `Ref<HTMLFieldSetElement>`
 - `value`: `string`
+- Other props are forwarded to `FieldsetHTMLAttributes<HTMLFieldSetElement>`, except `className` / `style` / `children` / `role`.
 
 ### Slider
 
@@ -871,7 +913,7 @@ import { Slider } from '@k8ordo/ui';
 
 Props:
 
-- `defaultValue`: `never`
+- `defaultValue`: `number`
 - `invalid`: `boolean` (default: `false`)
 - `max`: `number` (default: `100`)
 - `min`: `number` (default: `0`)
@@ -879,6 +921,7 @@ Props:
 - `ref`: `Ref<HTMLInputElement>`
 - `step`: `number` (default: `1`)
 - `value`: `number`
+- Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `type` / `className` / `style` / `children`.
 
 ### Switch
 
@@ -901,10 +944,11 @@ Props:
 
 - `label`: `string` (required)
 - `checked`: `boolean`
-- `defaultChecked`: `never`
+- `defaultChecked`: `boolean`
 - `invalid`: `boolean` (default: `false`)
 - `onChange`: `(checked: boolean, event: ChangeEvent<HTMLInputElement>) => void`
 - `ref`: `Ref<HTMLInputElement>`
+- Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `type` / `role` / `className` / `style` / `value` / `children`.
 
 ### FileField
 
@@ -934,6 +978,7 @@ Props (Root):
 - `onChange`: `(files: FileList | null, event?: ChangeEvent<HTMLInputElement>) => void`
 - `ref`: `Ref<HTMLInputElement>`
 - `webkitDirectory`: `boolean` (default: `false`)
+- Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `type` / `className` / `style` / `value`.
 
 Props (FileField.ItemList):
 
@@ -948,7 +993,7 @@ Props (FileField.Trigger):
 
 ### Heading
 
-A semantic heading. The `type` prop selects the HTML element.
+A semantic heading. The `level` prop selects the HTML element.
 
 ```tsx
 import { Heading } from '@k8ordo/ui';
@@ -963,6 +1008,7 @@ Props:
 - `level`: `'h1'` | `'h2'` | `'h3'` | `'h4'` | `'h5'` | `'h6'` (required)
 - `children`: `ReactNode`
 - `lineClamp`: `1` | `2` | `3` | `4` | `5` | `6`
+- Other props are forwarded to `HTMLAttributes<HTMLHeadingElement>`, except `className` / `style`.
 
 ### Avatar
 
@@ -986,6 +1032,7 @@ Props:
 - `name`: `string`
 - `size`: `'sm'` | `'md'` | `'lg'` (default: `'md'`)
 - `src`: `string`
+- Other props are forwarded to `HTMLAttributes<HTMLSpanElement>`, except `role` / `aria-label` / `className` / `style`.
 
 ### Badge
 
@@ -1002,10 +1049,11 @@ import { Badge } from '@k8ordo/ui';
 Props:
 
 - `label`: `string` (required)
-- `interactive`: `true`
-- `size`: `Size`
-- `tone`: `Tone`
-- `variant`: `Variant`
+- `interactive`: `boolean`
+- `size`: `'sm'` | `'md'` | `'lg'`
+- `tone`: `'neutral'` | `'info'` | `'success'` | `'warning'` | `'error'`
+- `variant`: `'solid'` | `'outline'`
+- Other props are forwarded to `ButtonHTMLAttributes<HTMLButtonElement> | HTMLAttributes<HTMLSpanElement>`, except `children` / `className` / `style` / `type`.
 
 ### Code
 
@@ -1020,6 +1068,7 @@ import { Code } from '@k8ordo/ui';
 Props:
 
 - `children`: `string` (required)
+- Other props are forwarded to `HTMLAttributes<HTMLElement>`, except `className` / `style`.
 
 ### Table
 
@@ -1047,16 +1096,19 @@ import { Table } from '@k8ordo/ui';
 Props (Table.Body):
 
 - `children`: `ReactNode`
+- Other props are forwarded to `HTMLAttributes<HTMLTableSectionElement>`, except `className` / `style`.
 
 Props (Table.Caption):
 
 - `children`: `ReactNode`
+- Other props are forwarded to `HTMLAttributes<HTMLTableCaptionElement>`, except `className` / `style`.
 
 Props (Table.Cell):
 
 - `align`: `CellAlign` (default: `'left'`)
 - `children`: `ReactNode`
 - `color`: `'base'` | `'mute'` (default: `'base'`)
+- Other props are forwarded to `TdHTMLAttributes<HTMLTableCellElement>`, except `className` / `style`.
 
 Props (Table.EmptyState):
 
@@ -1066,21 +1118,25 @@ Props (Table.EmptyState):
 Props (Table.Head):
 
 - `children`: `ReactNode`
+- Other props are forwarded to `HTMLAttributes<HTMLTableSectionElement>`, except `className` / `style`.
 
 Props (Table.HeaderCell):
 
 - `align`: `CellAlign` (default: `'left'`)
 - `children`: `ReactNode`
 - `scope`: `'col'` | `'row'` | `'colgroup'` | `'rowgroup'` (default: `'col'`)
+- Other props are forwarded to `ThHTMLAttributes<HTMLTableCellElement>`, except `className` / `style`.
 
 Props (Table.Root):
 
 - `children`: `ReactNode`
+- Other props are forwarded to `TableHTMLAttributes<HTMLTableElement>`, except `className` / `style`.
 
 Props (Table.Row):
 
 - `children`: `ReactNode`
 - `interactive`: `boolean` (default: `false`)
+- Other props are forwarded to `HTMLAttributes<HTMLTableRowElement>`, except `className` / `style`.
 
 ## Feedback
 
@@ -1100,6 +1156,11 @@ Props:
 - `action`: `AlertAction`
 - `closeLabel`: `string`
 - `onClose`: `() => void`
+- Other props are forwarded to `HTMLAttributes<HTMLDivElement>`, except `children` / `role` / `className` / `style`.
+
+`action` is an `AlertAction`, `{ label: string; renderItem: (props: { children: ReactNode }) => ReactNode }`.
+`renderItem` receives `label` as `children`; render your own button or link
+around it.
 
 ### Toast
 
@@ -1110,14 +1171,19 @@ const { open, close, closeAll } = useToast();
 
 open('success', 'Saved');
 open('error', 'Something went wrong');
+
+const syncingId = open('info', 'Syncing…', {
+  duration: Number.POSITIVE_INFINITY,
+});
+close(syncingId);
 ```
 
 `ToastProvider` is already inside `UIProvider`, so no extra wrapper is needed.
 
 What `useToast()` returns:
 
-- `open`: `(tone: Status, message: string, options?: ToastOptions) => void` (`ToastOptions` is `{ duration?: number; action?: ToastAction }`)
-- `close`: `(id: string) => void`
+- `open`: `(tone: Status, message: string, options?: ToastOptions) => string` (returns the toast's id; `ToastOptions` is `{ duration?: number; action?: ToastAction }`. `duration` is in milliseconds and defaults to `5000`; `Number.POSITIVE_INFINITY` keeps the toast until it is closed. `ToastAction` is the same type as `AlertAction`.)
+- `close`: `(id: string) => void` (closes only the toast with the id `open` returned)
 - `closeAll`: `() => void`
 
 ### ToastProvider
@@ -1153,6 +1219,7 @@ Props:
 - `value`: `number` (required)
 - `label`: `string`
 - `min`: `number` (default: `0`)
+- Other props are forwarded to `HTMLAttributes<HTMLDivElement>`, except `children` / `className` / `style`.
 
 ### Spinner
 
@@ -1168,6 +1235,7 @@ Props:
 
 - `label`: `string`
 - `size`: `'sm'` | `'md'` | `'lg'` (default: `'md'`)
+- Other props are forwarded to `OutputHTMLAttributes<HTMLOutputElement>`, except `children` / `aria-label` / `className` / `style`.
 
 ### Skeleton
 
@@ -1186,6 +1254,7 @@ Props:
 - `animate`: `boolean` (default: `true`)
 - `shape`: `'rect'` | `'circle'` (default: `'rect'`)
 - `size`: `'sm'` | `'md'` | `'lg'` (default: `'md'`)
+- Other props are forwarded to `HTMLAttributes<HTMLDivElement>`, except `children` / `className` / `style`.
 
 ## Observers
 
@@ -1216,12 +1285,13 @@ const [container, setContainer] = useState<HTMLElement | null>(null);
 </div>;
 ```
 
-- `onChange` reports the state as soon as observation starts, then again each
-  time it flips. The same value is never reported twice in a row, even when
-  `root` changes and the observer is re-created.
+- `onChange` reports the state as soon as a host element is observed, then again
+  each time it flips. The same value is never reported twice in a row, even
+  when `root` changes and the observer is re-created.
 - With several host elements, `isInView` is `true` while **any** of them
-  intersects, and it follows children that mount or unmount later. While there
-  is nothing to observe it is `false`.
+  intersects, and it follows children that mount or unmount later. While the
+  children render no host element, `onChange` is not called at all — the first
+  report comes once one mounts.
 - `once` stops observing after the first `true`.
 - Hold `root` in state, not a `RefObject`: the observer has to be re-created
   once the element exists.
@@ -1519,6 +1589,51 @@ Props (ListBox.Trigger):
 - `label`: `string`
 - `size`: `ComponentProps<typeof Button>['size']` (default: `'md'`)
 
+## Icons
+
+Decorative icons, all from the root entry. Each renders an `<svg>` with
+`aria-hidden` and `focusable="false"`, so the accessible name belongs to the
+control around it — an `IconButton`'s `label`, for example.
+
+```tsx
+import { AlertIcon, ChevronIcon, CloseIcon } from '@k8ordo/ui';
+
+<CloseIcon />
+<ChevronIcon direction="down" size="sm" />
+<AlertIcon status="warning" />
+```
+
+Every icon takes one optional prop and nothing else:
+
+- `size`: `'xs'` | `'sm'` | `'md'` | `'lg'` | `'xl'` | `'2xl'` | `'3xl'` (default: `'md'`)
+
+Two of them also require a prop that picks the glyph:
+
+- `ChevronIcon`: `direction`: `Direction` (`'up'` | `'down'` | `'left'` | `'right'`)
+- `AlertIcon`: `status`: `Status` (`'success'` | `'info'` | `'warning'` | `'error'`)
+
+The icons: `AccessibilityIcon`, `AIIcon`, `AlertIcon`, `AssistantIcon`,
+`AtomIcon`, `BadIcon`, `BlogIcon`, `BoringIcon`, `CheckIcon`, `ChevronIcon`,
+`ChromeIcon`, `CloseIcon`, `CodeXmlIcon`, `ColorContrastIcon`, `ColorInfoIcon`,
+`ColorScaleIcon`, `CopyIcon`, `DarkModeIcon`, `DifficultIcon`, `EasyIcon`,
+`EdgeIcon`, `ExternalLinkIcon`, `FirefoxIcon`, `FlaskIcon`, `ForkIcon`,
+`FormIcon`, `FullscreenIcon`, `GitHubIcon`, `GoodIcon`, `HistoryIcon`,
+`HorizontalWritingIcon`, `InformativeIcon`, `InterestingIcon`,
+`LightModeIcon`, `LinkIcon`, `ListIcon`, `LocationIcon`, `LockIcon`,
+`LockOpenIcon`, `LogoIcon`, `MailIcon`, `MinusIcon`, `MixedColorIcon`,
+`NavigationMenuIcon`, `NewsIcon`, `PackageIcon`, `PaletteIcon`, `PlusIcon`,
+`PrepareIcon`, `PublishDateIcon`, `QiitaIcon`, `RefreshIcon`, `RSSIcon`,
+`SafariIcon`, `SendIcon`, `ShallowIcon`, `ShieldCheckIcon`, `SlideIcon`,
+`SparklesIcon`, `SquircleIcon`, `SubscribeIcon`, `TableIcon`, `TagIcon`,
+`TwitterIcon`, `UpdateDateIcon`, `VerticalWritingIcon`, `ViewIcon`,
+`ViewOffIcon`.
+
+`Logo` is the mark `LogoIcon` draws, as a bare `<svg>` without the sizing: it
+takes `className`, `aria-hidden`, and `focusable` (`Partial<IconRenderProps>`)
+instead of `size`. The types `BaseIconProps` (`{ size }`) and
+`IconRenderProps` (`{ className: string; 'aria-hidden': true; focusable: 'false' }`)
+are exported as well.
+
 ## Providers
 
 ### UIProvider
@@ -1540,7 +1655,11 @@ Props:
 
 ### PortalRootProvider
 
-Sets the root element for portals.
+A context that shares a portal container with your own `createPortal` calls;
+read it with `usePortalRoot()`. The library's overlays do not read it — they
+open in the top layer (`<dialog>`, the Popover API), and toasts go where
+`ToastProvider`'s `portalRef` points. `Modal` passes its own `<dialog>` as the
+value, so a portal placed through `usePortalRoot()` inside a modal stays in it.
 
 ```tsx
 import { PortalRootProvider, usePortalRoot } from '@k8ordo/ui';
@@ -1634,16 +1753,33 @@ function DismissButton({ onDismiss }) {
 
 Every key in the `Messages` type. All values are `string`.
 
-| Category      | Keys                                                                                                                               |
-| ------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| Common        | `close`, `required`, `loading`, `avatar`, `color`                                                                                  |
-| Alert         | `alertSuccess`, `alertInfo`, `alertWarning`, `alertError`                                                                          |
-| Toast         | `toastRegion`                                                                                                                      |
-| Autocomplete  | `autocompletePlaceholder`, `autocompleteRemoveTag`, `autocompleteClear`, `autocompleteEmpty`                                       |
-| FileField     | `fileFieldRemove`                                                                                                                  |
-| NumberField   | `numberFieldIncrement`, `numberFieldDecrement`                                                                                     |
-| PasswordInput | `passwordShow`, `passwordHide`                                                                                                     |
-| ListBox       | `listBoxPlaceholder`                                                                                                               |
-| Breadcrumb    | `breadcrumb`                                                                                                                       |
-| Pagination    | `paginationLabel`, `paginationPrevious`, `paginationNext`                                                                          |
-| AI chat       | `chat`, `scrollToLatest`, `reasoning`, `reasoningStreaming`, `suggestions`, `send`, `stop`, `toolInput`, `toolOutput`, `toolError` |
+| Category      | Keys                                                                                                                                             |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Common        | `close`, `required`, `loading`, `avatar`, `color`                                                                                                |
+| Alert         | `alertSuccess`, `alertInfo`, `alertWarning`, `alertError`                                                                                        |
+| Toast         | `toastRegion`                                                                                                                                    |
+| Autocomplete  | `autocompletePlaceholder`, `autocompleteRemoveTag`, `autocompleteClear`, `autocompleteEmpty`                                                     |
+| FileField     | `fileFieldRemove`, `fileFieldTrigger`                                                                                                            |
+| NumberField   | `numberFieldIncrement`, `numberFieldDecrement`                                                                                                   |
+| PasswordInput | `passwordShow`, `passwordHide`                                                                                                                   |
+| ListBox       | `listBoxPlaceholder`                                                                                                                             |
+| Breadcrumb    | `breadcrumb`                                                                                                                                     |
+| Tabs          | `tabList`                                                                                                                                        |
+| Pagination    | `paginationLabel`, `paginationPrevious`, `paginationNext`                                                                                        |
+| AI chat       | `chat`, `scrollToLatest`, `reasoning`, `reasoningStreaming`, `suggestions`, `send`, `stop`, `toolInput`, `toolOutput`, `toolError`, `toolDenied` |
+| Response      | The `response*` keys below                                                                                                                       |
+
+`fileFieldTrigger` and `tabList` are the trigger text and tab-list name the
+generative-UI renderers fall back to when a spec leaves them out.
+
+The `response*` keys label the controls `Response` draws (`@k8ordo/ui/ai/response`):
+`responseCopied`, `responseCopyCode`, `responseCopyLink`, `responseCopyTable`,
+`responseCopyTableAsCsv`, `responseCopyTableAsMarkdown`,
+`responseCopyTableAsTsv`, `responseDownloadDiagram`,
+`responseDownloadDiagramAsMmd`, `responseDownloadDiagramAsPng`,
+`responseDownloadDiagramAsSvg`, `responseDownloadFile`,
+`responseDownloadImage`, `responseDownloadTable`,
+`responseDownloadTableAsCsv`, `responseDownloadTableAsMarkdown`,
+`responseExitFullscreen`, `responseViewFullscreen`,
+`responseImageNotAvailable`, `responseOpenExternalLink`,
+`responseExternalLinkWarning`, `responseOpenLink`.

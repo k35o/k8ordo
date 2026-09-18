@@ -70,8 +70,8 @@ import * as nav from '../messages/nav';
 <p>{nav.greeting(name)}</p>
 ```
 
-That is the whole surface: `defineLocales`, `Register`, `message`, and
-`paramsSchema` on the `[locale]` segment.
+That is all a working setup needs: `defineLocales`, `Register` (with
+`LocaleOf`), `message`, and `paramsSchema` on the `[locale]` segment.
 
 ## The locale set
 
@@ -111,8 +111,9 @@ locales.negotiate(parseAcceptLanguage(request.headers.get('accept-language')));
 ```
 
 `parseAcceptLanguage(header)` turns an `Accept-Language` header into that
-list: `q` weights decide the order, ties keep the header's order, `q=0` and
-`*` are dropped, and a missing header is an empty list.
+list: `q` weights decide the order (a `q` that is not a number is ignored),
+ties keep the header's order, a weight of 0 or less (an empty `q=` included)
+and `*` are dropped, and a missing header is an empty list.
 
 ## Messages
 
@@ -123,8 +124,10 @@ key does not compile" guarantee, per message, with no key list to maintain.
 
 A message is either text in every locale or a function in every locale;
 the two are not mixed within one message. For a function message the
-arguments are typed by the variant you annotate, and every other variant
-is held to the same parameters:
+argument types come from the variant you annotate, and every other variant
+is held to them. Declare every parameter in every variant, an unused one as
+`_count`: whether a variant that declares fewer compiles depends on which
+locale holds it, and with no annotation at all the arguments are `unknown`.
 
 ```ts
 export const items = message({
@@ -201,12 +204,21 @@ needs text names it and pays for that message alone.
 ## Where the locale comes from
 
 **On the server**, `paramsSchema` accepting a locale makes it the current
-one for the rest of that request's render — the Server Components, the
+one for the render of the page that accepted it — the Server Components, the
 HTML they become, and the client components that run on the server for
-that HTML. Concurrent renders stay apart (`AsyncLocalStorage`). Outside a
-`[locale]` route — a test, code that runs before the route matched — use
-`locales.run(locale, fn)`; and when nothing names a locale, messages render
-in the default.
+that HTML — and for nothing else. Concurrent renders stay apart
+(`AsyncLocalStorage`). An acceptance belongs to the pattern that answered,
+not to the request: when a schema further down the same stack refuses
+(`/en/blog/nope`, where the page's slug schema says no), the pattern does
+not answer and the locale goes with it, so the 404 renders in the default,
+as `/en/nothing` does. Outside a `[locale]` route — a test, code that runs
+before the route matched — use `locales.run(locale, fn)`; and when nothing
+names a locale, messages render in the default.
+
+The server keeps the locale in `AsyncLocalStorage`, reached through
+`process.getBuiltinModule`. A runtime without them throws from
+`paramsSchema` and from `run`, rather than accepting a locale and rendering
+the page in the default.
 
 **In the browser**, the URL is the locale: the first segment of
 `location.pathname`, read when a message is called. Changing locale is a
@@ -239,15 +251,22 @@ useEffect(() => {
 }, []);
 ```
 
-Under `@k8ordo/server` the same decision can be made on the server with
-`parseAcceptLanguage` and a redirect.
+Under `@k8ordo/server` a page can make the same decision from the request —
+`locales.negotiate(parseAcceptLanguage(request.headers.get('accept-language')))`
+— but cannot answer with a redirect: a page never writes to the response, and
+`redirect.ts` fills its target from the params, not the headers. `serve` has
+no hook for it either, so a server-side redirect sits outside the app: a proxy
+in front of `serve`, or a host of your own around the built handler
+(`dist/rsc/index.js`), answers `/` with a `307`.
 
 ### `<html lang>`
 
-The root layout sits above `[locale]` and receives `pathname`; the schema
-has already run for that request, so `locales.getLocale()` is right, and
+The root layout sits above `[locale]` and receives `pathname`. On a page the
+schema has already run for that page, so `locales.getLocale()` is right, and
 `locales.delocalize(pathname).locale ?? locales.default` says the same thing
-in terms of the URL alone.
+in terms of the URL alone. On a 404 the two can differ: nothing validates the
+catch-all's params, so `getLocale()` there is the default, while `delocalize`
+still reads the URL's segment.
 
 ## Static builds
 
@@ -258,15 +277,20 @@ The set answers for its own segment:
 framework({ paths: locales.paths });
 ```
 
-`/:locale` in every pattern becomes one pathname per locale; a pattern with
-another parameter keeps it, and the build asks for that one by name. A site
-with a second parameter composes: `paths: (patterns) =>
+`/:locale` in every pattern becomes one pathname per locale. A pattern with
+another parameter comes back still holding it (`/ja/blog/:slug`), which the
+build does not render: it stops with `static build needs pathnames for
+/:locale/blog/:slug`. A site with a second parameter expands the rest in the
+same function: `paths: (patterns) =>
 locales.paths(patterns).flatMap(expandSlug)`.
 
 Each path is rendered as its own request, so the schema names the locale
-for each and the messages come out in that locale. The `404.html` a static
-host serves for everything else is rendered once, under the build's
-sentinel locale; a client component on it reads the visitor's URL and
+for each and the messages come out in that locale; the build renders several
+at once, and none lends its locale to another. The `404.html` a static host
+serves for everything else is rendered once, by the catch-all under the
+build's sentinel segment, and no schema runs on a catch-all's params — so it
+is in the default locale whatever the build rendered before it, and cannot
+follow the visitor's. A client component on it reads the visitor's URL and
 re-renders in theirs after hydration.
 
 ## Alongside the rest of k8ordo
@@ -289,10 +313,28 @@ re-renders in theirs after hydration.
   application's. `localize` / `delocalize` remain for a pathname in hand —
   the language switcher, which takes the page it is on to another locale.
 
-- **`@k8ordo/ui`**: its own built-in strings take a dictionary prop on
-  `UIProvider`; pass `en` on `/en/…` from `locales.getLocale()`.
-- **`@k8ordo/form`**: constraint messages are messages — `message({ ja:
-(max: number) => …, en: … })` — called where the constraint is declared.
+- **`@k8ordo/ui`**: its own built-in strings go through `UIProvider`'s
+  `messages`. When the app's locales are among `ja` and `en`,
+  `<UIProvider messages={dictionaries[locales.getLocale()]}>` picks the
+  dictionary of the locale being rendered (`dictionaries` is from
+  `@k8ordo/ui/i18n`); any other locale passes its own `Messages`.
+- **`@k8ordo/form`**: constraint messages are messages, and a message called
+  where the constraint is declared keeps the text of whatever locale was
+  current then. Hand zod the message instead, so it is called when zod
+  reports the issue:
+
+  ```ts
+  z.string()
+    .min(1, { error: m.talk.titleRequired })
+    .max(120, { error: () => m.talk.titleTooLong(120) });
+  ```
+
+  Call `formFields` during the page's render, not at module scope. A Server
+  Action runs outside the `[locale]` render, so the page binds the locale to
+  it (`createTalk.bind(null, locales.getLocale())`), and the action checks
+  it with `locales.is` and calls `parseForm` inside `locales.run`. A
+  `defineForm` rule takes a string, so build a definition with rules in those
+  same places.
 
 ## What it guarantees
 
@@ -301,13 +343,21 @@ re-renders in theirs after hydration.
   From JavaScript, or through `as`, it throws where it is read, naming the
   locale and the variants present — never `undefined`.
 - Arguments to a function message are typed by the function.
-- No render is ever in a locale the URL does not spell (browser) or the
-  request did not accept (server).
+- A page under `[locale]` never renders in a locale its URL does not spell:
+  on the server its schema accepted that locale, and in the browser the URL
+  is what is read. A locale accepted for one page reaches no other page, no
+  404, and nothing rendered after it.
+- On a server runtime without `AsyncLocalStorage`, accepting a locale throws
+  rather than rendering in the default.
 
 ## Testing
 
 Under Node, `locales.run('en', () => nav.home())` renders in `en`; without
-it, the default. The `paramsSchema` sets the locale for the rest of its
-scope too, so wrap a test that validates in `run` to keep tests apart. In a
-browser environment, `history.replaceState(null, '', '/en/…')` is the
-locale.
+it, the default. Called directly, `paramsSchema` sets the locale for the
+rest of the caller's async context — the framework gives each pattern's
+schemas a context of their own, a test does not — so wrap a test that
+validates in `run` to keep tests apart. A test that calls `defineLocales`
+itself replaces the set messages read: the last one defined wins. In a
+browser environment, `history.replaceState(null, '', '/en/…')` is the locale
+and `run` throws; an environment that defines `document`, such as jsdom or
+happy-dom, counts as one.

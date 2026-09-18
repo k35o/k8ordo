@@ -13,7 +13,8 @@ const RUNTIME_DIR = fileURLToPath(new URL('./runtime/', import.meta.url));
 /**
  * Server mode: the request handler runs per request, so pages can depend on
  * the request and Server Actions have somewhere to arrive. The same handler
- * `@k8ordo/static` calls at build time — the difference is when, not what.
+ * `@k8ordo/static` builds and calls at build time, each mode compiling its own
+ * — the difference is chiefly when, not what.
  *
  * Named for what it brings rather than for the mode, so a `vite.config.ts` is
  * identical under either package and the mode is only ever the import — which
@@ -21,12 +22,3 @@ const RUNTIME_DIR = fileURLToPath(new URL('./runtime/', import.meta.url));
  */
 export const framework = (options: ServerOptions = {}): PluginOption[] =>
   engine(options, { via: '@k8ordo/server', runtimeDir: RUNTIME_DIR });
-
-export { serve } from './serve';
-export type { Server, ServeOptions } from './serve';
-export { redirect } from '@k8ordo/framework-engine';
-export type {
-  RedirectOptions,
-  RedirectTarget,
-  RouteRequest,
-} from '@k8ordo/framework-engine';

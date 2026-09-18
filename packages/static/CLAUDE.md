@@ -26,9 +26,11 @@ pnpm check         # check:write to auto-fix
 - **The mode is the dependency.** Nothing request-shaped may be exported from
   here, ever — the point of two packages instead of one option is that a
   static application does not have the server's machinery to reach for.
-- **The handler is the engine's, not ours.** Prerendering calls the same
-  `dist/rsc/index.js` request handler `@k8ordo/server` runs per request. If a
-  page renders differently under the two modes, something has leaked.
+- **The handler is the engine's, not ours.** Prerendering calls
+  `dist/rsc/index.js`, the engine's request handler compiled for this mode —
+  the one `@k8ordo/server` runs per request — once for each page's HTML and
+  once for its payload. If a page renders differently under the two modes,
+  something has leaked.
 - **An uncovered parameterised route fails the build.** Never warn, never
   skip: a site missing half its pages is worse than a build that stopped. A
   `'use server'` module fails it for the same reason: the RSC pipeline
@@ -61,8 +63,11 @@ pnpm check         # check:write to auto-fix
 
 ```
 src/
-  paths.ts   patternsOf / planPaths — 純関数(URLPattern で供給パスを照合)
-  index.ts   framework: engine + prerender(transform で dev の拒否 / buildApp)
+  paths.ts   patternsOf / patternsNeedingPaths / planPaths / catchAllPatterns /
+             catchAllPath / dirFor / isConcrete — pure functions (supplied
+             pathnames matched with URLPattern)
+  index.ts   framework: engine + prerender (the dev refusal in transform,
+             the files in buildApp), and sitemap
 ```
 
 ## Conventions

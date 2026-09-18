@@ -1,4 +1,5 @@
 import { inBrowser, localeStorage, register } from './current';
+import type { LocaleStorage } from './current';
 
 /**
  * The one shape every validation library agrees on (Standard Schema), as far
@@ -53,7 +54,11 @@ export type Locales<L extends string = string, D extends L = L> = {
    * that is not BCP 47 is skipped, not thrown on: the list is user input.
    */
   readonly negotiate: (requested: Iterable<string>) => L;
-  /** `'/ui'` → `'/en/ui'`, `'/'` → `'/en'`. The pathname must not already carry a locale segment. */
+  /**
+   * `'/ui'` → `'/en/ui'`, `'/'` → `'/en'`. Hand it a pathname without a
+   * locale segment, as `delocalize` returns one: that is not checked, so
+   * `localize('/en/ui', 'ja')` is `'/ja/en/ui'`.
+   */
   readonly localize: (pathname: string, locale: L) => string;
   /** The inverse: `'/en/ui'` → `{ locale: 'en', pathname: '/ui' }`, `'/x'` → `{ locale: null, pathname: '/x' }`. */
   readonly delocalize: (pathname: string) => Delocalized<L>;
@@ -61,16 +66,18 @@ export type Locales<L extends string = string, D extends L = L> = {
    * The static build's `paths` option: every pattern that has a `/:locale`
    * segment, once per locale, so `framework({ paths: locales.paths })` is
    * the whole answer for a site whose only parameter is the locale. A
-   * pattern with another parameter keeps it, and the build then asks for
-   * that one by name.
+   * pattern with another parameter comes back still holding it
+   * (`/ja/blog/:slug`), which the build does not render: expand the rest in
+   * the same function.
    */
   readonly paths: (patterns: readonly string[]) => string[];
   /**
    * A params schema for a `[locale]` route segment, in the shape
    * `@k8ordo/static` / `@k8ordo/server` run: `export const paramsSchema =
    * locales.paramsSchema` makes `/fr/…` a pathname the pattern does not
-   * answer. Accepting a locale also makes it the current one for the rest of
-   * that request's render, which is how `getLocale()` knows it on the server.
+   * answer. On a server, accepting a locale also makes it the current one for
+   * the render of the page that accepted it, which is how `getLocale()` knows
+   * it there; a server runtime without `AsyncLocalStorage` throws instead.
    */
   readonly paramsSchema: LocaleParamsSchema<L>;
   /**
@@ -116,6 +123,21 @@ const localize = (pathname: string, locale: string): string => {
   return `/${locale}${rest}`;
 };
 
+/**
+ * Where a server keeps the locale. Without one this throws rather than
+ * falling back: the locale set would be ignored and the page rendered in the
+ * default.
+ */
+const serverStorage = (caller: string): LocaleStorage => {
+  const storage = localeStorage();
+  if (storage === null) {
+    throw new Error(
+      `${caller}: this runtime has no AsyncLocalStorage to scope a locale to`,
+    );
+  }
+  return storage;
+};
+
 /** Server only: the browser has no request, and its URL already is the locale. */
 const run = <T>(locale: string, fn: () => T): T => {
   if (inBrowser) {
@@ -123,13 +145,7 @@ const run = <T>(locale: string, fn: () => T): T => {
       'locales.run: in the browser the URL is the locale — navigate instead',
     );
   }
-  const storage = localeStorage();
-  if (storage === null) {
-    throw new Error(
-      'locales.run: this runtime has no AsyncLocalStorage to scope a locale to',
-    );
-  }
-  return storage.run(locale, fn);
+  return serverStorage('locales.run').run(locale, fn);
 };
 
 /**
@@ -243,10 +259,9 @@ export const defineLocales = <
             ],
           };
         }
-        // 受理はこのリクエストの描画の始まりでもある。ここから先（RSC の
-        // 描画、その HTML 化、その中で走る client component）はすべてこの
-        // 同期区間から派生する非同期処理なので、enterWith で入れた値が届く。
-        localeStorage()?.enterWith(locale);
+        // validate は描画を包めないので run ではなく enterWith で書く。値が
+        // どの描画に届くかは、スキーマを走らせる側（フレームワーク）が決める。
+        if (!inBrowser) serverStorage('locales.paramsSchema').enterWith(locale);
         return { value: { locale } };
       },
     },

@@ -1,5 +1,13 @@
 import type { FC } from 'react';
-import { useEffect, useState, ViewTransition } from 'react';
+import {
+  lazy,
+  startTransition,
+  Suspense,
+  useDeferredValue,
+  useEffect,
+  useState,
+  ViewTransition,
+} from 'react';
 import { render } from 'vitest-browser-react';
 
 import { defineRoutes } from './define-routes';
@@ -128,6 +136,79 @@ it('resolves finished only after the new tree is on screen', async () => {
   expect(location.pathname.endsWith('/about')).toBe(true);
 });
 
+it('resolves finished awaited inside an async action, with the page on screen', async () => {
+  await render(<Router routes={routes} />);
+  await navigateTo('/', { history: 'replace' }).finished;
+
+  const onScreen = new Promise<boolean>((resolve) => {
+    startTransition(async () => {
+      await navigateTo('/about').finished;
+      resolve(document.querySelector('[data-testid="about"]') !== null);
+    });
+  });
+
+  // transition で木を適用すると、アクションの終わりを待つ適用と
+  // 適用を待つアクションが互いに待ち合って、どちらも終わらない
+  await expect(onScreen).resolves.toBe(true);
+});
+
+it('puts a page on screen while an unrelated async action is still pending', async () => {
+  await render(<Router routes={routes} />);
+  await navigateTo('/', { history: 'replace' }).finished;
+  let release!: () => void;
+  const action = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  startTransition(async () => {
+    await action;
+  });
+
+  try {
+    await navigateTo('/about').finished;
+
+    expect(document.querySelector('[data-testid="about"]')).not.toBeNull();
+  } finally {
+    release();
+  }
+});
+
+const Loading: FC = () => (
+  <Suspense fallback={<p data-testid="fallback">loading</p>}>
+    <Outlet />
+  </Suspense>
+);
+
+it('keeps the previous page on screen while the next one suspends', async () => {
+  let release!: () => void;
+  const chunk = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const Slow = lazy(async () => {
+    await chunk;
+    return { default: AboutPage };
+  });
+  const suspending = defineRoutes({
+    '/': { layout: Loading, children: { '/': HomePage, '/slow': Slow } },
+  });
+  const screen = await render(<Router routes={suspending} />);
+  await navigateTo('/', { history: 'replace' }).finished;
+  await expect.element(screen.getByTestId('home')).toBeInTheDocument();
+
+  const slow = navigateTo('/slow');
+  await slow.committed;
+  // 新しい木を描き始めて chunk で止まるまでの猶予
+  await new Promise((resolve) => {
+    setTimeout(resolve, 50);
+  });
+
+  expect(document.querySelector('[data-testid="home"]')).not.toBeNull();
+  expect(document.querySelector('[data-testid="fallback"]')).toBeNull();
+
+  release();
+  await slow.finished;
+  expect(document.querySelector('[data-testid="about"]')).not.toBeNull();
+});
+
 it('turns a plain anchor into a client navigation', async () => {
   const screen = await render(<Router routes={routes} />);
   await navigateTo('/', { history: 'replace' }).finished;
@@ -252,15 +333,16 @@ it('answers which section is showing without a table in hand', async () => {
 // フレームワークの下ではペイロードの fetch が入るので、load は非同期になる。
 // その待ちの間を再現するための、表を持たない最小のホスト
 const DeferredHost: FC<{ gate: Promise<void> }> = ({ gate }) => {
-  const [page, setPage] = useState('start');
+  const [latest, setLatest] = useState('start');
   useInterceptedNavigation<string>({
     claim: () => true,
     load: async (url) => {
       await gate;
       return url.pathname;
     },
-    apply: setPage,
+    apply: setLatest,
   });
+  const page = useDeferredValue(latest);
   return <p data-testid="page">{page}</p>;
 };
 

@@ -1,5 +1,5 @@
 import { createLibrary, defineComponent } from '@openuidev/lang-core';
-import type { Library } from '@openuidev/lang-core';
+import type { Library, SubComponentOf } from '@openuidev/lang-core';
 import { z } from 'zod';
 
 import * as s from './schemas';
@@ -236,75 +236,97 @@ export const buildComponentLibrary = <C>(
     FormControl.ref,
   ] as const;
 
+  // コンテナは互いを子に持つので、後で定義するコンテナも参照できるよう children を
+  // getter で遅延させる。戻り値の型を書かないと、推論がコンテナ自身の型に循環する
+  const containerChildren = (
+    description: string,
+  ): z.ZodArray<z.ZodType<SubComponentOf<unknown>>> =>
+    z
+      .array(
+        z.union([
+          ...childRefs,
+          Stack.ref,
+          Grid.ref,
+          Card.ref,
+          Form.ref,
+          Modal.ref,
+          Dialog.ref,
+          Drawer.ref,
+          Popover.ref,
+        ]),
+      )
+      .describe(description);
+
   const Stack = def(
     'Stack',
-    '子要素を縦/横に等間隔で並べるレイアウトコンテナ。Stack の直下に Stack/Grid/Card は置けない。入れ子レイアウトが必要なら Card の中に Stack や Grid を入れる。',
+    '子要素を縦/横に等間隔で並べるレイアウトコンテナ。',
     s.stackProps.extend({
-      children: z.array(z.union(childRefs)).describe('並べる子要素'),
+      get children() {
+        return containerChildren('並べる子要素');
+      },
     }),
   );
   const Grid = def(
     'Grid',
-    '子要素をグリッド状に並べる。cols（1〜6 / auto-fill / auto-fit）と gap、auto-fill/fit 時は minItemSize で各セルの最小サイズを制御。Grid の直下に Stack/Grid/Card は置けない。',
+    '子要素をグリッド状に並べる。cols（1〜6 / auto-fill / auto-fit）と gap、auto-fill/fit 時は minItemSize で各セルの最小サイズを制御。',
     s.gridProps.extend({
-      children: z.array(z.union(childRefs)).describe('グリッド内の子要素'),
+      get children() {
+        return containerChildren('グリッド内の子要素');
+      },
     }),
   );
-
-  const containerChildRefs = [...childRefs, Stack.ref, Grid.ref] as const;
-
   const Card = def(
     'Card',
-    'コンテンツをまとめるカード（コンテナ）。Stack や Grid も入れられる。interactive を付けるとホバー時にスケールする。',
+    'コンテンツをまとめるカード（コンテナ）。interactive を付けるとホバー時にスケールする。',
     s.cardProps.extend({
-      children: z
-        .array(z.union(containerChildRefs))
-        .describe('カード内の子要素'),
+      get children() {
+        return containerChildren('カード内の子要素');
+      },
     }),
   );
   const Form = def(
     'Form',
     'フォーム要素のラッパー（縦並びレイアウト）。',
     s.formProps.extend({
-      children: z
-        .array(z.union(containerChildRefs))
-        .describe('フォーム内の要素'),
+      get children() {
+        return containerChildren('フォーム内の要素');
+      },
     }),
   );
   const Modal = def(
     'Modal',
     'モーダルダイアログ。triggerLabel のボタンで開く。',
     s.modalProps.extend({
-      children: z
-        .array(z.union(containerChildRefs))
-        .describe('モーダル内の要素'),
+      get children() {
+        return containerChildren('モーダル内の要素');
+      },
     }),
   );
   const Dialog = def(
     'Dialog',
     'センターダイアログ。triggerLabel のボタンで開く。',
     s.dialogProps.extend({
-      children: z
-        .array(z.union(containerChildRefs))
-        .describe('ダイアログ内の要素'),
+      get children() {
+        return containerChildren('ダイアログ内の要素');
+      },
     }),
   );
   const Drawer = def(
     'Drawer',
     'サイドドロワー。triggerLabel のボタンで開く。',
     s.drawerProps.extend({
-      children: z
-        .array(z.union(containerChildRefs))
-        .describe('ドロワー内の要素'),
+      get children() {
+        return containerChildren('ドロワー内の要素');
+      },
     }),
   );
   const Popover = def(
     'Popover',
     'ポップオーバー。triggerLabel のボタンで開閉。',
     s.popoverProps.extend({
-      children: z
-        .array(z.union(containerChildRefs))
-        .describe('ポップオーバー内の要素'),
+      get children() {
+        return containerChildren('ポップオーバー内の要素');
+      },
     }),
   );
 

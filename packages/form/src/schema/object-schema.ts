@@ -11,6 +11,8 @@ export type ObjectSchema<Shape extends $ZodShape = $ZodShape> =
 
 export type ProbeIssue = {
   code: string;
+  /** Which string format rejected the value, on an `invalid_format` issue. */
+  format?: string;
   message: string;
   path: readonly PropertyKey[];
 };
