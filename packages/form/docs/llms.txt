@@ -21,11 +21,11 @@ When installed via npm, these docs live under `node_modules/@k8ordo/form/docs/`.
 `z.array(z.file())` derives repeated single-file rows, not one `multiple`
 input. Constraints behind a `.transform()` (or a `.pipe()` whose output JSON
 Schema cannot describe) are not derived: the field becomes a bare text input
-and is listed in `dropped`. A `<select>` with a placeholder option behind
-`.optional()` is still marked required. There is no input masking. A schema no
-control could satisfy is refused at derive time rather than left to fail on
-every submission: `z.number()` and `z.literal(1)` (use `z.coerce.number()`),
-`z.date()`, `z.bigint()`.
+and is listed in `dropped`. There is no input masking. A schema no control
+could satisfy is refused at derive time rather than left to fail on every
+submission: `z.number()` and `z.literal(1)` (use `z.coerce.number()`),
+`z.date()`, `z.bigint()`, and `z.stringbool()` on a checkbox (use
+`z.boolean()`).
 
 ## Entry points
 
@@ -48,7 +48,10 @@ every submission: `z.number()` and `z.literal(1)` (use `z.coerce.number()`),
   `parseForm(schema, formData)` validates a
   submission and returns typed data or per-field errors with the submitted
   values. An untouched control reaches the schema as what it actually submits:
-  `''` for text, `false` for a checkbox, and nothing at all for a number or a
-  file, so `z.coerce.number()` cannot read a blank field as 0.
+  `''` for text, `false` for a checkbox, and nothing at all for a number, a
+  `z.coerce.bigint()`, a file, or a choice (a radio group with none selected, a
+  `<select>` on a `value=""` placeholder), so `z.coerce.number()` cannot read a
+  blank field as 0 and `z.enum([…]).optional()` can be left empty. A checkbox
+  group always echoes as an array.
   `defineForm(schema, rules)` attaches cross-field rules (`sameAs`,
   `minChecked`, `requiredWhen`) typed against the schema's paths.

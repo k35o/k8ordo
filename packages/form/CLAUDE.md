@@ -54,16 +54,20 @@ checks (`refine`) vanish from its output without a trace.
 - **Messages** are recovered by running the field schema against a probe value
   chosen to fail one specific check, then taking the issue message. The probe
   is what the parse would hand the schema for an empty control: `''` for text,
-  `false` for a checkbox. Public API, and it guarantees the client shows the
-  text zod itself would produce.
-- **The internal surface** is `_zod.def`, read in four places: `checks` (the
-  object-level count, and the source RegExp behind a JSON `pattern` string —
-  the JSON loses the flags, and the flags decide whether the browser may see
-  it), `innerType` (peeling `.optional()` / `.default()` wrappers so a wrapped
-  object's subtree pairs with its JSON node), `element` (`zod/mini` arrays),
-  and `entries`-shaped enum detection at the type level. Reporting what the
-  client will not check is worth the coupling. If zod moves any of it, the reports degrade; the
-  attributes do not.
+  `false` for a checkbox, `undefined` for a number, a file, or a choice. Public
+  API, and it guarantees the client shows the text zod itself would produce.
+- **The internal surface** is `_zod.def`, read in six places: `checks` (the
+  object-level count), `format` / `pattern` on the leaf and on each of its
+  checks (which format picks the control once a stacked check has overwritten
+  the JSON `format`, which regex is the format's own, and the flags the JSON
+  `pattern` string has lost), `innerType` (peeling `.optional()` /
+  `.default()` wrappers so a wrapped leaf or object pairs with its JSON node),
+  `element` (`zod/mini` arrays), `type` (a bigint, which JSON Schema cannot
+  represent, submits a blank the way a number does), and `entries`-shaped enum
+  detection at the type level. Reporting what the client will not check is
+  worth the coupling. If zod moves `checks`, `format` or `pattern`, the reports
+  and the control type degrade; the parse does not. `type` is zod's own
+  discriminator, and losing it would bring back a blank bigint read as 0n.
 - **A pairing the walk cannot make is a throw, not a skip.** A JSON node with
   no matching zod node (records, tuples, nullable objects, nested repeats,
   dotted keys) would parse to silently discarded input, which is the one
