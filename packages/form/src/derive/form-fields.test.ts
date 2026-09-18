@@ -248,6 +248,24 @@ describe('formFields', () => {
     expect(fields.on.input.type).toBe('datetime-local');
   });
 
+  it('reads the format and the regex flags behind .optional()', () => {
+    // The wrapper hides both from a lookup on the schema itself: the control
+    // fell back to text, and the `i` flag went unseen, so a case-sensitive
+    // pattern reached the browser while the server ignored case.
+    const { fields, dropped } = formFields(
+      z.object({
+        at: z.iso.time().optional(),
+        flagged: z.string().regex(/^foo$/iu).optional(),
+      }),
+    );
+
+    expect(fields.at.input.type).toBe('time');
+    expect(fields.flagged.input.pattern).toBeUndefined();
+    expect(
+      dropped.find((entry) => entry.field === 'flagged')?.reason,
+    ).toContain("'iu'");
+  });
+
   it('carries multipleOf into step for integers instead of overwriting it', () => {
     const { fields } = formFields(
       z.object({
