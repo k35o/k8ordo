@@ -97,13 +97,12 @@ the package guarantees (checks the client skips are reported, native
 validation kept without JavaScript, secrets never echoed).
 
 A check HTML cannot express — a `refine` on the schema as a whole, a regex the
-`pattern` attribute would reinterpret — is returned in `dropped` (typed as
+`pattern` attribute would reinterpret, several regexes on one string, a
+`.mime()` that `accept` only suggests — is returned in `dropped` (typed as
 `DroppedCheck`, exported from both entries) and, outside production, logged
 once per schema with `console.warn`, so it is seen without anyone remembering
 to read it. It still runs on the server. Not reported yet: a `refine` on a
-single field, a nested object, or a row; a `.mime()` check, whose `accept` only
-narrows the file picker; and a string that carries more than one pattern, or
-puts a `.regex()`, `.lowercase()` or `.uppercase()` on a format.
+single field, a nested object, or a row.
 
 ## AI Agent Documentation
 

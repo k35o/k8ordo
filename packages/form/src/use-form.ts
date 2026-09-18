@@ -379,9 +379,8 @@ export const useForm = <FieldPath extends string, ArrayPath extends string>(
       } else if (typeof value === 'string') {
         input.defaultValue = value;
       }
-      // An array echo — a checkbox group with several boxes checked — has no
-      // single defaultValue; the caller restores the group per option from
-      // state.values.
+      // An array echo (a checkbox group) has no single defaultValue; the
+      // caller restores it per option from state.values.
 
       return {
         input,

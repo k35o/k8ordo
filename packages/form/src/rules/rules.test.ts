@@ -85,6 +85,24 @@ describe('cross-field rules', () => {
     });
   });
 
+  it('keeps the first broken rule for a field on the server, as the browser does', () => {
+    const layered = defineForm(
+      z.object({ a: z.string(), b: z.string(), c: z.string() }),
+      [sameAs('a', 'b', 'first'), requiredWhen('a', 'c', 'x', 'second')],
+    );
+
+    const result = parseForm(
+      layered,
+      formDataOf([
+        ['a', ''],
+        ['b', 'y'],
+        ['c', 'x'],
+      ]),
+    );
+
+    expect(result.state.errors).toStrictEqual({ a: 'first' });
+  });
+
   it('counts the boxes a checkbox group has checked', () => {
     const rule = minChecked('tags', 2, '2つ以上選んでください');
 

@@ -15,13 +15,16 @@ export type LeafSchema = {
   enum?: unknown[];
   contentMediaType?: string;
   anyOf?: LeafSchema[];
+  /** Where zod puts a string's patterns once there is more than one. */
+  allOf?: LeafSchema[];
 };
 
 /**
  * Which control a leaf becomes, at the resolution the submission cares about.
  * `attributesFor` needs the finer distinctions (`email` vs `url`); the walk and
- * the parse need only this, and reading it from one place is what keeps the
- * three from disagreeing about what an untouched control submits.
+ * the parse need only this. The walk settles it once per leaf, and both read it
+ * from there, which is what keeps the three from disagreeing about what an
+ * untouched control submits.
  */
 export type ControlKind = 'checkbox' | 'choice' | 'file' | 'number' | 'text';
 
@@ -43,19 +46,20 @@ export const controlKindOf = (schema: LeafSchema): ControlKind => {
 
 /**
  * What the control hands the schema when nobody fills it in. A text field
- * always submits `''` and an unchecked checkbox parses to `false`, but a number
- * and a file have no such value: an empty numeric field is not 0, and an
- * unfilled file input is not a zero-byte file. Reading both as "nothing was
- * entered" is what keeps `required` honest — `z.coerce.number()` turns `''`
- * into 0, so probing with `''` would say an empty field is acceptable and then
- * let a blank submission through as a number the person never typed.
+ * always submits `''` and an unchecked checkbox parses to `false`, but a
+ * number, a file and a choice have no such value: an empty numeric field is not
+ * 0, an unfilled file input is not a zero-byte file, and a select left on its
+ * placeholder has chosen nothing — just like a radio group with no selection,
+ * which submits no entry at all. Reading them as "nothing was entered" is what
+ * keeps `required` honest — `z.coerce.number()` turns `''` into 0, so probing
+ * with `''` would say an empty field is acceptable and then let a blank
+ * submission through as a number the person never typed.
  */
-export const emptySubmissionOf = (schema: LeafSchema): unknown => {
-  const kind = controlKindOf(schema);
+export const emptySubmissionOf = (kind: ControlKind): unknown => {
   if (kind === 'checkbox') {
     return false;
   }
-  return kind === 'file' || kind === 'number' ? undefined : '';
+  return kind === 'text' ? '' : undefined;
 };
 
 /**
@@ -122,20 +126,29 @@ const patternVerdict = (
     : 'ブラウザは pattern を v フラグで解釈し、コンパイルできない正規表現は黙って無視します';
 };
 
+/** Whether a JSON Schema `format` names what a control submits, not a refinement of it. */
+export const namesAControl = (format: string): boolean =>
+  Object.hasOwn(FORMAT_TO_INPUT_TYPE, format);
+
+/** What the JSON Schema has already lost, recovered from the zod side when it can be. */
+export type PatternHints = {
+  /** Flags of the RegExp behind a lone `pattern`. */
+  flags?: string;
+  /** Source of the regex the format itself carries, as opposed to one stacked on it. */
+  ofFormat?: string;
+};
+
 /**
  * Turn one leaf JSON Schema into input attributes, collecting whatever HTML
  * cannot express. Anything not representable is returned rather than dropped,
  * so the caller can report it instead of leaving the author to discover at
  * runtime that a check never ran on the client.
- *
- * `patternFlags` are the flags of the source RegExp when the caller could
- * recover it — the JSON Schema string has already lost them.
  */
 export const attributesFor = (
   name: string,
   schema: LeafSchema,
   required: boolean,
-  patternFlags?: string,
+  hints: PatternHints = {},
 ): { input: FieldInput; dropped: DroppedCheck[] } => {
   const input: FieldInput = { name };
   const dropped: DroppedCheck[] = [];
@@ -154,6 +167,11 @@ export const attributesFor = (
     ].filter((type) => type !== undefined);
     if (accept.length > 0) {
       input.accept = accept.join(',');
+      dropped.push({
+        field: name,
+        reason:
+          'accept はファイル選択ダイアログの候補を絞るだけで、ブラウザは選ばれたファイルの MIME タイプを検査しません',
+      });
     }
     if (schema.minLength !== undefined || schema.maxLength !== undefined) {
       // On type="file" they are byte counts, and minlength / maxlength do not
@@ -258,23 +276,43 @@ export const attributesFor = (
     input.maxLength = schema.maxLength;
   }
 
-  if (schema.pattern !== undefined) {
-    if (TYPES_WITHOUT_PATTERN.has(input.type)) {
-      // type="date" already constrains the value far more tightly than the
-      // regex would, so losing it costs nothing.
-      if (input.type !== 'date' && input.type !== 'datetime-local') {
-        dropped.push({
-          field: name,
-          reason: `pattern は type="${input.type}" では無視されます`,
-        });
-      }
+  const patterns =
+    schema.pattern === undefined
+      ? (schema.allOf ?? []).flatMap((branch) =>
+          branch.pattern === undefined ? [] : [branch.pattern],
+        )
+      : [schema.pattern];
+
+  if (TYPES_WITHOUT_PATTERN.has(input.type)) {
+    // type="date" already constrains the value far more tightly than the
+    // format's own regex would, so losing that one costs nothing. A regex
+    // stacked on top is a different check, and it is lost all the same.
+    const ignored = patterns.filter(
+      (pattern) =>
+        !(
+          (input.type === 'date' || input.type === 'datetime-local') &&
+          pattern === hints.ofFormat
+        ),
+    );
+    if (ignored.length > 0) {
+      dropped.push({
+        field: name,
+        reason: `pattern は type="${input.type}" では無視されます`,
+      });
+    }
+  } else if (patterns.length > 1) {
+    // One of them could be emitted, but its message is probed from the whole
+    // schema, which cannot say which of the stacked regexes a value failed.
+    dropped.push({
+      field: name,
+      reason: `HTML の pattern は 1 つしか持てないため、重ねた ${String(patterns.length)} 個の正規表現はブラウザでは検査されません`,
+    });
+  } else if (patterns[0] !== undefined) {
+    const verdict = patternVerdict(patterns[0], hints.flags);
+    if (verdict === undefined) {
+      input.pattern = patterns[0];
     } else {
-      const verdict = patternVerdict(schema.pattern, patternFlags);
-      if (verdict === undefined) {
-        input.pattern = schema.pattern;
-      } else {
-        dropped.push({ field: name, reason: verdict });
-      }
+      dropped.push({ field: name, reason: verdict });
     }
   }
 

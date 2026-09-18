@@ -140,34 +140,9 @@ export const notYetCustom = message({
   en: 'Refusing, at derive time, a `z.custom()` that rejects the strings a text control submits. Nothing about it is readable, so it derives as a text input, is listed in `dropped`, and fails on the server.',
 });
 
-export const notYetSelect = message({
-  ja: "`.optional()` の enum を、プレースホルダー付きの `<select>` やラジオボタンで未選択のままにすること。選択肢の空の送信は `''` とみなされ、`.optional()` の enum はそれを拒むので、欄は `required` になります。`<select>` はサーバーでも失敗します。ラジオボタンは、何も選ばなければサーバーでは通るのに、`required` を渡すとブラウザでは必須として扱われます。",
-  en: "Leaving an `.optional()` enum unpicked through a `<select>` with a placeholder option or a radio group. A choice's empty submission is taken to be `''`, which an optional enum rejects, so the field is marked `required`. The `<select>` fails on the server too; a radio group with nothing selected passes the server, yet is treated as mandatory in the browser once given `required`.",
-});
-
-export const notYetBigint = message({
-  ja: "空の `z.coerce.bigint()` の欄を未入力として読むこと。空欄を未入力として扱うのは数値とファイルの入力要素だけなので、`''` がそのままスキーマに届き、`0n` になります。",
-  en: "Reading an empty `z.coerce.bigint()` field as nothing entered. Only number and file controls turn a blank into nothing entered, so `''` reaches the schema and becomes `0n`.",
-});
-
-export const notYetStringbool = message({
-  ja: '`z.stringbool()`。チェックボックスとして導かれますが、`parseForm` はチェックボックスの値を真偽値で渡し、`z.stringbool()` は文字列しか受け付けないので、どの送信も失敗します。`z.boolean()` を使います。',
-  en: "`z.stringbool()`. It derives as a checkbox, but `parseForm` hands a checkbox's schema a boolean and `z.stringbool()` accepts only strings, so every submission fails. Use `z.boolean()`.",
-});
-
 export const notYetRefine = message({
   ja: '1 つの欄、ネストしたオブジェクト、繰り返し行に付けた `.refine()` / `.superRefine()` を `dropped` で報告すること。報告されるのはルートのオブジェクトのチェックの件数だけで、それ以外はクライアントに何も知らせずサーバーでだけ走ります。',
   en: "Reporting a `.refine()` / `.superRefine()` on a single field, on a nested object, or on a row in `dropped`. Only the count of the root object's checks is reported; the others run on the server without a word on the client.",
-});
-
-export const notYetMime = message({
-  ja: '`.mime()` を `dropped` で報告すること。`accept` になりますが、ファイル選択の候補を絞るだけで、ブラウザは種類を検査しません。それでも `dropped` には載らず、種類はサーバーでだけ検査されます。',
-  en: 'Reporting `.mime()` in `dropped`. It becomes `accept`, which only narrows the file picker and is never enforced, yet it is not listed; the type is checked on the server alone.',
-});
-
-export const notYetPatterns = message({
-  ja: '正規表現を重ねた文字列。`.regex()`・`.startsWith()`・`.endsWith()`・`.includes()`・`.lowercase()`・`.uppercase()` はそれぞれ正規表現を 1 つ足し、`z.email()`・`z.uuid()`・`z.iso.date()` などの形式も自分の正規表現を持ちます。2 つ以上になると JSON Schema では `allOf` にまとめられ、`formFields` はそれを読まないので、`pattern` は出ず、`dropped` にも載りません。形式に `.regex()`・`.lowercase()`・`.uppercase()` を足すと形式も置き換わるので、`z.email().regex(…)` や `z.url().lowercase()` は `type="text"` になり、これも `dropped` に載りません。検査はすべてサーバーで行われます。',
-  en: 'Strings that combine pattern checks. `.regex()`, `.startsWith()`, `.endsWith()`, `.includes()`, `.lowercase()` and `.uppercase()` each add a pattern, and so do formats such as `z.email()`, `z.uuid()` and `z.iso.date()`. Two or more reach JSON Schema as an `allOf`, which `formFields` does not read: no `pattern` is emitted and none of them is listed in `dropped`. A `.regex()`, `.lowercase()` or `.uppercase()` on a format also takes the format\'s place there, so `z.email().regex(…)` and `z.url().lowercase()` derive `type="text"`, again without a word in `dropped`. Every check still runs on the server.',
 });
 
 export const notYetRowRules = message({
