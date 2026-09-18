@@ -103,6 +103,39 @@ export const ForwardsRef: Story = {
   },
 };
 
+const checkMarkOf = (checkbox: HTMLElement) =>
+  checkbox.closest('label')?.querySelector('svg');
+
+export const CheckMarkFollowsReset: Story = {
+  render: () => (
+    <form className="flex flex-col items-start gap-2">
+      <Checkbox label="unchecked by default" />
+      <Checkbox defaultChecked label="checked by default" />
+      <button type="reset">reset</button>
+    </form>
+  ),
+  play: async ({ canvas, userEvent }) => {
+    const uncheckedByDefault = canvas.getByRole('checkbox', {
+      name: 'unchecked by default',
+    });
+    const checkedByDefault = canvas.getByRole('checkbox', {
+      name: 'checked by default',
+    });
+
+    await userEvent.click(uncheckedByDefault);
+    await userEvent.click(checkedByDefault);
+
+    await expect(checkMarkOf(uncheckedByDefault)).toBeVisible();
+
+    await userEvent.click(canvas.getByRole('button', { name: 'reset' }));
+
+    await expect(uncheckedByDefault).not.toBeChecked();
+    await expect(checkMarkOf(uncheckedByDefault)).not.toBeVisible();
+    await expect(checkedByDefault).toBeChecked();
+    await expect(checkMarkOf(checkedByDefault)).toBeVisible();
+  },
+};
+
 // FormControl の renderInput から受け取る invalid を aria-invalid として伝える
 export const Invalid: Story = {
   args: {

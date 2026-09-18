@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
 import type { ComponentProps } from 'react';
-import { expect } from 'storybook/test';
+import { expect, waitFor } from 'storybook/test';
 
 import { Radio } from './radio';
 
@@ -55,6 +55,58 @@ export const Disabled: Story = {
   args: {
     defaultValue: 'vue',
     disabled: true,
+  },
+};
+
+export const RequiredUntilSelected: Story = {
+  args: {
+    required: true,
+  },
+  play: async ({ canvas, userEvent }) => {
+    const react = canvas.getByRole('radio', { name: 'React' });
+
+    await expect(react).toBeInvalid();
+
+    await userEvent.click(canvas.getByRole('radio', { name: 'Vue' }));
+
+    await expect(react).toBeValid();
+  },
+};
+
+const selectionDotOf = (radio: HTMLElement) =>
+  radio.closest('label')?.querySelector('[aria-hidden] > span');
+
+// 点は opacity でフェードするので、切り替わり切るのを待つ
+export const SelectionFollowsReset: Story = {
+  render: () => (
+    <form className="flex flex-col items-start gap-2">
+      <Radio
+        aria-labelledby="radio-story-label"
+        defaultValue="react"
+        options={options}
+      />
+      <button type="reset">reset</button>
+    </form>
+  ),
+  play: async ({ canvas, userEvent }) => {
+    const react = canvas.getByRole('radio', { name: 'React' });
+    const vue = canvas.getByRole('radio', { name: 'Vue' });
+
+    await userEvent.click(vue);
+
+    await waitFor(async () => {
+      await expect(selectionDotOf(vue)).toBeVisible();
+    });
+
+    await userEvent.click(canvas.getByRole('button', { name: 'reset' }));
+
+    await expect(react).toBeChecked();
+    await waitFor(async () => {
+      await expect(selectionDotOf(vue)).not.toBeVisible();
+    });
+    await waitFor(async () => {
+      await expect(selectionDotOf(react)).toBeVisible();
+    });
   },
 };
 
