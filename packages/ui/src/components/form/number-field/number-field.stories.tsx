@@ -163,3 +163,17 @@ export const ForwardsRef: Story = {
     await expect(canvas.getByRole('spinbutton')).toHaveFocus();
   },
 };
+
+export const RoundsToPrecisionOnBlur: Story = {
+  args: {
+    onChange: fn(),
+  },
+  play: async ({ args, canvas, userEvent }) => {
+    const input = canvas.getByRole('spinbutton');
+    await userEvent.type(input, '1.5');
+    await userEvent.tab();
+
+    await expect(input).toHaveValue('2');
+    await expect(args.onChange).toHaveBeenLastCalledWith(2);
+  },
+};
