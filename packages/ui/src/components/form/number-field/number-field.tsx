@@ -147,7 +147,6 @@ export const NumberField: FC<Props> = ({
             setDisplayValue(newValue.toFixed(precision));
           }
         })}
-        pattern="[0-9]*(.[0-9]+)?"
         ref={ref}
         role="spinbutton"
         type="text"
