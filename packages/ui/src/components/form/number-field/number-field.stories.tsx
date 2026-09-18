@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useRef } from 'react';
-import { expect, fn } from 'storybook/test';
+import { expect, fn, waitFor } from 'storybook/test';
 
 import { NumberField } from './number-field';
 
@@ -76,6 +76,73 @@ export const Min0Max100: Story = {
     await userEvent.keyboard('{ArrowUp}');
 
     await expect(input).toHaveValue('100');
+  },
+};
+
+export const NegativeDecimal: Story = {
+  args: {
+    disabled: false,
+    invalid: false,
+    required: false,
+    min: -10,
+    precision: 1,
+    step: 0.1,
+  },
+  play: async ({ canvas, userEvent }) => {
+    const input = canvas.getByRole('spinbutton');
+    await userEvent.clear(input);
+    await userEvent.type(input, '-1.5[Tab]');
+
+    await expect(input).toHaveValue('-1.5');
+    await expect(input).toBeValid();
+  },
+};
+
+export const ReadOnly: Story = {
+  args: {
+    readOnly: true,
+    defaultValue: 5,
+  },
+  play: async ({ canvas, userEvent }) => {
+    const input = canvas.getByRole('spinbutton');
+    await userEvent.type(input, '9');
+    await userEvent.keyboard('{ArrowUp}');
+    await userEvent.keyboard('{ArrowDown}');
+    await userEvent.click(
+      canvas.getByRole('button', { name: '増やす', hidden: true }),
+    );
+
+    await expect(input).toHaveValue('5');
+  },
+};
+
+const PendingRender = () => (
+  <form
+    action={async () => {
+      // 送信中のまま止めておき、その間のキー操作を見る
+      await new Promise<void>(() => {});
+    }}
+  >
+    <NumberField defaultValue={5} id="number-field-pending" />
+    <button type="submit">送信</button>
+  </form>
+);
+
+export const IgnoresArrowKeysWhilePending: Story = {
+  render: () => <PendingRender />,
+  play: async ({ canvas, userEvent }) => {
+    const input = canvas.getByRole('spinbutton');
+    await userEvent.click(canvas.getByRole('button', { name: '送信' }));
+    await waitFor(async () => {
+      await expect(input).toHaveAttribute('readonly');
+    });
+
+    await userEvent.click(input);
+    await userEvent.keyboard('{ArrowUp}');
+    await userEvent.keyboard('{ArrowDown}');
+    await userEvent.keyboard('{ArrowDown}');
+
+    await expect(input).toHaveValue('5');
   },
 };
 

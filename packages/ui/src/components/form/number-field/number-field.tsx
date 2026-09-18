@@ -53,6 +53,7 @@ type Props = BaseProps & (ControlledProps | UncontrolledProps);
 export const NumberField: FC<Props> = ({
   invalid = false,
   disabled = false,
+  readOnly = false,
   required = false,
   value,
   defaultValue,
@@ -77,6 +78,7 @@ export const NumberField: FC<Props> = ({
   );
   const [prevValue, setPrevValue] = useState(currentValue);
   const { pending } = useFormStatus();
+  const readOnlyResolved = readOnly || pending;
 
   if (currentValue !== prevValue) {
     setDisplayValue(currentValue.toFixed(precision));
@@ -85,6 +87,19 @@ export const NumberField: FC<Props> = ({
 
   const handleChange = (newValue: number) => {
     setCurrentValue(newValue);
+  };
+
+  const stepBy = (delta: number) => {
+    if (readOnlyResolved) {
+      return;
+    }
+    const newValue = clamp(
+      toPrecision(cast(displayValue, precision) + delta, precision),
+      min,
+      max,
+    );
+    handleChange(newValue);
+    setDisplayValue(newValue.toFixed(precision));
   };
 
   return (
@@ -112,7 +127,7 @@ export const NumberField: FC<Props> = ({
           'read-only:cursor-not-allowed',
         )}
         disabled={disabled}
-        readOnly={pending || undefined}
+        readOnly={readOnlyResolved}
         onBlur={chain(onBlur, () => {
           const newValue = clamp(cast(displayValue, precision), min, max);
           handleChange(newValue);
@@ -129,25 +144,12 @@ export const NumberField: FC<Props> = ({
         }}
         onKeyDown={chain(onKeyDown, (e) => {
           if (e.key === 'ArrowUp') {
-            const newValue = clamp(
-              toPrecision(cast(displayValue, precision) + step, precision),
-              min,
-              max,
-            );
-            handleChange(newValue);
-            setDisplayValue(newValue.toFixed(precision));
+            stepBy(step);
           }
           if (e.key === 'ArrowDown') {
-            const newValue = clamp(
-              toPrecision(cast(displayValue, precision) - step, precision),
-              min,
-              max,
-            );
-            handleChange(newValue);
-            setDisplayValue(newValue.toFixed(precision));
+            stepBy(-step);
           }
         })}
-        pattern="[0-9]*(.[0-9]+)?"
         ref={ref}
         role="spinbutton"
         type="text"
@@ -163,15 +165,9 @@ export const NumberField: FC<Props> = ({
             'hover:bg-bg-mute hover:text-fg-base',
             'disabled:cursor-not-allowed disabled:text-fg-mute hover:disabled:bg-transparent',
           )}
-          disabled={disabled || pending}
+          disabled={disabled || readOnlyResolved}
           onClick={() => {
-            const newValue = clamp(
-              toPrecision(cast(displayValue, precision) + step, precision),
-              min,
-              max,
-            );
-            handleChange(newValue);
-            setDisplayValue(newValue.toFixed(precision));
+            stepBy(step);
           }}
           tabIndex={-1}
           type="button"
@@ -185,15 +181,9 @@ export const NumberField: FC<Props> = ({
             'hover:bg-bg-mute hover:text-fg-base',
             'disabled:cursor-not-allowed disabled:text-fg-mute hover:disabled:bg-transparent',
           )}
-          disabled={disabled || pending}
+          disabled={disabled || readOnlyResolved}
           onClick={() => {
-            const newValue = clamp(
-              toPrecision(cast(displayValue, precision) - step, precision),
-              min,
-              max,
-            );
-            handleChange(newValue);
-            setDisplayValue(newValue.toFixed(precision));
+            stepBy(-step);
           }}
           tabIndex={-1}
           type="button"
