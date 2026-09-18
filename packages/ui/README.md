@@ -571,7 +571,6 @@ To generate the prompt inside the client bundle instead, `library.prompt()` stil
 > - Make sure `@k8ordo/ui/styles.css` (or `tailwind.css` in Tailwind CSS 4 projects) is loaded and the app is wrapped in `UIProvider`.
 > - Both OpenUI entries need `@openuidev/lang-core` — `openui/prompt` is the React-free one, and `openui` builds its component library with it. Install it alongside `@openuidev/react-lang`: pnpm will not resolve it for you just because `react-lang` depends on it.
 > - `Tabs` panels are text content (`tabs: [{ label, content }]`); rich-component panels are a future enhancement.
-> - In OpenUI, `Card` can contain a `Stack` or `Grid`, but `Stack`/`Grid` cannot directly nest a `Stack`/`Grid`/`Card` (no self-referential schemas) — put nested layout inside a `Card`. json-render nests freely (slots-based).
 
 ## Accessibility
 

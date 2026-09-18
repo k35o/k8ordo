@@ -131,10 +131,10 @@ import { prompt } from '@k8ordo/ui/openui/prompt';
 const systemPrompt = prompt(); // No React dependency — callable from RSC or an API route
 ```
 
-In OpenUI a `Stack` or `Grid` cannot sit directly inside another `Stack` or
-`Grid` (self-referential schemas are unsupported). When you need nested layout,
-put the `Stack` / `Grid` inside a `Card`. json-render is slot-based and nests
-freely.
+Containers nest freely in OpenUI, as they do in json-render: `Stack`, `Grid`,
+`Card`, `Form`, `Modal`, `Dialog`, `Drawer`, and `Popover` each list every
+container among their children, so a `Card` can sit inside a `Stack` and a
+`Stack` inside another `Stack`.
 
 ## Exports at a glance
 
