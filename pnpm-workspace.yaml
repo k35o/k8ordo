@@ -19,11 +19,11 @@ catalog:
   # 使う版を同じ 1 コピーに保つ (scripts/check-peer-copies.mjs が検査する)。
   '@json-render/core': 0.20.0
   '@json-render/react': 0.20.0
-  '@openuidev/lang-core': 0.2.17
+  '@openuidev/lang-core': 0.2.18
   '@openuidev/react-lang': 0.2.15
   '@tailwindcss/postcss': 4.3.3
   '@tailwindcss/vite': 4.3.3
-  '@types/node': 24.13.3
+  '@types/node': 24.13.4
   '@types/react': 19.3.0
   '@types/react-dom': 19.3.0
   '@vitejs/plugin-react': 6.1.1
@@ -46,11 +46,17 @@ catalog:
   server-only: 0.0.1
   tailwindcss: 4.3.3
   typescript: 7.0.2
-  vite: 8.2.2
-  vite-plus: 0.3.0
+  # vite-plus 0.3.1 以降の `vp pack` / `vp dev` は、実行するパッケージが vite を
+  # 宣言していると、それが同じ版の @voidzero-dev/vite-plus-core でなければ落ちる。
+  # 本家 vite ではなく core の別名を置き、版は vite-plus と常に揃える。
+  # 宣言を消して vite-plus 任せにしないのは、消すと plugin-react や vitest の
+  # peer に pnpm が本家 vite を自動で入れ、vitest の実体が割れて
+  # expect.element の型が消えるため。
+  vite: npm:@voidzero-dev/vite-plus-core@0.3.1
+  vite-plus: 0.3.1
   vitest: 5.0.0
   vitest-browser-react: 2.3.0
-  zod: 4.5.4
+  zod: 4.6.2
 
 minimumReleaseAge: 10080
 
@@ -59,7 +65,7 @@ minimumReleaseAge: 10080
 # tsc が "Excessive stack depth" を起こして typecheck が落ちる。単一バージョンに
 # 強制して型グラフのコピーを 1 つに保つ (types のみのパッケージでランタイム影響なし)。
 overrides:
-  '@oxc-project/types': 0.148.0
+  '@oxc-project/types': 0.149.0
 
   # vitest は vite-plus が exact pin (0.3.2 時点でも 4.1.11) で連れてくる依存で、
   # `vp test` が起動するのは常に vite-plus 側の 1 本。catalog だけを 5 に上げても

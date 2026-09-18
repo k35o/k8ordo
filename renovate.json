@@ -21,6 +21,10 @@
       "groupName": "vitest dependencies"
     },
     {
+      "matchPackageNames": ["vite-plus", "@voidzero-dev/vite-plus-core"],
+      "groupName": "vite-plus dependencies"
+    },
+    {
       "matchPackageNames": ["/^react$/", "/^react-dom$/"],
       "groupName": "react dependencies"
     },
