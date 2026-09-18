@@ -21,6 +21,7 @@
     "@k8ordo/static": "workspace:^",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
+    "playwright": "1.63.0",
     "typescript": "catalog:",
     "vite": "catalog:",
     "vite-plus": "catalog:"

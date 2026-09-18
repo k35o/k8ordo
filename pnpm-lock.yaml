@@ -443,6 +443,9 @@ importers:
       '@types/react-dom':
         specifier: 'catalog:'
         version: 19.3.0(@types/react@19.3.0)
+      playwright:
+        specifier: 1.63.0
+        version: 1.63.0
       typescript:
         specifier: 'catalog:'
         version: 7.0.2
