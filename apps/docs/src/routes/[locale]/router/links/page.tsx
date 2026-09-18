@@ -33,29 +33,28 @@ navigateTo('/products', { history: 'replace' });`;
 
 const OPEN_BUTTON = `// src/open-product-button.tsx
 import { navigateTo } from '@k8ordo/router';
-import { useState } from 'react';
+import { useTransition } from 'react';
 
 const isAbort = (error: unknown) =>
   error instanceof DOMException && error.name === 'AbortError';
 
 export function OpenProductButton({ id }: { id: string }) {
-  const [isOpening, setIsOpening] = useState(false);
+  const [isPending, startTransition] = useTransition();
   return (
     <button
-      disabled={isOpening}
-      onClick={async () => {
-        setIsOpening(true);
-        try {
-          await navigateTo('/products/:id', { id }).finished;
-        } catch (error) {
-          if (!isAbort(error)) throw error;
-        } finally {
-          setIsOpening(false);
-        }
+      disabled={isPending}
+      onClick={() => {
+        startTransition(async () => {
+          try {
+            await navigateTo('/products/:id', { id }).finished;
+          } catch (error) {
+            if (!isAbort(error)) throw error;
+          }
+        });
       }}
       type="button"
     >
-      {isOpening ? 'Opening…' : 'Open'}
+      {isPending ? 'Opening…' : 'Open'}
     </button>
   );
 }`;
@@ -332,7 +331,7 @@ export default function RouterLinksPage() {
         </p>
         <CodeBlock code={OPEN_BUTTON} lang="tsx" />
         <p className="text-fg-mute leading-relaxed">
-          <Rich>{m.routerLinks.navigateNoAction()}</Rich>
+          <Rich>{m.routerLinks.navigateInAction()}</Rich>
         </p>
         <p className="text-fg-mute leading-relaxed">
           <Rich>{m.routerLinks.navigateAbort()}</Rich>{' '}

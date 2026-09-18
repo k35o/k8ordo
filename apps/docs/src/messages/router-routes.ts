@@ -31,8 +31,8 @@ export const shapeProps = message({
 });
 
 export const shapeLazy = message({
-  ja: '`React.lazy` の戻り値も leaf として置けます。branch は `children` キーの有無で見分けるので、関数ではない lazy コンポーネントを branch と取り違えません。chunk が届くまでの間に fallback を出す場所として、上のレイアウトに `<Suspense>` を置きます。fallback が出るのは、最初の描画と、その `<Suspense>` を新しくマウントするナビゲーションのときです。すでに画面にある `<Suspense>` の下でページが切り替わるときは、transition が前のページを残します。',
-  en: 'A `React.lazy` component works as a leaf. A branch is recognised by its `children` key, so a lazy component — an object, not a function — is never mistaken for one. Put a `<Suspense>` in a layout above it so there is somewhere to fall back to while the chunk arrives. The fallback shows on the first render and on a navigation that newly mounts that `<Suspense>`; when the page changes under a `<Suspense>` already on screen, the transition keeps the previous page instead.',
+  ja: '`React.lazy` の戻り値も leaf として置けます。branch は `children` キーの有無で見分けるので、関数ではない lazy コンポーネントを branch と取り違えません。chunk が届くまでの間に fallback を出す場所として、上のレイアウトに `<Suspense>` を置きます。fallback が出るのは、最初の描画と、その `<Suspense>` を新しくマウントするナビゲーションのときです。すでに画面にある `<Suspense>` の下でページが切り替わるときは、背景での描画が前のページを残します。',
+  en: 'A `React.lazy` component works as a leaf. A branch is recognised by its `children` key, so a lazy component — an object, not a function — is never mistaken for one. Put a `<Suspense>` in a layout above it so there is somewhere to fall back to while the chunk arrives. The fallback shows on the first render and on a navigation that newly mounts that `<Suspense>`; when the page changes under a `<Suspense>` already on screen, the background render keeps the previous page instead.',
 });
 
 export const grammarTitle = message({

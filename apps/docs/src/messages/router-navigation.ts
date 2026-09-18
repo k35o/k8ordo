@@ -23,8 +23,8 @@ export const claimTable = {
     en: 'To another pathname the table answers',
   }),
   pageChangeHandling: message({
-    ja: 'ページの切り替え。新しい木を transition で適用する',
-    en: 'A page change: the new tree is applied in a transition',
+    ja: 'ページの切り替え。新しい木を `useDeferredValue` で背景に描く',
+    en: 'A page change: the new tree renders in the background through `useDeferredValue`',
   }),
   stateChange: message({
     ja: '今表示しているページと同じ pathname への移動（search や履歴エントリの状態だけが変わる）',
@@ -96,8 +96,8 @@ export const timelineCommit = message({
 });
 
 export const timelineApply = message({
-  ja: '新しい照合結果を `startTransition` の中で適用します。transition には `navigation` と `navigation-push` などの型が付きます。',
-  en: 'The new match is applied inside `startTransition`, tagged with `navigation` and a type such as `navigation-push`.',
+  ja: '新しい照合結果を通常の更新として適用し、`useDeferredValue` を通して背景で描きます。その commit には `navigation` と `navigation-push` などの型が付きます。',
+  en: 'The new match is applied as an ordinary update and rendered in the background through `useDeferredValue`; that commit is tagged with `navigation` and a type such as `navigation-push`.',
 });
 
 export const timelineLayoutEffect = message({
@@ -130,9 +130,9 @@ export const finishedDescription = message({
   en: 'The intercept handler resolves in a layout effect, once React has committed the new tree and before the browser paints it. Code awaiting `finished` is awaiting the render, not the URL write. The render it waits for is the new tree’s first commit: a `React.lazy` page that suspends into a `<Suspense>` the navigation mounts anew commits its fallback first, and `finished` resolves then, before the chunk is in.',
 });
 
-export const finishedPitfall = message({
-  ja: 'ただし、`startTransition` の非同期アクションの中で `finished` を待つと止まります。ルーターが新しいページを適用する transition が、そのアクションの終わりを待つからです。待ちはイベントハンドラで行います。`finished` を待たない場合でも、どこかの非同期アクションが保留中の間に始まったページの切り替えは、そのアクションが終わるまで画面に出ません。',
-  en: 'Awaiting `finished` inside an async `startTransition` action stalls, though: the transition that applies the new page waits for that action to end. Await it in an event handler instead. Even without awaiting it, a page change that starts while any async action is pending does not reach the screen until that action ends.',
+export const finishedInAction = message({
+  ja: '`startTransition` の非同期アクションの中で待っても止まりません。ページの切り替えはアクションに加わらないので、`finished` はページが画面に出た時点で解決し、アクションの終わりを待ちません。どこかの非同期アクションが保留中の間に始まったページの切り替えも、そのアクションを待たずに画面に出ます。',
+  en: 'Awaiting it inside an async `startTransition` action does not stall: a page change never joins the action, so `finished` resolves once the page is on screen instead of waiting for the action to end. A page change that starts while any async action is pending reaches the screen without waiting for that action either.',
 });
 
 export const stateTitle = message({
@@ -166,13 +166,13 @@ export const scrollTraverse = message({
 });
 
 export const transitionTitle = message({
-  ja: 'ページの切り替えは transition',
-  en: 'Page changes run in a transition',
+  ja: 'ページの切り替えは背景で描く',
+  en: 'Page changes render in the background',
 });
 
 export const transitionDescription = message({
-  ja: '新しい木は `startTransition` の中で適用されるので、次のページの準備ができるまで React は前のページを操作できる状態で保てます。`React.lazy` の chunk を待つ間も同じです。',
-  en: 'The new tree is applied inside `startTransition`, so React can keep the previous page interactive while the next one prepares — while a `React.lazy` chunk arrives, for instance.',
+  ja: '新しい木は `useDeferredValue` の優先度で描かれるので、次のページの準備ができるまで React は前のページを操作できる状態で保てます。`React.lazy` の chunk を待つ間も同じです。transition にしないのは、非同期アクションが保留中の間、React がすべての transition をそのアクションの終わりまで止めるからです。',
+  en: 'The new tree renders at the priority `useDeferredValue` gives it, so React can keep the previous page interactive while the next one prepares — while a `React.lazy` chunk arrives, for instance. It is not a transition because React holds every transition until any pending async action ends.',
 });
 
 export const abortTitle = message({
@@ -223,13 +223,13 @@ export const animateTitle = message({
 });
 
 export const animateDescription = message({
-  ja: 'ページの切り替えは transition なので、React の `<ViewTransition>` でアニメーションできます。ページが描かれる穴を `<ViewTransition>` で包み、ルーターの transition の型をキーにします。',
-  en: 'A page change is a transition, and React’s `<ViewTransition>` animates what a transition changes. Wrap the hole the pages render into, and key it on the router’s transition types.',
+  ja: 'ページの切り替えは背景での描画なので、transition と同じく React の `<ViewTransition>` でアニメーションできます。ページが描かれる穴を `<ViewTransition>` で包み、ルーターの transition の型をキーにします。',
+  en: 'A page change renders in the background, and React’s `<ViewTransition>` animates what such a render changes, as it does a transition. Wrap the hole the pages render into, and key it on the router’s transition types.',
 });
 
 export const animateWhy = message({
-  ja: '型で絞るのは、ページの切り替え以外にも transition があるからです。ボタンの保留中のアクションも transition で、型で絞らなければボタンを押すたびにページ全体がクロスフェードします。`update` を使うのは、境界そのものは残り、中身だけが入れ替わるからです。`auto` はブラウザ既定のクロスフェードです。',
-  en: 'The types matter because page changes are not the only transitions: a button’s pending action is one too, and without the filter every press would cross-fade the whole page. It is `update` because the boundary stays and its content changes; `auto` is the browser’s own cross-fade.',
+  ja: '型で絞るのは、ページの切り替え以外にも `<ViewTransition>` を動かす更新があるからです。ボタンの保留中のアクションは transition で、型で絞らなければボタンを押すたびにページ全体がクロスフェードします。`update` を使うのは、境界そのものは残り、中身だけが入れ替わるからです。`auto` はブラウザ既定のクロスフェードです。',
+  en: 'The types matter because page changes are not the only updates a `<ViewTransition>` animates: a button’s pending action is a transition, and without the filter every press would cross-fade the whole page. It is `update` because the boundary stays and its content changes; `auto` is the browser’s own cross-fade.',
 });
 
 export const animateThisSite = message({
@@ -268,8 +268,8 @@ export const primitiveTitle = message({
 });
 
 export const primitiveDescription = message({
-  ja: '`<Router>` のナビゲーションの部分は、単独のフックとして公開されています。intercept して読み込み、transition の中で適用し、新しい木が画面に出てからプラットフォームのハンドラを解決します。上の保証はすべてこのフックによるものです。何を読み込むかは呼び出し側が決めます。',
-  en: 'The navigation half of `<Router>` is exported as a hook of its own: intercept, load, apply in a transition, and resolve the platform’s handler only once the new tree is on screen. Every guarantee above belongs to this hook. What gets loaded is the caller’s business.',
+  ja: '`<Router>` のナビゲーションの部分は、単独のフックとして公開されています。intercept して読み込み、適用し、新しい木が画面に出てからプラットフォームのハンドラを解決します。上の保証はすべてこのフックによるものです。何を読み込むかは呼び出し側が決めます。',
+  en: 'The navigation half of `<Router>` is exported as a hook of its own: intercept, load, apply, and resolve the platform’s handler only once the new tree is on screen. Every guarantee above belongs to this hook. What gets loaded is the caller’s business.',
 });
 
 export const primitiveHandler = message({
@@ -288,8 +288,8 @@ export const handlerLoad = message({
 });
 
 export const handlerApply = message({
-  ja: '`apply(value)`：それを適用します。transition の中で呼ばれます。',
-  en: '`apply(value)` — applies it. It is called inside a transition.',
+  ja: '`apply(value)`：それを適用します。transition の外で、通常の更新として呼ばれます。ホストは設定した値を `useDeferredValue` を通して描きます。そうすると新しいページが背景で描かれ、その間は前のページが画面に残り、`generation` と `finished` も同じ commit で進みます。',
+  en: '`apply(value)` — applies it, as an ordinary update outside any transition. The host renders what it set through `useDeferredValue`: the new page then renders in the background with the previous one still on screen, and `generation` and `finished` move in that same commit.',
 });
 
 export const primitiveEventTime = message({
@@ -303,8 +303,8 @@ export const primitiveRouter = message({
 });
 
 export const primitiveGeneration = message({
-  ja: '戻り値の `generation` は、URL が動いたときではなく新しい木が適用されたときにだけ変わる番号です。ホストはこれを `<NavigationGeneration value>` で配り、表の `error` 境界が失敗を手放す時を知らせます。サーバーでの描画とハイドレーションに備えて `<PathnameProvider pathname>` もホストがマウントします。`<Router>` もフレームワークのランタイムもこの 2 つを自分で置くので、アプリがこのフックを使うのは、自分で遷移の継ぎ目を作るときだけです。',
-  en: 'The `generation` it returns is a number that changes exactly when a new tree is applied, not when the URL moved. A host provides it through `<NavigationGeneration value>` so the table’s `error` boundaries know when to let a failure go, and mounts `<PathnameProvider pathname>` for server renders and hydration. `<Router>` and the framework’s runtime both do this themselves, so an application reaches for this hook only when it builds its own navigation seam.',
+  ja: '戻り値の `generation` は、URL が動いたときではなく新しい木が画面に出たときにだけ変わる番号です。ホストはこれを `<NavigationGeneration value>` で配り、表の `error` 境界が失敗を手放す時を知らせます。サーバーでの描画とハイドレーションに備えて `<PathnameProvider pathname>` もホストがマウントします。`<Router>` もフレームワークのランタイムもこの 2 つを自分で置くので、アプリがこのフックを使うのは、自分で遷移の継ぎ目を作るときだけです。',
+  en: 'The `generation` it returns is a number that changes exactly when a new tree is put on screen, not when the URL moved. A host provides it through `<NavigationGeneration value>` so the table’s `error` boundaries know when to let a failure go, and mounts `<PathnameProvider pathname>` for server renders and hydration. `<Router>` and the framework’s runtime both do this themselves, so an application reaches for this hook only when it builds its own navigation seam.',
 });
 
 export const testingTitle = message({
