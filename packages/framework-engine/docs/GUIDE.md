@@ -14,9 +14,10 @@ which is nearly everything:
   client dependencies the optimizer cannot discover on its own, and a single
   React across every environment.
 - **The execution boundary**, enforced on what reaches the client bundle.
-- **The request handler.** One function turns a request into a page. The
-  difference between the two modes is when it is called: once per route at
-  build time, or once per request.
+- **The request handler.** One function turns a request into a page, compiled
+  for each mode. The difference between the two modes is chiefly when it is
+  called: for each route at build time — once for its HTML, once for its
+  payload — or once per request.
 
 The grammar and the generator are documented where an application meets them,
 in [`@k8ordo/static`](../../static/docs/GUIDE.md) and

@@ -26,8 +26,8 @@ export const featureRoutes = message({
 });
 
 export const featureRoutesDescription = message({
-  ja: 'ディレクトリ木がそのまま pathname 空間です。page/layout/not-found・`[param]`・`(group)`・`_` の私物だけを認め、規約から外れたものはビルドを落とします。',
-  en: 'The directory tree is the pathname space: page/layout/not-found, `[param]`, `(group)`, and `_`-prefixed privates. Anything outside the grammar fails the build.',
+  ja: 'ディレクトリ木がそのまま pathname 空間です。page/layout/not-found/error/redirect・`[param]`・`(group)`・`_` の私物だけを認め、規約から外れたものはビルドを落とします。',
+  en: 'The directory tree is the pathname space: page/layout/not-found/error/redirect, `[param]`, `(group)`, and `_`-prefixed privates. Anything outside the grammar fails the build.',
 });
 
 export const featureActions = message({
@@ -46,8 +46,8 @@ export const featureSameHandler = message({
 });
 
 export const featureSameHandlerDescription = message({
-  ja: 'リクエストをページに変える関数は static と同一で、違いは呼ぶ時期だけです。両モードで描画が食い違うなら、それは何かが漏れています。',
-  en: 'The function that turns a request into a page is identical; only when it is called differs. If a page renders differently under the two modes, something has leaked.',
+  ja: 'リクエストをページに変える関数は static と同じもので、モードごとにコンパイルされ、違いは主に呼ぶ時期です。両モードで描画が食い違うなら、それは何かが漏れています。',
+  en: 'The function that turns a request into a page is the same one, compiled for each mode; what differs is chiefly when it is called. If a page renders differently under the two modes, something has leaked.',
 });
 
 export const featureRouteFiles = message({
@@ -88,4 +88,34 @@ export const docsTitle = message({
 export const docsDescription = message({
   ja: '設計ガイドは npm パッケージに同梱されています。AIコーディングエージェントは `node_modules/@k8ordo/server/docs/` からインストールした版そのものを読みます。',
   en: 'The guide ships inside the npm package. An AI coding assistant reads the exact installed version out of `node_modules/@k8ordo/server/docs/`.',
+});
+
+export const navRouting = message({
+  ja: 'routes/',
+  en: 'routes/',
+});
+
+export const navParams = message({
+  ja: 'パラメータ',
+  en: 'Parameters',
+});
+
+export const navErrors = message({
+  ja: 'エラーとリダイレクト',
+  en: 'Errors & redirects',
+});
+
+export const navBoundaries = message({
+  ja: '実行境界',
+  en: 'Boundaries',
+});
+
+export const navActions = message({
+  ja: 'アクションとリクエスト',
+  en: 'Actions & requests',
+});
+
+export const navDeploy = message({
+  ja: '実行と配信',
+  en: 'Run & deploy',
 });

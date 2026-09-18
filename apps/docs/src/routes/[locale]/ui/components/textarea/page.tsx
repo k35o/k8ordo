@@ -20,7 +20,7 @@ export default function TextareaPage() {
         </p>
         <div>
           <Anchor
-            href={`${STORYBOOK_URL}/?path=/docs/components-form-textarea--docs`}
+            href={`${STORYBOOK_URL}/?path=/story/components-form-textarea--default`}
             openInNewTab
           >
             <Rich>{m.components.common.storybookLink()}</Rich>
@@ -103,7 +103,6 @@ export default function TextareaPage() {
   invalid={false}
   required={false}
   placeholder="Type to auto-resize"
-  rows={2}
 />`}
           >
             <Textarea
@@ -114,7 +113,6 @@ export default function TextareaPage() {
               invalid={false}
               required={false}
               placeholder="Type to auto-resize"
-              rows={2}
             />
           </ComponentPreview>
         </div>

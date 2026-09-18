@@ -18,37 +18,54 @@ When installed via npm, these docs live under `node_modules/@k8ordo/form/docs/`.
 
 ## Not supported
 
-`z.array(z.file())` derives repeated single-file rows, not one `multiple`
-input. Constraints behind a `.transform()` (or a `.pipe()` whose output JSON
-Schema cannot describe) are not derived: the field becomes a bare text input
-and is listed in `dropped`. A `<select>` with a placeholder option behind
-`.optional()` is still marked required. There is no input masking. A schema no
-control could satisfy is refused at derive time rather than left to fail on
-every submission: `z.number()` and `z.literal(1)` (use `z.coerce.number()`),
-`z.date()`, `z.bigint()`.
+`z.array(z.file())` derives repeated single-file rows, not one `multiple` input.
+Constraints behind a `.transform()` (or a `.pipe()` whose output JSON Schema
+cannot describe) are not derived: the field becomes a bare text input and is
+listed in `dropped`. An `.optional()` or `.default()` enum is still marked
+required: a `<select>` placeholder for it fails on the server too, and an
+unpicked radio group, which the server accepts, keeps `required` in the markup.
+There is no input masking. A schema no control could satisfy is refused at
+derive time rather than left to fail on every submission: `z.number()` and
+`z.literal(1)` (use `z.coerce.number()`), `z.date()`, `z.bigint()`. A
+`z.custom()` that rejects strings cannot be refused at derive time: it derives
+as a text input, is listed in `dropped`, and fails on the server.
+`z.stringbool()` is not refused either, though every submission fails (use
+`z.boolean()`), and a blank `z.coerce.bigint()` reads as `0n`. Of `.refine()` /
+`.superRefine()` checks, `dropped` counts only the ones on the schema as a
+whole, not those on a single field, a nested object, or a row. A `.mime()` check
+(its `accept` only narrows the file picker) is not listed either, nor is a
+string that carries more than one pattern (zod puts them under `allOf`, which is
+not read, so no `pattern` is emitted) or puts a `.regex()`, `.lowercase()` or
+`.uppercase()` on a format (which loses the format, so `z.email().regex(…)`
+derives `type="text"`). Rules cannot target fields inside repeated rows.
 
 ## Entry points
 
 - `@k8ordo/form` — client. `useForm(fields, state?)` takes the whole
   `formFields` result (and the action's state, when there is one) and
   returns props for the `<form>` element — which also hear a reset, React's
-  own after a successful action included — a
+  own after every form action included — a
   `field(path)` accessor giving input attributes, the current error, and
   `invalid` / `required`, an `array(path)` accessor for repeated rows, and
   `isDirty`. Also `useAsyncCheck` for server-answered per-field checks and
   `HiddenValue` for components that render no input of their own. The types
   of the `formFields` result (`FormFields`, `DerivedField`, `DerivedArray`,
-  `DroppedCheck`) are exported here as well, since the result crosses to the
-  client as a prop.
-- `@k8ordo/form/server` — server. `formFields(schema)` derives serializable
-  fields plus a `dropped` list of checks HTML cannot express (outside
-  production the list is also logged once per schema with `console.warn`),
-  and throws on a schema no form can represent (including a leaf that could
-  never accept a submitted string, such as `z.number()`);
-  `parseForm(schema, formData)` validates a
-  submission and returns typed data or per-field errors with the submitted
-  values. An untouched control reaches the schema as what it actually submits:
-  `''` for text, `false` for a checkbox, and nothing at all for a number or a
-  file, so `z.coerce.number()` cannot read a blank field as 0.
+  `DroppedCheck`, `FieldInput`, `ValidityFlag`, `Rule`) are exported here as
+  well, since the result crosses to the client as a prop, and so are
+  `FormState` and the return types (`UseFormReturn`, `FieldView`, `ArrayView`,
+  `RowView`, `AsyncCheck`).
+- `@k8ordo/form/server` — server. `formFields(schemaOrDefinition)` derives
+  serializable fields plus a `dropped` list of checks HTML cannot express
+  (outside production the list is also logged once per schema with
+  `console.warn`), and throws on a schema no form can represent (including a
+  leaf that could never accept a submitted string, such as `z.number()`);
+  `parseForm(schemaOrDefinition, formData)` validates a submission and returns
+  typed data or per-field errors with the submitted values. An untouched
+  control reaches the schema as what it actually submits: `''` for text,
+  `false` for a checkbox, and nothing at all for a number or a file, so
+  `z.coerce.number()` cannot read a blank field as 0.
   `defineForm(schema, rules)` attaches cross-field rules (`sameAs`,
-  `minChecked`, `requiredWhen`) typed against the schema's paths.
+  `minChecked`, `requiredWhen`) typed against the schema's paths. Types:
+  `ParseResult`, `FormDefinition`, `Rule`, `FormState`, and the `formFields`
+  result's `FormFields`, `DerivedField`, `DerivedArray`, `DroppedCheck`,
+  `FieldInput`, `ValidityFlag`.

@@ -20,7 +20,7 @@ export default function TextFieldPage() {
         </p>
         <div>
           <Anchor
-            href={`${STORYBOOK_URL}/?path=/docs/components-form-text-field--docs`}
+            href={`${STORYBOOK_URL}/?path=/story/components-form-text-field--default`}
             openInNewTab
           >
             <Rich>{m.components.common.storybookLink()}</Rich>

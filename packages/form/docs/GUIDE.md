@@ -11,14 +11,10 @@ fallbacks.
 ## zod, or zod/mini
 
 The conversion is taken from zod's shared core, so a schema written with either
-entry works. `zod/mini` is the same validator with a much smaller surface — if
-the schema module is also imported somewhere on the client, that is the one to
-reach for.
-
-```
-zod        63 kB gzipped
-zod/mini   10 kB gzipped
-```
+entry works. `zod/mini` is the same validator with a much smaller surface —
+bundled for the browser, the `talkSchema` below comes to about a quarter of the
+size — so if the schema module is also imported somewhere on the client, that
+is the one to reach for.
 
 Nothing in this package notices which one you chose. Note that under this
 design the schema is imported only by server code — the Server Component that
@@ -29,7 +25,8 @@ the client imports the schema module anyway.
 ## The shape of it
 
 ```
-server    formFields(schema)  →  { title: { input, messages }, … }   plain data
+server    formFields(schema)  →  { fields: { title: { input, messages, secret }, … },
+                                   arrays, rules, dropped }   plain data
             ↓ props (zod does not cross)
 client    useForm(fields, state)  →  attributes to spread, message to show
             ↓ submit
@@ -38,7 +35,9 @@ server    parseForm(schema, formData)  →  typed data, or per-field errors
 
 `formFields` runs on the server — in a Server Component or at module scope. Its
 result is JSON, so it crosses the RSC boundary as props and zod never enters the
-client bundle.
+client bundle. The messages are read when it runs, and module scope runs once,
+before any request: when a message follows the request (its locale, say, with
+`@k8ordo/i18n`), call `formFields` during the render instead.
 
 ## Writing a form
 
@@ -65,6 +64,26 @@ makes an untouched field a type error, which is where its wording comes from:
 ```ts
 z.coerce.number('数値を入力してください');
 ```
+
+Depending on the zod version, that wording also replaces the default message of
+every other check on the field that has none of its own (4.5.4 does this, 4.4.3
+does not), so give `.int()` or `.min()` theirs.
+
+Each leaf derives the control that submits what it validates:
+
+| Schema                                           | `input`                                                                                   |
+| ------------------------------------------------ | ----------------------------------------------------------------------------------------- |
+| `z.string()`                                     | `type="text"`                                                                             |
+| `z.email()` / `z.url()`                          | `type="email"` / `type="url"`                                                             |
+| `z.iso.date()` / `z.iso.time()`                  | `type="date"` / `type="time"`                                                             |
+| `z.iso.datetime({ local: true })`                | `type="datetime-local"`                                                                   |
+| `z.coerce.number()`                              | `type="number"`; `step` from `.multipleOf()`, else `1` after `.int()` and `any` otherwise |
+| `z.boolean()`, `z.literal(true)`                 | `type="checkbox"`                                                                         |
+| `z.file()`                                       | `type="file"`                                                                             |
+| a password ([below](#what-it-guarantees))        | `type="password"`                                                                         |
+| `z.enum([…])`                                    | no `type`: spread it onto a `<select>`, not a radio ([Radio groups](#radio-groups))       |
+| `z.array(z.enum([…]))`                           | no `type`: one checkbox per option ([Checkbox groups](#checkbox-groups))                  |
+| anything else (`z.uuid()`, `z.coerce.date()`, …) | `type="text"`                                                                             |
 
 ```tsx
 // page.tsx — Server Component
@@ -98,9 +117,10 @@ export const TalkForm = ({ action, fields }: TalkFormProps) => {
 
 `form.props` attaches to the `<form>` and nowhere else. There is no per-field
 registration to forget. It also hears the form being reset — by a reset
-button, by `form.reset()`, or by React itself once an action has succeeded —
-and forgets what it knew about the old values: the messages, which server
-errors were still current, the rows that were added, and `isDirty`.
+button, by `form.reset()`, or by React itself after every form action, whatever
+it returned — and forgets what it knew about the old values: the messages,
+which server errors were still current, the rows that were added, and
+`isDirty`.
 
 A form with no action behind it — a GET filter, say — calls `useForm(fields)`
 and leaves the state out.
@@ -118,6 +138,25 @@ export async function createTalk(_prev: FormState, formData: FormData) {
 }
 ```
 
+When a new state arrives, focus moves to the first field in `state.errors`, so
+the failure is announced where it happened. A server error stays on its field
+until the person edits that field, and a message the browser raises takes
+precedence over it. Responses are told apart by their content plus
+`state.token`, which `parseForm` sets on every parse — a state built by hand
+needs a fresh `token` too, or a second identical failure reads as the same
+response.
+
+An issue with no path — a `.refine()` on the whole schema that names no
+`path` — lands in `state.formError`, not on a field. `useForm` does not render
+it, so show it yourself:
+
+```tsx
+<form {...form.props} action={formAction}>
+  {state.formError !== undefined && <p>{state.formError}</p>}
+  {/* … */}
+</form>
+```
+
 ## What it guarantees
 
 **The wording cannot drift.** Client messages are obtained by running the
@@ -131,17 +170,27 @@ an unchecked checkbox, and nothing at all for a number or a file — an empty
 numeric field is not 0, and an unfilled file input is not the zero-byte file the
 browser sends. The attribute is emitted only when the schema rejects that empty
 submission, and `parseForm` hands the schema exactly what the derivation probed,
-so the two sides always agree: a plain `z.boolean()` checkbox is not required,
-while `z.literal(true, '…')` — a consent box — is, and shows zod's own wording.
+so the two sides agree: a plain `z.boolean()` checkbox is not required, while
+`z.literal(true, '…')` — a consent box — is, and shows zod's own wording. The
+one exception is a radio group left unpicked. A choice is probed with the `''`
+a `<select>` placeholder submits, but an unpicked radio group submits no entry,
+so an `.optional()` or `.default()` enum is `required` in the markup while
+`parseForm` accepts the empty group — leave `required` off those radios.
 
-**Nothing is dropped in silence.** Checks HTML cannot express — `refine`,
-cross-field rules, an exclusive bound on a float, a regex whose flags or
-anchoring the `pattern` attribute would silently reinterpret, a
-`z.iso.datetime()` no `datetime-local` control can ever satisfy, a leaf whose
-constraints could not be read at all because a `.transform()` or a `z.custom()`
-left nothing to read — are returned in `dropped`. They still run on the server; you are told they do not run on
-the client. Outside production `formFields` also logs the list once per schema
-with `console.warn`, so it is seen without anyone remembering to read it.
+**Checks the client skips are reported.** What HTML cannot express — a
+`refine` on the schema as a whole, cross-field rules, an exclusive bound on a
+float, a regex whose flags or anchoring the `pattern` attribute would silently
+reinterpret, a `z.iso.datetime()` no `datetime-local` control can ever satisfy,
+a leaf whose constraints could not be read at all because a `.transform()` or a
+`z.custom()` left nothing to read — are returned in `dropped`. They still run
+on the server; you are told they do not run on the client. Outside production
+`formFields` also logs the list once per schema with `console.warn`, so it is
+seen without anyone remembering to read it. Some are not reported yet: a
+`refine` on a single field, a nested object, or a row; a `.mime()` check, whose
+`accept` only narrows the file picker; and a string that carries more than one
+pattern, or puts a `.regex()`, `.lowercase()` or `.uppercase()` on a format,
+which loses its `pattern`, its `type`, or both (see
+[What it does not do yet](#what-it-does-not-do-yet)).
 
 **A schema this package cannot express fails at derive time.** `z.record`,
 tuples, a repeat nested inside a repeat, nullable objects, keys containing
@@ -156,9 +205,12 @@ check to drop. A schema that coerces reads strings and is kept, so
 **A missing name is loud.** If the schema has a field that never arrived in the
 FormData, `parseForm` throws instead of reporting it as a validation failure.
 Forgetting to spread `input` is a wiring mistake, not something the person
-filling in the form did. The one exception is an enum field: a radio group
-with nothing selected submits no entry at all — a state the person can reach —
-so it comes back as that field's validation error instead.
+filling in the form did. The exceptions are the controls that submit no entry
+at all when left alone — a state the person can reach: a radio group with
+nothing selected reaches the schema as no value (a validation error unless the
+enum accepts `undefined`), an unchecked checkbox as `false`, and a checkbox
+group with nothing checked as `[]`. A forgotten spread on one of those is not
+caught either.
 
 **Native validation survives without JavaScript.** `noValidate` is applied
 from JavaScript on mount, never rendered into the markup. With scripts
@@ -166,22 +218,24 @@ disabled or not yet loaded, the browser's own checks stay on; once the hook is
 live, it takes over the message path and the server stays the arbiter.
 
 **Secrets are never echoed.** `parseForm` returns the submitted values so a
-retry without JavaScript keeps the input. Fields marked as passwords are
+retry keeps the input — they render as the controls' defaults, which is also
+what React's reset after the action restores. Fields marked as passwords are
 excluded automatically, and typed as `password` in the markup:
 
 ```ts
 z.string().min(8).meta({ input: 'password' }); // zod
+z.string().check(z.minLength(8), z.meta({ input: 'password' })); // zod/mini
 globalRegistry.add(password, { input: 'password' }); // zod or zod/mini
 ```
 
-`.meta()` is shorthand for the registry and is not available on `zod/mini`;
-the registry route works with either.
+`.meta()` is shorthand for the registry, and `zod/mini` has no such method —
+pass `z.meta()` to `.check()` there. The registry route works with either.
 
 **`isDirty` costs one boolean.** `form.isDirty` compares each control — text,
 checkbox, `<select>`, a `HiddenValue` — with the value it was rendered with,
 read straight from the DOM; adding or removing a row counts too. It flips at
 most twice, so it never becomes a per-keystroke re-render. A reset — React's
-own, after a successful action, included — is read from the DOM once it is
+own after every form action included — is read from the DOM once it is
 through, so it takes the flag back to `false` for everything the browser
 restores. A `HiddenValue` is not among those: its value is the caller's
 state, which React writes straight back, so a form holding an edited one
@@ -229,6 +283,10 @@ buttons disappear at exactly the bounds the server enforces. For an array of
 scalars (`z.array(z.string())`) the item has a single unnamed field:
 `row.field()`.
 
+`items.error` is the server's message about the array itself — too few or too
+many rows for its `.min()` / `.max()` — which no row's field carries, so render
+it next to the rows. `row.index` is the row's current position.
+
 `parseForm` reports how many rows arrived in `state.rows`, so a retry without
 JavaScript rebuilds the same number of rows. Row counts are read from the
 submitted names but never trusted beyond the schema's `.max()` (or a hard
@@ -236,7 +294,28 @@ ceiling), so a forged index cannot make the server allocate.
 
 A nested object behind `.optional()` / `.default()` keeps its fields — the
 wrapper is peeled the same way on both sides. A repeat nested inside a repeat
-has no unambiguous name; it is a compile error and a derive-time throw.
+has no unambiguous name; the types let it through, but `formFields` and
+`parseForm` throw on it.
+
+## Radio groups
+
+Do not spread an enum's `input` onto a radio: once `state` carries `values`,
+`input` holds the echoed choice as `defaultValue`, which collides with each
+radio's own `value` and restores no selection. Take `name` and `required` from
+it — leave `required` off for an `.optional()` or `.default()` enum
+([why](#what-it-guarantees)) — and restore the choice per option:
+
+```tsx
+const plan = form.field('plan');
+
+<input
+  defaultChecked={state.values?.plan === option}
+  name={plan.input.name}
+  required={plan.input.required}
+  type="radio"
+  value={option}
+/>;
+```
 
 ## Checkbox groups
 
@@ -250,7 +329,13 @@ const tags = form.field('tags');
 
 {
   ['a', 'b', 'c'].map((option) => (
-    <input key={option} type="checkbox" value={option} {...tags.input} />
+    <input
+      defaultChecked={[state.values?.tags].flat().includes(option)}
+      key={option}
+      name={tags.input.name}
+      type="checkbox"
+      value={option}
+    />
   ));
 }
 ```
@@ -259,15 +344,17 @@ const tags = form.field('tags');
 `[]`, never a wiring error. The `.min(2)` cannot become an HTML attribute (on
 a group, `required` would mean "check every box"), so it is reported in
 `dropped`; declare `minChecked('tags', 2, '…')` to run the same bound in the
-browser. On a no-JS retry the group echoes as an array, so restoring is:
-
-```tsx
-defaultChecked={Array.isArray(state.values?.tags) && state.values.tags.includes(option)}
-```
+browser. After a submission `state.values.tags` holds what was checked — a
+string when one box was, an array when several were — which is why the
+snippet flattens it. Give each box only the `name`: with one box checked,
+`input` carries that string as `defaultValue`, which collides with every box's
+own `value`.
 
 ## Files
 
-`z.file()` derives `type="file"`, and `.mime([…])` becomes `accept`. An unfilled
+`z.file()` derives `type="file"`, and `.mime([…])` becomes `accept`, which only
+narrows the file picker: only the server checks the type, and `dropped` does
+not say so yet. An unfilled
 file input still submits — an unnamed, zero-byte File, which `z.file()` would
 otherwise accept as a real upload — so it reaches the schema as nothing entered
 and `required` keeps meaning what it says.
@@ -279,9 +366,9 @@ put back into a file control.
 
 ## Paths are checked at compile time
 
-`formFields` derives the set of valid paths from the schema type, so a typo is
-a build error rather than something you find by clicking. Rules are typed
-against the same paths.
+`formFields` derives the set of valid paths from the schema type, so a typo in
+`form.field()` or `form.array()` is a build error rather than something you
+find by clicking. Rules are typed against the same paths.
 
 ```tsx
 form.field('titel'); // error: not a field in the schema
@@ -290,6 +377,9 @@ form.array('user'); // error: an object, not an array
 form.array('tags'); // error: a checkbox group is a field
 defineForm(schema, [sameAs('confrim', 'password', '…')]); // error: typo
 ```
+
+A row's `row.field(key)` is the exception: the key is a plain string, and a
+typo in it throws when the row renders.
 
 ## Checks HTML has no attribute for
 
@@ -317,16 +407,26 @@ On the client a breach is applied with `setCustomValidity`, so it is
 indistinguishable from a built-in check — `:user-invalid` matches and the
 message arrives through the same path as every other one.
 
-Available: `sameAs`, `minChecked`, `requiredWhen`. Anything else stays a
-`.refine()`, runs on the server, and is listed in `dropped`.
+Available: `sameAs(field, other, message)`, `minChecked(field, min, message)`,
+and `requiredWhen(field, when, equals, message)` —
+`requiredWhen('reason', 'status', 'rejected', '…')` requires `reason` while
+`status` is `'rejected'`. Anything else stays a `.refine()` and runs on the
+server only. A `refine` on the schema as a whole is listed in `dropped`; one on
+a single field, a nested object, or a row is not yet.
 
 ## Asking the server about one field
 
 Whether a name is already taken is something only the server knows. `useAsyncCheck`
 runs on blur, keeps the newest answer when replies arrive out of order, and
 applies the result with `setCustomValidity` — so the answer shows up through the
-same path as every other message. A blur that leaves the value unchanged does
-not ask again, and emptying the field clears the last answer with it.
+same path as every other message. Leaving the field while it still holds the
+value the last answer was about does not ask again — a blur while a check is
+still in flight does — and emptying the field and leaving it clears the last
+answer.
+
+`check` receives the field's value and resolves to the message to show, or to
+`undefined` when the value is fine. A rejected promise applies no verdict
+either way; the server still checks the submission.
 
 ```tsx
 const slug = form.field('slug');
@@ -349,20 +449,32 @@ into React state and pushing it back out at submit:
 <HiddenValue name="body" value={body} />
 ```
 
-The value is in the form, so it submits whether or not anything else works.
-`HiddenValue` is a component rather than a props helper because React updates
-a controlled value without any DOM event — the component announces each change
-with one, so cross-field rules and `isDirty` hear it like any keystroke.
+The value is an ordinary form entry, so it goes out with the rest of the
+FormData and needs no submit-time code. `HiddenValue` is a component rather
+than a props helper because React updates a controlled value without any DOM
+event — the component announces each change with one, so cross-field rules and
+`isDirty` hear it like any keystroke.
 
 ## Multi-step forms
 
 Keep every step mounted and hide the ones you are not on. The values stay in
-the DOM, so moving between steps costs nothing and losing a step is impossible:
+the DOM, so moving between steps costs nothing and losing a step is impossible.
+Hide steps only once hydrated — a step hidden in the server's HTML is out of
+reach without JavaScript — and, once hydrated, render the submit button only on
+the last step: Enter in a text field can click the form's first submit button
+even when it is hidden, which would send the whole form from an earlier step.
 
 ```tsx
-<div hidden={step !== 1} ref={stepOne}>
+const subscribe = () => () => {};
+const hydrated = useSyncExternalStore(subscribe, () => true, () => false);
+
+<fieldset hidden={hydrated && step !== 0} ref={stepOne}>
   {/* … */}
-</div>
+</fieldset>
+<fieldset hidden={hydrated && step !== 1}>
+  {/* … */}
+  {(!hydrated || step === 1) && <button type="submit">送信</button>}
+</fieldset>
 ```
 
 Validate one step before advancing by checking only the controls inside that
@@ -374,6 +486,11 @@ const stepIsValid = [
   ...(stepOne.current?.querySelectorAll('input, select, textarea') ?? []),
 ].every((control) => (control as HTMLInputElement).checkValidity());
 ```
+
+After a failed submit, `useForm` moves focus to the first field in
+`state.errors`, but a control inside a hidden step cannot take focus. When a
+new state arrives, switch during render to the step holding that field, so it
+is visible by the time focus moves.
 
 Without JavaScript this degrades to one long form that submits in a single
 request — which is the correct behaviour, not a broken one.
@@ -390,9 +507,34 @@ request — which is the correct behaviour, not a broken one.
 - A `z.custom()` that rejects the strings a text control submits. Nothing about
   it is readable, so it cannot be refused at derive time the way `z.date()` is
   — it derives as a text input, is listed in `dropped`, and fails on the server.
-- A `<select>` with a placeholder option behind `.optional()`. The empty
-  submission of a choice is taken to be `''`, which an optional enum rejects,
-  so the field is marked required.
+- Reporting a `.refine()` / `.superRefine()` on a single field, on a nested
+  object, or on a row. Of `.refine()` / `.superRefine()` checks, `dropped`
+  counts only the ones on the schema as a whole; the others run on the server
+  without a word on the client.
+- Reporting `.mime()`. It becomes `accept`, which only narrows the file picker
+  and is never enforced, yet it is not listed in `dropped`; the type is checked
+  on the server alone.
+- Strings that combine pattern checks. `.regex()`, `.startsWith()`,
+  `.endsWith()`, `.includes()`, `.lowercase()` and `.uppercase()` each add a
+  pattern, and so do formats such as `z.email()`, `z.uuid()` and `z.iso.date()`.
+  Two or more reach JSON Schema as an `allOf`, which is not read: no `pattern`
+  is emitted and none of them is listed in `dropped`. A `.regex()`,
+  `.lowercase()` or `.uppercase()` on a format also takes the format's place
+  there, so `z.email().regex(…)` and `z.url().lowercase()` derive `type="text"`,
+  again without a word in `dropped`. Every check still runs on the server.
+- An `.optional()` or `.default()` enum left unpicked. The empty submission of
+  a choice is taken to be `''`, which such an enum rejects, so the field is
+  marked required: a `<select>` placeholder fails on the server too, and an
+  unpicked radio group, which the server accepts, is still `required` in the
+  markup.
+- Refusing `z.stringbool()` at derive time. It derives a checkbox, but
+  `parseForm` hands a checkbox's schema a boolean, which `z.stringbool()`
+  rejects, so every submission fails. Use `z.boolean()`.
+- Reading a blank `z.coerce.bigint()` as nothing entered. Only number and file
+  controls do that, so the `''` a text control submits reaches the schema,
+  which reads it as `0n`.
+- Rules on fields inside repeated rows. Rule field names are typed against the
+  schema's field paths, and a row's fields are not among them.
 - Input masking. Rewriting `el.value` on input works with the DOM as the source
   of truth, but managing the caret is a separate problem from wiring a form.
 
@@ -400,16 +542,21 @@ request — which is the correct behaviour, not a broken one.
 
 `@k8ordo/form` does not depend on `@k8ordo/ui`. Attributes go to the input;
 `FormControl` gets only what it uses, and generates the `id` and `aria-*`
-links itself.
+links itself. A derived `type` is any string while `TextField` takes only its
+own text types, so take `type` out of `input` and set it on the component when
+the field is not plain text. Take it out for `PasswordInput` too: it sets
+`type` itself to show and hide the value, and a spread `type` overrides that
+toggle without a type error.
 
 ```tsx
 const title = form.field('title');
+const { type: _type, ...titleInput } = title.input;
 
 <FormControl
   errorText={title.error}
   invalid={title.invalid}
   label="タイトル"
   required={title.required}
-  renderInput={(props) => <TextField {...props} {...title.input} />}
+  renderInput={(props) => <TextField {...props} {...titleInput} />}
 />;
 ```

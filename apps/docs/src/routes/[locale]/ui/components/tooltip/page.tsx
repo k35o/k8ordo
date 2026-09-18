@@ -24,7 +24,7 @@ export default function TooltipPage() {
         </p>
         <div>
           <Anchor
-            href={`${STORYBOOK_URL}/?path=/docs/components-tooltip--docs`}
+            href={`${STORYBOOK_URL}/?path=/story/components-overlays-tooltip--default`}
             openInNewTab
           >
             <Rich>{m.components.common.storybookLink()}</Rich>

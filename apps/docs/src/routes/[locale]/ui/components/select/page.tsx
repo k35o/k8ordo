@@ -26,7 +26,7 @@ export default function SelectPage() {
         </p>
         <div>
           <Anchor
-            href={`${STORYBOOK_URL}/?path=/docs/components-form-select--docs`}
+            href={`${STORYBOOK_URL}/?path=/story/components-form-select--default`}
             openInNewTab
           >
             <Rich>{m.components.common.storybookLink()}</Rich>

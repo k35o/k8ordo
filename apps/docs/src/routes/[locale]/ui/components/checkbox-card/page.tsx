@@ -39,7 +39,7 @@ export default function CheckboxCardPage() {
         </p>
         <div>
           <Anchor
-            href={`${STORYBOOK_URL}/?path=/docs/components-form-checkbox-card--docs`}
+            href={`${STORYBOOK_URL}/?path=/story/components-form-checkbox-card--default`}
             openInNewTab
           >
             <Rich>{m.components.common.storybookLink()}</Rich>

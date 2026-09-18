@@ -46,9 +46,10 @@ const systemPrompt = catalog.prompt({ customRules: [...uiRules] });`}
         </p>
         <CodeBlock
           code={`'use client';
+import type { UISpec } from '@k8ordo/ui/json-render';
 import { JsonRenderUI } from '@k8ordo/ui/json-render/registry';
 
-export function GenUi({ spec }: { spec: unknown }) {
+export function GenUi({ spec }: { spec: UISpec }) {
   return <JsonRenderUI spec={spec} />;
 }`}
           lang="tsx"

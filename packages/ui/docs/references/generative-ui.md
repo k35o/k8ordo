@@ -57,12 +57,19 @@ collect form values.
 
 ```tsx
 'use client';
+import type { UISpec } from '@k8ordo/ui/json-render';
 import { JsonRenderUI } from '@k8ordo/ui/json-render/registry';
 
-export function GenUi({ spec }: { spec: unknown }) {
+export function GenUi({ spec }: { spec: UISpec }) {
   return <JsonRenderUI spec={spec} />;
 }
 ```
+
+Props:
+
+- `spec`: `Spec | null` (required; a `UISpec` is assignable to json-render's `Spec` without a cast, and `null` renders nothing)
+- `loading`: boolean (passed to `Renderer`: set it while the spec is still streaming in, so children that have not arrived yet are skipped without a warning)
+- `onStateChange`: `(changes: Array<{ path: string; value: unknown }>) => void` (called once per state update with every changed path and its new value)
 
 For an advanced setup (your own `navigate`, `handlers`, or
 `validationFunctions`), pass the low-level `registry` straight to
@@ -71,9 +78,12 @@ For an advanced setup (your own `navigate`, `handlers`, or
 ### 3. Validate LLM output, then render or repair it
 
 `validateGeneratedSpec` applies mechanical fixes, validates the structure, then
-validates props per component. On failure it returns a repair prompt you can
-send straight back to the LLM. Use it instead of `catalog.validate()`, which
-rejects valid specs in the current upstream version.
+validates props per component. On failure it returns the `issues` it found (each
+a `message`, plus the `elementKey` of the offending element when there is one)
+and a repair prompt built from them that you can send straight back to the LLM.
+Use it instead of `catalog.validate()`, which rejects valid specs in the current
+upstream version. The result and issue types are exported as
+`ValidateGeneratedSpecResult` and `GeneratedSpecIssue`.
 
 ```tsx
 import { validateGeneratedSpec } from '@k8ordo/ui/json-render';
@@ -104,8 +114,9 @@ const spec = {
 } satisfies UISpec;
 ```
 
-`ComponentName` and `ComponentProps<K>` are exported as well, so you can pull
-out the props type of a specific component.
+`UISpecElement` (one element of a `UISpec`), `ComponentName`, and
+`ComponentProps<K>` are exported as well, so you can pull out the props type of a
+specific component.
 
 ## OpenUI
 
@@ -131,6 +142,10 @@ import { prompt } from '@k8ordo/ui/openui/prompt';
 const systemPrompt = prompt(); // No React dependency — callable from RSC or an API route
 ```
 
+`prompt` takes an optional `PromptOptions` from `@openuidev/lang-core`
+(`preamble`, `additionalRules`, `examples`, …) and passes it straight through to
+the library's prompt generation.
+
 Containers nest freely in OpenUI, as they do in json-render: `Stack`, `Grid`,
 `Card`, `Form`, `Modal`, `Dialog`, `Drawer`, and `Popover` each list every
 container among their children, so a `Card` can sit inside a `Stack` and a
@@ -143,7 +158,7 @@ container among their children, so a `Card` can sit inside a `Stack` and a
 | `@k8ordo/ui/json-render`          | server-safe    | `catalog`, `validateGeneratedSpec`, `uiRules`, types (`UISpec`, …) |
 | `@k8ordo/ui/json-render/registry` | `'use client'` | `JsonRenderUI` (pre-wired), `registry` (low level)                 |
 | `@k8ordo/ui/openui`               | `'use client'` | `library` (rendering)                                              |
-| `@k8ordo/ui/openui/prompt`        | server-safe    | `prompt()` (prompt generation)                                     |
+| `@k8ordo/ui/openui/prompt`        | server-safe    | `prompt(options?)` (prompt generation)                             |
 
 > All of them assume you have loaded `@k8ordo/ui/styles.css` (or
 > `@k8ordo/ui/tailwind.css` in a Tailwind CSS 4 project) and wrapped the tree in

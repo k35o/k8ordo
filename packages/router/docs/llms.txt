@@ -24,11 +24,13 @@ When installed via npm, these docs live under `node_modules/@k8ordo/router/docs/
 ## Entry point
 
 - `@k8ordo/router` — `defineRoutes(record)` returns a table whose one operation
-  is `match(pathname)`; `<Router routes>` mounts it on the Navigation API and
+  is `match(pathname, accept?)` — a match `accept` declines is passed over and
+  the walk goes on to the next pattern, which is how the framework skips a
+  param a schema refused; `<Router routes>` mounts it on the Navigation API and
   `<Outlet />` renders the rest of the matched stack; a branch's `error`
-  component (`{ error, reset }` props, type `ErrorComponent`) renders in the
-  layout's hole when what is below throws, keyed by `NavigationGeneration`
-  so leaving the page clears it. `href(pattern, params?)`
+  component (props `ErrorProps`, `{ error, reset }`; type `ErrorComponent`)
+  renders in the layout's hole when what is below throws, keyed by
+  `NavigationGeneration` so leaving the page clears it. `href(pattern, params?)`
   and `navigateTo(pattern, params?, options?)` build and perform navigations
   from the pattern **string** alone — no table import, so no cycle — with
   params inferred from the literal and the pattern itself checked once
@@ -36,23 +38,29 @@ When installed via npm, these docs live under `node_modules/@k8ordo/router/docs/
   typed params and throws if rendered under a different pattern; under the
   framework `Register` also carries `params` — the type each pattern's
   `paramsSchema` produces — so `href` takes a param as the page receives it
-  (`ParsedParams` / `ParsedParamsMap` / `ParamsSchemaFor` are the types the
-  generated code uses); `useRoute()`
-  is the untyped form. `RouteOf<typeof routes>` is the pathname union to feed
-  `@k8ordo/state`'s `Register`. `usePathname()` reads the platform's
+  (`ParsedParams` / `ParsedParamsMap` / `ParamsSchemaFor` / `ParamsOf` /
+  `ErrorComponent` are the types the generated code imports); `useRoute()`
+  is the untyped form.
+  `@k8ordo/state`'s `Register` takes the same `routes: typeof routes`;
+  `RouteOf<typeof routes>` is that pathname space as a union, for any other
+  typed-path consumer. `usePathname()` reads the platform's
   pathname — never the search — so it works with or without a table, which
   makes it the location hook that also works under the framework;
-  `useMatch(pattern)` / `matchPath(pattern, pathname)` answer whether that
-  pattern — or, with a trailing `/*`, anything strictly below it — is the pathname
-  showing, with its params, table-free, so a sidebar can ask which section is
-  open under the framework too; `normalizePathname(pathname)` is the router's
-  own trailing-slash rule;
+  `useMatch(pattern, options?)` / `matchPath(pattern, pathname, options?)`
+  answer whether that pattern — or, with a trailing `/*`, anything strictly
+  below it — is the pathname showing, with its params, table-free, so a
+  sidebar can ask which section is open under the framework too, and
+  `{ inclusive: true }` on either counts a `/*` pattern's own index in;
+  `normalizePathname(pathname)` is the router's own trailing-slash rule;
   `bindParams(() => ({ locale }))` returns `{ href, navigateTo }` with those
   params supplied by the source at each call (still overridable), for a
-  segment every link shares; `useMatch(pattern, { inclusive: true })` counts
-  a `/*` pattern's own index in. `PageProps<P>` / `LayoutProps<P>` type a
-  framework route file's props by its pattern (`params` from the registered
-  schemas, `request` when the generated `Register` says the mode has one).
+  segment every link shares — a pattern that names a param still takes
+  `options` third, after an `undefined` params slot if the source supplies
+  them all. `PageProps<P>` / `LayoutProps<P>` type a framework route file's
+  props by its pattern (`PageProps`' `params` from the registered schemas,
+  `LayoutProps`' `params` always strings and its `P` only a pattern the table
+  has a page at; `request` when the generated `Register` says the mode has
+  one).
   `<PathnameProvider pathname>` seeds it for a server render and hydration,
   and is mounted by `<Router>` and by both mode runtimes, never by an
   application. Every page change is applied in a transition tagged
@@ -63,3 +71,15 @@ When installed via npm, these docs live under `node_modules/@k8ordo/router/docs/
   `{ generation }` and is the
   navigation primitive `<Router>` is built on, and the seam the framework
   uses to render server-produced trees instead.
+  Exported types, by group — the table: `Routes` (`{ kind, record, match }`),
+  `RoutesRecord`, `RouteNode`, `RouteComponent`, `Match`, `ErrorComponent`,
+  `ErrorProps`; patterns: `PatternOf`, `NavigablePatternOf`, `RouteOf`,
+  `MatchablePattern`; registration: `Register`, `RegisteredPattern`,
+  `RegisteredNavigablePattern`, `RegisteredParams` (what a link takes),
+  `RegisteredPageParams` (what a page receives), `PageProps`, `LayoutProps`;
+  paths and schemas: `ParamsOf`, `PathFor`, `ParamValue`,
+  `StandardSchemaLike`, `SchemaOutput`, `ParamsSchemaFor`, `ParsedParams`,
+  `ParsedParamsMap`; options and handlers: `NavigateToOptions`
+  (`{ history? }`), `MatchOptions` (`{ inclusive? }`), `BoundParams` /
+  `BoundLinks` (what `bindParams`'s source returns / what it returns),
+  `NavigationHandler` (`{ claim, load, apply }`).

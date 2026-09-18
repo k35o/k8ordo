@@ -4,58 +4,9 @@ import type { Message } from '@k8ordo/i18n';
 import { Button, GitHubIcon, Heading } from '@k8ordo/ui';
 
 import { Rich } from '../../components/rich';
+import { PACKAGES } from '../../data/packages';
 import { href } from '../../links';
-import type { SitePath } from '../../links';
 import * as m from '../../messages';
-
-type Package = {
-  name: string;
-  path: SitePath;
-  description: Message;
-};
-
-const PACKAGES: Package[] = [
-  {
-    name: '@k8ordo/ui',
-    path: '/:locale/ui',
-    description: m.home.memberUiDescription,
-  },
-  {
-    name: '@k8ordo/form',
-    path: '/:locale/form',
-    description: m.home.memberFormDescription,
-  },
-  {
-    name: '@k8ordo/state',
-    path: '/:locale/state',
-    description: m.home.memberStateDescription,
-  },
-  {
-    name: '@k8ordo/router',
-    path: '/:locale/router',
-    description: m.router.description,
-  },
-  {
-    name: '@k8ordo/static',
-    path: '/:locale/static',
-    description: m.static.description,
-  },
-  {
-    name: '@k8ordo/server',
-    path: '/:locale/server',
-    description: m.server.description,
-  },
-  {
-    name: '@k8ordo/i18n',
-    path: '/:locale/i18n',
-    description: m.i18n.description,
-  },
-  {
-    name: '@k8ordo/color-scheme',
-    path: '/:locale/color-scheme',
-    description: m.colorScheme.description,
-  },
-];
 
 type Discipline = { title: Message; description: Message };
 

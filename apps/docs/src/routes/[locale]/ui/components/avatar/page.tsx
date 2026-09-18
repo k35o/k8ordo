@@ -20,7 +20,7 @@ export default function AvatarPage() {
         </p>
         <div>
           <Anchor
-            href={`${STORYBOOK_URL}/?path=/docs/components-avatar--docs`}
+            href={`${STORYBOOK_URL}/?path=/story/components-data-display-avatar--default`}
             openInNewTab
           >
             <Rich>{m.components.common.storybookLink()}</Rich>

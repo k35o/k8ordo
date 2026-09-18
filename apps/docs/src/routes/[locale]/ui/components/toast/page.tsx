@@ -46,7 +46,7 @@ export default function ToastPage() {
         </p>
         <div>
           <Anchor
-            href={`${STORYBOOK_URL}/?path=/docs/components-toast--docs`}
+            href={`${STORYBOOK_URL}/?path=/story/components-feedback-toast--primary`}
             openInNewTab
           >
             <Rich>{m.components.common.storybookLink()}</Rich>

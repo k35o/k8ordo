@@ -5,11 +5,6 @@ export const docs = message({
   en: 'Documentation',
 });
 
-export const packages = message({
-  ja: 'パッケージ',
-  en: 'Packages',
-});
-
 export const resources = message({
   ja: 'リソース',
   en: 'Resources',

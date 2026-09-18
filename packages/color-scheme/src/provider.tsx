@@ -21,11 +21,17 @@ import {
 import type { ColorScheme, ColorSchemePreference } from './scheme';
 
 export type UseColorScheme = {
-  /** What is on screen: the preference, or the system's answer. */
+  /**
+   * What is on screen: the preference, the provider's default, or the
+   * system's answer.
+   */
   readonly scheme: ColorScheme;
   /** What the visitor asked for; `'system'` when nothing is stored. */
   readonly preference: ColorSchemePreference;
-  /** Stores a preference, or `'system'` to store none and follow it again. */
+  /**
+   * Stores a preference, or `'system'` to store none, so the provider's
+   * `defaultPreference` applies again.
+   */
   readonly setPreference: (preference: ColorSchemePreference) => void;
 };
 
