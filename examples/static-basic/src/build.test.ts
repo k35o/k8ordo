@@ -22,13 +22,13 @@ beforeAll(() => {
   try {
     execFileSync(
       'pnpm',
-      ['exec', 'vite', 'build', '--config', 'vite.broken.config.ts'],
+      ['exec', 'vp', 'build', '--config', 'vite.broken.config.ts'],
       { cwd: root, stdio: 'pipe' },
     );
   } catch (error) {
     brokenBuildStderr = String((error as { stderr?: Buffer }).stderr ?? '');
   }
-  execFileSync('pnpm', ['exec', 'vite', 'build'], { cwd: root, stdio: 'pipe' });
+  execFileSync('pnpm', ['exec', 'vp', 'build'], { cwd: root, stdio: 'pipe' });
 }, 360_000);
 
 const read = (...parts: string[]): string =>
