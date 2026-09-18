@@ -1,12 +1,13 @@
 # Agent guide — packages/color-scheme
 
 `@k8ordo/color-scheme` — the colour-scheme axis, owned: what the visitor
-asked for (`light`, `dark`, or nothing, which follows the system), where it
-is kept (localStorage, through `@k8ordo/state`), what it resolves to, and
-the one class `@k8ordo/ui` reads on `<html>`. One provider decides and
-writes; a hook reads. The shared discipline (React 19 / RSC assumed,
-Baseline newly available only, no polyfills) and how a new package joins
-are in the repository root's [`CLAUDE.md`](../../CLAUDE.md).
+asked for (`light`, `dark`, or nothing, which follows the provider's
+default — the system unless told otherwise), where it is kept
+(localStorage, through `@k8ordo/state`), what it resolves to, and the one
+class `@k8ordo/ui` reads on `<html>`. One provider decides and writes; a
+hook reads. The shared discipline (React 19 / RSC assumed, Baseline newly
+available only, no polyfills) and how a new package joins are in the
+repository root's [`CLAUDE.md`](../../CLAUDE.md).
 
 User-facing documentation is in [`docs/GUIDE.md`](docs/GUIDE.md), shipped
 inside the npm package.
@@ -42,14 +43,16 @@ systemDark)` is the rule; the provider reads it after hydration and
   separate placement in `<head>`. Hydration finds the node in place and does
   not run it again.
 - **The server renders the default, and the hydration render writes
-  nothing.** No storage and no system to ask on the server; the first render
-  in the browser reads the server's guesses and must not put them on a
-  document the script already put right, so the class effect waits for the
-  render that reads the store. Do not add a cookie or a header to guess
-  earlier.
-- **The store is `@k8ordo/state`'s.** The key (`color-scheme`, so
-  `k8ordo-state:color-scheme`) and `inlineRead()` are read from the
-  definition; nothing here spells the key or the JSON envelope by hand.
+  nothing.** No storage and no system to ask on the server, so a `'system'`
+  default renders `light`; the first render in the browser reads the
+  server's guesses and must not put them on a document the script already
+  put right, so the class effect waits for the render that reads the store.
+  Do not add a cookie or a header to guess earlier.
+- **The store is `@k8ordo/state`'s.** The definition names the state key
+  (`color-scheme`); the localStorage key it derives
+  (`k8ordo-state:color-scheme`, `storageKey`) and `inlineRead()` are read
+  from it, so nothing here spells the localStorage key or the row's JSON by
+  hand.
 
 ## Layout
 
@@ -66,8 +69,9 @@ src/
   was not used.
 - Browser tests clear localStorage, the class, and the state registry
   between cases; the test browser prefers light, which is what "system"
-  resolves to there. A client-only mount runs the rendered script too (a
-  script element React creates executes), which is idempotent with the
-  effect.
+  resolves to there. A client-only mount (`renderHook`) never runs the
+  rendered script — React does not execute an inline `<script>` it creates,
+  and logs a development error saying so — so the class those tests see is
+  the effect's; the script is tested on its own, appended to the document.
 - Tests state a guarantee in their name, English; comments and commits are
   Japanese except docs/ and this file.

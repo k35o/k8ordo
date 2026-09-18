@@ -20,7 +20,7 @@ export default function HeadingPage() {
         </p>
         <div>
           <Anchor
-            href={`${STORYBOOK_URL}/?path=/docs/components-heading--docs`}
+            href={`${STORYBOOK_URL}/?path=/story/components-data-display-heading--h-1`}
             openInNewTab
           >
             <Rich>{m.components.common.storybookLink()}</Rich>

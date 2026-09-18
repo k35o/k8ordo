@@ -1,9 +1,10 @@
 /**
  * The tags of an `Accept-Language` header, most preferred first: `q` weights
- * decide the order (a tag without one weighs 1), ties keep the header's
- * order, `q=0` and the `*` wildcard are dropped — the wildcard says "anything",
- * which is what the default locale already means. Feed the result to
- * `locales.negotiate`; a missing header (`null`) is an empty list.
+ * decide the order (a tag without one, or with one that is not a number,
+ * weighs 1), ties keep the header's order, a weight of 0 or less (an empty
+ * `q=` reads as 0) and the `*` wildcard are dropped — the wildcard says
+ * "anything", which is what the default locale already means. Feed the result
+ * to `locales.negotiate`; a missing header (`null`) is an empty list.
  */
 export const parseAcceptLanguage = (header: string | null): string[] => {
   if (header === null || header.trim() === '') return [];

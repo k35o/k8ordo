@@ -24,7 +24,7 @@ export default function TabsPage() {
         </p>
         <div>
           <Anchor
-            href={`${STORYBOOK_URL}/?path=/docs/components-tabs--docs`}
+            href={`${STORYBOOK_URL}/?path=/story/components-navigation-tabs--primary`}
             openInNewTab
           >
             <Rich>{m.components.common.storybookLink()}</Rich>

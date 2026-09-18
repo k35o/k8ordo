@@ -25,7 +25,7 @@ export default function DialogPage() {
         </p>
         <div>
           <Anchor
-            href={`${STORYBOOK_URL}/?path=/docs/components-dialog--docs`}
+            href={`${STORYBOOK_URL}/?path=/story/components-overlays-dialog--default`}
             openInNewTab
           >
             <Rich>{m.components.common.storybookLink()}</Rich>

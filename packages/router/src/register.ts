@@ -34,7 +34,10 @@ export interface Register {}
 // compared against (`useMatch`), while `href` only survives through generic
 // inference taking another path.
 
-/** Every pattern in the registered table; any `/`-pattern before Register. */
+/**
+ * Every leaf pattern in the registered table — each page and each `/*`, not a
+ * prefix with no page of its own; any `/`-pattern before Register.
+ */
 export type RegisteredPattern = Register extends {
   routes: Routes<infer R extends RoutesRecord>;
 }
@@ -59,10 +62,12 @@ type LooseParamsOf<P extends string> = {
  * A pattern's params as a link takes them: where the registered `params`
  * map — written by the framework from the schemas the route files declared
  * — says a page receives something, a link takes that same value (a number
- * in, a number's one spelling out); a param no schema covers takes anything
- * with one spelling. Before `Register` is augmented — a client application
- * that has not, or the framework's generated file not yet written — the
- * same loose shape applies, so a link written for a schema still compiles.
+ * in, a number's one spelling out), and a param those schemas leave alone is
+ * the string the page receives. A pattern no schema covers at all takes
+ * anything with one spelling in every param. Before `Register` is augmented
+ * — a client application that has not, or the framework's generated file
+ * not yet written — the same loose shape applies, so a link written for a
+ * schema still compiles.
  */
 export type RegisteredParams<P extends string> =
   RegisteredParamsMap extends null
@@ -109,8 +114,11 @@ export type PageProps<P extends RegisteredPattern> = {
 
 /**
  * The props a `layout.tsx` receives, by the prefix every route below it
- * shares. Its params are strings whatever it declared: under `not-found.tsx`
- * nothing is validated, and a typed value there would be a lie.
+ * shares — only where the table also has a page at that prefix, since the
+ * constraint is a page pattern; a layout with no page of its own declares
+ * its props inline. Its params are strings whatever it declared: under
+ * `not-found.tsx` nothing is validated, and a typed value there would be a
+ * lie.
  */
 export type LayoutProps<P extends RegisteredPattern> = {
   readonly params: ParamsOf<P>;

@@ -2,9 +2,11 @@ import type { Message } from '@k8ordo/i18n';
 import { GitHubIcon, Heading } from '@k8ordo/ui';
 import type { ReactNode } from 'react';
 
+import { PACKAGES } from '../data/packages';
 import { href } from '../links';
 import * as m from '../messages';
 import { LinkButton } from './link-button';
+import { LocaleAnchor } from './locale-anchor';
 import { PageTitle } from './page-title';
 import { Rich } from './rich';
 
@@ -42,6 +44,10 @@ export function PackageLanding({
   docsDescription,
   children,
 }: PackageLandingProps) {
+  const pkg = PACKAGES.find((entry) => entry.name === name);
+  if (pkg === undefined) throw new Error(`${name} is not in PACKAGES`);
+  const [firstSection] = pkg.sections;
+
   return (
     <div className="flex flex-1 flex-col">
       <PageTitle name={name} />
@@ -52,10 +58,13 @@ export function PackageLanding({
             {description()}
           </p>
           <div className="flex flex-wrap items-center gap-4">
+            <LinkButton href={href(firstSection.path)} variant="solid">
+              {firstSection.label()}
+            </LinkButton>
             <LinkButton
+              color="base"
               external
               href={`https://www.npmjs.com/package/${name}`}
-              variant="solid"
             >
               npm
             </LinkButton>
@@ -97,12 +106,34 @@ export function PackageLanding({
 
       <section className="mx-auto w-full max-w-6xl px-6 pb-24 md:px-8">
         <Heading level="h2">{docsTitle()}</Heading>
-        <p className="text-fg-mute mt-4 max-w-2xl text-sm leading-relaxed">
+        <ol className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {pkg.sections.map((section, index) => (
+            <li key={section.path}>
+              <LocaleAnchor
+                className="border-border-mute hover:bg-bg-mute focus-visible:ring-border-info flex items-baseline gap-3 rounded-lg border p-5 transition-colors duration-150 ease-out focus-visible:ring-2 focus-visible:outline-hidden"
+                path={section.path}
+                unstyled
+              >
+                <span className="text-fg-subtle text-sm tabular-nums">
+                  {index + 1}
+                </span>
+                <span className="text-fg-base font-medium">
+                  {section.label()}
+                </span>
+              </LocaleAnchor>
+            </li>
+          ))}
+        </ol>
+        <p className="text-fg-mute mt-8 max-w-2xl text-sm leading-relaxed">
           <Rich>{docsDescription()}</Rich>
         </p>
         <div className="mt-6">
-          <LinkButton color="base" href={href('/:locale')}>
-            {m.nav.home()}
+          <LinkButton
+            color="base"
+            external
+            href={`/${directory}/docs/GUIDE.md`}
+          >
+            GUIDE.md
           </LinkButton>
         </div>
       </section>

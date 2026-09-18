@@ -65,9 +65,15 @@ export type FormFields<
 > = {
   fields: Record<FieldPath, DerivedField>;
   arrays: Record<ArrayPath, DerivedArray>;
-  /** Checks HTML has no attribute for, evaluated identically on both sides. */
+  /**
+   * Checks HTML has no attribute for, each run by the same evaluator on both
+   * sides.
+   */
   rules: Rule[];
-  /** Checks that HTML cannot express. Reported once, never silently discarded. */
+  /**
+   * Checks that HTML cannot express, returned instead of silently discarded.
+   * Not every such check is listed yet; the guide names the gaps.
+   */
   dropped: DroppedCheck[];
 };
 
@@ -78,8 +84,9 @@ export type FormFields<
 export type FormState = {
   errors?: Record<string, string>;
   /**
-   * Submitted values for re-render. Secret fields are never included; a name
-   * several controls share — a checkbox group — echoes as an array.
+   * Submitted values for re-render. Secret fields and files are never
+   * included; a name submitted more than once — a checkbox group with several
+   * boxes checked — echoes as an array, and a single entry as a string.
    */
   values?: Record<string, string | string[]>;
   /** How many rows each array had, so a no-JS retry rebuilds them. */

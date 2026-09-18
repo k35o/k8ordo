@@ -25,7 +25,7 @@ export default function ModalPage() {
         </p>
         <div>
           <Anchor
-            href={`${STORYBOOK_URL}/?path=/docs/components-modal--docs`}
+            href={`${STORYBOOK_URL}/?path=/story/components-overlays-modal--default`}
             openInNewTab
           >
             <Rich>{m.components.common.storybookLink()}</Rich>

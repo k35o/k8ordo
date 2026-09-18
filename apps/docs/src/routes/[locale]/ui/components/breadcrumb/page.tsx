@@ -23,7 +23,7 @@ export default function BreadcrumbPage() {
         </p>
         <div>
           <Anchor
-            href={`${STORYBOOK_URL}/?path=/docs/components-breadcrumb--docs`}
+            href={`${STORYBOOK_URL}/?path=/story/components-navigation-breadcrumb--medium`}
             openInNewTab
           >
             <Rich>{m.components.common.storybookLink()}</Rich>

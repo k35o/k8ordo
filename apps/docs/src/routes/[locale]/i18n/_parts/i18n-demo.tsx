@@ -26,10 +26,11 @@ const PreferredRow = ({ preferred }: { preferred: string }) => (
   </div>
 );
 
-// 事前描画（Node）に navigator は無い。ブラウザでしか描けないことは
-// `use(browser())` で言う: サーバーは上の <Suspense> の fallback を残し、
-// ブラウザが hydrate 後にここを描く。null のサーバースナップショットで
-// 「まだ分からない」を表す必要は無くなった。
+// 事前描画（Node）の navigator.languages はサーバーの言語で、訪問者の
+// ものではない。ブラウザでしか描けないことは `use(browser())` で言う:
+// サーバーは上の <Suspense> の fallback を残し、ブラウザが hydrate 後に
+// ここを描く。null のサーバースナップショットで「まだ分からない」を表す
+// 必要は無くなった。
 function BrowserLanguages() {
   use(browser('navigator.languages is the visitor’s'));
   const languages = useSyncExternalStore(subscribeLanguages, readLanguages);

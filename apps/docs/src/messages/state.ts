@@ -1,8 +1,8 @@
 import { message } from '@k8ordo/i18n';
 
 export const description = message({
-  ja: '状態を「どこに住むか」で宣言します。URLのsearchParams・履歴エントリ・localStorage・メモリの4つの置き場所を、それぞれzodスキーマ1つで型付けし、サーバーの読み取り・リンク生成・購読までそこから導きます。',
-  en: 'Declare state by where it lives. Four places — URL search params, the history entry, localStorage, memory — each typed by one zod schema, from which the server read, link building and the subscription are all derived.',
+  ja: '状態を「どこに住むか」で宣言します。置き場所は URL の searchParams・履歴エントリ・localStorage・メモリの4つです。前の3つはそれぞれ zod スキーマ1つで型付けし、サーバーの読み取り・リンク生成・購読までそこから導きます。境界を越えないメモリは、スキーマを持たない型付きの箱です。',
+  en: 'Declare state by where it lives. Four places — URL search params, the history entry, localStorage, memory. The first three are each typed by one zod schema, from which the server read, link building and the subscription are all derived; memory never crosses a boundary, so it is a typed box with no schema.',
 });
 
 export const demoTitle = message({
@@ -71,8 +71,8 @@ export const featureKeys = message({
 });
 
 export const featureKeysDescription = message({
-  ja: '購読するキーを列挙すれば、それ以外のフィールドの更新では再レンダーされません。スキーマがキー集合を固定しているので、判定は正確です。',
-  en: 'List the keys you read and updates to any other field never re-render you. The schema fixes the key set, so change detection is exact.',
+  ja: '購読するキーを列挙すれば、それ以外のフィールドの更新では再レンダーされません。定義がキー集合を固定しているので、判定は正確です。',
+  en: 'List the keys you read and updates to any other field never re-render you. The definition fixes the key set, so change detection is exact.',
 });
 
 export const featureCanonical = message({
@@ -81,8 +81,8 @@ export const featureCanonical = message({
 });
 
 export const featureCanonicalDescription = message({
-  ja: 'update はその場でスキーマを通り、URL に手で書かれた不正値はフィールド単位で default に落ちます。default の値はクエリから省かれるので、同じ状態は常に同じ URL になります。',
-  en: 'update passes the schema on the spot, and a hand-edited URL param falls back to its own default, field by field. Defaults are omitted from the query, so the same state always makes the same URL.',
+  ja: 'update はその場でスキーマを通り、URL に手で書かれた不正値は default に落ちます。default の値はクエリから省かれるので、同じ状態は常に同じ URL になります。',
+  en: 'update passes the schema on the spot, and a hand-edited URL param falls back to its default. Defaults are omitted from the query, so the same state always makes the same URL.',
 });
 
 export const featureServer = message({
@@ -91,8 +91,8 @@ export const featureServer = message({
 });
 
 export const featureServerDescription = message({
-  ja: 'URL 状態は RSC が parseUrl で型付きに読めます。リンクと GET フォームはどのルーターでも、JavaScript なしでも動きます。',
-  en: 'URL state reads typed in an RSC via parseUrl. Links and GET forms work under any router, before JavaScript loads.',
+  ja: 'ページに search を渡すルーター（Next.js など）なら、URL 状態は RSC が parseUrl で型付きに読めます。@k8ordo/static / @k8ordo/server では、ブラウザで読みます。リンクと GET フォームは、どのルーターでも JavaScript の読み込み前から URL を書き換えます。',
+  en: 'Where the router hands a page its search (Next.js, say), an RSC reads URL state typed via parseUrl; under @k8ordo/static / @k8ordo/server it is read in the browser. Links and GET forms change the URL under any router, before JavaScript loads.',
 });
 
 export const docsTitle = message({
@@ -101,6 +101,26 @@ export const docsTitle = message({
 });
 
 export const docsDescription = message({
-  ja: '設計ガイドとリファレンスは npm パッケージに同梱されています。AIコーディングエージェントは `node_modules/@k8ordo/state/docs/` からインストールした版そのものを読みます。',
-  en: 'The guide and reference ship inside the npm package. An AI coding assistant reads the exact installed version out of `node_modules/@k8ordo/state/docs/`.',
+  ja: '設計ガイドは npm パッケージに同梱されています。AIコーディングエージェントは `node_modules/@k8ordo/state/docs/` からインストールした版そのものを読みます。',
+  en: 'The guide ships inside the npm package. An AI coding assistant reads the exact installed version out of `node_modules/@k8ordo/state/docs/`.',
+});
+
+export const navPlaces = message({
+  ja: '置き場所',
+  en: 'Places',
+});
+
+export const navReading = message({
+  ja: '読み取りとリンク',
+  en: 'Reading & links',
+});
+
+export const navUpdates = message({
+  ja: '更新',
+  en: 'Updates',
+});
+
+export const navIntegrations = message({
+  ja: '組み合わせ',
+  en: 'Integrations',
 });

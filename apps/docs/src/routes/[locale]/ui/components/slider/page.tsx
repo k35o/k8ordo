@@ -20,7 +20,7 @@ export default function SliderPage() {
         </p>
         <div>
           <Anchor
-            href={`${STORYBOOK_URL}/?path=/docs/components-form-slider--docs`}
+            href={`${STORYBOOK_URL}/?path=/story/components-form-slider--default`}
             openInNewTab
           >
             <Rich>{m.components.common.storybookLink()}</Rich>
