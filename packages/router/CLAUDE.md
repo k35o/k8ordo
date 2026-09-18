@@ -34,11 +34,24 @@ pnpm check         # check:write to auto-fix
   the tree React holds the new snapshot until the platform's pending
   navigation has finished and runs passive effects only after the
   animation, so a passive resolver would wait on itself.
-- **A page change is tagged.** The tree is applied inside `startTransition`
-  with `addTransitionType('navigation')` and `navigation-<kind>` for the
-  platform's `push` / `replace` / `traverse`, so an application's
-  `<ViewTransition>` can animate page changes and no other transition
-  (`transitionTypesFor` in `navigation.ts`).
+- **A page change never joins an async action.** `apply` is an urgent
+  update and the host renders it through `useDeferredValue`; the hook's own
+  `generation` is deferred beside it, so `finished` resolves in the deferred
+  commit. Never move `apply` back inside `startTransition`: while any async
+  action is pending React gives every transition the action's lane and holds
+  it until the action ends, so an action awaiting `finished` deadlocks and a
+  page change started beside an unrelated action waits for it (regression
+  tests in `router.browser.test.tsx`, and the JS-enabled Server Action
+  redirect in `examples/server-basic/src/browser.test.ts`).
+- **A page change is tagged.** `addTransitionType('navigation')` and
+  `navigation-<kind>` for the platform's `push` / `replace` / `traverse`, so
+  an application's `<ViewTransition>` can animate page changes and no other
+  transition (`transitionTypesFor` in `navigation.ts`). The types cannot ride
+  the update (that would be a transition again): they are said in a
+  `startTransition` of their own from the urgent commit's layout effect,
+  because React keeps types only while a transition-class render — the
+  deferred one — is pending on the root. The ViewTransition test fails if a
+  React upgrade changes that.
 - **A state change is not a page change.** Same pathname as the tree ON
   SCREEN ⇒ intercept with `scroll: 'manual'`, `focusReset: 'manual'`, no
   load, no apply. Not `location.pathname`: interception commits the URL

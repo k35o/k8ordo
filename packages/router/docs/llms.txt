@@ -55,11 +55,13 @@ When installed via npm, these docs live under `node_modules/@k8ordo/router/docs/
   schemas, `request` when the generated `Register` says the mode has one).
   `<PathnameProvider pathname>` seeds it for a server render and hydration,
   and is mounted by `<Router>` and by both mode runtimes, never by an
-  application. Every page change is applied in a transition tagged
+  application. Every page change renders in the background, outside any
+  pending async action (so awaiting `finished` inside one settles), tagged
   `navigation` and `navigation-push` / `navigation-replace` /
   `navigation-traverse` (`addTransitionType`), so a `<ViewTransition
   update={{ navigation: 'auto', default: 'none' }}>` around the pages'
   hole animates page changes and no other transition. `useInterceptedNavigation({claim, load, apply})` returns
   `{ generation }` and is the
   navigation primitive `<Router>` is built on, and the seam the framework
-  uses to render server-produced trees instead.
+  uses to render server-produced trees instead; its host renders what
+  `apply` set through `useDeferredValue`.

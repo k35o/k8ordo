@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, use, useMemo, useState } from 'react';
+import { createContext, use, useDeferredValue, useMemo, useState } from 'react';
 import type { FC, ReactNode } from 'react';
 
 import { setBoundaryOutlet } from './define-routes';
@@ -62,25 +62,29 @@ setBoundaryOutlet(() => <Outlet />);
  * mounts.
  */
 export function Router({ routes }: { routes: Routes }): ReactNode {
-  const [match, setMatch] = useState<Match | null>(() =>
+  const [latest, setLatest] = useState<Match | null>(() =>
     routes.match(location.pathname),
   );
 
   const { generation } = useInterceptedNavigation<Match>({
     claim: (url) => routes.match(url.pathname) !== null,
     load: (url) => routes.match(url.pathname) as Match,
-    apply: setMatch,
+    apply: setLatest,
   });
 
+  const match = useDeferredValue(latest);
   const value = useMemo(() => ({ routes, match }), [routes, match]);
+  // The same element while the deferred match stands still, so the urgent
+  // render a navigation starts with does not render the old page again.
+  const stack = useMemo(
+    () =>
+      match === null ? null : <RenderStack stack={match.stack} index={0} />,
+    [match],
+  );
   return (
     <PathnameProvider pathname={location.pathname}>
       <NavigationGeneration value={generation}>
-        <RouterContext value={value}>
-          {match === null ? null : (
-            <RenderStack stack={match.stack} index={0} />
-          )}
-        </RouterContext>
+        <RouterContext value={value}>{stack}</RouterContext>
       </NavigationGeneration>
     </PathnameProvider>
   );

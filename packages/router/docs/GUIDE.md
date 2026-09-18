@@ -249,6 +249,12 @@ startTransition(async () => {
 });
 ```
 
+The page change does not join the action, so awaiting `finished` inside one —
+`useTransition`'s, `@k8ordo/ui`'s `Button` `onAction`, a `<form action>` —
+settles as soon as the page is on screen, and `isPending` covers exactly that
+wait. The same holds for a page change started while some unrelated action is
+still pending: it reaches the screen without waiting for that action.
+
 Its default is `push`, the opposite of `@k8ordo/state`'s `update()`, and for
 the same reason: going to a page is what the back button should undo, while
 refining what is on the page is not. **Changing pages goes through
@@ -330,12 +336,16 @@ is against the page showing, not against the address bar — interception
 commits the URL first, so a state update issued while another page is still
 loading is a page change and lets that page finish arriving.
 
-**Route changes run in a transition.** The new tree is applied inside
-`startTransition`, so React can keep the old page interactive while the new
-one prepares. The transition is tagged with `addTransitionType` — `navigation`,
-and one of `navigation-push`, `navigation-replace`, `navigation-traverse` —
-which is what a `<ViewTransition>` reads to animate a page change and nothing
-else (below).
+**Route changes render in the background.** The new tree renders at the
+priority `useDeferredValue` gives it, so the old page stays on screen and
+interactive while the new one prepares, and a `<Suspense>` that is already
+showing keeps its content instead of falling back. It is deliberately not a
+transition: while any async action is pending React holds every transition
+until that action ends, which would stall a page change behind an unrelated
+action and deadlock an action that awaits `finished`. The commit is still
+tagged with `addTransitionType` — `navigation`, and one of `navigation-push`,
+`navigation-replace`, `navigation-traverse` — which is what a
+`<ViewTransition>` reads to animate a page change and nothing else (below).
 
 **A new page starts at the top.** Once the new tree is on screen, the
 viewport goes where a document load would have put it: the top, or the
@@ -354,11 +364,11 @@ kept for the next visit, while the page it belonged to is never shown.
 
 ## Animating page changes
 
-A route change is a transition, and React's `<ViewTransition>` animates what
-a transition changes. Put one around the hole the pages render into and key
-it on the router's transition types, so it animates page changes and stays
-out of every other transition — a `Button`'s pending action is one too, and
-must not cross-fade the page:
+A route change renders in the background, and React's `<ViewTransition>`
+animates what such a render changes, as it does a transition. Put one around
+the hole the pages render into and key it on the router's transition types,
+so it animates page changes and stays out of every transition — a `Button`'s
+pending action is one, and must not cross-fade the page:
 
 ```tsx
 import { Outlet } from '@k8ordo/router';
@@ -433,16 +443,23 @@ instead of `<Outlet />`. What stays is navigation: both build on
 `useInterceptedNavigation`, the primitive `<Router>` itself uses.
 
 ```tsx
+const [latest, setLatest] = useState(initial);
 const { generation } = useInterceptedNavigation<Value>({
   claim: (url) => boolean, // synchronous: the only moment interception is possible
   load: (url, signal) => Value | Promise<Value>,
-  apply: (value) => void, // called inside a transition
+  apply: setLatest, // an ordinary update, never inside a transition
 });
+const shown = useDeferredValue(latest); // render this, not `latest`
 ```
 
-`generation` changes exactly when a new tree is applied — not when the URL
-moved — and a host provides it through `<NavigationGeneration value>` so the
-table's `error` boundaries know when to let a failure go. `<Router>` does
+A host renders what `apply` set through `useDeferredValue`, in the same
+component that calls the hook. That is what renders the new page in the
+background and keeps the old one on screen meanwhile, and what the hook
+itself follows: `generation` and `finished` move in the same deferred commit.
+
+`generation` changes exactly when a new tree is put on screen — not when the
+URL moved — and a host provides it through `<NavigationGeneration value>` so
+the table's `error` boundaries know when to let a failure go. `<Router>` does
 this itself; the framework's runtime does too.
 
 What carries across unchanged is everything that needs no table: `href`,
