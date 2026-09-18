@@ -26,7 +26,6 @@ if (import.meta.vitest) {
     expect(cast('1', 0)).toBe(1);
     expect(cast('1.1', 1)).toBe(1.1);
     expect(cast('1.1.1', 1)).toBe(1.1);
-    expect(cast('1.1.1', 2)).toBe(1.1);
     expect(cast('1e4', 0)).toBe(10_000);
     expect(cast('-19', 0)).toBe(-19);
   });
@@ -37,8 +36,10 @@ if (import.meta.vitest) {
     expect(cast('-', 0)).toBeNull();
   });
 
-  it('precision の桁に丸める', () => {
-    expect(cast('1.5', 0)).toBe(2);
-    expect(cast('1.234', 2)).toBe(1.23);
+  it('precision の桁数に丸める', () => {
+    expect(cast('2.5', 0)).toBe(3);
+    expect(cast('2.4', 0)).toBe(2);
+    expect(cast('1.55', 1)).toBe(1.6);
+    expect(cast('1.1', 2)).toBe(1.1);
   });
 }

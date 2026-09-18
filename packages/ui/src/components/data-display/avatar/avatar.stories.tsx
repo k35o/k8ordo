@@ -21,6 +21,15 @@ export const WithImage: Story = {
     alt: 'k8o',
     src: '/k8o.jpg',
   },
+  // 画像の読み込みは非同期で、VRT は画像を待たずに撮る。読み込み前の空の円が
+  // 撮られないよう、描画できる状態になるまで待つ（読めなければテストが落ちる）
+  play: async ({ canvasElement }) => {
+    const image = canvasElement.querySelector('img');
+    if (!image) {
+      throw new Error('image not found');
+    }
+    await image.decode();
+  },
 };
 
 export const Large: Story = {

@@ -853,6 +853,7 @@ Props:
 - `name`: `string`
 - `onChange`: `(value: string, event: ChangeEvent<HTMLInputElement>) => void`
 - `ref`: `Ref<HTMLDivElement>`
+- `required`: `boolean` (default: `false`)
 - `value`: `string`
 - Other props are forwarded to `HTMLAttributes<HTMLDivElement>`, except `role` / `className` / `style` / `children`.
 

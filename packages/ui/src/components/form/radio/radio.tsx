@@ -6,13 +6,13 @@ import { useFormStatus } from 'react-dom';
 import type { Option } from '../../../types/variables';
 import { FOCUS_RING_PEER } from '../../_internal/focus-ring';
 import { cn } from './../../../helpers/cn';
-import { useControllableState } from './../../../hooks/controllable-state';
 
 type BaseProps = {
   'aria-labelledby': string;
   name?: string;
   disabled?: boolean;
   invalid?: boolean;
+  required?: boolean;
   options: readonly Option[];
   ref?: Ref<HTMLDivElement>;
 } & Omit<
@@ -39,6 +39,7 @@ export const Radio: FC<Props> = ({
   name,
   disabled = false,
   invalid = false,
+  required = false,
   value,
   defaultValue,
   onChange,
@@ -46,23 +47,9 @@ export const Radio: FC<Props> = ({
   ref,
   ...rest
 }) => {
-  const [selectedValue, setSelectedValue] = useControllableState<
-    string | undefined
-  >({
-    value,
-    defaultValue,
-  });
   const { pending } = useFormStatus();
   const isControlled = value !== undefined;
   const disabledResolved = disabled || pending;
-
-  const selectValue = (
-    nextValue: string,
-    event: ChangeEvent<HTMLInputElement>,
-  ) => {
-    setSelectedValue(nextValue);
-    onChange?.(nextValue, event);
-  };
 
   return (
     <div
@@ -92,8 +79,9 @@ export const Radio: FC<Props> = ({
             disabled={disabledResolved}
             name={name ?? labelledbyId}
             onChange={(event) => {
-              selectValue(option.value, event);
+              onChange?.(option.value, event);
             }}
+            required={required}
             type="radio"
             value={option.value}
           />
@@ -102,21 +90,16 @@ export const Radio: FC<Props> = ({
             className={cn(
               'inline-flex size-5 items-center justify-center rounded-full border-2 transition-colors',
               FOCUS_RING_PEER,
-              selectedValue === option.value
-                ? 'border-border-base bg-primary-bg'
-                : 'border-border-mute bg-bg-base',
-              disabledResolved && 'border-border-mute bg-bg-mute',
-              invalid && 'border-border-error',
+              // 非制御のとき、form の reset は change を飛ばさずに checked を戻すので、
+              // 見た目は state ではなく input の :checked から引く
+              disabledResolved
+                ? 'border-border-mute bg-bg-mute'
+                : 'border-border-mute bg-bg-base peer-checked:border-border-base peer-checked:bg-primary-bg',
+              'peer-checked:*:opacity-100',
+              invalid && 'border-border-error peer-checked:border-border-error',
             )}
           >
-            <span
-              className={cn(
-                'size-2 rounded-full transition-opacity',
-                selectedValue === option.value
-                  ? 'bg-primary-border opacity-100'
-                  : 'bg-transparent opacity-0',
-              )}
-            />
+            <span className="bg-primary-border size-2 rounded-full opacity-0 transition-opacity" />
           </span>
           <span>{option.label}</span>
         </label>
