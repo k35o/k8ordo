@@ -34,8 +34,36 @@ export const InView: FC<{
     const intersecting = new Set<Element>();
     let stopped = false;
 
-    const observer = new IntersectionObserver(
-      (entries, self) => {
+    const report = () => {
+      const next = intersecting.size > 0;
+      if (stopped || next === reportedRef.current) {
+        return;
+      }
+      reportedRef.current = next;
+      handleChange(next);
+
+      if (once && next) {
+        stopped = true;
+        instance.unobserveUsing(observer);
+        observer.disconnect();
+      }
+    };
+
+    // React は外れた子の unobserve をペイント後まで遅らせ、その子が交差しなく
+    // なったという最後の通知を待つ。ただ、それより先に交差の計算が走る保証は無く、
+    // 通知が落ちると外れた子が intersecting に残って true のままになる。子が外れた
+    // ことは、React が呼ぶ unobserve から直接知る。
+    class ChildrenObserver extends IntersectionObserver {
+      override unobserve(target: Element): void {
+        super.unobserve(target);
+        if (intersecting.delete(target)) {
+          report();
+        }
+      }
+    }
+
+    const observer = new ChildrenObserver(
+      (entries) => {
         for (const entry of entries) {
           if (entry.isIntersecting) {
             intersecting.add(entry.target);
@@ -43,19 +71,7 @@ export const InView: FC<{
             intersecting.delete(entry.target);
           }
         }
-
-        const next = intersecting.size > 0;
-        if (next === reportedRef.current) {
-          return;
-        }
-        reportedRef.current = next;
-        handleChange(next);
-
-        if (once && next) {
-          stopped = true;
-          instance.unobserveUsing(self);
-          self.disconnect();
-        }
+        report();
       },
       { root, rootMargin, threshold },
     );
@@ -64,6 +80,8 @@ export const InView: FC<{
 
     return () => {
       if (!stopped) {
+        // unobserveUsing も子ごとに unobserve を呼ぶが、後始末で外した子は報告しない
+        stopped = true;
         instance.unobserveUsing(observer);
       }
       observer.disconnect();
