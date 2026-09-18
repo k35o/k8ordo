@@ -1,4 +1,5 @@
 import 'server-only';
+import { setTimeout } from 'node:timers/promises';
 
 // `server-only` を import したモジュールはクライアントに届かない。秘密や DB
 // クライアントをここに置けば、間に何段挟まっても渡らない（渡そうとした時点で
@@ -11,7 +12,14 @@ const CATALOG: readonly Product[] = [
   { id: 2, name: 'second product' },
 ];
 
-export const listProducts = (): readonly Product[] => CATALOG;
+// データベースの往復の代わり。ページはシェルより遅れて届き、layout を先に
+// 描いたままストリームの後ろで差し込まれる
+const roundTrip = (): Promise<void> => setTimeout(200);
 
-export const findProduct = (id: number): Product | undefined =>
-  CATALOG.find((product) => product.id === id);
+export const listProducts = async (): Promise<readonly Product[]> => {
+  await roundTrip();
+  return CATALOG;
+};
+
+export const findProduct = async (id: number): Promise<Product | undefined> =>
+  (await listProducts()).find((product) => product.id === id);

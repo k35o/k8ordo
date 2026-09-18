@@ -56,6 +56,7 @@ const format = (value: number | null, precision: number): string =>
 export const NumberField: FC<Props> = ({
   invalid = false,
   disabled = false,
+  readOnly = false,
   required = false,
   value,
   defaultValue,
@@ -91,6 +92,7 @@ export const NumberField: FC<Props> = ({
   // value との食い違いに気づいて表示を value へ戻せるように。
   const [shownValue, setShownValue] = useState(currentValue);
   const { pending } = useFormStatus();
+  const readOnlyResolved = readOnly || pending;
 
   if (isControlled && currentValue !== shownValue) {
     setDisplayValue(format(currentValue, precision));
@@ -129,6 +131,9 @@ export const NumberField: FC<Props> = ({
   };
 
   const stepBy = (input: HTMLInputElement, delta: number) => {
+    if (readOnlyResolved) {
+      return;
+    }
     const current = cast(input.value, precision);
     commit(
       input,
@@ -177,7 +182,7 @@ export const NumberField: FC<Props> = ({
           'read-only:cursor-not-allowed',
         )}
         disabled={disabled}
-        readOnly={pending || undefined}
+        readOnly={readOnlyResolved}
         required={required}
         onBlur={chain(onBlur, (e) => {
           const parsed = cast(e.currentTarget.value, precision);
@@ -194,7 +199,6 @@ export const NumberField: FC<Props> = ({
             stepBy(e.currentTarget, -step);
           }
         })}
-        pattern="[0-9]*(.[0-9]+)?"
         ref={mergedRef}
         role="spinbutton"
         type="text"
@@ -209,7 +213,7 @@ export const NumberField: FC<Props> = ({
             'hover:bg-bg-mute hover:text-fg-base',
             'disabled:cursor-not-allowed disabled:text-fg-mute hover:disabled:bg-transparent',
           )}
-          disabled={disabled || pending}
+          disabled={disabled || readOnlyResolved}
           onClick={() => {
             if (inputRef.current) {
               stepBy(inputRef.current, step);
@@ -227,7 +231,7 @@ export const NumberField: FC<Props> = ({
             'hover:bg-bg-mute hover:text-fg-base',
             'disabled:cursor-not-allowed disabled:text-fg-mute hover:disabled:bg-transparent',
           )}
-          disabled={disabled || pending}
+          disabled={disabled || readOnlyResolved}
           onClick={() => {
             if (inputRef.current) {
               stepBy(inputRef.current, -step);
