@@ -203,7 +203,8 @@ const shiftSet = (
  * Values are never copied into React state — the DOM holds them. What lives
  * here is only what the DOM cannot express: which message to show for a field
  * the browser has judged invalid, which server errors are still current, the
- * identity of each repeated row, and one dirty flag.
+ * identity of each repeated row, one dirty flag, and the row counts adding or
+ * removing a row is measured against.
  */
 export const useForm = <FieldPath extends string, ArrayPath extends string>(
   fields: FormFields<FieldPath, ArrayPath>,
@@ -336,8 +337,8 @@ export const useForm = <FieldPath extends string, ArrayPath extends string>(
   );
 
   // The values go back to what the form was rendered with — a reset button,
-  // `form.reset()`, or React itself once an action has succeeded — so what
-  // the hook remembered about the old values goes with them.
+  // `form.reset()`, or React itself after every form action — so what the
+  // hook remembered about the old values goes with them.
   const onReset = useCallback(() => {
     setClientErrors({});
     setEdited(new Set());
@@ -378,8 +379,9 @@ export const useForm = <FieldPath extends string, ArrayPath extends string>(
       } else if (typeof value === 'string') {
         input.defaultValue = value;
       }
-      // An array echo (a checkbox group) has no single defaultValue; the
-      // caller restores it per option from state.values.
+      // An array echo — a checkbox group with several boxes checked — has no
+      // single defaultValue; the caller restores the group per option from
+      // state.values.
 
       return {
         input,

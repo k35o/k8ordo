@@ -135,8 +135,10 @@ const sameOrigin = (request: Request, url: URL): boolean => {
 
 /**
  * The one entry both modes share: a request in, a page out. `@k8ordo/server`
- * calls it per request; `@k8ordo/static` calls it once per route at build
- * time and writes the answers to files. Nothing about it knows which.
+ * calls it per request; `@k8ordo/static` calls it at build time, for each
+ * route's HTML and again for its payload, and writes the answers to files.
+ * What it knows of the mode is compiled in (`K8ORDO_MODE`): whether a page
+ * gets the request, and whether a failed render may still stream.
  */
 export default async function handler(request: Request): Promise<Response> {
   const url = new URL(request.url);
@@ -243,7 +245,7 @@ export default async function handler(request: Request): Promise<Response> {
   const html = await parsed.enter(() => ssr.renderHtml(rscStream));
   if (import.meta.env.K8ORDO_MODE === '@k8ordo/static') {
     // A build into files can afford to wait for the whole page, and has to:
-    // a component that threw would otherwise be written as a page whose
+    // a Server Component that threw would otherwise be written as a page whose
     // error shows only once a visitor's browser has rendered it. Under a
     // running server the same page streams and the browser shows error.tsx;
     // at build time it is a build that stops, naming the page.

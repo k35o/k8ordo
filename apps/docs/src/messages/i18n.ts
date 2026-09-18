@@ -112,8 +112,8 @@ export const demoPreferredUnknown = message({
 });
 
 export const demoHint = message({
-  ja: '`greeting(name)` の引数は、`ja` に書いた関数の引数から型が付きます。`en` 側を別の引数で書くとコンパイルが通りません。',
-  en: 'The argument of `greeting(name)` is typed by the function written for `ja`. An `en` written with different parameters does not compile.',
+  ja: '`greeting(name)` の引数は、`ja` に書いた関数の引数から型が付きます。`en` 側の引数を別の型で書くとコンパイルが通りません。',
+  en: 'The argument of `greeting(name)` is typed by the function written for `ja`. An `en` whose parameter has another type does not compile.',
 });
 
 export const docsTitle = message({
@@ -124,4 +124,24 @@ export const docsTitle = message({
 export const docsDescription = message({
   ja: '設計ガイドは npm パッケージに同梱されています。AIコーディングエージェントは `node_modules/@k8ordo/i18n/docs/` からインストールした版そのものを読みます。',
   en: 'The guide ships inside the npm package. An AI coding assistant reads the exact installed version out of `node_modules/@k8ordo/i18n/docs/`.',
+});
+
+export const navLocales = message({
+  ja: 'ロケール',
+  en: 'Locales',
+});
+
+export const navMessages = message({
+  ja: 'メッセージ',
+  en: 'Messages',
+});
+
+export const navRouting = message({
+  ja: 'URL とロケール',
+  en: 'URLs & locale',
+});
+
+export const navIntegrations = message({
+  ja: '組み合わせ',
+  en: 'Integrations',
 });

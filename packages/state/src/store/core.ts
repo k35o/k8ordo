@@ -5,8 +5,9 @@ import type { StateValues } from '../schema/object';
  * Mirrors `navigation.navigate()`'s own return shape: an object holding the
  * promises rather than a promise, so fire-and-forget callers ignore it
  * without tripping no-floating-promises, and the 5% that await pick a stage.
- * Slots with no navigation behind them return both promises pre-settled —
- * the type stays uniform across every kind of state.
+ * Slots with no navigation behind them return the same pair, settled or
+ * rejected by the store itself — the type stays uniform across every kind of
+ * state.
  */
 export type UpdateHandle = {
   /** The write is in its home (history entry, storage, memory). */

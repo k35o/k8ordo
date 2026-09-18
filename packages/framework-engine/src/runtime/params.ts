@@ -1,7 +1,7 @@
 import { AsyncLocalStorage, AsyncResource } from 'node:async_hooks';
 
 /**
- * A route file's `params` schema, in the one shape every validation library
+ * A route file's `paramsSchema` export, in the one shape every validation library
  * agrees on (Standard Schema). The framework runs it; the router only types
  * what comes out. Only the synchronous half is honoured: a matcher decides
  * which pattern answers a pathname before anything renders, and nothing

@@ -95,7 +95,9 @@ const elementOf = ($schema: $ZodType): $ZodType | undefined => {
  * submits something for every control, and what that is depends on the control
  * — `emptySubmissionOf` is the one place that decides. Asking the schema what
  * it does with that exact value, which is also what the parse will hand it, is
- * what makes the attribute mean the same on both sides.
+ * what makes the attribute mean the same on both sides — except for an
+ * unpicked radio group, which submits no entry where a choice is probed with
+ * the `''` of a `<select>` placeholder.
  */
 const rejectsEmptySubmission = (json: Node, $schema: $ZodType): boolean =>
   !asProbe($schema).safeParse(emptySubmissionOf(json)).success;

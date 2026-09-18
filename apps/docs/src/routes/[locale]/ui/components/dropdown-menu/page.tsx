@@ -26,7 +26,7 @@ export default function DropdownMenuPage() {
         </p>
         <div>
           <Anchor
-            href={`${STORYBOOK_URL}/?path=/docs/components-dropdown-menu--docs`}
+            href={`${STORYBOOK_URL}/?path=/story/components-overlays-dropdown-menu--default`}
             openInNewTab
           >
             <Rich>{m.components.common.storybookLink()}</Rich>

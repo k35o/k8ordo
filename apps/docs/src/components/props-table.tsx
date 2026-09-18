@@ -28,7 +28,7 @@ const DefaultValue: FC<{ value: string | null }> = ({ value }) =>
 export const PropsTable: FC<{
   items: readonly PropItem[];
   inherits?: string;
-  /** Default 欄に `messages.*` を持つ props があるとき、辞書の説明へ導く */
+  /** 組み込みの文言を文言辞書から引くコンポーネントで、辞書の説明へ導く */
   messagesNote?: boolean;
 }> = ({ items, inherits, messagesNote = false }) => (
   <div className="flex flex-col gap-4">

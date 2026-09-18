@@ -54,7 +54,11 @@ export type Locales<L extends string = string, D extends L = L> = {
    * that is not BCP 47 is skipped, not thrown on: the list is user input.
    */
   readonly negotiate: (requested: Iterable<string>) => L;
-  /** `'/ui'` → `'/en/ui'`, `'/'` → `'/en'`. The pathname must not already carry a locale segment. */
+  /**
+   * `'/ui'` → `'/en/ui'`, `'/'` → `'/en'`. Hand it a pathname without a
+   * locale segment, as `delocalize` returns one: that is not checked, so
+   * `localize('/en/ui', 'ja')` is `'/ja/en/ui'`.
+   */
   readonly localize: (pathname: string, locale: L) => string;
   /** The inverse: `'/en/ui'` → `{ locale: 'en', pathname: '/ui' }`, `'/x'` → `{ locale: null, pathname: '/x' }`. */
   readonly delocalize: (pathname: string) => Delocalized<L>;
@@ -62,8 +66,9 @@ export type Locales<L extends string = string, D extends L = L> = {
    * The static build's `paths` option: every pattern that has a `/:locale`
    * segment, once per locale, so `framework({ paths: locales.paths })` is
    * the whole answer for a site whose only parameter is the locale. A
-   * pattern with another parameter keeps it, and the build then asks for
-   * that one by name.
+   * pattern with another parameter comes back still holding it
+   * (`/ja/blog/:slug`), which the build does not render: expand the rest in
+   * the same function.
    */
   readonly paths: (patterns: readonly string[]) => string[];
   /**

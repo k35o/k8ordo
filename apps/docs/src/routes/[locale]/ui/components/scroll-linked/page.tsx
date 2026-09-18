@@ -21,7 +21,7 @@ export default function ScrollLinkedPage() {
         </p>
         <div>
           <Anchor
-            href={`${STORYBOOK_URL}/?path=/docs/components-scroll-linked--docs`}
+            href={`${STORYBOOK_URL}/?path=/story/components-layout-scroll-linked--no-scroll`}
             openInNewTab
           >
             <Rich>{m.components.common.storybookLink()}</Rich>

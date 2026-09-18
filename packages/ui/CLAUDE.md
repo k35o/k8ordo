@@ -24,16 +24,16 @@ pnpm storybook                               # Storybook dev server (port 6006)
 
 ## Adding a New Component
 
-1. Create directory `src/components/<name>/` with 3 files:
+1. Create directory `src/components/<category>/<name>/` (`buttons`, `form`, `overlays`, …) with 3 files:
 
 ```
-src/components/<name>/
+src/components/<category>/<name>/
   <name>.tsx            # Implementation
   <name>.stories.tsx    # Storybook stories (also used as component tests)
   index.ts              # Re-export: export { ComponentName } from './<name>';
 ```
 
-2. Add re-export in `src/index.ts` if the component should be available from the root entry point.
+2. Add a re-export in `src/components/index.ts` if the component should be available from the root entry point (`src/index.ts` re-exports everything from there).
 
 ## Props Naming Conventions
 
@@ -69,12 +69,12 @@ For example: `Modal` and `Drawer` take `isOpen?` + `defaultOpen?` + `onClose?`;
 | `role`      | Which ARIA role to use                        | `dialog` / `menu` / `listbox`                                                            |
 | `side`      | Placement against a viewport edge             | `center` / `bottom` / `right` / `left`                                                   |
 | `placement` | Placement relative to an anchor (`Placement`) | `bottom-start`, …                                                                        |
-| `onAction`  | Activating an item or button (no event arg)   | `() => void` (`Button` also accepts a `Promise`)                                         |
+| `onAction`  | Activating an item or button (no event arg)   | `() => void` (`Button` / `IconButton` also accept a `Promise`)                           |
 
 `type` is reserved for HTML attributes only (`button` / `submit`, input types).
 Render props take a verb+noun form: `renderItem` / `renderAnchor` / `renderInput`.
 In generative-UI schemas the trigger wording is `triggerLabel` and the body text
-is `content`.
+is `content` (`Toast` and `Alert` keep their component's `message`).
 
 ### Render props
 
@@ -83,9 +83,14 @@ escape hatch a caller has. There are two kinds, and they must not be blurred.
 
 **Replacing the element** (`Button` / `IconButton` `renderItem`, `Anchor` /
 `Breadcrumb.Link` `renderAnchor`). The bag is _everything the component would
-have put on its own element_ — the resolved `className`, the composed `children`
-(icons and the pending spinner included), `ref`, the click handler, the
-disabled and pending state, and the caller's remaining attributes. Build that
+have put on its own element_. For `Button` / `IconButton` that is the resolved
+`className`, the composed `children` (icons and the pending spinner included),
+`ref`, the click handler, the disabled and pending state, and the caller's
+remaining attributes. The link components own less: `Anchor`'s bag is `href` /
+`className` / `children` / `target` / `rel` and the caller's remaining
+attributes, plus `kind` (`'internal' | 'external'`), which is not an attribute;
+`Breadcrumb.Link` takes no extra attributes, so its bag is `href` / `className` /
+`children`, and a `current` link renders a `<span>` without calling it. Build that
 object once and hand the same one to both branches — the render prop and the
 component's own element — so the two can never drift. A render prop that quietly
 drops `onClick` or `disabled` hands the caller a dead, undisabled element with
@@ -111,14 +116,20 @@ open/close handlers — and the prop is required rather than optional.
 
 For form components, `onChange` takes **the element's meaningful value as its
 first argument** — not the event object — except for the thin wrappers around a
-native element (`TextField` / `Textarea` / `Select` / `PasswordInput`). A
-component backed by a real `<input>` also passes **the DOM event as a second
-argument**, so callers that need it are not stuck:
+native element (`TextField` / `Textarea` / `Select` / `PasswordInput`). Four
+components also pass **the DOM event as a second argument**, so callers that
+need it are not stuck:
 
 - `Checkbox` / `Switch`: `(checked: boolean, event: ChangeEvent<HTMLInputElement>) => void`
 - `Radio`: `(value: string, event: ChangeEvent<HTMLInputElement>) => void`
 - `FileField`: `(files: FileList | null, event?: ChangeEvent<HTMLInputElement>) => void` (no `event` when files are cleared programmatically)
-- `RadioCard` (notifies per group rather than per option input) and `ListBox`: value only, both `(value) => void`
+
+The rest pass the value only, even when a real `<input>` is underneath:
+
+- `Slider` / `NumberField`: `(value: number) => void`
+- `CheckboxGroup.Root` / `CheckboxCard` / `Autocomplete`: `(value: string[]) => void`
+- `RadioCard` (notifies per group rather than per option input): `(value: string) => void`
+- `ListBox`: `(value) => void`
 
 The second argument can be added without breaking anyone — `(value) => void` is
 assignable to `(value, event) => void` — and a caller that only needs the value
@@ -130,7 +141,7 @@ can keep taking one argument.
 
 ```tsx
 import type { FC, HTMLAttributes, Ref } from 'react';
-import { cn } from '../../helpers/cn';
+import { cn } from '../../../helpers/cn';
 
 export const MyComponent: FC<
   { customProp?: string; ref?: Ref<HTMLDivElement> } & Omit<
@@ -191,19 +202,20 @@ animating it. `base.css` turns every view transition off under
 
 ## Design Token System
 
-No raw color values — always use semantic tokens in Tailwind classes. The tokens are defined in `src/styles/index.css` via CSS custom properties and mapped to Tailwind's `@theme inline`.
+No raw color values — always use semantic tokens in Tailwind classes. The tokens are defined in `src/styles/tokens.css` (imported by `src/styles/index.css`) via CSS custom properties and mapped to Tailwind's `@theme inline`.
 
 ### Token Categories
 
-| Category   | Tokens                                                                       | Usage              |
-| ---------- | ---------------------------------------------------------------------------- | ------------------ |
-| Foreground | `fg-base`, `fg-mute`, `fg-subtle`, `fg-inverse`                              | Text colors        |
-| Background | `bg-base`, `bg-raised`, `bg-subtle`, `bg-mute`, `bg-emphasize`, `bg-inverse` | Surfaces           |
-| Border     | `border-base`, `border-subtle`, `border-mute`, `border-emphasize`            | Borders            |
-| Status     | `{fg,bg,border}-{info,success,warning,error}`                                | Semantic status    |
-| Primary    | `primary-{fg,bg,bg-subtle,bg-mute,bg-emphasize,border}`                      | Teal accent        |
-| Secondary  | `secondary-{fg,bg,bg-subtle,bg-mute,bg-emphasize,border}`                    | Cyan accent        |
-| Group      | `group-{primary,secondary,tertiary,quaternary}`                              | Data visualization |
+| Category   | Tokens                                                                                     | Usage              |
+| ---------- | ------------------------------------------------------------------------------------------ | ------------------ |
+| Foreground | `fg-base`, `fg-mute`, `fg-subtle`, `fg-inverse`                                            | Text colors        |
+| Background | `bg-base`, `bg-raised`, `bg-surface`, `bg-subtle`, `bg-mute`, `bg-emphasize`, `bg-inverse` | Surfaces           |
+| Border     | `border-base`, `border-subtle`, `border-mute`, `border-emphasize`, `border-inverse`        | Borders            |
+| Status     | `{fg,bg,border}-{info,success,warning,error}`                                              | Semantic status    |
+| Primary    | `primary-{fg,bg,bg-subtle,bg-mute,bg-emphasize,border}`                                    | Teal accent        |
+| Secondary  | `secondary-{fg,bg,bg-subtle,bg-mute,bg-emphasize,border}`                                  | Cyan accent        |
+| Group      | `group-{primary,secondary,tertiary,quaternary}`                                            | Data visualization |
+| Other      | `back-drop` (`backdrop:bg-back-drop`), `transparent`                                       | Modal backdrop     |
 
 ### Dark Mode
 
@@ -217,6 +229,10 @@ Standard pattern: `focus-visible:border-transparent focus-visible:outline-hidden
 
 - `grid-cols-auto-fill-*` / `grid-cols-auto-fit-*` — responsive grid columns
 - `grid-rows-auto-fill-*` / `grid-rows-auto-fit-*` — responsive grid rows
+- `writing-h` / `writing-v` / `writing-sideways-rl` — writing mode
+- `z-overlay` / `z-modal` / `z-toast` — stacking order
+
+Custom variants besides `dark:`: `light:` (under `.light`) and `vertical:` (under `.writing-v`, switched off again inside `.writing-h`).
 
 ## Testing
 
@@ -225,12 +241,12 @@ Standard pattern: `focus-visible:border-transparent focus-visible:outline-hidden
 - **Helper tests** are standard unit tests, no browser needed.
 - **There is no jsdom project, and components are not written to survive one.** They call `ResizeObserver`, `matchMedia`, `dialog.showModal`, and the Popover API directly — no support checks, no null branches. Consumers are told to test in a real browser (`docs/GUIDE.md`); do not reintroduce a guard layer to make a synthetic DOM work.
 - Storybook preview wraps all stories in `UIProvider` with light/dark theme toggle.
-- a11y addon is configured with `color-contrast` check disabled (trusts design token contrast).
+- a11y addon fails a story on violations (`test: 'error'`), `color-contrast` included. Only overlay stories that axe misreads while they fade in turn `color-contrast` off for themselves: every `Modal` story, and one story each in `Dialog` and `Popover`.
 - Mock date is set to `2023-01-02 12:34:56` in Storybook.
 
 ## Build Pipeline
 
-1. `vp pack` — tsdown bundles `src/index.ts` → ESM with `.d.mts` type declarations
+1. `vp pack` — tsdown emits every `src/**/*.{ts,tsx}` except stories and tests file by file (`unbundle`) → ESM with `.d.mts` type declarations, keeping the directory layout under `dist/`; in-source tests are dropped by defining `import.meta.vitest` as `undefined`
 2. `build:css` (`scripts/build-css.ts`) — copies `src/styles/*.css` → `dist/styles/` (`index.css` is renamed to `tailwind.css`), then compiles the `dist` entry with Tailwind to produce `dist/styles/index.css`, the prebuilt stylesheet
 
 ## Export Structure
@@ -238,8 +254,8 @@ Standard pattern: `focus-visible:border-transparent focus-visible:outline-hidden
 The authoritative list is the `exports` map in `package.json`.
 
 ```
-@k8ordo/ui                     all components and public types
-@k8ordo/ui/i18n                ja / en dictionaries and the Messages type
+@k8ordo/ui                     core UI components and public types (AI chat is under /ai)
+@k8ordo/ui/i18n                ja / en / dictionaries, useMessages, and the Messages type
 @k8ordo/ui/ai                  AI chat components
 @k8ordo/ui/ai/response         Response renderer only
 @k8ordo/ui/ai-sdk              AI SDK adapter
@@ -248,6 +264,7 @@ The authoritative list is the `exports` map in `package.json`.
 @k8ordo/ui/openui              OpenUI component library
 @k8ordo/ui/openui/prompt
 @k8ordo/ui/tokens              design tokens as JS values
+@k8ordo/ui/props.json          machine-readable component props (docs/props.generated.json)
 @k8ordo/ui/styles.css          prebuilt CSS (no Tailwind needed — for CSS Modules and plain CSS)
 @k8ordo/ui/tailwind.css        Tailwind source entry (for Tailwind 4 projects; exposes the @theme tokens)
 ```

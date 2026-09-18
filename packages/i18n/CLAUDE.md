@@ -1,11 +1,12 @@
 # Agent guide — packages/i18n
 
 `@k8ordo/i18n` — the locale axis, owned. `defineLocales` is the set (the
-list, the default, membership, negotiation, the URL segment, the `[locale]`
-params schema, the current locale); `message` is one message as a function
-that reads the current locale where it is called. No provider, no hook. The
-shared discipline (React 19 / RSC assumed, Baseline newly available only, no
-polyfills) and how a new package joins are in the repository root's
+list, the default, membership, negotiation, the URL segment, the static
+build's path expansion (`paths`), the `[locale]` params schema, the current
+locale); `message` is one message as a function that reads the current
+locale where it is called. No provider, no hook. The shared discipline
+(React 19 / RSC assumed, Baseline newly available only, no polyfills) and
+how a new package joins are in the repository root's
 [`CLAUDE.md`](../../CLAUDE.md).
 
 User-facing documentation is in [`docs/GUIDE.md`](docs/GUIDE.md), shipped
@@ -75,6 +76,7 @@ pnpm check         # check:write to auto-fix
 ```
 src/
   locales.ts          defineLocales(): the set; negotiate; localize/delocalize;
+                      paths (static path expansion);
                       the Standard Schema for [locale] (no schema library);
                       getLocale / run
   message.ts          message(): one message as a function; Message, Variants

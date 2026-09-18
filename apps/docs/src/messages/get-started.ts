@@ -81,8 +81,8 @@ export const nextStepsI18n = message({
 });
 
 export const nextStepsStorybook = message({
-  ja: 'Storybookで各コンポーネントの詳細なドキュメントを確認する',
-  en: 'View detailed documentation for each component in Storybook',
+  ja: 'Storybookで各コンポーネントのストーリーを動かして確認する',
+  en: 'Try each component’s stories in Storybook',
 });
 
 export const packageManagerLabel = message({

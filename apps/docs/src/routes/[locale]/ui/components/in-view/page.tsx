@@ -24,7 +24,7 @@ export default function InViewPage() {
         </p>
         <div>
           <Anchor
-            href={`${STORYBOOK_URL}/?path=/docs/components-in-view--docs`}
+            href={`${STORYBOOK_URL}/?path=/story/components-observers-in-view--default`}
             openInNewTab
           >
             <Rich>{m.components.common.storybookLink()}</Rich>

@@ -4,12 +4,25 @@ Typography in `@k8ordo/ui` aims for readability and quiet at the same time.
 
 ## Font family
 
-A font stack tuned for Japanese.
+A font stack tuned for Japanese: Noto Sans JP and M PLUS 2.
+
+The library ships no font files and sets no `font-family` of its own, so until
+your app sets one, text stays on preflight's system stack (Roboto included).
+Load the fonts yourself (fontsource, `next/font`, …) and define the two
+variables the theme reads:
 
 ```css
-font-family: 'Noto Sans JP', 'M PLUS 2', sans-serif;
+:root {
+  --font-noto-sans-jp: 'Noto Sans JP', sans-serif;
+  --font-m-plus-2: 'M PLUS 2', sans-serif;
+}
+
+body {
+  font-family: var(--font-noto-sans-jp);
+}
 ```
 
+- With `tailwind.css`, those variables back the `font-noto-sans-jp` and `font-m-plus-2` utilities. They are the only font-family utilities; the theme removes `font-sans`, `font-serif`, and `font-mono`
 - **Do not use Inter / Roboto / Open Sans** — they read as AI-generated
 - Japanese text dominates, so Japanese faces come first
 
@@ -33,11 +46,11 @@ Use weight sparingly. Heavy type undermines the quiet.
 
 | Tailwind class | Value | Use                                   |
 | -------------- | ----- | ------------------------------------- |
-| `font-normal`  | 400   | Body text                             |
+| (none)         | 400   | Body text (the inherited default)     |
 | `font-medium`  | 450   | Emphasized text (restrained emphasis) |
 | `font-bold`    | 700   | Headings, button labels               |
 
-- Do not use `font-semibold` (600) or `font-extrabold` (800)
+- The theme defines only `font-medium` and `font-bold`. `font-normal`, `font-semibold`, and the other Tailwind weight classes are not generated
 - Note that `font-medium` is 450 here — lighter than the usual 500
 
 ## Line height
@@ -78,10 +91,11 @@ Dedicated utilities and a variant are provided for vertical writing.
 
 ### Utilities
 
-| Tailwind class | Use                                                                                                                                  |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `writing-h`    | Return to horizontal (`writing-mode: horizontal-tb`). Use it for figures, code blocks, and replaced elements inside a vertical tree. |
-| `writing-v`    | Apply vertical writing (`writing-mode: vertical-rl`) together with the recommended defaults such as `text-orientation: mixed`.       |
+| Tailwind class        | Use                                                                                                                                                                                    |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `writing-h`           | Return to horizontal (`writing-mode: horizontal-tb`). Use it for figures, code blocks, and replaced elements inside a vertical tree.                                                   |
+| `writing-v`           | Apply vertical writing (`writing-mode: vertical-rl`) together with the recommended defaults such as `text-orientation: mixed`.                                                         |
+| `writing-sideways-rl` | Turn a block sideways (`writing-mode: sideways-rl`): it lays out like horizontal text rotated 90° clockwise, Japanese glyphs included. `Table` applies it to itself under `vertical:`. |
 
 ### The `vertical:` variant
 
@@ -131,7 +145,7 @@ const [mode, setMode] = useState<'horizontal' | 'vertical'>('horizontal');
 
 ## What not to do
 
-- Use three or more font weights on one screen
+- Reach past the three weights (400, `font-medium`, `font-bold`) with an arbitrary value (`font-[600]`, …)
 - Use anything larger than `text-3xl` for ordinary text (`text-emphasize` and `text-highlight` are for special cases)
 - Apply `uppercase` or `tracking-widest` to Japanese text
 - Apply a gradient to text

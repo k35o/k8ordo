@@ -21,7 +21,7 @@ export default function IconButtonPage() {
         </p>
         <div>
           <Anchor
-            href={`${STORYBOOK_URL}/?path=/docs/components-button-icon-button--docs`}
+            href={`${STORYBOOK_URL}/?path=/story/components-buttons-icon-button--large`}
             openInNewTab
           >
             <Rich>{m.components.common.storybookLink()}</Rich>

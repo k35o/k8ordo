@@ -1,9 +1,10 @@
 'use client';
 
-import type { Message } from '@k8ordo/i18n';
 import { matchPath, usePathname } from '@k8ordo/router';
 import { DropdownMenu, NavigationMenuIcon } from '@k8ordo/ui';
 
+import { PACKAGES } from '../data/packages';
+import type { PackageEntry } from '../data/packages';
 import { href, navigateTo } from '../links';
 import type { SitePath } from '../links';
 import * as m from '../messages';
@@ -11,38 +12,8 @@ import { LanguageSwitcher } from './language-switcher';
 import { LocaleAnchor } from './locale-anchor';
 import { ThemeSwitcher } from './theme-switcher';
 
-type NavItem = { path: SitePath; label: Message };
-
-/**
- * 第一階層はパッケージで、セクションはパッケージに属する。だから常に並ぶのは
- * パッケージ名だけで、セクションは今いるパッケージのものしか出さない。全部を
- * 並べると、セクションを持つパッケージ（今は UI だけ）がサイトの背骨に見える。
- */
-type PackageNav = { name: string; path: SitePath; sections: NavItem[] };
-
-const PACKAGES: PackageNav[] = [
-  {
-    name: 'UI',
-    path: '/:locale/ui',
-    sections: [
-      { path: '/:locale/ui/get-started', label: m.nav.getStarted },
-      { path: '/:locale/ui/theming', label: m.nav.theming },
-      { path: '/:locale/ui/i18n', label: m.nav.i18n },
-      { path: '/:locale/ui/components', label: m.nav.components },
-      { path: '/:locale/ui/ai', label: m.nav.ai },
-    ],
-  },
-  { name: 'Form', path: '/:locale/form', sections: [] },
-  { name: 'State', path: '/:locale/state', sections: [] },
-  { name: 'Router', path: '/:locale/router', sections: [] },
-  { name: 'Static', path: '/:locale/static', sections: [] },
-  { name: 'Server', path: '/:locale/server', sections: [] },
-  { name: 'i18n', path: '/:locale/i18n', sections: [] },
-  { name: 'Color scheme', path: '/:locale/color-scheme', sections: [] },
-];
-
 // パッケージの区画にいるか: そのランディングか、その下のどこか
-const packageOf = (pathname: string): PackageNav | undefined =>
+const packageOf = (pathname: string): PackageEntry | undefined =>
   PACKAGES.find(
     (pkg) => matchPath(`${pkg.path}/*`, pathname, { inclusive: true }) !== null,
   );
@@ -62,7 +33,7 @@ export function Navigation() {
    * パッケージのセクションが続く。
    */
   const mobileEntries: Array<{ path: SitePath; label: string }> = [
-    ...PACKAGES.map((pkg) => ({ path: pkg.path, label: pkg.name })),
+    ...PACKAGES.map((pkg) => ({ path: pkg.path, label: pkg.label })),
     ...(current?.sections ?? []).map((item) => ({
       path: item.path,
       label: item.label(),
@@ -97,7 +68,7 @@ export function Navigation() {
                   className={itemClass(isHere)}
                   href={href(pkg.path)}
                 >
-                  {pkg.name}
+                  {pkg.label}
                 </a>
               </li>
             );
@@ -127,9 +98,9 @@ export function Navigation() {
           </div>
         </div>
       </nav>
-      {current !== undefined && current.sections.length > 0 && (
+      {current !== undefined && (
         <div className="border-border-subtle hidden border-t md:block">
-          <ul className="mx-auto flex max-w-6xl items-center gap-1 px-4 py-2 md:px-8">
+          <ul className="mx-auto flex max-w-6xl items-center gap-1 overflow-x-auto px-4 py-2 md:px-8">
             {current.sections.map((item) => {
               const isActive = matchPath(item.path, pathname) !== null;
               return (

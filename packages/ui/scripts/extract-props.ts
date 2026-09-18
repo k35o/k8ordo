@@ -20,15 +20,25 @@ import { fileURLToPath } from 'node:url';
 import {
   isArrowFunction,
   isFunctionDeclaration,
+  isIntersectionTypeNode,
+  isLiteralTypeNode,
   isObjectBindingPattern,
+  isParenthesizedTypeNode,
   isPropertyAssignment,
   isPropertySignatureDeclaration,
   isShorthandPropertyAssignment,
+  isStringLiteral,
   isTypeAliasDeclaration,
   isTypeReferenceNode,
+  isUnionTypeNode,
   isVariableDeclaration,
 } from 'typescript/unstable/ast';
-import type { Node, TypeNode } from 'typescript/unstable/ast';
+import type {
+  Node,
+  PropertySignatureDeclaration,
+  TypeAliasDeclaration,
+  TypeNode,
+} from 'typescript/unstable/ast';
 import {
   API,
   isUnionType,
@@ -65,6 +75,8 @@ type Component = {
   props: Prop[];
   /** Base type the remaining props are forwarded to, e.g. `HTMLAttributes<HTMLElement>`. */
   inherits: string | null;
+  /** Keys of `inherits` the component leaves out and does not declare itself. */
+  omitted: string[];
 };
 
 const api = new API({ cwd: PACKAGE_DIR });
@@ -77,77 +89,44 @@ const { program, checker } = project;
 const declarationOf = (symbol: TsSymbol): Node | undefined =>
   (symbol.valueDeclaration ?? symbol.declarations[0])?.resolve(project);
 
+const isUnderSrc = (node: Node): boolean => {
+  const file = node.getSourceFile().fileName;
+  return file.startsWith(SRC_DIR) && !file.includes('node_modules');
+};
+
+/**
+ * The declarations of a prop written under `src/`. A prop typed through a
+ * controlled/uncontrolled union has one per branch, and the `?: never` of the
+ * branch that forbids it usually comes first.
+ */
+const ownDeclarationsOf = (symbol: TsSymbol): Node[] =>
+  symbol.declarations
+    .map((handle) => handle.resolve(project))
+    .filter((node): node is Node => node !== undefined && isUnderSrc(node));
+
 /**
  * A prop is ours when it is declared under `src/`; anything else is forwarded
  * from the base type. `children` is the exception — it reaches components
  * through React's types but is part of the documented surface.
  */
-const isOwnProp = (symbol: TsSymbol): boolean => {
-  if (symbol.name === 'children') return true;
-  const declaration = symbol.declarations[0]?.resolve(project);
-  if (!declaration) return false;
-  const file = declaration.getSourceFile().fileName;
-  return file.startsWith(SRC_DIR) && !file.includes('node_modules');
-};
+const isOwnProp = (symbol: TsSymbol): boolean =>
+  symbol.name === 'children' || ownDeclarationsOf(symbol).length > 0;
 
-/**
- * Splits a union at the top level only, so `Foo<A | B>` stays intact.
- *
- * Two things make this more than bracket counting. The `>` of `=>` closes
- * nothing, so counting it would drop below the real nesting and split inside
- * `((…) => A | B) | C`. And a bare top-level arrow swallows the rest of the
- * string as its return type — `() => A | B` is one function type, not a union,
- * because TypeScript requires parentheses to put a function type in a union.
- */
-const splitUnion = (text: string): string[] => {
-  const parts: string[] = [];
-  let depth = 0;
-  let afterTopLevelArrow = false;
-  let current = '';
-  for (let i = 0; i < text.length; i++) {
-    const char = text[i];
-    if (char === '<' || char === '(' || char === '{' || char === '[') depth++;
-    const isArrowHead = char === '>' && text[i - 1] === '=';
-    if (isArrowHead && depth === 0) afterTopLevelArrow = true;
-    if (
-      (char === '>' && !isArrowHead) ||
-      char === ')' ||
-      char === '}' ||
-      char === ']'
-    ) {
-      depth--;
-    }
-    if (char === '|' && depth === 0 && !afterTopLevelArrow) {
-      parts.push(current.trim());
-      current = '';
-      continue;
-    }
-    current += char;
+/** Every type exported from an entry, which a reader can look up by name. */
+const publicTypeIds = new Set<number>();
+for (const entry of ENTRIES) {
+  const entrySource = program.getSourceFile(entry);
+  const moduleSymbol = entrySource && checker.getSymbolAtLocation(entrySource);
+  for (const exported of moduleSymbol
+    ? checker.getExportsOfModule(moduleSymbol)
+    : []) {
+    const target =
+      exported.flags & SymbolFlags.Alias
+        ? checker.getAliasedSymbol(exported)
+        : exported;
+    publicTypeIds.add(target.id);
   }
-  parts.push(current.trim());
-  return parts.filter((part) => part !== '' && part !== 'undefined');
-};
-
-/**
- * Renders the prop's type as the author wrote it. The checker is only a
- * fallback: it expands `ReactNode` into a dozen members and erases the alias
- * names that make the docs readable.
- */
-const declaredTypeStrings = (symbol: TsSymbol): string[] | null => {
-  const declaration = symbol.declarations[0]?.resolve(project);
-  if (!declaration) return null;
-  if (!isPropertySignatureDeclaration(declaration)) return null;
-  // Multi-line signatures are wrapped for the editor, not for a docs table:
-  // unwrap them, then close the gaps the wrapping left inside the parens.
-  const text = declaration.type
-    .getText()
-    .replaceAll(/\s+/gu, ' ')
-    .replaceAll(/\(\s+/gu, '(')
-    .replaceAll(/\s+\)/gu, ')')
-    .replaceAll(/,\s*\)/gu, ')')
-    .trim();
-  return splitUnion(text);
-};
+}
 
 /** Unwraps a union into its members, dropping the `undefined` that `?` adds. */
 const typeStrings = (type: Type): string[] => {
@@ -172,6 +151,101 @@ const typeStrings = (type: Type): string[] => {
   return rendered.length > 0 ? rendered : ['unknown'];
 };
 
+/** The alias declared under `src/` that a type reference names, if any. */
+const localAliasOf = (
+  node: TypeNode,
+): { alias: TypeAliasDeclaration; isPublic: boolean } | undefined => {
+  if (!isTypeReferenceNode(node)) return undefined;
+  const symbol = checker.getSymbolAtLocation(node.typeName);
+  const target =
+    symbol && symbol.flags & SymbolFlags.Alias
+      ? checker.getAliasedSymbol(symbol)
+      : symbol;
+  const alias = target?.declarations
+    .map((handle) => handle.resolve(project))
+    .find(
+      (declaration): declaration is TypeAliasDeclaration =>
+        declaration !== undefined &&
+        isTypeAliasDeclaration(declaration) &&
+        isUnderSrc(declaration),
+    );
+  return alias && target
+    ? { alias, isPublic: publicTypeIds.has(target.id) }
+    : undefined;
+};
+
+// Multi-line signatures are wrapped for the editor, not for a docs table:
+// unwrap them, then close the gaps the wrapping left inside the parens.
+const textOf = (node: Node): string =>
+  node
+    .getText()
+    .replaceAll(/\s+/gu, ' ')
+    .replaceAll(/\(\s+/gu, '(')
+    .replaceAll(/\s+\)/gu, ')')
+    .replaceAll(/,\s*\)/gu, ')')
+    .trim();
+
+/**
+ * The top-level members of a union as written. An alias the package does not
+ * export is opened up — `size?: Size` would otherwise name a type the reader
+ * cannot look up anywhere.
+ */
+const unionMembersOf = (node: TypeNode): string[] => {
+  if (isUnionTypeNode(node)) return node.types.flatMap(unionMembersOf);
+  const local = localAliasOf(node);
+  if (
+    !local ||
+    local.isPublic ||
+    local.alias.typeParameters ||
+    !isTypeReferenceNode(node) ||
+    node.typeArguments
+  ) {
+    return [textOf(node)];
+  }
+  if (isUnionTypeNode(local.alias.type) || localAliasOf(local.alias.type)) {
+    return unionMembersOf(local.alias.type);
+  }
+  // A computed alias (`Extract<…>`) has no members to read off the source.
+  const type = checker.getTypeAtLocation(local.alias.type);
+  return type ? typeStrings(type) : [textOf(node)];
+};
+
+/**
+ * Renders the prop's type as the author wrote it. The checker is only a
+ * fallback: it expands `ReactNode` into a dozen members and erases the alias
+ * names that make the docs readable.
+ *
+ * Every branch's declaration counts, so a prop that one branch of a
+ * controlled/uncontrolled union forbids (`?: never`) shows the type the other
+ * branch takes.
+ */
+const declaredTypeStrings = (symbol: TsSymbol): string[] | null => {
+  const own = ownDeclarationsOf(symbol);
+  const first = symbol.declarations[0]?.resolve(project);
+  const declarations = (own.length > 0 ? own : first ? [first] : []).filter(
+    (node): node is PropertySignatureDeclaration =>
+      isPropertySignatureDeclaration(node),
+  );
+  if (declarations.length === 0) return null;
+
+  const members = [
+    ...new Set(
+      declarations.flatMap((declaration) => unionMembersOf(declaration.type)),
+    ),
+  ].filter((member) => member !== 'undefined');
+  const allowed = members.filter((member) => member !== 'never');
+  const types = allowed.length > 0 ? allowed : members;
+  // A discriminant (`interactive: true` / `interactive?: false`) reads as the
+  // boolean it is.
+  if (types.includes('true') && types.includes('false')) {
+    return [
+      'boolean',
+      ...types.filter((type) => type !== 'true' && type !== 'false'),
+    ];
+  }
+  return types;
+};
+
 /** Reads `({ size = 'md' })` style defaults off the component's parameter. */
 const defaultsOf = (declaration: Node): Map<string, string> => {
   const defaults = new Map<string, string>();
@@ -192,13 +266,62 @@ const defaultsOf = (declaration: Node): Map<string, string> => {
   return defaults;
 };
 
+/** The string literals of a key union such as `'className' | 'style'`. */
+const literalKeysOf = (node: TypeNode): string[] => {
+  if (isUnionTypeNode(node)) return node.types.flatMap(literalKeysOf);
+  if (isLiteralTypeNode(node) && isStringLiteral(node.literal)) {
+    return [node.literal.text];
+  }
+  return [];
+};
+
+type Forwarded = { base: string; omitted: string[] };
+
+/**
+ * The base types an annotation forwards to, and the keys it leaves out of
+ * them, following the aliases it is built from through intersections and
+ * unions (`BaseProps & (A | B)`).
+ */
+const forwardedOf = (node: TypeNode): Forwarded[] => {
+  if (isUnionTypeNode(node) || isIntersectionTypeNode(node)) {
+    return node.types.flatMap(forwardedOf);
+  }
+  if (isParenthesizedTypeNode(node)) return forwardedOf(node.type);
+  if (!isTypeReferenceNode(node)) return [];
+
+  const name = node.typeName.getText();
+  const [base, keys] = node.typeArguments ?? [];
+  if ((name === 'Omit' || name === 'Pick') && base) {
+    const inner = localAliasOf(base)
+      ? forwardedOf(base)
+      : [{ base: textOf(base), omitted: [] }];
+    const omitted = name === 'Omit' && keys ? literalKeysOf(keys) : [];
+    return inner.map((forwarded) => ({
+      base: forwarded.base,
+      omitted: [...forwarded.omitted, ...omitted],
+    }));
+  }
+  if (/HTMLAttributes$|^ComponentProps/u.test(name)) {
+    return [{ base: textOf(node), omitted: [] }];
+  }
+  const local = localAliasOf(node);
+  if (local) return forwardedOf(local.alias.type);
+  // `PropsWithChildren<…>` and the like wrap the props they are given.
+  return (node.typeArguments ?? []).flatMap((argument) =>
+    forwardedOf(argument),
+  );
+};
+
 /**
  * Recovers the forwarded base type from what the author actually wrote. The
  * checker flattens `A & Omit<HTMLAttributes<E>, …>` into one object type, so
- * the intersection only survives in the annotation: `FC<Props>` is followed
- * back to the `Props` alias, while `FC<{…} & …>` is read in place.
+ * the intersection only survives in the annotation. A component whose union
+ * branches forward to different elements lists each base, joined by `|`, and
+ * every key any branch leaves out.
  */
-const inheritsOf = (declaration: Node): string | null => {
+const inheritsOf = (
+  declaration: Node,
+): { inherits: string | null; omitted: string[] } => {
   // Props are annotated either on the const (`const X: FC<Props>`) or on the
   // parameter (`const X = ({ … }: Props)`); both spellings are in use here.
   let propsNode: TypeNode | undefined;
@@ -212,25 +335,12 @@ const inheritsOf = (declaration: Node): string | null => {
       propsNode = initializer.parameters[0]?.type;
     }
   }
-  if (!propsNode) return null;
-
-  let text = propsNode.getText();
-  // `FC<Props>` — resolve the alias and read its right-hand side instead.
-  if (isTypeReferenceNode(propsNode)) {
-    const aliasDeclaration = checker
-      .getSymbolAtLocation(propsNode.typeName)
-      ?.declarations.map((handle) => handle.resolve(project))
-      .find((node) => node !== undefined && isTypeAliasDeclaration(node));
-    if (aliasDeclaration && isTypeAliasDeclaration(aliasDeclaration)) {
-      text = aliasDeclaration.type.getText();
-    }
-  }
-  text = text.replaceAll(/\s+/gu, ' ');
-
-  const match =
-    /(?:Omit|Pick)<\s*((?:\w+)(?:<[^<>]*>)?)\s*,/u.exec(text) ??
-    /&\s*((?:\w*HTMLAttributes|ComponentProps\w*)(?:<[^<>]*>)?)/u.exec(text);
-  return match?.[1] ?? null;
+  const forwarded = propsNode ? forwardedOf(propsNode) : [];
+  if (forwarded.length === 0) return { inherits: null, omitted: [] };
+  return {
+    inherits: [...new Set(forwarded.map(({ base }) => base))].join(' | '),
+    omitted: [...new Set(forwarded.flatMap(({ omitted }) => omitted))],
+  };
 };
 
 /** Resolves a compound member (`Dialog.Root`) back to the `const Root` it aliases. */
@@ -297,11 +407,11 @@ const componentFrom = (name: string, symbol: TsSymbol): Component | null => {
         };
       })
       .toSorted(byRequiredThenName);
-    return { name, props, inherits: null };
+    return { name, props, inherits: null, omitted: [] };
   }
 
   const [paramSymbol] = signature.getParameters();
-  if (!paramSymbol) return { name, props: [], inherits: null };
+  if (!paramSymbol) return { name, props: [], inherits: null, omitted: [] };
 
   const propsType = checker.getTypeOfSymbolAtLocation(paramSymbol, declaration);
   const defaults = defaultsOf(declaration);
@@ -321,7 +431,15 @@ const componentFrom = (name: string, symbol: TsSymbol): Component | null => {
     // Required props first — that is the order a reader needs them in.
     .toSorted(byRequiredThenName);
 
-  return { name, props, inherits: inheritsOf(declaration) };
+  const { inherits, omitted } = inheritsOf(declaration);
+  // A key left out of the base only to be declared again is listed above.
+  const declared = new Set(props.map((prop) => prop.name));
+  return {
+    name,
+    props,
+    inherits,
+    omitted: omitted.filter((key) => !declared.has(key)),
+  };
 };
 
 const components: Component[] = [];
@@ -336,7 +454,7 @@ for (const entry of ENTRIES) {
 
   for (const exported of checker.getExportsOfModule(moduleSymbol)) {
     const { name } = exported;
-    // Hooks and helpers (`useToast`, `cn`, `chain`) also have call signatures.
+    // Hooks (`useToast`, `usePortalRoot`) also have call signatures.
     if (!/^[A-Z]/u.test(name)) continue;
     if (seen.has(name)) continue;
     seen.add(name);
