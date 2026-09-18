@@ -253,6 +253,20 @@ export const StepsFromMinWhenEmptyAndZeroIsBelowMin: Story = {
   },
 };
 
+export const StepsFromMaxWhenEmptyAndZeroIsAboveMax: Story = {
+  args: {
+    min: -10,
+    max: -5,
+  },
+  play: async ({ canvas, userEvent }) => {
+    const input = canvas.getByRole('spinbutton');
+    await userEvent.click(input);
+    await userEvent.keyboard('{ArrowDown}');
+
+    await expect(input).toHaveValue('-5');
+  },
+};
+
 export const ResetsToDefaultValue: Story = {
   args: {
     defaultValue: 5,
