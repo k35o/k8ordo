@@ -76,7 +76,7 @@ export const analyzeSchema = (
     );
   }
   const defaults: StateValues = {};
-  for (const key of keys) defaults[key] = (empty.data as StateValues)[key];
+  for (const key of keys) defaults[key] = empty.data[key];
 
   return { schema, shape, keys, defaults };
 };
