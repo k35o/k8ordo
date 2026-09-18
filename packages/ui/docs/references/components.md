@@ -587,6 +587,11 @@ an empty field fills in `0`, or the nearer of `min` / `max` when `0` is out of
 range. `required` reaches the input itself, so an empty required field fails
 native validation.
 
+A form reset — `form.reset()`, a reset button, or React resetting the form after
+an action — puts an uncontrolled field back to `defaultValue` (or to empty) and
+reports that value to `onChange`. A controlled field keeps its `value`; reset
+your own state from the form's `onReset`.
+
 Props:
 
 - `defaultValue`: `never`

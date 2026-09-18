@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useRef, useState } from 'react';
-import { expect, fn } from 'storybook/test';
+import { expect, fn, waitFor } from 'storybook/test';
 
 import { NumberField } from './number-field';
 
@@ -250,6 +250,96 @@ export const StepsFromMinWhenEmptyAndZeroIsBelowMin: Story = {
     await userEvent.keyboard('{ArrowUp}');
 
     await expect(input).toHaveValue('5');
+  },
+};
+
+export const ResetsToDefaultValue: Story = {
+  args: {
+    defaultValue: 5,
+  },
+  render: InFormRender,
+  play: async ({ canvas, userEvent }) => {
+    const input = canvas.getByRole<HTMLInputElement>('spinbutton');
+    await userEvent.clear(input);
+    await userEvent.type(input, '42');
+    await userEvent.tab();
+
+    await expect(input).toHaveValue('42');
+
+    input.form?.reset();
+
+    await expect(input).toHaveValue('5');
+    await expect(submittedValue(input)).toBe('5');
+    await waitFor(() => expect(input).toHaveAttribute('aria-valuenow', '5'));
+  },
+};
+
+export const ResetsToEmptyWithoutDefaultValue: Story = {
+  render: InFormRender,
+  play: async ({ canvas, userEvent }) => {
+    const input = canvas.getByRole<HTMLInputElement>('spinbutton');
+    await userEvent.type(input, '42');
+    await userEvent.tab();
+
+    input.form?.reset();
+
+    await expect(input).toHaveValue('');
+    await expect(submittedValue(input)).toBe('');
+    await waitFor(() => expect(input).not.toHaveAttribute('aria-valuenow'));
+  },
+};
+
+export const ReportsResetValueToOnChange: Story = {
+  args: {
+    defaultValue: 5,
+    onChange: fn(),
+  },
+  render: InFormRender,
+  play: async ({ args, canvas, userEvent }) => {
+    const input = canvas.getByRole<HTMLInputElement>('spinbutton');
+    await userEvent.clear(input);
+    await userEvent.type(input, '42');
+    await userEvent.tab();
+
+    input.form?.reset();
+
+    await expect(args.onChange).toHaveBeenLastCalledWith(5);
+  },
+};
+
+export const ResetsAfterFormAction: Story = {
+  args: {
+    defaultValue: 5,
+  },
+  render: (args) => (
+    <form action={async () => {}}>
+      <NumberField {...args} name="quantity" />
+      <button type="submit">submit</button>
+    </form>
+  ),
+  play: async ({ canvas, userEvent }) => {
+    const input = canvas.getByRole('spinbutton');
+    await userEvent.clear(input);
+    await userEvent.type(input, '42');
+    await userEvent.click(canvas.getByRole('button', { name: 'submit' }));
+
+    await waitFor(() => expect(input).toHaveValue('5'));
+  },
+};
+
+export const KeepsControlledValueOnReset: Story = {
+  args: {
+    value: 3,
+    onChange: fn(),
+  },
+  render: InFormRender,
+  play: async ({ args, canvas }) => {
+    const input = canvas.getByRole<HTMLInputElement>('spinbutton');
+
+    input.form?.reset();
+
+    await expect(input).toHaveValue('3');
+    await expect(args.onChange).not.toHaveBeenCalled();
   },
 };
 
