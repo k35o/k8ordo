@@ -29,7 +29,7 @@ export type ToastType = {
 };
 
 export type ToastStore = {
-  open: (tone: Status, message: string, options?: ToastOptions) => void;
+  open: (tone: Status, message: string, options?: ToastOptions) => string;
   close: (id: string) => void;
   closeAll: () => void;
 };

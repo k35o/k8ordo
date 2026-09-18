@@ -1085,14 +1085,19 @@ const { open, close, closeAll } = useToast();
 
 open('success', 'Saved');
 open('error', 'Something went wrong');
+
+const syncingId = open('info', 'Syncing…', {
+  duration: Number.POSITIVE_INFINITY,
+});
+close(syncingId);
 ```
 
 `ToastProvider` is already inside `UIProvider`, so no extra wrapper is needed.
 
 What `useToast()` returns:
 
-- `open`: `(tone: Status, message: string, options?: ToastOptions) => void` (`ToastOptions` is `{ duration?: number; action?: ToastAction }`)
-- `close`: `(id: string) => void`
+- `open`: `(tone: Status, message: string, options?: ToastOptions) => string` (returns the toast's id; `ToastOptions` is `{ duration?: number; action?: ToastAction }`)
+- `close`: `(id: string) => void` (closes only the toast with the id `open` returned)
 - `closeAll`: `() => void`
 
 ### ToastProvider

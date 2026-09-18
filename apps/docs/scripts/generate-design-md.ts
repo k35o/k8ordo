@@ -434,7 +434,7 @@ import { UIProvider, Button, Card } from '@k8ordo/ui';
 - **Progress** — \`value\`, \`max\`（必須）, \`min?\`, \`label?\`
 - **Skeleton** — \`shape: 'rect'|'circle'\`, \`size\`, \`animate\`
 - **Spinner** — \`size\`, \`label?\`（aria-live）
-- **Toast** — \`ToastProvider\` + \`useToast()\`（\`open(tone, message, options?)\` / \`close(id)\` / \`closeAll()\`）
+- **Toast** — \`ToastProvider\` + \`useToast()\`（\`open(tone, message, options?)\` は id を返す / \`close(id)\` / \`closeAll()\`）
 
 ### Form
 
