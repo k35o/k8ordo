@@ -146,15 +146,10 @@ const systemPrompt = prompt(); // No React dependency — callable from RSC or a
 (`preamble`, `additionalRules`, `examples`, …) and passes it straight through to
 the library's prompt generation.
 
-In OpenUI, self-referential schemas are unsupported, so the component
-signatures (and the prompt built from them) limit nesting. A `Stack` or `Grid`
-does not list a `Stack`, `Grid`, or `Card` among its children. `Card`, `Form`,
-`Modal`, `Dialog`, `Drawer`, and `Popover` list a `Stack` or `Grid`, but no
-component lists any of them, and the generated prompt requires
-`root = Stack(...)`, so the prompt gives the LLM no place to put them. These
-limits guide the LLM; the parser does not check which component fills a
-`children` slot, so hand-written OpenUI Lang such as `root = Card(...)` still
-renders. json-render is slot-based and nests freely.
+Containers nest freely in OpenUI, as they do in json-render: `Stack`, `Grid`,
+`Card`, `Form`, `Modal`, `Dialog`, `Drawer`, and `Popover` each list every
+container among their children, so a `Card` can sit inside a `Stack` and a
+`Stack` inside another `Stack`.
 
 ## Exports at a glance
 

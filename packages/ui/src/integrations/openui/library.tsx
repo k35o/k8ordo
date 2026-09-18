@@ -37,8 +37,6 @@ import {
  *
  * 合成モデルの違い: 子要素は json-render の slots ではなく、
  * `z.array(Child.ref)` という型付きサブコンポーネントの prop で表す。
- * NOTE: OpenUI は自己参照スキーマを安定して扱えないため、Stack/Grid 自身の
- * 入れ子は非対応（Card には Stack/Grid を入れられる）。
  */
 
 type ContainerRenderProps<P> = ComponentRenderProps<

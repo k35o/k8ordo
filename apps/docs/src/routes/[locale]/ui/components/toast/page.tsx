@@ -18,7 +18,9 @@ import {
 const toastReturnProps: PropItem[] = [
   {
     name: 'open',
-    types: ['(tone: Status, message: string, options?: ToastOptions) => void'],
+    types: [
+      '(tone: Status, message: string, options?: ToastOptions) => string',
+    ],
     defaultValue: null,
   },
   {
@@ -110,10 +112,16 @@ function ToastDemo() {
             <Rich>{m.components.toast.useToastTitle()}</Rich>
           </Heading>
           <CodeBlock
-            code={`const { open, closeAll } = useToast();
+            code={`const { open, close, closeAll } = useToast();
 
 // Show a toast
 open('success', 'Saved successfully');
+
+// Close a specific toast by the ID open returned
+const toastId = open('info', 'Syncing…', {
+  duration: Number.POSITIVE_INFINITY,
+});
+close(toastId);
 
 // Close all toasts
 closeAll();`}
