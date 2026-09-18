@@ -45,11 +45,14 @@ pnpm check:write       # Oxlint/Oxfmt lint/format auto-fix
 - **Unmatched routes**: `src/routes/[locale]/not-found.tsx` is rendered into a
   single `404.html`, which a static host serves for anything it does not have.
   One file for every locale, so the `:locale` it was rendered with is the build's
-  sentinel, not a language. The layout therefore takes the locale from the URL
-  the visitor is actually on (`usePathname`), falling back to `DEFAULT_LOCALE`
-  only when that has none either — which is why the file is Japanese as served
-  and becomes English the moment it hydrates on an `/en/…` URL. A visitor with
-  JavaScript off keeps the Japanese one; one file cannot be both.
+  sentinel, not a language — and no schema accepts it, because a catch-all's
+  params are never validated. Every message in the file therefore renders in
+  `locales.default`, so it is Japanese as served, whichever `/en/…` pages the
+  build rendered alongside it. The shell takes the locale from the URL the
+  visitor is actually on (`usePathname`), falling back to `locales.default`
+  only when that has none either, so the file becomes English the moment it
+  hydrates on an `/en/…` URL. A visitor with JavaScript off keeps the Japanese
+  one; one file cannot be both.
 - **An unknown locale is a 404.** `src/routes/[locale]/layout.tsx` exports
   `const { paramsSchema } = locales` — the generator parses the file for the
   export, so any spelling of it counts — so `/fr/ui` is a
