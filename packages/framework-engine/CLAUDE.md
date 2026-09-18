@@ -93,7 +93,10 @@ ParamsSchemaFor<pattern>`, lists per page pattern the schemas along its
   `@k8ordo/static` the handler also buffers the HTML and answers 500 when a
   Server Component threw inside a Suspense boundary, so the build stops naming
   the page instead of writing it; a throw with no boundary above it rejects
-  the HTML render itself, and the build stops on that error.
+  the HTML render itself, and the build stops on that error. `renderHtml`
+  also writes every Suspense boundary in place — it waits for `allReady` and
+  outlines nothing — so a file never carries a hidden segment for a script to
+  move in after hydration has started.
 - **One pattern walk.** `declaredPatterns(tree)` is the order the matcher
   tries patterns — pages and redirects, literals before params, the
   catch-all last in its branch — and everything that asks "which URLs does
