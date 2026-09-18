@@ -13,6 +13,7 @@ type BaseProps = {
   name?: string;
   disabled?: boolean;
   invalid?: boolean;
+  required?: boolean;
   options: readonly Option[];
   ref?: Ref<HTMLDivElement>;
 } & Omit<
@@ -39,6 +40,7 @@ export const Radio: FC<Props> = ({
   name,
   disabled = false,
   invalid = false,
+  required = false,
   value,
   defaultValue,
   onChange,
@@ -94,6 +96,7 @@ export const Radio: FC<Props> = ({
             onChange={(event) => {
               selectValue(option.value, event);
             }}
+            required={required}
             type="radio"
             value={option.value}
           />

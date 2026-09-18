@@ -58,6 +58,21 @@ export const Disabled: Story = {
   },
 };
 
+export const RequiredUntilSelected: Story = {
+  args: {
+    required: true,
+  },
+  play: async ({ canvas, userEvent }) => {
+    const react = canvas.getByRole('radio', { name: 'React' });
+
+    await expect(react).toBeInvalid();
+
+    await userEvent.click(canvas.getByRole('radio', { name: 'Vue' }));
+
+    await expect(react).toBeValid();
+  },
+};
+
 // FormControl の renderInput から受け取る invalid を radiogroup の aria-invalid として伝える
 export const Invalid: Story = {
   args: {
