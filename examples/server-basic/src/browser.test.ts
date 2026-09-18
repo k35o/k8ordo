@@ -52,4 +52,22 @@ describe('the built application in a browser', () => {
     expect(new URL(page.url()).pathname).toBe('/products');
     expect(await page.evaluate(() => 'stayed' in window)).toBe(true);
   }, 30_000);
+
+  it('hydrates the page where it streamed in, leaving no hidden copy and one <title>', async () => {
+    // ダークの訪問者: ルートの SchemeProvider の値が hydrate の直後に変わる
+    const context = await browser.newContext({ colorScheme: 'dark' });
+    const page = await context.newPage();
+    // 商品ページはデータを待つので、その境界はシェルより遅れて届く。
+    // ストリームを読み終え、本文が見えてから数える
+    await page.goto(`${server.url}/products/1`, { waitUntil: 'load' });
+    await page.getByText('scheme: dark').waitFor();
+    await page.getByRole('heading', { name: 'first product' }).waitFor();
+
+    expect({
+      hiddenSegments: await page.locator('div[hidden][id^="S:"]').count(),
+      titles: await page.locator('title').count(),
+      headings: await page.getByTestId('title').count(),
+    }).toStrictEqual({ hiddenSegments: 0, titles: 1, headings: 1 });
+    await context.close();
+  });
 });
