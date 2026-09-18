@@ -13,15 +13,9 @@ describe('redirect', () => {
       caught = error;
     }
     expect(isRedirect(caught)).toBe(true);
-    expect(caught).toMatchObject({ to: '/talks', permanent: false });
+    expect(caught).toMatchObject({ to: '/talks' });
     expect(isRedirect(new Error('/talks'))).toBe(false);
     expect(isRedirect(null)).toBe(false);
-  });
-
-  it('carries permanent when asked', () => {
-    expect(() => redirect('/x', { permanent: true })).toThrow(
-      expect.objectContaining({ permanent: true }),
-    );
   });
 });
 

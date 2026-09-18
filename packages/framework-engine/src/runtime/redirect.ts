@@ -14,18 +14,11 @@ const BRAND = Symbol.for('k8ordo.redirect');
 export class Redirect extends Error {
   readonly [BRAND] = true;
 
-  constructor(
-    readonly to: string,
-    readonly permanent: boolean,
-  ) {
+  constructor(readonly to: string) {
     super(`redirect to ${to}`);
     this.name = 'Redirect';
   }
 }
-
-export type RedirectOptions = {
-  readonly permanent?: boolean;
-};
 
 /**
  * Ends a Server Action by sending the visitor somewhere else. Thrown, so an
@@ -34,8 +27,8 @@ export type RedirectOptions = {
  * `303` to `to`; one posted by the client runtime is answered with a
  * payload that tells the browser to navigate there.
  */
-export const redirect = (to: string, options: RedirectOptions = {}): never => {
-  throw new Redirect(to, options.permanent ?? false);
+export const redirect = (to: string): never => {
+  throw new Redirect(to);
 };
 
 export const isRedirect = (value: unknown): value is Redirect =>

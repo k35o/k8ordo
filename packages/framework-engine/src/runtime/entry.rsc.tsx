@@ -20,8 +20,8 @@ import { routeRequestOf } from './request';
 type ActionResult = {
   returnValue?: unknown;
   formState?: unknown;
-  /** The action ended by sending the visitor elsewhere. */
-  redirect?: { to: string; permanent: boolean };
+  /** Where the action sent the visitor instead of returning. */
+  redirect?: string;
 };
 
 /**
@@ -49,7 +49,7 @@ const runAction = async (
     return await invokeAction(request, temporaryReferences);
   } catch (error) {
     // A redirect is how an action ends, not how it fails.
-    if (isRedirect(error)) return { redirect: error };
+    if (isRedirect(error)) return { redirect: error.to };
     throw error;
   }
 };
@@ -146,7 +146,7 @@ export default async function handler(request: Request): Promise<Response> {
     : {};
   if (action.redirect !== undefined && !addressed) {
     // A form posted without JavaScript: the browser follows a 303 with a GET.
-    return redirectResponse(action.redirect.to, 303);
+    return redirectResponse(action.redirect, 303);
   }
 
   // A param a schema refuses is a pathname the pattern does not answer, so
@@ -190,7 +190,7 @@ export default async function handler(request: Request): Promise<Response> {
     pathname,
     returnValue: action.returnValue,
     formState: action.formState,
-    redirect: action.redirect?.to,
+    redirect: action.redirect,
   };
 
   const failures: unknown[] = [];
