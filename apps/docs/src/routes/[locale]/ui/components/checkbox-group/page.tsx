@@ -27,7 +27,7 @@ export default function CheckboxGroupPage() {
         </p>
         <div>
           <Anchor
-            href={`${STORYBOOK_URL}/?path=/docs/components-form-checkbox-group--docs`}
+            href={`${STORYBOOK_URL}/?path=/story/components-form-checkbox-group--default`}
             openInNewTab
           >
             <Rich>{m.components.common.storybookLink()}</Rich>

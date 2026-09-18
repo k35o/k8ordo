@@ -26,8 +26,9 @@ pnpm check         # check:write to auto-fix
 - **The mode is the dependency.** The reason there are two packages instead of
   one option is that a static application must not have this machinery
   available at all. Keep anything request-shaped here.
-- **The handler is the engine's, not ours.** `serve` loads the same
-  `dist/rsc/index.js` that `@k8ordo/static` calls at build time. If a page
+- **The handler is the engine's, not ours.** `serve` loads
+  `dist/rsc/index.js`, the engine's handler — the one `@k8ordo/static` also
+  builds and calls at build time, compiled there for that mode. If a page
   renders differently under the two modes, something has leaked.
 - **The plugin is `framework()`, the same name `@k8ordo/static` exports.**
   The mode is the import and nothing else, which is what makes a
@@ -44,9 +45,10 @@ pnpm check         # check:write to auto-fix
 
 ```
 src/
-  static-file.ts  safeJoin — リクエストパス → ビルド出力内のパス(純関数)
-  serve.ts        node:http のサーバー(静的配信 + ハンドラ委譲)
-  index.ts        framework: engine そのまま
+  static-file.ts  safeJoin — request pathname → path inside the build output (pure)
+  serve.ts        the node:http server (static files + handing off to the handler)
+  index.ts        framework (the engine as is), serve, and the engine's
+                  redirect (with its types) and RouteRequest re-exported
 ```
 
 ## Conventions

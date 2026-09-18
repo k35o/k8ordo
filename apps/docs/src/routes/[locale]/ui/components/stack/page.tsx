@@ -23,7 +23,7 @@ export default function StackPage() {
         </p>
         <div>
           <Anchor
-            href={`${STORYBOOK_URL}/?path=/docs/components-stack--docs`}
+            href={`${STORYBOOK_URL}/?path=/story/components-layout-stack--default`}
             openInNewTab
           >
             <Rich>{m.components.common.storybookLink()}</Rich>

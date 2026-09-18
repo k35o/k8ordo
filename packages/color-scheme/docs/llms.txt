@@ -1,13 +1,14 @@
 # @k8ordo/color-scheme
 
 > The colour-scheme axis of an application, owned. The visitor's preference
-> — light, dark, or nothing, which follows the system — lives in
-> localStorage through `@k8ordo/state`; one rule resolves it against
-> `prefers-color-scheme`; the result is the `dark` class on `<html>` (what
-> `@k8ordo/ui` and Tailwind's dark variant read). `<ColorSchemeProvider>` in
-> the root layout renders the inline script that puts the class on before
-> the first paint and keeps it in step afterwards; `useColorScheme()` reads
-> it. The server renders the default.
+> — light, dark, or nothing, which follows the default (the system unless
+> told otherwise) — lives in localStorage through `@k8ordo/state`; one rule
+> resolves it against `prefers-color-scheme`; the result is the `dark` class
+> on `<html>` (what `@k8ordo/ui` reads, and Tailwind's `dark:` with a
+> class-based `@custom-variant dark`). `<ColorSchemeProvider>` in the root
+> layout renders the inline script that puts the class on before the first
+> paint and keeps it in step afterwards; `useColorScheme()` reads it. The
+> server renders the default (`light` when that default is `'system'`).
 >
 > Like every k8ordo package it assumes React 19 and Server Components, uses
 > only what has reached Baseline newly available, and ships no polyfills or
@@ -31,7 +32,8 @@ When installed via npm, these docs live under `node_modules/@k8ordo/color-scheme
   system, and keeps the class in step. `useColorScheme()` returns
   `{ scheme, preference, setPreference }`: `scheme` is `'light' | 'dark'`
   on screen, `preference` is `'light' | 'dark' | 'system'`, and
-  `setPreference('system')` clears the stored row. `colorSchemeState` is the
-  `@k8ordo/state` local definition itself (`k8ordo-state:color-scheme`).
+  `setPreference('system')` clears the stored preference, so the default
+  applies again. `colorSchemeState` is the `@k8ordo/state` local definition
+  itself (`k8ordo-state:color-scheme`).
   Types: `ColorScheme`, `ColorSchemePreference`, `ColorSchemeProviderProps`,
   `UseColorScheme`.

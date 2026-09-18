@@ -6,7 +6,7 @@ import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
 import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
-import { propsOf } from '../../../../../data/component-props';
+import { inheritsOf, propsOf } from '../../../../../data/component-props';
 import * as m from '../../../../../messages';
 import {
   FormActionStatePreview,
@@ -24,7 +24,7 @@ export default function FormPage() {
         </p>
         <div>
           <Anchor
-            href={`${STORYBOOK_URL}/?path=/docs/components-form-form--docs`}
+            href={`${STORYBOOK_URL}/?path=/story/components-form-form--with-action`}
             openInNewTab
           >
             <Rich>{m.components.common.storybookLink()}</Rich>
@@ -99,7 +99,7 @@ return (
         <Heading level="h2">
           <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>
-        <PropsTable items={propsOf('Form')} />
+        <PropsTable inherits={inheritsOf('Form')} items={propsOf('Form')} />
       </section>
     </div>
   );

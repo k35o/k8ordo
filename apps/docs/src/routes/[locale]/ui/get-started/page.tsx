@@ -112,12 +112,39 @@ function MyComponent() {
           <Rich>{m.getStarted.requirementsDescription()}</Rich>
         </p>
         <ul className="text-fg-mute flex flex-col gap-2 pl-6">
-          <li className="list-disc">React &gt;= 19.0.0</li>
-          <li className="list-disc">React DOM &gt;= 19.0.0</li>
+          <li className="list-disc">React &gt;= 19.3.0</li>
+          <li className="list-disc">React DOM &gt;= 19.3.0</li>
           <li className="list-disc">
-            Tailwind CSS &gt;= 4.0.0 (optional: tailwind.css)
+            Tailwind CSS &gt;= 4.3.3 (optional: tailwind.css)
           </li>
-          <li className="list-disc">TypeScript &gt;= 6.0.0</li>
+          <li className="list-disc">
+            TypeScript &gt;= 7.0.2 (optional: type declarations)
+          </li>
+          <li className="list-disc">
+            @types/react, @types/react-dom &gt;= 19.3.0 (optional: type
+            declarations)
+          </li>
+          <li className="list-disc">
+            zod &gt;= 4.4.3 &lt;5.0.0 (optional: generative-UI schemas)
+          </li>
+          <li className="list-disc">
+            @json-render/core, @json-render/react &gt;= 0.20.0 &lt;0.21.0
+            (optional: @k8ordo/ui/json-render)
+          </li>
+          <li className="list-disc">
+            @openuidev/lang-core &gt;= 0.2.10 &lt;0.3.0 (optional:
+            @k8ordo/ui/openui, @k8ordo/ui/openui/prompt)
+          </li>
+          <li className="list-disc">
+            @openuidev/react-lang &gt;= 0.2.9 &lt;0.3.0 (optional:
+            @k8ordo/ui/openui)
+          </li>
+          <li className="list-disc">
+            ai &gt;= 7.0.51 (optional: @k8ordo/ui/ai-sdk)
+          </li>
+          <li className="list-disc">
+            streamdown &gt;= 2.5.0 (optional: @k8ordo/ui/ai/response)
+          </li>
         </ul>
       </section>
 

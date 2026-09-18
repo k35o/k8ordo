@@ -77,3 +77,21 @@ type Option = Readonly<{ value: string; label: string }>;
 ```
 
 Used for the choices in Radio, Select, Autocomplete, and similar components.
+
+## Component prop types
+
+The root also exports types that belong to one component, for typing your own
+code around it:
+
+| Type                                                                  | What it types                                                                                           |
+| --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `StackProps` / `GridProps`                                            | Every prop of `Stack` / `Grid`, for a component that wraps one                                          |
+| `GapSize` / `PaddingSize`                                             | The `none`–`xl` scale of `gap` (Stack, Grid) and `padding` (Stack)                                      |
+| `ButtonRenderItemProps` / `IconButtonRenderItemProps`                 | What `renderItem` receives on `Button` / `IconButton`                                                   |
+| `IconButtonTriggerProps`                                              | `Partial<TooltipTriggerProps>`: the tooltip wiring in `IconButtonRenderItemProps`' `triggerProps`       |
+| `PopoverTriggerProps` / `PopoverContentProps` / `TooltipTriggerProps` | What `renderItem` receives on `Popover.Trigger` / `Popover.Content` / `Tooltip.Trigger`                 |
+| `AlertAction` / `ToastAction` / `ToastOptions`                        | `Alert`'s `action`, and the `action` and `duration` a toast takes                                       |
+| `CheckboxCardOption` / `RadioCardOption`                              | A choice in `CheckboxCard` / `RadioCard`: `value` and `label`, plus `description`, `visual`, `disabled` |
+| `CellAlign`                                                           | A table cell's `align`: `'left'`, `'center'`, or `'right'`                                              |
+| `BaseIconProps` / `IconRenderProps`                                   | An icon's `size`, and the props an icon puts on its `<svg>`                                             |
+| `Messages`                                                            | The wording dictionary; `UIProvider`'s `messages` takes a `Partial<Messages>`                           |

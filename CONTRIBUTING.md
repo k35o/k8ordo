@@ -61,7 +61,7 @@ To expose the component from the package root, add a re-export to `src/component
 
 The prop schemas under `src/integrations/_shared/schemas.ts` are not just validation. OpenUI Lang serializes component calls as **fully positional arguments**, mapped back to named props by the schema's key order. So, for those schemas:
 
-- **Renaming a key is safe** — positions are unchanged.
+- **Renaming a key is safe for OpenUI only** — positions are unchanged, but json-render specs name every prop, so a stored spec's old key becomes an unknown prop.
 - **Deleting or reordering keys is breaking** — every stored spec shifts by one.
 - **New keys must be appended at the end**, never inserted in the middle.
 
@@ -71,7 +71,7 @@ The prop schemas under `src/integrations/_shared/schemas.ts` are not just valida
 
 Every package's `docs/**` is published to npm (see `files` in its manifest) and is read by AI coding assistants out of `node_modules/@k8ordo/<name>/docs/`. Stale examples there are shipped defects, not just documentation debt.
 
-Any pull request that changes a package's public API must update, **in the same PR**, that package's `docs/GUIDE.md`, `docs/llms.txt` and `README.md` (and, for `@k8ordo/ui`, `docs/references/*.md` and `.claude/skills/ui-design/`, whose SKILL.md and `references/` mirror the shipped examples), plus its landing page under `apps/docs/src/routes/[locale]/<name>/`. The sections `@k8ordo/static` and `@k8ordo/server` share are written once in `packages/framework-engine/docs/shared/` and synced into both guides by `pnpm --filter @k8ordo/framework-engine check:write`; `pnpm check` fails when a copy drifts.
+Any pull request that changes a package's public API must update, **in the same PR**, that package's `docs/GUIDE.md`, `docs/llms.txt` and `README.md` (and, for `@k8ordo/ui`, `docs/references/*.md`, plus `.claude/skills/ui-design/SKILL.md` when a path or section it points to changes — it only bridges to the shipped docs), plus its landing page under `apps/docs/src/routes/[locale]/<name>/`. The sections `@k8ordo/static` and `@k8ordo/server` share are written once in `packages/framework-engine/docs/shared/` and synced into both guides by `pnpm --filter @k8ordo/framework-engine check:write`; `pnpm check` fails when a copy drifts.
 
 ## Testing `@k8ordo/ui`: writing a story is writing a test
 
@@ -79,7 +79,7 @@ Component tests use Storybook stories as fixtures via `@storybook/addon-vitest`:
 
 The a11y addon (`@storybook/addon-a11y`) checks every story with `a11y: { test: 'error' }`, so accessibility violations fail the test run.
 
-Hook tests (`src/hooks/**/*.test.tsx`) run in a real browser via `vitest-browser-react`; helper tests are plain unit tests.
+Hook tests (`src/hooks/**/*.test.{ts,tsx}`, plus `src/internal/**/*.test.tsx`) run in a real browser via `vitest-browser-react`; helper tests are plain unit tests.
 
 ## Visual regression testing (VRT)
 
@@ -96,11 +96,11 @@ pnpm --filter @k8ordo/ui exec svrt approve # accept changes as the new baseline
 Approval flow on CI ([`.github/workflows/vrt.yml`](.github/workflows/vrt.yml)):
 
 - Every pull request captures story screenshots and compares them against the latest baseline from a successful `main` run (comparison is skipped if no baseline exists yet).
-- The result is posted as a sticky PR comment with a link to the visual report (published to Cloudflare Pages when configured, and always uploaded as the `vrt-report` artifact).
+- The result is posted as a sticky PR comment with a link to the visual report (published to Cloudflare Pages when configured, and always uploaded as the `vrt-report` artifact); when there are no differences and no earlier comment, nothing is posted.
 - Visual differences do **not** fail CI — they only produce a warning annotation. Deciding whether a diff is intended is a human review step based on the report.
 - Merging the pull request makes its screenshots the next baseline: each push to `main` uploads a fresh `vrt-baseline` artifact.
 
-Separately, [`.github/workflows/chromatic.yml`](.github/workflows/chromatic.yml) publishes Storybook to Chromatic on every push (with `onlyChanged: true`; `renovate/**` branches are skipped). The published Storybook is available at <https://main--687a213c85e2e4589d8db1bb.chromatic.com>.
+Separately, [`.github/workflows/chromatic.yml`](.github/workflows/chromatic.yml) publishes Storybook to Chromatic on every push to `main` and on every pull request (with `onlyChanged: true`; `renovate/**` branches are skipped). The published Storybook is available at <https://main--687a213c85e2e4589d8db1bb.chromatic.com>.
 
 ## Release
 

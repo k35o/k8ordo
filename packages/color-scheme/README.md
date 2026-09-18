@@ -1,12 +1,14 @@
 # @k8ordo/color-scheme
 
 The colour-scheme axis of an application, owned. The visitor's preference —
-light, dark, or nothing, which follows the system — lives in localStorage
-through `@k8ordo/state`; one rule resolves it against `prefers-color-scheme`;
-the result is the `dark` class on `<html>`, put there by an inline script
-before the first paint and kept there after hydration. One provider does all
-of that; a hook reads it. `@k8ordo/ui`'s tokens, and Tailwind's own dark
-variant, read the class.
+light, dark, or nothing, which follows the default (the system unless told
+otherwise) — lives in localStorage through `@k8ordo/state`; one rule resolves
+it against `prefers-color-scheme`; the result is the `dark` class on `<html>`,
+put there by an inline script before the first paint and kept there after
+hydration. One provider does all of that; a hook reads it. `@k8ordo/ui`'s
+tokens read the class; Tailwind's `dark:` does too once the stylesheet declares
+`@custom-variant dark (&:where(.dark, .dark *));` — `@k8ordo/ui/tailwind.css`
+already does.
 
 Like every [k8ordo](https://ordo.k8o.me) package it assumes React 19 and Server
 Components, uses only what has reached Baseline newly available, and ships no
@@ -27,10 +29,11 @@ pnpm add @k8ordo/color-scheme @k8ordo/state zod
 
 | Package         | Version | Needed for                                 |
 | --------------- | ------- | ------------------------------------------ |
-| `@k8ordo/state` | ≥0.2.0  | where the preference lives (localStorage)  |
+| `@k8ordo/state` | ^0.2.0  | where the preference lives (localStorage)  |
 | `react`         | ≥19.3.0 | the provider and the hook                  |
 | `zod`           | ^4.4.3  | the one-field schema `@k8ordo/state` reads |
 | `typescript`    | ≥7.0.2  | the shipped type declarations (optional)   |
+| `@types/react`  | ≥19.3.0 | the shipped type declarations (optional)   |
 
 ## Quick Start
 
@@ -73,9 +76,10 @@ export function SchemeSwitcher() {
 ```
 
 `scheme` is what is on screen; `preference` is what the visitor asked for
-(`'system'` when nothing is stored); `setPreference('system')` clears it.
-`<ColorSchemeProvider defaultPreference="dark">` starts every visitor dark
-until they choose.
+(`'system'` when nothing is stored); `setPreference('system')` stores none, so
+the provider's default applies again. That default is the system unless told
+otherwise: `<ColorSchemeProvider defaultPreference="dark">` starts every
+visitor dark until they choose.
 
 ## AI Agent Documentation
 

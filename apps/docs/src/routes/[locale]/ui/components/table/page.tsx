@@ -20,7 +20,7 @@ export default function TablePage() {
         </p>
         <div>
           <Anchor
-            href={`${STORYBOOK_URL}/?path=/docs/components-table--docs`}
+            href={`${STORYBOOK_URL}/?path=/story/components-data-display-table--default`}
             openInNewTab
           >
             <Rich>{m.components.common.storybookLink()}</Rich>

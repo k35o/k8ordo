@@ -130,8 +130,10 @@ export const NavigationGeneration = createContext(-1);
 /**
  * The navigation half of the router, on its own: intercept, load, apply, and
  * resolve the platform's handler only once the new tree is on screen — which
- * is what makes `navigation.navigate().finished` mean "the page is showing",
- * and what `@k8ordo/state`'s `update().finished` inherits.
+ * is what makes `navigation.navigate().finished` mean "the page is showing".
+ * A navigation that keeps the pathname on screen — `@k8ordo/state`'s
+ * `update()` — is intercepted with no handler, so its `finished` settles as
+ * soon as the navigation commits.
  *
  * The new tree renders at the lane `useDeferredValue` gives it, not in a
  * transition. While any async action is pending, React holds every

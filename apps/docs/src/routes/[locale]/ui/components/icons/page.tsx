@@ -55,6 +55,22 @@ import {
   UpdateDateIcon,
   ViewIcon,
   ViewOffIcon,
+  AssistantIcon,
+  CodeXmlIcon,
+  FlaskIcon,
+  ForkIcon,
+  FullscreenIcon,
+  HorizontalWritingIcon,
+  VerticalWritingIcon,
+  LockIcon,
+  LockOpenIcon,
+  PackageIcon,
+  SquircleIcon,
+  ChromeIcon,
+  EdgeIcon,
+  FirefoxIcon,
+  SafariIcon,
+  Logo,
 } from '@k8ordo/ui';
 import type { ReactNode } from 'react';
 
@@ -90,7 +106,7 @@ export default function IconsPage() {
         </p>
         <div>
           <Anchor
-            href={`${STORYBOOK_URL}/?path=/docs/components-icons--docs`}
+            href={`${STORYBOOK_URL}/?path=/story/components-icons--sizes`}
             openInNewTab
           >
             <Rich>{m.components.common.storybookLink()}</Rich>
@@ -144,6 +160,9 @@ export default function IconsPage() {
         <div className="grid-cols-auto-fit-28 grid gap-4">
           <IconCard name="LogoIcon">
             <LogoIcon />
+          </IconCard>
+          <IconCard name="Logo">
+            <Logo className="size-6" />
           </IconCard>
           <IconCard name="CloseIcon">
             <CloseIcon />
@@ -301,6 +320,39 @@ export default function IconsPage() {
           <IconCard name="DifficultIcon">
             <DifficultIcon />
           </IconCard>
+          <IconCard name="AssistantIcon">
+            <AssistantIcon />
+          </IconCard>
+          <IconCard name="CodeXmlIcon">
+            <CodeXmlIcon />
+          </IconCard>
+          <IconCard name="FlaskIcon">
+            <FlaskIcon />
+          </IconCard>
+          <IconCard name="ForkIcon">
+            <ForkIcon />
+          </IconCard>
+          <IconCard name="FullscreenIcon">
+            <FullscreenIcon />
+          </IconCard>
+          <IconCard name="HorizontalWritingIcon">
+            <HorizontalWritingIcon />
+          </IconCard>
+          <IconCard name="VerticalWritingIcon">
+            <VerticalWritingIcon />
+          </IconCard>
+          <IconCard name="LockIcon">
+            <LockIcon />
+          </IconCard>
+          <IconCard name="LockOpenIcon">
+            <LockOpenIcon />
+          </IconCard>
+          <IconCard name="PackageIcon">
+            <PackageIcon />
+          </IconCard>
+          <IconCard name="SquircleIcon">
+            <SquircleIcon />
+          </IconCard>
           <IconCard name="GitHubIcon">
             <GitHubIcon />
           </IconCard>
@@ -309,6 +361,18 @@ export default function IconsPage() {
           </IconCard>
           <IconCard name="QiitaIcon">
             <QiitaIcon />
+          </IconCard>
+          <IconCard name="ChromeIcon">
+            <ChromeIcon />
+          </IconCard>
+          <IconCard name="EdgeIcon">
+            <EdgeIcon />
+          </IconCard>
+          <IconCard name="FirefoxIcon">
+            <FirefoxIcon />
+          </IconCard>
+          <IconCard name="SafariIcon">
+            <SafariIcon />
           </IconCard>
         </div>
       </section>

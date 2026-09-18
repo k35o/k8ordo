@@ -20,7 +20,7 @@ export default function NumberFieldPage() {
         </p>
         <div>
           <Anchor
-            href={`${STORYBOOK_URL}/?path=/docs/components-form-number-field--docs`}
+            href={`${STORYBOOK_URL}/?path=/story/components-form-number-field--default`}
             openInNewTab
           >
             <Rich>{m.components.common.storybookLink()}</Rich>

@@ -57,6 +57,23 @@ describe('parseUrl', () => {
     expect(parsed.q).toBe('shoes');
   });
 
+  it('keeps a stringbool field when a neighbouring param is salvaged', () => {
+    // stringbool は自分の出力（boolean）を入力として受け付けない。salvage の
+    // 仕上げがその出力をスキーマに通し直していた頃は、page が 1 つ弾かれる
+    // だけで q と inStock まで既定値に戻っていた
+    const filters = definePageState('filters', {
+      url: z.object({
+        q: z.string().default(''),
+        page: z.coerce.number().int().min(1).default(1),
+        inStock: z.stringbool().default(false),
+      }),
+    });
+
+    expect(
+      filters.parseUrl(new URLSearchParams('q=shoes&page=0&inStock=true')),
+    ).toStrictEqual({ q: 'shoes', page: 1, inStock: true });
+  });
+
   it('treats a constraint violation like any other broken param', () => {
     expect(listState.parseUrl(new URLSearchParams('page=0')).page).toBe(1);
   });

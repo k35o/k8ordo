@@ -21,7 +21,7 @@ export default function PasswordInputPage() {
         </p>
         <div>
           <Anchor
-            href={`${STORYBOOK_URL}/?path=/docs/components-form-password-input--docs`}
+            href={`${STORYBOOK_URL}/?path=/story/components-form-password-input--default`}
             openInNewTab
           >
             <Rich>{m.components.common.storybookLink()}</Rich>

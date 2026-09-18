@@ -20,7 +20,7 @@ export default function CardPage() {
         </p>
         <div>
           <Anchor
-            href={`${STORYBOOK_URL}/?path=/docs/components-card--docs`}
+            href={`${STORYBOOK_URL}/?path=/story/components-data-display-card--primary`}
             openInNewTab
           >
             <Rich>{m.components.common.storybookLink()}</Rich>

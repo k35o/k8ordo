@@ -29,10 +29,11 @@ export const reloadInstead = <T,>(): Promise<T> => {
 
 /**
  * Where a page that fails to render goes. A document load of the same URL
- * shows the server's own answer — its 500, its error page — so a failed
- * client navigation falls back to exactly that, the way a URL that turns out
- * not to be a page already does. Left alone, React would unmount the root and
- * leave a blank document under the new URL, with nothing settling `finished`.
+ * shows the server's own answer — its 500, its error page — or, from a static
+ * host, the prerendered file, so a failed client navigation falls back to
+ * exactly that, the way a URL that turns out not to be a page already does.
+ * Left alone, React would unmount the root and leave a blank document under
+ * the new URL, with nothing settling `finished`.
  *
  * Hydration is left to fail: a page whose HTML the server already rendered
  * cannot be made better by asking for it again, and reloading it would loop.

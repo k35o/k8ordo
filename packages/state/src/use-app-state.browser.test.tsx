@@ -291,6 +291,52 @@ it('validates the patch on the spot — the echo never shows a rejected value', 
   expect(navigations - before).toBe(0);
 });
 
+const filterState = definePageState('filter', {
+  url: z.object({
+    q: z.string().default(''),
+    page: z.coerce.number().int().min(1).default(1),
+    inStock: z.stringbool().default(false),
+  }),
+});
+
+const Filter: FC = () => {
+  const [{ q, page, inStock }, update] = useAppState(filterState);
+  return (
+    <>
+      <p data-testid="filter">{`${q}:${page}:${String(inStock)}`}</p>
+      <button
+        type="button"
+        onClick={() => {
+          lastHandle = update({ q: 'boots', page: 0 });
+        }}
+      >
+        boots
+      </button>
+    </>
+  );
+};
+
+it('a rejected value in a patch drops only its own field, even beside a stringbool', async () => {
+  const target = new URL(home);
+  target.searchParams.set('q', 'shoes');
+  target.searchParams.set('inStock', 'true');
+  await navigation.navigate(target.href, { history: 'replace' }).finished;
+  const screen = await render(<Filter />);
+
+  // 弾かれた page の隣で、同じ呼び出しが書いた q と、URL にあった inStock が
+  // 残る。以前は echo が全体を既定値に戻し、q の書き込みが消えていた
+  await screen.getByRole('button', { name: 'boots' }).click();
+
+  await expect
+    .element(screen.getByTestId('filter'))
+    .toHaveTextContent('boots:1:true');
+  await (lastHandle as UpdateHandle).finished;
+  const params = new URL(location.href).searchParams;
+  expect(params.get('q')).toBe('boots');
+  expect(params.get('inStock')).toBe('true');
+  expect(params.has('page')).toBe(false);
+});
+
 it('settles without navigating when nothing changed', async () => {
   const screen = await render(<Pager />);
   const before = navigations;
@@ -364,6 +410,46 @@ it('entry state written by an older schema parses to defaults', async () => {
   const screen = await render(<Panel />);
 
   await expect.element(screen.getByTestId('expanded')).toHaveTextContent('');
+});
+
+const drawerState = definePageState('drawer', {
+  entry: z.object({
+    open: z.stringbool().default(false),
+    step: z.number().default(0),
+  }),
+});
+
+const Drawer: FC = () => {
+  const [{ open, step }, update] = useAppState(drawerState);
+  return (
+    <>
+      <p data-testid="drawer">{`${String(open)}:${step}`}</p>
+      <button
+        type="button"
+        onClick={() => {
+          lastHandle = update({ open: true, step: 3 });
+        }}
+      >
+        open drawer
+      </button>
+    </>
+  );
+};
+
+it('an entry field that rejects its own output falls back alone on write', async () => {
+  const screen = await render(<Drawer />);
+
+  // entry は型付きの値をそのままスキーマに戻すので、stringbool の open は
+  // 書くたびに既定値へ戻る。それが step の書き込みまで道連れにしないこと
+  await screen.getByRole('button', { name: 'open drawer' }).click();
+
+  await expect
+    .element(screen.getByTestId('drawer'))
+    .toHaveTextContent('false:3');
+  await (lastHandle as UpdateHandle).finished;
+  expect(navigation.currentEntry?.getState()).toStrictEqual({
+    drawer: { open: false, step: 3 },
+  });
 });
 
 it('local state reads what an earlier session stored', async () => {

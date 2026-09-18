@@ -18,7 +18,7 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
 
 ## References
 
-- [Components](references/components.md): full component list, import paths, props, and i18n — every component, compound ones included (`Dialog.Root`, `Tabs.Root`, …), renders from a Server Component — component wording comes from a dictionary that defaults to Japanese; `@k8ordo/ui/i18n` exports `ja` / `en` / the `Messages` type for `<UIProvider messages={...}>` (per-component wording props win over the dictionary).
+- [Components](references/components.md): full component list, import paths, props, and i18n — every component, compound ones included (`Dialog.Root`, `Tabs.Root`, …), renders from a Server Component — component wording comes from a dictionary that defaults to Japanese; `@k8ordo/ui/i18n` exports `ja` / `en` / `dictionaries` (both keyed by locale) / the `Messages` type for `<UIProvider messages={...}>` (per-component wording props win over the dictionary), and `useMessages` to read the wording in effect in your own elements.
 - [AI chat](references/ai-chat.md): AI chat components from `@k8ordo/ui/ai` (Conversation / Message / PromptInput / Reasoning / Suggestion / ToolInvocation), streaming Markdown `Response` from `@k8ordo/ui/ai/response` (optional peer `streamdown`), and `mapMessageParts` from `@k8ordo/ui/ai-sdk` to render AI SDK `UIMessage.parts` (optional peer `ai`).
 - [Generative UI](references/generative-ui.md): use json-render / OpenUI to make an LLM generate UIs — `catalog.prompt()` (server-safe), `<JsonRenderUI spec={spec} />` (client), `validateGeneratedSpec()` (validate/repair LLM output), `satisfies UISpec` (typed specs), and `@k8ordo/ui/openui/prompt`.
 - [Typography](references/typography.md): type scale and usage.
@@ -26,3 +26,8 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
 - [Spacing & layout](references/spatial-design.md): spacing scale and layout patterns.
 - [Interaction](references/interaction-design.md): motion and interaction guidelines.
 - [Types](references/types.md): the shared types for typing component props (`Status` / `Direction` / `Placement` / `ModalSide` / `DrawerSide` / `Option`).
+
+## Data exports
+
+- `@k8ordo/ui/tokens`: the design tokens resolved to JS values — `tokens` (`theme` / `vars` / `refs`), `meta`, and key unions such as `ColorToken`.
+- `@k8ordo/ui/props.json`: every component's props as JSON (`docs/props.generated.json`), generated from the types — the same data as the Props blocks in components.md.

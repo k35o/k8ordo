@@ -25,6 +25,16 @@ export const englishDescription = message({
   en: 'Import en from @k8ordo/ui/i18n and pass it to messages. ja ships from the same entry point.',
 });
 
+export const localeTitle = message({
+  ja: '描画中のロケールで選ぶ',
+  en: 'Picking by the rendered locale',
+});
+
+export const localeDescription = message({
+  ja: '複数のロケールで描画するアプリは、描画中のロケールで辞書を選びます。`@k8ordo/ui/i18n`の`dictionaries`は、組み込みの辞書をすべてロケールのタグをキーにして持っています。',
+  en: 'An application that renders in several locales picks the dictionary by the locale it is rendering. `dictionaries` from `@k8ordo/ui/i18n` holds every built-in dictionary keyed by its locale tag.',
+});
+
 export const overrideTitle = message({
   ja: '一部だけ差し替える',
   en: 'Overriding part of a dictionary',

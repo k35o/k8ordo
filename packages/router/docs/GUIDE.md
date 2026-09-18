@@ -80,8 +80,9 @@ export const routes = defineRoutes({
 - **A trailing slash is the same pathname.** `/products/` matches `/products`.
 - A branch may name an **`error`** component beside its layout:
   `{ layout, error, children }`. When anything below throws, it renders in
-  the layout's hole instead — with `{ error, reset }` as props — and the
-  frame around it survives. Leaving the page that failed clears the failure.
+  the layout's hole instead — with `{ error, reset }` as props (`ErrorProps`;
+  the component's type is `ErrorComponent`) — and the frame around it
+  survives. Leaving the page that failed clears the failure.
 
 ### Order is the rule
 
@@ -100,13 +101,13 @@ Put `/*` last, for the same reason.
 
 A table is checked when the module loads, not when someone first navigates:
 
-| written                                                   | error                                                           |
-| --------------------------------------------------------- | --------------------------------------------------------------- |
-| the same full pattern twice, wherever the copies nest     | `route pattern "/x" is declared twice`                          |
-| a group with no children (it would redeclare the index)   | `route group "/(oops)" must have children`                      |
-| a key not starting with `/`                               | `route pattern "x" must start with "/"`                         |
-| parentheses that are not exactly a group (`/(admin)/new`) | `route group "/(admin)/new" must be "/(name)" and nothing else` |
-| a pattern URLPattern cannot parse                         | URLPattern's own `TypeError`                                    |
+| written                                                   | error                                                                                                             |
+| --------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| the same full pattern twice, wherever the copies nest     | `route pattern "/x" is declared twice`                                                                            |
+| a group with no children (it would redeclare the index)   | `route group "/(oops)" must have children`                                                                        |
+| a key not starting with `/`                               | `route pattern "x" must start with "/"`                                                                           |
+| parentheses that are not exactly a group (`/(admin)/new`) | `route group "/(admin)/new" must be "/(name)" and nothing else — a regular expression is not part of the grammar` |
+| a pattern URLPattern cannot parse                         | URLPattern's own `TypeError`                                                                                      |
 
 ## Mounting it
 
@@ -135,16 +136,30 @@ nothing rather than guessing.
 
 Four kinds of navigation are never the application's, whatever the table says:
 a reload, a form submitted with a body (POST), a download, and a fragment-only
-change. Intercepting any of them would silently do nothing where the platform
-would have done the obvious thing — a POST body only the server can act on, an
-`F5` that stops reloading. A GET form carries no body, so the search-shaped
-submissions `@k8ordo/state` builds still come through. Mark a link to a file
-the host serves as an attachment with `download`, so the browser tells the
-router before the click rather than after the answer.
+change — nor is any navigation the platform does not let a page intercept,
+such as one to another origin. Intercepting any of the four would silently do
+nothing where the platform would have done the obvious thing — a POST body
+only the server can act on, an `F5` that stops reloading. A GET form carries
+no body, so the search-shaped submissions `@k8ordo/state` builds still come
+through.
+
+A `/*` at the end of the table answers every pathname, so it claims a link to
+a file the host serves as well: `/report.pdf` renders the `/*` component
+instead of the file. Mark such a link with `download` — the browser then
+reports a download at the click, and the router leaves it alone. (Under the
+framework the runtime claims every same-origin URL too, finds out from the
+answer, and reloads into the file; `download` saves that round trip.)
 
 A leaf can be `React.lazy(...)`, which the table stores as any other component;
-put a `<Suspense>` in the layout above it so there is somewhere to fall back
-to while the chunk arrives.
+put a `<Suspense>` in a layout above it so there is somewhere to fall back to
+while the chunk arrives. The fallback shows on the first render and on a
+navigation that mounts that `<Suspense>` anew. A page change under a
+`<Suspense>` already on screen renders in the background, so the previous page
+stays until the chunk is in. A branch that names an `error` wraps what is
+below in a `<Suspense fallback={null}>` of its own, so a lazy page under that
+branch shows nothing there instead of reaching a layout's fallback above it:
+give such a page its `<Suspense>` below the boundary — in a nested branch's
+layout, or around the lazy component itself.
 
 ## Links and navigation
 
@@ -186,8 +201,9 @@ matchPath('/products/:id', pathname); // the same, pure, for a pathname in hand
 know which section of the site is open. The pattern's own page is not below
 it: `/products/*` matches `/products/42` and not `/products`, which is
 `useMatch('/products')`. A section link that wants to be marked on the index
-as much as below it asks `useMatch('/products/*', { inclusive: true })`. It
-is built on `usePathname`, so it re-renders on the pathname and never on the
+as much as below it asks `useMatch('/products/*', { inclusive: true })`;
+`matchPath` takes the same options as its third argument. `useMatch` is
+built on `usePathname`, so it re-renders on the pathname and never on the
 search, and it needs no table in the browser — which is what makes it the one
 of these that also works under the framework, where `useRoute` has no match
 to read.
@@ -195,9 +211,9 @@ to read.
 **`usePathname` changes when the URL changes, not when the new page appears.**
 Interception commits the URL first and the tree arrives when it has loaded, so
 on a slow navigation a link marks itself active while the previous page is
-still on screen — the same order the browser's own address bar follows. Pair it
-with `useTransition` if the wait needs showing — `navigateTo`'s `finished`
-resolves when the tree is on screen (below).
+still on screen — the same order the browser's own address bar follows. If the
+wait needs showing, await `navigateTo`'s `finished` — it resolves when the
+tree is on screen (below).
 
 `usePathname` reads the platform rather than the table, which is why it is the
 one that also works under the framework, where the browser holds no table at
@@ -228,32 +244,46 @@ export const { href, navigateTo } = bindParams(() => ({
 ```tsx
 href('/:locale/products/:id', { id }); // locale from the source, id as before
 navigateTo('/:locale', { locale: 'en' }, { history: 'replace' }); // or overridden
+navigateTo('/:locale', undefined, { history: 'replace' }); // options stay third
 ```
 
 Patterns keep their full spelling, so the table's types apply unchanged; the
 source is read at each call, so a value that differs per request or per URL
-is read where it is current. Which package supplies the value is the
-application's business — the router knows a param name, nothing more.
+is read where it is current. Options still come after the params whenever
+the pattern names one, even when the source supplies them all — params and
+options are both plain objects, and the pattern alone decides which is which —
+so the params slot is passed as `undefined`, as in the last line above. Which
+package supplies the value is the application's business — the router knows a
+param name, nothing more.
 `normalizePathname` is the router's own reading of a pathname — a trailing
 slash dropped, root excepted — for code that compares pathnames the way the
 table does.
 
-`navigateTo` returns the platform's own `{ committed, finished }`, so it
-composes with React 19's async transitions:
+`navigateTo` returns the platform's own `{ committed, finished }`. `finished`
+resolves once the new page is on screen, so an async action can await it and
+let `isPending` cover the wait:
 
 ```tsx
 const [isPending, startTransition] = useTransition();
 
 startTransition(async () => {
-  await navigateTo('/products/:id', { id }).finished;
+  try {
+    await navigateTo('/products/:id', { id }).finished;
+  } catch (error) {
+    // overtaken by another navigation
+    if (!(error instanceof DOMException && error.name === 'AbortError')) {
+      throw error;
+    }
+  }
 });
 ```
 
 The page change does not join the action, so awaiting `finished` inside one —
 `useTransition`'s, `@k8ordo/ui`'s `Button` `onAction`, a `<form action>` —
 settles as soon as the page is on screen, and `isPending` covers exactly that
-wait. The same holds for a page change started while some unrelated action is
-still pending: it reaches the screen without waiting for that action.
+wait. An event handler can await it the same way. A page change started while
+some unrelated action is still pending reaches the screen without waiting for
+that action either.
 
 Its default is `push`, the opposite of `@k8ordo/state`'s `update()`, and for
 the same reason: going to a page is what the back button should undo, while
@@ -298,10 +328,20 @@ type the route file's `paramsSchema` produces. With it, `href` and
 `navigateTo` take a param as the page receives it — `{ id: 42 }` for a
 schema that said number — and spell it the one way the schema reads back. A
 value with no URL spelling (an object) is refused. Before `Register` is
-augmented — or where no schema covers a param — a link takes any value with
-one spelling (a string, a number, a boolean), so a link written for a schema
-compiles before the generated file exists. `useParams` is unaffected: what a
-hand-written table matches is always a string.
+augmented — or for a pattern no schema along its stack covers — a link takes
+any value with one spelling (a string, a number, a bigint, a boolean), so a
+link written for a schema compiles before the generated file exists. Once a
+schema covers a pattern, a param the schemas leave alone is a string, as the
+page receives it. `useParams` is unaffected: what a hand-written table matches
+is always a string.
+
+The shapes these checks use are exported for code of your own:
+`RegisteredPattern` (every leaf pattern in the table — each page and each
+`/*`, never a prefix with no page of its own), `RegisteredNavigablePattern`
+(the ones a link can point at — no wildcards), `RegisteredParams<P>` (what a
+link to `P` takes) and `RegisteredPageParams<P>` (what the page at `P`
+receives). Before the augmentation the first two are any `/`-prefixed
+string.
 
 ## Typed paths for @k8ordo/state
 
@@ -324,17 +364,23 @@ typed-path consumer.
 
 **`finished` means the page is on screen.** The intercept handler resolves in
 a layout effect, once React has committed the new tree and before the browser
-paints it, so anything awaiting the platform's promise — including
-`@k8ordo/state`'s `update().finished` — is awaiting the render, not the URL
-write.
+paints it, so anything awaiting the platform's promise for a page change is
+awaiting the render, not the URL write. The render it waits for is the first
+commit of the new tree: a lazy page that suspends into a `<Suspense>` the
+navigation mounts anew commits its fallback first, and `finished` resolves
+then, before the chunk is in.
 
 **A state change is not a page change.** When only the search or the entry
 state moved, the pathname is the one whose tree is on screen: the route tree
 is left alone, nothing remounts, and scroll and focus are not disturbed. This
-is why a search update never scrolls the page back to the top. The comparison
-is against the page showing, not against the address bar — interception
-commits the URL first, so a state update issued while another page is still
-loading is a page change and lets that page finish arriving.
+is why a search update never scrolls the page back to the top. Such a
+navigation is intercepted with no handler, so its `finished` —
+`@k8ordo/state`'s `update().finished` included — settles as soon as the
+navigation commits, with no render to wait for. The comparison is against the
+page showing, not against the address bar — interception commits the URL
+first, so a state update issued while another page is still loading is a page
+change: it lets that page finish arriving, and its `finished` waits for that
+render.
 
 **Route changes render in the background.** The new tree renders at the
 priority `useDeferredValue` gives it, so the old page stays on screen and
@@ -410,8 +456,8 @@ the other way from a link:
 with each class styled through `::view-transition-old(.slide-back)` and
 `::view-transition-new(.slide-back)`. A state change — `@k8ordo/state`'s
 `update()` — never changes the tree, so it never animates. Under the
-framework the same `<ViewTransition>` goes in a client component of a
-layout, around `children`.
+framework the same `<ViewTransition>` wraps a layout's `children`, and a
+Server Component layout can render it directly.
 
 `@k8ordo/ui`'s stylesheet turns view-transition animations off under
 `prefers-reduced-motion`; an application without it adds that rule itself.
@@ -462,8 +508,15 @@ URL moved — and a host provides it through `<NavigationGeneration value>` so
 the table's `error` boundaries know when to let a failure go. `<Router>` does
 this itself; the framework's runtime does too.
 
+The table itself stays on the server, generated from `routes/`, and the
+framework matches against it with `match(pathname, accept)`. Each match that
+fits is handed to `accept` first, and one it declines — a param a
+`paramsSchema` along its stack refused — is passed over as if the pattern had
+not fit, so the walk goes on to the next pattern, the catch-all included.
+
 What carries across unchanged is everything that needs no table: `href`,
-`navigateTo`, `usePathname` and `useMatch`. `usePathname` needs one thing on the server,
+`navigateTo` and `bindParams`, `usePathname`, `useMatch` and `matchPath`, and
+`normalizePathname`. `usePathname` needs one thing on the server,
 where there is no Navigation API to read: the pathname the render is for,
 supplied by `<PathnameProvider pathname>`. `<Router>` mounts one itself and
 both mode runtimes supply it, so an application never writes it — only a host
@@ -476,8 +529,11 @@ server instead, which is the only form Server Components can take them in.
 Those props have a type here, by the pattern the directory puts the file
 under: `PageProps<'/products/:id'>` is `{ params, pathname }` with `params`
 typed by the schemas the framework ran (the generated `Register` carries
-them), and `LayoutProps<'/products'>` adds `children`. Under `@k8ordo/server`
-the generated `Register` also carries the `request`, so the same type gains
-`request` there and a page that reads it fails to type-check under a build
-into files. A page may equally declare its props inline — the generated table
-checks them at the import either way.
+them), and `LayoutProps<'/products'>` adds `children` — with `params` left as
+strings whatever the schemas say, since nothing is validated under
+`not-found.tsx`. Under `@k8ordo/server` the generated `Register` also carries
+the `request`, so both types gain `request` there and a page that reads it
+fails to type-check under a build into files. A route file may equally declare
+its props inline — the generated table checks them at the import either way —
+and a layout whose pattern has no page of its own has to: `LayoutProps` takes
+only a pattern the table has a page at.

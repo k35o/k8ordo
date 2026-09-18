@@ -29,11 +29,13 @@ pnpm check         # check:write to auto-fix
   routes-module cycle cannot form. Keep it that way.
 - **`finished` means committed.** The intercept handler resolves in a
   _layout_ effect, once React has committed the new tree and before it is
-  painted. `@k8ordo/state`'s `update().finished` inherits this, so it is a
-  cross-package contract. Layout, not passive: with a `<ViewTransition>` in
-  the tree React holds the new snapshot until the platform's pending
-  navigation has finished and runs passive effects only after the
-  animation, so a passive resolver would wait on itself.
+  painted. Layout, not passive: with a `<ViewTransition>` in the tree React
+  holds the new snapshot until the platform's pending navigation has
+  finished and runs passive effects only after the animation, so a passive
+  resolver would wait on itself. A same-pathname navigation (`@k8ordo/state`'s
+  url `update()`) is intercepted without a handler, so its `finished`
+  settles as soon as the navigation commits, with no render behind it —
+  state's GUIDE promises that, so keep the shortcut handler-free.
 - **A page change never joins an async action.** `apply` is an urgent
   update and the host renders it through `useDeferredValue`; the hook's own
   `generation` is deferred beside it, so `finished` resolves in the deferred
@@ -69,7 +71,8 @@ pnpm check         # check:write to auto-fix
   accepts, meaning "and everything below".
 - **Unmatched pathnames are not intercepted.** A real 404 is the server's.
 - **Reload, POST, download and hash are not ours.** `isOurs` says no before
-  the table is consulted; a GET form (no `formData`) still comes through.
+  the table is consulted — and to anything the platform reports it cannot
+  intercept (`canIntercept`); a GET form (no `formData`) still comes through.
 - **Schemas are typed here, run elsewhere.** `ParamsSchemaFor` /
   `ParsedParams` / `RegisteredParams` describe what a Standard Schema produces
   so `href` can take it; the framework runs the schema and hands `match` an
