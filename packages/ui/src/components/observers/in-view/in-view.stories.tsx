@@ -109,6 +109,61 @@ export const Once: Story = {
   },
 };
 
+const Remargined: FC<{
+  onChange: (isInView: boolean) => void;
+}> = ({ onChange }) => {
+  const [root, setRoot] = useState<HTMLElement | null>(null);
+  const [rootMargin, setRootMargin] = useState('0px');
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <button
+        onClick={() => {
+          setRootMargin('8px');
+        }}
+        type="button"
+      >
+        余白を広げる
+      </button>
+      <section
+        aria-label="スクロール領域"
+        data-testid="scroller"
+        ref={setRoot}
+        style={{ height: VIEWPORT, overflowY: 'auto' }}
+        // キーボードでもスクロールできるよう section にフォーカスを許可
+        // oxlint-disable-next-line eslint-plugin-jsx-a11y/no-noninteractive-tabindex
+        tabIndex={0}
+      >
+        <div style={{ height: SPACER }} />
+        <InView onChange={onChange} root={root} rootMargin={rootMargin}>
+          <div style={{ height: BOX }}>対象</div>
+        </InView>
+        <div style={{ height: SPACER }} />
+      </section>
+    </div>
+  );
+};
+
+// 見えている間に observer を張り直しても、外れたとは報告しない。
+export const ReobservedWhileInView: Story = {
+  args: { onChange: fn() },
+  render: ({ onChange }) => <Remargined onChange={onChange} />,
+  play: async ({ args, canvas, userEvent }) => {
+    const scroller = canvas.getByTestId('scroller');
+    await waitFor(() => {
+      expect(args.onChange).toHaveBeenCalledWith(false);
+    });
+
+    scroller.scrollTop = SPACER - BOX;
+    await waitFor(() => {
+      expect(args.onChange).toHaveBeenLastCalledWith(true);
+    });
+
+    await userEvent.click(canvas.getByRole('button', { name: '余白を広げる' }));
+    await settle();
+    await expect(args.onChange).toHaveBeenCalledTimes(2);
+  },
+};
+
 const Pair: FC<{
   onChange: (isInView: boolean) => void;
 }> = ({ onChange }) => {
@@ -166,6 +221,50 @@ export const Some: Story = {
 // 見えていた子が外れて、残りがどれも見えていなければ false に戻る。
 export const SomeAfterRemoval: Story = {
   args: { onChange: fn() },
+  render: ({ onChange }) => <Pair onChange={onChange} />,
+  play: async ({ args, canvas, userEvent }) => {
+    const scroller = canvas.getByTestId('scroller');
+    await waitFor(() => {
+      expect(args.onChange).toHaveBeenCalledWith(false);
+    });
+
+    scroller.scrollTop = SPACER;
+    await waitFor(() => {
+      expect(args.onChange).toHaveBeenLastCalledWith(true);
+    });
+
+    await userEvent.click(canvas.getByRole('button', { name: 'A を外す' }));
+    await waitFor(() => {
+      expect(args.onChange).toHaveBeenLastCalledWith(false);
+    });
+  },
+};
+
+// 外れた子が「交差していない」と通知されないままでも false に戻る。
+export const SomeAfterUnreportedRemoval: Story = {
+  args: { onChange: fn() },
+  // React は外れた子の unobserve をペイント後まで遅らせるが、負荷が高いと交差の
+  // 計算より先に走り、その子の最後の通知が失われる。タイミングでは再現できない
+  // ので、外れた子への通知を落とす IntersectionObserver に差し替えて毎回そうする。
+  beforeEach: () => {
+    const Native = globalThis.IntersectionObserver;
+    globalThis.IntersectionObserver = class extends Native {
+      constructor(
+        callback: IntersectionObserverCallback,
+        options?: IntersectionObserverInit,
+      ) {
+        super((entries, observer) => {
+          const delivered = entries.filter((entry) => entry.target.isConnected);
+          if (delivered.length > 0) {
+            callback(delivered, observer);
+          }
+        }, options);
+      }
+    };
+    return () => {
+      globalThis.IntersectionObserver = Native;
+    };
+  },
   render: ({ onChange }) => <Pair onChange={onChange} />,
   play: async ({ args, canvas, userEvent }) => {
     const scroller = canvas.getByTestId('scroller');
