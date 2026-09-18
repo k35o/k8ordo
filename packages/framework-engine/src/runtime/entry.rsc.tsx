@@ -13,7 +13,7 @@ import { parseParams } from './params';
 import { ACTION_ID_HEADER } from './payload';
 import type { Payload } from './payload';
 import { isPayloadPath, pagePathFor } from './payload-path';
-import { isRedirect, resolveTarget } from './redirect';
+import { isRedirect, matchRedirects } from './redirect';
 import { NotFound, renderMatch } from './render';
 import { routeRequestOf } from './request';
 
@@ -25,28 +25,10 @@ type ActionResult = {
 };
 
 /**
- * The redirects `routes/` declared, matched in declaration order — before
- * the table, since a directory that redirects has no page to render.
+ * Consulted before the table, since a directory that redirects has no page to
+ * render.
  */
-const REDIRECTS = Object.entries(redirects).map(([pattern, target]) => ({
-  matcher: new URLPattern({ pathname: pattern }),
-  target,
-}));
-
-const redirectFor = (
-  pathname: string,
-): { to: string; permanent: boolean } | null => {
-  for (const { matcher, target } of REDIRECTS) {
-    const result = matcher.exec({ pathname });
-    if (result === null) continue;
-    const params: Record<string, string> = {};
-    for (const [name, value] of Object.entries(result.pathname.groups)) {
-      if (!/^\d+$/u.test(name) && value !== undefined) params[name] = value;
-    }
-    return resolveTarget(target, params);
-  }
-  return null;
-};
+const redirectFor = matchRedirects(redirects);
 
 const redirectResponse = (to: string, status: number): Response =>
   new Response(null, { status, headers: { location: to } });

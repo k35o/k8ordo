@@ -48,29 +48,55 @@ export type RedirectTarget =
   | string
   | { readonly to: string; readonly permanent?: boolean };
 
-/**
- * A `redirect.ts` target with the matched params filled in: `/:locale/new`
- * under `{ locale: 'ja' }` is `/ja/new`. The same substitution `href` does,
- * so a target reads like a pattern.
- */
-export const resolveTarget = (
+type ResolvedRedirect = { readonly to: string; readonly permanent: boolean };
+
+const resolveTarget = (
   target: RedirectTarget,
-  params: Readonly<Record<string, string>>,
-): { readonly to: string; readonly permanent: boolean } => {
+  segments: Readonly<Record<string, string>>,
+): ResolvedRedirect => {
   const { to, permanent } =
     typeof target === 'string' ? { to: target, permanent: false } : target;
   const resolved = to
     .split('/')
     .map((segment) => {
       if (!segment.startsWith(':')) return segment;
-      const value = params[segment.slice(1)];
+      const value = segments[segment.slice(1)];
       if (value === undefined) {
         throw new TypeError(
           `redirect target "${to}" needs a value for "${segment}"`,
         );
       }
-      return encodeURIComponent(value);
+      // `href` encodes, because it is handed values. This is handed a
+      // segment the URL already spelled — escapes, and escapes that do not
+      // decode, included — and moves it as it is.
+      return value;
     })
     .join('/');
   return { to: resolved, permanent: permanent ?? false };
+};
+
+/**
+ * The redirects `routes/` declared, matched in declaration order: where a
+ * pathname is sent, with the matched params filled into the target, so
+ * `/:locale/legacy` can send to `/:locale/new`.
+ */
+export const matchRedirects = (
+  declared: Readonly<Record<string, RedirectTarget>>,
+): ((pathname: string) => ResolvedRedirect | null) => {
+  const matchers = Object.entries(declared).map(([pattern, target]) => ({
+    matcher: new URLPattern({ pathname: pattern }),
+    target,
+  }));
+  return (pathname) => {
+    for (const { matcher, target } of matchers) {
+      const result = matcher.exec({ pathname });
+      if (result === null) continue;
+      const segments: Record<string, string> = {};
+      for (const [name, value] of Object.entries(result.pathname.groups)) {
+        if (!/^\d+$/u.test(name) && value !== undefined) segments[name] = value;
+      }
+      return resolveTarget(target, segments);
+    }
+    return null;
+  };
 };
