@@ -16,8 +16,8 @@ export const noTableDescription = message({
 });
 
 export const noTableNavigation = message({
-  ja: 'ナビゲーションは引き続きこのルーターのものです。フレームワークのランタイムは `useInterceptedNavigation` の上に作られていて、同一オリジンの URL を引き受け、`load` で次のページの RSC ペイロードを取得し、transition の中で適用します。`finished` が画面に出た時点で解決すること、状態の変更がページの切り替えにならないこと、スクロール、transition の型、追い越されたナビゲーションの abort は、そのまま引き継がれます。',
-  en: 'Navigation is still this router’s. The framework’s runtime is built on `useInterceptedNavigation`: it claims same-origin URLs, fetches the next page’s RSC payload in `load`, and applies it in a transition. `finished` meaning on screen, state changes not being page changes, scrolling, transition types and aborting superseded navigations all carry over unchanged.',
+  ja: 'ナビゲーションは引き続きこのルーターのものです。フレームワークのランタイムは `useInterceptedNavigation` の上に作られていて、同一オリジンの URL を引き受け、`load` で次のページの RSC ペイロードを取得し、背景で描きます。`finished` が画面に出た時点で解決すること、状態の変更がページの切り替えにならないこと、スクロール、transition の型、追い越されたナビゲーションの abort は、そのまま引き継がれます。',
+  en: 'Navigation is still this router’s. The framework’s runtime is built on `useInterceptedNavigation`: it claims same-origin URLs, fetches the next page’s RSC payload in `load`, and renders it in the background. `finished` meaning on screen, state changes not being page changes, scrolling, transition types and aborting superseded navigations all carry over unchanged.',
 });
 
 export const compareTable = {

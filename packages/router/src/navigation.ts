@@ -4,6 +4,7 @@ import {
   addTransitionType,
   createContext,
   startTransition,
+  useDeferredValue,
   useEffect,
   useEffectEvent,
   useLayoutEffect,
@@ -50,7 +51,12 @@ export type NavigationHandler<T> = {
   claim: (url: URL) => boolean;
   /** Produces whatever the application renders for this URL. */
   load: (url: URL, signal: AbortSignal) => T | Promise<T>;
-  /** Applies it. Called inside a transition. */
+  /**
+   * Applies it, as an ordinary update and not inside a transition. Render
+   * what it sets through `useDeferredValue`: the new page then renders in the
+   * background, the previous one stays on screen while it suspends, and a
+   * `<ViewTransition>` animates the swap.
+   */
   apply: (value: T) => void;
 };
 
@@ -108,6 +114,7 @@ const applyScroll = (plan: ScrollPlan): void => {
 type Pending = {
   resolve: () => void;
   scroll: ScrollPlan | null;
+  types: readonly string[];
 };
 
 /**
@@ -121,12 +128,20 @@ type Pending = {
 export const NavigationGeneration = createContext(-1);
 
 /**
- * The navigation half of the router, on its own: intercept, load, apply in a
- * transition, and resolve the platform's handler only once the new tree is on
- * screen — which is what makes `navigation.navigate().finished` mean "the
- * page is showing". A navigation that keeps the pathname on screen —
- * `@k8ordo/state`'s `update()` — is intercepted with no handler, so its
- * `finished` settles as soon as the navigation commits.
+ * The navigation half of the router, on its own: intercept, load, apply, and
+ * resolve the platform's handler only once the new tree is on screen — which
+ * is what makes `navigation.navigate().finished` mean "the page is showing".
+ * A navigation that keeps the pathname on screen — `@k8ordo/state`'s
+ * `update()` — is intercepted with no handler, so its `finished` settles as
+ * soon as the navigation commits.
+ *
+ * The new tree renders at the lane `useDeferredValue` gives it, not in a
+ * transition. While any async action is pending, React holds every
+ * transition until that action ends — so an action awaiting `finished` would
+ * be waiting on itself, and a page change started beside an unrelated action
+ * would wait for it. A deferred render keeps what a transition gave (the old
+ * page stays while the new one suspends, and `<ViewTransition>` animates it)
+ * without joining the action.
  *
  * What gets loaded is the caller's business: a route table match for a plain
  * client app, an RSC payload under the framework. Neither has to teach this
@@ -154,6 +169,9 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
   const pending = useRef(new Map<number, Pending>());
   const count = useRef(0);
   const [applied, setApplied] = useState(-1);
+  // Moves in the background render that puts the host's deferred value on
+  // screen, and not in the urgent one that `apply` starts.
+  const onScreen = useDeferredValue(applied);
 
   // The pathname whose tree is on screen — not `location.pathname`. Under
   // interception the URL commits before the tree arrives, so while a page is
@@ -194,7 +212,11 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
           // never fire — an abort that already happened does not fire again.
           if (event.signal.aborted) throw event.signal.reason as Error;
           await new Promise<void>((resolve, reject) => {
-            pending.current.set(id, { resolve, scroll });
+            pending.current.set(id, {
+              resolve,
+              scroll,
+              types: transitionTypesFor(event.navigationType),
+            });
             event.signal.addEventListener(
               'abort',
               () => {
@@ -203,22 +225,14 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
               },
               { once: true },
             );
-            startTransition(() => {
-              // Said inside the transition, which is where a
-              // `<ViewTransition>` reads the types it animates by.
-              for (const type of transitionTypesFor(event.navigationType)) {
-                addTransitionType(type);
-              }
-              // Recorded at apply rather than at commit: an update inside a
-              // transition is never dropped, and a navigation that arrives in
-              // between must see this page as the one showing.
-              shown.current = pathname;
-              apply(value);
-              // Rides the same transition as the caller's own update, so the
-              // effect below runs in the commit that puts it on screen — and
-              // names which navigation that commit belongs to.
-              setApplied(id);
-            });
+            // Recorded at apply rather than at commit: a navigation that
+            // arrives in between must see this page as the one showing.
+            shown.current = pathname;
+            apply(value);
+            // Batched with the caller's own update, so its deferred copy
+            // moves in the same background commit as the host's — and names
+            // which navigation that commit belongs to.
+            setApplied(id);
           });
         },
       });
@@ -237,12 +251,26 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
   // navigation has finished, and runs passive effects only after the
   // animation — a passive resolver would be waiting on itself.
   useLayoutEffect(() => {
-    const entry = pending.current.get(applied);
+    const entry = pending.current.get(onScreen);
     if (entry === undefined) return;
-    pending.current.delete(applied);
+    pending.current.delete(onScreen);
     if (entry.scroll !== null) applyScroll(entry.scroll);
     entry.resolve();
-  }, [applied]);
+  }, [onScreen]);
 
-  return { generation: applied };
+  // The types a `<ViewTransition>` animates by cannot ride the update itself:
+  // said inside `startTransition` together with it, they would bring back the
+  // wait on a pending action. React keeps types for the root's next
+  // transition-class commit only while such a render is pending, and the
+  // background render is pending from the commit of the urgent one — so they
+  // are said here, and the background commit is the one that claims them.
+  useLayoutEffect(() => {
+    if (applied === onScreen) return;
+    const types = pending.current.get(applied)?.types ?? [];
+    startTransition(() => {
+      for (const type of types) addTransitionType(type);
+    });
+  }, [applied, onScreen]);
+
+  return { generation: onScreen };
 }

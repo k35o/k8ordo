@@ -112,7 +112,7 @@ import {
   PathnameProvider,
   useInterceptedNavigation,
 } from '@k8ordo/router';
-import { useState } from 'react';
+import { useDeferredValue, useState } from 'react';
 
 type Article = { title: string; body: string };
 
@@ -128,12 +128,13 @@ export function ArticleHost({
   initial: Article;
   pathname: string;
 }) {
-  const [article, setArticle] = useState(initial);
+  const [latest, setLatest] = useState(initial);
   const { generation } = useInterceptedNavigation<Article>({
     claim: (url) => url.pathname.startsWith('/articles/'),
     load: loadArticle,
-    apply: setArticle,
+    apply: setLatest,
   });
+  const article = useDeferredValue(latest);
   return (
     <PathnameProvider pathname={pathname}>
       <NavigationGeneration value={generation}>
@@ -332,7 +333,7 @@ export default function RouterNavigationPage() {
             <Rich>{m.routerNavigation.finishedDescription()}</Rich>
           </p>
           <p className="text-fg-mute leading-relaxed">
-            <Rich>{m.routerNavigation.finishedPitfall()}</Rich>{' '}
+            <Rich>{m.routerNavigation.finishedInAction()}</Rich>{' '}
             <LocaleAnchor path="/:locale/router/links">
               {m.router.navLinks()}
             </LocaleAnchor>

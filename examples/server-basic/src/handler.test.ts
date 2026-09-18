@@ -1,4 +1,3 @@
-import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
@@ -37,13 +36,12 @@ const root = path.resolve(import.meta.dirname, '..');
 const ORIGIN = 'https://example.test';
 let handler: Handler;
 
-// 主張の対象は組み上がったハンドラなので、テストがビルドを走らせる。
-// これは @k8ordo/static が事前描画で呼ぶのと同じ関数でもある
+// ビルドは global-setup.ts が済ませている。組み上がったハンドラは
+// @k8ordo/static が事前描画で呼ぶのと同じ関数でもある
 beforeAll(async () => {
-  execFileSync('pnpm', ['exec', 'vite', 'build'], { cwd: root, stdio: 'pipe' });
   const entry = pathToFileURL(path.join(root, 'dist', 'rsc', 'index.js')).href;
   ({ default: handler } = (await import(entry)) as { default: Handler });
-}, 180_000);
+});
 
 describe('the built request handler', () => {
   it('answers a page with HTML the server rendered', async () => {
