@@ -477,8 +477,8 @@ export function renderPasswordInput(
 
 export function renderNumberField(
   props: NumberFieldProps,
-  value: number,
-  onChange: (next: number) => void,
+  value: number | null,
+  onChange: (next: number | null) => void,
 ): ReactNode {
   return (
     <NumberField

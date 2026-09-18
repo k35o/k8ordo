@@ -2154,7 +2154,7 @@
         },
         {
           "name": "onChange",
-          "types": ["(value: number) => void"],
+          "types": ["(value: number | null) => void"],
           "defaultValue": null,
           "required": false
         },
@@ -2178,7 +2178,7 @@
         },
         {
           "name": "value",
-          "types": ["number"],
+          "types": ["number", "null"],
           "defaultValue": null,
           "required": false
         }

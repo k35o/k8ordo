@@ -1,13 +1,13 @@
 'use client';
 
-import { useState } from 'react';
-import type { FC, InputHTMLAttributes, Ref } from 'react';
+import { useEffect, useEffectEvent, useMemo, useRef, useState } from 'react';
+import type { ChangeEvent, FC, InputHTMLAttributes, Ref } from 'react';
 import { useFormStatus } from 'react-dom';
 
 import { useMessages } from '../../../i18n/context';
 import { FOCUS_RING_WITHIN } from '../../_internal/focus-ring';
 import { ChevronIcon } from '../../icons';
-import { chain, cn } from './../../../helpers';
+import { chain, cn, mergeRefs } from './../../../helpers';
 import { useControllableState } from './../../../hooks/controllable-state';
 import { clamp } from './../../../internal/clamp';
 import { toPrecision } from './../../../internal/to-precision';
@@ -37,18 +37,21 @@ type BaseProps = {
   };
 
 type ControlledProps = {
-  value: number;
-  onChange: (value: number) => void;
+  value: number | null;
+  onChange: (value: number | null) => void;
   defaultValue?: never;
 };
 
 type UncontrolledProps = {
   defaultValue?: number;
   value?: never;
-  onChange?: (value: number) => void;
+  onChange?: (value: number | null) => void;
 };
 
 type Props = BaseProps & (ControlledProps | UncontrolledProps);
+
+const format = (value: number | null, precision: number): string =>
+  value === null ? '' : value.toFixed(precision);
 
 export const NumberField: FC<Props> = ({
   invalid = false,
@@ -68,38 +71,76 @@ export const NumberField: FC<Props> = ({
   ...rest
 }) => {
   const messages = useMessages();
-  const [currentValue, setCurrentValue] = useControllableState<number>({
+  const inputRef = useRef<HTMLInputElement>(null);
+  // 参照が変わるたびに React が ref の解除と再設定を行うため、
+  // 利用者が副作用付きのコールバック ref を渡しても毎レンダー走らないようにする
+  const mergedRef = useMemo(() => mergeRefs(inputRef, ref), [ref]);
+  const isControlled = value !== undefined;
+  const [currentValue, setCurrentValue] = useControllableState<number | null>({
     value,
-    defaultValue: defaultValue ?? 0,
+    defaultValue: defaultValue ?? null,
     onChange,
   });
+  // 入力途中の文字列を React が持つのは制御モードだけ。非制御では DOM に持たせる。
+  // React の制御下に置くと value 属性が現在の文字列に同期され続け、form.reset() が
+  // 戻る先（描画時の defaultValue）を失うため。
   const [displayValue, setDisplayValue] = useState(() =>
-    currentValue.toFixed(precision),
+    format(currentValue, precision),
   );
-  const [prevValue, setPrevValue] = useState(currentValue);
+  // 確定のたびに表示している値も進めておく。親が onChange を採らずに value を
+  // 据え置いたとき（openui は null を受けると defaultValue に戻す）、次の描画で
+  // value との食い違いに気づいて表示を value へ戻せるように。
+  const [shownValue, setShownValue] = useState(currentValue);
   const { pending } = useFormStatus();
   const readOnlyResolved = readOnly || pending;
 
-  if (currentValue !== prevValue) {
-    setDisplayValue(currentValue.toFixed(precision));
-    setPrevValue(currentValue);
+  if (isControlled && currentValue !== shownValue) {
+    setDisplayValue(format(currentValue, precision));
+    setShownValue(currentValue);
   }
 
-  const handleChange = (newValue: number) => {
-    setCurrentValue(newValue);
+  const handleReset = useEffectEvent(() => {
+    if (!isControlled) {
+      setCurrentValue(defaultValue ?? null);
+    }
+  });
+
+  useEffect(() => {
+    const form = inputRef.current?.form;
+    if (!form) {
+      return undefined;
+    }
+    const listener = () => {
+      handleReset();
+    };
+    form.addEventListener('reset', listener);
+    return () => {
+      form.removeEventListener('reset', listener);
+    };
+  }, []);
+
+  const commit = (input: HTMLInputElement, next: number | null) => {
+    const text = format(next, precision);
+    if (isControlled) {
+      setDisplayValue(text);
+      setShownValue(next);
+    } else {
+      input.value = text;
+    }
+    setCurrentValue(next);
   };
 
-  const stepBy = (delta: number) => {
+  const stepBy = (input: HTMLInputElement, delta: number) => {
     if (readOnlyResolved) {
       return;
     }
-    const newValue = clamp(
-      toPrecision(cast(displayValue, precision) + delta, precision),
-      min,
-      max,
+    const current = cast(input.value, precision);
+    commit(
+      input,
+      current === null
+        ? clamp(0, min, max)
+        : clamp(toPrecision(current + delta, precision), min, max),
     );
-    handleChange(newValue);
-    setDisplayValue(newValue.toFixed(precision));
   };
 
   return (
@@ -116,11 +157,25 @@ export const NumberField: FC<Props> = ({
         autoCorrect="off"
         inputMode="decimal"
         {...rest}
+        {...(isControlled
+          ? {
+              value: displayValue,
+              onChange: (e: ChangeEvent<HTMLInputElement>) => {
+                if (
+                  e.nativeEvent instanceof InputEvent &&
+                  e.nativeEvent.isComposing
+                ) {
+                  return;
+                }
+                setDisplayValue(e.target.value);
+              },
+            }
+          : { defaultValue: format(defaultValue ?? null, precision) })}
         aria-invalid={invalid}
         aria-required={required}
         aria-valuemax={max}
         aria-valuemin={min}
-        aria-valuenow={currentValue}
+        aria-valuenow={currentValue ?? undefined}
         className={cn(
           'grow bg-transparent pe-8 ps-3 focus-visible:outline-hidden size-full',
           'disabled:cursor-not-allowed',
@@ -128,32 +183,25 @@ export const NumberField: FC<Props> = ({
         )}
         disabled={disabled}
         readOnly={readOnlyResolved}
-        onBlur={chain(onBlur, () => {
-          const newValue = clamp(cast(displayValue, precision), min, max);
-          handleChange(newValue);
-          setDisplayValue(newValue.toFixed(precision));
+        required={required}
+        onBlur={chain(onBlur, (e) => {
+          const parsed = cast(e.currentTarget.value, precision);
+          commit(
+            e.currentTarget,
+            parsed === null ? null : clamp(parsed, min, max),
+          );
         })}
-        onChange={(e) => {
-          if (
-            e.nativeEvent instanceof InputEvent &&
-            e.nativeEvent.isComposing
-          ) {
-            return;
-          }
-          setDisplayValue(e.target.value);
-        }}
         onKeyDown={chain(onKeyDown, (e) => {
           if (e.key === 'ArrowUp') {
-            stepBy(step);
+            stepBy(e.currentTarget, step);
           }
           if (e.key === 'ArrowDown') {
-            stepBy(-step);
+            stepBy(e.currentTarget, -step);
           }
         })}
-        ref={ref}
+        ref={mergedRef}
         role="spinbutton"
         type="text"
-        value={displayValue}
       />
       <div
         aria-hidden="true"
@@ -167,7 +215,9 @@ export const NumberField: FC<Props> = ({
           )}
           disabled={disabled || readOnlyResolved}
           onClick={() => {
-            stepBy(step);
+            if (inputRef.current) {
+              stepBy(inputRef.current, step);
+            }
           }}
           tabIndex={-1}
           type="button"
@@ -183,7 +233,9 @@ export const NumberField: FC<Props> = ({
           )}
           disabled={disabled || readOnlyResolved}
           onClick={() => {
-            stepBy(-step);
+            if (inputRef.current) {
+              stepBy(inputRef.current, -step);
+            }
           }}
           tabIndex={-1}
           type="button"

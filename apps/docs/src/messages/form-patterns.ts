@@ -101,8 +101,8 @@ export const uiSelect = message({
 });
 
 export const uiNumber = message({
-  ja: '`NumberField` は値を React の state に持ち、`type="text"` の入力を描いて、触られていなくても `0` を送ります。空の数値欄を未入力として扱う約束も、導かれた `required` も働かないので、数値には素の `<input>` に属性を広げます。',
-  en: '`NumberField` keeps its value in React state, renders a `type="text"` input, and submits `0` even when untouched. Neither the rule that a blank numeric field means nothing entered nor the derived `required` can apply, so for a number, spread the attributes onto a plain `<input>`.',
+  ja: '`NumberField` は空欄なら `\'\'` を送り、`required` も中の入力要素に渡すので、空の数値欄を未入力として扱う約束も、導かれた `required` も働きます。それでも導かれた `input` はそのままでは広げられません。送信に失敗したあとに入る `defaultValue` は文字列で、`min`・`max`・`step` の型も数値だけではないのに、`NumberField` は数値しか受け取らないからです。しかも `type="text"` の入力を描くので、ブラウザは `min`・`max`・`step` を検査しません。数値には素の `<input>` に属性を広げます。',
+  en: '`NumberField` submits `\'\'` when it is empty and passes `required` on to its input, so both the rule that a blank numeric field means nothing entered and the derived `required` hold. The derived `input` still does not spread onto it: the `defaultValue` a failed submit echoes back is a string, and `min`, `max` and `step` are not typed as plain numbers, while `NumberField` takes numbers only. It also renders a `type="text"` input, so the browser checks none of `min`, `max` and `step`. For a number, spread the attributes onto a plain `<input>`.',
 });
 
 export const uiOthers = message({
