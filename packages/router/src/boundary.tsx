@@ -16,18 +16,38 @@ export type ErrorProps = {
 
 export type ErrorComponent = ComponentType<ErrorProps>;
 
-type CatchProps = {
+type BoundaryProps = {
   readonly fallback: ErrorComponent;
   readonly children?: ReactNode;
 };
 
-type CatchState = { readonly error: unknown; readonly failed: boolean };
+type CatchProps = BoundaryProps & { readonly generation: number };
+
+type CatchState = {
+  readonly error: unknown;
+  readonly failed: boolean;
+  readonly generation: number;
+};
 
 class Catch extends Component<CatchProps, CatchState> {
-  override state: CatchState = { error: undefined, failed: false };
+  override state: CatchState = {
+    error: undefined,
+    failed: false,
+    generation: this.props.generation,
+  };
 
-  static getDerivedStateFromError(error: unknown): CatchState {
+  static getDerivedStateFromError(
+    error: unknown,
+  ): Pick<CatchState, 'error' | 'failed'> {
     return { error, failed: true };
+  }
+
+  static getDerivedStateFromProps(
+    props: CatchProps,
+    state: CatchState,
+  ): CatchState | null {
+    if (props.generation === state.generation) return null;
+    return { error: undefined, failed: false, generation: props.generation };
   }
 
   private readonly reset = (): void => {
@@ -44,15 +64,19 @@ class Catch extends Component<CatchProps, CatchState> {
 }
 
 /**
- * The boundary a table's `error` component renders inside. Keyed by the
- * navigation that put the tree on screen, so leaving the page that failed
- * leaves the failure behind — and not by the pathname, which commits before
- * the tree arrives and would remount the boundary onto the old tree.
+ * The boundary a table's `error` component renders inside. The navigation
+ * that puts the next tree on screen clears the failure, so leaving the page
+ * that failed leaves it behind — and not the pathname, which commits before
+ * the tree arrives and would clear it onto the old tree.
+ *
+ * Cleared, not keyed: a key would remount everything below the boundary on
+ * every page change, failed or not, and a root boundary would take the whole
+ * application's layouts with it.
  */
 export const RouteErrorBoundary = ({
   fallback,
   children,
-}: CatchProps): ReactNode => {
+}: BoundaryProps): ReactNode => {
   const generation = use(NavigationGeneration);
   // Under a Suspense boundary because a server render has no error
   // boundaries: what it has is the rule that a subtree which throws inside
@@ -62,6 +86,6 @@ export const RouteErrorBoundary = ({
   return createElement(
     Suspense,
     { fallback: null },
-    createElement(Catch, { key: generation, fallback }, children),
+    createElement(Catch, { generation, fallback }, children),
   );
 };

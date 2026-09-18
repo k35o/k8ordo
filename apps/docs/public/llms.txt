@@ -200,8 +200,9 @@ These docs are served from <https://ordo.k8o.me>.
   param a schema refused; `<Router routes>` mounts it on the Navigation API and
   `<Outlet />` renders the rest of the matched stack; a branch's `error`
   component (props `ErrorProps`, `{ error, reset }`; type `ErrorComponent`)
-  renders in the layout's hole when what is below throws, keyed by
-  `NavigationGeneration` so leaving the page clears it. `href(pattern, params?)`
+  renders in the layout's hole when what is below throws; the next
+  `NavigationGeneration` clears the failure without remounting what the
+  boundary wraps. `href(pattern, params?)`
   and `navigateTo(pattern, params?, options?)` build and perform navigations
   from the pattern **string** alone — no table import, so no cycle — with
   params inferred from the literal and the pattern itself checked once

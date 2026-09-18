@@ -78,13 +78,16 @@ pnpm check         # check:write to auto-fix
   so `href` can take it; the framework runs the schema and hands `match` an
   `accept` that declines a refused param, which makes the walk go on to the
   next pattern. Nothing in this package validates anything.
-- **An `error` boundary is an element of the stack, keyed by generation.**
-  `boundaryFor` puts it after the layout; `RouteErrorBoundary` keys its
-  class boundary by `NavigationGeneration` — the id of the navigation that
-  applied the tree — never by the pathname, which commits before the tree
-  arrives and would remount the boundary onto the old, still-failing tree
-  (regression test in `router.browser.test.tsx`). It sits under a Suspense
-  boundary so a server render leaves a throwing subtree to the browser.
+- **An `error` boundary is an element of the stack, cleared by generation.**
+  `boundaryFor` puts it after the layout; `RouteErrorBoundary` clears its
+  class boundary's failure when `NavigationGeneration` — the id of the
+  navigation that applied the tree — changes, never when the pathname does,
+  which commits before the tree arrives and would clear it onto the old,
+  still-failing tree. It never keys the boundary: a key remounts everything
+  below on every page change, and a root `error.tsx` would take every layout
+  with it (regression tests for both in `router.browser.test.tsx`). It sits
+  under a Suspense boundary so a server render leaves a throwing subtree to
+  the browser.
 - **Declaration order decides.** No specificity ranking, ever — the table
   reads top to bottom like the code it is.
 - **A bound param is a param, not a concept.** `bindParams` knows a name and
