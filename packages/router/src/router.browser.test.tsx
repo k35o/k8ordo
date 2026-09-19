@@ -388,12 +388,25 @@ const Frame: FC = () => (
     <Outlet />
   </section>
 );
+// 境界の内側にあるレイアウト。ページが替わっても同じ要素のままかを見る
+const Inner: FC = () => (
+  <section data-testid="inner">
+    <Outlet />
+  </section>
+);
 const guarded = defineRoutes({
   '/': HomePage,
   '/area': {
     layout: Frame,
     error: Oops,
-    children: { '/boom': Boom, '/fine': Fine },
+    children: {
+      '/boom': Boom,
+      '/fine': Fine,
+      '/inner': {
+        layout: Inner,
+        children: { '/fine': Fine, '/about': AboutPage },
+      },
+    },
   },
 });
 
@@ -424,6 +437,17 @@ it('leaves the failure behind when the pathname changes', async () => {
   } finally {
     consoleError.mockRestore();
   }
+});
+
+it('keeps a layout inside the boundary mounted when the page changes', async () => {
+  const screen = await render(<Router routes={guarded} />);
+  await navigateTo('/area/inner/fine', { history: 'replace' }).finished;
+  const inner = screen.getByTestId('inner').element();
+
+  await navigateTo('/area/inner/about').finished;
+
+  await expect.element(screen.getByTestId('about')).toBeInTheDocument();
+  expect(screen.getByTestId('inner').element()).toBe(inner);
 });
 
 it('tags the transition that applies a new tree with the navigation kind', async () => {

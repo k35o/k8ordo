@@ -220,8 +220,8 @@ export const errorProps = message({
 });
 
 export const errorLeave = message({
-  ja: '失敗したページを離れると、失敗は消えます。境界は `NavigationGeneration`（新しい木が画面に適用されるたびに変わる番号）をキーにしているので、別のページへ移ると作り直されます。pathname をキーにしないのは、URL が木より先に確定するからです。search だけが変わる状態の更新では木が変わらないので、失敗もそのまま残ります。',
-  en: 'Leaving the page that failed leaves the failure behind. The boundary is keyed by `NavigationGeneration` — a number that changes each time a new tree is applied — so it is recreated when another page arrives. It is not keyed by the pathname because the URL commits before the tree does. A state change that only moves the search changes no tree, so the failure stays.',
+  ja: '失敗したページを離れると、失敗は消えます。境界は `NavigationGeneration`（新しい木が画面に適用されるたびに変わる番号）が変わったときに失敗を手放します。pathname で判断しないのは、URL が木より先に確定するからです。境界の内側は作り直さないので、ページが替わってもその下のレイアウトの状態は残ります。search だけが変わる状態の更新では木が変わらないので、失敗もそのまま残ります。',
+  en: 'Leaving the page that failed leaves the failure behind. The boundary lets it go when `NavigationGeneration` — a number that changes each time a new tree is applied — moves. It does not go by the pathname because the URL commits before the tree does. Nothing inside the boundary is recreated, so the layouts below it keep their state across a page change. A state change that only moves the search changes no tree, so the failure stays.',
 });
 
 export const errorScope = message({

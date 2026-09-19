@@ -119,11 +119,11 @@ type Pending = {
 
 /**
  * Which navigation put the tree on screen — a number that changes exactly
- * when a new tree is applied, and not when only the URL moved. It is the
- * identity an error boundary keys on: leaving the page that failed is what
- * should clear the failure, and the URL commits before the tree arrives, so
- * the pathname would clear it one render too early and let the old tree
- * fail again under the new key.
+ * when a new tree is applied, and not when only the URL moved. It is what an
+ * error boundary clears its failure on: leaving the page that failed is what
+ * should clear it, and the URL commits before the tree arrives, so the
+ * pathname would clear it one render too early and let the old tree fail
+ * again.
  */
 export const NavigationGeneration = createContext(-1);
 
