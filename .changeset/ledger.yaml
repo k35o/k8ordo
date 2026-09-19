@@ -1,31 +1,131 @@
+"@k8ordo/color-scheme@0.2.0":
+  dir: packages/color-scheme
+  intents:
+    - color-scheme-package
+    - docs-drift-color-scheme
 "@k8ordo/form@0.1.1":
   dir: packages/form
   intents:
     - form-dropped-warning
+"@k8ordo/form@0.2.0":
+  dir: packages/form
+  intents:
+    - docs-drift-form
+    - form-derive-parse-parity
+    - react-19-3-form
+    - silent-cooks-leave
+    - zod-4-5-iso-formats
+"@k8ordo/i18n@0.2.0":
+  dir: packages/i18n
+  intents:
+    - docs-drift-i18n
+    - i18n-locale-scope
+    - i18n-package
+    - i18n-paths
 "@k8ordo/router@0.1.0":
   dir: packages/router
   intents:
     - framework-error-redirect-request
     - framework-params-schema
     - router-scroll-and-match
+"@k8ordo/router@0.2.0":
+  dir: packages/router
+  intents:
+    - bind-params-router
+    - calm-falcons-occur
+    - docs-drift-router
+    - react-19-3-router
+    - router-boundary-keeps-subtree
 "@k8ordo/server@0.1.0":
   dir: packages/server
   intents:
     - framework-error-redirect-request
     - framework-params-schema
     - static-server-hardening
+"@k8ordo/server@0.2.0":
+  dir: packages/server
+  intents:
+    - docs-drift-framework
+    - framework-layout-params
+    - framework-parse-exports
+    - framework-redirect-segments
+    - hydrate-after-reveal
+    - i18n-locale-scope
+    - lucky-moles-glow
+    - neat-ants-scream
+    - react-19-3-framework
+    - react-19-3-framework-docs
+    - server-redirect-options
+    - server-runtime-entry
 "@k8ordo/state@0.2.0":
   dir: packages/state
   intents:
     - state-register-and-inline-read
     - state-url-round-trip
+"@k8ordo/state@0.3.0":
+  dir: packages/state
+  intents:
+    - docs-drift-state
+    - friendly-teeth-complain
+    - mean-wasps-visit
+    - react-19-3-state
 "@k8ordo/static@0.1.0":
   dir: packages/static
   intents:
     - framework-error-redirect-request
     - framework-params-schema
     - static-server-hardening
+"@k8ordo/static@0.2.0":
+  dir: packages/static
+  intents:
+    - docs-drift-framework
+    - framework-layout-params
+    - framework-parse-exports
+    - framework-redirect-segments
+    - hydrate-after-reveal
+    - i18n-locale-scope
+    - lucky-moles-glow
+    - neat-ants-scream
+    - react-19-3-framework
+    - react-19-3-framework-docs
+    - static-dev-refuses-actions
+    - static-inline-boundaries
+    - static-sitemap-export
 "@k8ordo/ui@2.0.0":
   dir: packages/ui
   intents:
     - ui-two
+"@k8ordo/ui@3.0.0":
+  dir: packages/ui
+  intents:
+    - button-render-item-passthrough
+    - docs-drift-ui
+    - number-field-negative-decimal
+    - number-field-read-only
+    - number-field-round-to-precision
+    - purple-tools-design
+    - react-19-3-ui
+    - react-compiler-lint-conformance
+    - smooth-pumas-chew
+    - thick-rivers-speak
+    - tough-buses-happen
+    - ui-checked-follows-reset
+    - ui-dictionaries
+    - ui-helpers
+    - ui-hooks-audit
+    - ui-number-field-empty
+    - ui-number-field-reset
+    - ui-observers
+    - ui-openui-nesting
+    - ui-radio-required
+    - ui-testing-in-a-real-browser
+    - ui-toast-open-returns-id
+docs@0.0.10:
+  dir: apps/docs
+  intents:
+    - docs-color-scheme
+    - docs-i18n
+    - docs-links
+    - docs-package-guides
+    - react-19-3-docs
+    - router-boundary-keeps-subtree
