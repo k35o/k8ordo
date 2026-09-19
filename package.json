@@ -32,7 +32,7 @@
     "typescript": "catalog:",
     "vite-plus": "catalog:",
     "vite-plus-inspector": "0.1.1",
-    "wrangler": "4.131.0"
+    "wrangler": "4.131.1"
   },
   "engines": {
     "node": ">=24.13.0"
