@@ -29,6 +29,28 @@ import { markNavigated, Recover, reloadInstead } from './recover';
  */
 let applyPayload: ((payload: Payload) => void) | null = null;
 
+/**
+ * The client this document runs, as named by the payload its HTML was
+ * rendered from — the same render that told the HTML which script to load.
+ * A fact about the document, not about a component, which is why it is not
+ * a prop.
+ */
+let documentClient: string | undefined;
+
+export const setDocumentClient = (client: string): void => {
+  documentClient = client;
+};
+
+/**
+ * A payload rendered for another client comes from a deploy this document
+ * predates, and may name client components its script has no entry for.
+ * That fails only once the tree renders, where the page's `error.tsx` catches
+ * it before `Recover` can — so it is decided before anything renders, and a
+ * document load brings the script that can.
+ */
+const canRender = (payload: Payload): boolean =>
+  payload.client === documentClient;
+
 setServerCallback(async (id: string, args: unknown[]) => {
   const temporaryReferences = createTemporaryReferenceSet();
   const payload = await createFromFetch<Payload>(
@@ -45,6 +67,7 @@ setServerCallback(async (id: string, args: unknown[]) => {
     await navigation.navigate(payload.redirect).finished;
     return undefined;
   }
+  if (!canRender(payload)) return reloadInstead();
   // The action's answer arrives with the page it re-rendered, so the screen
   // is up to date by the time the caller has its value.
   applyPayload?.(payload);
@@ -112,6 +135,10 @@ export function AppRouter({
         // a URL that is not a page — the document load shows the truth.
         return reloadInstead<ReactNode>();
       }
+      // Reading it can outlast the navigation too — the body is in, and the
+      // client components it names are still being imported.
+      signal.throwIfAborted();
+      if (!canRender(payload)) return reloadInstead<ReactNode>();
       return payload.tree;
     },
     apply: (next) => {

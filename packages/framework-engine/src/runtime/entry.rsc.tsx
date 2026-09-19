@@ -178,6 +178,10 @@ export default async function handler(request: Request): Promise<Response> {
     import.meta.env.K8ORDO_MODE === '@k8ordo/server'
       ? routeRequestOf(request)
       : undefined;
+  const ssr = await import.meta.viteRsc.loadModule<typeof SsrEntry>(
+    'ssr',
+    'index',
+  );
   const payload: Payload = {
     // An action that redirected renders nothing: the client is about to
     // leave this page for the one it was sent to.
@@ -190,6 +194,7 @@ export default async function handler(request: Request): Promise<Response> {
         )
       ) : null,
     pathname,
+    client: ssr.clientEntry,
     returnValue: action.returnValue,
     formState: action.formState,
     redirect: action.redirect,
@@ -220,10 +225,6 @@ export default async function handler(request: Request): Promise<Response> {
     });
   }
 
-  const ssr = await import.meta.viteRsc.loadModule<typeof SsrEntry>(
-    'ssr',
-    'index',
-  );
   const html = await parsed.enter(() => ssr.renderHtml(rscStream));
   if (import.meta.env.K8ORDO_MODE === '@k8ordo/static') {
     // A build into files can afford to wait for the whole page, and has to:

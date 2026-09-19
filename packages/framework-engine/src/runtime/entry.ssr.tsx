@@ -11,6 +11,13 @@ import type { Payload } from './payload';
 type SsrOptions = NonNullable<Parameters<typeof renderToReadableStream>[1]>;
 
 /**
+ * The script every page's HTML loads, and so the client every payload is
+ * rendered for. Exported for the RSC entry, which renders the payloads:
+ * the RSC plugin names the client entry to this environment only.
+ */
+export const clientEntry = getClientEntryUrl();
+
+/**
  * The payload turned into HTML, with the payload itself written into that
  * HTML. Hydration then reads what this render read, rather than asking the
  * server to render the page a second time: one render, one source of truth,
@@ -26,7 +33,7 @@ export async function renderHtml(
   const htmlStream = await renderToReadableStream(
     <AppRouter pathname={payload.pathname} tree={payload.tree} />,
     {
-      bootstrapModules: [getClientEntryUrl()],
+      bootstrapModules: [clientEntry],
       // Present only when a form was posted without JavaScript: it is how
       // `useActionState` finds its result in the HTML it comes back to.
       formState: payload.formState as SsrOptions['formState'],

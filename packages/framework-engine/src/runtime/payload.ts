@@ -12,6 +12,17 @@ export type Payload = {
    * has no Navigation API to ask, so `usePathname` reads it from here.
    */
   pathname: string;
+  /**
+   * The client this payload was rendered for: the URL of the script its
+   * page's HTML loads. A document running another script cannot be trusted
+   * to render it.
+   *
+   * A URL rather than an id minted per build, because the bundler hashes
+   * into that name everything the script can load: a deploy that changed
+   * nothing in the browser leaves open tabs navigating as before, and servers
+   * built apart from the same source agree.
+   */
+  client: string;
   /** What the action returned, when this response answers one. */
   returnValue?: unknown;
   /** Where an action sent the visitor instead of returning. */

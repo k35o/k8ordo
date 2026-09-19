@@ -1,13 +1,14 @@
 import { execFileSync } from 'node:child_process';
-import { existsSync, readFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { createServer } from 'node:http';
 import type { Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
+import { tmpdir } from 'node:os';
 import path from 'node:path';
 
 import { chromium } from 'playwright';
-import type { Browser } from 'playwright';
+import type { Browser, Page } from 'playwright';
 
 const root = path.resolve(import.meta.dirname, '..');
 const client = path.join(root, 'dist', 'client');
@@ -15,6 +16,10 @@ const client = path.join(root, 'dist', 'client');
 // 描画に失敗するページを持つ構成のビルド。止まることを主張するので、
 // 先に走らせて stderr を取っておき、本物のビルドで dist を上書きする
 let brokenBuildStderr = '';
+
+// ひとつ前のデプロイの dist/client。アプリは同じで、クライアントの
+// スクリプトだけが違う。タブを開いた後にデプロイがあった、を再現する
+let previous = '';
 
 // 主張の対象がビルド成果物そのものなので、テストがビルドを走らせる。
 // 出力を読むだけにすると、何も書かなかったビルドと区別がつかない
@@ -28,8 +33,19 @@ beforeAll(() => {
   } catch (error) {
     brokenBuildStderr = String((error as { stderr?: Buffer }).stderr ?? '');
   }
+  // 圧縮しないだけで、スクリプトの中身とハッシュの入った名前が変わる
+  execFileSync('pnpm', ['exec', 'vp', 'build', '--minify', 'false'], {
+    cwd: root,
+    stdio: 'pipe',
+  });
+  previous = mkdtempSync(path.join(tmpdir(), 'k8ordo-previous-'));
+  cpSync(client, previous, { recursive: true });
   execFileSync('pnpm', ['exec', 'vp', 'build'], { cwd: root, stdio: 'pipe' });
 }, 360_000);
+
+afterAll(() => {
+  rmSync(previous, { recursive: true, force: true });
+});
 
 const read = (...parts: string[]): string =>
   readFileSync(path.join(client, ...parts), 'utf8');
@@ -109,18 +125,20 @@ describe('a written page in the browser', () => {
   let server: Server;
   let browser: Browser;
   let origin = '';
+  // ホストがいま配っているデプロイ
+  let deployed = client;
 
   beforeAll(async () => {
     // 静的ホストと同じ規則で dist/client を配る: ディレクトリは index.html
     server = createServer((request, response) => {
       const { pathname } = new URL(request.url ?? '/', 'http://localhost');
       const file = path.join(
-        client,
+        deployed,
         path.extname(pathname) === ''
           ? path.join(pathname, 'index.html')
           : pathname,
       );
-      const relative = path.relative(client, file);
+      const relative = path.relative(deployed, file);
       if (relative.startsWith('..') || path.isAbsolute(relative)) {
         response.writeHead(404).end();
         return;
@@ -146,6 +164,46 @@ describe('a written page in the browser', () => {
   afterAll(async () => {
     await browser.close();
     server.close();
+  });
+
+  afterEach(() => {
+    deployed = client;
+  });
+
+  // hydrate するまでのリンクは、JS なしのただの文書の読み込みになって
+  // 主張をすり抜ける。ブラウザでしか描かれない部分が出たら、JS が握っている
+  const openHydrated = async (url: string): Promise<Page> => {
+    const page = await browser.newPage();
+    await page.goto(url);
+    await page.getByText(/time zone: (?!not yet)/u).waitFor();
+    // 文書の読み込みが起きれば window ごと入れ替わり、この印は消える
+    await page.evaluate(() => {
+      Object.assign(window, { stayed: true });
+    });
+    return page;
+  };
+
+  it('moves to the next page in place while the tab runs the deploy the host serves', async () => {
+    const page = await openHydrated(origin);
+
+    await page.getByRole('link', { name: 'products', exact: true }).click();
+
+    await page.getByRole('heading', { name: 'products' }).waitFor();
+    expect(await page.evaluate(() => 'stayed' in window)).toBe(true);
+    await page.close();
+  });
+
+  it('loads the next page as a document once a deploy has changed the client since the tab opened', async () => {
+    deployed = previous;
+    const page = await openHydrated(origin);
+    deployed = client;
+
+    await page.getByRole('link', { name: 'products', exact: true }).click();
+
+    await page.getByRole('heading', { name: 'products' }).waitFor();
+    expect(new URL(page.url()).pathname).toBe('/products');
+    expect(await page.evaluate(() => 'stayed' in window)).toBe(false);
+    await page.close();
   });
 
   it('hydrates in place, leaving no hidden copy of the page and one <title>', async () => {
