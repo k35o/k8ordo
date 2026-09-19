@@ -1,6 +1,6 @@
 {
   "name": "@k8ordo/router",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "The pathname axis of the URL, owned. One route table derives the types, the matching, the links, and the navigation, over the Navigation API and URLPattern.",
   "keywords": [
     "navigation-api",

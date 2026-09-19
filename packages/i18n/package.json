@@ -1,6 +1,6 @@
 {
   "name": "@k8ordo/i18n",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "The locale axis of an application, owned. One locale set derives the URL segment, negotiation, the params schema, the static paths, and the current locale on either side of the network; each message is a function that reads it, so a bundler keeps only what a page names.",
   "keywords": [
     "i18n",
