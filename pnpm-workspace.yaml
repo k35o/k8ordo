@@ -56,7 +56,7 @@ catalog:
   vite-plus: 0.3.1
   vitest: 5.0.0
   vitest-browser-react: 2.3.0
-  zod: 4.6.2
+  zod: 4.6.5
 
 minimumReleaseAge: 10080
 
@@ -65,7 +65,7 @@ minimumReleaseAge: 10080
 # tsc が "Excessive stack depth" を起こして typecheck が落ちる。単一バージョンに
 # 強制して型グラフのコピーを 1 つに保つ (types のみのパッケージでランタイム影響なし)。
 overrides:
-  '@oxc-project/types': 0.149.0
+  '@oxc-project/types': 0.150.0
 
   # vitest は vite-plus が exact pin (0.3.2 時点でも 4.1.11) で連れてくる依存で、
   # `vp test` が起動するのは常に vite-plus 側の 1 本。catalog だけを 5 に上げても

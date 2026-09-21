@@ -103,8 +103,8 @@
   },
   "dependencies": {
     "clsx": "2.1.1",
-    "lucide-react": "1.44.0",
-    "tailwind-merge": "3.6.0"
+    "lucide-react": "1.46.0",
+    "tailwind-merge": "3.7.0"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "catalog:",
@@ -125,7 +125,7 @@
     "@vitest/browser-playwright": "catalog:",
     "@vitest/coverage-v8": "catalog:",
     "@vitest/ui": "catalog:",
-    "ai": "7.0.97",
+    "ai": "7.0.99",
     "postcss": "catalog:",
     "publint": "catalog:",
     "react": "catalog:",
