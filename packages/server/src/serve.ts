@@ -108,6 +108,8 @@ export const serve = async (options: ServeOptions = {}): Promise<Server> => {
             'content-type': type === false ? 'application/octet-stream' : type,
             'cache-control': cacheFor(url.pathname),
           });
+          // HEAD でも読んで流す。node:http は HEAD への write を捨てるので、
+          // 分岐を足さなくても本文は線に載らない
           const stream = createReadStream(file);
           // 送信開始後に読み取りが失敗しても writeHead は打ち直せない。
           // 中途半端な本文で繋いだままにするより、接続を切って知らせる。
