@@ -67,7 +67,7 @@ src/
                 catchAllPatterns / catchAllPath / dirFor / isConcrete — pure
                 functions (supplied pathnames matched with URLPattern)
   documents.ts  sitemap / redirectPage — the two files the build writes
-                itself rather than taking from the handler
+                itself rather than taking from the handler, escaped as markup
   index.ts      framework: engine + prerender (the dev refusal in transform,
                 the files in buildApp)
 ```

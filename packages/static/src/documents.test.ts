@@ -31,4 +31,11 @@ describe('redirectPage', () => {
       '<!doctype html><html><head><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=/search?a=1&amp;b=&quot;2&quot;"><link rel="canonical" href="/search?a=1&amp;b=&quot;2&quot;"><title>Redirecting</title></head><body><a href="/search?a=1&amp;b=&quot;2&quot;">/search?a=1&amp;b=&quot;2&quot;</a></body></html>\n',
     );
   });
+
+  it('writes a target holding markup as the link’s text, not as markup', () => {
+    const html = redirectPage('/tags/<b>');
+
+    expect(html).toContain('>/tags/&lt;b&gt;</a>');
+    expect(html).not.toContain('<b>');
+  });
 });
