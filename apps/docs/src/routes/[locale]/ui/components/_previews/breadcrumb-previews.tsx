@@ -2,19 +2,23 @@
 
 import { Breadcrumb } from '@k8ordo/ui';
 
+import { href } from '../../../../../links';
+
 export function BreadcrumbBasicPreview() {
   return (
     <Breadcrumb.List>
       <Breadcrumb.Item>
-        <Breadcrumb.Link href="/">Home</Breadcrumb.Link>
+        <Breadcrumb.Link href={href('/:locale')}>Home</Breadcrumb.Link>
       </Breadcrumb.Item>
       <Breadcrumb.Separator />
       <Breadcrumb.Item>
-        <Breadcrumb.Link href="/components">Components</Breadcrumb.Link>
+        <Breadcrumb.Link href={href('/:locale/ui/components')}>
+          Components
+        </Breadcrumb.Link>
       </Breadcrumb.Item>
       <Breadcrumb.Separator />
       <Breadcrumb.Item>
-        <Breadcrumb.Link href="/components/breadcrumb">
+        <Breadcrumb.Link href={href('/:locale/ui/components/breadcrumb')}>
           Breadcrumb
         </Breadcrumb.Link>
       </Breadcrumb.Item>
@@ -26,15 +30,20 @@ export function BreadcrumbCurrentPagePreview() {
   return (
     <Breadcrumb.List>
       <Breadcrumb.Item>
-        <Breadcrumb.Link href="/">Home</Breadcrumb.Link>
+        <Breadcrumb.Link href={href('/:locale')}>Home</Breadcrumb.Link>
       </Breadcrumb.Item>
       <Breadcrumb.Separator />
       <Breadcrumb.Item>
-        <Breadcrumb.Link href="/components">Components</Breadcrumb.Link>
+        <Breadcrumb.Link href={href('/:locale/ui/components')}>
+          Components
+        </Breadcrumb.Link>
       </Breadcrumb.Item>
       <Breadcrumb.Separator />
       <Breadcrumb.Item>
-        <Breadcrumb.Link current href="/components/breadcrumb">
+        <Breadcrumb.Link
+          current
+          href={href('/:locale/ui/components/breadcrumb')}
+        >
           Breadcrumb
         </Breadcrumb.Link>
       </Breadcrumb.Item>

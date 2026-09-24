@@ -257,23 +257,6 @@
       transition: inset 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
   }
-  /* anchor positioning 未対応ブラウザでは anchor() が無効になり迷子のバーが
-   残るため隠し、選択タブ側の静的な下線で選択表示を維持する（スライドなし）。
-   box-shadow だと utilities レイヤーの focus-visible リングを潰すため
-   擬似要素 + 論理プロパティで描く（.ao-tab は Tabs.Tab だけに付く） */
-  @supports not (anchor-name: --a) {
-    .ao-tab-indicator {
-      display: none;
-    }
-    .ao-tab[aria-selected='true']::after {
-      content: '';
-      position: absolute;
-      inset-inline: 0;
-      inset-block-end: -0.125rem;
-      block-size: 0.25rem;
-      background: var(--primary-border);
-    }
-  }
 
   /*
  * スクロール進捗バー。ルートスクローラーの進捗を scale x に写像する。

@@ -176,7 +176,7 @@ export const Tab: FC<PropsWithChildren<{ id: string }>> = ({
       aria-controls={selectedId === id ? `${rootId}-panel-${id}` : undefined}
       aria-selected={selectedId === id}
       className={cn(
-        'ao-tab relative cursor-pointer rounded-lg p-2 transition-colors',
+        'relative cursor-pointer rounded-lg p-2 transition-colors',
         selectedId !== id && 'hover:bg-primary-bg-subtle hover:text-primary-fg',
         FOCUS_RING,
       )}

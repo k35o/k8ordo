@@ -13,12 +13,18 @@ import type { Browser, Page } from 'playwright';
 const root = path.resolve(import.meta.dirname, '..');
 const client = path.join(root, 'dist', 'client');
 
-// 描画に失敗するページを持つ構成のビルド。止まることを主張するので、
-// 先に走らせて stderr を取っておき、本物のビルドで dist を上書きする
-let brokenBuildStderr = '';
+// 描画に失敗するページ・not-found を持つ構成のビルド。止まることを主張する
+// ので、先に走らせて stderr を取っておき、本物のビルドで dist を上書きする
+let brokenPageStderr = '';
+let brokenNotFoundStderr = '';
 // 同じく、失敗するページの上に error.tsx も Suspense も無い構成
-let noBoundaryBuildStderr = '';
+let noBoundaryStderr = '';
 
+// ひとつ前のデプロイの dist/client。アプリは同じで、クライアントの
+// スクリプトだけが違う。タブを開いた後にデプロイがあった、を再現する
+let previous = '';
+
+// 止まらなかったビルドは空の stderr を返し、止まることの主張で落ちる
 const failingBuild = (config: string): string => {
   try {
     execFileSync('pnpm', ['exec', 'vp', 'build', '--config', config], {
@@ -28,18 +34,15 @@ const failingBuild = (config: string): string => {
   } catch (error) {
     return String((error as { stderr?: Buffer }).stderr ?? '');
   }
-  throw new Error(`${config} built, but it was meant to fail`);
+  return '';
 };
-
-// ひとつ前のデプロイの dist/client。アプリは同じで、クライアントの
-// スクリプトだけが違う。タブを開いた後にデプロイがあった、を再現する
-let previous = '';
 
 // 主張の対象がビルド成果物そのものなので、テストがビルドを走らせる。
 // 出力を読むだけにすると、何も書かなかったビルドと区別がつかない
 beforeAll(() => {
-  brokenBuildStderr = failingBuild('vite.broken.config.ts');
-  noBoundaryBuildStderr = failingBuild('vite.broken-no-boundary.config.ts');
+  brokenPageStderr = failingBuild('vite.broken.config.ts');
+  brokenNotFoundStderr = failingBuild('vite.broken-not-found.config.ts');
+  noBoundaryStderr = failingBuild('vite.broken-no-boundary.config.ts');
   // 圧縮しないだけで、スクリプトの中身とハッシュの入った名前が変わる
   execFileSync('pnpm', ['exec', 'vp', 'build', '--minify', 'false'], {
     cwd: root,
@@ -96,33 +99,40 @@ describe('the static build', () => {
 
   it('stops, naming the page, when a page throws while rendering', () => {
     // error.tsx はブラウザでの失敗のためのもので、ビルド時の失敗は失敗のまま
-    expect(brokenBuildStderr).toContain('static build could not render /');
-    expect(brokenBuildStderr).toContain('broken on purpose');
+    expect(brokenPageStderr).toContain('static build could not render /');
+    expect(brokenPageStderr).toContain('broken on purpose');
+  });
+
+  it('stops, naming 404.html, when not-found.tsx throws while rendering', () => {
+    expect(brokenNotFoundStderr).toContain(
+      'static build could not render 404.html',
+    );
+    expect(brokenNotFoundStderr).toContain('not-found broken on purpose');
   });
 
   it('stops, naming the page, when a page throws with no boundary above it', () => {
     // 境界が無いと HTML の描画そのものが reject する。それでも境界があるときと
     // 同じく、ページ名を挙げて止まる
-    expect(noBoundaryBuildStderr).toContain('static build could not render /');
-    expect(noBoundaryBuildStderr).toContain('broken with no boundary above it');
+    expect(noBoundaryStderr).toContain('static build could not render /');
+    expect(noBoundaryStderr).toContain('broken with no boundary above it');
   });
 
   it('stops, naming the page, when a client component throws in the HTML render with no boundary above it', () => {
-    expect(noBoundaryBuildStderr).toMatch(
+    expect(noBoundaryStderr).toMatch(
       /static build could not render .*\/client\b/u,
     );
     // React 自身もこのエラーをログに出すので、ページの URL と並んだ行で
     // ハンドラが答えたメッセージだと確かめる
-    expect(noBoundaryBuildStderr).toMatch(
+    expect(noBoundaryStderr).toMatch(
       /\/client — client component broken with no boundary above it/u,
     );
   });
 
-  it('stops, naming 404.html, when not-found.tsx throws', () => {
-    expect(noBoundaryBuildStderr).toMatch(
+  it('stops, naming 404.html, when not-found.tsx throws with no boundary above it', () => {
+    expect(noBoundaryStderr).toMatch(
       /static build could not render .*404\.html/u,
     );
-    expect(noBoundaryBuildStderr).toContain(
+    expect(noBoundaryStderr).toContain(
       'not-found broken with no boundary above it',
     );
   });
