@@ -29,7 +29,10 @@ const NO_STATE: FormState = {};
 // the server-rendered markup.
 let signupProps: object = {};
 
-const Signup: FC<{ state?: FormState }> = ({ state = NO_STATE }) => {
+const Signup: FC<{
+  state?: FormState;
+  formErrorAt?: 'top' | 'bottom';
+}> = ({ state = NO_STATE, formErrorAt = 'top' }) => {
   const form = useForm(derived, state);
   useEffect(() => {
     signupProps = form.props;
@@ -37,9 +40,14 @@ const Signup: FC<{ state?: FormState }> = ({ state = NO_STATE }) => {
   const email = form.field('email');
   const password = form.field('password');
   const confirm = form.field('confirm');
+  const formError = form.formError.message !== undefined && (
+    <p {...form.formError.props}>{form.formError.message}</p>
+  );
 
   return (
     <form {...form.props}>
+      {formErrorAt === 'top' && formError}
+
       <input aria-label="email" {...email.input} />
       <p data-testid="email-error">{email.error ?? ''}</p>
 
@@ -48,6 +56,8 @@ const Signup: FC<{ state?: FormState }> = ({ state = NO_STATE }) => {
 
       <input aria-label="confirm" {...confirm.input} />
       <p data-testid="confirm-error">{confirm.error ?? ''}</p>
+
+      {formErrorAt === 'bottom' && formError}
 
       <p data-testid="dirty">{String(form.isDirty)}</p>
     </form>
@@ -520,6 +530,71 @@ describe('useForm in a browser', () => {
     await expect
       .element(screen.getByTestId('email-error'))
       .toHaveTextContent('すでに登録されています');
+  });
+
+  it('moves focus to the first failed field on the page, not the first one zod reported', async () => {
+    const screen = await render(<Signup />);
+
+    screen.rerender(
+      <Signup
+        state={{
+          errors: {
+            confirm: 'パスワードが一致しません',
+            email: 'すでに登録されています',
+          },
+          token: '1',
+        }}
+      />,
+    );
+
+    await expect.element(screen.getByLabelText('email')).toHaveFocus();
+  });
+
+  it('moves focus to the form-level message when no field failed', async () => {
+    const screen = await render(<Signup />);
+
+    screen.rerender(
+      <Signup state={{ formError: '登録を受け付けていません', token: '1' }} />,
+    );
+
+    await expect
+      .element(screen.getByText('登録を受け付けていません'))
+      .toHaveFocus();
+  });
+
+  it('moves focus to the form-level message when it comes before the failed fields', async () => {
+    const screen = await render(<Signup />);
+
+    screen.rerender(
+      <Signup
+        state={{
+          errors: { email: 'すでに登録されています' },
+          formError: '登録を受け付けていません',
+          token: '1',
+        }}
+      />,
+    );
+
+    await expect
+      .element(screen.getByText('登録を受け付けていません'))
+      .toHaveFocus();
+  });
+
+  it('moves focus to the first failed field when the form-level message comes after it', async () => {
+    const screen = await render(<Signup formErrorAt="bottom" />);
+
+    screen.rerender(
+      <Signup
+        formErrorAt="bottom"
+        state={{
+          errors: { email: 'すでに登録されています' },
+          formError: '登録を受け付けていません',
+          token: '1',
+        }}
+      />,
+    );
+
+    await expect.element(screen.getByLabelText('email')).toHaveFocus();
   });
 
   it('marks the form dirty when a select changes', async () => {
