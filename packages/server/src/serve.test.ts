@@ -19,6 +19,8 @@ beforeAll(async () => {
     path.join(dist, 'client', 'assets', 'app-abc123.js'),
     'export {};',
   );
+  await writeFile(path.join(dist, 'client', 'site.webmanifest'), '{}');
+  await writeFile(path.join(dist, 'client', 'notes.k8ordo'), 'k8ordo');
   await writeFile(
     path.join(dist, 'rsc', 'index.js'),
     `export default async (request) => {
@@ -50,7 +52,9 @@ describe('serve', () => {
   it('answers a file from the client build as it is, with its type', async () => {
     const response = await fetch(`${server.url}/index.html`);
     expect(response.status).toBe(200);
-    expect(response.headers.get('content-type')).toContain('text/html');
+    expect(response.headers.get('content-type')).toBe(
+      'text/html; charset=utf-8',
+    );
     expect(response.headers.get('cache-control')).toBe('no-cache');
     expect(await response.text()).toBe('<p>static</p>');
   });
@@ -59,6 +63,20 @@ describe('serve', () => {
     const response = await fetch(`${server.url}/assets/app-abc123.js`);
     expect(response.headers.get('cache-control')).toContain('immutable');
     expect(response.headers.get('content-type')).toContain('javascript');
+  });
+
+  it('types a file by the registered type of its extension', async () => {
+    const response = await fetch(`${server.url}/site.webmanifest`);
+    expect(response.headers.get('content-type')).toBe(
+      'application/manifest+json; charset=utf-8',
+    );
+  });
+
+  it('sends a file whose extension has no registered type as bytes', async () => {
+    const response = await fetch(`${server.url}/notes.k8ordo`);
+    expect(response.headers.get('content-type')).toBe(
+      'application/octet-stream',
+    );
   });
 
   it('hands everything else to the handler, with the request intact', async () => {
