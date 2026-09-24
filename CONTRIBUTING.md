@@ -20,12 +20,15 @@ If you do not use mise, use the pnpm named in `packageManager` and any Node.js t
 Run from the repository root:
 
 ```bash
-pnpm build       # Build all packages and apps
-pnpm test        # Run all tests
-pnpm typecheck   # Type check all packages
-pnpm check       # Lint/format check (Oxlint/Oxfmt via vp)
-pnpm check:write # Lint/format check with auto-fix
+pnpm build              # Build all packages and apps
+pnpm build:examples     # Build all examples
+pnpm test               # Run all tests
+pnpm test:examples      # Run the examples' tests, which read their builds
+pnpm typecheck          # Type check all packages
+pnpm check              # Lint/format check (Oxlint/Oxfmt via vp)
+pnpm check:write        # Lint/format check with auto-fix
 pnpm check:no-polyfills # Fail if a polyfill dependency has crept in
+pnpm check:peer-copies  # Fail if a peer shared with @k8ordo/* resolves to two copies
 ```
 
 `check:no-polyfills` guards one half of the shared discipline: k8ordo assumes

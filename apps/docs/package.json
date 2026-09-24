@@ -9,6 +9,7 @@
     "generate:design": "node scripts/generate-design-md.ts",
     "generate:docs": "node scripts/copy-reference-docs.ts",
     "generate:llms": "node scripts/generate-llms-txt.ts",
+    "check:llms": "node scripts/generate-llms-txt.ts --check",
     "typecheck": "tsc -b",
     "check": "vp check",
     "check:write": "vp check --fix"

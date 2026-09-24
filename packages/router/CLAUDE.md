@@ -105,14 +105,14 @@ pnpm check         # check:write to auto-fix
 
 ```
 src/
-  paths.ts          型導出(ParamsOf/PathFor/Join)+ 文字列操作
+  paths.ts          type derivation (ParamsOf / PathFor / Join) + string operations
   define-routes.ts  defineRoutes / match / RouteOf
-  links.ts          href / navigateTo / bindParams(表を必要としない側)
-  register.ts       Register(module augmentation)+ PageProps / LayoutProps
-  navigation.ts     useInterceptedNavigation(intercept と commit 契約)
-  location.tsx      usePathname / PathnameProvider(表を引かない現在地)
-  match.ts          matchPath / useMatch(表を引かない「どの区間にいるか」)
-  boundary.tsx      RouteErrorBoundary(表の error を描く境界)
+  links.ts          href / navigateTo / bindParams (the side that needs no table)
+  register.ts       Register (module augmentation) + PageProps / LayoutProps
+  navigation.ts     useInterceptedNavigation (intercept and the commit contract)
+  location.tsx      usePathname / PathnameProvider (where you are, without the table)
+  match.ts          matchPath / useMatch ("which section am I in", without the table)
+  boundary.tsx      RouteErrorBoundary (the boundary that renders the table's error)
   router.tsx        Router / Outlet / useRoute / useParams
 ```
 

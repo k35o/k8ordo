@@ -53,6 +53,11 @@ jobs:
       - name: Install
         uses: ./.github/composite-actions/install
 
+      # docs のビルドは llms.txt を書き直すので、比べるのはその前でないと
+      # いつも一致してしまう。
+      - name: Check llms.txt is in sync with the packages' indexes
+        run: pnpm --filter docs check:llms
+
       # 型を使う lint も typecheck と同じ .k8ordo/ を読む。表が無いと
       # PageProps の params が文字列に落ち、String(params.id) を余計な変換と
       # 誤読する。TypeScript ジョブと同じ手順で先に生成する。
@@ -137,9 +142,9 @@ jobs:
       - name: Install Playwright browsers
         run: pnpm exec playwright install chromium
 
-      # パッケージの下流（サイトと examples）はどちらも他ジョブが必要としないので、
-      # composite install の build からは外し、このジョブがまとめて面倒を見る。
-      # ドキュメントサイトは 177 ルートを実際に書き出す唯一の場所でもある。
+      # パッケージの下流（サイトと examples）は composite install の build から
+      # 外してある。Lint と TypeScript も route 表のために組むが、書き出した
+      # 全ルートと examples の出力を確かめるのはこのジョブだけ。
       - name: Build docs site
         run: pnpm --filter './apps/*' build
 
