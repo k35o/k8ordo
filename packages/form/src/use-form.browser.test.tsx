@@ -162,12 +162,26 @@ const Group: FC<{ state: FormState }> = ({ state }) => {
 const asyncSchema = z.object({ slug: z.string() });
 const asyncFields = formFields(asyncSchema);
 
-const AsyncSlug: FC = () => {
+const checkTaken = (value: string): Promise<string | undefined> =>
+  Promise.resolve(value === 'taken' ? '使われています' : undefined);
+
+/** A check whose answers the test hands back itself, in any order. */
+const checkByHand = () => {
+  const answers: Array<PromiseWithResolvers<string | undefined>> = [];
+  const check = (): Promise<string | undefined> => {
+    const answer = Promise.withResolvers<string | undefined>();
+    answers.push(answer);
+    return answer.promise;
+  };
+  return { answers, check };
+};
+
+const AsyncSlug: FC<{
+  check?: (value: string) => Promise<string | undefined>;
+}> = ({ check = checkTaken }) => {
   const form = useForm(asyncFields, NO_STATE);
   const slug = form.field('slug');
-  const taken = useAsyncCheck((value) =>
-    Promise.resolve(value === 'taken' ? '使われています' : undefined),
-  );
+  const taken = useAsyncCheck(check);
 
   return (
     <form {...form.props}>
@@ -570,8 +584,56 @@ describe('useForm in a browser', () => {
     expect(email.form?.noValidate).toBe(true);
   });
 
-  // Last on purpose: the answer lands from a plain promise, outside act(),
-  // and the act bookkeeping it trips must not poison a later render.
+  // The async checks are last on purpose: their answers land from plain
+  // promises, outside act(), and the act bookkeeping they trip must not poison
+  // a later render.
+  it('keeps the newest answer when an answer about an older value lands after it', async () => {
+    const { answers, check } = checkByHand();
+    const screen = await render(<AsyncSlug check={check} />);
+    const slug = screen.getByLabelText('slug');
+
+    await slug.fill('first');
+    await screen.getByRole('button', { name: 'away' }).click();
+    await slug.fill('second');
+    await screen.getByRole('button', { name: 'away' }).click();
+
+    answers[1]?.resolve('second は使われています');
+    await expect
+      .element(screen.getByTestId('slug-error'))
+      .toHaveTextContent('second は使われています');
+
+    answers[0]?.resolve('first は使われています');
+    await answers[0]?.promise;
+
+    expect((slug.element() as HTMLInputElement).validationMessage).toBe(
+      'second は使われています',
+    );
+    await expect
+      .element(screen.getByTestId('slug-error'))
+      .toHaveTextContent('second は使われています');
+  });
+
+  it('keeps the newest answer when an older answer about the same value lands after it', async () => {
+    const { answers, check } = checkByHand();
+    const screen = await render(<AsyncSlug check={check} />);
+    const slug = screen.getByLabelText('slug');
+
+    // Leaving the field again while the first answer is still out asks again.
+    await slug.fill('k8o');
+    await screen.getByRole('button', { name: 'away' }).click();
+    await slug.click();
+    await screen.getByRole('button', { name: 'away' }).click();
+
+    answers[1]?.resolve(undefined);
+    answers[0]?.resolve('使われています');
+    await answers[0]?.promise;
+
+    expect((slug.element() as HTMLInputElement).validationMessage).toBe('');
+    await expect
+      .element(screen.getByTestId('slug-error'))
+      .toHaveTextContent('');
+  });
+
   it('lets an async message go when the field is emptied', async () => {
     const screen = await render(<AsyncSlug />);
 
