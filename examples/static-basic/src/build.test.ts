@@ -13,26 +13,33 @@ import type { Browser, Page } from 'playwright';
 const root = path.resolve(import.meta.dirname, '..');
 const client = path.join(root, 'dist', 'client');
 
-// 描画に失敗するページを持つ構成のビルド。止まることを主張するので、
-// 先に走らせて stderr を取っておき、本物のビルドで dist を上書きする
-let brokenBuildStderr = '';
+// 描画に失敗するページ・not-found を持つ構成のビルド。止まることを主張する
+// ので、先に走らせて stderr を取っておき、本物のビルドで dist を上書きする
+let brokenPageStderr = '';
+let brokenNotFoundStderr = '';
 
 // ひとつ前のデプロイの dist/client。アプリは同じで、クライアントの
 // スクリプトだけが違う。タブを開いた後にデプロイがあった、を再現する
 let previous = '';
 
+// 止まらなかったビルドは空の stderr を返し、止まることの主張で落ちる
+const failingBuild = (config: string): string => {
+  try {
+    execFileSync('pnpm', ['exec', 'vp', 'build', '--config', config], {
+      cwd: root,
+      stdio: 'pipe',
+    });
+  } catch (error) {
+    return String((error as { stderr?: Buffer }).stderr ?? '');
+  }
+  return '';
+};
+
 // 主張の対象がビルド成果物そのものなので、テストがビルドを走らせる。
 // 出力を読むだけにすると、何も書かなかったビルドと区別がつかない
 beforeAll(() => {
-  try {
-    execFileSync(
-      'pnpm',
-      ['exec', 'vp', 'build', '--config', 'vite.broken.config.ts'],
-      { cwd: root, stdio: 'pipe' },
-    );
-  } catch (error) {
-    brokenBuildStderr = String((error as { stderr?: Buffer }).stderr ?? '');
-  }
+  brokenPageStderr = failingBuild('vite.broken.config.ts');
+  brokenNotFoundStderr = failingBuild('vite.broken-not-found.config.ts');
   // 圧縮しないだけで、スクリプトの中身とハッシュの入った名前が変わる
   execFileSync('pnpm', ['exec', 'vp', 'build', '--minify', 'false'], {
     cwd: root,
@@ -89,8 +96,15 @@ describe('the static build', () => {
 
   it('stops, naming the page, when a page throws while rendering', () => {
     // error.tsx はブラウザでの失敗のためのもので、ビルド時の失敗は失敗のまま
-    expect(brokenBuildStderr).toContain('static build could not render /');
-    expect(brokenBuildStderr).toContain('broken on purpose');
+    expect(brokenPageStderr).toContain('static build could not render /');
+    expect(brokenPageStderr).toContain('broken on purpose');
+  });
+
+  it('stops, naming 404.html, when not-found.tsx throws while rendering', () => {
+    expect(brokenNotFoundStderr).toContain(
+      'static build could not render 404.html',
+    );
+    expect(brokenNotFoundStderr).toContain('not-found broken on purpose');
   });
 
   it('writes a redirect.ts as a page that sends the visitor on', () => {

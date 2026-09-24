@@ -189,6 +189,18 @@ export const framework = (options: StaticOptions = {}): PluginOption[] => {
             ];
           }),
         );
+        // A static host answers an unknown URL from a file, so the
+        // application's own not-found has to be one — otherwise declaring it
+        // would mean nothing in this mode.
+        const unmatched = catchAllPath(tree);
+        if (unmatched !== null) {
+          const status = await write(
+            path.join(clientDir, '404.html'),
+            handler,
+            `${ORIGIN}${unmatched}`,
+          );
+          if (status === 500) failed.push('404.html');
+        }
         if (failed.length > 0) {
           throw new Error(
             `static build could not render ${failed.toSorted().join(', ')} — see the error above`,
@@ -197,17 +209,6 @@ export const framework = (options: StaticOptions = {}): PluginOption[] => {
         if (refused.length > 0) {
           throw new Error(
             `the "paths" option supplied pathnames a params schema refused: ${refused.toSorted().join(', ')}`,
-          );
-        }
-        // A static host answers an unknown URL from a file, so the
-        // application's own not-found has to be one — otherwise declaring it
-        // would mean nothing in this mode.
-        const unmatched = catchAllPath(tree);
-        if (unmatched !== null) {
-          await write(
-            path.join(clientDir, '404.html'),
-            handler,
-            `${ORIGIN}${unmatched}`,
           );
         }
         // The build knows every page it wrote, which is what a sitemap is.
