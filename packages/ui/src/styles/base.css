@@ -6,6 +6,17 @@
  */
 
 @layer base {
+  /* `light dark` にしないのは、トークンが prefers-color-scheme ではなく .dark で
+     切り替わるから。OS がダークでも .dark が無ければ、ネイティブ部品も
+     トークンと同じく明るいままにする */
+  :root {
+    color-scheme: light;
+  }
+
+  .dark {
+    color-scheme: dark;
+  }
+
   body:has(dialog[open]) {
     overflow: hidden;
   }
