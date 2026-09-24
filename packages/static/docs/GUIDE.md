@@ -363,16 +363,15 @@ and a hole where the page was, the browser throws at the same spot, and
 At build time that rule does not apply to a Server Component: a page whose
 Server Component throws while being rendered into a file is not a page, and
 the build stops rather than writing an HTML whose error shows only once a
-visitor's browser has rendered it. With a Suspense boundary above the throw —
-an `error.tsx` is one — the build ends naming the page,
-`static build could not render /broken — see the error above`; with none, it
-ends with React's production error,
-`An error occurred in the Server Components render…`, and the thrown message
-is only in the `k8ordo: rendering /broken failed` line logged above it. A
-client component that throws while the build renders the HTML is left to the
-browser when a Suspense boundary sits above it, and the file is written; with
-none, it stops the build too. `error.tsx` under this mode is for what fails
-in the browser: a client component, after hydration.
+visitor's browser has rendered it. The thrown message is logged beside the
+page's URL, and the build ends naming every page that failed,
+`static build could not render /broken — see the error above` — whether or
+not a Suspense boundary sits above the throw. A `not-found.tsx` that throws
+is named as `404.html`. A client component that throws while the build
+renders the HTML is left to the browser when a Suspense boundary sits above
+it, and the file is written; with none, it stops the build the same way.
+`error.tsx` under this mode is for what fails in the browser: a client
+component, after hydration.
 
 ## Redirects
 

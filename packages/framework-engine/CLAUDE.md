@@ -110,10 +110,15 @@ ParamsSchemaFor<pattern>`, lists per page pattern the schemas along its
 - **The request reaches a page only under a server.** `K8ORDO_MODE` is
   defined by the host; the handler attaches `request` (headers, cookies) only
   under `@k8ordo/server`, and the generator emits the field only there. Under
-  `@k8ordo/static` the handler also buffers the HTML and answers 500 when a
-  Server Component threw inside a Suspense boundary, so the build stops naming
-  the page instead of writing it; a throw with no boundary above it rejects
-  the HTML render itself, and the build stops on that error. `renderHtml`
+  `@k8ordo/static` the handler also buffers the HTML and answers 500 with the
+  thrown message when a page failed to render, so the build stops naming the
+  page instead of writing it. A throw inside a Suspense boundary leaves the
+  HTML render standing and is known only from the RSC render's `onError`; a
+  throw with no boundary above it rejects the HTML render itself, with the
+  SSR copy of the error — React's generic production message — so the
+  handler catches that and answers with what `onError` recorded, falling back
+  to the rejection's own error only when nothing was recorded (a client
+  component threw). `renderHtml`
   also writes every Suspense boundary in place — it waits for `allReady` and
   outlines nothing — so a file never carries a hidden segment for a script to
   move in after hydration has started.
