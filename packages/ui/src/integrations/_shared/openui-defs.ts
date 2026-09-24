@@ -30,166 +30,158 @@ export const buildComponentLibrary = <C>(
 
   const Button = def(
     'Button',
-    'アクションボタン。href を指定するとリンク（<a>）になる。',
+    'Action button. With href it renders as a link (<a>).',
     s.buttonProps,
   );
   const IconButton = def(
     'IconButton',
-    'アイコンのみのボタン（label は必須）。',
+    'Icon-only button (label is required).',
     s.iconButtonProps,
   );
-  const Badge = def('Badge', 'ステータスやラベルのバッジ。', s.badgeProps);
-  const Heading = def('Heading', '見出し（h1〜h6）。', s.headingProps);
-  const Anchor = def('Anchor', 'テキストリンク。', s.anchorProps);
-  const Avatar = def(
-    'Avatar',
-    'アバター（画像 or イニシャル）。',
-    s.avatarProps,
-  );
-  const Code = def('Code', 'インラインのコード/値表示。', s.codeProps);
-  const Icon = def('Icon', 'アイコン（name で指定）。', s.iconProps);
+  const Badge = def('Badge', 'Badge for a status or a label.', s.badgeProps);
+  const Heading = def('Heading', 'Heading (h1 to h6).', s.headingProps);
+  const Anchor = def('Anchor', 'Text link.', s.anchorProps);
+  const Avatar = def('Avatar', 'Avatar (an image or initials).', s.avatarProps);
+  const Code = def('Code', 'Inline code or value.', s.codeProps);
+  const Icon = def('Icon', 'Icon, chosen by name.', s.iconProps);
   const ChevronIcon = def(
     'ChevronIcon',
-    '矢印アイコン。direction で向きを指定。',
+    'Arrow icon. direction sets which way it points.',
     s.chevronIconProps,
   );
   const StatusIcon = def(
     'StatusIcon',
-    'ステータスを表すアイコン（success/info/warning/error）。装飾用途で、メッセージ表示なら Alert を使う。',
+    'Icon for a status (success/info/warning/error). It is decorative; to show a message, use Alert.',
     s.statusIconProps,
   );
   const Alert = def(
     'Alert',
-    '状態を伝えるアラート。message は文字列または文字列配列。',
+    'Alert that reports a status. message is a string or an array of strings.',
     s.alertProps,
   );
-  const Spinner = def('Spinner', 'ローディングスピナー。', s.spinnerProps);
-  const Progress = def('Progress', '進捗バー。', s.progressProps);
-  const Skeleton = def(
-    'Skeleton',
-    'ローディングのプレースホルダ。',
-    s.skeletonProps,
-  );
-  const Separator = def('Separator', '区切り線。', s.separatorProps);
+  const Spinner = def('Spinner', 'Loading spinner.', s.spinnerProps);
+  const Progress = def('Progress', 'Progress bar.', s.progressProps);
+  const Skeleton = def('Skeleton', 'Loading placeholder.', s.skeletonProps);
+  const Separator = def('Separator', 'Divider line.', s.separatorProps);
   const Tabs = def(
     'Tabs',
-    'タブ。各タブは label とテキスト content を持つ。content は文字列のみ。',
+    'Tabs. Each tab has a label and text content; content must be a plain string.',
     s.tabsProps,
   );
   const Accordion = def(
     'Accordion',
-    '開閉できるアコーディオン。各項目は title とテキスト content。content は文字列のみ。',
+    'Accordion of items that open and close. Each item has a title and text content; content must be a plain string.',
     s.accordionProps,
   );
-  const Breadcrumb = def('Breadcrumb', 'パンくずリスト。', s.breadcrumbProps);
+  const Breadcrumb = def('Breadcrumb', 'Breadcrumb trail.', s.breadcrumbProps);
   const Table = def(
     'Table',
-    'テーブル。columns と rows（行ごとのセル文字列）。各行のセル数は columns の数と一致させる。',
+    'Table with columns and rows (the cell strings of each row). Every row must have exactly as many cells as there are columns.',
     s.tableProps,
   );
   const TextField = def(
     'TextField',
-    '1行テキスト入力。name でフォーム状態に束縛される。',
+    'Single-line text input, bound to form state by name.',
     s.textFieldProps,
   );
   const Textarea = def(
     'Textarea',
-    '複数行テキスト入力。name でフォーム状態に束縛される。',
+    'Multi-line text input, bound to form state by name.',
     s.textareaProps,
   );
   const PasswordInput = def(
     'PasswordInput',
-    'パスワード入力。name でフォーム状態に束縛される。',
+    'Password input, bound to form state by name.',
     s.passwordInputProps,
   );
   const NumberField = def(
     'NumberField',
-    '数値入力。name でフォーム状態に束縛される。',
+    'Number input, bound to form state by name.',
     s.numberFieldProps,
   );
   const Slider = def(
     'Slider',
-    'スライダー。name でフォーム状態に束縛される。',
+    'Slider, bound to form state by name.',
     s.sliderProps,
   );
   const Checkbox = def(
     'Checkbox',
-    'チェックボックス。name でフォーム状態に束縛される。',
+    'Checkbox, bound to form state by name.',
     s.checkboxProps,
   );
   const Switch = def(
     'Switch',
-    'オン/オフスイッチ。name でフォーム状態に束縛される。',
+    'On/off switch, bound to form state by name.',
     s.switchProps,
   );
   const Select = def(
     'Select',
-    'ドロップダウン選択。name でフォーム状態に束縛される。',
+    'Dropdown select, bound to form state by name.',
     s.selectProps,
   );
   const Radio = def(
     'Radio',
-    '単一選択ラジオ。name でフォーム状態に束縛される。',
+    'Radio buttons for a single choice, bound to form state by name.',
     s.radioProps,
   );
   const RadioCard = def(
     'RadioCard',
-    'カード型の単一選択。name でフォーム状態に束縛される。',
+    'Single choice presented as cards, bound to form state by name.',
     s.radioCardProps,
   );
   const CheckboxCard = def(
     'CheckboxCard',
-    'カード型の複数選択。name でフォーム状態に束縛される。',
+    'Multiple choice presented as cards, bound to form state by name.',
     s.checkboxCardProps,
   );
   const Pagination = def(
     'Pagination',
-    'ページネーション。name でフォーム状態に束縛される。',
+    'Pagination, bound to form state by name.',
     s.paginationProps,
   );
   const Tooltip = def(
     'Tooltip',
-    'ツールチップ。ホバー/フォーカスで表示。',
+    'Tooltip shown on hover or focus.',
     s.tooltipProps,
   );
   const DropdownMenu = def(
     'DropdownMenu',
-    'ドロップダウンメニュー。',
+    'Dropdown menu.',
     s.dropdownMenuProps,
   );
   const Toast = def(
     'Toast',
-    'トースト通知。triggerLabel のボタンで発火。',
+    'Toast notification that a button labeled triggerLabel shows.',
     s.toastProps,
   );
   const ScrollLinked = def(
     'ScrollLinked',
-    'ページスクロール進捗バー（fixed top）。',
+    'Page scroll progress bar (fixed to the top).',
     s.scrollLinkedProps,
   );
   const ListBox = def(
     'ListBox',
-    'ポップアップ型の単一選択リスト。',
+    'Single-choice list in a popup.',
     s.listBoxProps,
   );
   const CheckboxGroup = def(
     'CheckboxGroup',
-    'チェックボックスグループ。name でフォーム状態に束縛。',
+    'Group of checkboxes, bound to form state by name.',
     s.checkboxGroupProps,
   );
   const Autocomplete = def(
     'Autocomplete',
-    'タグ風の複数選択オートコンプリート。',
+    'Tag-style autocomplete for multiple choices.',
     s.autocompleteProps,
   );
   const FileField = def(
     'FileField',
-    'ファイル選択フィールド（自己完結ウィジェット）。',
+    'File picker field (a self-contained widget).',
     s.fileFieldProps,
   );
   const FormControl = def(
     'FormControl',
-    'ラベル＋ヘルプ/エラー付きフィールド（text/textarea/password）。',
+    'Field with a label and help or error text (text/textarea/password).',
     s.formControlProps,
   );
 
@@ -259,73 +251,73 @@ export const buildComponentLibrary = <C>(
 
   const Stack = def(
     'Stack',
-    '子要素を縦/横に等間隔で並べるレイアウトコンテナ。',
+    'Layout container that places its children in a row or a column with even spacing.',
     s.stackProps.extend({
       get children() {
-        return containerChildren('並べる子要素');
+        return containerChildren('Children to lay out');
       },
     }),
   );
   const Grid = def(
     'Grid',
-    '子要素をグリッド状に並べる。cols（1〜6 / auto-fill / auto-fit）と gap、auto-fill/fit 時は minItemSize で各セルの最小サイズを制御。',
+    'Places its children in a grid. Set cols (1 to 6, auto-fill, or auto-fit) and gap; with auto-fill or auto-fit, minItemSize sets the smallest size of each cell.',
     s.gridProps.extend({
       get children() {
-        return containerChildren('グリッド内の子要素');
+        return containerChildren('Children of the grid');
       },
     }),
   );
   const Card = def(
     'Card',
-    'コンテンツをまとめるカード（コンテナ）。interactive を付けるとホバー時にスケールする。',
+    'Card that groups content (a container). interactive makes it scale up on hover.',
     s.cardProps.extend({
       get children() {
-        return containerChildren('カード内の子要素');
+        return containerChildren('Children of the card');
       },
     }),
   );
   const Form = def(
     'Form',
-    'フォーム要素のラッパー（縦並びレイアウト）。',
+    'Wrapper for form elements (a vertical layout).',
     s.formProps.extend({
       get children() {
-        return containerChildren('フォーム内の要素');
+        return containerChildren('Elements in the form');
       },
     }),
   );
   const Modal = def(
     'Modal',
-    'モーダルダイアログ。triggerLabel のボタンで開く。',
+    'Modal dialog that opens from a button labeled triggerLabel.',
     s.modalProps.extend({
       get children() {
-        return containerChildren('モーダル内の要素');
+        return containerChildren('Elements in the modal');
       },
     }),
   );
   const Dialog = def(
     'Dialog',
-    'センターダイアログ。triggerLabel のボタンで開く。',
+    'Centered dialog that opens from a button labeled triggerLabel.',
     s.dialogProps.extend({
       get children() {
-        return containerChildren('ダイアログ内の要素');
+        return containerChildren('Elements in the dialog');
       },
     }),
   );
   const Drawer = def(
     'Drawer',
-    'サイドドロワー。triggerLabel のボタンで開く。',
+    'Side drawer that opens from a button labeled triggerLabel.',
     s.drawerProps.extend({
       get children() {
-        return containerChildren('ドロワー内の要素');
+        return containerChildren('Elements in the drawer');
       },
     }),
   );
   const Popover = def(
     'Popover',
-    'ポップオーバー。triggerLabel のボタンで開閉。',
+    'Popover that a button labeled triggerLabel opens and closes.',
     s.popoverProps.extend({
       get children() {
-        return containerChildren('ポップオーバー内の要素');
+        return containerChildren('Elements in the popover');
       },
     }),
   );

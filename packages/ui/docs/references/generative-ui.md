@@ -70,6 +70,20 @@ These exports are left out on purpose, so a model cannot place them:
   `@k8ordo/ui/ai/response` — the chat the generated UI is shown in. Your
   application builds it from its message stream; a spec does not place it.
 
+## Prompt language
+
+Everything the adapters hand the model — component descriptions, `uiRules`,
+schema descriptions, and the repair prompt — is English, whatever your
+application's locale. The model reads it; your users never see it. To pin the
+language of the text the model writes into the UI, add a rule of your own:
+
+```tsx
+// json-render
+catalog.prompt({ customRules: [...uiRules, 'Write all UI text in Japanese.'] });
+// OpenUI
+prompt({ additionalRules: ['Write all UI text in Japanese.'] });
+```
+
 ## json-render
 
 The catalog (schemas and prompt) is separate from the registry (rendering), and
