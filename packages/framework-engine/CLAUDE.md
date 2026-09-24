@@ -122,6 +122,13 @@ ParamsSchemaFor<pattern>`, lists per page pattern the schemas along its
   also writes every Suspense boundary in place — it waits for `allReady` and
   outlines nothing — so a file never carries a hidden segment for a script to
   move in after hydration has started.
+- **The handler owns the methods.** It answers `GET`, `HEAD` and `POST`, and
+  anything else with a `405` and `Allow` — here, not in `@k8ordo/server`'s
+  `serve`, because a host that calls the built handler directly has no
+  `serve` in front of it. `HEAD` is answered from the status and headers,
+  which are settled before rendering, with a `null` body: nothing renders for
+  it, and no host is left to discard a stream. `@k8ordo/static` only ever
+  sends `GET`.
 - **One pattern walk.** `declaredPatterns(tree)` is the order the matcher
   tries patterns — pages and redirects, literals before params, the
   catch-all last in its branch — and everything that asks "which URLs does

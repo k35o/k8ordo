@@ -117,6 +117,31 @@ describe('the built request handler', () => {
     expect(html).toContain('<!--$!-->');
   });
 
+  it.each([
+    ['a page', '/', 200, 'text/html'],
+    ['a URL it does not have', '/nowhere', 404, 'text/html'],
+    ['a payload', '/products/index.rsc', 200, 'text/x-component'],
+  ])(
+    'answers HEAD for %s with the status and type a GET gets, and no body',
+    async (_what, pathname, status, type) => {
+      const response = await handler(
+        new Request(`${ORIGIN}${pathname}`, { method: 'HEAD' }),
+      );
+      expect(response.status).toBe(status);
+      expect(response.headers.get('content-type')).toContain(type);
+      expect(response.body).toBeNull();
+    },
+  );
+
+  it.each(['PUT', 'DELETE', 'PATCH', 'OPTIONS'])(
+    'answers %s with a 405 naming the methods it takes',
+    async (method) => {
+      const response = await handler(new Request(`${ORIGIN}/`, { method }));
+      expect(response.status).toBe(405);
+      expect(response.headers.get('allow')).toBe('GET, HEAD, POST');
+    },
+  );
+
   it('answers a redirect.ts with the status and location it declares', async () => {
     const response = await handler(new Request(`${ORIGIN}/old`));
     expect(response.status).toBe(307);

@@ -89,10 +89,11 @@ describe('serve', () => {
     expect(response.headers.get('content-type')).toContain('application/json');
   });
 
-  it('answers a POST from the handler, never from a file', async () => {
-    const response = await fetch(`${server.url}/index.html`, {
-      method: 'POST',
-    });
-    expect(await response.json()).toMatchObject({ method: 'POST' });
-  });
+  it.each(['POST', 'PUT', 'DELETE'])(
+    'answers a %s from the handler, never from a file',
+    async (method) => {
+      const response = await fetch(`${server.url}/index.html`, { method });
+      expect(await response.json()).toMatchObject({ method });
+    },
+  );
 });

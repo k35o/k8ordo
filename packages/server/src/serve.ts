@@ -111,8 +111,9 @@ export const serve = async (options: ServeOptions = {}): Promise<Server> => {
           incoming.url ?? '/',
           `http://${incoming.headers.host ?? 'localhost'}`,
         );
-        // Only a read can be answered from a file; a POST is always the
-        // application's to handle.
+        // ファイルで答えるのは読み取りだけ。ほかのメソッドは handler が答える
+        // （POST は action、残りは 405）。先にファイルが答えると、そのパスで
+        // だけ 405 が 200 に化ける
         const file =
           incoming.method === 'GET' || incoming.method === 'HEAD'
             ? await fileFor(clientDir, url.pathname)
