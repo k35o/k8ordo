@@ -63,11 +63,13 @@ pnpm check         # check:write to auto-fix
 
 ```
 src/
-  paths.ts   patternsOf / patternsNeedingPaths / planPaths / catchAllPatterns /
-             catchAllPath / dirFor / isConcrete — pure functions (supplied
-             pathnames matched with URLPattern)
-  index.ts   framework: engine + prerender (the dev refusal in transform,
-             the files in buildApp), and sitemap
+  paths.ts      patternsOf / patternsNeedingPaths / planPaths /
+                catchAllPatterns / catchAllPath / dirFor / isConcrete — pure
+                functions (supplied pathnames matched with URLPattern)
+  documents.ts  sitemap / redirectPage — the two files the build writes
+                itself rather than taking from the handler
+  index.ts      framework: engine + prerender (the dev refusal in transform,
+                the files in buildApp)
 ```
 
 ## Conventions
