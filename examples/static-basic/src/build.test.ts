@@ -118,6 +118,15 @@ describe('the static build', () => {
     );
   });
 
+  it('stops, naming 404.html, when not-found.tsx throws', () => {
+    expect(noBoundaryBuildStderr).toMatch(
+      /static build could not render .*404\.html/u,
+    );
+    expect(noBoundaryBuildStderr).toContain(
+      'not-found broken with no boundary above it',
+    );
+  });
+
   it('writes a redirect.ts as a page that sends the visitor on', () => {
     const html = read('old', 'index.html');
     expect(html).toContain('http-equiv="refresh"');
