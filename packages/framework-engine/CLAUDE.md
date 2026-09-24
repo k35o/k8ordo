@@ -164,6 +164,10 @@ src/
   runtime/render.tsx         the matched stack, nested through children
   runtime/virtual.d.ts       types of virtual:k8ordo/routes and K8ORDO_MODE
   index.ts
+fixtures/
+  bare-not-found/routes/     an application with no not-found.tsx, which
+                             runtime/not-found.test.ts builds from this
+                             package's source and opens in Chromium
 ```
 
 ## Conventions
