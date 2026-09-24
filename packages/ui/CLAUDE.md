@@ -220,7 +220,7 @@ No raw color values — always use semantic tokens in Tailwind classes. The toke
 
 ### Dark Mode
 
-Dark mode is class-based (`.dark` on `html`). All semantic tokens automatically remap — no manual `dark:` prefixes needed for tokens. Custom variant defined via `@custom-variant dark (&:where(.dark, .dark *))`.
+Dark mode is class-based (`.dark` on `html`, put there by `@k8ordo/color-scheme`; the library never adds it). All semantic tokens automatically remap — no manual `dark:` prefixes needed for tokens. Custom variant defined via `@custom-variant dark (&:where(.dark, .dark *))`. `base.css` sets `color-scheme` to follow the same class (`light` on `:root`, `dark` on `.dark`), not `light dark`, since the tokens do not follow `prefers-color-scheme`.
 
 ### Focus Style
 
@@ -233,7 +233,7 @@ Standard pattern: `focus-visible:border-transparent focus-visible:outline-hidden
 - `writing-h` / `writing-v` / `writing-sideways-rl` — writing mode
 - `z-overlay` / `z-modal` / `z-toast` — stacking order
 
-Custom variants besides `dark:`: `light:` (under `.light`) and `vertical:` (under `.writing-v`, switched off again inside `.writing-h`).
+Custom variants besides `dark:`: `light:` (anywhere not under `.dark`) and `vertical:` (under `.writing-v`, switched off again inside `.writing-h`).
 
 ## Testing
 
