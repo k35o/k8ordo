@@ -17,6 +17,8 @@ const client = path.join(root, 'dist', 'client');
 // ので、先に走らせて stderr を取っておき、本物のビルドで dist を上書きする
 let brokenPageStderr = '';
 let brokenNotFoundStderr = '';
+// 同じく、失敗するページの上に error.tsx も Suspense も無い構成
+let noBoundaryStderr = '';
 
 // ひとつ前のデプロイの dist/client。アプリは同じで、クライアントの
 // スクリプトだけが違う。タブを開いた後にデプロイがあった、を再現する
@@ -40,6 +42,7 @@ const failingBuild = (config: string): string => {
 beforeAll(() => {
   brokenPageStderr = failingBuild('vite.broken.config.ts');
   brokenNotFoundStderr = failingBuild('vite.broken-not-found.config.ts');
+  noBoundaryStderr = failingBuild('vite.broken-no-boundary.config.ts');
   // 圧縮しないだけで、スクリプトの中身とハッシュの入った名前が変わる
   execFileSync('pnpm', ['exec', 'vp', 'build', '--minify', 'false'], {
     cwd: root,
@@ -105,6 +108,33 @@ describe('the static build', () => {
       'static build could not render 404.html',
     );
     expect(brokenNotFoundStderr).toContain('not-found broken on purpose');
+  });
+
+  it('stops, naming the page, when a page throws with no boundary above it', () => {
+    // 境界が無いと HTML の描画そのものが reject する。それでも境界があるときと
+    // 同じく、ページ名を挙げて止まる
+    expect(noBoundaryStderr).toContain('static build could not render /');
+    expect(noBoundaryStderr).toContain('broken with no boundary above it');
+  });
+
+  it('stops, naming the page, when a client component throws in the HTML render with no boundary above it', () => {
+    expect(noBoundaryStderr).toMatch(
+      /static build could not render .*\/client\b/u,
+    );
+    // React 自身もこのエラーをログに出すので、ページの URL と並んだ行で
+    // ハンドラが答えたメッセージだと確かめる
+    expect(noBoundaryStderr).toMatch(
+      /\/client — client component broken with no boundary above it/u,
+    );
+  });
+
+  it('stops, naming 404.html, when not-found.tsx throws with no boundary above it', () => {
+    expect(noBoundaryStderr).toMatch(
+      /static build could not render .*404\.html/u,
+    );
+    expect(noBoundaryStderr).toContain(
+      'not-found broken with no boundary above it',
+    );
   });
 
   it('writes a redirect.ts as a page that sends the visitor on', () => {

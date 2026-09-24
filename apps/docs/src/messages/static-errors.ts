@@ -11,13 +11,13 @@ export const serverRenderTitle = message({
 });
 
 export const serverRenderDescription = message({
-  ja: 'ビルド中に Server Component が throw したページは、ページとして書かれません。訪問者のブラウザで描かれて初めてエラーが見える HTML を書く代わりに、ビルドが止まります。エラーはページの pathname と一緒に `k8ordo: rendering /broken failed` としてログに出ます。上に Suspense の境界（`error.tsx` もその 1 つ）があればビルドは次の行で終わり、無ければこの行ではなく React の本番用のエラー（`An error occurred in the Server Components render…`）で終わるので、throw されたメッセージが出るのは上のログの行だけです。',
-  en: "A page whose Server Component throws while the build renders it is not written as a page: the build stops rather than writing an HTML whose error would only show once a visitor's browser rendered it. The error is logged with the page's pathname, as `k8ordo: rendering /broken failed`. When a Suspense boundary sits above it — an `error.tsx` is one — the build then ends with the line below; with none, it ends with React's production error (`An error occurred in the Server Components render…`) instead, so that log line is the only place the thrown message appears.",
+  ja: 'ビルド中に Server Component が throw したページは、ページとして書かれません。訪問者のブラウザで描かれて初めてエラーが見える HTML を書く代わりに、ビルドが止まります。throw されたメッセージはページの URL と一緒にログに出て、ビルドは失敗したページをすべて挙げた次の行で終わります。上に Suspense の境界（`error.tsx` もその 1 つ）があってもなくても同じです。throw したのが `not-found.tsx` なら、`404.html` として挙がります。',
+  en: "A page whose Server Component throws while the build renders it is not written as a page: the build stops rather than writing an HTML whose error would only show once a visitor's browser rendered it. The thrown message is logged beside the page's URL, and the build ends with the line below, naming every page that failed — whether or not a Suspense boundary sits above the throw (an `error.tsx` is one). A `not-found.tsx` that throws is named as `404.html`.",
 });
 
 export const serverRenderClient = message({
-  ja: 'クライアントコンポーネントは事情が違います。ビルドが HTML を作る途中でクライアントコンポーネントが throw しても、上に Suspense の境界（`error.tsx` もその 1 つ）があれば、その部分はブラウザに任されてファイルは書かれ、ブラウザが描き直します。そこでも throw すれば、hydration の後にいちばん近い `error.tsx` が出ます。上に Suspense の境界が無ければ、そのエラーでビルドが止まります。',
-  en: 'A client component is different. When one throws while the build renders the HTML inside a Suspense boundary — an `error.tsx` is one — that part is left to the browser: the file is written, and the browser renders it again, showing the nearest `error.tsx` after hydration if it throws there too. With no Suspense boundary above it, the error stops the build.',
+  ja: 'クライアントコンポーネントは事情が違います。ビルドが HTML を作る途中でクライアントコンポーネントが throw しても、上に Suspense の境界（`error.tsx` もその 1 つ）があれば、その部分はブラウザに任されてファイルは書かれ、ブラウザが描き直します。そこでも throw すれば、hydration の後にいちばん近い `error.tsx` が出ます。上に Suspense の境界が無ければ、Server Component と同じようにビルドが止まります。',
+  en: 'A client component is different. When one throws while the build renders the HTML inside a Suspense boundary — an `error.tsx` is one — that part is left to the browser: the file is written, and the browser renders it again, showing the nearest `error.tsx` after hydration if it throws there too. With no Suspense boundary above it, it stops the build the same way a Server Component does.',
 });
 
 export const serverRenderBrowser = message({

@@ -116,6 +116,23 @@ const sameOrigin = (request: Request, url: URL): boolean => {
 };
 
 /**
+ * A page that could not be rendered, as `@k8ordo/static` receives it: the
+ * build writes nothing for a 500 and stops with the message.
+ */
+const renderFailed = (error: unknown): Response =>
+  new Response(
+    error instanceof Error
+      ? error.message
+      : typeof error === 'string'
+        ? error
+        : 'a component threw something that is not an Error',
+    {
+      status: 500,
+      headers: { 'content-type': 'text/plain;charset=utf-8' },
+    },
+  );
+
+/**
  * The one entry both modes share: a request in, a page out. `@k8ordo/server`
  * calls it per request; `@k8ordo/static` calls it at build time, for each
  * route's HTML and again for its payload, and writes the answers to files.
@@ -225,32 +242,32 @@ export default async function handler(request: Request): Promise<Response> {
     });
   }
 
-  const html = await parsed.enter(() => ssr.renderHtml(rscStream));
   if (import.meta.env.K8ORDO_MODE === '@k8ordo/static') {
     // A build into files can afford to wait for the whole page, and has to:
     // a Server Component that threw would otherwise be written as a page whose
     // error shows only once a visitor's browser has rendered it. Under a
     // running server the same page streams and the browser shows error.tsx;
     // at build time it is a build that stops, naming the page.
-    const body = await new Response(html).arrayBuffer();
-    const failed = failures[0];
-    if (failed !== undefined) {
-      const message =
-        failed instanceof Error
-          ? failed.message
-          : typeof failed === 'string'
-            ? failed
-            : 'a component threw something that is not an Error';
-      return new Response(message, {
-        status: 500,
-        headers: { 'content-type': 'text/plain;charset=utf-8' },
-      });
+    let body: ArrayBuffer;
+    try {
+      const html = await parsed.enter(() => ssr.renderHtml(rscStream));
+      body = await new Response(html).arrayBuffer();
+    } catch (error) {
+      // With no Suspense boundary above the throw the HTML render itself
+      // rejects, with the SSR environment's copy of a Server Component's
+      // error — React's generic production message. The original is the one
+      // `onError` recorded; a client component that threw left no record,
+      // and what rejected is its own error.
+      return renderFailed(failures[0] ?? error);
     }
+    const failed = failures[0];
+    if (failed !== undefined) return renderFailed(failed);
     return new Response(body, {
       status,
       headers: { 'content-type': 'text/html;charset=utf-8' },
     });
   }
+  const html = await parsed.enter(() => ssr.renderHtml(rscStream));
   return new Response(html, {
     status,
     headers: { 'content-type': 'text/html;charset=utf-8' },
