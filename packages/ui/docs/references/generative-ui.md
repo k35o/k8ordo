@@ -33,6 +33,43 @@ the types, and the build all pass, and the form views throw
 pnpm this happens as soon as your version differs from the one `@k8ordo/ui`
 resolves, even when both satisfy the range.
 
+## What the catalog covers
+
+Both adapters register the same components, and the prompts they generate list
+them. Most are the exported component of the same name. A few are shaped for a
+model instead:
+
+- **Icons** are one `Icon` entry whose `name` picks the glyph from a curated
+  set of icons that need nothing but a size. `ChevronIcon` has an entry of its
+  own, and `AlertIcon` is the `StatusIcon` entry.
+- **Toasts** are a `Toast` entry, standing in for `ToastProvider` and
+  `useToast`: a self-contained widget whose `triggerLabel` button shows the
+  toast.
+- **Overlays** (`Modal`, `Dialog`, `Drawer`, `Popover`, `Tooltip`,
+  `DropdownMenu`) are self-contained widgets too. Each declares its own trigger
+  with `triggerLabel` and handles opening and closing itself.
+- **Compound components** (`Tabs`, `Accordion`, `Table`, `Breadcrumb`, …) are
+  one entry each, with their parts flattened into data such as
+  `tabs: [{ label, content }]`.
+
+Every other component the package exports is either in the catalog or in the
+list below, and the package's tests keep it that way.
+
+## What the catalog leaves out
+
+These exports are left out on purpose, so a model cannot place them:
+
+- `InView`, `Resize` — they report to a callback and draw nothing of their own,
+  and a spec has no code to receive the report.
+- `UIProvider` — your application mounts it once, around the generated UI as
+  well.
+- `PortalRootProvider`, `usePortalRoot` — wiring for your own `createPortal`
+  calls. The generated overlays open their own surfaces.
+- `Conversation`, `Message`, `PromptInput`, `Reasoning`, `Suggestion`, and
+  `ToolInvocation` from `@k8ordo/ui/ai`, and `Response` from
+  `@k8ordo/ui/ai/response` — the chat the generated UI is shown in. Your
+  application builds it from its message stream; a spec does not place it.
+
 ## json-render
 
 The catalog (schemas and prompt) is separate from the registry (rendering), and
