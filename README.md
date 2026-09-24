@@ -83,10 +83,13 @@ already have.
 | Command | |
 | --- | --- |
 | `pnpm build` | Build every package and app |
+| `pnpm build:examples` | Build every example |
 | `pnpm test` | Run every test |
+| `pnpm test:examples` | Run the examples' tests, which read their builds (`build:examples` first) |
 | `pnpm typecheck` | Type check every workspace |
 | `pnpm check` | Lint and format check (`check:write` to auto-fix) |
 | `pnpm check:no-polyfills` | Fail if a polyfill dependency has crept in |
+| `pnpm check:peer-copies` | Fail if a peer shared with `@k8ordo/*` resolves to two copies |
 | `pnpm change` | Record a release intent for the changed packages |
 
 Run `pnpm build` and `pnpm build:examples` before `pnpm check` or
