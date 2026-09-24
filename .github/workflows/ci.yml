@@ -53,6 +53,11 @@ jobs:
       - name: Install
         uses: ./.github/composite-actions/install
 
+      # docs のビルドは llms.txt を書き直すので、比べるのはその前でないと
+      # いつも一致してしまう。
+      - name: Check llms.txt is in sync with the packages' indexes
+        run: pnpm --filter docs check:llms
+
       # 型を使う lint も typecheck と同じ .k8ordo/ を読む。表が無いと
       # PageProps の params が文字列に落ち、String(params.id) を余計な変換と
       # 誤読する。TypeScript ジョブと同じ手順で先に生成する。
