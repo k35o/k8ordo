@@ -22,8 +22,9 @@ runs:
       shell: bash
       run: pnpm ci
 
-    # apps/docs is deliberately absent: the site is built by the one job that
-    # owns it, so the other jobs do not pay for 177 prerendered routes.
+    # apps/docs is deliberately absent: most jobs never read the site, so they
+    # do not pay for prerendering every route. The ones that read its output
+    # or its generated route table build it themselves.
     - name: Build
       shell: bash
       env:

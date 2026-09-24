@@ -142,9 +142,9 @@ jobs:
       - name: Install Playwright browsers
         run: pnpm exec playwright install chromium
 
-      # パッケージの下流（サイトと examples）はどちらも他ジョブが必要としないので、
-      # composite install の build からは外し、このジョブがまとめて面倒を見る。
-      # ドキュメントサイトは 177 ルートを実際に書き出す唯一の場所でもある。
+      # パッケージの下流（サイトと examples）は composite install の build から
+      # 外してある。Lint と TypeScript も route 表のために組むが、書き出した
+      # 全ルートと examples の出力を確かめるのはこのジョブだけ。
       - name: Build docs site
         run: pnpm --filter './apps/*' build
 
