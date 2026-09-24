@@ -169,6 +169,10 @@ export function TalkForm({ fields }: Props) {
 
   return (
     <form {...form.props} action={formAction}>
+      {form.formError.message !== undefined && (
+        <p {...form.formError.props}>{form.formError.message}</p>
+      )}
+
       <label>
         Title
         <input {...title.input} aria-invalid={title.invalid} />
@@ -192,7 +196,6 @@ export function TalkForm({ fields }: Props) {
         Recorded
       </label>
 
-      {state.formError !== undefined && <p>{state.formError}</p>}
       <button type="submit">Register</button>
     </form>
   );
