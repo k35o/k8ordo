@@ -9,7 +9,7 @@ import type {
   StreamdownTranslations,
 } from 'streamdown';
 
-import { useMessages } from '../../../i18n/context';
+import { getMessages } from '../../../i18n/current';
 
 type Props = {
   children: string;
@@ -38,7 +38,7 @@ export const Response: FC<Props> = ({
   translations,
   ...rest
 }) => {
-  const messages = useMessages();
+  const messages = getMessages();
 
   const mergedTranslations = useMemo<Partial<StreamdownTranslations>>(
     () => ({

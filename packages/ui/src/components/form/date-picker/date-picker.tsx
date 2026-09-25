@@ -6,7 +6,7 @@ import { useFormStatus } from 'react-dom';
 
 import { cn } from '../../../helpers/cn';
 import { mergeRefs } from '../../../helpers/merge-refs';
-import { useMessages } from '../../../i18n/context';
+import { getMessages } from '../../../i18n/current';
 import { commitInputValue } from '../../../internal/commit-input-value';
 import {
   FOCUS_RING_NO_BORDER,
@@ -49,7 +49,7 @@ export const DatePicker: FC<Props> = ({
   ref,
   ...rest
 }) => {
-  const messages = useMessages();
+  const messages = getMessages();
   const { pending } = useFormStatus();
   const inputRef = useRef<HTMLInputElement>(null);
   const mergedRef = useMemo(() => mergeRefs(inputRef, ref), [ref]);

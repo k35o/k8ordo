@@ -944,6 +944,9 @@ importers:
       '@k8ordo/form':
         specifier: workspace:^
         version: link:../form
+      '@k8ordo/i18n':
+        specifier: workspace:^
+        version: link:../i18n
       '@openuidev/lang-core':
         specifier: 'catalog:'
         version: 0.3.0(zod@4.6.5)
