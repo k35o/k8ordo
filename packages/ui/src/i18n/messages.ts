@@ -45,6 +45,11 @@ export type Messages = {
   /** NumberField の値が max を上回ったときの検証メッセージ。`{max}` が max の値に置き換わる */
   numberFieldRangeOverflow: string;
 
+  /** RangeSlider の下側のつまみ。部品の名前（aria-label など）の後に続けて読まれる */
+  rangeSliderStart: string;
+  /** RangeSlider の上側のつまみ */
+  rangeSliderEnd: string;
+
   calendarPreviousMonth: string;
   calendarNextMonth: string;
   /** DatePicker のカレンダーを開くボタン */

@@ -32,6 +32,9 @@ export const en: Messages = {
   numberFieldRangeUnderflow: 'Enter {min} or more',
   numberFieldRangeOverflow: 'Enter {max} or less',
 
+  rangeSliderStart: 'minimum',
+  rangeSliderEnd: 'maximum',
+
   calendarPreviousMonth: 'Previous month',
   calendarNextMonth: 'Next month',
   datePickerOpen: 'Choose from calendar',

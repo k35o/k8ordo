@@ -40,6 +40,7 @@ export { NumberField } from './form/number-field';
 export { PasswordInput } from './form/password-input';
 export { Radio } from './form/radio';
 export { RadioCard, type RadioCardOption } from './form/radio-card';
+export { RangeSlider } from './form/range-slider';
 export { Select } from './form/select';
 export { Slider } from './form/slider';
 export { Switch } from './form/switch';

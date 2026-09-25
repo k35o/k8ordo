@@ -11,7 +11,7 @@ import * as m from '../../../../messages';
 const MESSAGE_USAGE = {
   close: 'Alert / Dialog / Drawer / Response',
   required: 'FormControl',
-  loading: 'Spinner',
+  loading: 'Spinner / Progress',
   avatar: 'Avatar',
   color: 'Code',
   alertSuccess: 'Alert',
@@ -33,6 +33,8 @@ const MESSAGE_USAGE = {
   numberFieldDecrement: 'NumberField',
   numberFieldRangeUnderflow: 'NumberField',
   numberFieldRangeOverflow: 'NumberField',
+  rangeSliderStart: 'RangeSlider',
+  rangeSliderEnd: 'RangeSlider',
   calendarPreviousMonth: 'Calendar / DatePicker',
   calendarNextMonth: 'Calendar / DatePicker',
   datePickerOpen: 'DatePicker',
