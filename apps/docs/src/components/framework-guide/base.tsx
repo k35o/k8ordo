@@ -33,6 +33,11 @@ export function BaseGuide({ mode }: { mode: Mode }) {
         <Bullet>
           <Rich>{t.redirects()}</Rich>
         </Bullet>
+        {mode === 'server' ? (
+          <Bullet>
+            <Rich>{t.builtRedirects()}</Rich>
+          </Bullet>
+        ) : null}
         <Bullet>
           <Rich>{t.outside()}</Rich>
         </Bullet>

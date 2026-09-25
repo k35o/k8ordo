@@ -19,9 +19,9 @@ const MESSAGE_USAGE = {
   alertWarning: 'Alert',
   alertError: 'Alert',
   toastRegion: 'Toast',
-  copy: 'CopyButton',
-  copied: 'CopyButton / CodeBlock',
-  copyFailed: 'CopyButton / CodeBlock',
+  copy: 'CopyButton / Message.Copy',
+  copied: 'CopyButton / CodeBlock / Message.Copy',
+  copyFailed: 'CopyButton / CodeBlock / Message.Copy',
   autocompletePlaceholder: 'Autocomplete',
   autocompleteRemoveTag: 'Autocomplete',
   autocompleteClear: 'Autocomplete',
@@ -59,10 +59,22 @@ const MESSAGE_USAGE = {
   suggestions: 'Suggestion.List',
   send: 'PromptInput',
   stop: 'PromptInput',
+  attach: 'PromptInput.Attach',
+  attachments: 'Attachment.List / PromptInput.Attachments',
+  attachmentRemove: 'PromptInput.Attachments',
+  attachmentImage: 'Attachment.Item / PromptInput.Attachments',
+  sources: 'Source.List',
+  messageActions: 'Message.Actions',
+  regenerate: 'Message.Regenerate',
+  feedbackPositive: 'Message.Feedback',
+  feedbackNegative: 'Message.Feedback',
   toolInput: 'ToolInvocation',
   toolOutput: 'ToolInvocation',
   toolError: 'ToolInvocation',
   toolDenied: 'ToolInvocation',
+  toolApprovalRequest: 'ToolInvocation',
+  toolApprove: 'ToolInvocation',
+  toolDeny: 'ToolInvocation',
   responseCopied: 'Response',
   responseCopyCode: 'Response',
   responseCopyLink: 'Response',
@@ -321,19 +333,19 @@ function DismissButton({ onDismiss }) {
                 <Code>{row.key}</Code>
               </dt>
               <dd className="text-fg-mute text-sm">
-                <span className="text-fg-mute/60">
+                <span className="text-fg-subtle">
                   <Rich>{m.uiI18n.usedByColumn()}</Rich>:{' '}
                 </span>
                 {row.usedBy}
               </dd>
               <dd className="text-fg-mute text-sm">
-                <span className="text-fg-mute/60">
+                <span className="text-fg-subtle">
                   <Rich>{m.uiI18n.jaColumn()}</Rich>:{' '}
                 </span>
                 {row.jaValue}
               </dd>
               <dd className="text-fg-mute text-sm">
-                <span className="text-fg-mute/60">
+                <span className="text-fg-subtle">
                   <Rich>{m.uiI18n.enColumn()}</Rich>:{' '}
                 </span>
                 {row.enValue}

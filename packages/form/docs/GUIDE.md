@@ -135,12 +135,15 @@ breaks its schema never reaches the URL.
 // actions.ts
 'use server';
 
+import { href } from '@k8ordo/router';
+import { redirect } from '@k8ordo/server/runtime';
+
 export async function createTalk(_prev: FormState, formData: FormData) {
   const parsed = parseForm(talkSchema, formData);
   if (!parsed.success) return parsed.state;
 
   await insertTalk(parsed.data); // typed
-  redirect('/talks');
+  redirect(href('/talks'));
 }
 ```
 

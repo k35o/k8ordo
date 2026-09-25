@@ -89,10 +89,29 @@ export type Messages = {
   suggestions: string;
   send: string;
   stop: string;
+  /** PromptInput.Attach の開くボタン */
+  attach: string;
+  /** Attachment.List / PromptInput.Attachments の list 名 */
+  attachments: string;
+  /** 添付 1 件を外すボタン。どの添付かは aria-describedby のファイル名で補う */
+  attachmentRemove: string;
+  /** 画像の添付に filename が無いときの代替テキスト */
+  attachmentImage: string;
+  /** Source.List の list 名 */
+  sources: string;
+  /** Message.Actions の group 名 */
+  messageActions: string;
+  regenerate: string;
+  feedbackPositive: string;
+  feedbackNegative: string;
   toolInput: string;
   toolOutput: string;
   toolError: string;
   toolDenied: string;
+  /** ToolInvocation の承認待ちで、requestReason が無いときの問いかけ */
+  toolApprovalRequest: string;
+  toolApprove: string;
+  toolDeny: string;
 
   /**
    * Response が描画する Markdown のコントロール文言。
