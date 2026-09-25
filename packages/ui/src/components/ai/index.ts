@@ -4,4 +4,9 @@ export { PromptInput } from './prompt-input';
 export { Reasoning } from './reasoning';
 export { Suggestion } from './suggestion';
 export { ToolInvocation } from './tool-invocation';
-export type { ChatStatus, ToolState } from './types';
+export type {
+  ChatStatus,
+  ToolApproval,
+  ToolApprovalResponse,
+  ToolState,
+} from './types';

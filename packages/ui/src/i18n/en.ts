@@ -48,6 +48,9 @@ export const en: Messages = {
   toolOutput: 'Output',
   toolError: 'The tool failed to run.',
   toolDenied: 'The tool run was not approved.',
+  toolApprovalRequest: 'Allow this tool to run?',
+  toolApprove: 'Allow',
+  toolDeny: 'Deny',
 
   responseCopied: 'Copied',
   responseCopyCode: 'Copy code',

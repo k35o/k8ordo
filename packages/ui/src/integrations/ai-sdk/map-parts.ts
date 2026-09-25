@@ -1,7 +1,7 @@
 import { getToolName, isReasoningUIPart, isTextUIPart, isToolUIPart } from 'ai';
 import type { UIMessage } from 'ai';
 
-import type { ToolState } from '../../components/ai/types';
+import type { ToolApproval, ToolState } from '../../components/ai/types';
 
 export type MappedPart =
   | { kind: 'text'; text: string }
@@ -14,7 +14,7 @@ export type MappedPart =
       input?: unknown;
       output?: unknown;
       errorText?: string;
-      deniedReason?: string;
+      approval?: ToolApproval;
     };
 
 /**
@@ -40,8 +40,7 @@ export const mapMessageParts = (message: UIMessage): MappedPart[] => {
         input: part.input,
         output: part.state === 'output-available' ? part.output : undefined,
         errorText: part.state === 'output-error' ? part.errorText : undefined,
-        deniedReason:
-          part.state === 'output-denied' ? part.approval.reason : undefined,
+        approval: part.approval,
       });
     }
   }

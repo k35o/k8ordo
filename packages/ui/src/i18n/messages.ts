@@ -61,6 +61,10 @@ export type Messages = {
   toolOutput: string;
   toolError: string;
   toolDenied: string;
+  /** ToolInvocation の承認待ちで、requestReason が無いときの問いかけ */
+  toolApprovalRequest: string;
+  toolApprove: string;
+  toolDeny: string;
 
   /**
    * Response が描画する Markdown のコントロール文言。

@@ -48,6 +48,9 @@ export const ja: Messages = {
   toolOutput: '出力',
   toolError: 'ツールの実行でエラーが発生しました。',
   toolDenied: 'ツールの実行は許可されませんでした。',
+  toolApprovalRequest: 'このツールの実行を許可しますか？',
+  toolApprove: '許可',
+  toolDeny: '拒否',
 
   responseCopied: 'コピーしました',
   responseCopyCode: 'コードをコピー',

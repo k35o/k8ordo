@@ -14,6 +14,7 @@ type Props = {
   isOpen?: boolean;
   defaultOpen?: boolean;
   onChange?: (isOpen: boolean) => void;
+  footer?: ReactNode;
   children: ReactNode;
 };
 
@@ -23,6 +24,7 @@ export const Collapsible: FC<Props> = ({
   isOpen,
   defaultOpen = false,
   onChange,
+  footer,
   children,
 }) => {
   const [open, setOpen] = useControllableState<boolean>({
@@ -55,6 +57,9 @@ export const Collapsible: FC<Props> = ({
       <div className="px-3 pt-2 pb-3" hidden={!open} id={panelId}>
         {children}
       </div>
+      {footer !== undefined && (
+        <div className="border-border-mute border-t px-3 py-2">{footer}</div>
+      )}
     </div>
   );
 };
