@@ -1,4 +1,5 @@
 import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises';
+import { connect } from 'node:net';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
@@ -19,10 +20,28 @@ beforeAll(async () => {
     path.join(dist, 'client', 'assets', 'app-abc123.js'),
     'export {};',
   );
+  await writeFile(path.join(dist, 'client', 'site.webmanifest'), '{}');
+  await writeFile(path.join(dist, 'client', 'notes.k8ordo'), 'k8ordo');
   await writeFile(
     path.join(dist, 'rsc', 'index.js'),
     `export default async (request) => {
       const url = new URL(request.url);
+      if (url.pathname === '/throws') {
+        throw new Error('postgres://admin:hunter2@db refused the connection');
+      }
+      if (url.pathname === '/breaks-midway') {
+        let sent = false;
+        return new Response(new ReadableStream({
+          pull(controller) {
+            if (sent) {
+              controller.error(new Error('the render died'));
+              return;
+            }
+            sent = true;
+            controller.enqueue(new TextEncoder().encode('<p>half a page'));
+          },
+        }));
+      }
       const body = request.method === 'POST' ? await request.text() : '';
       const headers = new Headers({ 'content-type': 'application/json' });
       headers.append('set-cookie', 'a=1');
@@ -41,6 +60,25 @@ afterAll(async () => {
   await rm(dist, { recursive: true, force: true });
 });
 
+// fetch は HEAD の答えに本文が付いていても読まずに捨てるので、本文が
+// 送られていないことは線上のバイトでしか確かめられない
+const exchange = (method: string, pathname: string): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const socket = connect(server.port, 'localhost');
+    let received = '';
+    socket.setEncoding('utf8');
+    socket.on('data', (chunk: string) => {
+      received += chunk;
+    });
+    socket.on('end', () => {
+      resolve(received);
+    });
+    socket.on('error', reject);
+    socket.write(
+      `${method} ${pathname} HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n`,
+    );
+  });
+
 describe('serve', () => {
   it('listens on the port the system gave it and says so', () => {
     expect(server.port).toBeGreaterThan(0);
@@ -50,7 +88,9 @@ describe('serve', () => {
   it('answers a file from the client build as it is, with its type', async () => {
     const response = await fetch(`${server.url}/index.html`);
     expect(response.status).toBe(200);
-    expect(response.headers.get('content-type')).toContain('text/html');
+    expect(response.headers.get('content-type')).toBe(
+      'text/html; charset=utf-8',
+    );
     expect(response.headers.get('cache-control')).toBe('no-cache');
     expect(await response.text()).toBe('<p>static</p>');
   });
@@ -60,6 +100,35 @@ describe('serve', () => {
     expect(response.headers.get('cache-control')).toContain('immutable');
     expect(response.headers.get('content-type')).toContain('javascript');
   });
+
+  it('types a file by the registered type of its extension', async () => {
+    const response = await fetch(`${server.url}/site.webmanifest`);
+    expect(response.headers.get('content-type')).toBe(
+      'application/manifest+json; charset=utf-8',
+    );
+  });
+
+  it('sends a file whose extension has no registered type as bytes', async () => {
+    const response = await fetch(`${server.url}/notes.k8ordo`);
+    expect(response.headers.get('content-type')).toBe(
+      'application/octet-stream',
+    );
+  });
+
+  it.each([
+    ['a file', '/index.html', 'text/html; charset=utf-8'],
+    // この handler は HEAD にも本文を返す。それでも線には載らない
+    ['the handler', '/products/1', 'application/json'],
+  ])(
+    'answers HEAD for %s with the headers alone',
+    async (_answerer, pathname, type) => {
+      const received = await exchange('HEAD', pathname);
+      const [head = '', ...rest] = received.split('\r\n\r\n');
+      expect(head).toMatch(/^HTTP\/1\.1 200 OK\r\n/u);
+      expect(head).toContain(`content-type: ${type}\r\n`);
+      expect(rest.join('\r\n\r\n')).toBe('');
+    },
+  );
 
   it('hands everything else to the handler, with the request intact', async () => {
     const response = await fetch(`${server.url}/products/1`, {
@@ -89,10 +158,46 @@ describe('serve', () => {
     expect(response.headers.get('content-type')).toContain('application/json');
   });
 
-  it('answers a POST from the handler, never from a file', async () => {
-    const response = await fetch(`${server.url}/index.html`, {
-      method: 'POST',
-    });
-    expect(await response.json()).toMatchObject({ method: 'POST' });
+  it.each(['POST', 'PUT', 'DELETE'])(
+    'answers a %s from the handler, never from a file',
+    async (method) => {
+      const response = await fetch(`${server.url}/index.html`, { method });
+      expect(await response.json()).toMatchObject({ method });
+    },
+  );
+
+  it('cuts the connection when the body fails partway, rather than leaving it open', async () => {
+    // 繋いだままなら読み取りは終わらずテストが時間切れになる。切れたときは
+    // fetch の仕様どおりネットワークエラー（TypeError）で落ちる
+    const body = fetch(`${server.url}/breaks-midway`).then((response) =>
+      response.text(),
+    );
+    await expect(body).rejects.toThrow(TypeError);
+  });
+
+  it('answers a handler that threw with a bare 500, keeping the error from the visitor', async () => {
+    const log = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      const response = await fetch(`${server.url}/throws`);
+      expect(response.status).toBe(500);
+      expect(await response.text()).toBe('internal error');
+    } finally {
+      log.mockRestore();
+    }
+  });
+
+  it('logs what the handler threw, for the operator', async () => {
+    const log = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      await (await fetch(`${server.url}/throws`)).text();
+      expect(log).toHaveBeenCalledWith(
+        'k8ordo: %s %s failed',
+        'GET',
+        '/throws',
+        new Error('postgres://admin:hunter2@db refused the connection'),
+      );
+    } finally {
+      log.mockRestore();
+    }
   });
 });

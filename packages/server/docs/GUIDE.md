@@ -541,13 +541,23 @@ can reach — inside a container, pass `host: '0.0.0.0'`).
 `serve` hands out the client build's files as they are and passes everything
 else to the request handler: HTML for a page, its RSC payload for a client
 navigation, and `not-found.tsx` under a genuine 404. Only a `GET` or `HEAD`
-is answered from a file; a `POST` always reaches the handler. A file under
-`assets/` has its content hash in its name and is sent `immutable`; any other
-file is sent `no-cache`. It returns where it listens and a way to stop —
-`port: 0` asks the system for a free port, which is what a test wants. A
-request pathname may only ever name a file inside the build output, whatever
-it is spelled like — traversal is not a case weighed per request but an
-outcome the path resolution cannot produce.
+is answered from a file; any other method reaches the handler, even at a path
+that names a file. A file is sent with the type registered for its extension
+— with `charset=utf-8` on text — or as `application/octet-stream` when none
+is registered. A file under `assets/` has its content hash in its name and is
+sent `immutable`; any other file is sent `no-cache`. A `HEAD` gets the
+headers a `GET` would and no body, whether a file or the handler answers it.
+It returns where it listens and a way to stop — `port: 0` asks the system
+for a free port, which is what a test wants. A request pathname may only ever
+name a file inside the build output, whatever it is spelled like — traversal
+is not a case weighed per request but an outcome the path resolution cannot
+produce.
+
+When the handler throws, `serve` answers `500` with the body `internal
+error` and logs what was thrown (`k8ordo: GET /products/1 failed`): the
+details are for whoever runs the server, not for the visitor. A body that
+fails after it has started streaming can no longer change its status, so the
+connection is cut rather than left open on half a page.
 
 For another host, the built handler is a plain function:
 
@@ -560,6 +570,11 @@ const response = await handler(new Request('https://example.com/products/1'));
 Anything that speaks `(request: Request) => Promise<Response>` can run it —
 and it is the same handler `@k8ordo/static` builds and calls at build time,
 compiled for that mode.
+
+It answers `GET`, `HEAD` and `POST`, and any other method with a `405` whose
+`Allow` header names those three, so a host needs no method filter of its
+own. A `HEAD` gets the status and headers a `GET` would, with a `null` body:
+both are settled before the page renders, so the page is not rendered for it.
 
 **Build the `Request` with the URL the visitor asked for.** A `POST` — a
 Server Action or not — is accepted only when its `Origin` header is present
