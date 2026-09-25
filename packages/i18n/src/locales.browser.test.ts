@@ -8,7 +8,10 @@ declare module './register' {
   }
 }
 
-const locales = defineLocales(['ja', 'en']);
+const locales = defineLocales({
+  ja: { timeZone: 'Asia/Tokyo', dir: 'ltr' },
+  en: { timeZone: 'America/New_York', dir: 'ltr' },
+});
 const home = message({ ja: 'ホーム', en: 'Home' });
 
 describe('getLocale (browser)', () => {

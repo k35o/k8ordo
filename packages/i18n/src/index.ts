@@ -1,6 +1,7 @@
 export { defineLocales } from './locales';
 export type {
   Delocalized,
+  LocaleDefinition,
   LocaleOf,
   LocaleParamsSchema,
   Locales,
