@@ -3,6 +3,7 @@ import type { $ZodType } from 'zod/v4/core';
 import type { ArrayPathsOf, FieldPathsOf } from '../paths';
 import { asDefinition } from '../rules/define-form';
 import type { FormDefinition } from '../rules/define-form';
+import { deriveRule } from '../rules/rules';
 import { asProbe } from '../schema/object-schema';
 import type { ObjectSchema } from '../schema/object-schema';
 import { schemaMap, unwrap } from '../schema/walk';
@@ -118,8 +119,9 @@ const warnDropped = (
  *
  * Call this on the server — in a Server Component or at module scope. The
  * result is plain data, so it crosses to the client as props and zod never
- * enters the bundle. Messages are read when it runs, so when one follows the
- * request (its locale, say), call it during the render, not at module scope.
+ * enters the bundle. Messages are read when it runs — zod's, and a rule's
+ * function message — so when one follows the request (its locale, say), call
+ * it during the render, not at module scope.
  */
 export const formFields = <Schema extends ObjectSchema>(
   input: FormDefinition<Schema> | Schema,
@@ -226,5 +228,10 @@ export const formFields = <Schema extends ObjectSchema>(
   }
 
   warnDropped(schema, dropped);
-  return { fields, arrays, rules, dropped };
+  return {
+    fields,
+    arrays,
+    rules: rules.map((rule) => deriveRule(rule)),
+    dropped,
+  };
 };
