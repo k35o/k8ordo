@@ -383,6 +383,99 @@ export const autocomplete = {
   }),
 };
 
+export const dateField = {
+  description: message({
+    ja: 'ブラウザの日付入力（`type="date"`）をそのまま使う入力欄。値は `YYYY-MM-DD`',
+    en: 'A field on the browser’s own date input (`type="date"`). The value is `YYYY-MM-DD`.',
+  }),
+  minMaxTitle: message({
+    ja: '最小値 / 最大値',
+    en: 'Min / Max',
+  }),
+  minMaxDescription: message({
+    ja: '範囲の判定はブラウザが持ちます。範囲の外の日付は `rangeUnderflow` / `rangeOverflow` になります。',
+    en: 'The browser checks the range itself: a date outside it reports `rangeUnderflow` / `rangeOverflow`.',
+  }),
+  disabledTitle: message({
+    ja: '無効',
+    en: 'Disabled',
+  }),
+  invalidTitle: message({
+    ja: 'エラー',
+    en: 'Invalid',
+  }),
+  formTitle: message({
+    ja: '@k8ordo/form と使う',
+    en: 'With @k8ordo/form',
+  }),
+  formDescription: message({
+    ja: '`z.iso.date()` から導いた `input` をそのまま spread できます。`type` を取り除く必要はありません。',
+    en: 'Spread the `input` derived from `z.iso.date()` as is. There is no need to take `type` out.',
+  }),
+};
+
+export const datePicker = {
+  description: message({
+    ja: '日付入力と、ポップオーバーで開くカレンダーを組み合わせた入力欄',
+    en: 'A date input paired with a calendar that opens in a popover.',
+  }),
+  controlledTitle: message({
+    ja: '制御モード',
+    en: 'Controlled',
+  }),
+  controlledDescription: message({
+    ja: "`onChange` は値（`YYYY-MM-DD`、空なら `''`）を受け取ります。カレンダーで選んだときも、打ち込んだときも同じです。",
+    en: "`onChange` receives the value (`YYYY-MM-DD`, `''` when empty), whether the date was typed or picked from the calendar.",
+  }),
+  minMaxTitle: message({
+    ja: '最小値 / 最大値',
+    en: 'Min / Max',
+  }),
+  disabledTitle: message({
+    ja: '無効',
+    en: 'Disabled',
+  }),
+  formTitle: message({
+    ja: '@k8ordo/form と使う',
+    en: 'With @k8ordo/form',
+  }),
+  formDescription: message({
+    ja: 'カレンダーで選んだ日付は入力欄に書き込まれ、`input` イベントで知らされます。フォームには打ち込んだときと同じように伝わります（変更の有無、ルール、エラーの解除）。',
+    en: 'A date picked from the calendar is written into the input and announced with an `input` event, so the form hears it just as if it had been typed (dirty state, rules, clearing an error).',
+  }),
+  firefoxNote: message({
+    ja: 'Firefox は日付入力の中に自前のカレンダーボタンを描き、それを消す方法がありません。そのため Firefox ではカレンダーのボタンが 2 つ並びます。',
+    en: 'Firefox draws its own calendar button inside every date input and offers no way to hide it, so there the field shows two calendar buttons.',
+  }),
+};
+
+export const calendar = {
+  description: message({
+    ja: '月の表から日付を 1 つ選ぶカレンダー。値は `YYYY-MM-DD`',
+    en: 'A month grid for picking one day. The value is `YYYY-MM-DD`.',
+  }),
+  keyboardTitle: message({
+    ja: 'キーボード操作',
+    en: 'Keyboard',
+  }),
+  keyboardDescription: message({
+    ja: '矢印キーで日と週を、`Home` / `End` で週の端を、`PageUp` / `PageDown` で月を（`Shift` と一緒なら年を）移り、`Enter` / `Space` で選びます。',
+    en: 'Arrow keys move by day and week, `Home` / `End` to the ends of the week, `PageUp` / `PageDown` by month (by year with `Shift`), and `Enter` / `Space` select.',
+  }),
+  minMaxTitle: message({
+    ja: '最小値 / 最大値',
+    en: 'Min / Max',
+  }),
+  localeTitle: message({
+    ja: '言語と「今日」',
+    en: 'Language and today',
+  }),
+  localeDescription: message({
+    ja: '月名・曜日名・週の始まりはページの言語（`<html lang>`）に従います。今日は閲覧者のタイムゾーンでしか決まらないので、カレンダーはブラウザでだけ描かれ、サーバーは同じ寸法の空の箱を書きます。',
+    en: 'Month and weekday names, and the first day of the week, follow the page language (`<html lang>`). Today depends on the visitor’s time zone, so the calendar renders in the browser alone; the server writes an empty box of the same size.',
+  }),
+};
+
 export const slider = {
   description: message({
     ja: '単一ノブのスライダー入力',
