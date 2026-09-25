@@ -12,6 +12,8 @@ let server: ViteDevServer;
 // guard.ts を置いた構成の dev サーバ。本物より先に立てる: どちらも同じ
 // .k8ordo/ に表を書くので、後に立てた本物の表が残る
 let guarded: ViteDevServer;
+// GET 以外を export する route.ts を置いた構成の dev サーバ
+let routed: ViteDevServer;
 
 const start = (config: string): Promise<ViteDevServer> =>
   createServer({
@@ -22,11 +24,13 @@ const start = (config: string): Promise<ViteDevServer> =>
 
 beforeAll(async () => {
   guarded = await start('vite.broken-guard.config.ts');
+  routed = await start('vite.broken-route.config.ts');
   server = await start('vite.config.ts');
 }, 180_000);
 
 afterAll(async () => {
   await guarded.close();
+  await routed.close();
   await server.close();
 });
 
@@ -66,6 +70,14 @@ describe('vite dev under @k8ordo/static', () => {
       transform('rsc', '/src/routes-broken-guard/admin/guard.ts', guarded),
     ).rejects.toThrow(
       /static build cannot run guard\.ts[\s\S]*src\/routes-broken-guard\/admin\/guard\.ts/u,
+    );
+  });
+
+  it('refuses a route.ts that answers a method a file cannot, the moment it is compiled', async () => {
+    await expect(
+      transform('rsc', '/src/routes-broken-route/api/route.ts', routed),
+    ).rejects.toThrow(
+      /a file cannot answer another method[\s\S]*src\/routes-broken-route\/api\/route\.ts \(POST\)/u,
     );
   });
 
