@@ -22,7 +22,8 @@ legacy fallbacks.
   locale segment in front of them and nothing after it.
 - **A message grammar.** No placeholder syntax, no ICU. A message with
   values is a function of those values: interpolation is a template
-  literal, plurals are `Intl.PluralRules`, dates and numbers are `Intl`.
+  literal, and plurals, dates and numbers are `Intl` — the set only draws
+  the `Intl` object for the current locale ([Formatting](#formatting)).
   TypeScript checks the arguments because they are arguments.
 - **Loading.** Messages are ordinary exports. Which ones reach the browser is
   decided by the bundler from what each client module imports, not by a
@@ -86,19 +87,21 @@ first entry is the default unless told otherwise (without `default`,
 zone the runtime does not know, and a `dir` other than `ltr` / `rtl` throw at
 the definition, not later.
 
-| Member            | What it is                                                                        |
-| ----------------- | --------------------------------------------------------------------------------- |
-| `all`             | The tags, in order.                                                               |
-| `definitions`     | Each locale's `{ timeZone, dir }`, as given.                                      |
-| `default`         | The tag used when nothing names one.                                              |
-| `is(value)`       | Membership as a type guard.                                                       |
-| `negotiate(…)`    | The best supported tag for a preference list.                                     |
-| `localize`        | `'/ui'` → `'/en/ui'`; `'/'` → `'/en'`.                                            |
-| `delocalize`      | `'/en/ui'` → `{ locale: 'en', pathname: '/ui' }`; `'/x'` → `{ locale: null, … }`. |
-| `paths`           | The static build's `paths` option: `/:locale` expanded to every locale.           |
-| `paramsSchema`    | The `[locale]` segment's schema (Standard Schema; no schema library).             |
-| `getLocale()`     | The locale of the render in progress. Not a hook.                                 |
-| `run(locale, fn)` | Server only: runs `fn` with `locale` current.                                     |
+| Member                | What it is                                                                        |
+| --------------------- | --------------------------------------------------------------------------------- |
+| `all`                 | The tags, in order.                                                               |
+| `definitions`         | Each locale's `{ timeZone, dir }`, as given.                                      |
+| `default`             | The tag used when nothing names one.                                              |
+| `is(value)`           | Membership as a type guard.                                                       |
+| `negotiate(…)`        | The best supported tag for a preference list.                                     |
+| `negotiateRequest(…)` | The best supported tag for a `Request`: a cookie, then `Accept-Language`.         |
+| `localize`            | `'/ui'` → `'/en/ui'`; `'/'` → `'/en'`.                                            |
+| `delocalize`          | `'/en/ui'` → `{ locale: 'en', pathname: '/ui' }`; `'/x'` → `{ locale: null, … }`. |
+| `paths`               | The static build's `paths` option: `/:locale` expanded to every locale.           |
+| `paramsSchema`        | The `[locale]` segment's schema (Standard Schema; no schema library).             |
+| `getLocale()`         | The locale of the render in progress. Not a hook.                                 |
+| `run(locale, fn)`     | Server only: runs `fn` with `locale` current.                                     |
+| `dateTimeFormat`…     | `Intl` for the current locale ([Formatting](#formatting)).                        |
 
 `LocaleOf<typeof locales>` is the tag union and `LocaleDefinition` one
 locale's `{ timeZone, dir }`. `delocalize` says `null` for a first segment
@@ -132,11 +135,20 @@ skipped, because the list is user input.
 
 ```ts
 locales.negotiate(navigator.languages); // in the browser
-locales.negotiate(parseAcceptLanguage(request.headers.get('accept-language')));
+locales.negotiateRequest(request, { cookie: 'locale' }); // on a server
 ```
 
-`parseAcceptLanguage(header)` turns an `Accept-Language` header into that
-list: `q` weights decide the order (a `q` that is not a number is ignored),
+`negotiateRequest(request, { cookie? })` is the server's form. The cookie
+named by `cookie` comes first when the request carries it — the locale the
+visitor chose before, written where they switched language — then the
+`Accept-Language` header in its order of preference. Both go through
+`negotiate`, so a cookie still holding a locale the set no longer lists falls
+through to the header. The name is the application's: a language switcher
+that writes it (`cookieStore.set('locale', next)`) and the server that reads it
+agree on one. Without `cookie`, only the header is read.
+
+`parseAcceptLanguage(header)` is the header half on its own: it turns an
+`Accept-Language` header into a preference list for `negotiate`: `q` weights decide the order (a `q` that is not a number is ignored),
 ties keep the header's order, a weight of 0 or less (an empty `q=` included)
 and `*` are dropped, and a missing header is an empty list.
 
@@ -158,7 +170,7 @@ locale holds it, and with no annotation at all the arguments are `unknown`.
 export const items = message({
   ja: (count: number) => `${String(count)} 件`,
   en: (count) =>
-    `${String(count)} ${new Intl.PluralRules('en').select(count) === 'one' ? 'item' : 'items'}`,
+    `${String(count)} ${locales.pluralRules().select(count) === 'one' ? 'item' : 'items'}`,
 });
 ```
 
@@ -226,6 +238,44 @@ Keep the rule of thumb in mind: text that a Server Component renders costs
 the client nothing, whichever module declares it. A client component that
 needs text names it and pays for that message alone.
 
+## Formatting
+
+Plurals, dates, numbers and lists are `Intl` itself; there is no format
+syntax here. The set draws the `Intl` object for the current locale:
+
+| Member                         | Returns                                                         |
+| ------------------------------ | --------------------------------------------------------------- |
+| `dateTimeFormat(options?)`     | `Intl.DateTimeFormat` in the current locale and its `timeZone`. |
+| `numberFormat(options?)`       | `Intl.NumberFormat` in the current locale.                      |
+| `relativeTimeFormat(options?)` | `Intl.RelativeTimeFormat` in the current locale.                |
+| `pluralRules(options?)`        | `Intl.PluralRules` in the current locale.                       |
+| `listFormat(options?)`         | `Intl.ListFormat` in the current locale.                        |
+
+```tsx
+<time dateTime={date.toISOString()}>
+  {locales.dateTimeFormat({ dateStyle: 'medium' }).format(date)}
+</time>
+```
+
+What comes back is the `Intl` object, so `format`, `formatToParts`,
+`formatRange`, `select` and the options are `Intl`'s own. One is made per
+locale and options and returned again after that, so calling it where a
+component or a message renders costs a lookup. Options are keyed by their
+JSON: the same options in another order make a second object, never a
+different answer. None of them is a hook, and each reads the current locale
+the way a message does, so the same call works in a Server Component, a
+Client Component, and inside a message's function.
+
+`dateTimeFormat` writes a date only in the locale's `timeZone`. Its options
+type refuses a `timeZone`, and one forced through with `as` is overridden. The
+runtime's own zone is the server's on one side and the visitor's on the other,
+so a date left to it reads differently in the HTML and while hydrating; the
+locale's zone is the same on both. A display that should follow the visitor's
+own zone — a local clock, a time relative to now — differs between the two by
+nature: use `Intl` directly for it, in a part that renders in the browser
+only. An `Intl` API not listed here (`Intl.Collator`, `Intl.DisplayNames`)
+takes the tag from `locales.getLocale()`.
+
 ## Where the locale comes from
 
 **On the server**, `paramsSchema` accepting a locale makes it the current
@@ -254,13 +304,20 @@ navigation to the same pathname under the other segment
 (`locales.localize(locales.delocalize(pathname).pathname, 'en')`), which
 re-renders the page; there is no state to keep in sync.
 
+Under Vite's `base` (`base: '/docs/'`), the segment read is the first one
+below it — `/docs/en/ui` is in `en` — as the route table's `[locale]` sits
+below it too. `localize` and `delocalize` work on pathnames in the table's
+terms, which is what `usePathname` returns; the one you navigate to gets the
+base back from `@k8ordo/router`'s `withBase`.
+
 A first segment that is not one of the set's locales is no locale, and the
 default applies; before the set has been defined in that environment, a
 segment no message has text for is read the same way, so a 404 page never
 throws on `/fr/…`.
 
 `locales.getLocale()` reads the same source for code that needs the tag
-itself: `<html lang>`, a language switcher, `Intl` formatters.
+itself: `<html lang>`, a language switcher, an `Intl` API the set does not
+draw.
 
 ### The `/` page
 
@@ -280,8 +337,8 @@ useEffect(() => {
 ```
 
 Under `@k8ordo/server` a page can make the same decision from the request —
-`locales.negotiate(parseAcceptLanguage(request.headers.get('accept-language')))`
-— but cannot answer with a redirect: a page never writes to the response, and
+`locales.negotiateRequest(request, { cookie: 'locale' })` — but cannot answer
+with a redirect: a page never writes to the response, and
 `redirect.ts` fills its target from the params, not the headers. `serve` has
 no hook for it either, so a server-side redirect sits outside the app: a proxy
 in front of `serve`, or a host of your own around the built handler
@@ -358,20 +415,29 @@ without JavaScript keeps the default.
 - **`@k8ordo/form`**: constraint messages are messages, and a message called
   where the constraint is declared keeps the text of whatever locale was
   current then. Hand zod the message instead, so it is called when zod
-  reports the issue:
+  reports the issue — and a `defineForm` rule the same way, which calls it
+  when the rule is reported:
 
   ```ts
-  z.string()
-    .min(1, { error: m.talk.titleRequired })
-    .max(120, { error: () => m.talk.titleTooLong(120) });
+  export const talkForm = defineForm(
+    z.object({
+      title: z
+        .string()
+        .min(1, { error: m.talk.titleRequired })
+        .max(120, { error: () => m.talk.titleTooLong(120) }),
+      status: z.enum(['draft', 'rejected']),
+      reason: z.string(),
+    }),
+    [requiredWhen('reason', 'status', 'rejected', m.talk.reasonRequired)],
+  );
   ```
 
-  Call `formFields` during the page's render, not at module scope. A Server
-  Action runs outside the `[locale]` render, so the page binds the locale to
-  it (`createTalk.bind(null, locales.getLocale())`), and the action checks
-  it with `locales.is` and calls `parseForm` inside `locales.run`. A
-  `defineForm` rule takes a string, so build a definition with rules in those
-  same places.
+  The definition stays at module scope; what has to happen per request is
+  calling it. Call `formFields` during the page's render, not at module
+  scope. A Server Action runs outside the `[locale]` render, so the page
+  binds the locale to it (`createTalk.bind(null, locales.getLocale())`), and
+  the action checks it with `locales.is` and calls `parseForm` inside
+  `locales.run`.
 
 ## What it guarantees
 
@@ -387,6 +453,8 @@ without JavaScript keeps the default.
   names, or the default.
 - On a server runtime without `AsyncLocalStorage`, accepting a locale throws
   rather than rendering in the default.
+- A date written through `dateTimeFormat` is in its locale's time zone on the
+  server and in every browser; the type refuses any other.
 
 ## Testing
 

@@ -161,6 +161,11 @@ export const componentCategories: NavCategory[] = [
         description: m.components.code.description,
       },
       {
+        name: 'CodeBlock',
+        path: '/:locale/ui/components/code-block',
+        description: m.components.codeBlock.description,
+      },
+      {
         name: 'Prose',
         path: '/:locale/ui/components/prose',
         description: m.components.prose.description,

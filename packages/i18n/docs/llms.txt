@@ -23,7 +23,8 @@ When installed via npm, these docs live under `node_modules/@k8ordo/i18n/docs/`.
 
 - [Design Guide](GUIDE.md): what the package owns and does not (the locale
   segment, not the pathname; no message grammar; no loader), the locale set
-  and negotiation, messages as functions and `Register`, the Server
+  and negotiation, messages as functions and `Register`, formatting (`Intl`
+  drawn for the current locale, dates in its time zone), the Server
   Component boundary (a message is called before it is passed to a
   `'use client'` component), what reaches the browser, where the locale comes
   from on each side, `/` and `<html lang>` / `dir`, static path expansion, and
@@ -34,17 +35,24 @@ When installed via npm, these docs live under `node_modules/@k8ordo/i18n/docs/`.
 - `@k8ordo/i18n` — `defineLocales(definitions, { default? })` takes each
   locale's `{ timeZone, dir }` by tag (both required; an unknown time zone
   throws) and returns `{ all, definitions, default, is, negotiate, localize,
-  delocalize, paths, paramsSchema, getLocale, run }`; `paths(patterns)` is the static build's `paths` option
+  delocalize, paths, paramsSchema, getLocale, run, negotiateRequest, dateTimeFormat,
+  numberFormat, relativeTimeFormat, pluralRules, listFormat }`; the last five
+  return the `Intl` object for the current locale, cached per locale and
+  options, and `dateTimeFormat` always in that locale's `timeZone` (its
+  options type refuses one); `paths(patterns)` is the static build's `paths` option
   with `/:locale` expanded to every locale; typed links come from
   `@k8ordo/router`'s `bindParams(() => ({ locale: locales.getLocale() }))`,
   written by the application; the first entry is the default unless told otherwise (and `default` is then typed as the whole union), every tag
   must be BCP 47, `negotiate(list)` tries each requested tag in order (exact,
   then language) before falling back to the default, `getLocale()` is the
   locale of the render in progress (not a hook), and `run(locale, fn)`
-  (server only) runs `fn` under a locale. `parseAcceptLanguage(header)` turns
-  an `Accept-Language` header into a preference list. `message(variants)`
+  (server only) runs `fn` under a locale. `negotiateRequest(request, {
+  cookie? })` chooses for a `Request` — the named cookie (the visitor's
+  earlier choice) first, then `Accept-Language` — through the same rule as
+  `negotiate`. `parseAcceptLanguage(header)` turns an `Accept-Language`
+  header into a preference list. `message(variants)`
   declares one message — text in every locale, or a function of the same
   parameters in every locale — and returns `Message<Args>`, a function that
-  renders the current locale's text. Types: `Locales`, `LocaleOf`, `LocaleDefinition`, `Message`,
+  renders the current locale's text. Types: `Locales`, `LocaleOf`, `LocaleDefinition`, `IntlFormats`, `LocaleDateTimeFormatOptions`, `Message`,
   `Variants`, `Register`, `RegisteredLocale`, `Delocalized`,
-  `LocaleParamsSchema`, `LocalesOptions`.
+  `LocaleParamsSchema`, `LocalesOptions`, `NegotiateRequestOptions`.

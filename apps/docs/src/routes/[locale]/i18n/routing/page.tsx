@@ -1,6 +1,6 @@
 import { Heading } from '@k8ordo/ui';
+import { CodeBlock } from '@k8ordo/ui/code-block';
 
-import { CodeBlock } from '../../../../components/code-block';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Rich } from '../../../../components/rich';
@@ -49,18 +49,11 @@ declare module '@k8ordo/i18n' {
 
 export const { getLocale } = locales;`;
 
-const GET_LOCALE_USE = `// src/components/published-at.tsx
+const GET_LOCALE_USE = `// src/components/region-name.tsx
 import { getLocale } from '../i18n';
 
-export function PublishedAt({ date }: { date: Date }) {
-  return (
-    <time dateTime={date.toISOString()}>
-      {new Intl.DateTimeFormat(getLocale(), {
-        dateStyle: 'medium',
-        timeZone: 'UTC',
-      }).format(date)}
-    </time>
-  );
+export function RegionName({ code }: { code: string }) {
+  return <>{new Intl.DisplayNames(getLocale(), { type: 'region' }).of(code)}</>;
 }`;
 
 const SWITCHER = `// src/components/language-switcher.tsx
