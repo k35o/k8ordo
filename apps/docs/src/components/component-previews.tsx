@@ -362,11 +362,6 @@ export const componentPreviews: Record<string, ReactNode> = {
       <Separator color="mute" />
     </div>
   ),
-  ScrollLinked: (
-    <div className="w-40">
-      <Progress max={100} value={40} />
-    </div>
-  ),
   Icons: (
     <div className="text-fg-base flex gap-3">
       <SparklesIcon size="lg" />

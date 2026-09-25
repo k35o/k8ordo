@@ -44,7 +44,6 @@ export * from './icons';
 export type { GapSize } from './layout/_shared/gap';
 export type { PaddingSize } from './layout/_shared/padding';
 export { Grid, type GridProps } from './layout/grid';
-export { ScrollLinked } from './layout/scroll-linked';
 export { Separator } from './layout/separator';
 export { Stack, type StackProps } from './layout/stack';
 export { Anchor } from './navigation/anchor';

@@ -252,27 +252,6 @@
   }
 
   /*
- * スクロール進捗バー。ルートスクローラーの進捗を scale x に写像する。
- * @supports 外（Firefox）と container 指定時はコンポーネント側の
- * scroll リスナーが inline の scale を更新する。ユーザーのスクロールに
- * 1:1 で追従する機能的表示のため prefers-reduced-motion では無効化しない。
- */
-  @supports (animation-timeline: scroll()) {
-    .ao-scroll-progress {
-      animation: ao-scroll-grow auto linear;
-      animation-timeline: scroll(root);
-    }
-    @keyframes ao-scroll-grow {
-      from {
-        scale: 0 1;
-      }
-      to {
-        scale: 1 1;
-      }
-    }
-  }
-
-  /*
  * CodeBlock。shiki の css-variables テーマが出す --shiki-* を ui のトークンに
  * 結びつける。トークンは .dark で切り替わるので、ダーク用の指定は要らない。
  * 行の印（data-mark）と注記（data-callout）は、CodeBlock の変換器が付ける。

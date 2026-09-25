@@ -164,11 +164,6 @@ export const buildComponentLibrary = <C>(
     'Toast notification that a button labeled triggerLabel shows.',
     s.toastProps,
   );
-  const ScrollLinked = def(
-    'ScrollLinked',
-    'Page scroll progress bar (fixed to the top).',
-    s.scrollLinkedProps,
-  );
   const ListBox = def(
     'ListBox',
     'Single-choice list in a popup.',
@@ -232,7 +227,6 @@ export const buildComponentLibrary = <C>(
     Tooltip.ref,
     DropdownMenu.ref,
     Toast.ref,
-    ScrollLinked.ref,
     ListBox.ref,
     CheckboxGroup.ref,
     Autocomplete.ref,
@@ -376,7 +370,6 @@ export const buildComponentLibrary = <C>(
       Progress,
       Skeleton,
       Separator,
-      ScrollLinked,
       Tabs,
       Accordion,
       Breadcrumb,

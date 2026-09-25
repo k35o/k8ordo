@@ -364,11 +364,10 @@ directly on APIs a browser has and jsdom does not: `ResizeObserver`,
 `IntersectionObserver`, `matchMedia`, `HTMLDialogElement`'s `showModal` /
 `close`, and the Popover API. None of them is called through a support check,
 so under jsdom `Tooltip`, `IconButton` (unless `tooltipDisabled`), `Tabs`,
-`Autocomplete`, `InView`, `Resize`, `Conversation`, and a `ScrollLinked` given
-a `container` throw as soon as they mount; `Modal`, `Drawer`, `Popover`,
-`DropdownMenu`, and `ListBox` throw the moment they open (a `DropdownMenu`
-holding a `SubMenu` already at mount); and a `clearable` `FileField.ItemList`
-throws once it lists a file.
+`Autocomplete`, `InView`, `Resize`, and `Conversation` throw as soon as they
+mount; `Modal`, `Drawer`, `Popover`, `DropdownMenu`, and `ListBox` throw the
+moment they open (a `DropdownMenu` holding a `SubMenu` already at mount); and a
+`clearable` `FileField.ItemList` throws once it lists a file.
 
 This is not a gap to be stubbed around. A synthetic DOM (jsdom, happy-dom) has
 no layout engine, so even with stubs in place a passing assertion about focus,

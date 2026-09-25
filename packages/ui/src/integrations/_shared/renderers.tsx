@@ -92,7 +92,6 @@ import {
   ViewOffIcon,
 } from '../../components/icons';
 import { Grid } from '../../components/layout/grid';
-import { ScrollLinked } from '../../components/layout/scroll-linked';
 import { Separator } from '../../components/layout/separator';
 import { Stack } from '../../components/layout/stack';
 import { Anchor } from '../../components/navigation/anchor';
@@ -145,7 +144,6 @@ import type {
   ProgressProps,
   RadioCardProps,
   RadioProps,
-  ScrollLinkedProps,
   SelectProps,
   SeparatorProps,
   SkeletonProps,
@@ -975,10 +973,6 @@ export function renderDropdownMenu(props: DropdownMenuProps): ReactNode {
       </DropdownMenu.Content>
     </DropdownMenu.Root>
   );
-}
-
-export function renderScrollLinked(_props: ScrollLinkedProps): ReactNode {
-  return <ScrollLinked />;
 }
 
 // ToastProvider はラッパー側で巻く必要があるため、ローカルにも 1 段被せる。
