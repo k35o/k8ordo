@@ -24,6 +24,8 @@ export const en: Messages = {
 
   numberFieldIncrement: 'Increase',
   numberFieldDecrement: 'Decrease',
+  numberFieldRangeUnderflow: 'Enter {min} or more',
+  numberFieldRangeOverflow: 'Enter {max} or less',
 
   passwordShow: 'Show password',
   passwordHide: 'Hide password',

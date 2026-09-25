@@ -24,6 +24,8 @@ export const ja: Messages = {
 
   numberFieldIncrement: '増やす',
   numberFieldDecrement: '減らす',
+  numberFieldRangeUnderflow: '{min} 以上で入力してください',
+  numberFieldRangeOverflow: '{max} 以下で入力してください',
 
   passwordShow: 'パスワードを表示',
   passwordHide: 'パスワードを非表示',

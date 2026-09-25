@@ -1,10 +1,18 @@
 'use client';
 
-import { useEffect, useEffectEvent, useMemo, useRef, useState } from 'react';
+import {
+  useEffect,
+  useEffectEvent,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import type { ChangeEvent, FC, InputHTMLAttributes, Ref } from 'react';
 import { useFormStatus } from 'react-dom';
 
 import { useMessages } from '../../../i18n/context';
+import type { Messages } from '../../../i18n/messages';
 import { FOCUS_RING_WITHIN } from '../../_internal/focus-ring';
 import { ChevronIcon } from '../../icons';
 import { chain, cn, mergeRefs } from './../../../helpers';
@@ -15,6 +23,7 @@ import { cast } from './cast';
 
 type BaseProps = {
   invalid?: boolean;
+  /** 小数の桁数。省略すると step の桁数に合わせ、step が 'any' なら丸めない */
   precision?: number;
   ref?: Ref<HTMLInputElement>;
 } & Omit<
@@ -31,9 +40,11 @@ type BaseProps = {
   | 'min'
   | 'max'
 > & {
-    step?: number;
-    min?: number;
-    max?: number;
+    // @k8ordo/form の formFields は step に 'any' を、min / max に文字列を導く
+    // ことがあるので、広げたまま受けられる型にする
+    step?: number | 'any';
+    min?: number | string;
+    max?: number | string;
   };
 
 type ControlledProps = {
@@ -43,15 +54,60 @@ type ControlledProps = {
 };
 
 type UncontrolledProps = {
-  defaultValue?: number;
+  // 送信に失敗した値を formFields が描き直すときは文字列で渡る
+  defaultValue?: number | string;
   value?: never;
   onChange?: (value: number | null) => void;
 };
 
 type Props = BaseProps & (ControlledProps | UncontrolledProps);
 
-const format = (value: number | null, precision: number): string =>
-  value === null ? '' : value.toFixed(precision);
+const format = (
+  value: number | null,
+  precision: number | undefined,
+): string => {
+  if (value === null) {
+    return '';
+  }
+  return precision === undefined ? String(value) : value.toFixed(precision);
+};
+
+const toBound = (value: number | string | undefined, fallback: number) => {
+  const bound =
+    value === undefined || value === '' ? Number.NaN : Number(value);
+  return Number.isFinite(bound) ? bound : fallback;
+};
+
+const decimalsOf = (step: number): number =>
+  String(step).split('.')[1]?.length ?? 0;
+
+const rangeErrorOf = (
+  value: number | null,
+  min: number,
+  max: number,
+  messages: Messages,
+): string => {
+  if (value !== null && value < min) {
+    return messages.numberFieldRangeUnderflow.replace('{min}', String(min));
+  }
+  if (value !== null && value > max) {
+    return messages.numberFieldRangeOverflow.replace('{max}', String(max));
+  }
+  return '';
+};
+
+// customValidity の枠は @k8ordo/form のルールや非同期チェックと共有なので、
+// 自分で書いた文言だけを消す
+const ownRangeErrors = new WeakMap<HTMLInputElement, string>();
+
+const applyRangeError = (input: HTMLInputElement, error: string) => {
+  if (error !== '') {
+    input.setCustomValidity(error);
+  } else if (input.validationMessage === ownRangeErrors.get(input)) {
+    input.setCustomValidity('');
+  }
+  ownRangeErrors.set(input, error);
+};
 
 export const NumberField: FC<Props> = ({
   invalid = false,
@@ -65,9 +121,10 @@ export const NumberField: FC<Props> = ({
   onKeyDown,
   ref,
   step = 1,
-  precision = 0,
-  max = 9_007_199_254_740_991,
-  min = -9_007_199_254_740_991,
+  precision: precisionProp,
+  max: maxProp,
+  min: minProp,
+  onInput,
   ...rest
 }) => {
   const messages = useMessages();
@@ -76,11 +133,28 @@ export const NumberField: FC<Props> = ({
   // 利用者が副作用付きのコールバック ref を渡しても毎レンダー走らないようにする
   const mergedRef = useMemo(() => mergeRefs(inputRef, ref), [ref]);
   const isControlled = value !== undefined;
+  const max = toBound(maxProp, Number.MAX_SAFE_INTEGER);
+  const min = toBound(minProp, Number.MIN_SAFE_INTEGER);
+  const stepSize = step === 'any' ? 1 : step;
+  const precision =
+    precisionProp ?? (step === 'any' ? undefined : decimalsOf(step));
+  const initialValue =
+    typeof defaultValue === 'string'
+      ? cast(defaultValue, precision)
+      : (defaultValue ?? null);
   const [currentValue, setCurrentValue] = useControllableState<number | null>({
     value,
-    defaultValue: defaultValue ?? null,
+    defaultValue: initialValue,
     onChange,
   });
+  // type="text" ではブラウザが min / max を検査しないので、範囲の違反は
+  // customValidity でブラウザの検証に載せる
+  const reportRange = (input: HTMLInputElement, text: string) => {
+    applyRangeError(
+      input,
+      rangeErrorOf(cast(text, precision), min, max, messages),
+    );
+  };
   // 入力途中の文字列を React が持つのは制御モードだけ。非制御では DOM に持たせる。
   // React の制御下に置くと value 属性が現在の文字列に同期され続け、form.reset() が
   // 戻る先（描画時の defaultValue）を失うため。
@@ -99,9 +173,32 @@ export const NumberField: FC<Props> = ({
     setShownValue(currentValue);
   }
 
+  useLayoutEffect(() => {
+    const input = inputRef.current;
+    if (input === null) {
+      return;
+    }
+    applyRangeError(
+      input,
+      rangeErrorOf(
+        cast(isControlled ? displayValue : input.value, precision),
+        min,
+        max,
+        messages,
+      ),
+    );
+  }, [isControlled, displayValue, precision, min, max, messages]);
+
   const handleReset = useEffectEvent(() => {
     if (!isControlled) {
-      setCurrentValue(defaultValue ?? null);
+      setCurrentValue(initialValue);
+    }
+  });
+  // reset はブラウザが値を戻す前に飛ぶので、戻り切った値で検査し直す
+  const handleRestored = useEffectEvent(() => {
+    const input = inputRef.current;
+    if (input !== null) {
+      reportRange(input, input.value);
     }
   });
 
@@ -112,6 +209,9 @@ export const NumberField: FC<Props> = ({
     }
     const listener = () => {
       handleReset();
+      setTimeout(() => {
+        handleRestored();
+      }, 0);
     };
     form.addEventListener('reset', listener);
     return () => {
@@ -119,15 +219,22 @@ export const NumberField: FC<Props> = ({
     };
   }, []);
 
+  // コードから書き換えた値は input イベントを出さないので、変わったときだけ自分で
+  // 出して @k8ordo/form などの form 側に知らせる。値トラッカーは代入を覚えるので、
+  // この input 自身の React onChange は二重に走らない
   const commit = (input: HTMLInputElement, next: number | null) => {
     const text = format(next, precision);
+    const changed = input.value !== text;
     if (isControlled) {
       setDisplayValue(text);
       setShownValue(next);
-    } else {
-      input.value = text;
     }
+    input.value = text;
     setCurrentValue(next);
+    reportRange(input, text);
+    if (changed) {
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+    }
   };
 
   const stepBy = (input: HTMLInputElement, delta: number) => {
@@ -170,7 +277,7 @@ export const NumberField: FC<Props> = ({
                 setDisplayValue(e.target.value);
               },
             }
-          : { defaultValue: format(defaultValue ?? null, precision) })}
+          : { defaultValue: format(initialValue, precision) })}
         aria-invalid={invalid}
         aria-required={required}
         aria-valuemax={max}
@@ -184,6 +291,9 @@ export const NumberField: FC<Props> = ({
         disabled={disabled}
         readOnly={readOnlyResolved}
         required={required}
+        onInput={chain(onInput, (e) => {
+          reportRange(e.currentTarget, e.currentTarget.value);
+        })}
         onBlur={chain(onBlur, (e) => {
           const parsed = cast(e.currentTarget.value, precision);
           commit(
@@ -193,10 +303,10 @@ export const NumberField: FC<Props> = ({
         })}
         onKeyDown={chain(onKeyDown, (e) => {
           if (e.key === 'ArrowUp') {
-            stepBy(e.currentTarget, step);
+            stepBy(e.currentTarget, stepSize);
           }
           if (e.key === 'ArrowDown') {
-            stepBy(e.currentTarget, -step);
+            stepBy(e.currentTarget, -stepSize);
           }
         })}
         ref={mergedRef}
@@ -216,7 +326,7 @@ export const NumberField: FC<Props> = ({
           disabled={disabled || readOnlyResolved}
           onClick={() => {
             if (inputRef.current) {
-              stepBy(inputRef.current, step);
+              stepBy(inputRef.current, stepSize);
             }
           }}
           tabIndex={-1}
@@ -234,7 +344,7 @@ export const NumberField: FC<Props> = ({
           disabled={disabled || readOnlyResolved}
           onClick={() => {
             if (inputRef.current) {
-              stepBy(inputRef.current, -step);
+              stepBy(inputRef.current, -stepSize);
             }
           }}
           tabIndex={-1}
