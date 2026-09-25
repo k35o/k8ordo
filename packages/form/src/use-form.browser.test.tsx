@@ -652,6 +652,19 @@ describe('useForm in a browser', () => {
     await expect.element(screen.getByTestId('dirty')).toHaveTextContent('true');
   });
 
+  it('reads a select with no selected option as clean once a reset puts back its first option', async () => {
+    const screen = await render(<Choice />);
+
+    await screen.getByLabelText('color').selectOptions('blue');
+    await expect.element(screen.getByTestId('dirty')).toHaveTextContent('true');
+    (document.querySelector('form') as HTMLFormElement).reset();
+
+    await expect.element(screen.getByLabelText('color')).toHaveValue('red');
+    await expect
+      .element(screen.getByTestId('dirty'))
+      .toHaveTextContent('false');
+  });
+
   it('restores a checked box from the echo through defaultChecked', async () => {
     const screen = await render(
       <Choice state={{ values: { color: 'blue', agree: 'on' } }} />,
