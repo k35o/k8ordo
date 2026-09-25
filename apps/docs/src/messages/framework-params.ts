@@ -59,8 +59,8 @@ export const refusedDescription = message({
 });
 
 export const refusedCatchAll = message({
-  ja: 'catch-all 自身のパラメータは検証されません。catch-all はほかのどれも答えなかったものに答えるので、値を拒んだときに返るはずの 404 がすでにそこにあります。`/:locale/*` の `not-found.tsx` が受け取る `params.locale` は、どんな文字列でもありえます。',
-  en: "A catch-all's own params are never validated: it answers what nothing else did, and a 404 is already what a refusal means. The `params.locale` a `not-found.tsx` at `/:locale/*` receives can be any string.",
+  ja: 'catch-all は拒まれません。ほかのどれも答えなかったものに答えるので、値を拒んだときに返るはずの 404 がすでにそこにあります。それでも `not-found.tsx` の上にあるレイアウトのスキーマは、描画に書き込むもののために走ります。`/en/missing` は `@k8ordo/i18n` のスキーマが受理したロケールで描かれ、拒まれたとき（`/fr/missing`）は、どれも走らなかったかのように描かれます。`/:locale/*` の `not-found.tsx` が受け取る `params.locale` は文字列のままで、どんな文字列でもありえます。',
+  en: "A catch-all is never refused: it answers what nothing else did, and a 404 is already what a refusal means. The schemas of the layouts above `not-found.tsx` still run, for what they write to the render — `/en/missing` renders in the locale `@k8ordo/i18n`'s schema accepted — and a refusal (`/fr/missing`) leaves the not-found as if none had run. The `params.locale` a `not-found.tsx` at `/:locale/*` receives stays a string, and can be any string.",
 });
 
 export const syncTitle = message({
@@ -109,8 +109,8 @@ export const layoutTitle = message({
 });
 
 export const layoutDescription = message({
-  ja: 'レイアウトの `params` は、自分でスキーマを宣言していても文字列として型が付きます（`LayoutProps` でも、生成された `Layout` でも）。同じレイアウトは `not-found.tsx` のまわりでも描かれ、そこでは何も検証されないからです。ただし実行時の値はこの型のとおりではありません。ページのまわりではスタックのスキーマが出したページの値（スキーマが数値にしたなら数値）が届き、`not-found.tsx` のまわりでは URL の文字列がそのまま届きます。型が文字列だからといって文字列のメソッドを呼ばず、1 つの形が要るならレイアウト自身が `String()` で揃えるか、型の付いた値は下のページに受け取らせます。',
-  en: "A layout's `params` are typed as strings — in `LayoutProps` and in the generated `Layout` — even when it declared a schema, because the same layout also renders around `not-found.tsx`, where nothing is validated. The run-time value does not follow that type: around a page the layout receives the page's parsed params (a number where a schema coerced one), and around `not-found.tsx` the raw strings. Do not call a string method on a param because the type says string; a layout that needs one form converts the value itself (`String(params.id)`), or leaves the typed value to the pages below.",
+  ja: 'レイアウトの `params` は、自分でスキーマを宣言していても文字列として型が付きます（`LayoutProps` でも、生成された `Layout` でも）。同じレイアウトは `not-found.tsx` のまわりでも、スキーマが受理したかどうかに関わらず描かれるからです。ただし実行時の値はこの型のとおりではありません。ページのまわりではスタックのスキーマが出したページの値（スキーマが数値にしたなら数値）が届き、`not-found.tsx` のまわりでは URL の文字列がそのまま届きます。型が文字列だからといって文字列のメソッドを呼ばず、1 つの形が要るならレイアウト自身が `String()` で揃えるか、型の付いた値は下のページに受け取らせます。',
+  en: "A layout's `params` are typed as strings — in `LayoutProps` and in the generated `Layout` — even when it declared a schema, because the same layout also renders around `not-found.tsx`, whether or not its schema accepted. The run-time value does not follow that type: around a page the layout receives the page's parsed params (a number where a schema coerced one), and around `not-found.tsx` the raw strings. Do not call a string method on a param because the type says string; a layout that needs one form converts the value itself (`String(params.id)`), or leaves the typed value to the pages below.",
 });
 
 export const layoutPropsPage = message({

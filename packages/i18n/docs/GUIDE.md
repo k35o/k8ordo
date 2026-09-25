@@ -210,10 +210,13 @@ that HTML — and for nothing else. Concurrent renders stay apart
 (`AsyncLocalStorage`). An acceptance belongs to the pattern that answered,
 not to the request: when a schema further down the same stack refuses
 (`/en/blog/nope`, where the page's slug schema says no), the pattern does
-not answer and the locale goes with it, so the 404 renders in the default,
-as `/en/nothing` does. Outside a `[locale]` route — a test, code that runs
-before the route matched — use `locales.run(locale, fn)`; and when nothing
-names a locale, messages render in the default.
+not answer and the locale goes with it. The 404 that answers instead runs
+the schemas above its `not-found.tsx` on its own, so it is in the locale its
+URL names — `/en/blog/nope` as `/en/nothing` is — and in the default under a
+segment the set refuses (`/fr/nothing`). Outside a `[locale]` route — a
+test, code that runs before the route matched — use
+`locales.run(locale, fn)`; and when nothing names a locale, messages render
+in the default.
 
 The server keeps the locale in `AsyncLocalStorage`, reached through
 `process.getBuiltinModule`. A runtime without them throws from
@@ -264,9 +267,9 @@ in front of `serve`, or a host of your own around the built handler
 The root layout sits above `[locale]` and receives `pathname`. On a page the
 schema has already run for that page, so `locales.getLocale()` is right, and
 `locales.delocalize(pathname).locale ?? locales.default` says the same thing
-in terms of the URL alone. On a 404 the two can differ: nothing validates the
-catch-all's params, so `getLocale()` there is the default, while `delocalize`
-still reads the URL's segment.
+in terms of the URL alone. On a 404 they agree too: the schema runs over the
+catch-all's params, so `getLocale()` is the URL's locale where it names one
+and the default where it does not, as `delocalize` reads it.
 
 ## Static builds
 
@@ -288,10 +291,13 @@ Each path is rendered as its own request, so the schema names the locale
 for each and the messages come out in that locale; the build renders several
 at once, and none lends its locale to another. The `404.html` a static host
 serves for everything else is rendered once, by the catch-all under the
-build's sentinel segment, and no schema runs on a catch-all's params — so it
-is in the default locale whatever the build rendered before it, and cannot
-follow the visitor's. A client component on it reads the visitor's URL and
-re-renders in theirs after hydration.
+build's sentinel segment, which the schema refuses — so it is in the default
+locale whatever the build rendered before it, and cannot follow the
+visitor's. The browser does not hydrate it: it was rendered for another URL,
+and a message read while hydrating would disagree with the text written
+there. It renders the file afresh where the visitor is instead, so its client
+components come out in their locale once the script runs, and a visitor
+without JavaScript keeps the default.
 
 ## Alongside the rest of k8ordo
 
@@ -346,7 +352,8 @@ re-renders in theirs after hydration.
 - A page under `[locale]` never renders in a locale its URL does not spell:
   on the server its schema accepted that locale, and in the browser the URL
   is what is read. A locale accepted for one page reaches no other page, no
-  404, and nothing rendered after it.
+  404, and nothing rendered after it; a 404 is in the locale its own URL
+  names, or the default.
 - On a server runtime without `AsyncLocalStorage`, accepting a locale throws
   rather than rendering in the default.
 

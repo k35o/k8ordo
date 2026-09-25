@@ -81,8 +81,8 @@ export const notFoundDescription = message({
 });
 
 export const notFoundParams = message({
-  ja: 'catch-all の上にあるパラメータは検証されないので、`/:locale/*` の `not-found.tsx` が受け取る `params.locale` は、どんな文字列でもありえます。使う前に確かめます。',
-  en: 'The parameters above a catch-all are not validated, so the `params.locale` a `not-found.tsx` at `/:locale/*` receives can be any string. Check it before using it.',
+  ja: 'catch-all は、パラメータが何であっても答えます。上のスキーマは走りますが、拒んでも catch-all は止まりません。そのため `/:locale/*` の `not-found.tsx` が受け取る `params.locale` は、どんな文字列でもありえます。使う前に確かめます。',
+  en: 'A catch-all answers whatever its parameters hold: the schemas above it run, but a refusal does not stop it. So the `params.locale` a `not-found.tsx` at `/:locale/*` receives can be any string. Check it before using it.',
 });
 
 export const redirectTitle = message({

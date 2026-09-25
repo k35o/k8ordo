@@ -209,8 +209,8 @@ export const htmlLang = {
     en: '`lang` has to be right in the HTML the server writes, because crawlers and screen readers read it without waiting for hydration. The root layout sits above `[locale]`, but it receives `pathname`.',
   }),
   same: message({
-    ja: 'スキーマはどの描画よりも先に走るので、スキーマが受理したページでは `locales.getLocale()` も同じ値を返します。`delocalize` を使う書き方は、URL だけから決まることが読んで分かり、catch-all の param を検証するものが無い 404 の描画でも pathname の区間を読めます。',
-    en: "Schemas run before anything renders, so on a page whose schema accepted, `locales.getLocale()` returns the same value. The `delocalize` form reads as depending on the URL alone, and it still reads the segment of the pathname in a 404 render, where nothing validates the catch-all's params.",
+    ja: 'スキーマはどの描画よりも先に走るので、スキーマが受理したページでは `locales.getLocale()` も同じ値を返します。`delocalize` を使う書き方は、URL だけから決まることが読んで分かります。404 でも両者は一致します。`not-found.tsx` の上のスキーマが catch-all の param にも走るので、`getLocale()` は URL がロケールを名指せばそのロケール、そうでなければ既定になります。',
+    en: "Schemas run before anything renders, so on a page whose schema accepted, `locales.getLocale()` returns the same value. The `delocalize` form reads as depending on the URL alone. On a 404 the two agree as well: the schema above `not-found.tsx` runs over the catch-all's params, so `getLocale()` is the URL's locale where it names one and the default where it does not.",
   }),
 };
 
@@ -244,8 +244,8 @@ export const staticBuild = {
     en: 'A pattern with another parameter, such as `/:locale/blog/:slug`, still has `:slug` after `locales.paths` (`/ja/blog/:slug`). The static build does not use a pathname that still holds a parameter, so the pattern counts as unexpanded and the build stops with `static build needs pathnames for /:locale/blog/:slug — supply them with the "paths" option`. Expand the remaining parameters in the same function.',
   }),
   notFound: message({
-    ja: '静的ホストが知らない URL すべてに返す `404.html` は、ビルドの番兵の区間で 1 回だけ描かれます。その区間を受理するスキーマは無いので文言は既定のロケールで描かれ、訪問者のロケールに合わせることはできません。Client Component はハイドレーションの時点で訪問者の URL を読み、そのロケールで描き直されます。このサイトの `not-found.tsx` が Client Component なのはそのためです。',
-    en: "The `404.html` a static host serves for every URL it does not have is rendered once, under the build's sentinel segment. No schema accepts that segment, so its text is in the default locale and cannot follow the visitor's. Client Components read the visitor's URL when they hydrate and render again in that locale. That is why this site's `not-found.tsx` is a Client Component.",
+    ja: '静的ホストが知らない URL すべてに返す `404.html` は、ビルドの番兵の区間で 1 回だけ描かれます。その区間を受理するスキーマは無いので文言は既定のロケールで描かれ、訪問者のロケールに合わせることはできません。ブラウザはこれをハイドレーションせず（別の URL 用に描かれたものなので、ハイドレーション中に読んだ文言と食い違います）、訪問者の URL で描き直します。そこで Client Component は訪問者のロケールで描かれます。このサイトの `not-found.tsx` が Client Component なのはそのためです。',
+    en: "The `404.html` a static host serves for every URL it does not have is rendered once, under the build's sentinel segment. No schema accepts that segment, so its text is in the default locale and cannot follow the visitor's. The browser does not hydrate it — it was rendered for another URL, and a message read while hydrating would disagree with it — but renders it afresh at the visitor's URL, where Client Components come out in their locale. That is why this site's `not-found.tsx` is a Client Component.",
   }),
 };
 

@@ -43,10 +43,16 @@ pnpm check         # check:write to auto-fix
   (`packages/framework-engine/src/runtime/params.ts`), so a locale accepted
   by a pattern a later schema refused is dropped, and a static build
   rendering many pages from one context lends no page's locale to another or
-  to `404.html`. Outside the browser, a runtime with no `AsyncLocalStorage`
+  to `404.html`. The catch-all runs the schemas of the layouts above its
+  not-found too, without being refused by them, so a 404 under `/en/…`
+  renders in `en`. Outside the browser, a runtime with no `AsyncLocalStorage`
   makes `validate` throw, as `run` does — accepting a locale `getLocale()`
   cannot see would silently render the default. In the browser
-  `location.pathname`'s first segment is the locale. Do not add a provider
+  `location.pathname`'s first segment is the locale, read as a message
+  renders. That agrees with the server's HTML only because the HTML was
+  rendered for the same URL: the engine renders a document drawn for another
+  one (`404.html`) afresh instead of hydrating it
+  (`packages/framework-engine/src/runtime/mount.ts`). Do not add a provider
   or a hook; do not pass the locale as a prop.
 - **The last set to define itself is the one messages read.**
   `defineLocales` registers `{ default, is }` on `globalThis` (last wins, so

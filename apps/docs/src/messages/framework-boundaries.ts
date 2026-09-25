@@ -54,8 +54,8 @@ export const shellDescription = message({
 });
 
 export const shellWhy = message({
-  ja: 'レイアウトの `params.locale` は文字列として型が付きます。ページのまわりではスキーマがすでに受け付けた値ですが、`not-found.tsx` のまわりでは何も検証されず、どんな値でもありうるからです。そこで殻は `locales.is()` で確かめ、ロケールでなければ URL から読み直します。サーバーが描いた `children` は、JSX として境界を越えます。',
-  en: "The layout's `params.locale` is typed as a string: around a page its schema has already accepted it, but around `not-found.tsx` nothing is validated and it can be anything — so the shell checks it with `locales.is()` and otherwise reads the locale from the URL. The `children` the server rendered cross the boundary as JSX.",
+  ja: 'レイアウトの `params.locale` は文字列として型が付きます。ページのまわりではスキーマがすでに受け付けた値ですが、`not-found.tsx` のまわりではスキーマが受け付けたかどうかに関わらず描かれ、どんな値でもありうるからです。そこで殻は `locales.is()` で確かめ、ロケールでなければ URL から読み直します。サーバーが描いた `children` は、JSX として境界を越えます。',
+  en: "The layout's `params.locale` is typed as a string: around a page its schema has already accepted it, but around `not-found.tsx` it renders whether or not the schema accepted, and can be anything — so the shell checks it with `locales.is()` and otherwise reads the locale from the URL. The `children` the server rendered cross the boundary as JSX.",
 });
 
 export const shellExcerpt = message({
