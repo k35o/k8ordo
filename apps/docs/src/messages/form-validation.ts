@@ -191,8 +191,8 @@ export const resetDirty = message({
 });
 
 export const resetEcho = message({
-  ja: 'React は action のあと、失敗を返したときにもフォームをリセットします。それでも入力が残るのは、`state.values` が `defaultValue` として描かれ、リセットがその値に戻すからです。パスワードは返されないので空になります。',
-  en: 'React resets the form after the action even when it returned a failure. The input survives because `state.values` is rendered as `defaultValue`, which is what the reset restores; passwords are never echoed, so they come back empty.',
+  ja: 'React は action のあと、失敗を返したときにもフォームをリセットします。それでも入力が残るのは、`state.values` が `defaultValue` として描かれ、リセットがその値に戻すからです。React は `<select>` の `defaultValue` をマウント時にしか反映しないので、`<select>` には `useForm` が各 `<option>` の `defaultSelected` を書きます。パスワードは返されないので空になります。',
+  en: "React resets the form after the action even when it returned a failure. The input survives because `state.values` is rendered as `defaultValue`, which is what the reset restores. React applies a `<select>`'s `defaultValue` only when it mounts, so for a select `useForm` writes each option's `defaultSelected` itself. Passwords are never echoed, so they come back empty.",
 });
 
 export const dirtyTitle = message({
