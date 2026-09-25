@@ -118,25 +118,37 @@ export type UseFormReturn<
   isDirty: boolean;
 };
 
-const initialRows = (
+const rowCountsFor = (
   fields: FormFields,
   state: FormState,
+): Record<string, number> => {
+  const counts: Record<string, number> = {};
+  for (const [path, array] of Object.entries(fields.arrays)) {
+    counts[path] = state.rows?.[path] ?? array.minItems ?? 0;
+  }
+  return counts;
+};
+
+const rowKeysFor = (
+  counts: Record<string, number>,
+  current: Record<string, string[]> = {},
 ): Record<string, string[]> => {
   const rows: Record<string, string[]> = {};
-  for (const [path, array] of Object.entries(fields.arrays)) {
-    const count = state.rows?.[path] ?? array.minItems ?? 0;
-    rows[path] = Array.from(
-      { length: count },
-      (_, index) => `${path}-${String(index)}`,
-    );
+  for (const [path, count] of Object.entries(counts)) {
+    const kept = current[path];
+    // 行数が同じなら、サーバーは送られた順に番号を振っただけで、同じ行を指している。
+    // key を振り直すと行が作り直され、送信失敗で移したフォーカスや、エコーのない
+    // 値まで消える
+    rows[path] =
+      kept?.length === count
+        ? kept
+        : Array.from(
+            { length: count },
+            (_, index) => `${path}-${String(index)}`,
+          );
   }
   return rows;
 };
-
-const rowCountsOf = (rows: Record<string, string[]>): Record<string, number> =>
-  Object.fromEntries(
-    Object.entries(rows).map(([path, keys]) => [path, keys.length]),
-  );
 
 /**
  * Rename one concrete indexed name after the row at `removed` is gone: entries
@@ -219,11 +231,13 @@ export const useForm = <FieldPath extends string, ArrayPath extends string>(
   const [clientErrors, setClientErrors] = useState<Record<string, string>>({});
   const [edited, setEdited] = useState<ReadonlySet<string>>(new Set());
   const [domDirty, setDomDirty] = useState(false);
-  const [rowKeys, setRowKeys] = useState(() => initialRows(lookup, state));
   // The row counts the current server state rendered with; more or fewer rows
   // than this is a structural edit even while every control is pristine. It is
   // state rather than a ref because `isDirty` is read during render.
-  const [baselineRows, setBaselineRows] = useState(() => rowCountsOf(rowKeys));
+  const [baselineRows, setBaselineRows] = useState(() =>
+    rowCountsFor(lookup, state),
+  );
+  const [rowKeys, setRowKeys] = useState(() => rowKeysFor(baselineRows));
 
   // Compared by content plus the parse token, not identity. A caller writing
   // `useForm(fields, {})` hands over a new object on every render, and
@@ -234,7 +248,7 @@ export const useForm = <FieldPath extends string, ArrayPath extends string>(
 
   // A fresh result from the server supersedes everything the client worked out
   // before the submit, including which fields the person had already fixed and
-  // which rows existed.
+  // how many rows there are.
   useEffect(() => {
     if (lastKey.current === stateKey) {
       return;
@@ -243,9 +257,9 @@ export const useForm = <FieldPath extends string, ArrayPath extends string>(
     setClientErrors({});
     setEdited(new Set());
     setDomDirty(false);
-    const rows = initialRows(lookup, state);
-    setBaselineRows(rowCountsOf(rows));
-    setRowKeys(rows);
+    const counts = rowCountsFor(lookup, state);
+    setBaselineRows(counts);
+    setRowKeys((previous) => rowKeysFor(counts, previous));
 
     // Moving focus to the first rejected field is the only way someone using a
     // screen reader learns the submit failed and where.
@@ -342,9 +356,9 @@ export const useForm = <FieldPath extends string, ArrayPath extends string>(
   const onReset = useCallback(() => {
     setClientErrors({});
     setEdited(new Set());
-    const rows = initialRows(lookup, state);
-    setBaselineRows(rowCountsOf(rows));
-    setRowKeys(rows);
+    const counts = rowCountsFor(lookup, state);
+    setBaselineRows(counts);
+    setRowKeys((previous) => rowKeysFor(counts, previous));
     // A rule's message is not a value, so a reset leaves it on the control.
     const form = formRef.current;
     for (const [name, message] of ownedRuleMessages.current) {
