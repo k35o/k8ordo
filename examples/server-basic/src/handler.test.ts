@@ -107,16 +107,17 @@ const specifiersOfHandler = async (): Promise<ReadonlySet<string>> => {
             const { module } = parseSync(file, source, {
               sourceType: 'module',
             });
-            return [
-              ...module.staticImports.map((entry) => entry.moduleRequest.value),
-              // 動的 import の範囲は引用符ごとの文字列リテラル
-              ...module.dynamicImports.map((entry) =>
-                source.slice(
-                  entry.moduleRequest.start + 1,
-                  entry.moduleRequest.end - 1,
+            return module.staticImports
+              .map((entry) => entry.moduleRequest.value)
+              .concat(
+                // 動的 import の範囲は引用符ごとの文字列リテラル
+                module.dynamicImports.map((entry) =>
+                  source.slice(
+                    entry.moduleRequest.start + 1,
+                    entry.moduleRequest.end - 1,
+                  ),
                 ),
-              ),
-            ];
+              );
           }),
       );
     }),
