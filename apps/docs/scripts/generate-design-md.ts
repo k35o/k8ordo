@@ -392,7 +392,9 @@ font-family: 'Noto Sans JP', 'M PLUS 2', sans-serif;
 | Selected | \`bg-primary-bg-subtle\` |
 | Error | \`border-border-error\` + \`text-fg-error\` |
 
-フォーカスは必ず \`focus-visible\`（\`focus\` ではない）を使い、リングは \`ring-border-info\` で統一。`,
+フォーカスは必ず \`focus-visible\`（\`focus\` ではない）を使い、リングは \`ring-border-info\` で統一。
+
+OS の \`prefers-contrast: more\` と \`forced-colors: active\` にはライブラリの CSS が従う。高コントラストでは文字と線のトークンが一段強くなり、影だけで縁取る面に線が付く。強制カラーでは境界線・フォーカスリング・選択状態をシステムカラー（\`Highlight\` / \`CanvasText\`）で描く。自前の UI では、境界やフォーカスを \`box-shadow\` だけで描かず、\`text-transparent\` で隠さない（強制カラーで塗られる。\`invisible\` を使う）。`,
 
     `## z-index`,
     table(['Token', '値'], zRows),
