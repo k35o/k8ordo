@@ -19,6 +19,10 @@ const CHAT =
   '生成 UI を載せる側のチャット。アプリがメッセージの流れから組み立てるもので、spec が置くものではない';
 
 const LEFT_OUT: ReadonlyMap<string, string> = new Map([
+  [
+    'ContextMenu',
+    '右クリックという見えない操作で開くので、生成 UI に置くと操作が見つけられなくなる。アプリが自分の中身（ファイルや行）に付けるもの',
+  ],
   ['InView', OBSERVER],
   ['Resize', OBSERVER],
   ['UIProvider', 'アプリが生成 UI も含めた全体の外側に 1 度だけ置く'],

@@ -84,6 +84,8 @@ const renderers = {
     ui.renderTooltip(props),
   DropdownMenu: ({ props }: ComponentRenderProps<sc.DropdownMenuProps>) =>
     ui.renderDropdownMenu(props),
+  Toolbar: ({ props }: ComponentRenderProps<sc.ToolbarProps>) =>
+    ui.renderToolbar(props),
   Toast: ({ props }: ComponentRenderProps<sc.ToastProps>) => (
     <ui.ToastWidget props={props} />
   ),

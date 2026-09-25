@@ -210,6 +210,7 @@ stories and rendered props rather than relying on trained knowledge:
 
 - **Button** - Primary action button (use `renderItem` to render as a link)
 - **IconButton** - Button with icon only (use `renderItem` to render as a link)
+- **Toolbar** - Group of buttons that arrow keys move between
 
 ### Navigation
 
@@ -253,6 +254,7 @@ stories and rendered props rather than relying on trained knowledge:
 
 ### Overlays
 
+- **ContextMenu** - Menu opened by right-click at the pointer
 - **Dialog** - Modal dialog boxes
 - **Drawer** - Slide-out panel
 - **DropdownMenu** - Action menu component
@@ -481,16 +483,16 @@ pnpm add @json-render/core @json-render/react zod
 pnpm add @openuidev/react-lang @openuidev/lang-core zod
 ```
 
-Supported components (**all 48**, both frameworks):
+Supported components (**all 49**, both frameworks):
 
 - **Layout / containers**: `Stack`, `Grid`, `Card`, `Form`
-- **Buttons / nav**: `Button`, `IconButton`, `Anchor`, `Breadcrumb`, `Pagination`
+- **Buttons / nav**: `Button`, `IconButton`, `Toolbar`, `Anchor`, `Breadcrumb`, `Pagination`
 - **Display**: `Badge`, `Heading`, `Avatar`, `Code`, `Icon`, `ChevronIcon`, `StatusIcon`, `Alert`, `Spinner`, `Progress`, `Skeleton`, `Separator`, `Tabs`, `Accordion`, `Table`, `ScrollLinked`
 - **Overlays (self-contained widgets)**: `Modal`, `Dialog`, `Drawer`, `Popover`, `Tooltip`, `DropdownMenu`, `Toast`
 - **Form**: `TextField`, `Textarea`, `PasswordInput`, `NumberField`, `Slider`, `Checkbox`, `Switch`, `Select`, `Radio`, `RadioCard`, `CheckboxCard`, `ListBox`, `CheckboxGroup`, `Autocomplete`, `FileField`, `FormControl`
 
-The rest of the exports — the observers, the providers, and the AI chat
-components — are left out on purpose;
+The rest of the exports — `ContextMenu`, the observers, the providers, and the
+AI chat components — are left out on purpose;
 [docs/references/generative-ui.md](docs/references/generative-ui.md#what-the-catalog-leaves-out)
 says why.
 

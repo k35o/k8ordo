@@ -144,6 +144,11 @@ export const buildComponentLibrary = <C>(
     'Tooltip shown on hover or focus.',
     s.tooltipProps,
   );
+  const Toolbar = def(
+    'Toolbar',
+    'Row (or column) of buttons that arrow keys move between, e.g. formatting actions. Give each item an icon to show only the icon.',
+    s.toolbarProps,
+  );
   const DropdownMenu = def(
     'DropdownMenu',
     'Dropdown menu.',
@@ -219,6 +224,7 @@ export const buildComponentLibrary = <C>(
     Pagination.ref,
     Tooltip.ref,
     DropdownMenu.ref,
+    Toolbar.ref,
     Toast.ref,
     ScrollLinked.ref,
     ListBox.ref,
@@ -334,6 +340,7 @@ export const buildComponentLibrary = <C>(
       Popover,
       Tooltip,
       DropdownMenu,
+      Toolbar,
       Toast,
       Button,
       IconButton,
