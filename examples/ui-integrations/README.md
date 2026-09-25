@@ -47,11 +47,11 @@ examples/ui-integrations/
 │   ├── json-render/
 │   │   ├── demo.tsx               # Typed UISpec rendered with <JsonRenderUI />
 │   │   ├── demo.test.ts           # The spec passes validateGeneratedSpec with no fixes
-│   │   └── demo.browser.test.tsx  # The spec renders and keeps form state in Chromium
+│   │   └── demo.browser.test.tsx  # The spec renders and keeps form state in a real browser
 │   ├── openui/
 │   │   ├── demo.tsx               # OpenUI-Lang DSL rendered with library + Renderer
 │   │   ├── demo.test.ts           # The DSL parses and every statement reaches the tree
-│   │   └── demo.browser.test.tsx  # The DSL renders and keeps form state in Chromium
+│   │   └── demo.browser.test.tsx  # The DSL renders and keeps form state in a real browser
 │   ├── main.tsx                   # Application entry point
 │   └── vite-env.d.ts              # Vite type declarations
 ├── index.html                     # HTML template
@@ -104,7 +104,7 @@ export function OpenUiDemo() {
 
 - `pnpm dev` - Start the development server (`vp dev`)
 - `pnpm build` - Build for production (`vp build`)
-- `pnpm test` - Run the tests (`vp test`): the `spec` project checks the demo spec and DSL against the adapters, and the `render` project mounts both demos in headless Chromium
+- `pnpm test` - Run the tests (`vp test`): the `spec` project checks the demo spec and DSL against the adapters, and the `render` project mounts both demos in headless Chromium, Firefox, and WebKit
 - `pnpm typecheck` - Run TypeScript type checking
 - `pnpm check` - Run Oxlint/Oxfmt linting/formatting checks (`vp check`)
 - `pnpm check:write` - Run `vp check --fix` to auto-fix issues

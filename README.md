@@ -50,6 +50,7 @@ that satisfies `engines` in [`package.json`](package.json) works.
 ```bash
 mise install
 pnpm install
+pnpm exec playwright install chromium firefox webkit
 pnpm build
 ```
 
@@ -84,7 +85,7 @@ already have.
 | --- | --- |
 | `pnpm build` | Build every package and app |
 | `pnpm build:examples` | Build every example |
-| `pnpm test` | Run every test |
+| `pnpm test` | Run every test; browser tests run in Chromium, Firefox, and WebKit (`TEST_BROWSER=<engine>` for one) |
 | `pnpm test:examples` | Run the examples' tests, which read their builds (`build:examples` first) |
 | `pnpm typecheck` | Type check every workspace |
 | `pnpm check` | Lint and format check (`check:write` to auto-fix) |

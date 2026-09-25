@@ -93,10 +93,10 @@
     "check:package": "publint && attw --pack . --profile esm-only --exclude-entrypoints ./styles.css ./tailwind.css && pnpm check:dist",
     "storybook": "storybook dev -p 6006 --no-open",
     "build-storybook": "storybook build",
-    "test:vrt": "VRT=1 vitest run --project=components",
+    "test:vrt": "VRT=1 TEST_BROWSER=chromium vitest run --project=components",
     "test": "vitest run",
-    "test:ui": "vitest --ui --coverage",
-    "test:coverage": "vitest run --coverage",
+    "test:ui": "TEST_BROWSER=chromium vitest --ui --coverage",
+    "test:coverage": "TEST_BROWSER=chromium vitest run --coverage",
     "typecheck": "tsc --noEmit",
     "check": "vp check",
     "check:write": "vp check --fix"

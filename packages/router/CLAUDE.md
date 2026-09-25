@@ -12,7 +12,7 @@ inside the npm package.
 ## Commands
 
 ```bash
-pnpm test          # unit (node) + browser (chromium)
+pnpm test          # unit (node) + browser (chromium, firefox, webkit)
 pnpm build         # vp pack
 pnpm typecheck
 pnpm check         # check:write to auto-fix

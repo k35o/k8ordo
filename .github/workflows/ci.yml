@@ -14,10 +14,18 @@ permissions:
   contents: read
 
 jobs:
+  # ブラウザのテストはエンジンごとにジョブを分けて並べる。1 ジョブで 3 つ
+  # 回すと待ち時間が 3 倍になる。1 つが落ちても他のエンジンの結果は見たい。
   tests:
-    name: Tests
+    name: Tests (${{ matrix.browser }})
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+    env:
+      TEST_BROWSER: ${{ matrix.browser }}
     steps:
       - name: Checkout branch
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -31,11 +39,12 @@ jobs:
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-playwright-${{ matrix.browser }}-${{ hashFiles('pnpm-lock.yaml') }}
 
-      # ブラウザモードのテストは全プロジェクトが chromium 固定。
+      # キャッシュに入るのはブラウザ本体だけで、OS のライブラリは毎回入れる。
+      # Firefox と WebKit にはランナーに無いライブラリが要る。
       - name: Install Playwright browsers
-        run: pnpm exec playwright install chromium
+        run: pnpm exec playwright install --with-deps ${{ matrix.browser }}
 
       - name: Run tests
         run: pnpm --filter './packages/*' test
@@ -118,10 +127,37 @@ jobs:
       - name: Check packaging
         run: pnpm --filter './packages/*' check:package
 
-  apps:
-    name: Apps & Examples
+  # パッケージの下流（サイトと examples）は composite install の build から
+  # 外してある。Lint と TypeScript も route 表のために組むが、書き出した
+  # 全ルートを確かめるのは docs、examples の出力を確かめるのは examples だけ。
+  docs:
+    name: Docs site
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install
+        uses: ./.github/composite-actions/install
+
+      - name: Build docs site
+        run: pnpm --filter './apps/*' build
+
+  # ui-integrations はブラウザモードのテストを、static-basic と server-basic は
+  # 組み上げたアプリをブラウザで開くテストを持つ。tests と同じくエンジンごとに分ける。
+  examples:
+    name: Examples (${{ matrix.browser }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+    env:
+      TEST_BROWSER: ${{ matrix.browser }}
     steps:
       - name: Checkout branch
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -135,18 +171,10 @@ jobs:
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-playwright-${{ matrix.browser }}-${{ hashFiles('pnpm-lock.yaml') }}
 
-      # ui-integrations はブラウザモードのテストを、static-basic は書き出した
-      # ページを Chromium で開くテストを持つ
       - name: Install Playwright browsers
-        run: pnpm exec playwright install chromium
-
-      # パッケージの下流（サイトと examples）は composite install の build から
-      # 外してある。Lint と TypeScript も route 表のために組むが、書き出した
-      # 全ルートと examples の出力を確かめるのはこのジョブだけ。
-      - name: Build docs site
-        run: pnpm --filter './apps/*' build
+        run: pnpm exec playwright install --with-deps ${{ matrix.browser }}
 
       # ビルドが通るだけでは「生成 UI のデモが実は何も描画しない」
       # 「フレームワークが 1 枚も書き出していない」を検出できないため、

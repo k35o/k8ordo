@@ -2,8 +2,17 @@ import path from 'node:path';
 
 import { serve } from '@k8ordo/server/runtime';
 import type { Server } from '@k8ordo/server/runtime';
-import { chromium } from 'playwright';
+import { chromium, firefox, webkit } from 'playwright';
 import type { Browser, Page } from 'playwright';
+
+// CI はエンジンごとにジョブを分けて並べるので、TEST_BROWSER で 1 つに絞れる
+const browserTypes = [chromium, firefox, webkit]
+  .filter(
+    (type) =>
+      process.env.TEST_BROWSER === undefined ||
+      process.env.TEST_BROWSER === type.name(),
+  )
+  .map((type) => ({ name: type.name(), type }));
 
 let server: Server;
 let browser: Browser;
@@ -13,11 +22,9 @@ beforeAll(async () => {
     dist: path.resolve(import.meta.dirname, '..', 'dist'),
     port: 0,
   });
-  browser = await chromium.launch();
 });
 
 afterAll(async () => {
-  await browser.close();
   await server.close();
 });
 
@@ -34,7 +41,15 @@ const hydrated = async (page: Page): Promise<void> => {
   );
 };
 
-describe('the built application in a browser', () => {
+describe.each(browserTypes)('the built application in $name', ({ type }) => {
+  beforeAll(async () => {
+    browser = await type.launch();
+  });
+
+  afterAll(async () => {
+    await browser.close();
+  });
+
   it('follows an action that redirected when JavaScript ran it', async () => {
     const page = await browser.newPage();
     await page.goto(server.url);
