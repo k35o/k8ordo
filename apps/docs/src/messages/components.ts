@@ -383,6 +383,29 @@ export const autocomplete = {
   }),
 };
 
+export const rangeSlider = {
+  description: message({
+    ja: '2 つのつまみで範囲を選ぶスライダー',
+    en: 'A slider with two thumbs for picking a range.',
+  }),
+  controlledTitle: message({
+    ja: '制御モード',
+    en: 'Controlled',
+  }),
+  formTitle: message({
+    ja: 'フォームで使う',
+    en: 'In a form',
+  }),
+  formDescription: message({
+    ja: 'つまみはそれぞれ本物の `<input type="range">` で、`name` の組の 2 つの欄として送られます。非制御のときは値を DOM に持つので、フォームの reset と変更の有無の判定がそのまま効きます。',
+    en: 'Each thumb is a real `<input type="range">` and submits as one of the two fields named by the `name` pair. Uncontrolled, the values stay in the DOM, so a form’s reset and its dirty check work on them as on any input.',
+  }),
+  disabledTitle: message({
+    ja: '無効',
+    en: 'Disabled',
+  }),
+};
+
 export const slider = {
   description: message({
     ja: '単一ノブのスライダー入力',
@@ -568,6 +591,14 @@ export const progress = {
   withLabelTitle: message({
     ja: 'ラベル付き',
     en: 'With Label',
+  }),
+  indeterminateTitle: message({
+    ja: '進み具合が分からないとき',
+    en: 'When progress is unknown',
+  }),
+  indeterminateDescription: message({
+    ja: '`value` を省くと、帯が溝の中を行き来する表示になります。読み上げでは値を持たず、名前は `label`（省くと組み込みの「読み込み中」）です。動きを減らす設定では、移動をやめて明滅だけにします。',
+    en: 'Leave `value` out and the bar slides back and forth. It carries no value for assistive technology and is named by `label` (the built-in “loading” wording when omitted). With reduced motion it stops sliding and only pulses.',
   }),
 };
 
