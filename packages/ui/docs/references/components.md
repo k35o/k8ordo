@@ -1543,11 +1543,11 @@ Props:
 - `label`: `string` (required)
 - `rows`: `readonly Row[]` (required)
 - `emptyState`: `ReactNode`
-- `hiddenColumnIds`: `readonly string[]`
+- `hiddenColumnIds`: `readonly string[]` (default: `NONE`)
 - `onHiddenColumnIdsChange`: `(ids: string[]) => void`
 - `onSelectedIdsChange`: `(ids: string[]) => void`
 - `onSortChange`: `(sort: DataTableSort | null) => void`
-- `selectedIds`: `readonly string[]`
+- `selectedIds`: `readonly string[]` (default: `NONE`)
 - `sort`: `DataTableSort` | `null` (default: `null`)
 
 ## Feedback

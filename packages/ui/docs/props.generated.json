@@ -1194,7 +1194,7 @@
         {
           "name": "hiddenColumnIds",
           "types": ["readonly string[]"],
-          "defaultValue": null,
+          "defaultValue": "NONE",
           "required": false
         },
         {
@@ -1218,7 +1218,7 @@
         {
           "name": "selectedIds",
           "types": ["readonly string[]"],
-          "defaultValue": null,
+          "defaultValue": "NONE",
           "required": false
         },
         {
