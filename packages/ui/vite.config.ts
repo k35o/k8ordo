@@ -9,11 +9,15 @@ import { defineConfig } from 'vite-plus';
 const storiesProject = ({
   label,
   color,
+  tags,
+  context,
   initialGlobals,
   withVrt = false,
 }: {
   label: string;
-  color: 'magenta' | 'cyan';
+  color: 'magenta' | 'red' | 'yellow' | 'cyan';
+  tags: { include?: string[]; exclude?: string[] };
+  context?: { forcedColors?: 'active'; contrast?: 'more' };
   initialGlobals?: Record<string, unknown>;
   withVrt?: boolean;
 }) => ({
@@ -22,6 +26,7 @@ const storiesProject = ({
     storybookTest({
       storybookScript: 'pnpm storybook --ci',
       configDir: fileURLToPath(new URL('./.storybook', import.meta.url)),
+      tags,
       initialGlobals,
     }),
     ...(withVrt ? [vrt()] : []),
@@ -31,7 +36,9 @@ const storiesProject = ({
     name: { label, color },
     browser: {
       enabled: true,
-      provider: playwright(),
+      provider: playwright({
+        contextOptions: { reducedMotion: 'reduce', ...context },
+      }),
       headless: true,
       screenshotFailures: false,
       // @storybook/addon-vitest はストーリーごとに page.viewport() で
@@ -44,12 +51,7 @@ const storiesProject = ({
       // ので、addon が敷いていたのと同じ寸法をこちらで明示する。
       // addon が vitest 5 に対応したら消してよい。
       viewport: { width: 1200, height: 900 },
-      instances: [
-        {
-          browser: 'chromium' as const,
-          context: { reducedMotion: 'reduce' as const },
-        },
-      ],
+      instances: [{ browser: 'chromium' as const }],
     },
   },
 });
@@ -82,13 +84,33 @@ export default defineConfig({
       provider: 'v8',
     },
     projects: [
-      storiesProject({ label: 'components', color: 'magenta', withVrt: true }),
+      storiesProject({
+        label: 'components',
+        color: 'magenta',
+        tags: { exclude: ['forced-colors', 'contrast-more'] },
+        withVrt: true,
+      }),
       // axe の color-contrast はそのとき描かれている配色しか見ないので、
       // ダークでも全ストーリーを走らせる
       storiesProject({
         label: 'components-dark',
-        color: 'cyan',
+        color: 'red',
+        tags: { exclude: ['forced-colors', 'contrast-more'] },
         initialGlobals: { theme: 'dark' },
+      }),
+      // OS の配色設定はストーリーごとには切り替えられないので、設定ごとに
+      // プロジェクトを分け、その設定で確かめるストーリーだけを走らせる
+      storiesProject({
+        label: 'components-forced-colors',
+        color: 'yellow',
+        tags: { include: ['forced-colors'] },
+        context: { forcedColors: 'active' },
+      }),
+      storiesProject({
+        label: 'components-contrast-more',
+        color: 'cyan',
+        tags: { include: ['contrast-more'] },
+        context: { contrast: 'more' },
       }),
       {
         extends: true,
@@ -101,15 +123,10 @@ export default defineConfig({
           ],
           browser: {
             enabled: true,
-            instances: [
-              {
-                browser: 'chromium',
-                context: {
-                  reducedMotion: 'reduce',
-                },
-              },
-            ],
-            provider: playwright(),
+            instances: [{ browser: 'chromium' }],
+            provider: playwright({
+              contextOptions: { reducedMotion: 'reduce' },
+            }),
             headless: true,
             screenshotFailures: false,
           },

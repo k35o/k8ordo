@@ -11,7 +11,7 @@ import { demoState } from './demo-state';
 
 type Props = {
   /** `formFields(demoState.url)` の結果。Server Component で導かれ、props で渡る。 */
-  fields: FormFields<'q' | 'min', never>;
+  fields: FormFields<'q' | 'min' | 'inStock', never>;
 };
 
 // TextField と同じ見た目。number は TextField の受け付ける type に無いので
@@ -24,9 +24,10 @@ export function FormDemo({ fields }: Props) {
   const form = useForm(fields);
   const q = form.field('q');
   const min = form.field('min');
+  const inStock = form.field('inStock');
   // フォームが GET で書いた URL を、同じスキーマの state が読み返す
-  const [{ q: currentQ, min: currentMin }] = useAppState(demoState);
-  const search = demoState.search({ q: currentQ, min: currentMin });
+  const [current] = useAppState(demoState);
+  const search = demoState.search(current);
 
   // `type` は TextField 側が決める（search）。それ以外の制約属性は
   // スキーマ由来のものをそのまま広げる。
@@ -48,7 +49,7 @@ export function FormDemo({ fields }: Props) {
               <TextField
                 {...props}
                 {...qInput}
-                defaultValue={currentQ}
+                defaultValue={current.q}
                 type="search"
               />
             )}
@@ -66,12 +67,23 @@ export function FormDemo({ fields }: Props) {
                 {...min.input}
                 aria-invalid={props.invalid}
                 className={NUMBER_INPUT_CLASS}
-                defaultValue={currentMin}
+                defaultValue={current.min}
               />
             )}
             required={min.required}
           />
         </div>
+        {/* @k8ordo/ui の Checkbox はグループの外では value 属性を出さず、
+            ブラウザ既定の on を送る。state が書く "true" と同じ文字列を
+            送るため、value まで広げられる素の <input> にする */}
+        <label className="flex items-center gap-2 sm:pb-2.5">
+          <input
+            {...inStock.input}
+            className="accent-primary-border size-4"
+            defaultChecked={current.inStock}
+          />
+          {m.form.demoLabelInStock()}
+        </label>
         <Button type="submit" variant="solid">
           {m.form.demoSubmit()}
         </Button>
@@ -86,12 +98,15 @@ export function FormDemo({ fields }: Props) {
         <div className="flex gap-3">
           <dt className="text-fg-mute">state</dt>
           <dd className="break-all">
-            <Code>{JSON.stringify({ q: currentQ, min: currentMin })}</Code>
+            <Code>{JSON.stringify(current)}</Code>
           </dd>
         </div>
       </dl>
       <p className="text-fg-mute text-sm leading-relaxed">
         <Rich>{m.form.demoHint()}</Rich>
+      </p>
+      <p className="text-fg-mute text-sm leading-relaxed">
+        <Rich>{m.form.demoHintCheckbox()}</Rich>
       </p>
     </div>
   );

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { FC, PropsWithChildren, Ref } from 'react';
 
 import type { ModalSide } from '../../../types/variables';
+import { HIGH_CONTRAST_EDGE } from '../../_internal/high-contrast';
 import { ToastProvider } from '../../feedback/toast';
 import { PortalRootProvider } from '../../providers';
 import { ModalDialogProvider } from '../_internal/modal-dialog-context';
@@ -97,6 +98,7 @@ export const Modal: FC<
       aria-labelledby={labelledBy}
       className={cn(
         'ao-modal bg-bg-raised text-fg-base z-modal shadow-md backdrop:bg-back-drop',
+        HIGH_CONTRAST_EDGE,
         side === 'center' &&
           'ao-modal-center m-auto max-h-128 w-5/6 max-w-2xl rounded-lg vertical:h-5/6 vertical:max-h-168 vertical:w-auto vertical:max-w-lg',
         side === 'bottom' &&

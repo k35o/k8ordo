@@ -4,6 +4,7 @@ import type { FC, HTMLAttributes, ReactNode } from 'react';
 
 import { useMessages } from '../../../i18n/context';
 import type { Messages } from '../../../i18n/messages';
+import { HIGH_CONTRAST_EDGE } from '../../_internal/high-contrast';
 import { IconButton } from '../../buttons/icon-button';
 import { AlertIcon, CloseIcon } from '../../icons';
 import { cn } from './../../../helpers/cn';
@@ -80,6 +81,7 @@ export const Alert: FC<Props> = ({
       {...rest}
       className={cn(
         'flex items-center gap-3 rounded-lg p-4',
+        HIGH_CONTRAST_EDGE,
         tone === 'success' && 'bg-bg-success',
         tone === 'info' && 'bg-bg-info',
         tone === 'warning' && 'bg-bg-warning',

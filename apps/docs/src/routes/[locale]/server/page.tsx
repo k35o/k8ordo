@@ -52,7 +52,7 @@ export async function createTalk(_previous: FormState, formData: FormData) {
   const parsed = parseForm(talkSchema, formData);
   if (!parsed.success) return parsed.state;
   await insertTalk(parsed.data);
-  redirect('/talks'); // throw されるので、この後の行は走らない
+  redirect(href('/talks')); // throw されるので、この後の行は走らない
 }
 
 // src/routes/_parts/talk-form.tsx
