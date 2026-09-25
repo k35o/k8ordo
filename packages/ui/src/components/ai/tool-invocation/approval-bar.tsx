@@ -31,7 +31,9 @@ export const ApprovalBar: FC<Props> = ({
   const keepFocusOnAnswer = useCallback(
     (group: HTMLDivElement) => () => {
       if (group.contains(document.activeElement)) {
-        document.getElementById(triggerId)?.focus();
+        document
+          .querySelector<HTMLElement>(`#${CSS.escape(triggerId)}`)
+          ?.focus();
       }
     },
     [triggerId],
