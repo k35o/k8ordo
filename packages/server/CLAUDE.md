@@ -42,6 +42,12 @@ pnpm check         # check:write to auto-fix
   the only way `serve` turns a pathname into a path, and it is tested against
   the spellings traversal takes; decoding is the engine's `decodePathname`,
   shared with `@k8ordo/static`.
+- **The client build sits at the build's base.** `serve` reads `base`
+  from `dist/rsc/index.js` — the value the handler was built with, so the
+  two cannot disagree — and takes it off a request (`withoutBase`, the base
+  passed in: Node has no `import.meta.env`) before looking for a file or
+  deciding `immutable`. A URL outside the base never names a file; the
+  handler answers it.
 - **`serve` hands back a handle.** `{ port, url, close }`, so a test can
   listen on port 0 and stop what it started (`serve.test.ts` runs it against
   a fixture `dist`, no real build needed).

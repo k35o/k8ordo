@@ -209,6 +209,11 @@ export const entryOnlyLinks = message({
   en: 'For an entry-only definition, `href` returns `base` unchanged and `search` returns an empty string.',
 });
 
+export const hrefBase = message({
+  ja: "`href` が受け取るパスは、ルート表と同じくアプリの根から書きます。返すリンクには Vite の `base` が前に付くので、`base: '/docs/'` のもとでは `catalogState.href('/catalog', { page: 2 })` が `/docs/catalog?page=2` になります。`@k8ordo/router` の `href` が返したものは、すでに base を持っているので渡さないでください。Vite の外（Next.js など）では何も付かず、basePath はそのフレームワークの `<Link>` が付けます。",
+  en: "The path `href` takes is written from the application’s root, the way the route table is, and the link it returns carries Vite’s `base` in front: under `base: '/docs/'`, `catalogState.href('/catalog', { page: 2 })` is `/docs/catalog?page=2`. Do not hand it what `@k8ordo/router`’s `href` returned, which carries the base already. Outside Vite (Next.js, say) nothing is added, and a basePath is the framework’s own `<Link>`’s to add.",
+});
+
 export const typedTitle = message({
   ja: '型付きルート',
   en: 'Typed routes',
