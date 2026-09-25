@@ -112,6 +112,79 @@ describe('mapMessageParts', () => {
     ]);
   });
 
+  it('maps file parts', () => {
+    const message = messageWith([
+      {
+        type: 'file',
+        mediaType: 'image/png',
+        filename: 'chart.png',
+        url: 'data:image/png;base64,AAAA',
+      },
+    ]);
+
+    expect(mapMessageParts(message)).toStrictEqual([
+      {
+        kind: 'file',
+        url: 'data:image/png;base64,AAAA',
+        mediaType: 'image/png',
+        filename: 'chart.png',
+      },
+    ]);
+  });
+
+  it('maps url and document sources to the same kind', () => {
+    const message = messageWith([
+      {
+        type: 'source-url',
+        sourceId: 's1',
+        url: 'https://example.com/a',
+        title: 'Example',
+      },
+      {
+        type: 'source-document',
+        sourceId: 's2',
+        mediaType: 'application/pdf',
+        title: '仕様書',
+        filename: 'spec.pdf',
+      },
+    ]);
+
+    expect(mapMessageParts(message)).toStrictEqual([
+      {
+        kind: 'source',
+        id: 's1',
+        url: 'https://example.com/a',
+        title: 'Example',
+      },
+      {
+        kind: 'source',
+        id: 's2',
+        title: '仕様書',
+        mediaType: 'application/pdf',
+        filename: 'spec.pdf',
+      },
+    ]);
+  });
+
+  it('maps data parts with the name after `data-`', () => {
+    const message = messageWith([
+      {
+        type: 'data-weather',
+        id: 'w1',
+        data: { city: 'Tokyo', celsius: 21 },
+      },
+    ]);
+
+    expect(mapMessageParts(message)).toStrictEqual([
+      {
+        kind: 'data',
+        name: 'weather',
+        id: 'w1',
+        data: { city: 'Tokyo', celsius: 21 },
+      },
+    ]);
+  });
+
   it('skips unsupported parts', () => {
     const message = messageWith([
       { type: 'step-start' },

@@ -57,6 +57,16 @@ export type Messages = {
   suggestions: string;
   send: string;
   stop: string;
+  /** PromptInput.Attach の開くボタン */
+  attach: string;
+  /** Attachment.List / PromptInput.Attachments の list 名 */
+  attachments: string;
+  /** 添付 1 件を外すボタン。どの添付かは aria-describedby のファイル名で補う */
+  attachmentRemove: string;
+  /** 画像の添付に filename が無いときの代替テキスト */
+  attachmentImage: string;
+  /** Source.List の list 名 */
+  sources: string;
   toolInput: string;
   toolOutput: string;
   toolError: string;
