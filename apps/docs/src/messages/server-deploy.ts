@@ -120,6 +120,26 @@ export const handlerOrigin = message({
   en: "Build the `Request` with the URL the visitor asked for: the handler accepts a POST only when its `Origin` header is present and names that URL's host, and answers any other POST with a `403`. Behind a proxy that means passing the public host through — `serve()` builds the URL from the request's own `Host` header and reads no forwarded header, so a proxy in front of it has to pass the original `Host` on unchanged.",
 });
 
+export const vercelTitle = message({
+  ja: 'Vercel にデプロイする',
+  en: 'Deploying to Vercel',
+});
+
+export const vercelDescription = message({
+  ja: '`@k8ordo/server/vercel` の `vercel()` を `framework()` の隣に置くと、`vite build` は Vercel の Build Output API（v3）の形で `.vercel/output/` も書きます。`vercel build` と `vercel deploy --prebuilt` は、それをそのままデプロイします。',
+  en: "Put `vercel()` from `@k8ordo/server/vercel` beside `framework()`, and `vite build` also writes `.vercel/output/` in the shape of Vercel's Build Output API (v3), which `vercel build` and `vercel deploy --prebuilt` deploy as it is.",
+});
+
+export const vercelOutput = message({
+  ja: 'クライアントのビルドは Vercel の CDN に置く静的ファイルになります。`assets/` の下は、ファイルが答えたときにだけ `immutable` を付けるので、無いファイルの 404 が 1 年キャッシュされることはありません。どのファイルも指さないリクエストは、Node.js の関数 1 つが受けます。中身はリクエストハンドラで、`fetch` として Vercel に渡し、答えをストリームのまま返します。`serve()` 向けに圧縮したコピーは入れません。Vercel は自分で圧縮し、コピーの分だけアップロードするファイルが増えるからです。',
+  en: "The client build becomes static files on Vercel's CDN — a file under `assets/` is sent `immutable` only once a file has answered, so a missing one is never cached for a year — and every request that names no file goes to one Node.js function: the request handler, handed to Vercel as `fetch` and streaming its answer. The copies compressed for `serve()` are left out: Vercel compresses on its own, and each is one more file to upload.",
+});
+
+export const vercelBundled = message({
+  ja: 'Vercel の関数が持てるのは自分のディレクトリの中身だけなので、`vercel()` の下ではハンドラをすべての依存ごと bundle してビルドします。ネイティブのバイナリを持つ依存や、自分のファイルをパスで読む依存は、そうして束ねられないので動きません。ビルドのたびに書き直すのは `.vercel/output/` だけで、その隣に `vercel pull` が書いたプロジェクトのリンクは残します。',
+  en: 'A Vercel function holds nothing but its own directory, so under `vercel()` the handler is built with every dependency bundled in. A dependency that ships a native binary, or that reads its own files by path, cannot be bundled that way and does not work there. Each build replaces `.vercel/output/` and nothing else: the project link `vercel pull` writes beside it stays.',
+});
+
 export const routesDirTitle = message({
   ja: '`routesDir`',
   en: '`routesDir`',

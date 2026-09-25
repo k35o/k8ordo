@@ -46,6 +46,13 @@ pnpm check         # check:write to auto-fix
   listen on port 0 and stop what it started (`serve.test.ts` runs it against
   a fixture `dist`, no real build needed).
 
+- **Vercel is the one host with an adapter.** `vercel()` exists because
+  k8o, the family's real consumer, deploys there; another host gets the
+  handler (`dist/rsc/index.js`) and no adapter until something here runs on
+  it. The adapter writes the Build Output API directory and nothing more — no
+  launcher of its own (Vercel calls the handler as `fetch`) and no dependency
+  tracing (the function is built with every dependency bundled in).
+
 ## Layout
 
 ```
@@ -53,6 +60,8 @@ src/
   static-file.ts  safeJoin — request pathname → path inside the build output (pure)
   serve.ts        the node:http server (static files + handing off to the handler)
   runtime.ts      ./runtime: serve, and the engine's redirect and types — no Vite
+  vercel-output.ts  the build as Vercel's Build Output API directory
+  vercel.ts       ./vercel: the plugin that bundles the handler and writes it
   index.ts        framework (the engine as is)
 ```
 

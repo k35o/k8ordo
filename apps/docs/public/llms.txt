@@ -358,6 +358,11 @@ These docs are served from <https://ordo.k8o.me>.
   spelled like. `redirect(to)` ends a Server Action by sending the visitor to
   `to`; `RedirectTarget` is the type of what a `redirect.ts` default-exports,
   and `RouteRequest` the type of the `request` prop.
+- `@k8ordo/server/vercel` — `vercel()` returns a Vite plugin to put beside
+  `framework()`: `vite build` then also writes `.vercel/output/` (Build Output
+  API v3) for `vercel build` / `vercel deploy --prebuilt` — the client build as
+  static files (`assets/` immutable), and the request handler as one streaming
+  Node.js function built with every dependency bundled in.
 
 ---
 
