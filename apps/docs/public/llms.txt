@@ -256,7 +256,8 @@ These docs are served from <https://ordo.k8o.me>.
   props by its pattern (`PageProps`' `params` from the registered schemas,
   `LayoutProps`' `params` always strings and its `P` only a pattern the table
   has a page at; `request` when the generated `Register` says the mode has
-  one). `notFound()` says, from a framework page, that its pathname is not a
+  one), and `RouteContext<P>` types a framework `route.ts` method export's
+  `{ request, params }`. `notFound()` says, from a framework page, that its pathname is not a
   page after all — the framework answers with the nearest `not-found.tsx`
   under a 404 — and `isNotFound(value)` recognises what it throws.
   `<PathnameProvider pathname>` seeds it for a server render and hydration,
@@ -293,7 +294,9 @@ These docs are served from <https://ordo.k8o.me>.
 > installing this package means request-time data does not exist as an API, and
 > a `'use server'` module, which the RSC pipeline still compiles, is refused by
 > name, as is a `guard.ts`. `src/routes/` is the pathname space
-> (page/layout/not-found/error/redirect, `[param]`, `(group)`, `_private`), a
+> (page/layout/not-found/error/redirect/route, `[param]`, `(group)`,
+> `_private`), a `route.ts` is written as the file its `GET` answers at its
+> pathname (`feed.xml/route.ts` → `feed.xml`; any other method is refused), a
 > page or layout may `export const paramsSchema` (any Standard Schema,
 > synchronous) to type its parameters — a refused value makes the pattern not
 > answer, so the walk goes on to `not-found.tsx` — a supplied pathname whose
@@ -340,12 +343,15 @@ These docs are served from <https://ordo.k8o.me>.
 > parameters need no list of values, an unknown URL is a real 404, and a form
 > can post to a Server Action. The mode is the dependency — the alternative is
 > `@k8ordo/static`, which renders every route at build time. `src/routes/` is
-> the pathname space (page/layout/not-found/error/redirect/guard, `[param]`,
+> the pathname space (page/layout/not-found/error/redirect/guard/route, `[param]`,
 > `(group)`, `_private`), a page or layout may `export const paramsSchema` (any
 > Standard Schema, synchronous) to type its parameters — a refused value makes
 > the pattern not answer, so the walk goes on to `not-found.tsx` under a real
 > 404 — an `error.tsx` shows in place of what throws below it, a `redirect.ts`
-> answers 307/308, a page that says `notFound()` (from `@k8ordo/router`) is
+> answers 307/308, a `route.ts` answers its URL with a `Response` from the
+> method it exports (`GET`/`POST`/…, `{ request, params }` — `RouteContext`
+> from the router; `HEAD` from `GET`, `405` with `Allow` otherwise, no
+> same-origin check), a page that says `notFound()` (from `@k8ordo/router`) is
 > answered by the nearest `not-found.tsx` under a 404 — a document waits for
 > the page's own component so the status can say so, a payload streams — a
 > Server Action ends with `redirect()` (303 without JavaScript, a navigation
@@ -383,8 +389,8 @@ These docs are served from <https://ordo.k8o.me>.
   `set(name, value, CookieOptions)`, `delete(name, CookieScope)`; defaults
   `path: '/'`, `httpOnly`, `secure`, `sameSite: 'lax'`; every write a
   `Set-Cookie` on the answer), and `requestHeaders()` the headers the request
-  arrived with — all three from a `guard.ts` or a Server Action, and they
-  throw anywhere else; `Guard<P>` is
+  arrived with — all three from a `guard.ts`, a `route.ts` or a Server
+  Action, and they throw anywhere else; `Guard<P>` is
   the type of what a `guard.ts` default-exports (`({ request, params }) =>
   Response | void`, `params` the strings of its directory's pattern) and
   `GuardContext<P>` its argument; `RedirectTarget` is the type of what a
