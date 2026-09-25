@@ -1,6 +1,12 @@
 'use client';
 
-import { useCallback, useDeferredValue, useRef, useState } from 'react';
+import {
+  useCallback,
+  useDeferredValue,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import type {
   CSSProperties,
   FC,
@@ -20,10 +26,12 @@ import {
 import { useMessages } from '../../../i18n/context';
 import type { Option } from '../../../types/variables';
 import { FOCUS_RING_WITHIN } from '../../_internal/focus-ring';
+import { FormValue } from '../../_internal/form-value';
 import { IconButton } from '../../buttons/icon-button';
 import { CloseIcon } from '../../icons';
 import { chain } from './../../../helpers/chain';
 import { cn } from './../../../helpers/cn';
+import { mergeRefs } from './../../../helpers/merge-refs';
 
 type BaseProps = {
   id: string;
@@ -87,6 +95,8 @@ export const Autocomplete: FC<Props> = ({
     defaultValue: defaultValue ?? [],
     onChange,
   });
+  const inputRef = useRef<HTMLInputElement>(null);
+  const mergedRef = useMemo(() => mergeRefs(inputRef, ref), [ref]);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -234,16 +244,20 @@ export const Autocomplete: FC<Props> = ({
       )}
       ref={setReferenceRef}
     >
-      {name !== undefined && name !== ''
-        ? currentValue.map((selectedValue) => (
-            <input
-              key={selectedValue}
-              name={name}
-              type="hidden"
-              value={selectedValue}
-            />
-          ))
-        : null}
+      <FormValue
+        defaultValues={value === undefined ? (defaultValue ?? []) : undefined}
+        disabled={disabled}
+        focusTarget={inputRef}
+        multiple
+        name={name}
+        onReset={() => {
+          if (value === undefined) {
+            handleChange(defaultValue ?? []);
+          }
+        }}
+        required={required}
+        values={currentValue}
+      />
       <div className="flex min-h-12 items-center justify-between gap-2 px-3 py-2">
         <div className="flex w-full min-w-0 flex-wrap gap-1">
           {currentValue.map((selectedValue) => {
@@ -301,7 +315,7 @@ export const Autocomplete: FC<Props> = ({
             onClick={chain(handleClick, onClick)}
             onKeyDown={chain(handleKeyDown, onKeyDown)}
             placeholder={placeholder ?? messages.autocompletePlaceholder}
-            ref={ref}
+            ref={mergedRef}
             role="combobox"
             type="text"
             value={text}
