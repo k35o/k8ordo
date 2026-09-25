@@ -812,13 +812,20 @@ import { Checkbox } from '@k8ordo/ui';
 <Checkbox itemValue="true" label="In stock only" name="inStock" />
 ```
 
+`indeterminate` shows the mixed state — some of a set selected — and sets the
+input's `indeterminate` property, so it is announced as partly checked.
+`labelHidden` keeps `label` as the accessible name but does not draw it, for a
+place with no room for text such as a table cell.
+
 Props:
 
 - `label`: `string` (required)
 - `checked`: `boolean`
 - `defaultChecked`: `boolean`
+- `indeterminate`: `boolean` (default: `false`)
 - `invalid`: `boolean` (default: `false`)
 - `itemValue`: `string`
+- `labelHidden`: `boolean` (default: `false`)
 - `onChange`: `(checked: boolean, event: ChangeEvent<HTMLInputElement>) => void`
 - `ref`: `Ref<HTMLInputElement>`
 - Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `type` / `className` / `style` / `value` / `children`.
@@ -851,8 +858,10 @@ Props (CheckboxGroup.Item):
 - `label`: `string` (required)
 - `checked`: `boolean`
 - `defaultChecked`: `boolean`
+- `indeterminate`: `boolean` (default: `false`)
 - `invalid`: `boolean` (default: `false`)
 - `itemValue`: `string`
+- `labelHidden`: `boolean` (default: `false`)
 - `onChange`: `(checked: boolean, event: ChangeEvent<HTMLInputElement>) => void`
 - `ref`: `Ref<HTMLInputElement>`
 - Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `type` / `className` / `style` / `value` / `children`.
@@ -1380,6 +1389,7 @@ Props (Table.Row):
 
 - `children`: `ReactNode`
 - `interactive`: `boolean` (default: `false`)
+- `selected`: `boolean` (default: `false`)
 - Other props are forwarded to `HTMLAttributes<HTMLTableRowElement>`, except `className` / `style`.
 
 ## Feedback

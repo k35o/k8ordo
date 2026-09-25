@@ -676,6 +676,12 @@
           "required": false
         },
         {
+          "name": "indeterminate",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
           "name": "invalid",
           "types": ["boolean"],
           "defaultValue": "false",
@@ -685,6 +691,12 @@
           "name": "itemValue",
           "types": ["string"],
           "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "labelHidden",
+          "types": ["boolean"],
+          "defaultValue": "false",
           "required": false
         },
         {
@@ -776,6 +788,12 @@
           "required": false
         },
         {
+          "name": "indeterminate",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
           "name": "invalid",
           "types": ["boolean"],
           "defaultValue": "false",
@@ -785,6 +803,12 @@
           "name": "itemValue",
           "types": ["string"],
           "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "labelHidden",
+          "types": ["boolean"],
+          "defaultValue": "false",
           "required": false
         },
         {
@@ -3603,6 +3627,12 @@
         },
         {
           "name": "interactive",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "selected",
           "types": ["boolean"],
           "defaultValue": "false",
           "required": false
