@@ -17,5 +17,6 @@ export type {
   FieldInput,
   FormFields,
   FormState,
+  StringCheckboxInput,
   ValidityFlag,
 } from './types';

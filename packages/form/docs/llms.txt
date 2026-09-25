@@ -48,8 +48,8 @@ row. Rules cannot target fields inside repeated rows.
   per-field checks and `HiddenValue` for components that render no input of
   their own. The types
   of the `formFields` result (`FormFields`, `DerivedField`, `DerivedArray`,
-  `DroppedCheck`, `FieldInput`, `ValidityFlag`, `Rule`, `DerivedRule`,
-  `RuleMessage`) are exported here as
+  `DroppedCheck`, `FieldInput`, `StringCheckboxInput`, `ValidityFlag`, `Rule`,
+  `DerivedRule`, `RuleMessage`) are exported here as
   well, since the result crosses to the client as a prop, and so are
   `FormState` and the return types (`UseFormReturn`, `FieldView`, `ArrayView`,
   `RowView`, `FormErrorView`, `AsyncCheck`).
@@ -76,4 +76,5 @@ row. Rules cannot target fields inside repeated rows.
   breaks), which keeps a localized definition at module scope. Types:
   `ParseResult`, `FormDefinition`, `Rule`, `RuleMessage`, `FormState`, and the
   `formFields` result's `FormFields`, `DerivedField`, `DerivedArray`,
-  `DerivedRule`, `DroppedCheck`, `FieldInput`, `ValidityFlag`.
+  `DerivedRule`, `DroppedCheck`, `FieldInput`, `StringCheckboxInput`,
+  `ValidityFlag`.
