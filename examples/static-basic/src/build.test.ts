@@ -21,6 +21,8 @@ let brokenNotFoundStderr = '';
 let noBoundaryStderr = '';
 // guard.ts を置いた構成。ファイルには守るリクエストが無い
 let guardStderr = '';
+// notFound() と言うページのパスを列挙した構成
+let notFoundPageStderr = '';
 
 // ひとつ前のデプロイの dist/client。アプリは同じで、クライアントの
 // スクリプトだけが違う。タブを開いた後にデプロイがあった、を再現する
@@ -46,6 +48,7 @@ beforeAll(() => {
   brokenNotFoundStderr = failingBuild('vite.broken-not-found.config.ts');
   noBoundaryStderr = failingBuild('vite.broken-no-boundary.config.ts');
   guardStderr = failingBuild('vite.broken-guard.config.ts');
+  notFoundPageStderr = failingBuild('vite.not-found-page.config.ts');
   // 圧縮しないだけで、スクリプトの中身とハッシュの入った名前が変わる
   execFileSync('pnpm', ['exec', 'vp', 'build', '--minify', 'false'], {
     cwd: root,
@@ -143,6 +146,12 @@ describe('the static build', () => {
   it('refuses guard.ts, naming every one and the mode that runs them', () => {
     expect(guardStderr).toContain(
       'static build cannot run guard.ts — a file has no request to guard, and these are guards:\n  src/routes-broken-guard/admin/guard.ts\n  src/routes-broken-guard/guard.ts\nthis application wants @k8ordo/server',
+    );
+  });
+
+  it('stops, naming the pathname, when a page it was supplied for said notFound()', () => {
+    expect(notFoundPageStderr).toContain(
+      'the "paths" option supplied pathnames whose page called notFound(): /products/3',
     );
   });
 
