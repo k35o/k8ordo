@@ -36,7 +36,7 @@ import {
 import type { Payload } from './payload';
 import { isPayloadPath, pagePathFor } from './payload-path';
 import { isRedirect, matchRedirects } from './redirect';
-import { NotFound, renderMatch } from './render';
+import { renderMatch, renderNotFound } from './render';
 import { routeRequestOf } from './request';
 import { answer, inPhase, withRequest } from './request-scope';
 
@@ -325,13 +325,11 @@ const respond = async (request: Request): Promise<Response> => {
   let rendered = render(
     // An action that redirected renders nothing: the client is about to
     // leave this page for the one it was sent to.
-    action.redirect === undefined ? (
-      match === null ? (
-        <NotFound />
-      ) : (
-        renderMatch(match, pathname, parsed.params, routeRequest, page?.Page)
-      )
-    ) : null,
+    action.redirect === undefined
+      ? match === null
+        ? renderNotFound(routes, pathname, routeRequest)
+        : renderMatch(match, pathname, parsed.params, routeRequest, page?.Page)
+      : null,
     enter,
   );
 
@@ -359,16 +357,14 @@ const respond = async (request: Request): Promise<Response> => {
       status = 404;
       ({ enter } = nearest.parsed);
       rendered = render(
-        nearest.match === null ? (
-          <NotFound />
-        ) : (
-          renderMatch(
-            nearest.match,
-            pathname,
-            nearest.parsed.params,
-            routeRequest,
-          )
-        ),
+        nearest.match === null
+          ? renderNotFound(routes, pathname, routeRequest)
+          : renderMatch(
+              nearest.match,
+              pathname,
+              nearest.parsed.params,
+              routeRequest,
+            ),
         enter,
       );
     }

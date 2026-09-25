@@ -1,4 +1,4 @@
-import type { Match } from '@k8ordo/router';
+import type { Match, RouteNode, Routes } from '@k8ordo/router';
 import type { ComponentType, ReactNode } from 'react';
 
 import { PageBoundary } from './page-boundary';
@@ -68,12 +68,45 @@ export const renderMatch = (
   return node;
 };
 
-/** Shown only when an application declares no `not-found.tsx` at all. */
-export const NotFound = (): ReactNode => (
-  <html lang="en">
-    <body>
-      <h1>404</h1>
-      <p>This page is not in the route table.</p>
-    </body>
-  </html>
+const NotFoundBody = (): ReactNode => (
+  <>
+    <title>Not found</title>
+    <h1>404</h1>
+    <p>This page is not in the route table.</p>
+  </>
 );
+
+/** The root layout, when the table has one: it sits on the transparent `/`. */
+const rootLayoutOf = (routes: Routes): ComponentType<PageProps> | null => {
+  const root: RouteNode | undefined = routes.record['/'];
+  if (typeof root !== 'object' || !('children' in root)) return null;
+  return (root.layout ?? null) as ComponentType<PageProps> | null;
+};
+
+/**
+ * What answers when an application declares no `not-found.tsx` at all: a
+ * heading and a line, inside the root layout — which is the document, so the
+ * visitor keeps the site's frame, its `<html lang>`, its stylesheets, and a
+ * way back. With no root layout either, a document of its own.
+ */
+export const renderNotFound = (
+  routes: Routes,
+  pathname: string,
+  request?: RouteRequest,
+): ReactNode => {
+  const Layout = rootLayoutOf(routes);
+  if (Layout === null) {
+    return (
+      <html lang="en">
+        <body>
+          <NotFoundBody />
+        </body>
+      </html>
+    );
+  }
+  return (
+    <Layout params={{}} pathname={pathname} request={request}>
+      <NotFoundBody />
+    </Layout>
+  );
+};
