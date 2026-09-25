@@ -71,12 +71,15 @@ const listSchema = z.object({
 });
 const listFields = formFields(listSchema);
 
-const List: FC = () => {
-  const form = useForm(listFields, {});
+const List: FC<{
+  state?: FormState;
+  action?: (formData: FormData) => void;
+}> = ({ state = NO_STATE, action }) => {
+  const form = useForm(listFields, state);
   const items = form.array('items');
 
   return (
-    <form {...form.props}>
+    <form {...form.props} action={action}>
       {items.rows.map((row) => (
         <div key={row.key}>
           <input
@@ -97,6 +100,16 @@ const List: FC = () => {
       <p data-testid="count">{String(items.rows.length)}</p>
     </form>
   );
+};
+
+const SubmittedList: FC = () => {
+  const [state, formAction] = useActionState(
+    (_previous: FormState, formData: FormData): Promise<FormState> =>
+      Promise.resolve(parseForm(listSchema, formData).state),
+    {},
+  );
+
+  return <List action={formAction} state={state} />;
 };
 
 /**
@@ -490,6 +503,38 @@ describe('useForm in a browser', () => {
     await expect
       .element(screen.getByTestId('name-error-0'))
       .toHaveTextContent('品名は必須です');
+  });
+
+  it('moves focus into a row added on the client when that row fails the submit', async () => {
+    const screen = await render(<List />);
+    await screen.getByRole('button', { name: 'add' }).click();
+    await screen.getByRole('button', { name: 'add' }).click();
+
+    screen.rerender(
+      <List
+        state={{
+          errors: { 'items[1].name': '品名は必須です' },
+          rows: { items: 2 },
+          token: '1',
+        }}
+      />,
+    );
+
+    await expect.element(screen.getByLabelText('name-1')).toHaveFocus();
+  });
+
+  it('keeps focus in a failed row through the reset React runs after an action', async () => {
+    const screen = await render(<SubmittedList />);
+    await screen.getByRole('button', { name: 'add' }).click();
+    await screen.getByRole('button', { name: 'add' }).click();
+    await screen.getByLabelText('name-0').fill('ねじ');
+
+    (document.querySelector('form') as HTMLFormElement).requestSubmit();
+
+    await expect
+      .element(screen.getByTestId('name-error-1'))
+      .toHaveTextContent('品名は必須です');
+    await expect.element(screen.getByLabelText('name-1')).toHaveFocus();
   });
 
   it('clears a cross-field message when the other field is the one fixed', async () => {
