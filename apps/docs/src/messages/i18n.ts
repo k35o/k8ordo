@@ -16,8 +16,8 @@ export const featureLocales = message({
 });
 
 export const featureLocalesDescription = message({
-  ja: "`defineLocales(['ja', 'en'])` を書くのは1回だけ。既定値・所属判定・交渉・URL区間・`[locale]` のスキーマは全部そこから出るので、一覧を複製する場所が無い。",
-  en: "`defineLocales(['ja', 'en'])` is written once. The default, membership, negotiation, the URL segment, and the `[locale]` schema all come from it, so there is nowhere to copy the list to.",
+  ja: '`defineLocales({ ja: …, en: … })` を書くのは1回だけ。各ロケールのタイムゾーンと文字の向きもそこに書く。既定値・所属判定・交渉・URL区間・`[locale]` のスキーマは全部そこから出るので、一覧を複製する場所が無い。',
+  en: "`defineLocales({ ja: …, en: … })` is written once, with each locale's time zone and text direction. The default, membership, negotiation, the URL segment, and the `[locale]` schema all come from it, so there is nowhere to copy the list to.",
 });
 
 export const featureSegment = message({

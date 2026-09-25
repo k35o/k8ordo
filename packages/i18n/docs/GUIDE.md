@@ -35,7 +35,10 @@ legacy fallbacks.
 import { defineLocales } from '@k8ordo/i18n';
 import type { LocaleOf } from '@k8ordo/i18n';
 
-export const locales = defineLocales(['ja', 'en']);
+export const locales = defineLocales({
+  ja: { timeZone: 'Asia/Tokyo', dir: 'ltr' },
+  en: { timeZone: 'UTC', dir: 'ltr' },
+});
 
 declare module '@k8ordo/i18n' {
   interface Register {
@@ -75,14 +78,18 @@ That is all a working setup needs: `defineLocales`, `Register` (with
 
 ## The locale set
 
-`defineLocales(all, { default? })` returns the set. The first entry is the
-default unless told otherwise; every tag must be BCP 47 (checked with
-`Intl.Locale`); a repeated tag or a default outside the list throws at the
-definition, not later.
+`defineLocales(definitions, { default? })` returns the set. `definitions` is
+keyed by locale tag, and each locale states its `timeZone` and its `dir`. The
+first entry is the default unless told otherwise (without `default`,
+`locales.default` is typed as the whole union); every tag must be BCP 47
+(checked with `Intl.Locale`); an empty set, a default outside the list, a time
+zone the runtime does not know, and a `dir` other than `ltr` / `rtl` throw at
+the definition, not later.
 
 | Member            | What it is                                                                        |
 | ----------------- | --------------------------------------------------------------------------------- |
 | `all`             | The tags, in order.                                                               |
+| `definitions`     | Each locale's `{ timeZone, dir }`, as given.                                      |
 | `default`         | The tag used when nothing names one.                                              |
 | `is(value)`       | Membership as a type guard.                                                       |
 | `negotiate(…)`    | The best supported tag for a preference list.                                     |
@@ -93,9 +100,27 @@ definition, not later.
 | `getLocale()`     | The locale of the render in progress. Not a hook.                                 |
 | `run(locale, fn)` | Server only: runs `fn` with `locale` current.                                     |
 
-`LocaleOf<typeof locales>` is the tag union. `delocalize` says `null` for a
-first segment that is not a locale rather than guessing the default, so the
-root layout and the 404 page choose the fallback visibly.
+`LocaleOf<typeof locales>` is the tag union and `LocaleDefinition` one
+locale's `{ timeZone, dir }`. `delocalize` says `null` for a first segment
+that is not a locale rather than guessing the default, so the root layout and
+the 404 page choose the fallback visibly.
+
+### `timeZone` and `dir`
+
+Neither can be derived from the runtime, so each locale declares both.
+
+`timeZone` is the IANA time zone the locale's dates are shown in. The
+runtime's own zone is the server's on the server and the visitor's in the
+browser, so a date left to it renders one way in the HTML and another while
+hydrating — a different day, near midnight. One zone per locale gives both
+sides the same value. Which zone is a product decision: a site about events in
+Tokyo may show its English pages in `Asia/Tokyo` too; a display that should
+follow each visitor's own zone belongs in a part that renders in the browser
+only.
+
+`dir` is the direction the locale's text runs in, for `<html dir>`.
+`Intl.Locale`'s `getTextInfo()` has not reached every browser, so it is
+declared rather than derived.
 
 ### Negotiation
 
@@ -262,7 +287,7 @@ no hook for it either, so a server-side redirect sits outside the app: a proxy
 in front of `serve`, or a host of your own around the built handler
 (`dist/rsc/index.js`), answers `/` with a `307`.
 
-### `<html lang>`
+### `<html lang>` and `dir`
 
 The root layout sits above `[locale]` and receives `pathname`. On a page the
 schema has already run for that page, so `locales.getLocale()` is right, and
@@ -270,6 +295,12 @@ schema has already run for that page, so `locales.getLocale()` is right, and
 in terms of the URL alone. On a 404 they agree too: the schema runs over the
 catch-all's params, so `getLocale()` is the URL's locale where it names one
 and the default where it does not, as `delocalize` reads it.
+
+```tsx
+const locale = locales.delocalize(pathname).locale ?? locales.default;
+
+<html dir={locales.definitions[locale].dir} lang={locale}>
+```
 
 ## Static builds
 
