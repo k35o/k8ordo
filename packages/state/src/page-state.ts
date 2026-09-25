@@ -31,8 +31,8 @@ export type PageState<
    * table's terms and the URL carries Vite's `base` in front of it; the path
    * literal survives in the type, which is what lets typed-route checks pass.
    */
-  href: <Path extends RegisteredPath>(
-    path: Path,
+  href: <Path extends string>(
+    path: RegisteredPath<Path>,
     values?: Readonly<Partial<OutputOf<Url>>>,
   ) => Path | `${Path}?${string}`;
   /** The query string alone (no `?`), for handrolled URL composition. */
@@ -126,8 +126,8 @@ export function definePageState(
     entry: config.entry,
     parseUrl: (input) => (url === null ? {} : url.parse(input)),
     search,
-    href: <Path extends RegisteredPath>(
-      path: Path,
+    href: <Path extends string>(
+      path: RegisteredPath<Path>,
       values?: Readonly<Partial<Record<string, unknown>>>,
     ) => {
       const query = search(values);

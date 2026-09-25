@@ -21,12 +21,18 @@ export const ja: Messages = {
 
   fileFieldRemove: 'ファイルを削除',
   fileFieldTrigger: 'ファイルを選択',
+  fileFieldDrop: 'ここにファイルをドロップ',
 
   numberFieldIncrement: '増やす',
   numberFieldDecrement: '減らす',
 
   rangeSliderStart: '最小',
   rangeSliderEnd: '最大',
+
+  calendarPreviousMonth: '前の月',
+  calendarNextMonth: '次の月',
+  datePickerOpen: 'カレンダーから選ぶ',
+  datePickerDialog: '日付を選ぶ',
 
   passwordShow: 'パスワードを表示',
   passwordHide: 'パスワードを非表示',
@@ -40,6 +46,9 @@ export const ja: Messages = {
   paginationPrevious: '前へ',
   paginationNext: '次へ',
 
+  codeBlockCopy: 'コードをコピー',
+  copied: 'コピーしました',
+  copyFailed: 'コピーできませんでした',
   carousel: 'カルーセル',
   carouselSlide: 'スライド',
   carouselPrevious: '前のスライド',

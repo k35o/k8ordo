@@ -1,8 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, screen, userEvent } from 'storybook/test';
 
-import { en } from '../../../i18n/en';
-import { UIProvider } from '../../providers';
+import { inEnglish } from '../../../../.storybook/locales';
 import { Response } from './response';
 
 const meta: Meta<typeof Response> = {
@@ -91,13 +90,7 @@ export const Table: Story = {
 
 export const EnglishMessages: Story = {
   args: { children: codeMarkdown },
-  decorators: [
-    (Story) => (
-      <UIProvider messages={en}>
-        <Story />
-      </UIProvider>
-    ),
-  ],
+  beforeEach: inEnglish,
   play: async ({ canvas }) => {
     await expect(
       canvas.getByRole('button', { name: 'Copy code' }),
@@ -111,13 +104,7 @@ export const TranslationsPropWinsOverMessages: Story = {
     children: codeMarkdown,
     translations: { copyCode: 'まるごと写す' },
   },
-  decorators: [
-    (Story) => (
-      <UIProvider messages={en}>
-        <Story />
-      </UIProvider>
-    ),
-  ],
+  beforeEach: inEnglish,
   play: async ({ canvas }) => {
     await expect(
       canvas.getByRole('button', { name: 'まるごと写す' }),

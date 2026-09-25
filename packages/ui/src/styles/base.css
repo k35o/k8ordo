@@ -289,23 +289,305 @@
   }
 
   /*
- * スクロール進捗バー。ルートスクローラーの進捗を scale x に写像する。
- * @supports 外（Firefox）と container 指定時はコンポーネント側の
- * scroll リスナーが inline の scale を更新する。ユーザーのスクロールに
- * 1:1 で追従する機能的表示のため prefers-reduced-motion では無効化しない。
+ * CodeBlock。shiki の css-variables テーマが出す --shiki-* を ui のトークンに
+ * 結びつける。トークンは .dark で切り替わるので、ダーク用の指定は要らない。
+ * 行の印（data-mark）と注記（data-callout）は、CodeBlock の変換器が付ける。
  */
-  @supports (animation-timeline: scroll()) {
-    .ao-scroll-progress {
-      animation: ao-scroll-grow auto linear;
-      animation-timeline: scroll(root);
+  .ao-code-block {
+    --shiki-foreground: var(--fg-base);
+    --shiki-background: transparent;
+    --shiki-token-keyword: var(--group-tertiary);
+    --shiki-token-function: var(--group-quaternary);
+    --shiki-token-constant: var(--fg-info);
+    --shiki-token-string: var(--primary-fg);
+    --shiki-token-string-expression: var(--primary-fg);
+    --shiki-token-parameter: var(--fg-warning);
+    --shiki-token-comment: var(--fg-subtle);
+    --shiki-token-punctuation: var(--fg-mute);
+    --shiki-token-link: var(--secondary-fg);
+    --shiki-token-inserted: var(--fg-success);
+    --shiki-token-deleted: var(--fg-error);
+    --shiki-token-changed: var(--fg-warning);
+  }
+  .ao-code-block pre {
+    overflow-x: auto;
+    padding-block: 1rem;
+    font-size: var(--text-sm);
+    line-height: var(--leading-relaxed);
+  }
+  .ao-code-block pre:focus-visible {
+    outline: none;
+    box-shadow: inset 0 0 0 2px var(--border-info);
+  }
+  .ao-code-block .line {
+    display: inline-block;
+    min-inline-size: 100%;
+    padding-inline: 1rem;
+  }
+  /* 印のある行が 1 つでもあれば、全行に印の幅だけ余白を取って桁を揃える */
+  .ao-code-block pre[data-marked] .line {
+    position: relative;
+    padding-inline-start: 2rem;
+  }
+  .ao-code-block [data-mark] {
+    box-shadow: inset 3px 0 0 var(--mark-border);
+    background-color: var(--mark-bg);
+  }
+  .ao-code-block [data-mark='highlight'] {
+    --mark-bg: var(--bg-mute);
+    --mark-border: var(--primary-border);
+  }
+  .ao-code-block [data-mark='add'] {
+    --mark-bg: var(--bg-success);
+    --mark-border: var(--border-success);
+  }
+  .ao-code-block [data-mark='remove'] {
+    --mark-bg: var(--bg-error);
+    --mark-border: var(--border-error);
+  }
+  .ao-code-block [data-mark='add']::before,
+  .ao-code-block [data-mark='remove']::before {
+    position: absolute;
+    inset-inline-start: 0.75rem;
+  }
+  .ao-code-block [data-mark='add']::before {
+    content: '+';
+    color: var(--fg-success);
+  }
+  .ao-code-block [data-mark='remove']::before {
+    content: '−';
+    color: var(--fg-error);
+  }
+  /* 注記はコードの行ではないので、行の流れの中に置いたまま箱として見せる */
+  .ao-code-block [data-callout] {
+    display: inline-block;
+    box-sizing: border-box;
+    min-inline-size: calc(100% - 2rem - var(--ao-callout-indent));
+    margin-block: 0.25rem 0.5rem;
+    margin-inline: calc(1rem + var(--ao-callout-indent)) 1rem;
+    padding: 0.375rem 0.75rem;
+    border-inline-start: 3px solid var(--border-info);
+    border-start-end-radius: 0.5rem;
+    border-end-end-radius: 0.5rem;
+    background-color: var(--bg-info);
+    color: var(--fg-info);
+    white-space: normal;
+  }
+  .ao-code-block pre[data-marked] [data-callout] {
+    min-inline-size: calc(100% - 3rem - var(--ao-callout-indent));
+    margin-inline-start: calc(2rem + var(--ao-callout-indent));
+  }
+
+  /*
+ * Prose。Markdown や MDX が描いた本文の組版を、base のリセットの上に戻す。
+ *
+ * 段落や見出しの間隔（流れ）は、クラスの有無にかかわらず直下の子に効かせる。
+ * 部品（Alert、CodeBlock、ui の Heading…）を本文に置いても、前後の間は本文と
+ * 同じに空く。部品の見た目そのものは部品が持つので、要素の組版はクラスの
+ * 無い要素（Markdown が出す素の HTML）にだけ効かせる。GFM が付けるクラス
+ * （脚注とタスクリスト）は素の HTML の一部として扱う。
+ */
+  .ao-prose {
+    color: var(--fg-base);
+    line-height: var(--leading-loose);
+    letter-spacing: var(--tracking-normal);
+  }
+  /* 流れの間隔は詳細度を持たせず、要素ごとの指定（hr の上下など）に譲る */
+  :where(.ao-prose > * + *) {
+    margin-block-start: 1rem;
+  }
+  :where(.ao-prose > :is(h1, h2)) {
+    margin-block-start: 3rem;
+  }
+  :where(.ao-prose > :is(h3, h4, h5, h6)) {
+    margin-block-start: 2rem;
+  }
+  :where(.ao-prose > :is(h1, h2, h3, h4, h5, h6) + *) {
+    margin-block-start: 0.75rem;
+  }
+  :where(.ao-prose > :first-child) {
+    margin-block-start: 0;
+  }
+
+  @scope (.ao-prose) to ([class]:not(:scope, .footnotes, .contains-task-list, .task-list-item, .data-footnote-backref)) {
+    :is(h1, h2, h3, h4, h5, h6) {
+      font-weight: var(--font-weight-bold);
+      line-height: var(--leading-snug);
+      letter-spacing: 0;
+      font-feature-settings: 'palt';
+      text-wrap: balance;
     }
-    @keyframes ao-scroll-grow {
-      from {
-        scale: 0 1;
-      }
-      to {
-        scale: 1 1;
-      }
+    h1 {
+      font-size: var(--text-3xl);
+    }
+    h2 {
+      font-size: var(--text-2xl);
+    }
+    h3 {
+      font-size: var(--text-xl);
+    }
+    h4 {
+      font-size: var(--text-lg);
+    }
+    :is(h5, h6) {
+      font-size: var(--text-md);
+    }
+
+    strong,
+    b {
+      font-weight: var(--font-weight-bold);
+    }
+    em:lang(ja) {
+      text-emphasis: filled sesame;
+    }
+    em:not(:lang(ja)),
+    i,
+    cite {
+      font-style: italic;
+    }
+
+    a {
+      color: var(--fg-info);
+      text-decoration: underline;
+      text-underline-offset: 0.2em;
+      transition: color 150ms ease-out;
+    }
+    a:hover {
+      color: var(--fg-base);
+    }
+    a:focus-visible {
+      outline: none;
+      border-radius: var(--radius-sm);
+      box-shadow: 0 0 0 2px var(--border-info);
+    }
+
+    :not(pre) > code {
+      padding: 0.125em 0.375em;
+      border-radius: var(--radius-md);
+      background-color: var(--bg-mute);
+      font-size: 0.875em;
+    }
+    pre {
+      overflow-x: auto;
+      padding: 1rem;
+      border: 1px solid var(--border-mute);
+      border-radius: var(--radius-lg);
+      background-color: var(--bg-subtle);
+      font-size: var(--text-sm);
+      line-height: var(--leading-relaxed);
+    }
+    kbd {
+      padding: 0.125em 0.375em;
+      border: 1px solid var(--border-mute);
+      border-block-end-width: 2px;
+      border-radius: var(--radius-md);
+      background-color: var(--bg-subtle);
+      font-size: 0.8125em;
+    }
+    mark {
+      background-color: var(--bg-warning);
+      color: inherit;
+    }
+
+    :is(ul, ol) {
+      padding-inline-start: 1.5em;
+    }
+    ul {
+      list-style-type: disc;
+    }
+    ol {
+      list-style-type: decimal;
+    }
+    li > :is(ul, ol) {
+      margin-block-start: 0.25em;
+    }
+    ul ul {
+      list-style-type: circle;
+    }
+    li + li {
+      margin-block-start: 0.25em;
+    }
+    li::marker {
+      color: var(--fg-subtle);
+    }
+    li > :is(p, ul, ol) + :is(p, ul, ol) {
+      margin-block-start: 0.5em;
+    }
+    .task-list-item {
+      list-style-type: none;
+    }
+    .task-list-item > input {
+      margin-inline: -1.25em 0.5em;
+    }
+
+    blockquote {
+      padding-inline-start: 1em;
+      border-inline-start: 3px solid var(--border-mute);
+      color: var(--fg-mute);
+    }
+    blockquote > * + * {
+      margin-block-start: 0.75em;
+    }
+
+    hr {
+      margin-block: 3em;
+      border-color: var(--border-mute);
+    }
+
+    table {
+      inline-size: 100%;
+      border-collapse: collapse;
+      font-size: var(--text-sm);
+      line-height: var(--leading-normal);
+    }
+    :is(th, td) {
+      padding: 0.5em 0.75em;
+      border-block-end: 1px solid var(--border-mute);
+      text-align: start;
+    }
+    th {
+      font-weight: var(--font-weight-medium);
+      background-color: var(--bg-subtle);
+    }
+
+    :is(img, video) {
+      max-inline-size: 100%;
+      block-size: auto;
+      border-radius: var(--radius-lg);
+    }
+    figcaption {
+      margin-block-start: 0.5em;
+      color: var(--fg-mute);
+      font-size: var(--text-sm);
+      text-align: center;
+    }
+
+    dt {
+      font-weight: var(--font-weight-bold);
+    }
+    dd {
+      padding-inline-start: 1.5em;
+    }
+    dd + dt {
+      margin-block-start: 0.75em;
+    }
+
+    .footnotes {
+      margin-block-start: 3em;
+      padding-block-start: 1.5em;
+      border-block-start: 1px solid var(--border-mute);
+      color: var(--fg-mute);
+      font-size: var(--text-sm);
+    }
+    sup > a {
+      text-decoration: none;
+    }
+  }
+
+  /* 縦書きの本文は、段落の頭を 1 字下げる（本の組み方） */
+  .ao-prose > p:not([class]) {
+    @variant vertical {
+      text-indent: 1em;
     }
   }
 

@@ -291,6 +291,73 @@ describe('the built request handler', () => {
     expect(page).not.toContain('data-testid="error"');
     expect(entriesOf(page)).toContain('<li>k8o</li>');
   });
+
+  it('answers a guestbook signed without JavaScript with the cookie the action set', async () => {
+    const html = await (await handler(new Request(`${ORIGIN}/`))).text();
+    const body = formDataOf(html, 'guestbook-form');
+    body.set('name', 'k8o');
+    const response = await handler(
+      new Request(`${ORIGIN}/`, {
+        method: 'POST',
+        headers: { origin: ORIGIN },
+        body,
+      }),
+    );
+    expect(response.headers.getSetCookie()).toStrictEqual([
+      'visitor=k8o; Path=/; HttpOnly; Secure; SameSite=Lax',
+    ]);
+  });
+});
+
+describe('guard.ts', () => {
+  it.each([
+    ['a page', '/'],
+    ['a URL nothing answers', '/nowhere'],
+    ['a payload', '/products/index.rsc'],
+  ])(
+    'runs the root guard before %s, and the answer carries what it added',
+    async (_what, pathname) => {
+      const response = await handler(new Request(`${ORIGIN}${pathname}`));
+      expect(response.headers.get('x-content-type-options')).toBe('nosniff');
+    },
+  );
+
+  it('ends a request its guard answers, before the page renders', async () => {
+    const response = await handler(new Request(`${ORIGIN}/members`));
+    expect(response.status).toBe(401);
+    expect(await response.text()).toBe(
+      'members only — sign the guestbook first',
+    );
+  });
+
+  it('lets through what its guard lets through', async () => {
+    const response = await handler(
+      new Request(`${ORIGIN}/members`, { headers: { cookie: 'visitor=k8o' } }),
+    );
+    expect(response.status).toBe(200);
+    expect(await response.text()).toContain('data-testid="member">k8o<');
+  });
+
+  it('carries the outer guard’s headers on the answer an inner guard ended with', async () => {
+    const response = await handler(new Request(`${ORIGIN}/members`));
+    expect(response.headers.get('x-content-type-options')).toBe('nosniff');
+  });
+
+  it.each([
+    ['the payload of a guarded page', '/members/index.rsc', { method: 'GET' }],
+    ['a HEAD of a guarded page', '/members', { method: 'HEAD' }],
+    [
+      'a POST to a guarded page',
+      '/members',
+      { method: 'POST', headers: { origin: ORIGIN }, body: new FormData() },
+    ],
+  ])(
+    'guards %s the same as its HTML',
+    async (_what, pathname, init: RequestInit) => {
+      const response = await handler(new Request(`${ORIGIN}${pathname}`, init));
+      expect(response.status).toBe(401);
+    },
+  );
 });
 
 describe('the built request handler, outside Node', () => {
@@ -352,6 +419,18 @@ describe('the built request handler, outside Node', () => {
 });
 
 describe('the deployed application', () => {
+  it('ships every script compressed ahead of time, beside itself', async () => {
+    const assets = await readdir(path.join(root, 'dist', 'client', 'assets'));
+    const scripts = assets.filter((name) => name.endsWith('.js'));
+    expect(scripts.length).toBeGreaterThan(0);
+    expect(assets.filter((name) => name.endsWith('.js.br'))).toStrictEqual(
+      scripts.map((name) => `${name}.br`),
+    );
+    expect(assets.filter((name) => name.endsWith('.js.gz'))).toStrictEqual(
+      scripts.map((name) => `${name}.gz`),
+    );
+  });
+
   it('serves a page with only its production dependencies installed', () => {
     const output = execFileSync(
       process.execPath,

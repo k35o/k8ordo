@@ -123,6 +123,21 @@ export const buildComponentLibrary = <C>(
     'Slider with two thumbs for picking a range, bound to form state by name as [lower, upper].',
     s.rangeSliderProps,
   );
+  const DateField = def(
+    'DateField',
+    'Date input with a visible label (YYYY-MM-DD), bound to form state by name.',
+    s.dateFieldProps,
+  );
+  const DatePicker = def(
+    'DatePicker',
+    'Date input with a visible label and a calendar popover (YYYY-MM-DD), bound to form state by name.',
+    s.datePickerProps,
+  );
+  const Calendar = def(
+    'Calendar',
+    'Month calendar shown inline for picking one day (YYYY-MM-DD), bound to state by name. It submits nothing; in a form, use DatePicker.',
+    s.calendarProps,
+  );
   const Checkbox = def(
     'Checkbox',
     'Checkbox, bound to form state by name.',
@@ -173,11 +188,6 @@ export const buildComponentLibrary = <C>(
     'Toast notification that a button labeled triggerLabel shows.',
     s.toastProps,
   );
-  const ScrollLinked = def(
-    'ScrollLinked',
-    'Page scroll progress bar (fixed to the top).',
-    s.scrollLinkedProps,
-  );
   const ListBox = def(
     'ListBox',
     'Single-choice list in a popup.',
@@ -195,7 +205,7 @@ export const buildComponentLibrary = <C>(
   );
   const FileField = def(
     'FileField',
-    'File picker field (a self-contained widget).',
+    'File picker field (a self-contained widget). With dropzone, files can also be dropped onto it.',
     s.fileFieldProps,
   );
   const FormControl = def(
@@ -232,6 +242,9 @@ export const buildComponentLibrary = <C>(
     NumberField.ref,
     Slider.ref,
     RangeSlider.ref,
+    DateField.ref,
+    DatePicker.ref,
+    Calendar.ref,
     Checkbox.ref,
     Switch.ref,
     Select.ref,
@@ -242,7 +255,6 @@ export const buildComponentLibrary = <C>(
     Tooltip.ref,
     DropdownMenu.ref,
     Toast.ref,
-    ScrollLinked.ref,
     ListBox.ref,
     CheckboxGroup.ref,
     Autocomplete.ref,
@@ -386,7 +398,6 @@ export const buildComponentLibrary = <C>(
       Progress,
       Skeleton,
       Separator,
-      ScrollLinked,
       Tabs,
       Accordion,
       Breadcrumb,
@@ -397,6 +408,9 @@ export const buildComponentLibrary = <C>(
       NumberField,
       Slider,
       RangeSlider,
+      DateField,
+      DatePicker,
+      Calendar,
       Checkbox,
       Switch,
       Select,

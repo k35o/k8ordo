@@ -406,6 +406,99 @@ export const rangeSlider = {
   }),
 };
 
+export const dateField = {
+  description: message({
+    ja: 'ブラウザの日付入力（`type="date"`）をそのまま使う入力欄。値は `YYYY-MM-DD`',
+    en: 'A field on the browser’s own date input (`type="date"`). The value is `YYYY-MM-DD`.',
+  }),
+  minMaxTitle: message({
+    ja: '最小値 / 最大値',
+    en: 'Min / Max',
+  }),
+  minMaxDescription: message({
+    ja: '範囲の判定はブラウザが持ちます。範囲の外の日付は `rangeUnderflow` / `rangeOverflow` になります。',
+    en: 'The browser checks the range itself: a date outside it reports `rangeUnderflow` / `rangeOverflow`.',
+  }),
+  disabledTitle: message({
+    ja: '無効',
+    en: 'Disabled',
+  }),
+  invalidTitle: message({
+    ja: 'エラー',
+    en: 'Invalid',
+  }),
+  formTitle: message({
+    ja: '@k8ordo/form と使う',
+    en: 'With @k8ordo/form',
+  }),
+  formDescription: message({
+    ja: '`z.iso.date()` から導いた `input` をそのまま spread できます。`type` を取り除く必要はありません。',
+    en: 'Spread the `input` derived from `z.iso.date()` as is. There is no need to take `type` out.',
+  }),
+};
+
+export const datePicker = {
+  description: message({
+    ja: '日付入力と、ポップオーバーで開くカレンダーを組み合わせた入力欄',
+    en: 'A date input paired with a calendar that opens in a popover.',
+  }),
+  controlledTitle: message({
+    ja: '制御モード',
+    en: 'Controlled',
+  }),
+  controlledDescription: message({
+    ja: "`onChange` は値（`YYYY-MM-DD`、空なら `''`）を受け取ります。カレンダーで選んだときも、打ち込んだときも同じです。",
+    en: "`onChange` receives the value (`YYYY-MM-DD`, `''` when empty), whether the date was typed or picked from the calendar.",
+  }),
+  minMaxTitle: message({
+    ja: '最小値 / 最大値',
+    en: 'Min / Max',
+  }),
+  disabledTitle: message({
+    ja: '無効',
+    en: 'Disabled',
+  }),
+  formTitle: message({
+    ja: '@k8ordo/form と使う',
+    en: 'With @k8ordo/form',
+  }),
+  formDescription: message({
+    ja: 'カレンダーで選んだ日付は入力欄に書き込まれ、`input` イベントで知らされます。フォームには打ち込んだときと同じように伝わります（変更の有無、ルール、エラーの解除）。',
+    en: 'A date picked from the calendar is written into the input and announced with an `input` event, so the form hears it just as if it had been typed (dirty state, rules, clearing an error).',
+  }),
+  firefoxNote: message({
+    ja: 'Firefox は日付入力の中に自前のカレンダーボタンを描き、それを消す方法がありません。そのため Firefox ではカレンダーのボタンが 2 つ並びます。',
+    en: 'Firefox draws its own calendar button inside every date input and offers no way to hide it, so there the field shows two calendar buttons.',
+  }),
+};
+
+export const calendar = {
+  description: message({
+    ja: '月の表から日付を 1 つ選ぶカレンダー。値は `YYYY-MM-DD`',
+    en: 'A month grid for picking one day. The value is `YYYY-MM-DD`.',
+  }),
+  keyboardTitle: message({
+    ja: 'キーボード操作',
+    en: 'Keyboard',
+  }),
+  keyboardDescription: message({
+    ja: '矢印キーで日と週を、`Home` / `End` で週の端を、`PageUp` / `PageDown` で月を（`Shift` と一緒なら年を）移り、`Enter` / `Space` で選びます。',
+    en: 'Arrow keys move by day and week, `Home` / `End` to the ends of the week, `PageUp` / `PageDown` by month (by year with `Shift`), and `Enter` / `Space` select.',
+  }),
+  minMaxTitle: message({
+    ja: '最小値 / 最大値',
+    en: 'Min / Max',
+  }),
+  localeTitle: message({
+    ja: '言語と「今日」',
+    en: 'Language and today',
+  }),
+  localeDescription: message({
+    ja: '月名・曜日名・週の始まりは、組み込みの文言と同じロケール（`@k8ordo/i18n` の今のロケール）に従います。今日は閲覧者のタイムゾーンでしか決まらないので、カレンダーはブラウザでだけ描かれ、サーバーは同じ寸法の空の箱を書きます。',
+    en: 'Month and weekday names, and the first day of the week, follow the same locale as the built-in wording (`@k8ordo/i18n`’s current locale). Today depends on the visitor’s time zone, so the calendar renders in the browser alone; the server writes an empty box of the same size.',
+  }),
+};
+
 export const slider = {
   description: message({
     ja: '単一ノブのスライダー入力',
@@ -425,6 +518,14 @@ export const fileField = {
   description: message({
     ja: 'ファイルアップロードフィールド',
     en: 'A file upload field.',
+  }),
+  dropzoneTitle: message({
+    ja: 'ドロップで追加する',
+    en: 'Adding files by dropping them',
+  }),
+  dropzoneDescription: message({
+    ja: '`FileField.Dropzone` にドロップしたファイルは、選んだときと同じく一覧と送信に加わり、`input` イベントでフォームに知らされます。中身を渡さないと、組み込みの案内と「ファイルを選択」のボタンが入るので、キーボードでも選べます。フォルダーはドロップでは受けず、`accept` もドロップでは確かめません。',
+    en: 'Files dropped on `FileField.Dropzone` join the list and the submission just as picked ones do, and an `input` event tells the form. Left empty, it holds the built-in hint and a choose-files button, so it works by keyboard too. Folders are skipped on drop, and `accept` is not checked there.',
   }),
   acceptTypesTitle: message({
     ja: '受け入れタイプ',
@@ -553,6 +654,49 @@ export const code = {
   }),
 };
 
+export const codeBlock = {
+  description: message({
+    ja: 'サーバーでハイライトし、コピーボタンを添えたコードブロック',
+    en: 'A code block highlighted on the server, with a copy button.',
+  }),
+  importDescription: message({
+    ja: 'ハイライトはサーバーで済ませ、shiki はブラウザに送らない。`server-only` を import しているので、Client Component から読み込むとビルドが止まる。そのためルートとは別の入口にある。',
+    en: 'Highlighting happens on the server, and shiki never reaches the browser. It imports `server-only`, so importing it from a Client Component fails the build, which is why it has an entry of its own.',
+  }),
+  titleTitle: message({
+    ja: 'ファイル名',
+    en: 'File Name',
+  }),
+  titleDescription: message({
+    ja: '`title` を渡すと、見出しの行に言語の代わりに表示する（figure の figcaption になる）。',
+    en: 'With `title`, the header shows it in place of the language, as the figure’s figcaption.',
+  }),
+  marksTitle: message({
+    ja: '行の印',
+    en: 'Line Marks',
+  }),
+  marksDescription: message({
+    ja: '`marks` は 1 始まりの行番号ごとに `highlight`・`add`・`remove` を付ける。追加と削除は色だけでなく `+` と `−` でも示す。',
+    en: '`marks` marks lines by their 1-based number with `highlight`, `add`, or `remove`. Additions and removals are shown with `+` and `−`, not by color alone.',
+  }),
+  calloutsTitle: message({
+    ja: '注記',
+    en: 'Callouts',
+  }),
+  calloutsDescription: message({
+    ja: '`callouts` は行の直後に、その行の字下げに揃えて注記を置く（配列なら書いた順に重ねる）。コピーされるのは `code` そのもので、印や注記は含まれない。',
+    en: '`callouts` puts a note right under a line, indented like the line (an array puts several, in order). The copy button copies `code` exactly, without the marks or the notes.',
+  }),
+  colorsTitle: message({
+    ja: '色とダークモード',
+    en: 'Colors and Dark Mode',
+  }),
+  colorsDescription: message({
+    ja: 'shiki の css-variables テーマを使い、`--shiki-token-*` を ui のトークンに結びつけている。トークンが `.dark` で切り替わるので、ダーク用のテーマは持たない。知らない言語名は色を付けずに描く。',
+    en: 'It uses shiki’s css-variables theme, with each `--shiki-token-*` mapped to a design token. The tokens switch under `.dark`, so there is no second theme. A language name shiki does not know renders as plain text.',
+  }),
+};
+
 export const kbd = {
   description: message({
     ja: 'キーボードのキーを、キーキャップとして示す',
@@ -592,6 +736,33 @@ export const carousel = {
   slideSizeDescription: message({
     ja: '`slideSize` は 1 枚がトラックに占める幅。`full`（1 枚）、`lg`（次の 1 枚がのぞく）、`md`（2 枚）、`sm`（3 枚）。複数枚並べるときは「今の 1 枚」が決まらないので、位置は出さない。',
     en: '`slideSize` is how much of the track one slide takes: `full` (one), `lg` (the next one peeks in), `md` (two), `sm` (three). With several in view there is no single current slide, so no position is shown.',
+  }),
+};
+
+export const prose = {
+  description: message({
+    ja: 'Markdown や MDX が描いた本文に、組版を戻す入れ物',
+    en: 'A container that puts typesetting back into rendered Markdown or MDX.',
+  }),
+  basicDescription: message({
+    ja: 'ベースのスタイルは見出し・リスト・余白・強調をリセットする。`Prose` の中だけ本文の組版を戻す。行間は広め（`leading-loose`）、見出しは詰め組み（`palt`）、日本語の `em` は傍点にする。',
+    en: 'The base styles reset headings, lists, margins, and emphasis. Inside `Prose`, the typesetting of body text comes back: loose leading (`leading-loose`), proportional kana in headings (`palt`), and emphasis dots for Japanese `em`.',
+  }),
+  componentsTitle: message({
+    ja: '部品を置く',
+    en: 'Components Inside',
+  }),
+  componentsDescription: message({
+    ja: '組版を効かせるのは、クラスの無い素の要素だけ。部品（どれもクラスを持つ）は自分の見た目のまま、前後の間だけが本文と同じに空く。MDX で要素を部品に対応づければ部品の見た目に、素のままなら本文の見た目になる。',
+    en: 'Only bare elements, without a class, are typeset. A component (every one has a class) keeps its own look, and only the space around it follows the text. Map an MDX element to a component to make it look like the component, or leave it bare to make it look like text.',
+  }),
+  verticalTitle: message({
+    ja: '縦書き',
+    en: 'Vertical Writing',
+  }),
+  verticalDescription: message({
+    ja: '`.writing-v` の中では、段落の頭を 1 字下げる（本の組み方）。',
+    en: 'Under `.writing-v`, each paragraph’s first line is indented one character, as a book is set.',
   }),
 };
 
@@ -919,17 +1090,6 @@ export const pagination = {
   disabledTitle: message({
     ja: '無効',
     en: 'Disabled',
-  }),
-};
-
-export const scrollLinked = {
-  description: message({
-    ja: 'スクロール位置に連動するプログレスバー',
-    en: 'A progress bar linked to scroll position.',
-  }),
-  windowScrollTitle: message({
-    ja: 'ウィンドウスクロール',
-    en: 'Window Scroll',
   }),
 };
 

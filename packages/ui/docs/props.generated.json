@@ -543,6 +543,43 @@
       "omitted": ["className", "style"]
     },
     {
+      "name": "Calendar",
+      "props": [
+        {
+          "name": "defaultValue",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "max",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "min",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "types": ["(value: string) => void"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "value",
+          "types": ["string", "null"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
       "name": "Card",
       "props": [
         {
@@ -895,6 +932,43 @@
       "omitted": ["className", "style"]
     },
     {
+      "name": "CodeBlock",
+      "props": [
+        {
+          "name": "code",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "callouts",
+          "types": ["Readonly<Record<number, string | readonly string[]>>"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "lang",
+          "types": ["string"],
+          "defaultValue": "'text'",
+          "required": false
+        },
+        {
+          "name": "marks",
+          "types": ["Readonly<Record<number, 'highlight' | 'add' | 'remove'>>"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "title",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": "HTMLAttributes<HTMLElement>",
+      "omitted": ["children", "className", "style"]
+    },
+    {
       "name": "CodeXmlIcon",
       "props": [
         {
@@ -1022,6 +1096,62 @@
       ],
       "inherits": null,
       "omitted": []
+    },
+    {
+      "name": "DateField",
+      "props": [
+        {
+          "name": "invalid",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "ref",
+          "types": ["Ref<HTMLInputElement>"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": "InputHTMLAttributes<HTMLInputElement>",
+      "omitted": ["className", "style", "type", "children"]
+    },
+    {
+      "name": "DatePicker",
+      "props": [
+        {
+          "name": "defaultValue",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "invalid",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "types": ["(value: string) => void"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "ref",
+          "types": ["Ref<HTMLInputElement>"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "value",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": "InputHTMLAttributes<HTMLInputElement>",
+      "omitted": ["className", "style", "type", "children"]
     },
     {
       "name": "Dialog.Content",
@@ -1351,6 +1481,19 @@
       "omitted": []
     },
     {
+      "name": "FileField.Dropzone",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
       "name": "FileField.ItemList",
       "props": [
         {
@@ -1380,7 +1523,7 @@
         },
         {
           "name": "defaultValue",
-          "types": ["File[]"],
+          "types": ["File[]", "string"],
           "defaultValue": null,
           "required": false
         },
@@ -2668,6 +2811,19 @@
       ]
     },
     {
+      "name": "Prose",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": "HTMLAttributes<HTMLDivElement>",
+      "omitted": ["className", "style"]
+    },
+    {
       "name": "PublishDateIcon",
       "props": [
         {
@@ -2992,19 +3148,6 @@
           "name": "size",
           "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
-          "required": false
-        }
-      ],
-      "inherits": null,
-      "omitted": []
-    },
-    {
-      "name": "ScrollLinked",
-      "props": [
-        {
-          "name": "container",
-          "types": ["Element", "null"],
-          "defaultValue": null,
           "required": false
         }
       ],
@@ -3909,12 +4052,6 @@
         {
           "name": "children",
           "types": ["ReactNode"],
-          "defaultValue": null,
-          "required": false
-        },
-        {
-          "name": "messages",
-          "types": ["Partial<Messages>"],
           "defaultValue": null,
           "required": false
         }

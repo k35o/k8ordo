@@ -1,8 +1,6 @@
-'use client';
-
 import type { CSSProperties, FC, HTMLAttributes } from 'react';
 
-import { useMessages } from '../../../i18n/context';
+import { getMessages } from '../../../i18n/current';
 import { HIGH_CONTRAST_EDGE } from '../../_internal/high-contrast';
 import { cn } from './../../../helpers/cn';
 import { toPrecision } from './../../../internal/to-precision';
@@ -22,7 +20,7 @@ export const Progress: FC<Props> = ({
   label,
   ...rest
 }) => {
-  const messages = useMessages();
+  const messages = getMessages();
 
   if (value === undefined) {
     return (

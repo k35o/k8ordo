@@ -21,12 +21,18 @@ export const en: Messages = {
 
   fileFieldRemove: 'Remove file',
   fileFieldTrigger: 'Select files',
+  fileFieldDrop: 'Drop files here',
 
   numberFieldIncrement: 'Increase',
   numberFieldDecrement: 'Decrease',
 
   rangeSliderStart: 'minimum',
   rangeSliderEnd: 'maximum',
+
+  calendarPreviousMonth: 'Previous month',
+  calendarNextMonth: 'Next month',
+  datePickerOpen: 'Choose from calendar',
+  datePickerDialog: 'Choose a date',
 
   passwordShow: 'Show password',
   passwordHide: 'Hide password',
@@ -40,6 +46,9 @@ export const en: Messages = {
   paginationPrevious: 'Previous',
   paginationNext: 'Next',
 
+  codeBlockCopy: 'Copy code',
+  copied: 'Copied',
+  copyFailed: 'Could not copy',
   carousel: 'Carousel',
   carouselSlide: 'Slide',
   carouselPrevious: 'Previous slide',

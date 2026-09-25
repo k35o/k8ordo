@@ -31,6 +31,7 @@ import {
   PaletteIcon,
   PasswordInput,
   Popover,
+  Prose,
   Progress,
   Radio,
   RadioCard,
@@ -293,6 +294,16 @@ export const componentPreviews: Record<string, ReactNode> = {
     </Table.Root>
   ),
   Heading: <Heading level="h2">Section Title</Heading>,
+  Prose: (
+    <div className="w-full max-w-56">
+      <Prose>
+        <h3>Heading</h3>
+        <p>
+          Body text with <strong>strong</strong> and <em>emphasis</em>.
+        </p>
+      </Prose>
+    </div>
+  ),
   Alert: <Alert message="This is an info alert." tone="info" />,
   EmptyState: (
     <EmptyState icon={<TableIcon size="md" />} title="Nothing here yet" />
@@ -360,11 +371,6 @@ export const componentPreviews: Record<string, ReactNode> = {
   Separator: (
     <div className="w-40">
       <Separator color="mute" />
-    </div>
-  ),
-  ScrollLinked: (
-    <div className="w-40">
-      <Progress max={100} value={40} />
     </div>
   ),
   Icons: (

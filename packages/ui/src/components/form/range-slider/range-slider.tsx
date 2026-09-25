@@ -11,7 +11,7 @@ import type {
 import { useFormStatus } from 'react-dom';
 
 import { cn } from '../../../helpers/cn';
-import { useMessages } from '../../../i18n/context';
+import { getMessages } from '../../../i18n/current';
 import { HIGH_CONTRAST_EDGE } from '../../_internal/high-contrast';
 import { rangeInputClass } from '../slider/range-input-class';
 
@@ -71,7 +71,7 @@ export const RangeSlider: FC<Props> = ({
   ref,
   ...rest
 }) => {
-  const messages = useMessages();
+  const messages = getMessages();
   const id = useId();
   const { pending } = useFormStatus();
   const disabledResolved = disabled || pending;

@@ -1,8 +1,8 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: 'ページに search を渡すルーターの下では、サーバーが `url` スロットを `parseUrl` で読みます。リンクは定義から組み立てます。localStorage の値も、ハイドレーションより前に読めます。',
-  en: 'Under a router that hands a page its search, the server reads the `url` slot with `parseUrl`, and links are built from the definition. localStorage values can be read before hydration, too.',
+  ja: 'ページに search を渡すルーターの下では、サーバーが `url` スロットを `parseUrl` で読みます。リクエストの Cookie を受け取るページでは、Cookie に置いた状態を `parseCookies` で読みます。リンクは定義から組み立てます。localStorage の値も、ハイドレーションより前に読めます。',
+  en: 'Under a router that hands a page its search, the server reads the `url` slot with `parseUrl`; where a page receives the request’s cookies, it reads cookie state with `parseCookies`. Links are built from the definition, and localStorage values can be read before hydration, too.',
 });
 
 export const parseTitle = message({
@@ -109,8 +109,8 @@ export const salvageTable = {
 };
 
 export const salvageSame = message({
-  ja: '同じサルベージは、エントリ状態・localStorage の行・`definePageState` と `defineLocalState` の `update()` に渡した値にも適用されます。',
-  en: 'The same salvage applies to entry state, to localStorage rows, and to the values passed to `update()` on `definePageState` and `defineLocalState`.',
+  ja: '同じサルベージは、エントリ状態・localStorage の行・Cookie・`definePageState`・`defineLocalState`・`defineCookieState` の `update()` に渡した値にも適用されます。',
+  en: 'The same salvage applies to entry state, to localStorage rows, to cookies, and to the values passed to `update()` on `definePageState`, `defineLocalState` and `defineCookieState`.',
 });
 
 export const frameworkTitle = message({
@@ -119,8 +119,8 @@ export const frameworkTitle = message({
 });
 
 export const frameworkDescription = message({
-  ja: 'このフレームワークのページは search params を受け取りません。受け取るのは `params` と `pathname`（`@k8ordo/server` ではさらに、ヘッダーと Cookie を持つ `request`）です。pathname はルーターのもので、search は `useAppState` がブラウザで読みます。',
-  en: 'Pages under the framework never see the search. They receive `params` and `pathname` — plus a `request` with headers and cookies under `@k8ordo/server`. The pathname is the router’s, and the search is read in the browser by `useAppState`.',
+  ja: 'このフレームワークのページは search params を受け取りません。受け取るのは `params` と `pathname`（`@k8ordo/server` ではさらに、ヘッダーと Cookie を持つ `request`。Cookie の状態はここから読めます）です。pathname はルーターのもので、search は `useAppState` がブラウザで読みます。',
+  en: 'Pages under the framework never see the search. They receive `params` and `pathname` — plus a `request` with headers and cookies under `@k8ordo/server`, which is where cookie state is read. The pathname is the router’s, and the search is read in the browser by `useAppState`.',
 });
 
 export const frameworkWhy = message({
@@ -131,6 +131,46 @@ export const frameworkWhy = message({
 export const frameworkLinks = message({
   ja: '`href` と `search` は純粋な関数なので、この制約を受けず、Server Component でもそのまま使えます。',
   en: '`href` and `search` are pure functions, so none of this affects them; they run in a Server Component as they are.',
+});
+
+export const cookieTitle = message({
+  ja: '`parseCookies` と `initialCookie`',
+  en: '`parseCookies` and `initialCookie`',
+});
+
+export const cookieDescription = message({
+  ja: '`defineCookieState` の値は Cookie に入っていて、リクエストごとにサーバーへ届きます。`@k8ordo/server` のページとレイアウトが受け取る `request.cookies` を `parseCookies` に渡すと、スキーマの出力型の値が返ります。それをクライアントコンポーネントに渡して `useAppState` の `initialCookie` にすると、サーバーの描画とハイドレーションの描画が実際の値で行われ、既定値がちらつきません。',
+  en: 'A `defineCookieState` keeps its values in a cookie, which every request carries to the server. Hand `parseCookies` the `request.cookies` that `@k8ordo/server` gives a page or a layout and it returns a value of the schema’s output type. Pass that down to a client component as `useAppState`’s `initialCookie`, and the server render and the hydration render show the real values instead of flashing the defaults.',
+});
+
+export const cookieInput = message({
+  ja: '`parseCookies` が受け取るのは、値がパーセントデコード済みの `ReadonlyMap<string, string>` で、`request.cookies` がそのまま渡せます。Cookie が無い・JSON が壊れている・スキーマが受け付けない値は、フィールドごとに既定値に戻ります。',
+  en: '`parseCookies` takes a `ReadonlyMap<string, string>` of percent-decoded values, which is exactly what `request.cookies` is. A missing cookie, corrupt JSON, or a value the schema rejects falls back to the defaults, field by field.',
+});
+
+export const cookieSeedEach = message({
+  ja: '`initialCookie` が効くのは、渡した `useAppState` だけです。サーバーで描かれるのに受け取っていないコンポーネントは、サーバーでは既定値を描きます。レイアウトのような上の方で一度読み、下へ渡してください。',
+  en: '`initialCookie` seeds only the `useAppState` call it is passed to; a component that renders on the server without it shows the defaults there. Read the cookie once, high up — in a layout, say — and pass it down.',
+});
+
+export const cookieStatic = message({
+  ja: '`@k8ordo/static` ではページがリクエストを受け取らないので、サーバーの描画は既定値で行われ、ハイドレーションの後に Cookie の値に置き換わります。localStorage と同じ振る舞いです。',
+  en: 'Under `@k8ordo/static` a page receives no request, so the server render shows the defaults and the cookie takes over after hydration — the same as localStorage.',
+});
+
+export const cookieWriteTitle = message({
+  ja: 'サーバーから書く Cookie との関係',
+  en: 'Cookies the server writes',
+});
+
+export const cookieWriteSecret = message({
+  ja: '`defineCookieState` はブラウザが書く Cookie なので、`HttpOnly` にはできません。セッションのような秘密の Cookie は、リクエストに答える場所（`@k8ordo/server` の `guard.ts`・`route.ts`・Server Action）でフレームワークの `cookies()` を使って `HttpOnly` で書きます。ページは描画なので、応答に Cookie を書くことはできません。',
+  en: 'A `defineCookieState` is a cookie the browser writes, so it can never be `HttpOnly`. A secret cookie such as a session is written `HttpOnly` with the framework’s `cookies()`, from the places that answer a request — `guard.ts`, `route.ts` and Server Actions under `@k8ordo/server`. A page is a render and never writes cookies onto the response.',
+});
+
+export const cookieWriteSame = message({
+  ja: '同じ `cookies()` で Cookie の状態を書くこともできます（JavaScript 無しで好みを変えるフォームなど）。名前は `cookieName`、値は `cookieValue(values)` が返すもので、属性は `Path=/`・`SameSite=Lax`・`Max-Age=34560000` にそろえ、`HttpOnly` は付けません。付けるとブラウザのストアから見えなくなります。開いているタブには `change` イベントで届きます。',
+  en: 'The same `cookies()` can write a cookie state as well — for a form that changes a preference without JavaScript, say. The name is `cookieName`, the value is what `cookieValue(values)` returns, and the attributes match the browser’s: `Path=/`, `SameSite=Lax`, `Max-Age=34560000`, and never `HttpOnly`, which would hide it from the browser store. Open tabs take it in through the `change` event.',
 });
 
 export const initialTitle = message({
@@ -225,8 +265,8 @@ export const typedDescription = message({
 });
 
 export const typedParam = message({
-  ja: '`:param` の区間には任意の文字列が入るので、`/products/:id` には `/products/42` を渡せます。',
-  en: 'A `:param` segment takes any string, so `/products/:id` accepts `/products/42`.',
+  ja: '渡したパスを、表のパターンと区間ごとに照合します。`:param` の区間には空でない 1 区間ならどんな文字列でも入るので、`/products/:id` には `/products/42` も、テンプレートリテラルで組んだパスも渡せます。どのパターンとも区間が合わないパスは、`/:locale` のように先頭が `:param` の表でも型エラーになります。',
+  en: 'The path is checked against the table’s patterns, segment by segment. A `:param` segment takes any one non-empty segment, so `/products/:id` accepts `/products/42`, and a path built with a template literal too. A path whose segments no pattern matches is a type error, even under a table that starts with a param such as `/:locale`.',
 });
 
 export const typedWildcard = message({
@@ -235,8 +275,8 @@ export const typedWildcard = message({
 });
 
 export const typedRuntime = message({
-  ja: 'パスの型は `@k8ordo/router` の `RouteOf` から型だけで導かれるので、ルーターは任意の peer のままで、実行時には読み込まれません。',
-  en: 'The path union comes from `RouteOf` in `@k8ordo/router` as a type only, so the router stays an optional peer and is never loaded at runtime.',
+  ja: '検査は `@k8ordo/router` の `NavigablePath` を型として使うだけなので、ルーターは任意の peer のままで、実行時には読み込まれません。',
+  en: 'The check uses `NavigablePath` from `@k8ordo/router` as a type only, so the router stays an optional peer and is never loaded at runtime.',
 });
 
 export const typedFramework = message({
@@ -250,8 +290,8 @@ export const typedPath = message({
 });
 
 export const typedRules = message({
-  ja: '両方があれば `routes` が優先され、どちらも無ければ `/` で始まる任意の文字列が通ります。解決されたパスの型は `RegisteredPath` として export されています。拡張はアプリケーションでだけ行ってください。共有ライブラリが拡張すると、その制約がすべての利用者に漏れます。',
-  en: 'When both are present, `routes` wins; with neither, any `/`-prefixed string is accepted. The resolved path type is exported as `RegisteredPath`. Augment only in an application — a shared library that augments `Register` leaks its constraint to every consumer.',
+  ja: '両方があれば `routes` が優先され、どちらも無ければ `/` で始まる任意の文字列が通ります。検査は `RegisteredPath<Path>` として export されています（受け付けるなら `Path`、拒むなら `never`）。拡張はアプリケーションでだけ行ってください。共有ライブラリが拡張すると、その制約がすべての利用者に漏れます。',
+  en: 'When both are present, `routes` wins; with neither, any `/`-prefixed string is accepted. The check is exported as `RegisteredPath<Path>` — `Path` when accepted, `never` when refused. Augment only in an application — a shared library that augments `Register` leaks its constraint to every consumer.',
 });
 
 export const beforeTitle = message({

@@ -61,6 +61,21 @@ export const componentCategories: NavCategory[] = [
         description: m.components.numberField.description,
       },
       {
+        name: 'DateField',
+        path: '/:locale/ui/components/date-field',
+        description: m.components.dateField.description,
+      },
+      {
+        name: 'DatePicker',
+        path: '/:locale/ui/components/date-picker',
+        description: m.components.datePicker.description,
+      },
+      {
+        name: 'Calendar',
+        path: '/:locale/ui/components/calendar',
+        description: m.components.calendar.description,
+      },
+      {
         name: 'Select',
         path: '/:locale/ui/components/select',
         description: m.components.select.description,
@@ -164,6 +179,16 @@ export const componentCategories: NavCategory[] = [
         name: 'Code',
         path: '/:locale/ui/components/code',
         description: m.components.code.description,
+      },
+      {
+        name: 'CodeBlock',
+        path: '/:locale/ui/components/code-block',
+        description: m.components.codeBlock.description,
+      },
+      {
+        name: 'Prose',
+        path: '/:locale/ui/components/prose',
+        description: m.components.prose.description,
       },
       {
         name: 'Table',
@@ -274,11 +299,6 @@ export const componentCategories: NavCategory[] = [
         name: 'Separator',
         path: '/:locale/ui/components/separator',
         description: m.components.separator.description,
-      },
-      {
-        name: 'ScrollLinked',
-        path: '/:locale/ui/components/scroll-linked',
-        description: m.components.scrollLinked.description,
       },
     ],
   },

@@ -446,11 +446,6 @@ export const gridProps = z.object({
   gap: z.enum(['none', 'sm', 'md', 'lg', 'xl']).optional(),
 }) satisfies z.ZodType<GridIntegrationProps>;
 
-type ScrollLinkedIntegrationProps = Record<string, never>;
-export const scrollLinkedProps = z.object(
-  {},
-) satisfies z.ZodType<ScrollLinkedIntegrationProps>;
-
 type AnchorIntegrationProps = {
   label: string;
   href: string;
@@ -602,6 +597,52 @@ export const sliderProps = z.object({
   min: z.number().optional().describe('Lower bound (0 when omitted)'),
   max: z.number().optional().describe('Upper bound (100 when omitted)'),
 }) satisfies z.ZodType<SliderIntegrationProps>;
+
+// DateField と DatePicker も形だけを共有する。値は `<input type="date">` の
+// value と同じ YYYY-MM-DD で、LLM が別の書式で書くと検証で弾く
+const isoDate = () => z.iso.date();
+const dateInputShape = {
+  name: z.string(),
+  label: z.string().describe('Visible label of the field'),
+  defaultValue: isoDate().optional().describe('YYYY-MM-DD'),
+  min: isoDate().optional().describe('Earliest date that can be entered'),
+  max: isoDate().optional().describe('Latest date that can be entered'),
+  invalid: z.boolean().optional(),
+  disabled: z.boolean().optional(),
+  required: z.boolean().optional(),
+};
+
+type DateFieldIntegrationProps = {
+  name: string;
+  label: string;
+  defaultValue?: string;
+  min?: string;
+  max?: string;
+  invalid?: boolean;
+  disabled?: boolean;
+  required?: boolean;
+};
+export const dateFieldProps = z.object({
+  ...dateInputShape,
+}) satisfies z.ZodType<DateFieldIntegrationProps>;
+
+type DatePickerIntegrationProps = DateFieldIntegrationProps;
+export const datePickerProps = z.object({
+  ...dateInputShape,
+}) satisfies z.ZodType<DatePickerIntegrationProps>;
+
+type CalendarIntegrationProps = {
+  name: string;
+  defaultValue?: string;
+  min?: string;
+  max?: string;
+};
+export const calendarProps = z.object({
+  name: z.string().describe('State key the picked date is stored under'),
+  defaultValue: isoDate().optional().describe('YYYY-MM-DD'),
+  min: isoDate().optional().describe('Earliest date that can be picked'),
+  max: isoDate().optional().describe('Latest date that can be picked'),
+}) satisfies z.ZodType<CalendarIntegrationProps>;
 
 type RangeSliderIntegrationProps = {
   name: string;
@@ -783,6 +824,7 @@ type FileFieldIntegrationProps = {
   multiple?: boolean;
   maxFiles?: number;
   clearable?: boolean;
+  dropzone?: boolean;
 };
 export const fileFieldProps = z.object({
   triggerLabel: z
@@ -794,6 +836,11 @@ export const fileFieldProps = z.object({
   multiple: z.boolean().optional(),
   maxFiles: z.number().optional(),
   clearable: z.boolean().optional(),
+  // 後から足したので末尾に置く（冒頭「キーの並び順が公開 ABI」参照）
+  dropzone: z
+    .boolean()
+    .optional()
+    .describe('Show an area files can be dropped onto, with the button in it'),
 }) satisfies z.ZodType<FileFieldIntegrationProps>;
 
 type FormControlIntegrationProps = {
@@ -915,6 +962,9 @@ export type PasswordInputProps = z.infer<typeof passwordInputProps>;
 export type NumberFieldProps = z.infer<typeof numberFieldProps>;
 export type SliderProps = z.infer<typeof sliderProps>;
 export type RangeSliderProps = z.infer<typeof rangeSliderProps>;
+export type DateFieldProps = z.infer<typeof dateFieldProps>;
+export type DatePickerProps = z.infer<typeof datePickerProps>;
+export type CalendarProps = z.infer<typeof calendarProps>;
 export type RadioProps = z.infer<typeof radioProps>;
 export type RadioCardProps = z.infer<typeof radioCardProps>;
 export type CheckboxCardProps = z.infer<typeof checkboxCardProps>;
@@ -927,7 +977,6 @@ export type ModalProps = z.infer<typeof modalProps>;
 export type DialogProps = z.infer<typeof dialogProps>;
 export type DrawerProps = z.infer<typeof drawerProps>;
 export type PopoverProps = z.infer<typeof popoverProps>;
-export type ScrollLinkedProps = z.infer<typeof scrollLinkedProps>;
 export type TooltipProps = z.infer<typeof tooltipProps>;
 export type DropdownMenuProps = z.infer<typeof dropdownMenuProps>;
 export type ToastProps = z.infer<typeof toastProps>;

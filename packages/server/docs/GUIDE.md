@@ -37,8 +37,10 @@ build time, which is why its guide installs it with `-D`.
 The package has three entries, split by where the code runs.
 `@k8ordo/server` is the plugin, for `vite.config.ts`, and loads Vite.
 `@k8ordo/server/runtime` is what code inside the request handler imports —
-`redirect()`, and the `RedirectTarget` and `RouteRequest` types — and needs
-nothing from Node, so it goes wherever the handler goes.
+`redirect()`, `cookies()`, `responseHeaders()`, `requestHeaders()`, and the
+`RedirectTarget`, `RouteRequest` and `Guard` types — and needs nothing from
+Node, so it goes wherever the
+handler goes.
 `@k8ordo/server/serve` is `serve`, the Node.js server for a build. Neither of
 the last two loads Vite, so the built application runs from an install
 without dev dependencies.
@@ -109,6 +111,7 @@ src/routes/
   page.tsx              /
   not-found.tsx         whatever nothing else matched — and a real 404
   error.tsx             shown in place of what is below when it throws
+  guard.ts              runs before whatever answers below it
   old/redirect.ts       /old sends the visitor elsewhere
   products/
     page.tsx            /products
@@ -120,8 +123,8 @@ src/routes/
   _data/                the same, for anything that is not a component
 ```
 
-- `page.tsx`, `layout.tsx`, `not-found.tsx`, `error.tsx` and `redirect.ts`
-  are the only filenames the grammar accepts. Anything else lives under a
+- `page.tsx`, `layout.tsx`, `not-found.tsx`, `error.tsx`, `redirect.ts` and
+  `guard.ts` are the only filenames the grammar accepts. Anything else lives under a
   `_`-prefixed directory. A file or directory whose name starts with `_` or
   `.` is skipped entirely.
 - **A page receives `params`; a layout receives `children`.** Server Components
@@ -159,18 +162,18 @@ without JavaScript: links load documents and forms post.
 
 Every problem is reported, not just the first, and each names the file:
 
-| routes/ contains                                                          | error                                                                                                                            |
-| ------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `products/helper.ts`                                                      | `routes/ holds only page.tsx, layout.tsx, not-found.tsx, error.tsx, redirect.ts — move "helper.ts" under a _-prefixed directory` |
-| `[123]/page.tsx`                                                          | `"[123]" is not a valid param directory — use [name] with a letter or underscore first`                                          |
-| `pro ducts/page.tsx`                                                      | `"pro ducts" cannot be a URL segment — use letters, digits, . _ ~ or -`                                                          |
-| `[id]/things/[id]/page.tsx`                                               | `":id" is already taken by an ancestor — params must be unique within a path`                                                    |
-| `orphan/layout.tsx` and no page below                                     | `has a layout but no page.tsx below it, so it can never render`                                                                  |
-| `(a)/page.tsx` and `(b)/page.tsx`                                         | `"/" is already declared by (a)/page.tsx — route groups do not separate URLs`                                                    |
-| `(docs/page.tsx`                                                          | `"(docs" is not a valid route group — use (name)`                                                                                |
-| `empty/error.tsx` and no page or redirect below                           | `declares no route — every directory needs a page.tsx (or redirect.ts) somewhere below it`                                       |
-| `(shop)/sale/page.tsx` and `(shop)/[id]/page.tsx` beside `about/page.tsx` | `"/about" can never match — "/:id" ((shop)/[id]/page.tsx) is declared first and answers it`                                      |
-| `old/page.tsx` and `old/redirect.ts`                                      | `"old" cannot both render page.tsx and redirect — keep one`                                                                      |
+| routes/ contains                                                          | error                                                                                                                                      |
+| ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `products/helper.ts`                                                      | `routes/ holds only page.tsx, layout.tsx, not-found.tsx, error.tsx, redirect.ts, guard.ts — move "helper.ts" under a _-prefixed directory` |
+| `[123]/page.tsx`                                                          | `"[123]" is not a valid param directory — use [name] with a letter or underscore first`                                                    |
+| `pro ducts/page.tsx`                                                      | `"pro ducts" cannot be a URL segment — use letters, digits, . _ ~ or -`                                                                    |
+| `[id]/things/[id]/page.tsx`                                               | `":id" is already taken by an ancestor — params must be unique within a path`                                                              |
+| `orphan/layout.tsx` and no page below                                     | `has a layout but no page.tsx below it, so it can never render`                                                                            |
+| `(a)/page.tsx` and `(b)/page.tsx`                                         | `"/" is already declared by (a)/page.tsx — route groups do not separate URLs`                                                              |
+| `(docs/page.tsx`                                                          | `"(docs" is not a valid route group — use (name)`                                                                                          |
+| `empty/error.tsx` and no page or redirect below                           | `declares no route — every directory needs a page.tsx (or redirect.ts) somewhere below it`                                                 |
+| `(shop)/sale/page.tsx` and `(shop)/[id]/page.tsx` beside `about/page.tsx` | `"/about" can never match — "/:id" ((shop)/[id]/page.tsx) is declared first and answers it`                                                |
+| `old/page.tsx` and `old/redirect.ts`                                      | `"old" cannot both render page.tsx and redirect — keep one`                                                                                |
 
 The generated table lists literal segments before parameters, so `about/`
 beside `[slug]/` is reachable without saying anything. A route group holds
@@ -211,6 +214,8 @@ type Layout<P extends string> = ComponentType<{
 
 export const paramSchemas = {} as const;
 
+export const guards = {} as const;
+
 export const redirects = {} as const;
 
 export const routes = defineRoutes({
@@ -234,9 +239,11 @@ puts it under — a type check, so `tsc` reports a mismatch and `vite build`,
 which does not type-check, passes. Under `@k8ordo/server` the `Page` and
 `Layout` types also carry `request`. `redirects` is what the request handler
 consults before it walks `routes` — where each `redirect.ts` sends the
-visitor — and `paramSchemas` holds, per page pattern, the schemas it runs when
-the walk reaches that pattern, before the page renders; both are empty here
-because no route file declares either.
+visitor — `paramSchemas` holds, per page pattern, the schemas it runs when
+the walk reaches that pattern, before the page renders, and `guards` the
+`guard.ts` files that run before a pattern answers, outer first (a mode that
+builds files refuses them); all three are empty here because no route file
+declares any.
 
 `.k8ordo/register.gen.ts` wires that table into `@k8ordo/router` — and into
 `@k8ordo/state` when the application depends on it — so typed paths work
@@ -564,6 +571,25 @@ name a file inside the build output, whatever it is spelled like — traversal
 is not a case weighed per request but an outcome the path resolution cannot
 produce.
 
+**Nothing is compressed twice, or sent twice.** `vite build` writes a Brotli
+and a gzip copy beside every file of the client build whose type compresses
+(`app-1a2b.js.br`, `app-1a2b.js.gz`, each kept only when it came out
+smaller), and `serve` sends the one the request's `Accept-Encoding` prefers —
+`br` when both are equally welcome — with `Vary: Accept-Encoding`. Every file
+carries an `ETag` taken from its contents, not its modification time, so a
+revalidation against a deploy that did not change the file, or against another
+server built from the same source, ends in a `304`; the contents are read for
+it once per file. A `Range` asking for one span of a file is answered with
+`206` — what Safari needs before it will play a `<video>` — a range past the
+end with `416`, and anything else (several spans, a `Range` that cannot be
+read, an `If-Range` naming another version) with the whole file.
+
+A page and its payload are compressed as they stream, under the same
+negotiation: every part React writes is flushed as it is written, so the
+shell reaches the browser before the slowest boundary has finished rendering.
+An answer in a type that is compressed already (an image), one the handler
+encoded itself, or one marked `Cache-Control: no-transform` is sent as it is.
+
 When the handler throws, `serve` answers `500` with the body `internal
 error` and logs what was thrown (`k8ordo: GET /products/1 failed`): the
 details are for whoever runs the server, not for the visitor. A body that
@@ -639,6 +665,82 @@ calling your functions with your visitor's cookies; anything else is answered
 with a `403`. Behind a proxy that means passing the public host through;
 `serve` reads it from the request's own `Host` header, so a proxy in front of
 it has to pass the original `Host` on unchanged.
+
+<!-- shared:prefetch -->
+
+### Fetching the next page ahead
+
+The client runtime listens on the whole document for a pointer moving onto a
+link, a link taking focus, and a press starting on one — `pointerover`,
+`focusin` and `pointerdown` — and fetches that page's payload there and then,
+so a click often finds the page already in hand. Nothing needs wiring: any
+`<a>` counts, the ones a component library renders included.
+
+Only a link a click would load in place is fetched: the same origin and below
+Vite's `base`, no `download`, no `target` other than `_self`, and not the
+page on screen, where only the search or the fragment would change. To stop
+it for a link — one whose page is expensive to render, say — mark the link,
+or any element around it, `data-k8ordo-prefetch="false"`
+(`data-k8ordo-prefetch={false}` in JSX renders the same). The nearest element
+carrying the attribute decides, so `"true"` opts a link back in inside a
+region that opted out.
+
+```tsx
+<nav data-k8ordo-prefetch={false}>
+  <a href="/reports">Reports</a>
+  <a data-k8ordo-prefetch href="/">
+    Home
+  </a>
+</nav>
+```
+
+What was fetched is used by the next navigation to that page, once, and only
+if it starts within 30 seconds of the fetch starting. After that — or once a
+navigation has used it — the page is fetched afresh, as it would have been
+with nothing prefetched, so a page hovered and left alone never shows up
+later as it was then. A Server Action's answer drops everything prefetched,
+since the action may have changed what those pages show, and a prefetch that
+failed is dropped at once, so the navigation asks again. A prefetch dropped
+before any navigation used it is cancelled if it is still on its way, and one
+a navigation took is cancelled with that navigation when another overtakes
+it — the same as a fetch the navigation had started itself.
+
+Under `@k8ordo/static` a prefetch is a request for a file. Under
+`@k8ordo/server` it is a render, as a navigation is — the reason to mark a
+link to an expensive page. The platform's Speculation Rules are not used:
+they are Chromium's alone, not Baseline.
+
+<!-- /shared:prefetch -->
+
+### Deploying to Vercel
+
+```ts
+// vite.config.ts
+import { framework } from '@k8ordo/server';
+import { vercel } from '@k8ordo/server/vercel';
+import { defineConfig } from 'vite';
+
+export default defineConfig({ plugins: [framework(), vercel()] });
+```
+
+With `vercel()` beside `framework()`, `vite build` also writes
+`.vercel/output/` in the shape of Vercel's Build Output API (v3), which
+`vercel build` and `vercel deploy --prebuilt` deploy as it is. The client
+build becomes static files on Vercel's CDN — a file under `assets/` is sent
+`immutable` once a file has answered, so a missing one is never cached — and
+every request that names no file goes to one Node.js function, the request
+handler, handed to Vercel as `fetch` and streaming its answer. Under a
+`base` the static files sit below it, as `serve` hands them out, and the
+handler answers every URL outside it with a `404`. The copies compressed for
+`serve` are left out: Vercel compresses on its own, and each is one more file
+to upload.
+
+**The function carries everything it imports.** A Vercel function holds
+nothing but its own directory, so under `vercel()` the handler is built with
+every dependency bundled in. A dependency that ships a native binary, or that
+reads its own files by path, cannot be bundled that way and does not work
+there. Each build replaces `.vercel/output/` and nothing else: the project link
+`vercel pull` writes beside it stays.
 
 <!-- shared:deploys -->
 
@@ -759,6 +861,29 @@ never _reach_. The client only ever receives a reference to an action, so the
 two do not collide — but the mark belongs on what the action reads: keep
 secrets and database clients in a `*.server.ts` module and import that.
 
+An action answers the request as much as a guard does, so it has the same
+API: `cookies()` to read and write the cookies, `responseHeaders()` to add to
+the answer, and `requestHeaders()` for the headers the request arrived with —
+an action is handed its arguments, not the request.
+
+```ts
+'use server';
+
+import { cookies, redirect } from '@k8ordo/server/runtime';
+
+export async function signIn(_previous: FormState, formData: FormData) {
+  const session = await startSession(formData);
+  if (session === null) return { error: 'wrong password' };
+  cookies().set('session', session.token, { maxAge: 60 * 60 * 24 * 30 });
+  redirect('/account');
+}
+```
+
+What an action writes goes on its answer: the page it re-rendered, the `303`
+to where it redirected, or the payload the client runtime applies. The page
+re-rendered after it sees the cookies the request carried in `request`, not
+what the action wrote.
+
 Calling the action re-renders the page and sends both answers back together,
 so the screen is up to date by the time the caller has its value — one round
 trip, not two.
@@ -769,6 +894,101 @@ submission, and the server runs the action and answers with the same page,
 re-rendered — or a `303` when the action ended with `redirect()`.
 `useActionState`'s result survives that trip, so the same component handles
 both worlds without knowing which one it is in.
+
+## Guards
+
+A `guard.ts` decides whether a request gets through, before anything below
+its directory answers it. It can sit at any level, and the guards along a URL
+run outer first, one at a time:
+
+```ts
+// src/routes/admin/guard.ts
+import { cookies } from '@k8ordo/server/runtime';
+import type { Guard } from '@k8ordo/server/runtime';
+
+const guard: Guard<'/admin'> = () => {
+  if (cookies().has('session')) return;
+  return new Response(null, { status: 303, headers: { location: '/login' } });
+};
+
+export default guard;
+```
+
+It receives `{ request, params }` — the `Request` as it arrived, and the
+params of the pattern its directory puts it under, as the strings the URL
+carried: a guard runs above every layout, where no schema has typed them.
+`Guard<'/admin/:id'>` from `@k8ordo/server/runtime` is its type, and the
+generated table checks each `guard.ts` against its directory's pattern either
+way.
+
+**A `Response` ends the request; nothing lets it through.** A redirect, a
+`401`, a `403` — whatever it returns is the answer, and the guards inside it
+and the page below never run. Returning nothing hands the request on to the
+next guard, and the last one to what answers the URL.
+
+Letting a request through can still add to its answer. `responseHeaders()`
+is the `Headers` the final response will carry, whatever answers — the page,
+its payload, the not-found, or a guard further in that ends the request:
+
+```ts
+// src/routes/guard.ts
+import { responseHeaders } from '@k8ordo/server/runtime';
+
+export default function guard() {
+  responseHeaders().set('x-content-type-options', 'nosniff');
+}
+```
+
+A header the answer already carries is replaced. `responseHeaders()` works
+while a guard or a Server Action runs and throws anywhere else — a page is a
+render, and a render that wrote the response would be a second handler.
+
+There is no `next()` that runs the page and hands its answer back to be
+rewritten: a page streams, and its headers are on the wire before its body is
+written, so a guard decides before the page starts, never after.
+
+**What a guard covers.** A guard runs before every URL below its directory —
+each page, its payload for a client navigation, a `HEAD`, a Server Action
+posted to it, and a `not-found.tsx` below it; the root's also runs for a URL
+nothing answers. A `redirect.ts` is answered before any guard runs: a
+directory that redirects has nothing below it to guard. A guard does not
+protect a Server Action as such — an action is a function any page can call,
+posted to whichever URL calls it — so an action checks what it needs itself.
+
+The guards run after the params schemas have matched the URL, so a guard
+under `[locale]` runs in the locale the URL names, and before the Server
+Action a `POST` carries.
+
+## Cookies
+
+`cookies()` is the request's cookies, to read and to write, from a
+`guard.ts` or a Server Action:
+
+```ts
+import { cookies } from '@k8ordo/server/runtime';
+
+cookies().get('session'); // string | undefined
+cookies().set('session', token, { maxAge: 60 * 60 * 24 });
+cookies().delete('session');
+```
+
+A read sees what the request carried, with what was set or deleted earlier in
+the same request — a guard's write is what a Server Action after it reads —
+and every write reaches the browser as a `Set-Cookie` on the answer, whatever
+the answer is. A cookie written twice at the same path and domain is said
+once, the last way.
+
+`set` takes `path`, `domain`, `maxAge` (seconds), `expires`, `httpOnly`,
+`secure` and `sameSite` (`'strict' | 'lax' | 'none'`, the last only with
+`secure`). The defaults are what a session wants: `path: '/'`,
+`httpOnly: true`, `secure: true` and `sameSite: 'lax'`. `localhost` counts as
+secure to the browsers that matter; anywhere else served over plain HTTP,
+say `secure: false`. A name outside RFC 6265's token characters throws.
+`delete` takes the `path` and `domain` the cookie was set with, since those
+are what a browser keys it by.
+
+A page never writes a cookie: it reads `request.cookies` from its props, the
+cookies the request carried.
 
 ## Reading the request
 
@@ -797,7 +1017,9 @@ it as a prop.
 
 Nothing lets a page write to the response — no status, no `Set-Cookie` —
 because a page is a render, and a render that answered the request would be
-a second handler.
+a second handler. What the response carries beyond the page is decided before
+it renders, in a `guard.ts`, or by the Server Action a `POST` carries;
+`cookies()` there is what writes a cookie.
 
 The field exists only under this mode: the generated `Page` and `Layout`
 types carry it here and not under `@k8ordo/static`, so a page that reads it
@@ -810,7 +1032,8 @@ no request to read. The search params are still not here — they are
 An unknown URL gets a real 404 from the application rather than whatever the
 host would have said; parameterised routes need no list of values, so a
 catalogue that changes does not need a rebuild; a form can post to a Server
-Action, and an action can `redirect()`; and a page can read the request's
-headers and cookies. If none of that is needed, `@k8ordo/static` renders the
+Action, and an action can `redirect()`; a page can read the request's
+headers and cookies; and a `guard.ts` decides whether a request gets through
+before anything renders. If none of that is needed, `@k8ordo/static` renders the
 same application into files — the same grammar, the same boundaries, the same
 handler, called for each route at build time.

@@ -29,6 +29,8 @@ export type Messages = {
 
   fileFieldRemove: string;
   fileFieldTrigger: string;
+  /** FileField.Dropzone の既定の案内 */
+  fileFieldDrop: string;
 
   numberFieldIncrement: string;
   numberFieldDecrement: string;
@@ -37,6 +39,13 @@ export type Messages = {
   rangeSliderStart: string;
   /** RangeSlider の上側のつまみ */
   rangeSliderEnd: string;
+
+  calendarPreviousMonth: string;
+  calendarNextMonth: string;
+  /** DatePicker のカレンダーを開くボタン */
+  datePickerOpen: string;
+  /** DatePicker が開くポップオーバー（dialog）の名前 */
+  datePickerDialog: string;
 
   passwordShow: string;
   passwordHide: string;
@@ -53,6 +62,11 @@ export type Messages = {
   paginationPrevious: string;
   paginationNext: string;
 
+  /** CodeBlock のコピーボタン */
+  codeBlockCopy: string;
+  /** コピーの結果を読み上げる（role="status"） */
+  copied: string;
+  copyFailed: string;
   /** Carousel の aria-roledescription（region と各スライド） */
   carousel: string;
   carouselSlide: string;

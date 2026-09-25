@@ -164,6 +164,21 @@ export const catalog = defineCatalog(schema, {
       description:
         'Slider with two thumbs for picking a range. defaultValue ([lower, upper]) can be bound to state with $bindState.',
     },
+    DateField: {
+      props: s.dateFieldProps,
+      description:
+        'Date input with a visible label. Dates are YYYY-MM-DD strings. defaultValue can be bound to state with $bindState.',
+    },
+    DatePicker: {
+      props: s.datePickerProps,
+      description:
+        'Date input with a visible label and a button that opens a calendar. Dates are YYYY-MM-DD strings. defaultValue can be bound to state with $bindState.',
+    },
+    Calendar: {
+      props: s.calendarProps,
+      description:
+        'Month calendar shown inline for picking one day (YYYY-MM-DD). It submits nothing; in a form, use DatePicker. defaultValue can be bound to state with $bindState.',
+    },
     Radio: {
       props: s.radioProps,
       description:
@@ -225,10 +240,6 @@ export const catalog = defineCatalog(schema, {
       description:
         'Toast notification that a button labeled triggerLabel shows.',
     },
-    ScrollLinked: {
-      props: s.scrollLinkedProps,
-      description: 'Page scroll progress bar (fixed to the top).',
-    },
     ListBox: {
       props: s.listBoxProps,
       description: 'Single-choice list in a popup.',
@@ -243,7 +254,8 @@ export const catalog = defineCatalog(schema, {
     },
     FileField: {
       props: s.fileFieldProps,
-      description: 'File picker field.',
+      description:
+        'File picker field. With dropzone, files can also be dropped onto it.',
     },
     FormControl: {
       props: s.formControlProps,

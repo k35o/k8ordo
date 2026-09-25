@@ -132,6 +132,30 @@ export const { registry } = defineRegistry(catalog, {
       );
       return ui.renderRangeSlider(props, value, setValue);
     },
+    DateField: ({ props, bindings }) => {
+      const [value, setValue] = useBoundOrLocal<string>(
+        props.defaultValue,
+        bindings?.defaultValue,
+        '',
+      );
+      return ui.renderDateField(props, value, setValue);
+    },
+    DatePicker: ({ props, bindings }) => {
+      const [value, setValue] = useBoundOrLocal<string>(
+        props.defaultValue,
+        bindings?.defaultValue,
+        '',
+      );
+      return ui.renderDatePicker(props, value, setValue);
+    },
+    Calendar: ({ props, bindings }) => {
+      const [value, setValue] = useBoundOrLocal<string>(
+        props.defaultValue,
+        bindings?.defaultValue,
+        '',
+      );
+      return ui.renderCalendar(props, value, setValue);
+    },
     Radio: ({ props, bindings }) => {
       const [value, setValue] = useBoundOrLocal<string>(
         props.defaultValue,
@@ -202,8 +226,6 @@ export const { registry } = defineRegistry(catalog, {
     Tooltip: ({ props }) => ui.renderTooltip(props),
     DropdownMenu: ({ props }) => ui.renderDropdownMenu(props),
     Toast: ({ props }) => <ui.ToastWidget props={props} />,
-
-    ScrollLinked: ({ props }) => ui.renderScrollLinked(props),
 
     ListBox: ({ props, bindings }) => {
       const path = bindings?.defaultValue;

@@ -87,20 +87,21 @@ first entry is the default unless told otherwise (without `default`,
 zone the runtime does not know, and a `dir` other than `ltr` / `rtl` throw at
 the definition, not later.
 
-| Member            | What it is                                                                        |
-| ----------------- | --------------------------------------------------------------------------------- |
-| `all`             | The tags, in order.                                                               |
-| `definitions`     | Each locale's `{ timeZone, dir }`, as given.                                      |
-| `default`         | The tag used when nothing names one.                                              |
-| `is(value)`       | Membership as a type guard.                                                       |
-| `negotiate(…)`    | The best supported tag for a preference list.                                     |
-| `localize`        | `'/ui'` → `'/en/ui'`; `'/'` → `'/en'`.                                            |
-| `delocalize`      | `'/en/ui'` → `{ locale: 'en', pathname: '/ui' }`; `'/x'` → `{ locale: null, … }`. |
-| `paths`           | The static build's `paths` option: `/:locale` expanded to every locale.           |
-| `paramsSchema`    | The `[locale]` segment's schema (Standard Schema; no schema library).             |
-| `getLocale()`     | The locale of the render in progress. Not a hook.                                 |
-| `run(locale, fn)` | Server only: runs `fn` with `locale` current.                                     |
-| `dateTimeFormat`… | `Intl` for the current locale ([Formatting](#formatting)).                        |
+| Member                | What it is                                                                        |
+| --------------------- | --------------------------------------------------------------------------------- |
+| `all`                 | The tags, in order.                                                               |
+| `definitions`         | Each locale's `{ timeZone, dir }`, as given.                                      |
+| `default`             | The tag used when nothing names one.                                              |
+| `is(value)`           | Membership as a type guard.                                                       |
+| `negotiate(…)`        | The best supported tag for a preference list.                                     |
+| `negotiateRequest(…)` | The best supported tag for a `Request`: a cookie, then `Accept-Language`.         |
+| `localize`            | `'/ui'` → `'/en/ui'`; `'/'` → `'/en'`.                                            |
+| `delocalize`          | `'/en/ui'` → `{ locale: 'en', pathname: '/ui' }`; `'/x'` → `{ locale: null, … }`. |
+| `paths`               | The static build's `paths` option: `/:locale` expanded to every locale.           |
+| `paramsSchema`        | The `[locale]` segment's schema (Standard Schema; no schema library).             |
+| `getLocale()`         | The locale of the render in progress. Not a hook.                                 |
+| `run(locale, fn)`     | Server only: runs `fn` with `locale` current.                                     |
+| `dateTimeFormat`…     | `Intl` for the current locale ([Formatting](#formatting)).                        |
 
 `LocaleOf<typeof locales>` is the tag union and `LocaleDefinition` one
 locale's `{ timeZone, dir }`. `delocalize` says `null` for a first segment
@@ -134,11 +135,20 @@ skipped, because the list is user input.
 
 ```ts
 locales.negotiate(navigator.languages); // in the browser
-locales.negotiate(parseAcceptLanguage(request.headers.get('accept-language')));
+locales.negotiateRequest(request, { cookie: 'locale' }); // on a server
 ```
 
-`parseAcceptLanguage(header)` turns an `Accept-Language` header into that
-list: `q` weights decide the order (a `q` that is not a number is ignored),
+`negotiateRequest(request, { cookie? })` is the server's form. The cookie
+named by `cookie` comes first when the request carries it — the locale the
+visitor chose before, written where they switched language — then the
+`Accept-Language` header in its order of preference. Both go through
+`negotiate`, so a cookie still holding a locale the set no longer lists falls
+through to the header. The name is the application's: a language switcher
+that writes it (`cookieStore.set('locale', next)`) and the server that reads it
+agree on one. Without `cookie`, only the header is read.
+
+`parseAcceptLanguage(header)` is the header half on its own: it turns an
+`Accept-Language` header into a preference list for `negotiate`: `q` weights decide the order (a `q` that is not a number is ignored),
 ties keep the header's order, a weight of 0 or less (an empty `q=` included)
 and `*` are dropped, and a missing header is an empty list.
 
@@ -327,8 +337,8 @@ useEffect(() => {
 ```
 
 Under `@k8ordo/server` a page can make the same decision from the request —
-`locales.negotiate(parseAcceptLanguage(request.headers.get('accept-language')))`
-— but cannot answer with a redirect: a page never writes to the response, and
+`locales.negotiateRequest(request, { cookie: 'locale' })` — but cannot answer
+with a redirect: a page never writes to the response, and
 `redirect.ts` fills its target from the params, not the headers. `serve` has
 no hook for it either, so a server-side redirect sits outside the app: a proxy
 in front of `serve`, or a host of your own around the built handler
@@ -397,11 +407,13 @@ without JavaScript keeps the default.
   application's. `localize` / `delocalize` remain for a pathname in hand —
   the language switcher, which takes the page it is on to another locale.
 
-- **`@k8ordo/ui`**: its own built-in strings go through `UIProvider`'s
-  `messages`. When the app's locales are among `ja` and `en`,
-  `<UIProvider messages={dictionaries[locales.getLocale()]}>` picks the
-  dictionary of the locale being rendered (`dictionaries` is from
-  `@k8ordo/ui/i18n`); any other locale passes its own `Messages`.
+- **`@k8ordo/ui`**: its built-in strings read `currentLocale()` from this
+  package — the locale messages render in, or `null` (English there) when no
+  set is defined in that environment — so they follow the app's locale with
+  nothing passed. `ja` and `en` ship with it; another locale is registered
+  next to the set with `registerMessages` from `@k8ordo/ui/i18n`. The module
+  that defines the set has to be loaded in the browser too, or the components
+  there speak English.
 - **`@k8ordo/form`**: constraint messages are messages, and a message called
   where the constraint is declared keeps the text of whatever locale was
   current then. Hand zod the message instead, so it is called when zod

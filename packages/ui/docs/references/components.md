@@ -12,6 +12,9 @@ import { UIProvider } from '@k8ordo/ui';
 
 // Components (all from the root entry)
 import { Button, Card, TextField } from '@k8ordo/ui';
+
+// Except CodeBlock, which highlights on the server and has its own entry
+import { CodeBlock } from '@k8ordo/ui/code-block';
 ```
 
 Every component can be rendered from a Server Component, compound ones
@@ -384,32 +387,6 @@ Props:
 - `orientation`: `'horizontal'` | `'vertical'` (default: `'horizontal'`)
 - Other props are forwarded to `HTMLAttributes<HTMLSpanElement>`, except `children` / `role` / `aria-orientation` / `className` / `style`.
 
-### ScrollLinked
-
-Shows scroll progress as a progress bar. Tracks the window unless `container`
-names an element to track instead.
-
-```tsx
-import { ScrollLinked } from '@k8ordo/ui';
-
-<ScrollLinked />;
-
-// a scroll container rather than the window
-const [container, setContainer] = useState<HTMLElement | null>(null);
-
-<div ref={setContainer} style={{ overflowY: 'auto' }}>
-  <ScrollLinked container={container} />…
-</div>;
-```
-
-Hold `container` in state, not a `RefObject`: tracking has to start once the
-element exists. While it is still `null` the bar tracks nothing — it does not
-fall back to the window.
-
-Props:
-
-- `container`: `Element` | `null`
-
 ### Stack
 
 Lays children out along one axis. Pick `gap` from the spacing tokens.
@@ -634,6 +611,103 @@ Props:
 - `step`: `number` (default: `1`)
 - `value`: `number` | `null`
 - Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `type` / `role` / `className` / `style` / `children`.
+
+### DateField
+
+A native `<input type="date">` styled like `TextField`. The value is a
+`YYYY-MM-DD` string (`''` when empty), and the browser checks `min` / `max` /
+`required` itself. `onChange` is the native event, as with `TextField`.
+
+It accepts what `@k8ordo/form` derives from `z.iso.date()` as is: spread the
+field's `input` and nothing needs to be taken out. `type` is always `date`, so a
+`type` in the spread does not replace it.
+
+```tsx
+import { DateField, FormControl } from '@k8ordo/ui';
+
+const eventDate = form.field('eventDate'); // z.iso.date()
+
+<FormControl
+  errorText={eventDate.error}
+  invalid={eventDate.invalid}
+  label="Date"
+  required={eventDate.required}
+  renderInput={(props) => <DateField {...props} {...eventDate.input} />}
+/>;
+```
+
+Props:
+
+- `invalid`: `boolean` (default: `false`)
+- `ref`: `Ref<HTMLInputElement>`
+- Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `className` / `style` / `type` / `children`.
+
+### DatePicker
+
+`DateField` with a button that opens `Calendar` in a popover. The field is the
+same native `<input type="date">`, so typing a date, `name`, `required`, and
+`min` / `max` all work as they do on `DateField`, and spreading a derived
+`@k8ordo/form` field works the same way. `onChange` takes the value
+(`YYYY-MM-DD`, `''` when cleared), not the event, because a date picked from the
+calendar has no input event of its own.
+
+Picking a date writes it into the input and dispatches an `input` event, so a
+form sees it exactly as if it had been typed (dirty state, rules, and clearing
+an error). The popover closes and focus returns to the calendar button.
+
+Firefox draws its own calendar button inside every `<input type="date">` and
+offers no way to hide it, so there the field shows two calendar buttons: the
+browser's and this component's. Chromium and Safari show only this one.
+
+```tsx
+import { DatePicker } from '@k8ordo/ui';
+
+<DatePicker
+  aria-label="Check-in"
+  min="2026-01-01"
+  name="checkIn"
+  onChange={setCheckIn}
+  value={checkIn}
+/>;
+```
+
+Props:
+
+- `defaultValue`: `string`
+- `invalid`: `boolean` (default: `false`)
+- `onChange`: `(value: string) => void`
+- `ref`: `Ref<HTMLInputElement>`
+- `value`: `string`
+- Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `className` / `style` / `type` / `children`.
+
+### Calendar
+
+A month grid for picking one day (the WAI-ARIA date picker grid). The value is
+a `YYYY-MM-DD` string. Arrow keys move by day and week, `Home` / `End` to the
+ends of the week, `PageUp` / `PageDown` by month (with `Shift`, by year), and
+`Enter` / `Space` select. Days outside `min` / `max` stay focusable but cannot
+be selected.
+
+Month and weekday names, and the first day of the week, follow the same locale
+as the built-in wording (i18n, below). Today is marked with
+`aria-current="date"` in the visitor's time zone, which only the browser knows,
+so the calendar renders in the browser alone: the server writes an empty box of
+the same size. It submits nothing; inside a form, use `DatePicker` or
+`DateField`.
+
+```tsx
+import { Calendar } from '@k8ordo/ui';
+
+<Calendar defaultValue="2026-09-25" max="2026-12-31" onChange={setDay} />;
+```
+
+Props:
+
+- `defaultValue`: `string`
+- `max`: `string`
+- `min`: `string`
+- `onChange`: `(value: string) => void`
+- `value`: `string` | `null`
 
 ### PasswordInput
 
@@ -1018,16 +1092,41 @@ import { FileField } from '@k8ordo/ui';
 </FileField.Root>;
 ```
 
+`FileField.Dropzone` is an area files can be dropped onto. Left empty, it holds
+the built-in `fileFieldDrop` wording and a "choose files" button, so the field
+stays usable by keyboard; pass children to lay it out yourself (put a
+`FileField.Trigger` inside). Dropped files are added exactly like picked ones:
+they respect `multiple` and `maxFiles`, land in the input so they are
+submitted, and are announced with an `input` event so a form sees the change.
+A dropped folder is skipped (choose folders through the picker with
+`webkitDirectory`), and `accept` is not checked on drop, just as the browser
+only suggests it to the picker.
+
+The files in the list are always the files the input submits: picking more
+with `multiple` adds to the list and to the input, and removing one from the
+list removes it from the input.
+
+```tsx
+<FileField.Root accept="image/*" multiple name="photos">
+  <FileField.Dropzone />
+  <FileField.ItemList clearable />
+</FileField.Root>
+```
+
 Props (Root):
 
 - `children`: `ReactNode`
-- `defaultValue`: `File[]`
+- `defaultValue`: `File[]` | `string`
 - `invalid`: `boolean` (default: `false`)
 - `maxFiles`: `number`
 - `onChange`: `(files: FileList | null, event?: ChangeEvent<HTMLInputElement>) => void`
 - `ref`: `Ref<HTMLInputElement>`
 - `webkitDirectory`: `boolean` (default: `false`)
 - Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `type` / `className` / `style` / `value`.
+
+Props (FileField.Dropzone):
+
+- `children`: `ReactNode`
 
 Props (FileField.ItemList):
 
@@ -1119,6 +1218,55 @@ Props:
 - `children`: `string` (required)
 - Other props are forwarded to `HTMLAttributes<HTMLElement>`, except `className` / `style`.
 
+### CodeBlock
+
+A block of code, highlighted on the server with shiki, with a copy button.
+It is an async Server Component on its own subpath, `@k8ordo/ui/code-block`,
+and imports `server-only`: the highlighter never reaches the browser, and
+importing it from a Client Component fails the build. Only the copy button is a
+client module.
+
+```tsx
+import { CodeBlock } from '@k8ordo/ui/code-block';
+
+<CodeBlock code={source} lang="tsx" title="save.tsx" />;
+```
+
+- `lang` is any language shiki bundles (`tsx`, `bash`, `css`, …). A name it
+  does not know renders as plain text rather than failing, so a Markdown fence
+  can pass its info string through as it is. The header shows `title` when
+  given (as the figure's `figcaption`), and the language otherwise.
+- The colors come from the design tokens (shiki's `css-variables` theme, mapped
+  to tokens in the stylesheet), so dark mode follows `.dark` with no second
+  theme.
+- `marks` marks lines by their 1-based number: `highlight`, `add` (drawn with a
+  `+`), or `remove` (drawn with a `−`). `callouts` puts a note under a line
+  (an array puts several, in order), indented like the line it points at. A
+  line can carry both. Neither is part of the copied text: the button copies
+  `code` exactly.
+
+```tsx
+<CodeBlock
+  callouts={{ 3: 'Guard the division' }}
+  code={source}
+  lang="ts"
+  marks={{ 2: 'remove', 3: 'add' }}
+/>
+```
+
+- Inside a `.writing-v` tree it stays a horizontal island.
+- It cannot render in a generative-UI spec, which renders on the client; see
+  [generative-ui](generative-ui.md).
+
+Props:
+
+- `code`: `string` (required)
+- `callouts`: `Readonly<Record<number, string | readonly string[]>>`
+- `lang`: `string` (default: `'text'`)
+- `marks`: `Readonly<Record<number, 'highlight' | 'add' | 'remove'>>`
+- `title`: `string`
+- Other props are forwarded to `HTMLAttributes<HTMLElement>`, except `children` / `className` / `style`.
+
 ### Kbd
 
 One keyboard key, drawn as a key cap. A shortcut is several `Kbd` side by side,
@@ -1178,6 +1326,30 @@ Props (Carousel.Slide):
 
 - `children`: `ReactNode`
 - `label`: `string`
+
+### Prose
+
+A container that puts the typesetting of body text back — for Markdown or MDX
+rendered to HTML. Only bare elements (no `class`) are typeset, so components
+placed inside keep their own look; the spacing between blocks applies to
+everything. Tuned for Japanese: loose leading, emphasis dots for `em`, and a
+one-character paragraph indent in vertical writing. See
+[Typography](typography.md#long-form-text-prose) for what it sets.
+
+```tsx
+import { Prose } from '@k8ordo/ui';
+
+<article>
+  <Prose>
+    <MDXContent components={{ pre: MyCodeBlock }} />
+  </Prose>
+</article>;
+```
+
+Props:
+
+- `children`: `ReactNode`
+- Other props are forwarded to `HTMLAttributes<HTMLDivElement>`, except `className` / `style`.
 
 ### Table
 
@@ -1786,7 +1958,7 @@ are exported as well.
 
 ### UIProvider
 
-Wrap the app root once. It includes ToastProvider and the message dictionary (i18n, below).
+Wrap the app root once. It includes ToastProvider. The components' own wording needs no provider: it follows `@k8ordo/i18n` (i18n, below).
 
 ```tsx
 import { UIProvider } from '@k8ordo/ui';
@@ -1799,7 +1971,6 @@ import { UIProvider } from '@k8ordo/ui';
 Props:
 
 - `children`: `ReactNode`
-- `messages`: `Partial<Messages>`
 
 ### PortalRootProvider
 
@@ -1822,45 +1993,34 @@ Props:
 
 ## i18n (message dictionary)
 
-The wording components own internally (close, required, loading, …) comes from a dictionary. **It defaults to Japanese**, and works without a provider and without passing `messages`.
+The wording components own internally (close, required, loading, …) comes from a dictionary, picked by `@k8ordo/i18n`'s current locale. There is no provider and nothing to pass.
 
-To switch to English, pass `en` from `@k8ordo/ui/i18n`.
+- An application that defines its locale set with `defineLocales` gets the locale its messages render in: the one the URL names, or the set's default.
+- An application that defines no set gets **English**, whatever its URL starts with, so the server and the browser agree.
+- The module defining the set has to be loaded in the browser as well; where no set is defined the components speak English.
 
-```tsx
-import { UIProvider } from '@k8ordo/ui';
-import { en } from '@k8ordo/ui/i18n';
-
-<UIProvider messages={en}>
-  <App />
-</UIProvider>;
-```
-
-`dictionaries` from the same entry holds every built-in dictionary by its tag (`{ ja, en }`), for an application that picks one by the locale it is rendering: `messages={dictionaries[locale]}`.
-
-To replace only part of it, spread the dictionary and override those keys (`Partial<Messages>`, so you need not fill in every key).
+`ja` and `en` ship with the library. Register any other locale — or replace a built-in one — with `registerMessages`, next to where the set is defined:
 
 ```tsx
-<UIProvider messages={{ ...en, close: 'Dismiss' }}>
-  <App />
-</UIProvider>
+import { en, registerMessages } from '@k8ordo/ui/i18n';
+import type { Messages } from '@k8ordo/ui/i18n';
+
+const fr: Messages = { close: 'Fermer' /* …every key */ };
+registerMessages('fr', fr);
+
+registerMessages('en', { ...en, close: 'Dismiss' });
 ```
 
-To stay in Japanese and change only one string, pass just that key.
-
-```tsx
-<UIProvider messages={{ close: '閉じる（Esc）' }}>
-  <App />
-</UIProvider>
-```
+A regional tag without a dictionary of its own (`en-US`) reads its language's (`en`). Rendering in a locale nothing has text for throws, naming the locale and `registerMessages`.
 
 ### Resolution order
 
-**Component prop > the dictionary passed to the provider > the built-in default (Japanese)**.
+**Component prop > registered dictionary > built-in dictionary**.
 
 A component with a wording prop of its own — `Spinner`'s `label`, `Alert`'s `closeLabel`, `PasswordInput`'s `showLabel` / `hideLabel`, `Pagination`'s `prevLabel` / `nextLabel` — takes that prop over the dictionary.
 
 ```tsx
-// Even with the en dictionary, this one Spinner reads 「保存中」
+// Whatever the locale, this one Spinner reads 「保存中」
 <Spinner label="保存中" />
 ```
 
@@ -1868,27 +2028,23 @@ A component with a wording prop of its own — `Spinner`'s `label`, `Alert`'s `c
 
 ```tsx
 import {
-  dictionaries,
   en,
+  getMessages,
   ja,
-  useMessages,
+  registerMessages,
   type Messages,
 } from '@k8ordo/ui/i18n';
 ```
 
-`ja` and `en` are exported only from the `@k8ordo/ui/i18n` subpath, not the root, so the dictionaries stay out of the main bundle.
-
 ### Reading the wording in your own elements
 
-`useMessages` returns the wording in effect: the built-in dictionary with whatever you passed to `UIProvider` laid over it. Read from it in an element you draw through `renderItem`, or in a component of your own that sits beside the library, and it follows the same language and overrides as the components do. It is a client hook.
+`getMessages` returns the wording in effect: the dictionary for the current locale, a registered one before a built-in one. Read from it in an element you draw through `renderItem`, or in a component of your own that sits beside the library, and it follows the same language and replacements as the components do. It is not a hook, so a Server Component calls it too.
 
 ```tsx
-'use client';
-
-import { useMessages } from '@k8ordo/ui/i18n';
+import { getMessages } from '@k8ordo/ui/i18n';
 
 function DismissButton({ onDismiss }) {
-  const { close } = useMessages();
+  const { close } = getMessages();
   return (
     <button aria-label={close} onClick={onDismiss} type="button">
       ×
@@ -1907,20 +2063,24 @@ Every key in the `Messages` type. All values are `string`.
 | Alert         | `alertSuccess`, `alertInfo`, `alertWarning`, `alertError`                                                                                        |
 | Toast         | `toastRegion`                                                                                                                                    |
 | Autocomplete  | `autocompletePlaceholder`, `autocompleteRemoveTag`, `autocompleteClear`, `autocompleteEmpty`                                                     |
-| FileField     | `fileFieldRemove`, `fileFieldTrigger`                                                                                                            |
+| FileField     | `fileFieldRemove`, `fileFieldTrigger`, `fileFieldDrop`                                                                                           |
 | NumberField   | `numberFieldIncrement`, `numberFieldDecrement`                                                                                                   |
 | RangeSlider   | `rangeSliderStart`, `rangeSliderEnd`                                                                                                             |
+| Calendar      | `calendarPreviousMonth`, `calendarNextMonth`                                                                                                     |
+| DatePicker    | `datePickerOpen`, `datePickerDialog`                                                                                                             |
 | PasswordInput | `passwordShow`, `passwordHide`                                                                                                                   |
 | ListBox       | `listBoxPlaceholder`                                                                                                                             |
 | Breadcrumb    | `breadcrumb`                                                                                                                                     |
 | Tabs          | `tabList`                                                                                                                                        |
 | Pagination    | `paginationLabel`, `paginationPrevious`, `paginationNext`                                                                                        |
+| CodeBlock     | `codeBlockCopy`, `copied`, `copyFailed`                                                                                                          |
 | Carousel      | `carousel`, `carouselSlide`, `carouselPrevious`, `carouselNext`                                                                                  |
 | AI chat       | `chat`, `scrollToLatest`, `reasoning`, `reasoningStreaming`, `suggestions`, `send`, `stop`, `toolInput`, `toolOutput`, `toolError`, `toolDenied` |
 | Response      | The `response*` keys below                                                                                                                       |
 
-`fileFieldTrigger` and `tabList` are the trigger text and tab-list name the
-generative-UI renderers fall back to when a spec leaves them out.
+`fileFieldTrigger` is the button text of an empty `FileField.Dropzone`, and
+with `tabList` it is also what the generative-UI renderers fall back to when a
+spec leaves the trigger text or the tab-list name out.
 
 The `response*` keys label the controls `Response` draws (`@k8ordo/ui/ai/response`):
 `responseCopied`, `responseCopyCode`, `responseCopyLink`, `responseCopyTable`,

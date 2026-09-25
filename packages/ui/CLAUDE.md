@@ -14,6 +14,7 @@ pnpm test                                    # Run all tests
 pnpm test --project=helpers                  # Helper tests only (no browser)
 pnpm test --project=hooks                    # Hook tests only (Playwright)
 pnpm test --project=components               # Component tests only (Storybook + Playwright)
+pnpm test --project=components-dark          # The same stories with the dark theme
 pnpm test --project=components-forced-colors # Stories tagged forced-colors, under forced colors
 pnpm test --project=components-contrast-more # Stories tagged contrast-more, under prefers-contrast: more
 pnpm test --project=hooks src/internal/focus-trap.test.tsx # Single test file (needs its project)
@@ -192,6 +193,17 @@ export const MyComponent = { Root, Part } as const;
 - Use `useId()` for accessible `aria-labelledby`/`aria-describedby` connections
 - `'use client'` directive at top when using hooks
 
+### Built-in wording
+
+A component reads its own wording with `getMessages()` (`src/i18n/current.ts`),
+which looks the dictionary up in `@k8ordo/i18n`'s `currentLocale()` — English
+when the application has defined no locale set. It is a plain function, not a
+hook, so wording never makes a component a client module:
+`src/components/compound-rsc.test.ts` keeps the ones that only read wording
+(`Spinner`, `Breadcrumb`, `Code`, `Alert`, `Reasoning`, `ToolInvocation`) free
+of `'use client'`. A new key goes into `messages.ts`, `ja.ts`, and `en.ts`;
+there is no provider and no context.
+
 ### Content that gets replaced
 
 A change that swaps what is on screen (`Tabs`) is applied inside
@@ -251,7 +263,10 @@ Custom variants besides `dark:`: `light:` (anywhere not under `.dark`) and `vert
 - **Hook tests** use `vitest-browser-react` for rendering hooks in a real browser.
 - **Helper tests** are standard unit tests, no browser needed.
 - **There is no jsdom project, and components are not written to survive one.** They call `ResizeObserver`, `matchMedia`, `dialog.showModal`, and the Popover API directly — no support checks, no null branches. Consumers are told to test in a real browser (`docs/GUIDE.md`); do not reintroduce a guard layer to make a synthetic DOM work.
-- Storybook preview wraps all stories in `UIProvider` with light/dark theme toggle.
+- Storybook preview wraps all stories in `UIProvider` with light/dark theme toggle, and defines a `@k8ordo/i18n` locale set (`.storybook/locales.ts`, default `ja`) so the built-in wording is Japanese; a story renders in English with `beforeEach: inEnglish` from the same file.
+- Every story runs twice: `components` in light and `components-dark` in dark (`storybookTest({ initialGlobals: { theme: 'dark' } })`), because axe only checks the colors on screen. A story that pins `parameters.theme` stays in that theme in both.
+- A form field in a story is given a name (`aria-label` in the meta `args`, and on any field a custom `render` draws), not a disabled `label` rule.
+- `src/styles/contrast.stories.tsx` renders every pair in `docs/references/color.md`'s contrast table, AAA rows under `color-contrast-enhanced`; keep the two in step.
 - The OS color settings cannot be switched per story, so they get projects of their own: `components-forced-colors` (Playwright `forcedColors: 'active'`) runs only stories tagged `forced-colors`, `components-contrast-more` (`contrast: 'more'`) only those tagged `contrast-more`, and `components` excludes both tags. Those stories live in `src/styles/high-contrast.stories.tsx`, hidden from the sidebar (`!dev`) and from Chromatic. Browser context options go in `playwright({ contextOptions })`; Vitest 5 ignores `instances[].context`.
 - a11y addon fails a story on violations (`test: 'error'`), `color-contrast` included. Only overlay stories that axe misreads while they fade in turn `color-contrast` off for themselves: every `Modal` story, and one story each in `Dialog` and `Popover`.
 - Mock date is set to `2023-01-02 12:34:56` in Storybook.
@@ -267,10 +282,11 @@ The authoritative list is the `exports` map in `package.json`.
 
 ```
 @k8ordo/ui                     core UI components and public types (AI chat is under /ai)
-@k8ordo/ui/i18n                ja / en / dictionaries, useMessages, and the Messages type
+@k8ordo/ui/i18n                ja / en, registerMessages, getMessages, and the Messages type
 @k8ordo/ui/ai                  AI chat components
 @k8ordo/ui/ai/response         Response renderer only
 @k8ordo/ui/ai-sdk              AI SDK adapter
+@k8ordo/ui/code-block          CodeBlock (Server Component; shiki and server-only are dependencies)
 @k8ordo/ui/json-render         json-render catalog
 @k8ordo/ui/json-render/registry
 @k8ordo/ui/openui              OpenUI component library

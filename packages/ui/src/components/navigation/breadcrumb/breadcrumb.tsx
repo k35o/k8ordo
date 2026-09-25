@@ -1,8 +1,6 @@
-'use client';
-
 import type { FC, PropsWithChildren, ReactNode } from 'react';
 
-import { useMessages } from '../../../i18n/context';
+import { getMessages } from '../../../i18n/current';
 import { ChevronIcon } from '../../icons';
 import { cn } from './../../../helpers/cn';
 
@@ -11,7 +9,7 @@ export const List: FC<
     size?: 'sm' | 'md' | 'lg';
   }>
 > = ({ children, size = 'md' }) => {
-  const messages = useMessages();
+  const messages = getMessages();
 
   return (
     <nav aria-label={messages.breadcrumb}>

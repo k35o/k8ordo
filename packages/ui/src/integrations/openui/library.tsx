@@ -9,9 +9,12 @@ import * as ui from '../_shared/renderers';
 import type * as sc from '../_shared/schemas';
 import {
   AutocompleteView,
+  CalendarView,
   CheckboxCardView,
   CheckboxGroupView,
   CheckboxView,
+  DateFieldView,
+  DatePickerView,
   ListBoxView,
   NumberFieldView,
   PaginationView,
@@ -125,8 +128,6 @@ const renderers = {
     ui.renderSkeleton(props),
   Separator: ({ props }: ComponentRenderProps<sc.SeparatorProps>) =>
     ui.renderSeparator(props),
-  ScrollLinked: ({ props }: ComponentRenderProps<sc.ScrollLinkedProps>) =>
-    ui.renderScrollLinked(props),
   Tabs: ({ props }: ComponentRenderProps<sc.TabsProps>) => ui.renderTabs(props),
   Accordion: ({ props }: ComponentRenderProps<sc.AccordionProps>) =>
     ui.renderAccordion(props),
@@ -141,6 +142,9 @@ const renderers = {
   NumberField: NumberFieldView,
   Slider: SliderView,
   RangeSlider: RangeSliderView,
+  DateField: DateFieldView,
+  DatePicker: DatePickerView,
+  Calendar: CalendarView,
   Checkbox: CheckboxView,
   Switch: SwitchView,
   Select: SelectView,
