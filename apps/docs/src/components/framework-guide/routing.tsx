@@ -222,6 +222,13 @@ export default function ProductsPage() {
   );
 }`;
 
+const PREFETCH = `<nav data-k8ordo-prefetch={false}>
+  <a href={href('/reports')}>reports</a>
+  <a data-k8ordo-prefetch href={href('/')}>
+    home
+  </a>
+</nav>`;
+
 /** Inline code names, comma separated. */
 function Names({ names }: { names: readonly string[] }) {
   return names.map((name, index) => (
@@ -613,6 +620,30 @@ export function RoutingGuide({ mode }: { mode: Mode }) {
             {m.router.navFramework()}
           </LocaleAnchor>
         </Paragraph>
+      </DocSection>
+
+      <DocSection description={t.prefetchDescription} title={t.prefetchTitle}>
+        <Bullets>
+          <Bullet>
+            <Rich>{t.prefetchSameOrigin()}</Rich>
+          </Bullet>
+          <Bullet>
+            <Rich>{t.prefetchInPlace()}</Rich>
+          </Bullet>
+          <Bullet>
+            <Rich>{t.prefetchOnScreen()}</Rich>
+          </Bullet>
+        </Bullets>
+        <SubHeading text={t.prefetchStopTitle} />
+        <Paragraph text={t.prefetchStop} />
+        <CodeBlock code={PREFETCH} lang="tsx" />
+        <SubHeading text={t.prefetchReuseTitle} />
+        <Paragraph text={t.prefetchReuse} />
+        <Paragraph text={t.prefetchDropped} />
+        <Paragraph
+          text={mode === 'static' ? t.prefetchStatic : t.prefetchServer}
+        />
+        <Paragraph text={t.prefetchSpeculation} />
       </DocSection>
     </>
   );

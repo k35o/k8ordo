@@ -34,6 +34,16 @@ const hydrated = async (page: Page): Promise<void> => {
   );
 };
 
+// ページが取りに行ったペイロードの pathname を、頼んだ順に集める
+const payloadsRequestedBy = (page: Page): string[] => {
+  const payloads: string[] = [];
+  page.on('request', (request) => {
+    const { pathname } = new URL(request.url());
+    if (pathname.endsWith('/index.rsc')) payloads.push(pathname);
+  });
+  return payloads;
+};
+
 describe('the built application in a browser', () => {
   it('follows an action that redirected when JavaScript ran it', async () => {
     const page = await browser.newPage();
@@ -70,6 +80,25 @@ describe('the built application in a browser', () => {
     await page.getByTestId('member').getByText('k8o').waitFor();
     expect(await page.evaluate(() => 'stayed' in window)).toBe(true);
     await context.close();
+  }, 30_000);
+
+  it('fetches the next page while the pointer rests on its link, and the click asks for nothing more', async () => {
+    const page = await browser.newPage();
+    const payloads = payloadsRequestedBy(page);
+    await page.goto(server.url);
+    await hydrated(page);
+
+    await page.getByRole('link', { name: 'guide' }).hover();
+    await vi.waitFor(() => {
+      expect(payloads).toStrictEqual(['/guide/index.rsc']);
+    });
+    await page.getByRole('link', { name: 'guide' }).click();
+
+    await page
+      .getByRole('heading', { name: 'guide' })
+      .waitFor({ timeout: 5000 });
+    expect(payloads).toStrictEqual(['/guide/index.rsc']);
+    await page.close();
   }, 30_000);
 
   it('hydrates the page where it streamed in, leaving no hidden copy and one <title>', async () => {
