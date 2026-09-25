@@ -321,14 +321,17 @@ export const spinnerProps = z.object({
 }) satisfies z.ZodType<SpinnerIntegrationProps>;
 
 type ProgressIntegrationProps = {
-  value: number;
-  max: number;
+  value?: number;
+  max?: number;
   min?: number;
   label?: string;
 };
 export const progressProps = z.object({
-  value: z.number(),
-  max: z.number(),
+  value: z
+    .number()
+    .optional()
+    .describe('Current value; leave it out when progress is unknown'),
+  max: z.number().optional().describe('Upper bound (100 when omitted)'),
   min: z.number().optional(),
   label: z.string().optional(),
 }) satisfies z.ZodType<ProgressIntegrationProps>;
@@ -566,6 +569,32 @@ export const sliderProps = z.object({
   min: z.number().optional().describe('Lower bound (0 when omitted)'),
   max: z.number().optional().describe('Upper bound (100 when omitted)'),
 }) satisfies z.ZodType<SliderIntegrationProps>;
+
+type RangeSliderIntegrationProps = {
+  name: string;
+  label: string;
+  defaultValue?: readonly [number, number];
+  min?: number;
+  max?: number;
+  step?: number;
+  invalid?: boolean;
+  disabled?: boolean;
+};
+export const rangeSliderProps = z.object({
+  name: z
+    .string()
+    .describe('Both thumbs submit under this name, lower value first'),
+  label: z.string().describe('Accessible name of the slider'),
+  defaultValue: z
+    .tuple([z.number(), z.number()])
+    .optional()
+    .describe('[lower, upper]; the whole range when omitted'),
+  min: z.number().optional().describe('Lower bound (0 when omitted)'),
+  max: z.number().optional().describe('Upper bound (100 when omitted)'),
+  step: z.number().optional(),
+  invalid: z.boolean().optional(),
+  disabled: z.boolean().optional(),
+}) satisfies z.ZodType<RangeSliderIntegrationProps>;
 
 type CheckboxIntegrationProps = {
   name: string;
@@ -849,6 +878,7 @@ export type TextareaProps = z.infer<typeof textareaProps>;
 export type PasswordInputProps = z.infer<typeof passwordInputProps>;
 export type NumberFieldProps = z.infer<typeof numberFieldProps>;
 export type SliderProps = z.infer<typeof sliderProps>;
+export type RangeSliderProps = z.infer<typeof rangeSliderProps>;
 export type RadioProps = z.infer<typeof radioProps>;
 export type RadioCardProps = z.infer<typeof radioCardProps>;
 export type CheckboxCardProps = z.infer<typeof checkboxCardProps>;

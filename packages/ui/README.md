@@ -228,7 +228,7 @@ stories and rendered props rather than relying on trained knowledge:
 - **PasswordInput** - Password input with show/hide toggle
 - **Radio** / **RadioCard** - Single-selection inputs
 - **Select** - Dropdown selection
-- **Slider** - Slider input control
+- **Slider** / **RangeSlider** - Slider input control, with one thumb or two
 - **Switch** - Toggle switch
 - **TextField** - Single-line text input
 - **Textarea** - Multi-line text input
@@ -246,7 +246,7 @@ stories and rendered props rather than relying on trained knowledge:
 ### Feedback
 
 - **Alert** - Important messages and notifications
-- **Progress** - Progress indication
+- **Progress** - Progress indication, or an animated bar when progress is unknown
 - **Skeleton** - Content loading placeholder
 - **Spinner** - Loading indicator
 - **ToastProvider** / **useToast** - Temporary notification messages
@@ -481,13 +481,13 @@ pnpm add @json-render/core @json-render/react zod
 pnpm add @openuidev/react-lang @openuidev/lang-core zod
 ```
 
-Supported components (**all 48**, both frameworks):
+Supported components (**all 49**, both frameworks):
 
 - **Layout / containers**: `Stack`, `Grid`, `Card`, `Form`
 - **Buttons / nav**: `Button`, `IconButton`, `Anchor`, `Breadcrumb`, `Pagination`
 - **Display**: `Badge`, `Heading`, `Avatar`, `Code`, `Icon`, `ChevronIcon`, `StatusIcon`, `Alert`, `Spinner`, `Progress`, `Skeleton`, `Separator`, `Tabs`, `Accordion`, `Table`, `ScrollLinked`
 - **Overlays (self-contained widgets)**: `Modal`, `Dialog`, `Drawer`, `Popover`, `Tooltip`, `DropdownMenu`, `Toast`
-- **Form**: `TextField`, `Textarea`, `PasswordInput`, `NumberField`, `Slider`, `Checkbox`, `Switch`, `Select`, `Radio`, `RadioCard`, `CheckboxCard`, `ListBox`, `CheckboxGroup`, `Autocomplete`, `FileField`, `FormControl`
+- **Form**: `TextField`, `Textarea`, `PasswordInput`, `NumberField`, `Slider`, `RangeSlider`, `Checkbox`, `Switch`, `Select`, `Radio`, `RadioCard`, `CheckboxCard`, `ListBox`, `CheckboxGroup`, `Autocomplete`, `FileField`, `FormControl`
 
 The rest of the exports — the observers, the providers, and the AI chat
 components — are left out on purpose;

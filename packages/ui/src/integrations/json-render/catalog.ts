@@ -99,7 +99,11 @@ export const catalog = defineCatalog(schema, {
       description: 'Avatar (an image or initials).',
     },
     Code: { props: s.codeProps, description: 'Inline code or value.' },
-    Progress: { props: s.progressProps, description: 'Progress bar.' },
+    Progress: {
+      props: s.progressProps,
+      description:
+        'Progress bar. Leave value out when progress is unknown; it then shows an animated bar.',
+    },
     Skeleton: {
       props: s.skeletonProps,
       description: 'Loading placeholder.',
@@ -138,6 +142,11 @@ export const catalog = defineCatalog(schema, {
       props: s.sliderProps,
       description:
         'Slider. defaultValue can be bound to state with $bindState.',
+    },
+    RangeSlider: {
+      props: s.rangeSliderProps,
+      description:
+        'Slider with two thumbs for picking a range. defaultValue ([lower, upper]) can be bound to state with $bindState.',
     },
     Radio: {
       props: s.radioProps,

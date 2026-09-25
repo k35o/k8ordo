@@ -35,6 +35,38 @@ describe('validateGeneratedSpec', () => {
     expect(result).toMatchObject({ ok: true });
   });
 
+  it('value を省いた Progress（進み具合の分からない表示）を受け入れる', () => {
+    const result = validateGeneratedSpec(
+      specWithTarget({
+        type: 'Progress',
+        props: { label: '読み込み中' },
+        children: [],
+      }),
+    );
+
+    expect(result).toMatchObject({ ok: true });
+  });
+
+  it('RangeSlider の defaultValue は [下側, 上側] の 2 つ組だけを受け入れる', () => {
+    const pair = validateGeneratedSpec(
+      specWithTarget({
+        type: 'RangeSlider',
+        props: { name: 'price', label: '価格', defaultValue: [20, 80] },
+        children: [],
+      }),
+    );
+    const triple = validateGeneratedSpec(
+      specWithTarget({
+        type: 'RangeSlider',
+        props: { name: 'price', label: '価格', defaultValue: [20, 50, 80] },
+        children: [],
+      }),
+    );
+
+    expect(pair).toMatchObject({ ok: true });
+    expect(triple.ok).toBe(false);
+  });
+
   it('スキーマに無いキーを未知のプロパティとして報告する', () => {
     const result = validateGeneratedSpec(
       specWithTarget({

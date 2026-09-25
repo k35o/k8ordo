@@ -25,6 +25,9 @@ export const ja: Messages = {
   numberFieldIncrement: '増やす',
   numberFieldDecrement: '減らす',
 
+  rangeSliderStart: '最小',
+  rangeSliderEnd: '最大',
+
   passwordShow: 'パスワードを表示',
   passwordHide: 'パスワードを非表示',
 

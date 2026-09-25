@@ -60,7 +60,11 @@ export const buildComponentLibrary = <C>(
     s.alertProps,
   );
   const Spinner = def('Spinner', 'Loading spinner.', s.spinnerProps);
-  const Progress = def('Progress', 'Progress bar.', s.progressProps);
+  const Progress = def(
+    'Progress',
+    'Progress bar. Leave value out when progress is unknown; it then shows an animated bar.',
+    s.progressProps,
+  );
   const Skeleton = def('Skeleton', 'Loading placeholder.', s.skeletonProps);
   const Separator = def('Separator', 'Divider line.', s.separatorProps);
   const Tabs = def(
@@ -103,6 +107,11 @@ export const buildComponentLibrary = <C>(
     'Slider',
     'Slider, bound to form state by name.',
     s.sliderProps,
+  );
+  const RangeSlider = def(
+    'RangeSlider',
+    'Slider with two thumbs for picking a range, bound to form state by name as [lower, upper].',
+    s.rangeSliderProps,
   );
   const Checkbox = def(
     'Checkbox',
@@ -210,6 +219,7 @@ export const buildComponentLibrary = <C>(
     PasswordInput.ref,
     NumberField.ref,
     Slider.ref,
+    RangeSlider.ref,
     Checkbox.ref,
     Switch.ref,
     Select.ref,
@@ -360,6 +370,7 @@ export const buildComponentLibrary = <C>(
       PasswordInput,
       NumberField,
       Slider,
+      RangeSlider,
       Checkbox,
       Switch,
       Select,

@@ -11,7 +11,7 @@ import * as m from '../../../../messages';
 const MESSAGE_USAGE = {
   close: 'Alert / Dialog / Drawer / Response',
   required: 'FormControl',
-  loading: 'Spinner',
+  loading: 'Spinner / Progress',
   avatar: 'Avatar',
   color: 'Code',
   alertSuccess: 'Alert',
@@ -27,6 +27,8 @@ const MESSAGE_USAGE = {
   fileFieldTrigger: 'FileField（生成 UI）',
   numberFieldIncrement: 'NumberField',
   numberFieldDecrement: 'NumberField',
+  rangeSliderStart: 'RangeSlider',
+  rangeSliderEnd: 'RangeSlider',
   passwordShow: 'PasswordInput',
   passwordHide: 'PasswordInput',
   listBoxPlaceholder: 'ListBox',

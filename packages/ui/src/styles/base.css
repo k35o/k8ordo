@@ -125,6 +125,43 @@
   }
 
   /*
+ * 値のない Progress。帯が溝の中を行き来する。縦書きでも溝に沿うよう、
+ * 動かすのは transform ではなく論理プロパティの inset-inline-start にする。
+ * 動きを減らす設定では、移動をやめて溝いっぱいの帯を明滅させる。
+ */
+  .ao-progress-indeterminate {
+    position: absolute;
+    inset-block: 0;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .ao-progress-indeterminate {
+      inline-size: 40%;
+      animation: ao-progress-slide 1.4s ease-in-out infinite;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ao-progress-indeterminate {
+      inset-inline: 0;
+      animation: ao-progress-pulse 2s ease-in-out infinite;
+    }
+  }
+
+  @keyframes ao-progress-slide {
+    from {
+      inset-inline-start: -40%;
+    }
+    to {
+      inset-inline-start: 100%;
+    }
+  }
+
+  @keyframes ao-progress-pulse {
+    50% {
+      opacity: 0.4;
+    }
+  }
+
+  /*
  * Toast の出入り。出現は下からのスライドイン、退出は data-closing で
  * 高さ(0fr)・間隔(padding)・不透明度を同時に畳み、後続トーストの詰めも
  * 1 つの transition で表現する（JS 側は EXIT_MS 経過後に DOM から除去）。

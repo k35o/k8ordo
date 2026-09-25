@@ -115,6 +115,18 @@ export const { registry } = defineRegistry(catalog, {
       );
       return ui.renderPasswordInput(props, value, setValue);
     },
+    RangeSlider: ({ props, bindings }) => {
+      const whole: readonly [number, number] = [
+        props.min ?? 0,
+        props.max ?? 100,
+      ];
+      const [value, setValue] = useBoundOrLocal<readonly [number, number]>(
+        props.defaultValue,
+        bindings?.defaultValue,
+        whole,
+      );
+      return ui.renderRangeSlider(props, value, setValue);
+    },
     Radio: ({ props, bindings }) => {
       const [value, setValue] = useBoundOrLocal<string>(
         props.defaultValue,

@@ -135,3 +135,13 @@ export const AutocompleteView: FC<
   const field = useStateField<string[]>(props.name, props.defaultValue ?? []);
   return ui.renderAutocomplete(props, field.value, field.setValue);
 };
+
+export const RangeSliderView: FC<ComponentRenderProps<s.RangeSliderProps>> = ({
+  props,
+}) => {
+  const field = useStateField<readonly [number, number]>(
+    props.name,
+    props.defaultValue ?? [props.min ?? 0, props.max ?? 100],
+  );
+  return ui.renderRangeSlider(props, field.value, field.setValue);
+};

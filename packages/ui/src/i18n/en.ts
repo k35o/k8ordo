@@ -25,6 +25,9 @@ export const en: Messages = {
   numberFieldIncrement: 'Increase',
   numberFieldDecrement: 'Decrease',
 
+  rangeSliderStart: 'minimum',
+  rangeSliderEnd: 'maximum',
+
   passwordShow: 'Show password',
   passwordHide: 'Hide password',
 
