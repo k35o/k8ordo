@@ -14,6 +14,7 @@ export { bindParams, href, navigateTo } from './links';
 export type { BoundLinks, BoundParams } from './links';
 export { PathnameProvider, usePathname } from './location';
 export { matchPath, useMatch } from './match';
+export { isNotFound, notFound } from './not-found';
 export type { MatchablePattern, MatchOptions } from './match';
 export { NavigationGeneration, useInterceptedNavigation } from './navigation';
 export type { NavigationHandler } from './navigation';
