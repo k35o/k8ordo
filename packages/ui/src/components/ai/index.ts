@@ -8,6 +8,7 @@ export { Suggestion } from './suggestion';
 export { ToolInvocation } from './tool-invocation';
 export type {
   ChatStatus,
+  MessageFeedback,
   ToolApproval,
   ToolApprovalResponse,
   ToolState,

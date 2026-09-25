@@ -67,6 +67,13 @@ export type Messages = {
   attachmentImage: string;
   /** Source.List の list 名 */
   sources: string;
+  /** Message.Actions の group 名 */
+  messageActions: string;
+  copy: string;
+  copied: string;
+  regenerate: string;
+  feedbackPositive: string;
+  feedbackNegative: string;
   toolInput: string;
   toolOutput: string;
   toolError: string;

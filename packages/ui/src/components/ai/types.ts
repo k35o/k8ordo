@@ -27,3 +27,5 @@ export type ToolApprovalResponse = {
   id: string;
   approved: boolean;
 };
+
+export type MessageFeedback = 'positive' | 'negative';
