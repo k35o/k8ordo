@@ -14,6 +14,17 @@ const PENDING_MIGRATION = new Set<string>();
 
 const COMPONENTS_DIR = join(import.meta.dirname, '.');
 
+// 組み込みの文言は getMessages() で読む。hook ではないので、文言を読むためだけに
+// 'use client' を付ける理由は無い。Server Component から描ける部品をここに固定する。
+const SERVER_COMPONENTS = [
+  'ai/reasoning/reasoning.tsx',
+  'ai/tool-invocation/tool-invocation.tsx',
+  'data-display/code/code.tsx',
+  'feedback/alert/alert.tsx',
+  'feedback/spinner/spinner.tsx',
+  'navigation/breadcrumb/breadcrumb.tsx',
+];
+
 const walk = (dir: string): string[] =>
   readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
     const path = join(dir, entry.name);
@@ -47,6 +58,17 @@ describe('複合コンポーネントの合成位置', () => {
       expect(clientComposedCompounds()).toStrictEqual(
         [...PENDING_MIGRATION].toSorted(),
       );
+    });
+  });
+});
+
+describe('Server Component から描ける部品', () => {
+  describe('正常系', () => {
+    it("組み込みの文言を読むだけの部品を 'use client' にしない", () => {
+      const clientModules = SERVER_COMPONENTS.filter((path) =>
+        CLIENT_DIRECTIVE.test(readFileSync(join(COMPONENTS_DIR, path), 'utf8')),
+      );
+      expect(clientModules).toStrictEqual([]);
     });
   });
 });

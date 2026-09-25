@@ -20,8 +20,13 @@ export type TableBranch<T> = {
 
 export type TableNode<T> = T | TableBranch<T>;
 
-/** A directory with nothing but a page is the component itself. */
+/**
+ * A directory with nothing but a page is the component itself — except a
+ * group: it adds no segment, so the router refuses it as a leaf (it would
+ * redeclare its parent's index) and takes it only as a branch.
+ */
 const isLeaf = (dir: RouteDir): boolean =>
+  dir.kind !== 'group' &&
   dir.page !== null &&
   dir.layout === null &&
   dir.error === null &&
@@ -318,6 +323,46 @@ const beliefs = (
 
 const schemaName = (componentName: string): string => `${componentName}_params`;
 
+type Guards = {
+  /** Per pattern, the `guard.ts` files that run before it answers, outer first. */
+  readonly stacks: ReadonlyMap<string, readonly string[]>;
+  /** Per `guard.ts`, the pattern its directory puts it under. */
+  readonly own: ReadonlyMap<string, string>;
+};
+
+/**
+ * The guards along each pattern's directories. A redirect is left out: it
+ * answers before any guard runs, since a directory that redirects has nothing
+ * below it to guard. `/*` always carries the root's — a URL nothing answers is
+ * still below the root, and the framework's own 404 is answered under them.
+ */
+const guardsOf = (tree: RouteDir): Guards => {
+  const stacks = new Map<string, readonly string[]>();
+  const own = new Map<string, string>();
+  const walk = (
+    dir: RouteDir,
+    prefix: string,
+    inherited: readonly string[],
+  ): void => {
+    const here = dir.kind === 'root' ? '' : prefix;
+    const pattern = here === '' ? '/' : here;
+    const stack = dir.guard === null ? inherited : [...inherited, dir.guard];
+    if (dir.guard !== null) own.set(dir.guard, pattern);
+    if (stack.length > 0) {
+      if (dir.page !== null) stacks.set(pattern, stack);
+      if (dir.notFound !== null) stacks.set(`${here}/*`, stack);
+    }
+    for (const child of dir.children) {
+      walk(child, child.kind === 'group' ? here : `${here}${child.key}`, stack);
+    }
+  };
+  walk(tree, '', []);
+  if (tree.guard !== null && !stacks.has('/*')) {
+    stacks.set('/*', [tree.guard]);
+  }
+  return { stacks, own };
+};
+
 export const emitRoutesModule = (
   tree: RouteDir,
   options: EmitOptions,
@@ -358,15 +403,27 @@ export const emitRoutesModule = (
   const body = Object.entries(table).map(
     ([key, node]) => `${pad(1)}'${key}': ${renderNode(node, 1, asserted)},`,
   );
+  const guarded = guardsOf(tree);
+  const guardStacks = new Map(
+    [...guarded.stacks].map(([pattern, files]) => [
+      pattern,
+      files.map((file) => namer.take(file)),
+    ]),
+  );
+  const guardChecks = [...guarded.own].map(
+    ([file, pattern]) =>
+      `${pad(1)}${namer.take(file)} satisfies Guard<'${pattern}'>,`,
+  );
+  const hasGuards = guardChecks.length > 0;
+  const hasLayout = [...asserted.values()].some((type) =>
+    type.startsWith('Layout<'),
+  );
   const importLines = [...namer.names].map(([file, name]) => {
     const specifier = `'${options.importPrefix}/${file.replace(/\.[jt]sx?$/u, '')}'`;
     return withParams.has(file)
       ? `import ${name}, { paramsSchema as ${schemaName(name)} } from ${specifier};`
       : `import ${name} from ${specifier};`;
   });
-  const hasLayout = [...asserted.values()].some((type) =>
-    type.startsWith('Layout<'),
-  );
   const hasError = [...asserted.values()].includes('ErrorComponent');
   const hasSchemas = withParams.size > 0;
   // Under a running server a page also receives the request; a build into
@@ -397,7 +454,7 @@ export const emitRoutesModule = (
     );
   const typeImports = [
     ...(hasError ? ['ErrorComponent'] : []),
-    ...(hasLayout ? ['ParamsOf'] : []),
+    ...(hasLayout || hasGuards ? ['ParamsOf'] : []),
     ...(hasSchemas ? ['ParamsSchemaFor'] : []),
     'ParsedParams',
   ];
@@ -461,6 +518,24 @@ export const emitRoutesModule = (
           '',
         ]
       : []),
+    ...(hasGuards
+      ? [
+          '// What a guard.ts default-exports: run before whatever answers below it,',
+          '// outer first. A Response ends the request there; nothing lets it through.',
+          'type Guard<P extends string> = (context: {',
+          '  readonly request: Request;',
+          '  readonly params: ParamsOf<P>;',
+          '}) => Response | void | Promise<Response | void>;',
+          '',
+          '// The guard.ts exports, each checked against the pattern its directory',
+          '// puts it under.',
+          'const guardChecks = [',
+          ...guardChecks,
+          '] as const;',
+          'void guardChecks;',
+          '',
+        ]
+      : []),
     '// Per page pattern, the schemas that run before it renders — every',
     '// layout above it that declared one, then its own. The handler reads',
     '// this; a schema that refuses makes the pattern not answer the pathname.',
@@ -473,6 +548,12 @@ export const emitRoutesModule = (
     '// 404 is in); a refusal does not stop a catch-all from answering.',
     'export const catchAllSchemas = {',
     ...toMap(catchAllStacks),
+    '} as const;',
+    '',
+    '// Per pattern, the guards that run before it answers — outer first. `/*`',
+    "// carries the root's, for a URL nothing answers.",
+    'export const guards = {',
+    ...toMap(guardStacks),
     '} as const;',
     '',
     '// Per pattern, where a redirect.ts sends the visitor. Consulted before the',

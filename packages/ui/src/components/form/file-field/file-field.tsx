@@ -2,10 +2,12 @@
 
 import type {
   ChangeEvent,
+  DragEvent,
   FC,
   InputHTMLAttributes,
   PropsWithChildren,
   ReactElement,
+  ReactNode,
   Ref,
 } from 'react';
 import {
@@ -19,7 +21,9 @@ import {
 } from 'react';
 import { useFormStatus } from 'react-dom';
 
-import { useMessages } from '../../../i18n/context';
+import { cn } from '../../../helpers/cn';
+import { getMessages } from '../../../i18n/current';
+import { Button } from '../../buttons/button';
 import { IconButton } from '../../buttons/icon-button';
 import { CloseIcon } from '../../icons';
 import { createSafeContext } from './../../../helpers/create-safe-context';
@@ -35,6 +39,7 @@ type FileFieldContext = {
   invalid: boolean;
   acceptedFiles: AcceptedFile[];
   onFileDelete: (id: string) => void;
+  onFilesDrop: (files: File[]) => void;
   openFilePicker: () => void;
 };
 
@@ -55,8 +60,15 @@ const toFileList = (files: readonly File[]) => {
 };
 
 // コードから files を書き換えても input イベントは出ないので、自分で出して
-// @k8ordo/form などの form 側に知らせる
+// @k8ordo/form などの form 側に知らせる。列が変わらないときは出さない
 const announce = (input: HTMLInputElement, files: readonly File[]) => {
+  const current = Array.from(input.files ?? []);
+  if (
+    current.length === files.length &&
+    current.every((file, index) => file === files[index])
+  ) {
+    return;
+  }
   input.files = toFileList(files);
   input.dispatchEvent(new Event('input', { bubbles: true }));
 };
@@ -145,40 +157,39 @@ export const Root = ({
     };
   }, []);
 
+  const withAdded = useCallback(
+    (files: readonly File[]): AcceptedFile[] => {
+      const added = toAccepted(files);
+      return multiple || webkitDirectory
+        ? [...acceptedFiles, ...added].slice(
+            0,
+            maxFiles ?? Number.POSITIVE_INFINITY,
+          )
+        : added.slice(0, 1);
+    },
+    [acceptedFiles, multiple, maxFiles, webkitDirectory],
+  );
+
   // ブラウザは選び直すたびに files を新しく選んだ分だけに置き換えるので、
   // 積み上げた一覧と同じ列を書き戻す
   const onFilesChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
       const input = event.currentTarget;
-      const picked = Array.from(input.files ?? []);
-      const added = toAccepted(picked);
-      const updatedFiles =
-        multiple || webkitDirectory
-          ? [...acceptedFiles, ...added].slice(
-              0,
-              maxFiles ?? Number.POSITIVE_INFINITY,
-            )
-          : added.slice(0, 1);
+      const updatedFiles = withAdded(Array.from(input.files ?? []));
       setAcceptedFiles(updatedFiles);
-
-      const files = updatedFiles.map(({ file }) => file);
-      if (
-        files.length !== picked.length ||
-        files.some((file, index) => file !== picked[index])
-      ) {
-        announce(input, files);
-      }
+      announce(
+        input,
+        updatedFiles.map(({ file }) => file),
+      );
       onChange?.(input.files, event);
     },
-    [acceptedFiles, multiple, maxFiles, onChange, webkitDirectory],
+    [onChange, withAdded],
   );
 
-  // 一覧から外したファイルは input からも外す。外さないと送信に残る
-  const onFileDelete = useCallback(
-    (fileId: string) => {
-      const updatedFiles = acceptedFiles.filter((f) => f.id !== fileId);
+  // ドロップと一覧からの削除は input を通らないので、送る列を input に書いて知らせる
+  const commitFiles = useCallback(
+    (updatedFiles: AcceptedFile[]) => {
       setAcceptedFiles(updatedFiles);
-
       const input = inputRef.current;
       if (input === null) {
         return;
@@ -189,7 +200,23 @@ export const Root = ({
       );
       onChange?.(input.files);
     },
-    [acceptedFiles, onChange],
+    [onChange],
+  );
+
+  const onFilesDrop = useCallback(
+    (files: File[]) => {
+      if (files.length > 0) {
+        commitFiles(withAdded(files));
+      }
+    },
+    [commitFiles, withAdded],
+  );
+
+  const onFileDelete = useCallback(
+    (fileId: string) => {
+      commitFiles(acceptedFiles.filter((f) => f.id !== fileId));
+    },
+    [acceptedFiles, commitFiles],
   );
 
   const openFilePicker = useCallback(() => {
@@ -202,9 +229,17 @@ export const Root = ({
       invalid,
       acceptedFiles,
       onFileDelete,
+      onFilesDrop,
       openFilePicker,
     }),
-    [disabledResolved, invalid, acceptedFiles, onFileDelete, openFilePicker],
+    [
+      disabledResolved,
+      invalid,
+      acceptedFiles,
+      onFileDelete,
+      onFilesDrop,
+      openFilePicker,
+    ],
   );
 
   return (
@@ -246,11 +281,76 @@ export const Trigger: FC<{
   });
 };
 
+// フォルダーは中身を辿らないとファイルにならないので、ドロップでは受けない
+// （フォルダーは webkitDirectory のピッカーで選ぶ）
+const droppedFiles = (event: DragEvent<HTMLElement>): File[] =>
+  Array.from(event.dataTransfer.items).flatMap((item) => {
+    if (item.kind !== 'file' || item.webkitGetAsEntry()?.isDirectory === true) {
+      return [];
+    }
+    const file = item.getAsFile();
+    return file === null ? [] : [file];
+  });
+
+export const Dropzone: FC<{ children?: ReactNode }> = ({ children }) => {
+  const messages = getMessages();
+  const { disabled, invalid, onFilesDrop, openFilePicker } =
+    useFileFieldContext();
+  // 子要素の上を通るたびに dragleave / dragenter が対で届くので、入った深さで数える
+  const [depth, setDepth] = useState(0);
+  const isDragging = depth > 0 && !disabled;
+
+  return (
+    <div
+      className={cn(
+        'flex w-full flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-border-base bg-bg-base p-6 text-center transition-colors',
+        invalid && 'border-border-error',
+        isDragging && 'border-primary-border bg-primary-bg-subtle',
+        disabled && 'cursor-not-allowed border-border-mute bg-bg-mute',
+      )}
+      data-dragging={isDragging ? '' : undefined}
+      onDragEnter={(event) => {
+        event.preventDefault();
+        setDepth((current) => current + 1);
+      }}
+      onDragLeave={() => {
+        setDepth((current) => Math.max(current - 1, 0));
+      }}
+      // 無効でも既定の動作は止める。止めないとブラウザがファイルを開いてページを離れる
+      onDragOver={(event) => {
+        event.preventDefault();
+        event.dataTransfer.dropEffect = disabled ? 'none' : 'copy';
+      }}
+      onDrop={(event) => {
+        event.preventDefault();
+        setDepth(0);
+        if (!disabled) {
+          onFilesDrop(droppedFiles(event));
+        }
+      }}
+    >
+      {children ?? (
+        <>
+          <p className="text-fg-mute text-sm">{messages.fileFieldDrop}</p>
+          <Button
+            disabled={disabled}
+            onClick={openFilePicker}
+            size="sm"
+            variant="outline"
+          >
+            {messages.fileFieldTrigger}
+          </Button>
+        </>
+      )}
+    </div>
+  );
+};
+
 export const ItemList: FC<{
   showWebkitRelativePath?: boolean;
   clearable?: boolean;
 }> = ({ showWebkitRelativePath, clearable }) => {
-  const messages = useMessages();
+  const messages = getMessages();
   const { acceptedFiles, onFileDelete } = useFileFieldContext();
 
   if (acceptedFiles.length === 0) {

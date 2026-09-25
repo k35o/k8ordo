@@ -16,8 +16,8 @@ export const featureLocales = message({
 });
 
 export const featureLocalesDescription = message({
-  ja: "`defineLocales(['ja', 'en'])` を書くのは1回だけ。既定値・所属判定・交渉・URL区間・`[locale]` のスキーマは全部そこから出るので、一覧を複製する場所が無い。",
-  en: "`defineLocales(['ja', 'en'])` is written once. The default, membership, negotiation, the URL segment, and the `[locale]` schema all come from it, so there is nowhere to copy the list to.",
+  ja: '`defineLocales({ ja: …, en: … })` を書くのは1回だけ。各ロケールのタイムゾーンと文字の向きもそこに書く。既定値・所属判定・交渉・URL区間・`[locale]` のスキーマは全部そこから出るので、一覧を複製する場所が無い。',
+  en: "`defineLocales({ ja: …, en: … })` is written once, with each locale's time zone and text direction. The default, membership, negotiation, the URL segment, and the `[locale]` schema all come from it, so there is nowhere to copy the list to.",
 });
 
 export const featureSegment = message({
@@ -36,8 +36,8 @@ export const featureNegotiate = message({
 });
 
 export const featureNegotiateDescription = message({
-  ja: '`negotiate(navigator.languages)` も `negotiate(parseAcceptLanguage(header))` も同じ関数。要求の順に、完全一致→同じ言語→既定値で決める。',
-  en: '`negotiate(navigator.languages)` and `negotiate(parseAcceptLanguage(header))` are the same function: each requested tag in order, exact match, then the same language, then the default.',
+  ja: '`negotiate(navigator.languages)` も、Cookie と `Accept-Language` を読む `negotiateRequest(request)` も同じ規則。要求の順に、完全一致→同じ言語→既定値で決める。',
+  en: '`negotiate(navigator.languages)` and `negotiateRequest(request)`, which reads the cookie and `Accept-Language`, follow the same rule: each requested tag in order, exact match, then the same language, then the default.',
 });
 
 export const featureDictionary = message({
@@ -134,6 +134,11 @@ export const navLocales = message({
 export const navMessages = message({
   ja: 'メッセージ',
   en: 'Messages',
+});
+
+export const navFormatting = message({
+  ja: '日付と数値',
+  en: 'Dates & numbers',
 });
 
 export const navRouting = message({

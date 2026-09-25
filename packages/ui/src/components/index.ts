@@ -1,4 +1,5 @@
 export { Button, type ButtonRenderItemProps } from './buttons/button';
+export { CopyButton } from './buttons/copy-button';
 export {
   IconButton,
   type IconButtonRenderItemProps,
@@ -8,10 +9,14 @@ export { Accordion } from './data-display/accordion';
 export { Avatar } from './data-display/avatar';
 export { Badge } from './data-display/badge';
 export { Card } from './data-display/card';
+export { Carousel } from './data-display/carousel';
 export { Code } from './data-display/code';
 export { Heading } from './data-display/heading';
+export { Kbd } from './data-display/kbd';
+export { Prose } from './data-display/prose';
 export { type CellAlign, Table } from './data-display/table';
 export { Alert, type AlertAction } from './feedback/alert';
+export { EmptyState } from './feedback/empty-state';
 export { Progress } from './feedback/progress';
 export { Skeleton } from './feedback/skeleton';
 export { Spinner } from './feedback/spinner';
@@ -22,9 +27,12 @@ export {
   useToast,
 } from './feedback/toast';
 export { Autocomplete } from './form/autocomplete';
+export { Calendar } from './form/calendar';
 export { Checkbox } from './form/checkbox';
 export { CheckboxCard, type CheckboxCardOption } from './form/checkbox-card';
 export { CheckboxGroup } from './form/checkbox-group';
+export { DateField } from './form/date-field';
+export { DatePicker } from './form/date-picker';
 export { FileField } from './form/file-field';
 export { Form } from './form/form';
 export { FormControl } from './form/form-control';
@@ -41,7 +49,6 @@ export * from './icons';
 export type { GapSize } from './layout/_shared/gap';
 export type { PaddingSize } from './layout/_shared/padding';
 export { Grid, type GridProps } from './layout/grid';
-export { ScrollLinked } from './layout/scroll-linked';
 export { Separator } from './layout/separator';
 export { Stack, type StackProps } from './layout/stack';
 export { Anchor } from './navigation/anchor';
@@ -61,9 +68,4 @@ export {
   type PopoverTriggerProps,
 } from './overlays/popover';
 export { Tooltip, type TooltipTriggerProps } from './overlays/tooltip';
-export {
-  UIProvider,
-  type Messages,
-  PortalRootProvider,
-  usePortalRoot,
-} from './providers';
+export { UIProvider, PortalRootProvider, usePortalRoot } from './providers';

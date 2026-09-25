@@ -301,6 +301,36 @@ export const normalizeTable = {
   output: message({ ja: '出力', en: 'Output' }),
 };
 
+export const baseTitle = message({
+  ja: 'サブパスに置く（Vite の base）',
+  en: 'Served under a base',
+});
+
+export const baseDescription = message({
+  ja: '表はアプリの根から書いたままです。アプリをその下（Vite の `base`、たとえば `/docs/`）に置いたときは、ルーターが `import.meta.env.BASE_URL` を読んで残りを受け持ちます。',
+  en: 'The table stays written from the application’s root. When the application is served below one — Vite’s `base`, `/docs/` say — the router reads `import.meta.env.BASE_URL` and does the rest.',
+});
+
+export const baseLinks = message({
+  ja: '`href` と `navigateTo` は、すべてのリンクの前に base を付けます。`href` が返すのはリンク先の URL なので、型は表のパスではなく `string` です',
+  en: '`href` and `navigateTo` put it in front of every link. What `href` returns is the URL a link points at, so it is typed `string`, not as a path in the table',
+});
+
+export const basePathname = message({
+  ja: '`usePathname` は base を外して返すので、パターンとそのまま比べられます。`useMatch` もそれに従い、`<Router>` は base の下の pathname で表を照合します',
+  en: '`usePathname` takes it off, so what it returns compares with the patterns; `useMatch` follows, and `<Router>` matches the table against the pathname below the base',
+});
+
+export const baseOutside = message({
+  ja: 'base の外の URL はアプリのものではないので、表が何と言っても `<Router>` はブラウザに任せます',
+  en: 'A URL outside the base is not the application’s, and `<Router>` leaves it to the browser whatever the table says',
+});
+
+export const baseHelpers = message({
+  ja: '`withBase(pathname)` と `withoutBase(pathname)` は、この 2 つの手順を自分のコードで使うためのものです。`withoutBase` は base の外の URL に `null` を返します。Vite が処理しないコード（`import.meta.env` が無い）では、2 つ目の引数で base を渡します。相対の base（`./`）はパスを名指さないので、何も付け外ししません。',
+  en: '`withBase(pathname)` and `withoutBase(pathname)` are those two steps for code of your own; `withoutBase` answers `null` for a URL outside the base. Code Vite does not process has no `import.meta.env` and passes the base as the second argument. A relative base (`./`) names no path, so it adds and removes nothing.',
+});
+
 export const stateTitle = message({
   ja: '`@k8ordo/state` と同じパスの型を使う',
   en: 'Sharing typed paths with `@k8ordo/state`',
@@ -311,7 +341,7 @@ export const stateDescription = message({
   en: '`@k8ordo/state`’s `Register` takes the same line this router does. Declare the same table on both, and `@k8ordo/state`’s links are checked against the table this router matches against — the two packages agree on what a path is.',
 });
 
-export const stateRouteOf = message({
-  ja: '`RouteOf<typeof routes>` は表のリンク可能な pathname を union にした型です。`@k8ordo/state` は内部でこれを使っています。ほかに型付きのパスを受け取るものがあれば、同じ型を渡せます。',
-  en: '`RouteOf<typeof routes>` is the table’s linkable pathname space as a union. `@k8ordo/state` derives its paths through it, and any other typed-path consumer can take the same type.',
+export const stateNavigablePath = message({
+  ja: '`NavigablePath<typeof routes, Path>` は、渡したパスを表のリンク可能なパターンと区間ごとに照合する型です。どれかに合えば `Path` そのもの、どれにも合わなければ `never` になります。`@k8ordo/state` の `href` はこれでパスを検査しています。ほかに型付きのパスを受け取るものがあれば、同じ型を使えます。',
+  en: '`NavigablePath<typeof routes, Path>` checks the path it is given against the table’s linkable patterns, segment by segment: `Path` itself when one matches, `never` when none does. `@k8ordo/state`’s `href` checks its paths through it, and any other typed-path consumer can use the same type.',
 });

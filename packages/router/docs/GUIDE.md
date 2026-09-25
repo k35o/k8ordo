@@ -208,6 +208,9 @@ search, and it needs no table in the browser — which is what makes it the one
 of these that also works under the framework, where `useRoute` has no match
 to read.
 
+`usePathname` answers in the table's terms: a `base` the application is
+served under is taken off (see _Served under a base_).
+
 **`usePathname` changes when the URL changes, not when the new page appears.**
 Interception commits the URL first and the tree arrives when it has loaded, so
 on a slow navigation a link marks itself active while the previous page is
@@ -225,6 +228,8 @@ the boundary between the two packages.
 
 `href` refuses a wildcard: `/*` is something to match, never something to link
 to. Param values are URL-encoded on the way in and decoded on the way out.
+What `href` returns is the URL a link points at — Vite's `base` in front of it
+(below) — so it is typed `string`, not as a path in the table.
 
 **A segment the whole application shares is bound once.** A locale, a tenant —
 a param every link would otherwise have to repeat — is supplied by a function
@@ -289,6 +294,27 @@ Its default is `push`, the opposite of `@k8ordo/state`'s `update()`, and for
 the same reason: going to a page is what the back button should undo, while
 refining what is on the page is not. **Changing pages goes through
 `navigateTo`; changing state goes through `update`.**
+
+## Served under a base
+
+The table is written from the application's root, and it stays that way when
+the application is served below one — Vite's
+[`base`](https://vite.dev/config/shared-options#base), `base: '/docs/'`. The
+router reads it from `import.meta.env.BASE_URL` and does the rest:
+
+- `href` and `navigateTo` put it in front of every link: `href('/products')`
+  is `/docs/products`, and `href('/')` is `/docs/`.
+- `usePathname` takes it off, so what it returns compares with the patterns:
+  `/products` at `/docs/products`. `useMatch` follows, and `<Router>` matches
+  the table against the pathname below the base.
+- A URL outside the base is not the application's, and `<Router>` leaves it
+  to the browser whatever the table says.
+
+`withBase(pathname)` and `withoutBase(pathname)` are those two steps for code
+of your own — `withoutBase` answers `null` for a URL outside the base. Each
+takes the base as a second argument for code Vite does not process, which
+has no `import.meta.env` to read. A relative base (`./`) names no path, so it
+adds and removes nothing.
 
 ## Checking patterns against the real table
 
@@ -357,8 +383,17 @@ declare module '@k8ordo/state' {
 
 With that, `listState.href('/products', { q })` is checked against the same
 table this router matches against, and the two packages agree on what a path
-is. `RouteOf<typeof routes>` is that pathname space as a union, for any other
-typed-path consumer.
+is. `NavigablePath<typeof routes, Path>` is that check, for any other
+typed-path consumer: `Path` itself when one of the table's linkable patterns
+matches it segment by segment — a literal segment spelled as the pattern
+spells it, a `:param` taking any one non-empty segment, a `${string}` from a
+template literal included — and `never` when none does. A trailing slash is
+refused: matching treats `/products/` as `/products`, but a path built for a
+link is spelled the one canonical way.
+
+The path is checked against the patterns rather than collected into a union
+of every path the table has: a `/:locale` page would put `/${string}` in such
+a union, and `/${string}` takes every path there is.
 
 ## What navigation guarantees
 
@@ -513,6 +548,15 @@ framework matches against it with `match(pathname, accept)`. Each match that
 fits is handed to `accept` first, and one it declines — a param a
 `paramsSchema` along its stack refused — is passed over as if the pattern had
 not fit, so the walk goes on to the next pattern, the catch-all included.
+
+A page under the framework says it is not there with `notFound()` — the
+product its id names does not exist. It throws, so nothing after it runs, and
+the framework answers with the nearest `not-found.tsx` under a 404. It lives
+here rather than in a mode package so a page reads the same under either;
+`isNotFound(value)` recognises what it throws, by a registry brand rather than
+a class, since a page and the framework may hold two copies of this package.
+Under a client `<Router>` there is no status to answer with, and `notFound()`
+is an error like any other.
 
 What carries across unchanged is everything that needs no table: `href`,
 `navigateTo` and `bindParams`, `usePathname`, `useMatch` and `matchPath`, and

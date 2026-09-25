@@ -23,7 +23,7 @@ import {
   useControllableState,
   useWritingMode,
 } from '../../../hooks';
-import { useMessages } from '../../../i18n/context';
+import { getMessages } from '../../../i18n/current';
 import type { Option } from '../../../types/variables';
 import { FOCUS_RING_WITHIN } from '../../_internal/focus-ring';
 import { FormValue } from '../../_internal/form-value';
@@ -89,7 +89,7 @@ export const Autocomplete: FC<Props> = ({
   ref,
   ...rest
 }) => {
-  const messages = useMessages();
+  const messages = getMessages();
   const [currentValue, handleChange] = useControllableState({
     value,
     defaultValue: defaultValue ?? [],
@@ -362,8 +362,11 @@ export const Autocomplete: FC<Props> = ({
                 <li
                   aria-selected={selected}
                   className={cn(
-                    'cursor-pointer px-3 py-2 transition-colors',
-                    selected && 'bg-primary-bg-subtle text-primary-fg',
+                    'cursor-pointer px-3 py-2 transition-colors outline-border-base -outline-offset-2',
+                    selected &&
+                      'bg-primary-bg-subtle text-primary-fg forced-colors:bg-[Highlight] forced-colors:text-[HighlightText]',
+                    activeIndex === idx &&
+                      'contrast-more:outline-2 forced-colors:outline-2',
                     activeIndex === idx && !selected && 'bg-bg-subtle',
                     activeIndex === idx &&
                       selected &&

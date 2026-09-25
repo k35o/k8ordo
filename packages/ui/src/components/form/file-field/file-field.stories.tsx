@@ -11,6 +11,7 @@ const meta: Meta<typeof FileField.Root> = {
   component: FileField.Root,
   args: {
     id: 'filefield',
+    'aria-label': '添付ファイル',
   },
   render: (args) => (
     <FileField.Root {...args}>
@@ -24,17 +25,6 @@ const meta: Meta<typeof FileField.Root> = {
       <FileField.ItemList />
     </FileField.Root>
   ),
-  parameters: {
-    a11y: {
-      options: {
-        rules: {
-          // FileField単体ではラベルを付随しない
-          'label-title-only': { enabled: false },
-          label: { enabled: false },
-        },
-      },
-    },
-  },
 };
 
 export default meta;
@@ -408,5 +398,123 @@ export const ResetRestoresTheDefaultFiles: Story = {
     );
     await expect(canvas.getByText('default.txt')).toBeInTheDocument();
     await waitFor(() => expect(submittedNames(input)).toEqual(['default.txt']));
+  },
+};
+
+// ドラッグしてドロップする。testing-library の fireEvent は DataTransfer の中身を
+// 写さないので、ブラウザが渡すのと同じ DragEvent を組み立てて送る
+const drag = (target: Element, files: File[]) => {
+  const dataTransfer = new DataTransfer();
+  for (const file of files) {
+    dataTransfer.items.add(file);
+  }
+  const send = (type: string) => {
+    target.dispatchEvent(
+      new DragEvent(type, { bubbles: true, cancelable: true, dataTransfer }),
+    );
+  };
+  send('dragenter');
+  send('dragover');
+  return {
+    drop: () => {
+      send('drop');
+    },
+  };
+};
+
+const dropzoneOf = (canvasElement: HTMLElement) => {
+  const zone = canvasElement.querySelector<HTMLElement>(
+    'input[type="file"] ~ div',
+  );
+  if (zone === null) {
+    throw new globalThis.Error('Dropzone が見つかりません');
+  }
+  return zone;
+};
+
+const DropzoneRender: Story['render'] = (args) => (
+  <form>
+    <FileField.Root {...args} name="attachment">
+      <FileField.Dropzone />
+      <FileField.ItemList clearable />
+    </FileField.Root>
+  </form>
+);
+
+// 中身を渡さないと、既定の案内と「ファイルを選択」のボタンが入る。
+// ボタンがあるので、ドラッグできない人もキーボードで選べる
+export const Dropzone: Story = {
+  args: {
+    onChange: fn(),
+  },
+  render: DropzoneRender,
+  play: async ({ args, canvas, canvasElement }) => {
+    await expect(canvas.getByText('ここにファイルをドロップ')).toBeVisible();
+    await expect(
+      canvas.getByRole('button', { name: 'ファイルを選択' }),
+    ).toBeEnabled();
+
+    const zone = dropzoneOf(canvasElement);
+    const dragging = drag(zone, [
+      new File(['content'], 'notes.txt', { type: 'text/plain' }),
+    ]);
+    await waitFor(async () => {
+      await expect(zone).toHaveAttribute('data-dragging');
+    });
+
+    dragging.drop();
+
+    await expect(await canvas.findByText('notes.txt')).toBeInTheDocument();
+    await expect(zone).not.toHaveAttribute('data-dragging');
+    // ドロップしたファイルも、選んだときと同じく input に載って送られる
+    await expect(fileInputOf(canvasElement).files).toHaveLength(1);
+    await expect(args.onChange).toHaveBeenCalled();
+  },
+};
+
+// multiple では、選んだ分とドロップした分が積み重なり、そのまま全部送られる
+export const DropAddsToThePickedFiles: Story = {
+  args: {
+    multiple: true,
+  },
+  render: DropzoneRender,
+  play: async ({ canvas, canvasElement }) => {
+    const input = fileInputOf(canvasElement);
+    pick(input, new File(['a'], 'picked.txt', { type: 'text/plain' }));
+    await canvas.findByText('picked.txt');
+
+    drag(dropzoneOf(canvasElement), [
+      new File(['b'], 'dropped.txt', { type: 'text/plain' }),
+    ]).drop();
+    await canvas.findByText('dropped.txt');
+
+    await expect(
+      Array.from(input.files ?? []).map((file) => file.name),
+    ).toStrictEqual(['picked.txt', 'dropped.txt']);
+
+    pick(input, new File(['c'], 'picked-again.txt', { type: 'text/plain' }));
+    await canvas.findByText('picked-again.txt');
+    await expect(input.files).toHaveLength(3);
+  },
+};
+
+export const DropWhenDisabled: Story = {
+  args: {
+    disabled: true,
+    onChange: fn(),
+  },
+  render: DropzoneRender,
+  play: async ({ args, canvas, canvasElement }) => {
+    const zone = dropzoneOf(canvasElement);
+    drag(zone, [
+      new File(['content'], 'notes.txt', { type: 'text/plain' }),
+    ]).drop();
+
+    await expect(zone).not.toHaveAttribute('data-dragging');
+    await expect(canvas.queryByText('notes.txt')).not.toBeInTheDocument();
+    await expect(args.onChange).not.toHaveBeenCalled();
+    await expect(
+      canvas.getByRole('button', { name: 'ファイルを選択' }),
+    ).toBeDisabled();
   },
 };
