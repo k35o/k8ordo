@@ -788,8 +788,11 @@ the way:
   client build's files are under `/docs/assets/`.
 - A `redirect.ts` target is written from the root, like the table, and is
   sent with the base in front; one that names another origin is sent as
-  written. `redirect()` from a Server Action takes a URL, so build it with
-  `href()`.
+  written.
+- Under `@k8ordo/server`, a redirect the application builds itself is sent
+  as written: `redirect()` from a Server Action, and the `location` of a
+  `Response` a `guard.ts` returns. Both are URLs, so build them with
+  `href()` — `redirect(href('/talks'))`, `location: href('/login')`.
 - A URL outside the base is none of the application's: the handler answers
   it with a `404`, and the client runtime leaves it to the browser.
 
@@ -903,12 +906,16 @@ run outer first, one at a time:
 
 ```ts
 // src/routes/admin/guard.ts
+import { href } from '@k8ordo/router';
 import { cookies } from '@k8ordo/server/runtime';
 import type { Guard } from '@k8ordo/server/runtime';
 
 const guard: Guard<'/admin'> = () => {
   if (cookies().has('session')) return;
-  return new Response(null, { status: 303, headers: { location: '/login' } });
+  return new Response(null, {
+    status: 303,
+    headers: { location: href('/login') },
+  });
 };
 
 export default guard;
@@ -925,6 +932,11 @@ way.
 `401`, a `403` — whatever it returns is the answer, and the guards inside it
 and the page below never run. Returning nothing hands the request on to the
 next guard, and the last one to what answers the URL.
+
+A redirect's `location` goes out as the guard wrote it. It is a URL, not a
+pattern in the table's terms like a `redirect.ts` target, so build it with
+`href()`, which carries Vite's `base` when the application is served under
+one.
 
 Letting a request through can still add to its answer. `responseHeaders()`
 is the `Headers` the final response will carry, whatever answers — the page,

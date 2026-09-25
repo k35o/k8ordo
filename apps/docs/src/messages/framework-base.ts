@@ -26,8 +26,13 @@ export const files = message({
 });
 
 export const redirects = message({
-  ja: '`redirect.ts` の行き先は表と同じく根から書き、base を前に付けて送られます。別のオリジンを指す行き先は書いたまま送られます。Server Action の `redirect()` は URL を受け取るので、`href()` で作ります',
-  en: 'A `redirect.ts` target is written from the root, like the table, and is sent with the base in front; one that names another origin is sent as written. `redirect()` from a Server Action takes a URL, so build it with `href()`',
+  ja: '`redirect.ts` の行き先は表と同じく根から書き、base を前に付けて送られます。別のオリジンを指す行き先は書いたまま送られます',
+  en: 'A `redirect.ts` target is written from the root, like the table, and is sent with the base in front; one that names another origin is sent as written',
+});
+
+export const builtRedirects = message({
+  ja: "アプリが自分で作るリダイレクトは書いたまま送られます。Server Action の `redirect()` と、`guard.ts` が返す `Response` の `location` です。どちらも URL なので、`href()` で作ります（`redirect(href('/talks'))`、`location: href('/login')`）",
+  en: "A redirect the application builds itself is sent as written: `redirect()` from a Server Action, and the `location` of a `Response` a `guard.ts` returns. Both are URLs, so build them with `href()` — `redirect(href('/talks'))`, `location: href('/login')`",
 });
 
 export const outside = message({

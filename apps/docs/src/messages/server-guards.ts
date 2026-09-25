@@ -30,6 +30,11 @@ export const endDescription = message({
   en: 'Returning a `Response` makes it the answer — a redirect, a `401`, a `403`, whatever it is — and neither the guards inside it nor the page below run. Returning nothing hands the request on to the next guard, and after the last one to whatever answers the URL.',
 });
 
+export const endLocation = message({
+  ja: 'リダイレクトの `location` は、guard が書いたまま送られます。`redirect.ts` の行き先のような表のパターンではなく URL なので、`href()` で作ります。`href()` なら、アプリを Vite の `base` の下に置いたときも、それが付きます。',
+  en: 'A redirect’s `location` goes out as the guard wrote it. It is a URL, not a pattern in the table’s terms like a `redirect.ts` target, so build it with `href()`, which carries Vite’s `base` when the application is served under one.',
+});
+
 export const addTitle = message({
   ja: '応答に添える',
   en: 'Adding to the answer',
