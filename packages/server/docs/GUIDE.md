@@ -792,7 +792,9 @@ the way:
 - Under `@k8ordo/server`, a redirect the application builds itself is sent
   as written: `redirect()` from a Server Action, and the `location` of a
   `Response` a `guard.ts` returns. Both are URLs, so build them with
-  `href()` — `redirect(href('/talks'))`, `location: href('/login')`.
+  `href()` — `redirect(href('/talks'))`, `location: href('/login')` — or
+  give a pathname built some other way its base with `withBase()` from
+  `@k8ordo/router`.
 - A URL outside the base is none of the application's: the handler answers
   it with a `404`, and the client runtime leaves it to the browser.
 
@@ -936,7 +938,8 @@ next guard, and the last one to what answers the URL.
 A redirect's `location` goes out as the guard wrote it. It is a URL, not a
 pattern in the table's terms like a `redirect.ts` target, so build it with
 `href()`, which carries Vite's `base` when the application is served under
-one.
+one. A pathname built some other way gets its base from `withBase()` in
+`@k8ordo/router`.
 
 Letting a request through can still add to its answer. `responseHeaders()`
 is the `Headers` the final response will carry, whatever answers — the page,

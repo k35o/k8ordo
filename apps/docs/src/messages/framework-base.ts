@@ -31,8 +31,8 @@ export const redirects = message({
 });
 
 export const builtRedirects = message({
-  ja: "アプリが自分で作るリダイレクトは書いたまま送られます。Server Action の `redirect()` と、`guard.ts` が返す `Response` の `location` です。どちらも URL なので、`href()` で作ります（`redirect(href('/talks'))`、`location: href('/login')`）",
-  en: "A redirect the application builds itself is sent as written: `redirect()` from a Server Action, and the `location` of a `Response` a `guard.ts` returns. Both are URLs, so build them with `href()` — `redirect(href('/talks'))`, `location: href('/login')`",
+  ja: "アプリが自分で作るリダイレクトは書いたまま送られます。Server Action の `redirect()` と、`guard.ts` が返す `Response` の `location` です。どちらも URL なので、`href()` で作ります（`redirect(href('/talks'))`、`location: href('/login')`）。ほかの方法で作った pathname には、`@k8ordo/router` の `withBase()` で base を付けます",
+  en: "A redirect the application builds itself is sent as written: `redirect()` from a Server Action, and the `location` of a `Response` a `guard.ts` returns. Both are URLs, so build them with `href()` — `redirect(href('/talks'))`, `location: href('/login')` — or give a pathname built some other way its base with `withBase()` from `@k8ordo/router`",
 });
 
 export const outside = message({

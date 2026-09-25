@@ -31,8 +31,8 @@ export const endDescription = message({
 });
 
 export const endLocation = message({
-  ja: 'リダイレクトの `location` は、guard が書いたまま送られます。`redirect.ts` の行き先のような表のパターンではなく URL なので、`href()` で作ります。`href()` なら、アプリを Vite の `base` の下に置いたときも、それが付きます。',
-  en: 'A redirect’s `location` goes out as the guard wrote it. It is a URL, not a pattern in the table’s terms like a `redirect.ts` target, so build it with `href()`, which carries Vite’s `base` when the application is served under one.',
+  ja: 'リダイレクトの `location` は、guard が書いたまま送られます。`redirect.ts` の行き先のような表のパターンではなく URL なので、`href()` で作ります。`href()` なら、アプリを Vite の `base` の下に置いたときも、それが付きます。ほかの方法で作った pathname には、`@k8ordo/router` の `withBase()` で base を付けます。',
+  en: 'A redirect’s `location` goes out as the guard wrote it. It is a URL, not a pattern in the table’s terms like a `redirect.ts` target, so build it with `href()`, which carries Vite’s `base` when the application is served under one. A pathname built some other way gets its base from `withBase()` in `@k8ordo/router`.',
 });
 
 export const addTitle = message({
