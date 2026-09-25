@@ -17,6 +17,7 @@ import { ROUTE_METHODS } from '../runtime/route';
 export type TableBranch<T> = {
   layout?: T;
   error?: T;
+  loading?: T;
   children: Record<string, TableNode<T>>;
 };
 
@@ -30,6 +31,7 @@ const isLeaf = (dir: RouteDir): boolean =>
   ownFile(dir) !== null &&
   dir.layout === null &&
   dir.error === null &&
+  dir.loading === null &&
   dir.notFound === null &&
   dir.children.length === 0;
 
@@ -83,12 +85,13 @@ export const buildTable = <T>(
     const branch: TableBranch<T> = { children: entries(dir) };
     if (dir.layout !== null) branch.layout = resolve(dir.layout);
     if (dir.error !== null) branch.error = resolve(dir.error);
+    if (dir.loading !== null) branch.loading = resolve(dir.loading);
     return branch;
   };
 
-  // The root's own layout (or error boundary) has to wrap everything, which
-  // is what a branch under the transparent '/' key does.
-  return tree.layout === null && tree.error === null
+  // The root's own layout (or error boundary, or loading) has to wrap
+  // everything, which is what a branch under the transparent '/' key does.
+  return tree.layout === null && tree.error === null && tree.loading === null
     ? entries(tree)
     : { '/': node(tree) };
 };
@@ -237,6 +240,11 @@ const renderNode = (
   if (node.error !== undefined) {
     lines.push(`${pad(depth + 1)}error: ${believed(node.error, asserted)},`);
   }
+  if (node.loading !== undefined) {
+    lines.push(
+      `${pad(depth + 1)}loading: ${believed(node.loading, asserted)},`,
+    );
+  }
   lines.push(`${pad(depth + 1)}children: {`);
   for (const [key, child] of Object.entries(node.children)) {
     lines.push(
@@ -258,7 +266,7 @@ const believed = (
 type Belief = {
   /** The pattern the directories put the file under. */
   readonly pattern: string;
-  readonly kind: 'page' | 'route' | 'layout' | 'notFound' | 'error';
+  readonly kind: 'page' | 'route' | 'layout' | 'notFound' | 'error' | 'loading';
   /** Schema-declaring files along the stack, outer-first, the file's own last. */
   readonly schemas: readonly string[];
 };
@@ -319,6 +327,9 @@ const beliefs = (
     }
     if (dir.error !== null) {
       found.set(dir.error, { pattern: own, kind: 'error', schemas: [] });
+    }
+    if (dir.loading !== null) {
+      found.set(dir.loading, { pattern: own, kind: 'loading', schemas: [] });
     }
     for (const child of dir.children) {
       walk(
@@ -407,6 +418,8 @@ export const emitRoutesModule = (
       asserted.set(name, `Layout<'${belief.pattern}'>`);
     } else if (belief.kind === 'error') {
       asserted.set(name, 'ErrorComponent');
+    } else if (belief.kind === 'loading') {
+      asserted.set(name, 'ComponentType');
     } else if (belief.kind === 'notFound') {
       asserted.set(name, `Page<'${belief.pattern}'>`);
       if (schemas.length > 0) catchAllStacks.set(belief.pattern, schemas);
