@@ -21,6 +21,7 @@ export const en: Messages = {
 
   fileFieldRemove: 'Remove file',
   fileFieldTrigger: 'Select files',
+  fileFieldDrop: 'Drop files here',
 
   numberFieldIncrement: 'Increase',
   numberFieldDecrement: 'Decrease',

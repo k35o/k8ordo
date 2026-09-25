@@ -44,6 +44,10 @@ const LEFT_OUT: ReadonlyMap<string, string> = new Map([
     'CodeBlock',
     'サーバーでハイライトする async の Server Component。生成 UI はクライアントで描くので置けず、置けば shiki をブラウザに送ることになる',
   ],
+  [
+    'Prose',
+    'Markdown が描いた素の HTML を整える入れ物。spec が置くのは自分の見た目を持つ部品なので、効くものが無い（流れは Stack で組む）',
+  ],
 ]);
 
 // 部品を export するエントリをすべて見る。/ai と /code-block は root に出ていない

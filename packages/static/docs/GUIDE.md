@@ -31,6 +31,16 @@ same refusal is said there too, the moment the file is seen — a form that
 works in development and posts into nothing in production would be the worst
 of the two.
 
+A `guard.ts` — what `@k8ordo/server` runs before a request is answered — is
+refused the same way, by name, in the build and in `vite dev`: a file is never
+requested of anything that could run one.
+
+```
+static build cannot run guard.ts — a file has no request to guard, and these are guards:
+  src/routes/admin/guard.ts
+this application wants @k8ordo/server
+```
+
 Choosing the other mode means installing `@k8ordo/server` instead, and nothing
 else about the application changes — the same route grammar, the same
 boundaries, the same request handler, called for each route at build time
@@ -134,8 +144,9 @@ src/routes/
   _data/                the same, for anything that is not a component
 ```
 
-- `page.tsx`, `layout.tsx`, `not-found.tsx`, `error.tsx` and `redirect.ts`
-  are the only filenames the grammar accepts. Anything else lives under a
+- `page.tsx`, `layout.tsx`, `not-found.tsx`, `error.tsx`, `redirect.ts` and
+  `guard.ts` are the only filenames the grammar accepts — and this mode
+  refuses `guard.ts` (above). Anything else lives under a
   `_`-prefixed directory. A file or directory whose name starts with `_` or
   `.` is skipped entirely.
 - **A page receives `params`; a layout receives `children`.** Server Components
@@ -158,18 +169,18 @@ export default function ProductPage({ params }: { params: { id: string } }) {
 
 Every problem is reported, not just the first, and each names the file:
 
-| routes/ contains                                                          | error                                                                                                                            |
-| ------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `products/helper.ts`                                                      | `routes/ holds only page.tsx, layout.tsx, not-found.tsx, error.tsx, redirect.ts — move "helper.ts" under a _-prefixed directory` |
-| `[123]/page.tsx`                                                          | `"[123]" is not a valid param directory — use [name] with a letter or underscore first`                                          |
-| `pro ducts/page.tsx`                                                      | `"pro ducts" cannot be a URL segment — use letters, digits, . _ ~ or -`                                                          |
-| `[id]/things/[id]/page.tsx`                                               | `":id" is already taken by an ancestor — params must be unique within a path`                                                    |
-| `orphan/layout.tsx` and no page below                                     | `has a layout but no page.tsx below it, so it can never render`                                                                  |
-| `(a)/page.tsx` and `(b)/page.tsx`                                         | `"/" is already declared by (a)/page.tsx — route groups do not separate URLs`                                                    |
-| `(docs/page.tsx`                                                          | `"(docs" is not a valid route group — use (name)`                                                                                |
-| `empty/error.tsx` and no page or redirect below                           | `declares no route — every directory needs a page.tsx (or redirect.ts) somewhere below it`                                       |
-| `(shop)/sale/page.tsx` and `(shop)/[id]/page.tsx` beside `about/page.tsx` | `"/about" can never match — "/:id" ((shop)/[id]/page.tsx) is declared first and answers it`                                      |
-| `old/page.tsx` and `old/redirect.ts`                                      | `"old" cannot both render page.tsx and redirect — keep one`                                                                      |
+| routes/ contains                                                          | error                                                                                                                                      |
+| ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `products/helper.ts`                                                      | `routes/ holds only page.tsx, layout.tsx, not-found.tsx, error.tsx, redirect.ts, guard.ts — move "helper.ts" under a _-prefixed directory` |
+| `[123]/page.tsx`                                                          | `"[123]" is not a valid param directory — use [name] with a letter or underscore first`                                                    |
+| `pro ducts/page.tsx`                                                      | `"pro ducts" cannot be a URL segment — use letters, digits, . _ ~ or -`                                                                    |
+| `[id]/things/[id]/page.tsx`                                               | `":id" is already taken by an ancestor — params must be unique within a path`                                                              |
+| `orphan/layout.tsx` and no page below                                     | `has a layout but no page.tsx below it, so it can never render`                                                                            |
+| `(a)/page.tsx` and `(b)/page.tsx`                                         | `"/" is already declared by (a)/page.tsx — route groups do not separate URLs`                                                              |
+| `(docs/page.tsx`                                                          | `"(docs" is not a valid route group — use (name)`                                                                                          |
+| `empty/error.tsx` and no page or redirect below                           | `declares no route — every directory needs a page.tsx (or redirect.ts) somewhere below it`                                                 |
+| `(shop)/sale/page.tsx` and `(shop)/[id]/page.tsx` beside `about/page.tsx` | `"/about" can never match — "/:id" ((shop)/[id]/page.tsx) is declared first and answers it`                                                |
+| `old/page.tsx` and `old/redirect.ts`                                      | `"old" cannot both render page.tsx and redirect — keep one`                                                                                |
 
 The generated table lists literal segments before parameters, so `about/`
 beside `[slug]/` is reachable without saying anything. A route group holds
@@ -210,6 +221,8 @@ type Layout<P extends string> = ComponentType<{
 
 export const paramSchemas = {} as const;
 
+export const guards = {} as const;
+
 export const redirects = {} as const;
 
 export const routes = defineRoutes({
@@ -233,9 +246,11 @@ puts it under — a type check, so `tsc` reports a mismatch and `vite build`,
 which does not type-check, passes. Under `@k8ordo/server` the `Page` and
 `Layout` types also carry `request`. `redirects` is what the request handler
 consults before it walks `routes` — where each `redirect.ts` sends the
-visitor — and `paramSchemas` holds, per page pattern, the schemas it runs when
-the walk reaches that pattern, before the page renders; both are empty here
-because no route file declares either.
+visitor — `paramSchemas` holds, per page pattern, the schemas it runs when
+the walk reaches that pattern, before the page renders, and `guards` the
+`guard.ts` files that run before a pattern answers, outer first (a mode that
+builds files refuses them); all three are empty here because no route file
+declares any.
 
 `.k8ordo/register.gen.ts` wires that table into `@k8ordo/router` — and into
 `@k8ordo/state` when the application depends on it — so typed paths work
@@ -652,6 +667,52 @@ disagree with it. The browser renders it afresh instead, where the visitor is,
 and a client component sees their URL from its first render. A visitor
 without JavaScript keeps whatever the build's render produced.
 
+<!-- shared:prefetch -->
+
+### Fetching the next page ahead
+
+The client runtime listens on the whole document for a pointer moving onto a
+link, a link taking focus, and a press starting on one — `pointerover`,
+`focusin` and `pointerdown` — and fetches that page's payload there and then,
+so a click often finds the page already in hand. Nothing needs wiring: any
+`<a>` counts, the ones a component library renders included.
+
+Only a link a click would load in place is fetched: the same origin and below
+Vite's `base`, no `download`, no `target` other than `_self`, and not the
+page on screen, where only the search or the fragment would change. To stop
+it for a link — one whose page is expensive to render, say — mark the link,
+or any element around it, `data-k8ordo-prefetch="false"`
+(`data-k8ordo-prefetch={false}` in JSX renders the same). The nearest element
+carrying the attribute decides, so `"true"` opts a link back in inside a
+region that opted out.
+
+```tsx
+<nav data-k8ordo-prefetch={false}>
+  <a href="/reports">Reports</a>
+  <a data-k8ordo-prefetch href="/">
+    Home
+  </a>
+</nav>
+```
+
+What was fetched is used by the next navigation to that page, once, and only
+if it starts within 30 seconds of the fetch starting. After that — or once a
+navigation has used it — the page is fetched afresh, as it would have been
+with nothing prefetched, so a page hovered and left alone never shows up
+later as it was then. A Server Action's answer drops everything prefetched,
+since the action may have changed what those pages show, and a prefetch that
+failed is dropped at once, so the navigation asks again. A prefetch dropped
+before any navigation used it is cancelled if it is still on its way, and one
+a navigation took is cancelled with that navigation when another overtakes
+it — the same as a fetch the navigation had started itself.
+
+Under `@k8ordo/static` a prefetch is a request for a file. Under
+`@k8ordo/server` it is a render, as a navigation is — the reason to mark a
+link to an expensive page. The platform's Speculation Rules are not used:
+they are Chromium's alone, not Baseline.
+
+<!-- /shared:prefetch -->
+
 <!-- shared:deploys -->
 
 ### A tab opened before a deploy
@@ -745,8 +806,8 @@ is the framework's, everything after it is state's.
 ## What static cannot do
 
 Anything that needs the request: Server Actions and `redirect()` from them,
-the `request` a page reads under `@k8ordo/server`, and status codes the
-application decides. A file cannot receive a form submission, and
+the `request` a page reads under `@k8ordo/server`, a `guard.ts` deciding
+whether a request gets through, and status codes the application decides. A file cannot receive a form submission, and
 whether `404.html` is served with a 404 rather than a 200 is the host's
 setting — the build can write the page, but not the response.
 

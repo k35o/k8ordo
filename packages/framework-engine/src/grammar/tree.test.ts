@@ -1,4 +1,4 @@
-import { parseRouteTree } from './tree';
+import { parseRouteTree, slotOf } from './tree';
 import type { RouteDir } from './tree';
 
 const childOf = (dir: RouteDir, name: string): RouteDir => {
@@ -155,5 +155,52 @@ describe('error.tsx and redirect.ts', () => {
     ]);
     expect(problems).toHaveLength(1);
     expect(problems[0]?.message).toContain('"/old" is already declared');
+  });
+});
+
+describe('guard.ts', () => {
+  it('fills the guard slot of the directory it sits in', () => {
+    const { tree, problems } = parseRouteTree([
+      'page.tsx',
+      'guard.ts',
+      'admin/guard.ts',
+      'admin/page.tsx',
+    ]);
+    expect(problems).toStrictEqual([]);
+    expect(tree.guard).toBe('guard.ts');
+    expect(childOf(tree, 'admin').guard).toBe('admin/guard.ts');
+  });
+
+  it('declares no route of its own, so a directory holding only one is refused', () => {
+    const { problems } = parseRouteTree(['page.tsx', 'admin/guard.ts']);
+    expect(problems).toStrictEqual([
+      {
+        path: 'admin',
+        message:
+          'declares no route — every directory needs a page.tsx (or redirect.ts) somewhere below it',
+      },
+    ]);
+  });
+});
+
+describe('slotOf', () => {
+  it.each([
+    ['guard.ts', 'guard'],
+    ['admin/guard.ts', 'guard'],
+    ['(auth)/[id]/page.tsx', 'page'],
+    ['old/redirect.ts', 'redirect'],
+  ])('reads %s as the %s slot', (file, slot) => {
+    expect(slotOf(file)).toBe(slot);
+  });
+
+  it.each(['_parts/guard.ts', 'admin/_lib/page.tsx', '.cache/guard.ts'])(
+    'reads nothing from %s, which is private',
+    (file) => {
+      expect(slotOf(file)).toBeNull();
+    },
+  );
+
+  it('reads nothing from a name outside the convention', () => {
+    expect(slotOf('products/helper.ts')).toBeNull();
   });
 });
