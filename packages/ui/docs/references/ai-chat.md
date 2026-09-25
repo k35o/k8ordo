@@ -235,7 +235,7 @@ import { PromptInput } from '@k8ordo/ui/ai';
 
 ### Attachments
 
-Pass `accept` to take files. It turns on all three ways in — the `Attach` button's file picker, dropping files onto the input, and pasting them into the textarea — and filters every one of them by the same rule as `<input accept>` (the browser applies it only to the picker). Without `accept` the input takes text only: `Attach` renders nothing and dropped or pasted files are ignored.
+Pass `accept` to take files. It turns on all three ways in — the `Attach` button's file picker, dropping files onto the input, and pasting them into the textarea — and filters every one of them by the same rule as `<input accept>` (the browser applies it only to the picker). Without `accept` the input takes text only: `Attach` renders nothing, a pasted file is not taken, and a file dragged over the input shows the not-allowed cursor — the drop is still cancelled, so the browser never opens the file and leaves the chat.
 
 `PromptInput.Attachments` lists the files waiting to be sent, image thumbnails included, each with a remove button. `onSubmit` receives them as a `FileList` in its second argument, which the AI SDK's `sendMessage` takes as is. The list empties after each submit, and a message with attachments but no text can be sent — pass `{ files }` alone then, since `sendMessage` turns `text: ''` into an empty text part that some providers reject.
 
@@ -265,7 +265,7 @@ Props (PromptInput.Root):
 - `onSubmit`: `(message: string, files: FileList) => void` (the trimmed body, and the attachments — an empty `FileList` when there are none)
 - `onStop`: `() => void` (when the stop button is pressed mid-send)
 - `accept`: string (the file types to take, in `<input accept>` syntax; omit to take no files)
-- `maxFiles`: number (files beyond it are dropped, first come first kept)
+- `maxFiles`: number (files beyond it are dropped, first come first kept; `1` also makes the picker single-select)
 
 Props (PromptInput.Attachments):
 
@@ -315,6 +315,8 @@ Props (Attachment.Item):
 - `url`: string (required; a hosted URL or a data URL)
 - `mediaType`: string (required)
 - `filename`: string (without it an image's alt text is 「添付画像」 and a file chip shows the media type)
+
+An image `url` is loaded as soon as the item renders, with no click in between. Pass URLs your own server produced or vouches for — a data URL, or your storage — rather than an arbitrary URL a model or tool wrote, which could point anywhere (a tracking pixel, an internal address). The AI SDK already turns files a provider generates into data URLs.
 
 ## Source
 
@@ -423,7 +425,7 @@ import { ToolInvocation } from '@k8ordo/ui/ai';
 
 ### Approval
 
-When `state` is `'approval-requested'`, the tool is waiting for the user. Pass the part's `approval` and an `onApprovalResponse`, and a question with Deny / Allow buttons appears below the header — outside the collapsible panel, so it is visible without expanding the call; the input stays one click away in the panel. Pressing one calls `onApprovalResponse({ id: approval.id, approved })`, which is exactly what the AI SDK's `addToolApprovalResponse` takes. Both buttons stay disabled until a returned promise settles.
+When `state` is `'approval-requested'`, the tool is waiting for the user. Pass the part's `approval` and an `onApprovalResponse`, and a question with Deny / Allow buttons appears below the header — outside the collapsible panel, so it is visible without expanding the call; the input stays one click away in the panel. Pressing one calls `onApprovalResponse({ id: approval.id, approved })`, which is exactly what the AI SDK's `addToolApprovalResponse` takes. Both buttons stay disabled until a returned promise settles. Once the state moves on, the question disappears; if it held focus, focus moves to the tool's header instead of falling to `body`.
 
 ```tsx
 <ToolInvocation
