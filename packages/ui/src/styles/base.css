@@ -290,6 +290,218 @@
     }
   }
 
+  /*
+ * Prose。Markdown や MDX が描いた本文の組版を、base のリセットの上に戻す。
+ *
+ * 段落や見出しの間隔（流れ）は、クラスの有無にかかわらず直下の子に効かせる。
+ * 部品（Alert、CodeBlock、ui の Heading…）を本文に置いても、前後の間は本文と
+ * 同じに空く。部品の見た目そのものは部品が持つので、要素の組版はクラスの
+ * 無い要素（Markdown が出す素の HTML）にだけ効かせる。GFM が付けるクラス
+ * （脚注とタスクリスト）は素の HTML の一部として扱う。
+ */
+  .ao-prose {
+    color: var(--fg-base);
+    line-height: var(--leading-loose);
+    letter-spacing: var(--tracking-normal);
+  }
+  /* 流れの間隔は詳細度を持たせず、要素ごとの指定（hr の上下など）に譲る */
+  :where(.ao-prose > * + *) {
+    margin-block-start: 1rem;
+  }
+  :where(.ao-prose > :is(h1, h2)) {
+    margin-block-start: 3rem;
+  }
+  :where(.ao-prose > :is(h3, h4, h5, h6)) {
+    margin-block-start: 2rem;
+  }
+  :where(.ao-prose > :is(h1, h2, h3, h4, h5, h6) + *) {
+    margin-block-start: 0.75rem;
+  }
+  :where(.ao-prose > :first-child) {
+    margin-block-start: 0;
+  }
+
+  @scope (.ao-prose) to ([class]:not(:scope, .footnotes, .contains-task-list, .task-list-item, .data-footnote-backref)) {
+    :is(h1, h2, h3, h4, h5, h6) {
+      font-weight: var(--font-weight-bold);
+      line-height: var(--leading-snug);
+      letter-spacing: 0;
+      font-feature-settings: 'palt';
+      text-wrap: balance;
+    }
+    h1 {
+      font-size: var(--text-3xl);
+    }
+    h2 {
+      font-size: var(--text-2xl);
+    }
+    h3 {
+      font-size: var(--text-xl);
+    }
+    h4 {
+      font-size: var(--text-lg);
+    }
+    :is(h5, h6) {
+      font-size: var(--text-md);
+    }
+
+    strong,
+    b {
+      font-weight: var(--font-weight-bold);
+    }
+    em:lang(ja) {
+      text-emphasis: filled sesame;
+    }
+    em:not(:lang(ja)),
+    i,
+    cite {
+      font-style: italic;
+    }
+
+    a {
+      color: var(--fg-info);
+      text-decoration: underline;
+      text-underline-offset: 0.2em;
+      transition: color 150ms ease-out;
+    }
+    a:hover {
+      color: var(--fg-base);
+    }
+    a:focus-visible {
+      outline: none;
+      border-radius: var(--radius-sm);
+      box-shadow: 0 0 0 2px var(--border-info);
+    }
+
+    :not(pre) > code {
+      padding: 0.125em 0.375em;
+      border-radius: var(--radius-md);
+      background-color: var(--bg-mute);
+      font-size: 0.875em;
+    }
+    pre {
+      overflow-x: auto;
+      padding: 1rem;
+      border: 1px solid var(--border-mute);
+      border-radius: var(--radius-lg);
+      background-color: var(--bg-subtle);
+      font-size: var(--text-sm);
+      line-height: var(--leading-relaxed);
+    }
+    kbd {
+      padding: 0.125em 0.375em;
+      border: 1px solid var(--border-mute);
+      border-block-end-width: 2px;
+      border-radius: var(--radius-md);
+      background-color: var(--bg-subtle);
+      font-size: 0.8125em;
+    }
+    mark {
+      background-color: var(--bg-warning);
+      color: inherit;
+    }
+
+    :is(ul, ol) {
+      padding-inline-start: 1.5em;
+    }
+    ul {
+      list-style-type: disc;
+    }
+    ol {
+      list-style-type: decimal;
+    }
+    li > :is(ul, ol) {
+      margin-block-start: 0.25em;
+    }
+    ul ul {
+      list-style-type: circle;
+    }
+    li + li {
+      margin-block-start: 0.25em;
+    }
+    li::marker {
+      color: var(--fg-subtle);
+    }
+    li > :is(p, ul, ol) + :is(p, ul, ol) {
+      margin-block-start: 0.5em;
+    }
+    .task-list-item {
+      list-style-type: none;
+    }
+    .task-list-item > input {
+      margin-inline: -1.25em 0.5em;
+    }
+
+    blockquote {
+      padding-inline-start: 1em;
+      border-inline-start: 3px solid var(--border-mute);
+      color: var(--fg-mute);
+    }
+    blockquote > * + * {
+      margin-block-start: 0.75em;
+    }
+
+    hr {
+      margin-block: 3em;
+      border-color: var(--border-mute);
+    }
+
+    table {
+      inline-size: 100%;
+      border-collapse: collapse;
+      font-size: var(--text-sm);
+      line-height: var(--leading-normal);
+    }
+    :is(th, td) {
+      padding: 0.5em 0.75em;
+      border-block-end: 1px solid var(--border-mute);
+      text-align: start;
+    }
+    th {
+      font-weight: var(--font-weight-medium);
+      background-color: var(--bg-subtle);
+    }
+
+    :is(img, video) {
+      max-inline-size: 100%;
+      block-size: auto;
+      border-radius: var(--radius-lg);
+    }
+    figcaption {
+      margin-block-start: 0.5em;
+      color: var(--fg-mute);
+      font-size: var(--text-sm);
+      text-align: center;
+    }
+
+    dt {
+      font-weight: var(--font-weight-bold);
+    }
+    dd {
+      padding-inline-start: 1.5em;
+    }
+    dd + dt {
+      margin-block-start: 0.75em;
+    }
+
+    .footnotes {
+      margin-block-start: 3em;
+      padding-block-start: 1.5em;
+      border-block-start: 1px solid var(--border-mute);
+      color: var(--fg-mute);
+      font-size: var(--text-sm);
+    }
+    sup > a {
+      text-decoration: none;
+    }
+  }
+
+  /* 縦書きの本文は、段落の頭を 1 字下げる（本の組み方） */
+  .ao-prose:where(.writing-v, .writing-v *):not(.writing-h, .writing-h *)
+    > p:not([class]) {
+    text-indent: 1em;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .ao-anim-scale:popover-open,
     .ao-anim-fade:popover-open {

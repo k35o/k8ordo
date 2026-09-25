@@ -72,6 +72,9 @@ These exports are left out on purpose, so a model cannot place them:
   `ToolInvocation` from `@k8ordo/ui/ai`, and `Response` from
   `@k8ordo/ui/ai/response` — the chat the generated UI is shown in. Your
   application builds it from its message stream; a spec does not place it.
+- `Prose` — it typesets the bare HTML that Markdown renders to. A spec places
+  components, which keep their own look, so it would have nothing to typeset;
+  lay a flow out with `Stack`.
 
 ## Prompt language
 

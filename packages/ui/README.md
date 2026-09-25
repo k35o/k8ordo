@@ -243,6 +243,7 @@ stories and rendered props rather than relying on trained knowledge:
 - **Code** - Formatted code display
 - **Heading** - Typography heading component
 - **Kbd** - Keyboard key cap for shortcuts
+- **Prose** - Typesetting for rendered Markdown/MDX, tuned for Japanese
 - **Table** - Tabular data display
 
 ### Feedback

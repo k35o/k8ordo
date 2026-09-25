@@ -34,6 +34,10 @@ const LEFT_OUT: ReadonlyMap<string, string> = new Map([
   ['Suggestion', CHAT],
   ['ToolInvocation', CHAT],
   ['Response', CHAT],
+  [
+    'Prose',
+    'Markdown が描いた素の HTML を整える入れ物。spec が置くのは自分の見た目を持つ部品なので、効くものが無い（流れは Stack で組む）',
+  ],
 ]);
 
 // 部品を export するエントリをすべて見る。/ai は root に出ていない
