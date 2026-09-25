@@ -258,8 +258,9 @@ type Belief = {
  *
  * A page's belief also carries the `paramsSchema` exports that run before it
  * renders: every layout's above it that declared one, then its own. A
- * not-found's carries none — a catch-all answers what nothing else did, and
- * its params are never validated.
+ * not-found's carries the layouts' above it, which run for what they write to
+ * the render's context and never refuse it — a catch-all answers what nothing
+ * else did, so its params stay strings.
  */
 const beliefs = (
   tree: RouteDir,
@@ -297,7 +298,7 @@ const beliefs = (
       found.set(dir.notFound, {
         pattern: `${here}/*`,
         kind: 'notFound',
-        schemas: [],
+        schemas: layoutSchemas,
       });
     }
     if (dir.error !== null) {
@@ -330,6 +331,9 @@ export const emitRoutesModule = (
   // Per page pattern, the schema identifiers along its stack — what the
   // handler runs before the page renders, and what its params are typed by.
   const stacks = new Map<string, readonly string[]>();
+  // Per catch-all pattern, the layouts' above its not-found. Kept apart from
+  // `stacks`: the router types a page's params, and links to it, by those.
+  const catchAllStacks = new Map<string, readonly string[]>();
   for (const [file, name] of namer.names) {
     const belief = byFile.get(file);
     if (belief === undefined) continue;
@@ -338,7 +342,10 @@ export const emitRoutesModule = (
       asserted.set(name, `Layout<'${belief.pattern}'>`);
     } else if (belief.kind === 'error') {
       asserted.set(name, 'ErrorComponent');
-    } else if (belief.kind === 'notFound' || schemas.length === 0) {
+    } else if (belief.kind === 'notFound') {
+      asserted.set(name, `Page<'${belief.pattern}'>`);
+      if (schemas.length > 0) catchAllStacks.set(belief.pattern, schemas);
+    } else if (schemas.length === 0) {
       asserted.set(name, `Page<'${belief.pattern}'>`);
     } else {
       asserted.set(
@@ -384,9 +391,10 @@ export const emitRoutesModule = (
       const belief = byFile.get(file) as Belief;
       return `${pad(1)}${schemaName(name)} satisfies ParamsSchemaFor<'${belief.pattern}'>,`;
     });
-  const schemaMap = [...stacks].map(
-    ([pattern, schemas]) => `${pad(1)}'${pattern}': [${schemas.join(', ')}],`,
-  );
+  const toMap = (map: ReadonlyMap<string, readonly string[]>): string[] =>
+    [...map].map(
+      ([pattern, schemas]) => `${pad(1)}'${pattern}': [${schemas.join(', ')}],`,
+    );
   const typeImports = [
     ...(hasError ? ['ErrorComponent'] : []),
     ...(hasLayout ? ['ParamsOf'] : []),
@@ -457,7 +465,14 @@ export const emitRoutesModule = (
     '// layout above it that declared one, then its own. The handler reads',
     '// this; a schema that refuses makes the pattern not answer the pathname.',
     'export const paramSchemas = {',
-    ...schemaMap,
+    ...toMap(stacks),
+    '} as const;',
+    '',
+    '// Per catch-all pattern, the schemas of the layouts above its not-found.',
+    '// The handler runs them for what they write to the render (the locale a',
+    '// 404 is in); a refusal does not stop a catch-all from answering.',
+    'export const catchAllSchemas = {',
+    ...toMap(catchAllStacks),
     '} as const;',
     '',
     '// Per pattern, where a redirect.ts sends the visitor. Consulted before the',

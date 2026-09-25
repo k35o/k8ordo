@@ -530,8 +530,8 @@ Those props have a type here, by the pattern the directory puts the file
 under: `PageProps<'/products/:id'>` is `{ params, pathname }` with `params`
 typed by the schemas the framework ran (the generated `Register` carries
 them), and `LayoutProps<'/products'>` adds `children` — with `params` left as
-strings whatever the schemas say, since nothing is validated under
-`not-found.tsx`. Under `@k8ordo/server` the generated `Register` also carries
+strings whatever the schemas say, since `not-found.tsx` renders under a layout
+whether or not its schemas accepted. Under `@k8ordo/server` the generated `Register` also carries
 the `request`, so both types gain `request` there and a page that reads it
 fails to type-check under a build into files. A route file may equally declare
 its props inline — the generated table checks them at the import either way —

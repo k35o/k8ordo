@@ -94,7 +94,11 @@ ParamsSchemaFor<pattern>`, lists per page pattern the schemas along its
   stack in `paramSchemas`, and types the page by them. `runtime/params.ts`
   runs them synchronously inside `routes.match`'s `accept`, so a refused
   value is a pattern that did not match and the catch-all answers under 404.
-  A catch-all's own params are never validated; a layout receives strings.
+  A catch-all is never refused: the schemas of the layouts above its
+  not-found (`catchAllSchemas`, apart from `paramSchemas` because the router
+  types pages and links by those) run through `parseCatchAllParams` for what
+  they write, and the not-found renders in their context when all accept, in
+  none when one refuses. It and every layout receive strings.
   Each pattern's schemas run in an async context of their own, and the
   render starts inside the answering pattern's (`enter`): a schema may write
   there (`@k8ordo/i18n` records the accepted locale), and neither a refused
@@ -157,7 +161,7 @@ src/
   runtime/revealed.ts        when every streamed boundary is on screen
   runtime/recover.tsx        a failed client render falls back to a document load
   runtime/reload.ts          location.reload, the one seam a test can watch
-  runtime/params.ts          runs the paramsSchema exports along a matched stack
+  runtime/params.ts          runs the paramsSchema exports along a matched stack, and above a not-found
   runtime/pathname.ts        decodePathname, before a pathname may name a file
   runtime/redirect.ts        redirect() / redirect.ts targets
   runtime/request.ts         the read-only request a page receives

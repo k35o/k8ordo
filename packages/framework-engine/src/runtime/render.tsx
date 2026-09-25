@@ -29,9 +29,10 @@ export type PageProps = {
  * application that renders entirely in the browser.
  *
  * `params` are the page's — what the schemas along its stack produced. Only
- * the leaf gets them: a layout does not know which page is below it, and
- * under `not-found.tsx` nothing is validated, so a layout receives the
- * strings the pathname carried, which is what its type says.
+ * the leaf gets them: a layout does not know which page is below it, and a
+ * `not-found.tsx` renders under it whether or not its schemas accepted, so a
+ * layout receives the strings the pathname carried, which is what its type
+ * says.
  */
 export const renderMatch = (
   match: Match,
