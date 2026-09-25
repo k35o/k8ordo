@@ -3,15 +3,17 @@
 > Declare state by where it lives: `definePageState` (typed URL search params
 > plus hidden history-entry state — the two faces of one entry, updated
 > atomically over the Navigation API), `defineLocalState` (localStorage,
-> cross-tab), `defineCookieState` (a cookie the browser writes with the
-> Cookie Store API and the server reads from the request, so preferences
-> render without a flash of the default — never a secret, it cannot be
-> `HttpOnly`), `defineMemoryState` (a typed shared box with no schema, resets
-> on reload). One zod schema per boundary place (url, entry, local, cookie)
-> derives the server read, canonical links, salvage of stale data, and a
-> client subscription with exact per-key change detection. Links and GET forms write
-> the URL before JavaScript loads under any router (the server renders what
-> they wrote wherever it reads the search); imperative url updates ride a
+> cross-tab), `defineSessionState` (sessionStorage — the same store over the
+> per-tab area: survives a reload, gone with the tab), `defineCookieState` (a
+> cookie the browser writes with the Cookie Store API and the server reads
+> from the request, so preferences render without a flash of the default —
+> never a secret, it cannot be `HttpOnly`), `defineMemoryState` (a typed
+> shared box with no schema, resets on reload). One zod schema per boundary
+> place (url, entry, local, session, cookie) derives the server read,
+> canonical links, salvage of stale data, and a client subscription with
+> exact per-key change detection. Links and GET forms write the URL before
+> JavaScript loads under any router (the server renders what they wrote
+> wherever it reads the search); imperative url updates ride a
 > Navigation-API-intercepting router.
 >
 > Like every k8ordo package it assumes React 19 and Server Components, uses
@@ -40,12 +42,13 @@ When installed via npm, these docs live under `node_modules/@k8ordo/state/docs/`
   and the url slot is read in the browser);
   `href(base, values?)` builds a canonical link keeping the path literal in
   the type; `search(values?)` returns the query string alone.
-  `defineLocalState(key, schema)`, `defineCookieState(key, schema)` and
-  `defineMemoryState(key, initial)` declare app-scope state; a local
-  definition also exposes `storageKey` (the localStorage key,
-  `k8ordo-state:<key>`) and `inlineRead()`, a JavaScript expression for an
-  inline `<script>` that evaluates to the stored object or `null` before
-  hydration — unvalidated, so read only what you need with a fallback. A
+  `defineLocalState(key, schema)`, `defineSessionState(key, schema)`,
+  `defineCookieState(key, schema)` and `defineMemoryState(key, initial)`
+  declare app-scope state; a local or session definition also exposes
+  `storageKey` (the key in its storage area, `k8ordo-state:<key>`) and
+  `inlineRead()`, a JavaScript expression for an inline `<script>` that
+  evaluates to the object stored in that area or `null` before hydration —
+  unvalidated, so read only what you need with a fallback. A
   cookie definition exposes `cookieName` (`k8ordo-state.<key>`),
   `parseCookies(cookies)` — reads the values out of a request's
   percent-decoded cookies (`request.cookies` under `@k8ordo/server`), salvaged
@@ -58,11 +61,12 @@ When installed via npm, these docs live under `node_modules/@k8ordo/state/docs/`
   what the server read; `update(patch)` applies synchronously, batches the
   calls a handler makes with no `await` between them into one write
   (url+entry changes atomically via `navigation.navigate()`, entry-only
-  changes via `updateCurrentEntry()`, local via one `setItem`, cookie via one
+  changes via `updateCurrentEntry()`, local and session via one `setItem`,
+  cookie via one
   `cookieStore.set()`; memory applies per call), and returns
   `{ committed, finished }` promise handles (for non-navigating kinds they
   settle once the write lands, and a write the browser refuses — a full
-  localStorage, a cookie over 4 KB — rejects them with its error;
+  Web Storage area, a cookie over 4 KB — rejects them with its error;
   `{ history: 'push' }` exists only on page state and takes effect only when
   a url value changes).
   `resetStateRegistry()` clears stores between tests. Augment
