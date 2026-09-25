@@ -181,6 +181,11 @@ export const componentCategories: NavCategory[] = [
         description: m.components.codeBlock.description,
       },
       {
+        name: 'Prose',
+        path: '/:locale/ui/components/prose',
+        description: m.components.prose.description,
+      },
+      {
         name: 'Table',
         path: '/:locale/ui/components/table',
         description: m.components.table.description,
@@ -289,11 +294,6 @@ export const componentCategories: NavCategory[] = [
         name: 'Separator',
         path: '/:locale/ui/components/separator',
         description: m.components.separator.description,
-      },
-      {
-        name: 'ScrollLinked',
-        path: '/:locale/ui/components/scroll-linked',
-        description: m.components.scrollLinked.description,
       },
     ],
   },

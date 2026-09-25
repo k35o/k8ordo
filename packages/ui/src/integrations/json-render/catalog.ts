@@ -231,10 +231,6 @@ export const catalog = defineCatalog(schema, {
       description:
         'Toast notification that a button labeled triggerLabel shows.',
     },
-    ScrollLinked: {
-      props: s.scrollLinkedProps,
-      description: 'Page scroll progress bar (fixed to the top).',
-    },
     ListBox: {
       props: s.listBoxProps,
       description: 'Single-choice list in a popup.',
@@ -249,7 +245,8 @@ export const catalog = defineCatalog(schema, {
     },
     FileField: {
       props: s.fileFieldProps,
-      description: 'File picker field.',
+      description:
+        'File picker field. With dropzone, files can also be dropped onto it.',
     },
     FormControl: {
       props: s.formControlProps,
