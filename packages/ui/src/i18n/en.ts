@@ -37,6 +37,9 @@ export const en: Messages = {
   paginationPrevious: 'Previous',
   paginationNext: 'Next',
 
+  codeBlockCopy: 'Copy code',
+  copied: 'Copied',
+  copyFailed: 'Could not copy',
   carousel: 'Carousel',
   carouselSlide: 'Slide',
   carouselPrevious: 'Previous slide',
@@ -56,7 +59,6 @@ export const en: Messages = {
   sources: 'Sources',
   messageActions: 'Message actions',
   copy: 'Copy',
-  copied: 'Copied',
   regenerate: 'Regenerate',
   feedbackPositive: 'Good response',
   feedbackNegative: 'Bad response',

@@ -939,6 +939,43 @@
       "omitted": ["className", "style"]
     },
     {
+      "name": "CodeBlock",
+      "props": [
+        {
+          "name": "code",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "callouts",
+          "types": ["Readonly<Record<number, string | readonly string[]>>"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "lang",
+          "types": ["string"],
+          "defaultValue": "'text'",
+          "required": false
+        },
+        {
+          "name": "marks",
+          "types": ["Readonly<Record<number, 'highlight' | 'add' | 'remove'>>"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "title",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": "HTMLAttributes<HTMLElement>",
+      "omitted": ["children", "className", "style"]
+    },
+    {
       "name": "CodeXmlIcon",
       "props": [
         {

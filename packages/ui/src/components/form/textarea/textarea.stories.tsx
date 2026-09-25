@@ -16,18 +16,8 @@ const meta: Meta<typeof Textarea> = {
   ],
   args: {
     id: 'textarea',
+    'aria-label': '本文',
     'aria-describedby': 'textarea-feedback',
-  },
-  parameters: {
-    a11y: {
-      options: {
-        rules: {
-          // TextArea単体ではラベルを付随しない
-          label: { enabled: false },
-          'label-title-only': { enabled: false },
-        },
-      },
-    },
   },
 };
 
@@ -101,6 +91,7 @@ const AutoResizeWithRefRender = () => {
   return (
     <div className="flex flex-col items-start gap-2">
       <Textarea
+        aria-label="本文"
         autoResize
         id="textarea-ref"
         onChange={(e) => {

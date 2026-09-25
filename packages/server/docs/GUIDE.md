@@ -659,6 +659,36 @@ with a `403`. Behind a proxy that means passing the public host through;
 `serve` reads it from the request's own `Host` header, so a proxy in front of
 it has to pass the original `Host` on unchanged.
 
+### Deploying to Vercel
+
+```ts
+// vite.config.ts
+import { framework } from '@k8ordo/server';
+import { vercel } from '@k8ordo/server/vercel';
+import { defineConfig } from 'vite';
+
+export default defineConfig({ plugins: [framework(), vercel()] });
+```
+
+With `vercel()` beside `framework()`, `vite build` also writes
+`.vercel/output/` in the shape of Vercel's Build Output API (v3), which
+`vercel build` and `vercel deploy --prebuilt` deploy as it is. The client
+build becomes static files on Vercel's CDN — a file under `assets/` is sent
+`immutable` once a file has answered, so a missing one is never cached — and
+every request that names no file goes to one Node.js function, the request
+handler, handed to Vercel as `fetch` and streaming its answer. Under a
+`base` the static files sit below it, as `serve` hands them out, and the
+handler answers every URL outside it with a `404`. The copies compressed for
+`serve` are left out: Vercel compresses on its own, and each is one more file
+to upload.
+
+**The function carries everything it imports.** A Vercel function holds
+nothing but its own directory, so under `vercel()` the handler is built with
+every dependency bundled in. A dependency that ships a native binary, or that
+reads its own files by path, cannot be bundled that way and does not work
+there. Each build replaces `.vercel/output/` and nothing else: the project link
+`vercel pull` writes beside it stays.
+
 <!-- shared:deploys -->
 
 ### A tab opened before a deploy

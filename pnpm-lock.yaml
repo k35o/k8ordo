@@ -313,9 +313,6 @@ importers:
       '@tailwindcss/vite':
         specifier: 'catalog:'
         version: 4.3.3(@voidzero-dev/vite-plus-core@0.3.2(@arethetypeswrong/core@0.18.5)(@types/node@24.13.5)(esbuild@0.28.2)(jiti@2.7.0)(publint@0.3.24)(typescript@7.0.2))
-      shiki:
-        specifier: 4.4.3
-        version: 4.4.3
       tailwindcss:
         specifier: 'catalog:'
         version: 4.3.3
@@ -931,6 +928,12 @@ importers:
       lucide-react:
         specifier: 1.47.0
         version: 1.47.0(react@19.3.0)
+      server-only:
+        specifier: 'catalog:'
+        version: 0.0.1
+      shiki:
+        specifier: 4.4.3
+        version: 4.4.3
       tailwind-merge:
         specifier: 3.7.0
         version: 3.7.0

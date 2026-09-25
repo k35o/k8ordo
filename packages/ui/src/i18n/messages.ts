@@ -48,6 +48,11 @@ export type Messages = {
   paginationPrevious: string;
   paginationNext: string;
 
+  /** CodeBlock のコピーボタン */
+  codeBlockCopy: string;
+  /** コピーの結果を読み上げる（role="status"）。CodeBlock と Message.Copy で共有する */
+  copied: string;
+  copyFailed: string;
   /** Carousel の aria-roledescription（region と各スライド） */
   carousel: string;
   carouselSlide: string;
@@ -76,7 +81,6 @@ export type Messages = {
   /** Message.Actions の group 名 */
   messageActions: string;
   copy: string;
-  copied: string;
   regenerate: string;
   feedbackPositive: string;
   feedbackNegative: string;

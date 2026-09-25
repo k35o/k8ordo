@@ -37,6 +37,9 @@ export const ja: Messages = {
   paginationPrevious: '前へ',
   paginationNext: '次へ',
 
+  codeBlockCopy: 'コードをコピー',
+  copied: 'コピーしました',
+  copyFailed: 'コピーできませんでした',
   carousel: 'カルーセル',
   carouselSlide: 'スライド',
   carouselPrevious: '前のスライド',
@@ -56,7 +59,6 @@ export const ja: Messages = {
   sources: '出典',
   messageActions: 'メッセージの操作',
   copy: 'コピー',
-  copied: 'コピーしました',
   regenerate: '再生成',
   feedbackPositive: '良い回答',
   feedbackNegative: '良くない回答',
