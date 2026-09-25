@@ -16,6 +16,7 @@ import {
   CheckboxCard,
   CloseIcon,
   Code,
+  CopyButton,
   DataTable,
   Dialog,
   DropdownMenu,
@@ -103,6 +104,7 @@ export const componentPreviews: Record<string, ReactNode> = {
       <CloseIcon size="sm" />
     </IconButton>
   ),
+  CopyButton: <CopyButton size="sm" value="pnpm add @k8ordo/ui" />,
   Anchor: (
     <Anchor href="https://example.com" openInNewTab>
       External Link

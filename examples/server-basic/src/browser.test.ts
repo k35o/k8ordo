@@ -82,6 +82,32 @@ describe('the built application in a browser', () => {
     await context.close();
   }, 30_000);
 
+  it('hands a client navigation to a page that said notFound() back to the server, which answers 404', async () => {
+    const page = await browser.newPage();
+    await page.goto(server.url);
+    await hydrated(page);
+    const responses: Array<{ type: string; status: number }> = [];
+    page.on('response', (response) => {
+      responses.push({
+        type: response.request().resourceType(),
+        status: response.status(),
+      });
+    });
+
+    await page.evaluate(async () => {
+      await navigation.navigate('/products/99').committed;
+    });
+
+    await page.getByRole('heading', { name: 'not found' }).waitFor();
+    expect(new URL(page.url()).pathname).toBe('/products/99');
+    expect(
+      responses
+        .filter((response) => response.type === 'document')
+        .map((response) => response.status),
+    ).toStrictEqual([404]);
+    await page.close();
+  }, 30_000);
+
   it('fetches the next page while the pointer rests on its link, and the click asks for nothing more', async () => {
     const page = await browser.newPage();
     const payloads = payloadsRequestedBy(page);

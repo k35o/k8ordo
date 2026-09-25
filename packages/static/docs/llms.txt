@@ -8,7 +8,9 @@
 > (page/layout/not-found/error/redirect, `[param]`, `(group)`, `_private`), a
 > page or layout may `export const paramsSchema` (any Standard Schema,
 > synchronous) to type its parameters — a refused value makes the pattern not
-> answer, so the walk goes on to `not-found.tsx` — an `error.tsx` shows in place
+> answer, so the walk goes on to `not-found.tsx` — a supplied pathname whose
+> page says `notFound()` (from `@k8ordo/router`) fails the build — an
+> `error.tsx` shows in place
 > of what throws below it (in the browser; at build time a Server Component that
 > throws stops the build), a `redirect.ts` is written as a page that sends the
 > visitor on, a page renders its own `<title>` (React 19 hoists it), boundaries

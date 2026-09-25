@@ -4,6 +4,7 @@ import { Fragment, useId, useState } from 'react';
 import type { ComponentProps, FC, ReactNode } from 'react';
 
 import { Button } from '../../components/buttons/button';
+import { CopyButton } from '../../components/buttons/copy-button';
 import { IconButton } from '../../components/buttons/icon-button';
 import { Accordion } from '../../components/data-display/accordion';
 import { Avatar } from '../../components/data-display/avatar';
@@ -141,6 +142,7 @@ import type {
   FormProps,
   HeadingProps,
   IconButtonProps,
+  CopyButtonProps,
   IconName,
   IconProps,
   KbdProps,
@@ -743,6 +745,17 @@ export function renderIconButton(props: IconButtonProps): ReactNode {
     <IconButton color={u(props.color)} label={props.label} size={u(props.size)}>
       <IconComponent size={u(props.size) ?? 'md'} />
     </IconButton>
+  );
+}
+
+export function renderCopyButton(props: CopyButtonProps): ReactNode {
+  return (
+    <CopyButton
+      iconOnly={u(props.iconOnly)}
+      label={u(props.label)}
+      size={u(props.size)}
+      value={props.value}
+    />
   );
 }
 

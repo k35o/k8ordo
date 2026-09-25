@@ -321,9 +321,52 @@ draw.
 
 ### The `/` page
 
-`/` is the one URL without a locale. Render nothing there and redirect from
-an effect — through the bound `navigateTo` where the router is
-`@k8ordo/router` (below), or `locales.localize` otherwise:
+`/` is the one URL without a locale; all it does is send the visitor to one.
+
+Under `@k8ordo/server` a `guard.ts` answers it before anything renders. It
+chooses from the request — the cookie holding the locale the visitor chose
+before, then `Accept-Language` — and ends the request with a `307`:
+
+```ts
+// src/routes/(home)/guard.ts
+import { withBase } from '@k8ordo/router';
+import type { Guard } from '@k8ordo/server/runtime';
+
+import { locales } from '../../i18n';
+
+const guard: Guard<'/'> = ({ request }) => {
+  const locale = locales.negotiateRequest(request, { cookie: 'locale' });
+  return new Response(null, {
+    status: 307,
+    headers: { location: withBase(locales.localize('/', locale)) },
+  });
+};
+
+export default guard;
+```
+
+```
+src/routes/
+  layout.tsx
+  (home)/
+    page.tsx      declares /; never renders, since the guard always answers
+    guard.ts
+  [locale]/
+```
+
+The route group is what keeps the guard to `/`: a `guard.ts` runs before
+every URL below its directory, so one directly in `src/routes/` would send
+`/en/…` away as well. The page still has to exist — a guard runs before a
+URL a page declares, and without one `/` is a 404 — and it can return
+`null`. The status is `307`, not `308`, because the answer depends on who
+asks; `withBase` puts back the Vite `base` that `localize` leaves out. A
+visitor without JavaScript is redirected all the same, and so is a client
+navigation to `/`, whose payload request the guard answers too.
+
+`@k8ordo/static` refuses a `guard.ts` — a file has no request to guard — so
+there the page renders nothing and redirects from an effect: through the
+bound `navigateTo` where the router is `@k8ordo/router` (below), or
+`locales.localize` otherwise:
 
 ```tsx
 'use client';
@@ -335,14 +378,6 @@ useEffect(() => {
   );
 }, []);
 ```
-
-Under `@k8ordo/server` a page can make the same decision from the request —
-`locales.negotiateRequest(request, { cookie: 'locale' })` — but cannot answer
-with a redirect: a page never writes to the response, and
-`redirect.ts` fills its target from the params, not the headers. `serve` has
-no hook for it either, so a server-side redirect sits outside the app: a proxy
-in front of `serve`, or a host of your own around the built handler
-(`dist/rsc/index.js`), answers `/` with a `307`.
 
 ### `<html lang>` and `dir`
 

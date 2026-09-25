@@ -88,8 +88,8 @@ row. Rules cannot target fields inside repeated rows.
   per-field checks and `HiddenValue` for components that render no input of
   their own. The types
   of the `formFields` result (`FormFields`, `DerivedField`, `DerivedArray`,
-  `DroppedCheck`, `FieldInput`, `ValidityFlag`, `Rule`, `DerivedRule`,
-  `RuleMessage`) are exported here as
+  `DroppedCheck`, `FieldInput`, `StringCheckboxInput`, `ValidityFlag`, `Rule`,
+  `DerivedRule`, `RuleMessage`) are exported here as
   well, since the result crosses to the client as a prop, and so are
   `FormState` and the return types (`UseFormReturn`, `FieldView`, `ArrayView`,
   `RowView`, `FormErrorView`, `AsyncCheck`).
@@ -116,7 +116,8 @@ row. Rules cannot target fields inside repeated rows.
   breaks), which keeps a localized definition at module scope. Types:
   `ParseResult`, `FormDefinition`, `Rule`, `RuleMessage`, `FormState`, and the
   `formFields` result's `FormFields`, `DerivedField`, `DerivedArray`,
-  `DerivedRule`, `DroppedCheck`, `FieldInput`, `ValidityFlag`.
+  `DerivedRule`, `DroppedCheck`, `FieldInput`, `StringCheckboxInput`,
+  `ValidityFlag`.
 
 ---
 
@@ -125,12 +126,17 @@ row. Rules cannot target fields inside repeated rows.
 > Declare state by where it lives: `definePageState` (typed URL search params
 > plus hidden history-entry state — the two faces of one entry, updated
 > atomically over the Navigation API), `defineLocalState` (localStorage,
-> cross-tab), `defineMemoryState` (a typed shared box with no schema, resets
-> on reload). One zod schema per boundary place (url, entry, local) derives
-> the server read, canonical links, salvage of stale data, and a client
-> subscription with exact per-key change detection. Links and GET forms write
-> the URL before JavaScript loads under any router (the server renders what
-> they wrote wherever it reads the search); imperative url updates ride a
+> cross-tab), `defineSessionState` (sessionStorage — the same store over the
+> per-tab area: survives a reload, gone with the tab), `defineCookieState` (a
+> cookie the browser writes with the Cookie Store API and the server reads
+> from the request, so preferences render without a flash of the default —
+> never a secret, it cannot be `HttpOnly`), `defineMemoryState` (a typed
+> shared box with no schema, resets on reload). One zod schema per boundary
+> place (url, entry, local, session, cookie) derives the server read,
+> canonical links, salvage of stale data, and a client subscription with
+> exact per-key change detection. Links and GET forms write the URL before
+> JavaScript loads under any router (the server renders what they wrote
+> wherever it reads the search); imperative url updates ride a
 > Navigation-API-intercepting router.
 >
 > Like every k8ordo package it assumes React 19 and Server Components, uses
@@ -141,11 +147,13 @@ These docs are served from <https://ordo.k8o.me>.
 
 ## Guide
 
-- [Design Guide](https://ordo.k8o.me/state/docs/GUIDE.md): the four places and when each fits, the shared
-  definition module, reading on the server, updating on the client, batching
-  and update handles, subscription granularity, router requirements, typed
-  routes via `Register`, reading local state before hydration, and pairing
-  with `@k8ordo/form` for GET forms.
+- [Design Guide](https://ordo.k8o.me/state/docs/GUIDE.md): the places and when each fits, the shared
+  definition module, versions and migrations of stored rows, reading on the
+  server, cookie state the server renders (and how it relates to cookies the
+  server writes), updating on the client,
+  batching and update handles, subscription granularity, router
+  requirements, typed routes via `Register`, reading local state before
+  hydration, and pairing with `@k8ordo/form` for GET forms.
 
 ## Entry point
 
@@ -160,22 +168,42 @@ These docs are served from <https://ordo.k8o.me>.
   the type — the path written from the app's root, the link carrying Vite's
   `base` (`import.meta.env.BASE_URL`) in front; `search(values?)` returns the
   query string alone.
-  `defineLocalState(key, schema)` and `defineMemoryState(key, initial)`
-  declare app-scope state; a local definition also exposes `storageKey` (the
-  localStorage key, `k8ordo-state:<key>`) and `inlineRead()`, a JavaScript
-  expression for an inline `<script>` that evaluates to the stored object or
-  `null` before hydration — unvalidated, so read only what you need with a
-  fallback. `useAppState(definition, keys?, { initialUrl? })`
-  (client) works on any kind and returns `[state, update]` — state is the
-  flat merge of a page definition's slots; `update(patch)` applies
-  synchronously, batches the calls a handler makes with no `await` between
-  them into one write (url+entry changes atomically via
-  `navigation.navigate()`, entry-only changes via `updateCurrentEntry()`,
-  local via one `setItem`; memory applies per call), and returns
+  `defineLocalState(key, schema, versioning?)`,
+  `defineSessionState(key, schema)`,
+  `defineCookieState(key, schema, versioning?)` and
+  `defineMemoryState(key, initial)` declare app-scope state;
+  `versioning` is `{ version, migrate(old, fromVersion) }` (type
+  `Versioning`): rows are then stored as `[version, values]`, a row with no
+  version reads as version 0, an older row goes through `migrate` and then
+  the schema's field-by-field salvage and is written back in the current
+  version by the browser store (`parseCookies` migrates but never writes), a
+  newer row is salvaged and left alone, and a throwing `migrate` reads as
+  nothing stored without touching the row; a local or session definition also exposes
+  `storageKey` (the key in its storage area, `k8ordo-state:<key>`) and
+  `inlineRead()`, a JavaScript expression for an inline `<script>` that
+  evaluates to the object stored in that area or `null` before hydration
+  (also `null` for a row of another version, when versioned) —
+  unvalidated, so read only what you need with a fallback. A
+  cookie definition exposes `cookieName` (`k8ordo-state.<key>`),
+  `parseCookies(cookies)` — reads the values out of a request's
+  percent-decoded cookies (`request.cookies` under `@k8ordo/server`), salvaged
+  like any read — and `cookieValue(values?)`, the value a server writes when
+  it sets the same cookie (`Path=/`, `SameSite=Lax`, `Max-Age=34560000`,
+  never `HttpOnly`). `useAppState(definition, keys?, { initialUrl? } |
+  { initialCookie? })` (client) works on any kind and returns
+  `[state, update]` — state is the flat merge of a page definition's slots;
+  `initialUrl` / `initialCookie` seed the server and hydration renders with
+  what the server read; `update(patch)` applies synchronously, batches the
+  calls a handler makes with no `await` between them into one write
+  (url+entry changes atomically via `navigation.navigate()`, entry-only
+  changes via `updateCurrentEntry()`, local and session via one `setItem`,
+  cookie via one
+  `cookieStore.set()`; memory applies per call), and returns
   `{ committed, finished }` promise handles (for non-navigating kinds they
-  settle once the write lands, and a write localStorage refuses rejects them
-  with its error; `{ history: 'push' }` exists only on page state and takes
-  effect only when a url value changes).
+  settle once the write lands, and a write the browser refuses — a full
+  Web Storage area, a cookie over 4 KB — rejects them with its error;
+  `{ history: 'push' }` exists only on page state and takes effect only when
+  a url value changes).
   `resetStateRegistry()` clears stores between tests. Augment
   `interface Register { routes: typeof routes }` — the same line as for
   `@k8ordo/router` — to check each `href` path against the route table's
@@ -256,7 +284,9 @@ These docs are served from <https://ordo.k8o.me>.
   props by its pattern (`PageProps`' `params` from the registered schemas,
   `LayoutProps`' `params` always strings and its `P` only a pattern the table
   has a page at; `request` when the generated `Register` says the mode has
-  one).
+  one). `notFound()` says, from a framework page, that its pathname is not a
+  page after all — the framework answers with the nearest `not-found.tsx`
+  under a 404 — and `isNotFound(value)` recognises what it throws.
   `<PathnameProvider pathname>` seeds it for a server render and hydration,
   and is mounted by `<Router>` and by both mode runtimes, never by an
   application. Every page change renders in the background, outside any
@@ -294,7 +324,9 @@ These docs are served from <https://ordo.k8o.me>.
 > (page/layout/not-found/error/redirect, `[param]`, `(group)`, `_private`), a
 > page or layout may `export const paramsSchema` (any Standard Schema,
 > synchronous) to type its parameters — a refused value makes the pattern not
-> answer, so the walk goes on to `not-found.tsx` — an `error.tsx` shows in place
+> answer, so the walk goes on to `not-found.tsx` — a supplied pathname whose
+> page says `notFound()` (from `@k8ordo/router`) fails the build — an
+> `error.tsx` shows in place
 > of what throws below it (in the browser; at build time a Server Component that
 > throws stops the build), a `redirect.ts` is written as a page that sends the
 > visitor on, a page renders its own `<title>` (React 19 hoists it), boundaries
@@ -341,8 +373,11 @@ These docs are served from <https://ordo.k8o.me>.
 > Standard Schema, synchronous) to type its parameters — a refused value makes
 > the pattern not answer, so the walk goes on to `not-found.tsx` under a real
 > 404 — an `error.tsx` shows in place of what throws below it, a `redirect.ts`
-> answers 307/308, a Server Action ends with `redirect()` (303 without
-> JavaScript, a navigation with it), a `guard.ts` runs before whatever answers
+> answers 307/308, a page that says `notFound()` (from `@k8ordo/router`) is
+> answered by the nearest `not-found.tsx` under a 404 — a document waits for
+> the page's own component so the status can say so, a payload streams — a
+> Server Action ends with `redirect()` (303 without JavaScript, a navigation
+> with it), a `guard.ts` runs before whatever answers
 > below it (a `Response` ends the request, nothing lets it through, and
 > `responseHeaders()` adds to the final answer), a guard or a Server Action
 > reads and writes cookies through `cookies()`, a page receives `request`
@@ -432,8 +467,10 @@ These docs are served from <https://ordo.k8o.me>.
   drawn for the current locale, dates in its time zone), the Server
   Component boundary (a message is called before it is passed to a
   `'use client'` component), what reaches the browser, where the locale comes
-  from on each side, `/` and `<html lang>` / `dir`, static path expansion, and
-  pairing with `@k8ordo/router` / `@k8ordo/ui` / `@k8ordo/form`.
+  from on each side, `/` (a `307` from a `guard.ts` under `@k8ordo/server`,
+  an effect under `@k8ordo/static`) and `<html lang>` / `dir`, static path
+  expansion, and pairing with `@k8ordo/router` / `@k8ordo/ui` /
+  `@k8ordo/form`.
 
 ## Entry point
 

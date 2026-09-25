@@ -80,8 +80,11 @@ export const Checkbox: FC<Props> = ({
   const disabledResolved =
     disabled || groupContext?.disabled === true || pending;
   const isChecked = groupContext
-    ? groupContext.currentValue.includes(groupItemValue)
+    ? groupContext.value?.includes(groupItemValue)
     : checked;
+  const isDefaultChecked = groupContext
+    ? groupContext.defaultValue.includes(groupItemValue)
+    : defaultChecked;
 
   return (
     <label
@@ -94,7 +97,7 @@ export const Checkbox: FC<Props> = ({
       <input
         {...rest}
         {...(isChecked === undefined
-          ? { defaultChecked }
+          ? { defaultChecked: isDefaultChecked }
           : { checked: isChecked })}
         aria-invalid={invalid}
         className="peer sr-only"
@@ -102,7 +105,7 @@ export const Checkbox: FC<Props> = ({
         name={groupContext?.name ?? name}
         onChange={(event) => {
           if (groupContext) {
-            groupContext.toggleValue(groupItemValue);
+            groupContext.notifyChange(event);
             return;
           }
 

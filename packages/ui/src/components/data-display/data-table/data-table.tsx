@@ -172,13 +172,15 @@ export const DataTable = <Row,>({
   getRowId,
   sort = null,
   onSortChange,
-  selectedIds = NONE,
+  selectedIds: selectedIdsProp,
   onSelectedIdsChange,
-  hiddenColumnIds = NONE,
+  hiddenColumnIds: hiddenColumnIdsProp,
   onHiddenColumnIdsChange,
   emptyState,
 }: Props<Row>) => {
   const messages = getMessages();
+  const selectedIds = selectedIdsProp ?? NONE;
+  const hiddenColumnIds = hiddenColumnIdsProp ?? NONE;
   const rowHeaderId = useId();
   const visibleColumns = columns.filter(
     (column) => !hiddenColumnIds.includes(column.id),
