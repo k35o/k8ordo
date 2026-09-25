@@ -336,6 +336,39 @@ export const MaxFiles: Story = {
   },
 };
 
+export const PasteBeyondMaxFiles: Story = {
+  args: { accept: 'image/*', maxFiles: 1, onSubmit: onSubmitWithFiles },
+  render: withAttachments,
+  play: async ({ canvas }) => {
+    const textarea = canvas.getByRole('textbox');
+    textarea.dispatchEvent(
+      new ClipboardEvent('paste', {
+        bubbles: true,
+        cancelable: true,
+        clipboardData: transferOf([png]),
+      }),
+    );
+    const list = await canvas.findByRole('list', { name: '添付ファイル' });
+
+    const transfer = transferOf([
+      new File(['png'], 'second.png', { type: 'image/png' }),
+    ]);
+    transfer.setData('text/plain', 'second.png');
+    const overflow = new ClipboardEvent('paste', {
+      bubbles: true,
+      cancelable: true,
+      clipboardData: transfer,
+    });
+    textarea.dispatchEvent(overflow);
+
+    // 上限で捨てたファイルでも、一緒に届いたファイル名を本文に貼らない
+    await expect(overflow.defaultPrevented).toBe(true);
+    await expect(textarea).toHaveValue('');
+    await expect(list.children).toHaveLength(1);
+    await expect(list).not.toHaveTextContent('second.png');
+  },
+};
+
 export const SingleFile: Story = {
   args: { accept: 'image/*', maxFiles: 1, onSubmit: onSubmitWithFiles },
   render: withAttachments,

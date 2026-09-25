@@ -37,7 +37,7 @@ const [PromptInputProvider, usePromptInputContext] = createSafeContext<{
   accept: string | undefined;
   maxFiles: number | undefined;
   files: AttachedFile[];
-  /** 受け取ったファイルがあれば true */
+  /** accept に当たるファイルがあれば true（maxFiles で捨てたものも数える） */
   addFiles: (files: FileList) => boolean;
   removeFile: (id: string) => void;
 }>('PromptInput.* must be used within <PromptInput.Root>');
@@ -257,7 +257,7 @@ export const Textarea: FC<TextareaProps> = ({
           return;
         }
         // ファイルと一緒に届く文字列はファイル名や <img> の HTML で、
-        // 本文として貼りたいものではない
+        // 本文として貼りたいものではない。上限で捨てたファイルでも同じ
         if (addFiles(event.clipboardData.files)) {
           event.preventDefault();
         }
