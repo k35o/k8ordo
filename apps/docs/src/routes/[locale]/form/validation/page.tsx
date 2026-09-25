@@ -317,6 +317,9 @@ export default function FormValidationPage() {
             <Rich>{m.formValidation.lifeInput()}</Rich>
           </li>
           <li className="list-disc">
+            <Rich>{m.formValidation.lifeSubmit()}</Rich>
+          </li>
+          <li className="list-disc">
             <Rich>{m.formValidation.lifeOrder()}</Rich>
           </li>
           <li className="list-disc">
