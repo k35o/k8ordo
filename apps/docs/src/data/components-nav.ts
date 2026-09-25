@@ -15,6 +15,11 @@ export const componentCategories: NavCategory[] = [
         path: '/:locale/ui/components/icon-button',
         description: m.components.iconButton.description,
       },
+      {
+        name: 'Toolbar',
+        path: '/:locale/ui/components/toolbar',
+        description: m.components.toolbar.description,
+      },
     ],
   },
   {
@@ -219,6 +224,11 @@ export const componentCategories: NavCategory[] = [
         name: 'Popover',
         path: '/:locale/ui/components/popover',
         description: m.components.popover.description,
+      },
+      {
+        name: 'ContextMenu',
+        path: '/:locale/ui/components/context-menu',
+        description: m.components.contextMenu.description,
       },
       {
         name: 'DropdownMenu',
