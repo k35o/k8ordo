@@ -1,8 +1,8 @@
 import type { output } from 'zod/v4/core';
 
-import { createStoredCodec } from './entry/codec';
-import type { StoredCodec } from './entry/codec';
-import type { StateSchema, StateValues } from './schema/object';
+import { createRowCodec } from './row/codec';
+import type { RowCodec, Versioning } from './row/codec';
+import type { StateSchema } from './schema/object';
 
 /**
  * App-scope state that lives in a cookie: device-persistent and shared across
@@ -41,8 +41,8 @@ const TOKEN = /^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$/u;
 
 // JSON は Cookie の値に書けない `"` や `,` だらけなので、encodeURIComponent に
 // 通して書ける文字だけにする。サーバーの Cookie パーサーが戻すのもこの符号化
-export const encodeCookie = (values: Readonly<StateValues>): string =>
-  encodeURIComponent(JSON.stringify(values));
+export const encodeCookie = (row: unknown): string =>
+  encodeURIComponent(JSON.stringify(row));
 
 export const parseCookieText = (text: string | undefined): unknown => {
   if (text === undefined) return undefined;
@@ -54,9 +54,9 @@ export const parseCookieText = (text: string | undefined): unknown => {
   }
 };
 
-const codecs = new WeakMap<CookieState, StoredCodec>();
+const codecs = new WeakMap<CookieState, RowCodec>();
 
-export const cookieCodecOf = (def: CookieState): StoredCodec => {
+export const cookieCodecOf = (def: CookieState): RowCodec => {
   const codec = codecs.get(def);
   if (codec === undefined) {
     throw new TypeError(
@@ -69,6 +69,7 @@ export const cookieCodecOf = (def: CookieState): StoredCodec => {
 export const defineCookieState = <Schema extends StateSchema>(
   key: string,
   schema: Schema,
+  versioning?: Versioning<Schema>,
 ): CookieState<Schema> => {
   const cookieName = `${COOKIE_NAME_PREFIX}${key}`;
   if (!TOKEN.test(cookieName)) {
@@ -76,15 +77,19 @@ export const defineCookieState = <Schema extends StateSchema>(
       `"${key}" cannot name a cookie — use letters, digits and !#$%&'*+-.^_\`|~`,
     );
   }
-  const codec = createStoredCodec(schema, 'cookie');
+  const codec = createRowCodec(schema, 'cookie', key, versioning);
   const def: CookieState<Schema> = {
     kind: 'cookie',
     key,
     schema,
     cookieName,
+    // サーバーは応答に Cookie を書けないので、古い版の Cookie は移行して読む
+    // だけにする。書き戻すのは hydration の後のブラウザのストア
     parseCookies: (cookies) =>
-      codec.parse(parseCookieText(cookies.get(cookieName))) as output<Schema>,
-    cookieValue: (values) => encodeCookie(codec.salvage(values ?? {})),
+      codec.read(parseCookieText(cookies.get(cookieName)))
+        .values as output<Schema>,
+    cookieValue: (values) =>
+      encodeCookie(codec.row(codec.salvage(values ?? {}))),
   };
   codecs.set(def, codec);
   return def;

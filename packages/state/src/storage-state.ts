@@ -1,5 +1,5 @@
-import { createStoredCodec } from './entry/codec';
-import type { StoredCodec } from './entry/codec';
+import { createRowCodec } from './row/codec';
+import type { RowCodec, Versioning } from './row/codec';
 import type { StateSchema } from './schema/object';
 
 type StorageArea = 'localStorage' | 'sessionStorage';
@@ -18,9 +18,10 @@ type StorageState<
   /**
    * A JavaScript expression, for an inline `<script>`, that evaluates in the
    * browser to the stored object — or `null` when nothing is stored, the JSON
-   * is corrupt, the value is not an object, or storage cannot be read. The
-   * schema does not run there: treat the result as untrusted and read only
-   * the fields you need, each with its own fallback.
+   * is corrupt, the value is not an object, storage cannot be read, or (for a
+   * versioned local state) the row was written by another version. Neither
+   * the schema nor `migrate` runs there: treat the result as untrusted and
+   * read only the fields you need, each with its own fallback.
    */
   inlineRead: () => string;
 };
@@ -58,16 +59,29 @@ const literalOf = (text: string): string =>
 // A self-invoking function, so the expression stays usable in any position
 // (`const s = …;`, an argument, a ternary) without leaking a binding. Only
 // an object survives: `JSON.parse` happily returns `5` or `null`, and a
-// scalar where the schema promised an object would be read as fields.
-const inlineReadOf = (area: StorageArea, storageKey: string): string =>
-  `(()=>{try{const v=JSON.parse(${area}.getItem(${literalOf(storageKey)}));return v!==null&&typeof v==="object"&&!Array.isArray(v)?v:null}catch{return null}})()`;
+// scalar where the schema promised an object would be read as fields. A
+// versioned row is `[version, values]`, and only this version's values are
+// handed out — migrate cannot run before any module has loaded.
+const isObjectExpression = (value: string): string =>
+  `${value}!==null&&typeof ${value}==="object"&&!Array.isArray(${value})`;
+
+const inlineReadOf = (
+  area: StorageArea,
+  storageKey: string,
+  version: number | undefined,
+): string => {
+  const row = `JSON.parse(${area}.getItem(${literalOf(storageKey)}))`;
+  return version === undefined
+    ? `(()=>{try{const v=${row};return ${isObjectExpression('v')}?v:null}catch{return null}})()`
+    : `(()=>{try{const r=${row};const v=Array.isArray(r)&&r.length===2&&r[0]===${String(version)}?r[1]:null;return ${isObjectExpression('v')}?v:null}catch{return null}})()`;
+};
 
 const codecs = new WeakMap<
   StorageState<'local' | 'session', StateSchema>,
-  StoredCodec
+  RowCodec
 >();
 
-export const storageCodecOf = (def: LocalState | SessionState): StoredCodec => {
+export const storageCodecOf = (def: LocalState | SessionState): RowCodec => {
   const codec = codecs.get(def);
   if (codec === undefined) {
     throw new TypeError(
@@ -85,27 +99,30 @@ const defineStorageState = <
   area: StorageArea,
   key: string,
   schema: Schema,
+  versioning: Versioning<Schema> | undefined,
 ): StorageState<Kind, Schema> => {
   const storageKey = `${STORAGE_KEY_PREFIX}${key}`;
+  const codec = createRowCodec(schema, kind, key, versioning);
   const def: StorageState<Kind, Schema> = {
     kind,
     key,
     schema,
     storageKey,
-    inlineRead: () => inlineReadOf(area, storageKey),
+    inlineRead: () => inlineReadOf(area, storageKey, codec.version),
   };
-  codecs.set(def, createStoredCodec(schema, kind));
+  codecs.set(def, codec);
   return def;
 };
 
 export const defineLocalState = <Schema extends StateSchema>(
   key: string,
   schema: Schema,
+  versioning?: Versioning<Schema>,
 ): LocalState<Schema> =>
-  defineStorageState('local', 'localStorage', key, schema);
+  defineStorageState('local', 'localStorage', key, schema, versioning);
 
 export const defineSessionState = <Schema extends StateSchema>(
   key: string,
   schema: Schema,
 ): SessionState<Schema> =>
-  defineStorageState('session', 'sessionStorage', key, schema);
+  defineStorageState('session', 'sessionStorage', key, schema, undefined);
