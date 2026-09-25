@@ -120,7 +120,11 @@ export const catalog = defineCatalog(schema, {
       description:
         'Horizontally scrolling carousel with previous and next buttons. Each child is one slide. slideSize sets how much of the track one slide takes (full, lg, md for two, sm for three).',
     },
-    Progress: { props: s.progressProps, description: 'Progress bar.' },
+    Progress: {
+      props: s.progressProps,
+      description:
+        'Progress bar. Leave value out when progress is unknown; it then shows an animated bar.',
+    },
     Skeleton: {
       props: s.skeletonProps,
       description: 'Loading placeholder.',
@@ -164,6 +168,11 @@ export const catalog = defineCatalog(schema, {
       props: s.sliderProps,
       description:
         'Slider. defaultValue can be bound to state with $bindState.',
+    },
+    RangeSlider: {
+      props: s.rangeSliderProps,
+      description:
+        'Slider with two thumbs for picking a range. defaultValue ([lower, upper]) can be bound to state with $bindState.',
     },
     DateField: {
       props: s.dateFieldProps,

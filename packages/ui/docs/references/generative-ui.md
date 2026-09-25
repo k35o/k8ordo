@@ -68,8 +68,9 @@ These exports are left out on purpose, so a model cannot place them:
   well.
 - `PortalRootProvider`, `usePortalRoot` — wiring for your own `createPortal`
   calls. The generated overlays open their own surfaces.
-- `Conversation`, `Message`, `PromptInput`, `Reasoning`, `Suggestion`, and
-  `ToolInvocation` from `@k8ordo/ui/ai`, and `Response` from
+- `Conversation`, `Message`, `PromptInput`, `Reasoning`, `Suggestion`,
+  `ToolInvocation`, `Attachment`, and `Source` from `@k8ordo/ui/ai`, and
+  `Response` from
   `@k8ordo/ui/ai/response` — the chat the generated UI is shown in. Your
   application builds it from its message stream; a spec does not place it.
 - `CodeBlock` from `@k8ordo/ui/code-block` — it highlights on the server, as an
