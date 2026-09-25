@@ -11,8 +11,8 @@ export const outputTitle = message({
 });
 
 export const outputDescription = message({
-  ja: '`dist/rsc/index.js` がリクエストハンドラ、`dist/ssr/` はハンドラがペイロードを HTML にするのに使う部分、`dist/client/` がブラウザに配るファイルです。このモードではページを前もって描かないので、`dist/client/` にページの HTML はありません。',
-  en: '`dist/rsc/index.js` is the request handler, `dist/ssr/` is what it turns payloads into HTML with, and `dist/client/` holds the files the browser is served. Nothing is rendered ahead of time in this mode, so there is no page HTML in `dist/client/`.',
+  ja: '`dist/rsc/index.js` がリクエストハンドラ、`dist/ssr/` はハンドラがペイロードを HTML にするのに使う部分、`dist/client/` がブラウザに配るファイルです。圧縮の効く型のファイルには、ビルドが Brotli と gzip で圧縮したコピー（`.br` と `.gz`）を隣に置きます。このモードではページを前もって描かないので、`dist/client/` にページの HTML はありません。',
+  en: '`dist/rsc/index.js` is the request handler, `dist/ssr/` is what it turns payloads into HTML with, and `dist/client/` holds the files the browser is served — each one whose type compresses with a Brotli and a gzip copy (`.br`, `.gz`) the build wrote beside it. Nothing is rendered ahead of time in this mode, so there is no page HTML in `dist/client/`.',
 });
 
 export const outputDeps = message({
@@ -80,6 +80,21 @@ export const answersFiles = message({
   en: 'A GET or HEAD naming a file inside `dist/client/` is answered with that file as it is. Its `content-type` is the type registered for its extension, with `charset=utf-8` on text, or `application/octet-stream` when none is registered. Everything under `/assets/` carries a content hash in its name, so it gets `cache-control: public, max-age=31536000, immutable`; anything else gets `no-cache`. A HEAD gets the headers a GET would and no body, whether a file or the handler answers it.',
 });
 
+export const answersEncoding = message({
+  ja: '圧縮したコピーがあるファイルには、リクエストの `Accept-Encoding` が選ぶほうを `Vary: Accept-Encoding` を付けて返します。両方を同じだけ受け付けるなら `br` です。コピーはビルドのときに一番小さくなる設定で一度だけ作り、元より小さくならなかったものは書きません。リクエストのたびに同じファイルを圧縮し直すことはありません。',
+  en: "A file with compressed copies is answered with the one the request's `Accept-Encoding` prefers — `br` when both are equally welcome — under `Vary: Accept-Encoding`. The copies are made once, at build time and at the smallest setting, and one that came out no smaller than the file is not written; nothing is compressed again per request.",
+});
+
+export const answersRevalidation = message({
+  ja: 'ファイルには中身から作った `ETag` が付きます。更新時刻ではないので、ファイルを変えなかったデプロイの後でも、同じソースから別々にビルドしたサーバーに対しても、再検証は `304` で終わります。中身を読むのは 1 ファイルにつき 1 回です。1 つの範囲を求める `Range` には `206` で答えます。Safari が `<video>` を再生するにはこれが要ります。末尾より先から始まる範囲には `416`、複数の範囲・読めない `Range`・別の版を指す `If-Range` には、ファイル全体を返します。',
+  en: 'Every file carries an `ETag` taken from its contents rather than its modification time, so a revalidation after a deploy that did not change the file, or against another server built from the same source, ends in a `304`; the contents are read for it once per file. A `Range` asking for one span is answered with `206` — what Safari needs before it will play a `<video>` — a range starting past the end with `416`, and anything else (several spans, a `Range` that cannot be read, an `If-Range` naming another version) with the whole file.',
+});
+
+export const answersStream = message({
+  ja: 'ページとそのペイロードは、同じ選び方でストリームのまま圧縮します。React が書いた部分はそのたびに押し出すので、いちばん遅い境界が描き終わるのを待たずにシェルがブラウザに届きます。すでに圧縮された型（画像など）、ハンドラが自分で符号化したもの、`Cache-Control: no-transform` が付いたものは、そのまま返します。',
+  en: 'A page and its payload are compressed as they stream, under the same negotiation: every part React writes is flushed as it is written, so the shell reaches the browser before the slowest boundary has finished. An answer in a type that is compressed already (an image), one the handler encoded itself, or one marked `Cache-Control: no-transform` is sent as it is.',
+});
+
 export const answersHandler = message({
   ja: 'それ以外はすべてハンドラに渡ります。GET と HEAD 以外のメソッドは、ファイルと同じパスでもかならずハンドラが答えます。ハンドラのステータスとヘッダーはそのまま返り、複数の `Set-Cookie` も 1 つにまとめられません。ハンドラが例外を投げたときは `500` と本文 `internal error` だけを返し、中身は訪問者ではなくサーバーのログに出します。本文を送り始めてから失敗したときは、もうステータスを変えられないので、ページの途中で繋いだままにせず接続を切ります。',
   en: "Everything else goes to the handler, and any method but GET and HEAD always does, even to a path that names a file. The handler's status and headers pass through as they are, several `Set-Cookie` headers included. When the handler throws, the answer is a `500` with the body `internal error`; the details go to the server's log, not to the visitor. A body that fails after it has started streaming can no longer change its status, so the connection is cut rather than left open on half a page.",
@@ -96,13 +111,23 @@ export const answersStatuses = message({
 });
 
 export const handlerTitle = message({
-  ja: 'ほかのホストで動かす',
-  en: 'Running on another host',
+  ja: 'リクエストハンドラ',
+  en: 'The request handler',
 });
 
 export const handlerDescription = message({
-  ja: 'ビルドされたハンドラは、`dist/rsc/index.js` が default export する `(request: Request) => Promise<Response>` という、ただの関数です。`Request` を渡して `Response` を受け取れる環境なら、どこでも動かせます。`@k8ordo/static` がビルド時に作って呼ぶのも、同じハンドラをそのモード向けにコンパイルしたものです。',
-  en: 'The built handler is a plain function, `(request: Request) => Promise<Response>`, default-exported from `dist/rsc/index.js`. Any runtime that can hand it a `Request` and take back a `Response` can run it. `@k8ordo/static` builds and calls the same handler at build time, compiled for that mode.',
+  ja: '`serve()` はビルドを動かすホストの 1 つです。動かされているアプリそのものはリクエストハンドラで、リクエストを `Request` にして渡し、返った `Response` で答えられる環境なら、どこでもホストになれます。ハンドラは `dist/rsc/index.js` が default export する `(request: Request) => Promise<Response>` という、ただの関数です。`@k8ordo/static` がビルド時に作って呼ぶのも、同じハンドラをそのモード向けにコンパイルしたものです。ハンドラは隣の `dist/ssr/` を読み込むので 2 つは一緒に置きます。アプリの依存は名前で import するので、動かす場所で解決できるようにしておくか、Wrangler のように bundle に含めます。',
+  en: "`serve()` is one host for the build. What it hosts — the application itself — is the request handler, and anything that can turn a request into a `Request` and answer with the `Response` it gets back can host it. The handler is a plain function, `(request: Request) => Promise<Response>`, default-exported from `dist/rsc/index.js`; `@k8ordo/static` builds and calls the same handler at build time, compiled for that mode. It loads `dist/ssr/` from beside itself, so the two travel together, and it imports the application's dependencies by name, so they have to resolve where it runs — or be bundled in, as Wrangler does.",
+});
+
+export const handlerRuntimes = message({
+  ja: 'Web の `Request`・`Response`・ストリームのほかに、ハンドラが実行環境から借りるのは `node:async_hooks` の `AsyncLocalStorage` だけです。React は描画ごとの状態をそこに持ち、`paramsSchema` もそこに書きます。Node.js・Bun・Deno・`nodejs_compat` を付けた Cloudflare Workers はどれもこれを持っていて、import したハンドラをそのまま受け取ります。',
+  en: "Past the web platform's `Request`, `Response` and streams, the one thing the handler takes from its runtime is `AsyncLocalStorage` from `node:async_hooks`: React keeps each render's state in it, and a `paramsSchema` writes to it. Node.js, Bun, Deno, and Cloudflare Workers with the `nodejs_compat` flag all have it, and each takes the imported handler as it is.",
+});
+
+export const handlerImports = message({
+  ja: 'この約束は、ハンドラが走らせるコードも Node にしか無いものを import しない限りで成り立ちます。`redirect()` と型が `@k8ordo/server/runtime` から、`serve()` が別の入口 `@k8ordo/server/serve` から来るのはそのためです。`node:fs` を読む route ファイルや Server Action は、アプリをそれを持つ実行環境に縛ります。',
+  en: 'What the handler runs keeps that promise only as long as it imports nothing that needs Node either — which is why `redirect()` and the types come from `@k8ordo/server/runtime`, and `serve()` from an entry of its own, `@k8ordo/server/serve`. A route file or a Server Action that reads `node:fs` ties the application to a runtime that has it.',
 });
 
 export const handlerMethods = message({
@@ -111,8 +136,8 @@ export const handlerMethods = message({
 });
 
 export const handlerFiles = message({
-  ja: 'ハンドラはファイルを配りません。ほかのホストでは `dist/client/` をホストの側で配信し、それ以外のリクエストをハンドラに渡します。',
-  en: 'The handler does not serve files: on another host, serve `dist/client/` from the host and hand every other request to the handler.',
+  ja: 'ハンドラはファイルを配りません。`dist/client/` をハンドラの前で配信し（`assets/` の下は名前に中身のハッシュが入っているので `Cache-Control: public, max-age=31536000, immutable`）、どのファイルも指さないリクエストをハンドラに渡します。Workers では、クライアントのビルドを指す static assets がそれにあたり、Worker が動く前に答えます。',
+  en: "The handler serves no files. Put `dist/client/` in front of it — the files under `assets/` with `Cache-Control: public, max-age=31536000, immutable`, since their names carry their contents' hash — and hand it every request that names none. On Workers that is static assets pointed at the client build, which answer before the Worker runs.",
 });
 
 export const handlerOrigin = message({

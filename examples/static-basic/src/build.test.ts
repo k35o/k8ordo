@@ -12,6 +12,8 @@ import type { Browser, Page } from 'playwright';
 
 const root = path.resolve(import.meta.dirname, '..');
 const client = path.join(root, 'dist', 'client');
+// vite.base.config.ts が base: '/site/' で書くサイト
+const underBase = path.join(root, 'dist', 'base', 'client');
 
 // 描画に失敗するページ・not-found を持つ構成のビルド。止まることを主張する
 // ので、先に走らせて stderr を取っておき、本物のビルドで dist を上書きする
@@ -51,7 +53,14 @@ beforeAll(() => {
   previous = mkdtempSync(path.join(tmpdir(), 'k8ordo-previous-'));
   cpSync(client, previous, { recursive: true });
   execFileSync('pnpm', ['exec', 'vp', 'build'], { cwd: root, stdio: 'pipe' });
-}, 360_000);
+  // 既定のビルドが空にするのは dist/client などの各出力先だけなので、
+  // dist/base/ は残る
+  execFileSync(
+    'pnpm',
+    ['exec', 'vp', 'build', '--config', 'vite.base.config.ts'],
+    { cwd: root, stdio: 'pipe' },
+  );
+}, 480_000);
 
 afterAll(() => {
   rmSync(previous, { recursive: true, force: true });
@@ -59,6 +68,9 @@ afterAll(() => {
 
 const read = (...parts: string[]): string =>
   readFileSync(path.join(client, ...parts), 'utf8');
+
+const readUnderBase = (...parts: string[]): string =>
+  readFileSync(path.join(underBase, ...parts), 'utf8');
 
 describe('the static build', () => {
   it('writes a page as HTML the server rendered', () => {
@@ -165,17 +177,52 @@ const CONTENT_TYPES: Readonly<Record<string, string>> = {
   '.rsc': 'text/x-component; charset=utf-8',
 };
 
+describe('the static build under a base', () => {
+  it('writes each page at its pathname in the table, beside its payload', () => {
+    expect(existsSync(path.join(underBase, 'index.html'))).toBe(true);
+    expect(existsSync(path.join(underBase, 'index.rsc'))).toBe(true);
+    expect(existsSync(path.join(underBase, 'products', '1', 'index.rsc'))).toBe(
+      true,
+    );
+  });
+
+  it('links and loads scripts under the base', () => {
+    const html = readUnderBase('products', 'index.html');
+    expect(html).toContain('href="/site/products/1"');
+    expect(html).toMatch(/src="\/site\/assets\/[^"]+\.js"/u);
+  });
+
+  it('lists each page in the sitemap at its URL under the base', () => {
+    expect(readUnderBase('sitemap.xml')).toContain(
+      '<loc>https://example.test/site/products/1</loc>',
+    );
+  });
+
+  it('sends a redirect.ts on to its target under the base', () => {
+    expect(readUnderBase('old', 'index.html')).toContain('url=/site/products');
+  });
+});
+
 describe('a written page in the browser', () => {
   let server: Server;
   let browser: Browser;
   let origin = '';
-  // ホストがいま配っているデプロイ
+  // ホストがいま配っているデプロイと、それを置いている場所（Vite の base）
   let deployed = client;
+  let mountedAt = '/';
 
   beforeAll(async () => {
     // 静的ホストと同じ規則で dist/client を配る: ディレクトリは index.html
     server = createServer((request, response) => {
-      const { pathname } = new URL(request.url ?? '/', 'http://localhost');
+      const { pathname: requested } = new URL(
+        request.url ?? '/',
+        'http://localhost',
+      );
+      if (!requested.startsWith(mountedAt)) {
+        response.writeHead(404).end();
+        return;
+      }
+      const pathname = `/${requested.slice(mountedAt.length)}`;
       const file = path.join(
         deployed,
         path.extname(pathname) === ''
@@ -212,6 +259,7 @@ describe('a written page in the browser', () => {
 
   afterEach(() => {
     deployed = client;
+    mountedAt = '/';
   });
 
   // hydrate するまでのリンクは、JS なしのただの文書の読み込みになって
@@ -247,6 +295,19 @@ describe('a written page in the browser', () => {
     await page.getByRole('heading', { name: 'products' }).waitFor();
     expect(new URL(page.url()).pathname).toBe('/products');
     expect(await page.evaluate(() => 'stayed' in window)).toBe(false);
+    await page.close();
+  });
+
+  it('moves to the next page in place when the site sits under a base', async () => {
+    deployed = underBase;
+    mountedAt = '/site/';
+    const page = await openHydrated(`${origin}/site/`);
+
+    await page.getByRole('link', { name: 'products', exact: true }).click();
+
+    await page.getByRole('heading', { name: 'products' }).waitFor();
+    expect(new URL(page.url()).pathname).toBe('/site/products');
+    expect(await page.evaluate(() => 'stayed' in window)).toBe(true);
     await page.close();
   });
 

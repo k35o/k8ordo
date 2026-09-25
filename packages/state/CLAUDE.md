@@ -74,6 +74,12 @@ pnpm check         # check:write to auto-fix
   normal case. Entry and local `salvage` hand the typed values straight to the
   schema — no structured clone, no JSON — so those schemas must accept their
   own output, and a local value JSON cannot hold (a Date) survives the echo and is lost on the next load.
+- **A link carries Vite's base; a path does not.** `href(path)` takes a
+  path in the route table's terms and puts `import.meta.env.BASE_URL` in
+  front (`base.ts`, the router's `withBase` rule re-spelled, since the router
+  is a type-only peer here). The type stays the path given, which is what
+  typed-route checks read. Outside Vite `import.meta.env` is undefined
+  despite its type, and nothing is added.
 - **No history-API fallback.** Imperative url updates assume an intercepting
   router; links and GET forms are the path that works everywhere. Updates
   that change only entry, local or memory values never navigate, so they work
@@ -87,6 +93,7 @@ src/
   url/codec.ts         schema ⇄ URLSearchParams: parse + canonical search
   entry/codec.ts       StoredCodec: read typed stored values (entry, local)
   page-state.ts        definePageState(); slot disjointness; internals WeakMap
+  base.ts              withBase: Vite's base in front of a link
   local-state.ts       defineLocalState()
   memory-state.ts      defineMemoryState() — no schema by design
   store/core.ts        snapshot core: key-diff notify, picks, update handles
@@ -96,7 +103,7 @@ src/
   store/memory-store.ts
   use-app-state.ts     the client hook ('use client'); dispatch on def.kind
   register.ts          Register interface for typed-route path constraint;
-                       PathFrom derives the union (routes → path → any)
+                       AcceptedPath checks a path (routes → path → any)
 ```
 
 ## Where zod's public API runs out
@@ -104,14 +111,20 @@ src/
 Wrapper peeling (`default`, `optional`, `catch`, pipes) reads `_zod.def` to
 decide whether a url field takes one param value or `getAll` — same coupling
 and same justification as `@k8ordo/form`'s walk. Everything else goes through
-`safeParse` from `zod/v4/core`, which is why `zod` and `zod/mini` both work.
+the public core: `safeParse`, and `safeEncode` from `zod/v4/core` for a url
+boolean, which is written in its schema's own spelling (a custom
+`z.stringbool({ truthy: ['yes'] })` cannot read back `String(true)`). That is
+why `zod` and `zod/mini` both work, and why `@k8ordo/form`'s checkbox for the
+same field submits the same string.
 
 ## Conventions
 
 - `type`, not `interface` — except `Register`, which must merge. It takes
-  the router's own line, `{ routes: typeof routes }`, and derives the path
-  union through `RouteOf` from `@k8ordo/router` — a type-only import, so the
-  router is an optional peer that never loads at runtime. The older
+  the router's own line, `{ routes: typeof routes }`, and checks each path
+  `href` is handed through `NavigablePath` from `@k8ordo/router` — a
+  type-only import, so the router is an optional peer that never loads at
+  runtime. `href` infers the path from the argument and checks that, never
+  a union of every path the table has. The older
   `{ path: P }` form stays accepted (other routers, and what the framework's
   generator emitted before `routes`); `routes` wins when both are present.
 - **A local definition owns its storage key.** `storageKey` on the

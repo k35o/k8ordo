@@ -64,8 +64,8 @@ cannot describe) are not derived: the field becomes a bare text input and is
 listed in `dropped`. There is no input masking. A schema no control could
 satisfy is refused at derive time rather than left to fail on every
 submission: `z.number()` and `z.literal(1)` (use `z.coerce.number()`),
-`z.date()`, `z.bigint()`, and `z.stringbool()` on a checkbox (use
-`z.boolean()`). A `z.custom()` that rejects strings cannot be refused at derive
+`z.date()`, and `z.bigint()`; so is a `z.stringbool().default(true)` checkbox,
+which could never submit `false`. A `z.custom()` that rejects strings cannot be refused at derive
 time: it derives as a text input, is listed in `dropped`, and fails on the
 server. Of `.refine()` / `.superRefine()` checks, `dropped` counts only the ones
 on the schema as a whole, not those on a single field, a nested object, or a
@@ -80,12 +80,16 @@ row. Rules cannot target fields inside repeated rows.
   `field(path)` accessor giving input attributes, the current error, and
   `invalid` / `required`, an `array(path)` accessor for repeated rows,
   `formError` (the message no field owns, with the props that let focus land
-  on it), and `isDirty`. After a failed submission focus moves to the first
-  failure in document order. Also `useAsyncCheck` for server-answered
+  on it), and `isDirty`. On submit it checks every field — untouched ones and
+  the rules included — and stops a failing submission, a GET form with no
+  action as much as one with (a `formNoValidate` button skips the check);
+  after a submission stopped here or failed on the server, focus moves to the
+  first failure in document order. Also `useAsyncCheck` for server-answered
   per-field checks and `HiddenValue` for components that render no input of
   their own. The types
   of the `formFields` result (`FormFields`, `DerivedField`, `DerivedArray`,
-  `DroppedCheck`, `FieldInput`, `ValidityFlag`, `Rule`) are exported here as
+  `DroppedCheck`, `FieldInput`, `ValidityFlag`, `Rule`, `DerivedRule`,
+  `RuleMessage`) are exported here as
   well, since the result crosses to the client as a prop, and so are
   `FormState` and the return types (`UseFormReturn`, `FieldView`, `ArrayView`,
   `RowView`, `FormErrorView`, `AsyncCheck`).
@@ -98,15 +102,21 @@ row. Rules cannot target fields inside repeated rows.
   typed data or per-field errors with the submitted values. An untouched
   control reaches the schema as what it actually submits: `''` for text,
   `false` for a checkbox, and nothing at all for a number, a
-  `z.coerce.bigint()`, a file, or a choice (a radio group with none selected, a
-  `<select>` on a `value=""` placeholder), so `z.coerce.number()` cannot read a
+  `z.coerce.bigint()`, a file, a choice (a radio group with none selected, a
+  `<select>` on a `value=""` placeholder), or a `z.stringbool()` checkbox —
+  which, checked, submits the `value` derived from the schema's own spelling of
+  `true`, the same string `@k8ordo/state` writes into a URL — so `z.coerce.number()` cannot read a
   blank field as 0 and `z.enum([…]).optional()` can be left empty. A checkbox
   group always echoes as an array.
   `defineForm(schema, rules)` attaches cross-field rules (`sameAs`,
-  `minChecked`, `requiredWhen`) typed against the schema's paths. Types:
-  `ParseResult`, `FormDefinition`, `Rule`, `FormState`, and the `formFields`
-  result's `FormFields`, `DerivedField`, `DerivedArray`, `DroppedCheck`,
-  `FieldInput`, `ValidityFlag`.
+  `minChecked`, `requiredWhen`) typed against the schema's paths; a rule's
+  message is a string or a function called when the rule is reported
+  (`formFields` calls it while deriving, so a rule crosses to the client as a
+  `DerivedRule` with the text in it; `parseForm` calls it when the rule
+  breaks), which keeps a localized definition at module scope. Types:
+  `ParseResult`, `FormDefinition`, `Rule`, `RuleMessage`, `FormState`, and the
+  `formFields` result's `FormFields`, `DerivedField`, `DerivedArray`,
+  `DerivedRule`, `DroppedCheck`, `FieldInput`, `ValidityFlag`.
 
 ---
 
@@ -146,8 +156,10 @@ These docs are served from <https://ordo.k8o.me>.
   `@k8ordo/server` a page receives `params` and `pathname` (plus a
   headers-and-cookies `request` under `@k8ordo/server`) but never the search,
   and the url slot is read in the browser);
-  `href(base, values?)` builds a canonical link keeping the path literal in
-  the type; `search(values?)` returns the query string alone.
+  `href(path, values?)` builds a canonical link keeping the path literal in
+  the type — the path written from the app's root, the link carrying Vite's
+  `base` (`import.meta.env.BASE_URL`) in front; `search(values?)` returns the
+  query string alone.
   `defineLocalState(key, schema)` and `defineMemoryState(key, initial)`
   declare app-scope state; a local definition also exposes `storageKey` (the
   localStorage key, `k8ordo-state:<key>`) and `inlineRead()`, a JavaScript
@@ -166,8 +178,9 @@ These docs are served from <https://ordo.k8o.me>.
   effect only when a url value changes).
   `resetStateRegistry()` clears stores between tests. Augment
   `interface Register { routes: typeof routes }` — the same line as for
-  `@k8ordo/router` — to constrain `href` paths to the route table's linkable
-  paths; a router without a table registers its own path union as
+  `@k8ordo/router` — to check each `href` path against the route table's
+  linkable patterns segment by segment (`NavigablePath`, so a `/:locale`
+  table no longer takes every path); a router without a table registers its own path union as
   `interface Register { path }` instead.
 
 ---
@@ -217,7 +230,10 @@ These docs are served from <https://ordo.k8o.me>.
   `ErrorComponent` are the types the generated code imports); `useRoute()`
   is the untyped form.
   `@k8ordo/state`'s `Register` takes the same `routes: typeof routes`;
-  `RouteOf<typeof routes>` is that pathname space as a union, for any other
+  `NavigablePath<typeof routes, Path>` is `Path` when a linkable pattern
+  matches it segment by segment (a `:param` takes one non-empty segment)
+  and `never` otherwise — a check of the path given, never a union of every
+  path, which a `/:locale` page would turn into `/${string}` — for any other
   typed-path consumer. `usePathname()` reads the platform's
   pathname — never the search — so it works with or without a table, which
   makes it the location hook that also works under the framework;
@@ -227,6 +243,11 @@ These docs are served from <https://ordo.k8o.me>.
   sidebar can ask which section is open under the framework too, and
   `{ inclusive: true }` on either counts a `/*` pattern's own index in;
   `normalizePathname(pathname)` is the router's own trailing-slash rule;
+  under Vite's `base` (`import.meta.env.BASE_URL`, e.g. `/docs/`) `href` /
+  `navigateTo` put it in front of every link (so `href` returns a `string`
+  URL, not a table path) and `usePathname` / `<Router>` take it off, a URL
+  outside it being left to the browser — `withBase(pathname, base?)` /
+  `withoutBase(pathname, base?)` (`null` outside the base) are the two steps;
   `bindParams(() => ({ locale }))` returns `{ href, navigateTo }` with those
   params supplied by the source at each call (still overridable), for a
   segment every link shares — a pattern that names a param still takes
@@ -250,7 +271,7 @@ These docs are served from <https://ordo.k8o.me>.
   `apply` set through `useDeferredValue`.
   Exported types, by group — the table: `Routes` (`{ kind, record, match }`),
   `RoutesRecord`, `RouteNode`, `RouteComponent`, `Match`, `ErrorComponent`,
-  `ErrorProps`; patterns: `PatternOf`, `NavigablePatternOf`, `RouteOf`,
+  `ErrorProps`; patterns: `PatternOf`, `NavigablePatternOf`, `NavigablePath`,
   `MatchablePattern`; registration: `Register`, `RegisteredPattern`,
   `RegisteredNavigablePattern`, `RegisteredParams` (what a link takes),
   `RegisteredPageParams` (what a page receives), `PageProps`, `LayoutProps`;
@@ -344,27 +365,31 @@ These docs are served from <https://ordo.k8o.me>.
   is the import and nothing else); `options.routesDir` moves the route directory
   (default `src/routes`); `ServerOptions` is the type of `options`. This
   entry loads Vite and is for `vite.config.ts` only.
-- `@k8ordo/server/runtime` — what the application's own code imports, without
-  loading Vite, so the built application runs from an install without dev
-  dependencies. `serve({ dist?, port?, host? })` (`ServeOptions`: `dist`
-  defaults to `dist` under the working directory, `port` to `3000`, `host` to
-  `localhost`) serves a build and returns a `Server`, `{ port, url, close }`
-  (`port: 0` takes a free port):
-  the client build's files as they are, everything else through the request
-  handler. The built handler is a plain
-  `(request: Request) => Promise<Response>` default-exported from
-  `dist/rsc/index.js`, so another host can run it directly. `serve` only ever answers a
-  request from a file inside the client build, whatever the pathname is
-  spelled like. `redirect(to)` ends a Server Action by sending the visitor to
-  `to`; `RedirectTarget` is the type of what a `redirect.ts` default-exports,
-  and `RouteRequest` the type of the `request` prop.
+- `@k8ordo/server/runtime` — what code inside the request handler imports,
+  needing nothing from Node: `redirect(to)` ends a Server Action by sending
+  the visitor to `to`; `RedirectTarget` is the type of what a `redirect.ts`
+  default-exports, and `RouteRequest` the type of the `request` prop.
+- `@k8ordo/server/serve` — the Node.js server for a build.
+  `serve({ dist?, port?, host? })` (`ServeOptions`: `dist` defaults to `dist`
+  under the working directory, `port` to `3000`, `host` to `localhost`) serves
+  a build and returns a `Server`, `{ port, url, close }` (`port: 0` takes a
+  free port): the client build's files as they are, everything else through
+  the request handler. `serve` only ever answers a request from a file inside
+  the client build, whatever the pathname is spelled like.
+- `dist/rsc/index.js` — the built request handler, a plain
+  `(request: Request) => Promise<Response>` default export that needs nothing
+  from its runtime but `AsyncLocalStorage` (`node:async_hooks`), so Node.js,
+  Bun, Deno and Cloudflare Workers with `nodejs_compat` run it directly; the
+  host serves `dist/client/` in front of it.
 
 ---
 
 # @k8ordo/i18n
 
-> The locale axis of an application, owned. `defineLocales(['ja', 'en'])`
-> declares the set once and derives membership, negotiation, the URL segment
+> The locale axis of an application, owned. `defineLocales({ ja: { timeZone,
+> dir }, en: … })` declares the set once — each locale with the time zone its
+> dates are shown in and its text direction — and derives membership,
+> negotiation, the URL segment
 > (`localize` / `delocalize`), the `[locale]` params schema in the shape
 > `@k8ordo/static` / `@k8ordo/server` run, and the current locale
 > (`getLocale()`). Each message is a function — `message({ ja, en })` — that
@@ -384,20 +409,26 @@ These docs are served from <https://ordo.k8o.me>.
 
 - [Design Guide](https://ordo.k8o.me/i18n/docs/GUIDE.md): what the package owns and does not (the locale
   segment, not the pathname; no message grammar; no loader), the locale set
-  and negotiation, messages as functions and `Register`, the Server
+  and negotiation, messages as functions and `Register`, formatting (`Intl`
+  drawn for the current locale, dates in its time zone), the Server
   Component boundary (a message is called before it is passed to a
   `'use client'` component), what reaches the browser, where the locale comes
-  from on each side, `/` and `<html lang>`, static path expansion, and
+  from on each side, `/` and `<html lang>` / `dir`, static path expansion, and
   pairing with `@k8ordo/router` / `@k8ordo/ui` / `@k8ordo/form`.
 
 ## Entry point
 
-- `@k8ordo/i18n` — `defineLocales(all, { default? })` returns `{ all,
-  default, is, negotiate, localize, delocalize, paths, paramsSchema,
-  getLocale, run }`; `paths(patterns)` is the static build's `paths` option
+- `@k8ordo/i18n` — `defineLocales(definitions, { default? })` takes each
+  locale's `{ timeZone, dir }` by tag (both required; an unknown time zone
+  throws) and returns `{ all, definitions, default, is, negotiate, localize,
+  delocalize, paths, paramsSchema, getLocale, run, dateTimeFormat,
+  numberFormat, relativeTimeFormat, pluralRules, listFormat }`; the last five
+  return the `Intl` object for the current locale, cached per locale and
+  options, and `dateTimeFormat` always in that locale's `timeZone` (its
+  options type refuses one); `paths(patterns)` is the static build's `paths` option
   with `/:locale` expanded to every locale; typed links come from
   `@k8ordo/router`'s `bindParams(() => ({ locale: locales.getLocale() }))`,
-  written by the application; the first entry is the default unless told otherwise, every tag
+  written by the application; the first entry is the default unless told otherwise (and `default` is then typed as the whole union), every tag
   must be BCP 47, `negotiate(list)` tries each requested tag in order (exact,
   then language) before falling back to the default, `getLocale()` is the
   locale of the render in progress (not a hook), and `run(locale, fn)`
@@ -405,7 +436,7 @@ These docs are served from <https://ordo.k8o.me>.
   an `Accept-Language` header into a preference list. `message(variants)`
   declares one message — text in every locale, or a function of the same
   parameters in every locale — and returns `Message<Args>`, a function that
-  renders the current locale's text. Types: `Locales`, `LocaleOf`, `Message`,
+  renders the current locale's text. Types: `Locales`, `LocaleOf`, `LocaleDefinition`, `IntlFormats`, `LocaleDateTimeFormatOptions`, `Message`,
   `Variants`, `Register`, `RegisteredLocale`, `Delocalized`,
   `LocaleParamsSchema`, `LocalesOptions`.
 

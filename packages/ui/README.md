@@ -241,13 +241,16 @@ stories and rendered props rather than relying on trained knowledge:
 - **Avatar** - User/entity avatar
 - **Badge** - Status/label indicator
 - **Card** - Flexible content container (hover interaction via `interactive`)
+- **Carousel** - Scroll-snapping slides with previous/next buttons
 - **Code** - Formatted code display
 - **Heading** - Typography heading component
+- **Kbd** - Keyboard key cap for shortcuts
 - **Table** - Tabular data display
 
 ### Feedback
 
 - **Alert** - Important messages and notifications
+- **EmptyState** - What a list, table, or search shows when it is empty
 - **Progress** - Progress indication
 - **Skeleton** - Content loading placeholder
 - **Spinner** - Loading indicator
@@ -485,9 +488,9 @@ pnpm add @openuidev/react-lang @openuidev/lang-core zod
 
 Supported components (**all 51**, both frameworks):
 
-- **Layout / containers**: `Stack`, `Grid`, `Card`, `Form`
+- **Layout / containers**: `Stack`, `Grid`, `Card`, `Form`, `Carousel`
 - **Buttons / nav**: `Button`, `IconButton`, `Anchor`, `Breadcrumb`, `Pagination`
-- **Display**: `Badge`, `Heading`, `Avatar`, `Code`, `Icon`, `ChevronIcon`, `StatusIcon`, `Alert`, `Spinner`, `Progress`, `Skeleton`, `Separator`, `Tabs`, `Accordion`, `Table`, `ScrollLinked`
+- **Display**: `Badge`, `Heading`, `Avatar`, `Code`, `Kbd`, `EmptyState`, `Icon`, `ChevronIcon`, `StatusIcon`, `Alert`, `Spinner`, `Progress`, `Skeleton`, `Separator`, `Tabs`, `Accordion`, `Table`, `ScrollLinked`
 - **Overlays (self-contained widgets)**: `Modal`, `Dialog`, `Drawer`, `Popover`, `Tooltip`, `DropdownMenu`, `Toast`
 - **Form**: `TextField`, `Textarea`, `PasswordInput`, `NumberField`, `Slider`, `DateField`, `DatePicker`, `Calendar`, `Checkbox`, `Switch`, `Select`, `Radio`, `RadioCard`, `CheckboxCard`, `ListBox`, `CheckboxGroup`, `Autocomplete`, `FileField`, `FormControl`
 
