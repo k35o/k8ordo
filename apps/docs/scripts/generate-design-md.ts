@@ -416,6 +416,7 @@ import { UIProvider, Button, Card } from '@k8ordo/ui';
 
 - **Button** — \`size: 'sm'|'md'|'lg'\`, \`color: 'primary'|'secondary'|'base'\`, \`variant: 'solid'|'outline'|'skeleton'\`, \`fullWidth\`, \`startIcon\`, \`endIcon\`, \`disabled\`
 - **IconButton** — \`label\`（必須・aria-label）, \`color: 'transparent'|'base'|'primary'|'secondary'\`, \`size\`
+- **CopyButton** — \`value\`（文字列、または押したときに呼ぶ関数。Promise も可）, \`label\`, \`iconOnly\`, \`size\`。押すとアイコンがチェックに変わり、結果を読み上げる。コピーは IconButton と自前のクリップボード処理ではなくこれを使う
 - リンクとして描画するときは Button / IconButton に \`renderItem\` を渡す（\`<button>\` 専用の \`disabled\` / \`type\` を外し、残りの props を \`<a>\` などへ展開する。IconButton は tooltip の配線と ref を持つ \`triggerProps\` も展開する）
 
 ### Data display

@@ -38,6 +38,11 @@ export const buildComponentLibrary = <C>(
     'Icon-only button (label is required).',
     s.iconButtonProps,
   );
+  const CopyButton = def(
+    'CopyButton',
+    'Button that copies value to the clipboard and confirms it.',
+    s.copyButtonProps,
+  );
   const Badge = def('Badge', 'Badge for a status or a label.', s.badgeProps);
   const Heading = def('Heading', 'Heading (h1 to h6).', s.headingProps);
   const Anchor = def('Anchor', 'Text link.', s.anchorProps);
@@ -188,6 +193,7 @@ export const buildComponentLibrary = <C>(
   const childRefs = [
     Button.ref,
     IconButton.ref,
+    CopyButton.ref,
     Badge.ref,
     Heading.ref,
     Anchor.ref,
@@ -337,6 +343,7 @@ export const buildComponentLibrary = <C>(
       Toast,
       Button,
       IconButton,
+      CopyButton,
       Badge,
       Heading,
       Anchor,

@@ -95,6 +95,7 @@ export const { registry } = defineRegistry(catalog, {
     ChevronIcon: ({ props }) => ui.renderChevronIcon(props),
     StatusIcon: ({ props }) => ui.renderStatusIcon(props),
     IconButton: ({ props }) => ui.renderIconButton(props),
+    CopyButton: ({ props }) => ui.renderCopyButton(props),
     Accordion: ({ props }) => ui.renderAccordion(props),
     Breadcrumb: ({ props }) => ui.renderBreadcrumb(props),
     Table: ({ props }) => ui.renderTable(props),

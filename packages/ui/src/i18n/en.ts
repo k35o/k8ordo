@@ -14,6 +14,10 @@ export const en: Messages = {
 
   toastRegion: 'Notifications',
 
+  copy: 'Copy',
+  copied: 'Copied',
+  copyFailed: 'Could not copy',
+
   autocompletePlaceholder: 'Type to filter',
   autocompleteRemoveTag: 'Remove tag',
   autocompleteClear: 'Clear all',

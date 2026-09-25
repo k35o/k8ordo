@@ -271,6 +271,19 @@ import { IconButton } from '@k8ordo/ui';
 </IconButton>
 ```
 
+### CopyButton
+
+For copying text, reach for `CopyButton` rather than an `IconButton` and your own
+clipboard code: it writes to the clipboard, shows a check, and announces the
+result to screen readers.
+
+```tsx
+import { CopyButton } from '@k8ordo/ui';
+
+<CopyButton value={code} label="Copy code" iconOnly size="sm" />
+<CopyButton value={() => window.location.href} label="Copy link" />
+```
+
 ### Card
 
 Floating on a shadow is the default: a white card over a `bg-subtle` page.
