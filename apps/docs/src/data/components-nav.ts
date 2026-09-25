@@ -71,6 +71,21 @@ export const componentCategories: NavCategory[] = [
         description: m.components.numberField.description,
       },
       {
+        name: 'DateField',
+        path: '/:locale/ui/components/date-field',
+        description: m.components.dateField.description,
+      },
+      {
+        name: 'DatePicker',
+        path: '/:locale/ui/components/date-picker',
+        description: m.components.datePicker.description,
+      },
+      {
+        name: 'Calendar',
+        path: '/:locale/ui/components/calendar',
+        description: m.components.calendar.description,
+      },
+      {
         name: 'Select',
         path: '/:locale/ui/components/select',
         description: m.components.select.description,

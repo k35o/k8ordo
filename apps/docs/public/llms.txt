@@ -5,7 +5,7 @@
 # @k8ordo/ui
 
 > React components from k8ordo, with semantic design tokens, dark mode,
-> built-in Japanese/English wording, AI chat components, and official generative UI
+> built-in wording that follows `@k8ordo/i18n` (Japanese and English included), AI chat components, and official generative UI
 > adapters (json-render & OpenUI) that let an LLM generate, validate, and render
 > on-brand UIs from these components.
 >
@@ -18,11 +18,11 @@ Start with the Design Guide, then follow the reference most relevant to the task
 
 ## Guide
 
-- [Design Guide](https://ordo.k8o.me/docs/GUIDE.md): setup, dark mode (the `dark` class that `@k8ordo/color-scheme` puts on `<html>`, and the `color-scheme` the stylesheet sets to match), i18n (default Japanese, switching to English), design direction, aesthetic guidelines, component usage principles, anti-patterns, implementation principles, testing (component tests belong in a real browser — Vitest browser mode or Playwright — because the components call browser APIs jsdom does not implement).
+- [Design Guide](https://ordo.k8o.me/docs/GUIDE.md): setup, dark mode (the `dark` class that `@k8ordo/color-scheme` puts on `<html>`, and the `color-scheme` the stylesheet sets to match), i18n (wording in `@k8ordo/i18n`'s current locale, English without a locale set, registering other locales, migrating from `UIProvider`'s `messages`), design direction, aesthetic guidelines, component usage principles, anti-patterns, implementation principles, testing (component tests belong in a real browser — Vitest browser mode or Playwright — because the components call browser APIs jsdom does not implement).
 
 ## References
 
-- [Components](https://ordo.k8o.me/docs/references/components.md): full component list, import paths, props, and i18n — every component, compound ones included (`Dialog.Root`, `Tabs.Root`, …), renders from a Server Component — component wording comes from a dictionary that defaults to Japanese; `@k8ordo/ui/i18n` exports `ja` / `en` / `dictionaries` (both keyed by locale) / the `Messages` type for `<UIProvider messages={...}>` (per-component wording props win over the dictionary), and `useMessages` to read the wording in effect in your own elements.
+- [Components](https://ordo.k8o.me/docs/references/components.md): full component list, import paths, props, and i18n — every component, compound ones included (`Dialog.Root`, `Tabs.Root`, …), renders from a Server Component — component wording comes from the dictionary of `@k8ordo/i18n`'s current locale (English when the app defines no locale set); `@k8ordo/ui/i18n` exports `ja` / `en` / the `Messages` type, `registerMessages(locale, messages)` for any other locale or a replacement (per-component wording props win over any dictionary), and `getMessages()` — not a hook — to read the wording in effect in your own elements.
 - [AI chat](https://ordo.k8o.me/docs/references/ai-chat.md): AI chat components from `@k8ordo/ui/ai` (Conversation / Message / PromptInput / Reasoning / Suggestion / ToolInvocation), streaming Markdown `Response` from `@k8ordo/ui/ai/response` (optional peer `streamdown`), and `mapMessageParts` from `@k8ordo/ui/ai-sdk` to render AI SDK `UIMessage.parts` (optional peer `ai`).
 - [Generative UI](https://ordo.k8o.me/docs/references/generative-ui.md): use json-render / OpenUI to make an LLM generate UIs — `catalog.prompt()` (server-safe), `<JsonRenderUI spec={spec} />` (client), `validateGeneratedSpec()` (validate/repair LLM output), `satisfies UISpec` (typed specs), `@k8ordo/ui/openui/prompt`, and which exports the catalog leaves out on purpose.
 - [Typography](https://ordo.k8o.me/docs/references/typography.md): type scale and usage.
@@ -125,10 +125,13 @@ row. Rules cannot target fields inside repeated rows.
 > Declare state by where it lives: `definePageState` (typed URL search params
 > plus hidden history-entry state — the two faces of one entry, updated
 > atomically over the Navigation API), `defineLocalState` (localStorage,
-> cross-tab), `defineMemoryState` (a typed shared box with no schema, resets
-> on reload). One zod schema per boundary place (url, entry, local) derives
-> the server read, canonical links, salvage of stale data, and a client
-> subscription with exact per-key change detection. Links and GET forms write
+> cross-tab), `defineCookieState` (a cookie the browser writes with the
+> Cookie Store API and the server reads from the request, so preferences
+> render without a flash of the default — never a secret, it cannot be
+> `HttpOnly`), `defineMemoryState` (a typed shared box with no schema, resets
+> on reload). One zod schema per boundary place (url, entry, local, cookie)
+> derives the server read, canonical links, salvage of stale data, and a
+> client subscription with exact per-key change detection. Links and GET forms write
 > the URL before JavaScript loads under any router (the server renders what
 > they wrote wherever it reads the search); imperative url updates ride a
 > Navigation-API-intercepting router.
@@ -141,11 +144,12 @@ These docs are served from <https://ordo.k8o.me>.
 
 ## Guide
 
-- [Design Guide](https://ordo.k8o.me/state/docs/GUIDE.md): the four places and when each fits, the shared
-  definition module, reading on the server, updating on the client, batching
-  and update handles, subscription granularity, router requirements, typed
-  routes via `Register`, reading local state before hydration, and pairing
-  with `@k8ordo/form` for GET forms.
+- [Design Guide](https://ordo.k8o.me/state/docs/GUIDE.md): the places and when each fits, the shared
+  definition module, reading on the server, cookie state the server renders
+  (and how it relates to cookies the server writes), updating on the client,
+  batching and update handles, subscription granularity, router
+  requirements, typed routes via `Register`, reading local state before
+  hydration, and pairing with `@k8ordo/form` for GET forms.
 
 ## Entry point
 
@@ -160,22 +164,31 @@ These docs are served from <https://ordo.k8o.me>.
   the type — the path written from the app's root, the link carrying Vite's
   `base` (`import.meta.env.BASE_URL`) in front; `search(values?)` returns the
   query string alone.
-  `defineLocalState(key, schema)` and `defineMemoryState(key, initial)`
-  declare app-scope state; a local definition also exposes `storageKey` (the
-  localStorage key, `k8ordo-state:<key>`) and `inlineRead()`, a JavaScript
-  expression for an inline `<script>` that evaluates to the stored object or
-  `null` before hydration — unvalidated, so read only what you need with a
-  fallback. `useAppState(definition, keys?, { initialUrl? })`
-  (client) works on any kind and returns `[state, update]` — state is the
-  flat merge of a page definition's slots; `update(patch)` applies
-  synchronously, batches the calls a handler makes with no `await` between
-  them into one write (url+entry changes atomically via
-  `navigation.navigate()`, entry-only changes via `updateCurrentEntry()`,
-  local via one `setItem`; memory applies per call), and returns
+  `defineLocalState(key, schema)`, `defineCookieState(key, schema)` and
+  `defineMemoryState(key, initial)` declare app-scope state; a local
+  definition also exposes `storageKey` (the localStorage key,
+  `k8ordo-state:<key>`) and `inlineRead()`, a JavaScript expression for an
+  inline `<script>` that evaluates to the stored object or `null` before
+  hydration — unvalidated, so read only what you need with a fallback. A
+  cookie definition exposes `cookieName` (`k8ordo-state.<key>`),
+  `parseCookies(cookies)` — reads the values out of a request's
+  percent-decoded cookies (`request.cookies` under `@k8ordo/server`), salvaged
+  like any read — and `cookieValue(values?)`, the value a server writes when
+  it sets the same cookie (`Path=/`, `SameSite=Lax`, `Max-Age=34560000`,
+  never `HttpOnly`). `useAppState(definition, keys?, { initialUrl? } |
+  { initialCookie? })` (client) works on any kind and returns
+  `[state, update]` — state is the flat merge of a page definition's slots;
+  `initialUrl` / `initialCookie` seed the server and hydration renders with
+  what the server read; `update(patch)` applies synchronously, batches the
+  calls a handler makes with no `await` between them into one write
+  (url+entry changes atomically via `navigation.navigate()`, entry-only
+  changes via `updateCurrentEntry()`, local via one `setItem`, cookie via one
+  `cookieStore.set()`; memory applies per call), and returns
   `{ committed, finished }` promise handles (for non-navigating kinds they
-  settle once the write lands, and a write localStorage refuses rejects them
-  with its error; `{ history: 'push' }` exists only on page state and takes
-  effect only when a url value changes).
+  settle once the write lands, and a write the browser refuses — a full
+  localStorage, a cookie over 4 KB — rejects them with its error;
+  `{ history: 'push' }` exists only on page state and takes effect only when
+  a url value changes).
   `resetStateRegistry()` clears stores between tests. Augment
   `interface Register { routes: typeof routes }` — the same line as for
   `@k8ordo/router` — to check each `href` path against the route table's
@@ -290,7 +303,7 @@ These docs are served from <https://ordo.k8o.me>.
 > output a directory a static host can serve. The mode is the dependency —
 > installing this package means request-time data does not exist as an API, and
 > a `'use server'` module, which the RSC pipeline still compiles, is refused by
-> name. `src/routes/` is the pathname space
+> name, as is a `guard.ts`. `src/routes/` is the pathname space
 > (page/layout/not-found/error/redirect, `[param]`, `(group)`, `_private`), a
 > page or layout may `export const paramsSchema` (any Standard Schema,
 > synchronous) to type its parameters — a refused value makes the pattern not
@@ -325,7 +338,8 @@ These docs are served from <https://ordo.k8o.me>.
   `StaticOptions` is the type of those options. A
   `'use server'` module fails it too — in `vite dev` as well as the build: a
   file cannot receive a Server Action, so the application wants
-  `@k8ordo/server` instead.
+  `@k8ordo/server` instead. So does a `guard.ts`, every one named at once: a
+  file has no request to guard.
 
 ---
 
@@ -335,14 +349,17 @@ These docs are served from <https://ordo.k8o.me>.
 > parameters need no list of values, an unknown URL is a real 404, and a form
 > can post to a Server Action. The mode is the dependency — the alternative is
 > `@k8ordo/static`, which renders every route at build time. `src/routes/` is
-> the pathname space (page/layout/not-found/error/redirect, `[param]`,
+> the pathname space (page/layout/not-found/error/redirect/guard, `[param]`,
 > `(group)`, `_private`), a page or layout may `export const paramsSchema` (any
 > Standard Schema, synchronous) to type its parameters — a refused value makes
 > the pattern not answer, so the walk goes on to `not-found.tsx` under a real
 > 404 — an `error.tsx` shows in place of what throws below it, a `redirect.ts`
 > answers 307/308, a Server Action ends with `redirect()` (303 without
-> JavaScript, a navigation with it), a page receives `request` (read-only
-> headers and cookies) and renders its own `<title>` — boundaries are React's
+> JavaScript, a navigation with it), a `guard.ts` runs before whatever answers
+> below it (a `Response` ends the request, nothing lets it through, and
+> `responseHeaders()` adds to the final answer), a guard or a Server Action
+> reads and writes cookies through `cookies()`, a page receives `request`
+> (read-only headers and cookies) and renders its own `<title>` — boundaries are React's
 > own `'use client'` with `server-only` modules barred from the client bundle,
 > and the route table and type wiring are generated rather than hand-written.
 >
@@ -367,8 +384,18 @@ These docs are served from <https://ordo.k8o.me>.
   entry loads Vite and is for `vite.config.ts` only.
 - `@k8ordo/server/runtime` — what code inside the request handler imports,
   needing nothing from Node: `redirect(to)` ends a Server Action by sending
-  the visitor to `to`; `RedirectTarget` is the type of what a `redirect.ts`
-  default-exports, and `RouteRequest` the type of the `request` prop.
+  the visitor to `to`; `responseHeaders()` is the `Headers` the final response
+  carries, `cookies()` the request's cookies to read and write (`get`, `has`,
+  `set(name, value, CookieOptions)`, `delete(name, CookieScope)`; defaults
+  `path: '/'`, `httpOnly`, `secure`, `sameSite: 'lax'`; every write a
+  `Set-Cookie` on the answer), and `requestHeaders()` the headers the request
+  arrived with — all three from a `guard.ts` or a Server Action, and they
+  throw anywhere else; `Guard<P>` is
+  the type of what a `guard.ts` default-exports (`({ request, params }) =>
+  Response | void`, `params` the strings of its directory's pattern) and
+  `GuardContext<P>` its argument; `RedirectTarget` is the type of what a
+  `redirect.ts` default-exports, and `RouteRequest` the type of the `request`
+  prop.
 - `@k8ordo/server/serve` — the Node.js server for a build.
   `serve({ dist?, port?, host? })` (`ServeOptions`: `dist` defaults to `dist`
   under the working directory, `port` to `3000`, `host` to `localhost`) serves

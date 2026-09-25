@@ -4,7 +4,7 @@ import { useEffect, useEffectEvent, useMemo, useRef, useState } from 'react';
 import type { ChangeEvent, FC, InputHTMLAttributes, Ref } from 'react';
 import { useFormStatus } from 'react-dom';
 
-import { useMessages } from '../../../i18n/context';
+import { getMessages } from '../../../i18n/current';
 import { FOCUS_RING_WITHIN } from '../../_internal/focus-ring';
 import { ChevronIcon } from '../../icons';
 import { chain, cn, mergeRefs } from './../../../helpers';
@@ -70,7 +70,7 @@ export const NumberField: FC<Props> = ({
   min = -9_007_199_254_740_991,
   ...rest
 }) => {
-  const messages = useMessages();
+  const messages = getMessages();
   const inputRef = useRef<HTMLInputElement>(null);
   // 参照が変わるたびに React が ref の解除と再設定を行うため、
   // 利用者が副作用付きのコールバック ref を渡しても毎レンダー走らないようにする

@@ -39,18 +39,18 @@ export const hookTable = {
 };
 
 export const hookShape = message({
-  ja: '状態の形は定義の種類で決まります。`definePageState` は `url` と `entry` を平らにマージしたもの、`defineLocalState` はスキーマの出力、`defineMemoryState` は初期値の型です。',
-  en: 'The state’s shape follows the kind: the flat merge of `url` and `entry` for `definePageState`, the schema’s output for `defineLocalState`, the initial values’ type for `defineMemoryState`.',
+  ja: '状態の形は定義の種類で決まります。`definePageState` は `url` と `entry` を平らにマージしたもの、`defineLocalState` と `defineCookieState` はスキーマの出力、`defineMemoryState` は初期値の型です。',
+  en: 'The state’s shape follows the kind: the flat merge of `url` and `entry` for `definePageState`, the schema’s output for `defineLocalState` and `defineCookieState`, the initial values’ type for `defineMemoryState`.',
 });
 
 export const hookFirstRender = message({
-  ja: 'サーバーの描画とハイドレーションの描画は、ブラウザの値ではなく既定値で行われ（`defineMemoryState` は初期値、`initialUrl` を渡したときはその `url` の値）、その次の描画から実際の値になります。',
-  en: 'The server render and the hydration render use the defaults rather than the browser’s values — the initial values for `defineMemoryState`, the passed `url` values when `initialUrl` is given — and the real values arrive in the render after.',
+  ja: 'サーバーの描画とハイドレーションの描画は、ブラウザの値ではなく既定値で行われ（`defineMemoryState` は初期値、`initialUrl` を渡したときはその `url` の値、`initialCookie` を渡したときはその値）、その次の描画から実際の値になります。',
+  en: 'The server render and the hydration render use the defaults rather than the browser’s values — the initial values for `defineMemoryState`, the passed `url` values when `initialUrl` is given, the passed values when `initialCookie` is — and the real values arrive in the render after.',
 });
 
 export const hookInitialUrl = message({
-  ja: '3 つ目の引数（キーを省くときは 2 つ目）の `{ initialUrl }` は、`url` スロットを持つ `definePageState` にだけ渡せます。ほかの種類に渡すと型エラーです。',
-  en: 'The `{ initialUrl }` options object — the third argument, or the second when you leave out the keys — exists only for a `definePageState` with a `url` slot; passing it for any other kind is a type error.',
+  ja: '3 つ目の引数（キーを省くときは 2 つ目）の `{ initialUrl }` は `url` スロットを持つ `definePageState` にだけ、`{ initialCookie }` は `defineCookieState` にだけ渡せます。ほかの種類に渡すと型エラーです。',
+  en: 'The options object — the third argument, or the second when you leave out the keys — takes `{ initialUrl }` only for a `definePageState` with a `url` slot and `{ initialCookie }` only for a `defineCookieState`; passing either for any other kind is a type error.',
 });
 
 export const hookInitialUrlLink = message({
@@ -114,8 +114,8 @@ export const batchTitle = message({
 });
 
 export const batchDescription = message({
-  ja: '`definePageState` と `defineLocalState` では、同じハンドラの中で呼んだ `update()` が定義ごとに 1 回の書き込みにまとまり、すべて同じハンドルを返します。上の例の `Clear` にある 2 回の `update()` も、1 回の遷移になります。`defineMemoryState` にはまとめる書き込みが無く、呼び出しごとにその場で反映され、それぞれ解決済みのハンドルを返します。書き込み先は、バッチが実際に値を変えたフィールドで決まります。',
-  en: 'On `definePageState` and `defineLocalState`, the `update()` calls made in one handler collapse into one write per definition, and they all return the same handle — the two calls behind `Clear` above make one navigation. `defineMemoryState` has no write to batch: each call applies on the spot and returns its own settled handle. Where the write goes depends on which fields the batch actually changed.',
+  ja: '`definePageState`・`defineLocalState`・`defineCookieState` では、同じハンドラの中で呼んだ `update()` が定義ごとに 1 回の書き込みにまとまり、すべて同じハンドルを返します。上の例の `Clear` にある 2 回の `update()` も、1 回の遷移になります。`defineMemoryState` にはまとめる書き込みが無く、呼び出しごとにその場で反映され、それぞれ解決済みのハンドルを返します。書き込み先は、バッチが実際に値を変えたフィールドで決まります。',
+  en: 'On `definePageState`, `defineLocalState` and `defineCookieState`, the `update()` calls made in one handler collapse into one write per definition, and they all return the same handle — the two calls behind `Clear` above make one navigation. `defineMemoryState` has no write to batch: each call applies on the spot and returns its own settled handle. Where the write goes depends on which fields the batch actually changed.',
 });
 
 export const batchTable = {
@@ -139,6 +139,10 @@ export const batchTable = {
     ja: '`localStorage.setItem` を 1 回',
     en: 'One `localStorage.setItem`',
   }),
+  cookieWrite: message({
+    ja: '`cookieStore.set()` を 1 回',
+    en: 'One `cookieStore.set()`',
+  }),
   memoryWrite: message({
     ja: 'その場で置き換え（まとめない）',
     en: 'Replaced on the spot, not batched',
@@ -151,8 +155,8 @@ export const batchAwait = message({
 });
 
 export const batchNoop = message({
-  ja: '`definePageState` のバッチが今の値と同じところで終われば、遷移もエントリの書き換えも起きません。`defineLocalState` のバッチは、結果が同じでも行を書き込みます（まだ行が無ければ作ります）。',
-  en: 'A `definePageState` batch that ends where it started neither navigates nor touches the entry. A `defineLocalState` batch writes its row even then, creating it if none was stored.',
+  ja: '`definePageState` のバッチが今の値と同じところで終われば、遷移もエントリの書き換えも起きません。`defineLocalState` と `defineCookieState` のバッチは、結果が同じでも行や Cookie を書き込みます（まだ無ければ作ります）。',
+  en: 'A `definePageState` batch that ends where it started neither navigates nor touches the entry. A `defineLocalState` or `defineCookieState` batch writes its row or cookie even then, creating it if none was stored.',
 });
 
 export const batchShared = message({
@@ -161,8 +165,8 @@ export const batchShared = message({
 });
 
 export const batchLive = message({
-  ja: '書き込む値は、描画に出した値ではなく、その時点のブラウザの値（URL・エントリ状態・localStorage）にバッチの変更を重ねて作ります。ほかのタブやほかの定義がその間に書いた値を巻き戻すことはありません。',
-  en: 'What is written is built from what the browser holds at that moment — the URL, the entry state, localStorage — with the batch’s changes on top, not from the rendered snapshot, so it never rolls back what another tab or another definition wrote in between.',
+  ja: '書き込む値は、描画に出した値ではなく、その時点のブラウザの値（URL・エントリ状態・localStorage・Cookie）にバッチの変更を重ねて作ります。ほかのタブやほかの定義がその間に書いた値を巻き戻すことはありません。',
+  en: 'What is written is built from what the browser holds at that moment — the URL, the entry state, localStorage, the cookie — with the batch’s changes on top, not from the rendered snapshot, so it never rolls back what another tab or another definition wrote in between.',
 });
 
 export const handleTitle = message({
@@ -179,8 +183,8 @@ export const handleTable = {
   promise: message({ ja: 'Promise', en: 'Promise' }),
   resolves: message({ ja: '解決するとき', en: 'Resolves when' }),
   committed: message({
-    ja: '書き込みが置き場所（履歴エントリ・localStorage・メモリ）に入ったとき',
-    en: 'The write is in its home — the history entry, localStorage, memory',
+    ja: '書き込みが置き場所（履歴エントリ・localStorage・Cookie・メモリ）に入ったとき',
+    en: 'The write is in its home — the history entry, localStorage, a cookie, memory',
   }),
   finished: message({
     ja: '書き込みの後にルーターが行う処理まで終わったとき',
@@ -194,13 +198,13 @@ export const handleRouter = message({
 });
 
 export const handleSettled = message({
-  ja: '遷移を伴わない書き込み（`entry` だけ・local・何も変わらない page のバッチ）のハンドルは、ハンドラの直後のマイクロタスクでバッチを書き込んだ時点で解決します。`defineMemoryState` のハンドルは、返った時点で解決済みです。',
-  en: 'A write with no navigation behind it — entry-only, local, a page batch that changed nothing — settles its handle when the batch is flushed, in a microtask right after the handler; a `defineMemoryState` handle is already settled when it is returned.',
+  ja: '遷移を伴わない書き込み（`entry` だけ・local・何も変わらない page のバッチ）のハンドルは、ハンドラの直後のマイクロタスクでバッチを書き込んだ時点で解決します。cookie のハンドルは、Cookie Store API が書き終えた時点で解決します。`defineMemoryState` のハンドルは、返った時点で解決済みです。',
+  en: 'A write with no navigation behind it — entry-only, local, a page batch that changed nothing — settles its handle when the batch is flushed, in a microtask right after the handler; a cookie handle settles once the Cookie Store API has written it; a `defineMemoryState` handle is already settled when it is returned.',
 });
 
 export const handleReject = message({
-  ja: 'あとから来た遷移に追い越された遷移のハンドルは、`AbortError` で reject します。localStorage への保存に失敗した（容量の超過など）ときも reject しますが、描画された値はそのまま残ります。どちらも、ハンドルを待っていなければ unhandled rejection にはなりません。',
-  en: 'A navigation overtaken by a later one rejects its handle with an `AbortError`. A failed localStorage write — a full quota, say — rejects too, while the rendered value stays. Neither surfaces as an unhandled rejection when nobody awaits the handle.',
+  ja: 'あとから来た遷移に追い越された遷移のハンドルは、`AbortError` で reject します。localStorage や Cookie への保存に失敗した（容量の超過、4 KB を超える Cookie など）ときも reject しますが、描画された値はそのまま残ります。どちらも、ハンドルを待っていなければ unhandled rejection にはなりません。',
+  en: 'A navigation overtaken by a later one rejects its handle with an `AbortError`. A failed localStorage or cookie write — a full quota, a cookie over 4 KB — rejects too, while the rendered value stays. Neither surfaces as an unhandled rejection when nobody awaits the handle.',
 });
 
 export const handleAwait = message({
@@ -229,8 +233,8 @@ export const historyDescription = message({
 });
 
 export const historyPageOnly = message({
-  ja: 'この引数（型は `UpdateOptions`）は `definePageState` にだけあります。遷移を伴うのはこの種類だけで、`defineLocalState`・`defineMemoryState` の `update()` に渡すと型エラーです。',
-  en: 'The option — typed `UpdateOptions` — exists only on `definePageState`, the one kind with a navigation behind it; passing it to a local or memory `update()` is a type error.',
+  ja: 'この引数（型は `UpdateOptions`）は `definePageState` にだけあります。遷移を伴うのはこの種類だけで、`defineLocalState`・`defineCookieState`・`defineMemoryState` の `update()` に渡すと型エラーです。',
+  en: 'The option — typed `UpdateOptions` — exists only on `definePageState`, the one kind with a navigation behind it; passing it to a local, cookie or memory `update()` is a type error.',
 });
 
 export const historyBatch = message({

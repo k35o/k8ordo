@@ -8,24 +8,19 @@ import * as m from '../../../../messages';
 
 const s = m.i18nIntegrations;
 
-// 文字列の中の `export const { paramsSchema }` は生成器に拾われない
-// （ファイルをパースして export を読む）ので、コード例として置ける。
-const UI_LAYOUT = `// src/routes/[locale]/layout.tsx
-import { UIProvider } from '@k8ordo/ui';
-import { dictionaries } from '@k8ordo/ui/i18n';
-import type { ReactNode } from 'react';
+const UI_LOCALES = `// src/i18n.ts
+import { defineLocales } from '@k8ordo/i18n';
+import { registerMessages } from '@k8ordo/ui/i18n';
 
-import { locales } from '../../i18n';
+import { fr } from './ui-messages/fr';
 
-export const { paramsSchema } = locales;
+export const locales = defineLocales({
+  ja: { timeZone: 'Asia/Tokyo', dir: 'ltr' },
+  en: { timeZone: 'UTC', dir: 'ltr' },
+  fr: { timeZone: 'Europe/Paris', dir: 'ltr' },
+});
 
-export default function LocaleLayout({ children }: { children: ReactNode }) {
-  return (
-    <UIProvider messages={dictionaries[locales.getLocale()]}>
-      {children}
-    </UIProvider>
-  );
-}`;
+registerMessages('fr', fr);`;
 
 const TALK_MESSAGES = `// src/messages/talk.ts
 import { message } from '@k8ordo/i18n';
@@ -181,10 +176,10 @@ export default function I18nIntegrationsPage() {
   return (
     <DocPage introduction={s.introduction} path="/:locale/i18n/integrations">
       <DocSection description={s.ui.description} title={s.ui.title}>
-        <CodeBlock code={UI_LAYOUT} lang="tsx" />
+        <CodeBlock code={UI_LOCALES} lang="ts" />
         <ul className="text-fg-mute flex flex-col gap-2 pl-6">
           <li className="list-disc">
-            <Rich>{s.ui.serializable()}</Rich>
+            <Rich>{s.ui.clientGraph()}</Rich>
           </li>
           <li className="list-disc">
             <Rich>{s.ui.notFound()}</Rich>

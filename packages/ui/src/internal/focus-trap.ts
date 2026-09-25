@@ -46,7 +46,12 @@ export const useFocusTrap = (
     const trigger = triggerRef.current;
 
     if (!content.contains(document.activeElement)) {
-      const first = content.querySelector<HTMLElement>(FOCUSABLE_SELECTOR);
+      // 中身が最初に受け取る要素を名指しできるようにする（Calendar は選択日）。
+      // React は autoFocus を属性として描かず、ポップアップが表示される前の
+      // commit でフォーカスしようとして空振りするため、データ属性で受け渡す。
+      const first =
+        content.querySelector<HTMLElement>('[data-autofocus]') ??
+        content.querySelector<HTMLElement>(FOCUSABLE_SELECTOR);
       if (first) {
         first.focus();
       } else {

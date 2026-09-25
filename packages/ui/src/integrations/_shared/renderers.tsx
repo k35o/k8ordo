@@ -21,9 +21,12 @@ import { Skeleton } from '../../components/feedback/skeleton';
 import { Spinner } from '../../components/feedback/spinner';
 import { ToastProvider, useToast } from '../../components/feedback/toast';
 import { Autocomplete } from '../../components/form/autocomplete';
+import { Calendar } from '../../components/form/calendar';
 import { Checkbox } from '../../components/form/checkbox';
 import { CheckboxCard } from '../../components/form/checkbox-card';
 import { CheckboxGroup } from '../../components/form/checkbox-group';
+import { DateField } from '../../components/form/date-field';
+import { DatePicker } from '../../components/form/date-picker';
 import { FileField } from '../../components/form/file-field';
 import { Form } from '../../components/form/form';
 import { FormControl } from '../../components/form/form-control';
@@ -106,7 +109,7 @@ import { ListBox } from '../../components/overlays/list-box';
 import { Modal } from '../../components/overlays/modal';
 import { Popover } from '../../components/overlays/popover';
 import { Tooltip } from '../../components/overlays/tooltip';
-import { useMessages } from '../../i18n/context';
+import { getMessages } from '../../i18n/current';
 import type {
   AccordionProps,
   AlertProps,
@@ -116,6 +119,7 @@ import type {
   BadgeProps,
   BreadcrumbProps,
   ButtonProps,
+  CalendarProps,
   CardProps,
   CarouselProps,
   CheckboxCardProps,
@@ -123,6 +127,8 @@ import type {
   CheckboxProps,
   ChevronIconProps,
   CodeProps,
+  DateFieldProps,
+  DatePickerProps,
   GridProps,
   DialogProps,
   DrawerProps,
@@ -313,7 +319,7 @@ export function renderCard(props: CardProps, children: ReactNode): ReactNode {
 // 同一ページに複数描画されても衝突しないよう `useId()` で生成する必要がある。
 // （生成 UI では Tabs が複数並ぶケースは普通にあり得る）。
 export const TabsView: FC<{ props: TabsProps }> = ({ props }) => {
-  const messages = useMessages();
+  const messages = getMessages();
   const baseId = useId();
   const ids = props.tabs.map((_, index) => `${baseId}-tab-${index}`) as [
     string,
@@ -536,6 +542,83 @@ const LabeledField: FC<{
     </div>
   );
 };
+
+const DateFieldView: FC<{
+  props: DateFieldProps;
+  value: string;
+  onChange: (next: string) => void;
+}> = ({ props, value, onChange }) => (
+  <LabeledField label={props.label}>
+    {(labelId) => (
+      <DateField
+        aria-labelledby={labelId}
+        disabled={u(props.disabled)}
+        invalid={u(props.invalid)}
+        max={u(props.max)}
+        min={u(props.min)}
+        name={props.name}
+        onChange={(event) => {
+          onChange(event.target.value);
+        }}
+        required={u(props.required)}
+        value={value}
+      />
+    )}
+  </LabeledField>
+);
+
+export function renderDateField(
+  props: DateFieldProps,
+  value: string,
+  onChange: (next: string) => void,
+): ReactNode {
+  return <DateFieldView onChange={onChange} props={props} value={value} />;
+}
+
+const DatePickerView: FC<{
+  props: DatePickerProps;
+  value: string;
+  onChange: (next: string) => void;
+}> = ({ props, value, onChange }) => (
+  <LabeledField label={props.label}>
+    {(labelId) => (
+      <DatePicker
+        aria-labelledby={labelId}
+        disabled={u(props.disabled)}
+        invalid={u(props.invalid)}
+        max={u(props.max)}
+        min={u(props.min)}
+        name={props.name}
+        onChange={onChange}
+        required={u(props.required)}
+        value={value}
+      />
+    )}
+  </LabeledField>
+);
+
+export function renderDatePicker(
+  props: DatePickerProps,
+  value: string,
+  onChange: (next: string) => void,
+): ReactNode {
+  return <DatePickerView onChange={onChange} props={props} value={value} />;
+}
+
+export function renderCalendar(
+  props: CalendarProps,
+  value: string,
+  onChange: (next: string) => void,
+): ReactNode {
+  return (
+    <Calendar
+      max={u(props.max)}
+      min={u(props.min)}
+      onChange={onChange}
+      value={value === '' ? null : value}
+    />
+  );
+}
 
 const RadioView: FC<{
   props: RadioProps;
@@ -1092,7 +1175,7 @@ export function renderAutocomplete(
 }
 
 export const FileFieldWidget: FC<{ props: FileFieldProps }> = ({ props }) => {
-  const messages = useMessages();
+  const messages = getMessages();
   const trigger = (
     <FileField.Trigger
       renderItem={({ onClick, disabled }) => (

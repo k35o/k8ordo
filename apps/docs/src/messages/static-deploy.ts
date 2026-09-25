@@ -174,6 +174,11 @@ export const stopsActions = message({
   en: "A module that declares `'use server'`",
 });
 
+export const stopsGuards = message({
+  ja: '`guard.ts`',
+  en: 'A `guard.ts`',
+});
+
 export const stopsThrow = message({
   ja: 'ビルド中に throw したコンポーネント（Server Component はいつでも、クライアントコンポーネントは上に Suspense の境界が無いとき）',
   en: 'A component that throws while the build renders it — a Server Component always, a client component when no Suspense boundary sits above it',
@@ -200,8 +205,8 @@ export const cannotTitle = message({
 });
 
 export const cannotDescription = message({
-  ja: 'リクエストを必要とするものすべてです。Server Action とそこからの `redirect()`、`@k8ordo/server` の下でページが読む `request`、そしてアプリが決めるステータスコード。ファイルはフォームの送信を受け取れず、`404.html` を 200 ではなく 404 で返すかどうかはホスティングの設定です。ビルドはページを書けても、応答は書けません。',
-  en: "Anything that needs the request: Server Actions and `redirect()` from them, the `request` a page reads under `@k8ordo/server`, and status codes the application decides. A file cannot receive a form submission, and whether `404.html` is served with a 404 rather than a 200 is the host's setting — the build can write the page, but not the response.",
+  ja: 'リクエストを必要とするものすべてです。Server Action とそこからの `redirect()`、`@k8ordo/server` の下でページが読む `request`、リクエストを通すかどうかを決める `guard.ts`、そしてアプリが決めるステータスコード。ファイルはフォームの送信を受け取れず、`404.html` を 200 ではなく 404 で返すかどうかはホスティングの設定です。ビルドはページを書けても、応答は書けません。',
+  en: "Anything that needs the request: Server Actions and `redirect()` from them, the `request` a page reads under `@k8ordo/server`, a `guard.ts` deciding whether a request gets through, and status codes the application decides. A file cannot receive a form submission, and whether `404.html` is served with a 404 rather than a 200 is the host's setting — the build can write the page, but not the response.",
 });
 
 export const cannotServer = message({

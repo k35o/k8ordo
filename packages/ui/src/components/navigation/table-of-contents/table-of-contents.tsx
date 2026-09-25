@@ -3,7 +3,7 @@
 import { useEffect, useId, useState } from 'react';
 import type { FC, HTMLAttributes } from 'react';
 
-import { useMessages } from '../../../i18n/context';
+import { getMessages } from '../../../i18n/current';
 import {
   NAV_LIST_CLASS_NAME,
   NAV_TITLE_CLASS_NAME,
@@ -133,7 +133,7 @@ export const TableOfContents: FC<
     'className' | 'style' | 'children' | 'aria-labelledby'
   >
 > = ({ items, label, ...rest }) => {
-  const messages = useMessages();
+  const messages = getMessages();
   const titleId = useId();
   const activeId = useActiveHeading(idsOf(items));
 

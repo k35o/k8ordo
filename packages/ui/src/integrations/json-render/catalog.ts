@@ -160,6 +160,21 @@ export const catalog = defineCatalog(schema, {
       description:
         'Slider. defaultValue can be bound to state with $bindState.',
     },
+    DateField: {
+      props: s.dateFieldProps,
+      description:
+        'Date input with a visible label. Dates are YYYY-MM-DD strings. defaultValue can be bound to state with $bindState.',
+    },
+    DatePicker: {
+      props: s.datePickerProps,
+      description:
+        'Date input with a visible label and a button that opens a calendar. Dates are YYYY-MM-DD strings. defaultValue can be bound to state with $bindState.',
+    },
+    Calendar: {
+      props: s.calendarProps,
+      description:
+        'Month calendar shown inline for picking one day (YYYY-MM-DD). It submits nothing; in a form, use DatePicker. defaultValue can be bound to state with $bindState.',
+    },
     Radio: {
       props: s.radioProps,
       description:

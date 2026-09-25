@@ -54,13 +54,13 @@ export const urlTable = {
 };
 
 export const filesTitle = message({
-  ja: 'ファイル名は 5 つだけ',
-  en: 'Five filenames',
+  ja: '決まったファイル名だけ',
+  en: 'A fixed set of filenames',
 });
 
 export const filesDescription = message({
-  ja: 'ディレクトリの中で文法が受け付けるファイル名は `page.tsx`・`layout.tsx`・`not-found.tsx`・`error.tsx`・`redirect.ts` の 5 つで、拡張子まで含めて完全に一致する必要があります。`page.ts` も `helpers.ts` もビルドが拒みます。それ以外のファイルは、`_` で始まるディレクトリに置きます。',
-  en: 'Inside a directory the grammar accepts five filenames — `page.tsx`, `layout.tsx`, `not-found.tsx`, `error.tsx` and `redirect.ts` — matched exactly, extension included, so `page.ts` fails the build as surely as `helpers.ts` does. Everything else goes under a directory whose name starts with `_`.',
+  ja: 'ディレクトリの中で文法が受け付けるファイル名は `page.tsx`・`layout.tsx`・`not-found.tsx`・`error.tsx`・`redirect.ts`・`guard.ts` だけで、拡張子まで含めて完全に一致する必要があります。`page.ts` も `helpers.ts` もビルドが拒みます。それ以外のファイルは、`_` で始まるディレクトリに置きます。',
+  en: 'Inside a directory the grammar accepts only `page.tsx`, `layout.tsx`, `not-found.tsx`, `error.tsx`, `redirect.ts` and `guard.ts`, matched exactly, extension included, so `page.ts` fails the build as surely as `helpers.ts` does. Everything else goes under a directory whose name starts with `_`.',
 });
 
 export const filesTable = {
@@ -86,6 +86,10 @@ export const filesTable = {
   redirect: message({
     ja: 'ページの代わりに、行き先を default export する',
     en: 'Default-exports where to send the visitor, instead of a page',
+  }),
+  guard: message({
+    ja: 'その下で答えるものの前に走る。`Response` を返せばそこで打ち切る（`@k8ordo/server` だけ。`@k8ordo/static` は拒む）',
+    en: 'Runs before whatever answers below it; a returned `Response` ends the request — `@k8ordo/server` only, `@k8ordo/static` refuses it',
   }),
   nothing: message({ ja: 'なし（描画しない）', en: 'None — nothing renders' }),
 };

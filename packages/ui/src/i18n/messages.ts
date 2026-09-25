@@ -35,6 +35,13 @@ export type Messages = {
   numberFieldIncrement: string;
   numberFieldDecrement: string;
 
+  calendarPreviousMonth: string;
+  calendarNextMonth: string;
+  /** DatePicker のカレンダーを開くボタン */
+  datePickerOpen: string;
+  /** DatePicker が開くポップオーバー（dialog）の名前 */
+  datePickerDialog: string;
+
   passwordShow: string;
   passwordHide: string;
 

@@ -121,6 +121,30 @@ export const { registry } = defineRegistry(catalog, {
       );
       return ui.renderPasswordInput(props, value, setValue);
     },
+    DateField: ({ props, bindings }) => {
+      const [value, setValue] = useBoundOrLocal<string>(
+        props.defaultValue,
+        bindings?.defaultValue,
+        '',
+      );
+      return ui.renderDateField(props, value, setValue);
+    },
+    DatePicker: ({ props, bindings }) => {
+      const [value, setValue] = useBoundOrLocal<string>(
+        props.defaultValue,
+        bindings?.defaultValue,
+        '',
+      );
+      return ui.renderDatePicker(props, value, setValue);
+    },
+    Calendar: ({ props, bindings }) => {
+      const [value, setValue] = useBoundOrLocal<string>(
+        props.defaultValue,
+        bindings?.defaultValue,
+        '',
+      );
+      return ui.renderCalendar(props, value, setValue);
+    },
     Radio: ({ props, bindings }) => {
       const [value, setValue] = useBoundOrLocal<string>(
         props.defaultValue,

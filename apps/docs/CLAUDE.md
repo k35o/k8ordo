@@ -134,9 +134,10 @@ pnpm check:write       # Oxlint/Oxfmt lint/format auto-fix
   that one component's group is `switchInput`.
 - **Styling**: Tailwind CSS 4, uses `@k8ordo/ui` design tokens
 - **Root provider**: `UIProvider` wraps each locale subtree in
-  `src/routes/[locale]/_parts/locale-shell.tsx`, passing `dictionaries[locale]`
-  from `@k8ordo/ui/i18n` as `messages`, so component built-in strings follow
-  the site locale
+  `src/routes/[locale]/_parts/locale-shell.tsx`, for toasts. Component
+  built-in strings follow the site locale on their own: `@k8ordo/ui` reads
+  `@k8ordo/i18n`'s current locale, and the shell importing `locales` is what
+  defines the set in the browser
 - **Where the browser is**: `usePathname()` from `@k8ordo/router`. Under the
   framework the browser holds no route table, so `useRoute` / `useParams` have
   no match to read — a page receives `params` as a prop, and anything else asks

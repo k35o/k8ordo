@@ -26,6 +26,11 @@ export const en: Messages = {
   numberFieldIncrement: 'Increase',
   numberFieldDecrement: 'Decrease',
 
+  calendarPreviousMonth: 'Previous month',
+  calendarNextMonth: 'Next month',
+  datePickerOpen: 'Choose from calendar',
+  datePickerDialog: 'Choose a date',
+
   passwordShow: 'Show password',
   passwordHide: 'Hide password',
 
