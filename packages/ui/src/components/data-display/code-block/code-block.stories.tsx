@@ -153,3 +153,30 @@ export const InVerticalText: Story = {
     await expect(getComputedStyle(figure).writingMode).toBe('horizontal-tb');
   },
 };
+
+// 強制カラー（Windows のハイコントラストなど）では影と地の色が消える。
+// 行の印の線とフォーカスリングは、システムの色で塗り直されて残る
+export const ForcedColors: Story = {
+  tags: ['forced-colors'],
+  args: {
+    code: 'const a = 1;\nconst b = 2;',
+    lang: 'ts',
+    marks: { 1: 'highlight' },
+  },
+  play: async ({ canvasElement }) => {
+    await expect(matchMedia('(forced-colors: active)').matches).toBe(true);
+
+    const mark = canvasElement.querySelector('[data-mark="highlight"]');
+    const bar = getComputedStyle(mark as Element, '::after');
+
+    await expect(bar.borderInlineStartStyle).toBe('solid');
+    await expect(bar.borderInlineStartColor).not.toBe('rgba(0, 0, 0, 0)');
+
+    const pre = canvasElement.querySelector('pre') as HTMLElement;
+    pre.focus();
+    const focused = getComputedStyle(pre);
+
+    await expect(focused.outlineStyle).toBe('solid');
+    await expect(focused.outlineColor).not.toBe('rgba(0, 0, 0, 0)');
+  },
+};
