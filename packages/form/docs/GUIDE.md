@@ -116,14 +116,16 @@ export const TalkForm = ({ action, fields }: TalkFormProps) => {
 ```
 
 `form.props` attaches to the `<form>` and nowhere else. There is no per-field
-registration to forget. It also hears the form being reset — by a reset
+registration to forget. It checks the form on submit ([below](#what-it-guarantees)),
+and it also hears the form being reset — by a reset
 button, by `form.reset()`, or by React itself after every form action, whatever
 it returned — and forgets what it knew about the old values: the messages,
 which server errors were still current, the rows that were added, and
 `isDirty`.
 
 A form with no action behind it — a GET filter, say — calls `useForm(fields)`
-and leaves the state out.
+and leaves the state out. It is still checked on submit, so a filter that
+breaks its schema never reaches the URL.
 
 ```ts
 // actions.ts
@@ -234,10 +236,16 @@ its placeholder (a validation error unless the enum accepts `undefined`), an
 unchecked checkbox as `false`, and a checkbox group with nothing checked as
 `[]`. A forgotten spread on one of those is not caught either.
 
-**Native validation survives without JavaScript.** `noValidate` is applied
-from JavaScript on mount, never rendered into the markup. With scripts
-disabled or not yet loaded, the browser's own checks stay on; once the hook is
-live, it takes over the message path and the server stays the arbiter.
+**A failing submission stops in the browser, with JavaScript or without.**
+`noValidate` is applied from JavaScript on mount, never rendered into the
+markup, so with scripts disabled or not yet loaded the browser's own checks
+stay on. Once the hook is live it runs the same check on every submit, in
+zod's wording: every field, the ones nobody touched included, and the
+cross-field [rules](#checks-html-has-no-attribute-for). A failure stops the submission, shows each failed field's message, and
+moves focus to the first failed field on the page. A submit button marked
+`formNoValidate` skips the check, as it skips the browser's. The server stays
+the arbiter: what passes still goes to it, and the checks in `dropped` run
+there alone.
 
 **Secrets are never echoed.** `parseForm` returns the submitted values so a
 retry keeps the input — they render as the controls' defaults, which is also
@@ -512,7 +520,10 @@ const stepIsValid = [
 After a failed submit, `useForm` moves focus to the first failed field on the
 page, but a control inside a hidden step cannot take focus. When a new state
 arrives, switch during render to the earliest step holding a key of
-`state.errors`, so the field is visible by the time focus moves.
+`state.errors`, so the field is visible by the time focus moves. The check on
+submit covers the hidden steps too, and stops the submission for a failure
+there without being able to show it — checking each step before advancing is
+what keeps the earlier steps from failing at the end.
 
 Without JavaScript this degrades to one long form that submits in a single
 request — which is the correct behaviour, not a broken one.
