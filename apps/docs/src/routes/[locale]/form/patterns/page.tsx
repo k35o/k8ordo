@@ -48,9 +48,9 @@ export function JoinForm({ fields }: Props) {
 
   if (answered !== state) {
     setAnswered(state);
-    const first = Object.keys(state.errors ?? {})[0];
-    if (first !== undefined) {
-      setStep(ACCOUNT_FIELDS.includes(first) ? 0 : 1);
+    const failed = Object.keys(state.errors ?? {});
+    if (failed.length > 0) {
+      setStep(failed.some((name) => ACCOUNT_FIELDS.includes(name)) ? 0 : 1);
     }
   }
 

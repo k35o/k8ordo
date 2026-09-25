@@ -138,24 +138,38 @@ export async function createTalk(_prev: FormState, formData: FormData) {
 }
 ```
 
-When a new state arrives, focus moves to the first field in `state.errors`, so
-the failure is announced where it happened. A server error stays on its field
-until the person edits that field, and a message the browser raises takes
-precedence over it. Responses are told apart by their content plus
-`state.token`, which `parseForm` sets on every parse — a state built by hand
-needs a fresh `token` too, or a second identical failure reads as the same
-response.
+When a new state arrives, focus moves to the first failure on the page, so the
+failure is announced where it happened. That is the first failed field in
+document order — not the first key of `state.errors`, which follows the schema
+— or the form-level message below, when it comes before every failed field. A
+server error stays on its field until the person edits that field, and a
+message the browser raises takes precedence over it. Responses are told apart
+by their content plus `state.token`, which `parseForm` sets on every parse — a
+state built by hand needs a fresh `token` too, or a second identical failure
+reads as the same response, and focus does not move.
 
 An issue with no path — a `.refine()` on the whole schema that names no
-`path` — lands in `state.formError`, not on a field. `useForm` does not render
-it, so show it yourself:
+`path` — lands in `state.formError`, not on a field. No control can take focus
+for it, so `form.formError` hands over the message and the props for the
+element that shows it — an `id` and `tabIndex={-1}`, which lets the script
+focus it without adding it to the Tab order. Without them the message is drawn
+but never focused, and a screen reader says nothing about it. Put it above the
+fields, the way an error summary is placed: it then takes focus even when
+fields failed too, the person hears what went wrong with the submission as a
+whole first, and Tab moves on through the fields.
 
 ```tsx
 <form {...form.props} action={formAction}>
-  {state.formError !== undefined && <p>{state.formError}</p>}
+  {form.formError.message !== undefined && (
+    <p {...form.formError.props}>{form.formError.message}</p>
+  )}
   {/* … */}
 </form>
 ```
+
+Focus carries the message rather than a live region because focus moves on
+every response: a live region already holding the same text announces nothing
+when the same failure comes back.
 
 ## What it guarantees
 
@@ -495,10 +509,10 @@ const stepIsValid = [
 ].every((control) => (control as HTMLInputElement).checkValidity());
 ```
 
-After a failed submit, `useForm` moves focus to the first field in
-`state.errors`, but a control inside a hidden step cannot take focus. When a
-new state arrives, switch during render to the step holding that field, so it
-is visible by the time focus moves.
+After a failed submit, `useForm` moves focus to the first failed field on the
+page, but a control inside a hidden step cannot take focus. When a new state
+arrives, switch during render to the earliest step holding a key of
+`state.errors`, so the field is visible by the time focus moves.
 
 Without JavaScript this degrades to one long form that submits in a single
 request — which is the correct behaviour, not a broken one.
@@ -545,4 +559,21 @@ const { type: _type, ...titleInput } = title.input;
   required={title.required}
   renderInput={(props) => <TextField {...props} {...titleInput} />}
 />;
+```
+
+The form-level message fits `Alert`, which passes `id` and `tabIndex` through
+to its element. Its `role="alert"` means a screen reader may read the message
+twice — once when it appears, once when focus lands on it — the same trade an
+error summary with an alert role makes.
+
+```tsx
+{
+  form.formError.message !== undefined && (
+    <Alert
+      {...form.formError.props}
+      message={form.formError.message}
+      tone="error"
+    />
+  );
+}
 ```
