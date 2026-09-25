@@ -29,8 +29,8 @@ export type PageState<
    * omitted from the query, so canonical URLs stay short. The path literal
    * survives in the type, which is what lets typed-route checks pass.
    */
-  href: <Path extends RegisteredPath>(
-    base: Path,
+  href: <Path extends string>(
+    base: RegisteredPath<Path>,
     values?: Readonly<Partial<OutputOf<Url>>>,
   ) => Path | `${Path}?${string}`;
   /** The query string alone (no `?`), for handrolled URL composition. */
@@ -124,8 +124,8 @@ export function definePageState(
     entry: config.entry,
     parseUrl: (input) => (url === null ? {} : url.parse(input)),
     search,
-    href: <Path extends RegisteredPath>(
-      base: Path,
+    href: <Path extends string>(
+      base: RegisteredPath<Path>,
       values?: Readonly<Partial<Record<string, unknown>>>,
     ) => {
       const query = search(values);

@@ -2,7 +2,7 @@ import { lazy } from 'react';
 import type { FC } from 'react';
 
 import { defineRoutes } from './define-routes';
-import type { PatternOf, RouteOf } from './define-routes';
+import type { NavigablePath, PatternOf } from './define-routes';
 import { href } from './links';
 
 const Home: FC = () => null;
@@ -181,14 +181,53 @@ describe('href', () => {
     expectTypeOf(
       href('/:locale/products/:id', { locale: 'ja', id: '1' }),
     ).toEqualTypeOf<`/${string}/products/${string}`>();
-    expectTypeOf<RouteOf<typeof routes>>().toEqualTypeOf<
-      | '/'
-      | `/${string}`
-      | `/${string}/products`
-      | `/${string}/products/${string}`
-    >();
 
     expect(rejectedByTypes).toBeInstanceOf(Function);
+  });
+});
+
+describe('NavigablePath', () => {
+  it('takes a path a navigable pattern matches, segment by segment', () => {
+    expectTypeOf<NavigablePath<typeof routes, '/'>>().toEqualTypeOf<'/'>();
+    expectTypeOf<NavigablePath<typeof routes, '/ja'>>().toEqualTypeOf<'/ja'>();
+    expectTypeOf<
+      NavigablePath<typeof routes, '/ja/products/42'>
+    >().toEqualTypeOf<'/ja/products/42'>();
+  });
+
+  it('takes a param built into a template literal as one segment', () => {
+    expectTypeOf<
+      NavigablePath<typeof routes, `/${string}/products`>
+    >().toEqualTypeOf<`/${string}/products`>();
+  });
+
+  it('refuses a path no pattern matches, though a param stands first', () => {
+    // 和集合だった頃は '/:locale' が `/${string}` になり、これを通していた
+    expectTypeOf<NavigablePath<typeof routes, '/ja/nowhere'>>().toBeNever();
+    expectTypeOf<
+      NavigablePath<typeof routes, '/ja/products/42/reviews'>
+    >().toBeNever();
+  });
+
+  it('refuses a path only the wildcard matches — matched, never linked', () => {
+    expectTypeOf<
+      NavigablePath<typeof routes, '/ja/no/such/page'>
+    >().toBeNever();
+  });
+
+  it('refuses an empty segment where a param stands', () => {
+    expectTypeOf<NavigablePath<typeof routes, '//products'>>().toBeNever();
+  });
+
+  it('refuses a path that is not spelled from the root', () => {
+    expectTypeOf<NavigablePath<typeof routes, 'ja/products'>>().toBeNever();
+    expectTypeOf<NavigablePath<typeof routes, string>>().toBeNever();
+  });
+
+  it('keeps only the members of a union that match', () => {
+    expectTypeOf<
+      NavigablePath<typeof routes, '/ja' | '/ja/nowhere'>
+    >().toEqualTypeOf<'/ja'>();
   });
 });
 
