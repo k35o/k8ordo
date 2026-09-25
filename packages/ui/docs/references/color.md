@@ -125,7 +125,9 @@ says AAA — so a token change that breaks a row fails the build:
 | `fg-base`, `fg-mute`, the status `fg-*`, `primary-fg`, `secondary-fg` | `bg-base`, `bg-raised`, `bg-surface`, `bg-subtle` | 7.0   | 8.3  | AAA                                                    |
 | A status `fg-*`                                                       | Its own `bg-*` (`bg-error` for `fg-error`, …)     | 6.9   | 7.5  | AAA, except `fg-success` on `bg-success` in light (AA) |
 | `primary-fg` / `secondary-fg`                                         | `*-bg-subtle`                                     | 7.5   | 11.9 | AAA                                                    |
+| `fg-base`                                                             | `bg-mute`                                         | 12.8  | 7.8  | AAA                                                    |
 | `fg-mute`                                                             | `bg-mute`                                         | 6.7   | 5.2  | AA                                                     |
+| `fg-base`                                                             | `bg-emphasize`                                    | 9.7   | 5.1  | AA                                                     |
 | `fg-subtle`                                                           | `bg-base`, `bg-raised`, `bg-surface`, `bg-subtle` | 4.8   | 6.1  | AA                                                     |
 | `primary-fg` / `secondary-fg`                                         | `*-bg`, `*-bg-mute`                               | 6.1   | 6.3  | AA                                                     |
 | `primary-fg` / `secondary-fg`                                         | `*-bg-emphasize`                                  | 5.2   | 5.2  | AA                                                     |

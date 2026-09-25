@@ -176,9 +176,9 @@ export const IconButton: FC<Props> = ({
     color === 'base' && 'bg-bg-base',
     color === 'transparent' && 'bg-transparent',
     color === 'primary' &&
-      'bg-primary-bg hover:bg-primary-bg-emphasize/80 active:bg-primary-bg-emphasize',
+      'bg-primary-bg hover:bg-primary-bg-emphasize active:bg-primary-bg-emphasize',
     color === 'secondary' &&
-      'bg-secondary-bg hover:bg-secondary-bg-emphasize/80 active:bg-secondary-bg-emphasize',
+      'bg-secondary-bg hover:bg-secondary-bg-emphasize active:bg-secondary-bg-emphasize',
     size === 'sm' && 'p-1',
     size === 'md' && 'p-2',
     size === 'lg' && 'p-3',
