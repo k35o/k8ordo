@@ -40,6 +40,10 @@ export const ja: Messages = {
   codeBlockCopy: 'コードをコピー',
   copied: 'コピーしました',
   copyFailed: 'コピーできませんでした',
+  carousel: 'カルーセル',
+  carouselSlide: 'スライド',
+  carouselPrevious: '前のスライド',
+  carouselNext: '次のスライド',
 
   chat: 'チャット',
   scrollToLatest: '最新のメッセージへ移動',

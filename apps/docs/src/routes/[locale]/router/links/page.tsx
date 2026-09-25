@@ -158,6 +158,15 @@ import type { routes } from './routes';
 
 type AppPath = RouteOf<typeof routes>;`;
 
+const BASE = `// vite.config.ts に base: '/docs/'
+import { href, usePathname, withoutBase } from '@k8ordo/router';
+
+href('/products'); // '/docs/products'
+href('/'); // '/docs/'
+usePathname(); // /docs/products にいるとき '/products'
+withoutBase('/docs/products'); // '/products'
+withoutBase('/elsewhere'); // null — base の外`;
+
 const USE_PARAMS_ERROR =
   'useParams("/products/:id") rendered under "/products"';
 
@@ -490,6 +499,27 @@ export default function RouterLinksPage() {
         />
         <p className="text-fg-mute leading-relaxed">
           <Rich>{m.routerLinks.normalizeScope()}</Rich>
+        </p>
+      </DocSection>
+
+      <DocSection
+        description={m.routerLinks.baseDescription}
+        title={m.routerLinks.baseTitle}
+      >
+        <CodeBlock code={BASE} lang="ts" />
+        <ul className="text-fg-mute flex flex-col gap-2 pl-6">
+          <li className="list-disc">
+            <Rich>{m.routerLinks.baseLinks()}</Rich>
+          </li>
+          <li className="list-disc">
+            <Rich>{m.routerLinks.basePathname()}</Rich>
+          </li>
+          <li className="list-disc">
+            <Rich>{m.routerLinks.baseOutside()}</Rich>
+          </li>
+        </ul>
+        <p className="text-fg-mute leading-relaxed">
+          <Rich>{m.routerLinks.baseHelpers()}</Rich>
         </p>
       </DocSection>
 

@@ -40,6 +40,10 @@ export const en: Messages = {
   codeBlockCopy: 'Copy code',
   copied: 'Copied',
   copyFailed: 'Could not copy',
+  carousel: 'Carousel',
+  carouselSlide: 'Slide',
+  carouselPrevious: 'Previous slide',
+  carouselNext: 'Next slide',
 
   chat: 'Chat',
   scrollToLatest: 'Scroll to latest message',

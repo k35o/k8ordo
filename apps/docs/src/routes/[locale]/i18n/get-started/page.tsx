@@ -11,7 +11,10 @@ const I18N_MODULE = `// src/i18n.ts
 import { defineLocales } from '@k8ordo/i18n';
 import type { LocaleOf } from '@k8ordo/i18n';
 
-export const locales = defineLocales(['ja', 'en']);
+export const locales = defineLocales({
+  ja: { timeZone: 'Asia/Tokyo', dir: 'ltr' },
+  en: { timeZone: 'UTC', dir: 'ltr' },
+});
 
 declare module '@k8ordo/i18n' {
   interface Register {

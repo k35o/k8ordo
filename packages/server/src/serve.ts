@@ -8,6 +8,7 @@ import { Readable } from 'node:stream';
 import type { ReadableStream as NodeReadableStream } from 'node:stream/web';
 import { pathToFileURL } from 'node:url';
 
+import { withoutBase } from '@k8ordo/router';
 import { contentType } from 'mime-types';
 
 import { safeJoin } from './static-file';
@@ -29,10 +30,14 @@ export type Server = {
 
 type Handler = (request: Request) => Promise<Response>;
 
+/** What `dist/rsc/index.js` exports: the handler, and the base it was built for. */
+type Entry = { readonly default: Handler; readonly base: string };
+
 /**
  * Vite writes the hash of the contents into the name of everything under
  * `assets/`, so those files can never change under a URL — anything else
- * might, and says so.
+ * might, and says so. The pathname is the one below the base, where the
+ * client build's own layout starts.
  */
 const cacheFor = (pathname: string): string =>
   pathname.startsWith('/assets/')
@@ -86,7 +91,7 @@ export const serve = async (options: ServeOptions = {}): Promise<Server> => {
   const dist = path.resolve(process.cwd(), options.dist ?? 'dist');
   const clientDir = path.join(dist, 'client');
   const entry = pathToFileURL(path.join(dist, 'rsc', 'index.js')).href;
-  const { default: handler } = (await import(entry)) as { default: Handler };
+  const { default: handler, base } = (await import(entry)) as Entry;
 
   const server = createServer(
     (incoming: IncomingMessage, response: ServerResponse) => {
@@ -97,16 +102,18 @@ export const serve = async (options: ServeOptions = {}): Promise<Server> => {
         );
         // ファイルで答えるのは読み取りだけ。ほかのメソッドは handler が答える
         // （POST は action、残りは 405）。先にファイルが答えると、そのパスで
-        // だけ 405 が 200 に化ける
+        // だけ 405 が 200 に化ける。client/ はビルドの base に置かれる
+        const own = withoutBase(url.pathname, base);
         const file =
-          incoming.method === 'GET' || incoming.method === 'HEAD'
-            ? await fileFor(clientDir, url.pathname)
+          own !== null &&
+          (incoming.method === 'GET' || incoming.method === 'HEAD')
+            ? await fileFor(clientDir, own)
             : null;
-        if (file !== null) {
+        if (own !== null && file !== null) {
           const type = contentType(path.extname(file));
           response.writeHead(200, {
             'content-type': type === false ? 'application/octet-stream' : type,
-            'cache-control': cacheFor(url.pathname),
+            'cache-control': cacheFor(own),
           });
           // HEAD でも読んで流す。node:http は HEAD への write を捨てるので、
           // 分岐を足さなくても本文は線に載らない

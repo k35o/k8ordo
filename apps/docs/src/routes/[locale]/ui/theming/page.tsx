@@ -436,6 +436,25 @@ document.documentElement.classList.remove('dark');`}
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
+          <Rich>{m.theming.highContrastTitle()}</Rich>
+        </Heading>
+        <p className="text-fg-mute">
+          <Rich>{m.theming.highContrastDescription()}</Rich>
+        </p>
+        <p className="text-fg-mute">
+          <Rich>{m.theming.highContrastOwnUiDescription()}</Rich>
+        </p>
+        <CodeBlock
+          code={`<button className="bg-primary-bg aria-pressed:bg-primary-bg-emphasize forced-colors:aria-pressed:bg-[Highlight] forced-colors:aria-pressed:text-[HighlightText]">
+  Bold
+</button>`}
+          lang="tsx"
+        />
+      </section>
+      <Separator color="mute" />
+
+      <section className="flex flex-col gap-4">
+        <Heading level="h2">
           <Rich>{m.theming.customizeTitle()}</Rich>
         </Heading>
         <p className="text-fg-mute">
