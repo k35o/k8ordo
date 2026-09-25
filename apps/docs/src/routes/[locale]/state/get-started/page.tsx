@@ -199,6 +199,9 @@ export default function StateGetStartedPage() {
             <Rich>{m.stateGetStarted.placeLocal()}</Rich>
           </li>
           <li className="list-disc">
+            <Rich>{m.stateGetStarted.placeCookie()}</Rich>
+          </li>
+          <li className="list-disc">
             <Rich>{m.stateGetStarted.placeMemory()}</Rich>
           </li>
         </ul>

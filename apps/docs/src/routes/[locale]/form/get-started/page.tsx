@@ -63,6 +63,7 @@ const SHARED_TYPES = [
   'DerivedArray',
   'DroppedCheck',
   'FieldInput',
+  'StringCheckboxInput',
   'ValidityFlag',
   'Rule',
 ] as const;

@@ -2,6 +2,7 @@ import type { RouteComponent, Routes } from '@k8ordo/router';
 import { z } from 'zod';
 import * as zm from 'zod/mini';
 
+import { defineCookieState } from './cookie-state';
 import { defineLocalState } from './local-state';
 import { defineMemoryState } from './memory-state';
 import { definePageState } from './page-state';
@@ -356,17 +357,21 @@ describe('parseUrl type', () => {
 });
 
 describe('useAppState options', () => {
-  it('offers initialUrl only where a url slot can seed it', () => {
+  it('offers initialUrl only where a url slot can seed it, and initialCookie only to cookie state', () => {
     expect(OptionsRejectedByTypes).toBeInstanceOf(Function);
   });
 });
 
 // 型検査だけが目的で、描画はしない。フックを呼ぶので関数ではなく
 // コンポーネントの形にしてある。initialUrl は url スロットを持つ
-// page state にしか無い
+// page state に、initialCookie は cookie state にしか無い
 const OptionsRejectedByTypes = () => {
   const memory = defineMemoryState('m', { open: false });
   const local = defineLocalState('l', z.object({ v: z.string().default('') }));
+  const cookie = defineCookieState(
+    'c',
+    z.object({ v: z.string().default('') }),
+  );
   const entryOnly = definePageState('e', {
     entry: z.object({ open: z.boolean().default(false) }),
   });
@@ -377,6 +382,12 @@ const OptionsRejectedByTypes = () => {
   useAppState(local, { initialUrl: { v: 'x' } });
   // @ts-expect-error an entry-only page state has no url slot to seed
   useAppState(entryOnly, { initialUrl: {} });
+  // @ts-expect-error a cookie state is seeded by initialCookie, not initialUrl
+  useAppState(cookie, { initialUrl: { v: 'x' } });
+  // @ts-expect-error only a cookie state takes initialCookie
+  useAppState(local, { initialCookie: { v: 'x' } });
+  // @ts-expect-error the cookie's own fields are still checked
+  useAppState(cookie, { initialCookie: { v: 1 } });
   // @ts-expect-error the url slot's own fields are still checked
   useAppState(listState, { initialUrl: { q: 1 } });
 };

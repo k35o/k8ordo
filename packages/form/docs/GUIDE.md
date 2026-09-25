@@ -374,6 +374,16 @@ accepts it, and a bare `z.stringbool()` makes the box `required`.
 `.default(true)` is refused at derive time — nothing would read as `true`, so
 unchecking the box could never submit `false`.
 
+Only these fields carry `value` in their type. `formFields` names their paths
+in the third type argument of `FormFields` (`FormFields<FieldPath, ArrayPath,
+StringCheckboxPath>`), and `field()` types `input` as `StringCheckboxInput` for
+them and as `FieldInput`, with no `value`, for every other field — so the other
+fields spread onto a component that takes `value` only when it is controlled.
+A `FormFields` type written by hand can leave the third argument out: it still
+takes the derived fields, and the box still submits its `value`, but
+`input.value` no longer compiles. The same holds for a box inside repeated
+rows, which `row.field()` never types with `value`.
+
 ## Checkbox groups
 
 An array of enums is a fixed option set the person picks several of — one
