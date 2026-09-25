@@ -399,8 +399,13 @@ export default async function ProductPage({
 It throws, so the lines after it never run, and the page is answered instead
 by what the table answers for a URL nothing matched there — the nearest
 `not-found.tsx` above it, inside the layouts above that — under a 404. With no
-`not-found.tsx` at all, the framework's own answers. It comes from the router
-rather than the mode package, so the page reads the same under either.
+`not-found.tsx` at all, the framework's own answers — a `404` heading and a
+line, with a `<title>`, rendered inside the root layout, so the visitor keeps
+the document's frame, its `<html lang>` and its stylesheets (a document of
+its own only when there is no root layout either). It is also what a URL
+nothing matches gets from such an application. `notFound()` comes from the
+router rather than the mode package, so the page reads the same under
+either.
 
 `notFound()` is the page's word about itself: thrown from the page's own
 component, before it returns.

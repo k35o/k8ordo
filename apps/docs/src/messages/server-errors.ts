@@ -31,8 +31,8 @@ export const withoutNote = message({
 });
 
 export const notFoundNote = message({
-  ja: 'このモードでは、`not-found.tsx` の答えは本物の 404 ステータスを持ちます。ディレクトリごとに置けるので、`docs/not-found.tsx` は `/docs` の下の知らない URL を `docs/layout.tsx` の内側で描けます。1 つも宣言しなければ、表にない pathname には `404` という見出しと 1 行だけの最小のページが 404 で返ります。',
-  en: 'In this mode `not-found.tsx` is answered under a genuine 404 status. Each directory may declare its own, so `docs/not-found.tsx` can render an unknown URL under `/docs` inside `docs/layout.tsx`. With none declared, an unknown pathname gets a minimal page — a `404` heading and one line — under a 404.',
+  ja: 'このモードでは、`not-found.tsx` の答えは本物の 404 ステータスを持ちます。ディレクトリごとに置けるので、`docs/not-found.tsx` は `/docs` の下の知らない URL を `docs/layout.tsx` の内側で描けます。1 つも宣言しなければ、表にない pathname には `404` という見出しと 1 行だけの最小のページが、ルートレイアウトの内側に描かれて 404 で返ります。サイトの枠も `<html lang>` もスタイルシートも残ります。',
+  en: 'In this mode `not-found.tsx` is answered under a genuine 404 status. Each directory may declare its own, so `docs/not-found.tsx` can render an unknown URL under `/docs` inside `docs/layout.tsx`. With none declared, an unknown pathname gets a minimal page — a `404` heading and one line — rendered inside the root layout under a 404, so the site’s frame, its `<html lang>` and its stylesheets stay.',
 });
 
 export const redirectNote = message({

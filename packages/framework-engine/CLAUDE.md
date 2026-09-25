@@ -256,7 +256,7 @@ src/
   runtime/request-scope.ts   the request in progress: phases, cookies() / responseHeaders() / requestHeaders(), answer()
   runtime/cookies.ts         the per-request cookie jar and its Set-Cookie lines
   runtime/guard.ts           Guard / GuardContext, runGuards (outer first, first Response ends it)
-  runtime/render.tsx         the matched stack, nested through children
+  runtime/render.tsx         the matched stack, nested through children; the framework's own not-found, inside the root layout
   runtime/page-watch.ts      a page called as the render calls it, its answer watched
   runtime/page-boundary.tsx  a navigation's late notFound() → a document load; anything else on to error.tsx
   runtime/virtual.d.ts       types of virtual:k8ordo/routes and K8ORDO_MODE
