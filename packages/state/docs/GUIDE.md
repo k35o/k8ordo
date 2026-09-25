@@ -166,6 +166,14 @@ default values are omitted from the query, so every link is canonical and as
 short as it can be. `search` returns the query string alone (no `?`) when the
 path should stay in the caller's hands.
 
+The path `href` takes is written from the application's root, the way the
+route table is, and the link it returns carries Vite's `base` in front of it:
+under `base: '/docs/'`, `listState.href('/products', { page: 2 })` is
+`/docs/products?page=2`. Hand it a path, then — not what `@k8ordo/router`'s
+`href` returned, which carries the base already. Outside Vite (Next.js, say)
+there is no `import.meta.env` to read, nothing is added, and a `basePath` is
+the framework's own `<Link>`'s to add.
+
 ## Client — subscribe and update
 
 ```tsx

@@ -1,3 +1,4 @@
+export { withBase, withoutBase } from './base';
 export type { ErrorComponent, ErrorProps } from './boundary';
 export { defineRoutes } from './define-routes';
 export type {

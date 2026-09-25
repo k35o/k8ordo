@@ -8,25 +8,58 @@ declare module './register' {
   }
 }
 
-const locales = defineLocales(['ja', 'en']);
+const ja = { timeZone: 'Asia/Tokyo', dir: 'ltr' } as const;
+const en = { timeZone: 'America/New_York', dir: 'ltr' } as const;
+const locales = defineLocales({ ja, en });
 
 describe('defineLocales', () => {
   it('takes the first locale as the default unless told otherwise', () => {
     expect(locales.default).toBe('ja');
-    expect(defineLocales(['ja', 'en'], { default: 'en' }).default).toBe('en');
-    expectTypeOf(locales.default).toEqualTypeOf<'ja'>();
+    expect(defineLocales({ ja, en }, { default: 'en' }).default).toBe('en');
+    expect(locales.all).toStrictEqual(['ja', 'en']);
+    expectTypeOf(locales.default).toEqualTypeOf<'ja' | 'en'>();
     expectTypeOf(locales.all).toEqualTypeOf<ReadonlyArray<'ja' | 'en'>>();
   });
 
-  it('refuses a default that is not listed, a repeated locale, and a tag that is not BCP 47', () => {
+  it("gives back each locale's time zone and text direction", () => {
+    const set = defineLocales({
+      ja,
+      ar: { timeZone: 'Africa/Cairo', dir: 'rtl' },
+    });
+    expect(set.definitions.ar).toStrictEqual({
+      timeZone: 'Africa/Cairo',
+      dir: 'rtl',
+    });
+    expect(set.definitions.ja.dir).toBe('ltr');
+    expectTypeOf(set.definitions.ar.dir).toEqualTypeOf<'ltr' | 'rtl'>();
+  });
+
+  it('refuses an empty set, a default that is not listed, and a tag that is not BCP 47', () => {
+    expect(() => defineLocales({})).toThrow(/no locale is defined/u);
     expect(() =>
       // @ts-expect-error -- the default must be one of the list; the runtime check is for JS callers
-      defineLocales(['ja', 'en'], { default: 'fr' }),
+      defineLocales({ ja, en }, { default: 'fr' }),
     ).toThrow(/default "fr" is not in/u);
-    expect(() => defineLocales(['ja', 'ja'])).toThrow(/listed twice/u);
-    expect(() => defineLocales(['ja', 'not a tag'])).toThrow(
+    expect(() => defineLocales({ ja, 'not a tag': en })).toThrow(
       /not a BCP 47 language tag/u,
     );
+  });
+
+  it('refuses a time zone the runtime does not know, and a missing one that would fall back to its own', () => {
+    expect(() =>
+      defineLocales({ ja: { timeZone: 'Asia/Tokio', dir: 'ltr' } }),
+    ).toThrow(/the timeZone of "ja", "Asia\/Tokio", is not a time zone/u);
+    expect(() =>
+      // @ts-expect-error -- timeZone is required; the runtime check is for JS callers
+      defineLocales({ ja: { dir: 'ltr' } }),
+    ).toThrow(/the timeZone of "ja", undefined, is not a time zone/u);
+  });
+
+  it('refuses a direction other than ltr and rtl', () => {
+    expect(() =>
+      // @ts-expect-error -- dir is 'ltr' or 'rtl'; the runtime check is for JS callers
+      defineLocales({ ja: { timeZone: 'Asia/Tokyo', dir: 'auto' } }),
+    ).toThrow(/the dir of "ja", "auto", is neither "ltr" nor "rtl"/u);
   });
 
   it('checks membership as a type guard', () => {
@@ -40,7 +73,7 @@ describe('defineLocales', () => {
 
 describe('negotiate', () => {
   it('tries each requested tag in order: the exact tag, then its language', () => {
-    const set = defineLocales(['ja', 'en', 'en-GB']);
+    const set = defineLocales({ ja, en, 'en-GB': en });
     expect(set.negotiate(['en-GB'])).toBe('en-GB');
     expect(set.negotiate(['en-GB', 'en'])).toBe('en-GB');
     expect(set.negotiate(['en-US', 'en-GB'])).toBe('en');
@@ -51,12 +84,14 @@ describe('negotiate', () => {
   it('falls back to the first supported locale that speaks a requested language', () => {
     expect(locales.negotiate(['en-US'])).toBe('en');
     expect(locales.negotiate(['fr', 'en-AU', 'ja'])).toBe('en');
-    expect(defineLocales(['en-US', 'en-GB']).negotiate(['en'])).toBe('en-US');
+    expect(defineLocales({ 'en-US': en, 'en-GB': en }).negotiate(['en'])).toBe(
+      'en-US',
+    );
   });
 
   it('matches tags case-insensitively', () => {
     expect(locales.negotiate(['EN'])).toBe('en');
-    expect(defineLocales(['en-GB']).negotiate(['en-gb'])).toBe('en-GB');
+    expect(defineLocales({ 'en-GB': en }).negotiate(['en-gb'])).toBe('en-GB');
   });
 
   it('returns the default when nothing matches, and skips tags that are not BCP 47', () => {
@@ -160,7 +195,7 @@ describe('message', () => {
   // 登録は後勝ちで、上の describe が別の集合を inline で定義しているので、
   // 文言が読む集合をここで戻す。
   beforeEach(() => {
-    defineLocales(['ja', 'en']);
+    defineLocales({ ja, en });
   });
 
   const nav = {

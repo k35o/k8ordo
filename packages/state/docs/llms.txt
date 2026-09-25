@@ -34,8 +34,10 @@ When installed via npm, these docs live under `node_modules/@k8ordo/state/docs/`
   `@k8ordo/server` a page receives `params` and `pathname` (plus a
   headers-and-cookies `request` under `@k8ordo/server`) but never the search,
   and the url slot is read in the browser);
-  `href(base, values?)` builds a canonical link keeping the path literal in
-  the type; `search(values?)` returns the query string alone.
+  `href(path, values?)` builds a canonical link keeping the path literal in
+  the type — the path written from the app's root, the link carrying Vite's
+  `base` (`import.meta.env.BASE_URL`) in front; `search(values?)` returns the
+  query string alone.
   `defineLocalState(key, schema)` and `defineMemoryState(key, initial)`
   declare app-scope state; a local definition also exposes `storageKey` (the
   localStorage key, `k8ordo-state:<key>`) and `inlineRead()`, a JavaScript

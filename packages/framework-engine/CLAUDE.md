@@ -60,6 +60,17 @@ pnpm check         # check:write to auto-fix
   (`runtime/is-payload.ts`) becomes a document load, which is also the
   recovery path when a render fails. The client router's "unmatched pathnames
   are not intercepted" does not apply here.
+- **Everything inside is in the table's terms; Vite's `base` is at the
+  edges.** The handler takes the base off the request (`withoutBase` from
+  the router; a URL outside it is a plain `404`) before anything else reads
+  the pathname, so payload paths, redirects, the match and `pathname` never
+  see it; a `redirect.ts` target gets it back in front (`locationOf`), while
+  a Server Action's `redirect(to)` is a URL and is sent as given. The client
+  claims only same-origin URLs under the base, and `mount` compares the
+  payload's `pathname` with `location` minus the base. `entry.rsc` exports
+  `base` (`import.meta.env.BASE_URL` as built) for `serve`, and the plugin
+  refuses a base that is not a path from the root (`'./'`, another origin),
+  under which no URL says which page it is.
 - **Hydration reads the payload the HTML was rendered from.**
   `runtime/entry.ssr.tsx` injects the RSC stream into the HTML and
   `runtime/entry.browser.tsx` reads it back; nothing refetches on load, which

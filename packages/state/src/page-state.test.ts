@@ -370,3 +370,20 @@ const OptionsRejectedByTypes = () => {
   // @ts-expect-error the url slot's own fields are still checked
   useAppState(listState, { initialUrl: { q: 1 } });
 };
+
+describe('href under a base', () => {
+  beforeEach(() => {
+    vi.stubEnv('BASE_URL', '/docs/');
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it('puts the base Vite serves the application under in front of the path', () => {
+    expect(listState.href('/products', { page: 2 })).toBe(
+      '/docs/products?page=2',
+    );
+    expect(listState.href('/products')).toBe('/docs/products');
+  });
+});
