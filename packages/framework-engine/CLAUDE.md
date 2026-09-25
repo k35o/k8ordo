@@ -70,7 +70,10 @@ pnpm check         # check:write to auto-fix
   components it names are imported too). `createPrefetchCache` hands each
   load to the next navigation of that page within `PREFETCH_LIFETIME`
   (30 s from the start) and forgets it; a failed load is forgotten at once,
-  and a Server Action's answer forgets everything. Keep it single-use: a
+  and a Server Action's answer forgets everything. A load forgotten untaken
+  is aborted, and a taken one is aborted by the taking navigation's signal,
+  which is what keeps the router's "a superseded navigation's fetch is
+  cancelled" true for a prefetched page. Keep it single-use: a
   page taken from the cache twice would show a server-mode page as it was
   when first hovered. No Speculation Rules — Chromium only.
 - **Hydration reads the payload the HTML was rendered from.**

@@ -325,8 +325,8 @@ export const prefetchReuse = message({
 });
 
 export const prefetchDropped = message({
-  ja: 'Server Action の答えが届くと、先読みしたものはすべて捨てます。アクションがそれらのページの中身を変えたかもしれないからです。失敗した先読みもその場で捨てるので、遷移はもう一度取りに行きます。',
-  en: 'A Server Action’s answer drops everything prefetched, since the action may have changed what those pages show; a prefetch that failed is dropped at once, so the navigation asks again.',
+  ja: 'Server Action の答えが届くと、先読みしたものはすべて捨てます。アクションがそれらのページの中身を変えたかもしれないからです。失敗した先読みもその場で捨てるので、遷移はもう一度取りに行きます。遷移に使われる前に捨てた先読みは、まだ届いていなければ中断します。遷移が使った先読みは、その遷移が別の遷移に追い越されたときに一緒に中断します。遷移が自分で始めた fetch と同じ扱いです。',
+  en: 'A Server Action’s answer drops everything prefetched, since the action may have changed what those pages show; a prefetch that failed is dropped at once, so the navigation asks again. A prefetch dropped before any navigation used it is cancelled if it is still on its way, and one a navigation took is cancelled with that navigation when another overtakes it — the same as a fetch the navigation had started itself.',
 });
 
 export const prefetchStatic = message({

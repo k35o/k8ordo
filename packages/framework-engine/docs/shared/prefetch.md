@@ -29,7 +29,10 @@ navigation has used it — the page is fetched afresh, as it would have been
 with nothing prefetched, so a page hovered and left alone never shows up
 later as it was then. A Server Action's answer drops everything prefetched,
 since the action may have changed what those pages show, and a prefetch that
-failed is dropped at once, so the navigation asks again.
+failed is dropped at once, so the navigation asks again. A prefetch dropped
+before any navigation used it is cancelled if it is still on its way, and one
+a navigation took is cancelled with that navigation when another overtakes
+it — the same as a fetch the navigation had started itself.
 
 Under `@k8ordo/static` a prefetch is a request for a file. Under
 `@k8ordo/server` it is a render, as a navigation is — the reason to mark a
