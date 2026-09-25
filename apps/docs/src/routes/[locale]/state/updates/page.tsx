@@ -252,6 +252,14 @@ export default function StateUpdatesPage() {
               ],
             },
             {
+              key: 'cookie',
+              cells: [
+                <Code key="changes">defineCookieState</Code>,
+                <Rich key="write">{batch.cookieWrite()}</Rich>,
+                batch.none(),
+              ],
+            },
+            {
               key: 'memory',
               cells: [
                 <Code key="changes">defineMemoryState</Code>,

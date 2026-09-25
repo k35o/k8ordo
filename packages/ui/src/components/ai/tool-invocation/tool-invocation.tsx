@@ -1,8 +1,6 @@
-'use client';
-
 import type { FC, ReactNode } from 'react';
 
-import { useMessages } from '../../../i18n/context';
+import { getMessages } from '../../../i18n/current';
 import { Spinner } from '../../feedback/spinner';
 import { AlertIcon, CheckIcon } from '../../icons';
 import { Collapsible } from '../_internal/collapsible';
@@ -67,7 +65,7 @@ export const ToolInvocation: FC<Props> = ({
   defaultOpen = false,
   onChange,
 }) => {
-  const messages = useMessages();
+  const messages = getMessages();
 
   return (
     <Collapsible

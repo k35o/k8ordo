@@ -13,19 +13,20 @@ const SCOPES = ['page', 'app'] as const;
 
 type Scope = (typeof SCOPES)[number];
 
-const PLACES = ['url', 'entry', 'local', 'memory'] as const;
+const PLACES = ['url', 'entry', 'local', 'cookie', 'memory'] as const;
 
 type Place = (typeof PLACES)[number];
 
 const PLACES_IN: Record<Scope, readonly Place[]> = {
   page: ['url', 'entry'],
-  app: ['local', 'memory'],
+  app: ['local', 'cookie', 'memory'],
 };
 
 const SUMMARY: Record<Place, Message> = {
   url: m.statePlaces.demoRowUrl,
   entry: m.statePlaces.demoRowEntry,
   local: m.statePlaces.demoRowLocal,
+  cookie: m.statePlaces.demoRowCookie,
   memory: m.statePlaces.demoRowMemory,
 };
 

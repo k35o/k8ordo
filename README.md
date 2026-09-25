@@ -15,7 +15,7 @@ Every package here commits to the same four things:
 | --- | --- |
 | [`@k8ordo/ui`](packages/ui) | React UI components with semantic design tokens, i18n, and generative-UI adapters |
 | [`@k8ordo/form`](packages/form) | HTML constraint attributes, messages, and server-side validation from one zod schema |
-| [`@k8ordo/state`](packages/state) | State declared by where it lives — URL, history entry, localStorage (one zod schema each), memory (a typed box) |
+| [`@k8ordo/state`](packages/state) | State declared by where it lives — URL, history entry, localStorage, a cookie (one zod schema each), memory (a typed box) |
 | [`@k8ordo/router`](packages/router) | The URL's pathname axis: one route table, typed paths, over the Navigation API |
 | [`@k8ordo/static`](packages/static) | Builds an application into files — every route rendered ahead of time |
 | [`@k8ordo/server`](packages/server) | Runs an application — RSC per request, with Server Actions |
