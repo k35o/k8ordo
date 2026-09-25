@@ -88,3 +88,8 @@ export const statusesTable = {
     en: 'The handler could not produce an answer (under `serve()`)',
   }),
 };
+
+export const pageNotFoundWait = message({
+  ja: 'ステータスは本文より先に送られるので、ページの HTML は、ページ自身のコンポーネントが答える（要るものを取って返すか、`notFound()` と言う）まで送りません。そのあとに流れるのは、ページが自分の `<Suspense>` の下に置いたものです。クライアント遷移には正しくすべきステータスが無いので、ペイロードは最初から流れます。そこでページが `notFound()` と言うと、ブラウザは同じ URL を文書として読み込み直し、サーバーが 404 で答えます。ページが返して応答が始まったあとに、それより下から投げた `notFound()` は、ほかのエラーと同じくいちばん近い `error.tsx` が受けます。',
+  en: 'A status leaves before the body it heads, so a page’s HTML is not sent until the page’s own component has answered — fetched what it needs and returned, or said `notFound()`. What streams after that is what the page puts under a `<Suspense>` of its own. A client navigation has no status to get right, so its payload streams from the start; a page that says `notFound()` there sends the browser back to the server for a document load of the same URL, which is answered with the 404. Thrown from further down, once the page has returned and its response has started, `notFound()` is an error like any other, and the nearest `error.tsx` answers it.',
+});

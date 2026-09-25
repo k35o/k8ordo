@@ -514,6 +514,15 @@ fits is handed to `accept` first, and one it declines — a param a
 `paramsSchema` along its stack refused — is passed over as if the pattern had
 not fit, so the walk goes on to the next pattern, the catch-all included.
 
+A page under the framework says it is not there with `notFound()` — the
+product its id names does not exist. It throws, so nothing after it runs, and
+the framework answers with the nearest `not-found.tsx` under a 404. It lives
+here rather than in a mode package so a page reads the same under either;
+`isNotFound(value)` recognises what it throws, by a registry brand rather than
+a class, since a page and the framework may hold two copies of this package.
+Under a client `<Router>` there is no status to answer with, and `notFound()`
+is an error like any other.
+
 What carries across unchanged is everything that needs no table: `href`,
 `navigateTo` and `bindParams`, `usePathname`, `useMatch` and `matchPath`, and
 `normalizePathname`. `usePathname` needs one thing on the server,

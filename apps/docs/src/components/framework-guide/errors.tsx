@@ -45,6 +45,22 @@ export default function NotFoundPage() {
   );
 }`;
 
+const PAGE_NOT_FOUND = `// src/routes/products/[id]/page.tsx
+import { notFound } from '@k8ordo/router';
+import type { PageProps } from '@k8ordo/router';
+
+import { findProduct } from '../../_data/catalog.server';
+
+export default async function ProductPage({
+  params,
+}: PageProps<'/products/:id'>) {
+  const product = await findProduct(params.id);
+  if (product === undefined) notFound();
+  return <h1>{product.name}</h1>;
+}`;
+
+const STATIC_PAGE_NOT_FOUND = `the "paths" option supplied pathnames whose page called notFound(): /products/3`;
+
 const STATIC_TWO_NOT_FOUND = `a static host answers every unknown URL from one file, so only one not-found.tsx can be represented — this table declares /docs/*, /*`;
 
 const REDIRECT = `// src/routes/old/redirect.ts
@@ -108,6 +124,23 @@ export function ErrorsGuide({ mode }: { mode: Mode }) {
               </LocaleAnchor>
             </Paragraph>
           </>
+        )}
+      </DocSection>
+
+      <DocSection
+        description={t.pageNotFoundDescription}
+        title={t.pageNotFoundTitle}
+      >
+        <CodeBlock code={PAGE_NOT_FOUND} lang="tsx" />
+        <Paragraph text={t.pageNotFoundAnswer} />
+        <Paragraph text={t.pageNotFoundOwn} />
+        {mode === 'static' ? (
+          <>
+            <Paragraph text={m.staticErrors.pageNotFoundBuild} />
+            <CodeBlock code={STATIC_PAGE_NOT_FOUND} lang="bash" />
+          </>
+        ) : (
+          <Paragraph text={m.serverErrors.pageNotFoundWait} />
         )}
       </DocSection>
 

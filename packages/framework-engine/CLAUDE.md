@@ -141,6 +141,28 @@ ParamsSchemaFor<pattern>`, lists per page pattern the schemas along its
   `Set-Cookie` line, the last one per name, path and domain. `@k8ordo/static` refuses
   `guard.ts` (by name at build, per module in `vite dev`), reading the slot
   through `slotOf`.
+- **A page's `notFound()` is its answer, and a document waits for it.**
+  `notFound()` lives in `@k8ordo/router` (so a page reads the same under
+  either mode) and is recognised by its `Symbol.for` brand. The handler
+  renders a page through `watchPage` (`runtime/page-watch.ts`): the page's
+  own function is called from inside the RSC render's call, so `use`,
+  `cache` and suspensions behave as for the page itself, and what it
+  returned settles `settled` (with the rejection's reason — the render's
+  `onError` hears of an async rejection only later). A document and a
+  `HEAD` wait for that, for a `notFound()` reaching `onError`, or for the
+  stream to end (a layout that never renders its children) — under
+  `@k8ordo/static` for the whole stream — before sending anything; a
+  `notFound()` then aborts that render and renders what the table answers
+  for the pathname plus `NOT_FOUND_SEGMENT` (only a catch-all may answer,
+  and `/:locale/*` does not match `/en` itself), under a 404. A payload
+  does not wait: `onError` turns `notFound()` into the digest
+  `NOT_FOUND_DIGEST`, and `PageBoundary` (`runtime/page-boundary.tsx`, a
+  client boundary around every page, inside any `error.tsx`) answers it
+  with a document load when the tree came from a navigation, and hands it
+  on to `error.tsx` otherwise — loading the server's document again would
+  only bring the same page back. Under `@k8ordo/static` the 404 carries
+  `NOT_FOUND_HEADER`, so the build tells a page's `notFound()` from a
+  refused param.
 - **The request reaches a page only under a server.** `K8ORDO_MODE` is
   defined by the host; the handler attaches `request` (headers, cookies) only
   under `@k8ordo/server`, and the generator emits the field only there. Under
@@ -159,9 +181,9 @@ ParamsSchemaFor<pattern>`, lists per page pattern the schemas along its
 - **The handler owns the methods.** It answers `GET`, `HEAD` and `POST`, and
   anything else with a `405` and `Allow` — here, not in `@k8ordo/server`'s
   `serve`, because a host that calls the built handler directly has no
-  `serve` in front of it. `HEAD` is answered from the status and headers,
-  which are settled before rendering, with a `null` body: nothing renders for
-  it, and no host is left to discard a stream. `@k8ordo/static` only ever
+  `serve` in front of it. `HEAD` gets a `null` body: a not-found is answered
+  before anything renders, and a page runs only as far as its own component,
+  which may say `notFound()`; its render is aborted, not streamed. `@k8ordo/static` only ever
   sends `GET`.
 - **One pattern walk.** `declaredPatterns(tree)` is the order the matcher
   tries patterns — pages and redirects, literals before params, the
@@ -207,6 +229,8 @@ src/
   runtime/cookies.ts         the per-request cookie jar and its Set-Cookie lines
   runtime/guard.ts           Guard / GuardContext, runGuards (outer first, first Response ends it)
   runtime/render.tsx         the matched stack, nested through children
+  runtime/page-watch.ts      a page called as the render calls it, its answer watched
+  runtime/page-boundary.tsx  a navigation's late notFound() → a document load; anything else on to error.tsx
   runtime/virtual.d.ts       types of virtual:k8ordo/routes and K8ORDO_MODE
   index.ts
 fixtures/

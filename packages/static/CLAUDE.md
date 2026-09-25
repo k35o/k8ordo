@@ -47,6 +47,10 @@ pnpm check         # check:write to auto-fix
   moment the module is compiled — found through the engine's grammar
   (`slotOf`), never by the file name alone, since a `_private/guard.ts` is
   not one.
+- **A supplied pathname the site then disowns fails the build.** A 404 for
+  a pathname `paths` supplied is either a params schema refusing it or the
+  page saying `notFound()`; the handler marks the second with
+  `NOT_FOUND_HEADER`, and the build names each kind in its own message.
 - **`site` is the only reason a sitemap exists.** Without the origin a
   sitemap would list relative URLs, which is not a sitemap; with it every
   page the build wrote is listed, redirects and the not-found excluded.

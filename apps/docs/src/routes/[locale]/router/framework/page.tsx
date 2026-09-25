@@ -280,6 +280,9 @@ export default function RouterFrameworkPage() {
         <p className="text-fg-mute leading-relaxed">
           <Rich>{m.routerFramework.propsInline()}</Rich>
         </p>
+        <p className="text-fg-mute leading-relaxed">
+          <Rich>{m.routerFramework.propsNotFound()}</Rich>
+        </p>
       </DocSection>
 
       <DocSection
