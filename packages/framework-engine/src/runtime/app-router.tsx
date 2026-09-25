@@ -20,13 +20,14 @@ import {
   useRef,
   useState,
 } from 'react';
-import type { ReactNode } from 'react';
+import type { ReactNode, RefObject } from 'react';
 
 import { isPayload } from './is-payload';
 import { ACTION_ID_HEADER } from './payload';
 import type { Payload } from './payload';
 import { payloadPathFor } from './payload-path';
 import { createPrefetchCache, prefetchTargetOf } from './prefetch';
+import type { PrefetchCache } from './prefetch';
 import { markNavigated, Recover, reloadInstead } from './recover';
 
 /**
@@ -103,6 +104,18 @@ const fetchPage = async (
   );
 };
 
+/**
+ * The router's prefetch cache, made the first time it is asked for. It is
+ * only ever asked for in an event or an effect; made as `useRef`'s initial
+ * value it would be built, and thrown away, on every render.
+ */
+const cacheIn = (
+  ref: RefObject<PrefetchCache<Payload | null> | null>,
+): PrefetchCache<Payload | null> =>
+  (ref.current ??= createPrefetchCache((payloadPath, signal: AbortSignal) =>
+    fetchPage(payloadPath, signal),
+  ));
+
 /** What starts a prefetch: a pointer onto a link, focus on one, a press. */
 const INTENTS = ['pointerover', 'focusin', 'pointerdown'] as const;
 
@@ -125,11 +138,7 @@ export function AppRouter({
 }): ReactNode {
   const [latest, setLatest] = useState(tree);
   const current = useDeferredValue(latest);
-  const prefetched = useRef(
-    createPrefetchCache((payloadPath, signal: AbortSignal) =>
-      fetchPage(payloadPath, signal),
-    ),
-  );
+  const prefetched = useRef<PrefetchCache<Payload | null>>(null);
 
   useEffect(() => {
     mounted = {
@@ -138,7 +147,9 @@ export function AppRouter({
           setLatest(payload.tree);
         });
       },
-      forgetPrefetched: prefetched.current.clear,
+      forgetPrefetched: () => {
+        cacheIn(prefetched).clear();
+      },
     };
     return () => {
       mounted = null;
@@ -149,7 +160,7 @@ export function AppRouter({
     const onIntent = (event: Event): void => {
       const url = prefetchTargetOf(event.target);
       if (url !== null) {
-        prefetched.current.prefetch(payloadPathFor(url.pathname));
+        cacheIn(prefetched).prefetch(payloadPathFor(url.pathname));
       }
     };
     // 捕捉段で聞く。途中の要素が伝播を止めても、押し始めは見逃さない
@@ -177,7 +188,7 @@ export function AppRouter({
       const payloadPath = payloadPathFor(url.pathname);
       let payload: Payload | null;
       try {
-        payload = await (prefetched.current.take(payloadPath, signal) ??
+        payload = await (cacheIn(prefetched).take(payloadPath, signal) ??
           fetchPage(payloadPath, signal));
       } catch (error) {
         if (signal.aborted) throw error;
