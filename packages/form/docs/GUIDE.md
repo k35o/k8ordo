@@ -116,8 +116,10 @@ export const TalkForm = ({ action, fields }: TalkFormProps) => {
 ```
 
 `form.props` attaches to the `<form>` and nowhere else. There is no per-field
-registration to forget. It checks the form on submit ([below](#what-it-guarantees)),
-and it also hears the form being reset — by a reset
+registration to forget. Its `onSubmit` checks the form
+([below](#what-it-guarantees)) — an `onSubmit` of your own written after the
+spread replaces it, so call `form.props.onSubmit(event)` from yours — and it
+also hears the form being reset — by a reset
 button, by `form.reset()`, or by React itself after every form action, whatever
 it returned — and forgets what it knew about the old values: the messages,
 which server errors were still current, the rows that were added, and
