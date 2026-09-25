@@ -95,6 +95,17 @@ export const prefsState = defineLocalState(
   }),
 );`;
 
+const NOTICES = `// src/state/notices.ts
+import { defineSessionState } from '@k8ordo/state';
+import * as z from 'zod/mini';
+
+export const noticesState = defineSessionState(
+  'notices',
+  z.object({
+    dismissed: z._default(z.array(z.string()), []),
+  }),
+);`;
+
 const DENSITY = `// src/state/density.ts
 import { defineCookieState } from '@k8ordo/state';
 import * as z from 'zod/mini';
@@ -205,6 +216,16 @@ export default function StatePlacesPage() {
               ],
             },
             {
+              key: 'session',
+              cells: [
+                <Code key="definition">defineSessionState</Code>,
+                'sessionStorage',
+                table.sessionSurvives(),
+                table.memorySharedWith(),
+                table.defaultsServer(),
+              ],
+            },
+            {
               key: 'cookie',
               cells: [
                 <Code key="definition">defineCookieState</Code>,
@@ -238,6 +259,9 @@ export default function StatePlacesPage() {
           </li>
           <li className="list-disc">
             <Rich>{m.statePlaces.chooseLocal()}</Rich>
+          </li>
+          <li className="list-disc">
+            <Rich>{m.statePlaces.chooseSession()}</Rich>
           </li>
           <li className="list-disc">
             <Rich>{m.statePlaces.chooseCookie()}</Rich>
@@ -400,6 +424,30 @@ export default function StatePlacesPage() {
       </DocSection>
 
       <DocSection
+        description={m.statePlaces.sessionDescription}
+        title={m.statePlaces.sessionTitle}
+      >
+        <CodeBlock code={NOTICES} lang="ts" />
+        <ul className="text-fg-mute flex flex-col gap-2 pl-6">
+          <li className="list-disc">
+            <Rich>{m.statePlaces.sessionSame()}</Rich>
+          </li>
+          <li className="list-disc">
+            <Rich>{m.statePlaces.sessionKeys()}</Rich>
+          </li>
+          <li className="list-disc">
+            <Rich>{m.statePlaces.sessionTabs()}</Rich>
+          </li>
+          <li className="list-disc">
+            <Rich>{m.statePlaces.sessionServer()}</Rich>{' '}
+            <LocaleAnchor path="/:locale/state/reading">
+              <Rich>{m.statePlaces.localServerLink()}</Rich>
+            </LocaleAnchor>
+          </li>
+        </ul>
+      </DocSection>
+
+      <DocSection
         description={m.statePlaces.cookieDescription}
         title={m.statePlaces.cookieTitle}
       >
@@ -530,6 +578,13 @@ export default function StatePlacesPage() {
               cells: [
                 <Code key="type">LocalState</Code>,
                 <Rich key="holds">{types.localState()}</Rich>,
+              ],
+            },
+            {
+              key: 'session',
+              cells: [
+                <Code key="type">SessionState</Code>,
+                <Rich key="holds">{types.sessionState()}</Rich>,
               ],
             },
             {
