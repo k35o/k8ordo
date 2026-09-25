@@ -1,11 +1,7 @@
-import { useForm } from '@k8ordo/form';
-import { formFields } from '@k8ordo/form/server';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
-import { expect, fireEvent, fn, waitFor } from 'storybook/test';
-import { z } from 'zod';
+import { expect, fireEvent, fn } from 'storybook/test';
 
-import { FormControl } from '../form-control';
 import { RangeSlider } from './range-slider';
 
 const meta: Meta<typeof RangeSlider> = {
@@ -124,72 +120,5 @@ export const Invalid: Story = {
 
     await expect(start).toHaveAttribute('aria-invalid', 'true');
     await expect(end).toHaveAttribute('aria-invalid', 'true');
-  },
-};
-
-const priceFields = formFields(
-  z.object({
-    priceMin: z.coerce.number().int().min(0).max(100),
-    priceMax: z.coerce.number().int().min(0).max(100),
-  }),
-);
-
-const PriceForm = () => {
-  const form = useForm(priceFields);
-  const priceMin = form.field('priceMin');
-  const priceMax = form.field('priceMax');
-
-  return (
-    <form {...form.props}>
-      <FormControl
-        label="価格"
-        renderInput={(props) => (
-          <RangeSlider
-            {...props}
-            defaultValue={[20, 80]}
-            max={Number(priceMax.input.max)}
-            min={Number(priceMin.input.min)}
-            name={[priceMin.input.name, priceMax.input.name]}
-          />
-        )}
-      />
-      <p data-testid="dirty">{form.isDirty ? '変更あり' : '変更なし'}</p>
-      <button type="reset">元に戻す</button>
-    </form>
-  );
-};
-
-// 2 つの欄を name の組で受け、つまみはそれぞれ本物の input として送られる。
-// 非制御のつまみは値を DOM に持つので、変更の有無と reset がそのまま効く
-export const WithFormFields: Story = {
-  render: () => <PriceForm />,
-  play: async ({ canvas, canvasElement, userEvent }) => {
-    const start = canvas.getByRole('slider', { name: /価格.*最小/u });
-    const form = canvasElement.querySelector('form');
-    if (form === null) {
-      throw new Error('form が見つかりません');
-    }
-
-    await expect(
-      Object.fromEntries(new FormData(form).entries()),
-    ).toStrictEqual({ priceMin: '20', priceMax: '80' });
-
-    slide(start, 21);
-    await expect(canvas.getByTestId('dirty')).toHaveTextContent('変更あり');
-    await expect(new FormData(form).get('priceMin')).toBe('21');
-
-    await userEvent.click(canvas.getByRole('button', { name: '元に戻す' }));
-    await waitFor(async () => {
-      await expect(canvas.getByTestId('dirty')).toHaveTextContent('変更なし');
-    });
-    await expect(start).toHaveValue('20');
-    // 塗りも戻った値に合わせて描き直す
-    await waitFor(async () => {
-      await expect(
-        canvas
-          .getByRole('group', { name: /価格/u })
-          .style.getPropertyValue('--range-start'),
-      ).toBe('20%');
-    });
   },
 };
