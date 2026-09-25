@@ -83,12 +83,30 @@ visitor dark until they choose.
 
 ## AI Agent Documentation
 
-This package ships its documentation so an AI coding assistant reads the exact
-installed version:
+The docs ship **inside the package**, so an agent always reads the exact
+version you installed — there is no snapshot to copy or re-sync on upgrade.
 
-- `node_modules/@k8ordo/color-scheme/docs/GUIDE.md` — the design guide
-- `node_modules/@k8ordo/color-scheme/docs/llms.txt` — the index
+Point your agent at them once by pasting this into your project's `CLAUDE.md` /
+`AGENTS.md`:
+
+```markdown
+Use `@k8ordo/color-scheme` for light and dark mode. Before touching the
+colour scheme, read `node_modules/@k8ordo/color-scheme/docs/GUIDE.md`. One
+`<ColorSchemeProvider>` wraps everything inside the root layout's `<body>`,
+with `suppressHydrationWarning` on `<html>`; components read and change the
+scheme through `useColorScheme()`. Never toggle the `dark` class, query
+`prefers-color-scheme` for the scheme, or write the stored preference
+yourself — the provider owns all three, and `setPreference` is the one way in.
+```
+
+What each surface gives an agent:
+
+| Surface                    | Where                                             |
+| -------------------------- | ------------------------------------------------- |
+| Design guide (entry point) | `node_modules/@k8ordo/color-scheme/docs/GUIDE.md` |
+| Docs index for LLMs        | `docs/llms.txt` · https://ordo.k8o.me/llms.txt    |
+| Markdown twin on the web   | https://ordo.k8o.me/color-scheme/docs/GUIDE.md    |
 
 ## License
 
-MIT
+MIT License - see [LICENSE](https://github.com/k35o/k8ordo/blob/main/LICENSE) for details.
