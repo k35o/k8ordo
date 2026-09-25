@@ -120,26 +120,46 @@ export const Root = ({
     };
   }, []);
 
-  const onFilesChange = useCallback(
-    (event: ChangeEvent<HTMLInputElement>) => {
-      onChange?.(event.target.files, event);
+  // 送信されるのは input の files なので、一覧と同じ並びを input にも持たせる
+  const syncInput = useCallback((files: AcceptedFile[]): FileList | null => {
+    const input = inputRef.current;
+    if (input === null) {
+      return null;
+    }
+    const dataTransfer = new DataTransfer();
+    for (const { file } of files) {
+      dataTransfer.items.add(file);
+    }
+    input.files = dataTransfer.files;
+    return input.files;
+  }, []);
 
-      const files = Array.from(event.target.files ?? []);
+  const withAdded = useCallback(
+    (files: File[]): AcceptedFile[] => {
       const newFiles = files.map((file) => ({
         file,
         id: crypto.randomUUID(),
       }));
-      const updatedFiles =
-        multiple || webkitDirectory
-          ? [...acceptedFiles, ...newFiles].slice(
-              0,
-              maxFiles ?? Number.POSITIVE_INFINITY,
-            )
-          : newFiles.slice(0, 1);
-
-      setAcceptedFiles(updatedFiles);
+      return multiple || webkitDirectory
+        ? [...acceptedFiles, ...newFiles].slice(
+            0,
+            maxFiles ?? Number.POSITIVE_INFINITY,
+          )
+        : newFiles.slice(0, 1);
     },
-    [acceptedFiles, multiple, maxFiles, onChange, webkitDirectory],
+    [acceptedFiles, multiple, maxFiles, webkitDirectory],
+  );
+
+  // 選び直すと input にはその回に選んだ分しか残らないので、一覧に足した結果を
+  // 書き戻す。書き戻さないと、一覧にあるのに送られないファイルが出る
+  const onFilesChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      const updatedFiles = withAdded(Array.from(event.target.files ?? []));
+      setAcceptedFiles(updatedFiles);
+      syncInput(updatedFiles);
+      onChange?.(event.target.files, event);
+    },
+    [onChange, syncInput, withAdded],
   );
 
   // 一覧から外したファイルは input からも外す。外さないと送信に残る。
@@ -149,20 +169,11 @@ export const Root = ({
     (fileId: string) => {
       const updatedFiles = acceptedFiles.filter((f) => f.id !== fileId);
       setAcceptedFiles(updatedFiles);
-
-      const input = inputRef.current;
-      if (input === null) {
-        return;
-      }
-      const dataTransfer = new DataTransfer();
-      for (const { file } of updatedFiles) {
-        dataTransfer.items.add(file);
-      }
-      input.files = dataTransfer.files;
-      input.dispatchEvent(new Event('input', { bubbles: true }));
-      onChange?.(dataTransfer.files);
+      const list = syncInput(updatedFiles);
+      inputRef.current?.dispatchEvent(new Event('input', { bubbles: true }));
+      onChange?.(list);
     },
-    [acceptedFiles, onChange],
+    [acceptedFiles, onChange, syncInput],
   );
 
   const openFilePicker = useCallback(() => {

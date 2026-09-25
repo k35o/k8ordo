@@ -270,3 +270,22 @@ export const ListFollowsReset: Story = {
     );
   },
 };
+
+// multiple で選び直すと、一覧に積み重なった分がそのまま全部送られる
+export const PickedFilesAllGetSubmitted: Story = {
+  args: {
+    multiple: true,
+  },
+  render: InFormRender,
+  play: async ({ canvas, canvasElement }) => {
+    const input = fileInputOf(canvasElement);
+    pick(input, new File(['a'], 'first.txt', { type: 'text/plain' }));
+    await canvas.findByText('first.txt');
+    pick(input, new File(['b'], 'second.txt', { type: 'text/plain' }));
+    await canvas.findByText('second.txt');
+
+    await expect(
+      Array.from(input.files ?? []).map((file) => file.name),
+    ).toStrictEqual(['first.txt', 'second.txt']);
+  },
+};
