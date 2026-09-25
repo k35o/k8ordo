@@ -244,7 +244,11 @@ export default function ServerActionsPage() {
         </GuideTable>
         <Paragraph text={t.requestType} />
         <CodeBlock code={REQUEST_PROP} lang="tsx" />
-        <Paragraph text={t.requestReadOnly} />
+        <Paragraph text={t.requestReadOnly}>
+          <LocaleAnchor path="/:locale/server/guards">
+            {m.server.navGuards()}
+          </LocaleAnchor>
+        </Paragraph>
         <Paragraph text={t.requestStatic} />
       </DocSection>
 

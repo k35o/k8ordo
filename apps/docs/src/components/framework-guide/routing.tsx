@@ -84,7 +84,7 @@ const SHADOW_ERROR = `routes/ is not a valid pathname space:
 
 const REFUSED = `routes/ is not a valid pathname space:
   routes/[123]: "[123]" is not a valid param directory — use [name] with a letter or underscore first
-  routes/products/helper.ts: routes/ holds only page.tsx, layout.tsx, not-found.tsx, error.tsx, redirect.ts — move "helper.ts" under a _-prefixed directory`;
+  routes/products/helper.ts: routes/ holds only page.tsx, layout.tsx, not-found.tsx, error.tsx, redirect.ts, guard.ts — move "helper.ts" under a _-prefixed directory`;
 
 type Refusal = { contains: string | (() => string); error: string };
 
@@ -92,7 +92,7 @@ const REFUSALS: readonly Refusal[] = [
   {
     contains: '`products/helper.ts`',
     error:
-      'routes/ holds only page.tsx, layout.tsx, not-found.tsx, error.tsx, redirect.ts — move "helper.ts" under a _-prefixed directory',
+      'routes/ holds only page.tsx, layout.tsx, not-found.tsx, error.tsx, redirect.ts, guard.ts — move "helper.ts" under a _-prefixed directory',
   },
   {
     contains: '`[123]/page.tsx`',
@@ -410,6 +410,17 @@ export function RoutingGuide({ mode }: { mode: Mode }) {
               <Rich>{t.filesTable.nothing()}</Rich>
             </Cell>
           </Row>
+          <Row>
+            <Cell nowrap>
+              <Code>guard.ts</Code>
+            </Cell>
+            <Cell>
+              <Rich>{t.filesTable.guard()}</Rich>
+            </Cell>
+            <Cell>
+              <Names names={['request', 'params']} />
+            </Cell>
+          </Row>
         </GuideTable>
         <Paragraph text={own.filesNote}>
           {mode === 'static' ? (
@@ -529,6 +540,12 @@ export function RoutingGuide({ mode }: { mode: Mode }) {
             </Bullet>
             <Bullet>
               <Rich>{m.staticRouting.refusesActions()}</Rich> —{' '}
+              <LocaleAnchor path="/:locale/static/get-started">
+                {m.nav.getStarted()}
+              </LocaleAnchor>
+            </Bullet>
+            <Bullet>
+              <Rich>{m.staticRouting.refusesGuards()}</Rich> —{' '}
               <LocaleAnchor path="/:locale/static/get-started">
                 {m.nav.getStarted()}
               </LocaleAnchor>

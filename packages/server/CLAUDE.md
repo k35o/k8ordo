@@ -35,8 +35,8 @@ pnpm check         # check:write to auto-fix
   `vite.config.ts` identical under either package.
 - **The root entry is the plugin; `./runtime` is everything else.** The root
   loads Vite, which a deployed application does not have installed, so
-  anything the application's own code imports — `serve`, `redirect`, their
-  types — goes in `src/runtime.ts`. `examples/server-basic`'s handler test
+  anything the application's own code imports — `serve`, `redirect`,
+  `responseHeaders`, their types and `Guard` — goes in `src/runtime.ts`. `examples/server-basic`'s handler test
   runs the build with Vite unresolvable to hold that.
 - **A request may only name a file inside the client build.** `safeJoin` is
   the only way `serve` turns a pathname into a path, and it is tested against
@@ -52,7 +52,7 @@ pnpm check         # check:write to auto-fix
 src/
   static-file.ts  safeJoin — request pathname → path inside the build output (pure)
   serve.ts        the node:http server (static files + handing off to the handler)
-  runtime.ts      ./runtime: serve, and the engine's redirect and types — no Vite
+  runtime.ts      ./runtime: serve, and the engine's redirect, responseHeaders and types — no Vite
   index.ts        framework (the engine as is)
 ```
 

@@ -103,6 +103,7 @@ export const PACKAGES: PackageEntry[] = [
       { path: '/:locale/server/errors', label: m.server.navErrors },
       { path: '/:locale/server/boundaries', label: m.server.navBoundaries },
       { path: '/:locale/server/actions', label: m.server.navActions },
+      { path: '/:locale/server/guards', label: m.server.navGuards },
       { path: '/:locale/server/deploy', label: m.server.navDeploy },
     ],
   },
