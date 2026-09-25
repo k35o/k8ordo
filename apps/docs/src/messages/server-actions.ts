@@ -110,8 +110,8 @@ export const requestType = message({
 });
 
 export const requestReadOnly = message({
-  ja: 'ページには応答を書く手段がありません。ステータスも `Set-Cookie` も書けません。ページは描画であり、リクエストに答える描画は 2 つ目のハンドラになってしまうからです。',
-  en: 'Nothing lets a page write to the response — no status, no `Set-Cookie` — because a page is a render, and a render that answered the request would be a second handler.',
+  ja: 'ページには応答を書く手段がありません。ステータスも `Set-Cookie` も書けません。ページは描画であり、リクエストに答える描画は 2 つ目のハンドラになってしまうからです。応答にページ以外の何を付けるかは、ページより前に `guard.ts` が決めます。',
+  en: 'Nothing lets a page write to the response — no status, no `Set-Cookie` — because a page is a render, and a render that answered the request would be a second handler. What the answer carries beyond the page is decided before it, in a `guard.ts`.',
 });
 
 export const requestStatic = message({
@@ -175,6 +175,6 @@ export const buysActions = message({
 });
 
 export const buysRequest = message({
-  ja: 'ページから読めるリクエストのヘッダーと cookie',
-  en: "The request's headers and cookies, readable from a page",
+  ja: 'ページから読めるリクエストのヘッダーと cookie、描く前にリクエストを通すかどうかを決める `guard.ts`',
+  en: "The request's headers and cookies, readable from a page, and a `guard.ts` deciding whether a request gets through before anything renders",
 });

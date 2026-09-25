@@ -36,7 +36,7 @@ pnpm check         # check:write to auto-fix
 - **Three entries, by where the code runs.** The root is the plugin and
   loads Vite, which a deployed application does not have installed.
   `./runtime` (`src/runtime.ts`) is what code inside the handler imports —
-  `redirect` and the types — and `./serve` (`src/serve.ts`) is the Node
+  `redirect`, `responseHeaders` and the types, `Guard` among them — and `./serve` (`src/serve.ts`) is the Node
   server. `examples/server-basic`'s handler test runs the build with Vite
   unresolvable to hold the first split.
 - **The handler is the exit, and it runs wherever `AsyncLocalStorage`
@@ -83,7 +83,7 @@ src/
   encoding.ts     which content coding a request gets, what is worth compressing
   precompress.ts  the client build's .br / .gz copies, written at build time
   serve.ts        ./serve: the node:http server (static files + handing off to the handler)
-  runtime.ts      ./runtime: the engine's redirect and types — no Vite, no Node
+  runtime.ts      ./runtime: the engine's redirect, responseHeaders and types — no Vite, no Node
   vercel-output.ts  the build as Vercel's Build Output API directory
   vercel.ts       ./vercel: the plugin that bundles the handler and writes it
   index.ts        framework (the engine, plus precompressing the client build)

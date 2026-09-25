@@ -2,6 +2,7 @@ import {
   AtomIcon,
   FormIcon,
   LocationIcon,
+  PrepareIcon,
   SendIcon,
   RefreshIcon,
   ShieldCheckIcon,
@@ -42,6 +43,11 @@ const FEATURES: PackageFeature[] = [
     title: m.server.featureParams,
     description: m.server.featureParamsDescription,
     icon: <ShieldCheckIcon />,
+  },
+  {
+    title: m.server.featureGuards,
+    description: m.server.featureGuardsDescription,
+    icon: <PrepareIcon />,
   },
 ];
 
