@@ -160,6 +160,7 @@ export default defineConfig({
             'src/internal/**/*.test.ts',
             'src/components/**/*.test.ts',
             'src/integrations/**/*.test.{ts,tsx}',
+            'src/i18n/**/*.test.ts',
           ],
           includeSource: [
             'src/helpers/**/*.{ts,tsx}',

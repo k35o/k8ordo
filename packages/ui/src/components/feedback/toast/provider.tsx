@@ -10,8 +10,8 @@ import {
 import type { FC, PropsWithChildren, RefObject } from 'react';
 import { createPortal } from 'react-dom';
 
+import { getMessages } from '../../../i18n/current';
 import { cn } from './../../../helpers/cn';
-import { useMessages } from './../../../i18n/context';
 import type { Status } from './../../../types/variables';
 import { ToastStoreContext } from './context';
 import type { ToastOptions, ToastType } from './context';
@@ -68,7 +68,7 @@ export const ToastProvider: FC<
     position?: 'fixed' | 'absolute';
   }>
 > = ({ children, portalRef = null, position = 'fixed' }) => {
-  const messages = useMessages();
+  const messages = getMessages();
   const [state, setState] = useState<ToastState>({
     toasts: [],
     closingIds: [],

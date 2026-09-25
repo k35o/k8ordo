@@ -1,18 +1,41 @@
-import { answer, inPhase, responseHeaders, withRequest } from './request-scope';
+import {
+  answer,
+  cookies,
+  inPhase,
+  requestHeaders,
+  responseHeaders,
+  withRequest,
+} from './request-scope';
 
 const request = new Request('https://example.test/');
 
-describe('responseHeaders()', () => {
+describe.each([
+  ['responseHeaders()', responseHeaders],
+  ['cookies()', cookies],
+  ['requestHeaders()', requestHeaders],
+])('%s', (name, api) => {
   it('refuses outside a request, naming where it belongs', () => {
-    expect(() => responseHeaders()).toThrow(/needs a request — .*guard\.ts/u);
+    expect(() => api()).toThrow(
+      `${name} needs a request — call it from a guard.ts or a Server Action`,
+    );
   });
 
   it('refuses while a page renders, since a render does not answer the request', () => {
     withRequest(request, () => {
-      expect(() => responseHeaders()).toThrow(/a page is a render/u);
+      expect(() => api()).toThrow(/a page is a render/u);
     });
   });
 
+  it.each(['guard', 'action'] as const)('works in a %s', (phase) => {
+    withRequest(request, () => {
+      inPhase(phase, () => {
+        expect(() => api()).not.toThrow();
+      });
+    });
+  });
+});
+
+describe('responseHeaders()', () => {
   it('is what a guard writes to, for the answer to carry', () => {
     const answered = withRequest(request, () => {
       inPhase('guard', () => {
@@ -24,6 +47,58 @@ describe('responseHeaders()', () => {
       "script-src 'self'",
     );
     expect(answered.headers.get('x-page')).toBe('1');
+  });
+});
+
+describe('cookies()', () => {
+  const withCookie = new Request('https://example.test/', {
+    headers: { cookie: 'visitor=k8o; theme=dark' },
+  });
+
+  it('reads what the request carried', () => {
+    withRequest(withCookie, () => {
+      inPhase('action', () => {
+        expect(cookies().get('visitor')).toBe('k8o');
+      });
+    });
+  });
+
+  it('carries a write from a guard through to a Server Action in the same request', () => {
+    withRequest(withCookie, () => {
+      inPhase('guard', () => {
+        cookies().set('visitor', 'someone');
+      });
+      inPhase('action', () => {
+        expect(cookies().get('visitor')).toBe('someone');
+      });
+    });
+  });
+
+  it('says every write as a Set-Cookie on the answer', () => {
+    const answered = withRequest(withCookie, () => {
+      inPhase('action', () => {
+        cookies().set('visitor', 'someone');
+        cookies().delete('theme');
+      });
+      return answer(new Response(null));
+    });
+    expect(answered.headers.getSetCookie()).toStrictEqual([
+      'visitor=someone; Path=/; HttpOnly; Secure; SameSite=Lax',
+      'theme=; Path=/; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; Secure; SameSite=Lax',
+    ]);
+  });
+});
+
+describe('requestHeaders()', () => {
+  it('is the headers the request arrived with', () => {
+    const asked = new Request('https://example.test/', {
+      headers: { 'accept-language': 'ja' },
+    });
+    withRequest(asked, () => {
+      inPhase('action', () => {
+        expect(requestHeaders().get('accept-language')).toBe('ja');
+      });
+    });
   });
 });
 

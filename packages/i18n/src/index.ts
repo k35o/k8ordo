@@ -1,3 +1,4 @@
+export { currentLocale } from './current';
 export { defineLocales } from './locales';
 export type {
   Delocalized,
