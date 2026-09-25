@@ -40,6 +40,7 @@ export const listState = definePageState('product-list', {
   url: z.object({
     q: z._default(z.string(), ''),
     page: z._default(z.coerce.number().check(z.int(), z.gte(1)), 1),
+    inStock: z._default(z.stringbool(), false),
   }),
   entry: z.object({
     expanded: z._default(z.array(z.string()), []),
@@ -75,10 +76,11 @@ system cannot enforce this, so treat the key like a global name.
 merged values through the schema before anything is written, and a field that
 fails there lands on its default instead of the value you wrote. A url value
 is written into a query string and read again — the road a visitor's URL
-takes — so a url field must read back its own query-string spelling (which is
-what lets `z.stringbool()` turn its own `"true"` back into `true`). Two
-spellings that cannot are refused at module load rather than at the first
-click:
+takes — so a url field must read back its own query-string spelling. A boolean
+is written in its schema's own spelling — `"true"`, or the first of a
+`z.stringbool()`'s `truthy` — which is what lets `z.stringbool()` turn it back
+into `true`. Two spellings that cannot are refused at module load rather than
+at the first click:
 
 | written                                                              | use instead      |
 | -------------------------------------------------------------------- | ---------------- |
@@ -135,7 +137,7 @@ example Next.js:
 ```tsx
 export default async function Page({ searchParams }: PageProps<'/products'>) {
   const url = listState.parseUrl(await searchParams);
-  //    ^ { q: string; page: number } — typed, defaults applied
+  //    ^ { q: string; page: number; inStock: boolean } — typed, defaults applied
 
   const products = await fetchProducts(url);
   return (
@@ -165,6 +167,14 @@ pure and run anywhere, including in a Server Component.
 default values are omitted from the query, so every link is canonical and as
 short as it can be. `search` returns the query string alone (no `?`) when the
 path should stay in the caller's hands.
+
+The path `href` takes is written from the application's root, the way the
+route table is, and the link it returns carries Vite's `base` in front of it:
+under `base: '/docs/'`, `listState.href('/products', { page: 2 })` is
+`/docs/products?page=2`. Hand it a path, then — not what `@k8ordo/router`'s
+`href` returned, which carries the base already. Outside Vite (Next.js, say)
+there is no `import.meta.env` to read, nothing is added, and a `basePath` is
+the framework's own `<Link>`'s to add.
 
 ## Client — subscribe and update
 
@@ -333,10 +343,15 @@ declare module '@k8ordo/state' {
 }
 ```
 
-`href` then accepts exactly the table's linkable paths — a `:param` becomes
-`${string}`, a `*` wildcard is matched but never linked — derived through
-`RouteOf` from `@k8ordo/router` as a type only, so the router stays an
-optional peer and never loads at runtime. Under `@k8ordo/static` or
+`href` then checks the path it is handed against the table's linkable
+patterns, segment by segment: a literal segment must be spelled as the pattern
+spells it, a `:param` takes any one non-empty segment — a `${string}` from a
+template literal such as `` `/${locale}/products` `` included — and a `*`
+wildcard is matched but never linked. A path no pattern matches is a type
+error, a `/:locale` table included: `'/ja/nowhere'` is refused even though
+`/:locale` takes any first segment. The check goes through `NavigablePath`
+from `@k8ordo/router` as a type only, so the router stays an optional peer and
+never loads at runtime. Under `@k8ordo/static` or
 `@k8ordo/server` this is generated for you into `.k8ordo/register.gen.ts` from
 `routes/` when the application's own `package.json` lists `@k8ordo/state` in
 `dependencies` or `devDependencies` — a transitive dependency does not count.
@@ -428,7 +443,10 @@ import { formFields } from '@k8ordo/form/server';
 const filterFields = formFields(listState.url); // one schema, both jobs
 ```
 
-The form submits as GET, which writes the URL with or without JavaScript.
+A `z.stringbool()` field derives a checkbox whose `value` is the same spelling
+of `true` that `update()` writes, so a checked box submits `inStock=true` —
+the URL state itself would write. The form submits as GET, which writes the
+URL with or without JavaScript.
 Where the router hands the page its search, the RSC reads it back with
 `parseUrl` and the whole loop works before JavaScript loads; under
 `@k8ordo/static` and `@k8ordo/server` the server render shows the defaults,

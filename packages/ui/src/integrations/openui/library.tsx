@@ -104,6 +104,14 @@ const renderers = {
   Avatar: ({ props }: ComponentRenderProps<sc.AvatarProps>) =>
     ui.renderAvatar(props),
   Code: ({ props }: ComponentRenderProps<sc.CodeProps>) => ui.renderCode(props),
+  Kbd: ({ props }: ComponentRenderProps<sc.KbdProps>) => ui.renderKbd(props),
+  EmptyState: ({ props }: ComponentRenderProps<sc.EmptyStateProps>) =>
+    ui.renderEmptyState(props),
+  Carousel: ({ props, renderNode }: ContainerRenderProps<sc.CarouselProps>) =>
+    ui.renderCarousel(
+      props,
+      props.children.map((child) => renderNode(child)),
+    ),
   Icon: ({ props }: ComponentRenderProps<sc.IconProps>) => ui.renderIcon(props),
   ChevronIcon: ({ props }: ComponentRenderProps<sc.ChevronIconProps>) =>
     ui.renderChevronIcon(props),

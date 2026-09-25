@@ -34,17 +34,24 @@ When installed via npm, these docs live under `node_modules/@k8ordo/server/docs/
   is the import and nothing else); `options.routesDir` moves the route directory
   (default `src/routes`); `ServerOptions` is the type of `options`. This
   entry loads Vite and is for `vite.config.ts` only.
-- `@k8ordo/server/runtime` — what the application's own code imports, without
-  loading Vite, so the built application runs from an install without dev
-  dependencies. `serve({ dist?, port?, host? })` (`ServeOptions`: `dist`
-  defaults to `dist` under the working directory, `port` to `3000`, `host` to
-  `localhost`) serves a build and returns a `Server`, `{ port, url, close }`
-  (`port: 0` takes a free port):
-  the client build's files as they are, everything else through the request
-  handler. The built handler is a plain
-  `(request: Request) => Promise<Response>` default-exported from
-  `dist/rsc/index.js`, so another host can run it directly. `serve` only ever answers a
-  request from a file inside the client build, whatever the pathname is
-  spelled like. `redirect(to)` ends a Server Action by sending the visitor to
-  `to`; `RedirectTarget` is the type of what a `redirect.ts` default-exports,
-  and `RouteRequest` the type of the `request` prop.
+- `@k8ordo/server/runtime` — what code inside the request handler imports,
+  needing nothing from Node: `redirect(to)` ends a Server Action by sending
+  the visitor to `to`; `RedirectTarget` is the type of what a `redirect.ts`
+  default-exports, and `RouteRequest` the type of the `request` prop.
+- `@k8ordo/server/serve` — the Node.js server for a build.
+  `serve({ dist?, port?, host? })` (`ServeOptions`: `dist` defaults to `dist`
+  under the working directory, `port` to `3000`, `host` to `localhost`) serves
+  a build and returns a `Server`, `{ port, url, close }` (`port: 0` takes a
+  free port): the client build's files as they are, everything else through
+  the request handler. `serve` only ever answers a request from a file inside
+  the client build, whatever the pathname is spelled like.
+- `dist/rsc/index.js` — the built request handler, a plain
+  `(request: Request) => Promise<Response>` default export that needs nothing
+  from its runtime but `AsyncLocalStorage` (`node:async_hooks`), so Node.js,
+  Bun, Deno and Cloudflare Workers with `nodejs_compat` run it directly; the
+  host serves `dist/client/` in front of it.
+- `@k8ordo/server/vercel` — `vercel()` returns a Vite plugin to put beside
+  `framework()`: `vite build` then also writes `.vercel/output/` (Build Output
+  API v3) for `vercel build` / `vercel deploy --prebuilt` — the client build as
+  static files at Vite's `base` (`assets/` immutable), and the request handler as one streaming
+  Node.js function built with every dependency bundled in.

@@ -97,16 +97,32 @@ pnpm check         # check:write to auto-fix
 - **`PageProps` reads `Register`, never the mode.** `request` appears only
   because the generator wrote it into `Register` under `@k8ordo/server`; the
   type has no idea which package did.
+- **The table is written from the root; Vite's `base` lives at the edges.**
+  `withBase` (in `href` / `navigateTo` / `bindParams`) puts
+  `import.meta.env.BASE_URL` in front of what leaves for the browser, and
+  `withoutBase` (in `usePathname`, `<Router>`'s match and claim) takes it off
+  what comes back; nothing between ever sees it. `href` returns `string`
+  because its result is a URL: typed as a table path it could be handed to
+  something that adds the base itself (`@k8ordo/state`'s `href`) and carry
+  it twice. Code Node loads without Vite (`@k8ordo/static`'s build, `serve`)
+  has no `import.meta.env` and passes the base explicitly.
 - **The type mirrors the runtime walk.** `Below` resets a branch that landed
   on the root, exactly as `walk` does; without it every route under a root
   layout types as `//products`. Any change to one has to change the other.
+- **A typed path is checked, never enumerated.** `NavigablePath` matches the
+  path it is handed against the table's patterns segment by segment
+  (`PathMatching` in `paths.ts`, a `:param` reading as URLPattern reads it:
+  one non-empty segment). Never go back to a union of `PathFor` each
+  pattern: a `/:locale` page puts `/${string}` in it, and that one member
+  takes every path there is.
 
 ## Layout
 
 ```
 src/
   paths.ts          type derivation (ParamsOf / PathFor / Join) + string operations
-  define-routes.ts  defineRoutes / match / RouteOf
+  base.ts           withBase / withoutBase (Vite's base at the edges)
+  define-routes.ts  defineRoutes / match / NavigablePath
   links.ts          href / navigateTo / bindParams (the side that needs no table)
   register.ts       Register (module augmentation) + PageProps / LayoutProps
   navigation.ts     useInterceptedNavigation (intercept and the commit contract)
