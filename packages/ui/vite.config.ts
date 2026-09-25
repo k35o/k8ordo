@@ -50,7 +50,9 @@ export default defineConfig({
           name: { label: 'components', color: 'magenta' },
           browser: {
             enabled: true,
-            provider: playwright(),
+            provider: playwright({
+              contextOptions: { reducedMotion: 'reduce' },
+            }),
             headless: true,
             screenshotFailures: false,
             // @storybook/addon-vitest はストーリーごとに page.viewport() で
@@ -63,14 +65,7 @@ export default defineConfig({
             // ので、addon が敷いていたのと同じ寸法をこちらで明示する。
             // addon が vitest 5 に対応したら消してよい。
             viewport: { width: 1200, height: 900 },
-            instances: [
-              {
-                browser: 'chromium',
-                context: {
-                  reducedMotion: 'reduce',
-                },
-              },
-            ],
+            instances: [{ browser: 'chromium' }],
           },
         },
       },
@@ -85,15 +80,10 @@ export default defineConfig({
           ],
           browser: {
             enabled: true,
-            instances: [
-              {
-                browser: 'chromium',
-                context: {
-                  reducedMotion: 'reduce',
-                },
-              },
-            ],
-            provider: playwright(),
+            instances: [{ browser: 'chromium' }],
+            provider: playwright({
+              contextOptions: { reducedMotion: 'reduce' },
+            }),
             headless: true,
             screenshotFailures: false,
           },
