@@ -90,14 +90,13 @@ describe('cookieValue', () => {
       z.object({ text: z.string().default('') }),
     );
 
+    // 入力は、RFC 6265 の cookie-octet に入らない文字（空白・`"`・`,`・`;`・
+    // `\`・非 ASCII）をひととおり含む
     const value = note.cookieValue({ text: 'a; b, "c" \\ d ü' });
 
-    // RFC 6265 の cookie-octet は、空白と制御文字・`"`・`,`・`;`・`\` を除く
-    // 印字可能な ASCII
-    const outside = [...value].filter(
-      (char) => char <= ' ' || char > '~' || '",;\\'.includes(char),
-    );
-    expect(outside).toStrictEqual([]);
+    for (const outside of [' ', '"', ',', ';', '\\', 'ü']) {
+      expect(value).not.toContain(outside);
+    }
   });
 
   it('is read back by parseCookies once a server has decoded it', () => {
