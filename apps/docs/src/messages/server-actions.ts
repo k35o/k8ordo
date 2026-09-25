@@ -1,8 +1,8 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: 'Server Action は、クライアントから呼べてサーバーで動く関数で、このモードにはその届き先があります。このページは、アクションの書き方、JavaScript が無くても動くフォーム、`redirect()` での終え方、ページがリクエストを読む方法を説明します。',
-  en: 'A Server Action is a function the client can call that runs on the server, and this mode has somewhere for it to arrive. This page covers writing one, forms that work without JavaScript, ending an action with `redirect()`, and how a page reads the request.',
+  ja: 'Server Action は、クライアントから呼べてサーバーで動く関数で、このモードにはその届き先があります。このページは、アクションの書き方、JavaScript が無くても動くフォーム、`redirect()` での終え方、アクションからの Cookie の読み書き、ページがリクエストを読む方法を説明します。',
+  en: 'A Server Action is a function the client can call that runs on the server, and this mode has somewhere for it to arrive. This page covers writing one, forms that work without JavaScript, ending an action with `redirect()`, reading and writing cookies from an action, and how a page reads the request.',
 });
 
 export const declareTitle = message({
@@ -177,4 +177,19 @@ export const buysActions = message({
 export const buysRequest = message({
   ja: 'ページから読めるリクエストのヘッダーと cookie、描く前にリクエストを通すかどうかを決める `guard.ts`',
   en: "The request's headers and cookies, readable from a page, and a `guard.ts` deciding whether a request gets through before anything renders",
+});
+
+export const contextTitle = message({
+  ja: 'アクションはリクエストに答える',
+  en: 'An action answers the request',
+});
+
+export const contextDescription = message({
+  ja: 'アクションは guard と同じくリクエストに答える側にいるので、同じ API を持ちます。`cookies()` で Cookie を読み書きし、`responseHeaders()` で答えに添え、`requestHeaders()` でリクエストが運んできたヘッダーを読みます。アクションに渡るのは引数で、リクエストではないからです。',
+  en: 'An action answers the request as much as a guard does, so it has the same API: `cookies()` to read and write the cookies, `responseHeaders()` to add to the answer, and `requestHeaders()` for the headers the request arrived with — an action is handed its arguments, not the request.',
+});
+
+export const contextAnswer = message({
+  ja: 'アクションが書いたものは、その答えに載ります。描き直したページでも、`redirect()` の `303` でも、クライアントランタイムが適用するペイロードでも同じです。アクションのあとに描き直すページが `request` で見るのは、リクエストが運んできた Cookie で、アクションが書いた値ではありません。',
+  en: 'What an action writes goes on its answer — the page it re-rendered, the `303` to where it redirected, or the payload the client runtime applies. The page re-rendered after it sees the cookies the request carried in `request`, not what the action wrote.',
 });
