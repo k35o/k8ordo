@@ -14,7 +14,7 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
 
 ## Guide
 
-- [Design Guide](GUIDE.md): setup, i18n (default Japanese, switching to English), design direction, aesthetic guidelines, component usage principles, anti-patterns, implementation principles, testing (component tests belong in a real browser — Vitest browser mode or Playwright — because the components call browser APIs jsdom does not implement).
+- [Design Guide](GUIDE.md): setup, dark mode (the `dark` class that `@k8ordo/color-scheme` puts on `<html>`, and the `color-scheme` the stylesheet sets to match), i18n (default Japanese, switching to English), design direction, aesthetic guidelines, component usage principles, anti-patterns, implementation principles, testing (component tests belong in a real browser — Vitest browser mode or Playwright — because the components call browser APIs jsdom does not implement).
 
 ## References
 

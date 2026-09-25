@@ -6,6 +6,17 @@
  */
 
 @layer base {
+  /* `light dark` にしないのは、トークンが prefers-color-scheme ではなく .dark で
+     切り替わるから。OS がダークでも .dark が無ければ、ネイティブ部品も
+     トークンと同じく明るいままにする */
+  :root {
+    color-scheme: light;
+  }
+
+  .dark {
+    color-scheme: dark;
+  }
+
   body:has(dialog[open]) {
     overflow: hidden;
   }
@@ -66,7 +77,7 @@
 }
 
 @custom-variant dark (&:where(.dark, .dark *));
-@custom-variant light (&:where(.light, .light *));
+@custom-variant light (&:where(:not(.dark, .dark *)));
 
 /* 縦書きモード。`.writing-v` 配下に適用し、`.writing-h` 配下のアイランドでは無効化する */
 @custom-variant vertical (
