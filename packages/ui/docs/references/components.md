@@ -480,6 +480,61 @@ Props:
 - `minItemSize`: `24` | `32` | `40` | `48` | `64` | `80` (default: `48`)
 - Other props are forwarded to `HTMLAttributes<HTMLDivElement>`, except `className` / `style`.
 
+### ResizablePanels
+
+Two panes with a divider between them that the user drags or moves with the
+arrow keys (the WAI-ARIA window splitter). `value` is the first pane's share in
+percent, kept between `min` and `max`; the second pane takes the rest. The root
+fills its parent, so give that parent a size — a vertical split needs a height.
+Each pane scrolls on its own.
+
+The divider is a focusable `separator` whose value is the first pane's size and
+whose `aria-controls` points at it. The arrow keys move it the way they point
+on screen — left/right when the panes sit side by side, up/down when they are
+stacked — so in a right-to-left page `ArrowLeft` widens a first pane that sits
+on the right; `Home` / `End` jump to `min` / `max`. `orientation="horizontal"`
+lays the panes along the line of text, so in vertical writing mode they stack.
+Name the divider after the first pane with `aria-labelledby` when it has a
+heading; otherwise it falls back to `resizablePanelsHandle` from the dictionary.
+
+```tsx
+import { ResizablePanels } from '@k8ordo/ui';
+
+<div className="h-96">
+  <ResizablePanels.Root defaultValue={25}>
+    <ResizablePanels.Panel>
+      <h2 id="files">Files</h2>
+    </ResizablePanels.Panel>
+    <ResizablePanels.Handle aria-labelledby="files" />
+    <ResizablePanels.Panel>…</ResizablePanels.Panel>
+  </ResizablePanels.Root>
+</div>;
+```
+
+Props (Root):
+
+- `children`: `ReactNode`
+- `defaultValue`: `number` (default: `50`)
+- `max`: `number` (default: `90`)
+- `min`: `number` (default: `10`)
+- `onChange`: `(value: number) => void`
+- `orientation`: `'horizontal'` | `'vertical'` (default: `'horizontal'`)
+- `ref`: `Ref<HTMLDivElement>`
+- `step`: `number` (default: `5`)
+- `value`: `number`
+- Other props are forwarded to `HTMLAttributes<HTMLDivElement>`, except `className` / `style`.
+
+Props (ResizablePanels.Panel):
+
+- `children`: `ReactNode`
+- `ref`: `Ref<HTMLDivElement>`
+- Other props are forwarded to `HTMLAttributes<HTMLDivElement>`, except `className` / `style`.
+
+Props (ResizablePanels.Handle):
+
+- _No props of its own._
+- Other props are forwarded to `HTMLAttributes<HTMLDivElement>`, except `className` / `style` / `role` / `children` / `tabIndex` / `aria-orientation` / `aria-valuenow` / `aria-valuemin` / `aria-valuemax` / `aria-controls`.
+
 ## Forms
 
 Form components are used together with `FormControl`'s `renderInput` pattern. Every form component except `FileField` supports both controlled and uncontrolled use; `FileField.Root` takes only `defaultValue` and keeps the selected files itself.

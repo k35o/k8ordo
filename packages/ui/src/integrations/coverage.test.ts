@@ -43,6 +43,10 @@ const LEFT_OUT: ReadonlyMap<string, string> = new Map([
     'サーバーでハイライトする async の Server Component。生成 UI はクライアントで描くので置けず、置けば shiki をブラウザに送ることになる',
   ],
   [
+    'ResizablePanels',
+    '高さの決まった親を 2 つに分ける作業画面の枠組み。生成 UI は会話の中に流れ、分ける高さを持たない（並べるだけなら Grid）',
+  ],
+  [
     'Prose',
     'Markdown が描いた素の HTML を整える入れ物。spec が置くのは自分の見た目を持つ部品なので、効くものが無い（流れは Stack で組む）',
   ],
