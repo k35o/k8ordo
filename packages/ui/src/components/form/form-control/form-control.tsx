@@ -3,7 +3,7 @@
 import { useId } from 'react';
 import type { FC, HTMLAttributes, ReactElement, Ref } from 'react';
 
-import { useMessages } from '../../../i18n/context';
+import { getMessages } from '../../../i18n/current';
 
 type FormControlProps = {
   disabled?: boolean;
@@ -38,7 +38,7 @@ export const FormControl: FC<FormControlProps> = ({
   ref,
   ...rest
 }) => {
-  const messages = useMessages();
+  const messages = getMessages();
   const id = useId();
   const hasErrorText = errorText !== undefined && errorText !== '';
   const hasHelpText = helpText !== undefined && helpText !== '';

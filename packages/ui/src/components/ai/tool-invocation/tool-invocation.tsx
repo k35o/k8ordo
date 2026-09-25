@@ -1,14 +1,12 @@
-'use client';
-
-import { useCallback, useId, useRef, useTransition } from 'react';
+import { useId } from 'react';
 import type { FC, ReactNode } from 'react';
 
-import { useMessages } from '../../../i18n/context';
-import { Button } from '../../buttons/button';
+import { getMessages } from '../../../i18n/current';
 import { Spinner } from '../../feedback/spinner';
 import { AlertIcon, CheckIcon } from '../../icons';
 import { Collapsible } from '../_internal/collapsible';
 import type { ToolApproval, ToolApprovalResponse, ToolState } from '../types';
+import { ApprovalBar } from './approval-bar';
 
 type Props = {
   name: string;
@@ -82,31 +80,13 @@ export const ToolInvocation: FC<Props> = ({
   defaultOpen = false,
   onChange,
 }) => {
-  const messages = useMessages();
+  const messages = getMessages();
   const nameId = useId();
-  const [isResponding, startTransition] = useTransition();
-  const triggerRef = useRef<HTMLButtonElement>(null);
-  // 答えると問いのバーごと消え、押したボタンにあったフォーカスが body に
-  // 落ちる。消える直前（ref の解除は DOM から外すより先に走る）にまだ
-  // フォーカスを持っていたら、同じツールの見出しへ移す
-  const keepFocusOnAnswer = useCallback(
-    (group: HTMLDivElement) => () => {
-      if (group.contains(document.activeElement)) {
-        triggerRef.current?.focus();
-      }
-    },
-    [],
-  );
+  const triggerId = useId();
   const pendingApproval =
     state === 'approval-requested' && approval?.isAutomatic !== true
       ? approval
       : undefined;
-
-  const respond = (id: string, approved: boolean) => {
-    startTransition(async () => {
-      await onApprovalResponse?.({ id, approved });
-    });
-  };
 
   return (
     <Collapsible
@@ -119,43 +99,15 @@ export const ToolInvocation: FC<Props> = ({
         </span>
       }
       onChange={onChange}
-      triggerRef={triggerRef}
+      triggerId={triggerId}
       footer={
         pendingApproval === undefined ? undefined : (
-          <div
-            aria-labelledby={nameId}
-            className="flex flex-wrap items-center gap-2"
-            ref={keepFocusOnAnswer}
-            role="group"
-          >
-            <p className="text-fg-base min-w-0 flex-1 text-sm">
-              {pendingApproval.requestReason ?? messages.toolApprovalRequest}
-            </p>
-            {onApprovalResponse !== undefined && (
-              <div className="flex shrink-0 gap-2">
-                <Button
-                  color="base"
-                  disabled={isResponding}
-                  onClick={() => {
-                    respond(pendingApproval.id, false);
-                  }}
-                  size="sm"
-                  variant="outline"
-                >
-                  {messages.toolDeny}
-                </Button>
-                <Button
-                  disabled={isResponding}
-                  onClick={() => {
-                    respond(pendingApproval.id, true);
-                  }}
-                  size="sm"
-                >
-                  {messages.toolApprove}
-                </Button>
-              </div>
-            )}
-          </div>
+          <ApprovalBar
+            approval={pendingApproval}
+            nameId={nameId}
+            onApprovalResponse={onApprovalResponse}
+            triggerId={triggerId}
+          />
         )
       }
     >

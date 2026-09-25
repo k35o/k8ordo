@@ -6,7 +6,7 @@ import type { FC, HTMLAttributes, ReactNode } from 'react';
 import { cn } from '../../../helpers/cn';
 import { createSafeContext } from '../../../helpers/create-safe-context';
 import { useControllableState } from '../../../hooks/controllable-state';
-import { useMessages } from '../../../i18n/context';
+import { getMessages } from '../../../i18n/current';
 import { HIGH_CONTRAST_EDGE } from '../../_internal/high-contrast';
 import { IconButton } from '../../buttons/icon-button';
 import {
@@ -95,7 +95,7 @@ type ActionsProps = {
 };
 
 export const Actions: FC<ActionsProps> = ({ label, children }) => {
-  const messages = useMessages();
+  const messages = getMessages();
   const { from } = useMessageContext();
 
   return (
@@ -139,7 +139,7 @@ type CopyProps = {
 };
 
 export const Copy: FC<CopyProps> = ({ value, label }) => {
-  const messages = useMessages();
+  const messages = getMessages();
   const [isCopied, setIsCopied] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
@@ -191,7 +191,7 @@ export const Regenerate: FC<RegenerateProps> = ({
   label,
   disabled,
 }) => {
-  const messages = useMessages();
+  const messages = getMessages();
 
   return (
     <Action
@@ -215,7 +215,7 @@ export const Feedback: FC<FeedbackProps> = ({
   defaultValue = null,
   onChange,
 }) => {
-  const messages = useMessages();
+  const messages = getMessages();
   const [feedback, setFeedback] = useControllableState<MessageFeedback | null>({
     value,
     defaultValue,

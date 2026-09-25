@@ -1,8 +1,6 @@
-'use client';
-
 import type { FC, ReactNode } from 'react';
 
-import { useMessages } from '../../../i18n/context';
+import { getMessages } from '../../../i18n/current';
 import {
   AttachmentPreview,
   isImageMediaType,
@@ -14,7 +12,7 @@ type ListProps = {
 };
 
 export const List: FC<ListProps> = ({ label, children }) => {
-  const messages = useMessages();
+  const messages = getMessages();
 
   return (
     <ul

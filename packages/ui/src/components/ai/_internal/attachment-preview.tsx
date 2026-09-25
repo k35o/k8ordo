@@ -1,9 +1,7 @@
-'use client';
-
 import { useId } from 'react';
 import type { FC, ReactNode } from 'react';
 
-import { useMessages } from '../../../i18n/context';
+import { getMessages } from '../../../i18n/current';
 import { IconButton } from '../../buttons/icon-button';
 import { CloseIcon } from '../../icons';
 import { FileIcon } from './icons';
@@ -25,7 +23,7 @@ export const AttachmentPreview: FC<Props> = ({
   renderImage,
   onRemove,
 }) => {
-  const messages = useMessages();
+  const messages = getMessages();
   const nameId = useId();
 
   return (

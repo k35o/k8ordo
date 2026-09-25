@@ -1,9 +1,7 @@
-'use client';
-
 import type { FC, ReactNode } from 'react';
 
 import { cn } from '../../../helpers/cn';
-import { useMessages } from '../../../i18n/context';
+import { getMessages } from '../../../i18n/current';
 import { FOCUS_RING } from '../../_internal/focus-ring';
 import { ExternalLinkIcon } from '../../icons';
 import { FileIcon } from '../_internal/icons';
@@ -14,7 +12,7 @@ type ListProps = {
 };
 
 export const List: FC<ListProps> = ({ label, children }) => {
-  const messages = useMessages();
+  const messages = getMessages();
 
   return (
     <ul aria-label={label ?? messages.sources} className="flex flex-wrap gap-2">

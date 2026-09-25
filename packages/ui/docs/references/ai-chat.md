@@ -56,7 +56,7 @@ import 'streamdown/styles.css';
 
 The `useChat` used in the examples below comes from the AI SDK's React bindings (`pnpm add @ai-sdk/react`).
 
-The "default" shown for `label`, `sendLabel`, and similar props below is the message dictionary's default (Japanese). Swap the whole dictionary with `<UIProvider messages={en}>` (see [i18n](components.md)). Passing the prop directly wins over the dictionary.
+The "default" shown for `label`, `sendLabel`, and similar props below is the built-in Japanese dictionary's. The text actually used follows `@k8ordo/i18n`'s current locale (see [i18n](components.md)). Passing the prop directly wins over the dictionary.
 
 ## The whole picture
 
@@ -374,7 +374,7 @@ Props:
 - `isStreaming`: boolean
 - Every other streamdown prop (`translations`, `controls`, `linkSafety`, `plugins`, `components`, `urlTransform`, `dir`, …) passes straight through. The library owns `className` and `mode` (`mode` is derived from `isStreaming`)
 
-The wording comes from the i18n dictionary, so by default strings such as 「コードをコピー」 and 「表をダウンロード」 appear in Japanese. Pass `translations` to change individual strings (prop > dictionary > streamdown's own default).
+The wording comes from the i18n dictionary of the current locale, so strings such as `responseCopyCode` and `responseDownloadTable` follow the rest of the components. Pass `translations` to change individual strings (prop > dictionary > streamdown's own default).
 
 The library **defaults `linkSafety` to off**. With streamdown's own default (on), links render as `<button>` rather than `<a>`, which loses ⌘-click, middle-click, copying the link address, and the link role for assistive technology. Turn it on explicitly if you want the confirmation dialog:
 

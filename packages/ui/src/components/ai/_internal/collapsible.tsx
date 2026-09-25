@@ -1,7 +1,7 @@
 'use client';
 
 import { useId } from 'react';
-import type { FC, ReactNode, Ref } from 'react';
+import type { FC, ReactNode } from 'react';
 
 import { cn } from '../../../helpers/cn';
 import { useControllableState } from '../../../hooks/controllable-state';
@@ -15,7 +15,7 @@ type Props = {
   defaultOpen?: boolean;
   onChange?: (isOpen: boolean) => void;
   footer?: ReactNode;
-  triggerRef?: Ref<HTMLButtonElement>;
+  triggerId?: string;
   children: ReactNode;
 };
 
@@ -26,7 +26,7 @@ export const Collapsible: FC<Props> = ({
   defaultOpen = false,
   onChange,
   footer,
-  triggerRef,
+  triggerId,
   children,
 }) => {
   const [open, setOpen] = useControllableState<boolean>({
@@ -45,10 +45,10 @@ export const Collapsible: FC<Props> = ({
           'flex w-full items-center gap-2 px-3 py-2 text-left text-fg-mute transition-colors duration-150 ease-out hover:bg-bg-mute',
           FOCUS_RING_NO_BORDER,
         )}
+        id={triggerId}
         onClick={() => {
           setOpen(!open);
         }}
-        ref={triggerRef}
         type="button"
       >
         {icon !== undefined && (

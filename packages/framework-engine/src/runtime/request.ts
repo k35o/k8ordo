@@ -9,7 +9,9 @@ export type RouteRequest = {
   readonly cookies: ReadonlyMap<string, string>;
 };
 
-const parseCookies = (header: string | null): ReadonlyMap<string, string> => {
+export const parseCookies = (
+  header: string | null,
+): ReadonlyMap<string, string> => {
   const cookies = new Map<string, string>();
   if (header === null) return cookies;
   for (const part of header.split(';')) {

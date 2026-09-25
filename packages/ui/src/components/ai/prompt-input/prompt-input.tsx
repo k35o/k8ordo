@@ -12,7 +12,7 @@ import type {
 import { cn } from '../../../helpers/cn';
 import { createSafeContext } from '../../../helpers/create-safe-context';
 import { useControllableState } from '../../../hooks/controllable-state';
-import { useMessages } from '../../../i18n/context';
+import { getMessages } from '../../../i18n/current';
 import { acceptsFile } from '../../../internal/accepts-file';
 import { FOCUS_RING, FOCUS_RING_WITHIN } from '../../_internal/focus-ring';
 import { SendIcon } from '../../icons';
@@ -338,7 +338,7 @@ type AttachProps = {
 };
 
 export const Attach: FC<AttachProps> = ({ label }) => {
-  const messages = useMessages();
+  const messages = getMessages();
   const { accept, maxFiles, addFiles } = usePromptInputContext();
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -386,7 +386,7 @@ type SubmitProps = {
 };
 
 export const Submit: FC<SubmitProps> = ({ sendLabel, stopLabel }) => {
-  const messages = useMessages();
+  const messages = getMessages();
   const { value, status, stop, files } = usePromptInputContext();
 
   if (isBusy(status)) {
