@@ -317,19 +317,19 @@ function DismissButton({ onDismiss }) {
                 <Code>{row.key}</Code>
               </dt>
               <dd className="text-fg-mute text-sm">
-                <span className="text-fg-mute/60">
+                <span className="text-fg-subtle">
                   <Rich>{m.uiI18n.usedByColumn()}</Rich>:{' '}
                 </span>
                 {row.usedBy}
               </dd>
               <dd className="text-fg-mute text-sm">
-                <span className="text-fg-mute/60">
+                <span className="text-fg-subtle">
                   <Rich>{m.uiI18n.jaColumn()}</Rich>:{' '}
                 </span>
                 {row.jaValue}
               </dd>
               <dd className="text-fg-mute text-sm">
-                <span className="text-fg-mute/60">
+                <span className="text-fg-subtle">
                   <Rich>{m.uiI18n.enColumn()}</Rich>:{' '}
                 </span>
                 {row.enValue}
