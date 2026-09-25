@@ -30,6 +30,9 @@ export function LanguageSwitcher() {
             key={l}
             label={LOCALE_LABELS[l]}
             onAction={() => {
+              // navigateTo は表のパターンしか受け取らず、ここの行き先は今の
+              // pathname から作るので、型を偽らずには書けない。フレームワーク
+              // 下のブラウザには、どのパターンが勝ったかが届かない。
               navigation.navigate(locales.localize(path, l));
             }}
           />

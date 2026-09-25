@@ -53,10 +53,13 @@ const PathnameProbe: FC = () => (
   <span data-testid="pathname">{usePathname()}</span>
 );
 
+// 絞り込み欄はレイアウトに置く。ページが替わっても残る要素にフォーカスが
+// あるときに、それがどこへ行くかを見る
 const Shell: FC = () => (
   <section data-testid="shell">
     <PathnameProbe />
     <SectionProbe />
+    <input aria-label="filter" />
     <Outlet />
   </section>
 );
@@ -319,6 +322,80 @@ it('scrolls to the fragment the new URL names', async () => {
 
   await expect.element(screen.getByTestId('tall')).toBeInTheDocument();
   expect(window.scrollY).toBeGreaterThan(1000);
+});
+
+it('restores the position a page was left at when the visitor goes back to it', async () => {
+  const screen = await render(<Router routes={routes} />);
+  await navigateTo('/tall', { history: 'replace' }).finished;
+  await expect.element(screen.getByTestId('tall')).toBeInTheDocument();
+  window.scrollTo(0, 3000);
+  const left = window.scrollY;
+  await navigateTo('/about').finished;
+  expect(window.scrollY).toBe(0);
+
+  await navigation.back().finished;
+
+  await expect.element(screen.getByTestId('tall')).toBeInTheDocument();
+  expect(window.scrollY).toBe(left);
+});
+
+it('restores the position a page was left at when the visitor goes forward to it', async () => {
+  const screen = await render(<Router routes={routes} />);
+  await navigateTo('/about', { history: 'replace' }).finished;
+  await navigateTo('/tall').finished;
+  await expect.element(screen.getByTestId('tall')).toBeInTheDocument();
+  window.scrollTo(0, 3000);
+  const left = window.scrollY;
+  await navigation.back().finished;
+  await expect.element(screen.getByTestId('about')).toBeInTheDocument();
+
+  await navigation.forward().finished;
+
+  await expect.element(screen.getByTestId('tall')).toBeInTheDocument();
+  expect(window.scrollY).toBe(left);
+});
+
+it('keeps the scroll position when only the search moves', async () => {
+  const screen = await render(<Router routes={routes} />);
+  await navigateTo('/tall', { history: 'replace' }).finished;
+  await expect.element(screen.getByTestId('tall')).toBeInTheDocument();
+  window.scrollTo(0, 3000);
+  const reading = window.scrollY;
+
+  const url = new URL(location.href);
+  url.searchParams.set('q', 'shoes');
+  await navigation.navigate(url.href, { history: 'replace' }).finished;
+
+  expect(window.scrollY).toBe(reading);
+});
+
+it('moves focus to the top of the document on a page change, the way a document load does', async () => {
+  const screen = await render(<Router routes={routes} />);
+  await navigateTo('/products', { history: 'replace' }).finished;
+  const filter = screen.getByRole('textbox', { name: 'filter' }).element();
+  (filter as HTMLInputElement).focus();
+  expect(document.activeElement).toBe(filter);
+
+  await navigateTo('/products/:id', { id: 'shoes' }).finished;
+
+  // 絞り込み欄はレイアウトごと残っている。それでもフォーカスは離れる
+  expect(screen.getByRole('textbox', { name: 'filter' }).element()).toBe(
+    filter,
+  );
+  expect(document.activeElement).toBe(document.body);
+});
+
+it('leaves focus where it was when only the search moves', async () => {
+  const screen = await render(<Router routes={routes} />);
+  await navigateTo('/products', { history: 'replace' }).finished;
+  const filter = screen.getByRole('textbox', { name: 'filter' }).element();
+  (filter as HTMLInputElement).focus();
+
+  const url = new URL(location.href);
+  url.searchParams.set('q', 'shoes');
+  await navigation.navigate(url.href, { history: 'replace' }).finished;
+
+  expect(document.activeElement).toBe(filter);
 });
 
 it('answers which section is showing without a table in hand', async () => {

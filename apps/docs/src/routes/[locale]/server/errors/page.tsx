@@ -17,6 +17,7 @@ const STATUSES = [
   { when: m.serverErrors.statusesTable.redirect, status: '307' },
   { when: m.serverErrors.statusesTable.action, status: '303' },
   { when: m.serverErrors.statusesTable.crossOrigin, status: '403' },
+  { when: m.serverErrors.statusesTable.method, status: '405' },
   { when: m.serverErrors.statusesTable.failed, status: '500' },
 ];
 

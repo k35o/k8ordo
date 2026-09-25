@@ -145,6 +145,7 @@ export default function ServerDeployPage() {
 
       <DocSection description={t.handlerDescription} title={t.handlerTitle}>
         <CodeBlock code={HANDLER} lang="ts" />
+        <Paragraph text={t.handlerMethods} />
         <Paragraph text={t.handlerFiles} />
         <Paragraph text={t.handlerOrigin} />
       </DocSection>

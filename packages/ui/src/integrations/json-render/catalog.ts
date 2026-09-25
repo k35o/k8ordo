@@ -25,191 +25,205 @@ export const catalog = defineCatalog(schema, {
       props: s.stackProps,
       slots: ['default'],
       description:
-        '子要素を縦/横に等間隔で並べるレイアウトコンテナ。gap で子要素間の間隔、padding（none〜xl）で内側の余白を付ける。セクションに余白が欲しいときは padding を指定する。',
+        'Layout container that places its children in a row or a column with even spacing. gap sets the space between children and padding (none to xl) the space inside; give a section padding when it needs room around its content.',
     },
     Grid: {
       props: s.gridProps,
       slots: ['default'],
       description:
-        '子要素をグリッド状に並べる。cols（1〜6 / auto-fill / auto-fit）と gap、auto-fill/fit 時は minItemSize で各セルの最小サイズを制御。',
+        'Places its children in a grid. Set cols (1 to 6, auto-fill, or auto-fit) and gap; with auto-fill or auto-fit, minItemSize sets the smallest size of each cell.',
     },
     Button: {
       props: s.buttonProps,
-      description: 'アクションボタン。href を指定するとリンク（<a>）になる。',
+      description: 'Action button. With href it renders as a link (<a>).',
     },
     Card: {
       props: s.cardProps,
       slots: ['default'],
       description:
-        'コンテンツをまとめるカード（コンテナ）。内側 padding は size（sm/md/lg、デフォルト md）で決まる。中身を Stack で囲む場合に重ねて padding を指定する必要はない。interactive を付けるとホバー時にスケールする。',
+        'Card that groups content (a container). size (sm/md/lg, default md) sets its inner padding, so a Stack inside it needs no padding of its own. interactive makes it scale up on hover.',
     },
-    Badge: { props: s.badgeProps, description: 'ステータスやラベルのバッジ。' },
-    Heading: { props: s.headingProps, description: '見出し（h1〜h6）。' },
+    Badge: {
+      props: s.badgeProps,
+      description: 'Badge for a status or a label.',
+    },
+    Heading: { props: s.headingProps, description: 'Heading (h1 to h6).' },
     Alert: {
       props: s.alertProps,
-      description: '状態を伝えるアラート。message は文字列または文字列配列。',
+      description:
+        'Alert that reports a status. message is a string or an array of strings.',
     },
-    Spinner: { props: s.spinnerProps, description: 'ローディングスピナー。' },
-    Separator: { props: s.separatorProps, description: '区切り線。' },
+    Spinner: { props: s.spinnerProps, description: 'Loading spinner.' },
+    Separator: { props: s.separatorProps, description: 'Divider line.' },
     TextField: {
       props: s.textFieldProps,
       description:
-        '1行テキスト入力。defaultValue を $bindState で状態に束縛できる。',
+        'Single-line text input. defaultValue can be bound to state with $bindState.',
     },
     Checkbox: {
       props: s.checkboxProps,
       description:
-        'チェックボックス。defaultChecked を $bindState で束縛できる。',
+        'Checkbox. defaultChecked can be bound to state with $bindState.',
     },
     Switch: {
       props: s.switchProps,
       description:
-        'オン/オフスイッチ。defaultChecked を $bindState で束縛できる。',
+        'On/off switch. defaultChecked can be bound to state with $bindState.',
     },
     Select: {
       props: s.selectProps,
       description:
-        'ドロップダウン選択。defaultValue を $bindState で状態に束縛できる。',
+        'Dropdown select. defaultValue can be bound to state with $bindState.',
     },
     Tabs: {
       props: s.tabsProps,
-      description: 'タブ。各タブは label とテキスト content を持つ。',
+      description: 'Tabs. Each tab has a label and text content.',
     },
     Accordion: {
       props: s.accordionProps,
       description:
-        '開閉できるアコーディオン。各項目は title とテキスト content。',
+        'Accordion of items that open and close. Each item has a title and text content.',
     },
     Breadcrumb: {
       props: s.breadcrumbProps,
-      description: 'パンくずリスト。',
+      description: 'Breadcrumb trail.',
     },
     Table: {
       props: s.tableProps,
-      description: 'テーブル。columns（見出し）と rows（行ごとのセル文字列）。',
+      description:
+        'Table with columns (the headers) and rows (the cell strings of each row).',
     },
-    Anchor: { props: s.anchorProps, description: 'テキストリンク。' },
+    Anchor: { props: s.anchorProps, description: 'Text link.' },
     Avatar: {
       props: s.avatarProps,
-      description: 'アバター（画像 or イニシャル）。',
+      description: 'Avatar (an image or initials).',
     },
-    Code: { props: s.codeProps, description: 'インラインのコード/値表示。' },
-    Progress: { props: s.progressProps, description: '進捗バー。' },
+    Code: { props: s.codeProps, description: 'Inline code or value.' },
+    Progress: { props: s.progressProps, description: 'Progress bar.' },
     Skeleton: {
       props: s.skeletonProps,
-      description: 'ローディングのプレースホルダ。',
+      description: 'Loading placeholder.',
     },
-    Icon: { props: s.iconProps, description: 'アイコン（name で指定）。' },
+    Icon: { props: s.iconProps, description: 'Icon, chosen by name.' },
     ChevronIcon: {
       props: s.chevronIconProps,
-      description: '矢印アイコン。direction で向きを指定。',
+      description: 'Arrow icon. direction sets which way it points.',
     },
     StatusIcon: {
       props: s.statusIconProps,
       description:
-        'ステータスを表すアイコン（success/info/warning/error）。装飾用途で、メッセージ表示なら Alert を使う。',
+        'Icon for a status (success/info/warning/error). It is decorative; to show a message, use Alert.',
     },
     IconButton: {
       props: s.iconButtonProps,
-      description: 'アイコンのみのボタン（label は必須・ツールチップ）。',
+      description:
+        'Icon-only button (label is required and shown as its tooltip).',
     },
     Textarea: {
       props: s.textareaProps,
       description:
-        '複数行テキスト入力。defaultValue を $bindState で束縛できる。',
+        'Multi-line text input. defaultValue can be bound to state with $bindState.',
     },
     PasswordInput: {
       props: s.passwordInputProps,
-      description: 'パスワード入力。defaultValue を $bindState で束縛できる。',
+      description:
+        'Password input. defaultValue can be bound to state with $bindState.',
     },
     NumberField: {
       props: s.numberFieldProps,
-      description: '数値入力。defaultValue を $bindState で束縛できる。',
+      description:
+        'Number input. defaultValue can be bound to state with $bindState.',
     },
     Slider: {
       props: s.sliderProps,
-      description: 'スライダー。defaultValue を $bindState で束縛できる。',
+      description:
+        'Slider. defaultValue can be bound to state with $bindState.',
     },
     Radio: {
       props: s.radioProps,
-      description: '単一選択ラジオ。defaultValue を $bindState で束縛できる。',
+      description:
+        'Radio buttons for a single choice. defaultValue can be bound to state with $bindState.',
     },
     RadioCard: {
       props: s.radioCardProps,
       description:
-        'カード型の単一選択。defaultValue を $bindState で束縛できる。',
+        'Single choice presented as cards. defaultValue can be bound to state with $bindState.',
     },
     CheckboxCard: {
       props: s.checkboxCardProps,
       description:
-        'カード型の複数選択。defaultValue を $bindState で束縛できる。',
+        'Multiple choice presented as cards. defaultValue can be bound to state with $bindState.',
     },
     Pagination: {
       props: s.paginationProps,
-      description: 'ページネーション。defaultPage を $bindState で束縛できる。',
+      description:
+        'Pagination. defaultPage can be bound to state with $bindState.',
     },
     Form: {
       props: s.formProps,
       slots: ['default'],
-      description: 'フォーム要素のラッパー（縦並びレイアウト）。',
+      description: 'Wrapper for form elements (a vertical layout).',
     },
     Modal: {
       props: s.modalProps,
       slots: ['default'],
       description:
-        'モーダルダイアログ。triggerLabel のボタンで開く自己完結ウィジェット。',
+        'Modal dialog. A self-contained widget that opens from a button labeled triggerLabel.',
     },
     Dialog: {
       props: s.dialogProps,
       slots: ['default'],
-      description: 'センターダイアログ。triggerLabel のボタンで開く。',
+      description:
+        'Centered dialog that opens from a button labeled triggerLabel.',
     },
     Drawer: {
       props: s.drawerProps,
       slots: ['default'],
-      description: 'サイドドロワー。triggerLabel のボタンで開く。',
+      description: 'Side drawer that opens from a button labeled triggerLabel.',
     },
     Popover: {
       props: s.popoverProps,
       slots: ['default'],
-      description: 'ポップオーバー。triggerLabel のボタンで開閉。',
+      description:
+        'Popover that a button labeled triggerLabel opens and closes.',
     },
     Tooltip: {
       props: s.tooltipProps,
-      description: 'ツールチップ。ホバー/フォーカスで表示。',
+      description: 'Tooltip shown on hover or focus.',
     },
     DropdownMenu: {
       props: s.dropdownMenuProps,
-      description: 'ドロップダウンメニュー。',
+      description: 'Dropdown menu.',
     },
     Toast: {
       props: s.toastProps,
-      description: 'トースト通知。triggerLabel のボタンで発火。',
+      description:
+        'Toast notification that a button labeled triggerLabel shows.',
     },
     ScrollLinked: {
       props: s.scrollLinkedProps,
-      description: 'ページスクロール進捗バー（fixed top）。',
+      description: 'Page scroll progress bar (fixed to the top).',
     },
     ListBox: {
       props: s.listBoxProps,
-      description: 'ポップアップ型の単一選択リスト。',
+      description: 'Single-choice list in a popup.',
     },
     CheckboxGroup: {
       props: s.checkboxGroupProps,
-      description: 'チェックボックスグループ。',
+      description: 'Group of checkboxes.',
     },
     Autocomplete: {
       props: s.autocompleteProps,
-      description: 'タグ風の複数選択オートコンプリート。',
+      description: 'Tag-style autocomplete for multiple choices.',
     },
     FileField: {
       props: s.fileFieldProps,
-      description: 'ファイル選択フィールド。',
+      description: 'File picker field.',
     },
     FormControl: {
       props: s.formControlProps,
       description:
-        'ラベル＋ヘルプ/エラー付きフィールド（text/textarea/password）。',
+        'Field with a label and help or error text (text/textarea/password).',
     },
   },
   actions: {},
@@ -223,9 +237,9 @@ export const catalog = defineCatalog(schema, {
  * const systemPrompt = catalog.prompt({ customRules: [...uiRules] });
  */
 export const uiRules: readonly string[] = [
-  'Table の rows は各行のセル数を columns の数と必ず一致させる。',
-  'href は https:// もしくは http:// で始まる絶対 URL か、/ で始まるパスのみ。',
-  'Tabs と Accordion の content はプレーンテキストのみ。コンポーネントは入れ子にできない。',
+  'Every row in rows of a Table must have exactly as many cells as there are columns.',
+  'An href must be an absolute URL starting with https:// or http://, or a path starting with /.',
+  'The content of Tabs and Accordion must be plain text; components cannot be nested inside it.',
 ];
 
 type ComponentSchemas = (typeof catalog)['data']['components'];

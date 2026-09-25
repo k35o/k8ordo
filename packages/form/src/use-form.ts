@@ -1,6 +1,13 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import type { FocusEvent, Ref, SyntheticEvent } from 'react';
 
 import { breachOf } from './rules/rules';
@@ -102,6 +109,13 @@ export type ArrayView = {
   error: string | undefined;
 };
 
+export type FormErrorView = {
+  /** `state.formError`: the failure no field owns. */
+  message: string | undefined;
+  /** Spread onto the element that shows `message`, so focus can land on it. */
+  props: { id: string; tabIndex: -1 };
+};
+
 export type UseFormReturn<
   FieldPath extends string = string,
   ArrayPath extends string = string,
@@ -114,6 +128,7 @@ export type UseFormReturn<
   };
   field: (path: FieldPath) => FieldView;
   array: (path: ArrayPath) => ArrayView;
+  formError: FormErrorView;
   /** True once any field differs from the value it was rendered with. */
   isDirty: boolean;
 };
@@ -238,6 +253,9 @@ export const useForm = <FieldPath extends string, ArrayPath extends string>(
     rowCountsFor(lookup, state),
   );
   const [rowKeys, setRowKeys] = useState(() => rowKeysFor(baselineRows));
+  // The form-level message is found by id, not by a ref: it is usually drawn
+  // by an alert component that passes HTML attributes through but not a ref.
+  const formErrorId = useId();
 
   // Compared by content plus the parse token, not identity. A caller writing
   // `useForm(fields, {})` hands over a new object on every render, and
@@ -261,13 +279,10 @@ export const useForm = <FieldPath extends string, ArrayPath extends string>(
     setBaselineRows(counts);
     setRowKeys((previous) => rowKeysFor(counts, previous));
 
-    // Moving focus to the first rejected field is the only way someone using a
+    // Moving focus to the first failure is the only way someone using a
     // screen reader learns the submit failed and where.
-    const firstErrored = Object.keys(state.errors ?? {})[0];
-    if (firstErrored !== undefined) {
-      controlNamed(formRef.current, firstErrored)?.focus();
-    }
-  }, [stateKey, state, lookup]);
+    firstFailure(formRef.current, state, formErrorId)?.focus();
+  }, [stateKey, state, lookup, formErrorId]);
 
   const evaluate = useCallback(
     (target: EventTarget | null, onlyIfShown: boolean) => {
@@ -495,11 +510,61 @@ export const useForm = <FieldPath extends string, ArrayPath extends string>(
     [onBlur, onInput, onReset, ref],
   );
 
+  const formError = useMemo(
+    (): FormErrorView => ({
+      message: state.formError,
+      props: { id: formErrorId, tabIndex: -1 },
+    }),
+    [state.formError, formErrorId],
+  );
+
   const structuralDirty = Object.entries(rowKeys).some(
     ([path, keys]) => keys.length !== (baselineRows[path] ?? 0),
   );
 
-  return { props, field, array, isDirty: domDirty || structuralDirty };
+  return {
+    props,
+    field,
+    array,
+    formError,
+    isDirty: domDirty || structuralDirty,
+  };
+};
+
+/**
+ * The first failure in document order: a failed control, or the form-level
+ * message. `state.errors` cannot say which comes first — its keys follow the
+ * order zod reported the issues in, which is the schema's, not the page's.
+ */
+const firstFailure = (
+  form: HTMLFormElement | null,
+  state: FormState,
+  formErrorId: string,
+): HTMLElement | undefined => {
+  if (form === null) {
+    return undefined;
+  }
+  const errors = state.errors ?? {};
+  const field = [...form.elements].find(
+    (element): element is Control =>
+      isControl(element) && errors[element.name] !== undefined,
+  );
+  const message =
+    state.formError === undefined
+      ? null
+      : form.ownerDocument.querySelector<HTMLElement>(
+          `#${CSS.escape(formErrorId)}`,
+        );
+  if (message === null) {
+    return field;
+  }
+  if (field === undefined) {
+    return message;
+  }
+  return message.compareDocumentPosition(field) &
+    Node.DOCUMENT_POSITION_FOLLOWING
+    ? message
+    : field;
 };
 
 /** Look up the derived field for a submitted name, row index included. */

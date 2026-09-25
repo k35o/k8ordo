@@ -218,8 +218,8 @@ export const styling = {
     en: 'With @k8ordo/ui',
   }),
   uiDescription: message({
-    ja: '@k8ordo/ui のセマンティックトークンは `.dark` の下で切り替わります。`styles.css` でも `tailwind.css` でも同じなので、コンポーネントも `bg-bg-base` のようなユーティリティも、追加の設定なしでクラスに従います。`tailwind.css` は `dark:` バリアントもクラスを読むように宣言しているので、自前のマークアップでも `dark:` がそのまま使えます。',
-    en: '@k8ordo/ui’s semantic tokens switch under `.dark`, in `styles.css` and `tailwind.css` alike, so the components and utilities such as `bg-bg-base` follow the class with nothing else to set up. `tailwind.css` also declares the `dark:` variant to read the class, so `dark:` works in your own markup as it is.',
+    ja: '@k8ordo/ui のセマンティックトークンは `.dark` の下で切り替わります。`styles.css` でも `tailwind.css` でも同じなので、コンポーネントも `bg-bg-base` のようなユーティリティも、追加の設定なしでクラスに従います。CSS の `color-scheme` プロパティもクラスに合わせて設定されるので、スクロールバーやフォーム部品も一緒に暗くなります。`tailwind.css` は `dark:` と `light:` のバリアントもクラスを読むように宣言しているので、自前のマークアップでもそのまま使えます。',
+    en: '@k8ordo/ui’s semantic tokens switch under `.dark`, in `styles.css` and `tailwind.css` alike, so the components and utilities such as `bg-bg-base` follow the class with nothing else to set up. The CSS `color-scheme` property is set to follow the class too, so scrollbars and form controls turn dark with the rest. `tailwind.css` also declares the `dark:` and `light:` variants to read the class, so they work in your own markup as they are.',
   }),
   tailwindTitle: message({
     ja: 'Tailwind CSS だけで使う',
@@ -234,8 +234,8 @@ export const styling = {
     en: 'With plain CSS',
   }),
   plainDescription: message({
-    ja: '色をクラスに結びつけます。このパッケージも @k8ordo/ui のトークンも CSS の `color-scheme` プロパティは設定しないので、フォーム部品やスクロールバーのようなブラウザ自身の描画も合わせたいなら、色と一緒に宣言します。',
-    en: 'Tie the colours to the class. Neither this package nor @k8ordo/ui’s tokens set the CSS `color-scheme` property, so declare it next to the colours if the browser’s own rendering, such as form controls and scrollbars, should follow too.',
+    ja: '色をクラスに結びつけます。このパッケージは CSS の `color-scheme` プロパティを設定しない（@k8ordo/ui ならトークンと一緒に設定している）ので、フォーム部品やスクロールバーのようなブラウザ自身の描画も合わせたいなら、色と一緒に宣言します。',
+    en: 'Tie the colours to the class. This package does not set the CSS `color-scheme` property (@k8ordo/ui sets it beside its tokens), so declare it next to the colours if the browser’s own rendering, such as form controls and scrollbars, should follow too.',
   }),
 };
 

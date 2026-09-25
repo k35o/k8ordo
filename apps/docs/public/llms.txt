@@ -18,13 +18,13 @@ Start with the Design Guide, then follow the reference most relevant to the task
 
 ## Guide
 
-- [Design Guide](https://ordo.k8o.me/docs/GUIDE.md): setup, i18n (default Japanese, switching to English), design direction, aesthetic guidelines, component usage principles, anti-patterns, implementation principles, testing (component tests belong in a real browser — Vitest browser mode or Playwright — because the components call browser APIs jsdom does not implement).
+- [Design Guide](https://ordo.k8o.me/docs/GUIDE.md): setup, dark mode (the `dark` class that `@k8ordo/color-scheme` puts on `<html>`, and the `color-scheme` the stylesheet sets to match), i18n (default Japanese, switching to English), design direction, aesthetic guidelines, component usage principles, anti-patterns, implementation principles, testing (component tests belong in a real browser — Vitest browser mode or Playwright — because the components call browser APIs jsdom does not implement).
 
 ## References
 
 - [Components](https://ordo.k8o.me/docs/references/components.md): full component list, import paths, props, and i18n — every component, compound ones included (`Dialog.Root`, `Tabs.Root`, …), renders from a Server Component — component wording comes from a dictionary that defaults to Japanese; `@k8ordo/ui/i18n` exports `ja` / `en` / `dictionaries` (both keyed by locale) / the `Messages` type for `<UIProvider messages={...}>` (per-component wording props win over the dictionary), and `useMessages` to read the wording in effect in your own elements.
 - [AI chat](https://ordo.k8o.me/docs/references/ai-chat.md): AI chat components from `@k8ordo/ui/ai` (Conversation / Message / PromptInput / Reasoning / Suggestion / ToolInvocation), streaming Markdown `Response` from `@k8ordo/ui/ai/response` (optional peer `streamdown`), and `mapMessageParts` from `@k8ordo/ui/ai-sdk` to render AI SDK `UIMessage.parts` (optional peer `ai`).
-- [Generative UI](https://ordo.k8o.me/docs/references/generative-ui.md): use json-render / OpenUI to make an LLM generate UIs — `catalog.prompt()` (server-safe), `<JsonRenderUI spec={spec} />` (client), `validateGeneratedSpec()` (validate/repair LLM output), `satisfies UISpec` (typed specs), and `@k8ordo/ui/openui/prompt`.
+- [Generative UI](https://ordo.k8o.me/docs/references/generative-ui.md): use json-render / OpenUI to make an LLM generate UIs — `catalog.prompt()` (server-safe), `<JsonRenderUI spec={spec} />` (client), `validateGeneratedSpec()` (validate/repair LLM output), `satisfies UISpec` (typed specs), `@k8ordo/ui/openui/prompt`, and which exports the catalog leaves out on purpose.
 - [Typography](https://ordo.k8o.me/docs/references/typography.md): type scale and usage.
 - [Color](https://ordo.k8o.me/docs/references/color.md): semantic token system and dark mode.
 - [Spacing & layout](https://ordo.k8o.me/docs/references/spatial-design.md): spacing scale and layout patterns.
@@ -78,14 +78,17 @@ row. Rules cannot target fields inside repeated rows.
   returns props for the `<form>` element — which also hear a reset, React's
   own after every form action included — a
   `field(path)` accessor giving input attributes, the current error, and
-  `invalid` / `required`, an `array(path)` accessor for repeated rows, and
-  `isDirty`. Also `useAsyncCheck` for server-answered per-field checks and
-  `HiddenValue` for components that render no input of their own. The types
+  `invalid` / `required`, an `array(path)` accessor for repeated rows,
+  `formError` (the message no field owns, with the props that let focus land
+  on it), and `isDirty`. After a failed submission focus moves to the first
+  failure in document order. Also `useAsyncCheck` for server-answered
+  per-field checks and `HiddenValue` for components that render no input of
+  their own. The types
   of the `formFields` result (`FormFields`, `DerivedField`, `DerivedArray`,
   `DroppedCheck`, `FieldInput`, `ValidityFlag`, `Rule`) are exported here as
   well, since the result crosses to the client as a prop, and so are
   `FormState` and the return types (`UseFormReturn`, `FieldView`, `ArrayView`,
-  `RowView`, `AsyncCheck`).
+  `RowView`, `FormErrorView`, `AsyncCheck`).
 - `@k8ordo/form/server` — server. `formFields(schemaOrDefinition)` derives
   serializable fields plus a `dropped` list of checks HTML cannot express
   (outside production the list is also logged once per schema with
