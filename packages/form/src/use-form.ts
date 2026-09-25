@@ -107,6 +107,8 @@ export type ArrayView = {
   canAdd: boolean;
   canRemove: boolean;
   error: string | undefined;
+  /** Spread onto the element that shows `error`, so focus can land on it. */
+  errorProps: { id: string; tabIndex: -1 };
 };
 
 export type FormErrorView = {
@@ -239,9 +241,11 @@ export const useForm = <FieldPath extends string, ArrayPath extends string>(
   // than this is a structural edit even while every control is pristine. It is
   // state rather than a ref because `isDirty` is read during render.
   const [baselineRows, setBaselineRows] = useState(() => rowCountsOf(rowKeys));
-  // The form-level message is found by id, not by a ref: it is usually drawn
-  // by an alert component that passes HTML attributes through but not a ref.
+  // The messages no control owns — the form's, each array's — are found by id,
+  // not by a ref: they are usually drawn by an alert component that passes
+  // HTML attributes through but not a ref.
   const formErrorId = useId();
+  const arrayErrorIdBase = useId();
 
   // Compared by content plus the parse token, not identity. A caller writing
   // `useForm(fields, {})` hands over a new object on every render, and
@@ -267,8 +271,14 @@ export const useForm = <FieldPath extends string, ArrayPath extends string>(
 
     // Moving focus to the first failure is the only way someone using a
     // screen reader learns the submit failed and where.
-    firstFailure(formRef.current, state, formErrorId)?.focus();
-  }, [stateKey, state, lookup, formErrorId]);
+    const messageIds = [
+      ...(state.formError === undefined ? [] : [formErrorId]),
+      ...Object.keys(lookup.arrays)
+        .filter((path) => state.errors?.[path] !== undefined)
+        .map((path) => arrayErrorId(arrayErrorIdBase, path)),
+    ];
+    firstFailure(formRef.current, state.errors ?? {}, messageIds)?.focus();
+  }, [stateKey, state, lookup, formErrorId, arrayErrorIdBase]);
 
   const evaluate = useCallback(
     (target: EventTarget | null, onlyIfShown: boolean) => {
@@ -476,9 +486,10 @@ export const useForm = <FieldPath extends string, ArrayPath extends string>(
           derived.maxItems === undefined || keys.length < derived.maxItems,
         canRemove: keys.length > (derived.minItems ?? 0),
         error: state.errors?.[path],
+        errorProps: { id: arrayErrorId(arrayErrorIdBase, path), tabIndex: -1 },
       };
     },
-    [lookup, rowKeys, state, viewOf],
+    [lookup, rowKeys, state, viewOf, arrayErrorIdBase],
   );
 
   // `noValidate` is set from JavaScript, never rendered: in the HTML the
@@ -518,39 +529,41 @@ export const useForm = <FieldPath extends string, ArrayPath extends string>(
 };
 
 /**
- * The first failure in document order: a failed control, or the form-level
- * message. `state.errors` cannot say which comes first — its keys follow the
+ * An object key may hold whitespace, which an id must not — it would also
+ * split an `aria-describedby` list — so the path is encoded, not appended.
+ */
+const arrayErrorId = (base: string, path: string): string =>
+  `${base}-${encodeURIComponent(path)}`;
+
+/**
+ * The first failure in document order: a failed control, or the element
+ * showing a failure no control owns — the form-level message or an array's
+ * own. `state.errors` cannot say which comes first — its keys follow the
  * order zod reported the issues in, which is the schema's, not the page's.
  */
 const firstFailure = (
   form: HTMLFormElement | null,
-  state: FormState,
-  formErrorId: string,
+  errors: Record<string, string>,
+  messageIds: readonly string[],
 ): HTMLElement | undefined => {
   if (form === null) {
     return undefined;
   }
-  const errors = state.errors ?? {};
+  const candidates: HTMLElement[] = messageIds
+    .map((id) =>
+      form.ownerDocument.querySelector<HTMLElement>(`#${CSS.escape(id)}`),
+    )
+    .filter((message) => message !== null);
   const field = [...form.elements].find(
     (element): element is Control =>
       isControl(element) && errors[element.name] !== undefined,
   );
-  const message =
-    state.formError === undefined
-      ? null
-      : form.ownerDocument.querySelector<HTMLElement>(
-          `#${CSS.escape(formErrorId)}`,
-        );
-  if (message === null) {
-    return field;
+  if (field !== undefined) {
+    candidates.push(field);
   }
-  if (field === undefined) {
-    return message;
-  }
-  return message.compareDocumentPosition(field) &
-    Node.DOCUMENT_POSITION_FOLLOWING
-    ? message
-    : field;
+  return candidates.toSorted((a, b) =>
+    a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1,
+  )[0];
 };
 
 /** Look up the derived field for a submitted name, row index included. */

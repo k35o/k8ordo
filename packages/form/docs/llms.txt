@@ -38,10 +38,11 @@ row. Rules cannot target fields inside repeated rows.
   returns props for the `<form>` element — which also hear a reset, React's
   own after every form action included — a
   `field(path)` accessor giving input attributes, the current error, and
-  `invalid` / `required`, an `array(path)` accessor for repeated rows,
-  `formError` (the message no field owns, with the props that let focus land
-  on it), and `isDirty`. After a failed submission focus moves to the first
-  failure in document order. Also `useAsyncCheck` for server-answered
+  `invalid` / `required`, an `array(path)` accessor for repeated rows (its
+  `error` is the array's own message, with `errorProps` to let focus land on
+  it), `formError` (the message no field owns, with the props that let focus
+  land on it), and `isDirty`. After a failed submission focus moves to the
+  first failure in document order. Also `useAsyncCheck` for server-answered
   per-field checks and `HiddenValue` for components that render no input of
   their own. The types
   of the `formFields` result (`FormFields`, `DerivedField`, `DerivedArray`,
