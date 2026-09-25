@@ -50,7 +50,10 @@ model instead:
   with `triggerLabel` and handles opening and closing itself.
 - **Compound components** (`Tabs`, `Accordion`, `Table`, `Breadcrumb`, …) are
   one entry each, with their parts flattened into data such as
-  `tabs: [{ label, content }]`.
+  `tabs: [{ label, content }]`. `Carousel` is one container entry whose
+  children are its slides, one child per slide.
+- **Kbd** takes `keys: string[]` and draws the whole shortcut, one key cap per
+  entry, where the component itself is one key.
 
 Every other component the package exports is either in the catalog or in the
 list below, and the package's tests keep it that way.

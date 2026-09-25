@@ -177,10 +177,15 @@ describe('href', () => {
     expect(() => href('/:locale/*', { locale: 'ja' })).toThrow(/wildcard/u);
   });
 
-  it('keeps the path shape in the type for typed-path consumers', () => {
+  it('types what it builds as a URL, not as a path in the table', () => {
+    // base を前に付けた URL なので、表のパスの形で型を付けると、base を
+    // 自分で足す state の href などへそのまま渡せてしまい、base が二重になる
     expectTypeOf(
       href('/:locale/products/:id', { locale: 'ja', id: '1' }),
-    ).toEqualTypeOf<`/${string}/products/${string}`>();
+    ).toEqualTypeOf<string>();
+  });
+
+  it('keeps the pathname space in the type for typed-path consumers', () => {
     expectTypeOf<RouteOf<typeof routes>>().toEqualTypeOf<
       | '/'
       | `/${string}`

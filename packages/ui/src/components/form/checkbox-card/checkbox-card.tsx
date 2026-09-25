@@ -149,7 +149,7 @@ export const CheckboxCard: FC<Props> = ({
                 'mt-0.5 ml-4 inline-flex size-5 shrink-0 items-center justify-center rounded-md border',
                 checked
                   ? 'border-border-base bg-primary-bg text-fg-base'
-                  : 'border-border-mute bg-bg-base text-transparent',
+                  : 'border-border-mute bg-bg-base *:invisible',
               )}
             >
               <CheckIcon size="sm" />

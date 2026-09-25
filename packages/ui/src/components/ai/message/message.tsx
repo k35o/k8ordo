@@ -7,6 +7,7 @@ import { cn } from '../../../helpers/cn';
 import { createSafeContext } from '../../../helpers/create-safe-context';
 import { useControllableState } from '../../../hooks/controllable-state';
 import { useMessages } from '../../../i18n/context';
+import { HIGH_CONTRAST_EDGE } from '../../_internal/high-contrast';
 import { IconButton } from '../../buttons/icon-button';
 import {
   BadIcon,
@@ -75,7 +76,10 @@ export const Content: FC<ContentProps> = ({
       className={cn(
         'min-w-0 wrap-break-word whitespace-pre-wrap text-fg-base',
         from === 'user'
-          ? 'w-fit max-w-[80%] rounded-2xl bg-bg-subtle px-4 py-2.5'
+          ? [
+              'w-fit max-w-[80%] rounded-2xl bg-bg-subtle px-4 py-2.5',
+              HIGH_CONTRAST_EDGE,
+            ]
           : 'leading-relaxed',
       )}
     >
