@@ -279,6 +279,71 @@ export const linksMore = message({
   en: 'How the router behaves under the framework is covered here.',
 });
 
+export const prefetchTitle = message({
+  ja: 'リンクに触れた時点で次のページを取りに行く',
+  en: 'The next page is fetched when a link is touched',
+});
+
+export const prefetchDescription = message({
+  ja: 'クライアントのランタイムは文書全体で、リンクへのポインターの乗り（`pointerover`）、フォーカス（`focusin`）、押し始め（`pointerdown`）を拾い、その先のページのペイロードをその場で取りに行きます。クリックが届く頃には、ページが手元にあることが多くなります。配線は要りません。コンポーネントライブラリが描く `<a>` も含め、どの `<a>` も対象です。取りに行くのは、クリックでその場に読み込まれるリンクだけです。',
+  en: 'The client runtime listens on the whole document for a pointer moving onto a link (`pointerover`), a link taking focus (`focusin`) and a press starting on one (`pointerdown`), and fetches that page’s payload there and then — so a click often finds the page already in hand. Nothing needs wiring: any `<a>` counts, the ones a component library renders included. Only a link a click would load in place is fetched:',
+});
+
+export const prefetchSameOrigin = message({
+  ja: '同じオリジンで、Vite の `base` の下にあるリンク',
+  en: 'one to the same origin, below Vite’s `base`',
+});
+
+export const prefetchInPlace = message({
+  ja: '`download` が無く、`target` が無いか `_self` のリンク',
+  en: 'one with no `download`, and no `target` other than `_self`',
+});
+
+export const prefetchOnScreen = message({
+  ja: '画面に出ているページ以外へのリンク。同じページへのリンクで変わるのは検索や fragment だけだからです',
+  en: 'one to a page other than the one on screen, where only the search or the fragment would change',
+});
+
+export const prefetchStopTitle = message({
+  ja: '止めたいリンク',
+  en: 'Stopping it for a link',
+});
+
+export const prefetchStop = message({
+  ja: '描くのが重いページへのリンクなどは、そのリンクか、それを囲むどれかの要素に `data-k8ordo-prefetch="false"` を付けると止まります。JSX の `data-k8ordo-prefetch={false}` も同じものを描きます。決めるのは、この属性を持ついちばん近い要素なので、止めた領域の中のリンクに `"true"` を付ければ、そのリンクだけ戻せます。',
+  en: 'For a link whose page is expensive to render, say, mark the link — or any element around it — `data-k8ordo-prefetch="false"`; `data-k8ordo-prefetch={false}` in JSX renders the same. The nearest element carrying the attribute decides, so `"true"` opts a link back in inside a region that opted out.',
+});
+
+export const prefetchReuseTitle = message({
+  ja: '取ったものを使う範囲',
+  en: 'How long a prefetched page is used',
+});
+
+export const prefetchReuse = message({
+  ja: '取ったページは、そのページへの次の遷移で 1 度だけ使われます。使われるのは、取りに行き始めてから 30 秒以内に遷移が始まったときだけです。それを過ぎたか、1 度使われた後は、先読みが無かったときと同じようにページを取り直します。ポインターを乗せたまま離れたページが、後になってそのときの姿で出てくることはありません。',
+  en: 'A prefetched page is used by the next navigation to it, once, and only if that navigation starts within 30 seconds of the fetch starting. After that — or once a navigation has used it — the page is fetched afresh, as it would have been with nothing prefetched, so a page hovered and left alone never shows up later as it was then.',
+});
+
+export const prefetchDropped = message({
+  ja: 'Server Action の答えが届くと、先読みしたものはすべて捨てます。アクションがそれらのページの中身を変えたかもしれないからです。失敗した先読みもその場で捨てるので、遷移はもう一度取りに行きます。遷移に使われる前に捨てた先読みは、まだ届いていなければ中断します。遷移が使った先読みは、その遷移が別の遷移に追い越されたときに一緒に中断します。遷移が自分で始めた fetch と同じ扱いです。',
+  en: 'A Server Action’s answer drops everything prefetched, since the action may have changed what those pages show; a prefetch that failed is dropped at once, so the navigation asks again. A prefetch dropped before any navigation used it is cancelled if it is still on its way, and one a navigation took is cancelled with that navigation when another overtakes it — the same as a fetch the navigation had started itself.',
+});
+
+export const prefetchStatic = message({
+  ja: 'このモードでは、先読みはファイルへのリクエストです。',
+  en: 'In this mode a prefetch is a request for a file.',
+});
+
+export const prefetchServer = message({
+  ja: 'このモードでは、先読みは遷移と同じくサーバーでの描画です。描くのが重いページへのリンクに属性を付けるのは、そのためです。',
+  en: 'In this mode a prefetch is a render on the server, as a navigation is — the reason to mark a link to an expensive page.',
+});
+
+export const prefetchSpeculation = message({
+  ja: 'プラットフォームの Speculation Rules は使いません。Chromium にしか無く、Baseline ではないからです。',
+  en: 'The platform’s Speculation Rules are not used: they are Chromium’s alone, not Baseline.',
+});
+
 /** 両モードの「はじめに」が共有する、設定と最小のルートの説明。 */
 export const setup = {
   configTitle: message({ ja: 'vite.config.ts', en: 'vite.config.ts' }),

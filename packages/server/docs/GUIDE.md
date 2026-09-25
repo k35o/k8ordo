@@ -659,6 +659,82 @@ with a `403`. Behind a proxy that means passing the public host through;
 `serve` reads it from the request's own `Host` header, so a proxy in front of
 it has to pass the original `Host` on unchanged.
 
+<!-- shared:prefetch -->
+
+### Fetching the next page ahead
+
+The client runtime listens on the whole document for a pointer moving onto a
+link, a link taking focus, and a press starting on one — `pointerover`,
+`focusin` and `pointerdown` — and fetches that page's payload there and then,
+so a click often finds the page already in hand. Nothing needs wiring: any
+`<a>` counts, the ones a component library renders included.
+
+Only a link a click would load in place is fetched: the same origin and below
+Vite's `base`, no `download`, no `target` other than `_self`, and not the
+page on screen, where only the search or the fragment would change. To stop
+it for a link — one whose page is expensive to render, say — mark the link,
+or any element around it, `data-k8ordo-prefetch="false"`
+(`data-k8ordo-prefetch={false}` in JSX renders the same). The nearest element
+carrying the attribute decides, so `"true"` opts a link back in inside a
+region that opted out.
+
+```tsx
+<nav data-k8ordo-prefetch={false}>
+  <a href="/reports">Reports</a>
+  <a data-k8ordo-prefetch href="/">
+    Home
+  </a>
+</nav>
+```
+
+What was fetched is used by the next navigation to that page, once, and only
+if it starts within 30 seconds of the fetch starting. After that — or once a
+navigation has used it — the page is fetched afresh, as it would have been
+with nothing prefetched, so a page hovered and left alone never shows up
+later as it was then. A Server Action's answer drops everything prefetched,
+since the action may have changed what those pages show, and a prefetch that
+failed is dropped at once, so the navigation asks again. A prefetch dropped
+before any navigation used it is cancelled if it is still on its way, and one
+a navigation took is cancelled with that navigation when another overtakes
+it — the same as a fetch the navigation had started itself.
+
+Under `@k8ordo/static` a prefetch is a request for a file. Under
+`@k8ordo/server` it is a render, as a navigation is — the reason to mark a
+link to an expensive page. The platform's Speculation Rules are not used:
+they are Chromium's alone, not Baseline.
+
+<!-- /shared:prefetch -->
+
+### Deploying to Vercel
+
+```ts
+// vite.config.ts
+import { framework } from '@k8ordo/server';
+import { vercel } from '@k8ordo/server/vercel';
+import { defineConfig } from 'vite';
+
+export default defineConfig({ plugins: [framework(), vercel()] });
+```
+
+With `vercel()` beside `framework()`, `vite build` also writes
+`.vercel/output/` in the shape of Vercel's Build Output API (v3), which
+`vercel build` and `vercel deploy --prebuilt` deploy as it is. The client
+build becomes static files on Vercel's CDN — a file under `assets/` is sent
+`immutable` once a file has answered, so a missing one is never cached — and
+every request that names no file goes to one Node.js function, the request
+handler, handed to Vercel as `fetch` and streaming its answer. Under a
+`base` the static files sit below it, as `serve` hands them out, and the
+handler answers every URL outside it with a `404`. The copies compressed for
+`serve` are left out: Vercel compresses on its own, and each is one more file
+to upload.
+
+**The function carries everything it imports.** A Vercel function holds
+nothing but its own directory, so under `vercel()` the handler is built with
+every dependency bundled in. A dependency that ships a native binary, or that
+reads its own files by path, cannot be bundled that way and does not work
+there. Each build replaces `.vercel/output/` and nothing else: the project link
+`vercel pull` writes beside it stays.
+
 <!-- shared:deploys -->
 
 ### A tab opened before a deploy

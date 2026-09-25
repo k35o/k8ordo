@@ -9,18 +9,8 @@ const meta: Meta<typeof TextField> = {
   component: TextField,
   args: {
     id: 'textfield',
+    'aria-label': '名前',
     'aria-describedby': 'textfield-feedback',
-  },
-  parameters: {
-    a11y: {
-      options: {
-        rules: {
-          // TextField単体ではラベルを付随しない
-          'label-title-only': { enabled: false },
-          label: { enabled: false },
-        },
-      },
-    },
   },
 };
 
@@ -56,7 +46,7 @@ const RefRender = () => {
 
   return (
     <div className="flex flex-col items-start gap-2">
-      <TextField id="text-field-ref" ref={ref} />
+      <TextField aria-label="名前" id="text-field-ref" ref={ref} />
       <button
         onClick={() => {
           ref.current?.focus();

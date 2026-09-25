@@ -29,6 +29,8 @@ export type Messages = {
 
   fileFieldRemove: string;
   fileFieldTrigger: string;
+  /** FileField.Dropzone の既定の案内 */
+  fileFieldDrop: string;
 
   numberFieldIncrement: string;
   numberFieldDecrement: string;
