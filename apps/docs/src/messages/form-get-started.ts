@@ -196,8 +196,8 @@ export const exampleFormTitle = message({
 });
 
 export const exampleFormDescription = message({
-  ja: '`useForm` は `UseFormReturn`（`props`・`field`・`array`・`isDirty`）を返します。`form.props` を `<form>` に広げます。欄ごとの登録はありません。`field(path)` が返す `input` を入力要素に広げ、`error` があれば表示します。パスはスキーマから型で導かれるので、打ち間違いはコンパイルで止まります。props の型の `FormFields<FieldPath, ArrayPath>` は、1 つ目に `field()` のパス、2 つ目に `array()` のパスを取ります（無ければ `never`）。',
-  en: '`useForm` returns a `UseFormReturn`: `props`, `field`, `array` and `isDirty`. Spread `form.props` onto the `<form>`; there is no per-field registration. Spread the `input` that `field(path)` returns onto the control, and show `error` when there is one. Paths are typed from the schema, so a typo stops at compile time. In the props type, `FormFields<FieldPath, ArrayPath>` takes the `field()` paths first and the `array()` paths second (`never` when there are none).',
+  ja: '`useForm` は `UseFormReturn`（`props`・`field`・`array`・`isDirty`）を返します。`form.props` を `<form>` に広げます。欄ごとの登録はありません。`field(path)` が返す `input` を入力要素に広げ、`error` があれば表示します。パスはスキーマから型で導かれるので、打ち間違いはコンパイルで止まります。props の型の `FormFields<FieldPath, ArrayPath>` は、1 つ目に `field()` のパス、2 つ目に `array()` のパスを取ります（無ければ `never`）。3 つ目は `z.stringbool()` のチェックボックスのパスで、`input.value` を読むときにだけ要ります。',
+  en: '`useForm` returns a `UseFormReturn`: `props`, `field`, `array` and `isDirty`. Spread `form.props` onto the `<form>`; there is no per-field registration. Spread the `input` that `field(path)` returns onto the control, and show `error` when there is one. Paths are typed from the schema, so a typo stops at compile time. In the props type, `FormFields<FieldPath, ArrayPath>` takes the `field()` paths first and the `array()` paths second (`never` when there are none). A third names the `z.stringbool()` checkboxes, and is needed only to read their `input.value`.',
 });
 
 export const exampleFormProps = message({

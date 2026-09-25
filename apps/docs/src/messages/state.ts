@@ -1,8 +1,8 @@
 import { message } from '@k8ordo/i18n';
 
 export const description = message({
-  ja: '状態を「どこに住むか」で宣言します。置き場所は URL の searchParams・履歴エントリ・localStorage・メモリの4つです。前の3つはそれぞれ zod スキーマ1つで型付けし、サーバーの読み取り・リンク生成・購読までそこから導きます。境界を越えないメモリは、スキーマを持たない型付きの箱です。',
-  en: 'Declare state by where it lives. Four places — URL search params, the history entry, localStorage, memory. The first three are each typed by one zod schema, from which the server read, link building and the subscription are all derived; memory never crosses a boundary, so it is a typed box with no schema.',
+  ja: '状態を「どこに住むか」で宣言します。置き場所は URL の searchParams・履歴エントリ・localStorage・Cookie・メモリです。メモリ以外はそれぞれ zod スキーマ1つで型付けし、サーバーの読み取り・リンク生成・購読までそこから導きます。境界を越えないメモリは、スキーマを持たない型付きの箱です。',
+  en: 'Declare state by where it lives — URL search params, the history entry, localStorage, a cookie, memory. Every place but memory is typed by one zod schema, from which the server read, link building and the subscription are all derived; memory never crosses a boundary, so it is a typed box with no schema.',
 });
 
 export const demoTitle = message({
@@ -41,8 +41,8 @@ export const featurePlaces = message({
 });
 
 export const featurePlacesDescription = message({
-  ja: 'URL・履歴エントリ・localStorage・メモリ。状態の寿命と共有範囲を決めるのはコードの書き方ではなく、定義した場所です。',
-  en: 'URL, history entry, localStorage, memory. Lifetime and sharing scope are decided by the place you declared, not by how the code happens to be written.',
+  ja: 'URL・履歴エントリ・localStorage・Cookie・メモリ。状態の寿命と共有範囲を決めるのはコードの書き方ではなく、定義した場所です。',
+  en: 'URL, history entry, localStorage, a cookie, memory. Lifetime and sharing scope are decided by the place you declared, not by how the code happens to be written.',
 });
 
 export const featureSchema = message({
@@ -91,8 +91,8 @@ export const featureServer = message({
 });
 
 export const featureServerDescription = message({
-  ja: 'ページに search を渡すルーター（Next.js など）なら、URL 状態は RSC が parseUrl で型付きに読めます。@k8ordo/static / @k8ordo/server では、ブラウザで読みます。リンクと GET フォームは、どのルーターでも JavaScript の読み込み前から URL を書き換えます。',
-  en: 'Where the router hands a page its search (Next.js, say), an RSC reads URL state typed via parseUrl; under @k8ordo/static / @k8ordo/server it is read in the browser. Links and GET forms change the URL under any router, before JavaScript loads.',
+  ja: 'ページに search を渡すルーター（Next.js など）なら、URL 状態は RSC が parseUrl で型付きに読めます。@k8ordo/static / @k8ordo/server では、ブラウザで読みます。リンクと GET フォームは、どのルーターでも JavaScript の読み込み前から URL を書き換えます。Cookie に置いた好みは、@k8ordo/server のページが parseCookies でリクエストから読むので、既定値がちらつきません。',
+  en: 'Where the router hands a page its search (Next.js, say), an RSC reads URL state typed via parseUrl; under @k8ordo/static / @k8ordo/server it is read in the browser. Links and GET forms change the URL under any router, before JavaScript loads. A preference kept in a cookie is read from the request with parseCookies under @k8ordo/server, so its default never flashes.',
 });
 
 export const docsTitle = message({

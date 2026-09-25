@@ -1,7 +1,7 @@
 # @k8ordo/ui
 
 React components from [k8ordo](https://ordo.k8o.me) — semantic design
-tokens, built-in Japanese/English wording, and adapters that let an LLM generate
+tokens, built-in wording that follows `@k8ordo/i18n` (Japanese and English included), and adapters that let an LLM generate
 on-brand UIs.
 
 Like every k8ordo package it assumes React 19 and Server Components, uses only
@@ -22,16 +22,17 @@ yarn add @k8ordo/ui
 
 ## Peer Dependencies
 
-Only React is required:
+Only React and `@k8ordo/i18n` (the locale the components' own wording is read in) are required:
 
 ```bash
-npm install react react-dom
+npm install react react-dom @k8ordo/i18n
 ```
 
-| Package     | Version |
-| ----------- | ------- |
-| `react`     | ≥19.3.0 |
-| `react-dom` | ≥19.3.0 |
+| Package        | Version |
+| -------------- | ------- |
+| `react`        | ≥19.3.0 |
+| `react-dom`    | ≥19.3.0 |
+| `@k8ordo/i18n` | ^1.0.0  |
 
 Everything else is an optional peer, needed only for the entry point that uses
 it. Install one when you import the entry it belongs to.
@@ -119,48 +120,20 @@ function MyPage() {
 
 ## Internationalization (i18n)
 
-The wording that components own internally — "close", "required", "loading", and so on — comes from a message dictionary. **It defaults to Japanese**, and that default applies even without a provider, so a Japanese app needs no setup at all.
+The wording that components own internally — "close", "required", "loading", and so on — is read in [`@k8ordo/i18n`](https://ordo.k8o.me/i18n)'s current locale. There is no provider and nothing to pass:
 
-To switch to English, pass the `en` dictionary from `@k8ordo/ui/i18n`:
+- an application that defines its locale set with `defineLocales` gets the locale its messages render in;
+- an application that defines none gets **English**, whatever its URL starts with.
 
-```tsx
-import { UIProvider } from '@k8ordo/ui';
-import { en } from '@k8ordo/ui/i18n';
+`ja` and `en` ship with the library. Register any other locale, or replace a built-in one, next to where the set is defined:
 
-function App() {
-  return (
-    <UIProvider messages={en}>
-      <YourApp />
-    </UIProvider>
-  );
-}
+```ts
+import { en, registerMessages } from '@k8ordo/ui/i18n';
+
+registerMessages('en', { ...en, close: 'Dismiss' });
 ```
 
-`messages` takes a `Partial<Messages>`, so you can spread a dictionary and override only the keys you care about:
-
-```tsx
-<UIProvider messages={{ ...en, close: 'Dismiss' }}>
-  <YourApp />
-</UIProvider>
-```
-
-Resolution order is **component prop > provider dictionary > built-in default (Japanese)**. Components that expose a wording prop of their own — `Spinner`'s `label`, `Alert`'s `closeLabel`, `PasswordInput`'s `showLabel` / `hideLabel`, `Pagination`'s `prevLabel` / `nextLabel` — take that prop over the dictionary.
-
-Besides `ja` / `en`, the subpath exports `dictionaries` (both of them keyed by locale, for `messages={dictionaries[locale]}`), `useMessages`, and the type:
-
-```tsx
-import {
-  dictionaries,
-  en,
-  ja,
-  useMessages,
-  type Messages,
-} from '@k8ordo/ui/i18n';
-```
-
-`useMessages` is a client hook that returns the wording in effect — the built-in dictionary with whatever you passed to `UIProvider` laid over it — for elements you draw yourself, such as through `renderItem`.
-
-`ja` / `en` live behind `@k8ordo/ui/i18n` rather than the root entry so the dictionaries stay out of the main bundle. See [docs/references/components.md](docs/references/components.md) for the full key list.
+Resolution order is **component prop > registered dictionary > built-in dictionary**. Components that expose a wording prop of their own — `Spinner`'s `label`, `Alert`'s `closeLabel`, `PasswordInput`'s `showLabel` / `hideLabel`, `Pagination`'s `prevLabel` / `nextLabel` — take it over the dictionary. `getMessages()` returns the wording in effect for elements you draw yourself; it is not a hook, so a Server Component calls it too. See [docs/references/components.md](docs/references/components.md) for the full key list, and [docs/GUIDE.md](docs/GUIDE.md) for migrating from `UIProvider`'s `messages`.
 
 ## AI Agent Documentation
 
@@ -221,7 +194,9 @@ stories and rendered props rather than relying on trained knowledge:
 ### Form Controls
 
 - **Autocomplete** - Search with suggestions
+- **Calendar** - Month grid for picking a day
 - **Checkbox** / **CheckboxCard** / **CheckboxGroup** - Multi-selection inputs
+- **DateField** / **DatePicker** - Native date input, alone or with a calendar popover
 - **FileField** - File upload with composite pattern, from a button or by dropping files
 - **Form** / **FormControl** - Form wrapper and field with label/validation
 - **NumberField** - Numeric input with controls
@@ -372,22 +347,22 @@ import { Button, Card, Stack } from '@k8ordo/ui';
 
 Optional features live behind dedicated subpath exports:
 
-| Subpath                           | Contents                                                             |
-| --------------------------------- | -------------------------------------------------------------------- |
-| `@k8ordo/ui`                      | Core UI components, their types, and provider hooks                  |
-| `@k8ordo/ui/tokens`               | Design token definitions                                             |
-| `@k8ordo/ui/props.json`           | Every component's props as JSON, generated from the types            |
-| `@k8ordo/ui/i18n`                 | `ja` / `en` / `dictionaries`, `useMessages`, and the `Messages` type |
-| `@k8ordo/ui/ai`                   | AI chat components                                                   |
-| `@k8ordo/ui/ai/response`          | `Response` Markdown renderer (needs optional peer `streamdown`)      |
-| `@k8ordo/ui/ai-sdk`               | AI SDK adapter (needs optional peer `ai`)                            |
-| `@k8ordo/ui/code-block`           | `CodeBlock`, highlighted on the server with shiki (Server Component) |
-| `@k8ordo/ui/json-render`          | json-render catalog (server-safe)                                    |
-| `@k8ordo/ui/json-render/registry` | json-render registry (`'use client'`)                                |
-| `@k8ordo/ui/openui`               | OpenUI library (`'use client'`)                                      |
-| `@k8ordo/ui/openui/prompt`        | OpenUI prompt generation (server-safe)                               |
-| `@k8ordo/ui/styles.css`           | Prebuilt stylesheet (no Tailwind required)                           |
-| `@k8ordo/ui/tailwind.css`         | Tailwind source entry (requires Tailwind CSS 4)                      |
+| Subpath                           | Contents                                                                |
+| --------------------------------- | ----------------------------------------------------------------------- |
+| `@k8ordo/ui`                      | Core UI components, their types, and provider hooks                     |
+| `@k8ordo/ui/tokens`               | Design token definitions                                                |
+| `@k8ordo/ui/props.json`           | Every component's props as JSON, generated from the types               |
+| `@k8ordo/ui/i18n`                 | `ja` / `en`, `registerMessages`, `getMessages`, and the `Messages` type |
+| `@k8ordo/ui/ai`                   | AI chat components                                                      |
+| `@k8ordo/ui/ai/response`          | `Response` Markdown renderer (needs optional peer `streamdown`)         |
+| `@k8ordo/ui/ai-sdk`               | AI SDK adapter (needs optional peer `ai`)                               |
+| `@k8ordo/ui/code-block`           | `CodeBlock`, highlighted on the server with shiki (Server Component)    |
+| `@k8ordo/ui/json-render`          | json-render catalog (server-safe)                                       |
+| `@k8ordo/ui/json-render/registry` | json-render registry (`'use client'`)                                   |
+| `@k8ordo/ui/openui`               | OpenUI library (`'use client'`)                                         |
+| `@k8ordo/ui/openui/prompt`        | OpenUI prompt generation (server-safe)                                  |
+| `@k8ordo/ui/styles.css`           | Prebuilt stylesheet (no Tailwind required)                              |
+| `@k8ordo/ui/tailwind.css`         | Tailwind source entry (requires Tailwind CSS 4)                         |
 
 ## AI Chat Components
 
@@ -486,13 +461,13 @@ pnpm add @json-render/core @json-render/react zod
 pnpm add @openuidev/react-lang @openuidev/lang-core zod
 ```
 
-Supported components (**all 50**, both frameworks):
+Supported components (**all 53**, both frameworks):
 
 - **Layout / containers**: `Stack`, `Grid`, `Card`, `Form`, `Carousel`
 - **Buttons / nav**: `Button`, `IconButton`, `Anchor`, `Breadcrumb`, `Pagination`
 - **Display**: `Badge`, `Heading`, `Avatar`, `Code`, `Kbd`, `EmptyState`, `Icon`, `ChevronIcon`, `StatusIcon`, `Alert`, `Spinner`, `Progress`, `Skeleton`, `Separator`, `Tabs`, `Accordion`, `Table`
 - **Overlays (self-contained widgets)**: `Modal`, `Dialog`, `Drawer`, `Popover`, `Tooltip`, `DropdownMenu`, `Toast`
-- **Form**: `TextField`, `Textarea`, `PasswordInput`, `NumberField`, `Slider`, `Checkbox`, `Switch`, `Select`, `Radio`, `RadioCard`, `CheckboxCard`, `ListBox`, `CheckboxGroup`, `Autocomplete`, `FileField`, `FormControl`
+- **Form**: `TextField`, `Textarea`, `PasswordInput`, `NumberField`, `Slider`, `DateField`, `DatePicker`, `Calendar`, `Checkbox`, `Switch`, `Select`, `Radio`, `RadioCard`, `CheckboxCard`, `ListBox`, `CheckboxGroup`, `Autocomplete`, `FileField`, `FormControl`
 
 The rest of the exports — the observers, the providers, and the AI chat
 components — are left out on purpose;

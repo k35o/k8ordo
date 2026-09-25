@@ -1,18 +1,18 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: '定義はそれぞれ 1 つの置き場所を名指しします。値がいつまで残るか、誰に見えるか、サーバーから読めるかを決めるのは置き場所です。このページでは 4 つの置き場所の違いと、置き場所ごとのスキーマの書き方を説明します。',
-  en: 'Each definition names one place, and the place decides how long the values live, who sees them and whether the server can read them. This page covers how the four places differ and how to write the schema for each.',
+  ja: '定義はそれぞれ 1 つの置き場所を名指しします。値がいつまで残るか、誰に見えるか、サーバーから読めるかを決めるのは置き場所です。このページでは置き場所ごとの違いと、スキーマの書き方を説明します。',
+  en: 'Each definition names one place, and the place decides how long the values live, who sees them and whether the server can read them. This page covers how the places differ and how to write the schema for each.',
 });
 
 export const overviewTitle = message({
-  ja: '4 つの置き場所',
-  en: 'The four places',
+  ja: '置き場所',
+  en: 'The places',
 });
 
 export const overviewDescription = message({
-  ja: '`url` と `entry` は同じ履歴エントリの 2 つの面（見えて共有できる面と、隠れた面）なので、1 つの定義にまとまり、原子的に更新されます。localStorage とメモリはページではなくアプリ全体に属するので、別の種類の定義になっています。',
-  en: '`url` and `entry` are the two faces of one history entry — one visible and shareable, one hidden — so they share a definition and update atomically. localStorage and memory belong to the app rather than the page, which is why they are definition kinds of their own.',
+  ja: '`url` と `entry` は同じ履歴エントリの 2 つの面（見えて共有できる面と、隠れた面）なので、1 つの定義にまとまり、原子的に更新されます。localStorage・Cookie・メモリはページではなくアプリ全体に属するので、それぞれ別の種類の定義になっています。',
+  en: '`url` and `entry` are the two faces of one history entry — one visible and shareable, one hidden — so they share a definition and update atomically. localStorage, cookies and memory belong to the app rather than the page, which is why they are definition kinds of their own.',
 });
 
 export const overviewTable = {
@@ -52,6 +52,15 @@ export const overviewTable = {
     ja: '同じブラウザで開いたサイトのすべてのタブ',
     en: 'every tab of the site in the same browser',
   }),
+  cookieLivesIn: message({ ja: 'Cookie', en: 'a cookie' }),
+  cookieSurvives: message({
+    ja: '最後の書き込みから 400 日',
+    en: '400 days from the last write',
+  }),
+  cookieServer: message({
+    ja: '`parseCookies` で読める（リクエストの Cookie を受け取るページのとき）',
+    en: 'reads it with `parseCookies` (where the page receives the request’s cookies)',
+  }),
   memoryLivesIn: message({
     ja: 'JavaScript の実行環境',
     en: 'the JavaScript runtime',
@@ -82,6 +91,11 @@ export const chooseEntry = message({
 export const chooseLocal = message({
   ja: 'localStorage — その端末を使う人の好み。表示形式、1 ページの件数、カラースキーム。',
   en: 'localStorage — the preferences of whoever uses the device: a view mode, a page size, a colour scheme.',
+});
+
+export const chooseCookie = message({
+  ja: 'Cookie — localStorage に置くような好みのうち、サーバーの描画に既定値が出てはいけないもの。表示密度、文字の大きさ。秘密は置けません。',
+  en: 'Cookie — a preference of the localStorage kind that the server render must not show at its default: a density, a font size. Never a secret.',
 });
 
 export const chooseMemory = message({
@@ -117,6 +131,11 @@ export const demoRowEntry = message({
 export const demoRowLocal = message({
   ja: 'localStorage。タブ間で共有され、消すまで残ります。',
   en: 'localStorage. Shared across tabs, kept until deleted.',
+});
+
+export const demoRowCookie = message({
+  ja: 'Cookie。タブ間で共有され、リクエストごとにサーバーへ届きます。',
+  en: 'A cookie. Shared across tabs, and sent to the server with every request.',
 });
 
 export const demoRowMemory = message({
@@ -318,6 +337,51 @@ export const localServerLink = message({
   en: 'Reading before hydration',
 });
 
+export const cookieTitle = message({
+  ja: '`defineCookieState`',
+  en: '`defineCookieState`',
+});
+
+export const cookieDescription = message({
+  ja: 'Cookie に置く、アプリ全体の状態です。localStorage と同じく端末の持ち主の好みを置く場所で、違いはサーバーが読めることです。Cookie はリクエストごとに届くので、リクエストを受け取るページがその値で描き、既定値がちらつきません。',
+  en: 'App-wide state kept in a cookie. It holds the same kind of thing localStorage does — a preference of whoever uses the device — and differs in that the server can read it: every request carries the cookie, so a page that receives the request renders the real value and the default never flashes.',
+});
+
+export const cookieName = message({
+  ja: '値は `k8ordo-state.<key>`（定義の `cookieName`）という 1 つの Cookie に、スキーマが宣言したフィールドだけの JSON をパーセントエンコードして保存されます。Cookie の名前は HTTP の token なので、区切りは `:` ではなく `.` です。空白・`;`・`=`・`:` など、token に使えない文字を含むキーは定義時に throw します。',
+  en: 'The values are stored as one cookie named `k8ordo-state.<key>` — the definition’s `cookieName` — holding the percent-encoded JSON of the fields the schema declares. A cookie name is an HTTP token, which is why the separator is `.` rather than `:`, and a key holding a character a token cannot — a space, `;`, `=`, `:` and the like — throws at definition time.',
+});
+
+export const cookieWrite = message({
+  ja: 'ブラウザは Cookie Store API で書き込みます。属性は `Path=/`・`SameSite=Lax`・`Max-Age` 400 日（ブラウザが Cookie を保つ上限）で、API が必ず `Secure` を付けるので、HTTPS か `localhost` で動かします。書き込むたびに期限が延びます。',
+  en: 'The browser writes it through the Cookie Store API with `Path=/`, `SameSite=Lax` and a `Max-Age` of 400 days — the longest a browser keeps a cookie — renewed by every write. The API always adds `Secure`, so the page runs on HTTPS or `localhost`.',
+});
+
+export const cookieLax = message({
+  ja: '`SameSite` を API の既定の `Strict` にしないのは、ほかのサイトのリンクから来た最初のリクエストにも Cookie を付けるためです。`Strict` では、まさにそのリクエストでサーバーが既定値を描きます。',
+  en: '`SameSite` is `Lax` rather than the API’s default `Strict` so that the first request arriving from a link on another site carries the cookie too; under `Strict` the server would render the defaults on exactly that request.',
+});
+
+export const cookieTabs = message({
+  ja: 'ほかのタブの書き込みも、サーバーの応答が設定した Cookie も、Cookie Store API の `change` イベントで届きます。',
+  en: 'Writes from other tabs, and cookies a server response set, arrive through the Cookie Store API’s `change` event.',
+});
+
+export const cookieSmall = message({
+  ja: 'Cookie はリクエストのたびに送られるので、小さく保ちます。名前と値で 4 KB を超える Cookie は拒まれ、`update()` のハンドルが reject します（描画された値は残ります）。',
+  en: 'Every request carries the cookie, so keep it small. One over 4 KB, name and value together, is refused and the `update()` handle rejects, while the rendered value stays.',
+});
+
+export const cookieSecret = message({
+  ja: 'ブラウザが書く Cookie なので `HttpOnly` にはできません。ページ上のスクリプトから読み書きでき、利用者は URL と同じように書き換えられます。セッションやトークンなど、漏れても偽造されても困るものは置かないでください。サーバーでも入力として扱い、`parseCookies` はスキーマを通してから値を返します。',
+  en: 'A cookie the browser writes can never be `HttpOnly`: any script on the page reads and rewrites it, and a visitor can edit it as freely as a URL. Keep sessions, tokens and anything else that must not leak or be forged out of it. The server treats it as input too — `parseCookies` returns values that have passed the schema.',
+});
+
+export const cookieServer = message({
+  ja: 'サーバーでの読み取りと、サーバーから書く Cookie との関係',
+  en: 'Reading it on the server, and cookies the server writes',
+});
+
 export const memoryTitle = message({
   ja: '`defineMemoryState`',
   en: '`defineMemoryState`',
@@ -368,9 +432,14 @@ export const keyLocal = message({
   en: 'For `defineLocalState`, it becomes the localStorage key `k8ordo-state:<key>`.',
 });
 
+export const keyCookie = message({
+  ja: '`defineCookieState` では、Cookie の名前 `k8ordo-state.<key>` になります。',
+  en: 'For `defineCookieState`, it becomes the cookie name `k8ordo-state.<key>`.',
+});
+
 export const keyRename = message({
-  ja: 'キーを変えると、保存されたデータの名前も変わります。同じ種類の定義が同じキーを使うと、1 つのストア（local なら 1 つの行）を黙って共有します。モジュールシステムはこれを検出できないので、アプリ全体のグローバル名として扱ってください。',
-  en: 'Renaming the key renames the data. Two definitions of the same kind that share a key silently share one store — and, for local state, one storage row. The module system cannot catch this, so treat the key as an app-wide global name.',
+  ja: 'キーを変えると、保存されたデータの名前も変わります。同じ種類の定義が同じキーを使うと、1 つのストア（local なら 1 つの行、cookie なら 1 つの Cookie）を黙って共有します。モジュールシステムはこれを検出できないので、アプリ全体のグローバル名として扱ってください。',
+  en: 'Renaming the key renames the data. Two definitions of the same kind that share a key silently share one store — and, for local state, one storage row; for cookie state, one cookie. The module system cannot catch this, so treat the key as an app-wide global name.',
 });
 
 export const schemaTitle = message({
@@ -379,8 +448,8 @@ export const schemaTitle = message({
 });
 
 export const schemaDescription = message({
-  ja: 'スキーマが要るのは、データが境界を越えて戻ってくる場所だけです。利用者が書き換えられる URL、古いスキーマが書いた localStorage、セッション復元で戻ってきたエントリ状態。そこから来る値は、信頼済みの状態ではなく入力として扱われます。',
-  en: 'Schemas appear exactly where data comes back across a boundary: a URL the user can edit, localStorage an older schema wrote, entry state a session restore brought back. What comes from there is treated as input, not as trusted state.',
+  ja: 'スキーマが要るのは、データが境界を越えて戻ってくる場所だけです。利用者が書き換えられる URL、古いスキーマが書いた localStorage や Cookie、セッション復元で戻ってきたエントリ状態。そこから来る値は、信頼済みの状態ではなく入力として扱われます。',
+  en: 'Schemas appear exactly where data comes back across a boundary: a URL the user can edit, localStorage or a cookie an older schema wrote, entry state a session restore brought back. What comes from there is treated as input, not as trusted state.',
 });
 
 export const schemaObject = message({
@@ -399,8 +468,8 @@ export const schemaRefine = message({
 });
 
 export const schemaOwnOutput = message({
-  ja: '`entry` と localStorage のスキーマは、自分の出力をそのまま入力として受け付けなければなりません。保存された値は型付きのまま戻ってきてスキーマを通り直すので、`z.stringbool()` や型を変える変換は、書き込むたびに既定値に戻ります。`url` では値がクエリ文字列を通って戻るので、`z.stringbool()` が使えます。',
-  en: 'In `entry` and localStorage the schema must accept its own output as input: stored values come back typed and go through the schema again, so a `z.stringbool()` or a type-changing transform lands on its default on every write. In `url` the values come back through the query string, which is why `z.stringbool()` works there.',
+  ja: '`entry`・localStorage・Cookie のスキーマは、自分の出力をそのまま入力として受け付けなければなりません。保存された値は型付きのまま戻ってきてスキーマを通り直すので、`z.stringbool()` や型を変える変換は、書き込むたびに既定値に戻ります。`url` では値がクエリ文字列を通って戻るので、`z.stringbool()` が使えます。',
+  en: 'In `entry`, localStorage and a cookie the schema must accept its own output as input: stored values come back typed and go through the schema again, so a `z.stringbool()` or a type-changing transform lands on its default on every write. In `url` the values come back through the query string, which is why `z.stringbool()` works there.',
 });
 
 export const schemaSalvage = message({
@@ -449,13 +518,17 @@ export const typesTable = {
     ja: "`kind: 'local'`・`key`・`schema`・`storageKey`・`inlineRead`",
     en: "`kind: 'local'`, `key`, `schema`, `storageKey`, `inlineRead`",
   }),
+  cookieState: message({
+    ja: "`kind: 'cookie'`・`key`・`schema`・`cookieName`・`parseCookies`・`cookieValue`",
+    en: "`kind: 'cookie'`, `key`, `schema`, `cookieName`, `parseCookies`, `cookieValue`",
+  }),
   memoryState: message({
     ja: "`kind: 'memory'`・`key`・`initial`。`initial` は渡した初期値の浅いコピー",
     en: "`kind: 'memory'`, `key`, `initial`. `initial` is a shallow copy of the values passed",
   }),
   stateSchema: message({
-    ja: '`url`・`entry`・`defineLocalState` が受け取るスキーマの型。`zod` と `zod/mini` の `z.object()` に共通する部分です',
-    en: 'The schema type `url`, `entry` and `defineLocalState` accept: what a `z.object()` from `zod` and one from `zod/mini` have in common',
+    ja: '`url`・`entry`・`defineLocalState`・`defineCookieState` が受け取るスキーマの型。`zod` と `zod/mini` の `z.object()` に共通する部分です',
+    en: 'The schema type `url`, `entry`, `defineLocalState` and `defineCookieState` accept: what a `z.object()` from `zod` and one from `zod/mini` have in common',
   }),
   outputOf: message({
     ja: 'スキーマの出力型（`undefined` なら空のオブジェクト型）。props の型に `OutputOf<typeof catalogState.url>` のように使います',

@@ -595,6 +595,52 @@ export const sliderProps = z.object({
   max: z.number().optional().describe('Upper bound (100 when omitted)'),
 }) satisfies z.ZodType<SliderIntegrationProps>;
 
+// DateField と DatePicker も形だけを共有する。値は `<input type="date">` の
+// value と同じ YYYY-MM-DD で、LLM が別の書式で書くと検証で弾く
+const isoDate = () => z.iso.date();
+const dateInputShape = {
+  name: z.string(),
+  label: z.string().describe('Visible label of the field'),
+  defaultValue: isoDate().optional().describe('YYYY-MM-DD'),
+  min: isoDate().optional().describe('Earliest date that can be entered'),
+  max: isoDate().optional().describe('Latest date that can be entered'),
+  invalid: z.boolean().optional(),
+  disabled: z.boolean().optional(),
+  required: z.boolean().optional(),
+};
+
+type DateFieldIntegrationProps = {
+  name: string;
+  label: string;
+  defaultValue?: string;
+  min?: string;
+  max?: string;
+  invalid?: boolean;
+  disabled?: boolean;
+  required?: boolean;
+};
+export const dateFieldProps = z.object({
+  ...dateInputShape,
+}) satisfies z.ZodType<DateFieldIntegrationProps>;
+
+type DatePickerIntegrationProps = DateFieldIntegrationProps;
+export const datePickerProps = z.object({
+  ...dateInputShape,
+}) satisfies z.ZodType<DatePickerIntegrationProps>;
+
+type CalendarIntegrationProps = {
+  name: string;
+  defaultValue?: string;
+  min?: string;
+  max?: string;
+};
+export const calendarProps = z.object({
+  name: z.string().describe('State key the picked date is stored under'),
+  defaultValue: isoDate().optional().describe('YYYY-MM-DD'),
+  min: isoDate().optional().describe('Earliest date that can be picked'),
+  max: isoDate().optional().describe('Latest date that can be picked'),
+}) satisfies z.ZodType<CalendarIntegrationProps>;
+
 type CheckboxIntegrationProps = {
   name: string;
   label: string;
@@ -886,6 +932,9 @@ export type TextareaProps = z.infer<typeof textareaProps>;
 export type PasswordInputProps = z.infer<typeof passwordInputProps>;
 export type NumberFieldProps = z.infer<typeof numberFieldProps>;
 export type SliderProps = z.infer<typeof sliderProps>;
+export type DateFieldProps = z.infer<typeof dateFieldProps>;
+export type DatePickerProps = z.infer<typeof datePickerProps>;
+export type CalendarProps = z.infer<typeof calendarProps>;
 export type RadioProps = z.infer<typeof radioProps>;
 export type RadioCardProps = z.infer<typeof radioCardProps>;
 export type CheckboxCardProps = z.infer<typeof checkboxCardProps>;
