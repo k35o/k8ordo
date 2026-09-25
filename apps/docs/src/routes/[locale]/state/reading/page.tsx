@@ -447,6 +447,9 @@ export default function StateReadingPage() {
         <p className="text-fg-mute leading-relaxed">
           <Rich>{m.stateReading.searchDescription()}</Rich>
         </p>
+        <p className="text-fg-mute leading-relaxed">
+          <Rich>{m.stateReading.hrefBase()}</Rich>
+        </p>
         <CodeBlock code={EXPORT_LINK} lang="tsx" />
       </DocSection>
 

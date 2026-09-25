@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { expect } from 'storybook/test';
 
 import { Badge } from '../badge';
 import { Table } from './table';
@@ -62,12 +63,20 @@ export const Empty: Story = {
         </Table.Row>
       </Table.Head>
       <Table.Body>
-        <Table.EmptyState colSpan={3}>
-          No records have been added yet.
-        </Table.EmptyState>
+        <Table.EmptyState
+          colSpan={3}
+          description="Invite a teammate to get started."
+          title="No records have been added yet."
+        />
       </Table.Body>
     </Table.Root>
   ),
+  play: async ({ canvas }) => {
+    await expect(canvas.getByRole('cell')).toHaveAttribute('colspan', '3');
+    await expect(
+      canvas.getByText('No records have been added yet.'),
+    ).toBeInTheDocument();
+  },
 };
 
 export const WithCaption: Story = {

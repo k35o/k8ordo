@@ -152,7 +152,7 @@ export const CheckboxCard: FC<Props> = ({
             </span>
             <span
               aria-hidden
-              className="border-border-mute bg-bg-base peer-checked:border-border-base peer-checked:bg-primary-bg peer-checked:text-fg-base mt-0.5 ml-4 inline-flex size-5 shrink-0 items-center justify-center rounded-md border text-transparent"
+              className="border-border-mute bg-bg-base peer-checked:border-border-base peer-checked:bg-primary-bg peer-checked:text-fg-base mt-0.5 ml-4 inline-flex size-5 shrink-0 items-center justify-center rounded-md border *:invisible peer-checked:*:visible"
             >
               <CheckIcon size="sm" />
             </span>

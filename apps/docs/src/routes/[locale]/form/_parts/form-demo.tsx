@@ -11,7 +11,7 @@ import { demoState } from './demo-state';
 
 type Props = {
   /** `formFields(demoState.url)` の結果。Server Component で導かれ、props で渡る。 */
-  fields: FormFields<'q' | 'min', never>;
+  fields: FormFields<'q' | 'min' | 'inStock', never>;
 };
 
 export function FormDemo({ fields }: Props) {
@@ -19,9 +19,10 @@ export function FormDemo({ fields }: Props) {
   const form = useForm(fields);
   const q = form.field('q');
   const min = form.field('min');
+  const inStock = form.field('inStock');
   // フォームが GET で書いた URL を、同じスキーマの state が読み返す
-  const [{ q: currentQ, min: currentMin }] = useAppState(demoState);
-  const search = demoState.search({ q: currentQ, min: currentMin });
+  const [current] = useAppState(demoState);
+  const search = demoState.search(current);
 
   return (
     <div className="border-border-mute flex flex-col gap-6 rounded-lg border p-6">
@@ -39,7 +40,7 @@ export function FormDemo({ fields }: Props) {
               <TextField
                 {...props}
                 {...q.input}
-                defaultValue={currentQ}
+                defaultValue={current.q}
                 type="search"
               />
             )}
@@ -54,11 +55,22 @@ export function FormDemo({ fields }: Props) {
             renderInput={(props) => (
               // NumberField は type="text" で描くので、JavaScript が無いと
               // ブラウザが min を検査しない。このデモはその検査も見せる
-              <TextField {...props} {...min.input} defaultValue={currentMin} />
+              <TextField {...props} {...min.input} defaultValue={current.min} />
             )}
             required={min.required}
           />
         </div>
+        {/* @k8ordo/ui の Checkbox はグループの外では value 属性を出さず、
+            ブラウザ既定の on を送る。state が書く "true" と同じ文字列を
+            送るため、value まで広げられる素の <input> にする */}
+        <label className="flex items-center gap-2 sm:pb-2.5">
+          <input
+            {...inStock.input}
+            className="accent-primary-border size-4"
+            defaultChecked={current.inStock}
+          />
+          {m.form.demoLabelInStock()}
+        </label>
         <Button type="submit" variant="solid">
           {m.form.demoSubmit()}
         </Button>
@@ -73,12 +85,15 @@ export function FormDemo({ fields }: Props) {
         <div className="flex gap-3">
           <dt className="text-fg-mute">state</dt>
           <dd className="break-all">
-            <Code>{JSON.stringify({ q: currentQ, min: currentMin })}</Code>
+            <Code>{JSON.stringify(current)}</Code>
           </dd>
         </div>
       </dl>
       <p className="text-fg-mute text-sm leading-relaxed">
         <Rich>{m.form.demoHint()}</Rich>
+      </p>
+      <p className="text-fg-mute text-sm leading-relaxed">
+        <Rich>{m.form.demoHintCheckbox()}</Rich>
       </p>
     </div>
   );

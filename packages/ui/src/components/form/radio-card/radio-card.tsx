@@ -141,7 +141,7 @@ export const RadioCard: FC<Props> = ({
               aria-hidden
               className="border-border-mute bg-bg-base peer-checked:border-border-base peer-checked:bg-primary-bg mt-0.5 ml-4 inline-flex size-5 shrink-0 items-center justify-center rounded-full border peer-checked:*:opacity-100"
             >
-              <span className="bg-primary-border size-2 rounded-full opacity-0 transition-opacity" />
+              <span className="bg-primary-border size-2 rounded-full opacity-0 transition-opacity forced-colors:bg-[CanvasText]" />
             </span>
           </label>
         );

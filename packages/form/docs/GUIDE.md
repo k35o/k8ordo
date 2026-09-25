@@ -35,9 +35,10 @@ server    parseForm(schema, formData)  →  typed data, or per-field errors
 
 `formFields` runs on the server — in a Server Component or at module scope. Its
 result is JSON, so it crosses the RSC boundary as props and zod never enters the
-client bundle. The messages are read when it runs, and module scope runs once,
-before any request: when a message follows the request (its locale, say, with
-`@k8ordo/i18n`), call `formFields` during the render instead.
+client bundle. The messages are read when it runs — zod's, and a rule's
+[function message](#a-message-that-follows-the-request) — and module scope runs
+once, before any request: when a message follows the request (its locale, say,
+with `@k8ordo/i18n`), call `formFields` during the render instead.
 
 ## Writing a form
 
@@ -71,19 +72,20 @@ does not), so give `.int()` or `.min()` theirs.
 
 Each leaf derives the control that submits what it validates:
 
-| Schema                                           | `input`                                                                                   |
-| ------------------------------------------------ | ----------------------------------------------------------------------------------------- |
-| `z.string()`                                     | `type="text"`                                                                             |
-| `z.email()` / `z.url()`                          | `type="email"` / `type="url"`                                                             |
-| `z.iso.date()` / `z.iso.time()`                  | `type="date"` / `type="time"`                                                             |
-| `z.iso.datetime({ local: true })`                | `type="datetime-local"`                                                                   |
-| `z.coerce.number()`                              | `type="number"`; `step` from `.multipleOf()`, else `1` after `.int()` and `any` otherwise |
-| `z.boolean()`, `z.literal(true)`                 | `type="checkbox"`                                                                         |
-| `z.file()`                                       | `type="file"`                                                                             |
-| a password ([below](#what-it-guarantees))        | `type="password"`                                                                         |
-| `z.enum([…])`                                    | no `type`: spread it onto a `<select>`, not a radio ([Radio groups](#radio-groups))       |
-| `z.array(z.enum([…]))`                           | no `type`: one checkbox per option ([Checkbox groups](#checkbox-groups))                  |
-| anything else (`z.uuid()`, `z.coerce.date()`, …) | `type="text"`                                                                             |
+| Schema                                           | `input`                                                                                                |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------ |
+| `z.string()`                                     | `type="text"`                                                                                          |
+| `z.email()` / `z.url()`                          | `type="email"` / `type="url"`                                                                          |
+| `z.iso.date()` / `z.iso.time()`                  | `type="date"` / `type="time"`                                                                          |
+| `z.iso.datetime({ local: true })`                | `type="datetime-local"`                                                                                |
+| `z.coerce.number()`                              | `type="number"`; `step` from `.multipleOf()`, else `1` after `.int()` and `any` otherwise              |
+| `z.boolean()`, `z.literal(true)`                 | `type="checkbox"`                                                                                      |
+| `z.stringbool()`                                 | `type="checkbox"` with a `value` ([Checkboxes that submit a string](#checkboxes-that-submit-a-string)) |
+| `z.file()`                                       | `type="file"`                                                                                          |
+| a password ([below](#what-it-guarantees))        | `type="password"`                                                                                      |
+| `z.enum([…])`                                    | no `type`: spread it onto a `<select>`, not a radio ([Radio groups](#radio-groups))                    |
+| `z.array(z.enum([…]))`                           | no `type`: one checkbox per option ([Checkbox groups](#checkbox-groups))                               |
+| anything else (`z.uuid()`, `z.coerce.date()`, …) | `type="text"`                                                                                          |
 
 ```tsx
 // page.tsx — Server Component
@@ -116,14 +118,18 @@ export const TalkForm = ({ action, fields }: TalkFormProps) => {
 ```
 
 `form.props` attaches to the `<form>` and nowhere else. There is no per-field
-registration to forget. It also hears the form being reset — by a reset
+registration to forget. Its `onSubmit` checks the form
+([below](#what-it-guarantees)) — an `onSubmit` of your own written after the
+spread replaces it, so call `form.props.onSubmit(event)` from yours — and it
+also hears the form being reset — by a reset
 button, by `form.reset()`, or by React itself after every form action, whatever
 it returned — and forgets what it knew about the old values: the messages,
 which server errors were still current, the rows that were added, and
 `isDirty`.
 
 A form with no action behind it — a GET filter, say — calls `useForm(fields)`
-and leaves the state out.
+and leaves the state out. It is still checked on submit, so a filter that
+breaks its schema never reaches the URL.
 
 ```ts
 // actions.ts
@@ -183,7 +189,8 @@ exception is a range message from `@k8ordo/ui`'s `NumberField` (see
 means "the key is present", but a form always submits something for every
 control. What that is depends on the control: `''` for a text field, `false` for
 an unchecked checkbox, and nothing at all for a number, a `z.coerce.bigint()`, a
-file, or a choice — an empty numeric field is not 0 (nor 0n), an unfilled file
+file, a choice, or an unchecked `z.stringbool()` box — an empty numeric field is
+not 0 (nor 0n), an unfilled file
 input is not the zero-byte file the browser sends, and neither a radio group
 with nothing selected nor a `<select>` left on a `value=""` placeholder has
 chosen anything. The attribute is emitted only when the schema rejects that
@@ -221,9 +228,11 @@ tuples, a repeat nested inside a repeat, nullable objects, keys containing
 form that would silently misparse what the person typed. So does a leaf no
 control could ever satisfy, because every value arrives as a string:
 `z.number()` (use `z.coerce.number()`), `z.literal(1)`, `z.date()`,
-`z.bigint()` — or, for a checkbox, as a boolean: `z.stringbool()` (use
-`z.boolean()`). A form that can never validate is a mistake to report, not a
-check to drop. A schema that coerces reads strings and is kept, so
+`z.bigint()`. So does a checkbox that could never submit `false`:
+`z.stringbool().default(true)`, since an unchecked box submits nothing and the
+default reads nothing as `true`. A form that can never validate, or that
+silently discards what the person did, is a mistake to report, not a check to
+drop. A schema that coerces reads strings and is kept, so
 `z.coerce.date()` and `z.coerce.bigint()` derive as text inputs.
 
 **A missing name is loud.** If the schema has a field that never arrived in the
@@ -233,13 +242,19 @@ filling in the form did. The exceptions are the controls that submit no entry
 at all when left alone — a state the person can reach: a radio group with
 nothing selected reaches the schema as no value, the same as a `<select>` on
 its placeholder (a validation error unless the enum accepts `undefined`), an
-unchecked checkbox as `false`, and a checkbox group with nothing checked as
-`[]`. A forgotten spread on one of those is not caught either.
+unchecked checkbox as `false` (or, under `z.stringbool()`, as no value), and a
+checkbox group with nothing checked as `[]`. A forgotten spread on one of those is not caught either.
 
-**Native validation survives without JavaScript.** `noValidate` is applied
-from JavaScript on mount, never rendered into the markup. With scripts
-disabled or not yet loaded, the browser's own checks stay on; once the hook is
-live, it takes over the message path and the server stays the arbiter.
+**A failing submission stops in the browser, with JavaScript or without.**
+`noValidate` is applied from JavaScript on mount, never rendered into the
+markup, so with scripts disabled or not yet loaded the browser's own checks
+stay on. Once the hook is live it runs the same check on every submit, in
+zod's wording: every field, the ones nobody touched included, and the
+cross-field [rules](#checks-html-has-no-attribute-for). A failure stops the submission, shows each failed field's message, and
+moves focus to the first failed field on the page. A submit button marked
+`formNoValidate` skips the check, as it skips the browser's. The server stays
+the arbiter: what passes still goes to it, and the checks in `dropped` run
+there alone.
 
 **Secrets are never echoed.** `parseForm` returns the submitted values so a
 retry keeps the input — they render as the controls' defaults, which is also
@@ -342,6 +357,23 @@ const plan = form.field('plan');
 />;
 ```
 
+## Checkboxes that submit a string
+
+`z.boolean()` reads a checkbox as checked or not, whatever it submits.
+`z.stringbool()` reads what it submits: its `value` when checked, and nothing
+when not. `input.value` is the schema's own spelling of `true` — `"true"`, or
+the first of `truthy` when one is given — so the box submits a string the
+schema reads back, never the browser's default `on`.
+
+That is the shape a boolean takes in a GET filter form derived from an
+`@k8ordo/state` url schema, where a boolean has to be `z.stringbool()`: the
+box submits the same string `update()` writes for `true`, so the URL the form
+lands on and the one state writes agree. An unchecked box submits nothing,
+which reaches the schema as `undefined`: `.default(false)` or `.optional()`
+accepts it, and a bare `z.stringbool()` makes the box `required`.
+`.default(true)` is refused at derive time — nothing would read as `true`, so
+unchecking the box could never submit `false`.
+
 ## Checkbox groups
 
 An array of enums is a fixed option set the person picks several of — one
@@ -440,6 +472,26 @@ and `requiredWhen(field, when, equals, message)` —
 server only. A `refine` on the schema as a whole is listed in `dropped`; one on
 a single field, a nested object, or a row is not yet.
 
+### A message that follows the request
+
+`message` takes a function as well as a string, the way zod takes
+`{ error: () => … }`: it is called when the rule is reported, not where the
+rule is declared. `formFields` calls it as it derives the fields — the client
+cannot run a function sent from the server, so the rules cross already
+worded — and `parseForm` calls it when the rule breaks. A definition at module
+scope therefore reports in whichever locale is current in the request that
+reads it:
+
+```ts
+export const signup = defineForm(schema, [
+  sameAs('confirm', 'password', m.signup.mismatch), // @k8ordo/i18n
+  minChecked('topics', 2, () => m.signup.pickAtLeast(2)),
+]);
+```
+
+Call `formFields` during the render for this, the same as for zod's function
+messages.
+
 ## Asking the server about one field
 
 Whether a name is already taken is something only the server knows. `useAsyncCheck`
@@ -516,7 +568,10 @@ const stepIsValid = [
 After a failed submit, `useForm` moves focus to the first failed field on the
 page, but a control inside a hidden step cannot take focus. When a new state
 arrives, switch during render to the earliest step holding a key of
-`state.errors`, so the field is visible by the time focus moves.
+`state.errors`, so the field is visible by the time focus moves. The check on
+submit covers the hidden steps too, and stops the submission for a failure
+there without being able to show it — checking each step before advancing is
+what keeps the earlier steps from failing at the end.
 
 Without JavaScript this degrades to one long form that submits in a single
 request — which is the correct behaviour, not a broken one.
@@ -586,6 +641,12 @@ arrives as an `input` event, the way typing does.
 about a hand-written `<input type="radio">`. `Radio` and `RadioCard` read an
 enum's `input` the other way round: `defaultValue` is the selected option and
 `required` reaches every radio.
+
+**A `z.stringbool()` box is the exception.** A spread `value` does not reach
+`Checkbox`'s input, so a `z.stringbool()` box drawn with it submits the
+browser's `on` — which the default `z.stringbool()` reads as `true`, but a
+custom `truthy`, and the URL state writes, do not share. Render a plain
+`<input {...field.input} />` there.
 
 **A `Select` needs a placeholder for `required` to mean anything.** Put
 `{ value: '', label: '…' }` first in `options`; a `<select>` without an empty

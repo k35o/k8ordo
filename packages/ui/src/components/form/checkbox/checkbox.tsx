@@ -94,7 +94,7 @@ export const Checkbox: FC<Props> = ({
         }}
         ref={ref}
         type="checkbox"
-        value={groupContext ? groupItemValue : undefined}
+        value={itemValue}
       />
       <span
         aria-hidden

@@ -30,7 +30,10 @@ export default function ProductPage({ params }: PageProps<'/products/:id'>) {
 const STACK_LOCALES = `// src/i18n.ts
 import { defineLocales } from '@k8ordo/i18n';
 
-export const locales = defineLocales(['ja', 'en']);`;
+export const locales = defineLocales({
+  ja: { timeZone: 'Asia/Tokyo', dir: 'ltr' },
+  en: { timeZone: 'UTC', dir: 'ltr' },
+});`;
 
 const STACK_LAYOUT = `// src/routes/[locale]/layout.tsx
 import type { ReactNode } from 'react';

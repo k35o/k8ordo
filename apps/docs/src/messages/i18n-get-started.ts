@@ -43,8 +43,8 @@ export const scope = {
     en: 'The pathname. Everything after the locale segment belongs to `@k8ordo/router`.',
   }),
   notGrammar: message({
-    ja: '文言の文法。プレースホルダ記法も ICU もありません。値の埋め込みはテンプレートリテラル、複数形は `Intl.PluralRules`、日付と数値は `Intl` の書式化で書きます。',
-    en: 'A message grammar. There is no placeholder syntax and no ICU: interpolation is a template literal, plurals are `Intl.PluralRules`, and dates and numbers are `Intl` formatters.',
+    ja: '文言の文法。プレースホルダ記法も ICU もありません。値の埋め込みはテンプレートリテラル、複数形・日付・数値は `Intl` で、ロケール集合は今のロケールの `Intl` を引くだけです。',
+    en: 'A message grammar. There is no placeholder syntax and no ICU: interpolation is a template literal, and plurals, dates and numbers are `Intl` — the locale set only draws it for the current locale.',
   }),
   notLoading: message({
     ja: '読み込み。文言は普通の export なので、どの文言がブラウザに届くかは、各 Client Component が何を import したかからバンドラが決めます。ローダーも名前空間の一覧もありません。',
@@ -97,8 +97,8 @@ export const defineSet = {
     en: 'This module is the only place the list is spelled. The `[locale]` schema, the static path expansion, the language switcher, the `/` redirect and the type of every message all read from it.',
   }),
   default: message({
-    ja: "先頭のロケールが既定値です。別のロケールを既定にするときは `defineLocales(['en', 'ja'], { default: 'ja' })` と書きます。既定値は、交渉で何も一致しなかったときと、何もロケールを指名していないときに使われます。",
-    en: "The first locale is the default. To make another one the default, write `defineLocales(['en', 'ja'], { default: 'ja' })`. The default is used when negotiation finds nothing and when nothing names a locale.",
+    ja: "ロケールごとに、日付を表示するタイムゾーン（`timeZone`）と文字の向き（`dir`）を必ず書きます。先頭のロケールが既定値で、別のロケールを既定にするときは第 2 引数に `{ default: 'en' }` と書きます。既定値は、交渉で何も一致しなかったときと、何もロケールを指名していないときに使われます。",
+    en: "Every locale states the time zone its dates are shown in (`timeZone`) and the direction its text runs in (`dir`). The first locale is the default; to make another one the default, pass `{ default: 'en' }` as the second argument. The default is used when negotiation finds nothing and when nothing names a locale.",
   }),
   register: message({
     ja: '`Register` にロケールを載せるのは 1 回だけです。載せた後は、すべての `message()` がこのロケールの和集合に照らして検査されます。`Register` はマージされるための型なので、`type` ではなく `interface` で書きます。',

@@ -148,7 +148,9 @@ const Item: FC<{
       className={cn(
         'flex w-full items-center justify-between px-3 py-2 text-left transition-colors',
         'hover:bg-bg-subtle',
-        'focus-visible:border-transparent focus-visible:bg-bg-subtle focus-visible:outline-hidden',
+        'focus-visible:border-transparent focus-visible:bg-bg-subtle',
+        // dropdown-menu の itemClass と同じく、線の色は高コントラストでだけ付ける
+        'outline-transparent -outline-offset-2 focus-visible:outline-2 contrast-more:outline-border-base',
       )}
       type="button"
       {...props}
