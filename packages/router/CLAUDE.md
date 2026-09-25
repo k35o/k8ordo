@@ -109,6 +109,12 @@ pnpm check         # check:write to auto-fix
 - **The type mirrors the runtime walk.** `Below` resets a branch that landed
   on the root, exactly as `walk` does; without it every route under a root
   layout types as `//products`. Any change to one has to change the other.
+- **A typed path is checked, never enumerated.** `NavigablePath` matches the
+  path it is handed against the table's patterns segment by segment
+  (`PathMatching` in `paths.ts`, a `:param` reading as URLPattern reads it:
+  one non-empty segment). Never go back to a union of `PathFor` each
+  pattern: a `/:locale` page puts `/${string}` in it, and that one member
+  takes every path there is.
 
 ## Layout
 
@@ -116,7 +122,7 @@ pnpm check         # check:write to auto-fix
 src/
   paths.ts          type derivation (ParamsOf / PathFor / Join) + string operations
   base.ts           withBase / withoutBase (Vite's base at the edges)
-  define-routes.ts  defineRoutes / match / RouteOf
+  define-routes.ts  defineRoutes / match / NavigablePath
   links.ts          href / navigateTo / bindParams (the side that needs no table)
   register.ts       Register (module augmentation) + PageProps / LayoutProps
   navigation.ts     useInterceptedNavigation (intercept and the commit contract)
