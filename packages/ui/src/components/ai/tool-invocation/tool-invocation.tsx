@@ -1,6 +1,6 @@
 'use client';
 
-import { useId, useTransition } from 'react';
+import { useCallback, useId, useRef, useTransition } from 'react';
 import type { FC, ReactNode } from 'react';
 
 import { useMessages } from '../../../i18n/context';
@@ -85,6 +85,18 @@ export const ToolInvocation: FC<Props> = ({
   const messages = useMessages();
   const nameId = useId();
   const [isResponding, startTransition] = useTransition();
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  // 答えると問いのバーごと消え、押したボタンにあったフォーカスが body に
+  // 落ちる。消える直前（ref の解除は DOM から外すより先に走る）にまだ
+  // フォーカスを持っていたら、同じツールの見出しへ移す
+  const keepFocusOnAnswer = useCallback(
+    (group: HTMLDivElement) => () => {
+      if (group.contains(document.activeElement)) {
+        triggerRef.current?.focus();
+      }
+    },
+    [],
+  );
   const pendingApproval =
     state === 'approval-requested' && approval?.isAutomatic !== true
       ? approval
@@ -107,11 +119,13 @@ export const ToolInvocation: FC<Props> = ({
         </span>
       }
       onChange={onChange}
+      triggerRef={triggerRef}
       footer={
         pendingApproval === undefined ? undefined : (
           <div
             aria-labelledby={nameId}
             className="flex flex-wrap items-center gap-2"
+            ref={keepFocusOnAnswer}
             role="group"
           >
             <p className="text-fg-base min-w-0 flex-1 text-sm">

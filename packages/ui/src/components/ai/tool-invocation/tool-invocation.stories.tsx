@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, fn } from 'storybook/test';
+import { useState } from 'react';
+import { expect, fn, waitFor } from 'storybook/test';
 
+import type { ToolState } from '../types';
 import { ToolInvocation } from './tool-invocation';
 
 const meta: Meta<typeof ToolInvocation> = {
@@ -131,13 +133,15 @@ export const ApprovalWithRequestReason: Story = {
   },
 };
 
+let finishAnswering = () => {};
+
 export const ApprovalWhileAnswering: Story = {
   args: {
     ...ApprovalRequested.args,
     // 答えを送り終わるまで返らない。その間に二度答えられないことを見る
     onApprovalResponse: () =>
-      new Promise<void>(() => {
-        /* never settles */
+      new Promise<void>((resolve) => {
+        finishAnswering = resolve;
       }),
   },
   play: async ({ canvas, userEvent }) => {
@@ -145,6 +149,45 @@ export const ApprovalWhileAnswering: Story = {
 
     await expect(canvas.getByRole('button', { name: '許可' })).toBeDisabled();
     await expect(canvas.getByRole('button', { name: '拒否' })).toBeDisabled();
+
+    // 終わらない非同期の transition は、同じ React の後続の transition を
+    // すべて待たせる。後のストーリーを巻き込まないよう片付ける
+    finishAnswering();
+  },
+};
+
+const AnsweredInPlace = () => {
+  const [state, setState] = useState<ToolState>('approval-requested');
+  return (
+    <ToolInvocation
+      approval={{ id: 'approval-1' }}
+      input={{ path: 'notes/2026-09.md' }}
+      name="delete_file"
+      onApprovalResponse={({ approved }) => {
+        setState(approved ? 'output-available' : 'output-denied');
+      }}
+      output="削除しました"
+      state={state}
+    />
+  );
+};
+
+export const FocusAfterAnswer: Story = {
+  render: () => <AnsweredInPlace />,
+  play: async ({ canvas, userEvent }) => {
+    await userEvent.click(canvas.getByRole('button', { name: '許可' }));
+
+    // 押したボタンは問いのバーごと消える。フォーカスは body に落とさず、
+    // 同じツールの見出しへ移す
+    // 答えは transition の中で送るので、消えるのはこの後の描画
+    await waitFor(() =>
+      expect(
+        canvas.queryByRole('group', { name: 'delete_file' }),
+      ).not.toBeInTheDocument(),
+    );
+    await expect(
+      canvas.getByRole('button', { name: /delete_file/u }),
+    ).toHaveFocus();
   },
 };
 
