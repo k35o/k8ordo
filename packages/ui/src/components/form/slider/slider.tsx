@@ -5,6 +5,7 @@ import { useFormStatus } from 'react-dom';
 
 import { cn } from '../../../helpers/cn';
 import { useControllableState } from '../../../hooks/controllable-state';
+import { HIGH_CONTRAST_EDGE } from '../../_internal/high-contrast';
 
 type BaseProps = {
   invalid?: boolean;
@@ -78,12 +79,15 @@ export const Slider: FC<Props> = ({
     >
       <span
         aria-hidden
-        className="bg-bg-mute relative rounded-full block-2 inline-full"
+        className={cn(
+          'bg-bg-mute relative rounded-full block-2 inline-full',
+          HIGH_CONTRAST_EDGE,
+        )}
       >
         <span
           aria-hidden
           className={cn(
-            'bg-primary-bg absolute inset-s-0 inset-be-0 block-full inline-(--slider-progress) rounded-full',
+            'bg-primary-bg absolute inset-s-0 inset-be-0 block-full inline-(--slider-progress) rounded-full forced-colors:bg-[Highlight]',
             invalid && 'bg-bg-error',
           )}
         />
