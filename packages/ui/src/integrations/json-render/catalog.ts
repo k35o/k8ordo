@@ -88,6 +88,11 @@ export const catalog = defineCatalog(schema, {
       props: s.breadcrumbProps,
       description: 'Breadcrumb trail.',
     },
+    SideNav: {
+      props: s.sideNavProps,
+      description:
+        'Side navigation: groups of links, each group under a small title. Mark the page being shown with current: true.',
+    },
     Table: {
       props: s.tableProps,
       description:

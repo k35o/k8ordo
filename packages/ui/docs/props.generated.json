@@ -3078,6 +3078,75 @@
       "omitted": []
     },
     {
+      "name": "SideNav.Group",
+      "props": [
+        {
+          "name": "title",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "SideNav.Link",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "href",
+          "types": ["T"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "current",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "renderAnchor",
+          "types": ["(props: RenderSideNavAnchorProps<T>) => ReactNode"],
+          "defaultValue": "defaultRenderAnchor",
+          "required": false
+        }
+      ],
+      "inherits": "AnchorHTMLAttributes<HTMLAnchorElement>",
+      "omitted": ["className", "style", "aria-current"]
+    },
+    {
+      "name": "SideNav.Root",
+      "props": [
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": "HTMLAttributes<HTMLElement>",
+      "omitted": ["className", "style", "aria-label"]
+    },
+    {
       "name": "Skeleton",
       "props": [
         {
@@ -3530,6 +3599,25 @@
       ],
       "inherits": null,
       "omitted": []
+    },
+    {
+      "name": "TableOfContents",
+      "props": [
+        {
+          "name": "items",
+          "types": ["readonly TableOfContentsItem[]"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": "HTMLAttributes<HTMLElement>",
+      "omitted": ["className", "style", "children", "aria-labelledby"]
     },
     {
       "name": "Tabs.List",

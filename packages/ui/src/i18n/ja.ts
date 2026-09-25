@@ -45,6 +45,7 @@ export const ja: Messages = {
   carouselSlide: 'スライド',
   carouselPrevious: '前のスライド',
   carouselNext: '次のスライド',
+  tableOfContents: '目次',
 
   chat: 'チャット',
   scrollToLatest: '最新のメッセージへ移動',

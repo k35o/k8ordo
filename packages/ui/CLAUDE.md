@@ -85,7 +85,7 @@ Because every component omits `className` and `style`, a render prop is the only
 escape hatch a caller has. There are two kinds, and they must not be blurred.
 
 **Replacing the element** (`Button` / `IconButton` `renderItem`, `Anchor` /
-`Breadcrumb.Link` `renderAnchor`). The bag is _everything the component would
+`Breadcrumb.Link` / `SideNav.Link` `renderAnchor`). The bag is _everything the component would
 have put on its own element_. For `Button` / `IconButton` that is the resolved
 `className`, the composed `children` (icons and the pending spinner included),
 `ref`, the click handler, the disabled and pending state, and the caller's
@@ -93,7 +93,9 @@ remaining attributes. The link components own less: `Anchor`'s bag is `href` /
 `className` / `children` / `target` / `rel` and the caller's remaining
 attributes, plus `kind` (`'internal' | 'external'`), which is not an attribute;
 `Breadcrumb.Link` takes no extra attributes, so its bag is `href` / `className` /
-`children`, and a `current` link renders a `<span>` without calling it. Build that
+`children`, and a `current` link renders a `<span>` without calling it;
+`SideNav.Link`'s bag is `href` / `className` / `children` / `aria-current` and
+the caller's remaining anchor attributes. Build that
 object once and hand the same one to both branches — the render prop and the
 component's own element — so the two can never drift. A render prop that quietly
 drops `onClick` or `disabled` hands the caller a dead, undisabled element with

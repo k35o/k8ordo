@@ -131,6 +131,8 @@ const renderers = {
     ui.renderBreadcrumb(props),
   Table: ({ props }: ComponentRenderProps<sc.TableProps>) =>
     ui.renderTable(props),
+  SideNav: ({ props }: ComponentRenderProps<sc.SideNavProps>) =>
+    ui.renderSideNav(props),
 
   TextField: TextFieldView,
   Textarea: TextareaView,
