@@ -34,11 +34,14 @@ pnpm add -D vite
 what the deployed application runs. `@k8ordo/static` is only ever needed at
 build time, which is why its guide installs it with `-D`.
 
-The package has two entries, split by where the code runs. `@k8ordo/server`
-is the plugin, for `vite.config.ts`, and loads Vite. What the application's
-own code imports — `serve`, `redirect()`, and the `RedirectTarget` and
-`RouteRequest` types — comes from `@k8ordo/server/runtime`, which does not, so
-the built application runs from an install without dev dependencies.
+The package has three entries, split by where the code runs.
+`@k8ordo/server` is the plugin, for `vite.config.ts`, and loads Vite.
+`@k8ordo/server/runtime` is what code inside the request handler imports —
+`redirect()`, and the `RedirectTarget` and `RouteRequest` types — and needs
+nothing from Node, so it goes wherever the handler goes.
+`@k8ordo/server/serve` is `serve`, the Node.js server for a build. Neither of
+the last two loads Vite, so the built application runs from an install
+without dev dependencies.
 
 ```ts
 // vite.config.ts
@@ -531,7 +534,7 @@ vite build
 
 ```js
 // serve.js
-import { serve } from '@k8ordo/server/runtime';
+import { serve } from '@k8ordo/server/serve';
 
 const server = await serve({ port: 3000 });
 // server.url, server.port; await server.close() to stop
@@ -563,7 +566,11 @@ details are for whoever runs the server, not for the visitor. A body that
 fails after it has started streaming can no longer change its status, so the
 connection is cut rather than left open on half a page.
 
-For another host, the built handler is a plain function:
+### The request handler
+
+`serve` is one host for the build. What it hosts — the application itself —
+is the request handler, and anything that turns a request into a `Request`
+and a `Response` back into an answer can host it:
 
 ```js
 import handler from './dist/rsc/index.js';
@@ -571,11 +578,52 @@ import handler from './dist/rsc/index.js';
 const response = await handler(new Request('https://example.com/products/1'));
 ```
 
-Anything that speaks `(request: Request) => Promise<Response>` can run it —
-and it is the same handler `@k8ordo/static` builds and calls at build time,
-compiled for that mode.
+`dist/rsc/index.js` default-exports `(request: Request) => Promise<Response>`,
+the same handler `@k8ordo/static` builds and calls at build time, compiled
+for that mode. It loads `dist/ssr/` from beside itself, so the two travel
+together, and it imports the application's dependencies by name, so they
+have to resolve where it runs — or be bundled in, as Wrangler does.
 
-It answers `GET`, `HEAD` and `POST`, and any other method with a `405` whose
+**It runs wherever `AsyncLocalStorage` does.** Past the web platform's
+`Request`, `Response` and streams, the one thing the handler takes from its
+runtime is `AsyncLocalStorage` from `node:async_hooks`: React keeps each
+render's state in it, and a `paramsSchema` writes to it. Node.js, Bun, Deno,
+and Cloudflare Workers with the `nodejs_compat` flag all have it, and each
+takes the handler as it is once it is imported:
+
+```js
+// Deno
+Deno.serve(handler);
+
+// Bun
+Bun.serve({ fetch: handler });
+
+// Cloudflare Workers — worker.js
+export default { fetch: handler };
+```
+
+What the handler runs keeps that promise only as long as it imports nothing
+that needs Node either — which is why `redirect()` and the types come from
+`@k8ordo/server/runtime`, and `serve` from an entry of its own. A route file
+or a Server Action that reads `node:fs` ties the application to a runtime
+that has it.
+
+**The handler serves no files.** Put `dist/client/` in front of it — the
+files under `assets/` with `Cache-Control: public, max-age=31536000,
+immutable`, since their names carry their contents' hash — and hand it every
+request that names none. On Workers that is static assets pointed at the
+client build, which answer before the Worker runs:
+
+```jsonc
+// wrangler.jsonc
+{
+  "main": "worker.js",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": { "directory": "dist/client" },
+}
+```
+
+The handler answers `GET`, `HEAD` and `POST`, and any other method with a `405` whose
 `Allow` header names those three, so a host needs no method filter of its
 own. A `HEAD` gets the status and headers a `GET` would, with a `null` body:
 both are settled before the page renders, so the page is not rendered for it.

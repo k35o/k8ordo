@@ -23,12 +23,12 @@ const OUTPUT = `dist/
     assets/`;
 
 const SERVE = `// serve.js
-import { serve } from '@k8ordo/server/runtime';
+import { serve } from '@k8ordo/server/serve';
 
 await serve({ port: 3000, host: '0.0.0.0' });`;
 
 const SMOKE = `// scripts/smoke.js
-import { serve } from '@k8ordo/server/runtime';
+import { serve } from '@k8ordo/server/serve';
 
 const server = await serve({ dist: 'dist', port: 0 });
 const response = await fetch(\`\${server.url}/products/1\`);
@@ -42,6 +42,22 @@ const response = await handler(
   new Request('https://example.com/products/1'),
 );
 console.log(response.status, response.headers.get('content-type'));`;
+
+const RUNTIMES = `// Deno
+Deno.serve(handler);
+
+// Bun
+Bun.serve({ fetch: handler });
+
+// Cloudflare Workers — worker.js
+export default { fetch: handler };`;
+
+const WRANGLER = `// wrangler.jsonc
+{
+  "main": "worker.js",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": { "directory": "dist/client" }
+}`;
 
 const ROUTES_DIR = `// vite.config.ts
 import { framework } from '@k8ordo/server';
@@ -145,8 +161,12 @@ export default function ServerDeployPage() {
 
       <DocSection description={t.handlerDescription} title={t.handlerTitle}>
         <CodeBlock code={HANDLER} lang="ts" />
-        <Paragraph text={t.handlerMethods} />
+        <Paragraph text={t.handlerRuntimes} />
+        <CodeBlock code={RUNTIMES} lang="ts" />
+        <Paragraph text={t.handlerImports} />
         <Paragraph text={t.handlerFiles} />
+        <CodeBlock code={WRANGLER} lang="json" />
+        <Paragraph text={t.handlerMethods} />
         <Paragraph text={t.handlerOrigin} />
       </DocSection>
 
