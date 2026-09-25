@@ -11,12 +11,7 @@ const ApplayThemeByStorybook: FC<{ theme: 'light' | 'dark' }> = memo(
     const [prevTheme, setPrevTheme] = useState<'light' | 'dark' | null>(null);
 
     if (prevTheme !== theme) {
-      document.documentElement.classList.remove(
-        prevTheme === 'dark' ? 'dark' : 'light',
-      );
-      document.documentElement.classList.add(
-        theme === 'dark' ? 'dark' : 'light',
-      );
+      document.documentElement.classList.toggle('dark', theme === 'dark');
       setPrevTheme(theme);
     }
 

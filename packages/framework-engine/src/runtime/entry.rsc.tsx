@@ -39,6 +39,14 @@ const redirectFor = matchRedirects(redirects);
 const redirectResponse = (to: string, status: number): Response =>
   new Response(null, { status, headers: { location: to } });
 
+// ページは GET（ヘッダーだけなら HEAD）で読まれ、Server Action は POST で届く。
+// route file はほかのメソッドに答えを宣言できないので、POST 以外をすべて
+// ページとして描くと、受け付けていない PUT や DELETE に 200 を返してしまう
+const METHODS = ['GET', 'HEAD', 'POST'];
+
+const HTML_TYPE = 'text/html;charset=utf-8';
+const PAYLOAD_TYPE = 'text/x-component;charset=utf-8';
+
 type TemporaryReferences = ReturnType<typeof createTemporaryReferenceSet>;
 
 /**
@@ -145,6 +153,12 @@ const renderFailed = (error: unknown): Response =>
  * gets the request, and whether a failed render may still stream.
  */
 export default async function handler(request: Request): Promise<Response> {
+  if (!METHODS.includes(request.method)) {
+    return new Response('method not allowed', {
+      status: 405,
+      headers: { allow: METHODS.join(', ') },
+    });
+  }
   const url = new URL(request.url);
   const wantsPayload = isPayloadPath(url.pathname);
   const pathname = wantsPayload ? pagePathFor(url.pathname) : url.pathname;
@@ -199,6 +213,20 @@ export default async function handler(request: Request): Promise<Response> {
   });
   const missing = match === null || match.pattern.endsWith('/*');
   const status = missing ? 404 : 200;
+  // An action the client addressed answers in the shape the client already
+  // knows how to read, so applying its result and applying a navigation are
+  // the same code path. A form posted without JavaScript gets HTML back,
+  // because that browser has nothing to apply a payload with.
+  const answersPayload = wantsPayload || addressed;
+  // ステータスとヘッダーは描く前のここで決まる（描画中に失敗したページも同じ
+  // ステータスのまま流れる）ので、HEAD はここで答える。描いてから本文を捨てる
+  // と、誰も受け取らない本文のためにページのデータ取得まで走る
+  if (request.method === 'HEAD') {
+    return new Response(null, {
+      status,
+      headers: { 'content-type': answersPayload ? PAYLOAD_TYPE : HTML_TYPE },
+    });
+  }
   // A build into files has no request to hand a page; a running server does.
   const routeRequest =
     import.meta.env.K8ORDO_MODE === '@k8ordo/server'
@@ -240,14 +268,10 @@ export default async function handler(request: Request): Promise<Response> {
       },
     }),
   );
-  // An action the client addressed answers in the shape the client already
-  // knows how to read, so applying its result and applying a navigation are
-  // the same code path. A form posted without JavaScript gets HTML back,
-  // because that browser has nothing to apply a payload with.
-  if (wantsPayload || addressed) {
+  if (answersPayload) {
     return new Response(rscStream, {
       status,
-      headers: { 'content-type': 'text/x-component;charset=utf-8' },
+      headers: { 'content-type': PAYLOAD_TYPE },
     });
   }
 
@@ -273,13 +297,13 @@ export default async function handler(request: Request): Promise<Response> {
     if (failed !== undefined) return renderFailed(failed);
     return new Response(body, {
       status,
-      headers: { 'content-type': 'text/html;charset=utf-8' },
+      headers: { 'content-type': HTML_TYPE },
     });
   }
   const html = await parsed.enter(() => ssr.renderHtml(rscStream));
   return new Response(html, {
     status,
-    headers: { 'content-type': 'text/html;charset=utf-8' },
+    headers: { 'content-type': HTML_TYPE },
   });
 }
 

@@ -285,8 +285,8 @@ export const darkModeTitle = message({
 });
 
 export const darkModeDescription = message({
-  ja: 'ルート要素にdarkクラスを追加することで、ダークモードが有効になります。セマンティックカラートークンは自動的にダークモード用の値に切り替わります。',
-  en: 'Add the dark class to the root element to enable dark mode. Semantic color tokens automatically switch to their dark mode values.',
+  ja: 'ルート要素にdarkクラスを追加することで、ダークモードが有効になります。セマンティックカラートークンは自動的にダークモード用の値に切り替わり、CSSの`color-scheme`プロパティも`dark`になるので、スクロールバーやフォーム部品も暗く描かれます。k8ordoのアプリケーションでは、クラスの付け外しは`@k8ordo/color-scheme`が受け持ちます。',
+  en: 'Add the dark class to the root element to enable dark mode. Semantic color tokens automatically switch to their dark mode values, and the CSS `color-scheme` property becomes `dark`, so scrollbars and form controls are drawn dark too. In a k8ordo application, `@k8ordo/color-scheme` adds and removes the class.',
 });
 
 export const customizeTitle = message({

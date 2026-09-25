@@ -29,7 +29,10 @@ const NO_STATE: FormState = {};
 // the server-rendered markup.
 let signupProps: object = {};
 
-const Signup: FC<{ state?: FormState }> = ({ state = NO_STATE }) => {
+const Signup: FC<{
+  state?: FormState;
+  formErrorAt?: 'top' | 'bottom';
+}> = ({ state = NO_STATE, formErrorAt = 'top' }) => {
   const form = useForm(derived, state);
   useEffect(() => {
     signupProps = form.props;
@@ -37,9 +40,14 @@ const Signup: FC<{ state?: FormState }> = ({ state = NO_STATE }) => {
   const email = form.field('email');
   const password = form.field('password');
   const confirm = form.field('confirm');
+  const formError = form.formError.message !== undefined && (
+    <p {...form.formError.props}>{form.formError.message}</p>
+  );
 
   return (
     <form {...form.props}>
+      {formErrorAt === 'top' && formError}
+
       <input aria-label="email" {...email.input} />
       <p data-testid="email-error">{email.error ?? ''}</p>
 
@@ -48,6 +56,8 @@ const Signup: FC<{ state?: FormState }> = ({ state = NO_STATE }) => {
 
       <input aria-label="confirm" {...confirm.input} />
       <p data-testid="confirm-error">{confirm.error ?? ''}</p>
+
+      {formErrorAt === 'bottom' && formError}
 
       <p data-testid="dirty">{String(form.isDirty)}</p>
     </form>
@@ -162,12 +172,26 @@ const Group: FC<{ state: FormState }> = ({ state }) => {
 const asyncSchema = z.object({ slug: z.string() });
 const asyncFields = formFields(asyncSchema);
 
-const AsyncSlug: FC = () => {
+const checkTaken = (value: string): Promise<string | undefined> =>
+  Promise.resolve(value === 'taken' ? '使われています' : undefined);
+
+/** A check whose answers the test hands back itself, in any order. */
+const checkByHand = () => {
+  const answers: Array<PromiseWithResolvers<string | undefined>> = [];
+  const check = (): Promise<string | undefined> => {
+    const answer = Promise.withResolvers<string | undefined>();
+    answers.push(answer);
+    return answer.promise;
+  };
+  return { answers, check };
+};
+
+const AsyncSlug: FC<{
+  check?: (value: string) => Promise<string | undefined>;
+}> = ({ check = checkTaken }) => {
   const form = useForm(asyncFields, NO_STATE);
   const slug = form.field('slug');
-  const taken = useAsyncCheck((value) =>
-    Promise.resolve(value === 'taken' ? '使われています' : undefined),
-  );
+  const taken = useAsyncCheck(check);
 
   return (
     <form {...form.props}>
@@ -508,6 +532,71 @@ describe('useForm in a browser', () => {
       .toHaveTextContent('すでに登録されています');
   });
 
+  it('moves focus to the first failed field on the page, not the first one zod reported', async () => {
+    const screen = await render(<Signup />);
+
+    screen.rerender(
+      <Signup
+        state={{
+          errors: {
+            confirm: 'パスワードが一致しません',
+            email: 'すでに登録されています',
+          },
+          token: '1',
+        }}
+      />,
+    );
+
+    await expect.element(screen.getByLabelText('email')).toHaveFocus();
+  });
+
+  it('moves focus to the form-level message when no field failed', async () => {
+    const screen = await render(<Signup />);
+
+    screen.rerender(
+      <Signup state={{ formError: '登録を受け付けていません', token: '1' }} />,
+    );
+
+    await expect
+      .element(screen.getByText('登録を受け付けていません'))
+      .toHaveFocus();
+  });
+
+  it('moves focus to the form-level message when it comes before the failed fields', async () => {
+    const screen = await render(<Signup />);
+
+    screen.rerender(
+      <Signup
+        state={{
+          errors: { email: 'すでに登録されています' },
+          formError: '登録を受け付けていません',
+          token: '1',
+        }}
+      />,
+    );
+
+    await expect
+      .element(screen.getByText('登録を受け付けていません'))
+      .toHaveFocus();
+  });
+
+  it('moves focus to the first failed field when the form-level message comes after it', async () => {
+    const screen = await render(<Signup formErrorAt="bottom" />);
+
+    screen.rerender(
+      <Signup
+        formErrorAt="bottom"
+        state={{
+          errors: { email: 'すでに登録されています' },
+          formError: '登録を受け付けていません',
+          token: '1',
+        }}
+      />,
+    );
+
+    await expect.element(screen.getByLabelText('email')).toHaveFocus();
+  });
+
   it('marks the form dirty when a select changes', async () => {
     const screen = await render(<Choice />);
 
@@ -570,8 +659,56 @@ describe('useForm in a browser', () => {
     expect(email.form?.noValidate).toBe(true);
   });
 
-  // Last on purpose: the answer lands from a plain promise, outside act(),
-  // and the act bookkeeping it trips must not poison a later render.
+  // The async checks are last on purpose: their answers land from plain
+  // promises, outside act(), and the act bookkeeping they trip must not poison
+  // a later render.
+  it('keeps the newest answer when an answer about an older value lands after it', async () => {
+    const { answers, check } = checkByHand();
+    const screen = await render(<AsyncSlug check={check} />);
+    const slug = screen.getByLabelText('slug');
+
+    await slug.fill('first');
+    await screen.getByRole('button', { name: 'away' }).click();
+    await slug.fill('second');
+    await screen.getByRole('button', { name: 'away' }).click();
+
+    answers[1]?.resolve('second は使われています');
+    await expect
+      .element(screen.getByTestId('slug-error'))
+      .toHaveTextContent('second は使われています');
+
+    answers[0]?.resolve('first は使われています');
+    await answers[0]?.promise;
+
+    expect((slug.element() as HTMLInputElement).validationMessage).toBe(
+      'second は使われています',
+    );
+    await expect
+      .element(screen.getByTestId('slug-error'))
+      .toHaveTextContent('second は使われています');
+  });
+
+  it('keeps the newest answer when an older answer about the same value lands after it', async () => {
+    const { answers, check } = checkByHand();
+    const screen = await render(<AsyncSlug check={check} />);
+    const slug = screen.getByLabelText('slug');
+
+    // Leaving the field again while the first answer is still out asks again.
+    await slug.fill('k8o');
+    await screen.getByRole('button', { name: 'away' }).click();
+    await slug.click();
+    await screen.getByRole('button', { name: 'away' }).click();
+
+    answers[1]?.resolve(undefined);
+    answers[0]?.resolve('使われています');
+    await answers[0]?.promise;
+
+    expect((slug.element() as HTMLInputElement).validationMessage).toBe('');
+    await expect
+      .element(screen.getByTestId('slug-error'))
+      .toHaveTextContent('');
+  });
+
   it('lets an async message go when the field is emptied', async () => {
     const screen = await render(<AsyncSlug />);
 

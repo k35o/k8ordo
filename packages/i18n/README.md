@@ -113,12 +113,31 @@ gives an `href` that spells `/:locale/…` patterns without the locale.
 
 ## AI Agent Documentation
 
-This package ships its documentation so an AI coding assistant reads the exact
-installed version:
+The docs ship **inside the package**, so an agent always reads the exact
+version you installed — there is no snapshot to copy or re-sync on upgrade.
 
-- `node_modules/@k8ordo/i18n/docs/GUIDE.md` — the design guide
-- `node_modules/@k8ordo/i18n/docs/llms.txt` — the index
+Point your agent at them once by pasting this into your project's `CLAUDE.md` /
+`AGENTS.md`:
+
+```markdown
+Use `@k8ordo/i18n` for locales and translated text. Before adding a message
+or touching a `[locale]` route, read `node_modules/@k8ordo/i18n/docs/GUIDE.md`.
+The locale set is declared once with `defineLocales` and registered through
+`Register`; each message is a `message({ ja, en })` export, called where it
+renders — the same call in a Server and a Client Component. There is no
+provider, no hook and no message grammar: never pass the locale down as a
+prop, interpolate inside the message's own function, and from a Server
+Component hand a `'use client'` component the called string, not the message.
+```
+
+What each surface gives an agent:
+
+| Surface                    | Where                                          |
+| -------------------------- | ---------------------------------------------- |
+| Design guide (entry point) | `node_modules/@k8ordo/i18n/docs/GUIDE.md`      |
+| Docs index for LLMs        | `docs/llms.txt` · https://ordo.k8o.me/llms.txt |
+| Markdown twin on the web   | https://ordo.k8o.me/i18n/docs/GUIDE.md         |
 
 ## License
 
-MIT
+MIT License - see [LICENSE](https://github.com/k35o/k8ordo/blob/main/LICENSE) for details.

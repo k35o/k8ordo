@@ -8,6 +8,8 @@ import { Readable } from 'node:stream';
 import type { ReadableStream as NodeReadableStream } from 'node:stream/web';
 import { pathToFileURL } from 'node:url';
 
+import { contentType } from 'mime-types';
+
 import { safeJoin } from './static-file';
 
 export type ServeOptions = {
@@ -26,24 +28,6 @@ export type Server = {
 };
 
 type Handler = (request: Request) => Promise<Response>;
-
-const TYPES: Readonly<Record<string, string>> = {
-  '.css': 'text/css;charset=utf-8',
-  '.html': 'text/html;charset=utf-8',
-  '.ico': 'image/x-icon',
-  '.jpeg': 'image/jpeg',
-  '.jpg': 'image/jpeg',
-  '.js': 'text/javascript;charset=utf-8',
-  '.json': 'application/json;charset=utf-8',
-  '.map': 'application/json;charset=utf-8',
-  '.png': 'image/png',
-  '.rsc': 'text/x-component;charset=utf-8',
-  '.svg': 'image/svg+xml',
-  '.txt': 'text/plain;charset=utf-8',
-  '.wasm': 'application/wasm',
-  '.webp': 'image/webp',
-  '.woff2': 'font/woff2',
-};
 
 /**
  * Vite writes the hash of the contents into the name of everything under
@@ -111,18 +95,21 @@ export const serve = async (options: ServeOptions = {}): Promise<Server> => {
           incoming.url ?? '/',
           `http://${incoming.headers.host ?? 'localhost'}`,
         );
-        // Only a read can be answered from a file; a POST is always the
-        // application's to handle.
+        // ファイルで答えるのは読み取りだけ。ほかのメソッドは handler が答える
+        // （POST は action、残りは 405）。先にファイルが答えると、そのパスで
+        // だけ 405 が 200 に化ける
         const file =
           incoming.method === 'GET' || incoming.method === 'HEAD'
             ? await fileFor(clientDir, url.pathname)
             : null;
         if (file !== null) {
+          const type = contentType(path.extname(file));
           response.writeHead(200, {
-            'content-type':
-              TYPES[path.extname(file)] ?? 'application/octet-stream',
+            'content-type': type === false ? 'application/octet-stream' : type,
             'cache-control': cacheFor(url.pathname),
           });
+          // HEAD でも読んで流す。node:http は HEAD への write を捨てるので、
+          // 分岐を足さなくても本文は線に載らない
           const stream = createReadStream(file);
           // 送信開始後に読み取りが失敗しても writeHead は打ち直せない。
           // 中途半端な本文で繋いだままにするより、接続を切って知らせる。

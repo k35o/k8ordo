@@ -226,8 +226,8 @@ export const flowJs = message({
 });
 
 export const flowServer = message({
-  ja: '`parseForm` が失敗を返すと、エラーが欄ごとに表示され、`state.errors` の先頭にある欄にフォーカスが移ります。',
-  en: 'When `parseForm` reports a failure, each error appears next to its field, and focus moves to the first field listed in `state.errors`.',
+  ja: '`parseForm` が失敗を返すと、エラーが欄ごとに表示され、ページ上で最初に失敗した欄にフォーカスが移ります。どの欄にも属さない `formError` は、`form.formError.props` を広げた要素に表示し、それが失敗した欄より前にあればそこにフォーカスが移ります。',
+  en: 'When `parseForm` reports a failure, each error appears next to its field, and focus moves to the first failed field on the page. A `formError`, which belongs to no field, goes in the element you spread `form.formError.props` onto, and focus moves there instead when it comes before every failed field.',
 });
 
 export const flowMore = message({

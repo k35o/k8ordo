@@ -31,8 +31,8 @@ export const multiStepFocus = message({
 });
 
 export const multiStepErrors = message({
-  ja: '送信に失敗すると、`useForm` は `state.errors` の先頭の欄にフォーカスを移しますが、隠れたステップの欄はフォーカスを受け取れません。新しい結果が届いたら、描画の中で先頭のエラーを含むステップに戻します。',
-  en: 'After a failed submission, `useForm` moves focus to the first field in `state.errors`, but a field in a hidden step cannot take focus. When a new result arrives, switch during render to the step that holds the first error.',
+  ja: '送信に失敗すると、`useForm` はページ上で最初に失敗した欄にフォーカスを移しますが、隠れたステップの欄はフォーカスを受け取れません。新しい結果が届いたら、描画の中で、エラーを含むステップのうち最も前のものに戻します。',
+  en: 'After a failed submission, `useForm` moves focus to the first failed field on the page, but a field in a hidden step cannot take focus. When a new result arrives, switch during render to the earliest step that holds an error.',
 });
 
 export const multiStepSubmit = message({

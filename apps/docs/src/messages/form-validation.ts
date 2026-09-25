@@ -146,8 +146,8 @@ export const lifeServer = message({
 });
 
 export const lifeNewState = message({
-  ja: 'Server Action から新しい結果が届くと、ブラウザ側のメッセージと「編集済み」の記録を捨て、行数を `state.rows` から作り直し、`state.errors` の先頭の欄にフォーカスを移します。スクリーンリーダーの利用者が、送信が失敗したことと、その場所を知るためです。',
-  en: 'When a new result arrives from the action, the browser-side messages and the record of edited fields are dropped, rows are rebuilt from `state.rows`, and focus moves to the first field in `state.errors` — which is how someone using a screen reader learns that the submit failed, and where.',
+  ja: 'Server Action から新しい結果が届くと、ブラウザ側のメッセージと「編集済み」の記録を捨て、行数を `state.rows` から作り直し、ページ上で最初の失敗にフォーカスを移します。文書順で最初に失敗した欄か、それより前にある `formError` の表示です。スクリーンリーダーの利用者が、送信が失敗したことと、その場所を知るためです。',
+  en: 'When a new result arrives from the action, the browser-side messages and the record of edited fields are dropped, rows are rebuilt from `state.rows`, and focus moves to the first failure on the page — the first failed field in document order, or the `formError` message when it comes before it. That is how someone using a screen reader learns that the submit failed, and where.',
 });
 
 export const lifeToken = message({
@@ -281,8 +281,8 @@ export const stateRows = message({
 });
 
 export const stateFormError = message({
-  ja: 'どの欄にも属さない問題。`path` を持たないルートの `.refine()` などです。`useForm` は表示しないので、`state.formError` を自分で描きます。',
-  en: 'An issue that belongs to no field, such as a root `.refine()` without a `path`. `useForm` does not show it; render `state.formError` yourself.',
+  ja: 'どの欄にも属さない問題。`path` を持たないルートの `.refine()` などです。`form.formError.message` を、`form.formError.props` を広げた要素に自分で描きます。欄より上に置けば、送信に失敗したときにフォーカスがそこへ移ります。',
+  en: 'An issue that belongs to no field, such as a root `.refine()` without a `path`. Render `form.formError.message` yourself, in an element you spread `form.formError.props` onto; placed above the fields, it takes focus when the submission fails.',
 });
 
 export const stateToken = message({

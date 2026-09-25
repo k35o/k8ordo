@@ -20,8 +20,10 @@ legacy fallbacks.
 
 - **The colours.** Which colour `dark` means is the stylesheet's business —
   `@k8ordo/ui`'s tokens, or any other that reads the class. So is the CSS
-  `color-scheme` property (form controls, scrollbars): neither this package
-  nor `@k8ordo/ui` sets it.
+  `color-scheme` property (form controls, scrollbars): this package never
+  sets it; `@k8ordo/ui`'s stylesheet does, next to its tokens (`light`, and
+  `dark` under `.dark`), and a stylesheet of your own declares it beside its
+  colours.
 - **Where the preference lives.** That is `@k8ordo/state`'s
   `defineLocalState`; this package declares one and reads and writes
   through it, so the localStorage key and the row's JSON are never spelled

@@ -38,14 +38,17 @@ row. Rules cannot target fields inside repeated rows.
   returns props for the `<form>` element — which also hear a reset, React's
   own after every form action included — a
   `field(path)` accessor giving input attributes, the current error, and
-  `invalid` / `required`, an `array(path)` accessor for repeated rows, and
-  `isDirty`. Also `useAsyncCheck` for server-answered per-field checks and
-  `HiddenValue` for components that render no input of their own. The types
+  `invalid` / `required`, an `array(path)` accessor for repeated rows,
+  `formError` (the message no field owns, with the props that let focus land
+  on it), and `isDirty`. After a failed submission focus moves to the first
+  failure in document order. Also `useAsyncCheck` for server-answered
+  per-field checks and `HiddenValue` for components that render no input of
+  their own. The types
   of the `formFields` result (`FormFields`, `DerivedField`, `DerivedArray`,
   `DroppedCheck`, `FieldInput`, `ValidityFlag`, `Rule`) are exported here as
   well, since the result crosses to the client as a prop, and so are
   `FormState` and the return types (`UseFormReturn`, `FieldView`, `ArrayView`,
-  `RowView`, `AsyncCheck`).
+  `RowView`, `FormErrorView`, `AsyncCheck`).
 - `@k8ordo/form/server` — server. `formFields(schemaOrDefinition)` derives
   serializable fields plus a `dropped` list of checks HTML cannot express
   (outside production the list is also logged once per schema with

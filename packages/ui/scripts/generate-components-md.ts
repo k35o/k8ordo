@@ -8,6 +8,12 @@
  * props and describe pass-through behavior, which the generated form would
  * flatten away.
  *
+ * Both modes also fail when a component is missing from the hand-written
+ * lists: a section in `components.md` (or `ai-chat.md`), the icon list in
+ * `components.md`, and a bullet in the README. The README tells agents that a
+ * component `components.md` does not list does not exist, so a component left
+ * out is one no agent will use.
+ *
  *   node scripts/generate-components-md.ts            # rewrite the blocks
  *   node scripts/generate-components-md.ts --check    # fail if any block is stale
  */
@@ -20,6 +26,10 @@ const DOC_PATH = fileURLToPath(
 const PROPS_PATH = fileURLToPath(
   new URL('../docs/props.generated.json', import.meta.url),
 );
+const AI_CHAT_PATH = fileURLToPath(
+  new URL('../docs/references/ai-chat.md', import.meta.url),
+);
+const README_PATH = fileURLToPath(new URL('../README.md', import.meta.url));
 
 type Prop = {
   name: string;
@@ -141,8 +151,8 @@ for (let i = 0; i < lines.length; i++) {
 
 const output = out.join('\n');
 
-// Fails in both modes: the block would be filled in correctly but read under
-// the wrong component, which no amount of regenerating fixes.
+// Stops before anything is written: the block would be filled in correctly but
+// read under the wrong component, which no amount of regenerating fixes.
 if (misplaced.length > 0) {
   console.error(
     `Props ブロックが所属する節の外にあります:\n  ${misplaced.join('\n  ')}`,
@@ -150,55 +160,89 @@ if (misplaced.length > 0) {
   process.exit(1);
 }
 
+const problems: string[] = [];
+
 if (process.argv.includes('--check')) {
   if (output !== source) {
-    console.error(
+    problems.push(
       'docs/references/components.md props are stale. Run `pnpm generate:props`.',
     );
-    process.exit(1);
   }
-  console.warn('docs/references/components.md props are in sync.');
 } else {
   await writeFile(DOC_PATH, output);
   console.warn(`Rewrote props for ${rewritten.size} components.`);
+}
 
-  const documented = new Set(
-    [...source.matchAll(/^### (\S+)/gmu)].map((m) => m[1] ?? ''),
+const topLevel = (name: string) => name.split('.')[0] ?? '';
+const headings = (markdown: string, level: '##' | '###') =>
+  new Set(
+    [...markdown.matchAll(new RegExp(`^${level} (\\S+)`, 'gmu'))].map(
+      (m) => m[1] ?? '',
+    ),
   );
-  // The AI chat components are documented in ai-chat.md with hand-written
-  // props bullets, so their absence from components.md is not a gap.
-  const aiChatSource = await readFile(
-    fileURLToPath(new URL('../docs/references/ai-chat.md', import.meta.url)),
-    'utf8',
+const sections = (markdown: string) =>
+  new Map(
+    markdown
+      .split(/^## /mu)
+      .map((part) => [part.slice(0, part.indexOf('\n')), part] as const),
   );
-  const documentedElsewhere = new Set(
-    [...aiChatSource.matchAll(/^## (\S+)/gmu)].map((m) => m[1] ?? ''),
-  );
-  const covered = (name: string) =>
-    documented.has(name.split('.')[0] ?? '') ||
-    documentedElsewhere.has(name.split('.')[0] ?? '');
-  const missing = components
-    .filter((c) => c.props.length > 0)
-    .map((c) => c.name)
-    .filter((name) => !rewritten.has(name) && !covered(name));
-  if (unknown.length > 0) {
-    console.warn(`Props ブロックの対応先が不明: ${unknown.join(', ')}`);
-  }
-  const uncovered = missing.filter((name) => !iconish(name));
-  if (uncovered.length > 0) {
-    console.warn(`components.md に未掲載: ${uncovered.join(', ')}`);
-  }
-  // Documented but with no `Props:` block to fill — the props exist, the
-  // section just never asked for them.
-  const noBlock = components
-    .filter((c) => c.props.length > 0 && !rewritten.has(c.name))
-    .filter(
-      (c) =>
-        documented.has(c.name) || documented.has(c.name.split('.')[0] ?? ''),
-    )
-    .map((c) => c.name)
-    .filter((name) => !iconish(name));
-  if (noBlock.length > 0) {
-    console.warn(`Props ブロックが無い節: ${noBlock.join(', ')}`);
-  }
+const backticked = (text: string) =>
+  new Set([...text.matchAll(/`(\w+)`/gu)].map((m) => m[1] ?? ''));
+
+const documented = headings(source, '###');
+// The AI chat components are documented in ai-chat.md with hand-written
+// props bullets, so their absence from components.md is not a gap.
+const documentedElsewhere = headings(
+  await readFile(AI_CHAT_PATH, 'utf8'),
+  '##',
+);
+const listedIcons = backticked(sections(source).get('Icons') ?? '');
+const covered = (name: string) =>
+  iconish(name)
+    ? listedIcons.has(name)
+    : documented.has(topLevel(name)) || documentedElsewhere.has(topLevel(name));
+
+const undocumented = components
+  .map((c) => c.name)
+  .filter((name) => !rewritten.has(name) && !covered(name));
+if (undocumented.length > 0) {
+  problems.push(`components.md に未掲載: ${undocumented.join(', ')}`);
+}
+if (unknown.length > 0) {
+  problems.push(`Props ブロックの対応先が不明: ${unknown.join(', ')}`);
+}
+// Documented but with no `Props:` block to fill — the props exist, the
+// section just never asked for them.
+const noBlock = components
+  .filter((c) => c.props.length > 0 && !rewritten.has(c.name))
+  .filter((c) => documented.has(c.name) || documented.has(topLevel(c.name)))
+  .map((c) => c.name)
+  .filter((name) => !iconish(name));
+if (noBlock.length > 0) {
+  problems.push(`Props ブロックが無い節: ${noBlock.join(', ')}`);
+}
+
+// The README's two component lists name each component in bold; the icons
+// share one bullet. Only those lists count, so a bold word elsewhere cannot
+// stand in for a missing bullet.
+const readme = sections(await readFile(README_PATH, 'utf8'));
+const readmeLists = ['Component Categories', 'AI Chat Components']
+  .map((title) => readme.get(title) ?? '')
+  .join('\n');
+const inReadme = new Set(
+  [...readmeLists.matchAll(/\*\*(\w+)\*\*/gu)].map((m) => m[1] ?? ''),
+);
+const notInReadme = [
+  ...new Set(components.map((c) => topLevel(c.name))),
+].filter((name) => !iconish(name) && !inReadme.has(name));
+if (notInReadme.length > 0) {
+  problems.push(`README.md の部品一覧に未掲載: ${notInReadme.join(', ')}`);
+}
+
+if (problems.length > 0) {
+  console.error(problems.join('\n'));
+  process.exit(1);
+}
+if (process.argv.includes('--check')) {
+  console.warn('docs/references/components.md props are in sync.');
 }

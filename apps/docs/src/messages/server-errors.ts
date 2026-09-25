@@ -79,6 +79,10 @@ export const statusesTable = {
     ja: '`Origin` ヘッダーが無いか、そのホストが一致しない POST',
     en: 'A POST with no `Origin` header, or one whose host does not match',
   }),
+  method: message({
+    ja: 'GET・HEAD・POST 以外のメソッド（`Allow` ヘッダーがその 3 つを示す）',
+    en: 'A method other than GET, HEAD or POST (the `Allow` header names those three)',
+  }),
   failed: message({
     ja: 'ハンドラが答えを作れなかった（`serve()` の場合）',
     en: 'The handler could not produce an answer (under `serve()`)',
