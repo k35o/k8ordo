@@ -53,8 +53,9 @@ describe('DatePicker と formFields', () => {
       .element(page.getByText('日付を入力してください'))
       .toBeVisible();
 
+    // このプロジェクトはロケール集合を定義しないので、組み込みの文言は英語になる
     await userEvent.click(
-      page.getByRole('button', { name: 'カレンダーから選ぶ' }),
+      page.getByRole('button', { name: 'Choose from calendar' }),
     );
     // 開くと、未入力なら今日にフォーカスがある。そのまま選ぶ
     await expect

@@ -1,7 +1,9 @@
+import { defineLocales } from '@k8ordo/i18n';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
 import { expect, fn, waitFor, within } from 'storybook/test';
 
+import { definitions, inEnglish } from '../../../../.storybook/locales';
 import { Calendar } from './calendar';
 
 const meta: Meta<typeof Calendar> = {
@@ -14,14 +16,8 @@ const meta: Meta<typeof Calendar> = {
       </div>
     ),
   ],
-  // 月名・曜日名はページの言語で書く。テストの文言を固定するため英語にしておく
-  beforeEach: () => {
-    const previous = document.documentElement.lang;
-    document.documentElement.lang = 'en-US';
-    return () => {
-      document.documentElement.lang = previous;
-    };
-  },
+  // 月名・曜日名は組み込みの文言と同じロケールで書く。テストの文言を固定するため英語で描く
+  beforeEach: inEnglish,
 };
 
 export default meta;
@@ -120,7 +116,7 @@ export const MonthButtonsKeepFocus: Story = {
     defaultValue: '2023-01-15',
   },
   play: async ({ canvas, userEvent }) => {
-    const next = await canvas.findByRole('button', { name: '次の月' });
+    const next = await canvas.findByRole('button', { name: 'Next month' });
     await userEvent.click(next);
 
     await expect(
@@ -132,7 +128,9 @@ export const MonthButtonsKeepFocus: Story = {
       canvas.getByRole('button', { name: 'Wednesday, February 15, 2023' }),
     ).toHaveAttribute('tabindex', '0');
 
-    await userEvent.click(canvas.getByRole('button', { name: '前の月' }));
+    await userEvent.click(
+      canvas.getByRole('button', { name: 'Previous month' }),
+    );
     await expect(
       canvas.getByRole('grid', { name: 'January 2023' }),
     ).toBeInTheDocument();
@@ -151,9 +149,9 @@ export const KeepsItsHeightAcrossMonths: Story = {
     const heightOf = () => grid.getBoundingClientRect().height;
     const january = heightOf();
 
-    await userEvent.click(canvas.getByRole('button', { name: '次の月' }));
-    await userEvent.click(canvas.getByRole('button', { name: '次の月' }));
-    await userEvent.click(canvas.getByRole('button', { name: '次の月' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Next month' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Next month' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Next month' }));
     await expect(
       canvas.getByRole('grid', { name: 'April 2023' }),
     ).toBeInTheDocument();
@@ -178,8 +176,12 @@ export const WithMinAndMax: Story = {
     await expect(args.onChange).not.toHaveBeenCalled();
 
     // 範囲の外の月へは送れない
-    await expect(canvas.getByRole('button', { name: '前の月' })).toBeDisabled();
-    await expect(canvas.getByRole('button', { name: '次の月' })).toBeDisabled();
+    await expect(
+      canvas.getByRole('button', { name: 'Previous month' }),
+    ).toBeDisabled();
+    await expect(
+      canvas.getByRole('button', { name: 'Next month' }),
+    ).toBeDisabled();
 
     // キーボードで範囲の外へ出ようとしても端で止まる
     canvas.getByRole('button', { name: 'Tuesday, January 10, 2023' }).focus();
@@ -192,10 +194,9 @@ export const WithMinAndMax: Story = {
 
 export const WeekStartFollowsTheLocale: Story = {
   beforeEach: () => {
-    const previous = document.documentElement.lang;
-    document.documentElement.lang = 'en-GB';
+    defineLocales({ 'en-GB': { timeZone: 'Europe/London', dir: 'ltr' } });
     return () => {
-      document.documentElement.lang = previous;
+      defineLocales(definitions);
     };
   },
   play: async ({ canvas }) => {
