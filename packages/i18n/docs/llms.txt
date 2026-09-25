@@ -35,7 +35,7 @@ When installed via npm, these docs live under `node_modules/@k8ordo/i18n/docs/`.
 - `@k8ordo/i18n` — `defineLocales(definitions, { default? })` takes each
   locale's `{ timeZone, dir }` by tag (both required; an unknown time zone
   throws) and returns `{ all, definitions, default, is, negotiate, localize,
-  delocalize, paths, paramsSchema, getLocale, run, dateTimeFormat,
+  delocalize, paths, paramsSchema, getLocale, run, negotiateRequest, dateTimeFormat,
   numberFormat, relativeTimeFormat, pluralRules, listFormat }`; the last five
   return the `Intl` object for the current locale, cached per locale and
   options, and `dateTimeFormat` always in that locale's `timeZone` (its
@@ -46,10 +46,13 @@ When installed via npm, these docs live under `node_modules/@k8ordo/i18n/docs/`.
   must be BCP 47, `negotiate(list)` tries each requested tag in order (exact,
   then language) before falling back to the default, `getLocale()` is the
   locale of the render in progress (not a hook), and `run(locale, fn)`
-  (server only) runs `fn` under a locale. `parseAcceptLanguage(header)` turns
-  an `Accept-Language` header into a preference list. `message(variants)`
+  (server only) runs `fn` under a locale. `negotiateRequest(request, {
+  cookie? })` chooses for a `Request` — the named cookie (the visitor's
+  earlier choice) first, then `Accept-Language` — through the same rule as
+  `negotiate`. `parseAcceptLanguage(header)` turns an `Accept-Language`
+  header into a preference list. `message(variants)`
   declares one message — text in every locale, or a function of the same
   parameters in every locale — and returns `Message<Args>`, a function that
   renders the current locale's text. Types: `Locales`, `LocaleOf`, `LocaleDefinition`, `IntlFormats`, `LocaleDateTimeFormatOptions`, `Message`,
   `Variants`, `Register`, `RegisteredLocale`, `Delocalized`,
-  `LocaleParamsSchema`, `LocalesOptions`.
+  `LocaleParamsSchema`, `LocalesOptions`, `NegotiateRequestOptions`.
