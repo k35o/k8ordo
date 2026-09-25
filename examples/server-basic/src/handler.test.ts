@@ -229,6 +229,22 @@ describe('the built request handler', () => {
     expect(page).not.toContain('data-testid="error"');
     expect(entriesOf(page)).toContain('<li>k8o</li>');
   });
+
+  it('answers a guestbook signed without JavaScript with the cookie the action set', async () => {
+    const html = await (await handler(new Request(`${ORIGIN}/`))).text();
+    const body = formDataOf(html, 'guestbook-form');
+    body.set('name', 'k8o');
+    const response = await handler(
+      new Request(`${ORIGIN}/`, {
+        method: 'POST',
+        headers: { origin: ORIGIN },
+        body,
+      }),
+    );
+    expect(response.headers.getSetCookie()).toStrictEqual([
+      'visitor=k8o; Path=/; HttpOnly; Secure; SameSite=Lax',
+    ]);
+  });
 });
 
 describe('guard.ts', () => {

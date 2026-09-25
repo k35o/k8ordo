@@ -53,6 +53,25 @@ describe('the built application in a browser', () => {
     expect(await page.evaluate(() => 'stayed' in window)).toBe(true);
   }, 30_000);
 
+  it('keeps the cookie a Server Action set, so the guard lets a client navigation through', async () => {
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    await page.goto(server.url);
+    await hydrated(page);
+    await page.evaluate(() => {
+      Object.assign(window, { stayed: true });
+    });
+
+    await page.getByLabel('name').fill('k8o');
+    await page.getByRole('button', { name: 'sign' }).click();
+    await page.getByTestId('entries').getByText('k8o').first().waitFor();
+    await page.getByRole('link', { name: 'members' }).click();
+
+    await page.getByTestId('member').getByText('k8o').waitFor();
+    expect(await page.evaluate(() => 'stayed' in window)).toBe(true);
+    await context.close();
+  }, 30_000);
+
   it('hydrates the page where it streamed in, leaving no hidden copy and one <title>', async () => {
     // ダークの訪問者: ルートの SchemeProvider の値が hydrate の直後に変わる
     const context = await browser.newContext({ colorScheme: 'dark' });
