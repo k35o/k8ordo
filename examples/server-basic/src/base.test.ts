@@ -1,7 +1,7 @@
 import path from 'node:path';
 
-import { serve } from '@k8ordo/server/runtime';
-import type { Server } from '@k8ordo/server/runtime';
+import { serve } from '@k8ordo/server/serve';
+import type { Server } from '@k8ordo/server/serve';
 import { chromium } from 'playwright';
 import type { Browser } from 'playwright';
 
