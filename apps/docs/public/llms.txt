@@ -85,7 +85,8 @@ row. Rules cannot target fields inside repeated rows.
   per-field checks and `HiddenValue` for components that render no input of
   their own. The types
   of the `formFields` result (`FormFields`, `DerivedField`, `DerivedArray`,
-  `DroppedCheck`, `FieldInput`, `ValidityFlag`, `Rule`) are exported here as
+  `DroppedCheck`, `FieldInput`, `ValidityFlag`, `Rule`, `DerivedRule`,
+  `RuleMessage`) are exported here as
   well, since the result crosses to the client as a prop, and so are
   `FormState` and the return types (`UseFormReturn`, `FieldView`, `ArrayView`,
   `RowView`, `FormErrorView`, `AsyncCheck`).
@@ -103,10 +104,14 @@ row. Rules cannot target fields inside repeated rows.
   blank field as 0 and `z.enum([…]).optional()` can be left empty. A checkbox
   group always echoes as an array.
   `defineForm(schema, rules)` attaches cross-field rules (`sameAs`,
-  `minChecked`, `requiredWhen`) typed against the schema's paths. Types:
-  `ParseResult`, `FormDefinition`, `Rule`, `FormState`, and the `formFields`
-  result's `FormFields`, `DerivedField`, `DerivedArray`, `DroppedCheck`,
-  `FieldInput`, `ValidityFlag`.
+  `minChecked`, `requiredWhen`) typed against the schema's paths; a rule's
+  message is a string or a function called when the rule is reported
+  (`formFields` calls it while deriving, so a rule crosses to the client as a
+  `DerivedRule` with the text in it; `parseForm` calls it when the rule
+  breaks), which keeps a localized definition at module scope. Types:
+  `ParseResult`, `FormDefinition`, `Rule`, `RuleMessage`, `FormState`, and the
+  `formFields` result's `FormFields`, `DerivedField`, `DerivedArray`,
+  `DerivedRule`, `DroppedCheck`, `FieldInput`, `ValidityFlag`.
 
 ---
 

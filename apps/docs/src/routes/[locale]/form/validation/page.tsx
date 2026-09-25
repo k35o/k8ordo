@@ -481,6 +481,9 @@ export default function FormValidationPage() {
             <Rich>{m.formValidation.rulesClient()}</Rich>
           </li>
           <li className="list-disc">
+            <Rich>{m.formValidation.rulesMessage()}</Rich>
+          </li>
+          <li className="list-disc">
             <Rich>{m.formValidation.rulesStrings()}</Rich>
           </li>
           <li className="list-disc">

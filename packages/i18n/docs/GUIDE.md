@@ -327,20 +327,29 @@ without JavaScript keeps the default.
 - **`@k8ordo/form`**: constraint messages are messages, and a message called
   where the constraint is declared keeps the text of whatever locale was
   current then. Hand zod the message instead, so it is called when zod
-  reports the issue:
+  reports the issue — and a `defineForm` rule the same way, which calls it
+  when the rule is reported:
 
   ```ts
-  z.string()
-    .min(1, { error: m.talk.titleRequired })
-    .max(120, { error: () => m.talk.titleTooLong(120) });
+  export const talkForm = defineForm(
+    z.object({
+      title: z
+        .string()
+        .min(1, { error: m.talk.titleRequired })
+        .max(120, { error: () => m.talk.titleTooLong(120) }),
+      status: z.enum(['draft', 'rejected']),
+      reason: z.string(),
+    }),
+    [requiredWhen('reason', 'status', 'rejected', m.talk.reasonRequired)],
+  );
   ```
 
-  Call `formFields` during the page's render, not at module scope. A Server
-  Action runs outside the `[locale]` render, so the page binds the locale to
-  it (`createTalk.bind(null, locales.getLocale())`), and the action checks
-  it with `locales.is` and calls `parseForm` inside `locales.run`. A
-  `defineForm` rule takes a string, so build a definition with rules in those
-  same places.
+  The definition stays at module scope; what has to happen per request is
+  calling it. Call `formFields` during the page's render, not at module
+  scope. A Server Action runs outside the `[locale]` render, so the page
+  binds the locale to it (`createTalk.bind(null, locales.getLocale())`), and
+  the action checks it with `locales.is` and calls `parseForm` inside
+  `locales.run`.
 
 ## What it guarantees
 
