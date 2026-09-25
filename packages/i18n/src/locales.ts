@@ -1,5 +1,7 @@
 import { inBrowser, localeStorage, register } from './current';
 import type { LocaleStorage } from './current';
+import { intlFormats } from './format';
+import type { IntlFormats } from './format';
 
 /**
  * The one shape every validation library agrees on (Standard Schema), as far
@@ -56,7 +58,10 @@ export type LocaleDefinition = {
  * An application's locale set. `L` is the union of its tags, `D` the default
  * among them.
  */
-export type Locales<L extends string = string, D extends L = L> = {
+export type Locales<
+  L extends string = string,
+  D extends L = L,
+> = IntlFormats & {
   /** Every locale, in the order defined; the first is the default unless told otherwise. */
   readonly all: readonly L[];
   /** Each locale's definition, as given: `definitions[locale].dir` for `<html dir>`. */
@@ -332,5 +337,6 @@ export const defineLocales = <
     paramsSchema,
     getLocale,
     run,
+    ...intlFormats(getLocale, byTag),
   };
 };
