@@ -341,7 +341,7 @@ export const stateDescription = message({
   en: '`@k8ordo/state`’s `Register` takes the same line this router does. Declare the same table on both, and `@k8ordo/state`’s links are checked against the table this router matches against — the two packages agree on what a path is.',
 });
 
-export const stateRouteOf = message({
-  ja: '`RouteOf<typeof routes>` は表のリンク可能な pathname を union にした型です。`@k8ordo/state` は内部でこれを使っています。ほかに型付きのパスを受け取るものがあれば、同じ型を渡せます。',
-  en: '`RouteOf<typeof routes>` is the table’s linkable pathname space as a union. `@k8ordo/state` derives its paths through it, and any other typed-path consumer can take the same type.',
+export const stateNavigablePath = message({
+  ja: '`NavigablePath<typeof routes, Path>` は、渡したパスを表のリンク可能なパターンと区間ごとに照合する型です。どれかに合えば `Path` そのもの、どれにも合わなければ `never` になります。`@k8ordo/state` の `href` はこれでパスを検査しています。ほかに型付きのパスを受け取るものがあれば、同じ型を使えます。',
+  en: '`NavigablePath<typeof routes, Path>` checks the path it is given against the table’s linkable patterns, segment by segment: `Path` itself when one matches, `never` when none does. `@k8ordo/state`’s `href` checks its paths through it, and any other typed-path consumer can use the same type.',
 });
