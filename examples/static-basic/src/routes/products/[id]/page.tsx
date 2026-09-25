@@ -1,3 +1,4 @@
+import { notFound } from '@k8ordo/router';
 import type { PageProps } from '@k8ordo/router';
 import * as z from 'zod/mini';
 
@@ -13,11 +14,13 @@ export default async function ProductPage({
   params,
 }: PageProps<'/products/:id'>) {
   const product = await findProduct(params.id);
-  const name = product?.name ?? 'unknown product';
+  // スキーマは形しか見られない。無い商品はページ自身が言い、いちばん近い
+  // not-found.tsx が 404 で答える
+  if (product === undefined) notFound();
   return (
     <>
-      <title>{name}</title>
-      <h1 data-testid="title">{name}</h1>
+      <title>{product.name}</title>
+      <h1 data-testid="title">{product.name}</h1>
       <p data-testid="product-id">{`${typeof params.id}:${String(params.id)}`}</p>
     </>
   );
