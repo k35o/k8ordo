@@ -197,7 +197,10 @@ export const ApproveThenAnswer: Story = {
 
     await userEvent.click(canvas.getByRole('button', { name: '許可' }));
 
-    await expect(canvas.getByRole('list', { name: '出典' })).toBeVisible();
+    // 答えは transition の中で送るので、回答が出るのはこの後の描画
+    await expect(
+      await canvas.findByRole('list', { name: '出典' }),
+    ).toBeVisible();
     await expect(
       canvas.queryByRole('button', { name: '許可' }),
     ).not.toBeInTheDocument();
