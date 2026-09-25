@@ -1,4 +1,4 @@
-import { inBrowser, localeStorage, register } from './current';
+import { browserPathname, inBrowser, localeStorage, register } from './current';
 import type { LocaleStorage } from './current';
 
 /**
@@ -82,7 +82,7 @@ export type Locales<L extends string = string, D extends L = L> = {
   readonly paramsSchema: LocaleParamsSchema<L>;
   /**
    * The locale of the render in progress. In the browser it is the first
-   * segment of `location.pathname`; on the server it is what `paramsSchema`
+   * segment of `location.pathname` below Vite's `base`; on the server it is what `paramsSchema`
    * accepted for this request, or what `run` set. Neither names one → the
    * default. Not a hook: call it anywhere, including inside a message.
    */
@@ -234,7 +234,7 @@ export const defineLocales = <
 
   const getLocale = (): L => {
     if (inBrowser) {
-      return delocalize(location.pathname).locale ?? fallback;
+      return delocalize(browserPathname()).locale ?? fallback;
     }
     const current = localeStorage()?.getStore();
     return is(current) ? current : fallback;
