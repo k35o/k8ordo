@@ -569,9 +569,10 @@
   }
 
   /* 縦書きの本文は、段落の頭を 1 字下げる（本の組み方） */
-  .ao-prose:where(.writing-v, .writing-v *):not(.writing-h, .writing-h *)
-    > p:not([class]) {
-    text-indent: 1em;
+  .ao-prose > p:not([class]) {
+    @variant vertical {
+      text-indent: 1em;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
