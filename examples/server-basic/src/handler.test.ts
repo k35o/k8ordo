@@ -231,6 +231,57 @@ describe('the built request handler', () => {
   });
 });
 
+describe('guard.ts', () => {
+  it.each([
+    ['a page', '/'],
+    ['a URL nothing answers', '/nowhere'],
+    ['a payload', '/products/index.rsc'],
+  ])(
+    'runs the root guard before %s, and the answer carries what it added',
+    async (_what, pathname) => {
+      const response = await handler(new Request(`${ORIGIN}${pathname}`));
+      expect(response.headers.get('x-content-type-options')).toBe('nosniff');
+    },
+  );
+
+  it('ends a request its guard answers, before the page renders', async () => {
+    const response = await handler(new Request(`${ORIGIN}/members`));
+    expect(response.status).toBe(401);
+    expect(await response.text()).toBe(
+      'members only — sign the guestbook first',
+    );
+  });
+
+  it('lets through what its guard lets through', async () => {
+    const response = await handler(
+      new Request(`${ORIGIN}/members`, { headers: { cookie: 'visitor=k8o' } }),
+    );
+    expect(response.status).toBe(200);
+    expect(await response.text()).toContain('data-testid="member">k8o<');
+  });
+
+  it('carries the outer guard’s headers on the answer an inner guard ended with', async () => {
+    const response = await handler(new Request(`${ORIGIN}/members`));
+    expect(response.headers.get('x-content-type-options')).toBe('nosniff');
+  });
+
+  it.each([
+    ['the payload of a guarded page', '/members/index.rsc', { method: 'GET' }],
+    ['a HEAD of a guarded page', '/members', { method: 'HEAD' }],
+    [
+      'a POST to a guarded page',
+      '/members',
+      { method: 'POST', headers: { origin: ORIGIN }, body: new FormData() },
+    ],
+  ])(
+    'guards %s the same as its HTML',
+    async (_what, pathname, init: RequestInit) => {
+      const response = await handler(new Request(`${ORIGIN}${pathname}`, init));
+      expect(response.status).toBe(401);
+    },
+  );
+});
+
 describe('the deployed application', () => {
   it('serves a page with only its production dependencies installed', () => {
     const output = execFileSync(
