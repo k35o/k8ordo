@@ -100,6 +100,7 @@ export const { registry } = defineRegistry(catalog, {
     ChevronIcon: ({ props }) => ui.renderChevronIcon(props),
     StatusIcon: ({ props }) => ui.renderStatusIcon(props),
     IconButton: ({ props }) => ui.renderIconButton(props),
+    CopyButton: ({ props }) => ui.renderCopyButton(props),
     Accordion: ({ props }) => ui.renderAccordion(props),
     Breadcrumb: ({ props }) => ui.renderBreadcrumb(props),
     Table: ({ props }) => ui.renderTable(props),
@@ -119,6 +120,30 @@ export const { registry } = defineRegistry(catalog, {
         '',
       );
       return ui.renderPasswordInput(props, value, setValue);
+    },
+    DateField: ({ props, bindings }) => {
+      const [value, setValue] = useBoundOrLocal<string>(
+        props.defaultValue,
+        bindings?.defaultValue,
+        '',
+      );
+      return ui.renderDateField(props, value, setValue);
+    },
+    DatePicker: ({ props, bindings }) => {
+      const [value, setValue] = useBoundOrLocal<string>(
+        props.defaultValue,
+        bindings?.defaultValue,
+        '',
+      );
+      return ui.renderDatePicker(props, value, setValue);
+    },
+    Calendar: ({ props, bindings }) => {
+      const [value, setValue] = useBoundOrLocal<string>(
+        props.defaultValue,
+        bindings?.defaultValue,
+        '',
+      );
+      return ui.renderCalendar(props, value, setValue);
     },
     Radio: ({ props, bindings }) => {
       const [value, setValue] = useBoundOrLocal<string>(

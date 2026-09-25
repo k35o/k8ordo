@@ -1,7 +1,8 @@
 import 'server-only';
 import type { FC, HTMLAttributes } from 'react';
 
-import { CopyButton } from './copy-button';
+import { getMessages } from '../../../i18n/current';
+import { CopyButton } from '../../buttons/copy-button';
 import { highlight } from './highlight';
 
 type Props = {
@@ -42,7 +43,12 @@ export const CodeBlock: FC<Props> = async ({
         </figcaption>
       )}
       <div className="border-border-mute self-stretch border-b py-1 pe-2">
-        <CopyButton value={code} />
+        <CopyButton
+          iconOnly
+          label={getMessages().codeBlockCopy}
+          size="sm"
+          value={code}
+        />
       </div>
       <div
         className="col-span-2"

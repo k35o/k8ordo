@@ -1,8 +1,8 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: 'ページは描画であって、応答を書きません。リクエストを通すかどうかと、応答にページ以外の何を付けるかは、ページより前に走る `guard.ts` が決めます。このページは、`guard.ts` の書き方、打ち切り方と通し方、`responseHeaders()` での添え方、guard が受け持つ範囲を説明します。',
-  en: 'A page is a render; it does not write the response. Whether a request gets through, and what the answer carries beyond the page, is decided before the page by a `guard.ts`. This page covers writing one, ending a request and letting it through, adding to the answer with `responseHeaders()`, and what a guard covers.',
+  ja: 'ページは描画であって、応答を書きません。リクエストを通すかどうかと、応答にページ以外の何を付けるかは、ページより前に走る `guard.ts` が決めます。このページは、`guard.ts` の書き方、打ち切り方と通し方、`responseHeaders()` での添え方、guard が受け持つ範囲、`cookies()` での Cookie の読み書きを説明します。',
+  en: 'A page is a render; it does not write the response. Whether a request gets through, and what the answer carries beyond the page, is decided before the page by a `guard.ts`. This page covers writing one, ending a request and letting it through, adding to the answer with `responseHeaders()`, what a guard covers, and reading and writing cookies with `cookies()`.',
 });
 
 export const guardTitle = message({
@@ -41,8 +41,8 @@ export const addDescription = message({
 });
 
 export const addReplace = message({
-  ja: '答えがすでに持っているヘッダーは置き換えます。`responseHeaders()` は guard が走っている間だけ使え、それ以外の場所では throw します。ページは描画で、応答を書く描画は 2 つ目のハンドラになってしまうからです。',
-  en: 'A header the answer already carries is replaced. `responseHeaders()` works while a guard runs and throws anywhere else: a page is a render, and a render that wrote the response would be a second handler.',
+  ja: '答えがすでに持っているヘッダーは置き換えます。`responseHeaders()` は guard か Server Action が走っている間だけ使え、それ以外の場所では throw します。ページは描画で、応答を書く描画は 2 つ目のハンドラになってしまうからです。',
+  en: 'A header the answer already carries is replaced. `responseHeaders()` works while a guard or a Server Action runs and throws anywhere else: a page is a render, and a render that wrote the response would be a second handler.',
 });
 
 export const nextTitle = message({
@@ -113,4 +113,24 @@ export const staticTitle = message({
 export const staticDescription = message({
   ja: 'ファイルには守るリクエストがありません。`@k8ordo/static` は `guard.ts` を名指しで拒みます。ビルドでも `vite dev` でもです。',
   en: 'A file has no request to guard. `@k8ordo/static` refuses a `guard.ts` by name, in the build and in `vite dev`.',
+});
+
+export const cookiesTitle = message({
+  ja: '`cookies()`',
+  en: '`cookies()`',
+});
+
+export const cookiesDescription = message({
+  ja: '`cookies()` はリクエストの Cookie で、`guard.ts` か Server Action の中で読み書きできます。読むと、リクエストが運んできたものに、同じリクエストの中で先に書いたものが重なって見えます。guard が書いた値は、そのあとに走る Server Action が読みます。書いたものは、答えが何であれ、その答えの `Set-Cookie` になってブラウザに届きます。',
+  en: 'The request’s cookies, to read and to write, from a `guard.ts` or a Server Action. A read sees what the request carried with what was set or deleted earlier in the same request — a guard’s write is what a Server Action after it reads — and every write reaches the browser as a `Set-Cookie` on the answer, whatever the answer is.',
+});
+
+export const cookiesOptions = message({
+  ja: "`set` は `path`・`domain`・`maxAge`（秒）・`expires`・`httpOnly`・`secure`・`sameSite` を受け取ります。既定はセッションに合わせた `path: '/'`・`httpOnly: true`・`secure: true`・`sameSite: 'lax'` です。`localhost` は主要なブラウザで安全な配信元として扱われます。それ以外を素の HTTP で配るなら `secure: false` を渡します。`delete` には、書いたときの `path` と `domain` を渡します。ブラウザは Cookie をそれで見分けるからです。",
+  en: "`set` takes `path`, `domain`, `maxAge` (seconds), `expires`, `httpOnly`, `secure` and `sameSite`. The defaults are what a session wants: `path: '/'`, `httpOnly: true`, `secure: true` and `sameSite: 'lax'`. `localhost` counts as secure to the browsers that matter; anywhere else served over plain HTTP, pass `secure: false`. `delete` takes the `path` and `domain` the cookie was set with, since a browser keys it by those.",
+});
+
+export const cookiesPage = message({
+  ja: 'ページは Cookie を書きません。props の `request.cookies` から、リクエストが運んできた Cookie を読むだけです。',
+  en: 'A page never writes a cookie: it reads `request.cookies` from its props, the cookies the request carried.',
 });

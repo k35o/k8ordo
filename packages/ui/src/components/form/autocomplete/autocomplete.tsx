@@ -17,7 +17,7 @@ import {
   useControllableState,
   useWritingMode,
 } from '../../../hooks';
-import { useMessages } from '../../../i18n/context';
+import { getMessages } from '../../../i18n/current';
 import type { Option } from '../../../types/variables';
 import { FOCUS_RING_WITHIN } from '../../_internal/focus-ring';
 import { IconButton } from '../../buttons/icon-button';
@@ -81,7 +81,7 @@ export const Autocomplete: FC<Props> = ({
   ref,
   ...rest
 }) => {
-  const messages = useMessages();
+  const messages = getMessages();
   const [currentValue, handleChange] = useControllableState({
     value,
     defaultValue: defaultValue ?? [],

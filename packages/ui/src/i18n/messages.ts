@@ -19,6 +19,12 @@ export type Messages = {
   /** Toast のビューポート（region ランドマーク）名 */
   toastRegion: string;
 
+  /** CopyButton の既定のラベル */
+  copy: string;
+  /** CopyButton が押した結果として読み上げる文言 */
+  copied: string;
+  copyFailed: string;
+
   autocompletePlaceholder: string;
   /** 選択済みタグ 1 件の解除 */
   autocompleteRemoveTag: string;
@@ -34,6 +40,13 @@ export type Messages = {
 
   numberFieldIncrement: string;
   numberFieldDecrement: string;
+
+  calendarPreviousMonth: string;
+  calendarNextMonth: string;
+  /** DatePicker のカレンダーを開くボタン */
+  datePickerOpen: string;
+  /** DatePicker が開くポップオーバー（dialog）の名前 */
+  datePickerDialog: string;
 
   passwordShow: string;
   passwordHide: string;
@@ -52,9 +65,6 @@ export type Messages = {
 
   /** CodeBlock のコピーボタン */
   codeBlockCopy: string;
-  /** コピーの結果を読み上げる（role="status"） */
-  copied: string;
-  copyFailed: string;
   /** Carousel の aria-roledescription（region と各スライド） */
   carousel: string;
   carouselSlide: string;

@@ -95,6 +95,28 @@ export const prefsState = defineLocalState(
   }),
 );`;
 
+const NOTICES = `// src/state/notices.ts
+import { defineSessionState } from '@k8ordo/state';
+import * as z from 'zod/mini';
+
+export const noticesState = defineSessionState(
+  'notices',
+  z.object({
+    dismissed: z._default(z.array(z.string()), []),
+  }),
+);`;
+
+const DENSITY = `// src/state/density.ts
+import { defineCookieState } from '@k8ordo/state';
+import * as z from 'zod/mini';
+
+export const densityState = defineCookieState(
+  'density',
+  z.object({
+    density: z._default(z.enum(['comfortable', 'compact']), 'comfortable'),
+  }),
+);`;
+
 const PALETTE = `// src/state/command-palette.ts
 import { defineMemoryState } from '@k8ordo/state';
 
@@ -194,6 +216,26 @@ export default function StatePlacesPage() {
               ],
             },
             {
+              key: 'session',
+              cells: [
+                <Code key="definition">defineSessionState</Code>,
+                'sessionStorage',
+                table.sessionSurvives(),
+                table.memorySharedWith(),
+                table.defaultsServer(),
+              ],
+            },
+            {
+              key: 'cookie',
+              cells: [
+                <Code key="definition">defineCookieState</Code>,
+                table.cookieLivesIn(),
+                table.cookieSurvives(),
+                table.localSharedWith(),
+                <Rich key="server">{table.cookieServer()}</Rich>,
+              ],
+            },
+            {
               key: 'memory',
               cells: [
                 <Code key="definition">defineMemoryState</Code>,
@@ -217,6 +259,12 @@ export default function StatePlacesPage() {
           </li>
           <li className="list-disc">
             <Rich>{m.statePlaces.chooseLocal()}</Rich>
+          </li>
+          <li className="list-disc">
+            <Rich>{m.statePlaces.chooseSession()}</Rich>
+          </li>
+          <li className="list-disc">
+            <Rich>{m.statePlaces.chooseCookie()}</Rich>
           </li>
           <li className="list-disc">
             <Rich>{m.statePlaces.chooseMemory()}</Rich>
@@ -376,6 +424,63 @@ export default function StatePlacesPage() {
       </DocSection>
 
       <DocSection
+        description={m.statePlaces.sessionDescription}
+        title={m.statePlaces.sessionTitle}
+      >
+        <CodeBlock code={NOTICES} lang="ts" />
+        <ul className="text-fg-mute flex flex-col gap-2 pl-6">
+          <li className="list-disc">
+            <Rich>{m.statePlaces.sessionSame()}</Rich>
+          </li>
+          <li className="list-disc">
+            <Rich>{m.statePlaces.sessionKeys()}</Rich>
+          </li>
+          <li className="list-disc">
+            <Rich>{m.statePlaces.sessionTabs()}</Rich>
+          </li>
+          <li className="list-disc">
+            <Rich>{m.statePlaces.sessionServer()}</Rich>{' '}
+            <LocaleAnchor path="/:locale/state/reading">
+              <Rich>{m.statePlaces.localServerLink()}</Rich>
+            </LocaleAnchor>
+          </li>
+        </ul>
+      </DocSection>
+
+      <DocSection
+        description={m.statePlaces.cookieDescription}
+        title={m.statePlaces.cookieTitle}
+      >
+        <CodeBlock code={DENSITY} lang="ts" />
+        <ul className="text-fg-mute flex flex-col gap-2 pl-6">
+          <li className="list-disc">
+            <Rich>{m.statePlaces.cookieName()}</Rich>
+          </li>
+          <li className="list-disc">
+            <Rich>{m.statePlaces.cookieWrite()}</Rich>
+          </li>
+          <li className="list-disc">
+            <Rich>{m.statePlaces.cookieLax()}</Rich>
+          </li>
+          <li className="list-disc">
+            <Rich>{m.statePlaces.cookieTabs()}</Rich>
+          </li>
+          <li className="list-disc">
+            <Rich>{m.statePlaces.cookieSmall()}</Rich>
+          </li>
+          <li className="list-disc">
+            <Rich>{m.statePlaces.localJson()}</Rich>
+          </li>
+        </ul>
+        <p className="text-fg-mute leading-relaxed">
+          <Rich>{m.statePlaces.cookieSecret()}</Rich>{' '}
+          <LocaleAnchor path="/:locale/state/reading">
+            <Rich>{m.statePlaces.cookieServer()}</Rich>
+          </LocaleAnchor>
+        </p>
+      </DocSection>
+
+      <DocSection
         description={m.statePlaces.memoryDescription}
         title={m.statePlaces.memoryTitle}
       >
@@ -407,6 +512,9 @@ export default function StatePlacesPage() {
           </li>
           <li className="list-disc">
             <Rich>{m.statePlaces.keyLocal()}</Rich>
+          </li>
+          <li className="list-disc">
+            <Rich>{m.statePlaces.keyCookie()}</Rich>
           </li>
         </ul>
         <p className="text-fg-mute leading-relaxed">
@@ -470,6 +578,20 @@ export default function StatePlacesPage() {
               cells: [
                 <Code key="type">LocalState</Code>,
                 <Rich key="holds">{types.localState()}</Rich>,
+              ],
+            },
+            {
+              key: 'session',
+              cells: [
+                <Code key="type">SessionState</Code>,
+                <Rich key="holds">{types.sessionState()}</Rich>,
+              ],
+            },
+            {
+              key: 'cookie',
+              cells: [
+                <Code key="type">CookieState</Code>,
+                <Rich key="holds">{types.cookieState()}</Rich>,
               ],
             },
             {

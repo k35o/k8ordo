@@ -1,3 +1,4 @@
+import { currentLocale } from './current';
 import { defineLocales } from './locales';
 import { message } from './message';
 
@@ -342,5 +343,27 @@ describe('getLocale / run (server)', () => {
       ),
     );
     expect(seen).toStrictEqual(['en', 'ja', 'en']);
+  });
+});
+
+describe('currentLocale', () => {
+  it('is the locale named, else the default of the set', () => {
+    defineLocales({ ja, en });
+    expect(currentLocale()).toBe('ja');
+    expect(locales.run('en', () => currentLocale())).toBe('en');
+  });
+
+  it('is null where no set is defined, even while a locale is named', () => {
+    // 集合を定義していないアプリでは、サーバーもブラウザも null で揃う。
+    const key = Symbol.for('@k8ordo/i18n/locales');
+    const registry = globalThis as { [key]?: unknown };
+    const saved = registry[key];
+    try {
+      registry[key] = undefined;
+      expect(currentLocale()).toBeNull();
+      expect(locales.run('en', () => currentLocale())).toBeNull();
+    } finally {
+      registry[key] = saved;
+    }
   });
 });

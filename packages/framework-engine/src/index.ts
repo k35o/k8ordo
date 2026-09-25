@@ -21,4 +21,9 @@ export { redirect } from './runtime/redirect';
 export type { RedirectTarget } from './runtime/redirect';
 export type { RouteRequest } from './runtime/request';
 export type { Guard, GuardContext } from './runtime/guard';
-export { responseHeaders } from './runtime/request-scope';
+export {
+  cookies,
+  requestHeaders,
+  responseHeaders,
+} from './runtime/request-scope';
+export type { CookieOptions, Cookies, CookieScope } from './runtime/cookies';

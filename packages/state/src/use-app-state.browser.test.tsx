@@ -1,11 +1,14 @@
-import type { FC } from 'react';
-import { useEffect, useState } from 'react';
+import type { FC, ReactElement } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
+import { hydrateRoot } from 'react-dom/client';
+import { renderToString } from 'react-dom/server';
 import { render } from 'vitest-browser-react';
 import { z } from 'zod';
 
-import { defineLocalState } from './local-state';
+import { defineCookieState } from './cookie-state';
 import { defineMemoryState } from './memory-state';
 import { definePageState } from './page-state';
+import { defineLocalState, defineSessionState } from './storage-state';
 import type { UpdateHandle } from './store/core';
 import { resetStateRegistry } from './store/registry';
 import { useAppState } from './use-app-state';
@@ -45,6 +48,10 @@ afterEach(async () => {
   navigation.removeEventListener('navigate', interceptAsRouter);
   resetStateRegistry();
   localStorage.removeItem('k8ordo-state:prefs');
+  sessionStorage.removeItem('k8ordo-state:prefs');
+  await cookieStore.delete('k8ordo-state.density');
+  await cookieStore.delete('k8ordo-state.note');
+  await cookieStore.delete('k8ordo-state.counter');
 });
 
 const renders: Record<string, number> = {};
@@ -671,4 +678,477 @@ it('a boolean written by update comes back as the boolean it wrote', async () =>
   expect(flagState.parseUrl(new URL(location.href).searchParams).open).toBe(
     false,
   );
+});
+
+const densityState = defineCookieState(
+  'density',
+  z.object({
+    density: z.enum(['comfortable', 'compact']).default('comfortable'),
+    fontSize: z.number().default(16),
+  }),
+);
+
+type DensityValues = { density: 'comfortable' | 'compact'; fontSize: number };
+
+const Density: FC = () => {
+  const [{ density, fontSize }, update] = useAppState(densityState);
+  return (
+    <>
+      <p data-testid="density">{`${density}:${fontSize}`}</p>
+      <button
+        type="button"
+        onClick={() => {
+          lastHandle = update({ density: 'compact' });
+        }}
+      >
+        compact
+      </button>
+    </>
+  );
+};
+
+let secondHandle: UpdateHandle | undefined;
+
+const TwoBatches: FC = () => {
+  const [{ density, fontSize }, update] = useAppState(densityState);
+  return (
+    <>
+      <p data-testid="density">{`${density}:${fontSize}`}</p>
+      <button
+        type="button"
+        onClick={() => {
+          lastHandle = update({ density: 'compact' });
+          // 1 つ目のバッチの flush より後に走るので、別のバッチになる
+          queueMicrotask(() => {
+            secondHandle = update({ fontSize: 20 });
+          });
+        }}
+      >
+        two batches
+      </button>
+    </>
+  );
+};
+
+const committed: string[] = [];
+
+const DensityProbe: FC<{ initialCookie?: DensityValues }> = ({
+  initialCookie,
+}) => {
+  const [{ density }] = useAppState(densityState, ['density'], {
+    initialCookie,
+  });
+  useLayoutEffect(() => {
+    committed.push(density);
+  });
+  return <p>{density}</p>;
+};
+
+const hydrate = (
+  element: ReactElement,
+): { container: HTMLElement; unmount: () => void } => {
+  const container = document.createElement('div');
+  container.innerHTML = renderToString(element);
+  document.body.append(container);
+  const app = hydrateRoot(container, element);
+  return {
+    container,
+    unmount: () => {
+      app.unmount();
+      container.remove();
+    },
+  };
+};
+
+const frame = async (): Promise<void> => {
+  await new Promise<void>((resolve) => {
+    requestAnimationFrame(() => {
+      resolve();
+    });
+  });
+};
+
+it('cookie state reads the cookie an earlier visit stored', async () => {
+  await cookieStore.set(
+    densityState.cookieName,
+    densityState.cookieValue({ density: 'compact', fontSize: 18 }),
+  );
+
+  const screen = await render(<Density />);
+
+  await expect
+    .element(screen.getByTestId('density'))
+    .toHaveTextContent('compact:18');
+});
+
+it('cookie state persists an update and settles its handle', async () => {
+  const screen = await render(<Density />);
+
+  await screen.getByRole('button', { name: 'compact' }).click();
+
+  await expect
+    .element(screen.getByTestId('density'))
+    .toHaveTextContent('compact:16');
+  await (lastHandle as UpdateHandle).finished;
+  const cookie = (await cookieStore.get(
+    densityState.cookieName,
+  )) as CookieListItem;
+  expect(JSON.parse(decodeURIComponent(cookie.value as string))).toStrictEqual({
+    density: 'compact',
+    fontSize: 16,
+  });
+});
+
+it('writes a cookie that a first visit from another site still carries', async () => {
+  const set = vi.spyOn(CookieStore.prototype, 'set');
+  try {
+    const screen = await render(<Density />);
+
+    await screen.getByRole('button', { name: 'compact' }).click();
+    await (lastHandle as UpdateHandle).finished;
+
+    // 既定の sameSite: 'strict' だと、ほかのサイトのリンクから来た最初の
+    // リクエストに Cookie が付かず、サーバーが既定値で描く
+    expect(set).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'k8ordo-state.density',
+        path: '/',
+        sameSite: 'lax',
+        maxAge: 400 * 24 * 60 * 60,
+      }),
+    );
+  } finally {
+    set.mockRestore();
+  }
+});
+
+it("another tab's write flows in through the change event", async () => {
+  const screen = await render(<Density />);
+  await expect
+    .element(screen.getByTestId('density'))
+    .toHaveTextContent('comfortable:16');
+
+  await cookieStore.set(
+    densityState.cookieName,
+    densityState.cookieValue({ density: 'compact', fontSize: 20 }),
+  );
+
+  await expect
+    .element(screen.getByTestId('density'))
+    .toHaveTextContent('compact:20');
+});
+
+it('a corrupt cookie reads as the defaults instead of crashing', async () => {
+  await cookieStore.set(densityState.cookieName, '%7Boops');
+
+  const screen = await render(<Density />);
+
+  await expect
+    .element(screen.getByTestId('density'))
+    .toHaveTextContent('comfortable:16');
+});
+
+it("the server render shows the request's cookie and hydration keeps it", async () => {
+  committed.length = 0;
+  await cookieStore.set(
+    densityState.cookieName,
+    densityState.cookieValue({ density: 'compact' }),
+  );
+  // サーバーでページが読む request.cookies は、値を復号済みで持っている
+  const initialCookie = densityState.parseCookies(
+    new Map([[densityState.cookieName, '{"density":"compact","fontSize":16}']]),
+  );
+
+  const app = hydrate(<DensityProbe initialCookie={initialCookie} />);
+  await vi.waitFor(() => {
+    expect(committed).toContain('compact');
+  });
+  await frame();
+  await frame();
+
+  expect(app.container.textContent).toBe('compact');
+  expect(committed).not.toContain('comfortable');
+  app.unmount();
+});
+
+it('without the request, the server renders the defaults and hydration takes the cookie', async () => {
+  committed.length = 0;
+  await cookieStore.set(
+    densityState.cookieName,
+    densityState.cookieValue({ density: 'compact' }),
+  );
+
+  const app = hydrate(<DensityProbe />);
+  await vi.waitFor(() => {
+    expect(committed.at(-1)).toBe('compact');
+  });
+
+  expect(committed[0]).toBe('comfortable');
+  app.unmount();
+});
+
+const noteState = defineCookieState(
+  'note',
+  z.object({ text: z.string().default('') }),
+);
+
+const Note: FC = () => {
+  const [{ text }, update] = useAppState(noteState);
+  return (
+    <>
+      <p data-testid="note-length">{text.length}</p>
+      <button
+        type="button"
+        onClick={() => {
+          lastHandle = update({ text: 'x'.repeat(5000) });
+        }}
+      >
+        long note
+      </button>
+    </>
+  );
+};
+
+it('a cookie the store refuses rejects the handle but keeps the echo', async () => {
+  const screen = await render(<Note />);
+
+  // 名前と値で 4096 バイトを超える Cookie は、Cookie Store API が拒む
+  await screen.getByRole('button', { name: 'long note' }).click();
+
+  await expect
+    .element(screen.getByTestId('note-length'))
+    .toHaveTextContent('5000');
+  await expect((lastHandle as UpdateHandle).finished).rejects.toThrow(
+    TypeError,
+  );
+  expect(await cookieStore.get(noteState.cookieName)).toBeNull();
+});
+
+it('a change that lands while its own write is in flight does not roll the echo back', async () => {
+  const realSet = CookieStore.prototype.set;
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const set = vi
+    .spyOn(CookieStore.prototype, 'set')
+    .mockImplementation(async function held(
+      this: CookieStore,
+      ...args: Parameters<CookieStore['set']>
+    ) {
+      await gate;
+      return realSet.apply(this, args);
+    });
+  try {
+    const screen = await render(<Density />);
+    await screen.getByRole('button', { name: 'compact' }).click();
+    await expect
+      .element(screen.getByTestId('density'))
+      .toHaveTextContent('compact:16');
+
+    // 書き込みが終わる前に届いた change で読み直すと、echo が一瞬その前の
+    // 値に戻る。ほかのタブの書き込みで change を起こして確かめる
+    const changed = new Promise((resolve) => {
+      cookieStore.addEventListener('change', resolve, { once: true });
+    });
+    await realSet.call(cookieStore, {
+      name: densityState.cookieName,
+      value: densityState.cookieValue({ fontSize: 24 }),
+    });
+    await changed;
+    await frame();
+    expect(screen.getByTestId('density').element().textContent).toBe(
+      'compact:16',
+    );
+
+    release();
+    await (lastHandle as UpdateHandle).finished;
+    await expect
+      .element(screen.getByTestId('density'))
+      .toHaveTextContent('compact:16');
+  } finally {
+    release();
+    set.mockRestore();
+  }
+});
+
+it("a batch written while an earlier one is in flight keeps the earlier batch's fields", async () => {
+  const realSet = CookieStore.prototype.set;
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  // 1 つ目の書き込みだけを止め、Cookie に入る前に 2 つ目のバッチを走らせる。
+  // 2 つ目からは本物の set() が呼ばれる
+  const set = vi
+    .spyOn(CookieStore.prototype, 'set')
+    .mockImplementationOnce(async function held(
+      this: CookieStore,
+      ...args: Parameters<CookieStore['set']>
+    ) {
+      await gate;
+      return realSet.apply(this, args);
+    });
+  try {
+    const screen = await render(<TwoBatches />);
+
+    await screen.getByRole('button', { name: 'two batches' }).click();
+    await expect
+      .element(screen.getByTestId('density'))
+      .toHaveTextContent('compact:20');
+    release();
+    await (lastHandle as UpdateHandle).finished;
+    await (secondHandle as UpdateHandle).finished;
+
+    const cookie = (await cookieStore.get(
+      densityState.cookieName,
+    )) as CookieListItem;
+    expect(
+      JSON.parse(decodeURIComponent(cookie.value as string)),
+    ).toStrictEqual({ density: 'compact', fontSize: 20 });
+    await expect
+      .element(screen.getByTestId('density'))
+      .toHaveTextContent('compact:20');
+  } finally {
+    release();
+    set.mockRestore();
+  }
+});
+
+const counterState = defineCookieState(
+  'counter',
+  z.object({ big: z.bigint().optional(), clicks: z.number().default(0) }),
+);
+
+let refusedHandle: UpdateHandle | undefined;
+
+const Counter: FC = () => {
+  const [{ clicks }, update] = useAppState(counterState);
+  return (
+    <>
+      <p data-testid="clicks">{clicks}</p>
+      <button
+        type="button"
+        onClick={() => {
+          refusedHandle = update({ big: 1n });
+          queueMicrotask(() => {
+            lastHandle = update({ big: undefined, clicks: clicks + 1 });
+          });
+        }}
+      >
+        count
+      </button>
+    </>
+  );
+};
+
+it('a write that cannot be encoded fails alone and the next one still lands', async () => {
+  const screen = await render(<Counter />);
+
+  // bigint は JSON にできないので 1 つ目のバッチは書けない。それが後ろに
+  // つないだ 2 つ目のバッチまで止めないこと
+  await screen.getByRole('button', { name: 'count' }).click();
+
+  await expect((refusedHandle as UpdateHandle).finished).rejects.toThrow(
+    TypeError,
+  );
+  await (lastHandle as UpdateHandle).finished;
+  const cookie = (await cookieStore.get(
+    counterState.cookieName,
+  )) as CookieListItem;
+  expect(JSON.parse(decodeURIComponent(cookie.value as string))).toStrictEqual({
+    clicks: 1,
+  });
+});
+
+// local の prefs と同じキー。置き場所が違えば別の状態であることを確かめる
+const tabPrefs = defineSessionState(
+  'prefs',
+  z.object({
+    view: z.enum(['grid', 'table']).default('grid'),
+    pageSize: z.number().default(20),
+  }),
+);
+
+const TabPrefs: FC = () => {
+  const [{ view }, update] = useAppState(tabPrefs, ['view']);
+  return (
+    <>
+      <p data-testid="tab-view">{view}</p>
+      <button
+        type="button"
+        onClick={() => {
+          lastHandle = update({ view: 'table' });
+        }}
+      >
+        tab table
+      </button>
+    </>
+  );
+};
+
+it('session state reads what the tab stored before a reload', async () => {
+  sessionStorage.setItem(
+    'k8ordo-state:prefs',
+    JSON.stringify({ view: 'table', pageSize: 50 }),
+  );
+
+  const screen = await render(<TabPrefs />);
+
+  await expect
+    .element(screen.getByTestId('tab-view'))
+    .toHaveTextContent('table');
+});
+
+it('session state persists an update in sessionStorage and settles its handle', async () => {
+  const screen = await render(<TabPrefs />);
+
+  await screen.getByRole('button', { name: 'tab table' }).click();
+
+  await expect
+    .element(screen.getByTestId('tab-view'))
+    .toHaveTextContent('table');
+  await (lastHandle as UpdateHandle).finished;
+  expect(
+    JSON.parse(sessionStorage.getItem('k8ordo-state:prefs') as string),
+  ).toStrictEqual({ view: 'table', pageSize: 20 });
+});
+
+it('local and session state under the same key are separate places', async () => {
+  const screen = await render(
+    <>
+      <Prefs />
+      <TabPrefs />
+    </>,
+  );
+
+  await screen.getByRole('button', { name: 'tab table' }).click();
+  await (lastHandle as UpdateHandle).finished;
+
+  await expect
+    .element(screen.getByTestId('tab-view'))
+    .toHaveTextContent('table');
+  await expect.element(screen.getByTestId('view')).toHaveTextContent('grid');
+  expect(localStorage.getItem('k8ordo-state:prefs')).toBeNull();
+});
+
+it("another frame's sessionStorage write flows in through the storage event", async () => {
+  const screen = await render(<TabPrefs />);
+
+  // storage イベントは、同じ置き場所を共有するほかの文書でだけ発火する。
+  // sessionStorage なら、このタブのほかのフレームがそれに当たる
+  sessionStorage.setItem(
+    'k8ordo-state:prefs',
+    JSON.stringify({ view: 'table', pageSize: 20 }),
+  );
+  window.dispatchEvent(
+    new StorageEvent('storage', {
+      key: 'k8ordo-state:prefs',
+      storageArea: sessionStorage,
+    }),
+  );
+
+  await expect
+    .element(screen.getByTestId('tab-view'))
+    .toHaveTextContent('table');
 });

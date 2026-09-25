@@ -35,6 +35,21 @@ describe('validateGeneratedSpec', () => {
     expect(result).toMatchObject({ ok: true });
   });
 
+  it('日付を YYYY-MM-DD 以外の書式で書いた spec を弾く', () => {
+    const result = validateGeneratedSpec(
+      specWithTarget({
+        type: 'DatePicker',
+        props: { name: 'checkIn', label: 'チェックイン', min: '2023/01/20' },
+        children: [],
+      }),
+    );
+
+    expect(result.ok).toBe(false);
+    expect(messages(result)).toContainEqual(
+      expect.stringContaining('DatePicker.min'),
+    );
+  });
+
   it('スキーマに無いキーを未知のプロパティとして報告する', () => {
     const result = validateGeneratedSpec(
       specWithTarget({
