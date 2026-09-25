@@ -134,6 +134,7 @@ const renderers = {
     ui.renderBreadcrumb(props),
   Table: ({ props }: ComponentRenderProps<sc.TableProps>) =>
     ui.renderTable(props),
+  Tree: ({ props }: ComponentRenderProps<sc.TreeProps>) => ui.renderTree(props),
 
   TextField: TextFieldView,
   Textarea: TextareaView,

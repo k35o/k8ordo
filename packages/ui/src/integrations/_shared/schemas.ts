@@ -320,6 +320,34 @@ export const tableProps = z.object({
     ),
 }) satisfies z.ZodType<TableIntegrationProps>;
 
+// 入れ子のスキーマは JSON Schema で再帰になり、モデルにも書き崩されやすい。
+// 平らな一覧にして、親は parentId で指す
+type TreeIntegrationProps = {
+  label: string;
+  items: ReadonlyArray<{
+    id: string;
+    label: string;
+    parentId?: string;
+    expanded?: boolean;
+  }>;
+};
+export const treeProps = z.object({
+  label: z.string().describe('Accessible name of the tree'),
+  items: z
+    .array(
+      z.object({
+        id: z.string(),
+        label: z.string(),
+        parentId: z.string().optional(),
+        expanded: z.boolean().optional(),
+      }),
+    )
+    .min(1)
+    .describe(
+      'Every node, flat and in display order; a child names its parent by parentId, and expanded opens a parent at first',
+    ),
+}) satisfies z.ZodType<TreeIntegrationProps>;
+
 type CardIntegrationProps = {
   width?: ComponentProps<typeof Card>['width'];
   variant?: ComponentProps<typeof Card>['variant'];
@@ -928,6 +956,7 @@ export type SkeletonProps = z.infer<typeof skeletonProps>;
 export type AccordionProps = z.infer<typeof accordionProps>;
 export type BreadcrumbProps = z.infer<typeof breadcrumbProps>;
 export type TableProps = z.infer<typeof tableProps>;
+export type TreeProps = z.infer<typeof treeProps>;
 export type TextareaProps = z.infer<typeof textareaProps>;
 export type PasswordInputProps = z.infer<typeof passwordInputProps>;
 export type NumberFieldProps = z.infer<typeof numberFieldProps>;

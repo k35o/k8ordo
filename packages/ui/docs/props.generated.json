@@ -3961,6 +3961,61 @@
       "omitted": []
     },
     {
+      "name": "Tree",
+      "props": [
+        {
+          "name": "items",
+          "types": ["readonly TreeItem[]"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "defaultExpandedIds",
+          "types": ["readonly string[]"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "defaultSelectedId",
+          "types": ["string", "null"],
+          "defaultValue": "null",
+          "required": false
+        },
+        {
+          "name": "expandedIds",
+          "types": ["readonly string[]"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "types": ["(id: string) => void"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "onExpandedChange",
+          "types": ["(ids: readonly string[]) => void"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "selectedId",
+          "types": ["string", "null"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": "HTMLAttributes<HTMLUListElement>",
+      "omitted": ["children", "className", "style", "role", "aria-label"]
+    },
+    {
       "name": "TwitterIcon",
       "props": [
         {

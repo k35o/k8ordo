@@ -88,6 +88,11 @@ export const catalog = defineCatalog(schema, {
       props: s.breadcrumbProps,
       description: 'Breadcrumb trail.',
     },
+    Tree: {
+      props: s.treeProps,
+      description:
+        'Tree of nodes that open and close, such as files and folders, navigable with the arrow keys. List every node flat; a child names its parent by parentId.',
+    },
     Table: {
       props: s.tableProps,
       description:

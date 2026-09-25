@@ -89,6 +89,11 @@ export const buildComponentLibrary = <C>(
     'Table with columns and rows (the cell strings of each row). Every row must have exactly as many cells as there are columns.',
     s.tableProps,
   );
+  const Tree = def(
+    'Tree',
+    'Tree of nodes that open and close, such as files and folders, navigable with the arrow keys. List every node flat; a child names its parent by parentId.',
+    s.treeProps,
+  );
   const TextField = def(
     'TextField',
     'Single-line text input, bound to form state by name.',
@@ -227,6 +232,7 @@ export const buildComponentLibrary = <C>(
     Accordion.ref,
     Breadcrumb.ref,
     Table.ref,
+    Tree.ref,
     TextField.ref,
     Textarea.ref,
     PasswordInput.ref,
@@ -392,6 +398,7 @@ export const buildComponentLibrary = <C>(
       Accordion,
       Breadcrumb,
       Table,
+      Tree,
       TextField,
       Textarea,
       PasswordInput,
