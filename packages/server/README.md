@@ -69,13 +69,14 @@ const server = await serve({ port: 3000 }); // { port, url, close }
 // src/routes/_parts/actions.ts
 'use server';
 
+import { href } from '@k8ordo/router';
 import { redirect } from '@k8ordo/server/runtime';
 
 export async function createTalk(_previous: FormState, formData: FormData) {
   const parsed = parseForm(talkSchema, formData);
   if (!parsed.success) return parsed.state;
   await insertTalk(parsed.data);
-  redirect('/talks'); // 303 without JavaScript, a navigation with it
+  redirect(href('/talks')); // 303 without JavaScript, a navigation with it
 }
 ```
 

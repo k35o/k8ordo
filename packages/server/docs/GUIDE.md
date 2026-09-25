@@ -869,13 +869,14 @@ an action is handed its arguments, not the request.
 ```ts
 'use server';
 
+import { href } from '@k8ordo/router';
 import { cookies, redirect } from '@k8ordo/server/runtime';
 
 export async function signIn(_previous: FormState, formData: FormData) {
   const session = await startSession(formData);
   if (session === null) return { error: 'wrong password' };
   cookies().set('session', session.token, { maxAge: 60 * 60 * 24 * 30 });
-  redirect('/account');
+  redirect(href('/account'));
 }
 ```
 
