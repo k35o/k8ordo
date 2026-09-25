@@ -144,16 +144,30 @@ export const WithoutAcceptTakesNoFiles: Story = {
     await expect(
       canvas.queryByRole('button', { name: 'ファイルを添付' }),
     ).not.toBeInTheDocument();
+    await expect(canvasElement.querySelector('input[type="file"]')).toBeNull();
 
-    const drop = new DragEvent('dragover', {
+    const transfer = transferOf([pdf]);
+    const over = new DragEvent('dragover', {
       bubbles: true,
       cancelable: true,
-      dataTransfer: transferOf([pdf]),
+      dataTransfer: transfer,
+    });
+    canvas.getByRole('textbox').dispatchEvent(over);
+
+    // それでもドラッグは止める。止めないとブラウザがファイルを開いて
+    // ページを離れる。none で、落とせないことをカーソルで示す
+    await expect(over.defaultPrevented).toBe(true);
+    await expect(transfer.dropEffect).toBe('none');
+
+    const drop = new DragEvent('drop', {
+      bubbles: true,
+      cancelable: true,
+      dataTransfer: transfer,
     });
     canvas.getByRole('textbox').dispatchEvent(drop);
 
-    await expect(drop.defaultPrevented).toBe(false);
-    await expect(canvasElement.querySelector('input[type="file"]')).toBeNull();
+    await expect(drop.defaultPrevented).toBe(true);
+    await expect(canvas.queryByRole('list')).not.toBeInTheDocument();
   },
 };
 
@@ -319,5 +333,14 @@ export const MaxFiles: Story = {
     const list = canvas.getByRole('list', { name: '添付ファイル' });
     await expect(list.children).toHaveLength(2);
     await expect(list).not.toHaveTextContent('third.png');
+  },
+};
+
+export const SingleFile: Story = {
+  args: { accept: 'image/*', maxFiles: 1, onSubmit: onSubmitWithFiles },
+  render: withAttachments,
+  play: async ({ canvasElement }) => {
+    // 1 件しか取らないなら、選択ダイアログでも複数を選ばせない
+    await expect(fileInputOf(canvasElement).multiple).toBe(false);
   },
 };

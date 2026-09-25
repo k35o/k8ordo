@@ -35,6 +35,7 @@ const [PromptInputProvider, usePromptInputContext] = createSafeContext<{
   status: ChatStatus;
   stop: () => void;
   accept: string | undefined;
+  maxFiles: number | undefined;
   files: AttachedFile[];
   /** 受け取ったファイルがあれば true */
   addFiles: (files: FileList) => boolean;
@@ -43,6 +44,9 @@ const [PromptInputProvider, usePromptInputContext] = createSafeContext<{
 
 const isBusy = (status: ChatStatus) =>
   status === 'submitted' || status === 'streaming';
+
+const carriesFiles = (dataTransfer: DataTransfer) =>
+  dataTransfer.types.includes('Files');
 
 type RootProps = {
   status?: ChatStatus;
@@ -109,15 +113,23 @@ export const Root: FC<RootProps> = ({
       status,
       stop: () => onStop?.(),
       accept,
+      maxFiles,
       files,
       addFiles,
       removeFile,
     }),
-    [text, setText, status, onStop, accept, files, addFiles, removeFile],
+    [
+      text,
+      setText,
+      status,
+      onStop,
+      accept,
+      maxFiles,
+      files,
+      addFiles,
+      removeFile,
+    ],
   );
-
-  const takesDraggedFiles = (dataTransfer: DataTransfer) =>
-    accept !== undefined && dataTransfer.types.includes('Files');
 
   return (
     <PromptInputProvider value={contextValue}>
@@ -132,14 +144,14 @@ export const Root: FC<RootProps> = ({
         )}
         data-dragging={isDragging || undefined}
         onDragEnter={(event) => {
-          if (!takesDraggedFiles(event.dataTransfer)) {
+          if (accept === undefined || !carriesFiles(event.dataTransfer)) {
             return;
           }
           dragDepthRef.current += 1;
           setIsDragging(true);
         }}
         onDragLeave={(event) => {
-          if (!takesDraggedFiles(event.dataTransfer)) {
+          if (accept === undefined || !carriesFiles(event.dataTransfer)) {
             return;
           }
           dragDepthRef.current -= 1;
@@ -148,14 +160,17 @@ export const Root: FC<RootProps> = ({
           }
         }}
         onDragOver={(event) => {
-          if (!takesDraggedFiles(event.dataTransfer)) {
+          if (!carriesFiles(event.dataTransfer)) {
             return;
           }
+          // 添付を受けないときも止める。止めないとブラウザがファイルを開き、
+          // ページごと会話が消える。none にして、落とせないことをカーソルで示す
           event.preventDefault();
-          event.dataTransfer.dropEffect = 'copy';
+          event.dataTransfer.dropEffect =
+            accept === undefined ? 'none' : 'copy';
         }}
         onDrop={(event) => {
-          if (!takesDraggedFiles(event.dataTransfer)) {
+          if (!carriesFiles(event.dataTransfer)) {
             return;
           }
           event.preventDefault();
@@ -324,7 +339,7 @@ type AttachProps = {
 
 export const Attach: FC<AttachProps> = ({ label }) => {
   const messages = useMessages();
-  const { accept, addFiles } = usePromptInputContext();
+  const { accept, maxFiles, addFiles } = usePromptInputContext();
   const inputRef = useRef<HTMLInputElement>(null);
 
   if (accept === undefined) {
@@ -336,7 +351,7 @@ export const Attach: FC<AttachProps> = ({ label }) => {
       <input
         accept={accept}
         hidden
-        multiple
+        multiple={maxFiles !== 1}
         onChange={(event) => {
           if (event.currentTarget.files !== null) {
             addFiles(event.currentTarget.files);
