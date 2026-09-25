@@ -34,7 +34,10 @@ const GET_LOCALE_EXPORT = `// src/i18n.ts
 import { defineLocales } from '@k8ordo/i18n';
 import type { LocaleOf } from '@k8ordo/i18n';
 
-export const locales = defineLocales(['ja', 'en']);
+export const locales = defineLocales({
+  ja: { timeZone: 'Asia/Tokyo', dir: 'ltr' },
+  en: { timeZone: 'UTC', dir: 'ltr' },
+});
 
 export type Locale = LocaleOf<typeof locales>;
 

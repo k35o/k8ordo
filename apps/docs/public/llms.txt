@@ -363,8 +363,10 @@ These docs are served from <https://ordo.k8o.me>.
 
 # @k8ordo/i18n
 
-> The locale axis of an application, owned. `defineLocales(['ja', 'en'])`
-> declares the set once and derives membership, negotiation, the URL segment
+> The locale axis of an application, owned. `defineLocales({ ja: { timeZone,
+> dir }, en: … })` declares the set once — each locale with the time zone its
+> dates are shown in and its text direction — and derives membership,
+> negotiation, the URL segment
 > (`localize` / `delocalize`), the `[locale]` params schema in the shape
 > `@k8ordo/static` / `@k8ordo/server` run, and the current locale
 > (`getLocale()`). Each message is a function — `message({ ja, en })` — that
@@ -387,17 +389,18 @@ These docs are served from <https://ordo.k8o.me>.
   and negotiation, messages as functions and `Register`, the Server
   Component boundary (a message is called before it is passed to a
   `'use client'` component), what reaches the browser, where the locale comes
-  from on each side, `/` and `<html lang>`, static path expansion, and
+  from on each side, `/` and `<html lang>` / `dir`, static path expansion, and
   pairing with `@k8ordo/router` / `@k8ordo/ui` / `@k8ordo/form`.
 
 ## Entry point
 
-- `@k8ordo/i18n` — `defineLocales(all, { default? })` returns `{ all,
-  default, is, negotiate, localize, delocalize, paths, paramsSchema,
-  getLocale, run }`; `paths(patterns)` is the static build's `paths` option
+- `@k8ordo/i18n` — `defineLocales(definitions, { default? })` takes each
+  locale's `{ timeZone, dir }` by tag (both required; an unknown time zone
+  throws) and returns `{ all, definitions, default, is, negotiate, localize,
+  delocalize, paths, paramsSchema, getLocale, run }`; `paths(patterns)` is the static build's `paths` option
   with `/:locale` expanded to every locale; typed links come from
   `@k8ordo/router`'s `bindParams(() => ({ locale: locales.getLocale() }))`,
-  written by the application; the first entry is the default unless told otherwise, every tag
+  written by the application; the first entry is the default unless told otherwise (and `default` is then typed as the whole union), every tag
   must be BCP 47, `negotiate(list)` tries each requested tag in order (exact,
   then language) before falling back to the default, `getLocale()` is the
   locale of the render in progress (not a hook), and `run(locale, fn)`
@@ -405,7 +408,7 @@ These docs are served from <https://ordo.k8o.me>.
   an `Accept-Language` header into a preference list. `message(variants)`
   declares one message — text in every locale, or a function of the same
   parameters in every locale — and returns `Message<Args>`, a function that
-  renders the current locale's text. Types: `Locales`, `LocaleOf`, `Message`,
+  renders the current locale's text. Types: `Locales`, `LocaleOf`, `LocaleDefinition`, `Message`,
   `Variants`, `Register`, `RegisteredLocale`, `Delocalized`,
   `LocaleParamsSchema`, `LocalesOptions`.
 

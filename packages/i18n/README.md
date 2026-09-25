@@ -42,15 +42,19 @@ does.
 
 ## Quick Start
 
-The locale set in its own module, registered once so every message is held
-to it:
+The locale set in its own module — each locale with the time zone its dates
+are shown in and the direction its text runs in — registered once so every
+message is held to it:
 
 ```ts
 // i18n.ts
 import { defineLocales } from '@k8ordo/i18n';
 import type { LocaleOf } from '@k8ordo/i18n';
 
-export const locales = defineLocales(['ja', 'en']);
+export const locales = defineLocales({
+  ja: { timeZone: 'Asia/Tokyo', dir: 'ltr' },
+  en: { timeZone: 'UTC', dir: 'ltr' },
+});
 
 declare module '@k8ordo/i18n' {
   interface Register {
@@ -107,7 +111,7 @@ Where a Server Component hands text to a Client Component as a prop, it calls
 the message and passes the string: a function does not cross that boundary.
 
 `/` negotiates and redirects; `<html lang>` and a language switcher read
-`locales.getLocale()`; a static build passes `paths: locales.paths`. Links
+`locales.getLocale()`, and `<html dir>` its `locales.definitions[…].dir`; a static build passes `paths: locales.paths`. Links
 stay `@k8ordo/router`'s: `bindParams(() => ({ locale: locales.getLocale() }))`
 gives an `href` that spells `/:locale/…` patterns without the locale.
 

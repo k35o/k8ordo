@@ -1,10 +1,10 @@
 # Agent guide — packages/i18n
 
 `@k8ordo/i18n` — the locale axis, owned. `defineLocales` is the set (the
-list, the default, membership, negotiation, the URL segment, the static
-build's path expansion (`paths`), the `[locale]` params schema, the current
-locale); `message` is one message as a function that reads the current
-locale where it is called. No provider, no hook. The shared discipline
+list with each locale's `timeZone` and `dir`, the default, membership,
+negotiation, the URL segment, the static build's path expansion (`paths`),
+the `[locale]` params schema, the current locale); `message` is one message
+as a function that reads the current locale where it is called. No provider, no hook. The shared discipline
 (React 19 / RSC assumed, Baseline newly available only, no polyfills) and
 how a new package joins are in the repository root's
 [`CLAUDE.md`](../../CLAUDE.md).
@@ -64,9 +64,15 @@ pnpm check         # check:write to auto-fix
   module defining it), a segment no message has text for counts as no
   locale, so a 404 page does not throw.
 - **Refuse where it is read, name what is missing.** A message lacking the
-  named locale throws from the call, listing the variants present. A tag
-  that is not BCP 47, a default outside the list, and a repeated locale
+  named locale throws from the call, listing the variants present. An empty
+  set, a tag that is not BCP 47, a default outside the list, a time zone
+  `Intl.DateTimeFormat` refuses (or a missing one, which it would quietly
+  replace with the runtime's own), and a `dir` other than `ltr` / `rtl`
   still throw from `defineLocales` — that one runs once.
+- **A locale's time zone and direction are declared, never derived.** The
+  runtime's time zone is the server's on one side and the visitor's on the
+  other, so anything formatted in it disagrees across hydration; and
+  `Intl.Locale#getTextInfo` is not Baseline. Do not default either.
 - **No grammar.** A message is text in every locale or a function in every
   locale; interpolation is the function's own template literal; plurals and
   formats are `Intl`. Do not add placeholder syntax, ICU parsing, or a

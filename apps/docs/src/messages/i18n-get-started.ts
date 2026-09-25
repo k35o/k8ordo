@@ -97,8 +97,8 @@ export const defineSet = {
     en: 'This module is the only place the list is spelled. The `[locale]` schema, the static path expansion, the language switcher, the `/` redirect and the type of every message all read from it.',
   }),
   default: message({
-    ja: "先頭のロケールが既定値です。別のロケールを既定にするときは `defineLocales(['en', 'ja'], { default: 'ja' })` と書きます。既定値は、交渉で何も一致しなかったときと、何もロケールを指名していないときに使われます。",
-    en: "The first locale is the default. To make another one the default, write `defineLocales(['en', 'ja'], { default: 'ja' })`. The default is used when negotiation finds nothing and when nothing names a locale.",
+    ja: "ロケールごとに、日付を表示するタイムゾーン（`timeZone`）と文字の向き（`dir`）を必ず書きます。先頭のロケールが既定値で、別のロケールを既定にするときは第 2 引数に `{ default: 'en' }` と書きます。既定値は、交渉で何も一致しなかったときと、何もロケールを指名していないときに使われます。",
+    en: "Every locale states the time zone its dates are shown in (`timeZone`) and the direction its text runs in (`dir`). The first locale is the default; to make another one the default, pass `{ default: 'en' }` as the second argument. The default is used when negotiation finds nothing and when nothing names a locale.",
   }),
   register: message({
     ja: '`Register` にロケールを載せるのは 1 回だけです。載せた後は、すべての `message()` がこのロケールの和集合に照らして検査されます。`Register` はマージされるための型なので、`type` ではなく `interface` で書きます。',
