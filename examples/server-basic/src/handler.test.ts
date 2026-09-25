@@ -51,7 +51,7 @@ registerHooks({
   },
 });
 
-const { serve } = await import('@k8ordo/server/runtime');
+const { serve } = await import('@k8ordo/server/serve');
 const server = await serve({ port: 0 });
 try {
   const response = await fetch(server.url);
