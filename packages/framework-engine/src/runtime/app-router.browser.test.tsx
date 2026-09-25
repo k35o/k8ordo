@@ -101,6 +101,15 @@ const settledYet = (promise: Promise<unknown>): Promise<boolean> =>
     }),
   ]);
 
+// 訪問者が戻る。戻る遷移が確定した時点で、取りかけの遷移は中断されている。
+// finished を待たないのは、WebKit が取りかけの遷移を中断させた側の finished
+// まで AbortError で reject するため（戻る遷移そのものは確定している）
+const moveBack = async (): Promise<void> => {
+  const back = navigation.back();
+  back.finished?.catch(() => undefined);
+  await back.committed;
+};
+
 const serverCallback = (): ServerCallback => {
   if (rsc.serverCallback === undefined) {
     throw new Error('no server callback registered');
@@ -168,7 +177,7 @@ describe('a client navigation', () => {
     });
 
     // 本文は届き終え、読み解きが import を待っているうちに戻る
-    await navigation.back().finished;
+    await moveBack();
     imported();
 
     // 読み解きの続きはマイクロタスクで走りきる。その後のタスクで読む
@@ -274,7 +283,7 @@ describe('a client navigation the answer cannot complete in place', () => {
       expect(requested).toBe(1);
     });
 
-    await navigation.back().finished;
+    await moveBack();
 
     // 中断で reject した fetch はマイクロタスクで片付く。その後のタスクで読む
     await new Promise((resolve) => {
