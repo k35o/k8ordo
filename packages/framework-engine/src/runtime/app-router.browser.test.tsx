@@ -46,7 +46,7 @@ const DEPLOYED = '/assets/index-deployed.js';
 const passThrough = globalThis.fetch;
 
 // ページのペイロードとアクションの答えを、どちらもこの 1 枚で返すサーバー
-const answerWith = (payload: Payload): void => {
+const answerWith = (payload: Payload, status = 200): void => {
   vi.stubGlobal('fetch', (input: RequestInfo | URL, init?: RequestInit) => {
     const url = String(input instanceof Request ? input.url : input);
     if (!url.endsWith('/index.rsc') && init?.method !== 'POST') {
@@ -54,11 +54,33 @@ const answerWith = (payload: Payload): void => {
     }
     return Promise.resolve(
       new Response(JSON.stringify(payload), {
+        status,
         headers: { 'content-type': 'text/x-component;charset=utf-8' },
       }),
     );
   });
 };
+
+// ペイロードを取りに行った fetch への答えを、テストごとに決める。
+// 本物の fetch と同じく、ナビゲーションの signal を受け取る
+const answerPayloadRequests = (
+  answer: (signal: AbortSignal) => Promise<Response>,
+): void => {
+  vi.stubGlobal('fetch', (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = String(input instanceof Request ? input.url : input);
+    if (!url.endsWith('/index.rsc')) return passThrough(input, init);
+    if (!(init?.signal instanceof AbortSignal)) {
+      throw new Error('a payload request without a signal');
+    }
+    return answer(init.signal);
+  });
+};
+
+const html = (status: number): Response =>
+  new Response('<!doctype html><title>the host</title>', {
+    status,
+    headers: { 'content-type': 'text/html; charset=utf-8' },
+  });
 
 // ルーターが外れた後の、元の URL へ戻るあいだだけルーターを演じる
 const interceptEverything = (event: NavigateEvent): void => {
@@ -150,6 +172,111 @@ describe('a client navigation', () => {
     imported();
 
     // 読み解きの続きはマイクロタスクで走りきる。その後のタスクで読む
+    await new Promise((resolve) => {
+      setTimeout(resolve, 0);
+    });
+    expect(reloadDocument).not.toHaveBeenCalled();
+    expect(screen.container.textContent).toBe('first page');
+  });
+
+  it('renders the not-found page the server answered with a payload under 404, in place', async () => {
+    answerWith(
+      { tree: 'not found page', pathname: '/nowhere', client: RUNNING },
+      404,
+    );
+    const screen = await render(<AppRouter pathname="/" tree="first page" />);
+
+    await navigation.navigate('/nowhere').finished;
+
+    await expect
+      .element(screen.getByText('not found page'))
+      .toBeInTheDocument();
+    expect(reloadDocument).not.toHaveBeenCalled();
+  });
+});
+
+describe('a client navigation the answer cannot complete in place', () => {
+  it.each([
+    ['its 404 page', 404],
+    ['a page it serves under 200 for any URL', 200],
+  ])(
+    'loads the destination as a document when the host answers with %s',
+    async (_, status) => {
+      answerPayloadRequests(() => Promise.resolve(html(status)));
+      const screen = await render(<AppRouter pathname="/" tree="first page" />);
+
+      // 文書が置き換わるので、このナビゲーションは終わらない
+      navigation.navigate('/next').finished?.catch(() => undefined);
+
+      await vi.waitFor(() => {
+        expect(reloadDocument).toHaveBeenCalledTimes(1);
+      });
+      // 割り込みの時点で URL は移っている。読み込み直されるのは行き先
+      expect(location.pathname).toBe('/next');
+      expect(screen.container.textContent).toBe('first page');
+    },
+  );
+
+  it('loads the destination as a document when the network fails', async () => {
+    answerPayloadRequests(() =>
+      Promise.reject(new TypeError('Failed to fetch')),
+    );
+    const screen = await render(<AppRouter pathname="/" tree="first page" />);
+
+    navigation.navigate('/next').finished?.catch(() => undefined);
+
+    await vi.waitFor(() => {
+      expect(reloadDocument).toHaveBeenCalledTimes(1);
+    });
+    expect(location.pathname).toBe('/next');
+    expect(screen.container.textContent).toBe('first page');
+  });
+
+  it('loads the destination as a document when the connection drops mid-payload', async () => {
+    answerPayloadRequests(() =>
+      Promise.resolve(
+        new Response(
+          new ReadableStream<Uint8Array>({
+            start(controller) {
+              controller.enqueue(new TextEncoder().encode('{"tree":'));
+              controller.error(new TypeError('network error'));
+            },
+          }),
+          { headers: { 'content-type': 'text/x-component;charset=utf-8' } },
+        ),
+      ),
+    );
+    const screen = await render(<AppRouter pathname="/" tree="first page" />);
+
+    navigation.navigate('/next').finished?.catch(() => undefined);
+
+    await vi.waitFor(() => {
+      expect(reloadDocument).toHaveBeenCalledTimes(1);
+    });
+    expect(location.pathname).toBe('/next');
+    expect(screen.container.textContent).toBe('first page');
+  });
+
+  it('leaves the document alone when the visitor moved on while the payload was on its way', async () => {
+    let requested = 0;
+    // 本物の fetch と同じく、中断されたらその理由で reject する
+    answerPayloadRequests((signal) => {
+      requested += 1;
+      return new Promise((_resolve, reject) => {
+        signal.addEventListener('abort', () => {
+          reject(signal.reason as Error);
+        });
+      });
+    });
+    const screen = await render(<AppRouter pathname="/" tree="first page" />);
+    navigation.navigate('/next').finished?.catch(() => undefined);
+    await vi.waitFor(() => {
+      expect(requested).toBe(1);
+    });
+
+    await navigation.back().finished;
+
+    // 中断で reject した fetch はマイクロタスクで片付く。その後のタスクで読む
     await new Promise((resolve) => {
       setTimeout(resolve, 0);
     });
