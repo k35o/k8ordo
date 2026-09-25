@@ -251,6 +251,7 @@ export const Autocomplete: FC<Props> = ({
         multiple
         name={name}
         onReset={() => {
+          reset();
           if (value === undefined) {
             handleChange(defaultValue ?? []);
           }

@@ -917,6 +917,21 @@ describe('Autocomplete', () => {
       .poll(() => received)
       .toStrictEqual({ tags: ['vue'], memo: 'よろしく' });
   });
+
+  it('reset で、選ばずに打ちかけた文字を消し、候補の一覧も閉じる', async () => {
+    const screen = await render(<Tags />);
+
+    await userEvent.type(screen.getByRole('combobox'), 'Re');
+    await expect
+      .element(screen.getByRole('combobox'))
+      .toHaveAttribute('aria-expanded', 'true');
+    reset();
+
+    await expect.element(screen.getByRole('combobox')).toHaveValue('');
+    await expect
+      .element(screen.getByRole('combobox'))
+      .toHaveAttribute('aria-expanded', 'false');
+  });
 });
 
 describe('NumberField', () => {
