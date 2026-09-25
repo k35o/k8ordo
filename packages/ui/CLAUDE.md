@@ -245,6 +245,7 @@ Custom variants besides `dark:`: `light:` (anywhere not under `.dark`) and `vert
 - Storybook preview wraps all stories in `UIProvider` with light/dark theme toggle.
 - Every story runs twice: `components` in light and `components-dark` in dark (`storybookTest({ initialGlobals: { theme: 'dark' } })`), because axe only checks the colors on screen. A story that pins `parameters.theme` stays in that theme in both.
 - A form field in a story is given a name (`aria-label` in the meta `args`, and on any field a custom `render` draws), not a disabled `label` rule.
+- `src/styles/contrast.stories.tsx` renders every pair in `docs/references/color.md`'s contrast table, AAA rows under `color-contrast-enhanced`; keep the two in step.
 - a11y addon fails a story on violations (`test: 'error'`), `color-contrast` included. Only overlay stories that axe misreads while they fade in turn `color-contrast` off for themselves: every `Modal` story, and one story each in `Dialog` and `Popover`.
 - Mock date is set to `2023-01-02 12:34:56` in Storybook.
 

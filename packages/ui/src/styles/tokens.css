@@ -229,18 +229,20 @@
   --border-warning: var(--yellow-400);
   --border-error: var(--red-400);
 
+  /* bg と emphasize を 1 段暗くしているのは、hover / active の emphasize の上でも
+     *-fg を通常の文字で AA にするため。700 だと 3.7:1 にしかならない */
   --primary-fg: var(--teal-300);
-  --primary-bg: var(--teal-800);
+  --primary-bg: var(--teal-900);
   --primary-bg-subtle: var(--teal-950);
   --primary-bg-mute: var(--teal-900);
-  --primary-bg-emphasize: var(--teal-700);
+  --primary-bg-emphasize: var(--teal-800);
   --primary-border: var(--teal-500);
 
   --secondary-fg: var(--cyan-300);
-  --secondary-bg: var(--cyan-800);
+  --secondary-bg: var(--cyan-900);
   --secondary-bg-subtle: var(--cyan-950);
   --secondary-bg-mute: var(--cyan-900);
-  --secondary-bg-emphasize: var(--cyan-700);
+  --secondary-bg-emphasize: var(--cyan-800);
   --secondary-border: var(--cyan-500);
 
   /* TODO: 上の変数の一環として使えるようにする */
