@@ -7,7 +7,8 @@ import { useFocusTrap } from './focus-trap';
 
 const Popup: FC<{
   withFocusable?: boolean;
-}> = ({ withFocusable = true }) => {
+  withAutofocus?: boolean;
+}> = ({ withFocusable = true, withAutofocus = false }) => {
   const [isOpen, setIsOpen] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -31,6 +32,11 @@ const Popup: FC<{
           ) : (
             <p>フォーカス可能な要素なし</p>
           )}
+          {withAutofocus ? (
+            <button data-autofocus tabIndex={-1} type="button">
+              名指しされたボタン
+            </button>
+          ) : null}
         </div>
       ) : null}
       <button type="button">外側のボタン</button>
@@ -59,6 +65,17 @@ describe('useFocusTrap', () => {
       .getByRole('button', { name: 'ポップアップ内ボタン' })
       .element();
     await expect.poll(activeElement).toBe(inner);
+  });
+
+  it('data-autofocus の要素があれば、先頭の要素より優先してフォーカスを移す', async () => {
+    const screen = await render(<Popup withAutofocus />);
+
+    await userEvent.click(screen.getByRole('button', { name: 'トリガー' }));
+
+    const named = screen
+      .getByRole('button', { name: '名指しされたボタン' })
+      .element();
+    await expect.poll(activeElement).toBe(named);
   });
 
   it('フォーカス可能な要素が無いときはコンテナ自体へフォーカスを移す', async () => {
