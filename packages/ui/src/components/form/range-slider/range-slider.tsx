@@ -12,6 +12,7 @@ import { useFormStatus } from 'react-dom';
 
 import { cn } from '../../../helpers/cn';
 import { useMessages } from '../../../i18n/context';
+import { HIGH_CONTRAST_EDGE } from '../../_internal/high-contrast';
 import { rangeInputClass } from '../slider/range-input-class';
 
 type BaseProps = {
@@ -22,6 +23,11 @@ type BaseProps = {
   name?: readonly [string, string];
   invalid?: boolean;
   disabled?: boolean;
+  /**
+   * 両方のつまみの input に渡す。range は常に値を持つので必須の検査には
+   * 掛からないが、読み上げには必須の欄として伝わる（Slider と同じ扱い）。
+   */
+  required?: boolean;
   ref?: Ref<HTMLDivElement>;
 } & Omit<
   HTMLAttributes<HTMLDivElement>,
@@ -58,6 +64,7 @@ export const RangeSlider: FC<Props> = ({
   onChange,
   invalid = false,
   disabled = false,
+  required = false,
   'aria-label': ariaLabel,
   'aria-labelledby': ariaLabelledBy,
   'aria-describedby': ariaDescribedBy,
@@ -173,12 +180,15 @@ export const RangeSlider: FC<Props> = ({
       </span>
       <span
         aria-hidden
-        className="bg-bg-mute relative rounded-full block-2 inline-full"
+        className={cn(
+          'bg-bg-mute relative rounded-full block-2 inline-full',
+          HIGH_CONTRAST_EDGE,
+        )}
       >
         <span
           aria-hidden
           className={cn(
-            'bg-primary-bg absolute inset-be-0 inset-s-(--range-start) block-full inline-[calc(var(--range-end)-var(--range-start))] rounded-full',
+            'bg-primary-bg absolute inset-be-0 inset-s-(--range-start) block-full inline-[calc(var(--range-end)-var(--range-start))] rounded-full forced-colors:bg-[Highlight]',
             invalid && 'bg-bg-error',
           )}
         />
@@ -196,6 +206,7 @@ export const RangeSlider: FC<Props> = ({
         name={name?.[0]}
         onChange={commit('start')}
         ref={startRef}
+        required={required}
         step={step}
         type="range"
       />
@@ -212,6 +223,7 @@ export const RangeSlider: FC<Props> = ({
         name={name?.[1]}
         onChange={commit('end')}
         ref={endRef}
+        required={required}
         step={step}
         type="range"
       />

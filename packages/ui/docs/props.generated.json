@@ -2863,6 +2863,12 @@
           "required": false
         },
         {
+          "name": "required",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
           "name": "step",
           "types": ["number"],
           "defaultValue": "1",

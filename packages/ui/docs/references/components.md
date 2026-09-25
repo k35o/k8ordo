@@ -967,6 +967,7 @@ Props:
 - `name`: `readonly [string, string]`
 - `onChange`: `(value: [number, number]) => void`
 - `ref`: `Ref<HTMLDivElement>`
+- `required`: `boolean` (default: `false`)
 - `step`: `number` (default: `1`)
 - `value`: `readonly [number, number]`
 - Other props are forwarded to `HTMLAttributes<HTMLDivElement>`, except `className` / `style` / `children` / `role`.
