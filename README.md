@@ -93,6 +93,11 @@ already have.
 | `pnpm check:peer-copies` | Fail if a peer shared with `@k8ordo/*` resolves to two copies |
 | `pnpm change` | Record a release intent for the changed packages |
 
+CI runs the same checks on every pull request into `main` and again on every
+push to `main`, where they gate the release: nothing is published from a commit
+that fails them. Browser tests run in one job per engine.
+[`CONTRIBUTING.md`](CONTRIBUTING.md#ci) has the details.
+
 Run `pnpm build` and `pnpm build:examples` before `pnpm check` or
 `pnpm typecheck` on a fresh checkout: the docs site and examples resolve
 `@k8ordo/*` types from each package's `dist/`, and the framework applications

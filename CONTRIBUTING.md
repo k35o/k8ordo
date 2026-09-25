@@ -118,12 +118,14 @@ Separately, [`.github/workflows/chromatic.yml`](.github/workflows/chromatic.yml)
 
 [`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs on every pull request into `main`: lint and format, type checking, packaging (`check:package`), the design-token and prop checks, the docs site build, and the tests. Package tests and example tests run in one job per engine — `Tests (chromium)`, `Tests (firefox)`, `Tests (webkit)`, and the same for `Examples` — so waiting for three engines takes no longer than waiting for one.
 
+Pull requests that pass on their own can still break `main` together, so a push to `main` runs the same workflow again, as the first stage of the release workflow. A push to `main` does not start `ci.yml` by itself; its results are under **Release**.
+
 ## Release
 
 Versioning uses pnpm's built-in release management (the `versioning` key in [`pnpm-workspace.yaml`](pnpm-workspace.yaml)), driven in CI by [k35o/pnpm-release-action](https://github.com/k35o/pnpm-release-action).
 
 - Run `pnpm change` to record a release intent, and include the generated `.changeset/<name>.md` in your pull request.
-- On pushes to `main`, CI either updates the release PR (branch `pnpm-release/main`) or, when no intents are pending, publishes to npm via OIDC trusted publishing.
+- On pushes to `main`, [`.github/workflows/release.yml`](.github/workflows/release.yml) first runs every check in `ci.yml` on that commit. Only when they pass does it update the release PR (branch `pnpm-release/main`) or, when no intents are pending, publish to npm via OIDC trusted publishing. A failing check stops both.
 
 ## Commit conventions
 

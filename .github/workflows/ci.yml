@@ -1,9 +1,12 @@
 name: CI
 
+# main への push では release.yml がこのワークフローを呼び、通ってから
+# リリース PR の更新か公開に進む。push で別に起動すると同じ検査が 2 回走る。
 on:
   pull_request:
     branches:
       - main
+  workflow_call:
 
 # 後続の push が来たら古い実行は用済み。走らせ切っても誰も読まない。
 concurrency:
