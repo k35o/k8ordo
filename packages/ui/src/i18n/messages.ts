@@ -19,6 +19,12 @@ export type Messages = {
   /** Toast のビューポート（region ランドマーク）名 */
   toastRegion: string;
 
+  /** CopyButton の既定のラベル */
+  copy: string;
+  /** CopyButton が押した結果として読み上げる文言 */
+  copied: string;
+  copyFailed: string;
+
   autocompletePlaceholder: string;
   /** 選択済みタグ 1 件の解除 */
   autocompleteRemoveTag: string;
@@ -59,9 +65,6 @@ export type Messages = {
 
   /** CodeBlock のコピーボタン */
   codeBlockCopy: string;
-  /** コピーの結果を読み上げる（role="status"）。CodeBlock と Message.Copy で共有する */
-  copied: string;
-  copyFailed: string;
   /** Carousel の aria-roledescription（region と各スライド） */
   carousel: string;
   carouselSlide: string;
@@ -89,7 +92,6 @@ export type Messages = {
   sources: string;
   /** Message.Actions の group 名 */
   messageActions: string;
-  copy: string;
   regenerate: string;
   feedbackPositive: string;
   feedbackNegative: string;

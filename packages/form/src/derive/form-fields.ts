@@ -1,6 +1,10 @@
 import type { $ZodType } from 'zod/v4/core';
 
-import type { ArrayPathsOf, FieldPathsOf } from '../paths';
+import type {
+  ArrayPathsOf,
+  FieldPathsOf,
+  StringCheckboxPathsOf,
+} from '../paths';
 import { asDefinition } from '../rules/define-form';
 import type { FormDefinition } from '../rules/define-form';
 import { deriveRule } from '../rules/rules';
@@ -12,6 +16,7 @@ import type {
   DerivedField,
   DroppedCheck,
   FormFields,
+  StringCheckboxInput,
 } from '../types';
 import { attributesFor, emptySubmissionOf, namesAControl } from './attributes';
 import { messagesFor } from './messages';
@@ -125,10 +130,14 @@ const warnDropped = (
  */
 export const formFields = <Schema extends ObjectSchema>(
   input: FormDefinition<Schema> | Schema,
-): FormFields<FieldPathsOf<Schema>, ArrayPathsOf<Schema>> => {
+): FormFields<
+  FieldPathsOf<Schema>,
+  ArrayPathsOf<Schema>,
+  StringCheckboxPathsOf<Schema>
+> => {
   const { schema, rules } = asDefinition(input);
   const map = schemaMap(schema);
-  const fields: Record<string, DerivedField> = {};
+  const fields: Record<string, DerivedField<StringCheckboxInput>> = {};
   const arrays: Record<string, DerivedArray> = {};
   const dropped: DroppedCheck[] = [];
 
@@ -184,9 +193,10 @@ export const formFields = <Schema extends ObjectSchema>(
     if (secret) {
       attributes.input.type = 'password';
     }
-    if (leaf.checkedValue !== undefined) {
-      attributes.input.value = leaf.checkedValue;
-    }
+    const fieldInput: StringCheckboxInput =
+      leaf.checkedValue === undefined
+        ? attributes.input
+        : { ...attributes.input, value: leaf.checkedValue };
 
     if (
       leaf.group !== undefined &&
@@ -199,11 +209,11 @@ export const formFields = <Schema extends ObjectSchema>(
       });
     }
 
-    const derived: DerivedField = {
-      input: attributes.input,
+    const derived: DerivedField<StringCheckboxInput> = {
+      input: fieldInput,
       messages: messagesFor(
         leaf.zod,
-        attributes.input,
+        fieldInput,
         leaf.required,
         emptySubmissionOf(leaf.kind),
       ),

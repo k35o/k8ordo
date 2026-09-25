@@ -135,6 +135,11 @@ export const catalog = defineCatalog(schema, {
       description:
         'Icon-only button (label is required and shown as its tooltip).',
     },
+    CopyButton: {
+      props: s.copyButtonProps,
+      description:
+        'Button that copies value to the clipboard and confirms it. With iconOnly, label becomes its tooltip.',
+    },
     Textarea: {
       props: s.textareaProps,
       description:

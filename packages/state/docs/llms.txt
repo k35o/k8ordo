@@ -3,12 +3,17 @@
 > Declare state by where it lives: `definePageState` (typed URL search params
 > plus hidden history-entry state — the two faces of one entry, updated
 > atomically over the Navigation API), `defineLocalState` (localStorage,
-> cross-tab), `defineMemoryState` (a typed shared box with no schema, resets
-> on reload). One zod schema per boundary place (url, entry, local) derives
-> the server read, canonical links, salvage of stale data, and a client
-> subscription with exact per-key change detection. Links and GET forms write
-> the URL before JavaScript loads under any router (the server renders what
-> they wrote wherever it reads the search); imperative url updates ride a
+> cross-tab), `defineSessionState` (sessionStorage — the same store over the
+> per-tab area: survives a reload, gone with the tab), `defineCookieState` (a
+> cookie the browser writes with the Cookie Store API and the server reads
+> from the request, so preferences render without a flash of the default —
+> never a secret, it cannot be `HttpOnly`), `defineMemoryState` (a typed
+> shared box with no schema, resets on reload). One zod schema per boundary
+> place (url, entry, local, session, cookie) derives the server read,
+> canonical links, salvage of stale data, and a client subscription with
+> exact per-key change detection. Links and GET forms write the URL before
+> JavaScript loads under any router (the server renders what they wrote
+> wherever it reads the search); imperative url updates ride a
 > Navigation-API-intercepting router.
 >
 > Like every k8ordo package it assumes React 19 and Server Components, uses
@@ -19,11 +24,13 @@ When installed via npm, these docs live under `node_modules/@k8ordo/state/docs/`
 
 ## Guide
 
-- [Design Guide](GUIDE.md): the four places and when each fits, the shared
-  definition module, reading on the server, updating on the client, batching
-  and update handles, subscription granularity, router requirements, typed
-  routes via `Register`, reading local state before hydration, and pairing
-  with `@k8ordo/form` for GET forms.
+- [Design Guide](GUIDE.md): the places and when each fits, the shared
+  definition module, versions and migrations of stored rows, reading on the
+  server, cookie state the server renders (and how it relates to cookies the
+  server writes), updating on the client,
+  batching and update handles, subscription granularity, router
+  requirements, typed routes via `Register`, reading local state before
+  hydration, and pairing with `@k8ordo/form` for GET forms.
 
 ## Entry point
 
@@ -38,22 +45,42 @@ When installed via npm, these docs live under `node_modules/@k8ordo/state/docs/`
   the type — the path written from the app's root, the link carrying Vite's
   `base` (`import.meta.env.BASE_URL`) in front; `search(values?)` returns the
   query string alone.
-  `defineLocalState(key, schema)` and `defineMemoryState(key, initial)`
-  declare app-scope state; a local definition also exposes `storageKey` (the
-  localStorage key, `k8ordo-state:<key>`) and `inlineRead()`, a JavaScript
-  expression for an inline `<script>` that evaluates to the stored object or
-  `null` before hydration — unvalidated, so read only what you need with a
-  fallback. `useAppState(definition, keys?, { initialUrl? })`
-  (client) works on any kind and returns `[state, update]` — state is the
-  flat merge of a page definition's slots; `update(patch)` applies
-  synchronously, batches the calls a handler makes with no `await` between
-  them into one write (url+entry changes atomically via
-  `navigation.navigate()`, entry-only changes via `updateCurrentEntry()`,
-  local via one `setItem`; memory applies per call), and returns
+  `defineLocalState(key, schema, versioning?)`,
+  `defineSessionState(key, schema)`,
+  `defineCookieState(key, schema, versioning?)` and
+  `defineMemoryState(key, initial)` declare app-scope state;
+  `versioning` is `{ version, migrate(old, fromVersion) }` (type
+  `Versioning`): rows are then stored as `[version, values]`, a row with no
+  version reads as version 0, an older row goes through `migrate` and then
+  the schema's field-by-field salvage and is written back in the current
+  version by the browser store (`parseCookies` migrates but never writes), a
+  newer row is salvaged and left alone, and a throwing `migrate` reads as
+  nothing stored without touching the row; a local or session definition also exposes
+  `storageKey` (the key in its storage area, `k8ordo-state:<key>`) and
+  `inlineRead()`, a JavaScript expression for an inline `<script>` that
+  evaluates to the object stored in that area or `null` before hydration
+  (also `null` for a row of another version, when versioned) —
+  unvalidated, so read only what you need with a fallback. A
+  cookie definition exposes `cookieName` (`k8ordo-state.<key>`),
+  `parseCookies(cookies)` — reads the values out of a request's
+  percent-decoded cookies (`request.cookies` under `@k8ordo/server`), salvaged
+  like any read — and `cookieValue(values?)`, the value a server writes when
+  it sets the same cookie (`Path=/`, `SameSite=Lax`, `Max-Age=34560000`,
+  never `HttpOnly`). `useAppState(definition, keys?, { initialUrl? } |
+  { initialCookie? })` (client) works on any kind and returns
+  `[state, update]` — state is the flat merge of a page definition's slots;
+  `initialUrl` / `initialCookie` seed the server and hydration renders with
+  what the server read; `update(patch)` applies synchronously, batches the
+  calls a handler makes with no `await` between them into one write
+  (url+entry changes atomically via `navigation.navigate()`, entry-only
+  changes via `updateCurrentEntry()`, local and session via one `setItem`,
+  cookie via one
+  `cookieStore.set()`; memory applies per call), and returns
   `{ committed, finished }` promise handles (for non-navigating kinds they
-  settle once the write lands, and a write localStorage refuses rejects them
-  with its error; `{ history: 'push' }` exists only on page state and takes
-  effect only when a url value changes).
+  settle once the write lands, and a write the browser refuses — a full
+  Web Storage area, a cookie over 4 KB — rejects them with its error;
+  `{ history: 'push' }` exists only on page state and takes effect only when
+  a url value changes).
   `resetStateRegistry()` clears stores between tests. Augment
   `interface Register { routes: typeof routes }` — the same line as for
   `@k8ordo/router` — to check each `href` path against the route table's

@@ -14,6 +14,10 @@ export const en: Messages = {
 
   toastRegion: 'Notifications',
 
+  copy: 'Copy',
+  copied: 'Copied',
+  copyFailed: 'Could not copy',
+
   autocompletePlaceholder: 'Type to filter',
   autocompleteRemoveTag: 'Remove tag',
   autocompleteClear: 'Clear all',
@@ -44,8 +48,6 @@ export const en: Messages = {
   paginationNext: 'Next',
 
   codeBlockCopy: 'Copy code',
-  copied: 'Copied',
-  copyFailed: 'Could not copy',
   carousel: 'Carousel',
   carouselSlide: 'Slide',
   carouselPrevious: 'Previous slide',
@@ -64,7 +66,6 @@ export const en: Messages = {
   attachmentImage: 'Attached image',
   sources: 'Sources',
   messageActions: 'Message actions',
-  copy: 'Copy',
   regenerate: 'Regenerate',
   feedbackPositive: 'Good response',
   feedbackNegative: 'Bad response',

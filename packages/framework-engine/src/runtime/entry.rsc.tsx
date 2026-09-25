@@ -1,4 +1,10 @@
-import { withBase, withoutBase } from '@k8ordo/router';
+import {
+  isNotFound,
+  normalizePathname,
+  withBase,
+  withoutBase,
+} from '@k8ordo/router';
+import type { Match, RouteComponent } from '@k8ordo/router';
 import {
   createTemporaryReferenceSet,
   decodeAction,
@@ -7,6 +13,7 @@ import {
   loadServerAction,
   renderToReadableStream,
 } from '@vitejs/plugin-rsc/rsc/server';
+import type { ReactNode } from 'react';
 import {
   catchAllSchemas,
   guards,
@@ -17,13 +24,19 @@ import {
 
 import type * as SsrEntry from './entry.ssr';
 import { runGuards } from './guard';
+import { watchPage } from './page-watch';
 import { parseCatchAllParams, parseParams } from './params';
 import type { ParsedParams } from './params';
-import { ACTION_ID_HEADER } from './payload';
+import { NOT_FOUND_SEGMENT } from './pathname';
+import {
+  ACTION_ID_HEADER,
+  NOT_FOUND_DIGEST,
+  NOT_FOUND_HEADER,
+} from './payload';
 import type { Payload } from './payload';
 import { isPayloadPath, pagePathFor } from './payload-path';
 import { isRedirect, matchRedirects } from './redirect';
-import { NotFound, renderMatch } from './render';
+import { renderMatch, renderNotFound } from './render';
 import { routeRequestOf } from './request';
 import { answer, inPhase, withRequest } from './request-scope';
 
@@ -263,19 +276,18 @@ const respond = async (request: Request): Promise<Response> => {
     return redirectResponse(action.redirect, 303);
   }
 
-  const missing = match === null || match.pattern.endsWith('/*');
-  const status = missing ? 404 : 200;
   // An action the client addressed answers in the shape the client already
   // knows how to read, so applying its result and applying a navigation are
   // the same code path. A form posted without JavaScript gets HTML back,
   // because that browser has nothing to apply a payload with.
   const answersPayload = wantsPayload || addressed;
-  // ステータスとヘッダーは描く前のここで決まる（描画中に失敗したページも同じ
-  // ステータスのまま流れる）ので、HEAD はここで答える。描いてから本文を捨てる
-  // と、誰も受け取らない本文のためにページのデータ取得まで走る
-  if (request.method === 'HEAD') {
+  const missing = match === null || match.pattern.endsWith('/*');
+  // ページでない答え（not-found）のステータスは描く前に決まるので、HEAD は
+  // ここで答える。描いてから本文を捨てると、誰も受け取らない本文のために
+  // データ取得まで走る。ページは notFound() と言うかもしれないので描く
+  if (request.method === 'HEAD' && missing) {
     return new Response(null, {
-      status,
+      status: 404,
       headers: { 'content-type': answersPayload ? PAYLOAD_TYPE : HTML_TYPE },
     });
   }
@@ -288,40 +300,93 @@ const respond = async (request: Request): Promise<Response> => {
     'ssr',
     'index',
   );
-  const payload: Payload = {
+
+  const render = (tree: ReactNode, enter: ParsedParams['enter']): Rendered =>
+    renderPayload(
+      {
+        tree,
+        pathname,
+        client: ssr.clientEntry,
+        returnValue: action.returnValue,
+        formState: action.formState,
+        redirect: action.redirect,
+      },
+      enter,
+      isAction ? temporaryReferences : undefined,
+    );
+
+  // A page is watched, so what it says of itself can still decide the answer.
+  const page =
+    match === null || missing || action.redirect !== undefined
+      ? null
+      : watchPage(match.stack.at(-1) as RouteComponent);
+  let status = missing ? 404 : 200;
+  let { enter } = parsed;
+  let rendered = render(
     // An action that redirected renders nothing: the client is about to
     // leave this page for the one it was sent to.
-    tree:
-      action.redirect === undefined ? (
-        match === null ? (
-          <NotFound />
-        ) : (
-          renderMatch(match, pathname, parsed.params, routeRequest)
-        )
-      ) : null,
-    pathname,
-    client: ssr.clientEntry,
-    returnValue: action.returnValue,
-    formState: action.formState,
-    redirect: action.redirect,
-  };
-
-  const failures: unknown[] = [];
-  const rscStream = parsed.enter(() =>
-    renderToReadableStream(payload, {
-      temporaryReferences: isAction ? temporaryReferences : undefined,
-      // Without this a component that throws simply truncates the stream, and
-      // the browser reports a closed connection instead of the actual error.
-      onError: (error: unknown) => {
-        failures.push(error);
-        // pathname は引数として渡す。第 1 引数はフォーマット文字列なので、
-        // `%s` を含む URL を投げられると error が食われて消える
-        console.error('k8ordo: rendering %s failed', pathname, error);
-      },
-    }),
+    action.redirect === undefined
+      ? match === null
+        ? renderNotFound(routes, pathname, routeRequest)
+        : renderMatch(match, pathname, parsed.params, routeRequest, page?.Page)
+      : null,
+    enter,
   );
+
+  // A document's status leaves before its body, so it waits for the page to
+  // answer: a page that says notFound() is not a 200. A payload does not
+  // wait — a client navigation has no status to get right, and a page that
+  // says it late is sent back to the server as a document load (PageBoundary).
+  // A build into files waits for everything, so it catches notFound() from
+  // anywhere in the page.
+  if (page !== null && (!answersPayload || request.method === 'HEAD')) {
+    const [forAnswer, forWatch] = rendered.stream.tee();
+    rendered = { ...rendered, stream: forAnswer };
+    const drained = drain(forWatch);
+    // 読み終えてもページが呼ばれていないことがある（children を描かない
+    // レイアウト）。そのときは待たない
+    const threw = await (import.meta.env.K8ORDO_MODE === '@k8ordo/static'
+      ? drained.then(() => Promise.race([page.settled, Promise.resolve()]))
+      : Promise.race([page.settled, rendered.saidNotFound, drained]));
+    if (rendered.notFound() || isNotFound(threw)) {
+      rendered.abort();
+      // The page's own answer: what the table answers for a URL nothing
+      // matched here — the nearest not-found.tsx, in the context its
+      // layouts' schemas leave.
+      const nearest = matchNotFound(pathname);
+      status = 404;
+      ({ enter } = nearest.parsed);
+      rendered = render(
+        nearest.match === null
+          ? renderNotFound(routes, pathname, routeRequest)
+          : renderMatch(
+              nearest.match,
+              pathname,
+              nearest.parsed.params,
+              routeRequest,
+            ),
+        enter,
+      );
+    }
+  }
+  // A build into files is told a page said notFound() apart from a refused
+  // param: both are a 404, and only the page's is a pathname the application
+  // named and then disowned.
+  const saidByPage: Record<string, string> =
+    import.meta.env.K8ORDO_MODE === '@k8ordo/static' &&
+    status === 404 &&
+    !missing
+      ? { [NOT_FOUND_HEADER]: 'page' }
+      : {};
+  if (request.method === 'HEAD') {
+    rendered.abort();
+    return new Response(null, {
+      status,
+      headers: { 'content-type': answersPayload ? PAYLOAD_TYPE : HTML_TYPE },
+    });
+  }
   if (answersPayload) {
-    return new Response(rscStream, {
+    return new Response(rendered.stream, {
       status,
       headers: { 'content-type': PAYLOAD_TYPE },
     });
@@ -335,7 +400,7 @@ const respond = async (request: Request): Promise<Response> => {
     // at build time it is a build that stops, naming the page.
     let body: ArrayBuffer;
     try {
-      const html = await parsed.enter(() => ssr.renderHtml(rscStream));
+      const html = await enter(() => ssr.renderHtml(rendered.stream));
       body = await new Response(html).arrayBuffer();
     } catch (error) {
       // With no Suspense boundary above the throw the HTML render itself
@@ -343,21 +408,110 @@ const respond = async (request: Request): Promise<Response> => {
       // error — React's generic production message. The original is the one
       // `onError` recorded; a client component that threw left no record,
       // and what rejected is its own error.
-      return renderFailed(failures[0] ?? error);
+      return renderFailed(rendered.failures[0] ?? error);
     }
-    const failed = failures[0];
+    const failed = rendered.failures[0];
     if (failed !== undefined) return renderFailed(failed);
     return new Response(body, {
       status,
-      headers: { 'content-type': HTML_TYPE },
+      headers: { 'content-type': HTML_TYPE, ...saidByPage },
     });
   }
-  const html = await parsed.enter(() => ssr.renderHtml(rscStream));
+  const html = await enter(() => ssr.renderHtml(rendered.stream));
   return new Response(html, {
     status,
     headers: { 'content-type': HTML_TYPE },
   });
 };
+
+/**
+ * Where a page that said notFound() is sent: the catch-all the table answers
+ * for a URL nothing matched here. Asked with a segment below the pathname,
+ * because `/:locale/*` does not match `/en` itself, and only a catch-all may
+ * answer.
+ */
+const matchNotFound = (
+  pathname: string,
+): { match: Match | null; parsed: ParsedParams } => {
+  let parsed: ParsedParams = { params: {}, enter: (fn) => fn() };
+  const page = normalizePathname(pathname);
+  const match = routes.match(
+    `${page === '/' ? '' : page}/${NOT_FOUND_SEGMENT}`,
+    (found) => {
+      if (!found.pattern.endsWith('/*')) return false;
+      parsed = parseCatchAllParams(
+        catchAllSchemas[found.pattern] ?? [],
+        found.params,
+      );
+      return true;
+    },
+  );
+  return { match, parsed };
+};
+
+type Rendered = {
+  readonly stream: ReadableStream<Uint8Array>;
+  /** What threw while rendering — notFound() aside, which is an answer. */
+  readonly failures: readonly unknown[];
+  /** Whether a component said notFound() yet. */
+  readonly notFound: () => boolean;
+  /** Settles when one does. */
+  readonly saidNotFound: Promise<undefined>;
+  /** Stops the render: its answer is not the one being sent. */
+  readonly abort: () => void;
+};
+
+const renderPayload = (
+  payload: Payload,
+  enter: ParsedParams['enter'],
+  // An action's, or none: `undefined` is one of the values this type admits.
+  temporaryReferences: TemporaryReferences,
+): Rendered => {
+  const failures: unknown[] = [];
+  let said = false;
+  const { promise: saidNotFound, resolve } = Promise.withResolvers<undefined>();
+  const controller = new AbortController();
+  const stream = enter(() =>
+    renderToReadableStream(payload, {
+      temporaryReferences,
+      signal: controller.signal,
+      // Without this a component that throws simply truncates the stream, and
+      // the browser reports a closed connection instead of the actual error.
+      onError: (error: unknown) => {
+        // notFound() is an answer, not a failure. What reaches the browser
+        // is its digest, which is how PageBoundary knows it.
+        if (isNotFound(error)) {
+          said = true;
+          resolve(undefined);
+          return NOT_FOUND_DIGEST;
+        }
+        // 捨てた描画を止めると、その理由がここに届く。失敗ではない
+        if (controller.signal.aborted) return undefined;
+        failures.push(error);
+        // pathname は引数として渡す。第 1 引数はフォーマット文字列なので、
+        // `%s` を含む URL を投げられると error が食われて消える
+        console.error('k8ordo: rendering %s failed', payload.pathname, error);
+        return undefined;
+      },
+    }),
+  );
+  return {
+    stream,
+    failures,
+    notFound: () => said,
+    saidNotFound,
+    abort: () => {
+      controller.abort();
+    },
+  };
+};
+
+/**
+ * Reads a stream to its end, for when it ends — whatever it held; the other
+ * branch of the tee has the content. A render that was stopped ends too.
+ */
+const drain = (stream: ReadableStream<Uint8Array>): Promise<void> =>
+  stream.pipeTo(new WritableStream()).catch(() => undefined);
 
 if (import.meta.hot) {
   import.meta.hot.accept();
