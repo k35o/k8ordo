@@ -25,8 +25,9 @@ When installed via npm, these docs live under `node_modules/@k8ordo/state/docs/`
 ## Guide
 
 - [Design Guide](GUIDE.md): the places and when each fits, the shared
-  definition module, reading on the server, cookie state the server renders
-  (and how it relates to cookies the server writes), updating on the client,
+  definition module, versions and migrations of stored rows, reading on the
+  server, cookie state the server renders (and how it relates to cookies the
+  server writes), updating on the client,
   batching and update handles, subscription granularity, router
   requirements, typed routes via `Register`, reading local state before
   hydration, and pairing with `@k8ordo/form` for GET forms.
@@ -42,12 +43,21 @@ When installed via npm, these docs live under `node_modules/@k8ordo/state/docs/`
   and the url slot is read in the browser);
   `href(base, values?)` builds a canonical link keeping the path literal in
   the type; `search(values?)` returns the query string alone.
-  `defineLocalState(key, schema)`, `defineSessionState(key, schema)`,
-  `defineCookieState(key, schema)` and `defineMemoryState(key, initial)`
-  declare app-scope state; a local or session definition also exposes
+  `defineLocalState(key, schema, versioning?)`,
+  `defineSessionState(key, schema)`,
+  `defineCookieState(key, schema, versioning?)` and
+  `defineMemoryState(key, initial)` declare app-scope state;
+  `versioning` is `{ version, migrate(old, fromVersion) }` (type
+  `Versioning`): rows are then stored as `[version, values]`, a row with no
+  version reads as version 0, an older row goes through `migrate` and then
+  the schema's field-by-field salvage and is written back in the current
+  version by the browser store (`parseCookies` migrates but never writes), a
+  newer row is salvaged and left alone, and a throwing `migrate` reads as
+  nothing stored without touching the row; a local or session definition also exposes
   `storageKey` (the key in its storage area, `k8ordo-state:<key>`) and
   `inlineRead()`, a JavaScript expression for an inline `<script>` that
-  evaluates to the object stored in that area or `null` before hydration —
+  evaluates to the object stored in that area or `null` before hydration
+  (also `null` for a row of another version, when versioned) —
   unvalidated, so read only what you need with a fallback. A
   cookie definition exposes `cookieName` (`k8ordo-state.<key>`),
   `parseCookies(cookies)` — reads the values out of a request's

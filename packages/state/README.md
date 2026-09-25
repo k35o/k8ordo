@@ -118,7 +118,8 @@ own default, field by field.
 
 The [design guide](docs/GUIDE.md) covers the rest: the places and when each
 fits, history-entry state, cookie state the server renders (and why it is
-never a secret), batching and update handles, subscription granularity,
+never a secret), migrating stored rows with `version` and `migrate`,
+batching and update handles, subscription granularity,
 router requirements, typed routes via `Register`, reading local state before
 hydration with `inlineRead()`, and GET forms with `@k8ordo/form`.
 
