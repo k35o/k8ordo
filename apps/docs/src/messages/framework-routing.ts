@@ -290,8 +290,8 @@ export const prefetchDescription = message({
 });
 
 export const prefetchSameOrigin = message({
-  ja: '同じオリジンのリンク',
-  en: 'one to the same origin',
+  ja: '同じオリジンで、Vite の `base` の下にあるリンク',
+  en: 'one to the same origin, below Vite’s `base`',
 });
 
 export const prefetchInPlace = message({

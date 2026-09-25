@@ -624,4 +624,28 @@ describe('under a base', () => {
     expect(requested).toStrictEqual([]);
     expect(screen.container.textContent).toBe('first page');
   });
+
+  it('fetches a link below the base ahead, at the payload beside its page', async () => {
+    const requested = recordPayloadRequests();
+    const screen = await render(
+      <AppRouter pathname="/" tree={<a href="/site/next">next</a>} />,
+    );
+
+    pointerOnto(screen.getByRole('link').element());
+    await nextTask();
+
+    expect(requested).toStrictEqual(['/site/next/index.rsc']);
+  });
+
+  it('fetches nothing ahead for a link outside the base', async () => {
+    const requested = recordPayloadRequests();
+    const screen = await render(
+      <AppRouter pathname="/" tree={<a href="/elsewhere">elsewhere</a>} />,
+    );
+
+    pointerOnto(screen.getByRole('link').element());
+    await nextTask();
+
+    expect(requested).toStrictEqual([]);
+  });
 });

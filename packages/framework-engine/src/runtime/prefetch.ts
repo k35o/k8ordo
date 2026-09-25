@@ -1,4 +1,4 @@
-import { normalizePathname } from '@k8ordo/router';
+import { normalizePathname, withoutBase } from '@k8ordo/router';
 
 /**
  * How long a prefetched page stays usable, from the moment it was asked for.
@@ -19,9 +19,9 @@ export const PREFETCH_ATTRIBUTE = 'data-k8ordo-prefetch';
 /**
  * The URL a pointer, a focus or a press is about to follow, when following it
  * would fetch a page's payload — `null` otherwise. What is left out is what a
- * click would not load in place: another origin, another browsing context
- * (`target="_blank"`), a download, and the page already on screen, where only
- * the search or the fragment would change.
+ * click would not load in place: another origin or a URL outside Vite's
+ * `base`, another browsing context (`target="_blank"`), a download, and the
+ * page already on screen, where only the search or the fragment would change.
  */
 export const prefetchTargetOf = (target: EventTarget | null): URL | null => {
   if (!(target instanceof Element)) return null;
@@ -33,6 +33,7 @@ export const prefetchTargetOf = (target: EventTarget | null): URL | null => {
   if (decided?.getAttribute(PREFETCH_ATTRIBUTE) === 'false') return null;
   const url = new URL(link.href);
   if (url.origin !== location.origin) return null;
+  if (withoutBase(url.pathname) === null) return null;
   if (
     normalizePathname(url.pathname) === normalizePathname(location.pathname)
   ) {

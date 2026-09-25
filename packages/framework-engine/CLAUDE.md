@@ -63,7 +63,7 @@ pnpm check         # check:write to auto-fix
 - **A prefetched page is used once, briefly, and never across an action.**
   `app-router.tsx` listens on the document (capture phase) for
   `pointerover`, `focusin` and `pointerdown` on a link `prefetchTargetOf`
-  accepts — same origin, no `download`, no other `target`, not the page on
+  accepts — same origin and under the base, no `download`, no other `target`, not the page on
   screen, no `data-k8ordo-prefetch="false"` on it or the nearest element
   carrying the attribute — and reads that page's payload the way a
   navigation would (`fetchPage`, the parse included, so the client

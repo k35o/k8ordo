@@ -6,13 +6,14 @@ link, a link taking focus, and a press starting on one — `pointerover`,
 so a click often finds the page already in hand. Nothing needs wiring: any
 `<a>` counts, the ones a component library renders included.
 
-Only a link a click would load in place is fetched: the same origin, no
-`download`, no `target` other than `_self`, and not the page on screen, where
-only the search or the fragment would change. To stop it for a link — one
-whose page is expensive to render, say — mark the link, or any element
-around it, `data-k8ordo-prefetch="false"` (`data-k8ordo-prefetch={false}` in
-JSX renders the same). The nearest element carrying the attribute decides,
-so `"true"` opts a link back in inside a region that opted out.
+Only a link a click would load in place is fetched: the same origin and below
+Vite's `base`, no `download`, no `target` other than `_self`, and not the
+page on screen, where only the search or the fragment would change. To stop
+it for a link — one whose page is expensive to render, say — mark the link,
+or any element around it, `data-k8ordo-prefetch="false"`
+(`data-k8ordo-prefetch={false}` in JSX renders the same). The nearest element
+carrying the attribute decides, so `"true"` opts a link back in inside a
+region that opted out.
 
 ```tsx
 <nav data-k8ordo-prefetch={false}>
