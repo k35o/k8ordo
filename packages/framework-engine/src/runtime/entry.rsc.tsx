@@ -438,9 +438,9 @@ const matchNotFound = (
   pathname: string,
 ): { match: Match | null; parsed: ParsedParams } => {
   let parsed: ParsedParams = { params: {}, enter: (fn) => fn() };
-  const base = normalizePathname(pathname);
+  const page = normalizePathname(pathname);
   const match = routes.match(
-    `${base === '/' ? '' : base}/${NOT_FOUND_SEGMENT}`,
+    `${page === '/' ? '' : page}/${NOT_FOUND_SEGMENT}`,
     (found) => {
       if (!found.pattern.endsWith('/*')) return false;
       parsed = parseCatchAllParams(
