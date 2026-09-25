@@ -1,5 +1,6 @@
 import type { FC, HTMLAttributes } from 'react';
 
+import { HIGH_CONTRAST_EDGE } from '../../_internal/high-contrast';
 import { cn } from './../../../helpers/cn';
 
 type CardProps = {
@@ -19,7 +20,7 @@ export const Card: FC<CardProps> = ({
     {...rest}
     className={cn(
       'rounded-xl',
-      variant === 'shadow' && 'shadow-sm',
+      variant === 'shadow' && ['shadow-sm', HIGH_CONTRAST_EDGE],
       variant === 'outline' && 'border border-border-mute',
       width === 'full' && 'w-full',
       width === 'fit' && 'w-fit',

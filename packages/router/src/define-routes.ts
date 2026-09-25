@@ -4,7 +4,7 @@ import type { ComponentType, ReactNode } from 'react';
 import { RouteErrorBoundary } from './boundary';
 import type { ErrorComponent } from './boundary';
 import { isGroupKey, joinPattern, normalizePathname } from './paths';
-import type { Join, PathFor } from './paths';
+import type { Join, PathMatching } from './paths';
 
 /**
  * Any component, whatever props it declares. The table is written once and
@@ -54,12 +54,16 @@ export type NavigablePatternOf<R extends RoutesRecord> = Exclude<
 >;
 
 /**
- * The app's pathname space as a type: the union `@k8ordo/state` derives from
- * the `routes` its `Register` is given, and what any other typed-path consumer
- * takes.
+ * `Path` when one of the table's navigable patterns matches it, segment by
+ * segment — a literal spelled as the pattern spells it, a `:param` taking any
+ * one non-empty segment — and `never` when none does. What `@k8ordo/state`
+ * checks a path against with the `routes` its `Register` is given, and what
+ * any other typed-path consumer takes.
  */
-export type RouteOf<D> =
-  D extends Routes<infer R> ? PathFor<NavigablePatternOf<R>> : never;
+export type NavigablePath<D, Path extends string> =
+  D extends Routes<infer R extends RoutesRecord>
+    ? PathMatching<Path, NavigablePatternOf<R>>
+    : never;
 
 export type Match = {
   /** The full pattern that won, as written in the table. */

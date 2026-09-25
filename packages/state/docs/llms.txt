@@ -40,8 +40,10 @@ When installed via npm, these docs live under `node_modules/@k8ordo/state/docs/`
   `@k8ordo/server` a page receives `params` and `pathname` (plus a
   headers-and-cookies `request` under `@k8ordo/server`) but never the search,
   and the url slot is read in the browser);
-  `href(base, values?)` builds a canonical link keeping the path literal in
-  the type; `search(values?)` returns the query string alone.
+  `href(path, values?)` builds a canonical link keeping the path literal in
+  the type — the path written from the app's root, the link carrying Vite's
+  `base` (`import.meta.env.BASE_URL`) in front; `search(values?)` returns the
+  query string alone.
   `defineLocalState(key, schema)`, `defineSessionState(key, schema)`,
   `defineCookieState(key, schema)` and `defineMemoryState(key, initial)`
   declare app-scope state; a local or session definition also exposes
@@ -71,6 +73,7 @@ When installed via npm, these docs live under `node_modules/@k8ordo/state/docs/`
   a url value changes).
   `resetStateRegistry()` clears stores between tests. Augment
   `interface Register { routes: typeof routes }` — the same line as for
-  `@k8ordo/router` — to constrain `href` paths to the route table's linkable
-  paths; a router without a table registers its own path union as
+  `@k8ordo/router` — to check each `href` path against the route table's
+  linkable patterns segment by segment (`NavigablePath`, so a `/:locale`
+  table no longer takes every path); a router without a table registers its own path union as
   `interface Register { path }` instead.

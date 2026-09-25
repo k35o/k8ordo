@@ -4,7 +4,7 @@
 > output a directory a static host can serve. The mode is the dependency —
 > installing this package means request-time data does not exist as an API, and
 > a `'use server'` module, which the RSC pipeline still compiles, is refused by
-> name. `src/routes/` is the pathname space
+> name, as is a `guard.ts`. `src/routes/` is the pathname space
 > (page/layout/not-found/error/redirect, `[param]`, `(group)`, `_private`), a
 > page or layout may `export const paramsSchema` (any Standard Schema,
 > synchronous) to type its parameters — a refused value makes the pattern not
@@ -39,4 +39,5 @@ When installed via npm, these docs live under `node_modules/@k8ordo/static/docs/
   `StaticOptions` is the type of those options. A
   `'use server'` module fails it too — in `vite dev` as well as the build: a
   file cannot receive a Server Action, so the application wants
-  `@k8ordo/server` instead.
+  `@k8ordo/server` instead. So does a `guard.ts`, every one named at once: a
+  file has no request to guard.

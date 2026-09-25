@@ -105,8 +105,9 @@ pnpm check:write       # Oxlint/Oxfmt lint/format auto-fix
   module so a Server Component could read it. The `@k8ordo/ui` storage hooks
   (`useLocalStorage`, `useSessionStorage`, `useHash`) no longer exist, so
   neither do their pages.
-- **i18n**: `@k8ordo/i18n`. `src/i18n.ts` is `defineLocales(['ja', 'en'])`
-  — the one place the list is spelled — plus the `Register` augmentation
+- **i18n**: `@k8ordo/i18n`. `src/i18n.ts` is `defineLocales({ ja: …, en: … })`
+  — the one place the list is spelled, with each locale's `timeZone`
+  (`Asia/Tokyo`, `UTC`) and `dir` — plus the `Register` augmentation
   that types every message against it, and `getLocale`. Messages live in
   `src/messages/<area>.ts`, one `message({ ja, en })` per export (a 3-level
   key became a group object: `m.components.button.description`), re-exported
@@ -133,9 +134,10 @@ pnpm check:write       # Oxlint/Oxfmt lint/format auto-fix
   that one component's group is `switchInput`.
 - **Styling**: Tailwind CSS 4, uses `@k8ordo/ui` design tokens
 - **Root provider**: `UIProvider` wraps each locale subtree in
-  `src/routes/[locale]/_parts/locale-shell.tsx`, passing `dictionaries[locale]`
-  from `@k8ordo/ui/i18n` as `messages`, so component built-in strings follow
-  the site locale
+  `src/routes/[locale]/_parts/locale-shell.tsx`, for toasts. Component
+  built-in strings follow the site locale on their own: `@k8ordo/ui` reads
+  `@k8ordo/i18n`'s current locale, and the shell importing `locales` is what
+  defines the set in the browser
 - **Where the browser is**: `usePathname()` from `@k8ordo/router`. Under the
   framework the browser holds no route table, so `useRoute` / `useParams` have
   no match to read — a page receives `params` as a prop, and anything else asks
@@ -161,7 +163,7 @@ src/
       ui/components/<name>/page.tsx
       ui/components/_previews/      # `_` never appears in a URL
   constants.ts         # Shared constants (e.g. STORYBOOK_URL)
-  components/          # Shared doc components (CodeBlock, PropsTable, etc.)
+  components/          # Shared doc components (ComponentPreview, PropsTable, etc.)
     framework-guide/   # topics @k8ordo/static and @k8ordo/server share, rendered per mode
   data/                # PACKAGES (packages.ts), the sidebars (components-nav, ai-nav), generated props (component-props)
   i18n.ts              # defineLocales + Register — the locale set
@@ -180,7 +182,7 @@ whose `page.tsx` default-exports the page, following this structure:
 
 1. **Title**: `<PageTitle name="Button" />` as the first child (see Titles above)
 2. **Header**: `Heading` + description via `<Rich>{m.components.x.description()}</Rich>` + Storybook link
-3. **Import section**: `CodeBlock` showing import statement
+3. **Import section**: `CodeBlock` (from `@k8ordo/ui/code-block`) showing the import statement
 4. **Usage section**: Multiple `ComponentPreview` blocks demonstrating variants, sizes, states, etc.
 5. **Props table**: `<PropsTable items={propsOf('Button')} inherits={inheritsOf('Button')} />` — read from the generated `@k8ordo/ui/props.json` through `src/data/component-props.ts`, never written by hand
 
@@ -253,12 +255,14 @@ grammar, which is why previews can live inside `routes/` at all.
 | `PackageExample`   | A landing's worked example           |
 | `DocPage`          | A package guide page, with its pager |
 | `DocSection`       | A guide page's h2 section            |
-| `CodeBlock`        | Syntax-highlighted code with Shiki   |
 | `ComponentPreview` | Live preview + code block combo      |
 | `PropsTable`       | Props documentation table            |
 | `Rich`             | Text with backtick spans as `<Code>` |
 | `InstallTabs`      | Package manager install command tabs |
 | `TokenCard`        | Design token display card            |
+
+Code samples are `@k8ordo/ui`'s own `CodeBlock` (`@k8ordo/ui/code-block`),
+highlighted on the server; the site keeps no highlighter of its own.
 
 ## The framework it runs on
 
@@ -276,4 +280,3 @@ framework is designed against.
 - **@k8ordo/ui** (workspace) for UI components
 - **@k8ordo/state** + **@k8ordo/form** (workspace) for the preferences and the live demos
 - **@k8ordo/i18n** + **@k8ordo/color-scheme** (workspace) for every message and the colour scheme
-- **shiki** for syntax highlighting

@@ -24,6 +24,21 @@ declare module 'virtual:k8ordo/routes' {
    * run for what they write, never to refuse it.
    */
   export const catchAllSchemas: SchemaStacks;
+  /**
+   * Per pattern, the `guard.ts` default exports that run before it answers,
+   * outer first; `/*` carries the root's.
+   */
+  export const guards: Readonly<
+    Record<
+      string,
+      ReadonlyArray<
+        (context: {
+          readonly request: Request;
+          readonly params: Readonly<Record<string, string>>;
+        }) => unknown
+      >
+    >
+  >;
 
   type SchemaStacks = Readonly<
     Record<

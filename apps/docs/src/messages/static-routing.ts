@@ -30,6 +30,11 @@ export const refusesActions = message({
   en: "A module that declares `'use server'`",
 });
 
+export const refusesGuards = message({
+  ja: '`guard.ts` がある',
+  en: 'A `guard.ts`',
+});
+
 export const refusesThrow = message({
   ja: 'ビルド中に throw したコンポーネント（Server Component はいつでも、クライアントコンポーネントは上に Suspense の境界が無いとき）',
   en: 'A component that throws while the build renders it — a Server Component always, a client component when no Suspense boundary sits above it',
