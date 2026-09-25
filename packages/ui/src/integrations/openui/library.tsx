@@ -9,9 +9,12 @@ import * as ui from '../_shared/renderers';
 import type * as sc from '../_shared/schemas';
 import {
   AutocompleteView,
+  CalendarView,
   CheckboxCardView,
   CheckboxGroupView,
   CheckboxView,
+  DateFieldView,
+  DatePickerView,
   ListBoxView,
   NumberFieldView,
   PaginationView,
@@ -139,6 +142,9 @@ const renderers = {
   PasswordInput: PasswordInputView,
   NumberField: NumberFieldView,
   Slider: SliderView,
+  DateField: DateFieldView,
+  DatePicker: DatePickerView,
+  Calendar: CalendarView,
   Checkbox: CheckboxView,
   Switch: SwitchView,
   Select: SelectView,

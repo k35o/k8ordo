@@ -22,9 +22,12 @@ import { Skeleton } from '../../components/feedback/skeleton';
 import { Spinner } from '../../components/feedback/spinner';
 import { ToastProvider, useToast } from '../../components/feedback/toast';
 import { Autocomplete } from '../../components/form/autocomplete';
+import { Calendar } from '../../components/form/calendar';
 import { Checkbox } from '../../components/form/checkbox';
 import { CheckboxCard } from '../../components/form/checkbox-card';
 import { CheckboxGroup } from '../../components/form/checkbox-group';
+import { DateField } from '../../components/form/date-field';
+import { DatePicker } from '../../components/form/date-picker';
 import { FileField } from '../../components/form/file-field';
 import { Form } from '../../components/form/form';
 import { FormControl } from '../../components/form/form-control';
@@ -116,6 +119,7 @@ import type {
   BadgeProps,
   BreadcrumbProps,
   ButtonProps,
+  CalendarProps,
   CardProps,
   CarouselProps,
   CheckboxCardProps,
@@ -123,6 +127,8 @@ import type {
   CheckboxProps,
   ChevronIconProps,
   CodeProps,
+  DateFieldProps,
+  DatePickerProps,
   GridProps,
   DialogProps,
   DrawerProps,
@@ -536,6 +542,83 @@ const LabeledField: FC<{
     </div>
   );
 };
+
+const DateFieldView: FC<{
+  props: DateFieldProps;
+  value: string;
+  onChange: (next: string) => void;
+}> = ({ props, value, onChange }) => (
+  <LabeledField label={props.label}>
+    {(labelId) => (
+      <DateField
+        aria-labelledby={labelId}
+        disabled={u(props.disabled)}
+        invalid={u(props.invalid)}
+        max={u(props.max)}
+        min={u(props.min)}
+        name={props.name}
+        onChange={(event) => {
+          onChange(event.target.value);
+        }}
+        required={u(props.required)}
+        value={value}
+      />
+    )}
+  </LabeledField>
+);
+
+export function renderDateField(
+  props: DateFieldProps,
+  value: string,
+  onChange: (next: string) => void,
+): ReactNode {
+  return <DateFieldView onChange={onChange} props={props} value={value} />;
+}
+
+const DatePickerView: FC<{
+  props: DatePickerProps;
+  value: string;
+  onChange: (next: string) => void;
+}> = ({ props, value, onChange }) => (
+  <LabeledField label={props.label}>
+    {(labelId) => (
+      <DatePicker
+        aria-labelledby={labelId}
+        disabled={u(props.disabled)}
+        invalid={u(props.invalid)}
+        max={u(props.max)}
+        min={u(props.min)}
+        name={props.name}
+        onChange={onChange}
+        required={u(props.required)}
+        value={value}
+      />
+    )}
+  </LabeledField>
+);
+
+export function renderDatePicker(
+  props: DatePickerProps,
+  value: string,
+  onChange: (next: string) => void,
+): ReactNode {
+  return <DatePickerView onChange={onChange} props={props} value={value} />;
+}
+
+export function renderCalendar(
+  props: CalendarProps,
+  value: string,
+  onChange: (next: string) => void,
+): ReactNode {
+  return (
+    <Calendar
+      max={u(props.max)}
+      min={u(props.min)}
+      onChange={onChange}
+      value={value === '' ? null : value}
+    />
+  );
+}
 
 const RadioView: FC<{
   props: RadioProps;
