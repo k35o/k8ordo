@@ -215,18 +215,24 @@ export const serve = async (options: ServeOptions = {}): Promise<Server> => {
 
   // ETag は更新時刻ではなく中身から作る。別々にビルドしたサーバーどうしでも、
   // 何も変えなかったデプロイの前後でも同じ値になり、再検証が 304 で終わる。
-  // 中身を読むのは 1 ファイル 1 回で、変わったら大きさか時刻が違うので読み直す
-  const etags = new Map<string, Promise<string>>();
+  // 中身を読むのは 1 ファイル 1 回。大きさか時刻が変わったら読み直して、
+  // そのファイルの記録を置き換える
+  const etags = new Map<
+    string,
+    {
+      readonly size: number;
+      readonly mtimeMs: number;
+      readonly etag: Promise<string>;
+    }
+  >();
   const etagOf = (
     file: string,
     { size, mtimeMs }: { size: number; mtimeMs: number },
   ): Promise<string> => {
-    const key = `${file}\0${String(size)}\0${String(mtimeMs)}`;
-    let etag = etags.get(key);
-    if (etag === undefined) {
-      etag = digest(file).then((hash) => `"${hash}"`);
-      etags.set(key, etag);
-    }
+    const known = etags.get(file);
+    if (known?.size === size && known.mtimeMs === mtimeMs) return known.etag;
+    const etag = digest(file).then((hash) => `"${hash}"`);
+    etags.set(file, { size, mtimeMs, etag });
     return etag;
   };
 
