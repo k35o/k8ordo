@@ -2,6 +2,7 @@
 
 import { parseForm } from '@k8ordo/form/server';
 import type { FormState } from '@k8ordo/form/server';
+import { cookies } from '@k8ordo/server/runtime';
 
 import { guestbookSchema } from './guestbook-schema';
 
@@ -22,6 +23,8 @@ export async function sign(
   const parsed = parseForm(guestbookSchema, formData);
   if (!parsed.success) return parsed.state;
   entries.push(parsed.data.name);
+  // 署名した人を覚えておく。members/guard.ts はこの cookie を見て通す
+  cookies().set('visitor', parsed.data.name);
   return {};
 }
 

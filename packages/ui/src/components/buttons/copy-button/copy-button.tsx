@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import type { FC } from 'react';
 
-import { useMessages } from '../../../i18n/context';
+import { getMessages } from '../../../i18n/current';
 import { AlertIcon, CheckIcon, CopyIcon } from '../../icons';
 import { Button } from '../button';
 import { IconButton } from '../icon-button';
@@ -20,7 +20,7 @@ export const CopyButton: FC<{
   size?: 'sm' | 'md' | 'lg';
   disabled?: boolean;
 }> = ({ value, label, iconOnly = false, size = 'md', disabled = false }) => {
-  const messages = useMessages();
+  const messages = getMessages();
   const [result, setResult] = useState<Result | null>(null);
 
   useEffect(() => {

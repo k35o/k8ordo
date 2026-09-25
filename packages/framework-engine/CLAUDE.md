@@ -157,10 +157,15 @@ ParamsSchemaFor<pattern>`, lists per page pattern the schemas along its
   `Symbol.for('k8ordo.request')` (`runtime/request-scope.ts`), because the
   mode package holds two copies of this module — the runtime the handler is
   built from and the `./runtime` entry the application imports
-  `responseHeaders()` from — and both must see the one request. What a guard
-  adds goes onto whatever the handler answers (`answer()`, a new `Response`,
-  since a redirect's headers cannot be written); the response API throws
-  outside a guard, because a page is a render. `@k8ordo/static` refuses
+  `responseHeaders()` from — and both must see the one request. Its phase
+  says what is running — `guard`, `action`, or the `render` — and the
+  response API (`cookies()`, `responseHeaders()`, `requestHeaders()`) throws
+  in the render and outside a request, because a page is a render. What a
+  guard or an action adds goes onto whatever the handler answers
+  (`answer()`, a new `Response`, since a redirect's headers cannot be
+  written); the cookie jar (`runtime/cookies.ts`) is one per request, so a
+  guard's write is what an action after it reads, and each write is one
+  `Set-Cookie` line, the last one per name, path and domain. `@k8ordo/static` refuses
   `guard.ts` (by name at build, per module in `vite dev`), reading the slot
   through `slotOf`.
 - **The request reaches a page only under a server.** `K8ORDO_MODE` is
@@ -226,7 +231,8 @@ src/
   runtime/pathname.ts        decodePathname, before a pathname may name a file
   runtime/redirect.ts        redirect() / redirect.ts targets
   runtime/request.ts         the read-only request a page receives
-  runtime/request-scope.ts   the request in progress: phases, responseHeaders(), answer()
+  runtime/request-scope.ts   the request in progress: phases, cookies() / responseHeaders() / requestHeaders(), answer()
+  runtime/cookies.ts         the per-request cookie jar and its Set-Cookie lines
   runtime/guard.ts           Guard / GuardContext, runGuards (outer first, first Response ends it)
   runtime/render.tsx         the matched stack, nested through children
   runtime/virtual.d.ts       types of virtual:k8ordo/routes and K8ORDO_MODE

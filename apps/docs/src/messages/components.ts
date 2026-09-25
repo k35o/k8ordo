@@ -498,8 +498,8 @@ export const calendar = {
     en: 'Language and today',
   }),
   localeDescription: message({
-    ja: '月名・曜日名・週の始まりはページの言語（`<html lang>`）に従います。今日は閲覧者のタイムゾーンでしか決まらないので、カレンダーはブラウザでだけ描かれ、サーバーは同じ寸法の空の箱を書きます。',
-    en: 'Month and weekday names, and the first day of the week, follow the page language (`<html lang>`). Today depends on the visitor’s time zone, so the calendar renders in the browser alone; the server writes an empty box of the same size.',
+    ja: '月名・曜日名・週の始まりは、組み込みの文言と同じロケール（`@k8ordo/i18n` の今のロケール）に従います。今日は閲覧者のタイムゾーンでしか決まらないので、カレンダーはブラウザでだけ描かれ、サーバーは同じ寸法の空の箱を書きます。',
+    en: 'Month and weekday names, and the first day of the week, follow the same locale as the built-in wording (`@k8ordo/i18n`’s current locale). Today depends on the visitor’s time zone, so the calendar renders in the browser alone; the server writes an empty box of the same size.',
   }),
 };
 

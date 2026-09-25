@@ -37,8 +37,9 @@ build time, which is why its guide installs it with `-D`.
 The package has three entries, split by where the code runs.
 `@k8ordo/server` is the plugin, for `vite.config.ts`, and loads Vite.
 `@k8ordo/server/runtime` is what code inside the request handler imports —
-`redirect()`, `responseHeaders()`, and the `RedirectTarget`, `RouteRequest`
-and `Guard` types — and needs nothing from Node, so it goes wherever the
+`redirect()`, `cookies()`, `responseHeaders()`, `requestHeaders()`, and the
+`RedirectTarget`, `RouteRequest` and `Guard` types — and needs nothing from
+Node, so it goes wherever the
 handler goes.
 `@k8ordo/server/serve` is `serve`, the Node.js server for a build. Neither of
 the last two loads Vite, so the built application runs from an install
@@ -860,6 +861,29 @@ never _reach_. The client only ever receives a reference to an action, so the
 two do not collide — but the mark belongs on what the action reads: keep
 secrets and database clients in a `*.server.ts` module and import that.
 
+An action answers the request as much as a guard does, so it has the same
+API: `cookies()` to read and write the cookies, `responseHeaders()` to add to
+the answer, and `requestHeaders()` for the headers the request arrived with —
+an action is handed its arguments, not the request.
+
+```ts
+'use server';
+
+import { cookies, redirect } from '@k8ordo/server/runtime';
+
+export async function signIn(_previous: FormState, formData: FormData) {
+  const session = await startSession(formData);
+  if (session === null) return { error: 'wrong password' };
+  cookies().set('session', session.token, { maxAge: 60 * 60 * 24 * 30 });
+  redirect('/account');
+}
+```
+
+What an action writes goes on its answer: the page it re-rendered, the `303`
+to where it redirected, or the payload the client runtime applies. The page
+re-rendered after it sees the cookies the request carried in `request`, not
+what the action wrote.
+
 Calling the action re-renders the page and sends both answers back together,
 so the screen is up to date by the time the caller has its value — one round
 trip, not two.
@@ -879,10 +903,11 @@ run outer first, one at a time:
 
 ```ts
 // src/routes/admin/guard.ts
+import { cookies } from '@k8ordo/server/runtime';
 import type { Guard } from '@k8ordo/server/runtime';
 
-const guard: Guard<'/admin'> = ({ request }) => {
-  if (request.headers.get('cookie')?.includes('session=') === true) return;
+const guard: Guard<'/admin'> = () => {
+  if (cookies().has('session')) return;
   return new Response(null, { status: 303, headers: { location: '/login' } });
 };
 
@@ -915,8 +940,8 @@ export default function guard() {
 ```
 
 A header the answer already carries is replaced. `responseHeaders()` works
-while a guard runs and throws anywhere else — a page is a render, and a render
-that wrote the response would be a second handler.
+while a guard or a Server Action runs and throws anywhere else — a page is a
+render, and a render that wrote the response would be a second handler.
 
 There is no `next()` that runs the page and hands its answer back to be
 rewritten: a page streams, and its headers are on the wire before its body is
@@ -933,6 +958,37 @@ posted to whichever URL calls it — so an action checks what it needs itself.
 The guards run after the params schemas have matched the URL, so a guard
 under `[locale]` runs in the locale the URL names, and before the Server
 Action a `POST` carries.
+
+## Cookies
+
+`cookies()` is the request's cookies, to read and to write, from a
+`guard.ts` or a Server Action:
+
+```ts
+import { cookies } from '@k8ordo/server/runtime';
+
+cookies().get('session'); // string | undefined
+cookies().set('session', token, { maxAge: 60 * 60 * 24 });
+cookies().delete('session');
+```
+
+A read sees what the request carried, with what was set or deleted earlier in
+the same request — a guard's write is what a Server Action after it reads —
+and every write reaches the browser as a `Set-Cookie` on the answer, whatever
+the answer is. A cookie written twice at the same path and domain is said
+once, the last way.
+
+`set` takes `path`, `domain`, `maxAge` (seconds), `expires`, `httpOnly`,
+`secure` and `sameSite` (`'strict' | 'lax' | 'none'`, the last only with
+`secure`). The defaults are what a session wants: `path: '/'`,
+`httpOnly: true`, `secure: true` and `sameSite: 'lax'`. `localhost` counts as
+secure to the browsers that matter; anywhere else served over plain HTTP,
+say `secure: false`. A name outside RFC 6265's token characters throws.
+`delete` takes the `path` and `domain` the cookie was set with, since those
+are what a browser keys it by.
+
+A page never writes a cookie: it reads `request.cookies` from its props, the
+cookies the request carried.
 
 ## Reading the request
 
@@ -962,7 +1018,8 @@ it as a prop.
 Nothing lets a page write to the response — no status, no `Set-Cookie` —
 because a page is a render, and a render that answered the request would be
 a second handler. What the response carries beyond the page is decided before
-it renders, in a `guard.ts`.
+it renders, in a `guard.ts`, or by the Server Action a `POST` carries;
+`cookies()` there is what writes a cookie.
 
 The field exists only under this mode: the generated `Page` and `Layout`
 types carry it here and not under `@k8ordo/static`, so a page that reads it
