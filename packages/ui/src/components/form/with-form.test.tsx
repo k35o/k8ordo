@@ -66,7 +66,9 @@ function Harness<F extends string, A extends string>({
   );
 }
 
-// FormControl のラベルは必須のバッジまで名前に含むので、前方で引く
+// FormControl のラベルは必須のバッジまで名前に含むので、前方で引く。
+// このプロジェクトはロケール集合を定義しないので、バッジを含む組み込みの
+// 文言は英語になる
 const labelled = (label: string) =>
   page.getByLabelText(label, { exact: false });
 
@@ -280,17 +282,17 @@ describe('PasswordInput', () => {
 
   it('導かれた type="password" を広げても、表示の切り替えが効く', async () => {
     const screen = await render(<Login />);
-    const input = labelled('パスワード必須');
+    const input = labelled('パスワード');
 
     await expect.element(input).toHaveAttribute('type', 'password');
-    await screen.getByRole('button', { name: 'パスワードを表示' }).click();
+    await screen.getByRole('button', { name: 'Show password' }).click();
     await expect.element(input).toHaveAttribute('type', 'text');
   });
 
   it('短いまま離れると zod の文言を出す', async () => {
     await render(<Login />);
 
-    await userEvent.fill(labelled('パスワード必須'), 'abc');
+    await userEvent.fill(labelled('パスワード'), 'abc');
     await userEvent.tab();
 
     await expect
@@ -301,12 +303,12 @@ describe('PasswordInput', () => {
   it('送信に失敗しても、入力したパスワードは描き直さない', async () => {
     await render(<Login />);
 
-    await userEvent.fill(labelled('パスワード必須'), 'correct-horse');
+    await userEvent.fill(labelled('パスワード'), 'correct-horse');
     await refuseOnServer();
     submit();
 
     await expect.poll(() => errorShown('却下されました')).toBe(true);
-    await expect.element(labelled('パスワード必須')).toHaveValue('');
+    await expect.element(labelled('パスワード')).toHaveValue('');
   });
 });
 
@@ -925,7 +927,7 @@ describe('Autocomplete', () => {
     submit();
     await expect.poll(() => errorShown('却下されました')).toBe(true);
     await expect
-      .element(screen.getByRole('button', { name: 'タグを削除' }))
+      .element(screen.getByRole('button', { name: 'Remove tag' }))
       .toBeInTheDocument();
 
     await choose('React');
@@ -1005,7 +1007,7 @@ describe('NumberField', () => {
     await userEvent.fill(labelled('個数'), '15');
 
     expect(countInput().validity.valid).toBe(false);
-    expect(countInput().validationMessage).toBe('10 以下で入力してください');
+    expect(countInput().validationMessage).toBe('Enter 10 or less');
     expect(countInput().form?.checkValidity()).toBe(false);
   });
 
@@ -1017,7 +1019,7 @@ describe('NumberField', () => {
     await expect.poll(() => errorShown('数値を入力してください')).toBe(true);
 
     await userEvent.type(labelled('個数'), '0');
-    await expect.poll(() => errorShown('1 以上で入力してください')).toBe(true);
+    await expect.poll(() => errorShown('Enter 1 or more')).toBe(true);
   });
 
   it('矢印キーで変えた値を form が知る', async () => {
@@ -1178,7 +1180,7 @@ describe('FileField', () => {
 
     await userEvent.upload(labelled('アバター'), picture());
     await expect.poll(isDirty).toBe('true');
-    await screen.getByRole('button', { name: 'ファイルを削除' }).click();
+    await screen.getByRole('button', { name: 'Remove file' }).click();
     await expect.poll(isDirty).toBe('false');
     submit();
 
