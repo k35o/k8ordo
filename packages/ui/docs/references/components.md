@@ -723,6 +723,8 @@ Props:
 
 The label is passed as the `label` prop, not as children. `onChange` is `(checked, event)`.
 
+`itemValue` is the input's `value`: the string a checked box submits under its `name`. Without it the box renders no `value` and submits the browser's default, `on`. There is no `value` prop — on a checkbox it is easily mistaken for the checked state, which is `checked`.
+
 ```tsx
 import { Checkbox } from '@k8ordo/ui';
 
@@ -731,6 +733,9 @@ import { Checkbox } from '@k8ordo/ui';
 
 // Uncontrolled
 <Checkbox defaultChecked label="I agree" />
+
+// Submits inStock=true when checked, instead of inStock=on
+<Checkbox itemValue="true" label="In stock only" name="inStock" />
 ```
 
 Props:
