@@ -37,6 +37,10 @@ export const en: Messages = {
   paginationPrevious: 'Previous',
   paginationNext: 'Next',
 
+  codeBlockCopy: 'Copy code',
+  copied: 'Copied',
+  copyFailed: 'Could not copy',
+
   chat: 'Chat',
   scrollToLatest: 'Scroll to latest message',
   reasoning: 'Reasoning',
