@@ -1,6 +1,7 @@
 import type { Match } from '@k8ordo/router';
 import type { ComponentType, ReactNode } from 'react';
 
+import { PageBoundary } from './page-boundary';
 import type { RouteRequest } from './request';
 
 export type PageProps = {
@@ -33,24 +34,36 @@ export type PageProps = {
  * `not-found.tsx` renders under it whether or not its schemas accepted, so a
  * layout receives the strings the pathname carried, which is what its type
  * says.
+ *
+ * `page`, when given, renders in the leaf's place — the page, watched — inside
+ * the boundary that sends a client navigation's `notFound()` back to the
+ * server.
  */
 export const renderMatch = (
   match: Match,
   pathname: string,
   params: Readonly<Record<string, unknown>> = match.params,
   request?: RouteRequest,
+  page?: ComponentType<never>,
 ): ReactNode => {
   let node: ReactNode = null;
   for (let index = match.stack.length - 1; index >= 0; index -= 1) {
+    const leaf = index === match.stack.length - 1;
     // The table stores components of every shape; this renderer is the one
     // that states what it passes.
-    const Component = match.stack[index] as ComponentType<PageProps>;
-    const own = index === match.stack.length - 1 ? params : match.params;
+    const Component = (
+      leaf && page !== undefined ? page : match.stack[index]
+    ) as ComponentType<PageProps>;
     node = (
-      <Component params={own} pathname={pathname} request={request}>
+      <Component
+        params={leaf ? params : match.params}
+        pathname={pathname}
+        request={request}
+      >
         {node}
       </Component>
     );
+    if (leaf && page !== undefined) node = <PageBoundary>{node}</PageBoundary>;
   }
   return node;
 };

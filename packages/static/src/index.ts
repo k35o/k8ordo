@@ -5,6 +5,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import {
   engine,
   isServerActionModule,
+  NOT_FOUND_HEADER,
   parseRouteTree,
   payloadPathFor,
   scanRoutes,
@@ -178,6 +179,9 @@ export const framework = (options: StaticOptions = {}): PluginOption[] => {
         // handler answers it the way it answers any unknown URL; here that
         // answer is a build error naming the pathname.
         const refused: string[] = [];
+        // The same for a page that said notFound(): the pathname was supplied
+        // for a page the application then disowned.
+        const disowned: string[] = [];
         // A page that threw while rendering: the handler answers 500 with
         // the message, and a build that wrote it would ship the failure.
         const failed: string[] = [];
@@ -189,12 +193,14 @@ export const framework = (options: StaticOptions = {}): PluginOption[] => {
             const dir = path.join(clientDir, dirFor(pathname));
             return [
               async () => {
-                const status = await write(
+                const { status, notFound } = await write(
                   path.join(dir, 'index.html'),
                   handler,
                   `${ORIGIN}${pathname}`,
                 );
-                if (status === 404) refused.push(pathname);
+                if (status === 404) {
+                  (notFound ? disowned : refused).push(pathname);
+                }
                 if (status === 500) failed.push(pathname);
                 if (status === 307 || status === 308) redirected.add(pathname);
                 // A redirect has no payload: a client navigation to it finds
@@ -216,7 +222,7 @@ export const framework = (options: StaticOptions = {}): PluginOption[] => {
         // would mean nothing in this mode.
         const unmatched = catchAllPath(tree);
         if (unmatched !== null) {
-          const status = await write(
+          const { status } = await write(
             path.join(clientDir, '404.html'),
             handler,
             `${ORIGIN}${unmatched}`,
@@ -231,6 +237,11 @@ export const framework = (options: StaticOptions = {}): PluginOption[] => {
         if (refused.length > 0) {
           throw new Error(
             `the "paths" option supplied pathnames a params schema refused: ${refused.toSorted().join(', ')}`,
+          );
+        }
+        if (disowned.length > 0) {
+          throw new Error(
+            `the "paths" option supplied pathnames whose page called notFound(): ${disowned.toSorted().join(', ')}`,
           );
         }
         // The build knows every page it wrote, which is what a sitemap is.
@@ -299,18 +310,25 @@ const inParallel = async (
   );
 };
 
+type Written = {
+  readonly status: number;
+  /** The page itself said notFound(), rather than a schema refusing it. */
+  readonly notFound: boolean;
+};
+
 /** Writes what the handler answered, and says with which status. */
 const write = async (
   file: string,
   handler: Handler,
   url: string,
-): Promise<number> => {
+): Promise<Written> => {
   const response = await handler(new Request(url));
+  const notFound = response.headers.has(NOT_FOUND_HEADER);
   // A page that failed to render is not a page: nothing is written, and the
   // caller stops the build with its name.
   if (response.status === 500) {
     console.error(`k8ordo: ${url} — ${await response.text()}`);
-    return response.status;
+    return { status: response.status, notFound };
   }
   await mkdir(path.dirname(file), { recursive: true });
   const location = response.headers.get('location');
@@ -322,5 +340,5 @@ const write = async (
   } else {
     await writeFile(file, Buffer.from(await response.arrayBuffer()));
   }
-  return response.status;
+  return { status: response.status, notFound };
 };

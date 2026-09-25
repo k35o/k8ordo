@@ -1,4 +1,8 @@
-import { declaredPatterns, decodePathname } from '@k8ordo/framework-engine';
+import {
+  declaredPatterns,
+  decodePathname,
+  NOT_FOUND_SEGMENT,
+} from '@k8ordo/framework-engine';
 import type { RouteDir } from '@k8ordo/framework-engine';
 import { normalizePathname } from '@k8ordo/router';
 
@@ -13,8 +17,6 @@ export const patternsOf = (dir: RouteDir): string[] =>
 
 export const isConcrete = (pattern: string): boolean =>
   !pattern.includes(':') && !pattern.includes('*');
-
-const SENTINEL = '__k8ordo-not-found__';
 
 /**
  * Every catch-all the table declares. A static host answers every URL it does
@@ -45,14 +47,17 @@ export const catchAllPath = (dir: RouteDir): string | null => {
     .slice(0, -'/*'.length)
     .split('/')
     .filter(Boolean)
-    .map((segment) => (segment.startsWith(':') ? SENTINEL : segment));
+    .map((segment) => (segment.startsWith(':') ? NOT_FOUND_SEGMENT : segment));
   const depth = Math.max(
     prefix.length + 1,
     ...patternsOf(dir)
       .filter((each) => !each.endsWith('/*'))
       .map((each) => each.split('/').filter(Boolean).length + 1),
   );
-  const filler = Array.from({ length: depth - prefix.length }, () => SENTINEL);
+  const filler = Array.from(
+    { length: depth - prefix.length },
+    () => NOT_FOUND_SEGMENT,
+  );
   return `/${[...prefix, ...filler].join('/')}`;
 };
 
