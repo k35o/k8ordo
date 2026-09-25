@@ -8,8 +8,10 @@ function — `message({ ja: 'ホーム', en: 'Home' })` — that reads the local
 where it is called: the request on the server, the URL in the browser. So the
 same line renders in a Server Component and in a Client Component, there is
 no provider and no hook, and a bundler keeps only the messages a client module
-names. No message grammar: interpolation is a template literal and plurals are
-`Intl.PluralRules`.
+names. No message grammar: interpolation is a template literal, and plurals,
+dates and numbers are `Intl`, drawn for the current locale by the set
+(`locales.pluralRules()`, `locales.dateTimeFormat()`, …) — a date always in
+that locale's time zone, so the server's HTML and the browser agree.
 
 Like every [k8ordo](https://ordo.k8o.me) package it assumes React 19 and Server
 Components, uses only what has reached Baseline newly available, and ships no
@@ -130,7 +132,9 @@ The locale set is declared once with `defineLocales` and registered through
 `Register`; each message is a `message({ ja, en })` export, called where it
 renders — the same call in a Server and a Client Component. There is no
 provider, no hook and no message grammar: never pass the locale down as a
-prop, interpolate inside the message's own function, and from a Server
+prop, interpolate inside the message's own function, format dates and numbers
+with `locales.dateTimeFormat()` / `numberFormat()` / `pluralRules()` (never a
+bare `Intl.DateTimeFormat` without the locale's time zone), and from a Server
 Component hand a `'use client'` component the called string, not the message.
 ```
 
