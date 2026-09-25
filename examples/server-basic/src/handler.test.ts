@@ -1,4 +1,5 @@
 import { execFileSync } from 'node:child_process';
+import { readdir } from 'node:fs/promises';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
@@ -232,6 +233,18 @@ describe('the built request handler', () => {
 });
 
 describe('the deployed application', () => {
+  it('ships every script compressed ahead of time, beside itself', async () => {
+    const assets = await readdir(path.join(root, 'dist', 'client', 'assets'));
+    const scripts = assets.filter((name) => name.endsWith('.js'));
+    expect(scripts.length).toBeGreaterThan(0);
+    expect(assets.filter((name) => name.endsWith('.js.br'))).toStrictEqual(
+      scripts.map((name) => `${name}.br`),
+    );
+    expect(assets.filter((name) => name.endsWith('.js.gz'))).toStrictEqual(
+      scripts.map((name) => `${name}.gz`),
+    );
+  });
+
   it('serves a page with only its production dependencies installed', () => {
     const output = execFileSync(
       process.execPath,
