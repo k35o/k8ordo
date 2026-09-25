@@ -1,4 +1,4 @@
-import type { RouteOf } from '@k8ordo/router';
+import type { NavigablePath } from '@k8ordo/router';
 
 /**
  * The app-side hook for typed route paths. An application augments this once,
@@ -11,27 +11,35 @@ import type { RouteOf } from '@k8ordo/router';
  * }
  * ```
  *
- * and every `href()` in the app is constrained to the table's linkable paths.
- * A router that is not `@k8ordo/router` registers its path union directly —
- * `interface Register { path: Route }` with `Route` from `next` — which is
- * also what the framework's generator emitted before `routes` existed.
- * Declared as an interface — the one exception to the repository's type-only
- * rule — because declaration merging is the entire mechanism.
+ * and every `href()` in the app is checked against the table's linkable
+ * patterns. A router that is not `@k8ordo/router` registers its path union
+ * directly — `interface Register { path: Route }` with `Route` from `next` —
+ * which is also what the framework's generator emitted before `routes`
+ * existed. Declared as an interface — the one exception to the repository's
+ * type-only rule — because declaration merging is the entire mechanism.
  */
 // oxlint-disable-next-line typescript/consistent-type-definitions, typescript/no-empty-object-type -- augmentation needs a merge-open interface
 export interface Register {}
 
 /**
- * The path union a `Register` shape yields: the table's linkable paths when
- * it carries `routes`, the union as given when it carries `path`, and any
- * `/`-path when it carries neither. `RouteOf` is imported as a type only, so
- * `@k8ordo/router` is never loaded at runtime and stays an optional peer.
+ * `Path` when the router a `Register` shape describes accepts it, `never`
+ * when it does not: matched against the table's linkable patterns segment by
+ * segment when it carries `routes`, against the union as given when it
+ * carries `path`, and any `/`-path when it carries neither. `NavigablePath`
+ * is imported as a type only, so `@k8ordo/router` is never loaded at runtime
+ * and stays an optional peer.
  */
-export type PathFrom<R> = R extends { routes: infer Routes }
-  ? RouteOf<Routes>
+export type AcceptedPath<R, Path extends string> = R extends {
+  routes: infer Routes;
+}
+  ? NavigablePath<Routes, Path>
   : R extends { path: infer P extends string }
-    ? P
-    : `/${string}`;
+    ? Path extends P
+      ? Path
+      : never
+    : Path extends `/${string}`
+      ? Path
+      : never;
 
-/** `href()`'s path constraint: the registered route type, or any `/`-path. */
-export type RegisteredPath = PathFrom<Register>;
+/** `href()`'s path check: `Path` when the registered router accepts it. */
+export type RegisteredPath<Path extends string> = AcceptedPath<Register, Path>;

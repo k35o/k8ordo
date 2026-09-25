@@ -229,6 +229,7 @@ const SIGNUP_ACTION = `// src/routes/signup/_parts/actions.ts
 
 import { parseForm } from '@k8ordo/form/server';
 import type { FormState } from '@k8ordo/form/server';
+import { href } from '@k8ordo/router';
 import { redirect } from '@k8ordo/server/runtime';
 
 import { createAccount } from './accounts.server';
@@ -241,11 +242,11 @@ export async function signUp(
   const parsed = parseForm(signup, formData);
   if (!parsed.success) return parsed.state;
   await createAccount(parsed.data);
-  redirect('/welcome');
+  redirect(href('/welcome'));
 }`;
 
 export default function FormValidationPage() {
-  const demoFields = formFields(signupDefinition());
+  const demoFields = formFields(signupDefinition);
   const demoData = JSON.stringify(
     { fields: { handle: demoFields.fields.handle }, rules: demoFields.rules },
     null,
@@ -314,6 +315,9 @@ export default function FormValidationPage() {
           </li>
           <li className="list-disc">
             <Rich>{m.formValidation.lifeInput()}</Rich>
+          </li>
+          <li className="list-disc">
+            <Rich>{m.formValidation.lifeSubmit()}</Rich>
           </li>
           <li className="list-disc">
             <Rich>{m.formValidation.lifeOrder()}</Rich>
@@ -479,6 +483,9 @@ export default function FormValidationPage() {
         <ul className="text-fg-mute flex flex-col gap-2 pl-6">
           <li className="list-disc">
             <Rich>{m.formValidation.rulesClient()}</Rich>
+          </li>
+          <li className="list-disc">
+            <Rich>{m.formValidation.rulesMessage()}</Rich>
           </li>
           <li className="list-disc">
             <Rich>{m.formValidation.rulesStrings()}</Rich>
