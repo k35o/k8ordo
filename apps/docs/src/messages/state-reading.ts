@@ -324,6 +324,11 @@ export const beforeNullNotObject = message({
   en: 'the value is not an object (a number, a string, an array, `null`)',
 });
 
+export const beforeNullVersion = message({
+  ja: '版を持つ定義で、行がほかの版で書かれている（移行はストアが読むまで行われません）',
+  en: 'the definition is versioned and the row was written by another version — migrating waits for the store to read it',
+});
+
 export const beforeNullBlocked = message({
   ja: 'ストレージ自体が読めない',
   en: 'storage itself cannot be read',

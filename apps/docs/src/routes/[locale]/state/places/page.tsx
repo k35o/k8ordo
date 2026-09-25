@@ -149,6 +149,25 @@ export function PaletteButton() {
   );
 }`;
 
+const PREFS_VERSIONED = `// src/state/prefs.ts
+import { defineLocalState } from '@k8ordo/state';
+import * as z from 'zod/mini';
+
+export const prefsState = defineLocalState(
+  'prefs',
+  z.object({
+    view: z._default(z.enum(['grid', 'table']), 'grid'),
+    pageSize: z._default(z.number(), 20),
+  }),
+  {
+    version: 1,
+    migrate: (old) => ({
+      view: old['layout'] === 'list' ? 'table' : 'grid',
+      pageSize: old['pageSize'],
+    }),
+  },
+);`;
+
 const CATALOG_CLASSIC = `// src/state/catalog.ts
 import { definePageState } from '@k8ordo/state';
 import * as z from 'zod';
@@ -549,6 +568,36 @@ export default function StatePlacesPage() {
       </DocSection>
 
       <DocSection
+        description={m.statePlaces.versionDescription}
+        title={m.statePlaces.versionTitle}
+      >
+        <CodeBlock code={PREFS_VERSIONED} lang="ts" />
+        <ul className="text-fg-mute flex flex-col gap-2 pl-6">
+          <li className="list-disc">
+            <Rich>{m.statePlaces.versionEnvelope()}</Rich>
+          </li>
+          <li className="list-disc">
+            <Rich>{m.statePlaces.versionMigrate()}</Rich>
+          </li>
+          <li className="list-disc">
+            <Rich>{m.statePlaces.versionServer()}</Rich>
+          </li>
+          <li className="list-disc">
+            <Rich>{m.statePlaces.versionNewer()}</Rich>
+          </li>
+          <li className="list-disc">
+            <Rich>{m.statePlaces.versionThrow()}</Rich>
+          </li>
+          <li className="list-disc">
+            <Rich>{m.statePlaces.versionShape()}</Rich>
+          </li>
+        </ul>
+        <p className="text-fg-mute leading-relaxed">
+          <Rich>{m.statePlaces.versionNone()}</Rich>
+        </p>
+      </DocSection>
+
+      <DocSection
         description={m.statePlaces.zodDescription}
         title={m.statePlaces.zodTitle}
       >
@@ -606,6 +655,13 @@ export default function StatePlacesPage() {
               cells: [
                 <Code key="type">StateSchema</Code>,
                 <Rich key="holds">{types.stateSchema()}</Rich>,
+              ],
+            },
+            {
+              key: 'versioning',
+              cells: [
+                <Code key="type">Versioning</Code>,
+                <Rich key="holds">{types.versioning()}</Rich>,
               ],
             },
             {
