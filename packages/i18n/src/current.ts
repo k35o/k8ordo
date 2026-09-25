@@ -11,6 +11,8 @@
  * In the browser the URL is the locale: its first segment, read when asked.
  */
 
+import type { RegisteredLocale } from './register';
+
 export type LocaleStorage = {
   getStore: () => string | undefined;
   enterWith: (locale: string) => void;
@@ -74,11 +76,11 @@ const browserSegment = (): string =>
 export const setRegistered = (): boolean => global[SET_KEY] !== undefined;
 
 /**
- * The current locale as a string, or `null` when nothing names one: no
+ * The locale named where this runs, or `null` when nothing names one: no
  * segment in the URL, no request in progress. A registered set makes an
  * unknown segment `null` too, so `/fr/…` does not read as a locale.
  */
-export const currentLocale = (): string | null => {
+export const namedLocale = (): string | null => {
   const set = global[SET_KEY];
   const named = inBrowser ? browserSegment() : localeStorage()?.getStore();
   if (named === undefined || named === '') return null;
@@ -89,3 +91,17 @@ export const currentLocale = (): string | null => {
 /** The registered default, when a set registered in this environment. */
 export const registeredDefault = (): string | null =>
   global[SET_KEY]?.default ?? null;
+
+/**
+ * The current locale as the application's set resolves it — the one named,
+ * else the set's default — or `null` when no set is defined in this
+ * environment. For a library rendering inside an application it does not
+ * know (`@k8ordo/ui`'s built-in text): an application that never defined a
+ * set has no locale, whatever its URL happens to start with, so the server
+ * and the browser both answer `null` and agree.
+ */
+export const currentLocale = (): RegisteredLocale | null => {
+  const set = global[SET_KEY];
+  if (set === undefined) return null;
+  return (namedLocale() ?? set.default) as RegisteredLocale;
+};
