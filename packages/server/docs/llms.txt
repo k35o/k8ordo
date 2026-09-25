@@ -57,3 +57,8 @@ When installed via npm, these docs live under `node_modules/@k8ordo/server/docs/
   from its runtime but `AsyncLocalStorage` (`node:async_hooks`), so Node.js,
   Bun, Deno and Cloudflare Workers with `nodejs_compat` run it directly; the
   host serves `dist/client/` in front of it.
+- `@k8ordo/server/vercel` — `vercel()` returns a Vite plugin to put beside
+  `framework()`: `vite build` then also writes `.vercel/output/` (Build Output
+  API v3) for `vercel build` / `vercel deploy --prebuilt` — the client build as
+  static files at Vite's `base` (`assets/` immutable), and the request handler as one streaming
+  Node.js function built with every dependency bundled in.

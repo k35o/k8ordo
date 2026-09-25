@@ -570,6 +570,25 @@ name a file inside the build output, whatever it is spelled like — traversal
 is not a case weighed per request but an outcome the path resolution cannot
 produce.
 
+**Nothing is compressed twice, or sent twice.** `vite build` writes a Brotli
+and a gzip copy beside every file of the client build whose type compresses
+(`app-1a2b.js.br`, `app-1a2b.js.gz`, each kept only when it came out
+smaller), and `serve` sends the one the request's `Accept-Encoding` prefers —
+`br` when both are equally welcome — with `Vary: Accept-Encoding`. Every file
+carries an `ETag` taken from its contents, not its modification time, so a
+revalidation against a deploy that did not change the file, or against another
+server built from the same source, ends in a `304`; the contents are read for
+it once per file. A `Range` asking for one span of a file is answered with
+`206` — what Safari needs before it will play a `<video>` — a range past the
+end with `416`, and anything else (several spans, a `Range` that cannot be
+read, an `If-Range` naming another version) with the whole file.
+
+A page and its payload are compressed as they stream, under the same
+negotiation: every part React writes is flushed as it is written, so the
+shell reaches the browser before the slowest boundary has finished rendering.
+An answer in a type that is compressed already (an image), one the handler
+encoded itself, or one marked `Cache-Control: no-transform` is sent as it is.
+
 When the handler throws, `serve` answers `500` with the body `internal
 error` and logs what was thrown (`k8ordo: GET /products/1 failed`): the
 details are for whoever runs the server, not for the visitor. A body that
@@ -645,6 +664,36 @@ calling your functions with your visitor's cookies; anything else is answered
 with a `403`. Behind a proxy that means passing the public host through;
 `serve` reads it from the request's own `Host` header, so a proxy in front of
 it has to pass the original `Host` on unchanged.
+
+### Deploying to Vercel
+
+```ts
+// vite.config.ts
+import { framework } from '@k8ordo/server';
+import { vercel } from '@k8ordo/server/vercel';
+import { defineConfig } from 'vite';
+
+export default defineConfig({ plugins: [framework(), vercel()] });
+```
+
+With `vercel()` beside `framework()`, `vite build` also writes
+`.vercel/output/` in the shape of Vercel's Build Output API (v3), which
+`vercel build` and `vercel deploy --prebuilt` deploy as it is. The client
+build becomes static files on Vercel's CDN — a file under `assets/` is sent
+`immutable` once a file has answered, so a missing one is never cached — and
+every request that names no file goes to one Node.js function, the request
+handler, handed to Vercel as `fetch` and streaming its answer. Under a
+`base` the static files sit below it, as `serve` hands them out, and the
+handler answers every URL outside it with a `404`. The copies compressed for
+`serve` are left out: Vercel compresses on its own, and each is one more file
+to upload.
+
+**The function carries everything it imports.** A Vercel function holds
+nothing but its own directory, so under `vercel()` the handler is built with
+every dependency bundled in. A dependency that ships a native binary, or that
+reads its own files by path, cannot be bundled that way and does not work
+there. Each build replaces `.vercel/output/` and nothing else: the project link
+`vercel pull` writes beside it stays.
 
 <!-- shared:deploys -->
 

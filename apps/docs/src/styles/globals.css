@@ -10,24 +10,6 @@
 @import '@fontsource-variable/noto-sans-jp';
 
 /*
- * Background shared by the live preview area and the Shiki code block so they
- * read as one panel. Values mirror the Shiki themes used in CodeBlock
- * (min-light / min-dark); #1f1f1f sits between bg-surface (gray-950) and
- * bg-base (gray-800), so cards still read against it.
- */
-:root {
-  --preview-bg: #ffffff;
-}
-
-.dark {
-  --preview-bg: #1f1f1f;
-}
-
-@theme inline {
-  --color-preview-bg: var(--preview-bg);
-}
-
-/*
  * tokens.css の @theme inline は --font-noto-sans-jp / --font-m-plus-2 を参照
  * するが、フォント変数自体の定義は利用側の責務。ここで定義することで
  * font-noto-sans-jp / font-m-plus-2 ユーティリティが有効になる。

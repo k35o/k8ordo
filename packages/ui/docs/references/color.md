@@ -7,7 +7,7 @@ in a calm tone.
 
 - **An OKLCH palette**: every color is defined in OKLCH. The chromatic hues share one lightness (L) scale, so a step number gives close to the same contrast whatever the hue; gray has a scale of its own
 - **A vivid palette, calm tokens**: the palette itself stays vivid; the semantic tokens map it down to a restrained tone
-- **Contrast**: text tokens hold WCAG AAA (7:1 or better) on the page and card grounds; `fg-subtle` and brand text on `*-bg` / `*-bg-mute` / `*-bg-emphasize` stop short of it — see [Contrast](#contrast)
+- **Contrast**: text tokens hold WCAG AAA (7:1 or better) on the page and card grounds; `fg-subtle` and brand text on `*-bg` / `*-bg-mute` / `*-bg-emphasize` stop short of it but hold AA for normal text, in light and in dark — see [Contrast](#contrast)
 - **The 60-30-10 rule**: 60% neutral (greys), 30% supporting (`bg-subtle`, …), 10% accent (primary)
 - Primary is teal (H:180), secondary is cyan (H:210)
 - Dark mode is designed as its own tone, not as an inversion of light mode
@@ -82,10 +82,10 @@ the browser maps them to what the display can show.
 | Tailwind class            | Light    | Dark     | Use                       |
 | ------------------------- | -------- | -------- | ------------------------- |
 | `text-primary-fg`         | teal-800 | teal-300 | Primary text              |
-| `bg-primary-bg`           | teal-200 | teal-800 | Primary background        |
+| `bg-primary-bg`           | teal-200 | teal-900 | Primary background        |
 | `bg-primary-bg-subtle`    | teal-50  | teal-950 | Light primary background  |
 | `bg-primary-bg-mute`      | teal-100 | teal-900 | Restrained primary ground |
-| `bg-primary-bg-emphasize` | teal-300 | teal-700 | Emphasized primary ground |
+| `bg-primary-bg-emphasize` | teal-300 | teal-800 | Emphasized primary ground |
 | `border-primary-border`   | teal-500 | teal-500 | Primary border            |
 
 ## Brand color (secondary: cyan H:210)
@@ -93,10 +93,10 @@ the browser maps them to what the display can show.
 | Tailwind class              | Light    | Dark     | Use                         |
 | --------------------------- | -------- | -------- | --------------------------- |
 | `text-secondary-fg`         | cyan-800 | cyan-300 | Secondary text              |
-| `bg-secondary-bg`           | cyan-200 | cyan-800 | Secondary background        |
+| `bg-secondary-bg`           | cyan-200 | cyan-900 | Secondary background        |
 | `bg-secondary-bg-subtle`    | cyan-50  | cyan-950 | Light secondary background  |
 | `bg-secondary-bg-mute`      | cyan-100 | cyan-900 | Restrained secondary ground |
-| `bg-secondary-bg-emphasize` | cyan-300 | cyan-700 | Emphasized secondary ground |
+| `bg-secondary-bg-emphasize` | cyan-300 | cyan-800 | Emphasized secondary ground |
 | `border-secondary-border`   | cyan-500 | cyan-500 | Secondary border            |
 
 ## Data visualization and backdrop
@@ -114,18 +114,26 @@ Like every color token, these work with any color utility (`text-`, `fill-`,
 
 ## Contrast
 
-WCAG 2 contrast ratios computed from the values in `tokens.css`, for the lowest
-pair in each row (rounded down):
+WCAG 2 contrast ratios of the values in `tokens.css`, as axe measures them, for
+the lowest pair in each row (rounded down). Every pair holds at least AA for
+normal text in light and in dark. The story `styles/contrast` renders each pair,
+and the test suite runs axe over it in both color schemes — AAA where the table
+says AAA — so a token change that breaks a row fails the build:
 
-| Text                                                                  | Ground                                            | Light | Dark | Level                                   |
-| --------------------------------------------------------------------- | ------------------------------------------------- | ----- | ---- | --------------------------------------- |
-| `fg-base`, `fg-mute`, the status `fg-*`, `primary-fg`, `secondary-fg` | `bg-base`, `bg-raised`, `bg-surface`, `bg-subtle` | 7.0   | 8.3  | AAA                                     |
-| A status `fg-*`                                                       | Its own `bg-*` (`bg-error` for `fg-error`, …)     | 7.0   | 7.5  | AAA                                     |
-| `primary-fg` / `secondary-fg`                                         | `*-bg-subtle`                                     | 7.5   | 11.8 | AAA                                     |
-| `fg-mute`                                                             | `bg-mute`                                         | 6.7   | 5.1  | AA                                      |
-| `fg-subtle`                                                           | `bg-base`, `bg-raised`, `bg-surface`, `bg-subtle` | 4.8   | 6.1  | AA                                      |
-| `primary-fg` / `secondary-fg`                                         | `*-bg`, `*-bg-mute`                               | 6.1   | 5.2  | AA                                      |
-| `primary-fg` / `secondary-fg`                                         | `*-bg-emphasize`                                  | 5.2   | 3.6  | AA in light; only AA large text in dark |
+| Text                                                                  | Ground                                            | Light | Dark | Level                                                  |
+| --------------------------------------------------------------------- | ------------------------------------------------- | ----- | ---- | ------------------------------------------------------ |
+| `fg-base`, `fg-mute`, the status `fg-*`, `primary-fg`, `secondary-fg` | `bg-base`, `bg-raised`, `bg-surface`, `bg-subtle` | 7.0   | 8.3  | AAA                                                    |
+| A status `fg-*`                                                       | Its own `bg-*` (`bg-error` for `fg-error`, …)     | 6.9   | 7.5  | AAA, except `fg-success` on `bg-success` in light (AA) |
+| `primary-fg` / `secondary-fg`                                         | `*-bg-subtle`                                     | 7.5   | 11.9 | AAA                                                    |
+| `fg-mute`                                                             | `bg-mute`                                         | 6.7   | 5.2  | AA                                                     |
+| `fg-subtle`                                                           | `bg-base`, `bg-raised`, `bg-surface`, `bg-subtle` | 4.8   | 6.1  | AA                                                     |
+| `primary-fg` / `secondary-fg`                                         | `*-bg`, `*-bg-mute`                               | 6.1   | 6.3  | AA                                                     |
+| `primary-fg` / `secondary-fg`                                         | `*-bg-emphasize`                                  | 5.2   | 5.2  | AA                                                     |
+
+In dark, `*-bg` is 900 (the same step as `*-bg-mute`) and `*-bg-emphasize` is
+800, a step darker than the rest of the dark scale would suggest, so the brand
+text stays AA on the hover and active grounds of a solid `Button` /
+`IconButton`.
 
 ## High contrast and forced colors
 
@@ -139,26 +147,23 @@ alone: there is nothing to toggle or persist.
 and in dark. Text then holds AAA on the page, card, and status grounds, and
 borders hold 3:1 against the grounds they sit on.
 
-| Token                                             | Light       | Dark     |
-| ------------------------------------------------- | ----------- | -------- |
-| `fg-base`                                         | gray-950    | white    |
-| `fg-mute`                                         | gray-900    | gray-100 |
-| `fg-subtle`                                       | gray-800    | gray-200 |
-| The status `fg-*`                                 | 900         | 100      |
-| `primary-fg` / `secondary-fg`                     | 900         | 100      |
-| `border-base`                                     | gray-600    | gray-400 |
-| `border-subtle`                                   | gray-500    | gray-500 |
-| `border-mute`                                     | gray-500    | gray-400 |
-| `border-emphasize`                                | gray-800    | gray-200 |
-| The status `border-*`                             | 700         | 300      |
-| `primary-border` / `secondary-border`             | 700         | 300      |
-| `bg-emphasize`                                    | (unchanged) | gray-700 |
-| `primary-bg` / `secondary-bg`                     | (unchanged) | 900      |
-| `primary-bg-mute` / `secondary-bg-mute`           | (unchanged) | 950      |
-| `primary-bg-emphasize` / `secondary-bg-emphasize` | (unchanged) | 800      |
+| Token                                 | Light       | Dark     |
+| ------------------------------------- | ----------- | -------- |
+| `fg-base`                             | gray-950    | white    |
+| `fg-mute`                             | gray-900    | gray-100 |
+| `fg-subtle`                           | gray-800    | gray-200 |
+| The status `fg-*`                     | 900         | 100      |
+| `primary-fg` / `secondary-fg`         | 900         | 100      |
+| `border-base`                         | gray-600    | gray-400 |
+| `border-subtle`                       | gray-500    | gray-500 |
+| `border-mute`                         | gray-500    | gray-400 |
+| `border-emphasize`                    | gray-800    | gray-200 |
+| The status `border-*`                 | 700         | 300      |
+| `primary-border` / `secondary-border` | 700         | 300      |
+| `bg-emphasize`                        | (unchanged) | gray-700 |
 
-The dark grounds move a step darker because white text on the usual dark
-`*-emphasize` grounds would stay near 5:1.
+In dark, `bg-emphasize` moves a step darker as well, because white text on the
+usual gray-600 would stay near 5:1.
 
 Surfaces outlined only by a shadow or a ground — `Card`'s `shadow` variant,
 `Modal`, `Drawer`, `Dialog`, `Alert` and `Toast`, a user `Message` — gain a

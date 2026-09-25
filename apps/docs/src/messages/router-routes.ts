@@ -260,9 +260,9 @@ export const typesTable = {
     ja: 'リンク先にできるパターン。ワイルドカードを除いたもの',
     en: 'The patterns a link can point at: the wildcards excluded',
   }),
-  routeOf: message({
-    ja: '表の pathname 空間。リンク可能なパターンの `:param` を任意の文字列にした union',
-    en: 'The table’s pathname space: the linkable patterns as a union, with any string where each `:param` was',
+  navigablePath: message({
+    ja: '`Path` を表のリンク可能なパターンと区間ごとに照合した結果。合えば `Path`、合わなければ `never`',
+    en: '`Path` checked against the table’s linkable patterns, segment by segment: `Path` when one matches, `never` when none does',
   }),
   routes: message({
     ja: '`defineRoutes` の戻り値。`kind`・`record`（渡した表）・`match` を持つ',
@@ -286,7 +286,7 @@ export const typesTable = {
   }),
 };
 
-export const typesRouteOf = message({
-  ja: '`RouteOf` は `@k8ordo/state` の `Register` が型付きのパスに使う型です。',
-  en: '`RouteOf` is what `@k8ordo/state`’s `Register` uses for typed paths.',
+export const typesNavigablePath = message({
+  ja: '`NavigablePath` は、`@k8ordo/state` の `href` がパスの検査に使う型です。',
+  en: '`NavigablePath` is what `@k8ordo/state`’s `href` checks its paths with.',
 });

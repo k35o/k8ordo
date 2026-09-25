@@ -1,8 +1,8 @@
 import { Code, Heading, Separator } from '@k8ordo/ui';
+import { CodeBlock } from '@k8ordo/ui/code-block';
 import { en, ja } from '@k8ordo/ui/i18n';
 import type { Messages } from '@k8ordo/ui/i18n';
 
-import { CodeBlock } from '../../../../components/code-block';
 import { PageTitle } from '../../../../components/page-title';
 import { Rich } from '../../../../components/rich';
 import * as m from '../../../../messages';
@@ -35,6 +35,9 @@ const MESSAGE_USAGE = {
   paginationLabel: 'Pagination',
   paginationPrevious: 'Pagination',
   paginationNext: 'Pagination',
+  codeBlockCopy: 'CodeBlock',
+  copied: 'CodeBlock',
+  copyFailed: 'CodeBlock',
   carousel: 'Carousel',
   carouselSlide: 'Carousel.Slide',
   carouselPrevious: 'Carousel',

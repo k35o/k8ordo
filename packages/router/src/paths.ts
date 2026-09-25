@@ -2,8 +2,8 @@
  * The type half of the route table: everything here is derived from the
  * pattern strings by inference alone — no code generation. A pattern like
  * `'/:locale/products/:id'` yields its params (`{ locale, id }`), its
- * concrete-path type (`` `/${string}/products/${string}` ``), and its place
- * in the app-wide route union.
+ * concrete-path type (`` `/${string}/products/${string}` ``), and whether a
+ * path handed in fits it.
  */
 
 type SegParam<Segment extends string> = Segment extends `:${infer Name}`
@@ -80,6 +80,62 @@ type SegListPath<Rest extends string> =
 /** `'/:locale/products/:id'` → `` `/${string}/products/${string}` `` */
 export type PathFor<Pattern extends string> = Pattern extends `/${infer Rest}`
   ? `/${SegListPath<Rest>}`
+  : never;
+
+/**
+ * One segment of a path against one segment of a pattern, the way URLPattern
+ * reads a `:param`: any single segment that is not empty. A `${string}` in
+ * the path — a param built into a template literal — counts as one segment.
+ */
+type SegmentFits<
+  Segment extends string,
+  PatternSegment extends string,
+> = PatternSegment extends `:${string}`
+  ? Segment extends ''
+    ? false
+    : true
+  : Segment extends PatternSegment
+    ? true
+    : false;
+
+type SegmentsFit<
+  Rest extends string,
+  PatternRest extends string,
+> = Rest extends `${infer Segment}/${infer Tail}`
+  ? PatternRest extends `${infer PatternSegment}/${infer PatternTail}`
+    ? SegmentFits<Segment, PatternSegment> extends true
+      ? SegmentsFit<Tail, PatternTail>
+      : false
+    : false
+  : PatternRest extends `${string}/${string}`
+    ? false
+    : SegmentFits<Rest, PatternRest>;
+
+// Pattern を裸の型引数のまま条件に置き、パターンの和集合に 1 つずつ分配する
+type FitsAny<
+  Path extends string,
+  Pattern extends string,
+> = Pattern extends `/${infer PatternRest}`
+  ? Path extends `/${infer Rest}`
+    ? SegmentsFit<Rest, PatternRest>
+    : false
+  : never;
+
+/**
+ * `Path` when one of `Patterns` matches it segment by segment, `never` when
+ * none does. A union of paths keeps only the members that match.
+ *
+ * The path is checked against the patterns, never collected into a union of
+ * `PathFor` each pattern: `/:locale` would put `/${string}` in that union,
+ * and `/${string}` takes every path there is.
+ */
+export type PathMatching<
+  Path extends string,
+  Patterns extends string,
+> = Path extends string
+  ? true extends FitsAny<Path, Patterns>
+    ? Path
+    : never
   : never;
 
 /**

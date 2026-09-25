@@ -6,6 +6,7 @@ export type {
   LocaleParamsSchema,
   Locales,
   LocalesOptions,
+  NegotiateRequestOptions,
 } from './locales';
 export type { IntlFormats, LocaleDateTimeFormatOptions } from './format';
 export { message } from './message';
