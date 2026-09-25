@@ -155,6 +155,53 @@ const Choice: FC<{ state?: FormState }> = ({ state = NO_STATE }) => {
   );
 };
 
+const pickSchema = z.object({
+  title: z.string().min(1, 'タイトルは必須です'),
+  color: z.enum(['red', 'green', 'blue']),
+  tags: z.array(z.enum(['a', 'b', 'c'])),
+});
+const pickFields = formFields(pickSchema);
+
+// title を空で送れば必ず失敗し、選んだ値は state.values で返る。React は action
+// の後にフォームを reset するので、select がそのエコーに戻るかが問われる
+const SubmittedPick: FC = () => {
+  const [state, formAction] = useActionState(
+    (_previous: FormState, formData: FormData): Promise<FormState> =>
+      Promise.resolve(parseForm(pickSchema, formData).state),
+    {},
+  );
+  const form = useForm(pickFields, state);
+  const tags = state.values?.tags;
+
+  return (
+    <form {...form.props} action={formAction}>
+      <input aria-label="title" {...form.field('title').input} />
+      <select aria-label="color" {...form.field('color').input}>
+        <option value="red">red</option>
+        <option value="green">green</option>
+        <option value="blue">blue</option>
+      </select>
+      <select
+        aria-label="tags"
+        multiple
+        {...form.field('tags').input}
+        defaultValue={Array.isArray(tags) ? tags : []}
+      >
+        <option value="a">a</option>
+        <option value="b">b</option>
+        <option value="c">c</option>
+      </select>
+      <p data-testid="echo-color">{String(state.values?.color ?? '')}</p>
+      <p data-testid="echo-tags">{JSON.stringify(tags ?? [])}</p>
+      <p data-testid="dirty">{String(form.isDirty)}</p>
+    </form>
+  );
+};
+
+const submit = () => {
+  (document.querySelector('form') as HTMLFormElement).requestSubmit();
+};
+
 const groupSchema = z.object({ tags: z.array(z.enum(['a', 'b'])) });
 const groupFields = formFields(groupSchema);
 
@@ -535,6 +582,77 @@ describe('useForm in a browser', () => {
       .element(screen.getByTestId('name-error-1'))
       .toHaveTextContent('品名は必須です');
     await expect.element(screen.getByLabelText('name-1')).toHaveFocus();
+  });
+
+  it('shows the echoed choice in a select after the reset React runs after a failed action', async () => {
+    const screen = await render(<SubmittedPick />);
+
+    await screen.getByLabelText('color').selectOptions('blue');
+    submit();
+
+    await expect
+      .element(screen.getByTestId('echo-color'))
+      .toHaveTextContent('blue');
+    await expect.element(screen.getByLabelText('color')).toHaveValue('blue');
+  });
+
+  it('makes the latest echo the choice a select resets to, dropping the earlier one', async () => {
+    const screen = await render(<SubmittedPick />);
+    await screen.getByLabelText('color').selectOptions('blue');
+    submit();
+    await expect
+      .element(screen.getByTestId('echo-color'))
+      .toHaveTextContent('blue');
+    // blue より前の option を選ぶ。前のエコーが既定値に残っていると、reset は
+    // 文書順で後ろにある blue を選ぶ
+    await screen.getByLabelText('color').selectOptions('green');
+    submit();
+    await expect
+      .element(screen.getByTestId('echo-color'))
+      .toHaveTextContent('green');
+
+    (document.querySelector('form') as HTMLFormElement).reset();
+
+    await expect.element(screen.getByLabelText('color')).toHaveValue('green');
+  });
+
+  it("measures isDirty and a later reset against a select's echoed choice", async () => {
+    const screen = await render(<SubmittedPick />);
+    await screen.getByLabelText('color').selectOptions('blue');
+    submit();
+    await expect
+      .element(screen.getByTestId('echo-color'))
+      .toHaveTextContent('blue');
+
+    await screen.getByLabelText('color').selectOptions('red');
+    await expect.element(screen.getByTestId('dirty')).toHaveTextContent('true');
+    (document.querySelector('form') as HTMLFormElement).reset();
+
+    await expect.element(screen.getByLabelText('color')).toHaveValue('blue');
+    await expect
+      .element(screen.getByTestId('dirty'))
+      .toHaveTextContent('false');
+  });
+
+  it('shows exactly the latest echoed choices in a multiple select after a failed action', async () => {
+    const screen = await render(<SubmittedPick />);
+
+    await screen.getByLabelText('tags').selectOptions(['a', 'c']);
+    submit();
+    await expect
+      .element(screen.getByTestId('echo-tags'))
+      .toHaveTextContent('["a","c"]');
+    await screen.getByLabelText('tags').selectOptions(['b']);
+    submit();
+
+    await expect
+      .element(screen.getByTestId('echo-tags'))
+      .toHaveTextContent('["b"]');
+    // toHaveValue は配列を部分集合として比べ、何も選ばれていなくても通る
+    const tags = screen.getByLabelText('tags').element() as HTMLSelectElement;
+    await expect
+      .poll(() => [...tags.selectedOptions].map((option) => option.value))
+      .toEqual(['b']);
   });
 
   it('clears a cross-field message when the other field is the one fixed', async () => {

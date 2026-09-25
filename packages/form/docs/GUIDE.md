@@ -239,10 +239,15 @@ from JavaScript on mount, never rendered into the markup. With scripts
 disabled or not yet loaded, the browser's own checks stay on; once the hook is
 live, it takes over the message path and the server stays the arbiter.
 
-**Secrets are never echoed.** `parseForm` returns the submitted values so a
-retry keeps the input — they render as the controls' defaults, which is also
-what React's reset after the action restores. Fields marked as passwords are
-excluded automatically, and typed as `password` in the markup:
+**A retry keeps what was submitted.** `parseForm` returns the submitted
+values, and they render as the controls' defaults, which is also what React's
+reset after the action restores. A `<select>` — `multiple` too — is no
+exception, although React applies a select's `defaultValue` only when it
+mounts: `useForm` writes each response's echo into the options'
+`defaultSelected` itself, so the select needs no `key` to remount it.
+
+**Secrets are never echoed.** Fields marked as passwords are left out of
+those values automatically, and typed as `password` in the markup:
 
 ```ts
 z.string().min(8).meta({ input: 'password' }); // zod

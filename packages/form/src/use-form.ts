@@ -4,6 +4,7 @@ import {
   useCallback,
   useEffect,
   useId,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -283,6 +284,15 @@ export const useForm = <FieldPath extends string, ArrayPath extends string>(
     // screen reader learns the submit failed and where.
     firstFailure(formRef.current, state, formErrorId)?.focus();
   }, [stateKey, state, lookup, formErrorId]);
+
+  // React は select の defaultValue をマウント時にしか反映しないので、あとから
+  // 返ったエコーは option の defaultSelected へ直接書く。action の後の自動リセット
+  // は同じコミットでこれより先に走るが、option の dirtiness を消すので、選択は
+  // 書いた既定値に追従する。layout effect なのは、描画と、reset の 1 タスク後に
+  // isDirty を DOM から読み直すのより先に済ませるため
+  useLayoutEffect(() => {
+    writeEchoToSelects(formRef.current, lookup, state.values);
+  }, [lookup, state.values]);
 
   const evaluate = useCallback(
     (target: EventTarget | null, onlyIfShown: boolean) => {
@@ -634,6 +644,36 @@ const applyRules = (
         control.setCustomValidity('');
       }
       owned.delete(name);
+    }
+  }
+};
+
+const writeEchoToSelects = (
+  form: HTMLFormElement | null,
+  fields: FormFields,
+  values: FormState['values'],
+): void => {
+  if (form === null || values === undefined) {
+    return;
+  }
+  for (const element of form.elements) {
+    // スキーマの外の select には、input に defaultValue を付けないのと同じく
+    // 触らない
+    if (
+      !(element instanceof HTMLSelectElement) ||
+      fieldFor(fields, element.name) === undefined
+    ) {
+      continue;
+    }
+    // エコーに無いのは disabled だったか送信時に無かった select で、何も送って
+    // いない。未選択と読むと既定値を消してしまう
+    const echoed = values[element.name];
+    if (echoed === undefined) {
+      continue;
+    }
+    const chosen = new Set([echoed].flat());
+    for (const option of element.options) {
+      option.defaultSelected = chosen.has(option.value);
     }
   }
 };
