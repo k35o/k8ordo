@@ -1,5 +1,6 @@
 import type { output } from 'zod/v4/core';
 
+import { withBase } from './base';
 import { createStoredCodec } from './entry/codec';
 import type { StoredCodec } from './entry/codec';
 import type { RegisteredPath } from './register';
@@ -26,11 +27,12 @@ export type PageState<
   parseUrl: (input: UrlInput) => OutputOf<Url>;
   /**
    * Builds a link. Unspecified fields mean their default and defaults are
-   * omitted from the query, so canonical URLs stay short. The path literal
-   * survives in the type, which is what lets typed-route checks pass.
+   * omitted from the query, so canonical URLs stay short. The path is in the
+   * table's terms and the URL carries Vite's `base` in front of it; the path
+   * literal survives in the type, which is what lets typed-route checks pass.
    */
   href: <Path extends RegisteredPath>(
-    base: Path,
+    path: Path,
     values?: Readonly<Partial<OutputOf<Url>>>,
   ) => Path | `${Path}?${string}`;
   /** The query string alone (no `?`), for handrolled URL composition. */
@@ -125,11 +127,13 @@ export function definePageState(
     parseUrl: (input) => (url === null ? {} : url.parse(input)),
     search,
     href: <Path extends RegisteredPath>(
-      base: Path,
+      path: Path,
       values?: Readonly<Partial<Record<string, unknown>>>,
     ) => {
       const query = search(values);
-      return query === '' ? base : `${base}?${query}`;
+      // 型は渡されたパスのまま。URL にだけ Vite の base が付く
+      const link = withBase(path) as Path;
+      return query === '' ? link : `${link}?${query}`;
     },
   };
   internals.set(def, {

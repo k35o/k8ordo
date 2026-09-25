@@ -199,23 +199,17 @@
   }
 
   /*
- * Modal（<dialog>）の出入り。入場は @starting-style からの transition、
- * 退場は transition-behavior: allow-discrete による display の遅延で表現する。
- * overlay を transition に含めることで、退場中も top layer に留まる
- * （overlay 未対応ブラウザでは退場が即時になる、という段階的劣化）。
+ * Modal（<dialog>）の入場。@starting-style からの transition で表現する。
+ * 退場のアニメーションは持たない。閉じた瞬間に top layer に留めるには
+ * overlay の transition が要り、それが Baseline に無いため。
  * scale / translate は transform ではなく個別プロパティを使う（Popover 同様）。
  */
-  /* allow-discrete は per-transition で指定する。ショートハンド後の別行
-   transition-behavior は lightningcss の宣言並べ替えでリセットされ、
-   本番ビルドだけ退場アニメーションが消える */
   .ao-modal {
     opacity: 0;
     transition:
       opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1),
       scale 0.2s cubic-bezier(0.4, 0, 0.2, 1),
-      translate 0.2s cubic-bezier(0.4, 0, 0.2, 1),
-      display 0.2s allow-discrete,
-      overlay 0.2s allow-discrete;
+      translate 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
   .ao-modal[open] {
     opacity: 1;
@@ -225,19 +219,7 @@
   }
   .ao-modal::backdrop {
     opacity: 0;
-    transition:
-      opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1),
-      display 0.2s allow-discrete,
-      overlay 0.2s allow-discrete;
-  }
-  /* overlay 未対応ブラウザ(Safari / Firefox)では close で top layer から即座に
-   外れるため、display の遅延だけが残ると位置がジャンプしたゴーストが
-   0.2s クリック可能なまま残る。退場を本当に即時にする(入場は影響なし) */
-  @supports not (overlay: auto) {
-    .ao-modal:not([open]),
-    .ao-modal:not([open])::backdrop {
-      transition: none;
-    }
+    transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
   @starting-style {
     .ao-modal[open],

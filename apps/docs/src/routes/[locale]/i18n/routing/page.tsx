@@ -34,7 +34,10 @@ const GET_LOCALE_EXPORT = `// src/i18n.ts
 import { defineLocales } from '@k8ordo/i18n';
 import type { LocaleOf } from '@k8ordo/i18n';
 
-export const locales = defineLocales(['ja', 'en']);
+export const locales = defineLocales({
+  ja: { timeZone: 'Asia/Tokyo', dir: 'ltr' },
+  en: { timeZone: 'UTC', dir: 'ltr' },
+});
 
 export type Locale = LocaleOf<typeof locales>;
 
@@ -46,18 +49,11 @@ declare module '@k8ordo/i18n' {
 
 export const { getLocale } = locales;`;
 
-const GET_LOCALE_USE = `// src/components/published-at.tsx
+const GET_LOCALE_USE = `// src/components/region-name.tsx
 import { getLocale } from '../i18n';
 
-export function PublishedAt({ date }: { date: Date }) {
-  return (
-    <time dateTime={date.toISOString()}>
-      {new Intl.DateTimeFormat(getLocale(), {
-        dateStyle: 'medium',
-        timeZone: 'UTC',
-      }).format(date)}
-    </time>
-  );
+export function RegionName({ code }: { code: string }) {
+  return <>{new Intl.DisplayNames(getLocale(), { type: 'region' }).of(code)}</>;
 }`;
 
 const SWITCHER = `// src/components/language-switcher.tsx

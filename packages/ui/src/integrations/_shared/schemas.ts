@@ -6,8 +6,10 @@ import type { IconButton } from '../../components/buttons/icon-button';
 import type { Avatar } from '../../components/data-display/avatar';
 import type { Badge } from '../../components/data-display/badge';
 import type { Card } from '../../components/data-display/card';
+import type { Carousel } from '../../components/data-display/carousel';
 import type { Heading } from '../../components/data-display/heading';
 import type { Alert } from '../../components/feedback/alert';
+import type { EmptyState } from '../../components/feedback/empty-state';
 import type { Skeleton } from '../../components/feedback/skeleton';
 import type { Spinner } from '../../components/feedback/spinner';
 import type { FormControl } from '../../components/form/form-control';
@@ -241,6 +243,37 @@ type CodeIntegrationProps = { code: string };
 export const codeProps = z.object({
   code: z.string(),
 }) satisfies z.ZodType<CodeIntegrationProps>;
+
+// Kbd は 1 キー 1 要素だが、生成 UI では組み合わせを 1 項目で置けるようにする
+type KbdIntegrationProps = { keys: readonly string[] };
+export const kbdProps = z.object({
+  keys: z
+    .array(z.string())
+    .min(1)
+    .describe(
+      'Keys pressed together, one per entry and in order, e.g. ["Ctrl", "S"]',
+    ),
+}) satisfies z.ZodType<KbdIntegrationProps>;
+
+type EmptyStateIntegrationProps = {
+  title: ComponentProps<typeof EmptyState>['title'];
+  description?: string;
+  icon?: z.infer<typeof iconName>;
+};
+export const emptyStateProps = z.object({
+  title: z.string(),
+  description: z.string().optional(),
+  icon: iconName.optional(),
+}) satisfies z.ZodType<EmptyStateIntegrationProps>;
+
+type CarouselIntegrationProps = {
+  label: ComponentProps<typeof Carousel.Root>['label'];
+  slideSize?: ComponentProps<typeof Carousel.Root>['slideSize'];
+};
+export const carouselProps = z.object({
+  label: z.string().describe('Accessible name of the carousel'),
+  slideSize: z.enum(['full', 'lg', 'md', 'sm']).optional(),
+}) satisfies z.ZodType<CarouselIntegrationProps>;
 
 type AccordionIntegrationProps = {
   items: ReadonlyArray<{
@@ -869,6 +902,9 @@ export type IconButtonProps = z.infer<typeof iconButtonProps>;
 export type AnchorProps = z.infer<typeof anchorProps>;
 export type AvatarProps = z.infer<typeof avatarProps>;
 export type CodeProps = z.infer<typeof codeProps>;
+export type KbdProps = z.infer<typeof kbdProps>;
+export type EmptyStateProps = z.infer<typeof emptyStateProps>;
+export type CarouselProps = z.infer<typeof carouselProps>;
 export type ProgressProps = z.infer<typeof progressProps>;
 export type SkeletonProps = z.infer<typeof skeletonProps>;
 export type AccordionProps = z.infer<typeof accordionProps>;
@@ -1056,6 +1092,12 @@ export type _EnumCoverage = [
     CoversComponent<
       ComponentProps<typeof Breadcrumb.List>['size'],
       BreadcrumbProps['size']
+    >
+  >,
+  AssertCovered<
+    CoversComponent<
+      ComponentProps<typeof Carousel.Root>['slideSize'],
+      CarouselProps['slideSize']
     >
   >,
 ];

@@ -34,7 +34,7 @@ export const Code: FC<Props> = ({ children, ...rest }) => {
       <Fragment key={`color-${String(index)}`}>
         <span
           aria-label={`${messages.color}: ${colorInfo.color}`}
-          className="border-border-base inline-block size-3 shrink-0 rounded-sm border"
+          className="border-border-base inline-block size-3 shrink-0 rounded-sm border forced-color-adjust-none"
           role="img"
           style={{ backgroundColor: colorInfo.color }}
         />

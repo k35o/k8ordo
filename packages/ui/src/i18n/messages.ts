@@ -53,6 +53,12 @@ export type Messages = {
   paginationPrevious: string;
   paginationNext: string;
 
+  /** Carousel の aria-roledescription（region と各スライド） */
+  carousel: string;
+  carouselSlide: string;
+  carouselPrevious: string;
+  carouselNext: string;
+
   /** Conversation.Messages の log ランドマーク名 */
   chat: string;
   scrollToLatest: string;

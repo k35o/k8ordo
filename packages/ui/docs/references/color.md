@@ -127,6 +127,64 @@ pair in each row (rounded down):
 | `primary-fg` / `secondary-fg`                                         | `*-bg`, `*-bg-mute`                               | 6.1   | 5.2  | AA                                      |
 | `primary-fg` / `secondary-fg`                                         | `*-bg-emphasize`                                  | 5.2   | 3.6  | AA in light; only AA large text in dark |
 
+## High contrast and forced colors
+
+The stylesheet follows the two contrast settings a user makes in the OS. Neither
+is a preference an application stores, so `@k8ordo/color-scheme` leaves them
+alone: there is nothing to toggle or persist.
+
+### `prefers-contrast: more`
+
+`tokens.css` moves the text and border tokens further from the ground, in light
+and in dark. Text then holds AAA on the page, card, and status grounds, and
+borders hold 3:1 against the grounds they sit on.
+
+| Token                                             | Light       | Dark     |
+| ------------------------------------------------- | ----------- | -------- |
+| `fg-base`                                         | gray-950    | white    |
+| `fg-mute`                                         | gray-900    | gray-100 |
+| `fg-subtle`                                       | gray-800    | gray-200 |
+| The status `fg-*`                                 | 900         | 100      |
+| `primary-fg` / `secondary-fg`                     | 900         | 100      |
+| `border-base`                                     | gray-600    | gray-400 |
+| `border-subtle`                                   | gray-500    | gray-500 |
+| `border-mute`                                     | gray-500    | gray-400 |
+| `border-emphasize`                                | gray-800    | gray-200 |
+| The status `border-*`                             | 700         | 300      |
+| `primary-border` / `secondary-border`             | 700         | 300      |
+| `bg-emphasize`                                    | (unchanged) | gray-700 |
+| `primary-bg` / `secondary-bg`                     | (unchanged) | 900      |
+| `primary-bg-mute` / `secondary-bg-mute`           | (unchanged) | 950      |
+| `primary-bg-emphasize` / `secondary-bg-emphasize` | (unchanged) | 800      |
+
+The dark grounds move a step darker because white text on the usual dark
+`*-emphasize` grounds would stay near 5:1.
+
+Surfaces outlined only by a shadow or a ground — `Card`'s `shadow` variant,
+`Modal`, `Drawer`, `Dialog`, `Alert` and `Toast`, a user `Message` — gain a
+1px `border-base` outline, as do the `Switch` track and thumb and the `Slider`
+and `Progress` tracks. A focused `DropdownMenu` or `ListBox` item and the
+active `Autocomplete` option draw a 2px outline on top of their ground.
+
+### `forced-colors: active`
+
+Under forced colors the browser repaints every color from the user's palette,
+drops shadows, and flattens grounds to one color. The components keep their
+boundaries, focus rings, and selected states visible:
+
+- **Boundaries**: the same outline as under `prefers-contrast: more`; controls with a border keep it
+- **Focus rings**: the `box-shadow` ring disappears and a 2px outline shows instead (`outline-hidden` draws a transparent outline that forced colors paints)
+- **Selected states** are painted with system colors: `Highlight` for the selected tab's indicator, a checked `Switch` track, the `Progress` and `Slider` fill, and a selected `Autocomplete` option; `CanvasText` for the dot of a checked `Radio` / `RadioCard` and the thumb of a `Switch`
+- `Separator` is painted `CanvasText` and `Skeleton` `GrayText`
+- A color swatch in `Code` keeps its real color (`forced-color-adjust: none`), because the color is the content
+
+### In your own UI
+
+- Reach for the `contrast-more:` and `forced-colors:` variants. Under forced colors only system colors survive, so paint state with them (`forced-colors:bg-[Highlight]`)
+- Do not draw a boundary or a focus ring with `box-shadow` alone
+- Do not hide something with a transparent color (`text-transparent`): forced colors paints it. Use `invisible`
+- To tune the high-contrast values, redefine the tokens inside `@media (prefers-contrast: more)`, on `:root` and on `.dark`, in CSS loaded after the library stylesheet
+
 ## Usage examples
 
 ```tsx

@@ -40,6 +40,11 @@ export const en: Messages = {
   paginationPrevious: 'Previous',
   paginationNext: 'Next',
 
+  carousel: 'Carousel',
+  carouselSlide: 'Slide',
+  carouselPrevious: 'Previous slide',
+  carouselNext: 'Next slide',
+
   chat: 'Chat',
   scrollToLatest: 'Scroll to latest message',
   reasoning: 'Reasoning',
