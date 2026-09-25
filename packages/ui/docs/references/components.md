@@ -688,8 +688,8 @@ ends of the week, `PageUp` / `PageDown` by month (with `Shift`, by year), and
 `Enter` / `Space` select. Days outside `min` / `max` stay focusable but cannot
 be selected.
 
-Month and weekday names, and the first day of the week, follow the page
-language (`<html lang>`, English when it is empty). Today is marked with
+Month and weekday names, and the first day of the week, follow the same locale
+as the built-in wording (i18n, below). Today is marked with
 `aria-current="date"` in the visitor's time zone, which only the browser knows,
 so the calendar renders in the browser alone: the server writes an empty box of
 the same size. It submits nothing; inside a form, use `DatePicker` or
