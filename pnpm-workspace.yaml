@@ -29,15 +29,8 @@ catalog:
   '@vitejs/plugin-react': 6.1.1
   '@vitest/browser': 5.0.1
   '@vitest/browser-playwright': 5.0.1
-  '@vitest/browser-preview': 5.0.1
   '@vitest/coverage-v8': 5.0.1
-  '@vitest/expect': 5.0.1
-  '@vitest/mocker': 5.0.1
-  '@vitest/pretty-format': 5.0.1
-  '@vitest/snapshot': 5.0.1
-  '@vitest/spy': 5.0.1
   '@vitest/ui': 5.0.1
-  '@vitest/utils': 5.0.1
   playwright: 1.63.0
   postcss: 8.5.28
   publint: 0.3.24
@@ -52,8 +45,8 @@ catalog:
   # 宣言を消して vite-plus 任せにしないのは、消すと plugin-react や vitest の
   # peer に pnpm が本家 vite を自動で入れ、vitest の実体が割れて
   # expect.element の型が消えるため。
-  vite: npm:@voidzero-dev/vite-plus-core@0.3.2
-  vite-plus: 0.3.2
+  vite: npm:@voidzero-dev/vite-plus-core@1.0.0-rc.0
+  vite-plus: 1.0.0-rc.0
   vitest: 5.0.1
   vitest-browser-react: 2.3.0
   zod: 4.6.5
@@ -65,32 +58,7 @@ minimumReleaseAge: 10080
 # tsc が "Excessive stack depth" を起こして typecheck が落ちる。単一バージョンに
 # 強制して型グラフのコピーを 1 つに保つ (types のみのパッケージでランタイム影響なし)。
 overrides:
-  '@oxc-project/types': 0.150.0
-
-  # vitest は vite-plus が exact pin (0.3.2 時点でも 4.1.11) で連れてくる依存で、
-  # `vp test` が起動するのは常に vite-plus 側の 1 本。catalog だけを 5 に上げても
-  # 走るのは 4 のままで、そこへ @vitest/browser-playwright 5 が刺さり、
-  # ブラウザモードが `_parentBrowser.spawn is not a function` で落ちる。
-  # 木全体を catalog の 1 バージョンに寄せて、vitest のコピーを 1 つに保つ。
-  # 版は書かず catalog を指す。overrides に数字を置くと catalog だけが更新された
-  # ときに overrides が黙って巻き戻す pin になり、上げたつもりで上がらない。
-  # vite-plus が vitest 5 を同梱したら、このブロックごと消して catalog だけで
-  # 足りる状態に戻すこと。
-  # @vitest/runner は v5 で vitest 本体に取り込まれ公開が止まったので 5 系が無い。
-  # vite-plus は再エクスポートのため (dist/test/plugins/runner.js、32 バイト) に
-  # 参照しているだけで実行時には読まれないため、4.1.11 のまま残す。
-  vitest: 'catalog:'
-  '@vitest/browser': 'catalog:'
-  '@vitest/browser-playwright': 'catalog:'
-  '@vitest/browser-preview': 'catalog:'
-  '@vitest/coverage-v8': 'catalog:'
-  '@vitest/expect': 'catalog:'
-  '@vitest/mocker': 'catalog:'
-  '@vitest/pretty-format': 'catalog:'
-  '@vitest/snapshot': 'catalog:'
-  '@vitest/spy': 'catalog:'
-  '@vitest/ui': 'catalog:'
-  '@vitest/utils': 'catalog:'
+  '@oxc-project/types': 0.151.0
 
 minimumReleaseAgeExclude:
   - '@k8o/*'

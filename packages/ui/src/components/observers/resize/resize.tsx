@@ -27,8 +27,5 @@ export const Resize: FC<{
     };
   }, [instance]);
 
-  // ref を持つ Fragment は子を観測するための境界で、無駄な Fragment ではない。
-  // このルールは Fragment の ref をまだ知らない。
-  // oxlint-disable-next-line react/jsx-no-useless-fragment
   return <Fragment ref={setInstance}>{children}</Fragment>;
 };
