@@ -123,8 +123,8 @@ export const server = {
     en: 'Rendering happens per request, so `paramsSchema` and messages work exactly as in a static build. What differs is that a page can read the request, and that there are Server Actions.',
   }),
   negotiate: message({
-    ja: 'ページは `request` を受け取るので、`/` で `Accept-Language` から交渉できます。答えを HTML に入れておけば、JavaScript の無い訪問者にも行き先のリンクが見えます。',
-    en: 'A page receives `request`, so `/` can negotiate from `Accept-Language`. With the answer in the HTML, a visitor without JavaScript also sees the link to follow.',
+    ja: 'ページは `request` を受け取るので、`/` で `locales.negotiateRequest(request, { cookie })` がロケールを選べます。訪問者が前に選んだロケールの Cookie を先に、無ければ `Accept-Language` を読みます。答えを HTML に入れておけば、JavaScript の無い訪問者にも行き先のリンクが見えます。',
+    en: 'A page receives `request`, so `/` can choose with `locales.negotiateRequest(request, { cookie })`: the cookie holding the locale the visitor chose before, then `Accept-Language`. With the answer in the HTML, a visitor without JavaScript also sees the link to follow.',
   }),
   noRedirect: message({
     ja: 'ページ自身はリダイレクトで応答できません。`redirect()` は Server Action のためのもので、`redirect.ts` の行き先は params から作られ、リクエストのヘッダーでは変わりません。サーバーで `307` を返したいときは、アプリケーションの外で行います。`serve` の前に置いたプロキシか、ビルドされたハンドラ（`dist/rsc/index.js`）を包む自前のホストが、ハンドラを呼ぶ前に `/` だけを答えます。そうしないなら、移動はクライアントで行います。',

@@ -9,14 +9,6 @@ const meta: Meta<typeof Slider> = {
   component: Slider,
   parameters: {
     layout: 'centered',
-    a11y: {
-      options: {
-        rules: {
-          'label-title-only': { enabled: false },
-          label: { enabled: false },
-        },
-      },
-    },
   },
   decorators: [
     (Story) => (
@@ -26,6 +18,7 @@ const meta: Meta<typeof Slider> = {
     ),
   ],
   args: {
+    'aria-label': '音量',
     min: 0,
     max: 100,
     step: 1,
@@ -79,7 +72,7 @@ const RefRender = () => {
 
   return (
     <div className="flex flex-col items-start gap-2">
-      <Slider defaultValue={50} ref={ref} />
+      <Slider aria-label="音量" defaultValue={50} ref={ref} />
       <button
         onClick={() => {
           ref.current?.focus();

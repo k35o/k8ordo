@@ -1,6 +1,6 @@
 import { Heading } from '@k8ordo/ui';
+import { CodeBlock } from '@k8ordo/ui/code-block';
 
-import { CodeBlock } from '../../../../components/code-block';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Rich } from '../../../../components/rich';
@@ -93,7 +93,6 @@ export async function createTalk(
 }`;
 
 const SERVER_ROOT_PAGE = `// src/routes/page.tsx
-import { parseAcceptLanguage } from '@k8ordo/i18n';
 import type { PageProps } from '@k8ordo/router';
 
 import { locales } from '../i18n';
@@ -101,9 +100,7 @@ import { href } from '../links';
 import { RedirectTo } from './_parts/redirect-to';
 
 export default function RootPage({ request }: PageProps<'/'>) {
-  const locale = locales.negotiate(
-    parseAcceptLanguage(request.headers.get('accept-language')),
-  );
+  const locale = locales.negotiateRequest(request, { cookie: 'locale' });
 
   return <RedirectTo to={href('/:locale', { locale })} />;
 }`;

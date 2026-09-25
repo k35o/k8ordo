@@ -59,15 +59,34 @@ pnpm check         # check:write to auto-fix
 - **`serve` hands back a handle.** `{ port, url, close }`, so a test can
   listen on port 0 and stop what it started (`serve.test.ts` runs it against
   a fixture `dist`, no real build needed).
+- **Compression happens once where it can, and never holds a stream back.**
+  The client build is compressed at build time (`precompress`, from
+  `framework()`'s `buildApp` hook) and `serve` only picks a copy; a page is
+  compressed per request, flushed after every chunk, because React writes it
+  as it renders. `serve.test.ts` holds the second half of a streamed page
+  back and reads the first through the compressor.
+- **An `ETag` is the file's contents, never its time.** Servers built apart,
+  and a deploy that changed nothing, have to agree on it for a revalidation
+  to end in a `304`.
+- **Vercel is the one host with an adapter.** `vercel()` exists because
+  k8o, the family's real consumer, deploys there; another host gets the
+  handler (`dist/rsc/index.js`) and no adapter until something here runs on
+  it. The adapter writes the Build Output API directory and nothing more — no
+  launcher of its own (Vercel calls the handler as `fetch`) and no dependency
+  tracing (the function is built with every dependency bundled in).
 
 ## Layout
 
 ```
 src/
   static-file.ts  safeJoin — request pathname → path inside the build output (pure)
+  encoding.ts     which content coding a request gets, what is worth compressing
+  precompress.ts  the client build's .br / .gz copies, written at build time
   serve.ts        ./serve: the node:http server (static files + handing off to the handler)
   runtime.ts      ./runtime: the engine's redirect, response API and types — no Vite, no Node
-  index.ts        framework (the engine as is)
+  vercel-output.ts  the build as Vercel's Build Output API directory
+  vercel.ts       ./vercel: the plugin that bundles the handler and writes it
+  index.ts        framework (the engine, plus precompressing the client build)
 ```
 
 ## Conventions

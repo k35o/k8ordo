@@ -1,8 +1,8 @@
 import type { Message } from '@k8ordo/i18n';
 import { Anchor, Code, Heading, Separator } from '@k8ordo/ui';
+import { CodeBlock } from '@k8ordo/ui/code-block';
 import type { FC } from 'react';
 
-import { CodeBlock } from '../../../../../components/code-block';
 import { PageTitle } from '../../../../../components/page-title';
 import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';

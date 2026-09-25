@@ -11,12 +11,14 @@ const storiesProject = ({
   color,
   tags,
   context,
+  initialGlobals,
   withVrt = false,
 }: {
   label: string;
-  color: 'magenta' | 'yellow' | 'cyan';
+  color: 'magenta' | 'red' | 'yellow' | 'cyan';
   tags: { include?: string[]; exclude?: string[] };
   context?: { forcedColors?: 'active'; contrast?: 'more' };
+  initialGlobals?: Record<string, unknown>;
   withVrt?: boolean;
 }) => ({
   extends: true,
@@ -25,6 +27,7 @@ const storiesProject = ({
       storybookScript: 'pnpm storybook --ci',
       configDir: fileURLToPath(new URL('./.storybook', import.meta.url)),
       tags,
+      initialGlobals,
     }),
     ...(withVrt ? [vrt()] : []),
   ],
@@ -87,6 +90,14 @@ export default defineConfig({
         tags: { exclude: ['forced-colors', 'contrast-more'] },
         withVrt: true,
       }),
+      // axe の color-contrast はそのとき描かれている配色しか見ないので、
+      // ダークでも全ストーリーを走らせる
+      storiesProject({
+        label: 'components-dark',
+        color: 'red',
+        tags: { exclude: ['forced-colors', 'contrast-more'] },
+        initialGlobals: { theme: 'dark' },
+      }),
       // OS の配色設定はストーリーごとには切り替えられないので、設定ごとに
       // プロジェクトを分け、その設定で確かめるストーリーだけを走らせる
       storiesProject({
@@ -109,6 +120,25 @@ export default defineConfig({
             'src/hooks/**/*.test.{ts,tsx}',
             // ブラウザで動く内部 hook のテスト（src/internal の .tsx テストのみ）
             'src/internal/**/*.test.tsx',
+          ],
+          browser: {
+            enabled: true,
+            instances: [{ browser: 'chromium' }],
+            provider: playwright({
+              contextOptions: { reducedMotion: 'reduce' },
+            }),
+            headless: true,
+            screenshotFailures: false,
+          },
+        },
+      },
+      {
+        extends: true,
+        test: {
+          name: { label: 'form', color: 'yellow' },
+          include: [
+            'src/components/form/**/*.test.tsx',
+            'src/components/_internal/**/*.test.tsx',
           ],
           browser: {
             enabled: true,
