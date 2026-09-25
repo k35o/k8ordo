@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, fn, spyOn } from 'storybook/test';
+import { expect, fn, spyOn, waitFor } from 'storybook/test';
 
 import { Message } from '.';
 import { Avatar } from '../../data-display/avatar';
@@ -128,35 +128,38 @@ export const Copy: Story = {
     </Message.Root>
   ),
   play: async ({ canvas, userEvent }) => {
-    // クリップボードは外部の境界。書き込み先だけ差し替えて、渡した値を見る
-    const writeText = spyOn(navigator.clipboard, 'writeText').mockResolvedValue(
-      undefined,
-    );
+    // クリップボードは外部の境界。書き込み口だけ差し替えて、渡した値を見る
+    const written: ClipboardItem[] = [];
+    spyOn(navigator.clipboard, 'write').mockImplementation((items) => {
+      written.push(...items);
+      return Promise.resolve();
+    });
 
     await userEvent.click(canvas.getByRole('button', { name: 'コピー' }));
 
-    await expect(writeText).toHaveBeenCalledWith(ANSWER);
-    await expect(
-      canvas.getByRole('button', { name: 'コピーしました' }),
-    ).toBeVisible();
-    await expect(canvas.getByRole('status')).toHaveTextContent(
-      'コピーしました',
-    );
+    const text = await written.at(-1)?.getType('text/plain');
+    await expect(await text?.text()).toBe(ANSWER);
+    await waitFor(() => {
+      expect(canvas.getByRole('status')).toHaveTextContent('コピーしました');
+    });
   },
 };
 
 export const CopyFailed: Story = {
   render: Copy.render,
   play: async ({ canvas, userEvent }) => {
-    spyOn(navigator.clipboard, 'writeText').mockRejectedValue(
+    spyOn(navigator.clipboard, 'write').mockRejectedValue(
       new DOMException('denied', 'NotAllowedError'),
     );
 
     await userEvent.click(canvas.getByRole('button', { name: 'コピー' }));
 
-    // 書けなかったときは「コピーしました」と言わず、会話もそのまま残る
-    await expect(canvas.getByRole('button', { name: 'コピー' })).toBeEnabled();
-    await expect(canvas.getByRole('status')).toHaveTextContent('');
+    // 書けなかったことを伝え、会話はそのまま残る
+    await waitFor(() => {
+      expect(canvas.getByRole('status')).toHaveTextContent(
+        'コピーできませんでした',
+      );
+    });
     await expect(canvas.getByText(ANSWER)).toBeVisible();
   },
 };

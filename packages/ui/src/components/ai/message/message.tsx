@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo } from 'react';
 import type { FC, HTMLAttributes, ReactNode } from 'react';
 
 import { cn } from '../../../helpers/cn';
@@ -8,14 +8,9 @@ import { createSafeContext } from '../../../helpers/create-safe-context';
 import { useControllableState } from '../../../hooks/controllable-state';
 import { getMessages } from '../../../i18n/current';
 import { HIGH_CONTRAST_EDGE } from '../../_internal/high-contrast';
+import { CopyButton } from '../../buttons/copy-button';
 import { IconButton } from '../../buttons/icon-button';
-import {
-  BadIcon,
-  CheckIcon,
-  CopyIcon,
-  GoodIcon,
-  RefreshIcon,
-} from '../../icons';
+import { BadIcon, GoodIcon, RefreshIcon } from '../../icons';
 import { StreamingCursor } from '../_internal/streaming-cursor';
 import type { MessageFeedback } from '../types';
 
@@ -131,54 +126,14 @@ export const Action: FC<ActionProps> = ({
   </IconButton>
 );
 
-const COPIED_DURATION_MS = 2000;
-
 type CopyProps = {
   value: string;
   label?: string;
 };
 
-export const Copy: FC<CopyProps> = ({ value, label }) => {
-  const messages = getMessages();
-  const [isCopied, setIsCopied] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
-
-  useEffect(
-    () => () => {
-      clearTimeout(timerRef.current);
-    },
-    [],
-  );
-
-  return (
-    <>
-      <IconButton
-        label={isCopied ? messages.copied : (label ?? messages.copy)}
-        onAction={async () => {
-          try {
-            await navigator.clipboard.writeText(value);
-          } catch {
-            // 権限が無いなどで書けなかったとき。transition の中で投げると
-            // エラーバウンダリまで届き、会話ごと描き直されてしまう
-            return;
-          }
-          setIsCopied(true);
-          clearTimeout(timerRef.current);
-          timerRef.current = setTimeout(() => {
-            setIsCopied(false);
-          }, COPIED_DURATION_MS);
-        }}
-        size="sm"
-      >
-        {isCopied ? <CheckIcon size="sm" /> : <CopyIcon size="sm" />}
-      </IconButton>
-      {/* フォーカス中のボタンの名前が変わっても読み上げられないので、別に知らせる */}
-      <span className="sr-only" role="status">
-        {isCopied ? messages.copied : ''}
-      </span>
-    </>
-  );
-};
+export const Copy: FC<CopyProps> = ({ value, label }) => (
+  <CopyButton iconOnly label={label} size="sm" value={value} />
+);
 
 type RegenerateProps = {
   onAction: () => void | Promise<void>;

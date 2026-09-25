@@ -186,7 +186,7 @@ Props (Message.Content):
 </Message.Root>
 ```
 
-- `Copy` writes `value` to the clipboard and switches to 「コピーしました」 with a check icon for two seconds, announced through a `status` region. If the clipboard refuses, nothing changes and nothing is thrown.
+- `Copy` is an icon-only, `sm` [`CopyButton`](components.md#copybutton): it writes `value` to the clipboard, shows a check icon — or an error icon when the clipboard refuses — for two seconds, and announces 「コピーしました」 or 「コピーできませんでした」 through a `status` region. Nothing is thrown either way.
 - `Regenerate` and `Action` take `onAction`; a returned promise keeps the button busy (`aria-busy`, disabled) until it settles, so `() => regenerate(...)` does not need its own pending state.
 - `Feedback` is a pair of toggle buttons (`aria-pressed`). Pressing the pressed one again clears it, so `onChange` receives `null`.
 
