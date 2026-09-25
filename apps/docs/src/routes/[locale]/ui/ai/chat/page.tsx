@@ -40,17 +40,28 @@ import {
   Suggestion,
 } from '@k8ordo/ui/ai';
 
+const avatar = (
+  <Avatar color="primary" icon={<AssistantIcon />} name="AI" size="sm" />
+);
+
 export function Chat({ messages, send }: Props) {
   return (
     <div className="flex h-full flex-col gap-3">
       <Conversation.Root>
         <Conversation.Messages>
           {messages.map((m) => (
-            <Message.Root from={m.role} key={m.id}>
-              {m.role === 'assistant' && (
-                <Avatar color="primary" icon={<AssistantIcon />} name="AI" size="sm" />
-              )}
+            <Message.Root
+              avatar={m.role === 'assistant' ? avatar : undefined}
+              from={m.role}
+              key={m.id}
+            >
               <Message.Content>{m.text}</Message.Content>
+              {m.role === 'assistant' && (
+                <Message.Actions>
+                  <Message.Copy value={m.text} />
+                  <Message.Feedback />
+                </Message.Actions>
+              )}
             </Message.Root>
           ))}
         </Conversation.Messages>
@@ -61,7 +72,9 @@ export function Chat({ messages, send }: Props) {
         <Suggestion.Item onSelect={send} value="Tell me about IME support" />
       </Suggestion.List>
 
-      <PromptInput.Root onSubmit={send}>
+      <PromptInput.Root accept="image/*,application/pdf" onSubmit={send}>
+        <PromptInput.Attachments />
+        <PromptInput.Attach />
         <PromptInput.Textarea placeholder="Type a message…" />
         <PromptInput.Submit />
       </PromptInput.Root>
@@ -95,10 +108,15 @@ export function Chat() {
       <Conversation.Root>
         <Conversation.Messages isStreaming={status === 'streaming'}>
           {messages.map((m) => (
-            <Message.Root from={m.role === 'user' ? 'user' : 'assistant'} key={m.id}>
-              {m.role !== 'user' && (
-                <Avatar color="primary" icon={<AssistantIcon />} name="AI" size="sm" />
-              )}
+            <Message.Root
+              avatar={
+                m.role === 'user' ? undefined : (
+                  <Avatar color="primary" icon={<AssistantIcon />} name="AI" size="sm" />
+                )
+              }
+              from={m.role === 'user' ? 'user' : 'assistant'}
+              key={m.id}
+            >
               <Message.Content>{textOf(m)}</Message.Content>
             </Message.Root>
           ))}
@@ -136,6 +154,32 @@ export function Chat() {
 <PromptInput.Root status={status} onSubmit={send} onStop={stop}>
   <PromptInput.Textarea placeholder="Type a message" />
   <PromptInput.Submit /> {/* send when ready, stop while streaming */}
+</PromptInput.Root>`}
+          lang="tsx"
+        />
+      </section>
+
+      <Separator color="mute" />
+
+      <section className="flex flex-col gap-4">
+        <Heading level="h2">
+          <Rich>{m.aiChat.attachmentsTitle()}</Rich>
+        </Heading>
+        <p className="text-fg-mute">
+          <Rich>{m.aiChat.attachmentsDescription()}</Rich>
+        </p>
+        <CodeBlock
+          code={`<PromptInput.Root
+  accept="image/*,application/pdf"
+  onSubmit={(text, files) =>
+    sendMessage(text === '' ? { files } : { text, files })
+  }
+  status={status}
+>
+  <PromptInput.Attachments />
+  <PromptInput.Attach />
+  <PromptInput.Textarea placeholder="Type a message" />
+  <PromptInput.Submit />
 </PromptInput.Root>`}
           lang="tsx"
         />
@@ -213,6 +257,82 @@ import 'streamdown/styles.css';
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
+          <Rich>{m.aiChat.approvalTitle()}</Rich>
+        </Heading>
+        <p className="text-fg-mute">
+          <Rich>{m.aiChat.approvalDescription()}</Rich>
+        </p>
+        <CodeBlock
+          code={`import { useChat } from '@ai-sdk/react';
+import { lastAssistantMessageIsCompleteWithApprovalResponses } from 'ai';
+
+const { addToolApprovalResponse } = useChat({
+  sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithApprovalResponses,
+});
+
+<ToolInvocation
+  name={part.name}
+  state={part.state}
+  input={part.input}
+  approval={part.approval}
+  onApprovalResponse={addToolApprovalResponse}
+/>`}
+          lang="tsx"
+        />
+      </section>
+
+      <Separator color="mute" />
+
+      <section className="flex flex-col gap-4">
+        <Heading level="h2">
+          <Rich>{m.aiChat.partsTitle()}</Rich>
+        </Heading>
+        <p className="text-fg-mute">
+          <Rich>{m.aiChat.partsDescription()}</Rich>
+        </p>
+        <CodeBlock
+          code={`import { Attachment, Source } from '@k8ordo/ui/ai';
+
+<Message.Root from="user">
+  <Attachment.List>
+    <Attachment.Item filename="diagram.png" mediaType="image/png" url={url} />
+  </Attachment.List>
+  <Message.Content>{text}</Message.Content>
+</Message.Root>
+
+<Source.List>
+  <Source.Item href="https://ordo.k8o.me/ui/ai/chat" title="AI chat" />
+  <Source.Item title="Internal design doc" />
+</Source.List>`}
+          lang="tsx"
+        />
+      </section>
+
+      <Separator color="mute" />
+
+      <section className="flex flex-col gap-4">
+        <Heading level="h2">
+          <Rich>{m.aiChat.actionsTitle()}</Rich>
+        </Heading>
+        <p className="text-fg-mute">
+          <Rich>{m.aiChat.actionsDescription()}</Rich>
+        </p>
+        <CodeBlock
+          code={`<Message.Root avatar={avatar} from="assistant">
+  <Message.Content>{text}</Message.Content>
+  <Message.Actions>
+    <Message.Copy value={text} />
+    <Message.Regenerate onAction={() => regenerate({ messageId: message.id })} />
+    <Message.Feedback onChange={(value) => saveFeedback(message.id, value)} />
+  </Message.Actions>
+</Message.Root>`}
+          lang="tsx"
+        />
+      </section>
+      <Separator color="mute" />
+
+      <section className="flex flex-col gap-4">
+        <Heading level="h2">
           <Rich>{m.aiChat.aiSdkTitle()}</Rich>
         </Heading>
         <p className="text-fg-mute">
@@ -220,11 +340,29 @@ import 'streamdown/styles.css';
         </p>
         <CodeBlock
           code={`import { mapMessageParts } from '@k8ordo/ui/ai-sdk';
-import { Reasoning, ToolInvocation } from '@k8ordo/ui/ai';
+import { Attachment, Reasoning, Source, ToolInvocation } from '@k8ordo/ui/ai';
 import { Response } from '@k8ordo/ui/ai/response';
 
-<Message.Content>
-  {mapMessageParts(message).map((part, i) => {
+const parts = mapMessageParts(message);
+const files = parts.filter((part) => part.kind === 'file');
+const sources = parts.filter((part) => part.kind === 'source');
+
+<Message.Root from="assistant">
+  {files.length > 0 && (
+    <Attachment.List>
+      {files.map((file) => (
+        <Attachment.Item key={file.url} {...file} />
+      ))}
+    </Attachment.List>
+  )}
+  {parts.map((part, i) => {
+    if (part.kind === 'text') {
+      return (
+        <Message.Content key={i}>
+          <Response>{part.text}</Response>
+        </Message.Content>
+      );
+    }
     if (part.kind === 'reasoning') return <Reasoning key={i}>{part.text}</Reasoning>;
     if (part.kind === 'tool') {
       return (
@@ -233,19 +371,23 @@ import { Response } from '@k8ordo/ui/ai/response';
           name={part.name}
           state={part.state}
           input={part.input}
-          output={
-            typeof part.output === 'string'
-              ? part.output
-              : JSON.stringify(part.output, null, 2)
-          }
+          output={JSON.stringify(part.output, null, 2)}
           errorText={part.errorText}
-          deniedReason={part.deniedReason}
+          approval={part.approval}
+          onApprovalResponse={addToolApprovalResponse}
         />
       );
     }
-    return <Response key={i}>{part.text}</Response>;
+    return null;
   })}
-</Message.Content>`}
+  {sources.length > 0 && (
+    <Source.List>
+      {sources.map((source) => (
+        <Source.Item href={source.url} key={source.id} title={source.title} />
+      ))}
+    </Source.List>
+  )}
+</Message.Root>`}
           lang="tsx"
         />
       </section>
@@ -290,7 +432,14 @@ import { JsonRenderUI } from '@k8ordo/ui/json-render/registry';
             'Conversation.ScrollButton',
             'Message.Root',
             'Message.Content',
+            'Message.Actions',
+            'Message.Action',
+            'Message.Copy',
+            'Message.Regenerate',
+            'Message.Feedback',
             'PromptInput.Root',
+            'PromptInput.Attachments',
+            'PromptInput.Attach',
             'PromptInput.Textarea',
             'PromptInput.Submit',
             'Suggestion.List',
@@ -298,6 +447,10 @@ import { JsonRenderUI } from '@k8ordo/ui/json-render/registry';
             'Response',
             'Reasoning',
             'ToolInvocation',
+            'Attachment.List',
+            'Attachment.Item',
+            'Source.List',
+            'Source.Item',
           ] as const
         ).map((name) => (
           <div className="flex flex-col gap-4" key={name}>

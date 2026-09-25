@@ -2115,7 +2115,10 @@ Every key in the `Messages` type. All values are `string`.
 | Pagination    | `paginationLabel`, `paginationPrevious`, `paginationNext`                                                                                           |
 | CodeBlock     | `codeBlockCopy` (announces with `CopyButton`'s `copied` / `copyFailed`)                                                                             |
 | Carousel      | `carousel`, `carouselSlide`, `carouselPrevious`, `carouselNext`                                                                                     |
-| AI chat       | `chat`, `scrollToLatest`, `reasoning`, `reasoningStreaming`, `suggestions`, `send`, `stop`, `toolInput`, `toolOutput`, `toolError`, `toolDenied`    |
+| AI chat       | `chat`, `scrollToLatest`, `reasoning`, `reasoningStreaming`, `suggestions`, `send`, `stop`, `attach`                                                |
+| AI content    | `attachments`, `attachmentRemove`, `attachmentImage`, `sources`                                                                                     |
+| AI actions    | `messageActions`, `regenerate`, `feedbackPositive`, `feedbackNegative` (`Message.Copy` uses `CopyButton`'s)                                         |
+| AI tools      | `toolInput`, `toolOutput`, `toolError`, `toolDenied`, `toolApprovalRequest`, `toolApprove`, `toolDeny`                                              |
 | Response      | The `response*` keys below                                                                                                                          |
 
 `fileFieldTrigger` is the button text of an empty `FileField.Dropzone`, and

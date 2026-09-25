@@ -1,6 +1,6 @@
 # @k8ordo/ui × Generative UI adapters
 
-This example belongs to `@k8ordo/ui` and exists to exercise its **generative UI adapters**. Vite is just the host. In a Vite + React app: an LLM-style spec is rendered with k8ordo UI components via both [json-render](https://json-render.dev) and [OpenUI](https://www.openui.com).
+This example belongs to `@k8ordo/ui` and exists to exercise its **generative UI adapters**. Vite is just the host. In a Vite + React app: an LLM-style spec is rendered with k8ordo UI components via both [json-render](https://json-render.dev) and [OpenUI](https://www.openui.com), and an [AI SDK](https://ai-sdk.dev) chat is rendered with `@k8ordo/ui/ai` through `@k8ordo/ui/ai-sdk`.
 
 ## Overview
 
@@ -9,6 +9,7 @@ This example showcases:
 - k8ordo UI setup in a Vite project (Vite+ / `vp` toolchain)
 - **json-render**: a typed `UISpec` rendered with the pre-wired `<JsonRenderUI />`
 - **OpenUI**: an OpenUI-Lang DSL string rendered with `library` + `Renderer`
+- **AI SDK**: `useChat` messages mapped onto the chat components with `mapMessageParts` — tool approval, attachments, sources, a `data-ui` part rendered as generative UI, and copy / regenerate / feedback — driven by a scripted transport, so no server or API key is needed
 - Tailwind CSS 4 integration and TypeScript
 
 ## Getting Started
@@ -43,7 +44,12 @@ The application will be available at `http://localhost:5173`.
 ```
 examples/ui-integrations/
 ├── src/
-│   ├── app.tsx                    # Hosts the json-render and OpenUI demos
+│   ├── app.tsx                    # Hosts the json-render, OpenUI, and AI SDK demos
+│   ├── ai-sdk/
+│   │   ├── demo.tsx               # useChat rendered with @k8ordo/ui/ai via mapMessageParts
+│   │   ├── scripted-transport.ts  # A ChatTransport that streams fixed replies instead of a model
+│   │   ├── demo.test.ts           # The SDK-assembled reply keeps its approval id; the data-ui spec validates
+│   │   └── demo.browser.test.tsx  # Approve / deny, attach, regenerate, and feedback through the real useChat
 │   ├── json-render/
 │   │   ├── demo.tsx               # Typed UISpec rendered with <JsonRenderUI />
 │   │   ├── demo.test.ts           # The spec passes validateGeneratedSpec with no fixes
@@ -92,11 +98,39 @@ export function OpenUiDemo() {
 }
 ```
 
+### AI SDK demo (`src/ai-sdk/demo.tsx`)
+
+`useChat` owns the conversation; `mapMessageParts` turns each `UIMessage` into
+parts that map onto `Message`, `Reasoning`, `ToolInvocation`, `Attachment`,
+and `Source`. The tool asks for approval, and the answer goes straight back to
+the SDK:
+
+```tsx
+const chat = useChat({
+  transport: scriptedTransport,
+  sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithApprovalResponses,
+});
+
+<ToolInvocation
+  approval={part.approval}
+  name={part.name}
+  onApprovalResponse={chat.addToolApprovalResponse}
+  state={part.state}
+/>;
+```
+
+Attachments come from `PromptInput` (`accept` turns them on) and go to
+`sendMessage` as a `FileList`. The reply's `data-ui` part carries a json-render
+spec, which is checked with `validateGeneratedSpec` before `<JsonRenderUI>`
+draws it. `scriptedTransport` stands in for the model: it streams the same UI
+message chunks a server would, so the demo runs without a backend.
+
 ### Dependencies
 
 - `@k8ordo/ui` (workspace)
 - `@json-render/core`, `@json-render/react` (json-render demo)
 - `@openuidev/react-lang`, `@openuidev/lang-core` (OpenUI demo)
+- `ai`, `@ai-sdk/react` (AI SDK demo)
 - `zod` (shared by both adapters)
 - `tailwindcss`, `@tailwindcss/vite` (Tailwind CSS 4)
 
@@ -104,7 +138,7 @@ export function OpenUiDemo() {
 
 - `pnpm dev` - Start the development server (`vp dev`)
 - `pnpm build` - Build for production (`vp build`)
-- `pnpm test` - Run the tests (`vp test`): the `spec` project checks the demo spec and DSL against the adapters, and the `render` project mounts both demos in headless Chromium
+- `pnpm test` - Run the tests (`vp test`): the `spec` project checks the demo spec and DSL against the adapters and the scripted replies against the AI SDK, and the `render` project mounts the demos in headless Chromium
 - `pnpm typecheck` - Run TypeScript type checking
 - `pnpm check` - Run Oxlint/Oxfmt linting/formatting checks (`vp check`)
 - `pnpm check:write` - Run `vp check --fix` to auto-fix issues
