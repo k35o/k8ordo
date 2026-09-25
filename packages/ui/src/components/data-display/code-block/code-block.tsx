@@ -12,7 +12,7 @@ type Props = {
   callouts?: Readonly<Record<number, string | readonly string[]>>;
 } & Omit<
   HTMLAttributes<HTMLElement>,
-  'children' | 'className' | 'style' | 'title'
+  'children' | 'className' | 'lang' | 'style' | 'title'
 >;
 
 export const CodeBlock: FC<Props> = async ({
