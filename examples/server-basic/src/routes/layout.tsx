@@ -15,7 +15,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <a href={href('/')}>home</a>{' '}
             <a href={href('/products')}>products</a>{' '}
             <a href={href('/products/:id', { id: 1 })}>product 1</a>{' '}
-            <a href={href('/guide')}>guide</a> <SchemeName />
+            <a href={href('/guide')}>guide</a>{' '}
+            <a href={href('/members')}>members</a> <SchemeName />
           </nav>
           <Where />
           <main>{children}</main>

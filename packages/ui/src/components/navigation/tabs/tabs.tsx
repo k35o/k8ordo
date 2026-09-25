@@ -130,7 +130,7 @@ export const List: FC<
       <TabsListProvider value={listContextValue}>{children}</TabsListProvider>
       <div
         aria-hidden="true"
-        className="ao-tab-indicator bg-primary-border"
+        className="ao-tab-indicator bg-primary-border forced-colors:bg-[Highlight]"
         style={
           {
             positionAnchor: toAnchorName(rootId),

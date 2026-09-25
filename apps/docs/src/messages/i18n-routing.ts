@@ -120,8 +120,8 @@ export const getLocale = {
     en: '`getLocale()` is not a hook',
   }),
   description: message({
-    ja: '`getLocale()` は、文言と同じ出どころからタグそのものを返します。hook ではないので、描画の中でも、イベントハンドラの中でも、文言の関数の中でも、`bindParams` のソースの中でも呼べます。`<html lang>`、`Intl` の書式化、言語切替の現在値に使います。',
-    en: '`getLocale()` returns the tag itself, from the same source messages read. It is not a hook, so it can be called during render, in an event handler, inside a message, or in a `bindParams` source. Use it for `<html lang>`, `Intl` formatters, and the current value of a language switcher.',
+    ja: '`getLocale()` は、文言と同じ出どころからタグそのものを返します。hook ではないので、描画の中でも、イベントハンドラの中でも、文言の関数の中でも、`bindParams` のソースの中でも呼べます。`<html lang>`、集合が引かない `Intl`（`Intl.DisplayNames` など）、言語切替の現在値に使います。日付・数値・複数形は `locales.dateTimeFormat()` などが引きます。',
+    en: '`getLocale()` returns the tag itself, from the same source messages read. It is not a hook, so it can be called during render, in an event handler, inside a message, or in a `bindParams` source. Use it for `<html lang>`, an `Intl` API the set does not draw (`Intl.DisplayNames`, …), and the current value of a language switcher. Dates, numbers and plurals are drawn by `locales.dateTimeFormat()` and its siblings.',
   }),
   destructure: message({
     ja: '`this` に依存しないので、このサイトの `src/i18n.ts` のように集合から取り出して export できます。',
@@ -190,8 +190,8 @@ export const root = {
     en: "Without `@k8ordo/router`, `location.replace(locales.localize('/', locale))` does the same job.",
   }),
   server: message({
-    ja: '`@k8ordo/server` では、ページが受け取る `request` の `Accept-Language` から、サーバーで交渉できます。',
-    en: 'Under `@k8ordo/server`, the page can negotiate on the server from the `Accept-Language` of the `request` it receives.',
+    ja: '`@k8ordo/server` では、ページが受け取る `request` から、`locales.negotiateRequest` がサーバーでロケールを選べます（Cookie、次に `Accept-Language`）。',
+    en: 'Under `@k8ordo/server`, `locales.negotiateRequest` can choose on the server from the `request` the page receives (the cookie, then `Accept-Language`).',
   }),
   serverLink: message({
     ja: '`@k8ordo/server` での書き方を読む',

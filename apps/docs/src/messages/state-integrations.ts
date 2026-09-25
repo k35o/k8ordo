@@ -127,6 +127,11 @@ export const formFlow = message({
   en: '`formFields` runs in the Server Component and its result crosses to the client as JSON props, so `@k8ordo/form` sends no zod to the browser (the schema `useAppState` uses ships regardless). The form submits with `method="get"`; `@k8ordo/router` intercepts GET forms, so the submission rewrites the URL as a client navigation and `useAppState` reads the values back. With no Server Action behind it, `useForm(fields)` takes no state.',
 });
 
+export const formCheckbox = message({
+  ja: '`z.stringbool()` のフィールドはチェックボックスになります。`value` 属性はスキーマ自身が `true` を書く綴りで、state が `update()` で URL に書く文字列と同じなので、チェックして送った URL（`?inStock=true`）は state が書く URL と一致します。',
+  en: 'A `z.stringbool()` field becomes a checkbox. Its `value` attribute is the schema’s own spelling of `true` — the string `update()` writes into the URL — so a checked submission (`?inStock=true`) spells the URL the way state itself would.',
+});
+
 export const formNoJs = message({
   ja: 'JavaScript が読み込まれる前でも、送信は URL を正しく書き換えます。ページに search を渡すルーターなら、`parseUrl` でそのまま描画できます。`@k8ordo/static`・`@k8ordo/server` ではサーバーの描画が既定値なので、送信した値が画面に出るのはハイドレーションの後です。',
   en: 'Before JavaScript loads, the submission still writes the URL correctly, and under a router that hands the page its search, `parseUrl` renders from it directly. Under `@k8ordo/static` and `@k8ordo/server` the server render shows the defaults, so the submitted values appear once the page hydrates.',
