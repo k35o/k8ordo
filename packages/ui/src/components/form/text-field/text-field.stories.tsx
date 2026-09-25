@@ -102,3 +102,16 @@ export const Disabled: Story = {
     required: false,
   },
 };
+
+// @k8ordo/form が z.iso.date() から導く type="date" のように、日付・時刻の入力も描く
+export const DateInput: Story = {
+  args: {
+    type: 'date',
+  },
+  play: async ({ canvasElement }) => {
+    await expect(canvasElement.querySelector('input')).toHaveAttribute(
+      'type',
+      'date',
+    );
+  },
+};
