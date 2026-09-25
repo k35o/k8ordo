@@ -3,7 +3,7 @@
 import { useForm } from '@k8ordo/form';
 import type { FormFields } from '@k8ordo/form';
 import { useAppState } from '@k8ordo/state';
-import { Button, Code, FormControl, TextField } from '@k8ordo/ui';
+import { Button, Checkbox, Code, FormControl, TextField } from '@k8ordo/ui';
 
 import { Rich } from '../../../../components/rich';
 import * as m from '../../../../messages';
@@ -73,17 +73,14 @@ export function FormDemo({ fields }: Props) {
             required={min.required}
           />
         </div>
-        {/* @k8ordo/ui の Checkbox はグループの外では value 属性を出さず、
-            ブラウザ既定の on を送る。state が書く "true" と同じ文字列を
-            送るため、value まで広げられる素の <input> にする */}
-        <label className="flex items-center gap-2 sm:pb-2.5">
-          <input
+        <div className="sm:pb-2.5">
+          <Checkbox
             {...inStock.input}
-            className="accent-primary-border size-4"
             defaultChecked={current.inStock}
+            itemValue={inStock.input.value}
+            label={m.form.demoLabelInStock()}
           />
-          {m.form.demoLabelInStock()}
-        </label>
+        </div>
         <Button type="submit" variant="solid">
           {m.form.demoSubmit()}
         </Button>

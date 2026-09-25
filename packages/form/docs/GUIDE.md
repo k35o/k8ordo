@@ -601,11 +601,12 @@ links itself. A derived `type` is any string while `TextField` takes only its
 own text types, so take `type` out of `input` and set it on the component when
 the field is not plain text. Take it out for `PasswordInput` too: it sets
 `type` itself to show and hide the value, and a spread `type` overrides that
-toggle without a type error. `Checkbox` renders no `value` outside a
-`CheckboxGroup`, so a `z.stringbool()` box drawn with it submits the browser's
-`on` — which the default `z.stringbool()` reads as `true`, but a custom
-`truthy`, and the URL state writes, do not share. Render a plain
-`<input {...field.input} />` there.
+toggle without a type error. `Checkbox` takes the `value` it submits as
+`itemValue`, and a spread `value` never reaches its input, so pass
+`itemValue={field.input.value}` alongside the spread. Without it a
+`z.stringbool()` box submits the browser's `on` — which the default
+`z.stringbool()` reads as `true`, but a custom `truthy`, and the URL state
+writes, do not share.
 
 ```tsx
 const title = form.field('title');
@@ -617,6 +618,14 @@ const { type: _type, ...titleInput } = title.input;
   label="タイトル"
   required={title.required}
   renderInput={(props) => <TextField {...props} {...titleInput} />}
+/>;
+
+const inStock = form.field('inStock');
+
+<Checkbox
+  {...inStock.input}
+  itemValue={inStock.input.value}
+  label="在庫ありのみ"
 />;
 ```
 
