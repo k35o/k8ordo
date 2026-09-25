@@ -3,10 +3,10 @@ import { z } from 'zod';
 import * as zm from 'zod/mini';
 
 import { defineCookieState } from './cookie-state';
-import { defineLocalState } from './local-state';
 import { defineMemoryState } from './memory-state';
 import { definePageState } from './page-state';
 import type { PathFrom, RegisteredPath } from './register';
+import { defineLocalState, defineSessionState } from './storage-state';
 import { useAppState } from './use-app-state';
 
 // アプリが `.k8ordo/register.gen.ts` に書く（生成される）行そのもの。この
@@ -328,6 +328,10 @@ describe('useAppState options', () => {
 const OptionsRejectedByTypes = () => {
   const memory = defineMemoryState('m', { open: false });
   const local = defineLocalState('l', z.object({ v: z.string().default('') }));
+  const session = defineSessionState(
+    's',
+    z.object({ v: z.string().default('') }),
+  );
   const cookie = defineCookieState(
     'c',
     z.object({ v: z.string().default('') }),
@@ -346,6 +350,8 @@ const OptionsRejectedByTypes = () => {
   useAppState(cookie, { initialUrl: { v: 'x' } });
   // @ts-expect-error only a cookie state takes initialCookie
   useAppState(local, { initialCookie: { v: 'x' } });
+  // @ts-expect-error a session state has nothing on the server to seed from
+  useAppState(session, { initialCookie: { v: 'x' } });
   // @ts-expect-error the cookie's own fields are still checked
   useAppState(cookie, { initialCookie: { v: 1 } });
   // @ts-expect-error the url slot's own fields are still checked

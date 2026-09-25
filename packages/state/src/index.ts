@@ -1,7 +1,7 @@
 export { definePageState } from './page-state';
 export type { OutputOf, PageState } from './page-state';
-export { defineLocalState } from './local-state';
-export type { LocalState } from './local-state';
+export { defineLocalState, defineSessionState } from './storage-state';
+export type { LocalState, SessionState } from './storage-state';
 export { defineCookieState } from './cookie-state';
 export type { CookieState } from './cookie-state';
 export { defineMemoryState } from './memory-state';
