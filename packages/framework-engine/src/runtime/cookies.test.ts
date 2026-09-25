@@ -81,6 +81,23 @@ describe('the cookie jar', () => {
     }).toThrow(/cannot be a cookie name/u);
   });
 
+  it.each([
+    ['path', { path: '/; Domain=evil.test' }],
+    ['path', { path: '/\r\nx-injected: 1' }],
+    ['domain', { domain: 'example.test; HttpOnly' }],
+    ['domain', { domain: 'example.test\n' }],
+  ])(
+    'refuses a %s that would write attributes or headers of its own',
+    (name, options) => {
+      expect(() => {
+        jar().cookies.set('a', 'x', options);
+      }).toThrow(new RegExp(`cannot be a cookie's ${name}`, 'u'));
+      expect(() => {
+        jar().cookies.delete('a', options);
+      }).toThrow(new RegExp(`cannot be a cookie's ${name}`, 'u'));
+    },
+  );
+
   it('refuses sameSite "none" without secure, which a browser would drop', () => {
     expect(() => {
       jar().cookies.set('a', 'x', { sameSite: 'none', secure: false });

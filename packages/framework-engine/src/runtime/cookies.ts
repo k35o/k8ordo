@@ -39,8 +39,26 @@ export type Cookies = {
 /** RFC 6265's token: what a cookie name may be spelled with. */
 const TOKEN = /^[!#$%&'*+\-.^`|~\w]+$/u;
 
+/**
+ * What an attribute's value may not hold: a `;` ends the attribute and a
+ * control character (a line break above all) ends the header, so either
+ * would let the value write attributes — or headers — of its own.
+ */
+// oxlint-disable-next-line no-control-regex -- 制御文字こそが探しているもの
+const BREAKS_OUT = /[;\u0000-\u001F\u007F]/u;
+
+const checkAttribute = (name: string, value: string): void => {
+  if (BREAKS_OUT.test(value)) {
+    throw new TypeError(
+      `${JSON.stringify(value)} cannot be a cookie's ${name} — it holds a ";" or a control character`,
+    );
+  }
+};
+
 const attributes = (options: CookieOptions): string[] => {
   const path = options.path ?? '/';
+  checkAttribute('path', path);
+  if (options.domain !== undefined) checkAttribute('domain', options.domain);
   const secure = options.secure ?? true;
   const sameSite = options.sameSite ?? 'lax';
   if (sameSite === 'none' && !secure) {
