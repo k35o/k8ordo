@@ -8,7 +8,15 @@ import type {
   ReactElement,
   Ref,
 } from 'react';
-import { useCallback, useId, useMemo, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useEffectEvent,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { useFormStatus } from 'react-dom';
 
 import { useMessages } from '../../../i18n/context';
@@ -39,7 +47,9 @@ type RootProps = PropsWithChildren<
   {
     invalid?: boolean;
     maxFiles?: number;
-    defaultValue?: File[];
+    // 文字列は @k8ordo/form の formFields が導く input の defaultValue の型。
+    // ファイルの欄に値が入ることはないが、広げたまま受けられるように型だけ受ける
+    defaultValue?: File[] | string;
     // event はファイル選択（input の change）時に渡る。プログラム的なファイル
     // 削除では change イベントが存在しないため undefined になる。
     onChange?: (
@@ -81,12 +91,34 @@ export const Root = ({
   const { pending } = useFormStatus();
   const disabledResolved = disabled || pending;
 
+  const initialFiles = Array.isArray(defaultValue) ? defaultValue : [];
   const [acceptedFiles, setAcceptedFiles] = useState<AcceptedFile[]>(() =>
-    (defaultValue ?? []).map((file) => ({
+    initialFiles.map((file) => ({
       file,
       id: crypto.randomUUID(),
     })),
   );
+
+  // form の reset はファイルを空に戻すが、change は飛ばないので一覧が取り残される
+  const handleReset = useEffectEvent(() => {
+    setAcceptedFiles(
+      initialFiles.map((file) => ({ file, id: crypto.randomUUID() })),
+    );
+  });
+
+  useEffect(() => {
+    const form = inputRef.current?.form;
+    if (!form) {
+      return undefined;
+    }
+    const listener = () => {
+      handleReset();
+    };
+    form.addEventListener('reset', listener);
+    return () => {
+      form.removeEventListener('reset', listener);
+    };
+  }, []);
 
   const onFilesChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
@@ -110,20 +142,25 @@ export const Root = ({
     [acceptedFiles, multiple, maxFiles, onChange, webkitDirectory],
   );
 
+  // 一覧から外したファイルは input からも外す。外さないと送信に残る。
+  // コードから files を書き換えても input イベントは出ないので、自分で出して
+  // @k8ordo/form などの form 側に知らせる
   const onFileDelete = useCallback(
     (fileId: string) => {
       const updatedFiles = acceptedFiles.filter((f) => f.id !== fileId);
       setAcceptedFiles(updatedFiles);
 
-      if (inputRef.current && onChange) {
-        const dataTransfer = new DataTransfer();
-        for (const { file } of updatedFiles) {
-          dataTransfer.items.add(file);
-        }
-        inputRef.current.files = dataTransfer.files;
-
-        onChange(dataTransfer.files);
+      const input = inputRef.current;
+      if (input === null) {
+        return;
       }
+      const dataTransfer = new DataTransfer();
+      for (const { file } of updatedFiles) {
+        dataTransfer.items.add(file);
+      }
+      input.files = dataTransfer.files;
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      onChange?.(dataTransfer.files);
     },
     [acceptedFiles, onChange],
   );
