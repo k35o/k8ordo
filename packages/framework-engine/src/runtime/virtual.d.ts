@@ -28,6 +28,10 @@ declare module 'virtual:k8ordo/routes' {
    * Per pattern, the `guard.ts` default exports that run before it answers,
    * outer first; `/*` carries the root's.
    */
+  /** Per pattern, the `route.ts` module that answers it, whole. */
+  export const routeModules: Readonly<
+    Record<string, Readonly<Record<string, unknown>> | undefined>
+  >;
   export const guards: Readonly<
     Record<
       string,
