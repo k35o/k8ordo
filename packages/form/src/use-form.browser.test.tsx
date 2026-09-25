@@ -170,15 +170,16 @@ const Choice: FC<{ state?: FormState }> = ({ state = NO_STATE }) => {
   );
 };
 
+// title はサーバーだけが断る値で描く。ブラウザの検査は通るので、送信は毎回
+// action まで届いて失敗し、選んだ値は state.values で返る。React は action の
+// 後にフォームを reset するので、select がそのエコーに戻るかが問われる
 const pickSchema = z.object({
-  title: z.string().min(1, 'タイトルは必須です'),
+  title: z.string().refine((title) => title !== '予約済み', '使われています'),
   color: z.enum(['red', 'green', 'blue']),
   tags: z.array(z.enum(['a', 'b', 'c'])),
 });
 const pickFields = formFields(pickSchema);
 
-// title を空で送れば必ず失敗し、選んだ値は state.values で返る。React は action
-// の後にフォームを reset するので、select がそのエコーに戻るかが問われる
 const SubmittedPick: FC = () => {
   const [state, formAction] = useActionState(
     (_previous: FormState, formData: FormData): Promise<FormState> =>
@@ -190,7 +191,11 @@ const SubmittedPick: FC = () => {
 
   return (
     <form {...form.props} action={formAction}>
-      <input aria-label="title" {...form.field('title').input} />
+      <input
+        aria-label="title"
+        defaultValue="予約済み"
+        {...form.field('title').input}
+      />
       <select aria-label="color" {...form.field('color').input}>
         <option value="red">red</option>
         <option value="green">green</option>
