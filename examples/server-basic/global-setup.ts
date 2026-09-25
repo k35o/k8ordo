@@ -7,4 +7,11 @@ export default function setup(): void {
     cwd: import.meta.dirname,
     stdio: 'pipe',
   });
+  // 同じアプリを base: '/site/' で dist/base/ に。既定のビルドの後に置くのは、
+  // 既定のビルドが空にするのは dist/client などの各出力先だけで、dist/base は残るから
+  execFileSync(
+    'pnpm',
+    ['exec', 'vp', 'build', '--config', 'vite.base.config.ts'],
+    { cwd: import.meta.dirname, stdio: 'pipe' },
+  );
 }

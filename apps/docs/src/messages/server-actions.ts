@@ -61,8 +61,8 @@ export const redirectTitle = message({
 });
 
 export const redirectDescription = message({
-  ja: '`@k8ordo/server/runtime` の `redirect(to)` は、訪問者を別の場所へ送ってアクションを終えます。値を返すのではなく throw するので、その後の行は走りません。Server Component が `<form action>` にアクションを直接渡す形なら、クライアントコンポーネントは 1 つも要りません。',
-  en: '`redirect(to)` from `@k8ordo/server/runtime` ends an action by sending the visitor elsewhere. It throws rather than returning, so the lines after it never run. A Server Component handing the action straight to `<form action>` needs no client component at all.',
+  ja: '`@k8ordo/server/runtime` の `redirect(to)` は、訪問者を別の場所へ送ってアクションを終えます。値を返すのではなく throw するので、その後の行は走りません。`to` は URL で、渡したまま送られます。`href()` で作れば、アプリを Vite の `base` の下に置いたときも、それが付きます。Server Component が `<form action>` にアクションを直接渡す形なら、クライアントコンポーネントは 1 つも要りません。',
+  en: '`redirect(to)` from `@k8ordo/server/runtime` ends an action by sending the visitor elsewhere. It throws rather than returning, so the lines after it never run. `to` is a URL, sent as given: build it with `href()`, which also carries Vite’s `base` when the application is served under one. A Server Component handing the action straight to `<form action>` needs no client component at all.',
 });
 
 export const redirectAnswers = message({

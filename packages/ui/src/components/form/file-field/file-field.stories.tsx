@@ -15,6 +15,7 @@ const meta: Meta<typeof FileField.Root> = {
   component: FileField.Root,
   args: {
     id: 'filefield',
+    'aria-label': '添付ファイル',
   },
   render: (args) => (
     <FileField.Root {...args}>
@@ -28,17 +29,6 @@ const meta: Meta<typeof FileField.Root> = {
       <FileField.ItemList />
     </FileField.Root>
   ),
-  parameters: {
-    a11y: {
-      options: {
-        rules: {
-          // FileField単体ではラベルを付随しない
-          'label-title-only': { enabled: false },
-          label: { enabled: false },
-        },
-      },
-    },
-  },
 };
 
 export default meta;

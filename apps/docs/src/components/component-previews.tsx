@@ -11,17 +11,20 @@ import {
   Breadcrumb,
   Button,
   Card,
+  Carousel,
   Checkbox,
   CheckboxCard,
   CloseIcon,
   Code,
   Dialog,
   DropdownMenu,
+  EmptyState,
   FileField,
   Form,
   FormControl,
   Heading,
   IconButton,
+  Kbd,
   ListBox,
   NumberField,
   Pagination,
@@ -39,6 +42,7 @@ import {
   Spinner,
   Switch,
   Table,
+  TableIcon,
   Tabs,
   TextField,
   Textarea,
@@ -253,6 +257,25 @@ export const componentPreviews: Record<string, ReactNode> = {
     </Card>
   ),
   Code: <Code>console.log()</Code>,
+  Kbd: (
+    <span className="inline-flex items-center gap-1">
+      <Kbd label="Command">⌘</Kbd>
+      <Kbd>K</Kbd>
+    </span>
+  ),
+  Carousel: (
+    <div className="w-full max-w-60">
+      <Carousel.Root label="Carousel" slideSize="lg">
+        {['1', '2', '3'].map((slide) => (
+          <Carousel.Slide key={slide}>
+            <div className="bg-bg-base flex h-12 items-center justify-center rounded-lg shadow-sm">
+              {slide}
+            </div>
+          </Carousel.Slide>
+        ))}
+      </Carousel.Root>
+    </div>
+  ),
   Table: (
     <Table.Root>
       <Table.Head>
@@ -271,6 +294,9 @@ export const componentPreviews: Record<string, ReactNode> = {
   ),
   Heading: <Heading level="h2">Section Title</Heading>,
   Alert: <Alert message="This is an info alert." tone="info" />,
+  EmptyState: (
+    <EmptyState icon={<TableIcon size="md" />} title="Nothing here yet" />
+  ),
   Skeleton: (
     <div className="w-40">
       <Skeleton />

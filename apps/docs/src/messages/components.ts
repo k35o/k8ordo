@@ -538,6 +538,91 @@ export const code = {
   }),
 };
 
+export const codeBlock = {
+  description: message({
+    ja: 'サーバーでハイライトし、コピーボタンを添えたコードブロック',
+    en: 'A code block highlighted on the server, with a copy button.',
+  }),
+  importDescription: message({
+    ja: 'ハイライトはサーバーで済ませ、shiki はブラウザに送らない。`server-only` を import しているので、Client Component から読み込むとビルドが止まる。そのためルートとは別の入口にある。',
+    en: 'Highlighting happens on the server, and shiki never reaches the browser. It imports `server-only`, so importing it from a Client Component fails the build, which is why it has an entry of its own.',
+  }),
+  titleTitle: message({
+    ja: 'ファイル名',
+    en: 'File Name',
+  }),
+  titleDescription: message({
+    ja: '`title` を渡すと、見出しの行に言語の代わりに表示する（figure の figcaption になる）。',
+    en: 'With `title`, the header shows it in place of the language, as the figure’s figcaption.',
+  }),
+  marksTitle: message({
+    ja: '行の印',
+    en: 'Line Marks',
+  }),
+  marksDescription: message({
+    ja: '`marks` は 1 始まりの行番号ごとに `highlight`・`add`・`remove` を付ける。追加と削除は色だけでなく `+` と `−` でも示す。',
+    en: '`marks` marks lines by their 1-based number with `highlight`, `add`, or `remove`. Additions and removals are shown with `+` and `−`, not by color alone.',
+  }),
+  calloutsTitle: message({
+    ja: '注記',
+    en: 'Callouts',
+  }),
+  calloutsDescription: message({
+    ja: '`callouts` は行の直後に、その行の字下げに揃えて注記を置く（配列なら書いた順に重ねる）。コピーされるのは `code` そのもので、印や注記は含まれない。',
+    en: '`callouts` puts a note right under a line, indented like the line (an array puts several, in order). The copy button copies `code` exactly, without the marks or the notes.',
+  }),
+  colorsTitle: message({
+    ja: '色とダークモード',
+    en: 'Colors and Dark Mode',
+  }),
+  colorsDescription: message({
+    ja: 'shiki の css-variables テーマを使い、`--shiki-token-*` を ui のトークンに結びつけている。トークンが `.dark` で切り替わるので、ダーク用のテーマは持たない。知らない言語名は色を付けずに描く。',
+    en: 'It uses shiki’s css-variables theme, with each `--shiki-token-*` mapped to a design token. The tokens switch under `.dark`, so there is no second theme. A language name shiki does not know renders as plain text.',
+  }),
+};
+
+export const kbd = {
+  description: message({
+    ja: 'キーボードのキーを、キーキャップとして示す',
+    en: 'A keyboard key, drawn as a key cap.',
+  }),
+  combinationTitle: message({
+    ja: 'キーの組み合わせ',
+    en: 'Key Combinations',
+  }),
+  combinationDescription: message({
+    ja: '同時に押すキーは、1 キーずつ `Kbd` を並べる。',
+    en: 'For keys pressed together, place one `Kbd` per key side by side.',
+  }),
+  labelTitle: message({
+    ja: '記号のキー',
+    en: 'Symbol Keys',
+  }),
+  labelDescription: message({
+    ja: '`⌘` や `⇧` のような記号は、読み上げると意味が通らない。`label` を渡すと、見た目は記号のまま、読み上げには `label` が使われる。',
+    en: 'A symbol such as `⌘` or `⇧` makes no sense read aloud. Pass `label`: the symbol stays on screen, and the label is what a screen reader says.',
+  }),
+};
+
+export const carousel = {
+  description: message({
+    ja: 'スクロールスナップで 1 枚ずつ止まるスライドと、前後のボタン',
+    en: 'Slides that snap one at a time as they scroll, with previous and next buttons.',
+  }),
+  basicDescription: message({
+    ja: 'トラックはスクロール領域そのもの。ボタンのほかに、トラックパッドやスワイプ、トラックにフォーカスを置いた矢印キーでも送れる。1 枚ずつ見せるときは「2 / 4」のように位置を示す。',
+    en: 'The track is itself a scroll container, so besides the buttons it moves with a trackpad, a swipe, or the arrow keys once the track has focus. When one slide shows at a time, the position is shown as "2 / 4".',
+  }),
+  slideSizeTitle: message({
+    ja: 'スライドの幅',
+    en: 'Slide Size',
+  }),
+  slideSizeDescription: message({
+    ja: '`slideSize` は 1 枚がトラックに占める幅。`full`（1 枚）、`lg`（次の 1 枚がのぞく）、`md`（2 枚）、`sm`（3 枚）。複数枚並べるときは「今の 1 枚」が決まらないので、位置は出さない。',
+    en: '`slideSize` is how much of the track one slide takes: `full` (one), `lg` (the next one peeks in), `md` (two), `sm` (three). With several in view there is no single current slide, so no position is shown.',
+  }),
+};
+
 export const table = {
   description: message({
     ja: '意味論を保ちつつ横スクロールにも対応するテーブル',
@@ -546,6 +631,10 @@ export const table = {
   emptyStateTitle: message({
     ja: '空状態',
     en: 'Empty State',
+  }),
+  emptyStateDescription: message({
+    ja: '行が無いときは `Table.Body` に `Table.EmptyState` を置く。`colSpan` 列をまたぐ行に `EmptyState` を描く。',
+    en: 'When there are no rows, put `Table.EmptyState` in `Table.Body`. It draws an `EmptyState` in a row spanning `colSpan` columns.',
   }),
 };
 
@@ -591,6 +680,21 @@ export const heading = {
   lineClampTitle: message({
     ja: '行数制限',
     en: 'Line Clamp',
+  }),
+};
+
+export const emptyState = {
+  description: message({
+    ja: 'リストや表、検索の結果が空のときに、その旨と次の一手を示す',
+    en: 'What a list, a table, or a search shows when there is nothing in it, and what to do next.',
+  }),
+  withActionTitle: message({
+    ja: 'アイコンと操作',
+    en: 'Icon and Action',
+  }),
+  inTableDescription: message({
+    ja: '表の中では `Table.EmptyState` を使う。列をまたぐ行の中に、同じ内容を描く。',
+    en: 'Inside a table, use `Table.EmptyState`: it draws the same content in a row that spans the columns.',
   }),
 };
 
