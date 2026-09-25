@@ -248,7 +248,10 @@ These docs are served from <https://ordo.k8o.me>.
   URL, not a table path) and `usePathname` / `<Router>` take it off, a URL
   outside it being left to the browser — `withBase(pathname, base?)` /
   `withoutBase(pathname, base?)` (`null` outside the base) are the two steps;
-  `bindParams(() => ({ locale }))` returns `{ href, navigateTo }` with those
+  `usePendingPathname()` is where a page change in progress is going (`null`
+  when none is), for a pending indicator; a branch's `loading` component
+  shows while what is below it suspends (a `<Suspense>` inside its `error`
+  boundary); `bindParams(() => ({ locale }))` returns `{ href, navigateTo }` with those
   params supplied by the source at each call (still overridable), for a
   segment every link shares — a pattern that names a param still takes
   `options` third, after an `undefined` params slot if the source supplies
@@ -294,8 +297,9 @@ These docs are served from <https://ordo.k8o.me>.
 > installing this package means request-time data does not exist as an API, and
 > a `'use server'` module, which the RSC pipeline still compiles, is refused by
 > name, as is a `guard.ts`. `src/routes/` is the pathname space
-> (page/layout/not-found/error/redirect/route, `[param]`, `(group)`,
-> `_private`), a `route.ts` is written as the file its `GET` answers at its
+> (page/layout/not-found/error/loading/redirect/route, `[param]`, `(group)`,
+> `_private`), a `loading.tsx` shows while what is below it suspends in a
+> client navigation (a written file is whole), a `route.ts` is written as the file its `GET` answers at its
 > pathname (`feed.xml/route.ts` → `feed.xml`; any other method is refused), a
 > page or layout may `export const paramsSchema` (any Standard Schema,
 > synchronous) to type its parameters — a refused value makes the pattern not
@@ -343,12 +347,14 @@ These docs are served from <https://ordo.k8o.me>.
 > parameters need no list of values, an unknown URL is a real 404, and a form
 > can post to a Server Action. The mode is the dependency — the alternative is
 > `@k8ordo/static`, which renders every route at build time. `src/routes/` is
-> the pathname space (page/layout/not-found/error/redirect/guard/route, `[param]`,
+> the pathname space (page/layout/not-found/error/loading/redirect/guard/route, `[param]`,
 > `(group)`, `_private`), a page or layout may `export const paramsSchema` (any
 > Standard Schema, synchronous) to type its parameters — a refused value makes
 > the pattern not answer, so the walk goes on to `not-found.tsx` under a real
 > 404 — an `error.tsx` shows in place of what throws below it, a `redirect.ts`
-> answers 307/308, a `route.ts` answers its URL with a `Response` from the
+> answers 307/308, a `loading.tsx` shows while what is below it suspends
+> (with the router's `usePendingPathname()` for a page change in progress), a
+> `route.ts` answers its URL with a `Response` from the
 > method it exports (`GET`/`POST`/…, `{ request, params }` — `RouteContext`
 > from the router; `HEAD` from `GET`, `405` with `Allow` otherwise, no
 > same-origin check), a page that says `notFound()` (from `@k8ordo/router`) is

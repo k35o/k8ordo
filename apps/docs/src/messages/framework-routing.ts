@@ -59,8 +59,8 @@ export const filesTitle = message({
 });
 
 export const filesDescription = message({
-  ja: 'ディレクトリの中で文法が受け付けるファイル名は `page.tsx`・`layout.tsx`・`not-found.tsx`・`error.tsx`・`redirect.ts`・`guard.ts` だけで、拡張子まで含めて完全に一致する必要があります。`page.ts` も `helpers.ts` もビルドが拒みます。それ以外のファイルは、`_` で始まるディレクトリに置きます。',
-  en: 'Inside a directory the grammar accepts only `page.tsx`, `layout.tsx`, `not-found.tsx`, `error.tsx`, `redirect.ts` and `guard.ts`, matched exactly, extension included, so `page.ts` fails the build as surely as `helpers.ts` does. Everything else goes under a directory whose name starts with `_`.',
+  ja: 'ディレクトリの中で文法が受け付けるファイル名は `page.tsx`・`layout.tsx`・`not-found.tsx`・`error.tsx`・`loading.tsx`・`redirect.ts`・`route.ts`・`guard.ts` だけで、拡張子まで含めて完全に一致する必要があります。`page.ts` も `helpers.ts` もビルドが拒みます。それ以外のファイルは、`_` で始まるディレクトリに置きます。',
+  en: 'Inside a directory the grammar accepts only `page.tsx`, `layout.tsx`, `not-found.tsx`, `error.tsx`, `loading.tsx`, `redirect.ts`, `route.ts` and `guard.ts`, matched exactly, extension included, so `page.ts` fails the build as surely as `helpers.ts` does. Everything else goes under a directory whose name starts with `_`.',
 });
 
 export const filesTable = {
@@ -87,6 +87,10 @@ export const filesTable = {
     ja: 'ページの代わりに、行き先を default export する',
     en: 'Default-exports where to send the visitor, instead of a page',
   }),
+  loading: message({
+    ja: 'その下がサスペンドしている間に出す。その階層に `<Suspense>` が置かれる',
+    en: 'Shown while what is below it suspends — a `<Suspense>` at that level',
+  }),
   route: message({
     ja: 'ページの代わりに、export したメソッドの関数が `Response` で答える（フィードや JSON）',
     en: 'Answers with a `Response` from the function named after the request method, instead of a page — a feed, JSON',
@@ -96,6 +100,7 @@ export const filesTable = {
     en: 'Runs before whatever answers below it; a returned `Response` ends the request — `@k8ordo/server` only, `@k8ordo/static` refuses it',
   }),
   nothing: message({ ja: 'なし（描画しない）', en: 'None — nothing renders' }),
+  noProps: message({ ja: 'なし', en: 'None' }),
 };
 
 export const segmentsTitle = message({
@@ -417,4 +422,19 @@ export const routeReceives = message({
 export const routeOrder = message({
   ja: '1 つのディレクトリは `route.ts` で答えるか `page.tsx` を描くか（またはリダイレクトするか）のどれか 1 つで、`route.ts` の上のレイアウトはそれを包みません。何も描かないからです。表の順番にはページと同じく並ぶので、`api/[id]/route.ts` の横の `api/latest/page.tsx` は `/api/latest` をページのまま受け持ちます。クライアント遷移で行き着くとペイロードは無く、文書の読み込みになります。',
   en: 'A directory answers from a `route.ts` or renders a `page.tsx` (or redirects), never two of them, and the layouts above a `route.ts` do not wrap it — nothing renders. It takes its place in the table’s order the way a page does, so `api/[id]/route.ts` beside `api/latest/page.tsx` leaves `/api/latest` to the page. A client navigation to it gets no payload, and loads the document instead.',
+});
+
+export const loadingTitle = message({
+  ja: '`loading.tsx` — ページが来るまで',
+  en: '`loading.tsx` — while a page loads',
+});
+
+export const loadingDescription = message({
+  ja: 'レイアウト（またはページ）の横の `loading.tsx` は、その下がサスペンドしている間に出るものです。フレームワークがその階層に `<Suspense>` を置き、その階層の `error.tsx` の境界の内側に入れます。props は受け取りません。',
+  en: 'A `loading.tsx` beside a `layout.tsx` (or a `page.tsx`) is what shows while what is below it suspends: a `<Suspense>` the framework puts at that level, inside its `error.tsx` boundary. It receives no props.',
+});
+
+export const loadingWhen = message({
+  ja: 'クライアント遷移でそのディレクトリに入り、ページがまだ届いていないとき、そしてページの中がストリームの途中でサスペンドしたときに出ます。すでに画面にあるものの下でのページの切り替えは、ほかの切り替えと同じく、次のページが来るまで今のページを出したままにします。その待ちを見せるのが `@k8ordo/router` の `usePendingPathname()` です。',
+  en: 'It shows when a client navigation enters its directory while the page there is still on its way, and for whatever inside the page suspends as it streams. A page change below one already on screen keeps the current page showing while the next one loads, as every page change does; `usePendingPathname()` from `@k8ordo/router` is how a link or a bar says that one is under way.',
 });
