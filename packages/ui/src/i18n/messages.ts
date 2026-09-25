@@ -40,6 +40,10 @@ export type Messages = {
 
   numberFieldIncrement: string;
   numberFieldDecrement: string;
+  /** NumberField の値が min を下回ったときの検証メッセージ。`{min}` が min の値に置き換わる */
+  numberFieldRangeUnderflow: string;
+  /** NumberField の値が max を上回ったときの検証メッセージ。`{max}` が max の値に置き換わる */
+  numberFieldRangeOverflow: string;
 
   calendarPreviousMonth: string;
   calendarNextMonth: string;

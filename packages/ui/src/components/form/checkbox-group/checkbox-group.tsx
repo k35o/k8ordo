@@ -1,16 +1,23 @@
 'use client';
 
-import { createContext, use, useCallback, useMemo } from 'react';
-import type { FC, FieldsetHTMLAttributes, PropsWithChildren, Ref } from 'react';
+import { createContext, use, useMemo } from 'react';
+import type {
+  ChangeEvent,
+  FC,
+  FieldsetHTMLAttributes,
+  PropsWithChildren,
+  Ref,
+} from 'react';
 
 import { cn } from '../../../helpers/cn';
-import { useControllableState } from '../../../hooks/controllable-state';
 
 type CheckboxGroupContextValue = {
-  currentValue: string[];
+  /** 制御モードの値。非制御では undefined で、各項目は defaultValue から始める */
+  value: string[] | undefined;
+  defaultValue: string[];
   disabled: boolean;
   name: string;
-  toggleValue: (value: string) => void;
+  notifyChange: (event: ChangeEvent<HTMLInputElement>) => void;
 };
 
 const CheckboxGroupContext = createContext<
@@ -63,31 +70,29 @@ const Root: FC<RootProps> = ({
   value,
   ...rest
 }) => {
-  const [currentValue, setCurrentValue] = useControllableState({
-    value,
-    defaultValue: defaultValue ?? [],
-    onChange,
-  });
-
-  const toggleValue = useCallback(
-    (targetValue: string) => {
-      const nextValue = currentValue.includes(targetValue)
-        ? currentValue.filter((item) => item !== targetValue)
-        : [...currentValue, targetValue];
-
-      setCurrentValue(nextValue);
-    },
-    [currentValue, setCurrentValue],
-  );
-
+  // 非制御のときは値を state に写さず DOM に持たせる。form の reset は change を
+  // 飛ばさずに checked を戻すので、写した state は取り残される
   const contextValue = useMemo<CheckboxGroupContextValue>(
     () => ({
-      currentValue,
+      value,
+      defaultValue: defaultValue ?? [],
       disabled,
       name,
-      toggleValue,
+      notifyChange: (event) => {
+        const inputs =
+          event.currentTarget
+            .closest('fieldset')
+            ?.querySelectorAll<HTMLInputElement>(
+              `input[type="checkbox"][name="${CSS.escape(name)}"]`,
+            ) ?? [];
+        onChange?.(
+          [...inputs]
+            .filter((input) => input.checked)
+            .map((input) => input.value),
+        );
+      },
     }),
-    [currentValue, disabled, name, toggleValue],
+    [value, defaultValue, disabled, name, onChange],
   );
 
   return (
