@@ -14,6 +14,7 @@ pnpm test                                    # Run all tests
 pnpm test --project=helpers                  # Helper tests only (no browser)
 pnpm test --project=hooks                    # Hook tests only (Playwright)
 pnpm test --project=components               # Component tests only (Storybook + Playwright)
+pnpm test --project=components-dark          # The same stories with the dark theme
 pnpm test --project=hooks src/internal/focus-trap.test.tsx # Single test file (needs its project)
 pnpm build                                   # vp pack + CSS copy
 pnpm typecheck                               # Type check (no emit)
@@ -242,6 +243,7 @@ Custom variants besides `dark:`: `light:` (anywhere not under `.dark`) and `vert
 - **Helper tests** are standard unit tests, no browser needed.
 - **There is no jsdom project, and components are not written to survive one.** They call `ResizeObserver`, `matchMedia`, `dialog.showModal`, and the Popover API directly — no support checks, no null branches. Consumers are told to test in a real browser (`docs/GUIDE.md`); do not reintroduce a guard layer to make a synthetic DOM work.
 - Storybook preview wraps all stories in `UIProvider` with light/dark theme toggle.
+- Every story runs twice: `components` in light and `components-dark` in dark (`storybookTest({ initialGlobals: { theme: 'dark' } })`), because axe only checks the colors on screen. A story that pins `parameters.theme` stays in that theme in both.
 - A form field in a story is given a name (`aria-label` in the meta `args`, and on any field a custom `render` draws), not a disabled `label` rule.
 - a11y addon fails a story on violations (`test: 'error'`), `color-contrast` included. Only overlay stories that axe misreads while they fade in turn `color-contrast` off for themselves: every `Modal` story, and one story each in `Dialog` and `Popover`.
 - Mock date is set to `2023-01-02 12:34:56` in Storybook.
