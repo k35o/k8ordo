@@ -3,9 +3,10 @@
 `@k8ordo/state` — declare state by where it lives. `definePageState` holds
 the two faces of a history entry (typed URL search params + hidden entry
 state) over the Navigation API; `defineLocalState` is localStorage,
+`defineSessionState` sessionStorage (the same store over the other area),
 `defineCookieState` a cookie the browser writes and the server reads,
 `defineMemoryState` a typed shared box with no schema. One zod schema per
-boundary place (url, entry, local, cookie) derives the server read
+boundary place (url, entry, local, session, cookie) derives the server read
 (`parseUrl`, `parseCookies`), canonical links (`href`/`search`), stale-data
 salvage, and the client subscription (`useAppState`). The shared discipline
 (React 19 / RSC assumed, Baseline newly available only, no polyfills) and how
@@ -30,20 +31,22 @@ pnpm check         # check:write to auto-fix
   live store is created lazily by the first `useAppState`, in a registry keyed
   by `kind + string key` — that is what survives HMR and what
   `resetStateRegistry()` clears for tests. Nothing in the package touches
-  `navigation`/`location`/`localStorage`/`document.cookie`/`cookieStore` at
-  import time.
+  `navigation`/`location`/`localStorage`/`sessionStorage`/`document.cookie`/
+  `cookieStore` at import time.
 - **`update()` applies synchronously and writes in a microtask.** The echo is
   canonical — the merged state passes the schema inside `update()` with the
   same salvage an arrival gets, so no render ever shows a value the schema
-  rejects. On page, local and cookie state, all `update()` calls made
-  synchronously in one handler share one write and one `{committed, finished}`
-  handle (an `await` between calls starts a new batch). A page batch that
-  lands back where it started must not navigate or touch the entry; local and
-  cookie have no such check and rewrite their row. Routing is by what
+  rejects. On page, local, session and cookie state, all `update()` calls
+  made synchronously in one handler share one write and one
+  `{committed, finished}` handle (an `await` between calls starts a new
+  batch). A page batch that lands back where it started must not navigate or
+  touch the entry; local, session and cookie have no such check and rewrite
+  their row. Routing is by what
   changed, compared on live values: url+entry changes are one
   `navigation.navigate()` (atomic), entry-only changes are
   `updateCurrentEntry()` (no navigation, so `history: 'push'` has no effect),
-  local is one `setItem`, cookie one `cookieStore.set()` whose promise settles
+  local and session are one `setItem`, cookie one `cookieStore.set()` whose
+  promise settles
   the handle. Memory has neither schema nor write to batch: each call swaps
   the snapshot and returns its own handle, settled on the spot.
 - **A pending batch survives concurrent events.** `sync`/`onStorage` overlay
@@ -70,7 +73,7 @@ pnpm check         # check:write to auto-fix
   arrays and plain objects (anything else — Date, Map, class instances —
   compares by reference); unchanged fields keep their object identity across
   snapshots.
-- **Boundary data is input.** URL params, localStorage and cookie JSON, and
+- **Boundary data is input.** URL params, Web Storage and cookie JSON, and
   restored entry state salvage field-by-field to their own defaults — never a
   throw, never a poisoned sibling. Memory has no schema because its values never cross a boundary.
 - **A url value is canonicalized by the road it comes back on.** The url
@@ -83,10 +86,10 @@ pnpm check         # check:write to auto-fix
   (`"false"` is truthy to `z.coerce.boolean()`). A value with no URL spelling
   at all throws out of `update()` before the batch is touched, since a
   rejected handle is invisible to the fire-and-forget caller that is the
-  normal case. Entry, local and cookie `salvage` hand the typed values
-  straight to the schema — no structured clone, no JSON — so those schemas
-  must accept their own output, and a local or cookie value JSON cannot hold
-  (a Date) survives the echo and is lost on the next load.
+  normal case. Entry, local, session and cookie `salvage` hand the typed
+  values straight to the schema — no structured clone, no JSON — so those
+  schemas must accept their own output, and a local, session or cookie value
+  JSON cannot hold (a Date) survives the echo and is lost on the next load.
 - **A link carries Vite's base; a path does not.** `href(path)` takes a
   path in the route table's terms and puts `import.meta.env.BASE_URL` in
   front (`base.ts`, the router's `withBase` rule re-spelled, since the router
@@ -95,8 +98,8 @@ pnpm check         # check:write to auto-fix
   despite its type, and nothing is added.
 - **No history-API fallback.** Imperative url updates assume an intercepting
   router; links and GET forms are the path that works everywhere. Updates
-  that change only entry, local, cookie or memory values never navigate, so
-  they work under any router.
+  that change only entry, local, session, cookie or memory values never
+  navigate, so they work under any router.
 - **A cookie state is a preference, never a secret.** The browser writes it,
   so it cannot be `HttpOnly`; the server reads it as input through the
   schema. It is written `Path=/; SameSite=Lax; Max-Age=400 days` (the API adds
@@ -113,16 +116,16 @@ pnpm check         # check:write to auto-fix
 src/
   schema/object.ts     StateSchema, absence rule, per-field salvage parse
   url/codec.ts         schema ⇄ URLSearchParams: parse + canonical search
-  entry/codec.ts       StoredCodec: read typed stored values (entry, local, cookie)
+  entry/codec.ts       StoredCodec: read typed stored values (entry, local, session, cookie)
   page-state.ts        definePageState(); slot disjointness; internals WeakMap
   base.ts              withBase: Vite's base in front of a link
-  local-state.ts       defineLocalState()
+  storage-state.ts     defineLocalState() / defineSessionState(); storageKey, inlineRead
   cookie-state.ts      defineCookieState(); cookie name, value encoding, parseCookies
   memory-state.ts      defineMemoryState() — no schema by design
   store/core.ts        snapshot core: key-diff notify, picks, update handles
   store/registry.ts    kind+key-keyed store registry + resetStateRegistry()
   store/page-store.ts  Navigation API wiring, batching, atomic two-face flush
-  store/local-store.ts localStorage wiring, storage-event cross-tab sync
+  store/storage-store.ts Web Storage wiring (local, session), storage-event sync
   store/cookie-store.ts Cookie Store API wiring, change-event sync, in-flight guard
   store/memory-store.ts
   use-app-state.ts     the client hook ('use client'); dispatch on def.kind
@@ -151,7 +154,7 @@ same field submits the same string.
   a union of every path the table has. The older
   `{ path: P }` form stays accepted (other routers, and what the framework's
   generator emitted before `routes`); `routes` wins when both are present.
-- **A local definition owns its storage key.** `storageKey` on the
+- **A local or session definition owns its storage key.** `storageKey` on the
   definition is the one place `k8ordo-state:<key>` is spelled — the store
   reads it from there — and `inlineRead()` renders the pre-hydration read as
   a self-contained expression so an app never hand-writes the key or the

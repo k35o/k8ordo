@@ -1,9 +1,9 @@
 # @k8ordo/state
 
 Declare state by where it lives — URL search params, hidden history-entry
-state, localStorage, a cookie, or memory. One zod schema per boundary place
-(URL, entry, localStorage, cookie) derives the server-side read, canonical
-links, salvage of stale data, and a client subscription with exact per-key
+state, localStorage, sessionStorage, a cookie, or memory. One zod schema per
+boundary place (URL, entry, Web Storage, cookie) derives the server-side
+read, canonical links, salvage of stale data, and a client subscription with exact per-key
 change detection; memory never crosses a boundary, so it is a typed shared
 box with no schema. Links and GET forms write the URL before JavaScript loads
 under any router (the server renders what they wrote wherever it reads the
@@ -131,11 +131,11 @@ Point your agent at them once by pasting this into your project's `CLAUDE.md` /
 `AGENTS.md`:
 
 ```markdown
-Use `@k8ordo/state` for URL, history-entry, localStorage, cookie and shared
-memory state. Before adding or changing state, read
+Use `@k8ordo/state` for URL, history-entry, localStorage, sessionStorage,
+cookie and shared memory state. Before adding or changing state, read
 `node_modules/@k8ordo/state/docs/GUIDE.md`. Declare each state by where it
-lives (`definePageState` / `defineLocalState` / `defineCookieState` /
-`defineMemoryState`) in a shared module, read the url slot with `parseUrl`
+lives (`definePageState` / `defineLocalState` / `defineSessionState` /
+`defineCookieState` / `defineMemoryState`) in a shared module, read the url slot with `parseUrl`
 where the router hands the page its search and a cookie state with
 `parseCookies` where it hands the page the request's cookies, build links
 with `href`, and subscribe on the client with `useAppState`. Every boundary

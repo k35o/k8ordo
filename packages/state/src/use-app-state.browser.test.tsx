@@ -6,9 +6,9 @@ import { render } from 'vitest-browser-react';
 import { z } from 'zod';
 
 import { defineCookieState } from './cookie-state';
-import { defineLocalState } from './local-state';
 import { defineMemoryState } from './memory-state';
 import { definePageState } from './page-state';
+import { defineLocalState, defineSessionState } from './storage-state';
 import type { UpdateHandle } from './store/core';
 import { resetStateRegistry } from './store/registry';
 import { useAppState } from './use-app-state';
@@ -48,6 +48,7 @@ afterEach(async () => {
   navigation.removeEventListener('navigate', interceptAsRouter);
   resetStateRegistry();
   localStorage.removeItem('k8ordo-state:prefs');
+  sessionStorage.removeItem('k8ordo-state:prefs');
   await cookieStore.delete('k8ordo-state.density');
   await cookieStore.delete('k8ordo-state.note');
   await cookieStore.delete('k8ordo-state.counter');
@@ -1058,4 +1059,96 @@ it('a write that cannot be encoded fails alone and the next one still lands', as
   expect(JSON.parse(decodeURIComponent(cookie.value as string))).toStrictEqual({
     clicks: 1,
   });
+});
+
+// local の prefs と同じキー。置き場所が違えば別の状態であることを確かめる
+const tabPrefs = defineSessionState(
+  'prefs',
+  z.object({
+    view: z.enum(['grid', 'table']).default('grid'),
+    pageSize: z.number().default(20),
+  }),
+);
+
+const TabPrefs: FC = () => {
+  const [{ view }, update] = useAppState(tabPrefs, ['view']);
+  return (
+    <>
+      <p data-testid="tab-view">{view}</p>
+      <button
+        type="button"
+        onClick={() => {
+          lastHandle = update({ view: 'table' });
+        }}
+      >
+        tab table
+      </button>
+    </>
+  );
+};
+
+it('session state reads what the tab stored before a reload', async () => {
+  sessionStorage.setItem(
+    'k8ordo-state:prefs',
+    JSON.stringify({ view: 'table', pageSize: 50 }),
+  );
+
+  const screen = await render(<TabPrefs />);
+
+  await expect
+    .element(screen.getByTestId('tab-view'))
+    .toHaveTextContent('table');
+});
+
+it('session state persists an update in sessionStorage and settles its handle', async () => {
+  const screen = await render(<TabPrefs />);
+
+  await screen.getByRole('button', { name: 'tab table' }).click();
+
+  await expect
+    .element(screen.getByTestId('tab-view'))
+    .toHaveTextContent('table');
+  await (lastHandle as UpdateHandle).finished;
+  expect(
+    JSON.parse(sessionStorage.getItem('k8ordo-state:prefs') as string),
+  ).toStrictEqual({ view: 'table', pageSize: 20 });
+});
+
+it('local and session state under the same key are separate places', async () => {
+  const screen = await render(
+    <>
+      <Prefs />
+      <TabPrefs />
+    </>,
+  );
+
+  await screen.getByRole('button', { name: 'tab table' }).click();
+  await (lastHandle as UpdateHandle).finished;
+
+  await expect
+    .element(screen.getByTestId('tab-view'))
+    .toHaveTextContent('table');
+  await expect.element(screen.getByTestId('view')).toHaveTextContent('grid');
+  expect(localStorage.getItem('k8ordo-state:prefs')).toBeNull();
+});
+
+it("another frame's sessionStorage write flows in through the storage event", async () => {
+  const screen = await render(<TabPrefs />);
+
+  // storage イベントは、同じ置き場所を共有するほかの文書でだけ発火する。
+  // sessionStorage なら、このタブのほかのフレームがそれに当たる
+  sessionStorage.setItem(
+    'k8ordo-state:prefs',
+    JSON.stringify({ view: 'table', pageSize: 20 }),
+  );
+  window.dispatchEvent(
+    new StorageEvent('storage', {
+      key: 'k8ordo-state:prefs',
+      storageArea: sessionStorage,
+    }),
+  );
+
+  await expect
+    .element(screen.getByTestId('tab-view'))
+    .toHaveTextContent('table');
 });
