@@ -64,8 +64,8 @@ cannot describe) are not derived: the field becomes a bare text input and is
 listed in `dropped`. There is no input masking. A schema no control could
 satisfy is refused at derive time rather than left to fail on every
 submission: `z.number()` and `z.literal(1)` (use `z.coerce.number()`),
-`z.date()`, `z.bigint()`, and `z.stringbool()` on a checkbox (use
-`z.boolean()`). A `z.custom()` that rejects strings cannot be refused at derive
+`z.date()`, and `z.bigint()`; so is a `z.stringbool().default(true)` checkbox,
+which could never submit `false`. A `z.custom()` that rejects strings cannot be refused at derive
 time: it derives as a text input, is listed in `dropped`, and fails on the
 server. Of `.refine()` / `.superRefine()` checks, `dropped` counts only the ones
 on the schema as a whole, not those on a single field, a nested object, or a
@@ -98,8 +98,10 @@ row. Rules cannot target fields inside repeated rows.
   typed data or per-field errors with the submitted values. An untouched
   control reaches the schema as what it actually submits: `''` for text,
   `false` for a checkbox, and nothing at all for a number, a
-  `z.coerce.bigint()`, a file, or a choice (a radio group with none selected, a
-  `<select>` on a `value=""` placeholder), so `z.coerce.number()` cannot read a
+  `z.coerce.bigint()`, a file, a choice (a radio group with none selected, a
+  `<select>` on a `value=""` placeholder), or a `z.stringbool()` checkbox —
+  which, checked, submits the `value` derived from the schema's own spelling of
+  `true`, the same string `@k8ordo/state` writes into a URL — so `z.coerce.number()` cannot read a
   blank field as 0 and `z.enum([…]).optional()` can be left empty. A checkbox
   group always echoes as an array.
   `defineForm(schema, rules)` attaches cross-field rules (`sameAs`,

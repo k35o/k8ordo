@@ -40,6 +40,7 @@ export const listState = definePageState('product-list', {
   url: z.object({
     q: z._default(z.string(), ''),
     page: z._default(z.coerce.number().check(z.int(), z.gte(1)), 1),
+    inStock: z._default(z.stringbool(), false),
   }),
   entry: z.object({
     expanded: z._default(z.array(z.string()), []),
@@ -136,7 +137,7 @@ example Next.js:
 ```tsx
 export default async function Page({ searchParams }: PageProps<'/products'>) {
   const url = listState.parseUrl(await searchParams);
-  //    ^ { q: string; page: number } — typed, defaults applied
+  //    ^ { q: string; page: number; inStock: boolean } — typed, defaults applied
 
   const products = await fetchProducts(url);
   return (
@@ -429,7 +430,10 @@ import { formFields } from '@k8ordo/form/server';
 const filterFields = formFields(listState.url); // one schema, both jobs
 ```
 
-The form submits as GET, which writes the URL with or without JavaScript.
+A `z.stringbool()` field derives a checkbox whose `value` is the same spelling
+of `true` that `update()` writes, so a checked box submits `inStock=true` —
+the URL state itself would write. The form submits as GET, which writes the
+URL with or without JavaScript.
 Where the router hands the page its search, the RSC reads it back with
 `parseUrl` and the whole loop works before JavaScript loads; under
 `@k8ordo/static` and `@k8ordo/server` the server render shows the defaults,
