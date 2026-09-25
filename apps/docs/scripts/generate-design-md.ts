@@ -424,13 +424,16 @@ import { UIProvider, Button, Card } from '@k8ordo/ui';
 - **Avatar** — \`src\` / \`name\`（イニシャル）/ \`fallback\`, \`size\`
 - **Badge** — \`label\`, \`tone: 'neutral'|'info'|'success'|'warning'|'error'\`, \`variant: 'solid'|'outline'\`, \`size\`, \`interactive\`
 - **Card** — \`width: 'full'|'fit'\`, \`variant: 'shadow'|'outline'\`, \`interactive\`
+- **Carousel**（compound: \`Root\`(\`label\`, \`slideSize: 'full'|'lg'|'md'|'sm'\`) / \`Slide\`(\`label?\`)）— スクロールスナップと前後ボタン。自動再生なし
 - **Code** — \`children: string\`（インラインコード。色文字列には色見本が付く）
 - **Heading** — \`level: 'h1'..'h6'\`（必須）, \`id?\`, \`lineClamp?\`
-- **Table**（compound: \`Root\` / \`Caption\` / \`Head\` / \`Body\` / \`Row\` / \`HeaderCell\` / \`Cell\` / \`EmptyState\`）
+- **Kbd** — \`children: string\`（1 キー 1 要素。組み合わせは並べる）, \`label?\`（記号キーの読み上げ）
+- **Table**（compound: \`Root\` / \`Caption\` / \`Head\` / \`Body\` / \`Row\` / \`HeaderCell\` / \`Cell\` / \`EmptyState\`(\`colSpan\` + EmptyState の props)）
 
 ### Feedback
 
 - **Alert** — \`tone: 'info'|'success'|'warning'|'error'\`, \`message: string | string[]\`
+- **EmptyState** — \`title\`（必須）, \`description?\`, \`icon?\`, \`action?\`（空のリスト・表・検索結果に置く）
 - **Progress** — \`value\`, \`max\`（必須）, \`min?\`, \`label?\`
 - **Skeleton** — \`shape: 'rect'|'circle'\`, \`size\`, \`animate\`
 - **Spinner** — \`size\`, \`label?\`（aria-live）
