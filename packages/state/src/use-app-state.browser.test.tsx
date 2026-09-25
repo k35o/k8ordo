@@ -6,9 +6,9 @@ import { render } from 'vitest-browser-react';
 import { z } from 'zod';
 
 import { defineCookieState } from './cookie-state';
-import { defineLocalState } from './local-state';
 import { defineMemoryState } from './memory-state';
 import { definePageState } from './page-state';
+import { defineLocalState, defineSessionState } from './storage-state';
 import type { UpdateHandle } from './store/core';
 import { resetStateRegistry } from './store/registry';
 import { useAppState } from './use-app-state';
@@ -48,9 +48,12 @@ afterEach(async () => {
   navigation.removeEventListener('navigate', interceptAsRouter);
   resetStateRegistry();
   localStorage.removeItem('k8ordo-state:prefs');
+  sessionStorage.removeItem('k8ordo-state:prefs');
   await cookieStore.delete('k8ordo-state.density');
   await cookieStore.delete('k8ordo-state.note');
   await cookieStore.delete('k8ordo-state.counter');
+  localStorage.removeItem('k8ordo-state:versioned');
+  await cookieStore.delete('k8ordo-state.versioned');
 });
 
 const renders: Record<string, number> = {};
@@ -730,6 +733,17 @@ const TwoBatches: FC = () => {
 };
 
 const committed: string[] = [];
+const committedViews: string[] = [];
+
+const VersionProbe: FC<{
+  initialCookie?: { view: 'grid' | 'table'; pageSize: number };
+}> = ({ initialCookie }) => {
+  const [{ view }] = useAppState(versionedCookie, ['view'], { initialCookie });
+  useLayoutEffect(() => {
+    committedViews.push(view);
+  });
+  return <p>{view}</p>;
+};
 
 const DensityProbe: FC<{ initialCookie?: DensityValues }> = ({
   initialCookie,
@@ -1058,4 +1072,339 @@ it('a write that cannot be encoded fails alone and the next one still lands', as
   expect(JSON.parse(decodeURIComponent(cookie.value as string))).toStrictEqual({
     clicks: 1,
   });
+});
+
+// local の prefs と同じキー。置き場所が違えば別の状態であることを確かめる
+const tabPrefs = defineSessionState(
+  'prefs',
+  z.object({
+    view: z.enum(['grid', 'table']).default('grid'),
+    pageSize: z.number().default(20),
+  }),
+);
+
+const TabPrefs: FC = () => {
+  const [{ view }, update] = useAppState(tabPrefs, ['view']);
+  return (
+    <>
+      <p data-testid="tab-view">{view}</p>
+      <button
+        type="button"
+        onClick={() => {
+          lastHandle = update({ view: 'table' });
+        }}
+      >
+        tab table
+      </button>
+    </>
+  );
+};
+
+it('session state reads what the tab stored before a reload', async () => {
+  sessionStorage.setItem(
+    'k8ordo-state:prefs',
+    JSON.stringify({ view: 'table', pageSize: 50 }),
+  );
+
+  const screen = await render(<TabPrefs />);
+
+  await expect
+    .element(screen.getByTestId('tab-view'))
+    .toHaveTextContent('table');
+});
+
+it('session state persists an update in sessionStorage and settles its handle', async () => {
+  const screen = await render(<TabPrefs />);
+
+  await screen.getByRole('button', { name: 'tab table' }).click();
+
+  await expect
+    .element(screen.getByTestId('tab-view'))
+    .toHaveTextContent('table');
+  await (lastHandle as UpdateHandle).finished;
+  expect(
+    JSON.parse(sessionStorage.getItem('k8ordo-state:prefs') as string),
+  ).toStrictEqual({ view: 'table', pageSize: 20 });
+});
+
+it('local and session state under the same key are separate places', async () => {
+  const screen = await render(
+    <>
+      <Prefs />
+      <TabPrefs />
+    </>,
+  );
+
+  await screen.getByRole('button', { name: 'tab table' }).click();
+  await (lastHandle as UpdateHandle).finished;
+
+  await expect
+    .element(screen.getByTestId('tab-view'))
+    .toHaveTextContent('table');
+  await expect.element(screen.getByTestId('view')).toHaveTextContent('grid');
+  expect(localStorage.getItem('k8ordo-state:prefs')).toBeNull();
+});
+
+it("another frame's sessionStorage write flows in through the storage event", async () => {
+  const screen = await render(<TabPrefs />);
+
+  // storage イベントは、同じ置き場所を共有するほかの文書でだけ発火する。
+  // sessionStorage なら、このタブのほかのフレームがそれに当たる
+  sessionStorage.setItem(
+    'k8ordo-state:prefs',
+    JSON.stringify({ view: 'table', pageSize: 20 }),
+  );
+  window.dispatchEvent(
+    new StorageEvent('storage', {
+      key: 'k8ordo-state:prefs',
+      storageArea: sessionStorage,
+    }),
+  );
+
+  await expect
+    .element(screen.getByTestId('tab-view'))
+    .toHaveTextContent('table');
+});
+
+// v1 は { layout: 'list' | 'cards' } を書いていた。v2 で view に改名した
+const versionedSchema = z.object({
+  view: z.enum(['grid', 'table']).default('grid'),
+  pageSize: z.number().default(20),
+});
+
+const versioning = {
+  version: 2,
+  migrate: (old: Readonly<Record<string, unknown>>) => ({
+    view: old['layout'] === 'list' ? 'table' : 'grid',
+  }),
+};
+
+const versionedLocal = defineLocalState(
+  'versioned',
+  versionedSchema,
+  versioning,
+);
+
+const versionedCookie = defineCookieState(
+  'versioned',
+  versionedSchema,
+  versioning,
+);
+
+const VersionedLocal: FC = () => {
+  const [{ view }, update] = useAppState(versionedLocal);
+  return (
+    <>
+      <p data-testid="local-view">{view}</p>
+      <button
+        type="button"
+        onClick={() => {
+          lastHandle = update({ pageSize: 50 });
+        }}
+      >
+        page size
+      </button>
+    </>
+  );
+};
+
+const VersionedCookie: FC = () => {
+  const [{ view }] = useAppState(versionedCookie);
+  return <p data-testid="cookie-view">{view}</p>;
+};
+
+it('local state migrates a row an older version wrote and writes it back', async () => {
+  localStorage.setItem('k8ordo-state:versioned', '[1,{"layout":"list"}]');
+
+  const screen = await render(<VersionedLocal />);
+
+  await expect
+    .element(screen.getByTestId('local-view'))
+    .toHaveTextContent('table');
+  await vi.waitFor(() => {
+    expect(localStorage.getItem('k8ordo-state:versioned')).toBe(
+      '[2,{"view":"table","pageSize":20}]',
+    );
+  });
+});
+
+it('local state writes a migrated row back after the render that read it, not during it', async () => {
+  localStorage.setItem('k8ordo-state:versioned', '[1,{"layout":"list"}]');
+  const seenInRender: Array<string | null> = [];
+  const Reader: FC = () => {
+    const [{ view }] = useAppState(versionedLocal);
+    // 描画の中で行を覗くのはこのテストだけの確かめ方
+    seenInRender.push(localStorage.getItem('k8ordo-state:versioned'));
+    return <p data-testid="reader-view">{view}</p>;
+  };
+
+  const screen = await render(<Reader />);
+
+  await expect
+    .element(screen.getByTestId('reader-view'))
+    .toHaveTextContent('table');
+  expect(seenInRender[0]).toBe('[1,{"layout":"list"}]');
+  await vi.waitFor(() => {
+    expect(localStorage.getItem('k8ordo-state:versioned')).toBe(
+      '[2,{"view":"table","pageSize":20}]',
+    );
+  });
+});
+
+it('a versioned local state writes its version with every update', async () => {
+  const screen = await render(<VersionedLocal />);
+
+  await screen.getByRole('button', { name: 'page size' }).click();
+  await (lastHandle as UpdateHandle).finished;
+
+  expect(localStorage.getItem('k8ordo-state:versioned')).toBe(
+    '[2,{"view":"grid","pageSize":50}]',
+  );
+});
+
+it('a local row a failing migrate cannot turn stays as it was', async () => {
+  const failing = defineLocalState('failing', versionedSchema, {
+    version: 2,
+    migrate: () => {
+      throw new Error('unexpected shape');
+    },
+  });
+  localStorage.setItem('k8ordo-state:failing', '[1,{"layout":"list"}]');
+  const Failing: FC = () => {
+    const [{ view }] = useAppState(failing);
+    return <p data-testid="failing-view">{view}</p>;
+  };
+  try {
+    const screen = await render(<Failing />);
+
+    // 直した migrate が次の読み込みでやり直せるよう、行には触らない
+    await expect
+      .element(screen.getByTestId('failing-view'))
+      .toHaveTextContent('grid');
+    expect(localStorage.getItem('k8ordo-state:failing')).toBe(
+      '[1,{"layout":"list"}]',
+    );
+  } finally {
+    localStorage.removeItem('k8ordo-state:failing');
+  }
+});
+
+it('cookie state migrates a cookie an older version wrote and writes it back', async () => {
+  await cookieStore.set(
+    versionedCookie.cookieName,
+    encodeURIComponent('{"layout":"list"}'),
+  );
+
+  const screen = await render(<VersionedCookie />);
+
+  await expect
+    .element(screen.getByTestId('cookie-view'))
+    .toHaveTextContent('table');
+  await vi.waitFor(async () => {
+    const cookie = (await cookieStore.get(
+      versionedCookie.cookieName,
+    )) as CookieListItem;
+    expect(decodeURIComponent(cookie.value as string)).toBe(
+      '[2,{"view":"table","pageSize":20}]',
+    );
+  });
+});
+
+it("hydration of a migrated cookie shows the server's values without a flash", async () => {
+  committedViews.length = 0;
+  await cookieStore.set(
+    versionedCookie.cookieName,
+    encodeURIComponent('{"layout":"list"}'),
+  );
+  // サーバーも同じ migrate を通して読むので、ブラウザの最初の読み取りと一致する
+  const initialCookie = versionedCookie.parseCookies(
+    new Map([[versionedCookie.cookieName, '{"layout":"list"}']]),
+  );
+
+  const app = hydrate(<VersionProbe initialCookie={initialCookie} />);
+  await vi.waitFor(() => {
+    expect(committedViews).toContain('table');
+  });
+  await frame();
+  await frame();
+
+  expect(committedViews).not.toContain('grid');
+  app.unmount();
+});
+
+const announce = (row: string): void => {
+  localStorage.setItem('k8ordo-state:versioned', row);
+  window.dispatchEvent(
+    new StorageEvent('storage', {
+      key: 'k8ordo-state:versioned',
+      storageArea: localStorage,
+    }),
+  );
+};
+
+it('an older row another tab writes is migrated here and written back', async () => {
+  const screen = await render(<VersionedLocal />);
+  await expect
+    .element(screen.getByTestId('local-view'))
+    .toHaveTextContent('grid');
+
+  // デプロイ前のコードのままのタブが、古い形の行を書いた
+  announce('{"layout":"list"}');
+
+  await expect
+    .element(screen.getByTestId('local-view'))
+    .toHaveTextContent('table');
+  await vi.waitFor(() => {
+    expect(localStorage.getItem('k8ordo-state:versioned')).toBe(
+      '[2,{"view":"table","pageSize":20}]',
+    );
+  });
+});
+
+it('a newer row another tab writes is read but never written back', async () => {
+  const screen = await render(<VersionedLocal />);
+
+  // 次のデプロイを先に読み込んだタブが、新しい版の行を書いた
+  announce('[3,{"view":"table","pageSize":50,"density":"compact"}]');
+
+  await expect
+    .element(screen.getByTestId('local-view'))
+    .toHaveTextContent('table');
+  await frame();
+  expect(localStorage.getItem('k8ordo-state:versioned')).toBe(
+    '[3,{"view":"table","pageSize":50,"density":"compact"}]',
+  );
+});
+
+it('a cookie a failing migrate cannot turn stays as it was', async () => {
+  const failing = defineCookieState('failing', versionedSchema, {
+    version: 2,
+    migrate: () => {
+      throw new Error('unexpected shape');
+    },
+  });
+  const Failing: FC = () => {
+    const [{ view }] = useAppState(failing);
+    return <p data-testid="failing-cookie-view">{view}</p>;
+  };
+  await cookieStore.set(
+    failing.cookieName,
+    encodeURIComponent('[1,{"layout":"list"}]'),
+  );
+  try {
+    const screen = await render(<Failing />);
+
+    await expect
+      .element(screen.getByTestId('failing-cookie-view'))
+      .toHaveTextContent('grid');
+    await frame();
+    const cookie = (await cookieStore.get(
+      failing.cookieName,
+    )) as CookieListItem;
+    expect(decodeURIComponent(cookie.value as string)).toBe(
+      '[1,{"layout":"list"}]',
+    );
+  } finally {
+    await cookieStore.delete(failing.cookieName);
+  }
 });

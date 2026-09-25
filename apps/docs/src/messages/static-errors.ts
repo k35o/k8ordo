@@ -44,3 +44,8 @@ export const redirectNote = message({
   ja: 'このモードでは、ステータスを送るサーバーはいないので、リダイレクトは訪問者を送り出すページとして書かれます（`<meta http-equiv="refresh">` とリンク）。横に `index.rsc` は無いので、クライアント遷移はそこで URL をブラウザに渡し、ブラウザがそのページを読み込んで従います。`permanent` は書かれるファイルを変えません。リダイレクトは `sitemap.xml` に載らず、パラメータの下の `redirect.ts` には `paths` で値を渡します。',
   en: 'In this mode no server will ever send the status, so a redirect is written as a page that sends the visitor on — `<meta http-equiv="refresh">` and a link. There is no `index.rsc` beside it, so a client navigation hands the URL to the browser, which loads that page and follows it. `permanent` changes nothing about the file written. Redirects are left out of `sitemap.xml`, and a `redirect.ts` under a parameter takes its values from `paths`.',
 });
+
+export const pageNotFoundBuild = message({
+  ja: 'ビルドはページ全体を待つので、`notFound()` はページのどこから投げても効きます。`paths` が渡した pathname のページがそう言うと、その pathname を挙げてビルドが止まります。そのまま書けば、サイトが持っていると言う URL に 404 のページを置くことになるからです。',
+  en: 'A build waits for the whole page, so `notFound()` counts from anywhere in it. A pathname the `paths` option supplied whose page says it stops the build, naming the pathname — it would otherwise be written as a 404 page under a URL the site claims to have.',
+});

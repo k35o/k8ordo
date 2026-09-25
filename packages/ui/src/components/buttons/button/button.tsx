@@ -131,11 +131,11 @@ export const Button: FC<Props> = ({
   const className = cn(
     'cursor-pointer rounded-full border-2 text-center font-bold transition-colors',
     {
-      'border-transparent bg-primary-bg text-primary-fg hover:bg-primary-bg-emphasize/80 active:bg-primary-bg-emphasize':
+      'border-transparent bg-primary-bg text-primary-fg hover:bg-primary-bg-emphasize active:bg-primary-bg-emphasize':
         variant === 'solid' && color === 'primary',
-      'border-transparent bg-secondary-bg text-secondary-fg hover:bg-secondary-bg-emphasize/80 active:bg-secondary-bg-emphasize':
+      'border-transparent bg-secondary-bg text-secondary-fg hover:bg-secondary-bg-emphasize active:bg-secondary-bg-emphasize':
         variant === 'solid' && color === 'secondary',
-      'border-transparent bg-bg-subtle text-fg-base hover:bg-bg-mute/80 active:bg-bg-mute':
+      'border-transparent bg-bg-subtle text-fg-base hover:bg-bg-mute active:bg-bg-emphasize':
         variant === 'solid' && color === 'base',
       'border-primary-border bg-bg-base text-primary-fg hover:bg-bg-subtle active:bg-bg-mute':
         variant === 'outline' && color === 'primary',

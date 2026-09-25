@@ -1072,6 +1072,43 @@
       "omitted": []
     },
     {
+      "name": "CopyButton",
+      "props": [
+        {
+          "name": "value",
+          "types": ["string", "(() => string | Promise<string>)"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "disabled",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "iconOnly",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "size",
+          "types": ["'sm'", "'md'", "'lg'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
       "name": "CopyIcon",
       "props": [
         {
@@ -2367,7 +2404,7 @@
       "props": [
         {
           "name": "defaultValue",
-          "types": ["number"],
+          "types": ["number", "string"],
           "defaultValue": null,
           "required": false
         },
@@ -2379,14 +2416,14 @@
         },
         {
           "name": "max",
-          "types": ["number"],
-          "defaultValue": "9_007_199_254_740_991",
+          "types": ["number", "string"],
+          "defaultValue": null,
           "required": false
         },
         {
           "name": "min",
-          "types": ["number"],
-          "defaultValue": "-9_007_199_254_740_991",
+          "types": ["number", "string"],
+          "defaultValue": null,
           "required": false
         },
         {
@@ -2398,7 +2435,7 @@
         {
           "name": "precision",
           "types": ["number"],
-          "defaultValue": "0",
+          "defaultValue": null,
           "required": false
         },
         {
@@ -2409,7 +2446,7 @@
         },
         {
           "name": "step",
-          "types": ["number"],
+          "types": ["number", "'any'"],
           "defaultValue": "1",
           "required": false
         },
@@ -2958,6 +2995,12 @@
           "required": false
         },
         {
+          "name": "required",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
           "name": "value",
           "types": ["string"],
           "defaultValue": null,
@@ -3213,7 +3256,7 @@
       "props": [
         {
           "name": "defaultValue",
-          "types": ["number"],
+          "types": ["number", "string"],
           "defaultValue": null,
           "required": false
         },
@@ -3225,14 +3268,14 @@
         },
         {
           "name": "max",
-          "types": ["number"],
-          "defaultValue": "100",
+          "types": ["number", "string"],
+          "defaultValue": null,
           "required": false
         },
         {
           "name": "min",
-          "types": ["number"],
-          "defaultValue": "0",
+          "types": ["number", "string"],
+          "defaultValue": null,
           "required": false
         },
         {
@@ -3249,7 +3292,7 @@
         },
         {
           "name": "step",
-          "types": ["number"],
+          "types": ["number", "'any'"],
           "defaultValue": "1",
           "required": false
         },
@@ -3812,6 +3855,12 @@
           "types": ["Ref<HTMLTextAreaElement>"],
           "defaultValue": null,
           "required": false
+        },
+        {
+          "name": "type",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
         }
       ],
       "inherits": "TextareaHTMLAttributes<HTMLTextAreaElement>",
@@ -3840,7 +3889,19 @@
         },
         {
           "name": "type",
-          "types": ["'email'", "'search'", "'tel'", "'text'", "'url'"],
+          "types": [
+            "'date'",
+            "'datetime-local'",
+            "'email'",
+            "'month'",
+            "'search'",
+            "'tel'",
+            "'text'",
+            "'time'",
+            "'url'",
+            "'week'",
+            "(string & Record<never, never>)"
+          ],
           "defaultValue": "'text'",
           "required": false
         }

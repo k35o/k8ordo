@@ -174,6 +174,43 @@ flat part of the bag holds neither.
 </IconButton>
 ```
 
+### CopyButton
+
+A button that copies text to the clipboard and shows that it did: its icon
+turns into a check for two seconds (an error icon if the write fails), and a
+live region beside it announces `copied` / `copyFailed` from the dictionary. The
+button's name stays the same throughout. By default it is an outline `Button`
+with its `label` as text; `iconOnly` makes it a transparent `IconButton` whose
+`label` is the tooltip.
+
+```tsx
+import { CopyButton } from '@k8ordo/ui';
+
+<CopyButton value={css} label="Copy CSS" size="sm" />;
+
+// Icon only, e.g. in the header of a code block
+<CopyButton value={code} label="Copy code" iconOnly size="sm" />;
+
+// Build the text when the button is pressed: read the DOM, or fetch it
+<CopyButton
+  label="Copy as Markdown"
+  value={async () => (await fetch(`/blog/${slug}.md`)).text()}
+/>;
+```
+
+`value` may be a function, and it may return a `Promise`. It is called on the
+click, and the promise goes to the clipboard as it is (a `ClipboardItem`), so the
+write starts inside the click even when the text arrives later. Safari refuses
+a write that begins after an `await`.
+
+Props:
+
+- `value`: `string` | `(() => string | Promise<string>)` (required)
+- `disabled`: `boolean` (default: `false`)
+- `iconOnly`: `boolean` (default: `false`)
+- `label`: `string`
+- `size`: `'sm'` | `'md'` | `'lg'` (default: `'md'`)
+
 ### Anchor
 
 A text link. External links automatically get a new-tab icon.
@@ -488,6 +525,10 @@ Form components are used together with `FormControl`'s `renderInput` pattern. Ev
 
 `ref` reaches the real element (`input` / `textarea` / `select` / `fieldset`). `FileField` uses a ref internally but composes it with yours, so the `ref` you pass still reaches the element. `Radio` (a group that renders several inputs) puts its `ref` on the radiogroup `<div>`, and `FormControl` (a wrapper) on its wrapper element — a `<div>`, or a `<fieldset>` with `labelAs="legend"`.
 
+An uncontrolled field keeps its value in the DOM, so a form reset — `form.reset()`, a reset button, or React resetting the form after an action — puts it back to its `defaultValue`, and a `defaultValue` that changes after mount (the values a failed submission echoes back) is where the next reset goes. A value a component changes in code (a stepper, a chosen option, a removed file) is announced with an `input` event, so a form library listening on the `<form>` hears it like typing.
+
+Every field takes the attributes `@k8ordo/form`'s `formFields` derives as they are — spread `field.input` after `FormControl`'s props. Its guide's "Working with @k8ordo/ui" section has one example per component.
+
 ### Form
 
 A wrapper for `<form>`. `action` accepts a Server Action (`(formData) => …`) or a URL string.
@@ -562,14 +603,20 @@ import { TextField } from '@k8ordo/ui';
 
 // type can be passed too (default: "text")
 <TextField id="tel" type="tel" inputMode="numeric" />
+
+// date and time inputs render as the browser's own pickers
+<TextField id="birthday" type="date" />
 ```
+
+`type` also accepts any string, so the `type` `@k8ordo/form` derives
+(`email`, `url`, `date`, `time`, `datetime-local`, …) spreads as it is.
 
 Props:
 
 - `children`: `ReactNode`
 - `invalid`: `boolean` (default: `false`)
 - `ref`: `Ref<HTMLInputElement>`
-- `type`: `'email'` | `'search'` | `'tel'` | `'text'` | `'url'` (default: `'text'`)
+- `type`: `'date'` | `'datetime-local'` | `'email'` | `'month'` | `'search'` | `'tel'` | `'text'` | `'time'` | `'url'` | `'week'` | `(string & Record<never, never>)` (default: `'text'`)
 - Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `className` / `style`.
 
 ### Textarea
@@ -594,7 +641,12 @@ Props:
 - `fullHeight`: `boolean` (default: `false`)
 - `invalid`: `boolean` (default: `false`)
 - `ref`: `Ref<HTMLTextAreaElement>`
+- `type`: `string`
 - Other props are forwarded to `TextareaHTMLAttributes<HTMLTextAreaElement>`, except `className` / `style`.
+
+`type` is accepted and dropped: a `<textarea>` has none, and the attributes
+`@k8ordo/form` derives for a string carry `type="text"`. A `pattern` is not
+checked by the browser on a `<textarea>` either.
 
 ### NumberField
 
@@ -633,6 +685,20 @@ an empty field fills in `0`, or the nearer of `min` / `max` when `0` is out of
 range. `required` reaches the input itself, so an empty required field fails
 native validation.
 
+The input is `type="text"` (so it can format to `precision` and step with the
+arrow keys), which the browser does not range-check — so the field does it: a
+value below `min` or above `max` is reported with `setCustomValidity`, using
+the `numberFieldRangeUnderflow` / `numberFieldRangeOverflow` wording. Leaving the
+field clamps the value into range. A message set by someone else on the same
+input — a form library's cross-field rule — is left alone.
+
+`min`, `max`, and an uncontrolled `defaultValue` also take strings, and `step`
+takes `'any'`, which is what `@k8ordo/form` derives. `precision` defaults to the
+number of decimals in `step`; with `step="any"` the value is not rounded.
+
+A value the field writes itself — an arrow key, a stepper press, formatting on
+blur — is announced with one `input` event, and `onChange` is still called once.
+
 A form reset — `form.reset()`, a reset button, or React resetting the form after
 an action — puts an uncontrolled field back to `defaultValue` (or to empty) and
 reports that value to `onChange`. A controlled field keeps its `value`; reset
@@ -640,14 +706,14 @@ your own state from the form's `onReset`.
 
 Props:
 
-- `defaultValue`: `number`
+- `defaultValue`: `number` | `string`
 - `invalid`: `boolean` (default: `false`)
-- `max`: `number` (default: `9_007_199_254_740_991`)
-- `min`: `number` (default: `-9_007_199_254_740_991`)
+- `max`: `number` | `string`
+- `min`: `number` | `string`
 - `onChange`: `(value: number | null) => void`
-- `precision`: `number` (default: `0`)
+- `precision`: `number`
 - `ref`: `Ref<HTMLInputElement>`
-- `step`: `number` (default: `1`)
+- `step`: `number` | `'any'` (default: `1`)
 - `value`: `number` | `null`
 - Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `type` / `role` / `className` / `style` / `children`.
 
@@ -776,6 +842,9 @@ Props:
 - `showLabel`: `string`
 - Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `type` / `className` / `style`.
 
+A spread `type="password"` (what `@k8ordo/form` derives for a password) does not
+override the show/hide toggle.
+
 ### Select
 
 ```tsx
@@ -803,9 +872,20 @@ Props:
 - `ref`: `Ref<HTMLSelectElement>`
 - Other props are forwarded to `SelectHTMLAttributes<HTMLSelectElement>`, except `className` / `style`.
 
+React applies a `<select>`'s `defaultValue` only when it mounts; `Select` also
+applies a later one, so the next reset — React's after a form action included —
+goes back to it. With `required`, put a placeholder option whose `value` is
+`''` first; leaving it selected fails validation.
+
 ### Autocomplete
 
 A multi-select autocomplete. `value` and `onChange` are `string[]`.
+
+With a `name`, the selection is submitted through a visually hidden
+`<select multiple>`: one entry per selected value, and `required` means at
+least one. It is always present — nothing selected included — so native
+validation and a form library's rules reach it, and when a form moves focus to
+it after a failure, focus goes on to the text input.
 
 ```tsx
 import { Autocomplete } from '@k8ordo/ui';
@@ -870,6 +950,10 @@ The group's selection lives in `value` / `onChange` (`string[]`). That is a diff
 
 It renders a `fieldset[role="group"]`, so `aria-labelledby` is required. Convey that the group is required through the referenced label element (for example `FormControl`'s required marker). `role="group"` does not allow `aria-required`, so do not put it on the group.
 
+Uncontrolled, the selection lives in the checkboxes themselves: `onChange`
+receives the checked values in document order, and a form reset puts the boxes
+back to `defaultValue` without leaving a stale selection behind.
+
 ```tsx
 import { CheckboxGroup } from '@k8ordo/ui';
 
@@ -910,7 +994,9 @@ Props (CheckboxGroup.Root):
 
 ### CheckboxCard
 
-A card-styled checkbox.
+A card-styled checkbox. Uncontrolled, the selection and its look follow the
+checkboxes themselves (`:checked`), so a form reset restores both; `onChange`
+receives the checked values in document order.
 
 ```tsx
 import { CheckboxCard } from '@k8ordo/ui';
@@ -977,7 +1063,7 @@ Props:
 
 ### RadioCard
 
-A card-styled radio button. Real `input[type="radio"]` elements sit inside a `fieldset[role="radiogroup"]`, so arrow-key roving and single selection are left to the browser. Reach them from tests with `getByRole('radio', { checked })`.
+A card-styled radio button. Real `input[type="radio"]` elements sit inside a `fieldset[role="radiogroup"]`, so arrow-key roving and single selection are left to the browser. Reach them from tests with `getByRole('radio', { checked })`. `required` goes to every radio, and an uncontrolled selection's look follows `:checked`, so a form reset restores it.
 
 ```tsx
 import { RadioCard } from '@k8ordo/ui';
@@ -1008,12 +1094,15 @@ Props:
 - `invalid`: `boolean` (default: `false`)
 - `onChange`: `(value: string) => void`
 - `ref`: `Ref<HTMLFieldSetElement>`
+- `required`: `boolean` (default: `false`)
 - `value`: `string`
 - Other props are forwarded to `FieldsetHTMLAttributes<HTMLFieldSetElement>`, except `className` / `style` / `children` / `role`.
 
 ### Slider
 
-A range slider.
+A range slider. Uncontrolled, the value lives in the input, so a form reset
+puts it back to `defaultValue` and the filled track follows. `min`, `max`, and
+an uncontrolled `defaultValue` also take strings, and `step` takes `'any'`.
 
 ```tsx
 import { Slider } from '@k8ordo/ui';
@@ -1032,13 +1121,13 @@ import { Slider } from '@k8ordo/ui';
 
 Props:
 
-- `defaultValue`: `number`
+- `defaultValue`: `number` | `string`
 - `invalid`: `boolean` (default: `false`)
-- `max`: `number` (default: `100`)
-- `min`: `number` (default: `0`)
+- `max`: `number` | `string`
+- `min`: `number` | `string`
 - `onChange`: `(value: number) => void`
 - `ref`: `Ref<HTMLInputElement>`
-- `step`: `number` (default: `1`)
+- `step`: `number` | `'any'` (default: `1`)
 - `value`: `number`
 - Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `type` / `className` / `style` / `children`.
 
@@ -1071,7 +1160,9 @@ Props:
 
 ### FileField
 
-File upload, as a composite pattern.
+File upload, as a composite pattern. A form reset empties the list along with
+the input. A string `defaultValue` (the type `@k8ordo/form`'s derived
+attributes carry) is accepted and ignored.
 
 ```tsx
 import { FileField } from '@k8ordo/ui';
@@ -2045,26 +2136,27 @@ function DismissButton({ onDismiss }) {
 
 Every key in the `Messages` type. All values are `string`.
 
-| Category      | Keys                                                                                                                                             |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Common        | `close`, `required`, `loading`, `avatar`, `color`                                                                                                |
-| Alert         | `alertSuccess`, `alertInfo`, `alertWarning`, `alertError`                                                                                        |
-| Toast         | `toastRegion`                                                                                                                                    |
-| Autocomplete  | `autocompletePlaceholder`, `autocompleteRemoveTag`, `autocompleteClear`, `autocompleteEmpty`                                                     |
-| FileField     | `fileFieldRemove`, `fileFieldTrigger`, `fileFieldDrop`                                                                                           |
-| NumberField   | `numberFieldIncrement`, `numberFieldDecrement`                                                                                                   |
-| Calendar      | `calendarPreviousMonth`, `calendarNextMonth`                                                                                                     |
-| DatePicker    | `datePickerOpen`, `datePickerDialog`                                                                                                             |
-| PasswordInput | `passwordShow`, `passwordHide`                                                                                                                   |
-| ListBox       | `listBoxPlaceholder`                                                                                                                             |
-| Breadcrumb    | `breadcrumb`                                                                                                                                     |
-| Tabs          | `tabList`                                                                                                                                        |
-| Pagination    | `paginationLabel`, `paginationPrevious`, `paginationNext`                                                                                        |
-| Stepper       | `stepperComplete`                                                                                                                                |
-| CodeBlock     | `codeBlockCopy`, `copied`, `copyFailed`                                                                                                          |
-| Carousel      | `carousel`, `carouselSlide`, `carouselPrevious`, `carouselNext`                                                                                  |
-| AI chat       | `chat`, `scrollToLatest`, `reasoning`, `reasoningStreaming`, `suggestions`, `send`, `stop`, `toolInput`, `toolOutput`, `toolError`, `toolDenied` |
-| Response      | The `response*` keys below                                                                                                                       |
+| Category      | Keys                                                                                                                                                |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Common        | `close`, `required`, `loading`, `avatar`, `color`                                                                                                   |
+| Alert         | `alertSuccess`, `alertInfo`, `alertWarning`, `alertError`                                                                                           |
+| Toast         | `toastRegion`                                                                                                                                       |
+| CopyButton    | `copy`, `copied`, `copyFailed`                                                                                                                      |
+| Autocomplete  | `autocompletePlaceholder`, `autocompleteRemoveTag`, `autocompleteClear`, `autocompleteEmpty`                                                        |
+| FileField     | `fileFieldRemove`, `fileFieldTrigger`, `fileFieldDrop`                                                                                              |
+| NumberField   | `numberFieldIncrement`, `numberFieldDecrement`, `numberFieldRangeUnderflow` (`{min}` is replaced), `numberFieldRangeOverflow` (`{max}` is replaced) |
+| Calendar      | `calendarPreviousMonth`, `calendarNextMonth`                                                                                                        |
+| DatePicker    | `datePickerOpen`, `datePickerDialog`                                                                                                                |
+| PasswordInput | `passwordShow`, `passwordHide`                                                                                                                      |
+| ListBox       | `listBoxPlaceholder`                                                                                                                                |
+| Breadcrumb    | `breadcrumb`                                                                                                                                        |
+| Tabs          | `tabList`                                                                                                                                           |
+| Pagination    | `paginationLabel`, `paginationPrevious`, `paginationNext`                                                                                           |
+| Stepper       | `stepperComplete`                                                                                                                                   |
+| CodeBlock     | `codeBlockCopy` (announces with `CopyButton`'s `copied` / `copyFailed`)                                                                             |
+| Carousel      | `carousel`, `carouselSlide`, `carouselPrevious`, `carouselNext`                                                                                     |
+| AI chat       | `chat`, `scrollToLatest`, `reasoning`, `reasoningStreaming`, `suggestions`, `send`, `stop`, `toolInput`, `toolOutput`, `toolError`, `toolDenied`    |
+| Response      | The `response*` keys below                                                                                                                          |
 
 `fileFieldTrigger` is the button text of an empty `FileField.Dropzone`, and
 with `tabList` it is also what the generative-UI renderers fall back to when a

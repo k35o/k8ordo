@@ -307,6 +307,19 @@ import { IconButton } from '@k8ordo/ui';
 </IconButton>
 ```
 
+### CopyButton
+
+For copying text, reach for `CopyButton` rather than an `IconButton` and your own
+clipboard code: it writes to the clipboard, shows a check, and announces the
+result to screen readers.
+
+```tsx
+import { CopyButton } from '@k8ordo/ui';
+
+<CopyButton value={code} label="Copy code" iconOnly size="sm" />
+<CopyButton value={() => window.location.href} label="Copy link" />
+```
+
 ### Card
 
 Floating on a shadow is the default: a white card over a `bg-subtle` page.
@@ -359,6 +372,26 @@ import {
   />
   <FileField.ItemList />
 </FileField.Root>
+```
+
+With `@k8ordo/form`, spread what `form.field(name).input` derives onto the
+field after `FormControl`'s props — `type`, `required`, the length and range
+bounds, and the echoed `defaultValue` all go in as they are, whichever field
+renders them. Uncontrolled fields keep their value in the DOM, so the form's
+reset, `isDirty`, and error clearing hear every change, including ones a
+component makes in code. The pairing per component is in `@k8ordo/form`'s
+guide (`node_modules/@k8ordo/form/docs/GUIDE.md`, "Working with @k8ordo/ui").
+
+```tsx
+const title = form.field('title');
+
+<FormControl
+  errorText={title.error}
+  invalid={title.invalid}
+  label="Title"
+  required={title.required}
+  renderInput={(props) => <TextField {...props} {...title.input} />}
+/>;
 ```
 
 ## Anti-patterns: avoiding "AI slop"

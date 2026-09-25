@@ -15,6 +15,11 @@ export const componentCategories: NavCategory[] = [
         path: '/:locale/ui/components/icon-button',
         description: m.components.iconButton.description,
       },
+      {
+        name: 'CopyButton',
+        path: '/:locale/ui/components/copy-button',
+        description: m.components.copyButton.description,
+      },
     ],
   },
   {
