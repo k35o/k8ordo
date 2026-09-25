@@ -3,10 +3,13 @@
 > Declare state by where it lives: `definePageState` (typed URL search params
 > plus hidden history-entry state — the two faces of one entry, updated
 > atomically over the Navigation API), `defineLocalState` (localStorage,
-> cross-tab), `defineMemoryState` (a typed shared box with no schema, resets
-> on reload). One zod schema per boundary place (url, entry, local) derives
-> the server read, canonical links, salvage of stale data, and a client
-> subscription with exact per-key change detection. Links and GET forms write
+> cross-tab), `defineCookieState` (a cookie the browser writes with the
+> Cookie Store API and the server reads from the request, so preferences
+> render without a flash of the default — never a secret, it cannot be
+> `HttpOnly`), `defineMemoryState` (a typed shared box with no schema, resets
+> on reload). One zod schema per boundary place (url, entry, local, cookie)
+> derives the server read, canonical links, salvage of stale data, and a
+> client subscription with exact per-key change detection. Links and GET forms write
 > the URL before JavaScript loads under any router (the server renders what
 > they wrote wherever it reads the search); imperative url updates ride a
 > Navigation-API-intercepting router.
@@ -19,11 +22,12 @@ When installed via npm, these docs live under `node_modules/@k8ordo/state/docs/`
 
 ## Guide
 
-- [Design Guide](GUIDE.md): the four places and when each fits, the shared
-  definition module, reading on the server, updating on the client, batching
-  and update handles, subscription granularity, router requirements, typed
-  routes via `Register`, reading local state before hydration, and pairing
-  with `@k8ordo/form` for GET forms.
+- [Design Guide](GUIDE.md): the places and when each fits, the shared
+  definition module, reading on the server, cookie state the server renders
+  (and how it relates to cookies the server writes), updating on the client,
+  batching and update handles, subscription granularity, router
+  requirements, typed routes via `Register`, reading local state before
+  hydration, and pairing with `@k8ordo/form` for GET forms.
 
 ## Entry point
 
@@ -36,22 +40,31 @@ When installed via npm, these docs live under `node_modules/@k8ordo/state/docs/`
   and the url slot is read in the browser);
   `href(base, values?)` builds a canonical link keeping the path literal in
   the type; `search(values?)` returns the query string alone.
-  `defineLocalState(key, schema)` and `defineMemoryState(key, initial)`
-  declare app-scope state; a local definition also exposes `storageKey` (the
-  localStorage key, `k8ordo-state:<key>`) and `inlineRead()`, a JavaScript
-  expression for an inline `<script>` that evaluates to the stored object or
-  `null` before hydration — unvalidated, so read only what you need with a
-  fallback. `useAppState(definition, keys?, { initialUrl? })`
-  (client) works on any kind and returns `[state, update]` — state is the
-  flat merge of a page definition's slots; `update(patch)` applies
-  synchronously, batches the calls a handler makes with no `await` between
-  them into one write (url+entry changes atomically via
-  `navigation.navigate()`, entry-only changes via `updateCurrentEntry()`,
-  local via one `setItem`; memory applies per call), and returns
+  `defineLocalState(key, schema)`, `defineCookieState(key, schema)` and
+  `defineMemoryState(key, initial)` declare app-scope state; a local
+  definition also exposes `storageKey` (the localStorage key,
+  `k8ordo-state:<key>`) and `inlineRead()`, a JavaScript expression for an
+  inline `<script>` that evaluates to the stored object or `null` before
+  hydration — unvalidated, so read only what you need with a fallback. A
+  cookie definition exposes `cookieName` (`k8ordo-state.<key>`),
+  `parseCookies(cookies)` — reads the values out of a request's
+  percent-decoded cookies (`request.cookies` under `@k8ordo/server`), salvaged
+  like any read — and `cookieValue(values?)`, the value a server writes when
+  it sets the same cookie (`Path=/`, `SameSite=Lax`, `Max-Age=34560000`,
+  never `HttpOnly`). `useAppState(definition, keys?, { initialUrl? } |
+  { initialCookie? })` (client) works on any kind and returns
+  `[state, update]` — state is the flat merge of a page definition's slots;
+  `initialUrl` / `initialCookie` seed the server and hydration renders with
+  what the server read; `update(patch)` applies synchronously, batches the
+  calls a handler makes with no `await` between them into one write
+  (url+entry changes atomically via `navigation.navigate()`, entry-only
+  changes via `updateCurrentEntry()`, local via one `setItem`, cookie via one
+  `cookieStore.set()`; memory applies per call), and returns
   `{ committed, finished }` promise handles (for non-navigating kinds they
-  settle once the write lands, and a write localStorage refuses rejects them
-  with its error; `{ history: 'push' }` exists only on page state and takes
-  effect only when a url value changes).
+  settle once the write lands, and a write the browser refuses — a full
+  localStorage, a cookie over 4 KB — rejects them with its error;
+  `{ history: 'push' }` exists only on page state and takes effect only when
+  a url value changes).
   `resetStateRegistry()` clears stores between tests. Augment
   `interface Register { routes: typeof routes }` — the same line as for
   `@k8ordo/router` — to constrain `href` paths to the route table's linkable

@@ -3,12 +3,13 @@
 `@k8ordo/state` — declare state by where it lives. `definePageState` holds
 the two faces of a history entry (typed URL search params + hidden entry
 state) over the Navigation API; `defineLocalState` is localStorage,
+`defineCookieState` a cookie the browser writes and the server reads,
 `defineMemoryState` a typed shared box with no schema. One zod schema per
-boundary place (url, entry, local) derives the server read (`parseUrl`),
-canonical links (`href`/`search`), stale-data salvage, and the client
-subscription (`useAppState`). The shared discipline (React 19 / RSC assumed,
-Baseline newly available only, no polyfills) and how a new package joins are
-in the repository root's [`CLAUDE.md`](../../CLAUDE.md).
+boundary place (url, entry, local, cookie) derives the server read
+(`parseUrl`, `parseCookies`), canonical links (`href`/`search`), stale-data
+salvage, and the client subscription (`useAppState`). The shared discipline
+(React 19 / RSC assumed, Baseline newly available only, no polyfills) and how
+a new package joins are in the repository root's [`CLAUDE.md`](../../CLAUDE.md).
 
 User-facing documentation is in [`docs/GUIDE.md`](docs/GUIDE.md), shipped
 inside the npm package.
@@ -29,26 +30,37 @@ pnpm check         # check:write to auto-fix
   live store is created lazily by the first `useAppState`, in a registry keyed
   by `kind + string key` — that is what survives HMR and what
   `resetStateRegistry()` clears for tests. Nothing in the package touches
-  `navigation`/`location`/`localStorage` at import time.
+  `navigation`/`location`/`localStorage`/`document.cookie`/`cookieStore` at
+  import time.
 - **`update()` applies synchronously and writes in a microtask.** The echo is
   canonical — the merged state passes the schema inside `update()` with the
   same salvage an arrival gets, so no render ever shows a value the schema
-  rejects. On page and local state, all `update()` calls made synchronously in
-  one handler share one write and one `{committed, finished}` handle (an
-  `await` between calls starts a new batch). A page batch that lands back
-  where it started must not navigate or touch the entry; local has no such
-  check and rewrites its row. Routing is by what changed, compared on
-  live values: url+entry changes are one `navigation.navigate()` (atomic),
-  entry-only changes are `updateCurrentEntry()` (no navigation, so
-  `history: 'push'` has no effect), local is one `setItem`. Memory has
-  neither schema nor write to batch: each call swaps the snapshot and returns
-  its own handle, settled on the spot.
+  rejects. On page, local and cookie state, all `update()` calls made
+  synchronously in one handler share one write and one `{committed, finished}`
+  handle (an `await` between calls starts a new batch). A page batch that
+  lands back where it started must not navigate or touch the entry; local and
+  cookie have no such check and rewrite their row. Routing is by what
+  changed, compared on live values: url+entry changes are one
+  `navigation.navigate()` (atomic), entry-only changes are
+  `updateCurrentEntry()` (no navigation, so `history: 'push'` has no effect),
+  local is one `setItem`, cookie one `cookieStore.set()` whose promise settles
+  the handle. Memory has neither schema nor write to batch: each call swaps
+  the snapshot and returns its own handle, settled on the spot.
 - **A pending batch survives concurrent events.** `sync`/`onStorage` overlay
   the unflushed patch on the fresh platform values, and `flush` rebuilds its
   target from live values + patch — never from the snapshot. Without both, a
   neighbouring store's synchronous `currententrychange` (from
   `updateCurrentEntry`) rolls the batch back and the write is silently lost;
-  the "combo" browser test is the regression guard.
+  the "combo" browser test is the regression guard. Cookie writes are
+  asynchronous, which adds two rules to the cookie store. Its writes run one
+  at a time, each building its target from the cookie after the previous one
+  landed — otherwise a second batch reads the cookie before the first
+  batch's write is in it and overwrites that batch's fields with stale
+  values. And it holds off re-reading while any of its writes is queued or in
+  flight: a `change` arriving then shows a value older than the echo, and
+  reading it would flash the echo back. The last write to settle re-reads (a
+  refused one only if a change was skipped meanwhile, so a refusal otherwise
+  keeps the echo, as local does).
 - **Shared ground stays shared.** A page store rewrites only its own URL
   params and only its own namespace in the entry-state object — the rest of
   both travels untouched with every write it makes.
@@ -58,9 +70,9 @@ pnpm check         # check:write to auto-fix
   arrays and plain objects (anything else — Date, Map, class instances —
   compares by reference); unchanged fields keep their object identity across
   snapshots.
-- **Boundary data is input.** URL params, localStorage JSON, and restored
-  entry state salvage field-by-field to their own defaults — never a throw,
-  never a poisoned sibling. Memory has no schema because its values never cross a boundary.
+- **Boundary data is input.** URL params, localStorage and cookie JSON, and
+  restored entry state salvage field-by-field to their own defaults — never a
+  throw, never a poisoned sibling. Memory has no schema because its values never cross a boundary.
 - **A url value is canonicalized by the road it comes back on.** The url
   codec's `salvage` is `parse(new URLSearchParams(search(values)))`, not a
   parse of the typed values: a one-way spelling (`z.stringbool()`'s
@@ -71,13 +83,23 @@ pnpm check         # check:write to auto-fix
   (`"false"` is truthy to `z.coerce.boolean()`). A value with no URL spelling
   at all throws out of `update()` before the batch is touched, since a
   rejected handle is invisible to the fire-and-forget caller that is the
-  normal case. Entry and local `salvage` hand the typed values straight to the
-  schema — no structured clone, no JSON — so those schemas must accept their
-  own output, and a local value JSON cannot hold (a Date) survives the echo and is lost on the next load.
+  normal case. Entry, local and cookie `salvage` hand the typed values
+  straight to the schema — no structured clone, no JSON — so those schemas
+  must accept their own output, and a local or cookie value JSON cannot hold
+  (a Date) survives the echo and is lost on the next load.
 - **No history-API fallback.** Imperative url updates assume an intercepting
   router; links and GET forms are the path that works everywhere. Updates
-  that change only entry, local or memory values never navigate, so they work
-  under any router.
+  that change only entry, local, cookie or memory values never navigate, so
+  they work under any router.
+- **A cookie state is a preference, never a secret.** The browser writes it,
+  so it cannot be `HttpOnly`; the server reads it as input through the
+  schema. It is written `Path=/; SameSite=Lax; Max-Age=400 days` (the API adds
+  `Secure`): `Lax` because the API's default `Strict` drops the cookie from
+  the first request arriving from another site, which is exactly where the
+  server render would otherwise show the defaults. Reads go through
+  `document.cookie` — `useSyncExternalStore` needs a synchronous snapshot and
+  `cookieStore.get()` is a promise; writes and cross-tab sync go through the
+  Cookie Store API.
 
 ## Layout
 
@@ -85,14 +107,16 @@ pnpm check         # check:write to auto-fix
 src/
   schema/object.ts     StateSchema, absence rule, per-field salvage parse
   url/codec.ts         schema ⇄ URLSearchParams: parse + canonical search
-  entry/codec.ts       StoredCodec: read typed stored values (entry, local)
+  entry/codec.ts       StoredCodec: read typed stored values (entry, local, cookie)
   page-state.ts        definePageState(); slot disjointness; internals WeakMap
   local-state.ts       defineLocalState()
+  cookie-state.ts      defineCookieState(); cookie name, value encoding, parseCookies
   memory-state.ts      defineMemoryState() — no schema by design
   store/core.ts        snapshot core: key-diff notify, picks, update handles
   store/registry.ts    kind+key-keyed store registry + resetStateRegistry()
   store/page-store.ts  Navigation API wiring, batching, atomic two-face flush
   store/local-store.ts localStorage wiring, storage-event cross-tab sync
+  store/cookie-store.ts Cookie Store API wiring, change-event sync, in-flight guard
   store/memory-store.ts
   use-app-state.ts     the client hook ('use client'); dispatch on def.kind
   register.ts          Register interface for typed-route path constraint;
@@ -120,6 +144,10 @@ and same justification as `@k8ordo/form`'s walk. Everything else goes through
   a self-contained expression so an app never hand-writes the key or the
   JSON envelope into an inline script. The schema cannot run there, which is
   why it returns the raw object or `null` and the GUIDE calls it untrusted.
+  A cookie definition likewise owns `cookieName` (`k8ordo-state.<key>` — `.`,
+  not `:`, because a cookie name is an HTTP token, and a key that would break
+  the token is refused at define time) and `cookieValue()`, the
+  percent-encoded JSON a server writes when it sets the same cookie.
 - Duplicate definition keys within a kind are NOT detected at runtime: an
   HMR re-evaluation legitimately re-registers the same key, so a warning
   would cry wolf on every edit. The GUIDE tells users to treat keys as
@@ -128,6 +156,9 @@ and same justification as `@k8ordo/form`'s walk. Everything else goes through
   `event.intercept()`. Without it, `navigation.navigate()` in the test iframe
   would be a cross-document load and kill the runner.
 - The `storage` event fires only in other tabs; tests simulate a foreign
-  tab's write with `setItem` + a dispatched `StorageEvent`.
+  tab's write with `setItem` + a dispatched `StorageEvent`. The cookie
+  `change` event fires in this tab too, so a test's own `cookieStore.set()`
+  is the foreign write. Tests that need a write held in flight spy on
+  `CookieStore.prototype.set`.
 - Tests state a guarantee in their name, English; comments and commits are
   Japanese except docs/ and this file.
