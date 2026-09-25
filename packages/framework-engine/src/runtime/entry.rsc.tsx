@@ -6,10 +6,15 @@ import {
   loadServerAction,
   renderToReadableStream,
 } from '@vitejs/plugin-rsc/rsc/server';
-import { paramSchemas, redirects, routes } from 'virtual:k8ordo/routes';
+import {
+  catchAllSchemas,
+  paramSchemas,
+  redirects,
+  routes,
+} from 'virtual:k8ordo/routes';
 
 import type * as SsrEntry from './entry.ssr';
-import { parseParams } from './params';
+import { parseCatchAllParams, parseParams } from './params';
 import type { ParsedParams } from './params';
 import { ACTION_ID_HEADER } from './payload';
 import type { Payload } from './payload';
@@ -183,15 +188,19 @@ export default async function handler(request: Request): Promise<Response> {
 
   // A param a schema refuses is a pathname the pattern does not answer, so
   // the walk goes on to whatever the table declares next — the catch-all in
-  // the end. A catch-all's own params are not validated: it answers what
-  // nothing else did, and a 404 is already what a refused param means.
+  // the end. A catch-all answers whatever its params hold: a 404 is already
+  // what a refused param means. The layouts' schemas above it still run, for
+  // what they write — `/en/missing` renders in the locale its URL names.
   // The render starts inside `parsed.enter`, so it sees what the schemas of
   // the pattern that answered wrote to the async context, and nothing a
   // refused pattern's did.
   let parsed: ParsedParams = { params: {}, enter: (fn) => fn() };
   const match = routes.match(pathname, (found) => {
     if (found.pattern.endsWith('/*')) {
-      parsed = { params: found.params, enter: (fn) => fn() };
+      parsed = parseCatchAllParams(
+        catchAllSchemas[found.pattern] ?? [],
+        found.params,
+      );
       return true;
     }
     const accepted = parseParams(

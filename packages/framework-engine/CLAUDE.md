@@ -64,6 +64,14 @@ pnpm check         # check:write to auto-fix
   `runtime/entry.ssr.tsx` injects the RSC stream into the HTML and
   `runtime/entry.browser.tsx` reads it back; nothing refetches on load, which
   is what lets a prerendered `404.html` come alive.
+- **Only HTML rendered for the browser's pathname is hydrated.**
+  `runtime/mount.ts` compares the payload's `pathname` with `location`
+  (normalized as `usePathname` normalizes) and renders anything else afresh
+  with `createRoot`. That is `404.html`, rendered once under the build's
+  sentinel: a component that reads the URL as it renders (`@k8ordo/i18n`'s
+  messages) cannot agree with it at the visitor's URL, and a failed
+  hydration regenerates the page anyway, reported as an error and with the
+  server's `<title>` left behind in `<head>`.
 - **A payload names the client it was rendered for.** `Payload.client` is
   the URL of the script the page's HTML loads (`getClientEntryUrl()`, which
   the RSC plugin exposes to the SSR environment only, so the RSC entry reads
@@ -94,7 +102,11 @@ ParamsSchemaFor<pattern>`, lists per page pattern the schemas along its
   stack in `paramSchemas`, and types the page by them. `runtime/params.ts`
   runs them synchronously inside `routes.match`'s `accept`, so a refused
   value is a pattern that did not match and the catch-all answers under 404.
-  A catch-all's own params are never validated; a layout receives strings.
+  A catch-all is never refused: the schemas of the layouts above its
+  not-found (`catchAllSchemas`, apart from `paramSchemas` because the router
+  types pages and links by those) run through `parseCatchAllParams` for what
+  they write, and the not-found renders in their context when all accept, in
+  none when one refuses. It and every layout receive strings.
   Each pattern's schemas run in an async context of their own, and the
   render starts inside the answering pattern's (`enter`): a schema may write
   there (`@k8ordo/i18n` records the accepted locale), and neither a refused
@@ -164,7 +176,8 @@ src/
   runtime/revealed.ts        when every streamed boundary is on screen
   runtime/recover.tsx        a failed client render falls back to a document load
   runtime/reload.ts          location.reload, the one seam a test can watch
-  runtime/params.ts          runs the paramsSchema exports along a matched stack
+  runtime/params.ts          runs the paramsSchema exports along a matched stack, and above a not-found
+  runtime/mount.ts           hydrate what was rendered for this pathname, render anything else afresh
   runtime/pathname.ts        decodePathname, before a pathname may name a file
   runtime/redirect.ts        redirect() / redirect.ts targets
   runtime/request.ts         the read-only request a page receives

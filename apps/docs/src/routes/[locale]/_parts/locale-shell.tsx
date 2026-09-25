@@ -182,15 +182,15 @@ export function LocaleShell({
   const pathname = usePathname();
   // 静的化された 404 は「ロケールを持たない 1 枚」で、そこに渡る :locale は
   // ビルドが使った番兵の区間。読んでいる人のロケールは URL にしか無いので、
-  // そこから取り直す。usePathname はサーバーの値で hydrate してからクライアント
-  // の値に切り替わるので、mismatch にはならず 1 度描き直されるだけ。
+  // そこから取り直す。あの 1 枚はブラウザで hydrate されず描き直されるので、
+  // usePathname は最初から訪問者の URL を返す。
   const locale = locales.is(param)
     ? param
     : (locales.delocalize(pathname).locale ?? locales.default);
 
   // 実ページの lang はルートレイアウトがサーバーで書く。ここで直すのは
   // 404.html の 1 枚だけで、あれは番兵の URL で描かれているので、読んでいる
-  // 人の URL が分かるのは hydrate した後になる。
+  // 人の URL が分かるのはブラウザで描いた後になる。
   useEffect(() => {
     document.documentElement.lang = locale;
   }, [locale]);

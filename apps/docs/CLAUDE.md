@@ -46,14 +46,19 @@ pnpm check:write       # Oxlint/Oxfmt lint/format auto-fix
 - **Unmatched routes**: `src/routes/[locale]/not-found.tsx` is rendered into a
   single `404.html`, which a static host serves for anything it does not have.
   One file for every locale, so the `:locale` it was rendered with is the build's
-  sentinel, not a language — and no schema accepts it, because a catch-all's
-  params are never validated. Every message in the file therefore renders in
-  `locales.default`, so it is Japanese as served, whichever `/en/…` pages the
-  build rendered alongside it. The shell takes the locale from the URL the
-  visitor is actually on (`usePathname`), falling back to `locales.default`
-  only when that has none either, so the file becomes English the moment it
-  hydrates on an `/en/…` URL. A visitor with JavaScript off keeps the Japanese
-  one; one file cannot be both.
+  sentinel, not a language — and the schema above `not-found.tsx` refuses it
+  (a catch-all still answers; it only renders in no locale). Every message in
+  the file therefore renders in `locales.default`, so it is Japanese as
+  served, whichever `/en/…` pages the build rendered alongside it. The browser
+  does not hydrate it — the framework renders a document drawn for another
+  URL afresh — so client components read the visitor's URL from their first
+  render: the messages, and the shell, which takes the locale from `usePathname`
+  when its param is the sentinel, falling back to `locales.default` only when
+  the URL has none either. The file becomes English the moment it renders on
+  an `/en/…` URL. A visitor with JavaScript off keeps the Japanese one; one
+  file cannot be both. Under the dev server (and `@k8ordo/server`) a 404 is
+  rendered at the visitor's URL, where the schema accepts `en`, so it is
+  English from the server's HTML on.
 - **An unknown locale is a 404.** `src/routes/[locale]/layout.tsx` exports
   `const { paramsSchema } = locales` — the generator parses the file for the
   export, so any spelling of it counts — so `/fr/ui` is a
@@ -61,7 +66,8 @@ pnpm check:write       # Oxlint/Oxfmt lint/format auto-fix
   `not-found.tsx` under a real 404, under `@k8ordo/server` as much as on the
   static host (where `404.html` was already what got served). The layout
   still receives `params.locale` as a string — a layout's params are never
-  typed by its schema, because under `not-found.tsx` nothing is validated —
+  typed by its schema, because `not-found.tsx` renders under it whether or not
+  the schema accepted —
   and `locales.paths` only ever expands the listed locales, so the build never asks
   for a pathname the schema would refuse. The schema lives in a Server
   Component on purpose: a value exported from a `'use client'` module reaches

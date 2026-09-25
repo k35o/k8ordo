@@ -23,8 +23,8 @@ export const ui = {
     en: '`dictionaries` holds `ja` and `en`. When the set has other locales (`fr`, or `en-US`), write those dictionaries yourself, annotated with the `Messages` type from `@k8ordo/ui/i18n`, and map locales to dictionaries with a `Variants<Messages>` so a missing one is a type error.',
   }),
   notFound: message({
-    ja: '`not-found.tsx` の下では catch-all の param を検証するものが無いので、そこでの `getLocale()` は URL に関係なく既定のロケールです。`/en/…` の 404 にも既定のロケールの辞書が渡ります。404 を訪問者のロケールで出すには、このサイトの `LocaleShell` のように、Client Component の中で `locales.delocalize(usePathname()).locale` から辞書を選びます。',
-    en: "Under `not-found.tsx` nothing validates the catch-all's params, so `getLocale()` there is the default whatever the URL says, and a 404 at `/en/…` gets the default locale's dictionary too. To show a 404 in the visitor's locale, pick the dictionary in a Client Component from `locales.delocalize(usePathname()).locale`, as this site's `LocaleShell` does.",
+    ja: '`not-found.tsx` の下でも上のスキーマは走るので、`getLocale()` は 404 の URL が名指すロケールになり、`/en/…` の 404 には英語の辞書が渡ります。URL がロケールを名指さなければ既定です。例外は静的ビルドの `404.html` で、番兵の区間で 1 回だけ描かれるので既定のロケールで届き、ブラウザが訪問者の URL で描き直したときに訪問者のロケールになります。辞書を Client Component の中で選べば（このサイトの `LocaleShell` のように `locales.delocalize(usePathname()).locale` から）、そこで訪問者のロケールに合います。',
+    en: "The schema above `not-found.tsx` still runs, so `getLocale()` on a 404 is the locale its URL names — a 404 at `/en/…` gets the English dictionary — and the default where the URL names none. The exception is a static build's `404.html`, rendered once under a sentinel segment: it arrives in the default, and follows the visitor's locale once the browser renders it afresh at their URL. Pick the dictionary in a Client Component (from `locales.delocalize(usePathname()).locale`, as this site's `LocaleShell` does) and it follows them there.",
   }),
   props: message({
     ja: 'コンポーネントの props に渡すテキストは文字列です。`<Button>{m.form.submit()}</Button>` のように、文言を呼んだ結果を渡します。',
@@ -108,8 +108,8 @@ export const staticMode = {
     en: '`framework({ paths: locales.paths })` expands the locale segment once per locale; any other parameter is expanded in the same function.',
   }),
   notFound: message({
-    ja: '`404.html` は番兵の区間で 1 回だけ描かれるので、`not-found.tsx` の文言は Client Component で描き、ハイドレーションで訪問者の URL のロケールに合わせます。このサイトは、`<html lang>` もハイドレーションの後に effect で `document.documentElement.lang` を直しています。',
-    en: "`404.html` is rendered once under a sentinel segment, so render the text of `not-found.tsx` in a Client Component and let hydration bring it to the locale of the visitor's URL. This site also corrects `<html lang>` from an effect after hydration, through `document.documentElement.lang`.",
+    ja: '`404.html` は番兵の区間で 1 回だけ、既定のロケールで描かれます。ブラウザはこれをハイドレーションせず（別の URL 用に描かれたものなので）、訪問者の URL で描き直します。`not-found.tsx` の文言を Client Component で描けば、そこで訪問者のロケールになります。このサイトは、`<html lang>` も描いた後に effect で `document.documentElement.lang` を直しています。',
+    en: "`404.html` is rendered once under a sentinel segment, in the default locale. The browser does not hydrate it — it was rendered for another URL — but renders it afresh at the visitor's, so render the text of `not-found.tsx` in a Client Component and it comes out in the visitor's locale. This site also corrects `<html lang>` from an effect once it has rendered, through `document.documentElement.lang`.",
   }),
 };
 

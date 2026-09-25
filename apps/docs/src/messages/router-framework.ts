@@ -120,8 +120,8 @@ export const propsPage = message({
 });
 
 export const propsLayout = message({
-  ja: '`LayoutProps<P>` はそれに `children` を足したものです（下の例は `src/routes/products/page.tsx` もあるものとします）。`LayoutProps` は、スキーマを宣言していても `params` を文字列（`ParamsOf<P>`）として型付けします。`not-found.tsx` の下では何も検証されないからです。ただし検証を通ったページの描画では、実行時にはスキーマの出力がレイアウトにも渡ります。値が文字列であることに頼らないでください。',
-  en: '`LayoutProps<P>` adds `children` (the example below assumes `src/routes/products/page.tsx` exists too). `LayoutProps` types a layout’s `params` as strings (`ParamsOf<P>`) whatever the schemas declare, because nothing is validated under `not-found.tsx`. At run time, though, a layout rendered for a validated page receives the schemas’ output, so do not rely on the values being strings.',
+  ja: '`LayoutProps<P>` はそれに `children` を足したものです（下の例は `src/routes/products/page.tsx` もあるものとします）。`LayoutProps` は、スキーマを宣言していても `params` を文字列（`ParamsOf<P>`）として型付けします。`not-found.tsx` の下では、スキーマが受理したかどうかに関わらずレイアウトが描かれるからです。ただし検証を通ったページの描画では、実行時にはスキーマの出力がレイアウトにも渡ります。値が文字列であることに頼らないでください。',
+  en: '`LayoutProps<P>` adds `children` (the example below assumes `src/routes/products/page.tsx` exists too). `LayoutProps` types a layout’s `params` as strings (`ParamsOf<P>`) whatever the schemas declare, because a layout also renders under `not-found.tsx`, whether or not its schemas accepted. At run time, though, a layout rendered for a validated page receives the schemas’ output, so do not rely on the values being strings.',
 });
 
 export const propsRequest = message({

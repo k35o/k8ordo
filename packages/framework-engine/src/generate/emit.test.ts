@@ -173,6 +173,7 @@ describe('params schemas', () => {
     'not-found.tsx',
     '[locale]/layout.tsx',
     '[locale]/page.tsx',
+    '[locale]/not-found.tsx',
     '[locale]/products/[id]/page.tsx',
     '[locale]/about/page.tsx',
   ];
@@ -226,16 +227,30 @@ describe('params schemas', () => {
       "locale_products_id_page satisfies Page<'/:locale/products/:id', (typeof paramSchemas)['/:locale/products/:id']>",
     );
     expect(source).toContain("page satisfies Page<'/'>");
-    // catch-all の params は検査しないので、型も文字列のまま
+    // catch-all の params はスキーマが拒んでも答えるので、型も文字列のまま
     expect(source).toContain("not_found satisfies Page<'/*'>");
+    expect(source).toContain("locale_not_found satisfies Page<'/:locale/*'>");
     // レイアウトは文字列のまま受ける
     expect(source).toContain("locale_layout satisfies Layout<'/:locale'>");
   });
 
-  it('emits an empty map, and no schema import, when nothing declares one', () => {
-    const { tree } = parseRouteTree(['page.tsx']);
+  it('lists, per catch-all, the schemas of the layouts above its not-found — apart from the pages, which they type', () => {
+    const map = (name: string): string => {
+      const start = source.indexOf(`export const ${name} = {`);
+      return source.slice(start, source.indexOf('} as const;', start));
+    };
+    // ルートの not-found の上にはスキーマが無いので、載るのは 1 つだけ
+    expect(map('catchAllSchemas')).toBe(
+      "export const catchAllSchemas = {\n  '/:locale/*': [locale_layout_params],\n",
+    );
+    expect(map('paramSchemas')).not.toContain('/*');
+  });
+
+  it('emits empty maps, and no schema import, when nothing declares one', () => {
+    const { tree } = parseRouteTree(['page.tsx', 'not-found.tsx']);
     const plain = emitRoutesModule(tree, { importPrefix: './routes' });
     expect(plain).toContain('export const paramSchemas = {\n} as const;');
+    expect(plain).toContain('export const catchAllSchemas = {\n} as const;');
     expect(plain).not.toContain('ParamsSchemaFor');
   });
 });

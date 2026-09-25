@@ -60,3 +60,20 @@ export const parseParams = (
     }
     return { params: current, enter: AsyncLocalStorage.snapshot() };
   });
+
+/**
+ * The layouts' schemas above a not-found, run over the catch-all's params for
+ * what they write — never to refuse it: a catch-all answers what nothing else
+ * did, whatever its params hold. When every schema accepts, the not-found
+ * renders in the context they left, so a 404 under `/en/…` is in the locale
+ * the URL names; when one refuses (`/fr/…`), in none. The params stay the
+ * strings the pathname carried either way, which is what a not-found's type
+ * says.
+ */
+export const parseCatchAllParams = (
+  schemas: readonly ParamsSchema[],
+  raw: Readonly<Record<string, string>>,
+): ParsedParams => ({
+  params: raw,
+  enter: parseParams(schemas, raw)?.enter ?? ((fn) => fn()),
+});

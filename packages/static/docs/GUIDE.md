@@ -302,9 +302,12 @@ client shell.
 **A refused param is a pathname the pattern does not answer.** `/products/shoes`
 does not become a page that renders with `NaN`; the walk goes on to whatever
 the table declares next, which in the end is `not-found.tsx` under a real
-404 — exactly as if the directory had never matched. A catch-all's own params
-are never validated: it answers what nothing else did, and a 404 is already
-what a refused param means.
+404 — exactly as if the directory had never matched. A catch-all is never
+refused: it answers what nothing else did, and a 404 is already what a refused
+param means. The schemas of the layouts above its `not-found.tsx` still run
+over its params, for what they write to the render — the locale of
+`/en/missing` is the one `@k8ordo/i18n`'s schema accepted — and when one
+refuses (`/fr/missing`), the not-found renders as if none had run.
 
 **Links take what the page receives.** The generated `Register` carries the
 schema's output type per pattern, so `href('/products/:id', { id: 42 })` takes
@@ -312,9 +315,10 @@ the number and spells it the one way the schema will read back; a string there
 is a type error, as is an object.
 
 A layout receives its params as strings whatever it declared — under
-`not-found.tsx`, where nothing is validated, a typed value would be a lie. A
-layout that wants the parsed value beside the page's parses it itself, or
-declares the schema and lets the pages below it receive the result.
+`not-found.tsx`, which renders whatever the schemas said, a typed value would
+be a lie, and a not-found receives strings for the same reason. A layout that
+wants the parsed value beside the page's parses it itself, or declares the
+schema and lets the pages below it receive the result.
 
 <!-- /shared:params -->
 
@@ -639,8 +643,12 @@ any 404 is. Its `pathname` is such a URL, and where a parameter sits above
 so `params.<name>` there is not a value the application named. Treat it as you
 must treat any parameter under a running server, where `/:locale/*` matches
 `/fr/anything` too: validate it, and read what the visitor actually typed from
-`usePathname()` in a client component after hydration. A visitor without
-JavaScript keeps whatever that render produced.
+`usePathname()` in a client component. The browser does not hydrate this file:
+it was rendered for another URL, so anything a component reads from the URL
+while it renders (`@k8ordo/i18n`'s messages read the locale segment) would
+disagree with it. The browser renders it afresh instead, where the visitor is,
+and a client component sees their URL from its first render. A visitor
+without JavaScript keeps whatever the build's render produced.
 
 <!-- shared:deploys -->
 
