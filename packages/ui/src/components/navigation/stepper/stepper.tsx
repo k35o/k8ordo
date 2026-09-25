@@ -4,7 +4,7 @@ import type { FC, OlHTMLAttributes, Ref } from 'react';
 
 import { cn } from '../../../helpers/cn';
 import { useControllableState } from '../../../hooks/controllable-state';
-import { useMessages } from '../../../i18n/context';
+import { getMessages } from '../../../i18n/current';
 import { FOCUS_RING } from '../../_internal/focus-ring';
 import { CheckIcon } from '../../icons';
 
@@ -40,7 +40,7 @@ export const Stepper: FC<Props> = ({
   ref,
   ...rest
 }) => {
-  const messages = useMessages();
+  const messages = getMessages();
   const [current, setCurrent] = useControllableState({
     value,
     defaultValue: defaultValue ?? 0,
