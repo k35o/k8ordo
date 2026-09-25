@@ -71,19 +71,20 @@ does not), so give `.int()` or `.min()` theirs.
 
 Each leaf derives the control that submits what it validates:
 
-| Schema                                           | `input`                                                                                   |
-| ------------------------------------------------ | ----------------------------------------------------------------------------------------- |
-| `z.string()`                                     | `type="text"`                                                                             |
-| `z.email()` / `z.url()`                          | `type="email"` / `type="url"`                                                             |
-| `z.iso.date()` / `z.iso.time()`                  | `type="date"` / `type="time"`                                                             |
-| `z.iso.datetime({ local: true })`                | `type="datetime-local"`                                                                   |
-| `z.coerce.number()`                              | `type="number"`; `step` from `.multipleOf()`, else `1` after `.int()` and `any` otherwise |
-| `z.boolean()`, `z.literal(true)`                 | `type="checkbox"`                                                                         |
-| `z.file()`                                       | `type="file"`                                                                             |
-| a password ([below](#what-it-guarantees))        | `type="password"`                                                                         |
-| `z.enum([…])`                                    | no `type`: spread it onto a `<select>`, not a radio ([Radio groups](#radio-groups))       |
-| `z.array(z.enum([…]))`                           | no `type`: one checkbox per option ([Checkbox groups](#checkbox-groups))                  |
-| anything else (`z.uuid()`, `z.coerce.date()`, …) | `type="text"`                                                                             |
+| Schema                                           | `input`                                                                                                |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------ |
+| `z.string()`                                     | `type="text"`                                                                                          |
+| `z.email()` / `z.url()`                          | `type="email"` / `type="url"`                                                                          |
+| `z.iso.date()` / `z.iso.time()`                  | `type="date"` / `type="time"`                                                                          |
+| `z.iso.datetime({ local: true })`                | `type="datetime-local"`                                                                                |
+| `z.coerce.number()`                              | `type="number"`; `step` from `.multipleOf()`, else `1` after `.int()` and `any` otherwise              |
+| `z.boolean()`, `z.literal(true)`                 | `type="checkbox"`                                                                                      |
+| `z.stringbool()`                                 | `type="checkbox"` with a `value` ([Checkboxes that submit a string](#checkboxes-that-submit-a-string)) |
+| `z.file()`                                       | `type="file"`                                                                                          |
+| a password ([below](#what-it-guarantees))        | `type="password"`                                                                                      |
+| `z.enum([…])`                                    | no `type`: spread it onto a `<select>`, not a radio ([Radio groups](#radio-groups))                    |
+| `z.array(z.enum([…]))`                           | no `type`: one checkbox per option ([Checkbox groups](#checkbox-groups))                               |
+| anything else (`z.uuid()`, `z.coerce.date()`, …) | `type="text"`                                                                                          |
 
 ```tsx
 // page.tsx — Server Component
@@ -181,7 +182,8 @@ zod itself produces. A custom `min(1, '…')` reaches both sides.
 means "the key is present", but a form always submits something for every
 control. What that is depends on the control: `''` for a text field, `false` for
 an unchecked checkbox, and nothing at all for a number, a `z.coerce.bigint()`, a
-file, or a choice — an empty numeric field is not 0 (nor 0n), an unfilled file
+file, a choice, or an unchecked `z.stringbool()` box — an empty numeric field is
+not 0 (nor 0n), an unfilled file
 input is not the zero-byte file the browser sends, and neither a radio group
 with nothing selected nor a `<select>` left on a `value=""` placeholder has
 chosen anything. The attribute is emitted only when the schema rejects that
@@ -219,9 +221,11 @@ tuples, a repeat nested inside a repeat, nullable objects, keys containing
 form that would silently misparse what the person typed. So does a leaf no
 control could ever satisfy, because every value arrives as a string:
 `z.number()` (use `z.coerce.number()`), `z.literal(1)`, `z.date()`,
-`z.bigint()` — or, for a checkbox, as a boolean: `z.stringbool()` (use
-`z.boolean()`). A form that can never validate is a mistake to report, not a
-check to drop. A schema that coerces reads strings and is kept, so
+`z.bigint()`. So does a checkbox that could never submit `false`:
+`z.stringbool().default(true)`, since an unchecked box submits nothing and the
+default reads nothing as `true`. A form that can never validate, or that
+silently discards what the person did, is a mistake to report, not a check to
+drop. A schema that coerces reads strings and is kept, so
 `z.coerce.date()` and `z.coerce.bigint()` derive as text inputs.
 
 **A missing name is loud.** If the schema has a field that never arrived in the
@@ -231,8 +235,8 @@ filling in the form did. The exceptions are the controls that submit no entry
 at all when left alone — a state the person can reach: a radio group with
 nothing selected reaches the schema as no value, the same as a `<select>` on
 its placeholder (a validation error unless the enum accepts `undefined`), an
-unchecked checkbox as `false`, and a checkbox group with nothing checked as
-`[]`. A forgotten spread on one of those is not caught either.
+unchecked checkbox as `false` (or, under `z.stringbool()`, as no value), and a
+checkbox group with nothing checked as `[]`. A forgotten spread on one of those is not caught either.
 
 **Native validation survives without JavaScript.** `noValidate` is applied
 from JavaScript on mount, never rendered into the markup. With scripts
@@ -337,6 +341,23 @@ const plan = form.field('plan');
   value={option}
 />;
 ```
+
+## Checkboxes that submit a string
+
+`z.boolean()` reads a checkbox as checked or not, whatever it submits.
+`z.stringbool()` reads what it submits: its `value` when checked, and nothing
+when not. `input.value` is the schema's own spelling of `true` — `"true"`, or
+the first of `truthy` when one is given — so the box submits a string the
+schema reads back, never the browser's default `on`.
+
+That is the shape a boolean takes in a GET filter form derived from an
+`@k8ordo/state` url schema, where a boolean has to be `z.stringbool()`: the
+box submits the same string `update()` writes for `true`, so the URL the form
+lands on and the one state writes agree. An unchecked box submits nothing,
+which reaches the schema as `undefined`: `.default(false)` or `.optional()`
+accepts it, and a bare `z.stringbool()` makes the box `required`.
+`.default(true)` is refused at derive time — nothing would read as `true`, so
+unchecking the box could never submit `false`.
 
 ## Checkbox groups
 
@@ -546,7 +567,11 @@ links itself. A derived `type` is any string while `TextField` takes only its
 own text types, so take `type` out of `input` and set it on the component when
 the field is not plain text. Take it out for `PasswordInput` too: it sets
 `type` itself to show and hide the value, and a spread `type` overrides that
-toggle without a type error.
+toggle without a type error. `Checkbox` renders no `value` outside a
+`CheckboxGroup`, so a `z.stringbool()` box drawn with it submits the browser's
+`on` — which the default `z.stringbool()` reads as `true`, but a custom
+`truthy`, and the URL state writes, do not share. Render a plain
+`<input {...field.input} />` there.
 
 ```tsx
 const title = form.field('title');

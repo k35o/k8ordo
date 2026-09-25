@@ -25,6 +25,11 @@ export type FieldInput = {
   min?: number | string;
   max?: number | string;
   step?: number | 'any';
+  /**
+   * What a checked box submits when its schema reads the string
+   * (`z.stringbool()`): the schema's own spelling of `true`.
+   */
+  value?: string;
   defaultValue?: string;
   defaultChecked?: boolean;
 };
