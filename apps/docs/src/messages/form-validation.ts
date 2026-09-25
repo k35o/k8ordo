@@ -146,8 +146,8 @@ export const lifeServer = message({
 });
 
 export const lifeNewState = message({
-  ja: 'Server Action から新しい結果が届くと、ブラウザ側のメッセージと「編集済み」の記録を捨て、行数を `state.rows` から作り直し、ページ上で最初の失敗にフォーカスを移します。文書順で最初に失敗した欄か、それより前にある `formError` の表示です。スクリーンリーダーの利用者が、送信が失敗したことと、その場所を知るためです。',
-  en: 'When a new result arrives from the action, the browser-side messages and the record of edited fields are dropped, rows are rebuilt from `state.rows`, and focus moves to the first failure on the page — the first failed field in document order, or the `formError` message when it comes before it. That is how someone using a screen reader learns that the submit failed, and where.',
+  ja: 'Server Action から新しい結果が届くと、ブラウザ側のメッセージと「編集済み」の記録を捨て、行数を `state.rows` から作り直し、ページ上で最初の失敗にフォーカスを移します。文書順で最初に失敗した欄か、それより前にある、欄を持たないエラー（`formError` や配列そのもののエラー）の表示です。スクリーンリーダーの利用者が、送信が失敗したことと、その場所を知るためです。',
+  en: "When a new result arrives from the action, the browser-side messages and the record of edited fields are dropped, rows are rebuilt from `state.rows`, and focus moves to the first failure on the page — the first failed field in document order, or a message no field owns (`formError`, or an array's own error) when it comes before it. That is how someone using a screen reader learns that the submit failed, and where.",
 });
 
 export const lifeToken = message({

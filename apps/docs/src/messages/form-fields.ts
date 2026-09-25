@@ -400,6 +400,16 @@ export const arrayError = message({
   en: "The server's error about the array itself, such as a failed `.min(1, …)`.",
 });
 
+export const arrayErrorProps = message({
+  ja: '`error` を表示する要素に広げる `id` と `tabIndex={-1}`。',
+  en: 'The `id` and `tabIndex={-1}` to spread onto the element that shows `error`.',
+});
+
+export const arrayErrorFocus = message({
+  ja: '配列そのもののエラーを持つ欄は無いので、`errorProps` を広げた要素がフォーカスの移り先になります。広げなければ、配列だけが失敗した送信ではフォーカスがどこにも移らず、スクリーンリーダーには何も伝わりません。行より上に置けば、行も失敗しているときもそこにフォーカスが移り、Tab で行へ進めます。行より下に置くと、最初に失敗した行の欄が先になります。',
+  en: "No field owns the array's own error, so the element you spread `errorProps` onto is where focus goes for it. Without it, a submit that failed only on the array moves focus nowhere, and a screen reader says nothing. Placed above the rows, it takes focus even when a row failed too, and Tab moves on into the rows; placed below them, the first failed row comes first.",
+});
+
 export const arrayInitial = message({
   ja: '最初の行数は、送信後なら `state.rows` の値、無ければ `.min()`、それも無ければ 0 です。JavaScript が無いときに表示される行数もこれで、追加や削除のボタンは動きません。',
   en: 'The first render has as many rows as `state.rows` says after a submission, otherwise `.min()`, otherwise none. That is also the row count without JavaScript, where the add and remove buttons do nothing.',
