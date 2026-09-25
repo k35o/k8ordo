@@ -16,6 +16,7 @@ import type {
   FieldInput,
   FormFields,
   FormState,
+  StringCheckboxInput,
   ValidityFlag,
 } from './types';
 
@@ -87,8 +88,8 @@ const messageFor = (
   return undefined;
 };
 
-export type FieldView = {
-  input: FieldInput;
+export type FieldView<Input extends FieldInput = FieldInput> = {
+  input: Input;
   error: string | undefined;
   invalid: boolean;
   required: boolean;
@@ -119,6 +120,7 @@ export type FormErrorView = {
 export type UseFormReturn<
   FieldPath extends string = string,
   ArrayPath extends string = string,
+  StringCheckboxPath extends string = never,
 > = {
   props: {
     onBlur: (event: FocusEvent<HTMLFormElement>) => void;
@@ -127,7 +129,10 @@ export type UseFormReturn<
     onSubmit: (event: SubmitEvent<HTMLFormElement>) => void;
     ref: Ref<HTMLFormElement>;
   };
-  field: (path: FieldPath) => FieldView;
+  field: {
+    (path: StringCheckboxPath): FieldView<StringCheckboxInput>;
+    (path: FieldPath): FieldView;
+  };
   array: (path: ArrayPath) => ArrayView;
   formError: FormErrorView;
   /** True once any field differs from the value it was rendered with. */
@@ -234,11 +239,15 @@ const shiftSet = (
  * identity of each repeated row, one dirty flag, and the row counts adding or
  * removing a row is measured against.
  */
-export const useForm = <FieldPath extends string, ArrayPath extends string>(
-  fields: FormFields<FieldPath, ArrayPath>,
+export const useForm = <
+  FieldPath extends string,
+  ArrayPath extends string,
+  StringCheckboxPath extends string = never,
+>(
+  fields: FormFields<FieldPath, ArrayPath, StringCheckboxPath>,
   state: FormState = {},
-): UseFormReturn<FieldPath, ArrayPath> => {
-  const lookup = fields as FormFields;
+): UseFormReturn<FieldPath, ArrayPath, StringCheckboxPath> => {
+  const lookup = fields as FormFields<string, string, string>;
   const formRef = useRef<HTMLFormElement>(null);
   const nextKey = useRef(0);
   // Messages applyRules wrote, so it never erases one it does not own — an
@@ -426,11 +435,14 @@ export const useForm = <FieldPath extends string, ArrayPath extends string>(
   }, [lookup, state]);
 
   const viewOf = useCallback(
-    (field: DerivedField, name: string): FieldView => {
+    (
+      field: DerivedField<StringCheckboxInput>,
+      name: string,
+    ): FieldView<StringCheckboxInput> => {
       const serverError = edited.has(name) ? undefined : state.errors?.[name];
       const error = clientErrors[name] ?? serverError;
       const value = state.values?.[name];
-      const input: FieldInput = { ...field.input, name };
+      const input: StringCheckboxInput = { ...field.input, name };
 
       if (field.input.type === 'checkbox') {
         // An unchecked box is simply absent from the echo, so presence is the
@@ -455,7 +467,7 @@ export const useForm = <FieldPath extends string, ArrayPath extends string>(
   );
 
   const field = useCallback(
-    (path: FieldPath): FieldView => {
+    (path: string): FieldView<StringCheckboxInput> => {
       const derived = lookup.fields[path];
       if (derived === undefined) {
         throw new Error(
