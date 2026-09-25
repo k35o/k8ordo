@@ -2,6 +2,7 @@ import type { ComponentProps } from 'react';
 import { z } from 'zod';
 
 import type { Button } from '../../components/buttons/button';
+import type { CopyButton } from '../../components/buttons/copy-button';
 import type { IconButton } from '../../components/buttons/icon-button';
 import type { Avatar } from '../../components/data-display/avatar';
 import type { Badge } from '../../components/data-display/badge';
@@ -172,6 +173,22 @@ export const iconButtonProps = z.object({
   size: z.enum(['sm', 'md', 'lg']).optional(),
   color: z.enum(['transparent', 'base', 'primary', 'secondary']).optional(),
 }) satisfies z.ZodType<IconButtonIntegrationProps>;
+
+type CopyButtonIntegrationProps = {
+  value: string;
+  label?: ComponentProps<typeof CopyButton>['label'];
+  iconOnly?: ComponentProps<typeof CopyButton>['iconOnly'];
+  size?: ComponentProps<typeof CopyButton>['size'];
+};
+export const copyButtonProps = z.object({
+  value: z.string().describe('Text copied to the clipboard'),
+  label: z
+    .string()
+    .optional()
+    .describe('Button text, or the tooltip when iconOnly (default: "Copy")'),
+  iconOnly: z.boolean().optional(),
+  size: z.enum(['sm', 'md', 'lg']).optional(),
+}) satisfies z.ZodType<CopyButtonIntegrationProps>;
 
 type ChevronIconIntegrationProps = {
   direction: ComponentProps<typeof ChevronIcon>['direction'];
@@ -946,6 +963,7 @@ export type TabsProps = z.infer<typeof tabsProps>;
 export type IconName = z.infer<typeof iconName>;
 export type IconProps = z.infer<typeof iconProps>;
 export type IconButtonProps = z.infer<typeof iconButtonProps>;
+export type CopyButtonProps = z.infer<typeof copyButtonProps>;
 export type AnchorProps = z.infer<typeof anchorProps>;
 export type AvatarProps = z.infer<typeof avatarProps>;
 export type CodeProps = z.infer<typeof codeProps>;
@@ -1091,6 +1109,12 @@ export type _EnumCoverage = [
     CoversComponent<
       ComponentProps<typeof IconButton>['color'],
       IconButtonProps['color']
+    >
+  >,
+  AssertCovered<
+    CoversComponent<
+      ComponentProps<typeof CopyButton>['size'],
+      CopyButtonProps['size']
     >
   >,
   AssertCovered<

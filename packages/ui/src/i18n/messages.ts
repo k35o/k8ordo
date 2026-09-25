@@ -19,6 +19,12 @@ export type Messages = {
   /** Toast のビューポート（region ランドマーク）名 */
   toastRegion: string;
 
+  /** CopyButton の既定のラベル */
+  copy: string;
+  /** CopyButton が押した結果として読み上げる文言 */
+  copied: string;
+  copyFailed: string;
+
   autocompletePlaceholder: string;
   /** 選択済みタグ 1 件の解除 */
   autocompleteRemoveTag: string;
@@ -34,6 +40,10 @@ export type Messages = {
 
   numberFieldIncrement: string;
   numberFieldDecrement: string;
+  /** NumberField の値が min を下回ったときの検証メッセージ。`{min}` が min の値に置き換わる */
+  numberFieldRangeUnderflow: string;
+  /** NumberField の値が max を上回ったときの検証メッセージ。`{max}` が max の値に置き換わる */
+  numberFieldRangeOverflow: string;
 
   /** RangeSlider の下側のつまみ。部品の名前（aria-label など）の後に続けて読まれる */
   rangeSliderStart: string;
@@ -64,9 +74,6 @@ export type Messages = {
 
   /** CodeBlock のコピーボタン */
   codeBlockCopy: string;
-  /** コピーの結果を読み上げる（role="status"） */
-  copied: string;
-  copyFailed: string;
   /** Carousel の aria-roledescription（region と各スライド） */
   carousel: string;
   carouselSlide: string;

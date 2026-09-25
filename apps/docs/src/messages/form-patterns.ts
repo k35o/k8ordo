@@ -81,38 +81,48 @@ export const uiTitle = message({
 });
 
 export const uiDescription = message({
-  ja: '`@k8ordo/form` は `@k8ordo/ui` に依存しません。属性は入力要素に、エラーは `FormControl` に渡します。`FormControl` は `id` と `aria-*` の結び付けを自分で作るので、渡すのは `label`・`errorText`・`invalid`・`required` だけです。',
-  en: '`@k8ordo/form` does not depend on `@k8ordo/ui`. The attributes go to the input and the error to `FormControl`, which generates the `id` and the `aria-*` links itself, so it needs only `label`, `errorText`, `invalid` and `required`.',
+  ja: '`@k8ordo/form` は `@k8ordo/ui` に依存しません。`@k8ordo/ui` のフィールドのほうが、`formFields` の導いたものをそのまま受けます。`input` は `FormControl` の props の後に広げます。`FormControl` は `id` と `aria-*` の結び付けを自分で作るので、渡すのは `label`・`errorText`・`invalid`・`required` だけです。',
+  en: "`@k8ordo/form` does not depend on `@k8ordo/ui`; the fields in `@k8ordo/ui` take what `formFields` derives as it is. Spread `input` after `FormControl`'s props. `FormControl` generates the `id` and the `aria-*` links itself, so it needs only `label`, `errorText`, `invalid` and `required`.",
 });
 
-export const uiTextField = message({
-  ja: '`TextField` が受け付ける `type` は `text`・`email`・`tel`・`url`・`search` だけで、`input.type` は `string` なので、そのまま広げると型エラーになります。`type` を外して残りを広げ、`type` は自分で書きます。',
-  en: '`TextField` accepts only `text`, `email`, `tel`, `url` and `search` as its `type`, while `input.type` is a `string`, so spreading it as it is fails to type-check. Take `type` out, spread the rest, and write `type` yourself.',
+export const uiSpread = message({
+  ja: '`input` から外しておくものはありません。`TextField` は日付と時刻の `type` も描き、`PasswordInput` は広げた `type` の下でも表示の切り替えを保ち、`Textarea` は `<textarea>` に無い `type` を捨てます。`NumberField` と `Slider` は、文字列の `min`・`max`、`step="any"`、文字列で戻るエコーの `defaultValue` を受けます。',
+  en: 'Nothing has to be taken out of `input` first. `TextField` renders the date and time types too, `PasswordInput` keeps its show/hide toggle under a spread `type`, and `Textarea` drops the `type` a `<textarea>` does not have. `NumberField` and `Slider` take string `min` and `max`, `step="any"`, and the echoed `defaultValue`, which is a string.',
 });
 
-export const uiPassword = message({
-  ja: '`PasswordInput` は表示を切り替えるために `type` を自分で書き換えます。導かれた `type` を広げると切り替えが効かなくなり、しかも型エラーにはならないので、必ず外します。`<textarea>` にも `type` 属性は無いので、`Textarea` でも外します。',
-  en: '`PasswordInput` sets `type` itself to show and hide the password. Spreading the derived `type` breaks the toggle, and the compiler does not catch it, so always take it out. A `<textarea>` has no `type` attribute either, so take it out for `Textarea` too.',
+export const uiDom = message({
+  ja: '非制御のフィールドは値を DOM に持つので、reset（action の後の React の自動リセットを含む）でエコーに戻り、`isDirty` がそれを読みます。部品がコードで変えた値（増減ボタン、選んだ選択肢、外したファイル）も、入力と同じく `input` イベントで届きます。',
+  en: "Uncontrolled fields keep their value in the DOM, so a reset — React's after each action included — restores the echo and `isDirty` reads it. A value a component changes in code — a stepper, a chosen option, a removed file — arrives as an `input` event, the way typing does.",
+});
+
+export const uiRadio = message({
+  ja: '`Radio` と `RadioCard` には、列挙型の `input` をそのまま広げます。手書きのラジオと違い、`defaultValue` は選ばれている選択肢として読まれ、`required` はすべてのラジオに届きます。',
+  en: "Spread an enum's `input` onto `Radio` and `RadioCard` as it is. Unlike a hand-written radio, they read `defaultValue` as the selected option, and `required` reaches every radio.",
 });
 
 export const uiSelect = message({
-  ja: '`z.enum()` から導かれた `input` は `type` を持たないので、`Select` にはそのまま広げられます。選択肢は `options` で渡します。',
-  en: 'The `input` derived from `z.enum()` has no `type`, so it spreads onto `Select` as it is. The choices go in `options`.',
+  ja: "`Select` の `required` を効かせるには、`value` が `''` の選択肢を `options` の先頭に置きます。空の選択肢が無い `<select>` は、いつも何かが選ばれています。",
+  en: "For `required` to mean anything on `Select`, put an option whose `value` is `''` first in `options`; a `<select>` without an empty option always has a choice selected.",
+});
+
+export const uiGroups = message({
+  ja: 'チェックボックスの組（`CheckboxGroup`・`CheckboxCard`・`Autocomplete`）は、配列でエコーされます。`input` は `name` だけなので、チェックされた値を `defaultValue` で戻します。`minChecked` は `Autocomplete` にも届きます。何も選んでいなくても残る隠した `<select multiple>` で送るので、ルールが印を付ける要素があり、失敗後のフォーカスは入力欄へ移ります。',
+  en: 'A checkbox group — `CheckboxGroup`, `CheckboxCard`, `Autocomplete` — echoes as an array, and `input` carries only the `name`, so pass what was checked back as `defaultValue`. `minChecked` reaches `Autocomplete` too: it submits through a hidden `<select multiple>` that stays even with nothing selected, so the rule has an element to mark, and focus after a failure goes on to the text input.',
 });
 
 export const uiNumber = message({
-  ja: '`NumberField` は空欄なら `\'\'` を送り、`required` も中の入力要素に渡すので、空の数値欄を未入力として扱う約束も、導かれた `required` も働きます。それでも導かれた `input` はそのままでは広げられません。送信に失敗したあとに入る `defaultValue` は文字列で、`min`・`max`・`step` の型も数値だけではないのに、`NumberField` は数値しか受け取らないからです。しかも `type="text"` の入力を描くので、ブラウザは `min`・`max`・`step` を検査しません。数値には素の `<input>` に属性を広げます。',
-  en: '`NumberField` submits `\'\'` when it is empty and passes `required` on to its input, so both the rule that a blank numeric field means nothing entered and the derived `required` hold. The derived `input` still does not spread onto it: the `defaultValue` a failed submit echoes back is a string, and `min`, `max` and `step` are not typed as plain numbers, while `NumberField` takes numbers only. It also renders a `type="text"` input, so the browser checks none of `min`, `max` and `step`. For a number, spread the attributes onto a plain `<input>`.',
+  ja: '`NumberField` は整形と増減のために `type="text"` の入力を描くので、ブラウザは `min`・`max` を検査しません。範囲外の値は `NumberField` が `setCustomValidity` で知らせ、`useForm` はほかの文言と同じく出します。ただしその文言は zod ではなく `@k8ordo/ui` の辞書（`numberFieldRangeUnderflow`・`numberFieldRangeOverflow`）のもので、クライアントの文言が zod と揃わない唯一の場所です。欄を離れると範囲内に収めるので、この文言が出るのは入力のあいだだけです。`.int()` や `.multipleOf()` が丸める桁を決め、ただの `z.coerce.number()`（`step="any"`）は丸めません。JavaScript が無いと、サーバーより前に範囲を検査するものはありません。導かれた `type="number"` のまま `TextField` に広げれば、ブラウザ自身の検査とその文言が残ります。',
+  en: '`NumberField` renders a `type="text"` input so it can format and step the value, and the browser does not check `min` and `max` there. `NumberField` reports an out-of-range value with `setCustomValidity`, which `useForm` shows like any other message — but in `@k8ordo/ui`\'s wording (`numberFieldRangeUnderflow` / `numberFieldRangeOverflow`), not zod\'s, the one place the client\'s text is not zod\'s own. Leaving the field clamps the value into range, so the message shows only while typing. `.int()` and `.multipleOf()` set the precision it rounds to; a plain `z.coerce.number()` (`step="any"`) is not rounded. Without JavaScript nothing checks the range before the server does; a `TextField` given the derived `type="number"` keeps the browser\'s own check, and its wording.',
 });
 
-export const uiOthers = message({
-  ja: 'この節で扱ったのは `TextField`・`PasswordInput`・`Textarea`・`Select`・`NumberField` だけです。チェックボックス、ラジオボタン、ファイルは、フィールドのページにある素の要素で描きます。たとえば `Radio` は `required` を中の入力要素に渡しません。',
-  en: 'This section covers only `TextField`, `PasswordInput`, `Textarea`, `Select` and `NumberField`. Render checkboxes, radio groups and files with the plain elements shown on the Fields page; `Radio`, for one, does not pass `required` on to its inputs.',
+export const uiTextarea = message({
+  ja: '`Textarea` で描く欄の正規表現は `pattern` として描かれますが、`<textarea>` はそれを無視します。検査はサーバーだけで行われ、どの要素が欄を描くかを導出は知らないので、`dropped` にも載りません。',
+  en: 'A regex on a field drawn as a `Textarea` reaches the markup as `pattern`, which a `<textarea>` ignores: it runs on the server only, and `dropped` cannot list it, since the derivation does not know which element renders the field.',
 });
 
-export const uiFieldsLink = message({
-  ja: 'チェックボックス・ラジオボタン・ファイルの描き方（フィールド）',
-  en: 'Checkboxes, radio groups and files on the Fields page',
+export const uiFile = message({
+  ja: '`FileField` は `FileField.ItemList` に見えているファイルを送ります。一覧から外したファイルは入力からも外れ、reset で一覧も空になります。',
+  en: '`FileField` submits what `FileField.ItemList` shows: removing a file there removes it from the input, and a reset empties the list with it.',
 });
 
 export const notYetTitle = message({

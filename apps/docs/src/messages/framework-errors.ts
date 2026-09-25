@@ -104,3 +104,23 @@ export const redirectOrder = message({
   ja: 'リダイレクトは表より先に調べられます。リダイレクトするディレクトリには描くページが無いので、同じディレクトリに `page.tsx` と `redirect.ts` を両方置くとビルドが拒みます。リダイレクトも宣言された URL として数えられるので、別のグループが同じ URL にページを置くことも拒まれます。',
   en: 'A redirect is consulted before the table. A directory that redirects has no page to render, so one holding both `page.tsx` and `redirect.ts` fails the build — and since a redirect counts as a declared URL, another group putting a page at the same URL is refused too.',
 });
+
+export const pageNotFoundTitle = message({
+  ja: '`notFound()` — そこに無いページ',
+  en: '`notFound()` — a page that is not there',
+});
+
+export const pageNotFoundDescription = message({
+  ja: 'params のスキーマが決めるのは URL の params の形までで、それが名指すものが存在するかどうかはページが言います。`@k8ordo/router` の `notFound()` がそれを言います。',
+  en: 'A params schema decides what a URL’s params look like; whether the thing they name exists is the page’s to say. `notFound()` from `@k8ordo/router` says it.',
+});
+
+export const pageNotFoundAnswer = message({
+  ja: '`notFound()` は throw するので、その後の行は走りません。ページの代わりに、そこで何にも当たらなかった URL に表が答えるもの、つまりいちばん近い上の `not-found.tsx` が、その上のレイアウトの内側で 404 として答えます。`not-found.tsx` が 1 つも無ければ、フレームワーク自身のものが答えます。モードのパッケージではなくルーターから来るので、ページはどちらのモードでも同じに読めます。',
+  en: 'It throws, so the lines after it never run, and the page is answered instead by what the table answers for a URL nothing matched there — the nearest `not-found.tsx` above it, inside the layouts above that — under a 404. With no `not-found.tsx` at all, the framework’s own answers. It comes from the router rather than the mode package, so the page reads the same under either.',
+});
+
+export const pageNotFoundOwn = message({
+  ja: '`notFound()` はページが自分について言う言葉です。ページ自身のコンポーネントから、返す前に投げます。',
+  en: '`notFound()` is the page’s word about itself: thrown from the page’s own component, before it returns.',
+});

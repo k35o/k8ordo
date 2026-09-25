@@ -119,20 +119,24 @@ export const server = {
     en: '`@k8ordo/server`',
   }),
   description: message({
-    ja: 'リクエストごとに描くので、`paramsSchema` と文言の働きは静的化と同じです。違うのは、ページがリクエストを読めることと、Server Action があることです。',
-    en: 'Rendering happens per request, so `paramsSchema` and messages work exactly as in a static build. What differs is that a page can read the request, and that there are Server Actions.',
+    ja: 'リクエストごとに描くので、`paramsSchema` と文言の働きは静的化と同じです。違うのは、ページの前に走る `guard.ts` がリクエストに答えられることと、Server Action があることです。',
+    en: 'Rendering happens per request, so `paramsSchema` and messages work exactly as in a static build. What differs is that a `guard.ts` running before the page can answer the request, and that there are Server Actions.',
   }),
   negotiate: message({
-    ja: 'ページは `request` を受け取るので、`/` で `locales.negotiateRequest(request, { cookie })` がロケールを選べます。訪問者が前に選んだロケールの Cookie を先に、無ければ `Accept-Language` を読みます。答えを HTML に入れておけば、JavaScript の無い訪問者にも行き先のリンクが見えます。',
-    en: 'A page receives `request`, so `/` can choose with `locales.negotiateRequest(request, { cookie })`: the cookie holding the locale the visitor chose before, then `Accept-Language`. With the answer in the HTML, a visitor without JavaScript also sees the link to follow.',
+    ja: '`/` には、何かを描く前に `guard.ts` が答えます。`locales.negotiateRequest(request, { cookie })` が、訪問者が前に選んだロケールの Cookie を先に、無ければ `Accept-Language` を読んでロケールを選び、guard はそのロケールの URL への `307` で応答を終えます。JavaScript の無い訪問者も、`/` へのクライアント遷移も、同じように振り分けられます。',
+    en: '`/` is answered by a `guard.ts`, before anything renders. `locales.negotiateRequest(request, { cookie })` chooses — the cookie holding the locale the visitor chose before, then `Accept-Language` — and the guard ends the request with a `307` to that locale. A visitor without JavaScript is sent on the same way, and so is a client navigation to `/`.',
   }),
-  noRedirect: message({
-    ja: 'ページ自身はリダイレクトで応答できません。`redirect()` は Server Action のためのもので、`redirect.ts` の行き先は params から作られ、リクエストのヘッダーでは変わりません。サーバーで `307` を返したいときは、アプリケーションの外で行います。`serve` の前に置いたプロキシか、ビルドされたハンドラ（`dist/rsc/index.js`）を包む自前のホストが、ハンドラを呼ぶ前に `/` だけを答えます。そうしないなら、移動はクライアントで行います。',
-    en: 'The page cannot answer with a redirect itself: `redirect()` is for Server Actions, and a `redirect.ts` builds its target from the params, never from the request headers. To answer `/` with a `307` on the server, do it outside the application: a proxy in front of `serve`, or a host of your own around the built handler (`dist/rsc/index.js`), answers `/` before calling the handler. Otherwise the move happens on the client.',
+  group: message({
+    ja: 'guard と `/` のページはルートグループ（`(home)/`）に入れます。`guard.ts` は自分のディレクトリより下のすべての URL の前に走るので、`src/routes/` の直下に置くと `/en/…` まで振り分けてしまいます。ページは描かれませんが、guard が走るのはページが宣言した URL の前なので、`null` を返すページを置きます。',
+    en: 'Put the guard and the `/` page in a route group (`(home)/`): a `guard.ts` runs before every URL below its directory, so one directly in `src/routes/` would send `/en/…` away too. The page never renders, but a guard runs before a URL a page declares, so one returning `null` has to be there.',
   }),
-  deployLink: message({
-    ja: '`@k8ordo/server` のハンドラの動かし方を読む',
-    en: "Read how `@k8ordo/server`'s handler is run",
+  status: message({
+    ja: '`308` ではなく `307` にするのは、行き先が訪問者によって変わるからです。`localize` が返すのは Vite の `base` を除いた pathname なので、`withBase` で付け直します。',
+    en: "`307` rather than `308`, because where it sends depends on the visitor. `localize` returns the pathname without Vite's `base`, so `withBase` puts it back in front.",
+  }),
+  guardsLink: message({
+    ja: '`guard.ts` の書き方を読む',
+    en: 'Read how a `guard.ts` is written',
   }),
   actions: message({
     ja: 'Server Action の中で文言を使うときは、上の `@k8ordo/form` の例のように `locales.run` で囲みます。',

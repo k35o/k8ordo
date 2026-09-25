@@ -26,8 +26,8 @@ export const memberFormDescription = message({
 });
 
 export const memberStateDescription = message({
-  ja: '状態を置き場所で宣言する。URL・履歴エントリ・localStorage・Cookie はそれぞれスキーマ1つで型付けし、メモリはスキーマのない型付きの箱にする。Navigation API に載せる。',
-  en: 'Declares state by where it lives — URL, history entry, localStorage, a cookie, memory — with one zod schema for each boundary place and a typed box for memory, riding the Navigation API.',
+  ja: '状態を置き場所で宣言する。URL・履歴エントリ・localStorage・sessionStorage・Cookie はそれぞれスキーマ1つで型付けし、メモリはスキーマのない型付きの箱にする。Navigation API に載せる。',
+  en: 'Declares state by where it lives — URL, history entry, localStorage, sessionStorage, a cookie, memory — with one zod schema for each boundary place and a typed box for memory, riding the Navigation API.',
 });
 
 export const disciplineTitle = message({

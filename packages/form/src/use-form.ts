@@ -744,13 +744,26 @@ const isFormDirty = (form: HTMLFormElement | null): boolean => {
       element.value !== element.defaultValue
     ) {
       return true;
-    } else if (element instanceof HTMLSelectElement) {
-      for (const option of element.options) {
-        if (option.selected !== option.defaultSelected) {
-          return true;
-        }
-      }
+    } else if (element instanceof HTMLSelectElement && isSelectDirty(element)) {
+      return true;
     }
   }
   return false;
+};
+
+/**
+ * A drop-down with no option marked as the default still shows one — its
+ * first option — and a reset goes back to that one too, so the baseline is
+ * the option a reset would select, not each option's `defaultSelected`.
+ */
+const isSelectDirty = (select: HTMLSelectElement): boolean => {
+  const options = [...select.options];
+  if (select.multiple) {
+    return options.some((option) => option.selected !== option.defaultSelected);
+  }
+  const defaults = options.filter((option) => option.defaultSelected);
+  const baseline =
+    defaults.at(-1) ??
+    (select.size > 1 ? undefined : options.find((option) => !option.disabled));
+  return select.selectedIndex !== (baseline?.index ?? -1);
 };

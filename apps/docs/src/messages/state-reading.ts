@@ -1,8 +1,8 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: 'ページに search を渡すルーターの下では、サーバーが `url` スロットを `parseUrl` で読みます。リクエストの Cookie を受け取るページでは、Cookie に置いた状態を `parseCookies` で読みます。リンクは定義から組み立てます。localStorage の値も、ハイドレーションより前に読めます。',
-  en: 'Under a router that hands a page its search, the server reads the `url` slot with `parseUrl`; where a page receives the request’s cookies, it reads cookie state with `parseCookies`. Links are built from the definition, and localStorage values can be read before hydration, too.',
+  ja: 'ページに search を渡すルーターの下では、サーバーが `url` スロットを `parseUrl` で読みます。リクエストの Cookie を受け取るページでは、Cookie に置いた状態を `parseCookies` で読みます。リンクは定義から組み立てます。Web Storage の値も、ハイドレーションより前に読めます。',
+  en: 'Under a router that hands a page its search, the server reads the `url` slot with `parseUrl`; where a page receives the request’s cookies, it reads cookie state with `parseCookies`. Links are built from the definition, and Web Storage values can be read before hydration, too.',
 });
 
 export const parseTitle = message({
@@ -109,8 +109,8 @@ export const salvageTable = {
 };
 
 export const salvageSame = message({
-  ja: '同じサルベージは、エントリ状態・localStorage の行・Cookie・`definePageState`・`defineLocalState`・`defineCookieState` の `update()` に渡した値にも適用されます。',
-  en: 'The same salvage applies to entry state, to localStorage rows, to cookies, and to the values passed to `update()` on `definePageState`, `defineLocalState` and `defineCookieState`.',
+  ja: '同じサルベージは、エントリ状態・Web Storage の行・Cookie・`definePageState`・`defineLocalState`・`defineSessionState`・`defineCookieState` の `update()` に渡した値にも適用されます。',
+  en: 'The same salvage applies to entry state, to Web Storage rows, to cookies, and to the values passed to `update()` on `definePageState`, `defineLocalState`, `defineSessionState` and `defineCookieState`.',
 });
 
 export const frameworkTitle = message({
@@ -305,8 +305,8 @@ export const beforeDescription = message({
 });
 
 export const beforeApi = message({
-  ja: '`defineLocalState` の定義はその両方を持っています。`storageKey` はストアが書き込むキーで、`inlineRead()` はインラインの `<script>` に埋め込む JavaScript の式を返します。この式は、ブラウザで保存されたオブジェクトに評価されます。',
-  en: 'A `defineLocalState` definition carries both halves. `storageKey` is the key the store writes under, and `inlineRead()` returns a JavaScript expression for an inline `<script>` that evaluates, in the browser, to the stored object.',
+  ja: '`defineLocalState` と `defineSessionState` の定義はその両方を持っています。`storageKey` はストアが書き込むキーで、`inlineRead()` はインラインの `<script>` に埋め込む JavaScript の式を返します。この式は、ブラウザでその定義の置き場所（localStorage か sessionStorage）に保存されたオブジェクトに評価されます。',
+  en: 'A `defineLocalState` or `defineSessionState` definition carries both halves. `storageKey` is the key the store writes under, and `inlineRead()` returns a JavaScript expression for an inline `<script>` that evaluates, in the browser, to the object stored in the definition’s own area — localStorage or sessionStorage.',
 });
 
 export const beforeNull = message({
@@ -327,6 +327,11 @@ export const beforeNullCorrupt = message({
 export const beforeNullNotObject = message({
   ja: '値がオブジェクトではない（数値・文字列・配列・`null`）',
   en: 'the value is not an object (a number, a string, an array, `null`)',
+});
+
+export const beforeNullVersion = message({
+  ja: '版を持つ定義で、行がほかの版で書かれている（移行はストアが読むまで行われません）',
+  en: 'the definition is versioned and the row was written by another version — migrating waits for the store to read it',
 });
 
 export const beforeNullBlocked = message({

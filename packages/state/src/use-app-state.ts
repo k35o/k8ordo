@@ -4,29 +4,40 @@ import { useCallback, useMemo, useSyncExternalStore } from 'react';
 import type { output } from 'zod/v4/core';
 
 import type { CookieState } from './cookie-state';
-import type { LocalState } from './local-state';
 import type { MemoryState } from './memory-state';
 import type { OutputOf, PageState } from './page-state';
 import type { StateSchema, StateValues } from './schema/object';
+import type { LocalState, SessionState } from './storage-state';
 import { cookieInitialSnapshot, cookieStoreOf } from './store/cookie-store';
 import type { Patch, Store, UpdateHandle } from './store/core';
-import { localInitialSnapshot, localStoreOf } from './store/local-store';
 import { memoryInitialSnapshot, memoryStoreOf } from './store/memory-store';
 import { pageInitialSnapshot, pageStoreOf } from './store/page-store';
 import type { UpdateOptions } from './store/page-store';
+import {
+  localStoreOf,
+  sessionStoreOf,
+  storageInitialSnapshot,
+} from './store/storage-store';
 
-export type AnyState = PageState | LocalState | CookieState | MemoryState;
+export type AnyState =
+  | PageState
+  | LocalState
+  | SessionState
+  | CookieState
+  | MemoryState;
 
 type StateOf<Def> =
   Def extends PageState<infer Url, infer Entry>
     ? OutputOf<Url> & OutputOf<Entry>
     : Def extends LocalState<infer Schema>
       ? output<Schema>
-      : Def extends CookieState<infer Schema>
+      : Def extends SessionState<infer Schema>
         ? output<Schema>
-        : Def extends MemoryState<infer Values>
-          ? Values
-          : never;
+        : Def extends CookieState<infer Schema>
+          ? output<Schema>
+          : Def extends MemoryState<infer Values>
+            ? Values
+            : never;
 
 type UrlStateOf<Def> = Def extends PageState<infer Url> ? OutputOf<Url> : never;
 
@@ -74,15 +85,17 @@ const storeOf = (def: AnyState): Store =>
     ? pageStoreOf(def)
     : def.kind === 'local'
       ? localStoreOf(def)
-      : def.kind === 'cookie'
-        ? cookieStoreOf(def)
-        : memoryStoreOf(def);
+      : def.kind === 'session'
+        ? sessionStoreOf(def)
+        : def.kind === 'cookie'
+          ? cookieStoreOf(def)
+          : memoryStoreOf(def);
 
 const initialOf = (def: AnyState, options: Options | undefined): StateValues =>
   def.kind === 'page'
     ? pageInitialSnapshot(def, options?.initialUrl)
-    : def.kind === 'local'
-      ? localInitialSnapshot(def)
+    : def.kind === 'local' || def.kind === 'session'
+      ? storageInitialSnapshot(def)
       : def.kind === 'cookie'
         ? cookieInitialSnapshot(def, options?.initialCookie)
         : memoryInitialSnapshot(def);

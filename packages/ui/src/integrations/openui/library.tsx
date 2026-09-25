@@ -96,6 +96,8 @@ const renderers = {
     ui.renderButton(props),
   IconButton: ({ props }: ComponentRenderProps<sc.IconButtonProps>) =>
     ui.renderIconButton(props),
+  CopyButton: ({ props }: ComponentRenderProps<sc.CopyButtonProps>) =>
+    ui.renderCopyButton(props),
   Badge: ({ props }: ComponentRenderProps<sc.BadgeProps>) =>
     ui.renderBadge(props),
   Heading: ({ props }: ComponentRenderProps<sc.HeadingProps>) =>
