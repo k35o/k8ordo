@@ -6,6 +6,7 @@ import {
   engine,
   exportsOf,
   isServerActionModule,
+  pagesReadingSearch,
   NOT_FOUND_HEADER,
   parseRouteTree,
   payloadPathFor,
@@ -65,6 +66,15 @@ const WANTS_SERVER = 'this application wants @k8ordo/server';
 const guardRefusal = (files: readonly string[]): string =>
   `static build cannot run guard.ts — a file has no request to guard, and these are guards:\n${files
     .map((file) => `  ${file}`)
+    .join('\n')}\n${WANTS_SERVER}`;
+
+/**
+ * A page that reads the search is rendered for each search it is given, and a
+ * file is the same whatever the search holds. Named every one at once.
+ */
+const searchRefusal = (pages: readonly string[]): string =>
+  `static build cannot hand a page the search — a file is the same for every search, and these pages export search:\n${pages
+    .map((page) => `  ${page}`)
     .join('\n')}\n${WANTS_SERVER}`;
 
 /** What a route.ts exports that a file cannot answer: anything but `GET`. */
@@ -145,6 +155,12 @@ export const framework = (options: StaticOptions = {}): PluginOption[] => {
               routeRefusal([[path.relative(root, module), methods]]),
             );
           }
+        }
+        if (
+          slot === 'page' &&
+          exportsOf(await readFile(module, 'utf8')).has('search')
+        ) {
+          throw new Error(searchRefusal([path.relative(root, module)]));
         }
         if (!isServerActionModule({ plugins }, id)) return null;
         throw new Error(
@@ -361,17 +377,18 @@ export const framework = (options: StaticOptions = {}): PluginOption[] => {
         const guards = files
           .filter((file) => slotOf(file) === 'guard')
           .map((file) => named(file));
-        const routes = [
-          ...(await readExports(
-            routesDir,
-            files.filter((file) => slotOf(file) === 'route'),
-          )),
-        ]
+        const exported = await readExports(routesDir, files);
+        const routes = [...exported]
+          .filter(([file]) => slotOf(file) === 'route')
           .map(([file, names]) => [named(file), unwritable(names)] as const)
           .filter(([, methods]) => methods.length > 0);
+        const searching = [...pagesReadingSearch(exported)].map((file) =>
+          named(file),
+        );
         const refusals = [
           ...(guards.length > 0 ? [guardRefusal(guards)] : []),
           ...(routes.length > 0 ? [routeRefusal(routes)] : []),
+          ...(searching.length > 0 ? [searchRefusal(searching)] : []),
         ];
         if (refusals.length > 0) throw new Error(refusals.join('\n\n'));
       },
