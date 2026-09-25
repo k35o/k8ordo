@@ -182,6 +182,9 @@ export const formFields = <Schema extends ObjectSchema>(
     if (secret) {
       attributes.input.type = 'password';
     }
+    if (leaf.checkedValue !== undefined) {
+      attributes.input.value = leaf.checkedValue;
+    }
 
     if (
       leaf.group !== undefined &&
