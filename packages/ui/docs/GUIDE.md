@@ -365,7 +365,7 @@ directly on APIs a browser has and jsdom does not: `ResizeObserver`,
 so under jsdom `Tooltip`, `IconButton` (unless `tooltipDisabled`), `Tabs`,
 `Autocomplete`, `InView`, `Resize`, `Conversation`, and a `ScrollLinked` given
 a `container` throw as soon as they mount; `Modal`, `Drawer`, `Popover`,
-`DropdownMenu`, and `ListBox` throw the moment they open (a `DropdownMenu`
+`DropdownMenu`, `ListBox`, and `DatePicker` throw the moment they open (a `DropdownMenu`
 holding a `SubMenu` already at mount); and a `clearable` `FileField.ItemList`
 throws once it lists a file.
 

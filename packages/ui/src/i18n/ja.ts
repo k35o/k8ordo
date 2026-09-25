@@ -25,6 +25,11 @@ export const ja: Messages = {
   numberFieldIncrement: '増やす',
   numberFieldDecrement: '減らす',
 
+  calendarPreviousMonth: '前の月',
+  calendarNextMonth: '次の月',
+  datePickerOpen: 'カレンダーから選ぶ',
+  datePickerDialog: '日付を選ぶ',
+
   passwordShow: 'パスワードを表示',
   passwordHide: 'パスワードを非表示',
 

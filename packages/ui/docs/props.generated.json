@@ -543,6 +543,43 @@
       "omitted": ["className", "style"]
     },
     {
+      "name": "Calendar",
+      "props": [
+        {
+          "name": "defaultValue",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "max",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "min",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "types": ["(value: string) => void"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "value",
+          "types": ["string", "null"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
       "name": "Card",
       "props": [
         {
@@ -978,6 +1015,62 @@
       ],
       "inherits": null,
       "omitted": []
+    },
+    {
+      "name": "DateField",
+      "props": [
+        {
+          "name": "invalid",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "ref",
+          "types": ["Ref<HTMLInputElement>"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": "InputHTMLAttributes<HTMLInputElement>",
+      "omitted": ["className", "style", "type", "children"]
+    },
+    {
+      "name": "DatePicker",
+      "props": [
+        {
+          "name": "defaultValue",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "invalid",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "types": ["(value: string) => void"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "ref",
+          "types": ["Ref<HTMLInputElement>"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "value",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": "InputHTMLAttributes<HTMLInputElement>",
+      "omitted": ["className", "style", "type", "children"]
     },
     {
       "name": "Dialog.Content",

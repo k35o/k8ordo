@@ -635,6 +635,103 @@ Props:
 - `value`: `number` | `null`
 - Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `type` / `role` / `className` / `style` / `children`.
 
+### DateField
+
+A native `<input type="date">` styled like `TextField`. The value is a
+`YYYY-MM-DD` string (`''` when empty), and the browser checks `min` / `max` /
+`required` itself. `onChange` is the native event, as with `TextField`.
+
+It accepts what `@k8ordo/form` derives from `z.iso.date()` as is: spread the
+field's `input` and nothing needs to be taken out. `type` is always `date`, so a
+`type` in the spread does not replace it.
+
+```tsx
+import { DateField, FormControl } from '@k8ordo/ui';
+
+const eventDate = form.field('eventDate'); // z.iso.date()
+
+<FormControl
+  errorText={eventDate.error}
+  invalid={eventDate.invalid}
+  label="Date"
+  required={eventDate.required}
+  renderInput={(props) => <DateField {...props} {...eventDate.input} />}
+/>;
+```
+
+Props:
+
+- `invalid`: `boolean` (default: `false`)
+- `ref`: `Ref<HTMLInputElement>`
+- Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `className` / `style` / `type` / `children`.
+
+### DatePicker
+
+`DateField` with a button that opens `Calendar` in a popover. The field is the
+same native `<input type="date">`, so typing a date, `name`, `required`, and
+`min` / `max` all work as they do on `DateField`, and spreading a derived
+`@k8ordo/form` field works the same way. `onChange` takes the value
+(`YYYY-MM-DD`, `''` when cleared), not the event, because a date picked from the
+calendar has no input event of its own.
+
+Picking a date writes it into the input and dispatches an `input` event, so a
+form sees it exactly as if it had been typed (dirty state, rules, and clearing
+an error). The popover closes and focus returns to the calendar button.
+
+Firefox draws its own calendar button inside every `<input type="date">` and
+offers no way to hide it, so there the field shows two calendar buttons: the
+browser's and this component's. Chromium and Safari show only this one.
+
+```tsx
+import { DatePicker } from '@k8ordo/ui';
+
+<DatePicker
+  aria-label="Check-in"
+  min="2026-01-01"
+  name="checkIn"
+  onChange={setCheckIn}
+  value={checkIn}
+/>;
+```
+
+Props:
+
+- `defaultValue`: `string`
+- `invalid`: `boolean` (default: `false`)
+- `onChange`: `(value: string) => void`
+- `ref`: `Ref<HTMLInputElement>`
+- `value`: `string`
+- Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `className` / `style` / `type` / `children`.
+
+### Calendar
+
+A month grid for picking one day (the WAI-ARIA date picker grid). The value is
+a `YYYY-MM-DD` string. Arrow keys move by day and week, `Home` / `End` to the
+ends of the week, `PageUp` / `PageDown` by month (with `Shift`, by year), and
+`Enter` / `Space` select. Days outside `min` / `max` stay focusable but cannot
+be selected.
+
+Month and weekday names, and the first day of the week, follow the page
+language (`<html lang>`, English when it is empty). Today is marked with
+`aria-current="date"` in the visitor's time zone, which only the browser knows,
+so the calendar renders in the browser alone: the server writes an empty box of
+the same size. It submits nothing; inside a form, use `DatePicker` or
+`DateField`.
+
+```tsx
+import { Calendar } from '@k8ordo/ui';
+
+<Calendar defaultValue="2026-09-25" max="2026-12-31" onChange={setDay} />;
+```
+
+Props:
+
+- `defaultValue`: `string`
+- `max`: `string`
+- `min`: `string`
+- `onChange`: `(value: string) => void`
+- `value`: `string` | `null`
+
 ### PasswordInput
 
 A password input, with a show/hide toggle.
@@ -1762,6 +1859,8 @@ Every key in the `Messages` type. All values are `string`.
 | Autocomplete  | `autocompletePlaceholder`, `autocompleteRemoveTag`, `autocompleteClear`, `autocompleteEmpty`                                                     |
 | FileField     | `fileFieldRemove`, `fileFieldTrigger`                                                                                                            |
 | NumberField   | `numberFieldIncrement`, `numberFieldDecrement`                                                                                                   |
+| Calendar      | `calendarPreviousMonth`, `calendarNextMonth`                                                                                                     |
+| DatePicker    | `datePickerOpen`, `datePickerDialog`                                                                                                             |
 | PasswordInput | `passwordShow`, `passwordHide`                                                                                                                   |
 | ListBox       | `listBoxPlaceholder`                                                                                                                             |
 | Breadcrumb    | `breadcrumb`                                                                                                                                     |
