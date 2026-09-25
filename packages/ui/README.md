@@ -239,6 +239,7 @@ stories and rendered props rather than relying on trained knowledge:
 - **Avatar** - User/entity avatar
 - **Badge** - Status/label indicator
 - **Card** - Flexible content container (hover interaction via `interactive`)
+- **Carousel** - Scroll-snapping slides with previous/next buttons
 - **Code** - Formatted code display
 - **Heading** - Typography heading component
 - **Kbd** - Keyboard key cap for shortcuts

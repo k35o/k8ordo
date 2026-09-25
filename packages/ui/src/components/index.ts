@@ -8,6 +8,7 @@ export { Accordion } from './data-display/accordion';
 export { Avatar } from './data-display/avatar';
 export { Badge } from './data-display/badge';
 export { Card } from './data-display/card';
+export { Carousel } from './data-display/carousel';
 export { Code } from './data-display/code';
 export { Heading } from './data-display/heading';
 export { Kbd } from './data-display/kbd';

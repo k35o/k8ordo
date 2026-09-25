@@ -1093,6 +1093,44 @@ Props:
 - `label`: `string`
 - Other props are forwarded to `HTMLAttributes<HTMLElement>`, except `className` / `style`.
 
+### Carousel
+
+Slides that scroll along the inline axis, snapping one slide at a time, with
+previous and next buttons under them. It is built on scroll snapping, so a
+trackpad, a touch swipe, and the arrow keys (the track takes focus) all move it
+as well; the buttons move one slide per press and are disabled at either end.
+
+```tsx
+import { Carousel } from '@k8ordo/ui';
+
+<Carousel.Root label="Featured posts" slideSize="md">
+  {posts.map((post) => (
+    <Carousel.Slide key={post.id} label={post.title}>
+      <PostCard post={post} />
+    </Carousel.Slide>
+  ))}
+</Carousel.Root>;
+```
+
+`slideSize` sets how much of the track one slide takes: `full` (one at a time),
+`lg` (the next one peeks in), `md` (two), `sm` (three). With `full` and `lg` the
+current position is shown as `2 / 5`; with several slides in view there is no
+single current slide, so no position is shown. The region is announced as a
+carousel and each slide as a slide (`aria-roledescription`); give a slide a
+`label` when its content has a title. The slides follow the writing mode, so
+under `.writing-v` the track scrolls vertically. There is no autoplay.
+
+Props (Carousel.Root):
+
+- `label`: `string` (required)
+- `children`: `ReactNode`
+- `slideSize`: `'full'` | `'lg'` | `'md'` | `'sm'` (default: `'full'`)
+
+Props (Carousel.Slide):
+
+- `children`: `ReactNode`
+- `label`: `string`
+
 ### Table
 
 A data table, as a compound component. `Table.EmptyState` is the row to put in
@@ -1820,6 +1858,7 @@ Every key in the `Messages` type. All values are `string`.
 | Breadcrumb    | `breadcrumb`                                                                                                                                     |
 | Tabs          | `tabList`                                                                                                                                        |
 | Pagination    | `paginationLabel`, `paginationPrevious`, `paginationNext`                                                                                        |
+| Carousel      | `carousel`, `carouselSlide`, `carouselPrevious`, `carouselNext`                                                                                  |
 | AI chat       | `chat`, `scrollToLatest`, `reasoning`, `reasoningStreaming`, `suggestions`, `send`, `stop`, `toolInput`, `toolOutput`, `toolError`, `toolDenied` |
 | Response      | The `response*` keys below                                                                                                                       |
 
