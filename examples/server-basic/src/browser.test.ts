@@ -162,6 +162,30 @@ describe('the built application in a browser', () => {
     await page.close();
   }, 30_000);
 
+  it('loads a page that reads the search again when a GET form moves it, in place', async () => {
+    const page = await browser.newPage();
+    await page.goto(server.url);
+    await hydrated(page);
+    await page.evaluate(() => {
+      Object.assign(window, { stayed: true });
+    });
+    await page.getByRole('link', { name: 'products', exact: true }).click();
+    await page.getByTestId('list').getByText('first product').waitFor();
+
+    await page.getByLabel('filter').fill('second');
+    await page.getByRole('button', { name: 'filter' }).click();
+
+    await page
+      .getByTestId('list')
+      .getByText('first product')
+      .waitFor({ state: 'detached' });
+    expect(new URL(page.url()).search).toBe('?q=second');
+    expect(await page.getByTestId('list').textContent()).toBe('second product');
+    // 文書の読み込みではなく、その場での取り直し
+    expect(await page.evaluate(() => 'stayed' in window)).toBe(true);
+    await page.close();
+  }, 30_000);
+
   it('hydrates the page where it streamed in, leaving no hidden copy and one <title>', async () => {
     // ダークの訪問者: ルートの SchemeProvider の値が hydrate の直後に変わる
     const context = await browser.newContext({ colorScheme: 'dark' });

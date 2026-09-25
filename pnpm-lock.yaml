@@ -347,6 +347,9 @@ importers:
       '@k8ordo/server':
         specifier: workspace:^
         version: link:../../packages/server
+      '@k8ordo/state':
+        specifier: workspace:^
+        version: link:../../packages/state
       react:
         specifier: 'catalog:'
         version: 19.3.0
