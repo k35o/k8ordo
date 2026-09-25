@@ -164,8 +164,8 @@ export const hrefTitle = message({
 });
 
 export const hrefDescription = message({
-  ja: '`href(base, values?)` はリンクを組み立てます。指定しなかったフィールドは既定値として扱われ、既定値のフィールドはクエリから省かれます。同じ状態からはいつも同じ最短の URL ができるので、リンク・ブックマーク・キャッシュが一致します。',
-  en: '`href(base, values?)` builds a link. A field you leave out means its default, and fields at their default are left out of the query, so the same state always yields the same, shortest URL — links, bookmarks and caches agree.',
+  ja: '`href(path, values?)` はリンクを組み立てます。指定しなかったフィールドは既定値として扱われ、既定値のフィールドはクエリから省かれます。同じ状態からはいつも同じ最短の URL ができるので、リンク・ブックマーク・キャッシュが一致します。',
+  en: '`href(path, values?)` builds a link. A field you leave out means its default, and fields at their default are left out of the query, so the same state always yields the same, shortest URL — links, bookmarks and caches agree.',
 });
 
 export const hrefTable = {
@@ -205,8 +205,8 @@ export const searchDescription = message({
 });
 
 export const entryOnlyLinks = message({
-  ja: '`entry` だけの定義では、`href` は `base` をそのまま返し、`search` は空文字列を返します。',
-  en: 'For an entry-only definition, `href` returns `base` unchanged and `search` returns an empty string.',
+  ja: '`entry` だけの定義では、`href` はクエリを付けずにパスをリンクにし（Vite の `base` は付きます）、`search` は空文字列を返します。',
+  en: 'For an entry-only definition, `href` makes a link of the path with no query — Vite’s `base` still goes in front — and `search` returns an empty string.',
 });
 
 export const hrefBase = message({
