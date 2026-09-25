@@ -222,7 +222,7 @@ stories and rendered props rather than relying on trained knowledge:
 
 - **Autocomplete** - Search with suggestions
 - **Checkbox** / **CheckboxCard** / **CheckboxGroup** - Multi-selection inputs
-- **FileField** - File upload with composite pattern
+- **FileField** - File upload with composite pattern, from a button or by dropping files
 - **Form** / **FormControl** - Form wrapper and field with label/validation
 - **NumberField** - Numeric input with controls
 - **PasswordInput** - Password input with show/hide toggle

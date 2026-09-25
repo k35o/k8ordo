@@ -721,6 +721,7 @@ type FileFieldIntegrationProps = {
   multiple?: boolean;
   maxFiles?: number;
   clearable?: boolean;
+  dropzone?: boolean;
 };
 export const fileFieldProps = z.object({
   triggerLabel: z
@@ -732,6 +733,11 @@ export const fileFieldProps = z.object({
   multiple: z.boolean().optional(),
   maxFiles: z.number().optional(),
   clearable: z.boolean().optional(),
+  // 後から足したので末尾に置く（冒頭「キーの並び順が公開 ABI」参照）
+  dropzone: z
+    .boolean()
+    .optional()
+    .describe('Show an area files can be dropped onto, with the button in it'),
 }) satisfies z.ZodType<FileFieldIntegrationProps>;
 
 type FormControlIntegrationProps = {

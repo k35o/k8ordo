@@ -914,6 +914,9 @@ importers:
       '@json-render/react':
         specifier: 'catalog:'
         version: 0.20.0(react@19.3.0)(zod@4.6.5)
+      '@k8ordo/form':
+        specifier: workspace:^
+        version: link:../form
       '@openuidev/lang-core':
         specifier: 'catalog:'
         version: 0.3.0(zod@4.6.5)

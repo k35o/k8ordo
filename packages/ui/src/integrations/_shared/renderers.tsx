@@ -1031,15 +1031,25 @@ export function renderAutocomplete(
 
 export const FileFieldWidget: FC<{ props: FileFieldProps }> = ({ props }) => {
   const messages = useMessages();
+  const trigger = (
+    <FileField.Trigger
+      renderItem={({ onClick, disabled }) => (
+        <Button disabled={disabled} onClick={onClick} variant="outline">
+          {u(props.triggerLabel) ?? messages.fileFieldTrigger}
+        </Button>
+      )}
+    />
+  );
   return (
     <FileField.Root maxFiles={u(props.maxFiles)} multiple={u(props.multiple)}>
-      <FileField.Trigger
-        renderItem={({ onClick, disabled }) => (
-          <Button disabled={disabled} onClick={onClick} variant="outline">
-            {u(props.triggerLabel) ?? messages.fileFieldTrigger}
-          </Button>
-        )}
-      />
+      {u(props.dropzone) === true ? (
+        <FileField.Dropzone>
+          <p className="text-fg-mute text-sm">{messages.fileFieldDrop}</p>
+          {trigger}
+        </FileField.Dropzone>
+      ) : (
+        trigger
+      )}
       <FileField.ItemList clearable={u(props.clearable)} />
     </FileField.Root>
   );

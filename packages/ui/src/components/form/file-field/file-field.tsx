@@ -2,10 +2,12 @@
 
 import type {
   ChangeEvent,
+  DragEvent,
   FC,
   InputHTMLAttributes,
   PropsWithChildren,
   ReactElement,
+  ReactNode,
   Ref,
 } from 'react';
 import {
@@ -19,7 +21,9 @@ import {
 } from 'react';
 import { useFormStatus } from 'react-dom';
 
+import { cn } from '../../../helpers/cn';
 import { useMessages } from '../../../i18n/context';
+import { Button } from '../../buttons/button';
 import { IconButton } from '../../buttons/icon-button';
 import { CloseIcon } from '../../icons';
 import { createSafeContext } from './../../../helpers/create-safe-context';
@@ -35,6 +39,7 @@ type FileFieldContext = {
   invalid: boolean;
   acceptedFiles: AcceptedFile[];
   onFileDelete: (id: string) => void;
+  onFilesDrop: (files: File[]) => void;
   openFilePicker: () => void;
 };
 
@@ -162,6 +167,22 @@ export const Root = ({
     [onChange, syncInput, withAdded],
   );
 
+  // ドロップはブラウザが input を通らないので、change も input イベントも出ない。
+  // 選んだときと同じく一覧と input を揃え、input イベントで form 側に知らせる
+  const onFilesDrop = useCallback(
+    (files: File[]) => {
+      if (files.length === 0) {
+        return;
+      }
+      const updatedFiles = withAdded(files);
+      setAcceptedFiles(updatedFiles);
+      const list = syncInput(updatedFiles);
+      inputRef.current?.dispatchEvent(new Event('input', { bubbles: true }));
+      onChange?.(list);
+    },
+    [onChange, syncInput, withAdded],
+  );
+
   // 一覧から外したファイルは input からも外す。外さないと送信に残る。
   // コードから files を書き換えても input イベントは出ないので、自分で出して
   // @k8ordo/form などの form 側に知らせる
@@ -186,9 +207,17 @@ export const Root = ({
       invalid,
       acceptedFiles,
       onFileDelete,
+      onFilesDrop,
       openFilePicker,
     }),
-    [disabledResolved, invalid, acceptedFiles, onFileDelete, openFilePicker],
+    [
+      disabledResolved,
+      invalid,
+      acceptedFiles,
+      onFileDelete,
+      onFilesDrop,
+      openFilePicker,
+    ],
   );
 
   return (
@@ -228,6 +257,71 @@ export const Trigger: FC<{
     disabled: context.disabled,
     invalid: context.invalid,
   });
+};
+
+// フォルダーは中身を辿らないとファイルにならないので、ドロップでは受けない
+// （フォルダーは webkitDirectory のピッカーで選ぶ）
+const droppedFiles = (event: DragEvent<HTMLElement>): File[] =>
+  Array.from(event.dataTransfer.items).flatMap((item) => {
+    if (item.kind !== 'file' || item.webkitGetAsEntry()?.isDirectory === true) {
+      return [];
+    }
+    const file = item.getAsFile();
+    return file === null ? [] : [file];
+  });
+
+export const Dropzone: FC<{ children?: ReactNode }> = ({ children }) => {
+  const messages = useMessages();
+  const { disabled, invalid, onFilesDrop, openFilePicker } =
+    useFileFieldContext();
+  // 子要素の上を通るたびに dragleave / dragenter が対で届くので、入った深さで数える
+  const [depth, setDepth] = useState(0);
+  const isDragging = depth > 0 && !disabled;
+
+  return (
+    <div
+      className={cn(
+        'flex w-full flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-border-base bg-bg-base p-6 text-center transition-colors',
+        invalid && 'border-border-error',
+        isDragging && 'border-primary-border bg-primary-bg-subtle',
+        disabled && 'cursor-not-allowed border-border-mute bg-bg-mute',
+      )}
+      data-dragging={isDragging ? '' : undefined}
+      onDragEnter={(event) => {
+        event.preventDefault();
+        setDepth((current) => current + 1);
+      }}
+      onDragLeave={() => {
+        setDepth((current) => Math.max(current - 1, 0));
+      }}
+      // 無効でも既定の動作は止める。止めないとブラウザがファイルを開いてページを離れる
+      onDragOver={(event) => {
+        event.preventDefault();
+        event.dataTransfer.dropEffect = disabled ? 'none' : 'copy';
+      }}
+      onDrop={(event) => {
+        event.preventDefault();
+        setDepth(0);
+        if (!disabled) {
+          onFilesDrop(droppedFiles(event));
+        }
+      }}
+    >
+      {children ?? (
+        <>
+          <p className="text-fg-mute text-sm">{messages.fileFieldDrop}</p>
+          <Button
+            disabled={disabled}
+            onClick={openFilePicker}
+            size="sm"
+            variant="outline"
+          >
+            {messages.fileFieldTrigger}
+          </Button>
+        </>
+      )}
+    </div>
+  );
 };
 
 export const ItemList: FC<{
