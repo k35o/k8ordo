@@ -84,3 +84,26 @@ describe('getLocale (browser)', () => {
     }
   });
 });
+
+describe('getLocale under a base', () => {
+  beforeEach(() => {
+    vi.stubEnv('BASE_URL', '/docs/');
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it('reads the first segment below the base Vite serves the application under', () => {
+    const original = location.pathname;
+    try {
+      history.replaceState(null, '', '/docs/en/ui');
+      expect(locales.getLocale()).toBe('en');
+      expect(home()).toBe('Home');
+      history.replaceState(null, '', '/docs/');
+      expect(locales.getLocale()).toBe('ja');
+    } finally {
+      history.replaceState(null, '', original);
+    }
+  });
+});

@@ -2,6 +2,7 @@ import { Code } from '@k8ordo/ui';
 
 import { CodeBlock } from '../../../../components/code-block';
 import { DocPage, DocSection } from '../../../../components/doc-page';
+import { BaseGuide } from '../../../../components/framework-guide/base';
 import {
   Cell,
   GuideTable,
@@ -169,6 +170,8 @@ export default function ServerDeployPage() {
         <Paragraph text={t.handlerMethods} />
         <Paragraph text={t.handlerOrigin} />
       </DocSection>
+
+      <BaseGuide mode="server" />
 
       <DocSection description={t.routesDirDescription} title={t.routesDirTitle}>
         <CodeBlock code={ROUTES_DIR} lang="ts" />
