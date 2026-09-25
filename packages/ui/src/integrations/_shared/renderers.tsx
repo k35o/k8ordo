@@ -93,7 +93,6 @@ import {
   ViewOffIcon,
 } from '../../components/icons';
 import { Grid } from '../../components/layout/grid';
-import { ScrollLinked } from '../../components/layout/scroll-linked';
 import { Separator } from '../../components/layout/separator';
 import { Stack } from '../../components/layout/stack';
 import { Anchor } from '../../components/navigation/anchor';
@@ -147,7 +146,6 @@ import type {
   ProgressProps,
   RadioCardProps,
   RadioProps,
-  ScrollLinkedProps,
   SelectProps,
   SeparatorProps,
   SkeletonProps,
@@ -990,10 +988,6 @@ export function renderDropdownMenu(props: DropdownMenuProps): ReactNode {
   );
 }
 
-export function renderScrollLinked(_props: ScrollLinkedProps): ReactNode {
-  return <ScrollLinked />;
-}
-
 // ToastProvider はラッパー側で巻く必要があるため、ローカルにも 1 段被せる。
 const ToastTriggerInner: FC<{ props: ToastProps }> = ({ props }) => {
   const { open } = useToast();
@@ -1090,15 +1084,25 @@ export function renderAutocomplete(
 
 export const FileFieldWidget: FC<{ props: FileFieldProps }> = ({ props }) => {
   const messages = useMessages();
+  const trigger = (
+    <FileField.Trigger
+      renderItem={({ onClick, disabled }) => (
+        <Button disabled={disabled} onClick={onClick} variant="outline">
+          {u(props.triggerLabel) ?? messages.fileFieldTrigger}
+        </Button>
+      )}
+    />
+  );
   return (
     <FileField.Root maxFiles={u(props.maxFiles)} multiple={u(props.multiple)}>
-      <FileField.Trigger
-        renderItem={({ onClick, disabled }) => (
-          <Button disabled={disabled} onClick={onClick} variant="outline">
-            {u(props.triggerLabel) ?? messages.fileFieldTrigger}
-          </Button>
-        )}
-      />
+      {u(props.dropzone) === true ? (
+        <FileField.Dropzone>
+          <p className="text-fg-mute text-sm">{messages.fileFieldDrop}</p>
+          {trigger}
+        </FileField.Dropzone>
+      ) : (
+        trigger
+      )}
       <FileField.ItemList clearable={u(props.clearable)} />
     </FileField.Root>
   );

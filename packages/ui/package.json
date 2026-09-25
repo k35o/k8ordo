@@ -117,6 +117,7 @@
     "@chromatic-com/storybook": "5.3.1",
     "@json-render/core": "catalog:",
     "@json-render/react": "catalog:",
+    "@k8ordo/form": "workspace:^",
     "@openuidev/lang-core": "catalog:",
     "@openuidev/react-lang": "catalog:",
     "@storybook/addon-a11y": "10.6.0",

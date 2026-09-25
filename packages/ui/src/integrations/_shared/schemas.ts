@@ -460,11 +460,6 @@ export const gridProps = z.object({
   gap: z.enum(['none', 'sm', 'md', 'lg', 'xl']).optional(),
 }) satisfies z.ZodType<GridIntegrationProps>;
 
-type ScrollLinkedIntegrationProps = Record<string, never>;
-export const scrollLinkedProps = z.object(
-  {},
-) satisfies z.ZodType<ScrollLinkedIntegrationProps>;
-
 type AnchorIntegrationProps = {
   label: string;
   href: string;
@@ -771,6 +766,7 @@ type FileFieldIntegrationProps = {
   multiple?: boolean;
   maxFiles?: number;
   clearable?: boolean;
+  dropzone?: boolean;
 };
 export const fileFieldProps = z.object({
   triggerLabel: z
@@ -782,6 +778,11 @@ export const fileFieldProps = z.object({
   multiple: z.boolean().optional(),
   maxFiles: z.number().optional(),
   clearable: z.boolean().optional(),
+  // 後から足したので末尾に置く（冒頭「キーの並び順が公開 ABI」参照）
+  dropzone: z
+    .boolean()
+    .optional()
+    .describe('Show an area files can be dropped onto, with the button in it'),
 }) satisfies z.ZodType<FileFieldIntegrationProps>;
 
 type FormControlIntegrationProps = {
@@ -915,7 +916,6 @@ export type ModalProps = z.infer<typeof modalProps>;
 export type DialogProps = z.infer<typeof dialogProps>;
 export type DrawerProps = z.infer<typeof drawerProps>;
 export type PopoverProps = z.infer<typeof popoverProps>;
-export type ScrollLinkedProps = z.infer<typeof scrollLinkedProps>;
 export type TooltipProps = z.infer<typeof tooltipProps>;
 export type DropdownMenuProps = z.infer<typeof dropdownMenuProps>;
 export type ToastProps = z.infer<typeof toastProps>;

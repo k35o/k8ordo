@@ -378,7 +378,7 @@ font-family: 'Noto Sans JP', 'M PLUS 2', sans-serif;
 
 - 基本は \`transition-colors duration-150 ease-out\`
 - **300ms を超えない。bounce / spring 系のイージングは使わない。**
-- \`prefers-reduced-motion: reduce\` を尊重（アニメーションはすべて CSS で、\`base.css\` の \`@media (prefers-reduced-motion)\` が止める。スクロールに追従する ScrollLinked の進捗バーは機能的な表示なので対象外。Conversation の最下部へのスクロールは JS 側で instant に切り替える）
+- \`prefers-reduced-motion: reduce\` を尊重（アニメーションはすべて CSS で、\`base.css\` の \`@media (prefers-reduced-motion)\` が止める。Conversation の最下部へのスクロールは JS 側で instant に切り替える）
 - 組み込み: \`ao-anim-scale\`（\`:popover-open\` で 0.18s scale）/ \`ao-anim-fade\`（0.15s opacity）
 
 ### インタラクティブ状態
@@ -431,6 +431,7 @@ import { UIProvider, Button, Card } from '@k8ordo/ui';
 - **Code** — \`children: string\`（インラインコード。色文字列には色見本が付く）
 - **Heading** — \`level: 'h1'..'h6'\`（必須）, \`id?\`, \`lineClamp?\`
 - **Kbd** — \`children: string\`（1 キー 1 要素。組み合わせは並べる）, \`label?\`（記号キーの読み上げ）
+- **Prose** — Markdown / MDX が描いた本文の組版を戻す入れ物。クラスの無い素の要素だけを組み、部品は自分の見た目のまま（日本語向け: 広い行間、em は傍点、縦書きは段落頭を 1 字下げ）
 - **Table**（compound: \`Root\` / \`Caption\` / \`Head\` / \`Body\` / \`Row\` / \`HeaderCell\` / \`Cell\` / \`EmptyState\`(\`colSpan\` + EmptyState の props)）
 
 ### Feedback
@@ -463,7 +464,6 @@ import { UIProvider, Button, Card } from '@k8ordo/ui';
 - **Stack** — フレックスレイアウト
 - **Grid** — グリッドレイアウト
 - **Separator** — \`color: 'base'|'mute'|'subtle'\`, \`orientation: 'horizontal'|'vertical'\`
-- **ScrollLinked** — スクロール進捗バー（\`container?\`）
 
 ### Observers
 

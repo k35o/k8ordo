@@ -85,6 +85,44 @@ import { Heading } from '@k8ordo/ui';
 <Heading level="h3">Subsection</Heading>
 ```
 
+## Long-form text (Prose)
+
+The base styles reset headings, lists, margins, and emphasis, which is right for
+an interface and wrong for an article. `Prose` puts the typesetting of body text
+back inside it, for Markdown or MDX rendered to HTML:
+
+```tsx
+import { Prose } from '@k8ordo/ui';
+
+<article>
+  <Prose>{content}</Prose>
+</article>;
+```
+
+What it sets, tuned for Japanese:
+
+- Body text on `leading-loose` (2) with `tracking-normal`: Japanese needs more
+  leading than Latin text.
+- `1rem` between blocks, `3rem` above an `h2`, `2rem` above `h3`–`h6`, and
+  `0.75rem` between a heading and what follows it.
+- Headings in `font-bold`, `leading-snug`, with `text-wrap: balance` and
+  proportional kana (`font-feature-settings: 'palt'`).
+- `strong` in `font-bold`. `em` as emphasis dots (傍点, `text-emphasis: filled
+sesame`) where the text is Japanese (`:lang(ja)`), and italic elsewhere.
+- Links, inline code, `kbd`, and `pre` drawn like `Anchor`, `Code`, `Kbd`, and a
+  code block; lists with their markers back; quotes, tables, rules, images,
+  and GFM footnotes and task lists.
+- Under `.writing-v`, each paragraph's first line is indented one character,
+  as a book is set.
+
+**Only bare elements are typeset.** The element rules stop at any element with a
+`class` — which is every `@k8ordo/ui` component — so a component placed in the
+text keeps its own look (an `Alert`'s list does not get bullets). The spacing
+between blocks still applies to it. The classes remark-gfm puts on footnotes
+and task lists are the exception: they are treated as part of the text.
+Map an MDX element to a component when you want it to look like the component,
+and leave it bare when you want it to look like text.
+
 ## Vertical writing mode
 
 Dedicated utilities and a variant are provided for vertical writing.

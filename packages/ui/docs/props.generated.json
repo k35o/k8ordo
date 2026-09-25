@@ -1425,6 +1425,19 @@
       "omitted": []
     },
     {
+      "name": "FileField.Dropzone",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
       "name": "FileField.ItemList",
       "props": [
         {
@@ -1454,7 +1467,7 @@
         },
         {
           "name": "defaultValue",
-          "types": ["File[]"],
+          "types": ["File[]", "string"],
           "defaultValue": null,
           "required": false
         },
@@ -2742,6 +2755,19 @@
       ]
     },
     {
+      "name": "Prose",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": "HTMLAttributes<HTMLDivElement>",
+      "omitted": ["className", "style"]
+    },
+    {
       "name": "PublishDateIcon",
       "props": [
         {
@@ -2993,19 +3019,6 @@
           "name": "size",
           "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
-          "required": false
-        }
-      ],
-      "inherits": null,
-      "omitted": []
-    },
-    {
-      "name": "ScrollLinked",
-      "props": [
-        {
-          "name": "container",
-          "types": ["Element", "null"],
-          "defaultValue": null,
           "required": false
         }
       ],

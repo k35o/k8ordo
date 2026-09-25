@@ -223,7 +223,7 @@ stories and rendered props rather than relying on trained knowledge:
 
 - **Autocomplete** - Search with suggestions
 - **Checkbox** / **CheckboxCard** / **CheckboxGroup** - Multi-selection inputs
-- **FileField** - File upload with composite pattern
+- **FileField** - File upload with composite pattern, from a button or by dropping files
 - **Form** / **FormControl** - Form wrapper and field with label/validation
 - **NumberField** - Numeric input with controls
 - **PasswordInput** - Password input with show/hide toggle
@@ -245,6 +245,7 @@ stories and rendered props rather than relying on trained knowledge:
 - **CodeBlock** (from `@k8ordo/ui/code-block`) - Code block highlighted on the server, with a copy button
 - **Heading** - Typography heading component
 - **Kbd** - Keyboard key cap for shortcuts
+- **Prose** - Typesetting for rendered Markdown/MDX, tuned for Japanese
 - **Table** - Tabular data display
 
 ### Feedback
@@ -270,7 +271,6 @@ stories and rendered props rather than relying on trained knowledge:
 
 - **Grid** - CSS grid with token-based gaps and responsive auto-fill/auto-fit columns
 - **Stack** - Flex layout with token-based gaps
-- **ScrollLinked** - Scroll progress indicator
 - **Separator** - Visual content divider
 
 ### Observers
@@ -487,11 +487,11 @@ pnpm add @json-render/core @json-render/react zod
 pnpm add @openuidev/react-lang @openuidev/lang-core zod
 ```
 
-Supported components (**all 52**, both frameworks):
+Supported components (**all 51**, both frameworks):
 
 - **Layout / containers**: `Stack`, `Grid`, `Card`, `Form`, `Carousel`
 - **Buttons / nav**: `Button`, `IconButton`, `CopyButton`, `Anchor`, `Breadcrumb`, `Pagination`
-- **Display**: `Badge`, `Heading`, `Avatar`, `Code`, `Kbd`, `EmptyState`, `Icon`, `ChevronIcon`, `StatusIcon`, `Alert`, `Spinner`, `Progress`, `Skeleton`, `Separator`, `Tabs`, `Accordion`, `Table`, `ScrollLinked`
+- **Display**: `Badge`, `Heading`, `Avatar`, `Code`, `Kbd`, `EmptyState`, `Icon`, `ChevronIcon`, `StatusIcon`, `Alert`, `Spinner`, `Progress`, `Skeleton`, `Separator`, `Tabs`, `Accordion`, `Table`
 - **Overlays (self-contained widgets)**: `Modal`, `Dialog`, `Drawer`, `Popover`, `Tooltip`, `DropdownMenu`, `Toast`
 - **Form**: `TextField`, `Textarea`, `PasswordInput`, `NumberField`, `Slider`, `Checkbox`, `Switch`, `Select`, `Radio`, `RadioCard`, `CheckboxCard`, `ListBox`, `CheckboxGroup`, `Autocomplete`, `FileField`, `FormControl`
 

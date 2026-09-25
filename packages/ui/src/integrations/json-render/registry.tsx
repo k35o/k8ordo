@@ -192,8 +192,6 @@ export const { registry } = defineRegistry(catalog, {
     DropdownMenu: ({ props }) => ui.renderDropdownMenu(props),
     Toast: ({ props }) => <ui.ToastWidget props={props} />,
 
-    ScrollLinked: ({ props }) => ui.renderScrollLinked(props),
-
     ListBox: ({ props, bindings }) => {
       const path = bindings?.defaultValue;
       const hasBinding = path !== undefined && path !== '';

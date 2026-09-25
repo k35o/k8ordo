@@ -25,6 +25,7 @@ export const ja: Messages = {
 
   fileFieldRemove: 'ファイルを削除',
   fileFieldTrigger: 'ファイルを選択',
+  fileFieldDrop: 'ここにファイルをドロップ',
 
   numberFieldIncrement: '増やす',
   numberFieldDecrement: '減らす',
