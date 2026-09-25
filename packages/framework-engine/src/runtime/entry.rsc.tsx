@@ -24,7 +24,7 @@ import { isPayloadPath, pagePathFor } from './payload-path';
 import { isRedirect, matchRedirects } from './redirect';
 import { NotFound, renderMatch } from './render';
 import { routeRequestOf } from './request';
-import { answer, withRequest } from './request-scope';
+import { answer, inPhase, withRequest } from './request-scope';
 
 type ActionResult = {
   returnValue?: unknown;
@@ -225,8 +225,10 @@ const respond = async (request: Request): Promise<Response> => {
   if (guarded !== null) return guarded;
 
   const temporaryReferences = createTemporaryReferenceSet();
+  // An action answers the request as much as a guard does: it reads and
+  // writes the cookies, and what it writes goes on the answer.
   const action: ActionResult = isAction
-    ? await runAction(request, temporaryReferences)
+    ? await inPhase('action', () => runAction(request, temporaryReferences))
     : {};
   if (action.redirect !== undefined && !addressed) {
     // A form posted without JavaScript: the browser follows a 303 with a GET.

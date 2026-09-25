@@ -6,8 +6,16 @@
  */
 export { serve } from './serve';
 export type { Server, ServeOptions } from './serve';
-export { redirect, responseHeaders } from '@k8ordo/framework-engine';
+export {
+  cookies,
+  redirect,
+  requestHeaders,
+  responseHeaders,
+} from '@k8ordo/framework-engine';
 export type {
+  CookieOptions,
+  Cookies,
+  CookieScope,
   Guard,
   GuardContext,
   RedirectTarget,
