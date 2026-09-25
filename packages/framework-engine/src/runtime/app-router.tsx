@@ -93,7 +93,7 @@ setServerCallback(async (id: string, args: unknown[]) => {
  */
 const fetchPage = async (
   payloadPath: string,
-  signal?: AbortSignal,
+  signal: AbortSignal,
 ): Promise<Payload | null> => {
   const response = await fetch(payloadPath, { signal });
   if (!isPayload(response)) return null;
@@ -125,7 +125,9 @@ export function AppRouter({
   const [latest, setLatest] = useState(tree);
   const current = useDeferredValue(latest);
   const prefetched = useRef(
-    createPrefetchCache((payloadPath) => fetchPage(payloadPath)),
+    createPrefetchCache((payloadPath, signal: AbortSignal) =>
+      fetchPage(payloadPath, signal),
+    ),
   );
 
   useEffect(() => {
@@ -173,7 +175,7 @@ export function AppRouter({
       const payloadPath = payloadPathFor(url.pathname);
       let payload: Payload | null;
       try {
-        payload = await (prefetched.current.take(payloadPath) ??
+        payload = await (prefetched.current.take(payloadPath, signal) ??
           fetchPage(payloadPath, signal));
       } catch (error) {
         if (signal.aborted) throw error;

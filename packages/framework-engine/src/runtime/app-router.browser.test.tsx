@@ -333,7 +333,7 @@ const payloadResponse = (payload: Payload): Response =>
 // ページのペイロードへの n 回目の GET に answer(n) で答え、何回来たかを数える。
 // アクションの POST には、そのページを描き直した答えを返す
 const countPayloadRequests = (
-  answer: (nth: number) => Promise<Response> = () =>
+  answer: (nth: number, signal: AbortSignal) => Promise<Response> = () =>
     Promise.resolve(payloadResponse(NEXT)),
 ): (() => number) => {
   let requested = 0;
@@ -344,10 +344,24 @@ const countPayloadRequests = (
     }
     if (!url.endsWith('/index.rsc')) return passThrough(input, init);
     requested += 1;
-    return answer(requested);
+    if (!(init?.signal instanceof AbortSignal)) {
+      throw new Error('a payload request without a signal');
+    }
+    return answer(requested, init.signal);
   });
   return () => requested;
 };
+
+// 答えずに待ち、中断されたら本物の fetch と同じくその理由で reject する
+const answerOnlyAnAbort = (
+  _nth: number,
+  signal: AbortSignal,
+): Promise<Response> =>
+  new Promise((_resolve, reject) => {
+    signal.addEventListener('abort', () => {
+      reject(signal.reason as Error);
+    });
+  });
 
 // 1 回目だけネットワークが落ちている
 const offlineAtFirst = (nth: number): Promise<Response> =>
@@ -525,5 +539,28 @@ describe('prefetching the page a link leads to', () => {
     await expect.element(screen.getByText('next page')).toBeInTheDocument();
     expect(requested()).toBe(2);
     expect(reloadDocument).not.toHaveBeenCalled();
+  });
+
+  it('cancels the prefetch a navigation took once that navigation is overtaken, and reloads nothing', async () => {
+    let cancelled = false;
+    const requested = countPayloadRequests((nth, signal) => {
+      signal.addEventListener('abort', () => {
+        cancelled = true;
+      });
+      return answerOnlyAnAbort(nth, signal);
+    });
+    const screen = await render(
+      <AppRouter pathname="/" tree={<a href="/next">next</a>} />,
+    );
+    pointerOnto(screen.getByRole('link').element());
+    navigation.navigate('/next').finished?.catch(() => undefined);
+
+    await navigation.back().finished;
+    await nextTask();
+
+    expect(requested()).toBe(1);
+    expect(cancelled).toBe(true);
+    expect(reloadDocument).not.toHaveBeenCalled();
+    expect(screen.container.textContent).toBe('next');
   });
 });

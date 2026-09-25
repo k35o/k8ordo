@@ -1,14 +1,17 @@
 import { createPrefetchCache, PREFETCH_LIFETIME } from './prefetch';
 
-// 時計はテストが進める。読み込みは呼ばれた key を記録して、その場で決着する
+// 時計はテストが進める。読み込みは呼ばれた key と signal を記録して、
+// 既定ではその場で決着する
 const setup = (
   load: (key: string) => Promise<string> = (key) => Promise.resolve(key),
 ) => {
   let time = 0;
   const loaded: string[] = [];
+  const signals: AbortSignal[] = [];
   const cache = createPrefetchCache(
-    (key) => {
+    (key, signal) => {
       loaded.push(key);
+      signals.push(signal);
       return load(key);
     },
     () => time,
@@ -16,11 +19,20 @@ const setup = (
   return {
     cache,
     loaded,
+    signals,
     advance: (ms: number) => {
       time += ms;
     },
   };
 };
+
+const navigating = (): AbortSignal => new AbortController().signal;
+
+// 決着しない読み込み
+const pending = (): Promise<string> =>
+  new Promise(() => {
+    // 何もしない
+  });
 
 describe('createPrefetchCache', () => {
   it('hands a prefetched load to the first navigation that asks for it', async () => {
@@ -28,7 +40,7 @@ describe('createPrefetchCache', () => {
 
     cache.prefetch('/next/index.rsc');
 
-    await expect(cache.take('/next/index.rsc')).resolves.toBe(
+    await expect(cache.take('/next/index.rsc', navigating())).resolves.toBe(
       '/next/index.rsc',
     );
     expect(loaded).toStrictEqual(['/next/index.rsc']);
@@ -38,9 +50,9 @@ describe('createPrefetchCache', () => {
     const { cache } = setup();
     cache.prefetch('/next/index.rsc');
 
-    void cache.take('/next/index.rsc');
+    void cache.take('/next/index.rsc', navigating());
 
-    expect(cache.take('/next/index.rsc')).toBeUndefined();
+    expect(cache.take('/next/index.rsc', navigating())).toBeUndefined();
   });
 
   it('starts no second load while one is held', () => {
@@ -58,7 +70,7 @@ describe('createPrefetchCache', () => {
 
     advance(PREFETCH_LIFETIME - 1);
 
-    expect(cache.take('/next/index.rsc')).toBeDefined();
+    expect(cache.take('/next/index.rsc', navigating())).toBeDefined();
   });
 
   it('forgets a load once its lifetime has run out', () => {
@@ -67,7 +79,7 @@ describe('createPrefetchCache', () => {
 
     advance(PREFETCH_LIFETIME);
 
-    expect(cache.take('/next/index.rsc')).toBeUndefined();
+    expect(cache.take('/next/index.rsc', navigating())).toBeUndefined();
   });
 
   it('starts a new load for a page whose held load has run out', () => {
@@ -78,7 +90,7 @@ describe('createPrefetchCache', () => {
     cache.prefetch('/next/index.rsc');
 
     expect(loaded).toStrictEqual(['/next/index.rsc', '/next/index.rsc']);
-    expect(cache.take('/next/index.rsc')).toBeDefined();
+    expect(cache.take('/next/index.rsc', navigating())).toBeDefined();
   });
 
   it('forgets a load that failed, so the navigation asks again', async () => {
@@ -90,7 +102,7 @@ describe('createPrefetchCache', () => {
       setTimeout(resolve, 0);
     });
 
-    expect(cache.take('/next/index.rsc')).toBeUndefined();
+    expect(cache.take('/next/index.rsc', navigating())).toBeUndefined();
   });
 
   it('still hands a failure to the navigation that took the load in flight', async () => {
@@ -102,7 +114,7 @@ describe('createPrefetchCache', () => {
         }),
     );
     cache.prefetch('/next/index.rsc');
-    const taken = cache.take('/next/index.rsc');
+    const taken = cache.take('/next/index.rsc', navigating());
 
     fail(new TypeError('offline'));
 
@@ -116,7 +128,48 @@ describe('createPrefetchCache', () => {
 
     cache.clear();
 
-    expect(cache.take('/a/index.rsc')).toBeUndefined();
-    expect(cache.take('/b/index.rsc')).toBeUndefined();
+    expect(cache.take('/a/index.rsc', navigating())).toBeUndefined();
+    expect(cache.take('/b/index.rsc', navigating())).toBeUndefined();
+  });
+
+  it('aborts what it forgets before anyone took it, on clear', () => {
+    const { cache, signals } = setup(() => pending());
+    cache.prefetch('/next/index.rsc');
+
+    cache.clear();
+
+    expect(signals[0]?.aborted).toBe(true);
+  });
+
+  it('aborts a load whose lifetime ran out before anyone took it', () => {
+    const { cache, signals, advance } = setup(() => pending());
+    cache.prefetch('/next/index.rsc');
+    advance(PREFETCH_LIFETIME);
+
+    cache.prefetch('/other/index.rsc');
+
+    expect(signals[0]?.aborted).toBe(true);
+    expect(signals[1]?.aborted).toBe(false);
+  });
+
+  it('hands a taken load to its taker: aborting the taker aborts it', () => {
+    const { cache, signals } = setup(() => pending());
+    cache.prefetch('/next/index.rsc');
+    const navigation = new AbortController();
+    void cache.take('/next/index.rsc', navigation.signal);
+
+    navigation.abort();
+
+    expect(signals[0]?.aborted).toBe(true);
+  });
+
+  it('leaves a taken load alone on clear — it is the taker’s now', () => {
+    const { cache, signals } = setup(() => pending());
+    cache.prefetch('/next/index.rsc');
+    void cache.take('/next/index.rsc', navigating());
+
+    cache.clear();
+
+    expect(signals[0]?.aborted).toBe(false);
   });
 });

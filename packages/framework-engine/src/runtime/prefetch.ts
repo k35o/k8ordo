@@ -41,14 +41,22 @@ export const prefetchTargetOf = (target: EventTarget | null): URL | null => {
   return url;
 };
 
-type Entry<T> = { readonly value: Promise<T>; readonly at: number };
+type Entry<T> = {
+  readonly value: Promise<T>;
+  readonly at: number;
+  readonly controller: AbortController;
+};
 
 export type PrefetchCache<T> = {
   /** Starts loading `key` unless a usable load of it is already held. */
   readonly prefetch: (key: string) => void;
-  /** Hands over a usable load of `key` and forgets it; `undefined` if none. */
-  readonly take: (key: string) => Promise<T> | undefined;
-  /** Forgets everything held. */
+  /**
+   * Hands over a usable load of `key` and forgets it; `undefined` if none.
+   * From then on the load is the taker's: `signal` aborting aborts it, as it
+   * would a load the taker had started itself.
+   */
+  readonly take: (key: string, signal: AbortSignal) => Promise<T> | undefined;
+  /** Forgets everything held, aborting what is still loading. */
   readonly clear: () => void;
 };
 
@@ -56,40 +64,62 @@ export type PrefetchCache<T> = {
  * Loads started ahead of a navigation, each handed to at most one — the next
  * navigation to the same page within `PREFETCH_LIFETIME` of the load starting.
  * Once taken it is gone: coming back to a page later fetches it afresh, as it
- * did before anything was prefetched.
+ * did before anything was prefetched. A load forgotten before anyone took it
+ * is aborted, so a request nobody will read does not run on.
  */
 export const createPrefetchCache = <T>(
-  load: (key: string) => Promise<T>,
+  load: (key: string, signal: AbortSignal) => Promise<T>,
   now: () => number = () => performance.now(),
 ): PrefetchCache<T> => {
   const entries = new Map<string, Entry<T>>();
   const usable = (entry: Entry<T>): boolean =>
     now() - entry.at < PREFETCH_LIFETIME;
+  const forget = (key: string, entry: Entry<T>): void => {
+    entries.delete(key);
+    entry.controller.abort();
+  };
   const sweep = (): void => {
     for (const [key, entry] of entries) {
-      if (!usable(entry)) entries.delete(key);
+      if (!usable(entry)) forget(key, entry);
     }
   };
   return {
     prefetch: (key) => {
       sweep();
       if (entries.has(key)) return;
-      const entry: Entry<T> = { value: load(key), at: now() };
+      const controller = new AbortController();
+      const entry: Entry<T> = {
+        value: load(key, controller.signal),
+        at: now(),
+        controller,
+      };
       entries.set(key, entry);
       // 失敗した先読みは渡さず、次の遷移に取り直させる。この catch は
-      // 誰も受け取らなかった失敗を未処理の reject にしない役も兼ねる
+      // 誰も受け取らなかった失敗（捨てたときの中断を含む）を、未処理の
+      // reject にしない役も兼ねる
       entry.value.catch(() => {
         if (entries.get(key) === entry) entries.delete(key);
       });
     },
-    take: (key) => {
+    take: (key, signal) => {
       const entry = entries.get(key);
       if (entry === undefined) return undefined;
+      if (!usable(entry)) {
+        forget(key, entry);
+        return undefined;
+      }
       entries.delete(key);
-      return usable(entry) ? entry.value : undefined;
+      signal.addEventListener(
+        'abort',
+        () => {
+          entry.controller.abort(signal.reason);
+        },
+        { once: true },
+      );
+      return entry.value;
     },
     clear: () => {
-      entries.clear();
+      for (const [key, entry] of entries) forget(key, entry);
     },
   };
 };
