@@ -480,21 +480,21 @@ export const DropAddsToThePickedFiles: Story = {
   render: DropzoneRender,
   play: async ({ canvas, canvasElement }) => {
     const input = fileInputOf(canvasElement);
-    pick(input, new File(['a'], 'picked.txt', { type: 'text/plain' }));
+    pick(input, textFile('picked.txt'));
     await canvas.findByText('picked.txt');
 
-    drag(dropzoneOf(canvasElement), [
-      new File(['b'], 'dropped.txt', { type: 'text/plain' }),
-    ]).drop();
+    drag(dropzoneOf(canvasElement), [textFile('dropped.txt')]).drop();
     await canvas.findByText('dropped.txt');
 
-    await expect(
-      Array.from(input.files ?? []).map((file) => file.name),
-    ).toStrictEqual(['picked.txt', 'dropped.txt']);
+    await expect(submittedNames(input)).toEqual(['picked.txt', 'dropped.txt']);
 
-    pick(input, new File(['c'], 'picked-again.txt', { type: 'text/plain' }));
+    pick(input, textFile('picked-again.txt'));
     await canvas.findByText('picked-again.txt');
-    await expect(input.files).toHaveLength(3);
+    await expect(submittedNames(input)).toEqual([
+      'picked.txt',
+      'dropped.txt',
+      'picked-again.txt',
+    ]);
   },
 };
 
