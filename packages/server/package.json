@@ -8,6 +8,7 @@
     "rsc",
     "server",
     "ssr",
+    "vercel",
     "vite-plugin"
   ],
   "homepage": "https://ordo.k8o.me",
@@ -34,6 +35,10 @@
     "./runtime": {
       "types": "./dist/runtime.d.mts",
       "default": "./dist/runtime.mjs"
+    },
+    "./vercel": {
+      "types": "./dist/vercel.d.mts",
+      "default": "./dist/vercel.mjs"
     },
     "./package.json": "./package.json"
   },
