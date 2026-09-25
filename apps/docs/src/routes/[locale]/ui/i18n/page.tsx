@@ -27,6 +27,8 @@ const MESSAGE_USAGE = {
   fileFieldTrigger: 'FileField（生成 UI）',
   numberFieldIncrement: 'NumberField',
   numberFieldDecrement: 'NumberField',
+  numberFieldRangeUnderflow: 'NumberField',
+  numberFieldRangeOverflow: 'NumberField',
   passwordShow: 'PasswordInput',
   passwordHide: 'PasswordInput',
   listBoxPlaceholder: 'ListBox',

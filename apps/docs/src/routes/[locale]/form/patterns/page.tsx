@@ -169,6 +169,12 @@ export const accountSchema = z.object({
     .max(50, 'Use 50 characters or fewer'),
   website: z.url('Enter a URL'),
   plan: z.enum(['personal', 'business'], 'Choose a plan'),
+  seats: z.coerce
+    .number('Enter a number')
+    .int('Enter a whole number')
+    .min(1, 'Use at least 1 seat')
+    .max(50, 'Use 50 seats or fewer'),
+  topics: z.array(z.enum(['design', 'code', 'writing'])),
   bio: z.string().max(1000, 'Use 1000 characters or fewer'),
   password: z
     .string()
@@ -183,7 +189,9 @@ import { useForm } from '@k8ordo/form';
 import type { FormFields } from '@k8ordo/form';
 import {
   Button,
+  CheckboxCard,
   FormControl,
+  NumberField,
   PasswordInput,
   Select,
   TextField,
@@ -194,13 +202,26 @@ import { useActionState } from 'react';
 import { saveAccount } from './actions';
 
 const PLANS = [
+  { value: '', label: 'Choose a plan' },
   { value: 'personal', label: 'Personal' },
   { value: 'business', label: 'Business' },
 ];
 
+const TOPICS = [
+  { value: 'design', label: 'Design' },
+  { value: 'code', label: 'Code' },
+  { value: 'writing', label: 'Writing' },
+];
+
 type Props = {
   fields: FormFields<
-    'displayName' | 'website' | 'plan' | 'bio' | 'password',
+    | 'displayName'
+    | 'website'
+    | 'plan'
+    | 'seats'
+    | 'topics'
+    | 'bio'
+    | 'password',
     never
   >;
 };
@@ -211,12 +232,11 @@ export function AccountForm({ fields }: Props) {
   const displayName = form.field('displayName');
   const website = form.field('website');
   const plan = form.field('plan');
+  const seats = form.field('seats');
+  const topics = form.field('topics');
   const bio = form.field('bio');
   const password = form.field('password');
-  const { type: _displayNameType, ...displayNameInput } = displayName.input;
-  const { type: _websiteType, ...websiteInput } = website.input;
-  const { type: _bioType, ...bioInput } = bio.input;
-  const { type: _passwordType, ...passwordInput } = password.input;
+  const checkedTopics = state.values?.topics;
 
   return (
     <form {...form.props} action={formAction}>
@@ -224,16 +244,14 @@ export function AccountForm({ fields }: Props) {
         errorText={displayName.error}
         invalid={displayName.invalid}
         label="Display name"
-        renderInput={(props) => <TextField {...props} {...displayNameInput} />}
+        renderInput={(props) => <TextField {...props} {...displayName.input} />}
         required={displayName.required}
       />
       <FormControl
         errorText={website.error}
         invalid={website.invalid}
         label="Website"
-        renderInput={(props) => (
-          <TextField {...props} {...websiteInput} type="url" />
-        )}
+        renderInput={(props) => <TextField {...props} {...website.input} />}
         required={website.required}
       />
       <FormControl
@@ -246,10 +264,32 @@ export function AccountForm({ fields }: Props) {
         required={plan.required}
       />
       <FormControl
+        errorText={seats.error}
+        invalid={seats.invalid}
+        label="Seats"
+        renderInput={(props) => <NumberField {...props} {...seats.input} />}
+        required={seats.required}
+      />
+      <FormControl
+        errorText={topics.error}
+        invalid={topics.invalid}
+        label="Topics"
+        labelAs="legend"
+        renderInput={(props) => (
+          <CheckboxCard
+            {...props}
+            {...topics.input}
+            defaultValue={Array.isArray(checkedTopics) ? checkedTopics : []}
+            options={TOPICS}
+          />
+        )}
+        required={topics.required}
+      />
+      <FormControl
         errorText={bio.error}
         invalid={bio.invalid}
         label="Bio"
-        renderInput={(props) => <Textarea {...props} {...bioInput} />}
+        renderInput={(props) => <Textarea {...props} {...bio.input} />}
         required={bio.required}
       />
       <FormControl
@@ -257,37 +297,12 @@ export function AccountForm({ fields }: Props) {
         invalid={password.invalid}
         label="Current password"
         renderInput={(props) => (
-          <PasswordInput {...props} {...passwordInput} />
+          <PasswordInput {...props} {...password.input} />
         )}
         required={password.required}
       />
       <Button type="submit">Save</Button>
     </form>
-  );
-}`;
-
-const UI_NUMBER = `// src/routes/settings/_parts/number-control.tsx
-'use client';
-
-import type { FieldView } from '@k8ordo/form';
-import { FormControl } from '@k8ordo/ui';
-
-type Props = {
-  field: FieldView;
-  label: string;
-};
-
-export function NumberControl({ field, label }: Props) {
-  return (
-    <FormControl
-      errorText={field.error}
-      invalid={field.invalid}
-      label={label}
-      renderInput={({ invalid, ...props }) => (
-        <input {...props} {...field.input} aria-invalid={invalid} />
-      )}
-      required={field.required}
-    />
   );
 }`;
 
@@ -360,27 +375,30 @@ export default function FormPatternsPage() {
         <CodeBlock code={UI_FORM} lang="tsx" />
         <ul className="text-fg-mute flex flex-col gap-2 pl-6">
           <li className="list-disc">
-            <Rich>{m.formPatterns.uiTextField()}</Rich>
+            <Rich>{m.formPatterns.uiSpread()}</Rich>
           </li>
           <li className="list-disc">
-            <Rich>{m.formPatterns.uiPassword()}</Rich>
+            <Rich>{m.formPatterns.uiDom()}</Rich>
+          </li>
+          <li className="list-disc">
+            <Rich>{m.formPatterns.uiRadio()}</Rich>
           </li>
           <li className="list-disc">
             <Rich>{m.formPatterns.uiSelect()}</Rich>
           </li>
           <li className="list-disc">
+            <Rich>{m.formPatterns.uiGroups()}</Rich>
+          </li>
+          <li className="list-disc">
             <Rich>{m.formPatterns.uiNumber()}</Rich>
           </li>
+          <li className="list-disc">
+            <Rich>{m.formPatterns.uiTextarea()}</Rich>
+          </li>
+          <li className="list-disc">
+            <Rich>{m.formPatterns.uiFile()}</Rich>
+          </li>
         </ul>
-        <CodeBlock code={UI_NUMBER} lang="tsx" />
-        <p className="text-fg-mute leading-relaxed">
-          <Rich>{m.formPatterns.uiOthers()}</Rich>
-        </p>
-        <p className="text-fg-mute text-sm">
-          <LocaleAnchor path="/:locale/form/fields">
-            {m.formPatterns.uiFieldsLink()}
-          </LocaleAnchor>
-        </p>
       </DocSection>
 
       <DocSection
