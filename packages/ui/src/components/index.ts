@@ -1,4 +1,5 @@
 export { Button, type ButtonRenderItemProps } from './buttons/button';
+export { CopyButton } from './buttons/copy-button';
 export {
   IconButton,
   type IconButtonRenderItemProps,

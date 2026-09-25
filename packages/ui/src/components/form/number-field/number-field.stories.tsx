@@ -527,3 +527,71 @@ export const RequiredIsInvalidWhileEmpty: Story = {
     await expect(input).toBeValid();
   },
 };
+
+// type="text" のままでも、範囲の違反はブラウザの検証に載る。確定（blur）すると範囲に収める
+export const ReportsOutOfRangeToTheBrowser: Story = {
+  args: {
+    min: 1,
+    max: 10,
+  },
+  render: InFormRender,
+  play: async ({ canvas, userEvent }) => {
+    const input = canvas.getByRole<HTMLInputElement>('spinbutton');
+    await userEvent.type(input, '15');
+
+    await expect(input).toBeInvalid();
+    await expect(input.validationMessage).toBe('10 以下で入力してください');
+
+    await userEvent.tab();
+
+    await expect(input).toHaveValue('10');
+    await expect(input).toBeValid();
+  },
+};
+
+// @k8ordo/form の formFields が導く属性（文字列の min / max / defaultValue、
+// step="any"）をそのまま受ける。step="any" なら小数を丸めない
+export const AcceptsDerivedAttributes: Story = {
+  args: {
+    defaultValue: '0.25',
+    max: '1',
+    min: '0',
+    step: 'any',
+  },
+  render: InFormRender,
+  play: async ({ canvas, userEvent }) => {
+    const input = canvas.getByRole<HTMLInputElement>('spinbutton');
+    await expect(input).toHaveValue('0.25');
+
+    await userEvent.clear(input);
+    await userEvent.type(input, '0.125[Tab]');
+
+    await expect(input).toHaveValue('0.125');
+    await expect(submittedValue(input)).toBe('0.125');
+  },
+};
+
+const onFormInput = fn();
+
+// 矢印キーや確定でコードから書き換えた値も input イベントで form に届く。
+// この input 自身の onChange は二重に呼ばれない
+export const AnnouncesSteppedValueToTheForm: Story = {
+  args: {
+    onChange: fn(),
+  },
+  render: (args) => (
+    <form onInput={onFormInput}>
+      <NumberField {...args} name="quantity" />
+    </form>
+  ),
+  play: async ({ args, canvas, userEvent }) => {
+    onFormInput.mockClear();
+    const input = canvas.getByRole('spinbutton');
+    await userEvent.click(input);
+    await userEvent.keyboard('{ArrowUp}');
+
+    await expect(input).toHaveValue('0');
+    await expect(onFormInput).toHaveBeenCalledOnce();
+    await expect(args.onChange).toHaveBeenCalledOnce();
+  },
+};

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useRef } from 'react';
-import { expect } from 'storybook/test';
+import { expect, fireEvent, waitFor } from 'storybook/test';
 
 import { Slider } from './slider';
 
@@ -91,5 +91,29 @@ export const ForwardsRef: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'focus' }));
 
     await expect(canvas.getByRole('slider')).toHaveFocus();
+  },
+};
+
+// 非制御の値は DOM が持つので、form の reset で既定値に戻り、塗りの幅も追従する
+export const FollowsReset: Story = {
+  render: (args) => (
+    <form>
+      <Slider {...args} name="volume" />
+    </form>
+  ),
+  play: async ({ canvas }) => {
+    const slider = canvas.getByRole<HTMLInputElement>('slider');
+    // storybook/test の keyboard は range のつまみを動かさないので、値を直接動かす
+    fireEvent.input(slider, { target: { value: '52' } });
+    await expect(slider).toHaveValue('52');
+
+    slider.form?.reset();
+
+    await expect(slider).toHaveValue('50');
+    await waitFor(() =>
+      expect(
+        slider.parentElement?.style.getPropertyValue('--slider-progress'),
+      ).toBe('50%'),
+    );
   },
 };

@@ -139,6 +139,33 @@ export const iconButton = {
   }),
 };
 
+export const copyButton = {
+  description: message({
+    ja: 'テキストをクリップボードにコピーし、コピーしたことを伝えるボタン',
+    en: 'A button that copies text to the clipboard and shows that it did.',
+  }),
+  feedbackDescription: message({
+    ja: '押すとアイコンが2秒間チェックに変わり（失敗したらエラーのアイコン）、隣のライブリージョンが「コピーしました」を読み上げます。ボタンの名前は変わりません。',
+    en: 'When pressed, its icon turns into a check for two seconds (an error icon if the write fails), and a live region beside it announces “Copied”. The button keeps its name.',
+  }),
+  iconOnlyTitle: message({
+    ja: 'アイコンだけ',
+    en: 'Icon Only',
+  }),
+  iconOnlyDescription: message({
+    ja: '`iconOnly`を付けると透明なIconButtonになり、`label`はツールチップとアクセシブルネームになります。',
+    en: 'With `iconOnly` it becomes a transparent IconButton, and `label` becomes its tooltip and accessible name.',
+  }),
+  lazyValueTitle: message({
+    ja: '押したときに中身を作る',
+    en: 'Building the Text on Click',
+  }),
+  lazyValueDescription: message({
+    ja: '`value`には関数も渡せ、Promiseを返してもかまいません。関数は押したときに呼ばれ、PromiseはそのままClipboardItemに渡るので、中身が後から届いても書き込みはクリックの中で始まります（Safariは`await`の後に始めた書き込みを拒みます）。',
+    en: '`value` can also be a function, and it may return a Promise. It is called on the click, and the promise goes to a ClipboardItem as it is, so the write starts inside the click even when the text arrives later (Safari refuses a write that begins after an `await`).',
+  }),
+};
+
 export const anchor = {
   description: message({
     ja: 'テキストリンク',

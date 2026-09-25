@@ -20,8 +20,13 @@ export type TableBranch<T> = {
 
 export type TableNode<T> = T | TableBranch<T>;
 
-/** A directory with nothing but a page is the component itself. */
+/**
+ * A directory with nothing but a page is the component itself — except a
+ * group: it adds no segment, so the router refuses it as a leaf (it would
+ * redeclare its parent's index) and takes it only as a branch.
+ */
 const isLeaf = (dir: RouteDir): boolean =>
+  dir.kind !== 'group' &&
   dir.page !== null &&
   dir.layout === null &&
   dir.error === null &&

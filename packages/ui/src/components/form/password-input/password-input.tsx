@@ -54,8 +54,10 @@ export const PasswordInput: FC<Props> = ({
         disabled={disabled}
         readOnly={pending || readOnly}
         ref={ref}
-        type={isVisible ? 'text' : 'password'}
         {...rest}
+        // rest より後に置く。@k8ordo/form が導く type="password" のように、
+        // 広げた type に表示の切り替えを上書きさせない
+        type={isVisible ? 'text' : 'password'}
       />
       <button
         aria-label={
@@ -67,7 +69,7 @@ export const PasswordInput: FC<Props> = ({
           'me-2 inline-flex shrink-0 items-center justify-center rounded-md p-1 text-fg-mute transition-colors',
           FOCUS_RING_NO_BORDER,
           !disabled && !pending && 'hover:bg-bg-mute hover:text-fg-base',
-          (disabled || pending) && 'cursor-not-allowed text-fg-mute/70',
+          (disabled || pending) && 'cursor-not-allowed text-fg-subtle',
         )}
         disabled={disabled || pending}
         onClick={() => {
