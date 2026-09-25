@@ -67,3 +67,4 @@ export * as frameworkRouting from './framework-routing';
 export * as frameworkParams from './framework-params';
 export * as frameworkErrors from './framework-errors';
 export * as frameworkBoundaries from './framework-boundaries';
+export * as frameworkBase from './framework-base';

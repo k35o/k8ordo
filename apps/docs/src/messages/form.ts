@@ -100,6 +100,11 @@ export const demoLabelMin = message({
   en: 'Minimum',
 });
 
+export const demoLabelInStock = message({
+  ja: '在庫ありのみ',
+  en: 'In stock only',
+});
+
 export const demoSubmit = message({
   ja: '絞り込む',
   en: 'Filter',
@@ -111,8 +116,13 @@ export const demoUrlEmpty = message({
 });
 
 export const demoHint = message({
-  ja: 'このサイトは @k8ordo/static で焼かれているので Server Action はありません。GET フォームは本体を持たないのでルーターが intercept し、同じ pathname への遷移は状態の更新として扱われます。JavaScript を切っても、同じフォームが同じ URL に着きます。`min` に -1 を入れて欄を離れると、スキーマと同じ文言のエラーが出ます。JavaScript が無ければ、ブラウザ自身の制約検証がブラウザの文言で送信を止めます。',
-  en: 'This site is built with @k8ordo/static, so there is no Server Action. A GET form carries no body, so the router intercepts it, and a navigation to the same pathname is a state update. With JavaScript off, the same form lands on the same URL. Type -1 into `min` and leave the field, and the error appears in the schema’s own words. Without JavaScript, the browser’s own constraint validation stops the submission, in the browser’s words.',
+  ja: 'このサイトは @k8ordo/static で焼かれているので Server Action はありません。GET フォームは本体を持たないのでルーターが intercept し、同じ pathname への遷移は状態の更新として扱われます。JavaScript を切っても、同じフォームが同じ URL に着きます。`min` に -1 を入れて欄を離れると、スキーマと同じ文言のエラーが出ます。そのまま送信しても、`useForm` が送信を止めて `min` にフォーカスを移すので、URL は変わりません。JavaScript が無ければ、ブラウザ自身の制約検証がブラウザの文言で送信を止めます。',
+  en: 'This site is built with @k8ordo/static, so there is no Server Action. A GET form carries no body, so the router intercepts it, and a navigation to the same pathname is a state update. With JavaScript off, the same form lands on the same URL. Type -1 into `min` and leave the field, and the error appears in the schema’s own words. Submit anyway, and `useForm` stops the submission and moves focus to `min`, so the URL stays as it was. Without JavaScript, the browser’s own constraint validation stops the submission, in the browser’s words.',
+});
+
+export const demoHintCheckbox = message({
+  ja: '「在庫ありのみ」は `z.stringbool()` から導いたチェックボックスです。チェックして送ると URL に `inStock=true` が付きます。`true` は、スキーマ自身が `true` を書く綴りから導いた `value` 属性で、state が `true` を URL に書くときの文字列と同じです。',
+  en: '“In stock only” is a checkbox derived from `z.stringbool()`. Check it and submit, and the URL gains `inStock=true`: the `value` attribute comes from the schema’s own spelling of `true`, the same string state writes into the URL for `true`.',
 });
 
 export const navFields = message({
