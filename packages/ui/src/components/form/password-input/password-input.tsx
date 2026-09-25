@@ -5,7 +5,7 @@ import type { FC, InputHTMLAttributes, Ref } from 'react';
 import { useFormStatus } from 'react-dom';
 
 import { cn } from '../../../helpers/cn';
-import { useMessages } from '../../../i18n/context';
+import { getMessages } from '../../../i18n/current';
 import {
   FOCUS_RING_NO_BORDER,
   FOCUS_RING_WITHIN,
@@ -29,7 +29,7 @@ export const PasswordInput: FC<Props> = ({
   ref,
   ...rest
 }) => {
-  const messages = useMessages();
+  const messages = getMessages();
   const [isVisible, setIsVisible] = useState(false);
   const { pending } = useFormStatus();
 

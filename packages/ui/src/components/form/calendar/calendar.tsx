@@ -14,7 +14,7 @@ import { browser } from 'react-dom';
 
 import { cn } from '../../../helpers/cn';
 import { useControllableState } from '../../../hooks/controllable-state';
-import { useMessages } from '../../../i18n/context';
+import { getLocale, getMessages } from '../../../i18n/current';
 import {
   addDays,
   addMonths,
@@ -56,13 +56,6 @@ export const Calendar: FC<Props> = (props) => (
   </Suspense>
 );
 
-// @k8ordo/i18n のロケールを ui が読めるようになるまでの間は、ページの言語を使う。
-// 本体はブラウザでしか描かないので document を読める
-const pageLocale = (): string => {
-  const { lang } = document.documentElement;
-  return lang === '' ? 'en' : lang;
-};
-
 const orUndefined = (value: string | undefined): string | undefined =>
   value !== undefined && isIsoDate(value) ? value : undefined;
 
@@ -75,11 +68,11 @@ const CalendarBody: FC<Props> = ({
 }) => {
   // 「今日」は閲覧者のタイムゾーンでしか決まらないので、サーバーでは描かない
   use(browser('Calendar は閲覧者のタイムゾーンで今日を決める'));
-  const messages = useMessages();
+  const messages = getMessages();
   const labelId = useId();
   const gridRef = useRef<HTMLTableElement>(null);
 
-  const locale = pageLocale();
+  const locale = getLocale();
   // Intl のフォーマッタはロケールの解決を伴って作るのが重いので、日を移すたびの
   // 描き直しで作り直さない
   const {

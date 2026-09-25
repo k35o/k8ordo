@@ -26,8 +26,8 @@ export const SITE_SHELL = `// src/routes/[locale]/_parts/locale-shell.tsx
 
 import { usePathname } from '@k8ordo/router';
 import { UIProvider } from '@k8ordo/ui';
-import { dictionaries } from '@k8ordo/ui/i18n';
 import type { ReactNode } from 'react';
+import { useEffect } from 'react';
 
 import { locales } from '../../../i18n';
 
@@ -42,5 +42,8 @@ export function LocaleShell({
   const locale = locales.is(param)
     ? param
     : (locales.delocalize(pathname).locale ?? locales.default);
-  return <UIProvider messages={dictionaries[locale]}>{children}</UIProvider>;
+  useEffect(() => {
+    document.documentElement.lang = locale;
+  }, [locale]);
+  return <UIProvider>{children}</UIProvider>;
 }`;

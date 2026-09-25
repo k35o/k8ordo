@@ -221,6 +221,17 @@ that). Four rules follow:
   Not `type="hidden"`: it is barred from constraint validation, cannot take
   focus, and with nothing selected no element carries the name at all.
 
+### Built-in wording
+
+A component reads its own wording with `getMessages()` (`src/i18n/current.ts`),
+which looks the dictionary up in `@k8ordo/i18n`'s `currentLocale()` — English
+when the application has defined no locale set. It is a plain function, not a
+hook, so wording never makes a component a client module:
+`src/components/compound-rsc.test.ts` keeps the ones that only read wording
+(`Spinner`, `Breadcrumb`, `Code`, `Alert`, `Reasoning`, `ToolInvocation`) free
+of `'use client'`. A new key goes into `messages.ts`, `ja.ts`, and `en.ts`;
+there is no provider and no context.
+
 ### Content that gets replaced
 
 A change that swaps what is on screen (`Tabs`) is applied inside
@@ -281,7 +292,7 @@ Custom variants besides `dark:`: `light:` (anywhere not under `.dark`) and `vert
 - **Form tests** (`src/components/form/**/*.test.tsx`, `src/components/_internal/**/*.test.tsx`) render fields under `@k8ordo/form`'s `useForm` with an action that calls `parseForm`, in a real browser without the stylesheet. `@k8ordo/form` is a devDependency and resolves from its `dist/`, so build it first on a fresh checkout.
 - **Helper tests** are standard unit tests, no browser needed.
 - **There is no jsdom project, and components are not written to survive one.** They call `ResizeObserver`, `matchMedia`, `dialog.showModal`, and the Popover API directly — no support checks, no null branches. Consumers are told to test in a real browser (`docs/GUIDE.md`); do not reintroduce a guard layer to make a synthetic DOM work.
-- Storybook preview wraps all stories in `UIProvider` with light/dark theme toggle.
+- Storybook preview wraps all stories in `UIProvider` with light/dark theme toggle, and defines a `@k8ordo/i18n` locale set (`.storybook/locales.ts`, default `ja`) so the built-in wording is Japanese; a story renders in English with `beforeEach: inEnglish` from the same file.
 - Every story runs twice: `components` in light and `components-dark` in dark (`storybookTest({ initialGlobals: { theme: 'dark' } })`), because axe only checks the colors on screen. A story that pins `parameters.theme` stays in that theme in both.
 - A form field in a story is given a name (`aria-label` in the meta `args`, and on any field a custom `render` draws), not a disabled `label` rule.
 - `src/styles/contrast.stories.tsx` renders every pair in `docs/references/color.md`'s contrast table, AAA rows under `color-contrast-enhanced`; keep the two in step.
@@ -300,7 +311,7 @@ The authoritative list is the `exports` map in `package.json`.
 
 ```
 @k8ordo/ui                     core UI components and public types (AI chat is under /ai)
-@k8ordo/ui/i18n                ja / en / dictionaries, useMessages, and the Messages type
+@k8ordo/ui/i18n                ja / en, registerMessages, getMessages, and the Messages type
 @k8ordo/ui/ai                  AI chat components
 @k8ordo/ui/ai/response         Response renderer only
 @k8ordo/ui/ai-sdk              AI SDK adapter

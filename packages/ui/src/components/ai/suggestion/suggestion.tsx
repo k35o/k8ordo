@@ -3,7 +3,7 @@
 import type { FC, ReactNode } from 'react';
 
 import { cn } from '../../../helpers/cn';
-import { useMessages } from '../../../i18n/context';
+import { getMessages } from '../../../i18n/current';
 import { FOCUS_RING } from '../../_internal/focus-ring';
 
 type ListProps = {
@@ -12,7 +12,7 @@ type ListProps = {
 };
 
 export const List: FC<ListProps> = ({ label, children }) => {
-  const messages = useMessages();
+  const messages = getMessages();
 
   return (
     <div

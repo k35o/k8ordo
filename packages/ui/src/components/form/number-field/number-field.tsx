@@ -11,7 +11,7 @@ import {
 import type { ChangeEvent, FC, InputHTMLAttributes, Ref } from 'react';
 import { useFormStatus } from 'react-dom';
 
-import { useMessages } from '../../../i18n/context';
+import { getMessages } from '../../../i18n/current';
 import type { Messages } from '../../../i18n/messages';
 import { FOCUS_RING_WITHIN } from '../../_internal/focus-ring';
 import { ChevronIcon } from '../../icons';
@@ -127,7 +127,7 @@ export const NumberField: FC<Props> = ({
   onInput,
   ...rest
 }) => {
-  const messages = useMessages();
+  const messages = getMessages();
   const inputRef = useRef<HTMLInputElement>(null);
   // 参照が変わるたびに React が ref の解除と再設定を行うため、
   // 利用者が副作用付きのコールバック ref を渡しても毎レンダー走らないようにする
