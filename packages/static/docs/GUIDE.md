@@ -643,8 +643,12 @@ any 404 is. Its `pathname` is such a URL, and where a parameter sits above
 so `params.<name>` there is not a value the application named. Treat it as you
 must treat any parameter under a running server, where `/:locale/*` matches
 `/fr/anything` too: validate it, and read what the visitor actually typed from
-`usePathname()` in a client component after hydration. A visitor without
-JavaScript keeps whatever that render produced.
+`usePathname()` in a client component. The browser does not hydrate this file:
+it was rendered for another URL, so anything a component reads from the URL
+while it renders (`@k8ordo/i18n`'s messages read the locale segment) would
+disagree with it. The browser renders it afresh instead, where the visitor is,
+and a client component sees their URL from its first render. A visitor
+without JavaScript keeps whatever the build's render produced.
 
 <!-- shared:deploys -->
 

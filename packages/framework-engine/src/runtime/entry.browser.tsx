@@ -1,15 +1,16 @@
 import { createFromReadableStream } from '@vitejs/plugin-rsc/browser';
-import { hydrateRoot } from 'react-dom/client';
 import { rscStream } from 'rsc-html-stream/client';
 
 import { AppRouter, setDocumentClient } from './app-router';
+import { mount } from './mount';
+import type { HydrateOptions } from './mount';
 import type { Payload } from './payload';
 import { whenRevealed } from './revealed';
 
 // The payload the HTML was rendered from, written into that HTML by the SSR
 // entry. Reading it here rather than fetching it again is what makes
 // hydration see exactly what the server saw — and what lets a page the
-// application does not have (its prerendered 404) hydrate at all.
+// application does not have (its prerendered 404) come alive at all.
 const payload = await createFromReadableStream<Payload>(
   rscStream as ReadableStream<Uint8Array>,
 );
@@ -23,13 +24,12 @@ setDocumentClient(payload.client);
 // what waits is the page responding, and a background tab until it is shown.
 await whenRevealed();
 
-type HydrateOptions = NonNullable<Parameters<typeof hydrateRoot>[2]>;
-
 // Present only when a form was posted without JavaScript. Hydration has to be
 // told, or React discards the result the page came back with and the message
 // the visitor is reading disappears the moment the script loads.
-hydrateRoot(
+mount(
   document,
   <AppRouter pathname={payload.pathname} tree={payload.tree} />,
+  payload.pathname,
   { formState: payload.formState as HydrateOptions['formState'] },
 );
