@@ -1,20 +1,28 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
 
+import { createCookies } from './cookies';
+import type { Cookies } from './cookies';
+import { parseCookies } from './request';
+
 /**
- * What is running for the request: a `guard.ts`, or the render. Only what
- * answers the request may add to the response; a page is a render, and a
- * render that wrote the response would be a second handler.
+ * What is running for the request: a `guard.ts`, a Server Action, or the
+ * render. Only what answers the request may read and write through the
+ * response API; a page is a render, and a render that wrote the response
+ * would be a second handler.
  */
-export type Phase = 'guard' | 'render';
+export type Phase = 'guard' | 'action' | 'render';
 
 /** What the final response carries beyond what answered it. */
 type Outgoing = {
   readonly headers: Headers;
+  /** The `Set-Cookie` lines the request's jar has to say. */
+  readonly cookies: () => readonly string[];
 };
 
 type Scope = {
   readonly request: Request;
   readonly phase: Phase;
+  readonly cookies: Cookies;
   readonly outgoing: Outgoing;
 };
 
@@ -36,11 +44,18 @@ const storage = (): AsyncLocalStorage<Scope> => {
 };
 
 /** Runs `fn` as the handling of `request`, starting in the render. */
-export const withRequest = <T>(request: Request, fn: () => T): T =>
-  storage().run(
-    { request, phase: 'render', outgoing: { headers: new Headers() } },
+export const withRequest = <T>(request: Request, fn: () => T): T => {
+  const jar = createCookies(parseCookies(request.headers.get('cookie')));
+  return storage().run(
+    {
+      request,
+      phase: 'render',
+      cookies: jar.cookies,
+      outgoing: { headers: new Headers(), cookies: jar.lines },
+    },
     fn,
   );
+};
 
 /** Runs `fn` as `phase` of the request in progress. */
 export const inPhase = <T>(phase: Phase, fn: () => T): T => {
@@ -56,7 +71,11 @@ export const inPhase = <T>(phase: Phase, fn: () => T): T => {
  */
 export const answer = (response: Response): Response => {
   const outgoing = storage().getStore()?.outgoing;
-  if (outgoing === undefined || [...outgoing.headers].length === 0) {
+  const cookies = outgoing?.cookies() ?? [];
+  if (
+    outgoing === undefined ||
+    ([...outgoing.headers].length === 0 && cookies.length === 0)
+  ) {
     return response;
   }
   const headers = new Headers(response.headers);
@@ -66,6 +85,7 @@ export const answer = (response: Response): Response => {
     if (name === 'set-cookie') headers.append(name, value);
     else headers.set(name, value);
   }
+  for (const line of cookies) headers.append('set-cookie', line);
   return new Response(response.body, {
     status: response.status,
     statusText: response.statusText,
@@ -81,12 +101,12 @@ const answering = (caller: string): Scope => {
   const scope = storage().getStore();
   if (scope === undefined) {
     throw new Error(
-      `${caller} needs a request — call it from a guard.ts, while the request is being answered`,
+      `${caller} needs a request — call it from a guard.ts or a Server Action, while the request is being answered`,
     );
   }
   if (scope.phase === 'render') {
     throw new Error(
-      `${caller} writes the response, and a page is a render — call it from a guard.ts; a page reads the request from its props`,
+      `${caller} belongs to what answers the request, and a page is a render — call it from a guard.ts or a Server Action; a page reads the request from its props`,
     );
   }
   return scope;
@@ -95,8 +115,25 @@ const answering = (caller: string): Scope => {
 /**
  * The headers the final response will carry, whatever answers the request.
  * Set from a `guard.ts` that lets the request through — a
- * `Content-Security-Policy`, say — or from one that ends it: they are added
- * to its `Response` too. A header the answer already carries is replaced.
+ * `Content-Security-Policy`, say — or from one that ends it, or from a
+ * Server Action: they are added to the answer. A header the answer already
+ * carries is replaced.
  */
 export const responseHeaders = (): Headers =>
   answering('responseHeaders()').outgoing.headers;
+
+/**
+ * The request's cookies, to read and to write: what the request carried,
+ * with what this answer set or deleted since, and every write said as a
+ * `Set-Cookie` on the answer. From a `guard.ts` or a Server Action; a page
+ * reads `request.cookies` from its props.
+ */
+export const cookies = (): Cookies => answering('cookies()').cookies;
+
+/**
+ * The headers the request arrived with — for a Server Action, which is
+ * handed its arguments rather than the request. Read them; they are the
+ * request's own.
+ */
+export const requestHeaders = (): Headers =>
+  answering('requestHeaders()').request.headers;
