@@ -952,16 +952,41 @@ import { FileField } from '@k8ordo/ui';
 </FileField.Root>;
 ```
 
+`FileField.Dropzone` is an area files can be dropped onto. Left empty, it holds
+the built-in `fileFieldDrop` wording and a "choose files" button, so the field
+stays usable by keyboard; pass children to lay it out yourself (put a
+`FileField.Trigger` inside). Dropped files are added exactly like picked ones:
+they respect `multiple` and `maxFiles`, land in the input so they are
+submitted, and are announced with an `input` event so a form sees the change.
+A dropped folder is skipped (choose folders through the picker with
+`webkitDirectory`), and `accept` is not checked on drop, just as the browser
+only suggests it to the picker.
+
+The files in the list are always the files the input submits: picking more
+with `multiple` adds to the list and to the input, and removing one from the
+list removes it from the input.
+
+```tsx
+<FileField.Root accept="image/*" multiple name="photos">
+  <FileField.Dropzone />
+  <FileField.ItemList clearable />
+</FileField.Root>
+```
+
 Props (Root):
 
 - `children`: `ReactNode`
-- `defaultValue`: `File[]`
+- `defaultValue`: `File[]` | `string`
 - `invalid`: `boolean` (default: `false`)
 - `maxFiles`: `number`
 - `onChange`: `(files: FileList | null, event?: ChangeEvent<HTMLInputElement>) => void`
 - `ref`: `Ref<HTMLInputElement>`
 - `webkitDirectory`: `boolean` (default: `false`)
 - Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `type` / `className` / `style` / `value`.
+
+Props (FileField.Dropzone):
+
+- `children`: `ReactNode`
 
 Props (FileField.ItemList):
 
@@ -1882,7 +1907,7 @@ Every key in the `Messages` type. All values are `string`.
 | Alert         | `alertSuccess`, `alertInfo`, `alertWarning`, `alertError`                                                                                        |
 | Toast         | `toastRegion`                                                                                                                                    |
 | Autocomplete  | `autocompletePlaceholder`, `autocompleteRemoveTag`, `autocompleteClear`, `autocompleteEmpty`                                                     |
-| FileField     | `fileFieldRemove`, `fileFieldTrigger`                                                                                                            |
+| FileField     | `fileFieldRemove`, `fileFieldTrigger`, `fileFieldDrop`                                                                                           |
 | NumberField   | `numberFieldIncrement`, `numberFieldDecrement`                                                                                                   |
 | PasswordInput | `passwordShow`, `passwordHide`                                                                                                                   |
 | ListBox       | `listBoxPlaceholder`                                                                                                                             |
@@ -1894,8 +1919,9 @@ Every key in the `Messages` type. All values are `string`.
 | AI chat       | `chat`, `scrollToLatest`, `reasoning`, `reasoningStreaming`, `suggestions`, `send`, `stop`, `toolInput`, `toolOutput`, `toolError`, `toolDenied` |
 | Response      | The `response*` keys below                                                                                                                       |
 
-`fileFieldTrigger` and `tabList` are the trigger text and tab-list name the
-generative-UI renderers fall back to when a spec leaves them out.
+`fileFieldTrigger` is the button text of an empty `FileField.Dropzone`, and
+with `tabList` it is also what the generative-UI renderers fall back to when a
+spec leaves the trigger text or the tab-list name out.
 
 The `response*` keys label the controls `Response` draws (`@k8ordo/ui/ai/response`):
 `responseCopied`, `responseCopyCode`, `responseCopyLink`, `responseCopyTable`,

@@ -181,7 +181,7 @@ export const buildComponentLibrary = <C>(
   );
   const FileField = def(
     'FileField',
-    'File picker field (a self-contained widget).',
+    'File picker field (a self-contained widget). With dropzone, files can also be dropped onto it.',
     s.fileFieldProps,
   );
   const FormControl = def(

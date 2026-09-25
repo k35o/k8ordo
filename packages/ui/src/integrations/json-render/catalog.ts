@@ -230,7 +230,8 @@ export const catalog = defineCatalog(schema, {
     },
     FileField: {
       props: s.fileFieldProps,
-      description: 'File picker field.',
+      description:
+        'File picker field. With dropzone, files can also be dropped onto it.',
     },
     FormControl: {
       props: s.formControlProps,
