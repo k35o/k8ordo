@@ -58,6 +58,13 @@ pnpm check         # check:write to auto-fix
 - **The plugin is `framework()`, the same name `@k8ordo/server` exports.**
   The mode is the import and nothing else, which is what makes a
   `vite.config.ts` identical under either package.
+- **Pages are counted in the table's terms and asked for under the base.**
+  `urlFor` puts `builder.config.base` in front of every pathname the
+  handler is asked for (HTML, payload, `404.html`) and of every sitemap
+  `<loc>`, while files go to `dirFor(pathname)` inside the client build —
+  the directory a host serves at the base. The `paths` option is in the
+  table's terms too. Node runs this without Vite, so the router's
+  `withBase` gets the base passed in.
 - **Prerender runs after every environment is built** — `buildApp` with
   `order: 'post'` — and writes into the client build's own output directory,
   which Vite may hand over as an absolute path, so resolve it rather than

@@ -1,6 +1,10 @@
 import { execFileSync } from 'node:child_process';
+import { readdir, readFile } from 'node:fs/promises';
+import { isBuiltin } from 'node:module';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
+
+import { parseSync } from 'vite';
 
 type Handler = (request: Request) => Promise<Response>;
 
@@ -51,7 +55,7 @@ registerHooks({
   },
 });
 
-const { serve } = await import('@k8ordo/server/runtime');
+const { serve } = await import('@k8ordo/server/serve');
 const server = await serve({ port: 0 });
 try {
   const response = await fetch(server.url);
@@ -61,7 +65,65 @@ try {
 }
 `;
 
+// 組み上がったハンドラを Deno で呼び、答えを JSON で書き出す。読むのは
+// ファイルだけで、ネットワークも環境変数も許さない
+const UNDER_DENO = `
+const { default: handler } = await import('./dist/rsc/index.js');
+const answers = [];
+for (const pathname of ['/', '/products/2', '/products/index.rsc', '/products/shoes', '/old']) {
+  const response = await handler(new Request('https://example.test' + pathname));
+  answers.push({
+    pathname,
+    status: response.status,
+    type: response.headers.get('content-type'),
+    location: response.headers.get('location'),
+    body: await response.text(),
+  });
+}
+console.log(JSON.stringify(answers));
+`;
+
+type Answer = {
+  pathname: string;
+  status: number;
+  type: string | null;
+  location: string | null;
+  body: string;
+};
+
 const root = path.resolve(import.meta.dirname, '..');
+
+/** ハンドラを成す rsc と ssr の全モジュールが import する指定子 */
+const specifiersOfHandler = async (): Promise<ReadonlySet<string>> => {
+  const modules = await Promise.all(
+    ['rsc', 'ssr'].map(async (environment) => {
+      const dir = path.join(root, 'dist', environment);
+      const files = await readdir(dir, { recursive: true });
+      return Promise.all(
+        files
+          .filter((file) => file.endsWith('.js'))
+          .map(async (file) => {
+            const source = await readFile(path.join(dir, file), 'utf8');
+            const { module } = parseSync(file, source, {
+              sourceType: 'module',
+            });
+            return module.staticImports
+              .map((entry) => entry.moduleRequest.value)
+              .concat(
+                // 動的 import の範囲は引用符ごとの文字列リテラル
+                module.dynamicImports.map((entry) =>
+                  source.slice(
+                    entry.moduleRequest.start + 1,
+                    entry.moduleRequest.end - 1,
+                  ),
+                ),
+              );
+          }),
+      );
+    }),
+  );
+  return new Set(modules.flat(2));
+};
 const ORIGIN = 'https://example.test';
 let handler: Handler;
 
@@ -296,6 +358,64 @@ describe('guard.ts', () => {
       expect(response.status).toBe(401);
     },
   );
+});
+
+describe('the built request handler, outside Node', () => {
+  it('reaches for nothing from Node but AsyncLocalStorage', async () => {
+    const builtins = [...(await specifiersOfHandler())].filter((specifier) =>
+      isBuiltin(specifier),
+    );
+    expect(builtins).toStrictEqual(['node:async_hooks']);
+  });
+
+  it('answers under Deno as it does under Node', () => {
+    const answers = JSON.parse(
+      execFileSync(
+        'deno',
+        ['run', '--allow-read', '--no-lock', '--node-modules-dir=manual', '-'],
+        { cwd: root, encoding: 'utf8', input: UNDER_DENO, stdio: 'pipe' },
+      ),
+    ) as Answer[];
+    expect(
+      answers.map(({ pathname, status, type, location }) => ({
+        pathname,
+        status,
+        type,
+        location,
+      })),
+    ).toStrictEqual([
+      {
+        pathname: '/',
+        status: 200,
+        type: 'text/html;charset=utf-8',
+        location: null,
+      },
+      {
+        pathname: '/products/2',
+        status: 200,
+        type: 'text/html;charset=utf-8',
+        location: null,
+      },
+      {
+        pathname: '/products/index.rsc',
+        status: 200,
+        type: 'text/x-component;charset=utf-8',
+        location: null,
+      },
+      {
+        pathname: '/products/shoes',
+        status: 404,
+        type: 'text/html;charset=utf-8',
+        location: null,
+      },
+      { pathname: '/old', status: 307, type: null, location: '/products' },
+    ]);
+    const [home, product, payload] = answers;
+    expect(home?.body).toContain('rendered on the server');
+    // スキーマが AsyncLocalStorage の文脈の中で走り、id を数にしてから描いた
+    expect(product?.body).toContain('number:2');
+    expect(payload?.body).toContain('second product');
+  });
 });
 
 describe('the deployed application', () => {

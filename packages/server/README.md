@@ -23,9 +23,10 @@ The mode is the dependency: installing this package is what makes the
 application one that runs, and `@k8ordo/static` is the other choice. Nothing
 else about the application changes between them.
 
-`@k8ordo/server` is the Vite plugin; what the application's own code imports
-comes from `@k8ordo/server/runtime`, which does not load Vite — so the built
-application runs from an install without dev dependencies.
+`@k8ordo/server` is the Vite plugin. What code inside the request handler
+imports comes from `@k8ordo/server/runtime`, and the Node.js server from
+`@k8ordo/server/serve`; neither loads Vite, so the built application runs from
+an install without dev dependencies.
 
 ## Peer Dependencies
 
@@ -59,7 +60,7 @@ src/routes/
 
 ```js
 // serve.js
-import { serve } from '@k8ordo/server/runtime';
+import { serve } from '@k8ordo/server/serve';
 
 const server = await serve({ port: 3000 }); // { port, url, close }
 ```
@@ -80,8 +81,15 @@ export async function createTalk(_previous: FormState, formData: FormData) {
 
 A page receives `params`, `pathname` and `request` — the headers and the
 cookies, read-only. The built handler is a plain
-`(request: Request) => Promise<Response>` in `dist/rsc/index.js`, so any host
-that speaks that can run it.
+`(request: Request) => Promise<Response>` in `dist/rsc/index.js`, and it needs
+nothing from its runtime but `AsyncLocalStorage` — Node.js, Bun, Deno and
+Cloudflare Workers (`nodejs_compat`) all run it:
+
+```js
+import handler from './dist/rsc/index.js';
+
+export default { fetch: handler }; // a Cloudflare Worker, say
+```
 
 ## AI Agent Documentation
 

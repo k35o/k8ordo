@@ -33,16 +33,29 @@ pnpm check         # check:write to auto-fix
 - **The plugin is `framework()`, the same name `@k8ordo/static` exports.**
   The mode is the import and nothing else, which is what makes a
   `vite.config.ts` identical under either package.
-- **The root entry is the plugin; `./runtime` is everything else.** The root
-  loads Vite, which a deployed application does not have installed, so
-  anything the application's own code imports — `serve`, `redirect`,
-  `cookies`, `responseHeaders`, `requestHeaders`, their types and `Guard` —
-  goes in `src/runtime.ts`. `examples/server-basic`'s handler test
-  runs the build with Vite unresolvable to hold that.
+- **Three entries, by where the code runs.** The root is the plugin and
+  loads Vite, which a deployed application does not have installed.
+  `./runtime` (`src/runtime.ts`) is what code inside the handler imports —
+  `redirect`, `cookies`, `responseHeaders`, `requestHeaders` and the types,
+  `Guard` among them — and `./serve` (`src/serve.ts`) is the Node server. `examples/server-basic`'s handler test runs the build with Vite
+  unresolvable to hold the first split.
+- **The handler is the exit, and it runs wherever `AsyncLocalStorage`
+  does.** Whatever `./runtime` imports is bundled into every handler that
+  imports `redirect`, so it takes nothing from Node, and `serve`'s
+  dependencies (CommonJS, `node:http`) stay behind `./serve`. The handler's
+  only Node API is `node:async_hooks`. `examples/server-basic` reads the
+  built handler's imports for that and runs it under Deno (`deno` is in
+  `mise.toml` for CI).
 - **A request may only name a file inside the client build.** `safeJoin` is
   the only way `serve` turns a pathname into a path, and it is tested against
   the spellings traversal takes; decoding is the engine's `decodePathname`,
   shared with `@k8ordo/static`.
+- **The client build sits at the build's base.** `serve` reads `base`
+  from `dist/rsc/index.js` — the value the handler was built with, so the
+  two cannot disagree — and takes it off a request (`withoutBase`, the base
+  passed in: Node has no `import.meta.env`) before looking for a file or
+  deciding `immutable`. A URL outside the base never names a file; the
+  handler answers it.
 - **`serve` hands back a handle.** `{ port, url, close }`, so a test can
   listen on port 0 and stop what it started (`serve.test.ts` runs it against
   a fixture `dist`, no real build needed).
@@ -52,8 +65,8 @@ pnpm check         # check:write to auto-fix
 ```
 src/
   static-file.ts  safeJoin — request pathname → path inside the build output (pure)
-  serve.ts        the node:http server (static files + handing off to the handler)
-  runtime.ts      ./runtime: serve, and the engine's redirect, response API and types — no Vite
+  serve.ts        ./serve: the node:http server (static files + handing off to the handler)
+  runtime.ts      ./runtime: the engine's redirect, response API and types — no Vite, no Node
   index.ts        framework (the engine as is)
 ```
 
