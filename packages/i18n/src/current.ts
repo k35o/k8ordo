@@ -68,9 +68,27 @@ export const register = (set: RegisteredSet): void => {
   global[SET_KEY] = set;
 };
 
-/** The first segment of the browser's URL, whatever it spells. */
-const browserSegment = (): string =>
-  global.location?.pathname.split('/')[1] ?? '';
+/**
+ * The browser's pathname in the application's terms: Vite's `base` taken
+ * off, so the first segment is the one the route table's `[locale]` names —
+ * `/docs/en/ui` is `/en/ui` under `base: '/docs/'`.
+ */
+export const browserPathname = (): string => {
+  const pathname = global.location?.pathname ?? '/';
+  // Vite の外（Next.js など）では import.meta.env が、型（Vite のもの）に反して
+  // undefined になる。base は無いものとして読む
+  // oxlint-disable-next-line typescript/no-unnecessary-condition -- 上のとおり型に反して undefined になりうる
+  const base = import.meta.env === undefined ? '/' : import.meta.env.BASE_URL;
+  if (!base.startsWith('/') || base === '/') return pathname;
+  const prefix = base.endsWith('/') ? base.slice(0, -1) : base;
+  if (pathname === prefix) return '/';
+  return pathname.startsWith(`${prefix}/`)
+    ? pathname.slice(prefix.length)
+    : pathname;
+};
+
+/** The first segment of the browser's URL below the base, whatever it spells. */
+const browserSegment = (): string => browserPathname().split('/')[1] ?? '';
 
 /** Whether a set has registered in this environment yet. */
 export const setRegistered = (): boolean => global[SET_KEY] !== undefined;

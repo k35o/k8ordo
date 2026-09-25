@@ -1,5 +1,7 @@
 import type { CSSProperties, FC, HTMLAttributes } from 'react';
 
+import { HIGH_CONTRAST_EDGE } from '../../_internal/high-contrast';
+import { cn } from './../../../helpers/cn';
 import { toPrecision } from './../../../internal/to-precision';
 
 type Props = {
@@ -20,7 +22,10 @@ export const Progress: FC<Props> = ({
   return (
     <div
       {...rest}
-      className="bg-bg-emphasize vertical:inline-48 rounded-full block-4 inline-full"
+      className={cn(
+        'bg-bg-emphasize vertical:inline-48 rounded-full block-4 inline-full',
+        HIGH_CONTRAST_EDGE,
+      )}
       style={
         {
           '--progress-fill': `${percentage.toString()}%`,
@@ -32,7 +37,7 @@ export const Progress: FC<Props> = ({
         aria-valuemax={max}
         aria-valuemin={min}
         aria-valuenow={value}
-        className="bg-primary-bg rounded-full transition-[inline-size] block-full inline-(--progress-fill)"
+        className="bg-primary-bg rounded-full transition-[inline-size] block-full inline-(--progress-fill) forced-colors:bg-[Highlight]"
         role="progressbar"
       />
     </div>

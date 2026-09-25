@@ -48,7 +48,8 @@ pnpm check         # check:write to auto-fix
   renders in `en`. Outside the browser, a runtime with no `AsyncLocalStorage`
   makes `validate` throw, as `run` does — accepting a locale `getLocale()`
   cannot see would silently render the default. In the browser
-  `location.pathname`'s first segment is the locale, read as a message
+  `location.pathname`'s first segment below Vite's `base`
+  (`browserPathname` in `current.ts`) is the locale, read as a message
   renders. That agrees with the server's HTML only because the HTML was
   rendered for the same URL: the engine renders a document drawn for another
   one (`404.html`) afresh instead of hydrating it
