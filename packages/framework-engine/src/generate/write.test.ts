@@ -1,4 +1,4 @@
-import { declaresParams } from './write';
+import { declaresParams, exportsOf, silentRoutes } from './write';
 
 describe('declaresParams', () => {
   it('sees the spellings a person writes', () => {
@@ -61,5 +61,48 @@ describe('declaresParams', () => {
 
   it('declares nothing for a file that does not parse', () => {
     expect(declaresParams('export const paramsSchema = ;')).toBe(false);
+  });
+});
+
+describe('exportsOf', () => {
+  it('lists the names a route.ts answers by, and nothing it only mentions', () => {
+    expect([
+      ...exportsOf(
+        [
+          'export async function GET() { return new Response(); }',
+          'export const POST = () => new Response();',
+          'const handler = () => new Response();',
+          'export { handler as DELETE };',
+          'export type PUT = string;',
+          '// export function PATCH() {}',
+        ].join('\n'),
+      ),
+    ]).toStrictEqual(['GET', 'POST', 'DELETE']);
+  });
+
+  it('names a default export default', () => {
+    expect(exportsOf('export default function Page() {}').has('default')).toBe(
+      true,
+    );
+  });
+});
+
+describe('silentRoutes', () => {
+  it('names a route.ts that exports no method, which would answer only 405', () => {
+    expect(
+      silentRoutes(
+        new Map([
+          ['feed.xml/route.ts', new Set(['GET'])],
+          ['api/route.ts', new Set(['paramsSchema', 'handler'])],
+          ['page.tsx', new Set(['default'])],
+        ]),
+      ),
+    ).toStrictEqual([
+      {
+        path: 'api/route.ts',
+        message:
+          'exports none of GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS — a route.ts answers the methods it exports',
+      },
+    ]);
   });
 });
