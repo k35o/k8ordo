@@ -152,11 +152,12 @@ declare module '@k8ordo/state' {
   }
 }`;
 
-const ROUTE_OF = `import type { RouteOf } from '@k8ordo/router';
+const NAVIGABLE_PATH = `import type { NavigablePath } from '@k8ordo/router';
 
 import type { routes } from './routes';
 
-type AppPath = RouteOf<typeof routes>;`;
+type Found = NavigablePath<typeof routes, '/products/42'>; // '/products/42'
+type Missing = NavigablePath<typeof routes, '/products/42/reviews'>; // never`;
 
 const USE_PARAMS_ERROR =
   'useParams("/products/:id") rendered under "/products"';
@@ -499,12 +500,12 @@ export default function RouterLinksPage() {
       >
         <CodeBlock code={STATE_REGISTER} lang="ts" />
         <p className="text-fg-mute leading-relaxed">
-          <Rich>{m.routerLinks.stateRouteOf()}</Rich>{' '}
+          <Rich>{m.routerLinks.stateNavigablePath()}</Rich>{' '}
           <LocaleAnchor path="/:locale/state/integrations">
             @k8ordo/state
           </LocaleAnchor>
         </p>
-        <CodeBlock code={ROUTE_OF} lang="ts" />
+        <CodeBlock code={NAVIGABLE_PATH} lang="ts" />
       </DocSection>
     </DocPage>
   );

@@ -166,8 +166,9 @@ These docs are served from <https://ordo.k8o.me>.
   effect only when a url value changes).
   `resetStateRegistry()` clears stores between tests. Augment
   `interface Register { routes: typeof routes }` — the same line as for
-  `@k8ordo/router` — to constrain `href` paths to the route table's linkable
-  paths; a router without a table registers its own path union as
+  `@k8ordo/router` — to check each `href` path against the route table's
+  linkable patterns segment by segment (`NavigablePath`, so a `/:locale`
+  table no longer takes every path); a router without a table registers its own path union as
   `interface Register { path }` instead.
 
 ---
@@ -217,7 +218,10 @@ These docs are served from <https://ordo.k8o.me>.
   `ErrorComponent` are the types the generated code imports); `useRoute()`
   is the untyped form.
   `@k8ordo/state`'s `Register` takes the same `routes: typeof routes`;
-  `RouteOf<typeof routes>` is that pathname space as a union, for any other
+  `NavigablePath<typeof routes, Path>` is `Path` when a linkable pattern
+  matches it segment by segment (a `:param` takes one non-empty segment)
+  and `never` otherwise — a check of the path given, never a union of every
+  path, which a `/:locale` page would turn into `/${string}` — for any other
   typed-path consumer. `usePathname()` reads the platform's
   pathname — never the search — so it works with or without a table, which
   makes it the location hook that also works under the framework;
@@ -250,7 +254,7 @@ These docs are served from <https://ordo.k8o.me>.
   `apply` set through `useDeferredValue`.
   Exported types, by group — the table: `Routes` (`{ kind, record, match }`),
   `RoutesRecord`, `RouteNode`, `RouteComponent`, `Match`, `ErrorComponent`,
-  `ErrorProps`; patterns: `PatternOf`, `NavigablePatternOf`, `RouteOf`,
+  `ErrorProps`; patterns: `PatternOf`, `NavigablePatternOf`, `NavigablePath`,
   `MatchablePattern`; registration: `Register`, `RegisteredPattern`,
   `RegisteredNavigablePattern`, `RegisteredParams` (what a link takes),
   `RegisteredPageParams` (what a page receives), `PageProps`, `LayoutProps`;

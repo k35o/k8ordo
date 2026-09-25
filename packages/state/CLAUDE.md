@@ -96,7 +96,7 @@ src/
   store/memory-store.ts
   use-app-state.ts     the client hook ('use client'); dispatch on def.kind
   register.ts          Register interface for typed-route path constraint;
-                       PathFrom derives the union (routes → path → any)
+                       AcceptedPath checks a path (routes → path → any)
 ```
 
 ## Where zod's public API runs out
@@ -109,9 +109,11 @@ and same justification as `@k8ordo/form`'s walk. Everything else goes through
 ## Conventions
 
 - `type`, not `interface` — except `Register`, which must merge. It takes
-  the router's own line, `{ routes: typeof routes }`, and derives the path
-  union through `RouteOf` from `@k8ordo/router` — a type-only import, so the
-  router is an optional peer that never loads at runtime. The older
+  the router's own line, `{ routes: typeof routes }`, and checks each path
+  `href` is handed through `NavigablePath` from `@k8ordo/router` — a
+  type-only import, so the router is an optional peer that never loads at
+  runtime. `href` infers the path from the argument and checks that, never
+  a union of every path the table has. The older
   `{ path: P }` form stays accepted (other routers, and what the framework's
   generator emitted before `routes`); `routes` wins when both are present.
 - **A local definition owns its storage key.** `storageKey` on the

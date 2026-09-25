@@ -220,8 +220,8 @@ export const typedDescription = message({
 });
 
 export const typedParam = message({
-  ja: '`:param` の区間には任意の文字列が入るので、`/products/:id` には `/products/42` を渡せます。',
-  en: 'A `:param` segment takes any string, so `/products/:id` accepts `/products/42`.',
+  ja: '渡したパスを、表のパターンと区間ごとに照合します。`:param` の区間には空でない 1 区間ならどんな文字列でも入るので、`/products/:id` には `/products/42` も、テンプレートリテラルで組んだパスも渡せます。どのパターンとも区間が合わないパスは、`/:locale` のように先頭が `:param` の表でも型エラーになります。',
+  en: 'The path is checked against the table’s patterns, segment by segment. A `:param` segment takes any one non-empty segment, so `/products/:id` accepts `/products/42`, and a path built with a template literal too. A path whose segments no pattern matches is a type error, even under a table that starts with a param such as `/:locale`.',
 });
 
 export const typedWildcard = message({
@@ -230,8 +230,8 @@ export const typedWildcard = message({
 });
 
 export const typedRuntime = message({
-  ja: 'パスの型は `@k8ordo/router` の `RouteOf` から型だけで導かれるので、ルーターは任意の peer のままで、実行時には読み込まれません。',
-  en: 'The path union comes from `RouteOf` in `@k8ordo/router` as a type only, so the router stays an optional peer and is never loaded at runtime.',
+  ja: '検査は `@k8ordo/router` の `NavigablePath` を型として使うだけなので、ルーターは任意の peer のままで、実行時には読み込まれません。',
+  en: 'The check uses `NavigablePath` from `@k8ordo/router` as a type only, so the router stays an optional peer and is never loaded at runtime.',
 });
 
 export const typedFramework = message({
@@ -245,8 +245,8 @@ export const typedPath = message({
 });
 
 export const typedRules = message({
-  ja: '両方があれば `routes` が優先され、どちらも無ければ `/` で始まる任意の文字列が通ります。解決されたパスの型は `RegisteredPath` として export されています。拡張はアプリケーションでだけ行ってください。共有ライブラリが拡張すると、その制約がすべての利用者に漏れます。',
-  en: 'When both are present, `routes` wins; with neither, any `/`-prefixed string is accepted. The resolved path type is exported as `RegisteredPath`. Augment only in an application — a shared library that augments `Register` leaks its constraint to every consumer.',
+  ja: '両方があれば `routes` が優先され、どちらも無ければ `/` で始まる任意の文字列が通ります。検査は `RegisteredPath<Path>` として export されています（受け付けるなら `Path`、拒むなら `never`）。拡張はアプリケーションでだけ行ってください。共有ライブラリが拡張すると、その制約がすべての利用者に漏れます。',
+  en: 'When both are present, `routes` wins; with neither, any `/`-prefixed string is accepted. The check is exported as `RegisteredPath<Path>` — `Path` when accepted, `never` when refused. Augment only in an application — a shared library that augments `Register` leaks its constraint to every consumer.',
 });
 
 export const beforeTitle = message({

@@ -43,7 +43,10 @@ When installed via npm, these docs live under `node_modules/@k8ordo/router/docs/
   `ErrorComponent` are the types the generated code imports); `useRoute()`
   is the untyped form.
   `@k8ordo/state`'s `Register` takes the same `routes: typeof routes`;
-  `RouteOf<typeof routes>` is that pathname space as a union, for any other
+  `NavigablePath<typeof routes, Path>` is `Path` when a linkable pattern
+  matches it segment by segment (a `:param` takes one non-empty segment)
+  and `never` otherwise — a check of the path given, never a union of every
+  path, which a `/:locale` page would turn into `/${string}` — for any other
   typed-path consumer. `usePathname()` reads the platform's
   pathname — never the search — so it works with or without a table, which
   makes it the location hook that also works under the framework;
@@ -76,7 +79,7 @@ When installed via npm, these docs live under `node_modules/@k8ordo/router/docs/
   `apply` set through `useDeferredValue`.
   Exported types, by group — the table: `Routes` (`{ kind, record, match }`),
   `RoutesRecord`, `RouteNode`, `RouteComponent`, `Match`, `ErrorComponent`,
-  `ErrorProps`; patterns: `PatternOf`, `NavigablePatternOf`, `RouteOf`,
+  `ErrorProps`; patterns: `PatternOf`, `NavigablePatternOf`, `NavigablePath`,
   `MatchablePattern`; registration: `Register`, `RegisteredPattern`,
   `RegisteredNavigablePattern`, `RegisteredParams` (what a link takes),
   `RegisteredPageParams` (what a page receives), `PageProps`, `LayoutProps`;

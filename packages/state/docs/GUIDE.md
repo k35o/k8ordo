@@ -333,10 +333,15 @@ declare module '@k8ordo/state' {
 }
 ```
 
-`href` then accepts exactly the table's linkable paths — a `:param` becomes
-`${string}`, a `*` wildcard is matched but never linked — derived through
-`RouteOf` from `@k8ordo/router` as a type only, so the router stays an
-optional peer and never loads at runtime. Under `@k8ordo/static` or
+`href` then checks the path it is handed against the table's linkable
+patterns, segment by segment: a literal segment must be spelled as the pattern
+spells it, a `:param` takes any one non-empty segment — a `${string}` from a
+template literal such as `` `/${locale}/products` `` included — and a `*`
+wildcard is matched but never linked. A path no pattern matches is a type
+error, a `/:locale` table included: `'/ja/nowhere'` is refused even though
+`/:locale` takes any first segment. The check goes through `NavigablePath`
+from `@k8ordo/router` as a type only, so the router stays an optional peer and
+never loads at runtime. Under `@k8ordo/static` or
 `@k8ordo/server` this is generated for you into `.k8ordo/register.gen.ts` from
 `routes/` when the application's own `package.json` lists `@k8ordo/state` in
 `dependencies` or `devDependencies` — a transitive dependency does not count.

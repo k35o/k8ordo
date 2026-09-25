@@ -357,8 +357,15 @@ declare module '@k8ordo/state' {
 
 With that, `listState.href('/products', { q })` is checked against the same
 table this router matches against, and the two packages agree on what a path
-is. `RouteOf<typeof routes>` is that pathname space as a union, for any other
-typed-path consumer.
+is. `NavigablePath<typeof routes, Path>` is that check, for any other
+typed-path consumer: `Path` itself when one of the table's linkable patterns
+matches it segment by segment — a literal segment spelled as the pattern
+spells it, a `:param` taking any one non-empty segment, a `${string}` from a
+template literal included — and `never` when none does.
+
+The path is checked against the patterns rather than collected into a union
+of every path the table has: a `/:locale` page would put `/${string}` in such
+a union, and `/${string}` takes every path there is.
 
 ## What navigation guarantees
 
