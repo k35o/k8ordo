@@ -87,30 +87,25 @@ export async function createTalk(
   return parsed.state;
 }`;
 
-const SERVER_ROOT_PAGE = `// src/routes/page.tsx
-import type { PageProps } from '@k8ordo/router';
+const SERVER_ROOT_GUARD = `// src/routes/(home)/guard.ts
+import { withBase } from '@k8ordo/router';
+import type { Guard } from '@k8ordo/server/runtime';
 
-import { locales } from '../i18n';
-import { href } from '../links';
-import { RedirectTo } from './_parts/redirect-to';
+import { locales } from '../../i18n';
 
-export default function RootPage({ request }: PageProps<'/'>) {
+const guard: Guard<'/'> = ({ request }) => {
   const locale = locales.negotiateRequest(request, { cookie: 'locale' });
+  return new Response(null, {
+    status: 307,
+    headers: { location: withBase(locales.localize('/', locale)) },
+  });
+};
 
-  return <RedirectTo to={href('/:locale', { locale })} />;
-}`;
+export default guard;`;
 
-const REDIRECT_TO = `// src/routes/_parts/redirect-to.tsx
-'use client';
-
-import { useEffect } from 'react';
-
-export function RedirectTo({ to }: { to: string }) {
-  useEffect(() => {
-    navigation.navigate(to, { history: 'replace' });
-  }, [to]);
-
-  return <a href={to}>{to}</a>;
+const SERVER_ROOT_PAGE = `// src/routes/(home)/page.tsx
+export default function RootPage() {
+  return null;
 }`;
 
 const NODE_TEST = `// src/messages/messages.test.ts
@@ -263,17 +258,20 @@ export default function I18nIntegrationsPage() {
             <Rich>{s.server.negotiate()}</Rich>
           </li>
           <li className="list-disc">
-            <Rich>{s.server.noRedirect()}</Rich>
+            <Rich>{s.server.group()}</Rich>
+          </li>
+          <li className="list-disc">
+            <Rich>{s.server.status()}</Rich>
           </li>
           <li className="list-disc">
             <Rich>{s.server.actions()}</Rich>
           </li>
         </ul>
+        <CodeBlock code={SERVER_ROOT_GUARD} lang="ts" />
         <CodeBlock code={SERVER_ROOT_PAGE} lang="tsx" />
-        <CodeBlock code={REDIRECT_TO} lang="tsx" />
         <p>
-          <LocaleAnchor path="/:locale/server/deploy">
-            <Rich>{s.server.deployLink()}</Rich>
+          <LocaleAnchor path="/:locale/server/guards">
+            <Rich>{s.server.guardsLink()}</Rich>
           </LocaleAnchor>
         </p>
       </DocSection>
