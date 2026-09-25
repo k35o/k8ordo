@@ -142,15 +142,10 @@ export default defineConfig({
           ],
           browser: {
             enabled: true,
-            instances: [
-              {
-                browser: 'chromium',
-                context: {
-                  reducedMotion: 'reduce',
-                },
-              },
-            ],
-            provider: playwright(),
+            instances: [{ browser: 'chromium' }],
+            provider: playwright({
+              contextOptions: { reducedMotion: 'reduce' },
+            }),
             headless: true,
             screenshotFailures: false,
           },
