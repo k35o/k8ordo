@@ -3,9 +3,10 @@
 import { createContext, use, useDeferredValue, useMemo, useState } from 'react';
 import type { FC, ReactNode } from 'react';
 
+import { withoutBase } from './base';
 import { setBoundaryOutlet } from './define-routes';
 import type { Match, RouteComponent, Routes } from './define-routes';
-import { PathnameProvider } from './location';
+import { appPathname, PathnameProvider } from './location';
 import { NavigationGeneration, useInterceptedNavigation } from './navigation';
 import type { ParamsOf } from './paths';
 import type { RegisteredPattern } from './register';
@@ -51,6 +52,12 @@ export const Outlet: FC = () => {
 // context. Registered at module load, before any table is walked.
 setBoundaryOutlet(() => <Outlet />);
 
+/** The table's match for a URL's pathname; a URL outside the base has none. */
+const matchUrl = (routes: Routes, pathname: string): Match | null => {
+  const own = withoutBase(pathname);
+  return own === null ? null : routes.match(own);
+};
+
 /**
  * Mounts a route table on the Navigation API: every same-origin navigation
  * that the table claims is handled in the client, and the rest is left to the
@@ -63,12 +70,12 @@ setBoundaryOutlet(() => <Outlet />);
  */
 export function Router({ routes }: { routes: Routes }): ReactNode {
   const [latest, setLatest] = useState<Match | null>(() =>
-    routes.match(location.pathname),
+    matchUrl(routes, location.pathname),
   );
 
   const { generation } = useInterceptedNavigation<Match>({
-    claim: (url) => routes.match(url.pathname) !== null,
-    load: (url) => routes.match(url.pathname) as Match,
+    claim: (url) => matchUrl(routes, url.pathname) !== null,
+    load: (url) => matchUrl(routes, url.pathname) as Match,
     apply: setLatest,
   });
 
@@ -82,7 +89,7 @@ export function Router({ routes }: { routes: Routes }): ReactNode {
     [match],
   );
   return (
-    <PathnameProvider pathname={location.pathname}>
+    <PathnameProvider pathname={appPathname()}>
       <NavigationGeneration value={generation}>
         <RouterContext value={value}>{stack}</RouterContext>
       </NavigationGeneration>

@@ -151,6 +151,16 @@ describe('definePageState', () => {
     expect(flags.parseUrl(new URLSearchParams()).open).toBe(true);
   });
 
+  it('writes a stringbool field in its own spelling, so a custom one reads back', () => {
+    const flags = definePageState('flags-spelled', {
+      url: z.object({
+        gift: z.stringbool({ truthy: ['yes'], falsy: ['no'] }).default(false),
+      }),
+    });
+    expect(flags.search({ gift: true })).toBe('gift=yes');
+    expect(flags.parseUrl(new URLSearchParams('gift=yes')).gift).toBe(true);
+  });
+
   it('salvage cannot smuggle a combination an object-level refine forbids', () => {
     const range = definePageState('range', {
       url: z
@@ -340,3 +350,20 @@ const OptionsRejectedByTypes = () => {
   // @ts-expect-error the url slot's own fields are still checked
   useAppState(listState, { initialUrl: { q: 1 } });
 };
+
+describe('href under a base', () => {
+  beforeEach(() => {
+    vi.stubEnv('BASE_URL', '/docs/');
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it('puts the base Vite serves the application under in front of the path', () => {
+    expect(listState.href('/products', { page: 2 })).toBe(
+      '/docs/products?page=2',
+    );
+    expect(listState.href('/products')).toBe('/docs/products');
+  });
+});

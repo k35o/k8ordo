@@ -36,6 +36,10 @@
       "types": "./dist/runtime.d.mts",
       "default": "./dist/runtime.mjs"
     },
+    "./serve": {
+      "types": "./dist/serve.d.mts",
+      "default": "./dist/serve.mjs"
+    },
     "./vercel": {
       "types": "./dist/vercel.d.mts",
       "default": "./dist/vercel.mjs"
