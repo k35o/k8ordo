@@ -75,10 +75,11 @@ system cannot enforce this, so treat the key like a global name.
 merged values through the schema before anything is written, and a field that
 fails there lands on its default instead of the value you wrote. A url value
 is written into a query string and read again — the road a visitor's URL
-takes — so a url field must read back its own query-string spelling (which is
-what lets `z.stringbool()` turn its own `"true"` back into `true`). Two
-spellings that cannot are refused at module load rather than at the first
-click:
+takes — so a url field must read back its own query-string spelling. A boolean
+is written in its schema's own spelling — `"true"`, or the first of a
+`z.stringbool()`'s `truthy` — which is what lets `z.stringbool()` turn it back
+into `true`. Two spellings that cannot are refused at module load rather than
+at the first click:
 
 | written                                                              | use instead      |
 | -------------------------------------------------------------------- | ---------------- |

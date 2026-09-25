@@ -104,7 +104,11 @@ src/
 Wrapper peeling (`default`, `optional`, `catch`, pipes) reads `_zod.def` to
 decide whether a url field takes one param value or `getAll` — same coupling
 and same justification as `@k8ordo/form`'s walk. Everything else goes through
-`safeParse` from `zod/v4/core`, which is why `zod` and `zod/mini` both work.
+the public core: `safeParse`, and `safeEncode` from `zod/v4/core` for a url
+boolean, which is written in its schema's own spelling (a custom
+`z.stringbool({ truthy: ['yes'] })` cannot read back `String(true)`). That is
+why `zod` and `zod/mini` both work, and why `@k8ordo/form`'s checkbox for the
+same field submits the same string.
 
 ## Conventions
 
