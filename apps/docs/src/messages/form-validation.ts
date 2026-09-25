@@ -360,6 +360,11 @@ export const ruleRequiredWhen = message({
   en: '`when` equals `equals` and `field` is empty',
 });
 
+export const rulesMessage = message({
+  ja: '`message` には文字列のほか、文字列を返す関数も渡せます。zod の `{ error: () => … }` と同じく、宣言したときではなく報告するときに呼ばれます。`formFields` は欄を導くときに呼び（関数はクライアントに渡せないので、ルールは文言の入ったデータとして渡ります）、`parseForm` はルールが破れたときに呼びます。@k8ordo/i18n の文言を渡せば、モジュールの先頭に置いた定義のまま、リクエストごとのロケールで報告されます。',
+  en: '`message` takes a function returning the text as well as a string. Like zod’s `{ error: () => … }`, it is called when the rule is reported, not where it is declared: `formFields` calls it as it derives the fields (a function cannot cross to the client, so the rules travel as data with the text in them), and `parseForm` calls it when the rule breaks. Pass an @k8ordo/i18n message, and a definition at module scope reports in each request’s locale.',
+});
+
 export const rulesStrings = message({
   ja: "ルールは送られる文字列を比べます。`sameAs` と `requiredWhen` はその名前の最初の値を読み、何も送られていなければ `''` として扱います。チェックされたチェックボックスは `value`（既定は `on`）を送ります。",
   en: "Rules compare the submitted strings. `sameAs` and `requiredWhen` read the first value under a name and treat nothing submitted as `''`. A checked checkbox submits its `value` (`on` by default).",

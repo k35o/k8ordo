@@ -1,4 +1,4 @@
-import type { Rule } from './rules/rules';
+import type { DerivedRule } from './rules/rules';
 
 /** ValidityState flags a derived field can report a message for. */
 export type ValidityFlag =
@@ -72,9 +72,9 @@ export type FormFields<
   arrays: Record<ArrayPath, DerivedArray>;
   /**
    * Checks HTML has no attribute for, each run by the same evaluator on both
-   * sides.
+   * sides. A function message has already been called.
    */
-  rules: Rule[];
+  rules: DerivedRule[];
   /**
    * Checks that HTML cannot express, returned instead of silently discarded.
    * Not every such check is listed yet; the guide names the gaps.

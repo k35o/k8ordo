@@ -35,9 +35,10 @@ server    parseForm(schema, formData)  →  typed data, or per-field errors
 
 `formFields` runs on the server — in a Server Component or at module scope. Its
 result is JSON, so it crosses the RSC boundary as props and zod never enters the
-client bundle. The messages are read when it runs, and module scope runs once,
-before any request: when a message follows the request (its locale, say, with
-`@k8ordo/i18n`), call `formFields` during the render instead.
+client bundle. The messages are read when it runs — zod's, and a rule's
+[function message](#a-message-that-follows-the-request) — and module scope runs
+once, before any request: when a message follows the request (its locale, say,
+with `@k8ordo/i18n`), call `formFields` during the render instead.
 
 ## Writing a form
 
@@ -466,6 +467,26 @@ and `requiredWhen(field, when, equals, message)` —
 `status` is `'rejected'`. Anything else stays a `.refine()` and runs on the
 server only. A `refine` on the schema as a whole is listed in `dropped`; one on
 a single field, a nested object, or a row is not yet.
+
+### A message that follows the request
+
+`message` takes a function as well as a string, the way zod takes
+`{ error: () => … }`: it is called when the rule is reported, not where the
+rule is declared. `formFields` calls it as it derives the fields — the client
+cannot run a function sent from the server, so the rules cross already
+worded — and `parseForm` calls it when the rule breaks. A definition at module
+scope therefore reports in whichever locale is current in the request that
+reads it:
+
+```ts
+export const signup = defineForm(schema, [
+  sameAs('confirm', 'password', m.signup.mismatch), // @k8ordo/i18n
+  minChecked('topics', 2, () => m.signup.pickAtLeast(2)),
+]);
+```
+
+Call `formFields` during the render for this, the same as for zod's function
+messages.
 
 ## Asking the server about one field
 

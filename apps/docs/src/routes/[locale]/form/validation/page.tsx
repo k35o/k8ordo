@@ -246,7 +246,7 @@ export async function signUp(
 }`;
 
 export default function FormValidationPage() {
-  const demoFields = formFields(signupDefinition());
+  const demoFields = formFields(signupDefinition);
   const demoData = JSON.stringify(
     { fields: { handle: demoFields.fields.handle }, rules: demoFields.rules },
     null,
@@ -483,6 +483,9 @@ export default function FormValidationPage() {
         <ul className="text-fg-mute flex flex-col gap-2 pl-6">
           <li className="list-disc">
             <Rich>{m.formValidation.rulesClient()}</Rich>
+          </li>
+          <li className="list-disc">
+            <Rich>{m.formValidation.rulesMessage()}</Rich>
           </li>
           <li className="list-disc">
             <Rich>{m.formValidation.rulesStrings()}</Rich>
