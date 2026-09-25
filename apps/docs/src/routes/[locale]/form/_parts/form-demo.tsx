@@ -14,11 +14,6 @@ type Props = {
   fields: FormFields<'q' | 'min' | 'inStock', never>;
 };
 
-// TextField と同じ見た目。number は TextField の受け付ける type に無いので
-// 素の <input> に、制約属性をそのまま広げる。
-const NUMBER_INPUT_CLASS =
-  'border-border-base bg-bg-base aria-invalid:border-border-error focus-visible:ring-border-info inline-full rounded-xl border px-3 py-2 focus-visible:border-transparent focus-visible:ring-2 focus-visible:outline-hidden';
-
 export function FormDemo({ fields }: Props) {
   // Server Action の無いサイトなので、送信結果の state は無い
   const form = useForm(fields);
@@ -28,10 +23,6 @@ export function FormDemo({ fields }: Props) {
   // フォームが GET で書いた URL を、同じスキーマの state が読み返す
   const [current] = useAppState(demoState);
   const search = demoState.search(current);
-
-  // `type` は TextField 側が決める（search）。それ以外の制約属性は
-  // スキーマ由来のものをそのまま広げる。
-  const { type: _qType, ...qInput } = q.input;
 
   return (
     <div className="border-border-mute flex flex-col gap-6 rounded-lg border p-6">
@@ -48,7 +39,7 @@ export function FormDemo({ fields }: Props) {
             renderInput={(props) => (
               <TextField
                 {...props}
-                {...qInput}
+                {...q.input}
                 defaultValue={current.q}
                 type="search"
               />
@@ -62,13 +53,9 @@ export function FormDemo({ fields }: Props) {
             invalid={min.invalid}
             label={m.form.demoLabelMin()}
             renderInput={(props) => (
-              <input
-                {...props}
-                {...min.input}
-                aria-invalid={props.invalid}
-                className={NUMBER_INPUT_CLASS}
-                defaultValue={current.min}
-              />
+              // NumberField は type="text" で描くので、JavaScript が無いと
+              // ブラウザが min を検査しない。このデモはその検査も見せる
+              <TextField {...props} {...min.input} defaultValue={current.min} />
             )}
             required={min.required}
           />

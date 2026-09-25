@@ -15,7 +15,10 @@ const parse = (value: string | number): number =>
   // eslint-disable-next-line unicorn/prefer-number-coercion -- 入力途中の "1.1.1" や "1e" を NaN にせず先頭の数値として解釈する（下の test が保証する仕様）
   Number.parseFloat(value.toString().replaceAll(/[^\w.-]+/gu, ''));
 
-export const cast = (value: string, precision: number): number | null => {
+export const cast = (
+  value: string,
+  precision: number | undefined,
+): number | null => {
   const parsedValue = parse(sanitize(value));
   if (Number.isNaN(parsedValue)) return null;
   return toPrecision(parsedValue, precision);

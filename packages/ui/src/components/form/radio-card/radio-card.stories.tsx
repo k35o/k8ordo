@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
 import type { ComponentProps } from 'react';
-import { expect } from 'storybook/test';
+import { expect, waitFor } from 'storybook/test';
 
 import { RadioCard } from './radio-card';
 
@@ -194,5 +194,45 @@ export const Disabled: Story = {
 
     await expect(team).toBeDisabled();
     await expect(team).toBeChecked();
+  },
+};
+
+const selectionDotOf = (radio: HTMLElement) =>
+  radio.closest('label')?.querySelector('[aria-hidden] > span');
+
+// 非制御の選択は input の :checked から描くので、change を飛ばさない reset にも追従する。
+// 点は opacity でフェードするので、切り替わり切るのを待つ
+export const SelectionFollowsReset: Story = {
+  render: (props) => (
+    <form className="flex flex-col items-start gap-2">
+      <p className="text-fg-base font-medium" id="radio-card-reset-label">
+        Choose a plan
+      </p>
+      <RadioCard
+        aria-labelledby="radio-card-reset-label"
+        defaultValue="starter"
+        options={props.options}
+      />
+      <button type="reset">reset</button>
+    </form>
+  ),
+  play: async ({ canvas, userEvent }) => {
+    const starter = canvas.getByRole('radio', { name: 'Starter' });
+    const team = canvas.getByRole('radio', { name: 'Team' });
+
+    await userEvent.click(team);
+    await waitFor(async () => {
+      await expect(selectionDotOf(team)).toBeVisible();
+    });
+
+    await userEvent.click(canvas.getByRole('button', { name: 'reset' }));
+
+    await expect(starter).toBeChecked();
+    await waitFor(async () => {
+      await expect(selectionDotOf(team)).not.toBeVisible();
+    });
+    await waitFor(async () => {
+      await expect(selectionDotOf(starter)).toBeVisible();
+    });
   },
 };
