@@ -11,16 +11,16 @@ export const define = {
     en: '`defineLocales(all, options?)`',
   }),
   description: message({
-    ja: 'ロケールのタグを並べた配列と、省略できる `default` を受け取ります。タグはリテラル型のまま推論されるので、`as const` は要りません。',
-    en: 'It takes an array of locale tags and an optional `default`. The tags are inferred as literal types, so no `as const` is needed.',
+    ja: 'ロケールのタグをキーに、そのロケールのタイムゾーン（`timeZone`）と文字の向き（`dir`）を値にしたオブジェクトと、省略できる `default` を受け取ります。キーはリテラル型のまま推論されるので、`as const` は要りません。',
+    en: "It takes an object keyed by locale tag, whose values are that locale's time zone (`timeZone`) and text direction (`dir`), and an optional `default`. The keys are inferred as literal types, so no `as const` is needed.",
   }),
   default: message({
-    ja: '`default` を省くと先頭のタグが既定値です。`default` の型は一覧の和集合なので、一覧に無いタグはコンパイルで落ちます。',
-    en: 'Without `default`, the first tag is the default. The type of `default` is the union of the list, so a tag outside it fails to compile.',
+    ja: '`default` を省くと、先頭に書いたタグが既定値です。そのとき `locales.default` の型は一覧の和集合になります。`default` の型も一覧の和集合なので、一覧に無いタグはコンパイルで落ちます。',
+    en: 'Without `default`, the tag written first is the default, and `locales.default` is then typed as the union of the list. `default` itself is typed as that union, so a tag outside it fails to compile.',
   }),
   throws: message({
-    ja: '誤った一覧は、使われた時点ではなく定義した時点で `TypeError` を投げます。重複したタグと BCP 47 ではないタグは型では検出されないので、検出するのはこの検査だけです。一覧に無い `default` はコンパイルでも落ちますが、JavaScript からの呼び出しや `as` で通した値のために実行時にも確かめます。',
-    en: 'A wrong list throws a `TypeError` where it is defined, not later where it is used. A repeated tag and a tag that is not BCP 47 pass the type checker, so this check is the only thing that catches them. A `default` outside the list already fails to compile, and is checked again at run time for callers in JavaScript and values forced through `as`.',
+    ja: '誤った定義は、使われた時点ではなく定義した時点で `TypeError` を投げます。BCP 47 ではないタグと、実行環境が知らないタイムゾーンは型では検出されないので、検出するのはこの検査だけです。一覧に無い `default`、欠けた `timeZone`、`ltr` / `rtl` 以外の `dir` はコンパイルでも落ちますが、JavaScript からの呼び出しや `as` で通した値のために実行時にも確かめます。',
+    en: 'A wrong definition throws a `TypeError` where it is defined, not later where it is used. A tag that is not BCP 47 and a time zone the runtime does not know pass the type checker, so this check is the only thing that catches them. A `default` outside the list, a missing `timeZone`, and a `dir` other than `ltr` / `rtl` already fail to compile, and are checked again at run time for callers in JavaScript and values forced through `as`.',
   }),
   callColumn: message({
     ja: '呼び出し',
@@ -29,6 +29,29 @@ export const define = {
   errorColumn: message({
     ja: '投げるエラーの文面',
     en: 'Error message',
+  }),
+};
+
+export const definition = {
+  title: message({
+    ja: '`timeZone` と `dir`',
+    en: '`timeZone` and `dir`',
+  }),
+  description: message({
+    ja: 'どちらも実行環境からは導けないので、ロケールごとに宣言します。',
+    en: 'Neither can be derived from the runtime, so each locale declares both.',
+  }),
+  timeZone: message({
+    ja: '`timeZone` は、そのロケールで日付を表示する IANA のタイムゾーンです（`Asia/Tokyo`、`UTC`）。実行環境のタイムゾーンはサーバーと訪問者のブラウザで違うので、それに任せて日付を書くと、サーバーの HTML とブラウザの描画で日付や時刻がずれ、hydration が食い違います。ロケールに 1 つ決めておけば、両側が同じ値を読みます。',
+    en: "`timeZone` is the IANA time zone the locale's dates are shown in (`Asia/Tokyo`, `UTC`). The runtime's own time zone differs between the server and each visitor's browser, so a date left to it comes out one way in the server's HTML and another in the browser, and hydration disagrees. Fixing one per locale gives both sides the same value.",
+  }),
+  choosing: message({
+    ja: 'どのタイムゾーンにするかはプロダクトの判断です。東京で開くイベントのサイトなら、英語のページでも `Asia/Tokyo` が正しいかもしれません。訪問者ごとのタイムゾーンで見せたい表示は、ブラウザだけで描く部分に置きます。',
+    en: "Which zone is a product decision: a site about events in Tokyo may well show its English pages in `Asia/Tokyo` too. A display that should follow each visitor's own zone belongs in a part that renders in the browser only.",
+  }),
+  dir: message({
+    ja: '`dir` は、そのロケールの文字が流れる向き（`ltr` か `rtl`）で、`<html dir>` に書きます。`Intl.Locale` の `getTextInfo()` はまだすべてのブラウザにはないので、導かずに宣言します。',
+    en: "`dir` is the direction the locale's text runs in (`ltr` or `rtl`), written to `<html dir>`. `Intl.Locale`'s `getTextInfo()` has not reached every browser, so it is declared rather than derived.",
   }),
 };
 
@@ -67,6 +90,10 @@ export const members = {
   all: message({
     ja: '一覧のタグ。書いた順のままです。',
     en: 'The tags, in the order written.',
+  }),
+  definitions: message({
+    ja: '各ロケールの定義。渡したオブジェクトそのままです（`definitions[locale].dir`）。',
+    en: "Each locale's definition, the object as given (`definitions[locale].dir`).",
   }),
   default: message({
     ja: '既定のロケール。交渉で何も一致しなかったときと、何もロケールを指名していないときに使われます。',
@@ -127,6 +154,10 @@ export const members = {
   localeOf: message({
     ja: '集合のタグの和集合。`Register` の `locale` にもこれを書きます。',
     en: "The union of a set's tags. It is also what `Register`'s `locale` is set to.",
+  }),
+  localeDefinition: message({
+    ja: "1 つのロケールの定義（`{ timeZone: string; dir: 'ltr' | 'rtl' }`）。",
+    en: "One locale's definition (`{ timeZone: string; dir: 'ltr' | 'rtl' }`).",
   }),
   localesOptions: message({
     ja: '第 2 引数の型（`{ default?: D }`）。',
@@ -207,8 +238,8 @@ export const negotiation = {
     en: 'Worked examples',
   }),
   examplesDescription: message({
-    ja: "集合 `defineLocales(['ja', 'en', 'en-GB'])` に対する結果です。",
-    en: "Results against `defineLocales(['ja', 'en', 'en-GB'])`.",
+    ja: "集合 `defineLocales({ ja: …, en: …, 'en-GB': … })` に対する結果です。",
+    en: "Results against `defineLocales({ ja: …, en: …, 'en-GB': … })`.",
   }),
   requestedColumn: message({
     ja: '希望',

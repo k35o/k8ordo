@@ -229,6 +229,7 @@ const SIGNUP_ACTION = `// src/routes/signup/_parts/actions.ts
 
 import { parseForm } from '@k8ordo/form/server';
 import type { FormState } from '@k8ordo/form/server';
+import { href } from '@k8ordo/router';
 import { redirect } from '@k8ordo/server/runtime';
 
 import { createAccount } from './accounts.server';
@@ -241,7 +242,7 @@ export async function signUp(
   const parsed = parseForm(signup, formData);
   if (!parsed.success) return parsed.state;
   await createAccount(parsed.data);
-  redirect('/welcome');
+  redirect(href('/welcome'));
 }`;
 
 export default function FormValidationPage() {

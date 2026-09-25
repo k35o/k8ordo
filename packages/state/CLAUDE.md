@@ -74,6 +74,12 @@ pnpm check         # check:write to auto-fix
   normal case. Entry and local `salvage` hand the typed values straight to the
   schema — no structured clone, no JSON — so those schemas must accept their
   own output, and a local value JSON cannot hold (a Date) survives the echo and is lost on the next load.
+- **A link carries Vite's base; a path does not.** `href(path)` takes a
+  path in the route table's terms and puts `import.meta.env.BASE_URL` in
+  front (`base.ts`, the router's `withBase` rule re-spelled, since the router
+  is a type-only peer here). The type stays the path given, which is what
+  typed-route checks read. Outside Vite `import.meta.env` is undefined
+  despite its type, and nothing is added.
 - **No history-API fallback.** Imperative url updates assume an intercepting
   router; links and GET forms are the path that works everywhere. Updates
   that change only entry, local or memory values never navigate, so they work
@@ -87,6 +93,7 @@ src/
   url/codec.ts         schema ⇄ URLSearchParams: parse + canonical search
   entry/codec.ts       StoredCodec: read typed stored values (entry, local)
   page-state.ts        definePageState(); slot disjointness; internals WeakMap
+  base.ts              withBase: Vite's base in front of a link
   local-state.ts       defineLocalState()
   memory-state.ts      defineMemoryState() — no schema by design
   store/core.ts        snapshot core: key-diff notify, picks, update handles

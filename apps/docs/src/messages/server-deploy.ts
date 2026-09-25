@@ -111,13 +111,23 @@ export const answersStatuses = message({
 });
 
 export const handlerTitle = message({
-  ja: 'ほかのホストで動かす',
-  en: 'Running on another host',
+  ja: 'リクエストハンドラ',
+  en: 'The request handler',
 });
 
 export const handlerDescription = message({
-  ja: 'ビルドされたハンドラは、`dist/rsc/index.js` が default export する `(request: Request) => Promise<Response>` という、ただの関数です。`Request` を渡して `Response` を受け取れる環境なら、どこでも動かせます。`@k8ordo/static` がビルド時に作って呼ぶのも、同じハンドラをそのモード向けにコンパイルしたものです。',
-  en: 'The built handler is a plain function, `(request: Request) => Promise<Response>`, default-exported from `dist/rsc/index.js`. Any runtime that can hand it a `Request` and take back a `Response` can run it. `@k8ordo/static` builds and calls the same handler at build time, compiled for that mode.',
+  ja: '`serve()` はビルドを動かすホストの 1 つです。動かされているアプリそのものはリクエストハンドラで、リクエストを `Request` にして渡し、返った `Response` で答えられる環境なら、どこでもホストになれます。ハンドラは `dist/rsc/index.js` が default export する `(request: Request) => Promise<Response>` という、ただの関数です。`@k8ordo/static` がビルド時に作って呼ぶのも、同じハンドラをそのモード向けにコンパイルしたものです。ハンドラは隣の `dist/ssr/` を読み込むので 2 つは一緒に置きます。アプリの依存は名前で import するので、動かす場所で解決できるようにしておくか、Wrangler のように bundle に含めます。',
+  en: "`serve()` is one host for the build. What it hosts — the application itself — is the request handler, and anything that can turn a request into a `Request` and answer with the `Response` it gets back can host it. The handler is a plain function, `(request: Request) => Promise<Response>`, default-exported from `dist/rsc/index.js`; `@k8ordo/static` builds and calls the same handler at build time, compiled for that mode. It loads `dist/ssr/` from beside itself, so the two travel together, and it imports the application's dependencies by name, so they have to resolve where it runs — or be bundled in, as Wrangler does.",
+});
+
+export const handlerRuntimes = message({
+  ja: 'Web の `Request`・`Response`・ストリームのほかに、ハンドラが実行環境から借りるのは `node:async_hooks` の `AsyncLocalStorage` だけです。React は描画ごとの状態をそこに持ち、`paramsSchema` もそこに書きます。Node.js・Bun・Deno・`nodejs_compat` を付けた Cloudflare Workers はどれもこれを持っていて、import したハンドラをそのまま受け取ります。',
+  en: "Past the web platform's `Request`, `Response` and streams, the one thing the handler takes from its runtime is `AsyncLocalStorage` from `node:async_hooks`: React keeps each render's state in it, and a `paramsSchema` writes to it. Node.js, Bun, Deno, and Cloudflare Workers with the `nodejs_compat` flag all have it, and each takes the imported handler as it is.",
+});
+
+export const handlerImports = message({
+  ja: 'この約束は、ハンドラが走らせるコードも Node にしか無いものを import しない限りで成り立ちます。`redirect()` と型が `@k8ordo/server/runtime` から、`serve()` が別の入口 `@k8ordo/server/serve` から来るのはそのためです。`node:fs` を読む route ファイルや Server Action は、アプリをそれを持つ実行環境に縛ります。',
+  en: 'What the handler runs keeps that promise only as long as it imports nothing that needs Node either — which is why `redirect()` and the types come from `@k8ordo/server/runtime`, and `serve()` from an entry of its own, `@k8ordo/server/serve`. A route file or a Server Action that reads `node:fs` ties the application to a runtime that has it.',
 });
 
 export const handlerMethods = message({
@@ -126,8 +136,8 @@ export const handlerMethods = message({
 });
 
 export const handlerFiles = message({
-  ja: 'ハンドラはファイルを配りません。ほかのホストでは `dist/client/` をホストの側で配信し、それ以外のリクエストをハンドラに渡します。',
-  en: 'The handler does not serve files: on another host, serve `dist/client/` from the host and hand every other request to the handler.',
+  ja: 'ハンドラはファイルを配りません。`dist/client/` をハンドラの前で配信し（`assets/` の下は名前に中身のハッシュが入っているので `Cache-Control: public, max-age=31536000, immutable`）、どのファイルも指さないリクエストをハンドラに渡します。Workers では、クライアントのビルドを指す static assets がそれにあたり、Worker が動く前に答えます。',
+  en: "The handler serves no files. Put `dist/client/` in front of it — the files under `assets/` with `Cache-Control: public, max-age=31536000, immutable`, since their names carry their contents' hash — and hand it every request that names none. On Workers that is static assets pointed at the client build, which answer before the Worker runs.",
 });
 
 export const handlerOrigin = message({

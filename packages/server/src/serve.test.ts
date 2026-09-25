@@ -39,7 +39,8 @@ beforeAll(async () => {
   await writeFile(path.join(dist, 'client', 'edited.txt'), 'first');
   await writeFile(
     path.join(dist, 'rsc', 'index.js'),
-    `export default async (request) => {
+    `export const base = '/';
+    export default async (request) => {
       const url = new URL(request.url);
       if (url.pathname === '/throws') {
         throw new Error('postgres://admin:hunter2@db refused the connection');
@@ -392,5 +393,56 @@ describe('serve', () => {
     } finally {
       log.mockRestore();
     }
+  });
+});
+
+describe('serve under a base', () => {
+  let under: string;
+  let served: Server;
+
+  // base を '/site/' にしたビルド。client/ の中身はその下で配られる
+  beforeAll(async () => {
+    under = await mkdtemp(path.join(tmpdir(), 'k8ordo-serve-base-'));
+    await mkdir(path.join(under, 'client', 'assets'), { recursive: true });
+    await mkdir(path.join(under, 'rsc'), { recursive: true });
+    await writeFile(path.join(under, 'client', 'index.html'), '<p>static</p>');
+    await writeFile(
+      path.join(under, 'client', 'assets', 'app-abc123.js'),
+      'export {};',
+    );
+    await writeFile(
+      path.join(under, 'rsc', 'index.js'),
+      `export const base = '/site/';
+      export default async (request) =>
+        new Response(new URL(request.url).pathname, {
+          headers: { 'content-type': 'text/plain' },
+        });`,
+    );
+    served = await serve({ dist: under, port: 0 });
+  });
+
+  afterAll(async () => {
+    await served.close();
+    await rm(under, { recursive: true, force: true });
+  });
+
+  it('answers a file of the client build at its URL under the base', async () => {
+    const response = await fetch(`${served.url}/site/index.html`);
+    expect(await response.text()).toBe('<p>static</p>');
+  });
+
+  it('marks a hashed asset under the base immutable', async () => {
+    const response = await fetch(`${served.url}/site/assets/app-abc123.js`);
+    expect(response.headers.get('cache-control')).toContain('immutable');
+  });
+
+  it('answers no file outside the base, leaving the URL to the handler', async () => {
+    const response = await fetch(`${served.url}/index.html`);
+    expect(await response.text()).toBe('/index.html');
+  });
+
+  it('hands a page under the base to the handler with the URL as asked', async () => {
+    const response = await fetch(`${served.url}/site/products/1`);
+    expect(await response.text()).toBe('/site/products/1');
   });
 });

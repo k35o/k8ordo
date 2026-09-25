@@ -35,6 +35,10 @@
       "types": "./dist/runtime.d.mts",
       "default": "./dist/runtime.mjs"
     },
+    "./serve": {
+      "types": "./dist/serve.d.mts",
+      "default": "./dist/serve.mjs"
+    },
     "./package.json": "./package.json"
   },
   "publishConfig": {
