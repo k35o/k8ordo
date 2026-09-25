@@ -1,6 +1,6 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
 
-import { parseParams } from './params';
+import { parseCatchAllParams, parseParams } from './params';
 import type { ParamsSchema } from './params';
 
 // zod を持ち込まずに Standard Schema の最小形を演じる
@@ -80,5 +80,48 @@ describe('parseParams', () => {
     });
     expect(store.getStore()).toBeUndefined();
     expect(await rendered).toBe('en');
+  });
+});
+
+describe('parseCatchAllParams', () => {
+  it('keeps the strings the pathname carried, whether the schemas accept or refuse', () => {
+    expect(
+      parseCatchAllParams([knownLocale, numericId], {
+        locale: 'en',
+        id: '7',
+        '*': 'missing',
+      }).params,
+    ).toStrictEqual({ locale: 'en', id: '7', '*': 'missing' });
+    expect(
+      parseCatchAllParams([knownLocale], { locale: 'fr', '*': 'missing' })
+        .params,
+    ).toStrictEqual({ locale: 'fr', '*': 'missing' });
+  });
+
+  it('renders in what the schemas wrote when they all accept, and in nothing when one refuses', async () => {
+    const store = new AsyncLocalStorage<string>();
+    const recordsLocale = schema((value) => {
+      store.enterWith(String(value['locale']));
+      return { locale: value['locale'] };
+    });
+    const readLater = async (): Promise<string | undefined> => {
+      await new Promise<void>((resolve) => {
+        setTimeout(resolve, 1);
+      });
+      return store.getStore();
+    };
+
+    const accepted = parseCatchAllParams([recordsLocale], {
+      locale: 'en',
+      '*': 'missing',
+    });
+    const refused = parseCatchAllParams([recordsLocale, numericId], {
+      locale: 'en',
+      id: 'shoes',
+    });
+
+    expect(store.getStore()).toBeUndefined();
+    expect(await accepted.enter(readLater)).toBe('en');
+    expect(await refused.enter(readLater)).toBeUndefined();
   });
 });

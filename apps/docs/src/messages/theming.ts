@@ -285,8 +285,23 @@ export const darkModeTitle = message({
 });
 
 export const darkModeDescription = message({
-  ja: 'ルート要素にdarkクラスを追加することで、ダークモードが有効になります。セマンティックカラートークンは自動的にダークモード用の値に切り替わります。',
-  en: 'Add the dark class to the root element to enable dark mode. Semantic color tokens automatically switch to their dark mode values.',
+  ja: 'ルート要素にdarkクラスを追加することで、ダークモードが有効になります。セマンティックカラートークンは自動的にダークモード用の値に切り替わり、CSSの`color-scheme`プロパティも`dark`になるので、スクロールバーやフォーム部品も暗く描かれます。k8ordoのアプリケーションでは、クラスの付け外しは`@k8ordo/color-scheme`が受け持ちます。',
+  en: 'Add the dark class to the root element to enable dark mode. Semantic color tokens automatically switch to their dark mode values, and the CSS `color-scheme` property becomes `dark`, so scrollbars and form controls are drawn dark too. In a k8ordo application, `@k8ordo/color-scheme` adds and removes the class.',
+});
+
+export const highContrastTitle = message({
+  ja: '高コントラストと強制カラー',
+  en: 'High Contrast and Forced Colors',
+});
+
+export const highContrastDescription = message({
+  ja: 'OSで選ぶコントラストの設定にも、スタイルシートが従います。`prefers-contrast: more`では文字と線のトークンが地の色から一段遠ざかり、影だけで縁取っていたカードやモーダルに線が付きます。`forced-colors: active`（Windowsのハイコントラストなど）では、境界線・フォーカスリング・選択状態をシステムカラーで描きます。どちらもOSの設定なので、アプリが切り替えたり保存したりするものはありません。',
+  en: 'The stylesheet also follows the contrast settings a user makes in the OS. Under `prefers-contrast: more`, the text and border tokens move a step further from the ground, and cards and modals that were outlined only by a shadow gain a line. Under `forced-colors: active` (such as Windows high contrast), boundaries, focus rings, and selected states are drawn with system colors. Both are OS settings, so there is nothing for an application to toggle or store.',
+});
+
+export const highContrastOwnUiDescription = message({
+  ja: '自前のUIでは`contrast-more:`と`forced-colors:`のバリアントを使います。強制カラーではシステムカラー以外は塗り替えられるので、状態は`Highlight`などで描きます。境界やフォーカスを`box-shadow`だけで描かず、`text-transparent`で隠さないでください（強制カラーで塗られて見えてしまうので、`invisible`を使います）。',
+  en: 'In your own UI, use the `contrast-more:` and `forced-colors:` variants. Under forced colors every color except a system color is repainted, so draw state with one such as `Highlight`. Do not draw a boundary or a focus ring with `box-shadow` alone, and do not hide something with `text-transparent` (forced colors paints it, so use `invisible`).',
 });
 
 export const customizeTitle = message({
@@ -295,8 +310,8 @@ export const customizeTitle = message({
 });
 
 export const customizeDescription = message({
-  ja: 'すべてのトークンはCSS変数なので、k8ordo UIのスタイルシートより後に読み込むCSSで同名の変数を再定義すれば上書きできます。ベースカラーの変数（`--purple-200`など）も定義済みなので、参照を差し替えるだけでブランドカラーを丸ごと切り替えられます。ダークモードの値は`.dark`側で再定義します。',
-  en: 'Every token is a CSS variable, so redefining the same variable in CSS loaded after the k8ordo UI stylesheet overrides it. The base color variables (such as `--purple-200`) are also defined, so swapping the references switches the whole brand color at once. Redefine the dark mode values under `.dark`.',
+  ja: 'すべてのトークンはCSS変数なので、k8ordo UIのスタイルシートより後に読み込むCSSで同名の変数を再定義すれば上書きできます。ベースカラーの変数（`--purple-200`など）も定義済みなので、参照を差し替えるだけでブランドカラーを丸ごと切り替えられます。ダークモードの値は`.dark`側で、高コントラストの値は`@media (prefers-contrast: more)`の中の`:root`と`.dark`で再定義します。',
+  en: 'Every token is a CSS variable, so redefining the same variable in CSS loaded after the k8ordo UI stylesheet overrides it. The base color variables (such as `--purple-200`) are also defined, so swapping the references switches the whole brand color at once. Redefine the dark mode values under `.dark`, and the high-contrast values on `:root` and `.dark` inside `@media (prefers-contrast: more)`.',
 });
 
 export const customizeValueDescription = message({

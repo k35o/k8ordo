@@ -8,7 +8,7 @@ import { formFields } from './derive/form-fields';
 import { HiddenValue } from './hidden-value';
 import { parseForm } from './parse/parse-form';
 import { defineForm } from './rules/define-form';
-import { sameAs } from './rules/rules';
+import { minChecked, requiredWhen, sameAs } from './rules/rules';
 import type { FormState } from './types';
 import { useForm } from './use-form';
 
@@ -77,8 +77,9 @@ const TWO_ROWS: FormState = { rows: { items: 2 } };
 
 const List: FC<{
   state?: FormState;
+  action?: (formData: FormData) => void;
   itemsErrorAt?: 'top' | 'bottom';
-}> = ({ state = NO_STATE, itemsErrorAt = 'top' }) => {
+}> = ({ state = NO_STATE, action, itemsErrorAt = 'top' }) => {
   const form = useForm(listFields, state);
   const items = form.array('items');
   const itemsError = items.error !== undefined && (
@@ -86,7 +87,7 @@ const List: FC<{
   );
 
   return (
-    <form {...form.props}>
+    <form {...form.props} action={action}>
       {itemsErrorAt === 'top' && itemsError}
       {items.rows.map((row) => (
         <div key={row.key}>
@@ -109,6 +110,31 @@ const List: FC<{
       <p data-testid="count">{String(items.rows.length)}</p>
     </form>
   );
+};
+
+// サーバーだけが知る理由（在庫）で行を断る。ブラウザの検査は通るので、
+// 送信は action まで届き、失敗が state で返ってくる
+const stockedListSchema = z.object({
+  items: z
+    .array(
+      z.object({
+        name: z
+          .string()
+          .min(1, '品名は必須です')
+          .refine((name) => name !== 'ねじ', '在庫がありません'),
+      }),
+    )
+    .max(2),
+});
+
+const SubmittedList: FC = () => {
+  const [state, formAction] = useActionState(
+    (_previous: FormState, formData: FormData): Promise<FormState> =>
+      Promise.resolve(parseForm(stockedListSchema, formData).state),
+    {},
+  );
+
+  return <List action={formAction} state={state} />;
 };
 
 /**
@@ -256,6 +282,125 @@ const Submitted: FC = () => {
       <button type="submit">send</button>
     </form>
   );
+};
+
+// 送信時の検査だけを見る。action が呼ばれたかどうかで、送信が止まったかを読む
+const Guarded: FC<{ action: (formData: FormData) => void }> = ({ action }) => {
+  const form = useForm(derived);
+  const email = form.field('email');
+  const password = form.field('password');
+  const confirm = form.field('confirm');
+
+  return (
+    <form {...form.props} action={action}>
+      <input aria-label="email" {...email.input} />
+      <p data-testid="email-error">{email.error ?? ''}</p>
+      <input aria-label="password" {...password.input} />
+      <p data-testid="password-error">{password.error ?? ''}</p>
+      <input aria-label="confirm" {...confirm.input} />
+      <p data-testid="confirm-error">{confirm.error ?? ''}</p>
+      <button type="submit">send</button>
+      <button formNoValidate type="submit">
+        draft
+      </button>
+    </form>
+  );
+};
+
+const review = defineForm(
+  z.object({ status: z.enum(['approved', 'rejected']), reason: z.string() }),
+  [
+    requiredWhen(
+      'reason',
+      'status',
+      'rejected',
+      '却下の理由を入力してください',
+    ),
+  ],
+);
+const reviewFields = formFields(review);
+
+// 却下が選ばれた状態で描かれ、誰も何も入力しないまま送信される
+const Review: FC<{ action: (formData: FormData) => void }> = ({ action }) => {
+  const form = useForm(reviewFields, { values: { status: 'rejected' } });
+  const status = form.field('status');
+  const reason = form.field('reason');
+
+  return (
+    <form {...form.props} action={action}>
+      <select aria-label="status" {...status.input}>
+        <option value="approved">approved</option>
+        <option value="rejected">rejected</option>
+      </select>
+      <input aria-label="reason" {...reason.input} />
+      <p data-testid="reason-error">{reason.error ?? ''}</p>
+      <button type="submit">send</button>
+    </form>
+  );
+};
+
+const filterFields = formFields(
+  z.object({ min: z.coerce.number('数値を入力してください') }),
+);
+
+// action を持たない GET の絞り込みフォーム。送信はブラウザの遷移そのもの
+const Filter: FC = () => {
+  const form = useForm(filterFields);
+
+  return (
+    <form method="get" {...form.props}>
+      <input aria-label="min" {...form.field('min').input} />
+      <p data-testid="min-error">{form.field('min').error ?? ''}</p>
+      <button type="submit">filter</button>
+    </form>
+  );
+};
+
+const topics = defineForm(
+  z.object({ topics: z.array(z.enum(['a', 'b', 'c'])) }),
+  [minChecked('topics', 2, '2つ以上選んでください')],
+);
+const topicsFields = formFields(topics);
+
+const Topics: FC<{ action: (formData: FormData) => void }> = ({ action }) => {
+  const form = useForm(topicsFields);
+  const field = form.field('topics');
+
+  return (
+    <form {...form.props} action={action}>
+      {(['a', 'b', 'c'] as const).map((option) => (
+        <input
+          aria-label={option}
+          key={option}
+          type="checkbox"
+          {...field.input}
+          value={option}
+        />
+      ))}
+      <p data-testid="topics-error">{field.error ?? ''}</p>
+      <button type="submit">send</button>
+    </form>
+  );
+};
+
+/**
+ * 送信が止められたかを window で読む。テストのページが遷移しないよう、
+ * 読んだあとはこちらでも止める。
+ */
+const watchSubmits = async (
+  run: (stopped: () => boolean | undefined) => Promise<void>,
+): Promise<void> => {
+  let stopped: boolean | undefined;
+  const listen = (event: SubmitEvent): void => {
+    stopped = event.defaultPrevented;
+    event.preventDefault();
+  };
+  window.addEventListener('submit', listen);
+  try {
+    await run(() => stopped);
+  } finally {
+    window.removeEventListener('submit', listen);
+  }
 };
 
 const draftSchema = z.object({ title: z.string(), body: z.string() });
@@ -437,20 +582,15 @@ describe('useForm in a browser', () => {
   it("hears React's own reset after an action and starts clean", async () => {
     const screen = await render(<Submitted />);
 
-    await screen.getByLabelText('email').fill('not-an-email');
+    await screen.getByLabelText('email').fill('k8o@example.com');
     await expect.element(screen.getByTestId('dirty')).toHaveTextContent('true');
 
-    // ボタンをクリックすると blur でメッセージが現れてボタンが下へずれ、
-    // クリックが外れる。送信そのものを主張したいので、DOM から送る
-    (document.querySelector('form') as HTMLFormElement).requestSubmit();
+    await screen.getByRole('button', { name: 'send' }).click();
 
     await expect.element(screen.getByLabelText('email')).toHaveValue('');
     await expect
       .element(screen.getByTestId('dirty'))
       .toHaveTextContent('false');
-    await expect
-      .element(screen.getByTestId('email-error'))
-      .toHaveTextContent('');
   });
 
   it('adds a row, numbers its name, and stops at the schema bound', async () => {
@@ -502,6 +642,39 @@ describe('useForm in a browser', () => {
     await expect
       .element(screen.getByTestId('name-error-0'))
       .toHaveTextContent('品名は必須です');
+  });
+
+  it('moves focus into a row added on the client when that row fails the submit', async () => {
+    const screen = await render(<List />);
+    await screen.getByRole('button', { name: 'add' }).click();
+    await screen.getByRole('button', { name: 'add' }).click();
+
+    screen.rerender(
+      <List
+        state={{
+          errors: { 'items[1].name': '品名は必須です' },
+          rows: { items: 2 },
+          token: '1',
+        }}
+      />,
+    );
+
+    await expect.element(screen.getByLabelText('name-1')).toHaveFocus();
+  });
+
+  it('keeps focus in a failed row through the reset React runs after an action', async () => {
+    const screen = await render(<SubmittedList />);
+    await screen.getByRole('button', { name: 'add' }).click();
+    await screen.getByRole('button', { name: 'add' }).click();
+    await screen.getByLabelText('name-0').fill('ボルト');
+    await screen.getByLabelText('name-1').fill('ねじ');
+
+    (document.querySelector('form') as HTMLFormElement).requestSubmit();
+
+    await expect
+      .element(screen.getByTestId('name-error-1'))
+      .toHaveTextContent('在庫がありません');
+    await expect.element(screen.getByLabelText('name-1')).toHaveFocus();
   });
 
   it('clears a cross-field message when the other field is the one fixed', async () => {
@@ -680,6 +853,19 @@ describe('useForm in a browser', () => {
     await expect.element(screen.getByTestId('dirty')).toHaveTextContent('true');
   });
 
+  it('reads a select with no selected option as clean once a reset puts back its first option', async () => {
+    const screen = await render(<Choice />);
+
+    await screen.getByLabelText('color').selectOptions('blue');
+    await expect.element(screen.getByTestId('dirty')).toHaveTextContent('true');
+    (document.querySelector('form') as HTMLFormElement).reset();
+
+    await expect.element(screen.getByLabelText('color')).toHaveValue('red');
+    await expect
+      .element(screen.getByTestId('dirty'))
+      .toHaveTextContent('false');
+  });
+
   it('restores a checked box from the echo through defaultChecked', async () => {
     const screen = await render(
       <Choice state={{ values: { color: 'blue', agree: 'on' } }} />,
@@ -730,6 +916,108 @@ describe('useForm in a browser', () => {
     expect(Object.keys(signupProps)).not.toContain('noValidate');
     const email = screen.getByLabelText('email').element() as HTMLInputElement;
     expect(email.form?.noValidate).toBe(true);
+  });
+
+  it('stops a failing submission, checking the fields nobody touched', async () => {
+    const action = vi.fn<(formData: FormData) => void>();
+    const screen = await render(<Guarded action={action} />);
+
+    await screen.getByRole('button', { name: 'send' }).click();
+
+    await expect
+      .element(screen.getByTestId('email-error'))
+      .toHaveTextContent('メールアドレスの形式で入力してください');
+    await expect
+      .element(screen.getByTestId('password-error'))
+      .toHaveTextContent('8文字以上で入力してください');
+    expect(action).not.toHaveBeenCalled();
+  });
+
+  it('moves focus to the first failed field on the page when it stops a submission', async () => {
+    const screen = await render(
+      <Guarded action={vi.fn<(formData: FormData) => void>()} />,
+    );
+
+    await screen.getByLabelText('email').fill('k8o@example.com');
+    await screen.getByRole('button', { name: 'send' }).click();
+
+    await expect.element(screen.getByLabelText('password')).toHaveFocus();
+  });
+
+  it('runs the cross-field rules on submit even when nothing was typed', async () => {
+    const action = vi.fn<(formData: FormData) => void>();
+    const screen = await render(<Review action={action} />);
+
+    await screen.getByRole('button', { name: 'send' }).click();
+
+    await expect
+      .element(screen.getByTestId('reason-error'))
+      .toHaveTextContent('却下の理由を入力してください');
+    await expect.element(screen.getByLabelText('reason')).toHaveFocus();
+    expect(action).not.toHaveBeenCalled();
+  });
+
+  it('lets a submission through once every field passes', async () => {
+    const action = vi.fn<(formData: FormData) => void>();
+    const screen = await render(<Guarded action={action} />);
+
+    await screen.getByLabelText('email').fill('k8o@example.com');
+    await screen.getByLabelText('password').fill('hunter2hunter2');
+    await screen.getByLabelText('confirm').fill('hunter2hunter2');
+    await screen.getByRole('button', { name: 'send' }).click();
+
+    await expect.poll(() => action.mock.calls.length).toBe(1);
+  });
+
+  it('lets a formNoValidate button submit unchecked, as the browser does', async () => {
+    const action = vi.fn<(formData: FormData) => void>();
+    const screen = await render(<Guarded action={action} />);
+
+    await screen.getByRole('button', { name: 'draft' }).click();
+
+    await expect.poll(() => action.mock.calls.length).toBe(1);
+  });
+
+  it('stops a GET form that has no action behind it', async () => {
+    await watchSubmits(async (stopped) => {
+      const screen = await render(<Filter />);
+
+      await screen.getByRole('button', { name: 'filter' }).click();
+
+      await expect.poll(stopped).toBe(true);
+      await expect
+        .element(screen.getByTestId('min-error'))
+        .toHaveTextContent('数値を入力してください');
+      await expect.element(screen.getByLabelText('min')).toHaveFocus();
+    });
+  });
+
+  it('lets a GET form through once it passes', async () => {
+    await watchSubmits(async (stopped) => {
+      const screen = await render(<Filter />);
+
+      await screen.getByLabelText('min').fill('5');
+      await screen.getByRole('button', { name: 'filter' }).click();
+
+      await expect.poll(stopped).toBe(false);
+    });
+  });
+
+  it('stops a submission on a checkbox group rule and focuses the group', async () => {
+    const action = vi.fn<(formData: FormData) => void>();
+    const screen = await render(<Topics action={action} />);
+
+    await screen.getByLabelText('b').click();
+    // ボタンを押すと、先に blur がメッセージを出してボタンが下へずれ、
+    // クリックが外れる。送信そのものを見たいので、DOM から送る
+    (document.querySelector('form') as HTMLFormElement).requestSubmit();
+
+    await expect
+      .element(screen.getByTestId('topics-error'))
+      .toHaveTextContent('2つ以上選んでください');
+    // グループの検証は先頭のボックスが代表して持つ
+    await expect.element(screen.getByLabelText('a')).toHaveFocus();
+    expect(action).not.toHaveBeenCalled();
   });
 
   // The async checks are last on purpose: their answers land from plain

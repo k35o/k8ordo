@@ -8,7 +8,7 @@ import {
   useBoundProp,
 } from '@json-render/react';
 import type { FC } from 'react';
-import { useState } from 'react';
+import { Children, useState } from 'react';
 
 import * as ui from '../_shared/renderers';
 import { catalog } from './catalog';
@@ -89,12 +89,18 @@ export const { registry } = defineRegistry(catalog, {
     Anchor: ({ props }) => ui.renderAnchor(props),
     Avatar: ({ props }) => ui.renderAvatar(props),
     Code: ({ props }) => ui.renderCode(props),
+    Kbd: ({ props }) => ui.renderKbd(props),
+    EmptyState: ({ props }) => ui.renderEmptyState(props),
+    // json-render は子を 1 つの ReactNode で渡すので、スライドごとに分ける
+    Carousel: ({ props, children }) =>
+      ui.renderCarousel(props, Children.toArray(children)),
     Progress: ({ props }) => ui.renderProgress(props),
     Skeleton: ({ props }) => ui.renderSkeleton(props),
     Icon: ({ props }) => ui.renderIcon(props),
     ChevronIcon: ({ props }) => ui.renderChevronIcon(props),
     StatusIcon: ({ props }) => ui.renderStatusIcon(props),
     IconButton: ({ props }) => ui.renderIconButton(props),
+    CopyButton: ({ props }) => ui.renderCopyButton(props),
     Accordion: ({ props }) => ui.renderAccordion(props),
     Breadcrumb: ({ props }) => ui.renderBreadcrumb(props),
     Table: ({ props }) => ui.renderTable(props),
@@ -114,6 +120,30 @@ export const { registry } = defineRegistry(catalog, {
         '',
       );
       return ui.renderPasswordInput(props, value, setValue);
+    },
+    DateField: ({ props, bindings }) => {
+      const [value, setValue] = useBoundOrLocal<string>(
+        props.defaultValue,
+        bindings?.defaultValue,
+        '',
+      );
+      return ui.renderDateField(props, value, setValue);
+    },
+    DatePicker: ({ props, bindings }) => {
+      const [value, setValue] = useBoundOrLocal<string>(
+        props.defaultValue,
+        bindings?.defaultValue,
+        '',
+      );
+      return ui.renderDatePicker(props, value, setValue);
+    },
+    Calendar: ({ props, bindings }) => {
+      const [value, setValue] = useBoundOrLocal<string>(
+        props.defaultValue,
+        bindings?.defaultValue,
+        '',
+      );
+      return ui.renderCalendar(props, value, setValue);
     },
     Radio: ({ props, bindings }) => {
       const [value, setValue] = useBoundOrLocal<string>(
@@ -185,8 +215,6 @@ export const { registry } = defineRegistry(catalog, {
     Tooltip: ({ props }) => ui.renderTooltip(props),
     DropdownMenu: ({ props }) => ui.renderDropdownMenu(props),
     Toast: ({ props }) => <ui.ToastWidget props={props} />,
-
-    ScrollLinked: ({ props }) => ui.renderScrollLinked(props),
 
     ListBox: ({ props, bindings }) => {
       const path = bindings?.defaultValue;

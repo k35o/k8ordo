@@ -195,6 +195,11 @@ export const mapBoolean = message({
   en: 'An unchecked box arrives as `false`, which `z.boolean()` accepts.',
 });
 
+export const mapStringbool = message({
+  ja: 'チェックされていれば `value` の文字列が届きます。`value` はスキーマ自身が `true` を書く綴り（既定は `"true"`、`truthy` を指定すればその先頭）です。未チェックは何も送らないので、`.default(false)` か `.optional()` を付けなければ `required` になります。',
+  en: 'A checked box submits its `value`: the schema’s own spelling of `true` (`"true"` by default, the first of `truthy` when given). An unchecked box submits nothing, so without `.default(false)` or `.optional()` it is `required`.',
+});
+
 export const mapLiteralTrue = message({
   ja: '同意のチェックボックス。未チェックを拒むので `required` になり、文言は zod のものです。',
   en: "A consent box. It rejects an unchecked box, so it is `required`, in zod's wording.",
@@ -276,8 +281,13 @@ export const emptyText = message({
 });
 
 export const emptyCheckbox = message({
-  ja: 'チェックボックス',
-  en: 'Checkbox',
+  ja: 'チェックボックス（`z.boolean()` など）',
+  en: 'Checkbox (`z.boolean()` and the like)',
+});
+
+export const emptyStringbool = message({
+  ja: 'チェックボックス（`z.stringbool()`）',
+  en: 'Checkbox (`z.stringbool()`)',
 });
 
 export const emptyNumber = message({
@@ -308,6 +318,11 @@ export const emptyTextValue = message({
 export const emptyCheckboxValue = message({
   ja: '`false`（チェックされていれば `value` に関係なく `true`）',
   en: '`false` (`true` when checked, whatever its `value`)',
+});
+
+export const emptyStringboolValue = message({
+  ja: '`undefined`（チェックされていれば `value` の文字列）',
+  en: '`undefined` (its `value` string when checked)',
 });
 
 export const emptyNothingValue = message({
@@ -468,6 +483,11 @@ export const checkboxTitle = message({
 export const checkboxDescription = message({
   ja: "`z.boolean()` は 1 つのチェックボックスです。チェックされていれば `true`、されていなければ `false` として届くので、`value` 属性は関係ありません。同意のように未チェックを拒みたいときは `z.literal(true, '…')` と書きます。",
   en: "`z.boolean()` is a single checkbox. It arrives as `true` when checked and `false` when not, so its `value` attribute does not matter. To reject an unchecked box, as for consent, write `z.literal(true, '…')`.",
+});
+
+export const stringboolDescription = message({
+  ja: '`z.stringbool()` もチェックボックスになります。こちらはチェックされていれば `value` 属性の文字列が、されていなければ何も届きません。`value` はスキーマ自身が `true` を書く綴りなので、@k8ordo/state が url の真偽値を書く文字列と同じです。GET の絞り込みフォームを state の url スキーマから導くとき、真偽値はこの形になります。',
+  en: '`z.stringbool()` is a checkbox too. It submits the string in its `value` attribute when checked and nothing when not. That `value` is the schema’s own spelling of `true`, the same string @k8ordo/state writes for a url boolean, so this is the shape a boolean takes when a GET filter form is derived from a state’s url schema.',
 });
 
 export const groupDescription = message({
@@ -685,9 +705,9 @@ export const refusedDate = message({
   en: '`z.date()`, `z.bigint()` and `z.nan()` — they accept no string. `z.coerce.date()` and `z.coerce.bigint()` read strings and are kept.',
 });
 
-export const refusedStringbool = message({
-  ja: '`z.stringbool()` — チェックボックスとして導かれますが、`parseForm` はチェックボックスを真偽値で渡すので、どんな送信も通りません。`z.boolean()` を使います。',
-  en: "`z.stringbool()` — it would derive a checkbox, but `parseForm` hands a checkbox's schema a boolean, so no submission could pass. Use `z.boolean()`.",
+export const refusedStringboolDefaultTrue = message({
+  ja: '`z.stringbool().default(true)` — チェックを外したボックスは何も送らず、それが `true` になるので、`false` を送る手段がありません。チェックすると `true` になる向きの項目にします。',
+  en: '`z.stringbool().default(true)` — an unchecked box submits nothing, which reads as `true`, so there is no way to submit `false`. Name the field so that checking it means `true`.',
 });
 
 export const refusedRecord = message({

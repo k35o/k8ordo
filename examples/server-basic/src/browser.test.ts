@@ -1,7 +1,7 @@
 import path from 'node:path';
 
-import { serve } from '@k8ordo/server/runtime';
-import type { Server } from '@k8ordo/server/runtime';
+import { serve } from '@k8ordo/server/serve';
+import type { Server } from '@k8ordo/server/serve';
 import { chromium } from 'playwright';
 import type { Browser, Page } from 'playwright';
 
@@ -34,6 +34,16 @@ const hydrated = async (page: Page): Promise<void> => {
   );
 };
 
+// ページが取りに行ったペイロードの pathname を、頼んだ順に集める
+const payloadsRequestedBy = (page: Page): string[] => {
+  const payloads: string[] = [];
+  page.on('request', (request) => {
+    const { pathname } = new URL(request.url());
+    if (pathname.endsWith('/index.rsc')) payloads.push(pathname);
+  });
+  return payloads;
+};
+
 describe('the built application in a browser', () => {
   it('follows an action that redirected when JavaScript ran it', async () => {
     const page = await browser.newPage();
@@ -51,6 +61,70 @@ describe('the built application in a browser', () => {
       .waitFor({ timeout: 5000 });
     expect(new URL(page.url()).pathname).toBe('/products');
     expect(await page.evaluate(() => 'stayed' in window)).toBe(true);
+  }, 30_000);
+
+  it('keeps the cookie a Server Action set, so the guard lets a client navigation through', async () => {
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    await page.goto(server.url);
+    await hydrated(page);
+    await page.evaluate(() => {
+      Object.assign(window, { stayed: true });
+    });
+
+    await page.getByLabel('name').fill('k8o');
+    await page.getByRole('button', { name: 'sign' }).click();
+    await page.getByTestId('entries').getByText('k8o').first().waitFor();
+    await page.getByRole('link', { name: 'members' }).click();
+
+    await page.getByTestId('member').getByText('k8o').waitFor();
+    expect(await page.evaluate(() => 'stayed' in window)).toBe(true);
+    await context.close();
+  }, 30_000);
+
+  it('hands a client navigation to a page that said notFound() back to the server, which answers 404', async () => {
+    const page = await browser.newPage();
+    await page.goto(server.url);
+    await hydrated(page);
+    const responses: Array<{ type: string; status: number }> = [];
+    page.on('response', (response) => {
+      responses.push({
+        type: response.request().resourceType(),
+        status: response.status(),
+      });
+    });
+
+    await page.evaluate(async () => {
+      await navigation.navigate('/products/99').committed;
+    });
+
+    await page.getByRole('heading', { name: 'not found' }).waitFor();
+    expect(new URL(page.url()).pathname).toBe('/products/99');
+    expect(
+      responses
+        .filter((response) => response.type === 'document')
+        .map((response) => response.status),
+    ).toStrictEqual([404]);
+    await page.close();
+  }, 30_000);
+
+  it('fetches the next page while the pointer rests on its link, and the click asks for nothing more', async () => {
+    const page = await browser.newPage();
+    const payloads = payloadsRequestedBy(page);
+    await page.goto(server.url);
+    await hydrated(page);
+
+    await page.getByRole('link', { name: 'guide' }).hover();
+    await vi.waitFor(() => {
+      expect(payloads).toStrictEqual(['/guide/index.rsc']);
+    });
+    await page.getByRole('link', { name: 'guide' }).click();
+
+    await page
+      .getByRole('heading', { name: 'guide' })
+      .waitFor({ timeout: 5000 });
+    expect(payloads).toStrictEqual(['/guide/index.rsc']);
+    await page.close();
   }, 30_000);
 
   it('hydrates the page where it streamed in, leaving no hidden copy and one <title>', async () => {

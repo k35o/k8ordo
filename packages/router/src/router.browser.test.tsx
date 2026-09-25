@@ -53,10 +53,13 @@ const PathnameProbe: FC = () => (
   <span data-testid="pathname">{usePathname()}</span>
 );
 
+// 絞り込み欄はレイアウトに置く。ページが替わっても残る要素にフォーカスが
+// あるときに、それがどこへ行くかを見る
 const Shell: FC = () => (
   <section data-testid="shell">
     <PathnameProbe />
     <SectionProbe />
+    <input aria-label="filter" />
     <Outlet />
   </section>
 );
@@ -321,6 +324,80 @@ it('scrolls to the fragment the new URL names', async () => {
   expect(window.scrollY).toBeGreaterThan(1000);
 });
 
+it('restores the position a page was left at when the visitor goes back to it', async () => {
+  const screen = await render(<Router routes={routes} />);
+  await navigateTo('/tall', { history: 'replace' }).finished;
+  await expect.element(screen.getByTestId('tall')).toBeInTheDocument();
+  window.scrollTo(0, 3000);
+  const left = window.scrollY;
+  await navigateTo('/about').finished;
+  expect(window.scrollY).toBe(0);
+
+  await navigation.back().finished;
+
+  await expect.element(screen.getByTestId('tall')).toBeInTheDocument();
+  expect(window.scrollY).toBe(left);
+});
+
+it('restores the position a page was left at when the visitor goes forward to it', async () => {
+  const screen = await render(<Router routes={routes} />);
+  await navigateTo('/about', { history: 'replace' }).finished;
+  await navigateTo('/tall').finished;
+  await expect.element(screen.getByTestId('tall')).toBeInTheDocument();
+  window.scrollTo(0, 3000);
+  const left = window.scrollY;
+  await navigation.back().finished;
+  await expect.element(screen.getByTestId('about')).toBeInTheDocument();
+
+  await navigation.forward().finished;
+
+  await expect.element(screen.getByTestId('tall')).toBeInTheDocument();
+  expect(window.scrollY).toBe(left);
+});
+
+it('keeps the scroll position when only the search moves', async () => {
+  const screen = await render(<Router routes={routes} />);
+  await navigateTo('/tall', { history: 'replace' }).finished;
+  await expect.element(screen.getByTestId('tall')).toBeInTheDocument();
+  window.scrollTo(0, 3000);
+  const reading = window.scrollY;
+
+  const url = new URL(location.href);
+  url.searchParams.set('q', 'shoes');
+  await navigation.navigate(url.href, { history: 'replace' }).finished;
+
+  expect(window.scrollY).toBe(reading);
+});
+
+it('moves focus to the top of the document on a page change, the way a document load does', async () => {
+  const screen = await render(<Router routes={routes} />);
+  await navigateTo('/products', { history: 'replace' }).finished;
+  const filter = screen.getByRole('textbox', { name: 'filter' }).element();
+  (filter as HTMLInputElement).focus();
+  expect(document.activeElement).toBe(filter);
+
+  await navigateTo('/products/:id', { id: 'shoes' }).finished;
+
+  // 絞り込み欄はレイアウトごと残っている。それでもフォーカスは離れる
+  expect(screen.getByRole('textbox', { name: 'filter' }).element()).toBe(
+    filter,
+  );
+  expect(document.activeElement).toBe(document.body);
+});
+
+it('leaves focus where it was when only the search moves', async () => {
+  const screen = await render(<Router routes={routes} />);
+  await navigateTo('/products', { history: 'replace' }).finished;
+  const filter = screen.getByRole('textbox', { name: 'filter' }).element();
+  (filter as HTMLInputElement).focus();
+
+  const url = new URL(location.href);
+  url.searchParams.set('q', 'shoes');
+  await navigation.navigate(url.href, { history: 'replace' }).finished;
+
+  expect(document.activeElement).toBe(filter);
+});
+
 it('answers which section is showing without a table in hand', async () => {
   const screen = await render(<Router routes={routes} />);
   await navigateTo('/products', { history: 'replace' }).finished;
@@ -507,4 +584,49 @@ it('navigates with a bound param supplied by its source, and honours the options
   ).finished;
   expect(location.pathname).toBe('/products/other');
   expect(navigation.currentEntry?.index).toBe(index);
+});
+
+describe('under a base', () => {
+  beforeEach(() => {
+    vi.stubEnv('BASE_URL', '/docs/');
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it('matches the pathname below the base, and reads it without the base', async () => {
+    await navigateOutsideTheTable('/docs/products');
+
+    const screen = await render(<Router routes={routes} />);
+
+    await expect.element(screen.getByTestId('list')).toBeInTheDocument();
+    expect(screen.getByTestId('pathname').element().textContent).toBe(
+      '/products',
+    );
+  });
+
+  it('navigates to the URL under the base and renders the page the table names', async () => {
+    await navigateOutsideTheTable('/docs/products');
+    const screen = await render(<Router routes={routes} />);
+
+    await navigateTo('/products/:id', { id: '7' }).finished;
+
+    expect(location.pathname).toBe('/docs/products/7');
+    await expect
+      .element(screen.getByTestId('detail'))
+      .toHaveTextContent('/products/:id:7');
+  });
+
+  it('leaves a URL outside the base to the browser, whatever the table says', async () => {
+    await navigateOutsideTheTable('/docs/products');
+    const screen = await render(<Router routes={routes} />);
+
+    // ルーターが引き受けなければ、文書の読み込みになってテストが落ちる。
+    // 引き受けなかったことは、ページが替わらないことで確かめる
+    await navigateOutsideTheTable('/about');
+
+    await expect.element(screen.getByTestId('list')).toBeInTheDocument();
+    expect(screen.container.querySelector('[data-testid="about"]')).toBeNull();
+  });
 });

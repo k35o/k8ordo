@@ -1,6 +1,6 @@
 import { Heading } from '@k8ordo/ui';
+import { CodeBlock } from '@k8ordo/ui/code-block';
 
-import { CodeBlock } from '../../../../components/code-block';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { InstallTabs } from '../../../../components/install-tabs';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
@@ -197,6 +197,12 @@ export default function StateGetStartedPage() {
           </li>
           <li className="list-disc">
             <Rich>{m.stateGetStarted.placeLocal()}</Rich>
+          </li>
+          <li className="list-disc">
+            <Rich>{m.stateGetStarted.placeSession()}</Rich>
+          </li>
+          <li className="list-disc">
+            <Rich>{m.stateGetStarted.placeCookie()}</Rich>
           </li>
           <li className="list-disc">
             <Rich>{m.stateGetStarted.placeMemory()}</Rich>

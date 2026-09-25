@@ -2,12 +2,15 @@ import type { ComponentProps } from 'react';
 import { z } from 'zod';
 
 import type { Button } from '../../components/buttons/button';
+import type { CopyButton } from '../../components/buttons/copy-button';
 import type { IconButton } from '../../components/buttons/icon-button';
 import type { Avatar } from '../../components/data-display/avatar';
 import type { Badge } from '../../components/data-display/badge';
 import type { Card } from '../../components/data-display/card';
+import type { Carousel } from '../../components/data-display/carousel';
 import type { Heading } from '../../components/data-display/heading';
 import type { Alert } from '../../components/feedback/alert';
+import type { EmptyState } from '../../components/feedback/empty-state';
 import type { Skeleton } from '../../components/feedback/skeleton';
 import type { Spinner } from '../../components/feedback/spinner';
 import type { FormControl } from '../../components/form/form-control';
@@ -72,7 +75,10 @@ import type { Modal } from '../../components/overlays/modal';
  */
 const safeUrl = z
   .string()
-  .regex(/^(https?:\/\/|\/)/u, '外部 URL（http/https）または相対 URL のみ許可');
+  .regex(
+    /^(https?:\/\/|\/)/u,
+    'Only an http:// or https:// URL, or a path starting with /, is allowed',
+  );
 
 type ButtonIntegrationProps = {
   label: string;
@@ -168,6 +174,22 @@ export const iconButtonProps = z.object({
   color: z.enum(['transparent', 'base', 'primary', 'secondary']).optional(),
 }) satisfies z.ZodType<IconButtonIntegrationProps>;
 
+type CopyButtonIntegrationProps = {
+  value: string;
+  label?: ComponentProps<typeof CopyButton>['label'];
+  iconOnly?: ComponentProps<typeof CopyButton>['iconOnly'];
+  size?: ComponentProps<typeof CopyButton>['size'];
+};
+export const copyButtonProps = z.object({
+  value: z.string().describe('Text copied to the clipboard'),
+  label: z
+    .string()
+    .optional()
+    .describe('Button text, or the tooltip when iconOnly (default: "Copy")'),
+  iconOnly: z.boolean().optional(),
+  size: z.enum(['sm', 'md', 'lg']).optional(),
+}) satisfies z.ZodType<CopyButtonIntegrationProps>;
+
 type ChevronIconIntegrationProps = {
   direction: ComponentProps<typeof ChevronIcon>['direction'];
   size?: ComponentProps<typeof ChevronIcon>['size'];
@@ -239,6 +261,37 @@ export const codeProps = z.object({
   code: z.string(),
 }) satisfies z.ZodType<CodeIntegrationProps>;
 
+// Kbd は 1 キー 1 要素だが、生成 UI では組み合わせを 1 項目で置けるようにする
+type KbdIntegrationProps = { keys: readonly string[] };
+export const kbdProps = z.object({
+  keys: z
+    .array(z.string())
+    .min(1)
+    .describe(
+      'Keys pressed together, one per entry and in order, e.g. ["Ctrl", "S"]',
+    ),
+}) satisfies z.ZodType<KbdIntegrationProps>;
+
+type EmptyStateIntegrationProps = {
+  title: ComponentProps<typeof EmptyState>['title'];
+  description?: string;
+  icon?: z.infer<typeof iconName>;
+};
+export const emptyStateProps = z.object({
+  title: z.string(),
+  description: z.string().optional(),
+  icon: iconName.optional(),
+}) satisfies z.ZodType<EmptyStateIntegrationProps>;
+
+type CarouselIntegrationProps = {
+  label: ComponentProps<typeof Carousel.Root>['label'];
+  slideSize?: ComponentProps<typeof Carousel.Root>['slideSize'];
+};
+export const carouselProps = z.object({
+  label: z.string().describe('Accessible name of the carousel'),
+  slideSize: z.enum(['full', 'lg', 'md', 'sm']).optional(),
+}) satisfies z.ZodType<CarouselIntegrationProps>;
+
 type AccordionIntegrationProps = {
   items: ReadonlyArray<{
     title: string;
@@ -256,7 +309,7 @@ export const accordionProps = z.object({
       }),
     )
     .min(1)
-    .describe('各アコーディオン項目（タイトルとテキスト本文）'),
+    .describe('Accordion items, each with a title and a plain-text body'),
 }) satisfies z.ZodType<AccordionIntegrationProps>;
 
 type TableIntegrationProps = {
@@ -279,7 +332,9 @@ export const tableProps = z.object({
     .min(1),
   rows: z
     .array(z.array(z.string()))
-    .describe('各行のセル文字列（columns と同じ順序・個数）'),
+    .describe(
+      'Cell strings of each row, in the same order and number as columns',
+    ),
 }) satisfies z.ZodType<TableIntegrationProps>;
 
 type CardIntegrationProps = {
@@ -345,7 +400,7 @@ type ToastIntegrationProps = {
   message: string;
 };
 export const toastProps = z.object({
-  triggerLabel: z.string().describe('トーストを表示するボタンの文言'),
+  triggerLabel: z.string().describe('Text of the button that shows the toast'),
   tone: z.enum(['success', 'info', 'warning', 'error']),
   message: z.string(),
 }) satisfies z.ZodType<ToastIntegrationProps>;
@@ -405,11 +460,6 @@ export const gridProps = z.object({
   gap: z.enum(['none', 'sm', 'md', 'lg', 'xl']).optional(),
 }) satisfies z.ZodType<GridIntegrationProps>;
 
-type ScrollLinkedIntegrationProps = Record<string, never>;
-export const scrollLinkedProps = z.object(
-  {},
-) satisfies z.ZodType<ScrollLinkedIntegrationProps>;
-
 type AnchorIntegrationProps = {
   label: string;
   href: string;
@@ -440,7 +490,9 @@ export const breadcrumbProps = z.object({
       }),
     )
     .min(1)
-    .describe('パンくず項目（href 無し、または current=true で現在地）'),
+    .describe(
+      'Breadcrumb items; the one without href, or with current: true, is the current page',
+    ),
 }) satisfies z.ZodType<BreadcrumbIntegrationProps>;
 
 type PaginationIntegrationProps = {
@@ -465,11 +517,11 @@ type TabsIntegrationProps = {
   tabs: ReadonlyArray<{ label: string; content: string }>;
 };
 export const tabsProps = z.object({
-  label: z.string().optional().describe('タブリストのアクセシブル名'),
+  label: z.string().optional().describe('Accessible name of the tab list'),
   tabs: z
     .array(z.object({ label: z.string(), content: z.string() }))
     .min(1)
-    .describe('各タブのラベルとテキストパネル'),
+    .describe('Label and text panel of each tab'),
 }) satisfies z.ZodType<TabsIntegrationProps>;
 
 // TextField と Textarea はキーが揃っているが、`textareaProps = textFieldProps`
@@ -502,11 +554,16 @@ type TextareaIntegrationProps = TextFieldIntegrationProps & {
 };
 export const textareaProps = z.object({
   ...textInputShape,
-  rows: z.int().min(1).max(40).optional().describe('初期表示の行数'),
+  rows: z
+    .int()
+    .min(1)
+    .max(40)
+    .optional()
+    .describe('Number of rows shown at first'),
   autoResize: z
     .boolean()
     .optional()
-    .describe('入力量に合わせて高さを自動で伸ばす'),
+    .describe('Grow the height to fit the text'),
 }) satisfies z.ZodType<TextareaIntegrationProps>;
 
 type PasswordInputIntegrationProps = {
@@ -551,9 +608,55 @@ export const numberFieldProps = z.object({
 type SliderIntegrationProps = NumberFieldIntegrationProps;
 export const sliderProps = z.object({
   ...numericInputShape,
-  min: z.number().optional().describe('下限（未指定なら 0）'),
-  max: z.number().optional().describe('上限（未指定なら 100）'),
+  min: z.number().optional().describe('Lower bound (0 when omitted)'),
+  max: z.number().optional().describe('Upper bound (100 when omitted)'),
 }) satisfies z.ZodType<SliderIntegrationProps>;
+
+// DateField と DatePicker も形だけを共有する。値は `<input type="date">` の
+// value と同じ YYYY-MM-DD で、LLM が別の書式で書くと検証で弾く
+const isoDate = () => z.iso.date();
+const dateInputShape = {
+  name: z.string(),
+  label: z.string().describe('Visible label of the field'),
+  defaultValue: isoDate().optional().describe('YYYY-MM-DD'),
+  min: isoDate().optional().describe('Earliest date that can be entered'),
+  max: isoDate().optional().describe('Latest date that can be entered'),
+  invalid: z.boolean().optional(),
+  disabled: z.boolean().optional(),
+  required: z.boolean().optional(),
+};
+
+type DateFieldIntegrationProps = {
+  name: string;
+  label: string;
+  defaultValue?: string;
+  min?: string;
+  max?: string;
+  invalid?: boolean;
+  disabled?: boolean;
+  required?: boolean;
+};
+export const dateFieldProps = z.object({
+  ...dateInputShape,
+}) satisfies z.ZodType<DateFieldIntegrationProps>;
+
+type DatePickerIntegrationProps = DateFieldIntegrationProps;
+export const datePickerProps = z.object({
+  ...dateInputShape,
+}) satisfies z.ZodType<DatePickerIntegrationProps>;
+
+type CalendarIntegrationProps = {
+  name: string;
+  defaultValue?: string;
+  min?: string;
+  max?: string;
+};
+export const calendarProps = z.object({
+  name: z.string().describe('State key the picked date is stored under'),
+  defaultValue: isoDate().optional().describe('YYYY-MM-DD'),
+  min: isoDate().optional().describe('Earliest date that can be picked'),
+  max: isoDate().optional().describe('Latest date that can be picked'),
+}) satisfies z.ZodType<CalendarIntegrationProps>;
 
 type CheckboxIntegrationProps = {
   name: string;
@@ -600,7 +703,7 @@ const radioCardOption = selectOption.extend({
 });
 export const selectProps = z.object({
   name: z.string(),
-  options: z.array(selectOption).min(1).describe('選択肢（value / label）'),
+  options: z.array(selectOption).min(1).describe('Choices (value / label)'),
   defaultValue: z.string().optional(),
   invalid: z.boolean().optional(),
   disabled: z.boolean().optional(),
@@ -671,7 +774,7 @@ export const listBoxProps = z.object({
   name: z.string(),
   options: z.array(selectOption).min(1),
   defaultValue: z.string().optional(),
-  label: z.string().optional().describe('トリガーのアクセシブル名'),
+  label: z.string().optional().describe('Accessible name of the trigger'),
 }) satisfies z.ZodType<ListBoxIntegrationProps>;
 
 type CheckboxGroupIntegrationProps = {
@@ -709,15 +812,23 @@ type FileFieldIntegrationProps = {
   multiple?: boolean;
   maxFiles?: number;
   clearable?: boolean;
+  dropzone?: boolean;
 };
 export const fileFieldProps = z.object({
   triggerLabel: z
     .string()
     .optional()
-    .describe('ファイル選択ボタンの文言（未指定なら辞書の既定文言）'),
+    .describe(
+      'Text of the file picker button (the built-in wording when omitted)',
+    ),
   multiple: z.boolean().optional(),
   maxFiles: z.number().optional(),
   clearable: z.boolean().optional(),
+  // 後から足したので末尾に置く（冒頭「キーの並び順が公開 ABI」参照）
+  dropzone: z
+    .boolean()
+    .optional()
+    .describe('Show an area files can be dropped onto, with the button in it'),
 }) satisfies z.ZodType<FileFieldIntegrationProps>;
 
 type FormControlIntegrationProps = {
@@ -747,7 +858,7 @@ type FormIntegrationProps = { action?: string };
 export const formProps = z.object({
   // href と同じく `javascript:` 等を弾く必要がある
   // （`<form action="javascript:...">` も submit 時にスクリプトを実行する）。
-  action: safeUrl.optional().describe('送信先 URL（任意）'),
+  action: safeUrl.optional().describe('URL the form submits to (optional)'),
 }) satisfies z.ZodType<FormIntegrationProps>;
 
 // 本体側は isOpen/onClose の命令的 API なので、ここでは triggerLabel +
@@ -758,14 +869,14 @@ type ModalIntegrationProps = {
   side?: ComponentProps<typeof Modal>['side'];
 };
 export const modalProps = z.object({
-  triggerLabel: z.string().describe('モーダルを開くボタンの文言'),
+  triggerLabel: z.string().describe('Text of the button that opens the modal'),
   title: z.string(),
   side: z.enum(['center', 'bottom', 'right', 'left']).optional(),
 }) satisfies z.ZodType<ModalIntegrationProps>;
 
 type DialogIntegrationProps = { triggerLabel: string; title: string };
 export const dialogProps = z.object({
-  triggerLabel: z.string().describe('ダイアログを開くボタンの文言'),
+  triggerLabel: z.string().describe('Text of the button that opens the dialog'),
   title: z.string(),
 }) satisfies z.ZodType<DialogIntegrationProps>;
 
@@ -775,20 +886,24 @@ type DrawerIntegrationProps = {
   side?: ComponentProps<typeof Drawer>['side'];
 };
 export const drawerProps = z.object({
-  triggerLabel: z.string().describe('ドロワーを開くボタンの文言'),
+  triggerLabel: z.string().describe('Text of the button that opens the drawer'),
   title: z.string(),
   side: z.enum(['left', 'right']).optional(),
 }) satisfies z.ZodType<DrawerIntegrationProps>;
 
 type PopoverIntegrationProps = { triggerLabel: string };
 export const popoverProps = z.object({
-  triggerLabel: z.string().describe('ポップオーバーを開くボタンの文言'),
+  triggerLabel: z
+    .string()
+    .describe('Text of the button that opens the popover'),
 }) satisfies z.ZodType<PopoverIntegrationProps>;
 
 type TooltipIntegrationProps = { triggerLabel: string; content: string };
 export const tooltipProps = z.object({
-  triggerLabel: z.string().describe('ツールチップを表示するトリガーの文言'),
-  content: z.string().describe('ツールチップの内容'),
+  triggerLabel: z
+    .string()
+    .describe('Text of the trigger that shows the tooltip'),
+  content: z.string().describe('Text of the tooltip'),
 }) satisfies z.ZodType<TooltipIntegrationProps>;
 
 type DropdownMenuIntegrationProps = {
@@ -800,7 +915,7 @@ export const dropdownMenuProps = z.object({
   items: z
     .array(z.object({ label: z.string() }))
     .min(1)
-    .describe('メニュー項目'),
+    .describe('Menu items'),
 }) satisfies z.ZodType<DropdownMenuIntegrationProps>;
 
 export type ButtonProps = z.infer<typeof buttonProps>;
@@ -819,9 +934,13 @@ export type TabsProps = z.infer<typeof tabsProps>;
 export type IconName = z.infer<typeof iconName>;
 export type IconProps = z.infer<typeof iconProps>;
 export type IconButtonProps = z.infer<typeof iconButtonProps>;
+export type CopyButtonProps = z.infer<typeof copyButtonProps>;
 export type AnchorProps = z.infer<typeof anchorProps>;
 export type AvatarProps = z.infer<typeof avatarProps>;
 export type CodeProps = z.infer<typeof codeProps>;
+export type KbdProps = z.infer<typeof kbdProps>;
+export type EmptyStateProps = z.infer<typeof emptyStateProps>;
+export type CarouselProps = z.infer<typeof carouselProps>;
 export type ProgressProps = z.infer<typeof progressProps>;
 export type SkeletonProps = z.infer<typeof skeletonProps>;
 export type AccordionProps = z.infer<typeof accordionProps>;
@@ -831,6 +950,9 @@ export type TextareaProps = z.infer<typeof textareaProps>;
 export type PasswordInputProps = z.infer<typeof passwordInputProps>;
 export type NumberFieldProps = z.infer<typeof numberFieldProps>;
 export type SliderProps = z.infer<typeof sliderProps>;
+export type DateFieldProps = z.infer<typeof dateFieldProps>;
+export type DatePickerProps = z.infer<typeof datePickerProps>;
+export type CalendarProps = z.infer<typeof calendarProps>;
 export type RadioProps = z.infer<typeof radioProps>;
 export type RadioCardProps = z.infer<typeof radioCardProps>;
 export type CheckboxCardProps = z.infer<typeof checkboxCardProps>;
@@ -843,7 +965,6 @@ export type ModalProps = z.infer<typeof modalProps>;
 export type DialogProps = z.infer<typeof dialogProps>;
 export type DrawerProps = z.infer<typeof drawerProps>;
 export type PopoverProps = z.infer<typeof popoverProps>;
-export type ScrollLinkedProps = z.infer<typeof scrollLinkedProps>;
 export type TooltipProps = z.infer<typeof tooltipProps>;
 export type DropdownMenuProps = z.infer<typeof dropdownMenuProps>;
 export type ToastProps = z.infer<typeof toastProps>;
@@ -962,6 +1083,12 @@ export type _EnumCoverage = [
   >,
   AssertCovered<
     CoversComponent<
+      ComponentProps<typeof CopyButton>['size'],
+      CopyButtonProps['size']
+    >
+  >,
+  AssertCovered<
+    CoversComponent<
       ComponentProps<typeof ChevronIcon>['direction'],
       ChevronIconProps['direction']
     >
@@ -1008,6 +1135,12 @@ export type _EnumCoverage = [
     CoversComponent<
       ComponentProps<typeof Breadcrumb.List>['size'],
       BreadcrumbProps['size']
+    >
+  >,
+  AssertCovered<
+    CoversComponent<
+      ComponentProps<typeof Carousel.Root>['slideSize'],
+      CarouselProps['slideSize']
     >
   >,
 ];

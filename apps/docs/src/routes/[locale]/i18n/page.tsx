@@ -18,7 +18,10 @@ import { I18nDemo } from './_parts/i18n-demo';
 // 文字列の中の `export const paramsSchema` を生成器は拾わない（ファイルを
 // パースして export を読む）ので、コード例はページに置ける。
 const EXAMPLE = `// i18n.ts — 一覧はここにしか書かない
-export const locales = defineLocales(['ja', 'en']);
+export const locales = defineLocales({
+  ja: { timeZone: 'Asia/Tokyo', dir: 'ltr' },
+  en: { timeZone: 'UTC', dir: 'ltr' },
+});
 declare module '@k8ordo/i18n' {
   interface Register { locale: LocaleOf<typeof locales> }
 }

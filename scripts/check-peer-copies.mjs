@@ -10,6 +10,12 @@
 // dev サーバーの依存最適化はパッケージ名でコピーを畳むため、ブラウザモードの
 // テストではこの失敗を再現できない。本番バンドルと同じ node_modules の
 // 探索を自分で辿って、解決先の実パスを突き合わせる。
+//
+// 使う側には packages も含める。アプリのバンドルは、workspace のパッケージが
+// import するものをそのパッケージ自身の実ディレクトリから解決するので、
+// color-scheme → state のような間の辺で割れると、アプリが自分で宣言した
+// パッケージとは揃っていても 2 コピーが入る。アプリ側だけを見ると、その辺は
+// アプリが両端と peer をたまたま宣言しているときにしか検査されない。
 
 import { existsSync, readFileSync, readdirSync, realpathSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
@@ -31,7 +37,7 @@ const resolvePackageDir = (fromDir, name) => {
 const readPackage = (dir) =>
   JSON.parse(readFileSync(join(dir, 'package.json'), 'utf8'));
 
-const consumers = ['apps', 'examples'].flatMap((group) => {
+const consumers = ['apps', 'examples', 'packages'].flatMap((group) => {
   const abs = join(ROOT, group);
   if (!existsSync(abs)) return [];
   return readdirSync(abs, { withFileTypes: true })

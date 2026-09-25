@@ -15,7 +15,7 @@ export const { paramsSchema } = locales;
 // の代理としてしか届かず、ハンドラがスキーマとして走らせられない。だから
 // レイアウトの本体（フックを使う）は _parts/ の client component に置く。
 // レイアウトが受け取る params はスキーマを宣言していても文字列のまま
-// （not-found の下では何も検証されないため）。
+// （not-found の下では、スキーマが拒んでも描かれるため）。
 export default function LocaleLayout({
   params,
   children,

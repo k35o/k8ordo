@@ -1,7 +1,7 @@
 # @k8ordo/ui
 
 > React components from k8ordo, with semantic design tokens, dark mode,
-> built-in Japanese/English wording, AI chat components, and official generative UI
+> built-in wording that follows `@k8ordo/i18n` (Japanese and English included), AI chat components, and official generative UI
 > adapters (json-render & OpenUI) that let an LLM generate, validate, and render
 > on-brand UIs from these components.
 >
@@ -14,13 +14,13 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
 
 ## Guide
 
-- [Design Guide](GUIDE.md): setup, i18n (default Japanese, switching to English), design direction, aesthetic guidelines, component usage principles, anti-patterns, implementation principles, testing (component tests belong in a real browser — Vitest browser mode or Playwright — because the components call browser APIs jsdom does not implement).
+- [Design Guide](GUIDE.md): setup, dark mode (the `dark` class that `@k8ordo/color-scheme` puts on `<html>`, and the `color-scheme` the stylesheet sets to match), i18n (wording in `@k8ordo/i18n`'s current locale, English without a locale set, registering other locales, migrating from `UIProvider`'s `messages`), design direction, aesthetic guidelines, component usage principles, anti-patterns, implementation principles, testing (component tests belong in a real browser — Vitest browser mode or Playwright — because the components call browser APIs jsdom does not implement).
 
 ## References
 
-- [Components](references/components.md): full component list, import paths, props, and i18n — every component, compound ones included (`Dialog.Root`, `Tabs.Root`, …), renders from a Server Component — component wording comes from a dictionary that defaults to Japanese; `@k8ordo/ui/i18n` exports `ja` / `en` / `dictionaries` (both keyed by locale) / the `Messages` type for `<UIProvider messages={...}>` (per-component wording props win over the dictionary), and `useMessages` to read the wording in effect in your own elements.
+- [Components](references/components.md): full component list, import paths, props, and i18n — every component, compound ones included (`Dialog.Root`, `Tabs.Root`, …), renders from a Server Component — component wording comes from the dictionary of `@k8ordo/i18n`'s current locale (English when the app defines no locale set); `@k8ordo/ui/i18n` exports `ja` / `en` / the `Messages` type, `registerMessages(locale, messages)` for any other locale or a replacement (per-component wording props win over any dictionary), and `getMessages()` — not a hook — to read the wording in effect in your own elements.
 - [AI chat](references/ai-chat.md): AI chat components from `@k8ordo/ui/ai` (Conversation / Message / PromptInput / Reasoning / Suggestion / ToolInvocation), streaming Markdown `Response` from `@k8ordo/ui/ai/response` (optional peer `streamdown`), and `mapMessageParts` from `@k8ordo/ui/ai-sdk` to render AI SDK `UIMessage.parts` (optional peer `ai`).
-- [Generative UI](references/generative-ui.md): use json-render / OpenUI to make an LLM generate UIs — `catalog.prompt()` (server-safe), `<JsonRenderUI spec={spec} />` (client), `validateGeneratedSpec()` (validate/repair LLM output), `satisfies UISpec` (typed specs), and `@k8ordo/ui/openui/prompt`.
+- [Generative UI](references/generative-ui.md): use json-render / OpenUI to make an LLM generate UIs — `catalog.prompt()` (server-safe), `<JsonRenderUI spec={spec} />` (client), `validateGeneratedSpec()` (validate/repair LLM output), `satisfies UISpec` (typed specs), `@k8ordo/ui/openui/prompt`, and which exports the catalog leaves out on purpose.
 - [Typography](references/typography.md): type scale and usage.
 - [Color](references/color.md): semantic token system and dark mode.
 - [Spacing & layout](references/spatial-design.md): spacing scale and layout patterns.

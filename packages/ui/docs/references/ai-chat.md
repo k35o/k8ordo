@@ -51,7 +51,7 @@ import 'streamdown/styles.css';
 
 The `useChat` used in the examples below comes from the AI SDK's React bindings (`pnpm add @ai-sdk/react`).
 
-The "default" shown for `label`, `sendLabel`, and similar props below is the message dictionary's default (Japanese). Swap the whole dictionary with `<UIProvider messages={en}>` (see [i18n](components.md)). Passing the prop directly wins over the dictionary.
+The "default" shown for `label`, `sendLabel`, and similar props below is the built-in Japanese dictionary's. The text actually used follows `@k8ordo/i18n`'s current locale (see [i18n](components.md)). Passing the prop directly wins over the dictionary.
 
 ## The whole picture
 

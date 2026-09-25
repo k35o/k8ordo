@@ -67,6 +67,10 @@
       "types": "./dist/components/ai/response/index.d.mts",
       "default": "./dist/components/ai/response/index.mjs"
     },
+    "./code-block": {
+      "types": "./dist/components/data-display/code-block/index.d.mts",
+      "default": "./dist/components/data-display/code-block/index.mjs"
+    },
     "./ai-sdk": {
       "types": "./dist/integrations/ai-sdk/index.d.mts",
       "default": "./dist/integrations/ai-sdk/index.mjs"
@@ -103,7 +107,9 @@
   },
   "dependencies": {
     "clsx": "2.1.1",
-    "lucide-react": "1.46.0",
+    "lucide-react": "1.47.0",
+    "server-only": "catalog:",
+    "shiki": "4.4.3",
     "tailwind-merge": "3.7.0"
   },
   "devDependencies": {
@@ -111,6 +117,8 @@
     "@chromatic-com/storybook": "5.3.1",
     "@json-render/core": "catalog:",
     "@json-render/react": "catalog:",
+    "@k8ordo/form": "workspace:^",
+    "@k8ordo/i18n": "workspace:^",
     "@openuidev/lang-core": "catalog:",
     "@openuidev/react-lang": "catalog:",
     "@storybook/addon-a11y": "10.6.0",
@@ -125,7 +133,7 @@
     "@vitest/browser-playwright": "catalog:",
     "@vitest/coverage-v8": "catalog:",
     "@vitest/ui": "catalog:",
-    "ai": "7.0.99",
+    "ai": "7.0.105",
     "postcss": "catalog:",
     "publint": "catalog:",
     "react": "catalog:",
@@ -147,8 +155,9 @@
   "peerDependencies": {
     "@json-render/core": ">=0.20.0 <0.21.0",
     "@json-render/react": ">=0.20.0 <0.21.0",
-    "@openuidev/lang-core": ">=0.2.10 <0.3.0",
-    "@openuidev/react-lang": ">=0.2.9 <0.3.0",
+    "@k8ordo/i18n": "workspace:^",
+    "@openuidev/lang-core": ">=0.2.10 <0.4.0",
+    "@openuidev/react-lang": ">=0.2.9 <0.4.0",
     "@types/react": ">=19.3.0",
     "@types/react-dom": ">=19.3.0",
     "ai": ">=7.0.51",

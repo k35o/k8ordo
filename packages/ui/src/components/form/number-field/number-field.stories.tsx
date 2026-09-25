@@ -9,18 +9,8 @@ const meta: Meta<typeof NumberField> = {
   component: NumberField,
   args: {
     id: 'textfield',
+    'aria-label': '数量',
     'aria-describedby': 'numberfield-feedback',
-  },
-  parameters: {
-    a11y: {
-      options: {
-        rules: {
-          // NumberField単体ではラベルを付随しない
-          'label-title-only': { enabled: false },
-          label: { enabled: false },
-        },
-      },
-    },
   },
 };
 
@@ -131,7 +121,11 @@ const PendingRender = () => {
         });
       }}
     >
-      <NumberField defaultValue={5} id="number-field-pending" />
+      <NumberField
+        aria-label="数量"
+        defaultValue={5}
+        id="number-field-pending"
+      />
       <button type="submit">送信</button>
       <button
         onClick={() => {
@@ -248,7 +242,12 @@ const RefRender = () => {
 
   return (
     <div className="flex flex-col items-start gap-2">
-      <NumberField defaultValue={0} id="number-field-ref" ref={ref} />
+      <NumberField
+        aria-label="数量"
+        defaultValue={0}
+        id="number-field-ref"
+        ref={ref}
+      />
       <button
         onClick={() => {
           ref.current?.focus();
@@ -455,6 +454,7 @@ const ControlledRender = () => {
   return (
     <div className="flex flex-col items-start gap-2">
       <NumberField
+        aria-label="数量"
         id="number-field-controlled"
         onChange={setValue}
         value={value}
@@ -525,5 +525,73 @@ export const RequiredIsInvalidWhileEmpty: Story = {
     await userEvent.type(input, '1');
 
     await expect(input).toBeValid();
+  },
+};
+
+// type="text" のままでも、範囲の違反はブラウザの検証に載る。確定（blur）すると範囲に収める
+export const ReportsOutOfRangeToTheBrowser: Story = {
+  args: {
+    min: 1,
+    max: 10,
+  },
+  render: InFormRender,
+  play: async ({ canvas, userEvent }) => {
+    const input = canvas.getByRole<HTMLInputElement>('spinbutton');
+    await userEvent.type(input, '15');
+
+    await expect(input).toBeInvalid();
+    await expect(input.validationMessage).toBe('10 以下で入力してください');
+
+    await userEvent.tab();
+
+    await expect(input).toHaveValue('10');
+    await expect(input).toBeValid();
+  },
+};
+
+// @k8ordo/form の formFields が導く属性（文字列の min / max / defaultValue、
+// step="any"）をそのまま受ける。step="any" なら小数を丸めない
+export const AcceptsDerivedAttributes: Story = {
+  args: {
+    defaultValue: '0.25',
+    max: '1',
+    min: '0',
+    step: 'any',
+  },
+  render: InFormRender,
+  play: async ({ canvas, userEvent }) => {
+    const input = canvas.getByRole<HTMLInputElement>('spinbutton');
+    await expect(input).toHaveValue('0.25');
+
+    await userEvent.clear(input);
+    await userEvent.type(input, '0.125[Tab]');
+
+    await expect(input).toHaveValue('0.125');
+    await expect(submittedValue(input)).toBe('0.125');
+  },
+};
+
+const onFormInput = fn();
+
+// 矢印キーや確定でコードから書き換えた値も input イベントで form に届く。
+// この input 自身の onChange は二重に呼ばれない
+export const AnnouncesSteppedValueToTheForm: Story = {
+  args: {
+    onChange: fn(),
+  },
+  render: (args) => (
+    <form onInput={onFormInput}>
+      <NumberField {...args} name="quantity" />
+    </form>
+  ),
+  play: async ({ args, canvas, userEvent }) => {
+    onFormInput.mockClear();
+    const input = canvas.getByRole('spinbutton');
+    await userEvent.click(input);
+    await userEvent.keyboard('{ArrowUp}');
+
+    await expect(input).toHaveValue('0');
+    await expect(onFormInput).toHaveBeenCalledOnce();
+    await expect(args.onChange).toHaveBeenCalledOnce();
   },
 };

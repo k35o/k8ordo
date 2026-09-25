@@ -120,8 +120,8 @@ export const propsPage = message({
 });
 
 export const propsLayout = message({
-  ja: '`LayoutProps<P>` はそれに `children` を足したものです（下の例は `src/routes/products/page.tsx` もあるものとします）。`LayoutProps` は、スキーマを宣言していても `params` を文字列（`ParamsOf<P>`）として型付けします。`not-found.tsx` の下では何も検証されないからです。ただし検証を通ったページの描画では、実行時にはスキーマの出力がレイアウトにも渡ります。値が文字列であることに頼らないでください。',
-  en: '`LayoutProps<P>` adds `children` (the example below assumes `src/routes/products/page.tsx` exists too). `LayoutProps` types a layout’s `params` as strings (`ParamsOf<P>`) whatever the schemas declare, because nothing is validated under `not-found.tsx`. At run time, though, a layout rendered for a validated page receives the schemas’ output, so do not rely on the values being strings.',
+  ja: '`LayoutProps<P>` はそれに `children` を足したものです（下の例は `src/routes/products/page.tsx` もあるものとします）。`LayoutProps` は、スキーマを宣言していても `params` を文字列（`ParamsOf<P>`）として型付けします。`not-found.tsx` の下では、スキーマが受理したかどうかに関わらずレイアウトが描かれるからです。ただし検証を通ったページの描画では、実行時にはスキーマの出力がレイアウトにも渡ります。値が文字列であることに頼らないでください。',
+  en: '`LayoutProps<P>` adds `children` (the example below assumes `src/routes/products/page.tsx` exists too). `LayoutProps` types a layout’s `params` as strings (`ParamsOf<P>`) whatever the schemas declare, because a layout also renders under `not-found.tsx`, whether or not its schemas accepted. At run time, though, a layout rendered for a validated page receives the schemas’ output, so do not rely on the values being strings.',
 });
 
 export const propsRequest = message({
@@ -132,6 +132,11 @@ export const propsRequest = message({
 export const propsInline = message({
   ja: '`P` は生成された表にページがあるパターンでなければなりません。自分の位置にページを持たないレイアウトは、props をインラインで宣言します。インラインで宣言しても、生成された表が import の位置で同じことを検査します。',
   en: '`P` must be a pattern the generated table has a page at, so a layout with no page of its own at that prefix declares its props inline. Inline props are checked by the generated table at the import all the same.',
+});
+
+export const propsNotFound = message({
+  ja: 'フレームワークのページは、自分の pathname が実はページではないことを `notFound()` で言います。id が名指す商品が無い、といった場合です。throw するのでその後は走らず、フレームワークがいちばん近い `not-found.tsx` で 404 として答えます。ページがどちらのモードでも同じに読めるよう、モードのパッケージではなくここにあります。`isNotFound(value)` は投げられたものを見分けます。クライアントの `<Router>` には答えるステータスが無いので、そこでの `notFound()` はほかのエラーと同じです。',
+  en: 'A framework page says its pathname is not a page after all with `notFound()` — the product its id names does not exist. It throws, so nothing after it runs, and the framework answers with the nearest `not-found.tsx` under a 404. It lives here rather than in a mode package so a page reads the same under either; `isNotFound(value)` recognises what it throws. Under a client `<Router>` there is no status to answer with, and `notFound()` is an error like any other.',
 });
 
 export const schemaTitle = message({

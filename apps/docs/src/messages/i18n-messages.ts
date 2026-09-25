@@ -30,8 +30,8 @@ export const values = {
     en: 'A message that embeds values is a function of the same parameters in every locale. Annotate the parameter types on one of them and the rest are held to those types.',
   }),
   grammar: message({
-    ja: '覚える記法はありません。埋め込みはテンプレートリテラル、複数形は `Intl.PluralRules`、日付と数値は `Intl.DateTimeFormat` と `Intl.NumberFormat` です。各ロケールの関数はどのロケールの文かが決まっているので、`Intl` に渡すタグもその場に直接書けます。',
-    en: "There is no syntax to learn. Interpolation is a template literal, plurals are `Intl.PluralRules`, and dates and numbers are `Intl.DateTimeFormat` and `Intl.NumberFormat`. Each locale's function is already tied to its locale, so the tag handed to `Intl` is written right there.",
+    ja: '覚える記法はありません。埋め込みはテンプレートリテラル、複数形・日付・数値は `Intl` です。`Intl` のオブジェクトはロケール集合が今のロケールで引きます（`locales.pluralRules()`、`locales.dateTimeFormat()`）。',
+    en: 'There is no syntax to learn. Interpolation is a template literal, and plurals, dates and numbers are `Intl` — the locale set draws the `Intl` object for the current locale (`locales.pluralRules()`, `locales.dateTimeFormat()`).',
   }),
   why: message({
     ja: '文言が普通の関数なので、呼ぶ側の引数は TypeScript がそのまま検査し、文を解釈するパーサーをバンドルに積む必要もありません。',
@@ -46,8 +46,12 @@ export const values = {
     en: "Text and functions cannot be mixed within one message, so a locale that does not use the value is still a function. Declare the parameter there too (`en: (_count) => 'Items'`): depending on which locale holds it, a function with no parameters either makes TypeScript infer that the message takes none, so the declaration fails to compile, or slips past the check unnoticed.",
   }),
   timeZone: message({
-    ja: '日付の書式化には `timeZone` を明示してください。指定しないと、サーバーは自分のタイムゾーンで、ブラウザは訪問者のタイムゾーンで書式化するので、Client Component が描く文が HTML とハイドレーションで食い違うことがあります。',
-    en: "Give a date formatter an explicit `timeZone`. Without one, the server formats in its own time zone and the browser in the visitor's, so text a Client Component renders can differ between the HTML and hydration.",
+    ja: '日付は `locales.dateTimeFormat()` で書きます。そのロケールの `timeZone` で書くので、サーバーの HTML とブラウザの hydrate で日付がずれません。`new Intl.DateTimeFormat` を `timeZone` なしで使うと、サーバーは自分の、ブラウザは訪問者のタイムゾーンで書き、食い違います。',
+    en: "Write a date with `locales.dateTimeFormat()`: it formats in the locale's `timeZone`, so the date does not shift between the server's HTML and hydration. A `new Intl.DateTimeFormat` without a `timeZone` formats in the server's zone on one side and the visitor's on the other, and the two disagree.",
+  }),
+  formattingLink: message({
+    ja: '日付と数値の書式を読む',
+    en: 'Read Dates & numbers',
   }),
 };
 

@@ -8,7 +8,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import type { FocusEvent, Ref, SyntheticEvent } from 'react';
+import type { FocusEvent, Ref, SubmitEvent, SyntheticEvent } from 'react';
 
 import { breachOf } from './rules/rules';
 import type {
@@ -16,6 +16,7 @@ import type {
   FieldInput,
   FormFields,
   FormState,
+  StringCheckboxInput,
   ValidityFlag,
 } from './types';
 
@@ -87,8 +88,8 @@ const messageFor = (
   return undefined;
 };
 
-export type FieldView = {
-  input: FieldInput;
+export type FieldView<Input extends FieldInput = FieldInput> = {
+  input: Input;
   error: string | undefined;
   invalid: boolean;
   required: boolean;
@@ -121,39 +122,56 @@ export type FormErrorView = {
 export type UseFormReturn<
   FieldPath extends string = string,
   ArrayPath extends string = string,
+  StringCheckboxPath extends string = never,
 > = {
   props: {
     onBlur: (event: FocusEvent<HTMLFormElement>) => void;
     onInput: (event: SyntheticEvent<HTMLFormElement>) => void;
     onReset: () => void;
+    onSubmit: (event: SubmitEvent<HTMLFormElement>) => void;
     ref: Ref<HTMLFormElement>;
   };
-  field: (path: FieldPath) => FieldView;
+  field: {
+    (path: StringCheckboxPath): FieldView<StringCheckboxInput>;
+    (path: FieldPath): FieldView;
+  };
   array: (path: ArrayPath) => ArrayView;
   formError: FormErrorView;
   /** True once any field differs from the value it was rendered with. */
   isDirty: boolean;
 };
 
-const initialRows = (
+const rowCountsFor = (
   fields: FormFields,
   state: FormState,
+): Record<string, number> => {
+  const counts: Record<string, number> = {};
+  for (const [path, array] of Object.entries(fields.arrays)) {
+    counts[path] = state.rows?.[path] ?? array.minItems ?? 0;
+  }
+  return counts;
+};
+
+const rowKeysFor = (
+  counts: Record<string, number>,
+  current: Record<string, string[]> = {},
 ): Record<string, string[]> => {
   const rows: Record<string, string[]> = {};
-  for (const [path, array] of Object.entries(fields.arrays)) {
-    const count = state.rows?.[path] ?? array.minItems ?? 0;
-    rows[path] = Array.from(
-      { length: count },
-      (_, index) => `${path}-${String(index)}`,
-    );
+  for (const [path, count] of Object.entries(counts)) {
+    const kept = current[path];
+    // 行数が同じなら、サーバーは送られた順に番号を振っただけで、同じ行を指している。
+    // key を振り直すと行が作り直され、送信失敗で移したフォーカスや、エコーのない
+    // 値まで消える
+    rows[path] =
+      kept?.length === count
+        ? kept
+        : Array.from(
+            { length: count },
+            (_, index) => `${path}-${String(index)}`,
+          );
   }
   return rows;
 };
-
-const rowCountsOf = (rows: Record<string, string[]>): Record<string, number> =>
-  Object.fromEntries(
-    Object.entries(rows).map(([path, keys]) => [path, keys.length]),
-  );
 
 /**
  * Rename one concrete indexed name after the row at `removed` is gone: entries
@@ -223,11 +241,15 @@ const shiftSet = (
  * identity of each repeated row, one dirty flag, and the row counts adding or
  * removing a row is measured against.
  */
-export const useForm = <FieldPath extends string, ArrayPath extends string>(
-  fields: FormFields<FieldPath, ArrayPath>,
+export const useForm = <
+  FieldPath extends string,
+  ArrayPath extends string,
+  StringCheckboxPath extends string = never,
+>(
+  fields: FormFields<FieldPath, ArrayPath, StringCheckboxPath>,
   state: FormState = {},
-): UseFormReturn<FieldPath, ArrayPath> => {
-  const lookup = fields as FormFields;
+): UseFormReturn<FieldPath, ArrayPath, StringCheckboxPath> => {
+  const lookup = fields as FormFields<string, string, string>;
   const formRef = useRef<HTMLFormElement>(null);
   const nextKey = useRef(0);
   // Messages applyRules wrote, so it never erases one it does not own — an
@@ -236,11 +258,13 @@ export const useForm = <FieldPath extends string, ArrayPath extends string>(
   const [clientErrors, setClientErrors] = useState<Record<string, string>>({});
   const [edited, setEdited] = useState<ReadonlySet<string>>(new Set());
   const [domDirty, setDomDirty] = useState(false);
-  const [rowKeys, setRowKeys] = useState(() => initialRows(lookup, state));
   // The row counts the current server state rendered with; more or fewer rows
   // than this is a structural edit even while every control is pristine. It is
   // state rather than a ref because `isDirty` is read during render.
-  const [baselineRows, setBaselineRows] = useState(() => rowCountsOf(rowKeys));
+  const [baselineRows, setBaselineRows] = useState(() =>
+    rowCountsFor(lookup, state),
+  );
+  const [rowKeys, setRowKeys] = useState(() => rowKeysFor(baselineRows));
   // The messages no control owns — the form's, each array's — are found by id,
   // not by a ref: they are usually drawn by an alert component that passes
   // HTML attributes through but not a ref.
@@ -256,7 +280,7 @@ export const useForm = <FieldPath extends string, ArrayPath extends string>(
 
   // A fresh result from the server supersedes everything the client worked out
   // before the submit, including which fields the person had already fixed and
-  // which rows existed.
+  // how many rows there are.
   useEffect(() => {
     if (lastKey.current === stateKey) {
       return;
@@ -265,9 +289,9 @@ export const useForm = <FieldPath extends string, ArrayPath extends string>(
     setClientErrors({});
     setEdited(new Set());
     setDomDirty(false);
-    const rows = initialRows(lookup, state);
-    setBaselineRows(rowCountsOf(rows));
-    setRowKeys(rows);
+    const counts = rowCountsFor(lookup, state);
+    setBaselineRows(counts);
+    setRowKeys((previous) => rowKeysFor(counts, previous));
 
     // Moving focus to the first failure is the only way someone using a
     // screen reader learns the submit failed and where.
@@ -361,15 +385,47 @@ export const useForm = <FieldPath extends string, ArrayPath extends string>(
     [evaluate],
   );
 
+  // noValidate でブラウザの検証を外した代わりに、送信のたびにここで同じ検証を
+  // する。触っていない欄も含めて全欄を読み、1 つでも失敗すれば送信を止めて、
+  // 画面の順で最初に失敗した欄へフォーカスを移す。決めるのは今までどおり
+  // サーバーで、ここはサーバーに届く前にブラウザが止めていた分を取り戻すだけ
+  const onSubmit = useCallback(
+    (event: SubmitEvent<HTMLFormElement>) => {
+      const { submitter } = event;
+      if (
+        (submitter instanceof HTMLButtonElement ||
+          submitter instanceof HTMLInputElement) &&
+        submitter.formNoValidate
+      ) {
+        return;
+      }
+      const form = event.currentTarget;
+      // ルールはどの欄のイベントでも走るが、誰も触っていなければまだ一度も
+      // 走っていない
+      applyRules(form, lookup.rules, ownedRuleMessages.current);
+      const failed = firstFailed(
+        form,
+        (control) => control.willValidate && !control.validity.valid,
+      );
+      if (failed === undefined) {
+        return;
+      }
+      event.preventDefault();
+      setClientErrors(messagesIn(form, lookup));
+      failed.focus();
+    },
+    [lookup],
+  );
+
   // The values go back to what the form was rendered with — a reset button,
   // `form.reset()`, or React itself after every form action — so what the
   // hook remembered about the old values goes with them.
   const onReset = useCallback(() => {
     setClientErrors({});
     setEdited(new Set());
-    const rows = initialRows(lookup, state);
-    setBaselineRows(rowCountsOf(rows));
-    setRowKeys(rows);
+    const counts = rowCountsFor(lookup, state);
+    setBaselineRows(counts);
+    setRowKeys((previous) => rowKeysFor(counts, previous));
     // A rule's message is not a value, so a reset leaves it on the control.
     const form = formRef.current;
     for (const [name, message] of ownedRuleMessages.current) {
@@ -389,11 +445,14 @@ export const useForm = <FieldPath extends string, ArrayPath extends string>(
   }, [lookup, state]);
 
   const viewOf = useCallback(
-    (field: DerivedField, name: string): FieldView => {
+    (
+      field: DerivedField<StringCheckboxInput>,
+      name: string,
+    ): FieldView<StringCheckboxInput> => {
       const serverError = edited.has(name) ? undefined : state.errors?.[name];
       const error = clientErrors[name] ?? serverError;
       const value = state.values?.[name];
-      const input: FieldInput = { ...field.input, name };
+      const input: StringCheckboxInput = { ...field.input, name };
 
       if (field.input.type === 'checkbox') {
         // An unchecked box is simply absent from the echo, so presence is the
@@ -418,7 +477,7 @@ export const useForm = <FieldPath extends string, ArrayPath extends string>(
   );
 
   const field = useCallback(
-    (path: FieldPath): FieldView => {
+    (path: string): FieldView<StringCheckboxInput> => {
       const derived = lookup.fields[path];
       if (derived === undefined) {
         throw new Error(
@@ -503,8 +562,8 @@ export const useForm = <FieldPath extends string, ArrayPath extends string>(
   }, []);
 
   const props = useMemo(
-    () => ({ onBlur, onInput, onReset, ref }),
-    [onBlur, onInput, onReset, ref],
+    () => ({ onBlur, onInput, onReset, onSubmit, ref }),
+    [onBlur, onInput, onReset, onSubmit, ref],
   );
 
   const formError = useMemo(
@@ -554,9 +613,9 @@ const firstFailure = (
       form.ownerDocument.querySelector<HTMLElement>(`#${CSS.escape(id)}`),
     )
     .filter((message) => message !== null);
-  const field = [...form.elements].find(
-    (element): element is Control =>
-      isControl(element) && errors[element.name] !== undefined,
+  const field = firstFailed(
+    form,
+    (control) => errors[control.name] !== undefined,
   );
   if (field !== undefined) {
     candidates.push(field);
@@ -564,6 +623,42 @@ const firstFailure = (
   return candidates.toSorted((a, b) =>
     a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1,
   )[0];
+};
+
+/** The first control in document order that `failed` picks out. */
+const firstFailed = (
+  form: HTMLFormElement,
+  failed: (control: Control) => boolean,
+): Control | undefined =>
+  [...form.elements].find(
+    (element): element is Control => isControl(element) && failed(element),
+  );
+
+/**
+ * The message every field of the form shows right now, read from the DOM —
+ * the untouched fields included, which is what a submit has to report.
+ */
+const messagesIn = (
+  form: HTMLFormElement,
+  fields: FormFields,
+): Record<string, string> => {
+  const messages: Record<string, string> = {};
+  for (const element of form.elements) {
+    if (!isControl(element) || Object.hasOwn(messages, element.name)) {
+      continue;
+    }
+    const field = fieldFor(fields, element.name);
+    // A group reports through its first member, as `evaluate` reads it.
+    const control = controlNamed(form, element.name);
+    if (field === undefined || control === undefined) {
+      continue;
+    }
+    const message = messageFor(control, field);
+    if (message !== undefined) {
+      messages[element.name] = message;
+    }
+  }
+  return messages;
 };
 
 /** Look up the derived field for a submitted name, row index included. */
@@ -662,13 +757,26 @@ const isFormDirty = (form: HTMLFormElement | null): boolean => {
       element.value !== element.defaultValue
     ) {
       return true;
-    } else if (element instanceof HTMLSelectElement) {
-      for (const option of element.options) {
-        if (option.selected !== option.defaultSelected) {
-          return true;
-        }
-      }
+    } else if (element instanceof HTMLSelectElement && isSelectDirty(element)) {
+      return true;
     }
   }
   return false;
+};
+
+/**
+ * A drop-down with no option marked as the default still shows one — its
+ * first option — and a reset goes back to that one too, so the baseline is
+ * the option a reset would select, not each option's `defaultSelected`.
+ */
+const isSelectDirty = (select: HTMLSelectElement): boolean => {
+  const options = [...select.options];
+  if (select.multiple) {
+    return options.some((option) => option.selected !== option.defaultSelected);
+  }
+  const defaults = options.filter((option) => option.defaultSelected);
+  const baseline =
+    defaults.at(-1) ??
+    (select.size > 1 ? undefined : options.find((option) => !option.disabled));
+  return select.selectedIndex !== (baseline?.index ?? -1);
 };

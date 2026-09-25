@@ -1,6 +1,7 @@
-import type { Match } from '@k8ordo/router';
+import type { Match, RouteNode, Routes } from '@k8ordo/router';
 import type { ComponentType, ReactNode } from 'react';
 
+import { PageBoundary } from './page-boundary';
 import type { RouteRequest } from './request';
 
 export type PageProps = {
@@ -29,37 +30,83 @@ export type PageProps = {
  * application that renders entirely in the browser.
  *
  * `params` are the page's — what the schemas along its stack produced. Only
- * the leaf gets them: a layout does not know which page is below it, and
- * under `not-found.tsx` nothing is validated, so a layout receives the
- * strings the pathname carried, which is what its type says.
+ * the leaf gets them: a layout does not know which page is below it, and a
+ * `not-found.tsx` renders under it whether or not its schemas accepted, so a
+ * layout receives the strings the pathname carried, which is what its type
+ * says.
+ *
+ * `page`, when given, renders in the leaf's place — the page, watched — inside
+ * the boundary that sends a client navigation's `notFound()` back to the
+ * server.
  */
 export const renderMatch = (
   match: Match,
   pathname: string,
   params: Readonly<Record<string, unknown>> = match.params,
   request?: RouteRequest,
+  page?: ComponentType<never>,
 ): ReactNode => {
   let node: ReactNode = null;
   for (let index = match.stack.length - 1; index >= 0; index -= 1) {
+    const leaf = index === match.stack.length - 1;
     // The table stores components of every shape; this renderer is the one
     // that states what it passes.
-    const Component = match.stack[index] as ComponentType<PageProps>;
-    const own = index === match.stack.length - 1 ? params : match.params;
+    const Component = (
+      leaf && page !== undefined ? page : match.stack[index]
+    ) as ComponentType<PageProps>;
     node = (
-      <Component params={own} pathname={pathname} request={request}>
+      <Component
+        params={leaf ? params : match.params}
+        pathname={pathname}
+        request={request}
+      >
         {node}
       </Component>
     );
+    if (leaf && page !== undefined) node = <PageBoundary>{node}</PageBoundary>;
   }
   return node;
 };
 
-/** Shown only when an application declares no `not-found.tsx` at all. */
-export const NotFound = (): ReactNode => (
-  <html lang="en">
-    <body>
-      <h1>404</h1>
-      <p>This page is not in the route table.</p>
-    </body>
-  </html>
+const NotFoundBody = (): ReactNode => (
+  <>
+    <title>Not found</title>
+    <h1>404</h1>
+    <p>This page is not in the route table.</p>
+  </>
 );
+
+/** The root layout, when the table has one: it sits on the transparent `/`. */
+const rootLayoutOf = (routes: Routes): ComponentType<PageProps> | null => {
+  const root: RouteNode | undefined = routes.record['/'];
+  if (typeof root !== 'object' || !('children' in root)) return null;
+  return (root.layout ?? null) as ComponentType<PageProps> | null;
+};
+
+/**
+ * What answers when an application declares no `not-found.tsx` at all: a
+ * heading and a line, inside the root layout — which is the document, so the
+ * visitor keeps the site's frame, its `<html lang>`, its stylesheets, and a
+ * way back. With no root layout either, a document of its own.
+ */
+export const renderNotFound = (
+  routes: Routes,
+  pathname: string,
+  request?: RouteRequest,
+): ReactNode => {
+  const Layout = rootLayoutOf(routes);
+  if (Layout === null) {
+    return (
+      <html lang="en">
+        <body>
+          <NotFoundBody />
+        </body>
+      </html>
+    );
+  }
+  return (
+    <Layout params={{}} pathname={pathname} request={request}>
+      <NotFoundBody />
+    </Layout>
+  );
+};

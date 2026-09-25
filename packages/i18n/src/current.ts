@@ -11,6 +11,8 @@
  * In the browser the URL is the locale: its first segment, read when asked.
  */
 
+import type { RegisteredLocale } from './register';
+
 export type LocaleStorage = {
   getStore: () => string | undefined;
   enterWith: (locale: string) => void;
@@ -66,19 +68,37 @@ export const register = (set: RegisteredSet): void => {
   global[SET_KEY] = set;
 };
 
-/** The first segment of the browser's URL, whatever it spells. */
-const browserSegment = (): string =>
-  global.location?.pathname.split('/')[1] ?? '';
+/**
+ * The browser's pathname in the application's terms: Vite's `base` taken
+ * off, so the first segment is the one the route table's `[locale]` names —
+ * `/docs/en/ui` is `/en/ui` under `base: '/docs/'`.
+ */
+export const browserPathname = (): string => {
+  const pathname = global.location?.pathname ?? '/';
+  // Vite の外（Next.js など）では import.meta.env が、型（Vite のもの）に反して
+  // undefined になる。base は無いものとして読む
+  // oxlint-disable-next-line typescript/no-unnecessary-condition -- 上のとおり型に反して undefined になりうる
+  const base = import.meta.env === undefined ? '/' : import.meta.env.BASE_URL;
+  if (!base.startsWith('/') || base === '/') return pathname;
+  const prefix = base.endsWith('/') ? base.slice(0, -1) : base;
+  if (pathname === prefix) return '/';
+  return pathname.startsWith(`${prefix}/`)
+    ? pathname.slice(prefix.length)
+    : pathname;
+};
+
+/** The first segment of the browser's URL below the base, whatever it spells. */
+const browserSegment = (): string => browserPathname().split('/')[1] ?? '';
 
 /** Whether a set has registered in this environment yet. */
 export const setRegistered = (): boolean => global[SET_KEY] !== undefined;
 
 /**
- * The current locale as a string, or `null` when nothing names one: no
+ * The locale named where this runs, or `null` when nothing names one: no
  * segment in the URL, no request in progress. A registered set makes an
  * unknown segment `null` too, so `/fr/…` does not read as a locale.
  */
-export const currentLocale = (): string | null => {
+export const namedLocale = (): string | null => {
   const set = global[SET_KEY];
   const named = inBrowser ? browserSegment() : localeStorage()?.getStore();
   if (named === undefined || named === '') return null;
@@ -89,3 +109,17 @@ export const currentLocale = (): string | null => {
 /** The registered default, when a set registered in this environment. */
 export const registeredDefault = (): string | null =>
   global[SET_KEY]?.default ?? null;
+
+/**
+ * The current locale as the application's set resolves it — the one named,
+ * else the set's default — or `null` when no set is defined in this
+ * environment. For a library rendering inside an application it does not
+ * know (`@k8ordo/ui`'s built-in text): an application that never defined a
+ * set has no locale, whatever its URL happens to start with, so the server
+ * and the browser both answer `null` and agree.
+ */
+export const currentLocale = (): RegisteredLocale | null => {
+  const set = global[SET_KEY];
+  if (set === undefined) return null;
+  return (namedLocale() ?? set.default) as RegisteredLocale;
+};

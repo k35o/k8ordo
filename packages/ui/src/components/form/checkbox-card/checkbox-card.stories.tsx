@@ -135,3 +135,38 @@ export const ForwardsRef: Story = {
     ).toHaveFocus();
   },
 };
+
+const checkMarkOf = (checkbox: HTMLElement) =>
+  checkbox.closest('label')?.querySelector('svg');
+
+// 非制御の選択は input の :checked から描くので、change を飛ばさない reset にも追従する
+export const CheckMarkFollowsReset: Story = {
+  render: (props) => (
+    <form className="flex flex-col items-start gap-2">
+      <p className="text-fg-base font-medium" id="checkbox-card-reset-label">
+        Enable collaboration features
+      </p>
+      <CheckboxCard
+        aria-labelledby="checkbox-card-reset-label"
+        defaultValue={['history']}
+        options={props.options}
+      />
+      <button type="reset">reset</button>
+    </form>
+  ),
+  play: async ({ canvas, userEvent }) => {
+    const history = canvas.getByRole('checkbox', { name: 'Version history' });
+    const share = canvas.getByRole('checkbox', { name: 'Share links' });
+
+    await userEvent.click(history);
+    await userEvent.click(share);
+    await expect(checkMarkOf(share)).toBeVisible();
+
+    await userEvent.click(canvas.getByRole('button', { name: 'reset' }));
+
+    await expect(history).toBeChecked();
+    await expect(share).not.toBeChecked();
+    await expect(checkMarkOf(history)).toBeVisible();
+    await expect(checkMarkOf(share)).not.toBeVisible();
+  },
+};

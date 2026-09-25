@@ -1,7 +1,7 @@
 import type { Message } from '@k8ordo/i18n';
 import { Code } from '@k8ordo/ui';
+import { CodeBlock } from '@k8ordo/ui/code-block';
 
-import { CodeBlock } from '../../../../components/code-block';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Rich } from '../../../../components/rich';
@@ -159,6 +159,11 @@ const MAPPING: ReadonlyArray<{ schema: string; input: string; note: Message }> =
       note: m.formFields.mapLiteralTrue,
     },
     {
+      schema: 'z.stringbool().default(false)',
+      input: "type: 'checkbox', value: 'true'",
+      note: m.formFields.mapStringbool,
+    },
+    {
       schema: "z.enum(['free', 'team'])",
       input: 'required: true',
       note: m.formFields.mapEnum,
@@ -229,6 +234,11 @@ const EMPTY_SUBMISSIONS: ReadonlyArray<{
     id: 'checkbox',
     control: m.formFields.emptyCheckbox,
     value: m.formFields.emptyCheckboxValue,
+  },
+  {
+    id: 'stringbool',
+    control: m.formFields.emptyStringbool,
+    value: m.formFields.emptyStringboolValue,
   },
   {
     id: 'number',
@@ -791,6 +801,9 @@ export default function FormFieldsPage() {
         title={m.formFields.checkboxTitle}
       >
         <p className="text-fg-mute leading-relaxed">
+          <Rich>{m.formFields.stringboolDescription()}</Rich>
+        </p>
+        <p className="text-fg-mute leading-relaxed">
           <Rich>{m.formFields.groupDescription()}</Rich>
         </p>
         <CodeBlock code={CHECKBOX_SCHEMA} lang="ts" />
@@ -940,7 +953,7 @@ export default function FormFieldsPage() {
             <Rich>{m.formFields.refusedDate()}</Rich>
           </li>
           <li className="list-disc">
-            <Rich>{m.formFields.refusedStringbool()}</Rich>
+            <Rich>{m.formFields.refusedStringboolDefaultTrue()}</Rich>
           </li>
           <li className="list-disc">
             <Rich>{m.formFields.refusedRecord()}</Rich>

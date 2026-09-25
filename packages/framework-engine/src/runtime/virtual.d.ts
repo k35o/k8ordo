@@ -18,7 +18,29 @@ declare module 'virtual:k8ordo/routes' {
    * ambient module declaration resolves loosely, and the handler wants the
    * real shape.
    */
-  export const paramSchemas: Readonly<
+  export const paramSchemas: SchemaStacks;
+  /**
+   * Per catch-all pattern, the schemas of the layouts above its not-found —
+   * run for what they write, never to refuse it.
+   */
+  export const catchAllSchemas: SchemaStacks;
+  /**
+   * Per pattern, the `guard.ts` default exports that run before it answers,
+   * outer first; `/*` carries the root's.
+   */
+  export const guards: Readonly<
+    Record<
+      string,
+      ReadonlyArray<
+        (context: {
+          readonly request: Request;
+          readonly params: Readonly<Record<string, string>>;
+        }) => unknown
+      >
+    >
+  >;
+
+  type SchemaStacks = Readonly<
     Record<
       string,
       ReadonlyArray<{

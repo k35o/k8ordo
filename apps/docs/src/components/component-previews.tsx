@@ -11,23 +11,28 @@ import {
   Breadcrumb,
   Button,
   Card,
+  Carousel,
   Checkbox,
   CheckboxCard,
   CloseIcon,
   Code,
+  CopyButton,
   Dialog,
   DropdownMenu,
+  EmptyState,
   FileField,
   Form,
   FormControl,
   Heading,
   IconButton,
+  Kbd,
   ListBox,
   NumberField,
   Pagination,
   PaletteIcon,
   PasswordInput,
   Popover,
+  Prose,
   Progress,
   Radio,
   RadioCard,
@@ -39,6 +44,7 @@ import {
   Spinner,
   Switch,
   Table,
+  TableIcon,
   Tabs,
   TextField,
   Textarea,
@@ -97,6 +103,7 @@ export const componentPreviews: Record<string, ReactNode> = {
       <CloseIcon size="sm" />
     </IconButton>
   ),
+  CopyButton: <CopyButton size="sm" value="pnpm add @k8ordo/ui" />,
   Anchor: (
     <Anchor href="https://example.com" openInNewTab>
       External Link
@@ -253,6 +260,25 @@ export const componentPreviews: Record<string, ReactNode> = {
     </Card>
   ),
   Code: <Code>console.log()</Code>,
+  Kbd: (
+    <span className="inline-flex items-center gap-1">
+      <Kbd label="Command">⌘</Kbd>
+      <Kbd>K</Kbd>
+    </span>
+  ),
+  Carousel: (
+    <div className="w-full max-w-60">
+      <Carousel.Root label="Carousel" slideSize="lg">
+        {['1', '2', '3'].map((slide) => (
+          <Carousel.Slide key={slide}>
+            <div className="bg-bg-base flex h-12 items-center justify-center rounded-lg shadow-sm">
+              {slide}
+            </div>
+          </Carousel.Slide>
+        ))}
+      </Carousel.Root>
+    </div>
+  ),
   Table: (
     <Table.Root>
       <Table.Head>
@@ -270,7 +296,20 @@ export const componentPreviews: Record<string, ReactNode> = {
     </Table.Root>
   ),
   Heading: <Heading level="h2">Section Title</Heading>,
+  Prose: (
+    <div className="w-full max-w-56">
+      <Prose>
+        <h3>Heading</h3>
+        <p>
+          Body text with <strong>strong</strong> and <em>emphasis</em>.
+        </p>
+      </Prose>
+    </div>
+  ),
   Alert: <Alert message="This is an info alert." tone="info" />,
+  EmptyState: (
+    <EmptyState icon={<TableIcon size="md" />} title="Nothing here yet" />
+  ),
   Skeleton: (
     <div className="w-40">
       <Skeleton />
@@ -334,11 +373,6 @@ export const componentPreviews: Record<string, ReactNode> = {
   Separator: (
     <div className="w-40">
       <Separator color="mute" />
-    </div>
-  ),
-  ScrollLinked: (
-    <div className="w-40">
-      <Progress max={100} value={40} />
     </div>
   ),
   Icons: (

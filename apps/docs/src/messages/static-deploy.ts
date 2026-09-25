@@ -86,13 +86,13 @@ export const notFoundOne = message({
 });
 
 export const notFoundParams = message({
-  ja: 'この 1 枚は、サイトが持たない pathname に対して描かれます。404 とはもともとそういうものです。`pathname` はそうした URL で、`not-found.tsx` の上にパラメータがあれば、そこにはどのルートも宣言していない区間が入ります。つまりそこでの `params.<name>` は、アプリが名付けた値ではありません。`@k8ordo/server` で `/:locale/*` が `/fr/anything` にも一致するときと同じように扱い、値を確かめます。訪問者が実際に開いた URL は、hydration の後にクライアントコンポーネントで `usePathname()` から読みます。JavaScript の無い訪問者には、ビルド時の描画がそのまま残ります。',
-  en: 'That one file is rendered for a pathname the site does not have, which is what any 404 is. Its `pathname` is such a URL, and where a parameter sits above `not-found.tsx`, that parameter is filled with a segment no route declared — so `params.<name>` there is not a value the application named. Treat it as you would under `@k8ordo/server`, where `/:locale/*` matches `/fr/anything` too: validate it, and read what the visitor actually opened from `usePathname()` in a client component after hydration. A visitor without JavaScript keeps whatever the build rendered.',
+  ja: 'この 1 枚は、サイトが持たない pathname に対して描かれます。404 とはもともとそういうものです。`pathname` はそうした URL で、`not-found.tsx` の上にパラメータがあれば、そこにはどのルートも宣言していない区間が入ります。つまりそこでの `params.<name>` は、アプリが名付けた値ではありません。`@k8ordo/server` で `/:locale/*` が `/fr/anything` にも一致するときと同じように扱い、値を確かめます。訪問者が実際に開いた URL は、クライアントコンポーネントで `usePathname()` から読みます。ブラウザはこの 1 枚を hydrate せず（別の URL 用に描かれたものなので）、訪問者の URL で描き直すので、クライアントコンポーネントは最初の描画から訪問者の URL を見ます。JavaScript の無い訪問者には、ビルド時の描画がそのまま残ります。',
+  en: 'That one file is rendered for a pathname the site does not have, which is what any 404 is. Its `pathname` is such a URL, and where a parameter sits above `not-found.tsx`, that parameter is filled with a segment no route declared — so `params.<name>` there is not a value the application named. Treat it as you would under `@k8ordo/server`, where `/:locale/*` matches `/fr/anything` too: validate it, and read what the visitor actually opened from `usePathname()` in a client component. The browser does not hydrate this file — it was rendered for another URL — but renders it afresh where the visitor is, so a client component sees their URL from its first render. A visitor without JavaScript keeps whatever the build rendered.',
 });
 
 export const notFoundSite = message({
-  ja: 'このサイトの `LocaleShell` がその形です（下はその部分の抜粋です）。受け取った値を `locales.is()` で確かめ、ロケールでなければ URL から読み直します。そのため `404.html` は日本語で配信され、`/en/…` の URL で hydrate した瞬間に英語になります。',
-  en: "This site's `LocaleShell` does exactly that (excerpted below): it checks the value with `locales.is()`, and otherwise reads the locale from the URL — which is why `404.html` is served in Japanese and turns English the moment it hydrates on an `/en/…` URL.",
+  ja: 'このサイトの `LocaleShell` がその形です（下はその部分の抜粋です）。受け取った値を `locales.is()` で確かめ、ロケールでなければ URL から読み直します。そのため `404.html` は日本語で配信され、`/en/…` の URL でブラウザが描き直した瞬間に英語になります。',
+  en: "This site's `LocaleShell` does exactly that (excerpted below): it checks the value with `locales.is()`, and otherwise reads the locale from the URL — which is why `404.html` is served in Japanese and turns English the moment the browser renders it on an `/en/…` URL.",
 });
 
 export const notFoundNone = message({
@@ -174,6 +174,11 @@ export const stopsActions = message({
   en: "A module that declares `'use server'`",
 });
 
+export const stopsGuards = message({
+  ja: '`guard.ts`',
+  en: 'A `guard.ts`',
+});
+
 export const stopsThrow = message({
   ja: 'ビルド中に throw したコンポーネント（Server Component はいつでも、クライアントコンポーネントは上に Suspense の境界が無いとき）',
   en: 'A component that throws while the build renders it — a Server Component always, a client component when no Suspense boundary sits above it',
@@ -200,8 +205,8 @@ export const cannotTitle = message({
 });
 
 export const cannotDescription = message({
-  ja: 'リクエストを必要とするものすべてです。Server Action とそこからの `redirect()`、`@k8ordo/server` の下でページが読む `request`、そしてアプリが決めるステータスコード。ファイルはフォームの送信を受け取れず、`404.html` を 200 ではなく 404 で返すかどうかはホスティングの設定です。ビルドはページを書けても、応答は書けません。',
-  en: "Anything that needs the request: Server Actions and `redirect()` from them, the `request` a page reads under `@k8ordo/server`, and status codes the application decides. A file cannot receive a form submission, and whether `404.html` is served with a 404 rather than a 200 is the host's setting — the build can write the page, but not the response.",
+  ja: 'リクエストを必要とするものすべてです。Server Action とそこからの `redirect()`、`@k8ordo/server` の下でページが読む `request`、リクエストを通すかどうかを決める `guard.ts`、そしてアプリが決めるステータスコード。ファイルはフォームの送信を受け取れず、`404.html` を 200 ではなく 404 で返すかどうかはホスティングの設定です。ビルドはページを書けても、応答は書けません。',
+  en: "Anything that needs the request: Server Actions and `redirect()` from them, the `request` a page reads under `@k8ordo/server`, a `guard.ts` deciding whether a request gets through, and status codes the application decides. A file cannot receive a form submission, and whether `404.html` is served with a 404 rather than a 200 is the host's setting — the build can write the page, but not the response.",
 });
 
 export const cannotServer = message({

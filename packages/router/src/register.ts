@@ -116,9 +116,9 @@ export type PageProps<P extends RegisteredPattern> = {
  * The props a `layout.tsx` receives, by the prefix every route below it
  * shares — only where the table also has a page at that prefix, since the
  * constraint is a page pattern; a layout with no page of its own declares
- * its props inline. Its params are strings whatever it declared: under
- * `not-found.tsx` nothing is validated, and a typed value there would be a
- * lie.
+ * its props inline. Its params are strings whatever it declared: a
+ * `not-found.tsx` renders under it whether or not its schemas accepted, and
+ * a typed value there would be a lie.
  */
 export type LayoutProps<P extends RegisteredPattern> = {
   readonly params: ParamsOf<P>;
