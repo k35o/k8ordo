@@ -322,3 +322,330 @@ describe("a Server Action's answer", () => {
     expect(screen.container.textContent).toBe('first page');
   });
 });
+
+const NEXT: Payload = { tree: 'next page', pathname: '/next', client: RUNNING };
+
+const payloadResponse = (payload: Payload): Response =>
+  new Response(JSON.stringify(payload), {
+    headers: { 'content-type': 'text/x-component;charset=utf-8' },
+  });
+
+// ページのペイロードへの n 回目の GET に answer(n) で答え、何回来たかを数える。
+// アクションの POST には、そのページを描き直した答えを返す
+const countPayloadRequests = (
+  answer: (nth: number, signal: AbortSignal) => Promise<Response> = () =>
+    Promise.resolve(payloadResponse(NEXT)),
+): (() => number) => {
+  let requested = 0;
+  vi.stubGlobal('fetch', (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = String(input instanceof Request ? input.url : input);
+    if (init?.method === 'POST') {
+      return Promise.resolve(payloadResponse({ ...NEXT, pathname: '/' }));
+    }
+    if (!url.endsWith('/index.rsc')) return passThrough(input, init);
+    requested += 1;
+    if (!(init?.signal instanceof AbortSignal)) {
+      throw new Error('a payload request without a signal');
+    }
+    return answer(requested, init.signal);
+  });
+  return () => requested;
+};
+
+// 答えずに待ち、中断されたら本物の fetch と同じくその理由で reject する
+const answerOnlyAnAbort = (
+  _nth: number,
+  signal: AbortSignal,
+): Promise<Response> =>
+  new Promise((_resolve, reject) => {
+    signal.addEventListener('abort', () => {
+      reject(signal.reason as Error);
+    });
+  });
+
+// 1 回目だけネットワークが落ちている
+const offlineAtFirst = (nth: number): Promise<Response> =>
+  nth === 1
+    ? Promise.reject(new TypeError('offline'))
+    : Promise.resolve(payloadResponse(NEXT));
+
+const pointerOnto = (link: Element): void => {
+  link.dispatchEvent(new PointerEvent('pointerover', { bubbles: true }));
+};
+
+const intents: ReadonlyArray<[string, (link: Element) => void]> = [
+  ['a pointer moves onto', pointerOnto],
+  [
+    'focus lands on',
+    (link) => {
+      link.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+    },
+  ],
+  [
+    'a press starts on',
+    (link) => {
+      link.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+    },
+  ],
+];
+
+const nextTask = (): Promise<unknown> =>
+  new Promise((resolve) => {
+    setTimeout(resolve, 0);
+  });
+
+describe('prefetching the page a link leads to', () => {
+  it.each(intents)(
+    'fetches the payload when %s a link, and the navigation renders it without asking again',
+    async (_, intent) => {
+      const requested = countPayloadRequests();
+      const screen = await render(
+        <AppRouter pathname="/" tree={<a href="/next">next</a>} />,
+      );
+
+      intent(screen.getByRole('link').element());
+      await vi.waitFor(() => {
+        expect(requested()).toBe(1);
+      });
+      await navigation.navigate('/next').finished;
+
+      await expect.element(screen.getByText('next page')).toBeInTheDocument();
+      expect(requested()).toBe(1);
+    },
+  );
+
+  it('fetches a page once however many times its link is touched', async () => {
+    const requested = countPayloadRequests();
+    const screen = await render(
+      <AppRouter pathname="/" tree={<a href="/next">next</a>} />,
+    );
+    const link = screen.getByRole('link').element();
+
+    for (const [, intent] of intents) intent(link);
+    await nextTask();
+
+    expect(requested()).toBe(1);
+  });
+
+  it('hands what it fetched to one navigation only — the next visit fetches afresh', async () => {
+    const requested = countPayloadRequests();
+    const screen = await render(
+      <AppRouter pathname="/" tree={<a href="/next">next</a>} />,
+    );
+    pointerOnto(screen.getByRole('link').element());
+    await navigation.navigate('/next').finished;
+
+    await navigation.back().finished;
+    await navigation.navigate('/next').finished;
+
+    // 行き・戻り（/ のペイロード）・2 度目の行きで 3 回。2 度目は取り直す
+    expect(requested()).toBe(3);
+  });
+
+  it.each([
+    [
+      'a link that says so',
+      () => (
+        <a data-k8ordo-prefetch={false} href="/next">
+          next
+        </a>
+      ),
+    ],
+    [
+      'a link inside an element that says so',
+      () => (
+        <nav data-k8ordo-prefetch="false">
+          <a href="/next">next</a>
+        </nav>
+      ),
+    ],
+    [
+      'a link to another origin',
+      () => <a href="https://example.com/next">next</a>,
+    ],
+    [
+      'a link that opens another tab',
+      () => (
+        <a href="/next" target="_blank">
+          next
+        </a>
+      ),
+    ],
+    [
+      'a download',
+      () => (
+        <a download href="/next">
+          next
+        </a>
+      ),
+    ],
+    ['a link to the page on screen', () => <a href="/?q=shoes">search</a>],
+  ])('fetches nothing for %s', async (_, tree) => {
+    const requested = countPayloadRequests();
+    const screen = await render(<AppRouter pathname="/" tree={tree()} />);
+    const link = screen.getByRole('link').element();
+
+    for (const [, intent] of intents) intent(link);
+    await nextTask();
+
+    expect(requested()).toBe(0);
+  });
+
+  it('fetches a link that opts back in inside an element that opted out', async () => {
+    const requested = countPayloadRequests();
+    const screen = await render(
+      <AppRouter
+        pathname="/"
+        tree={
+          <nav data-k8ordo-prefetch={false}>
+            <a data-k8ordo-prefetch href="/next">
+              next
+            </a>
+          </nav>
+        }
+      />,
+    );
+
+    pointerOnto(screen.getByRole('link').element());
+    await nextTask();
+
+    expect(requested()).toBe(1);
+  });
+
+  it('drops what it fetched once a Server Action answers, which may have changed it', async () => {
+    const requested = countPayloadRequests();
+    const screen = await render(
+      <AppRouter pathname="/" tree={<a href="/next">next</a>} />,
+    );
+    pointerOnto(screen.getByRole('link').element());
+    await nextTask();
+
+    await serverCallback()('action-id', []);
+    await navigation.navigate('/next').finished;
+
+    expect(requested()).toBe(2);
+  });
+
+  it('asks again when the prefetch failed', async () => {
+    const requested = countPayloadRequests(offlineAtFirst);
+    const screen = await render(
+      <AppRouter pathname="/" tree={<a href="/next">next</a>} />,
+    );
+    pointerOnto(screen.getByRole('link').element());
+    await nextTask();
+
+    await navigation.navigate('/next').finished;
+
+    await expect.element(screen.getByText('next page')).toBeInTheDocument();
+    expect(requested()).toBe(2);
+    expect(reloadDocument).not.toHaveBeenCalled();
+  });
+
+  it('cancels the prefetch a navigation took once that navigation is overtaken, and reloads nothing', async () => {
+    let cancelled = false;
+    const requested = countPayloadRequests((nth, signal) => {
+      signal.addEventListener('abort', () => {
+        cancelled = true;
+      });
+      return answerOnlyAnAbort(nth, signal);
+    });
+    const screen = await render(
+      <AppRouter pathname="/" tree={<a href="/next">next</a>} />,
+    );
+    pointerOnto(screen.getByRole('link').element());
+    navigation.navigate('/next').finished?.catch(() => undefined);
+
+    await navigation.back().finished;
+    await nextTask();
+
+    expect(requested()).toBe(1);
+    expect(cancelled).toBe(true);
+    expect(reloadDocument).not.toHaveBeenCalled();
+    expect(screen.container.textContent).toBe('next');
+  });
+});
+
+// ペイロードを取りに来た pathname を順に集め、どれにも NEXT で答える
+const recordPayloadRequests = (): string[] => {
+  const requested: string[] = [];
+  vi.stubGlobal('fetch', (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = new URL(
+      String(input instanceof Request ? input.url : input),
+      location.href,
+    );
+    if (!url.pathname.endsWith('/index.rsc')) return passThrough(input, init);
+    requested.push(url.pathname);
+    return Promise.resolve(
+      new Response(
+        JSON.stringify({
+          tree: 'next page',
+          pathname: '/next',
+          client: RUNNING,
+        }),
+        { headers: { 'content-type': 'text/x-component;charset=utf-8' } },
+      ),
+    );
+  });
+  return requested;
+};
+
+describe('under a base', () => {
+  beforeEach(() => {
+    vi.stubEnv('BASE_URL', '/site/');
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it('fetches the payload that sits beside the page under the base', async () => {
+    const requested = recordPayloadRequests();
+    const screen = await render(<AppRouter pathname="/" tree="first page" />);
+
+    await navigation.navigate('/site/next').finished;
+
+    await expect.element(screen.getByText('next page')).toBeInTheDocument();
+    expect(requested).toStrictEqual(['/site/next/index.rsc']);
+  });
+
+  it('leaves a URL outside the base to the browser', async () => {
+    const requested = recordPayloadRequests();
+    const screen = await render(<AppRouter pathname="/" tree="first page" />);
+
+    // 引き受けなければ文書の読み込みになってテストが落ちるので、ここでは
+    // テストがルーターを演じる。引き受けなかったことは、取りに行かないことで見る
+    navigation.addEventListener('navigate', interceptEverything);
+    try {
+      await navigation.navigate('/elsewhere').finished;
+    } finally {
+      navigation.removeEventListener('navigate', interceptEverything);
+    }
+
+    expect(requested).toStrictEqual([]);
+    expect(screen.container.textContent).toBe('first page');
+  });
+
+  it('fetches a link below the base ahead, at the payload beside its page', async () => {
+    const requested = recordPayloadRequests();
+    const screen = await render(
+      <AppRouter pathname="/" tree={<a href="/site/next">next</a>} />,
+    );
+
+    pointerOnto(screen.getByRole('link').element());
+    await nextTask();
+
+    expect(requested).toStrictEqual(['/site/next/index.rsc']);
+  });
+
+  it('fetches nothing ahead for a link outside the base', async () => {
+    const requested = recordPayloadRequests();
+    const screen = await render(
+      <AppRouter pathname="/" tree={<a href="/elsewhere">elsewhere</a>} />,
+    );
+
+    pointerOnto(screen.getByRole('link').element());
+    await nextTask();
+
+    expect(requested).toStrictEqual([]);
+  });
+});

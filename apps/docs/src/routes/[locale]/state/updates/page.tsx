@@ -1,6 +1,6 @@
 import { Code } from '@k8ordo/ui';
+import { CodeBlock } from '@k8ordo/ui/code-block';
 
-import { CodeBlock } from '../../../../components/code-block';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Rich } from '../../../../components/rich';
@@ -248,6 +248,22 @@ export default function StateUpdatesPage() {
               cells: [
                 <Code key="changes">defineLocalState</Code>,
                 <Rich key="write">{batch.localWrite()}</Rich>,
+                batch.none(),
+              ],
+            },
+            {
+              key: 'session',
+              cells: [
+                <Code key="changes">defineSessionState</Code>,
+                <Rich key="write">{batch.sessionWrite()}</Rich>,
+                batch.none(),
+              ],
+            },
+            {
+              key: 'cookie',
+              cells: [
+                <Code key="changes">defineCookieState</Code>,
+                <Rich key="write">{batch.cookieWrite()}</Rich>,
                 batch.none(),
               ],
             },

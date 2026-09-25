@@ -84,8 +84,9 @@ import { FormControl, TextField } from '@k8ordo/ui';
 
 - Set `aria-label` / `aria-describedby` where they belong
 - Guarantee keyboard navigation (Tab, Enter, Escape, arrow keys)
-- Respect `prefers-reduced-motion`. Under it the stylesheet turns off the open animation of Popover and what is built on it (DropdownMenu, ListBox, Tooltip), the Toast, Modal, and Drawer animations, the Tabs indicator slide, and every view transition; `Card`'s hover scale runs only under `motion-safe:`. Skeleton's pulse, Spinner's spin, and the Accordion chevron, Switch thumb, and Progress bar transitions keep running, and so does the `ScrollLinked` bar, which follows the scroll by design. Put `motion-safe:` on your own motion
+- Respect `prefers-reduced-motion`. Under it the stylesheet turns off the open animation of Popover and what is built on it (DropdownMenu, ListBox, Tooltip), the Toast, Modal, and Drawer animations, the Tabs indicator slide, and every view transition; `Card`'s hover scale runs only under `motion-safe:`. Skeleton's pulse, Spinner's spin, and the Accordion chevron, Switch thumb, and Progress bar transitions keep running. Put `motion-safe:` on your own motion
 - Never signal state with color alone; pair it with an icon or text
+- The components follow `prefers-contrast: more` and stay legible under `forced-colors: active` (see [High contrast and forced colors](./color.md#high-contrast-and-forced-colors)); do the same in your own UI
 
 ## What not to do
 

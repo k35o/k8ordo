@@ -42,7 +42,15 @@ pnpm check         # check:write to auto-fix
   fills, which is why the dev hook is ordered `post` and never looks at the
   code it is handed: that transform prepends its runtime import, so the
   file has stopped beginning with the directive by the time anyone downstream
-  sees it.
+  sees it. A `guard.ts` fails it the same way — every one named before
+  anything is built (`buildApp`, `order: 'pre'`), and in `vite dev` the
+  moment the module is compiled — found through the engine's grammar
+  (`slotOf`), never by the file name alone, since a `_private/guard.ts` is
+  not one.
+- **A supplied pathname the site then disowns fails the build.** A 404 for
+  a pathname `paths` supplied is either a params schema refusing it or the
+  page saying `notFound()`; the handler marks the second with
+  `NOT_FOUND_HEADER`, and the build names each kind in its own message.
 - **`site` is the only reason a sitemap exists.** Without the origin a
   sitemap would list relative URLs, which is not a sitemap; with it every
   page the build wrote is listed, redirects and the not-found excluded.
@@ -54,6 +62,13 @@ pnpm check         # check:write to auto-fix
 - **The plugin is `framework()`, the same name `@k8ordo/server` exports.**
   The mode is the import and nothing else, which is what makes a
   `vite.config.ts` identical under either package.
+- **Pages are counted in the table's terms and asked for under the base.**
+  `urlFor` puts `builder.config.base` in front of every pathname the
+  handler is asked for (HTML, payload, `404.html`) and of every sitemap
+  `<loc>`, while files go to `dirFor(pathname)` inside the client build —
+  the directory a host serves at the base. The `paths` option is in the
+  table's terms too. Node runs this without Vite, so the router's
+  `withBase` gets the base passed in.
 - **Prerender runs after every environment is built** — `buildApp` with
   `order: 'post'` — and writes into the client build's own output directory,
   which Vite may hand over as an absolute path, so resolve it rather than
@@ -68,8 +83,8 @@ src/
                 functions (supplied pathnames matched with URLPattern)
   documents.ts  sitemap / redirectPage — the two files the build writes
                 itself rather than taking from the handler, escaped as markup
-  index.ts      framework: engine + prerender (the dev refusal in transform,
-                the files in buildApp)
+  index.ts      framework: engine + refusals (guard.ts before the build) +
+                prerender (the dev refusals in transform, the files in buildApp)
 ```
 
 ## Conventions

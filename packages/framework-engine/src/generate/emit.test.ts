@@ -386,3 +386,57 @@ describe('the request a page receives', () => {
     expect(source).not.toContain('RouteRequest');
   });
 });
+
+const guardMap = (text: string): string => {
+  const start = text.indexOf('export const guards = {');
+  return text.slice(start, text.indexOf('} as const;', start));
+};
+
+describe('guard.ts in the emitted table', () => {
+  const source = emit([
+    'layout.tsx',
+    'page.tsx',
+    'guard.ts',
+    'not-found.tsx',
+    'old/redirect.ts',
+    'admin/guard.ts',
+    'admin/page.tsx',
+    'admin/[id]/page.tsx',
+    'admin/not-found.tsx',
+  ]);
+
+  it('checks each guard against the pattern its directory puts it under', () => {
+    expect(source).toContain("import admin_guard from './routes/admin/guard';");
+    expect(source).toContain("guard satisfies Guard<'/'>,");
+    expect(source).toContain("admin_guard satisfies Guard<'/admin'>,");
+  });
+
+  it('lists, per pattern, the guards that run before it answers — outer first', () => {
+    const map = guardMap(source);
+    expect(map).toContain("'/': [guard],");
+    expect(map).toContain("'/admin': [guard, admin_guard],");
+    expect(map).toContain("'/admin/:id': [guard, admin_guard],");
+    expect(map).toContain("'/admin/*': [guard, admin_guard],");
+    expect(map).toContain("'/*': [guard],");
+  });
+
+  it('leaves a redirect out, since it answers before any guard runs', () => {
+    expect(guardMap(source)).not.toContain('/old');
+  });
+
+  it('keeps guards out of the route table, where nothing renders them', () => {
+    const table = source.slice(source.indexOf('export const routes'));
+    expect(table).not.toContain('guard');
+  });
+
+  it('gives /* the root guards even where no not-found.tsx declares it', () => {
+    const map = guardMap(emit(['page.tsx', 'guard.ts']));
+    expect(map).toContain("'/*': [guard],");
+  });
+
+  it('emits an empty map, and no Guard type, when nothing guards', () => {
+    const plain = emit(['page.tsx']);
+    expect(plain).toContain('export const guards = {\n} as const;');
+    expect(plain).not.toContain('type Guard<');
+  });
+});

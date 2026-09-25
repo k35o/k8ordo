@@ -9,9 +9,12 @@ import * as ui from '../_shared/renderers';
 import type * as sc from '../_shared/schemas';
 import {
   AutocompleteView,
+  CalendarView,
   CheckboxCardView,
   CheckboxGroupView,
   CheckboxView,
+  DateFieldView,
+  DatePickerView,
   ListBoxView,
   NumberFieldView,
   PaginationView,
@@ -92,6 +95,8 @@ const renderers = {
     ui.renderButton(props),
   IconButton: ({ props }: ComponentRenderProps<sc.IconButtonProps>) =>
     ui.renderIconButton(props),
+  CopyButton: ({ props }: ComponentRenderProps<sc.CopyButtonProps>) =>
+    ui.renderCopyButton(props),
   Badge: ({ props }: ComponentRenderProps<sc.BadgeProps>) =>
     ui.renderBadge(props),
   Heading: ({ props }: ComponentRenderProps<sc.HeadingProps>) =>
@@ -101,6 +106,14 @@ const renderers = {
   Avatar: ({ props }: ComponentRenderProps<sc.AvatarProps>) =>
     ui.renderAvatar(props),
   Code: ({ props }: ComponentRenderProps<sc.CodeProps>) => ui.renderCode(props),
+  Kbd: ({ props }: ComponentRenderProps<sc.KbdProps>) => ui.renderKbd(props),
+  EmptyState: ({ props }: ComponentRenderProps<sc.EmptyStateProps>) =>
+    ui.renderEmptyState(props),
+  Carousel: ({ props, renderNode }: ContainerRenderProps<sc.CarouselProps>) =>
+    ui.renderCarousel(
+      props,
+      props.children.map((child) => renderNode(child)),
+    ),
   Icon: ({ props }: ComponentRenderProps<sc.IconProps>) => ui.renderIcon(props),
   ChevronIcon: ({ props }: ComponentRenderProps<sc.ChevronIconProps>) =>
     ui.renderChevronIcon(props),
@@ -116,8 +129,6 @@ const renderers = {
     ui.renderSkeleton(props),
   Separator: ({ props }: ComponentRenderProps<sc.SeparatorProps>) =>
     ui.renderSeparator(props),
-  ScrollLinked: ({ props }: ComponentRenderProps<sc.ScrollLinkedProps>) =>
-    ui.renderScrollLinked(props),
   Tabs: ({ props }: ComponentRenderProps<sc.TabsProps>) => ui.renderTabs(props),
   Accordion: ({ props }: ComponentRenderProps<sc.AccordionProps>) =>
     ui.renderAccordion(props),
@@ -131,6 +142,9 @@ const renderers = {
   PasswordInput: PasswordInputView,
   NumberField: NumberFieldView,
   Slider: SliderView,
+  DateField: DateFieldView,
+  DatePicker: DatePickerView,
+  Calendar: CalendarView,
   Checkbox: CheckboxView,
   Switch: SwitchView,
   Select: SelectView,

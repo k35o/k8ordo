@@ -1,6 +1,6 @@
 import { Anchor, Heading, Separator } from '@k8ordo/ui';
+import { CodeBlock } from '@k8ordo/ui/code-block';
 
-import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';
 import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
@@ -12,6 +12,7 @@ import {
   FileFieldAcceptTypesPreview,
   FileFieldBasicPreview,
   FileFieldDisabledPreview,
+  FileFieldDropzonePreview,
   FileFieldInvalidPreview,
   FileFieldMultiplePreview,
 } from '../_previews/file-field-previews';
@@ -62,6 +63,23 @@ export default function FileFieldPage() {
 </FileField.Root>`}
           >
             <FileFieldBasicPreview />
+          </ComponentPreview>
+        </div>
+
+        <div className="flex flex-col gap-4">
+          <Heading level="h3">
+            <Rich>{m.components.fileField.dropzoneTitle()}</Rich>
+          </Heading>
+          <p className="text-fg-mute">
+            <Rich>{m.components.fileField.dropzoneDescription()}</Rich>
+          </p>
+          <ComponentPreview
+            code={`<FileField.Root accept="image/*" multiple>
+  <FileField.Dropzone />
+  <FileField.ItemList clearable />
+</FileField.Root>`}
+          >
+            <FileFieldDropzonePreview />
           </ComponentPreview>
         </div>
 

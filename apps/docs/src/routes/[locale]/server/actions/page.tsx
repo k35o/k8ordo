@@ -1,6 +1,6 @@
 import { Code } from '@k8ordo/ui';
+import { CodeBlock } from '@k8ordo/ui/code-block';
 
-import { CodeBlock } from '../../../../components/code-block';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import {
   Bullet,
@@ -66,6 +66,7 @@ export function TalkForm() {
 const LEAVE = `// src/routes/_parts/leave.ts
 'use server';
 
+import { href } from '@k8ordo/router';
 import { redirect } from '@k8ordo/server/runtime';
 
 import { saveTalk } from '../_data/talks.server';
@@ -75,7 +76,7 @@ export async function addAndLeave(formData: FormData): Promise<void> {
   if (typeof title === 'string' && title !== '') {
     await saveTalk(title);
   }
-  redirect('/products');
+  redirect(href('/products'));
 }`;
 
 const LEAVE_PAGE = `// src/routes/page.tsx
@@ -88,6 +89,25 @@ export default function HomePage() {
       <button type="submit">add and leave</button>
     </form>
   );
+}`;
+
+const SIGN_IN = `// src/routes/_parts/sign-in.ts
+'use server';
+
+import { cookies, redirect } from '@k8ordo/server/runtime';
+
+import { startSession } from '../_data/sessions.server';
+
+export type SignInState = { error?: string };
+
+export async function signIn(
+  _previous: SignInState,
+  formData: FormData,
+): Promise<SignInState> {
+  const session = await startSession(formData);
+  if (session === null) return { error: 'wrong password' };
+  cookies().set('session', session.token, { maxAge: 60 * 60 * 24 * 30 });
+  redirect('/account');
 }`;
 
 const REQUEST = `// src/routes/layout.tsx
@@ -210,6 +230,15 @@ export default function ServerActionsPage() {
         </Paragraph>
       </DocSection>
 
+      <DocSection description={t.contextDescription} title={t.contextTitle}>
+        <CodeBlock code={SIGN_IN} lang="ts" />
+        <Paragraph text={t.contextAnswer}>
+          <LocaleAnchor path="/:locale/server/guards">
+            {m.server.navGuards()}
+          </LocaleAnchor>
+        </Paragraph>
+      </DocSection>
+
       <DocSection description={t.requestDescription} title={t.requestTitle}>
         <CodeBlock code={REQUEST} lang="tsx" />
         <GuideTable
@@ -244,7 +273,11 @@ export default function ServerActionsPage() {
         </GuideTable>
         <Paragraph text={t.requestType} />
         <CodeBlock code={REQUEST_PROP} lang="tsx" />
-        <Paragraph text={t.requestReadOnly} />
+        <Paragraph text={t.requestReadOnly}>
+          <LocaleAnchor path="/:locale/server/guards">
+            {m.server.navGuards()}
+          </LocaleAnchor>
+        </Paragraph>
         <Paragraph text={t.requestStatic} />
       </DocSection>
 

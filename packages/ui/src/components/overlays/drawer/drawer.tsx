@@ -4,7 +4,7 @@ import { useId, useRef } from 'react';
 import type { FC, PropsWithChildren, ReactNode } from 'react';
 
 import { cn } from '../../../helpers/cn';
-import { useMessages } from '../../../i18n/context';
+import { getMessages } from '../../../i18n/current';
 import type { DrawerSide } from '../../../types/variables';
 import { IconButton } from '../../buttons/icon-button';
 import { Heading } from '../../data-display/heading';
@@ -20,7 +20,7 @@ export const Drawer: FC<
     side?: DrawerSide;
   }>
 > = ({ title, isOpen, defaultOpen, onClose, side = 'right', children }) => {
-  const messages = useMessages();
+  const messages = getMessages();
   const rootId = useId();
   const dialogRef = useRef<HTMLDialogElement>(null);
 

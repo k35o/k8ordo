@@ -1,10 +1,10 @@
 # Agent guide — packages/i18n
 
 `@k8ordo/i18n` — the locale axis, owned. `defineLocales` is the set (the
-list, the default, membership, negotiation, the URL segment, the static
-build's path expansion (`paths`), the `[locale]` params schema, the current
-locale); `message` is one message as a function that reads the current
-locale where it is called. No provider, no hook. The shared discipline
+list with each locale's `timeZone` and `dir`, the default, membership,
+negotiation, the URL segment, the static build's path expansion (`paths`),
+the `[locale]` params schema, the current locale); `message` is one message
+as a function that reads the current locale where it is called. No provider, no hook. The shared discipline
 (React 19 / RSC assumed, Baseline newly available only, no polyfills) and
 how a new package joins are in the repository root's
 [`CLAUDE.md`](../../CLAUDE.md).
@@ -15,7 +15,7 @@ inside the npm package.
 ## Commands
 
 ```bash
-pnpm test          # unit (locales, messages, request scope, Accept-Language; node) + browser (URL locale, chromium)
+pnpm test          # unit (locales, messages, request scope, formats, Accept-Language, Request negotiation; node) + browser (URL locale, chromium)
 pnpm build         # vp pack
 pnpm typecheck
 pnpm check         # check:write to auto-fix
@@ -48,7 +48,8 @@ pnpm check         # check:write to auto-fix
   renders in `en`. Outside the browser, a runtime with no `AsyncLocalStorage`
   makes `validate` throw, as `run` does — accepting a locale `getLocale()`
   cannot see would silently render the default. In the browser
-  `location.pathname`'s first segment is the locale, read as a message
+  `location.pathname`'s first segment below Vite's `base`
+  (`browserPathname` in `current.ts`) is the locale, read as a message
   renders. That agrees with the server's HTML only because the HTML was
   rendered for the same URL: the engine renders a document drawn for another
   one (`404.html`) afresh instead of hydrating it
@@ -64,16 +65,32 @@ pnpm check         # check:write to auto-fix
   module defining it), a segment no message has text for counts as no
   locale, so a 404 page does not throw.
 - **Refuse where it is read, name what is missing.** A message lacking the
-  named locale throws from the call, listing the variants present. A tag
-  that is not BCP 47, a default outside the list, and a repeated locale
+  named locale throws from the call, listing the variants present. An empty
+  set, a tag that is not BCP 47, a default outside the list, a time zone
+  `Intl.DateTimeFormat` refuses (or a missing one, which it would quietly
+  replace with the runtime's own), and a `dir` other than `ltr` / `rtl`
   still throw from `defineLocales` — that one runs once.
+- **A locale's time zone and direction are declared, never derived.** The
+  runtime's time zone is the server's on one side and the visitor's on the
+  other, so anything formatted in it disagrees across hydration; and
+  `Intl.Locale#getTextInfo` is not Baseline. Do not default either.
 - **No grammar.** A message is text in every locale or a function in every
   locale; interpolation is the function's own template literal; plurals and
-  formats are `Intl`. Do not add placeholder syntax, ICU parsing, or a
-  `formatters` option.
+  formats are `Intl`. The set's `dateTimeFormat` / `numberFormat` /
+  `relativeTimeFormat` / `pluralRules` / `listFormat` only pick the locale
+  (and, for a date, its `timeZone`), cache, and return the `Intl` object
+  itself. Do not wrap their output, add placeholder syntax, ICU parsing, a
+  format-string language, or a `formatters` option.
+- **A date is written only in its locale's time zone.**
+  `LocaleDateTimeFormatOptions` refuses `timeZone`, and `dateTimeFormat`
+  spreads the options before the locale's zone so a forced one loses. This is
+  the whole reason the helper exists; do not add an escape hatch.
 - **Negotiation is per requested tag, in order** — exact, then the first
   supported locale speaking the same language, then the default (RFC 4647
   lookup shape). The test `['en-US', 'ja']` → `'en'` is the guard.
+  `negotiateRequest` is the same `negotiate` over the named cookie's value
+  followed by `parseAcceptLanguage`'s list — never a rule of its own. The
+  cookie name is the caller's; the package does not pick one.
 - **`delocalize` says `null`, never the default.** The root layout and the
   404 page choose the fallback visibly.
 
@@ -88,7 +105,9 @@ src/
   message.ts          message(): one message as a function; Message, Variants
   current.ts          where the current locale is kept on each side; the registry
   register.ts         Register (the one interface) and RegisteredLocale
+  format.ts           the set's Intl members (dateTimeFormat, …), cached
   accept-language.ts  parseAcceptLanguage(): header → preference list
+  cookie.ts           readCookie(): one value out of a Cookie header (internal)
   index.ts
 ```
 

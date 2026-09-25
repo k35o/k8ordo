@@ -19,6 +19,12 @@ export type Messages = {
   /** Toast のビューポート（region ランドマーク）名 */
   toastRegion: string;
 
+  /** CopyButton の既定のラベル */
+  copy: string;
+  /** CopyButton が押した結果として読み上げる文言 */
+  copied: string;
+  copyFailed: string;
+
   autocompletePlaceholder: string;
   /** 選択済みタグ 1 件の解除 */
   autocompleteRemoveTag: string;
@@ -29,9 +35,22 @@ export type Messages = {
 
   fileFieldRemove: string;
   fileFieldTrigger: string;
+  /** FileField.Dropzone の既定の案内 */
+  fileFieldDrop: string;
 
   numberFieldIncrement: string;
   numberFieldDecrement: string;
+  /** NumberField の値が min を下回ったときの検証メッセージ。`{min}` が min の値に置き換わる */
+  numberFieldRangeUnderflow: string;
+  /** NumberField の値が max を上回ったときの検証メッセージ。`{max}` が max の値に置き換わる */
+  numberFieldRangeOverflow: string;
+
+  calendarPreviousMonth: string;
+  calendarNextMonth: string;
+  /** DatePicker のカレンダーを開くボタン */
+  datePickerOpen: string;
+  /** DatePicker が開くポップオーバー（dialog）の名前 */
+  datePickerDialog: string;
 
   passwordShow: string;
   passwordHide: string;
@@ -47,6 +66,14 @@ export type Messages = {
   paginationLabel: string;
   paginationPrevious: string;
   paginationNext: string;
+
+  /** CodeBlock のコピーボタン */
+  codeBlockCopy: string;
+  /** Carousel の aria-roledescription（region と各スライド） */
+  carousel: string;
+  carouselSlide: string;
+  carouselPrevious: string;
+  carouselNext: string;
 
   /** Conversation.Messages の log ランドマーク名 */
   chat: string;

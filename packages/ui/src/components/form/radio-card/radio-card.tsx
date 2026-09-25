@@ -4,7 +4,6 @@ import type { FC, FieldsetHTMLAttributes, ReactNode, Ref } from 'react';
 import { useId } from 'react';
 
 import { cn } from '../../../helpers/cn';
-import { useControllableState } from '../../../hooks/controllable-state';
 
 export type RadioCardOption = Readonly<{
   value: string;
@@ -17,6 +16,7 @@ export type RadioCardOption = Readonly<{
 type BaseProps = {
   'aria-labelledby': string;
   invalid?: boolean;
+  required?: boolean;
   options: readonly RadioCardOption[];
   ref?: Ref<HTMLFieldSetElement>;
 } & Omit<
@@ -49,6 +49,7 @@ export const RadioCard: FC<Props> = ({
   name,
   disabled = false,
   invalid = false,
+  required = false,
   options,
   value,
   defaultValue,
@@ -57,17 +58,7 @@ export const RadioCard: FC<Props> = ({
   ...rest
 }) => {
   const groupId = useId();
-  const [currentValue, setCurrentValue] = useControllableState<
-    string | undefined
-  >({
-    value,
-    defaultValue,
-  });
-
-  const selectValue = (nextValue: string) => {
-    setCurrentValue(nextValue);
-    onChange?.(nextValue);
-  };
+  const isControlled = value !== undefined;
 
   return (
     <fieldset
@@ -82,7 +73,6 @@ export const RadioCard: FC<Props> = ({
       role="radiogroup"
     >
       {options.map((option) => {
-        const checked = currentValue === option.value;
         const optionDisabled = disabled || option.disabled === true;
         const hasDescription =
           option.description !== undefined && option.description !== '';
@@ -94,13 +84,14 @@ export const RadioCard: FC<Props> = ({
             className={cn(
               'flex min-w-0 rounded-xl border bg-bg-base p-4 text-left transition-colors inline-full',
               'has-[input:focus-visible]:outline-hidden has-[input:focus-visible]:ring-2 has-[input:focus-visible]:ring-border-info',
-              checked &&
-                'border-primary-border bg-primary-bg-subtle hover:bg-primary-bg-mute',
+              // 非制御のとき、form の reset は change を飛ばさずに checked を戻すので、
+              // 見た目は state ではなく input の :checked から引く
+              'has-checked:border-primary-border has-checked:bg-primary-bg-subtle hover:has-checked:bg-primary-bg-mute',
               invalid
-                ? 'border-border-error'
-                : !checked && 'border-border-mute hover:bg-bg-subtle',
+                ? 'border-border-error has-checked:border-border-error'
+                : 'border-border-mute hover:bg-bg-subtle',
               optionDisabled &&
-                'cursor-not-allowed border-border-mute bg-bg-subtle text-fg-mute',
+                'cursor-not-allowed border-border-mute bg-bg-subtle text-fg-mute has-checked:border-border-mute has-checked:bg-bg-subtle',
             )}
             id={optionId}
             key={option.value}
@@ -110,15 +101,18 @@ export const RadioCard: FC<Props> = ({
                 hasDescription ? `${optionId}-description` : undefined
               }
               aria-labelledby={`${optionId}-label`}
-              checked={checked}
-              className="sr-only"
+              {...(isControlled
+                ? { checked: value === option.value }
+                : { defaultChecked: defaultValue === option.value })}
+              className="peer sr-only"
               disabled={optionDisabled}
               // 矢印キーのローミングと単一選択はブラウザが name 単位で束ねる。
               // name 未指定でも束ねるために一意な名前を割り当てる。
               name={name ?? groupId}
               onChange={() => {
-                selectValue(option.value);
+                onChange?.(option.value);
               }}
+              required={required}
               type="radio"
               value={option.value}
             />
@@ -145,19 +139,9 @@ export const RadioCard: FC<Props> = ({
             </span>
             <span
               aria-hidden
-              className={cn(
-                'mt-0.5 ml-4 inline-flex size-5 shrink-0 items-center justify-center rounded-full border',
-                checked
-                  ? 'border-border-base bg-primary-bg'
-                  : 'border-border-mute bg-bg-base',
-              )}
+              className="border-border-mute bg-bg-base peer-checked:border-border-base peer-checked:bg-primary-bg mt-0.5 ml-4 inline-flex size-5 shrink-0 items-center justify-center rounded-full border peer-checked:*:opacity-100"
             >
-              <span
-                className={cn(
-                  'size-2 rounded-full bg-primary-border transition-opacity',
-                  checked ? 'opacity-100' : 'opacity-0',
-                )}
-              />
+              <span className="bg-primary-border size-2 rounded-full opacity-0 transition-opacity forced-colors:bg-[CanvasText]" />
             </span>
           </label>
         );

@@ -1,6 +1,6 @@
 import { Card, Heading, Separator } from '@k8ordo/ui';
+import { CodeBlock } from '@k8ordo/ui/code-block';
 
-import { CodeBlock } from '../../../../components/code-block';
 import { PageTitle } from '../../../../components/page-title';
 import { Rich } from '../../../../components/rich';
 import { TokenCard } from '../../../../components/token-card';
@@ -430,6 +430,25 @@ document.documentElement.classList.add('dark');
 // Disable dark mode
 document.documentElement.classList.remove('dark');`}
           lang="ts"
+        />
+      </section>
+      <Separator color="mute" />
+
+      <section className="flex flex-col gap-4">
+        <Heading level="h2">
+          <Rich>{m.theming.highContrastTitle()}</Rich>
+        </Heading>
+        <p className="text-fg-mute">
+          <Rich>{m.theming.highContrastDescription()}</Rich>
+        </p>
+        <p className="text-fg-mute">
+          <Rich>{m.theming.highContrastOwnUiDescription()}</Rich>
+        </p>
+        <CodeBlock
+          code={`<button className="bg-primary-bg aria-pressed:bg-primary-bg-emphasize forced-colors:aria-pressed:bg-[Highlight] forced-colors:aria-pressed:text-[HighlightText]">
+  Bold
+</button>`}
+          lang="tsx"
         />
       </section>
       <Separator color="mute" />

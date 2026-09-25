@@ -4,7 +4,7 @@ import type { FC, ReactElement, ReactNode } from 'react';
 
 import { buildTable } from '../generate/emit';
 import { parseRouteTree } from '../grammar/tree';
-import { renderMatch } from './render';
+import { renderMatch, renderNotFound } from './render';
 
 type Rendered = ReactElement<{
   readonly params: Readonly<Record<string, unknown>>;
@@ -39,5 +39,24 @@ describe('renderMatch', () => {
     const page = rendered.props.children as Rendered;
     expect(page.type).toBe(component('products/[id]/page.tsx'));
     expect(page.props.params).toStrictEqual({ id: 7 });
+  });
+});
+
+describe('renderNotFound', () => {
+  it('answers inside the root layout, so the document keeps its frame', () => {
+    const rendered = renderNotFound(routes, '/nowhere') as Rendered;
+
+    expect(rendered.type).toBe(component('layout.tsx'));
+    expect(rendered.props.params).toStrictEqual({});
+    expect(rendered.props.children).toBeDefined();
+  });
+
+  it('writes a document of its own when there is no root layout', () => {
+    const bare = defineRoutes(
+      buildTable(parseRouteTree(['page.tsx']).tree, component),
+    );
+    const rendered = renderNotFound(bare, '/nowhere') as Rendered;
+
+    expect(rendered.type).toBe('html');
   });
 });

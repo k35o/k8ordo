@@ -5,12 +5,15 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import {
   engine,
   isServerActionModule,
+  NOT_FOUND_HEADER,
   parseRouteTree,
   payloadPathFor,
   scanRoutes,
   serverActionModules,
+  slotOf,
 } from '@k8ordo/framework-engine';
 import type { EngineOptions } from '@k8ordo/framework-engine';
+import { withBase } from '@k8ordo/router';
 import type { Plugin, PluginOption, ResolvedConfig } from 'vite';
 
 import { redirectPage, sitemap } from './documents';
@@ -24,9 +27,9 @@ import {
 
 export type StaticOptions = EngineOptions & {
   /**
-   * Pathnames for routes with parameters. Static rendering cannot invent
-   * them, and a build that quietly skipped half the site would be worse than
-   * one that refuses.
+   * Pathnames for routes with parameters, in the table's terms — without
+   * Vite's `base`. Static rendering cannot invent them, and a build that
+   * quietly skipped half the site would be worse than one that refuses.
    *
    * The patterns that need covering are handed in, so a site whose parameter
    * takes the same values everywhere — a locale segment, say — expands them
@@ -37,8 +40,9 @@ export type StaticOptions = EngineOptions & {
   ) => readonly string[] | Promise<readonly string[]>;
   /**
    * The origin the site is served from — `https://example.com`. With it the
-   * build also writes `sitemap.xml`, listing every page it rendered; without
-   * it, no sitemap, because a sitemap of relative URLs is not one.
+   * build also writes `sitemap.xml`, listing every page it rendered at its
+   * URL, Vite's `base` included; without it, no sitemap, because a sitemap of
+   * relative URLs is not one.
    */
   readonly site?: string;
 };
@@ -46,6 +50,20 @@ export type StaticOptions = EngineOptions & {
 type Handler = (request: Request) => Promise<Response>;
 
 const ORIGIN = 'http://k8ordo.localhost';
+
+const WANTS_SERVER = 'this application wants @k8ordo/server';
+
+/**
+ * A `guard.ts` decides how a request is answered, and a file is never
+ * requested of anything that could run one. Named every one at once, as the
+ * Server Action refusal names every action module.
+ */
+const guardRefusal = (files: readonly string[]): Error =>
+  new Error(
+    `static build cannot run guard.ts — a file has no request to guard, and these are guards:\n${files
+      .map((file) => `  ${file}`)
+      .join('\n')}\n${WANTS_SERVER}`,
+  );
 
 // The engine is bundled into this package, and its runtime entries ship
 // beside this file — `dist/runtime/` — which is where Vite is pointed.
@@ -78,12 +96,13 @@ export const framework = (options: StaticOptions = {}): PluginOption[] => {
       routesDir = path.resolve(root, options.routesDir ?? 'src/routes');
     },
 
-    // The build refuses a Server Action (below); `vite dev` is a running
-    // server that would happily accept the POST, and a form that works in
-    // development and posts into nothing in production is the worst of the
-    // two. So the refusal is said here as well, the moment the module is
-    // compiled — and it asks the same registry the build reads, so the two
-    // cannot come to disagree about what a Server Action is.
+    // The build refuses a Server Action and a guard.ts (below); `vite dev` is
+    // a running server that would happily accept the POST and run the guard,
+    // and what works in development and does nothing in production is the
+    // worst of the two. So the refusal is said here as well, the moment the
+    // module is compiled — asking the same questions the build asks (the
+    // registry for an action, the grammar for a guard), so the two cannot
+    // come to disagree.
     transform: {
       // After `rsc:use-server`, which is what fills that registry. Its own
       // transform prepends a runtime import, so a module's text stops
@@ -95,9 +114,15 @@ export const framework = (options: StaticOptions = {}): PluginOption[] => {
         // by name, and names every offending module at once; asking here too
         // would replace that list with whichever file compiled first.
         if (this.environment.mode !== 'dev') return null;
+        const [module = id] = id.split('?');
+        // 文法は / 区切りで読む。Windows の path.relative は \ で区切って返す
+        const file = path.relative(routesDir, module).split(path.sep).join('/');
+        if (!file.startsWith('..') && slotOf(file) === 'guard') {
+          throw guardRefusal([path.relative(root, module)]);
+        }
         if (!isServerActionModule({ plugins }, id)) return null;
         throw new Error(
-          `static build cannot ship Server Actions — a file cannot receive one, and this declares 'use server':\n  ${path.relative(root, id)}\nthis application wants @k8ordo/server`,
+          `static build cannot ship Server Actions — a file cannot receive one, and this declares 'use server':\n  ${path.relative(root, id)}\n${WANTS_SERVER}`,
         );
       },
     },
@@ -134,7 +159,7 @@ export const framework = (options: StaticOptions = {}): PluginOption[] => {
           throw new Error(
             `static build cannot ship Server Actions — a file cannot receive one, and these declare 'use server':\n${actions
               .map((file) => `  ${file}`)
-              .join('\n')}\nthis application wants @k8ordo/server`,
+              .join('\n')}\n${WANTS_SERVER}`,
           );
         }
 
@@ -146,6 +171,11 @@ export const framework = (options: StaticOptions = {}): PluginOption[] => {
 
         // outDir はすでに絶対パスのことがあるので resolve で受ける
         const clientDir = path.resolve(root, clientOut);
+        // ページは表の pathname で数え、ハンドラには base を付けた URL で頼む。
+        // 書き出す先は client/ の中の表の pathname（client/ が base に置かれる）
+        const { base } = builder.config;
+        const urlFor = (pathname: string): string =>
+          `${ORIGIN}${withBase(pathname, base)}`;
         const entry = path.resolve(root, rscOut, 'index.js');
         const entryModule = (await import(pathToFileURL(entry).href)) as {
           default: Handler;
@@ -157,6 +187,9 @@ export const framework = (options: StaticOptions = {}): PluginOption[] => {
         // handler answers it the way it answers any unknown URL; here that
         // answer is a build error naming the pathname.
         const refused: string[] = [];
+        // The same for a page that said notFound(): the pathname was supplied
+        // for a page the application then disowned.
+        const disowned: string[] = [];
         // A page that threw while rendering: the handler answers 500 with
         // the message, and a build that wrote it would ship the failure.
         const failed: string[] = [];
@@ -168,12 +201,14 @@ export const framework = (options: StaticOptions = {}): PluginOption[] => {
             const dir = path.join(clientDir, dirFor(pathname));
             return [
               async () => {
-                const status = await write(
+                const { status, notFound } = await write(
                   path.join(dir, 'index.html'),
                   handler,
-                  `${ORIGIN}${pathname}`,
+                  urlFor(pathname),
                 );
-                if (status === 404) refused.push(pathname);
+                if (status === 404) {
+                  (notFound ? disowned : refused).push(pathname);
+                }
                 if (status === 500) failed.push(pathname);
                 if (status === 307 || status === 308) redirected.add(pathname);
                 // A redirect has no payload: a client navigation to it finds
@@ -183,7 +218,7 @@ export const framework = (options: StaticOptions = {}): PluginOption[] => {
                   await write(
                     path.join(dir, 'index.rsc'),
                     handler,
-                    `${ORIGIN}${payloadPathFor(pathname)}`,
+                    urlFor(payloadPathFor(pathname)),
                   );
                 }
               },
@@ -195,10 +230,10 @@ export const framework = (options: StaticOptions = {}): PluginOption[] => {
         // would mean nothing in this mode.
         const unmatched = catchAllPath(tree);
         if (unmatched !== null) {
-          const status = await write(
+          const { status } = await write(
             path.join(clientDir, '404.html'),
             handler,
-            `${ORIGIN}${unmatched}`,
+            urlFor(unmatched),
           );
           if (status === 500) failed.push('404.html');
         }
@@ -212,6 +247,11 @@ export const framework = (options: StaticOptions = {}): PluginOption[] => {
             `the "paths" option supplied pathnames a params schema refused: ${refused.toSorted().join(', ')}`,
           );
         }
+        if (disowned.length > 0) {
+          throw new Error(
+            `the "paths" option supplied pathnames whose page called notFound(): ${disowned.toSorted().join(', ')}`,
+          );
+        }
         // The build knows every page it wrote, which is what a sitemap is.
         // Redirects are not pages, and a not-found is not a URL to offer.
         if (options.site !== undefined) {
@@ -219,7 +259,9 @@ export const framework = (options: StaticOptions = {}): PluginOption[] => {
             path.join(clientDir, 'sitemap.xml'),
             sitemap(
               options.site,
-              plan.paths.filter((pathname) => !redirected.has(pathname)),
+              plan.paths
+                .filter((pathname) => !redirected.has(pathname))
+                .map((pathname) => withBase(pathname, base)),
             ),
           );
         }
@@ -230,8 +272,25 @@ export const framework = (options: StaticOptions = {}): PluginOption[] => {
     },
   };
 
+  // What only a running server can have is refused before anything is built.
+  // Server Actions are the exception: the RSC pipeline finds them only while
+  // it compiles, so the build names them once it has.
+  const refuse: Plugin = {
+    name: 'k8ordo:static-refuses',
+    buildApp: {
+      order: 'pre',
+      async handler() {
+        const guards = (await scanRoutes(routesDir))
+          .filter((file) => slotOf(file) === 'guard')
+          .map((file) => path.relative(root, path.join(routesDir, file)));
+        if (guards.length > 0) throw guardRefusal(guards);
+      },
+    },
+  };
+
   return [
     ...engine(options, { via: '@k8ordo/static', runtimeDir: RUNTIME_DIR }),
+    refuse,
     prerender,
   ];
 };
@@ -261,18 +320,25 @@ const inParallel = async (
   );
 };
 
+type Written = {
+  readonly status: number;
+  /** The page itself said notFound(), rather than a schema refusing it. */
+  readonly notFound: boolean;
+};
+
 /** Writes what the handler answered, and says with which status. */
 const write = async (
   file: string,
   handler: Handler,
   url: string,
-): Promise<number> => {
+): Promise<Written> => {
   const response = await handler(new Request(url));
+  const notFound = response.headers.has(NOT_FOUND_HEADER);
   // A page that failed to render is not a page: nothing is written, and the
   // caller stops the build with its name.
   if (response.status === 500) {
     console.error(`k8ordo: ${url} — ${await response.text()}`);
-    return response.status;
+    return { status: response.status, notFound };
   }
   await mkdir(path.dirname(file), { recursive: true });
   const location = response.headers.get('location');
@@ -284,5 +350,5 @@ const write = async (
   } else {
     await writeFile(file, Buffer.from(await response.arrayBuffer()));
   }
-  return response.status;
+  return { status: response.status, notFound };
 };

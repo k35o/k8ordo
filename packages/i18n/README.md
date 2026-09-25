@@ -8,8 +8,10 @@ function — `message({ ja: 'ホーム', en: 'Home' })` — that reads the local
 where it is called: the request on the server, the URL in the browser. So the
 same line renders in a Server Component and in a Client Component, there is
 no provider and no hook, and a bundler keeps only the messages a client module
-names. No message grammar: interpolation is a template literal and plurals are
-`Intl.PluralRules`.
+names. No message grammar: interpolation is a template literal, and plurals,
+dates and numbers are `Intl`, drawn for the current locale by the set
+(`locales.pluralRules()`, `locales.dateTimeFormat()`, …) — a date always in
+that locale's time zone, so the server's HTML and the browser agree.
 
 Like every [k8ordo](https://ordo.k8o.me) package it assumes React 19 and Server
 Components, uses only what has reached Baseline newly available, and ships no
@@ -42,15 +44,19 @@ does.
 
 ## Quick Start
 
-The locale set in its own module, registered once so every message is held
-to it:
+The locale set in its own module — each locale with the time zone its dates
+are shown in and the direction its text runs in — registered once so every
+message is held to it:
 
 ```ts
 // i18n.ts
 import { defineLocales } from '@k8ordo/i18n';
 import type { LocaleOf } from '@k8ordo/i18n';
 
-export const locales = defineLocales(['ja', 'en']);
+export const locales = defineLocales({
+  ja: { timeZone: 'Asia/Tokyo', dir: 'ltr' },
+  en: { timeZone: 'UTC', dir: 'ltr' },
+});
 
 declare module '@k8ordo/i18n' {
   interface Register {
@@ -107,7 +113,7 @@ Where a Server Component hands text to a Client Component as a prop, it calls
 the message and passes the string: a function does not cross that boundary.
 
 `/` negotiates and redirects; `<html lang>` and a language switcher read
-`locales.getLocale()`; a static build passes `paths: locales.paths`. Links
+`locales.getLocale()`, and `<html dir>` its `locales.definitions[…].dir`; a static build passes `paths: locales.paths`. Links
 stay `@k8ordo/router`'s: `bindParams(() => ({ locale: locales.getLocale() }))`
 gives an `href` that spells `/:locale/…` patterns without the locale.
 
@@ -126,7 +132,9 @@ The locale set is declared once with `defineLocales` and registered through
 `Register`; each message is a `message({ ja, en })` export, called where it
 renders — the same call in a Server and a Client Component. There is no
 provider, no hook and no message grammar: never pass the locale down as a
-prop, interpolate inside the message's own function, and from a Server
+prop, interpolate inside the message's own function, format dates and numbers
+with `locales.dateTimeFormat()` / `numberFormat()` / `pluralRules()` (never a
+bare `Intl.DateTimeFormat` without the locale's time zone), and from a Server
 Component hand a `'use client'` component the called string, not the message.
 ```
 

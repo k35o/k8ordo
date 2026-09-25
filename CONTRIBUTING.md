@@ -9,11 +9,11 @@ k8ordo is a set of packages under `@k8ordo/*` — the table in [`README.md`](REA
 Tool versions are pinned in [`mise.toml`](mise.toml) and managed with [mise](https://mise.jdx.dev/):
 
 ```bash
-mise install    # installs Node.js and pnpm at the pinned versions
+mise install    # installs Node.js, pnpm and Deno at the pinned versions
 pnpm install    # installs workspace dependencies
 ```
 
-If you do not use mise, use the pnpm named in `packageManager` and any Node.js that satisfies `engines`, both in [`package.json`](package.json).
+If you do not use mise, use the pnpm named in `packageManager` and any Node.js that satisfies `engines`, both in [`package.json`](package.json). Deno is only for `examples/server-basic`'s tests, which run the built request handler under it to hold that the handler needs nothing Node-only.
 
 ## Development commands
 
