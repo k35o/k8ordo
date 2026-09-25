@@ -19,6 +19,7 @@ import type { Grid } from '../../components/layout/grid';
 import type { Separator } from '../../components/layout/separator';
 import type { Stack } from '../../components/layout/stack';
 import type { Breadcrumb } from '../../components/navigation/breadcrumb';
+import type { Stepper } from '../../components/navigation/stepper';
 import type { Drawer } from '../../components/overlays/drawer';
 import type { ListBox } from '../../components/overlays/list-box';
 import type { Modal } from '../../components/overlays/modal';
@@ -495,6 +496,27 @@ export const paginationProps = z.object({
   disabled: z.boolean().optional(),
 }) satisfies z.ZodType<PaginationIntegrationProps>;
 
+type StepperIntegrationProps = {
+  label: string;
+  steps: ReadonlyArray<{ label: string; description?: string }>;
+  current: number;
+  orientation?: ComponentProps<typeof Stepper>['orientation'];
+};
+export const stepperProps = z.object({
+  label: z.string().describe('Accessible name of the list of steps'),
+  steps: z
+    .array(z.object({ label: z.string(), description: z.string().optional() }))
+    .min(1)
+    .describe('Steps in order'),
+  current: z
+    .int()
+    .min(0)
+    .describe(
+      'Index of the current step, from 0; the number of steps when every step is done',
+    ),
+  orientation: z.enum(['horizontal', 'vertical']).optional(),
+}) satisfies z.ZodType<StepperIntegrationProps>;
+
 type TabsIntegrationProps = {
   label?: string;
   tabs: ReadonlyArray<{ label: string; content: string }>;
@@ -914,6 +936,7 @@ export type SwitchProps = z.infer<typeof switchProps>;
 export type CardProps = z.infer<typeof cardProps>;
 export type SelectProps = z.infer<typeof selectProps>;
 export type TabsProps = z.infer<typeof tabsProps>;
+export type StepperProps = z.infer<typeof stepperProps>;
 export type IconName = z.infer<typeof iconName>;
 export type IconProps = z.infer<typeof iconProps>;
 export type IconButtonProps = z.infer<typeof iconButtonProps>;
@@ -1117,6 +1140,12 @@ export type _EnumCoverage = [
     CoversComponent<
       ComponentProps<typeof Carousel.Root>['slideSize'],
       CarouselProps['slideSize']
+    >
+  >,
+  AssertCovered<
+    CoversComponent<
+      ComponentProps<typeof Stepper>['orientation'],
+      StepperProps['orientation']
     >
   >,
 ];

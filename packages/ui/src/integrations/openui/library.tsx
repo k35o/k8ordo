@@ -132,6 +132,8 @@ const renderers = {
     ui.renderAccordion(props),
   Breadcrumb: ({ props }: ComponentRenderProps<sc.BreadcrumbProps>) =>
     ui.renderBreadcrumb(props),
+  Stepper: ({ props }: ComponentRenderProps<sc.StepperProps>) =>
+    ui.renderStepper(props),
   Table: ({ props }: ComponentRenderProps<sc.TableProps>) =>
     ui.renderTable(props),
 

@@ -43,6 +43,8 @@ export const en: Messages = {
   paginationPrevious: 'Previous',
   paginationNext: 'Next',
 
+  stepperComplete: 'completed',
+
   codeBlockCopy: 'Copy code',
   copied: 'Copied',
   copyFailed: 'Could not copy',

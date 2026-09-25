@@ -100,6 +100,7 @@ import { Stack } from '../../components/layout/stack';
 import { Anchor } from '../../components/navigation/anchor';
 import { Breadcrumb } from '../../components/navigation/breadcrumb';
 import { Pagination } from '../../components/navigation/pagination';
+import { Stepper } from '../../components/navigation/stepper';
 import { Tabs } from '../../components/navigation/tabs';
 import { Dialog } from '../../components/overlays/dialog';
 import { Drawer } from '../../components/overlays/drawer';
@@ -157,6 +158,7 @@ import type {
   SpinnerProps,
   StackProps,
   StatusIconProps,
+  StepperProps,
   SwitchProps,
   TableProps,
   TabsProps,
@@ -859,6 +861,20 @@ export function renderBreadcrumb(props: BreadcrumbProps): ReactNode {
         </Fragment>
       ))}
     </Breadcrumb.List>
+  );
+}
+
+export function renderStepper(props: StepperProps): ReactNode {
+  return (
+    <Stepper
+      aria-label={props.label}
+      orientation={u(props.orientation)}
+      steps={props.steps.map((step) => ({
+        label: step.label,
+        description: u(step.description),
+      }))}
+      value={props.current}
+    />
   );
 }
 

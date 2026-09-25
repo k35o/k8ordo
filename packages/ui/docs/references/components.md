@@ -298,6 +298,45 @@ Props:
 - `ref`: `Ref<HTMLElement>`
 - Other props are forwarded to `HTMLAttributes<HTMLElement>`, except `className` / `style` / `children`.
 
+### Stepper
+
+The steps of a process in order, as an `<ol>`: done steps show a check and are
+read with the built-in `stepperComplete` wording, and the current step carries
+`aria-current="step"`. `value` is the index of the current step (0-based);
+`steps.length` marks every step done. With `interactive`, done steps become
+buttons that go back to them (`onChange` receives the index); steps ahead are
+never buttons. Name the list with `aria-label`.
+
+In a multi-step form (see `@k8ordo/form`'s guide), keep every step mounted and
+drive `value` from the step you show.
+
+```tsx
+import { Stepper } from '@k8ordo/ui';
+
+<Stepper
+  aria-label="Sign-up"
+  interactive
+  onChange={setStep}
+  steps={[
+    { label: 'Plan', description: 'Pick what fits' },
+    { label: 'Payment' },
+    { label: 'Review' },
+  ]}
+  value={step}
+/>;
+```
+
+Props:
+
+- `steps`: `readonly StepperStep[]` (required)
+- `defaultValue`: `number`
+- `interactive`: `boolean` (default: `false`)
+- `onChange`: `(value: number) => void`
+- `orientation`: `'horizontal'` | `'vertical'` (default: `'horizontal'`)
+- `ref`: `Ref<HTMLOListElement>`
+- `value`: `number`
+- Other props are forwarded to `OlHTMLAttributes<HTMLOListElement>`, except `className` / `style` / `children`.
+
 ### Tabs
 
 Tab switching, as a compound component.
@@ -2037,6 +2076,7 @@ Every key in the `Messages` type. All values are `string`.
 | Breadcrumb    | `breadcrumb`                                                                                                                                     |
 | Tabs          | `tabList`                                                                                                                                        |
 | Pagination    | `paginationLabel`, `paginationPrevious`, `paginationNext`                                                                                        |
+| Stepper       | `stepperComplete`                                                                                                                                |
 | CodeBlock     | `codeBlockCopy`, `copied`, `copyFailed`                                                                                                          |
 | Carousel      | `carousel`, `carouselSlide`, `carouselPrevious`, `carouselNext`                                                                                  |
 | AI chat       | `chat`, `scrollToLatest`, `reasoning`, `reasoningStreaming`, `suggestions`, `send`, `stop`, `toolInput`, `toolOutput`, `toolError`, `toolDenied` |

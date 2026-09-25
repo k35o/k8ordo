@@ -43,6 +43,8 @@ export const ja: Messages = {
   paginationPrevious: '前へ',
   paginationNext: '次へ',
 
+  stepperComplete: '完了',
+
   codeBlockCopy: 'コードをコピー',
   copied: 'コピーしました',
   copyFailed: 'コピーできませんでした',

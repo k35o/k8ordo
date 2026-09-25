@@ -57,6 +57,9 @@ export type Messages = {
   paginationPrevious: string;
   paginationNext: string;
 
+  /** Stepper の済んだ段に添える読み上げ専用の文言 */
+  stepperComplete: string;
+
   /** CodeBlock のコピーボタン */
   codeBlockCopy: string;
   /** コピーの結果を読み上げる（role="status"） */

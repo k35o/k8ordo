@@ -40,6 +40,7 @@ const MESSAGE_USAGE = {
   paginationLabel: 'Pagination',
   paginationPrevious: 'Pagination',
   paginationNext: 'Pagination',
+  stepperComplete: 'Stepper',
   codeBlockCopy: 'CodeBlock',
   copied: 'CodeBlock',
   copyFailed: 'CodeBlock',

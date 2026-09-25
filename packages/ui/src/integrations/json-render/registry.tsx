@@ -102,6 +102,7 @@ export const { registry } = defineRegistry(catalog, {
     IconButton: ({ props }) => ui.renderIconButton(props),
     Accordion: ({ props }) => ui.renderAccordion(props),
     Breadcrumb: ({ props }) => ui.renderBreadcrumb(props),
+    Stepper: ({ props }) => ui.renderStepper(props),
     Table: ({ props }) => ui.renderTable(props),
 
     Textarea: ({ props, bindings }) => {
