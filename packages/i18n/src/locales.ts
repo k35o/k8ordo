@@ -1,5 +1,7 @@
-import { inBrowser, localeStorage, register } from './current';
+import { browserPathname, inBrowser, localeStorage, register } from './current';
 import type { LocaleStorage } from './current';
+import { intlFormats } from './format';
+import type { IntlFormats } from './format';
 
 /**
  * The one shape every validation library agrees on (Standard Schema), as far
@@ -36,12 +38,34 @@ export type Delocalized<L extends string> = {
 };
 
 /**
+ * What a locale carries besides its tag. Both are declared rather than
+ * derived: the runtime's own time zone differs between a server and each
+ * visitor's browser, and `Intl.Locale#getTextInfo` has not reached every
+ * browser.
+ */
+export type LocaleDefinition = {
+  /**
+   * The IANA time zone this locale's dates are shown in (`'Asia/Tokyo'`) —
+   * the same one on the server and in every browser, so a date renders the
+   * same on both sides.
+   */
+  readonly timeZone: string;
+  /** The direction its text runs in: `<html dir>`. */
+  readonly dir: 'ltr' | 'rtl';
+};
+
+/**
  * An application's locale set. `L` is the union of its tags, `D` the default
  * among them.
  */
-export type Locales<L extends string = string, D extends L = L> = {
-  /** Every locale, in the order given; the first is the default unless told otherwise. */
+export type Locales<
+  L extends string = string,
+  D extends L = L,
+> = IntlFormats & {
+  /** Every locale, in the order defined; the first is the default unless told otherwise. */
   readonly all: readonly L[];
+  /** Each locale's definition, as given: `definitions[locale].dir` for `<html dir>`. */
+  readonly definitions: Readonly<Record<L, LocaleDefinition>>;
   /** The locale used when negotiation finds nothing better, and when nothing names one. */
   readonly default: D;
   /** Membership, as a type guard — the check `params.locale` and a pathname segment go through. */
@@ -82,7 +106,7 @@ export type Locales<L extends string = string, D extends L = L> = {
   readonly paramsSchema: LocaleParamsSchema<L>;
   /**
    * The locale of the render in progress. In the browser it is the first
-   * segment of `location.pathname`; on the server it is what `paramsSchema`
+   * segment of `location.pathname` below Vite's `base`; on the server it is what `paramsSchema`
    * accepted for this request, or what `run` set. Neither names one → the
    * default. Not a hook: call it anywhere, including inside a message.
    */
@@ -149,29 +173,47 @@ const run = <T>(locale: string, fn: () => T): T => {
 };
 
 /**
+ * `Intl.DateTimeFormat` throws a RangeError on a time zone it does not know,
+ * and quietly takes the runtime's own for a missing one — the very value
+ * that differs between a server and a browser — so both are `null` here.
+ */
+const resolveTimeZone = (value: unknown): string | null => {
+  if (typeof value !== 'string') return null;
+  try {
+    return new Intl.DateTimeFormat('en', { timeZone: value }).resolvedOptions()
+      .timeZone;
+  } catch {
+    return null;
+  }
+};
+
+/**
  * Declares the locale set once. Everything that needs to know which locales
  * exist — the params schema of the `[locale]` segment, the static build's
  * path expansion, the language switcher, negotiation for a `/` redirect,
  * every message — reads this value, so the list is spelled in one place.
  *
  * ```ts
- * export const locales = defineLocales(['ja', 'en']);
- * export const locales = defineLocales(['en-US', 'en-GB', 'ja'], { default: 'ja' });
+ * export const locales = defineLocales({
+ *   ja: { timeZone: 'Asia/Tokyo', dir: 'ltr' },
+ *   en: { timeZone: 'America/New_York', dir: 'ltr' },
+ * });
  * ```
  */
 export const defineLocales = <
-  const All extends readonly [string, ...string[]],
-  D extends All[number] = All[0],
+  const Definitions extends Readonly<Record<string, LocaleDefinition>>,
+  D extends keyof Definitions & string = keyof Definitions & string,
 >(
-  all: All,
+  definitions: Definitions,
   options?: LocalesOptions<D>,
-): Locales<All[number], D> => {
-  type L = All[number];
-  const list: readonly L[] = all;
-  if (new Set(list).size !== list.length) {
-    throw new TypeError(
-      `defineLocales: a locale is listed twice in ${JSON.stringify(list)}`,
-    );
+): Locales<keyof Definitions & string, D> => {
+  type L = keyof Definitions & string;
+  // BCP 47 のタグは英字で始まるので、整数に見えるキーは無く、オブジェクトの
+  // キーは書いた順に並ぶ。
+  const byTag: Readonly<Record<L, LocaleDefinition>> = definitions;
+  const list = Object.keys(byTag) as L[];
+  if (list.length === 0) {
+    throw new TypeError('defineLocales: no locale is defined');
   }
   // 型は既定値が一覧に含まれることを保証するが、`as` で通した値や JS からの
   // 呼び出しは通り抜ける。ここで確かめておけば negotiate が既定値を返した
@@ -187,6 +229,18 @@ export const defineLocales = <
     if (parsed === null) {
       throw new TypeError(
         `defineLocales: ${JSON.stringify(tag)} is not a BCP 47 language tag`,
+      );
+    }
+    // 型は必須で 'ltr' | 'rtl' に絞るが、JS からの呼び出しは通り抜ける。
+    const { timeZone, dir }: { timeZone: unknown; dir: unknown } = byTag[tag];
+    if (resolveTimeZone(timeZone) === null) {
+      throw new TypeError(
+        `defineLocales: the timeZone of ${JSON.stringify(tag)}, ${JSON.stringify(timeZone)}, is not a time zone`,
+      );
+    }
+    if (dir !== 'ltr' && dir !== 'rtl') {
+      throw new TypeError(
+        `defineLocales: the dir of ${JSON.stringify(tag)}, ${JSON.stringify(dir)}, is neither "ltr" nor "rtl"`,
       );
     }
     return { tag, language: parsed.language };
@@ -234,7 +288,7 @@ export const defineLocales = <
 
   const getLocale = (): L => {
     if (inBrowser) {
-      return delocalize(location.pathname).locale ?? fallback;
+      return delocalize(browserPathname()).locale ?? fallback;
     }
     const current = localeStorage()?.getStore();
     return is(current) ? current : fallback;
@@ -273,6 +327,7 @@ export const defineLocales = <
 
   return {
     all: list,
+    definitions: byTag,
     default: fallback,
     is,
     negotiate,
@@ -282,5 +337,6 @@ export const defineLocales = <
     paramsSchema,
     getLocale,
     run,
+    ...intlFormats(getLocale, byTag),
   };
 };

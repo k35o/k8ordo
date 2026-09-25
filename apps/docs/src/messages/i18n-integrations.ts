@@ -46,8 +46,8 @@ export const form = {
     en: "The messages `@k8ordo/form` shows are zod's error messages: `formFields` turns them into strings by probing the schema when it derives the fields, and `parseForm` produces them when it validates. Both are made in the locale current at that moment, which leaves three things to get right.",
   }),
   errorMap: message({
-    ja: 'zod には文字列ではなく文言の関数を `error` として渡します。zod が issue を報告するときに呼ぶので、その時点のロケールの文になります。`min(1, m.talk.titleRequired())` のように宣言で呼ぶと、その時点のロケール（多くの場合は既定のロケール）の文字列で固定されます。',
-    en: 'Give zod the message function as `error`, not a string. Zod calls it when it reports the issue, so the text is in the locale current then. Calling the message in the declaration, as in `min(1, m.talk.titleRequired())`, freezes the string of whatever locale was current then, usually the default.',
+    ja: 'zod には文字列ではなく文言の関数を `error` として渡します。zod が issue を報告するときに呼ぶので、その時点のロケールの文になります。`min(1, m.talk.titleRequired())` のように宣言で呼ぶと、その時点のロケール（多くの場合は既定のロケール）の文字列で固定されます。`defineForm` のルールの文言も同じで、`requiredWhen(…, m.talk.reasonRequired)` のように関数のまま渡せば、ルールを報告するときに呼ばれます。',
+    en: 'Give zod the message function as `error`, not a string. Zod calls it when it reports the issue, so the text is in the locale current then. Calling the message in the declaration, as in `min(1, m.talk.titleRequired())`, freezes the string of whatever locale was current then, usually the default. The same goes for a `defineForm` rule’s message: pass the function, as in `requiredWhen(…, m.talk.reasonRequired)`, and it is called when the rule is reported.',
   }),
   derive: message({
     ja: '`formFields(schema)` は、モジュールの先頭ではなくページの描画の中で呼びます。モジュールの先頭は 1 回しか走らず、多くの場合リクエストの外なので、どのロケールのページにも同じ文言（たいていは既定のロケールのもの）が渡ります。',
