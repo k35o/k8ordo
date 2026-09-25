@@ -21,7 +21,10 @@ const OUTPUT = `dist/
     index.js
   ssr/
   client/
-    assets/`;
+    assets/
+      index-1a2b.js
+      index-1a2b.js.br
+      index-1a2b.js.gz`;
 
 const SERVE = `// serve.js
 import { serve } from '@k8ordo/server/serve';
@@ -151,7 +154,10 @@ export default function ServerDeployPage() {
       </DocSection>
 
       <DocSection description={t.answersFiles} title={t.answersTitle}>
+        <Paragraph text={t.answersEncoding} />
+        <Paragraph text={t.answersRevalidation} />
         <Paragraph text={t.answersHandler} />
+        <Paragraph text={t.answersStream} />
         <Paragraph text={t.answersSafe} />
         <Paragraph text={t.answersStatuses}>
           <LocaleAnchor path="/:locale/server/errors">

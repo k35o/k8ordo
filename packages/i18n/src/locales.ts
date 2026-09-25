@@ -1,3 +1,5 @@
+import { parseAcceptLanguage } from './accept-language';
+import { readCookie } from './cookie';
 import { browserPathname, inBrowser, localeStorage, register } from './current';
 import type { LocaleStorage } from './current';
 import { intlFormats } from './format';
@@ -79,6 +81,19 @@ export type Locales<
    */
   readonly negotiate: (requested: Iterable<string>) => L;
   /**
+   * The locale a request asks for, for a server that answers before any
+   * page renders — sending `/` to a locale. The cookie named in `options`
+   * comes first, when the request carries it: it is the visitor's own choice,
+   * written where they switched language. Then the `Accept-Language` header,
+   * in its order of preference. Each goes through `negotiate`, so a cookie
+   * holding a locale the set no longer has falls through to the header, and
+   * nothing matching is the default.
+   */
+  readonly negotiateRequest: (
+    request: Request,
+    options?: NegotiateRequestOptions,
+  ) => L;
+  /**
    * `'/ui'` → `'/en/ui'`, `'/'` → `'/en'`. Hand it a pathname without a
    * locale segment, as `delocalize` returns one: that is not checked, so
    * `localize('/en/ui', 'ja')` is `'/ja/en/ui'`.
@@ -117,6 +132,16 @@ export type Locales<
    * in the browser the URL is the locale.
    */
   readonly run: <T>(locale: L, fn: () => T) => T;
+};
+
+export type NegotiateRequestOptions = {
+  /**
+   * The cookie holding the visitor's choice (`'locale'`). The name is the
+   * application's: whatever writes it — a language switcher's
+   * `cookieStore.set` — uses the same one. Omitted, only `Accept-Language`
+   * is read.
+   */
+  readonly cookie?: string;
 };
 
 export type LocalesOptions<D extends string> = {
@@ -267,6 +292,20 @@ export const defineLocales = <
     return fallback;
   };
 
+  const negotiateRequest = (
+    request: Request,
+    { cookie }: NegotiateRequestOptions = {},
+  ): L => {
+    const chosen =
+      cookie === undefined
+        ? null
+        : readCookie(request.headers.get('cookie'), cookie);
+    return negotiate([
+      ...(chosen === null ? [] : [chosen]),
+      ...parseAcceptLanguage(request.headers.get('accept-language')),
+    ]);
+  };
+
   // By segment, not by substring: `:localeCode` is somebody else's param.
   const paths = (patterns: readonly string[]): string[] =>
     patterns.flatMap((pattern) => {
@@ -331,6 +370,7 @@ export const defineLocales = <
     default: fallback,
     is,
     negotiate,
+    negotiateRequest,
     localize,
     delocalize,
     paths,
