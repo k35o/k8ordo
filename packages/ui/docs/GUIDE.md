@@ -366,6 +366,7 @@ Avoid the traits that make a UI recognizably AI-generated at a glance.
 - **Use semantic tokens**: tokens (`bg-primary-bg`), never raw color values (`bg-teal-500`)
 - **Let space and shape carry it**: character comes from spacing and soft radii, not from vivid color
 - **Do not forget dark mode**: semantic tokens handle it for you
+- **High contrast is handled too**: the tokens follow `prefers-contrast: more` and the components stay legible under `forced-colors: active`; for your own UI, see [High contrast and forced colors](references/color.md#high-contrast-and-forced-colors)
 - **Accessibility**: `aria-label`, keyboard navigation, and state that does not rely on color alone
 
 ## Testing

@@ -28,11 +28,14 @@ const meta: Meta<typeof CopyButton> = {
   beforeEach: () => {
     written.length = 0;
     const write = spyOn(navigator.clipboard, 'write').mockImplementation(
-      async (items) => {
+      (items) => {
         if (rejectWrites) {
-          throw new DOMException('Write permission denied.', 'NotAllowedError');
+          return Promise.reject(
+            new DOMException('Write permission denied.', 'NotAllowedError'),
+          );
         }
         written.push(...items);
+        return Promise.resolve();
       },
     );
     return () => {

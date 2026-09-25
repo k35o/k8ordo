@@ -156,9 +156,19 @@ export const componentCategories: NavCategory[] = [
         description: m.components.card.description,
       },
       {
+        name: 'Carousel',
+        path: '/:locale/ui/components/carousel',
+        description: m.components.carousel.description,
+      },
+      {
         name: 'Code',
         path: '/:locale/ui/components/code',
         description: m.components.code.description,
+      },
+      {
+        name: 'CodeBlock',
+        path: '/:locale/ui/components/code-block',
+        description: m.components.codeBlock.description,
       },
       {
         name: 'Table',
@@ -170,6 +180,11 @@ export const componentCategories: NavCategory[] = [
         path: '/:locale/ui/components/heading',
         description: m.components.heading.description,
       },
+      {
+        name: 'Kbd',
+        path: '/:locale/ui/components/kbd',
+        description: m.components.kbd.description,
+      },
     ],
   },
   {
@@ -179,6 +194,11 @@ export const componentCategories: NavCategory[] = [
         name: 'Alert',
         path: '/:locale/ui/components/alert',
         description: m.components.alert.description,
+      },
+      {
+        name: 'EmptyState',
+        path: '/:locale/ui/components/empty-state',
+        description: m.components.emptyState.description,
       },
       {
         name: 'Skeleton',

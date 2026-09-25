@@ -1,6 +1,6 @@
 import { Code } from '@k8ordo/ui';
+import { CodeBlock } from '@k8ordo/ui/code-block';
 
-import { CodeBlock } from '../../../../components/code-block';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import {
   Bullet,
@@ -66,6 +66,7 @@ export function TalkForm() {
 const LEAVE = `// src/routes/_parts/leave.ts
 'use server';
 
+import { href } from '@k8ordo/router';
 import { redirect } from '@k8ordo/server/runtime';
 
 import { saveTalk } from '../_data/talks.server';
@@ -75,7 +76,7 @@ export async function addAndLeave(formData: FormData): Promise<void> {
   if (typeof title === 'string' && title !== '') {
     await saveTalk(title);
   }
-  redirect('/products');
+  redirect(href('/products'));
 }`;
 
 const LEAVE_PAGE = `// src/routes/page.tsx

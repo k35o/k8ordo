@@ -1,8 +1,8 @@
 import { Code, Heading, Separator } from '@k8ordo/ui';
+import { CodeBlock } from '@k8ordo/ui/code-block';
 import { en, ja } from '@k8ordo/ui/i18n';
 import type { Messages } from '@k8ordo/ui/i18n';
 
-import { CodeBlock } from '../../../../components/code-block';
 import { PageTitle } from '../../../../components/page-title';
 import { Rich } from '../../../../components/rich';
 import * as m from '../../../../messages';
@@ -20,8 +20,8 @@ const MESSAGE_USAGE = {
   alertError: 'Alert',
   toastRegion: 'Toast',
   copy: 'CopyButton',
-  copied: 'CopyButton',
-  copyFailed: 'CopyButton',
+  copied: 'CopyButton / CodeBlock',
+  copyFailed: 'CopyButton / CodeBlock',
   autocompletePlaceholder: 'Autocomplete',
   autocompleteRemoveTag: 'Autocomplete',
   autocompleteClear: 'Autocomplete',
@@ -38,6 +38,11 @@ const MESSAGE_USAGE = {
   paginationLabel: 'Pagination',
   paginationPrevious: 'Pagination',
   paginationNext: 'Pagination',
+  codeBlockCopy: 'CodeBlock',
+  carousel: 'Carousel',
+  carouselSlide: 'Carousel.Slide',
+  carouselPrevious: 'Carousel',
+  carouselNext: 'Carousel',
   chat: 'Conversation.Messages',
   scrollToLatest: 'Conversation.ScrollButton',
   reasoning: 'Reasoning',

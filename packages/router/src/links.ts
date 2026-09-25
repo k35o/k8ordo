@@ -1,5 +1,6 @@
+import { withBase } from './base';
 import { buildHref } from './paths';
-import type { ParamValue, PathFor } from './paths';
+import type { ParamValue } from './paths';
 import type { RegisteredNavigablePattern, RegisteredParams } from './register';
 
 type HrefArgs<Params> = keyof Params extends never
@@ -26,23 +27,25 @@ const navigate = (
   params: Readonly<Record<string, unknown>> | undefined,
   options: NavigateToOptions | undefined,
 ): ReturnType<Navigation['navigate']> =>
-  navigation.navigate(buildHref(pattern, params), {
+  navigation.navigate(withBase(buildHref(pattern, params)), {
     history: options?.history ?? 'push',
   });
 
 /**
- * Builds a concrete path from a pattern and its params — no route table
- * involved, which is why pages never import one. Params are inferred from
- * the pattern literal itself; `Register` adds the check that the pattern
- * exists in the app's table, and — under the framework — the type a page's
- * schema gave each param, so a link takes what the page received. The path
- * shape survives in the return type for typed-path consumers
- * (`@k8ordo/state`'s `Register` among them).
+ * Builds the URL a link points at from a pattern and its params — no route
+ * table involved, which is why pages never import one. Params are inferred
+ * from the pattern literal itself; `Register` adds the check that the
+ * pattern exists in the app's table, and — under the framework — the type a
+ * page's schema gave each param, so a link takes what the page received.
+ *
+ * What comes back is a URL, with Vite's `base` in front (`withBase`), not a
+ * pathname in the table's terms — which is why it is typed `string`: handed
+ * to something that adds the base itself, it would carry it twice.
  */
 export const href = <P extends RegisteredNavigablePattern>(
   pattern: P,
   ...params: HrefArgs<RegisteredParams<P>>
-): PathFor<P> => buildHref(pattern, params[0]) as PathFor<P>;
+): string => withBase(buildHref(pattern, params[0]));
 
 /**
  * Typed imperative navigation: `href` composed with
@@ -90,7 +93,7 @@ export type BoundLinks<Bound extends BoundParams> = {
   readonly href: <P extends RegisteredNavigablePattern>(
     pattern: P,
     ...rest: BoundHrefArgs<RegisteredParams<P>, Bound>
-  ) => PathFor<P>;
+  ) => string;
   readonly navigateTo: <P extends RegisteredNavigablePattern>(
     pattern: P,
     ...rest: BoundNavigateToArgs<RegisteredParams<P>, Bound>
@@ -115,7 +118,7 @@ export const bindParams = <const Bound extends BoundParams>(
   source: () => Bound,
 ): BoundLinks<Bound> => ({
   href: (pattern, ...rest) =>
-    buildHref(pattern, { ...source(), ...rest[0] }) as never,
+    withBase(buildHref(pattern, { ...source(), ...rest[0] })),
   navigateTo: (pattern, ...rest) => {
     // The same rule as `navigateTo`: a pattern that names params takes them
     // first, and a pattern that names none takes the options first.

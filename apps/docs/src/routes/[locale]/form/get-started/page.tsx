@@ -1,7 +1,7 @@
 import type { Message } from '@k8ordo/i18n';
 import { Code, Heading } from '@k8ordo/ui';
+import { CodeBlock } from '@k8ordo/ui/code-block';
 
-import { CodeBlock } from '../../../../components/code-block';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { InstallTabs } from '../../../../components/install-tabs';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
@@ -131,6 +131,7 @@ const EXAMPLE_ACTION = `// src/routes/talks/new/_parts/actions.ts
 
 import { parseForm } from '@k8ordo/form/server';
 import type { FormState } from '@k8ordo/form/server';
+import { href } from '@k8ordo/router';
 import { redirect } from '@k8ordo/server/runtime';
 
 import { talkSchema } from './talk-schema';
@@ -143,7 +144,7 @@ export async function createTalk(
   const parsed = parseForm(talkSchema, formData);
   if (!parsed.success) return parsed.state;
   await insertTalk(parsed.data);
-  redirect('/talks');
+  redirect(href('/talks'));
 }`;
 
 const EXAMPLE_FORM = `// src/routes/talks/new/_parts/talk-form.tsx

@@ -1,7 +1,7 @@
 import type { Message } from '@k8ordo/i18n';
+import { CodeBlock } from '@k8ordo/ui/code-block';
 
 import * as m from '../../messages';
-import { CodeBlock } from '../code-block';
 import { DocSection } from '../doc-page';
 import { LocaleAnchor } from '../locale-anchor';
 import { packageOf } from './mode';
