@@ -130,6 +130,7 @@ src/
   match.ts          matchPath / useMatch ("which section am I in", without the table)
   boundary.tsx      RouteErrorBoundary (the boundary that renders the table's error)
   router.tsx        Router / Outlet / useRoute / useParams
+  not-found.ts      notFound / isNotFound (the framework answers it; branded, not a class)
 ```
 
 ## Conventions

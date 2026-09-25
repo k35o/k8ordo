@@ -177,6 +177,43 @@ flat part of the bag holds neither.
 </IconButton>
 ```
 
+### CopyButton
+
+A button that copies text to the clipboard and shows that it did: its icon
+turns into a check for two seconds (an error icon if the write fails), and a
+live region beside it announces `copied` / `copyFailed` from the dictionary. The
+button's name stays the same throughout. By default it is an outline `Button`
+with its `label` as text; `iconOnly` makes it a transparent `IconButton` whose
+`label` is the tooltip.
+
+```tsx
+import { CopyButton } from '@k8ordo/ui';
+
+<CopyButton value={css} label="Copy CSS" size="sm" />;
+
+// Icon only, e.g. in the header of a code block
+<CopyButton value={code} label="Copy code" iconOnly size="sm" />;
+
+// Build the text when the button is pressed: read the DOM, or fetch it
+<CopyButton
+  label="Copy as Markdown"
+  value={async () => (await fetch(`/blog/${slug}.md`)).text()}
+/>;
+```
+
+`value` may be a function, and it may return a `Promise`. It is called on the
+click, and the promise goes to the clipboard as it is (a `ClipboardItem`), so the
+write starts inside the click even when the text arrives later. Safari refuses
+a write that begins after an `await`.
+
+Props:
+
+- `value`: `string` | `(() => string | Promise<string>)` (required)
+- `disabled`: `boolean` (default: `false`)
+- `iconOnly`: `boolean` (default: `false`)
+- `label`: `string`
+- `size`: `'sm'` | `'md'` | `'lg'` (default: `'md'`)
+
 ### Anchor
 
 A text link. External links automatically get a new-tab icon.
@@ -2102,6 +2139,7 @@ Every key in the `Messages` type. All values are `string`.
 | Common        | `close`, `required`, `loading`, `avatar`, `color`                                                                                                |
 | Alert         | `alertSuccess`, `alertInfo`, `alertWarning`, `alertError`                                                                                        |
 | Toast         | `toastRegion`                                                                                                                                    |
+| CopyButton    | `copy`, `copied`, `copyFailed`                                                                                                                   |
 | Autocomplete  | `autocompletePlaceholder`, `autocompleteRemoveTag`, `autocompleteClear`, `autocompleteEmpty`                                                     |
 | FileField     | `fileFieldRemove`, `fileFieldTrigger`, `fileFieldDrop`                                                                                           |
 | NumberField   | `numberFieldIncrement`, `numberFieldDecrement`                                                                                                   |
@@ -2112,7 +2150,7 @@ Every key in the `Messages` type. All values are `string`.
 | Breadcrumb    | `breadcrumb`                                                                                                                                     |
 | Tabs          | `tabList`                                                                                                                                        |
 | Pagination    | `paginationLabel`, `paginationPrevious`, `paginationNext`                                                                                        |
-| CodeBlock     | `codeBlockCopy`, `copied`, `copyFailed`                                                                                                          |
+| CodeBlock     | `codeBlockCopy` (announces with `CopyButton`'s `copied` / `copyFailed`)                                                                          |
 | TOC           | `tableOfContents`                                                                                                                                |
 | Carousel      | `carousel`, `carouselSlide`, `carouselPrevious`, `carouselNext`                                                                                  |
 | AI chat       | `chat`, `scrollToLatest`, `reasoning`, `reasoningStreaming`, `suggestions`, `send`, `stop`, `toolInput`, `toolOutput`, `toolError`, `toolDenied` |

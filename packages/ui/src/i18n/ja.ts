@@ -14,6 +14,10 @@ export const ja: Messages = {
 
   toastRegion: '通知',
 
+  copy: 'コピー',
+  copied: 'コピーしました',
+  copyFailed: 'コピーできませんでした',
+
   autocompletePlaceholder: '入力して絞り込めます',
   autocompleteRemoveTag: 'タグを削除',
   autocompleteClear: 'すべて削除',
@@ -44,8 +48,6 @@ export const ja: Messages = {
   paginationNext: '次へ',
 
   codeBlockCopy: 'コードをコピー',
-  copied: 'コピーしました',
-  copyFailed: 'コピーできませんでした',
   carousel: 'カルーセル',
   carouselSlide: 'スライド',
   carouselPrevious: '前のスライド',

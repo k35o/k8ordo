@@ -190,8 +190,8 @@ export const root = {
     en: "Without `@k8ordo/router`, `location.replace(locales.localize('/', locale))` does the same job.",
   }),
   server: message({
-    ja: '`@k8ordo/server` では、ページが受け取る `request` から、`locales.negotiateRequest` がサーバーでロケールを選べます（Cookie、次に `Accept-Language`）。',
-    en: 'Under `@k8ordo/server`, `locales.negotiateRequest` can choose on the server from the `request` the page receives (the cookie, then `Accept-Language`).',
+    ja: '`@k8ordo/server` では effect は要りません。`/` の `guard.ts` が、何かを描く前に `locales.negotiateRequest` でロケールを選び（Cookie、次に `Accept-Language`）、`307` で答えます。',
+    en: 'Under `@k8ordo/server` no effect is needed: the `guard.ts` for `/` chooses with `locales.negotiateRequest` (the cookie, then `Accept-Language`) and answers with a `307` before anything renders.',
   }),
   serverLink: message({
     ja: '`@k8ordo/server` での書き方を読む',

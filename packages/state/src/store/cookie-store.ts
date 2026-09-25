@@ -34,10 +34,10 @@ const createCookieStore = (def: CookieState): Store => {
   const codec = cookieCodecOf(def);
   const { cookieName } = def;
 
-  const read = (): StateValues =>
-    codec.parse(parseCookieText(decoded(rawCookie(cookieName))));
+  const readRow = (): { values: StateValues; stale: boolean } =>
+    codec.read(parseCookieText(decoded(rawCookie(cookieName))));
 
-  const core = createStoreCore(codec.keys, read());
+  const read = (): StateValues => readRow().values;
 
   let pending: StateValues | null = null;
   let handle: Handle | null = null;
@@ -53,7 +53,8 @@ const createCookieStore = (def: CookieState): Store => {
       return;
     }
     missed = false;
-    const fresh = read();
+    const { values: fresh, stale } = readRow();
+    if (stale) writeBack();
     // A foreign tab's write must not roll back a batch that has not flushed
     // yet: the pending patch stays on top.
     core.applyNext(pending === null ? fresh : { ...fresh, ...pending });
@@ -81,7 +82,7 @@ const createCookieStore = (def: CookieState): Store => {
       const init: CookieInit & { maxAge: number } = {
         name: cookieName,
         // JSON にできない値（bigint など）はここで throw する
-        value: encodeCookie(target),
+        value: encodeCookie(codec.row(target)),
         path: '/',
         // 既定の strict では、ほかのサイトのリンクから来た最初のリクエストに
         // Cookie が付かず、サーバーが既定値で描いてしまう
@@ -107,14 +108,28 @@ const createCookieStore = (def: CookieState): Store => {
   // 上書きしてしまう。書き込みを 1 本ずつ流し、前のものが入ってから読む
   let writes: Promise<void> = Promise.resolve();
 
+  const enqueue = (patch: StateValues, current: Handle): void => {
+    writing += 1;
+    writes = writes.then(() => write(patch, current));
+  };
+
   const flush = (): void => {
     const patch = pending as StateValues;
     const current = handle as Handle;
     pending = null;
     handle = null;
-    writing += 1;
-    writes = writes.then(() => write(patch, current));
+    enqueue(patch, current);
   };
+
+  // 古い版の Cookie は、移行した値を今の版で書き戻す。空のパッチの書き込み
+  // なので、ほかの書き込みと同じ列に並び、その時点の Cookie を読み直して書く
+  function writeBack(): void {
+    enqueue({}, createHandle());
+  }
+
+  const first = readRow();
+  const core = createStoreCore(codec.keys, first.values);
+  if (first.stale) writeBack();
 
   const update = (patch: Patch): UpdateHandle => {
     const resolved = resolvePatch(patch, core.snapshot(), codec.keys, def.key);

@@ -1072,6 +1072,43 @@
       "omitted": []
     },
     {
+      "name": "CopyButton",
+      "props": [
+        {
+          "name": "value",
+          "types": ["string", "(() => string | Promise<string>)"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "disabled",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "iconOnly",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "size",
+          "types": ["'sm'", "'md'", "'lg'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
       "name": "CopyIcon",
       "props": [
         {

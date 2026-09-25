@@ -1,8 +1,8 @@
 import { message } from '@k8ordo/i18n';
 
 export const description = message({
-  ja: '状態を「どこに住むか」で宣言します。置き場所は URL の searchParams・履歴エントリ・localStorage・Cookie・メモリです。メモリ以外はそれぞれ zod スキーマ1つで型付けし、サーバーの読み取り・リンク生成・購読までそこから導きます。境界を越えないメモリは、スキーマを持たない型付きの箱です。',
-  en: 'Declare state by where it lives — URL search params, the history entry, localStorage, a cookie, memory. Every place but memory is typed by one zod schema, from which the server read, link building and the subscription are all derived; memory never crosses a boundary, so it is a typed box with no schema.',
+  ja: '状態を「どこに住むか」で宣言します。置き場所は URL の searchParams・履歴エントリ・localStorage・sessionStorage・Cookie・メモリです。メモリ以外はそれぞれ zod スキーマ1つで型付けし、サーバーの読み取り・リンク生成・購読までそこから導きます。境界を越えないメモリは、スキーマを持たない型付きの箱です。',
+  en: 'Declare state by where it lives — URL search params, the history entry, localStorage, sessionStorage, a cookie, memory. Every place but memory is typed by one zod schema, from which the server read, link building and the subscription are all derived; memory never crosses a boundary, so it is a typed box with no schema.',
 });
 
 export const demoTitle = message({
@@ -41,8 +41,8 @@ export const featurePlaces = message({
 });
 
 export const featurePlacesDescription = message({
-  ja: 'URL・履歴エントリ・localStorage・Cookie・メモリ。状態の寿命と共有範囲を決めるのはコードの書き方ではなく、定義した場所です。',
-  en: 'URL, history entry, localStorage, a cookie, memory. Lifetime and sharing scope are decided by the place you declared, not by how the code happens to be written.',
+  ja: 'URL・履歴エントリ・localStorage・sessionStorage・Cookie・メモリ。状態の寿命と共有範囲を決めるのはコードの書き方ではなく、定義した場所です。',
+  en: 'URL, history entry, localStorage, sessionStorage, a cookie, memory. Lifetime and sharing scope are decided by the place you declared, not by how the code happens to be written.',
 });
 
 export const featureSchema = message({

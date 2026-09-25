@@ -139,6 +139,33 @@ export const iconButton = {
   }),
 };
 
+export const copyButton = {
+  description: message({
+    ja: 'テキストをクリップボードにコピーし、コピーしたことを伝えるボタン',
+    en: 'A button that copies text to the clipboard and shows that it did.',
+  }),
+  feedbackDescription: message({
+    ja: '押すとアイコンが2秒間チェックに変わり（失敗したらエラーのアイコン）、隣のライブリージョンが「コピーしました」を読み上げます。ボタンの名前は変わりません。',
+    en: 'When pressed, its icon turns into a check for two seconds (an error icon if the write fails), and a live region beside it announces “Copied”. The button keeps its name.',
+  }),
+  iconOnlyTitle: message({
+    ja: 'アイコンだけ',
+    en: 'Icon Only',
+  }),
+  iconOnlyDescription: message({
+    ja: '`iconOnly`を付けると透明なIconButtonになり、`label`はツールチップとアクセシブルネームになります。',
+    en: 'With `iconOnly` it becomes a transparent IconButton, and `label` becomes its tooltip and accessible name.',
+  }),
+  lazyValueTitle: message({
+    ja: '押したときに中身を作る',
+    en: 'Building the Text on Click',
+  }),
+  lazyValueDescription: message({
+    ja: '`value`には関数も渡せ、Promiseを返してもかまいません。関数は押したときに呼ばれ、PromiseはそのままClipboardItemに渡るので、中身が後から届いても書き込みはクリックの中で始まります（Safariは`await`の後に始めた書き込みを拒みます）。',
+    en: '`value` can also be a function, and it may return a Promise. It is called on the click, and the promise goes to a ClipboardItem as it is, so the write starts inside the click even when the text arrives later (Safari refuses a write that begins after an `await`).',
+  }),
+};
+
 export const anchor = {
   description: message({
     ja: 'テキストリンク',
@@ -1095,8 +1122,8 @@ export const tableOfContents = {
     en: 'How the Current Heading Is Chosen',
   }),
   activeDescription: message({
-    ja: '見出しの `scroll-margin-block-start` を読み取り位置にし、それを最後に越えた見出しを今の見出しにする。固定ヘッダーの高さを見出しの scroll-margin に指定すれば、目次から飛んだ見出しがそのまま今の見出しになる。文書の終わりまで来たら、最後の節が短くても最後の見出しにする。縦書きの文書では右から左へ読む向きで決める。',
-    en: 'Each heading’s `scroll-margin-block-start` is the reading line, and the last heading to pass it is the current one. Give the headings the scroll margin your sticky header needs, and a heading reached from the contents becomes current. At the end of the document the last heading is current even if its section is short. In a vertical document it reads from right to left.',
+    ja: '見出しの `scroll-margin-block-start` を読み取り位置にし、それを最後に越えた見出しを今の見出しにする。固定ヘッダーの高さを見出しの scroll-margin に指定すれば、目次から飛んだ見出しがそのまま今の見出しになる。文書の終わりまで来たら、最後の節が短くても最後の見出しにする。縦書きの文書では、vertical-rl なら右から左、vertical-lr なら左から右へ読む向きで決める。',
+    en: 'Each heading’s `scroll-margin-block-start` is the reading line, and the last heading to pass it is the current one. Give the headings the scroll margin your sticky header needs, and a heading reached from the contents becomes current. At the end of the document the last heading is current even if its section is short. In a vertical document it reads from right to left (`vertical-rl`) or left to right (`vertical-lr`).',
   }),
 };
 

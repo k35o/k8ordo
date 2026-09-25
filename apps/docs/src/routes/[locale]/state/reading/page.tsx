@@ -584,6 +584,9 @@ export default function StateReadingPage() {
           <li className="list-disc">
             <Rich>{m.stateReading.beforeNullBlocked()}</Rich>
           </li>
+          <li className="list-disc">
+            <Rich>{m.stateReading.beforeNullVersion()}</Rich>
+          </li>
         </ul>
         <p className="text-fg-mute leading-relaxed">
           <Rich>{m.stateReading.beforeUntrusted()}</Rich>
