@@ -403,6 +403,14 @@ export const fileField = {
     ja: 'ファイルアップロードフィールド',
     en: 'A file upload field.',
   }),
+  dropzoneTitle: message({
+    ja: 'ドロップで追加する',
+    en: 'Adding files by dropping them',
+  }),
+  dropzoneDescription: message({
+    ja: '`FileField.Dropzone` にドロップしたファイルは、選んだときと同じく一覧と送信に加わり、`input` イベントでフォームに知らされます。中身を渡さないと、組み込みの案内と「ファイルを選択」のボタンが入るので、キーボードでも選べます。フォルダーはドロップでは受けず、`accept` もドロップでは確かめません。',
+    en: 'Files dropped on `FileField.Dropzone` join the list and the submission just as picked ones do, and an `input` event tells the form. Left empty, it holds the built-in hint and a choose-files button, so it works by keyboard too. Folders are skipped on drop, and `accept` is not checked there.',
+  }),
   acceptTypesTitle: message({
     ja: '受け入れタイプ',
     en: 'Accept Types',
