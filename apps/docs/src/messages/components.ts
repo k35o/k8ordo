@@ -476,6 +476,29 @@ export const calendar = {
   }),
 };
 
+export const stepper = {
+  description: message({
+    ja: '手順の段を並べ、済んだ段といまの段を示すステッパー',
+    en: 'The steps of a process, marking the done ones and the current one.',
+  }),
+  usageDescription: message({
+    ja: '`value` はいまの段の位置（0 始まり）です。済んだ段にはチェックが付き、読み上げでは「完了」と添えます。いまの段は `aria-current="step"` で伝えます。',
+    en: '`value` is the index of the current step (0-based). Done steps show a check and are read as completed; the current step carries `aria-current="step"`.',
+  }),
+  interactiveTitle: message({
+    ja: '済んだ段へ戻る',
+    en: 'Going back to a done step',
+  }),
+  interactiveDescription: message({
+    ja: '`interactive` を付けると、済んだ段がボタンになり、押すと `onChange` にその位置が届きます。先の段へは飛べません。',
+    en: 'With `interactive`, done steps become buttons and `onChange` receives the index of the one pressed. Steps ahead cannot be jumped to.',
+  }),
+  verticalTitle: message({
+    ja: '縦に並べる',
+    en: 'Vertical',
+  }),
+};
+
 export const slider = {
   description: message({
     ja: '単一ノブのスライダー入力',

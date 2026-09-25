@@ -40,6 +40,11 @@ export const componentCategories: NavCategory[] = [
         path: '/:locale/ui/components/pagination',
         description: m.components.pagination.description,
       },
+      {
+        name: 'Stepper',
+        path: '/:locale/ui/components/stepper',
+        description: m.components.stepper.description,
+      },
     ],
   },
   {
