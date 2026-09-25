@@ -27,6 +27,8 @@ type Layout<P extends string> = ComponentType<{
 
 export const paramSchemas = {} as const;
 
+export const searchReaders = {} as const;
+
 export const routeModules = {} as const;
 
 export const guards = {} as const;
@@ -59,7 +61,8 @@ the walk reaches that pattern, before the page renders, `routeModules` the
 `route.ts` that answers a pattern (its place in `routes` is held by a
 component that renders nothing), and `guards` the `guard.ts` files that run
 before a pattern answers, outer first (a mode that builds files refuses
-them); all four are empty here because no route file declares any.
+them), and `searchReaders` what reads the search for a page that exports
+`search`; all five are empty here because no route file declares any.
 
 `.k8ordo/register.gen.ts` wires that table into `@k8ordo/router` — and into
 `@k8ordo/state` when the application depends on it — so typed paths work

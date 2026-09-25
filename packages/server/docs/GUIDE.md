@@ -223,6 +223,8 @@ type Layout<P extends string> = ComponentType<{
 
 export const paramSchemas = {} as const;
 
+export const searchReaders = {} as const;
+
 export const routeModules = {} as const;
 
 export const guards = {} as const;
@@ -255,7 +257,8 @@ the walk reaches that pattern, before the page renders, `routeModules` the
 `route.ts` that answers a pattern (its place in `routes` is held by a
 component that renders nothing), and `guards` the `guard.ts` files that run
 before a pattern answers, outer first (a mode that builds files refuses
-them); all four are empty here because no route file declares any.
+them), and `searchReaders` what reads the search for a page that exports
+`search`; all five are empty here because no route file declares any.
 
 `.k8ordo/register.gen.ts` wires that table into `@k8ordo/router` — and into
 `@k8ordo/state` when the application depends on it — so typed paths work
@@ -971,6 +974,15 @@ server render shows the url slot's defaults and the live URL takes over on
 hydration. That is the same split the router draws at the `?` — the pathname
 is the framework's, everything after it is state's.
 
+The one exception is a page that says what of the search it reads, by
+exporting the url schema — `export const search = listState.url`. It receives
+that slot, parsed as `listState.parseUrl` parses it, as `search`
+(`PageProps<'/products'>` types it), and because it is rendered for the
+search it was given, a navigation that moves the search loads it again, in
+place: no scroll, no focus reset, nothing remounted. The generated table
+reads it through `@k8ordo/state`, so the application depends on that. A
+layout never receives it.
+
 `@k8ordo/form` derives a form's constraint attributes, its messages and its
 server-side validation from one zod schema — and since this mode has Server
 Actions, the submission has somewhere to arrive.
@@ -1173,8 +1185,9 @@ it renders, in a `guard.ts`, or by the Server Action a `POST` carries;
 The field exists only under this mode: the generated `Page` and `Layout`
 types carry it here and not under `@k8ordo/static`, so a page that reads it
 fails to type-check when the application is built into files, where there is
-no request to read. The search params are still not here — they are
-`@k8ordo/state`'s, read in the browser.
+no request to read. The search is not here either — it is `@k8ordo/state`'s,
+read in the browser, or handed to a page that exports `search` (above, in
+"Alongside the rest of k8ordo").
 
 ## What running buys over static
 

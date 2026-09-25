@@ -22,7 +22,9 @@
 > below it (a `Response` ends the request, nothing lets it through, and
 > `responseHeaders()` adds to the final answer), a guard or a Server Action
 > reads and writes cookies through `cookies()`, a page receives `request`
-> (read-only headers and cookies) and renders its own `<title>` — boundaries are React's
+> (read-only headers and cookies) and renders its own `<title>`, a page that
+> exports `search = listState.url` receives that `@k8ordo/state` url slot
+> parsed as `search` and is loaded again in place when the search moves — boundaries are React's
 > own `'use client'` with `server-only` modules barred from the client bundle,
 > and the route table and type wiring are generated rather than hand-written.
 >

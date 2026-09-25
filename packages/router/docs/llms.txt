@@ -87,7 +87,10 @@ When installed via npm, these docs live under `node_modules/@k8ordo/router/docs/
   `{ generation }` and is the
   navigation primitive `<Router>` is built on, and the seam the framework
   uses to render server-produced trees instead; its host renders what
-  `apply` set through `useDeferredValue`.
+  `apply` set through `useDeferredValue`; its optional `refresh(url)` says
+  whether a same-pathname navigation still has to load (the page showing reads
+  the search), which then loads in place — no scroll, focus reset or
+  transition types.
   Exported types, by group — the table: `Routes` (`{ kind, record, match }`),
   `RoutesRecord`, `RouteNode`, `RouteComponent`, `Match`, `ErrorComponent`,
   `ErrorProps`; patterns: `PatternOf`, `NavigablePatternOf`, `NavigablePath`,

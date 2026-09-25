@@ -160,10 +160,12 @@ These docs are served from <https://ordo.k8o.me>.
 - `@k8ordo/state` — `definePageState(key, { url?, entry? })` returns a pure
   definition usable from server and client: `parseUrl(searchParams)` reads
   the url slot typed with defaults applied and invalid values salvaged
-  (wherever the router hands a page its search — under `@k8ordo/static` /
-  `@k8ordo/server` a page receives `params` and `pathname` (plus a
-  headers-and-cookies `request` under `@k8ordo/server`) but never the search,
-  and the url slot is read in the browser);
+  (wherever the router hands a page its search — under `@k8ordo/server` a
+  page that exports `search = listState.url` receives the slot parsed as
+  `search` and is loaded again when the search moves; any other framework
+  page never sees the search, and the url slot is read in the browser);
+  `urlReader(schema)` is that reading for a url schema alone, the codec
+  built once (what the framework's generated table calls);
   `href(path, values?)` builds a canonical link keeping the path literal in
   the type — the path written from the app's root, the link carrying Vite's
   `base` (`import.meta.env.BASE_URL`) in front; `search(values?)` returns the
@@ -302,7 +304,10 @@ These docs are served from <https://ordo.k8o.me>.
   `{ generation }` and is the
   navigation primitive `<Router>` is built on, and the seam the framework
   uses to render server-produced trees instead; its host renders what
-  `apply` set through `useDeferredValue`.
+  `apply` set through `useDeferredValue`; its optional `refresh(url)` says
+  whether a same-pathname navigation still has to load (the page showing reads
+  the search), which then loads in place — no scroll, focus reset or
+  transition types.
   Exported types, by group — the table: `Routes` (`{ kind, record, match }`),
   `RoutesRecord`, `RouteNode`, `RouteComponent`, `Match`, `ErrorComponent`,
   `ErrorProps`; patterns: `PatternOf`, `NavigablePatternOf`, `NavigablePath`,
@@ -324,7 +329,7 @@ These docs are served from <https://ordo.k8o.me>.
 > output a directory a static host can serve. The mode is the dependency —
 > installing this package means request-time data does not exist as an API, and
 > a `'use server'` module, which the RSC pipeline still compiles, is refused by
-> name, as is a `guard.ts`. `src/routes/` is the pathname space
+> name, as are a `guard.ts` and a page that exports `search`. `src/routes/` is the pathname space
 > (page/layout/not-found/error/loading/redirect/route, `[param]`, `(group)`,
 > `_private`), a `loading.tsx` shows while what is below it suspends in a
 > client navigation (a written file is whole), a `route.ts` is written as the file its `GET` answers at its
@@ -393,7 +398,9 @@ These docs are served from <https://ordo.k8o.me>.
 > below it (a `Response` ends the request, nothing lets it through, and
 > `responseHeaders()` adds to the final answer), a guard or a Server Action
 > reads and writes cookies through `cookies()`, a page receives `request`
-> (read-only headers and cookies) and renders its own `<title>` — boundaries are React's
+> (read-only headers and cookies) and renders its own `<title>`, a page that
+> exports `search = listState.url` receives that `@k8ordo/state` url slot
+> parsed as `search` and is loaded again in place when the search moves — boundaries are React's
 > own `'use client'` with `server-only` modules barred from the client bundle,
 > and the route table and type wiring are generated rather than hand-written.
 >

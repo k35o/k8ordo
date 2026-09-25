@@ -4,7 +4,7 @@
 > output a directory a static host can serve. The mode is the dependency —
 > installing this package means request-time data does not exist as an API, and
 > a `'use server'` module, which the RSC pipeline still compiles, is refused by
-> name, as is a `guard.ts`. `src/routes/` is the pathname space
+> name, as are a `guard.ts` and a page that exports `search`. `src/routes/` is the pathname space
 > (page/layout/not-found/error/loading/redirect/route, `[param]`, `(group)`,
 > `_private`), a `loading.tsx` shows while what is below it suspends in a
 > client navigation (a written file is whole), a `route.ts` is written as the file its `GET` answers at its

@@ -22,7 +22,10 @@ pnpm check         # check:write to auto-fix
 
 - **Pathname only.** No search API, and the raw search is never distributed —
   a search change must re-render `@k8ordo/state`'s key subscribers and nobody
-  here. The URL is split at the `?`.
+  here. The URL is split at the `?`. A host that renders pages for a search
+  (the framework, for a page that exports `search`) says so through the
+  handler's `refresh(url)`, and the hook loads in place for it — the router
+  itself still reads nothing of the search.
 - **Pages never import the table.** `href` / `navigateTo` / `useParams` work
   from the pattern string; `Register` supplies the check. Only `<Router>`
   holds the table's value, which is why the routes-module → pages →
@@ -56,7 +59,9 @@ pnpm check         # check:write to auto-fix
   React upgrade changes that.
 - **A state change is not a page change.** Same pathname as the tree ON
   SCREEN ⇒ intercept with `scroll: 'manual'`, `focusReset: 'manual'`, no
-  load, no apply. Not `location.pathname`: interception commits the URL
+  load, no apply — unless the host's `refresh(url)` says the page showing
+  reads what moved, when it loads and applies with the same manual scroll and
+  focus, no scroll plan and no transition types. Not `location.pathname`: interception commits the URL
   before the tree arrives, so comparing against the address bar makes a
   state update during a pending load abort that load and strand the old page
   under the new URL (regression test in `router.browser.test.tsx`).
@@ -95,7 +100,8 @@ pnpm check         # check:write to auto-fix
   sets at interception (in the table's terms, base removed) and clears in the
   commit that puts that navigation's tree on screen, or when it is aborted or
   its load fails — only for the latest navigation, since a newer one already
-  names its own. A same-pathname navigation never sets it.
+  names its own. A same-pathname navigation sets it only when `refresh(url)`
+  made it load.
 - **Declaration order decides.** No specificity ranking, ever — the table
   reads top to bottom like the code it is.
 - **A bound param is a param, not a concept.** `bindParams` knows a name and
