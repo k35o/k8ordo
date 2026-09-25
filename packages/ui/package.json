@@ -125,7 +125,7 @@
     "@vitest/browser-playwright": "catalog:",
     "@vitest/coverage-v8": "catalog:",
     "@vitest/ui": "catalog:",
-    "ai": "7.0.105",
+    "ai": "catalog:",
     "postcss": "catalog:",
     "publint": "catalog:",
     "react": "catalog:",
