@@ -1,7 +1,8 @@
-import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, rm, utimes, writeFile } from 'node:fs/promises';
 import { connect } from 'node:net';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
+import { brotliCompressSync, gzipSync } from 'node:zlib';
 
 import { serve } from './serve';
 import type { Server } from './serve';
@@ -11,17 +12,31 @@ import type { Server } from './serve';
 let dist: string;
 let server: Server;
 
+const SCRIPT = 'export {};';
+
+// ストリームの途中で止まっている handler を、テストが先へ進める合図
+type Gate = { k8ordoRelease?: Promise<undefined> };
+
+/** 本文を、届いた塊ごとの文字列として読むストリーム */
+const textOf = (response: Response): ReadableStream<string> => {
+  if (response.body === null) throw new Error('the answer has no body');
+  return response.body.pipeThrough(new TextDecoderStream());
+};
+
 beforeAll(async () => {
   dist = await mkdtemp(path.join(tmpdir(), 'k8ordo-serve-'));
   await mkdir(path.join(dist, 'client', 'assets'), { recursive: true });
   await mkdir(path.join(dist, 'rsc'), { recursive: true });
   await writeFile(path.join(dist, 'client', 'index.html'), '<p>static</p>');
-  await writeFile(
-    path.join(dist, 'client', 'assets', 'app-abc123.js'),
-    'export {};',
-  );
+  const script = path.join(dist, 'client', 'assets', 'app-abc123.js');
+  await writeFile(script, SCRIPT);
+  await writeFile(`${script}.br`, brotliCompressSync(SCRIPT));
+  await writeFile(`${script}.gz`, gzipSync(SCRIPT));
   await writeFile(path.join(dist, 'client', 'site.webmanifest'), '{}');
   await writeFile(path.join(dist, 'client', 'notes.k8ordo'), 'k8ordo');
+  await writeFile(path.join(dist, 'client', 'clip.mp4'), '0123456789');
+  await writeFile(path.join(dist, 'client', 'stable.txt'), 'stable');
+  await writeFile(path.join(dist, 'client', 'edited.txt'), 'first');
   await writeFile(
     path.join(dist, 'rsc', 'index.js'),
     `export const base = '/';
@@ -29,6 +44,22 @@ beforeAll(async () => {
       const url = new URL(request.url);
       if (url.pathname === '/throws') {
         throw new Error('postgres://admin:hunter2@db refused the connection');
+      }
+      if (url.pathname === '/streams') {
+        const encoder = new TextEncoder();
+        return new Response(new ReadableStream({
+          async start(controller) {
+            controller.enqueue(encoder.encode('<p>shell</p>'));
+            await globalThis.k8ordoRelease;
+            controller.enqueue(encoder.encode('<p>rest</p>'));
+            controller.close();
+          },
+        }), { headers: { 'content-type': 'text/html;charset=utf-8' } });
+      }
+      if (url.pathname === '/image') {
+        return new Response(new Uint8Array([137, 80, 78, 71]), {
+          headers: { 'content-type': 'image/png' },
+        });
       }
       if (url.pathname === '/breaks-midway') {
         let sent = false;
@@ -44,7 +75,7 @@ beforeAll(async () => {
         }));
       }
       const body = request.method === 'POST' ? await request.text() : '';
-      const headers = new Headers({ 'content-type': 'application/json' });
+      const headers = new Headers({ 'content-type': 'application/json', vary: 'cookie' });
       headers.append('set-cookie', 'a=1');
       headers.append('set-cookie', 'b=2');
       return new Response(
@@ -62,8 +93,13 @@ afterAll(async () => {
 });
 
 // fetch は HEAD の答えに本文が付いていても読まずに捨てるので、本文が
-// 送られていないことは線上のバイトでしか確かめられない
-const exchange = (method: string, pathname: string): Promise<string> =>
+// 送られていないことは線上のバイトでしか確かめられない。条件付きの GET に
+// Cache-Control: no-cache を足して 304 を封じるのも fetch なので、それもここで送る
+const exchange = (
+  method: string,
+  pathname: string,
+  headers: Readonly<Record<string, string>> = {},
+): Promise<string> =>
   new Promise((resolve, reject) => {
     const socket = connect(server.port, 'localhost');
     let received = '';
@@ -75,8 +111,11 @@ const exchange = (method: string, pathname: string): Promise<string> =>
       resolve(received);
     });
     socket.on('error', reject);
+    const lines = Object.entries(headers).map(
+      ([name, value]) => `${name}: ${value}\r\n`,
+    );
     socket.write(
-      `${method} ${pathname} HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n`,
+      `${method} ${pathname} HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n${lines.join('')}\r\n`,
     );
   });
 
@@ -164,6 +203,160 @@ describe('serve', () => {
     async (method) => {
       const response = await fetch(`${server.url}/index.html`, { method });
       expect(await response.json()).toMatchObject({ method });
+    },
+  );
+
+  it('sends the precompressed copy the client accepts best', async () => {
+    const both = await fetch(`${server.url}/assets/app-abc123.js`, {
+      headers: { 'accept-encoding': 'gzip, br' },
+    });
+    expect(both.headers.get('content-encoding')).toBe('br');
+    expect(both.headers.get('vary')).toBe('Accept-Encoding');
+    expect(await both.text()).toBe(SCRIPT);
+
+    const gzipOnly = await fetch(`${server.url}/assets/app-abc123.js`, {
+      headers: { 'accept-encoding': 'gzip' },
+    });
+    expect(gzipOnly.headers.get('content-encoding')).toBe('gzip');
+    expect(await gzipOnly.text()).toBe(SCRIPT);
+  });
+
+  it('sends the file itself to a client that accepts no coding, saying it could have', async () => {
+    const response = await fetch(`${server.url}/assets/app-abc123.js`, {
+      headers: { 'accept-encoding': 'identity' },
+    });
+    expect(response.headers.get('content-encoding')).toBeNull();
+    expect(response.headers.get('vary')).toBe('Accept-Encoding');
+    expect(await response.text()).toBe(SCRIPT);
+  });
+
+  it('answers a request for the copy the client already holds with 304 and no body', async () => {
+    const first = await fetch(`${server.url}/index.html`);
+    const etag = String(first.headers.get('etag'));
+    expect(etag).toMatch(/^"[\w-]+"$/u);
+
+    const received = await exchange('GET', '/index.html', {
+      'if-none-match': etag,
+    });
+    const [head = '', ...body] = received.split('\r\n\r\n');
+    expect(head).toMatch(/^HTTP\/1\.1 304 Not Modified\r\n/u);
+    expect(head).toContain(`etag: ${etag}\r\n`);
+    expect(head).toContain('cache-control: no-cache\r\n');
+    expect(body.join('\r\n\r\n')).toBe('');
+  });
+
+  it('tags each coding of a file apart, since they are different bytes', async () => {
+    const tagOf = async (encoding: string): Promise<string | null> =>
+      (
+        await fetch(`${server.url}/assets/app-abc123.js`, {
+          headers: { 'accept-encoding': encoding },
+        })
+      ).headers.get('etag');
+    const tags = new Set([
+      await tagOf('br'),
+      await tagOf('gzip'),
+      await tagOf('identity'),
+    ]);
+    expect(tags.size).toBe(3);
+  });
+
+  it('tags a file by what it holds, not by when it was written', async () => {
+    const tagOf = async (): Promise<string | null> =>
+      (await fetch(`${server.url}/stable.txt`)).headers.get('etag');
+    const before = await tagOf();
+    // 別のマシンでビルドし直したのと同じ状況: 中身は同じで、時刻だけが違う
+    await utimes(path.join(dist, 'client', 'stable.txt'), 0, 0);
+    expect(await tagOf()).toBe(before);
+  });
+
+  it('tags a file anew once what it holds changes', async () => {
+    const tagOf = async (): Promise<string | null> =>
+      (await fetch(`${server.url}/edited.txt`)).headers.get('etag');
+    const before = await tagOf();
+    await writeFile(path.join(dist, 'client', 'edited.txt'), 'second, longer');
+    expect(await tagOf()).not.toBe(before);
+  });
+
+  it('answers the byte range a video player asks for', async () => {
+    const whole = await fetch(`${server.url}/clip.mp4`);
+    expect(whole.headers.get('accept-ranges')).toBe('bytes');
+    await whole.arrayBuffer();
+
+    const part = await fetch(`${server.url}/clip.mp4`, {
+      headers: { range: 'bytes=2-5' },
+    });
+    expect(part.status).toBe(206);
+    expect(part.headers.get('content-range')).toBe('bytes 2-5/10');
+    expect(part.headers.get('content-length')).toBe('4');
+    expect(await part.text()).toBe('2345');
+  });
+
+  it('answers a range that starts past the end with 416 and the length', async () => {
+    const response = await fetch(`${server.url}/clip.mp4`, {
+      headers: { range: 'bytes=10-' },
+    });
+    expect(response.status).toBe(416);
+    expect(response.headers.get('content-range')).toBe('bytes */10');
+  });
+
+  it.each([
+    [
+      'names another version of the file',
+      { range: 'bytes=2-5', 'if-range': '"stale"' },
+    ],
+    ['asks for several ranges at once', { range: 'bytes=0-1,5-6' }],
+    ['cannot be read', { range: 'bytes=five-' }],
+  ])('sends the whole file when the range %s', async (_case, headers) => {
+    const response = await fetch(`${server.url}/clip.mp4`, { headers });
+    expect(response.status).toBe(200);
+    expect(await response.text()).toBe('0123456789');
+  });
+
+  it("compresses the handler's answer as the client accepts, keeping its own Vary", async () => {
+    const response = await fetch(`${server.url}/products/1`, {
+      headers: { 'accept-encoding': 'gzip' },
+    });
+    expect(response.headers.get('content-encoding')).toBe('gzip');
+    expect(response.headers.get('vary')).toBe('cookie, Accept-Encoding');
+    expect(await response.json()).toMatchObject({ pathname: '/products/1' });
+  });
+
+  it("leaves the handler's answer as it is for a client that accepts no coding", async () => {
+    const response = await fetch(`${server.url}/products/1`, {
+      headers: { 'accept-encoding': 'identity' },
+    });
+    expect(response.headers.get('content-encoding')).toBeNull();
+    expect(response.headers.get('vary')).toBe('cookie, Accept-Encoding');
+  });
+
+  it('never compresses an answer in a format that is compressed already', async () => {
+    const response = await fetch(`${server.url}/image`, {
+      headers: { 'accept-encoding': 'br' },
+    });
+    expect(response.headers.get('content-encoding')).toBeNull();
+    expect(response.headers.get('vary')).toBeNull();
+    expect(new Uint8Array(await response.arrayBuffer())).toStrictEqual(
+      new Uint8Array([137, 80, 78, 71]),
+    );
+  });
+
+  it.each(['br', 'gzip'])(
+    'sends each part of a streamed page as soon as it is rendered, compressed with %s',
+    async (encoding) => {
+      const gate = Promise.withResolvers<undefined>();
+      (globalThis as Gate).k8ordoRelease = gate.promise;
+      const response = await fetch(`${server.url}/streams`, {
+        headers: { 'accept-encoding': encoding },
+      });
+      expect(response.headers.get('content-encoding')).toBe(encoding);
+      const text = textOf(response);
+      const reader = text.getReader();
+      // 残りはまだ描かれていない。先頭がここで届かなければ、圧縮が溜め込んでいる
+      expect((await reader.read()).value).toBe('<p>shell</p>');
+      gate.resolve(undefined);
+      reader.releaseLock();
+      const rest = (await Array.fromAsync(text)).join('');
+      expect(rest).toBe('<p>rest</p>');
     },
   );
 
