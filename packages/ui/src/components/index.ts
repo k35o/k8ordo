@@ -12,6 +12,7 @@ export { Carousel } from './data-display/carousel';
 export { Code } from './data-display/code';
 export { Heading } from './data-display/heading';
 export { Kbd } from './data-display/kbd';
+export { Prose } from './data-display/prose';
 export { type CellAlign, Table } from './data-display/table';
 export { Alert, type AlertAction } from './feedback/alert';
 export { EmptyState } from './feedback/empty-state';

@@ -1187,6 +1187,30 @@ Props (Carousel.Slide):
 - `children`: `ReactNode`
 - `label`: `string`
 
+### Prose
+
+A container that puts the typesetting of body text back — for Markdown or MDX
+rendered to HTML. Only bare elements (no `class`) are typeset, so components
+placed inside keep their own look; the spacing between blocks applies to
+everything. Tuned for Japanese: loose leading, emphasis dots for `em`, and a
+one-character paragraph indent in vertical writing. See
+[Typography](typography.md#long-form-text-prose) for what it sets.
+
+```tsx
+import { Prose } from '@k8ordo/ui';
+
+<article>
+  <Prose>
+    <MDXContent components={{ pre: MyCodeBlock }} />
+  </Prose>
+</article>;
+```
+
+Props:
+
+- `children`: `ReactNode`
+- Other props are forwarded to `HTMLAttributes<HTMLDivElement>`, except `className` / `style`.
+
 ### Table
 
 A data table, as a compound component. `Table.EmptyState` is the row to put in

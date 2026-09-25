@@ -430,6 +430,7 @@ import { UIProvider, Button, Card } from '@k8ordo/ui';
 - **Code** — \`children: string\`（インラインコード。色文字列には色見本が付く）
 - **Heading** — \`level: 'h1'..'h6'\`（必須）, \`id?\`, \`lineClamp?\`
 - **Kbd** — \`children: string\`（1 キー 1 要素。組み合わせは並べる）, \`label?\`（記号キーの読み上げ）
+- **Prose** — Markdown / MDX が描いた本文の組版を戻す入れ物。クラスの無い素の要素だけを組み、部品は自分の見た目のまま（日本語向け: 広い行間、em は傍点、縦書きは段落頭を 1 字下げ）
 - **Table**（compound: \`Root\` / \`Caption\` / \`Head\` / \`Body\` / \`Row\` / \`HeaderCell\` / \`Cell\` / \`EmptyState\`(\`colSpan\` + EmptyState の props)）
 
 ### Feedback
