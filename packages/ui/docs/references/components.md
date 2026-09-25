@@ -1902,26 +1902,32 @@ function DismissButton({ onDismiss }) {
 
 Every key in the `Messages` type. All values are `string`.
 
-| Category      | Keys                                                                                                                                             |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Common        | `close`, `required`, `loading`, `avatar`, `color`                                                                                                |
-| Alert         | `alertSuccess`, `alertInfo`, `alertWarning`, `alertError`                                                                                        |
-| Toast         | `toastRegion`                                                                                                                                    |
-| Autocomplete  | `autocompletePlaceholder`, `autocompleteRemoveTag`, `autocompleteClear`, `autocompleteEmpty`                                                     |
-| FileField     | `fileFieldRemove`, `fileFieldTrigger`                                                                                                            |
-| NumberField   | `numberFieldIncrement`, `numberFieldDecrement`                                                                                                   |
-| PasswordInput | `passwordShow`, `passwordHide`                                                                                                                   |
-| ListBox       | `listBoxPlaceholder`                                                                                                                             |
-| Breadcrumb    | `breadcrumb`                                                                                                                                     |
-| Tabs          | `tabList`                                                                                                                                        |
-| Pagination    | `paginationLabel`, `paginationPrevious`, `paginationNext`                                                                                        |
-| CodeBlock     | `codeBlockCopy`, `copied`, `copyFailed`                                                                                                          |
-| Carousel      | `carousel`, `carouselSlide`, `carouselPrevious`, `carouselNext`                                                                                  |
-| AI chat       | `chat`, `scrollToLatest`, `reasoning`, `reasoningStreaming`, `suggestions`, `send`, `stop`, `toolInput`, `toolOutput`, `toolError`, `toolDenied` |
-| Response      | The `response*` keys below                                                                                                                       |
+| Category      | Keys                                                                                                   |
+| ------------- | ------------------------------------------------------------------------------------------------------ |
+| Common        | `close`, `required`, `loading`, `avatar`, `color`                                                      |
+| Alert         | `alertSuccess`, `alertInfo`, `alertWarning`, `alertError`                                              |
+| Toast         | `toastRegion`                                                                                          |
+| Autocomplete  | `autocompletePlaceholder`, `autocompleteRemoveTag`, `autocompleteClear`, `autocompleteEmpty`           |
+| FileField     | `fileFieldRemove`, `fileFieldTrigger`                                                                  |
+| NumberField   | `numberFieldIncrement`, `numberFieldDecrement`                                                         |
+| PasswordInput | `passwordShow`, `passwordHide`                                                                         |
+| ListBox       | `listBoxPlaceholder`                                                                                   |
+| Breadcrumb    | `breadcrumb`                                                                                           |
+| Tabs          | `tabList`                                                                                              |
+| Pagination    | `paginationLabel`, `paginationPrevious`, `paginationNext`                                              |
+| CodeBlock     | `codeBlockCopy`, `copied`, `copyFailed`                                                                |
+| Carousel      | `carousel`, `carouselSlide`, `carouselPrevious`, `carouselNext`                                        |
+| AI chat       | `chat`, `scrollToLatest`, `reasoning`, `reasoningStreaming`, `suggestions`, `send`, `stop`, `attach`   |
+| AI content    | `attachments`, `attachmentRemove`, `attachmentImage`, `sources`                                        |
+| AI actions    | `messageActions`, `copy`, `regenerate`, `feedbackPositive`, `feedbackNegative`                         |
+| AI tools      | `toolInput`, `toolOutput`, `toolError`, `toolDenied`, `toolApprovalRequest`, `toolApprove`, `toolDeny` |
+| Response      | The `response*` keys below                                                                             |
 
 `fileFieldTrigger` and `tabList` are the trigger text and tab-list name the
 generative-UI renderers fall back to when a spec leaves them out.
+
+`copied` is shared: `CodeBlock` and `Message.Copy` both announce it once the
+copy succeeds.
 
 The `response*` keys label the controls `Response` draws (`@k8ordo/ui/ai/response`):
 `responseCopied`, `responseCopyCode`, `responseCopyLink`, `responseCopyTable`,
