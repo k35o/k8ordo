@@ -401,11 +401,13 @@ without JavaScript keeps the default.
   application's. `localize` / `delocalize` remain for a pathname in hand —
   the language switcher, which takes the page it is on to another locale.
 
-- **`@k8ordo/ui`**: its own built-in strings go through `UIProvider`'s
-  `messages`. When the app's locales are among `ja` and `en`,
-  `<UIProvider messages={dictionaries[locales.getLocale()]}>` picks the
-  dictionary of the locale being rendered (`dictionaries` is from
-  `@k8ordo/ui/i18n`); any other locale passes its own `Messages`.
+- **`@k8ordo/ui`**: its built-in strings read `currentLocale()` from this
+  package — the locale messages render in, or `null` (English there) when no
+  set is defined in that environment — so they follow the app's locale with
+  nothing passed. `ja` and `en` ship with it; another locale is registered
+  next to the set with `registerMessages` from `@k8ordo/ui/i18n`. The module
+  that defines the set has to be loaded in the browser too, or the components
+  there speak English.
 - **`@k8ordo/form`**: constraint messages are messages, and a message called
   where the constraint is declared keeps the text of whatever locale was
   current then. Hand zod the message instead, so it is called when zod
