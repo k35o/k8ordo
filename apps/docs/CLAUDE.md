@@ -105,8 +105,9 @@ pnpm check:write       # Oxlint/Oxfmt lint/format auto-fix
   module so a Server Component could read it. The `@k8ordo/ui` storage hooks
   (`useLocalStorage`, `useSessionStorage`, `useHash`) no longer exist, so
   neither do their pages.
-- **i18n**: `@k8ordo/i18n`. `src/i18n.ts` is `defineLocales(['ja', 'en'])`
-  — the one place the list is spelled — plus the `Register` augmentation
+- **i18n**: `@k8ordo/i18n`. `src/i18n.ts` is `defineLocales({ ja: …, en: … })`
+  — the one place the list is spelled, with each locale's `timeZone`
+  (`Asia/Tokyo`, `UTC`) and `dir` — plus the `Register` augmentation
   that types every message against it, and `getLocale`. Messages live in
   `src/messages/<area>.ts`, one `message({ ja, en })` per export (a 3-level
   key became a group object: `m.components.button.description`), re-exported

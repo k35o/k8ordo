@@ -22,7 +22,8 @@ legacy fallbacks.
   locale segment in front of them and nothing after it.
 - **A message grammar.** No placeholder syntax, no ICU. A message with
   values is a function of those values: interpolation is a template
-  literal, plurals are `Intl.PluralRules`, dates and numbers are `Intl`.
+  literal, and plurals, dates and numbers are `Intl` — the set only draws
+  the `Intl` object for the current locale ([Formatting](#formatting)).
   TypeScript checks the arguments because they are arguments.
 - **Loading.** Messages are ordinary exports. Which ones reach the browser is
   decided by the bundler from what each client module imports, not by a
@@ -35,7 +36,10 @@ legacy fallbacks.
 import { defineLocales } from '@k8ordo/i18n';
 import type { LocaleOf } from '@k8ordo/i18n';
 
-export const locales = defineLocales(['ja', 'en']);
+export const locales = defineLocales({
+  ja: { timeZone: 'Asia/Tokyo', dir: 'ltr' },
+  en: { timeZone: 'UTC', dir: 'ltr' },
+});
 
 declare module '@k8ordo/i18n' {
   interface Register {
@@ -75,14 +79,18 @@ That is all a working setup needs: `defineLocales`, `Register` (with
 
 ## The locale set
 
-`defineLocales(all, { default? })` returns the set. The first entry is the
-default unless told otherwise; every tag must be BCP 47 (checked with
-`Intl.Locale`); a repeated tag or a default outside the list throws at the
-definition, not later.
+`defineLocales(definitions, { default? })` returns the set. `definitions` is
+keyed by locale tag, and each locale states its `timeZone` and its `dir`. The
+first entry is the default unless told otherwise (without `default`,
+`locales.default` is typed as the whole union); every tag must be BCP 47
+(checked with `Intl.Locale`); an empty set, a default outside the list, a time
+zone the runtime does not know, and a `dir` other than `ltr` / `rtl` throw at
+the definition, not later.
 
 | Member            | What it is                                                                        |
 | ----------------- | --------------------------------------------------------------------------------- |
 | `all`             | The tags, in order.                                                               |
+| `definitions`     | Each locale's `{ timeZone, dir }`, as given.                                      |
 | `default`         | The tag used when nothing names one.                                              |
 | `is(value)`       | Membership as a type guard.                                                       |
 | `negotiate(…)`    | The best supported tag for a preference list.                                     |
@@ -92,10 +100,29 @@ definition, not later.
 | `paramsSchema`    | The `[locale]` segment's schema (Standard Schema; no schema library).             |
 | `getLocale()`     | The locale of the render in progress. Not a hook.                                 |
 | `run(locale, fn)` | Server only: runs `fn` with `locale` current.                                     |
+| `dateTimeFormat`… | `Intl` for the current locale ([Formatting](#formatting)).                        |
 
-`LocaleOf<typeof locales>` is the tag union. `delocalize` says `null` for a
-first segment that is not a locale rather than guessing the default, so the
-root layout and the 404 page choose the fallback visibly.
+`LocaleOf<typeof locales>` is the tag union and `LocaleDefinition` one
+locale's `{ timeZone, dir }`. `delocalize` says `null` for a first segment
+that is not a locale rather than guessing the default, so the root layout and
+the 404 page choose the fallback visibly.
+
+### `timeZone` and `dir`
+
+Neither can be derived from the runtime, so each locale declares both.
+
+`timeZone` is the IANA time zone the locale's dates are shown in. The
+runtime's own zone is the server's on the server and the visitor's in the
+browser, so a date left to it renders one way in the HTML and another while
+hydrating — a different day, near midnight. One zone per locale gives both
+sides the same value. Which zone is a product decision: a site about events in
+Tokyo may show its English pages in `Asia/Tokyo` too; a display that should
+follow each visitor's own zone belongs in a part that renders in the browser
+only.
+
+`dir` is the direction the locale's text runs in, for `<html dir>`.
+`Intl.Locale`'s `getTextInfo()` has not reached every browser, so it is
+declared rather than derived.
 
 ### Negotiation
 
@@ -133,7 +160,7 @@ locale holds it, and with no annotation at all the arguments are `unknown`.
 export const items = message({
   ja: (count: number) => `${String(count)} 件`,
   en: (count) =>
-    `${String(count)} ${new Intl.PluralRules('en').select(count) === 'one' ? 'item' : 'items'}`,
+    `${String(count)} ${locales.pluralRules().select(count) === 'one' ? 'item' : 'items'}`,
 });
 ```
 
@@ -201,6 +228,44 @@ Keep the rule of thumb in mind: text that a Server Component renders costs
 the client nothing, whichever module declares it. A client component that
 needs text names it and pays for that message alone.
 
+## Formatting
+
+Plurals, dates, numbers and lists are `Intl` itself; there is no format
+syntax here. The set draws the `Intl` object for the current locale:
+
+| Member                         | Returns                                                         |
+| ------------------------------ | --------------------------------------------------------------- |
+| `dateTimeFormat(options?)`     | `Intl.DateTimeFormat` in the current locale and its `timeZone`. |
+| `numberFormat(options?)`       | `Intl.NumberFormat` in the current locale.                      |
+| `relativeTimeFormat(options?)` | `Intl.RelativeTimeFormat` in the current locale.                |
+| `pluralRules(options?)`        | `Intl.PluralRules` in the current locale.                       |
+| `listFormat(options?)`         | `Intl.ListFormat` in the current locale.                        |
+
+```tsx
+<time dateTime={date.toISOString()}>
+  {locales.dateTimeFormat({ dateStyle: 'medium' }).format(date)}
+</time>
+```
+
+What comes back is the `Intl` object, so `format`, `formatToParts`,
+`formatRange`, `select` and the options are `Intl`'s own. One is made per
+locale and options and returned again after that, so calling it where a
+component or a message renders costs a lookup. Options are keyed by their
+JSON: the same options in another order make a second object, never a
+different answer. None of them is a hook, and each reads the current locale
+the way a message does, so the same call works in a Server Component, a
+Client Component, and inside a message's function.
+
+`dateTimeFormat` writes a date only in the locale's `timeZone`. Its options
+type refuses a `timeZone`, and one forced through with `as` is overridden. The
+runtime's own zone is the server's on one side and the visitor's on the other,
+so a date left to it reads differently in the HTML and while hydrating; the
+locale's zone is the same on both. A display that should follow the visitor's
+own zone — a local clock, a time relative to now — differs between the two by
+nature: use `Intl` directly for it, in a part that renders in the browser
+only. An `Intl` API not listed here (`Intl.Collator`, `Intl.DisplayNames`)
+takes the tag from `locales.getLocale()`.
+
 ## Where the locale comes from
 
 **On the server**, `paramsSchema` accepting a locale makes it the current
@@ -235,7 +300,8 @@ segment no message has text for is read the same way, so a 404 page never
 throws on `/fr/…`.
 
 `locales.getLocale()` reads the same source for code that needs the tag
-itself: `<html lang>`, a language switcher, `Intl` formatters.
+itself: `<html lang>`, a language switcher, an `Intl` API the set does not
+draw.
 
 ### The `/` page
 
@@ -262,7 +328,7 @@ no hook for it either, so a server-side redirect sits outside the app: a proxy
 in front of `serve`, or a host of your own around the built handler
 (`dist/rsc/index.js`), answers `/` with a `307`.
 
-### `<html lang>`
+### `<html lang>` and `dir`
 
 The root layout sits above `[locale]` and receives `pathname`. On a page the
 schema has already run for that page, so `locales.getLocale()` is right, and
@@ -270,6 +336,12 @@ schema has already run for that page, so `locales.getLocale()` is right, and
 in terms of the URL alone. On a 404 they agree too: the schema runs over the
 catch-all's params, so `getLocale()` is the URL's locale where it names one
 and the default where it does not, as `delocalize` reads it.
+
+```tsx
+const locale = locales.delocalize(pathname).locale ?? locales.default;
+
+<html dir={locales.definitions[locale].dir} lang={locale}>
+```
 
 ## Static builds
 
@@ -356,6 +428,8 @@ without JavaScript keeps the default.
   names, or the default.
 - On a server runtime without `AsyncLocalStorage`, accepting a locale throws
   rather than rendering in the default.
+- A date written through `dateTimeFormat` is in its locale's time zone on the
+  server and in every browser; the type refuses any other.
 
 ## Testing
 
