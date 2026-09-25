@@ -180,7 +180,7 @@ const pickSchema = z.object({
 });
 const pickFields = formFields(pickSchema);
 
-const SubmittedPick: FC = () => {
+const SubmittedPick: FC<{ lockedTags?: string[] }> = ({ lockedTags }) => {
   const [state, formAction] = useActionState(
     (_previous: FormState, formData: FormData): Promise<FormState> =>
       Promise.resolve(parseForm(pickSchema, formData).state),
@@ -201,16 +201,18 @@ const SubmittedPick: FC = () => {
         <option value="green">green</option>
         <option value="blue">blue</option>
       </select>
-      <select
-        aria-label="tags"
-        multiple
-        {...form.field('tags').input}
-        defaultValue={Array.isArray(tags) ? tags : []}
-      >
-        <option value="a">a</option>
-        <option value="b">b</option>
-        <option value="c">c</option>
-      </select>
+      <fieldset disabled={lockedTags !== undefined}>
+        <select
+          aria-label="tags"
+          multiple
+          {...form.field('tags').input}
+          defaultValue={lockedTags ?? (Array.isArray(tags) ? tags : [])}
+        >
+          <option value="a">a</option>
+          <option value="b">b</option>
+          <option value="c">c</option>
+        </select>
+      </fieldset>
       <p data-testid="echo-color">{String(state.values?.color ?? '')}</p>
       <p data-testid="echo-tags">{JSON.stringify(tags ?? [])}</p>
       <p data-testid="dirty">{String(form.isDirty)}</p>
@@ -788,6 +790,25 @@ describe('useForm in a browser', () => {
     await expect
       .poll(() => [...tags.selectedOptions].map((option) => option.value))
       .toEqual(['b']);
+  });
+
+  it('leaves a disabled select on its own choice, since it submitted none', async () => {
+    const screen = await render(<SubmittedPick lockedTags={['a', 'c']} />);
+
+    await screen.getByLabelText('color').selectOptions('blue');
+    submit();
+
+    // チェックボックス群の欄は、何も送らなくても [] で返る
+    await expect
+      .element(screen.getByTestId('echo-color'))
+      .toHaveTextContent('blue');
+    await expect
+      .element(screen.getByTestId('echo-tags'))
+      .toHaveTextContent('[]');
+    const tags = screen.getByLabelText('tags').element() as HTMLSelectElement;
+    await expect
+      .poll(() => [...tags.selectedOptions].map((option) => option.value))
+      .toEqual(['a', 'c']);
   });
 
   it('clears a cross-field message when the other field is the one fixed', async () => {

@@ -746,8 +746,13 @@ const writeEchoToSelects = (
     ) {
       continue;
     }
-    // エコーに無いのは disabled だったか送信時に無かった select で、何も送って
-    // いない。未選択と読むと既定値を消してしまう
+    // disabled の select（fieldset ごと disabled なものも）は何も送っていないが、
+    // チェックボックス群の欄は送らなくても [] で返り、エコーからは見分けられない。
+    // 未選択と読むと既定値を消してしまう
+    if (element.matches(':disabled')) {
+      continue;
+    }
+    // エコーに無いのは送信時に無かった select で、これも何も送っていない
     const echoed = values[element.name];
     if (echoed === undefined) {
       continue;
