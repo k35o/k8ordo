@@ -1073,7 +1073,9 @@ Props:
 
 ### Table
 
-A data table, as a compound component.
+A data table, as a compound component. `Table.EmptyState` is the row to put in
+`Table.Body` when there are no rows: it spans `colSpan` columns and draws an
+`EmptyState` with the rest of its props.
 
 ```tsx
 import { Table } from '@k8ordo/ui';
@@ -1113,8 +1115,12 @@ Props (Table.Cell):
 
 Props (Table.EmptyState):
 
-- `children`: `ReactNode` (required)
 - `colSpan`: `number` (required)
+- `title`: `string` (required)
+- `action`: `ReactNode`
+- `description`: `ReactNode`
+- `icon`: `ReactNode`
+- Other props are forwarded to `ComponentProps<typeof EmptyState>`.
 
 Props (Table.Head):
 
@@ -1162,6 +1168,31 @@ Props:
 `action` is an `AlertAction`, `{ label: string; renderItem: (props: { children: ReactNode }) => ReactNode }`.
 `renderItem` receives `label` as `children`; render your own button or link
 around it.
+
+### EmptyState
+
+What a list, a table, or a search shows when there is nothing in it: a title,
+an optional description and icon, and an optional action. Inside a table, use
+`Table.EmptyState`, which puts the same content in a row spanning the columns.
+
+```tsx
+import { Button, EmptyState, TableIcon } from '@k8ordo/ui';
+
+<EmptyState
+  action={<Button onClick={clearFilters}>Clear filters</Button>}
+  description="Try removing a filter."
+  icon={<TableIcon size="lg" />}
+  title="No matching posts"
+/>;
+```
+
+Props:
+
+- `title`: `string` (required)
+- `action`: `ReactNode`
+- `description`: `ReactNode`
+- `icon`: `ReactNode`
+- Other props are forwarded to `HTMLAttributes<HTMLDivElement>`, except `children` / `className` / `style`.
 
 ### Toast
 

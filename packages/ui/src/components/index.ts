@@ -12,6 +12,7 @@ export { Code } from './data-display/code';
 export { Heading } from './data-display/heading';
 export { type CellAlign, Table } from './data-display/table';
 export { Alert, type AlertAction } from './feedback/alert';
+export { EmptyState } from './feedback/empty-state';
 export { Progress } from './feedback/progress';
 export { Skeleton } from './feedback/skeleton';
 export { Spinner } from './feedback/spinner';

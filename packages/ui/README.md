@@ -246,6 +246,7 @@ stories and rendered props rather than relying on trained knowledge:
 ### Feedback
 
 - **Alert** - Important messages and notifications
+- **EmptyState** - What a list, table, or search shows when it is empty
 - **Progress** - Progress indication
 - **Skeleton** - Content loading placeholder
 - **Spinner** - Loading indicator

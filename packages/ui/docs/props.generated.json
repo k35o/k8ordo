@@ -1263,6 +1263,37 @@
       "omitted": []
     },
     {
+      "name": "EmptyState",
+      "props": [
+        {
+          "name": "title",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "action",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "description",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "icon",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": "HTMLAttributes<HTMLDivElement>",
+      "omitted": ["children", "className", "style"]
+    },
+    {
       "name": "ExternalLinkIcon",
       "props": [
         {
@@ -3271,19 +3302,37 @@
       "name": "Table.EmptyState",
       "props": [
         {
-          "name": "children",
-          "types": ["ReactNode"],
-          "defaultValue": null,
-          "required": true
-        },
-        {
           "name": "colSpan",
           "types": ["number"],
           "defaultValue": null,
           "required": true
+        },
+        {
+          "name": "title",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "action",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "description",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "icon",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
         }
       ],
-      "inherits": null,
+      "inherits": "ComponentProps<typeof EmptyState>",
       "omitted": []
     },
     {
