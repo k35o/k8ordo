@@ -22,7 +22,7 @@ import {
 import { useFormStatus } from 'react-dom';
 
 import { cn } from '../../../helpers/cn';
-import { useMessages } from '../../../i18n/context';
+import { getMessages } from '../../../i18n/current';
 import { Button } from '../../buttons/button';
 import { IconButton } from '../../buttons/icon-button';
 import { CloseIcon } from '../../icons';
@@ -271,7 +271,7 @@ const droppedFiles = (event: DragEvent<HTMLElement>): File[] =>
   });
 
 export const Dropzone: FC<{ children?: ReactNode }> = ({ children }) => {
-  const messages = useMessages();
+  const messages = getMessages();
   const { disabled, invalid, onFilesDrop, openFilePicker } =
     useFileFieldContext();
   // 子要素の上を通るたびに dragleave / dragenter が対で届くので、入った深さで数える
@@ -328,7 +328,7 @@ export const ItemList: FC<{
   showWebkitRelativePath?: boolean;
   clearable?: boolean;
 }> = ({ showWebkitRelativePath, clearable }) => {
-  const messages = useMessages();
+  const messages = getMessages();
   const { acceptedFiles, onFileDelete } = useFileFieldContext();
 
   if (acceptedFiles.length === 0) {

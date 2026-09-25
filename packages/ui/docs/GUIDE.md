@@ -69,43 +69,77 @@ everywhere else.
 
 ### Wording language (i18n)
 
-The wording components own internally ("close", "required", "loading", …)
-**defaults to Japanese**. It works without a provider and without passing
-`messages`, so a Japanese app needs no setup at all.
+The wording components own internally ("close", "required", "loading", …) is
+read in `@k8ordo/i18n`'s current locale. There is no provider to configure and
+nothing to pass: `@k8ordo/i18n` is a peer dependency, installed with this
+package.
 
-To switch to English, pass `en` from `@k8ordo/ui/i18n`.
+- **With a locale set.** Once the application defines its set with
+  `defineLocales`, the components speak the locale its messages do — the one
+  the URL names, or the set's default.
+- **Without one.** An application that defines no set (a Next.js or plain
+  Vite app that does not use `@k8ordo/i18n`) gets **English**, whatever its
+  URL starts with — so the server's HTML and the browser agree.
 
-```tsx
-import { UIProvider } from '@k8ordo/ui';
-import { en } from '@k8ordo/ui/i18n';
+```ts
+// src/i18n.ts — a Japanese-only app defines a set of one
+import { defineLocales } from '@k8ordo/i18n';
 
-<UIProvider messages={en}>
-  <App />
-</UIProvider>;
+export const locales = defineLocales({
+  ja: { timeZone: 'Asia/Tokyo', dir: 'ltr' },
+});
 ```
 
-An application that renders in several locales picks the dictionary by the
-locale it is rendering — `dictionaries` holds every built-in one by its tag:
+The module that defines the set has to be loaded in the browser too, not
+only by the server render: where no set is defined the components speak
+English, and would disagree with the HTML. In a k8ordo app a client component
+that links (`bindParams`) or switches language already imports it; elsewhere,
+import it from a client module the root renders.
 
-```tsx
-import { dictionaries } from '@k8ordo/ui/i18n';
+`ja` and `en` ship with the library. Any other locale is registered next to
+the set, and a regional tag without a dictionary of its own (`en-US`) reads
+its language's (`en`); a locale nothing has text for throws, naming how to
+register it:
 
-<UIProvider messages={dictionaries[locale]}>
+```ts
+import { en, ja, registerMessages } from '@k8ordo/ui/i18n';
+import type { Messages } from '@k8ordo/ui/i18n';
+
+const fr: Messages = { close: 'Fermer' /* …every key */ };
+registerMessages('fr', fr);
+
+// A registered dictionary wins over a built-in one
+registerMessages('en', { ...en, close: 'Dismiss' });
 ```
 
-To replace only some of it, spread the dictionary and override those keys.
+Resolution order is **component prop > registered dictionary > built-in
+dictionary**. For a component with a wording prop of its own, such as
+`Spinner`'s `label`, that prop wins.
 
-```tsx
-<UIProvider messages={{ ...en, close: 'Dismiss' }}>
-  <App />
-</UIProvider>
-```
-
-Resolution order is **component prop > provider dictionary > built-in default
-(Japanese)**. For a component with a wording prop of its own, such as
-`Spinner`'s `label`, that prop wins over the dictionary.
+`getMessages()` from `@k8ordo/ui/i18n` returns the wording in effect for your
+own elements (a `renderItem`, a component beside the library). It is not a
+hook, so it works in a Server Component — which is also why `Spinner`,
+`Breadcrumb`, `Code`, `Alert`, `Reasoning`, and `ToolInvocation` are Server
+Components.
 
 > [Full key list and details](references/components.md) (the "i18n (message dictionary)" section)
+
+### Migrating from 3.x
+
+`UIProvider`'s `messages`, `MessagesProvider`, `useMessages`, and
+`dictionaries` are gone.
+
+1. Drop `messages` from `UIProvider`; it stays, for toasts.
+2. The default is English now, not Japanese. An app that rendered in
+   Japanese defines a set with `@k8ordo/i18n` — just `ja` for a Japanese-only
+   one — and imports the module that defines it from somewhere both the
+   server render and the browser load (for a Next.js app: a module a
+   `'use client'` component in the root layout imports, as well as the
+   server code).
+3. A dictionary or override once passed as `messages` is registered with
+   `registerMessages(locale, messages)`; to change a few keys, spread the
+   built-in dictionary (`{ ...ja, close: '閉じる（Esc）' }`).
+4. `useMessages()` becomes `getMessages()`, which needs no `'use client'`.
 
 ## Design direction
 
@@ -273,6 +307,19 @@ import { IconButton } from '@k8ordo/ui';
 </IconButton>
 ```
 
+### CopyButton
+
+For copying text, reach for `CopyButton` rather than an `IconButton` and your own
+clipboard code: it writes to the clipboard, shows a check, and announces the
+result to screen readers.
+
+```tsx
+import { CopyButton } from '@k8ordo/ui';
+
+<CopyButton value={code} label="Copy code" iconOnly size="sm" />
+<CopyButton value={() => window.location.href} label="Copy link" />
+```
+
 ### Card
 
 Floating on a shadow is the default: a white card over a `bg-subtle` page.
@@ -327,6 +374,26 @@ import {
 </FileField.Root>
 ```
 
+With `@k8ordo/form`, spread what `form.field(name).input` derives onto the
+field after `FormControl`'s props — `type`, `required`, the length and range
+bounds, and the echoed `defaultValue` all go in as they are, whichever field
+renders them. Uncontrolled fields keep their value in the DOM, so the form's
+reset, `isDirty`, and error clearing hear every change, including ones a
+component makes in code. The pairing per component is in `@k8ordo/form`'s
+guide (`node_modules/@k8ordo/form/docs/GUIDE.md`, "Working with @k8ordo/ui").
+
+```tsx
+const title = form.field('title');
+
+<FormControl
+  errorText={title.error}
+  invalid={title.invalid}
+  label="Title"
+  required={title.required}
+  renderInput={(props) => <TextField {...props} {...title.input} />}
+/>;
+```
+
 ## Anti-patterns: avoiding "AI slop"
 
 Avoid the traits that make a UI recognizably AI-generated at a glance.
@@ -367,9 +434,9 @@ directly on APIs a browser has and jsdom does not: `ResizeObserver`,
 `close`, and the Popover API. None of them is called through a support check,
 so under jsdom `Tooltip`, `IconButton` (unless `tooltipDisabled`), `Tabs`,
 `Autocomplete`, `InView`, `Resize`, and `Conversation` throw as soon as they
-mount; `Modal`, `Drawer`, `Popover`, `DropdownMenu`, and `ListBox` throw the
-moment they open (a `DropdownMenu` holding a `SubMenu` already at mount); and a
-`clearable` `FileField.ItemList` throws once it lists a file.
+mount; `Modal`, `Drawer`, `Popover`, `DropdownMenu`, `ListBox`, and `DatePicker`
+throw the moment they open (a `DropdownMenu` holding a `SubMenu` already at
+mount); and a `clearable` `FileField.ItemList` throws once it lists a file.
 
 This is not a gap to be stubbed around. A synthetic DOM (jsdom, happy-dom) has
 no layout engine, so even with stubs in place a passing assertion about focus,

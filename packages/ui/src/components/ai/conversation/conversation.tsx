@@ -5,7 +5,7 @@ import type { FC, ReactNode } from 'react';
 
 import { cn } from '../../../helpers/cn';
 import { createSafeContext } from '../../../helpers/create-safe-context';
-import { useMessages } from '../../../i18n/context';
+import { getMessages } from '../../../i18n/current';
 import { FOCUS_RING, FOCUS_RING_NO_BORDER } from '../../_internal/focus-ring';
 import { ChevronIcon } from '../../icons';
 import { InView } from '../../observers/in-view';
@@ -88,7 +88,7 @@ export const Messages: FC<MessagesProps> = ({
   isStreaming = false,
   children,
 }) => {
-  const messages = useMessages();
+  const messages = getMessages();
   const { viewport, setViewport, updateAtBottom, followContent } =
     useConversationContext();
 
@@ -124,7 +124,7 @@ export const Messages: FC<MessagesProps> = ({
 };
 
 export const ScrollButton: FC<{ label?: string }> = ({ label }) => {
-  const messages = useMessages();
+  const messages = getMessages();
   const { isAtBottom, scrollToBottom } = useConversationContext();
 
   if (isAtBottom) {

@@ -64,6 +64,22 @@ describe('the generated table, given to the router', () => {
     });
   });
 
+  it('accepts a group that holds nothing but a page', () => {
+    // guard.ts を / だけに効かせる形。グループがページそのものになると、
+    // router は親の / を宣言し直す葉として拒み、起動時に落ちる
+    const grouped = tableFor([
+      'layout.tsx',
+      '(home)/page.tsx',
+      '(home)/guard.ts',
+      '[locale]/page.tsx',
+    ]);
+    expect(grouped.match('/')).toMatchObject({
+      pattern: '/',
+      stack: [stub('layout.tsx'), stub('(home)/page.tsx')],
+    });
+    expect(grouped.match('/en')?.pattern).toBe('/:locale');
+  });
+
   it('falls back to not-found only when nothing else matched', () => {
     expect(routes.match('/products')?.pattern).toBe('/products');
     expect(routes.match('/nowhere')).toMatchObject({

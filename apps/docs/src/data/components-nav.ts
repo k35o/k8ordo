@@ -15,6 +15,11 @@ export const componentCategories: NavCategory[] = [
         path: '/:locale/ui/components/icon-button',
         description: m.components.iconButton.description,
       },
+      {
+        name: 'CopyButton',
+        path: '/:locale/ui/components/copy-button',
+        description: m.components.copyButton.description,
+      },
     ],
   },
   {
@@ -59,6 +64,21 @@ export const componentCategories: NavCategory[] = [
         name: 'NumberField',
         path: '/:locale/ui/components/number-field',
         description: m.components.numberField.description,
+      },
+      {
+        name: 'DateField',
+        path: '/:locale/ui/components/date-field',
+        description: m.components.dateField.description,
+      },
+      {
+        name: 'DatePicker',
+        path: '/:locale/ui/components/date-picker',
+        description: m.components.datePicker.description,
+      },
+      {
+        name: 'Calendar',
+        path: '/:locale/ui/components/calendar',
+        description: m.components.calendar.description,
       },
       {
         name: 'Select',
