@@ -18,7 +18,7 @@ newly available only) is in the repository root's [`CLAUDE.md`](../../CLAUDE.md)
 ## Commands
 
 ```bash
-pnpm test          # unit (node) + browser (Chromium via Playwright)
+pnpm test          # unit (node) + browser (Chromium, Firefox and WebKit via Playwright)
 pnpm build         # vp pack (the mode packages bundle the result)
 pnpm typecheck
 pnpm check         # check:write to auto-fix
@@ -187,7 +187,7 @@ src/
 fixtures/
   bare-not-found/routes/     an application with no not-found.tsx, which
                              runtime/not-found.test.ts builds from this
-                             package's source and opens in Chromium
+                             package's source and opens in each engine
 ```
 
 ## Conventions

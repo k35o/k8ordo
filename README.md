@@ -50,6 +50,7 @@ that satisfies `engines` in [`package.json`](package.json) works.
 ```bash
 mise install
 pnpm install
+pnpm exec playwright install chromium firefox webkit
 pnpm build
 ```
 
@@ -84,13 +85,18 @@ already have.
 | --- | --- |
 | `pnpm build` | Build every package and app |
 | `pnpm build:examples` | Build every example |
-| `pnpm test` | Run every test |
+| `pnpm test` | Run every test; browser tests run in Chromium, Firefox, and WebKit (`TEST_BROWSER=<engine>` for one) |
 | `pnpm test:examples` | Run the examples' tests, which read their builds (`build:examples` first) |
 | `pnpm typecheck` | Type check every workspace |
 | `pnpm check` | Lint and format check (`check:write` to auto-fix) |
 | `pnpm check:no-polyfills` | Fail if a polyfill dependency has crept in |
 | `pnpm check:peer-copies` | Fail if a peer shared with `@k8ordo/*` resolves to two copies |
 | `pnpm change` | Record a release intent for the changed packages |
+
+CI runs the same checks on every pull request into `main` and again on every
+push to `main`, where they gate the release: nothing is published from a commit
+that fails them. Browser tests run in one job per engine.
+[`CONTRIBUTING.md`](CONTRIBUTING.md#ci) has the details.
 
 Run `pnpm build` and `pnpm build:examples` before `pnpm check` or
 `pnpm typecheck` on a fresh checkout: the docs site and examples resolve

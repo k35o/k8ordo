@@ -11,6 +11,7 @@ Tool versions are pinned in [`mise.toml`](mise.toml) and managed with [mise](htt
 ```bash
 mise install    # installs Node.js and pnpm at the pinned versions
 pnpm install    # installs workspace dependencies
+pnpm exec playwright install chromium firefox webkit  # the engines the browser tests run in
 ```
 
 If you do not use mise, use the pnpm named in `packageManager` and any Node.js that satisfies `engines`, both in [`package.json`](package.json).
@@ -36,12 +37,20 @@ Baseline *newly available* and carries no polyfills. Checking Baseline *usage* w
 of its own (JS and CSS both), so the dependency check is what CI can enforce
 today.
 
+Every browser test — Vitest browser mode, and the tests that open a built
+application with Playwright — runs in Chromium, Firefox, and WebKit. `pnpm test`
+runs all three; set `TEST_BROWSER` to run one:
+
+```bash
+TEST_BROWSER=webkit pnpm test
+```
+
 Inside `packages/ui`, useful extras:
 
 ```bash
 pnpm storybook                     # Storybook dev server on port 6006
 pnpm test -- --project=helpers     # Helper unit tests only (no browser)
-pnpm test -- --project=hooks       # Hook tests only (headless Chromium)
+pnpm test -- --project=hooks       # Hook tests only (headless browsers)
 pnpm test -- --project=components  # Component tests only (Storybook stories)
 ```
 
@@ -78,7 +87,7 @@ Any pull request that changes a package's public API must update, **in the same 
 
 ## Testing `@k8ordo/ui`: writing a story is writing a test
 
-Component tests use Storybook stories as fixtures via `@storybook/addon-vitest`: every story runs as a Vitest browser-mode test in headless Chromium (the `components` test project). There are no separate component test files — cover the states you want guaranteed with stories, and use `play` functions for interaction behavior.
+Component tests use Storybook stories as fixtures via `@storybook/addon-vitest`: every story runs as a Vitest browser-mode test in headless Chromium, Firefox, and WebKit (the `components` test project). There are no separate component test files — cover the states you want guaranteed with stories, and use `play` functions for interaction behavior.
 
 The a11y addon (`@storybook/addon-a11y`) checks every story with `a11y: { test: 'error' }`, so accessibility violations fail the test run.
 
@@ -86,7 +95,7 @@ Hook tests (`src/hooks/**/*.test.{ts,tsx}`, plus `src/internal/**/*.test.tsx`) r
 
 ## Visual regression testing (VRT)
 
-VRT is specific to `@k8ordo/ui` — it screenshots stories, so it applies to a package that renders. Per-story VRT runs on [storybook-addon-vrt](https://github.com/k35o/storybook-addon-vrt).
+VRT is specific to `@k8ordo/ui` — it screenshots stories, so it applies to a package that renders. Per-story VRT runs on [storybook-addon-vrt](https://github.com/k35o/storybook-addon-vrt). It captures in Chromium only: each engine renders text and anti-aliasing differently, so a baseline belongs to one engine, and the engines' behavior is what the component tests already cover.
 
 Local commands:
 
@@ -105,12 +114,18 @@ Approval flow on CI ([`.github/workflows/vrt.yml`](.github/workflows/vrt.yml)):
 
 Separately, [`.github/workflows/chromatic.yml`](.github/workflows/chromatic.yml) publishes Storybook to Chromatic on every push to `main` and on every pull request (with `onlyChanged: true`; `renovate/**` branches are skipped). The published Storybook is available at <https://main--687a213c85e2e4589d8db1bb.chromatic.com>.
 
+## CI
+
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs on every pull request into `main`: lint and format, type checking, packaging (`check:package`), the design-token and prop checks, the docs site build, and the tests. Package tests and example tests run in one job per engine — `Tests (chromium)`, `Tests (firefox)`, `Tests (webkit)`, and the same for `Examples` — so waiting for three engines takes no longer than waiting for one.
+
+Pull requests that pass on their own can still break `main` together, so a push to `main` runs the same workflow again, as the first stage of the release workflow. A push to `main` does not start `ci.yml` by itself; its results are under **Release**.
+
 ## Release
 
 Versioning uses pnpm's built-in release management (the `versioning` key in [`pnpm-workspace.yaml`](pnpm-workspace.yaml)), driven in CI by [k35o/pnpm-release-action](https://github.com/k35o/pnpm-release-action).
 
 - Run `pnpm change` to record a release intent, and include the generated `.changeset/<name>.md` in your pull request.
-- On pushes to `main`, CI either updates the release PR (branch `pnpm-release/main`) or, when no intents are pending, publishes to npm via OIDC trusted publishing.
+- On pushes to `main`, [`.github/workflows/release.yml`](.github/workflows/release.yml) first runs every check in `ci.yml` on that commit. Only when they pass does it update the release PR (branch `pnpm-release/main`) or, when no intents are pending, publish to npm via OIDC trusted publishing. A failing check stops both.
 
 ## Commit conventions
 

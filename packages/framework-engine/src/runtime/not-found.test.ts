@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
-import { chromium } from 'playwright';
+import { chromium, firefox, webkit } from 'playwright';
 import type { Browser, Page } from 'playwright';
 import { createBuilder } from 'vite';
 
@@ -18,6 +18,15 @@ const root = fileURLToPath(
   new URL('../../fixtures/bare-not-found/', import.meta.url),
 );
 const out = path.join(root, 'dist');
+
+// CI はエンジンごとにジョブを分けて並べるので、TEST_BROWSER で 1 つに絞れる
+const browserTypes = [chromium, firefox, webkit]
+  .filter(
+    (type) =>
+      process.env.TEST_BROWSER === undefined ||
+      process.env.TEST_BROWSER === type.name(),
+  )
+  .map((type) => ({ name: type.name(), type }));
 
 let runtimeDir = '';
 let server: Server;
@@ -84,11 +93,9 @@ beforeAll(async () => {
     server.listen(0, '127.0.0.1', resolve);
   });
   origin = `http://127.0.0.1:${String((server.address() as AddressInfo).port)}`;
-  browser = await chromium.launch();
 }, 120_000);
 
 afterAll(async () => {
-  await browser.close();
   server.close();
   await rm(runtimeDir, { recursive: true, force: true });
   await rm(out, { recursive: true, force: true });
@@ -112,39 +119,50 @@ const payloadRequests = (page: Page): string[] => {
   return pathnames;
 };
 
-describe('an application that declares no not-found.tsx', () => {
-  it('answers a URL no route matches with the framework’s own page, under a real 404', async () => {
-    const page = await browser.newPage();
+describe.each(browserTypes)(
+  'an application that declares no not-found.tsx, in $name',
+  ({ type }) => {
+    beforeAll(async () => {
+      browser = await type.launch();
+    });
 
-    const response = await page.goto(`${origin}/nowhere`);
+    afterAll(async () => {
+      await browser.close();
+    });
 
-    expect(response?.status()).toBe(404);
-    await page.getByRole('heading', { name: '404' }).waitFor();
-    await page.close();
-  });
+    it('answers a URL no route matches with the framework’s own page, under a real 404', async () => {
+      const page = await browser.newPage();
 
-  it('shows that page when a client navigation reaches such a URL', async () => {
-    const page = await openHydrated(origin);
-    const requested = payloadRequests(page);
+      const response = await page.goto(`${origin}/nowhere`);
 
-    await page.getByRole('link', { name: 'nowhere' }).click();
+      expect(response?.status()).toBe(404);
+      await page.getByRole('heading', { name: '404' }).waitFor();
+      await page.close();
+    });
 
-    await page.getByRole('heading', { name: '404' }).waitFor();
-    expect(new URL(page.url()).pathname).toBe('/nowhere');
-    // 文書の読み込みで行き着いたのではなく、クライアントがペイロードを取りに行った
-    expect(requested).toStrictEqual(['/nowhere/index.rsc']);
-    await page.close();
-  });
+    it('shows that page when a client navigation reaches such a URL', async () => {
+      const page = await openHydrated(origin);
+      const requested = payloadRequests(page);
 
-  it('takes the visitor back to the page they left', async () => {
-    const page = await openHydrated(origin);
-    await page.getByRole('link', { name: 'nowhere' }).click();
-    await page.getByRole('heading', { name: '404' }).waitFor();
+      await page.getByRole('link', { name: 'nowhere' }).click();
 
-    await page.goBack();
+      await page.getByRole('heading', { name: '404' }).waitFor();
+      expect(new URL(page.url()).pathname).toBe('/nowhere');
+      // 文書の読み込みで行き着いたのではなく、クライアントがペイロードを取りに行った
+      expect(requested).toStrictEqual(['/nowhere/index.rsc']);
+      await page.close();
+    });
 
-    await page.getByRole('heading', { name: 'home' }).waitFor();
-    expect(new URL(page.url()).pathname).toBe('/');
-    await page.close();
-  });
-});
+    it('takes the visitor back to the page they left', async () => {
+      const page = await openHydrated(origin);
+      await page.getByRole('link', { name: 'nowhere' }).click();
+      await page.getByRole('heading', { name: '404' }).waitFor();
+
+      await page.goBack();
+
+      await page.getByRole('heading', { name: 'home' }).waitFor();
+      expect(new URL(page.url()).pathname).toBe('/');
+      await page.close();
+    });
+  },
+);

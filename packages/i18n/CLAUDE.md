@@ -15,7 +15,7 @@ inside the npm package.
 ## Commands
 
 ```bash
-pnpm test          # unit (locales, messages, request scope, Accept-Language; node) + browser (URL locale, chromium)
+pnpm test          # unit (locales, messages, request scope, Accept-Language; node) + browser (URL locale; chromium, firefox, webkit)
 pnpm build         # vp pack
 pnpm typecheck
 pnpm check         # check:write to auto-fix

@@ -11,7 +11,7 @@ the npm package.
 ## Commands
 
 ```bash
-pnpm test          # unit tests (derive, parse, rules, walk, paths, zod/mini) and useForm in Chromium (Playwright)
+pnpm test          # unit tests (derive, parse, rules, walk, paths, zod/mini) and useForm in Chromium, Firefox and WebKit (Playwright)
 pnpm build         # vp pack
 pnpm typecheck
 pnpm check         # check:write to auto-fix

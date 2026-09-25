@@ -15,6 +15,7 @@ pnpm test --project=helpers                  # Helper tests only (no browser)
 pnpm test --project=hooks                    # Hook tests only (Playwright)
 pnpm test --project=components               # Component tests only (Storybook + Playwright)
 pnpm test --project=hooks src/internal/focus-trap.test.tsx # Single test file (needs its project)
+TEST_BROWSER=webkit pnpm test --project=hooks # One engine only (chromium / firefox / webkit)
 pnpm build                                   # vp pack + CSS copy
 pnpm typecheck                               # Type check (no emit)
 pnpm check                                   # Oxlint/Oxfmt lint/format check
