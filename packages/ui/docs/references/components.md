@@ -1005,10 +1005,20 @@ Props:
 
 ### FileField
 
-File upload, as a composite pattern. Removing a file from `ItemList` removes
-it from the input too — what is listed is what is submitted — and a form reset
-empties the list along with the input. A string `defaultValue` (the type
-`@k8ordo/form`'s derived attributes carry) is accepted and ignored.
+File upload, as a composite pattern. The input holds exactly what `ItemList`
+lists, so what is listed is what is submitted:
+
+- With `multiple` or `webkitDirectory`, each pick adds to the list, up to
+  `maxFiles`, and the input is rewritten to the whole list — the browser alone
+  would keep only the files just picked.
+- Removing a file from `ItemList` removes it from the input.
+- A `File[]` `defaultValue` is submitted as well as listed, and a form reset
+  puts both back to it (to an empty list without one).
+- `onChange` receives that whole list — not only the files just picked —
+  after every pick and every removal. A removal passes no `event`.
+
+A string `defaultValue` (the type `@k8ordo/form`'s derived attributes carry)
+is accepted and ignored.
 
 ```tsx
 import { FileField } from '@k8ordo/ui';
