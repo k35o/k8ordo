@@ -60,6 +60,22 @@ pnpm check         # check:write to auto-fix
   (`runtime/is-payload.ts`) becomes a document load, which is also the
   recovery path when a render fails. The client router's "unmatched pathnames
   are not intercepted" does not apply here.
+- **A prefetched page is used once, briefly, and never across an action.**
+  `app-router.tsx` listens on the document (capture phase) for `pointerover`,
+  `focusin` and `pointerdown` on a link `prefetchTargetOf` accepts — same
+  origin and under the base, no `download`, no other `target`, not the page on
+  screen, no `data-k8ordo-prefetch="false"` on it or the nearest element
+  carrying the attribute — and reads that page's payload the way a navigation
+  would (`fetchPage`, the parse included, so the client components it names
+  are imported too). `createPrefetchCache` hands each load to the next
+  navigation of that page within `PREFETCH_LIFETIME` (30 s from the start) and
+  forgets it; a failed load is forgotten at once, and a Server Action's answer
+  forgets everything. A load forgotten untaken is aborted, and a taken one is
+  aborted by the taking navigation's signal, which is what keeps the router's
+  "a superseded navigation's fetch is cancelled" true for a prefetched page.
+  Keep it single-use: a page taken from the cache twice would show a
+  server-mode page as it was when first hovered. No Speculation Rules —
+  Chromium only.
 - **Everything inside is in the table's terms; Vite's `base` is at the
   edges.** The handler takes the base off the request (`withoutBase` from
   the router; a URL outside it is a plain `404`) before anything else reads
@@ -184,6 +200,7 @@ src/
   runtime/payload.ts         what a page is on the wire (tree, pathname, client, action result)
   runtime/payload-path.ts    where a payload lives: /x → /x/index.rsc
   runtime/is-payload.ts      whether an answer is a payload or a document load
+  runtime/prefetch.ts        which link to fetch ahead, and how long a fetched page stays usable
   runtime/revealed.ts        when every streamed boundary is on screen
   runtime/recover.tsx        a failed client render falls back to a document load
   runtime/reload.ts          location.reload, the one seam a test can watch

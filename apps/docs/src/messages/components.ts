@@ -403,6 +403,14 @@ export const fileField = {
     ja: 'ファイルアップロードフィールド',
     en: 'A file upload field.',
   }),
+  dropzoneTitle: message({
+    ja: 'ドロップで追加する',
+    en: 'Adding files by dropping them',
+  }),
+  dropzoneDescription: message({
+    ja: '`FileField.Dropzone` にドロップしたファイルは、選んだときと同じく一覧と送信に加わり、`input` イベントでフォームに知らされます。中身を渡さないと、組み込みの案内と「ファイルを選択」のボタンが入るので、キーボードでも選べます。フォルダーはドロップでは受けず、`accept` もドロップでは確かめません。',
+    en: 'Files dropped on `FileField.Dropzone` join the list and the submission just as picked ones do, and an `input` event tells the form. Left empty, it holds the built-in hint and a choose-files button, so it works by keyboard too. Folders are skipped on drop, and `accept` is not checked there.',
+  }),
   acceptTypesTitle: message({
     ja: '受け入れタイプ',
     en: 'Accept Types',
@@ -612,6 +620,33 @@ export const carousel = {
   slideSizeDescription: message({
     ja: '`slideSize` は 1 枚がトラックに占める幅。`full`（1 枚）、`lg`（次の 1 枚がのぞく）、`md`（2 枚）、`sm`（3 枚）。複数枚並べるときは「今の 1 枚」が決まらないので、位置は出さない。',
     en: '`slideSize` is how much of the track one slide takes: `full` (one), `lg` (the next one peeks in), `md` (two), `sm` (three). With several in view there is no single current slide, so no position is shown.',
+  }),
+};
+
+export const prose = {
+  description: message({
+    ja: 'Markdown や MDX が描いた本文に、組版を戻す入れ物',
+    en: 'A container that puts typesetting back into rendered Markdown or MDX.',
+  }),
+  basicDescription: message({
+    ja: 'ベースのスタイルは見出し・リスト・余白・強調をリセットする。`Prose` の中だけ本文の組版を戻す。行間は広め（`leading-loose`）、見出しは詰め組み（`palt`）、日本語の `em` は傍点にする。',
+    en: 'The base styles reset headings, lists, margins, and emphasis. Inside `Prose`, the typesetting of body text comes back: loose leading (`leading-loose`), proportional kana in headings (`palt`), and emphasis dots for Japanese `em`.',
+  }),
+  componentsTitle: message({
+    ja: '部品を置く',
+    en: 'Components Inside',
+  }),
+  componentsDescription: message({
+    ja: '組版を効かせるのは、クラスの無い素の要素だけ。部品（どれもクラスを持つ）は自分の見た目のまま、前後の間だけが本文と同じに空く。MDX で要素を部品に対応づければ部品の見た目に、素のままなら本文の見た目になる。',
+    en: 'Only bare elements, without a class, are typeset. A component (every one has a class) keeps its own look, and only the space around it follows the text. Map an MDX element to a component to make it look like the component, or leave it bare to make it look like text.',
+  }),
+  verticalTitle: message({
+    ja: '縦書き',
+    en: 'Vertical Writing',
+  }),
+  verticalDescription: message({
+    ja: '`.writing-v` の中では、段落の頭を 1 字下げる（本の組み方）。',
+    en: 'Under `.writing-v`, each paragraph’s first line is indented one character, as a book is set.',
   }),
 };
 
@@ -931,17 +966,6 @@ export const pagination = {
   disabledTitle: message({
     ja: '無効',
     en: 'Disabled',
-  }),
-};
-
-export const scrollLinked = {
-  description: message({
-    ja: 'スクロール位置に連動するプログレスバー',
-    en: 'A progress bar linked to scroll position.',
-  }),
-  windowScrollTitle: message({
-    ja: 'ウィンドウスクロール',
-    en: 'Window Scroll',
   }),
 };
 
