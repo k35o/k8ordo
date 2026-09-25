@@ -215,6 +215,12 @@ describe('NavigablePath', () => {
     >().toBeNever();
   });
 
+  it('refuses a trailing slash — a link is spelled the one way the table matches', () => {
+    // 実行時の match は末尾スラッシュを同じ pathname として受けるが、
+    // リンクとして組み立てるパスは正規形（末尾スラッシュなし）に揃えさせる
+    expectTypeOf<NavigablePath<typeof routes, '/ja/products/'>>().toBeNever();
+  });
+
   it('refuses an empty segment where a param stands', () => {
     expectTypeOf<NavigablePath<typeof routes, '//products'>>().toBeNever();
   });
