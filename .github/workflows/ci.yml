@@ -49,8 +49,10 @@ jobs:
       - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps ${{ matrix.browser }}
 
+      # 最初の失敗で打ち切ると、走っていた他のパッケージも止まり、そのエンジンで
+      # どこが落ちるのかが 1 つずつしか見えない。全部回してから落とす。
       - name: Run tests
-        run: pnpm --filter './packages/*' test
+        run: pnpm --filter './packages/*' --no-bail test
 
   lint:
     name: Lint
