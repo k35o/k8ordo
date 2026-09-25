@@ -80,8 +80,11 @@ row. Rules cannot target fields inside repeated rows.
   `field(path)` accessor giving input attributes, the current error, and
   `invalid` / `required`, an `array(path)` accessor for repeated rows,
   `formError` (the message no field owns, with the props that let focus land
-  on it), and `isDirty`. After a failed submission focus moves to the first
-  failure in document order. Also `useAsyncCheck` for server-answered
+  on it), and `isDirty`. On submit it checks every field — untouched ones and
+  the rules included — and stops a failing submission, a GET form with no
+  action as much as one with (a `formNoValidate` button skips the check);
+  after a submission stopped here or failed on the server, focus moves to the
+  first failure in document order. Also `useAsyncCheck` for server-answered
   per-field checks and `HiddenValue` for components that render no input of
   their own. The types
   of the `formFields` result (`FormFields`, `DerivedField`, `DerivedArray`,
