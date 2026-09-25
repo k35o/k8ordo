@@ -127,6 +127,41 @@ describe('the built application in a browser', () => {
     await page.close();
   }, 30_000);
 
+  it('shows loading.tsx and the pending pathname while a navigation into it loads', async () => {
+    const page = await browser.newPage();
+    await page.goto(server.url);
+    await hydrated(page);
+    // 読み込み中の表示は一瞬なので、出たものを DOM の変化から拾っておく
+    await page.evaluate(() => {
+      const seen = new Set<string>();
+      Object.assign(window, { seen });
+      new MutationObserver(() => {
+        for (const element of document.querySelectorAll<HTMLElement>(
+          '[data-testid="loading"], [data-testid="pending"]',
+        )) {
+          seen.add(`${String(element.dataset.testid)}:${element.textContent}`);
+        }
+      }).observe(document.body, {
+        subtree: true,
+        childList: true,
+        characterData: true,
+      });
+    });
+
+    await page.getByRole('link', { name: 'products', exact: true }).click();
+    await page.getByRole('heading', { name: 'products' }).waitFor();
+
+    const seen = await page.evaluate(() => [
+      ...(window as unknown as { seen: Set<string> }).seen,
+    ]);
+    expect(seen).toContain('loading:loading products…');
+    expect(seen).toContain('pending: (loading /products)');
+    // 画面に出たあとは、読み込み中の表示はどちらも残らない
+    expect(await page.getByTestId('loading').count()).toBe(0);
+    expect(await page.getByTestId('pending').count()).toBe(0);
+    await page.close();
+  }, 30_000);
+
   it('hydrates the page where it streamed in, leaving no hidden copy and one <title>', async () => {
     // ダークの訪問者: ルートの SchemeProvider の値が hydrate の直後に変わる
     const context = await browser.newContext({ colorScheme: 'dark' });
