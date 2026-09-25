@@ -34,7 +34,7 @@ const Popup: FC<{
         </div>
       ) : null}
       <button type="button">外側のボタン</button>
-      {/* トリガー以外の経路で閉じる。userEvent で押すとフォーカスは外側に残る */}
+      {/* トリガー以外の経路で閉じる */}
       <button
         onClick={() => {
           setIsOpen(false);
@@ -102,12 +102,15 @@ describe('useFocusTrap', () => {
       .element();
     await expect.poll(activeElement).toBe(inner);
 
-    // 外側のボタンを押して閉じる。押した時点でフォーカスは外側にあるので、
-    // cleanup がトリガーへ奪い返してはいけない
+    // 外側のボタンにフォーカスを移し、キーボードで押して閉じる。閉じた時点で
+    // フォーカスは外側にあるので、cleanup がトリガーへ奪い返してはいけない。
+    // クリックで移さないのは、macOS の WebKit がクリックではボタンにフォーカスを
+    // 移さず、フォーカスを失ったまま閉じる別のケースになるため
     const closer = screen
       .getByRole('button', { name: '外から閉じる' })
-      .element();
-    await userEvent.click(closer);
+      .element() as HTMLElement;
+    closer.focus();
+    await userEvent.keyboard('{Enter}');
 
     await expect.poll(activeElement).toBe(closer);
   });
@@ -116,9 +119,10 @@ describe('useFocusTrap', () => {
     const screen = await render(<Popup />);
     const outside = screen
       .getByRole('button', { name: '外側のボタン' })
-      .element();
+      .element() as HTMLElement;
 
-    await userEvent.click(outside);
+    // クリックで移さない理由は、ひとつ上のテストと同じ
+    outside.focus();
 
     await expect.poll(activeElement).toBe(outside);
   });
