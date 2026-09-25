@@ -126,7 +126,7 @@ need it are not stuck:
 
 - `Checkbox` / `Switch`: `(checked: boolean, event: ChangeEvent<HTMLInputElement>) => void`
 - `Radio`: `(value: string, event: ChangeEvent<HTMLInputElement>) => void`
-- `FileField`: `(files: FileList | null, event?: ChangeEvent<HTMLInputElement>) => void` (`files` is the whole list the field holds, not only the files just picked; no `event` when a file is removed from the list)
+- `FileField`: `(files: FileList | null, event?: ChangeEvent<HTMLInputElement>) => void` (`files` is the whole list the field holds, not only the files just picked or dropped; no `event` when files are dropped or removed from the list)
 
 The rest pass the value only, even when a real `<input>` is underneath:
 

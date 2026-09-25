@@ -80,7 +80,7 @@ type RootProps = PropsWithChildren<
     // 文字列は @k8ordo/form の formFields が導く input の defaultValue の型。
     // ファイルの欄に値が入ることはないが、広げたまま受けられるように型だけ受ける
     defaultValue?: File[] | string;
-    // event はファイル選択（input の change）時に渡る。プログラム的なファイル
+    // event はファイル選択（input の change）時に渡る。ドロップや一覧からの
     // 削除では change イベントが存在しないため undefined になる。
     onChange?: (
       files: FileList | null,
