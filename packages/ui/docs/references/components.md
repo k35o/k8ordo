@@ -384,32 +384,6 @@ Props:
 - `orientation`: `'horizontal'` | `'vertical'` (default: `'horizontal'`)
 - Other props are forwarded to `HTMLAttributes<HTMLSpanElement>`, except `children` / `role` / `aria-orientation` / `className` / `style`.
 
-### ScrollLinked
-
-Shows scroll progress as a progress bar. Tracks the window unless `container`
-names an element to track instead.
-
-```tsx
-import { ScrollLinked } from '@k8ordo/ui';
-
-<ScrollLinked />;
-
-// a scroll container rather than the window
-const [container, setContainer] = useState<HTMLElement | null>(null);
-
-<div ref={setContainer} style={{ overflowY: 'auto' }}>
-  <ScrollLinked container={container} />…
-</div>;
-```
-
-Hold `container` in state, not a `RefObject`: tracking has to start once the
-element exists. While it is still `null` the bar tracks nothing — it does not
-fall back to the window.
-
-Props:
-
-- `container`: `Element` | `null`
-
 ### Stack
 
 Lays children out along one axis. Pick `gap` from the spacing tokens.

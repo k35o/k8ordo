@@ -830,17 +830,6 @@ export const pagination = {
   }),
 };
 
-export const scrollLinked = {
-  description: message({
-    ja: 'スクロール位置に連動するプログレスバー',
-    en: 'A progress bar linked to scroll position.',
-  }),
-  windowScrollTitle: message({
-    ja: 'ウィンドウスクロール',
-    en: 'Window Scroll',
-  }),
-};
-
 export const inView = {
   description: message({
     ja: '子要素が画面やスクロール領域に入っているかを知らせるコンポーネント',

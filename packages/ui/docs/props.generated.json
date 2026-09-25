@@ -2832,19 +2832,6 @@
       "omitted": []
     },
     {
-      "name": "ScrollLinked",
-      "props": [
-        {
-          "name": "container",
-          "types": ["Element", "null"],
-          "defaultValue": null,
-          "required": false
-        }
-      ],
-      "inherits": null,
-      "omitted": []
-    },
-    {
       "name": "Select",
       "props": [
         {

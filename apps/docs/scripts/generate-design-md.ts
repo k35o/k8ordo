@@ -378,7 +378,7 @@ font-family: 'Noto Sans JP', 'M PLUS 2', sans-serif;
 
 - 基本は \`transition-colors duration-150 ease-out\`
 - **300ms を超えない。bounce / spring 系のイージングは使わない。**
-- \`prefers-reduced-motion: reduce\` を尊重（アニメーションはすべて CSS で、\`base.css\` の \`@media (prefers-reduced-motion)\` が止める。スクロールに追従する ScrollLinked の進捗バーは機能的な表示なので対象外。Conversation の最下部へのスクロールは JS 側で instant に切り替える）
+- \`prefers-reduced-motion: reduce\` を尊重（アニメーションはすべて CSS で、\`base.css\` の \`@media (prefers-reduced-motion)\` が止める。Conversation の最下部へのスクロールは JS 側で instant に切り替える）
 - 組み込み: \`ao-anim-scale\`（\`:popover-open\` で 0.18s scale）/ \`ao-anim-fade\`（0.15s opacity）
 
 ### インタラクティブ状態
@@ -457,7 +457,6 @@ import { UIProvider, Button, Card } from '@k8ordo/ui';
 - **Stack** — フレックスレイアウト
 - **Grid** — グリッドレイアウト
 - **Separator** — \`color: 'base'|'mute'|'subtle'\`, \`orientation: 'horizontal'|'vertical'\`
-- **ScrollLinked** — スクロール進捗バー（\`container?\`）
 
 ### Observers
 

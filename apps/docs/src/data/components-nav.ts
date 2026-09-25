@@ -255,11 +255,6 @@ export const componentCategories: NavCategory[] = [
         path: '/:locale/ui/components/separator',
         description: m.components.separator.description,
       },
-      {
-        name: 'ScrollLinked',
-        path: '/:locale/ui/components/scroll-linked',
-        description: m.components.scrollLinked.description,
-      },
     ],
   },
   {

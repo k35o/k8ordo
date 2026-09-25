@@ -410,11 +410,6 @@ export const gridProps = z.object({
   gap: z.enum(['none', 'sm', 'md', 'lg', 'xl']).optional(),
 }) satisfies z.ZodType<GridIntegrationProps>;
 
-type ScrollLinkedIntegrationProps = Record<string, never>;
-export const scrollLinkedProps = z.object(
-  {},
-) satisfies z.ZodType<ScrollLinkedIntegrationProps>;
-
 type AnchorIntegrationProps = {
   label: string;
   href: string;
@@ -861,7 +856,6 @@ export type ModalProps = z.infer<typeof modalProps>;
 export type DialogProps = z.infer<typeof dialogProps>;
 export type DrawerProps = z.infer<typeof drawerProps>;
 export type PopoverProps = z.infer<typeof popoverProps>;
-export type ScrollLinkedProps = z.infer<typeof scrollLinkedProps>;
 export type TooltipProps = z.infer<typeof tooltipProps>;
 export type DropdownMenuProps = z.infer<typeof dropdownMenuProps>;
 export type ToastProps = z.infer<typeof toastProps>;

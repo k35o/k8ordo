@@ -116,8 +116,6 @@ const renderers = {
     ui.renderSkeleton(props),
   Separator: ({ props }: ComponentRenderProps<sc.SeparatorProps>) =>
     ui.renderSeparator(props),
-  ScrollLinked: ({ props }: ComponentRenderProps<sc.ScrollLinkedProps>) =>
-    ui.renderScrollLinked(props),
   Tabs: ({ props }: ComponentRenderProps<sc.TabsProps>) => ui.renderTabs(props),
   Accordion: ({ props }: ComponentRenderProps<sc.AccordionProps>) =>
     ui.renderAccordion(props),
