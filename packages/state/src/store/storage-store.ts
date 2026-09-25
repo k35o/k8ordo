@@ -1,16 +1,19 @@
-import { localCodecOf } from '../local-state';
-import type { LocalState } from '../local-state';
 import type { StateValues } from '../schema/object';
+import { storageCodecOf } from '../storage-state';
+import type { LocalState, SessionState } from '../storage-state';
 import { createHandle, createStoreCore, resolvePatch } from './core';
 import type { Handle, Patch, Store, UpdateHandle } from './core';
 import { getOrCreateStore } from './registry';
 
-const createLocalStore = (def: LocalState): Store => {
-  const codec = localCodecOf(def);
+const createStorageStore = (
+  def: LocalState | SessionState,
+  storage: Storage,
+): Store => {
+  const codec = storageCodecOf(def);
   const { storageKey } = def;
 
   const read = (): StateValues => {
-    const text = localStorage.getItem(storageKey);
+    const text = storage.getItem(storageKey);
     if (text === null) return codec.parse(undefined);
     try {
       return codec.parse(JSON.parse(text));
@@ -25,10 +28,11 @@ const createLocalStore = (def: LocalState): Store => {
   let pending: StateValues | null = null;
   let handle: Handle | null = null;
 
-  // The storage event only fires in *other* tabs; same-tab notification runs
-  // through applyNext directly in update().
+  // The storage event only fires in *other* documents sharing the area — other
+  // tabs for localStorage, other frames of this tab for sessionStorage;
+  // same-document notification runs through applyNext directly in update().
   const onStorage = (event: StorageEvent): void => {
-    if (event.storageArea !== localStorage) return;
+    if (event.storageArea !== storage) return;
     if (event.key !== storageKey && event.key !== null) return;
     const fresh = read();
     // A foreign tab's write must not roll back a batch that has not flushed
@@ -49,7 +53,7 @@ const createLocalStore = (def: LocalState): Store => {
     const values: StateValues = {};
     for (const key of codec.keys) values[key] = target[key];
     try {
-      localStorage.setItem(storageKey, JSON.stringify(values));
+      storage.setItem(storageKey, JSON.stringify(values));
       core.applyNext(target);
       current.settle();
     } catch (error) {
@@ -87,9 +91,16 @@ const createLocalStore = (def: LocalState): Store => {
 };
 
 export const localStoreOf = (def: LocalState): Store =>
-  getOrCreateStore('local', def.key, () => createLocalStore(def));
+  getOrCreateStore('local', def.key, () =>
+    createStorageStore(def, localStorage),
+  );
 
-/** SSR and hydration see the defaults — the server has no localStorage. */
-export const localInitialSnapshot = (def: LocalState): StateValues => ({
-  ...localCodecOf(def).defaults,
-});
+export const sessionStoreOf = (def: SessionState): Store =>
+  getOrCreateStore('session', def.key, () =>
+    createStorageStore(def, sessionStorage),
+  );
+
+/** SSR and hydration see the defaults — the server has no Web Storage. */
+export const storageInitialSnapshot = (
+  def: LocalState | SessionState,
+): StateValues => ({ ...storageCodecOf(def).defaults });
