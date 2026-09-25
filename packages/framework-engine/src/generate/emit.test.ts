@@ -161,7 +161,7 @@ describe('the emitted register', () => {
     const source = emitRegisterModule({ routesModule: './routes.gen' });
     expect(source).toContain('params: ParsedParamsMap<typeof paramSchemas>;');
     expect(source).toContain(
-      "import type { paramSchemas, routes } from './routes.gen';",
+      "import type { paramSchemas, routes, searchReaders } from './routes.gen';",
     );
   });
 });
@@ -515,5 +515,50 @@ describe('loading.tsx in the emitted table', () => {
     expect(source).toMatch(
       /'\/': \{\n\s+loading: loading satisfies ComponentType,/u,
     );
+  });
+});
+
+describe('a page that exports search', () => {
+  const source = emitRoutesModule(
+    parseRouteTree(['page.tsx', 'products/page.tsx', 'products/[id]/page.tsx'])
+      .tree,
+    {
+      importPrefix: './routes',
+      withParams: new Set(['products/[id]/page.tsx']),
+      withSearch: new Set(['products/page.tsx', 'products/[id]/page.tsx']),
+    },
+  );
+
+  it('imports the schema beside the page, and reads it through @k8ordo/state', () => {
+    expect(source).toContain("import { urlReader } from '@k8ordo/state';");
+    expect(source).toContain(
+      "import products_page, { search as products_page_search } from './routes/products/page';",
+    );
+    expect(source).toContain(
+      "import products_id_page, { paramsSchema as products_id_page_params, search as products_id_page_search } from './routes/products/[id]/page';",
+    );
+  });
+
+  it('lists, per page, what reads its search', () => {
+    const start = source.indexOf('export const searchReaders = {');
+    expect(source.slice(start, source.indexOf('} as const;', start))).toBe(
+      "export const searchReaders = {\n  '/products': urlReader(products_page_search),\n  '/products/:id': urlReader(products_id_page_search),\n",
+    );
+  });
+
+  it('types the page by what it reads', () => {
+    expect(source).toContain(
+      "products_page satisfies Page<'/products', [], { search: ReturnType<(typeof searchReaders)['/products']> }>",
+    );
+    expect(source).toContain(
+      "products_id_page satisfies Page<'/products/:id', (typeof paramSchemas)['/products/:id'], { search: ReturnType<(typeof searchReaders)['/products/:id']> }>",
+    );
+  });
+
+  it('leaves every other page, and the state import, alone', () => {
+    const plain = emit(['page.tsx']);
+    expect(plain).toContain("page satisfies Page<'/'>");
+    expect(plain).toContain('export const searchReaders = {\n} as const;');
+    expect(plain).not.toContain("from '@k8ordo/state'");
   });
 });

@@ -187,6 +187,8 @@ export type EmitOptions = {
   readonly via?: string;
   /** Route files (relative to the routes root) that export a `paramsSchema`. */
   readonly withParams?: ReadonlySet<string>;
+  /** Pages (relative to the routes root) that export a `search` url schema. */
+  readonly withSearch?: ReadonlySet<string>;
 };
 
 const DEFAULT_VIA = '@k8ordo/static';
@@ -350,6 +352,8 @@ const beliefs = (
 
 const schemaName = (componentName: string): string => `${componentName}_params`;
 
+const searchName = (componentName: string): string => `${componentName}_search`;
+
 type Guards = {
   /** Per pattern, the `guard.ts` files that run before it answers, outer first. */
   readonly stacks: ReadonlyMap<string, readonly string[]>;
@@ -406,6 +410,7 @@ export const emitRoutesModule = (
     name: namer.take(route.file),
   }));
   const withParams = options.withParams ?? new Set<string>();
+  const withSearch = options.withSearch ?? new Set<string>();
 
   const byFile = beliefs(tree, withParams);
   const asserted = new Map<string, string>();
@@ -432,14 +437,20 @@ export const emitRoutesModule = (
       // Not in the table, so nothing to state there; its schemas still run
       // before it answers, and type its params.
       if (schemas.length > 0) stacks.set(belief.pattern, schemas);
-    } else if (schemas.length === 0) {
-      asserted.set(name, `Page<'${belief.pattern}'>`);
     } else {
+      if (schemas.length > 0) stacks.set(belief.pattern, schemas);
+      const typedBy =
+        schemas.length === 0
+          ? '[]'
+          : `(typeof paramSchemas)['${belief.pattern}']`;
       asserted.set(
         name,
-        `Page<'${belief.pattern}', (typeof paramSchemas)['${belief.pattern}']>`,
+        withSearch.has(file)
+          ? `Page<'${belief.pattern}', ${typedBy}, { search: ReturnType<(typeof searchReaders)['${belief.pattern}']> }>`
+          : schemas.length === 0
+            ? `Page<'${belief.pattern}'>`
+            : `Page<'${belief.pattern}', ${typedBy}>`,
       );
-      stacks.set(belief.pattern, schemas);
     }
   }
   const body = Object.entries(table).map(
@@ -464,10 +475,21 @@ export const emitRoutesModule = (
     const specifier = `'${options.importPrefix}/${file.replace(/\.[jt]sx?$/u, '')}'`;
     if (slotOf(file) === 'route')
       return `import * as ${name} from ${specifier};`;
-    return withParams.has(file)
-      ? `import ${name}, { paramsSchema as ${schemaName(name)} } from ${specifier};`
-      : `import ${name} from ${specifier};`;
+    const named = [
+      ...(withParams.has(file) ? [`paramsSchema as ${schemaName(name)}`] : []),
+      ...(withSearch.has(file) ? [`search as ${searchName(name)}`] : []),
+    ];
+    return named.length === 0
+      ? `import ${name} from ${specifier};`
+      : `import ${name}, { ${named.join(', ')} } from ${specifier};`;
   });
+  // Per page pattern, what reads the search a page declared it reads.
+  const searchReaders = [...namer.names]
+    .filter(([file]) => withSearch.has(file))
+    .map(
+      ([file, name]) =>
+        `${pad(1)}'${(byFile.get(file) as Belief).pattern}': urlReader(${searchName(name)}),`,
+    );
   // A route.ts is imported whole, so its schema is read off the module.
   const routeSchemaLines = routeFiles
     .filter(({ file }) => withParams.has(file))
@@ -517,6 +539,9 @@ export const emitRoutesModule = (
     banner(options.via),
     '',
     `import { defineRoutes } from '@k8ordo/router';`,
+    ...(searchReaders.length > 0
+      ? [`import { urlReader } from '@k8ordo/state';`]
+      : []),
     `import type { ${typeImports.join(', ')} } from '@k8ordo/router';`,
     `import type { ComponentType${hasLayout ? ', ReactNode' : ''} } from 'react';`,
     '',
@@ -538,11 +563,14 @@ export const emitRoutesModule = (
     'type Page<',
     '  P extends string,',
     '  S extends readonly unknown[] = [],',
-    '> = ComponentType<{',
-    '  params: ParsedParams<P, S>;',
-    '  pathname: string;',
-    ...requestLine,
-    '}>;',
+    '  Q = Record<never, never>,',
+    '> = ComponentType<',
+    '  {',
+    '    params: ParsedParams<P, S>;',
+    '    pathname: string;',
+    ...requestLine.map((line) => `  ${line}`),
+    '  } & Q',
+    '>;',
     ...(hasLayout
       ? [
           'type Layout<P extends string> = ComponentType<{',
@@ -633,6 +661,13 @@ export const emitRoutesModule = (
           '',
         ]
       : []),
+    '// Per page pattern that exports `search`, what reads it out of the URL —',
+    "// @k8ordo/state's reading of a url schema. The page receives what it read,",
+    '// and a client navigation that changes the search loads it again.',
+    'export const searchReaders = {',
+    ...searchReaders,
+    '} as const;',
+    '',
     '// Per pattern, the route.ts that answers it, by the methods it exports.',
     'export const routeModules = {',
     ...routeFiles.map(({ pattern, name }) => `${pad(1)}'${pattern}': ${name},`),
@@ -697,13 +732,19 @@ export const emitRegisterModule = (options: RegisterOptions): string => {
     ...(withRequest
       ? [`import type { RouteRequest } from '${ROUTE_REQUEST_FROM}';`]
       : []),
-    `import type { paramSchemas, routes } from '${options.routesModule}';`,
+    `import type { paramSchemas, routes, searchReaders } from '${options.routesModule}';`,
     '',
     `declare module '@k8ordo/router' {`,
     '  interface Register {',
     '    routes: typeof routes;',
     '    // A link takes a param as the page receives it — typed by its schema.',
     '    params: ParsedParamsMap<typeof paramSchemas>;',
+    '    // A page that exports `search` receives what it reads.',
+    '    search: {',
+    '      readonly [P in keyof typeof searchReaders]: ReturnType<',
+    '        (typeof searchReaders)[P]',
+    '      >;',
+    '    };',
     ...(withRequest
       ? [
           '    // A route file receives the request: this is a running server.',

@@ -1,4 +1,9 @@
-import { declaresParams, exportsOf, silentRoutes } from './write';
+import {
+  declaresParams,
+  exportsOf,
+  pagesReadingSearch,
+  silentRoutes,
+} from './write';
 
 describe('declaresParams', () => {
   it('sees the spellings a person writes', () => {
@@ -104,5 +109,19 @@ describe('silentRoutes', () => {
           'exports none of GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS — a route.ts answers the methods it exports',
       },
     ]);
+  });
+});
+
+describe('pagesReadingSearch', () => {
+  it('names the pages that export search, and nothing else that does', () => {
+    expect([
+      ...pagesReadingSearch(
+        new Map([
+          ['products/page.tsx', new Set(['default', 'search'])],
+          ['page.tsx', new Set(['default'])],
+          ['products/layout.tsx', new Set(['default', 'search'])],
+        ]),
+      ),
+    ]).toStrictEqual(['products/page.tsx']);
   });
 });
