@@ -78,6 +78,13 @@ export async function createTalk(_previous: FormState, formData: FormData) {
 }
 ```
 
+```ts
+// vite.config.ts, deploying to Vercel
+import { vercel } from '@k8ordo/server/vercel';
+
+export default defineConfig({ plugins: [framework(), vercel()] }); // + .vercel/output/
+```
+
 A page receives `params`, `pathname` and `request` — the headers and the
 cookies, read-only. The built handler is a plain
 `(request: Request) => Promise<Response>` in `dist/rsc/index.js`, and it needs

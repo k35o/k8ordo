@@ -68,6 +68,12 @@ pnpm check         # check:write to auto-fix
 - **An `ETag` is the file's contents, never its time.** Servers built apart,
   and a deploy that changed nothing, have to agree on it for a revalidation
   to end in a `304`.
+- **Vercel is the one host with an adapter.** `vercel()` exists because
+  k8o, the family's real consumer, deploys there; another host gets the
+  handler (`dist/rsc/index.js`) and no adapter until something here runs on
+  it. The adapter writes the Build Output API directory and nothing more — no
+  launcher of its own (Vercel calls the handler as `fetch`) and no dependency
+  tracing (the function is built with every dependency bundled in).
 
 ## Layout
 
@@ -78,6 +84,8 @@ src/
   precompress.ts  the client build's .br / .gz copies, written at build time
   serve.ts        ./serve: the node:http server (static files + handing off to the handler)
   runtime.ts      ./runtime: the engine's redirect and types — no Vite, no Node
+  vercel-output.ts  the build as Vercel's Build Output API directory
+  vercel.ts       ./vercel: the plugin that bundles the handler and writes it
   index.ts        framework (the engine, plus precompressing the client build)
 ```
 

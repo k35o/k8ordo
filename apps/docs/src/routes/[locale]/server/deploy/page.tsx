@@ -1,6 +1,6 @@
 import { Code } from '@k8ordo/ui';
+import { CodeBlock } from '@k8ordo/ui/code-block';
 
-import { CodeBlock } from '../../../../components/code-block';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { BaseGuide } from '../../../../components/framework-guide/base';
 import {
@@ -62,6 +62,13 @@ const WRANGLER = `// wrangler.jsonc
   "compatibility_flags": ["nodejs_compat"],
   "assets": { "directory": "dist/client" }
 }`;
+
+const VERCEL = `// vite.config.ts
+import { framework } from '@k8ordo/server';
+import { vercel } from '@k8ordo/server/vercel';
+import { defineConfig } from 'vite';
+
+export default defineConfig({ plugins: [framework(), vercel()] });`;
 
 const ROUTES_DIR = `// vite.config.ts
 import { framework } from '@k8ordo/server';
@@ -175,6 +182,12 @@ export default function ServerDeployPage() {
         <CodeBlock code={WRANGLER} lang="json" />
         <Paragraph text={t.handlerMethods} />
         <Paragraph text={t.handlerOrigin} />
+      </DocSection>
+
+      <DocSection description={t.vercelDescription} title={t.vercelTitle}>
+        <CodeBlock code={VERCEL} lang="ts" />
+        <Paragraph text={t.vercelOutput} />
+        <Paragraph text={t.vercelBundled} />
       </DocSection>
 
       <BaseGuide mode="server" />

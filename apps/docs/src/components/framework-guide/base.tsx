@@ -1,5 +1,6 @@
+import { CodeBlock } from '@k8ordo/ui/code-block';
+
 import * as m from '../../messages';
-import { CodeBlock } from '../code-block';
 import { DocSection } from '../doc-page';
 import { Rich } from '../rich';
 import type { Mode } from './mode';

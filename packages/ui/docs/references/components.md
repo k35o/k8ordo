@@ -12,6 +12,9 @@ import { UIProvider } from '@k8ordo/ui';
 
 // Components (all from the root entry)
 import { Button, Card, TextField } from '@k8ordo/ui';
+
+// Except CodeBlock, which highlights on the server and has its own entry
+import { CodeBlock } from '@k8ordo/ui/code-block';
 ```
 
 Every component can be rendered from a Server Component, compound ones
@@ -1076,6 +1079,55 @@ Props:
 - `children`: `string` (required)
 - Other props are forwarded to `HTMLAttributes<HTMLElement>`, except `className` / `style`.
 
+### CodeBlock
+
+A block of code, highlighted on the server with shiki, with a copy button.
+It is an async Server Component on its own subpath, `@k8ordo/ui/code-block`,
+and imports `server-only`: the highlighter never reaches the browser, and
+importing it from a Client Component fails the build. Only the copy button is a
+client module.
+
+```tsx
+import { CodeBlock } from '@k8ordo/ui/code-block';
+
+<CodeBlock code={source} lang="tsx" title="save.tsx" />;
+```
+
+- `lang` is any language shiki bundles (`tsx`, `bash`, `css`, …). A name it
+  does not know renders as plain text rather than failing, so a Markdown fence
+  can pass its info string through as it is. The header shows `title` when
+  given (as the figure's `figcaption`), and the language otherwise.
+- The colors come from the design tokens (shiki's `css-variables` theme, mapped
+  to tokens in the stylesheet), so dark mode follows `.dark` with no second
+  theme.
+- `marks` marks lines by their 1-based number: `highlight`, `add` (drawn with a
+  `+`), or `remove` (drawn with a `−`). `callouts` puts a note under a line
+  (an array puts several, in order), indented like the line it points at. A
+  line can carry both. Neither is part of the copied text: the button copies
+  `code` exactly.
+
+```tsx
+<CodeBlock
+  callouts={{ 3: 'Guard the division' }}
+  code={source}
+  lang="ts"
+  marks={{ 2: 'remove', 3: 'add' }}
+/>
+```
+
+- Inside a `.writing-v` tree it stays a horizontal island.
+- It cannot render in a generative-UI spec, which renders on the client; see
+  [generative-ui](generative-ui.md).
+
+Props:
+
+- `code`: `string` (required)
+- `callouts`: `Readonly<Record<number, string | readonly string[]>>`
+- `lang`: `string` (default: `'text'`)
+- `marks`: `Readonly<Record<number, 'highlight' | 'add' | 'remove'>>`
+- `title`: `string`
+- Other props are forwarded to `HTMLAttributes<HTMLElement>`, except `children` / `className` / `style`.
+
 ### Kbd
 
 One keyboard key, drawn as a key cap. A shortcut is several `Kbd` side by side,
@@ -1847,6 +1899,7 @@ Every key in the `Messages` type. All values are `string`.
 | Breadcrumb    | `breadcrumb`                                                                                                                                     |
 | Tabs          | `tabList`                                                                                                                                        |
 | Pagination    | `paginationLabel`, `paginationPrevious`, `paginationNext`                                                                                        |
+| CodeBlock     | `codeBlockCopy`, `copied`, `copyFailed`                                                                                                          |
 | Carousel      | `carousel`, `carouselSlide`, `carouselPrevious`, `carouselNext`                                                                                  |
 | AI chat       | `chat`, `scrollToLatest`, `reasoning`, `reasoningStreaming`, `suggestions`, `send`, `stop`, `toolInput`, `toolOutput`, `toolError`, `toolDenied` |
 | Response      | The `response*` keys below                                                                                                                       |
