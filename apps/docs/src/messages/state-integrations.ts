@@ -27,8 +27,8 @@ export const routersTable = {
     en: 'Nothing — the router handles the click or the submission',
   }),
   quiet: message({
-    ja: '`entry`・local・memory の値だけを変える `update()`',
-    en: 'Updates that change only `entry`, local or memory values',
+    ja: '`entry`・local・cookie・memory の値だけを変える `update()`',
+    en: 'Updates that change only `entry`, local, cookie or memory values',
   }),
   quietNeeds: message({
     ja: '何も要らない（遷移を伴わない）',
@@ -93,8 +93,8 @@ export const frameworkTitle = message({
 });
 
 export const frameworkDescription = message({
-  ja: 'このフレームワークのページは `@k8ordo/router` の上で動くので、上の性質はそのまま成り立ちます。違いは 2 つです。ページが search を受け取らないので `url` はブラウザで読まれること、そして `Register` が `.k8ordo/register.gen.ts` に生成されることです。',
-  en: 'Pages under the framework run on `@k8ordo/router`, so everything above holds. Two things differ: a page never receives the search, so `url` is read in the browser, and `Register` is generated into `.k8ordo/register.gen.ts`.',
+  ja: 'このフレームワークのページは `@k8ordo/router` の上で動くので、上の性質はそのまま成り立ちます。違いは 2 つです。ページが search を受け取らないので `url` はブラウザで読まれること、そして `Register` が `.k8ordo/register.gen.ts` に生成されることです。`@k8ordo/server` のページとレイアウトは `request` を受け取るので、`defineCookieState` の値は `parseCookies(request.cookies)` でサーバーから読めます。',
+  en: 'Pages under the framework run on `@k8ordo/router`, so everything above holds. Two things differ: a page never receives the search, so `url` is read in the browser, and `Register` is generated into `.k8ordo/register.gen.ts`. Pages and layouts under `@k8ordo/server` do receive `request`, so a `defineCookieState` is read on the server with `parseCookies(request.cookies)`.',
 });
 
 export const frameworkLink = message({
@@ -108,8 +108,8 @@ export const otherTitle = message({
 });
 
 export const otherDescription = message({
-  ja: '今の Next.js のように Navigation API を intercept しないルーターでは、URL を変える `update()` はドキュメント全体の読み込みになります。URL の変更はリンクと GET フォームで行い、ページで `parseUrl` して `initialUrl` を渡してください。もともとこのパッケージが勧める粒度です。`entry` のフィールド・localStorage・メモリだけを変える `update()` は遷移を伴わないので、そのまま使えます。',
-  en: 'On a router that does not intercept the Navigation API — Next.js today — an `update()` that changes the URL is a full document load. Change the URL through links and GET forms, read it on the page with `parseUrl`, and pass `initialUrl` down: the grain this package prefers anyway. Updates that change only entry fields, localStorage or memory involve no navigation and work as they are.',
+  ja: '今の Next.js のように Navigation API を intercept しないルーターでは、URL を変える `update()` はドキュメント全体の読み込みになります。URL の変更はリンクと GET フォームで行い、ページで `parseUrl` して `initialUrl` を渡してください。もともとこのパッケージが勧める粒度です。`entry` のフィールド・localStorage・Cookie・メモリだけを変える `update()` は遷移を伴わないので、そのまま使えます。',
+  en: 'On a router that does not intercept the Navigation API — Next.js today — an `update()` that changes the URL is a full document load. Change the URL through links and GET forms, read it on the page with `parseUrl`, and pass `initialUrl` down: the grain this package prefers anyway. Updates that change only entry fields, localStorage, a cookie or memory involve no navigation and work as they are.',
 });
 
 export const formTitle = message({
@@ -193,8 +193,8 @@ export const testingDescription = message({
 });
 
 export const testingBrowser = message({
-  ja: '`useAppState` を使うコンポーネントは本物の Navigation API と localStorage の上で動くので、ブラウザ環境でテストします（このパッケージ自身は Vitest のブラウザモードを使っています）。',
-  en: 'Components that use `useAppState` run on the real Navigation API and localStorage, so test them in a browser environment — this package’s own suite uses Vitest browser mode.',
+  ja: '`useAppState` を使うコンポーネントは本物の Navigation API・localStorage・Cookie Store API の上で動くので、ブラウザ環境でテストします（このパッケージ自身は Vitest のブラウザモードを使っています）。',
+  en: 'Components that use `useAppState` run on the real Navigation API, localStorage and Cookie Store API, so test them in a browser environment — this package’s own suite uses Vitest browser mode.',
 });
 
 export const testingReset = message({
@@ -213,6 +213,6 @@ export const testingIntercept = message({
 });
 
 export const testingStorage = message({
-  ja: 'localStorage の行は、定義の `storageKey` を使って消せます。',
-  en: 'Clear localStorage rows by the definition’s `storageKey`.',
+  ja: 'localStorage の行は定義の `storageKey` で、Cookie は `cookieName`（`await cookieStore.delete(def.cookieName)`）で消せます。Cookie Store API の `change` イベントは同じタブにも届くので、テスト自身が `cookieStore.set()` で書けば、ほかのタブの書き込みの代わりになります。',
+  en: 'Clear localStorage rows by the definition’s `storageKey`, and cookies by its `cookieName` (`await cookieStore.delete(def.cookieName)`). The Cookie Store API’s `change` event reaches the same tab too, so a test that writes with `cookieStore.set()` itself stands in for another tab.',
 });
