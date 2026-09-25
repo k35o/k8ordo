@@ -185,6 +185,10 @@ describe('params schemas', () => {
     importPrefix: './routes',
     withParams,
   });
+  const map = (name: string): string => {
+    const start = source.indexOf(`export const ${name} = {`);
+    return source.slice(start, source.indexOf('} as const;', start));
+  };
 
   it('is emitted from a table the grammar accepted', () => {
     expect(parseRouteTree(files).problems).toStrictEqual([]);
@@ -235,10 +239,6 @@ describe('params schemas', () => {
   });
 
   it('lists, per catch-all, the schemas of the layouts above its not-found — apart from the pages, which they type', () => {
-    const map = (name: string): string => {
-      const start = source.indexOf(`export const ${name} = {`);
-      return source.slice(start, source.indexOf('} as const;', start));
-    };
     // ルートの not-found の上にはスキーマが無いので、載るのは 1 つだけ
     expect(map('catchAllSchemas')).toBe(
       "export const catchAllSchemas = {\n  '/:locale/*': [locale_layout_params],\n",

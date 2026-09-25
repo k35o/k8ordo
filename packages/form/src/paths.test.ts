@@ -16,31 +16,31 @@ const schema = z.object({
 const derived = formFields(schema);
 const { fields } = derived;
 
+// Never invoked — hooks cannot run outside a render, and every assertion
+// in here is for tsc. A directive that stops erroring fails the build.
+const useCompileTimeOnly = (): void => {
+  const form = useForm(derived, {});
+
+  form.field('title');
+  form.field('user.email');
+  // A wrapped nested object keeps its paths.
+  form.field('note.body');
+  // An array of enums is a checkbox group: one name, so a field.
+  form.field('tags');
+  // @ts-expect-error 'titel' is not a field in the schema
+  form.field('titel');
+  // @ts-expect-error 'items' is an array of objects, reached through array()
+  form.field('items');
+
+  form.array('items');
+  // @ts-expect-error 'user' is an object, not an array
+  form.array('user');
+  // @ts-expect-error a checkbox group is a field, not repeated rows
+  form.array('tags');
+};
+
 describe('paths are derived from the schema', () => {
   it('accepts a nested path and rejects a typo at compile time', () => {
-    // Never invoked — hooks cannot run outside a render, and every assertion
-    // in here is for tsc. A directive that stops erroring fails the build.
-    const useCompileTimeOnly = (): void => {
-      const form = useForm(derived, {});
-
-      form.field('title');
-      form.field('user.email');
-      // A wrapped nested object keeps its paths.
-      form.field('note.body');
-      // An array of enums is a checkbox group: one name, so a field.
-      form.field('tags');
-      // @ts-expect-error 'titel' is not a field in the schema
-      form.field('titel');
-      // @ts-expect-error 'items' is an array of objects, reached through array()
-      form.field('items');
-
-      form.array('items');
-      // @ts-expect-error 'user' is an object, not an array
-      form.array('user');
-      // @ts-expect-error a checkbox group is a field, not repeated rows
-      form.array('tags');
-    };
-
     expect(useCompileTimeOnly).toBeTypeOf('function');
   });
 

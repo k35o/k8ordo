@@ -206,6 +206,11 @@ const createNamer = (): {
 
 const pad = (depth: number): string => '  '.repeat(depth);
 
+const toMap = (map: ReadonlyMap<string, readonly string[]>): string[] =>
+  [...map].map(
+    ([pattern, schemas]) => `${pad(1)}'${pattern}': [${schemas.join(', ')}],`,
+  );
+
 const isBranch = (node: TableNode<string>): node is TableBranch<string> =>
   typeof node !== 'string';
 
@@ -391,10 +396,6 @@ export const emitRoutesModule = (
       const belief = byFile.get(file) as Belief;
       return `${pad(1)}${schemaName(name)} satisfies ParamsSchemaFor<'${belief.pattern}'>,`;
     });
-  const toMap = (map: ReadonlyMap<string, readonly string[]>): string[] =>
-    [...map].map(
-      ([pattern, schemas]) => `${pad(1)}'${pattern}': [${schemas.join(', ')}],`,
-    );
   const typeImports = [
     ...(hasError ? ['ErrorComponent'] : []),
     ...(hasLayout ? ['ParamsOf'] : []),

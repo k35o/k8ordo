@@ -37,30 +37,29 @@ export const WithAction: Story = {
   ),
 };
 
+function GreetingForm() {
+  const [message, formAction] = useActionState(
+    async (_prev: string, formData: FormData) => {
+      const name = formData.get('name');
+      await sleep(1000);
+      return typeof name === 'string' && name.length > 0
+        ? `こんにちは、${name}さん`
+        : '名前を入力してください';
+    },
+    '',
+  );
+  return (
+    <Form action={formAction}>
+      <FormControl
+        label="お名前"
+        renderInput={(props) => <TextField {...props} name="name" />}
+      />
+      <Button type="submit">送信</Button>
+      {message && <p className="text-fg-base text-sm">{message}</p>}
+    </Form>
+  );
+}
+
 export const WithActionState: Story = {
-  render: () => {
-    function Inner() {
-      const [message, formAction] = useActionState(
-        async (_prev: string, formData: FormData) => {
-          const name = formData.get('name');
-          await sleep(1000);
-          return typeof name === 'string' && name.length > 0
-            ? `こんにちは、${name}さん`
-            : '名前を入力してください';
-        },
-        '',
-      );
-      return (
-        <Form action={formAction}>
-          <FormControl
-            label="お名前"
-            renderInput={(props) => <TextField {...props} name="name" />}
-          />
-          <Button type="submit">送信</Button>
-          {message && <p className="text-fg-base text-sm">{message}</p>}
-        </Form>
-      );
-    }
-    return <Inner />;
-  },
+  render: () => <GreetingForm />,
 };
