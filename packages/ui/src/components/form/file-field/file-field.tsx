@@ -23,6 +23,7 @@ import { useFormStatus } from 'react-dom';
 
 import { cn } from '../../../helpers/cn';
 import { getMessages } from '../../../i18n/current';
+import { acceptsFile } from '../../../internal/accepts-file';
 import { Button } from '../../buttons/button';
 import { IconButton } from '../../buttons/icon-button';
 import { CloseIcon } from '../../icons';
@@ -81,6 +82,7 @@ export const Root = ({
   invalid = false,
   required = false,
   multiple = false,
+  accept,
   maxFiles,
   defaultValue,
   onChange,
@@ -167,20 +169,25 @@ export const Root = ({
     [onChange, syncInput, withAdded],
   );
 
-  // ドロップはブラウザが input を通らないので、change も input イベントも出ない。
-  // 選んだときと同じく一覧と input を揃え、input イベントで form 側に知らせる
+  // ドロップはブラウザが input を通らないので、accept も当たらず、change も
+  // input イベントも出ない。accept で選り分けたうえで、選んだときと同じく一覧と
+  // input を揃え、input イベントで form 側に知らせる
   const onFilesDrop = useCallback(
     (files: File[]) => {
-      if (files.length === 0) {
+      const taken =
+        accept === undefined
+          ? files
+          : files.filter((file) => acceptsFile(file, accept));
+      if (taken.length === 0) {
         return;
       }
-      const updatedFiles = withAdded(files);
+      const updatedFiles = withAdded(taken);
       setAcceptedFiles(updatedFiles);
       const list = syncInput(updatedFiles);
       inputRef.current?.dispatchEvent(new Event('input', { bubbles: true }));
       onChange?.(list);
     },
-    [onChange, syncInput, withAdded],
+    [accept, onChange, syncInput, withAdded],
   );
 
   // 一覧から外したファイルは input からも外す。外さないと送信に残る。
@@ -225,6 +232,7 @@ export const Root = ({
       <div className="w-full">
         <input
           {...rest}
+          accept={accept}
           aria-invalid={invalid}
           className="sr-only"
           disabled={disabledResolved}

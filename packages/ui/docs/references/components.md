@@ -1147,8 +1147,10 @@ stays usable by keyboard; pass children to lay it out yourself (put a
 they respect `multiple` and `maxFiles`, land in the input so they are
 submitted, and are announced with an `input` event so a form sees the change.
 A dropped folder is skipped (choose folders through the picker with
-`webkitDirectory`), and `accept` is not checked on drop, just as the browser
-only suggests it to the picker.
+`webkitDirectory`). The browser applies `accept` only to the picker, so the
+field applies it to dropped files itself, by the same rules: a file it does not
+match is left out, and a drop with nothing it matches changes nothing — no
+`onChange`, no `input` event.
 
 The files in the list are always the files the input submits: picking more
 with `multiple` adds to the list and to the input, and removing one from the
