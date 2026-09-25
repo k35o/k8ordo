@@ -1,6 +1,14 @@
 'use client';
 
-import { Suspense, use, useEffect, useId, useRef, useState } from 'react';
+import {
+  Suspense,
+  use,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import type { FC, KeyboardEvent } from 'react';
 import { browser } from 'react-dom';
 
@@ -72,25 +80,41 @@ const CalendarBody: FC<Props> = ({
   const gridRef = useRef<HTMLTableElement>(null);
 
   const locale = pageLocale();
-  const firstDay = new Intl.Locale(locale).getWeekInfo().firstDay % 7;
-  const monthFormat = new Intl.DateTimeFormat(locale, {
-    year: 'numeric',
-    month: 'long',
-    timeZone: 'UTC',
-  });
-  const dayFormat = new Intl.DateTimeFormat(locale, {
-    dateStyle: 'full',
-    timeZone: 'UTC',
-  });
-  const weekdayShort = new Intl.DateTimeFormat(locale, {
-    weekday: 'short',
-    timeZone: 'UTC',
-  });
-  const weekdayLong = new Intl.DateTimeFormat(locale, {
-    weekday: 'long',
-    timeZone: 'UTC',
-  });
-  const dayNumber = new Intl.NumberFormat(locale, { useGrouping: false });
+  // Intl のフォーマッタはロケールの解決を伴って作るのが重いので、日を移すたびの
+  // 描き直しで作り直さない
+  const {
+    firstDay,
+    monthFormat,
+    dayFormat,
+    weekdayShort,
+    weekdayLong,
+    dayNumber,
+  } = useMemo(
+    () => ({
+      // getWeekInfo の firstDay は ISO の表し方（1 = 月 … 7 = 日）。iso-date.ts の
+      // 表し方（Date#getUTCDay と同じ 0 = 日 … 6 = 土）に合わせる
+      firstDay: new Intl.Locale(locale).getWeekInfo().firstDay % 7,
+      monthFormat: new Intl.DateTimeFormat(locale, {
+        year: 'numeric',
+        month: 'long',
+        timeZone: 'UTC',
+      }),
+      dayFormat: new Intl.DateTimeFormat(locale, {
+        dateStyle: 'full',
+        timeZone: 'UTC',
+      }),
+      weekdayShort: new Intl.DateTimeFormat(locale, {
+        weekday: 'short',
+        timeZone: 'UTC',
+      }),
+      weekdayLong: new Intl.DateTimeFormat(locale, {
+        weekday: 'long',
+        timeZone: 'UTC',
+      }),
+      dayNumber: new Intl.NumberFormat(locale, { useGrouping: false }),
+    }),
+    [locale],
+  );
 
   const min = orUndefined(minProp);
   const max = orUndefined(maxProp);
