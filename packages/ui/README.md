@@ -239,13 +239,17 @@ stories and rendered props rather than relying on trained knowledge:
 - **Avatar** - User/entity avatar
 - **Badge** - Status/label indicator
 - **Card** - Flexible content container (hover interaction via `interactive`)
+- **Carousel** - Scroll-snapping slides with previous/next buttons
 - **Code** - Formatted code display
+- **CodeBlock** (from `@k8ordo/ui/code-block`) - Code block highlighted on the server, with a copy button
 - **Heading** - Typography heading component
+- **Kbd** - Keyboard key cap for shortcuts
 - **Table** - Tabular data display
 
 ### Feedback
 
 - **Alert** - Important messages and notifications
+- **EmptyState** - What a list, table, or search shows when it is empty
 - **Progress** - Progress indication
 - **Skeleton** - Content loading placeholder
 - **Spinner** - Loading indicator
@@ -358,7 +362,7 @@ function MyComponent() {
 
 ## Imports & Bundle Size
 
-The core UI components ship from the root entry — there are no per-component subpaths; the AI chat components live under `@k8ordo/ui/ai`, with `Response` under `@k8ordo/ui/ai/response`. The package is tree-shakeable (`sideEffects` is limited to CSS), so bundlers drop everything you don't import:
+The core UI components ship from the root entry — there are no per-component subpaths; the AI chat components live under `@k8ordo/ui/ai`, with `Response` under `@k8ordo/ui/ai/response`, and `CodeBlock` under `@k8ordo/ui/code-block` so the highlighter stays out of everything else. The package is tree-shakeable (`sideEffects` is limited to CSS), so bundlers drop everything you don't import:
 
 ```tsx
 // Named imports from the root entry — unused exports are tree-shaken away
@@ -376,6 +380,7 @@ Optional features live behind dedicated subpath exports:
 | `@k8ordo/ui/ai`                   | AI chat components                                                   |
 | `@k8ordo/ui/ai/response`          | `Response` Markdown renderer (needs optional peer `streamdown`)      |
 | `@k8ordo/ui/ai-sdk`               | AI SDK adapter (needs optional peer `ai`)                            |
+| `@k8ordo/ui/code-block`           | `CodeBlock`, highlighted on the server with shiki (Server Component) |
 | `@k8ordo/ui/json-render`          | json-render catalog (server-safe)                                    |
 | `@k8ordo/ui/json-render/registry` | json-render registry (`'use client'`)                                |
 | `@k8ordo/ui/openui`               | OpenUI library (`'use client'`)                                      |
@@ -480,11 +485,11 @@ pnpm add @json-render/core @json-render/react zod
 pnpm add @openuidev/react-lang @openuidev/lang-core zod
 ```
 
-Supported components (**all 47**, both frameworks):
+Supported components (**all 50**, both frameworks):
 
-- **Layout / containers**: `Stack`, `Grid`, `Card`, `Form`
+- **Layout / containers**: `Stack`, `Grid`, `Card`, `Form`, `Carousel`
 - **Buttons / nav**: `Button`, `IconButton`, `Anchor`, `Breadcrumb`, `Pagination`
-- **Display**: `Badge`, `Heading`, `Avatar`, `Code`, `Icon`, `ChevronIcon`, `StatusIcon`, `Alert`, `Spinner`, `Progress`, `Skeleton`, `Separator`, `Tabs`, `Accordion`, `Table`
+- **Display**: `Badge`, `Heading`, `Avatar`, `Code`, `Kbd`, `EmptyState`, `Icon`, `ChevronIcon`, `StatusIcon`, `Alert`, `Spinner`, `Progress`, `Skeleton`, `Separator`, `Tabs`, `Accordion`, `Table`
 - **Overlays (self-contained widgets)**: `Modal`, `Dialog`, `Drawer`, `Popover`, `Tooltip`, `DropdownMenu`, `Toast`
 - **Form**: `TextField`, `Textarea`, `PasswordInput`, `NumberField`, `Slider`, `Checkbox`, `Switch`, `Select`, `Radio`, `RadioCard`, `CheckboxCard`, `ListBox`, `CheckboxGroup`, `Autocomplete`, `FileField`, `FormControl`
 

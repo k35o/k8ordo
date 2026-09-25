@@ -14,6 +14,8 @@ pnpm test                                    # Run all tests
 pnpm test --project=helpers                  # Helper tests only (no browser)
 pnpm test --project=hooks                    # Hook tests only (Playwright)
 pnpm test --project=components               # Component tests only (Storybook + Playwright)
+pnpm test --project=components-forced-colors # Stories tagged forced-colors, under forced colors
+pnpm test --project=components-contrast-more # Stories tagged contrast-more, under prefers-contrast: more
 pnpm test --project=hooks src/internal/focus-trap.test.tsx # Single test file (needs its project)
 pnpm build                                   # vp pack + CSS copy
 pnpm typecheck                               # Type check (no emit)
@@ -222,9 +224,17 @@ No raw color values — always use semantic tokens in Tailwind classes. The toke
 
 Dark mode is class-based (`.dark` on `html`, put there by `@k8ordo/color-scheme`; the library never adds it). All semantic tokens automatically remap — no manual `dark:` prefixes needed for tokens. Custom variant defined via `@custom-variant dark (&:where(.dark, .dark *))`. `base.css` sets `color-scheme` to follow the same class (`light` on `:root`, `dark` on `.dark`), not `light dark`, since the tokens do not follow `prefers-color-scheme`.
 
+### High Contrast and Forced Colors
+
+The stylesheet follows `prefers-contrast: more` and `forced-colors: active`; `@k8ordo/color-scheme` is not involved, since the OS owns both settings.
+
+- `tokens.css` redefines text and border tokens inside `@media (prefers-contrast: more)` on `:root:where(:not(.dark))` and `.dark`. `:where` keeps the specificity of `:root`, so a consumer's later `:root` override still wins.
+- A surface outlined only by a shadow or a ground takes `HIGH_CONTRAST_EDGE` (`src/components/_internal/high-contrast.ts`): an inset `border-base` outline under either setting.
+- Under forced colors only system colors survive and shadows are dropped. Paint selected state with `forced-colors:bg-[Highlight]` / `forced-colors:bg-[CanvasText]`, never rely on `box-shadow` for a boundary or focus, and hide with `invisible`, not `text-transparent` (a transparent color is repainted).
+
 ### Focus Style
 
-Standard pattern: `focus-visible:border-transparent focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-border-info`
+Standard pattern: `focus-visible:border-transparent focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-border-info`. The ring is a `box-shadow` and vanishes under forced colors; `outline-hidden` is what keeps focus visible there (Tailwind gives it a transparent outline, which forced colors paints). An item that shows focus with a ground instead (`DropdownMenu`, `ListBox`) keeps a transparent 2px outline and colors it under `contrast-more:`; `outline-hidden` would set `--tw-outline-style: none` and erase any outline added on top.
 
 ### Custom Utilities
 
@@ -242,6 +252,7 @@ Custom variants besides `dark:`: `light:` (anywhere not under `.dark`) and `vert
 - **Helper tests** are standard unit tests, no browser needed.
 - **There is no jsdom project, and components are not written to survive one.** They call `ResizeObserver`, `matchMedia`, `dialog.showModal`, and the Popover API directly — no support checks, no null branches. Consumers are told to test in a real browser (`docs/GUIDE.md`); do not reintroduce a guard layer to make a synthetic DOM work.
 - Storybook preview wraps all stories in `UIProvider` with light/dark theme toggle.
+- The OS color settings cannot be switched per story, so they get projects of their own: `components-forced-colors` (Playwright `forcedColors: 'active'`) runs only stories tagged `forced-colors`, `components-contrast-more` (`contrast: 'more'`) only those tagged `contrast-more`, and `components` excludes both tags. Those stories live in `src/styles/high-contrast.stories.tsx`, hidden from the sidebar (`!dev`) and from Chromatic. Browser context options go in `playwright({ contextOptions })`; Vitest 5 ignores `instances[].context`.
 - a11y addon fails a story on violations (`test: 'error'`), `color-contrast` included. Only overlay stories that axe misreads while they fade in turn `color-contrast` off for themselves: every `Modal` story, and one story each in `Dialog` and `Popover`.
 - Mock date is set to `2023-01-02 12:34:56` in Storybook.
 
@@ -260,6 +271,7 @@ The authoritative list is the `exports` map in `package.json`.
 @k8ordo/ui/ai                  AI chat components
 @k8ordo/ui/ai/response         Response renderer only
 @k8ordo/ui/ai-sdk              AI SDK adapter
+@k8ordo/ui/code-block          CodeBlock (Server Component; shiki and server-only are dependencies)
 @k8ordo/ui/json-render         json-render catalog
 @k8ordo/ui/json-render/registry
 @k8ordo/ui/openui              OpenUI component library

@@ -1,7 +1,7 @@
 import { Code } from '@k8ordo/ui';
+import { CodeBlock } from '@k8ordo/ui/code-block';
 
 import * as m from '../../messages';
-import { CodeBlock } from '../code-block';
 import { DocSection } from '../doc-page';
 import { LocaleAnchor } from '../locale-anchor';
 import { Rich } from '../rich';
@@ -63,7 +63,7 @@ export default function Root({
 }) {
   const locale = locales.delocalize(pathname).locale ?? locales.default;
   return (
-    <html lang={locale}>
+    <html dir={locales.definitions[locale].dir} lang={locale}>
       <body>{children}</body>
     </html>
   );

@@ -48,6 +48,17 @@ export type Messages = {
   paginationPrevious: string;
   paginationNext: string;
 
+  /** CodeBlock のコピーボタン */
+  codeBlockCopy: string;
+  /** コピーの結果を読み上げる（role="status"） */
+  copied: string;
+  copyFailed: string;
+  /** Carousel の aria-roledescription（region と各スライド） */
+  carousel: string;
+  carouselSlide: string;
+  carouselPrevious: string;
+  carouselNext: string;
+
   /** Conversation.Messages の log ランドマーク名 */
   chat: string;
   scrollToLatest: string;

@@ -574,6 +574,50 @@
       "omitted": ["className", "style"]
     },
     {
+      "name": "Carousel.Root",
+      "props": [
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "slideSize",
+          "types": ["'full'", "'lg'", "'md'", "'sm'"],
+          "defaultValue": "'full'",
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "Carousel.Slide",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
       "name": "Checkbox",
       "props": [
         {
@@ -849,6 +893,43 @@
       ],
       "inherits": "HTMLAttributes<HTMLElement>",
       "omitted": ["className", "style"]
+    },
+    {
+      "name": "CodeBlock",
+      "props": [
+        {
+          "name": "code",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "callouts",
+          "types": ["Readonly<Record<number, string | readonly string[]>>"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "lang",
+          "types": ["string"],
+          "defaultValue": "'text'",
+          "required": false
+        },
+        {
+          "name": "marks",
+          "types": ["Readonly<Record<number, 'highlight' | 'add' | 'remove'>>"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "title",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": "HTMLAttributes<HTMLElement>",
+      "omitted": ["children", "className", "style"]
     },
     {
       "name": "CodeXmlIcon",
@@ -1261,6 +1342,37 @@
       ],
       "inherits": null,
       "omitted": []
+    },
+    {
+      "name": "EmptyState",
+      "props": [
+        {
+          "name": "title",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "action",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "description",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "icon",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": "HTMLAttributes<HTMLDivElement>",
+      "omitted": ["children", "className", "style"]
     },
     {
       "name": "ExternalLinkIcon",
@@ -1744,6 +1856,25 @@
       ],
       "inherits": null,
       "omitted": []
+    },
+    {
+      "name": "Kbd",
+      "props": [
+        {
+          "name": "children",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": "HTMLAttributes<HTMLElement>",
+      "omitted": ["className", "style"]
     },
     {
       "name": "LightModeIcon",
@@ -3258,19 +3389,37 @@
       "name": "Table.EmptyState",
       "props": [
         {
-          "name": "children",
-          "types": ["ReactNode"],
-          "defaultValue": null,
-          "required": true
-        },
-        {
           "name": "colSpan",
           "types": ["number"],
           "defaultValue": null,
           "required": true
+        },
+        {
+          "name": "title",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "action",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "description",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "icon",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
         }
       ],
-      "inherits": null,
+      "inherits": "ComponentProps<typeof EmptyState>",
       "omitted": []
     },
     {
