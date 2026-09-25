@@ -37,8 +37,9 @@ build time, which is why its guide installs it with `-D`.
 The package has three entries, split by where the code runs.
 `@k8ordo/server` is the plugin, for `vite.config.ts`, and loads Vite.
 `@k8ordo/server/runtime` is what code inside the request handler imports —
-`redirect()`, `responseHeaders()`, and the `RedirectTarget`, `RouteRequest`
-and `Guard` types — and needs nothing from Node, so it goes wherever the
+`redirect()`, `cookies()`, `responseHeaders()`, `requestHeaders()`, and the
+`RedirectTarget`, `RouteRequest` and `Guard` types — and needs nothing from
+Node, so it goes wherever the
 handler goes.
 `@k8ordo/server/serve` is `serve`, the Node.js server for a build. Neither of
 the last two loads Vite, so the built application runs from an install
@@ -147,9 +148,11 @@ export default async function ProductPage({
 }
 ```
 
-**An async page streams.** The layout above it is on screen first, and the
-page follows in the same response once its data arrives. The browser
-hydrates when the last of it is in place, not before: a boundary still on
+**An async page answers, then streams.** The document waits for the page's
+own component — its data — before anything is sent, because the page may
+still say `notFound()` (below); what the page puts under a `<Suspense>` follows
+in the same response as it arrives. The browser hydrates when the last of it
+is in place, not before: a boundary still on
 its way cannot be hydrated, and a context that changes as the page hydrates —
 a colour scheme read from the browser — would make React render it again
 beside the copy still streaming in. Until then the page is what it is
@@ -371,6 +374,54 @@ and a hole where the page was, the browser throws at the same spot, and
 `error.tsx` shows after hydration. In production the error the browser sees
 carries React's generic message, not the thrown one, and an empty `digest` —
 the message is in the server's log.
+
+<!-- shared:not-found -->
+
+## A page that is not there
+
+A params schema decides what a URL's params look like; whether the thing they
+name exists is the page's to say. `notFound()` from `@k8ordo/router` says it:
+
+```tsx
+// src/routes/products/[id]/page.tsx
+import { notFound } from '@k8ordo/router';
+import type { PageProps } from '@k8ordo/router';
+
+export default async function ProductPage({
+  params,
+}: PageProps<'/products/:id'>) {
+  const product = await findProduct(params.id);
+  if (product === undefined) notFound();
+  return <h1>{product.name}</h1>;
+}
+```
+
+It throws, so the lines after it never run, and the page is answered instead
+by what the table answers for a URL nothing matched there — the nearest
+`not-found.tsx` above it, inside the layouts above that — under a 404. With no
+`not-found.tsx` at all, the framework's own answers — a `404` heading and a
+line, with a `<title>`, rendered inside the root layout, so the visitor keeps
+the document's frame, its `<html lang>` and its stylesheets (a document of
+its own only when there is no root layout either). It is also what a URL
+nothing matches gets from such an application. `notFound()` comes from the
+router rather than the mode package, so the page reads the same under
+either.
+
+`notFound()` is the page's word about itself: thrown from the page's own
+component, before it returns.
+
+<!-- /shared:not-found -->
+
+**A document waits for its page.** A status leaves before the body it heads,
+so a page's HTML is not sent until the page's own component has answered —
+fetched what it needs and returned, or said `notFound()`. What streams after
+that is what the page puts under a `<Suspense>` of its own. A client
+navigation has no status to get right, so its payload streams from the start;
+a page that says `notFound()` there sends the browser back to the server for a
+document load of the same URL, which is answered with the 404. A `HEAD` for a
+page runs the page for the same reason, and sends no body. Thrown from further
+down, once the page has returned and its response has started, `notFound()`
+is an error like any other, and the nearest `error.tsx` answers it.
 
 ## Redirects
 
@@ -655,7 +706,8 @@ client build, which answer before the Worker runs:
 The handler answers `GET`, `HEAD` and `POST`, and any other method with a `405` whose
 `Allow` header names those three, so a host needs no method filter of its
 own. A `HEAD` gets the status and headers a `GET` would, with a `null` body:
-both are settled before the page renders, so the page is not rendered for it.
+the page's own component runs, since it may say `notFound()`, and nothing it
+renders is sent.
 
 **Build the `Request` with the URL the visitor asked for.** A `POST` — a
 Server Action or not — is accepted only when its `Origin` header is present
@@ -860,6 +912,29 @@ never _reach_. The client only ever receives a reference to an action, so the
 two do not collide — but the mark belongs on what the action reads: keep
 secrets and database clients in a `*.server.ts` module and import that.
 
+An action answers the request as much as a guard does, so it has the same
+API: `cookies()` to read and write the cookies, `responseHeaders()` to add to
+the answer, and `requestHeaders()` for the headers the request arrived with —
+an action is handed its arguments, not the request.
+
+```ts
+'use server';
+
+import { cookies, redirect } from '@k8ordo/server/runtime';
+
+export async function signIn(_previous: FormState, formData: FormData) {
+  const session = await startSession(formData);
+  if (session === null) return { error: 'wrong password' };
+  cookies().set('session', session.token, { maxAge: 60 * 60 * 24 * 30 });
+  redirect('/account');
+}
+```
+
+What an action writes goes on its answer: the page it re-rendered, the `303`
+to where it redirected, or the payload the client runtime applies. The page
+re-rendered after it sees the cookies the request carried in `request`, not
+what the action wrote.
+
 Calling the action re-renders the page and sends both answers back together,
 so the screen is up to date by the time the caller has its value — one round
 trip, not two.
@@ -879,10 +954,11 @@ run outer first, one at a time:
 
 ```ts
 // src/routes/admin/guard.ts
+import { cookies } from '@k8ordo/server/runtime';
 import type { Guard } from '@k8ordo/server/runtime';
 
-const guard: Guard<'/admin'> = ({ request }) => {
-  if (request.headers.get('cookie')?.includes('session=') === true) return;
+const guard: Guard<'/admin'> = () => {
+  if (cookies().has('session')) return;
   return new Response(null, { status: 303, headers: { location: '/login' } });
 };
 
@@ -915,8 +991,8 @@ export default function guard() {
 ```
 
 A header the answer already carries is replaced. `responseHeaders()` works
-while a guard runs and throws anywhere else — a page is a render, and a render
-that wrote the response would be a second handler.
+while a guard or a Server Action runs and throws anywhere else — a page is a
+render, and a render that wrote the response would be a second handler.
 
 There is no `next()` that runs the page and hands its answer back to be
 rewritten: a page streams, and its headers are on the wire before its body is
@@ -933,6 +1009,37 @@ posted to whichever URL calls it — so an action checks what it needs itself.
 The guards run after the params schemas have matched the URL, so a guard
 under `[locale]` runs in the locale the URL names, and before the Server
 Action a `POST` carries.
+
+## Cookies
+
+`cookies()` is the request's cookies, to read and to write, from a
+`guard.ts` or a Server Action:
+
+```ts
+import { cookies } from '@k8ordo/server/runtime';
+
+cookies().get('session'); // string | undefined
+cookies().set('session', token, { maxAge: 60 * 60 * 24 });
+cookies().delete('session');
+```
+
+A read sees what the request carried, with what was set or deleted earlier in
+the same request — a guard's write is what a Server Action after it reads —
+and every write reaches the browser as a `Set-Cookie` on the answer, whatever
+the answer is. A cookie written twice at the same path and domain is said
+once, the last way.
+
+`set` takes `path`, `domain`, `maxAge` (seconds), `expires`, `httpOnly`,
+`secure` and `sameSite` (`'strict' | 'lax' | 'none'`, the last only with
+`secure`). The defaults are what a session wants: `path: '/'`,
+`httpOnly: true`, `secure: true` and `sameSite: 'lax'`. `localhost` counts as
+secure to the browsers that matter; anywhere else served over plain HTTP,
+say `secure: false`. A name outside RFC 6265's token characters throws.
+`delete` takes the `path` and `domain` the cookie was set with, since those
+are what a browser keys it by.
+
+A page never writes a cookie: it reads `request.cookies` from its props, the
+cookies the request carried.
 
 ## Reading the request
 
@@ -962,7 +1069,8 @@ it as a prop.
 Nothing lets a page write to the response — no status, no `Set-Cookie` —
 because a page is a render, and a render that answered the request would be
 a second handler. What the response carries beyond the page is decided before
-it renders, in a `guard.ts`.
+it renders, in a `guard.ts`, or by the Server Action a `POST` carries;
+`cookies()` there is what writes a cookie.
 
 The field exists only under this mode: the generated `Page` and `Layout`
 types carry it here and not under `@k8ordo/static`, so a page that reads it

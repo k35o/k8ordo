@@ -25,21 +25,25 @@ export type FieldInput = {
   min?: number | string;
   max?: number | string;
   step?: number | 'any';
-  /**
-   * What a checked box submits when its schema reads the string
-   * (`z.stringbool()`): the schema's own spelling of `true`.
-   */
-  value?: string;
   defaultValue?: string;
   defaultChecked?: boolean;
+};
+
+/**
+ * The input of a checkbox whose schema reads the submitted string
+ * (`z.stringbool()`): it also carries what a checked box submits.
+ */
+export type StringCheckboxInput = FieldInput & {
+  /** The schema's own spelling of `true`. */
+  value?: string;
 };
 
 /**
  * One field as derived from the schema. Serializable on purpose: it crosses the
  * RSC boundary as props, which is what keeps zod out of the client bundle.
  */
-export type DerivedField = {
-  input: FieldInput;
+export type DerivedField<Input extends FieldInput = FieldInput> = {
+  input: Input;
   /** Message per ValidityState flag, taken from zod itself. */
   messages: Partial<Record<ValidityFlag, string>>;
   /** True when the input must not be echoed back after a failed submit. */
@@ -64,11 +68,18 @@ export type DroppedCheck = {
   reason: string;
 };
 
+/**
+ * `StringCheckboxPath` names the fields whose `input` carries `value`.
+ * `formFields` fills it in from the schema; a type written by hand that leaves
+ * it out still takes the derived fields, and only hides `value` from `field()`.
+ */
 export type FormFields<
   FieldPath extends string = string,
   ArrayPath extends string = string,
+  StringCheckboxPath extends string = never,
 > = {
-  fields: Record<FieldPath, DerivedField>;
+  fields: Record<FieldPath, DerivedField> &
+    Record<StringCheckboxPath, DerivedField<StringCheckboxInput>>;
   arrays: Record<ArrayPath, DerivedArray>;
   /**
    * Checks HTML has no attribute for, each run by the same evaluator on both

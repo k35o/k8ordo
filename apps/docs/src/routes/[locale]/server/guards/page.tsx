@@ -21,10 +21,11 @@ const TREE = `src/routes/
       page.tsx`;
 
 const ADMIN = `// src/routes/admin/guard.ts
+import { cookies } from '@k8ordo/server/runtime';
 import type { Guard } from '@k8ordo/server/runtime';
 
-const guard: Guard<'/admin'> = ({ request }) => {
-  if (request.headers.get('cookie')?.includes('session=') === true) return;
+const guard: Guard<'/admin'> = () => {
+  if (cookies().has('session')) return;
   return new Response(null, { status: 303, headers: { location: '/login' } });
 };
 
@@ -36,6 +37,12 @@ import { responseHeaders } from '@k8ordo/server/runtime';
 export default function guard() {
   responseHeaders().set('x-content-type-options', 'nosniff');
 }`;
+
+const COOKIES = `import { cookies } from '@k8ordo/server/runtime';
+
+cookies().get('session');
+cookies().set('session', token, { maxAge: 60 * 60 * 24 });
+cookies().delete('session');`;
 
 export default function ServerGuardsPage() {
   const t = m.serverGuards;
@@ -80,6 +87,12 @@ export default function ServerGuardsPage() {
       </DocSection>
 
       <DocSection description={t.orderDescription} title={t.orderTitle} />
+
+      <DocSection description={t.cookiesDescription} title={t.cookiesTitle}>
+        <CodeBlock code={COOKIES} lang="ts" />
+        <Paragraph text={t.cookiesOptions} />
+        <Paragraph text={t.cookiesPage} />
+      </DocSection>
 
       <DocSection description={t.staticDescription} title={t.staticTitle}>
         <p>

@@ -1,28 +1,35 @@
 import { z } from 'zod';
 
-import { defineLocalState } from './local-state';
 import { defineMemoryState } from './memory-state';
-
-/**
- * Plays the browser: evaluates the inline expression with `localStorage`
- * bound to a fake, the way an inline `<script>` would see the real one.
- */
-const evaluateInline = (
-  expression: string,
-  storage: Pick<Storage, 'getItem'>,
-): unknown => {
-  // oxlint-disable-next-line no-new-func, no-implied-eval -- the expression under test is generated source; evaluating it is the test
-  const read = new Function('localStorage', `return ${expression};`) as (
-    storage: Pick<Storage, 'getItem'>,
-  ) => unknown;
-  return read(storage);
-};
+import { defineLocalState, defineSessionState } from './storage-state';
 
 const storageWith = (
   rows: Record<string, string>,
 ): Pick<Storage, 'getItem'> => ({
   getItem: (key) => rows[key] ?? null,
 });
+
+/**
+ * Plays the browser: evaluates the inline expression with `localStorage` and
+ * `sessionStorage` bound to fakes, the way an inline `<script>` would see the
+ * real ones.
+ */
+const evaluateInline = (
+  expression: string,
+  storage: Pick<Storage, 'getItem'>,
+  session: Pick<Storage, 'getItem'> = storageWith({}),
+): unknown => {
+  // oxlint-disable-next-line no-new-func, no-implied-eval -- the expression under test is generated source; evaluating it is the test
+  const read = new Function(
+    'localStorage',
+    'sessionStorage',
+    `return ${expression};`,
+  ) as (
+    storage: Pick<Storage, 'getItem'>,
+    session: Pick<Storage, 'getItem'>,
+  ) => unknown;
+  return read(storage, session);
+};
 
 describe('defineLocalState', () => {
   it('applies the absence rule to local fields too', () => {
@@ -101,6 +108,34 @@ describe('inlineRead', () => {
     expect(expression).not.toContain('<');
     const stored = storageWith({ [odd.storageKey]: JSON.stringify({ n: 3 }) });
     expect(evaluateInline(expression, stored)).toStrictEqual({ n: 3 });
+  });
+});
+
+describe('defineSessionState', () => {
+  const draft = defineSessionState(
+    'draft',
+    z.object({ step: z.number().default(1) }),
+  );
+
+  it('applies the absence rule to session fields too', () => {
+    expect(() =>
+      defineSessionState('strict-session', z.object({ step: z.number() })),
+    ).toThrow(/session fields.*step/u);
+  });
+
+  it('exposes the storage key the store writes under', () => {
+    expect(draft.storageKey).toBe('k8ordo-state:draft');
+  });
+
+  it('reads sessionStorage before hydration, never localStorage', () => {
+    const row = { [draft.storageKey]: JSON.stringify({ step: 3 }) };
+
+    expect(
+      evaluateInline(draft.inlineRead(), storageWith({}), storageWith(row)),
+    ).toStrictEqual({ step: 3 });
+    expect(
+      evaluateInline(draft.inlineRead(), storageWith(row), storageWith({})),
+    ).toBeNull();
   });
 });
 

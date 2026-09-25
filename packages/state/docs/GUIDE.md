@@ -1,37 +1,47 @@
 # @k8ordo/state
 
 Declare state by where it lives. A definition names a place — the URL, the
-history entry, localStorage, memory — and one zod schema per boundary place
-(URL, entry, localStorage) derives everything else: the server-side read,
-canonical link building, salvage of stale data, and a client subscription
-with exact per-key change detection. Memory never crosses a boundary, so it
-is a typed box with no schema.
+history entry, localStorage, sessionStorage, a cookie, memory — and one zod
+schema per boundary place (URL, entry, Web Storage, cookie) derives
+everything else: the server-side read, canonical link building, salvage of
+stale data, and a client subscription with exact per-key change detection.
+Memory never crosses a boundary, so it is a typed box with no schema.
 
 Like every k8ordo package it assumes React 19 and Server Components, uses only
 what has reached Baseline newly available, and ships no polyfills or legacy
 fallbacks. The Navigation API reached Baseline in January 2026; this package
 treats it as simply present.
 
-## The four places
+## The places
 
-| definition                  | lives in            | survives              | shared with           | server                                    |
-| --------------------------- | ------------------- | --------------------- | --------------------- | ----------------------------------------- |
-| `definePageState` — `url`   | searchParams        | back/forward, sharing | anyone given the URL  | reads, where the router passes the search |
-| `definePageState` — `entry` | history entry state | back/forward, reload  | that tab's entry      | —                                         |
-| `defineLocalState`          | localStorage        | until deleted         | every tab, one device | —                                         |
-| `defineMemoryState`         | the JS runtime      | until reload          | that tab              | —                                         |
+| definition                  | lives in            | survives                 | shared with           | server                                         |
+| --------------------------- | ------------------- | ------------------------ | --------------------- | ---------------------------------------------- |
+| `definePageState` — `url`   | searchParams        | back/forward, sharing    | anyone given the URL  | reads, where the router passes the search      |
+| `definePageState` — `entry` | history entry state | back/forward, reload     | that tab's entry      | —                                              |
+| `defineLocalState`          | localStorage        | until deleted            | every tab, one device | —                                              |
+| `defineSessionState`        | sessionStorage      | reload, until tab closes | that tab              | —                                              |
+| `defineCookieState`         | a cookie            | 400 days from last write | every tab, one device | reads, where the page receives request cookies |
+| `defineMemoryState`         | the JS runtime      | until reload             | that tab              | —                                              |
 
 `url` and `entry` are the two faces of one history entry — one visible and
 shareable, one hidden — which is why they share a definition and update
-atomically. localStorage and memory are app-scope, not page-scope, which is
-why they are their own kinds: the grouping difference is real, so the API
-makes it visible.
+atomically. Web Storage, cookies and memory are app-scope, not page-scope,
+which is why they are their own kinds: the grouping difference is real, so
+the API makes it visible. sessionStorage is localStorage's per-tab twin,
+built the same way: it survives a reload of the tab — unlike memory — and
+goes when the tab does, seen by no other tab — unlike localStorage. A
+cookie and localStorage hold the same kind of thing — a preference of
+whoever uses the device — and differ in who can read it: every request
+carries the cookie, so the server renders the real value instead of the
+default.
 
 ```ts
 import {
+  defineCookieState,
   defineLocalState,
   defineMemoryState,
   definePageState,
+  defineSessionState,
 } from '@k8ordo/state';
 import * as z from 'zod/mini';
 
@@ -53,6 +63,20 @@ export const prefs = defineLocalState(
   z.object({ view: z._default(z.enum(['grid', 'table']), 'grid') }),
 );
 
+// This tab's visit: kept through a reload, gone with the tab.
+export const notices = defineSessionState(
+  'notices',
+  z.object({ dismissed: z._default(z.array(z.string()), []) }),
+);
+
+// A preference the server renders: every request carries it.
+export const density = defineCookieState(
+  'density',
+  z.object({
+    density: z._default(z.enum(['comfortable', 'compact']), 'comfortable'),
+  }),
+);
+
 // A typed shared box. No schema: these values never cross a boundary,
 // so there is nothing to re-validate — the typed update is the only writer.
 // Treat the values as immutable: replace fields through update(); a nested
@@ -61,16 +85,20 @@ export const debugPanel = defineMemoryState('debug-panel', { open: false });
 ```
 
 Schemas appear exactly where data comes back across a boundary — URL strings
-a user can edit, localStorage JSON an older schema wrote, entry state a
-session restore revived — and every such field must tolerate absence:
+a user can edit, Web Storage or cookie JSON an older schema wrote, entry
+state a session restore revived — and every such field must tolerate absence:
 `.default()` (`z._default()` in mini) or `.optional()`. Definitions throw at
 module load naming the fields that do not. The first argument is the state's
-identity: the localStorage key (`k8ordo-state:<key>`, exposed as the
-definition's `storageKey`), the entry-state namespace, and the store-registry
-slot. Renaming it renames the data — and
-the key must be app-unique per kind: two definitions of the same kind sharing
-a key silently share one store (and, for local, one storage row). The module
-system cannot enforce this, so treat the key like a global name.
+identity: the Web Storage key (`k8ordo-state:<key>` in localStorage or
+sessionStorage, exposed as the definition's `storageKey`), the cookie name (`k8ordo-state.<key>`, exposed as
+`cookieName` — a cookie name is an HTTP token, so a cookie key is refused at
+module load when it holds anything but letters, digits and ``!#$%&'*+-.^_`|~``),
+the entry-state namespace, and the store-registry slot. Renaming it renames
+the data — and the key must be app-unique per kind: two definitions of the
+same kind sharing a key silently share one store (and, for local, session
+and cookie state, one stored row). Different kinds never collide: a local and
+a session definition under the same key are two places. The module system
+cannot enforce this, so treat the key like a global name.
 
 **A boundary schema must read back what it writes.** `update()` runs the
 merged values through the schema before anything is written, and a field that
@@ -93,13 +121,69 @@ not `[]` — non-empty, or `undefined` from `.optional()` — could never write
 `[]`. The same rule holds for values a URL cannot spell at all: a `z.date()`
 url field is refused the moment something writes one, naming the field.
 
-Entry and local values are handed back to the schema as the typed values they
-are, so there the schema must accept its own output: a `z.stringbool()` or a
-type-changing transform never survives a write — use `z.boolean()` and plain
-types. `update()` does not round-trip
-localStorage's JSON, so keep local fields to what JSON represents: a
-`z.date()` shows its `Date` after the write and falls back to its default on
-the next load.
+Entry, local, session and cookie values are handed back to the schema as the
+typed values they are, so there the schema must accept its own output: a
+`z.stringbool()` or a type-changing transform never survives a write — use
+`z.boolean()` and plain types. `update()` does not round-trip the JSON that
+Web Storage and the cookie hold, so keep those fields to what JSON
+represents: a `z.date()` shows its `Date` after the write and falls back to
+its default on the next load.
+
+## When a stored shape changes
+
+A localStorage row or a cookie outlives the code that wrote it. On its own, a
+row an older schema wrote salvages field by field: every field the schema
+still accepts keeps its value and the rest land on their defaults — right for
+an added field or a tightened constraint, wrong for a renamed field or a
+changed meaning, which reset without a word. For those, give
+`defineLocalState` or `defineCookieState` a version and a migration:
+
+```ts
+export const prefs = defineLocalState(
+  'prefs',
+  z.object({
+    view: z._default(z.enum(['grid', 'table']), 'grid'),
+    pageSize: z._default(z.number(), 20),
+  }),
+  {
+    version: 1,
+    // Rows from before the version stored { layout: 'list' | 'cards' }.
+    migrate: (old) => ({
+      view: old['layout'] === 'list' ? 'table' : 'grid',
+      pageSize: old['pageSize'],
+    }),
+  },
+);
+```
+
+- **A versioned row is `[version, values]`.** A row with no version — written
+  before the definition declared one — reads as version `0`, so a definition
+  adopts a version when its shape first changes and migrates its existing
+  rows from `0`. Raise the version on the next change and branch on
+  `migrate`'s second argument, `fromVersion`.
+- **Older rows are migrated, then read, then written back.** A row older than
+  `version` goes through `migrate(old, fromVersion)` and then through the
+  schema, field by field like any read: `migrate` returns the schema's keys
+  (another key is a type error) with whatever values it has — hand old
+  values over as they are, and the schema rejects what does not fit. The
+  browser store writes the result back in the current version. The server's
+  `parseCookies` migrates too but never writes (a page cannot answer with
+  `Set-Cookie`); the browser writes back after hydration, and both read the
+  same values, so nothing flashes.
+- **A newer row is left alone.** A row a newer version wrote — a tab that
+  loaded the next deploy first — is salvaged without `migrate` and never
+  written back, so it stays the newer tab's.
+- **A throwing `migrate` loses nothing.** It reads as nothing stored: the
+  defaults show, and the row stays as it was for a fixed `migrate` to try
+  again.
+- **Adopting a version changes the row's shape.** A tab still running code
+  from before reads `[version, values]` as nothing stored until it reloads.
+- **`inlineRead()` hands out only the current version.** Neither the schema
+  nor `migrate` can run before a module loads, so a row of any other version
+  evaluates to `null` until a store has migrated it.
+- **Without the option, nothing changes:** a row is the bare values object,
+  salvaged field by field. `defineSessionState` takes no version — its rows
+  go with the tab, and salvage covers the rare one kept open across a deploy.
 
 ## zod, or zod/mini
 
@@ -113,10 +197,12 @@ already pays for classic `zod` elsewhere.
 ## The shape of it
 
 ```
-shared    definePageState / defineLocalState / defineMemoryState     no 'use client'
+shared    definePageState / defineLocalState / defineSessionState
+          defineCookieState / defineMemoryState — no 'use client'
             ↓ import                              ↓ import
 server    listState.parseUrl(searchParams)     client    useAppState(def, ['q', 'page'])
-          listState.href('/products', {...})             → [state, update]
+          density.parseCookies(request.cookies)          → [state, update]
+          listState.href('/products', {...})
           RSC, Server Action
 ```
 
@@ -126,8 +212,8 @@ without creating server-side mutable state. The live store exists only in
 the browser, created lazily by the first `useAppState`, keyed by the
 definition's string key (which is what lets state survive HMR re-evaluation
 of the definition module). There is no Provider: the stores mirror
-browser-wide singletons — the URL, the history entry, localStorage — so there
-is nothing to scope.
+browser-wide singletons — the URL, the history entry, Web Storage, the
+cookie jar — so there is nothing to scope.
 
 ## Server — read, and build links
 
@@ -175,6 +261,94 @@ under `base: '/docs/'`, `listState.href('/products', { page: 2 })` is
 `href` returned, which carries the base already. Outside Vite (Next.js, say)
 there is no `import.meta.env` to read, nothing is added, and a `basePath` is
 the framework's own `<Link>`'s to add.
+
+## Cookie state — preferences the server renders
+
+localStorage never reaches the server, so a preference kept there renders its
+default on the server and flips to the real value after hydration. A cookie
+goes with every request: where the page receives the request's cookies —
+`request.cookies` under `@k8ordo/server` — `parseCookies` reads the values
+and `initialCookie` seeds the server render and the hydration render with
+them, so the default never flashes.
+
+```tsx
+// routes/layout.tsx — @k8ordo/server
+import type { LayoutProps } from '@k8ordo/router';
+import { density } from '../state';
+import { Shell } from './shell';
+
+export default function Layout({ request, children }: LayoutProps<'/'>) {
+  return (
+    <Shell initialCookie={density.parseCookies(request.cookies)}>
+      {children}
+    </Shell>
+  );
+}
+```
+
+```tsx
+// routes/shell.tsx
+'use client';
+import type { ReactNode } from 'react';
+import { useAppState } from '@k8ordo/state';
+import type { OutputOf } from '@k8ordo/state';
+import { density } from '../state';
+
+type ShellProps = {
+  initialCookie: OutputOf<typeof density.schema>;
+  children: ReactNode;
+};
+
+export function Shell({ initialCookie, children }: ShellProps) {
+  const [values, update] = useAppState(density, { initialCookie });
+  // …
+}
+```
+
+- **One cookie per definition.** The values are one cookie named
+  `k8ordo-state.<key>` (`cookieName`), holding the percent-encoded JSON of the
+  declared fields. `parseCookies(cookies)` takes the request's cookies as a
+  `ReadonlyMap<string, string>` of percent-decoded values — what
+  `request.cookies` is — and salvages field by field like every other read:
+  absent, corrupt or rejected values land on their defaults.
+- **Seed every renderer.** Like `initialUrl`, `initialCookie` seeds only the
+  `useAppState` call it is passed to: a component that renders on the server
+  without it shows the defaults there. Read the cookie once, high up — a
+  layout receives `request` too — and pass the result down.
+- **Without the request, it is local state.** Under `@k8ordo/static` there is
+  no request: the server render shows the defaults and hydration takes the
+  cookie over, exactly as localStorage does.
+- **The browser writes it with the Cookie Store API** (Baseline since Firefox
+  140 shipped it in June 2025): `Path=/`, `SameSite=Lax`, `Max-Age` of 400
+  days — the longest a browser keeps a cookie — renewed by every write, and
+  `Secure`, which the API always sets, so the page must be on HTTPS or
+  `localhost`. `Lax` rather than the API's default `Strict` is what makes the
+  first request from a link on another site carry the cookie; under `Strict`
+  the server would render the defaults exactly there. A read is synchronous
+  (`document.cookie`), because a render cannot wait for the API's promise.
+- **Tabs agree.** The API's `change` event reaches every open tab, and it
+  reports a cookie a server response set as well as one a script wrote.
+- **Keep it small.** Every byte rides every request, and a cookie over 4 KB
+  (name and value together) is refused: the handle rejects with the API's
+  `TypeError` while the rendered value stays, as with a full localStorage.
+
+**Not a secret.** A cookie the browser writes can never be `HttpOnly`: any
+script on the page reads and rewrites it, and a visitor can edit it as freely
+as a URL. Keep sessions, tokens and anything else that must not leak or be
+forged out of it — and on the server, treat what `parseCookies` returns as
+input, which is why it passes the schema before you see it.
+
+**Cookies the server writes are a different tool.** A page is a render and
+never writes the response; under `@k8ordo/server` the framework's
+`cookies()` writes cookies from the places that answer a request — `guard.ts`,
+`route.ts` and Server Actions. That is where a session cookie belongs, as
+`HttpOnly`, and this package never sees it. The same `cookies()` can also
+write a cookie state, for a form that sets a preference without JavaScript,
+say: write `cookieName` with the value `cookieValue(values)` returns — the
+values pass the schema, unspecified fields mean their default — and the
+attributes above (`Path=/`, `SameSite=Lax`, `Max-Age=34560000`), never
+`HttpOnly`, or the browser store can no longer see it. Open tabs take the new
+values in through the `change` event.
 
 ## Client — subscribe and update
 
@@ -241,10 +415,11 @@ once that page is on screen rather than waiting for the action to end.
 A navigation overtaken by a later one — another page state's write from the
 same handler, say — rejects the handle with an `AbortError`; unawaited calls
 never surface it. Updates with no navigation behind them return the same
-shape: entry-only, local and no-change page handles settle once the batch is
-flushed, memory handles on the spot. A local write the storage refuses —
-quota, say — rejects the handle with that error while the rendered value
-stays.
+shape: entry-only, local, session and no-change page handles settle once the
+batch is flushed, cookie handles once the Cookie Store API has written it,
+memory handles on the spot. A local, session or cookie write the browser
+refuses — a full quota, a cookie over 4 KB — rejects the handle with that
+error while the rendered value stays.
 
 - **Patches are validated on the spot.** The merged state goes through the
   schema inside `update()` itself, url fields by the road a URL arrival
@@ -257,20 +432,23 @@ stays.
   state: a batch that changes a url field travels, with any entry changes, in
   a single `navigation.navigate()`, atomically. A batch that changes entry
   values but no url value uses `updateCurrentEntry()` — no navigation, works
-  under any router — even when the patch names url fields.
+  under any router — even when the patch names url fields. Local and session
+  state are one `setItem` on their storage, cookie state one
+  `cookieStore.set()`.
 - **`replace` by default.** An update refines the current entry. Pass
   `{ history: 'push' }` only for updates the back button should undo — the
   option exists only on page state, the one kind with a navigation behind it,
   and takes effect only when a url value changes: an entry-only write
   rewrites the current entry in place.
-- **One handler, one write.** Several `update()` calls on a page or local
-  state made synchronously in one event handler collapse into a single write
-  — one navigation, entry update or storage write — and share one handle; an
-  `await` between two calls starts a new batch with its own write and handle.
-  For page state, a batch that ends where it started neither navigates nor
-  touches the entry; local state still writes its row (creating one if none
-  was stored). Memory has nothing to batch: each call applies on the spot and
-  returns its own settled handle.
+- **One handler, one write.** Several `update()` calls on a page, local,
+  session or cookie state made synchronously in one event handler collapse
+  into a single write — one navigation, entry update, storage write or cookie
+  write — and share one handle; an `await` between two calls starts a new
+  batch with its own write and handle. For page state, a batch that ends where
+  it started neither navigates nor touches the entry; local, session and
+  cookie state still write their row (creating one if none was stored).
+  Memory has nothing to batch: each call applies on the spot and returns its
+  own settled handle.
 - **Functional form.** `update((current) => ({ page: current.page + 1 }))`
   reads the batched state, not the committed one.
 - **Shared ground stays shared.** A page state rewrites only its own params
@@ -297,12 +475,12 @@ definition is the subscription boundary.
 
 Two operations depend on the router; everything else works under any router:
 
-| operation                                              | needs                                                                   |
-| ------------------------------------------------------ | ----------------------------------------------------------------------- |
-| `href` / `search` links, GET forms                     | nothing — the router or the browser handles the click or the submission |
-| updates that change only entry, local or memory values | nothing — no navigation is involved                                     |
-| url `update()` on the client                           | a router that intercepts the Navigation API                             |
-| `parseUrl` on the server                               | a router that hands the page its search                                 |
+| operation                                                               | needs                                                                   |
+| ----------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `href` / `search` links, GET forms                                      | nothing — the router or the browser handles the click or the submission |
+| updates that change only entry, local, session, cookie or memory values | nothing — no navigation is involved                                     |
+| url `update()` on the client                                            | a router that intercepts the Navigation API                             |
+| `parseUrl` on the server                                                | a router that hands the page its search                                 |
 
 A url `update()` calls `navigation.navigate()`. Under `@k8ordo/router` —
 including a page rendered by `@k8ordo/static` or `@k8ordo/server` — a
@@ -385,11 +563,13 @@ Some state has to be applied before the first paint: a theme class on
 alternative — an inline script with the storage key and the JSON envelope
 hard-coded in a string — drifts the moment either changes.
 
-A local definition carries both halves: `storageKey` is the key the store
-writes under, and `inlineRead()` returns a JavaScript _expression_ for an
-inline `<script>` that evaluates, in the browser, to the stored object — or
+A local or session definition carries both halves: `storageKey` is the key
+the store writes under, and `inlineRead()` returns a JavaScript _expression_
+for an inline `<script>` that evaluates, in the browser, to the object stored
+in its own storage area — localStorage or sessionStorage — or
 `null` when nothing is stored, the JSON is corrupt, the value is not an object,
-or storage cannot be read. The key is escaped for a script context, so any
+or storage cannot be read — and, for a versioned local state, when the row was
+written by another version. The key is escaped for a script context, so any
 key is safe to emit.
 
 ```tsx
@@ -406,11 +586,11 @@ the hydrated store be the source of truth from then on. The script changes
 ## What it guarantees
 
 **Boundary data is input, not trusted state.** A URL param a user edited, a
-localStorage row an older schema wrote, a restored entry state — anything the
-schema rejects falls back to that field's own default, field by field, and a
-combination an object-level `refine` forbids falls back to the defaults as a
-whole. One broken value does not take the rest down, and nothing throws at
-read time. An array field collects repeated params and is salvaged as one
+Web Storage row or a cookie an older schema wrote, a restored entry state —
+anything the schema rejects falls back to that field's own default, field by
+field, and a combination an object-level `refine` forbids falls back to the
+defaults as a whole. One broken value does not take the rest down, and
+nothing throws at read time. An array field collects repeated params and is salvaged as one
 field: one rejected element resets the whole array to `[]`. A repeated param
 on a scalar field takes the first value.
 
@@ -423,14 +603,23 @@ the platform, not in a parallel store, so back/forward restore them together
 with no library bookkeeping.
 
 **Tabs agree.** localStorage state propagates across tabs through the
-`storage` event; the same keyed subscription granularity applies.
+`storage` event, cookie state through the Cookie Store API's `change` event;
+the same keyed subscription granularity applies. sessionStorage belongs to one
+tab, so its `storage` event reaches only other frames of that tab.
 
 **SSR sees real url values when your router hands you the search.** Pass the
 RSC-parsed url as `initialUrl` and the server render and the hydration render
 show the actual URL state. Where a page receives no search — `@k8ordo/static`
 and `@k8ordo/server` — the url slot renders its defaults and the live URL
-takes over on hydration. Everything else — entry, local, memory — renders its
-defaults on the server by construction: those places do not exist there.
+takes over on hydration.
+
+**SSR sees real cookie values when the page receives the request.** Pass what
+`parseCookies(request.cookies)` returned as `initialCookie` — under
+`@k8ordo/server`, say — and neither render shows the defaults. Without a
+request (`@k8ordo/static`), the cookie takes over on hydration.
+
+Everything else — entry, local, session, memory — renders its defaults on the
+server by construction: those places do not exist there.
 
 ## GET forms with @k8ordo/form
 
@@ -456,6 +645,10 @@ and the submitted values appear once the page hydrates.
 
 `resetStateRegistry()` clears the provider-less store registry between tests.
 Unmount components first — mounted hooks keep their store through closures.
+Clear stored rows by the definition's `storageKey` (in its own storage area)
+or `cookieName` (`await cookieStore.delete(def.cookieName)`); the Cookie
+Store API's `change` event fires in the same tab too, so a test that writes
+the cookie itself stands in for another tab.
 When testing url updates, intercept the `navigate` event in the test itself
 (as a router would); an unintercepted `navigation.navigate()` is a
 cross-document load.

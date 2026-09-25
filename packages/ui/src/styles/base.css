@@ -28,7 +28,6 @@
   }
 
   body {
-    text-spacing-trim: trim-start;
     text-autospace: normal;
     line-break: strict;
     overflow-wrap: anywhere;
@@ -38,7 +37,6 @@
   }
 
   pre {
-    text-spacing-trim: space-all;
     text-autospace: no-autospace;
   }
 

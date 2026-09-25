@@ -26,12 +26,14 @@ const AAA_PAIRS: readonly Pair[] = [
   { text: 'text-fg-error', ground: 'bg-bg-error' },
   { text: 'text-primary-fg', ground: 'bg-primary-bg-subtle' },
   { text: 'text-secondary-fg', ground: 'bg-secondary-bg-subtle' },
+  { text: 'text-fg-base', ground: 'bg-bg-mute' },
 ];
 
 const AA_PAIRS: readonly Pair[] = [
   // ライトでは 6.9:1 で、ほかのステータスと違って AAA に届かない
   { text: 'text-fg-success', ground: 'bg-bg-success' },
   { text: 'text-fg-mute', ground: 'bg-bg-mute' },
+  { text: 'text-fg-base', ground: 'bg-bg-emphasize' },
   ...['bg-bg-base', 'bg-bg-raised', 'bg-bg-surface', 'bg-bg-subtle'].map(
     (ground) => ({ text: 'text-fg-subtle', ground }),
   ),

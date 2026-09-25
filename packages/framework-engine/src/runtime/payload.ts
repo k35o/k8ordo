@@ -37,3 +37,16 @@ export type Payload = {
 
 /** The header a client-invoked Server Action is addressed with. */
 export const ACTION_ID_HEADER = 'x-k8ordo-action';
+
+/**
+ * What `notFound()` becomes once the RSC render has sent it to the browser:
+ * the error's digest. The value it was thrown as does not cross the wire.
+ */
+export const NOT_FOUND_DIGEST = 'K8ORDO_NOT_FOUND';
+
+/**
+ * Said by the handler under `@k8ordo/static` alone, on the not-found a page
+ * answered with `notFound()`: the build tells it apart from a param a schema
+ * refused, which is a 404 as well.
+ */
+export const NOT_FOUND_HEADER = 'x-k8ordo-not-found';

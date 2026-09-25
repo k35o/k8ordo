@@ -291,6 +291,55 @@ describe('the built request handler', () => {
     expect(page).not.toContain('data-testid="error"');
     expect(entriesOf(page)).toContain('<li>k8o</li>');
   });
+
+  it('answers a guestbook signed without JavaScript with the cookie the action set', async () => {
+    const html = await (await handler(new Request(`${ORIGIN}/`))).text();
+    const body = formDataOf(html, 'guestbook-form');
+    body.set('name', 'k8o');
+    const response = await handler(
+      new Request(`${ORIGIN}/`, {
+        method: 'POST',
+        headers: { origin: ORIGIN },
+        body,
+      }),
+    );
+    expect(response.headers.getSetCookie()).toStrictEqual([
+      'visitor=k8o; Path=/; HttpOnly; Secure; SameSite=Lax',
+    ]);
+  });
+});
+
+describe('notFound()', () => {
+  it('answers a page that said notFound() with the nearest not-found.tsx, under a 404', async () => {
+    const response = await handler(new Request(`${ORIGIN}/products/99`));
+    expect(response.status).toBe(404);
+    const html = await response.text();
+    expect(html).toContain('data-testid="title">not found<');
+    // レイアウトの中に描かれる
+    expect(html).toContain('<nav>');
+  });
+
+  it('answers HEAD for such a page with the same 404', async () => {
+    const response = await handler(
+      new Request(`${ORIGIN}/products/99`, { method: 'HEAD' }),
+    );
+    expect(response.status).toBe(404);
+    expect(response.body).toBeNull();
+  });
+
+  it('streams the payload rather than waiting, carrying the page’s word as a digest', async () => {
+    const response = await handler(
+      new Request(`${ORIGIN}/products/99/index.rsc`),
+    );
+    expect(response.status).toBe(200);
+    expect(await response.text()).toContain('K8ORDO_NOT_FOUND');
+  });
+
+  it('leaves a page that found what it wanted alone', async () => {
+    const response = await handler(new Request(`${ORIGIN}/products/1`));
+    expect(response.status).toBe(200);
+    expect(await response.text()).toContain('first product');
+  });
 });
 
 describe('guard.ts', () => {
