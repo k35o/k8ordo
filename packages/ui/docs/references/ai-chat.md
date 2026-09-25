@@ -237,14 +237,16 @@ import { PromptInput } from '@k8ordo/ui/ai';
 
 Pass `accept` to take files. It turns on all three ways in — the `Attach` button's file picker, dropping files onto the input, and pasting them into the textarea — and filters every one of them by the same rule as `<input accept>` (the browser applies it only to the picker). Without `accept` the input takes text only: `Attach` renders nothing and dropped or pasted files are ignored.
 
-`PromptInput.Attachments` lists the files waiting to be sent, image thumbnails included, each with a remove button. `onSubmit` receives them as a `FileList` in its second argument, which the AI SDK's `sendMessage` takes as is. The list empties after each submit.
+`PromptInput.Attachments` lists the files waiting to be sent, image thumbnails included, each with a remove button. `onSubmit` receives them as a `FileList` in its second argument, which the AI SDK's `sendMessage` takes as is. The list empties after each submit, and a message with attachments but no text can be sent — pass `{ files }` alone then, since `sendMessage` turns `text: ''` into an empty text part that some providers reject.
 
 ```tsx
 <PromptInput.Root
   accept="image/*,application/pdf"
   maxFiles={4}
   onStop={stop}
-  onSubmit={(text, files) => sendMessage({ text, files })}
+  onSubmit={(text, files) =>
+    sendMessage(text === '' ? { files } : { text, files })
+  }
   status={status}
 >
   <PromptInput.Attachments />
@@ -483,7 +485,7 @@ type MappedPart =
 
 Order is preserved. `step-start`, `custom`, and `reasoning-file` parts are skipped.
 
-The caller switches on `kind`. Files and sources usually render as one list each, so pull them out with `filter` and render the rest in order:
+Render each part as its own row under `Message.Root` — the children stack in a column. Files and sources read better as one list each, so pull them out with `filter` and skip them in the loop. A `data` part is yours: pick the ones you know by `name`, and validate what the model put in them before drawing it.
 
 ```tsx
 'use client';
@@ -500,14 +502,12 @@ import {
 } from '@k8ordo/ui/ai';
 import { Response } from '@k8ordo/ui/ai/response';
 import { mapMessageParts } from '@k8ordo/ui/ai-sdk';
+import { validateGeneratedSpec } from '@k8ordo/ui/json-render';
+import { JsonRenderUI } from '@k8ordo/ui/json-render/registry';
 
-function ChatMessage({
-  message,
-  chat,
-}: {
-  message: UIMessage;
-  chat: ReturnType<typeof useChat>;
-}) {
+type Chat = ReturnType<typeof useChat>;
+
+function ChatMessage({ message, chat }: { message: UIMessage; chat: Chat }) {
   const parts = mapMessageParts(message);
   const files = parts.filter((part) => part.kind === 'file');
   const sources = parts.filter((part) => part.kind === 'source');
@@ -528,45 +528,54 @@ function ChatMessage({
       {files.length > 0 && (
         <Attachment.List>
           {files.map((file) => (
-            <Attachment.Item key={file.url} {...file} />
+            <Attachment.Item
+              filename={file.filename}
+              key={file.url}
+              mediaType={file.mediaType}
+              url={file.url}
+            />
           ))}
         </Attachment.List>
       )}
-      <Message.Content>
-        {parts.map((part, i) => {
-          switch (part.kind) {
-            case 'text':
-              return <Response key={i}>{part.text}</Response>;
-            case 'reasoning':
-              return <Reasoning key={i}>{part.text}</Reasoning>;
-            case 'tool':
-              return (
-                <ToolInvocation
-                  approval={part.approval}
-                  errorText={part.errorText}
-                  input={part.input}
-                  key={part.toolCallId}
-                  name={part.name}
-                  onApprovalResponse={chat.addToolApprovalResponse}
-                  // output is unknown, so convert it to a ReactNode first
-                  output={
-                    typeof part.output === 'string'
-                      ? part.output
-                      : JSON.stringify(part.output, null, 2)
-                  }
-                  state={part.state}
-                />
-              );
-            case 'data':
-              // data parts are your own; pick the ones you know by name
-              return part.name === 'weather' ? (
-                <WeatherCard key={part.id ?? i} data={part.data} />
-              ) : null;
-            default:
-              return null;
-          }
-        })}
-      </Message.Content>
+      {parts.map((part, i) => {
+        const key = `${message.id}-${i}`;
+        if (part.kind === 'text') {
+          return (
+            <Message.Content key={key}>
+              <Response>{part.text}</Response>
+            </Message.Content>
+          );
+        }
+        if (part.kind === 'reasoning') {
+          return <Reasoning key={key}>{part.text}</Reasoning>;
+        }
+        if (part.kind === 'tool') {
+          return (
+            <ToolInvocation
+              approval={part.approval}
+              errorText={part.errorText}
+              input={part.input}
+              key={part.toolCallId}
+              name={part.name}
+              onApprovalResponse={chat.addToolApprovalResponse}
+              // output is unknown, so convert it to a ReactNode first
+              output={
+                part.output === undefined
+                  ? undefined
+                  : JSON.stringify(part.output, null, 2)
+              }
+              state={part.state}
+            />
+          );
+        }
+        if (part.kind === 'data' && part.name === 'ui') {
+          const result = validateGeneratedSpec(part.data);
+          return result.ok ? (
+            <JsonRenderUI key={key} spec={result.spec} />
+          ) : null;
+        }
+        return null;
+      })}
       {sources.length > 0 && (
         <Source.List>
           {sources.map((source) => (
@@ -578,7 +587,7 @@ function ChatMessage({
           ))}
         </Source.List>
       )}
-      {!isUser && (
+      {!isUser && text !== '' && (
         <Message.Actions>
           <Message.Copy value={text} />
           <Message.Regenerate
@@ -594,9 +603,16 @@ function ChatMessage({
   );
 }
 
-// useChat({ sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithApprovalResponses })
-// sends the approval back as soon as every pending approval has an answer.
+export function Chat() {
+  const chat = useChat({
+    // sends the answers back as soon as every pending approval has one
+    sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithApprovalResponses,
+  });
+  // … Conversation.Root / chat.messages.map((message) => <ChatMessage … />) / PromptInput
+}
 ```
+
+`examples/ui-integrations` in the repository runs this against the real `useChat`, with a scripted transport in place of a model.
 
 `@k8ordo/ui/ai-sdk` exports the `MappedPart` type, and re-exports the `ChatStatus`, `ToolState`, `ToolApproval`, and `ToolApprovalResponse` types as well.
 
