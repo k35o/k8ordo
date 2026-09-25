@@ -8,7 +8,7 @@ import { formFields } from './derive/form-fields';
 import { HiddenValue } from './hidden-value';
 import { parseForm } from './parse/parse-form';
 import { defineForm } from './rules/define-form';
-import { requiredWhen, sameAs } from './rules/rules';
+import { minChecked, requiredWhen, sameAs } from './rules/rules';
 import type { FormState } from './types';
 import { useForm } from './use-form';
 
@@ -344,6 +344,53 @@ const Filter: FC = () => {
       <button type="submit">filter</button>
     </form>
   );
+};
+
+const topics = defineForm(
+  z.object({ topics: z.array(z.enum(['a', 'b', 'c'])) }),
+  [minChecked('topics', 2, '2つ以上選んでください')],
+);
+const topicsFields = formFields(topics);
+
+const Topics: FC<{ action: (formData: FormData) => void }> = ({ action }) => {
+  const form = useForm(topicsFields);
+  const field = form.field('topics');
+
+  return (
+    <form {...form.props} action={action}>
+      {(['a', 'b', 'c'] as const).map((option) => (
+        <input
+          aria-label={option}
+          key={option}
+          type="checkbox"
+          {...field.input}
+          value={option}
+        />
+      ))}
+      <p data-testid="topics-error">{field.error ?? ''}</p>
+      <button type="submit">send</button>
+    </form>
+  );
+};
+
+/**
+ * 送信が止められたかを window で読む。テストのページが遷移しないよう、
+ * 読んだあとはこちらでも止める。
+ */
+const watchSubmits = async (
+  run: (stopped: () => boolean | undefined) => Promise<void>,
+): Promise<void> => {
+  let stopped: boolean | undefined;
+  const listen = (event: SubmitEvent): void => {
+    stopped = event.defaultPrevented;
+    event.preventDefault();
+  };
+  window.addEventListener('submit', listen);
+  try {
+    await run(() => stopped);
+  } finally {
+    window.removeEventListener('submit', listen);
+  }
 };
 
 const draftSchema = z.object({ title: z.string(), body: z.string() });
@@ -848,27 +895,45 @@ describe('useForm in a browser', () => {
   });
 
   it('stops a GET form that has no action behind it', async () => {
-    // 送信が止められたかを window で読み、テストのページが遷移しないよう
-    // 最後にこちらでも止める
-    let stopped: boolean | undefined;
-    const listen = (event: SubmitEvent): void => {
-      stopped = event.defaultPrevented;
-      event.preventDefault();
-    };
-    window.addEventListener('submit', listen);
-    try {
+    await watchSubmits(async (stopped) => {
       const screen = await render(<Filter />);
 
       await screen.getByRole('button', { name: 'filter' }).click();
 
-      await expect.poll(() => stopped).toBe(true);
+      await expect.poll(stopped).toBe(true);
       await expect
         .element(screen.getByTestId('min-error'))
         .toHaveTextContent('数値を入力してください');
       await expect.element(screen.getByLabelText('min')).toHaveFocus();
-    } finally {
-      window.removeEventListener('submit', listen);
-    }
+    });
+  });
+
+  it('lets a GET form through once it passes', async () => {
+    await watchSubmits(async (stopped) => {
+      const screen = await render(<Filter />);
+
+      await screen.getByLabelText('min').fill('5');
+      await screen.getByRole('button', { name: 'filter' }).click();
+
+      await expect.poll(stopped).toBe(false);
+    });
+  });
+
+  it('stops a submission on a checkbox group rule and focuses the group', async () => {
+    const action = vi.fn<(formData: FormData) => void>();
+    const screen = await render(<Topics action={action} />);
+
+    await screen.getByLabelText('b').click();
+    // ボタンを押すと、先に blur がメッセージを出してボタンが下へずれ、
+    // クリックが外れる。送信そのものを見たいので、DOM から送る
+    (document.querySelector('form') as HTMLFormElement).requestSubmit();
+
+    await expect
+      .element(screen.getByTestId('topics-error'))
+      .toHaveTextContent('2つ以上選んでください');
+    // グループの検証は先頭のボックスが代表して持つ
+    await expect.element(screen.getByLabelText('a')).toHaveFocus();
+    expect(action).not.toHaveBeenCalled();
   });
 
   // The async checks are last on purpose: their answers land from plain
