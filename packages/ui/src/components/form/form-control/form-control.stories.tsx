@@ -108,18 +108,6 @@ export const Legend: Story = {
     labelAs: 'legend',
   },
 
-  parameters: {
-    a11y: {
-      options: {
-        rules: {
-          // labelが不要なケースに使うのでoffにする
-          label: { enabled: false },
-          'label-title-only': { enabled: false },
-        },
-      },
-    },
-  },
-
   play: async ({ canvas }) => {
     await expect(
       canvas.getByRole('textbox', { name: 'メールアドレス' }),

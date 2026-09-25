@@ -9,6 +9,7 @@ const meta: Meta<typeof Select> = {
   component: Select,
   args: {
     id: 'select',
+    'aria-label': '基数',
     'aria-describedby': 'select-feedback',
     options: [
       { value: '2', label: '2進数' },
@@ -17,17 +18,6 @@ const meta: Meta<typeof Select> = {
       { value: '16', label: '16進数' },
     ],
     defaultValue: '10',
-  },
-  parameters: {
-    a11y: {
-      options: {
-        rules: {
-          // Select単体ではラベルを付随しない
-          'label-title-only': { enabled: false },
-          'select-name': { enabled: false },
-        },
-      },
-    },
   },
 };
 
@@ -64,6 +54,7 @@ const RefRender = () => {
   return (
     <div className="flex flex-col items-start gap-2">
       <Select
+        aria-label="基数"
         id="select-ref"
         options={[
           { value: '2', label: '2進数' },

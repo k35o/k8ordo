@@ -37,6 +37,9 @@ export const ja: Messages = {
   paginationPrevious: '前へ',
   paginationNext: '次へ',
 
+  codeBlockCopy: 'コードをコピー',
+  copied: 'コピーしました',
+  copyFailed: 'コピーできませんでした',
   carousel: 'カルーセル',
   carouselSlide: 'スライド',
   carouselPrevious: '前のスライド',

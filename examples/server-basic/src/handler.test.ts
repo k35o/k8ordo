@@ -419,6 +419,18 @@ describe('the built request handler, outside Node', () => {
 });
 
 describe('the deployed application', () => {
+  it('ships every script compressed ahead of time, beside itself', async () => {
+    const assets = await readdir(path.join(root, 'dist', 'client', 'assets'));
+    const scripts = assets.filter((name) => name.endsWith('.js'));
+    expect(scripts.length).toBeGreaterThan(0);
+    expect(assets.filter((name) => name.endsWith('.js.br'))).toStrictEqual(
+      scripts.map((name) => `${name}.br`),
+    );
+    expect(assets.filter((name) => name.endsWith('.js.gz'))).toStrictEqual(
+      scripts.map((name) => `${name}.gz`),
+    );
+  });
+
   it('serves a page with only its production dependencies installed', () => {
     const output = execFileSync(
       process.execPath,

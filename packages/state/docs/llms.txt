@@ -56,6 +56,7 @@ When installed via npm, these docs live under `node_modules/@k8ordo/state/docs/`
   effect only when a url value changes).
   `resetStateRegistry()` clears stores between tests. Augment
   `interface Register { routes: typeof routes }` — the same line as for
-  `@k8ordo/router` — to constrain `href` paths to the route table's linkable
-  paths; a router without a table registers its own path union as
+  `@k8ordo/router` — to check each `href` path against the route table's
+  linkable patterns segment by segment (`NavigablePath`, so a `/:locale`
+  table no longer takes every path); a router without a table registers its own path union as
   `interface Register { path }` instead.

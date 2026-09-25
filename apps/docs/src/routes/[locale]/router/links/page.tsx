@@ -1,7 +1,7 @@
 import type { Message } from '@k8ordo/i18n';
 import { Anchor, Code, Heading, Table } from '@k8ordo/ui';
+import { CodeBlock } from '@k8ordo/ui/code-block';
 
-import { CodeBlock } from '../../../../components/code-block';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Rich } from '../../../../components/rich';
@@ -152,11 +152,12 @@ declare module '@k8ordo/state' {
   }
 }`;
 
-const ROUTE_OF = `import type { RouteOf } from '@k8ordo/router';
+const NAVIGABLE_PATH = `import type { NavigablePath } from '@k8ordo/router';
 
 import type { routes } from './routes';
 
-type AppPath = RouteOf<typeof routes>;`;
+type Found = NavigablePath<typeof routes, '/products/42'>; // '/products/42'
+type Missing = NavigablePath<typeof routes, '/products/42/reviews'>; // never`;
 
 const BASE = `// vite.config.ts に base: '/docs/'
 import { href, usePathname, withoutBase } from '@k8ordo/router';
@@ -529,12 +530,12 @@ export default function RouterLinksPage() {
       >
         <CodeBlock code={STATE_REGISTER} lang="ts" />
         <p className="text-fg-mute leading-relaxed">
-          <Rich>{m.routerLinks.stateRouteOf()}</Rich>{' '}
+          <Rich>{m.routerLinks.stateNavigablePath()}</Rich>{' '}
           <LocaleAnchor path="/:locale/state/integrations">
             @k8ordo/state
           </LocaleAnchor>
         </p>
-        <CodeBlock code={ROUTE_OF} lang="ts" />
+        <CodeBlock code={NAVIGABLE_PATH} lang="ts" />
       </DocSection>
     </DocPage>
   );
