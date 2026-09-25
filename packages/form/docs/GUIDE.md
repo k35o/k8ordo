@@ -628,7 +628,9 @@ but in `@k8ordo/ui`'s wording (`numberFieldRangeUnderflow` /
 zod's own. Leaving the field clamps the value into range, so the message shows
 only while typing. `.int()` and `.multipleOf()` set the precision the field
 rounds to; a plain `z.coerce.number()` derives `step="any"`, which is not
-rounded.
+rounded. Without JavaScript nothing checks the range before the server does;
+a `TextField` given the derived `type="number"` keeps the browser's own
+check, and its wording.
 
 **A `Textarea` has no `pattern`.** A regex on a field drawn as a `Textarea`
 reaches the markup, but a `<textarea>` ignores it: the check runs on the server
