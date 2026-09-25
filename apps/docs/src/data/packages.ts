@@ -116,6 +116,7 @@ export const PACKAGES: PackageEntry[] = [
       { path: '/:locale/i18n/get-started', label: m.nav.getStarted },
       { path: '/:locale/i18n/locales', label: m.i18n.navLocales },
       { path: '/:locale/i18n/messages', label: m.i18n.navMessages },
+      { path: '/:locale/i18n/formatting', label: m.i18n.navFormatting },
       { path: '/:locale/i18n/routing', label: m.i18n.navRouting },
       { path: '/:locale/i18n/integrations', label: m.i18n.navIntegrations },
     ],

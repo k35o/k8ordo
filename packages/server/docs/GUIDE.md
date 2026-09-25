@@ -34,12 +34,16 @@ pnpm add -D vite
 what the deployed application runs. `@k8ordo/static` is only ever needed at
 build time, which is why its guide installs it with `-D`.
 
-The package has two entries, split by where the code runs. `@k8ordo/server`
-is the plugin, for `vite.config.ts`, and loads Vite. What the application's
-own code imports — `serve`, `redirect()`, `cookies()`, `responseHeaders()`,
-`requestHeaders()`, and the `RedirectTarget`, `RouteRequest` and `Guard`
-types — comes from `@k8ordo/server/runtime`, which does not, so the built application runs from
-an install without dev dependencies.
+The package has three entries, split by where the code runs.
+`@k8ordo/server` is the plugin, for `vite.config.ts`, and loads Vite.
+`@k8ordo/server/runtime` is what code inside the request handler imports —
+`redirect()`, `cookies()`, `responseHeaders()`, `requestHeaders()`, and the
+`RedirectTarget`, `RouteRequest` and `Guard` types — and needs nothing from
+Node, so it goes wherever the
+handler goes.
+`@k8ordo/server/serve` is `serve`, the Node.js server for a build. Neither of
+the last two loads Vite, so the built application runs from an install
+without dev dependencies.
 
 ```ts
 // vite.config.ts
@@ -440,19 +444,23 @@ A Server Action ends with `redirect()` from `@k8ordo/server/runtime`:
 ```ts
 'use server';
 
+import { href } from '@k8ordo/router';
 import { redirect } from '@k8ordo/server/runtime';
 
 export async function createTalk(_previous: FormState, formData: FormData) {
   const parsed = parseForm(talkSchema, formData);
   if (!parsed.success) return parsed.state;
   await insertTalk(parsed.data);
-  redirect('/talks'); // thrown: the lines after it never run
+  redirect(href('/talks')); // thrown: the lines after it never run
 }
 ```
 
 A form posted without JavaScript is answered with a `303` to the target; one
 posted by the client runtime is answered with a payload that tells the
-router to navigate there. `redirect()` is for actions: a page that should
+router to navigate there. The target is a URL, sent as given — build it with
+`href()`, which carries Vite's `base` when the application is served under
+one, where a `redirect.ts` target is a pattern in the table's terms and gets
+the base put in front. `redirect()` is for actions: a page that should
 send the visitor elsewhere is a `redirect.ts`, where the build can see it.
 
 <!-- shared:titles -->
@@ -582,7 +590,7 @@ vite build
 
 ```js
 // serve.js
-import { serve } from '@k8ordo/server/runtime';
+import { serve } from '@k8ordo/server/serve';
 
 const server = await serve({ port: 3000 });
 // server.url, server.port; await server.close() to stop
@@ -614,7 +622,11 @@ details are for whoever runs the server, not for the visitor. A body that
 fails after it has started streaming can no longer change its status, so the
 connection is cut rather than left open on half a page.
 
-For another host, the built handler is a plain function:
+### The request handler
+
+`serve` is one host for the build. What it hosts — the application itself —
+is the request handler, and anything that turns a request into a `Request`
+and a `Response` back into an answer can host it:
 
 ```js
 import handler from './dist/rsc/index.js';
@@ -622,11 +634,52 @@ import handler from './dist/rsc/index.js';
 const response = await handler(new Request('https://example.com/products/1'));
 ```
 
-Anything that speaks `(request: Request) => Promise<Response>` can run it —
-and it is the same handler `@k8ordo/static` builds and calls at build time,
-compiled for that mode.
+`dist/rsc/index.js` default-exports `(request: Request) => Promise<Response>`,
+the same handler `@k8ordo/static` builds and calls at build time, compiled
+for that mode. It loads `dist/ssr/` from beside itself, so the two travel
+together, and it imports the application's dependencies by name, so they
+have to resolve where it runs — or be bundled in, as Wrangler does.
 
-It answers `GET`, `HEAD` and `POST`, and any other method with a `405` whose
+**It runs wherever `AsyncLocalStorage` does.** Past the web platform's
+`Request`, `Response` and streams, the one thing the handler takes from its
+runtime is `AsyncLocalStorage` from `node:async_hooks`: React keeps each
+render's state in it, and a `paramsSchema` writes to it. Node.js, Bun, Deno,
+and Cloudflare Workers with the `nodejs_compat` flag all have it, and each
+takes the handler as it is once it is imported:
+
+```js
+// Deno
+Deno.serve(handler);
+
+// Bun
+Bun.serve({ fetch: handler });
+
+// Cloudflare Workers — worker.js
+export default { fetch: handler };
+```
+
+What the handler runs keeps that promise only as long as it imports nothing
+that needs Node either — which is why `redirect()` and the types come from
+`@k8ordo/server/runtime`, and `serve` from an entry of its own. A route file
+or a Server Action that reads `node:fs` ties the application to a runtime
+that has it.
+
+**The handler serves no files.** Put `dist/client/` in front of it — the
+files under `assets/` with `Cache-Control: public, max-age=31536000,
+immutable`, since their names carry their contents' hash — and hand it every
+request that names none. On Workers that is static assets pointed at the
+client build, which answer before the Worker runs:
+
+```jsonc
+// wrangler.jsonc
+{
+  "main": "worker.js",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": { "directory": "dist/client" },
+}
+```
+
+The handler answers `GET`, `HEAD` and `POST`, and any other method with a `405` whose
 `Allow` header names those three, so a host needs no method filter of its
 own. A `HEAD` gets the status and headers a `GET` would, with a `null` body:
 the page's own component runs, since it may say `notFound()`, and nothing it
@@ -659,6 +712,54 @@ that changed nothing the browser runs leaves every open tab navigating in
 place, and servers built apart from the same source agree.
 
 <!-- /shared:deploys -->
+
+<!-- shared:base -->
+
+## Served under a base
+
+An application served below the root of its origin — `https://example.com/docs/`
+— says so with Vite's `base`, and nothing else in it changes:
+
+```ts
+// vite.config.ts
+export default defineConfig({
+  base: '/docs/',
+  plugins: [framework()],
+});
+```
+
+`routes/` is still written from the application's root:
+`routes/products/page.tsx` is `/products` in the table and `/docs/products`
+in the address bar. What crosses between the two gains or loses the base on
+the way:
+
+- A link built with `href()` or `navigateTo()` carries it. A page receives
+  `pathname` without it, and `usePathname()` returns it without it.
+- A page's payload sits beside it — `/docs/products/index.rsc` — and the
+  client build's files are under `/docs/assets/`.
+- A `redirect.ts` target is written from the root, like the table, and is
+  sent with the base in front; one that names another origin is sent as
+  written. `redirect()` from a Server Action takes a URL, so build it with
+  `href()`.
+- A URL outside the base is none of the application's: the handler answers
+  it with a `404`, and the client runtime leaves it to the browser.
+
+Under `@k8ordo/static` the pages are written into `dist/client/` at their
+pathnames in the table, so the host serves that directory at `/docs/`; the
+`paths` option takes pathnames without the base, and `sitemap.xml` lists
+each page at its URL, base included. Under `@k8ordo/server`, `serve` reads
+the base the build was made for from `dist/rsc/index.js` and hands out the
+client build's files below it; a host calling the handler itself passes the
+URL as the visitor asked for it, base included.
+
+The base has to be a path from the root. A relative base (`./`) or another
+origin says nothing about which URL is which page, and the build refuses it:
+
+```
+k8ordo serves its pages under Vite's base, so base has to be a path from the root, like '/docs/' — got './'
+```
+
+<!-- /shared:base -->
 
 ## Alongside the rest of k8ordo
 

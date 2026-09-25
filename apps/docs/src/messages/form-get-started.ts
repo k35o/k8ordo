@@ -201,8 +201,8 @@ export const exampleFormDescription = message({
 });
 
 export const exampleFormProps = message({
-  ja: '`form.props` は `ref`・`onBlur`・`onInput`・`onReset` の 4 つです。同じ名前の props を `<form>` に自分でも書くと、あとに書いたほうだけが効き、`useForm` の検証やリセットの処理が外れることがあります。',
-  en: "`form.props` is `ref`, `onBlur`, `onInput` and `onReset`. Writing a prop of the same name on the `<form>` yourself leaves only the one written last in effect, which can disconnect `useForm`'s validation or reset handling.",
+  ja: '`form.props` は `ref`・`onBlur`・`onInput`・`onReset`・`onSubmit` の 5 つです。同じ名前の props を `<form>` に自分でも書くと、あとに書いたほうだけが効き、`useForm` の検証やリセットの処理が外れることがあります。自分の `onSubmit` が要るときは、その中で `form.props.onSubmit(event)` を呼びます。',
+  en: "`form.props` is `ref`, `onBlur`, `onInput`, `onReset` and `onSubmit`. Writing a prop of the same name on the `<form>` yourself leaves only the one written last in effect, which can disconnect `useForm`'s validation or reset handling. When you need an `onSubmit` of your own, call `form.props.onSubmit(event)` from it.",
 });
 
 export const exampleFormTypes = message({
@@ -221,8 +221,8 @@ export const flowNoJs = message({
 });
 
 export const flowJs = message({
-  ja: 'JavaScript が動いていれば、`useForm` がフォームに `noValidate` を付け、欄を離れたときに zod の文言を出します。送信は止めず、そのまま Server Action に届けます。',
-  en: "With JavaScript, `useForm` sets `noValidate` on the form and shows zod's wording when a field is left. It does not block the submission; the submission goes to the Server Action.",
+  ja: 'JavaScript が動いていれば、`useForm` がフォームに `noValidate` を付け、欄を離れたときに zod の文言を出します。送信したときは触っていない欄も含めて全欄を検査し、通らなければ送信を止めて、最初に失敗した欄にフォーカスを移します。通った送信が Server Action に届きます。',
+  en: "With JavaScript, `useForm` sets `noValidate` on the form and shows zod's wording when a field is left. On submit it checks every field, the untouched ones included; a failing submission stops there, with focus on the first failed field, and one that passes goes to the Server Action.",
 });
 
 export const flowServer = message({

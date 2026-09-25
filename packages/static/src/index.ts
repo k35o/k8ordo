@@ -13,6 +13,7 @@ import {
   slotOf,
 } from '@k8ordo/framework-engine';
 import type { EngineOptions } from '@k8ordo/framework-engine';
+import { withBase } from '@k8ordo/router';
 import type { Plugin, PluginOption, ResolvedConfig } from 'vite';
 
 import { redirectPage, sitemap } from './documents';
@@ -26,9 +27,9 @@ import {
 
 export type StaticOptions = EngineOptions & {
   /**
-   * Pathnames for routes with parameters. Static rendering cannot invent
-   * them, and a build that quietly skipped half the site would be worse than
-   * one that refuses.
+   * Pathnames for routes with parameters, in the table's terms — without
+   * Vite's `base`. Static rendering cannot invent them, and a build that
+   * quietly skipped half the site would be worse than one that refuses.
    *
    * The patterns that need covering are handed in, so a site whose parameter
    * takes the same values everywhere — a locale segment, say — expands them
@@ -39,8 +40,9 @@ export type StaticOptions = EngineOptions & {
   ) => readonly string[] | Promise<readonly string[]>;
   /**
    * The origin the site is served from — `https://example.com`. With it the
-   * build also writes `sitemap.xml`, listing every page it rendered; without
-   * it, no sitemap, because a sitemap of relative URLs is not one.
+   * build also writes `sitemap.xml`, listing every page it rendered at its
+   * URL, Vite's `base` included; without it, no sitemap, because a sitemap of
+   * relative URLs is not one.
    */
   readonly site?: string;
 };
@@ -113,7 +115,8 @@ export const framework = (options: StaticOptions = {}): PluginOption[] => {
         // would replace that list with whichever file compiled first.
         if (this.environment.mode !== 'dev') return null;
         const [module = id] = id.split('?');
-        const file = path.relative(routesDir, module);
+        // 文法は / 区切りで読む。Windows の path.relative は \ で区切って返す
+        const file = path.relative(routesDir, module).split(path.sep).join('/');
         if (!file.startsWith('..') && slotOf(file) === 'guard') {
           throw guardRefusal([path.relative(root, module)]);
         }
@@ -168,6 +171,11 @@ export const framework = (options: StaticOptions = {}): PluginOption[] => {
 
         // outDir はすでに絶対パスのことがあるので resolve で受ける
         const clientDir = path.resolve(root, clientOut);
+        // ページは表の pathname で数え、ハンドラには base を付けた URL で頼む。
+        // 書き出す先は client/ の中の表の pathname（client/ が base に置かれる）
+        const { base } = builder.config;
+        const urlFor = (pathname: string): string =>
+          `${ORIGIN}${withBase(pathname, base)}`;
         const entry = path.resolve(root, rscOut, 'index.js');
         const entryModule = (await import(pathToFileURL(entry).href)) as {
           default: Handler;
@@ -196,7 +204,7 @@ export const framework = (options: StaticOptions = {}): PluginOption[] => {
                 const { status, notFound } = await write(
                   path.join(dir, 'index.html'),
                   handler,
-                  `${ORIGIN}${pathname}`,
+                  urlFor(pathname),
                 );
                 if (status === 404) {
                   (notFound ? disowned : refused).push(pathname);
@@ -210,7 +218,7 @@ export const framework = (options: StaticOptions = {}): PluginOption[] => {
                   await write(
                     path.join(dir, 'index.rsc'),
                     handler,
-                    `${ORIGIN}${payloadPathFor(pathname)}`,
+                    urlFor(payloadPathFor(pathname)),
                   );
                 }
               },
@@ -225,7 +233,7 @@ export const framework = (options: StaticOptions = {}): PluginOption[] => {
           const { status } = await write(
             path.join(clientDir, '404.html'),
             handler,
-            `${ORIGIN}${unmatched}`,
+            urlFor(unmatched),
           );
           if (status === 500) failed.push('404.html');
         }
@@ -251,7 +259,9 @@ export const framework = (options: StaticOptions = {}): PluginOption[] => {
             path.join(clientDir, 'sitemap.xml'),
             sitemap(
               options.site,
-              plan.paths.filter((pathname) => !redirected.has(pathname)),
+              plan.paths
+                .filter((pathname) => !redirected.has(pathname))
+                .map((pathname) => withBase(pathname, base)),
             ),
           );
         }

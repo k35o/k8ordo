@@ -18,7 +18,7 @@ export const Skeleton: FC<Props> = ({
     {...rest}
     aria-hidden
     className={cn(
-      'bg-bg-mute',
+      'bg-bg-mute forced-colors:bg-[GrayText]',
       animate && 'animate-pulse',
       shape === 'rect' && 'rounded-lg',
       shape === 'rect' && size === 'sm' && 'h-3 w-24',

@@ -624,8 +624,10 @@ the "paths" option supplied pathnames no route wants: /produtcs/2
 
 which is either a typo or a value that still contains a parameter
 (`/ja/blog/:slug` — what expanding only one of two parameters leaves behind).
-Pathnames are taken as a URL carries them, so `href()` output is accepted as
-is. Only the file name is decoded, and a pathname whose escapes do not decode,
+Pathnames are taken as a URL carries them, escapes included
+(`/products/caf%C3%A9`) — `href()` output as it is, unless the application is
+served under a `base`: these are pathnames in the table's terms, and `href()`
+puts the base in front. Only the file name is decoded, and a pathname whose escapes do not decode,
 or that decodes to a `..` segment, fails the build — neither names a file
 inside the output:
 
@@ -722,6 +724,54 @@ that changed nothing the browser runs leaves every open tab navigating in
 place, and servers built apart from the same source agree.
 
 <!-- /shared:deploys -->
+
+<!-- shared:base -->
+
+## Served under a base
+
+An application served below the root of its origin — `https://example.com/docs/`
+— says so with Vite's `base`, and nothing else in it changes:
+
+```ts
+// vite.config.ts
+export default defineConfig({
+  base: '/docs/',
+  plugins: [framework()],
+});
+```
+
+`routes/` is still written from the application's root:
+`routes/products/page.tsx` is `/products` in the table and `/docs/products`
+in the address bar. What crosses between the two gains or loses the base on
+the way:
+
+- A link built with `href()` or `navigateTo()` carries it. A page receives
+  `pathname` without it, and `usePathname()` returns it without it.
+- A page's payload sits beside it — `/docs/products/index.rsc` — and the
+  client build's files are under `/docs/assets/`.
+- A `redirect.ts` target is written from the root, like the table, and is
+  sent with the base in front; one that names another origin is sent as
+  written. `redirect()` from a Server Action takes a URL, so build it with
+  `href()`.
+- A URL outside the base is none of the application's: the handler answers
+  it with a `404`, and the client runtime leaves it to the browser.
+
+Under `@k8ordo/static` the pages are written into `dist/client/` at their
+pathnames in the table, so the host serves that directory at `/docs/`; the
+`paths` option takes pathnames without the base, and `sitemap.xml` lists
+each page at its URL, base included. Under `@k8ordo/server`, `serve` reads
+the base the build was made for from `dist/rsc/index.js` and hands out the
+client build's files below it; a host calling the handler itself passes the
+URL as the visitor asked for it, base included.
+
+The base has to be a path from the root. A relative base (`./`) or another
+origin says nothing about which URL is which page, and the build refuses it:
+
+```
+k8ordo serves its pages under Vite's base, so base has to be a path from the root, like '/docs/' — got './'
+```
+
+<!-- /shared:base -->
 
 ## Alongside the rest of k8ordo
 

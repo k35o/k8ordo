@@ -122,8 +122,8 @@ export const planPaths = (
 };
 
 /**
- * The directory a rendered pathname is written to. A supplied path is a URL —
- * `href()` hands back `/products/caf%C3%A9` — so writing it verbatim would
+ * The directory a rendered pathname is written to. A supplied path is
+ * URL-escaped — `/products/caf%C3%A9` — so writing it verbatim would
  * make a directory literally named with the escapes, which no host would then
  * match. Decoding is also the moment a path that leaves the output directory
  * has to be refused: `..` is a real URL segment and would otherwise be

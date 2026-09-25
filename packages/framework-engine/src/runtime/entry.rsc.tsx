@@ -1,4 +1,9 @@
-import { isNotFound, normalizePathname } from '@k8ordo/router';
+import {
+  isNotFound,
+  normalizePathname,
+  withBase,
+  withoutBase,
+} from '@k8ordo/router';
 import type { Match, RouteComponent } from '@k8ordo/router';
 import {
   createTemporaryReferenceSet,
@@ -50,6 +55,22 @@ const redirectFor = matchRedirects(redirects);
 
 const redirectResponse = (to: string, status: number): Response =>
   new Response(null, { status, headers: { location: to } });
+
+/**
+ * Where Vite serves the application, as the build was told (`base`). A host
+ * serving the client build's files needs it to find them — `serve` reads it
+ * from here, so it cannot disagree with the handler it runs.
+ */
+export const base = import.meta.env.BASE_URL;
+
+/**
+ * A `redirect.ts` target is written the way the route table is: a pathname
+ * from the application's root, which the URL spells with the base in front.
+ * Anything else — another origin, a protocol-relative URL — is left as
+ * written.
+ */
+const locationOf = (to: string): string =>
+  to.startsWith('/') && !to.startsWith('//') ? withBase(to) : to;
 
 // ページは GET（ヘッダーだけなら HEAD）で読まれ、Server Action は POST で届く。
 // route file はほかのメソッドに答えを宣言できないので、POST 以外をすべて
@@ -178,8 +199,16 @@ const respond = async (request: Request): Promise<Response> => {
     });
   }
   const url = new URL(request.url);
-  const wantsPayload = isPayloadPath(url.pathname);
-  const pathname = wantsPayload ? pagePathFor(url.pathname) : url.pathname;
+  // 表は base の下の pathname で書かれている。base の外はこのアプリの URL ではない
+  const own = withoutBase(url.pathname);
+  if (own === null) {
+    return new Response('not found', {
+      status: 404,
+      headers: { 'content-type': 'text/plain;charset=utf-8' },
+    });
+  }
+  const wantsPayload = isPayloadPath(own);
+  const pathname = wantsPayload ? pagePathFor(own) : own;
   const isAction = request.method === 'POST';
   const addressed = request.headers.get(ACTION_ID_HEADER) !== null;
   if (isAction && !sameOrigin(request, url)) {
@@ -192,7 +221,10 @@ const respond = async (request: Request): Promise<Response> => {
   // redirect as a document load — the URL bar ends up right.
   const declared = redirectFor(pathname);
   if (declared !== null && !isAction) {
-    return redirectResponse(declared.to, declared.permanent ? 308 : 307);
+    return redirectResponse(
+      locationOf(declared.to),
+      declared.permanent ? 308 : 307,
+    );
   }
 
   // A param a schema refuses is a pathname the pattern does not answer, so
