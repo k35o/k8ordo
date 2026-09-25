@@ -743,6 +743,25 @@ export const prose = {
   }),
 };
 
+export const tree = {
+  description: message({
+    ja: '枝を開閉できる階層。WAI-ARIA の tree のキーボード操作に従う',
+    en: 'A hierarchy whose branches open and close, with the WAI-ARIA tree keyboard model.',
+  }),
+  basicDescription: message({
+    ja: '項目は `{ id, label, icon?, children? }` の木で渡す。上下で見えている項目を移り、右で枝を開いて最初の子へ、左で枝を閉じて親へ戻る。Home / End、Enter / Space での選択、先頭の文字での移動もできる。',
+    en: 'Pass the nodes as a tree of `{ id, label, icon?, children? }`. Up and Down move between the visible nodes, Right opens a branch and then moves to its first child, and Left closes it or moves to the parent. Home / End, Enter / Space to select, and typing a first letter work too.',
+  }),
+  controlledTitle: message({
+    ja: '開いている枝と選択を持つ',
+    en: 'Owning the Open Branches and the Selection',
+  }),
+  controlledDescription: message({
+    ja: '開いている枝（`expandedIds`）と選択（`selectedId`）は外から渡せる。`onChange` には選んだ項目の `id` が届く。',
+    en: 'The open branches (`expandedIds`) and the selection (`selectedId`) can be yours. `onChange` receives the `id` of the node picked.',
+  }),
+};
+
 export const table = {
   description: message({
     ja: '意味論を保ちつつ横スクロールにも対応するテーブル',

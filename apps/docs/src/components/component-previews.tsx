@@ -48,6 +48,7 @@ import {
   TextField,
   Textarea,
   Tooltip,
+  Tree,
 } from '@k8ordo/ui';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
@@ -292,6 +293,23 @@ export const componentPreviews: Record<string, ReactNode> = {
         </Table.Row>
       </Table.Body>
     </Table.Root>
+  ),
+  Tree: (
+    <div className="w-44">
+      <Tree
+        defaultExpandedIds={['src']}
+        defaultSelectedId="index"
+        items={[
+          {
+            id: 'src',
+            label: 'src',
+            children: [{ id: 'index', label: 'index.ts' }],
+          },
+          { id: 'readme', label: 'README.md' },
+        ]}
+        label="Tree"
+      />
+    </div>
   ),
   Heading: <Heading level="h2">Section Title</Heading>,
   Prose: (

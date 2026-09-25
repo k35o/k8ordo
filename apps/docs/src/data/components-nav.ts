@@ -191,6 +191,11 @@ export const componentCategories: NavCategory[] = [
         description: m.components.table.description,
       },
       {
+        name: 'Tree',
+        path: '/:locale/ui/components/tree',
+        description: m.components.tree.description,
+      },
+      {
         name: 'Heading',
         path: '/:locale/ui/components/heading',
         description: m.components.heading.description,
