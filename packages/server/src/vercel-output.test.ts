@@ -76,11 +76,15 @@ beforeAll(async () => {
   await writeFile(path.join(root, '.vercel', 'project.json'), '{}');
   await writeFile(path.join(output, 'from-an-earlier-build.txt'), 'stale');
 
-  await writeVercelOutput(root, {
-    client: path.join(dist, 'client'),
-    rsc: path.join(dist, 'rsc'),
-    ssr: path.join(dist, 'ssr'),
-  });
+  await writeVercelOutput(
+    root,
+    {
+      client: path.join(dist, 'client'),
+      rsc: path.join(dist, 'rsc'),
+      ssr: path.join(dist, 'ssr'),
+    },
+    '/',
+  );
 });
 
 afterAll(async () => {
@@ -96,7 +100,7 @@ describe('writeVercelOutput', () => {
         { src: '^/.*$', dest: '/handler' },
         { handle: 'hit' },
         {
-          src: '^/assets/',
+          src: '^\\/assets\\/',
           headers: { 'cache-control': 'public, max-age=31536000, immutable' },
           continue: true,
         },
@@ -135,5 +139,53 @@ describe('writeVercelOutput', () => {
     expect(
       await readFile(path.join(root, '.vercel', 'project.json'), 'utf8'),
     ).toBe('{}');
+  });
+});
+
+describe('writeVercelOutput under a base', () => {
+  let under: string;
+
+  // base を '/site/' にしたビルド。client/ の中身はその下で配られる
+  beforeAll(async () => {
+    under = await mkdtemp(path.join(tmpdir(), 'k8ordo-vercel-base-'));
+    const dist = path.join(under, 'dist');
+    await mkdir(path.join(dist, 'client', 'assets'), { recursive: true });
+    await mkdir(path.join(dist, 'rsc'), { recursive: true });
+    await mkdir(path.join(dist, 'ssr'), { recursive: true });
+    await writeFile(
+      path.join(dist, 'client', 'assets', 'app-abc123.js'),
+      'export {};',
+    );
+    await writeFile(path.join(dist, 'rsc', 'index.js'), 'export default {};');
+    await writeVercelOutput(
+      under,
+      {
+        client: path.join(dist, 'client'),
+        rsc: path.join(dist, 'rsc'),
+        ssr: path.join(dist, 'ssr'),
+      },
+      '/site.v2/',
+    );
+  });
+
+  afterAll(async () => {
+    await rm(under, { recursive: true, force: true });
+  });
+
+  it('puts the client build at its URL under the base', async () => {
+    const files = await readdir(
+      path.join(under, '.vercel', 'output', 'static', 'site.v2', 'assets'),
+    );
+    expect(files).toStrictEqual(['app-abc123.js']);
+  });
+
+  it('marks the hashed files under the base immutable, reading the base literally', async () => {
+    const config = JSON.parse(
+      await readFile(
+        path.join(under, '.vercel', 'output', 'config.json'),
+        'utf8',
+      ),
+    ) as { routes: Array<{ src?: string }> };
+    expect(config.routes.at(-1)?.src).toBe('^\\/site\\.v2\\/assets\\/');
   });
 });

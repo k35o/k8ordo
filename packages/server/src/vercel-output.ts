@@ -16,19 +16,19 @@ const FUNCTION = 'handler';
  * assets are marked immutable in the `hit` phase — only once a file answered —
  * so a missing one is the handler's 404 and never cached for a year.
  */
-const CONFIG = {
+const configFor = (base: string) => ({
   version: 3,
   routes: [
     { handle: 'filesystem' },
     { src: '^/.*$', dest: `/${FUNCTION}` },
     { handle: 'hit' },
     {
-      src: '^/assets/',
+      src: `^${RegExp.escape(`${base}assets/`)}`,
       headers: { 'cache-control': 'public, max-age=31536000, immutable' },
       continue: true,
     },
   ],
-};
+});
 
 /**
  * A Node.js function that hands Vercel the handler as it is: the launcher
@@ -67,32 +67,33 @@ const json = (value: unknown): string => `${JSON.stringify(value, null, 2)}\n`;
 
 /**
  * The build laid out as Vercel's Build Output API (v3) reads it, under
- * `<root>/.vercel/output`: the client build as static files, and the request
- * handler as the one function behind them. Only `output/` is replaced —
- * `vercel pull` keeps the project's link and settings beside it.
+ * `<root>/.vercel/output`: the client build as static files at Vite's `base`,
+ * and the request handler as the one function behind them. Only `output/` is
+ * replaced — `vercel pull` keeps the project's link and settings beside it.
  */
 export const writeVercelOutput = async (
   root: string,
   dirs: BuildDirs,
+  base: string,
 ): Promise<void> => {
   const output = path.join(root, '.vercel', 'output');
   await rm(output, { recursive: true, force: true });
 
-  await cp(dirs.client, path.join(output, 'static'), {
+  await cp(dirs.client, path.join(output, 'static', base), {
     recursive: true,
     filter: async (source) => !(await isCompressedCopy(source)),
   });
 
   // rsc は ssr を相対パスで import するので、2 つの位置関係ごと写す
   const func = path.join(output, 'functions', `${FUNCTION}.func`);
-  const base = commonDir(dirs.rsc, dirs.ssr);
+  const shared = commonDir(dirs.rsc, dirs.ssr);
   await Promise.all(
     [dirs.rsc, dirs.ssr].map((dir) =>
-      cp(dir, path.join(func, path.relative(base, dir)), { recursive: true }),
+      cp(dir, path.join(func, path.relative(shared, dir)), { recursive: true }),
     ),
   );
   const entry = path
-    .relative(base, path.join(dirs.rsc, 'index.js'))
+    .relative(shared, path.join(dirs.rsc, 'index.js'))
     .split(path.sep)
     .join('/');
   await writeFile(
@@ -101,5 +102,5 @@ export const writeVercelOutput = async (
   );
   await writeFile(path.join(func, 'package.json'), json({ type: 'module' }));
   await writeFile(path.join(func, '.vc-config.json'), json(FUNCTION_CONFIG));
-  await writeFile(path.join(output, 'config.json'), json(CONFIG));
+  await writeFile(path.join(output, 'config.json'), json(configFor(base)));
 };

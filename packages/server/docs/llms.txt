@@ -53,5 +53,5 @@ When installed via npm, these docs live under `node_modules/@k8ordo/server/docs/
 - `@k8ordo/server/vercel` — `vercel()` returns a Vite plugin to put beside
   `framework()`: `vite build` then also writes `.vercel/output/` (Build Output
   API v3) for `vercel build` / `vercel deploy --prebuilt` — the client build as
-  static files (`assets/` immutable), and the request handler as one streaming
+  static files at Vite's `base` (`assets/` immutable), and the request handler as one streaming
   Node.js function built with every dependency bundled in.

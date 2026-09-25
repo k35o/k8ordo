@@ -657,9 +657,11 @@ With `vercel()` beside `framework()`, `vite build` also writes
 build becomes static files on Vercel's CDN — a file under `assets/` is sent
 `immutable` once a file has answered, so a missing one is never cached — and
 every request that names no file goes to one Node.js function, the request
-handler, handed to Vercel as `fetch` and streaming its answer. The copies
-compressed for `serve` are left out: Vercel compresses on its own, and each
-is one more file to upload.
+handler, handed to Vercel as `fetch` and streaming its answer. Under a
+`base` the static files sit below it, as `serve` hands them out, and the
+handler answers every URL outside it with a `404`. The copies compressed for
+`serve` are left out: Vercel compresses on its own, and each is one more file
+to upload.
 
 **The function carries everything it imports.** A Vercel function holds
 nothing but its own directory, so under `vercel()` the handler is built with

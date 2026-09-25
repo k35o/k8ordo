@@ -36,11 +36,11 @@ export const vercel = (): Plugin => ({
         }
         return path.resolve(builder.config.root, outDir);
       };
-      await writeVercelOutput(builder.config.root, {
-        client: dirOf('client'),
-        rsc: dirOf('rsc'),
-        ssr: dirOf('ssr'),
-      });
+      await writeVercelOutput(
+        builder.config.root,
+        { client: dirOf('client'), rsc: dirOf('rsc'), ssr: dirOf('ssr') },
+        builder.config.base,
+      );
       builder.config.logger.info('k8ordo: wrote .vercel/output');
     },
   },

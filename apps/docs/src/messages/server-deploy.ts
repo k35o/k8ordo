@@ -141,8 +141,8 @@ export const vercelDescription = message({
 });
 
 export const vercelOutput = message({
-  ja: 'クライアントのビルドは Vercel の CDN に置く静的ファイルになります。`assets/` の下は、ファイルが答えたときにだけ `immutable` を付けるので、無いファイルの 404 が 1 年キャッシュされることはありません。どのファイルも指さないリクエストは、Node.js の関数 1 つが受けます。中身はリクエストハンドラで、`fetch` として Vercel に渡し、答えをストリームのまま返します。`serve()` 向けに圧縮したコピーは入れません。Vercel は自分で圧縮し、コピーの分だけアップロードするファイルが増えるからです。',
-  en: "The client build becomes static files on Vercel's CDN — a file under `assets/` is sent `immutable` only once a file has answered, so a missing one is never cached for a year — and every request that names no file goes to one Node.js function: the request handler, handed to Vercel as `fetch` and streaming its answer. The copies compressed for `serve()` are left out: Vercel compresses on its own, and each is one more file to upload.",
+  ja: 'クライアントのビルドは Vercel の CDN に置く静的ファイルになります。`assets/` の下は、ファイルが答えたときにだけ `immutable` を付けるので、無いファイルの 404 が 1 年キャッシュされることはありません。どのファイルも指さないリクエストは、Node.js の関数 1 つが受けます。中身はリクエストハンドラで、`fetch` として Vercel に渡し、答えをストリームのまま返します。`base` を指定したビルドでは、`serve()` と同じく静的ファイルをその下に置き、base の外の URL にはハンドラが `404` で答えます。`serve()` 向けに圧縮したコピーは入れません。Vercel は自分で圧縮し、コピーの分だけアップロードするファイルが増えるからです。',
+  en: "The client build becomes static files on Vercel's CDN — a file under `assets/` is sent `immutable` only once a file has answered, so a missing one is never cached for a year — and every request that names no file goes to one Node.js function: the request handler, handed to Vercel as `fetch` and streaming its answer. Under a `base` the static files sit below it, as `serve()` hands them out, and the handler answers every URL outside it with a `404`. The copies compressed for `serve()` are left out: Vercel compresses on its own, and each is one more file to upload.",
 });
 
 export const vercelBundled = message({
