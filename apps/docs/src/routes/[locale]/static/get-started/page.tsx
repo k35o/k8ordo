@@ -1,4 +1,5 @@
-import { CodeBlock } from '../../../../components/code-block';
+import { CodeBlock } from '@k8ordo/ui/code-block';
+
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import {
   Bullet,
@@ -20,6 +21,10 @@ const REFUSED = `static build cannot ship Server Actions — a file cannot recei
   src/routes/_parts/guestbook.ts
 this application wants @k8ordo/server`;
 
+const REFUSED_GUARD = `static build cannot run guard.ts — a file has no request to guard, and these are guards:
+  src/routes/admin/guard.ts
+this application wants @k8ordo/server`;
+
 const RUN = `vite dev
 vite build`;
 
@@ -33,6 +38,8 @@ export default function StaticGetStartedPage() {
         <Paragraph text={t.modeActions} />
         <CodeBlock code={REFUSED} lang="bash" />
         <Paragraph text={t.modeDev} />
+        <Paragraph text={t.modeGuards} />
+        <CodeBlock code={REFUSED_GUARD} lang="bash" />
         <Paragraph text={t.modeSame} />
       </DocSection>
 

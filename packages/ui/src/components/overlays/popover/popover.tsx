@@ -141,7 +141,7 @@ export const Content: FC<{
   // Popover API の top-layer 表示・非表示を isOpen に同期する（FloatingPortal の置換）。
   // manual: native の light-dismiss は使わず、外側クリック / Escape は従来どおり
   // JS（useClickAway / window keydown）で扱い、trigger との二重トグルを避ける。
-  // 要素は常時マウントし、開閉アニメは CSS（@starting-style + allow-discrete）で行う。
+  // 要素は常時マウントし、開くときのアニメは CSS（base.css の :popover-open）で行う。
   useEffect(() => {
     const el = contentWrapperRef.current;
     if (!el) {

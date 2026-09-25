@@ -14,6 +14,10 @@ export const en: Messages = {
 
   toastRegion: 'Notifications',
 
+  copy: 'Copy',
+  copied: 'Copied',
+  copyFailed: 'Could not copy',
+
   autocompletePlaceholder: 'Type to filter',
   autocompleteRemoveTag: 'Remove tag',
   autocompleteClear: 'Clear all',
@@ -21,9 +25,15 @@ export const en: Messages = {
 
   fileFieldRemove: 'Remove file',
   fileFieldTrigger: 'Select files',
+  fileFieldDrop: 'Drop files here',
 
   numberFieldIncrement: 'Increase',
   numberFieldDecrement: 'Decrease',
+
+  calendarPreviousMonth: 'Previous month',
+  calendarNextMonth: 'Next month',
+  datePickerOpen: 'Choose from calendar',
+  datePickerDialog: 'Choose a date',
 
   passwordShow: 'Show password',
   passwordHide: 'Hide password',
@@ -36,6 +46,12 @@ export const en: Messages = {
   paginationLabel: 'Pagination',
   paginationPrevious: 'Previous',
   paginationNext: 'Next',
+
+  codeBlockCopy: 'Copy code',
+  carousel: 'Carousel',
+  carouselSlide: 'Slide',
+  carouselPrevious: 'Previous slide',
+  carouselNext: 'Next slide',
 
   chat: 'Chat',
   scrollToLatest: 'Scroll to latest message',

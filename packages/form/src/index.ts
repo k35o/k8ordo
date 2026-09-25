@@ -9,7 +9,7 @@ export type {
 export { useAsyncCheck } from './async-check';
 export type { AsyncCheck } from './async-check';
 export { HiddenValue } from './hidden-value';
-export type { Rule } from './rules/rules';
+export type { DerivedRule, Rule, RuleMessage } from './rules/rules';
 export type {
   DerivedArray,
   DerivedField,
@@ -17,5 +17,6 @@ export type {
   FieldInput,
   FormFields,
   FormState,
+  StringCheckboxInput,
   ValidityFlag,
 } from './types';

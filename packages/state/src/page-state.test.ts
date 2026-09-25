@@ -5,7 +5,7 @@ import * as zm from 'zod/mini';
 import { defineCookieState } from './cookie-state';
 import { defineMemoryState } from './memory-state';
 import { definePageState } from './page-state';
-import type { PathFrom, RegisteredPath } from './register';
+import type { AcceptedPath, RegisteredPath } from './register';
 import { defineLocalState, defineSessionState } from './storage-state';
 import { useAppState } from './use-app-state';
 
@@ -152,6 +152,16 @@ describe('definePageState', () => {
     expect(flags.parseUrl(new URLSearchParams()).open).toBe(true);
   });
 
+  it('writes a stringbool field in its own spelling, so a custom one reads back', () => {
+    const flags = definePageState('flags-spelled', {
+      url: z.object({
+        gift: z.stringbool({ truthy: ['yes'], falsy: ['no'] }).default(false),
+      }),
+    });
+    expect(flags.search({ gift: true })).toBe('gift=yes');
+    expect(flags.parseUrl(new URLSearchParams('gift=yes')).gift).toBe(true);
+  });
+
   it('salvage cannot smuggle a combination an object-level refine forbids', () => {
     const range = definePageState('range', {
       url: z
@@ -222,10 +232,10 @@ describe('href and search', () => {
     listState.href('products');
   });
 
-  it('constrains href to the linkable paths of a registered route table', () => {
-    expectTypeOf<RegisteredPath>().toEqualTypeOf<
-      '/products' | '/items' | '/signup' | `/posts/${string}`
-    >();
+  it('checks href against the linkable patterns of a registered route table', () => {
+    expectTypeOf<
+      RegisteredPath<'/posts/hello'>
+    >().toEqualTypeOf<'/posts/hello'>();
     expect(listState.href('/posts/hello', { page: 2 })).toBe(
       '/posts/hello?page=2',
     );
@@ -233,23 +243,53 @@ describe('href and search', () => {
     listState.href('/nowhere');
     // @ts-expect-error a wildcard pattern is matched, never linked
     listState.href('/files/a.txt');
+    // @ts-expect-error a param takes one segment, not two
+    listState.href('/posts/hello/comments');
   });
 
-  it('derives the path union from whichever form Register was given', () => {
+  it('takes a param spelled by a template literal', () => {
+    const postHref = (slug: string) => listState.href(`/posts/${slug}`);
+    expect(postHref('hello')).toBe('/posts/hello');
+  });
+
+  it('refuses what a leading param does not match, instead of taking every path', () => {
+    // [locale] の下の表。和集合だった頃は `/${string}` が混ざり、どのパスも通した
+    type LocaleRoutes = Routes<{
+      '/:locale': RouteComponent;
+      '/:locale/products': RouteComponent;
+    }>;
+    expectTypeOf<
+      AcceptedPath<{ routes: LocaleRoutes }, '/ja/products'>
+    >().toEqualTypeOf<'/ja/products'>();
+    expectTypeOf<
+      AcceptedPath<{ routes: LocaleRoutes }, '/ja/nowhere'>
+    >().toBeNever();
+    expectTypeOf<
+      AcceptedPath<{ routes: LocaleRoutes }, '/ja/products/42'>
+    >().toBeNever();
+  });
+
+  it('checks the path against whichever form Register was given', () => {
     // `routes` — the same line the router's augmentation uses
-    expectTypeOf<PathFrom<{ routes: AppRoutes }>>().toEqualTypeOf<
-      '/products' | '/items' | '/signup' | `/posts/${string}`
-    >();
+    expectTypeOf<
+      AcceptedPath<{ routes: AppRoutes }, '/signup'>
+    >().toEqualTypeOf<'/signup'>();
+    expectTypeOf<AcceptedPath<{ routes: AppRoutes }, '/a'>>().toBeNever();
     // `path` — another router's own union, e.g. `Route` from next
-    expectTypeOf<PathFrom<{ path: '/a' | `/b/${string}` }>>().toEqualTypeOf<
-      '/a' | `/b/${string}`
-    >();
+    type NextRoute = '/a' | `/b/${string}`;
+    expectTypeOf<
+      AcceptedPath<{ path: NextRoute }, '/b/1'>
+    >().toEqualTypeOf<'/b/1'>();
+    expectTypeOf<AcceptedPath<{ path: NextRoute }, '/c'>>().toBeNever();
     // `routes` wins when both are present
-    expectTypeOf<PathFrom<{ routes: AppRoutes; path: '/a' }>>().toEqualTypeOf<
-      '/products' | '/items' | '/signup' | `/posts/${string}`
-    >();
+    expectTypeOf<
+      AcceptedPath<{ routes: AppRoutes; path: '/a' }, '/a'>
+    >().toBeNever();
     // neither — any `/`-path
-    expectTypeOf<PathFrom<object>>().toEqualTypeOf<`/${string}`>();
+    expectTypeOf<
+      AcceptedPath<object, '/anything'>
+    >().toEqualTypeOf<'/anything'>();
+    expectTypeOf<AcceptedPath<object, 'anything'>>().toBeNever();
   });
 });
 
@@ -357,3 +397,20 @@ const OptionsRejectedByTypes = () => {
   // @ts-expect-error the url slot's own fields are still checked
   useAppState(listState, { initialUrl: { q: 1 } });
 };
+
+describe('href under a base', () => {
+  beforeEach(() => {
+    vi.stubEnv('BASE_URL', '/docs/');
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it('puts the base Vite serves the application under in front of the path', () => {
+    expect(listState.href('/products', { page: 2 })).toBe(
+      '/docs/products?page=2',
+    );
+    expect(listState.href('/products')).toBe('/docs/products');
+  });
+});

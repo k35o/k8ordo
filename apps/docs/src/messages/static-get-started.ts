@@ -25,6 +25,11 @@ export const modeDev = message({
   en: '`vite dev` is a running server that would happily accept that POST, so the same refusal is raised there too, the moment the file is compiled — a form that works in development and posts into nothing in production is worse than one that never worked.',
 });
 
+export const modeGuards = message({
+  ja: '`@k8ordo/server` がリクエストに答える前に走らせる `guard.ts` も、同じように名指しで拒みます。ビルドでも `vite dev` でもです。ファイルは、guard を走らせられる何かに要求されることがありません。',
+  en: 'A `guard.ts` — what `@k8ordo/server` runs before a request is answered — is refused the same way, by name, in the build and in `vite dev`: a file is never requested of anything that could run one.',
+});
+
 export const modeSame = message({
   ja: 'もう一方のモードを選ぶことは、代わりに `@k8ordo/server` を入れることで、アプリのほかの部分は何も変わりません。ルートの文法も、境界も、リクエストハンドラも同じで、ハンドラがビルド時にルートごとに呼ばれるか、リクエストごとに呼ばれるかだけが違います。プラグインが両方のパッケージで `framework()` という名前なのはそのためで、モードを決めるのは import だけです。`vite.config.ts` はどちらでも同じに読めます。',
   en: 'Choosing the other mode means installing `@k8ordo/server` instead, and nothing else about the application changes — the same route grammar, the same boundaries, the same request handler, called for each route at build time instead of per request. That is why the plugin is called `framework()` in both packages: the mode is the import, and `vite.config.ts` reads the same either way.',

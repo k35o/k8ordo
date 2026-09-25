@@ -14,6 +14,10 @@ export const ja: Messages = {
 
   toastRegion: '通知',
 
+  copy: 'コピー',
+  copied: 'コピーしました',
+  copyFailed: 'コピーできませんでした',
+
   autocompletePlaceholder: '入力して絞り込めます',
   autocompleteRemoveTag: 'タグを削除',
   autocompleteClear: 'すべて削除',
@@ -21,9 +25,15 @@ export const ja: Messages = {
 
   fileFieldRemove: 'ファイルを削除',
   fileFieldTrigger: 'ファイルを選択',
+  fileFieldDrop: 'ここにファイルをドロップ',
 
   numberFieldIncrement: '増やす',
   numberFieldDecrement: '減らす',
+
+  calendarPreviousMonth: '前の月',
+  calendarNextMonth: '次の月',
+  datePickerOpen: 'カレンダーから選ぶ',
+  datePickerDialog: '日付を選ぶ',
 
   passwordShow: 'パスワードを表示',
   passwordHide: 'パスワードを非表示',
@@ -36,6 +46,12 @@ export const ja: Messages = {
   paginationLabel: 'ページネーション',
   paginationPrevious: '前へ',
   paginationNext: '次へ',
+
+  codeBlockCopy: 'コードをコピー',
+  carousel: 'カルーセル',
+  carouselSlide: 'スライド',
+  carouselPrevious: '前のスライド',
+  carouselNext: '次のスライド',
 
   chat: 'チャット',
   scrollToLatest: '最新のメッセージへ移動',

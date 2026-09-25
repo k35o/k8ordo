@@ -1,6 +1,6 @@
 import { Code, Heading } from '@k8ordo/ui';
+import { CodeBlock } from '@k8ordo/ui/code-block';
 
-import { CodeBlock } from '../../../../components/code-block';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Rich } from '../../../../components/rich';
@@ -524,6 +524,9 @@ export default function StateReadingPage() {
         </p>
         <p className="text-fg-mute leading-relaxed">
           <Rich>{m.stateReading.searchDescription()}</Rich>
+        </p>
+        <p className="text-fg-mute leading-relaxed">
+          <Rich>{m.stateReading.hrefBase()}</Rich>
         </p>
         <CodeBlock code={EXPORT_LINK} lang="tsx" />
       </DocSection>

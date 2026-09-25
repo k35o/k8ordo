@@ -99,7 +99,7 @@ export const Radio: FC<Props> = ({
               invalid && 'border-border-error peer-checked:border-border-error',
             )}
           >
-            <span className="bg-primary-border size-2 rounded-full opacity-0 transition-opacity" />
+            <span className="bg-primary-border size-2 rounded-full opacity-0 transition-opacity forced-colors:bg-[CanvasText]" />
           </span>
           <span>{option.label}</span>
         </label>

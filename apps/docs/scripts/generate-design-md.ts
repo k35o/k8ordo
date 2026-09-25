@@ -378,7 +378,7 @@ font-family: 'Noto Sans JP', 'M PLUS 2', sans-serif;
 
 - 基本は \`transition-colors duration-150 ease-out\`
 - **300ms を超えない。bounce / spring 系のイージングは使わない。**
-- \`prefers-reduced-motion: reduce\` を尊重（アニメーションはすべて CSS で、\`base.css\` の \`@media (prefers-reduced-motion)\` が止める。スクロールに追従する ScrollLinked の進捗バーは機能的な表示なので対象外。Conversation の最下部へのスクロールは JS 側で instant に切り替える）
+- \`prefers-reduced-motion: reduce\` を尊重（アニメーションはすべて CSS で、\`base.css\` の \`@media (prefers-reduced-motion)\` が止める。Conversation の最下部へのスクロールは JS 側で instant に切り替える）
 - 組み込み: \`ao-anim-scale\`（\`:popover-open\` で 0.18s scale）/ \`ao-anim-fade\`（0.15s opacity）
 
 ### インタラクティブ状態
@@ -392,7 +392,9 @@ font-family: 'Noto Sans JP', 'M PLUS 2', sans-serif;
 | Selected | \`bg-primary-bg-subtle\` |
 | Error | \`border-border-error\` + \`text-fg-error\` |
 
-フォーカスは必ず \`focus-visible\`（\`focus\` ではない）を使い、リングは \`ring-border-info\` で統一。`,
+フォーカスは必ず \`focus-visible\`（\`focus\` ではない）を使い、リングは \`ring-border-info\` で統一。
+
+OS の \`prefers-contrast: more\` と \`forced-colors: active\` にはライブラリの CSS が従う。高コントラストでは文字と線のトークンが一段強くなり、影だけで縁取る面に線が付く。強制カラーでは境界線・フォーカスリング・選択状態をシステムカラー（\`Highlight\` / \`CanvasText\`）で描く。自前の UI では、境界やフォーカスを \`box-shadow\` だけで描かず、\`text-transparent\` で隠さない（強制カラーで塗られる。\`invisible\` を使う）。`,
 
     `## z-index`,
     table(['Token', '値'], zRows),
@@ -416,6 +418,7 @@ import { UIProvider, Button, Card } from '@k8ordo/ui';
 
 - **Button** — \`size: 'sm'|'md'|'lg'\`, \`color: 'primary'|'secondary'|'base'\`, \`variant: 'solid'|'outline'|'skeleton'\`, \`fullWidth\`, \`startIcon\`, \`endIcon\`, \`disabled\`
 - **IconButton** — \`label\`（必須・aria-label）, \`color: 'transparent'|'base'|'primary'|'secondary'\`, \`size\`
+- **CopyButton** — \`value\`（文字列、または押したときに呼ぶ関数。Promise も可）, \`label\`, \`iconOnly\`, \`size\`。押すとアイコンがチェックに変わり、結果を読み上げる。コピーは IconButton と自前のクリップボード処理ではなくこれを使う
 - リンクとして描画するときは Button / IconButton に \`renderItem\` を渡す（\`<button>\` 専用の \`disabled\` / \`type\` を外し、残りの props を \`<a>\` などへ展開する。IconButton は tooltip の配線と ref を持つ \`triggerProps\` も展開する）
 
 ### Data display
@@ -424,13 +427,17 @@ import { UIProvider, Button, Card } from '@k8ordo/ui';
 - **Avatar** — \`src\` / \`name\`（イニシャル）/ \`fallback\`, \`size\`
 - **Badge** — \`label\`, \`tone: 'neutral'|'info'|'success'|'warning'|'error'\`, \`variant: 'solid'|'outline'\`, \`size\`, \`interactive\`
 - **Card** — \`width: 'full'|'fit'\`, \`variant: 'shadow'|'outline'\`, \`interactive\`
+- **Carousel**（compound: \`Root\`(\`label\`, \`slideSize: 'full'|'lg'|'md'|'sm'\`) / \`Slide\`(\`label?\`)）— スクロールスナップと前後ボタン。自動再生なし
 - **Code** — \`children: string\`（インラインコード。色文字列には色見本が付く）
 - **Heading** — \`level: 'h1'..'h6'\`（必須）, \`id?\`, \`lineClamp?\`
-- **Table**（compound: \`Root\` / \`Caption\` / \`Head\` / \`Body\` / \`Row\` / \`HeaderCell\` / \`Cell\` / \`EmptyState\`）
+- **Kbd** — \`children: string\`（1 キー 1 要素。組み合わせは並べる）, \`label?\`（記号キーの読み上げ）
+- **Prose** — Markdown / MDX が描いた本文の組版を戻す入れ物。クラスの無い素の要素だけを組み、部品は自分の見た目のまま（日本語向け: 広い行間、em は傍点、縦書きは段落頭を 1 字下げ）
+- **Table**（compound: \`Root\` / \`Caption\` / \`Head\` / \`Body\` / \`Row\` / \`HeaderCell\` / \`Cell\` / \`EmptyState\`(\`colSpan\` + EmptyState の props)）
 
 ### Feedback
 
 - **Alert** — \`tone: 'info'|'success'|'warning'|'error'\`, \`message: string | string[]\`
+- **EmptyState** — \`title\`（必須）, \`description?\`, \`icon?\`, \`action?\`（空のリスト・表・検索結果に置く）
 - **Progress** — \`value\`, \`max\`（必須）, \`min?\`, \`label?\`
 - **Skeleton** — \`shape: 'rect'|'circle'\`, \`size\`, \`animate\`
 - **Spinner** — \`size\`, \`label?\`（aria-live）
@@ -457,7 +464,6 @@ import { UIProvider, Button, Card } from '@k8ordo/ui';
 - **Stack** — フレックスレイアウト
 - **Grid** — グリッドレイアウト
 - **Separator** — \`color: 'base'|'mute'|'subtle'\`, \`orientation: 'horizontal'|'vertical'\`
-- **ScrollLinked** — スクロール進捗バー（\`container?\`）
 
 ### Observers
 

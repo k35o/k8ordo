@@ -8,7 +8,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import type { FocusEvent, Ref, SyntheticEvent } from 'react';
+import type { FocusEvent, Ref, SubmitEvent, SyntheticEvent } from 'react';
 
 import { breachOf } from './rules/rules';
 import type {
@@ -16,6 +16,7 @@ import type {
   FieldInput,
   FormFields,
   FormState,
+  StringCheckboxInput,
   ValidityFlag,
 } from './types';
 
@@ -87,8 +88,8 @@ const messageFor = (
   return undefined;
 };
 
-export type FieldView = {
-  input: FieldInput;
+export type FieldView<Input extends FieldInput = FieldInput> = {
+  input: Input;
   error: string | undefined;
   invalid: boolean;
   required: boolean;
@@ -119,14 +120,19 @@ export type FormErrorView = {
 export type UseFormReturn<
   FieldPath extends string = string,
   ArrayPath extends string = string,
+  StringCheckboxPath extends string = never,
 > = {
   props: {
     onBlur: (event: FocusEvent<HTMLFormElement>) => void;
     onInput: (event: SyntheticEvent<HTMLFormElement>) => void;
     onReset: () => void;
+    onSubmit: (event: SubmitEvent<HTMLFormElement>) => void;
     ref: Ref<HTMLFormElement>;
   };
-  field: (path: FieldPath) => FieldView;
+  field: {
+    (path: StringCheckboxPath): FieldView<StringCheckboxInput>;
+    (path: FieldPath): FieldView;
+  };
   array: (path: ArrayPath) => ArrayView;
   formError: FormErrorView;
   /** True once any field differs from the value it was rendered with. */
@@ -233,11 +239,15 @@ const shiftSet = (
  * identity of each repeated row, one dirty flag, and the row counts adding or
  * removing a row is measured against.
  */
-export const useForm = <FieldPath extends string, ArrayPath extends string>(
-  fields: FormFields<FieldPath, ArrayPath>,
+export const useForm = <
+  FieldPath extends string,
+  ArrayPath extends string,
+  StringCheckboxPath extends string = never,
+>(
+  fields: FormFields<FieldPath, ArrayPath, StringCheckboxPath>,
   state: FormState = {},
-): UseFormReturn<FieldPath, ArrayPath> => {
-  const lookup = fields as FormFields;
+): UseFormReturn<FieldPath, ArrayPath, StringCheckboxPath> => {
+  const lookup = fields as FormFields<string, string, string>;
   const formRef = useRef<HTMLFormElement>(null);
   const nextKey = useRef(0);
   // Messages applyRules wrote, so it never erases one it does not own — an
@@ -365,6 +375,38 @@ export const useForm = <FieldPath extends string, ArrayPath extends string>(
     [evaluate],
   );
 
+  // noValidate でブラウザの検証を外した代わりに、送信のたびにここで同じ検証を
+  // する。触っていない欄も含めて全欄を読み、1 つでも失敗すれば送信を止めて、
+  // 画面の順で最初に失敗した欄へフォーカスを移す。決めるのは今までどおり
+  // サーバーで、ここはサーバーに届く前にブラウザが止めていた分を取り戻すだけ
+  const onSubmit = useCallback(
+    (event: SubmitEvent<HTMLFormElement>) => {
+      const { submitter } = event;
+      if (
+        (submitter instanceof HTMLButtonElement ||
+          submitter instanceof HTMLInputElement) &&
+        submitter.formNoValidate
+      ) {
+        return;
+      }
+      const form = event.currentTarget;
+      // ルールはどの欄のイベントでも走るが、誰も触っていなければまだ一度も
+      // 走っていない
+      applyRules(form, lookup.rules, ownedRuleMessages.current);
+      const failed = firstFailed(
+        form,
+        (control) => control.willValidate && !control.validity.valid,
+      );
+      if (failed === undefined) {
+        return;
+      }
+      event.preventDefault();
+      setClientErrors(messagesIn(form, lookup));
+      failed.focus();
+    },
+    [lookup],
+  );
+
   // The values go back to what the form was rendered with — a reset button,
   // `form.reset()`, or React itself after every form action — so what the
   // hook remembered about the old values goes with them.
@@ -393,11 +435,14 @@ export const useForm = <FieldPath extends string, ArrayPath extends string>(
   }, [lookup, state]);
 
   const viewOf = useCallback(
-    (field: DerivedField, name: string): FieldView => {
+    (
+      field: DerivedField<StringCheckboxInput>,
+      name: string,
+    ): FieldView<StringCheckboxInput> => {
       const serverError = edited.has(name) ? undefined : state.errors?.[name];
       const error = clientErrors[name] ?? serverError;
       const value = state.values?.[name];
-      const input: FieldInput = { ...field.input, name };
+      const input: StringCheckboxInput = { ...field.input, name };
 
       if (field.input.type === 'checkbox') {
         // An unchecked box is simply absent from the echo, so presence is the
@@ -422,7 +467,7 @@ export const useForm = <FieldPath extends string, ArrayPath extends string>(
   );
 
   const field = useCallback(
-    (path: FieldPath): FieldView => {
+    (path: string): FieldView<StringCheckboxInput> => {
       const derived = lookup.fields[path];
       if (derived === undefined) {
         throw new Error(
@@ -506,8 +551,8 @@ export const useForm = <FieldPath extends string, ArrayPath extends string>(
   }, []);
 
   const props = useMemo(
-    () => ({ onBlur, onInput, onReset, ref }),
-    [onBlur, onInput, onReset, ref],
+    () => ({ onBlur, onInput, onReset, onSubmit, ref }),
+    [onBlur, onInput, onReset, onSubmit, ref],
   );
 
   const formError = useMemo(
@@ -545,9 +590,9 @@ const firstFailure = (
     return undefined;
   }
   const errors = state.errors ?? {};
-  const field = [...form.elements].find(
-    (element): element is Control =>
-      isControl(element) && errors[element.name] !== undefined,
+  const field = firstFailed(
+    form,
+    (control) => errors[control.name] !== undefined,
   );
   const message =
     state.formError === undefined
@@ -565,6 +610,42 @@ const firstFailure = (
     Node.DOCUMENT_POSITION_FOLLOWING
     ? message
     : field;
+};
+
+/** The first control in document order that `failed` picks out. */
+const firstFailed = (
+  form: HTMLFormElement,
+  failed: (control: Control) => boolean,
+): Control | undefined =>
+  [...form.elements].find(
+    (element): element is Control => isControl(element) && failed(element),
+  );
+
+/**
+ * The message every field of the form shows right now, read from the DOM —
+ * the untouched fields included, which is what a submit has to report.
+ */
+const messagesIn = (
+  form: HTMLFormElement,
+  fields: FormFields,
+): Record<string, string> => {
+  const messages: Record<string, string> = {};
+  for (const element of form.elements) {
+    if (!isControl(element) || Object.hasOwn(messages, element.name)) {
+      continue;
+    }
+    const field = fieldFor(fields, element.name);
+    // A group reports through its first member, as `evaluate` reads it.
+    const control = controlNamed(form, element.name);
+    if (field === undefined || control === undefined) {
+      continue;
+    }
+    const message = messageFor(control, field);
+    if (message !== undefined) {
+      messages[element.name] = message;
+    }
+  }
+  return messages;
 };
 
 /** Look up the derived field for a submitted name, row index included. */
