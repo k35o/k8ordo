@@ -28,6 +28,11 @@ export const en: Messages = {
   numberFieldRangeUnderflow: 'Enter {min} or more',
   numberFieldRangeOverflow: 'Enter {max} or less',
 
+  calendarPreviousMonth: 'Previous month',
+  calendarNextMonth: 'Next month',
+  datePickerOpen: 'Choose from calendar',
+  datePickerDialog: 'Choose a date',
+
   passwordShow: 'Show password',
   passwordHide: 'Hide password',
 

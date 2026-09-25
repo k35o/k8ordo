@@ -42,7 +42,11 @@ pnpm check         # check:write to auto-fix
   fills, which is why the dev hook is ordered `post` and never looks at the
   code it is handed: that transform prepends its runtime import, so the
   file has stopped beginning with the directive by the time anyone downstream
-  sees it.
+  sees it. A `guard.ts` fails it the same way — every one named before
+  anything is built (`buildApp`, `order: 'pre'`), and in `vite dev` the
+  moment the module is compiled — found through the engine's grammar
+  (`slotOf`), never by the file name alone, since a `_private/guard.ts` is
+  not one.
 - **`site` is the only reason a sitemap exists.** Without the origin a
   sitemap would list relative URLs, which is not a sitemap; with it every
   page the build wrote is listed, redirects and the not-found excluded.
@@ -75,8 +79,8 @@ src/
                 functions (supplied pathnames matched with URLPattern)
   documents.ts  sitemap / redirectPage — the two files the build writes
                 itself rather than taking from the handler, escaped as markup
-  index.ts      framework: engine + prerender (the dev refusal in transform,
-                the files in buildApp)
+  index.ts      framework: engine + refusals (guard.ts before the build) +
+                prerender (the dev refusals in transform, the files in buildApp)
 ```
 
 ## Conventions

@@ -54,6 +54,7 @@ export * as serverParams from './server-params';
 export * as serverErrors from './server-errors';
 export * as serverBoundaries from './server-boundaries';
 export * as serverActions from './server-actions';
+export * as serverGuards from './server-guards';
 export * as serverDeploy from './server-deploy';
 export * as i18nGetStarted from './i18n-get-started';
 export * as i18nLocales from './i18n-locales';

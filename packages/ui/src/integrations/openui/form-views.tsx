@@ -135,3 +135,24 @@ export const AutocompleteView: FC<
   const field = useStateField<string[]>(props.name, props.defaultValue ?? []);
   return ui.renderAutocomplete(props, field.value, field.setValue);
 };
+
+export const DateFieldView: FC<ComponentRenderProps<s.DateFieldProps>> = ({
+  props,
+}) => {
+  const field = useStateField<string>(props.name, props.defaultValue ?? '');
+  return ui.renderDateField(props, field.value, field.setValue);
+};
+
+export const DatePickerView: FC<ComponentRenderProps<s.DatePickerProps>> = ({
+  props,
+}) => {
+  const field = useStateField<string>(props.name, props.defaultValue ?? '');
+  return ui.renderDatePicker(props, field.value, field.setValue);
+};
+
+export const CalendarView: FC<ComponentRenderProps<s.CalendarProps>> = ({
+  props,
+}) => {
+  const field = useStateField<string>(props.name, props.defaultValue ?? '');
+  return ui.renderCalendar(props, field.value, field.setValue);
+};

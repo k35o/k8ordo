@@ -39,6 +39,13 @@ export type Messages = {
   /** NumberField の値が max を上回ったときの検証メッセージ。`{max}` が max の値に置き換わる */
   numberFieldRangeOverflow: string;
 
+  calendarPreviousMonth: string;
+  calendarNextMonth: string;
+  /** DatePicker のカレンダーを開くボタン */
+  datePickerOpen: string;
+  /** DatePicker が開くポップオーバー（dialog）の名前 */
+  datePickerDialog: string;
+
   passwordShow: string;
   passwordHide: string;
 

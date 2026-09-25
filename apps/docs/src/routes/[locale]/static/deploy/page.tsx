@@ -201,6 +201,12 @@ export default function StaticDeployPage() {
             </LocaleAnchor>
           </Bullet>
           <Bullet>
+            <Rich>{t.stopsGuards()}</Rich> —{' '}
+            <LocaleAnchor path="/:locale/static/get-started">
+              {m.nav.getStarted()}
+            </LocaleAnchor>
+          </Bullet>
+          <Bullet>
             <Rich>{t.stopsThrow()}</Rich> —{' '}
             <LocaleAnchor path="/:locale/static/errors">
               {m.static.navErrors()}

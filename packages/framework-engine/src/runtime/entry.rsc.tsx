@@ -9,12 +9,14 @@ import {
 } from '@vitejs/plugin-rsc/rsc/server';
 import {
   catchAllSchemas,
+  guards,
   paramSchemas,
   redirects,
   routes,
 } from 'virtual:k8ordo/routes';
 
 import type * as SsrEntry from './entry.ssr';
+import { runGuards } from './guard';
 import { parseCatchAllParams, parseParams } from './params';
 import type { ParsedParams } from './params';
 import { ACTION_ID_HEADER } from './payload';
@@ -23,6 +25,7 @@ import { isPayloadPath, pagePathFor } from './payload-path';
 import { isRedirect, matchRedirects } from './redirect';
 import { NotFound, renderMatch } from './render';
 import { routeRequestOf } from './request';
+import { answer, inPhase, withRequest } from './request-scope';
 
 type ActionResult = {
   returnValue?: unknown;
@@ -169,7 +172,13 @@ const renderFailed = (error: unknown): Response =>
  * What it knows of the mode is compiled in (`K8ORDO_MODE`): whether a page
  * gets the request, and whether a failed render may still stream.
  */
-export default async function handler(request: Request): Promise<Response> {
+export default function handler(request: Request): Promise<Response> {
+  // What answers the request may add to the response — a guard's headers —
+  // and what it adds goes on whatever the answer turns out to be.
+  return withRequest(request, async () => answer(await respond(request)));
+}
+
+const respond = async (request: Request): Promise<Response> => {
   if (!METHODS.includes(request.method)) {
     return new Response('method not allowed', {
       status: 405,
@@ -205,15 +214,6 @@ export default async function handler(request: Request): Promise<Response> {
     );
   }
 
-  const temporaryReferences = createTemporaryReferenceSet();
-  const action: ActionResult = isAction
-    ? await runAction(request, temporaryReferences)
-    : {};
-  if (action.redirect !== undefined && !addressed) {
-    // A form posted without JavaScript: the browser follows a 303 with a GET.
-    return redirectResponse(action.redirect, 303);
-  }
-
   // A param a schema refuses is a pathname the pattern does not answer, so
   // the walk goes on to whatever the table declares next — the catch-all in
   // the end. A catch-all answers whatever its params hold: a 404 is already
@@ -239,6 +239,30 @@ export default async function handler(request: Request): Promise<Response> {
     parsed = accepted;
     return true;
   });
+
+  // The guards along the pattern, before anything else answers — the action
+  // a POST carries included. A URL nothing answers is still below the root,
+  // so the root's run for it. They run in the context the schemas left, so a
+  // guard reads the locale the URL names.
+  const guarded = await parsed.enter(() =>
+    runGuards(guards[match?.pattern ?? '/*'] ?? [], {
+      request,
+      params: match?.params ?? {},
+    }),
+  );
+  if (guarded !== null) return guarded;
+
+  const temporaryReferences = createTemporaryReferenceSet();
+  // An action answers the request as much as a guard does: it reads and
+  // writes the cookies, and what it writes goes on the answer.
+  const action: ActionResult = isAction
+    ? await inPhase('action', () => runAction(request, temporaryReferences))
+    : {};
+  if (action.redirect !== undefined && !addressed) {
+    // A form posted without JavaScript: the browser follows a 303 with a GET.
+    return redirectResponse(action.redirect, 303);
+  }
+
   const missing = match === null || match.pattern.endsWith('/*');
   const status = missing ? 404 : 200;
   // An action the client addressed answers in the shape the client already
@@ -333,7 +357,7 @@ export default async function handler(request: Request): Promise<Response> {
     status,
     headers: { 'content-type': HTML_TYPE },
   });
-}
+};
 
 if (import.meta.hot) {
   import.meta.hot.accept();
