@@ -136,6 +136,44 @@ export const CheckMarkFollowsReset: Story = {
   },
 };
 
+const submittedValue = (checkbox: HTMLInputElement) =>
+  new FormData(checkbox.form ?? undefined).get(checkbox.name);
+
+export const SubmitsItemValue: Story = {
+  render: () => (
+    <form>
+      <Checkbox
+        defaultChecked
+        itemValue="yes"
+        label="in stock"
+        name="inStock"
+      />
+    </form>
+  ),
+  play: async ({ canvas }) => {
+    const checkbox = canvas.getByRole<HTMLInputElement>('checkbox', {
+      name: 'in stock',
+    });
+
+    await expect(submittedValue(checkbox)).toBe('yes');
+  },
+};
+
+export const SubmitsOnWithoutItemValue: Story = {
+  render: () => (
+    <form>
+      <Checkbox defaultChecked label="agree" name="agree" />
+    </form>
+  ),
+  play: async ({ canvas }) => {
+    const checkbox = canvas.getByRole<HTMLInputElement>('checkbox', {
+      name: 'agree',
+    });
+
+    await expect(submittedValue(checkbox)).toBe('on');
+  },
+};
+
 // FormControl の renderInput から受け取る invalid を aria-invalid として伝える
 export const Invalid: Story = {
   args: {

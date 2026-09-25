@@ -564,3 +564,64 @@ describe('prefetching the page a link leads to', () => {
     expect(screen.container.textContent).toBe('next');
   });
 });
+
+// ペイロードを取りに来た pathname を順に集め、どれにも NEXT で答える
+const recordPayloadRequests = (): string[] => {
+  const requested: string[] = [];
+  vi.stubGlobal('fetch', (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = new URL(
+      String(input instanceof Request ? input.url : input),
+      location.href,
+    );
+    if (!url.pathname.endsWith('/index.rsc')) return passThrough(input, init);
+    requested.push(url.pathname);
+    return Promise.resolve(
+      new Response(
+        JSON.stringify({
+          tree: 'next page',
+          pathname: '/next',
+          client: RUNNING,
+        }),
+        { headers: { 'content-type': 'text/x-component;charset=utf-8' } },
+      ),
+    );
+  });
+  return requested;
+};
+
+describe('under a base', () => {
+  beforeEach(() => {
+    vi.stubEnv('BASE_URL', '/site/');
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it('fetches the payload that sits beside the page under the base', async () => {
+    const requested = recordPayloadRequests();
+    const screen = await render(<AppRouter pathname="/" tree="first page" />);
+
+    await navigation.navigate('/site/next').finished;
+
+    await expect.element(screen.getByText('next page')).toBeInTheDocument();
+    expect(requested).toStrictEqual(['/site/next/index.rsc']);
+  });
+
+  it('leaves a URL outside the base to the browser', async () => {
+    const requested = recordPayloadRequests();
+    const screen = await render(<AppRouter pathname="/" tree="first page" />);
+
+    // 引き受けなければ文書の読み込みになってテストが落ちるので、ここでは
+    // テストがルーターを演じる。引き受けなかったことは、取りに行かないことで見る
+    navigation.addEventListener('navigate', interceptEverything);
+    try {
+      await navigation.navigate('/elsewhere').finished;
+    } finally {
+      navigation.removeEventListener('navigate', interceptEverything);
+    }
+
+    expect(requested).toStrictEqual([]);
+    expect(screen.container.textContent).toBe('first page');
+  });
+});

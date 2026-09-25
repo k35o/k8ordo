@@ -585,3 +585,48 @@ it('navigates with a bound param supplied by its source, and honours the options
   expect(location.pathname).toBe('/products/other');
   expect(navigation.currentEntry?.index).toBe(index);
 });
+
+describe('under a base', () => {
+  beforeEach(() => {
+    vi.stubEnv('BASE_URL', '/docs/');
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it('matches the pathname below the base, and reads it without the base', async () => {
+    await navigateOutsideTheTable('/docs/products');
+
+    const screen = await render(<Router routes={routes} />);
+
+    await expect.element(screen.getByTestId('list')).toBeInTheDocument();
+    expect(screen.getByTestId('pathname').element().textContent).toBe(
+      '/products',
+    );
+  });
+
+  it('navigates to the URL under the base and renders the page the table names', async () => {
+    await navigateOutsideTheTable('/docs/products');
+    const screen = await render(<Router routes={routes} />);
+
+    await navigateTo('/products/:id', { id: '7' }).finished;
+
+    expect(location.pathname).toBe('/docs/products/7');
+    await expect
+      .element(screen.getByTestId('detail'))
+      .toHaveTextContent('/products/:id:7');
+  });
+
+  it('leaves a URL outside the base to the browser, whatever the table says', async () => {
+    await navigateOutsideTheTable('/docs/products');
+    const screen = await render(<Router routes={routes} />);
+
+    // ルーターが引き受けなければ、文書の読み込みになってテストが落ちる。
+    // 引き受けなかったことは、ページが替わらないことで確かめる
+    await navigateOutsideTheTable('/about');
+
+    await expect.element(screen.getByTestId('list')).toBeInTheDocument();
+    expect(screen.container.querySelector('[data-testid="about"]')).toBeNull();
+  });
+});

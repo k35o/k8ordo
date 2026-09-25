@@ -63,7 +63,7 @@ export default function Root({
 }) {
   const locale = locales.delocalize(pathname).locale ?? locales.default;
   return (
-    <html lang={locale}>
+    <html dir={locales.definitions[locale].dir} lang={locale}>
       <body>{children}</body>
     </html>
   );

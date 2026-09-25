@@ -723,6 +723,8 @@ Props:
 
 The label is passed as the `label` prop, not as children. `onChange` is `(checked, event)`.
 
+`itemValue` is the input's `value`: the string a checked box submits under its `name`. Without it the box renders no `value` and submits the browser's default, `on`. There is no `value` prop — on a checkbox it is easily mistaken for the checked state, which is `checked`.
+
 ```tsx
 import { Checkbox } from '@k8ordo/ui';
 
@@ -731,6 +733,9 @@ import { Checkbox } from '@k8ordo/ui';
 
 // Uncontrolled
 <Checkbox defaultChecked label="I agree" />
+
+// Submits inStock=true when checked, instead of inStock=on
+<Checkbox itemValue="true" label="In stock only" name="inStock" />
 ```
 
 Props:
@@ -1071,9 +1076,71 @@ Props:
 - `children`: `string` (required)
 - Other props are forwarded to `HTMLAttributes<HTMLElement>`, except `className` / `style`.
 
+### Kbd
+
+One keyboard key, drawn as a key cap. A shortcut is several `Kbd` side by side,
+one per key. When the key is a symbol a screen reader would not say usefully
+(`⌘`, `⇧`), pass `label`: the symbol stays on screen and the label is what is
+read out.
+
+```tsx
+import { Kbd } from '@k8ordo/ui';
+
+<Kbd>Esc</Kbd>
+
+<Kbd label="Command">⌘</Kbd>
+<Kbd>K</Kbd>
+```
+
+Props:
+
+- `children`: `string` (required)
+- `label`: `string`
+- Other props are forwarded to `HTMLAttributes<HTMLElement>`, except `className` / `style`.
+
+### Carousel
+
+Slides that scroll along the inline axis, snapping one slide at a time, with
+previous and next buttons under them. It is built on scroll snapping, so a
+trackpad, a touch swipe, and the arrow keys (the track takes focus) all move it
+as well; the buttons move one slide per press and are disabled at either end.
+
+```tsx
+import { Carousel } from '@k8ordo/ui';
+
+<Carousel.Root label="Featured posts" slideSize="md">
+  {posts.map((post) => (
+    <Carousel.Slide key={post.id} label={post.title}>
+      <PostCard post={post} />
+    </Carousel.Slide>
+  ))}
+</Carousel.Root>;
+```
+
+`slideSize` sets how much of the track one slide takes: `full` (one at a time),
+`lg` (the next one peeks in), `md` (two), `sm` (three). With `full` and `lg` the
+current position is shown as `2 / 5`; with several slides in view there is no
+single current slide, so no position is shown. The region is announced as a
+carousel and each slide as a slide (`aria-roledescription`); give a slide a
+`label` when its content has a title. The slides follow the writing mode, so
+under `.writing-v` the track scrolls vertically. There is no autoplay.
+
+Props (Carousel.Root):
+
+- `label`: `string` (required)
+- `children`: `ReactNode`
+- `slideSize`: `'full'` | `'lg'` | `'md'` | `'sm'` (default: `'full'`)
+
+Props (Carousel.Slide):
+
+- `children`: `ReactNode`
+- `label`: `string`
+
 ### Table
 
-A data table, as a compound component.
+A data table, as a compound component. `Table.EmptyState` is the row to put in
+`Table.Body` when there are no rows: it spans `colSpan` columns and draws an
+`EmptyState` with the rest of its props.
 
 ```tsx
 import { Table } from '@k8ordo/ui';
@@ -1113,8 +1180,12 @@ Props (Table.Cell):
 
 Props (Table.EmptyState):
 
-- `children`: `ReactNode` (required)
 - `colSpan`: `number` (required)
+- `title`: `string` (required)
+- `action`: `ReactNode`
+- `description`: `ReactNode`
+- `icon`: `ReactNode`
+- Other props are forwarded to `ComponentProps<typeof EmptyState>`.
 
 Props (Table.Head):
 
@@ -1162,6 +1233,31 @@ Props:
 `action` is an `AlertAction`, `{ label: string; renderItem: (props: { children: ReactNode }) => ReactNode }`.
 `renderItem` receives `label` as `children`; render your own button or link
 around it.
+
+### EmptyState
+
+What a list, a table, or a search shows when there is nothing in it: a title,
+an optional description and icon, and an optional action. Inside a table, use
+`Table.EmptyState`, which puts the same content in a row spanning the columns.
+
+```tsx
+import { Button, EmptyState, TableIcon } from '@k8ordo/ui';
+
+<EmptyState
+  action={<Button onClick={clearFilters}>Clear filters</Button>}
+  description="Try removing a filter."
+  icon={<TableIcon size="lg" />}
+  title="No matching posts"
+/>;
+```
+
+Props:
+
+- `title`: `string` (required)
+- `action`: `ReactNode`
+- `description`: `ReactNode`
+- `icon`: `ReactNode`
+- Other props are forwarded to `HTMLAttributes<HTMLDivElement>`, except `children` / `className` / `style`.
 
 ### Toast
 
@@ -1767,6 +1863,7 @@ Every key in the `Messages` type. All values are `string`.
 | Breadcrumb    | `breadcrumb`                                                                                                                                     |
 | Tabs          | `tabList`                                                                                                                                        |
 | Pagination    | `paginationLabel`, `paginationPrevious`, `paginationNext`                                                                                        |
+| Carousel      | `carousel`, `carouselSlide`, `carouselPrevious`, `carouselNext`                                                                                  |
 | AI chat       | `chat`, `scrollToLatest`, `reasoning`, `reasoningStreaming`, `suggestions`, `send`, `stop`, `toolInput`, `toolOutput`, `toolError`, `toolDenied` |
 | Response      | The `response*` keys below                                                                                                                       |
 

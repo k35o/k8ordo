@@ -4,6 +4,7 @@ import {
   NavigationGeneration,
   PathnameProvider,
   useInterceptedNavigation,
+  withoutBase,
 } from '@k8ordo/router';
 import {
   createFromFetch,
@@ -167,10 +168,11 @@ export function AppRouter({
 
   const { generation } = useInterceptedNavigation<ReactNode>({
     // The browser holds no route table, so this cannot answer "is it mine?"
-    // the way the client router does. It claims every same-origin URL and
-    // finds out from the answer — which is why `load` has somewhere to put
-    // the ones that turn out not to be.
-    claim: (url) => url.origin === location.origin,
+    // the way the client router does. It claims every same-origin URL under
+    // Vite's `base` and finds out from the answer — which is why `load` has
+    // somewhere to put the ones that turn out not to be.
+    claim: (url) =>
+      url.origin === location.origin && withoutBase(url.pathname) !== null,
     load: async (url, signal) => {
       const payloadPath = payloadPathFor(url.pathname);
       let payload: Payload | null;

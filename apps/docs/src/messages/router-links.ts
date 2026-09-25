@@ -301,6 +301,36 @@ export const normalizeTable = {
   output: message({ ja: '出力', en: 'Output' }),
 };
 
+export const baseTitle = message({
+  ja: 'サブパスに置く（Vite の base）',
+  en: 'Served under a base',
+});
+
+export const baseDescription = message({
+  ja: '表はアプリの根から書いたままです。アプリをその下（Vite の `base`、たとえば `/docs/`）に置いたときは、ルーターが `import.meta.env.BASE_URL` を読んで残りを受け持ちます。',
+  en: 'The table stays written from the application’s root. When the application is served below one — Vite’s `base`, `/docs/` say — the router reads `import.meta.env.BASE_URL` and does the rest.',
+});
+
+export const baseLinks = message({
+  ja: '`href` と `navigateTo` は、すべてのリンクの前に base を付けます。`href` が返すのはリンク先の URL なので、型は表のパスではなく `string` です',
+  en: '`href` and `navigateTo` put it in front of every link. What `href` returns is the URL a link points at, so it is typed `string`, not as a path in the table',
+});
+
+export const basePathname = message({
+  ja: '`usePathname` は base を外して返すので、パターンとそのまま比べられます。`useMatch` もそれに従い、`<Router>` は base の下の pathname で表を照合します',
+  en: '`usePathname` takes it off, so what it returns compares with the patterns; `useMatch` follows, and `<Router>` matches the table against the pathname below the base',
+});
+
+export const baseOutside = message({
+  ja: 'base の外の URL はアプリのものではないので、表が何と言っても `<Router>` はブラウザに任せます',
+  en: 'A URL outside the base is not the application’s, and `<Router>` leaves it to the browser whatever the table says',
+});
+
+export const baseHelpers = message({
+  ja: '`withBase(pathname)` と `withoutBase(pathname)` は、この 2 つの手順を自分のコードで使うためのものです。`withoutBase` は base の外の URL に `null` を返します。Vite が処理しないコード（`import.meta.env` が無い）では、2 つ目の引数で base を渡します。相対の base（`./`）はパスを名指さないので、何も付け外ししません。',
+  en: '`withBase(pathname)` and `withoutBase(pathname)` are those two steps for code of your own; `withoutBase` answers `null` for a URL outside the base. Code Vite does not process has no `import.meta.env` and passes the base as the second argument. A relative base (`./`) names no path, so it adds and removes nothing.',
+});
+
 export const stateTitle = message({
   ja: '`@k8ordo/state` と同じパスの型を使う',
   en: 'Sharing typed paths with `@k8ordo/state`',

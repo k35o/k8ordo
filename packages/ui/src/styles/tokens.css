@@ -250,6 +250,69 @@
   --group-quaternary: var(--purple-200);
 }
 
+@media (prefers-contrast: more) {
+  /* :root だけにすると、後に書いたこちらが html.dark のダークの値を上書きする。
+     :not(.dark) を :where で包むのは、詳細度を :root のままにして、利用側が
+     後から :root で上書きしたトークンに勝たないようにするため */
+  :root:where(:not(.dark)) {
+    --fg-base: var(--gray-950);
+    --fg-subtle: var(--gray-800);
+    --fg-mute: var(--gray-900);
+    --fg-info: var(--blue-900);
+    --fg-success: var(--green-900);
+    --fg-warning: var(--yellow-900);
+    --fg-error: var(--red-900);
+
+    --border-base: var(--gray-600);
+    --border-subtle: var(--gray-500);
+    --border-mute: var(--gray-500);
+    --border-emphasize: var(--gray-800);
+    --border-info: var(--blue-700);
+    --border-success: var(--green-700);
+    --border-warning: var(--yellow-700);
+    --border-error: var(--red-700);
+
+    --primary-fg: var(--teal-900);
+    --primary-border: var(--teal-700);
+
+    --secondary-fg: var(--cyan-900);
+    --secondary-border: var(--cyan-700);
+  }
+
+  .dark {
+    --fg-base: var(--white);
+    --fg-subtle: var(--gray-200);
+    --fg-mute: var(--gray-100);
+    --fg-info: var(--blue-100);
+    --fg-success: var(--green-100);
+    --fg-warning: var(--yellow-100);
+    --fg-error: var(--red-100);
+
+    --bg-emphasize: var(--gray-700);
+
+    --border-base: var(--gray-400);
+    --border-subtle: var(--gray-500);
+    --border-mute: var(--gray-400);
+    --border-emphasize: var(--gray-200);
+    --border-info: var(--blue-300);
+    --border-success: var(--green-300);
+    --border-warning: var(--yellow-300);
+    --border-error: var(--red-300);
+
+    --primary-fg: var(--teal-100);
+    --primary-bg: var(--teal-900);
+    --primary-bg-mute: var(--teal-950);
+    --primary-bg-emphasize: var(--teal-800);
+    --primary-border: var(--teal-300);
+
+    --secondary-fg: var(--cyan-100);
+    --secondary-bg: var(--cyan-900);
+    --secondary-bg-mute: var(--cyan-950);
+    --secondary-bg-emphasize: var(--cyan-800);
+    --secondary-border: var(--cyan-300);
+  }
+}
+
 @theme inline {
   --color-*: initial;
   --color-fg-base: var(--fg-base);

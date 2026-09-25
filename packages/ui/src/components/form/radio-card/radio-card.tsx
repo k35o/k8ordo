@@ -154,7 +154,7 @@ export const RadioCard: FC<Props> = ({
             >
               <span
                 className={cn(
-                  'size-2 rounded-full bg-primary-border transition-opacity',
+                  'size-2 rounded-full bg-primary-border transition-opacity forced-colors:bg-[CanvasText]',
                   checked ? 'opacity-100' : 'opacity-0',
                 )}
               />
