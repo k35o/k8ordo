@@ -75,7 +75,22 @@ pnpm check         # check:write to auto-fix
   snapshots.
 - **Boundary data is input.** URL params, Web Storage and cookie JSON, and
   restored entry state salvage field-by-field to their own defaults — never a
-  throw, never a poisoned sibling. Memory has no schema because its values never cross a boundary.
+  throw, never a poisoned sibling. Memory has no schema because its values
+  never cross a boundary.
+- **A versioned row is `[version, values]`; an unversioned one is the bare
+  values object** (`row/codec.ts`). Local and cookie definitions take an
+  optional `{ version, migrate }`; the array envelope can never be mistaken
+  for an unversioned row, which is always an object, and a bare object in a
+  versioned definition reads as version 0. Older rows go through `migrate`
+  then salvage and come back `stale`, which the browser stores write back —
+  never during a render, where stores are created: the Web Storage store in
+  a microtask that re-reads the row and writes only if it is still stale, the
+  cookie store as an empty-patch write on its serialized chain (never from
+  inside `write()`, whose own `read()` would re-trigger it). `parseCookies`
+  migrates but never writes.
+  Newer rows are salvaged and never written back (the newer tab owns them),
+  and a throwing `migrate` reads as nothing stored and leaves the row for a
+  fixed `migrate` to retry. Session state takes no version by design.
 - **A url value is canonicalized by the road it comes back on.** The url
   codec's `salvage` is `parse(new URLSearchParams(search(values)))`, not a
   parse of the typed values: a one-way spelling (`z.stringbool()`'s
@@ -121,6 +136,7 @@ src/
   base.ts              withBase: Vite's base in front of a link
   storage-state.ts     defineLocalState() / defineSessionState(); storageKey, inlineRead
   cookie-state.ts      defineCookieState(); cookie name, value encoding, parseCookies
+  row/codec.ts         RowCodec: [version, values] envelope, migrate, stale write-back flag
   memory-state.ts      defineMemoryState() — no schema by design
   store/core.ts        snapshot core: key-diff notify, picks, update handles
   store/registry.ts    kind+key-keyed store registry + resetStateRegistry()
@@ -159,7 +175,9 @@ same field submits the same string.
   reads it from there — and `inlineRead()` renders the pre-hydration read as
   a self-contained expression so an app never hand-writes the key or the
   JSON envelope into an inline script. The schema cannot run there, which is
-  why it returns the raw object or `null` and the GUIDE calls it untrusted.
+  why it returns the raw object or `null` and the GUIDE calls it untrusted;
+  for a versioned definition it also returns `null` for any other version,
+  since `migrate` cannot run there either.
   A cookie definition likewise owns `cookieName` (`k8ordo-state.<key>` — `.`,
   not `:`, because a cookie name is an HTTP token, and a key that would break
   the token is refused at define time) and `cookieValue()`, the

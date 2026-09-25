@@ -129,6 +129,62 @@ Web Storage and the cookie hold, so keep those fields to what JSON
 represents: a `z.date()` shows its `Date` after the write and falls back to
 its default on the next load.
 
+## When a stored shape changes
+
+A localStorage row or a cookie outlives the code that wrote it. On its own, a
+row an older schema wrote salvages field by field: every field the schema
+still accepts keeps its value and the rest land on their defaults — right for
+an added field or a tightened constraint, wrong for a renamed field or a
+changed meaning, which reset without a word. For those, give
+`defineLocalState` or `defineCookieState` a version and a migration:
+
+```ts
+export const prefs = defineLocalState(
+  'prefs',
+  z.object({
+    view: z._default(z.enum(['grid', 'table']), 'grid'),
+    pageSize: z._default(z.number(), 20),
+  }),
+  {
+    version: 1,
+    // Rows from before the version stored { layout: 'list' | 'cards' }.
+    migrate: (old) => ({
+      view: old['layout'] === 'list' ? 'table' : 'grid',
+      pageSize: old['pageSize'],
+    }),
+  },
+);
+```
+
+- **A versioned row is `[version, values]`.** A row with no version — written
+  before the definition declared one — reads as version `0`, so a definition
+  adopts a version when its shape first changes and migrates its existing
+  rows from `0`. Raise the version on the next change and branch on
+  `migrate`'s second argument, `fromVersion`.
+- **Older rows are migrated, then read, then written back.** A row older than
+  `version` goes through `migrate(old, fromVersion)` and then through the
+  schema, field by field like any read: `migrate` returns the schema's keys
+  (another key is a type error) with whatever values it has — hand old
+  values over as they are, and the schema rejects what does not fit. The
+  browser store writes the result back in the current version. The server's
+  `parseCookies` migrates too but never writes (a page cannot answer with
+  `Set-Cookie`); the browser writes back after hydration, and both read the
+  same values, so nothing flashes.
+- **A newer row is left alone.** A row a newer version wrote — a tab that
+  loaded the next deploy first — is salvaged without `migrate` and never
+  written back, so it stays the newer tab's.
+- **A throwing `migrate` loses nothing.** It reads as nothing stored: the
+  defaults show, and the row stays as it was for a fixed `migrate` to try
+  again.
+- **Adopting a version changes the row's shape.** A tab still running code
+  from before reads `[version, values]` as nothing stored until it reloads.
+- **`inlineRead()` hands out only the current version.** Neither the schema
+  nor `migrate` can run before a module loads, so a row of any other version
+  evaluates to `null` until a store has migrated it.
+- **Without the option, nothing changes:** a row is the bare values object,
+  salvaged field by field. `defineSessionState` takes no version — its rows
+  go with the tab, and salvage covers the rare one kept open across a deploy.
+
 ## zod, or zod/mini
 
 Parsing runs on zod's shared core, so a schema written with either entry
@@ -512,7 +568,8 @@ the store writes under, and `inlineRead()` returns a JavaScript _expression_
 for an inline `<script>` that evaluates, in the browser, to the object stored
 in its own storage area — localStorage or sessionStorage — or
 `null` when nothing is stored, the JSON is corrupt, the value is not an object,
-or storage cannot be read. The key is escaped for a script context, so any
+or storage cannot be read — and, for a versioned local state, when the row was
+written by another version. The key is escaped for a script context, so any
 key is safe to emit.
 
 ```tsx
