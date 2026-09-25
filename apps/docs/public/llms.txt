@@ -446,8 +446,10 @@ These docs are served from <https://ordo.k8o.me>.
   drawn for the current locale, dates in its time zone), the Server
   Component boundary (a message is called before it is passed to a
   `'use client'` component), what reaches the browser, where the locale comes
-  from on each side, `/` and `<html lang>` / `dir`, static path expansion, and
-  pairing with `@k8ordo/router` / `@k8ordo/ui` / `@k8ordo/form`.
+  from on each side, `/` (a `307` from a `guard.ts` under `@k8ordo/server`,
+  an effect under `@k8ordo/static`) and `<html lang>` / `dir`, static path
+  expansion, and pairing with `@k8ordo/router` / `@k8ordo/ui` /
+  `@k8ordo/form`.
 
 ## Entry point
 
