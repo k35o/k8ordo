@@ -1,6 +1,6 @@
 import { Code } from '@k8ordo/ui';
+import { CodeBlock } from '@k8ordo/ui/code-block';
 
-import { CodeBlock } from '../../../../components/code-block';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { BaseGuide } from '../../../../components/framework-guide/base';
 import {
@@ -21,7 +21,10 @@ const OUTPUT = `dist/
     index.js
   ssr/
   client/
-    assets/`;
+    assets/
+      index-1a2b.js
+      index-1a2b.js.br
+      index-1a2b.js.gz`;
 
 const SERVE = `// serve.js
 import { serve } from '@k8ordo/server/serve';
@@ -151,7 +154,10 @@ export default function ServerDeployPage() {
       </DocSection>
 
       <DocSection description={t.answersFiles} title={t.answersTitle}>
+        <Paragraph text={t.answersEncoding} />
+        <Paragraph text={t.answersRevalidation} />
         <Paragraph text={t.answersHandler} />
+        <Paragraph text={t.answersStream} />
         <Paragraph text={t.answersSafe} />
         <Paragraph text={t.answersStatuses}>
           <LocaleAnchor path="/:locale/server/errors">

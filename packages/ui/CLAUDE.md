@@ -300,6 +300,7 @@ The authoritative list is the `exports` map in `package.json`.
 @k8ordo/ui/ai                  AI chat components
 @k8ordo/ui/ai/response         Response renderer only
 @k8ordo/ui/ai-sdk              AI SDK adapter
+@k8ordo/ui/code-block          CodeBlock (Server Component; shiki and server-only are dependencies)
 @k8ordo/ui/json-render         json-render catalog
 @k8ordo/ui/json-render/registry
 @k8ordo/ui/openui              OpenUI component library

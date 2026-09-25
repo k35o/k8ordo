@@ -1,7 +1,7 @@
 import type { Message } from '@k8ordo/i18n';
 import { Code, Heading } from '@k8ordo/ui';
+import { CodeBlock } from '@k8ordo/ui/code-block';
 
-import { CodeBlock } from '../../../../components/code-block';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Rich } from '../../../../components/rich';
@@ -37,15 +37,13 @@ const locale = locales.delocalize(pathname).locale ?? locales.default;
 <html dir={locales.definitions[locale].dir} lang={locale}>`;
 
 const PREFERRED = `// src/preferred-locale.ts
-import { parseAcceptLanguage } from '@k8ordo/i18n';
-
 import { locales } from './i18n';
 import type { Locale } from './i18n';
 
 export const fromBrowser = (): Locale => locales.negotiate(navigator.languages);
 
-export const fromHeaders = (headers: Headers): Locale =>
-  locales.negotiate(parseAcceptLanguage(headers.get('accept-language')));`;
+export const fromRequest = (request: Request): Locale =>
+  locales.negotiateRequest(request, { cookie: 'locale' });`;
 
 type Row = { code: string; description: Message };
 
@@ -75,6 +73,10 @@ const MEMBERS: readonly Row[] = [
   { code: 'default', description: s.members.default },
   { code: 'is(value)', description: s.members.is },
   { code: 'negotiate(requested)', description: s.members.negotiate },
+  {
+    code: 'negotiateRequest(request, options?)',
+    description: s.members.negotiateRequest,
+  },
   { code: 'localize(pathname, locale)', description: s.members.localize },
   { code: 'delocalize(pathname)', description: s.members.delocalize },
   { code: 'paths(patterns)', description: s.members.paths },
@@ -88,6 +90,10 @@ const TYPES: readonly Row[] = [
   { code: 'LocaleOf<typeof locales>', description: s.members.localeOf },
   { code: 'LocaleDefinition', description: s.members.localeDefinition },
   { code: 'LocalesOptions<D>', description: s.members.localesOptions },
+  {
+    code: 'NegotiateRequestOptions',
+    description: s.members.negotiateRequestOptions,
+  },
   { code: 'Delocalized<L>', description: s.members.delocalized },
   {
     code: 'LocaleParamsSchema<L>',
@@ -289,6 +295,9 @@ export default function I18nLocalesPage() {
           <Rich>{s.negotiation.iterable()}</Rich>
         </p>
         <CodeBlock code={PREFERRED} lang="ts" />
+        <p className="text-fg-mute leading-relaxed">
+          <Rich>{s.negotiation.request()}</Rich>
+        </p>
         <Heading level="h3">{s.negotiation.examplesTitle()}</Heading>
         <p className="text-fg-mute leading-relaxed">
           <Rich>{s.negotiation.examplesDescription()}</Rich>
