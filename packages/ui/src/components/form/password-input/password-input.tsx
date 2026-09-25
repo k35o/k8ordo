@@ -54,8 +54,10 @@ export const PasswordInput: FC<Props> = ({
         disabled={disabled}
         readOnly={pending || readOnly}
         ref={ref}
-        type={isVisible ? 'text' : 'password'}
         {...rest}
+        // rest より後に置く。@k8ordo/form が導く type="password" のように、
+        // 広げた type に表示の切り替えを上書きさせない
+        type={isVisible ? 'text' : 'password'}
       />
       <button
         aria-label={

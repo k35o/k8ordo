@@ -31,6 +31,8 @@ const MESSAGE_USAGE = {
   fileFieldDrop: 'FileField.Dropzone',
   numberFieldIncrement: 'NumberField',
   numberFieldDecrement: 'NumberField',
+  numberFieldRangeUnderflow: 'NumberField',
+  numberFieldRangeOverflow: 'NumberField',
   calendarPreviousMonth: 'Calendar / DatePicker',
   calendarNextMonth: 'Calendar / DatePicker',
   datePickerOpen: 'DatePicker',
