@@ -94,8 +94,11 @@ const errorShown = (message: string) =>
 const listOf = (value: string | string[] | undefined): string[] =>
   Array.isArray(value) ? value : [];
 
-// 送信を落とすためだけの欄。空のまま送れば必ずサーバーで失敗する
-const failing = z.string().min(1, 'メモを入力してください');
+// 送信をサーバーで落とすためだけの欄。ブラウザの検査は通るので、送信は
+// action まで届き、失敗が state で返ってくる
+const failing = z.string().refine((memo) => memo !== '却下', '却下されました');
+
+const refuseOnServer = () => userEvent.fill(labelled('メモ'), '却下');
 
 const Memo = ({ form }: { form: UseFormReturn<'memo', never> }) => {
   const memo = form.field('memo');
@@ -134,6 +137,7 @@ describe('TextField', () => {
     title: z.string().min(1, 'タイトルを入力してください'),
     email: z.email('メールアドレスの形式で入力してください'),
     birthday: z.iso.date('日付を入力してください'),
+    memo: failing,
   });
   const fields = formFields(schema);
 
@@ -168,6 +172,7 @@ describe('TextField', () => {
               )}
               required={birthday.required}
             />
+            <Memo form={form} />
           </>
         );
       }}
@@ -201,11 +206,14 @@ describe('TextField', () => {
 
     await userEvent.fill(labelled('タイトル'), '秋の予定');
     await userEvent.fill(labelled('メール'), 'me@example.com');
+    await userEvent.fill(labelled('誕生日'), '2026-09-25');
+    await refuseOnServer();
     submit();
 
-    await expect.poll(() => errorShown('日付を入力してください')).toBe(true);
-    await expect.element(labelled('誕生日')).toHaveFocus();
+    await expect.poll(() => errorShown('却下されました')).toBe(true);
+    await expect.element(labelled('メモ')).toHaveFocus();
     await expect.element(labelled('タイトル')).toHaveValue('秋の予定');
+    await expect.element(labelled('誕生日')).toHaveValue('2026-09-25');
   });
 
   it('すべて満たして送ると値が届く', async () => {
@@ -222,6 +230,7 @@ describe('TextField', () => {
         title: '秋の予定',
         email: 'me@example.com',
         birthday: '2026-09-25',
+        memo: '',
       });
   });
 
@@ -243,6 +252,7 @@ describe('PasswordInput', () => {
       .string()
       .min(8, '8文字以上で入力してください')
       .meta({ input: 'password' }),
+    memo: failing,
   });
   const fields = formFields(schema);
 
@@ -251,15 +261,18 @@ describe('PasswordInput', () => {
       {(form) => {
         const password = form.field('password');
         return (
-          <FormControl
-            errorText={password.error}
-            invalid={password.invalid}
-            label="パスワード"
-            renderInput={(props) => (
-              <PasswordInput {...props} {...password.input} />
-            )}
-            required={password.required}
-          />
+          <>
+            <FormControl
+              errorText={password.error}
+              invalid={password.invalid}
+              label="パスワード"
+              renderInput={(props) => (
+                <PasswordInput {...props} {...password.input} />
+              )}
+              required={password.required}
+            />
+            <Memo form={form} />
+          </>
         );
       }}
     </Harness>
@@ -288,12 +301,11 @@ describe('PasswordInput', () => {
   it('送信に失敗しても、入力したパスワードは描き直さない', async () => {
     await render(<Login />);
 
-    await userEvent.fill(labelled('パスワード必須'), 'abc');
+    await userEvent.fill(labelled('パスワード必須'), 'correct-horse');
+    await refuseOnServer();
     submit();
 
-    await expect
-      .poll(() => errorShown('8文字以上で入力してください'))
-      .toBe(true);
+    await expect.poll(() => errorShown('却下されました')).toBe(true);
     await expect.element(labelled('パスワード必須')).toHaveValue('');
   });
 });
@@ -389,7 +401,9 @@ describe('Select', () => {
   it('選ばずに離れると、プレースホルダーのままとして zod の文言を出す', async () => {
     await render(<Plan />);
 
-    await labelled('プラン').click();
+    // クリックすると Linux の Chromium ではネイティブの一覧が開き、Tab が
+    // その一覧に取られて欄から離れない
+    (labelled('プラン').element() as HTMLSelectElement).focus();
     await userEvent.tab();
 
     await expect.poll(() => errorShown('プランを選んでください')).toBe(true);
@@ -399,9 +413,10 @@ describe('Select', () => {
     await render(<Plan />);
 
     await labelled('プラン').selectOptions('pro');
+    await refuseOnServer();
     submit();
 
-    await expect.poll(() => errorShown('メモを入力してください')).toBe(true);
+    await expect.poll(() => errorShown('却下されました')).toBe(true);
     await expect.element(labelled('プラン')).toHaveValue('pro');
   });
 
@@ -467,9 +482,10 @@ describe('Radio', () => {
     const screen = await render(<Plan />);
 
     await screen.getByRole('radio', { name: 'プロ' }).click();
+    await refuseOnServer();
     submit();
 
-    await expect.poll(() => errorShown('メモを入力してください')).toBe(true);
+    await expect.poll(() => errorShown('却下されました')).toBe(true);
     await expect
       .element(screen.getByRole('radio', { name: 'プロ' }))
       .toBeChecked();
@@ -537,9 +553,10 @@ describe('RadioCard', () => {
     const screen = await render(<Plan />);
 
     await screen.getByRole('radio', { name: 'プロ' }).click();
+    await refuseOnServer();
     submit();
 
-    await expect.poll(() => errorShown('メモを入力してください')).toBe(true);
+    await expect.poll(() => errorShown('却下されました')).toBe(true);
     await expect
       .element(screen.getByRole('radio', { name: 'プロ' }))
       .toBeChecked();
@@ -637,9 +654,10 @@ describe('Switch', () => {
     const screen = await render(<Settings />);
 
     await screen.getByRole('switch').click();
+    await refuseOnServer();
     submit();
 
-    await expect.poll(() => errorShown('メモを入力してください')).toBe(true);
+    await expect.poll(() => errorShown('却下されました')).toBe(true);
     await expect.element(screen.getByRole('switch')).toBeChecked();
   });
 
@@ -734,9 +752,10 @@ describe('CheckboxGroup', () => {
     const screen = await render(<Tags />);
 
     await screen.getByRole('checkbox', { name: 'Vue' }).click();
+    await refuseOnServer();
     submit();
 
-    await expect.poll(() => errorShown('メモを入力してください')).toBe(true);
+    await expect.poll(() => errorShown('却下されました')).toBe(true);
     await expect
       .element(screen.getByRole('checkbox', { name: 'Vue' }))
       .toBeChecked();
@@ -806,9 +825,10 @@ describe('CheckboxCard', () => {
     const screen = await render(<Tags />);
 
     await screen.getByRole('checkbox', { name: 'Vue' }).click();
+    await refuseOnServer();
     submit();
 
-    await expect.poll(() => errorShown('メモを入力してください')).toBe(true);
+    await expect.poll(() => errorShown('却下されました')).toBe(true);
     await expect
       .element(screen.getByRole('checkbox', { name: 'Vue' }))
       .toBeChecked();
@@ -901,8 +921,9 @@ describe('Autocomplete', () => {
     const screen = await render(<Tags />);
 
     await choose('Vue');
+    await refuseOnServer();
     submit();
-    await expect.poll(() => errorShown('メモを入力してください')).toBe(true);
+    await expect.poll(() => errorShown('却下されました')).toBe(true);
     await expect
       .element(screen.getByRole('button', { name: 'タグを削除' }))
       .toBeInTheDocument();
@@ -1014,9 +1035,10 @@ describe('NumberField', () => {
 
     await userEvent.fill(labelled('個数'), '3');
     await userEvent.fill(labelled('比率'), '0.25');
+    await refuseOnServer();
     submit();
 
-    await expect.poll(() => errorShown('メモを入力してください')).toBe(true);
+    await expect.poll(() => errorShown('却下されました')).toBe(true);
     await expect.element(labelled('個数')).toHaveValue('3');
     await expect.element(labelled('比率')).toHaveValue('0.25');
   });
@@ -1090,9 +1112,10 @@ describe('Slider', () => {
     await render(<Volume />);
 
     await userEvent.fill(labelled('音量'), '30');
+    await refuseOnServer();
     submit();
 
-    await expect.poll(() => errorShown('メモを入力してください')).toBe(true);
+    await expect.poll(() => errorShown('却下されました')).toBe(true);
     await expect.element(labelled('音量')).toHaveValue('30');
   });
 
