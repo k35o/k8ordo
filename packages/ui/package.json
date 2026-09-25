@@ -103,7 +103,7 @@
   },
   "dependencies": {
     "clsx": "2.1.1",
-    "lucide-react": "1.46.0",
+    "lucide-react": "1.47.0",
     "tailwind-merge": "3.7.0"
   },
   "devDependencies": {
@@ -125,7 +125,7 @@
     "@vitest/browser-playwright": "catalog:",
     "@vitest/coverage-v8": "catalog:",
     "@vitest/ui": "catalog:",
-    "ai": "7.0.99",
+    "ai": "7.0.105",
     "postcss": "catalog:",
     "publint": "catalog:",
     "react": "catalog:",
@@ -147,8 +147,8 @@
   "peerDependencies": {
     "@json-render/core": ">=0.20.0 <0.21.0",
     "@json-render/react": ">=0.20.0 <0.21.0",
-    "@openuidev/lang-core": ">=0.2.10 <0.3.0",
-    "@openuidev/react-lang": ">=0.2.9 <0.3.0",
+    "@openuidev/lang-core": ">=0.2.10 <0.4.0",
+    "@openuidev/react-lang": ">=0.2.9 <0.4.0",
     "@types/react": ">=19.3.0",
     "@types/react-dom": ">=19.3.0",
     "ai": ">=7.0.51",
