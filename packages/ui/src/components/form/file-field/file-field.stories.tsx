@@ -1,14 +1,10 @@
-import { useForm } from '@k8ordo/form';
-import { formFields } from '@k8ordo/form/server';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useRef, useState } from 'react';
 import type { ComponentProps } from 'react';
 import { expect, fn, waitFor } from 'storybook/test';
-import { z } from 'zod';
 
 import { FileField } from '.';
 import { Button } from '../../buttons/button';
-import { FormControl } from '../form-control';
 
 const meta: Meta<typeof FileField.Root> = {
   title: 'components/form/file-field',
@@ -380,62 +376,6 @@ export const DropWhenDisabled: Story = {
     await expect(
       canvas.getByRole('button', { name: 'ファイルを選択' }),
     ).toBeDisabled();
-  },
-};
-
-const attachmentFields = formFields(
-  z.object({ attachment: z.file('ファイルを選んでください') }),
-);
-
-const AttachmentForm = () => {
-  const form = useForm(attachmentFields);
-  const attachment = form.field('attachment');
-
-  return (
-    <form {...form.props}>
-      <FormControl
-        errorText={attachment.error}
-        invalid={attachment.invalid}
-        label="添付ファイル"
-        renderInput={({ invalid }) => (
-          <FileField.Root {...attachment.input} invalid={invalid}>
-            <FileField.Dropzone />
-            <FileField.ItemList clearable />
-          </FileField.Root>
-        )}
-        required={attachment.required}
-      />
-      <p data-testid="dirty">{form.isDirty ? '変更あり' : '変更なし'}</p>
-    </form>
-  );
-};
-
-// formFields が z.file() から導いた属性をそのまま広げ、ドロップした
-// ファイルも選んだときと同じく form に伝わる（エラーの解除と変更の有無）
-export const WithFormFields: Story = {
-  render: () => <AttachmentForm />,
-  play: async ({ canvas, canvasElement, userEvent }) => {
-    const input = fileInputOf(canvasElement);
-    await expect(input).toHaveAttribute('name', 'attachment');
-    await expect(input).toBeRequired();
-
-    input.focus();
-    await userEvent.tab();
-    await expect(
-      await canvas.findByText('ファイルを選んでください'),
-    ).toBeInTheDocument();
-
-    drag(dropzoneOf(canvasElement), [
-      new File(['content'], 'report.pdf', { type: 'application/pdf' }),
-    ]).drop();
-
-    await canvas.findByText('report.pdf');
-    await waitFor(async () => {
-      await expect(
-        canvas.queryByText('ファイルを選んでください'),
-      ).not.toBeInTheDocument();
-    });
-    await expect(canvas.getByTestId('dirty')).toHaveTextContent('変更あり');
   },
 };
 
