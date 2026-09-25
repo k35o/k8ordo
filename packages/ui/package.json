@@ -111,6 +111,7 @@
     "@chromatic-com/storybook": "5.3.1",
     "@json-render/core": "catalog:",
     "@json-render/react": "catalog:",
+    "@k8ordo/i18n": "workspace:^",
     "@openuidev/lang-core": "catalog:",
     "@openuidev/react-lang": "catalog:",
     "@storybook/addon-a11y": "10.6.0",
@@ -147,6 +148,7 @@
   "peerDependencies": {
     "@json-render/core": ">=0.20.0 <0.21.0",
     "@json-render/react": ">=0.20.0 <0.21.0",
+    "@k8ordo/i18n": "workspace:^",
     "@openuidev/lang-core": ">=0.2.10 <0.4.0",
     "@openuidev/react-lang": ">=0.2.9 <0.4.0",
     "@types/react": ">=19.3.0",

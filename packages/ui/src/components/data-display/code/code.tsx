@@ -1,9 +1,7 @@
-'use client';
-
 import { Fragment } from 'react';
 import type { FC, HTMLAttributes, ReactNode } from 'react';
 
-import { useMessages } from '../../../i18n/context';
+import { getMessages } from '../../../i18n/current';
 import { findAllColors } from './find-all-colors';
 
 type Props = {
@@ -11,7 +9,7 @@ type Props = {
 } & Omit<HTMLAttributes<HTMLElement>, 'children' | 'className' | 'style'>;
 
 export const Code: FC<Props> = ({ children, ...rest }) => {
-  const messages = useMessages();
+  const messages = getMessages();
   const colors = findAllColors(children);
 
   if (colors.length === 0) {

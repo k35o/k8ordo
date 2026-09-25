@@ -1,8 +1,6 @@
-'use client';
-
 import type { FC, HTMLAttributes, ReactNode } from 'react';
 
-import { useMessages } from '../../../i18n/context';
+import { getMessages } from '../../../i18n/current';
 import type { Messages } from '../../../i18n/messages';
 import { IconButton } from '../../buttons/icon-button';
 import { AlertIcon, CloseIcon } from '../../icons';
@@ -40,7 +38,7 @@ export const Alert: FC<Props> = ({
   closeLabel,
   ...rest
 }) => {
-  const messages = useMessages();
+  const messages = getMessages();
   const actionNode = action
     ? action.renderItem({ children: action.label })
     : null;

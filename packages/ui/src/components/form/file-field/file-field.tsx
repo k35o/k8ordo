@@ -11,7 +11,7 @@ import type {
 import { useCallback, useId, useMemo, useRef, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 
-import { useMessages } from '../../../i18n/context';
+import { getMessages } from '../../../i18n/current';
 import { IconButton } from '../../buttons/icon-button';
 import { CloseIcon } from '../../icons';
 import { createSafeContext } from './../../../helpers/create-safe-context';
@@ -186,7 +186,7 @@ export const ItemList: FC<{
   showWebkitRelativePath?: boolean;
   clearable?: boolean;
 }> = ({ showWebkitRelativePath, clearable }) => {
-  const messages = useMessages();
+  const messages = getMessages();
   const { acceptedFiles, onFileDelete } = useFileFieldContext();
 
   if (acceptedFiles.length === 0) {

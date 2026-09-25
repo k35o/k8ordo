@@ -61,9 +61,4 @@ export {
   type PopoverTriggerProps,
 } from './overlays/popover';
 export { Tooltip, type TooltipTriggerProps } from './overlays/tooltip';
-export {
-  UIProvider,
-  type Messages,
-  PortalRootProvider,
-  usePortalRoot,
-} from './providers';
+export { UIProvider, PortalRootProvider, usePortalRoot } from './providers';
