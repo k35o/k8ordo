@@ -245,7 +245,7 @@ export async function signUp(
 }`;
 
 export default function FormValidationPage() {
-  const demoFields = formFields(signupDefinition());
+  const demoFields = formFields(signupDefinition);
   const demoData = JSON.stringify(
     { fields: { handle: demoFields.fields.handle }, rules: demoFields.rules },
     null,
