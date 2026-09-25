@@ -241,6 +241,7 @@ stories and rendered props rather than relying on trained knowledge:
 - **Card** - Flexible content container (hover interaction via `interactive`)
 - **Code** - Formatted code display
 - **Heading** - Typography heading component
+- **Kbd** - Keyboard key cap for shortcuts
 - **Table** - Tabular data display
 
 ### Feedback

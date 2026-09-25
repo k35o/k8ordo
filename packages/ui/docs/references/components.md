@@ -1071,6 +1071,28 @@ Props:
 - `children`: `string` (required)
 - Other props are forwarded to `HTMLAttributes<HTMLElement>`, except `className` / `style`.
 
+### Kbd
+
+One keyboard key, drawn as a key cap. A shortcut is several `Kbd` side by side,
+one per key. When the key is a symbol a screen reader would not say usefully
+(`⌘`, `⇧`), pass `label`: the symbol stays on screen and the label is what is
+read out.
+
+```tsx
+import { Kbd } from '@k8ordo/ui';
+
+<Kbd>Esc</Kbd>
+
+<Kbd label="Command">⌘</Kbd>
+<Kbd>K</Kbd>
+```
+
+Props:
+
+- `children`: `string` (required)
+- `label`: `string`
+- Other props are forwarded to `HTMLAttributes<HTMLElement>`, except `className` / `style`.
+
 ### Table
 
 A data table, as a compound component. `Table.EmptyState` is the row to put in

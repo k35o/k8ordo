@@ -10,6 +10,7 @@ export { Badge } from './data-display/badge';
 export { Card } from './data-display/card';
 export { Code } from './data-display/code';
 export { Heading } from './data-display/heading';
+export { Kbd } from './data-display/kbd';
 export { type CellAlign, Table } from './data-display/table';
 export { Alert, type AlertAction } from './feedback/alert';
 export { EmptyState } from './feedback/empty-state';

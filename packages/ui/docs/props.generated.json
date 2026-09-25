@@ -1777,6 +1777,25 @@
       "omitted": []
     },
     {
+      "name": "Kbd",
+      "props": [
+        {
+          "name": "children",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": "HTMLAttributes<HTMLElement>",
+      "omitted": ["className", "style"]
+    },
+    {
       "name": "LightModeIcon",
       "props": [
         {
