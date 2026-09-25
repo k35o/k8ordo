@@ -21,6 +21,7 @@ export const en: Messages = {
 
   fileFieldRemove: 'Remove file',
   fileFieldTrigger: 'Select files',
+  fileFieldDrop: 'Drop files here',
 
   numberFieldIncrement: 'Increase',
   numberFieldDecrement: 'Decrease',
@@ -36,6 +37,14 @@ export const en: Messages = {
   paginationLabel: 'Pagination',
   paginationPrevious: 'Previous',
   paginationNext: 'Next',
+
+  codeBlockCopy: 'Copy code',
+  copied: 'Copied',
+  copyFailed: 'Could not copy',
+  carousel: 'Carousel',
+  carouselSlide: 'Slide',
+  carouselPrevious: 'Previous slide',
+  carouselNext: 'Next slide',
 
   chat: 'Chat',
   scrollToLatest: 'Scroll to latest message',

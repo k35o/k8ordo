@@ -8,7 +8,7 @@ import {
   useBoundProp,
 } from '@json-render/react';
 import type { FC } from 'react';
-import { useState } from 'react';
+import { Children, useState } from 'react';
 
 import * as ui from '../_shared/renderers';
 import { catalog } from './catalog';
@@ -89,6 +89,11 @@ export const { registry } = defineRegistry(catalog, {
     Anchor: ({ props }) => ui.renderAnchor(props),
     Avatar: ({ props }) => ui.renderAvatar(props),
     Code: ({ props }) => ui.renderCode(props),
+    Kbd: ({ props }) => ui.renderKbd(props),
+    EmptyState: ({ props }) => ui.renderEmptyState(props),
+    // json-render は子を 1 つの ReactNode で渡すので、スライドごとに分ける
+    Carousel: ({ props, children }) =>
+      ui.renderCarousel(props, Children.toArray(children)),
     Progress: ({ props }) => ui.renderProgress(props),
     Skeleton: ({ props }) => ui.renderSkeleton(props),
     Icon: ({ props }) => ui.renderIcon(props),
@@ -186,8 +191,6 @@ export const { registry } = defineRegistry(catalog, {
     DropdownMenu: ({ props }) => ui.renderDropdownMenu(props),
     Toolbar: ({ props }) => ui.renderToolbar(props),
     Toast: ({ props }) => <ui.ToastWidget props={props} />,
-
-    ScrollLinked: ({ props }) => ui.renderScrollLinked(props),
 
     ListBox: ({ props, bindings }) => {
       const path = bindings?.defaultValue;

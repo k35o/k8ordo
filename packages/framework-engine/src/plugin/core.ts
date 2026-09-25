@@ -135,6 +135,13 @@ export const engine = (
     },
 
     configResolved(config) {
+      // ページは base の下に置かれ、リンクもペイロードもそこから数える。
+      // 相対（'./'）や別オリジンの base では、どの URL がページかが決まらない
+      if (!config.base.startsWith('/') || config.base.startsWith('//')) {
+        throw new Error(
+          `k8ordo serves its pages under Vite's base, so base has to be a path from the root, like '/docs/' — got '${config.base}'`,
+        );
+      }
       ({ root } = config);
       routesDir = path.resolve(root, options.routesDir ?? 'src/routes');
       outDir = path.resolve(root, OUT_DIR);

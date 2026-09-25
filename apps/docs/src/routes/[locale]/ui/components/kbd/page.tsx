@@ -1,27 +1,26 @@
-import { Anchor, Heading, Separator } from '@k8ordo/ui';
+import { Anchor, Heading, Kbd, Separator } from '@k8ordo/ui';
+import { CodeBlock } from '@k8ordo/ui/code-block';
 
-import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';
 import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
 import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
-import { propsOf } from '../../../../../data/component-props';
+import { inheritsOf, propsOf } from '../../../../../data/component-props';
 import * as m from '../../../../../messages';
-import { ScrollLinkedBasicPreview } from '../_previews/scroll-linked-previews';
 
-export default function ScrollLinkedPage() {
+export default function KbdPage() {
   return (
     <div className="mx-auto flex max-w-4xl flex-col gap-8 px-6 py-12 md:px-8">
-      <PageTitle name="ScrollLinked" />
+      <PageTitle name="Kbd" />
       <div className="flex flex-col gap-4">
-        <Heading level="h1">ScrollLinked</Heading>
+        <Heading level="h1">Kbd</Heading>
         <p className="text-fg-mute text-lg">
-          <Rich>{m.components.scrollLinked.description()}</Rich>
+          <Rich>{m.components.kbd.description()}</Rich>
         </p>
         <div>
           <Anchor
-            href={`${STORYBOOK_URL}/?path=/story/components-layout-scroll-linked--no-scroll`}
+            href={`${STORYBOOK_URL}/?path=/story/components-data-display-kbd--default`}
             openInNewTab
           >
             <Rich>{m.components.common.storybookLink()}</Rich>
@@ -34,10 +33,7 @@ export default function ScrollLinkedPage() {
         <Heading level="h2">
           <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
-        <CodeBlock
-          code="import { ScrollLinked } from '@k8ordo/ui';"
-          lang="ts"
-        />
+        <CodeBlock code="import { Kbd } from '@k8ordo/ui';" lang="ts" />
       </section>
       <Separator color="mute" />
 
@@ -46,38 +42,47 @@ export default function ScrollLinkedPage() {
           <Heading level="h2">
             <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
-        </div>
-
-        <div className="flex flex-col gap-4">
-          <Heading level="h3">
-            <Rich>{m.components.common.basicUsageTitle()}</Rich>
-          </Heading>
-          <ComponentPreview
-            code={`const [container, setContainer] = useState<HTMLElement | null>(null);
-
-<div
-  className="relative h-64 overflow-y-scroll rounded-lg border"
-  ref={setContainer}
->
-  <ScrollLinked container={container} />
-  <div className="h-[800px] p-4">
-    <p>Scroll this container to see the progress bar.</p>
-  </div>
-</div>`}
-          >
-            <ScrollLinkedBasicPreview />
+          <ComponentPreview code="<Kbd>Esc</Kbd>">
+            <Kbd>Esc</Kbd>
           </ComponentPreview>
         </div>
 
         <div className="flex flex-col gap-4">
           <Heading level="h3">
-            <Rich>{m.components.scrollLinked.windowScrollTitle()}</Rich>
+            <Rich>{m.components.kbd.combinationTitle()}</Rich>
           </Heading>
-          <CodeBlock
-            code={`// Without a container prop, ScrollLinked tracks the window scroll position.
-<ScrollLinked />`}
-            lang="tsx"
-          />
+          <p className="text-fg-mute">
+            <Rich>{m.components.kbd.combinationDescription()}</Rich>
+          </p>
+          <ComponentPreview
+            code={`<Kbd>Ctrl</Kbd>
+<Kbd>Shift</Kbd>
+<Kbd>P</Kbd>`}
+          >
+            <span className="inline-flex items-center gap-1">
+              <Kbd>Ctrl</Kbd>
+              <Kbd>Shift</Kbd>
+              <Kbd>P</Kbd>
+            </span>
+          </ComponentPreview>
+        </div>
+
+        <div className="flex flex-col gap-4">
+          <Heading level="h3">
+            <Rich>{m.components.kbd.labelTitle()}</Rich>
+          </Heading>
+          <p className="text-fg-mute">
+            <Rich>{m.components.kbd.labelDescription()}</Rich>
+          </p>
+          <ComponentPreview
+            code={`<Kbd label="Command">⌘</Kbd>
+<Kbd>K</Kbd>`}
+          >
+            <span className="inline-flex items-center gap-1">
+              <Kbd label="Command">⌘</Kbd>
+              <Kbd>K</Kbd>
+            </span>
+          </ComponentPreview>
         </div>
       </section>
       <Separator color="mute" />
@@ -86,7 +91,7 @@ export default function ScrollLinkedPage() {
         <Heading level="h2">
           <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>
-        <PropsTable items={propsOf('ScrollLinked')} />
+        <PropsTable inherits={inheritsOf('Kbd')} items={propsOf('Kbd')} />
       </section>
     </div>
   );

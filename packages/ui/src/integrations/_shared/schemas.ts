@@ -7,8 +7,10 @@ import type { Toolbar } from '../../components/buttons/toolbar';
 import type { Avatar } from '../../components/data-display/avatar';
 import type { Badge } from '../../components/data-display/badge';
 import type { Card } from '../../components/data-display/card';
+import type { Carousel } from '../../components/data-display/carousel';
 import type { Heading } from '../../components/data-display/heading';
 import type { Alert } from '../../components/feedback/alert';
+import type { EmptyState } from '../../components/feedback/empty-state';
 import type { Skeleton } from '../../components/feedback/skeleton';
 import type { Spinner } from '../../components/feedback/spinner';
 import type { FormControl } from '../../components/form/form-control';
@@ -243,6 +245,37 @@ export const codeProps = z.object({
   code: z.string(),
 }) satisfies z.ZodType<CodeIntegrationProps>;
 
+// Kbd は 1 キー 1 要素だが、生成 UI では組み合わせを 1 項目で置けるようにする
+type KbdIntegrationProps = { keys: readonly string[] };
+export const kbdProps = z.object({
+  keys: z
+    .array(z.string())
+    .min(1)
+    .describe(
+      'Keys pressed together, one per entry and in order, e.g. ["Ctrl", "S"]',
+    ),
+}) satisfies z.ZodType<KbdIntegrationProps>;
+
+type EmptyStateIntegrationProps = {
+  title: ComponentProps<typeof EmptyState>['title'];
+  description?: string;
+  icon?: z.infer<typeof iconName>;
+};
+export const emptyStateProps = z.object({
+  title: z.string(),
+  description: z.string().optional(),
+  icon: iconName.optional(),
+}) satisfies z.ZodType<EmptyStateIntegrationProps>;
+
+type CarouselIntegrationProps = {
+  label: ComponentProps<typeof Carousel.Root>['label'];
+  slideSize?: ComponentProps<typeof Carousel.Root>['slideSize'];
+};
+export const carouselProps = z.object({
+  label: z.string().describe('Accessible name of the carousel'),
+  slideSize: z.enum(['full', 'lg', 'md', 'sm']).optional(),
+}) satisfies z.ZodType<CarouselIntegrationProps>;
+
 type AccordionIntegrationProps = {
   items: ReadonlyArray<{
     title: string;
@@ -410,11 +443,6 @@ export const gridProps = z.object({
     .optional(),
   gap: z.enum(['none', 'sm', 'md', 'lg', 'xl']).optional(),
 }) satisfies z.ZodType<GridIntegrationProps>;
-
-type ScrollLinkedIntegrationProps = Record<string, never>;
-export const scrollLinkedProps = z.object(
-  {},
-) satisfies z.ZodType<ScrollLinkedIntegrationProps>;
 
 type AnchorIntegrationProps = {
   label: string;
@@ -722,6 +750,7 @@ type FileFieldIntegrationProps = {
   multiple?: boolean;
   maxFiles?: number;
   clearable?: boolean;
+  dropzone?: boolean;
 };
 export const fileFieldProps = z.object({
   triggerLabel: z
@@ -733,6 +762,11 @@ export const fileFieldProps = z.object({
   multiple: z.boolean().optional(),
   maxFiles: z.number().optional(),
   clearable: z.boolean().optional(),
+  // 後から足したので末尾に置く（冒頭「キーの並び順が公開 ABI」参照）
+  dropzone: z
+    .boolean()
+    .optional()
+    .describe('Show an area files can be dropped onto, with the button in it'),
 }) satisfies z.ZodType<FileFieldIntegrationProps>;
 
 type FormControlIntegrationProps = {
@@ -862,6 +896,9 @@ export type IconButtonProps = z.infer<typeof iconButtonProps>;
 export type AnchorProps = z.infer<typeof anchorProps>;
 export type AvatarProps = z.infer<typeof avatarProps>;
 export type CodeProps = z.infer<typeof codeProps>;
+export type KbdProps = z.infer<typeof kbdProps>;
+export type EmptyStateProps = z.infer<typeof emptyStateProps>;
+export type CarouselProps = z.infer<typeof carouselProps>;
 export type ProgressProps = z.infer<typeof progressProps>;
 export type SkeletonProps = z.infer<typeof skeletonProps>;
 export type AccordionProps = z.infer<typeof accordionProps>;
@@ -883,7 +920,6 @@ export type ModalProps = z.infer<typeof modalProps>;
 export type DialogProps = z.infer<typeof dialogProps>;
 export type DrawerProps = z.infer<typeof drawerProps>;
 export type PopoverProps = z.infer<typeof popoverProps>;
-export type ScrollLinkedProps = z.infer<typeof scrollLinkedProps>;
 export type TooltipProps = z.infer<typeof tooltipProps>;
 export type DropdownMenuProps = z.infer<typeof dropdownMenuProps>;
 export type ToolbarProps = z.infer<typeof toolbarProps>;
@@ -1049,6 +1085,12 @@ export type _EnumCoverage = [
     CoversComponent<
       ComponentProps<typeof Breadcrumb.List>['size'],
       BreadcrumbProps['size']
+    >
+  >,
+  AssertCovered<
+    CoversComponent<
+      ComponentProps<typeof Carousel.Root>['slideSize'],
+      CarouselProps['slideSize']
     >
   >,
   AssertCovered<

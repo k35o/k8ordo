@@ -1,7 +1,7 @@
 import { Code } from '@k8ordo/ui';
+import { CodeBlock } from '@k8ordo/ui/code-block';
 
 import * as m from '../../messages';
-import { CodeBlock } from '../code-block';
 import { DocSection } from '../doc-page';
 import { LocaleAnchor } from '../locale-anchor';
 import { Rich } from '../rich';
@@ -63,7 +63,7 @@ export default function Root({
 }) {
   const locale = locales.delocalize(pathname).locale ?? locales.default;
   return (
-    <html lang={locale}>
+    <html dir={locales.definitions[locale].dir} lang={locale}>
       <body>{children}</body>
     </html>
   );
@@ -84,7 +84,7 @@ const SHADOW_ERROR = `routes/ is not a valid pathname space:
 
 const REFUSED = `routes/ is not a valid pathname space:
   routes/[123]: "[123]" is not a valid param directory — use [name] with a letter or underscore first
-  routes/products/helper.ts: routes/ holds only page.tsx, layout.tsx, not-found.tsx, error.tsx, redirect.ts — move "helper.ts" under a _-prefixed directory`;
+  routes/products/helper.ts: routes/ holds only page.tsx, layout.tsx, not-found.tsx, error.tsx, redirect.ts, guard.ts — move "helper.ts" under a _-prefixed directory`;
 
 type Refusal = { contains: string | (() => string); error: string };
 
@@ -92,7 +92,7 @@ const REFUSALS: readonly Refusal[] = [
   {
     contains: '`products/helper.ts`',
     error:
-      'routes/ holds only page.tsx, layout.tsx, not-found.tsx, error.tsx, redirect.ts — move "helper.ts" under a _-prefixed directory',
+      'routes/ holds only page.tsx, layout.tsx, not-found.tsx, error.tsx, redirect.ts, guard.ts — move "helper.ts" under a _-prefixed directory',
   },
   {
     contains: '`[123]/page.tsx`',
@@ -221,6 +221,13 @@ export default function ProductsPage() {
     </ul>
   );
 }`;
+
+const PREFETCH = `<nav data-k8ordo-prefetch={false}>
+  <a href={href('/reports')}>reports</a>
+  <a data-k8ordo-prefetch href={href('/')}>
+    home
+  </a>
+</nav>`;
 
 /** Inline code names, comma separated. */
 function Names({ names }: { names: readonly string[] }) {
@@ -410,6 +417,17 @@ export function RoutingGuide({ mode }: { mode: Mode }) {
               <Rich>{t.filesTable.nothing()}</Rich>
             </Cell>
           </Row>
+          <Row>
+            <Cell nowrap>
+              <Code>guard.ts</Code>
+            </Cell>
+            <Cell>
+              <Rich>{t.filesTable.guard()}</Rich>
+            </Cell>
+            <Cell>
+              <Names names={['request', 'params']} />
+            </Cell>
+          </Row>
         </GuideTable>
         <Paragraph text={own.filesNote}>
           {mode === 'static' ? (
@@ -534,6 +552,12 @@ export function RoutingGuide({ mode }: { mode: Mode }) {
               </LocaleAnchor>
             </Bullet>
             <Bullet>
+              <Rich>{m.staticRouting.refusesGuards()}</Rich> —{' '}
+              <LocaleAnchor path="/:locale/static/get-started">
+                {m.nav.getStarted()}
+              </LocaleAnchor>
+            </Bullet>
+            <Bullet>
               <Rich>{m.staticRouting.refusesThrow()}</Rich> —{' '}
               <LocaleAnchor path="/:locale/static/errors">
                 {m.static.navErrors()}
@@ -596,6 +620,30 @@ export function RoutingGuide({ mode }: { mode: Mode }) {
             {m.router.navFramework()}
           </LocaleAnchor>
         </Paragraph>
+      </DocSection>
+
+      <DocSection description={t.prefetchDescription} title={t.prefetchTitle}>
+        <Bullets>
+          <Bullet>
+            <Rich>{t.prefetchSameOrigin()}</Rich>
+          </Bullet>
+          <Bullet>
+            <Rich>{t.prefetchInPlace()}</Rich>
+          </Bullet>
+          <Bullet>
+            <Rich>{t.prefetchOnScreen()}</Rich>
+          </Bullet>
+        </Bullets>
+        <SubHeading text={t.prefetchStopTitle} />
+        <Paragraph text={t.prefetchStop} />
+        <CodeBlock code={PREFETCH} lang="tsx" />
+        <SubHeading text={t.prefetchReuseTitle} />
+        <Paragraph text={t.prefetchReuse} />
+        <Paragraph text={t.prefetchDropped} />
+        <Paragraph
+          text={mode === 'static' ? t.prefetchStatic : t.prefetchServer}
+        />
+        <Paragraph text={t.prefetchSpeculation} />
       </DocSection>
     </>
   );

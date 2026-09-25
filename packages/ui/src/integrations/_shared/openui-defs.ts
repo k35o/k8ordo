@@ -43,6 +43,16 @@ export const buildComponentLibrary = <C>(
   const Anchor = def('Anchor', 'Text link.', s.anchorProps);
   const Avatar = def('Avatar', 'Avatar (an image or initials).', s.avatarProps);
   const Code = def('Code', 'Inline code or value.', s.codeProps);
+  const Kbd = def(
+    'Kbd',
+    'Keyboard shortcut. keys lists the keys pressed together, and each is drawn as its own key cap.',
+    s.kbdProps,
+  );
+  const EmptyState = def(
+    'EmptyState',
+    'Placeholder for a list, table, or search with nothing to show: a title, an optional description, and an optional icon.',
+    s.emptyStateProps,
+  );
   const Icon = def('Icon', 'Icon, chosen by name.', s.iconProps);
   const ChevronIcon = def(
     'ChevronIcon',
@@ -159,11 +169,6 @@ export const buildComponentLibrary = <C>(
     'Toast notification that a button labeled triggerLabel shows.',
     s.toastProps,
   );
-  const ScrollLinked = def(
-    'ScrollLinked',
-    'Page scroll progress bar (fixed to the top).',
-    s.scrollLinkedProps,
-  );
   const ListBox = def(
     'ListBox',
     'Single-choice list in a popup.',
@@ -181,7 +186,7 @@ export const buildComponentLibrary = <C>(
   );
   const FileField = def(
     'FileField',
-    'File picker field (a self-contained widget).',
+    'File picker field (a self-contained widget). With dropzone, files can also be dropped onto it.',
     s.fileFieldProps,
   );
   const FormControl = def(
@@ -198,6 +203,8 @@ export const buildComponentLibrary = <C>(
     Anchor.ref,
     Avatar.ref,
     Code.ref,
+    Kbd.ref,
+    EmptyState.ref,
     Icon.ref,
     ChevronIcon.ref,
     StatusIcon.ref,
@@ -226,7 +233,6 @@ export const buildComponentLibrary = <C>(
     DropdownMenu.ref,
     Toolbar.ref,
     Toast.ref,
-    ScrollLinked.ref,
     ListBox.ref,
     CheckboxGroup.ref,
     Autocomplete.ref,
@@ -251,6 +257,7 @@ export const buildComponentLibrary = <C>(
           Dialog.ref,
           Drawer.ref,
           Popover.ref,
+          Carousel.ref,
         ]),
       )
       .describe(description);
@@ -328,6 +335,16 @@ export const buildComponentLibrary = <C>(
     }),
   );
 
+  const Carousel = def(
+    'Carousel',
+    'Horizontally scrolling carousel with previous and next buttons. Each child is one slide. slideSize sets how much of the track one slide takes (full, lg, md for two, sm for three).',
+    s.carouselProps.extend({
+      get children() {
+        return containerChildren('Slides, one child per slide');
+      },
+    }),
+  );
+
   return createLibrary({
     components: [
       Stack,
@@ -338,6 +355,7 @@ export const buildComponentLibrary = <C>(
       Dialog,
       Drawer,
       Popover,
+      Carousel,
       Tooltip,
       DropdownMenu,
       Toolbar,
@@ -349,6 +367,8 @@ export const buildComponentLibrary = <C>(
       Anchor,
       Avatar,
       Code,
+      Kbd,
+      EmptyState,
       Icon,
       ChevronIcon,
       StatusIcon,
@@ -357,7 +377,6 @@ export const buildComponentLibrary = <C>(
       Progress,
       Skeleton,
       Separator,
-      ScrollLinked,
       Tabs,
       Accordion,
       Breadcrumb,

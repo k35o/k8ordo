@@ -9,18 +9,8 @@ const meta: Meta<typeof NumberField> = {
   component: NumberField,
   args: {
     id: 'textfield',
+    'aria-label': '数量',
     'aria-describedby': 'numberfield-feedback',
-  },
-  parameters: {
-    a11y: {
-      options: {
-        rules: {
-          // NumberField単体ではラベルを付随しない
-          'label-title-only': { enabled: false },
-          label: { enabled: false },
-        },
-      },
-    },
   },
 };
 
@@ -131,7 +121,11 @@ const PendingRender = () => {
         });
       }}
     >
-      <NumberField defaultValue={5} id="number-field-pending" />
+      <NumberField
+        aria-label="数量"
+        defaultValue={5}
+        id="number-field-pending"
+      />
       <button type="submit">送信</button>
       <button
         onClick={() => {
@@ -248,7 +242,12 @@ const RefRender = () => {
 
   return (
     <div className="flex flex-col items-start gap-2">
-      <NumberField defaultValue={0} id="number-field-ref" ref={ref} />
+      <NumberField
+        aria-label="数量"
+        defaultValue={0}
+        id="number-field-ref"
+        ref={ref}
+      />
       <button
         onClick={() => {
           ref.current?.focus();
@@ -455,6 +454,7 @@ const ControlledRender = () => {
   return (
     <div className="flex flex-col items-start gap-2">
       <NumberField
+        aria-label="数量"
         id="number-field-controlled"
         onChange={setValue}
         value={value}

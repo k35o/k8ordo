@@ -10,10 +10,13 @@ import { Accordion } from '../../components/data-display/accordion';
 import { Avatar } from '../../components/data-display/avatar';
 import { Badge } from '../../components/data-display/badge';
 import { Card } from '../../components/data-display/card';
+import { Carousel } from '../../components/data-display/carousel';
 import { Code } from '../../components/data-display/code';
 import { Heading } from '../../components/data-display/heading';
+import { Kbd } from '../../components/data-display/kbd';
 import { Table } from '../../components/data-display/table';
 import { Alert } from '../../components/feedback/alert';
+import { EmptyState } from '../../components/feedback/empty-state';
 import { Progress } from '../../components/feedback/progress';
 import { Skeleton } from '../../components/feedback/skeleton';
 import { Spinner } from '../../components/feedback/spinner';
@@ -90,7 +93,6 @@ import {
   ViewOffIcon,
 } from '../../components/icons';
 import { Grid } from '../../components/layout/grid';
-import { ScrollLinked } from '../../components/layout/scroll-linked';
 import { Separator } from '../../components/layout/separator';
 import { Stack } from '../../components/layout/stack';
 import { Anchor } from '../../components/navigation/anchor';
@@ -115,6 +117,7 @@ import type {
   BreadcrumbProps,
   ButtonProps,
   CardProps,
+  CarouselProps,
   CheckboxCardProps,
   CheckboxGroupProps,
   CheckboxProps,
@@ -124,6 +127,7 @@ import type {
   DialogProps,
   DrawerProps,
   DropdownMenuProps,
+  EmptyStateProps,
   FileFieldProps,
   FormControlProps,
   FormProps,
@@ -131,6 +135,7 @@ import type {
   IconButtonProps,
   IconName,
   IconProps,
+  KbdProps,
   ListBoxProps,
   ModalProps,
   NumberFieldProps,
@@ -140,7 +145,6 @@ import type {
   ProgressProps,
   RadioCardProps,
   RadioProps,
-  ScrollLinkedProps,
   SelectProps,
   SeparatorProps,
   SkeletonProps,
@@ -682,6 +686,46 @@ export function renderCode(props: CodeProps): ReactNode {
   return <Code>{props.code}</Code>;
 }
 
+export function renderKbd(props: KbdProps): ReactNode {
+  return (
+    <span className="inline-flex items-center gap-1">
+      {props.keys.map((key, index) => (
+        // eslint-disable-next-line react/no-array-index-key -- 同じキーが並びうる静的な列
+        <Kbd key={`${key}-${index}`}>{key}</Kbd>
+      ))}
+    </span>
+  );
+}
+
+export function renderEmptyState(props: EmptyStateProps): ReactNode {
+  const icon = u(props.icon);
+  const IconComponent = icon === undefined ? undefined : iconMap[icon];
+  return (
+    <EmptyState
+      description={u(props.description)}
+      icon={
+        IconComponent === undefined ? undefined : <IconComponent size="lg" />
+      }
+      title={props.title}
+    />
+  );
+}
+
+// 子の 1 つずつが 1 枚のスライドになる。位置で固定の列なので index キーでよい
+export function renderCarousel(
+  props: CarouselProps,
+  slides: readonly ReactNode[],
+): ReactNode {
+  return (
+    <Carousel.Root label={props.label} slideSize={u(props.slideSize)}>
+      {slides.map((slide, index) => (
+        // eslint-disable-next-line react/no-array-index-key -- 静的な位置リスト
+        <Carousel.Slide key={index}>{slide}</Carousel.Slide>
+      ))}
+    </Carousel.Root>
+  );
+}
+
 export function renderProgress(props: ProgressProps): ReactNode {
   return (
     <Progress
@@ -961,10 +1005,6 @@ export function renderDropdownMenu(props: DropdownMenuProps): ReactNode {
   );
 }
 
-export function renderScrollLinked(_props: ScrollLinkedProps): ReactNode {
-  return <ScrollLinked />;
-}
-
 // ToastProvider はラッパー側で巻く必要があるため、ローカルにも 1 段被せる。
 const ToastTriggerInner: FC<{ props: ToastProps }> = ({ props }) => {
   const { open } = useToast();
@@ -1061,15 +1101,25 @@ export function renderAutocomplete(
 
 export const FileFieldWidget: FC<{ props: FileFieldProps }> = ({ props }) => {
   const messages = useMessages();
+  const trigger = (
+    <FileField.Trigger
+      renderItem={({ onClick, disabled }) => (
+        <Button disabled={disabled} onClick={onClick} variant="outline">
+          {u(props.triggerLabel) ?? messages.fileFieldTrigger}
+        </Button>
+      )}
+    />
+  );
   return (
     <FileField.Root maxFiles={u(props.maxFiles)} multiple={u(props.multiple)}>
-      <FileField.Trigger
-        renderItem={({ onClick, disabled }) => (
-          <Button disabled={disabled} onClick={onClick} variant="outline">
-            {u(props.triggerLabel) ?? messages.fileFieldTrigger}
-          </Button>
-        )}
-      />
+      {u(props.dropzone) === true ? (
+        <FileField.Dropzone>
+          <p className="text-fg-mute text-sm">{messages.fileFieldDrop}</p>
+          {trigger}
+        </FileField.Dropzone>
+      ) : (
+        trigger
+      )}
       <FileField.ItemList clearable={u(props.clearable)} />
     </FileField.Root>
   );

@@ -26,8 +26,8 @@ export const installTitle = message({
 });
 
 export const installDescription = message({
-  ja: '`@k8ordo/server` は実行時の依存です。デプロイしたアプリが動かすのは `serve()` とビルドされたハンドラだからです。`@k8ordo/server` はプラグインで Vite を読みますが、アプリのコードが import する `serve()`・`redirect()`・型は Vite を読まない `@k8ordo/server/runtime` から来るので、`vite` は開発時の依存で足ります。`server-only` は、サーバー専用のモジュールに付ける import を TypeScript が解決できるようにするためのものです。',
-  en: '`@k8ordo/server` is a runtime dependency: `serve()` and the built handler are what the deployed application runs. `@k8ordo/server` itself is the plugin and loads Vite, but what the application’s own code imports — `serve()`, `redirect()` and the types — comes from `@k8ordo/server/runtime`, which does not, so `vite` is a dev dependency. `server-only` is there so TypeScript can resolve the import that marks a server-only module.',
+  ja: '`@k8ordo/server` は実行時の依存です。デプロイしたアプリが動かすのは `serve()` とビルドされたハンドラだからです。`@k8ordo/server` はプラグインで Vite を読みますが、ハンドラの中のコードが import する `redirect()` と型は `@k8ordo/server/runtime` から、Node.js のサーバー `serve()` は `@k8ordo/server/serve` から来て、どちらも Vite を読まないので、`vite` は開発時の依存で足ります。`server-only` は、サーバー専用のモジュールに付ける import を TypeScript が解決できるようにするためのものです。',
+  en: '`@k8ordo/server` is a runtime dependency: `serve()` and the built handler are what the deployed application runs. `@k8ordo/server` itself is the plugin and loads Vite, but what code inside the handler imports — `redirect()` and the types — comes from `@k8ordo/server/runtime`, and the Node.js server `serve()` from `@k8ordo/server/serve`; neither loads Vite, so `vite` is a dev dependency. `server-only` is there so TypeScript can resolve the import that marks a server-only module.',
 });
 
 export const requirementsDescription = message({

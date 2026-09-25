@@ -28,6 +28,8 @@ export type RouteDir = {
   readonly error: string | null;
   /** A `redirect.ts`: this directory's URL sends the visitor elsewhere. */
   readonly redirect: string | null;
+  /** A `guard.ts`: runs before whatever answers below this directory. */
+  readonly guard: string | null;
   readonly children: readonly RouteDir[];
 };
 
@@ -42,11 +44,12 @@ const CONVENTION = {
   'not-found.tsx': 'notFound',
   'error.tsx': 'error',
   'redirect.ts': 'redirect',
+  'guard.ts': 'guard',
 } as const;
 
 export const ROUTE_FILES = Object.keys(CONVENTION).join(', ');
 
-type Slot = (typeof CONVENTION)[keyof typeof CONVENTION];
+export type Slot = (typeof CONVENTION)[keyof typeof CONVENTION];
 
 const PARAM = /^\[([A-Za-z_][A-Za-z0-9_]*)\]$/u;
 const GROUP = /^\(([A-Za-z0-9_-]+)\)$/u;
@@ -55,6 +58,21 @@ const LITERAL = /^[A-Za-z0-9._~-]+$/u;
 /** Private to the route it sits under, and invisible to the grammar. */
 const isPrivate = (segment: string): boolean =>
   segment.startsWith('_') || segment.startsWith('.');
+
+/**
+ * Which slot a file fills, by its path relative to the routes root — `null`
+ * for anything the grammar does not read: a private file, or a name outside
+ * the convention (which the parse reports). One module at a time, for a
+ * caller that is handed a module rather than the tree (a dev server's
+ * transform).
+ */
+export const slotOf = (file: string): Slot | null => {
+  const segments = file.split('/').filter((segment) => segment !== '');
+  if (segments.some((segment) => isPrivate(segment))) return null;
+  const basename = segments.at(-1);
+  if (basename === undefined) return null;
+  return (CONVENTION as Record<string, Slot | undefined>)[basename] ?? null;
+};
 
 type RawDir = {
   files: Map<string, string>;
@@ -170,6 +188,7 @@ const convert = (
     notFound: slots.notFound ?? null,
     error: slots.error ?? null,
     redirect: slots.redirect ?? null,
+    guard: slots.guard ?? null,
     children,
   };
 };

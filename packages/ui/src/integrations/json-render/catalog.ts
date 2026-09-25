@@ -99,6 +99,22 @@ export const catalog = defineCatalog(schema, {
       description: 'Avatar (an image or initials).',
     },
     Code: { props: s.codeProps, description: 'Inline code or value.' },
+    Kbd: {
+      props: s.kbdProps,
+      description:
+        'Keyboard shortcut. keys lists the keys pressed together, and each is drawn as its own key cap.',
+    },
+    EmptyState: {
+      props: s.emptyStateProps,
+      description:
+        'Placeholder for a list, table, or search with nothing to show: a title, an optional description, and an optional icon.',
+    },
+    Carousel: {
+      props: s.carouselProps,
+      slots: ['default'],
+      description:
+        'Horizontally scrolling carousel with previous and next buttons. Each child is one slide. slideSize sets how much of the track one slide takes (full, lg, md for two, sm for three).',
+    },
     Progress: { props: s.progressProps, description: 'Progress bar.' },
     Skeleton: {
       props: s.skeletonProps,
@@ -205,10 +221,6 @@ export const catalog = defineCatalog(schema, {
       description:
         'Toast notification that a button labeled triggerLabel shows.',
     },
-    ScrollLinked: {
-      props: s.scrollLinkedProps,
-      description: 'Page scroll progress bar (fixed to the top).',
-    },
     ListBox: {
       props: s.listBoxProps,
       description: 'Single-choice list in a popup.',
@@ -223,7 +235,8 @@ export const catalog = defineCatalog(schema, {
     },
     FileField: {
       props: s.fileFieldProps,
-      description: 'File picker field.',
+      description:
+        'File picker field. With dropzone, files can also be dropped onto it.',
     },
     FormControl: {
       props: s.formControlProps,

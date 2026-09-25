@@ -29,6 +29,8 @@ export type Messages = {
 
   fileFieldRemove: string;
   fileFieldTrigger: string;
+  /** FileField.Dropzone の既定の案内 */
+  fileFieldDrop: string;
 
   numberFieldIncrement: string;
   numberFieldDecrement: string;
@@ -47,6 +49,17 @@ export type Messages = {
   paginationLabel: string;
   paginationPrevious: string;
   paginationNext: string;
+
+  /** CodeBlock のコピーボタン */
+  codeBlockCopy: string;
+  /** コピーの結果を読み上げる（role="status"） */
+  copied: string;
+  copyFailed: string;
+  /** Carousel の aria-roledescription（region と各スライド） */
+  carousel: string;
+  carouselSlide: string;
+  carouselPrevious: string;
+  carouselNext: string;
 
   /** Conversation.Messages の log ランドマーク名 */
   chat: string;

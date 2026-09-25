@@ -1,7 +1,8 @@
 import { Code } from '@k8ordo/ui';
+import { CodeBlock } from '@k8ordo/ui/code-block';
 
-import { CodeBlock } from '../../../../components/code-block';
 import { DocPage, DocSection } from '../../../../components/doc-page';
+import { BaseGuide } from '../../../../components/framework-guide/base';
 import {
   Bullet,
   Bullets,
@@ -106,6 +107,8 @@ export default function StaticDeployPage() {
         <Paragraph text={t.notFoundNone} />
       </DocSection>
 
+      <BaseGuide mode="static" />
+
       <DocSection description={t.sitemapDescription} title={t.sitemapTitle}>
         <CodeBlock code={SITE} lang="ts" />
         <CodeBlock code={SITEMAP} lang="md" />
@@ -193,6 +196,12 @@ export default function StaticDeployPage() {
           </Bullet>
           <Bullet>
             <Rich>{t.stopsActions()}</Rich> —{' '}
+            <LocaleAnchor path="/:locale/static/get-started">
+              {m.nav.getStarted()}
+            </LocaleAnchor>
+          </Bullet>
+          <Bullet>
+            <Rich>{t.stopsGuards()}</Rich> —{' '}
             <LocaleAnchor path="/:locale/static/get-started">
               {m.nav.getStarted()}
             </LocaleAnchor>
