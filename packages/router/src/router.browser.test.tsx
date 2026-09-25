@@ -727,3 +727,82 @@ it('names nothing for a state change, which is not a page change', async () => {
   expect(seen.filter((text) => text !== 'none')).toStrictEqual([]);
   await expect.element(screen.getByTestId('pending')).toHaveTextContent('none');
 });
+
+it('loads again in place when the host says the page showing reads what moved', async () => {
+  const loads: string[] = [];
+  function Host() {
+    const [value, setValue] = useState('initial');
+    const shown = useDeferredValue(value);
+    useInterceptedNavigation<string>({
+      claim: () => true,
+      load: (url) => {
+        loads.push(url.search);
+        return url.search;
+      },
+      apply: setValue,
+      refresh: (url) => url.searchParams.has('q'),
+    });
+    return <p data-testid="value">{shown}</p>;
+  }
+  const screen = await render(<Host />);
+
+  await navigation.navigate(`${location.pathname}?q=shoes`, {
+    history: 'replace',
+  }).finished;
+  await expect
+    .element(screen.getByTestId('value'))
+    .toHaveTextContent('?q=shoes');
+
+  // 読んでいないものが動いただけなら、今までどおり何も読み込まない
+  await navigation.navigate(`${location.pathname}?view=grid`, {
+    history: 'replace',
+  }).finished;
+  expect(loads).toStrictEqual(['?q=shoes']);
+});
+
+it('keeps the scroll position and names the load in progress while it loads again in place', async () => {
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  function Host() {
+    const [value, setValue] = useState('initial');
+    const shown = useDeferredValue(value);
+    useInterceptedNavigation<string>({
+      claim: () => true,
+      load: async (url) => {
+        await gate;
+        return url.search;
+      },
+      apply: setValue,
+      refresh: () => true,
+    });
+    return (
+      <>
+        <PendingProbe />
+        <p data-testid="value">{shown}</p>
+        <div style={{ height: '5000px' }} />
+      </>
+    );
+  }
+  const screen = await render(<Host />);
+  await expect.element(screen.getByTestId('value')).toBeInTheDocument();
+  window.scrollTo(0, 800);
+  const reading = window.scrollY;
+  expect(reading).toBeGreaterThan(0);
+
+  const moved = navigation.navigate(`${location.pathname}?q=hats`, {
+    history: 'replace',
+  });
+  await expect
+    .element(screen.getByTestId('pending'))
+    .not.toHaveTextContent('none');
+  release();
+  await moved.finished;
+
+  await expect
+    .element(screen.getByTestId('value'))
+    .toHaveTextContent('?q=hats');
+  expect(window.scrollY).toBe(reading);
+  await expect.element(screen.getByTestId('pending')).toHaveTextContent('none');
+});

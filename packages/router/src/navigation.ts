@@ -60,6 +60,14 @@ export type NavigationHandler<T> = {
    * `<ViewTransition>` animates the swap.
    */
   apply: (value: T) => void;
+  /**
+   * Whether a navigation that keeps the pathname on screen still has to
+   * load — the page showing reads the search, and the search moved. Without
+   * one, such a navigation is a state change: nothing loads. With one, it
+   * loads and applies like a page change, but as a state change otherwise:
+   * no scroll, no focus reset, no transition types.
+   */
+  refresh?: (url: URL) => boolean;
 };
 
 /**
@@ -196,6 +204,7 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
   // site: each method is wrapped in an effect event, which always sees the
   // latest one without making the listener below reactive to it.
   const claim = useEffectEvent((url: URL) => handler.claim(url));
+  const refresh = useEffectEvent((url: URL) => handler.refresh?.(url) ?? false);
   const load = useEffectEvent((url: URL, signal: AbortSignal) =>
     handler.load(url, signal),
   );
@@ -229,9 +238,11 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
       if (!isOurs(event)) return;
       const url = new URL(event.destination.url);
       const pathname = normalizePathname(url.pathname);
-      if (pathname === shown.current) {
-        // Same place — only the search or the entry state moved. Nothing to
-        // load, nothing to remount, and no scroll or focus to disturb.
+      // Same place — only the search or the entry state moved. Nothing to
+      // remount, and no scroll or focus to disturb; nothing to load either,
+      // unless the page showing reads what moved.
+      const inPlace = pathname === shown.current;
+      if (inPlace && !refresh(url)) {
         event.intercept({ scroll: 'manual', focusReset: 'manual' });
         return;
       }
@@ -245,15 +256,19 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
       const settled = (): void => {
         if (latest.current === id) setPendingPathname(null);
       };
-      const scroll = scrollPlanFor(event.navigationType, url.hash);
+      const scroll = inPlace
+        ? null
+        : scrollPlanFor(event.navigationType, url.hash);
       event.intercept({
+        // A load in place moves neither the viewport nor focus.
+        ...(inPlace ? { focusReset: 'manual' as const } : {}),
         // The platform would scroll "after transition" — after the handler
         // settles — but the handler settles only once the tree is on screen,
         // which is exactly when this hook scrolls itself. Doing it here keeps
         // the two from disagreeing, and keeps the behaviour where a browser
         // has not implemented the platform's half. A traversal keeps the
         // default: restoring a position is the browser's, not ours.
-        scroll: scroll === null ? 'after-transition' : 'manual',
+        scroll: scroll === null && !inPlace ? 'after-transition' : 'manual',
         handler: async () => {
           // 失敗も中止も、名指していた遷移が終わったということ。新しい遷移が
           // 始まっていれば、それがもう自分の行き先を名指している
@@ -274,7 +289,9 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
             pending.current.set(id, {
               resolve,
               scroll,
-              types: transitionTypesFor(event.navigationType),
+              // 同じページの読み直しはページの切り替えではない。
+              // ViewTransition が切り替えとして動かさないよう、型を付けない
+              types: inPlace ? [] : transitionTypesFor(event.navigationType),
             });
             event.signal.addEventListener(
               'abort',
