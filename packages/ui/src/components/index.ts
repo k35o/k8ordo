@@ -10,6 +10,11 @@ export { Badge } from './data-display/badge';
 export { Card } from './data-display/card';
 export { Carousel } from './data-display/carousel';
 export { Code } from './data-display/code';
+export {
+  DataTable,
+  type DataTableColumn,
+  type DataTableSort,
+} from './data-display/data-table';
 export { Heading } from './data-display/heading';
 export { Kbd } from './data-display/kbd';
 export { Prose } from './data-display/prose';

@@ -1122,6 +1122,79 @@
       "omitted": []
     },
     {
+      "name": "DataTable",
+      "props": [
+        {
+          "name": "columns",
+          "types": ["ReadonlyArray<DataTableColumn<Row>>"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "getRowId",
+          "types": ["(row: Row) => string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "rows",
+          "types": ["readonly Row[]"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "emptyState",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "hiddenColumnIds",
+          "types": ["readonly string[]"],
+          "defaultValue": "NONE",
+          "required": false
+        },
+        {
+          "name": "onHiddenColumnIdsChange",
+          "types": ["(ids: string[]) => void"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "onSelectedIdsChange",
+          "types": ["(ids: string[]) => void"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "onSortChange",
+          "types": ["(sort: DataTableSort | null) => void"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "selectedIds",
+          "types": ["readonly string[]"],
+          "defaultValue": "NONE",
+          "required": false
+        },
+        {
+          "name": "sort",
+          "types": ["DataTableSort", "null"],
+          "defaultValue": "null",
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
       "name": "DateField",
       "props": [
         {

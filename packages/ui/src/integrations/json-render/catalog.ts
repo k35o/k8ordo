@@ -88,6 +88,11 @@ export const catalog = defineCatalog(schema, {
       props: s.breadcrumbProps,
       description: 'Breadcrumb trail.',
     },
+    DataTable: {
+      props: s.dataTableProps,
+      description:
+        'Table the reader can sort (by the columns marked sortable) and, with selectable, pick rows from. Use it for records someone works through; use Table for data only read.',
+    },
     Table: {
       props: s.tableProps,
       description:

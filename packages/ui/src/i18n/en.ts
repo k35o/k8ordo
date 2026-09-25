@@ -43,6 +43,10 @@ export const en: Messages = {
   paginationPrevious: 'Previous',
   paginationNext: 'Next',
 
+  dataTableColumns: 'Columns',
+  dataTableSelectAll: 'Select all rows',
+  dataTableSelectRow: 'Select row',
+
   codeBlockCopy: 'Copy code',
   copied: 'Copied',
   copyFailed: 'Could not copy',
