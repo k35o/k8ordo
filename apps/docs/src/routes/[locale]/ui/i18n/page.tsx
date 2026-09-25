@@ -39,6 +39,7 @@ const MESSAGE_USAGE = {
   codeBlockCopy: 'CodeBlock',
   copied: 'CodeBlock',
   copyFailed: 'CodeBlock',
+  tableOfContents: 'TableOfContents',
   carousel: 'Carousel',
   carouselSlide: 'Carousel.Slide',
   carouselPrevious: 'Carousel',

@@ -969,6 +969,44 @@ export const pagination = {
   }),
 };
 
+export const sideNav = {
+  description: message({
+    ja: '見出しごとにまとめたリンクで、今のページを傍線で示すサイドナビ',
+    en: 'Side navigation: links grouped under titles, with the current page marked by a bar.',
+  }),
+  basicDescription: message({
+    ja: 'ui はルーターを持たないので、どのリンクが今のページかは `current` で渡す。`aria-current="page"` が付き、傍線で示される。',
+    en: 'The library has no router, so you say which link is current with `current`. It gets `aria-current="page"` and the bar.',
+  }),
+  renderAnchorTitle: message({
+    ja: 'ルーターのリンクに差し替える',
+    en: 'Using Your Router’s Link',
+  }),
+  renderAnchorDescription: message({
+    ja: '`renderAnchor` は要素そのものを差し替える。束には `href`・`className`・`children`・`aria-current` と、渡した属性（ドロワーを閉じる `onClick` など）がすべて入っている。このサイトのサイドナビもこれで組んでいる。',
+    en: '`renderAnchor` replaces the element itself. Its bag holds `href`, `className`, `children`, `aria-current`, and every attribute you passed (an `onClick` that closes a drawer, say). This site’s side navigation is built with it.',
+  }),
+};
+
+export const tableOfContents = {
+  description: message({
+    ja: 'ページの目次。今読んでいる見出しを示す',
+    en: 'The contents of the page, marking the heading being read.',
+  }),
+  basicDescription: message({
+    ja: '見出しを `{ id, label, children? }` の木で渡す。右の目次はこのページの見出しを指していて、スクロールすると今の見出しが動く。',
+    en: 'Pass the headings as a tree of `{ id, label, children? }`. The contents here point at this page’s own headings; scroll, and the current one moves.',
+  }),
+  activeTitle: message({
+    ja: '今の見出しの決め方',
+    en: 'How the Current Heading Is Chosen',
+  }),
+  activeDescription: message({
+    ja: '見出しの `scroll-margin-block-start` を読み取り位置にし、それを最後に越えた見出しを今の見出しにする。固定ヘッダーの高さを見出しの scroll-margin に指定すれば、目次から飛んだ見出しがそのまま今の見出しになる。文書の終わりまで来たら、最後の節が短くても最後の見出しにする。縦書きの文書では右から左へ読む向きで決める。',
+    en: 'Each heading’s `scroll-margin-block-start` is the reading line, and the last heading to pass it is the current one. Give the headings the scroll margin your sticky header needs, and a heading reached from the contents becomes current. At the end of the document the last heading is current even if its section is short. In a vertical document it reads from right to left.',
+  }),
+};
+
 export const inView = {
   description: message({
     ja: '子要素が画面やスクロール領域に入っているかを知らせるコンポーネント',
