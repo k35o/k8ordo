@@ -19,6 +19,8 @@ let brokenPageStderr = '';
 let brokenNotFoundStderr = '';
 // 同じく、失敗するページの上に error.tsx も Suspense も無い構成
 let noBoundaryStderr = '';
+// guard.ts を置いた構成。ファイルには守るリクエストが無い
+let guardStderr = '';
 
 // ひとつ前のデプロイの dist/client。アプリは同じで、クライアントの
 // スクリプトだけが違う。タブを開いた後にデプロイがあった、を再現する
@@ -43,6 +45,7 @@ beforeAll(() => {
   brokenPageStderr = failingBuild('vite.broken.config.ts');
   brokenNotFoundStderr = failingBuild('vite.broken-not-found.config.ts');
   noBoundaryStderr = failingBuild('vite.broken-no-boundary.config.ts');
+  guardStderr = failingBuild('vite.broken-guard.config.ts');
   // 圧縮しないだけで、スクリプトの中身とハッシュの入った名前が変わる
   execFileSync('pnpm', ['exec', 'vp', 'build', '--minify', 'false'], {
     cwd: root,
@@ -134,6 +137,12 @@ describe('the static build', () => {
     );
     expect(noBoundaryStderr).toContain(
       'not-found broken with no boundary above it',
+    );
+  });
+
+  it('refuses guard.ts, naming every one and the mode that runs them', () => {
+    expect(guardStderr).toContain(
+      'static build cannot run guard.ts — a file has no request to guard, and these are guards:\n  src/routes-broken-guard/admin/guard.ts\n  src/routes-broken-guard/guard.ts\nthis application wants @k8ordo/server',
     );
   });
 

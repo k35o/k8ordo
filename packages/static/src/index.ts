@@ -9,6 +9,7 @@ import {
   payloadPathFor,
   scanRoutes,
   serverActionModules,
+  slotOf,
 } from '@k8ordo/framework-engine';
 import type { EngineOptions } from '@k8ordo/framework-engine';
 import type { Plugin, PluginOption, ResolvedConfig } from 'vite';
@@ -47,6 +48,20 @@ type Handler = (request: Request) => Promise<Response>;
 
 const ORIGIN = 'http://k8ordo.localhost';
 
+const WANTS_SERVER = 'this application wants @k8ordo/server';
+
+/**
+ * A `guard.ts` decides how a request is answered, and a file is never
+ * requested of anything that could run one. Named every one at once, as the
+ * Server Action refusal names every action module.
+ */
+const guardRefusal = (files: readonly string[]): Error =>
+  new Error(
+    `static build cannot run guard.ts — a file has no request to guard, and these are guards:\n${files
+      .map((file) => `  ${file}`)
+      .join('\n')}\n${WANTS_SERVER}`,
+  );
+
 // The engine is bundled into this package, and its runtime entries ship
 // beside this file — `dist/runtime/` — which is where Vite is pointed.
 const RUNTIME_DIR = fileURLToPath(new URL('./runtime/', import.meta.url));
@@ -78,12 +93,13 @@ export const framework = (options: StaticOptions = {}): PluginOption[] => {
       routesDir = path.resolve(root, options.routesDir ?? 'src/routes');
     },
 
-    // The build refuses a Server Action (below); `vite dev` is a running
-    // server that would happily accept the POST, and a form that works in
-    // development and posts into nothing in production is the worst of the
-    // two. So the refusal is said here as well, the moment the module is
-    // compiled — and it asks the same registry the build reads, so the two
-    // cannot come to disagree about what a Server Action is.
+    // The build refuses a Server Action and a guard.ts (below); `vite dev` is
+    // a running server that would happily accept the POST and run the guard,
+    // and what works in development and does nothing in production is the
+    // worst of the two. So the refusal is said here as well, the moment the
+    // module is compiled — asking the same questions the build asks (the
+    // registry for an action, the grammar for a guard), so the two cannot
+    // come to disagree.
     transform: {
       // After `rsc:use-server`, which is what fills that registry. Its own
       // transform prepends a runtime import, so a module's text stops
@@ -95,9 +111,14 @@ export const framework = (options: StaticOptions = {}): PluginOption[] => {
         // by name, and names every offending module at once; asking here too
         // would replace that list with whichever file compiled first.
         if (this.environment.mode !== 'dev') return null;
+        const [module = id] = id.split('?');
+        const file = path.relative(routesDir, module);
+        if (!file.startsWith('..') && slotOf(file) === 'guard') {
+          throw guardRefusal([path.relative(root, module)]);
+        }
         if (!isServerActionModule({ plugins }, id)) return null;
         throw new Error(
-          `static build cannot ship Server Actions — a file cannot receive one, and this declares 'use server':\n  ${path.relative(root, id)}\nthis application wants @k8ordo/server`,
+          `static build cannot ship Server Actions — a file cannot receive one, and this declares 'use server':\n  ${path.relative(root, id)}\n${WANTS_SERVER}`,
         );
       },
     },
@@ -134,7 +155,7 @@ export const framework = (options: StaticOptions = {}): PluginOption[] => {
           throw new Error(
             `static build cannot ship Server Actions — a file cannot receive one, and these declare 'use server':\n${actions
               .map((file) => `  ${file}`)
-              .join('\n')}\nthis application wants @k8ordo/server`,
+              .join('\n')}\n${WANTS_SERVER}`,
           );
         }
 
@@ -230,8 +251,25 @@ export const framework = (options: StaticOptions = {}): PluginOption[] => {
     },
   };
 
+  // What only a running server can have is refused before anything is built.
+  // Server Actions are the exception: the RSC pipeline finds them only while
+  // it compiles, so the build names them once it has.
+  const refuse: Plugin = {
+    name: 'k8ordo:static-refuses',
+    buildApp: {
+      order: 'pre',
+      async handler() {
+        const guards = (await scanRoutes(routesDir))
+          .filter((file) => slotOf(file) === 'guard')
+          .map((file) => path.relative(root, path.join(routesDir, file)));
+        if (guards.length > 0) throw guardRefusal(guards);
+      },
+    },
+  };
+
   return [
     ...engine(options, { via: '@k8ordo/static', runtimeDir: RUNTIME_DIR }),
+    refuse,
     prerender,
   ];
 };
