@@ -102,6 +102,30 @@ export default defineConfig({
       {
         extends: true,
         test: {
+          name: { label: 'form', color: 'yellow' },
+          include: [
+            'src/components/form/**/*.test.tsx',
+            'src/components/_internal/**/*.test.tsx',
+          ],
+          browser: {
+            enabled: true,
+            instances: [
+              {
+                browser: 'chromium',
+                context: {
+                  reducedMotion: 'reduce',
+                },
+              },
+            ],
+            provider: playwright(),
+            headless: true,
+            screenshotFailures: false,
+          },
+        },
+      },
+      {
+        extends: true,
+        test: {
           name: { label: 'helpers', color: 'blue' },
           include: [
             'src/helpers/**/*.test.{ts,tsx}',

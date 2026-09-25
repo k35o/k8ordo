@@ -1,11 +1,7 @@
-import { useForm } from '@k8ordo/form';
-import { formFields } from '@k8ordo/form/server';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
 import { expect, fn, waitFor } from 'storybook/test';
-import { z } from 'zod';
 
-import { FormControl } from '../form-control';
 import { DatePicker } from './date-picker';
 
 const meta: Meta<typeof DatePicker> = {
@@ -198,59 +194,5 @@ export const Controlled: Story = {
     );
     await expect(canvas.getByTestId('value')).toHaveTextContent('2023-02-28');
     await expect(input).toHaveValue('2023-02-28');
-  },
-};
-
-const eventFields = formFields(
-  z.object({ eventDate: z.iso.date('日付を入力してください') }),
-);
-
-const EventForm = () => {
-  const form = useForm(eventFields);
-  const eventDate = form.field('eventDate');
-
-  return (
-    <form {...form.props}>
-      <FormControl
-        errorText={eventDate.error}
-        invalid={eventDate.invalid}
-        label="開催日"
-        renderInput={(props) => <DatePicker {...props} {...eventDate.input} />}
-        required={eventDate.required}
-      />
-      <p data-testid="dirty">{form.isDirty ? '変更あり' : '変更なし'}</p>
-    </form>
-  );
-};
-
-// カレンダーで選んだ日付も、打ち込んだのと同じくフォームに伝わる
-export const WithFormFields: Story = {
-  render: () => <EventForm />,
-  play: async ({ canvas, userEvent }) => {
-    const input = canvas.getByLabelText<HTMLInputElement>(/開催日/u);
-
-    await expect(input).toHaveAttribute('name', 'eventDate');
-    await expect(input).toBeRequired();
-
-    input.focus();
-    await userEvent.tab();
-    await expect(
-      await canvas.findByText('日付を入力してください'),
-    ).toBeInTheDocument();
-
-    await userEvent.click(
-      canvas.getByRole('button', { name: 'カレンダーから選ぶ' }),
-    );
-    await userEvent.click(
-      await canvas.findByRole('button', { name: 'Friday, January 20, 2023' }),
-    );
-
-    await expect(input).toHaveValue('2023-01-20');
-    await waitFor(async () => {
-      await expect(
-        canvas.queryByText('日付を入力してください'),
-      ).not.toBeInTheDocument();
-    });
-    await expect(canvas.getByTestId('dirty')).toHaveTextContent('変更あり');
   },
 };
