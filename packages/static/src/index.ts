@@ -114,7 +114,8 @@ export const framework = (options: StaticOptions = {}): PluginOption[] => {
         // would replace that list with whichever file compiled first.
         if (this.environment.mode !== 'dev') return null;
         const [module = id] = id.split('?');
-        const file = path.relative(routesDir, module);
+        // 文法は / 区切りで読む。Windows の path.relative は \ で区切って返す
+        const file = path.relative(routesDir, module).split(path.sep).join('/');
         if (!file.startsWith('..') && slotOf(file) === 'guard') {
           throw guardRefusal([path.relative(root, module)]);
         }
