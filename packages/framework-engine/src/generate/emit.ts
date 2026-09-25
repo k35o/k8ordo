@@ -26,8 +26,13 @@ export type TableNode<T> = T | TableBranch<T>;
 /** What answers a directory's own URL: its page, or its route.ts. */
 const ownFile = (dir: RouteDir): string | null => dir.page ?? dir.route;
 
-/** A directory with nothing but a page (or a route.ts) is that, itself. */
+/**
+ * A directory with nothing but a page (or a route.ts) is that, itself —
+ * except a group: it adds no segment, so the router refuses it as a leaf (it
+ * would redeclare its parent's index) and takes it only as a branch.
+ */
 const isLeaf = (dir: RouteDir): boolean =>
+  dir.kind !== 'group' &&
   ownFile(dir) !== null &&
   dir.layout === null &&
   dir.error === null &&

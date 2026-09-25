@@ -135,6 +135,11 @@ export const catalog = defineCatalog(schema, {
       description:
         'Icon-only button (label is required and shown as its tooltip).',
     },
+    CopyButton: {
+      props: s.copyButtonProps,
+      description:
+        'Button that copies value to the clipboard and confirms it. With iconOnly, label becomes its tooltip.',
+    },
     Textarea: {
       props: s.textareaProps,
       description:
@@ -154,6 +159,21 @@ export const catalog = defineCatalog(schema, {
       props: s.sliderProps,
       description:
         'Slider. defaultValue can be bound to state with $bindState.',
+    },
+    DateField: {
+      props: s.dateFieldProps,
+      description:
+        'Date input with a visible label. Dates are YYYY-MM-DD strings. defaultValue can be bound to state with $bindState.',
+    },
+    DatePicker: {
+      props: s.datePickerProps,
+      description:
+        'Date input with a visible label and a button that opens a calendar. Dates are YYYY-MM-DD strings. defaultValue can be bound to state with $bindState.',
+    },
+    Calendar: {
+      props: s.calendarProps,
+      description:
+        'Month calendar shown inline for picking one day (YYYY-MM-DD). It submits nothing; in a form, use DatePicker. defaultValue can be bound to state with $bindState.',
     },
     Radio: {
       props: s.radioProps,

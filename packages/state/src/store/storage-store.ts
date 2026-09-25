@@ -1,36 +1,65 @@
-import { localCodecOf } from '../local-state';
-import type { LocalState } from '../local-state';
 import type { StateValues } from '../schema/object';
+import { storageCodecOf } from '../storage-state';
+import type { LocalState, SessionState } from '../storage-state';
 import { createHandle, createStoreCore, resolvePatch } from './core';
 import type { Handle, Patch, Store, UpdateHandle } from './core';
 import { getOrCreateStore } from './registry';
 
-const createLocalStore = (def: LocalState): Store => {
-  const codec = localCodecOf(def);
+const createStorageStore = (
+  def: LocalState | SessionState,
+  storage: Storage,
+): Store => {
+  const codec = storageCodecOf(def);
   const { storageKey } = def;
 
-  const read = (): StateValues => {
-    const text = localStorage.getItem(storageKey);
-    if (text === null) return codec.parse(undefined);
-    try {
-      return codec.parse(JSON.parse(text));
-    } catch {
-      // Corrupt JSON is stale data like any other: reset, don't crash.
-      return codec.parse(undefined);
-    }
+  const write = (values: Readonly<StateValues>): void => {
+    storage.setItem(storageKey, JSON.stringify(codec.row(values)));
   };
 
-  const core = createStoreCore(codec.keys, read());
+  const readRow = (): { values: StateValues; stale: boolean } => {
+    const text = storage.getItem(storageKey);
+    let row: unknown;
+    try {
+      row = text === null ? undefined : JSON.parse(text);
+    } catch {
+      // Corrupt JSON is stale data like any other: reset, don't crash.
+      row = undefined;
+    }
+    return codec.read(row);
+  };
+
+  const read = (): StateValues => readRow().values;
+
+  // 古い版の行は、移行した値を今の版で書き戻す。ストアは描画中に作られるので
+  // その場では書かず、マイクロタスクで行を読み直してからまだ古ければ書く。
+  // その間に update() が今の版で書いていれば、何もしない
+  const upgrade = (): void => {
+    queueMicrotask(() => {
+      const { values, stale } = readRow();
+      if (!stale) return;
+      try {
+        write(values);
+      } catch {
+        // 書けなくても読んだ値は正しい。次の読み込みでもう一度移行する
+      }
+    });
+  };
+
+  const first = readRow();
+  const core = createStoreCore(codec.keys, first.values);
+  if (first.stale) upgrade();
 
   let pending: StateValues | null = null;
   let handle: Handle | null = null;
 
-  // The storage event only fires in *other* tabs; same-tab notification runs
-  // through applyNext directly in update().
+  // The storage event only fires in *other* documents sharing the area — other
+  // tabs for localStorage, other frames of this tab for sessionStorage;
+  // same-document notification runs through applyNext directly in update().
   const onStorage = (event: StorageEvent): void => {
-    if (event.storageArea !== localStorage) return;
+    if (event.storageArea !== storage) return;
     if (event.key !== storageKey && event.key !== null) return;
-    const fresh = read();
+    const { values: fresh, stale } = readRow();
+    if (stale) upgrade();
     // A foreign tab's write must not roll back a batch that has not flushed
     // yet: the pending patch stays on top.
     core.applyNext(pending === null ? fresh : { ...fresh, ...pending });
@@ -49,7 +78,7 @@ const createLocalStore = (def: LocalState): Store => {
     const values: StateValues = {};
     for (const key of codec.keys) values[key] = target[key];
     try {
-      localStorage.setItem(storageKey, JSON.stringify(values));
+      write(values);
       core.applyNext(target);
       current.settle();
     } catch (error) {
@@ -87,9 +116,16 @@ const createLocalStore = (def: LocalState): Store => {
 };
 
 export const localStoreOf = (def: LocalState): Store =>
-  getOrCreateStore('local', def.key, () => createLocalStore(def));
+  getOrCreateStore('local', def.key, () =>
+    createStorageStore(def, localStorage),
+  );
 
-/** SSR and hydration see the defaults — the server has no localStorage. */
-export const localInitialSnapshot = (def: LocalState): StateValues => ({
-  ...localCodecOf(def).defaults,
-});
+export const sessionStoreOf = (def: SessionState): Store =>
+  getOrCreateStore('session', def.key, () =>
+    createStorageStore(def, sessionStorage),
+  );
+
+/** SSR and hydration see the defaults — the server has no Web Storage. */
+export const storageInitialSnapshot = (
+  def: LocalState | SessionState,
+): StateValues => ({ ...storageCodecOf(def).defaults });

@@ -86,3 +86,45 @@ export type ArrayPathsOf<Schema, Prefix extends string = ''> =
           }[keyof Shape & string]
         : never
     : never;
+
+/**
+ * The one control whose `input` carries a `value` is a checkbox whose schema
+ * reads the submitted string (`z.stringbool()`). The runtime walk finds it by
+ * encoding `true`, which takes a codec; the type sees the same codec as a
+ * string on its way in and a boolean on its way out. The string is read off
+ * the codec's inner schema because `zod/mini` leaves the codec's own input
+ * `unknown`.
+ */
+type EncodesTrueAsString<Schema> = Schema extends {
+  _zod: {
+    output: infer Output;
+    def: { in: { _zod: { output: infer In } }; reverseTransform: unknown };
+  };
+}
+  ? [In] extends [string]
+    ? [Output] extends [boolean]
+      ? true
+      : false
+    : false
+  : false;
+
+/**
+ * The field paths whose `input` carries the string a checked box submits.
+ * Arrays need no case of their own: neither a checkbox group nor repeated rows
+ * take a string in.
+ */
+export type StringCheckboxPathsOf<Schema, Prefix extends string = ''> =
+  Unwrap<Schema> extends infer Bare
+    ? Bare extends { shape: infer Shape }
+      ? {
+          [Key in keyof Shape & string]: StringCheckboxPathsOf<
+            Shape[Key],
+            Join<Prefix, Key>
+          >;
+        }[keyof Shape & string]
+      : Prefix extends ''
+        ? never
+        : EncodesTrueAsString<Bare> extends true
+          ? Prefix
+          : never
+    : never;

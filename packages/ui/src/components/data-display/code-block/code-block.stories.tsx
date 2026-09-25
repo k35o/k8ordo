@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import type { ReactElement } from 'react';
-import { expect, fn, spyOn, waitFor } from 'storybook/test';
+import { expect, spyOn, waitFor } from 'storybook/test';
 
 import { CodeBlock } from '.';
 
@@ -110,7 +110,8 @@ export const UnknownLanguage: Story = {
   },
 };
 
-const writeText = fn(async (_text: string) => {});
+// クリップボードを読み返すには権限が要るので、書き込み口で受け取って確かめる
+const written: ClipboardItem[] = [];
 
 export const Copy: Story = {
   args: {
@@ -118,8 +119,12 @@ export const Copy: Story = {
     lang: 'bash',
   },
   beforeEach: () => {
-    const spy = spyOn(navigator.clipboard, 'writeText').mockImplementation(
-      writeText,
+    written.length = 0;
+    const spy = spyOn(navigator.clipboard, 'write').mockImplementation(
+      (items) => {
+        written.push(...items);
+        return Promise.resolve();
+      },
     );
     return () => {
       spy.mockRestore();
@@ -130,7 +135,8 @@ export const Copy: Story = {
       await canvas.findByRole('button', { name: 'コードをコピー' }),
     );
 
-    await expect(writeText).toHaveBeenCalledWith('pnpm add @k8ordo/ui');
+    const blob = await written.at(-1)?.getType('text/plain');
+    await expect(await blob?.text()).toBe('pnpm add @k8ordo/ui');
     await waitFor(() => {
       expect(canvas.getByRole('status')).toHaveTextContent('コピーしました');
     });
@@ -151,5 +157,32 @@ export const InVerticalText: Story = {
     const figure = await canvas.findByRole('figure');
 
     await expect(getComputedStyle(figure).writingMode).toBe('horizontal-tb');
+  },
+};
+
+// 強制カラー（Windows のハイコントラストなど）では影と地の色が消える。
+// 行の印の線とフォーカスリングは、システムの色で塗り直されて残る
+export const ForcedColors: Story = {
+  tags: ['forced-colors'],
+  args: {
+    code: 'const a = 1;\nconst b = 2;',
+    lang: 'ts',
+    marks: { 1: 'highlight' },
+  },
+  play: async ({ canvasElement }) => {
+    await expect(matchMedia('(forced-colors: active)').matches).toBe(true);
+
+    const mark = canvasElement.querySelector('[data-mark="highlight"]');
+    const bar = getComputedStyle(mark as Element, '::after');
+
+    await expect(bar.borderInlineStartStyle).toBe('solid');
+    await expect(bar.borderInlineStartColor).not.toBe('rgba(0, 0, 0, 0)');
+
+    const pre = canvasElement.querySelector('pre') as HTMLElement;
+    pre.focus();
+    const focused = getComputedStyle(pre);
+
+    await expect(focused.outlineStyle).toBe('solid');
+    await expect(focused.outlineColor).not.toBe('rgba(0, 0, 0, 0)');
   },
 };

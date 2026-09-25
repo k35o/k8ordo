@@ -11,20 +11,20 @@ export const ui = {
     en: '`@k8ordo/ui`',
   }),
   description: message({
-    ja: 'コンポーネントが自前で描く文言（閉じるボタンのラベル、必須の表示、読み込み中の読み上げ）は、`@k8ordo/ui` 自身の辞書から引かれます。辞書は `UIProvider` の `messages` で渡し、`@k8ordo/ui/i18n` の `dictionaries` から描画中のロケールで選びます。',
-    en: "Wording the components render on their own — close button labels, the required marker, the loading announcement — comes from `@k8ordo/ui`'s own dictionary. Pass it to `UIProvider` as `messages`, picked from `dictionaries` in `@k8ordo/ui/i18n` by the locale being rendered.",
+    ja: 'コンポーネントが自前で描く文言（閉じるボタンのラベル、必須の表示、読み込み中の読み上げ）は、`@k8ordo/ui` が `@k8ordo/i18n` の今のロケールで引きます。Provider に渡すものはありません。`ja` と `en` は `@k8ordo/ui` が持ち、それ以外のロケールは集合の隣で `registerMessages` に登録します。',
+    en: "Wording the components render on their own — close button labels, the required marker, the loading announcement — is looked up by `@k8ordo/ui` in `@k8ordo/i18n`'s current locale. Nothing is passed to a provider. `@k8ordo/ui` ships `ja` and `en`; register any other locale with `registerMessages`, next to the set.",
   }),
-  serializable: message({
-    ja: '辞書は文字列だけのオブジェクトなので、Server Component のレイアウトから Client Component の `UIProvider` へそのまま渡せます。RSC ペイロードに入るのは選んだ 1 つの辞書だけです。',
-    en: 'A dictionary is an object of strings, so a Server Component layout can pass it straight to the client `UIProvider`. Only the one dictionary chosen travels in the RSC payload.',
+  clientGraph: message({
+    ja: '集合を定義するモジュールは、ブラウザ側でも読み込まれている必要があります。集合が無い環境では `@k8ordo/ui` は英語で描くので、サーバーの HTML と食い違います。Client Component が `links.ts`（`bindParams`）や言語切替で `locales` を import していれば満たされます。',
+    en: "The module that defines the set has to be loaded in the browser as well: where no set is defined `@k8ordo/ui` speaks English, which would disagree with the server's HTML. A Client Component importing `locales` — through `links.ts` (`bindParams`) or a language switcher — is enough.",
   }),
   otherLocales: message({
-    ja: '`dictionaries` が持つのは `ja` と `en` です。集合にそれ以外のロケール（`fr` や `en-US`）があるときは、`@k8ordo/ui/i18n` の `Messages` 型を注釈した辞書を自分で用意し、ロケールから辞書への対応を `Variants<Messages>` で書くと、漏れが型で分かります。',
-    en: '`dictionaries` holds `ja` and `en`. When the set has other locales (`fr`, or `en-US`), write those dictionaries yourself, annotated with the `Messages` type from `@k8ordo/ui/i18n`, and map locales to dictionaries with a `Variants<Messages>` so a missing one is a type error.',
+    ja: '`en-US` のような地域つきのタグは、登録が無ければ言語（`en`）の辞書を読みます。登録も組み込みも無いロケールで描くと、登録を促すエラーを投げます。登録する辞書に `@k8ordo/ui/i18n` の `Messages` 型を注釈すれば、キーの漏れが型で分かります。',
+    en: 'A regional tag such as `en-US` without a registration reads its language’s (`en`) dictionary. Rendering in a locale nothing has text for throws, naming how to register it. Annotate a registered dictionary with the `Messages` type from `@k8ordo/ui/i18n` and a missing key is a type error.',
   }),
   notFound: message({
-    ja: '`not-found.tsx` の下でも上のスキーマは走るので、`getLocale()` は 404 の URL が名指すロケールになり、`/en/…` の 404 には英語の辞書が渡ります。URL がロケールを名指さなければ既定です。例外は静的ビルドの `404.html` で、番兵の区間で 1 回だけ描かれるので既定のロケールで届き、ブラウザが訪問者の URL で描き直したときに訪問者のロケールになります。辞書を Client Component の中で選べば（このサイトの `LocaleShell` のように `locales.delocalize(usePathname()).locale` から）、そこで訪問者のロケールに合います。',
-    en: "The schema above `not-found.tsx` still runs, so `getLocale()` on a 404 is the locale its URL names — a 404 at `/en/…` gets the English dictionary — and the default where the URL names none. The exception is a static build's `404.html`, rendered once under a sentinel segment: it arrives in the default, and follows the visitor's locale once the browser renders it afresh at their URL. Pick the dictionary in a Client Component (from `locales.delocalize(usePathname()).locale`, as this site's `LocaleShell` does) and it follows them there.",
+    ja: '404 でも、コンポーネントは文言と同じロケールで描きます。静的ビルドの `404.html` は番兵の区間で 1 回だけ描かれるので既定のロケールで届き、ブラウザが訪問者の URL で描き直したときに訪問者のロケールになります。',
+    en: "On a 404 the components speak the same locale the messages do. A static build's `404.html`, rendered once under a sentinel segment, arrives in the default, and follows the visitor's locale once the browser renders it afresh at their URL.",
   }),
   props: message({
     ja: 'コンポーネントの props に渡すテキストは文字列です。`<Button>{m.form.submit()}</Button>` のように、文言を呼んだ結果を渡します。',
@@ -119,20 +119,24 @@ export const server = {
     en: '`@k8ordo/server`',
   }),
   description: message({
-    ja: 'リクエストごとに描くので、`paramsSchema` と文言の働きは静的化と同じです。違うのは、ページがリクエストを読めることと、Server Action があることです。',
-    en: 'Rendering happens per request, so `paramsSchema` and messages work exactly as in a static build. What differs is that a page can read the request, and that there are Server Actions.',
+    ja: 'リクエストごとに描くので、`paramsSchema` と文言の働きは静的化と同じです。違うのは、ページの前に走る `guard.ts` がリクエストに答えられることと、Server Action があることです。',
+    en: 'Rendering happens per request, so `paramsSchema` and messages work exactly as in a static build. What differs is that a `guard.ts` running before the page can answer the request, and that there are Server Actions.',
   }),
   negotiate: message({
-    ja: 'ページは `request` を受け取るので、`/` で `locales.negotiateRequest(request, { cookie })` がロケールを選べます。訪問者が前に選んだロケールの Cookie を先に、無ければ `Accept-Language` を読みます。答えを HTML に入れておけば、JavaScript の無い訪問者にも行き先のリンクが見えます。',
-    en: 'A page receives `request`, so `/` can choose with `locales.negotiateRequest(request, { cookie })`: the cookie holding the locale the visitor chose before, then `Accept-Language`. With the answer in the HTML, a visitor without JavaScript also sees the link to follow.',
+    ja: '`/` には、何かを描く前に `guard.ts` が答えます。`locales.negotiateRequest(request, { cookie })` が、訪問者が前に選んだロケールの Cookie を先に、無ければ `Accept-Language` を読んでロケールを選び、guard はそのロケールの URL への `307` で応答を終えます。JavaScript の無い訪問者も、`/` へのクライアント遷移も、同じように振り分けられます。',
+    en: '`/` is answered by a `guard.ts`, before anything renders. `locales.negotiateRequest(request, { cookie })` chooses — the cookie holding the locale the visitor chose before, then `Accept-Language` — and the guard ends the request with a `307` to that locale. A visitor without JavaScript is sent on the same way, and so is a client navigation to `/`.',
   }),
-  noRedirect: message({
-    ja: 'ページ自身はリダイレクトで応答できません。`redirect()` は Server Action のためのもので、`redirect.ts` の行き先は params から作られ、リクエストのヘッダーでは変わりません。サーバーで `307` を返したいときは、アプリケーションの外で行います。`serve` の前に置いたプロキシか、ビルドされたハンドラ（`dist/rsc/index.js`）を包む自前のホストが、ハンドラを呼ぶ前に `/` だけを答えます。そうしないなら、移動はクライアントで行います。',
-    en: 'The page cannot answer with a redirect itself: `redirect()` is for Server Actions, and a `redirect.ts` builds its target from the params, never from the request headers. To answer `/` with a `307` on the server, do it outside the application: a proxy in front of `serve`, or a host of your own around the built handler (`dist/rsc/index.js`), answers `/` before calling the handler. Otherwise the move happens on the client.',
+  group: message({
+    ja: 'guard と `/` のページはルートグループ（`(home)/`）に入れます。`guard.ts` は自分のディレクトリより下のすべての URL の前に走るので、`src/routes/` の直下に置くと `/en/…` まで振り分けてしまいます。ページは描かれませんが、guard が走るのはページが宣言した URL の前なので、`null` を返すページを置きます。',
+    en: 'Put the guard and the `/` page in a route group (`(home)/`): a `guard.ts` runs before every URL below its directory, so one directly in `src/routes/` would send `/en/…` away too. The page never renders, but a guard runs before a URL a page declares, so one returning `null` has to be there.',
   }),
-  deployLink: message({
-    ja: '`@k8ordo/server` のハンドラの動かし方を読む',
-    en: "Read how `@k8ordo/server`'s handler is run",
+  status: message({
+    ja: '`308` ではなく `307` にするのは、行き先が訪問者によって変わるからです。`localize` が返すのは Vite の `base` を除いた pathname なので、`withBase` で付け直します。',
+    en: "`307` rather than `308`, because where it sends depends on the visitor. `localize` returns the pathname without Vite's `base`, so `withBase` puts it back in front.",
+  }),
+  guardsLink: message({
+    ja: '`guard.ts` の書き方を読む',
+    en: 'Read how a `guard.ts` is written',
   }),
   actions: message({
     ja: 'Server Action の中で文言を使うときは、上の `@k8ordo/form` の例のように `locales.run` で囲みます。',

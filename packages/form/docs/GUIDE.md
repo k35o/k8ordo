@@ -181,7 +181,9 @@ when the same failure comes back.
 
 **The wording cannot drift.** Client messages are obtained by running the
 schema against a probe value, so the text shown next to the input is the text
-zod itself produces. A custom `min(1, '…')` reaches both sides.
+zod itself produces. A custom `min(1, '…')` reaches both sides. The one
+exception is a range message from `@k8ordo/ui`'s `NumberField` (see
+[Working with @k8ordo/ui](#working-with-k8ordoui)).
 
 **`required` means the same thing on both sides.** JSON Schema's `required`
 means "the key is present", but a form always submits something for every
@@ -336,10 +338,12 @@ has no unambiguous name; the types let it through, but `formFields` and
 
 ## Radio groups
 
-Do not spread an enum's `input` onto a radio: once `state` carries `values`,
-`input` holds the echoed choice as `defaultValue`, which collides with each
-radio's own `value` and restores no selection. Take `name` and `required` from
-it and restore the choice per option:
+Do not spread an enum's `input` onto a hand-written radio: once `state`
+carries `values`, `input` holds the echoed choice as `defaultValue`, which
+collides with each radio's own `value` and restores no selection. Take `name`
+and `required` from it and restore the choice per option (`@k8ordo/ui`'s
+`Radio` and `RadioCard` take the spread instead — see
+[Working with @k8ordo/ui](#working-with-k8ordoui)):
 
 ```tsx
 const plan = form.field('plan');
@@ -369,6 +373,16 @@ which reaches the schema as `undefined`: `.default(false)` or `.optional()`
 accepts it, and a bare `z.stringbool()` makes the box `required`.
 `.default(true)` is refused at derive time — nothing would read as `true`, so
 unchecking the box could never submit `false`.
+
+Only these fields carry `value` in their type. `formFields` names their paths
+in the third type argument of `FormFields` (`FormFields<FieldPath, ArrayPath,
+StringCheckboxPath>`), and `field()` types `input` as `StringCheckboxInput` for
+them and as `FieldInput`, with no `value`, for every other field — so the other
+fields spread onto a component that takes `value` only when it is controlled.
+A `FormFields` type written by hand can leave the third argument out: it still
+takes the derived fields, and the box still submits its `value`, but
+`input.value` no longer compiles. The same holds for a box inside repeated
+rows, which `row.field()` never types with `value`.
 
 ## Checkbox groups
 
@@ -595,30 +609,107 @@ request — which is the correct behaviour, not a broken one.
 
 ## Working with @k8ordo/ui
 
-`@k8ordo/form` does not depend on `@k8ordo/ui`. Attributes go to the input;
-`FormControl` gets only what it uses, and generates the `id` and `aria-*`
-links itself. A derived `type` is any string while `TextField` takes only its
-own text types, so take `type` out of `input` and set it on the component when
-the field is not plain text. Take it out for `PasswordInput` too: it sets
-`type` itself to show and hide the value, and a spread `type` overrides that
-toggle without a type error. `Checkbox` renders no `value` outside a
-`CheckboxGroup`, so a `z.stringbool()` box drawn with it submits the browser's
-`on` — which the default `z.stringbool()` reads as `true`, but a custom
-`truthy`, and the URL state writes, do not share. Render a plain
-`<input {...field.input} />` there.
+`@k8ordo/form` does not depend on `@k8ordo/ui`; the fields in `@k8ordo/ui`
+take what `formFields` derives as it is. Spread `input` onto the field after
+`FormControl`'s props. `FormControl` gets only what it uses — the label, the
+error, `invalid`, `required` — and generates the `id` and `aria-*` links
+itself.
 
 ```tsx
 const title = form.field('title');
-const { type: _type, ...titleInput } = title.input;
 
 <FormControl
   errorText={title.error}
   invalid={title.invalid}
   label="タイトル"
   required={title.required}
-  renderInput={(props) => <TextField {...props} {...titleInput} />}
+  renderInput={(props) => <TextField {...props} {...title.input} />}
 />;
 ```
+
+Nothing in `input` has to be taken out first: `TextField` renders the date and
+time types as well as the text ones, `PasswordInput` keeps its show/hide toggle
+under a spread `type`, `Textarea` drops the `type` a `<textarea>` does not
+have, and `NumberField` and `Slider` take string bounds, `step="any"`, and the
+echoed `defaultValue`, which is a string whichever field it belongs to.
+Uncontrolled fields keep their value in the DOM, so a reset — React's after
+each action included — restores the echo, `isDirty` reads them, and a value a
+component changes in code — a stepper, a chosen option, a removed file —
+arrives as an `input` event, the way typing does.
+
+| Schema                                            | Component                                            | What to pass besides `{...props} {...input}`              |
+| ------------------------------------------------- | ---------------------------------------------------- | --------------------------------------------------------- |
+| `z.string()`, `z.email()`, `z.url()`, `z.iso.*()` | `TextField`, `Textarea`                              | —                                                         |
+| a password                                        | `PasswordInput`                                      | —                                                         |
+| `z.coerce.number()`                               | `NumberField`, `Slider`                              | —                                                         |
+| `z.enum([…])`                                     | `Select`, `Radio`, `RadioCard`                       | `options`; `labelAs="legend"` on `FormControl` for radios |
+| `z.boolean()`, `z.literal(true)`                  | `Checkbox`, `Switch`                                 | `label`, and no `{...props}`: they need no `FormControl`  |
+| `z.array(z.enum([…]))`                            | `CheckboxGroup.Root`, `CheckboxCard`, `Autocomplete` | `defaultValue` from `state.values`                        |
+| `z.file()`                                        | `FileField.Root`                                     | a `FileField.Trigger` and `FileField.ItemList`            |
+
+**Radios take the spread.** The advice under [Radio groups](#radio-groups) is
+about a hand-written `<input type="radio">`. `Radio` and `RadioCard` read an
+enum's `input` the other way round: `defaultValue` is the selected option and
+`required` reaches every radio.
+
+**A `z.stringbool()` box is the exception.** A spread `value` does not reach
+`Checkbox`'s input, so a `z.stringbool()` box drawn with it submits the
+browser's `on` — which the default `z.stringbool()` reads as `true`, but a
+custom `truthy`, and the URL state writes, do not share. Render a plain
+`<input {...field.input} />` there.
+
+**A `Select` needs a placeholder for `required` to mean anything.** Put
+`{ value: '', label: '…' }` first in `options`; a `<select>` without an empty
+option always has a choice selected.
+
+**A checkbox group echoes as an array.** `input` carries only the `name`, so
+pass what was checked back as `defaultValue`:
+
+```tsx
+const tags = form.field('tags');
+const checked = state.values?.tags;
+
+<FormControl
+  errorText={tags.error}
+  invalid={tags.invalid}
+  label="タグ"
+  labelAs="legend"
+  renderInput={(props) => (
+    <CheckboxCard
+      {...props}
+      {...tags.input}
+      defaultValue={Array.isArray(checked) ? checked : []}
+      options={options}
+    />
+  )}
+/>;
+```
+
+`minChecked` reaches `Autocomplete` as well as the checkboxes: it submits
+through a hidden `<select multiple>` that is present even with nothing
+selected, so the rule has an element to mark, and focus sent to it after a
+failure goes on to the text input.
+
+**`NumberField` checks its own range.** It renders `type="text"` so it can
+format and step the value, and the browser does not check `min` and `max` on
+a text input. `NumberField` reports an out-of-range value with
+`setCustomValidity` instead, which `useForm` shows like any other message —
+but in `@k8ordo/ui`'s wording (`numberFieldRangeUnderflow` /
+`numberFieldRangeOverflow`), not zod's, the one place the client's text is not
+zod's own. Leaving the field clamps the value into range, so the message shows
+only while typing. `.int()` and `.multipleOf()` set the precision the field
+rounds to; a plain `z.coerce.number()` derives `step="any"`, which is not
+rounded. Without JavaScript nothing checks the range before the server does;
+a `TextField` given the derived `type="number"` keeps the browser's own
+check, and its wording.
+
+**A `Textarea` has no `pattern`.** A regex on a field drawn as a `Textarea`
+reaches the markup, but a `<textarea>` ignores it: the check runs on the server
+only, and `dropped` cannot list it, since the derivation does not know which
+element renders the field.
+
+**`FileField`** submits what `FileField.ItemList` shows: removing a file there
+removes it from the input, and a reset empties the list with it.
 
 The form-level message fits `Alert`, which passes `id` and `tabIndex` through
 to its element. Its `role="alert"` means a screen reader may read the message

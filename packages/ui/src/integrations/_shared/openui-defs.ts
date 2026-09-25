@@ -38,6 +38,11 @@ export const buildComponentLibrary = <C>(
     'Icon-only button (label is required).',
     s.iconButtonProps,
   );
+  const CopyButton = def(
+    'CopyButton',
+    'Button that copies value to the clipboard and confirms it.',
+    s.copyButtonProps,
+  );
   const Badge = def('Badge', 'Badge for a status or a label.', s.badgeProps);
   const Heading = def('Heading', 'Heading (h1 to h6).', s.headingProps);
   const Anchor = def('Anchor', 'Text link.', s.anchorProps);
@@ -113,6 +118,21 @@ export const buildComponentLibrary = <C>(
     'Slider',
     'Slider, bound to form state by name.',
     s.sliderProps,
+  );
+  const DateField = def(
+    'DateField',
+    'Date input with a visible label (YYYY-MM-DD), bound to form state by name.',
+    s.dateFieldProps,
+  );
+  const DatePicker = def(
+    'DatePicker',
+    'Date input with a visible label and a calendar popover (YYYY-MM-DD), bound to form state by name.',
+    s.datePickerProps,
+  );
+  const Calendar = def(
+    'Calendar',
+    'Month calendar shown inline for picking one day (YYYY-MM-DD), bound to state by name. It submits nothing; in a form, use DatePicker.',
+    s.calendarProps,
   );
   const Checkbox = def(
     'Checkbox',
@@ -193,6 +213,7 @@ export const buildComponentLibrary = <C>(
   const childRefs = [
     Button.ref,
     IconButton.ref,
+    CopyButton.ref,
     Badge.ref,
     Heading.ref,
     Anchor.ref,
@@ -217,6 +238,9 @@ export const buildComponentLibrary = <C>(
     PasswordInput.ref,
     NumberField.ref,
     Slider.ref,
+    DateField.ref,
+    DatePicker.ref,
+    Calendar.ref,
     Checkbox.ref,
     Switch.ref,
     Select.ref,
@@ -355,6 +379,7 @@ export const buildComponentLibrary = <C>(
       Toast,
       Button,
       IconButton,
+      CopyButton,
       Badge,
       Heading,
       Anchor,
@@ -379,6 +404,9 @@ export const buildComponentLibrary = <C>(
       PasswordInput,
       NumberField,
       Slider,
+      DateField,
+      DatePicker,
+      Calendar,
       Checkbox,
       Switch,
       Select,
