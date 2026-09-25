@@ -564,6 +564,25 @@ name a file inside the build output, whatever it is spelled like — traversal
 is not a case weighed per request but an outcome the path resolution cannot
 produce.
 
+**Nothing is compressed twice, or sent twice.** `vite build` writes a Brotli
+and a gzip copy beside every file of the client build whose type compresses
+(`app-1a2b.js.br`, `app-1a2b.js.gz`, each kept only when it came out
+smaller), and `serve` sends the one the request's `Accept-Encoding` prefers —
+`br` when both are equally welcome — with `Vary: Accept-Encoding`. Every file
+carries an `ETag` taken from its contents, not its modification time, so a
+revalidation against a deploy that did not change the file, or against another
+server built from the same source, ends in a `304`; the contents are read for
+it once per file. A `Range` asking for one span of a file is answered with
+`206` — what Safari needs before it will play a `<video>` — a range past the
+end with `416`, and anything else (several spans, a `Range` that cannot be
+read, an `If-Range` naming another version) with the whole file.
+
+A page and its payload are compressed as they stream, under the same
+negotiation: every part React writes is flushed as it is written, so the
+shell reaches the browser before the slowest boundary has finished rendering.
+An answer in a type that is compressed already (an image), one the handler
+encoded itself, or one marked `Cache-Control: no-transform` is sent as it is.
+
 When the handler throws, `serve` answers `500` with the body `internal
 error` and logs what was thrown (`k8ordo: GET /products/1 failed`): the
 details are for whoever runs the server, not for the visitor. A body that
