@@ -1,15 +1,32 @@
+import { createHash } from 'node:crypto';
 import { createReadStream } from 'node:fs';
 import { stat } from 'node:fs/promises';
 import { createServer } from 'node:http';
-import type { IncomingMessage, ServerResponse } from 'node:http';
+import type {
+  IncomingHttpHeaders,
+  IncomingMessage,
+  OutgoingHttpHeaders,
+  ServerResponse,
+} from 'node:http';
 import type { AddressInfo } from 'node:net';
 import path from 'node:path';
 import { Readable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
 import type { ReadableStream as NodeReadableStream } from 'node:stream/web';
 import { pathToFileURL } from 'node:url';
 
+import fresh from 'fresh';
 import { contentType } from 'mime-types';
+import parseRange from 'range-parser';
 
+import {
+  ENCODINGS,
+  isCompressible,
+  negotiateEncoding,
+  streamingCompressor,
+  SUFFIX,
+} from './encoding';
+import type { Encoding } from './encoding';
 import { safeJoin } from './static-file';
 
 export type ServeOptions = {
@@ -65,17 +82,120 @@ const asRequest = (incoming: IncomingMessage, url: URL): Request => {
   } as RequestInit);
 };
 
+const isFile = async (candidate: string): Promise<boolean> => {
+  try {
+    return (await stat(candidate)).isFile();
+  } catch {
+    return false;
+  }
+};
+
 const fileFor = async (
   root: string,
   pathname: string,
 ): Promise<string | null> => {
   const resolved = safeJoin(root, pathname);
   if (resolved === null) return null;
-  try {
-    return (await stat(resolved)).isFile() ? resolved : null;
-  } catch {
-    return null;
+  return (await isFile(resolved)) ? resolved : null;
+};
+
+/** The copies the build compressed ahead of time, by coding. */
+const variantsOf = async (
+  file: string,
+): Promise<ReadonlyMap<Encoding, string>> => {
+  const variants = new Map<Encoding, string>();
+  await Promise.all(
+    ENCODINGS.map(async (encoding) => {
+      const variant = `${file}${SUFFIX[encoding]}`;
+      if (await isFile(variant)) variants.set(encoding, variant);
+    }),
+  );
+  return variants;
+};
+
+const digest = async (file: string): Promise<string> => {
+  const hash = createHash('sha256');
+  for await (const chunk of createReadStream(file)) {
+    hash.update(chunk as Buffer);
   }
+  return hash.digest('base64url');
+};
+
+type ByteRange = { readonly start: number; readonly end: number };
+
+/**
+ * The part of a file a GET asked for: the whole, one byte range, or a range
+ * that starts past the end. Only the single range a media element asks for
+ * is honoured — several at once would be a `multipart/byteranges` body that
+ * no browser requests — and a `Range` that cannot be read, or an `If-Range`
+ * naming another version of the file, gets the whole of it, as HTTP says.
+ */
+const rangeOf = (
+  headers: IncomingHttpHeaders,
+  size: number,
+  etag: string,
+): ByteRange | 'whole' | 'unsatisfiable' => {
+  const { range, 'if-range': ifRange } = headers;
+  if (range === undefined) return 'whole';
+  if (ifRange !== undefined && ifRange !== etag) return 'whole';
+  const ranges = parseRange(size, range, { combine: true });
+  if (ranges === -1) return 'unsatisfiable';
+  if (ranges === -2 || ranges.type !== 'bytes' || ranges.length !== 1) {
+    return 'whole';
+  }
+  return ranges[0] ?? 'whole';
+};
+
+/**
+ * The handler's answer, written out — compressed on the way when its type is
+ * worth it and nothing has encoded it yet.
+ */
+const sendAnswer = async (
+  incoming: IncomingMessage,
+  response: ServerResponse,
+  result: Response,
+): Promise<void> => {
+  // getSetCookie は同名ヘッダを潰さない唯一の読み方。Object.fromEntries
+  // だと Set-Cookie が最後の 1 つに畳まれる。
+  const headers: OutgoingHttpHeaders = {};
+  for (const [name, value] of result.headers.entries()) {
+    if (name === 'set-cookie') continue;
+    headers[name] = value;
+  }
+  const cookies = result.headers.getSetCookie();
+  if (cookies.length > 0) headers['set-cookie'] = cookies;
+
+  const type = result.headers.get('content-type');
+  const compressible =
+    type !== null &&
+    isCompressible(type) &&
+    !result.headers.has('content-encoding') &&
+    !/\bno-transform\b/iu.test(result.headers.get('cache-control') ?? '');
+  const encoding = compressible
+    ? negotiateEncoding(incoming.headers['accept-encoding'], ENCODINGS)
+    : null;
+  if (compressible) {
+    const vary = result.headers.get('vary');
+    headers['vary'] =
+      vary === null ? 'Accept-Encoding' : `${vary}, Accept-Encoding`;
+  }
+  if (encoding !== null) {
+    headers['content-encoding'] = encoding;
+    delete headers['content-length'];
+  }
+  response.writeHead(result.status, headers);
+  if (result.body === null) {
+    response.end();
+    return;
+  }
+  // lib.dom と node:stream/web の ReadableStream は同じものの別宣言
+  const body = Readable.fromWeb(result.body as unknown as NodeReadableStream);
+  // 静的ファイルと同じ理由。送信開始後の失敗は writeHead を打ち直せない
+  await (
+    encoding === null
+      ? pipeline(body, response)
+      : pipeline(body, streamingCompressor(encoding), response)
+  ).catch(() => undefined);
 };
 
 /**
@@ -87,6 +207,93 @@ export const serve = async (options: ServeOptions = {}): Promise<Server> => {
   const clientDir = path.join(dist, 'client');
   const entry = pathToFileURL(path.join(dist, 'rsc', 'index.js')).href;
   const { default: handler } = (await import(entry)) as { default: Handler };
+
+  // ETag は更新時刻ではなく中身から作る。別々にビルドしたサーバーどうしでも、
+  // 何も変えなかったデプロイの前後でも同じ値になり、再検証が 304 で終わる。
+  // 中身を読むのは 1 ファイル 1 回で、変わったら大きさか時刻が違うので読み直す
+  const etags = new Map<string, Promise<string>>();
+  const etagOf = (
+    file: string,
+    { size, mtimeMs }: { size: number; mtimeMs: number },
+  ): Promise<string> => {
+    const key = `${file}\0${String(size)}\0${String(mtimeMs)}`;
+    let etag = etags.get(key);
+    if (etag === undefined) {
+      etag = digest(file).then((hash) => `"${hash}"`);
+      etags.set(key, etag);
+    }
+    return etag;
+  };
+
+  const sendFile = async (
+    incoming: IncomingMessage,
+    response: ServerResponse,
+    file: string,
+    pathname: string,
+  ): Promise<void> => {
+    const variants = await variantsOf(file);
+    const encoding = negotiateEncoding(incoming.headers['accept-encoding'], [
+      ...variants.keys(),
+    ]);
+    const sent =
+      (encoding === null ? undefined : variants.get(encoding)) ?? file;
+    const stats = await stat(sent);
+    const { size } = stats;
+    const etag = await etagOf(sent, stats);
+    // 304 にも、200 なら付けたキャッシュのヘッダーを付ける。キャッシュは
+    // 304 を受けて持っているコピーのヘッダーをこれで更新する
+    const cache: OutgoingHttpHeaders = {
+      'cache-control': cacheFor(pathname),
+      etag,
+      ...(variants.size > 0 ? { vary: 'Accept-Encoding' } : {}),
+    };
+    if (fresh(incoming.headers, { etag })) {
+      response.writeHead(304, cache);
+      response.end();
+      return;
+    }
+    const type = contentType(path.extname(file));
+    const headers: OutgoingHttpHeaders = {
+      ...cache,
+      'content-type': type === false ? 'application/octet-stream' : type,
+      'accept-ranges': 'bytes',
+      ...(encoding === null ? {} : { 'content-encoding': encoding }),
+    };
+    // Range を定義しているのは GET だけ。HEAD には全体の長さを答える
+    const range =
+      incoming.method === 'GET'
+        ? rangeOf(incoming.headers, size, etag)
+        : 'whole';
+    if (range === 'unsatisfiable') {
+      response.writeHead(416, {
+        ...headers,
+        'content-range': `bytes */${String(size)}`,
+      });
+      response.end();
+      return;
+    }
+    const { start, end } =
+      range === 'whole' ? { start: 0, end: size - 1 } : range;
+    response.writeHead(range === 'whole' ? 200 : 206, {
+      ...headers,
+      'content-length': end - start + 1,
+      ...(range === 'whole'
+        ? {}
+        : {
+            'content-range': `bytes ${String(start)}-${String(end)}/${String(size)}`,
+          }),
+    });
+    if (incoming.method === 'HEAD' || size === 0) {
+      response.end();
+      return;
+    }
+    // 送信開始後に読み取りが失敗しても writeHead は打ち直せない。
+    // 中途半端な本文で繋いだままにするより、接続を切って知らせる
+    // （pipeline は失敗した側から全部を destroy する）
+    await pipeline(createReadStream(sent, { start, end }), response).catch(
+      () => undefined,
+    );
+  };
 
   const server = createServer(
     (incoming: IncomingMessage, response: ServerResponse) => {
@@ -103,46 +310,14 @@ export const serve = async (options: ServeOptions = {}): Promise<Server> => {
             ? await fileFor(clientDir, url.pathname)
             : null;
         if (file !== null) {
-          const type = contentType(path.extname(file));
-          response.writeHead(200, {
-            'content-type': type === false ? 'application/octet-stream' : type,
-            'cache-control': cacheFor(url.pathname),
-          });
-          // HEAD でも読んで流す。node:http は HEAD への write を捨てるので、
-          // 分岐を足さなくても本文は線に載らない
-          const stream = createReadStream(file);
-          // 送信開始後に読み取りが失敗しても writeHead は打ち直せない。
-          // 中途半端な本文で繋いだままにするより、接続を切って知らせる。
-          stream.on('error', () => {
-            response.destroy();
-          });
-          stream.pipe(response);
+          await sendFile(incoming, response, file, url.pathname);
           return;
         }
-        const result = await handler(asRequest(incoming, url));
-        // getSetCookie は同名ヘッダを潰さない唯一の読み方。Object.fromEntries
-        // だと Set-Cookie が最後の 1 つに畳まれる。
-        const headers: Array<[string, string | string[]]> = [];
-        for (const [name, value] of result.headers.entries()) {
-          if (name === 'set-cookie') continue;
-          headers.push([name, value]);
-        }
-        const cookies = result.headers.getSetCookie();
-        if (cookies.length > 0) headers.push(['set-cookie', cookies]);
-        response.writeHead(result.status, Object.fromEntries(headers));
-        if (result.body === null) {
-          response.end();
-          return;
-        }
-        // lib.dom と node:stream/web の ReadableStream は同じものの別宣言
-        const body = Readable.fromWeb(
-          result.body as unknown as NodeReadableStream,
+        await sendAnswer(
+          incoming,
+          response,
+          await handler(asRequest(incoming, url)),
         );
-        // 静的ファイルと同じ理由。送信開始後の失敗は writeHead を打ち直せない
-        body.on('error', () => {
-          response.destroy();
-        });
-        body.pipe(response);
       })().catch((error: unknown) => {
         // 例外の中身は運用者のもので、訪問者のものではない。パスやスタックが
         // そのまま本文に出ると、答えられなかった理由まで外に漏れる。
