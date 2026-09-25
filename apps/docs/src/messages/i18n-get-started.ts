@@ -43,8 +43,8 @@ export const scope = {
     en: 'The pathname. Everything after the locale segment belongs to `@k8ordo/router`.',
   }),
   notGrammar: message({
-    ja: '文言の文法。プレースホルダ記法も ICU もありません。値の埋め込みはテンプレートリテラル、複数形は `Intl.PluralRules`、日付と数値は `Intl` の書式化で書きます。',
-    en: 'A message grammar. There is no placeholder syntax and no ICU: interpolation is a template literal, plurals are `Intl.PluralRules`, and dates and numbers are `Intl` formatters.',
+    ja: '文言の文法。プレースホルダ記法も ICU もありません。値の埋め込みはテンプレートリテラル、複数形・日付・数値は `Intl` で、ロケール集合は今のロケールの `Intl` を引くだけです。',
+    en: 'A message grammar. There is no placeholder syntax and no ICU: interpolation is a template literal, and plurals, dates and numbers are `Intl` — the locale set only draws it for the current locale.',
   }),
   notLoading: message({
     ja: '読み込み。文言は普通の export なので、どの文言がブラウザに届くかは、各 Client Component が何を import したかからバンドラが決めます。ローダーも名前空間の一覧もありません。',

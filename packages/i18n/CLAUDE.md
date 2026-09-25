@@ -15,7 +15,7 @@ inside the npm package.
 ## Commands
 
 ```bash
-pnpm test          # unit (locales, messages, request scope, Accept-Language; node) + browser (URL locale, chromium)
+pnpm test          # unit (locales, messages, request scope, formats, Accept-Language; node) + browser (URL locale, chromium)
 pnpm build         # vp pack
 pnpm typecheck
 pnpm check         # check:write to auto-fix
@@ -75,8 +75,15 @@ pnpm check         # check:write to auto-fix
   `Intl.Locale#getTextInfo` is not Baseline. Do not default either.
 - **No grammar.** A message is text in every locale or a function in every
   locale; interpolation is the function's own template literal; plurals and
-  formats are `Intl`. Do not add placeholder syntax, ICU parsing, or a
-  `formatters` option.
+  formats are `Intl`. The set's `dateTimeFormat` / `numberFormat` /
+  `relativeTimeFormat` / `pluralRules` / `listFormat` only pick the locale
+  (and, for a date, its `timeZone`), cache, and return the `Intl` object
+  itself. Do not wrap their output, add placeholder syntax, ICU parsing, a
+  format-string language, or a `formatters` option.
+- **A date is written only in its locale's time zone.**
+  `LocaleDateTimeFormatOptions` refuses `timeZone`, and `dateTimeFormat`
+  spreads the options before the locale's zone so a forced one loses. This is
+  the whole reason the helper exists; do not add an escape hatch.
 - **Negotiation is per requested tag, in order** — exact, then the first
   supported locale speaking the same language, then the default (RFC 4647
   lookup shape). The test `['en-US', 'ja']` → `'en'` is the guard.
@@ -94,6 +101,7 @@ src/
   message.ts          message(): one message as a function; Message, Variants
   current.ts          where the current locale is kept on each side; the registry
   register.ts         Register (the one interface) and RegisteredLocale
+  format.ts           the set's Intl members (dateTimeFormat, …), cached
   accept-language.ts  parseAcceptLanguage(): header → preference list
   index.ts
 ```

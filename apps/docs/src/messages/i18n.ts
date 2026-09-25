@@ -136,6 +136,11 @@ export const navMessages = message({
   en: 'Messages',
 });
 
+export const navFormatting = message({
+  ja: '日付と数値',
+  en: 'Dates & numbers',
+});
+
 export const navRouting = message({
   ja: 'URL とロケール',
   en: 'URLs & locale',
