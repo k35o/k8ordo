@@ -114,6 +114,21 @@ export const buildComponentLibrary = <C>(
     'Slider, bound to form state by name.',
     s.sliderProps,
   );
+  const DateField = def(
+    'DateField',
+    'Date input with a visible label (YYYY-MM-DD), bound to form state by name.',
+    s.dateFieldProps,
+  );
+  const DatePicker = def(
+    'DatePicker',
+    'Date input with a visible label and a calendar popover (YYYY-MM-DD), bound to form state by name.',
+    s.datePickerProps,
+  );
+  const Calendar = def(
+    'Calendar',
+    'Month calendar shown inline for picking one day (YYYY-MM-DD), bound to state by name. It submits nothing; in a form, use DatePicker.',
+    s.calendarProps,
+  );
   const Checkbox = def(
     'Checkbox',
     'Checkbox, bound to form state by name.',
@@ -217,6 +232,9 @@ export const buildComponentLibrary = <C>(
     PasswordInput.ref,
     NumberField.ref,
     Slider.ref,
+    DateField.ref,
+    DatePicker.ref,
+    Calendar.ref,
     Checkbox.ref,
     Switch.ref,
     Select.ref,
@@ -379,6 +397,9 @@ export const buildComponentLibrary = <C>(
       PasswordInput,
       NumberField,
       Slider,
+      DateField,
+      DatePicker,
+      Calendar,
       Checkbox,
       Switch,
       Select,
