@@ -4030,12 +4030,6 @@
           "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
-        },
-        {
-          "name": "messages",
-          "types": ["Partial<Messages>"],
-          "defaultValue": null,
-          "required": false
         }
       ],
       "inherits": null,

@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
 import { expect, fn, waitFor } from 'storybook/test';
 
+import { inEnglish } from '../../../../.storybook/locales';
 import { DatePicker } from './date-picker';
 
 const meta: Meta<typeof DatePicker> = {
@@ -14,14 +15,8 @@ const meta: Meta<typeof DatePicker> = {
       </div>
     ),
   ],
-  // カレンダーの月名・曜日名はページの言語で書く。テストの文言を固定するため英語にする
-  beforeEach: () => {
-    const previous = document.documentElement.lang;
-    document.documentElement.lang = 'en-US';
-    return () => {
-      document.documentElement.lang = previous;
-    };
-  },
+  // 月名・曜日名は組み込みの文言と同じロケールで書く。テストの文言を固定するため英語で描く
+  beforeEach: inEnglish,
 };
 
 export default meta;
@@ -36,11 +31,13 @@ export const Default: Story = {
   },
   play: async ({ args, canvas, userEvent }) => {
     const input = canvas.getByLabelText<HTMLInputElement>('開催日');
-    const trigger = canvas.getByRole('button', { name: 'カレンダーから選ぶ' });
+    const trigger = canvas.getByRole('button', {
+      name: 'Choose from calendar',
+    });
 
     await userEvent.click(trigger);
     await expect(
-      await canvas.findByRole('dialog', { name: '日付を選ぶ' }),
+      await canvas.findByRole('dialog', { name: 'Choose a date' }),
     ).toBeVisible();
     // 未入力なら今日にフォーカスを置く
     await waitFor(async () => {
@@ -67,7 +64,7 @@ export const OpensAtTheEnteredDate: Story = {
   },
   play: async ({ canvas, userEvent }) => {
     await userEvent.click(
-      canvas.getByRole('button', { name: 'カレンダーから選ぶ' }),
+      canvas.getByRole('button', { name: 'Choose from calendar' }),
     );
 
     await expect(
@@ -91,7 +88,9 @@ export const EscapeKeepsTheValue: Story = {
     onChange: fn(),
   },
   play: async ({ args, canvas, userEvent }) => {
-    const trigger = canvas.getByRole('button', { name: 'カレンダーから選ぶ' });
+    const trigger = canvas.getByRole('button', {
+      name: 'Choose from calendar',
+    });
     await userEvent.click(trigger);
     await canvas.findByRole('dialog');
 
@@ -115,7 +114,7 @@ export const WithMinAndMax: Story = {
   },
   play: async ({ canvas, userEvent }) => {
     await userEvent.click(
-      canvas.getByRole('button', { name: 'カレンダーから選ぶ' }),
+      canvas.getByRole('button', { name: 'Choose from calendar' }),
     );
 
     await expect(
@@ -135,7 +134,7 @@ export const Disabled: Story = {
   play: async ({ canvas }) => {
     await expect(canvas.getByLabelText('開催日')).toBeDisabled();
     await expect(
-      canvas.getByRole('button', { name: 'カレンダーから選ぶ' }),
+      canvas.getByRole('button', { name: 'Choose from calendar' }),
     ).toBeDisabled();
   },
 };
@@ -148,7 +147,7 @@ export const ReadOnly: Story = {
   },
   play: async ({ canvas }) => {
     await expect(
-      canvas.getByRole('button', { name: 'カレンダーから選ぶ' }),
+      canvas.getByRole('button', { name: 'Choose from calendar' }),
     ).toBeDisabled();
   },
 };
@@ -185,7 +184,7 @@ export const Controlled: Story = {
     await expect(canvas.getByTestId('value')).toHaveTextContent('2023-02-14');
 
     await userEvent.click(
-      canvas.getByRole('button', { name: 'カレンダーから選ぶ' }),
+      canvas.getByRole('button', { name: 'Choose from calendar' }),
     );
     await userEvent.click(
       await canvas.findByRole('button', {

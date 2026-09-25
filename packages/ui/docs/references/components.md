@@ -727,8 +727,8 @@ ends of the week, `PageUp` / `PageDown` by month (with `Shift`, by year), and
 `Enter` / `Space` select. Days outside `min` / `max` stay focusable but cannot
 be selected.
 
-Month and weekday names, and the first day of the week, follow the page
-language (`<html lang>`, English when it is empty). Today is marked with
+Month and weekday names, and the first day of the week, follow the same locale
+as the built-in wording (i18n, below). Today is marked with
 `aria-current="date"` in the visitor's time zone, which only the browser knows,
 so the calendar renders in the browser alone: the server writes an empty box of
 the same size. It submits nothing; inside a form, use `DatePicker` or
@@ -1946,7 +1946,7 @@ are exported as well.
 
 ### UIProvider
 
-Wrap the app root once. It includes ToastProvider and the message dictionary (i18n, below).
+Wrap the app root once. It includes ToastProvider. The components' own wording needs no provider: it follows `@k8ordo/i18n` (i18n, below).
 
 ```tsx
 import { UIProvider } from '@k8ordo/ui';
@@ -1959,7 +1959,6 @@ import { UIProvider } from '@k8ordo/ui';
 Props:
 
 - `children`: `ReactNode`
-- `messages`: `Partial<Messages>`
 
 ### PortalRootProvider
 
@@ -1982,45 +1981,34 @@ Props:
 
 ## i18n (message dictionary)
 
-The wording components own internally (close, required, loading, …) comes from a dictionary. **It defaults to Japanese**, and works without a provider and without passing `messages`.
+The wording components own internally (close, required, loading, …) comes from a dictionary, picked by `@k8ordo/i18n`'s current locale. There is no provider and nothing to pass.
 
-To switch to English, pass `en` from `@k8ordo/ui/i18n`.
+- An application that defines its locale set with `defineLocales` gets the locale its messages render in: the one the URL names, or the set's default.
+- An application that defines no set gets **English**, whatever its URL starts with, so the server and the browser agree.
+- The module defining the set has to be loaded in the browser as well; where no set is defined the components speak English.
 
-```tsx
-import { UIProvider } from '@k8ordo/ui';
-import { en } from '@k8ordo/ui/i18n';
-
-<UIProvider messages={en}>
-  <App />
-</UIProvider>;
-```
-
-`dictionaries` from the same entry holds every built-in dictionary by its tag (`{ ja, en }`), for an application that picks one by the locale it is rendering: `messages={dictionaries[locale]}`.
-
-To replace only part of it, spread the dictionary and override those keys (`Partial<Messages>`, so you need not fill in every key).
+`ja` and `en` ship with the library. Register any other locale — or replace a built-in one — with `registerMessages`, next to where the set is defined:
 
 ```tsx
-<UIProvider messages={{ ...en, close: 'Dismiss' }}>
-  <App />
-</UIProvider>
+import { en, registerMessages } from '@k8ordo/ui/i18n';
+import type { Messages } from '@k8ordo/ui/i18n';
+
+const fr: Messages = { close: 'Fermer' /* …every key */ };
+registerMessages('fr', fr);
+
+registerMessages('en', { ...en, close: 'Dismiss' });
 ```
 
-To stay in Japanese and change only one string, pass just that key.
-
-```tsx
-<UIProvider messages={{ close: '閉じる（Esc）' }}>
-  <App />
-</UIProvider>
-```
+A regional tag without a dictionary of its own (`en-US`) reads its language's (`en`). Rendering in a locale nothing has text for throws, naming the locale and `registerMessages`.
 
 ### Resolution order
 
-**Component prop > the dictionary passed to the provider > the built-in default (Japanese)**.
+**Component prop > registered dictionary > built-in dictionary**.
 
 A component with a wording prop of its own — `Spinner`'s `label`, `Alert`'s `closeLabel`, `PasswordInput`'s `showLabel` / `hideLabel`, `Pagination`'s `prevLabel` / `nextLabel` — takes that prop over the dictionary.
 
 ```tsx
-// Even with the en dictionary, this one Spinner reads 「保存中」
+// Whatever the locale, this one Spinner reads 「保存中」
 <Spinner label="保存中" />
 ```
 
@@ -2028,27 +2016,23 @@ A component with a wording prop of its own — `Spinner`'s `label`, `Alert`'s `c
 
 ```tsx
 import {
-  dictionaries,
   en,
+  getMessages,
   ja,
-  useMessages,
+  registerMessages,
   type Messages,
 } from '@k8ordo/ui/i18n';
 ```
 
-`ja` and `en` are exported only from the `@k8ordo/ui/i18n` subpath, not the root, so the dictionaries stay out of the main bundle.
-
 ### Reading the wording in your own elements
 
-`useMessages` returns the wording in effect: the built-in dictionary with whatever you passed to `UIProvider` laid over it. Read from it in an element you draw through `renderItem`, or in a component of your own that sits beside the library, and it follows the same language and overrides as the components do. It is a client hook.
+`getMessages` returns the wording in effect: the dictionary for the current locale, a registered one before a built-in one. Read from it in an element you draw through `renderItem`, or in a component of your own that sits beside the library, and it follows the same language and replacements as the components do. It is not a hook, so a Server Component calls it too.
 
 ```tsx
-'use client';
-
-import { useMessages } from '@k8ordo/ui/i18n';
+import { getMessages } from '@k8ordo/ui/i18n';
 
 function DismissButton({ onDismiss }) {
-  const { close } = useMessages();
+  const { close } = getMessages();
   return (
     <button aria-label={close} onClick={onDismiss} type="button">
       ×

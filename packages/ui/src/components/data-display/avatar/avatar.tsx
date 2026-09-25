@@ -4,7 +4,7 @@ import type { FC, HTMLAttributes, ReactNode } from 'react';
 import { useState } from 'react';
 
 import { cn } from '../../../helpers/cn';
-import { useMessages } from '../../../i18n/context';
+import { getMessages } from '../../../i18n/current';
 
 type Props = {
   alt?: string;
@@ -44,7 +44,7 @@ export const Avatar: FC<Props> = ({
   src,
   ...rest
 }) => {
-  const messages = useMessages();
+  const messages = getMessages();
   const [failedSrc, setFailedSrc] = useState<string | null>(null);
   const showImage = Boolean(src) && failedSrc !== src;
   const label = alt ?? name ?? messages.avatar;

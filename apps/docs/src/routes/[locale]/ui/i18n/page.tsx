@@ -115,19 +115,24 @@ export default function I18n() {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <Rich>{m.uiI18n.defaultTitle()}</Rich>
+          <Rich>{m.uiI18n.localeTitle()}</Rich>
         </Heading>
         <p className="text-fg-mute">
-          <Rich>{m.uiI18n.defaultDescription()}</Rich>
+          <Rich>{m.uiI18n.localeDescription()}</Rich>
         </p>
         <CodeBlock
-          code={`import { UIProvider } from '@k8ordo/ui';
+          code={`// src/i18n.ts
+import { defineLocales } from '@k8ordo/i18n';
 
-function App({ children }) {
-  return <UIProvider>{children}</UIProvider>;
-}`}
-          lang="tsx"
+export const locales = defineLocales({
+  ja: { timeZone: 'Asia/Tokyo', dir: 'ltr' },
+  en: { timeZone: 'UTC', dir: 'ltr' },
+});`}
+          lang="ts"
         />
+        <p className="text-fg-mute">
+          <Rich>{m.uiI18n.clientGraph()}</Rich>
+        </p>
       </section>
 
       <Separator color="mute" />
@@ -140,17 +145,13 @@ function App({ children }) {
           <Rich>{m.uiI18n.englishDescription()}</Rich>
         </p>
         <CodeBlock
-          code={`import { UIProvider } from '@k8ordo/ui';
-import { en } from '@k8ordo/ui/i18n';
+          code={`// src/i18n.ts
+import { defineLocales } from '@k8ordo/i18n';
 
-function App({ children }) {
-  return (
-    <UIProvider messages={en}>
-      {children}
-    </UIProvider>
-  );
-}`}
-          lang="tsx"
+export const locales = defineLocales({
+  ja: { timeZone: 'Asia/Tokyo', dir: 'ltr' },
+});`}
+          lang="ts"
         />
       </section>
 
@@ -158,24 +159,39 @@ function App({ children }) {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <Rich>{m.uiI18n.localeTitle()}</Rich>
+          <Rich>{m.uiI18n.registerTitle()}</Rich>
         </Heading>
         <p className="text-fg-mute">
-          <Rich>{m.uiI18n.localeDescription()}</Rich>
+          <Rich>{m.uiI18n.registerDescription()}</Rich>
         </p>
         <CodeBlock
-          code={`import { UIProvider } from '@k8ordo/ui';
-import { dictionaries } from '@k8ordo/ui/i18n';
+          code={`// src/ui-messages/fr.ts
+import type { Messages } from '@k8ordo/ui/i18n';
 
-function App({ locale, children }) {
-  return (
-    <UIProvider messages={dictionaries[locale]}>
-      {children}
-    </UIProvider>
-  );
-}`}
-          lang="tsx"
+export const fr: Messages = {
+  close: 'Fermer',
+  required: 'Requis',
+  loading: 'Chargement',
+  // ...
+};
+
+// src/i18n.ts
+import { defineLocales } from '@k8ordo/i18n';
+import { registerMessages } from '@k8ordo/ui/i18n';
+
+import { fr } from './ui-messages/fr';
+
+export const locales = defineLocales({
+  ja: { timeZone: 'Asia/Tokyo', dir: 'ltr' },
+  fr: { timeZone: 'Europe/Paris', dir: 'ltr' },
+});
+
+registerMessages('fr', fr);`}
+          lang="ts"
         />
+        <p className="text-fg-mute">
+          <Rich>{m.uiI18n.regional()}</Rich>
+        </p>
       </section>
 
       <Separator color="mute" />
@@ -188,16 +204,11 @@ function App({ locale, children }) {
           <Rich>{m.uiI18n.overrideDescription()}</Rich>
         </p>
         <CodeBlock
-          code={`import { en } from '@k8ordo/ui/i18n';
+          code={`import { en, ja, registerMessages } from '@k8ordo/ui/i18n';
 
-<UIProvider messages={{ close: '閉じる (Esc)' }}>
-  {children}
-</UIProvider>
-
-<UIProvider messages={{ ...en, autocompleteEmpty: 'No matches' }}>
-  {children}
-</UIProvider>`}
-          lang="tsx"
+registerMessages('ja', { ...ja, close: '閉じる (Esc)' });
+registerMessages('en', { ...en, autocompleteEmpty: 'No matches' });`}
+          lang="ts"
         />
       </section>
 
@@ -215,41 +226,13 @@ function App({ locale, children }) {
 <Spinner label="送信中" />
 // -> 送信中
 
-// 2. messages
-<UIProvider messages={en}>
-  <Spinner />
-</UIProvider>
-// -> Loading
+// 2. registerMessages('ja', { ...ja, loading: 'ロード中' })
+<Spinner />
+// -> ロード中
 
-// 3. default
+// 3. built-in
 <Spinner />
 // -> 読み込み中`}
-          lang="tsx"
-        />
-      </section>
-
-      <Separator color="mute" />
-
-      <section className="flex flex-col gap-4">
-        <Heading level="h2">
-          <Rich>{m.uiI18n.customTitle()}</Rich>
-        </Heading>
-        <p className="text-fg-mute">
-          <Rich>{m.uiI18n.customDescription()}</Rich>
-        </p>
-        <CodeBlock
-          code={`import type { Messages } from '@k8ordo/ui/i18n';
-
-const fr: Messages = {
-  close: 'Fermer',
-  required: 'Requis',
-  loading: 'Chargement',
-  avatar: 'Avatar',
-  color: 'Couleur',
-  // ...
-};
-
-<UIProvider messages={fr}>{children}</UIProvider>`}
           lang="tsx"
         />
       </section>
@@ -264,12 +247,10 @@ const fr: Messages = {
           <Rich>{m.uiI18n.readDescription()}</Rich>
         </p>
         <CodeBlock
-          code={`'use client';
-
-import { useMessages } from '@k8ordo/ui/i18n';
+          code={`import { getMessages } from '@k8ordo/ui/i18n';
 
 function DismissButton({ onDismiss }) {
-  const { close } = useMessages();
+  const { close } = getMessages();
   return (
     <button aria-label={close} onClick={onDismiss} type="button">
       ×
@@ -278,6 +259,43 @@ function DismissButton({ onDismiss }) {
 }`}
           lang="tsx"
         />
+      </section>
+
+      <Separator color="mute" />
+
+      <section className="flex flex-col gap-4">
+        <Heading level="h2">
+          <Rich>{m.uiI18n.serverTitle()}</Rich>
+        </Heading>
+        <p className="text-fg-mute">
+          <Rich>{m.uiI18n.serverDescription()}</Rich>
+        </p>
+      </section>
+
+      <Separator color="mute" />
+
+      <section className="flex flex-col gap-4">
+        <Heading level="h2">
+          <Rich>{m.uiI18n.migrationTitle()}</Rich>
+        </Heading>
+        <p className="text-fg-mute">
+          <Rich>{m.uiI18n.migrationDescription()}</Rich>
+        </p>
+        <ol className="text-fg-mute flex flex-col gap-2 pl-6">
+          <li className="list-decimal">
+            <Rich>{m.uiI18n.migrationProvider()}</Rich>
+          </li>
+          <li className="list-decimal">
+            <Rich>{m.uiI18n.migrationLocale()}</Rich>
+          </li>
+          <li className="list-decimal">
+            <Rich>{m.uiI18n.migrationRegister()}</Rich>
+          </li>
+          <li className="list-decimal">
+            <Rich>{m.uiI18n.migrationRead()}</Rich>
+          </li>
+        </ol>
+        <CodeBlock code="<UIProvider>{children}</UIProvider>" lang="tsx" />
       </section>
 
       <Separator color="mute" />

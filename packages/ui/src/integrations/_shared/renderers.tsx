@@ -109,7 +109,7 @@ import { ListBox } from '../../components/overlays/list-box';
 import { Modal } from '../../components/overlays/modal';
 import { Popover } from '../../components/overlays/popover';
 import { Tooltip } from '../../components/overlays/tooltip';
-import { useMessages } from '../../i18n/context';
+import { getMessages } from '../../i18n/current';
 import type {
   AccordionProps,
   AlertProps,
@@ -319,7 +319,7 @@ export function renderCard(props: CardProps, children: ReactNode): ReactNode {
 // 同一ページに複数描画されても衝突しないよう `useId()` で生成する必要がある。
 // （生成 UI では Tabs が複数並ぶケースは普通にあり得る）。
 export const TabsView: FC<{ props: TabsProps }> = ({ props }) => {
-  const messages = useMessages();
+  const messages = getMessages();
   const baseId = useId();
   const ids = props.tabs.map((_, index) => `${baseId}-tab-${index}`) as [
     string,
@@ -1169,7 +1169,7 @@ export function renderAutocomplete(
 }
 
 export const FileFieldWidget: FC<{ props: FileFieldProps }> = ({ props }) => {
-  const messages = useMessages();
+  const messages = getMessages();
   const trigger = (
     <FileField.Trigger
       renderItem={({ onClick, disabled }) => (
