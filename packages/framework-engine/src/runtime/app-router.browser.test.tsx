@@ -45,11 +45,18 @@ const DEPLOYED = '/assets/index-deployed.js';
 
 const passThrough = globalThis.fetch;
 
+// ペイロードは search を付けて頼まれる（search を読むページのため）ので、
+// パスだけで見分ける
+const urlOf = (input: RequestInfo | URL): URL =>
+  new URL(String(input instanceof Request ? input.url : input), location.href);
+
+const asksForPayload = (input: RequestInfo | URL): boolean =>
+  urlOf(input).pathname.endsWith('/index.rsc');
+
 // ページのペイロードとアクションの答えを、どちらもこの 1 枚で返すサーバー
 const answerWith = (payload: Payload, status = 200): void => {
   vi.stubGlobal('fetch', (input: RequestInfo | URL, init?: RequestInit) => {
-    const url = String(input instanceof Request ? input.url : input);
-    if (!url.endsWith('/index.rsc') && init?.method !== 'POST') {
+    if (!asksForPayload(input) && init?.method !== 'POST') {
       return passThrough(input, init);
     }
     return Promise.resolve(
@@ -67,8 +74,7 @@ const answerPayloadRequests = (
   answer: (signal: AbortSignal) => Promise<Response>,
 ): void => {
   vi.stubGlobal('fetch', (input: RequestInfo | URL, init?: RequestInit) => {
-    const url = String(input instanceof Request ? input.url : input);
-    if (!url.endsWith('/index.rsc')) return passThrough(input, init);
+    if (!asksForPayload(input)) return passThrough(input, init);
     if (!(init?.signal instanceof AbortSignal)) {
       throw new Error('a payload request without a signal');
     }
@@ -330,6 +336,18 @@ const payloadResponse = (payload: Payload): Response =>
     headers: { 'content-type': 'text/x-component;charset=utf-8' },
   });
 
+// ペイロードの URL の search ごとに答えを変えるサーバー。頼まれた search を返す
+const answerBySearch = (answer: (search: string) => Payload): string[] => {
+  const asked: string[] = [];
+  vi.stubGlobal('fetch', (input: RequestInfo | URL, init?: RequestInit) => {
+    if (!asksForPayload(input)) return passThrough(input, init);
+    const { search } = urlOf(input);
+    asked.push(search);
+    return Promise.resolve(payloadResponse(answer(search)));
+  });
+  return asked;
+};
+
 // ページのペイロードへの n 回目の GET に answer(n) で答え、何回来たかを数える。
 // アクションの POST には、そのページを描き直した答えを返す
 const countPayloadRequests = (
@@ -338,11 +356,10 @@ const countPayloadRequests = (
 ): (() => number) => {
   let requested = 0;
   vi.stubGlobal('fetch', (input: RequestInfo | URL, init?: RequestInit) => {
-    const url = String(input instanceof Request ? input.url : input);
     if (init?.method === 'POST') {
       return Promise.resolve(payloadResponse({ ...NEXT, pathname: '/' }));
     }
-    if (!url.endsWith('/index.rsc')) return passThrough(input, init);
+    if (!asksForPayload(input)) return passThrough(input, init);
     requested += 1;
     if (!(init?.signal instanceof AbortSignal)) {
       throw new Error('a payload request without a signal');
@@ -647,5 +664,63 @@ describe('under a base', () => {
     await nextTask();
 
     expect(requested).toStrictEqual([]);
+  });
+});
+
+describe('a page that reads the search', () => {
+  // 本文は JSON で運ぶので、木は文字列にする
+  const searched = (search: string): Payload => ({
+    tree: `results for ${search}`,
+    pathname: '/',
+    client: RUNNING,
+    search,
+  });
+
+  it('is loaded again, with the new search, when a navigation moves it', async () => {
+    const asked = answerBySearch(searched);
+    const screen = await render(
+      <AppRouter
+        pathname={location.pathname}
+        search={location.search}
+        tree="first"
+      />,
+    );
+
+    await navigation.navigate(`${location.pathname}?q=shoes`, {
+      history: 'replace',
+    }).finished;
+
+    await expect
+      .element(screen.getByText('results for ?q=shoes'))
+      .toBeInTheDocument();
+    expect(asked).toStrictEqual(['?q=shoes']);
+  });
+
+  it('is left alone by a navigation that keeps its search', async () => {
+    const requested = countPayloadRequests();
+    await render(
+      <AppRouter
+        pathname={location.pathname}
+        search={location.search}
+        tree={<p>first</p>}
+      />,
+    );
+
+    await navigation.navigate(location.href, { history: 'replace' }).finished;
+
+    expect(requested()).toBe(0);
+  });
+
+  it('leaves a page that does not read the search alone when it moves', async () => {
+    const requested = countPayloadRequests();
+    await render(
+      <AppRouter pathname={location.pathname} tree={<p>first</p>} />,
+    );
+
+    await navigation.navigate(`${location.pathname}?q=shoes`, {
+      history: 'replace',
+    }).finished;
+
+    expect(requested()).toBe(0);
   });
 });

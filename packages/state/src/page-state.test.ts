@@ -4,7 +4,7 @@ import * as zm from 'zod/mini';
 
 import { defineCookieState } from './cookie-state';
 import { defineMemoryState } from './memory-state';
-import { definePageState } from './page-state';
+import { definePageState, urlReader } from './page-state';
 import type { AcceptedPath, RegisteredPath } from './register';
 import { defineLocalState, defineSessionState } from './storage-state';
 import { useAppState } from './use-app-state';
@@ -34,6 +34,26 @@ const listState = definePageState('list', {
     tags: z.array(z.string()).default([]),
     sort: z.enum(['new', 'old']).optional(),
   }),
+});
+
+describe('urlReader', () => {
+  it('reads a search the way the definition its schema came from does', () => {
+    const read = urlReader(listState.url);
+    const search = new URLSearchParams('q=shoes&page=zero&tags=a&tags=b');
+    expect(read(search)).toStrictEqual(listState.parseUrl(search));
+    expect(read(search)).toStrictEqual({
+      q: 'shoes',
+      page: 1,
+      tags: ['a', 'b'],
+      sort: undefined,
+    });
+  });
+
+  it('refuses a spelling a URL cannot round-trip, when it is built', () => {
+    expect(() =>
+      urlReader(z.object({ open: z.boolean().default(false) })),
+    ).toThrow(/url boolean fields must use z.stringbool\(\).*: open$/u);
+  });
 });
 
 describe('parseUrl', () => {

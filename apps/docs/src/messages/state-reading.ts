@@ -119,13 +119,13 @@ export const frameworkTitle = message({
 });
 
 export const frameworkDescription = message({
-  ja: 'このフレームワークのページは search params を受け取りません。受け取るのは `params` と `pathname`（`@k8ordo/server` ではさらに、ヘッダーと Cookie を持つ `request`。Cookie の状態はここから読めます）です。pathname はルーターのもので、search は `useAppState` がブラウザで読みます。',
-  en: 'Pages under the framework never see the search. They receive `params` and `pathname` — plus a `request` with headers and cookies under `@k8ordo/server`, which is where cookie state is read. The pathname is the router’s, and the search is read in the browser by `useAppState`.',
+  ja: 'このフレームワークのページが受け取るのは `params` と `pathname`（`@k8ordo/server` ではさらに、ヘッダーと Cookie を持つ `request`。Cookie の状態はここから読めます）で、search は受け取りません。pathname はルーターのもので、search は `useAppState` がブラウザで読みます。例外は、`@k8ordo/server` で読む url スキーマを `export const search = listState.url` と宣言したページで、`parseUrl` と同じ読み方の `search` を受け取ります。',
+  en: 'Pages under the framework receive `params` and `pathname` — plus a `request` with headers and cookies under `@k8ordo/server`, which is where cookie state is read — and not the search: the pathname is the router’s, and the search is read in the browser by `useAppState`. The exception is a page under `@k8ordo/server` that declares the url schema it reads, `export const search = listState.url`: it receives `search`, read the way `parseUrl` reads it.',
 });
 
 export const frameworkWhy = message({
-  ja: 'サーバーの描画は `url` スロットの既定値で行われ、ハイドレーションの次の描画から実際の URL が使われます。これは回避すべき欠落ではありません。ルーターは pathname が変わらない遷移を何も読み込まずに intercept するので、search に依存したサーバーの描画は、最初の読み込みでは正しくても、最初の `update()` の後には古くなります。',
-  en: 'The server render uses the `url` slot’s defaults, and the live URL takes over one render after hydration. That is not a gap to work around: the router intercepts a navigation that keeps the pathname without loading anything, so a server render keyed on the search would be right on the first load and stale after the first `update()`.',
+  ja: 'search を宣言していないページでは、サーバーの描画は `url` スロットの既定値で行われ、ハイドレーションの次の描画から実際の URL が使われます。ルーターは pathname が変わらない遷移を何も読み込まずに intercept するからです。宣言したページは search を受け取るので、search が変わる遷移（GET フォーム・リンク・url の `update()`）でルーターがそのページをその場で取り直します。スクロールもフォーカスもそのままで、`update().finished` はそのページが画面に出てから決着します。`@k8ordo/static` は宣言を拒みます。ファイルは search がどうであれ同じだからです。',
+  en: 'For a page that does not declare it, the server render uses the `url` slot’s defaults and the live URL takes over one render after hydration, because the router intercepts a navigation that keeps the pathname without loading anything. A page that declares it receives the search, so a navigation that moves the search — a GET form, a link, a url `update()` — loads that page again in place: scroll and focus stay, and `update().finished` settles once the page is on screen. `@k8ordo/static` refuses the declaration: a file is the same whatever the search holds.',
 });
 
 export const frameworkLinks = message({
@@ -357,4 +357,9 @@ export const beforeAfter = message({
 export const beforeAfterLink = message({
   ja: '@k8ordo/color-scheme の仕組み',
   en: 'How @k8ordo/color-scheme works',
+});
+
+export const frameworkSearch = message({
+  ja: '読み方だけが要るときは `urlReader(schema)` です。url スキーマを受け取り、`(input) => 値` を返します（codec は 1 度だけ作ります）。フレームワークが生成する表は、これで宣言されたページの search を読みます。',
+  en: 'The reading on its own is `urlReader(schema)`: a url schema in, `(input) => values` out, the codec built once. The framework’s generated table reads a declaring page’s search through it.',
 });

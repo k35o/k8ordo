@@ -31,7 +31,11 @@ export async function renderHtml(
   const payload = await createFromReadableStream<Payload>(forHtml);
   const toFile = import.meta.env.K8ORDO_MODE === '@k8ordo/static';
   const htmlStream = await renderToReadableStream(
-    <AppRouter pathname={payload.pathname} tree={payload.tree} />,
+    <AppRouter
+      pathname={payload.pathname}
+      search={payload.search}
+      tree={payload.tree}
+    />,
     {
       bootstrapModules: [clientEntry],
       // Present only when a form was posted without JavaScript: it is how

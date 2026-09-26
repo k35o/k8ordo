@@ -29,7 +29,11 @@ await whenRevealed();
 // the visitor is reading disappears the moment the script loads.
 mount(
   document,
-  <AppRouter pathname={payload.pathname} tree={payload.tree} />,
+  <AppRouter
+    pathname={payload.pathname}
+    search={payload.search}
+    tree={payload.tree}
+  />,
   payload.pathname,
   { formState: payload.formState as HydrateOptions['formState'] },
 );

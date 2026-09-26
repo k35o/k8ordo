@@ -1,4 +1,4 @@
-export { definePageState } from './page-state';
+export { definePageState, urlReader } from './page-state';
 export type { OutputOf, PageState } from './page-state';
 export { defineLocalState, defineSessionState } from './storage-state';
 export type { LocalState, SessionState } from './storage-state';

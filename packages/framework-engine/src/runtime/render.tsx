@@ -20,7 +20,21 @@ export type PageProps = {
   readonly pathname: string;
   /** The request, under `@k8ordo/server` only; a build into files has none. */
   readonly request?: RouteRequest;
+  /** What of the search a page that exports `search` reads — that page only. */
+  readonly search?: unknown;
   readonly children?: ReactNode;
+};
+
+/** How a matched stack is rendered, beyond the match itself. */
+export type Rendering = {
+  readonly pathname: string;
+  /** The page's params; the strings the pathname carried when not given. */
+  readonly params?: Readonly<Record<string, unknown>>;
+  readonly request?: RouteRequest;
+  /** Renders in the leaf's place — the page, watched. */
+  readonly page?: ComponentType<never>;
+  /** The page's search, when it declared what it reads. */
+  readonly search?: unknown;
 };
 
 /**
@@ -37,14 +51,12 @@ export type PageProps = {
  *
  * `page`, when given, renders in the leaf's place — the page, watched — inside
  * the boundary that sends a client navigation's `notFound()` back to the
- * server.
+ * server. `search` goes to the leaf alone, and only when given: a page that
+ * did not declare it never sees the search.
  */
 export const renderMatch = (
   match: Match,
-  pathname: string,
-  params: Readonly<Record<string, unknown>> = match.params,
-  request?: RouteRequest,
-  page?: ComponentType<never>,
+  { pathname, params = match.params, request, page, search }: Rendering,
 ): ReactNode => {
   let node: ReactNode = null;
   for (let index = match.stack.length - 1; index >= 0; index -= 1) {
@@ -59,6 +71,7 @@ export const renderMatch = (
         params={leaf ? params : match.params}
         pathname={pathname}
         request={request}
+        {...(leaf && search !== undefined ? { search } : {})}
       >
         {node}
       </Component>

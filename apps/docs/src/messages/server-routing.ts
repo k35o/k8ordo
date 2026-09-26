@@ -19,3 +19,8 @@ export const routeServer = message({
   ja: '実行中のサーバーでは、7 つのメソッドのどれを export してもよく、それぞれは自分のメソッドにだけ答えます。自分の `HEAD` が無ければ、`GET` の答えから本文を外したものが `HEAD` の答えです。export していないメソッドには、export したものを `Allow` に並べた `405` を返します。上の guard が先に走ります。`route.ts` への `POST` は Server Action と違い、同じ origin からであることを求めません。送ってくるもの（webhook）はこのサイトのフォームではないので、要ることは `route.ts` が自分で確かめます。guard と同じく応答に答える側なので、`cookies()`・`responseHeaders()`・`requestHeaders()` が使えます。',
   en: 'Any of the seven methods may be exported, and each answers only its own; a `HEAD` with no export of its own is its `GET` with the body left off, and a method it does not export gets a `405` whose `Allow` names the ones it does. The guards above it run first. A `POST` to a `route.ts` is not held to the same-origin rule a Server Action is — what posts to one, a webhook, is not a form on this site — so it checks what it needs itself. It answers the request as much as a guard does: `cookies()`, `responseHeaders()` and `requestHeaders()` work inside it.',
 });
+
+export const loadingServer = message({
+  ja: '文書は、ページ自身のコンポーネントが答えるまで何も送りません（`notFound()` と言うかもしれないため）。なので HTML で `loading.tsx` が出るのは、ページが自分の `<Suspense>` の下に置いたものだけで、ステータスを待つ必要の無いクライアント遷移では、ページのペイロードが届くまで出ます。',
+  en: 'A document waits for the page’s own component before anything is sent — it may still say `notFound()` — so in the HTML a `loading.tsx` shows only for what the page leaves under a `<Suspense>` of its own; a client navigation, which has no status to wait for, shows it while the page’s payload streams in.',
+});

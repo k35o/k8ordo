@@ -27,6 +27,8 @@ let guardStderr = '';
 let notFoundPageStderr = '';
 // GET 以外を export する route.ts を置いた構成
 let routeStderr = '';
+// search を読むと宣言したページを置いた構成
+let searchStderr = '';
 
 // ひとつ前のデプロイの dist/client。アプリは同じで、クライアントの
 // スクリプトだけが違う。タブを開いた後にデプロイがあった、を再現する
@@ -54,6 +56,7 @@ beforeAll(() => {
   guardStderr = failingBuild('vite.broken-guard.config.ts');
   notFoundPageStderr = failingBuild('vite.not-found-page.config.ts');
   routeStderr = failingBuild('vite.broken-route.config.ts');
+  searchStderr = failingBuild('vite.broken-search.config.ts');
   // 圧縮しないだけで、スクリプトの中身とハッシュの入った名前が変わる
   execFileSync('pnpm', ['exec', 'vp', 'build', '--minify', 'false'], {
     cwd: root,
@@ -98,6 +101,13 @@ describe('the static build', () => {
 
   it('writes the same page as a payload beside it', () => {
     expect(read('index.rsc')).toContain('rendered on the server');
+  });
+
+  it('writes a page under a loading.tsx whole, without the fallback', () => {
+    const html = read('products', 'index.html');
+    expect(html).toContain('first product');
+    // フォールバックは埋め込んだペイロードには載るが、描かれてはいない
+    expect(html).not.toContain('<p data-testid="loading">');
   });
 
   it('writes a page per supplied pathname, with its data', () => {
@@ -181,6 +191,12 @@ describe('the static build', () => {
   it('refuses a route.ts that answers a method a file cannot, naming it and the method', () => {
     expect(routeStderr).toContain(
       'static build writes a route.ts as the file its GET answers, and a file cannot answer another method — these export one:\n  src/routes-broken-route/api/route.ts (POST)',
+    );
+  });
+
+  it('refuses a page that reads the search, naming it', () => {
+    expect(searchStderr).toContain(
+      'static build cannot hand a page the search — a file is the same for every search, and these pages export search:\n  src/routes-broken-search/products/page.tsx\nthis application wants @k8ordo/server',
     );
   });
 
