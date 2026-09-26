@@ -55,8 +55,8 @@ catalog:
   # 宣言を消して vite-plus 任せにしないのは、消すと plugin-react や vitest の
   # peer に pnpm が本家 vite を自動で入れ、vitest の実体が割れて
   # expect.element の型が消えるため。
-  vite: npm:@voidzero-dev/vite-plus-core@0.3.2
-  vite-plus: 0.3.2
+  vite: npm:@voidzero-dev/vite-plus-core@0.3.3
+  vite-plus: 0.3.3
   vitest: 5.0.1
   vitest-browser-react: 2.3.0
   zod: 4.6.5
