@@ -911,8 +911,13 @@ the way:
   client build's files are under `/docs/assets/`.
 - A `redirect.ts` target is written from the root, like the table, and is
   sent with the base in front; one that names another origin is sent as
-  written. `redirect()` from a Server Action takes a URL, so build it with
-  `href()`.
+  written.
+- Under `@k8ordo/server`, a redirect the application builds itself is sent
+  as written: `redirect()` from a Server Action, and the `location` of a
+  `Response` a `guard.ts` returns. Both are URLs, so build them with
+  `href()` — `redirect(href('/talks'))`, `location: href('/login')` — or
+  give a pathname built some other way its base with `withBase()` from
+  `@k8ordo/router`.
 - A URL outside the base is none of the application's: the handler answers
   it with a `404`, and the client runtime leaves it to the browser.
 

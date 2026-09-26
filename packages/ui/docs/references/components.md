@@ -1092,6 +1092,49 @@ Props:
 - `value`: `number`
 - Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `type` / `className` / `style` / `children`.
 
+### RangeSlider
+
+A slider with two thumbs for picking a range (the WAI-ARIA multi-thumb slider).
+Each thumb is a real `<input type="range">`, so the keyboard behaves as the
+browser's own slider does, and neither thumb can pass the other: the lower
+thumb's `aria-valuemax` is the upper value and the upper thumb's
+`aria-valuemin` the lower one. `value` / `defaultValue` / `onChange` carry the
+pair `[lower, upper]`.
+
+`name` is a pair too: the two thumbs submit as two form fields. Uncontrolled,
+the thumbs keep their values in the DOM, so a form's reset and its dirty check
+(value against default value) work on them as on any input. The whole slider is
+a `role="group"`: name it with `aria-label` or `aria-labelledby`
+(`FormControl`'s `renderInput` props work), and each thumb is read as that name
+followed by the built-in `rangeSliderStart` / `rangeSliderEnd` wording.
+
+```tsx
+import { RangeSlider } from '@k8ordo/ui';
+
+<RangeSlider
+  aria-label="Price"
+  defaultValue={[20, 80]}
+  max={100}
+  min={0}
+  name={['priceMin', 'priceMax']}
+/>;
+```
+
+Props:
+
+- `defaultValue`: `readonly [number, number]`
+- `disabled`: `boolean` (default: `false`)
+- `invalid`: `boolean` (default: `false`)
+- `max`: `number` (default: `100`)
+- `min`: `number` (default: `0`)
+- `name`: `readonly [string, string]`
+- `onChange`: `(value: [number, number]) => void`
+- `ref`: `Ref<HTMLDivElement>`
+- `required`: `boolean` (default: `false`)
+- `step`: `number` (default: `1`)
+- `value`: `readonly [number, number]`
+- Other props are forwarded to `HTMLAttributes<HTMLDivElement>`, except `className` / `style` / `children` / `role`.
+
 ### Switch
 
 A toggle switch.
@@ -1566,19 +1609,27 @@ Props:
 
 ### Progress
 
+Leave `value` out when how far along it is cannot be known: the bar then slides
+back and forth, has no `aria-valuenow`, and is named `label` (the built-in
+`loading` wording when omitted). With reduced motion it stops sliding and
+pulses across the whole track instead.
+
 ```tsx
 import { Progress } from '@k8ordo/ui';
 
-<Progress value={50} max={100} />
-<Progress value={50} max={100} min={0} label="Progress" />
+<Progress value={50} />
+<Progress value={150} max={200} min={100} label="Progress" />
+
+// Progress that cannot be measured
+<Progress label="Uploading" />
 ```
 
 Props:
 
-- `max`: `number` (required)
-- `value`: `number` (required)
 - `label`: `string`
+- `max`: `number` (default: `100`)
 - `min`: `number` (default: `0`)
+- `value`: `number`
 - Other props are forwarded to `HTMLAttributes<HTMLDivElement>`, except `children` / `className` / `style`.
 
 ### Spinner
@@ -2106,6 +2157,7 @@ Every key in the `Messages` type. All values are `string`.
 | Autocomplete  | `autocompletePlaceholder`, `autocompleteRemoveTag`, `autocompleteClear`, `autocompleteEmpty`                                                        |
 | FileField     | `fileFieldRemove`, `fileFieldTrigger`, `fileFieldDrop`                                                                                              |
 | NumberField   | `numberFieldIncrement`, `numberFieldDecrement`, `numberFieldRangeUnderflow` (`{min}` is replaced), `numberFieldRangeOverflow` (`{max}` is replaced) |
+| RangeSlider   | `rangeSliderStart`, `rangeSliderEnd`                                                                                                                |
 | Calendar      | `calendarPreviousMonth`, `calendarNextMonth`                                                                                                        |
 | DatePicker    | `datePickerOpen`, `datePickerDialog`                                                                                                                |
 | PasswordInput | `passwordShow`, `passwordHide`                                                                                                                      |
@@ -2115,7 +2167,10 @@ Every key in the `Messages` type. All values are `string`.
 | Pagination    | `paginationLabel`, `paginationPrevious`, `paginationNext`                                                                                           |
 | CodeBlock     | `codeBlockCopy` (announces with `CopyButton`'s `copied` / `copyFailed`)                                                                             |
 | Carousel      | `carousel`, `carouselSlide`, `carouselPrevious`, `carouselNext`                                                                                     |
-| AI chat       | `chat`, `scrollToLatest`, `reasoning`, `reasoningStreaming`, `suggestions`, `send`, `stop`, `toolInput`, `toolOutput`, `toolError`, `toolDenied`    |
+| AI chat       | `chat`, `scrollToLatest`, `reasoning`, `reasoningStreaming`, `suggestions`, `send`, `stop`, `attach`                                                |
+| AI content    | `attachments`, `attachmentRemove`, `attachmentImage`, `sources`                                                                                     |
+| AI actions    | `messageActions`, `regenerate`, `feedbackPositive`, `feedbackNegative` (`Message.Copy` uses `CopyButton`'s)                                         |
+| AI tools      | `toolInput`, `toolOutput`, `toolError`, `toolDenied`, `toolApprovalRequest`, `toolApprove`, `toolDeny`                                              |
 | Response      | The `response*` keys below                                                                                                                          |
 
 `fileFieldTrigger` is the button text of an empty `FileField.Dropzone`, and
