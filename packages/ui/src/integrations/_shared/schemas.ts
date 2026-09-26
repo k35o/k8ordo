@@ -13,6 +13,7 @@ import type { Alert } from '../../components/feedback/alert';
 import type { EmptyState } from '../../components/feedback/empty-state';
 import type { Skeleton } from '../../components/feedback/skeleton';
 import type { Spinner } from '../../components/feedback/spinner';
+import type { ColorPicker } from '../../components/form/color-picker';
 import type { FormControl } from '../../components/form/form-control';
 import type { Textarea } from '../../components/form/textarea';
 import type { AlertIcon, ChevronIcon } from '../../components/icons';
@@ -687,6 +688,38 @@ export const rangeSliderProps = z.object({
   disabled: z.boolean().optional(),
 }) satisfies z.ZodType<RangeSliderIntegrationProps>;
 
+// 値は `<ColorPicker>` の欄と同じ #rrggbb。大文字は部品が小文字にそろえる
+const hexColor = () => z.string().regex(/^#[0-9a-fA-F]{6}$/u);
+
+type ColorPickerIntegrationProps = {
+  name: string;
+  label: string;
+  defaultValue?: string;
+  swatches?: ComponentProps<typeof ColorPicker>['swatches'];
+  invalid?: boolean;
+  disabled?: boolean;
+  required?: boolean;
+};
+export const colorPickerProps = z.object({
+  name: z.string(),
+  label: z.string().describe('Visible label of the field'),
+  defaultValue: hexColor().optional().describe('#rrggbb'),
+  swatches: z
+    .array(
+      z.object({
+        value: hexColor().describe('#rrggbb'),
+        label: z
+          .string()
+          .describe('Name of the color, read out for the swatch'),
+      }),
+    )
+    .optional()
+    .describe('Preset colors offered as buttons'),
+  invalid: z.boolean().optional(),
+  disabled: z.boolean().optional(),
+  required: z.boolean().optional(),
+}) satisfies z.ZodType<ColorPickerIntegrationProps>;
+
 type CheckboxIntegrationProps = {
   name: string;
   label: string;
@@ -980,6 +1013,7 @@ export type PasswordInputProps = z.infer<typeof passwordInputProps>;
 export type NumberFieldProps = z.infer<typeof numberFieldProps>;
 export type SliderProps = z.infer<typeof sliderProps>;
 export type RangeSliderProps = z.infer<typeof rangeSliderProps>;
+export type ColorPickerProps = z.infer<typeof colorPickerProps>;
 export type DateFieldProps = z.infer<typeof dateFieldProps>;
 export type DatePickerProps = z.infer<typeof datePickerProps>;
 export type CalendarProps = z.infer<typeof calendarProps>;

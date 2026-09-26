@@ -40,6 +40,10 @@ export const en: Messages = {
   datePickerOpen: 'Choose from calendar',
   datePickerDialog: 'Choose a date',
 
+  colorPickerHue: 'Hue',
+  colorPickerSaturation: 'Saturation',
+  colorPickerLightness: 'Lightness',
+  colorPickerSwatches: 'Swatches',
   passwordShow: 'Show password',
   passwordHide: 'Hide password',
 

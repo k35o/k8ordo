@@ -1052,6 +1052,55 @@
       "omitted": []
     },
     {
+      "name": "ColorPicker",
+      "props": [
+        {
+          "name": "defaultValue",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "invalid",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "types": ["(value: string) => void"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "ref",
+          "types": ["Ref<HTMLInputElement>"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "swatches",
+          "types": ["readonly ColorPickerSwatch[]"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "type",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "value",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": "InputHTMLAttributes<HTMLInputElement>",
+      "omitted": ["className", "style", "children"]
+    },
+    {
       "name": "ColorScaleIcon",
       "props": [
         {

@@ -873,6 +873,49 @@ Props:
 - `value`: `string[]`
 - Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `type` / `role` / `className` / `style` / `children` / `autoComplete` / `aria-autocomplete` / `aria-controls` / `aria-expanded` / `aria-activedescendant`.
 
+### ColorPicker
+
+A color field whose value is `#rrggbb`. The value lives in a text input that
+carries `name`, so it submits and resets like any other field; hue, saturation,
+and lightness sliders and optional `swatches` (toggle buttons named by their
+`label`) write into it and announce the change with an `input` event, as if it
+had been typed. Typing reports a color only once it has six digits; on blur and
+on Enter the text is tidied to lowercase `#rrggbb`, and a three-digit `#f80` is
+expanded. Emptying the field reports `''`. Spread `@k8ordo/form`'s `input` onto
+it as is: a `.regex()` in the schema arrives as `pattern` and replaces the
+built-in `#[0-9a-fA-F]{6}`. The panel stays horizontal inside vertical writing
+mode.
+
+```tsx
+import { ColorPicker, FormControl } from '@k8ordo/ui';
+
+<FormControl
+  label="Accent color"
+  renderInput={(props) => (
+    <ColorPicker
+      {...props}
+      defaultValue="#0d9488"
+      name="accent"
+      swatches={[
+        { value: '#0d9488', label: 'Teal' },
+        { value: '#f97316', label: 'Orange' },
+      ]}
+    />
+  )}
+/>;
+```
+
+Props:
+
+- `defaultValue`: `string`
+- `invalid`: `boolean` (default: `false`)
+- `onChange`: `(value: string) => void`
+- `ref`: `Ref<HTMLInputElement>`
+- `swatches`: `readonly ColorPickerSwatch[]`
+- `type`: `string`
+- `value`: `string`
+- Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `className` / `style` / `children`.
+
 ### Checkbox
 
 The label is passed as the `label` prop, not as children. `onChange` is `(checked, event)`.
@@ -2169,6 +2212,7 @@ Every key in the `Messages` type. All values are `string`.
 | RangeSlider   | `rangeSliderStart`, `rangeSliderEnd`                                                                                                                |
 | Calendar      | `calendarPreviousMonth`, `calendarNextMonth`                                                                                                        |
 | DatePicker    | `datePickerOpen`, `datePickerDialog`                                                                                                                |
+| ColorPicker   | `colorPickerHue`, `colorPickerSaturation`, `colorPickerLightness`, `colorPickerSwatches`                                                            |
 | PasswordInput | `passwordShow`, `passwordHide`                                                                                                                      |
 | ListBox       | `listBoxPlaceholder`                                                                                                                                |
 | Breadcrumb    | `breadcrumb`                                                                                                                                        |

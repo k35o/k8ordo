@@ -184,6 +184,11 @@ export const catalog = defineCatalog(schema, {
       description:
         'Month calendar shown inline for picking one day (YYYY-MM-DD). It submits nothing; in a form, use DatePicker. defaultValue can be bound to state with $bindState.',
     },
+    ColorPicker: {
+      props: s.colorPickerProps,
+      description:
+        'Color input with a visible label: a #rrggbb text field, hue / saturation / lightness sliders, and optional preset swatches. defaultValue can be bound to state with $bindState.',
+    },
     Radio: {
       props: s.radioProps,
       description:

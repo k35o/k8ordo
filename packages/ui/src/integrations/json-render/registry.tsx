@@ -133,6 +133,14 @@ export const { registry } = defineRegistry(catalog, {
       );
       return ui.renderRangeSlider(props, value, setValue);
     },
+    ColorPicker: ({ props, bindings }) => {
+      const [value, setValue] = useBoundOrLocal<string>(
+        props.defaultValue,
+        bindings?.defaultValue,
+        '',
+      );
+      return ui.renderColorPicker(props, value, setValue);
+    },
     DateField: ({ props, bindings }) => {
       const [value, setValue] = useBoundOrLocal<string>(
         props.defaultValue,
