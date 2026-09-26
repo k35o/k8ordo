@@ -136,6 +136,11 @@ export const componentCategories: NavCategory[] = [
         description: m.components.slider.description,
       },
       {
+        name: 'RangeSlider',
+        path: '/:locale/ui/components/range-slider',
+        description: m.components.rangeSlider.description,
+      },
+      {
         name: 'FileField',
         path: '/:locale/ui/components/file-field',
         description: m.components.fileField.description,

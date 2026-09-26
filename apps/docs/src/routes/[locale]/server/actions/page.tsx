@@ -94,6 +94,7 @@ export default function HomePage() {
 const SIGN_IN = `// src/routes/_parts/sign-in.ts
 'use server';
 
+import { href } from '@k8ordo/router';
 import { cookies, redirect } from '@k8ordo/server/runtime';
 
 import { startSession } from '../_data/sessions.server';
@@ -107,7 +108,7 @@ export async function signIn(
   const session = await startSession(formData);
   if (session === null) return { error: 'wrong password' };
   cookies().set('session', session.token, { maxAge: 60 * 60 * 24 * 30 });
-  redirect('/account');
+  redirect(href('/account'));
 }`;
 
 const REQUEST = `// src/routes/layout.tsx

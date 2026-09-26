@@ -1,10 +1,12 @@
+import { useId } from 'react';
 import type { FC, ReactNode } from 'react';
 
 import { getMessages } from '../../../i18n/current';
 import { Spinner } from '../../feedback/spinner';
 import { AlertIcon, CheckIcon } from '../../icons';
 import { Collapsible } from '../_internal/collapsible';
-import type { ToolState } from '../types';
+import type { ToolApproval, ToolApprovalResponse, ToolState } from '../types';
+import { ApprovalBar } from './approval-bar';
 
 type Props = {
   name: string;
@@ -12,13 +14,25 @@ type Props = {
   input?: unknown;
   output?: ReactNode;
   errorText?: string;
-  deniedReason?: string;
+  approval?: ToolApproval;
+  // AI SDK の addToolApprovalResponse は PromiseLike を返すので、Promise に
+  // 狭めるとそのまま渡せなくなる。
+  onApprovalResponse?: (
+    response: ToolApprovalResponse,
+  ) => void | PromiseLike<void>;
   isOpen?: boolean;
   defaultOpen?: boolean;
   onChange?: (isOpen: boolean) => void;
 };
 
-const stateIcon = (state: ToolState): ReactNode => {
+const stateIcon = (state: ToolState, awaitsUser: boolean): ReactNode => {
+  if (awaitsUser) {
+    return (
+      <span className="text-fg-info">
+        <AlertIcon size="sm" status="info" />
+      </span>
+    );
+  }
   if (state === 'output-available') {
     return (
       <span className="text-fg-success">
@@ -60,20 +74,42 @@ export const ToolInvocation: FC<Props> = ({
   input,
   output,
   errorText,
-  deniedReason,
+  approval,
+  onApprovalResponse,
   isOpen,
   defaultOpen = false,
   onChange,
 }) => {
   const messages = getMessages();
+  const nameId = useId();
+  const triggerId = useId();
+  const pendingApproval =
+    state === 'approval-requested' && approval?.isAutomatic !== true
+      ? approval
+      : undefined;
 
   return (
     <Collapsible
       defaultOpen={defaultOpen}
-      icon={stateIcon(state)}
+      icon={stateIcon(state, pendingApproval !== undefined)}
       isOpen={isOpen}
-      label={<span className="text-fg-base font-medium">{name}</span>}
+      label={
+        <span className="text-fg-base font-medium" id={nameId}>
+          {name}
+        </span>
+      }
       onChange={onChange}
+      triggerId={triggerId}
+      footer={
+        pendingApproval === undefined ? undefined : (
+          <ApprovalBar
+            approval={pendingApproval}
+            nameId={nameId}
+            onApprovalResponse={onApprovalResponse}
+            triggerId={triggerId}
+          />
+        )
+      }
     >
       <div className="flex flex-col gap-3">
         {input !== undefined && (
@@ -92,7 +128,7 @@ export const ToolInvocation: FC<Props> = ({
           </p>
         ) : state === 'output-denied' ? (
           <p className="text-fg-warning text-sm">
-            {deniedReason ?? messages.toolDenied}
+            {approval?.reason ?? messages.toolDenied}
           </p>
         ) : output === undefined ? null : (
           <div>

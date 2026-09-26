@@ -17,7 +17,10 @@ const COMPONENTS_DIR = join(import.meta.dirname, '.');
 // 組み込みの文言は getMessages() で読む。hook ではないので、文言を読むためだけに
 // 'use client' を付ける理由は無い。Server Component から描ける部品をここに固定する。
 const SERVER_COMPONENTS = [
+  'ai/_internal/attachment-preview.tsx',
+  'ai/attachment/attachment.tsx',
   'ai/reasoning/reasoning.tsx',
+  'ai/source/source.tsx',
   'ai/tool-invocation/tool-invocation.tsx',
   'data-display/code/code.tsx',
   'feedback/alert/alert.tsx',
