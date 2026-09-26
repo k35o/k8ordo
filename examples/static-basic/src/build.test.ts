@@ -100,6 +100,13 @@ describe('the static build', () => {
     expect(read('index.rsc')).toContain('rendered on the server');
   });
 
+  it('writes a page under a loading.tsx whole, without the fallback', () => {
+    const html = read('products', 'index.html');
+    expect(html).toContain('first product');
+    // フォールバックは埋め込んだペイロードには載るが、描かれてはいない
+    expect(html).not.toContain('<p data-testid="loading">');
+  });
+
   it('writes a page per supplied pathname, with its data', () => {
     expect(read('products', '1', 'index.html')).toContain('first product');
     expect(read('products', '2', 'index.html')).toContain('second product');

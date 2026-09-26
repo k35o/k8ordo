@@ -14,7 +14,7 @@ import { defineRoutes } from './define-routes';
 import { bindParams, href, navigateTo } from './links';
 import { usePathname } from './location';
 import { useMatch } from './match';
-import { useInterceptedNavigation } from './navigation';
+import { useInterceptedNavigation, usePendingPathname } from './navigation';
 import { Outlet, Router, useParams, useRoute } from './router';
 
 let listMounts = 0;
@@ -629,4 +629,101 @@ describe('under a base', () => {
     await expect.element(screen.getByTestId('list')).toBeInTheDocument();
     expect(screen.container.querySelector('[data-testid="about"]')).toBeNull();
   });
+});
+
+const Spinner: FC = () => <div data-testid="spinner">loading</div>;
+
+const PendingProbe: FC = () => (
+  <span data-testid="pending">{usePendingPathname() ?? 'none'}</span>
+);
+
+const Framed: FC = () => (
+  <section>
+    <PendingProbe />
+    <Outlet />
+  </section>
+);
+
+it('shows the loading component of a branch while the page below it first loads', async () => {
+  let release!: () => void;
+  const chunk = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const Slow = lazy(async () => {
+    await chunk;
+    return { default: AboutPage };
+  });
+  const table = defineRoutes({
+    '/': HomePage,
+    '/area': { loading: Spinner, children: { '/slow': Slow } },
+  });
+  const screen = await render(<Router routes={table} />);
+  await navigateTo('/', { history: 'replace' }).finished;
+
+  const slow = navigateTo('/area/slow');
+  // 新しく現れた Suspense は、中身が来るまで loading を出す
+  await expect.element(screen.getByTestId('spinner')).toBeInTheDocument();
+
+  release();
+  await slow.finished;
+  await expect.element(screen.getByTestId('about')).toBeInTheDocument();
+  expect(document.querySelector('[data-testid="spinner"]')).toBeNull();
+});
+
+it('names the page a navigation is loading, and nothing once it is on screen', async () => {
+  let release!: () => void;
+  const chunk = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const Slow = lazy(async () => {
+    await chunk;
+    return { default: AboutPage };
+  });
+  const table = defineRoutes({
+    '/': {
+      layout: Framed,
+      children: {
+        '/': { loading: Spinner, children: { '/': HomePage, '/slow': Slow } },
+      },
+    },
+  });
+  const screen = await render(<Router routes={table} />);
+  await navigateTo('/', { history: 'replace' }).finished;
+  await expect.element(screen.getByTestId('pending')).toHaveTextContent('none');
+
+  const slow = navigateTo('/slow');
+
+  // 前のページは画面に残ったまま、行き先が名指される
+  await expect
+    .element(screen.getByTestId('pending'))
+    .toHaveTextContent('/slow');
+  expect(document.querySelector('[data-testid="home"]')).not.toBeNull();
+
+  release();
+  await slow.finished;
+  await expect.element(screen.getByTestId('pending')).toHaveTextContent('none');
+});
+
+it('names nothing for a state change, which is not a page change', async () => {
+  const table = defineRoutes({
+    '/': { layout: Framed, children: { '/': HomePage } },
+  });
+  const screen = await render(<Router routes={table} />);
+  await navigateTo('/', { history: 'replace' }).finished;
+  const probe = screen.getByTestId('pending').element();
+  const seen: Array<string | null> = [];
+  const observer = new MutationObserver(() => {
+    seen.push(probe.textContent);
+  });
+  observer.observe(document.body, {
+    subtree: true,
+    characterData: true,
+    childList: true,
+  });
+
+  await navigation.navigate('/?q=shoes', { history: 'replace' }).finished;
+  observer.disconnect();
+
+  expect(seen.filter((text) => text !== 'none')).toStrictEqual([]);
+  await expect.element(screen.getByTestId('pending')).toHaveTextContent('none');
 });

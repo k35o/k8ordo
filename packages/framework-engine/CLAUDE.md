@@ -139,6 +139,12 @@ ParamsSchemaFor<pattern>`, lists per page pattern the schemas along its
   there (`@k8ordo/i18n` records the accepted locale), and neither a refused
   pattern's write nor any other reaches the handler's caller, which under
   `@k8ordo/static` is one context for every page.
+- **`loading.tsx` is the router's `loading`.** The generator puts it on its
+  branch (a page with one becomes a branch of its own, and a root one makes
+  the root a branch); the router makes it a `<Suspense>` in the stack, after
+  the layout and the `error` boundary. Nothing keys it: a page change under
+  one already showing keeps the page, as every page change does, and the
+  router's `usePendingPathname()` is what says one is under way.
 - **`error.tsx` is the router's `error`; `redirect.ts` is answered before the
   table.** The generator puts an error file on its branch (a page with an
   error becomes a branch of its own) and lists redirects in `redirects`,

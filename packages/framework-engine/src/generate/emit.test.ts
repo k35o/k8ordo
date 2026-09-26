@@ -496,3 +496,24 @@ describe('route.ts in the emitted table', () => {
     expect(plain).not.toContain('answered');
   });
 });
+
+describe('loading.tsx in the emitted table', () => {
+  it('puts the loading component on the branch, checked as a component', () => {
+    const source = emit([
+      'layout.tsx',
+      'page.tsx',
+      'products/loading.tsx',
+      'products/page.tsx',
+    ]);
+    expect(source).toMatch(
+      /'\/products': \{\n\s+loading: products_loading satisfies ComponentType,\n\s+children: \{\n\s+'\/': products_page satisfies Page<'\/products'>,/u,
+    );
+  });
+
+  it('makes the root a branch of its own, so its loading wraps everything', () => {
+    const source = emit(['loading.tsx', 'page.tsx']);
+    expect(source).toMatch(
+      /'\/': \{\n\s+loading: loading satisfies ComponentType,/u,
+    );
+  });
+});

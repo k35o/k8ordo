@@ -61,7 +61,10 @@ When installed via npm, these docs live under `node_modules/@k8ordo/router/docs/
   URL, not a table path) and `usePathname` / `<Router>` take it off, a URL
   outside it being left to the browser — `withBase(pathname, base?)` /
   `withoutBase(pathname, base?)` (`null` outside the base) are the two steps;
-  `bindParams(() => ({ locale }))` returns `{ href, navigateTo }` with those
+  `usePendingPathname()` is where a page change in progress is going (`null`
+  when none is), for a pending indicator; a branch's `loading` component
+  shows while what is below it suspends (a `<Suspense>` inside its `error`
+  boundary); `bindParams(() => ({ locale }))` returns `{ href, navigateTo }` with those
   params supplied by the source at each call (still overridable), for a
   segment every link shares — a pattern that names a param still takes
   `options` third, after an `undefined` params slot if the source supplies

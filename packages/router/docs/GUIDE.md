@@ -78,6 +78,9 @@ export const routes = defineRoutes({
   only appear once in an object, so two sections at the same depth could not
   otherwise have different layouts.
 - **A trailing slash is the same pathname.** `/products/` matches `/products`.
+- A branch may name a **`loading`** component — no props — to show while
+  what is below it suspends: `{ layout, loading, children }` puts a
+  `<Suspense>` there, inside the branch's `error` boundary.
 - A branch may name an **`error`** component beside its layout:
   `{ layout, error, children }`. When anything below throws, it renders in
   the layout's hole instead — with `{ error, reset }` as props (`ErrorProps`;
@@ -215,8 +218,11 @@ served under is taken off (see _Served under a base_).
 Interception commits the URL first and the tree arrives when it has loaded, so
 on a slow navigation a link marks itself active while the previous page is
 still on screen — the same order the browser's own address bar follows. If the
-wait needs showing, await `navigateTo`'s `finished` — it resolves when the
-tree is on screen (below).
+wait needs showing, `usePendingPathname()` is where a page change in progress
+is going — `null` when none is — set as the navigation starts and cleared once
+the new page is on screen or the navigation is given up; a state change sets
+nothing. The caller that started it can instead await `navigateTo`'s
+`finished` — it resolves when the tree is on screen (below).
 
 `usePathname` reads the platform rather than the table, which is why it is the
 one that also works under the framework, where the browser holds no table at

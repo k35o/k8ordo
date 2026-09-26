@@ -4,12 +4,14 @@
 > parameters need no list of values, an unknown URL is a real 404, and a form
 > can post to a Server Action. The mode is the dependency — the alternative is
 > `@k8ordo/static`, which renders every route at build time. `src/routes/` is
-> the pathname space (page/layout/not-found/error/redirect/guard/route, `[param]`,
+> the pathname space (page/layout/not-found/error/loading/redirect/guard/route, `[param]`,
 > `(group)`, `_private`), a page or layout may `export const paramsSchema` (any
 > Standard Schema, synchronous) to type its parameters — a refused value makes
 > the pattern not answer, so the walk goes on to `not-found.tsx` under a real
 > 404 — an `error.tsx` shows in place of what throws below it, a `redirect.ts`
-> answers 307/308, a `route.ts` answers its URL with a `Response` from the
+> answers 307/308, a `loading.tsx` shows while what is below it suspends
+> (with the router's `usePendingPathname()` for a page change in progress), a
+> `route.ts` answers its URL with a `Response` from the
 > method it exports (`GET`/`POST`/…, `{ request, params }` — `RouteContext`
 > from the router; `HEAD` from `GET`, `405` with `Allow` otherwise, no
 > same-origin check), a page that says `notFound()` (from `@k8ordo/router`) is

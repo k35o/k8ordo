@@ -88,6 +88,14 @@ pnpm check         # check:write to auto-fix
   with it (regression tests for both in `router.browser.test.tsx`). It sits
   under a Suspense boundary so a server render leaves a throwing subtree to
   the browser.
+- **A branch's `loading` is a plain `<Suspense>` in the stack**, after the
+  layout and the `error` boundary (`loadingFor`), never keyed: a page change
+  under one already showing keeps the current page, as every page change
+  does. `usePendingPathname()` is a module-level store the navigation hook
+  sets at interception (in the table's terms, base removed) and clears in the
+  commit that puts that navigation's tree on screen, or when it is aborted or
+  its load fails — only for the latest navigation, since a newer one already
+  names its own. A same-pathname navigation never sets it.
 - **Declaration order decides.** No specificity ranking, ever — the table
   reads top to bottom like the code it is.
 - **A bound param is a param, not a concept.** `bindParams` knows a name and
@@ -125,7 +133,7 @@ src/
   define-routes.ts  defineRoutes / match / NavigablePath
   links.ts          href / navigateTo / bindParams (the side that needs no table)
   register.ts       Register (module augmentation) + PageProps / LayoutProps / RouteContext
-  navigation.ts     useInterceptedNavigation (intercept and the commit contract)
+  navigation.ts     useInterceptedNavigation (intercept and the commit contract), usePendingPathname
   location.tsx      usePathname / PathnameProvider (where you are, without the table)
   match.ts          matchPath / useMatch ("which section am I in", without the table)
   boundary.tsx      RouteErrorBoundary (the boundary that renders the table's error)

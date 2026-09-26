@@ -26,6 +26,8 @@ export type RouteDir = {
   readonly notFound: string | null;
   /** Shown in place of what is below when it throws — inside the layout. */
   readonly error: string | null;
+  /** Shown while what is below suspends — inside the error boundary. */
+  readonly loading: string | null;
   /** A `redirect.ts`: this directory's URL sends the visitor elsewhere. */
   readonly redirect: string | null;
   /** A `guard.ts`: runs before whatever answers below this directory. */
@@ -48,6 +50,7 @@ const CONVENTION = {
   'redirect.ts': 'redirect',
   'guard.ts': 'guard',
   'route.ts': 'route',
+  'loading.tsx': 'loading',
 } as const;
 
 export const ROUTE_FILES = Object.keys(CONVENTION).join(', ');
@@ -204,6 +207,7 @@ const convert = (
     layout: slots.layout ?? null,
     notFound: slots.notFound ?? null,
     error: slots.error ?? null,
+    loading: slots.loading ?? null,
     redirect: slots.redirect ?? null,
     guard: slots.guard ?? null,
     route: slots.route ?? null,
