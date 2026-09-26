@@ -5,12 +5,12 @@ import type { Cookies } from './cookies';
 import { parseCookies } from './request';
 
 /**
- * What is running for the request: a `guard.ts`, a Server Action, or the
- * render. Only what answers the request may read and write through the
- * response API; a page is a render, and a render that wrote the response
- * would be a second handler.
+ * What is running for the request: a `guard.ts`, a `route.ts`, a Server
+ * Action, or the render. Only what answers the request may read and write
+ * through the response API; a page is a render, and a render that wrote the
+ * response would be a second handler.
  */
-export type Phase = 'guard' | 'action' | 'render';
+export type Phase = 'guard' | 'route' | 'action' | 'render';
 
 /** What the final response carries beyond what answered it. */
 type Outgoing = {
@@ -101,12 +101,12 @@ const answering = (caller: string): Scope => {
   const scope = storage().getStore();
   if (scope === undefined) {
     throw new Error(
-      `${caller} needs a request — call it from a guard.ts or a Server Action, while the request is being answered`,
+      `${caller} needs a request — call it from a guard.ts, a route.ts or a Server Action, while the request is being answered`,
     );
   }
   if (scope.phase === 'render') {
     throw new Error(
-      `${caller} belongs to what answers the request, and a page is a render — call it from a guard.ts or a Server Action; a page reads the request from its props`,
+      `${caller} belongs to what answers the request, and a page is a render — call it from a guard.ts, a route.ts or a Server Action; a page reads the request from its props`,
     );
   }
   return scope;
@@ -125,7 +125,8 @@ export const responseHeaders = (): Headers =>
 /**
  * The request's cookies, to read and to write: what the request carried,
  * with what this answer set or deleted since, and every write said as a
- * `Set-Cookie` on the answer. From a `guard.ts` or a Server Action; a page
+ * `Set-Cookie` on the answer. From a `guard.ts`, a `route.ts` or a Server
+ * Action; a page
  * reads `request.cookies` from its props.
  */
 export const cookies = (): Cookies => answering('cookies()').cookies;

@@ -18,6 +18,7 @@ type RootProps = PropsWithChildren<
 type RowProps = PropsWithChildren<
   {
     interactive?: boolean;
+    selected?: boolean;
   } & Omit<HTMLAttributes<HTMLTableRowElement>, 'className' | 'style'>
 >;
 
@@ -78,12 +79,19 @@ const Body: FC<SectionProps> = ({ children, ...rest }) => (
   </tbody>
 );
 
-const Row: FC<RowProps> = ({ children, interactive = false, ...rest }) => (
+const Row: FC<RowProps> = ({
+  children,
+  interactive = false,
+  selected = false,
+  ...rest
+}) => (
   <tr
     {...rest}
     className={cn(
       'border-border-mute border-b transition-colors vertical:border-b-0 vertical:border-l',
       interactive && 'hover:bg-bg-mute',
+      selected &&
+        'bg-primary-bg-subtle forced-colors:bg-[Highlight] forced-colors:text-[HighlightText]',
     )}
   >
     {children}

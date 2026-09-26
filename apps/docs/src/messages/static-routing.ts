@@ -35,7 +35,17 @@ export const refusesGuards = message({
   en: 'A `guard.ts`',
 });
 
+export const refusesRouteMethods = message({
+  ja: '`GET` 以外のメソッドを export する `route.ts` がある',
+  en: 'A `route.ts` that exports a method other than `GET`',
+});
+
 export const refusesThrow = message({
   ja: 'ビルド中に throw したコンポーネント（Server Component はいつでも、クライアントコンポーネントは上に Suspense の境界が無いとき）',
   en: 'A component that throws while the build renders it — a Server Component always, a client component when no Suspense boundary sits above it',
+});
+
+export const routeStatic = message({
+  ja: 'ビルドは、サイトが持つ pathname ごとに `GET` を 1 度呼び（パラメータのあるパターンにはページと同じく `paths` が要ります）、答えをその pathname のファイルとして書きます（`dist/client/feed.xml`）。`site` を渡すと、リクエストの origin はサイトの配信元になるので、RSS のリンクを絶対 URL で書けます。`GET` は `200` で答える必要があり、それ以外なら pathname を挙げてビルドが止まります。ファイルは `GET` 以外に答えられないので、ほかのメソッドを export した `route.ts` は、ビルドでも `vite dev` でも名指しで拒みます。`/` の `route.ts` と、下にページを書く `route.ts` はファイルにできません。ページではないので `sitemap.xml` には載りません。',
+  en: 'The build calls its `GET` once for each pathname the site has — a pattern with params needs `paths`, as a page’s does — and writes what it answered as the file at that pathname: `dist/client/feed.xml`. With `site`, the request’s origin is where the site is served, so an RSS feed’s links can be absolute. The `GET` has to answer `200`; anything else stops the build naming the pathname. A file answers nothing but `GET`, so a `route.ts` exporting another method is refused by name, in the build and in `vite dev`. A `route.ts` at `/`, or one with pages written below it, cannot be a file, and what it writes is not a page, so `sitemap.xml` leaves it out.',
 });

@@ -135,3 +135,25 @@ describe('literal siblings of a parameter', () => {
     });
   });
 });
+
+describe('a route.ts in the table', () => {
+  const routes = tableFor([
+    'page.tsx',
+    'api/[id]/route.ts',
+    'api/special/page.tsx',
+    'feed.xml/route.ts',
+  ]);
+
+  it('matches in declaration order with the pages, literals first', () => {
+    expect(routes.match('/api/special')?.pattern).toBe('/api/special');
+    expect(routes.match('/api/7')).toMatchObject({
+      pattern: '/api/:id',
+      params: { id: '7' },
+      stack: [stub('api/[id]/route.ts')],
+    });
+  });
+
+  it('matches a directory named like a file', () => {
+    expect(routes.match('/feed.xml')?.pattern).toBe('/feed.xml');
+  });
+});

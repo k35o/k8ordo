@@ -19,6 +19,7 @@ import {
   guards,
   paramSchemas,
   redirects,
+  routeModules,
   routes,
 } from 'virtual:k8ordo/routes';
 
@@ -39,6 +40,7 @@ import { isRedirect, matchRedirects } from './redirect';
 import { renderMatch, renderNotFound } from './render';
 import { routeRequestOf } from './request';
 import { answer, inPhase, withRequest } from './request-scope';
+import { methodNotAllowed, routeAnswerFor, runRoute } from './route';
 
 type ActionResult = {
   returnValue?: unknown;
@@ -192,12 +194,6 @@ export default function handler(request: Request): Promise<Response> {
 }
 
 const respond = async (request: Request): Promise<Response> => {
-  if (!METHODS.includes(request.method)) {
-    return new Response('method not allowed', {
-      status: 405,
-      headers: { allow: METHODS.join(', ') },
-    });
-  }
   const url = new URL(request.url);
   // 表は base の下の pathname で書かれている。base の外はこのアプリの URL ではない
   const own = withoutBase(url.pathname);
@@ -209,18 +205,14 @@ const respond = async (request: Request): Promise<Response> => {
   }
   const wantsPayload = isPayloadPath(own);
   const pathname = wantsPayload ? pagePathFor(own) : own;
-  const isAction = request.method === 'POST';
-  const addressed = request.headers.get(ACTION_ID_HEADER) !== null;
-  if (isAction && !sameOrigin(request, url)) {
-    return new Response('cross-origin action', { status: 403 });
-  }
+  const reads = request.method === 'GET' || request.method === 'HEAD';
 
   // A redirect.ts answers before anything renders. A payload request for it
   // is sent to the page, not the payload: the client runtime sees HTML come
   // back, gives the navigation to the browser, and the browser follows the
   // redirect as a document load — the URL bar ends up right.
   const declared = redirectFor(pathname);
-  if (declared !== null && !isAction) {
+  if (declared !== null && reads) {
     return redirectResponse(
       locationOf(declared.to),
       declared.permanent ? 308 : 307,
@@ -252,6 +244,43 @@ const respond = async (request: Request): Promise<Response> => {
     parsed = accepted;
     return true;
   });
+
+  // A route.ts answers by its own methods, from anywhere: no origin check,
+  // since what posts to it — a webhook — is not a form on this site, and it
+  // checks what it needs itself.
+  const module = match === null ? undefined : routeModules[match.pattern];
+  if (match !== null && module !== undefined) {
+    // A route has no payload. A client navigation that asks for one gets
+    // something that is not, and loads the document instead — as it would
+    // from a static host, where no index.rsc sits beside the file.
+    if (wantsPayload) {
+      return new Response('not a page', {
+        status: 404,
+        headers: { 'content-type': 'text/plain;charset=utf-8' },
+      });
+    }
+    const found = routeAnswerFor(module, request.method);
+    if (found === null) return methodNotAllowed(module);
+    const guardedRoute = await parsed.enter(() =>
+      runGuards(guards[match.pattern] ?? [], { request, params: match.params }),
+    );
+    if (guardedRoute !== null) return guardedRoute;
+    return parsed.enter(() =>
+      runRoute(found, { request, params: parsed.params }),
+    );
+  }
+
+  if (!METHODS.includes(request.method)) {
+    return new Response('method not allowed', {
+      status: 405,
+      headers: { allow: METHODS.join(', ') },
+    });
+  }
+  const isAction = request.method === 'POST';
+  const addressed = request.headers.get(ACTION_ID_HEADER) !== null;
+  if (isAction && !sameOrigin(request, url)) {
+    return new Response('cross-origin action', { status: 403 });
+  }
 
   // The guards along the pattern, before anything else answers — the action
   // a POST carries included. A URL nothing answers is still below the root,

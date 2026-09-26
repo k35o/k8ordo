@@ -5,7 +5,9 @@
 > installing this package means request-time data does not exist as an API, and
 > a `'use server'` module, which the RSC pipeline still compiles, is refused by
 > name, as is a `guard.ts`. `src/routes/` is the pathname space
-> (page/layout/not-found/error/redirect, `[param]`, `(group)`, `_private`), a
+> (page/layout/not-found/error/redirect/route, `[param]`, `(group)`,
+> `_private`), a `route.ts` is written as the file its `GET` answers at its
+> pathname (`feed.xml/route.ts` → `feed.xml`; any other method is refused), a
 > page or layout may `export const paramsSchema` (any Standard Schema,
 > synchronous) to type its parameters — a refused value makes the pattern not
 > answer, so the walk goes on to `not-found.tsx` — a supplied pathname whose

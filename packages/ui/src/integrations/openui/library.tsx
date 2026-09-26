@@ -138,6 +138,9 @@ const renderers = {
     ui.renderBreadcrumb(props),
   Table: ({ props }: ComponentRenderProps<sc.TableProps>) =>
     ui.renderTable(props),
+  DataTable: ({ props }: ComponentRenderProps<sc.DataTableProps>) => (
+    <ui.DataTableWidget props={props} />
+  ),
   SideNav: ({ props }: ComponentRenderProps<sc.SideNavProps>) =>
     ui.renderSideNav(props),
 

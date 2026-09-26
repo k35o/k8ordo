@@ -17,6 +17,7 @@ import {
   CloseIcon,
   Code,
   CopyButton,
+  DataTable,
   Dialog,
   DropdownMenu,
   EmptyState,
@@ -318,6 +319,30 @@ export const componentPreviews: Record<string, ReactNode> = {
         </Table.Row>
       </Table.Body>
     </Table.Root>
+  ),
+  DataTable: (
+    <div className="w-full">
+      <DataTable
+        columns={[
+          {
+            id: 'name',
+            header: 'Name',
+            cell: (row: { id: string; name: string }) => row.name,
+            sortable: true,
+          },
+        ]}
+        getRowId={(row) => row.id}
+        label="DataTable"
+        onSelectedIdsChange={() => undefined}
+        onSortChange={() => undefined}
+        rows={[
+          { id: '1', name: 'Aoki' },
+          { id: '2', name: 'Inoue' },
+        ]}
+        selectedIds={['1']}
+        sort={{ columnId: 'name', direction: 'ascending' }}
+      />
+    </div>
   ),
   Heading: <Heading level="h2">Section Title</Heading>,
   Prose: (

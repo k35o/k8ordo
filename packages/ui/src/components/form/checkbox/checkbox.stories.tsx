@@ -186,3 +186,32 @@ export const Invalid: Story = {
     ).toHaveAttribute('aria-invalid', 'true');
   },
 };
+
+// 全選択の途中のように、一部だけ選ばれている状態を示す。DOM の
+// indeterminate に写るので、読み上げでも「一部選択」になる
+export const Indeterminate: Story = {
+  render: () => (
+    <Checkbox
+      checked={false}
+      indeterminate
+      label="すべて選択"
+      onChange={() => undefined}
+    />
+  ),
+  play: async ({ canvas }) => {
+    await expect(
+      canvas.getByRole('checkbox', { name: 'すべて選択' }),
+    ).toBePartiallyChecked();
+  },
+};
+
+// 表のセルのように文字を並べられない場所では、名前を読み上げだけに渡す
+export const LabelHidden: Story = {
+  render: () => <Checkbox label="行を選択" labelHidden />,
+  play: async ({ canvas }) => {
+    await expect(
+      canvas.getByRole('checkbox', { name: '行を選択' }),
+    ).toBeInTheDocument();
+    await expect(canvas.getByText('行を選択')).toHaveClass('sr-only');
+  },
+};
