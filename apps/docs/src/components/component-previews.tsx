@@ -13,6 +13,7 @@ import {
   Card,
   Carousel,
   Checkbox,
+  ColorPicker,
   CheckboxCard,
   CloseIcon,
   Code,
@@ -368,6 +369,11 @@ export const componentPreviews: Record<string, ReactNode> = {
       >
         <ListBox.Trigger />
       </ListBox.Root>
+    </div>
+  ),
+  ColorPicker: (
+    <div className="w-56">
+      <ColorPicker aria-label="Accent color" defaultValue="#0d9488" />
     </div>
   ),
   Separator: (

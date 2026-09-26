@@ -81,6 +81,11 @@ export const componentCategories: NavCategory[] = [
         description: m.components.calendar.description,
       },
       {
+        name: 'ColorPicker',
+        path: '/:locale/ui/components/color-picker',
+        description: m.components.colorPicker.description,
+      },
+      {
         name: 'Select',
         path: '/:locale/ui/components/select',
         description: m.components.select.description,
