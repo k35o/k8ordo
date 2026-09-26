@@ -23,6 +23,9 @@ export const ja: Messages = {
   autocompleteClear: 'すべて削除',
   autocompleteEmpty: '該当なし',
 
+  comboboxToggle: '候補を開く',
+  comboboxEmpty: '該当なし',
+  comboboxFailed: '候補を読み込めませんでした',
   fileFieldRemove: 'ファイルを削除',
   fileFieldTrigger: 'ファイルを選択',
   fileFieldDrop: 'ここにファイルをドロップ',

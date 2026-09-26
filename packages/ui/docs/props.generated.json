@@ -1089,6 +1089,71 @@
       "omitted": []
     },
     {
+      "name": "Combobox",
+      "props": [
+        {
+          "name": "defaultValue",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "invalid",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "types": ["(value: string) => void"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "options",
+          "types": ["readonly Option[]"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "ref",
+          "types": ["Ref<HTMLInputElement>"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "search",
+          "types": ["ComboboxSearch"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "type",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "value",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": "InputHTMLAttributes<HTMLInputElement>",
+      "omitted": [
+        "role",
+        "className",
+        "style",
+        "children",
+        "autoComplete",
+        "aria-autocomplete",
+        "aria-controls",
+        "aria-expanded",
+        "aria-activedescendant"
+      ]
+    },
+    {
       "name": "Conversation.Messages",
       "props": [
         {

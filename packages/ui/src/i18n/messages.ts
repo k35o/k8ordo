@@ -33,6 +33,13 @@ export type Messages = {
   /** 絞り込み結果が空のときの表示 */
   autocompleteEmpty: string;
 
+  /** Combobox の候補を開くボタン */
+  comboboxToggle: string;
+  /** Combobox の候補が見つからなかったとき */
+  comboboxEmpty: string;
+  /** Combobox の search が失敗したとき */
+  comboboxFailed: string;
+
   fileFieldRemove: string;
   fileFieldTrigger: string;
   /** FileField.Dropzone の既定の案内 */

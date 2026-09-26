@@ -28,6 +28,7 @@ import { Calendar } from '../../components/form/calendar';
 import { Checkbox } from '../../components/form/checkbox';
 import { CheckboxCard } from '../../components/form/checkbox-card';
 import { CheckboxGroup } from '../../components/form/checkbox-group';
+import { Combobox } from '../../components/form/combobox';
 import { DateField } from '../../components/form/date-field';
 import { DatePicker } from '../../components/form/date-picker';
 import { FileField } from '../../components/form/file-field';
@@ -119,6 +120,7 @@ import type {
   AlertProps,
   AnchorProps,
   AutocompleteProps,
+  ComboboxProps,
   AvatarProps,
   BadgeProps,
   BreadcrumbProps,
@@ -1251,6 +1253,36 @@ export function renderAutocomplete(
   onChange: (next: string[]) => void,
 ): ReactNode {
   return <AutocompleteView onChange={onChange} props={props} value={value} />;
+}
+
+const ComboboxView: FC<{
+  props: ComboboxProps;
+  value: string;
+  onChange: (next: string) => void;
+}> = ({ props, value, onChange }) => (
+  <LabeledField label={props.label}>
+    {(labelId) => (
+      <Combobox
+        aria-labelledby={labelId}
+        disabled={u(props.disabled)}
+        invalid={u(props.invalid)}
+        name={props.name}
+        onChange={onChange}
+        options={props.options}
+        placeholder={u(props.placeholder)}
+        required={u(props.required)}
+        value={value}
+      />
+    )}
+  </LabeledField>
+);
+
+export function renderCombobox(
+  props: ComboboxProps,
+  value: string,
+  onChange: (next: string) => void,
+): ReactNode {
+  return <ComboboxView onChange={onChange} props={props} value={value} />;
 }
 
 export const FileFieldWidget: FC<{ props: FileFieldProps }> = ({ props }) => {

@@ -11,7 +11,7 @@ import * as m from '../../../../messages';
 const MESSAGE_USAGE = {
   close: 'Alert / Dialog / Drawer / Response',
   required: 'FormControl',
-  loading: 'Spinner / Progress',
+  loading: 'Spinner / Progress / Combobox',
   avatar: 'Avatar',
   color: 'Code',
   alertSuccess: 'Alert',
@@ -26,6 +26,9 @@ const MESSAGE_USAGE = {
   autocompleteRemoveTag: 'Autocomplete',
   autocompleteClear: 'Autocomplete',
   autocompleteEmpty: 'Autocomplete',
+  comboboxToggle: 'Combobox',
+  comboboxEmpty: 'Combobox',
+  comboboxFailed: 'Combobox',
   fileFieldRemove: 'FileField',
   fileFieldTrigger: 'FileField.Dropzone / FileField（生成 UI）',
   fileFieldDrop: 'FileField.Dropzone',

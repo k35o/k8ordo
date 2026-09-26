@@ -263,6 +263,11 @@ export const catalog = defineCatalog(schema, {
       props: s.checkboxGroupProps,
       description: 'Group of checkboxes.',
     },
+    Combobox: {
+      props: s.comboboxProps,
+      description:
+        'Text field with a visible label that filters a list of options as you type, for picking one. Prefer it to ListBox when there are many options. defaultValue can be bound to state with $bindState.',
+    },
     Autocomplete: {
       props: s.autocompleteProps,
       description: 'Tag-style autocomplete for multiple choices.',

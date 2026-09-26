@@ -387,10 +387,37 @@ export const radioCard = {
   }),
 };
 
+export const combobox = {
+  description: message({
+    ja: '候補から 1 つを選ぶ入力欄。打った文字で絞り込むか、サーバーに問い合わせて探す',
+    en: 'A field for picking one option: typing filters the list, or searches a server.',
+  }),
+  usageDescription: message({
+    ja: '打つと一覧が開き、クリックか `Enter` で選ぶまで値は変わりません。打ちかけで離れると選んだ候補の表示名に戻り、空にして離れると選択を外します。`↓` / `↑` で一覧を開いて移り（`Alt+↓` は開くだけ）、`Escape` で閉じ、もう一度で打った文字を戻します。複数を選ぶなら `Autocomplete` を使います。',
+    en: 'Typing opens the list, and the value changes only when an option is picked with a click or `Enter`. Leaving half-typed text puts the chosen label back; leaving the field empty clears the choice. `↓` / `↑` open the list and move through it (`Alt+↓` only opens it), `Escape` closes it and, pressed again, drops what was typed. To pick several, use `Autocomplete`.',
+  }),
+  asyncTitle: message({
+    ja: 'サーバーに問い合わせる',
+    en: 'Searching a server',
+  }),
+  asyncDescription: message({
+    ja: '`search` を渡すと、打つたびに呼んで候補を受け取ります。打ち直すと前の呼び出しの `signal` が打ち切られるので、`fetch` に渡してください。探している間は一覧が busy になり、失敗や 0 件は一覧と読み上げで知らせます。`options` は打つ前に見せる候補になります。',
+    en: 'With `search`, each keystroke calls it for the options. Typing again aborts the previous call’s `signal`, so pass it on to `fetch`. While a search runs the list is busy, and a failure or an empty result is shown and announced. `options` becomes what is shown before anything is typed.',
+  }),
+  formTitle: message({
+    ja: '@k8ordo/form と使う',
+    en: 'With @k8ordo/form',
+  }),
+  formDescription: message({
+    ja: '`z.enum()` から導いた `input` をそのまま spread できます。選んだ値は見えない `<select>` で送られるので、`required`・ルール・reset・送信に失敗したときのフォーカスの移動がそのまま効きます。',
+    en: 'Spread the `input` derived from `z.enum()` as is. The choice submits through a hidden `<select>`, so `required`, rules, reset, and moving focus after a failed submission all work on it.',
+  }),
+};
+
 export const autocomplete = {
   description: message({
-    ja: '入力補完付きの選択フィールド',
-    en: 'A selection component with autocomplete.',
+    ja: '決まった候補から複数を選ぶ入力欄。選んだものはタグで並ぶ',
+    en: 'A field for picking several options from a fixed list, shown as tags.',
   }),
   disabledTitle: message({
     ja: '無効',

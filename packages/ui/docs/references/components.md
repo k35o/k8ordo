@@ -931,7 +931,9 @@ goes back to it. With `required`, put a placeholder option whose `value` is
 
 ### Autocomplete
 
-A multi-select autocomplete. `value` and `onChange` are `string[]`.
+A multi-select autocomplete over a fixed list of options, shown as removable
+tags. `value` and `onChange` are `string[]`. To pick one option, or to search a
+list that lives on a server, use `Combobox`.
 
 With a `name`, the selection is submitted through a visually hidden
 `<select multiple>`: one entry per selected value, and `required` means at
@@ -963,6 +965,61 @@ Props:
 - `ref`: `Ref<HTMLInputElement>`
 - `value`: `string[]`
 - Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `type` / `role` / `className` / `style` / `children` / `autoComplete` / `aria-autocomplete` / `aria-controls` / `aria-expanded` / `aria-activedescendant`.
+
+### Combobox
+
+A text field with a list of options, for picking one (the WAI-ARIA combobox
+with list autocomplete and manual selection). `value` and `onChange` are the
+chosen option's `value`, `''` when nothing is chosen. To pick several from a
+fixed list, use `Autocomplete`.
+
+Typing opens the list; nothing is chosen until an option is picked with a click
+or `Enter`, so leaving half-typed text puts the chosen option's label back, and
+leaving the field empty clears the choice. `ArrowDown` / `ArrowUp` open the list
+and move through it (`Alt+ArrowDown` opens it without entering it), `Escape`
+closes it and, pressed again, drops what was typed. Keys pressed while an IME is
+composing belong to the IME.
+
+Without `search`, typing filters `options` by label. With `search`, typing
+calls it for the options instead — each call gets a `signal` that aborts when
+the text changes again, so pass it to `fetch` — and `options` becomes the list
+shown before anything is typed and where the current value's label is looked
+up. While a search runs, the list is marked busy; a failed one says so with
+`comboboxFailed`, an empty result with `comboboxEmpty`.
+
+With a `name`, the choice is submitted through a visually hidden `<select>`, the
+same way `Autocomplete` submits, so `required`, a form library's rules, reset,
+and moving focus to the field after a failure all work on it.
+
+```tsx
+import { Combobox } from '@k8ordo/ui';
+
+<Combobox aria-label="Prefecture" name="prefecture" options={prefectures} />;
+
+// Options from a server
+<Combobox
+  aria-label="City"
+  name="city"
+  search={async (query, { signal }) => {
+    const response = await fetch(`/api/cities?q=${encodeURIComponent(query)}`, {
+      signal,
+    });
+    return response.json();
+  }}
+/>;
+```
+
+Props:
+
+- `defaultValue`: `string`
+- `invalid`: `boolean` (default: `false`)
+- `onChange`: `(value: string) => void`
+- `options`: `readonly Option[]`
+- `ref`: `Ref<HTMLInputElement>`
+- `search`: `ComboboxSearch`
+- `type`: `string`
+- `value`: `string`
+- Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `role` / `className` / `style` / `children` / `autoComplete` / `aria-autocomplete` / `aria-controls` / `aria-expanded` / `aria-activedescendant`.
 
 ### Checkbox
 
@@ -2332,6 +2389,7 @@ Every key in the `Messages` type. All values are `string`.
 | Toast         | `toastRegion`                                                                                                                                       |
 | CopyButton    | `copy`, `copied`, `copyFailed`                                                                                                                      |
 | Autocomplete  | `autocompletePlaceholder`, `autocompleteRemoveTag`, `autocompleteClear`, `autocompleteEmpty`                                                        |
+| Combobox      | `comboboxToggle`, `comboboxEmpty`, `comboboxFailed`, and the common `loading` while searching                                                       |
 | FileField     | `fileFieldRemove`, `fileFieldTrigger`, `fileFieldDrop`                                                                                              |
 | NumberField   | `numberFieldIncrement`, `numberFieldDecrement`, `numberFieldRangeUnderflow` (`{min}` is replaced), `numberFieldRangeOverflow` (`{max}` is replaced) |
 | RangeSlider   | `rangeSliderStart`, `rangeSliderEnd`                                                                                                                |

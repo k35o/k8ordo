@@ -213,6 +213,11 @@ export const buildComponentLibrary = <C>(
     'Group of checkboxes, bound to form state by name.',
     s.checkboxGroupProps,
   );
+  const Combobox = def(
+    'Combobox',
+    'Text field with a visible label that filters options as you type, for picking one, bound to form state by name. Prefer it to ListBox when there are many options.',
+    s.comboboxProps,
+  );
   const Autocomplete = def(
     'Autocomplete',
     'Tag-style autocomplete for multiple choices.',
@@ -275,6 +280,7 @@ export const buildComponentLibrary = <C>(
     Toast.ref,
     ListBox.ref,
     CheckboxGroup.ref,
+    Combobox.ref,
     Autocomplete.ref,
     FileField.ref,
     FormControl.ref,
@@ -441,6 +447,7 @@ export const buildComponentLibrary = <C>(
       Pagination,
       ListBox,
       CheckboxGroup,
+      Combobox,
       Autocomplete,
       FileField,
       FormControl,
