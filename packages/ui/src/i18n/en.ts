@@ -61,6 +61,7 @@ export const en: Messages = {
   carouselSlide: 'Slide',
   carouselPrevious: 'Previous slide',
   carouselNext: 'Next slide',
+  tableOfContents: 'Contents',
 
   chat: 'Chat',
   scrollToLatest: 'Scroll to latest message',

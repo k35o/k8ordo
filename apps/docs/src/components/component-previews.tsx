@@ -39,6 +39,7 @@ import {
   RadioCard,
   Select,
   Separator,
+  SideNav,
   Skeleton,
   Slider,
   SparklesIcon,
@@ -46,6 +47,7 @@ import {
   Switch,
   Table,
   TableIcon,
+  TableOfContents,
   Tabs,
   TextField,
   Textarea,
@@ -140,6 +142,28 @@ export const componentPreviews: Record<string, ReactNode> = {
     </Breadcrumb.List>
   ),
   Pagination: <PaginationPreview />,
+  SideNav: (
+    <div className="w-40">
+      <SideNav.Root label="SideNav">
+        <SideNav.Group title="Guide">
+          <SideNav.Link current href="/">
+            Get started
+          </SideNav.Link>
+          <SideNav.Link href="/">Theming</SideNav.Link>
+        </SideNav.Group>
+      </SideNav.Root>
+    </div>
+  ),
+  TableOfContents: (
+    <div className="w-40">
+      <TableOfContents
+        items={[
+          { id: 'preview-install', label: 'Install' },
+          { id: 'preview-usage', label: 'Usage' },
+        ]}
+      />
+    </div>
+  ),
   TextField: <TextField placeholder="Enter your name" />,
   Textarea: <Textarea placeholder="Enter text" rows={3} />,
   NumberField: <NumberField placeholder="0" />,

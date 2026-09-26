@@ -140,6 +140,8 @@ const renderers = {
   DataTable: ({ props }: ComponentRenderProps<sc.DataTableProps>) => (
     <ui.DataTableWidget props={props} />
   ),
+  SideNav: ({ props }: ComponentRenderProps<sc.SideNavProps>) =>
+    ui.renderSideNav(props),
 
   TextField: TextFieldView,
   Textarea: TextareaView,

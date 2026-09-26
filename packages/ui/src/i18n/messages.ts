@@ -86,6 +86,8 @@ export type Messages = {
   carouselSlide: string;
   carouselPrevious: string;
   carouselNext: string;
+  /** TableOfContents の見出し（nav の名前にもなる） */
+  tableOfContents: string;
 
   /** Conversation.Messages の log ランドマーク名 */
   chat: string;

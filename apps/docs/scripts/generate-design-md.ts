@@ -476,6 +476,8 @@ import { UIProvider, Button, Card } from '@k8ordo/ui';
 - **Anchor** — テキストリンク。外部リンクに自動で新規タブアイコン。\`href\`, \`openInNewTab?\`, \`renderAnchor?\`
 - **Breadcrumb**（compound: \`List\` / \`Item\` / \`Link\`(\`current?\`) / \`Separator\`）
 - **Pagination** — ページネーション
+- **SideNav**（compound: \`Root\`(\`label\`) / \`Group\`(\`title\`) / \`Link\`(\`href\`, \`current?\`, \`renderAnchor?\`)）— 今のページを傍線で示す
+- **TableOfContents** — \`items\`（\`{ id, label, children? }\` の木）, \`label?\`。見出しの scroll-margin を読み取り位置にして今の見出しを示す
 - **Tabs**（compound: \`Root\`(\`ids\` / \`defaultSelectedId?\`) / \`List\` / \`Tab\` / \`Panel\`）
 
 ### Overlays

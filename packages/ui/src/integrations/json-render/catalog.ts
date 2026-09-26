@@ -93,6 +93,11 @@ export const catalog = defineCatalog(schema, {
       description:
         'Table the reader can sort (by the columns marked sortable) and, with selectable, pick rows from. Use it for records someone works through; use Table for data only read.',
     },
+    SideNav: {
+      props: s.sideNavProps,
+      description:
+        'Side navigation: groups of links, each group under a small title. Mark the page being shown with current: true.',
+    },
     Table: {
       props: s.tableProps,
       description:

@@ -1,48 +1,38 @@
 'use client';
 
 import { matchPath, usePathname } from '@k8ordo/router';
+import { SideNav } from '@k8ordo/ui';
 
 import type { NavCategory } from '../data/nav-types';
-import { LocaleAnchor } from './locale-anchor';
+import { href } from '../links';
 
 type Props = {
+  label: string;
   categories: NavCategory[];
   onNavigate?: () => void;
 };
 
-export function SideNavigation({ categories, onNavigate }: Props) {
+export function SideNavigation({ label, categories, onNavigate }: Props) {
   const pathname = usePathname();
 
   return (
-    <nav className="flex flex-col gap-6 overflow-y-auto py-4">
-      {categories.map((category) => (
-        <div className="flex flex-col gap-1" key={category.title()}>
-          <span className="text-fg-subtle px-3 text-xs font-bold tracking-normal">
-            {category.title()}
-          </span>
-          {/* 傍線インデックス: 親罫 border-l に -ml-px のアクティブ罫を重ねる */}
-          <ul className="border-border-mute mt-1 ml-3 flex flex-col gap-0.5 border-l">
-            {category.items.map((item) => {
-              const isActive = matchPath(item.path, pathname) !== null;
-              return (
-                <li key={item.path}>
-                  <LocaleAnchor
-                    className={`-ml-px block border-l-2 py-1.5 pr-3 pl-4 text-sm ${
-                      isActive
-                        ? 'border-primary-border bg-primary-bg-subtle text-fg-base font-medium'
-                        : 'text-fg-mute hover:border-border-emphasize hover:text-fg-base border-transparent transition-colors duration-150 ease-out'
-                    }`}
-                    onClick={onNavigate}
-                    path={item.path}
-                  >
-                    {item.name}
-                  </LocaleAnchor>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      ))}
-    </nav>
+    <div className="overflow-y-auto py-4">
+      <SideNav.Root label={label}>
+        {categories.map((category) => (
+          <SideNav.Group key={category.title()} title={category.title()}>
+            {category.items.map((item) => (
+              <SideNav.Link
+                current={matchPath(item.path, pathname) !== null}
+                href={href(item.path)}
+                key={item.path}
+                onClick={onNavigate}
+              >
+                {item.name}
+              </SideNav.Link>
+            ))}
+          </SideNav.Group>
+        ))}
+      </SideNav.Root>
+    </div>
   );
 }

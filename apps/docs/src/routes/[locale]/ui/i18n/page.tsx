@@ -51,6 +51,7 @@ const MESSAGE_USAGE = {
   dataTableSelectAll: 'DataTable',
   dataTableSelectRow: 'DataTable',
   codeBlockCopy: 'CodeBlock',
+  tableOfContents: 'TableOfContents',
   carousel: 'Carousel',
   carouselSlide: 'Carousel.Slide',
   carouselPrevious: 'Carousel',

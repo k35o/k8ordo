@@ -80,6 +80,9 @@ These exports are left out on purpose, so a model cannot place them:
 - `Prose` — it typesets the bare HTML that Markdown renders to. A spec places
   components, which keep their own look, so it would have nothing to typeset;
   lay a flow out with `Stack`.
+- `TableOfContents` — it points at the ids of the document's headings and
+  follows the scroll. The headings a spec places carry no id, so there would be
+  nothing to point at.
 
 ## Prompt language
 
