@@ -309,6 +309,41 @@ describe('the built request handler', () => {
   });
 });
 
+describe('a page that exports search', () => {
+  it('receives the search, read through its url schema', async () => {
+    const html = await (
+      await handler(new Request(`${ORIGIN}/products?q=second`))
+    ).text();
+    expect(html).toContain('second product');
+    expect(html).not.toContain('first product');
+    expect(html).toContain('value="second"');
+  });
+
+  it('receives the schema’s defaults when the URL has no search', async () => {
+    const html = await (
+      await handler(new Request(`${ORIGIN}/products`))
+    ).text();
+    expect(html).toContain('first product');
+    expect(html).toContain('second product');
+  });
+
+  it('is rendered for the search its payload is asked with, and says which', async () => {
+    const payload = await (
+      await handler(new Request(`${ORIGIN}/products/index.rsc?q=first`))
+    ).text();
+    expect(payload).toContain('first product');
+    expect(payload).not.toContain('second product');
+    expect(payload).toContain('"search":"?q=first"');
+  });
+
+  it('leaves a page that does not export search without one', async () => {
+    const payload = await (
+      await handler(new Request(`${ORIGIN}/index.rsc?q=anything`))
+    ).text();
+    expect(payload).not.toContain('"search":"?q=anything"');
+  });
+});
+
 describe('route.ts', () => {
   it('answers with what its GET returns, reading the request it was handed', async () => {
     const response = await handler(new Request(`${ORIGIN}/feed.xml`));
@@ -450,6 +485,43 @@ describe('guard.ts', () => {
       expect(response.status).toBe(401);
     },
   );
+});
+
+// ガードが書いたポリシーが名指す nonce
+const nonceNamedBy = (response: Response): string | undefined =>
+  /'nonce-([^']+)'/u.exec(
+    response.headers.get('content-security-policy') ?? '',
+  )?.[1];
+
+describe('a Content-Security-Policy with a nonce', () => {
+  it.each([
+    ['a page', '/'],
+    ['a page whose content streams in', '/products'],
+    ['the not-found page', '/nowhere'],
+  ])(
+    'signs every script of %s with the nonce its guard named',
+    async (_what, pathname) => {
+      const response = await handler(new Request(`${ORIGIN}${pathname}`));
+      const nonce = nonceNamedBy(response);
+      expect(nonce).toMatch(/^[A-Za-z0-9+/]{22}==$/u);
+      const scripts = [
+        ...(await response.text()).matchAll(/<script\b[^>]*>/gu),
+      ].map(([tag]) => tag);
+      // 起動のモジュール・ペイロード・color-scheme のインラインスクリプト
+      expect(scripts.length).toBeGreaterThanOrEqual(3);
+      expect(
+        scripts.filter((tag) => !tag.includes(` nonce="${String(nonce)}"`)),
+      ).toStrictEqual([]);
+    },
+  );
+
+  it('signs each answer with a nonce of its own', async () => {
+    const [first, second] = await Promise.all([
+      handler(new Request(`${ORIGIN}/`)),
+      handler(new Request(`${ORIGIN}/`)),
+    ]);
+    expect(nonceNamedBy(first)).not.toBe(nonceNamedBy(second));
+  });
 });
 
 describe('the built request handler, outside Node', () => {

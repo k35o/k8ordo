@@ -141,8 +141,8 @@ export const stateTitle = message({
 });
 
 export const stateDescription = message({
-  ja: 'search か履歴エントリの状態だけが変わった移動では、pathname は画面に出ているページのものと同じです。ルーターはハンドラを付けずに intercept し、ルートの木に触れません。何も再マウントされず、スクロール位置もフォーカスも動きません。search を更新してもページが先頭に戻らないのはこのためです。待つべき描画が無いので、その `finished`（`@k8ordo/state` の `update().finished` を含む）は移動が確定した時点で解決します。',
-  en: 'When only the search or the entry state moved, the pathname is that of the page on screen. The router intercepts with no handler and leaves the route tree alone: nothing remounts, and neither scroll nor focus is disturbed. This is why a search update never scrolls the page back to the top. With no render to wait for, its `finished` — `@k8ordo/state`’s `update().finished` included — settles as soon as the navigation commits.',
+  ja: 'search か履歴エントリの状態だけが変わった移動では、pathname は画面に出ているページのものと同じです。ルーターはハンドラを付けずに intercept し、ルートの木に触れません。何も再マウントされず、スクロール位置もフォーカスも動きません。search を更新してもページが先頭に戻らないのはこのためです。待つべき描画が無いので、その `finished`（`@k8ordo/state` の `update().finished` を含む）は移動が確定した時点で解決します。例外は、ホストがハンドラの `refresh(url)` で「画面のページは動いた部分を読む」と答えたときで、そのときはページの切り替えと同じように読み込んで差し替えます。スクロールとフォーカスはそのままで、トランジションの種類も付けません。フレームワークは `search` を export したページについてそう答えます。',
+  en: 'When only the search or the entry state moved, the pathname is that of the page on screen. The router intercepts with no handler and leaves the route tree alone: nothing remounts, and neither scroll nor focus is disturbed. This is why a search update never scrolls the page back to the top. With no render to wait for, its `finished` — `@k8ordo/state`’s `update().finished` included — settles as soon as the navigation commits. The exception is a host whose handler answers `refresh(url)` with “the page showing reads what moved”: then it loads and applies like a page change, with scroll and focus left alone and no transition types. The framework answers so for a page that exports `search`.',
 });
 
 export const stateShown = message({
@@ -330,4 +330,19 @@ export const testingRender = message({
 export const testingIntercept = message({
   ja: '注意が 1 つあります。マウントした `<Router>` が intercept しない移動（表に無い URL への移動や、ルーターが無い状態でテストランナーの URL へ戻す処理など）は、テスト自身が intercept しなければなりません。誰も intercept しない `navigation.navigate()` は文書読み込みになり、テストランナーごと別のページへ移ってしまいます。下の例は、表が何に答えるかにかかわらず後片付けが効くように、ランナーの URL へ戻す移動を自分で intercept しています。',
   en: 'One thing to know: a navigation no mounted `<Router>` intercepts — to a URL outside the table, or back to the runner’s URL when no router is there — has to be intercepted by the test itself. A `navigation.navigate()` nobody intercepts is a cross-document load that takes the test runner with it. The example below intercepts its own return to the runner’s URL, so the clean-up works whatever the table answers.',
+});
+
+export const pendingTitle = message({
+  ja: '読み込み中を見せる',
+  en: 'Showing that a page is loading',
+});
+
+export const pendingDescription = message({
+  ja: 'ページの切り替えは裏で描かれ、新しいページが来るまで前のページが画面に残ります。`usePendingPathname()` は、進行中のページの切り替えの行き先（表の書き方の pathname）で、何も進行していなければ `null` です。遷移が始まった時点で入り、新しいページが画面に出たとき、または遷移が諦められたときに消えます。状態の変更（search や entry）はページの切り替えではないので、何も入れません。ただし、ホストがその場で読み込み直す場合（search を読むフレームワークのページ）は、ほかと同じ読み込み中として入ります。',
+  en: 'A page change renders in the background, so the previous page stays on screen until the next one is ready. `usePendingPathname()` is where a page change in progress is going — a pathname in the table’s terms — or `null` when none is. It is set as the navigation starts and cleared once the new page is on screen, or when the navigation is given up; a state change (the search, the entry) is not a page change and sets nothing, unless the host loads the page again for it (a framework page that reads the search), which is a load in progress like any other.',
+});
+
+export const pendingLoading = message({
+  ja: '枝の `loading` は、その下がサスペンドしている間に出すコンポーネントです。その場所に `<Suspense>` が置かれます。すでに画面にあるものの下でのページの切り替えは、ほかの切り替えと同じく前のページを残すので、その待ちを見せるのが `usePendingPathname()` です。',
+  en: 'A branch’s `loading` is a component to show while what is below it suspends — a `<Suspense>` at that place. A page change below one already on screen keeps the previous page, as every page change does; `usePendingPathname()` is what shows that wait.',
 });

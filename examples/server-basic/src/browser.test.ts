@@ -44,6 +44,19 @@ const payloadsRequestedBy = (page: Page): string[] => {
   return payloads;
 };
 
+// 文書が読み込まれるたびに、ポリシーが拒んだものを window に集める
+const refusedBy = async (page: Page): Promise<() => Promise<string[]>> => {
+  await page.addInitScript(() => {
+    const refused: string[] = [];
+    Object.assign(window, { refused });
+    document.addEventListener('securitypolicyviolation', (event) => {
+      refused.push(`${event.effectiveDirective} ${event.blockedURI}`);
+    });
+  });
+  return () =>
+    page.evaluate(() => (window as unknown as { refused: string[] }).refused);
+};
+
 describe('the built application in a browser', () => {
   it('follows an action that redirected when JavaScript ran it', async () => {
     const page = await browser.newPage();
@@ -124,6 +137,97 @@ describe('the built application in a browser', () => {
       .getByRole('heading', { name: 'guide' })
       .waitFor({ timeout: 5000 });
     expect(payloads).toStrictEqual(['/guide/index.rsc']);
+    await page.close();
+  }, 30_000);
+
+  it('shows loading.tsx and the pending pathname while a navigation into it loads', async () => {
+    const page = await browser.newPage();
+    await page.goto(server.url);
+    await hydrated(page);
+    // 読み込み中の表示は一瞬なので、出たものを DOM の変化から拾っておく
+    await page.evaluate(() => {
+      const seen = new Set<string>();
+      Object.assign(window, { seen });
+      new MutationObserver(() => {
+        for (const element of document.querySelectorAll<HTMLElement>(
+          '[data-testid="loading"], [data-testid="pending"]',
+        )) {
+          seen.add(`${String(element.dataset.testid)}:${element.textContent}`);
+        }
+      }).observe(document.body, {
+        subtree: true,
+        childList: true,
+        characterData: true,
+      });
+    });
+
+    await page.getByRole('link', { name: 'products', exact: true }).click();
+    await page.getByRole('heading', { name: 'products' }).waitFor();
+
+    const seen = await page.evaluate(() => [
+      ...(window as unknown as { seen: Set<string> }).seen,
+    ]);
+    expect(seen).toContain('loading:loading products…');
+    expect(seen).toContain('pending: (loading /products)');
+    // 画面に出たあとは、読み込み中の表示はどちらも残らない
+    expect(await page.getByTestId('loading').count()).toBe(0);
+    expect(await page.getByTestId('pending').count()).toBe(0);
+    await page.close();
+  }, 30_000);
+
+  it('loads a page that reads the search again when a GET form moves it, in place', async () => {
+    const page = await browser.newPage();
+    await page.goto(server.url);
+    await hydrated(page);
+    await page.evaluate(() => {
+      Object.assign(window, { stayed: true });
+    });
+    await page.getByRole('link', { name: 'products', exact: true }).click();
+    await page.getByTestId('list').getByText('first product').waitFor();
+
+    await page.getByLabel('filter').fill('second');
+    await page.getByRole('button', { name: 'filter' }).click();
+
+    await page
+      .getByTestId('list')
+      .getByText('first product')
+      .waitFor({ state: 'detached' });
+    expect(new URL(page.url()).search).toBe('?q=second');
+    expect(await page.getByTestId('list').textContent()).toBe('second product');
+    // 文書の読み込みではなく、その場での取り直し
+    expect(await page.evaluate(() => 'stayed' in window)).toBe(true);
+    await page.close();
+  }, 30_000);
+
+  it('runs under the policy its guard wrote: nothing refused, through hydration and a navigation', async () => {
+    const page = await browser.newPage();
+    const refused = await refusedBy(page);
+    await page.goto(server.url);
+    await hydrated(page);
+
+    await page.getByRole('link', { name: 'products', exact: true }).click();
+    await page.getByTestId('list').getByText('first product').waitFor();
+
+    expect(await refused()).toStrictEqual([]);
+    await page.close();
+  }, 30_000);
+
+  it('is in force: an inline handler, which nothing signed, is refused', async () => {
+    const page = await browser.newPage();
+    const refused = await refusedBy(page);
+    await page.goto(server.url);
+    await hydrated(page);
+
+    await page.evaluate(() => {
+      document.body.setAttribute('onclick', 'window.injected = true');
+      document.body.click();
+    });
+
+    expect(await page.evaluate(() => 'injected' in window)).toBe(false);
+    // 違反の知らせは後のタスクで届く
+    await vi.waitFor(async () => {
+      expect(await refused()).toStrictEqual(['script-src-attr inline']);
+    });
     await page.close();
   }, 30_000);
 

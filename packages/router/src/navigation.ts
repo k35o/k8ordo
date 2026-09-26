@@ -10,8 +10,10 @@ import {
   useLayoutEffect,
   useRef,
   useState,
+  useSyncExternalStore,
 } from 'react';
 
+import { withoutBase } from './base';
 import { normalizePathname } from './paths';
 
 /**
@@ -58,6 +60,14 @@ export type NavigationHandler<T> = {
    * `<ViewTransition>` animates the swap.
    */
   apply: (value: T) => void;
+  /**
+   * Whether a navigation that keeps the pathname on screen still has to
+   * load — the page showing reads the search, and the search moved. Without
+   * one, such a navigation is a state change: nothing loads. With one, it
+   * loads and applies like a page change, but as a state change otherwise:
+   * no scroll, no focus reset, no transition types.
+   */
+  refresh?: (url: URL) => boolean;
 };
 
 /**
@@ -118,6 +128,45 @@ type Pending = {
 };
 
 /**
+ * The pathname a page change is loading, in the table's terms — `null` when
+ * none is. One per document, like the navigation it follows: there is one
+ * intercepting host, and a pending indicator anywhere reads the same answer.
+ */
+let pendingPathname: string | null = null;
+const pendingListeners = new Set<() => void>();
+
+const setPendingPathname = (value: string | null): void => {
+  if (pendingPathname === value) return;
+  pendingPathname = value;
+  for (const listener of pendingListeners) listener();
+};
+
+const subscribePending = (onChange: () => void): (() => void) => {
+  pendingListeners.add(onChange);
+  return () => {
+    pendingListeners.delete(onChange);
+  };
+};
+
+/**
+ * Where a page change in progress is going, as a pathname in the table's
+ * terms, or `null` when none is. The URL commits before the new page
+ * arrives — `usePathname` already names the destination — and the previous
+ * page stays on screen while the next one loads; this is what tells the two
+ * apart, for a link that marks itself as loading or a bar across the top. It
+ * clears when the new page is on screen, and when the navigation is given up.
+ * A state change (the search, the entry) is not a page change and sets
+ * nothing. A server render has no navigation in progress: `null`.
+ */
+export function usePendingPathname(): string | null {
+  return useSyncExternalStore(
+    subscribePending,
+    () => pendingPathname,
+    () => null,
+  );
+}
+
+/**
  * Which navigation put the tree on screen — a number that changes exactly
  * when a new tree is applied, and not when only the URL moved. It is what an
  * error boundary clears its failure on: leaving the page that failed is what
@@ -155,6 +204,7 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
   // site: each method is wrapped in an effect event, which always sees the
   // latest one without making the listener below reactive to it.
   const claim = useEffectEvent((url: URL) => handler.claim(url));
+  const refresh = useEffectEvent((url: URL) => handler.refresh?.(url) ?? false);
   const load = useEffectEvent((url: URL, signal: AbortSignal) =>
     handler.load(url, signal),
   );
@@ -179,6 +229,8 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
   // a navigation to a page that is not showing yet. Taking the shortcut then
   // would abort the load and leave the old page under the new URL.
   const shown = useRef<string | null>(null);
+  // The navigation `usePendingPathname` names: the last one to start.
+  const latest = useRef(-1);
 
   useEffect(() => {
     shown.current = normalizePathname(location.pathname);
@@ -186,26 +238,48 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
       if (!isOurs(event)) return;
       const url = new URL(event.destination.url);
       const pathname = normalizePathname(url.pathname);
-      if (pathname === shown.current) {
-        // Same place — only the search or the entry state moved. Nothing to
-        // load, nothing to remount, and no scroll or focus to disturb.
+      // Same place — only the search or the entry state moved. Nothing to
+      // remount, and no scroll or focus to disturb; nothing to load either,
+      // unless the page showing reads what moved.
+      const inPlace = pathname === shown.current;
+      if (inPlace && !refresh(url)) {
         event.intercept({ scroll: 'manual', focusReset: 'manual' });
         return;
       }
       if (!claim(url)) return;
 
       const id = count.current++;
-      const scroll = scrollPlanFor(event.navigationType, url.hash);
+      latest.current = id;
+      setPendingPathname(
+        normalizePathname(withoutBase(url.pathname) ?? url.pathname),
+      );
+      const settled = (): void => {
+        if (latest.current === id) setPendingPathname(null);
+      };
+      const scroll = inPlace
+        ? null
+        : scrollPlanFor(event.navigationType, url.hash);
       event.intercept({
+        // A load in place moves neither the viewport nor focus.
+        ...(inPlace ? { focusReset: 'manual' as const } : {}),
         // The platform would scroll "after transition" — after the handler
         // settles — but the handler settles only once the tree is on screen,
         // which is exactly when this hook scrolls itself. Doing it here keeps
         // the two from disagreeing, and keeps the behaviour where a browser
         // has not implemented the platform's half. A traversal keeps the
         // default: restoring a position is the browser's, not ours.
-        scroll: scroll === null ? 'after-transition' : 'manual',
+        scroll: scroll === null && !inPlace ? 'after-transition' : 'manual',
         handler: async () => {
-          const value = await load(url, event.signal);
+          // 失敗も中止も、名指していた遷移が終わったということ。新しい遷移が
+          // 始まっていれば、それがもう自分の行き先を名指している
+          event.signal.addEventListener('abort', settled, { once: true });
+          let value: T;
+          try {
+            value = await load(url, event.signal);
+          } catch (error) {
+            settled();
+            throw error;
+          }
           // A load that ignores the signal can come back after a second
           // navigation has already taken over. Applying it then would put the
           // page the visitor left back on screen, and the listener below would
@@ -215,7 +289,9 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
             pending.current.set(id, {
               resolve,
               scroll,
-              types: transitionTypesFor(event.navigationType),
+              // 同じページの読み直しはページの切り替えではない。
+              // ViewTransition が切り替えとして動かさないよう、型を付けない
+              types: inPlace ? [] : transitionTypesFor(event.navigationType),
             });
             event.signal.addEventListener(
               'abort',
@@ -255,6 +331,7 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
     if (entry === undefined) return;
     pending.current.delete(onScreen);
     if (entry.scroll !== null) applyScroll(entry.scroll);
+    if (latest.current === onScreen) setPendingPathname(null);
     entry.resolve();
   }, [onScreen]);
 

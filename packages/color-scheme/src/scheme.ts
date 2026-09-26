@@ -54,3 +54,19 @@ export const resolve = (
  */
 export const scriptFor = (defaultPreference: ColorSchemePreference): string =>
   `(()=>{const s=${colorSchemeState.inlineRead()};const v=s&&s.preference;const p=v==="dark"||v==="light"?v:${JSON.stringify(defaultPreference)};if(p==="dark"||(p!=="light"&&matchMedia(${JSON.stringify(DARK_QUERY)}).matches))document.documentElement.classList.add(${JSON.stringify(DARK_CLASS)})})()`;
+
+/**
+ * The inline script's hash as a CSP source, `'sha256-…'`, for a policy that
+ * allows it by what it is rather than by a nonce — `@k8ordo/static`'s `csp`
+ * option, or a header that names no nonce. Give it the default the provider
+ * is given: the script carries it.
+ */
+export const colorSchemeScriptHash = async (
+  defaultPreference: ColorSchemePreference = 'system',
+): Promise<string> => {
+  const digest = await crypto.subtle.digest(
+    'SHA-256',
+    new TextEncoder().encode(scriptFor(defaultPreference)),
+  );
+  return `'sha256-${btoa(String.fromCodePoint(...new Uint8Array(digest)))}'`;
+};

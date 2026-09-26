@@ -129,8 +129,8 @@ export const searchTitle = message({
 });
 
 export const searchDescription = message({
-  ja: 'ページは search を見ません。フレームワークが持つのは pathname で、`?` から後ろは `@k8ordo/state` のものです。`useAppState` はブラウザで search を読むので、サーバーでの描画は url スロットの既定値を描き、hydration で実際の URL に切り替わります。search だけが変わってもページは変わらず、何も再マウントされず、スクロール位置もそのままです。',
-  en: "A page never sees the search. The pathname is the framework's, and everything after the `?` is `@k8ordo/state`'s: `useAppState` reads the search in the browser, so a server render shows the url slot's defaults and the live URL takes over on hydration. Changing only the search does not change the page — nothing remounts, and the scroll position stays where it was.",
+  ja: 'ページは search を見ません（`@k8ordo/server` で読むものを宣言したページは例外です）。フレームワークが持つのは pathname で、`?` から後ろは `@k8ordo/state` のものです。`useAppState` はブラウザで search を読むので、サーバーでの描画は url スロットの既定値を描き、hydration で実際の URL に切り替わります。search だけが変わってもページは変わらず、何も再マウントされず、スクロール位置もそのままです。',
+  en: "A page never sees the search (under `@k8ordo/server`, one that declares what it reads is the exception). The pathname is the framework's, and everything after the `?` is `@k8ordo/state`'s: `useAppState` reads the search in the browser, so a server render shows the url slot's defaults and the live URL takes over on hydration. Changing only the search does not change the page — nothing remounts, and the scroll position stays where it was.",
 });
 
 export const searchRegister = message({

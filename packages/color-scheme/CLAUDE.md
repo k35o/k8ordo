@@ -48,6 +48,13 @@ systemDark)` is the rule; the provider reads it after hydration and
   server's guesses and must not put them on a document the script already
   put right, so the class effect waits for the render that reads the store.
   Do not add a cookie or a header to guess earlier.
+- **The script is allowed by nonce or by hash, never by being special.**
+  `nonce` goes on the script as given; `colorSchemeScriptHash` hashes
+  `scriptFor(defaultPreference)`, which is exactly what React writes between
+  the tags — the browser test renders the provider on the server into a
+  document under a `<meta>` policy and checks the hash is what lets it run.
+  Anything that changes the script's text changes its hash, which is why the
+  hash is computed, never written down.
 - **The store is `@k8ordo/state`'s.** The definition names the state key
   (`color-scheme`); the localStorage key it derives
   (`k8ordo-state:color-scheme`, `storageKey`) and `inlineRead()` are read
@@ -58,7 +65,7 @@ systemDark)` is the rule; the provider reads it after hydration and
 
 ```
 src/
-  scheme.ts       colorSchemeState, resolve, scriptFor
+  scheme.ts       colorSchemeState, resolve, scriptFor, colorSchemeScriptHash
   provider.tsx    ColorSchemeProvider + useColorScheme ('use client')
   index.ts
 ```

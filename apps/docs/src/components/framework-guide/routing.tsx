@@ -84,7 +84,7 @@ const SHADOW_ERROR = `routes/ is not a valid pathname space:
 
 const REFUSED = `routes/ is not a valid pathname space:
   routes/[123]: "[123]" is not a valid param directory — use [name] with a letter or underscore first
-  routes/products/helper.ts: routes/ holds only page.tsx, layout.tsx, not-found.tsx, error.tsx, redirect.ts, guard.ts, route.ts — move "helper.ts" under a _-prefixed directory`;
+  routes/products/helper.ts: routes/ holds only page.tsx, layout.tsx, not-found.tsx, error.tsx, redirect.ts, guard.ts, route.ts, loading.tsx — move "helper.ts" under a _-prefixed directory`;
 
 type Refusal = { contains: string | (() => string); error: string };
 
@@ -92,7 +92,7 @@ const REFUSALS: readonly Refusal[] = [
   {
     contains: '`products/helper.ts`',
     error:
-      'routes/ holds only page.tsx, layout.tsx, not-found.tsx, error.tsx, redirect.ts, guard.ts, route.ts — move "helper.ts" under a _-prefixed directory',
+      'routes/ holds only page.tsx, layout.tsx, not-found.tsx, error.tsx, redirect.ts, guard.ts, route.ts, loading.tsx — move "helper.ts" under a _-prefixed directory',
   },
   {
     contains: '`[123]/page.tsx`',
@@ -242,6 +242,11 @@ const PREFETCH = `<nav data-k8ordo-prefetch={false}>
     home
   </a>
 </nav>`;
+
+const LOADING = `// src/routes/products/loading.tsx
+export default function ProductsLoading() {
+  return <p>loading products…</p>;
+}`;
 
 const ROUTE = `// src/routes/feed.xml/route.ts
 import type { RouteContext } from '@k8ordo/router';
@@ -437,6 +442,17 @@ export function RoutingGuide({ mode }: { mode: Mode }) {
           </Row>
           <Row>
             <Cell nowrap>
+              <Code>loading.tsx</Code>
+            </Cell>
+            <Cell>
+              <Rich>{t.filesTable.loading()}</Rich>
+            </Cell>
+            <Cell>
+              <Rich>{t.filesTable.noProps()}</Rich>
+            </Cell>
+          </Row>
+          <Row>
+            <Cell nowrap>
               <Code>redirect.ts</Code>
             </Cell>
             <Cell>
@@ -608,6 +624,22 @@ export function RoutingGuide({ mode }: { mode: Mode }) {
             </Bullet>
           </Bullets>
         )}
+      </DocSection>
+
+      <DocSection description={t.loadingDescription} title={t.loadingTitle}>
+        <CodeBlock code={LOADING} lang="tsx" />
+        <Paragraph text={t.loadingWhen}>
+          <LocaleAnchor path="/:locale/router/navigation">
+            {m.router.navNavigation()}
+          </LocaleAnchor>
+        </Paragraph>
+        <Paragraph
+          text={
+            mode === 'static'
+              ? m.staticRouting.loadingStatic
+              : m.serverRouting.loadingServer
+          }
+        />
       </DocSection>
 
       <DocSection description={t.routeDescription} title={t.routeTitle}>

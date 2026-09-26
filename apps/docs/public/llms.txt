@@ -160,10 +160,12 @@ These docs are served from <https://ordo.k8o.me>.
 - `@k8ordo/state` — `definePageState(key, { url?, entry? })` returns a pure
   definition usable from server and client: `parseUrl(searchParams)` reads
   the url slot typed with defaults applied and invalid values salvaged
-  (wherever the router hands a page its search — under `@k8ordo/static` /
-  `@k8ordo/server` a page receives `params` and `pathname` (plus a
-  headers-and-cookies `request` under `@k8ordo/server`) but never the search,
-  and the url slot is read in the browser);
+  (wherever the router hands a page its search — under `@k8ordo/server` a
+  page that exports `search = listState.url` receives the slot parsed as
+  `search` and is loaded again when the search moves; any other framework
+  page never sees the search, and the url slot is read in the browser);
+  `urlReader(schema)` is that reading for a url schema alone, the codec
+  built once (what the framework's generated table calls);
   `href(path, values?)` builds a canonical link keeping the path literal in
   the type — the path written from the app's root, the link carrying Vite's
   `base` (`import.meta.env.BASE_URL`) in front; `search(values?)` returns the
@@ -276,7 +278,10 @@ These docs are served from <https://ordo.k8o.me>.
   URL, not a table path) and `usePathname` / `<Router>` take it off, a URL
   outside it being left to the browser — `withBase(pathname, base?)` /
   `withoutBase(pathname, base?)` (`null` outside the base) are the two steps;
-  `bindParams(() => ({ locale }))` returns `{ href, navigateTo }` with those
+  `usePendingPathname()` is where a page change in progress is going (`null`
+  when none is), for a pending indicator; a branch's `loading` component
+  shows while what is below it suspends (a `<Suspense>` inside its `error`
+  boundary); `bindParams(() => ({ locale }))` returns `{ href, navigateTo }` with those
   params supplied by the source at each call (still overridable), for a
   segment every link shares — a pattern that names a param still takes
   `options` third, after an `undefined` params slot if the source supplies
@@ -299,7 +304,10 @@ These docs are served from <https://ordo.k8o.me>.
   `{ generation }` and is the
   navigation primitive `<Router>` is built on, and the seam the framework
   uses to render server-produced trees instead; its host renders what
-  `apply` set through `useDeferredValue`.
+  `apply` set through `useDeferredValue`; its optional `refresh(url)` says
+  whether a same-pathname navigation still has to load (the page showing reads
+  the search), which then loads in place — no scroll, focus reset or
+  transition types.
   Exported types, by group — the table: `Routes` (`{ kind, record, match }`),
   `RoutesRecord`, `RouteNode`, `RouteComponent`, `Match`, `ErrorComponent`,
   `ErrorProps`; patterns: `PatternOf`, `NavigablePatternOf`, `NavigablePath`,
@@ -321,9 +329,10 @@ These docs are served from <https://ordo.k8o.me>.
 > output a directory a static host can serve. The mode is the dependency —
 > installing this package means request-time data does not exist as an API, and
 > a `'use server'` module, which the RSC pipeline still compiles, is refused by
-> name, as is a `guard.ts`. `src/routes/` is the pathname space
-> (page/layout/not-found/error/redirect/route, `[param]`, `(group)`,
-> `_private`), a `route.ts` is written as the file its `GET` answers at its
+> name, as are a `guard.ts` and a page that exports `search`. `src/routes/` is the pathname space
+> (page/layout/not-found/error/loading/redirect/route, `[param]`, `(group)`,
+> `_private`), a `loading.tsx` shows while what is below it suspends in a
+> client navigation (a written file is whole), a `route.ts` is written as the file its `GET` answers at its
 > pathname (`feed.xml/route.ts` → `feed.xml`; any other method is refused), a
 > page or layout may `export const paramsSchema` (any Standard Schema,
 > synchronous) to type its parameters — a refused value makes the pattern not
@@ -347,7 +356,8 @@ These docs are served from <https://ordo.k8o.me>.
 
 - [Design Guide](https://ordo.k8o.me/static/docs/GUIDE.md): setup, the `routes/` grammar and what it refuses,
   execution boundaries, the build output, supplying pathnames for
-  parameterised routes, and what static mode cannot do.
+  parameterised routes, a Content-Security-Policy by hash, and what static
+  mode cannot do.
 
 ## Entry point
 
@@ -357,7 +367,14 @@ These docs are served from <https://ordo.k8o.me>.
   `src/routes`); `options.paths` supplies concrete pathnames for routes with
   parameters, and a parameterised route left uncovered fails the build;
   `options.site` (the origin) makes the build also write `sitemap.xml`;
-  `StaticOptions` is the type of those options. A
+  `options.csp` (directives → sources, `ContentSecurityPolicy`) is the
+  Content-Security-Policy written into each page's `<meta>`, first in
+  `<head>`, with the hashes of the framework's own inline scripts on that
+  page added to `script-src` — the framework decides no policy, and an
+  inline script of the application's is allowed by its hash there
+  (`colorSchemeScriptHash()`); no nonce is left in a file, and a policy with
+  `'strict-dynamic'`, `frame-ancestors`, `report-uri` or `sandbox` is
+  refused; `StaticOptions` is the type of those options. A
   `'use server'` module fails it too — in `vite dev` as well as the build: a
   file cannot receive a Server Action, so the application wants
   `@k8ordo/server` instead. So does a `guard.ts`, every one named at once: a
@@ -371,12 +388,14 @@ These docs are served from <https://ordo.k8o.me>.
 > parameters need no list of values, an unknown URL is a real 404, and a form
 > can post to a Server Action. The mode is the dependency — the alternative is
 > `@k8ordo/static`, which renders every route at build time. `src/routes/` is
-> the pathname space (page/layout/not-found/error/redirect/guard/route, `[param]`,
+> the pathname space (page/layout/not-found/error/loading/redirect/guard/route, `[param]`,
 > `(group)`, `_private`), a page or layout may `export const paramsSchema` (any
 > Standard Schema, synchronous) to type its parameters — a refused value makes
 > the pattern not answer, so the walk goes on to `not-found.tsx` under a real
 > 404 — an `error.tsx` shows in place of what throws below it, a `redirect.ts`
-> answers 307/308, a `route.ts` answers its URL with a `Response` from the
+> answers 307/308, a `loading.tsx` shows while what is below it suspends
+> (with the router's `usePendingPathname()` for a page change in progress), a
+> `route.ts` answers its URL with a `Response` from the
 > method it exports (`GET`/`POST`/…, `{ request, params }` — `RouteContext`
 > from the router; `HEAD` from `GET`, `405` with `Allow` otherwise, no
 > same-origin check), a page that says `notFound()` (from `@k8ordo/router`) is
@@ -387,7 +406,9 @@ These docs are served from <https://ordo.k8o.me>.
 > below it (a `Response` ends the request, nothing lets it through, and
 > `responseHeaders()` adds to the final answer), a guard or a Server Action
 > reads and writes cookies through `cookies()`, a page receives `request`
-> (read-only headers and cookies) and renders its own `<title>` — boundaries are React's
+> (read-only headers and cookies) and renders its own `<title>`, a page that
+> exports `search = listState.url` receives that `@k8ordo/state` url slot
+> parsed as `search` and is loaded again in place when the search moves — boundaries are React's
 > own `'use client'` with `server-only` modules barred from the client bundle,
 > and the route table and type wiring are generated rather than hand-written.
 >
@@ -418,7 +439,11 @@ These docs are served from <https://ordo.k8o.me>.
   `path: '/'`, `httpOnly`, `secure`, `sameSite: 'lax'`; every write a
   `Set-Cookie` on the answer), and `requestHeaders()` the headers the request
   arrived with — all three from a `guard.ts`, a `route.ts` or a Server
-  Action, and they throw anywhere else; `Guard<P>` is
+  Action, and they throw anywhere else; `nonce()` is the nonce this answer's
+  inline scripts carry (the framework's own, and what the application signs
+  with it, as `<ColorSchemeProvider nonce>`), new per request and readable
+  anywhere the request is answered, the render included — a guard names it
+  in the `Content-Security-Policy` it writes; `Guard<P>` is
   the type of what a `guard.ts` default-exports (`({ request, params }) =>
   Response | void`, `params` the strings of its directory's pattern) and
   `GuardContext<P>` its argument; `RedirectTarget` is the type of what a
@@ -530,15 +555,20 @@ These docs are served from <https://ordo.k8o.me>.
 - [Design Guide](https://ordo.k8o.me/color-scheme/docs/GUIDE.md): what the package owns and does not (the class,
   not the colours; the rule, not the storage), placing the provider in the
   root layout, reading and changing the preference with the hook, what it
-  guarantees, and testing.
+  guarantees, allowing its inline script under a Content-Security-Policy
+  (by nonce or by hash), and testing.
 
 ## Entry point
 
-- `@k8ordo/color-scheme` — `<ColorSchemeProvider defaultPreference?>`
+- `@k8ordo/color-scheme` — `<ColorSchemeProvider defaultPreference? nonce?>`
   (client; goes inside `<body>` around everything) renders the inline
   `<script>` that puts `dark` on `<html>` before the first paint from the
   stored preference, the default (`'system'` unless told otherwise), or the
-  system, and keeps the class in step. `useColorScheme()` returns
+  system, and keeps the class in step; `nonce` signs that script for a
+  Content-Security-Policy (under `@k8ordo/server`, `nonce()`).
+  `colorSchemeScriptHash(defaultPreference?)` resolves to the script's hash
+  as a CSP source (`'sha256-…'`), for a policy that allows it by hash —
+  `@k8ordo/static`'s `csp` option. `useColorScheme()` returns
   `{ scheme, preference, setPreference }`: `scheme` is `'light' | 'dark'`
   on screen, `preference` is `'light' | 'dark' | 'system'`, and
   `setPreference('system')` clears the stored preference, so the default

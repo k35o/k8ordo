@@ -21,15 +21,20 @@ When installed via npm, these docs live under `node_modules/@k8ordo/color-scheme
 - [Design Guide](GUIDE.md): what the package owns and does not (the class,
   not the colours; the rule, not the storage), placing the provider in the
   root layout, reading and changing the preference with the hook, what it
-  guarantees, and testing.
+  guarantees, allowing its inline script under a Content-Security-Policy
+  (by nonce or by hash), and testing.
 
 ## Entry point
 
-- `@k8ordo/color-scheme` — `<ColorSchemeProvider defaultPreference?>`
+- `@k8ordo/color-scheme` — `<ColorSchemeProvider defaultPreference? nonce?>`
   (client; goes inside `<body>` around everything) renders the inline
   `<script>` that puts `dark` on `<html>` before the first paint from the
   stored preference, the default (`'system'` unless told otherwise), or the
-  system, and keeps the class in step. `useColorScheme()` returns
+  system, and keeps the class in step; `nonce` signs that script for a
+  Content-Security-Policy (under `@k8ordo/server`, `nonce()`).
+  `colorSchemeScriptHash(defaultPreference?)` resolves to the script's hash
+  as a CSP source (`'sha256-…'`), for a policy that allows it by hash —
+  `@k8ordo/static`'s `csp` option. `useColorScheme()` returns
   `{ scheme, preference, setPreference }`: `scheme` is `'light' | 'dark'`
   on screen, `preference` is `'light' | 'dark' | 'system'`, and
   `setPreference('system')` clears the stored preference, so the default

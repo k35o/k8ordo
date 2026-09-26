@@ -2,6 +2,7 @@ import {
   answer,
   cookies,
   inPhase,
+  nonce,
   requestHeaders,
   responseHeaders,
   withRequest,
@@ -166,5 +167,37 @@ describe('answer()', () => {
     });
     expect((await guarded).headers.get('x-who')).toBe('first');
     expect((await plain).headers.get('x-who')).toBeNull();
+  });
+});
+
+describe('nonce()', () => {
+  it('refuses outside a request, naming where it belongs', () => {
+    expect(() => nonce()).toThrow(
+      'nonce() needs a request — call it while one is answered',
+    );
+  });
+
+  it.each(['guard', 'route', 'action', 'render'] as const)(
+    'is the same one in a %s of the request',
+    (phase) => {
+      withRequest(request, () => {
+        const signed = nonce();
+        inPhase(phase, () => {
+          expect(nonce()).toBe(signed);
+        });
+      });
+    },
+  );
+
+  it('is 128 random bits in base64, which a CSP nonce-source accepts', () => {
+    const signed = withRequest(request, nonce);
+    expect(signed).toMatch(/^[A-Za-z0-9+/]{22}==$/u);
+  });
+
+  it('is new for every request', () => {
+    const signed = new Set(
+      Array.from({ length: 50 }, () => withRequest(request, nonce)),
+    );
+    expect(signed.size).toBe(50);
   });
 });

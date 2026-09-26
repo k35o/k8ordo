@@ -139,6 +139,26 @@ ParamsSchemaFor<pattern>`, lists per page pattern the schemas along its
   there (`@k8ordo/i18n` records the accepted locale), and neither a refused
   pattern's write nor any other reaches the handler's caller, which under
   `@k8ordo/static` is one context for every page.
+- **Only a page that declared it reads the search.** A page exporting
+  `search` (a `@k8ordo/state` url schema) is found by parsing, like
+  `paramsSchema`; the generated table reads it through state's
+  `urlReader` in `searchReaders`, types the page's `search` by what that
+  returns, and the generated `Register` carries it for `PageProps` — which is
+  why the generator refuses the export in an application that does not
+  depend on `@k8ordo/state`. The handler hands the leaf what it read from
+  the request's own search (a payload is asked for with the page's search on
+  its URL) and puts the search it was rendered with on the payload
+  (`Payload.search`, absent for every other page); `app-router.tsx` keeps the
+  one on screen and answers the router's `refresh` with whether a
+  same-pathname navigation moved it, so such a page loads again in place and
+  every other page keeps the router's no-load shortcut. `@k8ordo/static`
+  refuses the export (a file is the same whatever the search holds).
+- **`loading.tsx` is the router's `loading`.** The generator puts it on its
+  branch (a page with one becomes a branch of its own, and a root one makes
+  the root a branch); the router makes it a `<Suspense>` in the stack, after
+  the layout and the `error` boundary. Nothing keys it: a page change under
+  one already showing keeps the page, as every page change does, and the
+  router's `usePendingPathname()` is what says one is under way.
 - **`error.tsx` is the router's `error`; `redirect.ts` is answered before the
   table.** The generator puts an error file on its branch (a page with an
   error becomes a branch of its own) and lists redirects in `redirects`,
@@ -205,6 +225,18 @@ ParamsSchemaFor<pattern>`, lists per page pattern the schemas along its
   only bring the same page back. Under `@k8ordo/static` the 404 carries
   `NOT_FOUND_HEADER`, so the build tells a page's `notFound()` from a
   refused param.
+- **The framework signs its own inline scripts, and decides no policy.**
+  Every request's scope holds a fresh nonce (`withRequest`, 128 random bits);
+  `renderHtml` hands it to React's SSR (`nonce`: the bootstrap module and
+  React's inline scripts), to the SSR Flight client (its preloads), and to
+  `rsc-html-stream` (the payload written into the HTML). `nonce()` reads it
+  in every phase, the render included — signing a script is not writing the
+  response — so a guard names it in the header it writes and a layout signs
+  a script of its own (`<ColorSchemeProvider nonce>`). Under
+  `@k8ordo/static` the HTML also says it in `NONCE_HEADER`, and the build
+  takes it off the file and names what it signed by hash; the mode package
+  exports no `nonce()`, since what an application signed with it would land
+  in the payload and make every build differ.
 - **The request reaches a page only under a server.** `K8ORDO_MODE` is
   defined by the host; the handler attaches `request` (headers, cookies) only
   under `@k8ordo/server`, and the generator emits the field only there. Under
@@ -269,7 +301,7 @@ src/
   runtime/pathname.ts        decodePathname, before a pathname may name a file
   runtime/redirect.ts        redirect() / redirect.ts targets
   runtime/request.ts         the read-only request a page receives
-  runtime/request-scope.ts   the request in progress: phases, cookies() / responseHeaders() / requestHeaders(), answer()
+  runtime/request-scope.ts   the request in progress: phases, cookies() / responseHeaders() / requestHeaders(), nonce(), answer()
   runtime/cookies.ts         the per-request cookie jar and its Set-Cookie lines
   runtime/guard.ts           Guard / GuardContext, runGuards (outer first, first Response ends it)
   runtime/route.ts           ROUTE_METHODS, which export answers a method, 405, running it in the route phase

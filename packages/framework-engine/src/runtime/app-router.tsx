@@ -116,6 +116,14 @@ const cacheIn = (
     fetchPage(payloadPath, signal),
   ));
 
+/**
+ * Where a page's payload is asked for: its path, with the URL's search. A page
+ * that reads the search is rendered for it; for any other page the server
+ * ignores it — and a static host, which has no such page, ignores it anyway.
+ */
+const payloadUrlFor = (url: URL): string =>
+  `${payloadPathFor(url.pathname)}${url.search}`;
+
 /** What starts a prefetch: a pointer onto a link, focus on one, a press. */
 const INTENTS = ['pointerover', 'focusin', 'pointerdown'] as const;
 
@@ -131,18 +139,26 @@ const INTENTS = ['pointerover', 'focusin', 'pointerdown'] as const;
  */
 export function AppRouter({
   pathname,
+  search,
   tree,
 }: {
   pathname: string;
+  /** The search the page was rendered with, when it reads the search. */
+  search?: string | undefined;
   tree: ReactNode;
 }): ReactNode {
   const [latest, setLatest] = useState(tree);
   const current = useDeferredValue(latest);
   const prefetched = useRef<PrefetchCache<Payload | null>>(null);
+  // The search the tree last applied was rendered with — `undefined` when its
+  // page does not read the search, which is every page that did not declare
+  // it. Only for such a page does a navigation that keeps the pathname load.
+  const searchApplied = useRef(search);
 
   useEffect(() => {
     mounted = {
       apply: (payload) => {
+        searchApplied.current = payload.search;
         startTransition(() => {
           setLatest(payload.tree);
         });
@@ -159,9 +175,7 @@ export function AppRouter({
   useEffect(() => {
     const onIntent = (event: Event): void => {
       const url = prefetchTargetOf(event.target);
-      if (url !== null) {
-        cacheIn(prefetched).prefetch(payloadPathFor(url.pathname));
-      }
+      if (url !== null) cacheIn(prefetched).prefetch(payloadUrlFor(url));
     };
     // 捕捉段で聞く。途中の要素が伝播を止めても、押し始めは見逃さない
     for (const type of INTENTS) {
@@ -177,7 +191,7 @@ export function AppRouter({
     };
   }, []);
 
-  const { generation } = useInterceptedNavigation<ReactNode>({
+  const { generation } = useInterceptedNavigation<Payload>({
     // The browser holds no route table, so this cannot answer "is it mine?"
     // the way the client router does. It claims every same-origin URL under
     // Vite's `base` and finds out from the answer — which is why `load` has
@@ -185,7 +199,7 @@ export function AppRouter({
     claim: (url) =>
       url.origin === location.origin && withoutBase(url.pathname) !== null,
     load: async (url, signal) => {
-      const payloadPath = payloadPathFor(url.pathname);
+      const payloadPath = payloadUrlFor(url);
       let payload: Payload | null;
       try {
         payload = await (cacheIn(prefetched).take(payloadPath, signal) ??
@@ -194,7 +208,7 @@ export function AppRouter({
         if (signal.aborted) throw error;
         // The network, or a server that could not answer: the same rule as
         // a URL that is not a page — the document load shows the truth.
-        return reloadInstead<ReactNode>();
+        return reloadInstead<Payload>();
       }
       // A second navigation may have taken over while this was in flight —
       // the body read, the client components it names imported — and
@@ -204,14 +218,21 @@ export function AppRouter({
       // URL, so reloading asks the server for exactly what the browser would
       // have asked for had this never been claimed — its real status
       // included.
-      if (payload === null) return reloadInstead<ReactNode>();
-      if (!canRender(payload)) return reloadInstead<ReactNode>();
-      return payload.tree;
+      if (payload === null) return reloadInstead<Payload>();
+      if (!canRender(payload)) return reloadInstead<Payload>();
+      return payload;
     },
     apply: (next) => {
       markNavigated();
-      setLatest(next);
+      searchApplied.current = next.search;
+      setLatest(next.tree);
     },
+    // A page that reads the search is rendered for the one it was given, so
+    // a navigation that moves it loads the page again; a page that does not
+    // renders the same whatever the search holds.
+    refresh: (url) =>
+      searchApplied.current !== undefined &&
+      url.search !== searchApplied.current,
   });
 
   // The tree comes from the server, so a client component in it cannot ask a

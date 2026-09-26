@@ -26,14 +26,22 @@ export const clientEntry = getClientEntryUrl();
  */
 export async function renderHtml(
   rscStream: ReadableStream<Uint8Array>,
+  // The request's: every script written here carries it. What else does, the
+  // application signed, and the policy that names it is the application's.
+  nonce: string,
 ): Promise<ReadableStream> {
   const [forHtml, forHydration] = rscStream.tee();
-  const payload = await createFromReadableStream<Payload>(forHtml);
+  const payload = await createFromReadableStream<Payload>(forHtml, { nonce });
   const toFile = import.meta.env.K8ORDO_MODE === '@k8ordo/static';
   const htmlStream = await renderToReadableStream(
-    <AppRouter pathname={payload.pathname} tree={payload.tree} />,
+    <AppRouter
+      pathname={payload.pathname}
+      search={payload.search}
+      tree={payload.tree}
+    />,
     {
       bootstrapModules: [clientEntry],
+      nonce,
       // Present only when a form was posted without JavaScript: it is how
       // `useActionState` finds its result in the HTML it comes back to.
       formState: payload.formState as SsrOptions['formState'],
@@ -49,5 +57,5 @@ export async function renderHtml(
   // Reading only once every boundary has completed writes each in place;
   // one still pending when the shell is read is outlined whatever its size.
   if (toFile) await htmlStream.allReady;
-  return htmlStream.pipeThrough(injectRSCPayload(forHydration));
+  return htmlStream.pipeThrough(injectRSCPayload(forHydration, { nonce }));
 }

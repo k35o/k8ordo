@@ -71,6 +71,27 @@ never chooses follows the system, in either direction, for as long as the
 page is open. To start every visitor somewhere other than the system, say
 so once: `<ColorSchemeProvider defaultPreference="dark">`.
 
+### Under a Content-Security-Policy
+
+The script is inline, so a policy that restricts scripts has to allow it,
+by nonce or by hash. `nonce` puts the answer's nonce on it — under
+`@k8ordo/server`, `nonce()` from `@k8ordo/server/runtime`:
+
+```tsx
+<ColorSchemeProvider nonce={nonce()}>{children}</ColorSchemeProvider>
+```
+
+`colorSchemeScriptHash(defaultPreference?)` resolves to its hash as a CSP
+source, `'sha256-…'`, for a policy that allows it by what it is — the
+`csp` option of `@k8ordo/static`, whose files cannot carry a nonce, or a
+header that names none. Pass it the `defaultPreference` the provider is
+given: the script carries it, so the hash depends on it.
+
+```ts
+// vite.config.ts, under @k8ordo/static
+csp: { 'script-src': ["'self'", await colorSchemeScriptHash()] },
+```
+
 ## Reading and changing it
 
 ```tsx

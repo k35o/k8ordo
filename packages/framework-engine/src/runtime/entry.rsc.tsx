@@ -21,6 +21,7 @@ import {
   redirects,
   routeModules,
   routes,
+  searchReaders,
 } from 'virtual:k8ordo/routes';
 
 import type * as SsrEntry from './entry.ssr';
@@ -32,6 +33,7 @@ import { NOT_FOUND_SEGMENT } from './pathname';
 import {
   ACTION_ID_HEADER,
   NOT_FOUND_DIGEST,
+  NONCE_HEADER,
   NOT_FOUND_HEADER,
 } from './payload';
 import type { Payload } from './payload';
@@ -39,7 +41,7 @@ import { isPayloadPath, pagePathFor } from './payload-path';
 import { isRedirect, matchRedirects } from './redirect';
 import { renderMatch, renderNotFound } from './render';
 import { routeRequestOf } from './request';
-import { answer, inPhase, withRequest } from './request-scope';
+import { answer, inPhase, nonce, withRequest } from './request-scope';
 import { methodNotAllowed, routeAnswerFor, runRoute } from './route';
 
 type ActionResult = {
@@ -330,11 +332,23 @@ const respond = async (request: Request): Promise<Response> => {
     'index',
   );
 
-  const render = (tree: ReactNode, enter: ParsedParams['enter']): Rendered =>
+  // Only a page that declared what of the search it reads is handed it, read
+  // the way @k8ordo/state reads a url schema; the payload says which search
+  // it was rendered with, so the browser loads the page again when it moves.
+  const readSearch =
+    match === null || missing ? undefined : searchReaders[match.pattern];
+  const search = readSearch?.(url.searchParams);
+
+  const render = (
+    tree: ReactNode,
+    enter: ParsedParams['enter'],
+    renderedSearch?: string,
+  ): Rendered =>
     renderPayload(
       {
         tree,
         pathname,
+        search: renderedSearch,
         client: ssr.clientEntry,
         returnValue: action.returnValue,
         formState: action.formState,
@@ -357,9 +371,16 @@ const respond = async (request: Request): Promise<Response> => {
     action.redirect === undefined
       ? match === null
         ? renderNotFound(routes, pathname, routeRequest)
-        : renderMatch(match, pathname, parsed.params, routeRequest, page?.Page)
+        : renderMatch(match, {
+            pathname,
+            params: parsed.params,
+            request: routeRequest,
+            page: page?.Page,
+            search,
+          })
       : null,
     enter,
+    readSearch === undefined ? undefined : url.search,
   );
 
   // A document's status leaves before its body, so it waits for the page to
@@ -388,12 +409,11 @@ const respond = async (request: Request): Promise<Response> => {
       rendered = render(
         nearest.match === null
           ? renderNotFound(routes, pathname, routeRequest)
-          : renderMatch(
-              nearest.match,
+          : renderMatch(nearest.match, {
               pathname,
-              nearest.parsed.params,
-              routeRequest,
-            ),
+              params: nearest.parsed.params,
+              request: routeRequest,
+            }),
         enter,
       );
     }
@@ -429,7 +449,7 @@ const respond = async (request: Request): Promise<Response> => {
     // at build time it is a build that stops, naming the page.
     let body: ArrayBuffer;
     try {
-      const html = await enter(() => ssr.renderHtml(rendered.stream));
+      const html = await enter(() => ssr.renderHtml(rendered.stream, nonce()));
       body = await new Response(html).arrayBuffer();
     } catch (error) {
       // With no Suspense boundary above the throw the HTML render itself
@@ -443,10 +463,14 @@ const respond = async (request: Request): Promise<Response> => {
     if (failed !== undefined) return renderFailed(failed);
     return new Response(body, {
       status,
-      headers: { 'content-type': HTML_TYPE, ...saidByPage },
+      headers: {
+        'content-type': HTML_TYPE,
+        [NONCE_HEADER]: nonce(),
+        ...saidByPage,
+      },
     });
   }
-  const html = await enter(() => ssr.renderHtml(rendered.stream));
+  const html = await enter(() => ssr.renderHtml(rendered.stream, nonce()));
   return new Response(html, {
     status,
     headers: { 'content-type': HTML_TYPE },
