@@ -24,10 +24,6 @@ declare module 'virtual:k8ordo/routes' {
    * run for what they write, never to refuse it.
    */
   export const catchAllSchemas: SchemaStacks;
-  /**
-   * Per pattern, the `guard.ts` default exports that run before it answers,
-   * outer first; `/*` carries the root's.
-   */
   /** Per page pattern, what reads the search a page declared it reads. */
   export const searchReaders: Readonly<
     Record<string, ((input: URLSearchParams) => unknown) | undefined>
@@ -36,6 +32,10 @@ declare module 'virtual:k8ordo/routes' {
   export const routeModules: Readonly<
     Record<string, Readonly<Record<string, unknown>> | undefined>
   >;
+  /**
+   * Per pattern, the `guard.ts` default exports that run before it answers,
+   * outer first; `/*` carries the root's.
+   */
   export const guards: Readonly<
     Record<
       string,
