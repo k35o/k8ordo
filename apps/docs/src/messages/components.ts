@@ -793,6 +793,33 @@ export const prose = {
   }),
 };
 
+export const dataTable = {
+  description: message({
+    ja: '並べ替え・行の選択・列の表示切り替えができる表。状態はすべて外から渡す',
+    en: 'A table with sorting, row selection, and column visibility, all driven by state you own.',
+  }),
+  basicDescription: message({
+    ja: '状態はすべて呼び出し側が持つ（制御型）。並べ替えの状態を受けても DataTable は並べ替えず、渡された順に描くので、サーバーで並べ替えるときも同じ部品で済む。機能は、その変化を受け取る関数を渡したときだけ現れる。',
+    en: 'Every piece of state is yours (controlled). DataTable takes the sort state but does not sort — it draws `rows` in the order given, so the same component works when the server sorts. Each feature appears only when you pass the handler that receives its changes.',
+  }),
+  urlTitle: message({
+    ja: '並べ替えとページを URL に持つ',
+    en: 'Keeping the Sort and the Page in the URL',
+  }),
+  urlDescription: message({
+    ja: '`@k8ordo/state` の url スロットに並べ替えとページを置く例。並べ替えるとアドレスバーが変わり、リンクを渡した相手にも同じ並びの同じページが見え、戻るで前の並びに戻る。',
+    en: 'This example keeps the sort and the page in `@k8ordo/state`’s url slot. Sort, and the address bar changes: whoever you send the link to sees the same order on the same page, and Back returns to the previous order.',
+  }),
+  emptyTitle: message({
+    ja: '行が無いとき',
+    en: 'No Rows',
+  }),
+  emptyDescription: message({
+    ja: '`rows` が空のときは、`emptyState` を列をまたぐ行に描く。`EmptyState` を渡す。',
+    en: 'When `rows` is empty, `emptyState` is drawn in a row spanning the columns. Pass an `EmptyState`.',
+  }),
+};
+
 export const tree = {
   description: message({
     ja: '枝を開閉できる階層。WAI-ARIA の tree のキーボード操作に従う',

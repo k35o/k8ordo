@@ -16,7 +16,7 @@ describe.each([
 ])('%s', (name, api) => {
   it('refuses outside a request, naming where it belongs', () => {
     expect(() => api()).toThrow(
-      `${name} needs a request — call it from a guard.ts or a Server Action`,
+      `${name} needs a request — call it from a guard.ts, a route.ts or a Server Action`,
     );
   });
 
@@ -26,7 +26,7 @@ describe.each([
     });
   });
 
-  it.each(['guard', 'action'] as const)('works in a %s', (phase) => {
+  it.each(['guard', 'route', 'action'] as const)('works in a %s', (phase) => {
     withRequest(request, () => {
       inPhase(phase, () => {
         expect(() => api()).not.toThrow();

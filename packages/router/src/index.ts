@@ -39,5 +39,6 @@ export type {
   RegisteredPageParams,
   RegisteredParams,
   RegisteredPattern,
+  RouteContext,
 } from './register';
 export { Outlet, Router, useParams, useRoute } from './router';

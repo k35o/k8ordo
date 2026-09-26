@@ -84,7 +84,7 @@ const SHADOW_ERROR = `routes/ is not a valid pathname space:
 
 const REFUSED = `routes/ is not a valid pathname space:
   routes/[123]: "[123]" is not a valid param directory — use [name] with a letter or underscore first
-  routes/products/helper.ts: routes/ holds only page.tsx, layout.tsx, not-found.tsx, error.tsx, redirect.ts, guard.ts — move "helper.ts" under a _-prefixed directory`;
+  routes/products/helper.ts: routes/ holds only page.tsx, layout.tsx, not-found.tsx, error.tsx, redirect.ts, guard.ts, route.ts — move "helper.ts" under a _-prefixed directory`;
 
 type Refusal = { contains: string | (() => string); error: string };
 
@@ -92,7 +92,7 @@ const REFUSALS: readonly Refusal[] = [
   {
     contains: '`products/helper.ts`',
     error:
-      'routes/ holds only page.tsx, layout.tsx, not-found.tsx, error.tsx, redirect.ts, guard.ts — move "helper.ts" under a _-prefixed directory',
+      'routes/ holds only page.tsx, layout.tsx, not-found.tsx, error.tsx, redirect.ts, guard.ts, route.ts — move "helper.ts" under a _-prefixed directory',
   },
   {
     contains: '`[123]/page.tsx`',
@@ -120,7 +120,7 @@ const REFUSALS: readonly Refusal[] = [
   {
     contains: m.frameworkRouting.refusesTable.nothingBelow,
     error:
-      'declares no route — every directory needs a page.tsx (or redirect.ts) somewhere below it',
+      'declares no route — every directory needs a page.tsx (or a redirect.ts or route.ts) somewhere below it',
   },
   {
     contains: m.frameworkRouting.refusesTable.twoGroups,
@@ -130,6 +130,20 @@ const REFUSALS: readonly Refusal[] = [
   {
     contains: m.frameworkRouting.refusesTable.pageAndRedirect,
     error: '"old" cannot both render page.tsx and redirect — keep one',
+  },
+  {
+    contains: m.frameworkRouting.refusesTable.pageAndRoute,
+    error:
+      '"api" cannot both render page.tsx and answer from route.ts — keep one',
+  },
+  {
+    contains: m.frameworkRouting.refusesTable.redirectAndRoute,
+    error: '"old" cannot both redirect and answer from route.ts — keep one',
+  },
+  {
+    contains: m.frameworkRouting.refusesTable.silentRoute,
+    error:
+      'exports none of GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS — a route.ts answers the methods it exports',
   },
   {
     contains: m.frameworkRouting.refusesTable.groupShadow,
@@ -228,6 +242,21 @@ const PREFETCH = `<nav data-k8ordo-prefetch={false}>
     home
   </a>
 </nav>`;
+
+const ROUTE = `// src/routes/feed.xml/route.ts
+import type { RouteContext } from '@k8ordo/router';
+
+import { listProducts } from '../_data/catalog.server';
+
+export async function GET({ request }: RouteContext<'/feed.xml'>) {
+  const origin = new URL(request.url).origin;
+  const items = (await listProducts())
+    .map((product) => \`<item><link>\${origin}/products/\${product.id}</link></item>\`)
+    .join('');
+  return new Response(\`<rss version="2.0"><channel>\${items}</channel></rss>\`, {
+    headers: { 'content-type': 'application/rss+xml;charset=utf-8' },
+  });
+}`;
 
 /** Inline code names, comma separated. */
 function Names({ names }: { names: readonly string[] }) {
@@ -419,6 +448,17 @@ export function RoutingGuide({ mode }: { mode: Mode }) {
           </Row>
           <Row>
             <Cell nowrap>
+              <Code>route.ts</Code>
+            </Cell>
+            <Cell>
+              <Rich>{t.filesTable.route()}</Rich>
+            </Cell>
+            <Cell>
+              <Names names={['request', 'params']} />
+            </Cell>
+          </Row>
+          <Row>
+            <Cell nowrap>
               <Code>guard.ts</Code>
             </Cell>
             <Cell>
@@ -558,6 +598,9 @@ export function RoutingGuide({ mode }: { mode: Mode }) {
               </LocaleAnchor>
             </Bullet>
             <Bullet>
+              <Rich>{m.staticRouting.refusesRouteMethods()}</Rich>
+            </Bullet>
+            <Bullet>
               <Rich>{m.staticRouting.refusesThrow()}</Rich> —{' '}
               <LocaleAnchor path="/:locale/static/errors">
                 {m.static.navErrors()}
@@ -565,6 +608,19 @@ export function RoutingGuide({ mode }: { mode: Mode }) {
             </Bullet>
           </Bullets>
         )}
+      </DocSection>
+
+      <DocSection description={t.routeDescription} title={t.routeTitle}>
+        <CodeBlock code={ROUTE} lang="ts" />
+        <Paragraph text={t.routeReceives} />
+        <Paragraph text={t.routeOrder} />
+        <Paragraph
+          text={
+            mode === 'static'
+              ? m.staticRouting.routeStatic
+              : m.serverRouting.routeServer
+          }
+        />
       </DocSection>
 
       <DocSection description={t.generatedDescription} title={t.generatedTitle}>

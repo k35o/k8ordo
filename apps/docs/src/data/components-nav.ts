@@ -211,6 +211,11 @@ export const componentCategories: NavCategory[] = [
         description: m.components.table.description,
       },
       {
+        name: 'DataTable',
+        path: '/:locale/ui/components/data-table',
+        description: m.components.dataTable.description,
+      },
+      {
         name: 'Tree',
         path: '/:locale/ui/components/tree',
         description: m.components.tree.description,

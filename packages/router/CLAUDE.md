@@ -124,7 +124,7 @@ src/
   base.ts           withBase / withoutBase (Vite's base at the edges)
   define-routes.ts  defineRoutes / match / NavigablePath
   links.ts          href / navigateTo / bindParams (the side that needs no table)
-  register.ts       Register (module augmentation) + PageProps / LayoutProps
+  register.ts       Register (module augmentation) + PageProps / LayoutProps / RouteContext
   navigation.ts     useInterceptedNavigation (intercept and the commit contract)
   location.tsx      usePathname / PathnameProvider (where you are, without the table)
   match.ts          matchPath / useMatch ("which section am I in", without the table)

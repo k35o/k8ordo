@@ -103,6 +103,11 @@ export const buildComponentLibrary = <C>(
     'Table with columns and rows (the cell strings of each row). Every row must have exactly as many cells as there are columns.',
     s.tableProps,
   );
+  const DataTable = def(
+    'DataTable',
+    'Table the reader can sort (by the columns marked sortable) and, with selectable, pick rows from. Every row must have exactly as many cells as there are columns.',
+    s.dataTableProps,
+  );
   const Tree = def(
     'Tree',
     'Tree of nodes that open and close, such as files and folders, navigable with the arrow keys. List every node flat; a child names its parent by parentId.',
@@ -253,6 +258,7 @@ export const buildComponentLibrary = <C>(
     Breadcrumb.ref,
     SideNav.ref,
     Table.ref,
+    DataTable.ref,
     Tree.ref,
     TextField.ref,
     Textarea.ref,
@@ -422,6 +428,7 @@ export const buildComponentLibrary = <C>(
       Breadcrumb,
       SideNav,
       Table,
+      DataTable,
       Tree,
       TextField,
       Textarea,

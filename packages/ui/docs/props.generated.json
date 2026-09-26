@@ -720,6 +720,12 @@
           "required": false
         },
         {
+          "name": "indeterminate",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
           "name": "invalid",
           "types": ["boolean"],
           "defaultValue": "false",
@@ -729,6 +735,12 @@
           "name": "itemValue",
           "types": ["string"],
           "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "labelHidden",
+          "types": ["boolean"],
+          "defaultValue": "false",
           "required": false
         },
         {
@@ -820,6 +832,12 @@
           "required": false
         },
         {
+          "name": "indeterminate",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
           "name": "invalid",
           "types": ["boolean"],
           "defaultValue": "false",
@@ -829,6 +847,12 @@
           "name": "itemValue",
           "types": ["string"],
           "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "labelHidden",
+          "types": ["boolean"],
+          "defaultValue": "false",
           "required": false
         },
         {
@@ -1172,6 +1196,79 @@
           "name": "size",
           "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "DataTable",
+      "props": [
+        {
+          "name": "columns",
+          "types": ["ReadonlyArray<DataTableColumn<Row>>"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "getRowId",
+          "types": ["(row: Row) => string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "rows",
+          "types": ["readonly Row[]"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "emptyState",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "hiddenColumnIds",
+          "types": ["readonly string[]"],
+          "defaultValue": "NONE",
+          "required": false
+        },
+        {
+          "name": "onHiddenColumnIdsChange",
+          "types": ["(ids: string[]) => void"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "onSelectedIdsChange",
+          "types": ["(ids: string[]) => void"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "onSortChange",
+          "types": ["(sort: DataTableSort | null) => void"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "selectedIds",
+          "types": ["readonly string[]"],
+          "defaultValue": "NONE",
+          "required": false
+        },
+        {
+          "name": "sort",
+          "types": ["DataTableSort", "null"],
+          "defaultValue": "null",
           "required": false
         }
       ],
@@ -4033,6 +4130,12 @@
         },
         {
           "name": "interactive",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "selected",
           "types": ["boolean"],
           "defaultValue": "false",
           "required": false

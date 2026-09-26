@@ -52,6 +52,10 @@ export const en: Messages = {
   paginationPrevious: 'Previous',
   paginationNext: 'Next',
 
+  dataTableColumns: 'Columns',
+  dataTableSelectAll: 'Select all rows',
+  dataTableSelectRow: 'Select row',
+
   codeBlockCopy: 'Copy code',
   carousel: 'Carousel',
   carouselSlide: 'Slide',
