@@ -38,6 +38,9 @@ catalog:
   '@vitest/spy': 5.0.1
   '@vitest/ui': 5.0.1
   '@vitest/utils': 5.0.1
+  # @k8ordo/ui/ai-sdk の peer。example が使う @ai-sdk/react は ai を exact で
+  # 持つので、上げるときは同じ ai を持つ @ai-sdk/react と揃えて 1 コピーに保つ。
+  ai: 7.0.105
   playwright: 1.63.0
   postcss: 8.5.28
   publint: 0.3.24
