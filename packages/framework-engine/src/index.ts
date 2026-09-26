@@ -9,7 +9,7 @@ export type { RouteDir, Slot } from './grammar/tree';
 export { buildTable, declaredPatterns } from './generate/emit';
 export type { DeclaredPattern } from './generate/emit';
 export { decodePathname, NOT_FOUND_SEGMENT } from './runtime/pathname';
-export { NOT_FOUND_HEADER } from './runtime/payload';
+export { NONCE_HEADER, NOT_FOUND_HEADER } from './runtime/payload';
 export {
   exportsOf,
   pagesReadingSearch,
@@ -30,6 +30,7 @@ export type { RouteRequest } from './runtime/request';
 export type { Guard, GuardContext } from './runtime/guard';
 export {
   cookies,
+  nonce,
   requestHeaders,
   responseHeaders,
 } from './runtime/request-scope';

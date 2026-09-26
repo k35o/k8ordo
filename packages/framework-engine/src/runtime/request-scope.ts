@@ -24,6 +24,8 @@ type Scope = {
   readonly phase: Phase;
   readonly cookies: Cookies;
   readonly outgoing: Outgoing;
+  /** What this answer's inline scripts are signed with. */
+  readonly nonce: string;
 };
 
 /**
@@ -43,6 +45,10 @@ const storage = (): AsyncLocalStorage<Scope> => {
   return global[KEY];
 };
 
+// CSP は nonce に 128 ビット以上の乱数を求める
+const freshNonce = (): string =>
+  btoa(String.fromCodePoint(...crypto.getRandomValues(new Uint8Array(16))));
+
 /** Runs `fn` as the handling of `request`, starting in the render. */
 export const withRequest = <T>(request: Request, fn: () => T): T => {
   const jar = createCookies(parseCookies(request.headers.get('cookie')));
@@ -52,6 +58,7 @@ export const withRequest = <T>(request: Request, fn: () => T): T => {
       phase: 'render',
       cookies: jar.cookies,
       outgoing: { headers: new Headers(), cookies: jar.lines },
+      nonce: freshNonce(),
     },
     fn,
   );
@@ -138,3 +145,22 @@ export const cookies = (): Cookies => answering('cookies()').cookies;
  */
 export const requestHeaders = (): Headers =>
   answering('requestHeaders()').request.headers;
+
+/**
+ * The nonce this answer's inline scripts carry: the framework's own — the
+ * payload written into the HTML, React's — and any the application signs
+ * with it, as `<ColorSchemeProvider nonce={nonce()}>`. A new one per
+ * request. Readable wherever the request is in progress, the render
+ * included: signing a script is not writing the response. A guard names it
+ * in the `Content-Security-Policy` it writes; a build into files turns what
+ * carries it into hashes.
+ */
+export const nonce = (): string => {
+  const scope = storage().getStore();
+  if (scope === undefined) {
+    throw new Error(
+      'nonce() needs a request — call it while one is answered: from a guard.ts, a layout or page, or a Server Action',
+    );
+  }
+  return scope.nonce;
+};
