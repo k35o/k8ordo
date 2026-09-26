@@ -70,6 +70,13 @@ export type ColorSchemeProviderProps = {
    * choose.
    */
   readonly defaultPreference?: ColorSchemePreference;
+  /**
+   * The nonce the page's `Content-Security-Policy` lets inline scripts run
+   * with, put on the inline script — under `@k8ordo/server`, `nonce()` from
+   * `@k8ordo/server/runtime`. A policy that allows the script by its hash
+   * instead names `colorSchemeScriptHash()`.
+   */
+  readonly nonce?: string;
   readonly children: ReactNode;
 };
 
@@ -81,6 +88,7 @@ export type ColorSchemeProviderProps = {
  */
 export function ColorSchemeProvider({
   defaultPreference = 'system',
+  nonce,
   children,
 }: ColorSchemeProviderProps): ReactNode {
   const [{ preference }, update] = useAppState(colorSchemeState);
@@ -113,7 +121,7 @@ export function ColorSchemeProvider({
       {/* Before the children, so the parser runs it before it reaches what
           they render — the first paint is already right, and hydration
           finds the node in place and does not run it again. */}
-      <script>{scriptFor(defaultPreference)}</script>
+      <script nonce={nonce}>{scriptFor(defaultPreference)}</script>
       <ColorSchemeContext value={value}>{children}</ColorSchemeContext>
     </>
   );
