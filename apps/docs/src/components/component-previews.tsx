@@ -419,6 +419,12 @@ export const componentPreviews: Record<string, ReactNode> = {
       </ListBox.Root>
     </div>
   ),
+  CommandPalette: (
+    <span className="flex gap-1">
+      <Kbd label="Command">⌘</Kbd>
+      <Kbd>K</Kbd>
+    </span>
+  ),
   Separator: (
     <div className="w-40">
       <Separator color="mute" />

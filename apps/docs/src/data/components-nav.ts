@@ -266,6 +266,11 @@ export const componentCategories: NavCategory[] = [
     title: m.components.categoryOverlays,
     items: [
       {
+        name: 'CommandPalette',
+        path: '/:locale/ui/components/command-palette',
+        description: m.components.commandPalette.description,
+      },
+      {
         name: 'Dialog',
         path: '/:locale/ui/components/dialog',
         description: m.components.dialog.description,
