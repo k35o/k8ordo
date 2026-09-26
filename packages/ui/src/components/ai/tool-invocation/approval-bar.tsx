@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useTransition } from 'react';
+import { useTransition } from 'react';
 import type { FC } from 'react';
 
 import { getMessages } from '../../../i18n/current';
@@ -24,22 +24,15 @@ export const ApprovalBar: FC<Props> = ({
 }) => {
   const messages = getMessages();
   const [isResponding, startTransition] = useTransition();
-  // 答えると問いのバーごと消え、押したボタンにあったフォーカスが body に
-  // 落ちる。消える直前（ref の解除は DOM から外すより先に走る）にまだ
-  // フォーカスを持っていたら、同じツールの見出しへ移す。見出しは
-  // Server Component の ToolInvocation が組むので ref は届かず、id で引く
-  const keepFocusOnAnswer = useCallback(
-    (group: HTMLDivElement) => () => {
-      if (group.contains(document.activeElement)) {
-        document
-          .querySelector<HTMLElement>(`#${CSS.escape(triggerId)}`)
-          ?.focus();
-      }
-    },
-    [triggerId],
-  );
 
-  const respond = (approved: boolean) => {
+  const respond = (approved: boolean, button: HTMLButtonElement) => {
+    // 送るあいだボタンは disabled になり、フォーカスを持っていても
+    // ブラウザが body へ落とす。問いのバーも答えが届けば消えるので、
+    // 無効にする前に同じツールの見出しへ移す。見出しは Server Component の
+    // ToolInvocation が組むので ref は届かず、id で引く
+    if (button === document.activeElement) {
+      document.querySelector<HTMLElement>(`#${CSS.escape(triggerId)}`)?.focus();
+    }
     startTransition(async () => {
       await onApprovalResponse?.({ id: approval.id, approved });
     });
@@ -49,7 +42,6 @@ export const ApprovalBar: FC<Props> = ({
     <div
       aria-labelledby={nameId}
       className="flex flex-wrap items-center gap-2"
-      ref={keepFocusOnAnswer}
       role="group"
     >
       <p className="text-fg-base min-w-0 flex-1 text-sm">
@@ -60,8 +52,8 @@ export const ApprovalBar: FC<Props> = ({
           <Button
             color="base"
             disabled={isResponding}
-            onClick={() => {
-              respond(false);
+            onClick={(event) => {
+              respond(false, event.currentTarget);
             }}
             size="sm"
             variant="outline"
@@ -70,8 +62,8 @@ export const ApprovalBar: FC<Props> = ({
           </Button>
           <Button
             disabled={isResponding}
-            onClick={() => {
-              respond(true);
+            onClick={(event) => {
+              respond(true, event.currentTarget);
             }}
             size="sm"
           >

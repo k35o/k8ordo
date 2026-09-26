@@ -163,7 +163,11 @@ const AnsweredInPlace = () => {
       approval={{ id: 'approval-1' }}
       input={{ path: 'notes/2026-09.md' }}
       name="delete_file"
-      onApprovalResponse={({ approved }) => {
+      onApprovalResponse={async ({ approved }) => {
+        // 答えは送り終えてから状態に届く
+        await new Promise<void>((resolve) => {
+          finishAnswering = resolve;
+        });
         setState(approved ? 'output-available' : 'output-denied');
       }}
       output="削除しました"
@@ -175,19 +179,22 @@ const AnsweredInPlace = () => {
 export const FocusAfterAnswer: Story = {
   render: () => <AnsweredInPlace />,
   play: async ({ canvas, userEvent }) => {
+    const header = canvas.getByRole('button', { name: /delete_file/u });
     await userEvent.click(canvas.getByRole('button', { name: '許可' }));
 
-    // 押したボタンは問いのバーごと消える。フォーカスは body に落とさず、
-    // 同じツールの見出しへ移す
-    // 答えは transition の中で送るので、消えるのはこの後の描画
+    // 送っているあいだボタンは押せなくなり、押したボタンのフォーカスは
+    // ブラウザが body へ落とす。その前に同じツールの見出しへ移す
+    await expect(canvas.getByRole('button', { name: '許可' })).toBeDisabled();
+    await expect(header).toHaveFocus();
+
+    // 答えが届くと問いのバーは消え、フォーカスは見出しに残る
+    finishAnswering();
     await waitFor(() =>
       expect(
         canvas.queryByRole('group', { name: 'delete_file' }),
       ).not.toBeInTheDocument(),
     );
-    await expect(
-      canvas.getByRole('button', { name: /delete_file/u }),
-    ).toHaveFocus();
+    await expect(header).toHaveFocus();
   },
 };
 
