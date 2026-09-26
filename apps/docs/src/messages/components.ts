@@ -1052,6 +1052,41 @@ export const grid = {
   }),
 };
 
+export const resizablePanels = {
+  description: message({
+    ja: '仕切りをドラッグするか矢印キーで動かして、2 枚のパネルの大きさを分ける',
+    en: 'Two panes split by a divider you drag or move with the arrow keys.',
+  }),
+  usageDescription: message({
+    ja: '`value` は 1 枚目が占める割合（%）で、2 枚目は残りを取ります。根は親いっぱいに広がるので、親に大きさを与えてください（縦に分けるなら高さが要ります）。仕切りはフォーカスでき、矢印キーは画面上の向きのとおりに動かし、`Home` / `End` で `min` / `max` の端へ移ります。',
+    en: '`value` is the first pane’s share in percent; the second pane takes the rest. The root fills its parent, so give the parent a size (a vertical split needs a height). The divider takes focus; the arrow keys move it the way they point on screen, and `Home` / `End` jump to `min` / `max`.',
+  }),
+  verticalTitle: message({
+    ja: '上下に分ける',
+    en: 'Vertical',
+  }),
+  verticalDescription: message({
+    ja: '`orientation="horizontal"` は文字の行に沿って並べるので、縦書きの中では上下に並びます。右から左の言語では 1 枚目が右に付き、`ArrowLeft` で広がります。',
+    en: '`orientation="horizontal"` lays the panes along the line of text, so in vertical writing mode they stack. In a right-to-left page the first pane sits on the right, and `ArrowLeft` widens it.',
+  }),
+  labelTitle: message({
+    ja: '仕切りの名前',
+    en: 'Naming the divider',
+  }),
+  labelDescription: message({
+    ja: '仕切りの値は 1 枚目の大きさなので、名前も 1 枚目に合わせます。1 枚目に見出しがあれば `aria-labelledby` で指してください。指さなければ辞書の `resizablePanelsHandle` を使います。',
+    en: 'The divider’s value is the first pane’s size, so name it after the first pane: point `aria-labelledby` at its heading. Without one it falls back to `resizablePanelsHandle` from the dictionary.',
+  }),
+  controlledTitle: message({
+    ja: '制御モード',
+    en: 'Controlled',
+  }),
+  controlledDescription: message({
+    ja: '`onChange` はドラッグの間も割合を受け取ります。キーボードでは `step` ずつ動きます。',
+    en: '`onChange` receives the share while dragging, too. From the keyboard it moves by `step`.',
+  }),
+};
+
 export const tabs = {
   description: message({
     ja: 'タブ切り替え',

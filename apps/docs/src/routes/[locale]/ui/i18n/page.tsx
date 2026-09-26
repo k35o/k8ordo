@@ -50,6 +50,7 @@ const MESSAGE_USAGE = {
   carouselSlide: 'Carousel.Slide',
   carouselPrevious: 'Carousel',
   carouselNext: 'Carousel',
+  resizablePanelsHandle: 'ResizablePanels.Handle',
   chat: 'Conversation.Messages',
   scrollToLatest: 'Conversation.ScrollButton',
   reasoning: 'Reasoning',
