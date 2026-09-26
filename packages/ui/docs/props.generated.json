@@ -210,6 +210,50 @@
       "omitted": []
     },
     {
+      "name": "Attachment.Item",
+      "props": [
+        {
+          "name": "mediaType",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "url",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "filename",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "Attachment.List",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
       "name": "Autocomplete",
       "props": [
         {
@@ -2346,6 +2390,56 @@
       "omitted": []
     },
     {
+      "name": "Message.Action",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "disabled",
+          "types": ["boolean"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "onAction",
+          "types": ["() => void | Promise<void>"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "Message.Actions",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
       "name": "Message.Content",
       "props": [
         {
@@ -2365,6 +2459,75 @@
       "omitted": ["className", "style"]
     },
     {
+      "name": "Message.Copy",
+      "props": [
+        {
+          "name": "value",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "Message.Feedback",
+      "props": [
+        {
+          "name": "defaultValue",
+          "types": ["MessageFeedback", "null"],
+          "defaultValue": "null",
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "types": ["(value: MessageFeedback | null) => void"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "value",
+          "types": ["MessageFeedback", "null"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "Message.Regenerate",
+      "props": [
+        {
+          "name": "onAction",
+          "types": ["() => void | Promise<void>"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "disabled",
+          "types": ["boolean"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
       "name": "Message.Root",
       "props": [
         {
@@ -2378,6 +2541,12 @@
           "types": ["'user'", "'assistant'"],
           "defaultValue": null,
           "required": true
+        },
+        {
+          "name": "avatar",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
         }
       ],
       "inherits": "HTMLAttributes<HTMLDivElement>",
@@ -2501,7 +2670,7 @@
       "props": [
         {
           "name": "defaultValue",
-          "types": ["number"],
+          "types": ["number", "string"],
           "defaultValue": null,
           "required": false
         },
@@ -2513,14 +2682,14 @@
         },
         {
           "name": "max",
-          "types": ["number"],
-          "defaultValue": "9_007_199_254_740_991",
+          "types": ["number", "string"],
+          "defaultValue": null,
           "required": false
         },
         {
           "name": "min",
-          "types": ["number"],
-          "defaultValue": "-9_007_199_254_740_991",
+          "types": ["number", "string"],
+          "defaultValue": null,
           "required": false
         },
         {
@@ -2532,7 +2701,7 @@
         {
           "name": "precision",
           "types": ["number"],
-          "defaultValue": "0",
+          "defaultValue": null,
           "required": false
         },
         {
@@ -2543,7 +2712,7 @@
         },
         {
           "name": "step",
-          "types": ["number"],
+          "types": ["number", "'any'"],
           "defaultValue": "1",
           "required": false
         },
@@ -2817,21 +2986,15 @@
       "name": "Progress",
       "props": [
         {
-          "name": "max",
-          "types": ["number"],
-          "defaultValue": null,
-          "required": true
-        },
-        {
-          "name": "value",
-          "types": ["number"],
-          "defaultValue": null,
-          "required": true
-        },
-        {
           "name": "label",
           "types": ["string"],
           "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "max",
+          "types": ["number"],
+          "defaultValue": "100",
           "required": false
         },
         {
@@ -2839,10 +3002,42 @@
           "types": ["number"],
           "defaultValue": "0",
           "required": false
+        },
+        {
+          "name": "value",
+          "types": ["number"],
+          "defaultValue": null,
+          "required": false
         }
       ],
       "inherits": "HTMLAttributes<HTMLDivElement>",
       "omitted": ["children", "className", "style"]
+    },
+    {
+      "name": "PromptInput.Attach",
+      "props": [
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "PromptInput.Attachments",
+      "props": [
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "PromptInput.Root",
@@ -2854,9 +3049,21 @@
           "required": true
         },
         {
+          "name": "accept",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
           "name": "defaultValue",
           "types": ["string"],
           "defaultValue": "''",
+          "required": false
+        },
+        {
+          "name": "maxFiles",
+          "types": ["number"],
+          "defaultValue": null,
           "required": false
         },
         {
@@ -2873,7 +3080,7 @@
         },
         {
           "name": "onSubmit",
-          "types": ["(message: string) => void"],
+          "types": ["(message: string, files: FileList) => void"],
           "defaultValue": null,
           "required": false
         },
@@ -3092,6 +3299,12 @@
           "required": false
         },
         {
+          "name": "required",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
           "name": "value",
           "types": ["string"],
           "defaultValue": null,
@@ -3099,6 +3312,79 @@
         }
       ],
       "inherits": "FieldsetHTMLAttributes<HTMLFieldSetElement>",
+      "omitted": ["className", "style", "children", "role"]
+    },
+    {
+      "name": "RangeSlider",
+      "props": [
+        {
+          "name": "defaultValue",
+          "types": ["readonly [number, number]"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "disabled",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "invalid",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "max",
+          "types": ["number"],
+          "defaultValue": "100",
+          "required": false
+        },
+        {
+          "name": "min",
+          "types": ["number"],
+          "defaultValue": "0",
+          "required": false
+        },
+        {
+          "name": "name",
+          "types": ["readonly [string, string]"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "types": ["(value: [number, number]) => void"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "ref",
+          "types": ["Ref<HTMLDivElement>"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "required",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "step",
+          "types": ["number"],
+          "defaultValue": "1",
+          "required": false
+        },
+        {
+          "name": "value",
+          "types": ["readonly [number, number]"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": "HTMLAttributes<HTMLDivElement>",
       "omitted": ["className", "style", "children", "role"]
     },
     {
@@ -3347,7 +3633,7 @@
       "props": [
         {
           "name": "defaultValue",
-          "types": ["number"],
+          "types": ["number", "string"],
           "defaultValue": null,
           "required": false
         },
@@ -3359,14 +3645,14 @@
         },
         {
           "name": "max",
-          "types": ["number"],
-          "defaultValue": "100",
+          "types": ["number", "string"],
+          "defaultValue": null,
           "required": false
         },
         {
           "name": "min",
-          "types": ["number"],
-          "defaultValue": "0",
+          "types": ["number", "string"],
+          "defaultValue": null,
           "required": false
         },
         {
@@ -3383,7 +3669,7 @@
         },
         {
           "name": "step",
-          "types": ["number"],
+          "types": ["number", "'any'"],
           "defaultValue": "1",
           "required": false
         },
@@ -3396,6 +3682,44 @@
       ],
       "inherits": "InputHTMLAttributes<HTMLInputElement>",
       "omitted": ["type", "className", "style", "children"]
+    },
+    {
+      "name": "Source.Item",
+      "props": [
+        {
+          "name": "href",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "title",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "Source.List",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "SparklesIcon",
@@ -3897,6 +4221,12 @@
           "types": ["Ref<HTMLTextAreaElement>"],
           "defaultValue": null,
           "required": false
+        },
+        {
+          "name": "type",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
         }
       ],
       "inherits": "TextareaHTMLAttributes<HTMLTextAreaElement>",
@@ -3925,7 +4255,19 @@
         },
         {
           "name": "type",
-          "types": ["'email'", "'search'", "'tel'", "'text'", "'url'"],
+          "types": [
+            "'date'",
+            "'datetime-local'",
+            "'email'",
+            "'month'",
+            "'search'",
+            "'tel'",
+            "'text'",
+            "'time'",
+            "'url'",
+            "'week'",
+            "(string & Record<never, never>)"
+          ],
           "defaultValue": "'text'",
           "required": false
         }
@@ -4018,15 +4360,15 @@
           "required": true
         },
         {
-          "name": "defaultOpen",
-          "types": ["boolean"],
-          "defaultValue": "false",
+          "name": "approval",
+          "types": ["ToolApproval"],
+          "defaultValue": null,
           "required": false
         },
         {
-          "name": "deniedReason",
-          "types": ["string"],
-          "defaultValue": null,
+          "name": "defaultOpen",
+          "types": ["boolean"],
+          "defaultValue": "false",
           "required": false
         },
         {
@@ -4044,6 +4386,14 @@
         {
           "name": "isOpen",
           "types": ["boolean"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "onApprovalResponse",
+          "types": [
+            "(response: ToolApprovalResponse) => void | PromiseLike<void>"
+          ],
           "defaultValue": null,
           "required": false
         },

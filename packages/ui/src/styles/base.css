@@ -28,7 +28,6 @@
   }
 
   body {
-    text-spacing-trim: trim-start;
     text-autospace: normal;
     line-break: strict;
     overflow-wrap: anywhere;
@@ -38,7 +37,6 @@
   }
 
   pre {
-    text-spacing-trim: space-all;
     text-autospace: no-autospace;
   }
 
@@ -121,6 +119,43 @@
     }
     to {
       opacity: 1;
+    }
+  }
+
+  /*
+ * 値のない Progress。帯が溝の中を行き来する。縦書きでも溝に沿うよう、
+ * 動かすのは transform ではなく論理プロパティの inset-inline-start にする。
+ * 動きを減らす設定では、移動をやめて溝いっぱいの帯を明滅させる。
+ */
+  .ao-progress-indeterminate {
+    position: absolute;
+    inset-block: 0;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .ao-progress-indeterminate {
+      inline-size: 40%;
+      animation: ao-progress-slide 1.4s ease-in-out infinite;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ao-progress-indeterminate {
+      inset-inline: 0;
+      animation: ao-progress-pulse 2s ease-in-out infinite;
+    }
+  }
+
+  @keyframes ao-progress-slide {
+    from {
+      inset-inline-start: -40%;
+    }
+    to {
+      inset-inline-start: 100%;
+    }
+  }
+
+  @keyframes ao-progress-pulse {
+    50% {
+      opacity: 0.4;
     }
   }
 
@@ -278,9 +313,10 @@
     font-size: var(--text-sm);
     line-height: var(--leading-relaxed);
   }
+  /* 強制カラーでは box-shadow が消えるので、フォーカスは outline で描く */
   .ao-code-block pre:focus-visible {
-    outline: none;
-    box-shadow: inset 0 0 0 2px var(--border-info);
+    outline: 2px solid var(--border-info);
+    outline-offset: -2px;
   }
   .ao-code-block .line {
     display: inline-block;
@@ -293,8 +329,16 @@
     padding-inline-start: 2rem;
   }
   .ao-code-block [data-mark] {
-    box-shadow: inset 3px 0 0 var(--mark-border);
     background-color: var(--mark-bg);
+  }
+  /* 行の頭の線は疑似要素の border で描く。強制カラーでは影と地の色が
+     消えるが、border はシステムの色で塗り直されて残る */
+  .ao-code-block [data-mark]::after {
+    content: '';
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    border-inline-start: 3px solid var(--mark-border);
   }
   .ao-code-block [data-mark='highlight'] {
     --mark-bg: var(--bg-mute);

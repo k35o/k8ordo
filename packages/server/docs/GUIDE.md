@@ -148,9 +148,11 @@ export default async function ProductPage({
 }
 ```
 
-**An async page streams.** The layout above it is on screen first, and the
-page follows in the same response once its data arrives. The browser
-hydrates when the last of it is in place, not before: a boundary still on
+**An async page answers, then streams.** The document waits for the page's
+own component — its data — before anything is sent, because the page may
+still say `notFound()` (below); what the page puts under a `<Suspense>` follows
+in the same response as it arrives. The browser hydrates when the last of it
+is in place, not before: a boundary still on
 its way cannot be hydrated, and a context that changes as the page hydrates —
 a colour scheme read from the browser — would make React render it again
 beside the copy still streaming in. Until then the page is what it is
@@ -372,6 +374,54 @@ and a hole where the page was, the browser throws at the same spot, and
 `error.tsx` shows after hydration. In production the error the browser sees
 carries React's generic message, not the thrown one, and an empty `digest` —
 the message is in the server's log.
+
+<!-- shared:not-found -->
+
+## A page that is not there
+
+A params schema decides what a URL's params look like; whether the thing they
+name exists is the page's to say. `notFound()` from `@k8ordo/router` says it:
+
+```tsx
+// src/routes/products/[id]/page.tsx
+import { notFound } from '@k8ordo/router';
+import type { PageProps } from '@k8ordo/router';
+
+export default async function ProductPage({
+  params,
+}: PageProps<'/products/:id'>) {
+  const product = await findProduct(params.id);
+  if (product === undefined) notFound();
+  return <h1>{product.name}</h1>;
+}
+```
+
+It throws, so the lines after it never run, and the page is answered instead
+by what the table answers for a URL nothing matched there — the nearest
+`not-found.tsx` above it, inside the layouts above that — under a 404. With no
+`not-found.tsx` at all, the framework's own answers — a `404` heading and a
+line, with a `<title>`, rendered inside the root layout, so the visitor keeps
+the document's frame, its `<html lang>` and its stylesheets (a document of
+its own only when there is no root layout either). It is also what a URL
+nothing matches gets from such an application. `notFound()` comes from the
+router rather than the mode package, so the page reads the same under
+either.
+
+`notFound()` is the page's word about itself: thrown from the page's own
+component, before it returns.
+
+<!-- /shared:not-found -->
+
+**A document waits for its page.** A status leaves before the body it heads,
+so a page's HTML is not sent until the page's own component has answered —
+fetched what it needs and returned, or said `notFound()`. What streams after
+that is what the page puts under a `<Suspense>` of its own. A client
+navigation has no status to get right, so its payload streams from the start;
+a page that says `notFound()` there sends the browser back to the server for a
+document load of the same URL, which is answered with the 404. A `HEAD` for a
+page runs the page for the same reason, and sends no body. Thrown from further
+down, once the page has returned and its response has started, `notFound()`
+is an error like any other, and the nearest `error.tsx` answers it.
 
 ## Redirects
 
@@ -656,7 +706,8 @@ client build, which answer before the Worker runs:
 The handler answers `GET`, `HEAD` and `POST`, and any other method with a `405` whose
 `Allow` header names those three, so a host needs no method filter of its
 own. A `HEAD` gets the status and headers a `GET` would, with a `null` body:
-both are settled before the page renders, so the page is not rendered for it.
+the page's own component runs, since it may say `notFound()`, and nothing it
+renders is sent.
 
 **Build the `Request` with the URL the visitor asked for.** A `POST` — a
 Server Action or not — is accepted only when its `Origin` header is present
@@ -788,8 +839,13 @@ the way:
   client build's files are under `/docs/assets/`.
 - A `redirect.ts` target is written from the root, like the table, and is
   sent with the base in front; one that names another origin is sent as
-  written. `redirect()` from a Server Action takes a URL, so build it with
-  `href()`.
+  written.
+- Under `@k8ordo/server`, a redirect the application builds itself is sent
+  as written: `redirect()` from a Server Action, and the `location` of a
+  `Response` a `guard.ts` returns. Both are URLs, so build them with
+  `href()` — `redirect(href('/talks'))`, `location: href('/login')` — or
+  give a pathname built some other way its base with `withBase()` from
+  `@k8ordo/router`.
 - A URL outside the base is none of the application's: the handler answers
   it with a `404`, and the client runtime leaves it to the browser.
 
@@ -869,13 +925,14 @@ an action is handed its arguments, not the request.
 ```ts
 'use server';
 
+import { href } from '@k8ordo/router';
 import { cookies, redirect } from '@k8ordo/server/runtime';
 
 export async function signIn(_previous: FormState, formData: FormData) {
   const session = await startSession(formData);
   if (session === null) return { error: 'wrong password' };
   cookies().set('session', session.token, { maxAge: 60 * 60 * 24 * 30 });
-  redirect('/account');
+  redirect(href('/account'));
 }
 ```
 
@@ -903,12 +960,16 @@ run outer first, one at a time:
 
 ```ts
 // src/routes/admin/guard.ts
+import { href } from '@k8ordo/router';
 import { cookies } from '@k8ordo/server/runtime';
 import type { Guard } from '@k8ordo/server/runtime';
 
 const guard: Guard<'/admin'> = () => {
   if (cookies().has('session')) return;
-  return new Response(null, { status: 303, headers: { location: '/login' } });
+  return new Response(null, {
+    status: 303,
+    headers: { location: href('/login') },
+  });
 };
 
 export default guard;
@@ -925,6 +986,12 @@ way.
 `401`, a `403` — whatever it returns is the answer, and the guards inside it
 and the page below never run. Returning nothing hands the request on to the
 next guard, and the last one to what answers the URL.
+
+A redirect's `location` goes out as the guard wrote it. It is a URL, not a
+pattern in the table's terms like a `redirect.ts` target, so build it with
+`href()`, which carries Vite's `base` when the application is served under
+one. A pathname built some other way gets its base from `withBase()` in
+`@k8ordo/router`.
 
 Letting a request through can still add to its answer. `responseHeaders()`
 is the `Headers` the final response will carry, whatever answers — the page,

@@ -374,6 +374,26 @@ import {
 </FileField.Root>
 ```
 
+With `@k8ordo/form`, spread what `form.field(name).input` derives onto the
+field after `FormControl`'s props — `type`, `required`, the length and range
+bounds, and the echoed `defaultValue` all go in as they are, whichever field
+renders them. Uncontrolled fields keep their value in the DOM, so the form's
+reset, `isDirty`, and error clearing hear every change, including ones a
+component makes in code. The pairing per component is in `@k8ordo/form`'s
+guide (`node_modules/@k8ordo/form/docs/GUIDE.md`, "Working with @k8ordo/ui").
+
+```tsx
+const title = form.field('title');
+
+<FormControl
+  errorText={title.error}
+  invalid={title.invalid}
+  label="Title"
+  required={title.required}
+  renderInput={(props) => <TextField {...props} {...title.input} />}
+/>;
+```
+
 ## Anti-patterns: avoiding "AI slop"
 
 Avoid the traits that make a UI recognizably AI-generated at a glance.

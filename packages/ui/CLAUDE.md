@@ -17,6 +17,7 @@ pnpm test --project=components               # Component tests only (Storybook +
 pnpm test --project=components-dark          # The same stories with the dark theme
 pnpm test --project=components-forced-colors # Stories tagged forced-colors, under forced colors
 pnpm test --project=components-contrast-more # Stories tagged contrast-more, under prefers-contrast: more
+pnpm test --project=form                     # Fields with @k8ordo/form's derived attributes, and FormValue (Playwright)
 pnpm test --project=hooks src/internal/focus-trap.test.tsx # Single test file (needs its project)
 pnpm build                                   # vp pack + CSS copy
 pnpm typecheck                               # Type check (no emit)
@@ -125,7 +126,7 @@ need it are not stuck:
 
 - `Checkbox` / `Switch`: `(checked: boolean, event: ChangeEvent<HTMLInputElement>) => void`
 - `Radio`: `(value: string, event: ChangeEvent<HTMLInputElement>) => void`
-- `FileField`: `(files: FileList | null, event?: ChangeEvent<HTMLInputElement>) => void` (no `event` when files are cleared programmatically)
+- `FileField`: `(files: FileList | null, event?: ChangeEvent<HTMLInputElement>) => void` (`files` is the whole list the field holds, not only the files just picked or dropped; no `event` when files are dropped or removed from the list)
 
 The rest pass the value only, even when a real `<input>` is underneath:
 
@@ -192,6 +193,33 @@ export const MyComponent = { Root, Part } as const;
 - Use `createContext` + `use()` (or `createSafeContext`) for sharing state between parts
 - Use `useId()` for accessible `aria-labelledby`/`aria-describedby` connections
 - `'use client'` directive at top when using hooks
+
+### Form fields
+
+A field must work when `@k8ordo/form`'s `formFields` output is spread onto it
+unchanged (`src/components/form/with-form.test.tsx` holds each component to
+that). Four rules follow:
+
+- **Accept the derived attribute types.** `input` carries `type` as a string,
+  `min` / `max` as `number | string`, `step` as `number | 'any'`, and the
+  echoed `defaultValue` as a string whatever the field is. Widen a prop to
+  take them, or take one and drop it (`Textarea`'s `type`); never make the
+  caller destructure it away.
+- **Keep an uncontrolled value in the DOM.** Pass `defaultValue` /
+  `defaultChecked` to the element, not a `value` / `checked` mirrored from
+  state: a form reset — React's after every action included — restores the
+  DOM without a change event, and the form reads dirtiness from the
+  element's own default. Draw the look from `:checked` rather than from state.
+  Where state is unavoidable (a filled track, a file list), listen for the
+  form's `reset` and put it back.
+- **Announce a value written in code.** Set the DOM value first, then dispatch
+  one `new Event('input', { bubbles: true })` when it actually changed, and
+  never during a reset. React's value tracker remembers the assignment, so the
+  element's own `onChange` does not fire twice.
+- **Submit a composite through `FormValue`** (`src/components/_internal/form-value.tsx`)
+  when the visible part is not the element that submits (`Autocomplete`).
+  Not `type="hidden"`: it is barred from constraint validation, cannot take
+  focus, and with nothing selected no element carries the name at all.
 
 ### Built-in wording
 
@@ -261,6 +289,7 @@ Custom variants besides `dark:`: `light:` (anywhere not under `.dark`) and `vert
 
 - **Component tests** rely on Storybook stories as test fixtures via `@storybook/addon-vitest`. Writing a story IS writing a test.
 - **Hook tests** use `vitest-browser-react` for rendering hooks in a real browser.
+- **Form tests** (`src/components/form/**/*.test.tsx`, `src/components/_internal/**/*.test.tsx`) render fields under `@k8ordo/form`'s `useForm` with an action that calls `parseForm`, in a real browser without the stylesheet. `@k8ordo/form` is a devDependency and resolves from its `dist/`, so build it first on a fresh checkout.
 - **Helper tests** are standard unit tests, no browser needed.
 - **There is no jsdom project, and components are not written to survive one.** They call `ResizeObserver`, `matchMedia`, `dialog.showModal`, and the Popover API directly — no support checks, no null branches. Consumers are told to test in a real browser (`docs/GUIDE.md`); do not reintroduce a guard layer to make a synthetic DOM work.
 - Storybook preview wraps all stories in `UIProvider` with light/dark theme toggle, and defines a `@k8ordo/i18n` locale set (`.storybook/locales.ts`, default `ja`) so the built-in wording is Japanese; a story renders in English with `beforeEach: inEnglish` from the same file.

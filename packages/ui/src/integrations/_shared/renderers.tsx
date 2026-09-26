@@ -36,6 +36,7 @@ import { NumberField } from '../../components/form/number-field';
 import { PasswordInput } from '../../components/form/password-input';
 import { Radio } from '../../components/form/radio';
 import { RadioCard } from '../../components/form/radio-card';
+import { RangeSlider } from '../../components/form/range-slider';
 import { Select } from '../../components/form/select';
 import { Slider } from '../../components/form/slider';
 import { Switch } from '../../components/form/switch';
@@ -153,6 +154,7 @@ import type {
   ProgressProps,
   RadioCardProps,
   RadioProps,
+  RangeSliderProps,
   SelectProps,
   SeparatorProps,
   SkeletonProps,
@@ -527,6 +529,27 @@ export function renderSlider(
   );
 }
 
+// 両方のつまみが同じ name で送るので、FormData では [下側, 上側] の配列になる
+export function renderRangeSlider(
+  props: RangeSliderProps,
+  value: readonly [number, number],
+  onChange: (next: readonly [number, number]) => void,
+): ReactNode {
+  return (
+    <RangeSlider
+      aria-label={props.label}
+      disabled={u(props.disabled)}
+      invalid={u(props.invalid)}
+      max={u(props.max)}
+      min={u(props.min)}
+      name={[props.name, props.name]}
+      onChange={onChange}
+      step={u(props.step)}
+      value={value}
+    />
+  );
+}
+
 // Radio / RadioCard は `aria-labelledby` の宛先 ID を持つ必要があるが、
 // `${name}-label` は同じ name の別 Renderer が同居すると衝突する。
 // `useId()` でユニーク化したラベルを子に渡す共有ラッパー。
@@ -826,9 +849,9 @@ export function renderProgress(props: ProgressProps): ReactNode {
   return (
     <Progress
       label={u(props.label)}
-      max={props.max}
+      max={u(props.max)}
       min={u(props.min)}
-      value={props.value}
+      value={u(props.value)}
     />
   );
 }

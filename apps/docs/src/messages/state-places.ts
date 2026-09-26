@@ -526,6 +526,51 @@ export const schemaSalvageLink = message({
   en: 'Worked salvage examples',
 });
 
+export const versionTitle = message({
+  ja: '保存した形が変わったとき',
+  en: 'When a stored shape changes',
+});
+
+export const versionDescription = message({
+  ja: 'localStorage の行や Cookie は、書いたコードより長く残ります。何もしなければ、古いスキーマが書いた行はフィールドごとにサルベージされます。フィールドを足した・制約を厳しくしたときはそれで正しいのですが、フィールドの名前や意味を変えたときは、何も言わずに既定値に戻ります。そのときは `defineLocalState` か `defineCookieState` に版と移行を渡します。',
+  en: 'A localStorage row or a cookie outlives the code that wrote it. On its own, a row an older schema wrote is salvaged field by field — right for an added field or a tightened constraint, but a renamed field or a changed meaning resets to its default without a word. For those, give `defineLocalState` or `defineCookieState` a version and a migration.',
+});
+
+export const versionEnvelope = message({
+  ja: '版を持つ行は `[version, values]` の形で保存されます。版の無い行（定義が版を宣言する前に書かれた行）は版 `0` として読むので、形が初めて変わったときに `version: 1` を宣言すれば、今ある行は `0` から移行されます。次に変えるときは版を上げ、`migrate` の 2 つ目の引数 `fromVersion` で分けます。',
+  en: 'A versioned row is stored as `[version, values]`. A row with no version — written before the definition declared one — reads as version `0`, so declaring `version: 1` when the shape first changes migrates the existing rows from `0`. On the next change, raise the version and branch on `migrate`’s second argument, `fromVersion`.',
+});
+
+export const versionMigrate = message({
+  ja: '`version` より古い行は、`migrate(old, fromVersion)` を通ってから、ほかの読み取りと同じくスキーマでフィールドごとにサルベージされ、ブラウザのストアが今の版で書き戻します。`migrate` が返すのはスキーマのキーで（ほかのキーは型エラーです）、値は古い値をそのまま渡してかまいません。合わない値はスキーマが既定値に落とします。',
+  en: 'A row older than `version` goes through `migrate(old, fromVersion)`, then through the schema field by field like any read, and the browser store writes it back in the current version. `migrate` returns the schema’s keys — any other key is a type error — with values as they are: hand old values over and the schema drops what does not fit to its default.',
+});
+
+export const versionServer = message({
+  ja: 'サーバーの `parseCookies` も移行して読みますが、書き戻しません（ページは応答に `Set-Cookie` を書けません）。ハイドレーションの後にブラウザが書き戻し、サーバーとブラウザが同じ値を読むので、ちらつきは出ません。',
+  en: 'The server’s `parseCookies` migrates too but never writes back — a page cannot answer with `Set-Cookie`. The browser writes back after hydration, and since both read the same values, nothing flashes.',
+});
+
+export const versionNewer = message({
+  ja: '新しい版が書いた行（次のデプロイを先に読み込んだタブが書いたもの）は、移行せずにサルベージし、書き戻しません。その行は新しいタブのものです。',
+  en: 'A row a newer version wrote — by a tab that loaded the next deploy first — is salvaged without `migrate` and never written back: it stays the newer tab’s.',
+});
+
+export const versionThrow = message({
+  ja: '`migrate` が throw した行は、何も保存されていないものとして既定値で読み、行には触りません。直した `migrate` が次の読み込みでやり直せます。',
+  en: 'A row whose `migrate` throws reads as nothing stored: the defaults show, and the row stays as it was for a fixed `migrate` to try again.',
+});
+
+export const versionShape = message({
+  ja: '版を宣言すると行の形が変わります。宣言する前のコードで動いているタブは、再読み込みするまで `[version, values]` を何も保存されていないものとして読みます。',
+  en: 'Declaring a version changes the row’s shape: a tab still running code from before reads `[version, values]` as nothing stored until it reloads.',
+});
+
+export const versionNone = message({
+  ja: '渡さなければ今までどおりで、行は値のオブジェクトそのもの、古い行はフィールドごとにサルベージされます。`defineSessionState` は版を取りません。行はタブと一緒に消えるので、デプロイをまたいで開いていたタブの行もサルベージで足ります。',
+  en: 'Leave the option out and nothing changes: the row is the bare values object, and an old row is salvaged field by field. `defineSessionState` takes no version — its rows go with the tab, and salvage covers one kept open across a deploy.',
+});
+
 export const zodTitle = message({
   ja: '`zod` と `zod/mini`',
   en: '`zod` or `zod/mini`',
@@ -577,6 +622,10 @@ export const typesTable = {
   stateSchema: message({
     ja: '`url`・`entry`・`defineLocalState`・`defineSessionState`・`defineCookieState` が受け取るスキーマの型。`zod` と `zod/mini` の `z.object()` に共通する部分です',
     en: 'The schema type `url`, `entry`, `defineLocalState`, `defineSessionState` and `defineCookieState` accept: what a `z.object()` from `zod` and one from `zod/mini` have in common',
+  }),
+  versioning: message({
+    ja: '`defineLocalState`・`defineCookieState` の 3 つ目の引数の型。`version`（正の整数）と `migrate(old, fromVersion)`',
+    en: 'The type of the third argument to `defineLocalState` and `defineCookieState`: `version` (a positive integer) and `migrate(old, fromVersion)`',
   }),
   outputOf: message({
     ja: 'スキーマの出力型（`undefined` なら空のオブジェクト型）。props の型に `OutputOf<typeof catalogState.url>` のように使います',

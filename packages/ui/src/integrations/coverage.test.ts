@@ -41,6 +41,8 @@ const LEFT_OUT: ReadonlyMap<string, string> = new Map([
   ['Reasoning', CHAT],
   ['Suggestion', CHAT],
   ['ToolInvocation', CHAT],
+  ['Attachment', CHAT],
+  ['Source', CHAT],
   ['Response', CHAT],
   [
     'CodeBlock',
