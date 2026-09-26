@@ -138,6 +138,8 @@ const renderers = {
   Table: ({ props }: ComponentRenderProps<sc.TableProps>) =>
     ui.renderTable(props),
   Tree: ({ props }: ComponentRenderProps<sc.TreeProps>) => ui.renderTree(props),
+  SideNav: ({ props }: ComponentRenderProps<sc.SideNavProps>) =>
+    ui.renderSideNav(props),
 
   TextField: TextFieldView,
   Textarea: TextareaView,

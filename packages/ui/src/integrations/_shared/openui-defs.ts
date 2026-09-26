@@ -93,6 +93,11 @@ export const buildComponentLibrary = <C>(
     s.accordionProps,
   );
   const Breadcrumb = def('Breadcrumb', 'Breadcrumb trail.', s.breadcrumbProps);
+  const SideNav = def(
+    'SideNav',
+    'Side navigation: groups of links, each group under a small title. Mark the page being shown with current: true.',
+    s.sideNavProps,
+  );
   const Table = def(
     'Table',
     'Table with columns and rows (the cell strings of each row). Every row must have exactly as many cells as there are columns.',
@@ -246,6 +251,7 @@ export const buildComponentLibrary = <C>(
     Tabs.ref,
     Accordion.ref,
     Breadcrumb.ref,
+    SideNav.ref,
     Table.ref,
     Tree.ref,
     TextField.ref,
@@ -414,6 +420,7 @@ export const buildComponentLibrary = <C>(
       Tabs,
       Accordion,
       Breadcrumb,
+      SideNav,
       Table,
       Tree,
       TextField,

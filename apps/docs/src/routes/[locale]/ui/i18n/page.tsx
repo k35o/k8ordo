@@ -48,6 +48,7 @@ const MESSAGE_USAGE = {
   paginationPrevious: 'Pagination',
   paginationNext: 'Pagination',
   codeBlockCopy: 'CodeBlock',
+  tableOfContents: 'TableOfContents',
   carousel: 'Carousel',
   carouselSlide: 'Carousel.Slide',
   carouselPrevious: 'Carousel',

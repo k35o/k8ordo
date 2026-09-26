@@ -526,6 +526,36 @@ export const breadcrumbProps = z.object({
     ),
 }) satisfies z.ZodType<BreadcrumbIntegrationProps>;
 
+type SideNavIntegrationProps = {
+  label: string;
+  groups: ReadonlyArray<{
+    title: string;
+    links: ReadonlyArray<{ label: string; href: string; current?: boolean }>;
+  }>;
+};
+export const sideNavProps = z.object({
+  label: z.string().describe('Accessible name of the navigation'),
+  groups: z
+    .array(
+      z.object({
+        title: z.string(),
+        links: z
+          .array(
+            z.object({
+              label: z.string(),
+              href: safeUrl,
+              current: z.boolean().optional(),
+            }),
+          )
+          .min(1),
+      }),
+    )
+    .min(1)
+    .describe(
+      'Groups of links, each under a title; the link with current: true is the page being shown',
+    ),
+}) satisfies z.ZodType<SideNavIntegrationProps>;
+
 type PaginationIntegrationProps = {
   name: string;
   totalPages: number;
@@ -1002,6 +1032,7 @@ export type ProgressProps = z.infer<typeof progressProps>;
 export type SkeletonProps = z.infer<typeof skeletonProps>;
 export type AccordionProps = z.infer<typeof accordionProps>;
 export type BreadcrumbProps = z.infer<typeof breadcrumbProps>;
+export type SideNavProps = z.infer<typeof sideNavProps>;
 export type TableProps = z.infer<typeof tableProps>;
 export type TreeProps = z.infer<typeof treeProps>;
 export type TextareaProps = z.infer<typeof textareaProps>;

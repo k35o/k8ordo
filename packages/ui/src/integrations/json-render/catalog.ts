@@ -93,6 +93,11 @@ export const catalog = defineCatalog(schema, {
       description:
         'Tree of nodes that open and close, such as files and folders, navigable with the arrow keys. List every node flat; a child names its parent by parentId.',
     },
+    SideNav: {
+      props: s.sideNavProps,
+      description:
+        'Side navigation: groups of links, each group under a small title. Mark the page being shown with current: true.',
+    },
     Table: {
       props: s.tableProps,
       description:
