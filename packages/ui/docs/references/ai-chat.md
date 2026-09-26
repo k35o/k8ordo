@@ -425,7 +425,7 @@ import { ToolInvocation } from '@k8ordo/ui/ai';
 
 ### Approval
 
-When `state` is `'approval-requested'`, the tool is waiting for the user. Pass the part's `approval` and an `onApprovalResponse`, and a question with Deny / Allow buttons appears below the header — outside the collapsible panel, so it is visible without expanding the call; the input stays one click away in the panel. Pressing one calls `onApprovalResponse({ id: approval.id, approved })`, which is exactly what the AI SDK's `addToolApprovalResponse` takes. Both buttons stay disabled until a returned promise settles. Once the state moves on, the question disappears; if it held focus, focus moves to the tool's header instead of falling to `body`.
+When `state` is `'approval-requested'`, the tool is waiting for the user. Pass the part's `approval` and an `onApprovalResponse`, and a question with Deny / Allow buttons appears below the header — outside the collapsible panel, so it is visible without expanding the call; the input stays one click away in the panel. Pressing one calls `onApprovalResponse({ id: approval.id, approved })`, which is exactly what the AI SDK's `addToolApprovalResponse` takes. Both buttons stay disabled until a returned promise settles, and the question disappears once the state moves on. A disabled button cannot keep focus, so if the pressed button held it, focus moves to the tool's header as the answer is sent instead of falling to `body`.
 
 ```tsx
 <ToolInvocation
