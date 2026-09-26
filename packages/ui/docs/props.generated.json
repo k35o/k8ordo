@@ -5,15 +5,7 @@
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -26,9 +18,7 @@
       "props": [
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         }
@@ -41,33 +31,25 @@
       "props": [
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "defaultOpen",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": "false",
           "required": false
         },
         {
           "name": "isOpen",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "onChange",
-          "types": [
-            "(isOpen: boolean) => void"
-          ],
+          "types": ["(isOpen: boolean) => void"],
           "defaultValue": null,
           "required": false
         }
@@ -80,9 +62,7 @@
       "props": [
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         }
@@ -95,9 +75,7 @@
       "props": [
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         }
@@ -110,15 +88,7 @@
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -131,76 +101,50 @@
       "props": [
         {
           "name": "message",
-          "types": [
-            "string",
-            "string[]"
-          ],
+          "types": ["string", "string[]"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "tone",
-          "types": [
-            "Status"
-          ],
+          "types": ["Status"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "action",
-          "types": [
-            "AlertAction"
-          ],
+          "types": ["AlertAction"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "closeLabel",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "onClose",
-          "types": [
-            "() => void"
-          ],
+          "types": ["() => void"],
           "defaultValue": null,
           "required": false
         }
       ],
       "inherits": "HTMLAttributes<HTMLDivElement>",
-      "omitted": [
-        "children",
-        "role",
-        "className",
-        "style"
-      ]
+      "omitted": ["children", "role", "className", "style"]
     },
     {
       "name": "AlertIcon",
       "props": [
         {
           "name": "status",
-          "types": [
-            "Status"
-          ],
+          "types": ["Status"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -213,59 +157,38 @@
       "props": [
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "href",
-          "types": [
-            "T"
-          ],
+          "types": ["T"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "openInNewTab",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": "false",
           "required": false
         },
         {
           "name": "renderAnchor",
-          "types": [
-            "(props: RenderAnchorProps<T>) => ReactNode"
-          ],
+          "types": ["(props: RenderAnchorProps<T>) => ReactNode"],
           "defaultValue": "defaultRenderAnchor",
           "required": false
         }
       ],
       "inherits": "AnchorHTMLAttributes<HTMLAnchorElement>",
-      "omitted": [
-        "target",
-        "rel",
-        "className",
-        "style"
-      ]
+      "omitted": ["target", "rel", "className", "style"]
     },
     {
       "name": "AssistantIcon",
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -278,15 +201,7 @@
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -299,25 +214,19 @@
       "props": [
         {
           "name": "mediaType",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "url",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "filename",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         }
@@ -330,17 +239,13 @@
       "props": [
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "label",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         }
@@ -353,57 +258,43 @@
       "props": [
         {
           "name": "id",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "options",
-          "types": [
-            "readonly Option[]"
-          ],
+          "types": ["readonly Option[]"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "defaultValue",
-          "types": [
-            "string[]"
-          ],
+          "types": ["string[]"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "invalid",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": "false",
           "required": false
         },
         {
           "name": "onChange",
-          "types": [
-            "(value: string[]) => void"
-          ],
+          "types": ["(value: string[]) => void"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "ref",
-          "types": [
-            "Ref<HTMLInputElement>"
-          ],
+          "types": ["Ref<HTMLInputElement>"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "value",
-          "types": [
-            "string[]"
-          ],
+          "types": ["string[]"],
           "defaultValue": null,
           "required": false
         }
@@ -427,154 +318,99 @@
       "props": [
         {
           "name": "alt",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "color",
-          "types": [
-            "'base'",
-            "'primary'",
-            "'secondary'"
-          ],
+          "types": ["'base'", "'primary'", "'secondary'"],
           "defaultValue": "'base'",
           "required": false
         },
         {
           "name": "fallback",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "icon",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "name",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "size",
-          "types": [
-            "'sm'",
-            "'md'",
-            "'lg'"
-          ],
+          "types": ["'sm'", "'md'", "'lg'"],
           "defaultValue": "'md'",
           "required": false
         },
         {
           "name": "src",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         }
       ],
       "inherits": "HTMLAttributes<HTMLSpanElement>",
-      "omitted": [
-        "role",
-        "aria-label",
-        "className",
-        "style"
-      ]
+      "omitted": ["role", "aria-label", "className", "style"]
     },
     {
       "name": "Badge",
       "props": [
         {
           "name": "label",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "interactive",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "size",
-          "types": [
-            "'sm'",
-            "'md'",
-            "'lg'"
-          ],
+          "types": ["'sm'", "'md'", "'lg'"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "tone",
-          "types": [
-            "'neutral'",
-            "'info'",
-            "'success'",
-            "'warning'",
-            "'error'"
-          ],
+          "types": ["'neutral'", "'info'", "'success'", "'warning'", "'error'"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "variant",
-          "types": [
-            "'solid'",
-            "'outline'"
-          ],
+          "types": ["'solid'", "'outline'"],
           "defaultValue": null,
           "required": false
         }
       ],
       "inherits": "ButtonHTMLAttributes<HTMLButtonElement> | HTMLAttributes<HTMLSpanElement>",
-      "omitted": [
-        "children",
-        "className",
-        "style",
-        "type"
-      ]
+      "omitted": ["children", "className", "style", "type"]
     },
     {
       "name": "BadIcon",
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -587,15 +423,7 @@
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -608,15 +436,7 @@
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -629,9 +449,7 @@
       "props": [
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         }
@@ -644,33 +462,25 @@
       "props": [
         {
           "name": "href",
-          "types": [
-            "T"
-          ],
+          "types": ["T"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "current",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": "false",
           "required": false
         },
         {
           "name": "renderAnchor",
-          "types": [
-            "(props: RenderBreadcrumbAnchorProps<T>) => ReactNode"
-          ],
+          "types": ["(props: RenderBreadcrumbAnchorProps<T>) => ReactNode"],
           "defaultValue": "defaultRenderBreadcrumbAnchor",
           "required": false
         }
@@ -683,19 +493,13 @@
       "props": [
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "size",
-          "types": [
-            "'sm'",
-            "'md'",
-            "'lg'"
-          ],
+          "types": ["'sm'", "'md'", "'lg'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -714,147 +518,104 @@
       "props": [
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "color",
-          "types": [
-            "'primary'",
-            "'secondary'",
-            "'base'"
-          ],
+          "types": ["'primary'", "'secondary'", "'base'"],
           "defaultValue": "'primary'",
           "required": false
         },
         {
           "name": "endIcon",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "fullWidth",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": "false",
           "required": false
         },
         {
           "name": "isActive",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": "false",
           "required": false
         },
         {
           "name": "onAction",
-          "types": [
-            "() => void | Promise<void>"
-          ],
+          "types": ["() => void | Promise<void>"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "renderItem",
-          "types": [
-            "(props: ButtonRenderItemProps) => ReactNode"
-          ],
+          "types": ["(props: ButtonRenderItemProps) => ReactNode"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "size",
-          "types": [
-            "'sm'",
-            "'md'",
-            "'lg'"
-          ],
+          "types": ["'sm'", "'md'", "'lg'"],
           "defaultValue": "'md'",
           "required": false
         },
         {
           "name": "startIcon",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "type",
-          "types": [
-            "'button'",
-            "'submit'"
-          ],
+          "types": ["'button'", "'submit'"],
           "defaultValue": "'button'",
           "required": false
         },
         {
           "name": "variant",
-          "types": [
-            "'solid'",
-            "'outline'",
-            "'skeleton'"
-          ],
+          "types": ["'solid'", "'outline'", "'skeleton'"],
           "defaultValue": "'solid'",
           "required": false
         }
       ],
       "inherits": "ComponentPropsWithRef<'button'>",
-      "omitted": [
-        "className",
-        "style"
-      ]
+      "omitted": ["className", "style"]
     },
     {
       "name": "Calendar",
       "props": [
         {
           "name": "defaultValue",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "max",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "min",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "onChange",
-          "types": [
-            "(value: string) => void"
-          ],
+          "types": ["(value: string) => void"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "value",
-          "types": [
-            "string",
-            "null"
-          ],
+          "types": ["string", "null"],
           "defaultValue": null,
           "required": false
         }
@@ -867,72 +628,50 @@
       "props": [
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "interactive",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": "false",
           "required": false
         },
         {
           "name": "variant",
-          "types": [
-            "'shadow'",
-            "'outline'"
-          ],
+          "types": ["'shadow'", "'outline'"],
           "defaultValue": "'shadow'",
           "required": false
         },
         {
           "name": "width",
-          "types": [
-            "'full'",
-            "'fit'"
-          ],
+          "types": ["'full'", "'fit'"],
           "defaultValue": "'full'",
           "required": false
         }
       ],
       "inherits": "HTMLAttributes<HTMLDivElement>",
-      "omitted": [
-        "className",
-        "style"
-      ]
+      "omitted": ["className", "style"]
     },
     {
       "name": "Carousel.Root",
       "props": [
         {
           "name": "label",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "slideSize",
-          "types": [
-            "'full'",
-            "'lg'",
-            "'md'",
-            "'sm'"
-          ],
+          "types": ["'full'", "'lg'", "'md'", "'sm'"],
           "defaultValue": "'full'",
           "required": false
         }
@@ -945,17 +684,13 @@
       "props": [
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "label",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         }
@@ -968,25 +703,19 @@
       "props": [
         {
           "name": "label",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "checked",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "defaultChecked",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": null,
           "required": false
         },
@@ -998,17 +727,13 @@
         },
         {
           "name": "invalid",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": "false",
           "required": false
         },
         {
           "name": "itemValue",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         },
@@ -1028,114 +753,81 @@
         },
         {
           "name": "ref",
-          "types": [
-            "Ref<HTMLInputElement>"
-          ],
+          "types": ["Ref<HTMLInputElement>"],
           "defaultValue": null,
           "required": false
         }
       ],
       "inherits": "InputHTMLAttributes<HTMLInputElement>",
-      "omitted": [
-        "type",
-        "className",
-        "style",
-        "value",
-        "children"
-      ]
+      "omitted": ["type", "className", "style", "value", "children"]
     },
     {
       "name": "CheckboxCard",
       "props": [
         {
           "name": "aria-labelledby",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "options",
-          "types": [
-            "readonly CheckboxCardOption[]"
-          ],
+          "types": ["readonly CheckboxCardOption[]"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "defaultValue",
-          "types": [
-            "string[]"
-          ],
+          "types": ["string[]"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "invalid",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": "false",
           "required": false
         },
         {
           "name": "onChange",
-          "types": [
-            "(value: string[]) => void"
-          ],
+          "types": ["(value: string[]) => void"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "ref",
-          "types": [
-            "Ref<HTMLFieldSetElement>"
-          ],
+          "types": ["Ref<HTMLFieldSetElement>"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "value",
-          "types": [
-            "string[]"
-          ],
+          "types": ["string[]"],
           "defaultValue": null,
           "required": false
         }
       ],
       "inherits": "FieldsetHTMLAttributes<HTMLFieldSetElement>",
-      "omitted": [
-        "className",
-        "style",
-        "children",
-        "role"
-      ]
+      "omitted": ["className", "style", "children", "role"]
     },
     {
       "name": "CheckboxGroup.Item",
       "props": [
         {
           "name": "label",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "checked",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "defaultChecked",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": null,
           "required": false
         },
@@ -1147,17 +839,13 @@
         },
         {
           "name": "invalid",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": "false",
           "required": false
         },
         {
           "name": "itemValue",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         },
@@ -1177,111 +865,75 @@
         },
         {
           "name": "ref",
-          "types": [
-            "Ref<HTMLInputElement>"
-          ],
+          "types": ["Ref<HTMLInputElement>"],
           "defaultValue": null,
           "required": false
         }
       ],
       "inherits": "InputHTMLAttributes<HTMLInputElement>",
-      "omitted": [
-        "type",
-        "className",
-        "style",
-        "value",
-        "children"
-      ]
+      "omitted": ["type", "className", "style", "value", "children"]
     },
     {
       "name": "CheckboxGroup.Root",
       "props": [
         {
           "name": "aria-labelledby",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "name",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "defaultValue",
-          "types": [
-            "string[]"
-          ],
+          "types": ["string[]"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "invalid",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": "false",
           "required": false
         },
         {
           "name": "onChange",
-          "types": [
-            "(value: string[]) => void"
-          ],
+          "types": ["(value: string[]) => void"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "ref",
-          "types": [
-            "Ref<HTMLFieldSetElement>"
-          ],
+          "types": ["Ref<HTMLFieldSetElement>"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "value",
-          "types": [
-            "string[]"
-          ],
+          "types": ["string[]"],
           "defaultValue": null,
           "required": false
         }
       ],
       "inherits": "FieldsetHTMLAttributes<HTMLFieldSetElement>",
-      "omitted": [
-        "className",
-        "style",
-        "role"
-      ]
+      "omitted": ["className", "style", "role"]
     },
     {
       "name": "CheckIcon",
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -1294,23 +946,13 @@
       "props": [
         {
           "name": "direction",
-          "types": [
-            "Direction"
-          ],
+          "types": ["Direction"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -1323,15 +965,7 @@
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -1344,15 +978,7 @@
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -1365,84 +991,57 @@
       "props": [
         {
           "name": "children",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": true
         }
       ],
       "inherits": "HTMLAttributes<HTMLElement>",
-      "omitted": [
-        "className",
-        "style"
-      ]
+      "omitted": ["className", "style"]
     },
     {
       "name": "CodeBlock",
       "props": [
         {
           "name": "code",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "callouts",
-          "types": [
-            "Readonly<Record<number, string | readonly string[]>>"
-          ],
+          "types": ["Readonly<Record<number, string | readonly string[]>>"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "lang",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": "'text'",
           "required": false
         },
         {
           "name": "marks",
-          "types": [
-            "Readonly<Record<number, 'highlight' | 'add' | 'remove'>>"
-          ],
+          "types": ["Readonly<Record<number, 'highlight' | 'add' | 'remove'>>"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "title",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         }
       ],
       "inherits": "HTMLAttributes<HTMLElement>",
-      "omitted": [
-        "children",
-        "className",
-        "style"
-      ]
+      "omitted": ["children", "className", "style"]
     },
     {
       "name": "CodeXmlIcon",
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -1455,15 +1054,7 @@
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -1476,15 +1067,7 @@
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -1497,15 +1080,7 @@
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -1518,65 +1093,49 @@
       "props": [
         {
           "name": "defaultValue",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "invalid",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": "false",
           "required": false
         },
         {
           "name": "onChange",
-          "types": [
-            "(value: string) => void"
-          ],
+          "types": ["(value: string) => void"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "options",
-          "types": [
-            "readonly Option[]"
-          ],
+          "types": ["readonly Option[]"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "ref",
-          "types": [
-            "Ref<HTMLInputElement>"
-          ],
+          "types": ["Ref<HTMLInputElement>"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "search",
-          "types": [
-            "ComboboxSearch"
-          ],
+          "types": ["ComboboxSearch"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "type",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "value",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         }
@@ -1599,25 +1158,19 @@
       "props": [
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "isStreaming",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": "false",
           "required": false
         },
         {
           "name": "label",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         }
@@ -1630,9 +1183,7 @@
       "props": [
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": true
         }
@@ -1645,9 +1196,7 @@
       "props": [
         {
           "name": "label",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         }
@@ -1660,44 +1209,31 @@
       "props": [
         {
           "name": "value",
-          "types": [
-            "string",
-            "(() => string | Promise<string>)"
-          ],
+          "types": ["string", "(() => string | Promise<string>)"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "disabled",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": "false",
           "required": false
         },
         {
           "name": "iconOnly",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": "false",
           "required": false
         },
         {
           "name": "label",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "size",
-          "types": [
-            "'sm'",
-            "'md'",
-            "'lg'"
-          ],
+          "types": ["'sm'", "'md'", "'lg'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -1710,15 +1246,7 @@
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -1731,15 +1259,7 @@
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -1825,89 +1345,63 @@
       "props": [
         {
           "name": "invalid",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": "false",
           "required": false
         },
         {
           "name": "ref",
-          "types": [
-            "Ref<HTMLInputElement>"
-          ],
+          "types": ["Ref<HTMLInputElement>"],
           "defaultValue": null,
           "required": false
         }
       ],
       "inherits": "InputHTMLAttributes<HTMLInputElement>",
-      "omitted": [
-        "className",
-        "style",
-        "type",
-        "children"
-      ]
+      "omitted": ["className", "style", "type", "children"]
     },
     {
       "name": "DatePicker",
       "props": [
         {
           "name": "defaultValue",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "invalid",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": "false",
           "required": false
         },
         {
           "name": "onChange",
-          "types": [
-            "(value: string) => void"
-          ],
+          "types": ["(value: string) => void"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "ref",
-          "types": [
-            "Ref<HTMLInputElement>"
-          ],
+          "types": ["Ref<HTMLInputElement>"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "value",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         }
       ],
       "inherits": "InputHTMLAttributes<HTMLInputElement>",
-      "omitted": [
-        "className",
-        "style",
-        "type",
-        "children"
-      ]
+      "omitted": ["className", "style", "type", "children"]
     },
     {
       "name": "Dialog.Content",
       "props": [
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         }
@@ -1920,17 +1414,13 @@
       "props": [
         {
           "name": "onClose",
-          "types": [
-            "() => void"
-          ],
+          "types": ["() => void"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "title",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": true
         }
@@ -1943,42 +1433,31 @@
       "props": [
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "id",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "ref",
-          "types": [
-            "Ref<HTMLElement>"
-          ],
+          "types": ["Ref<HTMLElement>"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "role",
-          "types": [
-            "'dialog'",
-            "'alertdialog'"
-          ],
+          "types": ["'dialog'", "'alertdialog'"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "tabIndex",
-          "types": [
-            "number"
-          ],
+          "types": ["number"],
           "defaultValue": null,
           "required": false
         }
@@ -1991,15 +1470,7 @@
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -2012,49 +1483,37 @@
       "props": [
         {
           "name": "title",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "defaultOpen",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "isOpen",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "onClose",
-          "types": [
-            "() => void"
-          ],
+          "types": ["() => void"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "side",
-          "types": [
-            "DrawerSide"
-          ],
+          "types": ["DrawerSide"],
           "defaultValue": "'right'",
           "required": false
         }
@@ -2067,9 +1526,7 @@
       "props": [
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         }
@@ -2082,17 +1539,13 @@
       "props": [
         {
           "name": "icon",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "label",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": true
         }
@@ -2105,17 +1558,13 @@
       "props": [
         {
           "name": "label",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "onAction",
-          "types": [
-            "() => void"
-          ],
+          "types": ["() => void"],
           "defaultValue": null,
           "required": true
         }
@@ -2128,41 +1577,31 @@
       "props": [
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "defaultOpen",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "isOpen",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "onChange",
-          "types": [
-            "(isOpen: boolean) => void"
-          ],
+          "types": ["(isOpen: boolean) => void"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "placement",
-          "types": [
-            "Placement"
-          ],
+          "types": ["Placement"],
           "defaultValue": "'bottom-start'",
           "required": false
         }
@@ -2175,17 +1614,13 @@
       "props": [
         {
           "name": "label",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         }
@@ -2198,25 +1633,19 @@
       "props": [
         {
           "name": "label",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "size",
-          "types": [
-            "ComponentProps<typeof Button>['size']"
-          ],
+          "types": ["ComponentProps<typeof Button>['size']"],
           "defaultValue": "'md'",
           "required": false
         },
         {
           "name": "variant",
-          "types": [
-            "ComponentProps<typeof Button>['variant']"
-          ],
+          "types": ["ComponentProps<typeof Button>['variant']"],
           "defaultValue": "'solid'",
           "required": false
         }
@@ -2229,15 +1658,7 @@
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -2250,15 +1671,7 @@
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -2271,58 +1684,38 @@
       "props": [
         {
           "name": "title",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "action",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "description",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "icon",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         }
       ],
       "inherits": "HTMLAttributes<HTMLDivElement>",
-      "omitted": [
-        "children",
-        "className",
-        "style"
-      ]
+      "omitted": ["children", "className", "style"]
     },
     {
       "name": "ExternalLinkIcon",
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -2335,9 +1728,7 @@
       "props": [
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         }
@@ -2350,17 +1741,13 @@
       "props": [
         {
           "name": "clearable",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "showWebkitRelativePath",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": null,
           "required": false
         }
@@ -2373,34 +1760,25 @@
       "props": [
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "defaultValue",
-          "types": [
-            "File[]",
-            "string"
-          ],
+          "types": ["File[]", "string"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "invalid",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": "false",
           "required": false
         },
         {
           "name": "maxFiles",
-          "types": [
-            "number"
-          ],
+          "types": ["number"],
           "defaultValue": null,
           "required": false
         },
@@ -2414,28 +1792,19 @@
         },
         {
           "name": "ref",
-          "types": [
-            "Ref<HTMLInputElement>"
-          ],
+          "types": ["Ref<HTMLInputElement>"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "webkitDirectory",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": "false",
           "required": false
         }
       ],
       "inherits": "InputHTMLAttributes<HTMLInputElement>",
-      "omitted": [
-        "type",
-        "className",
-        "style",
-        "value"
-      ]
+      "omitted": ["type", "className", "style", "value"]
     },
     {
       "name": "FileField.Trigger",
@@ -2457,15 +1826,7 @@
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -2478,15 +1839,7 @@
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -2499,15 +1852,7 @@
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -2520,44 +1865,32 @@
       "props": [
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "action",
-          "types": [
-            "((formData: FormData) => void | Promise<void>)",
-            "string"
-          ],
+          "types": ["((formData: FormData) => void | Promise<void>)", "string"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "ref",
-          "types": [
-            "Ref<HTMLFormElement>"
-          ],
+          "types": ["Ref<HTMLFormElement>"],
           "defaultValue": null,
           "required": false
         }
       ],
       "inherits": "FormHTMLAttributes<HTMLFormElement>",
-      "omitted": [
-        "className",
-        "style"
-      ]
+      "omitted": ["className", "style"]
     },
     {
       "name": "FormControl",
       "props": [
         {
           "name": "label",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": true
         },
@@ -2571,83 +1904,56 @@
         },
         {
           "name": "disabled",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": "false",
           "required": false
         },
         {
           "name": "errorText",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "helpText",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "invalid",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": "false",
           "required": false
         },
         {
           "name": "labelAs",
-          "types": [
-            "'label'",
-            "'legend'"
-          ],
+          "types": ["'label'", "'legend'"],
           "defaultValue": "'label'",
           "required": false
         },
         {
           "name": "ref",
-          "types": [
-            "Ref<HTMLElement>"
-          ],
+          "types": ["Ref<HTMLElement>"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "required",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": "false",
           "required": false
         }
       ],
       "inherits": "HTMLAttributes<HTMLElement>",
-      "omitted": [
-        "className",
-        "style",
-        "children"
-      ]
+      "omitted": ["className", "style", "children"]
     },
     {
       "name": "FormIcon",
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -2660,15 +1966,7 @@
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -2681,15 +1979,7 @@
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -2702,15 +1992,7 @@
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -2723,113 +2005,63 @@
       "props": [
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "cols",
-          "types": [
-            "1",
-            "2",
-            "3",
-            "4",
-            "5",
-            "6",
-            "'auto-fill'",
-            "'auto-fit'"
-          ],
+          "types": ["1", "2", "3", "4", "5", "6", "'auto-fill'", "'auto-fit'"],
           "defaultValue": "'auto-fill'",
           "required": false
         },
         {
           "name": "gap",
-          "types": [
-            "GapSize"
-          ],
+          "types": ["GapSize"],
           "defaultValue": "'md'",
           "required": false
         },
         {
           "name": "minItemSize",
-          "types": [
-            "24",
-            "32",
-            "40",
-            "48",
-            "64",
-            "80"
-          ],
+          "types": ["24", "32", "40", "48", "64", "80"],
           "defaultValue": "48",
           "required": false
         }
       ],
       "inherits": "HTMLAttributes<HTMLDivElement>",
-      "omitted": [
-        "className",
-        "style"
-      ]
+      "omitted": ["className", "style"]
     },
     {
       "name": "Heading",
       "props": [
         {
           "name": "level",
-          "types": [
-            "'h1'",
-            "'h2'",
-            "'h3'",
-            "'h4'",
-            "'h5'",
-            "'h6'"
-          ],
+          "types": ["'h1'", "'h2'", "'h3'", "'h4'", "'h5'", "'h6'"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "lineClamp",
-          "types": [
-            "1",
-            "2",
-            "3",
-            "4",
-            "5",
-            "6"
-          ],
+          "types": ["1", "2", "3", "4", "5", "6"],
           "defaultValue": null,
           "required": false
         }
       ],
       "inherits": "HTMLAttributes<HTMLHeadingElement>",
-      "omitted": [
-        "className",
-        "style"
-      ]
+      "omitted": ["className", "style"]
     },
     {
       "name": "HistoryIcon",
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -2842,15 +2074,7 @@
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -2863,95 +2087,62 @@
       "props": [
         {
           "name": "label",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "color",
-          "types": [
-            "'transparent'",
-            "'base'",
-            "'primary'",
-            "'secondary'"
-          ],
+          "types": ["'transparent'", "'base'", "'primary'", "'secondary'"],
           "defaultValue": "'transparent'",
           "required": false
         },
         {
           "name": "onAction",
-          "types": [
-            "() => void | Promise<void>"
-          ],
+          "types": ["() => void | Promise<void>"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "renderItem",
-          "types": [
-            "(props: IconButtonRenderItemProps) => ReactNode"
-          ],
+          "types": ["(props: IconButtonRenderItemProps) => ReactNode"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "size",
-          "types": [
-            "'sm'",
-            "'md'",
-            "'lg'"
-          ],
+          "types": ["'sm'", "'md'", "'lg'"],
           "defaultValue": "'md'",
           "required": false
         },
         {
           "name": "tooltipDisabled",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": "false",
           "required": false
         },
         {
           "name": "tooltipPlacement",
-          "types": [
-            "Placement"
-          ],
+          "types": ["Placement"],
           "defaultValue": "'top'",
           "required": false
         }
       ],
       "inherits": "ComponentPropsWithRef<'button'>",
-      "omitted": [
-        "type",
-        "className",
-        "style"
-      ]
+      "omitted": ["type", "className", "style"]
     },
     {
       "name": "InformativeIcon",
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -2964,15 +2155,7 @@
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -2985,50 +2168,37 @@
       "props": [
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "onChange",
-          "types": [
-            "(isInView: boolean) => void"
-          ],
+          "types": ["(isInView: boolean) => void"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "once",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": "false",
           "required": false
         },
         {
           "name": "root",
-          "types": [
-            "Element",
-            "null"
-          ],
+          "types": ["Element", "null"],
           "defaultValue": "null",
           "required": false
         },
         {
           "name": "rootMargin",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": "'0px'",
           "required": false
         },
         {
           "name": "threshold",
-          "types": [
-            "number"
-          ],
+          "types": ["number"],
           "defaultValue": "0",
           "required": false
         }
@@ -3041,41 +2211,26 @@
       "props": [
         {
           "name": "children",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "label",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         }
       ],
       "inherits": "HTMLAttributes<HTMLElement>",
-      "omitted": [
-        "className",
-        "style"
-      ]
+      "omitted": ["className", "style"]
     },
     {
       "name": "LightModeIcon",
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -3088,15 +2243,7 @@
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -3109,9 +2256,7 @@
       "props": [
         {
           "name": "helpContent",
-          "types": [
-            "ReactElement"
-          ],
+          "types": ["ReactElement"],
           "defaultValue": null,
           "required": false
         }
@@ -3124,25 +2269,19 @@
       "props": [
         {
           "name": "icon",
-          "types": [
-            "ReactElement"
-          ],
+          "types": ["ReactElement"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "label",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "size",
-          "types": [
-            "ComponentProps<typeof Button>['size']"
-          ],
+          "types": ["ComponentProps<typeof Button>['size']"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -3155,49 +2294,37 @@
       "props": [
         {
           "name": "options",
-          "types": [
-            "readonly Option[]"
-          ],
+          "types": ["readonly Option[]"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "defaultValue",
-          "types": [
-            "Option['value']"
-          ],
+          "types": ["Option['value']"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "onChange",
-          "types": [
-            "(value: Option['value']) => void"
-          ],
+          "types": ["(value: Option['value']) => void"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "placement",
-          "types": [
-            "Placement"
-          ],
+          "types": ["Placement"],
           "defaultValue": "'bottom'",
           "required": false
         },
         {
           "name": "value",
-          "types": [
-            "Option['value']"
-          ],
+          "types": ["Option['value']"],
           "defaultValue": null,
           "required": false
         }
@@ -3210,17 +2337,13 @@
       "props": [
         {
           "name": "label",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "size",
-          "types": [
-            "ComponentProps<typeof Button>['size']"
-          ],
+          "types": ["ComponentProps<typeof Button>['size']"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -3233,15 +2356,7 @@
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -3254,15 +2369,7 @@
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -3275,15 +2382,7 @@
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -3296,15 +2395,7 @@
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -3317,25 +2408,19 @@
       "props": [
         {
           "name": "aria-hidden",
-          "types": [
-            "true"
-          ],
+          "types": ["true"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "className",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "focusable",
-          "types": [
-            "'false'"
-          ],
+          "types": ["'false'"],
           "defaultValue": null,
           "required": false
         }
@@ -3348,15 +2433,7 @@
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -3369,15 +2446,7 @@
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -3390,33 +2459,25 @@
       "props": [
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "label",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "disabled",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "onAction",
-          "types": [
-            "() => void | Promise<void>"
-          ],
+          "types": ["() => void | Promise<void>"],
           "defaultValue": null,
           "required": false
         }
@@ -3429,17 +2490,13 @@
       "props": [
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "label",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         }
@@ -3452,43 +2509,32 @@
       "props": [
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "isStreaming",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": "false",
           "required": false
         }
       ],
       "inherits": "HTMLAttributes<HTMLDivElement>",
-      "omitted": [
-        "className",
-        "style"
-      ]
+      "omitted": ["className", "style"]
     },
     {
       "name": "Message.Copy",
       "props": [
         {
           "name": "value",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "label",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         }
@@ -3501,27 +2547,19 @@
       "props": [
         {
           "name": "defaultValue",
-          "types": [
-            "MessageFeedback",
-            "null"
-          ],
+          "types": ["MessageFeedback", "null"],
           "defaultValue": "null",
           "required": false
         },
         {
           "name": "onChange",
-          "types": [
-            "(value: MessageFeedback | null) => void"
-          ],
+          "types": ["(value: MessageFeedback | null) => void"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "value",
-          "types": [
-            "MessageFeedback",
-            "null"
-          ],
+          "types": ["MessageFeedback", "null"],
           "defaultValue": null,
           "required": false
         }
@@ -3534,25 +2572,19 @@
       "props": [
         {
           "name": "onAction",
-          "types": [
-            "() => void | Promise<void>"
-          ],
+          "types": ["() => void | Promise<void>"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "disabled",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "label",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         }
@@ -3565,50 +2597,32 @@
       "props": [
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "from",
-          "types": [
-            "'user'",
-            "'assistant'"
-          ],
+          "types": ["'user'", "'assistant'"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "avatar",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         }
       ],
       "inherits": "HTMLAttributes<HTMLDivElement>",
-      "omitted": [
-        "className",
-        "style"
-      ]
+      "omitted": ["className", "style"]
     },
     {
       "name": "MinusIcon",
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -3621,15 +2635,7 @@
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -3642,73 +2648,55 @@
       "props": [
         {
           "name": "aria-describedby",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "aria-label",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "aria-labelledby",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "defaultOpen",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "isOpen",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "onClose",
-          "types": [
-            "() => void"
-          ],
+          "types": ["() => void"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "ref",
-          "types": [
-            "Ref<HTMLDialogElement>"
-          ],
+          "types": ["Ref<HTMLDialogElement>"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "side",
-          "types": [
-            "ModalSide"
-          ],
+          "types": ["ModalSide"],
           "defaultValue": "'center'",
           "required": false
         }
@@ -3721,15 +2709,7 @@
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -3742,15 +2722,7 @@
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -3763,105 +2735,68 @@
       "props": [
         {
           "name": "defaultValue",
-          "types": [
-            "number",
-            "string"
-          ],
+          "types": ["number", "string"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "invalid",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": "false",
           "required": false
         },
         {
           "name": "max",
-          "types": [
-            "number",
-            "string"
-          ],
+          "types": ["number", "string"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "min",
-          "types": [
-            "number",
-            "string"
-          ],
+          "types": ["number", "string"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "onChange",
-          "types": [
-            "(value: number | null) => void"
-          ],
+          "types": ["(value: number | null) => void"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "precision",
-          "types": [
-            "number"
-          ],
+          "types": ["number"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "ref",
-          "types": [
-            "Ref<HTMLInputElement>"
-          ],
+          "types": ["Ref<HTMLInputElement>"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "step",
-          "types": [
-            "number",
-            "'any'"
-          ],
+          "types": ["number", "'any'"],
           "defaultValue": "1",
           "required": false
         },
         {
           "name": "value",
-          "types": [
-            "number",
-            "null"
-          ],
+          "types": ["number", "null"],
           "defaultValue": null,
           "required": false
         }
       ],
       "inherits": "InputHTMLAttributes<HTMLInputElement>",
-      "omitted": [
-        "type",
-        "role",
-        "className",
-        "style",
-        "children"
-      ]
+      "omitted": ["type", "role", "className", "style", "children"]
     },
     {
       "name": "PackageIcon",
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -3874,90 +2809,62 @@
       "props": [
         {
           "name": "currentPage",
-          "types": [
-            "number"
-          ],
+          "types": ["number"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "onChange",
-          "types": [
-            "(page: number) => void"
-          ],
+          "types": ["(page: number) => void"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "totalPages",
-          "types": [
-            "number"
-          ],
+          "types": ["number"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "aria-label",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "disabled",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": "false",
           "required": false
         },
         {
           "name": "nextLabel",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "prevLabel",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "ref",
-          "types": [
-            "Ref<HTMLElement>"
-          ],
+          "types": ["Ref<HTMLElement>"],
           "defaultValue": null,
           "required": false
         }
       ],
       "inherits": "HTMLAttributes<HTMLElement>",
-      "omitted": [
-        "className",
-        "style",
-        "children"
-      ]
+      "omitted": ["className", "style", "children"]
     },
     {
       "name": "PaletteIcon",
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -3970,66 +2877,44 @@
       "props": [
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "hideLabel",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "invalid",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": "false",
           "required": false
         },
         {
           "name": "ref",
-          "types": [
-            "Ref<HTMLInputElement>"
-          ],
+          "types": ["Ref<HTMLInputElement>"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "showLabel",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         }
       ],
       "inherits": "InputHTMLAttributes<HTMLInputElement>",
-      "omitted": [
-        "type",
-        "className",
-        "style"
-      ]
+      "omitted": ["type", "className", "style"]
     },
     {
       "name": "PlusIcon",
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -4042,18 +2927,13 @@
       "props": [
         {
           "name": "renderItem",
-          "types": [
-            "(props: PopoverContentProps) => ReactElement"
-          ],
+          "types": ["(props: PopoverContentProps) => ReactElement"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "animation",
-          "types": [
-            "'scale'",
-            "'fade'"
-          ],
+          "types": ["'scale'", "'fade'"],
           "defaultValue": "'scale'",
           "required": false
         }
@@ -4066,75 +2946,55 @@
       "props": [
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "closeOnClickAway",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": "true",
           "required": false
         },
         {
           "name": "defaultOpen",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": "false",
           "required": false
         },
         {
           "name": "flipDisabled",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": "false",
           "required": false
         },
         {
           "name": "isOpen",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "onChange",
-          "types": [
-            "(isOpen: boolean) => void"
-          ],
+          "types": ["(isOpen: boolean) => void"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "placement",
-          "types": [
-            "Placement"
-          ],
+          "types": ["Placement"],
           "defaultValue": "'bottom-start'",
           "required": false
         },
         {
           "name": "role",
-          "types": [
-            "'dialog'",
-            "'menu'",
-            "'listbox'"
-          ],
+          "types": ["'dialog'", "'menu'", "'listbox'"],
           "defaultValue": "'menu'",
           "required": false
         },
         {
           "name": "trapFocus",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": "true",
           "required": false
         }
@@ -4147,9 +3007,7 @@
       "props": [
         {
           "name": "renderItem",
-          "types": [
-            "(props: PopoverTriggerProps) => ReactElement"
-          ],
+          "types": ["(props: PopoverTriggerProps) => ReactElement"],
           "defaultValue": null,
           "required": true
         }
@@ -4162,17 +3020,13 @@
       "props": [
         {
           "name": "value",
-          "types": [
-            "RefObject<HTMLElement | null>"
-          ],
+          "types": ["RefObject<HTMLElement | null>"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         }
@@ -4185,15 +3039,7 @@
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -4206,52 +3052,38 @@
       "props": [
         {
           "name": "label",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "max",
-          "types": [
-            "number"
-          ],
+          "types": ["number"],
           "defaultValue": "100",
           "required": false
         },
         {
           "name": "min",
-          "types": [
-            "number"
-          ],
+          "types": ["number"],
           "defaultValue": "0",
           "required": false
         },
         {
           "name": "value",
-          "types": [
-            "number"
-          ],
+          "types": ["number"],
           "defaultValue": null,
           "required": false
         }
       ],
       "inherits": "HTMLAttributes<HTMLDivElement>",
-      "omitted": [
-        "children",
-        "className",
-        "style"
-      ]
+      "omitted": ["children", "className", "style"]
     },
     {
       "name": "PromptInput.Attach",
       "props": [
         {
           "name": "label",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         }
@@ -4264,9 +3096,7 @@
       "props": [
         {
           "name": "label",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         }
@@ -4279,73 +3109,55 @@
       "props": [
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "accept",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "defaultValue",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": "''",
           "required": false
         },
         {
           "name": "maxFiles",
-          "types": [
-            "number"
-          ],
+          "types": ["number"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "onChange",
-          "types": [
-            "(value: string) => void"
-          ],
+          "types": ["(value: string) => void"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "onStop",
-          "types": [
-            "() => void"
-          ],
+          "types": ["() => void"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "onSubmit",
-          "types": [
-            "(message: string, files: FileList) => void"
-          ],
+          "types": ["(message: string, files: FileList) => void"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "status",
-          "types": [
-            "ChatStatus"
-          ],
+          "types": ["ChatStatus"],
           "defaultValue": "'ready'",
           "required": false
         },
         {
           "name": "value",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         }
@@ -4358,17 +3170,13 @@
       "props": [
         {
           "name": "sendLabel",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "stopLabel",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         }
@@ -4381,25 +3189,19 @@
       "props": [
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "placeholder",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "ref",
-          "types": [
-            "Ref<HTMLTextAreaElement>"
-          ],
+          "types": ["Ref<HTMLTextAreaElement>"],
           "defaultValue": null,
           "required": false
         }
@@ -4419,33 +3221,20 @@
       "props": [
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         }
       ],
       "inherits": "HTMLAttributes<HTMLDivElement>",
-      "omitted": [
-        "className",
-        "style"
-      ]
+      "omitted": ["className", "style"]
     },
     {
       "name": "PublishDateIcon",
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -4458,15 +3247,7 @@
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -4479,49 +3260,37 @@
       "props": [
         {
           "name": "aria-labelledby",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "options",
-          "types": [
-            "readonly Option[]"
-          ],
+          "types": ["readonly Option[]"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "defaultValue",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "disabled",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": "false",
           "required": false
         },
         {
           "name": "invalid",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": "false",
           "required": false
         },
         {
           "name": "name",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         },
@@ -4535,253 +3304,184 @@
         },
         {
           "name": "ref",
-          "types": [
-            "Ref<HTMLDivElement>"
-          ],
+          "types": ["Ref<HTMLDivElement>"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "required",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": "false",
           "required": false
         },
         {
           "name": "value",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         }
       ],
       "inherits": "HTMLAttributes<HTMLDivElement>",
-      "omitted": [
-        "role",
-        "className",
-        "style",
-        "children"
-      ]
+      "omitted": ["role", "className", "style", "children"]
     },
     {
       "name": "RadioCard",
       "props": [
         {
           "name": "aria-labelledby",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "options",
-          "types": [
-            "readonly RadioCardOption[]"
-          ],
+          "types": ["readonly RadioCardOption[]"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "defaultValue",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "invalid",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": "false",
           "required": false
         },
         {
           "name": "onChange",
-          "types": [
-            "(value: string) => void"
-          ],
+          "types": ["(value: string) => void"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "ref",
-          "types": [
-            "Ref<HTMLFieldSetElement>"
-          ],
+          "types": ["Ref<HTMLFieldSetElement>"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "required",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": "false",
           "required": false
         },
         {
           "name": "value",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         }
       ],
       "inherits": "FieldsetHTMLAttributes<HTMLFieldSetElement>",
-      "omitted": [
-        "className",
-        "style",
-        "children",
-        "role"
-      ]
+      "omitted": ["className", "style", "children", "role"]
     },
     {
       "name": "RangeSlider",
       "props": [
         {
           "name": "defaultValue",
-          "types": [
-            "readonly [number, number]"
-          ],
+          "types": ["readonly [number, number]"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "disabled",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": "false",
           "required": false
         },
         {
           "name": "invalid",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": "false",
           "required": false
         },
         {
           "name": "max",
-          "types": [
-            "number"
-          ],
+          "types": ["number"],
           "defaultValue": "100",
           "required": false
         },
         {
           "name": "min",
-          "types": [
-            "number"
-          ],
+          "types": ["number"],
           "defaultValue": "0",
           "required": false
         },
         {
           "name": "name",
-          "types": [
-            "readonly [string, string]"
-          ],
+          "types": ["readonly [string, string]"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "onChange",
-          "types": [
-            "(value: [number, number]) => void"
-          ],
+          "types": ["(value: [number, number]) => void"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "ref",
-          "types": [
-            "Ref<HTMLDivElement>"
-          ],
+          "types": ["Ref<HTMLDivElement>"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "required",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": "false",
           "required": false
         },
         {
           "name": "step",
-          "types": [
-            "number"
-          ],
+          "types": ["number"],
           "defaultValue": "1",
           "required": false
         },
         {
           "name": "value",
-          "types": [
-            "readonly [number, number]"
-          ],
+          "types": ["readonly [number, number]"],
           "defaultValue": null,
           "required": false
         }
       ],
       "inherits": "HTMLAttributes<HTMLDivElement>",
-      "omitted": [
-        "className",
-        "style",
-        "children",
-        "role"
-      ]
+      "omitted": ["className", "style", "children", "role"]
     },
     {
       "name": "Reasoning",
       "props": [
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "defaultOpen",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": "false",
           "required": false
         },
         {
           "name": "isOpen",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "isStreaming",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": "false",
           "required": false
         },
         {
           "name": "onChange",
-          "types": [
-            "(isOpen: boolean) => void"
-          ],
+          "types": ["(isOpen: boolean) => void"],
           "defaultValue": null,
           "required": false
         }
@@ -4794,15 +3494,7 @@
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -4815,17 +3507,13 @@
       "props": [
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "onChange",
-          "types": [
-            "() => void"
-          ],
+          "types": ["() => void"],
           "defaultValue": null,
           "required": true
         }
@@ -4838,41 +3526,26 @@
       "props": [
         {
           "name": "children",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "isStreaming",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": "false",
           "required": false
         }
       ],
       "inherits": "StreamdownProps",
-      "omitted": [
-        "className",
-        "mode"
-      ]
+      "omitted": ["className", "mode"]
     },
     {
       "name": "RSSIcon",
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -4885,15 +3558,7 @@
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -4906,57 +3571,38 @@
       "props": [
         {
           "name": "options",
-          "types": [
-            "readonly Option[]"
-          ],
+          "types": ["readonly Option[]"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "invalid",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": "false",
           "required": false
         },
         {
           "name": "ref",
-          "types": [
-            "Ref<HTMLSelectElement>"
-          ],
+          "types": ["Ref<HTMLSelectElement>"],
           "defaultValue": null,
           "required": false
         }
       ],
       "inherits": "SelectHTMLAttributes<HTMLSelectElement>",
-      "omitted": [
-        "className",
-        "style"
-      ]
+      "omitted": ["className", "style"]
     },
     {
       "name": "SendIcon",
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -4969,47 +3615,26 @@
       "props": [
         {
           "name": "color",
-          "types": [
-            "'base'",
-            "'mute'",
-            "'subtle'"
-          ],
+          "types": ["'base'", "'mute'", "'subtle'"],
           "defaultValue": "'base'",
           "required": false
         },
         {
           "name": "orientation",
-          "types": [
-            "'horizontal'",
-            "'vertical'"
-          ],
+          "types": ["'horizontal'", "'vertical'"],
           "defaultValue": "'horizontal'",
           "required": false
         }
       ],
       "inherits": "HTMLAttributes<HTMLSpanElement>",
-      "omitted": [
-        "children",
-        "role",
-        "aria-orientation",
-        "className",
-        "style"
-      ]
+      "omitted": ["children", "role", "aria-orientation", "className", "style"]
     },
     {
       "name": "ShallowIcon",
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -5022,15 +3647,7 @@
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -5043,17 +3660,13 @@
       "props": [
         {
           "name": "title",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         }
@@ -5066,123 +3679,82 @@
       "props": [
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "href",
-          "types": [
-            "T"
-          ],
+          "types": ["T"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "current",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": "false",
           "required": false
         },
         {
           "name": "renderAnchor",
-          "types": [
-            "(props: RenderSideNavAnchorProps<T>) => ReactNode"
-          ],
+          "types": ["(props: RenderSideNavAnchorProps<T>) => ReactNode"],
           "defaultValue": "defaultRenderAnchor",
           "required": false
         }
       ],
       "inherits": "AnchorHTMLAttributes<HTMLAnchorElement>",
-      "omitted": [
-        "className",
-        "style",
-        "aria-current"
-      ]
+      "omitted": ["className", "style", "aria-current"]
     },
     {
       "name": "SideNav.Root",
       "props": [
         {
           "name": "label",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         }
       ],
       "inherits": "HTMLAttributes<HTMLElement>",
-      "omitted": [
-        "className",
-        "style",
-        "aria-label"
-      ]
+      "omitted": ["className", "style", "aria-label"]
     },
     {
       "name": "Skeleton",
       "props": [
         {
           "name": "animate",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": "true",
           "required": false
         },
         {
           "name": "shape",
-          "types": [
-            "'rect'",
-            "'circle'"
-          ],
+          "types": ["'rect'", "'circle'"],
           "defaultValue": "'rect'",
           "required": false
         },
         {
           "name": "size",
-          "types": [
-            "'sm'",
-            "'md'",
-            "'lg'"
-          ],
+          "types": ["'sm'", "'md'", "'lg'"],
           "defaultValue": "'md'",
           "required": false
         }
       ],
       "inherits": "HTMLAttributes<HTMLDivElement>",
-      "omitted": [
-        "children",
-        "className",
-        "style"
-      ]
+      "omitted": ["children", "className", "style"]
     },
     {
       "name": "SlideIcon",
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -5195,97 +3767,68 @@
       "props": [
         {
           "name": "defaultValue",
-          "types": [
-            "number",
-            "string"
-          ],
+          "types": ["number", "string"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "invalid",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": "false",
           "required": false
         },
         {
           "name": "max",
-          "types": [
-            "number",
-            "string"
-          ],
+          "types": ["number", "string"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "min",
-          "types": [
-            "number",
-            "string"
-          ],
+          "types": ["number", "string"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "onChange",
-          "types": [
-            "(value: number) => void"
-          ],
+          "types": ["(value: number) => void"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "ref",
-          "types": [
-            "Ref<HTMLInputElement>"
-          ],
+          "types": ["Ref<HTMLInputElement>"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "step",
-          "types": [
-            "number",
-            "'any'"
-          ],
+          "types": ["number", "'any'"],
           "defaultValue": "1",
           "required": false
         },
         {
           "name": "value",
-          "types": [
-            "number"
-          ],
+          "types": ["number"],
           "defaultValue": null,
           "required": false
         }
       ],
       "inherits": "InputHTMLAttributes<HTMLInputElement>",
-      "omitted": [
-        "type",
-        "className",
-        "style",
-        "children"
-      ]
+      "omitted": ["type", "className", "style", "children"]
     },
     {
       "name": "Source.Item",
       "props": [
         {
           "name": "href",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "title",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         }
@@ -5298,17 +3841,13 @@
       "props": [
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "label",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         }
@@ -5321,15 +3860,7 @@
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -5342,45 +3873,26 @@
       "props": [
         {
           "name": "label",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "size",
-          "types": [
-            "'sm'",
-            "'md'",
-            "'lg'"
-          ],
+          "types": ["'sm'", "'md'", "'lg'"],
           "defaultValue": "'md'",
           "required": false
         }
       ],
       "inherits": "OutputHTMLAttributes<HTMLOutputElement>",
-      "omitted": [
-        "children",
-        "aria-label",
-        "className",
-        "style"
-      ]
+      "omitted": ["children", "aria-label", "className", "style"]
     },
     {
       "name": "SquircleIcon",
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -5393,80 +3905,50 @@
       "props": [
         {
           "name": "align",
-          "types": [
-            "'start'",
-            "'center'",
-            "'end'",
-            "'stretch'"
-          ],
+          "types": ["'start'", "'center'", "'end'", "'stretch'"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "direction",
-          "types": [
-            "'row'",
-            "'column'"
-          ],
+          "types": ["'row'", "'column'"],
           "defaultValue": "'column'",
           "required": false
         },
         {
           "name": "gap",
-          "types": [
-            "GapSize"
-          ],
+          "types": ["GapSize"],
           "defaultValue": "'md'",
           "required": false
         },
         {
           "name": "justify",
-          "types": [
-            "'start'",
-            "'center'",
-            "'end'",
-            "'between'"
-          ],
+          "types": ["'start'", "'center'", "'end'", "'between'"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "padding",
-          "types": [
-            "PaddingSize"
-          ],
+          "types": ["PaddingSize"],
           "defaultValue": null,
           "required": false
         }
       ],
       "inherits": "HTMLAttributes<HTMLDivElement>",
-      "omitted": [
-        "className",
-        "style"
-      ]
+      "omitted": ["className", "style"]
     },
     {
       "name": "SubscribeIcon",
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -5479,25 +3961,19 @@
       "props": [
         {
           "name": "value",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "onSelect",
-          "types": [
-            "(value: string) => void"
-          ],
+          "types": ["(value: string) => void"],
           "defaultValue": null,
           "required": false
         }
@@ -5510,17 +3986,13 @@
       "props": [
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "label",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         }
@@ -5533,33 +4005,25 @@
       "props": [
         {
           "name": "label",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "checked",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "defaultChecked",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "invalid",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": "false",
           "required": false
         },
@@ -5573,134 +4037,95 @@
         },
         {
           "name": "ref",
-          "types": [
-            "Ref<HTMLInputElement>"
-          ],
+          "types": ["Ref<HTMLInputElement>"],
           "defaultValue": null,
           "required": false
         }
       ],
       "inherits": "InputHTMLAttributes<HTMLInputElement>",
-      "omitted": [
-        "type",
-        "role",
-        "className",
-        "style",
-        "value",
-        "children"
-      ]
+      "omitted": ["type", "role", "className", "style", "value", "children"]
     },
     {
       "name": "Table.Body",
       "props": [
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         }
       ],
       "inherits": "HTMLAttributes<HTMLTableSectionElement>",
-      "omitted": [
-        "className",
-        "style"
-      ]
+      "omitted": ["className", "style"]
     },
     {
       "name": "Table.Caption",
       "props": [
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         }
       ],
       "inherits": "HTMLAttributes<HTMLTableCaptionElement>",
-      "omitted": [
-        "className",
-        "style"
-      ]
+      "omitted": ["className", "style"]
     },
     {
       "name": "Table.Cell",
       "props": [
         {
           "name": "align",
-          "types": [
-            "CellAlign"
-          ],
+          "types": ["CellAlign"],
           "defaultValue": "'left'",
           "required": false
         },
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "color",
-          "types": [
-            "'base'",
-            "'mute'"
-          ],
+          "types": ["'base'", "'mute'"],
           "defaultValue": "'base'",
           "required": false
         }
       ],
       "inherits": "TdHTMLAttributes<HTMLTableCellElement>",
-      "omitted": [
-        "className",
-        "style"
-      ]
+      "omitted": ["className", "style"]
     },
     {
       "name": "Table.EmptyState",
       "props": [
         {
           "name": "colSpan",
-          "types": [
-            "number"
-          ],
+          "types": ["number"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "title",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "action",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "description",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "icon",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         }
@@ -5713,90 +4138,64 @@
       "props": [
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         }
       ],
       "inherits": "HTMLAttributes<HTMLTableSectionElement>",
-      "omitted": [
-        "className",
-        "style"
-      ]
+      "omitted": ["className", "style"]
     },
     {
       "name": "Table.HeaderCell",
       "props": [
         {
           "name": "align",
-          "types": [
-            "CellAlign"
-          ],
+          "types": ["CellAlign"],
           "defaultValue": "'left'",
           "required": false
         },
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "scope",
-          "types": [
-            "'col'",
-            "'row'",
-            "'colgroup'",
-            "'rowgroup'"
-          ],
+          "types": ["'col'", "'row'", "'colgroup'", "'rowgroup'"],
           "defaultValue": "'col'",
           "required": false
         }
       ],
       "inherits": "ThHTMLAttributes<HTMLTableCellElement>",
-      "omitted": [
-        "className",
-        "style"
-      ]
+      "omitted": ["className", "style"]
     },
     {
       "name": "Table.Root",
       "props": [
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         }
       ],
       "inherits": "TableHTMLAttributes<HTMLTableElement>",
-      "omitted": [
-        "className",
-        "style"
-      ]
+      "omitted": ["className", "style"]
     },
     {
       "name": "Table.Row",
       "props": [
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "interactive",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": "false",
           "required": false
         },
@@ -5808,25 +4207,14 @@
         }
       ],
       "inherits": "HTMLAttributes<HTMLTableRowElement>",
-      "omitted": [
-        "className",
-        "style"
-      ]
+      "omitted": ["className", "style"]
     },
     {
       "name": "TableIcon",
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -5839,45 +4227,32 @@
       "props": [
         {
           "name": "items",
-          "types": [
-            "readonly TableOfContentsItem[]"
-          ],
+          "types": ["readonly TableOfContentsItem[]"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "label",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         }
       ],
       "inherits": "HTMLAttributes<HTMLElement>",
-      "omitted": [
-        "className",
-        "style",
-        "children",
-        "aria-labelledby"
-      ]
+      "omitted": ["className", "style", "children", "aria-labelledby"]
     },
     {
       "name": "Tabs.List",
       "props": [
         {
           "name": "label",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         }
@@ -5890,17 +4265,13 @@
       "props": [
         {
           "name": "id",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         }
@@ -5913,42 +4284,31 @@
       "props": [
         {
           "name": "ids",
-          "types": [
-            "[string, ...string[]]"
-          ],
+          "types": ["[string, ...string[]]"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "defaultSelectedId",
-          "types": [
-            "string",
-            "null"
-          ],
+          "types": ["string", "null"],
           "defaultValue": "null",
           "required": false
         },
         {
           "name": "onChange",
-          "types": [
-            "(id: string) => void"
-          ],
+          "types": ["(id: string) => void"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "selectedId",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         }
@@ -5961,17 +4321,13 @@
       "props": [
         {
           "name": "id",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         }
@@ -5984,15 +4340,7 @@
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -6005,83 +4353,62 @@
       "props": [
         {
           "name": "autoResize",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": "false",
           "required": false
         },
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "fullHeight",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": "false",
           "required": false
         },
         {
           "name": "invalid",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": "false",
           "required": false
         },
         {
           "name": "ref",
-          "types": [
-            "Ref<HTMLTextAreaElement>"
-          ],
+          "types": ["Ref<HTMLTextAreaElement>"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "type",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         }
       ],
       "inherits": "TextareaHTMLAttributes<HTMLTextAreaElement>",
-      "omitted": [
-        "className",
-        "style"
-      ]
+      "omitted": ["className", "style"]
     },
     {
       "name": "TextField",
       "props": [
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "invalid",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": "false",
           "required": false
         },
         {
           "name": "ref",
-          "types": [
-            "Ref<HTMLInputElement>"
-          ],
+          "types": ["Ref<HTMLInputElement>"],
           "defaultValue": null,
           "required": false
         },
@@ -6105,36 +4432,26 @@
         }
       ],
       "inherits": "InputHTMLAttributes<HTMLInputElement>",
-      "omitted": [
-        "className",
-        "style"
-      ]
+      "omitted": ["className", "style"]
     },
     {
       "name": "ToastProvider",
       "props": [
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "portalRef",
-          "types": [
-            "RefObject<HTMLElement | null>"
-          ],
+          "types": ["RefObject<HTMLElement | null>"],
           "defaultValue": "null",
           "required": false
         },
         {
           "name": "position",
-          "types": [
-            "'fixed'",
-            "'absolute'"
-          ],
+          "types": ["'fixed'", "'absolute'"],
           "defaultValue": "'fixed'",
           "required": false
         }
@@ -6147,57 +4464,43 @@
       "props": [
         {
           "name": "name",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "state",
-          "types": [
-            "ToolState"
-          ],
+          "types": ["ToolState"],
           "defaultValue": null,
           "required": true
         },
         {
           "name": "approval",
-          "types": [
-            "ToolApproval"
-          ],
+          "types": ["ToolApproval"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "defaultOpen",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": "false",
           "required": false
         },
         {
           "name": "errorText",
-          "types": [
-            "string"
-          ],
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "input",
-          "types": [
-            "unknown"
-          ],
+          "types": ["unknown"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "isOpen",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": null,
           "required": false
         },
@@ -6211,17 +4514,13 @@
         },
         {
           "name": "onChange",
-          "types": [
-            "(isOpen: boolean) => void"
-          ],
+          "types": ["(isOpen: boolean) => void"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "output",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         }
@@ -6234,9 +4533,7 @@
       "props": [
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         }
@@ -6249,57 +4546,43 @@
       "props": [
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "closeDelay",
-          "types": [
-            "number"
-          ],
+          "types": ["number"],
           "defaultValue": "150",
           "required": false
         },
         {
           "name": "defaultOpen",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "isOpen",
-          "types": [
-            "boolean"
-          ],
+          "types": ["boolean"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "onChange",
-          "types": [
-            "(isOpen: boolean) => void"
-          ],
+          "types": ["(isOpen: boolean) => void"],
           "defaultValue": null,
           "required": false
         },
         {
           "name": "openDelay",
-          "types": [
-            "number"
-          ],
+          "types": ["number"],
           "defaultValue": "0",
           "required": false
         },
         {
           "name": "placement",
-          "types": [
-            "Placement"
-          ],
+          "types": ["Placement"],
           "defaultValue": "'bottom'",
           "required": false
         }
@@ -6312,9 +4595,7 @@
       "props": [
         {
           "name": "renderItem",
-          "types": [
-            "(props: TooltipTriggerProps) => ReactElement"
-          ],
+          "types": ["(props: TooltipTriggerProps) => ReactElement"],
           "defaultValue": null,
           "required": true
         }
@@ -6327,15 +4608,7 @@
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -6348,9 +4621,7 @@
       "props": [
         {
           "name": "children",
-          "types": [
-            "ReactNode"
-          ],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         }
@@ -6363,15 +4634,7 @@
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -6384,15 +4647,7 @@
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -6405,15 +4660,7 @@
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
@@ -6426,15 +4673,7 @@
       "props": [
         {
           "name": "size",
-          "types": [
-            "'xs'",
-            "'sm'",
-            "'md'",
-            "'lg'",
-            "'xl'",
-            "'2xl'",
-            "'3xl'"
-          ],
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
           "required": false
         }
