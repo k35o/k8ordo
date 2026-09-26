@@ -1,0 +1,30 @@
+# @k8ordo/color-scheme
+
+## 0.2.0
+
+### Minor Changes
+
+- `@k8ordo/color-scheme` を追加。アプリケーションのカラースキーム軸を持つパッケージ。
+
+  - `<ColorSchemeProvider defaultPreference?>` をルートレイアウトの `<body>` の中で全体に被せる。先頭にインラインスクリプトを描いて最初の描画の前に `<html>` へ `dark` を付け（`@k8ordo/ui` と Tailwind の dark variant が読むクラス）、hydrate 後は保存行とシステム設定を読んでクラスを追従させる。`<head>` に置くものは無い。`defaultPreference` は訪問者が選ぶまで何に従うか（既定は `'system'`）。
+  - `useColorScheme()` が `{ scheme, preference, setPreference }` を返す。`scheme` は画面に出ている `'light' | 'dark'`、`preference` は訪問者の設定 `'light' | 'dark' | 'system'`。`setPreference('system')` で保存行を消す。hook は Provider を読むだけで、DOM には触らない。
+  - 保存先は `@k8ordo/state` の `defineLocalState('color-scheme')`（`colorSchemeState` として export）。キーも JSON の形もここには書かれない。サーバーは既定値で描き、hydrate 直後のレンダーは DOM に書かず、ストアを読んだレンダーから追従する。
+  - peer: `@k8ordo/state`、`react` / `@types/react` `>=19.3.0`、`zod`。
+
+### Patch Changes
+
+- 同梱ドキュメントを実装に追従させました。
+
+  - Tailwind CSS 4 の既定の `dark:` はメディアクエリで、`<html>` の `dark` クラスを読むのは `@k8ordo/ui` の dark variant（Tailwind を直接使うなら `@custom-variant` の宣言が要る）だと直しました。
+  - 既定の `'system'` のとき、サーバーはシステムの設定を知らないので `scheme` を `'light'` で描く、と書きました。
+  - `setPreference('system')` は保存行を消すのではなく preference を外すこと、クライアントだけでマウントしたときはインラインスクリプトが実行されないことを書きました。
+  - README の peer 表に optional peer の `@types/react` を足し、`@k8ordo/state` の範囲を公開時の `^0.2.0` にしました。
+
+- 公開する tarball に `LICENSE`（MIT の本文）を同梱しました。これまでは `package.json` の `license` フィールドだけで、ライセンス本文が入っていませんでした。
+
+- 同梱ドキュメント（GUIDE）の「CSS の `color-scheme` プロパティは `@k8ordo/ui` も設定しない」という記述を直しました。`@k8ordo/ui` のスタイルシートがトークンと一緒に設定します。
+
+- README の「AI Agent Documentation」節を他のパッケージに揃えました。エージェントの `CLAUDE.md` / `AGENTS.md` に貼るスニペットと、同梱ドキュメント・サイトの `llms.txt`・web 上の markdown twin の表を足し、License 節に LICENSE へのリンクを書いています。
+
+- Updated dependencies:
+  - @k8ordo/state@0.3.0
