@@ -866,6 +866,31 @@ export const autocompleteProps = z.object({
   disabled: z.boolean().optional(),
 }) satisfies z.ZodType<AutocompleteIntegrationProps>;
 
+// search は関数なので生成 UI からは渡せない。決まった候補の絞り込みだけを載せる
+type ComboboxIntegrationProps = {
+  name: string;
+  label: string;
+  options: readonly SelectOption[];
+  defaultValue?: string;
+  placeholder?: string;
+  invalid?: boolean;
+  disabled?: boolean;
+  required?: boolean;
+};
+export const comboboxProps = z.object({
+  name: z.string(),
+  label: z.string().describe('Visible label of the field'),
+  options: z
+    .array(selectOption)
+    .min(1)
+    .describe('Choices (value / label); typing filters them by label'),
+  defaultValue: z.string().optional().describe('value of the chosen option'),
+  placeholder: z.string().optional(),
+  invalid: z.boolean().optional(),
+  disabled: z.boolean().optional(),
+  required: z.boolean().optional(),
+}) satisfies z.ZodType<ComboboxIntegrationProps>;
+
 type FileFieldIntegrationProps = {
   triggerLabel?: string;
   multiple?: boolean;
@@ -1032,6 +1057,7 @@ export type ToastProps = z.infer<typeof toastProps>;
 export type ListBoxProps = z.infer<typeof listBoxProps>;
 export type CheckboxGroupProps = z.infer<typeof checkboxGroupProps>;
 export type AutocompleteProps = z.infer<typeof autocompleteProps>;
+export type ComboboxProps = z.infer<typeof comboboxProps>;
 export type FileFieldProps = z.infer<typeof fileFieldProps>;
 export type FormControlProps = z.infer<typeof formControlProps>;
 

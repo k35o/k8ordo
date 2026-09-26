@@ -13,6 +13,7 @@ import {
   CheckboxCardView,
   CheckboxGroupView,
   CheckboxView,
+  ComboboxView,
   DateFieldView,
   DatePickerView,
   ListBoxView,
@@ -158,6 +159,7 @@ const renderers = {
   Pagination: PaginationView,
   ListBox: ListBoxView,
   CheckboxGroup: CheckboxGroupView,
+  Combobox: ComboboxView,
   Autocomplete: AutocompleteView,
   FileField: ({ props }: ComponentRenderProps<sc.FileFieldProps>) => (
     <ui.FileFieldWidget props={props} />

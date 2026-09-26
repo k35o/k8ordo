@@ -252,6 +252,14 @@ export const { registry } = defineRegistry(catalog, {
       const setValue = hasBinding ? setBound : setLocal;
       return ui.renderCheckboxGroup(props, value, setValue);
     },
+    Combobox: ({ props, bindings }) => {
+      const [value, setValue] = useBoundOrLocal<string>(
+        props.defaultValue,
+        bindings?.defaultValue,
+        '',
+      );
+      return ui.renderCombobox(props, value, setValue);
+    },
     Autocomplete: ({ props, bindings }) => {
       const path = bindings?.defaultValue;
       const hasBinding = path !== undefined && path !== '';
