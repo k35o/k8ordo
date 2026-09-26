@@ -466,7 +466,7 @@ pnpm add @json-render/core @json-render/react zod
 pnpm add @openuidev/react-lang @openuidev/lang-core zod
 ```
 
-Supported components (**all 55**, both frameworks):
+Supported components (**all 56**, both frameworks):
 
 - **Layout / containers**: `Stack`, `Grid`, `Card`, `Form`, `Carousel`
 - **Buttons / nav**: `Button`, `IconButton`, `CopyButton`, `Anchor`, `Breadcrumb`, `Pagination`, `SideNav`
