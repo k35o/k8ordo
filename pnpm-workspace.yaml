@@ -17,13 +17,13 @@ catalog:
   '@arethetypeswrong/cli': 0.18.5
   # generative-UI アダプタの peer。@k8ordo/ui が開発対象にする版と examples が
   # 使う版を同じ 1 コピーに保つ (scripts/check-peer-copies.mjs が検査する)。
-  '@json-render/core': 0.20.0
-  '@json-render/react': 0.20.0
+  '@json-render/core': 0.21.0
+  '@json-render/react': 0.21.0
   '@openuidev/lang-core': 0.3.0
   '@openuidev/react-lang': 0.3.0
   '@tailwindcss/postcss': 4.3.3
   '@tailwindcss/vite': 4.3.3
-  '@types/node': 24.13.5
+  '@types/node': 24.13.6
   '@types/react': 19.3.0
   '@types/react-dom': 19.3.0
   '@vitejs/plugin-react': 6.1.1
@@ -40,7 +40,7 @@ catalog:
   '@vitest/utils': 5.0.1
   # @k8ordo/ui/ai-sdk の peer。example が使う @ai-sdk/react は ai を exact で
   # 持つので、上げるときは同じ ai を持つ @ai-sdk/react と揃えて 1 コピーに保つ。
-  ai: 7.0.105
+  ai: 7.0.107
   playwright: 1.63.0
   postcss: 8.5.28
   publint: 0.3.24
