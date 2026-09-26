@@ -37,6 +37,7 @@ import {
   Radio,
   RadioCard,
   Select,
+  ResizablePanels,
   Separator,
   Skeleton,
   Slider,
@@ -373,6 +374,19 @@ export const componentPreviews: Record<string, ReactNode> = {
   Separator: (
     <div className="w-40">
       <Separator color="mute" />
+    </div>
+  ),
+  ResizablePanels: (
+    <div className="border-border-base h-20 w-40 overflow-hidden rounded-md border">
+      <ResizablePanels.Root defaultValue={40}>
+        <ResizablePanels.Panel>
+          <div className="bg-bg-subtle size-full" />
+        </ResizablePanels.Panel>
+        <ResizablePanels.Handle />
+        <ResizablePanels.Panel>
+          <div className="size-full" />
+        </ResizablePanels.Panel>
+      </ResizablePanels.Root>
     </div>
   ),
   Icons: (

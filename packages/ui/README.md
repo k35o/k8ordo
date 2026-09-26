@@ -247,6 +247,7 @@ stories and rendered props rather than relying on trained knowledge:
 - **Grid** - CSS grid with token-based gaps and responsive auto-fill/auto-fit columns
 - **Stack** - Flex layout with token-based gaps
 - **Separator** - Visual content divider
+- **ResizablePanels** - Two panes with a divider dragged or moved with the arrow keys
 
 ### Observers
 
@@ -472,8 +473,8 @@ Supported components (**all 55**, both frameworks):
 - **Overlays (self-contained widgets)**: `Modal`, `Dialog`, `Drawer`, `Popover`, `Tooltip`, `DropdownMenu`, `Toast`
 - **Form**: `TextField`, `Textarea`, `PasswordInput`, `NumberField`, `Slider`, `RangeSlider`, `DateField`, `DatePicker`, `Calendar`, `Checkbox`, `Switch`, `Select`, `Radio`, `RadioCard`, `CheckboxCard`, `ListBox`, `CheckboxGroup`, `Autocomplete`, `FileField`, `FormControl`
 
-The rest of the exports — the observers, the providers, and the AI chat
-components — are left out on purpose;
+The rest of the exports — `ResizablePanels`, the observers, the providers, and
+the AI chat components — are left out on purpose;
 [docs/references/generative-ui.md](docs/references/generative-ui.md#what-the-catalog-leaves-out)
 says why.
 

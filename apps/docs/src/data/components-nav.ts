@@ -305,6 +305,11 @@ export const componentCategories: NavCategory[] = [
         path: '/:locale/ui/components/separator',
         description: m.components.separator.description,
       },
+      {
+        name: 'ResizablePanels',
+        path: '/:locale/ui/components/resizable-panels',
+        description: m.components.resizablePanels.description,
+      },
     ],
   },
   {

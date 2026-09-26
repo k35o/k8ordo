@@ -77,6 +77,10 @@ These exports are left out on purpose, so a model cannot place them:
   async Server Component. The generated UI renders on the client, where it
   cannot run, and placing it there would ship the highlighter to the browser.
   `Code` (inline code) is in the catalog.
+- `ResizablePanels` — it divides a parent of fixed size into a workspace, the
+  frame an application draws around its content. The generated UI flows inside
+  a message and has no height to divide; to set things side by side, use
+  `Grid`.
 - `Prose` — it typesets the bare HTML that Markdown renders to. A spec places
   components, which keep their own look, so it would have nothing to typeset;
   lay a flow out with `Stack`.

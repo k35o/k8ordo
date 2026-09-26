@@ -57,6 +57,7 @@ export const ja: Messages = {
   carouselSlide: 'スライド',
   carouselPrevious: '前のスライド',
   carouselNext: '次のスライド',
+  resizablePanelsHandle: 'パネルの大きさ',
 
   chat: 'チャット',
   scrollToLatest: '最新のメッセージへ移動',
