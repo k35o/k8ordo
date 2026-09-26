@@ -153,8 +153,8 @@
     "zod": "catalog:"
   },
   "peerDependencies": {
-    "@json-render/core": ">=0.20.0 <0.21.0",
-    "@json-render/react": ">=0.20.0 <0.21.0",
+    "@json-render/core": ">=0.20.0 <0.22.0",
+    "@json-render/react": ">=0.20.0 <0.22.0",
     "@k8ordo/i18n": "workspace:^",
     "@openuidev/lang-core": ">=0.2.10 <0.4.0",
     "@openuidev/react-lang": ">=0.2.9 <0.4.0",
