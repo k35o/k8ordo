@@ -72,6 +72,13 @@ export type Messages = {
   paginationPrevious: string;
   paginationNext: string;
 
+  /** DataTable の列の表示を切り替えるボタンと、その一覧の見出し */
+  dataTableColumns: string;
+  /** DataTable の見出しの行の、表示中の行をまとめて選ぶチェックボックス */
+  dataTableSelectAll: string;
+  /** DataTable の各行のチェックボックス。行の見出しが後に続く */
+  dataTableSelectRow: string;
+
   /** CodeBlock のコピーボタン */
   codeBlockCopy: string;
   /** Carousel の aria-roledescription（region と各スライド） */
