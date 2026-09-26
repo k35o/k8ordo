@@ -150,7 +150,9 @@ export async function createTalk(_prev: FormState, formData: FormData) {
 When a new state arrives, focus moves to the first failure on the page, so the
 failure is announced where it happened. That is the first failed field in
 document order — not the first key of `state.errors`, which follows the schema
-— or the form-level message below, when it comes before every failed field. A
+— or a message no field owns, when it comes before every failed field: the
+form-level message below, or an array's own
+([Nested objects and repeated rows](#nested-objects-and-repeated-rows)). A
 server error stays on its field until the person edits that field, and a
 message the browser raises takes precedence over it. Responses are told apart
 by their content plus `state.token`, which `parseForm` sets on every parse — a
@@ -326,8 +328,24 @@ scalars (`z.array(z.string())`) the item has a single unnamed field:
 `row.field()`.
 
 `items.error` is the server's message about the array itself — too few or too
-many rows for its `.min()` / `.max()` — which no row's field carries, so render
-it next to the rows. `row.index` is the row's current position.
+many rows for its `.min()` / `.max()` — which no row's field carries, so no
+control can take focus for it. Like `form.formError`, it comes with the props
+for the element that shows it: `items.errorProps`, an `id` and
+`tabIndex={-1}`. Without them a submit that failed only on the array moves
+focus nowhere, and a screen reader says nothing about it. Put it above the
+rows: it then takes focus even when a row failed too, and Tab moves on into
+the rows. Below them, the first failed row takes focus instead.
+
+```tsx
+<form {...form.props} action={formAction}>
+  {items.error !== undefined && <p {...items.errorProps}>{items.error}</p>}
+  {items.rows.map((row) => (
+    <div key={row.key}>{/* … */}</div>
+  ))}
+</form>
+```
+
+`row.index` is the row's current position.
 
 `parseForm` reports how many rows arrived in `state.rows`, so a retry without
 JavaScript rebuilds the same number of rows. Row counts are read from the

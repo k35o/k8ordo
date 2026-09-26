@@ -64,6 +64,11 @@ const ARRAY_VIEW: readonly MemberRow[] = [
     type: 'string | undefined',
     meaning: m.formFields.arrayError,
   },
+  {
+    name: 'errorProps',
+    type: '{ id: string; tabIndex: -1 }',
+    meaning: m.formFields.arrayErrorProps,
+  },
 ];
 
 const MAPPING: ReadonlyArray<{ schema: string; input: string; note: Message }> =
@@ -388,6 +393,9 @@ export function OrderForm({ fields }: Props) {
 
   return (
     <form {...form.props} action={formAction}>
+      {items.error !== undefined && (
+        <p {...items.errorProps}>{items.error}</p>
+      )}
       {items.rows.map((row) => {
         const name = row.field('name');
         const quantity = row.field('quantity');
@@ -406,7 +414,6 @@ export function OrderForm({ fields }: Props) {
           </fieldset>
         );
       })}
-      {items.error !== undefined && <p>{items.error}</p>}
       {items.canAdd && (
         <button onClick={items.add} type="button">
           Add an item
@@ -751,6 +758,9 @@ export default function FormFieldsPage() {
         <CodeBlock code={ARRAY_SCHEMA} lang="ts" />
         <CodeBlock code={ARRAY_FORM} lang="tsx" />
         <ul className="text-fg-mute flex flex-col gap-2 pl-6">
+          <li className="list-disc">
+            <Rich>{m.formFields.arrayErrorFocus()}</Rich>
+          </li>
           <li className="list-disc">
             <Rich>{m.formFields.arrayInitial()}</Rich>
           </li>

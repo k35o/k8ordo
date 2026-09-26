@@ -71,15 +71,24 @@ const listSchema = z.object({
 });
 const listFields = formFields(listSchema);
 
+// 送信の前から行がある状態で始める。行の無い状態から失敗の state を渡すと、
+// 行はフォーカスを移すエフェクトの後に描かれ、フォーカス先の候補に入れない
+const TWO_ROWS: FormState = { rows: { items: 2 } };
+
 const List: FC<{
   state?: FormState;
   action?: (formData: FormData) => void;
-}> = ({ state = NO_STATE, action }) => {
+  itemsErrorAt?: 'top' | 'bottom';
+}> = ({ state = NO_STATE, action, itemsErrorAt = 'top' }) => {
   const form = useForm(listFields, state);
   const items = form.array('items');
+  const itemsError = items.error !== undefined && (
+    <p {...items.errorProps}>{items.error}</p>
+  );
 
   return (
     <form {...form.props} action={action}>
+      {itemsErrorAt === 'top' && itemsError}
       {items.rows.map((row) => (
         <div key={row.key}>
           <input
@@ -94,6 +103,7 @@ const List: FC<{
           </button>
         </div>
       ))}
+      {itemsErrorAt === 'bottom' && itemsError}
       <button disabled={!items.canAdd} onClick={items.add} type="button">
         add
       </button>
@@ -770,6 +780,67 @@ describe('useForm in a browser', () => {
     );
 
     await expect.element(screen.getByLabelText('email')).toHaveFocus();
+  });
+
+  it("moves focus to an array's own message when no row failed", async () => {
+    const screen = await render(<List state={TWO_ROWS} />);
+
+    screen.rerender(
+      <List
+        state={{
+          errors: { items: '品名が重複しています' },
+          rows: { items: 2 },
+          token: '1',
+        }}
+      />,
+    );
+
+    await expect
+      .element(screen.getByText('品名が重複しています'))
+      .toHaveFocus();
+  });
+
+  it("moves focus to an array's own message when it comes before the failed rows", async () => {
+    const screen = await render(<List state={TWO_ROWS} />);
+
+    screen.rerender(
+      <List
+        state={{
+          errors: {
+            'items[1].name': 'この品名は扱っていません',
+            items: '品名が重複しています',
+          },
+          rows: { items: 2 },
+          token: '1',
+        }}
+      />,
+    );
+
+    await expect
+      .element(screen.getByText('品名が重複しています'))
+      .toHaveFocus();
+  });
+
+  it("moves focus to the first failed row when the array's own message comes after it", async () => {
+    const screen = await render(
+      <List itemsErrorAt="bottom" state={TWO_ROWS} />,
+    );
+
+    screen.rerender(
+      <List
+        itemsErrorAt="bottom"
+        state={{
+          errors: {
+            'items[1].name': 'この品名は扱っていません',
+            items: '品名が重複しています',
+          },
+          rows: { items: 2 },
+          token: '1',
+        }}
+      />,
+    );
+
+    await expect.element(screen.getByLabelText('name-1')).toHaveFocus();
   });
 
   it('marks the form dirty when a select changes', async () => {

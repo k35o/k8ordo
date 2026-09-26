@@ -78,10 +78,11 @@ row. Rules cannot target fields inside repeated rows.
   returns props for the `<form>` element — which also hear a reset, React's
   own after every form action included — a
   `field(path)` accessor giving input attributes, the current error, and
-  `invalid` / `required`, an `array(path)` accessor for repeated rows,
-  `formError` (the message no field owns, with the props that let focus land
-  on it), and `isDirty`. On submit it checks every field — untouched ones and
-  the rules included — and stops a failing submission, a GET form with no
+  `invalid` / `required`, an `array(path)` accessor for repeated rows (its
+  `error` is the array's own message, with `errorProps` to let focus land on
+  it), `formError` (the message no field owns, with the props that let focus
+  land on it), and `isDirty`. On submit it checks every field — untouched ones
+  and the rules included — and stops a failing submission, a GET form with no
   action as much as one with (a `formNoValidate` button skips the check);
   after a submission stopped here or failed on the server, focus moves to the
   first failure in document order. Also `useAsyncCheck` for server-answered
