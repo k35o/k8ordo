@@ -44,6 +44,10 @@ native attribute the caller passed in. Spread the bag onto whatever you render.
   and calls `preventDefault()` while disabled, so a disabled link will not
   navigate. The examples below name them `_disabled` / `_type` so the discarded
   bindings pass a `no-unused-vars` rule.
+- `disabled` is only the `disabled` you passed. While an action is pending (see
+  [Button](#button)), the bag carries `aria-disabled` and `aria-busy` but
+  `disabled` stays `false`, so the pressed element keeps focus; the supplied
+  `onClick` is what ignores presses meanwhile.
 - Spreading onto a real `<button>` is exact, but write `type` on the element
   anyway: the `button-has-type` lint rule cannot see a `type` that arrives
   through a spread.
@@ -106,6 +110,15 @@ Props:
 - `variant`: `'solid'` | `'outline'` | `'skeleton'` (default: `'solid'`)
 - Other props are forwarded to `ComponentPropsWithRef<'button'>`, except `className` / `style`.
 
+`onAction` runs inside a transition. While the promise it returns is pending —
+and, with `type="submit"`, while the form's action is pending — the button shows
+a spinner, carries `aria-busy` and `aria-disabled`, and ignores presses,
+including the implicit submission of pressing Enter in a field. It does not
+become natively `disabled`: Chromium moves focus to `body` when the focused
+element is disabled, so a keyboard user who pressed the button would lose their
+place. The `disabled` you pass is native, and takes the button out of the tab
+order.
+
 `renderItem` replaces the `<button>`; see [Render props](#render-props) for the
 contract. It receives `className`, the composed `children`, `ref`, `type`,
 `disabled`, `aria-disabled`, `aria-busy`, `onClick`, and every other attribute
@@ -149,6 +162,9 @@ Props:
 - `tooltipDisabled`: `boolean` (default: `false`)
 - `tooltipPlacement`: `Placement` (default: `'top'`)
 - Other props are forwarded to `ComponentPropsWithRef<'button'>`, except `type` / `className` / `style`.
+
+`onAction` keeps the button busy the way `Button`'s does — `aria-busy`,
+`aria-disabled`, presses ignored, focus kept — without the spinner.
 
 `renderItem` replaces the `<button>` under the same contract as `Button`'s,
 with one addition: the tooltip wiring is kept in a nested `triggerProps` so it
