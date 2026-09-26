@@ -60,6 +60,26 @@ export const Labelled: Story = {
   },
 };
 
+// 中にフォーカスできるものが無いと、<dialog> 自身がフォーカスを受ける。
+// そのリングは UA のままで、高コントラスト用の縁取りの色や位置が混ざらない
+export const FocusRingOnDialog: Story = {
+  args: {
+    defaultOpen: true,
+    'aria-label': 'お知らせ',
+    children: <p className="p-4">フォーカスできるものが無いモーダル</p>,
+  },
+  play: async ({ canvas }) => {
+    const dialog = canvas.getByRole('dialog', { name: 'お知らせ' });
+    await waitFor(() => {
+      expect(dialog).toHaveFocus();
+    });
+
+    const style = getComputedStyle(dialog);
+    await expect(style.outlineStyle).toBe('auto');
+    await expect(style.outlineOffset).toBe('0px');
+  },
+};
+
 export const BottomSide: Story = {
   args: {
     defaultOpen: true,
