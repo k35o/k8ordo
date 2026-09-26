@@ -133,6 +133,11 @@ export const buildComponentLibrary = <C>(
     'Slider with two thumbs for picking a range, bound to form state by name as [lower, upper].',
     s.rangeSliderProps,
   );
+  const ColorPicker = def(
+    'ColorPicker',
+    'Color input with a visible label (#rrggbb), hue / saturation / lightness sliders, and optional preset swatches, bound to form state by name.',
+    s.colorPickerProps,
+  );
   const DateField = def(
     'DateField',
     'Date input with a visible label (YYYY-MM-DD), bound to form state by name.',
@@ -257,6 +262,7 @@ export const buildComponentLibrary = <C>(
     DateField.ref,
     DatePicker.ref,
     Calendar.ref,
+    ColorPicker.ref,
     Checkbox.ref,
     Switch.ref,
     Select.ref,
@@ -425,6 +431,7 @@ export const buildComponentLibrary = <C>(
       DateField,
       DatePicker,
       Calendar,
+      ColorPicker,
       Checkbox,
       Switch,
       Select,

@@ -26,6 +26,7 @@ import { Calendar } from '../../components/form/calendar';
 import { Checkbox } from '../../components/form/checkbox';
 import { CheckboxCard } from '../../components/form/checkbox-card';
 import { CheckboxGroup } from '../../components/form/checkbox-group';
+import { ColorPicker } from '../../components/form/color-picker';
 import { DateField } from '../../components/form/date-field';
 import { DatePicker } from '../../components/form/date-picker';
 import { FileField } from '../../components/form/file-field';
@@ -129,6 +130,7 @@ import type {
   CheckboxProps,
   ChevronIconProps,
   CodeProps,
+  ColorPickerProps,
   DateFieldProps,
   DatePickerProps,
   GridProps,
@@ -567,6 +569,35 @@ const LabeledField: FC<{
     </div>
   );
 };
+
+const ColorPickerView: FC<{
+  props: ColorPickerProps;
+  value: string;
+  onChange: (next: string) => void;
+}> = ({ props, value, onChange }) => (
+  <LabeledField label={props.label}>
+    {(labelId) => (
+      <ColorPicker
+        aria-labelledby={labelId}
+        disabled={u(props.disabled)}
+        invalid={u(props.invalid)}
+        name={props.name}
+        onChange={onChange}
+        required={u(props.required)}
+        swatches={u(props.swatches)}
+        value={value}
+      />
+    )}
+  </LabeledField>
+);
+
+export function renderColorPicker(
+  props: ColorPickerProps,
+  value: string,
+  onChange: (next: string) => void,
+): ReactNode {
+  return <ColorPickerView onChange={onChange} props={props} value={value} />;
+}
 
 const DateFieldView: FC<{
   props: DateFieldProps;
