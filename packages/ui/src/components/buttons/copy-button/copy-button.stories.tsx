@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, spyOn, waitFor } from 'storybook/test';
 
+import { blurActiveElement } from '../../../../.storybook/focus';
 import { CopyButton } from './copy-button';
 
 // クリップボードを読み返すには権限が要り、テストの中では与えられないので、
@@ -42,6 +43,7 @@ const meta: Meta<typeof CopyButton> = {
       write.mockRestore();
     };
   },
+  afterEach: blurActiveElement,
 };
 
 export default meta;
