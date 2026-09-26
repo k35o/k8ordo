@@ -68,6 +68,10 @@ export {
 export { Tabs } from './navigation/tabs';
 export { InView } from './observers/in-view';
 export { Resize } from './observers/resize';
+export {
+  CommandPalette,
+  type CommandPaletteItem,
+} from './overlays/command-palette';
 export { Dialog } from './overlays/dialog';
 export { Drawer } from './overlays/drawer';
 export { DropdownMenu } from './overlays/dropdown-menu';

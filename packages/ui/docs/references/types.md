@@ -90,6 +90,7 @@ code around it:
 | `ButtonRenderItemProps` / `IconButtonRenderItemProps`                 | What `renderItem` receives on `Button` / `IconButton`                                                   |
 | `IconButtonTriggerProps`                                              | `Partial<TooltipTriggerProps>`: the tooltip wiring in `IconButtonRenderItemProps`' `triggerProps`       |
 | `PopoverTriggerProps` / `PopoverContentProps` / `TooltipTriggerProps` | What `renderItem` receives on `Popover.Trigger` / `Popover.Content` / `Tooltip.Trigger`                 |
+| `CommandPaletteItem`                                                  | A command in `CommandPalette`: `id`, `label`, `onSelect`, plus `group`, `keywords`, `shortcut`          |
 | `AlertAction` / `ToastAction` / `ToastOptions`                        | `Alert`'s `action`, and the `action` and `duration` a toast takes                                       |
 | `CheckboxCardOption` / `RadioCardOption`                              | A choice in `CheckboxCard` / `RadioCard`: `value` and `label`, plus `description`, `visual`, `disabled` |
 | `CellAlign`                                                           | A table cell's `align`: `'left'`, `'center'`, or `'right'`                                              |

@@ -1089,6 +1089,55 @@
       "omitted": []
     },
     {
+      "name": "CommandPalette",
+      "props": [
+        {
+          "name": "items",
+          "types": ["readonly CommandPaletteItem[]"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "aria-label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "defaultOpen",
+          "types": ["boolean"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "isOpen",
+          "types": ["boolean"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "onClose",
+          "types": ["() => void"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "placeholder",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "ref",
+          "types": ["Ref<HTMLDialogElement>"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
       "name": "Conversation.Messages",
       "props": [
         {

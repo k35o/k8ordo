@@ -1980,6 +1980,53 @@ Props (Dialog.Root):
 - `role`: `'dialog'` | `'alertdialog'`
 - `tabIndex`: `number`
 
+### CommandPalette
+
+A command palette: a `Modal` holding a search field and the list of commands it
+filters. Typing matches each item's `label` and `keywords`, case-insensitively.
+`ArrowDown` / `ArrowUp` move through the matches and wrap around, `Enter` or a
+click runs the item's `onSelect` after closing the palette, and `Escape` closes
+it; focus stays in the search field throughout (the WAI-ARIA combobox, with the
+list always shown). Items that share a `group` are gathered under that heading,
+in the order the group first appears, and `shortcut` keys are drawn with `Kbd`.
+Each opening starts from an empty search. Open and close it like `Modal`
+(`isOpen` / `defaultOpen` / `onClose`); a key such as ⌘K / Ctrl+K is the
+application's to wire.
+
+```tsx
+import { CommandPalette } from '@k8ordo/ui';
+
+<CommandPalette
+  isOpen={isOpen}
+  onClose={() => setIsOpen(false)}
+  items={[
+    {
+      id: 'new-file',
+      label: 'New file',
+      group: 'File',
+      shortcut: ['⌘', 'N'],
+      onSelect: createFile,
+    },
+    {
+      id: 'theme',
+      label: 'Toggle theme',
+      keywords: ['dark', 'light'],
+      onSelect: toggleTheme,
+    },
+  ]}
+/>;
+```
+
+Props:
+
+- `items`: `readonly CommandPaletteItem[]` (required)
+- `aria-label`: `string`
+- `defaultOpen`: `boolean`
+- `isOpen`: `boolean`
+- `onClose`: `() => void`
+- `placeholder`: `string`
+- `ref`: `Ref<HTMLDialogElement>`
+
 ### Drawer
 
 A side panel. It uses Modal internally.
@@ -2325,31 +2372,32 @@ function DismissButton({ onDismiss }) {
 
 Every key in the `Messages` type. All values are `string`.
 
-| Category      | Keys                                                                                                                                                |
-| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Common        | `close`, `required`, `loading`, `avatar`, `color`                                                                                                   |
-| Alert         | `alertSuccess`, `alertInfo`, `alertWarning`, `alertError`                                                                                           |
-| Toast         | `toastRegion`                                                                                                                                       |
-| CopyButton    | `copy`, `copied`, `copyFailed`                                                                                                                      |
-| Autocomplete  | `autocompletePlaceholder`, `autocompleteRemoveTag`, `autocompleteClear`, `autocompleteEmpty`                                                        |
-| FileField     | `fileFieldRemove`, `fileFieldTrigger`, `fileFieldDrop`                                                                                              |
-| NumberField   | `numberFieldIncrement`, `numberFieldDecrement`, `numberFieldRangeUnderflow` (`{min}` is replaced), `numberFieldRangeOverflow` (`{max}` is replaced) |
-| RangeSlider   | `rangeSliderStart`, `rangeSliderEnd`                                                                                                                |
-| Calendar      | `calendarPreviousMonth`, `calendarNextMonth`                                                                                                        |
-| DatePicker    | `datePickerOpen`, `datePickerDialog`                                                                                                                |
-| PasswordInput | `passwordShow`, `passwordHide`                                                                                                                      |
-| ListBox       | `listBoxPlaceholder`                                                                                                                                |
-| Breadcrumb    | `breadcrumb`                                                                                                                                        |
-| Tabs          | `tabList`                                                                                                                                           |
-| Pagination    | `paginationLabel`, `paginationPrevious`, `paginationNext`                                                                                           |
-| CodeBlock     | `codeBlockCopy` (announces with `CopyButton`'s `copied` / `copyFailed`)                                                                             |
-| TOC           | `tableOfContents`                                                                                                                                   |
-| Carousel      | `carousel`, `carouselSlide`, `carouselPrevious`, `carouselNext`                                                                                     |
-| AI chat       | `chat`, `scrollToLatest`, `reasoning`, `reasoningStreaming`, `suggestions`, `send`, `stop`, `attach`                                                |
-| AI content    | `attachments`, `attachmentRemove`, `attachmentImage`, `sources`                                                                                     |
-| AI actions    | `messageActions`, `regenerate`, `feedbackPositive`, `feedbackNegative` (`Message.Copy` uses `CopyButton`'s)                                         |
-| AI tools      | `toolInput`, `toolOutput`, `toolError`, `toolDenied`, `toolApprovalRequest`, `toolApprove`, `toolDeny`                                              |
-| Response      | The `response*` keys below                                                                                                                          |
+| Category       | Keys                                                                                                                                                |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Common         | `close`, `required`, `loading`, `avatar`, `color`                                                                                                   |
+| Alert          | `alertSuccess`, `alertInfo`, `alertWarning`, `alertError`                                                                                           |
+| Toast          | `toastRegion`                                                                                                                                       |
+| CopyButton     | `copy`, `copied`, `copyFailed`                                                                                                                      |
+| Autocomplete   | `autocompletePlaceholder`, `autocompleteRemoveTag`, `autocompleteClear`, `autocompleteEmpty`                                                        |
+| FileField      | `fileFieldRemove`, `fileFieldTrigger`, `fileFieldDrop`                                                                                              |
+| NumberField    | `numberFieldIncrement`, `numberFieldDecrement`, `numberFieldRangeUnderflow` (`{min}` is replaced), `numberFieldRangeOverflow` (`{max}` is replaced) |
+| RangeSlider    | `rangeSliderStart`, `rangeSliderEnd`                                                                                                                |
+| Calendar       | `calendarPreviousMonth`, `calendarNextMonth`                                                                                                        |
+| DatePicker     | `datePickerOpen`, `datePickerDialog`                                                                                                                |
+| PasswordInput  | `passwordShow`, `passwordHide`                                                                                                                      |
+| ListBox        | `listBoxPlaceholder`                                                                                                                                |
+| Breadcrumb     | `breadcrumb`                                                                                                                                        |
+| Tabs           | `tabList`                                                                                                                                           |
+| Pagination     | `paginationLabel`, `paginationPrevious`, `paginationNext`                                                                                           |
+| CommandPalette | `commandPalette`, `commandPaletteSearch`, `commandPaletteEmpty`                                                                                     |
+| CodeBlock      | `codeBlockCopy` (announces with `CopyButton`'s `copied` / `copyFailed`)                                                                             |
+| TOC            | `tableOfContents`                                                                                                                                   |
+| Carousel       | `carousel`, `carouselSlide`, `carouselPrevious`, `carouselNext`                                                                                     |
+| AI chat        | `chat`, `scrollToLatest`, `reasoning`, `reasoningStreaming`, `suggestions`, `send`, `stop`, `attach`                                                |
+| AI content     | `attachments`, `attachmentRemove`, `attachmentImage`, `sources`                                                                                     |
+| AI actions     | `messageActions`, `regenerate`, `feedbackPositive`, `feedbackNegative` (`Message.Copy` uses `CopyButton`'s)                                         |
+| AI tools       | `toolInput`, `toolOutput`, `toolError`, `toolDenied`, `toolApprovalRequest`, `toolApprove`, `toolDeny`                                              |
+| Response       | The `response*` keys below                                                                                                                          |
 
 `fileFieldTrigger` is the button text of an empty `FileField.Dropzone`, and
 with `tabList` it is also what the generative-UI renderers fall back to when a

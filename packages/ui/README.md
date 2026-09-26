@@ -237,6 +237,7 @@ stories and rendered props rather than relying on trained knowledge:
 
 ### Overlays
 
+- **CommandPalette** - Searchable list of commands in a modal
 - **Dialog** - Modal dialog boxes
 - **Drawer** - Slide-out panel
 - **DropdownMenu** - Action menu component
@@ -475,8 +476,8 @@ Supported components (**all 57**, both frameworks):
 - **Overlays (self-contained widgets)**: `Modal`, `Dialog`, `Drawer`, `Popover`, `Tooltip`, `DropdownMenu`, `Toast`
 - **Form**: `TextField`, `Textarea`, `PasswordInput`, `NumberField`, `Slider`, `RangeSlider`, `DateField`, `DatePicker`, `Calendar`, `Checkbox`, `Switch`, `Select`, `Radio`, `RadioCard`, `CheckboxCard`, `ListBox`, `CheckboxGroup`, `Autocomplete`, `FileField`, `FormControl`
 
-The rest of the exports — the observers, the providers, and the AI chat
-components — are left out on purpose;
+The rest of the exports — `CommandPalette`, the observers, the providers, and
+the AI chat components — are left out on purpose;
 [docs/references/generative-ui.md](docs/references/generative-ui.md#what-the-catalog-leaves-out)
 says why.
 
