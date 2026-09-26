@@ -52,6 +52,8 @@ export const en: Messages = {
   paginationPrevious: 'Previous',
   paginationNext: 'Next',
 
+  stepperComplete: 'completed',
+
   codeBlockCopy: 'Copy code',
   carousel: 'Carousel',
   carouselSlide: 'Slide',

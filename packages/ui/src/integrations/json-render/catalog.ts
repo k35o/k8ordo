@@ -84,6 +84,11 @@ export const catalog = defineCatalog(schema, {
       description:
         'Accordion of items that open and close. Each item has a title and text content.',
     },
+    Stepper: {
+      props: s.stepperProps,
+      description:
+        'Steps of a process in order, marking the ones done and the current one (display only).',
+    },
     Breadcrumb: {
       props: s.breadcrumbProps,
       description: 'Breadcrumb trail.',

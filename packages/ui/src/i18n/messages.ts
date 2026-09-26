@@ -72,6 +72,9 @@ export type Messages = {
   paginationPrevious: string;
   paginationNext: string;
 
+  /** Stepper の済んだ段に添える読み上げ専用の文言 */
+  stepperComplete: string;
+
   /** CodeBlock のコピーボタン */
   codeBlockCopy: string;
   /** Carousel の aria-roledescription（region と各スライド） */

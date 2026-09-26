@@ -47,6 +47,7 @@ const MESSAGE_USAGE = {
   paginationLabel: 'Pagination',
   paginationPrevious: 'Pagination',
   paginationNext: 'Pagination',
+  stepperComplete: 'Stepper',
   codeBlockCopy: 'CodeBlock',
   carousel: 'Carousel',
   carouselSlide: 'Carousel.Slide',

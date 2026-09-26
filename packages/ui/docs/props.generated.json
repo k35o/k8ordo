@@ -3713,6 +3713,55 @@
       "omitted": ["className", "style"]
     },
     {
+      "name": "Stepper",
+      "props": [
+        {
+          "name": "steps",
+          "types": ["readonly StepperStep[]"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "defaultValue",
+          "types": ["number"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "interactive",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "types": ["(value: number) => void"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "orientation",
+          "types": ["'horizontal'", "'vertical'"],
+          "defaultValue": "'horizontal'",
+          "required": false
+        },
+        {
+          "name": "ref",
+          "types": ["Ref<HTMLOListElement>"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "value",
+          "types": ["number"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": "OlHTMLAttributes<HTMLOListElement>",
+      "omitted": ["className", "style", "children"]
+    },
+    {
       "name": "SubscribeIcon",
       "props": [
         {
