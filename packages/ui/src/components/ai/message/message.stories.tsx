@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, spyOn, waitFor } from 'storybook/test';
 
 import { Message } from '.';
+import { blurActiveElement } from '../../../../.storybook/focus';
 import { Avatar } from '../../data-display/avatar';
 import { AssistantIcon } from '../../icons';
 import { Attachment } from '../attachment';
@@ -127,6 +128,7 @@ export const Copy: Story = {
       </Message.Actions>
     </Message.Root>
   ),
+  afterEach: blurActiveElement,
   play: async ({ canvas, userEvent }) => {
     // クリップボードは外部の境界。書き込み口だけ差し替えて、渡した値を見る
     const written: ClipboardItem[] = [];
@@ -147,6 +149,7 @@ export const Copy: Story = {
 
 export const CopyFailed: Story = {
   render: Copy.render,
+  afterEach: blurActiveElement,
   play: async ({ canvas, userEvent }) => {
     spyOn(navigator.clipboard, 'write').mockRejectedValue(
       new DOMException('denied', 'NotAllowedError'),

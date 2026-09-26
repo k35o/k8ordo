@@ -3,6 +3,7 @@ import type { ReactElement } from 'react';
 import { expect, spyOn, waitFor } from 'storybook/test';
 
 import { CodeBlock } from '.';
+import { blurActiveElement } from '../../../../.storybook/focus';
 
 // CodeBlock はサーバーでハイライトする async の Server Component で、
 // ブラウザの React は async の部品を描かない。RSC の描画と同じく関数として
@@ -130,6 +131,7 @@ export const Copy: Story = {
       spy.mockRestore();
     };
   },
+  afterEach: blurActiveElement,
   play: async ({ canvas, userEvent }) => {
     await userEvent.click(
       await canvas.findByRole('button', { name: 'コードをコピー' }),
