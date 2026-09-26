@@ -236,6 +236,11 @@ export const catalog = defineCatalog(schema, {
       props: s.tooltipProps,
       description: 'Tooltip shown on hover or focus.',
     },
+    Toolbar: {
+      props: s.toolbarProps,
+      description:
+        'Row (or column) of buttons that arrow keys move between, e.g. formatting actions. Give each item an icon to show only the icon.',
+    },
     DropdownMenu: {
       props: s.dropdownMenuProps,
       description: 'Dropdown menu.',

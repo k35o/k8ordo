@@ -1065,6 +1065,103 @@
       "omitted": []
     },
     {
+      "name": "ContextMenu.Content",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "ContextMenu.Item",
+      "props": [
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "onAction",
+          "types": ["() => void"],
+          "defaultValue": null,
+          "required": true
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "ContextMenu.Root",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "defaultOpen",
+          "types": ["boolean"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "isOpen",
+          "types": ["boolean"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "types": ["(isOpen: boolean) => void"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "ContextMenu.SubMenu",
+      "props": [
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "ContextMenu.Trigger",
+      "props": [
+        {
+          "name": "renderItem",
+          "types": [
+            "(props: { onContextMenu: MouseEventHandler<HTMLElement>; }) => ReactElement"
+          ],
+          "defaultValue": null,
+          "required": true
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
       "name": "Conversation.Messages",
       "props": [
         {
@@ -4200,6 +4297,50 @@
           "required": false
         }
       ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "Toolbar.Item",
+      "props": [
+        {
+          "name": "renderItem",
+          "types": ["(props: ToolbarItemProps) => ReactElement"],
+          "defaultValue": null,
+          "required": true
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "Toolbar.Root",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "orientation",
+          "types": ["'horizontal'", "'vertical'"],
+          "defaultValue": "'horizontal'",
+          "required": false
+        },
+        {
+          "name": "ref",
+          "types": ["Ref<HTMLDivElement>"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": "HTMLAttributes<HTMLDivElement>",
+      "omitted": ["className", "style", "role", "aria-orientation"]
+    },
+    {
+      "name": "Toolbar.Separator",
+      "props": [],
       "inherits": null,
       "omitted": []
     },

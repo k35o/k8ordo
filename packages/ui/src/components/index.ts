@@ -5,6 +5,7 @@ export {
   type IconButtonRenderItemProps,
   type IconButtonTriggerProps,
 } from './buttons/icon-button';
+export { Toolbar, type ToolbarItemProps } from './buttons/toolbar';
 export { Accordion } from './data-display/accordion';
 export { Avatar } from './data-display/avatar';
 export { Badge } from './data-display/badge';
@@ -58,6 +59,7 @@ export { Pagination } from './navigation/pagination';
 export { Tabs } from './navigation/tabs';
 export { InView } from './observers/in-view';
 export { Resize } from './observers/resize';
+export { ContextMenu } from './overlays/context-menu';
 export { Dialog } from './overlays/dialog';
 export { Drawer } from './overlays/drawer';
 export { DropdownMenu } from './overlays/dropdown-menu';

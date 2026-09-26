@@ -211,6 +211,59 @@ Props:
 - `label`: `string`
 - `size`: `'sm'` | `'md'` | `'lg'` (default: `'md'`)
 
+### Toolbar
+
+A group of controls that takes one Tab stop (the WAI-ARIA toolbar). Arrow keys
+move between the items — left/right when `orientation` is `horizontal`, up/down
+when `vertical`, and in vertical writing mode the other pair, since the row
+itself runs vertically — `Home` / `End` jump to the ends, and disabled items are
+skipped. Tab leaves the toolbar, and coming back lands on the item last focused.
+
+Each item is a slot: `Toolbar.Item`'s `renderItem` receives `ref`, `tabIndex`,
+and `onFocus` (`ToolbarItemProps`) to spread onto a `Button`, an `IconButton`,
+or any other button. A toggle item sets `aria-pressed`; the toolbar shades a
+pressed item. The root needs a name (`aria-label` or `aria-labelledby`).
+Items are meant to be buttons: a control that uses the arrow keys itself (a text
+field, a slider) would fight the toolbar for them.
+
+```tsx
+import { IconButton, Toolbar } from '@k8ordo/ui';
+
+<Toolbar.Root aria-label="Formatting">
+  <Toolbar.Item
+    renderItem={(props) => (
+      <IconButton {...props} label="Copy">
+        <CopyIcon />
+      </IconButton>
+    )}
+  />
+  <Toolbar.Separator />
+  <Toolbar.Item
+    renderItem={(props) => (
+      <IconButton
+        {...props}
+        aria-pressed={isList}
+        label="Bulleted list"
+        onClick={toggleList}
+      >
+        <ListIcon />
+      </IconButton>
+    )}
+  />
+</Toolbar.Root>;
+```
+
+Props (Root):
+
+- `children`: `ReactNode`
+- `orientation`: `'horizontal'` | `'vertical'` (default: `'horizontal'`)
+- `ref`: `Ref<HTMLDivElement>`
+- Other props are forwarded to `HTMLAttributes<HTMLDivElement>`, except `className` / `style` / `role` / `aria-orientation`.
+
+Props (Toolbar.Item):
+
+- `renderItem`: `(props: ToolbarItemProps) => ReactElement` (required)
+
 ### Anchor
 
 A text link. External links automatically get a new-tab icon.
@@ -1957,6 +2010,66 @@ Props (DropdownMenu.Trigger):
 - `label`: `string` (required)
 - `size`: `ComponentProps<typeof Button>['size']` (default: `'md'`)
 - `variant`: `ComponentProps<typeof Button>['variant']` (default: `'solid'`)
+
+### ContextMenu
+
+A menu opened by right-clicking (or by the keyboard's context-menu key or
+Shift+F10) on an area, shown at the pointer. The inside is `DropdownMenu`'s —
+`ContextMenu.Content`, `ContextMenu.Item` (`label` / `onAction`), and
+`ContextMenu.SubMenu` behave exactly like theirs — and only how it opens and
+where differ. When it closes from inside (an item, Escape), focus returns to
+the element that had it before it opened; closing by clicking elsewhere leaves
+focus where the click put it.
+
+`ContextMenu.Trigger` fills a slot: `renderItem` receives `onContextMenu` to
+put on the area. To open it from the keyboard, the area (or something in it)
+has to be able to take focus.
+
+```tsx
+import { ContextMenu } from '@k8ordo/ui';
+
+<ContextMenu.Root>
+  <ContextMenu.Trigger
+    renderItem={(props) => (
+      <div {...props} tabIndex={0}>
+        report.pdf
+      </div>
+    )}
+  />
+  <ContextMenu.Content>
+    <ContextMenu.Item label="Rename" onAction={rename} />
+    <ContextMenu.SubMenu label="Move to">
+      <ContextMenu.Item label="Archive" onAction={archive} />
+    </ContextMenu.SubMenu>
+    <ContextMenu.Item label="Delete" onAction={remove} />
+  </ContextMenu.Content>
+</ContextMenu.Root>;
+```
+
+Props (Root):
+
+- `children`: `ReactNode`
+- `defaultOpen`: `boolean`
+- `isOpen`: `boolean`
+- `onChange`: `(isOpen: boolean) => void`
+
+Props (ContextMenu.Content):
+
+- `children`: `ReactNode`
+
+Props (ContextMenu.Item):
+
+- `label`: `string` (required)
+- `onAction`: `() => void` (required)
+
+Props (ContextMenu.SubMenu):
+
+- `label`: `string` (required)
+- `children`: `ReactNode`
+
+Props (ContextMenu.Trigger):
+
+- `renderItem`: `(props: { onContextMenu: MouseEventHandler<HTMLElement>; }) => ReactElement` (required)
 
 ### ListBox
 

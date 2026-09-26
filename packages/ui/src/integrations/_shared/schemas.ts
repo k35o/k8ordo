@@ -4,6 +4,7 @@ import { z } from 'zod';
 import type { Button } from '../../components/buttons/button';
 import type { CopyButton } from '../../components/buttons/copy-button';
 import type { IconButton } from '../../components/buttons/icon-button';
+import type { Toolbar } from '../../components/buttons/toolbar';
 import type { Avatar } from '../../components/data-display/avatar';
 import type { Badge } from '../../components/data-display/badge';
 import type { Card } from '../../components/data-display/card';
@@ -935,6 +936,27 @@ export const tooltipProps = z.object({
   content: z.string().describe('Text of the tooltip'),
 }) satisfies z.ZodType<TooltipIntegrationProps>;
 
+type ToolbarIntegrationProps = {
+  label: string;
+  items: ReadonlyArray<{ label: string; icon?: z.infer<typeof iconName> }>;
+  orientation?: ComponentProps<typeof Toolbar.Root>['orientation'];
+};
+export const toolbarProps = z.object({
+  label: z.string().describe('Accessible name of the toolbar'),
+  items: z
+    .array(
+      z.object({
+        label: z.string(),
+        icon: iconName
+          .optional()
+          .describe('Show only this icon; label becomes its accessible name'),
+      }),
+    )
+    .min(1)
+    .describe('Buttons in the toolbar, in order'),
+  orientation: z.enum(['horizontal', 'vertical']).optional(),
+}) satisfies z.ZodType<ToolbarIntegrationProps>;
+
 type DropdownMenuIntegrationProps = {
   triggerLabel: string;
   items: ReadonlyArray<{ label: string }>;
@@ -997,6 +1019,7 @@ export type DrawerProps = z.infer<typeof drawerProps>;
 export type PopoverProps = z.infer<typeof popoverProps>;
 export type TooltipProps = z.infer<typeof tooltipProps>;
 export type DropdownMenuProps = z.infer<typeof dropdownMenuProps>;
+export type ToolbarProps = z.infer<typeof toolbarProps>;
 export type ToastProps = z.infer<typeof toastProps>;
 export type ListBoxProps = z.infer<typeof listBoxProps>;
 export type CheckboxGroupProps = z.infer<typeof checkboxGroupProps>;
@@ -1171,6 +1194,12 @@ export type _EnumCoverage = [
     CoversComponent<
       ComponentProps<typeof Carousel.Root>['slideSize'],
       CarouselProps['slideSize']
+    >
+  >,
+  AssertCovered<
+    CoversComponent<
+      ComponentProps<typeof Toolbar.Root>['orientation'],
+      ToolbarProps['orientation']
     >
   >,
 ];

@@ -6,6 +6,7 @@ import type { ComponentProps, FC, ReactNode } from 'react';
 import { Button } from '../../components/buttons/button';
 import { CopyButton } from '../../components/buttons/copy-button';
 import { IconButton } from '../../components/buttons/icon-button';
+import { Toolbar } from '../../components/buttons/toolbar';
 import { Accordion } from '../../components/data-display/accordion';
 import { Avatar } from '../../components/data-display/avatar';
 import { Badge } from '../../components/data-display/badge';
@@ -167,6 +168,7 @@ import type {
   TextareaProps,
   TextFieldProps,
   ToastProps,
+  ToolbarProps,
   TooltipProps,
 } from './schemas';
 
@@ -1072,6 +1074,34 @@ export function renderTooltip(props: TooltipProps): ReactNode {
       />
       <Tooltip.Content>{props.content}</Tooltip.Content>
     </Tooltip.Root>
+  );
+}
+
+export function renderToolbar(props: ToolbarProps): ReactNode {
+  return (
+    <Toolbar.Root aria-label={props.label} orientation={u(props.orientation)}>
+      {props.items.map((item, index) => {
+        const icon = u(item.icon);
+        const IconComponent = icon === undefined ? undefined : iconMap[icon];
+        return (
+          <Toolbar.Item
+            // eslint-disable-next-line react/no-array-index-key -- 生成された静的な並び
+            key={`${item.label}-${index}`}
+            renderItem={(itemProps) =>
+              IconComponent === undefined ? (
+                <Button {...itemProps} size="sm" variant="skeleton">
+                  {item.label}
+                </Button>
+              ) : (
+                <IconButton {...itemProps} label={item.label} size="sm">
+                  <IconComponent size="sm" />
+                </IconButton>
+              )
+            }
+          />
+        );
+      })}
+    </Toolbar.Root>
   );
 }
 

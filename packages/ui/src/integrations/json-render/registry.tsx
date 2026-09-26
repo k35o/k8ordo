@@ -226,6 +226,7 @@ export const { registry } = defineRegistry(catalog, {
     Popover: ({ props, children }) => ui.renderPopover(props, children),
     Tooltip: ({ props }) => ui.renderTooltip(props),
     DropdownMenu: ({ props }) => ui.renderDropdownMenu(props),
+    Toolbar: ({ props }) => ui.renderToolbar(props),
     Toast: ({ props }) => <ui.ToastWidget props={props} />,
 
     ListBox: ({ props, bindings }) => {
