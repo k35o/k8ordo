@@ -1,4 +1,6 @@
+import { slotOf } from '../grammar/tree';
 import type { Problem, RouteDir } from '../grammar/tree';
+import { ROUTE_METHODS } from '../runtime/route';
 
 /**
  * The generator writes the route table and the type wiring so an application
@@ -20,14 +22,17 @@ export type TableBranch<T> = {
 
 export type TableNode<T> = T | TableBranch<T>;
 
+/** What answers a directory's own URL: its page, or its route.ts. */
+const ownFile = (dir: RouteDir): string | null => dir.page ?? dir.route;
+
 /**
- * A directory with nothing but a page is the component itself — except a
- * group: it adds no segment, so the router refuses it as a leaf (it would
- * redeclare its parent's index) and takes it only as a branch.
+ * A directory with nothing but a page (or a route.ts) is that, itself —
+ * except a group: it adds no segment, so the router refuses it as a leaf (it
+ * would redeclare its parent's index) and takes it only as a branch.
  */
 const isLeaf = (dir: RouteDir): boolean =>
   dir.kind !== 'group' &&
-  dir.page !== null &&
+  ownFile(dir) !== null &&
   dir.layout === null &&
   dir.error === null &&
   dir.notFound === null &&
@@ -69,7 +74,8 @@ export const buildTable = <T>(
 ): Record<string, TableNode<T>> => {
   const entries = (dir: RouteDir): Record<string, TableNode<T>> => {
     const record: Record<string, TableNode<T>> = {};
-    if (dir.page !== null) record['/'] = resolve(dir.page);
+    const own = ownFile(dir);
+    if (own !== null) record['/'] = resolve(own);
     for (const child of order(dir.children)) record[child.key] = node(child);
     // Last, because the table matches in declaration order: every route the
     // app actually declared out-ranks the catch-all.
@@ -78,7 +84,7 @@ export const buildTable = <T>(
   };
 
   const node = (dir: RouteDir): TableNode<T> => {
-    if (isLeaf(dir)) return resolve(dir.page as string);
+    if (isLeaf(dir)) return resolve(ownFile(dir) as string);
     const branch: TableBranch<T> = { children: entries(dir) };
     if (dir.layout !== null) branch.layout = resolve(dir.layout);
     if (dir.error !== null) branch.error = resolve(dir.error);
@@ -95,7 +101,7 @@ export const buildTable = <T>(
 export type DeclaredPattern = {
   readonly pattern: string;
   readonly file: string;
-  readonly kind: 'page' | 'redirect' | 'notFound';
+  readonly kind: 'page' | 'route' | 'redirect' | 'notFound';
 };
 
 /**
@@ -111,9 +117,11 @@ export const declaredPatterns = (
   const here = dir.kind === 'root' ? '' : prefix;
   const own = here === '' ? '/' : here;
   const found: DeclaredPattern[] = [];
-  if (dir.page !== null)
+  if (dir.page !== null) {
     found.push({ pattern: own, file: dir.page, kind: 'page' });
-  if (dir.redirect !== null && dir.page === null) {
+  } else if (dir.route !== null) {
+    found.push({ pattern: own, file: dir.route, kind: 'route' });
+  } else if (dir.redirect !== null) {
     found.push({ pattern: own, file: dir.redirect, kind: 'redirect' });
   }
   for (const child of order(dir.children)) {
@@ -135,6 +143,10 @@ const declared = declaredPatterns;
 /** Every `redirect.ts`, with the pattern its directory puts it under. */
 export const declaredRedirects = (dir: RouteDir): DeclaredPattern[] =>
   declaredPatterns(dir).filter((each) => each.kind === 'redirect');
+
+/** Every `route.ts`, with the pattern its directory puts it under. */
+export const declaredRouteFiles = (dir: RouteDir): DeclaredPattern[] =>
+  declaredPatterns(dir).filter((each) => each.kind === 'route');
 
 /**
  * Routes that exist and can never render, because something declared earlier
@@ -175,6 +187,9 @@ export type EmitOptions = {
 };
 
 const DEFAULT_VIA = '@k8ordo/static';
+
+/** What holds a route.ts's place in the table. */
+const ANSWERED = 'answered';
 const ROUTE_REQUEST_FROM = '@k8ordo/server/runtime';
 
 const banner = (via: string | undefined): string =>
@@ -248,7 +263,7 @@ const believed = (
 type Belief = {
   /** The pattern the directories put the file under. */
   readonly pattern: string;
-  readonly kind: 'page' | 'layout' | 'notFound' | 'error';
+  readonly kind: 'page' | 'route' | 'layout' | 'notFound' | 'error';
   /** Schema-declaring files along the stack, outer-first, the file's own last. */
   readonly schemas: readonly string[];
 };
@@ -290,12 +305,13 @@ const beliefs = (
         schemas: layoutSchemas,
       });
     }
-    if (dir.page !== null) {
-      found.set(dir.page, {
+    const answers = ownFile(dir);
+    if (answers !== null) {
+      found.set(answers, {
         pattern: own,
-        kind: 'page',
-        schemas: withParams.has(dir.page)
-          ? [...layoutSchemas, dir.page]
+        kind: dir.page === null ? 'route' : 'page',
+        schemas: withParams.has(answers)
+          ? [...layoutSchemas, answers]
           : layoutSchemas,
       });
     }
@@ -349,7 +365,7 @@ const guardsOf = (tree: RouteDir): Guards => {
     const stack = dir.guard === null ? inherited : [...inherited, dir.guard];
     if (dir.guard !== null) own.set(dir.guard, pattern);
     if (stack.length > 0) {
-      if (dir.page !== null) stacks.set(pattern, stack);
+      if (ownFile(dir) !== null) stacks.set(pattern, stack);
       if (dir.notFound !== null) stacks.set(`${here}/*`, stack);
     }
     for (const child of dir.children) {
@@ -368,7 +384,16 @@ export const emitRoutesModule = (
   options: EmitOptions,
 ): string => {
   const namer = createNamer();
-  const table = buildTable(tree, namer.take);
+  // A route.ts is not a component: its place in the table is held by one
+  // that renders nothing, and the module itself goes to `routeModules`.
+  const table = buildTable(tree, (file) =>
+    slotOf(file) === 'route' ? ANSWERED : namer.take(file),
+  );
+  const routeFiles = declaredRouteFiles(tree).map((route) => ({
+    pattern: route.pattern,
+    file: route.file,
+    name: namer.take(route.file),
+  }));
   const withParams = options.withParams ?? new Set<string>();
 
   const byFile = beliefs(tree, withParams);
@@ -390,6 +415,10 @@ export const emitRoutesModule = (
     } else if (belief.kind === 'notFound') {
       asserted.set(name, `Page<'${belief.pattern}'>`);
       if (schemas.length > 0) catchAllStacks.set(belief.pattern, schemas);
+    } else if (belief.kind === 'route') {
+      // Not in the table, so nothing to state there; its schemas still run
+      // before it answers, and type its params.
+      if (schemas.length > 0) stacks.set(belief.pattern, schemas);
     } else if (schemas.length === 0) {
       asserted.set(name, `Page<'${belief.pattern}'>`);
     } else {
@@ -420,10 +449,22 @@ export const emitRoutesModule = (
   );
   const importLines = [...namer.names].map(([file, name]) => {
     const specifier = `'${options.importPrefix}/${file.replace(/\.[jt]sx?$/u, '')}'`;
+    if (slotOf(file) === 'route')
+      return `import * as ${name} from ${specifier};`;
     return withParams.has(file)
       ? `import ${name}, { paramsSchema as ${schemaName(name)} } from ${specifier};`
       : `import ${name} from ${specifier};`;
   });
+  // A route.ts is imported whole, so its schema is read off the module.
+  const routeSchemaLines = routeFiles
+    .filter(({ file }) => withParams.has(file))
+    .map(({ name }) => `const ${schemaName(name)} = ${name}.paramsSchema;`);
+  const routeChecks = routeFiles.map(({ pattern, name }) =>
+    stacks.has(pattern)
+      ? `${pad(1)}${name} satisfies RouteModule<'${pattern}', (typeof paramSchemas)['${pattern}']>,`
+      : `${pad(1)}${name} satisfies RouteModule<'${pattern}'>,`,
+  );
+  const hasRoutes = routeFiles.length > 0;
   const hasError = [...asserted.values()].includes('ErrorComponent');
   const hasSchemas = withParams.size > 0;
   // Under a running server a page also receives the request; a build into
@@ -469,6 +510,7 @@ export const emitRoutesModule = (
     ...importLines,
     ...redirectImports,
     '',
+    ...(routeSchemaLines.length > 0 ? [...routeSchemaLines, ''] : []),
     ...(withRequest
       ? [
           '// What a page may read of the request, under a running server only.',
@@ -548,6 +590,39 @@ export const emitRoutesModule = (
     '// 404 is in); a refusal does not stop a catch-all from answering.',
     'export const catchAllSchemas = {',
     ...toMap(catchAllStacks),
+    '} as const;',
+    '',
+    ...(hasRoutes
+      ? [
+          '// What a route.ts exports: a function per request method it answers,',
+          '// handed the request and the params, answering with a Response.',
+          'type RouteHandler<',
+          '  P extends string,',
+          '  S extends readonly unknown[] = [],',
+          '> = (context: {',
+          '  readonly request: Request;',
+          '  readonly params: ParsedParams<P, S>;',
+          '}) => Response | Promise<Response>;',
+          'type RouteModule<P extends string, S extends readonly unknown[] = []> = {',
+          `  readonly [M in ${ROUTE_METHODS.map((method) => `'${method}'`).join(' | ')}]?: RouteHandler<P, S>;`,
+          '};',
+          '',
+          '// The route.ts modules, each checked against the pattern its directory',
+          '// puts it under.',
+          'const routeChecks = [',
+          ...routeChecks,
+          '] as const;',
+          'void routeChecks;',
+          '',
+          '// A route.ts in the table: the handler answers it from `routeModules`',
+          '// before anything renders, so its place here is only where it matches.',
+          `const ${ANSWERED} = (): null => null;`,
+          '',
+        ]
+      : []),
+    '// Per pattern, the route.ts that answers it, by the methods it exports.',
+    'export const routeModules = {',
+    ...routeFiles.map(({ pattern, name }) => `${pad(1)}'${pattern}': ${name},`),
     '} as const;',
     '',
     '// Per pattern, the guards that run before it answers — outer first. `/*`',
