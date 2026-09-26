@@ -1,4 +1,5 @@
 import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { cpSync, existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { createServer } from 'node:http';
@@ -34,13 +35,18 @@ let searchStderr = '';
 // スクリプトだけが違う。タブを開いた後にデプロイがあった、を再現する
 let previous = '';
 
+// vitest は NODE_ENV=test を置き、子プロセスのビルドもそれを継いで React の
+// 開発版を積む。主張の対象は配る成果物なので、本番のビルドにする
+const BUILD = {
+  cwd: root,
+  stdio: 'pipe',
+  env: { ...process.env, NODE_ENV: 'production' },
+} as const;
+
 // 止まらなかったビルドは空の stderr を返し、止まることの主張で落ちる
 const failingBuild = (config: string): string => {
   try {
-    execFileSync('pnpm', ['exec', 'vp', 'build', '--config', config], {
-      cwd: root,
-      stdio: 'pipe',
-    });
+    execFileSync('pnpm', ['exec', 'vp', 'build', '--config', config], BUILD);
   } catch (error) {
     return String((error as { stderr?: Buffer }).stderr ?? '');
   }
@@ -58,25 +64,36 @@ beforeAll(() => {
   routeStderr = failingBuild('vite.broken-route.config.ts');
   searchStderr = failingBuild('vite.broken-search.config.ts');
   // 圧縮しないだけで、スクリプトの中身とハッシュの入った名前が変わる
-  execFileSync('pnpm', ['exec', 'vp', 'build', '--minify', 'false'], {
-    cwd: root,
-    stdio: 'pipe',
-  });
+  execFileSync('pnpm', ['exec', 'vp', 'build', '--minify', 'false'], BUILD);
   previous = mkdtempSync(path.join(tmpdir(), 'k8ordo-previous-'));
   cpSync(client, previous, { recursive: true });
-  execFileSync('pnpm', ['exec', 'vp', 'build'], { cwd: root, stdio: 'pipe' });
+  execFileSync('pnpm', ['exec', 'vp', 'build'], BUILD);
   // 既定のビルドが空にするのは dist/client などの各出力先だけなので、
   // dist/base/ は残る
   execFileSync(
     'pnpm',
     ['exec', 'vp', 'build', '--config', 'vite.base.config.ts'],
-    { cwd: root, stdio: 'pipe' },
+    BUILD,
   );
 }, 480_000);
 
 afterAll(() => {
   rmSync(previous, { recursive: true, force: true });
 });
+
+// <head> の先頭に置かれた <meta> のポリシー。無ければ空
+const policyFirstIn = (html: string): string =>
+  (
+    /^<!DOCTYPE html><html lang="en"><head><meta http-equiv="Content-Security-Policy" content="([^"]*)">/u.exec(
+      html,
+    )?.[1] ?? ''
+  ).replaceAll('&apos;', "'");
+
+// src を持たないスクリプトの中身
+const inlineScriptsIn = (html: string): string[] =>
+  [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gu)]
+    .filter(([, attributes = '']) => !attributes.includes('src='))
+    .map(([, , source = '']) => source);
 
 const read = (...parts: string[]): string =>
   readFileSync(path.join(client, ...parts), 'utf8');
@@ -217,6 +234,31 @@ describe('the static build', () => {
     expect(xml).not.toContain('404');
   });
 
+  it.each(['index.html', 'products/1/index.html', '404.html'])(
+    'writes the application’s policy first in the <head> of %s, naming each inline script by hash',
+    (file) => {
+      const html = read(file);
+      const policy = policyFirstIn(html);
+      expect(policy).toMatch(
+        /^script-src 'self'( 'sha256-[A-Za-z0-9+/]{43}=')+; object-src 'none'; base-uri 'none'$/u,
+      );
+      const inline = inlineScriptsIn(html);
+      // color-scheme と、書き込んだペイロード
+      expect(inline.length).toBeGreaterThanOrEqual(2);
+      for (const source of inline) {
+        expect(policy).toContain(
+          `'sha256-${createHash('sha256').update(source).digest('base64')}'`,
+        );
+      }
+    },
+  );
+
+  it('leaves no nonce in what it writes: a file everyone reads cannot keep one', () => {
+    for (const file of ['index.html', 'index.rsc', '404.html']) {
+      expect(read(file)).not.toContain('nonce');
+    }
+  });
+
   it('ships the client entry, so the page hydrates', () => {
     expect(read('index.html')).toMatch(/<script[^>]+type="module"/u);
   });
@@ -326,6 +368,36 @@ describe('a written page in the browser', () => {
     });
     return page;
   };
+
+  it('runs under the policy its <meta> states: nothing refused, through hydration and a navigation', async () => {
+    const page = await browser.newPage();
+    await page.addInitScript(() => {
+      const refused: string[] = [];
+      Object.assign(window, { refused });
+      document.addEventListener('securitypolicyviolation', (event) => {
+        refused.push(`${event.effectiveDirective} ${event.blockedURI}`);
+      });
+    });
+    await page.goto(origin);
+    await page.getByText(/time zone: (?!not yet)/u).waitFor();
+
+    await page.getByRole('link', { name: 'product 1' }).click();
+    await page.getByTestId('product-id').getByText('number:1').waitFor();
+    // 違反の知らせは後のタスクで届くので、ひと巡り待ってから読む
+    await page.evaluate(
+      () =>
+        new Promise((resolve) => {
+          setTimeout(resolve, 0);
+        }),
+    );
+
+    expect(
+      await page.evaluate(
+        () => (window as unknown as { refused: string[] }).refused,
+      ),
+    ).toStrictEqual([]);
+    await page.close();
+  });
 
   it('moves to the next page in place while the tab runs the deploy the host serves', async () => {
     const page = await openHydrated(origin);

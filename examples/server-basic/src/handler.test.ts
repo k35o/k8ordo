@@ -487,6 +487,43 @@ describe('guard.ts', () => {
   );
 });
 
+// ガードが書いたポリシーが名指す nonce
+const nonceNamedBy = (response: Response): string | undefined =>
+  /'nonce-([^']+)'/u.exec(
+    response.headers.get('content-security-policy') ?? '',
+  )?.[1];
+
+describe('a Content-Security-Policy with a nonce', () => {
+  it.each([
+    ['a page', '/'],
+    ['a page whose content streams in', '/products'],
+    ['the not-found page', '/nowhere'],
+  ])(
+    'signs every script of %s with the nonce its guard named',
+    async (_what, pathname) => {
+      const response = await handler(new Request(`${ORIGIN}${pathname}`));
+      const nonce = nonceNamedBy(response);
+      expect(nonce).toMatch(/^[A-Za-z0-9+/]{22}==$/u);
+      const scripts = [
+        ...(await response.text()).matchAll(/<script\b[^>]*>/gu),
+      ].map(([tag]) => tag);
+      // 起動のモジュール・ペイロード・color-scheme のインラインスクリプト
+      expect(scripts.length).toBeGreaterThanOrEqual(3);
+      expect(
+        scripts.filter((tag) => !tag.includes(` nonce="${String(nonce)}"`)),
+      ).toStrictEqual([]);
+    },
+  );
+
+  it('signs each answer with a nonce of its own', async () => {
+    const [first, second] = await Promise.all([
+      handler(new Request(`${ORIGIN}/`)),
+      handler(new Request(`${ORIGIN}/`)),
+    ]);
+    expect(nonceNamedBy(first)).not.toBe(nonceNamedBy(second));
+  });
+});
+
 describe('the built request handler, outside Node', () => {
   it('reaches for nothing from Node but AsyncLocalStorage', async () => {
     const builtins = [...(await specifiersOfHandler())].filter((specifier) =>

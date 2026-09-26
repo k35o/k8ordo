@@ -44,6 +44,19 @@ const payloadsRequestedBy = (page: Page): string[] => {
   return payloads;
 };
 
+// 文書が読み込まれるたびに、ポリシーが拒んだものを window に集める
+const refusedBy = async (page: Page): Promise<() => Promise<string[]>> => {
+  await page.addInitScript(() => {
+    const refused: string[] = [];
+    Object.assign(window, { refused });
+    document.addEventListener('securitypolicyviolation', (event) => {
+      refused.push(`${event.effectiveDirective} ${event.blockedURI}`);
+    });
+  });
+  return () =>
+    page.evaluate(() => (window as unknown as { refused: string[] }).refused);
+};
+
 describe('the built application in a browser', () => {
   it('follows an action that redirected when JavaScript ran it', async () => {
     const page = await browser.newPage();
@@ -183,6 +196,38 @@ describe('the built application in a browser', () => {
     expect(await page.getByTestId('list').textContent()).toBe('second product');
     // 文書の読み込みではなく、その場での取り直し
     expect(await page.evaluate(() => 'stayed' in window)).toBe(true);
+    await page.close();
+  }, 30_000);
+
+  it('runs under the policy its guard wrote: nothing refused, through hydration and a navigation', async () => {
+    const page = await browser.newPage();
+    const refused = await refusedBy(page);
+    await page.goto(server.url);
+    await hydrated(page);
+
+    await page.getByRole('link', { name: 'products', exact: true }).click();
+    await page.getByTestId('list').getByText('first product').waitFor();
+
+    expect(await refused()).toStrictEqual([]);
+    await page.close();
+  }, 30_000);
+
+  it('is in force: an inline handler, which nothing signed, is refused', async () => {
+    const page = await browser.newPage();
+    const refused = await refusedBy(page);
+    await page.goto(server.url);
+    await hydrated(page);
+
+    await page.evaluate(() => {
+      document.body.setAttribute('onclick', 'window.injected = true');
+      document.body.click();
+    });
+
+    expect(await page.evaluate(() => 'injected' in window)).toBe(false);
+    // 違反の知らせは後のタスクで届く
+    await vi.waitFor(async () => {
+      expect(await refused()).toStrictEqual(['script-src-attr inline']);
+    });
     await page.close();
   }, 30_000);
 
