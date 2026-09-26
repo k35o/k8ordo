@@ -32,6 +32,9 @@ export const ja: Messages = {
   numberFieldRangeUnderflow: '{min} 以上で入力してください',
   numberFieldRangeOverflow: '{max} 以下で入力してください',
 
+  rangeSliderStart: '最小',
+  rangeSliderEnd: '最大',
+
   calendarPreviousMonth: '前の月',
   calendarNextMonth: '次の月',
   datePickerOpen: 'カレンダーから選ぶ',

@@ -11,7 +11,7 @@ import * as m from '../../../../messages';
 const MESSAGE_USAGE = {
   close: 'Alert / Dialog / Drawer / Response',
   required: 'FormControl',
-  loading: 'Spinner',
+  loading: 'Spinner / Progress',
   avatar: 'Avatar',
   color: 'Code',
   alertSuccess: 'Alert',
@@ -33,6 +33,8 @@ const MESSAGE_USAGE = {
   numberFieldDecrement: 'NumberField',
   numberFieldRangeUnderflow: 'NumberField',
   numberFieldRangeOverflow: 'NumberField',
+  rangeSliderStart: 'RangeSlider',
+  rangeSliderEnd: 'RangeSlider',
   calendarPreviousMonth: 'Calendar / DatePicker',
   calendarNextMonth: 'Calendar / DatePicker',
   datePickerOpen: 'DatePicker',
@@ -331,19 +333,19 @@ function DismissButton({ onDismiss }) {
                 <Code>{row.key}</Code>
               </dt>
               <dd className="text-fg-mute text-sm">
-                <span className="text-fg-mute/60">
+                <span className="text-fg-subtle">
                   <Rich>{m.uiI18n.usedByColumn()}</Rich>:{' '}
                 </span>
                 {row.usedBy}
               </dd>
               <dd className="text-fg-mute text-sm">
-                <span className="text-fg-mute/60">
+                <span className="text-fg-subtle">
                   <Rich>{m.uiI18n.jaColumn()}</Rich>:{' '}
                 </span>
                 {row.jaValue}
               </dd>
               <dd className="text-fg-mute text-sm">
-                <span className="text-fg-mute/60">
+                <span className="text-fg-subtle">
                   <Rich>{m.uiI18n.enColumn()}</Rich>:{' '}
                 </span>
                 {row.enValue}

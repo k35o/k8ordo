@@ -49,6 +49,31 @@ const [FileFieldProvider, useFileFieldContext] =
     'useFileFieldContext must be used within a FileField.Root',
   );
 
+const toAccepted = (files: readonly File[]): AcceptedFile[] =>
+  files.map((file) => ({ file, id: crypto.randomUUID() }));
+
+const toFileList = (files: readonly File[]) => {
+  const dataTransfer = new DataTransfer();
+  for (const file of files) {
+    dataTransfer.items.add(file);
+  }
+  return dataTransfer.files;
+};
+
+// コードから files を書き換えても input イベントは出ないので、自分で出して
+// @k8ordo/form などの form 側に知らせる。列が変わらないときは出さない
+const announce = (input: HTMLInputElement, files: readonly File[]) => {
+  const current = Array.from(input.files ?? []);
+  if (
+    current.length === files.length &&
+    current.every((file, index) => file === files[index])
+  ) {
+    return;
+  }
+  input.files = toFileList(files);
+  input.dispatchEvent(new Event('input', { bubbles: true }));
+};
+
 type RootProps = PropsWithChildren<
   {
     invalid?: boolean;
@@ -56,7 +81,7 @@ type RootProps = PropsWithChildren<
     // 文字列は @k8ordo/form の formFields が導く input の defaultValue の型。
     // ファイルの欄に値が入ることはないが、広げたまま受けられるように型だけ受ける
     defaultValue?: File[] | string;
-    // event はファイル選択（input の change）時に渡る。プログラム的なファイル
+    // event はファイル選択（input の change）時に渡る。ドロップや一覧からの
     // 削除では change イベントが存在しないため undefined になる。
     onChange?: (
       files: FileList | null,
@@ -98,28 +123,35 @@ export const Root = ({
   const { pending } = useFormStatus();
   const disabledResolved = disabled || pending;
 
-  const initialFiles = Array.isArray(defaultValue) ? defaultValue : [];
-  const [acceptedFiles, setAcceptedFiles] = useState<AcceptedFile[]>(() =>
-    initialFiles.map((file) => ({
-      file,
-      id: crypto.randomUUID(),
-    })),
+  const defaultFiles = Array.isArray(defaultValue) ? defaultValue : [];
+  const [acceptedFiles, setAcceptedFiles] = useState(() =>
+    toAccepted(defaultFiles),
   );
 
-  // form の reset はファイルを空に戻すが、change は飛ばないので一覧が取り残される
-  const handleReset = useEffectEvent(() => {
-    setAcceptedFiles(
-      initialFiles.map((file) => ({ file, id: crypto.randomUUID() })),
-    );
+  // files は属性で渡せないので、既定のファイルは描いたあとに書く
+  const writeDefaults = useEffectEvent(() => {
+    if (inputRef.current !== null) {
+      inputRef.current.files = toFileList(defaultFiles);
+    }
+  });
+  // form の reset は files を空にするが、change は飛ばないので一覧が取り残される
+  const resetList = useEffectEvent(() => {
+    setAcceptedFiles(toAccepted(defaultFiles));
   });
 
   useEffect(() => {
+    writeDefaults();
     const form = inputRef.current?.form;
     if (!form) {
       return undefined;
     }
     const listener = () => {
-      handleReset();
+      resetList();
+      // ブラウザが files を空にするのはこのイベントのあとなので、
+      // 既定のファイルはそれを待ってから書き戻す
+      setTimeout(() => {
+        writeDefaults();
+      }, 0);
     };
     form.addEventListener('reset', listener);
     return () => {
@@ -127,81 +159,72 @@ export const Root = ({
     };
   }, []);
 
-  // 送信されるのは input の files なので、一覧と同じ並びを input にも持たせる
-  const syncInput = useCallback((files: AcceptedFile[]): FileList | null => {
-    const input = inputRef.current;
-    if (input === null) {
-      return null;
-    }
-    const dataTransfer = new DataTransfer();
-    for (const { file } of files) {
-      dataTransfer.items.add(file);
-    }
-    input.files = dataTransfer.files;
-    return input.files;
-  }, []);
-
   const withAdded = useCallback(
-    (files: File[]): AcceptedFile[] => {
-      const newFiles = files.map((file) => ({
-        file,
-        id: crypto.randomUUID(),
-      }));
+    (files: readonly File[]): AcceptedFile[] => {
+      const added = toAccepted(files);
       return multiple || webkitDirectory
-        ? [...acceptedFiles, ...newFiles].slice(
+        ? [...acceptedFiles, ...added].slice(
             0,
             maxFiles ?? Number.POSITIVE_INFINITY,
           )
-        : newFiles.slice(0, 1);
+        : added.slice(0, 1);
     },
     [acceptedFiles, multiple, maxFiles, webkitDirectory],
   );
 
-  // 選び直すと input にはその回に選んだ分しか残らないので、一覧に足した結果を
-  // 書き戻す。書き戻さないと、一覧にあるのに送られないファイルが出る
+  // ブラウザは選び直すたびに files を新しく選んだ分だけに置き換えるので、
+  // 積み上げた一覧と同じ列を書き戻す
   const onFilesChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
-      const updatedFiles = withAdded(Array.from(event.target.files ?? []));
+      const input = event.currentTarget;
+      const updatedFiles = withAdded(Array.from(input.files ?? []));
       setAcceptedFiles(updatedFiles);
-      syncInput(updatedFiles);
-      onChange?.(event.target.files, event);
+      announce(
+        input,
+        updatedFiles.map(({ file }) => file),
+      );
+      onChange?.(input.files, event);
     },
-    [onChange, syncInput, withAdded],
+    [onChange, withAdded],
   );
 
-  // ドロップはブラウザが input を通らないので、accept も当たらず、change も
-  // input イベントも出ない。accept で選り分けたうえで、選んだときと同じく一覧と
-  // input を揃え、input イベントで form 側に知らせる
+  // ドロップと一覧からの削除は input を通らないので、送る列を input に書いて知らせる
+  const commitFiles = useCallback(
+    (updatedFiles: AcceptedFile[]) => {
+      setAcceptedFiles(updatedFiles);
+      const input = inputRef.current;
+      if (input === null) {
+        return;
+      }
+      announce(
+        input,
+        updatedFiles.map(({ file }) => file),
+      );
+      onChange?.(input.files);
+    },
+    [onChange],
+  );
+
+  // ブラウザが accept を当てるのは選択ダイアログだけなので、ドロップで届いた
+  // ファイルはここで選り分ける
   const onFilesDrop = useCallback(
     (files: File[]) => {
       const taken =
         accept === undefined
           ? files
           : files.filter((file) => acceptsFile(file, accept));
-      if (taken.length === 0) {
-        return;
+      if (taken.length > 0) {
+        commitFiles(withAdded(taken));
       }
-      const updatedFiles = withAdded(taken);
-      setAcceptedFiles(updatedFiles);
-      const list = syncInput(updatedFiles);
-      inputRef.current?.dispatchEvent(new Event('input', { bubbles: true }));
-      onChange?.(list);
     },
-    [accept, onChange, syncInput, withAdded],
+    [accept, commitFiles, withAdded],
   );
 
-  // 一覧から外したファイルは input からも外す。外さないと送信に残る。
-  // コードから files を書き換えても input イベントは出ないので、自分で出して
-  // @k8ordo/form などの form 側に知らせる
   const onFileDelete = useCallback(
     (fileId: string) => {
-      const updatedFiles = acceptedFiles.filter((f) => f.id !== fileId);
-      setAcceptedFiles(updatedFiles);
-      const list = syncInput(updatedFiles);
-      inputRef.current?.dispatchEvent(new Event('input', { bubbles: true }));
-      onChange?.(list);
+      commitFiles(acceptedFiles.filter((f) => f.id !== fileId));
     },
-    [acceptedFiles, onChange, syncInput],
+    [acceptedFiles, commitFiles],
   );
 
   const openFilePicker = useCallback(() => {
