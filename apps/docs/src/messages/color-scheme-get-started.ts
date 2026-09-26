@@ -204,6 +204,25 @@ export const defaults = {
   }),
 };
 
+export const csp = {
+  title: message({
+    ja: 'Content-Security-Policy の下で使う',
+    en: 'Under a Content-Security-Policy',
+  }),
+  description: message({
+    ja: 'プロバイダーが描くスクリプトはインラインなので、スクリプトを制限するポリシーの下では、nonce かハッシュで許す必要があります。',
+    en: 'The script the provider renders is inline, so a policy that restricts scripts has to allow it, by nonce or by hash.',
+  }),
+  nonce: message({
+    ja: '`nonce` は、その応答の nonce をスクリプトに付けます。`@k8ordo/server` なら `@k8ordo/server/runtime` の `nonce()` です。',
+    en: '`nonce` puts the answer’s nonce on the script — under `@k8ordo/server`, `nonce()` from `@k8ordo/server/runtime`.',
+  }),
+  hash: message({
+    ja: "`colorSchemeScriptHash()` は、スクリプトのハッシュを CSP のソース（`'sha256-…'`）として返します。nonce を持てない `@k8ordo/static` の `csp` オプションや、nonce を名指さないヘッダーで使います。スクリプトは既定値を埋め込むので、プロバイダーに渡す `defaultPreference` を渡します。",
+    en: "`colorSchemeScriptHash()` resolves to the script’s hash as a CSP source (`'sha256-…'`), for `@k8ordo/static`’s `csp` option — a file cannot carry a nonce — or a header that names none. The script carries the default, so pass the `defaultPreference` the provider is given.",
+  }),
+};
+
 export const styling = {
   title: message({
     ja: 'クラスでスタイルを当てる',

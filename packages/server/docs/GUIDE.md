@@ -37,8 +37,9 @@ build time, which is why its guide installs it with `-D`.
 The package has three entries, split by where the code runs.
 `@k8ordo/server` is the plugin, for `vite.config.ts`, and loads Vite.
 `@k8ordo/server/runtime` is what code inside the request handler imports —
-`redirect()`, `cookies()`, `responseHeaders()`, `requestHeaders()`, and the
-`RedirectTarget`, `RouteRequest` and `Guard` types — and needs nothing from
+`redirect()`, `cookies()`, `responseHeaders()`, `requestHeaders()`,
+`nonce()`, and the `RedirectTarget`, `RouteRequest` and `Guard` types — and
+needs nothing from
 Node, so it goes wherever the
 handler goes.
 `@k8ordo/server/serve` is `serve`, the Node.js server for a build. Neither of
@@ -966,6 +967,51 @@ k8ordo serves its pages under Vite's base, so base has to be a path from the roo
 ```
 
 <!-- /shared:base -->
+
+<!-- shared:csp -->
+
+## Content Security Policy
+
+The framework decides no policy. It signs the inline scripts it writes
+itself — the payload it puts into the HTML for hydration, and React's own —
+and the policy that names them is the application's to write. An inline
+script of the application's own, `@k8ordo/color-scheme`'s among them, is the
+application's to allow the same way.
+
+<!-- /shared:csp -->
+
+Every answer is signed with a nonce of its own, and `nonce()` from
+`@k8ordo/server/runtime` reads it — from a `guard.ts`, which names it in the
+header it writes (see "Guards" below), and from a layout or a page, which
+signs a script of its own with it:
+
+```ts
+// src/routes/guard.ts
+import { nonce, responseHeaders } from '@k8ordo/server/runtime';
+
+export default function guard() {
+  responseHeaders().set(
+    'content-security-policy',
+    `script-src 'nonce-${nonce()}' 'strict-dynamic'; object-src 'none'; base-uri 'none'`,
+  );
+}
+```
+
+```tsx
+// src/routes/layout.tsx
+import { ColorSchemeProvider } from '@k8ordo/color-scheme';
+import { nonce } from '@k8ordo/server/runtime';
+
+// …inside <body>
+<ColorSchemeProvider nonce={nonce()}>{children}</ColorSchemeProvider>;
+```
+
+The framework's module script carries the nonce as well, so under
+`'strict-dynamic'` it loads the rest of the client. `nonce()` reads the same
+value anywhere the request is being answered, the render included — signing
+a script is not writing the response — and throws outside one. A nonce is
+worth something only while it is new: an answer that carries one is not one
+to keep in a shared cache.
 
 ## Alongside the rest of k8ordo
 

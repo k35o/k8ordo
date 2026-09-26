@@ -31,7 +31,8 @@ When installed via npm, these docs live under `node_modules/@k8ordo/static/docs/
 
 - [Design Guide](GUIDE.md): setup, the `routes/` grammar and what it refuses,
   execution boundaries, the build output, supplying pathnames for
-  parameterised routes, and what static mode cannot do.
+  parameterised routes, a Content-Security-Policy by hash, and what static
+  mode cannot do.
 
 ## Entry point
 
@@ -41,7 +42,14 @@ When installed via npm, these docs live under `node_modules/@k8ordo/static/docs/
   `src/routes`); `options.paths` supplies concrete pathnames for routes with
   parameters, and a parameterised route left uncovered fails the build;
   `options.site` (the origin) makes the build also write `sitemap.xml`;
-  `StaticOptions` is the type of those options. A
+  `options.csp` (directives → sources, `ContentSecurityPolicy`) is the
+  Content-Security-Policy written into each page's `<meta>`, first in
+  `<head>`, with the hashes of the framework's own inline scripts on that
+  page added to `script-src` — the framework decides no policy, and an
+  inline script of the application's is allowed by its hash there
+  (`colorSchemeScriptHash()`); no nonce is left in a file, and a policy with
+  `'strict-dynamic'`, `frame-ancestors`, `report-uri` or `sandbox` is
+  refused; `StaticOptions` is the type of those options. A
   `'use server'` module fails it too — in `vite dev` as well as the build: a
   file cannot receive a Server Action, so the application wants
   `@k8ordo/server` instead. So does a `guard.ts`, every one named at once: a

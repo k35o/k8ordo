@@ -938,6 +938,55 @@ k8ordo serves its pages under Vite's base, so base has to be a path from the roo
 
 <!-- /shared:base -->
 
+<!-- shared:csp -->
+
+## Content Security Policy
+
+The framework decides no policy. It signs the inline scripts it writes
+itself — the payload it puts into the HTML for hydration, and React's own —
+and the policy that names them is the application's to write. An inline
+script of the application's own, `@k8ordo/color-scheme`'s among them, is the
+application's to allow the same way.
+
+<!-- /shared:csp -->
+
+A file cannot carry a nonce — everyone reads the same one — so the build
+names what the framework signed by hash, and leaves no nonce in what it
+writes. Give the plugin the policy as `csp`, directives and their sources,
+and each page gets it in a `<meta http-equiv="Content-Security-Policy">`
+first in its `<head>`, with the hashes of that page's framework scripts added
+to `script-src` (made from `default-src` when only that was given, and added
+to `script-src-elem` as well when that is given):
+
+```ts
+// vite.config.ts
+import { colorSchemeScriptHash } from '@k8ordo/color-scheme';
+import { framework } from '@k8ordo/static';
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+  plugins: [
+    framework({
+      csp: {
+        'script-src': ["'self'", await colorSchemeScriptHash()],
+        'object-src': ["'none'"],
+        'base-uri': ["'none'"],
+      },
+    }),
+  ],
+});
+```
+
+An inline script of the application's is allowed by its hash in that policy,
+as `colorSchemeScriptHash()` gives `@k8ordo/color-scheme`'s (pass it the
+`defaultPreference` the provider is given); any other inline script on the
+page — one that reached it from content — is refused. The framework's module
+script is allowed by where it comes from (`'self'`), since nothing in a file
+can sign it, which is why the build refuses a policy with `'strict-dynamic'`.
+It refuses `frame-ancestors`, `report-uri` and `sandbox` too, which a
+`<meta>` ignores: set those as headers at the host. Without `csp`, no policy
+is written.
+
 ## Alongside the rest of k8ordo
 
 `@k8ordo/state` owns the search params, and this framework generates its

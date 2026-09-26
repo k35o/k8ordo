@@ -225,6 +225,18 @@ ParamsSchemaFor<pattern>`, lists per page pattern the schemas along its
   only bring the same page back. Under `@k8ordo/static` the 404 carries
   `NOT_FOUND_HEADER`, so the build tells a page's `notFound()` from a
   refused param.
+- **The framework signs its own inline scripts, and decides no policy.**
+  Every request's scope holds a fresh nonce (`withRequest`, 128 random bits);
+  `renderHtml` hands it to React's SSR (`nonce`: the bootstrap module and
+  React's inline scripts), to the SSR Flight client (its preloads), and to
+  `rsc-html-stream` (the payload written into the HTML). `nonce()` reads it
+  in every phase, the render included — signing a script is not writing the
+  response — so a guard names it in the header it writes and a layout signs
+  a script of its own (`<ColorSchemeProvider nonce>`). Under
+  `@k8ordo/static` the HTML also says it in `NONCE_HEADER`, and the build
+  takes it off the file and names what it signed by hash; the mode package
+  exports no `nonce()`, since what an application signed with it would land
+  in the payload and make every build differ.
 - **The request reaches a page only under a server.** `K8ORDO_MODE` is
   defined by the host; the handler attaches `request` (headers, cookies) only
   under `@k8ordo/server`, and the generator emits the field only there. Under
@@ -289,7 +301,7 @@ src/
   runtime/pathname.ts        decodePathname, before a pathname may name a file
   runtime/redirect.ts        redirect() / redirect.ts targets
   runtime/request.ts         the read-only request a page receives
-  runtime/request-scope.ts   the request in progress: phases, cookies() / responseHeaders() / requestHeaders(), answer()
+  runtime/request-scope.ts   the request in progress: phases, cookies() / responseHeaders() / requestHeaders(), nonce(), answer()
   runtime/cookies.ts         the per-request cookie jar and its Set-Cookie lines
   runtime/guard.ts           Guard / GuardContext, runGuards (outer first, first Response ends it)
   runtime/route.ts           ROUTE_METHODS, which export answers a method, 405, running it in the route phase

@@ -356,7 +356,8 @@ These docs are served from <https://ordo.k8o.me>.
 
 - [Design Guide](https://ordo.k8o.me/static/docs/GUIDE.md): setup, the `routes/` grammar and what it refuses,
   execution boundaries, the build output, supplying pathnames for
-  parameterised routes, and what static mode cannot do.
+  parameterised routes, a Content-Security-Policy by hash, and what static
+  mode cannot do.
 
 ## Entry point
 
@@ -366,7 +367,14 @@ These docs are served from <https://ordo.k8o.me>.
   `src/routes`); `options.paths` supplies concrete pathnames for routes with
   parameters, and a parameterised route left uncovered fails the build;
   `options.site` (the origin) makes the build also write `sitemap.xml`;
-  `StaticOptions` is the type of those options. A
+  `options.csp` (directives → sources, `ContentSecurityPolicy`) is the
+  Content-Security-Policy written into each page's `<meta>`, first in
+  `<head>`, with the hashes of the framework's own inline scripts on that
+  page added to `script-src` — the framework decides no policy, and an
+  inline script of the application's is allowed by its hash there
+  (`colorSchemeScriptHash()`); no nonce is left in a file, and a policy with
+  `'strict-dynamic'`, `frame-ancestors`, `report-uri` or `sandbox` is
+  refused; `StaticOptions` is the type of those options. A
   `'use server'` module fails it too — in `vite dev` as well as the build: a
   file cannot receive a Server Action, so the application wants
   `@k8ordo/server` instead. So does a `guard.ts`, every one named at once: a
@@ -431,7 +439,11 @@ These docs are served from <https://ordo.k8o.me>.
   `path: '/'`, `httpOnly`, `secure`, `sameSite: 'lax'`; every write a
   `Set-Cookie` on the answer), and `requestHeaders()` the headers the request
   arrived with — all three from a `guard.ts`, a `route.ts` or a Server
-  Action, and they throw anywhere else; `Guard<P>` is
+  Action, and they throw anywhere else; `nonce()` is the nonce this answer's
+  inline scripts carry (the framework's own, and what the application signs
+  with it, as `<ColorSchemeProvider nonce>`), new per request and readable
+  anywhere the request is answered, the render included — a guard names it
+  in the `Content-Security-Policy` it writes; `Guard<P>` is
   the type of what a `guard.ts` default-exports (`({ request, params }) =>
   Response | void`, `params` the strings of its directory's pattern) and
   `GuardContext<P>` its argument; `RedirectTarget` is the type of what a
@@ -543,15 +555,20 @@ These docs are served from <https://ordo.k8o.me>.
 - [Design Guide](https://ordo.k8o.me/color-scheme/docs/GUIDE.md): what the package owns and does not (the class,
   not the colours; the rule, not the storage), placing the provider in the
   root layout, reading and changing the preference with the hook, what it
-  guarantees, and testing.
+  guarantees, allowing its inline script under a Content-Security-Policy
+  (by nonce or by hash), and testing.
 
 ## Entry point
 
-- `@k8ordo/color-scheme` — `<ColorSchemeProvider defaultPreference?>`
+- `@k8ordo/color-scheme` — `<ColorSchemeProvider defaultPreference? nonce?>`
   (client; goes inside `<body>` around everything) renders the inline
   `<script>` that puts `dark` on `<html>` before the first paint from the
   stored preference, the default (`'system'` unless told otherwise), or the
-  system, and keeps the class in step. `useColorScheme()` returns
+  system, and keeps the class in step; `nonce` signs that script for a
+  Content-Security-Policy (under `@k8ordo/server`, `nonce()`).
+  `colorSchemeScriptHash(defaultPreference?)` resolves to the script's hash
+  as a CSP source (`'sha256-…'`), for a policy that allows it by hash —
+  `@k8ordo/static`'s `csp` option. `useColorScheme()` returns
   `{ scheme, preference, setPreference }`: `scheme` is `'light' | 'dark'`
   on screen, `preference` is `'light' | 'dark' | 'system'`, and
   `setPreference('system')` clears the stored preference, so the default

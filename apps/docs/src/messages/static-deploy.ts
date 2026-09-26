@@ -1,8 +1,8 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: '`vite build` は全ページを描いて `dist/client/` に書きます。そのディレクトリがサイトで、どんな静的ホスティングにも置けます。このページは、出力の形、ページの届き方と遷移の仕方、ホスティングに求めること、`404.html` と `sitemap.xml` を説明します。',
-  en: '`vite build` renders every page into `dist/client/`. That directory is the site, and any static host can serve it. This page covers the shape of the output, how a page arrives and navigates, what the host has to do, and `404.html` and `sitemap.xml`.',
+  ja: '`vite build` は全ページを描いて `dist/client/` に書きます。そのディレクトリがサイトで、どんな静的ホスティングにも置けます。このページは、出力の形、ページの届き方と遷移の仕方、ホスティングに求めること、`404.html` と `sitemap.xml`、Content-Security-Policy を説明します。',
+  en: '`vite build` renders every page into `dist/client/`. That directory is the site, and any static host can serve it. This page covers the shape of the output, how a page arrives and navigates, what the host has to do, `404.html` and `sitemap.xml`, and a Content-Security-Policy.',
 });
 
 export const outputTitle = message({
@@ -142,6 +142,10 @@ export const optionsTable = {
     ja: 'サイトの配信元。渡すと `sitemap.xml` を書きます。',
     en: 'The origin the site is served from; with it the build writes `sitemap.xml`.',
   }),
+  csp: message({
+    ja: 'すべてのページに書く Content-Security-Policy（ディレクティブとそのソース）。フレームワークのインラインスクリプトのハッシュを足して、ページごとの `<meta>` に書きます。',
+    en: 'The Content-Security-Policy every page carries, as directives and their sources; written into each page’s `<meta>` with the hashes of the framework’s inline scripts added.',
+  }),
 };
 
 export const stopsTitle = message({
@@ -217,4 +221,24 @@ export const cannotDescription = message({
 export const cannotServer = message({
   ja: 'どれかが要るなら、アプリが求めているのは `@k8ordo/server` で、ほかの部分はそのまま使えます。',
   en: 'If the application needs any of that, it wants `@k8ordo/server`, and everything else stays exactly as it is.',
+});
+
+export const cspTitle = message({
+  ja: '`csp` と Content-Security-Policy',
+  en: '`csp` and a Content-Security-Policy',
+});
+
+export const cspDescription = message({
+  ja: 'フレームワークはポリシーを決めません。自分が出すインラインスクリプト（hydration 用に HTML へ書くペイロードと、React のもの）に署名するだけです。ファイルは誰が読んでも同じなので nonce は持てず、ビルドは署名したものをハッシュで名指します。`csp` にポリシーを渡すと、各ページの `<head>` の先頭に `<meta http-equiv="Content-Security-Policy">` を書き、そのページのハッシュを `script-src` に足します。',
+  en: 'The framework decides no policy: it signs the inline scripts it writes itself — the payload it puts into the HTML for hydration, and React’s. A file reads the same to everyone and cannot carry a nonce, so the build names what it signed by hash. Give the policy as `csp`, and each page gets a `<meta http-equiv="Content-Security-Policy">` first in its `<head>`, with that page’s hashes added to `script-src`.',
+});
+
+export const cspApp = message({
+  ja: 'アプリ自身のインラインスクリプトは、そのハッシュをこのポリシーで許します。`@k8ordo/color-scheme` なら `colorSchemeScriptHash()` がそれを返します（プロバイダーに渡す `defaultPreference` を渡します）。それ以外のインラインスクリプト、たとえばコンテンツから紛れ込んだものは拒まれます。ファイルには nonce を残しません。',
+  en: 'An inline script of the application’s own is allowed by its hash in this policy — for `@k8ordo/color-scheme`, `colorSchemeScriptHash()` gives it (pass the `defaultPreference` the provider is given). Any other inline script, one that reached a page from content, is refused. No nonce is left in a file.',
+});
+
+export const cspRefuses = message({
+  ja: "`script-src` が無ければ `default-src` から作り、`script-src-elem` があればそこにも足します。フレームワークのモジュールのスクリプトは、ファイルでは署名できないので出どころ（`'self'`）で許されます。そのため `'strict-dynamic'` を含むポリシーは断ります。`<meta>` では効かない `frame-ancestors`・`report-uri`・`sandbox` も断るので、ホストのヘッダーで書いてください。",
+  en: "`script-src` is made from `default-src` when only that was given, and `script-src-elem` gets the hashes too when given. The framework’s module script is allowed by where it comes from (`'self'`), since nothing in a file can sign it, which is why a policy with `'strict-dynamic'` is refused. So are `frame-ancestors`, `report-uri` and `sandbox`, which a `<meta>` ignores — set those as headers at the host.",
 });
