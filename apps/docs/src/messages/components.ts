@@ -551,8 +551,8 @@ export const fileField = {
     en: 'Adding files by dropping them',
   }),
   dropzoneDescription: message({
-    ja: '`FileField.Dropzone` にドロップしたファイルは、選んだときと同じく一覧と送信に加わり、`input` イベントでフォームに知らされます。中身を渡さないと、組み込みの案内と「ファイルを選択」のボタンが入るので、キーボードでも選べます。フォルダーはドロップでは受けず、`accept` もドロップでは確かめません。',
-    en: 'Files dropped on `FileField.Dropzone` join the list and the submission just as picked ones do, and an `input` event tells the form. Left empty, it holds the built-in hint and a choose-files button, so it works by keyboard too. Folders are skipped on drop, and `accept` is not checked there.',
+    ja: '`FileField.Dropzone` にドロップしたファイルは、選んだときと同じく一覧と送信に加わり、`input` イベントでフォームに知らされます。中身を渡さないと、組み込みの案内と「ファイルを選択」のボタンが入るので、キーボードでも選べます。フォルダーはドロップでは受けません。ブラウザが `accept` を当てるのはファイル選択だけなので、ドロップしたファイルには FileField が同じ規則で当て、当たらないファイルは加えません。',
+    en: 'Files dropped on `FileField.Dropzone` join the list and the submission just as picked ones do, and an `input` event tells the form. Left empty, it holds the built-in hint and a choose-files button, so it works by keyboard too. Folders are skipped on drop. The browser applies `accept` only to the picker, so the field applies it to dropped files by the same rules and leaves out any it does not match.',
   }),
   acceptTypesTitle: message({
     ja: '受け入れタイプ',
