@@ -13,6 +13,7 @@ import {
   Card,
   Carousel,
   Checkbox,
+  Combobox,
   CheckboxCard,
   CloseIcon,
   Code,
@@ -417,6 +418,18 @@ export const componentPreviews: Record<string, ReactNode> = {
       >
         <ListBox.Trigger />
       </ListBox.Root>
+    </div>
+  ),
+  Combobox: (
+    <div className="w-56">
+      <Combobox
+        aria-label="Prefecture"
+        defaultValue="kyoto"
+        options={[
+          { value: 'tokyo', label: 'Tokyo' },
+          { value: 'kyoto', label: 'Kyoto' },
+        ]}
+      />
     </div>
   ),
   Separator: (

@@ -131,6 +131,11 @@ export const componentCategories: NavCategory[] = [
         description: m.components.radioCard.description,
       },
       {
+        name: 'Combobox',
+        path: '/:locale/ui/components/combobox',
+        description: m.components.combobox.description,
+      },
+      {
         name: 'Autocomplete',
         path: '/:locale/ui/components/autocomplete',
         description: m.components.autocomplete.description,
