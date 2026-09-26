@@ -1,31 +1,254 @@
+"@k8ordo/color-scheme@0.2.0":
+  dir: packages/color-scheme
+  intents:
+    - color-scheme-package
+    - docs-drift-color-scheme
+    - gentle-taxis-sing
+    - large-jars-know
+    - modern-wolves-yell
 "@k8ordo/form@0.1.1":
   dir: packages/form
   intents:
     - form-dropped-warning
+"@k8ordo/form@0.2.0":
+  dir: packages/form
+  intents:
+    - docs-drift-form
+    - form-derive-parse-parity
+    - form-string-checkbox-input-type
+    - gentle-taxis-sing
+    - happy-jokes-cover
+    - honest-apes-live
+    - neat-pandas-shout
+    - pretty-beds-scream
+    - react-19-3-form
+    - real-shirts-learn
+    - silent-cooks-leave
+    - vast-geckos-love
+    - young-shirts-flow
+    - zod-4-5-iso-formats
+"@k8ordo/i18n@1.0.0":
+  dir: packages/i18n
+  intents:
+    - ancient-beds-sneeze
+    - docs-drift-i18n
+    - docs-not-found-locale
+    - early-squids-pay
+    - fluffy-tigers-sit
+    - gentle-taxis-sing
+    - i18n-locale-scope
+    - i18n-package
+    - i18n-paths
+    - modern-wolves-yell
+    - new-seals-stare
+    - shaggy-hounds-beam
+    - tough-snails-start
+    - wide-jars-compete
 "@k8ordo/router@0.1.0":
   dir: packages/router
   intents:
     - framework-error-redirect-request
     - framework-params-schema
     - router-scroll-and-match
+"@k8ordo/router@0.2.0":
+  dir: packages/router
+  intents:
+    - afraid-trees-fail
+    - bind-params-router
+    - calm-falcons-occur
+    - docs-drift-router
+    - gentle-taxis-sing
+    - kind-teeth-hammer
+    - light-donkeys-kick
+    - not-found-in-the-visitors-locale
+    - polite-geese-press
+    - react-19-3-router
+    - router-boundary-keeps-subtree
 "@k8ordo/server@0.1.0":
   dir: packages/server
   intents:
     - framework-error-redirect-request
     - framework-params-schema
     - static-server-hardening
+"@k8ordo/server@0.2.0":
+  dir: packages/server
+  intents:
+    - big-lemons-tap
+    - calm-moons-kiss
+    - curvy-bottles-wink
+    - docs-drift-framework
+    - eager-camels-tease
+    - fast-knives-drop
+    - framework-layout-params
+    - framework-parse-exports
+    - framework-redirect-segments
+    - funny-birds-doubt
+    - gentle-owls-change
+    - gentle-taxis-sing
+    - hydrate-after-reveal
+    - hydrate-only-where-rendered
+    - i18n-locale-scope
+    - kind-teeth-hammer
+    - lazy-pandas-brake
+    - light-donkeys-kick
+    - lucky-moles-glow
+    - neat-ants-scream
+    - not-found-in-the-visitors-locale
+    - polite-geese-press
+    - react-19-3-framework
+    - react-19-3-framework-docs
+    - server-redirect-options
+    - server-runtime-entry
+    - soft-plums-arrive
+    - strong-carrots-jam
+    - thick-geese-wash
+    - vast-geckos-love
 "@k8ordo/state@0.2.0":
   dir: packages/state
   intents:
     - state-register-and-inline-read
     - state-url-round-trip
+"@k8ordo/state@0.3.0":
+  dir: packages/state
+  intents:
+    - afraid-trees-fail
+    - docs-drift-state
+    - friendly-teeth-complain
+    - gentle-taxis-sing
+    - good-tigers-hammer
+    - lucky-jokes-obey
+    - mean-wasps-visit
+    - polite-geese-press
+    - react-19-3-state
+    - smooth-falcons-peel
+    - spicy-birds-cry
 "@k8ordo/static@0.1.0":
   dir: packages/static
   intents:
     - framework-error-redirect-request
     - framework-params-schema
     - static-server-hardening
+"@k8ordo/static@0.2.0":
+  dir: packages/static
+  intents:
+    - brave-moles-live
+    - calm-moons-kiss
+    - docs-drift-framework
+    - eager-camels-tease
+    - framework-layout-params
+    - framework-parse-exports
+    - framework-redirect-segments
+    - funny-birds-doubt
+    - gentle-jars-sing
+    - gentle-taxis-sing
+    - hydrate-after-reveal
+    - hydrate-only-where-rendered
+    - i18n-locale-scope
+    - kind-teeth-hammer
+    - light-donkeys-kick
+    - lucky-moles-glow
+    - neat-ants-scream
+    - not-found-in-the-visitors-locale
+    - polite-geese-press
+    - react-19-3-framework
+    - react-19-3-framework-docs
+    - soft-plums-arrive
+    - static-dev-refuses-actions
+    - static-inline-boundaries
+    - static-sitemap-export
+    - strong-carrots-jam
+    - thick-geese-wash
+    - weak-hounds-mix
 "@k8ordo/ui@2.0.0":
   dir: packages/ui
   intents:
     - ui-two
+"@k8ordo/ui@3.0.0":
+  dir: packages/ui
+  intents:
+    - breezy-crabs-thank
+    - button-render-item-passthrough
+    - calm-pigs-visit
+    - checkbox-standalone-item-value
+    - cool-walls-bake
+    - docs-drift-ui
+    - fluffy-plums-hang
+    - giant-peaches-vanish
+    - itchy-maps-run
+    - light-cups-tease
+    - number-field-negative-decimal
+    - number-field-read-only
+    - number-field-round-to-precision
+    - purple-buses-tease
+    - purple-tools-design
+    - react-19-3-ui
+    - react-compiler-lint-conformance
+    - real-pigs-travel
+    - sharp-bats-end
+    - sharp-kids-sell
+    - smooth-pumas-chew
+    - soft-deers-remember
+    - spicy-pandas-cry
+    - sweet-beans-explode
+    - sweet-dragons-pay
+    - thick-fireants-itch
+    - thick-rivers-speak
+    - tidy-boats-thank
+    - tough-buses-happen
+    - ui-carousel
+    - ui-catalog-kbd-empty-state-carousel
+    - ui-checkbox-indeterminate
+    - ui-checked-follows-reset
+    - ui-code-block
+    - ui-code-block-forced-colors
+    - ui-data-table
+    - ui-dictionaries
+    - ui-empty-state
+    - ui-helpers
+    - ui-hooks-audit
+    - ui-kbd
+    - ui-number-field-empty
+    - ui-number-field-reset
+    - ui-observers
+    - ui-openui-nesting
+    - ui-prose
+    - ui-radio-required
+    - ui-side-nav-table-of-contents
+    - ui-table-empty-state
+    - ui-testing-in-a-real-browser
+    - ui-toast-open-returns-id
+    - warm-dodos-return
+docs@0.0.10:
+  dir: apps/docs
+  intents:
+    - ancient-beds-sneeze
+    - big-lemons-tap
+    - cool-grapes-agree
+    - docs-code-block
+    - docs-color-scheme
+    - docs-data-table
+    - docs-i18n
+    - docs-kbd-empty-state-carousel
+    - docs-links
+    - docs-not-found-locale
+    - docs-package-guides
+    - docs-prose
+    - docs-side-nav
+    - early-squids-pay
+    - fluffy-plums-hang
+    - fluffy-tigers-sit
+    - fresh-olives-leave
+    - gentle-owls-change
+    - khaki-onions-complain
+    - lazy-pandas-brake
+    - neat-rings-crash
+    - quiet-zebras-relax
+    - react-19-3-docs
+    - real-squids-raise
+    - router-boundary-keeps-subtree
+    - shiny-boats-collect
+    - soft-plums-arrive
+    - tame-wolves-live
+    - vast-geckos-love
+    - warm-pots-lie
+    - wide-jars-compete
