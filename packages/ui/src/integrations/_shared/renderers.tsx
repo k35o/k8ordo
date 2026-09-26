@@ -102,6 +102,7 @@ import { Stack } from '../../components/layout/stack';
 import { Anchor } from '../../components/navigation/anchor';
 import { Breadcrumb } from '../../components/navigation/breadcrumb';
 import { Pagination } from '../../components/navigation/pagination';
+import { SideNav } from '../../components/navigation/side-nav';
 import { Tabs } from '../../components/navigation/tabs';
 import { Dialog } from '../../components/overlays/dialog';
 import { Drawer } from '../../components/overlays/drawer';
@@ -156,6 +157,7 @@ import type {
   RangeSliderProps,
   SelectProps,
   SeparatorProps,
+  SideNavProps,
   SkeletonProps,
   SliderProps,
   SpinnerProps,
@@ -895,6 +897,26 @@ export function renderBreadcrumb(props: BreadcrumbProps): ReactNode {
         </Fragment>
       ))}
     </Breadcrumb.List>
+  );
+}
+
+export function renderSideNav(props: SideNavProps): ReactNode {
+  return (
+    <SideNav.Root label={props.label}>
+      {props.groups.map((group) => (
+        <SideNav.Group key={group.title} title={group.title}>
+          {group.links.map((link) => (
+            <SideNav.Link
+              current={u(link.current)}
+              href={link.href}
+              key={link.href}
+            >
+              {link.label}
+            </SideNav.Link>
+          ))}
+        </SideNav.Group>
+      ))}
+    </SideNav.Root>
   );
 }
 

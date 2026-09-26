@@ -119,7 +119,10 @@ function LayoutContent({ children }: { children: ReactNode }) {
             height: `calc(100dvh - ${headerHeight}px)`,
           }}
         >
-          <SideNavigation categories={sideNavConfig.categories} />
+          <SideNavigation
+            categories={sideNavConfig.categories}
+            label={sideNavConfig.title()}
+          />
         </aside>
         <main className="flex min-w-0 flex-1 flex-col">
           <div className="flex-1">
@@ -144,6 +147,7 @@ function LayoutContent({ children }: { children: ReactNode }) {
       >
         <SideNavigation
           categories={sideNavConfig.categories}
+          label={sideNavConfig.title()}
           onNavigate={() => {
             setIsDrawerOpen(false);
           }}

@@ -104,6 +104,7 @@ export const { registry } = defineRegistry(catalog, {
     Accordion: ({ props }) => ui.renderAccordion(props),
     Breadcrumb: ({ props }) => ui.renderBreadcrumb(props),
     Table: ({ props }) => ui.renderTable(props),
+    SideNav: ({ props }) => ui.renderSideNav(props),
 
     Textarea: ({ props, bindings }) => {
       const [value, setValue] = useBoundOrLocal<string>(

@@ -55,6 +55,11 @@ export { Stack, type StackProps } from './layout/stack';
 export { Anchor } from './navigation/anchor';
 export { Breadcrumb } from './navigation/breadcrumb';
 export { Pagination } from './navigation/pagination';
+export { SideNav } from './navigation/side-nav';
+export {
+  TableOfContents,
+  type TableOfContentsItem,
+} from './navigation/table-of-contents';
 export { Tabs } from './navigation/tabs';
 export { InView } from './observers/in-view';
 export { Resize } from './observers/resize';

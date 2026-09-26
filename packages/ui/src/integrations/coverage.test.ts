@@ -48,6 +48,10 @@ const LEFT_OUT: ReadonlyMap<string, string> = new Map([
     'Prose',
     'Markdown が描いた素の HTML を整える入れ物。spec が置くのは自分の見た目を持つ部品なので、効くものが無い（流れは Stack で組む）',
   ],
+  [
+    'TableOfContents',
+    '文書の見出しの id を指し、スクロールに合わせて今の見出しを示す部品。spec の見出しは id を持たないので、指す先が無い',
+  ],
 ]);
 
 // 部品を export するエントリをすべて見る。/ai と /code-block は root に出ていない
