@@ -52,11 +52,16 @@ export const ja: Messages = {
   paginationPrevious: '前へ',
   paginationNext: '次へ',
 
+  dataTableColumns: '表示する列',
+  dataTableSelectAll: 'すべての行を選択',
+  dataTableSelectRow: '行を選択',
+
   codeBlockCopy: 'コードをコピー',
   carousel: 'カルーセル',
   carouselSlide: 'スライド',
   carouselPrevious: '前のスライド',
   carouselNext: '次のスライド',
+  tableOfContents: '目次',
 
   chat: 'チャット',
   scrollToLatest: '最新のメッセージへ移動',

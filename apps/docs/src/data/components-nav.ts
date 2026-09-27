@@ -45,6 +45,16 @@ export const componentCategories: NavCategory[] = [
         path: '/:locale/ui/components/pagination',
         description: m.components.pagination.description,
       },
+      {
+        name: 'SideNav',
+        path: '/:locale/ui/components/side-nav',
+        description: m.components.sideNav.description,
+      },
+      {
+        name: 'TableOfContents',
+        path: '/:locale/ui/components/table-of-contents',
+        description: m.components.tableOfContents.description,
+      },
     ],
   },
   {
@@ -199,6 +209,11 @@ export const componentCategories: NavCategory[] = [
         name: 'Table',
         path: '/:locale/ui/components/table',
         description: m.components.table.description,
+      },
+      {
+        name: 'DataTable',
+        path: '/:locale/ui/components/data-table',
+        description: m.components.dataTable.description,
       },
       {
         name: 'Heading',
