@@ -125,3 +125,14 @@ export type LayoutProps<P extends RegisteredPattern> = {
   readonly pathname: string;
   readonly children: ReactNode;
 } & RequestProps;
+
+/**
+ * What a `route.ts` method export receives under the framework, by the
+ * pattern its directory puts it under: the request, and `params` typed by
+ * the schemas along its stack — the same as a page receives. Mode-free: a
+ * build into files calls `GET` with a request of its own.
+ */
+export type RouteContext<P extends RegisteredPattern> = {
+  readonly request: Request;
+  readonly params: RegisteredPageParams<P>;
+};

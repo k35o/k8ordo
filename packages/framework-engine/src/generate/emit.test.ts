@@ -440,3 +440,59 @@ describe('guard.ts in the emitted table', () => {
     expect(plain).not.toContain('type Guard<');
   });
 });
+
+describe('route.ts in the emitted table', () => {
+  const source = emitRoutesModule(
+    parseRouteTree([
+      'layout.tsx',
+      'page.tsx',
+      'feed.xml/route.ts',
+      'api/[id]/route.ts',
+      'api/[id]/special/page.tsx',
+    ]).tree,
+    {
+      importPrefix: './routes',
+      withParams: new Set(['api/[id]/route.ts']),
+    },
+  );
+
+  it('imports a route.ts whole, since it answers by its exports', () => {
+    expect(source).toContain(
+      "import * as feed_xml_route from './routes/feed.xml/route';",
+    );
+    expect(source).toContain(
+      'const api_id_route_params = api_id_route.paramsSchema;',
+    );
+  });
+
+  it('holds its place in the table with a component that renders nothing', () => {
+    expect(source).toContain('const answered = (): null => null;');
+    expect(source).toContain("'/feed.xml': answered,");
+    // 子を持つディレクトリでは分岐の '/' に座る
+    expect(source).toMatch(/'\/:id': \{\n\s+children: \{\n\s+'\/': answered,/u);
+  });
+
+  it('lists each module under its pattern', () => {
+    const start = source.indexOf('export const routeModules = {');
+    expect(source.slice(start, source.indexOf('} as const;', start))).toBe(
+      "export const routeModules = {\n  '/feed.xml': feed_xml_route,\n  '/api/:id': api_id_route,\n",
+    );
+  });
+
+  it('checks each module against its pattern, typed by the schemas along it', () => {
+    expect(source).toContain(
+      "feed_xml_route satisfies RouteModule<'/feed.xml'>,",
+    );
+    expect(source).toContain(
+      "api_id_route satisfies RouteModule<'/api/:id', (typeof paramSchemas)['/api/:id']>,",
+    );
+    expect(source).toContain("'/api/:id': [api_id_route_params],");
+  });
+
+  it('emits an empty map, and no route types, when nothing answers from a route.ts', () => {
+    const plain = emit(['page.tsx']);
+    expect(plain).toContain('export const routeModules = {\n} as const;');
+    expect(plain).not.toContain('RouteModule');
+    expect(plain).not.toContain('answered');
+  });
+});

@@ -74,6 +74,12 @@ export type Messages = {
 
   /** Stepper の済んだ段に添える読み上げ専用の文言 */
   stepperComplete: string;
+  /** DataTable の列の表示を切り替えるボタンと、その一覧の見出し */
+  dataTableColumns: string;
+  /** DataTable の見出しの行の、表示中の行をまとめて選ぶチェックボックス */
+  dataTableSelectAll: string;
+  /** DataTable の各行のチェックボックス。行の見出しが後に続く */
+  dataTableSelectRow: string;
 
   /** CodeBlock のコピーボタン */
   codeBlockCopy: string;
@@ -82,6 +88,8 @@ export type Messages = {
   carouselSlide: string;
   carouselPrevious: string;
   carouselNext: string;
+  /** TableOfContents の見出し（nav の名前にもなる） */
+  tableOfContents: string;
 
   /** Conversation.Messages の log ランドマーク名 */
   chat: string;

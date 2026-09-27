@@ -309,6 +309,65 @@ describe('the built request handler', () => {
   });
 });
 
+describe('route.ts', () => {
+  it('answers with what its GET returns, reading the request it was handed', async () => {
+    const response = await handler(new Request(`${ORIGIN}/feed.xml`));
+    expect(response.status).toBe(200);
+    expect(response.headers.get('content-type')).toBe(
+      'application/rss+xml;charset=utf-8',
+    );
+    const xml = await response.text();
+    expect(xml).toContain('<title>first product</title>');
+    expect(xml).toContain(`<link>${ORIGIN}/products/1</link>`);
+  });
+
+  it('answers HEAD from its GET, without the body', async () => {
+    const response = await handler(
+      new Request(`${ORIGIN}/feed.xml`, { method: 'HEAD' }),
+    );
+    expect(response.status).toBe(200);
+    expect(response.headers.get('content-type')).toContain('rss');
+    expect(response.body).toBeNull();
+  });
+
+  it('answers a method it does not export with a 405 naming the ones it does', async () => {
+    const response = await handler(
+      new Request(`${ORIGIN}/feed.xml`, { method: 'PUT' }),
+    );
+    expect(response.status).toBe(405);
+    expect(response.headers.get('allow')).toBe('GET, HEAD');
+  });
+
+  it('has no payload, so a client navigation to it loads the document', async () => {
+    const response = await handler(new Request(`${ORIGIN}/feed.xml/index.rsc`));
+    expect(response.status).toBe(404);
+    expect(response.headers.get('content-type')).toContain('text/plain');
+  });
+
+  it('runs the guards above it first', async () => {
+    const response = await handler(new Request(`${ORIGIN}/feed.xml`));
+    expect(response.headers.get('x-content-type-options')).toBe('nosniff');
+  });
+
+  it('takes a POST from anywhere, and writes the cookies it sets', async () => {
+    const response = await handler(
+      new Request(`${ORIGIN}/api/entries`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ name: 'webhook' }),
+      }),
+    );
+    expect(response.status).toBe(201);
+    expect(response.headers.getSetCookie()).toStrictEqual([
+      'visitor=webhook; Path=/; HttpOnly; Secure; SameSite=Lax',
+    ]);
+    const listed = await handler(new Request(`${ORIGIN}/api/entries`));
+    expect(await listed.json()).toMatchObject({
+      entries: expect.arrayContaining(['webhook']),
+    });
+  });
+});
+
 describe('notFound()', () => {
   it('answers a page that said notFound() with the nearest not-found.tsx, under a 404', async () => {
     const response = await handler(new Request(`${ORIGIN}/products/99`));

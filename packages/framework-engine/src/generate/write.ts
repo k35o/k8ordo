@@ -3,8 +3,9 @@ import path from 'node:path';
 
 import { parseSync } from 'vite';
 
-import { parseRouteTree } from '../grammar/tree';
+import { parseRouteTree, slotOf } from '../grammar/tree';
 import type { Problem } from '../grammar/tree';
+import { ROUTE_METHODS } from '../runtime/route';
 import {
   emitRegisterModule,
   emitRoutesModule,
@@ -50,50 +51,81 @@ export type GenerateResult = {
 };
 
 /**
- * Whether a route file exports a `paramsSchema`. Read from the module's
- * syntax rather than by importing it — the generator runs before anything
- * is compiled, and an import would evaluate the page. Vite's own parser
- * lists a module's exports the way a person reads the file: `export const
- * paramsSchema`, `export { paramsSchema }`, and a destructured `export
- * const { paramsSchema } = locales` are all the export; the same words
- * inside a string or a comment are not, and `export type paramsSchema` is
- * a type. Named so rather than `params` because the page's own prop is
- * `params`, and a module-level binding of the same name is a shadow every
- * linter flags.
+ * The names a module exports, read from its syntax rather than by importing
+ * it — the generator runs before anything is compiled, and an import would
+ * evaluate the page. Vite's own parser lists a module's exports the way a
+ * person reads the file: `export const paramsSchema`, `export {
+ * paramsSchema }`, and a destructured `export const { paramsSchema } =
+ * locales` are all an export; the same words inside a string or a comment
+ * are not, and `export type paramsSchema` is a type. A file that does not
+ * parse exports nothing; the build reports the syntax error itself, where it
+ * can name the line.
  */
-export const declaresParams = (source: string): boolean => {
-  // A file that does not parse declares nothing; the build reports the
-  // syntax error itself, where it can name the line.
+export const exportsOf = (source: string): ReadonlySet<string> => {
   const { errors, module } = parseSync('route.tsx', source, {
     sourceType: 'module',
   });
-  if (errors.length > 0) return false;
-  return module.staticExports.some((statement) =>
-    statement.entries.some(
-      (entry) => !entry.isType && entry.exportName.name === 'paramsSchema',
+  if (errors.length > 0) return new Set();
+  return new Set(
+    module.staticExports.flatMap((statement) =>
+      statement.entries
+        .filter((entry) => !entry.isType)
+        .map((entry) => entry.exportName.name ?? 'default'),
     ),
   );
 };
 
-const filesDeclaringParams = async (
+/**
+ * Whether a route file exports a `paramsSchema` — named so rather than
+ * `params` because the page's own prop is `params`, and a module-level
+ * binding of the same name is a shadow every linter flags.
+ */
+export const declaresParams = (source: string): boolean =>
+  exportsOf(source).has('paramsSchema');
+
+/** The route files whose exports say something: pages, layouts, route.ts. */
+const READS_EXPORTS = new Set(['page', 'layout', 'route']);
+
+/**
+ * What each page, layout and route.ts exports, by file. A file that cannot be
+ * read exports nothing.
+ */
+export const readExports = async (
   routesDir: string,
   files: readonly string[],
-): Promise<Set<string>> => {
-  const found = new Set<string>();
-  await Promise.all(
-    files
-      .filter((file) => /(?:^|\/)(?:page|layout)\.tsx$/u.test(file))
-      .map(async (file) => {
-        try {
-          const source = await readFile(path.join(routesDir, file), 'utf8');
-          if (declaresParams(source)) found.add(file);
-        } catch {
-          // 読めないファイルはスキーマを持たないものとして扱う
-        }
-      }),
+): Promise<ReadonlyMap<string, ReadonlySet<string>>> =>
+  new Map(
+    await Promise.all(
+      files
+        .filter((file) => READS_EXPORTS.has(slotOf(file) ?? ''))
+        .map(async (file): Promise<[string, ReadonlySet<string>]> => {
+          try {
+            return [
+              file,
+              exportsOf(await readFile(path.join(routesDir, file), 'utf8')),
+            ];
+          } catch {
+            // 読めないファイルは何も export しないものとして扱う
+            return [file, new Set()];
+          }
+        }),
+    ),
   );
-  return found;
-};
+
+/** A route.ts that exports no method answers every request with a 405. */
+export const silentRoutes = (
+  exported: ReadonlyMap<string, ReadonlySet<string>>,
+): Problem[] =>
+  [...exported]
+    .filter(
+      ([file, names]) =>
+        slotOf(file) === 'route' &&
+        !ROUTE_METHODS.some((method) => names.has(method)),
+    )
+    .map(([file]) => ({
+      path: file,
+      message: `exports none of ${ROUTE_METHODS.join(', ')} — a route.ts answers the methods it exports`,
+    }));
 
 const dependsOnState = async (root: string): Promise<boolean> => {
   try {
@@ -126,9 +158,11 @@ export const generate = async (
   // 文法として正しくても、順序で救えない重なりは残る。ただし文法が拒んだ名前
   // (`(foo` など)は URLPattern にならないので、壊れた木の上で走らせると報告
   // ではなく例外になる。だから文法が通ってからだけ見る。
+  const exported = await readExports(options.routesDir, files);
   const problems = [
     ...parsed.problems,
     ...(parsed.problems.length > 0 ? [] : unreachableRoutes(parsed.tree)),
+    ...silentRoutes(exported),
   ];
   const { tree } = parsed;
   // 壊れた木から作った表を置いていくと、次のビルドがそれを読んで別の失敗を
@@ -146,7 +180,11 @@ export const generate = async (
   const routesSource = emitRoutesModule(tree, {
     importPrefix: toRoutes.startsWith('.') ? toRoutes : `./${toRoutes}`,
     via: options.via,
-    withParams: await filesDeclaringParams(options.routesDir, files),
+    withParams: new Set(
+      [...exported]
+        .filter(([, names]) => names.has('paramsSchema'))
+        .map(([file]) => file),
+    ),
   });
   const registerSource = emitRegisterModule({
     routesModule: './routes.gen',

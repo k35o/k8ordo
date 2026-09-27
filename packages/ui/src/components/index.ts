@@ -11,6 +11,11 @@ export { Badge } from './data-display/badge';
 export { Card } from './data-display/card';
 export { Carousel } from './data-display/carousel';
 export { Code } from './data-display/code';
+export {
+  DataTable,
+  type DataTableColumn,
+  type DataTableSort,
+} from './data-display/data-table';
 export { Heading } from './data-display/heading';
 export { Kbd } from './data-display/kbd';
 export { Prose } from './data-display/prose';
@@ -56,6 +61,11 @@ export { Anchor } from './navigation/anchor';
 export { Breadcrumb } from './navigation/breadcrumb';
 export { Pagination } from './navigation/pagination';
 export { Stepper, type StepperStep } from './navigation/stepper';
+export { SideNav } from './navigation/side-nav';
+export {
+  TableOfContents,
+  type TableOfContentsItem,
+} from './navigation/table-of-contents';
 export { Tabs } from './navigation/tabs';
 export { InView } from './observers/in-view';
 export { Resize } from './observers/resize';
