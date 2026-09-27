@@ -59,6 +59,10 @@ pnpm check         # check:write to auto-fix
   also be a directory), and a route.ts exporting any method but `GET` is
   refused before the build (`readExports`) and in `vite dev`'s transform.
   It is not a page: no `index.rsc`, not in the sitemap.
+- **A page that reads the search is refused.** Exporting `search` asks the
+  framework to render a page per search, and a file is the same for every
+  search — every such page named before the build, and in `vite dev` when
+  the page is compiled (`pagesReadingSearch` / `exportsOf`).
 - **`site` is the only reason a sitemap exists.** Without the origin a
   sitemap would list relative URLs, which is not a sitemap; with it every
   page the build wrote is listed, redirects and the not-found excluded.

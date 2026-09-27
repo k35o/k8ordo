@@ -238,16 +238,44 @@ export default async function Page({ searchParams }: PageProps<'/products'>) {
 }
 ```
 
-**Under `@k8ordo/static` and `@k8ordo/server` a page never sees the search.**
-Those pages receive `params` and `pathname` (and, under `@k8ordo/server`, a
-`request` of headers and cookies) — never the search: the pathname axis is the
-router's, and the search is read in the browser by `useAppState`. The server
-render therefore shows the url slot's defaults and the live URL takes over one
-render after hydration. That is not a gap to route around: the router
-intercepts a same-pathname navigation without loading anything, so a server
-render keyed on the search would be right on the first load and stale after
-the first `update()`. Building links is unaffected — `href` and `search` are
-pure and run anywhere, including in a Server Component.
+**Under `@k8ordo/server` a page says what of the search it reads.** A page
+exports the url schema it reads, and receives that slot, parsed, as `search`:
+
+```tsx
+// src/routes/products/page.tsx
+import type { PageProps } from '@k8ordo/router';
+
+import { listState } from '../_data/list-state';
+
+export const search = listState.url;
+
+export default async function ProductsPage({ search }: PageProps<'/products'>) {
+  //                                          ^ { q: string; page: number }
+  const products = await fetchProducts(search);
+  return <ProductList products={products} />;
+}
+```
+
+The framework reads it the way `parseUrl` does — defaults applied, a
+rejected field salvaged — and, because the page is rendered for the search it
+was given, a navigation that moves the search loads that page again: a GET
+form, a link, or a url `update()`. That load is a state change otherwise — no
+scroll, no focus reset, nothing remounts — and `update().finished` settles
+once the page is on screen with the new search. The router's usual shortcut,
+a same-pathname navigation that loads nothing, still holds for every page
+that did not declare `search`, and for a search that did not move.
+
+A page that does not export `search` never sees the search, and neither does
+a layout: the pathname axis is the router's, and the search is read in the
+browser by `useAppState`, so such a server render shows the url slot's
+defaults and the live URL takes over one render after hydration.
+`@k8ordo/static` refuses the export: a file is the same whatever the search
+holds. Building links is unaffected — `href` and `search` are pure and run
+anywhere, including in a Server Component.
+
+`urlReader(schema)` is that reading on its own — a url schema in,
+`(input) => values` out, the codec built once — for code handed the schema
+without its definition; the framework's generated table calls it.
 
 `href` and `search` are pure: unspecified fields mean their default, and
 default values are omitted from the query, so every link is canonical and as
@@ -475,12 +503,12 @@ definition is the subscription boundary.
 
 Two operations depend on the router; everything else works under any router:
 
-| operation                                                               | needs                                                                   |
-| ----------------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| `href` / `search` links, GET forms                                      | nothing — the router or the browser handles the click or the submission |
-| updates that change only entry, local, session, cookie or memory values | nothing — no navigation is involved                                     |
-| url `update()` on the client                                            | a router that intercepts the Navigation API                             |
-| `parseUrl` on the server                                                | a router that hands the page its search                                 |
+| operation                                                               | needs                                                                             |
+| ----------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| `href` / `search` links, GET forms                                      | nothing — the router or the browser handles the click or the submission           |
+| updates that change only entry, local, session, cookie or memory values | nothing — no navigation is involved                                               |
+| url `update()` on the client                                            | a router that intercepts the Navigation API                                       |
+| `parseUrl` on the server                                                | a router that hands the page its search (`@k8ordo/server`: `export const search`) |
 
 A url `update()` calls `navigation.navigate()`. Under `@k8ordo/router` —
 including a page rendered by `@k8ordo/static` or `@k8ordo/server` — a
@@ -488,7 +516,9 @@ navigation that keeps the pathname is a state change and not a page change:
 the router intercepts it without a load, nothing remounts, and scroll and
 focus stay where they are. `finished` therefore resolves once that navigation
 settles, with no fetch or render behind it, since `update()` already rendered
-the new values. On a router that does not intercept the Navigation API
+the new values — unless the page showing exports `search` under
+`@k8ordo/server` and the search moved: then the page loads again, in place,
+and `finished` waits for it to be on screen. On a router that does not intercept the Navigation API
 (Next.js today), the same call is a full document load: use links and GET
 forms for url changes there, which is this package's preferred grain anyway.
 There is deliberately no history-API fallback.
@@ -609,8 +639,10 @@ tab, so its `storage` event reaches only other frames of that tab.
 
 **SSR sees real url values when your router hands you the search.** Pass the
 RSC-parsed url as `initialUrl` and the server render and the hydration render
-show the actual URL state. Where a page receives no search — `@k8ordo/static`
-and `@k8ordo/server` — the url slot renders its defaults and the live URL
+show the actual URL state. Under `@k8ordo/server` a page that exports
+`search = listState.url` receives it already parsed — pass that as
+`initialUrl`. Where a page receives no search — any other page, and every page
+under `@k8ordo/static` — the url slot renders its defaults and the live URL
 takes over on hydration.
 
 **SSR sees real cookie values when the page receives the request.** Pass what
@@ -637,9 +669,11 @@ of `true` that `update()` writes, so a checked box submits `inStock=true` —
 the URL state itself would write. The form submits as GET, which writes the
 URL with or without JavaScript.
 Where the router hands the page its search, the RSC reads it back with
-`parseUrl` and the whole loop works before JavaScript loads; under
-`@k8ordo/static` and `@k8ordo/server` the server render shows the defaults,
-and the submitted values appear once the page hydrates.
+`parseUrl` and the whole loop works before JavaScript loads — under
+`@k8ordo/server`, a page that exports `search = listState.url` is that page,
+and with JavaScript the submission loads it again in place. Anywhere else
+(`@k8ordo/static`, a page that does not declare `search`) the server render
+shows the defaults, and the submitted values appear once the page hydrates.
 
 ## Testing
 

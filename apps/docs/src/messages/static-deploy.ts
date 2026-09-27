@@ -184,6 +184,11 @@ export const stopsRoute = message({
   en: 'A `route.ts` that exports a method other than `GET`, answers its `GET` with anything but `200`, or sits where no file can (`/`, or above pages)',
 });
 
+export const stopsSearch = message({
+  ja: '`search` を export するページ',
+  en: 'A page that exports `search`',
+});
+
 export const stopsThrow = message({
   ja: 'ビルド中に throw したコンポーネント（Server Component はいつでも、クライアントコンポーネントは上に Suspense の境界が無いとき）',
   en: 'A component that throws while the build renders it — a Server Component always, a client component when no Suspense boundary sits above it',

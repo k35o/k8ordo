@@ -91,6 +91,11 @@ export const componentCategories: NavCategory[] = [
         description: m.components.calendar.description,
       },
       {
+        name: 'ColorPicker',
+        path: '/:locale/ui/components/color-picker',
+        description: m.components.colorPicker.description,
+      },
+      {
         name: 'Select',
         path: '/:locale/ui/components/select',
         description: m.components.select.description,
@@ -219,6 +224,11 @@ export const componentCategories: NavCategory[] = [
         name: 'DataTable',
         path: '/:locale/ui/components/data-table',
         description: m.components.dataTable.description,
+      },
+      {
+        name: 'Tree',
+        path: '/:locale/ui/components/tree',
+        description: m.components.tree.description,
       },
       {
         name: 'Heading',

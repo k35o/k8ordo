@@ -309,6 +309,41 @@ describe('the built request handler', () => {
   });
 });
 
+describe('a page that exports search', () => {
+  it('receives the search, read through its url schema', async () => {
+    const html = await (
+      await handler(new Request(`${ORIGIN}/products?q=second`))
+    ).text();
+    expect(html).toContain('second product');
+    expect(html).not.toContain('first product');
+    expect(html).toContain('value="second"');
+  });
+
+  it('receives the schema’s defaults when the URL has no search', async () => {
+    const html = await (
+      await handler(new Request(`${ORIGIN}/products`))
+    ).text();
+    expect(html).toContain('first product');
+    expect(html).toContain('second product');
+  });
+
+  it('is rendered for the search its payload is asked with, and says which', async () => {
+    const payload = await (
+      await handler(new Request(`${ORIGIN}/products/index.rsc?q=first`))
+    ).text();
+    expect(payload).toContain('first product');
+    expect(payload).not.toContain('second product');
+    expect(payload).toContain('"search":"?q=first"');
+  });
+
+  it('leaves a page that does not export search without one', async () => {
+    const payload = await (
+      await handler(new Request(`${ORIGIN}/index.rsc?q=anything`))
+    ).text();
+    expect(payload).not.toContain('"search":"?q=anything"');
+  });
+});
+
 describe('route.ts', () => {
   it('answers with what its GET returns, reading the request it was handed', async () => {
     const response = await handler(new Request(`${ORIGIN}/feed.xml`));
