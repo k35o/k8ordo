@@ -313,7 +313,7 @@ export const Dropzone: FC<{ children?: ReactNode }> = ({ children }) => {
   return (
     <div
       className={cn(
-        'flex w-full flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-border-base bg-bg-base p-6 text-center transition-colors',
+        'flex w-full flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-border-base bg-bg-base p-6 text-center transition-colors duration-150 ease-out',
         invalid && 'border-border-error',
         isDragging && 'border-primary-border bg-primary-bg-subtle',
         disabled && 'cursor-not-allowed border-border-mute bg-bg-mute',
