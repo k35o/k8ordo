@@ -23,6 +23,9 @@ export const en: Messages = {
   autocompleteClear: 'Clear all',
   autocompleteEmpty: 'No results',
 
+  comboboxToggle: 'Show options',
+  comboboxEmpty: 'No results',
+  comboboxFailed: 'Could not load options',
   fileFieldRemove: 'Remove file',
   fileFieldTrigger: 'Select files',
   fileFieldDrop: 'Drop files here',
