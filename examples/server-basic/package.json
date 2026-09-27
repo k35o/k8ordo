@@ -12,6 +12,7 @@
     "start": "node ./serve.js"
   },
   "dependencies": {
+    "@k8ordo/color-scheme": "workspace:^",
     "@k8ordo/form": "workspace:^",
     "@k8ordo/router": "workspace:^",
     "@k8ordo/server": "workspace:^",

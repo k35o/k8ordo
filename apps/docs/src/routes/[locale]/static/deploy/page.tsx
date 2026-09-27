@@ -60,6 +60,23 @@ const SITEMAP = `<?xml version="1.0" encoding="UTF-8"?>
   <url><loc>https://example.com/products/1</loc></url>
 </urlset>`;
 
+const CSP = `// vite.config.ts
+import { colorSchemeScriptHash } from '@k8ordo/color-scheme';
+import { framework } from '@k8ordo/static';
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+  plugins: [
+    framework({
+      csp: {
+        'script-src': ["'self'", await colorSchemeScriptHash()],
+        'object-src': ["'none'"],
+        'base-uri': ["'none'"],
+      },
+    }),
+  ],
+});`;
+
 const ROUTES_DIR = `// vite.config.ts
 import { framework } from '@k8ordo/static';
 import { defineConfig } from 'vite';
@@ -115,6 +132,12 @@ export default function StaticDeployPage() {
         <Paragraph text={t.sitemapDetails} />
       </DocSection>
 
+      <DocSection description={t.cspDescription} title={t.cspTitle}>
+        <CodeBlock code={CSP} lang="ts" />
+        <Paragraph text={t.cspApp} />
+        <Paragraph text={t.cspRefuses} />
+      </DocSection>
+
       <DocSection description={t.optionsDescription} title={t.optionsTitle}>
         <GuideTable
           head={[
@@ -156,6 +179,17 @@ export default function StaticDeployPage() {
             </Cell>
             <Cell>
               <Rich>{t.optionsTable.site()}</Rich>
+            </Cell>
+          </Row>
+          <Row>
+            <Cell nowrap>
+              <Code>csp</Code>
+            </Cell>
+            <Cell nowrap>
+              <Rich>{t.optionsTable.none()}</Rich>
+            </Cell>
+            <Cell>
+              <Rich>{t.optionsTable.csp()}</Rich>
             </Cell>
           </Row>
         </GuideTable>

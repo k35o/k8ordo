@@ -36,7 +36,8 @@ pnpm check         # check:write to auto-fix
 - **Three entries, by where the code runs.** The root is the plugin and
   loads Vite, which a deployed application does not have installed.
   `./runtime` (`src/runtime.ts`) is what code inside the handler imports —
-  `redirect`, `cookies`, `responseHeaders`, `requestHeaders` and the types,
+  `redirect`, `cookies`, `responseHeaders`, `requestHeaders`, `nonce` and
+  the types,
   `Guard` among them — and `./serve` (`src/serve.ts`) is the Node server. `examples/server-basic`'s handler test runs the build with Vite
   unresolvable to hold the first split.
 - **The handler is the exit, and it runs wherever `AsyncLocalStorage`

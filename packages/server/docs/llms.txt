@@ -55,7 +55,11 @@ When installed via npm, these docs live under `node_modules/@k8ordo/server/docs/
   `path: '/'`, `httpOnly`, `secure`, `sameSite: 'lax'`; every write a
   `Set-Cookie` on the answer), and `requestHeaders()` the headers the request
   arrived with — all three from a `guard.ts`, a `route.ts` or a Server
-  Action, and they throw anywhere else; `Guard<P>` is
+  Action, and they throw anywhere else; `nonce()` is the nonce this answer's
+  inline scripts carry (the framework's own, and what the application signs
+  with it, as `<ColorSchemeProvider nonce>`), new per request and readable
+  anywhere the request is answered, the render included — a guard names it
+  in the `Content-Security-Policy` it writes; `Guard<P>` is
   the type of what a `guard.ts` default-exports (`({ request, params }) =>
   Response | void`, `params` the strings of its directory's pattern) and
   `GuardContext<P>` its argument; `RedirectTarget` is the type of what a

@@ -57,3 +57,11 @@ export const NOT_FOUND_DIGEST = 'K8ORDO_NOT_FOUND';
  * refused, which is a 404 as well.
  */
 export const NOT_FOUND_HEADER = 'x-k8ordo-not-found';
+
+/**
+ * Said by the handler under `@k8ordo/static` alone, on a page's HTML: the
+ * nonce its inline scripts were signed with, which the build turns into the
+ * hashes a `Content-Security-Policy` names. A file cannot carry a nonce —
+ * everyone reads the same one.
+ */
+export const NONCE_HEADER = 'x-k8ordo-nonce';

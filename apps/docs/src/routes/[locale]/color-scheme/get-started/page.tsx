@@ -127,6 +127,18 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   );
 }`;
 
+const WITH_NONCE = `// src/routes/layout.tsx (@k8ordo/server)
+import { nonce } from '@k8ordo/server/runtime';
+
+<ColorSchemeProvider nonce={nonce()}>{children}</ColorSchemeProvider>`;
+
+const WITH_HASH = `// vite.config.ts (@k8ordo/static)
+import { colorSchemeScriptHash } from '@k8ordo/color-scheme';
+
+framework({
+  csp: { 'script-src': ["'self'", await colorSchemeScriptHash()] },
+});`;
+
 const UI_CSS = `/* src/styles/globals.css */
 @import '@k8ordo/ui/tailwind.css';`;
 
@@ -343,6 +355,17 @@ export default function ColorSchemeGetStartedPage() {
         <p className="text-fg-mute leading-relaxed">
           <Rich>{t.defaults.notStored()}</Rich>
         </p>
+      </DocSection>
+
+      <DocSection description={t.csp.description} title={t.csp.title}>
+        <p className="text-fg-mute leading-relaxed">
+          <Rich>{t.csp.nonce()}</Rich>
+        </p>
+        <CodeBlock code={WITH_NONCE} lang="tsx" />
+        <p className="text-fg-mute leading-relaxed">
+          <Rich>{t.csp.hash()}</Rich>
+        </p>
+        <CodeBlock code={WITH_HASH} lang="ts" />
       </DocSection>
 
       <DocSection description={t.styling.description} title={t.styling.title}>

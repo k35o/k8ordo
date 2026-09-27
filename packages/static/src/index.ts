@@ -7,6 +7,7 @@ import {
   exportsOf,
   isServerActionModule,
   pagesReadingSearch,
+  NONCE_HEADER,
   NOT_FOUND_HEADER,
   parseRouteTree,
   payloadPathFor,
@@ -20,7 +21,8 @@ import type { EngineOptions } from '@k8ordo/framework-engine';
 import { withBase } from '@k8ordo/router';
 import type { Plugin, PluginOption, ResolvedConfig } from 'vite';
 
-import { redirectPage, sitemap } from './documents';
+import { asFile, policyProblems, redirectPage, sitemap } from './documents';
+import type { ContentSecurityPolicy } from './documents';
 import {
   answeredByRoute,
   catchAllPath,
@@ -50,7 +52,19 @@ export type StaticOptions = EngineOptions & {
    * relative URLs is not one.
    */
   readonly site?: string;
+  /**
+   * The `Content-Security-Policy` every page carries, as directives and
+   * their sources. The framework decides no policy: it writes this one into
+   * each page's `<meta>`, adding to `script-src` the hashes of its own inline
+   * scripts on that page — the payload and React's. An inline script of the
+   * application's is allowed by its hash here, as
+   * `colorSchemeScriptHash()` gives `@k8ordo/color-scheme`'s. Without it, no
+   * policy is written.
+   */
+  readonly csp?: ContentSecurityPolicy;
 };
+
+export type { ContentSecurityPolicy } from './documents';
 
 type Handler = (request: Request) => Promise<Response>;
 
@@ -108,6 +122,15 @@ const RUNTIME_DIR = fileURLToPath(new URL('./runtime/', import.meta.url));
  * is what "the mode is the dependency" says.
  */
 export const framework = (options: StaticOptions = {}): PluginOption[] => {
+  const { csp } = options;
+  const unwritablePolicy = csp === undefined ? [] : policyProblems(csp);
+  if (unwritablePolicy.length > 0) {
+    throw new Error(
+      `the "csp" option cannot go into a page's <meta> as it is:\n${unwritablePolicy
+        .map((problem) => `  ${problem}`)
+        .join('\n')}`,
+    );
+  }
   let root = '';
   let routesDir = '';
   // The plugin list the RSC pipeline's registry is reached through, kept the
@@ -287,6 +310,7 @@ export const framework = (options: StaticOptions = {}): PluginOption[] => {
                   path.join(dir, 'index.html'),
                   handler,
                   urlFor(pathname),
+                  csp,
                 );
                 if (status === 404) {
                   (notFound ? disowned : refused).push(pathname);
@@ -301,6 +325,7 @@ export const framework = (options: StaticOptions = {}): PluginOption[] => {
                     path.join(dir, 'index.rsc'),
                     handler,
                     urlFor(payloadPathFor(pathname)),
+                    csp,
                   );
                 }
               },
@@ -316,6 +341,7 @@ export const framework = (options: StaticOptions = {}): PluginOption[] => {
             path.join(clientDir, '404.html'),
             handler,
             urlFor(unmatched),
+            csp,
           );
           if (status === 500) failed.push('404.html');
         }
@@ -433,11 +459,16 @@ type Written = {
   readonly notFound: boolean;
 };
 
-/** Writes what the handler answered, and says with which status. */
+/**
+ * Writes what the handler answered, and says with which status. A page's
+ * HTML says the nonce the framework signed its scripts with, which the file
+ * says as hashes in the application's policy, if it gave one.
+ */
 const write = async (
   file: string,
   handler: Handler,
   url: string,
+  csp: ContentSecurityPolicy | undefined,
 ): Promise<Written> => {
   const response = await handler(new Request(url));
   const notFound = response.headers.has(NOT_FOUND_HEADER);
@@ -454,8 +485,13 @@ const write = async (
     location !== null
   ) {
     await writeFile(file, redirectPage(location));
-  } else {
+    return { status: response.status, notFound };
+  }
+  const nonce = response.headers.get(NONCE_HEADER);
+  if (nonce === null) {
     await writeFile(file, Buffer.from(await response.arrayBuffer()));
+  } else {
+    await writeFile(file, asFile(await response.text(), nonce, csp));
   }
   return { status: response.status, notFound };
 };

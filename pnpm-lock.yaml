@@ -341,6 +341,9 @@ importers:
 
   examples/server-basic:
     dependencies:
+      '@k8ordo/color-scheme':
+        specifier: workspace:^
+        version: link:../../packages/color-scheme
       '@k8ordo/form':
         specifier: workspace:^
         version: link:../../packages/form
@@ -387,9 +390,15 @@ importers:
 
   examples/static-basic:
     dependencies:
+      '@k8ordo/color-scheme':
+        specifier: workspace:^
+        version: link:../../packages/color-scheme
       '@k8ordo/router':
         specifier: workspace:^
         version: link:../../packages/router
+      '@k8ordo/state':
+        specifier: workspace:^
+        version: link:../../packages/state
       react:
         specifier: 'catalog:'
         version: 19.3.0

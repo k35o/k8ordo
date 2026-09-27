@@ -63,6 +63,19 @@ pnpm check         # check:write to auto-fix
   framework to render a page per search, and a file is the same for every
   search — every such page named before the build, and in `vite dev` when
   the page is compiled (`pagesReadingSearch` / `exportsOf`).
+- **A file never carries a nonce; the policy names hashes.** The handler
+  signs the framework's inline scripts with a nonce per render and says it in
+  `NONCE_HEADER`; `write` takes it off every page (`asFile`) whether or not
+  a `csp` was given — a nonce in a file everyone reads is worth nothing, and
+  a random one would make every build differ. With `csp`, what that nonce
+  signed is hashed into `script-src` of a `<meta>` placed first in `<head>`;
+  nothing else is hashed, so an inline script that reached a page from
+  content stays refused, and the application allows its own by hash in the
+  policy (`colorSchemeScriptHash`). There is no `nonce()` for this mode for
+  the same reason. A policy the `<meta>` cannot carry (`frame-ancestors`,
+  `report-uri`, `sandbox`) or one with `'strict-dynamic'` — under which the
+  module script, allowed only by `'self'`, never loads — is refused when the
+  plugin is created (`policyProblems`).
 - **`site` is the only reason a sitemap exists.** Without the origin a
   sitemap would list relative URLs, which is not a sitemap; with it every
   page the build wrote is listed, redirects and the not-found excluded.
@@ -95,7 +108,9 @@ src/
                 answeredByRoute — pure
                 functions (supplied pathnames matched with URLPattern)
   documents.ts  sitemap / redirectPage — the two files the build writes
-                itself rather than taking from the handler, escaped as markup
+                itself rather than taking from the handler, escaped as markup;
+                asFile / policyProblems — a page as a file: its nonce off, its
+                Content-Security-Policy <meta> with the framework's hashes
   index.ts      framework: engine + refusals (guard.ts before the build) +
                 prerender (the dev refusals in transform, the files in buildApp)
 ```
