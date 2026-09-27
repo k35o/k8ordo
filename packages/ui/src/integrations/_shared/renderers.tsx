@@ -12,9 +12,13 @@ import { Badge } from '../../components/data-display/badge';
 import { Card } from '../../components/data-display/card';
 import { Carousel } from '../../components/data-display/carousel';
 import { Code } from '../../components/data-display/code';
+import { DataTable } from '../../components/data-display/data-table';
+import type { DataTableSort } from '../../components/data-display/data-table';
 import { Heading } from '../../components/data-display/heading';
 import { Kbd } from '../../components/data-display/kbd';
 import { Table } from '../../components/data-display/table';
+import { Tree } from '../../components/data-display/tree';
+import type { TreeItem } from '../../components/data-display/tree';
 import { Alert } from '../../components/feedback/alert';
 import { EmptyState } from '../../components/feedback/empty-state';
 import { Progress } from '../../components/feedback/progress';
@@ -26,6 +30,7 @@ import { Calendar } from '../../components/form/calendar';
 import { Checkbox } from '../../components/form/checkbox';
 import { CheckboxCard } from '../../components/form/checkbox-card';
 import { CheckboxGroup } from '../../components/form/checkbox-group';
+import { ColorPicker } from '../../components/form/color-picker';
 import { DateField } from '../../components/form/date-field';
 import { DatePicker } from '../../components/form/date-picker';
 import { FileField } from '../../components/form/file-field';
@@ -102,6 +107,7 @@ import { Stack } from '../../components/layout/stack';
 import { Anchor } from '../../components/navigation/anchor';
 import { Breadcrumb } from '../../components/navigation/breadcrumb';
 import { Pagination } from '../../components/navigation/pagination';
+import { SideNav } from '../../components/navigation/side-nav';
 import { Tabs } from '../../components/navigation/tabs';
 import { Dialog } from '../../components/overlays/dialog';
 import { Drawer } from '../../components/overlays/drawer';
@@ -128,6 +134,8 @@ import type {
   CheckboxProps,
   ChevronIconProps,
   CodeProps,
+  ColorPickerProps,
+  DataTableProps,
   DateFieldProps,
   DatePickerProps,
   GridProps,
@@ -156,6 +164,7 @@ import type {
   RangeSliderProps,
   SelectProps,
   SeparatorProps,
+  SideNavProps,
   SkeletonProps,
   SliderProps,
   SpinnerProps,
@@ -163,6 +172,7 @@ import type {
   StatusIconProps,
   SwitchProps,
   TableProps,
+  TreeProps,
   TabsProps,
   TextareaProps,
   TextFieldProps,
@@ -566,6 +576,35 @@ const LabeledField: FC<{
   );
 };
 
+const ColorPickerView: FC<{
+  props: ColorPickerProps;
+  value: string;
+  onChange: (next: string) => void;
+}> = ({ props, value, onChange }) => (
+  <LabeledField label={props.label}>
+    {(labelId) => (
+      <ColorPicker
+        aria-labelledby={labelId}
+        disabled={u(props.disabled)}
+        invalid={u(props.invalid)}
+        name={props.name}
+        onChange={onChange}
+        required={u(props.required)}
+        swatches={u(props.swatches)}
+        value={value}
+      />
+    )}
+  </LabeledField>
+);
+
+export function renderColorPicker(
+  props: ColorPickerProps,
+  value: string,
+  onChange: (next: string) => void,
+): ReactNode {
+  return <ColorPickerView onChange={onChange} props={props} value={value} />;
+}
+
 const DateFieldView: FC<{
   props: DateFieldProps;
   value: string;
@@ -898,6 +937,59 @@ export function renderBreadcrumb(props: BreadcrumbProps): ReactNode {
   );
 }
 
+// 平らな一覧を親子の木に組む。親の見つからない項目は根に置く
+export const toTree = (items: TreeProps['items']): TreeItem[] => {
+  const ids = new Set(items.map((item) => item.id));
+  const build = (parentId: string | undefined): TreeItem[] =>
+    items
+      .filter((item) => {
+        // OpenUI は省いた引数を null で渡すので、undefined にそろえてから見る
+        const parent = u(item.parentId);
+        return parentId === undefined
+          ? parent === undefined || !ids.has(parent)
+          : parent === parentId;
+      })
+      .map((item): TreeItem => {
+        const children = build(item.id);
+        return children.length > 0
+          ? { id: item.id, label: item.label, children }
+          : { id: item.id, label: item.label };
+      });
+  return build(undefined);
+};
+
+export function renderTree(props: TreeProps): ReactNode {
+  return (
+    <Tree
+      defaultExpandedIds={props.items
+        .filter((item) => item.expanded === true)
+        .map((item) => item.id)}
+      items={toTree(props.items)}
+      label={props.label}
+    />
+  );
+}
+
+export function renderSideNav(props: SideNavProps): ReactNode {
+  return (
+    <SideNav.Root label={props.label}>
+      {props.groups.map((group) => (
+        <SideNav.Group key={group.title} title={group.title}>
+          {group.links.map((link) => (
+            <SideNav.Link
+              current={u(link.current)}
+              href={link.href}
+              key={link.href}
+            >
+              {link.label}
+            </SideNav.Link>
+          ))}
+        </SideNav.Group>
+      ))}
+    </SideNav.Root>
+  );
+}
+
 export function renderTable(props: TableProps): ReactNode {
   return (
     <Table.Root>
@@ -1106,6 +1198,46 @@ const ToastTriggerInner: FC<{ props: ToastProps }> = ({ props }) => {
     >
       {props.triggerLabel}
     </Button>
+  );
+};
+
+const collator = new Intl.Collator(undefined, { numeric: true });
+
+export const DataTableWidget: FC<{ props: DataTableProps }> = ({ props }) => {
+  const [sort, setSort] = useState<DataTableSort | null>(null);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const rows = props.rows.map((cells, index) => ({ id: String(index), cells }));
+  const columnIndex = sort === null ? -1 : Number(sort.columnId);
+  const sorted =
+    sort === null
+      ? rows
+      : rows.toSorted((a, b) =>
+          collator.compare(
+            a.cells[columnIndex] ?? '',
+            b.cells[columnIndex] ?? '',
+          ),
+        );
+  const ordered =
+    sort?.direction === 'descending' ? sorted.toReversed() : sorted;
+  return (
+    <DataTable
+      columns={props.columns.map((column, index) => ({
+        id: String(index),
+        header: column.label,
+        cell: (row: { cells: string[] }) => row.cells[index] ?? '',
+        align: u(column.align),
+        sortable: u(column.sortable),
+      }))}
+      getRowId={(row) => row.id}
+      label={props.label}
+      onSelectedIdsChange={
+        props.selectable === true ? setSelectedIds : undefined
+      }
+      onSortChange={setSort}
+      rows={ordered}
+      selectedIds={selectedIds}
+      sort={sort}
+    />
   );
 };
 

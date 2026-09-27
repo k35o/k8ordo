@@ -25,6 +25,10 @@ let noBoundaryStderr = '';
 let guardStderr = '';
 // notFound() と言うページのパスを列挙した構成
 let notFoundPageStderr = '';
+// GET 以外を export する route.ts を置いた構成
+let routeStderr = '';
+// search を読むと宣言したページを置いた構成
+let searchStderr = '';
 
 // ひとつ前のデプロイの dist/client。アプリは同じで、クライアントの
 // スクリプトだけが違う。タブを開いた後にデプロイがあった、を再現する
@@ -51,6 +55,8 @@ beforeAll(() => {
   noBoundaryStderr = failingBuild('vite.broken-no-boundary.config.ts');
   guardStderr = failingBuild('vite.broken-guard.config.ts');
   notFoundPageStderr = failingBuild('vite.not-found-page.config.ts');
+  routeStderr = failingBuild('vite.broken-route.config.ts');
+  searchStderr = failingBuild('vite.broken-search.config.ts');
   // 圧縮しないだけで、スクリプトの中身とハッシュの入った名前が変わる
   execFileSync('pnpm', ['exec', 'vp', 'build', '--minify', 'false'], {
     cwd: root,
@@ -95,6 +101,13 @@ describe('the static build', () => {
 
   it('writes the same page as a payload beside it', () => {
     expect(read('index.rsc')).toContain('rendered on the server');
+  });
+
+  it('writes a page under a loading.tsx whole, without the fallback', () => {
+    const html = read('products', 'index.html');
+    expect(html).toContain('first product');
+    // フォールバックは埋め込んだペイロードには載るが、描かれてはいない
+    expect(html).not.toContain('<p data-testid="loading">');
   });
 
   it('writes a page per supplied pathname, with its data', () => {
@@ -167,6 +180,26 @@ describe('the static build', () => {
     );
   });
 
+  it('writes a route.ts as the file its GET answered, with the site as its origin', () => {
+    const xml = read('feed.xml');
+    expect(xml).toContain('<title>first product</title>');
+    expect(xml).toContain('<link>https://example.test/products/1</link>');
+    // ページではないので、ペイロードも index.html も無い
+    expect(existsSync(path.join(client, 'feed.xml', 'index.rsc'))).toBe(false);
+  });
+
+  it('refuses a route.ts that answers a method a file cannot, naming it and the method', () => {
+    expect(routeStderr).toContain(
+      'static build writes a route.ts as the file its GET answers, and a file cannot answer another method — these export one:\n  src/routes-broken-route/api/route.ts (POST)',
+    );
+  });
+
+  it('refuses a page that reads the search, naming it', () => {
+    expect(searchStderr).toContain(
+      'static build cannot hand a page the search — a file is the same for every search, and these pages export search:\n  src/routes-broken-search/products/page.tsx\nthis application wants @k8ordo/server',
+    );
+  });
+
   it('writes a redirect.ts as a page that sends the visitor on', () => {
     const html = read('old', 'index.html');
     expect(html).toContain('http-equiv="refresh"');
@@ -178,8 +211,9 @@ describe('the static build', () => {
     const xml = read('sitemap.xml');
     expect(xml).toContain('<loc>https://example.test/</loc>');
     expect(xml).toContain('<loc>https://example.test/products/2</loc>');
-    // リダイレクトと not-found はページではない
+    // リダイレクトと not-found と route.ts はページではない
     expect(xml).not.toContain('/old');
+    expect(xml).not.toContain('feed.xml');
     expect(xml).not.toContain('404');
   });
 

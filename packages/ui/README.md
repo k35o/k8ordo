@@ -190,6 +190,8 @@ stories and rendered props rather than relying on trained knowledge:
 - **Anchor** - Text link with external-link awareness
 - **Breadcrumb** - Navigation path indicator
 - **Pagination** - Page navigation controls
+- **SideNav** - Grouped side navigation links (use `renderAnchor` for a router link)
+- **TableOfContents** - On-page contents that marks the heading being read
 - **Tabs** - Tab-based content organization
 
 ### Form Controls
@@ -197,6 +199,7 @@ stories and rendered props rather than relying on trained knowledge:
 - **Autocomplete** - Search with suggestions
 - **Calendar** - Month grid for picking a day
 - **Checkbox** / **CheckboxCard** / **CheckboxGroup** - Multi-selection inputs
+- **ColorPicker** - Hex color field with hue / saturation / lightness sliders and swatches
 - **DateField** / **DatePicker** - Native date input, alone or with a calendar popover
 - **FileField** - File upload with composite pattern, from a button or by dropping files
 - **Form** / **FormControl** - Form wrapper and field with label/validation
@@ -217,11 +220,13 @@ stories and rendered props rather than relying on trained knowledge:
 - **Card** - Flexible content container (hover interaction via `interactive`)
 - **Carousel** - Scroll-snapping slides with previous/next buttons
 - **Code** - Formatted code display
+- **DataTable** - Table with sorting, row selection, and column visibility (controlled)
 - **CodeBlock** (from `@k8ordo/ui/code-block`) - Code block highlighted on the server, with a copy button
 - **Heading** - Typography heading component
 - **Kbd** - Keyboard key cap for shortcuts
 - **Prose** - Typesetting for rendered Markdown/MDX, tuned for Japanese
 - **Table** - Tabular data display
+- **Tree** - Expandable hierarchy with WAI-ARIA tree keyboard navigation
 
 ### Feedback
 
@@ -464,13 +469,13 @@ pnpm add @json-render/core @json-render/react zod
 pnpm add @openuidev/react-lang @openuidev/lang-core zod
 ```
 
-Supported components (**all 55**, both frameworks):
+Supported components (**all 59**, both frameworks):
 
 - **Layout / containers**: `Stack`, `Grid`, `Card`, `Form`, `Carousel`
-- **Buttons / nav**: `Button`, `IconButton`, `CopyButton`, `Anchor`, `Breadcrumb`, `Pagination`
-- **Display**: `Badge`, `Heading`, `Avatar`, `Code`, `Kbd`, `EmptyState`, `Icon`, `ChevronIcon`, `StatusIcon`, `Alert`, `Spinner`, `Progress`, `Skeleton`, `Separator`, `Tabs`, `Accordion`, `Table`
+- **Buttons / nav**: `Button`, `IconButton`, `CopyButton`, `Anchor`, `Breadcrumb`, `Pagination`, `SideNav`
+- **Display**: `Badge`, `Heading`, `Avatar`, `Code`, `Kbd`, `EmptyState`, `Icon`, `ChevronIcon`, `StatusIcon`, `Alert`, `Spinner`, `Progress`, `Skeleton`, `Separator`, `Tabs`, `Accordion`, `Table`, `DataTable`, `Tree`
 - **Overlays (self-contained widgets)**: `Modal`, `Dialog`, `Drawer`, `Popover`, `Tooltip`, `DropdownMenu`, `Toast`
-- **Form**: `TextField`, `Textarea`, `PasswordInput`, `NumberField`, `Slider`, `RangeSlider`, `DateField`, `DatePicker`, `Calendar`, `Checkbox`, `Switch`, `Select`, `Radio`, `RadioCard`, `CheckboxCard`, `ListBox`, `CheckboxGroup`, `Autocomplete`, `FileField`, `FormControl`
+- **Form**: `TextField`, `Textarea`, `PasswordInput`, `NumberField`, `Slider`, `RangeSlider`, `DateField`, `DatePicker`, `Calendar`, `ColorPicker`, `Checkbox`, `Switch`, `Select`, `Radio`, `RadioCard`, `CheckboxCard`, `ListBox`, `CheckboxGroup`, `Autocomplete`, `FileField`, `FormControl`
 
 The rest of the exports — the observers, the providers, and the AI chat
 components — are left out on purpose;

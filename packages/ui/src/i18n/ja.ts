@@ -40,6 +40,10 @@ export const ja: Messages = {
   datePickerOpen: 'カレンダーから選ぶ',
   datePickerDialog: '日付を選ぶ',
 
+  colorPickerHue: '色相',
+  colorPickerSaturation: '彩度',
+  colorPickerLightness: '明度',
+  colorPickerSwatches: '色の見本',
   passwordShow: 'パスワードを表示',
   passwordHide: 'パスワードを非表示',
 
@@ -52,11 +56,16 @@ export const ja: Messages = {
   paginationPrevious: '前へ',
   paginationNext: '次へ',
 
+  dataTableColumns: '表示する列',
+  dataTableSelectAll: 'すべての行を選択',
+  dataTableSelectRow: '行を選択',
+
   codeBlockCopy: 'コードをコピー',
   carousel: 'カルーセル',
   carouselSlide: 'スライド',
   carouselPrevious: '前のスライド',
   carouselNext: '次のスライド',
+  tableOfContents: '目次',
 
   chat: 'チャット',
   scrollToLatest: '最新のメッセージへ移動',

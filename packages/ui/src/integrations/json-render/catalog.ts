@@ -88,6 +88,21 @@ export const catalog = defineCatalog(schema, {
       props: s.breadcrumbProps,
       description: 'Breadcrumb trail.',
     },
+    DataTable: {
+      props: s.dataTableProps,
+      description:
+        'Table the reader can sort (by the columns marked sortable) and, with selectable, pick rows from. Use it for records someone works through; use Table for data only read.',
+    },
+    Tree: {
+      props: s.treeProps,
+      description:
+        'Tree of nodes that open and close, such as files and folders, navigable with the arrow keys. List every node flat; a child names its parent by parentId.',
+    },
+    SideNav: {
+      props: s.sideNavProps,
+      description:
+        'Side navigation: groups of links, each group under a small title. Mark the page being shown with current: true.',
+    },
     Table: {
       props: s.tableProps,
       description:
@@ -183,6 +198,11 @@ export const catalog = defineCatalog(schema, {
       props: s.calendarProps,
       description:
         'Month calendar shown inline for picking one day (YYYY-MM-DD). It submits nothing; in a form, use DatePicker. defaultValue can be bound to state with $bindState.',
+    },
+    ColorPicker: {
+      props: s.colorPickerProps,
+      description:
+        'Color input with a visible label: a #rrggbb text field, hue / saturation / lightness sliders, and optional preset swatches. defaultValue can be bound to state with $bindState.',
     },
     Radio: {
       props: s.radioProps,

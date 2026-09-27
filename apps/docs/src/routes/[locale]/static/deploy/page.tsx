@@ -207,6 +207,18 @@ export default function StaticDeployPage() {
             </LocaleAnchor>
           </Bullet>
           <Bullet>
+            <Rich>{t.stopsRoute()}</Rich> —{' '}
+            <LocaleAnchor path="/:locale/static/routing">
+              {m.static.navRouting()}
+            </LocaleAnchor>
+          </Bullet>
+          <Bullet>
+            <Rich>{t.stopsSearch()}</Rich> —{' '}
+            <LocaleAnchor path="/:locale/static/boundaries">
+              {m.static.navBoundaries()}
+            </LocaleAnchor>
+          </Bullet>
+          <Bullet>
             <Rich>{t.stopsThrow()}</Rich> —{' '}
             <LocaleAnchor path="/:locale/static/errors">
               {m.static.navErrors()}

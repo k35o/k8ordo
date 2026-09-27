@@ -136,6 +136,13 @@ export const AutocompleteView: FC<
   return ui.renderAutocomplete(props, field.value, field.setValue);
 };
 
+export const ColorPickerView: FC<ComponentRenderProps<s.ColorPickerProps>> = ({
+  props,
+}) => {
+  const field = useStateField<string>(props.name, props.defaultValue ?? '');
+  return ui.renderColorPicker(props, field.value, field.setValue);
+};
+
 export const DateFieldView: FC<ComponentRenderProps<s.DateFieldProps>> = ({
   props,
 }) => {

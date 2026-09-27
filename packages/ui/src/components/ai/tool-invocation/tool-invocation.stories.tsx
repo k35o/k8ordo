@@ -133,26 +133,46 @@ export const ApprovalWithRequestReason: Story = {
   },
 };
 
+// Chromium は、フォーカスを持った要素が disabled になると、描画を更新した
+// あとのタスクでフォーカスを外す。1 フレームだけでは、そのタスクより先に
+// React の描画が走ることがあるので 2 フレーム待つ
+const waitTwoFrames = async () => {
+  await new Promise(requestAnimationFrame);
+  await new Promise(requestAnimationFrame);
+};
+
 let finishAnswering = () => {};
 
 export const ApprovalWhileAnswering: Story = {
   args: {
     ...ApprovalRequested.args,
     // 答えを送り終わるまで返らない。その間に二度答えられないことを見る
-    onApprovalResponse: () =>
-      new Promise<void>((resolve) => {
-        finishAnswering = resolve;
-      }),
+    onApprovalResponse: fn(
+      () =>
+        new Promise<void>((resolve) => {
+          finishAnswering = resolve;
+        }),
+    ),
   },
-  play: async ({ canvas, userEvent }) => {
-    await userEvent.click(canvas.getByRole('button', { name: '許可' }));
+  play: async ({ canvas, userEvent, args }) => {
+    const approve = canvas.getByRole('button', { name: '許可' });
+    const deny = canvas.getByRole('button', { name: '拒否' });
+    try {
+      await userEvent.click(approve);
+      await waitTwoFrames();
 
-    await expect(canvas.getByRole('button', { name: '許可' })).toBeDisabled();
-    await expect(canvas.getByRole('button', { name: '拒否' })).toBeDisabled();
+      // 答えている間も、押したボタンはフォーカスを持ったまま
+      await expect(approve).toHaveFocus();
+      await expect(approve).toHaveAttribute('aria-disabled', 'true');
+      await expect(deny).toHaveAttribute('aria-disabled', 'true');
 
-    // 終わらない非同期の transition は、同じ React の後続の transition を
-    // すべて待たせる。後のストーリーを巻き込まないよう片付ける
-    finishAnswering();
+      await userEvent.click(deny);
+      await expect(args.onApprovalResponse).toHaveBeenCalledOnce();
+    } finally {
+      // 終わらない非同期の transition は、同じ React の後続の transition を
+      // すべて待たせる。途中で落ちても後のストーリーを巻き込まないよう片付ける
+      finishAnswering();
+    }
   },
 };
 
@@ -163,7 +183,9 @@ const AnsweredInPlace = () => {
       approval={{ id: 'approval-1' }}
       input={{ path: 'notes/2026-09.md' }}
       name="delete_file"
-      onApprovalResponse={({ approved }) => {
+      onApprovalResponse={async ({ approved }) => {
+        // 答えが届くのは描画の更新をまたいだ後。実際の送信もそうなる
+        await waitTwoFrames();
         setState(approved ? 'output-available' : 'output-denied');
       }}
       output="削除しました"
@@ -179,7 +201,6 @@ export const FocusAfterAnswer: Story = {
 
     // 押したボタンは問いのバーごと消える。フォーカスは body に落とさず、
     // 同じツールの見出しへ移す
-    // 答えは transition の中で送るので、消えるのはこの後の描画
     await waitFor(() =>
       expect(
         canvas.queryByRole('group', { name: 'delete_file' }),
@@ -188,6 +209,26 @@ export const FocusAfterAnswer: Story = {
     await expect(
       canvas.getByRole('button', { name: /delete_file/u }),
     ).toHaveFocus();
+  },
+};
+
+export const FocusAfterKeyboardAnswer: Story = {
+  render: () => <AnsweredInPlace />,
+  play: async ({ canvas, userEvent }) => {
+    const heading = canvas.getByRole('button', { name: /delete_file/u });
+    await userEvent.tab();
+    await expect(heading).toHaveFocus();
+    await userEvent.tab();
+    await expect(canvas.getByRole('button', { name: '拒否' })).toHaveFocus();
+
+    await userEvent.keyboard('{Enter}');
+
+    await waitFor(() =>
+      expect(
+        canvas.queryByRole('group', { name: 'delete_file' }),
+      ).not.toBeInTheDocument(),
+    );
+    await expect(heading).toHaveFocus();
   },
 };
 

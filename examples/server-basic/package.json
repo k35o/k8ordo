@@ -15,6 +15,7 @@
     "@k8ordo/form": "workspace:^",
     "@k8ordo/router": "workspace:^",
     "@k8ordo/server": "workspace:^",
+    "@k8ordo/state": "workspace:^",
     "react": "catalog:",
     "react-dom": "catalog:",
     "server-only": "catalog:",

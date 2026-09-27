@@ -13,6 +13,13 @@ export type Payload = {
    */
   pathname: string;
   /**
+   * The search this payload was rendered with (`?q=shoes`, or `''`) — only
+   * when its page declared what of the search it reads. A client navigation
+   * that moves the search loads such a page again; any other page renders
+   * the same whatever the search holds, and has none.
+   */
+  search?: string;
+  /**
    * The client this payload was rendered for: the URL of the script its
    * page's HTML loads. A document running another script cannot be trusted
    * to render it.

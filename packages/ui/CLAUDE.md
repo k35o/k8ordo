@@ -86,7 +86,7 @@ Because every component omits `className` and `style`, a render prop is the only
 escape hatch a caller has. There are two kinds, and they must not be blurred.
 
 **Replacing the element** (`Button` / `IconButton` `renderItem`, `Anchor` /
-`Breadcrumb.Link` `renderAnchor`). The bag is _everything the component would
+`Breadcrumb.Link` / `SideNav.Link` `renderAnchor`). The bag is _everything the component would
 have put on its own element_. For `Button` / `IconButton` that is the resolved
 `className`, the composed `children` (icons and the pending spinner included),
 `ref`, the click handler, the disabled and pending state, and the caller's
@@ -94,7 +94,9 @@ remaining attributes. The link components own less: `Anchor`'s bag is `href` /
 `className` / `children` / `target` / `rel` and the caller's remaining
 attributes, plus `kind` (`'internal' | 'external'`), which is not an attribute;
 `Breadcrumb.Link` takes no extra attributes, so its bag is `href` / `className` /
-`children`, and a `current` link renders a `<span>` without calling it. Build that
+`children`, and a `current` link renders a `<span>` without calling it;
+`SideNav.Link`'s bag is `href` / `className` / `children` / `aria-current` and
+the caller's remaining anchor attributes. Build that
 object once and hand the same one to both branches — the render prop and the
 component's own element — so the two can never drift. A render prop that quietly
 drops `onClick` or `disabled` hands the caller a dead, undisabled element with
@@ -269,7 +271,7 @@ Dark mode is class-based (`.dark` on `html`, put there by `@k8ordo/color-scheme`
 The stylesheet follows `prefers-contrast: more` and `forced-colors: active`; `@k8ordo/color-scheme` is not involved, since the OS owns both settings.
 
 - `tokens.css` redefines text and border tokens inside `@media (prefers-contrast: more)` on `:root:where(:not(.dark))` and `.dark`. `:where` keeps the specificity of `:root`, so a consumer's later `:root` override still wins.
-- A surface outlined only by a shadow or a ground takes `HIGH_CONTRAST_EDGE` (`src/components/_internal/high-contrast.ts`): an inset `border-base` outline under either setting.
+- A surface outlined only by a shadow or a ground takes `HIGH_CONTRAST_EDGE` (`src/components/_internal/high-contrast.ts`): an inset `border-base` outline under either setting. Every part of it, color and offset included, sits behind those media queries and `not-focus-visible:`, so a surface that takes focus itself (`Modal`'s `<dialog>`) keeps the browser's own focus ring untouched.
 - Under forced colors only system colors survive and shadows are dropped. Paint selected state with `forced-colors:bg-[Highlight]` / `forced-colors:bg-[CanvasText]`, never rely on `box-shadow` for a boundary or focus, and hide with `invisible`, not `text-transparent` (a transparent color is repainted).
 
 ### Focus Style

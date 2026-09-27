@@ -13,6 +13,7 @@ import type { Alert } from '../../components/feedback/alert';
 import type { EmptyState } from '../../components/feedback/empty-state';
 import type { Skeleton } from '../../components/feedback/skeleton';
 import type { Spinner } from '../../components/feedback/spinner';
+import type { ColorPicker } from '../../components/form/color-picker';
 import type { FormControl } from '../../components/form/form-control';
 import type { Textarea } from '../../components/form/textarea';
 import type { AlertIcon, ChevronIcon } from '../../components/icons';
@@ -337,6 +338,65 @@ export const tableProps = z.object({
     ),
 }) satisfies z.ZodType<TableIntegrationProps>;
 
+// DataTable は制御型だが、生成 UI には状態を持つ場所が無いので、並べ替えと
+// 選択を中で持つ自己完結の部品にする（オーバーレイと同じ扱い）
+type DataTableIntegrationProps = {
+  label: string;
+  columns: ReadonlyArray<{
+    label: string;
+    align?: 'left' | 'center' | 'right';
+    sortable?: boolean;
+  }>;
+  rows: readonly string[][];
+  selectable?: boolean;
+};
+export const dataTableProps = z.object({
+  label: z.string().describe('Accessible name of the table'),
+  columns: z
+    .array(
+      z.object({
+        label: z.string(),
+        align: z.enum(['left', 'center', 'right']).optional(),
+        sortable: z.boolean().optional(),
+      }),
+    )
+    .min(1),
+  rows: z
+    .array(z.array(z.string()))
+    .describe(
+      'Cell strings of each row, in the same order and number as columns',
+    ),
+  selectable: z.boolean().optional(),
+}) satisfies z.ZodType<DataTableIntegrationProps>;
+
+// 入れ子のスキーマは JSON Schema で再帰になり、モデルにも書き崩されやすい。
+// 平らな一覧にして、親は parentId で指す
+type TreeIntegrationProps = {
+  label: string;
+  items: ReadonlyArray<{
+    id: string;
+    label: string;
+    parentId?: string;
+    expanded?: boolean;
+  }>;
+};
+export const treeProps = z.object({
+  label: z.string().describe('Accessible name of the tree'),
+  items: z
+    .array(
+      z.object({
+        id: z.string(),
+        label: z.string(),
+        parentId: z.string().optional(),
+        expanded: z.boolean().optional(),
+      }),
+    )
+    .min(1)
+    .describe(
+      'Every node, flat and in display order; a child names its parent by parentId, and expanded opens a parent at first',
+    ),
+}) satisfies z.ZodType<TreeIntegrationProps>;
+
 type CardIntegrationProps = {
   width?: ComponentProps<typeof Card>['width'];
   variant?: ComponentProps<typeof Card>['variant'];
@@ -497,6 +557,36 @@ export const breadcrumbProps = z.object({
       'Breadcrumb items; the one without href, or with current: true, is the current page',
     ),
 }) satisfies z.ZodType<BreadcrumbIntegrationProps>;
+
+type SideNavIntegrationProps = {
+  label: string;
+  groups: ReadonlyArray<{
+    title: string;
+    links: ReadonlyArray<{ label: string; href: string; current?: boolean }>;
+  }>;
+};
+export const sideNavProps = z.object({
+  label: z.string().describe('Accessible name of the navigation'),
+  groups: z
+    .array(
+      z.object({
+        title: z.string(),
+        links: z
+          .array(
+            z.object({
+              label: z.string(),
+              href: safeUrl,
+              current: z.boolean().optional(),
+            }),
+          )
+          .min(1),
+      }),
+    )
+    .min(1)
+    .describe(
+      'Groups of links, each under a title; the link with current: true is the page being shown',
+    ),
+}) satisfies z.ZodType<SideNavIntegrationProps>;
 
 type PaginationIntegrationProps = {
   name: string;
@@ -686,6 +776,38 @@ export const rangeSliderProps = z.object({
   invalid: z.boolean().optional(),
   disabled: z.boolean().optional(),
 }) satisfies z.ZodType<RangeSliderIntegrationProps>;
+
+// 値は `<ColorPicker>` の欄と同じ #rrggbb。大文字は部品が小文字にそろえる
+const hexColor = () => z.string().regex(/^#[0-9a-fA-F]{6}$/u);
+
+type ColorPickerIntegrationProps = {
+  name: string;
+  label: string;
+  defaultValue?: string;
+  swatches?: ComponentProps<typeof ColorPicker>['swatches'];
+  invalid?: boolean;
+  disabled?: boolean;
+  required?: boolean;
+};
+export const colorPickerProps = z.object({
+  name: z.string(),
+  label: z.string().describe('Visible label of the field'),
+  defaultValue: hexColor().optional().describe('#rrggbb'),
+  swatches: z
+    .array(
+      z.object({
+        value: hexColor().describe('#rrggbb'),
+        label: z
+          .string()
+          .describe('Name of the color, read out for the swatch'),
+      }),
+    )
+    .optional()
+    .describe('Preset colors offered as buttons'),
+  invalid: z.boolean().optional(),
+  disabled: z.boolean().optional(),
+  required: z.boolean().optional(),
+}) satisfies z.ZodType<ColorPickerIntegrationProps>;
 
 type CheckboxIntegrationProps = {
   name: string;
@@ -974,12 +1096,16 @@ export type ProgressProps = z.infer<typeof progressProps>;
 export type SkeletonProps = z.infer<typeof skeletonProps>;
 export type AccordionProps = z.infer<typeof accordionProps>;
 export type BreadcrumbProps = z.infer<typeof breadcrumbProps>;
+export type SideNavProps = z.infer<typeof sideNavProps>;
 export type TableProps = z.infer<typeof tableProps>;
+export type DataTableProps = z.infer<typeof dataTableProps>;
+export type TreeProps = z.infer<typeof treeProps>;
 export type TextareaProps = z.infer<typeof textareaProps>;
 export type PasswordInputProps = z.infer<typeof passwordInputProps>;
 export type NumberFieldProps = z.infer<typeof numberFieldProps>;
 export type SliderProps = z.infer<typeof sliderProps>;
 export type RangeSliderProps = z.infer<typeof rangeSliderProps>;
+export type ColorPickerProps = z.infer<typeof colorPickerProps>;
 export type DateFieldProps = z.infer<typeof dateFieldProps>;
 export type DatePickerProps = z.infer<typeof datePickerProps>;
 export type CalendarProps = z.infer<typeof calendarProps>;

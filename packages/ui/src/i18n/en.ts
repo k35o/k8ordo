@@ -40,6 +40,10 @@ export const en: Messages = {
   datePickerOpen: 'Choose from calendar',
   datePickerDialog: 'Choose a date',
 
+  colorPickerHue: 'Hue',
+  colorPickerSaturation: 'Saturation',
+  colorPickerLightness: 'Lightness',
+  colorPickerSwatches: 'Swatches',
   passwordShow: 'Show password',
   passwordHide: 'Hide password',
 
@@ -52,11 +56,16 @@ export const en: Messages = {
   paginationPrevious: 'Previous',
   paginationNext: 'Next',
 
+  dataTableColumns: 'Columns',
+  dataTableSelectAll: 'Select all rows',
+  dataTableSelectRow: 'Select row',
+
   codeBlockCopy: 'Copy code',
   carousel: 'Carousel',
   carouselSlide: 'Slide',
   carouselPrevious: 'Previous slide',
   carouselNext: 'Next slide',
+  tableOfContents: 'Contents',
 
   chat: 'Chat',
   scrollToLatest: 'Scroll to latest message',

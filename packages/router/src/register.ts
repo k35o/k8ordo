@@ -100,17 +100,32 @@ type RequestProps = Register extends { request: infer R }
   : Record<never, never>;
 
 /**
+ * The search a page receives — only a page that declared what it reads, by
+ * exporting `search` (the generated `Register` says which, and what it
+ * reads into). Every other page never sees the search.
+ */
+type SearchProps<P extends string> = P extends keyof RegisteredSearch
+  ? { readonly search: RegisteredSearch[P] }
+  : Record<never, never>;
+
+type RegisteredSearch = Register extends { search: infer M }
+  ? M
+  : Record<never, never>;
+
+/**
  * The props a `page.tsx` receives under the framework, by the pattern its
  * directory puts it under: `params` typed by the schemas along its stack,
- * the `pathname` this render is for, and — under `@k8ordo/server` — the
- * `request`. The generated table checks the same thing at the import, so a
- * page may equally declare its props inline; this is the spelling that names
- * the pattern once and lets the schema say the rest.
+ * the `pathname` this render is for, under `@k8ordo/server` the `request`,
+ * and for a page that exports `search`, the `search` it reads. The generated
+ * table checks the same thing at the import, so a page may equally declare
+ * its props inline; this is the spelling that names the pattern once and
+ * lets the schema say the rest.
  */
 export type PageProps<P extends RegisteredPattern> = {
   readonly params: RegisteredPageParams<P>;
   readonly pathname: string;
-} & RequestProps;
+} & RequestProps &
+  SearchProps<P>;
 
 /**
  * The props a `layout.tsx` receives, by the prefix every route below it
@@ -125,3 +140,14 @@ export type LayoutProps<P extends RegisteredPattern> = {
   readonly pathname: string;
   readonly children: ReactNode;
 } & RequestProps;
+
+/**
+ * What a `route.ts` method export receives under the framework, by the
+ * pattern its directory puts it under: the request, and `params` typed by
+ * the schemas along its stack — the same as a page receives. Mode-free: a
+ * build into files calls `GET` with a request of its own.
+ */
+export type RouteContext<P extends RegisteredPattern> = {
+  readonly request: Request;
+  readonly params: RegisteredPageParams<P>;
+};
