@@ -135,10 +135,12 @@ ParamsSchemaFor<pattern>`, lists per page pattern the schemas along its
   they write, and the not-found renders in their context when all accept, in
   none when one refuses. It and every layout receive strings.
   Each pattern's schemas run in an async context of their own, and the
-  render starts inside the answering pattern's (`enter`): a schema may write
-  there (`@k8ordo/i18n` records the accepted locale), and neither a refused
-  pattern's write nor any other reaches the handler's caller, which under
-  `@k8ordo/static` is one context for every page.
+  guards, the Server Action a `POST` carries and the render all run inside
+  the answering pattern's (`enter`): a schema may write there
+  (`@k8ordo/i18n` records the accepted locale, so an action posted from
+  `/ja/…` builds its messages in `ja`), and neither a refused pattern's write
+  nor any other reaches the handler's caller, which under `@k8ordo/static`
+  is one context for every page.
 - **Only a page that declared it reads the search.** A page exporting
   `search` (a `@k8ordo/state` url schema) is found by parsing, like
   `paramsSchema`; the generated table reads it through state's
