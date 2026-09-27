@@ -24,6 +24,7 @@ import { useFormStatus } from 'react-dom';
 import { cn } from '../../../helpers/cn';
 import { getMessages } from '../../../i18n/current';
 import { acceptsFile } from '../../../internal/accepts-file';
+import { carriesFiles } from '../../../internal/carries-files';
 import { Button } from '../../buttons/button';
 import { IconButton } from '../../buttons/icon-button';
 import { CloseIcon } from '../../icons';
@@ -312,25 +313,37 @@ export const Dropzone: FC<{ children?: ReactNode }> = ({ children }) => {
   return (
     <div
       className={cn(
-        'flex w-full flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-border-base bg-bg-base p-6 text-center transition-colors',
+        'flex w-full flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-border-base bg-bg-base p-6 text-center transition-colors duration-150 ease-out',
         invalid && 'border-border-error',
         isDragging && 'border-primary-border bg-primary-bg-subtle',
         disabled && 'cursor-not-allowed border-border-mute bg-bg-mute',
       )}
       data-dragging={isDragging ? '' : undefined}
       onDragEnter={(event) => {
+        if (!carriesFiles(event.dataTransfer)) {
+          return;
+        }
         event.preventDefault();
         setDepth((current) => current + 1);
       }}
-      onDragLeave={() => {
+      onDragLeave={(event) => {
+        if (!carriesFiles(event.dataTransfer)) {
+          return;
+        }
         setDepth((current) => Math.max(current - 1, 0));
       }}
       // 無効でも既定の動作は止める。止めないとブラウザがファイルを開いてページを離れる
       onDragOver={(event) => {
+        if (!carriesFiles(event.dataTransfer)) {
+          return;
+        }
         event.preventDefault();
         event.dataTransfer.dropEffect = disabled ? 'none' : 'copy';
       }}
       onDrop={(event) => {
+        if (!carriesFiles(event.dataTransfer)) {
+          return;
+        }
         event.preventDefault();
         setDepth(0);
         if (!disabled) {
