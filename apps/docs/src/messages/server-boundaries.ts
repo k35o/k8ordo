@@ -21,6 +21,6 @@ export const directiveNote = message({
 });
 
 export const searchNote = message({
-  ja: 'このモードでページが受け取る `request` にも、search は含まれません。',
-  en: 'The `request` a page receives in this mode carries no search either.',
+  ja: 'このモードでページが受け取る `request` にも、search は含まれません。search を受け取るのは、読む url スキーマを `export const search = listState.url` と宣言したページだけで、search が変わるとルーターがそのページをその場で取り直します。',
+  en: 'The `request` a page receives in this mode carries no search either. The one page that receives it is a page that declares the url schema it reads, `export const search = listState.url`, and the router loads that page again in place when the search moves.',
 });

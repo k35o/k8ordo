@@ -105,6 +105,18 @@ export default function RootLayout({ children, request }: LayoutProps<'/'>) {
   );
 }`;
 
+const PAGE_SEARCH = `// src/routes/products/page.tsx
+import type { PageProps } from '@k8ordo/router';
+
+import { listState } from '../_data/list-state';
+
+export const search = listState.url;
+
+export default async function ProductsPage({ search }: PageProps<'/products'>) {
+  const products = await fetchProducts(search);
+  return <ProductList products={products} />;
+}`;
+
 const COOKIE_SHELL = `// src/routes/_parts/shell.tsx
 'use client';
 
@@ -423,8 +435,12 @@ export default function StateReadingPage() {
         description={m.stateReading.frameworkDescription}
         title={m.stateReading.frameworkTitle}
       >
+        <CodeBlock code={PAGE_SEARCH} lang="tsx" />
         <p className="text-fg-mute leading-relaxed">
           <Rich>{m.stateReading.frameworkWhy()}</Rich>
+        </p>
+        <p className="text-fg-mute leading-relaxed">
+          <Rich>{m.stateReading.frameworkSearch()}</Rich>
         </p>
         <p className="text-fg-mute leading-relaxed">
           <Rich>{m.stateReading.frameworkLinks()}</Rich>

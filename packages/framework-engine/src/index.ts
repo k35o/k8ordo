@@ -10,7 +10,12 @@ export { buildTable, declaredPatterns } from './generate/emit';
 export type { DeclaredPattern } from './generate/emit';
 export { decodePathname, NOT_FOUND_SEGMENT } from './runtime/pathname';
 export { NOT_FOUND_HEADER } from './runtime/payload';
-export { exportsOf, readExports, scanRoutes } from './generate/write';
+export {
+  exportsOf,
+  pagesReadingSearch,
+  readExports,
+  scanRoutes,
+} from './generate/write';
 export { ROUTE_METHODS } from './runtime/route';
 export { engine } from './plugin/core';
 export type { EngineOptions } from './plugin/core';

@@ -14,7 +14,7 @@ import { defineRoutes } from './define-routes';
 import { bindParams, href, navigateTo } from './links';
 import { usePathname } from './location';
 import { useMatch } from './match';
-import { useInterceptedNavigation } from './navigation';
+import { useInterceptedNavigation, usePendingPathname } from './navigation';
 import { Outlet, Router, useParams, useRoute } from './router';
 
 let listMounts = 0;
@@ -629,4 +629,180 @@ describe('under a base', () => {
     await expect.element(screen.getByTestId('list')).toBeInTheDocument();
     expect(screen.container.querySelector('[data-testid="about"]')).toBeNull();
   });
+});
+
+const Spinner: FC = () => <div data-testid="spinner">loading</div>;
+
+const PendingProbe: FC = () => (
+  <span data-testid="pending">{usePendingPathname() ?? 'none'}</span>
+);
+
+const Framed: FC = () => (
+  <section>
+    <PendingProbe />
+    <Outlet />
+  </section>
+);
+
+it('shows the loading component of a branch while the page below it first loads', async () => {
+  let release!: () => void;
+  const chunk = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const Slow = lazy(async () => {
+    await chunk;
+    return { default: AboutPage };
+  });
+  const table = defineRoutes({
+    '/': HomePage,
+    '/area': { loading: Spinner, children: { '/slow': Slow } },
+  });
+  const screen = await render(<Router routes={table} />);
+  await navigateTo('/', { history: 'replace' }).finished;
+
+  const slow = navigateTo('/area/slow');
+  // 新しく現れた Suspense は、中身が来るまで loading を出す
+  await expect.element(screen.getByTestId('spinner')).toBeInTheDocument();
+
+  release();
+  await slow.finished;
+  await expect.element(screen.getByTestId('about')).toBeInTheDocument();
+  expect(document.querySelector('[data-testid="spinner"]')).toBeNull();
+});
+
+it('names the page a navigation is loading, and nothing once it is on screen', async () => {
+  let release!: () => void;
+  const chunk = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const Slow = lazy(async () => {
+    await chunk;
+    return { default: AboutPage };
+  });
+  const table = defineRoutes({
+    '/': {
+      layout: Framed,
+      children: {
+        '/': { loading: Spinner, children: { '/': HomePage, '/slow': Slow } },
+      },
+    },
+  });
+  const screen = await render(<Router routes={table} />);
+  await navigateTo('/', { history: 'replace' }).finished;
+  await expect.element(screen.getByTestId('pending')).toHaveTextContent('none');
+
+  const slow = navigateTo('/slow');
+
+  // 前のページは画面に残ったまま、行き先が名指される
+  await expect
+    .element(screen.getByTestId('pending'))
+    .toHaveTextContent('/slow');
+  expect(document.querySelector('[data-testid="home"]')).not.toBeNull();
+
+  release();
+  await slow.finished;
+  await expect.element(screen.getByTestId('pending')).toHaveTextContent('none');
+});
+
+it('names nothing for a state change, which is not a page change', async () => {
+  const table = defineRoutes({
+    '/': { layout: Framed, children: { '/': HomePage } },
+  });
+  const screen = await render(<Router routes={table} />);
+  await navigateTo('/', { history: 'replace' }).finished;
+  const probe = screen.getByTestId('pending').element();
+  const seen: Array<string | null> = [];
+  const observer = new MutationObserver(() => {
+    seen.push(probe.textContent);
+  });
+  observer.observe(document.body, {
+    subtree: true,
+    characterData: true,
+    childList: true,
+  });
+
+  await navigation.navigate('/?q=shoes', { history: 'replace' }).finished;
+  observer.disconnect();
+
+  expect(seen.filter((text) => text !== 'none')).toStrictEqual([]);
+  await expect.element(screen.getByTestId('pending')).toHaveTextContent('none');
+});
+
+it('loads again in place when the host says the page showing reads what moved', async () => {
+  const loads: string[] = [];
+  function Host() {
+    const [value, setValue] = useState('initial');
+    const shown = useDeferredValue(value);
+    useInterceptedNavigation<string>({
+      claim: () => true,
+      load: (url) => {
+        loads.push(url.search);
+        return url.search;
+      },
+      apply: setValue,
+      refresh: (url) => url.searchParams.has('q'),
+    });
+    return <p data-testid="value">{shown}</p>;
+  }
+  const screen = await render(<Host />);
+
+  await navigation.navigate(`${location.pathname}?q=shoes`, {
+    history: 'replace',
+  }).finished;
+  await expect
+    .element(screen.getByTestId('value'))
+    .toHaveTextContent('?q=shoes');
+
+  // 読んでいないものが動いただけなら、今までどおり何も読み込まない
+  await navigation.navigate(`${location.pathname}?view=grid`, {
+    history: 'replace',
+  }).finished;
+  expect(loads).toStrictEqual(['?q=shoes']);
+});
+
+it('keeps the scroll position and names the load in progress while it loads again in place', async () => {
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  function Host() {
+    const [value, setValue] = useState('initial');
+    const shown = useDeferredValue(value);
+    useInterceptedNavigation<string>({
+      claim: () => true,
+      load: async (url) => {
+        await gate;
+        return url.search;
+      },
+      apply: setValue,
+      refresh: () => true,
+    });
+    return (
+      <>
+        <PendingProbe />
+        <p data-testid="value">{shown}</p>
+        <div style={{ height: '5000px' }} />
+      </>
+    );
+  }
+  const screen = await render(<Host />);
+  await expect.element(screen.getByTestId('value')).toBeInTheDocument();
+  window.scrollTo(0, 800);
+  const reading = window.scrollY;
+  expect(reading).toBeGreaterThan(0);
+
+  const moved = navigation.navigate(`${location.pathname}?q=hats`, {
+    history: 'replace',
+  });
+  await expect
+    .element(screen.getByTestId('pending'))
+    .not.toHaveTextContent('none');
+  release();
+  await moved.finished;
+
+  await expect
+    .element(screen.getByTestId('value'))
+    .toHaveTextContent('?q=hats');
+  expect(window.scrollY).toBe(reading);
+  await expect.element(screen.getByTestId('pending')).toHaveTextContent('none');
 });
