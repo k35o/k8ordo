@@ -84,6 +84,20 @@ export default function ProgressPage() {
             </div>
           </ComponentPreview>
         </div>
+
+        <div className="flex flex-col gap-4">
+          <Heading level="h3">
+            <Rich>{m.components.progress.indeterminateTitle()}</Rich>
+          </Heading>
+          <p className="text-fg-mute">
+            <Rich>{m.components.progress.indeterminateDescription()}</Rich>
+          </p>
+          <ComponentPreview code='<Progress label="Uploading" />'>
+            <div className="w-full">
+              <Progress label="Uploading" />
+            </div>
+          </ComponentPreview>
+        </div>
       </section>
       <Separator color="mute" />
 

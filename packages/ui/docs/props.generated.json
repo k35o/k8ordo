@@ -210,6 +210,50 @@
       "omitted": []
     },
     {
+      "name": "Attachment.Item",
+      "props": [
+        {
+          "name": "mediaType",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "url",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "filename",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "Attachment.List",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
       "name": "Autocomplete",
       "props": [
         {
@@ -676,6 +720,12 @@
           "required": false
         },
         {
+          "name": "indeterminate",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
           "name": "invalid",
           "types": ["boolean"],
           "defaultValue": "false",
@@ -685,6 +735,12 @@
           "name": "itemValue",
           "types": ["string"],
           "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "labelHidden",
+          "types": ["boolean"],
+          "defaultValue": "false",
           "required": false
         },
         {
@@ -776,6 +832,12 @@
           "required": false
         },
         {
+          "name": "indeterminate",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
           "name": "invalid",
           "types": ["boolean"],
           "defaultValue": "false",
@@ -785,6 +847,12 @@
           "name": "itemValue",
           "types": ["string"],
           "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "labelHidden",
+          "types": ["boolean"],
+          "defaultValue": "false",
           "required": false
         },
         {
@@ -1128,6 +1196,79 @@
           "name": "size",
           "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "DataTable",
+      "props": [
+        {
+          "name": "columns",
+          "types": ["ReadonlyArray<DataTableColumn<Row>>"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "getRowId",
+          "types": ["(row: Row) => string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "rows",
+          "types": ["readonly Row[]"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "emptyState",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "hiddenColumnIds",
+          "types": ["readonly string[]"],
+          "defaultValue": "NONE",
+          "required": false
+        },
+        {
+          "name": "onHiddenColumnIdsChange",
+          "types": ["(ids: string[]) => void"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "onSelectedIdsChange",
+          "types": ["(ids: string[]) => void"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "onSortChange",
+          "types": ["(sort: DataTableSort | null) => void"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "selectedIds",
+          "types": ["readonly string[]"],
+          "defaultValue": "NONE",
+          "required": false
+        },
+        {
+          "name": "sort",
+          "types": ["DataTableSort", "null"],
+          "defaultValue": "null",
           "required": false
         }
       ],
@@ -2249,6 +2390,56 @@
       "omitted": []
     },
     {
+      "name": "Message.Action",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "disabled",
+          "types": ["boolean"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "onAction",
+          "types": ["() => void | Promise<void>"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "Message.Actions",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
       "name": "Message.Content",
       "props": [
         {
@@ -2268,6 +2459,75 @@
       "omitted": ["className", "style"]
     },
     {
+      "name": "Message.Copy",
+      "props": [
+        {
+          "name": "value",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "Message.Feedback",
+      "props": [
+        {
+          "name": "defaultValue",
+          "types": ["MessageFeedback", "null"],
+          "defaultValue": "null",
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "types": ["(value: MessageFeedback | null) => void"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "value",
+          "types": ["MessageFeedback", "null"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "Message.Regenerate",
+      "props": [
+        {
+          "name": "onAction",
+          "types": ["() => void | Promise<void>"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "disabled",
+          "types": ["boolean"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
       "name": "Message.Root",
       "props": [
         {
@@ -2281,6 +2541,12 @@
           "types": ["'user'", "'assistant'"],
           "defaultValue": null,
           "required": true
+        },
+        {
+          "name": "avatar",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
         }
       ],
       "inherits": "HTMLAttributes<HTMLDivElement>",
@@ -2720,21 +2986,15 @@
       "name": "Progress",
       "props": [
         {
-          "name": "max",
-          "types": ["number"],
-          "defaultValue": null,
-          "required": true
-        },
-        {
-          "name": "value",
-          "types": ["number"],
-          "defaultValue": null,
-          "required": true
-        },
-        {
           "name": "label",
           "types": ["string"],
           "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "max",
+          "types": ["number"],
+          "defaultValue": "100",
           "required": false
         },
         {
@@ -2742,10 +3002,42 @@
           "types": ["number"],
           "defaultValue": "0",
           "required": false
+        },
+        {
+          "name": "value",
+          "types": ["number"],
+          "defaultValue": null,
+          "required": false
         }
       ],
       "inherits": "HTMLAttributes<HTMLDivElement>",
       "omitted": ["children", "className", "style"]
+    },
+    {
+      "name": "PromptInput.Attach",
+      "props": [
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "PromptInput.Attachments",
+      "props": [
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "PromptInput.Root",
@@ -2757,9 +3049,21 @@
           "required": true
         },
         {
+          "name": "accept",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
           "name": "defaultValue",
           "types": ["string"],
           "defaultValue": "''",
+          "required": false
+        },
+        {
+          "name": "maxFiles",
+          "types": ["number"],
+          "defaultValue": null,
           "required": false
         },
         {
@@ -2776,7 +3080,7 @@
         },
         {
           "name": "onSubmit",
-          "types": ["(message: string) => void"],
+          "types": ["(message: string, files: FileList) => void"],
           "defaultValue": null,
           "required": false
         },
@@ -3008,6 +3312,79 @@
         }
       ],
       "inherits": "FieldsetHTMLAttributes<HTMLFieldSetElement>",
+      "omitted": ["className", "style", "children", "role"]
+    },
+    {
+      "name": "RangeSlider",
+      "props": [
+        {
+          "name": "defaultValue",
+          "types": ["readonly [number, number]"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "disabled",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "invalid",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "max",
+          "types": ["number"],
+          "defaultValue": "100",
+          "required": false
+        },
+        {
+          "name": "min",
+          "types": ["number"],
+          "defaultValue": "0",
+          "required": false
+        },
+        {
+          "name": "name",
+          "types": ["readonly [string, string]"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "types": ["(value: [number, number]) => void"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "ref",
+          "types": ["Ref<HTMLDivElement>"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "required",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "step",
+          "types": ["number"],
+          "defaultValue": "1",
+          "required": false
+        },
+        {
+          "name": "value",
+          "types": ["readonly [number, number]"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": "HTMLAttributes<HTMLDivElement>",
       "omitted": ["className", "style", "children", "role"]
     },
     {
@@ -3311,6 +3688,75 @@
       "omitted": []
     },
     {
+      "name": "SideNav.Group",
+      "props": [
+        {
+          "name": "title",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "SideNav.Link",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "href",
+          "types": ["T"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "current",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "renderAnchor",
+          "types": ["(props: RenderSideNavAnchorProps<T>) => ReactNode"],
+          "defaultValue": "defaultRenderAnchor",
+          "required": false
+        }
+      ],
+      "inherits": "AnchorHTMLAttributes<HTMLAnchorElement>",
+      "omitted": ["className", "style", "aria-current"]
+    },
+    {
+      "name": "SideNav.Root",
+      "props": [
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": "HTMLAttributes<HTMLElement>",
+      "omitted": ["className", "style", "aria-label"]
+    },
+    {
       "name": "Skeleton",
       "props": [
         {
@@ -3402,6 +3848,44 @@
       ],
       "inherits": "InputHTMLAttributes<HTMLInputElement>",
       "omitted": ["type", "className", "style", "children"]
+    },
+    {
+      "name": "Source.Item",
+      "props": [
+        {
+          "name": "href",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "title",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "Source.List",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "SparklesIcon",
@@ -3746,6 +4230,12 @@
           "types": ["boolean"],
           "defaultValue": "false",
           "required": false
+        },
+        {
+          "name": "selected",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
         }
       ],
       "inherits": "HTMLAttributes<HTMLTableRowElement>",
@@ -3763,6 +4253,25 @@
       ],
       "inherits": null,
       "omitted": []
+    },
+    {
+      "name": "TableOfContents",
+      "props": [
+        {
+          "name": "items",
+          "types": ["readonly TableOfContentsItem[]"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": "HTMLAttributes<HTMLElement>",
+      "omitted": ["className", "style", "children", "aria-labelledby"]
     },
     {
       "name": "Tabs.List",
@@ -3998,15 +4507,15 @@
           "required": true
         },
         {
-          "name": "defaultOpen",
-          "types": ["boolean"],
-          "defaultValue": "false",
+          "name": "approval",
+          "types": ["ToolApproval"],
+          "defaultValue": null,
           "required": false
         },
         {
-          "name": "deniedReason",
-          "types": ["string"],
-          "defaultValue": null,
+          "name": "defaultOpen",
+          "types": ["boolean"],
+          "defaultValue": "false",
           "required": false
         },
         {
@@ -4024,6 +4533,14 @@
         {
           "name": "isOpen",
           "types": ["boolean"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "onApprovalResponse",
+          "types": [
+            "(response: ToolApprovalResponse) => void | PromiseLike<void>"
+          ],
           "defaultValue": null,
           "required": false
         },

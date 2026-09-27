@@ -12,6 +12,8 @@ import { Badge } from '../../components/data-display/badge';
 import { Card } from '../../components/data-display/card';
 import { Carousel } from '../../components/data-display/carousel';
 import { Code } from '../../components/data-display/code';
+import { DataTable } from '../../components/data-display/data-table';
+import type { DataTableSort } from '../../components/data-display/data-table';
 import { Heading } from '../../components/data-display/heading';
 import { Kbd } from '../../components/data-display/kbd';
 import { Table } from '../../components/data-display/table';
@@ -35,6 +37,7 @@ import { NumberField } from '../../components/form/number-field';
 import { PasswordInput } from '../../components/form/password-input';
 import { Radio } from '../../components/form/radio';
 import { RadioCard } from '../../components/form/radio-card';
+import { RangeSlider } from '../../components/form/range-slider';
 import { Select } from '../../components/form/select';
 import { Slider } from '../../components/form/slider';
 import { Switch } from '../../components/form/switch';
@@ -101,6 +104,7 @@ import { Stack } from '../../components/layout/stack';
 import { Anchor } from '../../components/navigation/anchor';
 import { Breadcrumb } from '../../components/navigation/breadcrumb';
 import { Pagination } from '../../components/navigation/pagination';
+import { SideNav } from '../../components/navigation/side-nav';
 import { Tabs } from '../../components/navigation/tabs';
 import { Dialog } from '../../components/overlays/dialog';
 import { Drawer } from '../../components/overlays/drawer';
@@ -127,6 +131,7 @@ import type {
   CheckboxProps,
   ChevronIconProps,
   CodeProps,
+  DataTableProps,
   DateFieldProps,
   DatePickerProps,
   GridProps,
@@ -152,8 +157,10 @@ import type {
   ProgressProps,
   RadioCardProps,
   RadioProps,
+  RangeSliderProps,
   SelectProps,
   SeparatorProps,
+  SideNavProps,
   SkeletonProps,
   SliderProps,
   SpinnerProps,
@@ -525,6 +532,27 @@ export function renderSlider(
   );
 }
 
+// 両方のつまみが同じ name で送るので、FormData では [下側, 上側] の配列になる
+export function renderRangeSlider(
+  props: RangeSliderProps,
+  value: readonly [number, number],
+  onChange: (next: readonly [number, number]) => void,
+): ReactNode {
+  return (
+    <RangeSlider
+      aria-label={props.label}
+      disabled={u(props.disabled)}
+      invalid={u(props.invalid)}
+      max={u(props.max)}
+      min={u(props.min)}
+      name={[props.name, props.name]}
+      onChange={onChange}
+      step={u(props.step)}
+      value={value}
+    />
+  );
+}
+
 // Radio / RadioCard は `aria-labelledby` の宛先 ID を持つ必要があるが、
 // `${name}-label` は同じ name の別 Renderer が同居すると衝突する。
 // `useId()` でユニーク化したラベルを子に渡す共有ラッパー。
@@ -824,9 +852,9 @@ export function renderProgress(props: ProgressProps): ReactNode {
   return (
     <Progress
       label={u(props.label)}
-      max={props.max}
+      max={u(props.max)}
       min={u(props.min)}
-      value={props.value}
+      value={u(props.value)}
     />
   );
 }
@@ -872,6 +900,26 @@ export function renderBreadcrumb(props: BreadcrumbProps): ReactNode {
         </Fragment>
       ))}
     </Breadcrumb.List>
+  );
+}
+
+export function renderSideNav(props: SideNavProps): ReactNode {
+  return (
+    <SideNav.Root label={props.label}>
+      {props.groups.map((group) => (
+        <SideNav.Group key={group.title} title={group.title}>
+          {group.links.map((link) => (
+            <SideNav.Link
+              current={u(link.current)}
+              href={link.href}
+              key={link.href}
+            >
+              {link.label}
+            </SideNav.Link>
+          ))}
+        </SideNav.Group>
+      ))}
+    </SideNav.Root>
   );
 }
 
@@ -1083,6 +1131,46 @@ const ToastTriggerInner: FC<{ props: ToastProps }> = ({ props }) => {
     >
       {props.triggerLabel}
     </Button>
+  );
+};
+
+const collator = new Intl.Collator(undefined, { numeric: true });
+
+export const DataTableWidget: FC<{ props: DataTableProps }> = ({ props }) => {
+  const [sort, setSort] = useState<DataTableSort | null>(null);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const rows = props.rows.map((cells, index) => ({ id: String(index), cells }));
+  const columnIndex = sort === null ? -1 : Number(sort.columnId);
+  const sorted =
+    sort === null
+      ? rows
+      : rows.toSorted((a, b) =>
+          collator.compare(
+            a.cells[columnIndex] ?? '',
+            b.cells[columnIndex] ?? '',
+          ),
+        );
+  const ordered =
+    sort?.direction === 'descending' ? sorted.toReversed() : sorted;
+  return (
+    <DataTable
+      columns={props.columns.map((column, index) => ({
+        id: String(index),
+        header: column.label,
+        cell: (row: { cells: string[] }) => row.cells[index] ?? '',
+        align: u(column.align),
+        sortable: u(column.sortable),
+      }))}
+      getRowId={(row) => row.id}
+      label={props.label}
+      onSelectedIdsChange={
+        props.selectable === true ? setSelectedIds : undefined
+      }
+      onSortChange={setSort}
+      rows={ordered}
+      selectedIds={selectedIds}
+      sort={sort}
+    />
   );
 };
 

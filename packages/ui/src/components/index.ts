@@ -11,6 +11,11 @@ export { Badge } from './data-display/badge';
 export { Card } from './data-display/card';
 export { Carousel } from './data-display/carousel';
 export { Code } from './data-display/code';
+export {
+  DataTable,
+  type DataTableColumn,
+  type DataTableSort,
+} from './data-display/data-table';
 export { Heading } from './data-display/heading';
 export { Kbd } from './data-display/kbd';
 export { Prose } from './data-display/prose';
@@ -40,6 +45,7 @@ export { NumberField } from './form/number-field';
 export { PasswordInput } from './form/password-input';
 export { Radio } from './form/radio';
 export { RadioCard, type RadioCardOption } from './form/radio-card';
+export { RangeSlider } from './form/range-slider';
 export { Select } from './form/select';
 export { Slider } from './form/slider';
 export { Switch } from './form/switch';
@@ -55,6 +61,11 @@ export { Stack, type StackProps } from './layout/stack';
 export { Anchor } from './navigation/anchor';
 export { Breadcrumb } from './navigation/breadcrumb';
 export { Pagination } from './navigation/pagination';
+export { SideNav } from './navigation/side-nav';
+export {
+  TableOfContents,
+  type TableOfContentsItem,
+} from './navigation/table-of-contents';
 export { Tabs } from './navigation/tabs';
 export { InView } from './observers/in-view';
 export { Resize } from './observers/resize';

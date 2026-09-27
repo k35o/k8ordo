@@ -75,7 +75,11 @@ export const buildComponentLibrary = <C>(
     s.alertProps,
   );
   const Spinner = def('Spinner', 'Loading spinner.', s.spinnerProps);
-  const Progress = def('Progress', 'Progress bar.', s.progressProps);
+  const Progress = def(
+    'Progress',
+    'Progress bar. Leave value out when progress is unknown; it then shows an animated bar.',
+    s.progressProps,
+  );
   const Skeleton = def('Skeleton', 'Loading placeholder.', s.skeletonProps);
   const Separator = def('Separator', 'Divider line.', s.separatorProps);
   const Tabs = def(
@@ -89,10 +93,20 @@ export const buildComponentLibrary = <C>(
     s.accordionProps,
   );
   const Breadcrumb = def('Breadcrumb', 'Breadcrumb trail.', s.breadcrumbProps);
+  const SideNav = def(
+    'SideNav',
+    'Side navigation: groups of links, each group under a small title. Mark the page being shown with current: true.',
+    s.sideNavProps,
+  );
   const Table = def(
     'Table',
     'Table with columns and rows (the cell strings of each row). Every row must have exactly as many cells as there are columns.',
     s.tableProps,
+  );
+  const DataTable = def(
+    'DataTable',
+    'Table the reader can sort (by the columns marked sortable) and, with selectable, pick rows from. Every row must have exactly as many cells as there are columns.',
+    s.dataTableProps,
   );
   const TextField = def(
     'TextField',
@@ -118,6 +132,11 @@ export const buildComponentLibrary = <C>(
     'Slider',
     'Slider, bound to form state by name.',
     s.sliderProps,
+  );
+  const RangeSlider = def(
+    'RangeSlider',
+    'Slider with two thumbs for picking a range, bound to form state by name as [lower, upper].',
+    s.rangeSliderProps,
   );
   const DateField = def(
     'DateField',
@@ -232,12 +251,15 @@ export const buildComponentLibrary = <C>(
     Tabs.ref,
     Accordion.ref,
     Breadcrumb.ref,
+    SideNav.ref,
     Table.ref,
+    DataTable.ref,
     TextField.ref,
     Textarea.ref,
     PasswordInput.ref,
     NumberField.ref,
     Slider.ref,
+    RangeSlider.ref,
     DateField.ref,
     DatePicker.ref,
     Calendar.ref,
@@ -398,12 +420,15 @@ export const buildComponentLibrary = <C>(
       Tabs,
       Accordion,
       Breadcrumb,
+      SideNav,
       Table,
+      DataTable,
       TextField,
       Textarea,
       PasswordInput,
       NumberField,
       Slider,
+      RangeSlider,
       DateField,
       DatePicker,
       Calendar,

@@ -337,6 +337,37 @@ export const tableProps = z.object({
     ),
 }) satisfies z.ZodType<TableIntegrationProps>;
 
+// DataTable は制御型だが、生成 UI には状態を持つ場所が無いので、並べ替えと
+// 選択を中で持つ自己完結の部品にする（オーバーレイと同じ扱い）
+type DataTableIntegrationProps = {
+  label: string;
+  columns: ReadonlyArray<{
+    label: string;
+    align?: 'left' | 'center' | 'right';
+    sortable?: boolean;
+  }>;
+  rows: readonly string[][];
+  selectable?: boolean;
+};
+export const dataTableProps = z.object({
+  label: z.string().describe('Accessible name of the table'),
+  columns: z
+    .array(
+      z.object({
+        label: z.string(),
+        align: z.enum(['left', 'center', 'right']).optional(),
+        sortable: z.boolean().optional(),
+      }),
+    )
+    .min(1),
+  rows: z
+    .array(z.array(z.string()))
+    .describe(
+      'Cell strings of each row, in the same order and number as columns',
+    ),
+  selectable: z.boolean().optional(),
+}) satisfies z.ZodType<DataTableIntegrationProps>;
+
 type CardIntegrationProps = {
   width?: ComponentProps<typeof Card>['width'];
   variant?: ComponentProps<typeof Card>['variant'];
@@ -371,14 +402,17 @@ export const spinnerProps = z.object({
 }) satisfies z.ZodType<SpinnerIntegrationProps>;
 
 type ProgressIntegrationProps = {
-  value: number;
-  max: number;
+  value?: number;
+  max?: number;
   min?: number;
   label?: string;
 };
 export const progressProps = z.object({
-  value: z.number(),
-  max: z.number(),
+  value: z
+    .number()
+    .optional()
+    .describe('Current value; leave it out when progress is unknown'),
+  max: z.number().optional().describe('Upper bound (100 when omitted)'),
   min: z.number().optional(),
   label: z.string().optional(),
 }) satisfies z.ZodType<ProgressIntegrationProps>;
@@ -494,6 +528,36 @@ export const breadcrumbProps = z.object({
       'Breadcrumb items; the one without href, or with current: true, is the current page',
     ),
 }) satisfies z.ZodType<BreadcrumbIntegrationProps>;
+
+type SideNavIntegrationProps = {
+  label: string;
+  groups: ReadonlyArray<{
+    title: string;
+    links: ReadonlyArray<{ label: string; href: string; current?: boolean }>;
+  }>;
+};
+export const sideNavProps = z.object({
+  label: z.string().describe('Accessible name of the navigation'),
+  groups: z
+    .array(
+      z.object({
+        title: z.string(),
+        links: z
+          .array(
+            z.object({
+              label: z.string(),
+              href: safeUrl,
+              current: z.boolean().optional(),
+            }),
+          )
+          .min(1),
+      }),
+    )
+    .min(1)
+    .describe(
+      'Groups of links, each under a title; the link with current: true is the page being shown',
+    ),
+}) satisfies z.ZodType<SideNavIntegrationProps>;
 
 type PaginationIntegrationProps = {
   name: string;
@@ -657,6 +721,32 @@ export const calendarProps = z.object({
   min: isoDate().optional().describe('Earliest date that can be picked'),
   max: isoDate().optional().describe('Latest date that can be picked'),
 }) satisfies z.ZodType<CalendarIntegrationProps>;
+
+type RangeSliderIntegrationProps = {
+  name: string;
+  label: string;
+  defaultValue?: readonly [number, number];
+  min?: number;
+  max?: number;
+  step?: number;
+  invalid?: boolean;
+  disabled?: boolean;
+};
+export const rangeSliderProps = z.object({
+  name: z
+    .string()
+    .describe('Both thumbs submit under this name, lower value first'),
+  label: z.string().describe('Accessible name of the slider'),
+  defaultValue: z
+    .tuple([z.number(), z.number()])
+    .optional()
+    .describe('[lower, upper]; the whole range when omitted'),
+  min: z.number().optional().describe('Lower bound (0 when omitted)'),
+  max: z.number().optional().describe('Upper bound (100 when omitted)'),
+  step: z.number().optional(),
+  invalid: z.boolean().optional(),
+  disabled: z.boolean().optional(),
+}) satisfies z.ZodType<RangeSliderIntegrationProps>;
 
 type CheckboxIntegrationProps = {
   name: string;
@@ -945,11 +1035,14 @@ export type ProgressProps = z.infer<typeof progressProps>;
 export type SkeletonProps = z.infer<typeof skeletonProps>;
 export type AccordionProps = z.infer<typeof accordionProps>;
 export type BreadcrumbProps = z.infer<typeof breadcrumbProps>;
+export type SideNavProps = z.infer<typeof sideNavProps>;
 export type TableProps = z.infer<typeof tableProps>;
+export type DataTableProps = z.infer<typeof dataTableProps>;
 export type TextareaProps = z.infer<typeof textareaProps>;
 export type PasswordInputProps = z.infer<typeof passwordInputProps>;
 export type NumberFieldProps = z.infer<typeof numberFieldProps>;
 export type SliderProps = z.infer<typeof sliderProps>;
+export type RangeSliderProps = z.infer<typeof rangeSliderProps>;
 export type DateFieldProps = z.infer<typeof dateFieldProps>;
 export type DatePickerProps = z.infer<typeof datePickerProps>;
 export type CalendarProps = z.infer<typeof calendarProps>;
