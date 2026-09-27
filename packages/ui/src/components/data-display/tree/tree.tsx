@@ -17,7 +17,6 @@ export type TreeItem = {
 
 type VisibleItem = {
   item: TreeItem;
-  depth: number;
   parentId: string | null;
 };
 
@@ -26,13 +25,12 @@ type VisibleItem = {
 const visibleItemsOf = (
   items: readonly TreeItem[],
   expandedIds: readonly string[],
-  depth = 1,
   parentId: string | null = null,
 ): VisibleItem[] =>
   items.flatMap((item) => [
-    { item, depth, parentId },
+    { item, parentId },
     ...(item.children !== undefined && expandedIds.includes(item.id)
-      ? visibleItemsOf(item.children, expandedIds, depth + 1, item.id)
+      ? visibleItemsOf(item.children, expandedIds, item.id)
       : []),
   ]);
 
@@ -104,12 +102,13 @@ export const Tree: FC<Props> = ({
     },
   });
   const visible = visibleItemsOf(items, expanded);
+  const entryById = new Map(visible.map((entry) => [entry.item.id, entry]));
   // Tab で入ったときにフォーカスを受ける 1 つ（roving tabindex）
   const [focusedId, setFocusedId] = useState<string | null>(null);
   const tabbableId =
-    visible.find(({ item }) => item.id === focusedId)?.item.id ??
-    visible.find(({ item }) => item.id === selected)?.item.id ??
-    visible[0]?.item.id;
+    [focusedId, selected].find(
+      (id): id is string => id !== null && entryById.has(id),
+    ) ?? visible[0]?.item.id;
   const elements = useRef(new Map<string, HTMLElement>());
 
   const focus = (id: string | undefined) => {
@@ -182,7 +181,7 @@ export const Tree: FC<Props> = ({
 
   const renderItems = (level: readonly TreeItem[], depth: number): ReactNode =>
     level.map((item) => {
-      const entry = visible.find((candidate) => candidate.item.id === item.id);
+      const entry = entryById.get(item.id);
       const isParent = hasChildren(item);
       const isExpanded = isParent && expanded.includes(item.id);
       const isSelected = selected === item.id;
