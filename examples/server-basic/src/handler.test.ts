@@ -309,6 +309,33 @@ describe('the built request handler', () => {
   });
 });
 
+describe('a Server Action posted to a [locale] page', () => {
+  it.each([
+    ['/ja/greeting', 'こんにちは、k8o さん。'],
+    ['/en/greeting', 'Hello, k8o.'],
+  ])(
+    'runs in the locale %s names, as the page renders',
+    async (pathname, greeting) => {
+      const html = await (
+        await handler(new Request(`${ORIGIN}${pathname}`))
+      ).text();
+      const body = formDataOf(html, 'greet-form');
+      body.set('name', 'k8o');
+      const response = await handler(
+        new Request(`${ORIGIN}${pathname}`, {
+          method: 'POST',
+          headers: { origin: ORIGIN },
+          body,
+        }),
+      );
+      expect(response.status).toBe(200);
+      expect(await response.text()).toContain(
+        `<p data-testid="greeting">${greeting}</p>`,
+      );
+    },
+  );
+});
+
 describe('a page that exports search', () => {
   it('receives the search, read through its url schema', async () => {
     const html = await (
