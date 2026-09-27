@@ -146,6 +146,11 @@ const REFUSALS: readonly Refusal[] = [
       'exports none of GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS — a route.ts answers the methods it exports',
   },
   {
+    contains: m.frameworkRouting.refusesTable.searchWithoutState,
+    error:
+      'exports search, which is read through @k8ordo/state — add it to the application’s dependencies',
+  },
+  {
     contains: m.frameworkRouting.refusesTable.groupShadow,
     error:
       '"/about" can never match — "/:id" ((shop)/[id]/page.tsx) is declared first and answers it',

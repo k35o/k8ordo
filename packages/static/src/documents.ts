@@ -45,6 +45,7 @@ export type ContentSecurityPolicy = Readonly<Record<string, readonly string[]>>;
 // <meta> で書いたポリシーでは効かない。ホストのヘッダーで書くもの
 const HEADER_ONLY = new Set(['frame-ancestors', 'report-uri', 'sandbox']);
 
+/** What decides scripts: `script-src`, or `default-src` without it. */
 const scriptDirectiveOf = (
   policy: ContentSecurityPolicy,
 ): [string, readonly string[]] | null => {
@@ -52,6 +53,23 @@ const scriptDirectiveOf = (
   if (own !== undefined) return ['script-src', own];
   const fallback = policy['default-src'];
   return fallback === undefined ? null : ['default-src', fallback];
+};
+
+/**
+ * What decides a script element: `script-src-elem` when given, which
+ * overrides the rest for elements, and whatever decides scripts besides.
+ */
+const elementDirectivesOf = (
+  policy: ContentSecurityPolicy,
+): Array<[string, readonly string[]]> => {
+  const elements = policy['script-src-elem'];
+  const scripts = scriptDirectiveOf(policy);
+  return [
+    ...(elements === undefined
+      ? []
+      : [['script-src-elem', elements] as [string, readonly string[]]]),
+    ...(scripts === null ? [] : [scripts]),
+  ];
 };
 
 /**
@@ -78,11 +96,12 @@ export const policyProblems = (policy: ContentSecurityPolicy): string[] => {
       }
     }
   }
-  const scripts = scriptDirectiveOf(policy);
-  if (scripts?.[1].includes("'strict-dynamic'") === true) {
-    problems.push(
-      `'strict-dynamic' in ${scripts[0]} would block the framework's module script, which a file allows by where it comes from ('self'), not by a hash`,
-    );
+  for (const [name, sources] of elementDirectivesOf(policy)) {
+    if (sources.includes("'strict-dynamic'")) {
+      problems.push(
+        `'strict-dynamic' in ${name} would block the framework's module script, which a file allows by where it comes from ('self'), not by a hash`,
+      );
+    }
   }
   return problems;
 };
@@ -98,23 +117,21 @@ const hashOf = (source: string): string =>
 
 /**
  * The policy as the page's `<meta>` says it: the application's directives,
- * with the hashes added where scripts are decided — `script-src`, made from
- * `default-src` when only that was given (hashes there would also turn off
- * `'unsafe-inline'` for styles), and `script-src-elem` when given, which
- * overrides it for script elements. Neither given, scripts are not
- * restricted, and nothing is added.
+ * with the hashes added wherever a script element is decided —
+ * `script-src-elem` when given, which overrides the rest for elements, and
+ * `script-src`, made from `default-src` when only that was given (hashes
+ * there would also turn off `'unsafe-inline'` for styles). None of them
+ * given, scripts are not restricted, and nothing is added.
  */
 const serialize = (
   policy: ContentSecurityPolicy,
   hashes: readonly string[],
 ): string => {
   const directives = new Map(Object.entries(policy));
-  const scripts = scriptDirectiveOf(policy);
-  if (scripts !== null && hashes.length > 0) {
-    directives.set('script-src', [...scripts[1], ...hashes]);
-    const elements = directives.get('script-src-elem');
-    if (elements !== undefined) {
-      directives.set('script-src-elem', [...elements, ...hashes]);
+  if (hashes.length > 0) {
+    for (const [name, sources] of elementDirectivesOf(policy)) {
+      const into = name === 'default-src' ? 'script-src' : name;
+      directives.set(into, [...sources, ...hashes]);
     }
   }
   return [...directives]

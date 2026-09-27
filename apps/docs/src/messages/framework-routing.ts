@@ -217,6 +217,10 @@ export const refusesTable = {
     ja: 'メソッドを 1 つも export しない `api/route.ts`',
     en: '`api/route.ts` exporting no method',
   }),
+  searchWithoutState: message({
+    ja: '`search` を export する `products/page.tsx`（アプリが `@k8ordo/state` に依存していない）',
+    en: '`products/page.tsx` exporting `search`, without `@k8ordo/state`',
+  }),
   groupShadow: message({
     ja: '`(shop)/sale/page.tsx` と `(shop)/[id]/page.tsx` の横に `about/page.tsx`',
     en: '`(shop)/sale/page.tsx` and `(shop)/[id]/page.tsx` beside `about/page.tsx`',

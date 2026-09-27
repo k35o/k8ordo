@@ -188,6 +188,11 @@ export const stopsRoute = message({
   en: 'A `route.ts` that exports a method other than `GET`, answers its `GET` with anything but `200`, or sits where no file can (`/`, or above pages)',
 });
 
+export const stopsSearch = message({
+  ja: '`search` を export するページ',
+  en: 'A page that exports `search`',
+});
+
 export const stopsThrow = message({
   ja: 'ビルド中に throw したコンポーネント（Server Component はいつでも、クライアントコンポーネントは上に Suspense の境界が無いとき）',
   en: 'A component that throws while the build renders it — a Server Component always, a client component when no Suspense boundary sits above it',
@@ -239,6 +244,6 @@ export const cspApp = message({
 });
 
 export const cspRefuses = message({
-  ja: "`script-src` が無ければ `default-src` から作り、`script-src-elem` があればそこにも足します。フレームワークのモジュールのスクリプトは、ファイルでは署名できないので出どころ（`'self'`）で許されます。そのため `'strict-dynamic'` を含むポリシーは断ります。`<meta>` では効かない `frame-ancestors`・`report-uri`・`sandbox` も断るので、ホストのヘッダーで書いてください。",
-  en: "`script-src` is made from `default-src` when only that was given, and `script-src-elem` gets the hashes too when given. The framework’s module script is allowed by where it comes from (`'self'`), since nothing in a file can sign it, which is why a policy with `'strict-dynamic'` is refused. So are `frame-ancestors`, `report-uri` and `sandbox`, which a `<meta>` ignores — set those as headers at the host.",
+  ja: "ハッシュは、スクリプト要素を決めるディレクティブのすべてに足します。`script-src`（無ければ `default-src` から作ります）と、あれば `script-src-elem` です。フレームワークのモジュールのスクリプトは、ファイルでは署名できないので出どころ（`'self'`）で許されます。そのため `'strict-dynamic'` を含むポリシーは断ります。`<meta>` では効かない `frame-ancestors`・`report-uri`・`sandbox` も断るので、ホストのヘッダーで書いてください。",
+  en: "The hashes go wherever a script element is decided: `script-src` (made from `default-src` when only that was given) and `script-src-elem` when given. The framework’s module script is allowed by where it comes from (`'self'`), since nothing in a file can sign it, which is why a policy with `'strict-dynamic'` is refused. So are `frame-ancestors`, `report-uri` and `sandbox`, which a `<meta>` ignores — set those as headers at the host.",
 });
