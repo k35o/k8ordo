@@ -108,7 +108,7 @@ export const DatePicker: FC<Props> = ({
               {...props}
               aria-label={messages.datePickerOpen}
               className={cn(
-                'me-2 inline-flex shrink-0 items-center justify-center rounded-md p-1 text-fg-mute transition-colors',
+                'me-2 inline-flex shrink-0 items-center justify-center rounded-md p-1 text-fg-mute transition-colors duration-150 ease-out',
                 FOCUS_RING_NO_BORDER,
                 !locked && 'hover:bg-bg-mute hover:text-fg-base',
                 locked && 'cursor-not-allowed',
