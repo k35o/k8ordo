@@ -956,8 +956,8 @@ names what the framework signed by hash, and leaves no nonce in what it
 writes. Give the plugin the policy as `csp`, directives and their sources,
 and each page gets it in a `<meta http-equiv="Content-Security-Policy">`
 first in its `<head>`, with the hashes of that page's framework scripts added
-to `script-src` (made from `default-src` when only that was given, and added
-to `script-src-elem` as well when that is given):
+wherever a script element is decided — `script-src` (made from `default-src`
+when only that was given) and `script-src-elem` when given:
 
 ```ts
 // vite.config.ts

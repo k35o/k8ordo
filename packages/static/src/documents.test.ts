@@ -130,6 +130,15 @@ describe('asFile', () => {
     );
   });
 
+  it('adds the hashes to script-src-elem when it alone decides script elements', () => {
+    const html = page(`<script nonce="${NONCE}">signed()</script>`);
+    expect(
+      policyOf(asFile(html, NONCE, { 'script-src-elem': ["'self'"] })),
+    ).toBe(
+      'script-src-elem &apos;self&apos; &apos;sha256-VXPk1QxJVho+2mU5aKk+EJTW7+XzGtVTcsOkesUPCMY=&apos;',
+    );
+  });
+
   it('leaves scripts unrestricted when the policy does not restrict them', () => {
     const html = page(`<script nonce="${NONCE}">signed()</script>`);
     expect(policyOf(asFile(html, NONCE, { 'img-src': ["'self'"] }))).toBe(
@@ -184,6 +193,17 @@ describe('policyProblems', () => {
       policyProblems({ 'default-src': ["'self'", "'strict-dynamic'"] }),
     ).toStrictEqual([
       `'strict-dynamic' in default-src would block the framework's module script, which a file allows by where it comes from ('self'), not by a hash`,
+    ]);
+  });
+
+  it('refuses strict-dynamic in script-src-elem, which decides the module script too', () => {
+    expect(
+      policyProblems({
+        'script-src': ["'self'"],
+        'script-src-elem': ["'self'", "'strict-dynamic'"],
+      }),
+    ).toStrictEqual([
+      `'strict-dynamic' in script-src-elem would block the framework's module script, which a file allows by where it comes from ('self'), not by a hash`,
     ]);
   });
 

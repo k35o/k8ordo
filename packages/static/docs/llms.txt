@@ -45,8 +45,10 @@ When installed via npm, these docs live under `node_modules/@k8ordo/static/docs/
   `options.csp` (directives → sources, `ContentSecurityPolicy`) is the
   Content-Security-Policy written into each page's `<meta>`, first in
   `<head>`, with the hashes of the framework's own inline scripts on that
-  page added to `script-src` — the framework decides no policy, and an
-  inline script of the application's is allowed by its hash there
+  page added wherever a script element is decided (`script-src`, or
+  `default-src` made into it, and `script-src-elem`) — the framework
+  decides no policy, and an inline script of the application's is allowed
+  by its hash there
   (`colorSchemeScriptHash()`); no nonce is left in a file, and a policy with
   `'strict-dynamic'`, `frame-ancestors`, `report-uri` or `sandbox` is
   refused; `StaticOptions` is the type of those options. A

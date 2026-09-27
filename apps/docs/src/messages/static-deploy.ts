@@ -244,6 +244,6 @@ export const cspApp = message({
 });
 
 export const cspRefuses = message({
-  ja: "`script-src` が無ければ `default-src` から作り、`script-src-elem` があればそこにも足します。フレームワークのモジュールのスクリプトは、ファイルでは署名できないので出どころ（`'self'`）で許されます。そのため `'strict-dynamic'` を含むポリシーは断ります。`<meta>` では効かない `frame-ancestors`・`report-uri`・`sandbox` も断るので、ホストのヘッダーで書いてください。",
-  en: "`script-src` is made from `default-src` when only that was given, and `script-src-elem` gets the hashes too when given. The framework’s module script is allowed by where it comes from (`'self'`), since nothing in a file can sign it, which is why a policy with `'strict-dynamic'` is refused. So are `frame-ancestors`, `report-uri` and `sandbox`, which a `<meta>` ignores — set those as headers at the host.",
+  ja: "ハッシュは、スクリプト要素を決めるディレクティブのすべてに足します。`script-src`（無ければ `default-src` から作ります）と、あれば `script-src-elem` です。フレームワークのモジュールのスクリプトは、ファイルでは署名できないので出どころ（`'self'`）で許されます。そのため `'strict-dynamic'` を含むポリシーは断ります。`<meta>` では効かない `frame-ancestors`・`report-uri`・`sandbox` も断るので、ホストのヘッダーで書いてください。",
+  en: "The hashes go wherever a script element is decided: `script-src` (made from `default-src` when only that was given) and `script-src-elem` when given. The framework’s module script is allowed by where it comes from (`'self'`), since nothing in a file can sign it, which is why a policy with `'strict-dynamic'` is refused. So are `frame-ancestors`, `report-uri` and `sandbox`, which a `<meta>` ignores — set those as headers at the host.",
 });
