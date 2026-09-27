@@ -1,8 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import type { MouseEvent, MouseEventHandler } from 'react';
 import { useRef, useState } from 'react';
-import { expect, fn } from 'storybook/test';
+import { expect, fn, waitFor } from 'storybook/test';
 
+import { TextField } from '../../form/text-field';
 import { CopyIcon } from '../../icons';
 import { Button } from './button';
 
@@ -130,6 +131,84 @@ export const AsyncAction: Story = {
       });
       console.warn('async action completed');
     },
+  },
+};
+
+// Chromium は、フォーカスを持った要素が無効になっても、その場では外さず、
+// 描画の更新の終わりで外す。rAF のコールバックはそれより前に走るので、
+// 1 フレーム待っただけでは外れたかどうかがまだ分からない
+const waitTwoFrames = async () => {
+  await new Promise(requestAnimationFrame);
+  await new Promise(requestAnimationFrame);
+};
+
+// play が片付けるまで保留が続く。二度呼ばれても同じ Promise を待たせ、
+// 片付け 1 回で済むようにする
+let action = Promise.resolve();
+let finishAction = () => {};
+
+export const FocusWhilePending: Story = {
+  args: {
+    onAction: fn(() => action),
+  },
+  play: async ({ args, canvas, userEvent }) => {
+    const button = canvas.getByRole('button', { name: 'ボタン' });
+    action = new Promise<void>((resolve) => {
+      finishAction = resolve;
+    });
+    try {
+      await userEvent.tab();
+      await userEvent.keyboard('{Enter}');
+      await waitTwoFrames();
+
+      // 保留中も、押したボタンはフォーカスを持ったまま、二度目を受け付けない
+      await expect(button).toHaveAttribute('aria-busy', 'true');
+      await expect(button).toHaveFocus();
+      await userEvent.keyboard('{Enter}');
+      await expect(args.onAction).toHaveBeenCalledOnce();
+    } finally {
+      // 終わらない非同期の transition は、同じ React の後続の transition を
+      // すべて待たせる。途中で落ちても後のストーリーを巻き込まないよう片付ける
+      finishAction();
+    }
+
+    await waitFor(() => expect(button).not.toHaveAttribute('aria-busy'));
+    await expect(button).toHaveFocus();
+  },
+};
+
+let submission = Promise.resolve();
+let finishSubmission = () => {};
+const submit = fn(() => submission);
+
+// テキスト欄の Enter による暗黙の送信は、既定のボタンへの click として届く。
+// 送信中のボタンはネイティブの disabled ではないので、その click を自分で断る
+export const EnterWhileSubmitting: Story = {
+  render: () => (
+    <form action={submit} className="flex items-center gap-2">
+      <TextField aria-label="名前" name="name" />
+      <Button type="submit">送信</Button>
+    </form>
+  ),
+  play: async ({ canvas, userEvent }) => {
+    submit.mockClear();
+    const button = canvas.getByRole('button', { name: '送信' });
+    submission = new Promise<void>((resolve) => {
+      finishSubmission = resolve;
+    });
+    try {
+      await userEvent.click(canvas.getByRole('textbox', { name: '名前' }));
+      await userEvent.keyboard('{Enter}');
+      await waitFor(() => expect(button).toHaveAttribute('aria-busy', 'true'));
+
+      await userEvent.keyboard('{Enter}');
+
+      await expect(submit).toHaveBeenCalledOnce();
+    } finally {
+      finishSubmission();
+    }
+
+    await waitFor(() => expect(button).not.toHaveAttribute('aria-busy'));
   },
 };
 

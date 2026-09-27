@@ -27,8 +27,10 @@ export type IconButtonTriggerProps = Partial<TooltipTriggerProps>;
  * オブジェクトで、`<button>` には `triggerProps` ともども展開できる。
  * `<a>` など別の要素を描画するときは `<button>` 専用の `disabled` /
  * `type` を分割代入で外してから残りを展開する。無効状態は同梱の
- * `aria-disabled` で表現できる。`ref` は tooltip の配線と合成済みのものが
- * `triggerProps` に入っているので、平置きでは渡さない。
+ * `aria-disabled` で表現できる。`disabled` は呼び出し側が渡した `disabled`
+ * だけで、`onAction` や送信の保留中は `aria-disabled` と `aria-busy` だけが
+ * 立つ。`ref` は tooltip の配線と合成済みのものが `triggerProps` に入って
+ * いるので、平置きでは渡さない。
  *
  * ハンドラの要素型を `HTMLButtonElement` ではなく `HTMLElement` にしているのは、
  * `ClipboardEventHandler<HTMLButtonElement>` のような兄弟型が `<a>` の同名 props
@@ -76,9 +78,10 @@ type Props = {
   tooltipDisabled?: boolean;
   /**
    * クリック時の処理。`onAction` は非同期処理を `useTransition` で包み、保留中は
-   * `aria-busy` を立てる糖衣。素のクリックイベントが必要なら `onClick` を使う。
-   * 両者は併用可能で `onClick` → `onAction` の順に実行される（`onClick` が
-   * `preventDefault` した場合は `onAction` をスキップ）。
+   * `aria-busy` を立てて押せなくする糖衣。押したボタンはフォーカスを保つ。
+   * 素のクリックイベントが必要なら `onClick` を使う。両者は併用可能で
+   * `onClick` → `onAction` の順に実行される（`onClick` が `preventDefault`
+   * した場合は `onAction` をスキップ）。
    */
   onAction?: () => void | Promise<void>;
   renderItem?: (props: IconButtonRenderItemProps) => ReactNode;
@@ -139,7 +142,7 @@ export const IconButton: FC<Props> = ({
   onMouseLeave,
   onFocus,
   onBlur,
-  disabled,
+  disabled = false,
   renderItem,
   'aria-describedby': describedBy,
   ...props
@@ -147,10 +150,10 @@ export const IconButton: FC<Props> = ({
   const [transitionPending, startTransition] = useTransition();
   const { pending: formPending } = useFormStatus();
   const isPending = transitionPending || formPending;
-  const isDisabled = Boolean(disabled) || isPending;
+  const isDisabled = disabled || isPending;
 
-  // 無効なときもハンドラを付けるのは、renderItem が <a> などを描画したときに
-  // ネイティブの disabled が効かず、そのまま遷移してしまうため。
+  // 無効なときもハンドラを付けるのは、保留中の <button> や renderItem が描画した
+  // <a> などにはネイティブの disabled が効かず、押せてしまうため。
   const handleClick =
     onClick || onAction || isDisabled
       ? (event: MouseEvent<HTMLButtonElement>) => {
@@ -196,7 +199,10 @@ export const IconButton: FC<Props> = ({
     'aria-label': label,
     children,
     className,
-    disabled: isDisabled,
+    // 保留中はネイティブの disabled にしない。Chromium はフォーカスを持った
+    // 要素が無効になるとフォーカスを外すので、キーボードで押した利用者が
+    // 位置を失う。
+    disabled,
     onClick: handleClick,
     type: 'button',
     triggerProps: {

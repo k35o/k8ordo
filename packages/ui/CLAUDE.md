@@ -113,6 +113,14 @@ Two rules make such a bag usable on a tag other than the component's own:
   return early with `preventDefault()` while disabled. `disabled` does nothing
   on an `<a>`, so without both a "disabled" link still navigates.
 
+A pending state is never native `disabled`, on the component's own element or
+in the bag: Chromium moves focus to `body` once a focused element becomes
+disabled, so a keyboard user loses their place mid-action. `Button` /
+`IconButton` pending sets `aria-disabled` and `aria-busy`, and the same early
+return refuses presses — including a text field's Enter, since implicit
+submission arrives as a click on the form's default button. Native `disabled`
+is left to the caller's `disabled` prop.
+
 **Filling a slot** (`FormControl` `renderInput`, `Popover.Trigger` /
 `Tooltip.Trigger` / `FileField.Trigger` / `Alert` `action.renderItem`). The
 component owns no element; the bag is wiring only — ids, ARIA relationships,

@@ -23,6 +23,8 @@ import { mergeRefs } from './../../../helpers/merge-refs';
  * 描画するときは `<button>` 専用の `disabled` / `type` を分割代入で外してから
  * 残りを展開する。無効状態は同梱の `aria-disabled` で表現でき、
  * `onClick` は無効なら何もしないので `<a>` でも遷移しない。
+ * `disabled` は呼び出し側が渡した `disabled` だけで、`onAction` や送信の
+ * 保留中は `aria-disabled` と `aria-busy` だけが立つ。
  *
  * ハンドラの要素型を `HTMLButtonElement` ではなく `HTMLElement` にしているのは、
  * `ClipboardEventHandler<HTMLButtonElement>` のような兄弟型が `<a>` の同名 props
@@ -62,10 +64,10 @@ type Props = {
   endIcon?: ReactNode;
   /**
    * クリック時の処理。`onAction` は非同期処理を `useTransition` で包み、保留中は
-   * 自動でスピナーを表示する糖衣。素のクリックイベント（`event` が必要、
-   * `preventDefault` したい等）は `onClick` を使う。両者は併用可能で、
-   * `onClick` → `onAction` の順に実行される（`onClick` が `preventDefault`
-   * した場合は `onAction` をスキップ）。
+   * 自動でスピナーを表示して押せなくする糖衣。押したボタンはフォーカスを
+   * 保つ。素のクリックイベント（`event` が必要、`preventDefault` したい等）は
+   * `onClick` を使う。両者は併用可能で、`onClick` → `onAction` の順に実行
+   * される（`onClick` が `preventDefault` した場合は `onAction` をスキップ）。
    */
   onAction?: () => void | Promise<void>;
   renderItem?: (props: ButtonRenderItemProps) => ReactNode;
@@ -100,8 +102,9 @@ export const Button: FC<Props> = ({
   const isPending = transitionPending || (type === 'submit' && formPending);
   const isDisabled = disabled || isPending;
 
-  // 無効なときもハンドラを付けるのは、renderItem が <a> などを描画したときに
-  // ネイティブの disabled が効かず、そのまま遷移してしまうため。
+  // 無効なときもハンドラを付けるのは、保留中の <button> や renderItem が描画した
+  // <a> などにはネイティブの disabled が効かず、押せてしまうため。テキスト欄の
+  // Enter による暗黙の送信も既定のボタンへの click として届くので、ここで止まる。
   const handleClick =
     onClick || onAction || isDisabled
       ? (event: MouseEvent<HTMLButtonElement>) => {
@@ -177,7 +180,10 @@ export const Button: FC<Props> = ({
     'aria-busy': isPending || undefined,
     'aria-disabled': isDisabled || undefined,
     className,
-    disabled: isDisabled,
+    // 保留中はネイティブの disabled にしない。Chromium はフォーカスを持った
+    // 要素が無効になるとフォーカスを外すので、キーボードで押した利用者が
+    // 位置を失う。
+    disabled,
     onClick: handleClick,
     ref: mergedRef,
     type,

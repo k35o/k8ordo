@@ -44,6 +44,9 @@ native attribute the caller passed in. Spread the bag onto whatever you render.
   and calls `preventDefault()` while disabled, so a disabled link will not
   navigate. The examples below name them `_disabled` / `_type` so the discarded
   bindings pass a `no-unused-vars` rule.
+- `disabled` is only the `disabled` you passed. While the button is pending,
+  the bag sets `aria-disabled` and `aria-busy` but leaves `disabled` off, so a
+  `<button>` you render keeps focus the same way the component's own does.
 - Spreading onto a real `<button>` is exact, but write `type` on the element
   anyway: the `button-has-type` lint rule cannot see a `type` that arrives
   through a spread.
@@ -106,6 +109,15 @@ Props:
 - `variant`: `'solid'` | `'outline'` | `'skeleton'` (default: `'solid'`)
 - Other props are forwarded to `ComponentPropsWithRef<'button'>`, except `className` / `style`.
 
+While the promise `onAction` returns is pending — and, for `type="submit"`,
+while the enclosing form's action is — the button shows a spinner, sets
+`aria-busy` and `aria-disabled`, and ignores presses. It is not natively
+`disabled`, so a button pressed from the keyboard keeps focus through the wait
+and after it. An Enter in one of the form's text fields does not submit it
+again either: implicit submission arrives as a click on the form's default
+button, which the button refuses. `disabled` itself still sets the native
+attribute.
+
 `renderItem` replaces the `<button>`; see [Render props](#render-props) for the
 contract. It receives `className`, the composed `children`, `ref`, `type`,
 `disabled`, `aria-disabled`, `aria-busy`, `onClick`, and every other attribute
@@ -149,6 +161,10 @@ Props:
 - `tooltipDisabled`: `boolean` (default: `false`)
 - `tooltipPlacement`: `Placement` (default: `'top'`)
 - Other props are forwarded to `ComponentPropsWithRef<'button'>`, except `type` / `className` / `style`.
+
+Pending works as on `Button`: while the promise `onAction` returns is pending,
+or the enclosing form's action is, the button sets `aria-busy` and
+`aria-disabled`, ignores presses, and keeps focus.
 
 `renderItem` replaces the `<button>` under the same contract as `Button`'s,
 with one addition: the tooltip wiring is kept in a nested `triggerProps` so it
