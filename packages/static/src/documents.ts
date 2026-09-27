@@ -87,7 +87,8 @@ export const policyProblems = (policy: ContentSecurityPolicy): string[] => {
   return problems;
 };
 
-const SCRIPT = /<script\b([^>]*)>([\s\S]*?)<\/script>/gu;
+// 終わりは HTML の読み方どおり、大文字小文字を問わず `</script` の後に空白・`/`・`>`
+const SCRIPT = /<script\b([^>]*)>([\s\S]*?)<\/script[\s/>]/giu;
 
 // ブラウザは改行を LF に揃えてからハッシュを取る
 const hashOf = (source: string): string =>
