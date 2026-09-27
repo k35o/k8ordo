@@ -91,7 +91,7 @@ const policyFirstIn = (html: string): string =>
 
 // src を持たないスクリプトの中身
 const inlineScriptsIn = (html: string): string[] =>
-  [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gu)]
+  [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script[\s/>]/giu)]
     .filter(([, attributes = '']) => !attributes.includes('src='))
     .map(([, , source = '']) => source);
 

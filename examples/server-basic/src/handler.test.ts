@@ -532,7 +532,7 @@ describe('a Content-Security-Policy with a nonce', () => {
       const nonce = nonceNamedBy(response);
       expect(nonce).toMatch(/^[A-Za-z0-9+/]{22}==$/u);
       const scripts = [
-        ...(await response.text()).matchAll(/<script\b[^>]*>/gu),
+        ...(await response.text()).matchAll(/<script\b[^>]*>/giu),
       ].map(([tag]) => tag);
       // 起動のモジュール・ペイロード・color-scheme のインラインスクリプト
       expect(scripts.length).toBeGreaterThanOrEqual(3);

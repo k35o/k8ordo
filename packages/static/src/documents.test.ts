@@ -65,6 +65,15 @@ describe('asFile', () => {
     );
   });
 
+  it('reads where a script ends as a browser does, so one closed oddly does not swallow the next', () => {
+    const html = page(
+      `<script>content()</SCRIPT ><script nonce="${NONCE}">console.log(1)</script>`,
+    );
+    expect(policyOf(asFile(html, NONCE, { 'script-src': [] }))).toBe(
+      'script-src &apos;sha256-CihokcEcBW4atb/CW/XWsvWwbTjqwQlE9nj9ii5ww5M=&apos;',
+    );
+  });
+
   it('puts the policy first in <head>, ahead of anything it governs', () => {
     const html = asFile(page(''), NONCE, { 'object-src': ["'none'"] });
     expect(html).toBe(
