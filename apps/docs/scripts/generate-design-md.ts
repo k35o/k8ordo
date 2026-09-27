@@ -433,6 +433,7 @@ import { UIProvider, Button, Card } from '@k8ordo/ui';
 - **Kbd** — \`children: string\`（1 キー 1 要素。組み合わせは並べる）, \`label?\`（記号キーの読み上げ）
 - **Prose** — Markdown / MDX が描いた本文の組版を戻す入れ物。クラスの無い素の要素だけを組み、部品は自分の見た目のまま（日本語向け: 広い行間、em は傍点、縦書きは段落頭を 1 字下げ）
 - **Table**（compound: \`Root\` / \`Caption\` / \`Head\` / \`Body\` / \`Row\` / \`HeaderCell\` / \`Cell\` / \`EmptyState\`(\`colSpan\` + EmptyState の props)）
+- **DataTable** — 制御型（\`sort\` / \`onSortChange\`、\`selectedIds\` / \`onSelectedIdsChange\`、\`hiddenColumnIds\` / \`onHiddenColumnIdsChange\`）。並べ替えはせず、渡された順に描く。列は \`{ id, header, cell, align?, sortable?, hideable? }\`
 
 ### Feedback
 
@@ -475,6 +476,8 @@ import { UIProvider, Button, Card } from '@k8ordo/ui';
 - **Anchor** — テキストリンク。外部リンクに自動で新規タブアイコン。\`href\`, \`openInNewTab?\`, \`renderAnchor?\`
 - **Breadcrumb**（compound: \`List\` / \`Item\` / \`Link\`(\`current?\`) / \`Separator\`）
 - **Pagination** — ページネーション
+- **SideNav**（compound: \`Root\`(\`label\`) / \`Group\`(\`title\`) / \`Link\`(\`href\`, \`current?\`, \`renderAnchor?\`)）— 今のページを傍線で示す
+- **TableOfContents** — \`items\`（\`{ id, label, children? }\` の木）, \`label?\`。見出しの scroll-margin を読み取り位置にして今の見出しを示す
 - **Tabs**（compound: \`Root\`(\`ids\` / \`defaultSelectedId?\`) / \`List\` / \`Tab\` / \`Panel\`）
 
 ### Overlays
