@@ -39,10 +39,11 @@ Restrained, natural motion.
 
 ```tsx
 // Good: transition-colors (only the color changes)
-className = 'transition-colors hover:bg-bg-mute';
+className = 'transition-colors duration-150 ease-out hover:bg-bg-mute';
 
 // OK: transition-all (only when several properties change)
-className = 'transition-all hover:bg-bg-mute hover:scale-[1.02]';
+className =
+  'transition-all duration-150 ease-out hover:bg-bg-mute hover:scale-[1.02]';
 
 // Bad: bounce or spring easing
 className = 'animate-bounce';
@@ -53,6 +54,7 @@ className = 'animate-bounce';
 - Use `focus-visible`, not `focus` — no ring appears on a mouse click
 - Keep the focus ring consistent with `ring-border-info`
 - Clear the default outline with `outline-hidden` before applying the ring
+- Keep focus on a button that is waiting on its own action: show the wait with `aria-busy` and `aria-disabled` and ignore presses, rather than setting `disabled`. Chromium moves focus to `body` when the focused element becomes disabled, so the keyboard user who pressed it loses their place. `Button` and `IconButton` do this for `onAction`
 
 ```tsx
 className =

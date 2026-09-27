@@ -23,6 +23,9 @@ export const ja: Messages = {
   autocompleteClear: 'すべて削除',
   autocompleteEmpty: '該当なし',
 
+  comboboxToggle: '候補を開く',
+  comboboxEmpty: '該当なし',
+  comboboxFailed: '候補を読み込めませんでした',
   fileFieldRemove: 'ファイルを削除',
   fileFieldTrigger: 'ファイルを選択',
   fileFieldDrop: 'ここにファイルをドロップ',
@@ -40,6 +43,10 @@ export const ja: Messages = {
   datePickerOpen: 'カレンダーから選ぶ',
   datePickerDialog: '日付を選ぶ',
 
+  colorPickerHue: '色相',
+  colorPickerSaturation: '彩度',
+  colorPickerLightness: '明度',
+  colorPickerSwatches: '色の見本',
   passwordShow: 'パスワードを表示',
   passwordHide: 'パスワードを非表示',
 

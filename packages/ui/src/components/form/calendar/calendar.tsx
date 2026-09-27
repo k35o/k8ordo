@@ -258,7 +258,7 @@ const CalendarBody: FC<Props> = ({
                       aria-disabled={selectable ? undefined : true}
                       aria-label={dayFormat.format(formatDate(date))}
                       className={cn(
-                        'inline-flex size-10 items-center justify-center rounded-full text-sm tabular-nums transition-colors',
+                        'inline-flex size-10 items-center justify-center rounded-full text-sm tabular-nums transition-colors duration-150 ease-out',
                         FOCUS_RING_NO_BORDER,
                         'hover:bg-bg-mute',
                         date === today && 'font-bold text-primary-fg',
