@@ -27,6 +27,8 @@ type Layout<P extends string> = ComponentType<{
 
 export const paramSchemas = {} as const;
 
+export const routeModules = {} as const;
+
 export const guards = {} as const;
 
 export const redirects = {} as const;
@@ -53,10 +55,11 @@ which does not type-check, passes. Under `@k8ordo/server` the `Page` and
 `Layout` types also carry `request`. `redirects` is what the request handler
 consults before it walks `routes` — where each `redirect.ts` sends the
 visitor — `paramSchemas` holds, per page pattern, the schemas it runs when
-the walk reaches that pattern, before the page renders, and `guards` the
-`guard.ts` files that run before a pattern answers, outer first (a mode that
-builds files refuses them); all three are empty here because no route file
-declares any.
+the walk reaches that pattern, before the page renders, `routeModules` the
+`route.ts` that answers a pattern (its place in `routes` is held by a
+component that renders nothing), and `guards` the `guard.ts` files that run
+before a pattern answers, outer first (a mode that builds files refuses
+them); all four are empty here because no route file declares any.
 
 `.k8ordo/register.gen.ts` wires that table into `@k8ordo/router` — and into
 `@k8ordo/state` when the application depends on it — so typed paths work

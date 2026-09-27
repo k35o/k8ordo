@@ -549,6 +549,10 @@ fits is handed to `accept` first, and one it declines — a param a
 `paramsSchema` along its stack refused — is passed over as if the pattern had
 not fit, so the walk goes on to the next pattern, the catch-all included.
 
+A framework `route.ts` — an answer that is not a page, a feed or JSON —
+exports a function per request method, and `RouteContext<'/feed.xml'>` is
+what each receives: the `Request`, and `params` typed as a page's are.
+
 A page under the framework says it is not there with `notFound()` — the
 product its id names does not exist. It throws, so nothing after it runs, and
 the framework answers with the nearest `not-found.tsx` under a 404. It lives

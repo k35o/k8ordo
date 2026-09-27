@@ -12,6 +12,8 @@ import { Badge } from '../../components/data-display/badge';
 import { Card } from '../../components/data-display/card';
 import { Carousel } from '../../components/data-display/carousel';
 import { Code } from '../../components/data-display/code';
+import { DataTable } from '../../components/data-display/data-table';
+import type { DataTableSort } from '../../components/data-display/data-table';
 import { Heading } from '../../components/data-display/heading';
 import { Kbd } from '../../components/data-display/kbd';
 import { Table } from '../../components/data-display/table';
@@ -103,6 +105,7 @@ import { Stack } from '../../components/layout/stack';
 import { Anchor } from '../../components/navigation/anchor';
 import { Breadcrumb } from '../../components/navigation/breadcrumb';
 import { Pagination } from '../../components/navigation/pagination';
+import { SideNav } from '../../components/navigation/side-nav';
 import { Tabs } from '../../components/navigation/tabs';
 import { Dialog } from '../../components/overlays/dialog';
 import { Drawer } from '../../components/overlays/drawer';
@@ -130,6 +133,7 @@ import type {
   ChevronIconProps,
   CodeProps,
   ColorPickerProps,
+  DataTableProps,
   DateFieldProps,
   DatePickerProps,
   GridProps,
@@ -158,6 +162,7 @@ import type {
   RangeSliderProps,
   SelectProps,
   SeparatorProps,
+  SideNavProps,
   SkeletonProps,
   SliderProps,
   SpinnerProps,
@@ -929,6 +934,26 @@ export function renderBreadcrumb(props: BreadcrumbProps): ReactNode {
   );
 }
 
+export function renderSideNav(props: SideNavProps): ReactNode {
+  return (
+    <SideNav.Root label={props.label}>
+      {props.groups.map((group) => (
+        <SideNav.Group key={group.title} title={group.title}>
+          {group.links.map((link) => (
+            <SideNav.Link
+              current={u(link.current)}
+              href={link.href}
+              key={link.href}
+            >
+              {link.label}
+            </SideNav.Link>
+          ))}
+        </SideNav.Group>
+      ))}
+    </SideNav.Root>
+  );
+}
+
 export function renderTable(props: TableProps): ReactNode {
   return (
     <Table.Root>
@@ -1137,6 +1162,46 @@ const ToastTriggerInner: FC<{ props: ToastProps }> = ({ props }) => {
     >
       {props.triggerLabel}
     </Button>
+  );
+};
+
+const collator = new Intl.Collator(undefined, { numeric: true });
+
+export const DataTableWidget: FC<{ props: DataTableProps }> = ({ props }) => {
+  const [sort, setSort] = useState<DataTableSort | null>(null);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const rows = props.rows.map((cells, index) => ({ id: String(index), cells }));
+  const columnIndex = sort === null ? -1 : Number(sort.columnId);
+  const sorted =
+    sort === null
+      ? rows
+      : rows.toSorted((a, b) =>
+          collator.compare(
+            a.cells[columnIndex] ?? '',
+            b.cells[columnIndex] ?? '',
+          ),
+        );
+  const ordered =
+    sort?.direction === 'descending' ? sorted.toReversed() : sorted;
+  return (
+    <DataTable
+      columns={props.columns.map((column, index) => ({
+        id: String(index),
+        header: column.label,
+        cell: (row: { cells: string[] }) => row.cells[index] ?? '',
+        align: u(column.align),
+        sortable: u(column.sortable),
+      }))}
+      getRowId={(row) => row.id}
+      label={props.label}
+      onSelectedIdsChange={
+        props.selectable === true ? setSelectedIds : undefined
+      }
+      onSortChange={setSort}
+      rows={ordered}
+      selectedIds={selectedIds}
+      sort={sort}
+    />
   );
 };
 

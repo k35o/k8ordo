@@ -3,6 +3,7 @@ import { defineRoutes } from '@k8ordo/router';
 import type { FC } from 'react';
 
 import {
+  answeredByRoute,
   catchAllPath,
   catchAllPatterns,
   dirFor,
@@ -180,5 +181,25 @@ describe('dirFor', () => {
 
   it('refuses a malformed escape instead of writing it verbatim', () => {
     expect(() => dirFor('/products/%zz')).toThrow(/malformed escape/u);
+  });
+});
+
+describe('answeredByRoute', () => {
+  const tree = treeOf([
+    'page.tsx',
+    'feed.xml/route.ts',
+    'api/[id]/route.ts',
+    'api/special/page.tsx',
+    'not-found.tsx',
+  ]);
+
+  it('says a route.ts answers the pathnames its pattern takes', () => {
+    expect(answeredByRoute(tree, '/feed.xml')).toBe(true);
+    expect(answeredByRoute(tree, '/api/7')).toBe(true);
+  });
+
+  it('says a page answers what it takes, in the matcher’s order', () => {
+    expect(answeredByRoute(tree, '/')).toBe(false);
+    expect(answeredByRoute(tree, '/api/special')).toBe(false);
   });
 });

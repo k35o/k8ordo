@@ -18,6 +18,7 @@ import {
   CloseIcon,
   Code,
   CopyButton,
+  DataTable,
   Dialog,
   DropdownMenu,
   EmptyState,
@@ -39,6 +40,7 @@ import {
   RadioCard,
   Select,
   Separator,
+  SideNav,
   Skeleton,
   Slider,
   SparklesIcon,
@@ -46,6 +48,7 @@ import {
   Switch,
   Table,
   TableIcon,
+  TableOfContents,
   Tabs,
   TextField,
   Textarea,
@@ -140,6 +143,28 @@ export const componentPreviews: Record<string, ReactNode> = {
     </Breadcrumb.List>
   ),
   Pagination: <PaginationPreview />,
+  SideNav: (
+    <div className="w-40">
+      <SideNav.Root label="SideNav">
+        <SideNav.Group title="Guide">
+          <SideNav.Link current href="/">
+            Get started
+          </SideNav.Link>
+          <SideNav.Link href="/">Theming</SideNav.Link>
+        </SideNav.Group>
+      </SideNav.Root>
+    </div>
+  ),
+  TableOfContents: (
+    <div className="w-40">
+      <TableOfContents
+        items={[
+          { id: 'preview-install', label: 'Install' },
+          { id: 'preview-usage', label: 'Usage' },
+        ]}
+      />
+    </div>
+  ),
   TextField: <TextField placeholder="Enter your name" />,
   Textarea: <Textarea placeholder="Enter text" rows={3} />,
   NumberField: <NumberField placeholder="0" />,
@@ -295,6 +320,30 @@ export const componentPreviews: Record<string, ReactNode> = {
         </Table.Row>
       </Table.Body>
     </Table.Root>
+  ),
+  DataTable: (
+    <div className="w-full">
+      <DataTable
+        columns={[
+          {
+            id: 'name',
+            header: 'Name',
+            cell: (row: { id: string; name: string }) => row.name,
+            sortable: true,
+          },
+        ]}
+        getRowId={(row) => row.id}
+        label="DataTable"
+        onSelectedIdsChange={() => undefined}
+        onSortChange={() => undefined}
+        rows={[
+          { id: '1', name: 'Aoki' },
+          { id: '2', name: 'Inoue' },
+        ]}
+        selectedIds={['1']}
+        sort={{ columnId: 'name', direction: 'ascending' }}
+      />
+    </div>
   ),
   Heading: <Heading level="h2">Section Title</Heading>,
   Prose: (

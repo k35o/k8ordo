@@ -177,7 +177,7 @@ describe('guard.ts', () => {
       {
         path: 'admin',
         message:
-          'declares no route — every directory needs a page.tsx (or redirect.ts) somewhere below it',
+          'declares no route — every directory needs a page.tsx (or a redirect.ts or route.ts) somewhere below it',
       },
     ]);
   });
@@ -202,5 +202,56 @@ describe('slotOf', () => {
 
   it('reads nothing from a name outside the convention', () => {
     expect(slotOf('products/helper.ts')).toBeNull();
+  });
+});
+
+describe('route.ts', () => {
+  it('fills the route slot, and declares the URL of its directory', () => {
+    const { tree, problems } = parseRouteTree([
+      'page.tsx',
+      'feed.xml/route.ts',
+    ]);
+    expect(problems).toStrictEqual([]);
+    expect(childOf(tree, 'feed.xml').route).toBe('feed.xml/route.ts');
+  });
+
+  it('refuses a directory that both renders and answers from route.ts', () => {
+    const { problems } = parseRouteTree([
+      'page.tsx',
+      'api/page.tsx',
+      'api/route.ts',
+    ]);
+    expect(problems).toStrictEqual([
+      {
+        path: 'api/route.ts',
+        message:
+          '"api" cannot both render page.tsx and answer from route.ts — keep one',
+      },
+    ]);
+  });
+
+  it('refuses a directory that both redirects and answers from route.ts', () => {
+    const { problems } = parseRouteTree([
+      'page.tsx',
+      'old/redirect.ts',
+      'old/route.ts',
+    ]);
+    expect(problems).toStrictEqual([
+      {
+        path: 'old/route.ts',
+        message:
+          '"old" cannot both redirect and answer from route.ts — keep one',
+      },
+    ]);
+  });
+
+  it('counts as a declared URL, so a page at the same URL through a group is refused', () => {
+    const { problems } = parseRouteTree([
+      'page.tsx',
+      '(a)/feed/route.ts',
+      '(b)/feed/page.tsx',
+    ]);
+    expect(problems).toHaveLength(1);
+    expect(problems[0]?.message).toContain('"/feed" is already declared');
   });
 });

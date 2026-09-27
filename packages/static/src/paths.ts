@@ -143,3 +143,18 @@ export const dirFor = (pathname: string): string => {
   }
   return decoded;
 };
+
+/**
+ * Whether a route.ts answers a pathname the build writes, rather than a page:
+ * the first declared pattern that matches it says, in the matcher's order.
+ * The catch-all never answers a pathname the build was given.
+ */
+export const answeredByRoute = (dir: RouteDir, pathname: string): boolean => {
+  for (const each of declaredPatterns(dir)) {
+    if (each.kind === 'notFound') continue;
+    if (new URLPattern({ pathname: each.pattern }).test({ pathname })) {
+      return each.kind === 'route';
+    }
+  }
+  return false;
+};

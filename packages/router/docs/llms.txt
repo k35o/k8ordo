@@ -69,7 +69,8 @@ When installed via npm, these docs live under `node_modules/@k8ordo/router/docs/
   props by its pattern (`PageProps`' `params` from the registered schemas,
   `LayoutProps`' `params` always strings and its `P` only a pattern the table
   has a page at; `request` when the generated `Register` says the mode has
-  one). `notFound()` says, from a framework page, that its pathname is not a
+  one), and `RouteContext<P>` types a framework `route.ts` method export's
+  `{ request, params }`. `notFound()` says, from a framework page, that its pathname is not a
   page after all — the framework answers with the nearest `not-found.tsx`
   under a 404 — and `isNotFound(value)` recognises what it throws.
   `<PathnameProvider pathname>` seeds it for a server render and hydration,

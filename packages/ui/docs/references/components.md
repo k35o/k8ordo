@@ -28,7 +28,7 @@ Two different contracts are spelled `render*`, and mixing them up is the usual
 source of surprise.
 
 **Replacing the element** — `renderItem` on `Button` and `IconButton`,
-`renderAnchor` on `Anchor` and `Breadcrumb.Link`. The component computes
+`renderAnchor` on `Anchor`, `Breadcrumb.Link`, and `SideNav.Link`. The component computes
 everything and hands back the exact props it would have put on its own element,
 so substituting an `<a>`, a framework `<Link>`, or your own button loses
 nothing. For `Button` and `IconButton` that is the resolved `className`, the
@@ -59,6 +59,9 @@ The link components own less, so their bags are smaller:
 - `Breadcrumb.Link` hands back `href`, `className`, and `children` only — it
   takes no other attributes. A `current` link renders
   `<span aria-current="page">` and does not call `renderAnchor`.
+- `SideNav.Link` hands back `href`, `className`, `children`, `aria-current`
+  (`'page'` on the current link), and every other anchor attribute the caller
+  passed. A current link is still a link.
 
 **Filling a slot** — `renderInput` on `FormControl`, `renderItem` on
 `Popover.Trigger`, `Tooltip.Trigger`, `FileField.Trigger`, and `Alert`'s
@@ -334,6 +337,94 @@ Props:
 - `prevLabel`: `string`
 - `ref`: `Ref<HTMLElement>`
 - Other props are forwarded to `HTMLAttributes<HTMLElement>`, except `className` / `style` / `children`.
+
+### SideNav
+
+Side navigation: groups of links, each under a small title, with the page being
+shown marked by a bar (`aria-current="page"`). The library has no router, so
+you say which link is current, and swap the `<a>` for your router's link with
+`renderAnchor` — it replaces the element, and its bag holds `href`,
+`className`, `children`, `aria-current`, and every other anchor attribute you
+passed (an `onClick` that closes a drawer, say). Every part renders from a
+Server Component.
+
+```tsx
+import { SideNav } from '@k8ordo/ui';
+
+<SideNav.Root label="Components">
+  <SideNav.Group title="Buttons">
+    <SideNav.Link current={pathname === '/button'} href="/button">
+      Button
+    </SideNav.Link>
+    <SideNav.Link
+      href="/icon-button"
+      renderAnchor={({ children, ...props }) => (
+        <Link {...props}>{children}</Link>
+      )}
+    >
+      IconButton
+    </SideNav.Link>
+  </SideNav.Group>
+</SideNav.Root>;
+```
+
+Props (SideNav.Root):
+
+- `label`: `string` (required)
+- `children`: `ReactNode`
+- Other props are forwarded to `HTMLAttributes<HTMLElement>`, except `className` / `style` / `aria-label`.
+
+Props (SideNav.Group):
+
+- `title`: `string` (required)
+- `children`: `ReactNode`
+
+Props (SideNav.Link):
+
+- `children`: `ReactNode` (required)
+- `href`: `T` (required)
+- `current`: `boolean` (default: `false`)
+- `renderAnchor`: `(props: RenderSideNavAnchorProps<T>) => ReactNode` (default: `defaultRenderAnchor`)
+- Other props are forwarded to `AnchorHTMLAttributes<HTMLAnchorElement>`, except `className` / `style` / `aria-current`.
+
+### TableOfContents
+
+The contents of the page, with the heading being read marked
+(`aria-current="location"`). Pass the headings as a tree of `{ id, label,
+children? }`; each item links to `#id`.
+
+```tsx
+import { TableOfContents } from '@k8ordo/ui';
+
+<TableOfContents
+  items={[
+    { id: 'install', label: 'Install' },
+    {
+      id: 'usage',
+      label: 'Usage',
+      children: [{ id: 'usage-basic', label: 'Basics' }],
+    },
+  ]}
+/>;
+```
+
+- The heading being read is the last one whose start has passed the heading's
+  own `scroll-margin-block-start`: set the margin your sticky header needs on
+  the headings, and a heading reached from the contents becomes the current
+  one. At the end of the document, the last heading is current even if its
+  section is too short to reach that line.
+- It follows the document's scroll: the headings are expected to scroll with
+  the page, and `items` to be in document order. It measures on scroll, on
+  resize, and when the page's size changes. In a vertical document it reads
+  from right to left (`vertical-rl`) or left to right (`vertical-lr`).
+- `label` replaces the title (`tableOfContents` in the message dictionary),
+  which also names the `nav`.
+
+Props:
+
+- `items`: `readonly TableOfContentsItem[]` (required)
+- `label`: `string`
+- Other props are forwarded to `HTMLAttributes<HTMLElement>`, except `className` / `style` / `children` / `aria-labelledby`.
 
 ### Tabs
 
@@ -935,13 +1026,20 @@ import { Checkbox } from '@k8ordo/ui';
 <Checkbox itemValue="true" label="In stock only" name="inStock" />
 ```
 
+`indeterminate` shows the mixed state — some of a set selected — and sets the
+input's `indeterminate` property, so it is announced as partly checked.
+`labelHidden` keeps `label` as the accessible name but does not draw it, for a
+place with no room for text such as a table cell.
+
 Props:
 
 - `label`: `string` (required)
 - `checked`: `boolean`
 - `defaultChecked`: `boolean`
+- `indeterminate`: `boolean` (default: `false`)
 - `invalid`: `boolean` (default: `false`)
 - `itemValue`: `string`
+- `labelHidden`: `boolean` (default: `false`)
 - `onChange`: `(checked: boolean, event: ChangeEvent<HTMLInputElement>) => void`
 - `ref`: `Ref<HTMLInputElement>`
 - Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `type` / `className` / `style` / `value` / `children`.
@@ -978,8 +1076,10 @@ Props (CheckboxGroup.Item):
 - `label`: `string` (required)
 - `checked`: `boolean`
 - `defaultChecked`: `boolean`
+- `indeterminate`: `boolean` (default: `false`)
 - `invalid`: `boolean` (default: `false`)
 - `itemValue`: `string`
+- `labelHidden`: `boolean` (default: `false`)
 - `onChange`: `(checked: boolean, event: ChangeEvent<HTMLInputElement>) => void`
 - `ref`: `Ref<HTMLInputElement>`
 - Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `type` / `className` / `style` / `value` / `children`.
@@ -1566,7 +1666,75 @@ Props (Table.Row):
 
 - `children`: `ReactNode`
 - `interactive`: `boolean` (default: `false`)
+- `selected`: `boolean` (default: `false`)
 - Other props are forwarded to `HTMLAttributes<HTMLTableRowElement>`, except `className` / `style`.
+
+### DataTable
+
+A table with sorting, row selection, and column visibility. Every piece of state
+is **controlled** and owned by the caller, so it can live anywhere — component
+state, or the URL through `@k8ordo/state`'s url slot, which keeps the sort and
+the page in a shareable link. It takes functions (`cell`, `getRowId`, the
+handlers), so render it from the Client Component that owns that state.
+
+```tsx
+'use client';
+import { DataTable, type DataTableSort } from '@k8ordo/ui';
+
+const [sort, setSort] = useState<DataTableSort | null>(null);
+const [selectedIds, setSelectedIds] = useState<string[]>([]);
+const [hiddenColumnIds, setHiddenColumnIds] = useState<string[]>([]);
+
+<DataTable
+  columns={[
+    { id: 'name', header: 'Name', cell: (m) => m.name, sortable: true },
+    { id: 'role', header: 'Role', cell: (m) => m.role, hideable: false },
+  ]}
+  getRowId={(m) => m.id}
+  hiddenColumnIds={hiddenColumnIds}
+  label="Members"
+  onHiddenColumnIdsChange={setHiddenColumnIds}
+  onSelectedIdsChange={setSelectedIds}
+  onSortChange={setSort}
+  rows={sortMembers(members, sort)}
+  selectedIds={selectedIds}
+  sort={sort}
+/>;
+```
+
+- A column is a `DataTableColumn<Row>`: `id`, `header` (text), `cell(row)`
+  (what to draw), and optionally `align`, `sortable`, and `hideable`.
+- **It does not sort, filter, or page.** It draws `rows` in the order given, so
+  the same component works when the server sorts. `sort` is
+  `{ columnId, direction: 'ascending' | 'descending' } | null`; a sortable
+  header cycles ascending → descending → unsorted and carries `aria-sort`.
+  Put `Pagination` under it for pages.
+- Each feature appears only when you pass its handler: sort buttons on the
+  `sortable` columns with `onSortChange`, a checkbox column with
+  `onSelectedIdsChange`, and a "Columns" menu (every column but those with
+  `hideable: false`) with `onHiddenColumnIdsChange`.
+- The header checkbox selects or clears the rows on screen and shows the mixed
+  state when some are selected (`Checkbox`'s `indeterminate`). The first column
+  is the row header (`th scope="row"`), and each row's checkbox is named after
+  it ("Select row Aoki").
+- `emptyState` is drawn in a row spanning the columns when `rows` is empty —
+  pass an `EmptyState`.
+- Selected rows use `Table.Row`'s `selected`. For bulk actions, render your own
+  bar above the table from `selectedIds`.
+
+Props:
+
+- `columns`: `ReadonlyArray<DataTableColumn<Row>>` (required)
+- `getRowId`: `(row: Row) => string` (required)
+- `label`: `string` (required)
+- `rows`: `readonly Row[]` (required)
+- `emptyState`: `ReactNode`
+- `hiddenColumnIds`: `readonly string[]` (default: `NONE`)
+- `onHiddenColumnIdsChange`: `(ids: string[]) => void`
+- `onSelectedIdsChange`: `(ids: string[]) => void`
+- `onSortChange`: `(sort: DataTableSort | null) => void`
+- `selectedIds`: `readonly string[]` (default: `NONE`)
+- `sort`: `DataTableSort` | `null` (default: `null`)
 
 ## Feedback
 
@@ -2219,6 +2387,7 @@ Every key in the `Messages` type. All values are `string`.
 | Tabs          | `tabList`                                                                                                                                           |
 | Pagination    | `paginationLabel`, `paginationPrevious`, `paginationNext`                                                                                           |
 | CodeBlock     | `codeBlockCopy` (announces with `CopyButton`'s `copied` / `copyFailed`)                                                                             |
+| TOC           | `tableOfContents`                                                                                                                                   |
 | Carousel      | `carousel`, `carouselSlide`, `carouselPrevious`, `carouselNext`                                                                                     |
 | AI chat       | `chat`, `scrollToLatest`, `reasoning`, `reasoningStreaming`, `suggestions`, `send`, `stop`, `attach`                                                |
 | AI content    | `attachments`, `attachmentRemove`, `attachmentImage`, `sources`                                                                                     |
