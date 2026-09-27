@@ -567,7 +567,18 @@ describe('prefetching the page a link leads to', () => {
       return answerOnlyAnAbort(nth, signal);
     });
     const screen = await render(
-      <AppRouter pathname="/" tree={<a href="/next">next</a>} />,
+      <AppRouter
+        pathname="/"
+        tree={
+          // 動かしていない本物のポインタは (0, 0) にあり、左上に描いたリンクに
+          // 重なる。戻ったあとで Chromium がホバーを計算し直すと本物の
+          // pointerover が届き、先読みを正しくやり直す。数えたいのは遷移と
+          // 戻りが頼んだものだけなので、本物のポインタはリンクに当てない
+          <a href="/next" style={{ pointerEvents: 'none' }}>
+            next
+          </a>
+        }
+      />,
     );
     pointerOnto(screen.getByRole('link').element());
     navigation.navigate('/next').finished?.catch(() => undefined);
