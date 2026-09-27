@@ -105,6 +105,7 @@ export const { registry } = defineRegistry(catalog, {
     Breadcrumb: ({ props }) => ui.renderBreadcrumb(props),
     Table: ({ props }) => ui.renderTable(props),
     DataTable: ({ props }) => <ui.DataTableWidget props={props} />,
+    Tree: ({ props }) => ui.renderTree(props),
     SideNav: ({ props }) => ui.renderSideNav(props),
 
     Textarea: ({ props, bindings }) => {

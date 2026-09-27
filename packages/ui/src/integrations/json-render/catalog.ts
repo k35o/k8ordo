@@ -93,6 +93,11 @@ export const catalog = defineCatalog(schema, {
       description:
         'Table the reader can sort (by the columns marked sortable) and, with selectable, pick rows from. Use it for records someone works through; use Table for data only read.',
     },
+    Tree: {
+      props: s.treeProps,
+      description:
+        'Tree of nodes that open and close, such as files and folders, navigable with the arrow keys. List every node flat; a child names its parent by parentId.',
+    },
     SideNav: {
       props: s.sideNavProps,
       description:

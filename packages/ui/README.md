@@ -225,6 +225,7 @@ stories and rendered props rather than relying on trained knowledge:
 - **Kbd** - Keyboard key cap for shortcuts
 - **Prose** - Typesetting for rendered Markdown/MDX, tuned for Japanese
 - **Table** - Tabular data display
+- **Tree** - Expandable hierarchy with WAI-ARIA tree keyboard navigation
 
 ### Feedback
 
@@ -467,11 +468,11 @@ pnpm add @json-render/core @json-render/react zod
 pnpm add @openuidev/react-lang @openuidev/lang-core zod
 ```
 
-Supported components (**all 57**, both frameworks):
+Supported components (**all 58**, both frameworks):
 
 - **Layout / containers**: `Stack`, `Grid`, `Card`, `Form`, `Carousel`
 - **Buttons / nav**: `Button`, `IconButton`, `CopyButton`, `Anchor`, `Breadcrumb`, `Pagination`, `SideNav`
-- **Display**: `Badge`, `Heading`, `Avatar`, `Code`, `Kbd`, `EmptyState`, `Icon`, `ChevronIcon`, `StatusIcon`, `Alert`, `Spinner`, `Progress`, `Skeleton`, `Separator`, `Tabs`, `Accordion`, `Table`, `DataTable`
+- **Display**: `Badge`, `Heading`, `Avatar`, `Code`, `Kbd`, `EmptyState`, `Icon`, `ChevronIcon`, `StatusIcon`, `Alert`, `Spinner`, `Progress`, `Skeleton`, `Separator`, `Tabs`, `Accordion`, `Table`, `DataTable`, `Tree`
 - **Overlays (self-contained widgets)**: `Modal`, `Dialog`, `Drawer`, `Popover`, `Tooltip`, `DropdownMenu`, `Toast`
 - **Form**: `TextField`, `Textarea`, `PasswordInput`, `NumberField`, `Slider`, `RangeSlider`, `DateField`, `DatePicker`, `Calendar`, `Checkbox`, `Switch`, `Select`, `Radio`, `RadioCard`, `CheckboxCard`, `ListBox`, `CheckboxGroup`, `Autocomplete`, `FileField`, `FormControl`
 
