@@ -30,6 +30,8 @@ export type RouteDir = {
   readonly redirect: string | null;
   /** A `guard.ts`: runs before whatever answers below this directory. */
   readonly guard: string | null;
+  /** A `route.ts`: this directory's URL is answered by its method exports. */
+  readonly route: string | null;
   readonly children: readonly RouteDir[];
 };
 
@@ -45,6 +47,7 @@ const CONVENTION = {
   'error.tsx': 'error',
   'redirect.ts': 'redirect',
   'guard.ts': 'guard',
+  'route.ts': 'route',
 } as const;
 
 export const ROUTE_FILES = Object.keys(CONVENTION).join(', ');
@@ -157,11 +160,25 @@ const convert = (
     }
     slots[slot] = file;
   }
+  const here = path === '' ? '/' : path;
   if (slots.page !== undefined && slots.redirect !== undefined) {
     // 同じ URL が「描画する」と「よそへ送る」の両方を言うことはできない
     problems.push({
       path: slots.redirect,
-      message: `"${path === '' ? '/' : path}" cannot both render page.tsx and redirect — keep one`,
+      message: `"${here}" cannot both render page.tsx and redirect — keep one`,
+    });
+  }
+  // route.ts も同じ URL に答えるので、page.tsx とも redirect.ts とも並べない
+  if (slots.route !== undefined && slots.page !== undefined) {
+    problems.push({
+      path: slots.route,
+      message: `"${here}" cannot both render page.tsx and answer from route.ts — keep one`,
+    });
+  }
+  if (slots.route !== undefined && slots.redirect !== undefined) {
+    problems.push({
+      path: slots.route,
+      message: `"${here}" cannot both redirect and answer from route.ts — keep one`,
     });
   }
 
@@ -189,12 +206,14 @@ const convert = (
     error: slots.error ?? null,
     redirect: slots.redirect ?? null,
     guard: slots.guard ?? null,
+    route: slots.route ?? null,
     children,
   };
 };
 
 const declaresRoute = (dir: RouteDir): boolean =>
   dir.page !== null ||
+  dir.route !== null ||
   dir.notFound !== null ||
   dir.redirect !== null ||
   dir.children.some(declaresRoute);
@@ -210,8 +229,11 @@ const eachPattern = (
 ): void => {
   const here = dir.kind === 'root' ? '' : prefix;
   if (dir.page !== null) visit(here === '' ? '/' : here, dir.page);
-  // 同じ dir の page と redirect の衝突は別に報告するので、ここでは片方だけ
-  if (dir.redirect !== null && dir.page === null) {
+  // 同じ dir の page・redirect・route の衝突は別に報告するので、ここでは 1 つだけ
+  if (dir.route !== null && dir.page === null) {
+    visit(here === '' ? '/' : here, dir.route);
+  }
+  if (dir.redirect !== null && dir.page === null && dir.route === null) {
     visit(here === '' ? '/' : here, dir.redirect);
   }
   if (dir.notFound !== null) visit(`${here}/*`, dir.notFound);
@@ -239,7 +261,7 @@ const validate = (root: RouteDir, problems: Problem[]): void => {
         path: dir.path === '' ? '.' : dir.path,
         message:
           dir.layout === null
-            ? 'declares no route — every directory needs a page.tsx (or redirect.ts) somewhere below it'
+            ? 'declares no route — every directory needs a page.tsx (or a redirect.ts or route.ts) somewhere below it'
             : 'has a layout but no page.tsx below it, so it can never render',
       });
       return;

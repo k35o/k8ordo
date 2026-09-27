@@ -720,6 +720,12 @@
           "required": false
         },
         {
+          "name": "indeterminate",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
           "name": "invalid",
           "types": ["boolean"],
           "defaultValue": "false",
@@ -729,6 +735,12 @@
           "name": "itemValue",
           "types": ["string"],
           "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "labelHidden",
+          "types": ["boolean"],
+          "defaultValue": "false",
           "required": false
         },
         {
@@ -820,6 +832,12 @@
           "required": false
         },
         {
+          "name": "indeterminate",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
           "name": "invalid",
           "types": ["boolean"],
           "defaultValue": "false",
@@ -829,6 +847,12 @@
           "name": "itemValue",
           "types": ["string"],
           "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "labelHidden",
+          "types": ["boolean"],
+          "defaultValue": "false",
           "required": false
         },
         {
@@ -1269,6 +1293,79 @@
           "name": "size",
           "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "DataTable",
+      "props": [
+        {
+          "name": "columns",
+          "types": ["ReadonlyArray<DataTableColumn<Row>>"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "getRowId",
+          "types": ["(row: Row) => string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "rows",
+          "types": ["readonly Row[]"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "emptyState",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "hiddenColumnIds",
+          "types": ["readonly string[]"],
+          "defaultValue": "NONE",
+          "required": false
+        },
+        {
+          "name": "onHiddenColumnIdsChange",
+          "types": ["(ids: string[]) => void"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "onSelectedIdsChange",
+          "types": ["(ids: string[]) => void"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "onSortChange",
+          "types": ["(sort: DataTableSort | null) => void"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "selectedIds",
+          "types": ["readonly string[]"],
+          "defaultValue": "NONE",
+          "required": false
+        },
+        {
+          "name": "sort",
+          "types": ["DataTableSort", "null"],
+          "defaultValue": "null",
           "required": false
         }
       ],
@@ -3591,6 +3688,75 @@
       "omitted": []
     },
     {
+      "name": "SideNav.Group",
+      "props": [
+        {
+          "name": "title",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "SideNav.Link",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "href",
+          "types": ["T"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "current",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "renderAnchor",
+          "types": ["(props: RenderSideNavAnchorProps<T>) => ReactNode"],
+          "defaultValue": "defaultRenderAnchor",
+          "required": false
+        }
+      ],
+      "inherits": "AnchorHTMLAttributes<HTMLAnchorElement>",
+      "omitted": ["className", "style", "aria-current"]
+    },
+    {
+      "name": "SideNav.Root",
+      "props": [
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": "HTMLAttributes<HTMLElement>",
+      "omitted": ["className", "style", "aria-label"]
+    },
+    {
       "name": "Skeleton",
       "props": [
         {
@@ -4064,6 +4230,12 @@
           "types": ["boolean"],
           "defaultValue": "false",
           "required": false
+        },
+        {
+          "name": "selected",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
         }
       ],
       "inherits": "HTMLAttributes<HTMLTableRowElement>",
@@ -4081,6 +4253,25 @@
       ],
       "inherits": null,
       "omitted": []
+    },
+    {
+      "name": "TableOfContents",
+      "props": [
+        {
+          "name": "items",
+          "types": ["readonly TableOfContentsItem[]"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": "HTMLAttributes<HTMLElement>",
+      "omitted": ["className", "style", "children", "aria-labelledby"]
     },
     {
       "name": "Tabs.List",

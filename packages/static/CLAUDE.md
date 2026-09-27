@@ -51,6 +51,14 @@ pnpm check         # check:write to auto-fix
   a pathname `paths` supplied is either a params schema refusing it or the
   page saying `notFound()`; the handler marks the second with
   `NOT_FOUND_HEADER`, and the build names each kind in its own message.
+- **A route.ts is a file.** The build calls its `GET` once per pathname
+  (with `site`'s origin in the URL when given) and writes the body at the
+  pathname — `answeredByRoute` asks the declared patterns, in the matcher's
+  order, which of them answers. Anything but a `200` stops the build, as do
+  a route at `/` and a route with written pathnames below it (a file cannot
+  also be a directory), and a route.ts exporting any method but `GET` is
+  refused before the build (`readExports`) and in `vite dev`'s transform.
+  It is not a page: no `index.rsc`, not in the sitemap.
 - **`site` is the only reason a sitemap exists.** Without the origin a
   sitemap would list relative URLs, which is not a sitemap; with it every
   page the build wrote is listed, redirects and the not-found excluded.
@@ -79,7 +87,8 @@ pnpm check         # check:write to auto-fix
 ```
 src/
   paths.ts      patternsOf / patternsNeedingPaths / planPaths /
-                catchAllPatterns / catchAllPath / dirFor / isConcrete — pure
+                catchAllPatterns / catchAllPath / dirFor / isConcrete /
+                answeredByRoute — pure
                 functions (supplied pathnames matched with URLPattern)
   documents.ts  sitemap / redirectPage — the two files the build writes
                 itself rather than taking from the handler, escaped as markup

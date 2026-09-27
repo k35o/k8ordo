@@ -179,6 +179,11 @@ export const stopsGuards = message({
   en: 'A `guard.ts`',
 });
 
+export const stopsRoute = message({
+  ja: '`GET` 以外を export する `route.ts`、`200` 以外で答える `GET`、ファイルにできない場所（`/`、下にページがある）の `route.ts`',
+  en: 'A `route.ts` that exports a method other than `GET`, answers its `GET` with anything but `200`, or sits where no file can (`/`, or above pages)',
+});
+
 export const stopsThrow = message({
   ja: 'ビルド中に throw したコンポーネント（Server Component はいつでも、クライアントコンポーネントは上に Suspense の境界が無いとき）',
   en: 'A component that throws while the build renders it — a Server Component always, a client component when no Suspense boundary sits above it',
