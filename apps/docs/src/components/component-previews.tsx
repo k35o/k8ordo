@@ -13,10 +13,11 @@ import {
   Card,
   Carousel,
   Checkbox,
-  ColorPicker,
   CheckboxCard,
   CloseIcon,
   Code,
+  ColorPicker,
+  Combobox,
   CopyButton,
   DataTable,
   Dialog,
@@ -441,6 +442,18 @@ export const componentPreviews: Record<string, ReactNode> = {
   ColorPicker: (
     <div className="w-56">
       <ColorPicker aria-label="Accent color" defaultValue="#0d9488" />
+    </div>
+  ),
+  Combobox: (
+    <div className="w-56">
+      <Combobox
+        aria-label="Prefecture"
+        defaultValue="kyoto"
+        options={[
+          { value: 'tokyo', label: 'Tokyo' },
+          { value: 'kyoto', label: 'Kyoto' },
+        ]}
+      />
     </div>
   ),
   Separator: (
