@@ -238,7 +238,7 @@ Soft spacing and quiet refinement. The appeal is in space and shape.
 
 **DO:**
 
-- Start from `transition-colors`
+- Start from `transition-colors duration-150 ease-out`
 - Express focus with `focus-visible:ring-2 focus-visible:ring-border-info`
 - Keep hover gentle with `hover:bg-bg-mute`
 

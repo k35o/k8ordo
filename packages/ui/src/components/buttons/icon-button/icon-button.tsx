@@ -175,7 +175,7 @@ export const IconButton: FC<Props> = ({
       : undefined;
 
   const className = cn(
-    'inline-flex cursor-pointer rounded-full transition-colors',
+    'inline-flex cursor-pointer rounded-full transition-colors duration-150 ease-out',
     FOCUS_RING,
     (color === 'transparent' || color === 'base') &&
       'hover:bg-bg-subtle active:bg-bg-mute',

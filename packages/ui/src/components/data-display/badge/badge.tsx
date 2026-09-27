@@ -66,7 +66,7 @@ const badgeClassName = (
   );
 
   return cn(
-    'inline-flex items-center rounded-full border font-medium transition-colors',
+    'inline-flex items-center rounded-full border font-medium transition-colors duration-150 ease-out',
     size === 'sm' && 'px-2 py-0.5 text-xs',
     size === 'md' && 'px-2.5 py-1 text-xs',
     size === 'lg' && 'px-3 py-1.5 text-sm',

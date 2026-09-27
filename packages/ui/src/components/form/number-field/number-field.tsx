@@ -319,7 +319,7 @@ export const NumberField: FC<Props> = ({
       >
         <button
           className={cn(
-            'flex w-6 grow items-center justify-center rounded-md text-fg-mute transition-colors vertical:h-6 vertical:w-auto',
+            'flex w-6 grow items-center justify-center rounded-md text-fg-mute transition-colors duration-150 ease-out vertical:h-6 vertical:w-auto',
             'hover:bg-bg-mute hover:text-fg-base',
             'disabled:cursor-not-allowed disabled:text-fg-mute hover:disabled:bg-transparent',
           )}
@@ -337,7 +337,7 @@ export const NumberField: FC<Props> = ({
         </button>
         <button
           className={cn(
-            'flex w-6 grow items-center justify-center rounded-md text-fg-mute transition-colors vertical:h-6 vertical:w-auto',
+            'flex w-6 grow items-center justify-center rounded-md text-fg-mute transition-colors duration-150 ease-out vertical:h-6 vertical:w-auto',
             'hover:bg-bg-mute hover:text-fg-base',
             'disabled:cursor-not-allowed disabled:text-fg-mute hover:disabled:bg-transparent',
           )}
