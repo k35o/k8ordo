@@ -234,6 +234,19 @@ hook, so wording never makes a component a client module:
 of `'use client'`. A new key goes into `messages.ts`, `ja.ts`, and `en.ts`;
 there is no provider and no context.
 
+### Pending state
+
+`Button` / `IconButton` waiting on their own action — an `onAction` promise, or
+the form's action for a submit button — take `aria-busy` and `aria-disabled` and
+ignore presses in the click handler, but never native `disabled`. Chromium
+moves focus to `body` once the focused element is disabled, so a keyboard user
+who pressed the button would lose their place. Native `disabled` is kept for a
+`disabled` the caller passed. The click handler covers implicit submission too:
+Enter in a field fires a click at the default button, and `preventDefault()`
+there cancels the submission. `PendingKeepsFocus` in `button.stories.tsx` shows
+how to test it — keyboard focus, a promise the play function resolves, and two
+animation frames before `toHaveFocus()`.
+
 ### Content that gets replaced
 
 A change that swaps what is on screen (`Tabs`) is applied inside
