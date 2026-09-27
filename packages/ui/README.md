@@ -190,6 +190,8 @@ stories and rendered props rather than relying on trained knowledge:
 - **Anchor** - Text link with external-link awareness
 - **Breadcrumb** - Navigation path indicator
 - **Pagination** - Page navigation controls
+- **SideNav** - Grouped side navigation links (use `renderAnchor` for a router link)
+- **TableOfContents** - On-page contents that marks the heading being read
 - **Tabs** - Tab-based content organization
 
 ### Form Controls
@@ -217,6 +219,7 @@ stories and rendered props rather than relying on trained knowledge:
 - **Card** - Flexible content container (hover interaction via `interactive`)
 - **Carousel** - Scroll-snapping slides with previous/next buttons
 - **Code** - Formatted code display
+- **DataTable** - Table with sorting, row selection, and column visibility (controlled)
 - **CodeBlock** (from `@k8ordo/ui/code-block`) - Code block highlighted on the server, with a copy button
 - **Heading** - Typography heading component
 - **Kbd** - Keyboard key cap for shortcuts
@@ -464,11 +467,11 @@ pnpm add @json-render/core @json-render/react zod
 pnpm add @openuidev/react-lang @openuidev/lang-core zod
 ```
 
-Supported components (**all 55**, both frameworks):
+Supported components (**all 57**, both frameworks):
 
 - **Layout / containers**: `Stack`, `Grid`, `Card`, `Form`, `Carousel`
-- **Buttons / nav**: `Button`, `IconButton`, `CopyButton`, `Anchor`, `Breadcrumb`, `Pagination`
-- **Display**: `Badge`, `Heading`, `Avatar`, `Code`, `Kbd`, `EmptyState`, `Icon`, `ChevronIcon`, `StatusIcon`, `Alert`, `Spinner`, `Progress`, `Skeleton`, `Separator`, `Tabs`, `Accordion`, `Table`
+- **Buttons / nav**: `Button`, `IconButton`, `CopyButton`, `Anchor`, `Breadcrumb`, `Pagination`, `SideNav`
+- **Display**: `Badge`, `Heading`, `Avatar`, `Code`, `Kbd`, `EmptyState`, `Icon`, `ChevronIcon`, `StatusIcon`, `Alert`, `Spinner`, `Progress`, `Skeleton`, `Separator`, `Tabs`, `Accordion`, `Table`, `DataTable`
 - **Overlays (self-contained widgets)**: `Modal`, `Dialog`, `Drawer`, `Popover`, `Tooltip`, `DropdownMenu`, `Toast`
 - **Form**: `TextField`, `Textarea`, `PasswordInput`, `NumberField`, `Slider`, `RangeSlider`, `DateField`, `DatePicker`, `Calendar`, `Checkbox`, `Switch`, `Select`, `Radio`, `RadioCard`, `CheckboxCard`, `ListBox`, `CheckboxGroup`, `Autocomplete`, `FileField`, `FormControl`
 
