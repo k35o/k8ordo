@@ -71,7 +71,7 @@ const SortButton = <Row,>({
   return (
     <button
       className={cn(
-        'group -mx-2 inline-flex items-center gap-1 rounded-md px-2 py-1 font-medium transition-colors hover:bg-bg-mute',
+        'group -mx-2 inline-flex items-center gap-1 rounded-md px-2 py-1 font-medium transition-colors duration-150 ease-out hover:bg-bg-mute',
         column.align === 'right' && 'flex-row-reverse',
         FOCUS_RING_NO_BORDER,
       )}

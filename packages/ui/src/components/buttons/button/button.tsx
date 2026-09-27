@@ -135,7 +135,7 @@ export const Button: FC<Props> = ({
   const hasEndIcon = endIcon !== undefined;
 
   const className = cn(
-    'cursor-pointer rounded-full border-2 text-center font-bold transition-colors',
+    'cursor-pointer rounded-full border-2 text-center font-bold transition-colors duration-150 ease-out',
     {
       'border-transparent bg-primary-bg text-primary-fg hover:bg-primary-bg-emphasize active:bg-primary-bg-emphasize':
         variant === 'solid' && color === 'primary',

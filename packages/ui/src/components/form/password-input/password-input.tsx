@@ -66,7 +66,7 @@ export const PasswordInput: FC<Props> = ({
             : (showLabel ?? messages.passwordShow)
         }
         className={cn(
-          'me-2 inline-flex shrink-0 items-center justify-center rounded-md p-1 text-fg-mute transition-colors',
+          'me-2 inline-flex shrink-0 items-center justify-center rounded-md p-1 text-fg-mute transition-colors duration-150 ease-out',
           FOCUS_RING_NO_BORDER,
           !disabled && !pending && 'hover:bg-bg-mute hover:text-fg-base',
           (disabled || pending) && 'cursor-not-allowed text-fg-subtle',

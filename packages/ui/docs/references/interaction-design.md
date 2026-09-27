@@ -39,10 +39,11 @@ Restrained, natural motion.
 
 ```tsx
 // Good: transition-colors (only the color changes)
-className = 'transition-colors hover:bg-bg-mute';
+className = 'transition-colors duration-150 ease-out hover:bg-bg-mute';
 
 // OK: transition-all (only when several properties change)
-className = 'transition-all hover:bg-bg-mute hover:scale-[1.02]';
+className =
+  'transition-all duration-150 ease-out hover:bg-bg-mute hover:scale-[1.02]';
 
 // Bad: bounce or spring easing
 className = 'animate-bounce';

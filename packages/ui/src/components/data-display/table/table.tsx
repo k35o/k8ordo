@@ -88,7 +88,7 @@ const Row: FC<RowProps> = ({
   <tr
     {...rest}
     className={cn(
-      'border-border-mute border-b transition-colors vertical:border-b-0 vertical:border-l',
+      'border-border-mute border-b transition-colors duration-150 ease-out vertical:border-b-0 vertical:border-l',
       interactive && 'hover:bg-bg-mute',
       selected &&
         'bg-primary-bg-subtle forced-colors:bg-[Highlight] forced-colors:text-[HighlightText]',

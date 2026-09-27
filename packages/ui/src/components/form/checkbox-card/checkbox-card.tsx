@@ -100,7 +100,7 @@ export const CheckboxCard: FC<Props> = ({
         return (
           <label
             className={cn(
-              'flex min-w-0 rounded-xl border bg-bg-base p-4 text-left transition-colors inline-full',
+              'flex min-w-0 rounded-xl border bg-bg-base p-4 text-left transition-colors duration-150 ease-out inline-full',
               'has-[input:focus-visible]:outline-hidden has-[input:focus-visible]:ring-2 has-[input:focus-visible]:ring-border-info',
               // 非制御のとき、form の reset は change を飛ばさずに checked を戻すので、
               // 見た目は state ではなく input の :checked から引く
