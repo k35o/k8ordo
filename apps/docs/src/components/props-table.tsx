@@ -15,7 +15,7 @@ const TypeCodes: FC<{ types: readonly string[] }> = ({ types }) => (
   <span className="inline-flex items-center gap-1">
     {types.map((type, i) => (
       <span className="flex items-center gap-1" key={type}>
-        {i > 0 && <span className="text-fg-mute/60">|</span>}
+        {i > 0 && <span className="text-fg-subtle">|</span>}
         <Code>{type}</Code>
       </span>
     ))}
@@ -42,11 +42,11 @@ export const PropsTable: FC<{
             <Code>{prop.name}</Code>
           </dt>
           <dd className="text-fg-mute text-sm">
-            <span className="text-fg-mute/60">Type: </span>
+            <span className="text-fg-subtle">Type: </span>
             <TypeCodes types={prop.types} />
           </dd>
           <dd className="text-fg-mute text-sm">
-            <span className="text-fg-mute/60">Default: </span>
+            <span className="text-fg-subtle">Default: </span>
             <DefaultValue value={prop.defaultValue} />
           </dd>
         </div>

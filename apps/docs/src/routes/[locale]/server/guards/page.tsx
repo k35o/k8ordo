@@ -21,12 +21,16 @@ const TREE = `src/routes/
       page.tsx`;
 
 const ADMIN = `// src/routes/admin/guard.ts
+import { href } from '@k8ordo/router';
 import { cookies } from '@k8ordo/server/runtime';
 import type { Guard } from '@k8ordo/server/runtime';
 
 const guard: Guard<'/admin'> = () => {
   if (cookies().has('session')) return;
-  return new Response(null, { status: 303, headers: { location: '/login' } });
+  return new Response(null, {
+    status: 303,
+    headers: { location: href('/login') },
+  });
 };
 
 export default guard;`;
@@ -54,7 +58,13 @@ export default function ServerGuardsPage() {
         <Paragraph text={t.guardReceives} />
       </DocSection>
 
-      <DocSection description={t.endDescription} title={t.endTitle} />
+      <DocSection description={t.endDescription} title={t.endTitle}>
+        <Paragraph text={t.endLocation}>
+          <LocaleAnchor path="/:locale/server/deploy">
+            {m.server.navDeploy()}
+          </LocaleAnchor>
+        </Paragraph>
+      </DocSection>
 
       <DocSection description={t.addDescription} title={t.addTitle}>
         <CodeBlock code={ROOT} lang="ts" />

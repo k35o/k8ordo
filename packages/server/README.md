@@ -56,6 +56,7 @@ src/routes/
   products/[id]/page.tsx   /products/:id — `export const paramsSchema` types :id
   old/redirect.ts       /old answers 307 with where to go
   admin/guard.ts        runs before everything under /admin; a Response ends it
+  feed.xml/route.ts     /feed.xml answered by its GET — a Response, not a page
 ```
 
 ```js
@@ -69,13 +70,14 @@ const server = await serve({ port: 3000 }); // { port, url, close }
 // src/routes/_parts/actions.ts
 'use server';
 
+import { href } from '@k8ordo/router';
 import { redirect } from '@k8ordo/server/runtime';
 
 export async function createTalk(_previous: FormState, formData: FormData) {
   const parsed = parseForm(talkSchema, formData);
   if (!parsed.success) return parsed.state;
   await insertTalk(parsed.data);
-  redirect('/talks'); // 303 without JavaScript, a navigation with it
+  redirect(href('/talks')); // 303 without JavaScript, a navigation with it
 }
 ```
 
@@ -110,8 +112,8 @@ Point your agent at them once by pasting this into your project's `CLAUDE.md` /
 This application is built with `@k8ordo/server`. Before adding or changing a
 route or a Server Action, read `node_modules/@k8ordo/server/docs/GUIDE.md`.
 `src/routes/` is the pathname space and holds only page.tsx, layout.tsx,
-not-found.tsx, error.tsx, redirect.ts and guard.ts; everything else goes under
-a `_`-prefixed directory. Never edit `.k8ordo/` — it is generated. A Server
+not-found.tsx, error.tsx, redirect.ts, guard.ts and route.ts; everything else
+goes under a `_`-prefixed directory. Never edit `.k8ordo/` — it is generated. A Server
 Action ends with `redirect()` from `@k8ordo/server/runtime`, not a returned
 URL.
 Build links with `href()` from `@k8ordo/router`; search params are

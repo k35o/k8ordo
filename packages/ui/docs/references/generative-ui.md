@@ -68,8 +68,9 @@ These exports are left out on purpose, so a model cannot place them:
   well.
 - `PortalRootProvider`, `usePortalRoot` — wiring for your own `createPortal`
   calls. The generated overlays open their own surfaces.
-- `Conversation`, `Message`, `PromptInput`, `Reasoning`, `Suggestion`, and
-  `ToolInvocation` from `@k8ordo/ui/ai`, and `Response` from
+- `Conversation`, `Message`, `PromptInput`, `Reasoning`, `Suggestion`,
+  `ToolInvocation`, `Attachment`, and `Source` from `@k8ordo/ui/ai`, and
+  `Response` from
   `@k8ordo/ui/ai/response` — the chat the generated UI is shown in. Your
   application builds it from its message stream; a spec does not place it.
 - `CodeBlock` from `@k8ordo/ui/code-block` — it highlights on the server, as an
@@ -79,6 +80,9 @@ These exports are left out on purpose, so a model cannot place them:
 - `Prose` — it typesets the bare HTML that Markdown renders to. A spec places
   components, which keep their own look, so it would have nothing to typeset;
   lay a flow out with `Stack`.
+- `TableOfContents` — it points at the ids of the document's headings and
+  follows the scroll. The headings a spec places carry no id, so there would be
+  nothing to point at.
 
 ## Prompt language
 

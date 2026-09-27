@@ -135,12 +135,15 @@ breaks its schema never reaches the URL.
 // actions.ts
 'use server';
 
+import { href } from '@k8ordo/router';
+import { redirect } from '@k8ordo/server/runtime';
+
 export async function createTalk(_prev: FormState, formData: FormData) {
   const parsed = parseForm(talkSchema, formData);
   if (!parsed.success) return parsed.state;
 
   await insertTalk(parsed.data); // typed
-  redirect('/talks');
+  redirect(href('/talks'));
 }
 ```
 
@@ -258,10 +261,15 @@ moves focus to the first failed field on the page. A submit button marked
 the arbiter: what passes still goes to it, and the checks in `dropped` run
 there alone.
 
-**Secrets are never echoed.** `parseForm` returns the submitted values so a
-retry keeps the input — they render as the controls' defaults, which is also
-what React's reset after the action restores. Fields marked as passwords are
-excluded automatically, and typed as `password` in the markup:
+**A retry keeps what was submitted.** `parseForm` returns the submitted
+values, and they render as the controls' defaults, which is also what React's
+reset after the action restores. A `<select>` — `multiple` too — is no
+exception, although React applies a select's `defaultValue` only when it
+mounts: `useForm` writes each response's echo into the options'
+`defaultSelected` itself, so the select needs no `key` to remount it.
+
+**Secrets are never echoed.** Fields marked as passwords are left out of
+those values automatically, and typed as `password` in the markup:
 
 ```ts
 z.string().min(8).meta({ input: 'password' }); // zod

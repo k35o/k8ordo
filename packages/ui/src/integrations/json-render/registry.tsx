@@ -104,6 +104,9 @@ export const { registry } = defineRegistry(catalog, {
     Accordion: ({ props }) => ui.renderAccordion(props),
     Breadcrumb: ({ props }) => ui.renderBreadcrumb(props),
     Table: ({ props }) => ui.renderTable(props),
+    DataTable: ({ props }) => <ui.DataTableWidget props={props} />,
+    Tree: ({ props }) => ui.renderTree(props),
+    SideNav: ({ props }) => ui.renderSideNav(props),
 
     Textarea: ({ props, bindings }) => {
       const [value, setValue] = useBoundOrLocal<string>(
@@ -120,6 +123,26 @@ export const { registry } = defineRegistry(catalog, {
         '',
       );
       return ui.renderPasswordInput(props, value, setValue);
+    },
+    RangeSlider: ({ props, bindings }) => {
+      const whole: readonly [number, number] = [
+        props.min ?? 0,
+        props.max ?? 100,
+      ];
+      const [value, setValue] = useBoundOrLocal<readonly [number, number]>(
+        props.defaultValue,
+        bindings?.defaultValue,
+        whole,
+      );
+      return ui.renderRangeSlider(props, value, setValue);
+    },
+    ColorPicker: ({ props, bindings }) => {
+      const [value, setValue] = useBoundOrLocal<string>(
+        props.defaultValue,
+        bindings?.defaultValue,
+        '',
+      );
+      return ui.renderColorPicker(props, value, setValue);
     },
     DateField: ({ props, bindings }) => {
       const [value, setValue] = useBoundOrLocal<string>(

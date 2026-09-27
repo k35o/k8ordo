@@ -32,11 +32,18 @@ export const ja: Messages = {
   numberFieldRangeUnderflow: '{min} 以上で入力してください',
   numberFieldRangeOverflow: '{max} 以下で入力してください',
 
+  rangeSliderStart: '最小',
+  rangeSliderEnd: '最大',
+
   calendarPreviousMonth: '前の月',
   calendarNextMonth: '次の月',
   datePickerOpen: 'カレンダーから選ぶ',
   datePickerDialog: '日付を選ぶ',
 
+  colorPickerHue: '色相',
+  colorPickerSaturation: '彩度',
+  colorPickerLightness: '明度',
+  colorPickerSwatches: '色の見本',
   passwordShow: 'パスワードを表示',
   passwordHide: 'パスワードを非表示',
 
@@ -49,11 +56,16 @@ export const ja: Messages = {
   paginationPrevious: '前へ',
   paginationNext: '次へ',
 
+  dataTableColumns: '表示する列',
+  dataTableSelectAll: 'すべての行を選択',
+  dataTableSelectRow: '行を選択',
+
   codeBlockCopy: 'コードをコピー',
   carousel: 'カルーセル',
   carouselSlide: 'スライド',
   carouselPrevious: '前のスライド',
   carouselNext: '次のスライド',
+  tableOfContents: '目次',
 
   chat: 'チャット',
   scrollToLatest: '最新のメッセージへ移動',
@@ -62,10 +74,22 @@ export const ja: Messages = {
   suggestions: '候補',
   send: '送信',
   stop: '停止',
+  attach: 'ファイルを添付',
+  attachments: '添付ファイル',
+  attachmentRemove: '添付を外す',
+  attachmentImage: '添付画像',
+  sources: '出典',
+  messageActions: 'メッセージの操作',
+  regenerate: '再生成',
+  feedbackPositive: '良い回答',
+  feedbackNegative: '良くない回答',
   toolInput: '入力',
   toolOutput: '出力',
   toolError: 'ツールの実行でエラーが発生しました。',
   toolDenied: 'ツールの実行は許可されませんでした。',
+  toolApprovalRequest: 'このツールの実行を許可しますか？',
+  toolApprove: '許可',
+  toolDeny: '拒否',
 
   responseCopied: 'コピーしました',
   responseCopyCode: 'コードをコピー',

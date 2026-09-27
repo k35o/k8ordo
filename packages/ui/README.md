@@ -190,6 +190,8 @@ stories and rendered props rather than relying on trained knowledge:
 - **Anchor** - Text link with external-link awareness
 - **Breadcrumb** - Navigation path indicator
 - **Pagination** - Page navigation controls
+- **SideNav** - Grouped side navigation links (use `renderAnchor` for a router link)
+- **TableOfContents** - On-page contents that marks the heading being read
 - **Tabs** - Tab-based content organization
 
 ### Form Controls
@@ -197,6 +199,7 @@ stories and rendered props rather than relying on trained knowledge:
 - **Autocomplete** - Search with suggestions
 - **Calendar** - Month grid for picking a day
 - **Checkbox** / **CheckboxCard** / **CheckboxGroup** - Multi-selection inputs
+- **ColorPicker** - Hex color field with hue / saturation / lightness sliders and swatches
 - **DateField** / **DatePicker** - Native date input, alone or with a calendar popover
 - **FileField** - File upload with composite pattern, from a button or by dropping files
 - **Form** / **FormControl** - Form wrapper and field with label/validation
@@ -204,7 +207,7 @@ stories and rendered props rather than relying on trained knowledge:
 - **PasswordInput** - Password input with show/hide toggle
 - **Radio** / **RadioCard** - Single-selection inputs
 - **Select** - Dropdown selection
-- **Slider** - Slider input control
+- **Slider** / **RangeSlider** - Slider input control, with one thumb or two
 - **Switch** - Toggle switch
 - **TextField** - Single-line text input
 - **Textarea** - Multi-line text input
@@ -217,17 +220,19 @@ stories and rendered props rather than relying on trained knowledge:
 - **Card** - Flexible content container (hover interaction via `interactive`)
 - **Carousel** - Scroll-snapping slides with previous/next buttons
 - **Code** - Formatted code display
+- **DataTable** - Table with sorting, row selection, and column visibility (controlled)
 - **CodeBlock** (from `@k8ordo/ui/code-block`) - Code block highlighted on the server, with a copy button
 - **Heading** - Typography heading component
 - **Kbd** - Keyboard key cap for shortcuts
 - **Prose** - Typesetting for rendered Markdown/MDX, tuned for Japanese
 - **Table** - Tabular data display
+- **Tree** - Expandable hierarchy with WAI-ARIA tree keyboard navigation
 
 ### Feedback
 
 - **Alert** - Important messages and notifications
 - **EmptyState** - What a list, table, or search shows when it is empty
-- **Progress** - Progress indication
+- **Progress** - Progress indication, or an animated bar when progress is unknown
 - **Skeleton** - Content loading placeholder
 - **Spinner** - Loading indicator
 - **ToastProvider** / **useToast** - Temporary notification messages
@@ -370,11 +375,13 @@ Optional features live behind dedicated subpath exports:
 `@k8ordo/ui/ai` ships building blocks for chat UIs:
 
 - **Conversation** (`Root` / `Messages` / `ScrollButton`) - Scroll container with stick-to-bottom behavior and a scroll-to-bottom button
-- **Message** (`Root` / `Content`) - Chat bubble, styled by `from="user" | "assistant"`
-- **PromptInput** (`Root` / `Textarea` / `Submit`) - Message input form with IME-aware Enter-to-send and a stop button while streaming
+- **Message** (`Root` / `Content` / `Actions` / `Action` / `Copy` / `Regenerate` / `Feedback`) - Chat bubble, styled by `from="user" | "assistant"`, with an optional `avatar`; `Actions` holds copy, regenerate, and good/bad feedback under the message
+- **PromptInput** (`Root` / `Attachments` / `Attach` / `Textarea` / `Submit`) - Message input form with IME-aware Enter-to-send and a stop button while streaming; pass `accept` to take attachments from a file picker, drag and drop, or paste
 - **Reasoning** - Collapsible display of the model's thinking text
 - **Suggestion** (`List` / `Item`) - Suggested prompt chips
-- **ToolInvocation** - Tool call display with input/output and `state` (`'input-streaming' | 'input-available' | 'approval-requested' | 'approval-responded' | 'output-available' | 'output-error' | 'output-denied'`); `deniedReason` explains an `output-denied` call
+- **ToolInvocation** - Tool call display with input/output and `state` (`'input-streaming' | 'input-available' | 'approval-requested' | 'approval-responded' | 'output-available' | 'output-error' | 'output-denied'`); with `approval` and `onApprovalResponse` it asks the user to allow or deny the call and answers with the approval `id`
+- **Attachment** (`List` / `Item`) - Files attached to a message: image thumbnails, or a name and media-type chip
+- **Source** (`List` / `Item`) - The sources a response cites, as links (http(s) only) or document titles
 - **Response** (from `@k8ordo/ui/ai/response`) - Streaming-safe Markdown renderer built on streamdown
 
 Two of these need optional peer dependencies:
@@ -447,7 +454,7 @@ import 'streamdown/styles.css';
 @source '../node_modules/streamdown/dist/*.js';
 ```
 
-With the [AI SDK](https://ai-sdk.dev), `mapMessageParts` from `@k8ordo/ui/ai-sdk` converts a `UIMessage` into a flat array of `{ kind: 'text' | 'reasoning' | 'tool', ... }` parts that map 1:1 onto `Response`, `Reasoning`, and `ToolInvocation`.
+With the [AI SDK](https://ai-sdk.dev), `mapMessageParts` from `@k8ordo/ui/ai-sdk` converts a `UIMessage` into a flat array of `{ kind: 'text' | 'reasoning' | 'tool' | 'file' | 'source' | 'data', ... }` parts that map onto `Response`, `Reasoning`, `ToolInvocation`, `Attachment`, and `Source`; `data` parts are yours to render. A tool part keeps its `approval`, so `onApprovalResponse={addToolApprovalResponse}` answers the SDK directly.
 
 ## Generative UI integrations
 
@@ -462,13 +469,13 @@ pnpm add @json-render/core @json-render/react zod
 pnpm add @openuidev/react-lang @openuidev/lang-core zod
 ```
 
-Supported components (**all 54**, both frameworks):
+Supported components (**all 59**, both frameworks):
 
 - **Layout / containers**: `Stack`, `Grid`, `Card`, `Form`, `Carousel`
-- **Buttons / nav**: `Button`, `IconButton`, `CopyButton`, `Anchor`, `Breadcrumb`, `Pagination`
-- **Display**: `Badge`, `Heading`, `Avatar`, `Code`, `Kbd`, `EmptyState`, `Icon`, `ChevronIcon`, `StatusIcon`, `Alert`, `Spinner`, `Progress`, `Skeleton`, `Separator`, `Tabs`, `Accordion`, `Table`
+- **Buttons / nav**: `Button`, `IconButton`, `CopyButton`, `Anchor`, `Breadcrumb`, `Pagination`, `SideNav`
+- **Display**: `Badge`, `Heading`, `Avatar`, `Code`, `Kbd`, `EmptyState`, `Icon`, `ChevronIcon`, `StatusIcon`, `Alert`, `Spinner`, `Progress`, `Skeleton`, `Separator`, `Tabs`, `Accordion`, `Table`, `DataTable`, `Tree`
 - **Overlays (self-contained widgets)**: `Modal`, `Dialog`, `Drawer`, `Popover`, `Tooltip`, `DropdownMenu`, `Toast`
-- **Form**: `TextField`, `Textarea`, `PasswordInput`, `NumberField`, `Slider`, `DateField`, `DatePicker`, `Calendar`, `Checkbox`, `Switch`, `Select`, `Radio`, `RadioCard`, `CheckboxCard`, `ListBox`, `CheckboxGroup`, `Autocomplete`, `FileField`, `FormControl`
+- **Form**: `TextField`, `Textarea`, `PasswordInput`, `NumberField`, `Slider`, `RangeSlider`, `DateField`, `DatePicker`, `Calendar`, `ColorPicker`, `Checkbox`, `Switch`, `Select`, `Radio`, `RadioCard`, `CheckboxCard`, `ListBox`, `CheckboxGroup`, `Autocomplete`, `FileField`, `FormControl`
 
 The rest of the exports — the observers, the providers, and the AI chat
 components — are left out on purpose;

@@ -32,11 +32,18 @@ export const en: Messages = {
   numberFieldRangeUnderflow: 'Enter {min} or more',
   numberFieldRangeOverflow: 'Enter {max} or less',
 
+  rangeSliderStart: 'minimum',
+  rangeSliderEnd: 'maximum',
+
   calendarPreviousMonth: 'Previous month',
   calendarNextMonth: 'Next month',
   datePickerOpen: 'Choose from calendar',
   datePickerDialog: 'Choose a date',
 
+  colorPickerHue: 'Hue',
+  colorPickerSaturation: 'Saturation',
+  colorPickerLightness: 'Lightness',
+  colorPickerSwatches: 'Swatches',
   passwordShow: 'Show password',
   passwordHide: 'Hide password',
 
@@ -49,11 +56,16 @@ export const en: Messages = {
   paginationPrevious: 'Previous',
   paginationNext: 'Next',
 
+  dataTableColumns: 'Columns',
+  dataTableSelectAll: 'Select all rows',
+  dataTableSelectRow: 'Select row',
+
   codeBlockCopy: 'Copy code',
   carousel: 'Carousel',
   carouselSlide: 'Slide',
   carouselPrevious: 'Previous slide',
   carouselNext: 'Next slide',
+  tableOfContents: 'Contents',
 
   chat: 'Chat',
   scrollToLatest: 'Scroll to latest message',
@@ -62,10 +74,22 @@ export const en: Messages = {
   suggestions: 'Suggestions',
   send: 'Send',
   stop: 'Stop',
+  attach: 'Attach files',
+  attachments: 'Attachments',
+  attachmentRemove: 'Remove attachment',
+  attachmentImage: 'Attached image',
+  sources: 'Sources',
+  messageActions: 'Message actions',
+  regenerate: 'Regenerate',
+  feedbackPositive: 'Good response',
+  feedbackNegative: 'Bad response',
   toolInput: 'Input',
   toolOutput: 'Output',
   toolError: 'The tool failed to run.',
   toolDenied: 'The tool run was not approved.',
+  toolApprovalRequest: 'Allow this tool to run?',
+  toolApprove: 'Allow',
+  toolDeny: 'Deny',
 
   responseCopied: 'Copied',
   responseCopyCode: 'Copy code',

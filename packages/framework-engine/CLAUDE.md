@@ -139,6 +139,26 @@ ParamsSchemaFor<pattern>`, lists per page pattern the schemas along its
   there (`@k8ordo/i18n` records the accepted locale), and neither a refused
   pattern's write nor any other reaches the handler's caller, which under
   `@k8ordo/static` is one context for every page.
+- **Only a page that declared it reads the search.** A page exporting
+  `search` (a `@k8ordo/state` url schema) is found by parsing, like
+  `paramsSchema`; the generated table reads it through state's
+  `urlReader` in `searchReaders`, types the page's `search` by what that
+  returns, and the generated `Register` carries it for `PageProps` — which is
+  why the generator refuses the export in an application that does not
+  depend on `@k8ordo/state`. The handler hands the leaf what it read from
+  the request's own search (a payload is asked for with the page's search on
+  its URL) and puts the search it was rendered with on the payload
+  (`Payload.search`, absent for every other page); `app-router.tsx` keeps the
+  one on screen and answers the router's `refresh` with whether a
+  same-pathname navigation moved it, so such a page loads again in place and
+  every other page keeps the router's no-load shortcut. `@k8ordo/static`
+  refuses the export (a file is the same whatever the search holds).
+- **`loading.tsx` is the router's `loading`.** The generator puts it on its
+  branch (a page with one becomes a branch of its own, and a root one makes
+  the root a branch); the router makes it a `<Suspense>` in the stack, after
+  the layout and the `error` boundary. Nothing keys it: a page change under
+  one already showing keeps the page, as every page change does, and the
+  router's `usePendingPathname()` is what says one is under way.
 - **`error.tsx` is the router's `error`; `redirect.ts` is answered before the
   table.** The generator puts an error file on its branch (a page with an
   error becomes a branch of its own) and lists redirects in `redirects`,
@@ -168,6 +188,21 @@ ParamsSchemaFor<pattern>`, lists per page pattern the schemas along its
   `Set-Cookie` line, the last one per name, path and domain. `@k8ordo/static` refuses
   `guard.ts` (by name at build, per module in `vite dev`), reading the slot
   through `slotOf`.
+- **A `route.ts` holds its place in the table and answers outside it.**
+  It is a slot of the grammar that answers its directory's URL, so it
+  conflicts with a `page.tsx` or a `redirect.ts` there and counts as a
+  declared URL. The generated table puts a component that renders nothing
+  (`answered`) in its place — so it matches in declaration order, literals
+  before params, with the pages — and lists the module, imported whole, in
+  `routeModules`. The handler, having matched, answers it from there
+  (`runtime/route.ts`): a payload request gets a plain `404` (a route has no
+  payload), a method it does not export a `405` with `Allow`, `HEAD` falls
+  back to `GET` without the body, the guards run first, and the handler runs
+  in the `route` phase, so it writes cookies. No same-origin check: what
+  posts to a route.ts is not a form on this site. The generator reads its
+  exports (`readExports`, oxc) and refuses one that exports no method.
+  `@k8ordo/static` writes each as the file its `GET` answered and refuses
+  any other method export, by name at build and per module in `vite dev`.
 - **A page's `notFound()` is its answer, and a document waits for it.**
   `notFound()` lives in `@k8ordo/router` (so a page reads the same under
   either mode) and is recognised by its `Symbol.for` brand. The handler
@@ -205,8 +240,9 @@ ParamsSchemaFor<pattern>`, lists per page pattern the schemas along its
   also writes every Suspense boundary in place — it waits for `allReady` and
   outlines nothing — so a file never carries a hidden segment for a script to
   move in after hydration has started.
-- **The handler owns the methods.** It answers `GET`, `HEAD` and `POST`, and
-  anything else with a `405` and `Allow` — here, not in `@k8ordo/server`'s
+- **The handler owns the methods.** A page answers `GET`, `HEAD` and `POST`,
+  and anything else with a `405` and `Allow` (a `route.ts` answers what it
+  exports) — here, not in `@k8ordo/server`'s
   `serve`, because a host that calls the built handler directly has no
   `serve` in front of it. `HEAD` gets a `null` body: a not-found is answered
   before anything renders, and a page runs only as far as its own component,
@@ -256,6 +292,7 @@ src/
   runtime/request-scope.ts   the request in progress: phases, cookies() / responseHeaders() / requestHeaders(), answer()
   runtime/cookies.ts         the per-request cookie jar and its Set-Cookie lines
   runtime/guard.ts           Guard / GuardContext, runGuards (outer first, first Response ends it)
+  runtime/route.ts           ROUTE_METHODS, which export answers a method, 405, running it in the route phase
   runtime/render.tsx         the matched stack, nested through children; the framework's own not-found, inside the root layout
   runtime/page-watch.ts      a page called as the render calls it, its answer watched
   runtime/page-boundary.tsx  a navigation's late notFound() → a document load; anything else on to error.tsx

@@ -45,6 +45,16 @@ export const componentCategories: NavCategory[] = [
         path: '/:locale/ui/components/pagination',
         description: m.components.pagination.description,
       },
+      {
+        name: 'SideNav',
+        path: '/:locale/ui/components/side-nav',
+        description: m.components.sideNav.description,
+      },
+      {
+        name: 'TableOfContents',
+        path: '/:locale/ui/components/table-of-contents',
+        description: m.components.tableOfContents.description,
+      },
     ],
   },
   {
@@ -79,6 +89,11 @@ export const componentCategories: NavCategory[] = [
         name: 'Calendar',
         path: '/:locale/ui/components/calendar',
         description: m.components.calendar.description,
+      },
+      {
+        name: 'ColorPicker',
+        path: '/:locale/ui/components/color-picker',
+        description: m.components.colorPicker.description,
       },
       {
         name: 'Select',
@@ -129,6 +144,11 @@ export const componentCategories: NavCategory[] = [
         name: 'Slider',
         path: '/:locale/ui/components/slider',
         description: m.components.slider.description,
+      },
+      {
+        name: 'RangeSlider',
+        path: '/:locale/ui/components/range-slider',
+        description: m.components.rangeSlider.description,
       },
       {
         name: 'FileField',
@@ -194,6 +214,16 @@ export const componentCategories: NavCategory[] = [
         name: 'Table',
         path: '/:locale/ui/components/table',
         description: m.components.table.description,
+      },
+      {
+        name: 'DataTable',
+        path: '/:locale/ui/components/data-table',
+        description: m.components.dataTable.description,
+      },
+      {
+        name: 'Tree',
+        path: '/:locale/ui/components/tree',
+        description: m.components.tree.description,
       },
       {
         name: 'Heading',

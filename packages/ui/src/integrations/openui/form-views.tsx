@@ -136,6 +136,13 @@ export const AutocompleteView: FC<
   return ui.renderAutocomplete(props, field.value, field.setValue);
 };
 
+export const ColorPickerView: FC<ComponentRenderProps<s.ColorPickerProps>> = ({
+  props,
+}) => {
+  const field = useStateField<string>(props.name, props.defaultValue ?? '');
+  return ui.renderColorPicker(props, field.value, field.setValue);
+};
+
 export const DateFieldView: FC<ComponentRenderProps<s.DateFieldProps>> = ({
   props,
 }) => {
@@ -155,4 +162,14 @@ export const CalendarView: FC<ComponentRenderProps<s.CalendarProps>> = ({
 }) => {
   const field = useStateField<string>(props.name, props.defaultValue ?? '');
   return ui.renderCalendar(props, field.value, field.setValue);
+};
+
+export const RangeSliderView: FC<ComponentRenderProps<s.RangeSliderProps>> = ({
+  props,
+}) => {
+  const field = useStateField<readonly [number, number]>(
+    props.name,
+    props.defaultValue ?? [props.min ?? 0, props.max ?? 100],
+  );
+  return ui.renderRangeSlider(props, field.value, field.setValue);
 };

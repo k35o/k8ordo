@@ -410,6 +410,29 @@ export const autocomplete = {
   }),
 };
 
+export const rangeSlider = {
+  description: message({
+    ja: '2 つのつまみで範囲を選ぶスライダー',
+    en: 'A slider with two thumbs for picking a range.',
+  }),
+  controlledTitle: message({
+    ja: '制御モード',
+    en: 'Controlled',
+  }),
+  formTitle: message({
+    ja: 'フォームで使う',
+    en: 'In a form',
+  }),
+  formDescription: message({
+    ja: 'つまみはそれぞれ本物の `<input type="range">` で、`name` の組の 2 つの欄として送られます。非制御のときは値を DOM に持つので、フォームの reset と変更の有無の判定がそのまま効きます。',
+    en: 'Each thumb is a real `<input type="range">` and submits as one of the two fields named by the `name` pair. Uncontrolled, the values stay in the DOM, so a form’s reset and its dirty check work on them as on any input.',
+  }),
+  disabledTitle: message({
+    ja: '無効',
+    en: 'Disabled',
+  }),
+};
+
 export const dateField = {
   description: message({
     ja: 'ブラウザの日付入力（`type="date"`）をそのまま使う入力欄。値は `YYYY-MM-DD`',
@@ -438,6 +461,45 @@ export const dateField = {
   formDescription: message({
     ja: '`z.iso.date()` から導いた `input` をそのまま spread できます。`type` を取り除く必要はありません。',
     en: 'Spread the `input` derived from `z.iso.date()` as is. There is no need to take `type` out.',
+  }),
+};
+
+export const colorPicker = {
+  description: message({
+    ja: '色を `#rrggbb` で選ぶ入力欄。色相・彩度・明度のつまみと見本から選べる',
+    en: 'A field for picking a color as `#rrggbb`, with hue / saturation / lightness sliders and swatches.',
+  }),
+  usageDescription: message({
+    ja: '値を運ぶのは `name` を持つテキスト欄です。つまみや見本で選んだ色はその欄に書き込まれ、打ち込んだときと同じく `input` イベントで知らされます。打っている間は 6 桁そろって初めて色として扱い、離れるときと Enter で小文字の `#rrggbb` にそろえます（3 桁の `#f80` もそこで広げます）。',
+    en: 'The value travels in a text field that carries `name`. A color picked with the sliders or a swatch is written into it and announced with an `input` event, just as if it had been typed. While typing, the text counts as a color only once it has six digits; on blur and on Enter it is tidied to lowercase `#rrggbb` (a three-digit `#f80` is expanded there).',
+  }),
+  swatchesTitle: message({
+    ja: '見本',
+    en: 'Swatches',
+  }),
+  swatchesDescription: message({
+    ja: '見本はそれぞれ `label` を名前に持つトグルボタンで、いまの色と同じものが押された状態になります。',
+    en: 'Each swatch is a toggle button named by its `label`; the one matching the current color is pressed.',
+  }),
+  controlledTitle: message({
+    ja: '制御モード',
+    en: 'Controlled',
+  }),
+  controlledDescription: message({
+    ja: "`onChange` は `#rrggbb` を受け取ります。欄を空にしたときは `''` です。",
+    en: "`onChange` receives `#rrggbb`, or `''` when the field is emptied.",
+  }),
+  disabledTitle: message({
+    ja: '無効',
+    en: 'Disabled',
+  }),
+  formTitle: message({
+    ja: '@k8ordo/form と使う',
+    en: 'With @k8ordo/form',
+  }),
+  formDescription: message({
+    ja: '`formFields` が導いた `input` をそのまま spread できます。スキーマの `.regex()` は `pattern` として届き、組み込みの `#[0-9a-fA-F]{6}` を置き換えます。つまみや見本での変更も、フォームには打ち込んだときと同じように伝わります（変更の有無、ルール、エラーの解除、reset）。',
+    en: 'Spread the `input` that `formFields` derives as is. A `.regex()` in the schema arrives as `pattern` and replaces the built-in `#[0-9a-fA-F]{6}`. A change made with the sliders or a swatch reaches the form just as typing does (dirty state, rules, clearing an error, reset).',
   }),
 };
 
@@ -770,6 +832,52 @@ export const prose = {
   }),
 };
 
+export const dataTable = {
+  description: message({
+    ja: '並べ替え・行の選択・列の表示切り替えができる表。状態はすべて外から渡す',
+    en: 'A table with sorting, row selection, and column visibility, all driven by state you own.',
+  }),
+  basicDescription: message({
+    ja: '状態はすべて呼び出し側が持つ（制御型）。並べ替えの状態を受けても DataTable は並べ替えず、渡された順に描くので、サーバーで並べ替えるときも同じ部品で済む。機能は、その変化を受け取る関数を渡したときだけ現れる。',
+    en: 'Every piece of state is yours (controlled). DataTable takes the sort state but does not sort — it draws `rows` in the order given, so the same component works when the server sorts. Each feature appears only when you pass the handler that receives its changes.',
+  }),
+  urlTitle: message({
+    ja: '並べ替えとページを URL に持つ',
+    en: 'Keeping the Sort and the Page in the URL',
+  }),
+  urlDescription: message({
+    ja: '`@k8ordo/state` の url スロットに並べ替えとページを置く例。並べ替えるとアドレスバーが変わり、リンクを渡した相手にも同じ並びの同じページが見え、戻るで前の並びに戻る。',
+    en: 'This example keeps the sort and the page in `@k8ordo/state`’s url slot. Sort, and the address bar changes: whoever you send the link to sees the same order on the same page, and Back returns to the previous order.',
+  }),
+  emptyTitle: message({
+    ja: '行が無いとき',
+    en: 'No Rows',
+  }),
+  emptyDescription: message({
+    ja: '`rows` が空のときは、`emptyState` を列をまたぐ行に描く。`EmptyState` を渡す。',
+    en: 'When `rows` is empty, `emptyState` is drawn in a row spanning the columns. Pass an `EmptyState`.',
+  }),
+};
+
+export const tree = {
+  description: message({
+    ja: '枝を開閉できる階層。WAI-ARIA の tree のキーボード操作に従う',
+    en: 'A hierarchy whose branches open and close, with the WAI-ARIA tree keyboard model.',
+  }),
+  basicDescription: message({
+    ja: '項目は `{ id, label, icon?, children? }` の木で渡す。上下で見えている項目を移り、右で枝を開いて最初の子へ、左で枝を閉じて親へ戻る。Home / End、Enter / Space での選択、先頭の文字での移動もできる。',
+    en: 'Pass the nodes as a tree of `{ id, label, icon?, children? }`. Up and Down move between the visible nodes, Right opens a branch and then moves to its first child, and Left closes it or moves to the parent. Home / End, Enter / Space to select, and typing a first letter work too.',
+  }),
+  controlledTitle: message({
+    ja: '開いている枝と選択を持つ',
+    en: 'Owning the Open Branches and the Selection',
+  }),
+  controlledDescription: message({
+    ja: '開いている枝（`expandedIds`）と選択（`selectedId`）は外から渡せる。`onChange` には選んだ項目の `id` が届く。',
+    en: 'The open branches (`expandedIds`) and the selection (`selectedId`) can be yours. `onChange` receives the `id` of the node picked.',
+  }),
+};
+
 export const table = {
   description: message({
     ja: '意味論を保ちつつ横スクロールにも対応するテーブル',
@@ -812,6 +920,14 @@ export const progress = {
   withLabelTitle: message({
     ja: 'ラベル付き',
     en: 'With Label',
+  }),
+  indeterminateTitle: message({
+    ja: '進み具合が分からないとき',
+    en: 'When progress is unknown',
+  }),
+  indeterminateDescription: message({
+    ja: '`value` を省くと、帯が溝の中を行き来する表示になります。読み上げでは値を持たず、名前は `label`（省くと組み込みの「読み込み中」）です。動きを減らす設定では、移動をやめて明滅だけにします。',
+    en: 'Leave `value` out and the bar slides back and forth. It carries no value for assistive technology and is named by `label` (the built-in “loading” wording when omitted). With reduced motion it stops sliding and only pulses.',
   }),
 };
 
@@ -1086,6 +1202,44 @@ export const pagination = {
   disabledTitle: message({
     ja: '無効',
     en: 'Disabled',
+  }),
+};
+
+export const sideNav = {
+  description: message({
+    ja: '見出しごとにまとめたリンクで、今のページを傍線で示すサイドナビ',
+    en: 'Side navigation: links grouped under titles, with the current page marked by a bar.',
+  }),
+  basicDescription: message({
+    ja: 'ui はルーターを持たないので、どのリンクが今のページかは `current` で渡す。`aria-current="page"` が付き、傍線で示される。',
+    en: 'The library has no router, so you say which link is current with `current`. It gets `aria-current="page"` and the bar.',
+  }),
+  renderAnchorTitle: message({
+    ja: 'ルーターのリンクに差し替える',
+    en: 'Using Your Router’s Link',
+  }),
+  renderAnchorDescription: message({
+    ja: '`renderAnchor` は要素そのものを差し替える。束には `href`・`className`・`children`・`aria-current` と、渡した属性（ドロワーを閉じる `onClick` など）がすべて入っている。このサイトのサイドナビもこれで組んでいる。',
+    en: '`renderAnchor` replaces the element itself. Its bag holds `href`, `className`, `children`, `aria-current`, and every attribute you passed (an `onClick` that closes a drawer, say). This site’s side navigation is built with it.',
+  }),
+};
+
+export const tableOfContents = {
+  description: message({
+    ja: 'ページの目次。今読んでいる見出しを示す',
+    en: 'The contents of the page, marking the heading being read.',
+  }),
+  basicDescription: message({
+    ja: '見出しを `{ id, label, children? }` の木で渡す。右の目次はこのページの見出しを指していて、スクロールすると今の見出しが動く。',
+    en: 'Pass the headings as a tree of `{ id, label, children? }`. The contents here point at this page’s own headings; scroll, and the current one moves.',
+  }),
+  activeTitle: message({
+    ja: '今の見出しの決め方',
+    en: 'How the Current Heading Is Chosen',
+  }),
+  activeDescription: message({
+    ja: '見出しの `scroll-margin-block-start` を読み取り位置にし、それを最後に越えた見出しを今の見出しにする。固定ヘッダーの高さを見出しの scroll-margin に指定すれば、目次から飛んだ見出しがそのまま今の見出しになる。文書の終わりまで来たら、最後の節が短くても最後の見出しにする。縦書きの文書では、vertical-rl なら右から左、vertical-lr なら左から右へ読む向きで決める。',
+    en: 'Each heading’s `scroll-margin-block-start` is the reading line, and the last heading to pass it is the current one. Give the headings the scroll margin your sticky header needs, and a heading reached from the contents becomes current. At the end of the document the last heading is current even if its section is short. In a vertical document it reads from right to left (`vertical-rl`) or left to right (`vertical-lr`).',
   }),
 };
 
