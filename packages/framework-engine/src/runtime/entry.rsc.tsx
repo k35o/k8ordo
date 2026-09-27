@@ -298,9 +298,14 @@ const respond = async (request: Request): Promise<Response> => {
 
   const temporaryReferences = createTemporaryReferenceSet();
   // An action answers the request as much as a guard does: it reads and
-  // writes the cookies, and what it writes goes on the answer.
+  // writes the cookies, and what it writes goes on the answer. It runs in the
+  // context the schemas of the page it was posted to left, as the guards and
+  // the render do — a message it builds is in the locale that page's URL
+  // names.
   const action: ActionResult = isAction
-    ? await inPhase('action', () => runAction(request, temporaryReferences))
+    ? await parsed.enter(() =>
+        inPhase('action', () => runAction(request, temporaryReferences)),
+      )
     : {};
   if (action.redirect !== undefined && !addressed) {
     // A form posted without JavaScript: the browser follows a 303 with a GET.
