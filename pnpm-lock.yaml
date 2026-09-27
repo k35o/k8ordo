@@ -347,6 +347,9 @@ importers:
       '@k8ordo/form':
         specifier: workspace:^
         version: link:../../packages/form
+      '@k8ordo/i18n':
+        specifier: workspace:^
+        version: link:../../packages/i18n
       '@k8ordo/router':
         specifier: workspace:^
         version: link:../../packages/router

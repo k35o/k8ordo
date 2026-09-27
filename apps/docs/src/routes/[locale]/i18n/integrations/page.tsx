@@ -50,18 +50,12 @@ export const talkSchema = z.object({
 const TALK_PAGE = `// src/routes/[locale]/talks/new/page.tsx
 import { formFields } from '@k8ordo/form/server';
 
-import { locales } from '../../../../i18n';
 import { createTalk } from './_parts/actions';
 import { talkSchema } from './_parts/schema';
 import { TalkForm } from './_parts/talk-form';
 
 export default function NewTalkPage() {
-  return (
-    <TalkForm
-      action={createTalk.bind(null, locales.getLocale())}
-      fields={formFields(talkSchema)}
-    />
-  );
+  return <TalkForm action={createTalk} fields={formFields(talkSchema)} />;
 }`;
 
 const TALK_ACTION = `// src/routes/[locale]/talks/new/_parts/actions.ts
@@ -71,18 +65,14 @@ import { parseForm } from '@k8ordo/form/server';
 import type { FormState } from '@k8ordo/form/server';
 
 import { saveTalk } from '../../../../../db/talks';
-import { locales } from '../../../../../i18n';
 import { talkSchema } from './schema';
 
+// Posted from /ja/talks/new, it runs in ja: the zod messages are Japanese.
 export async function createTalk(
-  locale: string,
   _previous: FormState,
   formData: FormData,
 ): Promise<FormState> {
-  const parsed = locales.run(
-    locales.is(locale) ? locale : locales.default,
-    () => parseForm(talkSchema, formData),
-  );
+  const parsed = parseForm(talkSchema, formData);
   if (parsed.success) await saveTalk(parsed.data);
   return parsed.state;
 }`;

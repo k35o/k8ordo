@@ -1098,6 +1098,13 @@ to where it redirected, or the payload the client runtime applies. The page
 re-rendered after it sees the cookies the request carried in `request`, not
 what the action wrote.
 
+**An action runs in the context of the page it was posted to.** A call
+posts to the URL of the page on screen, whose params schemas run for that
+request as they do for its render, and the action runs in what they wrote —
+posted from `/ja/talks/new`, it runs in `ja` under `@k8ordo/i18n`, so the
+zod messages `parseForm` produces are the page's language with nothing bound
+to the action or wrapped around it.
+
 Calling the action re-renders the page and sends both answers back together,
 so the screen is up to date by the time the caller has its value — one round
 trip, not two.

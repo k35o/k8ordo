@@ -231,6 +231,29 @@ describe('the built application in a browser', () => {
     await page.close();
   }, 30_000);
 
+  it('runs an action a [locale] page called in the locale its URL names', async () => {
+    const page = await browser.newPage();
+    await page.goto(server.url);
+    await hydrated(page);
+    await page.evaluate(() => {
+      Object.assign(window, { stayed: true });
+    });
+    // リンクは無いので、ルーターに渡すナビゲーションで入る
+    await page.evaluate(() => navigation.navigate('/ja/greeting').finished);
+    await page.getByTestId('title').getByText('greeting (ja)').waitFor();
+
+    await page.getByLabel('your name').fill('k8o');
+    await page.getByRole('button', { name: 'greet' }).click();
+
+    await page
+      .getByTestId('greeting')
+      .getByText('こんにちは、k8o さん。')
+      .waitFor();
+    // 文書の読み込みではなく、JavaScript が呼んだ action
+    expect(await page.evaluate(() => 'stayed' in window)).toBe(true);
+    await page.close();
+  }, 30_000);
+
   it('hydrates the page where it streamed in, leaving no hidden copy and one <title>', async () => {
     // ダークの訪問者: ルートの SchemeProvider の値が hydrate の直後に変わる
     const context = await browser.newContext({ colorScheme: 'dark' });
