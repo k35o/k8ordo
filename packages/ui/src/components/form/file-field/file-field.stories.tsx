@@ -518,3 +518,51 @@ export const DropWhenDisabled: Story = {
     ).toBeDisabled();
   },
 };
+
+// ブラウザが accept を当てるのは選択ダイアログだけなので、ドロップで届いた
+// ファイルは FileField が選り分ける。当たらない分は一覧にも送信にも入らない
+export const DropSkipsFilesOutsideAccept: Story = {
+  args: {
+    accept: 'image/*',
+    multiple: true,
+  },
+  render: DropzoneRender,
+  play: async ({ canvas, canvasElement }) => {
+    drag(dropzoneOf(canvasElement), [
+      new File(['png'], 'photo.png', { type: 'image/png' }),
+      new File(['pdf'], 'report.pdf', { type: 'application/pdf' }),
+    ]).drop();
+    await canvas.findByText('photo.png');
+
+    await expect(canvas.queryByText('report.pdf')).not.toBeInTheDocument();
+    await expect(submittedNames(fileInputOf(canvasElement))).toEqual([
+      'photo.png',
+    ]);
+  },
+};
+
+// 当たるファイルが 1 つも無いドロップは、選んであったファイルを置き換えず、
+// onChange も input イベントも出さない
+export const DropOfRejectedFilesKeepsTheSelection: Story = {
+  args: {
+    accept: 'image/*',
+    onChange: fn(),
+  },
+  render: DropzoneRender,
+  play: async ({ args, canvas, canvasElement }) => {
+    const input = fileInputOf(canvasElement);
+    pick(input, new File(['png'], 'photo.png', { type: 'image/png' }));
+    await canvas.findByText('photo.png');
+    const onInput = fn();
+    input.addEventListener('input', onInput);
+
+    drag(dropzoneOf(canvasElement), [
+      new File(['pdf'], 'report.pdf', { type: 'application/pdf' }),
+    ]).drop();
+
+    await expect(args.onChange).toHaveBeenCalledTimes(1);
+    await expect(onInput).not.toHaveBeenCalled();
+    await expect(submittedNames(input)).toEqual(['photo.png']);
+    await expect(canvas.getByText('photo.png')).toBeInTheDocument();
+  },
+};

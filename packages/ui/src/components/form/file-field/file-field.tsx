@@ -23,6 +23,7 @@ import { useFormStatus } from 'react-dom';
 
 import { cn } from '../../../helpers/cn';
 import { getMessages } from '../../../i18n/current';
+import { acceptsFile } from '../../../internal/accepts-file';
 import { Button } from '../../buttons/button';
 import { IconButton } from '../../buttons/icon-button';
 import { CloseIcon } from '../../icons';
@@ -106,6 +107,7 @@ export const Root = ({
   invalid = false,
   required = false,
   multiple = false,
+  accept,
   maxFiles,
   defaultValue,
   onChange,
@@ -203,13 +205,19 @@ export const Root = ({
     [onChange],
   );
 
+  // ブラウザが accept を当てるのは選択ダイアログだけなので、ドロップで届いた
+  // ファイルはここで選り分ける
   const onFilesDrop = useCallback(
     (files: File[]) => {
-      if (files.length > 0) {
-        commitFiles(withAdded(files));
+      const taken =
+        accept === undefined
+          ? files
+          : files.filter((file) => acceptsFile(file, accept));
+      if (taken.length > 0) {
+        commitFiles(withAdded(taken));
       }
     },
-    [commitFiles, withAdded],
+    [accept, commitFiles, withAdded],
   );
 
   const onFileDelete = useCallback(
@@ -247,6 +255,7 @@ export const Root = ({
       <div className="w-full">
         <input
           {...rest}
+          accept={accept}
           aria-invalid={invalid}
           className="sr-only"
           disabled={disabledResolved}
