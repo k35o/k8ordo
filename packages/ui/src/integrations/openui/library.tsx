@@ -13,6 +13,7 @@ import {
   CheckboxCardView,
   CheckboxGroupView,
   CheckboxView,
+  ColorPickerView,
   DateFieldView,
   DatePickerView,
   ListBoxView,
@@ -140,6 +141,7 @@ const renderers = {
   DataTable: ({ props }: ComponentRenderProps<sc.DataTableProps>) => (
     <ui.DataTableWidget props={props} />
   ),
+  Tree: ({ props }: ComponentRenderProps<sc.TreeProps>) => ui.renderTree(props),
   SideNav: ({ props }: ComponentRenderProps<sc.SideNavProps>) =>
     ui.renderSideNav(props),
 
@@ -149,6 +151,7 @@ const renderers = {
   NumberField: NumberFieldView,
   Slider: SliderView,
   RangeSlider: RangeSliderView,
+  ColorPicker: ColorPickerView,
   DateField: DateFieldView,
   DatePicker: DatePickerView,
   Calendar: CalendarView,

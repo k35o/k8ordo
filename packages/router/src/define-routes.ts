@@ -1,4 +1,4 @@
-import { createElement } from 'react';
+import { createElement, Suspense } from 'react';
 import type { ComponentType, ReactNode } from 'react';
 
 import { RouteErrorBoundary } from './boundary';
@@ -18,15 +18,17 @@ export type RouteComponent = ComponentType<never>;
 /**
  * A leaf renders; a branch wraps its children in an optional layout, and
  * may name an `error` component to show in place of what is below when it
- * throws — inside the layout, so the frame survives the failure. Lazy
- * components (`React.lazy`) are objects, not functions, so a branch is
- * recognized by its `children` key rather than by `typeof`.
+ * throws — inside the layout, so the frame survives the failure — and a
+ * `loading` component to show while what is below suspends. Lazy components
+ * (`React.lazy`) are objects, not functions, so a branch is recognized by
+ * its `children` key rather than by `typeof`.
  */
 export type RouteNode =
   | RouteComponent
   | {
       layout?: RouteComponent;
       error?: ErrorComponent;
+      loading?: ComponentType;
       children: RoutesRecord;
     };
 
@@ -98,13 +100,10 @@ type Entry = {
   stack: readonly RouteComponent[];
 };
 
-const isBranch = (
-  node: RouteNode,
-): node is {
-  layout?: RouteComponent;
-  error?: ErrorComponent;
-  children: RoutesRecord;
-} => typeof node === 'object' && 'children' in node;
+type Branch = Exclude<RouteNode, RouteComponent>;
+
+const isBranch = (node: RouteNode): node is Branch =>
+  typeof node === 'object' && 'children' in node;
 
 /**
  * A branch's `error` becomes an element of the stack — after the layout, so
@@ -123,6 +122,26 @@ const boundaryFor = (
       children === undefined ? outlet() : children,
     );
   return Boundary;
+};
+
+/**
+ * A branch's `loading` becomes an element of the stack too — after the
+ * layout and inside the error boundary, so what the boundary catches is what
+ * the fallback stood in for. A plain `<Suspense>`: a page change under one
+ * already showing keeps the page on screen while the next one loads, as
+ * every page change does, and the fallback shows while it first streams in
+ * and when a navigation mounts it anew.
+ */
+const loadingFor = (
+  Fallback: ComponentType,
+): ComponentType<{ children?: ReactNode }> => {
+  const Loading = ({ children }: { children?: ReactNode }): ReactNode =>
+    createElement(
+      Suspense,
+      { fallback: createElement(Fallback) },
+      children === undefined ? outlet() : children,
+    );
+  return Loading;
 };
 
 const decode = (value: string): string => {
@@ -179,6 +198,9 @@ export function defineRoutes<R extends RoutesRecord>(record: R): Routes<R> {
           ...(node.error === undefined
             ? []
             : [boundaryFor(node.error) as RouteComponent]),
+          ...(node.loading === undefined
+            ? []
+            : [loadingFor(node.loading) as RouteComponent]),
         ];
         walk(node.children, pattern === '/' ? '' : pattern, below);
       } else {

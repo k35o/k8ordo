@@ -980,6 +980,49 @@ Props:
 - `value`: `string[]`
 - Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `type` / `role` / `className` / `style` / `children` / `autoComplete` / `aria-autocomplete` / `aria-controls` / `aria-expanded` / `aria-activedescendant`.
 
+### ColorPicker
+
+A color field whose value is `#rrggbb`. The value lives in a text input that
+carries `name`, so it submits and resets like any other field; hue, saturation,
+and lightness sliders and optional `swatches` (toggle buttons named by their
+`label`) write into it and announce the change with an `input` event, as if it
+had been typed. Typing reports a color only once it has six digits; on blur and
+on Enter the text is tidied to lowercase `#rrggbb`, and a three-digit `#f80` is
+expanded. Emptying the field reports `''`. Spread `@k8ordo/form`'s `input` onto
+it as is: a `.regex()` in the schema arrives as `pattern` and replaces the
+built-in `#[0-9a-fA-F]{6}`. The panel stays horizontal inside vertical writing
+mode.
+
+```tsx
+import { ColorPicker, FormControl } from '@k8ordo/ui';
+
+<FormControl
+  label="Accent color"
+  renderInput={(props) => (
+    <ColorPicker
+      {...props}
+      defaultValue="#0d9488"
+      name="accent"
+      swatches={[
+        { value: '#0d9488', label: 'Teal' },
+        { value: '#f97316', label: 'Orange' },
+      ]}
+    />
+  )}
+/>;
+```
+
+Props:
+
+- `defaultValue`: `string`
+- `invalid`: `boolean` (default: `false`)
+- `onChange`: `(value: string) => void`
+- `ref`: `Ref<HTMLInputElement>`
+- `swatches`: `readonly ColorPickerSwatch[]`
+- `type`: `string`
+- `value`: `string`
+- Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `className` / `style` / `children`.
+
 ### Checkbox
 
 The label is passed as the `label` prop, not as children. `onChange` is `(checked, event)`.
@@ -1709,6 +1752,55 @@ Props:
 - `selectedIds`: `readonly string[]` (default: `NONE`)
 - `sort`: `DataTableSort` | `null` (default: `null`)
 
+### Tree
+
+A hierarchy whose parents open and close — files and folders, an outline —
+with the WAI-ARIA tree view keyboard model. Pass the nodes as a tree of
+`{ id, label, icon?, children? }`.
+
+```tsx
+import { Tree } from '@k8ordo/ui';
+
+<Tree
+  defaultExpandedIds={['src']}
+  items={[
+    {
+      id: 'src',
+      label: 'src',
+      children: [{ id: 'index', label: 'index.ts' }],
+    },
+    { id: 'readme', label: 'README.md' },
+  ]}
+  label="Files"
+  onChange={(id) => open(id)}
+/>;
+```
+
+- Which parents are open is controllable (`expandedIds` / `defaultExpandedIds`
+  / `onExpandedChange`), and so is the selected node (`selectedId` /
+  `defaultSelectedId` / `onChange`, called with the node's `id`).
+- Keyboard: Down / Up move between the visible nodes; Right opens a closed
+  parent, then moves to its first child; Left closes an open parent, or moves
+  to the parent; Home / End go to the first / last visible node; Enter or Space
+  selects; a character moves to the next node whose label starts with it.
+- Clicking a node selects it and, on a parent, opens or closes it.
+- One node takes Tab at a time (roving tabindex): the focused one, else the
+  selected one, else the first.
+- Under `.writing-v` the nodes run right to left, so Left / Right move between
+  them and Down / Up open and close.
+
+Props:
+
+- `items`: `readonly TreeItem[]` (required)
+- `label`: `string` (required)
+- `defaultExpandedIds`: `readonly string[]`
+- `defaultSelectedId`: `string` | `null` (default: `null`)
+- `expandedIds`: `readonly string[]`
+- `onChange`: `(id: string) => void`
+- `onExpandedChange`: `(ids: readonly string[]) => void`
+- `selectedId`: `string` | `null`
+- Other props are forwarded to `HTMLAttributes<HTMLUListElement>`, except `children` / `className` / `style` / `role` / `aria-label`.
+
 ## Feedback
 
 ### Alert
@@ -2353,6 +2445,7 @@ Every key in the `Messages` type. All values are `string`.
 | RangeSlider   | `rangeSliderStart`, `rangeSliderEnd`                                                                                                                |
 | Calendar      | `calendarPreviousMonth`, `calendarNextMonth`                                                                                                        |
 | DatePicker    | `datePickerOpen`, `datePickerDialog`                                                                                                                |
+| ColorPicker   | `colorPickerHue`, `colorPickerSaturation`, `colorPickerLightness`, `colorPickerSwatches`                                                            |
 | PasswordInput | `passwordShow`, `passwordHide`                                                                                                                      |
 | ListBox       | `listBoxPlaceholder`                                                                                                                                |
 | Breadcrumb    | `breadcrumb`                                                                                                                                        |

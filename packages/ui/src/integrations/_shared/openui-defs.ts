@@ -108,6 +108,11 @@ export const buildComponentLibrary = <C>(
     'Table the reader can sort (by the columns marked sortable) and, with selectable, pick rows from. Every row must have exactly as many cells as there are columns.',
     s.dataTableProps,
   );
+  const Tree = def(
+    'Tree',
+    'Tree of nodes that open and close, such as files and folders, navigable with the arrow keys. List every node flat; a child names its parent by parentId.',
+    s.treeProps,
+  );
   const TextField = def(
     'TextField',
     'Single-line text input, bound to form state by name.',
@@ -137,6 +142,11 @@ export const buildComponentLibrary = <C>(
     'RangeSlider',
     'Slider with two thumbs for picking a range, bound to form state by name as [lower, upper].',
     s.rangeSliderProps,
+  );
+  const ColorPicker = def(
+    'ColorPicker',
+    'Color input with a visible label (#rrggbb), hue / saturation / lightness sliders, and optional preset swatches, bound to form state by name.',
+    s.colorPickerProps,
   );
   const DateField = def(
     'DateField',
@@ -254,6 +264,7 @@ export const buildComponentLibrary = <C>(
     SideNav.ref,
     Table.ref,
     DataTable.ref,
+    Tree.ref,
     TextField.ref,
     Textarea.ref,
     PasswordInput.ref,
@@ -263,6 +274,7 @@ export const buildComponentLibrary = <C>(
     DateField.ref,
     DatePicker.ref,
     Calendar.ref,
+    ColorPicker.ref,
     Checkbox.ref,
     Switch.ref,
     Select.ref,
@@ -423,6 +435,7 @@ export const buildComponentLibrary = <C>(
       SideNav,
       Table,
       DataTable,
+      Tree,
       TextField,
       Textarea,
       PasswordInput,
@@ -432,6 +445,7 @@ export const buildComponentLibrary = <C>(
       DateField,
       DatePicker,
       Calendar,
+      ColorPicker,
       Checkbox,
       Switch,
       Select,

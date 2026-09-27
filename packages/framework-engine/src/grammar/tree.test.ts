@@ -255,3 +255,20 @@ describe('route.ts', () => {
     expect(problems[0]?.message).toContain('"/feed" is already declared');
   });
 });
+
+describe('loading.tsx', () => {
+  it('fills the loading slot of the directory it sits in', () => {
+    const { tree, problems } = parseRouteTree([
+      'page.tsx',
+      'products/loading.tsx',
+      'products/page.tsx',
+    ]);
+    expect(problems).toStrictEqual([]);
+    expect(childOf(tree, 'products').loading).toBe('products/loading.tsx');
+  });
+
+  it('declares no route of its own', () => {
+    const { problems } = parseRouteTree(['page.tsx', 'empty/loading.tsx']);
+    expect(problems.map((problem) => problem.path)).toStrictEqual(['empty']);
+  });
+});
