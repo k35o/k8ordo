@@ -464,6 +464,45 @@ export const dateField = {
   }),
 };
 
+export const colorPicker = {
+  description: message({
+    ja: '色を `#rrggbb` で選ぶ入力欄。色相・彩度・明度のつまみと見本から選べる',
+    en: 'A field for picking a color as `#rrggbb`, with hue / saturation / lightness sliders and swatches.',
+  }),
+  usageDescription: message({
+    ja: '値を運ぶのは `name` を持つテキスト欄です。つまみや見本で選んだ色はその欄に書き込まれ、打ち込んだときと同じく `input` イベントで知らされます。打っている間は 6 桁そろって初めて色として扱い、離れるときと Enter で小文字の `#rrggbb` にそろえます（3 桁の `#f80` もそこで広げます）。',
+    en: 'The value travels in a text field that carries `name`. A color picked with the sliders or a swatch is written into it and announced with an `input` event, just as if it had been typed. While typing, the text counts as a color only once it has six digits; on blur and on Enter it is tidied to lowercase `#rrggbb` (a three-digit `#f80` is expanded there).',
+  }),
+  swatchesTitle: message({
+    ja: '見本',
+    en: 'Swatches',
+  }),
+  swatchesDescription: message({
+    ja: '見本はそれぞれ `label` を名前に持つトグルボタンで、いまの色と同じものが押された状態になります。',
+    en: 'Each swatch is a toggle button named by its `label`; the one matching the current color is pressed.',
+  }),
+  controlledTitle: message({
+    ja: '制御モード',
+    en: 'Controlled',
+  }),
+  controlledDescription: message({
+    ja: "`onChange` は `#rrggbb` を受け取ります。欄を空にしたときは `''` です。",
+    en: "`onChange` receives `#rrggbb`, or `''` when the field is emptied.",
+  }),
+  disabledTitle: message({
+    ja: '無効',
+    en: 'Disabled',
+  }),
+  formTitle: message({
+    ja: '@k8ordo/form と使う',
+    en: 'With @k8ordo/form',
+  }),
+  formDescription: message({
+    ja: '`formFields` が導いた `input` をそのまま spread できます。スキーマの `.regex()` は `pattern` として届き、組み込みの `#[0-9a-fA-F]{6}` を置き換えます。つまみや見本での変更も、フォームには打ち込んだときと同じように伝わります（変更の有無、ルール、エラーの解除、reset）。',
+    en: 'Spread the `input` that `formFields` derives as is. A `.regex()` in the schema arrives as `pattern` and replaces the built-in `#[0-9a-fA-F]{6}`. A change made with the sliders or a swatch reaches the form just as typing does (dirty state, rules, clearing an error, reset).',
+  }),
+};
+
 export const datePicker = {
   description: message({
     ja: '日付入力と、ポップオーバーで開くカレンダーを組み合わせた入力欄',

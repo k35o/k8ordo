@@ -40,6 +40,10 @@ export const ja: Messages = {
   datePickerOpen: 'カレンダーから選ぶ',
   datePickerDialog: '日付を選ぶ',
 
+  colorPickerHue: '色相',
+  colorPickerSaturation: '彩度',
+  colorPickerLightness: '明度',
+  colorPickerSwatches: '色の見本',
   passwordShow: 'パスワードを表示',
   passwordHide: 'パスワードを非表示',
 

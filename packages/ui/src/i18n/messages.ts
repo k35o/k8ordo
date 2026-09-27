@@ -57,6 +57,13 @@ export type Messages = {
   /** DatePicker が開くポップオーバー（dialog）の名前 */
   datePickerDialog: string;
 
+  /** ColorPicker の HSL のつまみ */
+  colorPickerHue: string;
+  colorPickerSaturation: string;
+  colorPickerLightness: string;
+  /** ColorPicker の見本のボタンをまとめる group の名前 */
+  colorPickerSwatches: string;
+
   passwordShow: string;
   passwordHide: string;
 
