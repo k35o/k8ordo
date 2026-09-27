@@ -171,22 +171,25 @@ export const PendingKeepsFocus: Story = {
   play: async ({ args, canvas, userEvent }) => {
     const button = canvas.getByRole('button', { name: 'ボタン' });
 
-    await userEvent.tab();
-    await userEvent.keyboard('{Enter}');
+    try {
+      await userEvent.tab();
+      await userEvent.keyboard('{Enter}');
 
-    await waitFor(() => {
-      expect(button).toHaveAttribute('aria-busy', 'true');
-    });
-    await expect(button).toHaveAttribute('aria-disabled', 'true');
-    await afterRenderingUpdate();
-    await expect(button).toHaveFocus();
+      await waitFor(() => {
+        expect(button).toHaveAttribute('aria-busy', 'true');
+      });
+      await expect(button).toHaveAttribute('aria-disabled', 'true');
+      await afterRenderingUpdate();
+      await expect(button).toHaveFocus();
 
-    await userEvent.keyboard('{Enter}');
-    await userEvent.click(button);
-    await expect(args.onAction).toHaveBeenCalledOnce();
-
-    // 終わらない transition は後続の transition をすべて待たせるので片付ける
-    finishAction();
+      await userEvent.keyboard('{Enter}');
+      await userEvent.click(button);
+      await expect(args.onAction).toHaveBeenCalledOnce();
+    } finally {
+      // 終わらない非同期の transition は、同じ React の後続の transition を
+      // すべて待たせる。途中で落ちても後のストーリーを巻き込まないよう片付ける
+      finishAction();
+    }
     await waitFor(() => {
       expect(button).not.toHaveAttribute('aria-busy');
     });
@@ -212,23 +215,27 @@ export const SubmitPendingKeepsFocus: Story = {
   play: async ({ canvas, userEvent }) => {
     const button = canvas.getByRole('button', { name: '送信' });
 
-    await userEvent.tab();
-    await userEvent.tab();
-    await userEvent.keyboard('{Enter}');
+    try {
+      await userEvent.tab();
+      await userEvent.tab();
+      await userEvent.keyboard('{Enter}');
 
-    await waitFor(() => {
-      expect(button).toHaveAttribute('aria-busy', 'true');
-    });
-    await expect(button).toHaveAttribute('aria-disabled', 'true');
-    await afterRenderingUpdate();
-    await expect(button).toHaveFocus();
+      await waitFor(() => {
+        expect(button).toHaveAttribute('aria-busy', 'true');
+      });
+      await expect(button).toHaveAttribute('aria-disabled', 'true');
+      await afterRenderingUpdate();
+      await expect(button).toHaveFocus();
 
-    await userEvent.keyboard('{Enter}');
-    await userEvent.click(canvas.getByRole('textbox', { name: '名前' }));
-    await userEvent.keyboard('{Enter}');
-    await expect(submitAction).toHaveBeenCalledOnce();
-
-    finishAction();
+      await userEvent.keyboard('{Enter}');
+      await userEvent.click(canvas.getByRole('textbox', { name: '名前' }));
+      await userEvent.keyboard('{Enter}');
+      await expect(submitAction).toHaveBeenCalledOnce();
+    } finally {
+      // 終わらない非同期の transition は、同じ React の後続の transition を
+      // すべて待たせる。途中で落ちても後のストーリーを巻き込まないよう片付ける
+      finishAction();
+    }
     await waitFor(() => {
       expect(button).not.toHaveAttribute('aria-busy');
     });
