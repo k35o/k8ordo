@@ -112,6 +112,31 @@ export const readExports = async (
     ),
   );
 
+/**
+ * The pages that export `search` — a url schema of `@k8ordo/state` saying
+ * what of the search they read. Only a page: a layout renders under pages
+ * that read different searches, or none.
+ */
+export const pagesReadingSearch = (
+  exported: ReadonlyMap<string, ReadonlySet<string>>,
+): ReadonlySet<string> =>
+  new Set(
+    [...exported]
+      .filter(([file, names]) => slotOf(file) === 'page' && names.has('search'))
+      .map(([file]) => file),
+  );
+
+/**
+ * The search is read through `@k8ordo/state`'s `urlReader`, which the table
+ * imports; an application that does not depend on it cannot build that.
+ */
+const searchWithoutState = (pages: ReadonlySet<string>): Problem[] =>
+  [...pages].map((file) => ({
+    path: file,
+    message:
+      'exports search, which is read through @k8ordo/state — add it to the application’s dependencies',
+  }));
+
 /** A route.ts that exports no method answers every request with a 405. */
 export const silentRoutes = (
   exported: ReadonlyMap<string, ReadonlySet<string>>,
@@ -159,10 +184,13 @@ export const generate = async (
   // (`(foo` など)は URLPattern にならないので、壊れた木の上で走らせると報告
   // ではなく例外になる。だから文法が通ってからだけ見る。
   const exported = await readExports(options.routesDir, files);
+  const withState = await dependsOnState(options.root);
+  const withSearch = pagesReadingSearch(exported);
   const problems = [
     ...parsed.problems,
     ...(parsed.problems.length > 0 ? [] : unreachableRoutes(parsed.tree)),
     ...silentRoutes(exported),
+    ...(withState ? [] : searchWithoutState(withSearch)),
   ];
   const { tree } = parsed;
   // 壊れた木から作った表を置いていくと、次のビルドがそれを読んで別の失敗を
@@ -185,10 +213,11 @@ export const generate = async (
         .filter(([, names]) => names.has('paramsSchema'))
         .map(([file]) => file),
     ),
+    withSearch,
   });
   const registerSource = emitRegisterModule({
     routesModule: './routes.gen',
-    stateModule: (await dependsOnState(options.root)) ? '@k8ordo/state' : null,
+    stateModule: withState ? '@k8ordo/state' : null,
     via: options.via,
   });
 

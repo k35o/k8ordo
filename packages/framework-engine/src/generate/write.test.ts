@@ -1,4 +1,15 @@
-import { declaresParams, exportsOf, silentRoutes } from './write';
+import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
+
+import type { Problem } from '../grammar/tree';
+import {
+  declaresParams,
+  exportsOf,
+  generate,
+  pagesReadingSearch,
+  silentRoutes,
+} from './write';
 
 describe('declaresParams', () => {
   it('sees the spellings a person writes', () => {
@@ -87,6 +98,52 @@ describe('exportsOf', () => {
   });
 });
 
+// search は @k8ordo/state の urlReader で読むので、アプリの依存が要る
+const generateWith = async (
+  dependencies: Record<string, string>,
+): Promise<readonly Problem[]> => {
+  const root = await mkdtemp(path.join(tmpdir(), 'k8ordo-search-'));
+  try {
+    const routesDir = path.join(root, 'src/routes');
+    await mkdir(path.join(routesDir, 'products'), { recursive: true });
+    await writeFile(
+      path.join(root, 'package.json'),
+      JSON.stringify({ dependencies }),
+    );
+    await writeFile(
+      path.join(routesDir, 'products/page.tsx'),
+      'export const search = listState.url;\nexport default function Page() { return null; }\n',
+    );
+    const { problems } = await generate({
+      root,
+      routesDir,
+      outDir: path.join(root, '.k8ordo'),
+      via: '@k8ordo/server',
+    });
+    return problems;
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+};
+
+describe('generate, for a page that exports search', () => {
+  it('refuses it by name in an application that does not depend on @k8ordo/state', async () => {
+    expect(await generateWith({ '@k8ordo/server': '*' })).toStrictEqual([
+      {
+        path: 'products/page.tsx',
+        message:
+          'exports search, which is read through @k8ordo/state — add it to the application’s dependencies',
+      },
+    ]);
+  });
+
+  it('accepts it once the application depends on @k8ordo/state', async () => {
+    expect(
+      await generateWith({ '@k8ordo/server': '*', '@k8ordo/state': '*' }),
+    ).toStrictEqual([]);
+  });
+});
+
 describe('silentRoutes', () => {
   it('names a route.ts that exports no method, which would answer only 405', () => {
     expect(
@@ -104,5 +161,19 @@ describe('silentRoutes', () => {
           'exports none of GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS — a route.ts answers the methods it exports',
       },
     ]);
+  });
+});
+
+describe('pagesReadingSearch', () => {
+  it('names the pages that export search, and nothing else that does', () => {
+    expect([
+      ...pagesReadingSearch(
+        new Map([
+          ['products/page.tsx', new Set(['default', 'search'])],
+          ['page.tsx', new Set(['default'])],
+          ['products/layout.tsx', new Set(['default', 'search'])],
+        ]),
+      ),
+    ]).toStrictEqual(['products/page.tsx']);
   });
 });

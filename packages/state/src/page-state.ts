@@ -143,3 +143,18 @@ export function definePageState(
   });
   return def;
 }
+
+/**
+ * Reads the url slot a schema describes out of a URL's search, the way
+ * `parseUrl` reads it for the definition the schema came from — defaults
+ * applied, repeated params gathered, a rejected field salvaged to its
+ * default. For code handed the schema alone: `@k8ordo/server` reads the
+ * search of a page that exports `search = listState.url` through it. The
+ * codec is built once, when this is called.
+ */
+export const urlReader = <Url extends StateSchema>(
+  schema: Url,
+): ((input: UrlInput) => output<Url>) => {
+  const codec = createUrlCodec(schema);
+  return (input) => codec.parse(input) as output<Url>;
+};
