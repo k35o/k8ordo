@@ -130,6 +130,7 @@ describe.each(browserTypes)(
       await browser.close();
     });
 
+    // Firefox は最初のページを開くだけで数秒かかり、既定の 5 秒に収まらない
     it('answers a URL no route matches with the framework’s own page, under a real 404', async () => {
       const page = await browser.newPage();
 
@@ -141,7 +142,7 @@ describe.each(browserTypes)(
       await page.getByRole('link', { name: 'nowhere' }).waitFor();
       expect(await page.title()).toBe('Not found');
       await page.close();
-    });
+    }, 30_000);
 
     it('shows that page when a client navigation reaches such a URL', async () => {
       const page = await openHydrated(origin);
@@ -154,7 +155,7 @@ describe.each(browserTypes)(
       // 文書の読み込みで行き着いたのではなく、クライアントがペイロードを取りに行った
       expect(requested).toStrictEqual(['/nowhere/index.rsc']);
       await page.close();
-    });
+    }, 30_000);
 
     it('takes the visitor back to the page they left', async () => {
       const page = await openHydrated(origin);
@@ -166,6 +167,6 @@ describe.each(browserTypes)(
       await page.getByRole('heading', { name: 'home' }).waitFor();
       expect(new URL(page.url()).pathname).toBe('/');
       await page.close();
-    });
+    }, 30_000);
   },
 );
