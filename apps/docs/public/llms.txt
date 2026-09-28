@@ -610,10 +610,13 @@ These docs are served from <https://ordo.k8o.me>.
 ## Guide
 
 - [Design Guide](https://ordo.k8o.me/color-scheme/docs/GUIDE.md): what the package owns and does not (the class,
-  not the colours; the rule, not the storage), placing the provider in the
-  root layout, reading and changing the preference with the hook, what it
-  guarantees, allowing its inline script under a Content-Security-Policy
-  (by nonce or by hash), and testing.
+  not the colours or the `color-scheme` property; the rule, not the storage;
+  no contrast preference — `prefers-contrast` and `forced-colors` are the
+  OS's, which `@k8ordo/ui` follows in either scheme), placing the provider
+  in the root layout, allowing its inline script under a
+  Content-Security-Policy (by nonce or by hash, and what a blocked script
+  costs), reading and changing the preference with the hook, the stored row
+  and reading it without the hook, what it guarantees, and testing.
 
 ## Entry point
 

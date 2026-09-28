@@ -23,7 +23,15 @@ legacy fallbacks.
   `color-scheme` property (form controls, scrollbars): this package never
   sets it; `@k8ordo/ui`'s stylesheet does, next to its tokens (`light`, and
   `dark` under `.dark`), and a stylesheet of your own declares it beside its
-  colours.
+  colours. Declare it by the class, not as `light dark`: that lets the
+  browser pick by `prefers-color-scheme`, and the scrollbars would disagree
+  with what the visitor chose.
+- **Contrast.** `prefers-contrast: more` and `forced-colors: active` are
+  settings the visitor makes in the OS, not something an application stores
+  or toggles, so neither is a preference here. `@k8ordo/ui`'s stylesheet
+  follows both on its own, in either scheme — its high-contrast values are
+  declared for `:root` and for `.dark` — so a visitor who chose dark and asks
+  the OS for more contrast gets the dark high-contrast values.
 - **Where the preference lives.** That is `@k8ordo/state`'s
   `defineLocalState`; this package declares one and reads and writes
   through it, so the localStorage key and the row's JSON are never spelled
@@ -74,8 +82,15 @@ so once: `<ColorSchemeProvider defaultPreference="dark">`.
 ### Under a Content-Security-Policy
 
 The script is inline, so a policy that restricts scripts has to allow it,
-by nonce or by hash. `nonce` puts the answer's nonce on it — under
-`@k8ordo/server`, `nonce()` from `@k8ordo/server/runtime`:
+by nonce or by hash. Blocked, it costs the first paint and nothing else: the
+provider's effect still writes the class after hydration, but until then
+the page shows the default, and a visitor who chose dark sees the flash the
+script exists to prevent. Do not reach for `'unsafe-inline'`, which allows
+every inline script that reaches the page; name this one.
+
+`nonce` puts the answer's nonce on it — under
+`@k8ordo/server`, `nonce()` from `@k8ordo/server/runtime`, which the render
+may read (signing a script is not writing the response):
 
 ```tsx
 <ColorSchemeProvider nonce={nonce()}>{children}</ColorSchemeProvider>
@@ -91,6 +106,10 @@ given: the script carries it, so the hash depends on it.
 // vite.config.ts, under @k8ordo/static
 csp: { 'script-src': ["'self'", await colorSchemeScriptHash()] },
 ```
+
+Compute the hash where the policy is written, every time, rather than
+copying its value: the script's text is the installed version's, and an
+update may change it.
 
 ## Reading and changing it
 
@@ -126,15 +145,48 @@ A toggle is `setPreference(scheme === 'dark' ? 'light' : 'dark')`. The hook
 reads the provider and touches nothing else, so a switcher and a preview
 agree because there is one provider deciding.
 
-`colorSchemeState` is the `defineLocalState` definition itself, exported for
-anything that wants the row without the hook — `useAppState(colorSchemeState)`,
-or `colorSchemeState.storageKey` in a test.
+## Where it is stored
+
+`colorSchemeState` is the `defineLocalState` definition itself — key
+`color-scheme`, so the localStorage key is `k8ordo-state:color-scheme`
+(`colorSchemeState.storageKey`) — with one optional field:
+
+```ts
+defineLocalState(
+  'color-scheme',
+  z.object({ preference: z.optional(z.enum(['light', 'dark'])) }),
+);
+```
+
+| When                      | The stored row                    |
+| ------------------------- | --------------------------------- |
+| Never chose               | no row (`getItem` returns `null`) |
+| `setPreference('dark')`   | `{"preference":"dark"}`           |
+| `setPreference('light')`  | `{"preference":"light"}`          |
+| `setPreference('system')` | `{}`                              |
+
+The default is never stored, so changing `defaultPreference` later moves
+every visitor who never chose.
+
+- **Reading it without the hook.** `useAppState(colorSchemeState)` from any
+  client component reads the same store the provider does (`@k8ordo/state`
+  keeps one per key). It returns the stored `preference`
+  (`'light' | 'dark' | undefined`), not the resolved `scheme` — for what is
+  on screen, use `useColorScheme()`.
+- **Before the first paint, in a script of your own.**
+  `colorSchemeState.inlineRead()` is a JavaScript expression that evaluates
+  to the stored object, or `null`. No schema runs there, so check each field.
+- **Other preferences beside it.** A display preference of the
+  application's own is a `defineLocalState` under another key, in a module
+  without `'use client'`. Never define another `'color-scheme'`: stores are
+  shared by key, and the two definitions would fight over one row.
 
 ## What it guarantees
 
 - **No flash.** The script runs before the first paint and reads the same
-  row the provider writes; a dark page loads dark. It is an inline script
-  with no `nonce`, so a Content Security Policy has to let it run.
+  row the provider writes; a dark page loads dark. It is an inline script,
+  so a Content-Security-Policy that restricts scripts has to allow it (see
+  "Under a Content-Security-Policy").
 - **Nothing chosen follows the default, and a `'system'` default follows
   the system.** A visitor who never chose is never pinned to what the
   system said on their first visit, and a row that is not a JSON object, or
