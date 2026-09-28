@@ -53,6 +53,10 @@ const LEFT_OUT: ReadonlyMap<string, string> = new Map([
     '項目ごとに onSelect の関数を持ち、アプリがショートカットで開く枠組み。spec は関数を書けず、会話の中に置くものでもない（その場の操作は Button や DropdownMenu）',
   ],
   [
+    'ResizablePanels',
+    '高さの決まった親を 2 つに分ける作業画面の枠組み。生成 UI は会話の中に流れ、分ける高さを持たない（並べるだけなら Grid）',
+  ],
+  [
     'Prose',
     'Markdown が描いた素の HTML を整える入れ物。spec が置くのは自分の見た目を持つ部品なので、効くものが無い（流れは Stack で組む）',
   ],

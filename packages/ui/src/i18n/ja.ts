@@ -69,6 +69,7 @@ export const ja: Messages = {
   carouselSlide: 'スライド',
   carouselPrevious: '前のスライド',
   carouselNext: '次のスライド',
+  resizablePanelsHandle: 'パネルの大きさ',
   tableOfContents: '目次',
 
   commandPalette: 'コマンド',

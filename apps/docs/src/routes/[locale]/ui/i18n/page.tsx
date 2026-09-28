@@ -67,6 +67,7 @@ const MESSAGE_USAGE = {
   commandPalette: 'CommandPalette',
   commandPaletteSearch: 'CommandPalette',
   commandPaletteEmpty: 'CommandPalette',
+  resizablePanelsHandle: 'ResizablePanels.Handle',
   chat: 'Conversation.Messages',
   scrollToLatest: 'Conversation.ScrollButton',
   reasoning: 'Reasoning',

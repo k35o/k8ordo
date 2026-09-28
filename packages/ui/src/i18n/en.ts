@@ -69,6 +69,7 @@ export const en: Messages = {
   carouselSlide: 'Slide',
   carouselPrevious: 'Previous slide',
   carouselNext: 'Next slide',
+  resizablePanelsHandle: 'Panel size',
   tableOfContents: 'Contents',
 
   commandPalette: 'Commands',
