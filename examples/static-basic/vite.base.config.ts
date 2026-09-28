@@ -1,13 +1,22 @@
 import { framework } from '@k8ordo/static';
 import { defineConfig } from 'vite';
 
+import { locales } from './src/i18n';
+
 // build.test.ts が「サブパスに置いても動く」を主張するための構成。dist/ の
 // 既定の出力を上書きしないよう、出力先を dist/base/ の下に分ける
 export default defineConfig({
   base: '/site/',
   plugins: [
     framework({
-      paths: () => ['/products/1', '/products/2'],
+      paths: (patterns) =>
+        locales
+          .paths(patterns)
+          .flatMap((pathname) =>
+            pathname === '/products/:id'
+              ? ['/products/1', '/products/2']
+              : [pathname],
+          ),
       site: 'https://example.test',
     }),
   ],

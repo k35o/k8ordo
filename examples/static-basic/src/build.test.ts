@@ -84,7 +84,7 @@ afterAll(() => {
 // <head> の先頭に置かれた <meta> のポリシー。無ければ空
 const policyFirstIn = (html: string): string =>
   (
-    /^<!DOCTYPE html><html lang="en"><head><meta http-equiv="Content-Security-Policy" content="([^"]*)">/u.exec(
+    /^<!DOCTYPE html><html[^>]*><head><meta http-equiv="Content-Security-Policy" content="([^"]*)">/u.exec(
       html,
     )?.[1] ?? ''
   ).replaceAll('&apos;', "'");
@@ -228,6 +228,7 @@ describe('the static build', () => {
     const xml = read('sitemap.xml');
     expect(xml).toContain('<loc>https://example.test/</loc>');
     expect(xml).toContain('<loc>https://example.test/products/2</loc>');
+    expect(xml).toContain('<loc>https://example.test/ja/about</loc>');
     // リダイレクトと not-found と route.ts はページではない
     expect(xml).not.toContain('/old');
     expect(xml).not.toContain('feed.xml');
@@ -250,6 +251,19 @@ describe('the static build', () => {
           `'sha256-${createHash('sha256').update(source).digest('base64')}'`,
         );
       }
+    },
+  );
+
+  it.each([
+    ['en', 'about the shop', 'Open since September 1, 2026.'],
+    ['ja', 'このお店について', '2026年9月2日から営業しています。'],
+  ])(
+    'writes /%s/about in that locale, its dates in the locale’s time zone',
+    (locale, title, opened) => {
+      const html = read(locale, 'about', 'index.html');
+      expect(html).toMatch(new RegExp(`<html[^>]* lang="${locale}"`, 'u'));
+      expect(html).toContain(`<h1 data-testid="title">${title}</h1>`);
+      expect(html).toContain(opened);
     },
   );
 
@@ -473,6 +487,47 @@ describe('a written page in the browser', () => {
       .toStrictEqual(['first product']);
     expect(new URL(page.url()).search).toBe('?q=first');
     expect(await page.evaluate(() => 'stayed' in window)).toBe(true);
+    await page.close();
+  });
+
+  it('hydrates a page written in ja without a mismatch: the browser reads the locale the URL names', async () => {
+    const page = await browser.newPage();
+    const thrown: string[] = [];
+    const logged: string[] = [];
+    page.on('pageerror', (error) => thrown.push(error.message));
+    page.on('console', (message) => {
+      logged.push(`${message.type()}: ${message.text()}`);
+    });
+
+    await page.goto(`${origin}/ja/about`);
+    await page.getByText(/time zone: (?!not yet)/u).waitFor();
+
+    // 本文の食い違いなら、本番の React もエラーを出してクライアントで描き直す
+    expect({
+      select: await page.getByRole('combobox', { name: '言語' }).count(),
+      thrown,
+      errors: logged.filter((line) => line.startsWith('error:')),
+    }).toStrictEqual({ select: 1, thrown: [], errors: [] });
+    await page.close();
+  });
+
+  it('moves to the same page in another locale in place, <html lang> with it', async () => {
+    const page = await openHydrated(`${origin}/en/about`);
+
+    await page.getByLabel('language').selectOption('ja');
+
+    await page.getByRole('heading', { name: 'このお店について' }).waitFor();
+    expect({
+      pathname: new URL(page.url()).pathname,
+      lang: await page.evaluate(() => document.documentElement.lang),
+      opened: await page.getByTestId('opened').textContent(),
+      stayed: await page.evaluate(() => 'stayed' in window),
+    }).toStrictEqual({
+      pathname: '/ja/about',
+      lang: 'ja',
+      opened: '2026年9月2日から営業しています。',
+      stayed: true,
+    });
     await page.close();
   });
 
