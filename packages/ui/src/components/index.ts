@@ -65,6 +65,7 @@ export { Stack, type StackProps } from './layout/stack';
 export { Anchor } from './navigation/anchor';
 export { Breadcrumb } from './navigation/breadcrumb';
 export { Pagination } from './navigation/pagination';
+export { Stepper, type StepperStep } from './navigation/stepper';
 export { SideNav } from './navigation/side-nav';
 export {
   TableOfContents,

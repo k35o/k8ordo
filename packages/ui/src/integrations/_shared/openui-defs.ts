@@ -92,6 +92,11 @@ export const buildComponentLibrary = <C>(
     'Accordion of items that open and close. Each item has a title and text content; content must be a plain string.',
     s.accordionProps,
   );
+  const Stepper = def(
+    'Stepper',
+    'Steps of a process in order, marking the ones done and the current one (display only).',
+    s.stepperProps,
+  );
   const Breadcrumb = def('Breadcrumb', 'Breadcrumb trail.', s.breadcrumbProps);
   const SideNav = def(
     'SideNav',
@@ -271,6 +276,7 @@ export const buildComponentLibrary = <C>(
     Tabs.ref,
     Accordion.ref,
     Breadcrumb.ref,
+    Stepper.ref,
     SideNav.ref,
     Table.ref,
     DataTable.ref,
@@ -445,6 +451,7 @@ export const buildComponentLibrary = <C>(
       Tabs,
       Accordion,
       Breadcrumb,
+      Stepper,
       SideNav,
       Table,
       DataTable,
