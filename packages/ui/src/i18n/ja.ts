@@ -59,6 +59,7 @@ export const ja: Messages = {
   paginationPrevious: '前へ',
   paginationNext: '次へ',
 
+  stepperComplete: '完了',
   dataTableColumns: '表示する列',
   dataTableSelectAll: 'すべての行を選択',
   dataTableSelectRow: '行を選択',
@@ -68,8 +69,12 @@ export const ja: Messages = {
   carouselSlide: 'スライド',
   carouselPrevious: '前のスライド',
   carouselNext: '次のスライド',
+  resizablePanelsHandle: 'パネルの大きさ',
   tableOfContents: '目次',
 
+  commandPalette: 'コマンド',
+  commandPaletteSearch: 'コマンドを検索',
+  commandPaletteEmpty: '一致するコマンドはありません',
   chat: 'チャット',
   scrollToLatest: '最新のメッセージへ移動',
   reasoning: '思考の過程',

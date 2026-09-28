@@ -20,6 +20,11 @@ export const componentCategories: NavCategory[] = [
         path: '/:locale/ui/components/copy-button',
         description: m.components.copyButton.description,
       },
+      {
+        name: 'Toolbar',
+        path: '/:locale/ui/components/toolbar',
+        description: m.components.toolbar.description,
+      },
     ],
   },
   {
@@ -44,6 +49,11 @@ export const componentCategories: NavCategory[] = [
         name: 'Pagination',
         path: '/:locale/ui/components/pagination',
         description: m.components.pagination.description,
+      },
+      {
+        name: 'Stepper',
+        path: '/:locale/ui/components/stepper',
+        description: m.components.stepper.description,
       },
       {
         name: 'SideNav',
@@ -281,6 +291,11 @@ export const componentCategories: NavCategory[] = [
     title: m.components.categoryOverlays,
     items: [
       {
+        name: 'CommandPalette',
+        path: '/:locale/ui/components/command-palette',
+        description: m.components.commandPalette.description,
+      },
+      {
         name: 'Dialog',
         path: '/:locale/ui/components/dialog',
         description: m.components.dialog.description,
@@ -299,6 +314,11 @@ export const componentCategories: NavCategory[] = [
         name: 'Popover',
         path: '/:locale/ui/components/popover',
         description: m.components.popover.description,
+      },
+      {
+        name: 'ContextMenu',
+        path: '/:locale/ui/components/context-menu',
+        description: m.components.contextMenu.description,
       },
       {
         name: 'DropdownMenu',
@@ -334,6 +354,11 @@ export const componentCategories: NavCategory[] = [
         name: 'Separator',
         path: '/:locale/ui/components/separator',
         description: m.components.separator.description,
+      },
+      {
+        name: 'ResizablePanels',
+        path: '/:locale/ui/components/resizable-panels',
+        description: m.components.resizablePanels.description,
       },
     ],
   },

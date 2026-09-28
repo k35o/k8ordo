@@ -5,6 +5,7 @@ export {
   type IconButtonRenderItemProps,
   type IconButtonTriggerProps,
 } from './buttons/icon-button';
+export { Toolbar, type ToolbarItemProps } from './buttons/toolbar';
 export { Accordion } from './data-display/accordion';
 export { Avatar } from './data-display/avatar';
 export { Badge } from './data-display/badge';
@@ -58,11 +59,13 @@ export * from './icons';
 export type { GapSize } from './layout/_shared/gap';
 export type { PaddingSize } from './layout/_shared/padding';
 export { Grid, type GridProps } from './layout/grid';
+export { ResizablePanels } from './layout/resizable-panels';
 export { Separator } from './layout/separator';
 export { Stack, type StackProps } from './layout/stack';
 export { Anchor } from './navigation/anchor';
 export { Breadcrumb } from './navigation/breadcrumb';
 export { Pagination } from './navigation/pagination';
+export { Stepper, type StepperStep } from './navigation/stepper';
 export { SideNav } from './navigation/side-nav';
 export {
   TableOfContents,
@@ -71,6 +74,11 @@ export {
 export { Tabs } from './navigation/tabs';
 export { InView } from './observers/in-view';
 export { Resize } from './observers/resize';
+export {
+  CommandPalette,
+  type CommandPaletteItem,
+} from './overlays/command-palette';
+export { ContextMenu } from './overlays/context-menu';
 export { Dialog } from './overlays/dialog';
 export { Drawer } from './overlays/drawer';
 export { DropdownMenu } from './overlays/dropdown-menu';

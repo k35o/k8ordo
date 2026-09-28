@@ -23,6 +23,10 @@ const CHAT =
   '生成 UI を載せる側のチャット。アプリがメッセージの流れから組み立てるもので、spec が置くものではない';
 
 const LEFT_OUT: ReadonlyMap<string, string> = new Map([
+  [
+    'ContextMenu',
+    '右クリックという見えない操作で開くので、生成 UI に置くと操作が見つけられなくなる。アプリが自分の中身（ファイルや行）に付けるもの',
+  ],
   ['InView', OBSERVER],
   ['Resize', OBSERVER],
   ['UIProvider', 'アプリが生成 UI も含めた全体の外側に 1 度だけ置く'],
@@ -43,6 +47,14 @@ const LEFT_OUT: ReadonlyMap<string, string> = new Map([
   [
     'CodeBlock',
     'サーバーでハイライトする async の Server Component。生成 UI はクライアントで描くので置けず、置けば shiki をブラウザに送ることになる',
+  ],
+  [
+    'CommandPalette',
+    '項目ごとに onSelect の関数を持ち、アプリがショートカットで開く枠組み。spec は関数を書けず、会話の中に置くものでもない（その場の操作は Button や DropdownMenu）',
+  ],
+  [
+    'ResizablePanels',
+    '高さの決まった親を 2 つに分ける作業画面の枠組み。生成 UI は会話の中に流れ、分ける高さを持たない（並べるだけなら Grid）',
   ],
   [
     'Prose',

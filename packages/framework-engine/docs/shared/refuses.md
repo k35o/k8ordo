@@ -1,4 +1,4 @@
-### What the build refuses
+## What the build refuses
 
 Every problem is reported, not just the first, and each names the file:
 

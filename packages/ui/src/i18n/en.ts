@@ -59,6 +59,7 @@ export const en: Messages = {
   paginationPrevious: 'Previous',
   paginationNext: 'Next',
 
+  stepperComplete: 'completed',
   dataTableColumns: 'Columns',
   dataTableSelectAll: 'Select all rows',
   dataTableSelectRow: 'Select row',
@@ -68,8 +69,12 @@ export const en: Messages = {
   carouselSlide: 'Slide',
   carouselPrevious: 'Previous slide',
   carouselNext: 'Next slide',
+  resizablePanelsHandle: 'Panel size',
   tableOfContents: 'Contents',
 
+  commandPalette: 'Commands',
+  commandPaletteSearch: 'Search commands',
+  commandPaletteEmpty: 'No matching commands',
   chat: 'Chat',
   scrollToLatest: 'Scroll to latest message',
   reasoning: 'Reasoning',

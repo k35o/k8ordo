@@ -86,6 +86,8 @@ export type Messages = {
   paginationPrevious: string;
   paginationNext: string;
 
+  /** Stepper の済んだ段に添える読み上げ専用の文言 */
+  stepperComplete: string;
   /** DataTable の列の表示を切り替えるボタンと、その一覧の見出し */
   dataTableColumns: string;
   /** DataTable の見出しの行の、表示中の行をまとめて選ぶチェックボックス */
@@ -102,6 +104,16 @@ export type Messages = {
   carouselNext: string;
   /** TableOfContents の見出し（nav の名前にもなる） */
   tableOfContents: string;
+
+  /** CommandPalette の dialog の名前 */
+  commandPalette: string;
+  /** CommandPalette の検索欄の名前と placeholder */
+  commandPaletteSearch: string;
+  /** CommandPalette で一致するコマンドが無いとき */
+  commandPaletteEmpty: string;
+
+  /** ResizablePanels.Handle の既定の名前。値は 1 枚目の大きさ */
+  resizablePanelsHandle: string;
 
   /** Conversation.Messages の log ランドマーク名 */
   chat: string;

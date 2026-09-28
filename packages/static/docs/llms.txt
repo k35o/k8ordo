@@ -26,13 +26,36 @@
 > legacy fallbacks.
 
 When installed via npm, these docs live under `node_modules/@k8ordo/static/docs/`.
+Start with GUIDE.md, then follow the reference most relevant to the task.
 
 ## Guide
 
-- [Design Guide](GUIDE.md): setup, the `routes/` grammar and what it refuses,
-  execution boundaries, the build output, supplying pathnames for
-  parameterised routes, a Content-Security-Policy by hash, and what static
-  mode cannot do.
+- [Design Guide](GUIDE.md): the mode as the dependency, setup
+  (`vite.config.ts`, `tsconfig.json`, the root layout as the document),
+  `vite dev` against `vite build`, the plugin's options, and what static mode
+  cannot do.
+
+## References
+
+- [Routing](references/routing.md): the `routes/` grammar and every refusal
+  the build names, `loading.tsx`, a `route.ts` written as the file its `GET`
+  answers, the generated `.k8ordo/` files, titles, and fetching the next page
+  ahead (`data-k8ordo-prefetch`).
+- [Parameters](references/params.md): `paramsSchema` (a refused value is a
+  pathname the pattern does not answer), and the `paths` option — supplying
+  pathnames, expanding a parameter every page shares, and what fails the
+  build.
+- [Errors and redirects](references/errors.md): `error.tsx`, a Server
+  Component that throws stopping the build, `notFound()` and
+  `not-found.tsx`, and a `redirect.ts` written as a page that sends the
+  visitor on.
+- [Execution boundaries](references/boundaries.md): `'use client'`,
+  `use(browser())` for a component that needs a browser, `server-only`
+  modules, and the search as `@k8ordo/state`'s.
+- [The output and deploying](references/deploy.md): `dist/client/` (HTML,
+  `index.rsc` payloads, `404.html`, `sitemap.xml`), a tab opened before a
+  deploy, Vite's `base`, and a Content-Security-Policy by hash (`csp`,
+  `colorSchemeScriptHash()`).
 
 ## Entry point
 

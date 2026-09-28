@@ -437,6 +437,40 @@ export const autocomplete = {
   }),
 };
 
+export const toolbar = {
+  description: message({
+    ja: '矢印キーで行き来するボタンのまとまり',
+    en: 'A group of buttons that arrow keys move between.',
+  }),
+  keyboardDescription: message({
+    ja: 'Tab で入れるのは 1 つだけで、中は矢印キーで移ります（`Home` / `End` で端へ、無効な項目は飛ばす）。出て戻ると、最後にいた項目へ戻ります。各項目は `Toolbar.Item` の `renderItem` が渡す `ref` / `tabIndex` / `onFocus` を、`Button` や `IconButton` に広げて作ります。',
+    en: 'It takes one Tab stop; arrow keys move inside (`Home` / `End` to the ends, skipping disabled items), and coming back lands on the item last focused. Each item spreads the `ref` / `tabIndex` / `onFocus` that `Toolbar.Item`’s `renderItem` passes onto a `Button` or an `IconButton`.',
+  }),
+  toggleTitle: message({
+    ja: 'トグル',
+    en: 'Toggles',
+  }),
+  toggleDescription: message({
+    ja: '押した状態は `aria-pressed` で渡します。ツールバーは押した項目の地を濃くします。',
+    en: 'Pass the pressed state as `aria-pressed`; the toolbar shades a pressed item.',
+  }),
+  verticalTitle: message({
+    ja: '縦に並べる',
+    en: 'Vertical',
+  }),
+};
+
+export const contextMenu = {
+  description: message({
+    ja: '右クリックした位置に開くメニュー',
+    en: 'A menu that opens where you right-click.',
+  }),
+  usageDescription: message({
+    ja: '中身は `DropdownMenu` と同じ（`Content` / `Item` / `SubMenu`）で、違うのは開き方と出す位置だけです。キーボードからは、フォーカスのある領域で Shift+F10 やコンテキストメニューキーで開きます。閉じると、開く前にいた要素へフォーカスが戻ります。',
+    en: 'The inside is `DropdownMenu`’s (`Content` / `Item` / `SubMenu`); only how it opens and where differ. From the keyboard, press Shift+F10 or the context-menu key on the focused area. When it closes, focus returns to where it was before it opened.',
+  }),
+};
+
 export const rangeSlider = {
   description: message({
     ja: '2 つのつまみで範囲を選ぶスライダー',
@@ -589,6 +623,29 @@ export const calendar = {
   localeDescription: message({
     ja: '月名・曜日名・週の始まりは、組み込みの文言と同じロケール（`@k8ordo/i18n` の今のロケール）に従います。今日は閲覧者のタイムゾーンでしか決まらないので、カレンダーはブラウザでだけ描かれ、サーバーは同じ寸法の空の箱を書きます。',
     en: 'Month and weekday names, and the first day of the week, follow the same locale as the built-in wording (`@k8ordo/i18n`’s current locale). Today depends on the visitor’s time zone, so the calendar renders in the browser alone; the server writes an empty box of the same size.',
+  }),
+};
+
+export const stepper = {
+  description: message({
+    ja: '手順の段を並べ、済んだ段といまの段を示すステッパー',
+    en: 'The steps of a process, marking the done ones and the current one.',
+  }),
+  usageDescription: message({
+    ja: '`value` はいまの段の位置（0 始まり）です。済んだ段にはチェックが付き、読み上げでは「完了」と添えます。いまの段は `aria-current="step"` で伝えます。',
+    en: '`value` is the index of the current step (0-based). Done steps show a check and are read as completed; the current step carries `aria-current="step"`.',
+  }),
+  interactiveTitle: message({
+    ja: '済んだ段へ戻る',
+    en: 'Going back to a done step',
+  }),
+  interactiveDescription: message({
+    ja: '`interactive` を付けると、済んだ段がボタンになり、押すと `onChange` にその位置が届きます。先の段へは飛べません。',
+    en: 'With `interactive`, done steps become buttons and `onChange` receives the index of the one pressed. Steps ahead cannot be jumped to.',
+  }),
+  verticalTitle: message({
+    ja: '縦に並べる',
+    en: 'Vertical',
   }),
 };
 
@@ -1089,6 +1146,25 @@ export const drawer = {
   }),
 };
 
+export const commandPalette = {
+  description: message({
+    ja: '打った文字でコマンドを絞り込み、キーボードだけで実行するパレット',
+    en: 'A palette that filters commands as you type and runs them from the keyboard.',
+  }),
+  usageDescription: message({
+    ja: '`label` と `keywords` を大文字小文字を区別せずに絞り込みます。`↓` / `↑` で移り（端で反対側へ回る）、`Enter` かクリックでパレットを閉じてから `onSelect` を呼びます。フォーカスは検索欄に置いたままです。同じ `group` の項目は見出しの下にまとまり、`shortcut` のキーは `Kbd` で添えます。',
+    en: 'It filters on `label` and `keywords`, ignoring case. `↓` / `↑` move through the matches and wrap around; `Enter` or a click closes the palette and then calls `onSelect`. Focus stays in the search field. Items that share a `group` gather under its heading, and `shortcut` keys are drawn with `Kbd`.',
+  }),
+  shortcutTitle: message({
+    ja: 'キーで開く',
+    en: 'Opening from a key',
+  }),
+  shortcutDescription: message({
+    ja: '開閉は `Modal` と同じく `isOpen` / `onClose` で、⌘K / Ctrl+K のようなキーはアプリが配線します。閉じるとフォーカスは開く前の場所へ戻り、次に開いたときは空の検索から始まります。',
+    en: 'Open and close it like `Modal`, with `isOpen` / `onClose`; a key such as ⌘K / Ctrl+K is the application’s to wire. Closing returns focus to where it was, and the next opening starts from an empty search.',
+  }),
+};
+
 export const modal = {
   description: message({
     ja: 'モーダルダイアログ',
@@ -1192,6 +1268,41 @@ export const grid = {
   autoFillDescription: message({
     ja: 'cols="auto-fill" / "auto-fit" のとき、minItemSizeで各セルの最小幅を指定するとグリッドがレスポンシブにリフローする。',
     en: 'With cols="auto-fill" or "auto-fit", minItemSize controls the minimum width of each cell so the grid reflows responsively.',
+  }),
+};
+
+export const resizablePanels = {
+  description: message({
+    ja: '仕切りをドラッグするか矢印キーで動かして、2 枚のパネルの大きさを分ける',
+    en: 'Two panes split by a divider you drag or move with the arrow keys.',
+  }),
+  usageDescription: message({
+    ja: '`value` は 1 枚目が占める割合（%）で、2 枚目は残りを取ります。根は親いっぱいに広がるので、親に大きさを与えてください（縦に分けるなら高さが要ります）。仕切りはフォーカスでき、矢印キーは画面上の向きのとおりに動かし、`Home` / `End` で `min` / `max` の端へ移ります。右から左の言語では 1 枚目が右に付くので、`ArrowLeft` で広がります。並びは文字の行に沿うので、縦書きの中では `orientation="horizontal"` が上下に並びます。',
+    en: '`value` is the first pane’s share in percent; the second pane takes the rest. The root fills its parent, so give the parent a size (a vertical split needs a height). The divider takes focus; the arrow keys move it the way they point on screen, and `Home` / `End` jump to `min` / `max`. In a right-to-left page the first pane sits on the right, so `ArrowLeft` widens it. The panes follow the line of text, so in vertical writing mode `orientation="horizontal"` stacks them.',
+  }),
+  verticalTitle: message({
+    ja: '上下に分ける',
+    en: 'Vertical',
+  }),
+  verticalDescription: message({
+    ja: '`orientation="vertical"` は 2 枚を上下に並べます。仕切りは上下の矢印キーで動き、値は上のパネルが高さに占める割合です。',
+    en: '`orientation="vertical"` stacks the two panes. The divider moves with the up and down arrow keys, and its value is the top pane’s share of the height.',
+  }),
+  labelTitle: message({
+    ja: '仕切りの名前',
+    en: 'Naming the divider',
+  }),
+  labelDescription: message({
+    ja: '仕切りの値は 1 枚目の大きさなので、名前も 1 枚目に合わせます。1 枚目に見出しがあれば `aria-labelledby` で指してください。指さなければ辞書の `resizablePanelsHandle` を使います。',
+    en: 'The divider’s value is the first pane’s size, so name it after the first pane: point `aria-labelledby` at its heading. Without one it falls back to `resizablePanelsHandle` from the dictionary.',
+  }),
+  controlledTitle: message({
+    ja: '制御モード',
+    en: 'Controlled',
+  }),
+  controlledDescription: message({
+    ja: '`onChange` はドラッグの間も割合を受け取ります。キーボードでは `step` ずつ動きます。',
+    en: '`onChange` receives the share while dragging, too. From the keyboard it moves by `step`.',
   }),
 };
 

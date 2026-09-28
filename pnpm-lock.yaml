@@ -399,6 +399,9 @@ importers:
       '@k8ordo/color-scheme':
         specifier: workspace:^
         version: link:../../packages/color-scheme
+      '@k8ordo/i18n':
+        specifier: workspace:^
+        version: link:../../packages/i18n
       '@k8ordo/router':
         specifier: workspace:^
         version: link:../../packages/router

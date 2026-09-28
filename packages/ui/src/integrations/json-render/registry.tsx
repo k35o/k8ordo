@@ -103,6 +103,7 @@ export const { registry } = defineRegistry(catalog, {
     CopyButton: ({ props }) => ui.renderCopyButton(props),
     Accordion: ({ props }) => ui.renderAccordion(props),
     Breadcrumb: ({ props }) => ui.renderBreadcrumb(props),
+    Stepper: ({ props }) => ui.renderStepper(props),
     Table: ({ props }) => ui.renderTable(props),
     DataTable: ({ props }) => <ui.DataTableWidget props={props} />,
     Tree: ({ props }) => ui.renderTree(props),
@@ -237,6 +238,7 @@ export const { registry } = defineRegistry(catalog, {
     Popover: ({ props, children }) => ui.renderPopover(props, children),
     Tooltip: ({ props }) => ui.renderTooltip(props),
     DropdownMenu: ({ props }) => ui.renderDropdownMenu(props),
+    Toolbar: ({ props }) => ui.renderToolbar(props),
     Toast: ({ props }) => <ui.ToastWidget props={props} />,
 
     ListBox: ({ props, bindings }) => {

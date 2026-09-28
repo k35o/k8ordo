@@ -79,18 +79,34 @@ Start with the Design Guide, then follow the reference most relevant to the task
   },
   {
     src: '../../../packages/static/docs/llms.txt',
-    npmNote: `When installed via npm, these docs live under \`node_modules/@k8ordo/static/docs/\`.`,
-    siteNote: `These docs are served from <${SITE_URL}>.`,
+    npmNote: `When installed via npm, these docs live under \`node_modules/@k8ordo/static/docs/\`.
+Start with GUIDE.md, then follow the reference most relevant to the task.`,
+    siteNote: `These docs are served from <${SITE_URL}>.
+Start with the Design Guide, then follow the reference most relevant to the task.`,
     linkMap: {
       'GUIDE.md': `${SITE_URL}/static/docs/GUIDE.md`,
+      'references/routing.md': `${SITE_URL}/static/docs/references/routing.md`,
+      'references/params.md': `${SITE_URL}/static/docs/references/params.md`,
+      'references/errors.md': `${SITE_URL}/static/docs/references/errors.md`,
+      'references/boundaries.md': `${SITE_URL}/static/docs/references/boundaries.md`,
+      'references/deploy.md': `${SITE_URL}/static/docs/references/deploy.md`,
     },
   },
   {
     src: '../../../packages/server/docs/llms.txt',
-    npmNote: `When installed via npm, these docs live under \`node_modules/@k8ordo/server/docs/\`.`,
-    siteNote: `These docs are served from <${SITE_URL}>.`,
+    npmNote: `When installed via npm, these docs live under \`node_modules/@k8ordo/server/docs/\`.
+Start with GUIDE.md, then follow the reference most relevant to the task.`,
+    siteNote: `These docs are served from <${SITE_URL}>.
+Start with the Design Guide, then follow the reference most relevant to the task.`,
     linkMap: {
       'GUIDE.md': `${SITE_URL}/server/docs/GUIDE.md`,
+      'references/routing.md': `${SITE_URL}/server/docs/references/routing.md`,
+      'references/params.md': `${SITE_URL}/server/docs/references/params.md`,
+      'references/errors.md': `${SITE_URL}/server/docs/references/errors.md`,
+      'references/boundaries.md': `${SITE_URL}/server/docs/references/boundaries.md`,
+      'references/actions.md': `${SITE_URL}/server/docs/references/actions.md`,
+      'references/guards.md': `${SITE_URL}/server/docs/references/guards.md`,
+      'references/deploy.md': `${SITE_URL}/server/docs/references/deploy.md`,
     },
   },
   {

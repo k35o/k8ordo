@@ -33,12 +33,43 @@
 > legacy fallbacks.
 
 When installed via npm, these docs live under `node_modules/@k8ordo/server/docs/`.
+Start with GUIDE.md, then follow the reference most relevant to the task.
 
 ## Guide
 
-- [Design Guide](GUIDE.md): setup, the `routes/` grammar and what it refuses,
-  execution boundaries, building and running, and what running buys over
-  static.
+- [Design Guide](GUIDE.md): the mode as the dependency, setup (the three
+  entries, `vite.config.ts`, `tsconfig.json`, the root layout as the
+  document), and what running buys over static.
+
+## References
+
+- [Routing](references/routing.md): the `routes/` grammar and every refusal
+  the build names, an async page answering and then streaming,
+  `loading.tsx`, `route.ts` (methods, `405`, no same-origin check), the
+  generated `.k8ordo/` files, titles, and fetching the next page ahead
+  (`data-k8ordo-prefetch`).
+- [Parameters](references/params.md): `paramsSchema` — a refused value is a
+  pathname the pattern does not answer, so `not-found.tsx` answers under a
+  real 404.
+- [Errors and redirects](references/errors.md): `error.tsx`, `notFound()`
+  and a document waiting for its page, `not-found.tsx`, and `redirect.ts`
+  answering `307`/`308`.
+- [Execution boundaries](references/boundaries.md): `'use client'`,
+  `use(browser())` for a component that needs a browser, `server-only`
+  modules, and the search — `@k8ordo/state`'s, or handed to a page that
+  exports `search`.
+- [Server Actions](references/actions.md): `'use server'` against
+  `server-only`, `cookies()` / `responseHeaders()` / `requestHeaders()` in an
+  action, the page context an action runs in, forms before JavaScript, and
+  ending with `redirect()`.
+- [Guards, cookies and the request](references/guards.md): `guard.ts`
+  (outer first; a `Response` ends the request), `responseHeaders()`,
+  `cookies()` and its defaults, the read-only `request` a page receives, and
+  a Content-Security-Policy with `nonce()`.
+- [Running and deploying](references/deploy.md): `serve` (compression,
+  `ETag`, `Range`), the request handler under Node.js, Bun, Deno and
+  Cloudflare Workers, the same-origin rule for a `POST`, `vercel()`, a tab
+  opened before a deploy, and Vite's `base`.
 
 ## Entry point
 

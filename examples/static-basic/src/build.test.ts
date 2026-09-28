@@ -93,7 +93,7 @@ afterAll(() => {
 // <head> の先頭に置かれた <meta> のポリシー。無ければ空
 const policyFirstIn = (html: string): string =>
   (
-    /^<!DOCTYPE html><html lang="en"><head><meta http-equiv="Content-Security-Policy" content="([^"]*)">/u.exec(
+    /^<!DOCTYPE html><html[^>]*><head><meta http-equiv="Content-Security-Policy" content="([^"]*)">/u.exec(
       html,
     )?.[1] ?? ''
   ).replaceAll('&apos;', "'");
@@ -237,6 +237,7 @@ describe('the static build', () => {
     const xml = read('sitemap.xml');
     expect(xml).toContain('<loc>https://example.test/</loc>');
     expect(xml).toContain('<loc>https://example.test/products/2</loc>');
+    expect(xml).toContain('<loc>https://example.test/ja/about</loc>');
     // リダイレクトと not-found と route.ts はページではない
     expect(xml).not.toContain('/old');
     expect(xml).not.toContain('feed.xml');
@@ -261,6 +262,25 @@ describe('the static build', () => {
       }
     },
   );
+
+  it.each([
+    ['en', 'about the shop', 'Open since September 1, 2026.'],
+    ['ja', 'このお店について', '2026年9月2日から営業しています。'],
+  ])(
+    'writes /%s/about in that locale, its dates in the locale’s time zone',
+    (locale, title, opened) => {
+      const html = read(locale, 'about', 'index.html');
+      expect(html).toMatch(new RegExp(`<html[^>]* lang="${locale}"`, 'u'));
+      expect(html).toContain(`<h1 data-testid="title">${title}</h1>`);
+      expect(html).toContain(opened);
+    },
+  );
+
+  it('writes the product list whole: a file is the same whatever the search', () => {
+    const html = read('products', 'index.html');
+    expect(html).toContain('first product');
+    expect(html).toContain('second product');
+  });
 
   it('leaves no nonce in what it writes: a file everyone reads cannot keep one', () => {
     for (const file of ['index.html', 'index.rsc', '404.html']) {
@@ -444,8 +464,102 @@ describe.each(browserTypes)('a written page in $name', ({ type }) => {
     await page.close();
   });
 
+  it('filters the product list by the search once it runs in the browser', async () => {
+    const page = await browser.newPage();
+
+    await page.goto(`${origin}/products?q=second`);
+
+    await expect
+      .poll(
+        () => page.getByTestId('list').getByRole('listitem').allTextContents(),
+        {
+          timeout: 10_000,
+        },
+      )
+      .toStrictEqual(['second product']);
+    expect(await page.getByLabel('filter').inputValue()).toBe('second');
+    await page.close();
+  });
+
+  it('moves the search in place when the filter form is submitted', async () => {
+    const page = await openHydrated(origin);
+    await page.getByRole('link', { name: 'products', exact: true }).click();
+    await page.getByRole('heading', { name: 'products' }).waitFor();
+
+    await page.getByLabel('filter').fill('first');
+    await page.getByRole('button', { name: 'filter' }).click();
+
+    await expect
+      .poll(() =>
+        page.getByTestId('list').getByRole('listitem').allTextContents(),
+      )
+      .toStrictEqual(['first product']);
+    expect(new URL(page.url()).search).toBe('?q=first');
+    expect(await page.evaluate(() => 'stayed' in window)).toBe(true);
+    await page.close();
+  });
+
+  it('hydrates a page written in ja without a mismatch: the browser reads the locale the URL names', async () => {
+    const page = await browser.newPage();
+    const thrown: string[] = [];
+    const logged: string[] = [];
+    page.on('pageerror', (error) => thrown.push(error.message));
+    page.on('console', (message) => {
+      logged.push(`${message.type()}: ${message.text()}`);
+    });
+
+    await page.goto(`${origin}/ja/about`);
+    await page.getByText(/time zone: (?!not yet)/u).waitFor();
+
+    // 本文の食い違いなら、本番の React もエラーを出してクライアントで描き直す
+    expect({
+      select: await page.getByRole('combobox', { name: '言語' }).count(),
+      thrown,
+      errors: logged.filter((line) => line.startsWith('error:')),
+    }).toStrictEqual({ select: 1, thrown: [], errors: [] });
+    await page.close();
+  });
+
+  it('moves to the same page in another locale in place, <html lang> with it', async () => {
+    const page = await openHydrated(`${origin}/en/about`);
+
+    await page.getByLabel('language').selectOption('ja');
+
+    await page.getByRole('heading', { name: 'このお店について' }).waitFor();
+    expect({
+      pathname: new URL(page.url()).pathname,
+      lang: await page.evaluate(() => document.documentElement.lang),
+      opened: await page.getByTestId('opened').textContent(),
+      stayed: await page.evaluate(() => 'stayed' in window),
+    }).toStrictEqual({
+      pathname: '/ja/about',
+      lang: 'ja',
+      opened: '2026年9月2日から営業しています。',
+      stayed: true,
+    });
+    await page.close();
+  });
+
+  it('keeps the scheme the toggle stores, and the next load starts from it before any module runs', async () => {
+    const page = await openHydrated(origin);
+    await page.getByRole('button', { name: 'scheme: light' }).click();
+    await page.getByRole('button', { name: 'scheme: dark' }).waitFor();
+
+    // モジュールを止めて読み直す。<html> に dark を付けられるのは、ポリシーが
+    // ハッシュで許したインラインスクリプトだけになる
+    await page.route('**/*.js', (route) => route.abort());
+    await page.reload();
+
+    expect(
+      await page.evaluate(() =>
+        document.documentElement.classList.contains('dark'),
+      ),
+    ).toBe(true);
+    await page.close();
+  });
+
   it('hydrates in place, leaving no hidden copy of the page and one <title>', async () => {
-    // ダークの訪問者: ルートの SchemeProvider の値が hydrate の直後に変わる
+    // ダークの訪問者: ColorSchemeProvider の値が hydrate の直後に変わる
     const context = await browser.newContext({ colorScheme: 'dark' });
     const page = await context.newPage();
     // 裏のタブで開かれたページとして読む。ブラウザはアニメーションフレームを

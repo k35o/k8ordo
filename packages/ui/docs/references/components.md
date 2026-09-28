@@ -230,6 +230,59 @@ Props:
 - `label`: `string`
 - `size`: `'sm'` | `'md'` | `'lg'` (default: `'md'`)
 
+### Toolbar
+
+A group of controls that takes one Tab stop (the WAI-ARIA toolbar). Arrow keys
+move between the items — left/right when `orientation` is `horizontal`, up/down
+when `vertical`, and in vertical writing mode the other pair, since the row
+itself runs vertically — `Home` / `End` jump to the ends, and disabled items are
+skipped. Tab leaves the toolbar, and coming back lands on the item last focused.
+
+Each item is a slot: `Toolbar.Item`'s `renderItem` receives `ref`, `tabIndex`,
+and `onFocus` (`ToolbarItemProps`) to spread onto a `Button`, an `IconButton`,
+or any other button. A toggle item sets `aria-pressed`; the toolbar shades a
+pressed item. The root needs a name (`aria-label` or `aria-labelledby`).
+Items are meant to be buttons: a control that uses the arrow keys itself (a text
+field, a slider) would fight the toolbar for them.
+
+```tsx
+import { IconButton, Toolbar } from '@k8ordo/ui';
+
+<Toolbar.Root aria-label="Formatting">
+  <Toolbar.Item
+    renderItem={(props) => (
+      <IconButton {...props} label="Copy">
+        <CopyIcon />
+      </IconButton>
+    )}
+  />
+  <Toolbar.Separator />
+  <Toolbar.Item
+    renderItem={(props) => (
+      <IconButton
+        {...props}
+        aria-pressed={isList}
+        label="Bulleted list"
+        onClick={toggleList}
+      >
+        <ListIcon />
+      </IconButton>
+    )}
+  />
+</Toolbar.Root>;
+```
+
+Props (Root):
+
+- `children`: `ReactNode`
+- `orientation`: `'horizontal'` | `'vertical'` (default: `'horizontal'`)
+- `ref`: `Ref<HTMLDivElement>`
+- Other props are forwarded to `HTMLAttributes<HTMLDivElement>`, except `className` / `style` / `role` / `aria-orientation`.
+
+Props (Toolbar.Item):
+
+- `renderItem`: `(props: ToolbarItemProps) => ReactElement` (required)
+
 ### Anchor
 
 A text link. External links automatically get a new-tab icon.
@@ -353,6 +406,45 @@ Props:
 - `prevLabel`: `string`
 - `ref`: `Ref<HTMLElement>`
 - Other props are forwarded to `HTMLAttributes<HTMLElement>`, except `className` / `style` / `children`.
+
+### Stepper
+
+The steps of a process in order, as an `<ol>`: done steps show a check and are
+read with the built-in `stepperComplete` wording, and the current step carries
+`aria-current="step"`. `value` is the index of the current step (0-based);
+`steps.length` marks every step done. With `interactive`, done steps become
+buttons that go back to them (`onChange` receives the index); steps ahead are
+never buttons. Name the list with `aria-label`.
+
+In a multi-step form (see `@k8ordo/form`'s guide), keep every step mounted and
+drive `value` from the step you show.
+
+```tsx
+import { Stepper } from '@k8ordo/ui';
+
+<Stepper
+  aria-label="Sign-up"
+  interactive
+  onChange={setStep}
+  steps={[
+    { label: 'Plan', description: 'Pick what fits' },
+    { label: 'Payment' },
+    { label: 'Review' },
+  ]}
+  value={step}
+/>;
+```
+
+Props:
+
+- `steps`: `readonly StepperStep[]` (required)
+- `defaultValue`: `number`
+- `interactive`: `boolean` (default: `false`)
+- `onChange`: `(value: number) => void`
+- `orientation`: `'horizontal'` | `'vertical'` (default: `'horizontal'`)
+- `ref`: `Ref<HTMLOListElement>`
+- `value`: `number`
+- Other props are forwarded to `OlHTMLAttributes<HTMLOListElement>`, except `className` / `style` / `children`.
 
 ### SideNav
 
@@ -586,6 +678,61 @@ Props:
 - `gap`: `GapSize` (default: `'md'`)
 - `minItemSize`: `24` | `32` | `40` | `48` | `64` | `80` (default: `48`)
 - Other props are forwarded to `HTMLAttributes<HTMLDivElement>`, except `className` / `style`.
+
+### ResizablePanels
+
+Two panes with a divider between them that the user drags or moves with the
+arrow keys (the WAI-ARIA window splitter). `value` is the first pane's share in
+percent, kept between `min` and `max`; the second pane takes the rest. The root
+fills its parent, so give that parent a size — a vertical split needs a height.
+Each pane scrolls on its own.
+
+The divider is a focusable `separator` whose value is the first pane's size and
+whose `aria-controls` points at it. The arrow keys move it the way they point
+on screen — left/right when the panes sit side by side, up/down when they are
+stacked — so in a right-to-left page `ArrowLeft` widens a first pane that sits
+on the right; `Home` / `End` jump to `min` / `max`. `orientation="horizontal"`
+lays the panes along the line of text, so in vertical writing mode they stack.
+Name the divider after the first pane with `aria-labelledby` when it has a
+heading; otherwise it falls back to `resizablePanelsHandle` from the dictionary.
+
+```tsx
+import { ResizablePanels } from '@k8ordo/ui';
+
+<div className="h-96">
+  <ResizablePanels.Root defaultValue={25}>
+    <ResizablePanels.Panel>
+      <h2 id="files">Files</h2>
+    </ResizablePanels.Panel>
+    <ResizablePanels.Handle aria-labelledby="files" />
+    <ResizablePanels.Panel>…</ResizablePanels.Panel>
+  </ResizablePanels.Root>
+</div>;
+```
+
+Props (Root):
+
+- `children`: `ReactNode`
+- `defaultValue`: `number` (default: `50`)
+- `max`: `number` (default: `90`)
+- `min`: `number` (default: `10`)
+- `onChange`: `(value: number) => void`
+- `orientation`: `'horizontal'` | `'vertical'` (default: `'horizontal'`)
+- `ref`: `Ref<HTMLDivElement>`
+- `step`: `number` (default: `5`)
+- `value`: `number`
+- Other props are forwarded to `HTMLAttributes<HTMLDivElement>`, except `className` / `style`.
+
+Props (ResizablePanels.Panel):
+
+- `children`: `ReactNode`
+- `ref`: `Ref<HTMLDivElement>`
+- Other props are forwarded to `HTMLAttributes<HTMLDivElement>`, except `className` / `style`.
+
+Props (ResizablePanels.Handle):
+
+- _No props of its own._
+- Other props are forwarded to `HTMLAttributes<HTMLDivElement>`, except `className` / `style` / `role` / `children` / `tabIndex` / `aria-orientation` / `aria-valuenow` / `aria-valuemin` / `aria-valuemax` / `aria-controls`.
 
 ## Forms
 
@@ -2147,6 +2294,53 @@ Props (Dialog.Root):
 - `role`: `'dialog'` | `'alertdialog'`
 - `tabIndex`: `number`
 
+### CommandPalette
+
+A command palette: a `Modal` holding a search field and the list of commands it
+filters. Typing matches each item's `label` and `keywords`, case-insensitively.
+`ArrowDown` / `ArrowUp` move through the matches and wrap around, `Enter` or a
+click runs the item's `onSelect` after closing the palette, and `Escape` closes
+it; focus stays in the search field throughout (the WAI-ARIA combobox, with the
+list always shown). Items that share a `group` are gathered under that heading,
+in the order the group first appears, and `shortcut` keys are drawn with `Kbd`.
+Each opening starts from an empty search. Open and close it like `Modal`
+(`isOpen` / `defaultOpen` / `onClose`); a key such as ⌘K / Ctrl+K is the
+application's to wire.
+
+```tsx
+import { CommandPalette } from '@k8ordo/ui';
+
+<CommandPalette
+  isOpen={isOpen}
+  onClose={() => setIsOpen(false)}
+  items={[
+    {
+      id: 'new-file',
+      label: 'New file',
+      group: 'File',
+      shortcut: ['⌘', 'N'],
+      onSelect: createFile,
+    },
+    {
+      id: 'theme',
+      label: 'Toggle theme',
+      keywords: ['dark', 'light'],
+      onSelect: toggleTheme,
+    },
+  ]}
+/>;
+```
+
+Props:
+
+- `items`: `readonly CommandPaletteItem[]` (required)
+- `aria-label`: `string`
+- `defaultOpen`: `boolean`
+- `isOpen`: `boolean`
+- `onClose`: `() => void`
+- `placeholder`: `string`
+- `ref`: `Ref<HTMLDialogElement>`
+
 ### Drawer
 
 A side panel. It uses Modal internally.
@@ -2292,6 +2486,66 @@ Props (DropdownMenu.Trigger):
 - `label`: `string` (required)
 - `size`: `ComponentProps<typeof Button>['size']` (default: `'md'`)
 - `variant`: `ComponentProps<typeof Button>['variant']` (default: `'solid'`)
+
+### ContextMenu
+
+A menu opened by right-clicking (or by the keyboard's context-menu key or
+Shift+F10) on an area, shown at the pointer. The inside is `DropdownMenu`'s —
+`ContextMenu.Content`, `ContextMenu.Item` (`label` / `onAction`), and
+`ContextMenu.SubMenu` behave exactly like theirs — and only how it opens and
+where differ. When it closes from inside (an item, Escape), focus returns to
+the element that had it before it opened; closing by clicking elsewhere leaves
+focus where the click put it.
+
+`ContextMenu.Trigger` fills a slot: `renderItem` receives `onContextMenu` to
+put on the area. To open it from the keyboard, the area (or something in it)
+has to be able to take focus.
+
+```tsx
+import { ContextMenu } from '@k8ordo/ui';
+
+<ContextMenu.Root>
+  <ContextMenu.Trigger
+    renderItem={(props) => (
+      <div {...props} tabIndex={0}>
+        report.pdf
+      </div>
+    )}
+  />
+  <ContextMenu.Content>
+    <ContextMenu.Item label="Rename" onAction={rename} />
+    <ContextMenu.SubMenu label="Move to">
+      <ContextMenu.Item label="Archive" onAction={archive} />
+    </ContextMenu.SubMenu>
+    <ContextMenu.Item label="Delete" onAction={remove} />
+  </ContextMenu.Content>
+</ContextMenu.Root>;
+```
+
+Props (Root):
+
+- `children`: `ReactNode`
+- `defaultOpen`: `boolean`
+- `isOpen`: `boolean`
+- `onChange`: `(isOpen: boolean) => void`
+
+Props (ContextMenu.Content):
+
+- `children`: `ReactNode`
+
+Props (ContextMenu.Item):
+
+- `label`: `string` (required)
+- `onAction`: `() => void` (required)
+
+Props (ContextMenu.SubMenu):
+
+- `label`: `string` (required)
+- `children`: `ReactNode`
+
+Props (ContextMenu.Trigger):
+
+- `renderItem`: `(props: { onContextMenu: MouseEventHandler<HTMLElement>; }) => ReactElement` (required)
 
 ### ListBox
 
@@ -2492,33 +2746,35 @@ function DismissButton({ onDismiss }) {
 
 Every key in the `Messages` type. All values are `string`.
 
-| Category      | Keys                                                                                                                                                |
-| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Common        | `close`, `required`, `loading`, `avatar`, `color`                                                                                                   |
-| Alert         | `alertSuccess`, `alertInfo`, `alertWarning`, `alertError`                                                                                           |
-| Toast         | `toastRegion`                                                                                                                                       |
-| CopyButton    | `copy`, `copied`, `copyFailed`                                                                                                                      |
-| Autocomplete  | `autocompletePlaceholder`, `autocompleteRemoveTag`, `autocompleteClear`, `autocompleteEmpty`                                                        |
-| Combobox      | `comboboxToggle`, `comboboxEmpty`, `comboboxFailed`, and the common `loading` while searching                                                       |
-| FileField     | `fileFieldRemove`, `fileFieldTrigger`, `fileFieldDrop`                                                                                              |
-| NumberField   | `numberFieldIncrement`, `numberFieldDecrement`, `numberFieldRangeUnderflow` (`{min}` is replaced), `numberFieldRangeOverflow` (`{max}` is replaced) |
-| RangeSlider   | `rangeSliderStart`, `rangeSliderEnd`                                                                                                                |
-| Calendar      | `calendarPreviousMonth`, `calendarNextMonth`                                                                                                        |
-| DatePicker    | `datePickerOpen`, `datePickerDialog`                                                                                                                |
-| ColorPicker   | `colorPickerHue`, `colorPickerSaturation`, `colorPickerLightness`, `colorPickerSwatches`                                                            |
-| PasswordInput | `passwordShow`, `passwordHide`                                                                                                                      |
-| ListBox       | `listBoxPlaceholder`                                                                                                                                |
-| Breadcrumb    | `breadcrumb`                                                                                                                                        |
-| Tabs          | `tabList`                                                                                                                                           |
-| Pagination    | `paginationLabel`, `paginationPrevious`, `paginationNext`                                                                                           |
-| CodeBlock     | `codeBlockCopy` (announces with `CopyButton`'s `copied` / `copyFailed`)                                                                             |
-| TOC           | `tableOfContents`                                                                                                                                   |
-| Carousel      | `carousel`, `carouselSlide`, `carouselPrevious`, `carouselNext`                                                                                     |
-| AI chat       | `chat`, `scrollToLatest`, `reasoning`, `reasoningStreaming`, `suggestions`, `send`, `stop`, `attach`                                                |
-| AI content    | `attachments`, `attachmentRemove`, `attachmentImage`, `sources`                                                                                     |
-| AI actions    | `messageActions`, `regenerate`, `feedbackPositive`, `feedbackNegative` (`Message.Copy` uses `CopyButton`'s)                                         |
-| AI tools      | `toolInput`, `toolOutput`, `toolError`, `toolDenied`, `toolApprovalRequest`, `toolApprove`, `toolDeny`                                              |
-| Response      | The `response*` keys below                                                                                                                          |
+| Category       | Keys                                                                                                                                                |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Common         | `close`, `required`, `loading`, `avatar`, `color`                                                                                                   |
+| Alert          | `alertSuccess`, `alertInfo`, `alertWarning`, `alertError`                                                                                           |
+| Toast          | `toastRegion`                                                                                                                                       |
+| CopyButton     | `copy`, `copied`, `copyFailed`                                                                                                                      |
+| Autocomplete   | `autocompletePlaceholder`, `autocompleteRemoveTag`, `autocompleteClear`, `autocompleteEmpty`                                                        |
+| Combobox       | `comboboxToggle`, `comboboxEmpty`, `comboboxFailed`, and the common `loading` while searching                                                       |
+| FileField      | `fileFieldRemove`, `fileFieldTrigger`, `fileFieldDrop`                                                                                              |
+| NumberField    | `numberFieldIncrement`, `numberFieldDecrement`, `numberFieldRangeUnderflow` (`{min}` is replaced), `numberFieldRangeOverflow` (`{max}` is replaced) |
+| RangeSlider    | `rangeSliderStart`, `rangeSliderEnd`                                                                                                                |
+| Calendar       | `calendarPreviousMonth`, `calendarNextMonth`                                                                                                        |
+| DatePicker     | `datePickerOpen`, `datePickerDialog`                                                                                                                |
+| ColorPicker    | `colorPickerHue`, `colorPickerSaturation`, `colorPickerLightness`, `colorPickerSwatches`                                                            |
+| PasswordInput  | `passwordShow`, `passwordHide`                                                                                                                      |
+| ListBox        | `listBoxPlaceholder`                                                                                                                                |
+| Breadcrumb     | `breadcrumb`                                                                                                                                        |
+| Tabs           | `tabList`                                                                                                                                           |
+| Pagination     | `paginationLabel`, `paginationPrevious`, `paginationNext`                                                                                           |
+| Stepper        | `stepperComplete`                                                                                                                                   |
+| CommandPalette | `commandPalette`, `commandPaletteSearch`, `commandPaletteEmpty`                                                                                     |
+| CodeBlock      | `codeBlockCopy` (announces with `CopyButton`'s `copied` / `copyFailed`)                                                                             |
+| TOC            | `tableOfContents`                                                                                                                                   |
+| Carousel       | `carousel`, `carouselSlide`, `carouselPrevious`, `carouselNext`                                                                                     |
+| AI chat        | `chat`, `scrollToLatest`, `reasoning`, `reasoningStreaming`, `suggestions`, `send`, `stop`, `attach`                                                |
+| AI content     | `attachments`, `attachmentRemove`, `attachmentImage`, `sources`                                                                                     |
+| AI actions     | `messageActions`, `regenerate`, `feedbackPositive`, `feedbackNegative` (`Message.Copy` uses `CopyButton`'s)                                         |
+| AI tools       | `toolInput`, `toolOutput`, `toolError`, `toolDenied`, `toolApprovalRequest`, `toolApprove`, `toolDeny`                                              |
+| Response       | The `response*` keys below                                                                                                                          |
 
 `fileFieldTrigger` is the button text of an empty `FileField.Dropzone`, and
 with `tabList` it is also what the generative-UI renderers fall back to when a

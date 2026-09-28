@@ -268,11 +268,14 @@ ParamsSchemaFor<pattern>`, lists per page pattern the schemas along its
   this site have" reads it: the shadow check here, `patternsOf` in
   `@k8ordo/static`. `decodePathname` is likewise the one decoding both mode
   packages use before a pathname may name a file.
-- **The two GUIDEs share their common sections from one source.**
-  `docs/shared/<name>.md` is written into both `packages/static/docs/GUIDE.md`
-  and `packages/server/docs/GUIDE.md` between `<!-- shared:<name> -->`
-  markers by `scripts/sync-guides.ts`; `pnpm check` fails on drift and
-  `pnpm check:write` re-syncs. Edit the fragment, never the copy.
+- **The two modes' docs share their common sections from one source.**
+  `docs/shared/<name>.md` is one `##` section, written into
+  `packages/static/docs/` and `packages/server/docs/` — the `GUIDE.md` or
+  `references/*.md` whose topic it belongs to, once per package, not
+  necessarily the same file in both — between `<!-- shared:<name> -->`
+  markers by `scripts/sync-guides.ts`; `pnpm check` fails on drift and on a
+  fragment a package places twice or not at all, and `pnpm check:write`
+  re-syncs. Edit the fragment, never the copy.
 - **A route file's props are checked in the generated table.** `routes.gen.ts`
   emits `satisfies Page<'/products/:id'>` / `satisfies Layout<'/:locale'>`
   per file, so a mistyped param name is a type error without any route file

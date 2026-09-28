@@ -62,6 +62,9 @@ list below, and the package's tests keep it that way.
 
 These exports are left out on purpose, so a model cannot place them:
 
+- `ContextMenu` — it opens on a right-click, which nothing on screen invites,
+  so actions put in it would be hidden in a generated UI. It belongs on your
+  application's own content (a file, a row).
 - `InView`, `Resize` — they report to a callback and draw nothing of their own,
   and a spec has no code to receive the report.
 - `UIProvider` — your application mounts it once, around the generated UI as
@@ -77,6 +80,14 @@ These exports are left out on purpose, so a model cannot place them:
   async Server Component. The generated UI renders on the client, where it
   cannot run, and placing it there would ship the highlighter to the browser.
   `Code` (inline code) is in the catalog.
+- `CommandPalette` — every item runs a function of your application, which a
+  spec cannot write, and it is chrome your application opens from a shortcut
+  rather than something placed in a reply. For actions inside the generated UI,
+  use `Button` or `DropdownMenu`.
+- `ResizablePanels` — it divides a parent of fixed size into a workspace, the
+  frame an application draws around its content. The generated UI flows inside
+  a message and has no height to divide; to set things side by side, use
+  `Grid`.
 - `Prose` — it typesets the bare HTML that Markdown renders to. A spec places
   components, which keep their own look, so it would have nothing to typeset;
   lay a flow out with `Stack`.
