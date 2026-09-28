@@ -184,6 +184,7 @@ stories and rendered props rather than relying on trained knowledge:
 - **Button** - Primary action button (use `renderItem` to render as a link)
 - **IconButton** - Button with icon only (use `renderItem` to render as a link)
 - **CopyButton** - Copies text to the clipboard, then shows and announces the result
+- **Toolbar** - Group of buttons that arrow keys move between
 
 ### Navigation
 
@@ -241,6 +242,7 @@ stories and rendered props rather than relying on trained knowledge:
 
 ### Overlays
 
+- **ContextMenu** - Menu opened by right-click at the pointer
 - **Dialog** - Modal dialog boxes
 - **Drawer** - Slide-out panel
 - **DropdownMenu** - Action menu component
@@ -471,16 +473,16 @@ pnpm add @json-render/core @json-render/react zod
 pnpm add @openuidev/react-lang @openuidev/lang-core zod
 ```
 
-Supported components (**all 61**, both frameworks):
+Supported components (**all 62**, both frameworks):
 
 - **Layout / containers**: `Stack`, `Grid`, `Card`, `Form`, `Carousel`
-- **Buttons / nav**: `Button`, `IconButton`, `CopyButton`, `Anchor`, `Breadcrumb`, `Pagination`, `Stepper`, `SideNav`
+- **Buttons / nav**: `Button`, `IconButton`, `CopyButton`, `Toolbar`, `Anchor`, `Breadcrumb`, `Pagination`, `Stepper`, `SideNav`
 - **Display**: `Badge`, `Heading`, `Avatar`, `Code`, `Kbd`, `EmptyState`, `Icon`, `ChevronIcon`, `StatusIcon`, `Alert`, `Spinner`, `Progress`, `Skeleton`, `Separator`, `Tabs`, `Accordion`, `Table`, `DataTable`, `Tree`
 - **Overlays (self-contained widgets)**: `Modal`, `Dialog`, `Drawer`, `Popover`, `Tooltip`, `DropdownMenu`, `Toast`
 - **Form**: `TextField`, `Textarea`, `PasswordInput`, `NumberField`, `Slider`, `RangeSlider`, `DateField`, `DatePicker`, `Calendar`, `ColorPicker`, `Combobox`, `Checkbox`, `Switch`, `Select`, `Radio`, `RadioCard`, `CheckboxCard`, `ListBox`, `CheckboxGroup`, `Autocomplete`, `FileField`, `FormControl`
 
-The rest of the exports — the observers, the providers, and the AI chat
-components — are left out on purpose;
+The rest of the exports — `ContextMenu`, the observers, the providers, and the
+AI chat components — are left out on purpose;
 [docs/references/generative-ui.md](docs/references/generative-ui.md#what-the-catalog-leaves-out)
 says why.
 
