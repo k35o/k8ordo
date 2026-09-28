@@ -129,6 +129,15 @@ export const PACKAGES: PackageEntry[] = [
     sections: [
       { path: '/:locale/color-scheme/get-started', label: m.nav.getStarted },
       {
+        path: '/:locale/color-scheme/styling',
+        label: m.colorScheme.navStyling,
+      },
+      {
+        path: '/:locale/color-scheme/storage',
+        label: m.colorScheme.navStorage,
+      },
+      { path: '/:locale/color-scheme/csp', label: m.colorScheme.navCsp },
+      {
         path: '/:locale/color-scheme/how-it-works',
         label: m.colorScheme.navHowItWorks,
       },

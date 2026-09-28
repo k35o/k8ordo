@@ -92,6 +92,11 @@ export const buildComponentLibrary = <C>(
     'Accordion of items that open and close. Each item has a title and text content; content must be a plain string.',
     s.accordionProps,
   );
+  const Stepper = def(
+    'Stepper',
+    'Steps of a process in order, marking the ones done and the current one (display only).',
+    s.stepperProps,
+  );
   const Breadcrumb = def('Breadcrumb', 'Breadcrumb trail.', s.breadcrumbProps);
   const SideNav = def(
     'SideNav',
@@ -203,6 +208,11 @@ export const buildComponentLibrary = <C>(
     'Tooltip shown on hover or focus.',
     s.tooltipProps,
   );
+  const Toolbar = def(
+    'Toolbar',
+    'Row (or column) of buttons that arrow keys move between, e.g. formatting actions. Give each item an icon to show only the icon.',
+    s.toolbarProps,
+  );
   const DropdownMenu = def(
     'DropdownMenu',
     'Dropdown menu.',
@@ -266,6 +276,7 @@ export const buildComponentLibrary = <C>(
     Tabs.ref,
     Accordion.ref,
     Breadcrumb.ref,
+    Stepper.ref,
     SideNav.ref,
     Table.ref,
     DataTable.ref,
@@ -289,6 +300,7 @@ export const buildComponentLibrary = <C>(
     Pagination.ref,
     Tooltip.ref,
     DropdownMenu.ref,
+    Toolbar.ref,
     Toast.ref,
     ListBox.ref,
     CheckboxGroup.ref,
@@ -416,6 +428,7 @@ export const buildComponentLibrary = <C>(
       Carousel,
       Tooltip,
       DropdownMenu,
+      Toolbar,
       Toast,
       Button,
       IconButton,
@@ -438,6 +451,7 @@ export const buildComponentLibrary = <C>(
       Tabs,
       Accordion,
       Breadcrumb,
+      Stepper,
       SideNav,
       Table,
       DataTable,

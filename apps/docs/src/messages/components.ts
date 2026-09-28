@@ -437,6 +437,40 @@ export const autocomplete = {
   }),
 };
 
+export const toolbar = {
+  description: message({
+    ja: '矢印キーで行き来するボタンのまとまり',
+    en: 'A group of buttons that arrow keys move between.',
+  }),
+  keyboardDescription: message({
+    ja: 'Tab で入れるのは 1 つだけで、中は矢印キーで移ります（`Home` / `End` で端へ、無効な項目は飛ばす）。出て戻ると、最後にいた項目へ戻ります。各項目は `Toolbar.Item` の `renderItem` が渡す `ref` / `tabIndex` / `onFocus` を、`Button` や `IconButton` に広げて作ります。',
+    en: 'It takes one Tab stop; arrow keys move inside (`Home` / `End` to the ends, skipping disabled items), and coming back lands on the item last focused. Each item spreads the `ref` / `tabIndex` / `onFocus` that `Toolbar.Item`’s `renderItem` passes onto a `Button` or an `IconButton`.',
+  }),
+  toggleTitle: message({
+    ja: 'トグル',
+    en: 'Toggles',
+  }),
+  toggleDescription: message({
+    ja: '押した状態は `aria-pressed` で渡します。ツールバーは押した項目の地を濃くします。',
+    en: 'Pass the pressed state as `aria-pressed`; the toolbar shades a pressed item.',
+  }),
+  verticalTitle: message({
+    ja: '縦に並べる',
+    en: 'Vertical',
+  }),
+};
+
+export const contextMenu = {
+  description: message({
+    ja: '右クリックした位置に開くメニュー',
+    en: 'A menu that opens where you right-click.',
+  }),
+  usageDescription: message({
+    ja: '中身は `DropdownMenu` と同じ（`Content` / `Item` / `SubMenu`）で、違うのは開き方と出す位置だけです。キーボードからは、フォーカスのある領域で Shift+F10 やコンテキストメニューキーで開きます。閉じると、開く前にいた要素へフォーカスが戻ります。',
+    en: 'The inside is `DropdownMenu`’s (`Content` / `Item` / `SubMenu`); only how it opens and where differ. From the keyboard, press Shift+F10 or the context-menu key on the focused area. When it closes, focus returns to where it was before it opened.',
+  }),
+};
+
 export const rangeSlider = {
   description: message({
     ja: '2 つのつまみで範囲を選ぶスライダー',
@@ -589,6 +623,29 @@ export const calendar = {
   localeDescription: message({
     ja: '月名・曜日名・週の始まりは、組み込みの文言と同じロケール（`@k8ordo/i18n` の今のロケール）に従います。今日は閲覧者のタイムゾーンでしか決まらないので、カレンダーはブラウザでだけ描かれ、サーバーは同じ寸法の空の箱を書きます。',
     en: 'Month and weekday names, and the first day of the week, follow the same locale as the built-in wording (`@k8ordo/i18n`’s current locale). Today depends on the visitor’s time zone, so the calendar renders in the browser alone; the server writes an empty box of the same size.',
+  }),
+};
+
+export const stepper = {
+  description: message({
+    ja: '手順の段を並べ、済んだ段といまの段を示すステッパー',
+    en: 'The steps of a process, marking the done ones and the current one.',
+  }),
+  usageDescription: message({
+    ja: '`value` はいまの段の位置（0 始まり）です。済んだ段にはチェックが付き、読み上げでは「完了」と添えます。いまの段は `aria-current="step"` で伝えます。',
+    en: '`value` is the index of the current step (0-based). Done steps show a check and are read as completed; the current step carries `aria-current="step"`.',
+  }),
+  interactiveTitle: message({
+    ja: '済んだ段へ戻る',
+    en: 'Going back to a done step',
+  }),
+  interactiveDescription: message({
+    ja: '`interactive` を付けると、済んだ段がボタンになり、押すと `onChange` にその位置が届きます。先の段へは飛べません。',
+    en: 'With `interactive`, done steps become buttons and `onChange` receives the index of the one pressed. Steps ahead cannot be jumped to.',
+  }),
+  verticalTitle: message({
+    ja: '縦に並べる',
+    en: 'Vertical',
   }),
 };
 

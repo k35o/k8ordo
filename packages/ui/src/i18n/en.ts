@@ -59,6 +59,7 @@ export const en: Messages = {
   paginationPrevious: 'Previous',
   paginationNext: 'Next',
 
+  stepperComplete: 'completed',
   dataTableColumns: 'Columns',
   dataTableSelectAll: 'Select all rows',
   dataTableSelectRow: 'Select row',

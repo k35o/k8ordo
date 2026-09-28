@@ -9,8 +9,11 @@ is here is only the part that makes a build
 into files. The repository-wide discipline is in the root
 [`CLAUDE.md`](../../CLAUDE.md).
 
-User-facing documentation is in [`docs/GUIDE.md`](docs/GUIDE.md), shipped
-inside the npm package.
+User-facing documentation is [`docs/GUIDE.md`](docs/GUIDE.md), the entry
+point, with a reference per topic under [`docs/references/`](docs/references/)
+— the topics of the docs site's `/static/…` pages — all shipped inside the npm
+package. The sections both modes share are written from
+`packages/framework-engine/docs/shared/`; edit the fragment, never the copy.
 
 ## Commands
 

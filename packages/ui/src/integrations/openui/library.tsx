@@ -90,6 +90,8 @@ const renderers = {
     ui.renderTooltip(props),
   DropdownMenu: ({ props }: ComponentRenderProps<sc.DropdownMenuProps>) =>
     ui.renderDropdownMenu(props),
+  Toolbar: ({ props }: ComponentRenderProps<sc.ToolbarProps>) =>
+    ui.renderToolbar(props),
   Toast: ({ props }: ComponentRenderProps<sc.ToastProps>) => (
     <ui.ToastWidget props={props} />
   ),
@@ -137,6 +139,8 @@ const renderers = {
     ui.renderAccordion(props),
   Breadcrumb: ({ props }: ComponentRenderProps<sc.BreadcrumbProps>) =>
     ui.renderBreadcrumb(props),
+  Stepper: ({ props }: ComponentRenderProps<sc.StepperProps>) =>
+    ui.renderStepper(props),
   Table: ({ props }: ComponentRenderProps<sc.TableProps>) =>
     ui.renderTable(props),
   DataTable: ({ props }: ComponentRenderProps<sc.DataTableProps>) => (

@@ -54,6 +54,7 @@ const MESSAGE_USAGE = {
   paginationLabel: 'Pagination',
   paginationPrevious: 'Pagination',
   paginationNext: 'Pagination',
+  stepperComplete: 'Stepper',
   dataTableColumns: 'DataTable',
   dataTableSelectAll: 'DataTable',
   dataTableSelectRow: 'DataTable',

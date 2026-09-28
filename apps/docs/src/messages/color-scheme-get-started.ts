@@ -1,8 +1,8 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: 'パッケージを入れ、ルートレイアウトに Provider を 1 つ置き、切替を 1 つ書き、クラスを読むスタイルを用意するまでの手順です。これで、ダークを選んだ訪問者のページは最初の描画からダークになり、何も選んでいない訪問者は OS の設定に追従します。',
-  en: 'Install the package, put one provider in the root layout, write one switcher, and style with the class it sets. With that, a visitor who chose dark gets a page that is dark from the first paint, and a visitor who chose nothing follows the OS setting.',
+  ja: 'パッケージを入れ、ルートレイアウトに Provider を 1 つ置き、切替を 1 つ書くまでの手順です。これで、ダークを選んだ訪問者のページは最初の描画からダークになり、何も選んでいない訪問者は OS の設定に追従します。クラスに色を当てる方法は、次の「スタイル」で説明します。',
+  en: 'Install the package, put one provider in the root layout, and write one switcher. With that, a visitor who chose dark gets a page that is dark from the first paint, and a visitor who chose nothing follows the OS setting. Giving the class its colours is the next page, Styling.',
 });
 
 export const owns = {
@@ -204,75 +204,25 @@ export const defaults = {
   }),
 };
 
-export const csp = {
-  title: message({
-    ja: 'Content-Security-Policy の下で使う',
-    en: 'Under a Content-Security-Policy',
-  }),
-  description: message({
-    ja: 'プロバイダーが描くスクリプトはインラインなので、スクリプトを制限するポリシーの下では、nonce かハッシュで許す必要があります。',
-    en: 'The script the provider renders is inline, so a policy that restricts scripts has to allow it, by nonce or by hash.',
-  }),
-  nonce: message({
-    ja: '`nonce` は、その応答の nonce をスクリプトに付けます。`@k8ordo/server` なら `@k8ordo/server/runtime` の `nonce()` です。',
-    en: '`nonce` puts the answer’s nonce on the script — under `@k8ordo/server`, `nonce()` from `@k8ordo/server/runtime`.',
-  }),
-  hash: message({
-    ja: "`colorSchemeScriptHash()` は、スクリプトのハッシュを CSP のソース（`'sha256-…'`）として返します。nonce を持てない `@k8ordo/static` の `csp` オプションや、nonce を名指さないヘッダーで使います。スクリプトは既定値を埋め込むので、プロバイダーに渡す `defaultPreference` を渡します。",
-    en: "`colorSchemeScriptHash()` resolves to the script’s hash as a CSP source (`'sha256-…'`), for `@k8ordo/static`’s `csp` option — a file cannot carry a nonce — or a header that names none. The script carries the default, so pass the `defaultPreference` the provider is given.",
-  }),
-};
-
-export const styling = {
-  title: message({
-    ja: 'クラスでスタイルを当てる',
-    en: 'Style with the class',
-  }),
-  description: message({
-    ja: 'このパッケージが出力するのはクラス 1 つです。そのクラスの下で何が変わるかは CSS が決めます。',
-    en: 'What this package produces is one class. What changes under it is decided by CSS.',
-  }),
-  uiTitle: message({
-    ja: '@k8ordo/ui と使う',
-    en: 'With @k8ordo/ui',
-  }),
-  uiDescription: message({
-    ja: '@k8ordo/ui のセマンティックトークンは `.dark` の下で切り替わります。`styles.css` でも `tailwind.css` でも同じなので、コンポーネントも `bg-bg-base` のようなユーティリティも、追加の設定なしでクラスに従います。CSS の `color-scheme` プロパティもクラスに合わせて設定されるので、スクロールバーやフォーム部品も一緒に暗くなります。`tailwind.css` は `dark:` と `light:` のバリアントもクラスを読むように宣言しているので、自前のマークアップでもそのまま使えます。',
-    en: '@k8ordo/ui’s semantic tokens switch under `.dark`, in `styles.css` and `tailwind.css` alike, so the components and utilities such as `bg-bg-base` follow the class with nothing else to set up. The CSS `color-scheme` property is set to follow the class too, so scrollbars and form controls turn dark with the rest. `tailwind.css` also declares the `dark:` and `light:` variants to read the class, so they work in your own markup as they are.',
-  }),
-  tailwindTitle: message({
-    ja: 'Tailwind CSS だけで使う',
-    en: 'With Tailwind CSS alone',
-  }),
-  tailwindDescription: message({
-    ja: 'Tailwind CSS 4 の `dark:` バリアントは、既定では `prefers-color-scheme` を読みます。そのままでは OS の設定に従い、訪問者の選択を無視します。クラスを読むように宣言し直します。@k8ordo/ui の `tailwind.css` がしている宣言と同じものです。',
-    en: 'Tailwind CSS 4’s `dark:` variant reads `prefers-color-scheme` by default, so on its own it follows the OS and ignores the visitor’s choice. Redeclare it to read the class — the same declaration @k8ordo/ui’s `tailwind.css` makes.',
-  }),
-  plainTitle: message({
-    ja: '素の CSS で使う',
-    en: 'With plain CSS',
-  }),
-  plainDescription: message({
-    ja: '色をクラスに結びつけます。このパッケージは CSS の `color-scheme` プロパティを設定しない（@k8ordo/ui ならトークンと一緒に設定している）ので、フォーム部品やスクロールバーのようなブラウザ自身の描画も合わせたいなら、色と一緒に宣言します。',
-    en: 'Tie the colours to the class. This package does not set the CSS `color-scheme` property (@k8ordo/ui sets it beside its tokens), so declare it next to the colours if the browser’s own rendering, such as form controls and scrollbars, should follow too.',
-  }),
-};
-
 export const next = {
   title: message({
     ja: '次に読む',
     en: 'Next steps',
   }),
+  styling: message({
+    ja: 'スタイル: @k8ordo/ui・Tailwind CSS・素の CSS での当て方、`color-scheme` プロパティ、高コントラスト',
+    en: 'Styling: with @k8ordo/ui, Tailwind CSS or plain CSS, the `color-scheme` property, and high contrast',
+  }),
+  storage: message({
+    ja: '保存: @k8ordo/state のローカル状態としての行、ほかの場所から読む、タブ間の同期',
+    en: 'Storage: the row as an @k8ordo/state local state, reading it elsewhere, and tabs',
+  }),
+  csp: message({
+    ja: 'Content-Security-Policy: nonce とハッシュでインラインスクリプトを許す',
+    en: 'Content-Security-Policy: allowing the inline script by nonce or by hash',
+  }),
   howItWorks: message({
-    ja: '仕組み: 解決の規則、最初の描画の前に走るスクリプト、その後の追従、保存行、保証すること、テスト',
-    en: 'How it works: the resolution rule, the script that runs before the first paint, staying in step, the stored row, what it guarantees, and testing',
-  }),
-  state: message({
-    ja: '@k8ordo/state: 設定が置かれているローカル状態',
-    en: '@k8ordo/state: the local state the preference lives in',
-  }),
-  theming: message({
-    ja: '@k8ordo/ui のテーマ: `.dark` の下で切り替わるトークン',
-    en: '@k8ordo/ui theming: the tokens that switch under `.dark`',
+    ja: '仕組み: 解決の規則、最初の描画の前に走るスクリプト、その後の追従、保証すること、型、テスト',
+    en: 'How it works: the resolution rule, the script that runs before the first paint, staying in step, what it guarantees, the types, and testing',
   }),
 };

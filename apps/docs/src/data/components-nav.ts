@@ -20,6 +20,11 @@ export const componentCategories: NavCategory[] = [
         path: '/:locale/ui/components/copy-button',
         description: m.components.copyButton.description,
       },
+      {
+        name: 'Toolbar',
+        path: '/:locale/ui/components/toolbar',
+        description: m.components.toolbar.description,
+      },
     ],
   },
   {
@@ -44,6 +49,11 @@ export const componentCategories: NavCategory[] = [
         name: 'Pagination',
         path: '/:locale/ui/components/pagination',
         description: m.components.pagination.description,
+      },
+      {
+        name: 'Stepper',
+        path: '/:locale/ui/components/stepper',
+        description: m.components.stepper.description,
       },
       {
         name: 'SideNav',
@@ -299,6 +309,11 @@ export const componentCategories: NavCategory[] = [
         name: 'Popover',
         path: '/:locale/ui/components/popover',
         description: m.components.popover.description,
+      },
+      {
+        name: 'ContextMenu',
+        path: '/:locale/ui/components/context-menu',
+        description: m.components.contextMenu.description,
       },
       {
         name: 'DropdownMenu',

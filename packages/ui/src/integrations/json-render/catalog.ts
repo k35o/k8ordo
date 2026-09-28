@@ -84,6 +84,11 @@ export const catalog = defineCatalog(schema, {
       description:
         'Accordion of items that open and close. Each item has a title and text content.',
     },
+    Stepper: {
+      props: s.stepperProps,
+      description:
+        'Steps of a process in order, marking the ones done and the current one (display only).',
+    },
     Breadcrumb: {
       props: s.breadcrumbProps,
       description: 'Breadcrumb trail.',
@@ -255,6 +260,11 @@ export const catalog = defineCatalog(schema, {
     Tooltip: {
       props: s.tooltipProps,
       description: 'Tooltip shown on hover or focus.',
+    },
+    Toolbar: {
+      props: s.toolbarProps,
+      description:
+        'Row (or column) of buttons that arrow keys move between, e.g. formatting actions. Give each item an icon to show only the icon.',
     },
     DropdownMenu: {
       props: s.dropdownMenuProps,

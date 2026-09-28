@@ -352,13 +352,36 @@ These docs are served from <https://ordo.k8o.me>.
 > legacy fallbacks.
 
 These docs are served from <https://ordo.k8o.me>.
+Start with the Design Guide, then follow the reference most relevant to the task.
 
 ## Guide
 
-- [Design Guide](https://ordo.k8o.me/static/docs/GUIDE.md): setup, the `routes/` grammar and what it refuses,
-  execution boundaries, the build output, supplying pathnames for
-  parameterised routes, a Content-Security-Policy by hash, and what static
-  mode cannot do.
+- [Design Guide](https://ordo.k8o.me/static/docs/GUIDE.md): the mode as the dependency, setup
+  (`vite.config.ts`, `tsconfig.json`, the root layout as the document),
+  `vite dev` against `vite build`, the plugin's options, and what static mode
+  cannot do.
+
+## References
+
+- [Routing](https://ordo.k8o.me/static/docs/references/routing.md): the `routes/` grammar and every refusal
+  the build names, `loading.tsx`, a `route.ts` written as the file its `GET`
+  answers, the generated `.k8ordo/` files, titles, and fetching the next page
+  ahead (`data-k8ordo-prefetch`).
+- [Parameters](https://ordo.k8o.me/static/docs/references/params.md): `paramsSchema` (a refused value is a
+  pathname the pattern does not answer), and the `paths` option — supplying
+  pathnames, expanding a parameter every page shares, and what fails the
+  build.
+- [Errors and redirects](https://ordo.k8o.me/static/docs/references/errors.md): `error.tsx`, a Server
+  Component that throws stopping the build, `notFound()` and
+  `not-found.tsx`, and a `redirect.ts` written as a page that sends the
+  visitor on.
+- [Execution boundaries](https://ordo.k8o.me/static/docs/references/boundaries.md): `'use client'`,
+  `use(browser())` for a component that needs a browser, `server-only`
+  modules, and the search as `@k8ordo/state`'s.
+- [The output and deploying](https://ordo.k8o.me/static/docs/references/deploy.md): `dist/client/` (HTML,
+  `index.rsc` payloads, `404.html`, `sitemap.xml`), a tab opened before a
+  deploy, Vite's `base`, and a Content-Security-Policy by hash (`csp`,
+  `colorSchemeScriptHash()`).
 
 ## Entry point
 
@@ -420,12 +443,43 @@ These docs are served from <https://ordo.k8o.me>.
 > legacy fallbacks.
 
 These docs are served from <https://ordo.k8o.me>.
+Start with the Design Guide, then follow the reference most relevant to the task.
 
 ## Guide
 
-- [Design Guide](https://ordo.k8o.me/server/docs/GUIDE.md): setup, the `routes/` grammar and what it refuses,
-  execution boundaries, building and running, and what running buys over
-  static.
+- [Design Guide](https://ordo.k8o.me/server/docs/GUIDE.md): the mode as the dependency, setup (the three
+  entries, `vite.config.ts`, `tsconfig.json`, the root layout as the
+  document), and what running buys over static.
+
+## References
+
+- [Routing](https://ordo.k8o.me/server/docs/references/routing.md): the `routes/` grammar and every refusal
+  the build names, an async page answering and then streaming,
+  `loading.tsx`, `route.ts` (methods, `405`, no same-origin check), the
+  generated `.k8ordo/` files, titles, and fetching the next page ahead
+  (`data-k8ordo-prefetch`).
+- [Parameters](https://ordo.k8o.me/server/docs/references/params.md): `paramsSchema` — a refused value is a
+  pathname the pattern does not answer, so `not-found.tsx` answers under a
+  real 404.
+- [Errors and redirects](https://ordo.k8o.me/server/docs/references/errors.md): `error.tsx`, `notFound()`
+  and a document waiting for its page, `not-found.tsx`, and `redirect.ts`
+  answering `307`/`308`.
+- [Execution boundaries](https://ordo.k8o.me/server/docs/references/boundaries.md): `'use client'`,
+  `use(browser())` for a component that needs a browser, `server-only`
+  modules, and the search — `@k8ordo/state`'s, or handed to a page that
+  exports `search`.
+- [Server Actions](https://ordo.k8o.me/server/docs/references/actions.md): `'use server'` against
+  `server-only`, `cookies()` / `responseHeaders()` / `requestHeaders()` in an
+  action, the page context an action runs in, forms before JavaScript, and
+  ending with `redirect()`.
+- [Guards, cookies and the request](https://ordo.k8o.me/server/docs/references/guards.md): `guard.ts`
+  (outer first; a `Response` ends the request), `responseHeaders()`,
+  `cookies()` and its defaults, the read-only `request` a page receives, and
+  a Content-Security-Policy with `nonce()`.
+- [Running and deploying](https://ordo.k8o.me/server/docs/references/deploy.md): `serve` (compression,
+  `ETag`, `Range`), the request handler under Node.js, Bun, Deno and
+  Cloudflare Workers, the same-origin rule for a `POST`, `vercel()`, a tab
+  opened before a deploy, and Vite's `base`.
 
 ## Entry point
 
@@ -556,10 +610,13 @@ These docs are served from <https://ordo.k8o.me>.
 ## Guide
 
 - [Design Guide](https://ordo.k8o.me/color-scheme/docs/GUIDE.md): what the package owns and does not (the class,
-  not the colours; the rule, not the storage), placing the provider in the
-  root layout, reading and changing the preference with the hook, what it
-  guarantees, allowing its inline script under a Content-Security-Policy
-  (by nonce or by hash), and testing.
+  not the colours or the `color-scheme` property; the rule, not the storage;
+  no contrast preference — `prefers-contrast` and `forced-colors` are the
+  OS's, which `@k8ordo/ui` follows in either scheme), placing the provider
+  in the root layout, allowing its inline script under a
+  Content-Security-Policy (by nonce or by hash, and what a blocked script
+  costs), reading and changing the preference with the hook, the stored row
+  and reading it without the hook, what it guarantees, and testing.
 
 ## Entry point
 

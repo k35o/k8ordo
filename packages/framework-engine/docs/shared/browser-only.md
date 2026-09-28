@@ -1,4 +1,4 @@
-### Components that need a browser
+## Components that need a browser
 
 A client component that reads something only a browser has — `localStorage`,
 the visitor's time zone, `navigator` — says so with React's `use(browser())`

@@ -6,6 +6,7 @@ import type { ComponentProps, FC, ReactNode } from 'react';
 import { Button } from '../../components/buttons/button';
 import { CopyButton } from '../../components/buttons/copy-button';
 import { IconButton } from '../../components/buttons/icon-button';
+import { Toolbar } from '../../components/buttons/toolbar';
 import { Accordion } from '../../components/data-display/accordion';
 import { Avatar } from '../../components/data-display/avatar';
 import { Badge } from '../../components/data-display/badge';
@@ -109,6 +110,7 @@ import { Anchor } from '../../components/navigation/anchor';
 import { Breadcrumb } from '../../components/navigation/breadcrumb';
 import { Pagination } from '../../components/navigation/pagination';
 import { SideNav } from '../../components/navigation/side-nav';
+import { Stepper } from '../../components/navigation/stepper';
 import { Tabs } from '../../components/navigation/tabs';
 import { Dialog } from '../../components/overlays/dialog';
 import { Drawer } from '../../components/overlays/drawer';
@@ -172,6 +174,7 @@ import type {
   SpinnerProps,
   StackProps,
   StatusIconProps,
+  StepperProps,
   SwitchProps,
   TableProps,
   TreeProps,
@@ -179,6 +182,7 @@ import type {
   TextareaProps,
   TextFieldProps,
   ToastProps,
+  ToolbarProps,
   TooltipProps,
 } from './schemas';
 
@@ -939,6 +943,20 @@ export function renderBreadcrumb(props: BreadcrumbProps): ReactNode {
   );
 }
 
+export function renderStepper(props: StepperProps): ReactNode {
+  return (
+    <Stepper
+      aria-label={props.label}
+      orientation={u(props.orientation)}
+      steps={props.steps.map((step) => ({
+        label: step.label,
+        description: u(step.description),
+      }))}
+      value={props.current}
+    />
+  );
+}
+
 // 平らな一覧を親子の木に組む。親の見つからない項目は根に置く
 export const toTree = (items: TreeProps['items']): TreeItem[] => {
   const ids = new Set(items.map((item) => item.id));
@@ -1166,6 +1184,34 @@ export function renderTooltip(props: TooltipProps): ReactNode {
       />
       <Tooltip.Content>{props.content}</Tooltip.Content>
     </Tooltip.Root>
+  );
+}
+
+export function renderToolbar(props: ToolbarProps): ReactNode {
+  return (
+    <Toolbar.Root aria-label={props.label} orientation={u(props.orientation)}>
+      {props.items.map((item, index) => {
+        const icon = u(item.icon);
+        const IconComponent = icon === undefined ? undefined : iconMap[icon];
+        return (
+          <Toolbar.Item
+            // eslint-disable-next-line react/no-array-index-key -- 生成された静的な並び
+            key={`${item.label}-${index}`}
+            renderItem={(itemProps) =>
+              IconComponent === undefined ? (
+                <Button {...itemProps} size="sm" variant="skeleton">
+                  {item.label}
+                </Button>
+              ) : (
+                <IconButton {...itemProps} label={item.label} size="sm">
+                  <IconComponent size="sm" />
+                </IconButton>
+              )
+            }
+          />
+        );
+      })}
+    </Toolbar.Root>
   );
 }
 
