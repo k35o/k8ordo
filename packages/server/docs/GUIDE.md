@@ -1212,9 +1212,12 @@ once, the last way.
 `set` takes `path`, `domain`, `maxAge` (seconds), `expires`, `httpOnly`,
 `secure` and `sameSite` (`'strict' | 'lax' | 'none'`, the last only with
 `secure`). The defaults are what a session wants: `path: '/'`,
-`httpOnly: true`, `secure: true` and `sameSite: 'lax'`. `localhost` counts as
-secure to the browsers that matter; anywhere else served over plain HTTP,
-say `secure: false`. A name outside RFC 6265's token characters throws.
+`httpOnly: true`, `secure: true` and `sameSite: 'lax'` — except that over
+plain HTTP to this machine (`localhost`, `127.0.0.1`, `[::1]`) `secure`
+defaults to `false`, because Safari drops a `Secure` cookie there where
+Chromium and Firefox keep it. Anywhere else served over plain HTTP, say
+`secure: false`; `sameSite: 'none'` stays `Secure` everywhere. A name outside
+RFC 6265's token characters throws.
 `delete` takes the `path` and `domain` the cookie was set with, since those
 are what a browser keys it by.
 

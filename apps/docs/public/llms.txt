@@ -439,7 +439,8 @@ These docs are served from <https://ordo.k8o.me>.
   the visitor to `to`; `responseHeaders()` is the `Headers` the final response
   carries, `cookies()` the request's cookies to read and write (`get`, `has`,
   `set(name, value, CookieOptions)`, `delete(name, CookieScope)`; defaults
-  `path: '/'`, `httpOnly`, `secure`, `sameSite: 'lax'`; every write a
+  `path: '/'`, `httpOnly`, `secure` (not over plain HTTP to `localhost`),
+  `sameSite: 'lax'`; every write a
   `Set-Cookie` on the answer), and `requestHeaders()` the headers the request
   arrived with — all three from a `guard.ts`, a `route.ts` or a Server
   Action, and they throw anywhere else; `nonce()` is the nonce this answer's
