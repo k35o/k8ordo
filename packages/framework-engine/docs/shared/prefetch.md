@@ -1,4 +1,4 @@
-### Fetching the next page ahead
+## Fetching the next page ahead
 
 The client runtime listens on the whole document for a pointer moving onto a
 link, a link taking focus, and a press starting on one — `pointerover`,
