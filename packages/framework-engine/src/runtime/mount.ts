@@ -1,4 +1,4 @@
-import { normalizePathname } from '@k8ordo/router';
+import { normalizePathname, withoutBase } from '@k8ordo/router';
 import type { ReactNode } from 'react';
 import { createRoot, hydrateRoot } from 'react-dom/client';
 import type { Root } from 'react-dom/client';
@@ -21,7 +21,11 @@ export const mount = (
   renderedFor: string,
   options?: HydrateOptions,
 ): Root => {
-  if (normalizePathname(renderedFor) === normalizePathname(location.pathname)) {
+  const here = withoutBase(location.pathname);
+  if (
+    here !== null &&
+    normalizePathname(renderedFor) === normalizePathname(here)
+  ) {
     return hydrateRoot(container, app, options);
   }
   const root = createRoot(container);

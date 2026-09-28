@@ -145,7 +145,7 @@ export const tokens = {
       },
       'primary-bg': {
         light: 'oklch(0.9 0.11 180)',
-        dark: 'oklch(0.41 0.098 180)',
+        dark: 'oklch(0.37 0.078 180)',
       },
       'primary-bg-subtle': {
         light: 'oklch(0.975 0.02 180)',
@@ -157,7 +157,7 @@ export const tokens = {
       },
       'primary-bg-emphasize': {
         light: 'oklch(0.84 0.16 180)',
-        dark: 'oklch(0.49 0.12 180)',
+        dark: 'oklch(0.41 0.098 180)',
       },
       'primary-border': 'oklch(0.66 0.165 180)',
       'secondary-fg': {
@@ -166,7 +166,7 @@ export const tokens = {
       },
       'secondary-bg': {
         light: 'oklch(0.9 0.098 210)',
-        dark: 'oklch(0.41 0.105 210)',
+        dark: 'oklch(0.37 0.082 210)',
       },
       'secondary-bg-subtle': {
         light: 'oklch(0.975 0.022 210)',
@@ -178,7 +178,7 @@ export const tokens = {
       },
       'secondary-bg-emphasize': {
         light: 'oklch(0.84 0.155 210)',
-        dark: 'oklch(0.49 0.128 210)',
+        dark: 'oklch(0.41 0.105 210)',
       },
       'secondary-border': 'oklch(0.66 0.17 210)',
       transparent: 'transparent',
@@ -574,7 +574,7 @@ export const tokens = {
     },
     'primary-bg': {
       light: 'oklch(0.9 0.11 180)',
-      dark: 'oklch(0.41 0.098 180)',
+      dark: 'oklch(0.37 0.078 180)',
     },
     'primary-bg-subtle': {
       light: 'oklch(0.975 0.02 180)',
@@ -586,7 +586,7 @@ export const tokens = {
     },
     'primary-bg-emphasize': {
       light: 'oklch(0.84 0.16 180)',
-      dark: 'oklch(0.49 0.12 180)',
+      dark: 'oklch(0.41 0.098 180)',
     },
     'primary-border': 'oklch(0.66 0.165 180)',
     'secondary-fg': {
@@ -595,7 +595,7 @@ export const tokens = {
     },
     'secondary-bg': {
       light: 'oklch(0.9 0.098 210)',
-      dark: 'oklch(0.41 0.105 210)',
+      dark: 'oklch(0.37 0.082 210)',
     },
     'secondary-bg-subtle': {
       light: 'oklch(0.975 0.022 210)',
@@ -607,7 +607,7 @@ export const tokens = {
     },
     'secondary-bg-emphasize': {
       light: 'oklch(0.84 0.155 210)',
-      dark: 'oklch(0.49 0.128 210)',
+      dark: 'oklch(0.41 0.105 210)',
     },
     'secondary-border': 'oklch(0.66 0.17 210)',
     'back-drop': 'rgb(0, 0, 0, 0.5)',
@@ -750,7 +750,7 @@ export const tokens = {
     },
     'primary-bg': {
       light: 'teal-200',
-      dark: 'teal-800',
+      dark: 'teal-900',
     },
     'primary-bg-subtle': {
       light: 'teal-50',
@@ -762,7 +762,7 @@ export const tokens = {
     },
     'primary-bg-emphasize': {
       light: 'teal-300',
-      dark: 'teal-700',
+      dark: 'teal-800',
     },
     'primary-border': {
       light: 'teal-500',
@@ -774,7 +774,7 @@ export const tokens = {
     },
     'secondary-bg': {
       light: 'cyan-200',
-      dark: 'cyan-800',
+      dark: 'cyan-900',
     },
     'secondary-bg-subtle': {
       light: 'cyan-50',
@@ -786,7 +786,7 @@ export const tokens = {
     },
     'secondary-bg-emphasize': {
       light: 'cyan-300',
-      dark: 'cyan-700',
+      dark: 'cyan-800',
     },
     'secondary-border': {
       light: 'cyan-500',

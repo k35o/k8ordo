@@ -1,8 +1,8 @@
 import type { Message } from '@k8ordo/i18n';
 import { Anchor, Code, Heading, Table } from '@k8ordo/ui';
+import { CodeBlock } from '@k8ordo/ui/code-block';
 import type { ReactNode } from 'react';
 
-import { CodeBlock } from '../../../../components/code-block';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Rich } from '../../../../components/rich';
@@ -10,6 +10,26 @@ import * as m from '../../../../messages';
 
 const LOCALE_SHELL_URL =
   'https://github.com/k35o/k8ordo/blob/main/apps/docs/src/routes/%5Blocale%5D/_parts/locale-shell.tsx';
+
+const PENDING = `'use client';
+
+import { href, usePendingPathname } from '@k8ordo/router';
+
+export function ProductsLink() {
+  const pending = usePendingPathname();
+  return (
+    <a aria-busy={pending === '/products'} href={href('/products')}>
+      products
+    </a>
+  );
+}`;
+
+const LOADING_BRANCH = `defineRoutes({
+  '/products': {
+    loading: ProductsLoading,
+    children: { '/': ProductList, '/:id': ProductPage },
+  },
+});`;
 
 const CROSS_FADE = `// src/root-layout.tsx
 import { href, Outlet } from '@k8ordo/router';
@@ -401,6 +421,17 @@ export default function RouterNavigationPage() {
             @k8ordo/state
           </LocaleAnchor>
         </p>
+      </DocSection>
+
+      <DocSection
+        description={m.routerNavigation.pendingDescription}
+        title={m.routerNavigation.pendingTitle}
+      >
+        <CodeBlock code={PENDING} lang="tsx" />
+        <p className="text-fg-mute leading-relaxed">
+          <Rich>{m.routerNavigation.pendingLoading()}</Rich>
+        </p>
+        <CodeBlock code={LOADING_BRANCH} lang="ts" />
       </DocSection>
 
       <DocSection

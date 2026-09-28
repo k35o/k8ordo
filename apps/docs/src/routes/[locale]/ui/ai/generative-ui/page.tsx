@@ -1,6 +1,6 @@
 import { Heading, Separator } from '@k8ordo/ui';
+import { CodeBlock } from '@k8ordo/ui/code-block';
 
-import { CodeBlock } from '../../../../../components/code-block';
 import { PageTitle } from '../../../../../components/page-title';
 import { Rich } from '../../../../../components/rich';
 import * as m from '../../../../../messages';

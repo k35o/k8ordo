@@ -24,6 +24,11 @@ import { mergeRefs } from './../../../helpers/merge-refs';
  * 残りを展開する。無効状態は同梱の `aria-disabled` で表現でき、
  * `onClick` は無効なら何もしないので `<a>` でも遷移しない。
  *
+ * `disabled` が表すのは利用者が渡した `disabled` だけ。`onAction` の保留中と、
+ * `type="submit"` で属するフォームの送信が保留中のあいだは、`aria-disabled` と
+ * `aria-busy` が立っても `disabled` は `false` のままで、押された要素はフォーカスを
+ * 保つ。その間に押されても `onClick` が何もしない。
+ *
  * ハンドラの要素型を `HTMLButtonElement` ではなく `HTMLElement` にしているのは、
  * `ClipboardEventHandler<HTMLButtonElement>` のような兄弟型が `<a>` の同名 props
  * に代入できず、束ごと展開できなくなるため。
@@ -62,7 +67,8 @@ type Props = {
   endIcon?: ReactNode;
   /**
    * クリック時の処理。`onAction` は非同期処理を `useTransition` で包み、保留中は
-   * 自動でスピナーを表示する糖衣。素のクリックイベント（`event` が必要、
+   * 自動でスピナーを表示する糖衣。保留中は押しても何もしないが、ボタンは
+   * フォーカスを持ったままでいる。素のクリックイベント（`event` が必要、
    * `preventDefault` したい等）は `onClick` を使う。両者は併用可能で、
    * `onClick` → `onAction` の順に実行される（`onClick` が `preventDefault`
    * した場合は `onAction` をスキップ）。
@@ -100,8 +106,8 @@ export const Button: FC<Props> = ({
   const isPending = transitionPending || (type === 'submit' && formPending);
   const isDisabled = disabled || isPending;
 
-  // 無効なときもハンドラを付けるのは、renderItem が <a> などを描画したときに
-  // ネイティブの disabled が効かず、そのまま遷移してしまうため。
+  // 無効なときもハンドラを付けるのは、保留中の <button> や renderItem が描いた
+  // <a> などにはネイティブの disabled が付かず、押せば click が届くため。
   const handleClick =
     onClick || onAction || isDisabled
       ? (event: MouseEvent<HTMLButtonElement>) => {
@@ -129,13 +135,13 @@ export const Button: FC<Props> = ({
   const hasEndIcon = endIcon !== undefined;
 
   const className = cn(
-    'cursor-pointer rounded-full border-2 text-center font-bold transition-colors',
+    'cursor-pointer rounded-full border-2 text-center font-bold transition-colors duration-150 ease-out',
     {
-      'border-transparent bg-primary-bg text-primary-fg hover:bg-primary-bg-emphasize/80 active:bg-primary-bg-emphasize':
+      'border-transparent bg-primary-bg text-primary-fg hover:bg-primary-bg-emphasize active:bg-primary-bg-emphasize':
         variant === 'solid' && color === 'primary',
-      'border-transparent bg-secondary-bg text-secondary-fg hover:bg-secondary-bg-emphasize/80 active:bg-secondary-bg-emphasize':
+      'border-transparent bg-secondary-bg text-secondary-fg hover:bg-secondary-bg-emphasize active:bg-secondary-bg-emphasize':
         variant === 'solid' && color === 'secondary',
-      'border-transparent bg-bg-subtle text-fg-base hover:bg-bg-mute/80 active:bg-bg-mute':
+      'border-transparent bg-bg-subtle text-fg-base hover:bg-bg-mute active:bg-bg-emphasize':
         variant === 'solid' && color === 'base',
       'border-primary-border bg-bg-base text-primary-fg hover:bg-bg-subtle active:bg-bg-mute':
         variant === 'outline' && color === 'primary',
@@ -177,7 +183,11 @@ export const Button: FC<Props> = ({
     'aria-busy': isPending || undefined,
     'aria-disabled': isDisabled || undefined,
     className,
-    disabled: isDisabled,
+    // 保留中にネイティブの disabled を付けないのは、押されてフォーカスを持つ要素が
+    // disabled になると、Chromium が描画の更新でフォーカスを body へ落とすため。
+    // 二重の実行は handleClick が止める。入力欄の Enter による暗黙の送信も、既定の
+    // ボタンへの click を経るので同じく止まる。
+    disabled,
     onClick: handleClick,
     ref: mergedRef,
     type,

@@ -1,8 +1,6 @@
-'use client';
-
 import type { FC, PropsWithChildren, ReactNode } from 'react';
 
-import { useMessages } from '../../../i18n/context';
+import { getMessages } from '../../../i18n/current';
 import { ChevronIcon } from '../../icons';
 import { cn } from './../../../helpers/cn';
 
@@ -11,7 +9,7 @@ export const List: FC<
     size?: 'sm' | 'md' | 'lg';
   }>
 > = ({ children, size = 'md' }) => {
-  const messages = useMessages();
+  const messages = getMessages();
 
   return (
     <nav aria-label={messages.breadcrumb}>
@@ -70,7 +68,7 @@ export const Link = <T extends string>({
     renderAnchor({
       href,
       className:
-        'hover:text-fg-base focus-visible:ring-border-info underline transition-colors focus-visible:rounded-sm focus-visible:ring-2 focus-visible:outline-hidden',
+        'hover:text-fg-base focus-visible:ring-border-info underline transition-colors duration-150 ease-out focus-visible:rounded-sm focus-visible:ring-2 focus-visible:outline-hidden',
       children,
     })
   );

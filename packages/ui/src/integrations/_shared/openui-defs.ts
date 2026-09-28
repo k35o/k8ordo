@@ -38,11 +38,26 @@ export const buildComponentLibrary = <C>(
     'Icon-only button (label is required).',
     s.iconButtonProps,
   );
+  const CopyButton = def(
+    'CopyButton',
+    'Button that copies value to the clipboard and confirms it.',
+    s.copyButtonProps,
+  );
   const Badge = def('Badge', 'Badge for a status or a label.', s.badgeProps);
   const Heading = def('Heading', 'Heading (h1 to h6).', s.headingProps);
   const Anchor = def('Anchor', 'Text link.', s.anchorProps);
   const Avatar = def('Avatar', 'Avatar (an image or initials).', s.avatarProps);
   const Code = def('Code', 'Inline code or value.', s.codeProps);
+  const Kbd = def(
+    'Kbd',
+    'Keyboard shortcut. keys lists the keys pressed together, and each is drawn as its own key cap.',
+    s.kbdProps,
+  );
+  const EmptyState = def(
+    'EmptyState',
+    'Placeholder for a list, table, or search with nothing to show: a title, an optional description, and an optional icon.',
+    s.emptyStateProps,
+  );
   const Icon = def('Icon', 'Icon, chosen by name.', s.iconProps);
   const ChevronIcon = def(
     'ChevronIcon',
@@ -60,7 +75,11 @@ export const buildComponentLibrary = <C>(
     s.alertProps,
   );
   const Spinner = def('Spinner', 'Loading spinner.', s.spinnerProps);
-  const Progress = def('Progress', 'Progress bar.', s.progressProps);
+  const Progress = def(
+    'Progress',
+    'Progress bar. Leave value out when progress is unknown; it then shows an animated bar.',
+    s.progressProps,
+  );
   const Skeleton = def('Skeleton', 'Loading placeholder.', s.skeletonProps);
   const Separator = def('Separator', 'Divider line.', s.separatorProps);
   const Tabs = def(
@@ -74,10 +93,25 @@ export const buildComponentLibrary = <C>(
     s.accordionProps,
   );
   const Breadcrumb = def('Breadcrumb', 'Breadcrumb trail.', s.breadcrumbProps);
+  const SideNav = def(
+    'SideNav',
+    'Side navigation: groups of links, each group under a small title. Mark the page being shown with current: true.',
+    s.sideNavProps,
+  );
   const Table = def(
     'Table',
     'Table with columns and rows (the cell strings of each row). Every row must have exactly as many cells as there are columns.',
     s.tableProps,
+  );
+  const DataTable = def(
+    'DataTable',
+    'Table the reader can sort (by the columns marked sortable) and, with selectable, pick rows from. Every row must have exactly as many cells as there are columns.',
+    s.dataTableProps,
+  );
+  const Tree = def(
+    'Tree',
+    'Tree of nodes that open and close, such as files and folders, navigable with the arrow keys. List every node flat; a child names its parent by parentId.',
+    s.treeProps,
   );
   const TextField = def(
     'TextField',
@@ -103,6 +137,31 @@ export const buildComponentLibrary = <C>(
     'Slider',
     'Slider, bound to form state by name.',
     s.sliderProps,
+  );
+  const RangeSlider = def(
+    'RangeSlider',
+    'Slider with two thumbs for picking a range, bound to form state by name as [lower, upper].',
+    s.rangeSliderProps,
+  );
+  const ColorPicker = def(
+    'ColorPicker',
+    'Color input with a visible label (#rrggbb), hue / saturation / lightness sliders, and optional preset swatches, bound to form state by name.',
+    s.colorPickerProps,
+  );
+  const DateField = def(
+    'DateField',
+    'Date input with a visible label (YYYY-MM-DD), bound to form state by name.',
+    s.dateFieldProps,
+  );
+  const DatePicker = def(
+    'DatePicker',
+    'Date input with a visible label and a calendar popover (YYYY-MM-DD), bound to form state by name.',
+    s.datePickerProps,
+  );
+  const Calendar = def(
+    'Calendar',
+    'Month calendar shown inline for picking one day (YYYY-MM-DD), bound to state by name. It submits nothing; in a form, use DatePicker.',
+    s.calendarProps,
   );
   const Checkbox = def(
     'Checkbox',
@@ -154,11 +213,6 @@ export const buildComponentLibrary = <C>(
     'Toast notification that a button labeled triggerLabel shows.',
     s.toastProps,
   );
-  const ScrollLinked = def(
-    'ScrollLinked',
-    'Page scroll progress bar (fixed to the top).',
-    s.scrollLinkedProps,
-  );
   const ListBox = def(
     'ListBox',
     'Single-choice list in a popup.',
@@ -169,6 +223,11 @@ export const buildComponentLibrary = <C>(
     'Group of checkboxes, bound to form state by name.',
     s.checkboxGroupProps,
   );
+  const Combobox = def(
+    'Combobox',
+    'Text field with a visible label that filters options as you type, for picking one, bound to form state by name. Prefer it to ListBox when there are many options.',
+    s.comboboxProps,
+  );
   const Autocomplete = def(
     'Autocomplete',
     'Tag-style autocomplete for multiple choices.',
@@ -176,7 +235,7 @@ export const buildComponentLibrary = <C>(
   );
   const FileField = def(
     'FileField',
-    'File picker field (a self-contained widget).',
+    'File picker field (a self-contained widget). With dropzone, files can also be dropped onto it.',
     s.fileFieldProps,
   );
   const FormControl = def(
@@ -188,11 +247,14 @@ export const buildComponentLibrary = <C>(
   const childRefs = [
     Button.ref,
     IconButton.ref,
+    CopyButton.ref,
     Badge.ref,
     Heading.ref,
     Anchor.ref,
     Avatar.ref,
     Code.ref,
+    Kbd.ref,
+    EmptyState.ref,
     Icon.ref,
     ChevronIcon.ref,
     StatusIcon.ref,
@@ -204,12 +266,20 @@ export const buildComponentLibrary = <C>(
     Tabs.ref,
     Accordion.ref,
     Breadcrumb.ref,
+    SideNav.ref,
     Table.ref,
+    DataTable.ref,
+    Tree.ref,
     TextField.ref,
     Textarea.ref,
     PasswordInput.ref,
     NumberField.ref,
     Slider.ref,
+    RangeSlider.ref,
+    DateField.ref,
+    DatePicker.ref,
+    Calendar.ref,
+    ColorPicker.ref,
     Checkbox.ref,
     Switch.ref,
     Select.ref,
@@ -220,9 +290,9 @@ export const buildComponentLibrary = <C>(
     Tooltip.ref,
     DropdownMenu.ref,
     Toast.ref,
-    ScrollLinked.ref,
     ListBox.ref,
     CheckboxGroup.ref,
+    Combobox.ref,
     Autocomplete.ref,
     FileField.ref,
     FormControl.ref,
@@ -245,6 +315,7 @@ export const buildComponentLibrary = <C>(
           Dialog.ref,
           Drawer.ref,
           Popover.ref,
+          Carousel.ref,
         ]),
       )
       .describe(description);
@@ -322,6 +393,16 @@ export const buildComponentLibrary = <C>(
     }),
   );
 
+  const Carousel = def(
+    'Carousel',
+    'Horizontally scrolling carousel with previous and next buttons. Each child is one slide. slideSize sets how much of the track one slide takes (full, lg, md for two, sm for three).',
+    s.carouselProps.extend({
+      get children() {
+        return containerChildren('Slides, one child per slide');
+      },
+    }),
+  );
+
   return createLibrary({
     components: [
       Stack,
@@ -332,16 +413,20 @@ export const buildComponentLibrary = <C>(
       Dialog,
       Drawer,
       Popover,
+      Carousel,
       Tooltip,
       DropdownMenu,
       Toast,
       Button,
       IconButton,
+      CopyButton,
       Badge,
       Heading,
       Anchor,
       Avatar,
       Code,
+      Kbd,
+      EmptyState,
       Icon,
       ChevronIcon,
       StatusIcon,
@@ -350,16 +435,23 @@ export const buildComponentLibrary = <C>(
       Progress,
       Skeleton,
       Separator,
-      ScrollLinked,
       Tabs,
       Accordion,
       Breadcrumb,
+      SideNav,
       Table,
+      DataTable,
+      Tree,
       TextField,
       Textarea,
       PasswordInput,
       NumberField,
       Slider,
+      RangeSlider,
+      DateField,
+      DatePicker,
+      Calendar,
+      ColorPicker,
       Checkbox,
       Switch,
       Select,
@@ -369,6 +461,7 @@ export const buildComponentLibrary = <C>(
       Pagination,
       ListBox,
       CheckboxGroup,
+      Combobox,
       Autocomplete,
       FileField,
       FormControl,

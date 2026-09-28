@@ -54,13 +54,13 @@ export const urlTable = {
 };
 
 export const filesTitle = message({
-  ja: 'ファイル名は 5 つだけ',
-  en: 'Five filenames',
+  ja: '決まったファイル名だけ',
+  en: 'A fixed set of filenames',
 });
 
 export const filesDescription = message({
-  ja: 'ディレクトリの中で文法が受け付けるファイル名は `page.tsx`・`layout.tsx`・`not-found.tsx`・`error.tsx`・`redirect.ts` の 5 つで、拡張子まで含めて完全に一致する必要があります。`page.ts` も `helpers.ts` もビルドが拒みます。それ以外のファイルは、`_` で始まるディレクトリに置きます。',
-  en: 'Inside a directory the grammar accepts five filenames — `page.tsx`, `layout.tsx`, `not-found.tsx`, `error.tsx` and `redirect.ts` — matched exactly, extension included, so `page.ts` fails the build as surely as `helpers.ts` does. Everything else goes under a directory whose name starts with `_`.',
+  ja: 'ディレクトリの中で文法が受け付けるファイル名は `page.tsx`・`layout.tsx`・`not-found.tsx`・`error.tsx`・`loading.tsx`・`redirect.ts`・`route.ts`・`guard.ts` だけで、拡張子まで含めて完全に一致する必要があります。`page.ts` も `helpers.ts` もビルドが拒みます。それ以外のファイルは、`_` で始まるディレクトリに置きます。',
+  en: 'Inside a directory the grammar accepts only `page.tsx`, `layout.tsx`, `not-found.tsx`, `error.tsx`, `loading.tsx`, `redirect.ts`, `route.ts` and `guard.ts`, matched exactly, extension included, so `page.ts` fails the build as surely as `helpers.ts` does. Everything else goes under a directory whose name starts with `_`.',
 });
 
 export const filesTable = {
@@ -87,7 +87,20 @@ export const filesTable = {
     ja: 'ページの代わりに、行き先を default export する',
     en: 'Default-exports where to send the visitor, instead of a page',
   }),
+  loading: message({
+    ja: 'その下がサスペンドしている間に出す。その階層に `<Suspense>` が置かれる',
+    en: 'Shown while what is below it suspends — a `<Suspense>` at that level',
+  }),
+  route: message({
+    ja: 'ページの代わりに、export したメソッドの関数が `Response` で答える（フィードや JSON）',
+    en: 'Answers with a `Response` from the function named after the request method, instead of a page — a feed, JSON',
+  }),
+  guard: message({
+    ja: 'その下で答えるものの前に走る。`Response` を返せばそこで打ち切る（`@k8ordo/server` だけ。`@k8ordo/static` は拒む）',
+    en: 'Runs before whatever answers below it; a returned `Response` ends the request — `@k8ordo/server` only, `@k8ordo/static` refuses it',
+  }),
   nothing: message({ ja: 'なし（描画しない）', en: 'None — nothing renders' }),
+  noProps: message({ ja: 'なし', en: 'None' }),
 };
 
 export const segmentsTitle = message({
@@ -192,6 +205,22 @@ export const refusesTable = {
     ja: '`old/page.tsx` と `old/redirect.ts`',
     en: '`old/page.tsx` and `old/redirect.ts`',
   }),
+  pageAndRoute: message({
+    ja: '`api/page.tsx` と `api/route.ts`',
+    en: '`api/page.tsx` and `api/route.ts`',
+  }),
+  redirectAndRoute: message({
+    ja: '`old/redirect.ts` と `old/route.ts`',
+    en: '`old/redirect.ts` and `old/route.ts`',
+  }),
+  silentRoute: message({
+    ja: 'メソッドを 1 つも export しない `api/route.ts`',
+    en: '`api/route.ts` exporting no method',
+  }),
+  searchWithoutState: message({
+    ja: '`search` を export する `products/page.tsx`（アプリが `@k8ordo/state` に依存していない）',
+    en: '`products/page.tsx` exporting `search`, without `@k8ordo/state`',
+  }),
   groupShadow: message({
     ja: '`(shop)/sale/page.tsx` と `(shop)/[id]/page.tsx` の横に `about/page.tsx`',
     en: '`(shop)/sale/page.tsx` and `(shop)/[id]/page.tsx` beside `about/page.tsx`',
@@ -279,6 +308,71 @@ export const linksMore = message({
   en: 'How the router behaves under the framework is covered here.',
 });
 
+export const prefetchTitle = message({
+  ja: 'リンクに触れた時点で次のページを取りに行く',
+  en: 'The next page is fetched when a link is touched',
+});
+
+export const prefetchDescription = message({
+  ja: 'クライアントのランタイムは文書全体で、リンクへのポインターの乗り（`pointerover`）、フォーカス（`focusin`）、押し始め（`pointerdown`）を拾い、その先のページのペイロードをその場で取りに行きます。クリックが届く頃には、ページが手元にあることが多くなります。配線は要りません。コンポーネントライブラリが描く `<a>` も含め、どの `<a>` も対象です。取りに行くのは、クリックでその場に読み込まれるリンクだけです。',
+  en: 'The client runtime listens on the whole document for a pointer moving onto a link (`pointerover`), a link taking focus (`focusin`) and a press starting on one (`pointerdown`), and fetches that page’s payload there and then — so a click often finds the page already in hand. Nothing needs wiring: any `<a>` counts, the ones a component library renders included. Only a link a click would load in place is fetched:',
+});
+
+export const prefetchSameOrigin = message({
+  ja: '同じオリジンで、Vite の `base` の下にあるリンク',
+  en: 'one to the same origin, below Vite’s `base`',
+});
+
+export const prefetchInPlace = message({
+  ja: '`download` が無く、`target` が無いか `_self` のリンク',
+  en: 'one with no `download`, and no `target` other than `_self`',
+});
+
+export const prefetchOnScreen = message({
+  ja: '画面に出ているページ以外へのリンク。同じページへのリンクで変わるのは検索や fragment だけだからです',
+  en: 'one to a page other than the one on screen, where only the search or the fragment would change',
+});
+
+export const prefetchStopTitle = message({
+  ja: '止めたいリンク',
+  en: 'Stopping it for a link',
+});
+
+export const prefetchStop = message({
+  ja: '描くのが重いページへのリンクなどは、そのリンクか、それを囲むどれかの要素に `data-k8ordo-prefetch="false"` を付けると止まります。JSX の `data-k8ordo-prefetch={false}` も同じものを描きます。決めるのは、この属性を持ついちばん近い要素なので、止めた領域の中のリンクに `"true"` を付ければ、そのリンクだけ戻せます。',
+  en: 'For a link whose page is expensive to render, say, mark the link — or any element around it — `data-k8ordo-prefetch="false"`; `data-k8ordo-prefetch={false}` in JSX renders the same. The nearest element carrying the attribute decides, so `"true"` opts a link back in inside a region that opted out.',
+});
+
+export const prefetchReuseTitle = message({
+  ja: '取ったものを使う範囲',
+  en: 'How long a prefetched page is used',
+});
+
+export const prefetchReuse = message({
+  ja: '取ったページは、そのページへの次の遷移で 1 度だけ使われます。使われるのは、取りに行き始めてから 30 秒以内に遷移が始まったときだけです。それを過ぎたか、1 度使われた後は、先読みが無かったときと同じようにページを取り直します。ポインターを乗せたまま離れたページが、後になってそのときの姿で出てくることはありません。',
+  en: 'A prefetched page is used by the next navigation to it, once, and only if that navigation starts within 30 seconds of the fetch starting. After that — or once a navigation has used it — the page is fetched afresh, as it would have been with nothing prefetched, so a page hovered and left alone never shows up later as it was then.',
+});
+
+export const prefetchDropped = message({
+  ja: 'Server Action の答えが届くと、先読みしたものはすべて捨てます。アクションがそれらのページの中身を変えたかもしれないからです。失敗した先読みもその場で捨てるので、遷移はもう一度取りに行きます。遷移に使われる前に捨てた先読みは、まだ届いていなければ中断します。遷移が使った先読みは、その遷移が別の遷移に追い越されたときに一緒に中断します。遷移が自分で始めた fetch と同じ扱いです。',
+  en: 'A Server Action’s answer drops everything prefetched, since the action may have changed what those pages show; a prefetch that failed is dropped at once, so the navigation asks again. A prefetch dropped before any navigation used it is cancelled if it is still on its way, and one a navigation took is cancelled with that navigation when another overtakes it — the same as a fetch the navigation had started itself.',
+});
+
+export const prefetchStatic = message({
+  ja: 'このモードでは、先読みはファイルへのリクエストです。',
+  en: 'In this mode a prefetch is a request for a file.',
+});
+
+export const prefetchServer = message({
+  ja: 'このモードでは、先読みは遷移と同じくサーバーでの描画です。描くのが重いページへのリンクに属性を付けるのは、そのためです。',
+  en: 'In this mode a prefetch is a render on the server, as a navigation is — the reason to mark a link to an expensive page.',
+});
+
+export const prefetchSpeculation = message({
+  ja: 'プラットフォームの Speculation Rules は使いません。Chromium にしか無く、Baseline ではないからです。',
+  en: 'The platform’s Speculation Rules are not used: they are Chromium’s alone, not Baseline.',
+});
+
 /** 両モードの「はじめに」が共有する、設定と最小のルートの説明。 */
 export const setup = {
   configTitle: message({ ja: 'vite.config.ts', en: 'vite.config.ts' }),
@@ -313,3 +407,38 @@ export const setup = {
     en: 'What is in them, and what the build refuses, is covered here.',
   }),
 };
+
+export const routeTitle = message({
+  ja: '`route.ts` — ページではない答え',
+  en: '`route.ts` — answers that are not pages',
+});
+
+export const routeDescription = message({
+  ja: '`route.ts` は、そのディレクトリの URL にページではなく `Response` で答えます。RSS のフィード、`robots.txt`、JSON、webhook などです。答えるリクエストのメソッドごとに関数を export します。',
+  en: 'A `route.ts` answers its directory’s URL with a `Response` rather than a page — an RSS feed, `robots.txt`, JSON, a webhook. It exports a function for each request method it answers.',
+});
+
+export const routeReceives = message({
+  ja: 'ファイル名のようなディレクトリ名もただの区間なので、`feed.xml/route.ts` は `/feed.xml` に答えます。各関数は `{ request, params }` を受け取ります。`params` はページと同じく、スタックに沿った `paramsSchema` の出力で型が付きます（`route.ts` 自身も export できます）。型は `@k8ordo/router` の `RouteContext<P>` で、生成された表も各モジュールをパターンで検査します。メソッドを 1 つも export しない `route.ts` は拒みます。答えられるのは `405` だけになるからです。',
+  en: 'A directory named like a file is an ordinary segment, so `feed.xml/route.ts` answers `/feed.xml`. Each export receives `{ request, params }`, with `params` typed by the `paramsSchema` exports along its stack as a page’s are — a `route.ts` may export one too. `RouteContext<P>` from `@k8ordo/router` is the type, and the generated table checks each module against its pattern. A `route.ts` exporting no method is refused, since it could only ever answer `405`.',
+});
+
+export const routeOrder = message({
+  ja: '1 つのディレクトリは `route.ts` で答えるか `page.tsx` を描くか（またはリダイレクトするか）のどれか 1 つで、`route.ts` の上のレイアウトはそれを包みません。何も描かないからです。表の順番にはページと同じく並ぶので、`api/[id]/route.ts` の横の `api/latest/page.tsx` は `/api/latest` をページのまま受け持ちます。クライアント遷移で行き着くとペイロードは無く、文書の読み込みになります。',
+  en: 'A directory answers from a `route.ts` or renders a `page.tsx` (or redirects), never two of them, and the layouts above a `route.ts` do not wrap it — nothing renders. It takes its place in the table’s order the way a page does, so `api/[id]/route.ts` beside `api/latest/page.tsx` leaves `/api/latest` to the page. A client navigation to it gets no payload, and loads the document instead.',
+});
+
+export const loadingTitle = message({
+  ja: '`loading.tsx` — ページが来るまで',
+  en: '`loading.tsx` — while a page loads',
+});
+
+export const loadingDescription = message({
+  ja: 'レイアウト（またはページ）の横の `loading.tsx` は、その下がサスペンドしている間に出るものです。フレームワークがその階層に `<Suspense>` を置き、その階層の `error.tsx` の境界の内側に入れます。props は受け取りません。',
+  en: 'A `loading.tsx` beside a `layout.tsx` (or a `page.tsx`) is what shows while what is below it suspends: a `<Suspense>` the framework puts at that level, inside its `error.tsx` boundary. It receives no props.',
+});
+
+export const loadingWhen = message({
+  ja: 'クライアント遷移でそのディレクトリに入り、ページがまだ届いていないとき、そしてページの中がストリームの途中でサスペンドしたときに出ます。すでに画面にあるものの下でのページの切り替えは、ほかの切り替えと同じく、次のページが来るまで今のページを出したままにします。その待ちを見せるのが `@k8ordo/router` の `usePendingPathname()` です。',
+  en: 'It shows when a client navigation enters its directory while the page there is still on its way, and for whatever inside the page suspends as it streams. A page change below one already on screen keeps the current page showing while the next one loads, as every page change does; `usePendingPathname()` from `@k8ordo/router` is how a link or a bar says that one is under way.',
+});

@@ -19,6 +19,12 @@ export type Messages = {
   /** Toast のビューポート（region ランドマーク）名 */
   toastRegion: string;
 
+  /** CopyButton の既定のラベル */
+  copy: string;
+  /** CopyButton が押した結果として読み上げる文言 */
+  copied: string;
+  copyFailed: string;
+
   autocompletePlaceholder: string;
   /** 選択済みタグ 1 件の解除 */
   autocompleteRemoveTag: string;
@@ -27,11 +33,43 @@ export type Messages = {
   /** 絞り込み結果が空のときの表示 */
   autocompleteEmpty: string;
 
+  /** Combobox の候補を開くボタン */
+  comboboxToggle: string;
+  /** Combobox の候補が見つからなかったとき */
+  comboboxEmpty: string;
+  /** Combobox の search が失敗したとき */
+  comboboxFailed: string;
+
   fileFieldRemove: string;
   fileFieldTrigger: string;
+  /** FileField.Dropzone の既定の案内 */
+  fileFieldDrop: string;
 
   numberFieldIncrement: string;
   numberFieldDecrement: string;
+  /** NumberField の値が min を下回ったときの検証メッセージ。`{min}` が min の値に置き換わる */
+  numberFieldRangeUnderflow: string;
+  /** NumberField の値が max を上回ったときの検証メッセージ。`{max}` が max の値に置き換わる */
+  numberFieldRangeOverflow: string;
+
+  /** RangeSlider の下側のつまみ。部品の名前（aria-label など）の後に続けて読まれる */
+  rangeSliderStart: string;
+  /** RangeSlider の上側のつまみ */
+  rangeSliderEnd: string;
+
+  calendarPreviousMonth: string;
+  calendarNextMonth: string;
+  /** DatePicker のカレンダーを開くボタン */
+  datePickerOpen: string;
+  /** DatePicker が開くポップオーバー（dialog）の名前 */
+  datePickerDialog: string;
+
+  /** ColorPicker の HSL のつまみ */
+  colorPickerHue: string;
+  colorPickerSaturation: string;
+  colorPickerLightness: string;
+  /** ColorPicker の見本のボタンをまとめる group の名前 */
+  colorPickerSwatches: string;
 
   passwordShow: string;
   passwordHide: string;
@@ -48,6 +86,23 @@ export type Messages = {
   paginationPrevious: string;
   paginationNext: string;
 
+  /** DataTable の列の表示を切り替えるボタンと、その一覧の見出し */
+  dataTableColumns: string;
+  /** DataTable の見出しの行の、表示中の行をまとめて選ぶチェックボックス */
+  dataTableSelectAll: string;
+  /** DataTable の各行のチェックボックス。行の見出しが後に続く */
+  dataTableSelectRow: string;
+
+  /** CodeBlock のコピーボタン */
+  codeBlockCopy: string;
+  /** Carousel の aria-roledescription（region と各スライド） */
+  carousel: string;
+  carouselSlide: string;
+  carouselPrevious: string;
+  carouselNext: string;
+  /** TableOfContents の見出し（nav の名前にもなる） */
+  tableOfContents: string;
+
   /** Conversation.Messages の log ランドマーク名 */
   chat: string;
   scrollToLatest: string;
@@ -57,10 +112,29 @@ export type Messages = {
   suggestions: string;
   send: string;
   stop: string;
+  /** PromptInput.Attach の開くボタン */
+  attach: string;
+  /** Attachment.List / PromptInput.Attachments の list 名 */
+  attachments: string;
+  /** 添付 1 件を外すボタン。どの添付かは aria-describedby のファイル名で補う */
+  attachmentRemove: string;
+  /** 画像の添付に filename が無いときの代替テキスト */
+  attachmentImage: string;
+  /** Source.List の list 名 */
+  sources: string;
+  /** Message.Actions の group 名 */
+  messageActions: string;
+  regenerate: string;
+  feedbackPositive: string;
+  feedbackNegative: string;
   toolInput: string;
   toolOutput: string;
   toolError: string;
   toolDenied: string;
+  /** ToolInvocation の承認待ちで、requestReason が無いときの問いかけ */
+  toolApprovalRequest: string;
+  toolApprove: string;
+  toolDeny: string;
 
   /**
    * Response が描画する Markdown のコントロール文言。

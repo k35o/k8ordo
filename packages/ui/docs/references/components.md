@@ -12,6 +12,9 @@ import { UIProvider } from '@k8ordo/ui';
 
 // Components (all from the root entry)
 import { Button, Card, TextField } from '@k8ordo/ui';
+
+// Except CodeBlock, which highlights on the server and has its own entry
+import { CodeBlock } from '@k8ordo/ui/code-block';
 ```
 
 Every component can be rendered from a Server Component, compound ones
@@ -25,7 +28,7 @@ Two different contracts are spelled `render*`, and mixing them up is the usual
 source of surprise.
 
 **Replacing the element** — `renderItem` on `Button` and `IconButton`,
-`renderAnchor` on `Anchor` and `Breadcrumb.Link`. The component computes
+`renderAnchor` on `Anchor`, `Breadcrumb.Link`, and `SideNav.Link`. The component computes
 everything and hands back the exact props it would have put on its own element,
 so substituting an `<a>`, a framework `<Link>`, or your own button loses
 nothing. For `Button` and `IconButton` that is the resolved `className`, the
@@ -41,6 +44,10 @@ native attribute the caller passed in. Spread the bag onto whatever you render.
   and calls `preventDefault()` while disabled, so a disabled link will not
   navigate. The examples below name them `_disabled` / `_type` so the discarded
   bindings pass a `no-unused-vars` rule.
+- `disabled` is only the `disabled` you passed. While an action is pending (see
+  [Button](#button)), the bag carries `aria-disabled` and `aria-busy` but
+  `disabled` stays `false`, so the pressed element keeps focus; the supplied
+  `onClick` is what ignores presses meanwhile.
 - Spreading onto a real `<button>` is exact, but write `type` on the element
   anyway: the `button-has-type` lint rule cannot see a `type` that arrives
   through a spread.
@@ -56,6 +63,9 @@ The link components own less, so their bags are smaller:
 - `Breadcrumb.Link` hands back `href`, `className`, and `children` only — it
   takes no other attributes. A `current` link renders
   `<span aria-current="page">` and does not call `renderAnchor`.
+- `SideNav.Link` hands back `href`, `className`, `children`, `aria-current`
+  (`'page'` on the current link), and every other anchor attribute the caller
+  passed. A current link is still a link.
 
 **Filling a slot** — `renderInput` on `FormControl`, `renderItem` on
 `Popover.Trigger`, `Tooltip.Trigger`, `FileField.Trigger`, and `Alert`'s
@@ -99,6 +109,15 @@ Props:
 - `type`: `'button'` | `'submit'` (default: `'button'`)
 - `variant`: `'solid'` | `'outline'` | `'skeleton'` (default: `'solid'`)
 - Other props are forwarded to `ComponentPropsWithRef<'button'>`, except `className` / `style`.
+
+`onAction` runs inside a transition. While the promise it returns is pending —
+and, with `type="submit"`, while the form's action is pending — the button shows
+a spinner, carries `aria-busy` and `aria-disabled`, and ignores presses,
+including the implicit submission of pressing Enter in a field. It does not
+become natively `disabled`: Chromium moves focus to `body` when the focused
+element is disabled, so a keyboard user who pressed the button would lose their
+place. The `disabled` you pass is native, and takes the button out of the tab
+order.
 
 `renderItem` replaces the `<button>`; see [Render props](#render-props) for the
 contract. It receives `className`, the composed `children`, `ref`, `type`,
@@ -144,6 +163,9 @@ Props:
 - `tooltipPlacement`: `Placement` (default: `'top'`)
 - Other props are forwarded to `ComponentPropsWithRef<'button'>`, except `type` / `className` / `style`.
 
+`onAction` keeps the button busy the way `Button`'s does — `aria-busy`,
+`aria-disabled`, presses ignored, focus kept — without the spinner.
+
 `renderItem` replaces the `<button>` under the same contract as `Button`'s,
 with one addition: the tooltip wiring is kept in a nested `triggerProps` so it
 stays free of any element type. Spread it too, and `label` shows as a tooltip on
@@ -170,6 +192,43 @@ flat part of the bag holds neither.
   <MailIcon />
 </IconButton>
 ```
+
+### CopyButton
+
+A button that copies text to the clipboard and shows that it did: its icon
+turns into a check for two seconds (an error icon if the write fails), and a
+live region beside it announces `copied` / `copyFailed` from the dictionary. The
+button's name stays the same throughout. By default it is an outline `Button`
+with its `label` as text; `iconOnly` makes it a transparent `IconButton` whose
+`label` is the tooltip.
+
+```tsx
+import { CopyButton } from '@k8ordo/ui';
+
+<CopyButton value={css} label="Copy CSS" size="sm" />;
+
+// Icon only, e.g. in the header of a code block
+<CopyButton value={code} label="Copy code" iconOnly size="sm" />;
+
+// Build the text when the button is pressed: read the DOM, or fetch it
+<CopyButton
+  label="Copy as Markdown"
+  value={async () => (await fetch(`/blog/${slug}.md`)).text()}
+/>;
+```
+
+`value` may be a function, and it may return a `Promise`. It is called on the
+click, and the promise goes to the clipboard as it is (a `ClipboardItem`), so the
+write starts inside the click even when the text arrives later. Safari refuses
+a write that begins after an `await`.
+
+Props:
+
+- `value`: `string` | `(() => string | Promise<string>)` (required)
+- `disabled`: `boolean` (default: `false`)
+- `iconOnly`: `boolean` (default: `false`)
+- `label`: `string`
+- `size`: `'sm'` | `'md'` | `'lg'` (default: `'md'`)
 
 ### Anchor
 
@@ -295,6 +354,94 @@ Props:
 - `ref`: `Ref<HTMLElement>`
 - Other props are forwarded to `HTMLAttributes<HTMLElement>`, except `className` / `style` / `children`.
 
+### SideNav
+
+Side navigation: groups of links, each under a small title, with the page being
+shown marked by a bar (`aria-current="page"`). The library has no router, so
+you say which link is current, and swap the `<a>` for your router's link with
+`renderAnchor` — it replaces the element, and its bag holds `href`,
+`className`, `children`, `aria-current`, and every other anchor attribute you
+passed (an `onClick` that closes a drawer, say). Every part renders from a
+Server Component.
+
+```tsx
+import { SideNav } from '@k8ordo/ui';
+
+<SideNav.Root label="Components">
+  <SideNav.Group title="Buttons">
+    <SideNav.Link current={pathname === '/button'} href="/button">
+      Button
+    </SideNav.Link>
+    <SideNav.Link
+      href="/icon-button"
+      renderAnchor={({ children, ...props }) => (
+        <Link {...props}>{children}</Link>
+      )}
+    >
+      IconButton
+    </SideNav.Link>
+  </SideNav.Group>
+</SideNav.Root>;
+```
+
+Props (SideNav.Root):
+
+- `label`: `string` (required)
+- `children`: `ReactNode`
+- Other props are forwarded to `HTMLAttributes<HTMLElement>`, except `className` / `style` / `aria-label`.
+
+Props (SideNav.Group):
+
+- `title`: `string` (required)
+- `children`: `ReactNode`
+
+Props (SideNav.Link):
+
+- `children`: `ReactNode` (required)
+- `href`: `T` (required)
+- `current`: `boolean` (default: `false`)
+- `renderAnchor`: `(props: RenderSideNavAnchorProps<T>) => ReactNode` (default: `defaultRenderAnchor`)
+- Other props are forwarded to `AnchorHTMLAttributes<HTMLAnchorElement>`, except `className` / `style` / `aria-current`.
+
+### TableOfContents
+
+The contents of the page, with the heading being read marked
+(`aria-current="location"`). Pass the headings as a tree of `{ id, label,
+children? }`; each item links to `#id`.
+
+```tsx
+import { TableOfContents } from '@k8ordo/ui';
+
+<TableOfContents
+  items={[
+    { id: 'install', label: 'Install' },
+    {
+      id: 'usage',
+      label: 'Usage',
+      children: [{ id: 'usage-basic', label: 'Basics' }],
+    },
+  ]}
+/>;
+```
+
+- The heading being read is the last one whose start has passed the heading's
+  own `scroll-margin-block-start`: set the margin your sticky header needs on
+  the headings, and a heading reached from the contents becomes the current
+  one. At the end of the document, the last heading is current even if its
+  section is too short to reach that line.
+- It follows the document's scroll: the headings are expected to scroll with
+  the page, and `items` to be in document order. It measures on scroll, on
+  resize, and when the page's size changes. In a vertical document it reads
+  from right to left (`vertical-rl`) or left to right (`vertical-lr`).
+- `label` replaces the title (`tableOfContents` in the message dictionary),
+  which also names the `nav`.
+
+Props:
+
+- `items`: `readonly TableOfContentsItem[]` (required)
+- `label`: `string`
+- Other props are forwarded to `HTMLAttributes<HTMLElement>`, except `className` / `style` / `children` / `aria-labelledby`.
+
 ### Tabs
 
 Tab switching, as a compound component.
@@ -384,32 +531,6 @@ Props:
 - `orientation`: `'horizontal'` | `'vertical'` (default: `'horizontal'`)
 - Other props are forwarded to `HTMLAttributes<HTMLSpanElement>`, except `children` / `role` / `aria-orientation` / `className` / `style`.
 
-### ScrollLinked
-
-Shows scroll progress as a progress bar. Tracks the window unless `container`
-names an element to track instead.
-
-```tsx
-import { ScrollLinked } from '@k8ordo/ui';
-
-<ScrollLinked />;
-
-// a scroll container rather than the window
-const [container, setContainer] = useState<HTMLElement | null>(null);
-
-<div ref={setContainer} style={{ overflowY: 'auto' }}>
-  <ScrollLinked container={container} />…
-</div>;
-```
-
-Hold `container` in state, not a `RefObject`: tracking has to start once the
-element exists. While it is still `null` the bar tracks nothing — it does not
-fall back to the window.
-
-Props:
-
-- `container`: `Element` | `null`
-
 ### Stack
 
 Lays children out along one axis. Pick `gap` from the spacing tokens.
@@ -471,6 +592,10 @@ Props:
 Form components are used together with `FormControl`'s `renderInput` pattern. Every form component except `FileField` supports both controlled and uncontrolled use; `FileField.Root` takes only `defaultValue` and keeps the selected files itself.
 
 `ref` reaches the real element (`input` / `textarea` / `select` / `fieldset`). `FileField` uses a ref internally but composes it with yours, so the `ref` you pass still reaches the element. `Radio` (a group that renders several inputs) puts its `ref` on the radiogroup `<div>`, and `FormControl` (a wrapper) on its wrapper element — a `<div>`, or a `<fieldset>` with `labelAs="legend"`.
+
+An uncontrolled field keeps its value in the DOM, so a form reset — `form.reset()`, a reset button, or React resetting the form after an action — puts it back to its `defaultValue`, and a `defaultValue` that changes after mount (the values a failed submission echoes back) is where the next reset goes. A value a component changes in code (a stepper, a chosen option, a removed file) is announced with an `input` event, so a form library listening on the `<form>` hears it like typing.
+
+Every field takes the attributes `@k8ordo/form`'s `formFields` derives as they are — spread `field.input` after `FormControl`'s props. Its guide's "Working with @k8ordo/ui" section has one example per component.
 
 ### Form
 
@@ -546,14 +671,20 @@ import { TextField } from '@k8ordo/ui';
 
 // type can be passed too (default: "text")
 <TextField id="tel" type="tel" inputMode="numeric" />
+
+// date and time inputs render as the browser's own pickers
+<TextField id="birthday" type="date" />
 ```
+
+`type` also accepts any string, so the `type` `@k8ordo/form` derives
+(`email`, `url`, `date`, `time`, `datetime-local`, …) spreads as it is.
 
 Props:
 
 - `children`: `ReactNode`
 - `invalid`: `boolean` (default: `false`)
 - `ref`: `Ref<HTMLInputElement>`
-- `type`: `'email'` | `'search'` | `'tel'` | `'text'` | `'url'` (default: `'text'`)
+- `type`: `'date'` | `'datetime-local'` | `'email'` | `'month'` | `'search'` | `'tel'` | `'text'` | `'time'` | `'url'` | `'week'` | `(string & Record<never, never>)` (default: `'text'`)
 - Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `className` / `style`.
 
 ### Textarea
@@ -578,7 +709,12 @@ Props:
 - `fullHeight`: `boolean` (default: `false`)
 - `invalid`: `boolean` (default: `false`)
 - `ref`: `Ref<HTMLTextAreaElement>`
+- `type`: `string`
 - Other props are forwarded to `TextareaHTMLAttributes<HTMLTextAreaElement>`, except `className` / `style`.
+
+`type` is accepted and dropped: a `<textarea>` has none, and the attributes
+`@k8ordo/form` derives for a string carry `type="text"`. A `pattern` is not
+checked by the browser on a `<textarea>` either.
 
 ### NumberField
 
@@ -617,6 +753,20 @@ an empty field fills in `0`, or the nearer of `min` / `max` when `0` is out of
 range. `required` reaches the input itself, so an empty required field fails
 native validation.
 
+The input is `type="text"` (so it can format to `precision` and step with the
+arrow keys), which the browser does not range-check — so the field does it: a
+value below `min` or above `max` is reported with `setCustomValidity`, using
+the `numberFieldRangeUnderflow` / `numberFieldRangeOverflow` wording. Leaving the
+field clamps the value into range. A message set by someone else on the same
+input — a form library's cross-field rule — is left alone.
+
+`min`, `max`, and an uncontrolled `defaultValue` also take strings, and `step`
+takes `'any'`, which is what `@k8ordo/form` derives. `precision` defaults to the
+number of decimals in `step`; with `step="any"` the value is not rounded.
+
+A value the field writes itself — an arrow key, a stepper press, formatting on
+blur — is announced with one `input` event, and `onChange` is still called once.
+
 A form reset — `form.reset()`, a reset button, or React resetting the form after
 an action — puts an uncontrolled field back to `defaultValue` (or to empty) and
 reports that value to `onChange`. A controlled field keeps its `value`; reset
@@ -624,16 +774,113 @@ your own state from the form's `onReset`.
 
 Props:
 
-- `defaultValue`: `number`
+- `defaultValue`: `number` | `string`
 - `invalid`: `boolean` (default: `false`)
-- `max`: `number` (default: `9_007_199_254_740_991`)
-- `min`: `number` (default: `-9_007_199_254_740_991`)
+- `max`: `number` | `string`
+- `min`: `number` | `string`
 - `onChange`: `(value: number | null) => void`
-- `precision`: `number` (default: `0`)
+- `precision`: `number`
 - `ref`: `Ref<HTMLInputElement>`
-- `step`: `number` (default: `1`)
+- `step`: `number` | `'any'` (default: `1`)
 - `value`: `number` | `null`
 - Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `type` / `role` / `className` / `style` / `children`.
+
+### DateField
+
+A native `<input type="date">` styled like `TextField`. The value is a
+`YYYY-MM-DD` string (`''` when empty), and the browser checks `min` / `max` /
+`required` itself. `onChange` is the native event, as with `TextField`.
+
+It accepts what `@k8ordo/form` derives from `z.iso.date()` as is: spread the
+field's `input` and nothing needs to be taken out. `type` is always `date`, so a
+`type` in the spread does not replace it.
+
+```tsx
+import { DateField, FormControl } from '@k8ordo/ui';
+
+const eventDate = form.field('eventDate'); // z.iso.date()
+
+<FormControl
+  errorText={eventDate.error}
+  invalid={eventDate.invalid}
+  label="Date"
+  required={eventDate.required}
+  renderInput={(props) => <DateField {...props} {...eventDate.input} />}
+/>;
+```
+
+Props:
+
+- `invalid`: `boolean` (default: `false`)
+- `ref`: `Ref<HTMLInputElement>`
+- Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `className` / `style` / `type` / `children`.
+
+### DatePicker
+
+`DateField` with a button that opens `Calendar` in a popover. The field is the
+same native `<input type="date">`, so typing a date, `name`, `required`, and
+`min` / `max` all work as they do on `DateField`, and spreading a derived
+`@k8ordo/form` field works the same way. `onChange` takes the value
+(`YYYY-MM-DD`, `''` when cleared), not the event, because a date picked from the
+calendar has no input event of its own.
+
+Picking a date writes it into the input and dispatches an `input` event, so a
+form sees it exactly as if it had been typed (dirty state, rules, and clearing
+an error). The popover closes and focus returns to the calendar button.
+
+Firefox draws its own calendar button inside every `<input type="date">` and
+offers no way to hide it, so there the field shows two calendar buttons: the
+browser's and this component's. Chromium and Safari show only this one.
+
+```tsx
+import { DatePicker } from '@k8ordo/ui';
+
+<DatePicker
+  aria-label="Check-in"
+  min="2026-01-01"
+  name="checkIn"
+  onChange={setCheckIn}
+  value={checkIn}
+/>;
+```
+
+Props:
+
+- `defaultValue`: `string`
+- `invalid`: `boolean` (default: `false`)
+- `onChange`: `(value: string) => void`
+- `ref`: `Ref<HTMLInputElement>`
+- `value`: `string`
+- Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `className` / `style` / `type` / `children`.
+
+### Calendar
+
+A month grid for picking one day (the WAI-ARIA date picker grid). The value is
+a `YYYY-MM-DD` string. Arrow keys move by day and week, `Home` / `End` to the
+ends of the week, `PageUp` / `PageDown` by month (with `Shift`, by year), and
+`Enter` / `Space` select. Days outside `min` / `max` stay focusable but cannot
+be selected.
+
+Month and weekday names, and the first day of the week, follow the same locale
+as the built-in wording (i18n, below). Today is marked with
+`aria-current="date"` in the visitor's time zone, which only the browser knows,
+so the calendar renders in the browser alone: the server writes an empty box of
+the same size. It submits nothing; inside a form, use `DatePicker` or
+`DateField`.
+
+```tsx
+import { Calendar } from '@k8ordo/ui';
+
+<Calendar defaultValue="2026-09-25" max="2026-12-31" onChange={setDay} />;
+```
+
+Props:
+
+- `defaultValue`: `string`
+- `max`: `string`
+- `min`: `string`
+- `onChange`: `(value: string) => void`
+- `value`: `string` | `null`
 
 ### PasswordInput
 
@@ -663,6 +910,9 @@ Props:
 - `showLabel`: `string`
 - Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `type` / `className` / `style`.
 
+A spread `type="password"` (what `@k8ordo/form` derives for a password) does not
+override the show/hide toggle.
+
 ### Select
 
 ```tsx
@@ -690,9 +940,22 @@ Props:
 - `ref`: `Ref<HTMLSelectElement>`
 - Other props are forwarded to `SelectHTMLAttributes<HTMLSelectElement>`, except `className` / `style`.
 
+React applies a `<select>`'s `defaultValue` only when it mounts; `Select` also
+applies a later one, so the next reset — React's after a form action included —
+goes back to it. With `required`, put a placeholder option whose `value` is
+`''` first; leaving it selected fails validation.
+
 ### Autocomplete
 
-A multi-select autocomplete. `value` and `onChange` are `string[]`.
+A multi-select autocomplete over a fixed list of options, shown as removable
+tags. `value` and `onChange` are `string[]`. To pick one option, or to search a
+list that lives on a server, use `Combobox`.
+
+With a `name`, the selection is submitted through a visually hidden
+`<select multiple>`: one entry per selected value, and `required` means at
+least one. It is always present — nothing selected included — so native
+validation and a form library's rules reach it, and when a form moves focus to
+it after a failure, focus goes on to the text input.
 
 ```tsx
 import { Autocomplete } from '@k8ordo/ui';
@@ -719,9 +982,109 @@ Props:
 - `value`: `string[]`
 - Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `type` / `role` / `className` / `style` / `children` / `autoComplete` / `aria-autocomplete` / `aria-controls` / `aria-expanded` / `aria-activedescendant`.
 
+### ColorPicker
+
+A color field whose value is `#rrggbb`. The value lives in a text input that
+carries `name`, so it submits and resets like any other field; hue, saturation,
+and lightness sliders and optional `swatches` (toggle buttons named by their
+`label`) write into it and announce the change with an `input` event, as if it
+had been typed. Typing reports a color only once it has six digits; on blur and
+on Enter the text is tidied to lowercase `#rrggbb`, and a three-digit `#f80` is
+expanded. Emptying the field reports `''`. Spread `@k8ordo/form`'s `input` onto
+it as is: a `.regex()` in the schema arrives as `pattern` and replaces the
+built-in `#[0-9a-fA-F]{6}`. The panel stays horizontal inside vertical writing
+mode.
+
+```tsx
+import { ColorPicker, FormControl } from '@k8ordo/ui';
+
+<FormControl
+  label="Accent color"
+  renderInput={(props) => (
+    <ColorPicker
+      {...props}
+      defaultValue="#0d9488"
+      name="accent"
+      swatches={[
+        { value: '#0d9488', label: 'Teal' },
+        { value: '#f97316', label: 'Orange' },
+      ]}
+    />
+  )}
+/>;
+```
+
+Props:
+
+- `defaultValue`: `string`
+- `invalid`: `boolean` (default: `false`)
+- `onChange`: `(value: string) => void`
+- `ref`: `Ref<HTMLInputElement>`
+- `swatches`: `readonly ColorPickerSwatch[]`
+- `type`: `string`
+- `value`: `string`
+- Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `className` / `style` / `children`.
+
+### Combobox
+
+A text field with a list of options, for picking one (the WAI-ARIA combobox
+with list autocomplete and manual selection). `value` and `onChange` are the
+chosen option's `value`, `''` when nothing is chosen. To pick several from a
+fixed list, use `Autocomplete`.
+
+Typing opens the list; nothing is chosen until an option is picked with a click
+or `Enter`, so leaving half-typed text puts the chosen option's label back, and
+leaving the field empty clears the choice. `ArrowDown` / `ArrowUp` open the list
+and move through it (`Alt+ArrowDown` opens it without entering it), `Escape`
+closes it and, pressed again, drops what was typed. Keys pressed while an IME is
+composing belong to the IME.
+
+Without `search`, typing filters `options` by label. With `search`, typing
+calls it for the options instead — each call gets a `signal` that aborts when
+the text changes again, so pass it to `fetch` — and `options` becomes the list
+shown before anything is typed and where the current value's label is looked
+up. While a search runs, the list is marked busy; a failed one says so with
+`comboboxFailed`, an empty result with `comboboxEmpty`.
+
+With a `name`, the choice is submitted through a visually hidden `<select>`, the
+same way `Autocomplete` submits, so `required`, a form library's rules, reset,
+and moving focus to the field after a failure all work on it.
+
+```tsx
+import { Combobox } from '@k8ordo/ui';
+
+<Combobox aria-label="Prefecture" name="prefecture" options={prefectures} />;
+
+// Options from a server
+<Combobox
+  aria-label="City"
+  name="city"
+  search={async (query, { signal }) => {
+    const response = await fetch(`/api/cities?q=${encodeURIComponent(query)}`, {
+      signal,
+    });
+    return response.json();
+  }}
+/>;
+```
+
+Props:
+
+- `defaultValue`: `string`
+- `invalid`: `boolean` (default: `false`)
+- `onChange`: `(value: string) => void`
+- `options`: `readonly Option[]`
+- `ref`: `Ref<HTMLInputElement>`
+- `search`: `ComboboxSearch`
+- `type`: `string`
+- `value`: `string`
+- Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `role` / `className` / `style` / `children` / `autoComplete` / `aria-autocomplete` / `aria-controls` / `aria-expanded` / `aria-activedescendant`.
+
 ### Checkbox
 
 The label is passed as the `label` prop, not as children. `onChange` is `(checked, event)`.
+
+`itemValue` is the input's `value`: the string a checked box submits under its `name`. Without it the box renders no `value` and submits the browser's default, `on`. There is no `value` prop — on a checkbox it is easily mistaken for the checked state, which is `checked`.
 
 ```tsx
 import { Checkbox } from '@k8ordo/ui';
@@ -731,15 +1094,25 @@ import { Checkbox } from '@k8ordo/ui';
 
 // Uncontrolled
 <Checkbox defaultChecked label="I agree" />
+
+// Submits inStock=true when checked, instead of inStock=on
+<Checkbox itemValue="true" label="In stock only" name="inStock" />
 ```
+
+`indeterminate` shows the mixed state — some of a set selected — and sets the
+input's `indeterminate` property, so it is announced as partly checked.
+`labelHidden` keeps `label` as the accessible name but does not draw it, for a
+place with no room for text such as a table cell.
 
 Props:
 
 - `label`: `string` (required)
 - `checked`: `boolean`
 - `defaultChecked`: `boolean`
+- `indeterminate`: `boolean` (default: `false`)
 - `invalid`: `boolean` (default: `false`)
 - `itemValue`: `string`
+- `labelHidden`: `boolean` (default: `false`)
 - `onChange`: `(checked: boolean, event: ChangeEvent<HTMLInputElement>) => void`
 - `ref`: `Ref<HTMLInputElement>`
 - Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `type` / `className` / `style` / `value` / `children`.
@@ -751,6 +1124,10 @@ A group of checkboxes. The children are `CheckboxGroup.Item` (= `Checkbox`), and
 The group's selection lives in `value` / `onChange` (`string[]`). That is a different thing from a lone `Checkbox` holding a boolean in `checked` — do not conflate them.
 
 It renders a `fieldset[role="group"]`, so `aria-labelledby` is required. Convey that the group is required through the referenced label element (for example `FormControl`'s required marker). `role="group"` does not allow `aria-required`, so do not put it on the group.
+
+Uncontrolled, the selection lives in the checkboxes themselves: `onChange`
+receives the checked values in document order, and a form reset puts the boxes
+back to `defaultValue` without leaving a stale selection behind.
 
 ```tsx
 import { CheckboxGroup } from '@k8ordo/ui';
@@ -772,8 +1149,10 @@ Props (CheckboxGroup.Item):
 - `label`: `string` (required)
 - `checked`: `boolean`
 - `defaultChecked`: `boolean`
+- `indeterminate`: `boolean` (default: `false`)
 - `invalid`: `boolean` (default: `false`)
 - `itemValue`: `string`
+- `labelHidden`: `boolean` (default: `false`)
 - `onChange`: `(checked: boolean, event: ChangeEvent<HTMLInputElement>) => void`
 - `ref`: `Ref<HTMLInputElement>`
 - Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `type` / `className` / `style` / `value` / `children`.
@@ -792,7 +1171,9 @@ Props (CheckboxGroup.Root):
 
 ### CheckboxCard
 
-A card-styled checkbox.
+A card-styled checkbox. Uncontrolled, the selection and its look follow the
+checkboxes themselves (`:checked`), so a form reset restores both; `onChange`
+receives the checked values in document order.
 
 ```tsx
 import { CheckboxCard } from '@k8ordo/ui';
@@ -859,7 +1240,7 @@ Props:
 
 ### RadioCard
 
-A card-styled radio button. Real `input[type="radio"]` elements sit inside a `fieldset[role="radiogroup"]`, so arrow-key roving and single selection are left to the browser. Reach them from tests with `getByRole('radio', { checked })`.
+A card-styled radio button. Real `input[type="radio"]` elements sit inside a `fieldset[role="radiogroup"]`, so arrow-key roving and single selection are left to the browser. Reach them from tests with `getByRole('radio', { checked })`. `required` goes to every radio, and an uncontrolled selection's look follows `:checked`, so a form reset restores it.
 
 ```tsx
 import { RadioCard } from '@k8ordo/ui';
@@ -890,12 +1271,15 @@ Props:
 - `invalid`: `boolean` (default: `false`)
 - `onChange`: `(value: string) => void`
 - `ref`: `Ref<HTMLFieldSetElement>`
+- `required`: `boolean` (default: `false`)
 - `value`: `string`
 - Other props are forwarded to `FieldsetHTMLAttributes<HTMLFieldSetElement>`, except `className` / `style` / `children` / `role`.
 
 ### Slider
 
-A range slider.
+A range slider. Uncontrolled, the value lives in the input, so a form reset
+puts it back to `defaultValue` and the filled track follows. `min`, `max`, and
+an uncontrolled `defaultValue` also take strings, and `step` takes `'any'`.
 
 ```tsx
 import { Slider } from '@k8ordo/ui';
@@ -914,15 +1298,58 @@ import { Slider } from '@k8ordo/ui';
 
 Props:
 
-- `defaultValue`: `number`
+- `defaultValue`: `number` | `string`
+- `invalid`: `boolean` (default: `false`)
+- `max`: `number` | `string`
+- `min`: `number` | `string`
+- `onChange`: `(value: number) => void`
+- `ref`: `Ref<HTMLInputElement>`
+- `step`: `number` | `'any'` (default: `1`)
+- `value`: `number`
+- Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `type` / `className` / `style` / `children`.
+
+### RangeSlider
+
+A slider with two thumbs for picking a range (the WAI-ARIA multi-thumb slider).
+Each thumb is a real `<input type="range">`, so the keyboard behaves as the
+browser's own slider does, and neither thumb can pass the other: the lower
+thumb's `aria-valuemax` is the upper value and the upper thumb's
+`aria-valuemin` the lower one. `value` / `defaultValue` / `onChange` carry the
+pair `[lower, upper]`.
+
+`name` is a pair too: the two thumbs submit as two form fields. Uncontrolled,
+the thumbs keep their values in the DOM, so a form's reset and its dirty check
+(value against default value) work on them as on any input. The whole slider is
+a `role="group"`: name it with `aria-label` or `aria-labelledby`
+(`FormControl`'s `renderInput` props work), and each thumb is read as that name
+followed by the built-in `rangeSliderStart` / `rangeSliderEnd` wording.
+
+```tsx
+import { RangeSlider } from '@k8ordo/ui';
+
+<RangeSlider
+  aria-label="Price"
+  defaultValue={[20, 80]}
+  max={100}
+  min={0}
+  name={['priceMin', 'priceMax']}
+/>;
+```
+
+Props:
+
+- `defaultValue`: `readonly [number, number]`
+- `disabled`: `boolean` (default: `false`)
 - `invalid`: `boolean` (default: `false`)
 - `max`: `number` (default: `100`)
 - `min`: `number` (default: `0`)
-- `onChange`: `(value: number) => void`
-- `ref`: `Ref<HTMLInputElement>`
+- `name`: `readonly [string, string]`
+- `onChange`: `(value: [number, number]) => void`
+- `ref`: `Ref<HTMLDivElement>`
+- `required`: `boolean` (default: `false`)
 - `step`: `number` (default: `1`)
-- `value`: `number`
-- Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `type` / `className` / `style` / `children`.
+- `value`: `readonly [number, number]`
+- Other props are forwarded to `HTMLAttributes<HTMLDivElement>`, except `className` / `style` / `children` / `role`.
 
 ### Switch
 
@@ -953,7 +1380,8 @@ Props:
 
 ### FileField
 
-File upload, as a composite pattern.
+File upload, as a composite pattern. A string `defaultValue` (the type
+`@k8ordo/form`'s derived attributes carry) is accepted and ignored.
 
 ```tsx
 import { FileField } from '@k8ordo/ui';
@@ -970,16 +1398,53 @@ import { FileField } from '@k8ordo/ui';
 </FileField.Root>;
 ```
 
+`FileField.Dropzone` is an area files can be dropped onto. Left empty, it holds
+the built-in `fileFieldDrop` wording and a "choose files" button, so the field
+stays usable by keyboard; pass children to lay it out yourself (put a
+`FileField.Trigger` inside). Dropped files are added exactly like picked ones:
+they respect `multiple` and `maxFiles`, land in the input so they are
+submitted, and are announced with an `input` event so a form sees the change.
+A dropped folder is skipped (choose folders through the picker with
+`webkitDirectory`). The browser applies `accept` only to the picker, so the
+field applies it to dropped files itself, by the same rules: a file it does not
+match is left out, and a drop with nothing it matches changes nothing — no
+`onChange`, no `input` event.
+
+The input holds exactly what `ItemList` lists, so what is listed is what is
+submitted:
+
+- With `multiple` or `webkitDirectory`, each pick or drop adds to the list, up
+  to `maxFiles`, and the input is rewritten to the whole list — the browser
+  alone would keep only the files just picked. A rewrite is announced with an
+  `input` event.
+- Removing a file from `ItemList` removes it from the input.
+- A `File[]` `defaultValue` is submitted as well as listed, and a form reset
+  puts both back to it (to an empty list without one).
+- `onChange` receives that whole list — not only the files just picked or
+  dropped — after every pick, drop, and removal. Only a pick passes the
+  `event`.
+
+```tsx
+<FileField.Root accept="image/*" multiple name="photos">
+  <FileField.Dropzone />
+  <FileField.ItemList clearable />
+</FileField.Root>
+```
+
 Props (Root):
 
 - `children`: `ReactNode`
-- `defaultValue`: `File[]`
+- `defaultValue`: `File[]` | `string`
 - `invalid`: `boolean` (default: `false`)
 - `maxFiles`: `number`
 - `onChange`: `(files: FileList | null, event?: ChangeEvent<HTMLInputElement>) => void`
 - `ref`: `Ref<HTMLInputElement>`
 - `webkitDirectory`: `boolean` (default: `false`)
 - Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `type` / `className` / `style` / `value`.
+
+Props (FileField.Dropzone):
+
+- `children`: `ReactNode`
 
 Props (FileField.ItemList):
 
@@ -1071,9 +1536,144 @@ Props:
 - `children`: `string` (required)
 - Other props are forwarded to `HTMLAttributes<HTMLElement>`, except `className` / `style`.
 
+### CodeBlock
+
+A block of code, highlighted on the server with shiki, with a copy button.
+It is an async Server Component on its own subpath, `@k8ordo/ui/code-block`,
+and imports `server-only`: the highlighter never reaches the browser, and
+importing it from a Client Component fails the build. Only the copy button is a
+client module.
+
+```tsx
+import { CodeBlock } from '@k8ordo/ui/code-block';
+
+<CodeBlock code={source} lang="tsx" title="save.tsx" />;
+```
+
+- `lang` is any language shiki bundles (`tsx`, `bash`, `css`, …). A name it
+  does not know renders as plain text rather than failing, so a Markdown fence
+  can pass its info string through as it is. The header shows `title` when
+  given (as the figure's `figcaption`), and the language otherwise.
+- The colors come from the design tokens (shiki's `css-variables` theme, mapped
+  to tokens in the stylesheet), so dark mode follows `.dark` with no second
+  theme.
+- `marks` marks lines by their 1-based number: `highlight`, `add` (drawn with a
+  `+`), or `remove` (drawn with a `−`). `callouts` puts a note under a line
+  (an array puts several, in order), indented like the line it points at. A
+  line can carry both. Neither is part of the copied text: the button copies
+  `code` exactly.
+
+```tsx
+<CodeBlock
+  callouts={{ 3: 'Guard the division' }}
+  code={source}
+  lang="ts"
+  marks={{ 2: 'remove', 3: 'add' }}
+/>
+```
+
+- Inside a `.writing-v` tree it stays a horizontal island.
+- It cannot render in a generative-UI spec, which renders on the client; see
+  [generative-ui](generative-ui.md).
+
+Props:
+
+- `code`: `string` (required)
+- `callouts`: `Readonly<Record<number, string | readonly string[]>>`
+- `lang`: `string` (default: `'text'`)
+- `marks`: `Readonly<Record<number, 'highlight' | 'add' | 'remove'>>`
+- `title`: `string`
+- Other props are forwarded to `HTMLAttributes<HTMLElement>`, except `children` / `className` / `style`.
+
+### Kbd
+
+One keyboard key, drawn as a key cap. A shortcut is several `Kbd` side by side,
+one per key. When the key is a symbol a screen reader would not say usefully
+(`⌘`, `⇧`), pass `label`: the symbol stays on screen and the label is what is
+read out.
+
+```tsx
+import { Kbd } from '@k8ordo/ui';
+
+<Kbd>Esc</Kbd>
+
+<Kbd label="Command">⌘</Kbd>
+<Kbd>K</Kbd>
+```
+
+Props:
+
+- `children`: `string` (required)
+- `label`: `string`
+- Other props are forwarded to `HTMLAttributes<HTMLElement>`, except `className` / `style`.
+
+### Carousel
+
+Slides that scroll along the inline axis, snapping one slide at a time, with
+previous and next buttons under them. It is built on scroll snapping, so a
+trackpad, a touch swipe, and the arrow keys (the track takes focus) all move it
+as well; the buttons move one slide per press and are disabled at either end.
+
+```tsx
+import { Carousel } from '@k8ordo/ui';
+
+<Carousel.Root label="Featured posts" slideSize="md">
+  {posts.map((post) => (
+    <Carousel.Slide key={post.id} label={post.title}>
+      <PostCard post={post} />
+    </Carousel.Slide>
+  ))}
+</Carousel.Root>;
+```
+
+`slideSize` sets how much of the track one slide takes: `full` (one at a time),
+`lg` (the next one peeks in), `md` (two), `sm` (three). With `full` and `lg` the
+current position is shown as `2 / 5`; with several slides in view there is no
+single current slide, so no position is shown. The region is announced as a
+carousel and each slide as a slide (`aria-roledescription`); give a slide a
+`label` when its content has a title. The slides follow the writing mode, so
+under `.writing-v` the track scrolls vertically. There is no autoplay.
+
+Props (Carousel.Root):
+
+- `label`: `string` (required)
+- `children`: `ReactNode`
+- `slideSize`: `'full'` | `'lg'` | `'md'` | `'sm'` (default: `'full'`)
+
+Props (Carousel.Slide):
+
+- `children`: `ReactNode`
+- `label`: `string`
+
+### Prose
+
+A container that puts the typesetting of body text back — for Markdown or MDX
+rendered to HTML. Only bare elements (no `class`) are typeset, so components
+placed inside keep their own look; the spacing between blocks applies to
+everything. Tuned for Japanese: loose leading, emphasis dots for `em`, and a
+one-character paragraph indent in vertical writing. See
+[Typography](typography.md#long-form-text-prose) for what it sets.
+
+```tsx
+import { Prose } from '@k8ordo/ui';
+
+<article>
+  <Prose>
+    <MDXContent components={{ pre: MyCodeBlock }} />
+  </Prose>
+</article>;
+```
+
+Props:
+
+- `children`: `ReactNode`
+- Other props are forwarded to `HTMLAttributes<HTMLDivElement>`, except `className` / `style`.
+
 ### Table
 
-A data table, as a compound component.
+A data table, as a compound component. `Table.EmptyState` is the row to put in
+`Table.Body` when there are no rows: it spans `colSpan` columns and draws an
+`EmptyState` with the rest of its props.
 
 ```tsx
 import { Table } from '@k8ordo/ui';
@@ -1113,8 +1713,12 @@ Props (Table.Cell):
 
 Props (Table.EmptyState):
 
-- `children`: `ReactNode` (required)
 - `colSpan`: `number` (required)
+- `title`: `string` (required)
+- `action`: `ReactNode`
+- `description`: `ReactNode`
+- `icon`: `ReactNode`
+- Other props are forwarded to `ComponentProps<typeof EmptyState>`.
 
 Props (Table.Head):
 
@@ -1137,7 +1741,124 @@ Props (Table.Row):
 
 - `children`: `ReactNode`
 - `interactive`: `boolean` (default: `false`)
+- `selected`: `boolean` (default: `false`)
 - Other props are forwarded to `HTMLAttributes<HTMLTableRowElement>`, except `className` / `style`.
+
+### DataTable
+
+A table with sorting, row selection, and column visibility. Every piece of state
+is **controlled** and owned by the caller, so it can live anywhere — component
+state, or the URL through `@k8ordo/state`'s url slot, which keeps the sort and
+the page in a shareable link. It takes functions (`cell`, `getRowId`, the
+handlers), so render it from the Client Component that owns that state.
+
+```tsx
+'use client';
+import { DataTable, type DataTableSort } from '@k8ordo/ui';
+
+const [sort, setSort] = useState<DataTableSort | null>(null);
+const [selectedIds, setSelectedIds] = useState<string[]>([]);
+const [hiddenColumnIds, setHiddenColumnIds] = useState<string[]>([]);
+
+<DataTable
+  columns={[
+    { id: 'name', header: 'Name', cell: (m) => m.name, sortable: true },
+    { id: 'role', header: 'Role', cell: (m) => m.role, hideable: false },
+  ]}
+  getRowId={(m) => m.id}
+  hiddenColumnIds={hiddenColumnIds}
+  label="Members"
+  onHiddenColumnIdsChange={setHiddenColumnIds}
+  onSelectedIdsChange={setSelectedIds}
+  onSortChange={setSort}
+  rows={sortMembers(members, sort)}
+  selectedIds={selectedIds}
+  sort={sort}
+/>;
+```
+
+- A column is a `DataTableColumn<Row>`: `id`, `header` (text), `cell(row)`
+  (what to draw), and optionally `align`, `sortable`, and `hideable`.
+- **It does not sort, filter, or page.** It draws `rows` in the order given, so
+  the same component works when the server sorts. `sort` is
+  `{ columnId, direction: 'ascending' | 'descending' } | null`; a sortable
+  header cycles ascending → descending → unsorted and carries `aria-sort`.
+  Put `Pagination` under it for pages.
+- Each feature appears only when you pass its handler: sort buttons on the
+  `sortable` columns with `onSortChange`, a checkbox column with
+  `onSelectedIdsChange`, and a "Columns" menu (every column but those with
+  `hideable: false`) with `onHiddenColumnIdsChange`.
+- The header checkbox selects or clears the rows on screen and shows the mixed
+  state when some are selected (`Checkbox`'s `indeterminate`). The first column
+  is the row header (`th scope="row"`), and each row's checkbox is named after
+  it ("Select row Aoki").
+- `emptyState` is drawn in a row spanning the columns when `rows` is empty —
+  pass an `EmptyState`.
+- Selected rows use `Table.Row`'s `selected`. For bulk actions, render your own
+  bar above the table from `selectedIds`.
+
+Props:
+
+- `columns`: `ReadonlyArray<DataTableColumn<Row>>` (required)
+- `getRowId`: `(row: Row) => string` (required)
+- `label`: `string` (required)
+- `rows`: `readonly Row[]` (required)
+- `emptyState`: `ReactNode`
+- `hiddenColumnIds`: `readonly string[]` (default: `NONE`)
+- `onHiddenColumnIdsChange`: `(ids: string[]) => void`
+- `onSelectedIdsChange`: `(ids: string[]) => void`
+- `onSortChange`: `(sort: DataTableSort | null) => void`
+- `selectedIds`: `readonly string[]` (default: `NONE`)
+- `sort`: `DataTableSort` | `null` (default: `null`)
+
+### Tree
+
+A hierarchy whose parents open and close — files and folders, an outline —
+with the WAI-ARIA tree view keyboard model. Pass the nodes as a tree of
+`{ id, label, icon?, children? }`.
+
+```tsx
+import { Tree } from '@k8ordo/ui';
+
+<Tree
+  defaultExpandedIds={['src']}
+  items={[
+    {
+      id: 'src',
+      label: 'src',
+      children: [{ id: 'index', label: 'index.ts' }],
+    },
+    { id: 'readme', label: 'README.md' },
+  ]}
+  label="Files"
+  onChange={(id) => open(id)}
+/>;
+```
+
+- Which parents are open is controllable (`expandedIds` / `defaultExpandedIds`
+  / `onExpandedChange`), and so is the selected node (`selectedId` /
+  `defaultSelectedId` / `onChange`, called with the node's `id`).
+- Keyboard: Down / Up move between the visible nodes; Right opens a closed
+  parent, then moves to its first child; Left closes an open parent, or moves
+  to the parent; Home / End go to the first / last visible node; Enter or Space
+  selects; a character moves to the next node whose label starts with it.
+- Clicking a node selects it and, on a parent, opens or closes it.
+- One node takes Tab at a time (roving tabindex): the focused one, else the
+  selected one, else the first.
+- Under `.writing-v` the nodes run right to left, so Left / Right move between
+  them and Down / Up open and close.
+
+Props:
+
+- `items`: `readonly TreeItem[]` (required)
+- `label`: `string` (required)
+- `defaultExpandedIds`: `readonly string[]`
+- `defaultSelectedId`: `string` | `null` (default: `null`)
+- `expandedIds`: `readonly string[]`
+- `onChange`: `(id: string) => void`
+- `onExpandedChange`: `(ids: readonly string[]) => void`
+- `selectedId`: `string` | `null`
+- Other props are forwarded to `HTMLAttributes<HTMLUListElement>`, except `children` / `className` / `style` / `role` / `aria-label`.
 
 ## Feedback
 
@@ -1162,6 +1883,31 @@ Props:
 `action` is an `AlertAction`, `{ label: string; renderItem: (props: { children: ReactNode }) => ReactNode }`.
 `renderItem` receives `label` as `children`; render your own button or link
 around it.
+
+### EmptyState
+
+What a list, a table, or a search shows when there is nothing in it: a title,
+an optional description and icon, and an optional action. Inside a table, use
+`Table.EmptyState`, which puts the same content in a row spanning the columns.
+
+```tsx
+import { Button, EmptyState, TableIcon } from '@k8ordo/ui';
+
+<EmptyState
+  action={<Button onClick={clearFilters}>Clear filters</Button>}
+  description="Try removing a filter."
+  icon={<TableIcon size="lg" />}
+  title="No matching posts"
+/>;
+```
+
+Props:
+
+- `title`: `string` (required)
+- `action`: `ReactNode`
+- `description`: `ReactNode`
+- `icon`: `ReactNode`
+- Other props are forwarded to `HTMLAttributes<HTMLDivElement>`, except `children` / `className` / `style`.
 
 ### Toast
 
@@ -1207,19 +1953,27 @@ Props:
 
 ### Progress
 
+Leave `value` out when how far along it is cannot be known: the bar then slides
+back and forth, has no `aria-valuenow`, and is named `label` (the built-in
+`loading` wording when omitted). With reduced motion it stops sliding and
+pulses across the whole track instead.
+
 ```tsx
 import { Progress } from '@k8ordo/ui';
 
-<Progress value={50} max={100} />
-<Progress value={50} max={100} min={0} label="Progress" />
+<Progress value={50} />
+<Progress value={150} max={200} min={100} label="Progress" />
+
+// Progress that cannot be measured
+<Progress label="Uploading" />
 ```
 
 Props:
 
-- `max`: `number` (required)
-- `value`: `number` (required)
 - `label`: `string`
+- `max`: `number` (default: `100`)
 - `min`: `number` (default: `0`)
+- `value`: `number`
 - Other props are forwarded to `HTMLAttributes<HTMLDivElement>`, except `children` / `className` / `style`.
 
 ### Spinner
@@ -1639,7 +2393,7 @@ are exported as well.
 
 ### UIProvider
 
-Wrap the app root once. It includes ToastProvider and the message dictionary (i18n, below).
+Wrap the app root once. It includes ToastProvider. The components' own wording needs no provider: it follows `@k8ordo/i18n` (i18n, below).
 
 ```tsx
 import { UIProvider } from '@k8ordo/ui';
@@ -1652,7 +2406,6 @@ import { UIProvider } from '@k8ordo/ui';
 Props:
 
 - `children`: `ReactNode`
-- `messages`: `Partial<Messages>`
 
 ### PortalRootProvider
 
@@ -1675,45 +2428,34 @@ Props:
 
 ## i18n (message dictionary)
 
-The wording components own internally (close, required, loading, …) comes from a dictionary. **It defaults to Japanese**, and works without a provider and without passing `messages`.
+The wording components own internally (close, required, loading, …) comes from a dictionary, picked by `@k8ordo/i18n`'s current locale. There is no provider and nothing to pass.
 
-To switch to English, pass `en` from `@k8ordo/ui/i18n`.
+- An application that defines its locale set with `defineLocales` gets the locale its messages render in: the one the URL names, or the set's default.
+- An application that defines no set gets **English**, whatever its URL starts with, so the server and the browser agree.
+- The module defining the set has to be loaded in the browser as well; where no set is defined the components speak English.
 
-```tsx
-import { UIProvider } from '@k8ordo/ui';
-import { en } from '@k8ordo/ui/i18n';
-
-<UIProvider messages={en}>
-  <App />
-</UIProvider>;
-```
-
-`dictionaries` from the same entry holds every built-in dictionary by its tag (`{ ja, en }`), for an application that picks one by the locale it is rendering: `messages={dictionaries[locale]}`.
-
-To replace only part of it, spread the dictionary and override those keys (`Partial<Messages>`, so you need not fill in every key).
+`ja` and `en` ship with the library. Register any other locale — or replace a built-in one — with `registerMessages`, next to where the set is defined:
 
 ```tsx
-<UIProvider messages={{ ...en, close: 'Dismiss' }}>
-  <App />
-</UIProvider>
+import { en, registerMessages } from '@k8ordo/ui/i18n';
+import type { Messages } from '@k8ordo/ui/i18n';
+
+const fr: Messages = { close: 'Fermer' /* …every key */ };
+registerMessages('fr', fr);
+
+registerMessages('en', { ...en, close: 'Dismiss' });
 ```
 
-To stay in Japanese and change only one string, pass just that key.
-
-```tsx
-<UIProvider messages={{ close: '閉じる（Esc）' }}>
-  <App />
-</UIProvider>
-```
+A regional tag without a dictionary of its own (`en-US`) reads its language's (`en`). Rendering in a locale nothing has text for throws, naming the locale and `registerMessages`.
 
 ### Resolution order
 
-**Component prop > the dictionary passed to the provider > the built-in default (Japanese)**.
+**Component prop > registered dictionary > built-in dictionary**.
 
 A component with a wording prop of its own — `Spinner`'s `label`, `Alert`'s `closeLabel`, `PasswordInput`'s `showLabel` / `hideLabel`, `Pagination`'s `prevLabel` / `nextLabel` — takes that prop over the dictionary.
 
 ```tsx
-// Even with the en dictionary, this one Spinner reads 「保存中」
+// Whatever the locale, this one Spinner reads 「保存中」
 <Spinner label="保存中" />
 ```
 
@@ -1721,27 +2463,23 @@ A component with a wording prop of its own — `Spinner`'s `label`, `Alert`'s `c
 
 ```tsx
 import {
-  dictionaries,
   en,
+  getMessages,
   ja,
-  useMessages,
+  registerMessages,
   type Messages,
 } from '@k8ordo/ui/i18n';
 ```
 
-`ja` and `en` are exported only from the `@k8ordo/ui/i18n` subpath, not the root, so the dictionaries stay out of the main bundle.
-
 ### Reading the wording in your own elements
 
-`useMessages` returns the wording in effect: the built-in dictionary with whatever you passed to `UIProvider` laid over it. Read from it in an element you draw through `renderItem`, or in a component of your own that sits beside the library, and it follows the same language and overrides as the components do. It is a client hook.
+`getMessages` returns the wording in effect: the dictionary for the current locale, a registered one before a built-in one. Read from it in an element you draw through `renderItem`, or in a component of your own that sits beside the library, and it follows the same language and replacements as the components do. It is not a hook, so a Server Component calls it too.
 
 ```tsx
-'use client';
-
-import { useMessages } from '@k8ordo/ui/i18n';
+import { getMessages } from '@k8ordo/ui/i18n';
 
 function DismissButton({ onDismiss }) {
-  const { close } = useMessages();
+  const { close } = getMessages();
   return (
     <button aria-label={close} onClick={onDismiss} type="button">
       ×
@@ -1754,24 +2492,37 @@ function DismissButton({ onDismiss }) {
 
 Every key in the `Messages` type. All values are `string`.
 
-| Category      | Keys                                                                                                                                             |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Common        | `close`, `required`, `loading`, `avatar`, `color`                                                                                                |
-| Alert         | `alertSuccess`, `alertInfo`, `alertWarning`, `alertError`                                                                                        |
-| Toast         | `toastRegion`                                                                                                                                    |
-| Autocomplete  | `autocompletePlaceholder`, `autocompleteRemoveTag`, `autocompleteClear`, `autocompleteEmpty`                                                     |
-| FileField     | `fileFieldRemove`, `fileFieldTrigger`                                                                                                            |
-| NumberField   | `numberFieldIncrement`, `numberFieldDecrement`                                                                                                   |
-| PasswordInput | `passwordShow`, `passwordHide`                                                                                                                   |
-| ListBox       | `listBoxPlaceholder`                                                                                                                             |
-| Breadcrumb    | `breadcrumb`                                                                                                                                     |
-| Tabs          | `tabList`                                                                                                                                        |
-| Pagination    | `paginationLabel`, `paginationPrevious`, `paginationNext`                                                                                        |
-| AI chat       | `chat`, `scrollToLatest`, `reasoning`, `reasoningStreaming`, `suggestions`, `send`, `stop`, `toolInput`, `toolOutput`, `toolError`, `toolDenied` |
-| Response      | The `response*` keys below                                                                                                                       |
+| Category      | Keys                                                                                                                                                |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Common        | `close`, `required`, `loading`, `avatar`, `color`                                                                                                   |
+| Alert         | `alertSuccess`, `alertInfo`, `alertWarning`, `alertError`                                                                                           |
+| Toast         | `toastRegion`                                                                                                                                       |
+| CopyButton    | `copy`, `copied`, `copyFailed`                                                                                                                      |
+| Autocomplete  | `autocompletePlaceholder`, `autocompleteRemoveTag`, `autocompleteClear`, `autocompleteEmpty`                                                        |
+| Combobox      | `comboboxToggle`, `comboboxEmpty`, `comboboxFailed`, and the common `loading` while searching                                                       |
+| FileField     | `fileFieldRemove`, `fileFieldTrigger`, `fileFieldDrop`                                                                                              |
+| NumberField   | `numberFieldIncrement`, `numberFieldDecrement`, `numberFieldRangeUnderflow` (`{min}` is replaced), `numberFieldRangeOverflow` (`{max}` is replaced) |
+| RangeSlider   | `rangeSliderStart`, `rangeSliderEnd`                                                                                                                |
+| Calendar      | `calendarPreviousMonth`, `calendarNextMonth`                                                                                                        |
+| DatePicker    | `datePickerOpen`, `datePickerDialog`                                                                                                                |
+| ColorPicker   | `colorPickerHue`, `colorPickerSaturation`, `colorPickerLightness`, `colorPickerSwatches`                                                            |
+| PasswordInput | `passwordShow`, `passwordHide`                                                                                                                      |
+| ListBox       | `listBoxPlaceholder`                                                                                                                                |
+| Breadcrumb    | `breadcrumb`                                                                                                                                        |
+| Tabs          | `tabList`                                                                                                                                           |
+| Pagination    | `paginationLabel`, `paginationPrevious`, `paginationNext`                                                                                           |
+| CodeBlock     | `codeBlockCopy` (announces with `CopyButton`'s `copied` / `copyFailed`)                                                                             |
+| TOC           | `tableOfContents`                                                                                                                                   |
+| Carousel      | `carousel`, `carouselSlide`, `carouselPrevious`, `carouselNext`                                                                                     |
+| AI chat       | `chat`, `scrollToLatest`, `reasoning`, `reasoningStreaming`, `suggestions`, `send`, `stop`, `attach`                                                |
+| AI content    | `attachments`, `attachmentRemove`, `attachmentImage`, `sources`                                                                                     |
+| AI actions    | `messageActions`, `regenerate`, `feedbackPositive`, `feedbackNegative` (`Message.Copy` uses `CopyButton`'s)                                         |
+| AI tools      | `toolInput`, `toolOutput`, `toolError`, `toolDenied`, `toolApprovalRequest`, `toolApprove`, `toolDeny`                                              |
+| Response      | The `response*` keys below                                                                                                                          |
 
-`fileFieldTrigger` and `tabList` are the trigger text and tab-list name the
-generative-UI renderers fall back to when a spec leaves them out.
+`fileFieldTrigger` is the button text of an empty `FileField.Dropzone`, and
+with `tabList` it is also what the generative-UI renderers fall back to when a
+spec leaves the trigger text or the tab-list name out.
 
 The `response*` keys label the controls `Response` draws (`@k8ordo/ui/ai/response`):
 `responseCopied`, `responseCopyCode`, `responseCopyLink`, `responseCopyTable`,

@@ -1,17 +1,21 @@
 'use client';
 
+import { useCallback, useMemo } from 'react';
 import type { ChangeEvent, FC, InputHTMLAttributes, Ref } from 'react';
 import { useFormStatus } from 'react-dom';
 
+import { mergeRefs } from '../../../helpers/merge-refs';
 import { FOCUS_RING_PEER } from '../../_internal/focus-ring';
-import { CheckIcon } from '../../icons';
+import { CheckIcon, MinusIcon } from '../../icons';
 import { useCheckboxGroupContext } from '../checkbox-group/checkbox-group';
 import { cn } from './../../../helpers/cn';
 
 type BaseProps = {
+  indeterminate?: boolean;
   invalid?: boolean;
   itemValue?: string;
   label: string;
+  labelHidden?: boolean;
   ref?: Ref<HTMLInputElement>;
 } & Omit<
   InputHTMLAttributes<HTMLInputElement>,
@@ -43,8 +47,10 @@ export const Checkbox: FC<Props> = ({
   name,
   itemValue,
   disabled = false,
+  indeterminate = false,
   invalid = false,
   label,
+  labelHidden = false,
   checked,
   defaultChecked,
   onChange,
@@ -59,23 +65,39 @@ export const Checkbox: FC<Props> = ({
     throw new Error('Checkbox inside CheckboxGroup requires itemValue');
   }
 
+  // indeterminate は属性ではなく DOM のプロパティにしか無い
+  const indeterminateRef = useCallback(
+    (input: HTMLInputElement | null) => {
+      if (input !== null) input.indeterminate = indeterminate;
+    },
+    [indeterminate],
+  );
+  const mergedRef = useMemo(
+    () => mergeRefs(ref, indeterminateRef),
+    [ref, indeterminateRef],
+  );
+
   const disabledResolved =
     disabled || groupContext?.disabled === true || pending;
   const isChecked = groupContext
-    ? groupContext.currentValue.includes(groupItemValue)
+    ? groupContext.value?.includes(groupItemValue)
     : checked;
+  const isDefaultChecked = groupContext
+    ? groupContext.defaultValue.includes(groupItemValue)
+    : defaultChecked;
 
   return (
     <label
       className={cn(
-        'inline-flex items-center gap-2 text-left',
+        'inline-flex items-center text-left',
+        !labelHidden && 'gap-2',
         disabledResolved ? 'cursor-not-allowed text-fg-mute' : 'cursor-pointer',
       )}
     >
       <input
         {...rest}
         {...(isChecked === undefined
-          ? { defaultChecked }
+          ? { defaultChecked: isDefaultChecked }
           : { checked: isChecked })}
         aria-invalid={invalid}
         className="peer sr-only"
@@ -83,32 +105,33 @@ export const Checkbox: FC<Props> = ({
         name={groupContext?.name ?? name}
         onChange={(event) => {
           if (groupContext) {
-            groupContext.toggleValue(groupItemValue);
+            groupContext.notifyChange(event);
             return;
           }
 
           onChange?.(event.target.checked, event);
         }}
-        ref={ref}
+        ref={mergedRef}
         type="checkbox"
-        value={groupContext ? groupItemValue : undefined}
+        value={itemValue}
       />
       <span
         aria-hidden
         className={cn(
-          'inline-flex size-5 items-center justify-center rounded-md border-2 transition-colors',
+          'inline-flex size-5 items-center justify-center rounded-md border-2 transition-colors duration-150 ease-out',
           FOCUS_RING_PEER,
           disabledResolved && 'border-border-mute bg-bg-mute',
           // 非制御のとき、form の reset は change を飛ばさずに checked を戻すので、
           // 見た目は state ではなく input の :checked から引く
           'border-border-mute bg-bg-base *:invisible',
           'peer-checked:border-border-base peer-checked:bg-primary-bg peer-checked:text-fg-base peer-checked:*:visible',
+          'peer-indeterminate:border-border-base peer-indeterminate:bg-primary-bg peer-indeterminate:text-fg-base peer-indeterminate:*:visible',
           invalid && 'border-border-error peer-checked:border-border-error',
         )}
       >
-        <CheckIcon size="sm" />
+        {indeterminate ? <MinusIcon size="sm" /> : <CheckIcon size="sm" />}
       </span>
-      <span className="text-lg">{label}</span>
+      <span className={labelHidden ? 'sr-only' : 'text-lg'}>{label}</span>
     </label>
   );
 };

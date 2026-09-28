@@ -4,23 +4,36 @@ import { Fragment, useId, useState } from 'react';
 import type { ComponentProps, FC, ReactNode } from 'react';
 
 import { Button } from '../../components/buttons/button';
+import { CopyButton } from '../../components/buttons/copy-button';
 import { IconButton } from '../../components/buttons/icon-button';
 import { Accordion } from '../../components/data-display/accordion';
 import { Avatar } from '../../components/data-display/avatar';
 import { Badge } from '../../components/data-display/badge';
 import { Card } from '../../components/data-display/card';
+import { Carousel } from '../../components/data-display/carousel';
 import { Code } from '../../components/data-display/code';
+import { DataTable } from '../../components/data-display/data-table';
+import type { DataTableSort } from '../../components/data-display/data-table';
 import { Heading } from '../../components/data-display/heading';
+import { Kbd } from '../../components/data-display/kbd';
 import { Table } from '../../components/data-display/table';
+import { Tree } from '../../components/data-display/tree';
+import type { TreeItem } from '../../components/data-display/tree';
 import { Alert } from '../../components/feedback/alert';
+import { EmptyState } from '../../components/feedback/empty-state';
 import { Progress } from '../../components/feedback/progress';
 import { Skeleton } from '../../components/feedback/skeleton';
 import { Spinner } from '../../components/feedback/spinner';
 import { ToastProvider, useToast } from '../../components/feedback/toast';
 import { Autocomplete } from '../../components/form/autocomplete';
+import { Calendar } from '../../components/form/calendar';
 import { Checkbox } from '../../components/form/checkbox';
 import { CheckboxCard } from '../../components/form/checkbox-card';
 import { CheckboxGroup } from '../../components/form/checkbox-group';
+import { ColorPicker } from '../../components/form/color-picker';
+import { Combobox } from '../../components/form/combobox';
+import { DateField } from '../../components/form/date-field';
+import { DatePicker } from '../../components/form/date-picker';
 import { FileField } from '../../components/form/file-field';
 import { Form } from '../../components/form/form';
 import { FormControl } from '../../components/form/form-control';
@@ -28,6 +41,7 @@ import { NumberField } from '../../components/form/number-field';
 import { PasswordInput } from '../../components/form/password-input';
 import { Radio } from '../../components/form/radio';
 import { RadioCard } from '../../components/form/radio-card';
+import { RangeSlider } from '../../components/form/range-slider';
 import { Select } from '../../components/form/select';
 import { Slider } from '../../components/form/slider';
 import { Switch } from '../../components/form/switch';
@@ -89,12 +103,12 @@ import {
   ViewOffIcon,
 } from '../../components/icons';
 import { Grid } from '../../components/layout/grid';
-import { ScrollLinked } from '../../components/layout/scroll-linked';
 import { Separator } from '../../components/layout/separator';
 import { Stack } from '../../components/layout/stack';
 import { Anchor } from '../../components/navigation/anchor';
 import { Breadcrumb } from '../../components/navigation/breadcrumb';
 import { Pagination } from '../../components/navigation/pagination';
+import { SideNav } from '../../components/navigation/side-nav';
 import { Tabs } from '../../components/navigation/tabs';
 import { Dialog } from '../../components/overlays/dialog';
 import { Drawer } from '../../components/overlays/drawer';
@@ -103,33 +117,43 @@ import { ListBox } from '../../components/overlays/list-box';
 import { Modal } from '../../components/overlays/modal';
 import { Popover } from '../../components/overlays/popover';
 import { Tooltip } from '../../components/overlays/tooltip';
-import { useMessages } from '../../i18n/context';
+import { getMessages } from '../../i18n/current';
 import type {
   AccordionProps,
   AlertProps,
   AnchorProps,
   AutocompleteProps,
+  ComboboxProps,
   AvatarProps,
   BadgeProps,
   BreadcrumbProps,
   ButtonProps,
+  CalendarProps,
   CardProps,
+  CarouselProps,
   CheckboxCardProps,
   CheckboxGroupProps,
   CheckboxProps,
   ChevronIconProps,
   CodeProps,
+  ColorPickerProps,
+  DataTableProps,
+  DateFieldProps,
+  DatePickerProps,
   GridProps,
   DialogProps,
   DrawerProps,
   DropdownMenuProps,
+  EmptyStateProps,
   FileFieldProps,
   FormControlProps,
   FormProps,
   HeadingProps,
   IconButtonProps,
+  CopyButtonProps,
   IconName,
   IconProps,
+  KbdProps,
   ListBoxProps,
   ModalProps,
   NumberFieldProps,
@@ -139,9 +163,10 @@ import type {
   ProgressProps,
   RadioCardProps,
   RadioProps,
-  ScrollLinkedProps,
+  RangeSliderProps,
   SelectProps,
   SeparatorProps,
+  SideNavProps,
   SkeletonProps,
   SliderProps,
   SpinnerProps,
@@ -149,6 +174,7 @@ import type {
   StatusIconProps,
   SwitchProps,
   TableProps,
+  TreeProps,
   TabsProps,
   TextareaProps,
   TextFieldProps,
@@ -307,7 +333,7 @@ export function renderCard(props: CardProps, children: ReactNode): ReactNode {
 // 同一ページに複数描画されても衝突しないよう `useId()` で生成する必要がある。
 // （生成 UI では Tabs が複数並ぶケースは普通にあり得る）。
 export const TabsView: FC<{ props: TabsProps }> = ({ props }) => {
-  const messages = useMessages();
+  const messages = getMessages();
   const baseId = useId();
   const ids = props.tabs.map((_, index) => `${baseId}-tab-${index}`) as [
     string,
@@ -513,6 +539,27 @@ export function renderSlider(
   );
 }
 
+// 両方のつまみが同じ name で送るので、FormData では [下側, 上側] の配列になる
+export function renderRangeSlider(
+  props: RangeSliderProps,
+  value: readonly [number, number],
+  onChange: (next: readonly [number, number]) => void,
+): ReactNode {
+  return (
+    <RangeSlider
+      aria-label={props.label}
+      disabled={u(props.disabled)}
+      invalid={u(props.invalid)}
+      max={u(props.max)}
+      min={u(props.min)}
+      name={[props.name, props.name]}
+      onChange={onChange}
+      step={u(props.step)}
+      value={value}
+    />
+  );
+}
+
 // Radio / RadioCard は `aria-labelledby` の宛先 ID を持つ必要があるが、
 // `${name}-label` は同じ name の別 Renderer が同居すると衝突する。
 // `useId()` でユニーク化したラベルを子に渡す共有ラッパー。
@@ -530,6 +577,112 @@ const LabeledField: FC<{
     </div>
   );
 };
+
+const ColorPickerView: FC<{
+  props: ColorPickerProps;
+  value: string;
+  onChange: (next: string) => void;
+}> = ({ props, value, onChange }) => (
+  <LabeledField label={props.label}>
+    {(labelId) => (
+      <ColorPicker
+        aria-labelledby={labelId}
+        disabled={u(props.disabled)}
+        invalid={u(props.invalid)}
+        name={props.name}
+        onChange={onChange}
+        required={u(props.required)}
+        swatches={u(props.swatches)}
+        value={value}
+      />
+    )}
+  </LabeledField>
+);
+
+export function renderColorPicker(
+  props: ColorPickerProps,
+  value: string,
+  onChange: (next: string) => void,
+): ReactNode {
+  return <ColorPickerView onChange={onChange} props={props} value={value} />;
+}
+
+const DateFieldView: FC<{
+  props: DateFieldProps;
+  value: string;
+  onChange: (next: string) => void;
+}> = ({ props, value, onChange }) => (
+  <LabeledField label={props.label}>
+    {(labelId) => (
+      <DateField
+        aria-labelledby={labelId}
+        disabled={u(props.disabled)}
+        invalid={u(props.invalid)}
+        max={u(props.max)}
+        min={u(props.min)}
+        name={props.name}
+        onChange={(event) => {
+          onChange(event.target.value);
+        }}
+        required={u(props.required)}
+        value={value}
+      />
+    )}
+  </LabeledField>
+);
+
+export function renderDateField(
+  props: DateFieldProps,
+  value: string,
+  onChange: (next: string) => void,
+): ReactNode {
+  return <DateFieldView onChange={onChange} props={props} value={value} />;
+}
+
+const DatePickerView: FC<{
+  props: DatePickerProps;
+  value: string;
+  onChange: (next: string) => void;
+}> = ({ props, value, onChange }) => (
+  <LabeledField label={props.label}>
+    {(labelId) => (
+      <DatePicker
+        aria-labelledby={labelId}
+        disabled={u(props.disabled)}
+        invalid={u(props.invalid)}
+        max={u(props.max)}
+        min={u(props.min)}
+        name={props.name}
+        onChange={onChange}
+        required={u(props.required)}
+        value={value}
+      />
+    )}
+  </LabeledField>
+);
+
+export function renderDatePicker(
+  props: DatePickerProps,
+  value: string,
+  onChange: (next: string) => void,
+): ReactNode {
+  return <DatePickerView onChange={onChange} props={props} value={value} />;
+}
+
+export function renderCalendar(
+  props: CalendarProps,
+  value: string,
+  onChange: (next: string) => void,
+): ReactNode {
+  return (
+    <Calendar
+      max={u(props.max)}
+      min={u(props.min)}
+      onChange={onChange}
+      value={value === '' ? null : value}
+    />
+  );
+}
 
 const RadioView: FC<{
   props: RadioProps;
@@ -656,6 +809,17 @@ export function renderIconButton(props: IconButtonProps): ReactNode {
   );
 }
 
+export function renderCopyButton(props: CopyButtonProps): ReactNode {
+  return (
+    <CopyButton
+      iconOnly={u(props.iconOnly)}
+      label={u(props.label)}
+      size={u(props.size)}
+      value={props.value}
+    />
+  );
+}
+
 export function renderAnchor(props: AnchorProps): ReactNode {
   return (
     <Anchor href={props.href} openInNewTab={u(props.openInNewTab)}>
@@ -680,13 +844,53 @@ export function renderCode(props: CodeProps): ReactNode {
   return <Code>{props.code}</Code>;
 }
 
+export function renderKbd(props: KbdProps): ReactNode {
+  return (
+    <span className="inline-flex items-center gap-1">
+      {props.keys.map((key, index) => (
+        // eslint-disable-next-line react/no-array-index-key -- 同じキーが並びうる静的な列
+        <Kbd key={`${key}-${index}`}>{key}</Kbd>
+      ))}
+    </span>
+  );
+}
+
+export function renderEmptyState(props: EmptyStateProps): ReactNode {
+  const icon = u(props.icon);
+  const IconComponent = icon === undefined ? undefined : iconMap[icon];
+  return (
+    <EmptyState
+      description={u(props.description)}
+      icon={
+        IconComponent === undefined ? undefined : <IconComponent size="lg" />
+      }
+      title={props.title}
+    />
+  );
+}
+
+// 子の 1 つずつが 1 枚のスライドになる。位置で固定の列なので index キーでよい
+export function renderCarousel(
+  props: CarouselProps,
+  slides: readonly ReactNode[],
+): ReactNode {
+  return (
+    <Carousel.Root label={props.label} slideSize={u(props.slideSize)}>
+      {slides.map((slide, index) => (
+        // eslint-disable-next-line react/no-array-index-key -- 静的な位置リスト
+        <Carousel.Slide key={index}>{slide}</Carousel.Slide>
+      ))}
+    </Carousel.Root>
+  );
+}
+
 export function renderProgress(props: ProgressProps): ReactNode {
   return (
     <Progress
       label={u(props.label)}
-      max={props.max}
+      max={u(props.max)}
       min={u(props.min)}
-      value={props.value}
+      value={u(props.value)}
     />
   );
 }
@@ -732,6 +936,59 @@ export function renderBreadcrumb(props: BreadcrumbProps): ReactNode {
         </Fragment>
       ))}
     </Breadcrumb.List>
+  );
+}
+
+// 平らな一覧を親子の木に組む。親の見つからない項目は根に置く
+export const toTree = (items: TreeProps['items']): TreeItem[] => {
+  const ids = new Set(items.map((item) => item.id));
+  const build = (parentId: string | undefined): TreeItem[] =>
+    items
+      .filter((item) => {
+        // OpenUI は省いた引数を null で渡すので、undefined にそろえてから見る
+        const parent = u(item.parentId);
+        return parentId === undefined
+          ? parent === undefined || !ids.has(parent)
+          : parent === parentId;
+      })
+      .map((item): TreeItem => {
+        const children = build(item.id);
+        return children.length > 0
+          ? { id: item.id, label: item.label, children }
+          : { id: item.id, label: item.label };
+      });
+  return build(undefined);
+};
+
+export function renderTree(props: TreeProps): ReactNode {
+  return (
+    <Tree
+      defaultExpandedIds={props.items
+        .filter((item) => item.expanded === true)
+        .map((item) => item.id)}
+      items={toTree(props.items)}
+      label={props.label}
+    />
+  );
+}
+
+export function renderSideNav(props: SideNavProps): ReactNode {
+  return (
+    <SideNav.Root label={props.label}>
+      {props.groups.map((group) => (
+        <SideNav.Group key={group.title} title={group.title}>
+          {group.links.map((link) => (
+            <SideNav.Link
+              current={u(link.current)}
+              href={link.href}
+              key={link.href}
+            >
+              {link.label}
+            </SideNav.Link>
+          ))}
+        </SideNav.Group>
+      ))}
+    </SideNav.Root>
   );
 }
 
@@ -931,10 +1188,6 @@ export function renderDropdownMenu(props: DropdownMenuProps): ReactNode {
   );
 }
 
-export function renderScrollLinked(_props: ScrollLinkedProps): ReactNode {
-  return <ScrollLinked />;
-}
-
 // ToastProvider はラッパー側で巻く必要があるため、ローカルにも 1 段被せる。
 const ToastTriggerInner: FC<{ props: ToastProps }> = ({ props }) => {
   const { open } = useToast();
@@ -947,6 +1200,46 @@ const ToastTriggerInner: FC<{ props: ToastProps }> = ({ props }) => {
     >
       {props.triggerLabel}
     </Button>
+  );
+};
+
+const collator = new Intl.Collator(undefined, { numeric: true });
+
+export const DataTableWidget: FC<{ props: DataTableProps }> = ({ props }) => {
+  const [sort, setSort] = useState<DataTableSort | null>(null);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const rows = props.rows.map((cells, index) => ({ id: String(index), cells }));
+  const columnIndex = sort === null ? -1 : Number(sort.columnId);
+  const sorted =
+    sort === null
+      ? rows
+      : rows.toSorted((a, b) =>
+          collator.compare(
+            a.cells[columnIndex] ?? '',
+            b.cells[columnIndex] ?? '',
+          ),
+        );
+  const ordered =
+    sort?.direction === 'descending' ? sorted.toReversed() : sorted;
+  return (
+    <DataTable
+      columns={props.columns.map((column, index) => ({
+        id: String(index),
+        header: column.label,
+        cell: (row: { cells: string[] }) => row.cells[index] ?? '',
+        align: u(column.align),
+        sortable: u(column.sortable),
+      }))}
+      getRowId={(row) => row.id}
+      label={props.label}
+      onSelectedIdsChange={
+        props.selectable === true ? setSelectedIds : undefined
+      }
+      onSortChange={setSort}
+      rows={ordered}
+      selectedIds={selectedIds}
+      sort={sort}
+    />
   );
 };
 
@@ -1029,17 +1322,57 @@ export function renderAutocomplete(
   return <AutocompleteView onChange={onChange} props={props} value={value} />;
 }
 
+const ComboboxView: FC<{
+  props: ComboboxProps;
+  value: string;
+  onChange: (next: string) => void;
+}> = ({ props, value, onChange }) => (
+  <LabeledField label={props.label}>
+    {(labelId) => (
+      <Combobox
+        aria-labelledby={labelId}
+        disabled={u(props.disabled)}
+        invalid={u(props.invalid)}
+        name={props.name}
+        onChange={onChange}
+        options={props.options}
+        placeholder={u(props.placeholder)}
+        required={u(props.required)}
+        value={value}
+      />
+    )}
+  </LabeledField>
+);
+
+export function renderCombobox(
+  props: ComboboxProps,
+  value: string,
+  onChange: (next: string) => void,
+): ReactNode {
+  return <ComboboxView onChange={onChange} props={props} value={value} />;
+}
+
 export const FileFieldWidget: FC<{ props: FileFieldProps }> = ({ props }) => {
-  const messages = useMessages();
+  const messages = getMessages();
+  const trigger = (
+    <FileField.Trigger
+      renderItem={({ onClick, disabled }) => (
+        <Button disabled={disabled} onClick={onClick} variant="outline">
+          {u(props.triggerLabel) ?? messages.fileFieldTrigger}
+        </Button>
+      )}
+    />
+  );
   return (
     <FileField.Root maxFiles={u(props.maxFiles)} multiple={u(props.multiple)}>
-      <FileField.Trigger
-        renderItem={({ onClick, disabled }) => (
-          <Button disabled={disabled} onClick={onClick} variant="outline">
-            {u(props.triggerLabel) ?? messages.fileFieldTrigger}
-          </Button>
-        )}
-      />
+      {u(props.dropzone) === true ? (
+        <FileField.Dropzone>
+          <p className="text-fg-mute text-sm">{messages.fileFieldDrop}</p>
+          {trigger}
+        </FileField.Dropzone>
+      ) : (
+        trigger
+      )}
       <FileField.ItemList clearable={u(props.clearable)} />
     </FileField.Root>
   );

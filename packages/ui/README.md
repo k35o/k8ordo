@@ -1,7 +1,7 @@
 # @k8ordo/ui
 
 React components from [k8ordo](https://ordo.k8o.me) — semantic design
-tokens, built-in Japanese/English wording, and adapters that let an LLM generate
+tokens, built-in wording that follows `@k8ordo/i18n` (Japanese and English included), and adapters that let an LLM generate
 on-brand UIs.
 
 Like every k8ordo package it assumes React 19 and Server Components, uses only
@@ -22,16 +22,17 @@ yarn add @k8ordo/ui
 
 ## Peer Dependencies
 
-Only React is required:
+Only React and `@k8ordo/i18n` (the locale the components' own wording is read in) are required:
 
 ```bash
-npm install react react-dom
+npm install react react-dom @k8ordo/i18n
 ```
 
-| Package     | Version |
-| ----------- | ------- |
-| `react`     | ≥19.3.0 |
-| `react-dom` | ≥19.3.0 |
+| Package        | Version |
+| -------------- | ------- |
+| `react`        | ≥19.3.0 |
+| `react-dom`    | ≥19.3.0 |
+| `@k8ordo/i18n` | ^1.0.0  |
 
 Everything else is an optional peer, needed only for the entry point that uses
 it. Install one when you import the entry it belongs to.
@@ -119,48 +120,20 @@ function MyPage() {
 
 ## Internationalization (i18n)
 
-The wording that components own internally — "close", "required", "loading", and so on — comes from a message dictionary. **It defaults to Japanese**, and that default applies even without a provider, so a Japanese app needs no setup at all.
+The wording that components own internally — "close", "required", "loading", and so on — is read in [`@k8ordo/i18n`](https://ordo.k8o.me/i18n)'s current locale. There is no provider and nothing to pass:
 
-To switch to English, pass the `en` dictionary from `@k8ordo/ui/i18n`:
+- an application that defines its locale set with `defineLocales` gets the locale its messages render in;
+- an application that defines none gets **English**, whatever its URL starts with.
 
-```tsx
-import { UIProvider } from '@k8ordo/ui';
-import { en } from '@k8ordo/ui/i18n';
+`ja` and `en` ship with the library. Register any other locale, or replace a built-in one, next to where the set is defined:
 
-function App() {
-  return (
-    <UIProvider messages={en}>
-      <YourApp />
-    </UIProvider>
-  );
-}
+```ts
+import { en, registerMessages } from '@k8ordo/ui/i18n';
+
+registerMessages('en', { ...en, close: 'Dismiss' });
 ```
 
-`messages` takes a `Partial<Messages>`, so you can spread a dictionary and override only the keys you care about:
-
-```tsx
-<UIProvider messages={{ ...en, close: 'Dismiss' }}>
-  <YourApp />
-</UIProvider>
-```
-
-Resolution order is **component prop > provider dictionary > built-in default (Japanese)**. Components that expose a wording prop of their own — `Spinner`'s `label`, `Alert`'s `closeLabel`, `PasswordInput`'s `showLabel` / `hideLabel`, `Pagination`'s `prevLabel` / `nextLabel` — take that prop over the dictionary.
-
-Besides `ja` / `en`, the subpath exports `dictionaries` (both of them keyed by locale, for `messages={dictionaries[locale]}`), `useMessages`, and the type:
-
-```tsx
-import {
-  dictionaries,
-  en,
-  ja,
-  useMessages,
-  type Messages,
-} from '@k8ordo/ui/i18n';
-```
-
-`useMessages` is a client hook that returns the wording in effect — the built-in dictionary with whatever you passed to `UIProvider` laid over it — for elements you draw yourself, such as through `renderItem`.
-
-`ja` / `en` live behind `@k8ordo/ui/i18n` rather than the root entry so the dictionaries stay out of the main bundle. See [docs/references/components.md](docs/references/components.md) for the full key list.
+Resolution order is **component prop > registered dictionary > built-in dictionary**. Components that expose a wording prop of their own — `Spinner`'s `label`, `Alert`'s `closeLabel`, `PasswordInput`'s `showLabel` / `hideLabel`, `Pagination`'s `prevLabel` / `nextLabel` — take it over the dictionary. `getMessages()` returns the wording in effect for elements you draw yourself; it is not a hook, so a Server Component calls it too. See [docs/references/components.md](docs/references/components.md) for the full key list, and [docs/GUIDE.md](docs/GUIDE.md) for migrating from `UIProvider`'s `messages`.
 
 ## AI Agent Documentation
 
@@ -210,25 +183,32 @@ stories and rendered props rather than relying on trained knowledge:
 
 - **Button** - Primary action button (use `renderItem` to render as a link)
 - **IconButton** - Button with icon only (use `renderItem` to render as a link)
+- **CopyButton** - Copies text to the clipboard, then shows and announces the result
 
 ### Navigation
 
 - **Anchor** - Text link with external-link awareness
 - **Breadcrumb** - Navigation path indicator
 - **Pagination** - Page navigation controls
+- **SideNav** - Grouped side navigation links (use `renderAnchor` for a router link)
+- **TableOfContents** - On-page contents that marks the heading being read
 - **Tabs** - Tab-based content organization
 
 ### Form Controls
 
-- **Autocomplete** - Search with suggestions
+- **Autocomplete** - Pick several from a fixed list, shown as tags
+- **Calendar** - Month grid for picking a day
 - **Checkbox** / **CheckboxCard** / **CheckboxGroup** - Multi-selection inputs
-- **FileField** - File upload with composite pattern
+- **ColorPicker** - Hex color field with hue / saturation / lightness sliders and swatches
+- **Combobox** - Pick one from a list filtered as you type, or searched on a server
+- **DateField** / **DatePicker** - Native date input, alone or with a calendar popover
+- **FileField** - File upload with composite pattern, from a button or by dropping files
 - **Form** / **FormControl** - Form wrapper and field with label/validation
 - **NumberField** - Numeric input with controls
 - **PasswordInput** - Password input with show/hide toggle
 - **Radio** / **RadioCard** - Single-selection inputs
 - **Select** - Dropdown selection
-- **Slider** - Slider input control
+- **Slider** / **RangeSlider** - Slider input control, with one thumb or two
 - **Switch** - Toggle switch
 - **TextField** - Single-line text input
 - **Textarea** - Multi-line text input
@@ -239,14 +219,21 @@ stories and rendered props rather than relying on trained knowledge:
 - **Avatar** - User/entity avatar
 - **Badge** - Status/label indicator
 - **Card** - Flexible content container (hover interaction via `interactive`)
+- **Carousel** - Scroll-snapping slides with previous/next buttons
 - **Code** - Formatted code display
+- **DataTable** - Table with sorting, row selection, and column visibility (controlled)
+- **CodeBlock** (from `@k8ordo/ui/code-block`) - Code block highlighted on the server, with a copy button
 - **Heading** - Typography heading component
+- **Kbd** - Keyboard key cap for shortcuts
+- **Prose** - Typesetting for rendered Markdown/MDX, tuned for Japanese
 - **Table** - Tabular data display
+- **Tree** - Expandable hierarchy with WAI-ARIA tree keyboard navigation
 
 ### Feedback
 
 - **Alert** - Important messages and notifications
-- **Progress** - Progress indication
+- **EmptyState** - What a list, table, or search shows when it is empty
+- **Progress** - Progress indication, or an animated bar when progress is unknown
 - **Skeleton** - Content loading placeholder
 - **Spinner** - Loading indicator
 - **ToastProvider** / **useToast** - Temporary notification messages
@@ -265,7 +252,6 @@ stories and rendered props rather than relying on trained knowledge:
 
 - **Grid** - CSS grid with token-based gaps and responsive auto-fill/auto-fit columns
 - **Stack** - Flex layout with token-based gaps
-- **ScrollLinked** - Scroll progress indicator
 - **Separator** - Visual content divider
 
 ### Observers
@@ -359,7 +345,7 @@ function MyComponent() {
 
 ## Imports & Bundle Size
 
-The core UI components ship from the root entry — there are no per-component subpaths; the AI chat components live under `@k8ordo/ui/ai`, with `Response` under `@k8ordo/ui/ai/response`. The package is tree-shakeable (`sideEffects` is limited to CSS), so bundlers drop everything you don't import:
+The core UI components ship from the root entry — there are no per-component subpaths; the AI chat components live under `@k8ordo/ui/ai`, with `Response` under `@k8ordo/ui/ai/response`, and `CodeBlock` under `@k8ordo/ui/code-block` so the highlighter stays out of everything else. The package is tree-shakeable (`sideEffects` is limited to CSS), so bundlers drop everything you don't import:
 
 ```tsx
 // Named imports from the root entry — unused exports are tree-shaken away
@@ -368,32 +354,35 @@ import { Button, Card, Stack } from '@k8ordo/ui';
 
 Optional features live behind dedicated subpath exports:
 
-| Subpath                           | Contents                                                             |
-| --------------------------------- | -------------------------------------------------------------------- |
-| `@k8ordo/ui`                      | Core UI components, their types, and provider hooks                  |
-| `@k8ordo/ui/tokens`               | Design token definitions                                             |
-| `@k8ordo/ui/props.json`           | Every component's props as JSON, generated from the types            |
-| `@k8ordo/ui/i18n`                 | `ja` / `en` / `dictionaries`, `useMessages`, and the `Messages` type |
-| `@k8ordo/ui/ai`                   | AI chat components                                                   |
-| `@k8ordo/ui/ai/response`          | `Response` Markdown renderer (needs optional peer `streamdown`)      |
-| `@k8ordo/ui/ai-sdk`               | AI SDK adapter (needs optional peer `ai`)                            |
-| `@k8ordo/ui/json-render`          | json-render catalog (server-safe)                                    |
-| `@k8ordo/ui/json-render/registry` | json-render registry (`'use client'`)                                |
-| `@k8ordo/ui/openui`               | OpenUI library (`'use client'`)                                      |
-| `@k8ordo/ui/openui/prompt`        | OpenUI prompt generation (server-safe)                               |
-| `@k8ordo/ui/styles.css`           | Prebuilt stylesheet (no Tailwind required)                           |
-| `@k8ordo/ui/tailwind.css`         | Tailwind source entry (requires Tailwind CSS 4)                      |
+| Subpath                           | Contents                                                                |
+| --------------------------------- | ----------------------------------------------------------------------- |
+| `@k8ordo/ui`                      | Core UI components, their types, and provider hooks                     |
+| `@k8ordo/ui/tokens`               | Design token definitions                                                |
+| `@k8ordo/ui/props.json`           | Every component's props as JSON, generated from the types               |
+| `@k8ordo/ui/i18n`                 | `ja` / `en`, `registerMessages`, `getMessages`, and the `Messages` type |
+| `@k8ordo/ui/ai`                   | AI chat components                                                      |
+| `@k8ordo/ui/ai/response`          | `Response` Markdown renderer (needs optional peer `streamdown`)         |
+| `@k8ordo/ui/ai-sdk`               | AI SDK adapter (needs optional peer `ai`)                               |
+| `@k8ordo/ui/code-block`           | `CodeBlock`, highlighted on the server with shiki (Server Component)    |
+| `@k8ordo/ui/json-render`          | json-render catalog (server-safe)                                       |
+| `@k8ordo/ui/json-render/registry` | json-render registry (`'use client'`)                                   |
+| `@k8ordo/ui/openui`               | OpenUI library (`'use client'`)                                         |
+| `@k8ordo/ui/openui/prompt`        | OpenUI prompt generation (server-safe)                                  |
+| `@k8ordo/ui/styles.css`           | Prebuilt stylesheet (no Tailwind required)                              |
+| `@k8ordo/ui/tailwind.css`         | Tailwind source entry (requires Tailwind CSS 4)                         |
 
 ## AI Chat Components
 
 `@k8ordo/ui/ai` ships building blocks for chat UIs:
 
 - **Conversation** (`Root` / `Messages` / `ScrollButton`) - Scroll container with stick-to-bottom behavior and a scroll-to-bottom button
-- **Message** (`Root` / `Content`) - Chat bubble, styled by `from="user" | "assistant"`
-- **PromptInput** (`Root` / `Textarea` / `Submit`) - Message input form with IME-aware Enter-to-send and a stop button while streaming
+- **Message** (`Root` / `Content` / `Actions` / `Action` / `Copy` / `Regenerate` / `Feedback`) - Chat bubble, styled by `from="user" | "assistant"`, with an optional `avatar`; `Actions` holds copy, regenerate, and good/bad feedback under the message
+- **PromptInput** (`Root` / `Attachments` / `Attach` / `Textarea` / `Submit`) - Message input form with IME-aware Enter-to-send and a stop button while streaming; pass `accept` to take attachments from a file picker, drag and drop, or paste
 - **Reasoning** - Collapsible display of the model's thinking text
 - **Suggestion** (`List` / `Item`) - Suggested prompt chips
-- **ToolInvocation** - Tool call display with input/output and `state` (`'input-streaming' | 'input-available' | 'approval-requested' | 'approval-responded' | 'output-available' | 'output-error' | 'output-denied'`); `deniedReason` explains an `output-denied` call
+- **ToolInvocation** - Tool call display with input/output and `state` (`'input-streaming' | 'input-available' | 'approval-requested' | 'approval-responded' | 'output-available' | 'output-error' | 'output-denied'`); with `approval` and `onApprovalResponse` it asks the user to allow or deny the call and answers with the approval `id`
+- **Attachment** (`List` / `Item`) - Files attached to a message: image thumbnails, or a name and media-type chip
+- **Source** (`List` / `Item`) - The sources a response cites, as links (http(s) only) or document titles
 - **Response** (from `@k8ordo/ui/ai/response`) - Streaming-safe Markdown renderer built on streamdown
 
 Two of these need optional peer dependencies:
@@ -466,7 +455,7 @@ import 'streamdown/styles.css';
 @source '../node_modules/streamdown/dist/*.js';
 ```
 
-With the [AI SDK](https://ai-sdk.dev), `mapMessageParts` from `@k8ordo/ui/ai-sdk` converts a `UIMessage` into a flat array of `{ kind: 'text' | 'reasoning' | 'tool', ... }` parts that map 1:1 onto `Response`, `Reasoning`, and `ToolInvocation`.
+With the [AI SDK](https://ai-sdk.dev), `mapMessageParts` from `@k8ordo/ui/ai-sdk` converts a `UIMessage` into a flat array of `{ kind: 'text' | 'reasoning' | 'tool' | 'file' | 'source' | 'data', ... }` parts that map onto `Response`, `Reasoning`, `ToolInvocation`, `Attachment`, and `Source`; `data` parts are yours to render. A tool part keeps its `approval`, so `onApprovalResponse={addToolApprovalResponse}` answers the SDK directly.
 
 ## Generative UI integrations
 
@@ -481,13 +470,13 @@ pnpm add @json-render/core @json-render/react zod
 pnpm add @openuidev/react-lang @openuidev/lang-core zod
 ```
 
-Supported components (**all 48**, both frameworks):
+Supported components (**all 60**, both frameworks):
 
-- **Layout / containers**: `Stack`, `Grid`, `Card`, `Form`
-- **Buttons / nav**: `Button`, `IconButton`, `Anchor`, `Breadcrumb`, `Pagination`
-- **Display**: `Badge`, `Heading`, `Avatar`, `Code`, `Icon`, `ChevronIcon`, `StatusIcon`, `Alert`, `Spinner`, `Progress`, `Skeleton`, `Separator`, `Tabs`, `Accordion`, `Table`, `ScrollLinked`
+- **Layout / containers**: `Stack`, `Grid`, `Card`, `Form`, `Carousel`
+- **Buttons / nav**: `Button`, `IconButton`, `CopyButton`, `Anchor`, `Breadcrumb`, `Pagination`, `SideNav`
+- **Display**: `Badge`, `Heading`, `Avatar`, `Code`, `Kbd`, `EmptyState`, `Icon`, `ChevronIcon`, `StatusIcon`, `Alert`, `Spinner`, `Progress`, `Skeleton`, `Separator`, `Tabs`, `Accordion`, `Table`, `DataTable`, `Tree`
 - **Overlays (self-contained widgets)**: `Modal`, `Dialog`, `Drawer`, `Popover`, `Tooltip`, `DropdownMenu`, `Toast`
-- **Form**: `TextField`, `Textarea`, `PasswordInput`, `NumberField`, `Slider`, `Checkbox`, `Switch`, `Select`, `Radio`, `RadioCard`, `CheckboxCard`, `ListBox`, `CheckboxGroup`, `Autocomplete`, `FileField`, `FormControl`
+- **Form**: `TextField`, `Textarea`, `PasswordInput`, `NumberField`, `Slider`, `RangeSlider`, `DateField`, `DatePicker`, `Calendar`, `ColorPicker`, `Combobox`, `Checkbox`, `Switch`, `Select`, `Radio`, `RadioCard`, `CheckboxCard`, `ListBox`, `CheckboxGroup`, `Autocomplete`, `FileField`, `FormControl`
 
 The rest of the exports — the observers, the providers, and the AI chat
 components — are left out on purpose;

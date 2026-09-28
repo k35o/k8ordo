@@ -367,15 +367,51 @@ describe('formFields', () => {
     expect(dropped[0]?.reason).toContain('検査されません');
   });
 
-  it('refuses a checkbox whose schema turns away the boolean it submits', () => {
-    // parseForm reads a checkbox as true or false; z.stringbool() wants the
-    // string, so the box could never be satisfied either way.
-    expect(() => formFields(z.object({ agree: z.stringbool() }))).toThrow(
-      /z\.boolean\(\)/u,
+  it('gives a stringbool checkbox the value its schema writes for true', () => {
+    // @k8ordo/state writes a url boolean the same way, so a GET form and the
+    // state it fills agree on the query string.
+    const { fields } = formFields(
+      z.object({
+        inStock: z.stringbool().default(false),
+        gift: z.stringbool({ truthy: ['yes'], falsy: ['no'] }).optional(),
+      }),
     );
+
+    expect(fields.inStock.input).toStrictEqual({
+      name: 'inStock',
+      type: 'checkbox',
+      value: 'true',
+    });
+    expect(fields.gift.input.value).toBe('yes');
+  });
+
+  it('requires a stringbool checkbox that rejects the nothing an unchecked box submits', () => {
+    const { fields } = formFields(z.object({ agree: z.stringbool() }));
+
+    expect(fields.agree.input.required).toBe(true);
+  });
+
+  it('refuses a stringbool checkbox whose unchecked box reads as true', () => {
+    // An unchecked box submits nothing, which the default turns into true:
+    // unchecking it would be discarded.
     expect(() =>
-      formFields(z.object({ agree: z.stringbool().optional() })),
-    ).toThrow(/z\.boolean\(\)/u);
+      formFields(z.object({ open: z.stringbool().default(true) })),
+    ).toThrow(/false/u);
+  });
+
+  it('refuses a checkbox whose schema reads neither a boolean nor a string it can write', () => {
+    // A one-way transform reads 'on', but cannot say which string a checked
+    // box should submit, and turns away the boolean a plain checkbox parses to.
+    expect(() =>
+      formFields(
+        z.object({
+          agree: z
+            .string()
+            .transform((value) => value === 'on')
+            .pipe(z.boolean()),
+        }),
+      ),
+    ).toThrow(/z\.stringbool\(\)/u);
   });
 
   it('requires a bigint field whose schema rejects a blank', () => {

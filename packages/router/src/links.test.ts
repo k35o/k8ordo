@@ -39,3 +39,25 @@ describe('bindParams', () => {
     );
   });
 });
+
+describe('links under a base', () => {
+  beforeEach(() => {
+    vi.stubEnv('BASE_URL', '/docs/');
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it('puts the base Vite serves the application under in front of every href', () => {
+    expect(href('/:locale/products/:id', { locale: 'ja', id: 42 })).toBe(
+      '/docs/ja/products/42',
+    );
+    expect(href('/')).toBe('/docs/');
+  });
+
+  it('puts it in front of a bound href too', () => {
+    const links = bindParams(() => ({ locale: 'ja' }));
+    expect(links.href('/:locale/about')).toBe('/docs/ja/about');
+  });
+});

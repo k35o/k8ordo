@@ -11,8 +11,8 @@ export const ideaTitle = message({
 });
 
 export const ideaDescription = message({
-  ja: '状態を持つとき、ふつうは先にストアを選び、永続化や URL との同期はあとから足します。ここでは順番が逆で、最初に置き場所を決めます。置き場所が決まれば、寿命（いつ消えるか）と共有範囲（誰に見えるか）が決まります。境界を越えて値が戻ってくる置き場所（URL・履歴エントリ・localStorage）はスキーマを 1 つずつ持ち、そこからサーバーでの読み取り・正規化されたリンク・古いデータのサルベージ・キー単位の購読が導かれます。メモリは境界を越えないので、スキーマを持たない型付きの箱です。',
-  en: 'Usually you pick a store first and bolt persistence or URL syncing on later. Here the order is reversed: you name the place first. The place fixes the lifetime (when the values go away) and the reach (who sees them). Each place where values come back across a boundary — the URL, the history entry, localStorage — has one schema, and from it derive the server-side read, canonical links, salvage of stale data and a per-key subscription. Memory never crosses a boundary, so it is a typed box with no schema.',
+  ja: '状態を持つとき、ふつうは先にストアを選び、永続化や URL との同期はあとから足します。ここでは順番が逆で、最初に置き場所を決めます。置き場所が決まれば、寿命（いつ消えるか）と共有範囲（誰に見えるか）が決まります。境界を越えて値が戻ってくる置き場所（URL・履歴エントリ・Web Storage・Cookie）はスキーマを 1 つずつ持ち、そこからサーバーでの読み取り・正規化されたリンク・古いデータのサルベージ・キー単位の購読が導かれます。メモリは境界を越えないので、スキーマを持たない型付きの箱です。',
+  en: 'Usually you pick a store first and bolt persistence or URL syncing on later. Here the order is reversed: you name the place first. The place fixes the lifetime (when the values go away) and the reach (who sees them). Each place where values come back across a boundary — the URL, the history entry, Web Storage, a cookie — has one schema, and from it derive the server-side read, canonical links, salvage of stale data and a per-key subscription. Memory never crosses a boundary, so it is a typed box with no schema.',
 });
 
 export const placeUrl = message({
@@ -30,19 +30,29 @@ export const placeLocal = message({
   en: '`defineLocalState` — localStorage. Shared by every tab of the site in the same browser, kept until deleted.',
 });
 
+export const placeSession = message({
+  ja: '`defineSessionState` — sessionStorage。localStorage と同じ作りで、そのタブのリロードでは残り、タブを閉じると消えます。ほかのタブとは共有されません。',
+  en: '`defineSessionState` — sessionStorage. Built like localStorage, but kept only through reloads of the tab and gone when it closes; no other tab shares it.',
+});
+
+export const placeCookie = message({
+  ja: '`defineCookieState` — Cookie。localStorage と同じくタブ間で共有され、リクエストごとにサーバーへ届くので、サーバーが実際の値で描けます。',
+  en: '`defineCookieState` — a cookie. Shared across tabs like localStorage, and sent with every request, so the server renders the real value.',
+});
+
 export const placeMemory = message({
   ja: '`defineMemoryState` — JavaScript の実行環境。型付きの共有の箱で、リロードで初期値に戻ります。',
   en: '`defineMemoryState` — the JavaScript runtime. A typed shared box that resets on reload.',
 });
 
 export const ideaNoProvider = message({
-  ja: 'Provider はありません。URL・履歴エントリ・localStorage はもともとブラウザに 1 つずつしかなく、ストアはそれをそのまま映すので、区切る範囲がありません。',
-  en: 'There is no Provider. The URL, the history entry and localStorage each exist only once in the browser, and the stores mirror them one to one, so there is nothing to scope.',
+  ja: 'Provider はありません。URL・履歴エントリ・Web Storage・Cookie はもともとブラウザに 1 つずつしかなく、ストアはそれをそのまま映すので、区切る範囲がありません。',
+  en: 'There is no Provider. The URL, the history entry, Web Storage and the cookie jar each exist only once in the browser, and the stores mirror them one to one, so there is nothing to scope.',
 });
 
 export const ideaMore = message({
-  ja: '4 つの置き場所の違いと選び方',
-  en: 'How the four places differ, and how to choose',
+  ja: '置き場所の違いと選び方',
+  en: 'How the places differ, and how to choose',
 });
 
 export const installTitle = message({
@@ -211,13 +221,13 @@ export const nextTitle = message({
 });
 
 export const nextPlaces = message({
-  ja: '置き場所 — 4 つの置き場所と、スキーマの規則',
-  en: 'Places — the four places, and the schema rules',
+  ja: '置き場所 — それぞれの置き場所と、スキーマの規則',
+  en: 'Places — each place, and the schema rules',
 });
 
 export const nextReading = message({
-  ja: '読み取りとリンク — `parseUrl`・`href`・型付きルート・ハイドレーション前の読み取り',
-  en: 'Reading & links — `parseUrl`, `href`, typed routes, reading before hydration',
+  ja: '読み取りとリンク — `parseUrl`・`parseCookies`・`href`・型付きルート・ハイドレーション前の読み取り',
+  en: 'Reading & links — `parseUrl`, `parseCookies`, `href`, typed routes, reading before hydration',
 });
 
 export const nextUpdates = message({

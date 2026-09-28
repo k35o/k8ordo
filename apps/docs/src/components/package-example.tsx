@@ -1,8 +1,8 @@
 import type { Message } from '@k8ordo/i18n';
 import { Heading } from '@k8ordo/ui';
+import { CodeBlock } from '@k8ordo/ui/code-block';
 import type { ComponentProps, FC } from 'react';
 
-import { CodeBlock } from './code-block';
 import { Rich } from './rich';
 
 type Props = {

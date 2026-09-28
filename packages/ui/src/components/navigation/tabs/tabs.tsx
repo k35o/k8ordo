@@ -130,7 +130,7 @@ export const List: FC<
       <TabsListProvider value={listContextValue}>{children}</TabsListProvider>
       <div
         aria-hidden="true"
-        className="ao-tab-indicator bg-primary-border"
+        className="ao-tab-indicator bg-primary-border forced-colors:bg-[Highlight]"
         style={
           {
             positionAnchor: toAnchorName(rootId),
@@ -176,7 +176,7 @@ export const Tab: FC<PropsWithChildren<{ id: string }>> = ({
       aria-controls={selectedId === id ? `${rootId}-panel-${id}` : undefined}
       aria-selected={selectedId === id}
       className={cn(
-        'relative cursor-pointer rounded-lg p-2 transition-colors',
+        'relative cursor-pointer rounded-lg p-2 transition-colors duration-150 ease-out',
         selectedId !== id && 'hover:bg-primary-bg-subtle hover:text-primary-fg',
         FOCUS_RING,
       )}

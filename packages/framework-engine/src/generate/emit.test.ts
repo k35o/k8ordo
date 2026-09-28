@@ -161,7 +161,7 @@ describe('the emitted register', () => {
     const source = emitRegisterModule({ routesModule: './routes.gen' });
     expect(source).toContain('params: ParsedParamsMap<typeof paramSchemas>;');
     expect(source).toContain(
-      "import type { paramSchemas, routes } from './routes.gen';",
+      "import type { paramSchemas, routes, searchReaders } from './routes.gen';",
     );
   });
 });
@@ -384,5 +384,181 @@ describe('the request a page receives', () => {
       via: '@k8ordo/static',
     });
     expect(source).not.toContain('RouteRequest');
+  });
+});
+
+const guardMap = (text: string): string => {
+  const start = text.indexOf('export const guards = {');
+  return text.slice(start, text.indexOf('} as const;', start));
+};
+
+describe('guard.ts in the emitted table', () => {
+  const source = emit([
+    'layout.tsx',
+    'page.tsx',
+    'guard.ts',
+    'not-found.tsx',
+    'old/redirect.ts',
+    'admin/guard.ts',
+    'admin/page.tsx',
+    'admin/[id]/page.tsx',
+    'admin/not-found.tsx',
+  ]);
+
+  it('checks each guard against the pattern its directory puts it under', () => {
+    expect(source).toContain("import admin_guard from './routes/admin/guard';");
+    expect(source).toContain("guard satisfies Guard<'/'>,");
+    expect(source).toContain("admin_guard satisfies Guard<'/admin'>,");
+  });
+
+  it('lists, per pattern, the guards that run before it answers — outer first', () => {
+    const map = guardMap(source);
+    expect(map).toContain("'/': [guard],");
+    expect(map).toContain("'/admin': [guard, admin_guard],");
+    expect(map).toContain("'/admin/:id': [guard, admin_guard],");
+    expect(map).toContain("'/admin/*': [guard, admin_guard],");
+    expect(map).toContain("'/*': [guard],");
+  });
+
+  it('leaves a redirect out, since it answers before any guard runs', () => {
+    expect(guardMap(source)).not.toContain('/old');
+  });
+
+  it('keeps guards out of the route table, where nothing renders them', () => {
+    const table = source.slice(source.indexOf('export const routes'));
+    expect(table).not.toContain('guard');
+  });
+
+  it('gives /* the root guards even where no not-found.tsx declares it', () => {
+    const map = guardMap(emit(['page.tsx', 'guard.ts']));
+    expect(map).toContain("'/*': [guard],");
+  });
+
+  it('emits an empty map, and no Guard type, when nothing guards', () => {
+    const plain = emit(['page.tsx']);
+    expect(plain).toContain('export const guards = {\n} as const;');
+    expect(plain).not.toContain('type Guard<');
+  });
+});
+
+describe('route.ts in the emitted table', () => {
+  const source = emitRoutesModule(
+    parseRouteTree([
+      'layout.tsx',
+      'page.tsx',
+      'feed.xml/route.ts',
+      'api/[id]/route.ts',
+      'api/[id]/special/page.tsx',
+    ]).tree,
+    {
+      importPrefix: './routes',
+      withParams: new Set(['api/[id]/route.ts']),
+    },
+  );
+
+  it('imports a route.ts whole, since it answers by its exports', () => {
+    expect(source).toContain(
+      "import * as feed_xml_route from './routes/feed.xml/route';",
+    );
+    expect(source).toContain(
+      'const api_id_route_params = api_id_route.paramsSchema;',
+    );
+  });
+
+  it('holds its place in the table with a component that renders nothing', () => {
+    expect(source).toContain('const answered = (): null => null;');
+    expect(source).toContain("'/feed.xml': answered,");
+    // 子を持つディレクトリでは分岐の '/' に座る
+    expect(source).toMatch(/'\/:id': \{\n\s+children: \{\n\s+'\/': answered,/u);
+  });
+
+  it('lists each module under its pattern', () => {
+    const start = source.indexOf('export const routeModules = {');
+    expect(source.slice(start, source.indexOf('} as const;', start))).toBe(
+      "export const routeModules = {\n  '/feed.xml': feed_xml_route,\n  '/api/:id': api_id_route,\n",
+    );
+  });
+
+  it('checks each module against its pattern, typed by the schemas along it', () => {
+    expect(source).toContain(
+      "feed_xml_route satisfies RouteModule<'/feed.xml'>,",
+    );
+    expect(source).toContain(
+      "api_id_route satisfies RouteModule<'/api/:id', (typeof paramSchemas)['/api/:id']>,",
+    );
+    expect(source).toContain("'/api/:id': [api_id_route_params],");
+  });
+
+  it('emits an empty map, and no route types, when nothing answers from a route.ts', () => {
+    const plain = emit(['page.tsx']);
+    expect(plain).toContain('export const routeModules = {\n} as const;');
+    expect(plain).not.toContain('RouteModule');
+    expect(plain).not.toContain('answered');
+  });
+});
+
+describe('loading.tsx in the emitted table', () => {
+  it('puts the loading component on the branch, checked as a component', () => {
+    const source = emit([
+      'layout.tsx',
+      'page.tsx',
+      'products/loading.tsx',
+      'products/page.tsx',
+    ]);
+    expect(source).toMatch(
+      /'\/products': \{\n\s+loading: products_loading satisfies ComponentType,\n\s+children: \{\n\s+'\/': products_page satisfies Page<'\/products'>,/u,
+    );
+  });
+
+  it('makes the root a branch of its own, so its loading wraps everything', () => {
+    const source = emit(['loading.tsx', 'page.tsx']);
+    expect(source).toMatch(
+      /'\/': \{\n\s+loading: loading satisfies ComponentType,/u,
+    );
+  });
+});
+
+describe('a page that exports search', () => {
+  const source = emitRoutesModule(
+    parseRouteTree(['page.tsx', 'products/page.tsx', 'products/[id]/page.tsx'])
+      .tree,
+    {
+      importPrefix: './routes',
+      withParams: new Set(['products/[id]/page.tsx']),
+      withSearch: new Set(['products/page.tsx', 'products/[id]/page.tsx']),
+    },
+  );
+
+  it('imports the schema beside the page, and reads it through @k8ordo/state', () => {
+    expect(source).toContain("import { urlReader } from '@k8ordo/state';");
+    expect(source).toContain(
+      "import products_page, { search as products_page_search } from './routes/products/page';",
+    );
+    expect(source).toContain(
+      "import products_id_page, { paramsSchema as products_id_page_params, search as products_id_page_search } from './routes/products/[id]/page';",
+    );
+  });
+
+  it('lists, per page, what reads its search', () => {
+    const start = source.indexOf('export const searchReaders = {');
+    expect(source.slice(start, source.indexOf('} as const;', start))).toBe(
+      "export const searchReaders = {\n  '/products': urlReader(products_page_search),\n  '/products/:id': urlReader(products_id_page_search),\n",
+    );
+  });
+
+  it('types the page by what it reads', () => {
+    expect(source).toContain(
+      "products_page satisfies Page<'/products', [], { search: ReturnType<(typeof searchReaders)['/products']> }>",
+    );
+    expect(source).toContain(
+      "products_id_page satisfies Page<'/products/:id', (typeof paramSchemas)['/products/:id'], { search: ReturnType<(typeof searchReaders)['/products/:id']> }>",
+    );
+  });
+
+  it('leaves every other page, and the state import, alone', () => {
+    const plain = emit(['page.tsx']);
+    expect(plain).toContain("page satisfies Page<'/'>");
+    expect(plain).toContain('export const searchReaders = {\n} as const;');
+    expect(plain).not.toContain("from '@k8ordo/state'");
   });
 });

@@ -6,6 +6,7 @@ import { useFormStatus } from 'react-dom';
 
 import { cn } from '../../../helpers/cn';
 import { FOCUS_RING_PEER_NO_BORDER } from '../../_internal/focus-ring';
+import { HIGH_CONTRAST_EDGE } from '../../_internal/high-contrast';
 
 type BaseProps = {
   invalid?: boolean;
@@ -84,23 +85,25 @@ export const Switch: FC<Props> = ({
         <span
           aria-hidden
           className={cn(
-            'inline-flex items-center rounded-full transition-colors',
+            'inline-flex items-center rounded-full transition-colors duration-150 ease-out',
             'h-7 w-12 vertical:h-12 vertical:w-7',
             invalid && 'ring-2 ring-border-error',
             // 非制御のとき、form の reset は change を飛ばさずに checked を戻すので、
             // 見た目は state ではなく input の :checked から引く
             disabledResolved
               ? 'bg-bg-subtle'
-              : 'bg-bg-mute peer-checked:bg-primary-bg',
+              : 'bg-bg-mute peer-checked:bg-primary-bg forced-colors:peer-checked:bg-[Highlight] forced-colors:peer-checked:*:bg-[HighlightText]',
             'peer-checked:*:translate-x-5 peer-checked:*:vertical:translate-x-0 peer-checked:*:vertical:translate-y-5',
+            HIGH_CONTRAST_EDGE,
             FOCUS_RING_PEER_NO_BORDER,
             'peer-focus-visible:ring-offset-2',
           )}
         >
           <span
             className={cn(
-              'ms-0.5 size-5 rounded-full bg-bg-base shadow-xs transition-transform',
-              disabledResolved && 'bg-bg-emphasize',
+              'ms-0.5 size-5 rounded-full bg-bg-base shadow-xs transition-transform forced-colors:bg-[CanvasText]',
+              HIGH_CONTRAST_EDGE,
+              disabledResolved && 'bg-bg-emphasize forced-colors:bg-[GrayText]',
             )}
           />
         </span>

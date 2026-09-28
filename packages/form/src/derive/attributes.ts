@@ -25,8 +25,19 @@ export type LeafSchema = {
  * the parse need only this. The walk settles it once per leaf, and both read it
  * from there, which is what keeps the three from disagreeing about what an
  * untouched control submits.
+ *
+ * チェックボックスは、スキーマが何を読むかで 2 つに分かれる。`checkbox` は
+ * チェックの有無を真偽値で（`z.boolean()`）、`string-checkbox` は送られた
+ * 文字列か何も無いかを（`z.stringbool()`）読む。JSON Schema ではどちらも
+ * boolean なので、分けられるのは walk だけ。
  */
-export type ControlKind = 'checkbox' | 'choice' | 'file' | 'number' | 'text';
+export type ControlKind =
+  | 'checkbox'
+  | 'choice'
+  | 'file'
+  | 'number'
+  | 'string-checkbox'
+  | 'text';
 
 export const controlKindOf = (schema: LeafSchema): ControlKind => {
   if (schema.format === 'binary') {
@@ -50,10 +61,11 @@ export const controlKindOf = (schema: LeafSchema): ControlKind => {
  * number, a file and a choice have no such value: an empty numeric field is not
  * 0, an unfilled file input is not a zero-byte file, and a select left on its
  * placeholder has chosen nothing — just like a radio group with no selection,
- * which submits no entry at all. Reading them as "nothing was entered" is what
- * keeps `required` honest — `z.coerce.number()` turns `''` into 0, so probing
- * with `''` would say an empty field is acceptable and then let a blank
- * submission through as a number the person never typed.
+ * which submits no entry at all (as does an unchecked `string-checkbox`).
+ * Reading them as "nothing was entered" is what keeps `required` honest —
+ * `z.coerce.number()` turns `''` into 0, so probing with `''` would say an
+ * empty field is acceptable and then let a blank submission through as a
+ * number the person never typed.
  */
 export const emptySubmissionOf = (kind: ControlKind): unknown => {
   if (kind === 'checkbox') {

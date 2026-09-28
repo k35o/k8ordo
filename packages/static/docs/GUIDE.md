@@ -31,6 +31,16 @@ same refusal is said there too, the moment the file is seen — a form that
 works in development and posts into nothing in production would be the worst
 of the two.
 
+A `guard.ts` — what `@k8ordo/server` runs before a request is answered — is
+refused the same way, by name, in the build and in `vite dev`: a file is never
+requested of anything that could run one.
+
+```
+static build cannot run guard.ts — a file has no request to guard, and these are guards:
+  src/routes/admin/guard.ts
+this application wants @k8ordo/server
+```
+
 Choosing the other mode means installing `@k8ordo/server` instead, and nothing
 else about the application changes — the same route grammar, the same
 boundaries, the same request handler, called for each route at build time
@@ -123,7 +133,9 @@ src/routes/
   page.tsx              /
   not-found.tsx         whatever nothing else matched
   error.tsx             shown in place of what is below when it throws
+  loading.tsx           shown while what is below it loads
   old/redirect.ts       /old sends the visitor elsewhere
+  feed.xml/route.ts     /feed.xml answered by its GET, not a page
   products/
     page.tsx            /products
     [id]/page.tsx       /products/:id
@@ -134,8 +146,10 @@ src/routes/
   _data/                the same, for anything that is not a component
 ```
 
-- `page.tsx`, `layout.tsx`, `not-found.tsx`, `error.tsx` and `redirect.ts`
-  are the only filenames the grammar accepts. Anything else lives under a
+- `page.tsx`, `layout.tsx`, `not-found.tsx`, `error.tsx`, `loading.tsx`,
+  `redirect.ts`, `guard.ts` and `route.ts` are the only filenames the grammar
+  accepts — and
+  this mode refuses `guard.ts` (above). Anything else lives under a
   `_`-prefixed directory. A file or directory whose name starts with `_` or
   `.` is skipped entirely.
 - **A page receives `params`; a layout receives `children`.** Server Components
@@ -158,18 +172,22 @@ export default function ProductPage({ params }: { params: { id: string } }) {
 
 Every problem is reported, not just the first, and each names the file:
 
-| routes/ contains                                                          | error                                                                                                                            |
-| ------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `products/helper.ts`                                                      | `routes/ holds only page.tsx, layout.tsx, not-found.tsx, error.tsx, redirect.ts — move "helper.ts" under a _-prefixed directory` |
-| `[123]/page.tsx`                                                          | `"[123]" is not a valid param directory — use [name] with a letter or underscore first`                                          |
-| `pro ducts/page.tsx`                                                      | `"pro ducts" cannot be a URL segment — use letters, digits, . _ ~ or -`                                                          |
-| `[id]/things/[id]/page.tsx`                                               | `":id" is already taken by an ancestor — params must be unique within a path`                                                    |
-| `orphan/layout.tsx` and no page below                                     | `has a layout but no page.tsx below it, so it can never render`                                                                  |
-| `(a)/page.tsx` and `(b)/page.tsx`                                         | `"/" is already declared by (a)/page.tsx — route groups do not separate URLs`                                                    |
-| `(docs/page.tsx`                                                          | `"(docs" is not a valid route group — use (name)`                                                                                |
-| `empty/error.tsx` and no page or redirect below                           | `declares no route — every directory needs a page.tsx (or redirect.ts) somewhere below it`                                       |
-| `(shop)/sale/page.tsx` and `(shop)/[id]/page.tsx` beside `about/page.tsx` | `"/about" can never match — "/:id" ((shop)/[id]/page.tsx) is declared first and answers it`                                      |
-| `old/page.tsx` and `old/redirect.ts`                                      | `"old" cannot both render page.tsx and redirect — keep one`                                                                      |
+| routes/ contains                                                          | error                                                                                                                                                             |
+| ------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `products/helper.ts`                                                      | `routes/ holds only page.tsx, layout.tsx, not-found.tsx, error.tsx, redirect.ts, guard.ts, route.ts, loading.tsx — move "helper.ts" under a _-prefixed directory` |
+| `[123]/page.tsx`                                                          | `"[123]" is not a valid param directory — use [name] with a letter or underscore first`                                                                           |
+| `pro ducts/page.tsx`                                                      | `"pro ducts" cannot be a URL segment — use letters, digits, . _ ~ or -`                                                                                           |
+| `[id]/things/[id]/page.tsx`                                               | `":id" is already taken by an ancestor — params must be unique within a path`                                                                                     |
+| `orphan/layout.tsx` and no page below                                     | `has a layout but no page.tsx below it, so it can never render`                                                                                                   |
+| `(a)/page.tsx` and `(b)/page.tsx`                                         | `"/" is already declared by (a)/page.tsx — route groups do not separate URLs`                                                                                     |
+| `(docs/page.tsx`                                                          | `"(docs" is not a valid route group — use (name)`                                                                                                                 |
+| `empty/error.tsx` and no page, redirect or route below                    | `declares no route — every directory needs a page.tsx (or a redirect.ts or route.ts) somewhere below it`                                                          |
+| `(shop)/sale/page.tsx` and `(shop)/[id]/page.tsx` beside `about/page.tsx` | `"/about" can never match — "/:id" ((shop)/[id]/page.tsx) is declared first and answers it`                                                                       |
+| `old/page.tsx` and `old/redirect.ts`                                      | `"old" cannot both render page.tsx and redirect — keep one`                                                                                                       |
+| `api/page.tsx` and `api/route.ts`                                         | `"api" cannot both render page.tsx and answer from route.ts — keep one`                                                                                           |
+| `old/redirect.ts` and `old/route.ts`                                      | `"old" cannot both redirect and answer from route.ts — keep one`                                                                                                  |
+| `api/route.ts` exporting no method                                        | `exports none of GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS — a route.ts answers the methods it exports`                                                        |
+| `products/page.tsx` exporting `search`, without `@k8ordo/state`           | `exports search, which is read through @k8ordo/state — add it to the application’s dependencies`                                                                  |
 
 The generated table lists literal segments before parameters, so `about/`
 beside `[slug]/` is reachable without saying anything. A route group holds
@@ -210,6 +228,12 @@ type Layout<P extends string> = ComponentType<{
 
 export const paramSchemas = {} as const;
 
+export const searchReaders = {} as const;
+
+export const routeModules = {} as const;
+
+export const guards = {} as const;
+
 export const redirects = {} as const;
 
 export const routes = defineRoutes({
@@ -233,9 +257,13 @@ puts it under — a type check, so `tsc` reports a mismatch and `vite build`,
 which does not type-check, passes. Under `@k8ordo/server` the `Page` and
 `Layout` types also carry `request`. `redirects` is what the request handler
 consults before it walks `routes` — where each `redirect.ts` sends the
-visitor — and `paramSchemas` holds, per page pattern, the schemas it runs when
-the walk reaches that pattern, before the page renders; both are empty here
-because no route file declares either.
+visitor — `paramSchemas` holds, per page pattern, the schemas it runs when
+the walk reaches that pattern, before the page renders, `routeModules` the
+`route.ts` that answers a pattern (its place in `routes` is held by a
+component that renders nothing), and `guards` the `guard.ts` files that run
+before a pattern answers, outer first (a mode that builds files refuses
+them), and `searchReaders` what reads the search for a page that exports
+`search`; all five are empty here because no route file declares any.
 
 `.k8ordo/register.gen.ts` wires that table into `@k8ordo/router` — and into
 `@k8ordo/state` when the application depends on it — so typed paths work
@@ -376,6 +404,145 @@ renders the HTML is left to the browser when a Suspense boundary sits above
 it, and the file is written; with none, it stops the build the same way.
 `error.tsx` under this mode is for what fails in the browser: a client
 component, after hydration.
+
+<!-- shared:loading -->
+
+## While a page loads
+
+A `loading.tsx` beside a `layout.tsx` (or a `page.tsx`) is what shows while
+what is below it suspends: a `<Suspense>` the framework puts at that level,
+inside its `error.tsx` boundary, so what the boundary catches is what the
+fallback stood in for.
+
+```tsx
+// src/routes/products/loading.tsx
+export default function ProductsLoading() {
+  return <p>loading products…</p>;
+}
+```
+
+It receives no props. It shows when a client navigation enters its directory
+while the page there is still on its way, and for whatever inside the page
+suspends as it streams. A page change below one already on screen keeps the
+current page showing while the next one loads — every page change renders in
+the background — and `usePendingPathname()` from `@k8ordo/router` is how a
+link or a bar says that one is under way:
+
+```tsx
+'use client';
+
+import { usePendingPathname } from '@k8ordo/router';
+
+export function Progress() {
+  const pending = usePendingPathname();
+  return pending === null ? null : <p role="status">loading {pending}…</p>;
+}
+```
+
+<!-- /shared:loading -->
+
+A file is written whole, so the HTML never shows a `loading.tsx`; a client
+navigation does, while the next page's payload arrives.
+
+<!-- shared:not-found -->
+
+## A page that is not there
+
+A params schema decides what a URL's params look like; whether the thing they
+name exists is the page's to say. `notFound()` from `@k8ordo/router` says it:
+
+```tsx
+// src/routes/products/[id]/page.tsx
+import { notFound } from '@k8ordo/router';
+import type { PageProps } from '@k8ordo/router';
+
+export default async function ProductPage({
+  params,
+}: PageProps<'/products/:id'>) {
+  const product = await findProduct(params.id);
+  if (product === undefined) notFound();
+  return <h1>{product.name}</h1>;
+}
+```
+
+It throws, so the lines after it never run, and the page is answered instead
+by what the table answers for a URL nothing matched there — the nearest
+`not-found.tsx` above it, inside the layouts above that — under a 404. With no
+`not-found.tsx` at all, the framework's own answers — a `404` heading and a
+line, with a `<title>`, rendered inside the root layout, so the visitor keeps
+the document's frame, its `<html lang>` and its stylesheets (a document of
+its own only when there is no root layout either). It is also what a URL
+nothing matches gets from such an application. `notFound()` comes from the
+router rather than the mode package, so the page reads the same under
+either.
+
+`notFound()` is the page's word about itself: thrown from the page's own
+component, before it returns.
+
+<!-- /shared:not-found -->
+
+**A build waits for the whole page**, so `notFound()` counts from anywhere in
+it. A pathname the `paths` option supplied whose page says it fails the build,
+naming the pathname — it would otherwise be written as a 404 page under a URL
+the site claims to have (see Routes with parameters, below).
+
+<!-- shared:route-handlers -->
+
+## Answers that are not pages
+
+A `route.ts` answers its directory's URL with a `Response` rather than a
+page — an RSS feed, `robots.txt`, JSON, a webhook. It exports a function for
+each request method it answers:
+
+```ts
+// src/routes/feed.xml/route.ts
+import type { RouteContext } from '@k8ordo/router';
+
+export async function GET({ request }: RouteContext<'/feed.xml'>) {
+  const origin = new URL(request.url).origin;
+  return new Response(rss(origin, await listProducts()), {
+    headers: { 'content-type': 'application/rss+xml;charset=utf-8' },
+  });
+}
+```
+
+A directory named like a file is an ordinary segment, so `feed.xml/route.ts`
+answers `/feed.xml`. Each export receives `{ request, params }`: the
+`Request`, and the params its pattern names, typed by the `paramsSchema`
+exports along its stack as a page's are — a `route.ts` may export one too.
+`RouteContext<P>` from `@k8ordo/router` is that type, and the generated table
+checks each module against its pattern. A `route.ts` exporting none of `GET`,
+`HEAD`, `POST`, `PUT`, `PATCH`, `DELETE` and `OPTIONS` is refused, since it
+could only ever answer `405`.
+
+A directory answers from a `route.ts` or renders a `page.tsx` (or redirects),
+never two of them, and the layouts above a `route.ts` do not wrap it —
+nothing renders. It takes its place in the table's order the way a page does,
+literals before params, so `api/[id]/route.ts` beside `api/latest/page.tsx`
+leaves `/api/latest` to the page. A client navigation to it gets no payload,
+and loads the document instead.
+
+<!-- /shared:route-handlers -->
+
+**What the build does with it.** The build calls its `GET` once for each
+pathname the site has — a pattern with params needs `paths`, as a page's
+does — with a request whose origin is `site` when that option is given (an
+RSS feed's links are absolute), and writes what it answered as the file at
+that pathname: `dist/client/feed.xml`. A static host then serves it with the
+type its extension says. The `GET` has to answer `200`; anything else stops
+the build naming the pathname. A file answers nothing but `GET`, so a
+`route.ts` exporting another method is refused by name, in the build and in
+`vite dev`:
+
+```
+static build writes a route.ts as the file its GET answers, and a file cannot answer another method — these export one:
+  src/routes/api/route.ts (POST)
+this application wants @k8ordo/server
+```
+
+A `route.ts` at `/` cannot be a file (the host serves `/` from `index.html`),
+nor one with pages written below it, which would need a directory of the same
+name. What it writes is not a page, so `sitemap.xml` leaves it out.
 
 ## Redirects
 
@@ -572,8 +739,10 @@ the "paths" option supplied pathnames no route wants: /produtcs/2
 
 which is either a typo or a value that still contains a parameter
 (`/ja/blog/:slug` — what expanding only one of two parameters leaves behind).
-Pathnames are taken as a URL carries them, so `href()` output is accepted as
-is. Only the file name is decoded, and a pathname whose escapes do not decode,
+Pathnames are taken as a URL carries them, escapes included
+(`/products/caf%C3%A9`) — `href()` output as it is, unless the application is
+served under a `base`: these are pathnames in the table's terms, and `href()`
+puts the base in front. Only the file name is decoded, and a pathname whose escapes do not decode,
 or that decodes to a `..` segment, fails the build — neither names a file
 inside the output:
 
@@ -584,10 +753,11 @@ the "paths" option supplied a pathname that leaves the output: /products/..%2F..
 
 A supplied pathname that a `paramsSchema` along its route's stack refuses
 fails the build too — it would otherwise be written as a 404 page under a
-URL the site claims to have:
+URL the site claims to have — and so does one whose page says `notFound()`:
 
 ```
 the "paths" option supplied pathnames a params schema refused: /products/shoes
+the "paths" option supplied pathnames whose page called notFound(): /products/3
 ```
 
 ## The output
@@ -650,6 +820,52 @@ disagree with it. The browser renders it afresh instead, where the visitor is,
 and a client component sees their URL from its first render. A visitor
 without JavaScript keeps whatever the build's render produced.
 
+<!-- shared:prefetch -->
+
+### Fetching the next page ahead
+
+The client runtime listens on the whole document for a pointer moving onto a
+link, a link taking focus, and a press starting on one — `pointerover`,
+`focusin` and `pointerdown` — and fetches that page's payload there and then,
+so a click often finds the page already in hand. Nothing needs wiring: any
+`<a>` counts, the ones a component library renders included.
+
+Only a link a click would load in place is fetched: the same origin and below
+Vite's `base`, no `download`, no `target` other than `_self`, and not the
+page on screen, where only the search or the fragment would change. To stop
+it for a link — one whose page is expensive to render, say — mark the link,
+or any element around it, `data-k8ordo-prefetch="false"`
+(`data-k8ordo-prefetch={false}` in JSX renders the same). The nearest element
+carrying the attribute decides, so `"true"` opts a link back in inside a
+region that opted out.
+
+```tsx
+<nav data-k8ordo-prefetch={false}>
+  <a href="/reports">Reports</a>
+  <a data-k8ordo-prefetch href="/">
+    Home
+  </a>
+</nav>
+```
+
+What was fetched is used by the next navigation to that page, once, and only
+if it starts within 30 seconds of the fetch starting. After that — or once a
+navigation has used it — the page is fetched afresh, as it would have been
+with nothing prefetched, so a page hovered and left alone never shows up
+later as it was then. A Server Action's answer drops everything prefetched,
+since the action may have changed what those pages show, and a prefetch that
+failed is dropped at once, so the navigation asks again. A prefetch dropped
+before any navigation used it is cancelled if it is still on its way, and one
+a navigation took is cancelled with that navigation when another overtakes
+it — the same as a fetch the navigation had started itself.
+
+Under `@k8ordo/static` a prefetch is a request for a file. Under
+`@k8ordo/server` it is a render, as a navigation is — the reason to mark a
+link to an expensive page. The platform's Speculation Rules are not used:
+they are Chromium's alone, not Baseline.
+
+<!-- /shared:prefetch -->
+
 <!-- shared:deploys -->
 
 ### A tab opened before a deploy
@@ -669,6 +885,108 @@ that changed nothing the browser runs leaves every open tab navigating in
 place, and servers built apart from the same source agree.
 
 <!-- /shared:deploys -->
+
+<!-- shared:base -->
+
+## Served under a base
+
+An application served below the root of its origin — `https://example.com/docs/`
+— says so with Vite's `base`, and nothing else in it changes:
+
+```ts
+// vite.config.ts
+export default defineConfig({
+  base: '/docs/',
+  plugins: [framework()],
+});
+```
+
+`routes/` is still written from the application's root:
+`routes/products/page.tsx` is `/products` in the table and `/docs/products`
+in the address bar. What crosses between the two gains or loses the base on
+the way:
+
+- A link built with `href()` or `navigateTo()` carries it. A page receives
+  `pathname` without it, and `usePathname()` returns it without it.
+- A page's payload sits beside it — `/docs/products/index.rsc` — and the
+  client build's files are under `/docs/assets/`.
+- A `redirect.ts` target is written from the root, like the table, and is
+  sent with the base in front; one that names another origin is sent as
+  written.
+- Under `@k8ordo/server`, a redirect the application builds itself is sent
+  as written: `redirect()` from a Server Action, and the `location` of a
+  `Response` a `guard.ts` returns. Both are URLs, so build them with
+  `href()` — `redirect(href('/talks'))`, `location: href('/login')` — or
+  give a pathname built some other way its base with `withBase()` from
+  `@k8ordo/router`.
+- A URL outside the base is none of the application's: the handler answers
+  it with a `404`, and the client runtime leaves it to the browser.
+
+Under `@k8ordo/static` the pages are written into `dist/client/` at their
+pathnames in the table, so the host serves that directory at `/docs/`; the
+`paths` option takes pathnames without the base, and `sitemap.xml` lists
+each page at its URL, base included. Under `@k8ordo/server`, `serve` reads
+the base the build was made for from `dist/rsc/index.js` and hands out the
+client build's files below it; a host calling the handler itself passes the
+URL as the visitor asked for it, base included.
+
+The base has to be a path from the root. A relative base (`./`) or another
+origin says nothing about which URL is which page, and the build refuses it:
+
+```
+k8ordo serves its pages under Vite's base, so base has to be a path from the root, like '/docs/' — got './'
+```
+
+<!-- /shared:base -->
+
+<!-- shared:csp -->
+
+## Content Security Policy
+
+The framework decides no policy. It signs the inline scripts it writes
+itself — the payload it puts into the HTML for hydration, and React's own —
+and the policy that names them is the application's to write. An inline
+script of the application's own, `@k8ordo/color-scheme`'s among them, is the
+application's to allow the same way.
+
+<!-- /shared:csp -->
+
+A file cannot carry a nonce — everyone reads the same one — so the build
+names what the framework signed by hash, and leaves no nonce in what it
+writes. Give the plugin the policy as `csp`, directives and their sources,
+and each page gets it in a `<meta http-equiv="Content-Security-Policy">`
+first in its `<head>`, with the hashes of that page's framework scripts added
+wherever a script element is decided — `script-src` (made from `default-src`
+when only that was given) and `script-src-elem` when given:
+
+```ts
+// vite.config.ts
+import { colorSchemeScriptHash } from '@k8ordo/color-scheme';
+import { framework } from '@k8ordo/static';
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+  plugins: [
+    framework({
+      csp: {
+        'script-src': ["'self'", await colorSchemeScriptHash()],
+        'object-src': ["'none'"],
+        'base-uri': ["'none'"],
+      },
+    }),
+  ],
+});
+```
+
+An inline script of the application's is allowed by its hash in that policy,
+as `colorSchemeScriptHash()` gives `@k8ordo/color-scheme`'s (pass it the
+`defaultPreference` the provider is given); any other inline script on the
+page — one that reached it from content — is refused. The framework's module
+script is allowed by where it comes from (`'self'`), since nothing in a file
+can sign it, which is why the build refuses a policy with `'strict-dynamic'`.
+It refuses `frame-ancestors`, `report-uri` and `sandbox` too, which a
+`<meta>` ignores: set those as headers at the host. Without `csp`, no policy
+is written.
 
 ## Alongside the rest of k8ordo
 
@@ -692,11 +1010,21 @@ server render shows the url slot's defaults and the live URL takes over on
 hydration. That is the same split the router draws at the `?` — the pathname
 is the framework's, everything after it is state's.
 
+A page that exports `search` — the url schema it would read, which
+`@k8ordo/server` hands such a page — is refused by name: a file is the same
+whatever the search holds.
+
+```
+static build cannot hand a page the search — a file is the same for every search, and these pages export search:
+  src/routes/products/page.tsx
+this application wants @k8ordo/server
+```
+
 ## What static cannot do
 
 Anything that needs the request: Server Actions and `redirect()` from them,
-the `request` a page reads under `@k8ordo/server`, and status codes the
-application decides. A file cannot receive a form submission, and
+the `request` a page reads under `@k8ordo/server`, a `guard.ts` deciding
+whether a request gets through, and status codes the application decides. A file cannot receive a form submission, and
 whether `404.html` is served with a 404 rather than a 200 is the host's
 setting — the build can write the page, but not the response.
 

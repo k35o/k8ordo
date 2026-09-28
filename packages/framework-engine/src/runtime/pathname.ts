@@ -13,3 +13,10 @@ export const decodePathname = (pathname: string): string | null => {
   }
   return decoded.includes('\0') ? null : decoded;
 };
+
+/**
+ * A segment no route declares: a pathname that only a catch-all answers is
+ * built with it — the static build's `404.html`, and the handler's search
+ * for the not-found nearest a page that said `notFound()`.
+ */
+export const NOT_FOUND_SEGMENT = '__k8ordo-not-found__';

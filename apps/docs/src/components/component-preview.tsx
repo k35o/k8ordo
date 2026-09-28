@@ -1,6 +1,6 @@
+import { CodeBlock } from '@k8ordo/ui/code-block';
 import type { FC, ReactNode } from 'react';
 
-import { CodeBlock } from './code-block';
 import { PreviewArea } from './preview-area';
 
 type Props = {
@@ -14,8 +14,8 @@ export const ComponentPreview: FC<Props> = ({
   code,
   lang = 'tsx',
 }) => (
-  <div className="flex flex-col overflow-hidden rounded-xl shadow-sm">
+  <div className="flex flex-col gap-2">
     <PreviewArea>{children}</PreviewArea>
-    <CodeBlock code={code} lang={lang} rounded="bottom" />
+    <CodeBlock code={code} lang={lang} />
   </div>
 );

@@ -20,6 +20,7 @@ export default defineConfig({
       'src/**/*.tsx',
       '!src/**/*.test.ts',
       '!src/**/*.browser.test.tsx',
+      '!src/**/*.d.ts',
     ],
     format: 'esm',
     dts: true,

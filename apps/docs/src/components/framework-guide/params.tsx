@@ -1,7 +1,7 @@
 import { Anchor } from '@k8ordo/ui';
+import { CodeBlock } from '@k8ordo/ui/code-block';
 
 import * as m from '../../messages';
-import { CodeBlock } from '../code-block';
 import { DocSection } from '../doc-page';
 import { LocaleAnchor } from '../locale-anchor';
 import type { Mode } from './mode';
@@ -30,7 +30,10 @@ export default function ProductPage({ params }: PageProps<'/products/:id'>) {
 const STACK_LOCALES = `// src/i18n.ts
 import { defineLocales } from '@k8ordo/i18n';
 
-export const locales = defineLocales(['ja', 'en']);`;
+export const locales = defineLocales({
+  ja: { timeZone: 'Asia/Tokyo', dir: 'ltr' },
+  en: { timeZone: 'UTC', dir: 'ltr' },
+});`;
 
 const STACK_LAYOUT = `// src/routes/[locale]/layout.tsx
 import type { ReactNode } from 'react';

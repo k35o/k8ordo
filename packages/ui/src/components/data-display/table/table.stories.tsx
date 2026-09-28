@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { expect } from 'storybook/test';
 
 import { Badge } from '../badge';
 import { Table } from './table';
@@ -62,12 +63,20 @@ export const Empty: Story = {
         </Table.Row>
       </Table.Head>
       <Table.Body>
-        <Table.EmptyState colSpan={3}>
-          No records have been added yet.
-        </Table.EmptyState>
+        <Table.EmptyState
+          colSpan={3}
+          description="Invite a teammate to get started."
+          title="No records have been added yet."
+        />
       </Table.Body>
     </Table.Root>
   ),
+  play: async ({ canvas }) => {
+    await expect(canvas.getByRole('cell')).toHaveAttribute('colspan', '3');
+    await expect(
+      canvas.getByText('No records have been added yet.'),
+    ).toBeInTheDocument();
+  },
 };
 
 export const WithCaption: Story = {
@@ -92,4 +101,33 @@ export const WithCaption: Story = {
       </Table.Body>
     </Table.Root>
   ),
+};
+
+// selected の行は地の色で示す（強制カラーでは Highlight で塗る）
+export const SelectedRow: Story = {
+  render: () => (
+    <Table.Root aria-label="選択できる表">
+      <Table.Head>
+        <Table.Row>
+          <Table.HeaderCell>Name</Table.HeaderCell>
+        </Table.Row>
+      </Table.Head>
+      <Table.Body>
+        <Table.Row selected>
+          <Table.Cell>Selected</Table.Cell>
+        </Table.Row>
+        <Table.Row>
+          <Table.Cell>Not selected</Table.Cell>
+        </Table.Row>
+      </Table.Body>
+    </Table.Root>
+  ),
+  play: async ({ canvas }) => {
+    const selected = canvas.getByText('Selected').closest('tr');
+    const other = canvas.getByText('Not selected').closest('tr');
+
+    await expect(
+      getComputedStyle(selected as Element).backgroundColor,
+    ).not.toBe(getComputedStyle(other as Element).backgroundColor);
+  },
 };

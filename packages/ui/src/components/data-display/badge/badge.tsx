@@ -44,41 +44,29 @@ const badgeClassName = (
       variant === 'outline' &&
       'hover:bg-bg-subtle active:bg-bg-mute',
     interactive &&
-      tone === 'info' &&
+      tone !== 'neutral' &&
       variant === 'solid' &&
-      'hover:bg-bg-info/80 active:bg-bg-info/60',
+      'hover:bg-bg-base active:bg-bg-base',
     interactive &&
       tone === 'info' &&
       variant === 'outline' &&
-      'hover:bg-bg-info active:bg-bg-info/80',
-    interactive &&
-      tone === 'success' &&
-      variant === 'solid' &&
-      'hover:bg-bg-success/80 active:bg-bg-success/60',
+      'hover:bg-bg-info active:bg-bg-info',
     interactive &&
       tone === 'success' &&
       variant === 'outline' &&
-      'hover:bg-bg-success active:bg-bg-success/80',
-    interactive &&
-      tone === 'warning' &&
-      variant === 'solid' &&
-      'hover:bg-bg-warning/80 active:bg-bg-warning/60',
+      'hover:bg-bg-success active:bg-bg-success',
     interactive &&
       tone === 'warning' &&
       variant === 'outline' &&
-      'hover:bg-bg-warning active:bg-bg-warning/80',
-    interactive &&
-      tone === 'error' &&
-      variant === 'solid' &&
-      'hover:bg-bg-error/80 active:bg-bg-error/60',
+      'hover:bg-bg-warning active:bg-bg-warning',
     interactive &&
       tone === 'error' &&
       variant === 'outline' &&
-      'hover:bg-bg-error active:bg-bg-error/80',
+      'hover:bg-bg-error active:bg-bg-error',
   );
 
   return cn(
-    'inline-flex items-center rounded-full border font-medium transition-colors',
+    'inline-flex items-center rounded-full border font-medium transition-colors duration-150 ease-out',
     size === 'sm' && 'px-2 py-0.5 text-xs',
     size === 'md' && 'px-2.5 py-1 text-xs',
     size === 'lg' && 'px-3 py-1.5 text-sm',

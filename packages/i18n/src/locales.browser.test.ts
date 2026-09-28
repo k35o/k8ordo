@@ -1,3 +1,4 @@
+import { currentLocale } from './current';
 import { defineLocales } from './locales';
 import { message } from './message';
 
@@ -8,7 +9,10 @@ declare module './register' {
   }
 }
 
-const locales = defineLocales(['ja', 'en']);
+const locales = defineLocales({
+  ja: { timeZone: 'Asia/Tokyo', dir: 'ltr' },
+  en: { timeZone: 'America/New_York', dir: 'ltr' },
+});
 const home = message({ ja: 'ホーム', en: 'Home' });
 
 describe('getLocale (browser)', () => {
@@ -59,5 +63,67 @@ describe('getLocale (browser)', () => {
     expect(() => locales.run('en', () => 'x')).toThrow(
       /the URL is the locale/u,
     );
+  });
+
+  it("writes a date in the time zone of the URL's locale, not the browser's", () => {
+    // 東京は 3/6 0:30、ニューヨークは 3/5 10:30。ブラウザのタイムゾーンが
+    // どちらでも、片方のアサーションが落ちる。
+    const instant = new Date('2022-03-05T15:30:00Z');
+    const numeric = {
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+    } as const;
+    const original = location.pathname;
+    try {
+      history.replaceState(null, '', '/ja/ui');
+      expect(locales.dateTimeFormat(numeric).format(instant)).toBe('2022/3/6');
+      history.replaceState(null, '', '/en/ui');
+      expect(locales.dateTimeFormat(numeric).format(instant)).toBe('3/5/2022');
+    } finally {
+      history.replaceState(null, '', original);
+    }
+  });
+
+  it('gives a library the URL locale, or null without a set whatever the URL spells', () => {
+    const key = Symbol.for('@k8ordo/i18n/locales');
+    const registry = globalThis as { [key]?: unknown };
+    const saved = registry[key];
+    const original = location.pathname;
+    try {
+      history.replaceState(null, '', '/en/ui');
+      expect(currentLocale()).toBe('en');
+      history.replaceState(null, '', '/fr/ui');
+      expect(currentLocale()).toBe('ja');
+      registry[key] = undefined;
+      history.replaceState(null, '', '/ja/ui');
+      expect(currentLocale()).toBeNull();
+    } finally {
+      registry[key] = saved;
+      history.replaceState(null, '', original);
+    }
+  });
+});
+
+describe('getLocale under a base', () => {
+  beforeEach(() => {
+    vi.stubEnv('BASE_URL', '/docs/');
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it('reads the first segment below the base Vite serves the application under', () => {
+    const original = location.pathname;
+    try {
+      history.replaceState(null, '', '/docs/en/ui');
+      expect(locales.getLocale()).toBe('en');
+      expect(home()).toBe('Home');
+      history.replaceState(null, '', '/docs/');
+      expect(locales.getLocale()).toBe('ja');
+    } finally {
+      history.replaceState(null, '', original);
+    }
   });
 });

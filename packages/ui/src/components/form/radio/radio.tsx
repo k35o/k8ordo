@@ -88,7 +88,7 @@ export const Radio: FC<Props> = ({
           <span
             aria-hidden
             className={cn(
-              'inline-flex size-5 items-center justify-center rounded-full border-2 transition-colors',
+              'inline-flex size-5 items-center justify-center rounded-full border-2 transition-colors duration-150 ease-out',
               FOCUS_RING_PEER,
               // 非制御のとき、form の reset は change を飛ばさずに checked を戻すので、
               // 見た目は state ではなく input の :checked から引く
@@ -99,7 +99,7 @@ export const Radio: FC<Props> = ({
               invalid && 'border-border-error peer-checked:border-border-error',
             )}
           >
-            <span className="bg-primary-border size-2 rounded-full opacity-0 transition-opacity" />
+            <span className="bg-primary-border size-2 rounded-full opacity-0 transition-opacity forced-colors:bg-[CanvasText]" />
           </span>
           <span>{option.label}</span>
         </label>

@@ -1,7 +1,7 @@
 import type { Message } from '@k8ordo/i18n';
 import { Code, Heading } from '@k8ordo/ui';
+import { CodeBlock } from '@k8ordo/ui/code-block';
 
-import { CodeBlock } from '../../../../components/code-block';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Rich } from '../../../../components/rich';
@@ -14,9 +14,14 @@ const DEFINE = `// src/i18n.ts
 import { defineLocales } from '@k8ordo/i18n';
 import type { LocaleOf } from '@k8ordo/i18n';
 
-export const locales = defineLocales(['en-US', 'en-GB', 'ja'], {
-  default: 'ja',
-});
+export const locales = defineLocales(
+  {
+    'en-US': { timeZone: 'America/New_York', dir: 'ltr' },
+    'en-GB': { timeZone: 'Europe/London', dir: 'ltr' },
+    ja: { timeZone: 'Asia/Tokyo', dir: 'ltr' },
+  },
+  { default: 'ja' },
+);
 
 export type Locale = LocaleOf<typeof locales>;
 
@@ -26,39 +31,52 @@ declare module '@k8ordo/i18n' {
   }
 }`;
 
-const PREFERRED = `// src/preferred-locale.ts
-import { parseAcceptLanguage } from '@k8ordo/i18n';
+const HTML_DIR = `// src/routes/layout.tsx
+const locale = locales.delocalize(pathname).locale ?? locales.default;
 
+<html dir={locales.definitions[locale].dir} lang={locale}>`;
+
+const PREFERRED = `// src/preferred-locale.ts
 import { locales } from './i18n';
 import type { Locale } from './i18n';
 
 export const fromBrowser = (): Locale => locales.negotiate(navigator.languages);
 
-export const fromHeaders = (headers: Headers): Locale =>
-  locales.negotiate(parseAcceptLanguage(headers.get('accept-language')));`;
+export const fromRequest = (request: Request): Locale =>
+  locales.negotiateRequest(request, { cookie: 'locale' });`;
 
 type Row = { code: string; description: Message };
 
 const THROWS: ReadonlyArray<{ call: string; error: string }> = [
   {
-    call: "defineLocales(['ja', 'en'], { default: 'fr' })",
+    call: 'defineLocales({})',
+    error: 'defineLocales: no locale is defined',
+  },
+  {
+    call: "defineLocales({ ja: …, en: … }, { default: 'fr' })",
     error: 'defineLocales: the default "fr" is not in ["ja","en"]',
   },
   {
-    call: "defineLocales(['ja', 'ja'])",
-    error: 'defineLocales: a locale is listed twice in ["ja","ja"]',
+    call: "defineLocales({ ja: …, 'not a tag': … })",
+    error: 'defineLocales: "not a tag" is not a BCP 47 language tag',
   },
   {
-    call: "defineLocales(['ja', 'not a tag'])",
-    error: 'defineLocales: "not a tag" is not a BCP 47 language tag',
+    call: "defineLocales({ ja: { timeZone: 'Asia/Tokio', dir: 'ltr' } })",
+    error:
+      'defineLocales: the timeZone of "ja", "Asia/Tokio", is not a time zone',
   },
 ];
 
 const MEMBERS: readonly Row[] = [
   { code: 'all', description: s.members.all },
+  { code: 'definitions', description: s.members.definitions },
   { code: 'default', description: s.members.default },
   { code: 'is(value)', description: s.members.is },
   { code: 'negotiate(requested)', description: s.members.negotiate },
+  {
+    code: 'negotiateRequest(request, options?)',
+    description: s.members.negotiateRequest,
+  },
   { code: 'localize(pathname, locale)', description: s.members.localize },
   { code: 'delocalize(pathname)', description: s.members.delocalize },
   { code: 'paths(patterns)', description: s.members.paths },
@@ -70,7 +88,12 @@ const MEMBERS: readonly Row[] = [
 const TYPES: readonly Row[] = [
   { code: 'Locales<L, D>', description: s.members.locales },
   { code: 'LocaleOf<typeof locales>', description: s.members.localeOf },
+  { code: 'LocaleDefinition', description: s.members.localeDefinition },
   { code: 'LocalesOptions<D>', description: s.members.localesOptions },
+  {
+    code: 'NegotiateRequestOptions',
+    description: s.members.negotiateRequestOptions,
+  },
   { code: 'Delocalized<L>', description: s.members.delocalized },
   {
     code: 'LocaleParamsSchema<L>',
@@ -194,6 +217,22 @@ export default function I18nLocalesPage() {
         </div>
       </DocSection>
 
+      <DocSection
+        description={s.definition.description}
+        title={s.definition.title}
+      >
+        <p className="text-fg-mute leading-relaxed">
+          <Rich>{s.definition.timeZone()}</Rich>
+        </p>
+        <p className="text-fg-mute leading-relaxed">
+          <Rich>{s.definition.choosing()}</Rich>
+        </p>
+        <p className="text-fg-mute leading-relaxed">
+          <Rich>{s.definition.dir()}</Rich>
+        </p>
+        <CodeBlock code={HTML_DIR} lang="tsx" />
+      </DocSection>
+
       <DocSection description={s.oneSet.description} title={s.oneSet.title}>
         <p className="text-fg-mute leading-relaxed">
           <Rich>{s.oneSet.last()}</Rich>
@@ -256,6 +295,9 @@ export default function I18nLocalesPage() {
           <Rich>{s.negotiation.iterable()}</Rich>
         </p>
         <CodeBlock code={PREFERRED} lang="ts" />
+        <p className="text-fg-mute leading-relaxed">
+          <Rich>{s.negotiation.request()}</Rich>
+        </p>
         <Heading level="h3">{s.negotiation.examplesTitle()}</Heading>
         <p className="text-fg-mute leading-relaxed">
           <Rich>{s.negotiation.examplesDescription()}</Rich>

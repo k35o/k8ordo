@@ -58,6 +58,7 @@ src/routes/
   error.tsx             shown in place of what is below when it throws
   products/[id]/page.tsx   /products/:id — `export const paramsSchema` types :id
   old/redirect.ts       /old sends the visitor elsewhere
+  feed.xml/route.ts     dist/client/feed.xml — what its GET answered
 ```
 
 ```bash
@@ -82,8 +83,8 @@ Point your agent at them once by pasting this into your project's `CLAUDE.md` /
 This application is built with `@k8ordo/static`. Before adding or changing a
 route, read `node_modules/@k8ordo/static/docs/GUIDE.md`. `src/routes/` is
 the pathname space and holds only page.tsx, layout.tsx, not-found.tsx,
-error.tsx and redirect.ts; everything else goes under a `_`-prefixed
-directory. Never edit `.k8ordo/` — it is generated. Build links with
+error.tsx, redirect.ts and route.ts (a route.ts exports only GET); everything
+else goes under a `_`-prefixed directory. Never edit `.k8ordo/` — it is generated. Build links with
 `href()` from `@k8ordo/router`; search params are `@k8ordo/state`'s.
 ```
 

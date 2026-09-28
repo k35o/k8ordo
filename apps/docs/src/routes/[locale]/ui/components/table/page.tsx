@@ -1,6 +1,6 @@
 import { Anchor, Badge, Heading, Separator, Table } from '@k8ordo/ui';
+import { CodeBlock } from '@k8ordo/ui/code-block';
 
-import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';
 import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
@@ -92,6 +92,9 @@ export default function TablePage() {
           <Heading level="h3">
             <Rich>{m.components.table.emptyStateTitle()}</Rich>
           </Heading>
+          <p className="text-fg-mute">
+            <Rich>{m.components.table.emptyStateDescription()}</Rich>
+          </p>
           <ComponentPreview
             code={`<Table.Root>
   <Table.Head>
@@ -102,9 +105,11 @@ export default function TablePage() {
     </Table.Row>
   </Table.Head>
   <Table.Body>
-    <Table.EmptyState colSpan={3}>
-      No records have been added yet.
-    </Table.EmptyState>
+    <Table.EmptyState
+      colSpan={3}
+      description="Invite a teammate to get started."
+      title="No records have been added yet."
+    />
   </Table.Body>
 </Table.Root>`}
           >
@@ -117,9 +122,11 @@ export default function TablePage() {
                 </Table.Row>
               </Table.Head>
               <Table.Body>
-                <Table.EmptyState colSpan={3}>
-                  No records have been added yet.
-                </Table.EmptyState>
+                <Table.EmptyState
+                  colSpan={3}
+                  description="Invite a teammate to get started."
+                  title="No records have been added yet."
+                />
               </Table.Body>
             </Table.Root>
           </ComponentPreview>
@@ -167,7 +174,10 @@ export default function TablePage() {
           items={propsOf('Table.Cell')}
         />
         <Heading level="h3">Table.EmptyState</Heading>
-        <PropsTable items={propsOf('Table.EmptyState')} />
+        <PropsTable
+          inherits={inheritsOf('Table.EmptyState')}
+          items={propsOf('Table.EmptyState')}
+        />
       </section>
     </div>
   );

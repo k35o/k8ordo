@@ -26,6 +26,7 @@ export const Separator: FC<Props> = ({
         color === 'base' && 'bg-border-base',
         color === 'mute' && 'bg-border-mute',
         color === 'subtle' && 'bg-border-subtle',
+        'forced-colors:bg-[CanvasText]',
       )}
       role="separator"
     />

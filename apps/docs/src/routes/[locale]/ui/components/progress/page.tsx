@@ -1,6 +1,6 @@
 import { Anchor, Heading, Progress, Separator } from '@k8ordo/ui';
+import { CodeBlock } from '@k8ordo/ui/code-block';
 
-import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';
 import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
@@ -81,6 +81,20 @@ export default function ProgressPage() {
           >
             <div className="w-full">
               <Progress label="Upload progress" max={100} value={75} />
+            </div>
+          </ComponentPreview>
+        </div>
+
+        <div className="flex flex-col gap-4">
+          <Heading level="h3">
+            <Rich>{m.components.progress.indeterminateTitle()}</Rich>
+          </Heading>
+          <p className="text-fg-mute">
+            <Rich>{m.components.progress.indeterminateDescription()}</Rich>
+          </p>
+          <ComponentPreview code='<Progress label="Uploading" />'>
+            <div className="w-full">
+              <Progress label="Uploading" />
             </div>
           </ComponentPreview>
         </div>

@@ -136,6 +136,44 @@ export const CheckMarkFollowsReset: Story = {
   },
 };
 
+const submittedValue = (checkbox: HTMLInputElement) =>
+  new FormData(checkbox.form ?? undefined).get(checkbox.name);
+
+export const SubmitsItemValue: Story = {
+  render: () => (
+    <form>
+      <Checkbox
+        defaultChecked
+        itemValue="yes"
+        label="in stock"
+        name="inStock"
+      />
+    </form>
+  ),
+  play: async ({ canvas }) => {
+    const checkbox = canvas.getByRole<HTMLInputElement>('checkbox', {
+      name: 'in stock',
+    });
+
+    await expect(submittedValue(checkbox)).toBe('yes');
+  },
+};
+
+export const SubmitsOnWithoutItemValue: Story = {
+  render: () => (
+    <form>
+      <Checkbox defaultChecked label="agree" name="agree" />
+    </form>
+  ),
+  play: async ({ canvas }) => {
+    const checkbox = canvas.getByRole<HTMLInputElement>('checkbox', {
+      name: 'agree',
+    });
+
+    await expect(submittedValue(checkbox)).toBe('on');
+  },
+};
+
 // FormControl の renderInput から受け取る invalid を aria-invalid として伝える
 export const Invalid: Story = {
   args: {
@@ -146,5 +184,34 @@ export const Invalid: Story = {
     await expect(
       canvas.getByRole('checkbox', { name: 'invalid checkbox' }),
     ).toHaveAttribute('aria-invalid', 'true');
+  },
+};
+
+// 全選択の途中のように、一部だけ選ばれている状態を示す。DOM の
+// indeterminate に写るので、読み上げでも「一部選択」になる
+export const Indeterminate: Story = {
+  render: () => (
+    <Checkbox
+      checked={false}
+      indeterminate
+      label="すべて選択"
+      onChange={() => undefined}
+    />
+  ),
+  play: async ({ canvas }) => {
+    await expect(
+      canvas.getByRole('checkbox', { name: 'すべて選択' }),
+    ).toBePartiallyChecked();
+  },
+};
+
+// 表のセルのように文字を並べられない場所では、名前を読み上げだけに渡す
+export const LabelHidden: Story = {
+  render: () => <Checkbox label="行を選択" labelHidden />,
+  play: async ({ canvas }) => {
+    await expect(
+      canvas.getByRole('checkbox', { name: '行を選択' }),
+    ).toBeInTheDocument();
+    await expect(canvas.getByText('行を選択')).toHaveClass('sr-only');
   },
 };

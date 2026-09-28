@@ -1,7 +1,7 @@
 import type { Message } from '@k8ordo/i18n';
 import { Code, Heading } from '@k8ordo/ui';
+import { CodeBlock } from '@k8ordo/ui/code-block';
 
-import { CodeBlock } from '../../../../components/code-block';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Rich } from '../../../../components/rich';
@@ -19,17 +19,19 @@ export const search = message({ ja: '検索', en: 'Search' });`;
 const CART = `// src/messages/cart.ts
 import { message } from '@k8ordo/i18n';
 
+import { locales } from '../i18n';
+
 export const items = message({
   ja: (count: number) => \`\${String(count)} 件\`,
   en: (count) =>
-    \`\${String(count)} \${new Intl.PluralRules('en').select(count) === 'one' ? 'item' : 'items'}\`,
+    \`\${String(count)} \${locales.pluralRules().select(count) === 'one' ? 'item' : 'items'}\`,
 });
 
 export const updated = message({
   ja: (date: Date) =>
-    \`\${new Intl.DateTimeFormat('ja', { dateStyle: 'long', timeZone: 'UTC' }).format(date)} 更新\`,
+    \`\${locales.dateTimeFormat({ dateStyle: 'long' }).format(date)} 更新\`,
   en: (date) =>
-    \`Updated \${new Intl.DateTimeFormat('en', { dateStyle: 'long', timeZone: 'UTC' }).format(date)}\`,
+    \`Updated \${locales.dateTimeFormat({ dateStyle: 'long' }).format(date)}\`,
 });`;
 
 const NAV_LIST = `// src/components/nav-list.tsx
@@ -190,6 +192,11 @@ export default function I18nMessagesPage() {
             <Rich>{s.values.timeZone()}</Rich>
           </li>
         </ul>
+        <p>
+          <LocaleAnchor path="/:locale/i18n/formatting">
+            {s.values.formattingLink()}
+          </LocaleAnchor>
+        </p>
       </DocSection>
 
       <DocSection description={s.types.description} title={s.types.title}>

@@ -1,6 +1,6 @@
 import { Heading } from '@k8ordo/ui';
+import { CodeBlock } from '@k8ordo/ui/code-block';
 
-import { CodeBlock } from '../../../../components/code-block';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Rich } from '../../../../components/rich';
@@ -8,24 +8,19 @@ import * as m from '../../../../messages';
 
 const s = m.i18nIntegrations;
 
-// 文字列の中の `export const { paramsSchema }` は生成器に拾われない
-// （ファイルをパースして export を読む）ので、コード例として置ける。
-const UI_LAYOUT = `// src/routes/[locale]/layout.tsx
-import { UIProvider } from '@k8ordo/ui';
-import { dictionaries } from '@k8ordo/ui/i18n';
-import type { ReactNode } from 'react';
+const UI_LOCALES = `// src/i18n.ts
+import { defineLocales } from '@k8ordo/i18n';
+import { registerMessages } from '@k8ordo/ui/i18n';
 
-import { locales } from '../../i18n';
+import { fr } from './ui-messages/fr';
 
-export const { paramsSchema } = locales;
+export const locales = defineLocales({
+  ja: { timeZone: 'Asia/Tokyo', dir: 'ltr' },
+  en: { timeZone: 'UTC', dir: 'ltr' },
+  fr: { timeZone: 'Europe/Paris', dir: 'ltr' },
+});
 
-export default function LocaleLayout({ children }: { children: ReactNode }) {
-  return (
-    <UIProvider messages={dictionaries[locales.getLocale()]}>
-      {children}
-    </UIProvider>
-  );
-}`;
+registerMessages('fr', fr);`;
 
 const TALK_MESSAGES = `// src/messages/talk.ts
 import { message } from '@k8ordo/i18n';
@@ -55,18 +50,12 @@ export const talkSchema = z.object({
 const TALK_PAGE = `// src/routes/[locale]/talks/new/page.tsx
 import { formFields } from '@k8ordo/form/server';
 
-import { locales } from '../../../../i18n';
 import { createTalk } from './_parts/actions';
 import { talkSchema } from './_parts/schema';
 import { TalkForm } from './_parts/talk-form';
 
 export default function NewTalkPage() {
-  return (
-    <TalkForm
-      action={createTalk.bind(null, locales.getLocale())}
-      fields={formFields(talkSchema)}
-    />
-  );
+  return <TalkForm action={createTalk} fields={formFields(talkSchema)} />;
 }`;
 
 const TALK_ACTION = `// src/routes/[locale]/talks/new/_parts/actions.ts
@@ -76,49 +65,37 @@ import { parseForm } from '@k8ordo/form/server';
 import type { FormState } from '@k8ordo/form/server';
 
 import { saveTalk } from '../../../../../db/talks';
-import { locales } from '../../../../../i18n';
 import { talkSchema } from './schema';
 
+// Posted from /ja/talks/new, it runs in ja: the zod messages are Japanese.
 export async function createTalk(
-  locale: string,
   _previous: FormState,
   formData: FormData,
 ): Promise<FormState> {
-  const parsed = locales.run(
-    locales.is(locale) ? locale : locales.default,
-    () => parseForm(talkSchema, formData),
-  );
+  const parsed = parseForm(talkSchema, formData);
   if (parsed.success) await saveTalk(parsed.data);
   return parsed.state;
 }`;
 
-const SERVER_ROOT_PAGE = `// src/routes/page.tsx
-import { parseAcceptLanguage } from '@k8ordo/i18n';
-import type { PageProps } from '@k8ordo/router';
+const SERVER_ROOT_GUARD = `// src/routes/(home)/guard.ts
+import { withBase } from '@k8ordo/router';
+import type { Guard } from '@k8ordo/server/runtime';
 
-import { locales } from '../i18n';
-import { href } from '../links';
-import { RedirectTo } from './_parts/redirect-to';
+import { locales } from '../../i18n';
 
-export default function RootPage({ request }: PageProps<'/'>) {
-  const locale = locales.negotiate(
-    parseAcceptLanguage(request.headers.get('accept-language')),
-  );
+const guard: Guard<'/'> = ({ request }) => {
+  const locale = locales.negotiateRequest(request, { cookie: 'locale' });
+  return new Response(null, {
+    status: 307,
+    headers: { location: withBase(locales.localize('/', locale)) },
+  });
+};
 
-  return <RedirectTo to={href('/:locale', { locale })} />;
-}`;
+export default guard;`;
 
-const REDIRECT_TO = `// src/routes/_parts/redirect-to.tsx
-'use client';
-
-import { useEffect } from 'react';
-
-export function RedirectTo({ to }: { to: string }) {
-  useEffect(() => {
-    navigation.navigate(to, { history: 'replace' });
-  }, [to]);
-
-  return <a href={to}>{to}</a>;
+const SERVER_ROOT_PAGE = `// src/routes/(home)/page.tsx
+export default function RootPage() {
+  return null;
 }`;
 
 const NODE_TEST = `// src/messages/messages.test.ts
@@ -184,10 +161,10 @@ export default function I18nIntegrationsPage() {
   return (
     <DocPage introduction={s.introduction} path="/:locale/i18n/integrations">
       <DocSection description={s.ui.description} title={s.ui.title}>
-        <CodeBlock code={UI_LAYOUT} lang="tsx" />
+        <CodeBlock code={UI_LOCALES} lang="ts" />
         <ul className="text-fg-mute flex flex-col gap-2 pl-6">
           <li className="list-disc">
-            <Rich>{s.ui.serializable()}</Rich>
+            <Rich>{s.ui.clientGraph()}</Rich>
           </li>
           <li className="list-disc">
             <Rich>{s.ui.notFound()}</Rich>
@@ -271,17 +248,20 @@ export default function I18nIntegrationsPage() {
             <Rich>{s.server.negotiate()}</Rich>
           </li>
           <li className="list-disc">
-            <Rich>{s.server.noRedirect()}</Rich>
+            <Rich>{s.server.group()}</Rich>
+          </li>
+          <li className="list-disc">
+            <Rich>{s.server.status()}</Rich>
           </li>
           <li className="list-disc">
             <Rich>{s.server.actions()}</Rich>
           </li>
         </ul>
+        <CodeBlock code={SERVER_ROOT_GUARD} lang="ts" />
         <CodeBlock code={SERVER_ROOT_PAGE} lang="tsx" />
-        <CodeBlock code={REDIRECT_TO} lang="tsx" />
         <p>
-          <LocaleAnchor path="/:locale/server/deploy">
-            <Rich>{s.server.deployLink()}</Rich>
+          <LocaleAnchor path="/:locale/server/guards">
+            <Rich>{s.server.guardsLink()}</Rich>
           </LocaleAnchor>
         </p>
       </DocSection>

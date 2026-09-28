@@ -1,14 +1,15 @@
 import type {
+  ComponentProps,
   FC,
   HTMLAttributes,
   PropsWithChildren,
-  ReactNode,
   TableHTMLAttributes,
   TdHTMLAttributes,
   ThHTMLAttributes,
 } from 'react';
 
 import { cn } from '../../../helpers/cn';
+import { EmptyState } from '../../feedback/empty-state';
 
 type RootProps = PropsWithChildren<
   Omit<TableHTMLAttributes<HTMLTableElement>, 'className' | 'style'>
@@ -17,6 +18,7 @@ type RootProps = PropsWithChildren<
 type RowProps = PropsWithChildren<
   {
     interactive?: boolean;
+    selected?: boolean;
   } & Omit<HTMLAttributes<HTMLTableRowElement>, 'className' | 'style'>
 >;
 
@@ -50,10 +52,9 @@ type CaptionProps = PropsWithChildren<
   Omit<HTMLAttributes<HTMLTableCaptionElement>, 'className' | 'style'>
 >;
 
-type EmptyStateProps = {
+type EmptyRowProps = {
   colSpan: number;
-  children: ReactNode;
-};
+} & ComponentProps<typeof EmptyState>;
 
 const Root: FC<RootProps> = ({ children, ...rest }) => (
   <div className="border-border-mute bg-bg-base vertical:writing-sideways-rl vertical:size-fit w-full overflow-x-auto rounded-lg border">
@@ -78,12 +79,19 @@ const Body: FC<SectionProps> = ({ children, ...rest }) => (
   </tbody>
 );
 
-const Row: FC<RowProps> = ({ children, interactive = false, ...rest }) => (
+const Row: FC<RowProps> = ({
+  children,
+  interactive = false,
+  selected = false,
+  ...rest
+}) => (
   <tr
     {...rest}
     className={cn(
-      'border-border-mute border-b transition-colors vertical:border-b-0 vertical:border-l',
+      'border-border-mute border-b transition-colors duration-150 ease-out vertical:border-b-0 vertical:border-l',
       interactive && 'hover:bg-bg-mute',
+      selected &&
+        'bg-primary-bg-subtle forced-colors:bg-[Highlight] forced-colors:text-[HighlightText]',
     )}
   >
     {children}
@@ -134,13 +142,11 @@ const Caption: FC<CaptionProps> = ({ children, ...rest }) => (
   </caption>
 );
 
-const EmptyState: FC<EmptyStateProps> = ({ children, colSpan }) => (
-  <tr className="border-border-mute border-b transition-colors">
-    <td
-      className="text-fg-mute px-4 py-10 text-center align-middle"
-      colSpan={colSpan}
-    >
-      {children}
+// 空の見た目は EmptyState が持つ。ここは表の中に置くための行とセルだけ
+const EmptyRow: FC<EmptyRowProps> = ({ colSpan, ...rest }) => (
+  <tr className="border-border-mute border-b">
+    <td className="align-middle" colSpan={colSpan}>
+      <EmptyState {...rest} />
     </td>
   </tr>
 );
@@ -153,5 +159,5 @@ export const Table = {
   HeaderCell,
   Cell,
   Caption,
-  EmptyState,
+  EmptyState: EmptyRow,
 } as const;

@@ -4,11 +4,16 @@
 > output a directory a static host can serve. The mode is the dependency —
 > installing this package means request-time data does not exist as an API, and
 > a `'use server'` module, which the RSC pipeline still compiles, is refused by
-> name. `src/routes/` is the pathname space
-> (page/layout/not-found/error/redirect, `[param]`, `(group)`, `_private`), a
+> name, as are a `guard.ts` and a page that exports `search`. `src/routes/` is the pathname space
+> (page/layout/not-found/error/loading/redirect/route, `[param]`, `(group)`,
+> `_private`), a `loading.tsx` shows while what is below it suspends in a
+> client navigation (a written file is whole), a `route.ts` is written as the file its `GET` answers at its
+> pathname (`feed.xml/route.ts` → `feed.xml`; any other method is refused), a
 > page or layout may `export const paramsSchema` (any Standard Schema,
 > synchronous) to type its parameters — a refused value makes the pattern not
-> answer, so the walk goes on to `not-found.tsx` — an `error.tsx` shows in place
+> answer, so the walk goes on to `not-found.tsx` — a supplied pathname whose
+> page says `notFound()` (from `@k8ordo/router`) fails the build — an
+> `error.tsx` shows in place
 > of what throws below it (in the browser; at build time a Server Component that
 > throws stops the build), a `redirect.ts` is written as a page that sends the
 > visitor on, a page renders its own `<title>` (React 19 hoists it), boundaries
@@ -26,7 +31,8 @@ When installed via npm, these docs live under `node_modules/@k8ordo/static/docs/
 
 - [Design Guide](GUIDE.md): setup, the `routes/` grammar and what it refuses,
   execution boundaries, the build output, supplying pathnames for
-  parameterised routes, and what static mode cannot do.
+  parameterised routes, a Content-Security-Policy by hash, and what static
+  mode cannot do.
 
 ## Entry point
 
@@ -36,7 +42,17 @@ When installed via npm, these docs live under `node_modules/@k8ordo/static/docs/
   `src/routes`); `options.paths` supplies concrete pathnames for routes with
   parameters, and a parameterised route left uncovered fails the build;
   `options.site` (the origin) makes the build also write `sitemap.xml`;
-  `StaticOptions` is the type of those options. A
+  `options.csp` (directives → sources, `ContentSecurityPolicy`) is the
+  Content-Security-Policy written into each page's `<meta>`, first in
+  `<head>`, with the hashes of the framework's own inline scripts on that
+  page added wherever a script element is decided (`script-src`, or
+  `default-src` made into it, and `script-src-elem`) — the framework
+  decides no policy, and an inline script of the application's is allowed
+  by its hash there
+  (`colorSchemeScriptHash()`); no nonce is left in a file, and a policy with
+  `'strict-dynamic'`, `frame-ancestors`, `report-uri` or `sandbox` is
+  refused; `StaticOptions` is the type of those options. A
   `'use server'` module fails it too — in `vite dev` as well as the build: a
   file cannot receive a Server Action, so the application wants
-  `@k8ordo/server` instead.
+  `@k8ordo/server` instead. So does a `guard.ts`, every one named at once: a
+  file has no request to guard.

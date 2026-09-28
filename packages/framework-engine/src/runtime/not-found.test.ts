@@ -137,6 +137,9 @@ describe.each(browserTypes)(
 
       expect(response?.status()).toBe(404);
       await page.getByRole('heading', { name: '404' }).waitFor();
+      // ルートレイアウトの中に描かれる: レイアウトのナビゲーションが残る
+      await page.getByRole('link', { name: 'nowhere' }).waitFor();
+      expect(await page.title()).toBe('Not found');
       await page.close();
     });
 

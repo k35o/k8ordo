@@ -30,6 +30,11 @@ export type IconButtonTriggerProps = Partial<TooltipTriggerProps>;
  * `aria-disabled` で表現できる。`ref` は tooltip の配線と合成済みのものが
  * `triggerProps` に入っているので、平置きでは渡さない。
  *
+ * `disabled` が表すのは利用者が渡した `disabled` だけ。`onAction` や属する
+ * フォームの送信が保留中のあいだは、`aria-disabled` と `aria-busy` が立っても
+ * `disabled` は `false` のままで、押された要素はフォーカスを保つ。その間に
+ * 押されても `onClick` が何もしない。
+ *
  * ハンドラの要素型を `HTMLButtonElement` ではなく `HTMLElement` にしているのは、
  * `ClipboardEventHandler<HTMLButtonElement>` のような兄弟型が `<a>` の同名 props
  * に代入できず、束ごと展開できなくなるため。
@@ -76,7 +81,8 @@ type Props = {
   tooltipDisabled?: boolean;
   /**
    * クリック時の処理。`onAction` は非同期処理を `useTransition` で包み、保留中は
-   * `aria-busy` を立てる糖衣。素のクリックイベントが必要なら `onClick` を使う。
+   * `aria-busy` を立てる糖衣。保留中は押しても何もしないが、ボタンはフォーカスを
+   * 持ったままでいる。素のクリックイベントが必要なら `onClick` を使う。
    * 両者は併用可能で `onClick` → `onAction` の順に実行される（`onClick` が
    * `preventDefault` した場合は `onAction` をスキップ）。
    */
@@ -149,8 +155,8 @@ export const IconButton: FC<Props> = ({
   const isPending = transitionPending || formPending;
   const isDisabled = Boolean(disabled) || isPending;
 
-  // 無効なときもハンドラを付けるのは、renderItem が <a> などを描画したときに
-  // ネイティブの disabled が効かず、そのまま遷移してしまうため。
+  // 無効なときもハンドラを付けるのは、保留中の <button> や renderItem が描いた
+  // <a> などにはネイティブの disabled が付かず、押せば click が届くため。
   const handleClick =
     onClick || onAction || isDisabled
       ? (event: MouseEvent<HTMLButtonElement>) => {
@@ -169,16 +175,16 @@ export const IconButton: FC<Props> = ({
       : undefined;
 
   const className = cn(
-    'inline-flex cursor-pointer rounded-full transition-colors',
+    'inline-flex cursor-pointer rounded-full transition-colors duration-150 ease-out',
     FOCUS_RING,
     (color === 'transparent' || color === 'base') &&
       'hover:bg-bg-subtle active:bg-bg-mute',
     color === 'base' && 'bg-bg-base',
     color === 'transparent' && 'bg-transparent',
     color === 'primary' &&
-      'bg-primary-bg hover:bg-primary-bg-emphasize/80 active:bg-primary-bg-emphasize',
+      'bg-primary-bg hover:bg-primary-bg-emphasize active:bg-primary-bg-emphasize',
     color === 'secondary' &&
-      'bg-secondary-bg hover:bg-secondary-bg-emphasize/80 active:bg-secondary-bg-emphasize',
+      'bg-secondary-bg hover:bg-secondary-bg-emphasize active:bg-secondary-bg-emphasize',
     size === 'sm' && 'p-1',
     size === 'md' && 'p-2',
     size === 'lg' && 'p-3',
@@ -196,7 +202,10 @@ export const IconButton: FC<Props> = ({
     'aria-label': label,
     children,
     className,
-    disabled: isDisabled,
+    // 保留中にネイティブの disabled を付けないのは、押されてフォーカスを持つ要素が
+    // disabled になると、Chromium が描画の更新でフォーカスを body へ落とすため。
+    // 二重の実行は handleClick が止める。
+    disabled: Boolean(disabled),
     onClick: handleClick,
     type: 'button',
     triggerProps: {

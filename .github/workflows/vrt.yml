@@ -26,11 +26,10 @@ jobs:
         with:
           persist-credentials: false
 
-      # 撮影は packages/ui の src から組んだ Storybook を回すだけで dist は要らない。
+      # Storybook は packages/ui の src から組むが、ui が読む @k8ordo/i18n は
+      # その dist から解決されるので、build: none にはできない。
       - name: Install
         uses: ./.github/composite-actions/install
-        with:
-          build: none
 
       - name: Cache Playwright browsers
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0

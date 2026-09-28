@@ -72,9 +72,9 @@ import {
   SafariIcon,
   Logo,
 } from '@k8ordo/ui';
+import { CodeBlock } from '@k8ordo/ui/code-block';
 import type { ReactNode } from 'react';
 
-import { CodeBlock } from '../../../../../components/code-block';
 import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
 import { Rich } from '../../../../../components/rich';

@@ -26,8 +26,8 @@ export const featureRoutes = message({
 });
 
 export const featureRoutesDescription = message({
-  ja: 'ディレクトリ木がそのまま pathname 空間です。page/layout/not-found/error/redirect・`[param]`・`(group)`・`_` の私物だけを認め、規約から外れたものはビルドを落とします。',
-  en: 'The directory tree is the pathname space: page/layout/not-found/error/redirect, `[param]`, `(group)`, and `_`-prefixed privates. Anything outside the grammar fails the build.',
+  ja: 'ディレクトリ木がそのまま pathname 空間です。page/layout/not-found/error/redirect/guard・`[param]`・`(group)`・`_` の私物だけを認め、規約から外れたものはビルドを落とします。',
+  en: 'The directory tree is the pathname space: page/layout/not-found/error/redirect/guard, `[param]`, `(group)`, and `_`-prefixed privates. Anything outside the grammar fails the build.',
 });
 
 export const featureActions = message({
@@ -58,6 +58,16 @@ export const featureRouteFiles = message({
 export const featureRouteFilesDescription = message({
   ja: 'ページが throw したら `error.tsx` が layout の内側に描かれ、枠は残ります。移転したディレクトリには `redirect.ts` を 1 行置き、Server Action は `redirect()` で送り先を告げます。',
   en: 'When a page throws, `error.tsx` renders inside the layout and the frame survives. A directory that moved keeps a one-line `redirect.ts`, and a Server Action ends with `redirect()` to say where next.',
+});
+
+export const featureGuards = message({
+  ja: 'guard.ts が先に決める',
+  en: 'guard.ts decides first',
+});
+
+export const featureGuardsDescription = message({
+  ja: 'どの階層にも置ける `guard.ts` が、その下で答えるものより前に外から順に走ります。`Response` を返せばそこで打ち切り、通すときは最終的な応答に付けるヘッダーを添えられます。ページは描画のままです。',
+  en: 'A `guard.ts` at any level runs, outer first, before whatever answers below it. Returning a `Response` ends the request there; letting it through can still add headers to the final answer. A page stays a render.',
 });
 
 export const featureParams = message({
@@ -113,6 +123,11 @@ export const navBoundaries = message({
 export const navActions = message({
   ja: 'アクションとリクエスト',
   en: 'Actions & requests',
+});
+
+export const navGuards = message({
+  ja: 'ガードと応答',
+  en: 'Guards & responses',
 });
 
 export const navDeploy = message({

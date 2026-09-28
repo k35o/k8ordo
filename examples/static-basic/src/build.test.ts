@@ -1,4 +1,5 @@
 import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { cpSync, existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { createServer } from 'node:http';
@@ -12,6 +13,8 @@ import type { Browser, Page } from 'playwright';
 
 const root = path.resolve(import.meta.dirname, '..');
 const client = path.join(root, 'dist', 'client');
+// vite.base.config.ts が base: '/site/' で書くサイト
+const underBase = path.join(root, 'dist', 'base', 'client');
 
 // CI はエンジンごとにジョブを分けて並べるので、TEST_BROWSER で 1 つに絞れる
 const browserTypes = [chromium, firefox, webkit]
@@ -28,18 +31,31 @@ let brokenPageStderr = '';
 let brokenNotFoundStderr = '';
 // 同じく、失敗するページの上に error.tsx も Suspense も無い構成
 let noBoundaryStderr = '';
+// guard.ts を置いた構成。ファイルには守るリクエストが無い
+let guardStderr = '';
+// notFound() と言うページのパスを列挙した構成
+let notFoundPageStderr = '';
+// GET 以外を export する route.ts を置いた構成
+let routeStderr = '';
+// search を読むと宣言したページを置いた構成
+let searchStderr = '';
 
 // ひとつ前のデプロイの dist/client。アプリは同じで、クライアントの
 // スクリプトだけが違う。タブを開いた後にデプロイがあった、を再現する
 let previous = '';
 
+// vitest は NODE_ENV=test を置き、子プロセスのビルドもそれを継いで React の
+// 開発版を積む。主張の対象は配る成果物なので、本番のビルドにする
+const BUILD = {
+  cwd: root,
+  stdio: 'pipe',
+  env: { ...process.env, NODE_ENV: 'production' },
+} as const;
+
 // 止まらなかったビルドは空の stderr を返し、止まることの主張で落ちる
 const failingBuild = (config: string): string => {
   try {
-    execFileSync('pnpm', ['exec', 'vp', 'build', '--config', config], {
-      cwd: root,
-      stdio: 'pipe',
-    });
+    execFileSync('pnpm', ['exec', 'vp', 'build', '--config', config], BUILD);
   } catch (error) {
     return String((error as { stderr?: Buffer }).stderr ?? '');
   }
@@ -52,22 +68,47 @@ beforeAll(() => {
   brokenPageStderr = failingBuild('vite.broken.config.ts');
   brokenNotFoundStderr = failingBuild('vite.broken-not-found.config.ts');
   noBoundaryStderr = failingBuild('vite.broken-no-boundary.config.ts');
+  guardStderr = failingBuild('vite.broken-guard.config.ts');
+  notFoundPageStderr = failingBuild('vite.not-found-page.config.ts');
+  routeStderr = failingBuild('vite.broken-route.config.ts');
+  searchStderr = failingBuild('vite.broken-search.config.ts');
   // 圧縮しないだけで、スクリプトの中身とハッシュの入った名前が変わる
-  execFileSync('pnpm', ['exec', 'vp', 'build', '--minify', 'false'], {
-    cwd: root,
-    stdio: 'pipe',
-  });
+  execFileSync('pnpm', ['exec', 'vp', 'build', '--minify', 'false'], BUILD);
   previous = mkdtempSync(path.join(tmpdir(), 'k8ordo-previous-'));
   cpSync(client, previous, { recursive: true });
-  execFileSync('pnpm', ['exec', 'vp', 'build'], { cwd: root, stdio: 'pipe' });
-}, 360_000);
+  execFileSync('pnpm', ['exec', 'vp', 'build'], BUILD);
+  // 既定のビルドが空にするのは dist/client などの各出力先だけなので、
+  // dist/base/ は残る
+  execFileSync(
+    'pnpm',
+    ['exec', 'vp', 'build', '--config', 'vite.base.config.ts'],
+    BUILD,
+  );
+}, 480_000);
 
 afterAll(() => {
   rmSync(previous, { recursive: true, force: true });
 });
 
+// <head> の先頭に置かれた <meta> のポリシー。無ければ空
+const policyFirstIn = (html: string): string =>
+  (
+    /^<!DOCTYPE html><html lang="en"><head><meta http-equiv="Content-Security-Policy" content="([^"]*)">/u.exec(
+      html,
+    )?.[1] ?? ''
+  ).replaceAll('&apos;', "'");
+
+// src を持たないスクリプトの中身
+const inlineScriptsIn = (html: string): string[] =>
+  [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script[\s/>]/giu)]
+    .filter(([, attributes = '']) => !attributes.includes('src='))
+    .map(([, , source = '']) => source);
+
 const read = (...parts: string[]): string =>
   readFileSync(path.join(client, ...parts), 'utf8');
+
+const readUnderBase = (...parts: string[]): string =>
+  readFileSync(path.join(underBase, ...parts), 'utf8');
 
 describe('the static build', () => {
   it('writes a page as HTML the server rendered', () => {
@@ -86,6 +127,13 @@ describe('the static build', () => {
 
   it('writes the same page as a payload beside it', () => {
     expect(read('index.rsc')).toContain('rendered on the server');
+  });
+
+  it('writes a page under a loading.tsx whole, without the fallback', () => {
+    const html = read('products', 'index.html');
+    expect(html).toContain('first product');
+    // フォールバックは埋め込んだペイロードには載るが、描かれてはいない
+    expect(html).not.toContain('<p data-testid="loading">');
   });
 
   it('writes a page per supplied pathname, with its data', () => {
@@ -146,6 +194,38 @@ describe('the static build', () => {
     );
   });
 
+  it('refuses guard.ts, naming every one and the mode that runs them', () => {
+    expect(guardStderr).toContain(
+      'static build cannot run guard.ts — a file has no request to guard, and these are guards:\n  src/routes-broken-guard/admin/guard.ts\n  src/routes-broken-guard/guard.ts\nthis application wants @k8ordo/server',
+    );
+  });
+
+  it('stops, naming the pathname, when a page it was supplied for said notFound()', () => {
+    expect(notFoundPageStderr).toContain(
+      'the "paths" option supplied pathnames whose page called notFound(): /products/3',
+    );
+  });
+
+  it('writes a route.ts as the file its GET answered, with the site as its origin', () => {
+    const xml = read('feed.xml');
+    expect(xml).toContain('<title>first product</title>');
+    expect(xml).toContain('<link>https://example.test/products/1</link>');
+    // ページではないので、ペイロードも index.html も無い
+    expect(existsSync(path.join(client, 'feed.xml', 'index.rsc'))).toBe(false);
+  });
+
+  it('refuses a route.ts that answers a method a file cannot, naming it and the method', () => {
+    expect(routeStderr).toContain(
+      'static build writes a route.ts as the file its GET answers, and a file cannot answer another method — these export one:\n  src/routes-broken-route/api/route.ts (POST)',
+    );
+  });
+
+  it('refuses a page that reads the search, naming it', () => {
+    expect(searchStderr).toContain(
+      'static build cannot hand a page the search — a file is the same for every search, and these pages export search:\n  src/routes-broken-search/products/page.tsx\nthis application wants @k8ordo/server',
+    );
+  });
+
   it('writes a redirect.ts as a page that sends the visitor on', () => {
     const html = read('old', 'index.html');
     expect(html).toContain('http-equiv="refresh"');
@@ -157,9 +237,35 @@ describe('the static build', () => {
     const xml = read('sitemap.xml');
     expect(xml).toContain('<loc>https://example.test/</loc>');
     expect(xml).toContain('<loc>https://example.test/products/2</loc>');
-    // リダイレクトと not-found はページではない
+    // リダイレクトと not-found と route.ts はページではない
     expect(xml).not.toContain('/old');
+    expect(xml).not.toContain('feed.xml');
     expect(xml).not.toContain('404');
+  });
+
+  it.each(['index.html', 'products/1/index.html', '404.html'])(
+    'writes the application’s policy first in the <head> of %s, naming each inline script by hash',
+    (file) => {
+      const html = read(file);
+      const policy = policyFirstIn(html);
+      expect(policy).toMatch(
+        /^script-src 'self'( 'sha256-[A-Za-z0-9+/]{43}=')+; object-src 'none'; base-uri 'none'$/u,
+      );
+      const inline = inlineScriptsIn(html);
+      // color-scheme と、書き込んだペイロード
+      expect(inline.length).toBeGreaterThanOrEqual(2);
+      for (const source of inline) {
+        expect(policy).toContain(
+          `'sha256-${createHash('sha256').update(source).digest('base64')}'`,
+        );
+      }
+    },
+  );
+
+  it('leaves no nonce in what it writes: a file everyone reads cannot keep one', () => {
+    for (const file of ['index.html', 'index.rsc', '404.html']) {
+      expect(read(file)).not.toContain('nonce');
+    }
   });
 
   it('ships the client entry, so the page hydrates', () => {
@@ -174,17 +280,52 @@ const CONTENT_TYPES: Readonly<Record<string, string>> = {
   '.rsc': 'text/x-component; charset=utf-8',
 };
 
+describe('the static build under a base', () => {
+  it('writes each page at its pathname in the table, beside its payload', () => {
+    expect(existsSync(path.join(underBase, 'index.html'))).toBe(true);
+    expect(existsSync(path.join(underBase, 'index.rsc'))).toBe(true);
+    expect(existsSync(path.join(underBase, 'products', '1', 'index.rsc'))).toBe(
+      true,
+    );
+  });
+
+  it('links and loads scripts under the base', () => {
+    const html = readUnderBase('products', 'index.html');
+    expect(html).toContain('href="/site/products/1"');
+    expect(html).toMatch(/src="\/site\/assets\/[^"]+\.js"/u);
+  });
+
+  it('lists each page in the sitemap at its URL under the base', () => {
+    expect(readUnderBase('sitemap.xml')).toContain(
+      '<loc>https://example.test/site/products/1</loc>',
+    );
+  });
+
+  it('sends a redirect.ts on to its target under the base', () => {
+    expect(readUnderBase('old', 'index.html')).toContain('url=/site/products');
+  });
+});
+
 describe.each(browserTypes)('a written page in $name', ({ type }) => {
   let server: Server;
   let browser: Browser;
   let origin = '';
-  // ホストがいま配っているデプロイ
+  // ホストがいま配っているデプロイと、それを置いている場所（Vite の base）
   let deployed = client;
+  let mountedAt = '/';
 
   beforeAll(async () => {
     // 静的ホストと同じ規則で dist/client を配る: ディレクトリは index.html
     server = createServer((request, response) => {
-      const { pathname } = new URL(request.url ?? '/', 'http://localhost');
+      const { pathname: requested } = new URL(
+        request.url ?? '/',
+        'http://localhost',
+      );
+      if (!requested.startsWith(mountedAt)) {
+        response.writeHead(404).end();
+        return;
+      }
+      const pathname = `/${requested.slice(mountedAt.length)}`;
       const file = path.join(
         deployed,
         path.extname(pathname) === ''
@@ -221,6 +362,7 @@ describe.each(browserTypes)('a written page in $name', ({ type }) => {
 
   afterEach(() => {
     deployed = client;
+    mountedAt = '/';
   });
 
   // hydrate するまでのリンクは、JS なしのただの文書の読み込みになって
@@ -235,6 +377,36 @@ describe.each(browserTypes)('a written page in $name', ({ type }) => {
     });
     return page;
   };
+
+  it('runs under the policy its <meta> states: nothing refused, through hydration and a navigation', async () => {
+    const page = await browser.newPage();
+    await page.addInitScript(() => {
+      const refused: string[] = [];
+      Object.assign(window, { refused });
+      document.addEventListener('securitypolicyviolation', (event) => {
+        refused.push(`${event.effectiveDirective} ${event.blockedURI}`);
+      });
+    });
+    await page.goto(origin);
+    await page.getByText(/time zone: (?!not yet)/u).waitFor();
+
+    await page.getByRole('link', { name: 'product 1' }).click();
+    await page.getByTestId('product-id').getByText('number:1').waitFor();
+    // 違反の知らせは後のタスクで届くので、ひと巡り待ってから読む
+    await page.evaluate(
+      () =>
+        new Promise((resolve) => {
+          setTimeout(resolve, 0);
+        }),
+    );
+
+    expect(
+      await page.evaluate(
+        () => (window as unknown as { refused: string[] }).refused,
+      ),
+    ).toStrictEqual([]);
+    await page.close();
+  });
 
   it('moves to the next page in place while the tab runs the deploy the host serves', async () => {
     const page = await openHydrated(origin);
@@ -256,6 +428,19 @@ describe.each(browserTypes)('a written page in $name', ({ type }) => {
     await page.getByRole('heading', { name: 'products' }).waitFor();
     expect(new URL(page.url()).pathname).toBe('/products');
     expect(await page.evaluate(() => 'stayed' in window)).toBe(false);
+    await page.close();
+  });
+
+  it('moves to the next page in place when the site sits under a base', async () => {
+    deployed = underBase;
+    mountedAt = '/site/';
+    const page = await openHydrated(`${origin}/site/`);
+
+    await page.getByRole('link', { name: 'products', exact: true }).click();
+
+    await page.getByRole('heading', { name: 'products' }).waitFor();
+    expect(new URL(page.url()).pathname).toBe('/site/products');
+    expect(await page.evaluate(() => 'stayed' in window)).toBe(true);
     await page.close();
   });
 

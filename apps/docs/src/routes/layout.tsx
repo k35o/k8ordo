@@ -20,7 +20,11 @@ export default function Root({
     // 属性だけはサーバーの出力と一致しない。それが目的の差分なので警告を抑える。
     // <title> はここには無い。React 19 が各ページの <title> を head に持ち上げる
     // ので、ここにも書くと 2 つ並ぶ。
-    <html lang={locale} suppressHydrationWarning>
+    <html
+      dir={locales.definitions[locale].dir}
+      lang={locale}
+      suppressHydrationWarning
+    >
       <head>
         <meta charSet="UTF-8" />
         <meta content="width=device-width, initial-scale=1.0" name="viewport" />
