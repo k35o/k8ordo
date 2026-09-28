@@ -18,10 +18,10 @@ const section = (): string => {
 describe('components.md の Messages のキーの一覧', () => {
   it('Messages のキーをすべて挙げる', () => {
     const listed = new Set(
-      [...section().matchAll(/`([A-Za-z]+)`/g)].map(([, key]) => key),
+      [...section().matchAll(/`([A-Za-z]+)`/gu)].map(([, key]) => key),
     );
     const missing = Object.keys(en).filter((key) => !listed.has(key));
 
-    expect(missing).toEqual([]);
+    expect(missing).toStrictEqual([]);
   });
 });
