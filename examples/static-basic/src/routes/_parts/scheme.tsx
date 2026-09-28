@@ -1,33 +1,20 @@
 'use client';
 
-import { createContext, use, useSyncExternalStore } from 'react';
-import type { ReactNode } from 'react';
+import { useColorScheme } from '@k8ordo/color-scheme';
 
-type Scheme = 'light' | 'dark';
-
-const DARK = '(prefers-color-scheme: dark)';
-
-const SchemeContext = createContext<Scheme>('light');
-
-const subscribe = (onChange: () => void): (() => void) => {
-  const query = matchMedia(DARK);
-  query.addEventListener('change', onChange);
-  return () => {
-    query.removeEventListener('change', onChange);
-  };
-};
-
-const readScheme = (): Scheme => (matchMedia(DARK).matches ? 'dark' : 'light');
-
-// ビルドは訪問者の設定を知らないので light で書く。ダークの訪問者では
-// hydrate した直後に値が変わり、その下のページ全体へ伝わる
-const buildScheme = (): Scheme => 'light';
-
-export function SchemeProvider({ children }: { children: ReactNode }) {
-  const scheme = useSyncExternalStore(subscribe, readScheme, buildScheme);
-  return <SchemeContext value={scheme}>{children}</SchemeContext>;
-}
-
-export function SchemeName() {
-  return <span data-testid="scheme">scheme: {use(SchemeContext)}</span>;
+// ビルドは訪問者の設定もシステムも知らないので light で書く。ダークの
+// 訪問者では hydrate した直後に値が変わり、その下のページ全体へ伝わる
+export function SchemeToggle() {
+  const { scheme, setPreference } = useColorScheme();
+  return (
+    <button
+      data-testid="scheme"
+      onClick={() => {
+        setPreference(scheme === 'dark' ? 'light' : 'dark');
+      }}
+      type="button"
+    >
+      scheme: {scheme}
+    </button>
+  );
 }

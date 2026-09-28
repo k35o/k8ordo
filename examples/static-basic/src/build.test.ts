@@ -435,8 +435,26 @@ describe('a written page in the browser', () => {
     await page.close();
   });
 
+  it('keeps the scheme the toggle stores, and the next load starts from it before any module runs', async () => {
+    const page = await openHydrated(origin);
+    await page.getByRole('button', { name: 'scheme: light' }).click();
+    await page.getByRole('button', { name: 'scheme: dark' }).waitFor();
+
+    // モジュールを止めて読み直す。<html> に dark を付けられるのは、ポリシーが
+    // ハッシュで許したインラインスクリプトだけになる
+    await page.route('**/*.js', (route) => route.abort());
+    await page.reload();
+
+    expect(
+      await page.evaluate(() =>
+        document.documentElement.classList.contains('dark'),
+      ),
+    ).toBe(true);
+    await page.close();
+  });
+
   it('hydrates in place, leaving no hidden copy of the page and one <title>', async () => {
-    // ダークの訪問者: ルートの SchemeProvider の値が hydrate の直後に変わる
+    // ダークの訪問者: ColorSchemeProvider の値が hydrate の直後に変わる
     const context = await browser.newContext({ colorScheme: 'dark' });
     const page = await context.newPage();
     // 裏のタブで開かれたページとして読む。ブラウザはアニメーションフレームを
