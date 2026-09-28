@@ -1,3 +1,4 @@
+import basicSsl from '@vitejs/plugin-basic-ssl';
 import react from '@vitejs/plugin-react';
 import { playwright } from '@vitest/browser-playwright';
 import { defineConfig } from 'vite-plus';
@@ -41,6 +42,10 @@ export default defineConfig({
       },
       {
         extends: true,
+        // Cookie Store API は必ず Secure を付け、Safari は http://localhost でも
+        // Secure の Cookie を捨てる。WebKit で cookie の置き場所を確かめるには
+        // HTTPS で配るしかない
+        plugins: [basicSsl()],
         test: {
           name: { label: 'browser', color: 'green' },
           include: ['src/**/*.browser.test.tsx'],

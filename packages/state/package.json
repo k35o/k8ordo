@@ -54,6 +54,7 @@
     "@k8ordo/router": "workspace:^",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
+    "@vitejs/plugin-basic-ssl": "catalog:",
     "@vitejs/plugin-react": "catalog:",
     "@vitest/browser-playwright": "catalog:",
     "publint": "catalog:",
