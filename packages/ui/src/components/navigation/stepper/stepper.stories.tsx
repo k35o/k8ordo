@@ -63,6 +63,23 @@ export const Interactive: Story = {
   },
 };
 
+// 押したボタンはいまの段になって消えるので、フォーカスはその段へ移す
+export const InteractiveKeepsFocus: Story = {
+  args: {
+    defaultValue: 2,
+    interactive: true,
+  },
+  play: async ({ canvas, userEvent }) => {
+    await userEvent.tab();
+    await expect(canvas.getByRole('button', { name: /プラン/u })).toHaveFocus();
+
+    await userEvent.keyboard('{Enter}');
+
+    const [plan] = canvas.getAllByRole('listitem');
+    await expect(plan).toContainElement(document.activeElement as HTMLElement);
+  },
+};
+
 export const Vertical: Story = {
   args: {
     defaultValue: 1,

@@ -1,6 +1,8 @@
 'use client';
 
+import { useRef } from 'react';
 import type { FC, OlHTMLAttributes, Ref } from 'react';
+import { flushSync } from 'react-dom';
 
 import { cn } from '../../../helpers/cn';
 import { useControllableState } from '../../../hooks/controllable-state';
@@ -47,6 +49,7 @@ export const Stepper: FC<Props> = ({
     onChange,
   });
   const vertical = orientation === 'vertical';
+  const currentRef = useRef<HTMLSpanElement>(null);
 
   return (
     <ol
@@ -112,15 +115,32 @@ export const Stepper: FC<Props> = ({
                   'flex items-center gap-2 rounded-lg transition-colors hover:bg-bg-subtle',
                   FOCUS_RING,
                 )}
-                onClick={() => {
-                  setCurrent(index);
+                onClick={(event) => {
+                  const button = event.currentTarget;
+                  flushSync(() => {
+                    setCurrent(index);
+                  });
+                  // 押した段はいまの段になり、ボタンから外される。フォーカスが
+                  // body へ落ちないよう、同じ段へ移す
+                  if (!button.isConnected) {
+                    currentRef.current?.focus();
+                  }
                 }}
                 type="button"
               >
                 {body}
               </button>
             ) : (
-              <span className="flex items-center gap-2">{body}</span>
+              <span
+                className={cn(
+                  'flex items-center gap-2',
+                  interactive && ['rounded-lg', FOCUS_RING],
+                )}
+                ref={status === 'current' ? currentRef : undefined}
+                tabIndex={interactive && status === 'current' ? -1 : undefined}
+              >
+                {body}
+              </span>
             )}
             {isLast ? null : (
               <span
