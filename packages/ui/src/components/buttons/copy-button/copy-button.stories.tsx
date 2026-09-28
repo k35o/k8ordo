@@ -64,11 +64,13 @@ export const Default: Story = {
     await expect(button).toHaveAccessibleName('コピー');
     await expect(iconOf(button)).not.toBe(idleIcon);
 
+    // 結果は 2 秒見せてから消える。CI の Firefox では、描き直しまで
+    // 3 秒を超えたことがある
     await waitFor(
       () => {
         expect(iconOf(button)).toBe(idleIcon);
       },
-      { timeout: 3000 },
+      { timeout: 5000 },
     );
     await expect(canvas.getByRole('status')).toHaveTextContent('');
   },
