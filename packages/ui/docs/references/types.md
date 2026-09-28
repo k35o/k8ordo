@@ -90,6 +90,7 @@ code around it:
 | `ButtonRenderItemProps` / `IconButtonRenderItemProps`                 | What `renderItem` receives on `Button` / `IconButton`                                                   |
 | `IconButtonTriggerProps`                                              | `Partial<TooltipTriggerProps>`: the tooltip wiring in `IconButtonRenderItemProps`' `triggerProps`       |
 | `PopoverTriggerProps` / `PopoverContentProps` / `TooltipTriggerProps` | What `renderItem` receives on `Popover.Trigger` / `Popover.Content` / `Tooltip.Trigger`                 |
+| `ToolbarItemProps`                                                    | What `renderItem` receives on `Toolbar.Item`: `ref`, `tabIndex`, `onFocus`                              |
 | `AlertAction` / `ToastAction` / `ToastOptions`                        | `Alert`'s `action`, and the `action` and `duration` a toast takes                                       |
 | `ColorPickerSwatch`                                                   | A preset in `ColorPicker`'s `swatches`: `value` (`#rrggbb`) and `label`, the color's name               |
 | `ComboboxSearch`                                                      | `Combobox`'s `search`: `(query, { signal }) => Promise<readonly Option[]>`                              |
