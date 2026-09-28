@@ -4,6 +4,7 @@ import {
   useCallback,
   useEffect,
   useId,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -108,6 +109,8 @@ export type ArrayView = {
   canAdd: boolean;
   canRemove: boolean;
   error: string | undefined;
+  /** Spread onto the element that shows `error`, so focus can land on it. */
+  errorProps: { id: string; tabIndex: -1 };
 };
 
 export type FormErrorView = {
@@ -263,9 +266,11 @@ export const useForm = <
     rowCountsFor(lookup, state),
   );
   const [rowKeys, setRowKeys] = useState(() => rowKeysFor(baselineRows));
-  // The form-level message is found by id, not by a ref: it is usually drawn
-  // by an alert component that passes HTML attributes through but not a ref.
+  // The messages no control owns — the form's, each array's — are found by id,
+  // not by a ref: they are usually drawn by an alert component that passes
+  // HTML attributes through but not a ref.
   const formErrorId = useId();
+  const arrayErrorIdBase = useId();
 
   // Compared by content plus the parse token, not identity. A caller writing
   // `useForm(fields, {})` hands over a new object on every render, and
@@ -291,8 +296,23 @@ export const useForm = <
 
     // Moving focus to the first failure is the only way someone using a
     // screen reader learns the submit failed and where.
-    firstFailure(formRef.current, state, formErrorId)?.focus();
-  }, [stateKey, state, lookup, formErrorId]);
+    const messageIds = [
+      ...(state.formError === undefined ? [] : [formErrorId]),
+      ...Object.keys(lookup.arrays)
+        .filter((path) => state.errors?.[path] !== undefined)
+        .map((path) => arrayErrorId(arrayErrorIdBase, path)),
+    ];
+    firstFailure(formRef.current, state.errors ?? {}, messageIds)?.focus();
+  }, [stateKey, state, lookup, formErrorId, arrayErrorIdBase]);
+
+  // React は select の defaultValue をマウント時にしか反映しないので、あとから
+  // 返ったエコーは option の defaultSelected へ直接書く。action の後の自動リセット
+  // は同じコミットでこれより先に走るが、option の dirtiness を消すので、選択は
+  // 書いた既定値に追従する。layout effect なのは、描画と、reset の 1 タスク後に
+  // isDirty を DOM から読み直すのより先に済ませるため
+  useLayoutEffect(() => {
+    writeEchoToSelects(formRef.current, lookup, state.values);
+  }, [lookup, state.values]);
 
   const evaluate = useCallback(
     (target: EventTarget | null, onlyIfShown: boolean) => {
@@ -535,9 +555,10 @@ export const useForm = <
           derived.maxItems === undefined || keys.length < derived.maxItems,
         canRemove: keys.length > (derived.minItems ?? 0),
         error: state.errors?.[path],
+        errorProps: { id: arrayErrorId(arrayErrorIdBase, path), tabIndex: -1 },
       };
     },
-    [lookup, rowKeys, state, viewOf],
+    [lookup, rowKeys, state, viewOf, arrayErrorIdBase],
   );
 
   // `noValidate` is set from JavaScript, never rendered: in the HTML the
@@ -577,39 +598,41 @@ export const useForm = <
 };
 
 /**
- * The first failure in document order: a failed control, or the form-level
- * message. `state.errors` cannot say which comes first — its keys follow the
+ * An object key may hold whitespace, which an id must not — it would also
+ * split an `aria-describedby` list — so the path is encoded, not appended.
+ */
+const arrayErrorId = (base: string, path: string): string =>
+  `${base}-${encodeURIComponent(path)}`;
+
+/**
+ * The first failure in document order: a failed control, or the element
+ * showing a failure no control owns — the form-level message or an array's
+ * own. `state.errors` cannot say which comes first — its keys follow the
  * order zod reported the issues in, which is the schema's, not the page's.
  */
 const firstFailure = (
   form: HTMLFormElement | null,
-  state: FormState,
-  formErrorId: string,
+  errors: Record<string, string>,
+  messageIds: readonly string[],
 ): HTMLElement | undefined => {
   if (form === null) {
     return undefined;
   }
-  const errors = state.errors ?? {};
+  const candidates: HTMLElement[] = messageIds
+    .map((id) =>
+      form.ownerDocument.querySelector<HTMLElement>(`#${CSS.escape(id)}`),
+    )
+    .filter((message) => message !== null);
   const field = firstFailed(
     form,
     (control) => errors[control.name] !== undefined,
   );
-  const message =
-    state.formError === undefined
-      ? null
-      : form.ownerDocument.querySelector<HTMLElement>(
-          `#${CSS.escape(formErrorId)}`,
-        );
-  if (message === null) {
-    return field;
+  if (field !== undefined) {
+    candidates.push(field);
   }
-  if (field === undefined) {
-    return message;
-  }
-  return message.compareDocumentPosition(field) &
-    Node.DOCUMENT_POSITION_FOLLOWING
-    ? message
-    : field;
+  return candidates.toSorted((a, b) =>
+    a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1,
+  )[0];
 };
 
 /** The first control in document order that `failed` picks out. */
@@ -715,6 +738,41 @@ const applyRules = (
         control.setCustomValidity('');
       }
       owned.delete(name);
+    }
+  }
+};
+
+const writeEchoToSelects = (
+  form: HTMLFormElement | null,
+  fields: FormFields,
+  values: FormState['values'],
+): void => {
+  if (form === null || values === undefined) {
+    return;
+  }
+  for (const element of form.elements) {
+    // スキーマの外の select には、input に defaultValue を付けないのと同じく
+    // 触らない
+    if (
+      !(element instanceof HTMLSelectElement) ||
+      fieldFor(fields, element.name) === undefined
+    ) {
+      continue;
+    }
+    // disabled の select（fieldset ごと disabled なものも）は何も送っていないが、
+    // チェックボックス群の欄は送らなくても [] で返り、エコーからは見分けられない。
+    // 未選択と読むと既定値を消してしまう
+    if (element.matches(':disabled')) {
+      continue;
+    }
+    // エコーに無いのは送信時に無かった select で、これも何も送っていない
+    const echoed = values[element.name];
+    if (echoed === undefined) {
+      continue;
+    }
+    const chosen = new Set([echoed].flat());
+    for (const option of element.options) {
+      option.defaultSelected = chosen.has(option.value);
     }
   }
 };

@@ -78,6 +78,9 @@ export const routes = defineRoutes({
   only appear once in an object, so two sections at the same depth could not
   otherwise have different layouts.
 - **A trailing slash is the same pathname.** `/products/` matches `/products`.
+- A branch may name a **`loading`** component — no props — to show while
+  what is below it suspends: `{ layout, loading, children }` puts a
+  `<Suspense>` there, inside the branch's `error` boundary.
 - A branch may name an **`error`** component beside its layout:
   `{ layout, error, children }`. When anything below throws, it renders in
   the layout's hole instead — with `{ error, reset }` as props (`ErrorProps`;
@@ -215,7 +218,12 @@ served under is taken off (see _Served under a base_).
 Interception commits the URL first and the tree arrives when it has loaded, so
 on a slow navigation a link marks itself active while the previous page is
 still on screen — the same order the browser's own address bar follows. If the
-wait needs showing, await `navigateTo`'s `finished` — it resolves when the
+wait needs showing, `usePendingPathname()` is where a page change in progress
+is going — `null` when none is — set as the navigation starts and cleared once
+the new page is on screen or the navigation is given up; a state change sets
+nothing, unless the host loads the page again for it (a framework page that
+reads the search), which is a load in progress like any other. The caller that
+started it can instead await `navigateTo`'s `finished` — it resolves when the
 tree is on screen (below).
 
 `usePathname` reads the platform rather than the table, which is why it is the
@@ -533,6 +541,13 @@ const { generation } = useInterceptedNavigation<Value>({
 const shown = useDeferredValue(latest); // render this, not `latest`
 ```
 
+A fourth, optional member, `refresh: (url) => boolean`, says whether a
+navigation that keeps the pathname on screen still has to load — the page
+showing reads what moved. Without it such a navigation is a state change and
+loads nothing; with it, it loads and applies like a page change but as a
+state change otherwise: no scroll, no focus reset, no transition types. The
+framework's runtime answers it for a page that exports `search`.
+
 A host renders what `apply` set through `useDeferredValue`, in the same
 component that calls the hook. That is what renders the new page in the
 background and keeps the old one on screen meanwhile, and what the hook
@@ -577,7 +592,8 @@ server instead, which is the only form Server Components can take them in.
 Those props have a type here, by the pattern the directory puts the file
 under: `PageProps<'/products/:id'>` is `{ params, pathname }` with `params`
 typed by the schemas the framework ran (the generated `Register` carries
-them), and `LayoutProps<'/products'>` adds `children` — with `params` left as
+them), plus `search` for a page that exports `search` (typed by what it
+reads), and `LayoutProps<'/products'>` adds `children` — with `params` left as
 strings whatever the schemas say, since `not-found.tsx` renders under a layout
 whether or not its schemas accepted. Under `@k8ordo/server` the generated `Register` also carries
 the `request`, so both types gain `request` there and a page that reads it

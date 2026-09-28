@@ -108,6 +108,11 @@ export const buildComponentLibrary = <C>(
     'Table the reader can sort (by the columns marked sortable) and, with selectable, pick rows from. Every row must have exactly as many cells as there are columns.',
     s.dataTableProps,
   );
+  const Tree = def(
+    'Tree',
+    'Tree of nodes that open and close, such as files and folders, navigable with the arrow keys. List every node flat; a child names its parent by parentId.',
+    s.treeProps,
+  );
   const TextField = def(
     'TextField',
     'Single-line text input, bound to form state by name.',
@@ -137,6 +142,11 @@ export const buildComponentLibrary = <C>(
     'RangeSlider',
     'Slider with two thumbs for picking a range, bound to form state by name as [lower, upper].',
     s.rangeSliderProps,
+  );
+  const ColorPicker = def(
+    'ColorPicker',
+    'Color input with a visible label (#rrggbb), hue / saturation / lightness sliders, and optional preset swatches, bound to form state by name.',
+    s.colorPickerProps,
   );
   const DateField = def(
     'DateField',
@@ -193,6 +203,11 @@ export const buildComponentLibrary = <C>(
     'Tooltip shown on hover or focus.',
     s.tooltipProps,
   );
+  const Toolbar = def(
+    'Toolbar',
+    'Row (or column) of buttons that arrow keys move between, e.g. formatting actions. Give each item an icon to show only the icon.',
+    s.toolbarProps,
+  );
   const DropdownMenu = def(
     'DropdownMenu',
     'Dropdown menu.',
@@ -212,6 +227,11 @@ export const buildComponentLibrary = <C>(
     'CheckboxGroup',
     'Group of checkboxes, bound to form state by name.',
     s.checkboxGroupProps,
+  );
+  const Combobox = def(
+    'Combobox',
+    'Text field with a visible label that filters options as you type, for picking one, bound to form state by name. Prefer it to ListBox when there are many options.',
+    s.comboboxProps,
   );
   const Autocomplete = def(
     'Autocomplete',
@@ -254,6 +274,7 @@ export const buildComponentLibrary = <C>(
     SideNav.ref,
     Table.ref,
     DataTable.ref,
+    Tree.ref,
     TextField.ref,
     Textarea.ref,
     PasswordInput.ref,
@@ -263,6 +284,7 @@ export const buildComponentLibrary = <C>(
     DateField.ref,
     DatePicker.ref,
     Calendar.ref,
+    ColorPicker.ref,
     Checkbox.ref,
     Switch.ref,
     Select.ref,
@@ -272,9 +294,11 @@ export const buildComponentLibrary = <C>(
     Pagination.ref,
     Tooltip.ref,
     DropdownMenu.ref,
+    Toolbar.ref,
     Toast.ref,
     ListBox.ref,
     CheckboxGroup.ref,
+    Combobox.ref,
     Autocomplete.ref,
     FileField.ref,
     FormControl.ref,
@@ -398,6 +422,7 @@ export const buildComponentLibrary = <C>(
       Carousel,
       Tooltip,
       DropdownMenu,
+      Toolbar,
       Toast,
       Button,
       IconButton,
@@ -423,6 +448,7 @@ export const buildComponentLibrary = <C>(
       SideNav,
       Table,
       DataTable,
+      Tree,
       TextField,
       Textarea,
       PasswordInput,
@@ -432,6 +458,7 @@ export const buildComponentLibrary = <C>(
       DateField,
       DatePicker,
       Calendar,
+      ColorPicker,
       Checkbox,
       Switch,
       Select,
@@ -441,6 +468,7 @@ export const buildComponentLibrary = <C>(
       Pagination,
       ListBox,
       CheckboxGroup,
+      Combobox,
       Autocomplete,
       FileField,
       FormControl,

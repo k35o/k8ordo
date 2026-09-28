@@ -207,7 +207,7 @@ boundaries, focus rings, and selected states visible:
 </div>
 
 // Hover state
-<button className="bg-bg-base hover:bg-bg-mute transition-colors">
+<button className="bg-bg-base hover:bg-bg-mute transition-colors duration-150 ease-out">
   Button
 </button>
 ```

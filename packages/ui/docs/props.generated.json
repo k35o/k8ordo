@@ -1076,6 +1076,55 @@
       "omitted": []
     },
     {
+      "name": "ColorPicker",
+      "props": [
+        {
+          "name": "defaultValue",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "invalid",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "types": ["(value: string) => void"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "ref",
+          "types": ["Ref<HTMLInputElement>"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "swatches",
+          "types": ["readonly ColorPickerSwatch[]"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "type",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "value",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": "InputHTMLAttributes<HTMLInputElement>",
+      "omitted": ["className", "style", "children"]
+    },
+    {
       "name": "ColorScaleIcon",
       "props": [
         {
@@ -1087,6 +1136,71 @@
       ],
       "inherits": null,
       "omitted": []
+    },
+    {
+      "name": "Combobox",
+      "props": [
+        {
+          "name": "defaultValue",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "invalid",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "types": ["(value: string) => void"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "options",
+          "types": ["readonly Option[]"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "ref",
+          "types": ["Ref<HTMLInputElement>"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "search",
+          "types": ["ComboboxSearch"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "type",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "value",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": "InputHTMLAttributes<HTMLInputElement>",
+      "omitted": [
+        "role",
+        "className",
+        "style",
+        "children",
+        "autoComplete",
+        "aria-autocomplete",
+        "aria-controls",
+        "aria-expanded",
+        "aria-activedescendant"
+      ]
     },
     {
       "name": "CommandPalette",
@@ -1132,6 +1246,103 @@
           "types": ["Ref<HTMLDialogElement>"],
           "defaultValue": null,
           "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "ContextMenu.Content",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "ContextMenu.Item",
+      "props": [
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "onAction",
+          "types": ["() => void"],
+          "defaultValue": null,
+          "required": true
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "ContextMenu.Root",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "defaultOpen",
+          "types": ["boolean"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "isOpen",
+          "types": ["boolean"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "types": ["(isOpen: boolean) => void"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "ContextMenu.SubMenu",
+      "props": [
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "ContextMenu.Trigger",
+      "props": [
+        {
+          "name": "renderItem",
+          "types": [
+            "(props: { onContextMenu: MouseEventHandler<HTMLElement>; }) => ReactElement"
+          ],
+          "defaultValue": null,
+          "required": true
         }
       ],
       "inherits": null,
@@ -4444,6 +4655,50 @@
       "omitted": []
     },
     {
+      "name": "Toolbar.Item",
+      "props": [
+        {
+          "name": "renderItem",
+          "types": ["(props: ToolbarItemProps) => ReactElement"],
+          "defaultValue": null,
+          "required": true
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "Toolbar.Root",
+      "props": [
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "orientation",
+          "types": ["'horizontal'", "'vertical'"],
+          "defaultValue": "'horizontal'",
+          "required": false
+        },
+        {
+          "name": "ref",
+          "types": ["Ref<HTMLDivElement>"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": "HTMLAttributes<HTMLDivElement>",
+      "omitted": ["className", "style", "role", "aria-orientation"]
+    },
+    {
+      "name": "Toolbar.Separator",
+      "props": [],
+      "inherits": null,
+      "omitted": []
+    },
+    {
       "name": "ToolInvocation",
       "props": [
         {
@@ -4586,6 +4841,61 @@
       ],
       "inherits": null,
       "omitted": []
+    },
+    {
+      "name": "Tree",
+      "props": [
+        {
+          "name": "items",
+          "types": ["readonly TreeItem[]"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "defaultExpandedIds",
+          "types": ["readonly string[]"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "defaultSelectedId",
+          "types": ["string", "null"],
+          "defaultValue": "null",
+          "required": false
+        },
+        {
+          "name": "expandedIds",
+          "types": ["readonly string[]"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "onChange",
+          "types": ["(id: string) => void"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "onExpandedChange",
+          "types": ["(ids: readonly string[]) => void"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "selectedId",
+          "types": ["string", "null"],
+          "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": "HTMLAttributes<HTMLUListElement>",
+      "omitted": ["children", "className", "style", "role", "aria-label"]
     },
     {
       "name": "TwitterIcon",

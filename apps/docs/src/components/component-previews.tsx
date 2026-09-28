@@ -16,6 +16,8 @@ import {
   CheckboxCard,
   CloseIcon,
   Code,
+  ColorPicker,
+  Combobox,
   CopyButton,
   DataTable,
   Dialog,
@@ -52,6 +54,7 @@ import {
   TextField,
   Textarea,
   Tooltip,
+  Tree,
 } from '@k8ordo/ui';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
@@ -344,6 +347,23 @@ export const componentPreviews: Record<string, ReactNode> = {
       />
     </div>
   ),
+  Tree: (
+    <div className="w-44">
+      <Tree
+        defaultExpandedIds={['src']}
+        defaultSelectedId="index"
+        items={[
+          {
+            id: 'src',
+            label: 'src',
+            children: [{ id: 'index', label: 'index.ts' }],
+          },
+          { id: 'readme', label: 'README.md' },
+        ]}
+        label="Tree"
+      />
+    </div>
+  ),
   Heading: <Heading level="h2">Section Title</Heading>,
   Prose: (
     <div className="w-full max-w-56">
@@ -417,6 +437,23 @@ export const componentPreviews: Record<string, ReactNode> = {
       >
         <ListBox.Trigger />
       </ListBox.Root>
+    </div>
+  ),
+  ColorPicker: (
+    <div className="w-56">
+      <ColorPicker aria-label="Accent color" defaultValue="#0d9488" />
+    </div>
+  ),
+  Combobox: (
+    <div className="w-56">
+      <Combobox
+        aria-label="Prefecture"
+        defaultValue="kyoto"
+        options={[
+          { value: 'tokyo', label: 'Tokyo' },
+          { value: 'kyoto', label: 'Kyoto' },
+        ]}
+      />
     </div>
   ),
   CommandPalette: (

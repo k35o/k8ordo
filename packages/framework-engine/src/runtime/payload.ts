@@ -13,6 +13,13 @@ export type Payload = {
    */
   pathname: string;
   /**
+   * The search this payload was rendered with (`?q=shoes`, or `''`) — only
+   * when its page declared what of the search it reads. A client navigation
+   * that moves the search loads such a page again; any other page renders
+   * the same whatever the search holds, and has none.
+   */
+  search?: string;
+  /**
    * The client this payload was rendered for: the URL of the script its
    * page's HTML loads. A document running another script cannot be trusted
    * to render it.
@@ -50,3 +57,11 @@ export const NOT_FOUND_DIGEST = 'K8ORDO_NOT_FOUND';
  * refused, which is a 404 as well.
  */
 export const NOT_FOUND_HEADER = 'x-k8ordo-not-found';
+
+/**
+ * Said by the handler under `@k8ordo/static` alone, on a page's HTML: the
+ * nonce its inline scripts were signed with, which the build turns into the
+ * hashes a `Content-Security-Policy` names. A file cannot carry a nonce —
+ * everyone reads the same one.
+ */
+export const NONCE_HEADER = 'x-k8ordo-nonce';

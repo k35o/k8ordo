@@ -238,7 +238,7 @@ Soft spacing and quiet refinement. The appeal is in space and shape.
 
 **DO:**
 
-- Start from `transition-colors`
+- Start from `transition-colors duration-150 ease-out`
 - Express focus with `focus-visible:ring-2 focus-visible:ring-border-info`
 - Keep hover gentle with `hover:bg-bg-mute`
 
@@ -433,10 +433,11 @@ directly on APIs a browser has and jsdom does not: `ResizeObserver`,
 `IntersectionObserver`, `matchMedia`, `HTMLDialogElement`'s `showModal` /
 `close`, and the Popover API. None of them is called through a support check,
 so under jsdom `Tooltip`, `IconButton` (unless `tooltipDisabled`), `Tabs`,
-`Autocomplete`, `InView`, `Resize`, and `Conversation` throw as soon as they
-mount; `Modal`, `CommandPalette`, `Drawer`, `Popover`, `DropdownMenu`, `ListBox`,
-and `DatePicker` throw the moment they open (a `DropdownMenu` holding a `SubMenu` already at
-mount); and a `clearable` `FileField.ItemList` throws once it lists a file.
+`Autocomplete`, `Combobox`, `Toolbar`, `InView`, `Resize`, and `Conversation`
+throw as soon as they mount; `Modal`, `CommandPalette`, `Drawer`, `Popover`,
+`DropdownMenu`, `ContextMenu`, `ListBox`, and `DatePicker` throw the moment they
+open (a `DropdownMenu` holding a `SubMenu` already at mount); and a `clearable`
+`FileField.ItemList` throws once it lists a file.
 
 This is not a gap to be stubbed around. A synthetic DOM (jsdom, happy-dom) has
 no layout engine, so even with stubs in place a passing assertion about focus,

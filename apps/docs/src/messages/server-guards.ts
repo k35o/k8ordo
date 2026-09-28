@@ -1,8 +1,8 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: 'ページは描画であって、応答を書きません。リクエストを通すかどうかと、応答にページ以外の何を付けるかは、ページより前に走る `guard.ts` が決めます。このページは、`guard.ts` の書き方、打ち切り方と通し方、`responseHeaders()` での添え方、guard が受け持つ範囲、`cookies()` での Cookie の読み書きを説明します。',
-  en: 'A page is a render; it does not write the response. Whether a request gets through, and what the answer carries beyond the page, is decided before the page by a `guard.ts`. This page covers writing one, ending a request and letting it through, adding to the answer with `responseHeaders()`, what a guard covers, and reading and writing cookies with `cookies()`.',
+  ja: 'ページは描画であって、応答を書きません。リクエストを通すかどうかと、応答にページ以外の何を付けるかは、ページより前に走る `guard.ts` が決めます。このページは、`guard.ts` の書き方、打ち切り方と通し方、`responseHeaders()` での添え方、guard が受け持つ範囲、`cookies()` での Cookie の読み書き、`nonce()` での Content-Security-Policy を説明します。',
+  en: 'A page is a render; it does not write the response. Whether a request gets through, and what the answer carries beyond the page, is decided before the page by a `guard.ts`. This page covers writing one, ending a request and letting it through, adding to the answer with `responseHeaders()`, what a guard covers, reading and writing cookies with `cookies()`, and a Content-Security-Policy with `nonce()`.',
 });
 
 export const guardTitle = message({
@@ -138,4 +138,24 @@ export const cookiesOptions = message({
 export const cookiesPage = message({
   ja: 'ページは Cookie を書きません。props の `request.cookies` から、リクエストが運んできた Cookie を読むだけです。',
   en: 'A page never writes a cookie: it reads `request.cookies` from its props, the cookies the request carried.',
+});
+
+export const cspTitle = message({
+  ja: 'Content-Security-Policy と `nonce()`',
+  en: 'A Content-Security-Policy, and `nonce()`',
+});
+
+export const cspDescription = message({
+  ja: 'フレームワークはポリシーを決めません。自分が出すインラインスクリプト（hydration 用に HTML へ書くペイロードと、React のもの）と起動のモジュールに、リクエストごとに作った nonce を付けるだけです。`nonce()` はその nonce で、guard はそれを名指すポリシーをヘッダーに書きます。',
+  en: 'The framework decides no policy. It puts a nonce, new for every request, on the inline scripts it writes itself — the payload it puts into the HTML for hydration, and React’s — and on its module script. `nonce()` is that nonce, and a guard writes the policy that names it.',
+});
+
+export const cspSign = message({
+  ja: 'アプリ自身のインラインスクリプトは、アプリが同じ nonce で署名します。`@k8ordo/color-scheme` なら、ルートレイアウトで `nonce={nonce()}` を渡します。`nonce()` はリクエストに答えている間ならどこでも、描画の中でも同じ値を返します。スクリプトに署名するのは応答を書くことではないからです。リクエストの外では throw します。',
+  en: 'An inline script of the application’s own is signed by the application with the same nonce — for `@k8ordo/color-scheme`, `nonce={nonce()}` in the root layout. `nonce()` returns the same value anywhere the request is being answered, the render included, since signing a script is not writing the response; it throws outside a request.',
+});
+
+export const cspCache = message({
+  ja: "起動のモジュールにも nonce が付くので、`'strict-dynamic'` の下ではそこから残りのクライアントが読み込まれます。nonce は新しいうちしか意味を持たないので、nonce を持つ答えを共有キャッシュに置かないでください。",
+  en: "The module script carries the nonce too, so under `'strict-dynamic'` it loads the rest of the client. A nonce is worth something only while it is new: an answer that carries one is not one to keep in a shared cache.",
 });

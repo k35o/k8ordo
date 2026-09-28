@@ -6,6 +6,7 @@ import type { ComponentProps, FC, ReactNode } from 'react';
 import { Button } from '../../components/buttons/button';
 import { CopyButton } from '../../components/buttons/copy-button';
 import { IconButton } from '../../components/buttons/icon-button';
+import { Toolbar } from '../../components/buttons/toolbar';
 import { Accordion } from '../../components/data-display/accordion';
 import { Avatar } from '../../components/data-display/avatar';
 import { Badge } from '../../components/data-display/badge';
@@ -17,6 +18,8 @@ import type { DataTableSort } from '../../components/data-display/data-table';
 import { Heading } from '../../components/data-display/heading';
 import { Kbd } from '../../components/data-display/kbd';
 import { Table } from '../../components/data-display/table';
+import { Tree } from '../../components/data-display/tree';
+import type { TreeItem } from '../../components/data-display/tree';
 import { Alert } from '../../components/feedback/alert';
 import { EmptyState } from '../../components/feedback/empty-state';
 import { Progress } from '../../components/feedback/progress';
@@ -28,6 +31,8 @@ import { Calendar } from '../../components/form/calendar';
 import { Checkbox } from '../../components/form/checkbox';
 import { CheckboxCard } from '../../components/form/checkbox-card';
 import { CheckboxGroup } from '../../components/form/checkbox-group';
+import { ColorPicker } from '../../components/form/color-picker';
+import { Combobox } from '../../components/form/combobox';
 import { DateField } from '../../components/form/date-field';
 import { DatePicker } from '../../components/form/date-picker';
 import { FileField } from '../../components/form/file-field';
@@ -119,6 +124,7 @@ import type {
   AlertProps,
   AnchorProps,
   AutocompleteProps,
+  ComboboxProps,
   AvatarProps,
   BadgeProps,
   BreadcrumbProps,
@@ -131,6 +137,7 @@ import type {
   CheckboxProps,
   ChevronIconProps,
   CodeProps,
+  ColorPickerProps,
   DataTableProps,
   DateFieldProps,
   DatePickerProps,
@@ -168,10 +175,12 @@ import type {
   StatusIconProps,
   SwitchProps,
   TableProps,
+  TreeProps,
   TabsProps,
   TextareaProps,
   TextFieldProps,
   ToastProps,
+  ToolbarProps,
   TooltipProps,
 } from './schemas';
 
@@ -571,6 +580,35 @@ const LabeledField: FC<{
   );
 };
 
+const ColorPickerView: FC<{
+  props: ColorPickerProps;
+  value: string;
+  onChange: (next: string) => void;
+}> = ({ props, value, onChange }) => (
+  <LabeledField label={props.label}>
+    {(labelId) => (
+      <ColorPicker
+        aria-labelledby={labelId}
+        disabled={u(props.disabled)}
+        invalid={u(props.invalid)}
+        name={props.name}
+        onChange={onChange}
+        required={u(props.required)}
+        swatches={u(props.swatches)}
+        value={value}
+      />
+    )}
+  </LabeledField>
+);
+
+export function renderColorPicker(
+  props: ColorPickerProps,
+  value: string,
+  onChange: (next: string) => void,
+): ReactNode {
+  return <ColorPickerView onChange={onChange} props={props} value={value} />;
+}
+
 const DateFieldView: FC<{
   props: DateFieldProps;
   value: string;
@@ -903,6 +941,39 @@ export function renderBreadcrumb(props: BreadcrumbProps): ReactNode {
   );
 }
 
+// 平らな一覧を親子の木に組む。親の見つからない項目は根に置く
+export const toTree = (items: TreeProps['items']): TreeItem[] => {
+  const ids = new Set(items.map((item) => item.id));
+  const build = (parentId: string | undefined): TreeItem[] =>
+    items
+      .filter((item) => {
+        // OpenUI は省いた引数を null で渡すので、undefined にそろえてから見る
+        const parent = u(item.parentId);
+        return parentId === undefined
+          ? parent === undefined || !ids.has(parent)
+          : parent === parentId;
+      })
+      .map((item): TreeItem => {
+        const children = build(item.id);
+        return children.length > 0
+          ? { id: item.id, label: item.label, children }
+          : { id: item.id, label: item.label };
+      });
+  return build(undefined);
+};
+
+export function renderTree(props: TreeProps): ReactNode {
+  return (
+    <Tree
+      defaultExpandedIds={props.items
+        .filter((item) => item.expanded === true)
+        .map((item) => item.id)}
+      items={toTree(props.items)}
+      label={props.label}
+    />
+  );
+}
+
 export function renderSideNav(props: SideNavProps): ReactNode {
   return (
     <SideNav.Root label={props.label}>
@@ -1100,6 +1171,34 @@ export function renderTooltip(props: TooltipProps): ReactNode {
   );
 }
 
+export function renderToolbar(props: ToolbarProps): ReactNode {
+  return (
+    <Toolbar.Root aria-label={props.label} orientation={u(props.orientation)}>
+      {props.items.map((item, index) => {
+        const icon = u(item.icon);
+        const IconComponent = icon === undefined ? undefined : iconMap[icon];
+        return (
+          <Toolbar.Item
+            // eslint-disable-next-line react/no-array-index-key -- 生成された静的な並び
+            key={`${item.label}-${index}`}
+            renderItem={(itemProps) =>
+              IconComponent === undefined ? (
+                <Button {...itemProps} size="sm" variant="skeleton">
+                  {item.label}
+                </Button>
+              ) : (
+                <IconButton {...itemProps} label={item.label} size="sm">
+                  <IconComponent size="sm" />
+                </IconButton>
+              )
+            }
+          />
+        );
+      })}
+    </Toolbar.Root>
+  );
+}
+
 export function renderDropdownMenu(props: DropdownMenuProps): ReactNode {
   return (
     <DropdownMenu.Root>
@@ -1251,6 +1350,36 @@ export function renderAutocomplete(
   onChange: (next: string[]) => void,
 ): ReactNode {
   return <AutocompleteView onChange={onChange} props={props} value={value} />;
+}
+
+const ComboboxView: FC<{
+  props: ComboboxProps;
+  value: string;
+  onChange: (next: string) => void;
+}> = ({ props, value, onChange }) => (
+  <LabeledField label={props.label}>
+    {(labelId) => (
+      <Combobox
+        aria-labelledby={labelId}
+        disabled={u(props.disabled)}
+        invalid={u(props.invalid)}
+        name={props.name}
+        onChange={onChange}
+        options={props.options}
+        placeholder={u(props.placeholder)}
+        required={u(props.required)}
+        value={value}
+      />
+    )}
+  </LabeledField>
+);
+
+export function renderCombobox(
+  props: ComboboxProps,
+  value: string,
+  onChange: (next: string) => void,
+): ReactNode {
+  return <ComboboxView onChange={onChange} props={props} value={value} />;
 }
 
 export const FileFieldWidget: FC<{ props: FileFieldProps }> = ({ props }) => {

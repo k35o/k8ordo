@@ -82,6 +82,42 @@ describe('validateGeneratedSpec', () => {
     expect(triple.ok).toBe(false);
   });
 
+  it('ColorPicker の色は #rrggbb だけを受け入れる', () => {
+    const colorOf = (defaultValue: string) =>
+      validateGeneratedSpec(
+        specWithTarget({
+          type: 'ColorPicker',
+          props: {
+            name: 'accent',
+            label: 'テーマの色',
+            defaultValue,
+            swatches: [{ value: '#0D9488', label: 'ティール' }],
+          },
+          children: [],
+        }),
+      );
+
+    expect(colorOf('#f97316')).toMatchObject({ ok: true });
+    expect(colorOf('#f80').ok).toBe(false);
+    expect(colorOf('orange').ok).toBe(false);
+  });
+
+  it('Combobox は候補を 1 つ以上要る', () => {
+    const withOptions = (options: readonly unknown[]) =>
+      validateGeneratedSpec(
+        specWithTarget({
+          type: 'Combobox',
+          props: { name: 'prefecture', label: '都道府県', options },
+          children: [],
+        }),
+      );
+
+    expect(withOptions([{ value: 'tokyo', label: '東京都' }])).toMatchObject({
+      ok: true,
+    });
+    expect(withOptions([]).ok).toBe(false);
+  });
+
   it('スキーマに無いキーを未知のプロパティとして報告する', () => {
     const result = validateGeneratedSpec(
       specWithTarget({

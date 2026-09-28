@@ -127,41 +127,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   );
 }`;
 
-const UI_CSS = `/* src/styles/globals.css */
-@import '@k8ordo/ui/tailwind.css';`;
-
-const UI_MARKUP = `// src/components/logo.tsx
-export function Logo() {
-  return (
-    <div className="bg-bg-base text-fg-base rounded-md p-4">
-      <img alt="k8ordo" className="dark:invert" src="/logo.svg" />
-    </div>
-  );
-}`;
-
-const TAILWIND_CSS = `/* src/styles/globals.css */
-@import 'tailwindcss';
-
-@custom-variant dark (&:where(.dark, .dark *));`;
-
-const PLAIN_CSS = `/* src/styles/globals.css */
-:root {
-  color-scheme: light;
-  --page-bg: #ffffff;
-  --page-fg: #1f1f1f;
-}
-
-:root.dark {
-  color-scheme: dark;
-  --page-bg: #1f1f1f;
-  --page-fg: #f5f5f5;
-}
-
-body {
-  background: var(--page-bg);
-  color: var(--page-fg);
-}`;
-
 const thClass = 'py-3 pr-6 font-medium whitespace-nowrap';
 const tdClass = 'py-3 pr-6 align-top';
 
@@ -345,46 +310,26 @@ export default function ColorSchemeGetStartedPage() {
         </p>
       </DocSection>
 
-      <DocSection description={t.styling.description} title={t.styling.title}>
-        <Heading level="h3">
-          <Rich>{t.styling.uiTitle()}</Rich>
-        </Heading>
-        <p className="text-fg-mute leading-relaxed">
-          <Rich>{t.styling.uiDescription()}</Rich>
-        </p>
-        <CodeBlock code={UI_CSS} lang="css" />
-        <CodeBlock code={UI_MARKUP} lang="tsx" />
-        <Heading level="h3">
-          <Rich>{t.styling.tailwindTitle()}</Rich>
-        </Heading>
-        <p className="text-fg-mute leading-relaxed">
-          <Rich>{t.styling.tailwindDescription()}</Rich>
-        </p>
-        <CodeBlock code={TAILWIND_CSS} lang="css" />
-        <Heading level="h3">
-          <Rich>{t.styling.plainTitle()}</Rich>
-        </Heading>
-        <p className="text-fg-mute leading-relaxed">
-          <Rich>{t.styling.plainDescription()}</Rich>
-        </p>
-        <CodeBlock code={PLAIN_CSS} lang="css" />
-      </DocSection>
-
       <DocSection title={t.next.title}>
         <ul className="flex flex-col gap-3 pl-6">
           <li className="list-disc">
+            <LocaleAnchor path="/:locale/color-scheme/styling">
+              <Rich>{t.next.styling()}</Rich>
+            </LocaleAnchor>
+          </li>
+          <li className="list-disc">
+            <LocaleAnchor path="/:locale/color-scheme/storage">
+              <Rich>{t.next.storage()}</Rich>
+            </LocaleAnchor>
+          </li>
+          <li className="list-disc">
+            <LocaleAnchor path="/:locale/color-scheme/csp">
+              <Rich>{t.next.csp()}</Rich>
+            </LocaleAnchor>
+          </li>
+          <li className="list-disc">
             <LocaleAnchor path="/:locale/color-scheme/how-it-works">
               <Rich>{t.next.howItWorks()}</Rich>
-            </LocaleAnchor>
-          </li>
-          <li className="list-disc">
-            <LocaleAnchor path="/:locale/state/places">
-              <Rich>{t.next.state()}</Rich>
-            </LocaleAnchor>
-          </li>
-          <li className="list-disc">
-            <LocaleAnchor path="/:locale/ui/theming">
-              <Rich>{t.next.theming()}</Rich>
             </LocaleAnchor>
           </li>
         </ul>

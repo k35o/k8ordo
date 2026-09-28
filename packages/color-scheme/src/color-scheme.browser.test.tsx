@@ -6,7 +6,7 @@ import { renderHook } from 'vitest-browser-react';
 
 import { ColorSchemeProvider, useColorScheme } from './provider';
 import type { ColorSchemePreference } from './scheme';
-import { colorSchemeState, scriptFor } from './scheme';
+import { colorSchemeScriptHash, colorSchemeState, scriptFor } from './scheme';
 
 const root = document.documentElement;
 
@@ -135,6 +135,76 @@ describe('ColorSchemeProvider under hydration', () => {
     expect(root.classList.contains('dark')).toBe(true);
     app.unmount();
     container.remove();
+  });
+});
+
+describe('ColorSchemeProvider under a Content-Security-Policy', () => {
+  it('signs its inline script with the nonce it is given, and hydrates over it', async () => {
+    const container = document.createElement('div');
+    container.innerHTML = renderToString(
+      <ColorSchemeProvider nonce="bm9uY2U=">
+        <Probe />
+      </ColorSchemeProvider>,
+    );
+    const script = container.querySelector('script');
+    expect(script?.nonce).toBe('bm9uY2U=');
+    expect(script?.textContent).toBe(scriptFor('system'));
+    document.body.append(container);
+    const recoverable: unknown[] = [];
+    const app = hydrateRoot(
+      container,
+      <ColorSchemeProvider nonce="bm9uY2U=">
+        <Probe />
+      </ColorSchemeProvider>,
+      {
+        onRecoverableError: (error) => {
+          recoverable.push(error);
+        },
+      },
+    );
+    await vi.waitFor(() => {
+      expect(container.querySelector('span')?.textContent).toBe('light');
+    });
+
+    expect(recoverable).toStrictEqual([]);
+    expect(container.querySelector('script')).toBe(script);
+    app.unmount();
+    container.remove();
+  });
+});
+
+// A document of its own, under the policy its <meta> states, with the
+// provider's server render in its body — the script as React writes it.
+const underPolicy = async (policy: string): Promise<Document> => {
+  const frame = document.createElement('iframe');
+  frame.srcdoc = `<!doctype html><html><head><meta http-equiv="Content-Security-Policy" content="${policy}"></head><body>${renderToString(
+    <ColorSchemeProvider defaultPreference="dark">
+      <Probe />
+    </ColorSchemeProvider>,
+  )}</body></html>`;
+  const loaded = new Promise((resolve) => {
+    frame.addEventListener('load', resolve, { once: true });
+  });
+  document.body.append(frame);
+  await loaded;
+  onTestFinished(() => {
+    frame.remove();
+  });
+  return frame.contentDocument as Document;
+};
+
+describe('colorSchemeScriptHash', () => {
+  it('lets the inline script run under a policy that names it', async () => {
+    const hash = await colorSchemeScriptHash('dark');
+    const framed = await underPolicy(`script-src ${hash}`);
+    expect(framed.documentElement.classList.contains('dark')).toBe(true);
+  });
+
+  it('is what a policy has to name: without it the script is refused', async () => {
+    const framed = await underPolicy(
+      `script-src ${await colorSchemeScriptHash('light')}`,
+    );
+    expect(framed.documentElement.classList.contains('dark')).toBe(false);
   });
 });
 

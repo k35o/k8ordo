@@ -33,6 +33,13 @@ export type Messages = {
   /** 絞り込み結果が空のときの表示 */
   autocompleteEmpty: string;
 
+  /** Combobox の候補を開くボタン */
+  comboboxToggle: string;
+  /** Combobox の候補が見つからなかったとき */
+  comboboxEmpty: string;
+  /** Combobox の search が失敗したとき */
+  comboboxFailed: string;
+
   fileFieldRemove: string;
   fileFieldTrigger: string;
   /** FileField.Dropzone の既定の案内 */
@@ -56,6 +63,13 @@ export type Messages = {
   datePickerOpen: string;
   /** DatePicker が開くポップオーバー（dialog）の名前 */
   datePickerDialog: string;
+
+  /** ColorPicker の HSL のつまみ */
+  colorPickerHue: string;
+  colorPickerSaturation: string;
+  colorPickerLightness: string;
+  /** ColorPicker の見本のボタンをまとめる group の名前 */
+  colorPickerSwatches: string;
 
   passwordShow: string;
   passwordHide: string;

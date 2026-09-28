@@ -9,8 +9,11 @@ is here is only the part that makes an
 application run. The repository-wide discipline is in the root
 [`CLAUDE.md`](../../CLAUDE.md).
 
-User-facing documentation is in [`docs/GUIDE.md`](docs/GUIDE.md), shipped
-inside the npm package.
+User-facing documentation is [`docs/GUIDE.md`](docs/GUIDE.md), the entry
+point, with a reference per topic under [`docs/references/`](docs/references/)
+— the topics of the docs site's `/server/…` pages — all shipped inside the npm
+package. The sections both modes share are written from
+`packages/framework-engine/docs/shared/`; edit the fragment, never the copy.
 
 ## Commands
 
@@ -36,7 +39,8 @@ pnpm check         # check:write to auto-fix
 - **Three entries, by where the code runs.** The root is the plugin and
   loads Vite, which a deployed application does not have installed.
   `./runtime` (`src/runtime.ts`) is what code inside the handler imports —
-  `redirect`, `cookies`, `responseHeaders`, `requestHeaders` and the types,
+  `redirect`, `cookies`, `responseHeaders`, `requestHeaders`, `nonce` and
+  the types,
   `Guard` among them — and `./serve` (`src/serve.ts`) is the Node server. `examples/server-basic`'s handler test runs the build with Vite
   unresolvable to hold the first split.
 - **The handler is the exit, and it runs wherever `AsyncLocalStorage`

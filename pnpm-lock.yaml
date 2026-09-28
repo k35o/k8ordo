@@ -341,15 +341,24 @@ importers:
 
   examples/server-basic:
     dependencies:
+      '@k8ordo/color-scheme':
+        specifier: workspace:^
+        version: link:../../packages/color-scheme
       '@k8ordo/form':
         specifier: workspace:^
         version: link:../../packages/form
+      '@k8ordo/i18n':
+        specifier: workspace:^
+        version: link:../../packages/i18n
       '@k8ordo/router':
         specifier: workspace:^
         version: link:../../packages/router
       '@k8ordo/server':
         specifier: workspace:^
         version: link:../../packages/server
+      '@k8ordo/state':
+        specifier: workspace:^
+        version: link:../../packages/state
       react:
         specifier: 'catalog:'
         version: 19.3.0
@@ -384,9 +393,15 @@ importers:
 
   examples/static-basic:
     dependencies:
+      '@k8ordo/color-scheme':
+        specifier: workspace:^
+        version: link:../../packages/color-scheme
       '@k8ordo/router':
         specifier: workspace:^
         version: link:../../packages/router
+      '@k8ordo/state':
+        specifier: workspace:^
+        version: link:../../packages/state
       react:
         specifier: 'catalog:'
         version: 19.3.0
