@@ -701,47 +701,47 @@ const tagOptions = [
   { value: 'svelte', label: 'Svelte' },
 ];
 
-describe('CheckboxGroup', () => {
-  const Tags = () => (
-    <Harness
-      fields={tagsFields}
-      serve={(data) => parseForm(tagsDefinition, data)}
-    >
-      {(form, state) => {
-        const tags = form.field('tags');
-        return (
-          <>
-            <FormControl
-              errorText={tags.error}
-              invalid={tags.invalid}
-              label="好きなもの"
-              labelAs="legend"
-              renderInput={(props) => (
-                <CheckboxGroup.Root
-                  {...props}
-                  {...tags.input}
-                  defaultValue={listOf(state.values?.['tags'])}
-                >
-                  {tagOptions.map((option) => (
-                    <CheckboxGroup.Item
-                      itemValue={option.value}
-                      key={option.value}
-                      label={option.label}
-                    />
-                  ))}
-                </CheckboxGroup.Root>
-              )}
-              required={tags.required}
-            />
-            <Memo form={form} />
-          </>
-        );
-      }}
-    </Harness>
-  );
+const CheckboxGroupTags = () => (
+  <Harness
+    fields={tagsFields}
+    serve={(data) => parseForm(tagsDefinition, data)}
+  >
+    {(form, state) => {
+      const tags = form.field('tags');
+      return (
+        <>
+          <FormControl
+            errorText={tags.error}
+            invalid={tags.invalid}
+            label="好きなもの"
+            labelAs="legend"
+            renderInput={(props) => (
+              <CheckboxGroup.Root
+                {...props}
+                {...tags.input}
+                defaultValue={listOf(state.values?.['tags'])}
+              >
+                {tagOptions.map((option) => (
+                  <CheckboxGroup.Item
+                    itemValue={option.value}
+                    key={option.value}
+                    label={option.label}
+                  />
+                ))}
+              </CheckboxGroup.Root>
+            )}
+            required={tags.required}
+          />
+          <Memo form={form} />
+        </>
+      );
+    }}
+  </Harness>
+);
 
+describe('CheckboxGroup', () => {
   it('1 つもチェックせずに離れると minChecked の文言を出す', async () => {
-    const screen = await render(<Tags />);
+    const screen = await render(<CheckboxGroupTags />);
 
     await screen.getByRole('checkbox', { name: 'React' }).click();
     await screen.getByRole('checkbox', { name: 'React' }).click();
@@ -751,7 +751,7 @@ describe('CheckboxGroup', () => {
   });
 
   it('送信に失敗しても、チェックした値を描き直す', async () => {
-    const screen = await render(<Tags />);
+    const screen = await render(<CheckboxGroupTags />);
 
     await screen.getByRole('checkbox', { name: 'Vue' }).click();
     await refuseOnServer();
@@ -764,7 +764,7 @@ describe('CheckboxGroup', () => {
   });
 
   it('reset のあとも、次の操作は既定値から数える', async () => {
-    const screen = await render(<Tags />);
+    const screen = await render(<CheckboxGroupTags />);
 
     await screen.getByRole('checkbox', { name: 'React' }).click();
     reset();
@@ -779,40 +779,40 @@ describe('CheckboxGroup', () => {
   });
 });
 
-describe('CheckboxCard', () => {
-  const Tags = () => (
-    <Harness
-      fields={tagsFields}
-      serve={(data) => parseForm(tagsDefinition, data)}
-    >
-      {(form, state) => {
-        const tags = form.field('tags');
-        return (
-          <>
-            <FormControl
-              errorText={tags.error}
-              invalid={tags.invalid}
-              label="好きなもの"
-              labelAs="legend"
-              renderInput={(props) => (
-                <CheckboxCard
-                  {...props}
-                  {...tags.input}
-                  defaultValue={listOf(state.values?.['tags'])}
-                  options={tagOptions}
-                />
-              )}
-              required={tags.required}
-            />
-            <Memo form={form} />
-          </>
-        );
-      }}
-    </Harness>
-  );
+const CheckboxCardTags = () => (
+  <Harness
+    fields={tagsFields}
+    serve={(data) => parseForm(tagsDefinition, data)}
+  >
+    {(form, state) => {
+      const tags = form.field('tags');
+      return (
+        <>
+          <FormControl
+            errorText={tags.error}
+            invalid={tags.invalid}
+            label="好きなもの"
+            labelAs="legend"
+            renderInput={(props) => (
+              <CheckboxCard
+                {...props}
+                {...tags.input}
+                defaultValue={listOf(state.values?.['tags'])}
+                options={tagOptions}
+              />
+            )}
+            required={tags.required}
+          />
+          <Memo form={form} />
+        </>
+      );
+    }}
+  </Harness>
+);
 
+describe('CheckboxCard', () => {
   it('1 つもチェックせずに送ると minChecked の文言を出し、最初のカードへフォーカスを移す', async () => {
-    const screen = await render(<Tags />);
+    const screen = await render(<CheckboxCardTags />);
 
     await userEvent.fill(labelled('メモ'), 'よろしく');
     submit();
@@ -824,7 +824,7 @@ describe('CheckboxCard', () => {
   });
 
   it('送信に失敗しても、チェックした値を描き直す', async () => {
-    const screen = await render(<Tags />);
+    const screen = await render(<CheckboxCardTags />);
 
     await screen.getByRole('checkbox', { name: 'Vue' }).click();
     await refuseOnServer();
@@ -837,7 +837,7 @@ describe('CheckboxCard', () => {
   });
 
   it('reset のあとも、次の操作は既定値から数える', async () => {
-    const screen = await render(<Tags />);
+    const screen = await render(<CheckboxCardTags />);
 
     await screen.getByRole('checkbox', { name: 'React' }).click();
     reset();
@@ -854,39 +854,39 @@ describe('CheckboxCard', () => {
   });
 });
 
-describe('Autocomplete', () => {
-  const Tags = () => (
-    <Harness
-      fields={tagsFields}
-      serve={(data) => parseForm(tagsDefinition, data)}
-    >
-      {(form, state) => {
-        const tags = form.field('tags');
-        return (
-          <>
-            <FormControl
-              errorText={tags.error}
-              invalid={tags.invalid}
-              label="好きなもの"
-              renderInput={(props) => (
-                <Autocomplete
-                  {...props}
-                  {...tags.input}
-                  defaultValue={listOf(state.values?.['tags'])}
-                  options={tagOptions}
-                />
-              )}
-              required={tags.required}
-            />
-            <Memo form={form} />
-          </>
-        );
-      }}
-    </Harness>
-  );
+const AutocompleteTags = () => (
+  <Harness
+    fields={tagsFields}
+    serve={(data) => parseForm(tagsDefinition, data)}
+  >
+    {(form, state) => {
+      const tags = form.field('tags');
+      return (
+        <>
+          <FormControl
+            errorText={tags.error}
+            invalid={tags.invalid}
+            label="好きなもの"
+            renderInput={(props) => (
+              <Autocomplete
+                {...props}
+                {...tags.input}
+                defaultValue={listOf(state.values?.['tags'])}
+                options={tagOptions}
+              />
+            )}
+            required={tags.required}
+          />
+          <Memo form={form} />
+        </>
+      );
+    }}
+  </Harness>
+);
 
+describe('Autocomplete', () => {
   it('選んだ値を配列で送る', async () => {
-    await render(<Tags />);
+    await render(<AutocompleteTags />);
 
     await choose('Vue');
     await choose('React');
@@ -899,7 +899,7 @@ describe('Autocomplete', () => {
   });
 
   it('何も選ばずに送ると minChecked の文言を出し、入力欄へフォーカスを移す', async () => {
-    const screen = await render(<Tags />);
+    const screen = await render(<AutocompleteTags />);
 
     await userEvent.fill(labelled('メモ'), 'よろしく');
     submit();
@@ -909,7 +909,7 @@ describe('Autocomplete', () => {
   });
 
   it('選択の変化を form が知り、エラーの解除と isDirty に届く', async () => {
-    await render(<Tags />);
+    await render(<AutocompleteTags />);
 
     submit();
     await expect.poll(() => errorShown('1つ以上選んでください')).toBe(true);
@@ -920,7 +920,7 @@ describe('Autocomplete', () => {
   });
 
   it('送信に失敗しても選択を描き直し、reset で既定値に戻る', async () => {
-    const screen = await render(<Tags />);
+    const screen = await render(<AutocompleteTags />);
 
     await choose('Vue');
     await refuseOnServer();
@@ -942,7 +942,7 @@ describe('Autocomplete', () => {
   });
 
   it('reset で、選ばずに打ちかけた文字を消し、候補の一覧も閉じる', async () => {
-    const screen = await render(<Tags />);
+    const screen = await render(<AutocompleteTags />);
 
     await userEvent.type(screen.getByRole('combobox'), 'Re');
     await expect

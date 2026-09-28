@@ -678,15 +678,15 @@ describe('under a base', () => {
   });
 });
 
-describe('a page that reads the search', () => {
-  // 本文は JSON で運ぶので、木は文字列にする
-  const searched = (search: string): Payload => ({
-    tree: `results for ${search}`,
-    pathname: '/',
-    client: RUNNING,
-    search,
-  });
+// 本文は JSON で運ぶので、木は文字列にする
+const searched = (search: string): Payload => ({
+  tree: `results for ${search}`,
+  pathname: '/',
+  client: RUNNING,
+  search,
+});
 
+describe('a page that reads the search', () => {
   it('is loaded again, with the new search, when a navigation moves it', async () => {
     const asked = answerBySearch(searched);
     const screen = await render(

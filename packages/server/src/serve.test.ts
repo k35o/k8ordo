@@ -119,6 +119,12 @@ const exchange = (
     );
   });
 
+const etagOf = async (
+  pathname: string,
+  headers?: Readonly<Record<string, string>>,
+): Promise<string | null> =>
+  (await fetch(`${server.url}${pathname}`, { headers })).headers.get('etag');
+
 describe('serve', () => {
   it('listens on the port the system gave it and says so', () => {
     expect(server.port).toBeGreaterThan(0);
@@ -246,35 +252,27 @@ describe('serve', () => {
   });
 
   it('tags each coding of a file apart, since they are different bytes', async () => {
-    const tagOf = async (encoding: string): Promise<string | null> =>
-      (
-        await fetch(`${server.url}/assets/app-abc123.js`, {
-          headers: { 'accept-encoding': encoding },
-        })
-      ).headers.get('etag');
-    const tags = new Set([
-      await tagOf('br'),
-      await tagOf('gzip'),
-      await tagOf('identity'),
-    ]);
+    const tags = new Set(
+      await Promise.all(
+        ['br', 'gzip', 'identity'].map((encoding) =>
+          etagOf('/assets/app-abc123.js', { 'accept-encoding': encoding }),
+        ),
+      ),
+    );
     expect(tags.size).toBe(3);
   });
 
   it('tags a file by what it holds, not by when it was written', async () => {
-    const tagOf = async (): Promise<string | null> =>
-      (await fetch(`${server.url}/stable.txt`)).headers.get('etag');
-    const before = await tagOf();
+    const before = await etagOf('/stable.txt');
     // 別のマシンでビルドし直したのと同じ状況: 中身は同じで、時刻だけが違う
     await utimes(path.join(dist, 'client', 'stable.txt'), 0, 0);
-    expect(await tagOf()).toBe(before);
+    expect(await etagOf('/stable.txt')).toBe(before);
   });
 
   it('tags a file anew once what it holds changes', async () => {
-    const tagOf = async (): Promise<string | null> =>
-      (await fetch(`${server.url}/edited.txt`)).headers.get('etag');
-    const before = await tagOf();
+    const before = await etagOf('/edited.txt');
     await writeFile(path.join(dist, 'client', 'edited.txt'), 'second, longer');
-    expect(await tagOf()).not.toBe(before);
+    expect(await etagOf('/edited.txt')).not.toBe(before);
   });
 
   it('answers the byte range a video player asks for', async () => {

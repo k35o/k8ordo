@@ -36,6 +36,8 @@ const listState = definePageState('list', {
   }),
 });
 
+const postHref = (slug: string) => listState.href(`/posts/${slug}`);
+
 describe('urlReader', () => {
   it('reads a search the way the definition its schema came from does', () => {
     const read = urlReader(listState.url);
@@ -268,7 +270,6 @@ describe('href and search', () => {
   });
 
   it('takes a param spelled by a template literal', () => {
-    const postHref = (slug: string) => listState.href(`/posts/${slug}`);
     expect(postHref('hello')).toBe('/posts/hello');
   });
 

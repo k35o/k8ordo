@@ -87,6 +87,10 @@ const shown = () =>
   document.querySelector('[data-testid="values"]')?.textContent;
 const carrier = () =>
   document.querySelector('select[name="fruit"]') as HTMLSelectElement;
+const differs = () =>
+  [...carrier().options].some(
+    (option) => option.selected !== option.defaultSelected,
+  );
 
 beforeEach(() => {
   inputEvents = 0;
@@ -142,10 +146,6 @@ describe('FormValue', () => {
 
   it('既定値との差を option の defaultSelected で持つので、選び直すと元の状態と見分けられる', async () => {
     const screen = await render(<Picker defaultValues={['apple']} />);
-    const differs = () =>
-      [...carrier().options].some(
-        (option) => option.selected !== option.defaultSelected,
-      );
 
     expect(differs()).toBe(false);
     await screen.getByRole('button', { name: 'apple' }).click();
@@ -158,10 +158,6 @@ describe('FormValue', () => {
     const screen = await render(
       <Picker controlled defaultValues={['apple']} />,
     );
-    const differs = () =>
-      [...carrier().options].some(
-        (option) => option.selected !== option.defaultSelected,
-      );
 
     expect(differs()).toBe(false);
     await screen.getByRole('button', { name: 'apple' }).click();

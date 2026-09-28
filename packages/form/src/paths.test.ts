@@ -20,7 +20,7 @@ const { fields } = derived;
 
 // Never invoked — hooks cannot run outside a render, and every assertion
 // in here is for tsc. A directive that stops erroring fails the build.
-const useCompileTimeOnly = (): void => {
+const usePathsCompileTimeOnly = (): void => {
   const form = useForm(derived, {});
 
   form.field('title');
@@ -43,7 +43,7 @@ const useCompileTimeOnly = (): void => {
 
 describe('paths are derived from the schema', () => {
   it('accepts a nested path and rejects a typo at compile time', () => {
-    expect(useCompileTimeOnly).toBeTypeOf('function');
+    expect(usePathsCompileTimeOnly).toBeTypeOf('function');
   });
 
   it('rejects a rule naming a field the schema does not have', () => {
