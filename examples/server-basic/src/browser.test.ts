@@ -254,8 +254,28 @@ describe('the built application in a browser', () => {
     await page.close();
   }, 30_000);
 
+  it('keeps the scheme the toggle stores, and the next load starts from it before any module runs', async () => {
+    const page = await browser.newPage();
+    await page.goto(server.url);
+    await hydrated(page);
+    await page.getByRole('button', { name: 'scheme: light' }).click();
+    await page.getByRole('button', { name: 'scheme: dark' }).waitFor();
+
+    // モジュールを止めて読み直す。<html> に dark を付けられるのは、この応答の
+    // nonce で署名されたインラインスクリプトだけになる
+    await page.route('**/*.js', (route) => route.abort());
+    await page.reload();
+
+    expect(
+      await page.evaluate(() =>
+        document.documentElement.classList.contains('dark'),
+      ),
+    ).toBe(true);
+    await page.close();
+  }, 30_000);
+
   it('hydrates the page where it streamed in, leaving no hidden copy and one <title>', async () => {
-    // ダークの訪問者: ルートの SchemeProvider の値が hydrate の直後に変わる
+    // ダークの訪問者: ColorSchemeProvider の値が hydrate の直後に変わる
     const context = await browser.newContext({ colorScheme: 'dark' });
     const page = await context.newPage();
     // 商品ページはデータを待つので、その境界はシェルより遅れて届く。
