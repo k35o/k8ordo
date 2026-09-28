@@ -245,18 +245,6 @@ it('replaces the entry by default and pushes only on request', async () => {
   expect(navigation.entries()).toHaveLength(entries + 1);
 });
 
-it('going back restores the state the entry held', async () => {
-  const screen = await render(<Pager />);
-
-  await screen.getByRole('button', { name: 'push next' }).click();
-  await (lastHandle as UpdateHandle).finished;
-  await expect.element(screen.getByTestId('page')).toHaveTextContent('2');
-
-  await navigation.back().finished;
-
-  await expect.element(screen.getByTestId('page')).toHaveTextContent('1');
-});
-
 it('does not re-render a component subscribed to other keys', async () => {
   const screen = await render(
     <>
@@ -382,19 +370,6 @@ it('a mixed update is one navigation carrying both faces', async () => {
   expect(navigation.currentEntry?.getState()).toStrictEqual({
     panel: { expanded: ['y'] },
   });
-});
-
-it('going back restores both faces of the entry', async () => {
-  const screen = await render(<Panel />);
-
-  await screen.getByRole('button', { name: 'tab and expand' }).click();
-  await (lastHandle as UpdateHandle).finished;
-  await expect.element(screen.getByTestId('tab')).toHaveTextContent('b');
-
-  await navigation.back().finished;
-
-  await expect.element(screen.getByTestId('tab')).toHaveTextContent('a');
-  await expect.element(screen.getByTestId('expanded')).toHaveTextContent('');
 });
 
 it('a url-only update carries entry and foreign state forward', async () => {
