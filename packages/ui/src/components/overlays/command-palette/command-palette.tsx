@@ -41,18 +41,23 @@ const matches = (item: CommandPaletteItem, needle: string) =>
     text.toLocaleLowerCase().includes(needle),
   );
 
-// 一致した順を保ったまま、まとまりごとに集める。行の番号は一致した中での位置
+// 一致した順を保ったまま、まとまりごとに集める。まとめると並びが入れ替わる
+// ことがあるので、行の番号は画面に並ぶ順で振る
 const sectionsOf = (items: readonly CommandPaletteItem[]): Section[] => {
-  const sections: Section[] = [];
-  for (const [index, item] of items.entries()) {
-    const section = sections.find((entry) => entry.group === item.group);
-    if (section === undefined) {
-      sections.push({ group: item.group, entries: [{ item, index }] });
-    } else {
-      section.entries.push({ item, index });
-    }
-  }
-  return sections;
+  let offset = 0;
+  return [...Map.groupBy(items, (item) => item.group)].map(
+    ([group, members]) => {
+      const start = offset;
+      offset += members.length;
+      return {
+        group,
+        entries: members.map((item, position) => ({
+          item,
+          index: start + position,
+        })),
+      };
+    },
+  );
 };
 
 export const CommandPalette: FC<Props> = ({
@@ -75,10 +80,14 @@ export const CommandPalette: FC<Props> = ({
   const needle = query.trim().toLocaleLowerCase();
   const matched =
     needle === '' ? items : items.filter((item) => matches(item, needle));
+  const sections = sectionsOf(matched);
+  const ordered = sections.flatMap((section) =>
+    section.entries.map(({ item }) => item),
+  );
   const active =
-    matched.length === 0
+    ordered.length === 0
       ? undefined
-      : Math.min(activeIndex, matched.length - 1);
+      : Math.min(activeIndex, ordered.length - 1);
   const optionId = (index: number) => `${baseId}-option-${String(index)}`;
 
   const scrollIntoView = useCallback((node: HTMLDivElement | null) => {
@@ -95,7 +104,7 @@ export const CommandPalette: FC<Props> = ({
     if (event.nativeEvent.isComposing || active === undefined) {
       return;
     }
-    const last = matched.length - 1;
+    const last = ordered.length - 1;
     const next = {
       ArrowDown: active === last ? 0 : active + 1,
       ArrowUp: active === 0 ? last : active - 1,
@@ -105,7 +114,7 @@ export const CommandPalette: FC<Props> = ({
       setActiveIndex(next);
       return;
     }
-    const item = matched[active];
+    const item = ordered[active];
     if (event.key === 'Enter' && item !== undefined) {
       event.preventDefault();
       run(item);
@@ -187,7 +196,7 @@ export const CommandPalette: FC<Props> = ({
           value={query}
         />
         <div className="min-h-0 overflow-y-auto p-2">
-          {matched.length === 0 ? (
+          {ordered.length === 0 ? (
             <p
               className="text-fg-mute px-3 py-6 text-center text-sm"
               role="status"
@@ -198,11 +207,11 @@ export const CommandPalette: FC<Props> = ({
           <div
             aria-label={ariaLabel ?? messages.commandPalette}
             // 項目の無い listbox は役割を満たさないので隠す。aria-controls の参照先は残す
-            hidden={matched.length === 0}
+            hidden={ordered.length === 0}
             id={listboxId}
             role="listbox"
           >
-            {sectionsOf(matched).map((section, sectionIndex) =>
+            {sections.map((section, sectionIndex) =>
               section.group === undefined ? (
                 section.entries.map(renderOption)
               ) : (

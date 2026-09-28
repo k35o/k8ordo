@@ -142,6 +142,40 @@ export const Mouse: Story = {
   },
 };
 
+// 同じまとまりが離れて並んでいても、矢印キーは画面に並ぶ順で移る
+export const SplitGroups: Story = {
+  args: {
+    items: [
+      { id: 'a', label: '保存する', onSelect: fn() },
+      { id: 'b', label: '拡大する', group: '表示', onSelect: fn() },
+      { id: 'c', label: '閉じる', onSelect: fn() },
+      { id: 'd', label: '縮小する', group: '表示', onSelect: fn() },
+    ],
+  },
+  play: async ({ canvas, userEvent }) => {
+    const input = await waitFor(() =>
+      canvas.getByRole('combobox', { name: 'コマンドを検索' }),
+    );
+    await waitFor(async () => {
+      await expect(input).toHaveFocus();
+    });
+    const options = canvas.getAllByRole('option');
+    await expect(options.map((option) => option.textContent)).toStrictEqual([
+      '保存する',
+      '閉じる',
+      '拡大する',
+      '縮小する',
+    ]);
+
+    for (const option of [...options.slice(1), options[0]]) {
+      // eslint-disable-next-line no-await-in-loop -- 1 回ずつ押して、行を順に確かめる
+      await userEvent.keyboard('{ArrowDown}');
+      // eslint-disable-next-line no-await-in-loop -- 同上
+      await expect(option).toHaveAttribute('aria-selected', 'true');
+    }
+  },
+};
+
 const closed = fn();
 
 // ⌘K / Ctrl+K で開く配線はアプリが持つ。閉じるとフォーカスは開く前の場所へ戻る
