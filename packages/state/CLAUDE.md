@@ -132,7 +132,7 @@ src/
   schema/object.ts     StateSchema, absence rule, per-field salvage parse
   url/codec.ts         schema ⇄ URLSearchParams: parse + canonical search
   entry/codec.ts       StoredCodec: read typed stored values (entry, local, session, cookie)
-  page-state.ts        definePageState(); slot disjointness; internals WeakMap
+  page-state.ts        definePageState(); slot disjointness; internals WeakMap; urlReader (a url schema's reader, for the framework)
   base.ts              withBase: Vite's base in front of a link
   storage-state.ts     defineLocalState() / defineSessionState(); storageKey, inlineRead
   cookie-state.ts      defineCookieState(); cookie name, value encoding, parseCookies

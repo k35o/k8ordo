@@ -128,8 +128,9 @@ export type Locales<
   readonly getLocale: () => L;
   /**
    * Runs `fn` with `locale` as the current one for everything it starts —
-   * a test, a Server Action, code outside a `[locale]` route. Server only:
-   * in the browser the URL is the locale.
+   * a test, a job, code outside a `[locale]` route. A Server Action posted
+   * from a `[locale]` page already runs in that page's locale under the
+   * framework. Server only: in the browser the URL is the locale.
    */
   readonly run: <T>(locale: L, fn: () => T) => T;
 };

@@ -238,6 +238,7 @@ export default function ServerActionsPage() {
             {m.server.navGuards()}
           </LocaleAnchor>
         </Paragraph>
+        <Paragraph text={t.contextLocale} />
       </DocSection>
 
       <DocSection description={t.requestDescription} title={t.requestTitle}>

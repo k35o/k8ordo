@@ -13,6 +13,8 @@ import {
   CheckboxCardView,
   CheckboxGroupView,
   CheckboxView,
+  ColorPickerView,
+  ComboboxView,
   DateFieldView,
   DatePickerView,
   ListBoxView,
@@ -88,6 +90,8 @@ const renderers = {
     ui.renderTooltip(props),
   DropdownMenu: ({ props }: ComponentRenderProps<sc.DropdownMenuProps>) =>
     ui.renderDropdownMenu(props),
+  Toolbar: ({ props }: ComponentRenderProps<sc.ToolbarProps>) =>
+    ui.renderToolbar(props),
   Toast: ({ props }: ComponentRenderProps<sc.ToastProps>) => (
     <ui.ToastWidget props={props} />
   ),
@@ -140,6 +144,7 @@ const renderers = {
   DataTable: ({ props }: ComponentRenderProps<sc.DataTableProps>) => (
     <ui.DataTableWidget props={props} />
   ),
+  Tree: ({ props }: ComponentRenderProps<sc.TreeProps>) => ui.renderTree(props),
   SideNav: ({ props }: ComponentRenderProps<sc.SideNavProps>) =>
     ui.renderSideNav(props),
 
@@ -149,6 +154,7 @@ const renderers = {
   NumberField: NumberFieldView,
   Slider: SliderView,
   RangeSlider: RangeSliderView,
+  ColorPicker: ColorPickerView,
   DateField: DateFieldView,
   DatePicker: DatePickerView,
   Calendar: CalendarView,
@@ -161,6 +167,7 @@ const renderers = {
   Pagination: PaginationView,
   ListBox: ListBoxView,
   CheckboxGroup: CheckboxGroupView,
+  Combobox: ComboboxView,
   Autocomplete: AutocompleteView,
   FileField: ({ props }: ComponentRenderProps<sc.FileFieldProps>) => (
     <ui.FileFieldWidget props={props} />

@@ -68,7 +68,7 @@ export const Link = <T extends string>({
     renderAnchor({
       href,
       className:
-        'hover:text-fg-base focus-visible:ring-border-info underline transition-colors focus-visible:rounded-sm focus-visible:ring-2 focus-visible:outline-hidden',
+        'hover:text-fg-base focus-visible:ring-border-info underline transition-colors duration-150 ease-out focus-visible:rounded-sm focus-visible:ring-2 focus-visible:outline-hidden',
       children,
     })
   );

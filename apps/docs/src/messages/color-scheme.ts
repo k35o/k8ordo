@@ -105,6 +105,21 @@ export const docsDescription = message({
   en: 'The guide ships inside the npm package. An AI coding assistant reads the exact installed version out of `node_modules/@k8ordo/color-scheme/docs/`.',
 });
 
+export const navStyling = message({
+  ja: 'スタイル',
+  en: 'Styling',
+});
+
+export const navStorage = message({
+  ja: '保存',
+  en: 'Storage',
+});
+
+export const navCsp = message({
+  ja: 'CSP',
+  en: 'CSP',
+});
+
 export const navHowItWorks = message({
   ja: '仕組み',
   en: 'How it works',

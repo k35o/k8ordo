@@ -40,7 +40,7 @@ export const Anchor = <T extends string>({
   const isExternal = href.startsWith('http');
   const kind = !isExternal && !openInNewTab ? 'internal' : 'external';
   const baseClassName =
-    'text-fg-info underline transition-colors hover:text-fg-base focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-border-info focus-visible:rounded-sm';
+    'text-fg-info underline transition-colors duration-150 ease-out hover:text-fg-base focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-border-info focus-visible:rounded-sm';
   const props =
     kind === 'internal'
       ? {

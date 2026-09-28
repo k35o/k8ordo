@@ -93,6 +93,11 @@ export const catalog = defineCatalog(schema, {
       description:
         'Table the reader can sort (by the columns marked sortable) and, with selectable, pick rows from. Use it for records someone works through; use Table for data only read.',
     },
+    Tree: {
+      props: s.treeProps,
+      description:
+        'Tree of nodes that open and close, such as files and folders, navigable with the arrow keys. List every node flat; a child names its parent by parentId.',
+    },
     SideNav: {
       props: s.sideNavProps,
       description:
@@ -194,6 +199,11 @@ export const catalog = defineCatalog(schema, {
       description:
         'Month calendar shown inline for picking one day (YYYY-MM-DD). It submits nothing; in a form, use DatePicker. defaultValue can be bound to state with $bindState.',
     },
+    ColorPicker: {
+      props: s.colorPickerProps,
+      description:
+        'Color input with a visible label: a #rrggbb text field, hue / saturation / lightness sliders, and optional preset swatches. defaultValue can be bound to state with $bindState.',
+    },
     Radio: {
       props: s.radioProps,
       description:
@@ -246,6 +256,11 @@ export const catalog = defineCatalog(schema, {
       props: s.tooltipProps,
       description: 'Tooltip shown on hover or focus.',
     },
+    Toolbar: {
+      props: s.toolbarProps,
+      description:
+        'Row (or column) of buttons that arrow keys move between, e.g. formatting actions. Give each item an icon to show only the icon.',
+    },
     DropdownMenu: {
       props: s.dropdownMenuProps,
       description: 'Dropdown menu.',
@@ -262,6 +277,11 @@ export const catalog = defineCatalog(schema, {
     CheckboxGroup: {
       props: s.checkboxGroupProps,
       description: 'Group of checkboxes.',
+    },
+    Combobox: {
+      props: s.comboboxProps,
+      description:
+        'Text field with a visible label that filters a list of options as you type, for picking one. Prefer it to ListBox when there are many options. defaultValue can be bound to state with $bindState.',
     },
     Autocomplete: {
       props: s.autocompleteProps,

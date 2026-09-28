@@ -4,9 +4,10 @@
 > output a directory a static host can serve. The mode is the dependency —
 > installing this package means request-time data does not exist as an API, and
 > a `'use server'` module, which the RSC pipeline still compiles, is refused by
-> name, as is a `guard.ts`. `src/routes/` is the pathname space
-> (page/layout/not-found/error/redirect/route, `[param]`, `(group)`,
-> `_private`), a `route.ts` is written as the file its `GET` answers at its
+> name, as are a `guard.ts` and a page that exports `search`. `src/routes/` is the pathname space
+> (page/layout/not-found/error/loading/redirect/route, `[param]`, `(group)`,
+> `_private`), a `loading.tsx` shows while what is below it suspends in a
+> client navigation (a written file is whole), a `route.ts` is written as the file its `GET` answers at its
 > pathname (`feed.xml/route.ts` → `feed.xml`; any other method is refused), a
 > page or layout may `export const paramsSchema` (any Standard Schema,
 > synchronous) to type its parameters — a refused value makes the pattern not
@@ -25,12 +26,36 @@
 > legacy fallbacks.
 
 When installed via npm, these docs live under `node_modules/@k8ordo/static/docs/`.
+Start with GUIDE.md, then follow the reference most relevant to the task.
 
 ## Guide
 
-- [Design Guide](GUIDE.md): setup, the `routes/` grammar and what it refuses,
-  execution boundaries, the build output, supplying pathnames for
-  parameterised routes, and what static mode cannot do.
+- [Design Guide](GUIDE.md): the mode as the dependency, setup
+  (`vite.config.ts`, `tsconfig.json`, the root layout as the document),
+  `vite dev` against `vite build`, the plugin's options, and what static mode
+  cannot do.
+
+## References
+
+- [Routing](references/routing.md): the `routes/` grammar and every refusal
+  the build names, `loading.tsx`, a `route.ts` written as the file its `GET`
+  answers, the generated `.k8ordo/` files, titles, and fetching the next page
+  ahead (`data-k8ordo-prefetch`).
+- [Parameters](references/params.md): `paramsSchema` (a refused value is a
+  pathname the pattern does not answer), and the `paths` option — supplying
+  pathnames, expanding a parameter every page shares, and what fails the
+  build.
+- [Errors and redirects](references/errors.md): `error.tsx`, a Server
+  Component that throws stopping the build, `notFound()` and
+  `not-found.tsx`, and a `redirect.ts` written as a page that sends the
+  visitor on.
+- [Execution boundaries](references/boundaries.md): `'use client'`,
+  `use(browser())` for a component that needs a browser, `server-only`
+  modules, and the search as `@k8ordo/state`'s.
+- [The output and deploying](references/deploy.md): `dist/client/` (HTML,
+  `index.rsc` payloads, `404.html`, `sitemap.xml`), a tab opened before a
+  deploy, Vite's `base`, and a Content-Security-Policy by hash (`csp`,
+  `colorSchemeScriptHash()`).
 
 ## Entry point
 
@@ -40,7 +65,16 @@ When installed via npm, these docs live under `node_modules/@k8ordo/static/docs/
   `src/routes`); `options.paths` supplies concrete pathnames for routes with
   parameters, and a parameterised route left uncovered fails the build;
   `options.site` (the origin) makes the build also write `sitemap.xml`;
-  `StaticOptions` is the type of those options. A
+  `options.csp` (directives → sources, `ContentSecurityPolicy`) is the
+  Content-Security-Policy written into each page's `<meta>`, first in
+  `<head>`, with the hashes of the framework's own inline scripts on that
+  page added wherever a script element is decided (`script-src`, or
+  `default-src` made into it, and `script-src-elem`) — the framework
+  decides no policy, and an inline script of the application's is allowed
+  by its hash there
+  (`colorSchemeScriptHash()`); no nonce is left in a file, and a policy with
+  `'strict-dynamic'`, `frame-ancestors`, `report-uri` or `sandbox` is
+  refused; `StaticOptions` is the type of those options. A
   `'use server'` module fails it too — in `vite dev` as well as the build: a
   file cannot receive a Server Action, so the application wants
   `@k8ordo/server` instead. So does a `guard.ts`, every one named at once: a

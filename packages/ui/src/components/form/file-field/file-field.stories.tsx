@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useRef, useState } from 'react';
 import type { ComponentProps } from 'react';
-import { expect, fn, mocked, waitFor } from 'storybook/test';
+import { expect, fireEvent, fn, mocked, waitFor } from 'storybook/test';
 
 import { FileField } from '.';
 import { Button } from '../../buttons/button';
@@ -409,17 +409,43 @@ const drag = (target: Element, files: File[]) => {
     dataTransfer.items.add(file);
   }
   const send = (type: string) => {
-    target.dispatchEvent(
-      new DragEvent(type, { bubbles: true, cancelable: true, dataTransfer }),
-    );
+    const event = new DragEvent(type, {
+      bubbles: true,
+      cancelable: true,
+      dataTransfer,
+    });
+    target.dispatchEvent(event);
+    return event;
   };
   send('dragenter');
-  send('dragover');
+  const over = send('dragover');
   return {
-    drop: () => {
-      send('drop');
-    },
+    over,
+    drop: () => send('drop'),
   };
+};
+
+// 文字の選択範囲やリンクのドラッグ。ファイルを運ばないので text/plain だけを載せる。
+// data-dragging が付かないことを確かめるので、act で包まれる fireEvent で送り、
+// React が描き終えてから見る。dispatchEvent だと描く前に見てしまい、直す前でも通る
+const dragText = async (target: Element, text: string) => {
+  const dataTransfer = new DataTransfer();
+  dataTransfer.setData('text/plain', text);
+  const over = new DragEvent('dragover', {
+    bubbles: true,
+    cancelable: true,
+    dataTransfer,
+  });
+  await fireEvent(
+    target,
+    new DragEvent('dragenter', {
+      bubbles: true,
+      cancelable: true,
+      dataTransfer,
+    }),
+  );
+  await fireEvent(target, over);
+  return { over };
 };
 
 const dropzoneOf = (canvasElement: HTMLElement) => {
@@ -498,6 +524,8 @@ export const DropAddsToThePickedFiles: Story = {
   },
 };
 
+// 無効でも、ファイルのドラッグは既定の動作を止める。止めないとブラウザが
+// ファイルを開いてページを離れる
 export const DropWhenDisabled: Story = {
   args: {
     disabled: true,
@@ -506,15 +534,79 @@ export const DropWhenDisabled: Story = {
   render: DropzoneRender,
   play: async ({ args, canvas, canvasElement }) => {
     const zone = dropzoneOf(canvasElement);
-    drag(zone, [
+    const dragging = drag(zone, [
       new File(['content'], 'notes.txt', { type: 'text/plain' }),
-    ]).drop();
+    ]);
+    const drop = dragging.drop();
 
+    await expect(dragging.over.defaultPrevented).toBe(true);
+    await expect(drop.defaultPrevented).toBe(true);
     await expect(zone).not.toHaveAttribute('data-dragging');
     await expect(canvas.queryByText('notes.txt')).not.toBeInTheDocument();
     await expect(args.onChange).not.toHaveBeenCalled();
     await expect(
       canvas.getByRole('button', { name: 'ファイルを選択' }),
     ).toBeDisabled();
+  },
+};
+
+// 文字の選択範囲やリンクのドラッグには反応しない。光らせず、既定の動作も止めない
+export const DragWithoutFilesIsIgnored: Story = {
+  render: DropzoneRender,
+  play: async ({ canvasElement }) => {
+    const zone = dropzoneOf(canvasElement);
+
+    const { over } = await dragText(zone, 'ただの文字');
+
+    await expect(zone).not.toHaveAttribute('data-dragging');
+    await expect(over.defaultPrevented).toBe(false);
+  },
+};
+
+// ブラウザが accept を当てるのは選択ダイアログだけなので、ドロップで届いた
+// ファイルは FileField が選り分ける。当たらない分は一覧にも送信にも入らない
+export const DropSkipsFilesOutsideAccept: Story = {
+  args: {
+    accept: 'image/*',
+    multiple: true,
+  },
+  render: DropzoneRender,
+  play: async ({ canvas, canvasElement }) => {
+    drag(dropzoneOf(canvasElement), [
+      new File(['png'], 'photo.png', { type: 'image/png' }),
+      new File(['pdf'], 'report.pdf', { type: 'application/pdf' }),
+    ]).drop();
+    await canvas.findByText('photo.png');
+
+    await expect(canvas.queryByText('report.pdf')).not.toBeInTheDocument();
+    await expect(submittedNames(fileInputOf(canvasElement))).toEqual([
+      'photo.png',
+    ]);
+  },
+};
+
+// 当たるファイルが 1 つも無いドロップは、選んであったファイルを置き換えず、
+// onChange も input イベントも出さない
+export const DropOfRejectedFilesKeepsTheSelection: Story = {
+  args: {
+    accept: 'image/*',
+    onChange: fn(),
+  },
+  render: DropzoneRender,
+  play: async ({ args, canvas, canvasElement }) => {
+    const input = fileInputOf(canvasElement);
+    pick(input, new File(['png'], 'photo.png', { type: 'image/png' }));
+    await canvas.findByText('photo.png');
+    const onInput = fn();
+    input.addEventListener('input', onInput);
+
+    drag(dropzoneOf(canvasElement), [
+      new File(['pdf'], 'report.pdf', { type: 'application/pdf' }),
+    ]).drop();
+
+    await expect(args.onChange).toHaveBeenCalledTimes(1);
+    await expect(onInput).not.toHaveBeenCalled();
+    await expect(submittedNames(input)).toEqual(['photo.png']);
+    await expect(canvas.getByText('photo.png')).toBeInTheDocument();
   },
 };
