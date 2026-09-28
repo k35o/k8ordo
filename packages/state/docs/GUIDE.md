@@ -349,8 +349,10 @@ export function Shell({ initialCookie, children }: ShellProps) {
 - **The browser writes it with the Cookie Store API** (Baseline since Firefox
   140 shipped it in June 2025): `Path=/`, `SameSite=Lax`, `Max-Age` of 400
   days — the longest a browser keeps a cookie — renewed by every write, and
-  `Secure`, which the API always sets, so the page must be on HTTPS or
-  `localhost`. `Lax` rather than the API's default `Strict` is what makes the
+  `Secure`, which the API always sets, so the page must be on HTTPS —
+  Chromium and Firefox also keep it on `http://localhost`, but Safari drops a
+  `Secure` cookie there, so develop over HTTPS to see it persist in Safari.
+  `Lax` rather than the API's default `Strict` is what makes the
   first request from a link on another site carry the cookie; under `Strict`
   the server would render the defaults exactly there. A read is synchronous
   (`document.cookie`), because a render cannot wait for the API's promise.

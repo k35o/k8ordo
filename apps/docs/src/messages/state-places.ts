@@ -397,8 +397,8 @@ export const cookieName = message({
 });
 
 export const cookieWrite = message({
-  ja: 'ブラウザは Cookie Store API で書き込みます。属性は `Path=/`・`SameSite=Lax`・`Max-Age` 400 日（ブラウザが Cookie を保つ上限）で、API が必ず `Secure` を付けるので、HTTPS か `localhost` で動かします。書き込むたびに期限が延びます。',
-  en: 'The browser writes it through the Cookie Store API with `Path=/`, `SameSite=Lax` and a `Max-Age` of 400 days — the longest a browser keeps a cookie — renewed by every write. The API always adds `Secure`, so the page runs on HTTPS or `localhost`.',
+  ja: 'ブラウザは Cookie Store API で書き込みます。属性は `Path=/`・`SameSite=Lax`・`Max-Age` 400 日（ブラウザが Cookie を保つ上限）で、API が必ず `Secure` を付けるので、HTTPS で動かします。Chromium と Firefox は `http://localhost` でも保ちますが、Safari はそこでも `Secure` の Cookie を捨てるので、Safari で確かめるなら開発中も HTTPS で配ります。書き込むたびに期限が延びます。',
+  en: 'The browser writes it through the Cookie Store API with `Path=/`, `SameSite=Lax` and a `Max-Age` of 400 days — the longest a browser keeps a cookie — renewed by every write. The API always adds `Secure`, so the page runs on HTTPS. Chromium and Firefox also keep it on `http://localhost`, but Safari drops a `Secure` cookie there, so serve over HTTPS while developing to see it persist in Safari.',
 });
 
 export const cookieLax = message({
