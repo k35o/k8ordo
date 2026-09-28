@@ -63,7 +63,9 @@ describe('DatePicker と formFields', () => {
       .toBe('date');
     await userEvent.keyboard('{Enter}');
 
-    expect(input().value).toMatch(/^\d{4}-\d{2}-\d{2}$/u);
+    // 選んだ日付は Enter の既定動作（クリック）で入る。CI の Firefox では
+    // keyboard が解決した時点でまだ空だったことがあるので、入るのを待つ
+    await expect.poll(() => input().value).toMatch(/^\d{4}-\d{2}-\d{2}$/u);
     await expect
       .element(page.getByText('日付を入力してください'))
       .not.toBeInTheDocument();
