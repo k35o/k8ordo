@@ -61,7 +61,10 @@ describe('DatePicker と formFields', () => {
     await expect
       .poll(() => document.activeElement?.getAttribute('aria-current'))
       .toBe('date');
-    await userEvent.keyboard('{Enter}');
+    // Enter では選ばない。並行する別のテストのページがアクティブになって
+    // 文書がフォーカスを失うと（document.hasFocus() が偽）、Firefox はキーを
+    // ボタンに届けても既定動作のクリックを起こさない
+    await userEvent.click(document.activeElement as HTMLElement);
 
     expect(input().value).toMatch(/^\d{4}-\d{2}-\d{2}$/u);
     await expect

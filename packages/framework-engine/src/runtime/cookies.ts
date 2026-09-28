@@ -13,11 +13,13 @@ export type CookieOptions = {
   /** Default `true`: a page's script cannot read it. */
   readonly httpOnly?: boolean;
   /**
-   * Default `true`: sent only over HTTPS — `localhost` counts as secure to
-   * the browsers that matter. Say `false` for plain HTTP anywhere else.
+   * Default `true`: sent only over HTTPS. On plain HTTP to this machine —
+   * `localhost`, `127.0.0.1` or `[::1]` — the default is `false`, because
+   * Safari drops a `Secure` cookie there. Say `false` for plain HTTP
+   * anywhere else.
    */
   readonly secure?: boolean;
-  /** Default `'lax'`. `'none'` needs `secure`. */
+  /** Default `'lax'`. `'none'` needs `secure`, and defaults to it. */
   readonly sameSite?: 'strict' | 'lax' | 'none';
 };
 
@@ -55,12 +57,26 @@ const checkAttribute = (name: string, value: string): void => {
   }
 };
 
-const attributes = (options: CookieOptions): string[] => {
+const LOOPBACK = new Set(['localhost', '127.0.0.1', '[::1]']);
+
+/**
+ * Whether a cookie the request's answer writes is `Secure` unless it says
+ * otherwise. Chromium and Firefox keep a `Secure` cookie from plain HTTP to
+ * this machine and Safari does not, so a default that held there would lose
+ * every cookie written while developing in Safari.
+ */
+const securesByDefault = (url: URL): boolean =>
+  !(url.protocol === 'http:' && LOOPBACK.has(url.hostname));
+
+const attributes = (
+  options: CookieOptions,
+  secureByDefault: boolean,
+): string[] => {
   const path = options.path ?? '/';
   checkAttribute('path', path);
   if (options.domain !== undefined) checkAttribute('domain', options.domain);
-  const secure = options.secure ?? true;
   const sameSite = options.sameSite ?? 'lax';
+  const secure = options.secure ?? (sameSite === 'none' || secureByDefault);
   if (sameSite === 'none' && !secure) {
     // ブラウザは Secure の無い SameSite=None を捨てる。黙って消えるより、
     // 書いたところで知らせる
@@ -93,11 +109,14 @@ const checkName = (name: string): void => {
  * The jar a request's answer writes through: the cookies the request
  * carried, overlaid with what was set or deleted since, and the
  * `Set-Cookie` lines that say so. A cookie set twice at the same path and
- * domain is said once, the last way.
+ * domain is said once, the last way. `url` is the request's, which decides
+ * whether a cookie is `Secure` by default.
  */
 export const createCookies = (
   incoming: ReadonlyMap<string, string>,
+  url: URL,
 ): { readonly cookies: Cookies; readonly lines: () => string[] } => {
+  const secureByDefault = securesByDefault(url);
   const values = new Map(incoming);
   const lines = new Map<string, string>();
   const say = (name: string, scope: CookieScope, line: string): void => {
@@ -112,7 +131,7 @@ export const createCookies = (
       checkName(name);
       const line = [
         `${name}=${encodeURIComponent(value)}`,
-        ...attributes(options),
+        ...attributes(options, secureByDefault),
       ].join('; ');
       values.set(name, value);
       say(name, options, line);
@@ -121,7 +140,11 @@ export const createCookies = (
       checkName(name);
       values.delete(name);
       const expired = { ...scope, maxAge: 0, expires: new Date(0) };
-      say(name, scope, [`${name}=`, ...attributes(expired)].join('; '));
+      say(
+        name,
+        scope,
+        [`${name}=`, ...attributes(expired, secureByDefault)].join('; '),
+      );
     },
   };
   return { cookies, lines: () => [...lines.values()] };

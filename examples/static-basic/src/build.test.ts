@@ -8,13 +8,22 @@ import type { AddressInfo } from 'node:net';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
-import { chromium } from 'playwright';
+import { chromium, firefox, webkit } from 'playwright';
 import type { Browser, Page } from 'playwright';
 
 const root = path.resolve(import.meta.dirname, '..');
 const client = path.join(root, 'dist', 'client');
 // vite.base.config.ts が base: '/site/' で書くサイト
 const underBase = path.join(root, 'dist', 'base', 'client');
+
+// CI はエンジンごとにジョブを分けて並べるので、TEST_BROWSER で 1 つに絞れる
+const browserTypes = [chromium, firefox, webkit]
+  .filter(
+    (type) =>
+      process.env.TEST_BROWSER === undefined ||
+      process.env.TEST_BROWSER === type.name(),
+  )
+  .map((type) => ({ name: type.name(), type }));
 
 // 描画に失敗するページ・not-found を持つ構成のビルド。止まることを主張する
 // ので、先に走らせて stderr を取っておき、本物のビルドで dist を上書きする
@@ -317,7 +326,7 @@ describe('the static build under a base', () => {
   });
 });
 
-describe('a written page in the browser', () => {
+describe.each(browserTypes)('a written page in $name', ({ type }) => {
   let server: Server;
   let browser: Browser;
   let origin = '';
@@ -363,7 +372,7 @@ describe('a written page in the browser', () => {
       server.listen(0, '127.0.0.1', resolve);
     });
     origin = `http://127.0.0.1:${String((server.address() as AddressInfo).port)}`;
-    browser = await chromium.launch();
+    browser = await type.launch();
   }, 60_000);
 
   afterAll(async () => {

@@ -15,7 +15,7 @@ inside the npm package.
 ## Commands
 
 ```bash
-pnpm test          # unit (resolve, the script; node) + browser (provider + hook, hydration, the script on a document; chromium)
+pnpm test          # unit (resolve, the script; node) + browser (provider + hook, hydration, the script on a document; chromium, firefox, webkit)
 pnpm build         # vp pack
 pnpm typecheck
 pnpm check         # check:write to auto-fix

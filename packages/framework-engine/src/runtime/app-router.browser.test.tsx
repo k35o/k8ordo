@@ -107,6 +107,15 @@ const settledYet = (promise: Promise<unknown>): Promise<boolean> =>
     }),
   ]);
 
+// 訪問者が戻る。戻る遷移が確定した時点で、取りかけの遷移は中断されている。
+// finished を待たないのは、WebKit が取りかけの遷移を中断させた側の finished
+// まで AbortError で reject するため（戻る遷移そのものは確定している）
+const moveBack = async (): Promise<void> => {
+  const back = navigation.back();
+  back.finished?.catch(() => undefined);
+  await back.committed;
+};
+
 const serverCallback = (): ServerCallback => {
   if (rsc.serverCallback === undefined) {
     throw new Error('no server callback registered');
@@ -174,7 +183,7 @@ describe('a client navigation', () => {
     });
 
     // 本文は届き終え、読み解きが import を待っているうちに戻る
-    await navigation.back().finished;
+    await moveBack();
     imported();
 
     // 読み解きの続きはマイクロタスクで走りきる。その後のタスクで読む
@@ -280,7 +289,7 @@ describe('a client navigation the answer cannot complete in place', () => {
       expect(requested).toBe(1);
     });
 
-    await navigation.back().finished;
+    await moveBack();
 
     // 中断で reject した fetch はマイクロタスクで片付く。その後のタスクで読む
     await new Promise((resolve) => {
@@ -445,7 +454,7 @@ describe('prefetching the page a link leads to', () => {
   });
 
   it('hands what it fetched to one navigation only — the next visit fetches afresh', async () => {
-    const requested = countPayloadRequests();
+    const requested = recordPayloadRequests();
     const screen = await render(
       <AppRouter pathname="/" tree={<a href="/next">next</a>} />,
     );
@@ -455,8 +464,12 @@ describe('prefetching the page a link leads to', () => {
     await navigation.back().finished;
     await navigation.navigate('/next').finished;
 
-    // 行き・戻り（/ のペイロード）・2 度目の行きで 3 回。2 度目は取り直す
-    expect(requested()).toBe(3);
+    // 行きと 2 度目の行きで 1 回ずつ。2 度目は取り直す。戻りが / を何回
+    // 取るかは数えない: Firefox は iframe の中でだけ、戻る遷移の handler を
+    // 2 回走らせる
+    expect(
+      requested.filter((pathname) => pathname === '/next/index.rsc'),
+    ).toHaveLength(2);
   });
 
   it.each([
@@ -583,7 +596,7 @@ describe('prefetching the page a link leads to', () => {
     pointerOnto(screen.getByRole('link').element());
     navigation.navigate('/next').finished?.catch(() => undefined);
 
-    await navigation.back().finished;
+    await moveBack();
     await nextTask();
 
     expect(requested()).toBe(1);

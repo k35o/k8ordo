@@ -19,6 +19,7 @@ pnpm test --project=components-forced-colors # Stories tagged forced-colors, und
 pnpm test --project=components-contrast-more # Stories tagged contrast-more, under prefers-contrast: more
 pnpm test --project=form                     # Fields with @k8ordo/form's derived attributes, and FormValue (Playwright)
 pnpm test --project=hooks src/internal/focus-trap.test.tsx # Single test file (needs its project)
+TEST_BROWSER=webkit pnpm test --project=hooks # One engine only (chromium / firefox / webkit)
 pnpm build                                   # vp pack + CSS copy
 pnpm typecheck                               # Type check (no emit)
 pnpm check                                   # Oxlint/Oxfmt lint/format check

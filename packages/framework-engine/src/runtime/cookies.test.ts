@@ -1,7 +1,9 @@
 import { createCookies } from './cookies';
 
-const jar = (incoming: Record<string, string> = {}) =>
-  createCookies(new Map(Object.entries(incoming)));
+const jar = (
+  incoming: Record<string, string> = {},
+  url = 'https://example.test/',
+) => createCookies(new Map(Object.entries(incoming)), new URL(url));
 
 describe('the cookie jar', () => {
   it('reads what the request carried', () => {
@@ -97,6 +99,40 @@ describe('the cookie jar', () => {
       }).toThrow(new RegExp(`cannot be a cookie's ${name}`, 'u'));
     },
   );
+
+  it.each(['http://localhost:5173/', 'http://127.0.0.1/', 'http://[::1]/'])(
+    'leaves Secure off by default on plain HTTP to this machine (%s), where Safari would drop it',
+    (url) => {
+      const { cookies, lines } = jar({ session: 'abc' }, url);
+      cookies.set('theme', 'dark');
+      cookies.delete('session');
+      expect(lines()).toStrictEqual([
+        'theme=dark; Path=/; HttpOnly; SameSite=Lax',
+        'session=; Path=/; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; SameSite=Lax',
+      ]);
+    },
+  );
+
+  it.each(['https://localhost/', 'http://example.test/'])(
+    'keeps Secure by default anywhere else (%s)',
+    (url) => {
+      const { cookies, lines } = jar({}, url);
+      cookies.set('theme', 'dark');
+      expect(lines()).toStrictEqual([
+        'theme=dark; Path=/; HttpOnly; Secure; SameSite=Lax',
+      ]);
+    },
+  );
+
+  it('writes Secure on plain HTTP to this machine when asked, and for sameSite "none"', () => {
+    const { cookies, lines } = jar({}, 'http://localhost/');
+    cookies.set('a', '1', { secure: true });
+    cookies.set('b', '2', { sameSite: 'none' });
+    expect(lines()).toStrictEqual([
+      'a=1; Path=/; HttpOnly; Secure; SameSite=Lax',
+      'b=2; Path=/; HttpOnly; Secure; SameSite=None',
+    ]);
+  });
 
   it('refuses sameSite "none" without secure, which a browser would drop', () => {
     expect(() => {

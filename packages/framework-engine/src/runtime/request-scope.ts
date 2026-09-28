@@ -51,7 +51,10 @@ const freshNonce = (): string =>
 
 /** Runs `fn` as the handling of `request`, starting in the render. */
 export const withRequest = <T>(request: Request, fn: () => T): T => {
-  const jar = createCookies(parseCookies(request.headers.get('cookie')));
+  const jar = createCookies(
+    parseCookies(request.headers.get('cookie')),
+    new URL(request.url),
+  );
   return storage().run(
     {
       request,

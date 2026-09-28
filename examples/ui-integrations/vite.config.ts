@@ -3,6 +3,13 @@ import react from '@vitejs/plugin-react';
 import { playwright } from '@vitest/browser-playwright';
 import { defineConfig } from 'vite-plus';
 
+// CI はエンジンごとにジョブを分けて並べるので、TEST_BROWSER で 1 つに絞れる
+const browsers = (['chromium', 'firefox', 'webkit'] as const).filter(
+  (browser) =>
+    process.env.TEST_BROWSER === undefined ||
+    process.env.TEST_BROWSER === browser,
+);
+
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   test: {
@@ -19,7 +26,7 @@ export default defineConfig({
       {
         // spec / DSL がパーサを通ることと、それが実際に描画されることは別問題。
         // アダプタが使う React context は本物のツリーの中でしか成立しないので、
-        // 描画側は素の Chromium にマウントして確かめる。
+        // 描画側は本物のブラウザにマウントして確かめる。
         //
         // 注: dev の依存最適化はパッケージ名でコピーを畳むので、peer が
         // 2 コピーに割れていてもここでは再現しない。その規律は
@@ -33,9 +40,10 @@ export default defineConfig({
             provider: playwright(),
             headless: true,
             screenshotFailures: false,
-            instances: [
-              { browser: 'chromium', context: { reducedMotion: 'reduce' } },
-            ],
+            instances: browsers.map((browser) => ({
+              browser,
+              context: { reducedMotion: 'reduce' },
+            })),
           },
         },
       },

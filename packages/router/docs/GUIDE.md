@@ -508,9 +508,13 @@ Server Component layout can render it directly.
 ## Testing
 
 Nothing here is mocked, so a test needs a browser environment (this package's
-own suite uses Vitest's Chromium browser mode). The one thing to know: a test
-that navigates must intercept, or `navigation.navigate()` is a cross-document
-load that takes the test runner with it.
+own suite uses Vitest's browser mode in Chromium, Firefox and WebKit). The one
+thing to know: a test that navigates must intercept, or `navigation.navigate()`
+is a cross-document load that takes the test runner with it. And Vitest's
+browser mode runs a test inside an iframe, where Firefox and WebKit do not
+restore the scroll position on back and forward — Firefox also runs a
+traversal's handler twice there — so this package asserts going back and
+forward in a top-level page it opens with Playwright.
 
 ```tsx
 // a test that mounts <Router> is already intercepting; one that sets up a URL

@@ -324,37 +324,6 @@ it('scrolls to the fragment the new URL names', async () => {
   expect(window.scrollY).toBeGreaterThan(1000);
 });
 
-it('restores the position a page was left at when the visitor goes back to it', async () => {
-  const screen = await render(<Router routes={routes} />);
-  await navigateTo('/tall', { history: 'replace' }).finished;
-  await expect.element(screen.getByTestId('tall')).toBeInTheDocument();
-  window.scrollTo(0, 3000);
-  const left = window.scrollY;
-  await navigateTo('/about').finished;
-  expect(window.scrollY).toBe(0);
-
-  await navigation.back().finished;
-
-  await expect.element(screen.getByTestId('tall')).toBeInTheDocument();
-  expect(window.scrollY).toBe(left);
-});
-
-it('restores the position a page was left at when the visitor goes forward to it', async () => {
-  const screen = await render(<Router routes={routes} />);
-  await navigateTo('/about', { history: 'replace' }).finished;
-  await navigateTo('/tall').finished;
-  await expect.element(screen.getByTestId('tall')).toBeInTheDocument();
-  window.scrollTo(0, 3000);
-  const left = window.scrollY;
-  await navigation.back().finished;
-  await expect.element(screen.getByTestId('about')).toBeInTheDocument();
-
-  await navigation.forward().finished;
-
-  await expect.element(screen.getByTestId('tall')).toBeInTheDocument();
-  expect(window.scrollY).toBe(left);
-});
-
 it('keeps the scroll position when only the search moves', async () => {
   const screen = await render(<Router routes={routes} />);
   await navigateTo('/tall', { history: 'replace' }).finished;

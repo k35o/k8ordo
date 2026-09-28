@@ -16,7 +16,14 @@ permissions:
   id-token: write
 
 jobs:
+  # PR で通った検査も、並んでマージされた PR の組み合わせで壊れうる。公開する
+  # コミットそのものに同じ検査を通し、落ちたらリリース PR の更新も公開もしない。
+  ci:
+    name: CI
+    uses: ./.github/workflows/ci.yml
+
   release:
+    needs: ci
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:

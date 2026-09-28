@@ -18,7 +18,7 @@ inside the npm package.
 ## Commands
 
 ```bash
-pnpm test          # unit (codecs, node) + browser (hook + stores, chromium)
+pnpm test          # unit (codecs, node; going back in a top-level page via Playwright) + browser (hook + stores; chromium, firefox, webkit, over HTTPS)
 pnpm build         # vp pack
 pnpm typecheck
 pnpm check         # check:write to auto-fix
@@ -147,6 +147,9 @@ src/
   use-app-state.ts     the client hook ('use client'); dispatch on def.kind
   register.ts          Register interface for typed-route path constraint;
                        AcceptedPath checks a path (routes → path → any)
+  traversal.test.ts    serves fixtures/traversal with Vite and opens it top-level
+fixtures/
+  traversal/           a page on useAppState, for going back
 ```
 
 ## Where zod's public API runs out
@@ -189,6 +192,12 @@ same field submits the same string.
 - Browser tests play the router themselves: a `navigate` listener that calls
   `event.intercept()`. Without it, `navigation.navigate()` in the test iframe
   would be a cross-document load and kill the runner.
+- Going back is asserted in `traversal.test.ts`, never in the browser tests:
+  inside Vitest's iframe, Firefox runs a traversal's handler twice and then
+  loses `currentEntry`, which stops every test after it.
+- The browser tests are served over HTTPS (`@vitejs/plugin-basic-ssl`): the
+  Cookie Store API always sets `Secure`, and WebKit drops a `Secure` cookie
+  from `http://localhost`.
 - The `storage` event fires only in other tabs; tests simulate a foreign
   tab's write with `setItem` + a dispatched `StorageEvent`. The cookie
   `change` event fires in this tab too, so a test's own `cookieStore.set()`

@@ -131,8 +131,8 @@ export const cookiesDescription = message({
 });
 
 export const cookiesOptions = message({
-  ja: "`set` は `path`・`domain`・`maxAge`（秒）・`expires`・`httpOnly`・`secure`・`sameSite` を受け取ります。既定はセッションに合わせた `path: '/'`・`httpOnly: true`・`secure: true`・`sameSite: 'lax'` です。`localhost` は主要なブラウザで安全な配信元として扱われます。それ以外を素の HTTP で配るなら `secure: false` を渡します。`delete` には、書いたときの `path` と `domain` を渡します。ブラウザは Cookie をそれで見分けるからです。",
-  en: "`set` takes `path`, `domain`, `maxAge` (seconds), `expires`, `httpOnly`, `secure` and `sameSite`. The defaults are what a session wants: `path: '/'`, `httpOnly: true`, `secure: true` and `sameSite: 'lax'`. `localhost` counts as secure to the browsers that matter; anywhere else served over plain HTTP, pass `secure: false`. `delete` takes the `path` and `domain` the cookie was set with, since a browser keys it by those.",
+  ja: "`set` は `path`・`domain`・`maxAge`（秒）・`expires`・`httpOnly`・`secure`・`sameSite` を受け取ります。既定はセッションに合わせた `path: '/'`・`httpOnly: true`・`secure: true`・`sameSite: 'lax'` です。ただし素の HTTP でこの機械（`localhost`・`127.0.0.1`・`[::1]`）に届いたリクエストでは `secure` の既定が `false` になります。Chromium と Firefox はそこでも `Secure` の Cookie を保ちますが、Safari は捨てるからです。それ以外を素の HTTP で配るなら `secure: false` を渡します。`sameSite: 'none'` はどこでも `Secure` のままです。`delete` には、書いたときの `path` と `domain` を渡します。ブラウザは Cookie をそれで見分けるからです。",
+  en: "`set` takes `path`, `domain`, `maxAge` (seconds), `expires`, `httpOnly`, `secure` and `sameSite`. The defaults are what a session wants: `path: '/'`, `httpOnly: true`, `secure: true` and `sameSite: 'lax'`. Over plain HTTP to this machine (`localhost`, `127.0.0.1`, `[::1]`), `secure` defaults to `false` instead: Chromium and Firefox keep a `Secure` cookie there, but Safari drops it. Anywhere else served over plain HTTP, pass `secure: false`; `sameSite: 'none'` stays `Secure` everywhere. `delete` takes the `path` and `domain` the cookie was set with, since a browser keys it by those.",
 });
 
 export const cookiesPage = message({

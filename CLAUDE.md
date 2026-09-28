@@ -55,6 +55,7 @@ pnpm check              # lint/format check (pnpm check:write to auto-fix)
 ## Gotchas
 
 - Run `pnpm build` before `pnpm check` / `pnpm typecheck` on a fresh checkout or worktree: docs/examples resolve `@k8ordo/*` types from each package's `dist/`, so without it type-aware lint reports bogus `no-unsafe-*` errors (and parallel checks can die with exit 137). CI builds in the install action. The framework applications (`apps/docs`, `examples/static-basic`, `examples/server-basic`) also type-check and type-aware-lint against their generated `.k8ordo/`, which only a build of that application writes — `pnpm build` writes the docs one and `pnpm build:examples` the examples', so run them before a typecheck or check there; CI's `types` and `lint` jobs build all three first. Without the table `PageProps` falls back to string params, and lint misreads a needed `String()` as redundant.
+- Browser tests run in Chromium, Firefox, and WebKit — `pnpm test` runs all three, so install them once with `pnpm exec playwright install chromium firefox webkit`. `TEST_BROWSER=<engine>` narrows a run to one; CI runs one engine per job the same way. Every browser-mode `vite.config.ts` and every test that launches Playwright itself reads that variable, so a new one does too. VRT is the exception: it captures in Chromium only.
 - Use `type`, not `interface` — except `Register` (router, state, i18n, and the generated `.k8ordo/register.gen.ts`), which exists to be merged.
 - No `@ts-ignore` — use `@ts-expect-error` with an explanation.
 - No skipped tests (`test.skip`, `describe.skip`).
@@ -62,4 +63,4 @@ pnpm check              # lint/format check (pnpm check:write to auto-fix)
 
 ## Release
 
-Versioning uses pnpm's built-in release management, driven in CI by [k35o/pnpm-release-action](https://github.com/k35o/pnpm-release-action). To author a change, run `pnpm change` and include the generated `.changeset/<name>.md` in the PR. Pushes to `main` either update the release PR (branch `pnpm-release/main`) or, when no intents are pending, publish to npm via OIDC trusted publishing. Config lives under the `versioning` key in `pnpm-workspace.yaml`.
+Versioning uses pnpm's built-in release management, driven in CI by [k35o/pnpm-release-action](https://github.com/k35o/pnpm-release-action). To author a change, run `pnpm change` and include the generated `.changeset/<name>.md` in the PR. Pushes to `main` first run every check in `ci.yml` (`release.yml` calls it as its first job; `ci.yml` has no push trigger of its own), and only if they pass either update the release PR (branch `pnpm-release/main`) or, when no intents are pending, publish to npm via OIDC trusted publishing. Config lives under the `versioning` key in `pnpm-workspace.yaml`.

@@ -313,8 +313,8 @@ export const testingTitle = message({
 });
 
 export const testingDescription = message({
-  ja: 'このパッケージは何もモックしないので、ナビゲーションのテストには本物のブラウザ環境が要ります。パッケージ自身のテストは Vitest の browser mode を Chromium で動かしています。',
-  en: 'Nothing here is mocked, so a test of navigation needs a real browser environment. The package’s own suite runs in Vitest’s browser mode on Chromium.',
+  ja: 'このパッケージは何もモックしないので、ナビゲーションのテストには本物のブラウザ環境が要ります。パッケージ自身のテストは Vitest の browser mode を Chromium・Firefox・WebKit で動かしています。ただし browser mode はテストを iframe の中で動かし、Firefox と WebKit は iframe の中では戻る・進むでスクロール位置を正しく戻しません（Firefox は戻る遷移の handler も 2 回走らせます）。そのため戻る・進むは、Playwright でトップレベルに開いたページで確かめています。',
+  en: 'Nothing here is mocked, so a test of navigation needs a real browser environment. The package’s own suite runs in Vitest’s browser mode on Chromium, Firefox and WebKit. Browser mode runs a test inside an iframe, though, where Firefox and WebKit do not restore the scroll position on back and forward (Firefox also runs a traversal’s handler twice), so going back and forward is checked in a top-level page opened with Playwright.',
 });
 
 export const testingPure = message({

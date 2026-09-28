@@ -49,8 +49,10 @@
   "devDependencies": {
     "@arethetypeswrong/cli": "catalog:",
     "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
     "@vitejs/plugin-react": "catalog:",
     "@vitest/browser-playwright": "catalog:",
+    "playwright": "catalog:",
     "publint": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",

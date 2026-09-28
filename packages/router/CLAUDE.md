@@ -12,7 +12,7 @@ inside the npm package.
 ## Commands
 
 ```bash
-pnpm test          # unit (node) + browser (chromium)
+pnpm test          # unit (node; back and forward in a top-level page via Playwright) + browser (chromium, firefox, webkit)
 pnpm build         # vp pack
 pnpm typecheck
 pnpm check         # check:write to auto-fix
@@ -145,6 +145,9 @@ src/
   boundary.tsx      RouteErrorBoundary (the boundary that renders the table's error)
   router.tsx        Router / Outlet / useRoute / useParams
   not-found.ts      notFound / isNotFound (the framework answers it; branded, not a class)
+  traversal.test.ts serves fixtures/traversal with Vite and opens it top-level
+fixtures/
+  traversal/        a page on <Router>, for going back and forward
 ```
 
 ## Conventions
@@ -156,5 +159,8 @@ src/
 - Browser tests play the router themselves where they need one — an
   unintercepted `navigation.navigate()` in the test iframe is a cross-document
   load and kills the runner.
+- Going back and forward is asserted in `traversal.test.ts`, never in the
+  browser tests: inside Vitest's iframe, Firefox and WebKit do not restore the
+  scroll position, and Firefox runs a traversal's handler twice.
 - Tests state a guarantee in their name, English; comments and commits are
   Japanese except docs/ and this file.

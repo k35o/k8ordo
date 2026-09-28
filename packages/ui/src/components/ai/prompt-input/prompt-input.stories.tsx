@@ -125,6 +125,17 @@ const transferOf = (files: File[]): DataTransfer => {
   return transfer;
 };
 
+// Firefox は初期化辞書の clipboardData を捨て、空の DataTransfer を持たせる。
+// 合成の貼り付けに中身を載せるため、インスタンスに直接置く
+const pasteOf = (clipboardData: DataTransfer): ClipboardEvent => {
+  const paste = new ClipboardEvent('paste', {
+    bubbles: true,
+    cancelable: true,
+  });
+  Object.defineProperty(paste, 'clipboardData', { value: clipboardData });
+  return paste;
+};
+
 const submittedFileNames = () =>
   Array.from(onSubmitWithFiles.mock.lastCall?.[1] ?? [], (file) => file.name);
 
@@ -282,11 +293,7 @@ export const PasteImage: Story = {
   render: withAttachments,
   play: async ({ canvas }) => {
     const textarea = canvas.getByRole('textbox');
-    const paste = new ClipboardEvent('paste', {
-      bubbles: true,
-      cancelable: true,
-      clipboardData: transferOf([png]),
-    });
+    const paste = pasteOf(transferOf([png]));
     textarea.dispatchEvent(paste);
 
     await expect(
@@ -304,11 +311,7 @@ export const PasteTextStaysText: Story = {
   play: async ({ canvas }) => {
     const transfer = new DataTransfer();
     transfer.setData('text/plain', 'ただの文字');
-    const paste = new ClipboardEvent('paste', {
-      bubbles: true,
-      cancelable: true,
-      clipboardData: transfer,
-    });
+    const paste = pasteOf(transfer);
     canvas.getByRole('textbox').dispatchEvent(paste);
 
     await expect(paste.defaultPrevented).toBe(false);
@@ -341,24 +344,14 @@ export const PasteBeyondMaxFiles: Story = {
   render: withAttachments,
   play: async ({ canvas }) => {
     const textarea = canvas.getByRole('textbox');
-    textarea.dispatchEvent(
-      new ClipboardEvent('paste', {
-        bubbles: true,
-        cancelable: true,
-        clipboardData: transferOf([png]),
-      }),
-    );
+    textarea.dispatchEvent(pasteOf(transferOf([png])));
     const list = await canvas.findByRole('list', { name: '添付ファイル' });
 
     const transfer = transferOf([
       new File(['png'], 'second.png', { type: 'image/png' }),
     ]);
     transfer.setData('text/plain', 'second.png');
-    const overflow = new ClipboardEvent('paste', {
-      bubbles: true,
-      cancelable: true,
-      clipboardData: transfer,
-    });
+    const overflow = pasteOf(transfer);
     textarea.dispatchEvent(overflow);
 
     // 上限で捨てたファイルでも、一緒に届いたファイル名を本文に貼らない

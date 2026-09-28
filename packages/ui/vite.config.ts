@@ -6,6 +6,13 @@ import { playwright } from '@vitest/browser-playwright';
 import { vrt } from 'storybook-addon-vrt/vitest-plugin';
 import { defineConfig } from 'vite-plus';
 
+// CI はエンジンごとにジョブを分けて並べるので、TEST_BROWSER で 1 つに絞れる
+const browsers = (['chromium', 'firefox', 'webkit'] as const).filter(
+  (browser) =>
+    process.env.TEST_BROWSER === undefined ||
+    process.env.TEST_BROWSER === browser,
+);
+
 const storiesProject = ({
   label,
   color,
@@ -51,7 +58,7 @@ const storiesProject = ({
       // ので、addon が敷いていたのと同じ寸法をこちらで明示する。
       // addon が vitest 5 に対応したら消してよい。
       viewport: { width: 1200, height: 900 },
-      instances: [{ browser: 'chromium' as const }],
+      instances: browsers.map((browser) => ({ browser })),
     },
   },
 });
@@ -123,7 +130,7 @@ export default defineConfig({
           ],
           browser: {
             enabled: true,
-            instances: [{ browser: 'chromium' }],
+            instances: browsers.map((browser) => ({ browser })),
             provider: playwright({
               contextOptions: { reducedMotion: 'reduce' },
             }),
@@ -142,7 +149,7 @@ export default defineConfig({
           ],
           browser: {
             enabled: true,
-            instances: [{ browser: 'chromium' }],
+            instances: browsers.map((browser) => ({ browser })),
             provider: playwright({
               contextOptions: { reducedMotion: 'reduce' },
             }),
