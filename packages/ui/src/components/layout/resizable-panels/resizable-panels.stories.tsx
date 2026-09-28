@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
 import type { ComponentProps } from 'react';
-import { expect, fireEvent, fn, waitFor } from 'storybook/test';
+import { expect, fireEvent, fn, spyOn, waitFor } from 'storybook/test';
 
 import { ResizablePanels } from '.';
 
@@ -89,6 +89,13 @@ export const Drag: Story = {
     const box = handle.getBoundingClientRect();
     const x = box.left + box.width / 2;
     const y = box.top + box.height / 2;
+    // 合成の pointerdown の id は、どのエンジンでも動いているポインタに当たる
+    // とは限らない（Firefox のマウスは 0 で、1 への setPointerCapture は
+    // NotFoundError）。つかむのはスパイで受けて、押したポインタを捕まえに
+    // いったことだけを確かめる
+    const capture = spyOn(handle, 'setPointerCapture').mockImplementation(
+      () => undefined,
+    );
 
     fireEvent.pointerDown(handle, { pointerId: 1, clientX: x, clientY: y });
     fireEvent.pointerMove(handle, {
@@ -98,6 +105,7 @@ export const Drag: Story = {
     });
     fireEvent.pointerUp(handle, { pointerId: 1, clientX: x + 100, clientY: y });
 
+    await expect(capture).toHaveBeenCalledWith(1);
     // つかんだ点へ跳ばず、動かした分だけ広がる
     await expect(primaryWidth(primary)).toBeCloseTo(before + 100, 0);
     await expect(dragged).toHaveBeenCalled();
