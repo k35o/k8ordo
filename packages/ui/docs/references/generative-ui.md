@@ -80,6 +80,10 @@ These exports are left out on purpose, so a model cannot place them:
   async Server Component. The generated UI renders on the client, where it
   cannot run, and placing it there would ship the highlighter to the browser.
   `Code` (inline code) is in the catalog.
+- `CommandPalette` — every item runs a function of your application, which a
+  spec cannot write, and it is chrome your application opens from a shortcut
+  rather than something placed in a reply. For actions inside the generated UI,
+  use `Button` or `DropdownMenu`.
 - `ResizablePanels` — it divides a parent of fixed size into a workspace, the
   frame an application draws around its content. The generated UI flows inside
   a message and has no height to divide; to set things side by side, use

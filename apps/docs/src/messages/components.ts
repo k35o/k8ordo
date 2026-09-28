@@ -1146,6 +1146,25 @@ export const drawer = {
   }),
 };
 
+export const commandPalette = {
+  description: message({
+    ja: '打った文字でコマンドを絞り込み、キーボードだけで実行するパレット',
+    en: 'A palette that filters commands as you type and runs them from the keyboard.',
+  }),
+  usageDescription: message({
+    ja: '`label` と `keywords` を大文字小文字を区別せずに絞り込みます。`↓` / `↑` で移り（端で反対側へ回る）、`Enter` かクリックでパレットを閉じてから `onSelect` を呼びます。フォーカスは検索欄に置いたままです。同じ `group` の項目は見出しの下にまとまり、`shortcut` のキーは `Kbd` で添えます。',
+    en: 'It filters on `label` and `keywords`, ignoring case. `↓` / `↑` move through the matches and wrap around; `Enter` or a click closes the palette and then calls `onSelect`. Focus stays in the search field. Items that share a `group` gather under its heading, and `shortcut` keys are drawn with `Kbd`.',
+  }),
+  shortcutTitle: message({
+    ja: 'キーで開く',
+    en: 'Opening from a key',
+  }),
+  shortcutDescription: message({
+    ja: '開閉は `Modal` と同じく `isOpen` / `onClose` で、⌘K / Ctrl+K のようなキーはアプリが配線します。閉じるとフォーカスは開く前の場所へ戻り、次に開いたときは空の検索から始まります。',
+    en: 'Open and close it like `Modal`, with `isOpen` / `onClose`; a key such as ⌘K / Ctrl+K is the application’s to wire. Closing returns focus to where it was, and the next opening starts from an empty search.',
+  }),
+};
+
 export const modal = {
   description: message({
     ja: 'モーダルダイアログ',

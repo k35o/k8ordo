@@ -72,6 +72,9 @@ export const ja: Messages = {
   resizablePanelsHandle: 'パネルの大きさ',
   tableOfContents: '目次',
 
+  commandPalette: 'コマンド',
+  commandPaletteSearch: 'コマンドを検索',
+  commandPaletteEmpty: '一致するコマンドはありません',
   chat: 'チャット',
   scrollToLatest: '最新のメッセージへ移動',
   reasoning: '思考の過程',

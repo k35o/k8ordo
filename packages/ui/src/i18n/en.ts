@@ -72,6 +72,9 @@ export const en: Messages = {
   resizablePanelsHandle: 'Panel size',
   tableOfContents: 'Contents',
 
+  commandPalette: 'Commands',
+  commandPaletteSearch: 'Search commands',
+  commandPaletteEmpty: 'No matching commands',
   chat: 'Chat',
   scrollToLatest: 'Scroll to latest message',
   reasoning: 'Reasoning',
