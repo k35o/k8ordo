@@ -51,8 +51,10 @@ jobs:
 
       # 最初の失敗で打ち切ると、走っていた他のパッケージも止まり、そのエンジンで
       # どこが落ちるのかが 1 つずつしか見えない。全部回してから落とす。
+      # 依存順に並べると、落ちたパッケージに依存するものは --no-bail でも黙って
+      # 飛ばされる。ビルドは install で済んでいて、テストは互いを待たない。
       - name: Run tests
-        run: pnpm --filter './packages/*' --no-bail test
+        run: pnpm --filter './packages/*' --no-bail --no-sort test
 
   lint:
     name: Lint
