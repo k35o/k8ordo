@@ -1,6 +1,7 @@
 import { renderHook } from 'vitest-browser-react';
 
 import { readWritingMode, useWritingMode } from '.';
+import type { WritingMode } from '.';
 
 const mount = (writingMode: string): HTMLDivElement => {
   const div = document.createElement('div');
@@ -30,6 +31,18 @@ describe('readWritingMode', () => {
 });
 
 describe('useWritingMode', () => {
+  it('最初の描画から縦書きを返す', async () => {
+    const div = mount('vertical-rl');
+    const seen: WritingMode[] = [];
+    await renderHook(() => {
+      const writingMode = useWritingMode(div);
+      seen.push(writingMode);
+      return writingMode;
+    });
+    expect(seen[0]).toBe('vertical');
+    div.remove();
+  });
+
   it('要素が縦書きなら "vertical" を返す', async () => {
     const div = mount('vertical-rl');
 
