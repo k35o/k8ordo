@@ -42,6 +42,27 @@ jobs:
         # fonts-wqy-zenhei) so Japanese text renders instead of tofu (□) boxes.
         run: pnpm exec playwright install --with-deps chromium
 
+      # headless shell の総称 monospace は、はじめ fontconfig の monospace
+      # （DejaVu Sans Mono）を指すが、画面より背の高いストーリーを撮ると
+      # （captureBeyondViewport）ブラウザ側の既定の Courier New（Liberation
+      # Mono）に書き戻される。Liberation Mono に無い Kbd の ⌘ や ⇧ は、背の高い
+      # ストーリーより前に撮られたかどうかで字形が変わっていたので、Courier New
+      # も DejaVu Sans Mono に解決させて書き戻しの前後をそろえる。
+      - name: Resolve Courier New to the default monospace font
+        run: |
+          mkdir -p ~/.config/fontconfig
+          cat > ~/.config/fontconfig/fonts.conf <<'EOF'
+          <?xml version="1.0"?>
+          <!DOCTYPE fontconfig SYSTEM "urn:fontconfig:fonts.dtd">
+          <fontconfig>
+            <alias binding="strong">
+              <family>Courier New</family>
+              <prefer><family>DejaVu Sans Mono</family></prefer>
+            </alias>
+          </fontconfig>
+          EOF
+          test "$(fc-match -f '%{family[0]}' 'Courier New')" = "$(fc-match -f '%{family[0]}' monospace)"
+
       - name: Capture story screenshots
         run: pnpm --filter @k8ordo/ui test:vrt
 
