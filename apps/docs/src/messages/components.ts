@@ -1116,16 +1116,16 @@ export const resizablePanels = {
     en: 'Two panes split by a divider you drag or move with the arrow keys.',
   }),
   usageDescription: message({
-    ja: '`value` は 1 枚目が占める割合（%）で、2 枚目は残りを取ります。根は親いっぱいに広がるので、親に大きさを与えてください（縦に分けるなら高さが要ります）。仕切りはフォーカスでき、矢印キーは画面上の向きのとおりに動かし、`Home` / `End` で `min` / `max` の端へ移ります。',
-    en: '`value` is the first pane’s share in percent; the second pane takes the rest. The root fills its parent, so give the parent a size (a vertical split needs a height). The divider takes focus; the arrow keys move it the way they point on screen, and `Home` / `End` jump to `min` / `max`.',
+    ja: '`value` は 1 枚目が占める割合（%）で、2 枚目は残りを取ります。根は親いっぱいに広がるので、親に大きさを与えてください（縦に分けるなら高さが要ります）。仕切りはフォーカスでき、矢印キーは画面上の向きのとおりに動かし、`Home` / `End` で `min` / `max` の端へ移ります。右から左の言語では 1 枚目が右に付くので、`ArrowLeft` で広がります。並びは文字の行に沿うので、縦書きの中では `orientation="horizontal"` が上下に並びます。',
+    en: '`value` is the first pane’s share in percent; the second pane takes the rest. The root fills its parent, so give the parent a size (a vertical split needs a height). The divider takes focus; the arrow keys move it the way they point on screen, and `Home` / `End` jump to `min` / `max`. In a right-to-left page the first pane sits on the right, so `ArrowLeft` widens it. The panes follow the line of text, so in vertical writing mode `orientation="horizontal"` stacks them.',
   }),
   verticalTitle: message({
     ja: '上下に分ける',
     en: 'Vertical',
   }),
   verticalDescription: message({
-    ja: '`orientation="horizontal"` は文字の行に沿って並べるので、縦書きの中では上下に並びます。右から左の言語では 1 枚目が右に付き、`ArrowLeft` で広がります。',
-    en: '`orientation="horizontal"` lays the panes along the line of text, so in vertical writing mode they stack. In a right-to-left page the first pane sits on the right, and `ArrowLeft` widens it.',
+    ja: '`orientation="vertical"` は 2 枚を上下に並べます。仕切りは上下の矢印キーで動き、値は上のパネルが高さに占める割合です。',
+    en: '`orientation="vertical"` stacks the two panes. The divider moves with the up and down arrow keys, and its value is the top pane’s share of the height.',
   }),
   labelTitle: message({
     ja: '仕切りの名前',
