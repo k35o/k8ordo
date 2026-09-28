@@ -253,6 +253,12 @@ describe('the static build', () => {
     },
   );
 
+  it('writes the product list whole: a file is the same whatever the search', () => {
+    const html = read('products', 'index.html');
+    expect(html).toContain('first product');
+    expect(html).toContain('second product');
+  });
+
   it('leaves no nonce in what it writes: a file everyone reads cannot keep one', () => {
     for (const file of ['index.html', 'index.rsc', '404.html']) {
       expect(read(file)).not.toContain('nonce');
@@ -431,6 +437,41 @@ describe('a written page in the browser', () => {
 
     await page.getByRole('heading', { name: 'products' }).waitFor();
     expect(new URL(page.url()).pathname).toBe('/site/products');
+    expect(await page.evaluate(() => 'stayed' in window)).toBe(true);
+    await page.close();
+  });
+
+  it('filters the product list by the search once it runs in the browser', async () => {
+    const page = await browser.newPage();
+
+    await page.goto(`${origin}/products?q=second`);
+
+    await expect
+      .poll(
+        () => page.getByTestId('list').getByRole('listitem').allTextContents(),
+        {
+          timeout: 10_000,
+        },
+      )
+      .toStrictEqual(['second product']);
+    expect(await page.getByLabel('filter').inputValue()).toBe('second');
+    await page.close();
+  });
+
+  it('moves the search in place when the filter form is submitted', async () => {
+    const page = await openHydrated(origin);
+    await page.getByRole('link', { name: 'products', exact: true }).click();
+    await page.getByRole('heading', { name: 'products' }).waitFor();
+
+    await page.getByLabel('filter').fill('first');
+    await page.getByRole('button', { name: 'filter' }).click();
+
+    await expect
+      .poll(() =>
+        page.getByTestId('list').getByRole('listitem').allTextContents(),
+      )
+      .toStrictEqual(['first product']);
+    expect(new URL(page.url()).search).toBe('?q=first');
     expect(await page.evaluate(() => 'stayed' in window)).toBe(true);
     await page.close();
   });
