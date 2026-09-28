@@ -1,6 +1,13 @@
 'use client';
 
-import { useCallback, useId, useMemo, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import type {
   FC,
   FocusEventHandler,
@@ -68,20 +75,45 @@ export const Root: FC<
   );
 
   // Tab で入れるのは 1 つだけ（roving tabindex）。最初は先頭、以後は最後に
-  // フォーカスした項目。その項目が消えたら先頭に戻す
+  // フォーカスした項目。その項目が消えたか無効になったら先頭に戻す
+  const settle = useCallback(() => {
+    setActiveId((current) => {
+      const element =
+        current === undefined ? undefined : items.current.get(current);
+      return element !== undefined && isEnabled(element)
+        ? current
+        : ordered()[0]?.[0];
+    });
+  }, [ordered]);
+
   const register = useCallback(
     (id: string, element: HTMLElement) => {
       items.current.set(id, element);
-      setActiveId((current) => current ?? ordered()[0]?.[0]);
+      settle();
       return () => {
         items.current.delete(id);
-        setActiveId((current) =>
-          current === id ? ordered()[0]?.[0] : current,
-        );
+        settle();
       };
     },
-    [ordered],
+    [settle],
   );
+
+  // 項目は消えずに無効になることもある。disabled の <button> は tabIndex に
+  // かかわらず Tab 順から外れるので、そのまま今の項目にしておくとツールバーに
+  // Tab で入れなくなる
+  useEffect(() => {
+    if (container === null) {
+      return undefined;
+    }
+    const observer = new MutationObserver(settle);
+    observer.observe(container, {
+      subtree: true,
+      attributeFilter: ['disabled'],
+    });
+    return () => {
+      observer.disconnect();
+    };
+  }, [container, settle]);
 
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     onKeyDown?.(event);

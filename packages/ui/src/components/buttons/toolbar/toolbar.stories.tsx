@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
 import type { ComponentProps } from 'react';
-import { expect, fn } from 'storybook/test';
+import { expect, fn, waitFor } from 'storybook/test';
 
 import { Toolbar } from '.';
 import { CopyIcon, LinkIcon, ListIcon, TableIcon } from '../../icons';
@@ -161,5 +161,54 @@ export const ActivatesItems: Story = {
     await userEvent.keyboard('{End}{Enter}');
 
     await expect(save).toHaveBeenCalledOnce();
+  },
+};
+
+const UndoToolbar = () => {
+  const [history, setHistory] = useState(1);
+  return (
+    <Toolbar.Root aria-label="編集">
+      <Toolbar.Item
+        renderItem={(props) => (
+          <Button {...props} size="sm">
+            切り取り
+          </Button>
+        )}
+      />
+      <Toolbar.Item
+        renderItem={(props) => (
+          <Button
+            {...props}
+            disabled={history === 0}
+            onClick={() => {
+              setHistory((current) => current - 1);
+            }}
+            size="sm"
+          >
+            元に戻す
+          </Button>
+        )}
+      />
+    </Toolbar.Root>
+  );
+};
+
+// 最後にいた項目が無効になっても、ツールバーには Tab で入れる
+export const ActiveItemDisabled: Story = {
+  render: () => <UndoToolbar />,
+  play: async ({ canvas, userEvent }) => {
+    const cut = canvas.getByRole('button', { name: '切り取り' });
+    const undo = canvas.getByRole('button', { name: '元に戻す' });
+    cut.focus();
+    await userEvent.keyboard('{ArrowRight}{Enter}');
+    await expect(undo).toBeDisabled();
+
+    // 無効になったことは描画のあとで DOM から知るので、付け替えを待つ
+    await waitFor(async () => {
+      await expect(cut).toHaveAttribute('tabindex', '0');
+    });
+    canvas.getByRole('button', { name: '前のボタン' }).focus();
+    await userEvent.tab();
+    await expect(cut).toHaveFocus();
   },
 };
