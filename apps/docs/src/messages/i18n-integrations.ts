@@ -54,8 +54,8 @@ export const form = {
     en: "Call `formFields(schema)` inside the page's render, not at module scope. Module scope runs once, usually outside any request, so every locale's page would be handed the same messages, most likely the default locale's.",
   }),
   action: message({
-    ja: 'Server Action は `[locale]` の描画の外で走るので、ロケールを指名するものがありません。ページで `bind` したロケールを受け取り、`locales.run` の中で `parseForm` を呼びます。クライアントから戻ってくる値なので、`locales.is` で確かめてから使います。',
-    en: 'A Server Action runs outside the `[locale]` render, so nothing names a locale there. Take the locale the page bound to the action and call `parseForm` inside `locales.run`. The value comes back from the client, so check it with `locales.is` before using it.',
+    ja: '`[locale]` のページから送られた Server Action は、そのページのロケールで走ります。フレームワークが action のリクエストでもページの `paramsSchema` を通すからです。だから `parseForm` の文言はページの言語になり、ロケールを `bind` したり `locales.run` で囲んだりする必要はありません。',
+    en: 'A Server Action posted from a `[locale]` page runs in that page’s locale: the framework runs the page’s `paramsSchema` for the action’s request as well. So the messages `parseForm` produces are in the page’s language, with no locale to bind to the action and no `locales.run` around it.',
   }),
   guideLink: message({
     ja: '`@k8ordo/form` のガイドを読む',
@@ -139,8 +139,8 @@ export const server = {
     en: 'Read how a `guard.ts` is written',
   }),
   actions: message({
-    ja: 'Server Action の中で文言を使うときは、上の `@k8ordo/form` の例のように `locales.run` で囲みます。',
-    en: 'Wrap message calls in a Server Action with `locales.run`, as in the `@k8ordo/form` example above.',
+    ja: '`[locale]` のページから送られた Server Action は、上の `@k8ordo/form` の例のとおりそのページのロケールで走るので、中で文言をそのまま呼べます。',
+    en: 'A Server Action posted from a `[locale]` page runs in that page’s locale, as in the `@k8ordo/form` example above, so messages can be called in it as they are.',
   }),
 };
 

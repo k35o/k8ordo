@@ -5,7 +5,17 @@ import type { FC } from 'react';
 
 import { getMessages } from '../../../i18n/current';
 import { Button } from '../../buttons/button';
+import type { ButtonRenderItemProps } from '../../buttons/button';
 import type { ToolApproval, ToolApprovalResponse } from '../types';
+
+// 答えている間も、押したボタンにフォーカスを残す。disabled にすると
+// Chromium は描画の更新のあとでフォーカスを body へ外し、バーが消えるときに
+// 見出しへ移せなくなる。無効は Button が添える aria-disabled で示し、
+// 二度目の答えは Button の onClick が止める
+const renderFocusable = ({
+  disabled: _disabled,
+  ...props
+}: ButtonRenderItemProps) => <button {...props} type="button" />;
 
 type Props = {
   approval: ToolApproval;
@@ -63,6 +73,7 @@ export const ApprovalBar: FC<Props> = ({
             onClick={() => {
               respond(false);
             }}
+            renderItem={renderFocusable}
             size="sm"
             variant="outline"
           >
@@ -73,6 +84,7 @@ export const ApprovalBar: FC<Props> = ({
             onClick={() => {
               respond(true);
             }}
+            renderItem={renderFocusable}
             size="sm"
           >
             {messages.toolApprove}

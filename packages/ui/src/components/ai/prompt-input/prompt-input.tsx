@@ -14,6 +14,7 @@ import { createSafeContext } from '../../../helpers/create-safe-context';
 import { useControllableState } from '../../../hooks/controllable-state';
 import { getMessages } from '../../../i18n/current';
 import { acceptsFile } from '../../../internal/accepts-file';
+import { carriesFiles } from '../../../internal/carries-files';
 import { FOCUS_RING, FOCUS_RING_WITHIN } from '../../_internal/focus-ring';
 import { SendIcon } from '../../icons';
 import {
@@ -44,9 +45,6 @@ const [PromptInputProvider, usePromptInputContext] = createSafeContext<{
 
 const isBusy = (status: ChatStatus) =>
   status === 'submitted' || status === 'streaming';
-
-const carriesFiles = (dataTransfer: DataTransfer) =>
-  dataTransfer.types.includes('Files');
 
 type RootProps = {
   status?: ChatStatus;

@@ -129,11 +129,25 @@ export const CheckboxGroupView: FC<
   return ui.renderCheckboxGroup(props, field.value, field.setValue);
 };
 
+export const ComboboxView: FC<ComponentRenderProps<s.ComboboxProps>> = ({
+  props,
+}) => {
+  const field = useStateField<string>(props.name, props.defaultValue ?? '');
+  return ui.renderCombobox(props, field.value, field.setValue);
+};
+
 export const AutocompleteView: FC<
   ComponentRenderProps<s.AutocompleteProps>
 > = ({ props }) => {
   const field = useStateField<string[]>(props.name, props.defaultValue ?? []);
   return ui.renderAutocomplete(props, field.value, field.setValue);
+};
+
+export const ColorPickerView: FC<ComponentRenderProps<s.ColorPickerProps>> = ({
+  props,
+}) => {
+  const field = useStateField<string>(props.name, props.defaultValue ?? '');
+  return ui.renderColorPicker(props, field.value, field.setValue);
 };
 
 export const DateFieldView: FC<ComponentRenderProps<s.DateFieldProps>> = ({

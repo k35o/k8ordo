@@ -23,6 +23,9 @@ export const en: Messages = {
   autocompleteClear: 'Clear all',
   autocompleteEmpty: 'No results',
 
+  comboboxToggle: 'Show options',
+  comboboxEmpty: 'No results',
+  comboboxFailed: 'Could not load options',
   fileFieldRemove: 'Remove file',
   fileFieldTrigger: 'Select files',
   fileFieldDrop: 'Drop files here',
@@ -40,6 +43,10 @@ export const en: Messages = {
   datePickerOpen: 'Choose from calendar',
   datePickerDialog: 'Choose a date',
 
+  colorPickerHue: 'Hue',
+  colorPickerSaturation: 'Saturation',
+  colorPickerLightness: 'Lightness',
+  colorPickerSwatches: 'Swatches',
   passwordShow: 'Show password',
   passwordHide: 'Hide password',
 

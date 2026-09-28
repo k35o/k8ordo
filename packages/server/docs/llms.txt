@@ -4,12 +4,14 @@
 > parameters need no list of values, an unknown URL is a real 404, and a form
 > can post to a Server Action. The mode is the dependency — the alternative is
 > `@k8ordo/static`, which renders every route at build time. `src/routes/` is
-> the pathname space (page/layout/not-found/error/redirect/guard/route, `[param]`,
+> the pathname space (page/layout/not-found/error/loading/redirect/guard/route, `[param]`,
 > `(group)`, `_private`), a page or layout may `export const paramsSchema` (any
 > Standard Schema, synchronous) to type its parameters — a refused value makes
 > the pattern not answer, so the walk goes on to `not-found.tsx` under a real
 > 404 — an `error.tsx` shows in place of what throws below it, a `redirect.ts`
-> answers 307/308, a `route.ts` answers its URL with a `Response` from the
+> answers 307/308, a `loading.tsx` shows while what is below it suspends
+> (with the router's `usePendingPathname()` for a page change in progress), a
+> `route.ts` answers its URL with a `Response` from the
 > method it exports (`GET`/`POST`/…, `{ request, params }` — `RouteContext`
 > from the router; `HEAD` from `GET`, `405` with `Allow` otherwise, no
 > same-origin check), a page that says `notFound()` (from `@k8ordo/router`) is
@@ -20,7 +22,9 @@
 > below it (a `Response` ends the request, nothing lets it through, and
 > `responseHeaders()` adds to the final answer), a guard or a Server Action
 > reads and writes cookies through `cookies()`, a page receives `request`
-> (read-only headers and cookies) and renders its own `<title>` — boundaries are React's
+> (read-only headers and cookies) and renders its own `<title>`, a page that
+> exports `search = listState.url` receives that `@k8ordo/state` url slot
+> parsed as `search` and is loaded again in place when the search moves — boundaries are React's
 > own `'use client'` with `server-only` modules barred from the client bundle,
 > and the route table and type wiring are generated rather than hand-written.
 >
@@ -51,7 +55,11 @@ When installed via npm, these docs live under `node_modules/@k8ordo/server/docs/
   `path: '/'`, `httpOnly`, `secure`, `sameSite: 'lax'`; every write a
   `Set-Cookie` on the answer), and `requestHeaders()` the headers the request
   arrived with — all three from a `guard.ts`, a `route.ts` or a Server
-  Action, and they throw anywhere else; `Guard<P>` is
+  Action, and they throw anywhere else; `nonce()` is the nonce this answer's
+  inline scripts carry (the framework's own, and what the application signs
+  with it, as `<ColorSchemeProvider nonce>`), new per request and readable
+  anywhere the request is answered, the render included — a guard names it
+  in the `Content-Security-Policy` it writes; `Guard<P>` is
   the type of what a `guard.ts` default-exports (`({ request, params }) =>
   Response | void`, `params` the strings of its directory's pattern) and
   `GuardContext<P>` its argument; `RedirectTarget` is the type of what a

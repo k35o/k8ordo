@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import type { MouseEvent, MouseEventHandler } from 'react';
+import type { FC, MouseEvent, MouseEventHandler } from 'react';
 import { useRef, useState } from 'react';
-import { expect, fn } from 'storybook/test';
+import { expect, fn, waitFor } from 'storybook/test';
 
 import { CopyIcon } from '../../icons';
 import { Button } from './button';
@@ -95,6 +95,10 @@ export const Disabled: Story = {
   args: {
     disabled: true,
   },
+  play: async ({ canvas }) => {
+    // 利用者が渡した disabled は保留と違い、ネイティブの disabled にする
+    await expect(canvas.getByRole('button')).toBeDisabled();
+  },
 };
 export const DisabledOutline: Story = {
   args: {
@@ -130,6 +134,111 @@ export const AsyncAction: Story = {
       });
       console.warn('async action completed');
     },
+  },
+};
+
+// 返した Promise は play が finishAction を呼ぶまで解決しない。保留のあいだを
+// 好きなだけ延ばして、その間の振る舞いを見る
+let finishAction = (): void => {};
+const actionUntilFinished = (): Promise<void> =>
+  new Promise<void>((resolve) => {
+    finishAction = resolve;
+  });
+
+// Chromium は無効になった要素のフォーカスを描画の更新で外す。2 フレーム待って
+// 最初のフレームの更新を越えてからフォーカスを確かめる
+const afterRenderingUpdate = async (): Promise<void> => {
+  await new Promise<void>((resolve) => {
+    requestAnimationFrame(() => {
+      resolve();
+    });
+  });
+  await new Promise<void>((resolve) => {
+    requestAnimationFrame(() => {
+      resolve();
+    });
+  });
+};
+
+/**
+ * `onAction` の保留中も、押したボタンはフォーカスを持ち続ける。押せないことは
+ * `aria-disabled` で伝え、もう一度押しても `onAction` は走らない。
+ */
+export const PendingKeepsFocus: Story = {
+  args: {
+    onAction: fn(actionUntilFinished),
+  },
+  play: async ({ args, canvas, userEvent }) => {
+    const button = canvas.getByRole('button', { name: 'ボタン' });
+
+    try {
+      await userEvent.tab();
+      await userEvent.keyboard('{Enter}');
+
+      await waitFor(() => {
+        expect(button).toHaveAttribute('aria-busy', 'true');
+      });
+      await expect(button).toHaveAttribute('aria-disabled', 'true');
+      await afterRenderingUpdate();
+      await expect(button).toHaveFocus();
+
+      await userEvent.keyboard('{Enter}');
+      await userEvent.click(button);
+      await expect(args.onAction).toHaveBeenCalledOnce();
+    } finally {
+      // 終わらない非同期の transition は、同じ React の後続の transition を
+      // すべて待たせる。途中で落ちても後のストーリーを巻き込まないよう片付ける
+      finishAction();
+    }
+    await waitFor(() => {
+      expect(button).not.toHaveAttribute('aria-busy');
+    });
+    await expect(button).toHaveFocus();
+  },
+};
+
+const submitAction = fn(actionUntilFinished);
+
+const SubmitRender: FC = () => (
+  <form action={submitAction}>
+    <input aria-label="名前" name="name" />
+    <Button type="submit">送信</Button>
+  </form>
+);
+
+/**
+ * 送信の保留中も、押した送信ボタンはフォーカスを持ち続ける。ボタンを押し直しても、
+ * 入力欄の Enter（暗黙の送信）でも、二重には送らない。
+ */
+export const SubmitPendingKeepsFocus: Story = {
+  render: () => <SubmitRender />,
+  play: async ({ canvas, userEvent }) => {
+    const button = canvas.getByRole('button', { name: '送信' });
+
+    try {
+      await userEvent.tab();
+      await userEvent.tab();
+      await userEvent.keyboard('{Enter}');
+
+      await waitFor(() => {
+        expect(button).toHaveAttribute('aria-busy', 'true');
+      });
+      await expect(button).toHaveAttribute('aria-disabled', 'true');
+      await afterRenderingUpdate();
+      await expect(button).toHaveFocus();
+
+      await userEvent.keyboard('{Enter}');
+      await userEvent.click(canvas.getByRole('textbox', { name: '名前' }));
+      await userEvent.keyboard('{Enter}');
+      await expect(submitAction).toHaveBeenCalledOnce();
+    } finally {
+      // 終わらない非同期の transition は、同じ React の後続の transition を
+      // すべて待たせる。途中で落ちても後のストーリーを巻き込まないよう片付ける
+      finishAction();
+    }
+    await waitFor(() => {
+      expect(button).not.toHaveAttribute('aria-busy');
+    });
   },
 };
 

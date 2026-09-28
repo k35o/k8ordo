@@ -21,6 +21,6 @@ export const directiveNote = message({
 });
 
 export const searchNote = message({
-  ja: 'GET のフォームは JavaScript が読み込まれる前から動くので、`@k8ordo/form` で作る検索や絞り込みのフォームは静的なサイトに向いています。',
-  en: 'A GET form works before JavaScript loads, so a search or filter form built with `@k8ordo/form` suits a static site.',
+  ja: '`search` を export したページ（`@k8ordo/server` が search を渡すページ）は、名指しで拒みます。ファイルは search がどうであれ同じだからです。GET のフォームは JavaScript が読み込まれる前から動くので、`@k8ordo/form` で作る検索や絞り込みのフォームは静的なサイトに向いています。',
+  en: 'A page that exports `search` — what `@k8ordo/server` hands the search — is refused by name: a file is the same whatever the search holds. A GET form works before JavaScript loads, so a search or filter form built with `@k8ordo/form` suits a static site.',
 });

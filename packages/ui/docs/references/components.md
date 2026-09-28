@@ -44,6 +44,10 @@ native attribute the caller passed in. Spread the bag onto whatever you render.
   and calls `preventDefault()` while disabled, so a disabled link will not
   navigate. The examples below name them `_disabled` / `_type` so the discarded
   bindings pass a `no-unused-vars` rule.
+- `disabled` is only the `disabled` you passed. While an action is pending (see
+  [Button](#button)), the bag carries `aria-disabled` and `aria-busy` but
+  `disabled` stays `false`, so the pressed element keeps focus; the supplied
+  `onClick` is what ignores presses meanwhile.
 - Spreading onto a real `<button>` is exact, but write `type` on the element
   anyway: the `button-has-type` lint rule cannot see a `type` that arrives
   through a spread.
@@ -106,6 +110,15 @@ Props:
 - `variant`: `'solid'` | `'outline'` | `'skeleton'` (default: `'solid'`)
 - Other props are forwarded to `ComponentPropsWithRef<'button'>`, except `className` / `style`.
 
+`onAction` runs inside a transition. While the promise it returns is pending —
+and, with `type="submit"`, while the form's action is pending — the button shows
+a spinner, carries `aria-busy` and `aria-disabled`, and ignores presses,
+including the implicit submission of pressing Enter in a field. It does not
+become natively `disabled`: Chromium moves focus to `body` when the focused
+element is disabled, so a keyboard user who pressed the button would lose their
+place. The `disabled` you pass is native, and takes the button out of the tab
+order.
+
 `renderItem` replaces the `<button>`; see [Render props](#render-props) for the
 contract. It receives `className`, the composed `children`, `ref`, `type`,
 `disabled`, `aria-disabled`, `aria-busy`, `onClick`, and every other attribute
@@ -149,6 +162,9 @@ Props:
 - `tooltipDisabled`: `boolean` (default: `false`)
 - `tooltipPlacement`: `Placement` (default: `'top'`)
 - Other props are forwarded to `ComponentPropsWithRef<'button'>`, except `type` / `className` / `style`.
+
+`onAction` keeps the button busy the way `Button`'s does — `aria-busy`,
+`aria-disabled`, presses ignored, focus kept — without the spinner.
 
 `renderItem` replaces the `<button>` under the same contract as `Button`'s,
 with one addition: the tooltip wiring is kept in a nested `triggerProps` so it
@@ -970,7 +986,9 @@ goes back to it. With `required`, put a placeholder option whose `value` is
 
 ### Autocomplete
 
-A multi-select autocomplete. `value` and `onChange` are `string[]`.
+A multi-select autocomplete over a fixed list of options, shown as removable
+tags. `value` and `onChange` are `string[]`. To pick one option, or to search a
+list that lives on a server, use `Combobox`.
 
 With a `name`, the selection is submitted through a visually hidden
 `<select multiple>`: one entry per selected value, and `required` means at
@@ -1002,6 +1020,104 @@ Props:
 - `ref`: `Ref<HTMLInputElement>`
 - `value`: `string[]`
 - Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `type` / `role` / `className` / `style` / `children` / `autoComplete` / `aria-autocomplete` / `aria-controls` / `aria-expanded` / `aria-activedescendant`.
+
+### ColorPicker
+
+A color field whose value is `#rrggbb`. The value lives in a text input that
+carries `name`, so it submits and resets like any other field; hue, saturation,
+and lightness sliders and optional `swatches` (toggle buttons named by their
+`label`) write into it and announce the change with an `input` event, as if it
+had been typed. Typing reports a color only once it has six digits; on blur and
+on Enter the text is tidied to lowercase `#rrggbb`, and a three-digit `#f80` is
+expanded. Emptying the field reports `''`. Spread `@k8ordo/form`'s `input` onto
+it as is: a `.regex()` in the schema arrives as `pattern` and replaces the
+built-in `#[0-9a-fA-F]{6}`. The panel stays horizontal inside vertical writing
+mode.
+
+```tsx
+import { ColorPicker, FormControl } from '@k8ordo/ui';
+
+<FormControl
+  label="Accent color"
+  renderInput={(props) => (
+    <ColorPicker
+      {...props}
+      defaultValue="#0d9488"
+      name="accent"
+      swatches={[
+        { value: '#0d9488', label: 'Teal' },
+        { value: '#f97316', label: 'Orange' },
+      ]}
+    />
+  )}
+/>;
+```
+
+Props:
+
+- `defaultValue`: `string`
+- `invalid`: `boolean` (default: `false`)
+- `onChange`: `(value: string) => void`
+- `ref`: `Ref<HTMLInputElement>`
+- `swatches`: `readonly ColorPickerSwatch[]`
+- `type`: `string`
+- `value`: `string`
+- Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `className` / `style` / `children`.
+
+### Combobox
+
+A text field with a list of options, for picking one (the WAI-ARIA combobox
+with list autocomplete and manual selection). `value` and `onChange` are the
+chosen option's `value`, `''` when nothing is chosen. To pick several from a
+fixed list, use `Autocomplete`.
+
+Typing opens the list; nothing is chosen until an option is picked with a click
+or `Enter`, so leaving half-typed text puts the chosen option's label back, and
+leaving the field empty clears the choice. `ArrowDown` / `ArrowUp` open the list
+and move through it (`Alt+ArrowDown` opens it without entering it), `Escape`
+closes it and, pressed again, drops what was typed. Keys pressed while an IME is
+composing belong to the IME.
+
+Without `search`, typing filters `options` by label. With `search`, typing
+calls it for the options instead — each call gets a `signal` that aborts when
+the text changes again, so pass it to `fetch` — and `options` becomes the list
+shown before anything is typed and where the current value's label is looked
+up. While a search runs, the list is marked busy; a failed one says so with
+`comboboxFailed`, an empty result with `comboboxEmpty`.
+
+With a `name`, the choice is submitted through a visually hidden `<select>`, the
+same way `Autocomplete` submits, so `required`, a form library's rules, reset,
+and moving focus to the field after a failure all work on it.
+
+```tsx
+import { Combobox } from '@k8ordo/ui';
+
+<Combobox aria-label="Prefecture" name="prefecture" options={prefectures} />;
+
+// Options from a server
+<Combobox
+  aria-label="City"
+  name="city"
+  search={async (query, { signal }) => {
+    const response = await fetch(`/api/cities?q=${encodeURIComponent(query)}`, {
+      signal,
+    });
+    return response.json();
+  }}
+/>;
+```
+
+Props:
+
+- `defaultValue`: `string`
+- `invalid`: `boolean` (default: `false`)
+- `onChange`: `(value: string) => void`
+- `options`: `readonly Option[]`
+- `ref`: `Ref<HTMLInputElement>`
+- `search`: `ComboboxSearch`
+- `type`: `string`
+- `value`: `string`
+- Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `role` / `className` / `style` / `children` / `autoComplete` / `aria-autocomplete` / `aria-controls` / `aria-expanded` / `aria-activedescendant`.
 
 ### Checkbox
 
@@ -1328,8 +1444,10 @@ stays usable by keyboard; pass children to lay it out yourself (put a
 they respect `multiple` and `maxFiles`, land in the input so they are
 submitted, and are announced with an `input` event so a form sees the change.
 A dropped folder is skipped (choose folders through the picker with
-`webkitDirectory`), and `accept` is not checked on drop, just as the browser
-only suggests it to the picker.
+`webkitDirectory`). The browser applies `accept` only to the picker, so the
+field applies it to dropped files itself, by the same rules: a file it does not
+match is left out, and a drop with nothing it matches changes nothing — no
+`onChange`, no `input` event.
 
 The input holds exactly what `ItemList` lists, so what is listed is what is
 submitted:
@@ -1731,6 +1849,55 @@ Props:
 - `onSortChange`: `(sort: DataTableSort | null) => void`
 - `selectedIds`: `readonly string[]` (default: `NONE`)
 - `sort`: `DataTableSort` | `null` (default: `null`)
+
+### Tree
+
+A hierarchy whose parents open and close — files and folders, an outline —
+with the WAI-ARIA tree view keyboard model. Pass the nodes as a tree of
+`{ id, label, icon?, children? }`.
+
+```tsx
+import { Tree } from '@k8ordo/ui';
+
+<Tree
+  defaultExpandedIds={['src']}
+  items={[
+    {
+      id: 'src',
+      label: 'src',
+      children: [{ id: 'index', label: 'index.ts' }],
+    },
+    { id: 'readme', label: 'README.md' },
+  ]}
+  label="Files"
+  onChange={(id) => open(id)}
+/>;
+```
+
+- Which parents are open is controllable (`expandedIds` / `defaultExpandedIds`
+  / `onExpandedChange`), and so is the selected node (`selectedId` /
+  `defaultSelectedId` / `onChange`, called with the node's `id`).
+- Keyboard: Down / Up move between the visible nodes; Right opens a closed
+  parent, then moves to its first child; Left closes an open parent, or moves
+  to the parent; Home / End go to the first / last visible node; Enter or Space
+  selects; a character moves to the next node whose label starts with it.
+- Clicking a node selects it and, on a parent, opens or closes it.
+- One node takes Tab at a time (roving tabindex): the focused one, else the
+  selected one, else the first.
+- Under `.writing-v` the nodes run right to left, so Left / Right move between
+  them and Down / Up open and close.
+
+Props:
+
+- `items`: `readonly TreeItem[]` (required)
+- `label`: `string` (required)
+- `defaultExpandedIds`: `readonly string[]`
+- `defaultSelectedId`: `string` | `null` (default: `null`)
+- `expandedIds`: `readonly string[]`
+- `onChange`: `(id: string) => void`
+- `onExpandedChange`: `(ids: readonly string[]) => void`
+- `selectedId`: `string` | `null`
+- Other props are forwarded to `HTMLAttributes<HTMLUListElement>`, except `children` / `className` / `style` / `role` / `aria-label`.
 
 ## Feedback
 
@@ -2371,11 +2538,13 @@ Every key in the `Messages` type. All values are `string`.
 | Toast         | `toastRegion`                                                                                                                                       |
 | CopyButton    | `copy`, `copied`, `copyFailed`                                                                                                                      |
 | Autocomplete  | `autocompletePlaceholder`, `autocompleteRemoveTag`, `autocompleteClear`, `autocompleteEmpty`                                                        |
+| Combobox      | `comboboxToggle`, `comboboxEmpty`, `comboboxFailed`, and the common `loading` while searching                                                       |
 | FileField     | `fileFieldRemove`, `fileFieldTrigger`, `fileFieldDrop`                                                                                              |
 | NumberField   | `numberFieldIncrement`, `numberFieldDecrement`, `numberFieldRangeUnderflow` (`{min}` is replaced), `numberFieldRangeOverflow` (`{max}` is replaced) |
 | RangeSlider   | `rangeSliderStart`, `rangeSliderEnd`                                                                                                                |
 | Calendar      | `calendarPreviousMonth`, `calendarNextMonth`                                                                                                        |
 | DatePicker    | `datePickerOpen`, `datePickerDialog`                                                                                                                |
+| ColorPicker   | `colorPickerHue`, `colorPickerSaturation`, `colorPickerLightness`, `colorPickerSwatches`                                                            |
 | PasswordInput | `passwordShow`, `passwordHide`                                                                                                                      |
 | ListBox       | `listBoxPlaceholder`                                                                                                                                |
 | Breadcrumb    | `breadcrumb`                                                                                                                                        |
