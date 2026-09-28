@@ -454,7 +454,7 @@ describe('prefetching the page a link leads to', () => {
   });
 
   it('hands what it fetched to one navigation only — the next visit fetches afresh', async () => {
-    const requested = countPayloadRequests();
+    const requested = recordPayloadRequests();
     const screen = await render(
       <AppRouter pathname="/" tree={<a href="/next">next</a>} />,
     );
@@ -464,8 +464,12 @@ describe('prefetching the page a link leads to', () => {
     await navigation.back().finished;
     await navigation.navigate('/next').finished;
 
-    // 行き・戻り（/ のペイロード）・2 度目の行きで 3 回。2 度目は取り直す
-    expect(requested()).toBe(3);
+    // 行きと 2 度目の行きで 1 回ずつ。2 度目は取り直す。戻りが / を何回
+    // 取るかは数えない: Firefox は iframe の中でだけ、戻る遷移の handler を
+    // 2 回走らせる
+    expect(
+      requested.filter((pathname) => pathname === '/next/index.rsc'),
+    ).toHaveLength(2);
   });
 
   it.each([
@@ -592,7 +596,7 @@ describe('prefetching the page a link leads to', () => {
     pointerOnto(screen.getByRole('link').element());
     navigation.navigate('/next').finished?.catch(() => undefined);
 
-    await navigation.back().finished;
+    await moveBack();
     await nextTask();
 
     expect(requested()).toBe(1);
