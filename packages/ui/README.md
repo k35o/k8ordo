@@ -191,6 +191,7 @@ stories and rendered props rather than relying on trained knowledge:
 - **Anchor** - Text link with external-link awareness
 - **Breadcrumb** - Navigation path indicator
 - **Pagination** - Page navigation controls
+- **Stepper** - Steps of a process, with the done and current ones marked
 - **SideNav** - Grouped side navigation links (use `renderAnchor` for a router link)
 - **TableOfContents** - On-page contents that marks the heading being read
 - **Tabs** - Tab-based content organization
@@ -472,10 +473,10 @@ pnpm add @json-render/core @json-render/react zod
 pnpm add @openuidev/react-lang @openuidev/lang-core zod
 ```
 
-Supported components (**all 61**, both frameworks):
+Supported components (**all 62**, both frameworks):
 
 - **Layout / containers**: `Stack`, `Grid`, `Card`, `Form`, `Carousel`
-- **Buttons / nav**: `Button`, `IconButton`, `CopyButton`, `Toolbar`, `Anchor`, `Breadcrumb`, `Pagination`, `SideNav`
+- **Buttons / nav**: `Button`, `IconButton`, `CopyButton`, `Toolbar`, `Anchor`, `Breadcrumb`, `Pagination`, `Stepper`, `SideNav`
 - **Display**: `Badge`, `Heading`, `Avatar`, `Code`, `Kbd`, `EmptyState`, `Icon`, `ChevronIcon`, `StatusIcon`, `Alert`, `Spinner`, `Progress`, `Skeleton`, `Separator`, `Tabs`, `Accordion`, `Table`, `DataTable`, `Tree`
 - **Overlays (self-contained widgets)**: `Modal`, `Dialog`, `Drawer`, `Popover`, `Tooltip`, `DropdownMenu`, `Toast`
 - **Form**: `TextField`, `Textarea`, `PasswordInput`, `NumberField`, `Slider`, `RangeSlider`, `DateField`, `DatePicker`, `Calendar`, `ColorPicker`, `Combobox`, `Checkbox`, `Switch`, `Select`, `Radio`, `RadioCard`, `CheckboxCard`, `ListBox`, `CheckboxGroup`, `Autocomplete`, `FileField`, `FormControl`

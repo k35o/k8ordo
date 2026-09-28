@@ -59,6 +59,7 @@ export const ja: Messages = {
   paginationPrevious: '前へ',
   paginationNext: '次へ',
 
+  stepperComplete: '完了',
   dataTableColumns: '表示する列',
   dataTableSelectAll: 'すべての行を選択',
   dataTableSelectRow: '行を選択',
