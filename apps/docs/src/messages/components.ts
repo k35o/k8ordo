@@ -387,10 +387,37 @@ export const radioCard = {
   }),
 };
 
+export const combobox = {
+  description: message({
+    ja: '候補から 1 つを選ぶ入力欄。打った文字で絞り込むか、サーバーに問い合わせて探す',
+    en: 'A field for picking one option: typing filters the list, or searches a server.',
+  }),
+  usageDescription: message({
+    ja: '打つと一覧が開き、クリックか `Enter` で選ぶまで値は変わりません。打ちかけで離れると選んだ候補の表示名に戻り、空にして離れると選択を外します。`↓` / `↑` で一覧を開いて移り（`Alt+↓` は開くだけ）、`Escape` で閉じ、もう一度で打った文字を戻します。複数を選ぶなら `Autocomplete` を使います。',
+    en: 'Typing opens the list, and the value changes only when an option is picked with a click or `Enter`. Leaving half-typed text puts the chosen label back; leaving the field empty clears the choice. `↓` / `↑` open the list and move through it (`Alt+↓` only opens it), `Escape` closes it and, pressed again, drops what was typed. To pick several, use `Autocomplete`.',
+  }),
+  asyncTitle: message({
+    ja: 'サーバーに問い合わせる',
+    en: 'Searching a server',
+  }),
+  asyncDescription: message({
+    ja: '`search` を渡すと、打つたびに呼んで候補を受け取ります。打ち直すと前の呼び出しの `signal` が打ち切られるので、`fetch` に渡してください。探している間は一覧が busy になり、失敗や 0 件は一覧と読み上げで知らせます。`options` は打つ前に見せる候補になります。',
+    en: 'With `search`, each keystroke calls it for the options. Typing again aborts the previous call’s `signal`, so pass it on to `fetch`. While a search runs the list is busy, and a failure or an empty result is shown and announced. `options` becomes what is shown before anything is typed.',
+  }),
+  formTitle: message({
+    ja: '@k8ordo/form と使う',
+    en: 'With @k8ordo/form',
+  }),
+  formDescription: message({
+    ja: '`z.enum()` から導いた `input` をそのまま spread できます。選んだ値は見えない `<select>` で送られるので、`required`・ルール・reset・送信に失敗したときのフォーカスの移動がそのまま効きます。',
+    en: 'Spread the `input` derived from `z.enum()` as is. The choice submits through a hidden `<select>`, so `required`, rules, reset, and moving focus after a failed submission all work on it.',
+  }),
+};
+
 export const autocomplete = {
   description: message({
-    ja: '入力補完付きの選択フィールド',
-    en: 'A selection component with autocomplete.',
+    ja: '決まった候補から複数を選ぶ入力欄。選んだものはタグで並ぶ',
+    en: 'A field for picking several options from a fixed list, shown as tags.',
   }),
   disabledTitle: message({
     ja: '無効',
@@ -498,6 +525,45 @@ export const dateField = {
   }),
 };
 
+export const colorPicker = {
+  description: message({
+    ja: '色を `#rrggbb` で選ぶ入力欄。色相・彩度・明度のつまみと見本から選べる',
+    en: 'A field for picking a color as `#rrggbb`, with hue / saturation / lightness sliders and swatches.',
+  }),
+  usageDescription: message({
+    ja: '値を運ぶのは `name` を持つテキスト欄です。つまみや見本で選んだ色はその欄に書き込まれ、打ち込んだときと同じく `input` イベントで知らされます。打っている間は 6 桁そろって初めて色として扱い、離れるときと Enter で小文字の `#rrggbb` にそろえます（3 桁の `#f80` もそこで広げます）。',
+    en: 'The value travels in a text field that carries `name`. A color picked with the sliders or a swatch is written into it and announced with an `input` event, just as if it had been typed. While typing, the text counts as a color only once it has six digits; on blur and on Enter it is tidied to lowercase `#rrggbb` (a three-digit `#f80` is expanded there).',
+  }),
+  swatchesTitle: message({
+    ja: '見本',
+    en: 'Swatches',
+  }),
+  swatchesDescription: message({
+    ja: '見本はそれぞれ `label` を名前に持つトグルボタンで、いまの色と同じものが押された状態になります。',
+    en: 'Each swatch is a toggle button named by its `label`; the one matching the current color is pressed.',
+  }),
+  controlledTitle: message({
+    ja: '制御モード',
+    en: 'Controlled',
+  }),
+  controlledDescription: message({
+    ja: "`onChange` は `#rrggbb` を受け取ります。欄を空にしたときは `''` です。",
+    en: "`onChange` receives `#rrggbb`, or `''` when the field is emptied.",
+  }),
+  disabledTitle: message({
+    ja: '無効',
+    en: 'Disabled',
+  }),
+  formTitle: message({
+    ja: '@k8ordo/form と使う',
+    en: 'With @k8ordo/form',
+  }),
+  formDescription: message({
+    ja: '`formFields` が導いた `input` をそのまま spread できます。スキーマの `.regex()` は `pattern` として届き、組み込みの `#[0-9a-fA-F]{6}` を置き換えます。つまみや見本での変更も、フォームには打ち込んだときと同じように伝わります（変更の有無、ルール、エラーの解除、reset）。',
+    en: 'Spread the `input` that `formFields` derives as is. A `.regex()` in the schema arrives as `pattern` and replaces the built-in `#[0-9a-fA-F]{6}`. A change made with the sliders or a swatch reaches the form just as typing does (dirty state, rules, clearing an error, reset).',
+  }),
+};
+
 export const datePicker = {
   description: message({
     ja: '日付入力と、ポップオーバーで開くカレンダーを組み合わせた入力欄',
@@ -585,8 +651,8 @@ export const fileField = {
     en: 'Adding files by dropping them',
   }),
   dropzoneDescription: message({
-    ja: '`FileField.Dropzone` にドロップしたファイルは、選んだときと同じく一覧と送信に加わり、`input` イベントでフォームに知らされます。中身を渡さないと、組み込みの案内と「ファイルを選択」のボタンが入るので、キーボードでも選べます。フォルダーはドロップでは受けず、`accept` もドロップでは確かめません。',
-    en: 'Files dropped on `FileField.Dropzone` join the list and the submission just as picked ones do, and an `input` event tells the form. Left empty, it holds the built-in hint and a choose-files button, so it works by keyboard too. Folders are skipped on drop, and `accept` is not checked there.',
+    ja: '`FileField.Dropzone` にドロップしたファイルは、選んだときと同じく一覧と送信に加わり、`input` イベントでフォームに知らされます。中身を渡さないと、組み込みの案内と「ファイルを選択」のボタンが入るので、キーボードでも選べます。フォルダーはドロップでは受けません。ブラウザが `accept` を当てるのはファイル選択だけなので、ドロップしたファイルには FileField が同じ規則で当て、当たらないファイルは加えません。',
+    en: 'Files dropped on `FileField.Dropzone` join the list and the submission just as picked ones do, and an `input` event tells the form. Left empty, it holds the built-in hint and a choose-files button, so it works by keyboard too. Folders are skipped on drop. The browser applies `accept` only to the picker, so the field applies it to dropped files by the same rules and leaves out any it does not match.',
   }),
   acceptTypesTitle: message({
     ja: '受け入れタイプ',
@@ -851,6 +917,25 @@ export const dataTable = {
   emptyDescription: message({
     ja: '`rows` が空のときは、`emptyState` を列をまたぐ行に描く。`EmptyState` を渡す。',
     en: 'When `rows` is empty, `emptyState` is drawn in a row spanning the columns. Pass an `EmptyState`.',
+  }),
+};
+
+export const tree = {
+  description: message({
+    ja: '枝を開閉できる階層。WAI-ARIA の tree のキーボード操作に従う',
+    en: 'A hierarchy whose branches open and close, with the WAI-ARIA tree keyboard model.',
+  }),
+  basicDescription: message({
+    ja: '項目は `{ id, label, icon?, children? }` の木で渡す。上下で見えている項目を移り、右で枝を開いて最初の子へ、左で枝を閉じて親へ戻る。Home / End、Enter / Space での選択、先頭の文字での移動もできる。',
+    en: 'Pass the nodes as a tree of `{ id, label, icon?, children? }`. Up and Down move between the visible nodes, Right opens a branch and then moves to its first child, and Left closes it or moves to the parent. Home / End, Enter / Space to select, and typing a first letter work too.',
+  }),
+  controlledTitle: message({
+    ja: '開いている枝と選択を持つ',
+    en: 'Owning the Open Branches and the Selection',
+  }),
+  controlledDescription: message({
+    ja: '開いている枝（`expandedIds`）と選択（`selectedId`）は外から渡せる。`onChange` には選んだ項目の `id` が届く。',
+    en: 'The open branches (`expandedIds`) and the selection (`selectedId`) can be yours. `onChange` receives the `id` of the node picked.',
   }),
 };
 

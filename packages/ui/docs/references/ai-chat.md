@@ -187,7 +187,7 @@ Props (Message.Content):
 ```
 
 - `Copy` is an icon-only, `sm` [`CopyButton`](components.md#copybutton): it writes `value` to the clipboard, shows a check icon — or an error icon when the clipboard refuses — for two seconds, and announces 「コピーしました」 or 「コピーできませんでした」 through a `status` region. Nothing is thrown either way.
-- `Regenerate` and `Action` take `onAction`; a returned promise keeps the button busy (`aria-busy`, disabled) until it settles, so `() => regenerate(...)` does not need its own pending state.
+- `Regenerate` and `Action` take `onAction`; a returned promise keeps the button busy (`aria-busy`, `aria-disabled`, presses ignored) until it settles, so `() => regenerate(...)` does not need its own pending state. The button keeps focus meanwhile.
 - `Feedback` is a pair of toggle buttons (`aria-pressed`). Pressing the pressed one again clears it, so `onChange` receives `null`.
 
 Props (Message.Actions):
@@ -425,7 +425,7 @@ import { ToolInvocation } from '@k8ordo/ui/ai';
 
 ### Approval
 
-When `state` is `'approval-requested'`, the tool is waiting for the user. Pass the part's `approval` and an `onApprovalResponse`, and a question with Deny / Allow buttons appears below the header — outside the collapsible panel, so it is visible without expanding the call; the input stays one click away in the panel. Pressing one calls `onApprovalResponse({ id: approval.id, approved })`, which is exactly what the AI SDK's `addToolApprovalResponse` takes. Both buttons stay disabled until a returned promise settles. Once the state moves on, the question disappears; if it held focus, focus moves to the tool's header instead of falling to `body`.
+When `state` is `'approval-requested'`, the tool is waiting for the user. Pass the part's `approval` and an `onApprovalResponse`, and a question with Deny / Allow buttons appears below the header — outside the collapsible panel, so it is visible without expanding the call; the input stays one click away in the panel. Pressing one calls `onApprovalResponse({ id: approval.id, approved })`, which is exactly what the AI SDK's `addToolApprovalResponse` takes. Until a returned promise settles, both buttons are `aria-disabled` and ignore presses; they are not natively `disabled`, so the pressed one keeps focus while the answer is sent. Once the state moves on, the question disappears; if it held focus, focus moves to the tool's header instead of falling to `body`.
 
 ```tsx
 <ToolInvocation

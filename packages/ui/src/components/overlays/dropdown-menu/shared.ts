@@ -7,7 +7,7 @@ export const panelClass =
   'bg-bg-raised border-border-subtle vertical:min-w-0 vertical:min-h-40 flex min-w-40 flex-col rounded-lg border py-2 shadow-md';
 
 export const itemClass = cn(
-  'w-full px-2 py-1 text-left transition-colors',
+  'w-full px-2 py-1 text-left transition-colors duration-150 ease-out',
   'hover:bg-bg-subtle',
   'focus-visible:bg-bg-subtle',
   // 地の色だけのフォーカスは高コントラストでは見分けにくいので、そのときだけ線に

@@ -189,6 +189,11 @@ export const contextDescription = message({
   en: 'An action answers the request as much as a guard does, so it has the same API: `cookies()` to read and write the cookies, `responseHeaders()` to add to the answer, and `requestHeaders()` for the headers the request arrived with — an action is handed its arguments, not the request.',
 });
 
+export const contextLocale = message({
+  ja: 'アクションは、送られた先のページの文脈で走ります。呼び出しは画面に出ているページの URL に送られ、そのリクエストでもページの params のスキーマが走るので、アクションはスキーマが書いた文脈の中にいます。`/ja/talks/new` から送られれば `@k8ordo/i18n` のロケールは `ja` で、`parseForm` が作る zod の文言もページの言語になります。',
+  en: 'An action runs in the context of the page it was posted to. A call posts to the URL of the page on screen, whose params schemas run for that request as they do for its render, and the action runs in what they wrote — posted from `/ja/talks/new`, it runs in `ja` under `@k8ordo/i18n`, and the zod messages `parseForm` produces are in the page’s language.',
+});
+
 export const contextAnswer = message({
   ja: 'アクションが書いたものは、その答えに載ります。描き直したページでも、`redirect()` の `303` でも、クライアントランタイムが適用するペイロードでも同じです。アクションのあとに描き直すページが `request` で見るのは、リクエストが運んできた Cookie で、アクションが書いた値ではありません。',
   en: 'What an action writes goes on its answer — the page it re-rendered, the `303` to where it redirected, or the payload the client runtime applies. The page re-rendered after it sees the cookies the request carried in `request`, not what the action wrote.',

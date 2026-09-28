@@ -234,6 +234,19 @@ hook, so wording never makes a component a client module:
 of `'use client'`. A new key goes into `messages.ts`, `ja.ts`, and `en.ts`;
 there is no provider and no context.
 
+### Pending state
+
+`Button` / `IconButton` waiting on their own action — an `onAction` promise, or
+the form's action for a submit button — take `aria-busy` and `aria-disabled` and
+ignore presses in the click handler, but never native `disabled`. Chromium
+moves focus to `body` once the focused element is disabled, so a keyboard user
+who pressed the button would lose their place. Native `disabled` is kept for a
+`disabled` the caller passed. The click handler covers implicit submission too:
+Enter in a field fires a click at the default button, and `preventDefault()`
+there cancels the submission. `PendingKeepsFocus` in `button.stories.tsx` shows
+how to test it — keyboard focus, a promise the play function resolves, and two
+animation frames before `toHaveFocus()`.
+
 ### Content that gets replaced
 
 A change that swaps what is on screen (`Tabs`) is applied inside
@@ -271,7 +284,7 @@ Dark mode is class-based (`.dark` on `html`, put there by `@k8ordo/color-scheme`
 The stylesheet follows `prefers-contrast: more` and `forced-colors: active`; `@k8ordo/color-scheme` is not involved, since the OS owns both settings.
 
 - `tokens.css` redefines text and border tokens inside `@media (prefers-contrast: more)` on `:root:where(:not(.dark))` and `.dark`. `:where` keeps the specificity of `:root`, so a consumer's later `:root` override still wins.
-- A surface outlined only by a shadow or a ground takes `HIGH_CONTRAST_EDGE` (`src/components/_internal/high-contrast.ts`): an inset `border-base` outline under either setting.
+- A surface outlined only by a shadow or a ground takes `HIGH_CONTRAST_EDGE` (`src/components/_internal/high-contrast.ts`): an inset `border-base` outline under either setting. Every part of it, color and offset included, sits behind those media queries and `not-focus-visible:`, so a surface that takes focus itself (`Modal`'s `<dialog>`) keeps the browser's own focus ring untouched.
 - Under forced colors only system colors survive and shadows are dropped. Paint selected state with `forced-colors:bg-[Highlight]` / `forced-colors:bg-[CanvasText]`, never rely on `box-shadow` for a boundary or focus, and hide with `invisible`, not `text-transparent` (a transparent color is repainted).
 
 ### Focus Style

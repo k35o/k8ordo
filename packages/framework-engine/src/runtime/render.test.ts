@@ -30,8 +30,9 @@ describe('renderMatch', () => {
     const match = routes.match('/products/7');
     expect(match).not.toBeNull();
 
-    const rendered = renderMatch(match as Match, '/products/7', {
-      id: 7,
+    const rendered = renderMatch(match as Match, {
+      pathname: '/products/7',
+      params: { id: 7 },
     }) as Rendered;
 
     expect(rendered.type).toBe(component('layout.tsx'));
@@ -39,6 +40,29 @@ describe('renderMatch', () => {
     const page = rendered.props.children as Rendered;
     expect(page.type).toBe(component('products/[id]/page.tsx'));
     expect(page.props.params).toStrictEqual({ id: 7 });
+  });
+});
+
+describe('renderMatch with a search', () => {
+  it('hands the search to the page alone', () => {
+    const match = routes.match('/products/7') as Match;
+    const rendered = renderMatch(match, {
+      pathname: '/products/7',
+      search: { q: 'shoes' },
+    }) as ReactElement<{ search?: unknown; children?: ReactNode }>;
+
+    expect(rendered.props.search).toBeUndefined();
+    const page = rendered.props.children as ReactElement<{ search?: unknown }>;
+    expect(page.props.search).toStrictEqual({ q: 'shoes' });
+  });
+
+  it('gives no page a search it did not declare', () => {
+    const match = routes.match('/products/7') as Match;
+    const rendered = renderMatch(match, {
+      pathname: '/products/7',
+    }) as ReactElement<{ children?: ReactNode }>;
+    const page = rendered.props.children as ReactElement<object>;
+    expect('search' in page.props).toBe(false);
   });
 });
 

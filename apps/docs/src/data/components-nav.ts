@@ -96,6 +96,11 @@ export const componentCategories: NavCategory[] = [
         description: m.components.calendar.description,
       },
       {
+        name: 'ColorPicker',
+        path: '/:locale/ui/components/color-picker',
+        description: m.components.colorPicker.description,
+      },
+      {
         name: 'Select',
         path: '/:locale/ui/components/select',
         description: m.components.select.description,
@@ -134,6 +139,11 @@ export const componentCategories: NavCategory[] = [
         name: 'RadioCard',
         path: '/:locale/ui/components/radio-card',
         description: m.components.radioCard.description,
+      },
+      {
+        name: 'Combobox',
+        path: '/:locale/ui/components/combobox',
+        description: m.components.combobox.description,
       },
       {
         name: 'Autocomplete',
@@ -219,6 +229,11 @@ export const componentCategories: NavCategory[] = [
         name: 'DataTable',
         path: '/:locale/ui/components/data-table',
         description: m.components.dataTable.description,
+      },
+      {
+        name: 'Tree',
+        path: '/:locale/ui/components/tree',
+        description: m.components.tree.description,
       },
       {
         name: 'Heading',

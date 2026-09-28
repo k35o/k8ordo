@@ -105,8 +105,8 @@ export const run = {
     en: 'On the server: `run(locale, fn)`',
   }),
   description: message({
-    ja: '`[locale]` の描画の外で、ロケールを決めて何かを実行するときに使います。Server Action、バッチ処理、メール本文の生成、テストです。`fn` の戻り値をそのまま返し、`fn` が async でも `await` をまたいでロケールが保たれます。',
-    en: 'Use it to run something under a chosen locale outside a `[locale]` render: a Server Action, a batch job, building an email, a test. It returns what `fn` returns, and when `fn` is async the locale is kept across its awaits.',
+    ja: '`[locale]` の描画の外で、ロケールを決めて何かを実行するときに使います。バッチ処理、メール本文の生成、テストです（`[locale]` のページから送られた Server Action は、`@k8ordo/server` の下ではすでにそのページのロケールで走ります）。`fn` の戻り値をそのまま返し、`fn` が async でも `await` をまたいでロケールが保たれます。',
+    en: 'Use it to run something under a chosen locale outside a `[locale]` render: a batch job, building an email, a test (a Server Action posted from a `[locale]` page already runs in that page’s locale under `@k8ordo/server`). It returns what `fn` returns, and when `fn` is async the locale is kept across its awaits.',
   }),
   throws: message({
     ja: 'ブラウザで呼ぶと throw します。ブラウザでは URL がロケールなので、変えたいときはナビゲーションします。`AsyncLocalStorage` を取り出せないランタイムでも throw します。',

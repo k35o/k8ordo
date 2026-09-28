@@ -85,7 +85,7 @@ export const Switch: FC<Props> = ({
         <span
           aria-hidden
           className={cn(
-            'inline-flex items-center rounded-full transition-colors',
+            'inline-flex items-center rounded-full transition-colors duration-150 ease-out',
             'h-7 w-12 vertical:h-12 vertical:w-7',
             invalid && 'ring-2 ring-border-error',
             // 非制御のとき、form の reset は change を飛ばさずに checked を戻すので、

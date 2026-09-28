@@ -471,10 +471,11 @@ without JavaScript keeps the default.
 
   The definition stays at module scope; what has to happen per request is
   calling it. Call `formFields` during the page's render, not at module
-  scope. A Server Action runs outside the `[locale]` render, so the page
-  binds the locale to it (`createTalk.bind(null, locales.getLocale())`), and
-  the action checks it with `locales.is` and calls `parseForm` inside
-  `locales.run`.
+  scope. A Server Action posted from a `[locale]` page runs in that page's
+  locale under `@k8ordo/server` — the framework runs the page's params
+  schemas for the action's request too — so `parseForm` in it needs nothing
+  more. Anywhere else — an action run outside the framework, a job — call it
+  inside `locales.run`.
 
 ## What it guarantees
 

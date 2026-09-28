@@ -118,7 +118,7 @@ export const Checkbox: FC<Props> = ({
       <span
         aria-hidden
         className={cn(
-          'inline-flex size-5 items-center justify-center rounded-md border-2 transition-colors',
+          'inline-flex size-5 items-center justify-center rounded-md border-2 transition-colors duration-150 ease-out',
           FOCUS_RING_PEER,
           disabledResolved && 'border-border-mute bg-bg-mute',
           // 非制御のとき、form の reset は change を飛ばさずに checked を戻すので、
