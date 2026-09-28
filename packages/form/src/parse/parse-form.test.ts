@@ -48,6 +48,27 @@ describe('parseForm', () => {
     expect(result.data?.subscribed).toBe(false);
   });
 
+  it('hands a stringbool checkbox the string it submitted, and nothing when unchecked', () => {
+    const flags = z.object({
+      inStock: z.stringbool().default(false),
+      gift: z.stringbool({ truthy: ['yes'], falsy: ['no'] }).optional(),
+    });
+
+    expect(
+      parseForm(
+        flags,
+        formDataOf([
+          ['inStock', 'true'],
+          ['gift', 'yes'],
+        ]),
+      ).data,
+    ).toStrictEqual({ inStock: true, gift: true });
+    expect(parseForm(flags, new FormData()).data).toStrictEqual({
+      inStock: false,
+      gift: undefined,
+    });
+  });
+
   it('returns one error per field, keyed by the schema key', () => {
     const result = parseForm(
       schema,

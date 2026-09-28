@@ -9,15 +9,21 @@ import * as ui from '../_shared/renderers';
 import type * as sc from '../_shared/schemas';
 import {
   AutocompleteView,
+  CalendarView,
   CheckboxCardView,
   CheckboxGroupView,
   CheckboxView,
+  ColorPickerView,
+  ComboboxView,
+  DateFieldView,
+  DatePickerView,
   ListBoxView,
   NumberFieldView,
   PaginationView,
   PasswordInputView,
   RadioCardView,
   RadioView,
+  RangeSliderView,
   SelectView,
   SliderView,
   SwitchView,
@@ -84,6 +90,8 @@ const renderers = {
     ui.renderTooltip(props),
   DropdownMenu: ({ props }: ComponentRenderProps<sc.DropdownMenuProps>) =>
     ui.renderDropdownMenu(props),
+  Toolbar: ({ props }: ComponentRenderProps<sc.ToolbarProps>) =>
+    ui.renderToolbar(props),
   Toast: ({ props }: ComponentRenderProps<sc.ToastProps>) => (
     <ui.ToastWidget props={props} />
   ),
@@ -92,6 +100,8 @@ const renderers = {
     ui.renderButton(props),
   IconButton: ({ props }: ComponentRenderProps<sc.IconButtonProps>) =>
     ui.renderIconButton(props),
+  CopyButton: ({ props }: ComponentRenderProps<sc.CopyButtonProps>) =>
+    ui.renderCopyButton(props),
   Badge: ({ props }: ComponentRenderProps<sc.BadgeProps>) =>
     ui.renderBadge(props),
   Heading: ({ props }: ComponentRenderProps<sc.HeadingProps>) =>
@@ -124,21 +134,32 @@ const renderers = {
     ui.renderSkeleton(props),
   Separator: ({ props }: ComponentRenderProps<sc.SeparatorProps>) =>
     ui.renderSeparator(props),
-  ScrollLinked: ({ props }: ComponentRenderProps<sc.ScrollLinkedProps>) =>
-    ui.renderScrollLinked(props),
   Tabs: ({ props }: ComponentRenderProps<sc.TabsProps>) => ui.renderTabs(props),
   Accordion: ({ props }: ComponentRenderProps<sc.AccordionProps>) =>
     ui.renderAccordion(props),
   Breadcrumb: ({ props }: ComponentRenderProps<sc.BreadcrumbProps>) =>
     ui.renderBreadcrumb(props),
+  Stepper: ({ props }: ComponentRenderProps<sc.StepperProps>) =>
+    ui.renderStepper(props),
   Table: ({ props }: ComponentRenderProps<sc.TableProps>) =>
     ui.renderTable(props),
+  DataTable: ({ props }: ComponentRenderProps<sc.DataTableProps>) => (
+    <ui.DataTableWidget props={props} />
+  ),
+  Tree: ({ props }: ComponentRenderProps<sc.TreeProps>) => ui.renderTree(props),
+  SideNav: ({ props }: ComponentRenderProps<sc.SideNavProps>) =>
+    ui.renderSideNav(props),
 
   TextField: TextFieldView,
   Textarea: TextareaView,
   PasswordInput: PasswordInputView,
   NumberField: NumberFieldView,
   Slider: SliderView,
+  RangeSlider: RangeSliderView,
+  ColorPicker: ColorPickerView,
+  DateField: DateFieldView,
+  DatePicker: DatePickerView,
+  Calendar: CalendarView,
   Checkbox: CheckboxView,
   Switch: SwitchView,
   Select: SelectView,
@@ -148,6 +169,7 @@ const renderers = {
   Pagination: PaginationView,
   ListBox: ListBoxView,
   CheckboxGroup: CheckboxGroupView,
+  Combobox: ComboboxView,
   Autocomplete: AutocompleteView,
   FileField: ({ props }: ComponentRenderProps<sc.FileFieldProps>) => (
     <ui.FileFieldWidget props={props} />

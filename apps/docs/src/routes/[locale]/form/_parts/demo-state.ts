@@ -10,6 +10,7 @@ export const demoState = definePageState('form-demo', {
   url: z.object({
     q: z._default(z.string(), ''),
     min: z._default(z.coerce.number().check(z.int(), z.gte(0)), 0),
+    inStock: z._default(z.stringbool(), false),
   }),
 });
 /* oxlint-enable no-underscore-dangle */

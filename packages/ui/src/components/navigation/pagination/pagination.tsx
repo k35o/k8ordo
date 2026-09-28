@@ -2,7 +2,7 @@
 
 import type { FC, HTMLAttributes, Ref } from 'react';
 
-import { useMessages } from '../../../i18n/context';
+import { getMessages } from '../../../i18n/current';
 import { Button } from '../../buttons/button';
 import { ChevronIcon } from '../../icons';
 
@@ -31,7 +31,7 @@ export const Pagination: FC<Props> = ({
   ref,
   ...rest
 }) => {
-  const messages = useMessages();
+  const messages = getMessages();
   const safeTotal = Math.max(1, totalPages);
   const safeCurrent = Math.min(Math.max(1, currentPage), safeTotal);
   const isFirst = safeCurrent <= 1;

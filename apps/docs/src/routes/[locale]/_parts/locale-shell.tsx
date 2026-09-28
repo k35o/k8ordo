@@ -3,7 +3,6 @@
 import type { Message } from '@k8ordo/i18n';
 import { useMatch, usePathname } from '@k8ordo/router';
 import { UIProvider, Drawer, Heading, IconButton, ListIcon } from '@k8ordo/ui';
-import { dictionaries } from '@k8ordo/ui/i18n';
 import { useEffect, useRef, useState, ViewTransition } from 'react';
 import type { FC, ReactNode } from 'react';
 
@@ -120,7 +119,10 @@ function LayoutContent({ children }: { children: ReactNode }) {
             height: `calc(100dvh - ${headerHeight}px)`,
           }}
         >
-          <SideNavigation categories={sideNavConfig.categories} />
+          <SideNavigation
+            categories={sideNavConfig.categories}
+            label={sideNavConfig.title()}
+          />
         </aside>
         <main className="flex min-w-0 flex-1 flex-col">
           <div className="flex-1">
@@ -145,6 +147,7 @@ function LayoutContent({ children }: { children: ReactNode }) {
       >
         <SideNavigation
           categories={sideNavConfig.categories}
+          label={sideNavConfig.title()}
           onNavigate={() => {
             setIsDrawerOpen(false);
           }}
@@ -198,7 +201,7 @@ export function LocaleShell({
   // 遷移後にトップ（または #fragment）へ戻すのはルーターの仕事になったので、
   // ここにスクロールの処理は無い。
   return (
-    <UIProvider messages={dictionaries[locale]}>
+    <UIProvider>
       <WritingModeProvider>
         <div className="flex min-h-dvh flex-col">
           <LayoutContent>{children}</LayoutContent>

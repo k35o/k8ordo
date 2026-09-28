@@ -107,6 +107,10 @@ export const members = {
     ja: '希望の並びに対して、対応する最良のロケールを返します（下の「交渉」）。',
     en: 'The best supported locale for a preference list (see Negotiation below).',
   }),
+  negotiateRequest: message({
+    ja: 'サーバー向け。Request の Cookie（`options.cookie` で名前を指定したとき）を先に、次に `Accept-Language` を、`negotiate` と同じ規則で読みます（下の「交渉」）。',
+    en: 'For a server: the cookie named by `options.cookie` first, when given, then `Accept-Language`, by the same rule as `negotiate` (see Negotiation below).',
+  }),
   localize: message({
     ja: "pathname の前にロケールの区間を付けます。`'/ui'` は `'/en/ui'`、`'/'` は `'/en'` になります。",
     en: "Puts a locale segment in front of a pathname: `'/ui'` becomes `'/en/ui'`, and `'/'` becomes `'/en'`.",
@@ -158,6 +162,10 @@ export const members = {
   localeDefinition: message({
     ja: "1 つのロケールの定義（`{ timeZone: string; dir: 'ltr' | 'rtl' }`）。",
     en: "One locale's definition (`{ timeZone: string; dir: 'ltr' | 'rtl' }`).",
+  }),
+  negotiateRequestOptions: message({
+    ja: '`negotiateRequest` の第 2 引数の型（`{ cookie?: string }`）。',
+    en: 'The type of `negotiateRequest`’s second argument (`{ cookie?: string }`).',
   }),
   localesOptions: message({
     ja: '第 2 引数の型（`{ default?: D }`）。',
@@ -232,6 +240,10 @@ export const negotiation = {
   iterable: message({
     ja: '引数は `Iterable<string>` なので、`navigator.languages` も配列も `Set` もそのまま渡せます。',
     en: 'The argument is an `Iterable<string>`, so `navigator.languages`, an array and a `Set` all pass as they are.',
+  }),
+  request: message({
+    ja: 'サーバーでは `negotiateRequest(request, { cookie })` が Request から選びます。名前を渡した Cookie に訪問者が前に選んだロケールがあればそれを先に、次に `Accept-Language` を希望の順に試します。どちらも `negotiate` を通るので、集合にもう無いロケールが Cookie に残っていても、ヘッダーに落ちます。Cookie の名前はアプリケーションが決めるもので、言語切替が `cookieStore.set` で書くときも同じ名前を使います。`cookie` を省くとヘッダーだけを読みます。',
+    en: 'On a server, `negotiateRequest(request, { cookie })` chooses from a `Request`: the locale the visitor chose before, from the named cookie, comes first, then `Accept-Language` in its order of preference. Both go through `negotiate`, so a cookie still holding a locale the set no longer has falls through to the header. The cookie name is the application’s — a language switcher writing it with `cookieStore.set` uses the same one. Without `cookie`, only the header is read.',
   }),
   examplesTitle: message({
     ja: '例',

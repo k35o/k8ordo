@@ -1,4 +1,4 @@
-### Server-only modules
+## Server-only modules
 
 A module that imports `server-only` may never reach the client:
 

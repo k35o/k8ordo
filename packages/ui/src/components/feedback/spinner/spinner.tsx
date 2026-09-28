@@ -1,9 +1,7 @@
-'use client';
-
 import type { FC, OutputHTMLAttributes } from 'react';
 
 import { cn } from '../../../helpers/cn';
-import { useMessages } from '../../../i18n/context';
+import { getMessages } from '../../../i18n/current';
 
 type Props = {
   label?: string;
@@ -14,7 +12,7 @@ type Props = {
 >;
 
 export const Spinner: FC<Props> = ({ label, size = 'md', ...rest }) => {
-  const messages = useMessages();
+  const messages = getMessages();
   const resolvedLabel = label ?? messages.loading;
 
   return (

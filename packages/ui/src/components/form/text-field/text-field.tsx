@@ -11,17 +11,29 @@ import { useFormStatus } from 'react-dom';
 import { FOCUS_RING } from '../../_internal/focus-ring';
 import { cn } from './../../../helpers/cn';
 
-// 1 行テキスト入力に絞る。number は NumberField、password は PasswordInput、
-// file は FileField が別途あり、checkbox / radio / color 等は見た目が別物になる
+// 1 行の入力欄として描けるものを並べる。number は NumberField、password は
+// PasswordInput、file は FileField が別途あり、checkbox / radio / color 等は
+// 見た目が別物になる
 type TextInputType = Extract<
   HTMLInputTypeAttribute,
-  'text' | 'email' | 'tel' | 'url' | 'search'
+  | 'text'
+  | 'email'
+  | 'tel'
+  | 'url'
+  | 'search'
+  | 'date'
+  | 'time'
+  | 'datetime-local'
+  | 'month'
+  | 'week'
 >;
 
 type Props = {
   invalid?: boolean;
   ref?: Ref<HTMLInputElement>;
-  type?: TextInputType;
+  // @k8ordo/form の formFields が導く type は string なので、上の候補に絞ると
+  // 導かれた属性をそのまま広げられない。候補は補完のために残す
+  type?: TextInputType | (string & Record<never, never>);
 } & Omit<InputHTMLAttributes<HTMLInputElement>, 'className' | 'style' | 'type'>;
 
 export const TextField: FC<Props> = ({

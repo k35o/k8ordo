@@ -15,7 +15,7 @@ inside the npm package.
 ## Commands
 
 ```bash
-pnpm test          # unit (locales, messages, request scope, formats, Accept-Language; node) + browser (URL locale, chromium)
+pnpm test          # unit (locales, messages, request scope, formats, Accept-Language, Request negotiation; node) + browser (URL locale, chromium)
 pnpm build         # vp pack
 pnpm typecheck
 pnpm check         # check:write to auto-fix
@@ -48,7 +48,8 @@ pnpm check         # check:write to auto-fix
   renders in `en`. Outside the browser, a runtime with no `AsyncLocalStorage`
   makes `validate` throw, as `run` does — accepting a locale `getLocale()`
   cannot see would silently render the default. In the browser
-  `location.pathname`'s first segment is the locale, read as a message
+  `location.pathname`'s first segment below Vite's `base`
+  (`browserPathname` in `current.ts`) is the locale, read as a message
   renders. That agrees with the server's HTML only because the HTML was
   rendered for the same URL: the engine renders a document drawn for another
   one (`404.html`) afresh instead of hydrating it
@@ -87,6 +88,9 @@ pnpm check         # check:write to auto-fix
 - **Negotiation is per requested tag, in order** — exact, then the first
   supported locale speaking the same language, then the default (RFC 4647
   lookup shape). The test `['en-US', 'ja']` → `'en'` is the guard.
+  `negotiateRequest` is the same `negotiate` over the named cookie's value
+  followed by `parseAcceptLanguage`'s list — never a rule of its own. The
+  cookie name is the caller's; the package does not pick one.
 - **`delocalize` says `null`, never the default.** The root layout and the
   404 page choose the fallback visibly.
 
@@ -103,6 +107,7 @@ src/
   register.ts         Register (the one interface) and RegisteredLocale
   format.ts           the set's Intl members (dateTimeFormat, …), cached
   accept-language.ts  parseAcceptLanguage(): header → preference list
+  cookie.ts           readCookie(): one value out of a Cookie header (internal)
   index.ts
 ```
 

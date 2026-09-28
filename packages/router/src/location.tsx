@@ -3,6 +3,7 @@
 import { createContext, use, useMemo, useSyncExternalStore } from 'react';
 import type { ReactNode } from 'react';
 
+import { withoutBase } from './base';
 import { normalizePathname } from './paths';
 
 const ServerPathname = createContext<string | null>(null);
@@ -33,11 +34,18 @@ const subscribe = (onChange: () => void): (() => void) => {
   };
 };
 
-const readPathname = (): string => normalizePathname(location.pathname);
+/**
+ * The document's pathname in the table's terms — Vite's `base` removed. A
+ * document outside its own base is a deployment that went wrong, and the
+ * pathname is shown as it is rather than failing the render over it.
+ */
+export const appPathname = (): string =>
+  normalizePathname(withoutBase(location.pathname) ?? location.pathname);
 
 /**
- * Where the browser currently is, as a pathname — the one axis this package
- * owns. It reads the platform rather than a table, so it works the same in a
+ * Where the browser currently is, as a pathname in the table's terms — the
+ * one axis this package owns, with Vite's `base` removed so it compares with
+ * the patterns. It reads the platform rather than a table, so it works the same in a
  * client application and under the framework, where there is no route table
  * in the browser at all.
  *
@@ -51,7 +59,7 @@ const readPathname = (): string => normalizePathname(location.pathname);
  */
 export function usePathname(): string {
   const fromServer = use(ServerPathname);
-  return useSyncExternalStore(subscribe, readPathname, () => {
+  return useSyncExternalStore(subscribe, appPathname, () => {
     if (fromServer === null) {
       throw new Error(
         'usePathname needs <Router> above it, or a page rendered by @k8ordo/static or @k8ordo/server',

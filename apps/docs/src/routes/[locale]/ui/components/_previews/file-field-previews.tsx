@@ -76,3 +76,12 @@ export function FileFieldInvalidPreview() {
     </FileField.Root>
   );
 }
+
+export function FileFieldDropzonePreview() {
+  return (
+    <FileField.Root accept="image/*" multiple>
+      <FileField.Dropzone />
+      <FileField.ItemList clearable />
+    </FileField.Root>
+  );
+}

@@ -31,8 +31,8 @@ export const withoutNote = message({
 });
 
 export const notFoundNote = message({
-  ja: 'このモードでは、`not-found.tsx` の答えは本物の 404 ステータスを持ちます。ディレクトリごとに置けるので、`docs/not-found.tsx` は `/docs` の下の知らない URL を `docs/layout.tsx` の内側で描けます。1 つも宣言しなければ、表にない pathname には `404` という見出しと 1 行だけの最小のページが 404 で返ります。',
-  en: 'In this mode `not-found.tsx` is answered under a genuine 404 status. Each directory may declare its own, so `docs/not-found.tsx` can render an unknown URL under `/docs` inside `docs/layout.tsx`. With none declared, an unknown pathname gets a minimal page — a `404` heading and one line — under a 404.',
+  ja: 'このモードでは、`not-found.tsx` の答えは本物の 404 ステータスを持ちます。ディレクトリごとに置けるので、`docs/not-found.tsx` は `/docs` の下の知らない URL を `docs/layout.tsx` の内側で描けます。1 つも宣言しなければ、表にない pathname には `404` という見出しと 1 行だけの最小のページが、ルートレイアウトの内側に描かれて 404 で返ります。サイトの枠も `<html lang>` もスタイルシートも残ります。',
+  en: 'In this mode `not-found.tsx` is answered under a genuine 404 status. Each directory may declare its own, so `docs/not-found.tsx` can render an unknown URL under `/docs` inside `docs/layout.tsx`. With none declared, an unknown pathname gets a minimal page — a `404` heading and one line — rendered inside the root layout under a 404, so the site’s frame, its `<html lang>` and its stylesheets stay.',
 });
 
 export const redirectNote = message({
@@ -88,3 +88,8 @@ export const statusesTable = {
     en: 'The handler could not produce an answer (under `serve()`)',
   }),
 };
+
+export const pageNotFoundWait = message({
+  ja: 'ステータスは本文より先に送られるので、ページの HTML は、ページ自身のコンポーネントが答える（要るものを取って返すか、`notFound()` と言う）まで送りません。そのあとに流れるのは、ページが自分の `<Suspense>` の下に置いたものです。クライアント遷移には正しくすべきステータスが無いので、ペイロードは最初から流れます。そこでページが `notFound()` と言うと、ブラウザは同じ URL を文書として読み込み直し、サーバーが 404 で答えます。ページが返して応答が始まったあとに、それより下から投げた `notFound()` は、ほかのエラーと同じくいちばん近い `error.tsx` が受けます。',
+  en: 'A status leaves before the body it heads, so a page’s HTML is not sent until the page’s own component has answered — fetched what it needs and returned, or said `notFound()`. What streams after that is what the page puts under a `<Suspense>` of its own. A client navigation has no status to get right, so its payload streams from the start; a page that says `notFound()` there sends the browser back to the server for a document load of the same URL, which is answered with the 404. Thrown from further down, once the page has returned and its response has started, `notFound()` is an error like any other, and the nearest `error.tsx` answers it.',
+});

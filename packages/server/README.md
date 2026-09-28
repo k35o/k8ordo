@@ -23,9 +23,10 @@ The mode is the dependency: installing this package is what makes the
 application one that runs, and `@k8ordo/static` is the other choice. Nothing
 else about the application changes between them.
 
-`@k8ordo/server` is the Vite plugin; what the application's own code imports
-comes from `@k8ordo/server/runtime`, which does not load Vite — so the built
-application runs from an install without dev dependencies.
+`@k8ordo/server` is the Vite plugin. What code inside the request handler
+imports comes from `@k8ordo/server/runtime`, and the Node.js server from
+`@k8ordo/server/serve`; neither loads Vite, so the built application runs from
+an install without dev dependencies.
 
 ## Peer Dependencies
 
@@ -54,11 +55,13 @@ src/routes/
   error.tsx             shown in place of what is below when it throws
   products/[id]/page.tsx   /products/:id — `export const paramsSchema` types :id
   old/redirect.ts       /old answers 307 with where to go
+  admin/guard.ts        runs before everything under /admin; a Response ends it
+  feed.xml/route.ts     /feed.xml answered by its GET — a Response, not a page
 ```
 
 ```js
 // serve.js
-import { serve } from '@k8ordo/server/runtime';
+import { serve } from '@k8ordo/server/serve';
 
 const server = await serve({ port: 3000 }); // { port, url, close }
 ```
@@ -67,20 +70,35 @@ const server = await serve({ port: 3000 }); // { port, url, close }
 // src/routes/_parts/actions.ts
 'use server';
 
+import { href } from '@k8ordo/router';
 import { redirect } from '@k8ordo/server/runtime';
 
 export async function createTalk(_previous: FormState, formData: FormData) {
   const parsed = parseForm(talkSchema, formData);
   if (!parsed.success) return parsed.state;
   await insertTalk(parsed.data);
-  redirect('/talks'); // 303 without JavaScript, a navigation with it
+  redirect(href('/talks')); // 303 without JavaScript, a navigation with it
 }
+```
+
+```ts
+// vite.config.ts, deploying to Vercel
+import { vercel } from '@k8ordo/server/vercel';
+
+export default defineConfig({ plugins: [framework(), vercel()] }); // + .vercel/output/
 ```
 
 A page receives `params`, `pathname` and `request` — the headers and the
 cookies, read-only. The built handler is a plain
-`(request: Request) => Promise<Response>` in `dist/rsc/index.js`, so any host
-that speaks that can run it.
+`(request: Request) => Promise<Response>` in `dist/rsc/index.js`, and it needs
+nothing from its runtime but `AsyncLocalStorage` — Node.js, Bun, Deno and
+Cloudflare Workers (`nodejs_compat`) all run it:
+
+```js
+import handler from './dist/rsc/index.js';
+
+export default { fetch: handler }; // a Cloudflare Worker, say
+```
 
 ## AI Agent Documentation
 
@@ -92,10 +110,11 @@ Point your agent at them once by pasting this into your project's `CLAUDE.md` /
 
 ```markdown
 This application is built with `@k8ordo/server`. Before adding or changing a
-route or a Server Action, read `node_modules/@k8ordo/server/docs/GUIDE.md`.
+route or a Server Action, read `node_modules/@k8ordo/server/docs/GUIDE.md`,
+then only the `docs/references/*.md` it lists that the task needs.
 `src/routes/` is the pathname space and holds only page.tsx, layout.tsx,
-not-found.tsx, error.tsx and redirect.ts; everything else goes under a
-`_`-prefixed directory. Never edit `.k8ordo/` — it is generated. A Server
+not-found.tsx, error.tsx, redirect.ts, guard.ts and route.ts; everything else
+goes under a `_`-prefixed directory. Never edit `.k8ordo/` — it is generated. A Server
 Action ends with `redirect()` from `@k8ordo/server/runtime`, not a returned
 URL.
 Build links with `href()` from `@k8ordo/router`; search params are
@@ -104,11 +123,12 @@ Build links with `href()` from `@k8ordo/router`; search params are
 
 What each surface gives an agent:
 
-| Surface                    | Where                                          |
-| -------------------------- | ---------------------------------------------- |
-| Design guide (entry point) | `node_modules/@k8ordo/server/docs/GUIDE.md`    |
-| Docs index for LLMs        | `docs/llms.txt` · https://ordo.k8o.me/llms.txt |
-| Markdown twin on the web   | https://ordo.k8o.me/server/docs/GUIDE.md       |
+| Surface                    | Where                                              |
+| -------------------------- | -------------------------------------------------- |
+| Design guide (entry point) | `node_modules/@k8ordo/server/docs/GUIDE.md`        |
+| Reference docs             | `node_modules/@k8ordo/server/docs/references/*.md` |
+| Docs index for LLMs        | `docs/llms.txt` · https://ordo.k8o.me/llms.txt     |
+| Markdown twin on the web   | https://ordo.k8o.me/server/docs/GUIDE.md           |
 
 ## License
 

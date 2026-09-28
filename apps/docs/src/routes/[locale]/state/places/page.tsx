@@ -1,6 +1,6 @@
 import { Code, Heading } from '@k8ordo/ui';
+import { CodeBlock } from '@k8ordo/ui/code-block';
 
-import { CodeBlock } from '../../../../components/code-block';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Rich } from '../../../../components/rich';
@@ -95,6 +95,28 @@ export const prefsState = defineLocalState(
   }),
 );`;
 
+const NOTICES = `// src/state/notices.ts
+import { defineSessionState } from '@k8ordo/state';
+import * as z from 'zod/mini';
+
+export const noticesState = defineSessionState(
+  'notices',
+  z.object({
+    dismissed: z._default(z.array(z.string()), []),
+  }),
+);`;
+
+const DENSITY = `// src/state/density.ts
+import { defineCookieState } from '@k8ordo/state';
+import * as z from 'zod/mini';
+
+export const densityState = defineCookieState(
+  'density',
+  z.object({
+    density: z._default(z.enum(['comfortable', 'compact']), 'comfortable'),
+  }),
+);`;
+
 const PALETTE = `// src/state/command-palette.ts
 import { defineMemoryState } from '@k8ordo/state';
 
@@ -126,6 +148,25 @@ export function PaletteButton() {
     </button>
   );
 }`;
+
+const PREFS_VERSIONED = `// src/state/prefs.ts
+import { defineLocalState } from '@k8ordo/state';
+import * as z from 'zod/mini';
+
+export const prefsState = defineLocalState(
+  'prefs',
+  z.object({
+    view: z._default(z.enum(['grid', 'table']), 'grid'),
+    pageSize: z._default(z.number(), 20),
+  }),
+  {
+    version: 1,
+    migrate: (old) => ({
+      view: old['layout'] === 'list' ? 'table' : 'grid',
+      pageSize: old['pageSize'],
+    }),
+  },
+);`;
 
 const CATALOG_CLASSIC = `// src/state/catalog.ts
 import { definePageState } from '@k8ordo/state';
@@ -194,6 +235,26 @@ export default function StatePlacesPage() {
               ],
             },
             {
+              key: 'session',
+              cells: [
+                <Code key="definition">defineSessionState</Code>,
+                'sessionStorage',
+                table.sessionSurvives(),
+                table.memorySharedWith(),
+                table.defaultsServer(),
+              ],
+            },
+            {
+              key: 'cookie',
+              cells: [
+                <Code key="definition">defineCookieState</Code>,
+                table.cookieLivesIn(),
+                table.cookieSurvives(),
+                table.localSharedWith(),
+                <Rich key="server">{table.cookieServer()}</Rich>,
+              ],
+            },
+            {
               key: 'memory',
               cells: [
                 <Code key="definition">defineMemoryState</Code>,
@@ -217,6 +278,12 @@ export default function StatePlacesPage() {
           </li>
           <li className="list-disc">
             <Rich>{m.statePlaces.chooseLocal()}</Rich>
+          </li>
+          <li className="list-disc">
+            <Rich>{m.statePlaces.chooseSession()}</Rich>
+          </li>
+          <li className="list-disc">
+            <Rich>{m.statePlaces.chooseCookie()}</Rich>
           </li>
           <li className="list-disc">
             <Rich>{m.statePlaces.chooseMemory()}</Rich>
@@ -376,6 +443,63 @@ export default function StatePlacesPage() {
       </DocSection>
 
       <DocSection
+        description={m.statePlaces.sessionDescription}
+        title={m.statePlaces.sessionTitle}
+      >
+        <CodeBlock code={NOTICES} lang="ts" />
+        <ul className="text-fg-mute flex flex-col gap-2 pl-6">
+          <li className="list-disc">
+            <Rich>{m.statePlaces.sessionSame()}</Rich>
+          </li>
+          <li className="list-disc">
+            <Rich>{m.statePlaces.sessionKeys()}</Rich>
+          </li>
+          <li className="list-disc">
+            <Rich>{m.statePlaces.sessionTabs()}</Rich>
+          </li>
+          <li className="list-disc">
+            <Rich>{m.statePlaces.sessionServer()}</Rich>{' '}
+            <LocaleAnchor path="/:locale/state/reading">
+              <Rich>{m.statePlaces.localServerLink()}</Rich>
+            </LocaleAnchor>
+          </li>
+        </ul>
+      </DocSection>
+
+      <DocSection
+        description={m.statePlaces.cookieDescription}
+        title={m.statePlaces.cookieTitle}
+      >
+        <CodeBlock code={DENSITY} lang="ts" />
+        <ul className="text-fg-mute flex flex-col gap-2 pl-6">
+          <li className="list-disc">
+            <Rich>{m.statePlaces.cookieName()}</Rich>
+          </li>
+          <li className="list-disc">
+            <Rich>{m.statePlaces.cookieWrite()}</Rich>
+          </li>
+          <li className="list-disc">
+            <Rich>{m.statePlaces.cookieLax()}</Rich>
+          </li>
+          <li className="list-disc">
+            <Rich>{m.statePlaces.cookieTabs()}</Rich>
+          </li>
+          <li className="list-disc">
+            <Rich>{m.statePlaces.cookieSmall()}</Rich>
+          </li>
+          <li className="list-disc">
+            <Rich>{m.statePlaces.localJson()}</Rich>
+          </li>
+        </ul>
+        <p className="text-fg-mute leading-relaxed">
+          <Rich>{m.statePlaces.cookieSecret()}</Rich>{' '}
+          <LocaleAnchor path="/:locale/state/reading">
+            <Rich>{m.statePlaces.cookieServer()}</Rich>
+          </LocaleAnchor>
+        </p>
+      </DocSection>
+
+      <DocSection
         description={m.statePlaces.memoryDescription}
         title={m.statePlaces.memoryTitle}
       >
@@ -408,6 +532,9 @@ export default function StatePlacesPage() {
           <li className="list-disc">
             <Rich>{m.statePlaces.keyLocal()}</Rich>
           </li>
+          <li className="list-disc">
+            <Rich>{m.statePlaces.keyCookie()}</Rich>
+          </li>
         </ul>
         <p className="text-fg-mute leading-relaxed">
           <Rich>{m.statePlaces.keyRename()}</Rich>
@@ -438,6 +565,36 @@ export default function StatePlacesPage() {
             </LocaleAnchor>
           </li>
         </ul>
+      </DocSection>
+
+      <DocSection
+        description={m.statePlaces.versionDescription}
+        title={m.statePlaces.versionTitle}
+      >
+        <CodeBlock code={PREFS_VERSIONED} lang="ts" />
+        <ul className="text-fg-mute flex flex-col gap-2 pl-6">
+          <li className="list-disc">
+            <Rich>{m.statePlaces.versionEnvelope()}</Rich>
+          </li>
+          <li className="list-disc">
+            <Rich>{m.statePlaces.versionMigrate()}</Rich>
+          </li>
+          <li className="list-disc">
+            <Rich>{m.statePlaces.versionServer()}</Rich>
+          </li>
+          <li className="list-disc">
+            <Rich>{m.statePlaces.versionNewer()}</Rich>
+          </li>
+          <li className="list-disc">
+            <Rich>{m.statePlaces.versionThrow()}</Rich>
+          </li>
+          <li className="list-disc">
+            <Rich>{m.statePlaces.versionShape()}</Rich>
+          </li>
+        </ul>
+        <p className="text-fg-mute leading-relaxed">
+          <Rich>{m.statePlaces.versionNone()}</Rich>
+        </p>
       </DocSection>
 
       <DocSection
@@ -473,6 +630,20 @@ export default function StatePlacesPage() {
               ],
             },
             {
+              key: 'session',
+              cells: [
+                <Code key="type">SessionState</Code>,
+                <Rich key="holds">{types.sessionState()}</Rich>,
+              ],
+            },
+            {
+              key: 'cookie',
+              cells: [
+                <Code key="type">CookieState</Code>,
+                <Rich key="holds">{types.cookieState()}</Rich>,
+              ],
+            },
+            {
               key: 'memory',
               cells: [
                 <Code key="type">MemoryState</Code>,
@@ -484,6 +655,13 @@ export default function StatePlacesPage() {
               cells: [
                 <Code key="type">StateSchema</Code>,
                 <Rich key="holds">{types.stateSchema()}</Rich>,
+              ],
+            },
+            {
+              key: 'versioning',
+              cells: [
+                <Code key="type">Versioning</Code>,
+                <Rich key="holds">{types.versioning()}</Rich>,
               ],
             },
             {

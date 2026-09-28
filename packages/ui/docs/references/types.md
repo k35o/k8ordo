@@ -90,8 +90,13 @@ code around it:
 | `ButtonRenderItemProps` / `IconButtonRenderItemProps`                 | What `renderItem` receives on `Button` / `IconButton`                                                   |
 | `IconButtonTriggerProps`                                              | `Partial<TooltipTriggerProps>`: the tooltip wiring in `IconButtonRenderItemProps`' `triggerProps`       |
 | `PopoverTriggerProps` / `PopoverContentProps` / `TooltipTriggerProps` | What `renderItem` receives on `Popover.Trigger` / `Popover.Content` / `Tooltip.Trigger`                 |
+| `ToolbarItemProps`                                                    | What `renderItem` receives on `Toolbar.Item`: `ref`, `tabIndex`, `onFocus`                              |
+| `CommandPaletteItem`                                                  | A command in `CommandPalette`: `id`, `label`, `onSelect`, plus `group`, `keywords`, `shortcut`          |
 | `AlertAction` / `ToastAction` / `ToastOptions`                        | `Alert`'s `action`, and the `action` and `duration` a toast takes                                       |
+| `ColorPickerSwatch`                                                   | A preset in `ColorPicker`'s `swatches`: `value` (`#rrggbb`) and `label`, the color's name               |
+| `ComboboxSearch`                                                      | `Combobox`'s `search`: `(query, { signal }) => Promise<readonly Option[]>`                              |
 | `CheckboxCardOption` / `RadioCardOption`                              | A choice in `CheckboxCard` / `RadioCard`: `value` and `label`, plus `description`, `visual`, `disabled` |
+| `StepperStep`                                                         | A step in `Stepper`: `label`, plus `description`                                                        |
 | `CellAlign`                                                           | A table cell's `align`: `'left'`, `'center'`, or `'right'`                                              |
 | `BaseIconProps` / `IconRenderProps`                                   | An icon's `size`, and the props an icon puts on its `<svg>`                                             |
 | `Messages`                                                            | The wording dictionary; `UIProvider`'s `messages` takes a `Partial<Messages>`                           |

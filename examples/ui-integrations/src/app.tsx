@@ -1,3 +1,4 @@
+import { AiSdkChatDemo } from './ai-sdk/demo';
 import { JsonRenderDemo } from './json-render/demo';
 import { OpenUiDemo } from './openui/demo';
 
@@ -38,6 +39,13 @@ function App() {
         description="OpenUI Lang(DSL) 文字列を <Renderer> に渡して描画。同じ Button / Stack アダプタで、href は同様に <a> になります。"
       >
         <OpenUiDemo />
+      </Section>
+
+      <Section
+        title="AI SDK"
+        description="useChat の UIMessage を mapMessageParts で部品に割り当てるチャット。ツールの許可・拒否、添付、出典、data パーツで届く生成 UI、コピー・再生成・フィードバックまで、台本どおりに返す transport で動かします。"
+      >
+        <AiSdkChatDemo />
       </Section>
     </div>
   );

@@ -9,8 +9,11 @@ is here is only the part that makes a build
 into files. The repository-wide discipline is in the root
 [`CLAUDE.md`](../../CLAUDE.md).
 
-User-facing documentation is in [`docs/GUIDE.md`](docs/GUIDE.md), shipped
-inside the npm package.
+User-facing documentation is [`docs/GUIDE.md`](docs/GUIDE.md), the entry
+point, with a reference per topic under [`docs/references/`](docs/references/)
+— the topics of the docs site's `/static/…` pages — all shipped inside the npm
+package. The sections both modes share are written from
+`packages/framework-engine/docs/shared/`; edit the fragment, never the copy.
 
 ## Commands
 
@@ -42,7 +45,40 @@ pnpm check         # check:write to auto-fix
   fills, which is why the dev hook is ordered `post` and never looks at the
   code it is handed: that transform prepends its runtime import, so the
   file has stopped beginning with the directive by the time anyone downstream
-  sees it.
+  sees it. A `guard.ts` fails it the same way — every one named before
+  anything is built (`buildApp`, `order: 'pre'`), and in `vite dev` the
+  moment the module is compiled — found through the engine's grammar
+  (`slotOf`), never by the file name alone, since a `_private/guard.ts` is
+  not one.
+- **A supplied pathname the site then disowns fails the build.** A 404 for
+  a pathname `paths` supplied is either a params schema refusing it or the
+  page saying `notFound()`; the handler marks the second with
+  `NOT_FOUND_HEADER`, and the build names each kind in its own message.
+- **A route.ts is a file.** The build calls its `GET` once per pathname
+  (with `site`'s origin in the URL when given) and writes the body at the
+  pathname — `answeredByRoute` asks the declared patterns, in the matcher's
+  order, which of them answers. Anything but a `200` stops the build, as do
+  a route at `/` and a route with written pathnames below it (a file cannot
+  also be a directory), and a route.ts exporting any method but `GET` is
+  refused before the build (`readExports`) and in `vite dev`'s transform.
+  It is not a page: no `index.rsc`, not in the sitemap.
+- **A page that reads the search is refused.** Exporting `search` asks the
+  framework to render a page per search, and a file is the same for every
+  search — every such page named before the build, and in `vite dev` when
+  the page is compiled (`pagesReadingSearch` / `exportsOf`).
+- **A file never carries a nonce; the policy names hashes.** The handler
+  signs the framework's inline scripts with a nonce per render and says it in
+  `NONCE_HEADER`; `write` takes it off every page (`asFile`) whether or not
+  a `csp` was given — a nonce in a file everyone reads is worth nothing, and
+  a random one would make every build differ. With `csp`, what that nonce
+  signed is hashed into `script-src` of a `<meta>` placed first in `<head>`;
+  nothing else is hashed, so an inline script that reached a page from
+  content stays refused, and the application allows its own by hash in the
+  policy (`colorSchemeScriptHash`). There is no `nonce()` for this mode for
+  the same reason. A policy the `<meta>` cannot carry (`frame-ancestors`,
+  `report-uri`, `sandbox`) or one with `'strict-dynamic'` — under which the
+  module script, allowed only by `'self'`, never loads — is refused when the
+  plugin is created (`policyProblems`).
 - **`site` is the only reason a sitemap exists.** Without the origin a
   sitemap would list relative URLs, which is not a sitemap; with it every
   page the build wrote is listed, redirects and the not-found excluded.
@@ -54,6 +90,13 @@ pnpm check         # check:write to auto-fix
 - **The plugin is `framework()`, the same name `@k8ordo/server` exports.**
   The mode is the import and nothing else, which is what makes a
   `vite.config.ts` identical under either package.
+- **Pages are counted in the table's terms and asked for under the base.**
+  `urlFor` puts `builder.config.base` in front of every pathname the
+  handler is asked for (HTML, payload, `404.html`) and of every sitemap
+  `<loc>`, while files go to `dirFor(pathname)` inside the client build —
+  the directory a host serves at the base. The `paths` option is in the
+  table's terms too. Node runs this without Vite, so the router's
+  `withBase` gets the base passed in.
 - **Prerender runs after every environment is built** — `buildApp` with
   `order: 'post'` — and writes into the client build's own output directory,
   which Vite may hand over as an absolute path, so resolve it rather than
@@ -64,12 +107,15 @@ pnpm check         # check:write to auto-fix
 ```
 src/
   paths.ts      patternsOf / patternsNeedingPaths / planPaths /
-                catchAllPatterns / catchAllPath / dirFor / isConcrete — pure
+                catchAllPatterns / catchAllPath / dirFor / isConcrete /
+                answeredByRoute — pure
                 functions (supplied pathnames matched with URLPattern)
   documents.ts  sitemap / redirectPage — the two files the build writes
-                itself rather than taking from the handler, escaped as markup
-  index.ts      framework: engine + prerender (the dev refusal in transform,
-                the files in buildApp)
+                itself rather than taking from the handler, escaped as markup;
+                asFile / policyProblems — a page as a file: its nonce off, its
+                Content-Security-Policy <meta> with the framework's hashes
+  index.ts      framework: engine + refusals (guard.ts before the build) +
+                prerender (the dev refusals in transform, the files in buildApp)
 ```
 
 ## Conventions

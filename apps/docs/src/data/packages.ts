@@ -103,6 +103,7 @@ export const PACKAGES: PackageEntry[] = [
       { path: '/:locale/server/errors', label: m.server.navErrors },
       { path: '/:locale/server/boundaries', label: m.server.navBoundaries },
       { path: '/:locale/server/actions', label: m.server.navActions },
+      { path: '/:locale/server/guards', label: m.server.navGuards },
       { path: '/:locale/server/deploy', label: m.server.navDeploy },
     ],
   },
@@ -127,6 +128,15 @@ export const PACKAGES: PackageEntry[] = [
     description: m.colorScheme.description,
     sections: [
       { path: '/:locale/color-scheme/get-started', label: m.nav.getStarted },
+      {
+        path: '/:locale/color-scheme/styling',
+        label: m.colorScheme.navStyling,
+      },
+      {
+        path: '/:locale/color-scheme/storage',
+        label: m.colorScheme.navStorage,
+      },
+      { path: '/:locale/color-scheme/csp', label: m.colorScheme.navCsp },
       {
         path: '/:locale/color-scheme/how-it-works',
         label: m.colorScheme.navHowItWorks,

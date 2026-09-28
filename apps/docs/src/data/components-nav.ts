@@ -15,6 +15,16 @@ export const componentCategories: NavCategory[] = [
         path: '/:locale/ui/components/icon-button',
         description: m.components.iconButton.description,
       },
+      {
+        name: 'CopyButton',
+        path: '/:locale/ui/components/copy-button',
+        description: m.components.copyButton.description,
+      },
+      {
+        name: 'Toolbar',
+        path: '/:locale/ui/components/toolbar',
+        description: m.components.toolbar.description,
+      },
     ],
   },
   {
@@ -40,6 +50,21 @@ export const componentCategories: NavCategory[] = [
         path: '/:locale/ui/components/pagination',
         description: m.components.pagination.description,
       },
+      {
+        name: 'Stepper',
+        path: '/:locale/ui/components/stepper',
+        description: m.components.stepper.description,
+      },
+      {
+        name: 'SideNav',
+        path: '/:locale/ui/components/side-nav',
+        description: m.components.sideNav.description,
+      },
+      {
+        name: 'TableOfContents',
+        path: '/:locale/ui/components/table-of-contents',
+        description: m.components.tableOfContents.description,
+      },
     ],
   },
   {
@@ -59,6 +84,26 @@ export const componentCategories: NavCategory[] = [
         name: 'NumberField',
         path: '/:locale/ui/components/number-field',
         description: m.components.numberField.description,
+      },
+      {
+        name: 'DateField',
+        path: '/:locale/ui/components/date-field',
+        description: m.components.dateField.description,
+      },
+      {
+        name: 'DatePicker',
+        path: '/:locale/ui/components/date-picker',
+        description: m.components.datePicker.description,
+      },
+      {
+        name: 'Calendar',
+        path: '/:locale/ui/components/calendar',
+        description: m.components.calendar.description,
+      },
+      {
+        name: 'ColorPicker',
+        path: '/:locale/ui/components/color-picker',
+        description: m.components.colorPicker.description,
       },
       {
         name: 'Select',
@@ -101,6 +146,11 @@ export const componentCategories: NavCategory[] = [
         description: m.components.radioCard.description,
       },
       {
+        name: 'Combobox',
+        path: '/:locale/ui/components/combobox',
+        description: m.components.combobox.description,
+      },
+      {
         name: 'Autocomplete',
         path: '/:locale/ui/components/autocomplete',
         description: m.components.autocomplete.description,
@@ -109,6 +159,11 @@ export const componentCategories: NavCategory[] = [
         name: 'Slider',
         path: '/:locale/ui/components/slider',
         description: m.components.slider.description,
+      },
+      {
+        name: 'RangeSlider',
+        path: '/:locale/ui/components/range-slider',
+        description: m.components.rangeSlider.description,
       },
       {
         name: 'FileField',
@@ -161,9 +216,29 @@ export const componentCategories: NavCategory[] = [
         description: m.components.code.description,
       },
       {
+        name: 'CodeBlock',
+        path: '/:locale/ui/components/code-block',
+        description: m.components.codeBlock.description,
+      },
+      {
+        name: 'Prose',
+        path: '/:locale/ui/components/prose',
+        description: m.components.prose.description,
+      },
+      {
         name: 'Table',
         path: '/:locale/ui/components/table',
         description: m.components.table.description,
+      },
+      {
+        name: 'DataTable',
+        path: '/:locale/ui/components/data-table',
+        description: m.components.dataTable.description,
+      },
+      {
+        name: 'Tree',
+        path: '/:locale/ui/components/tree',
+        description: m.components.tree.description,
       },
       {
         name: 'Heading',
@@ -216,6 +291,11 @@ export const componentCategories: NavCategory[] = [
     title: m.components.categoryOverlays,
     items: [
       {
+        name: 'CommandPalette',
+        path: '/:locale/ui/components/command-palette',
+        description: m.components.commandPalette.description,
+      },
+      {
         name: 'Dialog',
         path: '/:locale/ui/components/dialog',
         description: m.components.dialog.description,
@@ -234,6 +314,11 @@ export const componentCategories: NavCategory[] = [
         name: 'Popover',
         path: '/:locale/ui/components/popover',
         description: m.components.popover.description,
+      },
+      {
+        name: 'ContextMenu',
+        path: '/:locale/ui/components/context-menu',
+        description: m.components.contextMenu.description,
       },
       {
         name: 'DropdownMenu',
@@ -271,9 +356,9 @@ export const componentCategories: NavCategory[] = [
         description: m.components.separator.description,
       },
       {
-        name: 'ScrollLinked',
-        path: '/:locale/ui/components/scroll-linked',
-        description: m.components.scrollLinked.description,
+        name: 'ResizablePanels',
+        path: '/:locale/ui/components/resizable-panels',
+        description: m.components.resizablePanels.description,
       },
     ],
   },

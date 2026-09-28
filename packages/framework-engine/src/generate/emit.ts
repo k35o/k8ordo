@@ -1,4 +1,6 @@
+import { slotOf } from '../grammar/tree';
 import type { Problem, RouteDir } from '../grammar/tree';
+import { ROUTE_METHODS } from '../runtime/route';
 
 /**
  * The generator writes the route table and the type wiring so an application
@@ -15,16 +17,26 @@ import type { Problem, RouteDir } from '../grammar/tree';
 export type TableBranch<T> = {
   layout?: T;
   error?: T;
+  loading?: T;
   children: Record<string, TableNode<T>>;
 };
 
 export type TableNode<T> = T | TableBranch<T>;
 
-/** A directory with nothing but a page is the component itself. */
+/** What answers a directory's own URL: its page, or its route.ts. */
+const ownFile = (dir: RouteDir): string | null => dir.page ?? dir.route;
+
+/**
+ * A directory with nothing but a page (or a route.ts) is that, itself —
+ * except a group: it adds no segment, so the router refuses it as a leaf (it
+ * would redeclare its parent's index) and takes it only as a branch.
+ */
 const isLeaf = (dir: RouteDir): boolean =>
-  dir.page !== null &&
+  dir.kind !== 'group' &&
+  ownFile(dir) !== null &&
   dir.layout === null &&
   dir.error === null &&
+  dir.loading === null &&
   dir.notFound === null &&
   dir.children.length === 0;
 
@@ -64,7 +76,8 @@ export const buildTable = <T>(
 ): Record<string, TableNode<T>> => {
   const entries = (dir: RouteDir): Record<string, TableNode<T>> => {
     const record: Record<string, TableNode<T>> = {};
-    if (dir.page !== null) record['/'] = resolve(dir.page);
+    const own = ownFile(dir);
+    if (own !== null) record['/'] = resolve(own);
     for (const child of order(dir.children)) record[child.key] = node(child);
     // Last, because the table matches in declaration order: every route the
     // app actually declared out-ranks the catch-all.
@@ -73,16 +86,17 @@ export const buildTable = <T>(
   };
 
   const node = (dir: RouteDir): TableNode<T> => {
-    if (isLeaf(dir)) return resolve(dir.page as string);
+    if (isLeaf(dir)) return resolve(ownFile(dir) as string);
     const branch: TableBranch<T> = { children: entries(dir) };
     if (dir.layout !== null) branch.layout = resolve(dir.layout);
     if (dir.error !== null) branch.error = resolve(dir.error);
+    if (dir.loading !== null) branch.loading = resolve(dir.loading);
     return branch;
   };
 
-  // The root's own layout (or error boundary) has to wrap everything, which
-  // is what a branch under the transparent '/' key does.
-  return tree.layout === null && tree.error === null
+  // The root's own layout (or error boundary, or loading) has to wrap
+  // everything, which is what a branch under the transparent '/' key does.
+  return tree.layout === null && tree.error === null && tree.loading === null
     ? entries(tree)
     : { '/': node(tree) };
 };
@@ -90,7 +104,7 @@ export const buildTable = <T>(
 export type DeclaredPattern = {
   readonly pattern: string;
   readonly file: string;
-  readonly kind: 'page' | 'redirect' | 'notFound';
+  readonly kind: 'page' | 'route' | 'redirect' | 'notFound';
 };
 
 /**
@@ -106,9 +120,11 @@ export const declaredPatterns = (
   const here = dir.kind === 'root' ? '' : prefix;
   const own = here === '' ? '/' : here;
   const found: DeclaredPattern[] = [];
-  if (dir.page !== null)
+  if (dir.page !== null) {
     found.push({ pattern: own, file: dir.page, kind: 'page' });
-  if (dir.redirect !== null && dir.page === null) {
+  } else if (dir.route !== null) {
+    found.push({ pattern: own, file: dir.route, kind: 'route' });
+  } else if (dir.redirect !== null) {
     found.push({ pattern: own, file: dir.redirect, kind: 'redirect' });
   }
   for (const child of order(dir.children)) {
@@ -130,6 +146,10 @@ const declared = declaredPatterns;
 /** Every `redirect.ts`, with the pattern its directory puts it under. */
 export const declaredRedirects = (dir: RouteDir): DeclaredPattern[] =>
   declaredPatterns(dir).filter((each) => each.kind === 'redirect');
+
+/** Every `route.ts`, with the pattern its directory puts it under. */
+export const declaredRouteFiles = (dir: RouteDir): DeclaredPattern[] =>
+  declaredPatterns(dir).filter((each) => each.kind === 'route');
 
 /**
  * Routes that exist and can never render, because something declared earlier
@@ -167,9 +187,14 @@ export type EmitOptions = {
   readonly via?: string;
   /** Route files (relative to the routes root) that export a `paramsSchema`. */
   readonly withParams?: ReadonlySet<string>;
+  /** Pages (relative to the routes root) that export a `search` url schema. */
+  readonly withSearch?: ReadonlySet<string>;
 };
 
 const DEFAULT_VIA = '@k8ordo/static';
+
+/** What holds a route.ts's place in the table. */
+const ANSWERED = 'answered';
 const ROUTE_REQUEST_FROM = '@k8ordo/server/runtime';
 
 const banner = (via: string | undefined): string =>
@@ -227,6 +252,11 @@ const renderNode = (
   if (node.error !== undefined) {
     lines.push(`${pad(depth + 1)}error: ${believed(node.error, asserted)},`);
   }
+  if (node.loading !== undefined) {
+    lines.push(
+      `${pad(depth + 1)}loading: ${believed(node.loading, asserted)},`,
+    );
+  }
   lines.push(`${pad(depth + 1)}children: {`);
   for (const [key, child] of Object.entries(node.children)) {
     lines.push(
@@ -248,7 +278,7 @@ const believed = (
 type Belief = {
   /** The pattern the directories put the file under. */
   readonly pattern: string;
-  readonly kind: 'page' | 'layout' | 'notFound' | 'error';
+  readonly kind: 'page' | 'route' | 'layout' | 'notFound' | 'error' | 'loading';
   /** Schema-declaring files along the stack, outer-first, the file's own last. */
   readonly schemas: readonly string[];
 };
@@ -290,12 +320,13 @@ const beliefs = (
         schemas: layoutSchemas,
       });
     }
-    if (dir.page !== null) {
-      found.set(dir.page, {
+    const answers = ownFile(dir);
+    if (answers !== null) {
+      found.set(answers, {
         pattern: own,
-        kind: 'page',
-        schemas: withParams.has(dir.page)
-          ? [...layoutSchemas, dir.page]
+        kind: dir.page === null ? 'route' : 'page',
+        schemas: withParams.has(answers)
+          ? [...layoutSchemas, answers]
           : layoutSchemas,
       });
     }
@@ -308,6 +339,9 @@ const beliefs = (
     }
     if (dir.error !== null) {
       found.set(dir.error, { pattern: own, kind: 'error', schemas: [] });
+    }
+    if (dir.loading !== null) {
+      found.set(dir.loading, { pattern: own, kind: 'loading', schemas: [] });
     }
     for (const child of dir.children) {
       walk(
@@ -323,13 +357,65 @@ const beliefs = (
 
 const schemaName = (componentName: string): string => `${componentName}_params`;
 
+const searchName = (componentName: string): string => `${componentName}_search`;
+
+type Guards = {
+  /** Per pattern, the `guard.ts` files that run before it answers, outer first. */
+  readonly stacks: ReadonlyMap<string, readonly string[]>;
+  /** Per `guard.ts`, the pattern its directory puts it under. */
+  readonly own: ReadonlyMap<string, string>;
+};
+
+/**
+ * The guards along each pattern's directories. A redirect is left out: it
+ * answers before any guard runs, since a directory that redirects has nothing
+ * below it to guard. `/*` always carries the root's — a URL nothing answers is
+ * still below the root, and the framework's own 404 is answered under them.
+ */
+const guardsOf = (tree: RouteDir): Guards => {
+  const stacks = new Map<string, readonly string[]>();
+  const own = new Map<string, string>();
+  const walk = (
+    dir: RouteDir,
+    prefix: string,
+    inherited: readonly string[],
+  ): void => {
+    const here = dir.kind === 'root' ? '' : prefix;
+    const pattern = here === '' ? '/' : here;
+    const stack = dir.guard === null ? inherited : [...inherited, dir.guard];
+    if (dir.guard !== null) own.set(dir.guard, pattern);
+    if (stack.length > 0) {
+      if (ownFile(dir) !== null) stacks.set(pattern, stack);
+      if (dir.notFound !== null) stacks.set(`${here}/*`, stack);
+    }
+    for (const child of dir.children) {
+      walk(child, child.kind === 'group' ? here : `${here}${child.key}`, stack);
+    }
+  };
+  walk(tree, '', []);
+  if (tree.guard !== null && !stacks.has('/*')) {
+    stacks.set('/*', [tree.guard]);
+  }
+  return { stacks, own };
+};
+
 export const emitRoutesModule = (
   tree: RouteDir,
   options: EmitOptions,
 ): string => {
   const namer = createNamer();
-  const table = buildTable(tree, namer.take);
+  // A route.ts is not a component: its place in the table is held by one
+  // that renders nothing, and the module itself goes to `routeModules`.
+  const table = buildTable(tree, (file) =>
+    slotOf(file) === 'route' ? ANSWERED : namer.take(file),
+  );
+  const routeFiles = declaredRouteFiles(tree).map((route) => ({
+    pattern: route.pattern,
+    file: route.file,
+    name: namer.take(route.file),
+  }));
   const withParams = options.withParams ?? new Set<string>();
+  const withSearch = options.withSearch ?? new Set<string>();
 
   const byFile = beliefs(tree, withParams);
   const asserted = new Map<string, string>();
@@ -347,31 +433,78 @@ export const emitRoutesModule = (
       asserted.set(name, `Layout<'${belief.pattern}'>`);
     } else if (belief.kind === 'error') {
       asserted.set(name, 'ErrorComponent');
+    } else if (belief.kind === 'loading') {
+      asserted.set(name, 'ComponentType');
     } else if (belief.kind === 'notFound') {
       asserted.set(name, `Page<'${belief.pattern}'>`);
       if (schemas.length > 0) catchAllStacks.set(belief.pattern, schemas);
-    } else if (schemas.length === 0) {
-      asserted.set(name, `Page<'${belief.pattern}'>`);
+    } else if (belief.kind === 'route') {
+      // Not in the table, so nothing to state there; its schemas still run
+      // before it answers, and type its params.
+      if (schemas.length > 0) stacks.set(belief.pattern, schemas);
     } else {
+      if (schemas.length > 0) stacks.set(belief.pattern, schemas);
+      const typedBy =
+        schemas.length === 0
+          ? '[]'
+          : `(typeof paramSchemas)['${belief.pattern}']`;
       asserted.set(
         name,
-        `Page<'${belief.pattern}', (typeof paramSchemas)['${belief.pattern}']>`,
+        withSearch.has(file)
+          ? `Page<'${belief.pattern}', ${typedBy}, { search: ReturnType<(typeof searchReaders)['${belief.pattern}']> }>`
+          : schemas.length === 0
+            ? `Page<'${belief.pattern}'>`
+            : `Page<'${belief.pattern}', ${typedBy}>`,
       );
-      stacks.set(belief.pattern, schemas);
     }
   }
   const body = Object.entries(table).map(
     ([key, node]) => `${pad(1)}'${key}': ${renderNode(node, 1, asserted)},`,
   );
-  const importLines = [...namer.names].map(([file, name]) => {
-    const specifier = `'${options.importPrefix}/${file.replace(/\.[jt]sx?$/u, '')}'`;
-    return withParams.has(file)
-      ? `import ${name}, { paramsSchema as ${schemaName(name)} } from ${specifier};`
-      : `import ${name} from ${specifier};`;
-  });
+  const guarded = guardsOf(tree);
+  const guardStacks = new Map(
+    [...guarded.stacks].map(([pattern, files]) => [
+      pattern,
+      files.map((file) => namer.take(file)),
+    ]),
+  );
+  const guardChecks = [...guarded.own].map(
+    ([file, pattern]) =>
+      `${pad(1)}${namer.take(file)} satisfies Guard<'${pattern}'>,`,
+  );
+  const hasGuards = guardChecks.length > 0;
   const hasLayout = [...asserted.values()].some((type) =>
     type.startsWith('Layout<'),
   );
+  const importLines = [...namer.names].map(([file, name]) => {
+    const specifier = `'${options.importPrefix}/${file.replace(/\.[jt]sx?$/u, '')}'`;
+    if (slotOf(file) === 'route')
+      return `import * as ${name} from ${specifier};`;
+    const named = [
+      ...(withParams.has(file) ? [`paramsSchema as ${schemaName(name)}`] : []),
+      ...(withSearch.has(file) ? [`search as ${searchName(name)}`] : []),
+    ];
+    return named.length === 0
+      ? `import ${name} from ${specifier};`
+      : `import ${name}, { ${named.join(', ')} } from ${specifier};`;
+  });
+  // Per page pattern, what reads the search a page declared it reads.
+  const searchReaders = [...namer.names]
+    .filter(([file]) => withSearch.has(file))
+    .map(
+      ([file, name]) =>
+        `${pad(1)}'${(byFile.get(file) as Belief).pattern}': urlReader(${searchName(name)}),`,
+    );
+  // A route.ts is imported whole, so its schema is read off the module.
+  const routeSchemaLines = routeFiles
+    .filter(({ file }) => withParams.has(file))
+    .map(({ name }) => `const ${schemaName(name)} = ${name}.paramsSchema;`);
+  const routeChecks = routeFiles.map(({ pattern, name }) =>
+    stacks.has(pattern)
+      ? `${pad(1)}${name} satisfies RouteModule<'${pattern}', (typeof paramSchemas)['${pattern}']>,`
+      : `${pad(1)}${name} satisfies RouteModule<'${pattern}'>,`,
+  );
+  const hasRoutes = routeFiles.length > 0;
   const hasError = [...asserted.values()].includes('ErrorComponent');
   const hasSchemas = withParams.size > 0;
   // Under a running server a page also receives the request; a build into
@@ -398,7 +531,7 @@ export const emitRoutesModule = (
     });
   const typeImports = [
     ...(hasError ? ['ErrorComponent'] : []),
-    ...(hasLayout ? ['ParamsOf'] : []),
+    ...(hasLayout || hasGuards ? ['ParamsOf'] : []),
     ...(hasSchemas ? ['ParamsSchemaFor'] : []),
     'ParsedParams',
   ];
@@ -407,12 +540,16 @@ export const emitRoutesModule = (
     banner(options.via),
     '',
     `import { defineRoutes } from '@k8ordo/router';`,
+    ...(searchReaders.length > 0
+      ? [`import { urlReader } from '@k8ordo/state';`]
+      : []),
     `import type { ${typeImports.join(', ')} } from '@k8ordo/router';`,
     `import type { ComponentType${hasLayout ? ', ReactNode' : ''} } from 'react';`,
     '',
     ...importLines,
     ...redirectImports,
     '',
+    ...(routeSchemaLines.length > 0 ? [...routeSchemaLines, ''] : []),
     ...(withRequest
       ? [
           '// What a page may read of the request, under a running server only.',
@@ -427,11 +564,14 @@ export const emitRoutesModule = (
     'type Page<',
     '  P extends string,',
     '  S extends readonly unknown[] = [],',
-    '> = ComponentType<{',
-    '  params: ParsedParams<P, S>;',
-    '  pathname: string;',
-    ...requestLine,
-    '}>;',
+    '  Q = Record<never, never>,',
+    '> = ComponentType<',
+    '  {',
+    '    params: ParsedParams<P, S>;',
+    '    pathname: string;',
+    ...requestLine.map((line) => `  ${line}`),
+    '  } & Q',
+    '>;',
     ...(hasLayout
       ? [
           'type Layout<P extends string> = ComponentType<{',
@@ -462,6 +602,24 @@ export const emitRoutesModule = (
           '',
         ]
       : []),
+    ...(hasGuards
+      ? [
+          '// What a guard.ts default-exports: run before whatever answers below it,',
+          '// outer first. A Response ends the request there; nothing lets it through.',
+          'type Guard<P extends string> = (context: {',
+          '  readonly request: Request;',
+          '  readonly params: ParamsOf<P>;',
+          '}) => Response | void | Promise<Response | void>;',
+          '',
+          '// The guard.ts exports, each checked against the pattern its directory',
+          '// puts it under.',
+          'const guardChecks = [',
+          ...guardChecks,
+          '] as const;',
+          'void guardChecks;',
+          '',
+        ]
+      : []),
     '// Per page pattern, the schemas that run before it renders — every',
     '// layout above it that declared one, then its own. The handler reads',
     '// this; a schema that refuses makes the pattern not answer the pathname.',
@@ -474,6 +632,52 @@ export const emitRoutesModule = (
     '// 404 is in); a refusal does not stop a catch-all from answering.',
     'export const catchAllSchemas = {',
     ...toMap(catchAllStacks),
+    '} as const;',
+    '',
+    ...(hasRoutes
+      ? [
+          '// What a route.ts exports: a function per request method it answers,',
+          '// handed the request and the params, answering with a Response.',
+          'type RouteHandler<',
+          '  P extends string,',
+          '  S extends readonly unknown[] = [],',
+          '> = (context: {',
+          '  readonly request: Request;',
+          '  readonly params: ParsedParams<P, S>;',
+          '}) => Response | Promise<Response>;',
+          'type RouteModule<P extends string, S extends readonly unknown[] = []> = {',
+          `  readonly [M in ${ROUTE_METHODS.map((method) => `'${method}'`).join(' | ')}]?: RouteHandler<P, S>;`,
+          '};',
+          '',
+          '// The route.ts modules, each checked against the pattern its directory',
+          '// puts it under.',
+          'const routeChecks = [',
+          ...routeChecks,
+          '] as const;',
+          'void routeChecks;',
+          '',
+          '// A route.ts in the table: the handler answers it from `routeModules`',
+          '// before anything renders, so its place here is only where it matches.',
+          `const ${ANSWERED} = (): null => null;`,
+          '',
+        ]
+      : []),
+    '// Per page pattern that exports `search`, what reads it out of the URL —',
+    "// @k8ordo/state's reading of a url schema. The page receives what it read,",
+    '// and a client navigation that changes the search loads it again.',
+    'export const searchReaders = {',
+    ...searchReaders,
+    '} as const;',
+    '',
+    '// Per pattern, the route.ts that answers it, by the methods it exports.',
+    'export const routeModules = {',
+    ...routeFiles.map(({ pattern, name }) => `${pad(1)}'${pattern}': ${name},`),
+    '} as const;',
+    '',
+    '// Per pattern, the guards that run before it answers — outer first. `/*`',
+    "// carries the root's, for a URL nothing answers.",
+    'export const guards = {',
+    ...toMap(guardStacks),
     '} as const;',
     '',
     '// Per pattern, where a redirect.ts sends the visitor. Consulted before the',
@@ -529,13 +733,19 @@ export const emitRegisterModule = (options: RegisterOptions): string => {
     ...(withRequest
       ? [`import type { RouteRequest } from '${ROUTE_REQUEST_FROM}';`]
       : []),
-    `import type { paramSchemas, routes } from '${options.routesModule}';`,
+    `import type { paramSchemas, routes, searchReaders } from '${options.routesModule}';`,
     '',
     `declare module '@k8ordo/router' {`,
     '  interface Register {',
     '    routes: typeof routes;',
     '    // A link takes a param as the page receives it — typed by its schema.',
     '    params: ParsedParamsMap<typeof paramSchemas>;',
+    '    // A page that exports `search` receives what it reads.',
+    '    search: {',
+    '      readonly [P in keyof typeof searchReaders]: ReturnType<',
+    '        (typeof searchReaders)[P]',
+    '      >;',
+    '    };',
     ...(withRequest
       ? [
           '    // A route file receives the request: this is a running server.',

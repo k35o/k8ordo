@@ -1,4 +1,5 @@
-import { CodeBlock } from '../../../../components/code-block';
+import { CodeBlock } from '@k8ordo/ui/code-block';
+
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import {
   Bullet,
@@ -21,7 +22,7 @@ vite build
 node serve.js`;
 
 const SERVE = `// serve.js
-import { serve } from '@k8ordo/server/runtime';
+import { serve } from '@k8ordo/server/serve';
 
 await serve({ port: 3000 });`;
 

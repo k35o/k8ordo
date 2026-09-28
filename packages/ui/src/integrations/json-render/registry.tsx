@@ -100,9 +100,14 @@ export const { registry } = defineRegistry(catalog, {
     ChevronIcon: ({ props }) => ui.renderChevronIcon(props),
     StatusIcon: ({ props }) => ui.renderStatusIcon(props),
     IconButton: ({ props }) => ui.renderIconButton(props),
+    CopyButton: ({ props }) => ui.renderCopyButton(props),
     Accordion: ({ props }) => ui.renderAccordion(props),
     Breadcrumb: ({ props }) => ui.renderBreadcrumb(props),
+    Stepper: ({ props }) => ui.renderStepper(props),
     Table: ({ props }) => ui.renderTable(props),
+    DataTable: ({ props }) => <ui.DataTableWidget props={props} />,
+    Tree: ({ props }) => ui.renderTree(props),
+    SideNav: ({ props }) => ui.renderSideNav(props),
 
     Textarea: ({ props, bindings }) => {
       const [value, setValue] = useBoundOrLocal<string>(
@@ -119,6 +124,50 @@ export const { registry } = defineRegistry(catalog, {
         '',
       );
       return ui.renderPasswordInput(props, value, setValue);
+    },
+    RangeSlider: ({ props, bindings }) => {
+      const whole: readonly [number, number] = [
+        props.min ?? 0,
+        props.max ?? 100,
+      ];
+      const [value, setValue] = useBoundOrLocal<readonly [number, number]>(
+        props.defaultValue,
+        bindings?.defaultValue,
+        whole,
+      );
+      return ui.renderRangeSlider(props, value, setValue);
+    },
+    ColorPicker: ({ props, bindings }) => {
+      const [value, setValue] = useBoundOrLocal<string>(
+        props.defaultValue,
+        bindings?.defaultValue,
+        '',
+      );
+      return ui.renderColorPicker(props, value, setValue);
+    },
+    DateField: ({ props, bindings }) => {
+      const [value, setValue] = useBoundOrLocal<string>(
+        props.defaultValue,
+        bindings?.defaultValue,
+        '',
+      );
+      return ui.renderDateField(props, value, setValue);
+    },
+    DatePicker: ({ props, bindings }) => {
+      const [value, setValue] = useBoundOrLocal<string>(
+        props.defaultValue,
+        bindings?.defaultValue,
+        '',
+      );
+      return ui.renderDatePicker(props, value, setValue);
+    },
+    Calendar: ({ props, bindings }) => {
+      const [value, setValue] = useBoundOrLocal<string>(
+        props.defaultValue,
+        bindings?.defaultValue,
+        '',
+      );
+      return ui.renderCalendar(props, value, setValue);
     },
     Radio: ({ props, bindings }) => {
       const [value, setValue] = useBoundOrLocal<string>(
@@ -189,9 +238,8 @@ export const { registry } = defineRegistry(catalog, {
     Popover: ({ props, children }) => ui.renderPopover(props, children),
     Tooltip: ({ props }) => ui.renderTooltip(props),
     DropdownMenu: ({ props }) => ui.renderDropdownMenu(props),
+    Toolbar: ({ props }) => ui.renderToolbar(props),
     Toast: ({ props }) => <ui.ToastWidget props={props} />,
-
-    ScrollLinked: ({ props }) => ui.renderScrollLinked(props),
 
     ListBox: ({ props, bindings }) => {
       const path = bindings?.defaultValue;
@@ -215,6 +263,14 @@ export const { registry } = defineRegistry(catalog, {
       const value = hasBinding ? (bound ?? []) : local;
       const setValue = hasBinding ? setBound : setLocal;
       return ui.renderCheckboxGroup(props, value, setValue);
+    },
+    Combobox: ({ props, bindings }) => {
+      const [value, setValue] = useBoundOrLocal<string>(
+        props.defaultValue,
+        bindings?.defaultValue,
+        '',
+      );
+      return ui.renderCombobox(props, value, setValue);
     },
     Autocomplete: ({ props, bindings }) => {
       const path = bindings?.defaultValue;

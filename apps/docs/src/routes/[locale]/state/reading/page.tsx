@@ -1,6 +1,6 @@
-import { Code } from '@k8ordo/ui';
+import { Code, Heading } from '@k8ordo/ui';
+import { CodeBlock } from '@k8ordo/ui/code-block';
 
-import { CodeBlock } from '../../../../components/code-block';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Rich } from '../../../../components/rich';
@@ -84,6 +84,68 @@ export function CatalogFilters({ initialUrl }: Props) {
       <option value="new">Newest</option>
       <option value="price">Price</option>
     </select>
+  );
+}`;
+
+const COOKIE_LAYOUT = `// src/routes/layout.tsx
+import type { LayoutProps } from '@k8ordo/router';
+
+import { densityState } from '../state/density';
+import { Shell } from './_parts/shell';
+
+export default function RootLayout({ children, request }: LayoutProps<'/'>) {
+  return (
+    <html lang="en">
+      <body>
+        <Shell initialCookie={densityState.parseCookies(request.cookies)}>
+          {children}
+        </Shell>
+      </body>
+    </html>
+  );
+}`;
+
+const PAGE_SEARCH = `// src/routes/products/page.tsx
+import type { PageProps } from '@k8ordo/router';
+
+import { listState } from '../_data/list-state';
+
+export const search = listState.url;
+
+export default async function ProductsPage({ search }: PageProps<'/products'>) {
+  const products = await fetchProducts(search);
+  return <ProductList products={products} />;
+}`;
+
+const COOKIE_SHELL = `// src/routes/_parts/shell.tsx
+'use client';
+
+import { useAppState } from '@k8ordo/state';
+import type { OutputOf } from '@k8ordo/state';
+import type { ReactNode } from 'react';
+
+import { densityState } from '../../state/density';
+
+type Props = {
+  initialCookie: OutputOf<typeof densityState.schema>;
+  children: ReactNode;
+};
+
+export function Shell({ initialCookie, children }: Props) {
+  const [{ density }, update] = useAppState(densityState, { initialCookie });
+
+  return (
+    <div data-density={density}>
+      <button
+        onClick={() => {
+          update({ density: density === 'compact' ? 'comfortable' : 'compact' });
+        }}
+        type="button"
+      >
+        {density === 'compact' ? 'Comfortable' : 'Compact'}
+      </button>
+      {children}
+    </div>
   );
 }`;
 
@@ -373,8 +435,12 @@ export default function StateReadingPage() {
         description={m.stateReading.frameworkDescription}
         title={m.stateReading.frameworkTitle}
       >
+        <CodeBlock code={PAGE_SEARCH} lang="tsx" />
         <p className="text-fg-mute leading-relaxed">
           <Rich>{m.stateReading.frameworkWhy()}</Rich>
+        </p>
+        <p className="text-fg-mute leading-relaxed">
+          <Rich>{m.stateReading.frameworkSearch()}</Rich>
         </p>
         <p className="text-fg-mute leading-relaxed">
           <Rich>{m.stateReading.frameworkLinks()}</Rich>
@@ -398,6 +464,34 @@ export default function StateReadingPage() {
             </LocaleAnchor>
           </li>
         </ul>
+      </DocSection>
+
+      <DocSection
+        description={m.stateReading.cookieDescription}
+        title={m.stateReading.cookieTitle}
+      >
+        <CodeBlock code={COOKIE_LAYOUT} lang="tsx" />
+        <CodeBlock code={COOKIE_SHELL} lang="tsx" />
+        <ul className="text-fg-mute flex flex-col gap-2 pl-6">
+          <li className="list-disc">
+            <Rich>{m.stateReading.cookieInput()}</Rich>
+          </li>
+          <li className="list-disc">
+            <Rich>{m.stateReading.cookieSeedEach()}</Rich>
+          </li>
+          <li className="list-disc">
+            <Rich>{m.stateReading.cookieStatic()}</Rich>
+          </li>
+        </ul>
+        <Heading level="h3">
+          <Rich>{m.stateReading.cookieWriteTitle()}</Rich>
+        </Heading>
+        <p className="text-fg-mute leading-relaxed">
+          <Rich>{m.stateReading.cookieWriteSecret()}</Rich>
+        </p>
+        <p className="text-fg-mute leading-relaxed">
+          <Rich>{m.stateReading.cookieWriteSame()}</Rich>
+        </p>
       </DocSection>
 
       <DocSection
@@ -446,6 +540,9 @@ export default function StateReadingPage() {
         </p>
         <p className="text-fg-mute leading-relaxed">
           <Rich>{m.stateReading.searchDescription()}</Rich>
+        </p>
+        <p className="text-fg-mute leading-relaxed">
+          <Rich>{m.stateReading.hrefBase()}</Rich>
         </p>
         <CodeBlock code={EXPORT_LINK} lang="tsx" />
       </DocSection>
@@ -502,6 +599,9 @@ export default function StateReadingPage() {
           </li>
           <li className="list-disc">
             <Rich>{m.stateReading.beforeNullBlocked()}</Rich>
+          </li>
+          <li className="list-disc">
+            <Rich>{m.stateReading.beforeNullVersion()}</Rich>
           </li>
         </ul>
         <p className="text-fg-mute leading-relaxed">

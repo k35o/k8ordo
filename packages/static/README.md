@@ -58,6 +58,7 @@ src/routes/
   error.tsx             shown in place of what is below when it throws
   products/[id]/page.tsx   /products/:id — `export const paramsSchema` types :id
   old/redirect.ts       /old sends the visitor elsewhere
+  feed.xml/route.ts     dist/client/feed.xml — what its GET answered
 ```
 
 ```bash
@@ -80,20 +81,22 @@ Point your agent at them once by pasting this into your project's `CLAUDE.md` /
 
 ```markdown
 This application is built with `@k8ordo/static`. Before adding or changing a
-route, read `node_modules/@k8ordo/static/docs/GUIDE.md`. `src/routes/` is
+route, read `node_modules/@k8ordo/static/docs/GUIDE.md`, then only the
+`docs/references/*.md` it lists that the task needs. `src/routes/` is
 the pathname space and holds only page.tsx, layout.tsx, not-found.tsx,
-error.tsx and redirect.ts; everything else goes under a `_`-prefixed
-directory. Never edit `.k8ordo/` — it is generated. Build links with
+error.tsx, redirect.ts and route.ts (a route.ts exports only GET); everything
+else goes under a `_`-prefixed directory. Never edit `.k8ordo/` — it is generated. Build links with
 `href()` from `@k8ordo/router`; search params are `@k8ordo/state`'s.
 ```
 
 What each surface gives an agent:
 
-| Surface                    | Where                                          |
-| -------------------------- | ---------------------------------------------- |
-| Design guide (entry point) | `node_modules/@k8ordo/static/docs/GUIDE.md`    |
-| Docs index for LLMs        | `docs/llms.txt` · https://ordo.k8o.me/llms.txt |
-| Markdown twin on the web   | https://ordo.k8o.me/static/docs/GUIDE.md       |
+| Surface                    | Where                                              |
+| -------------------------- | -------------------------------------------------- |
+| Design guide (entry point) | `node_modules/@k8ordo/static/docs/GUIDE.md`        |
+| Reference docs             | `node_modules/@k8ordo/static/docs/references/*.md` |
+| Docs index for LLMs        | `docs/llms.txt` · https://ordo.k8o.me/llms.txt     |
+| Markdown twin on the web   | https://ordo.k8o.me/static/docs/GUIDE.md           |
 
 ## License
 

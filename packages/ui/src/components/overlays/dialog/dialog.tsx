@@ -3,7 +3,7 @@
 import { useEffect, useId, useMemo } from 'react';
 import type { FC, PropsWithChildren, Ref, ReactNode } from 'react';
 
-import { useMessages } from '../../../i18n/context';
+import { getMessages } from '../../../i18n/current';
 import { HIGH_CONTRAST_EDGE } from '../../_internal/high-contrast';
 import { IconButton } from '../../buttons/icon-button';
 import { Heading } from '../../data-display/heading';
@@ -74,7 +74,7 @@ export const Header: FC<{
   title: ReactNode;
   onClose: () => void;
 }> = ({ title, onClose }) => {
-  const messages = useMessages();
+  const messages = getMessages();
   const { rootId } = useDialogContext();
   return (
     <div className="flex items-center justify-center p-4 pb-2">

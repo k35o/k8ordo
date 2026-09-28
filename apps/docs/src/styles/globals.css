@@ -1,4 +1,8 @@
-@import 'tailwindcss';
+/*
+ * tailwindcss は ui の index.css（配布物の tailwind.css）が中で読み込む。
+ * ここでも @import すると、テーマとユーティリティは 1 つにまとまるが
+ * プリフライトだけが 2 回出力される。
+ */
 @import '../../../../packages/ui/src/styles/index.css';
 /*
  * フォントは自前で配る。外部への <link> を置くと、HTML を書き換える経路
@@ -8,24 +12,6 @@
  */
 @import '@fontsource-variable/m-plus-2';
 @import '@fontsource-variable/noto-sans-jp';
-
-/*
- * Background shared by the live preview area and the Shiki code block so they
- * read as one panel. Values mirror the Shiki themes used in CodeBlock
- * (min-light / min-dark); #1f1f1f sits between bg-surface (gray-950) and
- * bg-base (gray-800), so cards still read against it.
- */
-:root {
-  --preview-bg: #ffffff;
-}
-
-.dark {
-  --preview-bg: #1f1f1f;
-}
-
-@theme inline {
-  --color-preview-bg: var(--preview-bg);
-}
 
 /*
  * tokens.css の @theme inline は --font-noto-sans-jp / --font-m-plus-2 を参照
@@ -57,8 +43,7 @@
 
 /*
  * 表示用文字組（プロポーショナルメトリクス）。ワードマーク・ヒーロー・短冊・
- * 柱の表示文字にのみ使う。本文は base.css の text-spacing-trim に任せて
- * ベタ組みを維持する。
+ * 柱の表示文字にのみ使う。本文には掛けずベタ組みを維持する。
  */
 @utility font-palt {
   font-feature-settings: 'palt' 1;

@@ -1,4 +1,4 @@
-### A tab opened before a deploy
+## A tab opened before a deploy
 
 A tab keeps running the script it loaded, while every payload it fetches
 comes from whatever is deployed now — and a new deploy may render a client

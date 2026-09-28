@@ -1,7 +1,7 @@
 import type { Message } from '@k8ordo/i18n';
 import { Code, Heading } from '@k8ordo/ui';
+import { CodeBlock } from '@k8ordo/ui/code-block';
 
-import { CodeBlock } from '../../../../components/code-block';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Rich } from '../../../../components/rich';
@@ -63,25 +63,6 @@ const RULE_ROWS: ReadonlyArray<{
   },
 ];
 
-const ROW_SHAPES: ReadonlyArray<{ id: string; when: Cell; row: Cell }> = [
-  { id: 'never', when: { text: t.state.never }, row: { text: t.state.noRow } },
-  {
-    id: 'dark',
-    when: { code: "setPreference('dark')" },
-    row: { code: '{"preference":"dark"}' },
-  },
-  {
-    id: 'light',
-    when: { code: "setPreference('light')" },
-    row: { code: '{"preference":"light"}' },
-  },
-  {
-    id: 'system',
-    when: { code: "setPreference('system')" },
-    row: { code: '{}' },
-  },
-];
-
 const TYPE_ROWS: ReadonlyArray<{ name: string; use: Message }> = [
   { name: 'ColorScheme', use: t.types.colorScheme },
   { name: 'ColorSchemePreference', use: t.types.preference },
@@ -128,26 +109,6 @@ export function SchemeToggle() {
   );
 }`;
 
-const DEFINITION = `import { defineLocalState } from '@k8ordo/state';
-import * as z from 'zod/mini';
-
-export const colorSchemeState = defineLocalState(
-  'color-scheme',
-  z.object({ preference: z.optional(z.enum(['light', 'dark'])) }),
-);`;
-
-const READ_ELSEWHERE = `// src/components/stored-preference.tsx
-'use client';
-
-import { colorSchemeState } from '@k8ordo/color-scheme';
-import { useAppState } from '@k8ordo/state';
-
-export function StoredPreference() {
-  const [{ preference }] = useAppState(colorSchemeState);
-
-  return <output>{preference ?? 'system'}</output>;
-}`;
-
 const TYPES = `import type { ReactNode } from 'react';
 
 export type ColorScheme = 'light' | 'dark';
@@ -156,6 +117,7 @@ export type ColorSchemePreference = ColorScheme | 'system';
 
 export type ColorSchemeProviderProps = {
   readonly defaultPreference?: ColorSchemePreference;
+  readonly nonce?: string;
   readonly children: ReactNode;
 };
 
@@ -323,7 +285,10 @@ export default function ColorSchemeHowItWorksPage() {
           <Rich>{t.script.hydration()}</Rich>
         </p>
         <p className="text-fg-mute leading-relaxed">
-          <Rich>{t.script.csp()}</Rich>
+          <Rich>{t.script.csp()}</Rich>{' '}
+          <LocaleAnchor path="/:locale/color-scheme/csp">
+            <Rich>{t.script.cspLink()}</Rich>
+          </LocaleAnchor>
         </p>
         <Heading level="h3">
           <Rich>{t.script.serverTitle()}</Rich>
@@ -337,7 +302,7 @@ export default function ColorSchemeHowItWorksPage() {
         <CodeBlock code={CSS_TOGGLE} lang="tsx" />
         <p className="text-fg-mute leading-relaxed">
           <Rich>{t.script.darkVariant()}</Rich>{' '}
-          <LocaleAnchor path="/:locale/color-scheme/get-started">
+          <LocaleAnchor path="/:locale/color-scheme/styling">
             <Rich>{t.script.darkVariantLink()}</Rich>
           </LocaleAnchor>
         </p>
@@ -354,76 +319,10 @@ export default function ColorSchemeHowItWorksPage() {
           items={[t.step.choice, t.step.system, t.step.tabs, t.step.hydration]}
         />
         <Heading level="h3">
-          <Rich>{t.step.sameTabTitle()}</Rich>
-        </Heading>
-        <p className="text-fg-mute leading-relaxed">
-          <Rich>{t.step.sameTab()}</Rich>
-        </p>
-        <Heading level="h3">
           <Rich>{t.step.oneProviderTitle()}</Rich>
         </Heading>
         <p className="text-fg-mute leading-relaxed">
           <Rich>{t.step.oneProvider()}</Rich>
-        </p>
-      </DocSection>
-
-      <DocSection description={t.state.description} title={t.state.title}>
-        <CodeBlock code={DEFINITION} lang="ts" />
-        <p className="text-fg-mute leading-relaxed">
-          <Rich>{t.state.key()}</Rich>
-        </p>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead>
-              <tr className="border-border-mute border-b">
-                <th className={thClass}>
-                  <Rich>{t.state.columnWhen()}</Rich>
-                </th>
-                <th className="py-3 font-medium whitespace-nowrap">
-                  <Rich>{t.state.columnRow()}</Rich>
-                </th>
-              </tr>
-            </thead>
-            <tbody className="text-fg-mute">
-              {ROW_SHAPES.map((shape) => (
-                <tr className="border-border-mute border-b" key={shape.id}>
-                  <td className="py-3 pr-6 whitespace-nowrap">
-                    <CellContent cell={shape.when} />
-                  </td>
-                  <td className="py-3">
-                    <CellContent cell={shape.row} />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <p className="text-fg-mute leading-relaxed">
-          <Rich>{t.state.systemRow()}</Rich>
-        </p>
-        <Heading level="h3">
-          <Rich>{t.state.readTitle()}</Rich>
-        </Heading>
-        <p className="text-fg-mute leading-relaxed">
-          <Rich>{t.state.readDescription()}</Rich>
-        </p>
-        <CodeBlock code={READ_ELSEWHERE} lang="tsx" />
-        <p className="text-fg-mute leading-relaxed">
-          <Rich>{t.state.readCaveat()}</Rich>
-        </p>
-        <p className="text-fg-mute leading-relaxed">
-          <Rich>{t.state.inlineRead()}</Rich>{' '}
-          <LocaleAnchor path="/:locale/state/reading">
-            <Rich>{t.state.inlineReadLink()}</Rich>
-          </LocaleAnchor>
-        </p>
-        <p className="text-fg-mute leading-relaxed">
-          <Rich>{t.state.collision()}</Rich>
-        </p>
-        <p className="text-sm">
-          <LocaleAnchor path="/:locale/state/places">
-            <Rich>{t.state.link()}</Rich>
-          </LocaleAnchor>
         </p>
       </DocSection>
 
@@ -447,7 +346,8 @@ export default function ColorSchemeHowItWorksPage() {
             t.guarantees.limitCookie,
             t.guarantees.limitClass,
             t.guarantees.limitProperty,
-            t.guarantees.limitNonce,
+            t.guarantees.limitContrast,
+            t.guarantees.limitPolicy,
           ]}
         />
       </DocSection>

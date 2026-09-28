@@ -16,6 +16,9 @@ export const markNavigated = (): void => {
   navigated = true;
 };
 
+/** Whether the tree on screen came from a client navigation, not the HTML. */
+export const isNavigated = (): boolean => navigated;
+
 /**
  * The document is being replaced; a value returned now would render into a
  * page that is on its way out.

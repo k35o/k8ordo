@@ -64,6 +64,22 @@ describe('the generated table, given to the router', () => {
     });
   });
 
+  it('accepts a group that holds nothing but a page', () => {
+    // guard.ts を / だけに効かせる形。グループがページそのものになると、
+    // router は親の / を宣言し直す葉として拒み、起動時に落ちる
+    const grouped = tableFor([
+      'layout.tsx',
+      '(home)/page.tsx',
+      '(home)/guard.ts',
+      '[locale]/page.tsx',
+    ]);
+    expect(grouped.match('/')).toMatchObject({
+      pattern: '/',
+      stack: [stub('layout.tsx'), stub('(home)/page.tsx')],
+    });
+    expect(grouped.match('/en')?.pattern).toBe('/:locale');
+  });
+
   it('falls back to not-found only when nothing else matched', () => {
     expect(routes.match('/products')?.pattern).toBe('/products');
     expect(routes.match('/nowhere')).toMatchObject({
@@ -117,5 +133,50 @@ describe('literal siblings of a parameter', () => {
       pattern: '/blog/:id',
       params: { id: '42' },
     });
+  });
+});
+
+describe('a route.ts in the table', () => {
+  const routes = tableFor([
+    'page.tsx',
+    'api/[id]/route.ts',
+    'api/special/page.tsx',
+    'feed.xml/route.ts',
+  ]);
+
+  it('matches in declaration order with the pages, literals first', () => {
+    expect(routes.match('/api/special')?.pattern).toBe('/api/special');
+    expect(routes.match('/api/7')).toMatchObject({
+      pattern: '/api/:id',
+      params: { id: '7' },
+      stack: [stub('api/[id]/route.ts')],
+    });
+  });
+
+  it('matches a directory named like a file', () => {
+    expect(routes.match('/feed.xml')?.pattern).toBe('/feed.xml');
+  });
+});
+
+describe('a loading.tsx in the table', () => {
+  const routes = tableFor([
+    'layout.tsx',
+    'page.tsx',
+    'products/loading.tsx',
+    'products/page.tsx',
+  ]);
+
+  it('wraps what is below it, inside the layout', () => {
+    const match = routes.match('/products');
+    expect(match?.stack).toHaveLength(3);
+    expect(match?.stack[0]).toBe(stub('layout.tsx'));
+    expect(match?.stack[2]).toBe(stub('products/page.tsx'));
+  });
+
+  it('leaves the pages beside it alone', () => {
+    expect(routes.match('/')?.stack).toStrictEqual([
+      stub('layout.tsx'),
+      stub('page.tsx'),
+    ]);
   });
 });

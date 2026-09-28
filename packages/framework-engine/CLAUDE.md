@@ -60,6 +60,33 @@ pnpm check         # check:write to auto-fix
   (`runtime/is-payload.ts`) becomes a document load, which is also the
   recovery path when a render fails. The client router's "unmatched pathnames
   are not intercepted" does not apply here.
+- **A prefetched page is used once, briefly, and never across an action.**
+  `app-router.tsx` listens on the document (capture phase) for `pointerover`,
+  `focusin` and `pointerdown` on a link `prefetchTargetOf` accepts — same
+  origin and under the base, no `download`, no other `target`, not the page on
+  screen, no `data-k8ordo-prefetch="false"` on it or the nearest element
+  carrying the attribute — and reads that page's payload the way a navigation
+  would (`fetchPage`, the parse included, so the client components it names
+  are imported too). `createPrefetchCache` hands each load to the next
+  navigation of that page within `PREFETCH_LIFETIME` (30 s from the start) and
+  forgets it; a failed load is forgotten at once, and a Server Action's answer
+  forgets everything. A load forgotten untaken is aborted, and a taken one is
+  aborted by the taking navigation's signal, which is what keeps the router's
+  "a superseded navigation's fetch is cancelled" true for a prefetched page.
+  Keep it single-use: a page taken from the cache twice would show a
+  server-mode page as it was when first hovered. No Speculation Rules —
+  Chromium only.
+- **Everything inside is in the table's terms; Vite's `base` is at the
+  edges.** The handler takes the base off the request (`withoutBase` from
+  the router; a URL outside it is a plain `404`) before anything else reads
+  the pathname, so payload paths, redirects, the match and `pathname` never
+  see it; a `redirect.ts` target gets it back in front (`locationOf`), while
+  a Server Action's `redirect(to)` is a URL and is sent as given. The client
+  claims only same-origin URLs under the base, and `mount` compares the
+  payload's `pathname` with `location` minus the base. `entry.rsc` exports
+  `base` (`import.meta.env.BASE_URL` as built) for `serve`, and the plugin
+  refuses a base that is not a path from the root (`'./'`, another origin),
+  under which no URL says which page it is.
 - **Hydration reads the payload the HTML was rendered from.**
   `runtime/entry.ssr.tsx` injects the RSC stream into the HTML and
   `runtime/entry.browser.tsx` reads it back; nothing refetches on load, which
@@ -108,10 +135,32 @@ ParamsSchemaFor<pattern>`, lists per page pattern the schemas along its
   they write, and the not-found renders in their context when all accept, in
   none when one refuses. It and every layout receive strings.
   Each pattern's schemas run in an async context of their own, and the
-  render starts inside the answering pattern's (`enter`): a schema may write
-  there (`@k8ordo/i18n` records the accepted locale), and neither a refused
-  pattern's write nor any other reaches the handler's caller, which under
-  `@k8ordo/static` is one context for every page.
+  guards, the Server Action a `POST` carries and the render all run inside
+  the answering pattern's (`enter`): a schema may write there
+  (`@k8ordo/i18n` records the accepted locale, so an action posted from
+  `/ja/…` builds its messages in `ja`), and neither a refused pattern's write
+  nor any other reaches the handler's caller, which under `@k8ordo/static`
+  is one context for every page.
+- **Only a page that declared it reads the search.** A page exporting
+  `search` (a `@k8ordo/state` url schema) is found by parsing, like
+  `paramsSchema`; the generated table reads it through state's
+  `urlReader` in `searchReaders`, types the page's `search` by what that
+  returns, and the generated `Register` carries it for `PageProps` — which is
+  why the generator refuses the export in an application that does not
+  depend on `@k8ordo/state`. The handler hands the leaf what it read from
+  the request's own search (a payload is asked for with the page's search on
+  its URL) and puts the search it was rendered with on the payload
+  (`Payload.search`, absent for every other page); `app-router.tsx` keeps the
+  one on screen and answers the router's `refresh` with whether a
+  same-pathname navigation moved it, so such a page loads again in place and
+  every other page keeps the router's no-load shortcut. `@k8ordo/static`
+  refuses the export (a file is the same whatever the search holds).
+- **`loading.tsx` is the router's `loading`.** The generator puts it on its
+  branch (a page with one becomes a branch of its own, and a root one makes
+  the root a branch); the router makes it a `<Suspense>` in the stack, after
+  the layout and the `error` boundary. Nothing keys it: a page change under
+  one already showing keeps the page, as every page change does, and the
+  router's `usePendingPathname()` is what says one is under way.
 - **`error.tsx` is the router's `error`; `redirect.ts` is answered before the
   table.** The generator puts an error file on its branch (a page with an
   error becomes a branch of its own) and lists redirects in `redirects`,
@@ -119,6 +168,77 @@ ParamsSchemaFor<pattern>`, lists per page pattern the schemas along its
   `redirect()` throws a `Symbol.for`-branded `Redirect` — never checked by
   `instanceof`, because the mode package holds two copies of this module —
   and the handler answers 303 (no JavaScript) or a payload with `redirect`.
+- **A guard answers or adds, never rewrites.** `guard.ts` is a slot of the
+  grammar but not of the router's table: the generator lists, per pattern,
+  the guards along its directories (`guards`, outer first; `/*` always
+  carries the root's, for a URL nothing answers), and the handler runs them
+  after the params schemas matched — inside the answering pattern's `enter`
+  — and before the Server Action and the render (`runtime/guard.ts`). A
+  `redirect.ts` is answered before them. The request in progress lives in
+  an `AsyncLocalStorage` on `globalThis` under
+  `Symbol.for('k8ordo.request')` (`runtime/request-scope.ts`), because the
+  mode package holds two copies of this module — the runtime the handler is
+  built from and the `./runtime` entry the application imports
+  `responseHeaders()` from — and both must see the one request. Its phase
+  says what is running — `guard`, `action`, or the `render` — and the
+  response API (`cookies()`, `responseHeaders()`, `requestHeaders()`) throws
+  in the render and outside a request, because a page is a render. What a
+  guard or an action adds goes onto whatever the handler answers
+  (`answer()`, a new `Response`, since a redirect's headers cannot be
+  written); the cookie jar (`runtime/cookies.ts`) is one per request, so a
+  guard's write is what an action after it reads, and each write is one
+  `Set-Cookie` line, the last one per name, path and domain. `@k8ordo/static` refuses
+  `guard.ts` (by name at build, per module in `vite dev`), reading the slot
+  through `slotOf`.
+- **A `route.ts` holds its place in the table and answers outside it.**
+  It is a slot of the grammar that answers its directory's URL, so it
+  conflicts with a `page.tsx` or a `redirect.ts` there and counts as a
+  declared URL. The generated table puts a component that renders nothing
+  (`answered`) in its place — so it matches in declaration order, literals
+  before params, with the pages — and lists the module, imported whole, in
+  `routeModules`. The handler, having matched, answers it from there
+  (`runtime/route.ts`): a payload request gets a plain `404` (a route has no
+  payload), a method it does not export a `405` with `Allow`, `HEAD` falls
+  back to `GET` without the body, the guards run first, and the handler runs
+  in the `route` phase, so it writes cookies. No same-origin check: what
+  posts to a route.ts is not a form on this site. The generator reads its
+  exports (`readExports`, oxc) and refuses one that exports no method.
+  `@k8ordo/static` writes each as the file its `GET` answered and refuses
+  any other method export, by name at build and per module in `vite dev`.
+- **A page's `notFound()` is its answer, and a document waits for it.**
+  `notFound()` lives in `@k8ordo/router` (so a page reads the same under
+  either mode) and is recognised by its `Symbol.for` brand. The handler
+  renders a page through `watchPage` (`runtime/page-watch.ts`): the page's
+  own function is called from inside the RSC render's call, so `use`,
+  `cache` and suspensions behave as for the page itself, and what it
+  returned settles `settled` (with the rejection's reason — the render's
+  `onError` hears of an async rejection only later). A document and a
+  `HEAD` wait for that, for a `notFound()` reaching `onError`, or for the
+  stream to end (a layout that never renders its children) — under
+  `@k8ordo/static` for the whole stream — before sending anything; a
+  `notFound()` then aborts that render and renders what the table answers
+  for the pathname plus `NOT_FOUND_SEGMENT` (only a catch-all may answer,
+  and `/:locale/*` does not match `/en` itself), under a 404. A payload
+  does not wait: `onError` turns `notFound()` into the digest
+  `NOT_FOUND_DIGEST`, and `PageBoundary` (`runtime/page-boundary.tsx`, a
+  client boundary around every page, inside any `error.tsx`) answers it
+  with a document load when the tree came from a navigation, and hands it
+  on to `error.tsx` otherwise — loading the server's document again would
+  only bring the same page back. Under `@k8ordo/static` the 404 carries
+  `NOT_FOUND_HEADER`, so the build tells a page's `notFound()` from a
+  refused param.
+- **The framework signs its own inline scripts, and decides no policy.**
+  Every request's scope holds a fresh nonce (`withRequest`, 128 random bits);
+  `renderHtml` hands it to React's SSR (`nonce`: the bootstrap module and
+  React's inline scripts), to the SSR Flight client (its preloads), and to
+  `rsc-html-stream` (the payload written into the HTML). `nonce()` reads it
+  in every phase, the render included — signing a script is not writing the
+  response — so a guard names it in the header it writes and a layout signs
+  a script of its own (`<ColorSchemeProvider nonce>`). Under
+  `@k8ordo/static` the HTML also says it in `NONCE_HEADER`, and the build
+  takes it off the file and names what it signed by hash; the mode package
+  exports no `nonce()`, since what an application signed with it would land
+  in the payload and make every build differ.
 - **The request reaches a page only under a server.** `K8ORDO_MODE` is
   defined by the host; the handler attaches `request` (headers, cookies) only
   under `@k8ordo/server`, and the generator emits the field only there. Under
@@ -134,12 +254,13 @@ ParamsSchemaFor<pattern>`, lists per page pattern the schemas along its
   also writes every Suspense boundary in place — it waits for `allReady` and
   outlines nothing — so a file never carries a hidden segment for a script to
   move in after hydration has started.
-- **The handler owns the methods.** It answers `GET`, `HEAD` and `POST`, and
-  anything else with a `405` and `Allow` — here, not in `@k8ordo/server`'s
+- **The handler owns the methods.** A page answers `GET`, `HEAD` and `POST`,
+  and anything else with a `405` and `Allow` (a `route.ts` answers what it
+  exports) — here, not in `@k8ordo/server`'s
   `serve`, because a host that calls the built handler directly has no
-  `serve` in front of it. `HEAD` is answered from the status and headers,
-  which are settled before rendering, with a `null` body: nothing renders for
-  it, and no host is left to discard a stream. `@k8ordo/static` only ever
+  `serve` in front of it. `HEAD` gets a `null` body: a not-found is answered
+  before anything renders, and a page runs only as far as its own component,
+  which may say `notFound()`; its render is aborted, not streamed. `@k8ordo/static` only ever
   sends `GET`.
 - **One pattern walk.** `declaredPatterns(tree)` is the order the matcher
   tries patterns — pages and redirects, literals before params, the
@@ -147,11 +268,14 @@ ParamsSchemaFor<pattern>`, lists per page pattern the schemas along its
   this site have" reads it: the shadow check here, `patternsOf` in
   `@k8ordo/static`. `decodePathname` is likewise the one decoding both mode
   packages use before a pathname may name a file.
-- **The two GUIDEs share their common sections from one source.**
-  `docs/shared/<name>.md` is written into both `packages/static/docs/GUIDE.md`
-  and `packages/server/docs/GUIDE.md` between `<!-- shared:<name> -->`
-  markers by `scripts/sync-guides.ts`; `pnpm check` fails on drift and
-  `pnpm check:write` re-syncs. Edit the fragment, never the copy.
+- **The two modes' docs share their common sections from one source.**
+  `docs/shared/<name>.md` is one `##` section, written into
+  `packages/static/docs/` and `packages/server/docs/` — the `GUIDE.md` or
+  `references/*.md` whose topic it belongs to, once per package, not
+  necessarily the same file in both — between `<!-- shared:<name> -->`
+  markers by `scripts/sync-guides.ts`; `pnpm check` fails on drift and on a
+  fragment a package places twice or not at all, and `pnpm check:write`
+  re-syncs. Edit the fragment, never the copy.
 - **A route file's props are checked in the generated table.** `routes.gen.ts`
   emits `satisfies Page<'/products/:id'>` / `satisfies Layout<'/:locale'>`
   per file, so a mistyped param name is a type error without any route file
@@ -173,6 +297,7 @@ src/
   runtime/payload.ts         what a page is on the wire (tree, pathname, client, action result)
   runtime/payload-path.ts    where a payload lives: /x → /x/index.rsc
   runtime/is-payload.ts      whether an answer is a payload or a document load
+  runtime/prefetch.ts        which link to fetch ahead, and how long a fetched page stays usable
   runtime/revealed.ts        when every streamed boundary is on screen
   runtime/recover.tsx        a failed client render falls back to a document load
   runtime/reload.ts          location.reload, the one seam a test can watch
@@ -181,7 +306,13 @@ src/
   runtime/pathname.ts        decodePathname, before a pathname may name a file
   runtime/redirect.ts        redirect() / redirect.ts targets
   runtime/request.ts         the read-only request a page receives
-  runtime/render.tsx         the matched stack, nested through children
+  runtime/request-scope.ts   the request in progress: phases, cookies() / responseHeaders() / requestHeaders(), nonce(), answer()
+  runtime/cookies.ts         the per-request cookie jar and its Set-Cookie lines
+  runtime/guard.ts           Guard / GuardContext, runGuards (outer first, first Response ends it)
+  runtime/route.ts           ROUTE_METHODS, which export answers a method, 405, running it in the route phase
+  runtime/render.tsx         the matched stack, nested through children; the framework's own not-found, inside the root layout
+  runtime/page-watch.ts      a page called as the render calls it, its answer watched
+  runtime/page-boundary.tsx  a navigation's late notFound() → a document load; anything else on to error.tsx
   runtime/virtual.d.ts       types of virtual:k8ordo/routes and K8ORDO_MODE
   index.ts
 fixtures/

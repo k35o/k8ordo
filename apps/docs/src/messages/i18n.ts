@@ -36,8 +36,8 @@ export const featureNegotiate = message({
 });
 
 export const featureNegotiateDescription = message({
-  ja: '`negotiate(navigator.languages)` も `negotiate(parseAcceptLanguage(header))` も同じ関数。要求の順に、完全一致→同じ言語→既定値で決める。',
-  en: '`negotiate(navigator.languages)` and `negotiate(parseAcceptLanguage(header))` are the same function: each requested tag in order, exact match, then the same language, then the default.',
+  ja: '`negotiate(navigator.languages)` も、Cookie と `Accept-Language` を読む `negotiateRequest(request)` も同じ規則。要求の順に、完全一致→同じ言語→既定値で決める。',
+  en: '`negotiate(navigator.languages)` and `negotiateRequest(request)`, which reads the cookie and `Accept-Language`, follow the same rule: each requested tag in order, exact match, then the same language, then the default.',
 });
 
 export const featureDictionary = message({

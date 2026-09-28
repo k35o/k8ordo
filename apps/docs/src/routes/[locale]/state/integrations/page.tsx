@@ -1,6 +1,6 @@
 import { Heading } from '@k8ordo/ui';
+import { CodeBlock } from '@k8ordo/ui/code-block';
 
-import { CodeBlock } from '../../../../components/code-block';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Rich } from '../../../../components/rich';
@@ -15,6 +15,7 @@ export const filterState = definePageState('product-filter', {
   url: z.object({
     q: z._default(z.string().check(z.maxLength(50)), ''),
     min: z._default(z.coerce.number().check(z.int(), z.gte(0)), 0),
+    inStock: z._default(z.stringbool(), false),
   }),
 });`;
 
@@ -40,27 +41,32 @@ import { useAppState } from '@k8ordo/state';
 import { filterState } from '../../../state/filter';
 
 type Props = {
-  fields: FormFields<'q' | 'min', never>;
+  fields: FormFields<'q' | 'min' | 'inStock', never>;
 };
 
 export function FilterForm({ fields }: Props) {
   const form = useForm(fields);
   const q = form.field('q');
   const min = form.field('min');
-  const [{ q: currentQ, min: currentMin }] = useAppState(filterState);
+  const inStock = form.field('inStock');
+  const [current] = useAppState(filterState);
 
   return (
     <form method="get" {...form.props}>
       <label>
         Keyword
-        <input {...q.input} defaultValue={currentQ} />
+        <input {...q.input} defaultValue={current.q} />
       </label>
       {q.error !== undefined && <p>{q.error}</p>}
       <label>
         Minimum price
-        <input {...min.input} defaultValue={currentMin} />
+        <input {...min.input} defaultValue={current.min} />
       </label>
       {min.error !== undefined && <p>{min.error}</p>}
+      <label>
+        <input {...inStock.input} defaultChecked={current.inStock} />
+        In stock only
+      </label>
       <button type="submit">Filter</button>
     </form>
   );
@@ -230,6 +236,9 @@ export default function StateIntegrationsPage() {
         <ul className="text-fg-mute flex flex-col gap-2 pl-6">
           <li className="list-disc">
             <Rich>{m.stateIntegrations.formFlow()}</Rich>
+          </li>
+          <li className="list-disc">
+            <Rich>{m.stateIntegrations.formCheckbox()}</Rich>
           </li>
           <li className="list-disc">
             <Rich>{m.stateIntegrations.formNoJs()}</Rich>

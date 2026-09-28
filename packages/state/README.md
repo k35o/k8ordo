@@ -1,13 +1,13 @@
 # @k8ordo/state
 
 Declare state by where it lives — URL search params, hidden history-entry
-state, localStorage, or memory. One zod schema per boundary place (URL,
-entry, localStorage) derives the server-side read, canonical links, salvage
-of stale data, and a client subscription with exact per-key change
-detection; memory never crosses a boundary, so it is a typed shared box with
-no schema. Links and GET forms write the URL before JavaScript loads under
-any router (the server renders what they wrote wherever it reads the search);
-imperative URL updates ride the Navigation API.
+state, localStorage, sessionStorage, a cookie, or memory. One zod schema per
+boundary place (URL, entry, Web Storage, cookie) derives the server-side
+read, canonical links, salvage of stale data, and a client subscription with exact per-key
+change detection; memory never crosses a boundary, so it is a typed shared
+box with no schema. Links and GET forms write the URL before JavaScript loads
+under any router (the server renders what they wrote wherever it reads the
+search); imperative URL updates ride the Navigation API.
 
 Like every [k8ordo](https://ordo.k8o.me) package it assumes React 19 and Server
 Components, uses only what has reached Baseline newly available, and ships no
@@ -105,7 +105,10 @@ export function Filters({ initialUrl }: FiltersProps) {
 
 `parseUrl` needs a router that hands the page its search, as Next.js does;
 under `@k8ordo/static` and `@k8ordo/server` a page never sees it, and
-`useAppState` reads the url slot in the browser.
+`useAppState` reads the url slot in the browser. A preference the server
+should render goes in `defineCookieState` instead of `defineLocalState`:
+under `@k8ordo/server`, `parseCookies(request.cookies)` reads it and
+`initialCookie` seeds the first render, so the default never flashes.
 
 `update()` applies synchronously, batches per handler into one write (memory
 applies per call), and returns `{ committed, finished }` handles. `href` omits
@@ -113,10 +116,12 @@ every field at its default, so every link is canonical. A value the schema
 rejects — a URL a user edited, a row an older schema wrote — falls back to its
 own default, field by field.
 
-The [design guide](docs/GUIDE.md) covers the rest: the four places and when
-each fits, history-entry state, batching and update handles, subscription
-granularity, router requirements, typed routes via `Register`, reading local
-state before hydration with `inlineRead()`, and GET forms with `@k8ordo/form`.
+The [design guide](docs/GUIDE.md) covers the rest: the places and when each
+fits, history-entry state, cookie state the server renders (and why it is
+never a secret), migrating stored rows with `version` and `migrate`,
+batching and update handles, subscription granularity,
+router requirements, typed routes via `Register`, reading local state before
+hydration with `inlineRead()`, and GET forms with `@k8ordo/form`.
 
 ## AI Agent Documentation
 
@@ -127,14 +132,17 @@ Point your agent at them once by pasting this into your project's `CLAUDE.md` /
 `AGENTS.md`:
 
 ```markdown
-Use `@k8ordo/state` for URL, history-entry, localStorage and shared memory
-state. Before adding or changing state, read
+Use `@k8ordo/state` for URL, history-entry, localStorage, sessionStorage,
+cookie and shared memory state. Before adding or changing state, read
 `node_modules/@k8ordo/state/docs/GUIDE.md`. Declare each state by where it
-lives (`definePageState` / `defineLocalState` / `defineMemoryState`) in a
-shared module, read the url slot with `parseUrl` where the router hands the
-page its search, build links with `href`, and subscribe on the client with
-`useAppState`. Every boundary field needs a default or `.optional()`; never
-mirror a definition's values into React state.
+lives (`definePageState` / `defineLocalState` / `defineSessionState` /
+`defineCookieState` / `defineMemoryState`) in a shared module, read the url slot with `parseUrl`
+where the router hands the page its search and a cookie state with
+`parseCookies` where it hands the page the request's cookies, build links
+with `href`, and subscribe on the client with `useAppState`. Every boundary
+field needs a default or `.optional()`; never put a secret in a cookie state
+(the browser writes it, so it cannot be `HttpOnly`); never mirror a
+definition's values into React state.
 ```
 
 What each surface gives an agent:

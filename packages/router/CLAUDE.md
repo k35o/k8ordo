@@ -22,7 +22,10 @@ pnpm check         # check:write to auto-fix
 
 - **Pathname only.** No search API, and the raw search is never distributed —
   a search change must re-render `@k8ordo/state`'s key subscribers and nobody
-  here. The URL is split at the `?`.
+  here. The URL is split at the `?`. A host that renders pages for a search
+  (the framework, for a page that exports `search`) says so through the
+  handler's `refresh(url)`, and the hook loads in place for it — the router
+  itself still reads nothing of the search.
 - **Pages never import the table.** `href` / `navigateTo` / `useParams` work
   from the pattern string; `Register` supplies the check. Only `<Router>`
   holds the table's value, which is why the routes-module → pages →
@@ -56,7 +59,9 @@ pnpm check         # check:write to auto-fix
   React upgrade changes that.
 - **A state change is not a page change.** Same pathname as the tree ON
   SCREEN ⇒ intercept with `scroll: 'manual'`, `focusReset: 'manual'`, no
-  load, no apply. Not `location.pathname`: interception commits the URL
+  load, no apply — unless the host's `refresh(url)` says the page showing
+  reads what moved, when it loads and applies with the same manual scroll and
+  focus, no scroll plan and no transition types. Not `location.pathname`: interception commits the URL
   before the tree arrives, so comparing against the address bar makes a
   state update during a pending load abort that load and strand the old page
   under the new URL (regression test in `router.browser.test.tsx`).
@@ -88,6 +93,15 @@ pnpm check         # check:write to auto-fix
   with it (regression tests for both in `router.browser.test.tsx`). It sits
   under a Suspense boundary so a server render leaves a throwing subtree to
   the browser.
+- **A branch's `loading` is a plain `<Suspense>` in the stack**, after the
+  layout and the `error` boundary (`loadingFor`), never keyed: a page change
+  under one already showing keeps the current page, as every page change
+  does. `usePendingPathname()` is a module-level store the navigation hook
+  sets at interception (in the table's terms, base removed) and clears in the
+  commit that puts that navigation's tree on screen, or when it is aborted or
+  its load fails — only for the latest navigation, since a newer one already
+  names its own. A same-pathname navigation sets it only when `refresh(url)`
+  made it load.
 - **Declaration order decides.** No specificity ranking, ever — the table
   reads top to bottom like the code it is.
 - **A bound param is a param, not a concept.** `bindParams` knows a name and
@@ -97,23 +111,40 @@ pnpm check         # check:write to auto-fix
 - **`PageProps` reads `Register`, never the mode.** `request` appears only
   because the generator wrote it into `Register` under `@k8ordo/server`; the
   type has no idea which package did.
+- **The table is written from the root; Vite's `base` lives at the edges.**
+  `withBase` (in `href` / `navigateTo` / `bindParams`) puts
+  `import.meta.env.BASE_URL` in front of what leaves for the browser, and
+  `withoutBase` (in `usePathname`, `<Router>`'s match and claim) takes it off
+  what comes back; nothing between ever sees it. `href` returns `string`
+  because its result is a URL: typed as a table path it could be handed to
+  something that adds the base itself (`@k8ordo/state`'s `href`) and carry
+  it twice. Code Node loads without Vite (`@k8ordo/static`'s build, `serve`)
+  has no `import.meta.env` and passes the base explicitly.
 - **The type mirrors the runtime walk.** `Below` resets a branch that landed
   on the root, exactly as `walk` does; without it every route under a root
   layout types as `//products`. Any change to one has to change the other.
+- **A typed path is checked, never enumerated.** `NavigablePath` matches the
+  path it is handed against the table's patterns segment by segment
+  (`PathMatching` in `paths.ts`, a `:param` reading as URLPattern reads it:
+  one non-empty segment). Never go back to a union of `PathFor` each
+  pattern: a `/:locale` page puts `/${string}` in it, and that one member
+  takes every path there is.
 
 ## Layout
 
 ```
 src/
   paths.ts          type derivation (ParamsOf / PathFor / Join) + string operations
-  define-routes.ts  defineRoutes / match / RouteOf
+  base.ts           withBase / withoutBase (Vite's base at the edges)
+  define-routes.ts  defineRoutes / match / NavigablePath
   links.ts          href / navigateTo / bindParams (the side that needs no table)
-  register.ts       Register (module augmentation) + PageProps / LayoutProps
-  navigation.ts     useInterceptedNavigation (intercept and the commit contract)
+  register.ts       Register (module augmentation) + PageProps / LayoutProps / RouteContext
+  navigation.ts     useInterceptedNavigation (intercept and the commit contract), usePendingPathname
   location.tsx      usePathname / PathnameProvider (where you are, without the table)
   match.ts          matchPath / useMatch ("which section am I in", without the table)
   boundary.tsx      RouteErrorBoundary (the boundary that renders the table's error)
   router.tsx        Router / Outlet / useRoute / useParams
+  not-found.ts      notFound / isNotFound (the framework answers it; branded, not a class)
 ```
 
 ## Conventions

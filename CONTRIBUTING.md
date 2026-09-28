@@ -9,11 +9,11 @@ k8ordo is a set of packages under `@k8ordo/*` — the table in [`README.md`](REA
 Tool versions are pinned in [`mise.toml`](mise.toml) and managed with [mise](https://mise.jdx.dev/):
 
 ```bash
-mise install    # installs Node.js and pnpm at the pinned versions
+mise install    # installs Node.js, pnpm and Deno at the pinned versions
 pnpm install    # installs workspace dependencies
 ```
 
-If you do not use mise, use the pnpm named in `packageManager` and any Node.js that satisfies `engines`, both in [`package.json`](package.json).
+If you do not use mise, use the pnpm named in `packageManager` and any Node.js that satisfies `engines`, both in [`package.json`](package.json). Deno is only for `examples/server-basic`'s tests, which run the built request handler under it to hold that the handler needs nothing Node-only.
 
 ## Development commands
 
@@ -74,7 +74,7 @@ The prop schemas under `src/integrations/_shared/schemas.ts` are not just valida
 
 Every package's `docs/**` is published to npm (see `files` in its manifest) and is read by AI coding assistants out of `node_modules/@k8ordo/<name>/docs/`. Stale examples there are shipped defects, not just documentation debt.
 
-Any pull request that changes a package's public API must update, **in the same PR**, that package's `docs/GUIDE.md`, `docs/llms.txt` and `README.md` (and, for `@k8ordo/ui`, `docs/references/*.md`, plus `.claude/skills/ui-design/SKILL.md` when a path or section it points to changes — it only bridges to the shipped docs), plus its landing page under `apps/docs/src/routes/[locale]/<name>/`. The sections `@k8ordo/static` and `@k8ordo/server` share are written once in `packages/framework-engine/docs/shared/` and synced into both guides by `pnpm --filter @k8ordo/framework-engine check:write`; `pnpm check` fails when a copy drifts.
+Any pull request that changes a package's public API must update, **in the same PR**, that package's `docs/GUIDE.md`, `docs/llms.txt` and `README.md` (and `docs/references/*.md` where the package has them — `@k8ordo/ui`, `@k8ordo/static`, `@k8ordo/server` — plus, for `@k8ordo/ui`, `.claude/skills/ui-design/SKILL.md` when a path or section it points to changes — it only bridges to the shipped docs), plus its landing page under `apps/docs/src/routes/[locale]/<name>/`. The sections `@k8ordo/static` and `@k8ordo/server` share are written once in `packages/framework-engine/docs/shared/` and synced into both packages' docs by `pnpm --filter @k8ordo/framework-engine check:write`; `pnpm check` fails when a copy drifts.
 
 ## Testing `@k8ordo/ui`: writing a story is writing a test
 

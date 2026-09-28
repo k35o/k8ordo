@@ -5,7 +5,7 @@ import type { FC, PropsWithChildren } from 'react';
 
 import { cn } from '../../../helpers/cn';
 import { readWritingMode } from '../../../hooks/writing-mode';
-import { useMessages } from '../../../i18n/context';
+import { getMessages } from '../../../i18n/current';
 import { FOCUS_RING_NO_BORDER } from '../../_internal/focus-ring';
 import { IconButton } from '../../buttons/icon-button';
 import { ChevronIcon } from '../../icons';
@@ -119,7 +119,7 @@ export const Root: FC<
     slideSize?: SlideSize;
   }>
 > = ({ label, slideSize = 'full', children }) => {
-  const messages = useMessages();
+  const messages = getMessages();
   const trackId = useId();
   const [track, setTrack] = useState<HTMLDivElement | null>(null);
   const {
@@ -196,7 +196,7 @@ export const Slide: FC<PropsWithChildren<{ label?: string }>> = ({
   label,
   children,
 }) => {
-  const messages = useMessages();
+  const messages = getMessages();
   const slideSize = use(SlideSizeContext);
 
   return (

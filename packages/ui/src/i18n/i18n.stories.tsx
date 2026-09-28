@@ -1,14 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { useEffect, useState } from 'react';
 import type { FC } from 'react';
-import { createRoot } from 'react-dom/client';
-import { expect, waitFor, within } from 'storybook/test';
+import { expect } from 'storybook/test';
 
+import { inEnglish } from '../../.storybook/locales';
 import { Alert } from '../components/feedback/alert';
 import { Spinner } from '../components/feedback/spinner';
 import { Pagination } from '../components/navigation/pagination';
-import { UIProvider } from '../components/providers';
-import { en } from './en';
+import { registerMessages } from './current';
+import { ja } from './ja';
 
 const noop = () => undefined;
 
@@ -33,28 +32,6 @@ const Sample: FC<{ closeLabel?: string; prevLabel?: string }> = ({
   </div>
 );
 
-// グローバルデコレーターが全ストーリーを UIProvider で包むため、
-// 同じ木の中では context を外せない。Provider 未設置の状態は別ルートで作る
-const DetachedRoot: FC = () => {
-  const [host, setHost] = useState<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    if (host === null) {
-      return undefined;
-    }
-    const root = createRoot(host);
-    root.render(<Sample />);
-    return () => {
-      // 同期 unmount は親のレンダー中になりうるので次のタスクへ逃がす
-      queueMicrotask(() => {
-        root.unmount();
-      });
-    };
-  }, [host]);
-
-  return <div ref={setHost} />;
-};
-
 const meta: Meta<typeof Sample> = {
   title: 'i18n',
   component: Sample,
@@ -78,13 +55,7 @@ export const Japanese: Story = {
 };
 
 export const English: Story = {
-  decorators: [
-    (Story) => (
-      <UIProvider messages={en}>
-        <Story />
-      </UIProvider>
-    ),
-  ],
+  beforeEach: inEnglish,
   play: async ({ canvas }) => {
     await expect(canvas.getByRole('status', { name: 'Loading' })).toBeVisible();
     await expect(canvas.getByRole('button', { name: 'Close' })).toBeVisible();
@@ -98,54 +69,33 @@ export const English: Story = {
   },
 };
 
-// 全キーの翻訳を強制せず、渡されたキーだけ差し替わる
-export const PartialOverride: Story = {
-  decorators: [
-    (Story) => (
-      <UIProvider messages={{ close: 'Dismiss' }}>
-        <Story />
-      </UIProvider>
-    ),
-  ],
+// 登録した辞書は組み込みの辞書より優先される。一部だけ替えるなら広げて上書きする
+export const RegisteredOverride: Story = {
+  beforeEach: () => {
+    registerMessages('ja', { ...ja, close: '閉じる（Esc）' });
+    return () => {
+      registerMessages('ja', ja);
+    };
+  },
   play: async ({ canvas }) => {
-    await expect(canvas.getByRole('button', { name: 'Dismiss' })).toBeVisible();
+    await expect(
+      canvas.getByRole('button', { name: '閉じる（Esc）' }),
+    ).toBeVisible();
     await expect(canvas.getByRole('button', { name: '前へ' })).toBeVisible();
   },
 };
 
-// 優先順位は prop > 辞書 > 既定値
+// 優先順位は prop > 辞書
 export const PropWinsOverMessages: Story = {
   args: {
     closeLabel: 'とじる',
     prevLabel: 'もどる',
   },
-  decorators: [
-    (Story) => (
-      <UIProvider messages={en}>
-        <Story />
-      </UIProvider>
-    ),
-  ],
+  beforeEach: inEnglish,
   play: async ({ canvas }) => {
     await expect(canvas.getByRole('button', { name: 'とじる' })).toBeVisible();
     await expect(canvas.getByRole('button', { name: 'もどる' })).toBeVisible();
     // prop を渡していないものは辞書のまま
     await expect(canvas.getByRole('button', { name: 'Next' })).toBeVisible();
-  },
-};
-
-export const WithoutProvider: Story = {
-  render: () => <DetachedRoot />,
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    await waitFor(async () => {
-      await expect(
-        canvas.getByRole('button', { name: '閉じる' }),
-      ).toBeVisible();
-    });
-    await expect(
-      canvas.getByRole('status', { name: '読み込み中' }),
-    ).toBeVisible();
-    await expect(canvas.getByRole('button', { name: '前へ' })).toBeVisible();
   },
 };

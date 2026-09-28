@@ -1,8 +1,8 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: 'Provider が何を材料に、いつ、どう決めているかを説明します。1 つの規則、それを最初の描画の前に当てるインラインスクリプト、その後の追従、設定が保存される行、そこから導かれる保証、そしてテストの書き方です。',
-  en: 'What the provider decides, from what, and when: the one rule, the inline script that applies it before the first paint, how it stays in step afterwards, the row the preference is stored in, what all of that guarantees, and how to test it.',
+  ja: 'Provider が何を材料に、いつ、どう決めているかを説明します。1 つの規則、それを最初の描画の前に当てるインラインスクリプト、その後の追従、そこから導かれる保証、export される型、そしてテストの書き方です。',
+  en: 'What the provider decides, from what, and when: the one rule, the inline script that applies it before the first paint, how it stays in step afterwards, what all of that guarantees, the exported types, and how to test it.',
 });
 
 export const rule = {
@@ -113,8 +113,12 @@ export const script = {
     en: 'On hydration React adopts the `<script>` element in place and does not run it again.',
   }),
   csp: message({
-    ja: 'インラインスクリプトなので、インラインスクリプトを禁じる Content Security Policy の下では実行されません。Provider は `nonce` を受け取りません。',
-    en: 'Being an inline script, it does not run under a Content Security Policy that forbids inline scripts, and the provider takes no `nonce`.',
+    ja: 'インラインスクリプトなので、スクリプトを制限する Content-Security-Policy の下では、Provider の `nonce` か `colorSchemeScriptHash()` のハッシュで許します。',
+    en: 'Being an inline script, it runs under a Content-Security-Policy that restricts scripts only when allowed, by the provider’s `nonce` or by the hash `colorSchemeScriptHash()` gives.',
+  }),
+  cspLink: message({
+    ja: 'Content-Security-Policy の下で使う',
+    en: 'Under a Content-Security-Policy',
   }),
   serverTitle: message({
     ja: 'サーバーが描くもの',
@@ -133,8 +137,8 @@ export const script = {
     en: 'This example relies on a `dark:` variant that reads the class, as @k8ordo/ui’s `tailwind.css` declares. Tailwind CSS 4’s default `dark:` reads `prefers-color-scheme` instead.',
   }),
   darkVariantLink: message({
-    ja: 'Get Started: クラスでスタイルを当てる',
-    en: 'Get Started: Style with the class',
+    ja: 'スタイル: Tailwind CSS だけで使う',
+    en: 'Styling: With Tailwind CSS alone',
   }),
   serverBrowserOnly: message({
     ja: 'CSS で出し分けられないものは、React の `use(browser())`（`browser` は `react-dom` から）を `<Suspense>` の下で使うと、サーバーの HTML に含めずに済みます。サーバーは推測を書く代わりに fallback を書き、中身はブラウザで描かれます。',
@@ -171,14 +175,6 @@ export const step = {
     ja: 'hydrate のとき: hydrate する描画はサーバーと同じ推測を読み、何も書きません。クラスを書くのは、その直後にストアを読む描画です。スクリプトが付けたクラスが途中で外れることはありません。',
     en: 'Hydration: the render that hydrates reads the server’s guesses and writes nothing; the render straight after reads the store, and that one writes. The class the script put on is never taken off along the way.',
   }),
-  sameTabTitle: message({
-    ja: '同じタブで行を直接書き換えない',
-    en: 'Do not write the row by hand in the same tab',
-  }),
-  sameTab: message({
-    ja: "`storage` イベントは、書き込んだタブ自身には届きません。同じタブで `localStorage.setItem('k8ordo-state:color-scheme', …)` と直接書いても、Provider は再読み込みまで気づきません。変えるときは `setPreference` を通します。",
-    en: "A `storage` event never reaches the tab that wrote. Writing `localStorage.setItem('k8ordo-state:color-scheme', …)` by hand in the same tab goes unnoticed by the provider until a reload. Change it through `setPreference`.",
-  }),
   oneProviderTitle: message({
     ja: 'Provider は 1 つ',
     en: 'One provider',
@@ -186,69 +182,6 @@ export const step = {
   oneProvider: message({
     ja: 'Provider はルートレイアウトに 1 つだけ置きます。Provider はそれぞれがスクリプトを描いてクラスを書くので、`defaultPreference` の違う Provider が 2 つあれば食い違います。`useColorScheme()` が読むのは一番近い Provider です。',
     en: 'Put exactly one provider in the root layout. Each provider renders its own script and writes the class, so two providers with different `defaultPreference` values would disagree. `useColorScheme()` reads the nearest one.',
-  }),
-};
-
-export const state = {
-  title: message({
-    ja: '保存先は `colorSchemeState`',
-    en: 'Where it is stored: `colorSchemeState`',
-  }),
-  description: message({
-    ja: '設定は @k8ordo/state のふつうのローカル状態として保存されます。その定義が `colorSchemeState` として export されており、中身はこれですべてです。',
-    en: 'The preference is stored as an ordinary @k8ordo/state local state. Its definition is exported as `colorSchemeState`, and this is all of it.',
-  }),
-  key: message({
-    ja: 'キーは `color-scheme` なので、localStorage のキーは `k8ordo-state:color-scheme` です（`colorSchemeState.storageKey`）。`preference` は省略可能で、省略されていることが「選んでいない」を表します。',
-    en: 'The key is `color-scheme`, so the localStorage key is `k8ordo-state:color-scheme` (`colorSchemeState.storageKey`). `preference` is optional, and its absence is what “nothing chosen” means.',
-  }),
-  columnWhen: message({
-    ja: '操作',
-    en: 'When',
-  }),
-  columnRow: message({
-    ja: '保存される行',
-    en: 'The stored row',
-  }),
-  never: message({
-    ja: '一度も選んでいない',
-    en: 'Never chose',
-  }),
-  noRow: message({
-    ja: '行なし（`getItem` は `null`）',
-    en: 'no row (`getItem` returns `null`)',
-  }),
-  systemRow: message({
-    ja: "`'system'` に戻しても行は消えず、`preference` の無い `{}` が残ります。`preference` を読む側にとっては、行が無いのと同じです。",
-    en: "Going back to `'system'` does not remove the row: `{}` remains, with no `preference` in it. Anything that reads `preference` treats it the same as no row.",
-  }),
-  readTitle: message({
-    ja: 'ほかの場所から読む',
-    en: 'Reading it elsewhere',
-  }),
-  readDescription: message({
-    ja: 'hook を通さずに行を読みたいときは、どのクライアントコンポーネントからでも `useAppState(colorSchemeState)` を呼べます。@k8ordo/state には Provider が無く、ストアはキーごとに 1 つなので、`<ColorSchemeProvider>` と同じ値を読みます。',
-    en: 'To read the row without the hook, call `useAppState(colorSchemeState)` from any client component. @k8ordo/state has no provider and keeps one store per key, so it reads what `<ColorSchemeProvider>` reads.',
-  }),
-  readCaveat: message({
-    ja: "返るのは保存された `preference`（`'light' | 'dark' | undefined`）で、解決した `scheme` ではありません。画面に出ているものが欲しいなら `useColorScheme()` を使います。サーバーでの描画と hydrate の描画では、何も保存されていないときの値 `undefined` を返します。",
-    en: "What comes back is the stored `preference` (`'light' | 'dark' | undefined`), not the resolved `scheme`; for what is on screen, use `useColorScheme()`. On the server and in the hydration render it is the nothing-stored value, `undefined`.",
-  }),
-  inlineRead: message({
-    ja: '最初の描画の前に同じ行を読みたい自前のインラインスクリプトには `colorSchemeState.inlineRead()` があります。保存されたオブジェクト（読めなければ `null`）に評価される JavaScript の式を返します。スキーマは走らないので、使うフィールドは自分で確かめます。',
-    en: 'An inline script of your own that needs the row before the first paint has `colorSchemeState.inlineRead()`: it returns a JavaScript expression that evaluates to the stored object, or to `null` when there is none it can read. The schema does not run there, so check each field you use.',
-  }),
-  inlineReadLink: message({
-    ja: '@k8ordo/state: ハイドレーション前に読む',
-    en: '@k8ordo/state: Reading before hydration',
-  }),
-  collision: message({
-    ja: "アプリで `defineLocalState('color-scheme', …)` を別に定義しないでください。@k8ordo/state のストアはキーで共有されるので、2 つの定義が同じ行と同じストアを取り合います。",
-    en: "Do not define another `defineLocalState('color-scheme', …)` in the application: @k8ordo/state shares stores by key, so the two definitions would fight over one row and one store.",
-  }),
-  link: message({
-    ja: '@k8ordo/state の状態の置き場所',
-    en: 'Where @k8ordo/state keeps state',
   }),
 };
 
@@ -290,12 +223,16 @@ export const guarantees = {
     en: 'Change the class or where it goes: it is always `dark`, on `<html>`.',
   }),
   limitProperty: message({
-    ja: 'CSS の `color-scheme` プロパティを設定すること。',
-    en: 'Set the CSS `color-scheme` property.',
+    ja: 'CSS の `color-scheme` プロパティを設定すること。@k8ordo/ui のスタイルシートがトークンと並べて宣言します。',
+    en: 'Set the CSS `color-scheme` property: @k8ordo/ui’s stylesheet declares it next to its tokens.',
   }),
-  limitNonce: message({
-    ja: 'インラインスクリプトに `nonce` を付けること。',
-    en: 'Put a `nonce` on the inline script.',
+  limitContrast: message({
+    ja: 'コントラストを保存すること。`prefers-contrast` と `forced-colors` は OS の設定で、スタイルシートがそれに従います。',
+    en: 'Store a contrast preference: `prefers-contrast` and `forced-colors` are the OS’s settings, and the stylesheet follows them.',
+  }),
+  limitPolicy: message({
+    ja: 'Content-Security-Policy を決めること。スクリプトに付ける nonce も、ポリシーに書くハッシュも、アプリが渡します。',
+    en: 'Decide a Content-Security-Policy: the application gives the nonce the script carries, or writes its hash into the policy.',
   }),
 };
 
@@ -305,8 +242,8 @@ export const types = {
     en: 'Exported types',
   }),
   description: message({
-    ja: '値の export は `ColorSchemeProvider`、`useColorScheme`、`colorSchemeState` の 3 つで、型の export は次の 4 つです。宣言どおりに示します。',
-    en: 'The value exports are `ColorSchemeProvider`, `useColorScheme` and `colorSchemeState`; the type exports are these four, shown as declared.',
+    ja: '値の export は `ColorSchemeProvider`、`useColorScheme`、`colorSchemeState`、`colorSchemeScriptHash` の 4 つで、型の export は次の 4 つです。宣言どおりに示します。',
+    en: 'The value exports are `ColorSchemeProvider`, `useColorScheme`, `colorSchemeState` and `colorSchemeScriptHash`; the type exports are these four, shown as declared.',
   }),
   columnName: message({
     ja: '型',

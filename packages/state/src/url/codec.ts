@@ -1,3 +1,4 @@
+import { safeEncode } from 'zod/v4/core';
 import type { $ZodType } from 'zod/v4/core';
 
 import { analyzeSchema, parseWithSalvage, sameValue } from '../schema/object';
@@ -50,6 +51,23 @@ const readAll = (input: UrlInput, key: string): readonly string[] => {
   const value = input[key];
   if (value === undefined) return [];
   return typeof value === 'string' ? [value] : value;
+};
+
+/**
+ * 真偽値は、フィールドのスキーマ自身が encode した綴りで書く。`String(true)` の
+ * `"true"` は `z.stringbool({ truthy: ['yes'] })` が読み返せず、既定値に落ちる。
+ */
+const spellBoolean = (schema: $ZodType, value: boolean): string => {
+  try {
+    const encoded = safeEncode(schema, value);
+    if (encoded.success && typeof encoded.data === 'string') {
+      return encoded.data;
+    }
+  } catch {
+    // 一方向の `.transform()` は逆向きに走らせられず、zod は issue ではなく
+    // 例外で知らせる。綴りを持たないスキーマとして String() に任せる
+  }
+  return String(value);
 };
 
 const serializeValue = (key: string, value: unknown): string => {
@@ -110,7 +128,12 @@ export const createUrlCodec = (schema: StateSchema): UrlCodec => {
       if (Array.isArray(value)) {
         for (const item of value) params.append(key, serializeValue(key, item));
       } else {
-        params.append(key, serializeValue(key, value));
+        params.append(
+          key,
+          typeof value === 'boolean'
+            ? spellBoolean(info.shape[key] as $ZodType, value)
+            : serializeValue(key, value),
+        );
       }
     }
     return params.toString();

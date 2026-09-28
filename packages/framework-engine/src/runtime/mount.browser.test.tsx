@@ -78,4 +78,25 @@ describe('mount', () => {
     expect(errors).toStrictEqual([]);
     root.unmount();
   });
+
+  it('hydrates HTML rendered for the pathname below the base Vite serves the application under', async () => {
+    vi.stubEnv('BASE_URL', '/site/');
+    try {
+      // サーバーは base を外した pathname で描き、ブラウザは base の下にいる
+      const container = serverHtml('/site/en/docs');
+      const written = container.querySelector('h1');
+      const committed = Promise.withResolvers<Element>();
+
+      const root = mount(
+        container,
+        <Segment onCommit={committed.resolve} />,
+        '/en/docs',
+      );
+
+      expect(await committed.promise).toBe(written);
+      root.unmount();
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
 });

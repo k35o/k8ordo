@@ -128,18 +128,19 @@ export const parseForm = <Shape extends ObjectSchema>(
         continue;
       }
 
-      if (leaf.json.type === 'boolean') {
+      if (leaf.kind === 'checkbox') {
         setPath(raw, name, formData.has(name));
         continue;
       }
 
       const entries = formData.getAll(name);
       if (entries.length === 0) {
-        if (leaf.kind === 'choice') {
+        if (leaf.kind === 'choice' || leaf.kind === 'string-checkbox') {
           // A radio group with nothing selected submits no entry — a state
           // the person filling in the form can reach, unlike a text control,
           // which always submits at least ''. Like a select left on its
-          // placeholder, it has chosen nothing.
+          // placeholder, it has chosen nothing; so has an unchecked box whose
+          // schema reads the string a checked one submits.
           setPath(raw, name, undefined);
           continue;
         }

@@ -24,7 +24,6 @@
     "@k8ordo/state": "workspace:^",
     "@k8ordo/ui": "workspace:^",
     "@tailwindcss/vite": "catalog:",
-    "shiki": "4.4.3",
     "tailwindcss": "catalog:",
     "zod": "catalog:"
   },

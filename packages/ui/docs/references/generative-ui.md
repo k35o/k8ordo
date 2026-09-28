@@ -62,16 +62,38 @@ list below, and the package's tests keep it that way.
 
 These exports are left out on purpose, so a model cannot place them:
 
+- `ContextMenu` — it opens on a right-click, which nothing on screen invites,
+  so actions put in it would be hidden in a generated UI. It belongs on your
+  application's own content (a file, a row).
 - `InView`, `Resize` — they report to a callback and draw nothing of their own,
   and a spec has no code to receive the report.
 - `UIProvider` — your application mounts it once, around the generated UI as
   well.
 - `PortalRootProvider`, `usePortalRoot` — wiring for your own `createPortal`
   calls. The generated overlays open their own surfaces.
-- `Conversation`, `Message`, `PromptInput`, `Reasoning`, `Suggestion`, and
-  `ToolInvocation` from `@k8ordo/ui/ai`, and `Response` from
+- `Conversation`, `Message`, `PromptInput`, `Reasoning`, `Suggestion`,
+  `ToolInvocation`, `Attachment`, and `Source` from `@k8ordo/ui/ai`, and
+  `Response` from
   `@k8ordo/ui/ai/response` — the chat the generated UI is shown in. Your
   application builds it from its message stream; a spec does not place it.
+- `CodeBlock` from `@k8ordo/ui/code-block` — it highlights on the server, as an
+  async Server Component. The generated UI renders on the client, where it
+  cannot run, and placing it there would ship the highlighter to the browser.
+  `Code` (inline code) is in the catalog.
+- `CommandPalette` — every item runs a function of your application, which a
+  spec cannot write, and it is chrome your application opens from a shortcut
+  rather than something placed in a reply. For actions inside the generated UI,
+  use `Button` or `DropdownMenu`.
+- `ResizablePanels` — it divides a parent of fixed size into a workspace, the
+  frame an application draws around its content. The generated UI flows inside
+  a message and has no height to divide; to set things side by side, use
+  `Grid`.
+- `Prose` — it typesets the bare HTML that Markdown renders to. A spec places
+  components, which keep their own look, so it would have nothing to typeset;
+  lay a flow out with `Stack`.
+- `TableOfContents` — it points at the ids of the document's headings and
+  follows the scroll. The headings a spec places carry no id, so there would be
+  nothing to point at.
 
 ## Prompt language
 

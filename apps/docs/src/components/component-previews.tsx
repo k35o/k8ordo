@@ -16,6 +16,10 @@ import {
   CheckboxCard,
   CloseIcon,
   Code,
+  ColorPicker,
+  Combobox,
+  CopyButton,
+  DataTable,
   Dialog,
   DropdownMenu,
   EmptyState,
@@ -31,11 +35,14 @@ import {
   PaletteIcon,
   PasswordInput,
   Popover,
+  Prose,
   Progress,
   Radio,
   RadioCard,
   Select,
+  ResizablePanels,
   Separator,
+  SideNav,
   Skeleton,
   Slider,
   SparklesIcon,
@@ -43,10 +50,12 @@ import {
   Switch,
   Table,
   TableIcon,
+  TableOfContents,
   Tabs,
   TextField,
   Textarea,
   Tooltip,
+  Tree,
 } from '@k8ordo/ui';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
@@ -101,6 +110,7 @@ export const componentPreviews: Record<string, ReactNode> = {
       <CloseIcon size="sm" />
     </IconButton>
   ),
+  CopyButton: <CopyButton size="sm" value="pnpm add @k8ordo/ui" />,
   Anchor: (
     <Anchor href="https://example.com" openInNewTab>
       External Link
@@ -136,6 +146,28 @@ export const componentPreviews: Record<string, ReactNode> = {
     </Breadcrumb.List>
   ),
   Pagination: <PaginationPreview />,
+  SideNav: (
+    <div className="w-40">
+      <SideNav.Root label="SideNav">
+        <SideNav.Group title="Guide">
+          <SideNav.Link current href="/">
+            Get started
+          </SideNav.Link>
+          <SideNav.Link href="/">Theming</SideNav.Link>
+        </SideNav.Group>
+      </SideNav.Root>
+    </div>
+  ),
+  TableOfContents: (
+    <div className="w-40">
+      <TableOfContents
+        items={[
+          { id: 'preview-install', label: 'Install' },
+          { id: 'preview-usage', label: 'Usage' },
+        ]}
+      />
+    </div>
+  ),
   TextField: <TextField placeholder="Enter your name" />,
   Textarea: <Textarea placeholder="Enter text" rows={3} />,
   NumberField: <NumberField placeholder="0" />,
@@ -292,7 +324,58 @@ export const componentPreviews: Record<string, ReactNode> = {
       </Table.Body>
     </Table.Root>
   ),
+  DataTable: (
+    <div className="w-full">
+      <DataTable
+        columns={[
+          {
+            id: 'name',
+            header: 'Name',
+            cell: (row: { id: string; name: string }) => row.name,
+            sortable: true,
+          },
+        ]}
+        getRowId={(row) => row.id}
+        label="DataTable"
+        onSelectedIdsChange={() => undefined}
+        onSortChange={() => undefined}
+        rows={[
+          { id: '1', name: 'Aoki' },
+          { id: '2', name: 'Inoue' },
+        ]}
+        selectedIds={['1']}
+        sort={{ columnId: 'name', direction: 'ascending' }}
+      />
+    </div>
+  ),
+  Tree: (
+    <div className="w-44">
+      <Tree
+        defaultExpandedIds={['src']}
+        defaultSelectedId="index"
+        items={[
+          {
+            id: 'src',
+            label: 'src',
+            children: [{ id: 'index', label: 'index.ts' }],
+          },
+          { id: 'readme', label: 'README.md' },
+        ]}
+        label="Tree"
+      />
+    </div>
+  ),
   Heading: <Heading level="h2">Section Title</Heading>,
+  Prose: (
+    <div className="w-full max-w-56">
+      <Prose>
+        <h3>Heading</h3>
+        <p>
+          Body text with <strong>strong</strong> and <em>emphasis</em>.
+        </p>
+      </Prose>
+    </div>
+  ),
   Alert: <Alert message="This is an info alert." tone="info" />,
   EmptyState: (
     <EmptyState icon={<TableIcon size="md" />} title="Nothing here yet" />
@@ -357,14 +440,45 @@ export const componentPreviews: Record<string, ReactNode> = {
       </ListBox.Root>
     </div>
   ),
+  ColorPicker: (
+    <div className="w-56">
+      <ColorPicker aria-label="Accent color" defaultValue="#0d9488" />
+    </div>
+  ),
+  Combobox: (
+    <div className="w-56">
+      <Combobox
+        aria-label="Prefecture"
+        defaultValue="kyoto"
+        options={[
+          { value: 'tokyo', label: 'Tokyo' },
+          { value: 'kyoto', label: 'Kyoto' },
+        ]}
+      />
+    </div>
+  ),
+  CommandPalette: (
+    <span className="flex gap-1">
+      <Kbd label="Command">⌘</Kbd>
+      <Kbd>K</Kbd>
+    </span>
+  ),
   Separator: (
     <div className="w-40">
       <Separator color="mute" />
     </div>
   ),
-  ScrollLinked: (
-    <div className="w-40">
-      <Progress max={100} value={40} />
+  ResizablePanels: (
+    <div className="border-border-base h-20 w-40 overflow-hidden rounded-md border">
+      <ResizablePanels.Root defaultValue={40}>
+        <ResizablePanels.Panel>
+          <div className="bg-bg-subtle size-full" />
+        </ResizablePanels.Panel>
+        <ResizablePanels.Handle />
+        <ResizablePanels.Panel>
+          <div className="size-full" />
+        </ResizablePanels.Panel>
+      </ResizablePanels.Root>
     </div>
   ),
   Icons: (

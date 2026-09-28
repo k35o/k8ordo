@@ -1,7 +1,7 @@
 // From core rather than the classic entry, so a schema written with `zod/mini`
 // works too — same conversion, and the caller is not forced to pull in an API
 // seven times the size of the one they chose.
-import { toJSONSchema } from 'zod/v4/core';
+import { safeEncode, toJSONSchema } from 'zod/v4/core';
 import type { $ZodType } from 'zod/v4/core';
 
 import { controlKindOf, emptySubmissionOf } from '../derive/attributes';
@@ -20,6 +20,8 @@ export type LeafNode = {
   json: LeafSchema & { input?: string };
   zod: $ZodType;
   kind: ControlKind;
+  /** `string-checkbox` がチェック時に送る文字列（{@link checkedValueOf}）。 */
+  checkedValue?: string;
   required: boolean;
   /** The array this leaf repeats inside, or null. */
   arrayPath: string | null;
@@ -108,6 +110,25 @@ const kindOf = (json: Node, $schema: $ZodType): ControlKind => {
 /* oxlint-enable no-underscore-dangle */
 
 /**
+ * 文字列を読むスキーマのチェックボックスが、チェック時に送る文字列。スキーマ
+ * 自身が `true` を encode した綴りを使う。ブラウザ既定の `on` を拒む
+ * `z.stringbool({ truthy: ['yes'] })` にも読める値が届き、`@k8ordo/state` が
+ * `true` として URL に書く文字列とも一致する。
+ */
+const checkedValueOf = ($schema: $ZodType): string | undefined => {
+  try {
+    const encoded = safeEncode($schema, true);
+    return encoded.success && typeof encoded.data === 'string'
+      ? encoded.data
+      : undefined;
+  } catch {
+    // 一方向の `.transform()` は逆向きに走らせられず、zod は issue ではなく
+    // 例外で知らせる。送るべき文字列を持たないスキーマとして扱う
+    return undefined;
+  }
+};
+
+/**
  * `required` in JSON Schema means "the key is present", but a form always
  * submits something for every control, and what that is depends on the control
  * — `emptySubmissionOf` is the one place that decides. Asking the schema what
@@ -137,18 +158,32 @@ const rejectsAsWrongType = ($schema: $ZodType, value: unknown): boolean => {
 
 /**
  * A text or number control can only submit strings, and the parse reads a
- * checkbox as a boolean, so a leaf that turns every such value away on type
- * alone can never be satisfied by the control it derives. That is not a check
- * the client skips; it is a form that always fails, so it is refused here
- * rather than shipped, with the reason. (A file is exempt: the parse hands the
- * schema a File, which is what `z.file()` reads.)
+ * checkbox as a boolean unless its schema names a string to submit, so a leaf
+ * that turns every such value away on type alone can never be satisfied by the
+ * control it derives. That is not a check the client skips; it is a form that
+ * always fails, so it is refused here rather than shipped, with the reason. (A
+ * file is exempt: the parse hands the schema a File, which is what `z.file()`
+ * reads.)
  *
  * A constraint is not a refusal: `z.coerce.number().min(100)` rejects the probe
  * with `too_small`, which is the schema doing its job.
  */
-const refusalOf = (json: Node, $schema: $ZodType): string | undefined => {
-  const kind = controlKindOf(json);
-  if (kind === 'number') {
+const refusalOf = (
+  json: Node,
+  $schema: $ZodType,
+  kind: ControlKind,
+): string | undefined => {
+  if (kind === 'string-checkbox') {
+    // チェックを外したボックスは何も送らない。それを true と読むスキーマ
+    // （`.default(true)`）では、外した操作が黙って捨てられる
+    return asProbe($schema).safeParse(undefined).data === true
+      ? 'チェックを外したボックスは何も送らないため、未送信を true と読むこのスキーマ（.default(true) など）では false を送れません。チェックすると true になる向きの項目にしてください'
+      : undefined;
+  }
+  // 数値と文字列の判定は JSON のノードで分ける。bigint は数値の欄として扱うが、
+  // 拒むかどうかは文字列の欄として確かめる
+  const control = controlKindOf(json);
+  if (control === 'number') {
     const asText = asProbe($schema).safeParse('1');
     if (asText.success) {
       return undefined;
@@ -163,10 +198,10 @@ const refusalOf = (json: Node, $schema: $ZodType): string | undefined => {
   }
   if (kind === 'checkbox') {
     return [true, false].every((value) => rejectsAsWrongType($schema, value))
-      ? 'チェックボックスは真偽値として届くため、このスキーマはどんな入力でも失敗します（z.stringbool() などは表現できません）。z.boolean() を使ってください'
+      ? 'チェックボックスは真偽値（z.boolean()）か、送信する文字列（z.stringbool()）として読むため、どちらでもないこのスキーマはどんな入力でも失敗します'
       : undefined;
   }
-  if (kind === 'text' && json.type !== 'string') {
+  if (control === 'text' && json.type !== 'string') {
     return TEXT_PROBES.every((probe) => rejectsAsWrongType($schema, probe))
       ? 'このスキーマは文字列を受け付けないため、フォームが送信できる値がありません（z.date() や z.bigint() などは表現できません）'
       : undefined;
@@ -309,18 +344,22 @@ const walkNode = (
     // reported by the derivation, not here.
   }
 
-  const refusal = refusalOf(json, zod);
+  const checkedValue =
+    controlKindOf(json) === 'checkbox' ? checkedValueOf(zod) : undefined;
+  const kind =
+    checkedValue === undefined ? kindOf(json, zod) : 'string-checkbox';
+  const refusal = refusalOf(json, zod, kind);
   if (refusal !== undefined) {
     fail(path, refusal);
   }
 
-  const kind = kindOf(json, zod);
   out.leaves.push({
     path,
     name,
     json,
     zod,
     kind,
+    checkedValue,
     required: rejectsEmptySubmission(kind, zod),
     arrayPath: context.arrayPath,
     itemKey: context.itemKey,

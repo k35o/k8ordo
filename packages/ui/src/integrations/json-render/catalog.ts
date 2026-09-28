@@ -84,9 +84,29 @@ export const catalog = defineCatalog(schema, {
       description:
         'Accordion of items that open and close. Each item has a title and text content.',
     },
+    Stepper: {
+      props: s.stepperProps,
+      description:
+        'Steps of a process in order, marking the ones done and the current one (display only).',
+    },
     Breadcrumb: {
       props: s.breadcrumbProps,
       description: 'Breadcrumb trail.',
+    },
+    DataTable: {
+      props: s.dataTableProps,
+      description:
+        'Table the reader can sort (by the columns marked sortable) and, with selectable, pick rows from. Use it for records someone works through; use Table for data only read.',
+    },
+    Tree: {
+      props: s.treeProps,
+      description:
+        'Tree of nodes that open and close, such as files and folders, navigable with the arrow keys. List every node flat; a child names its parent by parentId.',
+    },
+    SideNav: {
+      props: s.sideNavProps,
+      description:
+        'Side navigation: groups of links, each group under a small title. Mark the page being shown with current: true.',
     },
     Table: {
       props: s.tableProps,
@@ -115,7 +135,11 @@ export const catalog = defineCatalog(schema, {
       description:
         'Horizontally scrolling carousel with previous and next buttons. Each child is one slide. slideSize sets how much of the track one slide takes (full, lg, md for two, sm for three).',
     },
-    Progress: { props: s.progressProps, description: 'Progress bar.' },
+    Progress: {
+      props: s.progressProps,
+      description:
+        'Progress bar. Leave value out when progress is unknown; it then shows an animated bar.',
+    },
     Skeleton: {
       props: s.skeletonProps,
       description: 'Loading placeholder.',
@@ -134,6 +158,11 @@ export const catalog = defineCatalog(schema, {
       props: s.iconButtonProps,
       description:
         'Icon-only button (label is required and shown as its tooltip).',
+    },
+    CopyButton: {
+      props: s.copyButtonProps,
+      description:
+        'Button that copies value to the clipboard and confirms it. With iconOnly, label becomes its tooltip.',
     },
     Textarea: {
       props: s.textareaProps,
@@ -154,6 +183,31 @@ export const catalog = defineCatalog(schema, {
       props: s.sliderProps,
       description:
         'Slider. defaultValue can be bound to state with $bindState.',
+    },
+    RangeSlider: {
+      props: s.rangeSliderProps,
+      description:
+        'Slider with two thumbs for picking a range. defaultValue ([lower, upper]) can be bound to state with $bindState.',
+    },
+    DateField: {
+      props: s.dateFieldProps,
+      description:
+        'Date input with a visible label. Dates are YYYY-MM-DD strings. defaultValue can be bound to state with $bindState.',
+    },
+    DatePicker: {
+      props: s.datePickerProps,
+      description:
+        'Date input with a visible label and a button that opens a calendar. Dates are YYYY-MM-DD strings. defaultValue can be bound to state with $bindState.',
+    },
+    Calendar: {
+      props: s.calendarProps,
+      description:
+        'Month calendar shown inline for picking one day (YYYY-MM-DD). It submits nothing; in a form, use DatePicker. defaultValue can be bound to state with $bindState.',
+    },
+    ColorPicker: {
+      props: s.colorPickerProps,
+      description:
+        'Color input with a visible label: a #rrggbb text field, hue / saturation / lightness sliders, and optional preset swatches. defaultValue can be bound to state with $bindState.',
     },
     Radio: {
       props: s.radioProps,
@@ -207,6 +261,11 @@ export const catalog = defineCatalog(schema, {
       props: s.tooltipProps,
       description: 'Tooltip shown on hover or focus.',
     },
+    Toolbar: {
+      props: s.toolbarProps,
+      description:
+        'Row (or column) of buttons that arrow keys move between, e.g. formatting actions. Give each item an icon to show only the icon.',
+    },
     DropdownMenu: {
       props: s.dropdownMenuProps,
       description: 'Dropdown menu.',
@@ -216,10 +275,6 @@ export const catalog = defineCatalog(schema, {
       description:
         'Toast notification that a button labeled triggerLabel shows.',
     },
-    ScrollLinked: {
-      props: s.scrollLinkedProps,
-      description: 'Page scroll progress bar (fixed to the top).',
-    },
     ListBox: {
       props: s.listBoxProps,
       description: 'Single-choice list in a popup.',
@@ -228,13 +283,19 @@ export const catalog = defineCatalog(schema, {
       props: s.checkboxGroupProps,
       description: 'Group of checkboxes.',
     },
+    Combobox: {
+      props: s.comboboxProps,
+      description:
+        'Text field with a visible label that filters a list of options as you type, for picking one. Prefer it to ListBox when there are many options. defaultValue can be bound to state with $bindState.',
+    },
     Autocomplete: {
       props: s.autocompleteProps,
       description: 'Tag-style autocomplete for multiple choices.',
     },
     FileField: {
       props: s.fileFieldProps,
-      description: 'File picker field.',
+      description:
+        'File picker field. With dropzone, files can also be dropped onto it.',
     },
     FormControl: {
       props: s.formControlProps,

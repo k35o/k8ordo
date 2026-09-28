@@ -1,3 +1,4 @@
+import { currentLocale } from './current';
 import { defineLocales } from './locales';
 import { message } from './message';
 
@@ -11,6 +12,9 @@ declare module './register' {
 const ja = { timeZone: 'Asia/Tokyo', dir: 'ltr' } as const;
 const en = { timeZone: 'America/New_York', dir: 'ltr' } as const;
 const locales = defineLocales({ ja, en });
+
+const request = (headers: Record<string, string>) =>
+  new Request('https://example.com/', { headers });
 
 describe('defineLocales', () => {
   it('takes the first locale as the default unless told otherwise', () => {
@@ -102,6 +106,56 @@ describe('negotiate', () => {
 
   it('accepts any iterable, so navigator.languages passes as is', () => {
     expect(locales.negotiate(new Set(['en']))).toBe('en');
+  });
+});
+
+describe('negotiateRequest', () => {
+  it('negotiates from Accept-Language, in its order of preference', () => {
+    expect(
+      locales.negotiateRequest(
+        request({ 'accept-language': 'fr;q=0.9, en-US;q=0.8, ja;q=0.5' }),
+      ),
+    ).toBe('en');
+    expect(locales.negotiateRequest(request({}))).toBe('ja');
+  });
+
+  it("puts the visitor's choice in the named cookie before the header", () => {
+    expect(
+      locales.negotiateRequest(
+        request({
+          'accept-language': 'en',
+          cookie: 'theme=dark; locale=ja; other=1',
+        }),
+        { cookie: 'locale' },
+      ),
+    ).toBe('ja');
+    expect(
+      locales.negotiateRequest(
+        request({ 'accept-language': 'ja', cookie: 'locale="en"' }),
+        { cookie: 'locale' },
+      ),
+    ).toBe('en');
+  });
+
+  it('falls through to the header when the cookie is missing, unnamed, or not a locale of the set', () => {
+    const headers = { 'accept-language': 'en' };
+    expect(
+      locales.negotiateRequest(request(headers), { cookie: 'locale' }),
+    ).toBe('en');
+    expect(
+      locales.negotiateRequest(request({ ...headers, cookie: 'locale=ja' })),
+    ).toBe('en');
+    expect(
+      locales.negotiateRequest(request({ ...headers, cookie: 'locale=fr' }), {
+        cookie: 'locale',
+      }),
+    ).toBe('en');
+    expect(
+      locales.negotiateRequest(
+        request({ ...headers, cookie: 'xlocale=ja; locale_=ja' }),
+        { cookie: 'locale' },
+      ),
+    ).toBe('en');
   });
 });
 
@@ -289,5 +343,27 @@ describe('getLocale / run (server)', () => {
       ),
     );
     expect(seen).toStrictEqual(['en', 'ja', 'en']);
+  });
+});
+
+describe('currentLocale', () => {
+  it('is the locale named, else the default of the set', () => {
+    defineLocales({ ja, en });
+    expect(currentLocale()).toBe('ja');
+    expect(locales.run('en', () => currentLocale())).toBe('en');
+  });
+
+  it('is null where no set is defined, even while a locale is named', () => {
+    // 集合を定義していないアプリでは、サーバーもブラウザも null で揃う。
+    const key = Symbol.for('@k8ordo/i18n/locales');
+    const registry = globalThis as { [key]?: unknown };
+    const saved = registry[key];
+    try {
+      registry[key] = undefined;
+      expect(currentLocale()).toBeNull();
+      expect(locales.run('en', () => currentLocale())).toBeNull();
+    } finally {
+      registry[key] = saved;
+    }
   });
 });

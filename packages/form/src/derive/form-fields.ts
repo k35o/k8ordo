@@ -1,8 +1,13 @@
 import type { $ZodType } from 'zod/v4/core';
 
-import type { ArrayPathsOf, FieldPathsOf } from '../paths';
+import type {
+  ArrayPathsOf,
+  FieldPathsOf,
+  StringCheckboxPathsOf,
+} from '../paths';
 import { asDefinition } from '../rules/define-form';
 import type { FormDefinition } from '../rules/define-form';
+import { deriveRule } from '../rules/rules';
 import { asProbe } from '../schema/object-schema';
 import type { ObjectSchema } from '../schema/object-schema';
 import { schemaMap, unwrap } from '../schema/walk';
@@ -11,6 +16,7 @@ import type {
   DerivedField,
   DroppedCheck,
   FormFields,
+  StringCheckboxInput,
 } from '../types';
 import { attributesFor, emptySubmissionOf, namesAControl } from './attributes';
 import { messagesFor } from './messages';
@@ -118,15 +124,20 @@ const warnDropped = (
  *
  * Call this on the server — in a Server Component or at module scope. The
  * result is plain data, so it crosses to the client as props and zod never
- * enters the bundle. Messages are read when it runs, so when one follows the
- * request (its locale, say), call it during the render, not at module scope.
+ * enters the bundle. Messages are read when it runs — zod's, and a rule's
+ * function message — so when one follows the request (its locale, say), call
+ * it during the render, not at module scope.
  */
 export const formFields = <Schema extends ObjectSchema>(
   input: FormDefinition<Schema> | Schema,
-): FormFields<FieldPathsOf<Schema>, ArrayPathsOf<Schema>> => {
+): FormFields<
+  FieldPathsOf<Schema>,
+  ArrayPathsOf<Schema>,
+  StringCheckboxPathsOf<Schema>
+> => {
   const { schema, rules } = asDefinition(input);
   const map = schemaMap(schema);
-  const fields: Record<string, DerivedField> = {};
+  const fields: Record<string, DerivedField<StringCheckboxInput>> = {};
   const arrays: Record<string, DerivedArray> = {};
   const dropped: DroppedCheck[] = [];
 
@@ -182,6 +193,10 @@ export const formFields = <Schema extends ObjectSchema>(
     if (secret) {
       attributes.input.type = 'password';
     }
+    const fieldInput: StringCheckboxInput =
+      leaf.checkedValue === undefined
+        ? attributes.input
+        : { ...attributes.input, value: leaf.checkedValue };
 
     if (
       leaf.group !== undefined &&
@@ -194,11 +209,11 @@ export const formFields = <Schema extends ObjectSchema>(
       });
     }
 
-    const derived: DerivedField = {
-      input: attributes.input,
+    const derived: DerivedField<StringCheckboxInput> = {
+      input: fieldInput,
       messages: messagesFor(
         leaf.zod,
-        attributes.input,
+        fieldInput,
         leaf.required,
         emptySubmissionOf(leaf.kind),
       ),
@@ -226,5 +241,10 @@ export const formFields = <Schema extends ObjectSchema>(
   }
 
   warnDropped(schema, dropped);
-  return { fields, arrays, rules, dropped };
+  return {
+    fields,
+    arrays,
+    rules: rules.map((rule) => deriveRule(rule)),
+    dropped,
+  };
 };

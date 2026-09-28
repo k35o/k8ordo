@@ -21,13 +21,13 @@ export const layersNoJs = message({
 });
 
 export const layersJs = message({
-  ja: 'JavaScript が動くと、`form.props` の `ref` がフォームに `noValidate` を付けます。ブラウザは送信を止めなくなり、代わりに `useForm` が zod の文言を表示します。`noValidate` はマークアップに書かれないので、スクリプトが読み込まれるまではブラウザの検証が残ります。',
-  en: "Once JavaScript runs, the `ref` in `form.props` sets `noValidate` on the form. The browser stops blocking submission, and `useForm` shows zod's wording instead. `noValidate` is never rendered into the markup, so the browser's own validation stays on until the script loads.",
+  ja: 'JavaScript が動くと、`form.props` の `ref` がフォームに `noValidate` を付け、ブラウザの検証に代わって `useForm` が送信のたびに同じ検証をします。触っていない欄も含めた全欄とルールを検査し、通らなければ送信を止めて、失敗した欄に zod の文言を出します。`noValidate` はマークアップに書かれないので、スクリプトが読み込まれるまではブラウザの検証が残ります。',
+  en: "Once JavaScript runs, the `ref` in `form.props` sets `noValidate` on the form, and `useForm` runs the same check in the browser's place on every submit: every field, the untouched ones included, and the rules. A failing submission stops, and each failed field shows zod's wording. `noValidate` is never rendered into the markup, so the browser's own validation stays on until the script loads.",
 });
 
 export const layersServer = message({
-  ja: 'そのため JavaScript が動いているときの送信は、ブラウザ側のメッセージにかかわらず Server Action に届きます。HTML で表せない検証（`dropped` に載ったもの）はサーバーでしか走らないので、決めるのはサーバーです。',
-  en: 'So with JavaScript, a submission reaches the Server Action whatever the browser-side messages say. The checks HTML cannot express — the ones in `dropped` — run only on the server, which is why the server decides.',
+  ja: 'ブラウザの検査を通った送信は Server Action に届きます。HTML で表せない検証（`dropped` に載ったもの）はサーバーでしか走らないので、決めるのはサーバーです。',
+  en: 'A submission that passes the browser reaches the Server Action. The checks HTML cannot express — the ones in `dropped` — run only on the server, which is why the server decides.',
 });
 
 export const demoTitle = message({
@@ -135,6 +135,11 @@ export const lifeInput = message({
   en: 'While typing, only a message already on screen is refreshed, and it clears once the value is valid. A new message is never raised mid-word — the same idea as `:user-invalid`.',
 });
 
+export const lifeSubmit = message({
+  ja: '送信したときは、触っていない欄も含めて全欄を検査し、ルールも走らせます。失敗した欄にはすべてメッセージを出し、送信を止めて、ページ上で最初に失敗した欄にフォーカスを移します。`formNoValidate` の付いた送信ボタンは、ブラウザの検証と同じくこの検査を飛ばします。',
+  en: 'On submit, every field is checked, the untouched ones included, and the rules run. Each failed field shows its message, the submission stops, and focus moves to the first failed field on the page. A submit button with `formNoValidate` skips this check, as it skips the browser’s.',
+});
+
 export const lifeOrder = message({
   ja: 'どの文言を出すかは、`setCustomValidity` で付いた文言（ルールや `useAsyncCheck` の答え）が最優先で、その後は `ValidityFlag` の `valueMissing`・`typeMismatch`・`patternMismatch`・`tooShort`・`tooLong`・`rangeUnderflow`・`rangeOverflow`・`stepMismatch`・`badInput` の順です。',
   en: 'Which wording shows: a message set with `setCustomValidity` (a rule, or a `useAsyncCheck` answer) comes first, then the `ValidityFlag` values `valueMissing`, `typeMismatch`, `patternMismatch`, `tooShort`, `tooLong`, `rangeUnderflow`, `rangeOverflow`, `stepMismatch` and `badInput`, in that order.',
@@ -146,8 +151,8 @@ export const lifeServer = message({
 });
 
 export const lifeNewState = message({
-  ja: 'Server Action から新しい結果が届くと、ブラウザ側のメッセージと「編集済み」の記録を捨て、行数を `state.rows` から作り直し、ページ上で最初の失敗にフォーカスを移します。文書順で最初に失敗した欄か、それより前にある `formError` の表示です。スクリーンリーダーの利用者が、送信が失敗したことと、その場所を知るためです。',
-  en: 'When a new result arrives from the action, the browser-side messages and the record of edited fields are dropped, rows are rebuilt from `state.rows`, and focus moves to the first failure on the page — the first failed field in document order, or the `formError` message when it comes before it. That is how someone using a screen reader learns that the submit failed, and where.',
+  ja: 'Server Action から新しい結果が届くと、ブラウザ側のメッセージと「編集済み」の記録を捨て、行数を `state.rows` から作り直し、ページ上で最初の失敗にフォーカスを移します。文書順で最初に失敗した欄か、それより前にある、欄を持たないエラー（`formError` や配列そのもののエラー）の表示です。スクリーンリーダーの利用者が、送信が失敗したことと、その場所を知るためです。',
+  en: "When a new result arrives from the action, the browser-side messages and the record of edited fields are dropped, rows are rebuilt from `state.rows`, and focus moves to the first failure on the page — the first failed field in document order, or a message no field owns (`formError`, or an array's own error) when it comes before it. That is how someone using a screen reader learns that the submit failed, and where.",
 });
 
 export const lifeToken = message({
@@ -191,8 +196,8 @@ export const resetDirty = message({
 });
 
 export const resetEcho = message({
-  ja: 'React は action のあと、失敗を返したときにもフォームをリセットします。それでも入力が残るのは、`state.values` が `defaultValue` として描かれ、リセットがその値に戻すからです。パスワードは返されないので空になります。',
-  en: 'React resets the form after the action even when it returned a failure. The input survives because `state.values` is rendered as `defaultValue`, which is what the reset restores; passwords are never echoed, so they come back empty.',
+  ja: 'React は action のあと、失敗を返したときにもフォームをリセットします。それでも入力が残るのは、`state.values` が `defaultValue` として描かれ、リセットがその値に戻すからです。React は `<select>` の `defaultValue` をマウント時にしか反映しないので、`<select>` には `useForm` が各 `<option>` の `defaultSelected` を書きます。パスワードは返されないので空になります。',
+  en: "React resets the form after the action even when it returned a failure. The input survives because `state.values` is rendered as `defaultValue`, which is what the reset restores. React applies a `<select>`'s `defaultValue` only when it mounts, so for a select `useForm` writes each option's `defaultSelected` itself. Passwords are never echoed, so they come back empty.",
 });
 
 export const dirtyTitle = message({
@@ -353,6 +358,11 @@ export const ruleMinChecked = message({
 export const ruleRequiredWhen = message({
   ja: '`when` の値が `equals` と等しく、`field` が空のとき',
   en: '`when` equals `equals` and `field` is empty',
+});
+
+export const rulesMessage = message({
+  ja: '`message` には文字列のほか、文字列を返す関数も渡せます。zod の `{ error: () => … }` と同じく、宣言したときではなく報告するときに呼ばれます。`formFields` は欄を導くときに呼び（関数はクライアントに渡せないので、ルールは文言の入ったデータとして渡ります）、`parseForm` はルールが破れたときに呼びます。@k8ordo/i18n の文言を渡せば、モジュールの先頭に置いた定義のまま、リクエストごとのロケールで報告されます。',
+  en: '`message` takes a function returning the text as well as a string. Like zod’s `{ error: () => … }`, it is called when the rule is reported, not where it is declared: `formFields` calls it as it derives the fields (a function cannot cross to the client, so the rules travel as data with the text in them), and `parseForm` calls it when the rule breaks. Pass an @k8ordo/i18n message, and a definition at module scope reports in each request’s locale.',
 });
 
 export const rulesStrings = message({

@@ -1,7 +1,7 @@
 import type { Message } from '@k8ordo/i18n';
 import { Code, Heading, Table } from '@k8ordo/ui';
+import { CodeBlock } from '@k8ordo/ui/code-block';
 
-import { CodeBlock } from '../../../../components/code-block';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Rich } from '../../../../components/rich';
@@ -169,20 +169,22 @@ export const routes = defineRoutes({
 });`;
 
 const TYPES = `import type {
+  NavigablePath,
   NavigablePatternOf,
   PatternOf,
-  RouteOf,
 } from '@k8ordo/router';
 
 import type { routes } from './routes';
 
 type Pattern = PatternOf<typeof routes.record>;
 type Linkable = NavigablePatternOf<typeof routes.record>;
-type Path = RouteOf<typeof routes>;`;
+type Found = NavigablePath<typeof routes, '/products/42'>;
+type Missing = NavigablePath<typeof routes, '/products/42/reviews'>;`;
 
 const TYPES_RESOLVED = `type Pattern = '/' | '/products' | '/products/:id' | '/*';
 type Linkable = '/' | '/products' | '/products/:id';
-type Path = '/' | '/products' | \`/products/\${string}\`;`;
+type Found = '/products/42';
+type Missing = never;`;
 
 type GrammarRow = {
   pattern: string;
@@ -284,8 +286,8 @@ const TYPE_ROWS: ReadonlyArray<{ name: string; meaning: Message }> = [
     meaning: m.routerRoutes.typesTable.navigablePatternOf,
   },
   {
-    name: 'RouteOf<typeof routes>',
-    meaning: m.routerRoutes.typesTable.routeOf,
+    name: 'NavigablePath<typeof routes, Path>',
+    meaning: m.routerRoutes.typesTable.navigablePath,
   },
   { name: 'Routes<R>', meaning: m.routerRoutes.typesTable.routes },
   { name: 'RoutesRecord', meaning: m.routerRoutes.typesTable.routesRecord },
@@ -528,7 +530,7 @@ export default function RouterRoutesPage() {
           </Table.Body>
         </Table.Root>
         <p className="text-fg-mute leading-relaxed">
-          <Rich>{m.routerRoutes.typesRouteOf()}</Rich>{' '}
+          <Rich>{m.routerRoutes.typesNavigablePath()}</Rich>{' '}
           <LocaleAnchor path="/:locale/router/links">
             {m.router.navLinks()}
           </LocaleAnchor>

@@ -378,7 +378,7 @@ font-family: 'Noto Sans JP', 'M PLUS 2', sans-serif;
 
 - 基本は \`transition-colors duration-150 ease-out\`
 - **300ms を超えない。bounce / spring 系のイージングは使わない。**
-- \`prefers-reduced-motion: reduce\` を尊重（アニメーションはすべて CSS で、\`base.css\` の \`@media (prefers-reduced-motion)\` が止める。スクロールに追従する ScrollLinked の進捗バーは機能的な表示なので対象外。Conversation の最下部へのスクロールは JS 側で instant に切り替える）
+- \`prefers-reduced-motion: reduce\` を尊重（アニメーションはすべて CSS で、\`base.css\` の \`@media (prefers-reduced-motion)\` が止める。Conversation の最下部へのスクロールは JS 側で instant に切り替える）
 - 組み込み: \`ao-anim-scale\`（\`:popover-open\` で 0.18s scale）/ \`ao-anim-fade\`（0.15s opacity）
 
 ### インタラクティブ状態
@@ -418,6 +418,7 @@ import { UIProvider, Button, Card } from '@k8ordo/ui';
 
 - **Button** — \`size: 'sm'|'md'|'lg'\`, \`color: 'primary'|'secondary'|'base'\`, \`variant: 'solid'|'outline'|'skeleton'\`, \`fullWidth\`, \`startIcon\`, \`endIcon\`, \`disabled\`
 - **IconButton** — \`label\`（必須・aria-label）, \`color: 'transparent'|'base'|'primary'|'secondary'\`, \`size\`
+- **CopyButton** — \`value\`（文字列、または押したときに呼ぶ関数。Promise も可）, \`label\`, \`iconOnly\`, \`size\`。押すとアイコンがチェックに変わり、結果を読み上げる。コピーは IconButton と自前のクリップボード処理ではなくこれを使う
 - リンクとして描画するときは Button / IconButton に \`renderItem\` を渡す（\`<button>\` 専用の \`disabled\` / \`type\` を外し、残りの props を \`<a>\` などへ展開する。IconButton は tooltip の配線と ref を持つ \`triggerProps\` も展開する）
 
 ### Data display
@@ -430,7 +431,10 @@ import { UIProvider, Button, Card } from '@k8ordo/ui';
 - **Code** — \`children: string\`（インラインコード。色文字列には色見本が付く）
 - **Heading** — \`level: 'h1'..'h6'\`（必須）, \`id?\`, \`lineClamp?\`
 - **Kbd** — \`children: string\`（1 キー 1 要素。組み合わせは並べる）, \`label?\`（記号キーの読み上げ）
+- **Prose** — Markdown / MDX が描いた本文の組版を戻す入れ物。クラスの無い素の要素だけを組み、部品は自分の見た目のまま（日本語向け: 広い行間、em は傍点、縦書きは段落頭を 1 字下げ）
 - **Table**（compound: \`Root\` / \`Caption\` / \`Head\` / \`Body\` / \`Row\` / \`HeaderCell\` / \`Cell\` / \`EmptyState\`(\`colSpan\` + EmptyState の props)）
+- **DataTable** — 制御型（\`sort\` / \`onSortChange\`、\`selectedIds\` / \`onSelectedIdsChange\`、\`hiddenColumnIds\` / \`onHiddenColumnIdsChange\`）。並べ替えはせず、渡された順に描く。列は \`{ id, header, cell, align?, sortable?, hideable? }\`
+- **Tree** — \`items\`（\`{ id, label, icon?, children? }\` の木）, \`label\`、\`expandedIds\` / \`selectedId\` は制御も非制御も可。WAI-ARIA tree のキーボード操作
 
 ### Feedback
 
@@ -462,7 +466,6 @@ import { UIProvider, Button, Card } from '@k8ordo/ui';
 - **Stack** — フレックスレイアウト
 - **Grid** — グリッドレイアウト
 - **Separator** — \`color: 'base'|'mute'|'subtle'\`, \`orientation: 'horizontal'|'vertical'\`
-- **ScrollLinked** — スクロール進捗バー（\`container?\`）
 
 ### Observers
 
@@ -474,6 +477,8 @@ import { UIProvider, Button, Card } from '@k8ordo/ui';
 - **Anchor** — テキストリンク。外部リンクに自動で新規タブアイコン。\`href\`, \`openInNewTab?\`, \`renderAnchor?\`
 - **Breadcrumb**（compound: \`List\` / \`Item\` / \`Link\`(\`current?\`) / \`Separator\`）
 - **Pagination** — ページネーション
+- **SideNav**（compound: \`Root\`(\`label\`) / \`Group\`(\`title\`) / \`Link\`(\`href\`, \`current?\`, \`renderAnchor?\`)）— 今のページを傍線で示す
+- **TableOfContents** — \`items\`（\`{ id, label, children? }\` の木）, \`label?\`。見出しの scroll-margin を読み取り位置にして今の見出しを示す
 - **Tabs**（compound: \`Root\`(\`ids\` / \`defaultSelectedId?\`) / \`List\` / \`Tab\` / \`Panel\`）
 
 ### Overlays

@@ -1,8 +1,6 @@
-'use client';
-
 import type { FC, ReactNode } from 'react';
 
-import { useMessages } from '../../../i18n/context';
+import { getMessages } from '../../../i18n/current';
 import { SparklesIcon } from '../../icons';
 import { Collapsible } from '../_internal/collapsible';
 
@@ -21,7 +19,7 @@ export const Reasoning: FC<Props> = ({
   defaultOpen = false,
   onChange,
 }) => {
-  const messages = useMessages();
+  const messages = getMessages();
 
   return (
     <Collapsible

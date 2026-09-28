@@ -1,6 +1,10 @@
 import { execFileSync } from 'node:child_process';
+import { readdir, readFile } from 'node:fs/promises';
+import { isBuiltin } from 'node:module';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
+
+import { parseSync } from 'vite';
 
 type Handler = (request: Request) => Promise<Response>;
 
@@ -51,7 +55,7 @@ registerHooks({
   },
 });
 
-const { serve } = await import('@k8ordo/server/runtime');
+const { serve } = await import('@k8ordo/server/serve');
 const server = await serve({ port: 0 });
 try {
   const response = await fetch(server.url);
@@ -61,7 +65,65 @@ try {
 }
 `;
 
+// 組み上がったハンドラを Deno で呼び、答えを JSON で書き出す。読むのは
+// ファイルだけで、ネットワークも環境変数も許さない
+const UNDER_DENO = `
+const { default: handler } = await import('./dist/rsc/index.js');
+const answers = [];
+for (const pathname of ['/', '/products/2', '/products/index.rsc', '/products/shoes', '/old']) {
+  const response = await handler(new Request('https://example.test' + pathname));
+  answers.push({
+    pathname,
+    status: response.status,
+    type: response.headers.get('content-type'),
+    location: response.headers.get('location'),
+    body: await response.text(),
+  });
+}
+console.log(JSON.stringify(answers));
+`;
+
+type Answer = {
+  pathname: string;
+  status: number;
+  type: string | null;
+  location: string | null;
+  body: string;
+};
+
 const root = path.resolve(import.meta.dirname, '..');
+
+/** ハンドラを成す rsc と ssr の全モジュールが import する指定子 */
+const specifiersOfHandler = async (): Promise<ReadonlySet<string>> => {
+  const modules = await Promise.all(
+    ['rsc', 'ssr'].map(async (environment) => {
+      const dir = path.join(root, 'dist', environment);
+      const files = await readdir(dir, { recursive: true });
+      return Promise.all(
+        files
+          .filter((file) => file.endsWith('.js'))
+          .map(async (file) => {
+            const source = await readFile(path.join(dir, file), 'utf8');
+            const { module } = parseSync(file, source, {
+              sourceType: 'module',
+            });
+            return module.staticImports
+              .map((entry) => entry.moduleRequest.value)
+              .concat(
+                // 動的 import の範囲は引用符ごとの文字列リテラル
+                module.dynamicImports.map((entry) =>
+                  source.slice(
+                    entry.moduleRequest.start + 1,
+                    entry.moduleRequest.end - 1,
+                  ),
+                ),
+              );
+          }),
+      );
+    }),
+  );
+  return new Set(modules.flat(2));
+};
 const ORIGIN = 'https://example.test';
 let handler: Handler;
 
@@ -229,9 +291,337 @@ describe('the built request handler', () => {
     expect(page).not.toContain('data-testid="error"');
     expect(entriesOf(page)).toContain('<li>k8o</li>');
   });
+
+  it('answers a guestbook signed without JavaScript with the cookie the action set', async () => {
+    const html = await (await handler(new Request(`${ORIGIN}/`))).text();
+    const body = formDataOf(html, 'guestbook-form');
+    body.set('name', 'k8o');
+    const response = await handler(
+      new Request(`${ORIGIN}/`, {
+        method: 'POST',
+        headers: { origin: ORIGIN },
+        body,
+      }),
+    );
+    expect(response.headers.getSetCookie()).toStrictEqual([
+      'visitor=k8o; Path=/; HttpOnly; Secure; SameSite=Lax',
+    ]);
+  });
+});
+
+describe('a Server Action posted to a [locale] page', () => {
+  it.each([
+    ['/ja/greeting', 'こんにちは、k8o さん。'],
+    ['/en/greeting', 'Hello, k8o.'],
+  ])(
+    'runs in the locale %s names, as the page renders',
+    async (pathname, greeting) => {
+      const html = await (
+        await handler(new Request(`${ORIGIN}${pathname}`))
+      ).text();
+      const body = formDataOf(html, 'greet-form');
+      body.set('name', 'k8o');
+      const response = await handler(
+        new Request(`${ORIGIN}${pathname}`, {
+          method: 'POST',
+          headers: { origin: ORIGIN },
+          body,
+        }),
+      );
+      expect(response.status).toBe(200);
+      expect(await response.text()).toContain(
+        `<p data-testid="greeting">${greeting}</p>`,
+      );
+    },
+  );
+});
+
+describe('a page that exports search', () => {
+  it('receives the search, read through its url schema', async () => {
+    const html = await (
+      await handler(new Request(`${ORIGIN}/products?q=second`))
+    ).text();
+    expect(html).toContain('second product');
+    expect(html).not.toContain('first product');
+    expect(html).toContain('value="second"');
+  });
+
+  it('receives the schema’s defaults when the URL has no search', async () => {
+    const html = await (
+      await handler(new Request(`${ORIGIN}/products`))
+    ).text();
+    expect(html).toContain('first product');
+    expect(html).toContain('second product');
+  });
+
+  it('is rendered for the search its payload is asked with, and says which', async () => {
+    const payload = await (
+      await handler(new Request(`${ORIGIN}/products/index.rsc?q=first`))
+    ).text();
+    expect(payload).toContain('first product');
+    expect(payload).not.toContain('second product');
+    expect(payload).toContain('"search":"?q=first"');
+  });
+
+  it('leaves a page that does not export search without one', async () => {
+    const payload = await (
+      await handler(new Request(`${ORIGIN}/index.rsc?q=anything`))
+    ).text();
+    expect(payload).not.toContain('"search":"?q=anything"');
+  });
+});
+
+describe('route.ts', () => {
+  it('answers with what its GET returns, reading the request it was handed', async () => {
+    const response = await handler(new Request(`${ORIGIN}/feed.xml`));
+    expect(response.status).toBe(200);
+    expect(response.headers.get('content-type')).toBe(
+      'application/rss+xml;charset=utf-8',
+    );
+    const xml = await response.text();
+    expect(xml).toContain('<title>first product</title>');
+    expect(xml).toContain(`<link>${ORIGIN}/products/1</link>`);
+  });
+
+  it('answers HEAD from its GET, without the body', async () => {
+    const response = await handler(
+      new Request(`${ORIGIN}/feed.xml`, { method: 'HEAD' }),
+    );
+    expect(response.status).toBe(200);
+    expect(response.headers.get('content-type')).toContain('rss');
+    expect(response.body).toBeNull();
+  });
+
+  it('answers a method it does not export with a 405 naming the ones it does', async () => {
+    const response = await handler(
+      new Request(`${ORIGIN}/feed.xml`, { method: 'PUT' }),
+    );
+    expect(response.status).toBe(405);
+    expect(response.headers.get('allow')).toBe('GET, HEAD');
+  });
+
+  it('has no payload, so a client navigation to it loads the document', async () => {
+    const response = await handler(new Request(`${ORIGIN}/feed.xml/index.rsc`));
+    expect(response.status).toBe(404);
+    expect(response.headers.get('content-type')).toContain('text/plain');
+  });
+
+  it('runs the guards above it first', async () => {
+    const response = await handler(new Request(`${ORIGIN}/feed.xml`));
+    expect(response.headers.get('x-content-type-options')).toBe('nosniff');
+  });
+
+  it('takes a POST from anywhere, and writes the cookies it sets', async () => {
+    const response = await handler(
+      new Request(`${ORIGIN}/api/entries`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ name: 'webhook' }),
+      }),
+    );
+    expect(response.status).toBe(201);
+    expect(response.headers.getSetCookie()).toStrictEqual([
+      'visitor=webhook; Path=/; HttpOnly; Secure; SameSite=Lax',
+    ]);
+    const listed = await handler(new Request(`${ORIGIN}/api/entries`));
+    expect(await listed.json()).toMatchObject({
+      entries: expect.arrayContaining(['webhook']),
+    });
+  });
+});
+
+describe('notFound()', () => {
+  it('answers a page that said notFound() with the nearest not-found.tsx, under a 404', async () => {
+    const response = await handler(new Request(`${ORIGIN}/products/99`));
+    expect(response.status).toBe(404);
+    const html = await response.text();
+    expect(html).toContain('data-testid="title">not found<');
+    // レイアウトの中に描かれる
+    expect(html).toContain('<nav>');
+  });
+
+  it('answers HEAD for such a page with the same 404', async () => {
+    const response = await handler(
+      new Request(`${ORIGIN}/products/99`, { method: 'HEAD' }),
+    );
+    expect(response.status).toBe(404);
+    expect(response.body).toBeNull();
+  });
+
+  it('streams the payload rather than waiting, carrying the page’s word as a digest', async () => {
+    const response = await handler(
+      new Request(`${ORIGIN}/products/99/index.rsc`),
+    );
+    expect(response.status).toBe(200);
+    expect(await response.text()).toContain('K8ORDO_NOT_FOUND');
+  });
+
+  it('leaves a page that found what it wanted alone', async () => {
+    const response = await handler(new Request(`${ORIGIN}/products/1`));
+    expect(response.status).toBe(200);
+    expect(await response.text()).toContain('first product');
+  });
+});
+
+describe('guard.ts', () => {
+  it.each([
+    ['a page', '/'],
+    ['a URL nothing answers', '/nowhere'],
+    ['a payload', '/products/index.rsc'],
+  ])(
+    'runs the root guard before %s, and the answer carries what it added',
+    async (_what, pathname) => {
+      const response = await handler(new Request(`${ORIGIN}${pathname}`));
+      expect(response.headers.get('x-content-type-options')).toBe('nosniff');
+    },
+  );
+
+  it('ends a request its guard answers, before the page renders', async () => {
+    const response = await handler(new Request(`${ORIGIN}/members`));
+    expect(response.status).toBe(401);
+    expect(await response.text()).toBe(
+      'members only — sign the guestbook first',
+    );
+  });
+
+  it('lets through what its guard lets through', async () => {
+    const response = await handler(
+      new Request(`${ORIGIN}/members`, { headers: { cookie: 'visitor=k8o' } }),
+    );
+    expect(response.status).toBe(200);
+    expect(await response.text()).toContain('data-testid="member">k8o<');
+  });
+
+  it('carries the outer guard’s headers on the answer an inner guard ended with', async () => {
+    const response = await handler(new Request(`${ORIGIN}/members`));
+    expect(response.headers.get('x-content-type-options')).toBe('nosniff');
+  });
+
+  it.each([
+    ['the payload of a guarded page', '/members/index.rsc', { method: 'GET' }],
+    ['a HEAD of a guarded page', '/members', { method: 'HEAD' }],
+    [
+      'a POST to a guarded page',
+      '/members',
+      { method: 'POST', headers: { origin: ORIGIN }, body: new FormData() },
+    ],
+  ])(
+    'guards %s the same as its HTML',
+    async (_what, pathname, init: RequestInit) => {
+      const response = await handler(new Request(`${ORIGIN}${pathname}`, init));
+      expect(response.status).toBe(401);
+    },
+  );
+});
+
+// ガードが書いたポリシーが名指す nonce
+const nonceNamedBy = (response: Response): string | undefined =>
+  /'nonce-([^']+)'/u.exec(
+    response.headers.get('content-security-policy') ?? '',
+  )?.[1];
+
+describe('a Content-Security-Policy with a nonce', () => {
+  it.each([
+    ['a page', '/'],
+    ['a page whose content streams in', '/products'],
+    ['the not-found page', '/nowhere'],
+  ])(
+    'signs every script of %s with the nonce its guard named',
+    async (_what, pathname) => {
+      const response = await handler(new Request(`${ORIGIN}${pathname}`));
+      const nonce = nonceNamedBy(response);
+      expect(nonce).toMatch(/^[A-Za-z0-9+/]{22}==$/u);
+      const scripts = [
+        ...(await response.text()).matchAll(/<script\b[^>]*>/giu),
+      ].map(([tag]) => tag);
+      // 起動のモジュール・ペイロード・color-scheme のインラインスクリプト
+      expect(scripts.length).toBeGreaterThanOrEqual(3);
+      expect(
+        scripts.filter((tag) => !tag.includes(` nonce="${String(nonce)}"`)),
+      ).toStrictEqual([]);
+    },
+  );
+
+  it('signs each answer with a nonce of its own', async () => {
+    const [first, second] = await Promise.all([
+      handler(new Request(`${ORIGIN}/`)),
+      handler(new Request(`${ORIGIN}/`)),
+    ]);
+    expect(nonceNamedBy(first)).not.toBe(nonceNamedBy(second));
+  });
+});
+
+describe('the built request handler, outside Node', () => {
+  it('reaches for nothing from Node but AsyncLocalStorage', async () => {
+    const builtins = [...(await specifiersOfHandler())].filter((specifier) =>
+      isBuiltin(specifier),
+    );
+    expect(builtins).toStrictEqual(['node:async_hooks']);
+  });
+
+  it('answers under Deno as it does under Node', () => {
+    const answers = JSON.parse(
+      execFileSync(
+        'deno',
+        ['run', '--allow-read', '--no-lock', '--node-modules-dir=manual', '-'],
+        { cwd: root, encoding: 'utf8', input: UNDER_DENO, stdio: 'pipe' },
+      ),
+    ) as Answer[];
+    expect(
+      answers.map(({ pathname, status, type, location }) => ({
+        pathname,
+        status,
+        type,
+        location,
+      })),
+    ).toStrictEqual([
+      {
+        pathname: '/',
+        status: 200,
+        type: 'text/html;charset=utf-8',
+        location: null,
+      },
+      {
+        pathname: '/products/2',
+        status: 200,
+        type: 'text/html;charset=utf-8',
+        location: null,
+      },
+      {
+        pathname: '/products/index.rsc',
+        status: 200,
+        type: 'text/x-component;charset=utf-8',
+        location: null,
+      },
+      {
+        pathname: '/products/shoes',
+        status: 404,
+        type: 'text/html;charset=utf-8',
+        location: null,
+      },
+      { pathname: '/old', status: 307, type: null, location: '/products' },
+    ]);
+    const [home, product, payload] = answers;
+    expect(home?.body).toContain('rendered on the server');
+    // スキーマが AsyncLocalStorage の文脈の中で走り、id を数にしてから描いた
+    expect(product?.body).toContain('number:2');
+    expect(payload?.body).toContain('second product');
+  });
 });
 
 describe('the deployed application', () => {
+  it('ships every script compressed ahead of time, beside itself', async () => {
+    const assets = await readdir(path.join(root, 'dist', 'client', 'assets'));
+    const scripts = assets.filter((name) => name.endsWith('.js'));
+    expect(scripts.length).toBeGreaterThan(0);
+    expect(assets.filter((name) => name.endsWith('.js.br'))).toStrictEqual(
+      scripts.map((name) => `${name}.br`),
+    );
+    expect(assets.filter((name) => name.endsWith('.js.gz'))).toStrictEqual(
+      scripts.map((name) => `${name}.gz`),
+    );
+  });
+
   it('serves a page with only its production dependencies installed', () => {
     const output = execFileSync(
       process.execPath,

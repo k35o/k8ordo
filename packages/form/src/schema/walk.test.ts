@@ -172,6 +172,37 @@ describe('nested and repeated fields', () => {
     });
   });
 
+  it('reads a stringbool checkbox inside a repeated row through its row name', () => {
+    const rowsWithFlag = z.object({
+      members: z.array(
+        z.object({ name: z.string(), admin: z.stringbool().default(false) }),
+      ),
+    });
+
+    expect(
+      formFields(rowsWithFlag).arrays.members.item.admin?.input,
+    ).toStrictEqual({
+      name: 'members[{index}].admin',
+      type: 'checkbox',
+      value: 'true',
+    });
+    expect(
+      parseForm(
+        rowsWithFlag,
+        formDataOf([
+          ['members[0].name', 'k8o'],
+          ['members[0].admin', 'true'],
+          ['members[1].name', 'guest'],
+        ]),
+      ).data,
+    ).toStrictEqual({
+      members: [
+        { name: 'k8o', admin: true },
+        { name: 'guest', admin: false },
+      ],
+    });
+  });
+
   it('refuses a schema it cannot expand rather than parsing it wrong', () => {
     expect(() =>
       formFields(z.object({ meta: z.record(z.string(), z.string()) })),
