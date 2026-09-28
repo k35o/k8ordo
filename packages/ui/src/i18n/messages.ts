@@ -105,6 +105,9 @@ export type Messages = {
   /** TableOfContents の見出し（nav の名前にもなる） */
   tableOfContents: string;
 
+  /** ResizablePanels.Handle の既定の名前。値は 1 枚目の大きさ */
+  resizablePanelsHandle: string;
+
   /** Conversation.Messages の log ランドマーク名 */
   chat: string;
   scrollToLatest: string;
