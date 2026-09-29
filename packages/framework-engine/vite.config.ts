@@ -37,6 +37,11 @@ export default defineConfig({
         test: {
           name: { label: 'unit', color: 'blue' },
           include: ['src/**/*.test.ts'],
+          // フィクスチャのビルド出力は、@k8ordo/server の serve と同じく Node に
+          // そのまま読ませる。既定ではモジュールランナーが最初のリクエストで
+          // 2 万行近い SSR バンドルをメインプロセスに変換させ、CI の負荷の下では
+          // それだけで 5 秒を超える
+          server: { deps: { external: [/\/fixtures\/[^/]+\/dist\//u] } },
         },
       },
       {
