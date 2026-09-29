@@ -416,6 +416,11 @@ read with the built-in `stepperComplete` wording, and the current step carries
 buttons that go back to them (`onChange` receives the index); steps ahead are
 never buttons. Name the list with `aria-label`.
 
+`orientation` is logical: `horizontal` lays the steps along the line and
+`vertical` stacks them, so inside `writing-v` they run top to bottom and right
+to left respectively, with the connecting lines drawn to match and the step
+numbers kept upright.
+
 In a multi-step form (see `@k8ordo/form`'s guide), keep every step mounted and
 drive `value` from the step you show.
 
