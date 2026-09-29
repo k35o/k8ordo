@@ -43,7 +43,15 @@ import type { Locale } from './i18n';
 export const fromBrowser = (): Locale => locales.negotiate(navigator.languages);
 
 export const fromRequest = (request: Request): Locale =>
-  locales.negotiateRequest(request, { cookie: 'locale' });`;
+  locales.negotiateRequest(request, { cookie: 'locale' });
+
+export const remember = (locale: Locale): Promise<void> =>
+  cookieStore.set({
+    name: 'locale',
+    value: locale,
+    sameSite: 'lax',
+    expires: Date.now() + 400 * 24 * 60 * 60 * 1000,
+  });`;
 
 type Row = { code: string; description: Message };
 

@@ -144,8 +144,25 @@ visitor chose before, written where they switched language — then the
 `Accept-Language` header in its order of preference. Both go through
 `negotiate`, so a cookie still holding a locale the set no longer lists falls
 through to the header. The name is the application's: a language switcher
-that writes it (`cookieStore.set('locale', next)`) and the server that reads it
-agree on one. Without `cookie`, only the header is read.
+that writes it and the server that reads it agree on one. Without `cookie`,
+only the header is read.
+
+```ts
+// the language switcher, in the browser
+await cookieStore.set({
+  name: 'locale',
+  value: next,
+  sameSite: 'lax',
+  expires: Date.now() + 400 * 24 * 60 * 60 * 1000,
+});
+```
+
+Left to the Cookie Store API's defaults, the switcher would write a session
+cookie under `SameSite=Strict`: the choice is gone once the browser closes,
+and the first request arriving from a link on another site goes without it,
+so that page is chosen by the header instead. `sameSite: 'lax'` and a far
+`expires` — 400 days is the longest a browser keeps a cookie — are what make
+the choice stick.
 
 `parseAcceptLanguage(header)` is the header half on its own: it turns an
 `Accept-Language` header into a preference list for `negotiate`: `q` weights decide the order (a `q` that is not a number is ignored),
