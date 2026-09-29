@@ -171,6 +171,16 @@ describe('a redirect.ts in the table', () => {
       stack: [stub('[slug]/redirect.ts')],
     });
   });
+
+  it('holds the URL of a directory that has pages below it', () => {
+    const branch = tableFor([
+      'page.tsx',
+      'docs/redirect.ts',
+      'docs/intro/page.tsx',
+    ]);
+    expect(branch.match('/docs')?.pattern).toBe('/docs');
+    expect(branch.match('/docs/intro')?.pattern).toBe('/docs/intro');
+  });
 });
 
 describe('a loading.tsx in the table', () => {

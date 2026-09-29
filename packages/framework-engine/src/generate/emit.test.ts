@@ -293,6 +293,32 @@ describe('unreachableRoutes', () => {
     ]);
   });
 
+  it('says nothing of a literal page beside a [slug]/redirect.ts', () => {
+    expect(
+      unreachableRoutes(
+        treeOf(['page.tsx', 'about/page.tsx', '[slug]/redirect.ts']),
+      ),
+    ).toStrictEqual([]);
+  });
+
+  it('names a redirect that a group puts before a page it shadows', () => {
+    const problems = unreachableRoutes(
+      treeOf([
+        'page.tsx',
+        'about/page.tsx',
+        '(legacy)/sale/page.tsx',
+        '(legacy)/[slug]/redirect.ts',
+      ]),
+    );
+    expect(problems).toStrictEqual([
+      {
+        path: 'about/page.tsx',
+        message:
+          '"/about" can never match — "/:slug" ((legacy)/[slug]/redirect.ts) is declared first and answers it',
+      },
+    ]);
+  });
+
   it('names a route the catch-all above it swallows', () => {
     const problems = unreachableRoutes(
       treeOf([

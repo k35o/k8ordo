@@ -19,7 +19,7 @@ const browserTypes = [chromium, firefox, webkit]
   )
   .map((type) => ({ name: type.name(), type }));
 
-let built: BuiltFixture;
+let built: BuiltFixture | undefined;
 let server: Server;
 let browser: Browser;
 let origin = '';
@@ -27,8 +27,7 @@ let origin = '';
 // 素の NotFound はビルドされたアプリの中にしか現れないので、テストが
 // not-found.tsx を持たないアプリを実際にビルドする
 beforeAll(async () => {
-  built = await buildFixture('bare-not-found');
-  const { handler, out } = built;
+  const { handler, out } = (built = await buildFixture('bare-not-found'));
 
   // ハッシュ付きの資産はファイルから、それ以外はハンドラが答える。
   // @k8ordo/server の serve と同じ分担
@@ -58,7 +57,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   server.close();
-  await built.dispose();
+  await built?.dispose();
 });
 
 // hydrate する前のリンクは JS なしの文書の読み込みになり、クライアント遷移の
