@@ -124,7 +124,7 @@ Components.
 
 > [Full key list and details](references/components.md) (the "i18n (message dictionary)" section)
 
-### Migrating from 3.x
+### Migrating from 2.x
 
 `UIProvider`'s `messages`, `MessagesProvider`, `useMessages`, and
 `dictionaries` are gone.

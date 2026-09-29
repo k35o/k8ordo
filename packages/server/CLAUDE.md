@@ -50,6 +50,12 @@ pnpm check         # check:write to auto-fix
   only Node API is `node:async_hooks`. `examples/server-basic` reads the
   built handler's imports for that and runs it under Deno (`deno` is in
   `mise.toml` for CI).
+- **The request's URL is the `Host` header and the path, written, never
+  resolved.** `urlOf` writes the request target after `http://<Host>`; resolved
+  against it instead, `//evil.test/x` is a URL on evil.test, and the handler's
+  Server Action same-origin check compares `Origin` with whatever host the URL
+  names. So a target that is not a path (absolute-form, `*`) and a `Host` that
+  is not a host are refused with `400` rather than given a URL.
 - **A request may only name a file inside the client build.** `safeJoin` is
   the only way `serve` turns a pathname into a path, and it is tested against
   the spellings traversal takes; decoding is the engine's `decodePathname`,

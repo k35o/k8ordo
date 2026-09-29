@@ -141,8 +141,8 @@ export const handlerFiles = message({
 });
 
 export const handlerOrigin = message({
-  ja: '`Request` は、訪問者が求めた URL で作ります。ハンドラは、POST の `Origin` ヘッダーがあり、そのホストがその URL のホストと一致するときだけ受け付け、それ以外の POST には `403` で答えるからです。プロキシの後ろでは、公開されているホストをそのまま渡します。`serve()` はリクエスト自身の `Host` ヘッダーから URL を作り、転送用のヘッダーは読まないので、前に置くプロキシは元の `Host` を書き換えずに渡します。',
-  en: "Build the `Request` with the URL the visitor asked for: the handler accepts a POST only when its `Origin` header is present and names that URL's host, and answers any other POST with a `403`. Behind a proxy that means passing the public host through — `serve()` builds the URL from the request's own `Host` header and reads no forwarded header, so a proxy in front of it has to pass the original `Host` on unchanged.",
+  ja: '`Request` は、訪問者が求めた URL で作ります。ハンドラは、POST の `Origin` ヘッダーがあり、そのホストがその URL のホストと一致するときだけ受け付け、それ以外の POST には `403` で答えるからです。プロキシの後ろでは、公開されているホストをそのまま渡します。`serve()` はリクエスト自身の `Host` ヘッダーから URL を作り、転送用のヘッダーは読まないので、前に置くプロキシは元の `Host` を書き換えずに、パスはブラウザが送るとおりパスだけで渡します。リクエスト行が自分でホストを名乗るもの（`GET http://…`）や、`Host` がホストでないものには `400` で答えます。パスから URL を自分で作るホストは、`new URL(path, origin)` で解決せず、オリジンの後ろに文字列としてつなぎます。解決すると `https://example.com//evil.test/` のパスは `evil.test` の URL になり、evil.test のフォームがこの検査を通ってしまいます。',
+  en: "Build the `Request` with the URL the visitor asked for: the handler accepts a POST only when its `Origin` header is present and names that URL's host, and answers any other POST with a `403`. Behind a proxy that means passing the public host through — `serve()` builds the URL from the request's own `Host` header and reads no forwarded header, so a proxy in front of it has to pass the original `Host` on unchanged, and the path alone, as a browser sends it: a request line that names a host of its own (`GET http://…`), or a `Host` that is not a host, is answered with a `400`. A host that builds the URL from a path itself appends the path to the origin as text instead of resolving it with `new URL(path, origin)`: resolved, the path of `https://example.com//evil.test/` is a URL on `evil.test`, and a form on evil.test would pass the check.",
 });
 
 export const vercelTitle = message({

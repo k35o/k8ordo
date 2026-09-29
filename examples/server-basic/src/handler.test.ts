@@ -4,6 +4,8 @@ import { isBuiltin } from 'node:module';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
+import { serve } from '@k8ordo/server/serve';
+import type { Server } from '@k8ordo/server/serve';
 import { parseSync } from 'vite';
 
 type Handler = (request: Request) => Promise<Response>;
@@ -333,6 +335,32 @@ describe('a cookie state a Server Action writes', () => {
       }),
     );
     expect(await next.text()).toContain('density:compact');
+  });
+});
+
+describe('a Server Action under serve', () => {
+  let server: Server;
+
+  beforeAll(async () => {
+    server = await serve({ dist: path.join(root, 'dist'), port: 0 });
+  });
+
+  afterAll(async () => {
+    await server.close();
+  });
+
+  it('is refused when posted to a path that spells the posting origin as a host', async () => {
+    // attacker.test のフォームが http://<このサーバー>//attacker.test/ へ送ると、
+    // ブラウザは Host にこのサーバーを、パスに //attacker.test/ を書き、Origin を
+    // http://attacker.test にする。パスを URL として解決すると、ホストが Origin と揃う
+    const html = await (await fetch(server.url)).text();
+    const response = await fetch(`${server.url}//attacker.test/`, {
+      method: 'POST',
+      headers: { origin: 'http://attacker.test' },
+      body: formDataOf(html, 'leave-form'),
+      redirect: 'manual',
+    });
+    expect(response.status).toBe(403);
   });
 });
 
