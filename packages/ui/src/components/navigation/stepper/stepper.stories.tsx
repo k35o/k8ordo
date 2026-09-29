@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
+import type { Decorator, Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, within } from 'storybook/test';
 
 import { Stepper } from '.';
@@ -111,7 +111,7 @@ const connectorsOf = (canvasElement: HTMLElement) => [
 ];
 
 // 横書きの例（max-w-2xl）と同じだけの長さを、縦書きの行の向きに取る
-const writingVertical = (Story: () => React.JSX.Element) => (
+const writingVertical: Decorator = (Story) => (
   <div className="writing-v h-168">
     <Story />
   </div>
