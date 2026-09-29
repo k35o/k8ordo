@@ -555,6 +555,12 @@ Selecting a tab is a transition: the panels cross-fade through React's
 `<ViewTransition>` (off under `prefers-reduced-motion`), and a panel that
 suspends keeps the current one on screen until it is ready.
 
+The keys follow the WAI-ARIA tabs pattern, and focusing a tab selects it.
+`ArrowLeft` / `ArrowRight` move to the previous / next tab, wrapping at the
+ends, and swap under `dir="rtl"`; in vertical writing mode the list is
+vertical and `ArrowUp` / `ArrowDown` do the same. `Home` / `End` go to the
+first / last tab.
+
 Props (Tabs.Root):
 
 - `ids`: `[string, ...string[]]` (required)
