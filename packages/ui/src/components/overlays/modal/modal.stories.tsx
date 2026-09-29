@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { expect, fn, waitFor } from 'storybook/test';
 
 import { Button } from '../../buttons/button';
@@ -148,6 +148,77 @@ export const ExternalRefControl: Story = {
       if (getComputedStyle(dialog).opacity !== '1') {
         throw new Error('waiting for animation');
       }
+    });
+  },
+};
+
+// 閉じるのは <dialog> 自身で、Modal はその close を onClose で知らせる。
+// Storybook の userEvent のキーは合成で Escape の既定の動作が起きないので、
+// 枠外（<dialog> 自身）を押して閉じる
+export const UncontrolledCloses: Story = {
+  args: {
+    defaultOpen: true,
+    'aria-label': 'お知らせ',
+    children: <p className="p-4">枠外を押すと閉じるモーダル</p>,
+    onClose: fn(),
+  },
+  play: async ({ args, canvas, userEvent }) => {
+    const dialog = canvas.getByRole('dialog', { name: 'お知らせ' });
+
+    await userEvent.click(dialog);
+
+    await expect(dialog).not.toHaveAttribute('open');
+    // close イベントは閉じたあとのタスクで届く
+    await waitFor(() => {
+      expect(args.onClose).toHaveBeenCalledOnce();
+    });
+  },
+};
+
+const ControlledRender = () => {
+  const [isOpen, setIsOpen] = useState(true);
+  return (
+    <>
+      <Button
+        onClick={() => {
+          setIsOpen(true);
+        }}
+        size="md"
+        type="button"
+      >
+        開く
+      </Button>
+      <p>{isOpen ? '開いています' : '閉じています'}</p>
+      <Modal
+        aria-label="制御されたモーダル"
+        isOpen={isOpen}
+        onClose={() => {
+          setIsOpen(false);
+        }}
+      >
+        <p className="p-4">isOpen で開け閉めするモーダル</p>
+      </Modal>
+    </>
+  );
+};
+
+// isOpen を渡すと、開け閉めは呼び出し側の state に従う。閉じる操作は onClose で
+// 知らせ、呼び出し側が isOpen を戻すと開き直す
+export const Controlled: Story = {
+  render: () => <ControlledRender />,
+  play: async ({ canvas, userEvent }) => {
+    const dialog = canvas.getByRole('dialog', { name: '制御されたモーダル' });
+
+    await userEvent.click(dialog);
+
+    await canvas.findByText('閉じています');
+    await expect(dialog).not.toHaveAttribute('open');
+
+    await userEvent.click(canvas.getByRole('button', { name: '開く' }));
+
+    await canvas.findByText('開いています');
+    await waitFor(() => {
+      expect(dialog).toHaveAttribute('open');
     });
   },
 };
