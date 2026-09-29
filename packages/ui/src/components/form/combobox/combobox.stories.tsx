@@ -1,7 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
+import type { FC } from 'react';
+import { useFormStatus } from 'react-dom';
 import { expect, fn, waitFor } from 'storybook/test';
 
+import { afterRenderingUpdate } from '../../../../.storybook/focus';
 import type { Option } from '../../../types/variables';
 import { Combobox } from './combobox';
 import type { ComboboxSearch } from './combobox';
@@ -254,6 +257,66 @@ export const Controlled: Story = {
 
     await expect(canvas.getByText('選んだ値: hokkaido')).toBeInTheDocument();
     await expect(input).toHaveValue('北海道');
+  },
+};
+
+// 返した Promise は play が finishPending を呼ぶまで解決しない。終わらない
+// action のままにすると、React が後から始まる action を同じ送信中として束ね、
+// 以降のストーリーの action も完了しなくなるので、見終わったら終わらせる
+let finishPending = (): void => {};
+
+const PendingNote: FC = () => {
+  const { pending } = useFormStatus();
+  return pending ? <p>送信中</p> : null;
+};
+
+const PendingRender: FC = () => (
+  <form
+    action={async () => {
+      await new Promise<void>((resolve) => {
+        finishPending = resolve;
+      });
+    }}
+  >
+    <Combobox
+      aria-label="都道府県"
+      defaultValue="kyoto"
+      name="prefecture"
+      options={PREFECTURES}
+    />
+    <PendingNote />
+  </form>
+);
+
+// 送信中も欄はフォーカスを持ち続け、値は変えさせない。Enter で送ると
+// 欄にフォーカスがあるまま送信中になる
+export const PendingKeepsFocus: Story = {
+  render: () => <PendingRender />,
+  play: async ({ canvas, userEvent }) => {
+    const input = canvas.getByRole<HTMLInputElement>('combobox', {
+      name: '都道府県',
+    });
+
+    try {
+      input.focus();
+      input.form?.requestSubmit();
+      await canvas.findByText('送信中');
+      await afterRenderingUpdate();
+
+      await expect(input).toHaveFocus();
+      await expect(input).toHaveAttribute('readonly');
+
+      await userEvent.keyboard('{ArrowDown}');
+      await expect(input).toHaveAttribute('aria-expanded', 'false');
+      await userEvent.click(input);
+      await expect(input).toHaveAttribute('aria-expanded', 'false');
+      await expect(input).toHaveValue('京都府');
+    } finally {
+      finishPending();
+    }
+    await waitFor(async () => {
+      await expect(input).not.toHaveAttribute('readonly');
+    });
   },
 };
 
