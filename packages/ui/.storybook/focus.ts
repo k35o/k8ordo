@@ -12,3 +12,20 @@ export const blurActiveElement = (): void => {
     document.activeElement.blur();
   }
 };
+
+/**
+ * Chromium は無効になった要素のフォーカスを描画の更新で外す。2 フレーム待って
+ * 最初のフレームの更新を越えてから、フォーカスが残っているかを確かめる。
+ */
+export const afterRenderingUpdate = async (): Promise<void> => {
+  await new Promise<void>((resolve) => {
+    requestAnimationFrame(() => {
+      resolve();
+    });
+  });
+  await new Promise<void>((resolve) => {
+    requestAnimationFrame(() => {
+      resolve();
+    });
+  });
+};

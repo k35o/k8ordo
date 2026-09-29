@@ -55,6 +55,7 @@ className = 'animate-bounce';
 - Keep the focus ring consistent with `ring-border-info`
 - Clear the default outline with `outline-hidden` before applying the ring
 - Keep focus on a button that is waiting on its own action: show the wait with `aria-busy` and `aria-disabled` and ignore presses, rather than setting `disabled`. Chromium moves focus to `body` when the focused element becomes disabled, so the keyboard user who pressed it loses their place. `Button` and `IconButton` do this for `onAction`
+- For the same reason, a text field whose form's action is pending turns `readOnly`, not `disabled`, and ignores the keys that would change its value, so the user who pressed Enter in it keeps their place. `TextField`, `Textarea`, `PasswordInput`, `NumberField`, `DateField`, `DatePicker`, `ColorPicker`, `Combobox`, and `Autocomplete` do this
 
 ```tsx
 className =
