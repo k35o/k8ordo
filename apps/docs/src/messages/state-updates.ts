@@ -207,8 +207,8 @@ export const handleSettled = message({
 });
 
 export const handleReject = message({
-  ja: 'あとから来た遷移に追い越された遷移のハンドルは、`AbortError` で reject します。Web Storage や Cookie への保存に失敗した（容量の超過、4 KB を超える Cookie など）ときも reject しますが、描画された値はそのまま残ります。どちらも、ハンドルを待っていなければ unhandled rejection にはなりません。',
-  en: 'A navigation overtaken by a later one rejects its handle with an `AbortError`. A failed Web Storage or cookie write — a full quota, a cookie over 4 KB — rejects too, while the rendered value stays. Neither surfaces as an unhandled rejection when nobody awaits the handle.',
+  ja: 'あとから来た遷移に追い越された遷移のハンドルは、`AbortError` で reject します。Web Storage や Cookie への保存に失敗した（容量の超過、4 KB を超える Cookie、書き込む値でスキーマが例外を投げたなど）ときも reject しますが、描画された値はそのまま残ります。どちらも、ハンドルを待っていなければ unhandled rejection にはなりません。',
+  en: 'A navigation overtaken by a later one rejects its handle with an `AbortError`. A failed Web Storage or cookie write — a full quota, a cookie over 4 KB, a schema that throws on the values being written — rejects too, while the rendered value stays. Neither surfaces as an unhandled rejection when nobody awaits the handle.',
 });
 
 export const handleAwait = message({

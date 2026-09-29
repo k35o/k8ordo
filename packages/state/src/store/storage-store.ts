@@ -72,18 +72,19 @@ const createStorageStore = (
     pending = null;
     handle = null;
 
-    // Base the write on what storage holds now, not on the snapshot — a
-    // foreign tab may have written between the echo and this flush.
-    const target = codec.salvage({ ...read(), ...patch });
-    const values: StateValues = {};
-    for (const key of codec.keys) values[key] = target[key];
     try {
+      // Base the write on what storage holds now, not on the snapshot — a
+      // foreign tab may have written between the echo and this flush.
+      const target = codec.salvage({ ...read(), ...patch });
+      const values: StateValues = {};
+      for (const key of codec.keys) values[key] = target[key];
       write(values);
       core.applyNext(target);
       current.settle();
     } catch (error) {
-      // Quota or serialization failure: the echo already showed the value,
-      // but the caller who awaits learns persistence did not happen.
+      // Quota or serialization failure, or a schema that throws on its own
+      // output: the echo already showed the value, but the caller who awaits
+      // learns persistence did not happen.
       current.fail(error);
     }
   };

@@ -97,8 +97,8 @@ pnpm check         # check:write to auto-fix
   `string → boolean`) must never see its own output, or `update()` lands on
   the default. Two spellings the round trip cannot hold are refused when the
   codec is built — a url array whose default is not `[]` (absence and an
-  empty list are the same URL) and any boolean that is not `z.stringbool()`
-  (`"false"` is truthy to `z.coerce.boolean()`). A value with no URL spelling
+  empty list are the same URL) and any boolean, a field or an array's item,
+  that is not `z.stringbool()` (`"false"` is truthy to `z.coerce.boolean()`). A value with no URL spelling
   at all throws out of `update()` before the batch is touched, since a
   rejected handle is invisible to the fire-and-forget caller that is the
   normal case. Entry, local, session and cookie `salvage` hand the typed
@@ -155,7 +155,8 @@ fixtures/
 ## Where zod's public API runs out
 
 Wrapper peeling (`default`, `optional`, `catch`, pipes) reads `_zod.def` to
-decide whether a url field takes one param value or `getAll` — same coupling
+decide whether a url field takes one param value or `getAll`, and an array's
+`element` there to hold its items to the boolean rule — same coupling
 and same justification as `@k8ordo/form`'s walk. Everything else goes through
 the public core: `safeParse`, and `safeEncode` from `zod/v4/core` for a url
 boolean, which is written in its schema's own spelling (a custom

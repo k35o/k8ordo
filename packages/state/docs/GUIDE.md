@@ -107,13 +107,14 @@ is written into a query string and read again — the road a visitor's URL
 takes — so a url field must read back its own query-string spelling. A boolean
 is written in its schema's own spelling — `"true"`, or the first of a
 `z.stringbool()`'s `truthy` — which is what lets `z.stringbool()` turn it back
-into `true`. Two spellings that cannot are refused at module load rather than
-at the first click:
+into `true`; an array's booleans are each written in the item schema's. Two
+spellings that cannot are refused at module load rather than at the first
+click:
 
-| written                                                              | use instead      |
-| -------------------------------------------------------------------- | ---------------- |
-| `z.boolean()` / `z.coerce.boolean()` in `url`                        | `z.stringbool()` |
-| a `url` array that is `.optional()` or defaults to anything but `[]` | `.default([])`   |
+| written                                                                   | use instead      |
+| ------------------------------------------------------------------------- | ---------------- |
+| `z.boolean()` / `z.coerce.boolean()` in `url`, or as a `url` array's item | `z.stringbool()` |
+| a `url` array that is `.optional()` or defaults to anything but `[]`      | `.default([])`   |
 
 A URL carries strings, and `"false"` is not `false` to a boolean schema; an
 absent param and an empty list are the same URL, so an array whose default is
@@ -447,8 +448,9 @@ same handler, say — rejects the handle with an `AbortError`; unawaited calls
 never surface it. Updates with no navigation behind them return the same
 shape: entry-only, local, session and no-change page handles settle once the
 batch is flushed, cookie handles once the Cookie Store API has written it,
-memory handles on the spot. A local, session or cookie write the browser
-refuses — a full quota, a cookie over 4 KB — rejects the handle with that
+memory handles on the spot. A local, session or cookie write that fails —
+the browser refuses it (a full quota, a cookie over 4 KB), or the schema
+throws on the values it was about to write — rejects the handle with that
 error while the rendered value stays.
 
 - **Patches are validated on the spot.** The merged state goes through the
