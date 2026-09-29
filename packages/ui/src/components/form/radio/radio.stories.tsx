@@ -1,8 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
 import type { ComponentProps } from 'react';
-import { expect, waitFor } from 'storybook/test';
+import { expect, fn, waitFor } from 'storybook/test';
 
+import { afterRenderingUpdate } from '../../../../.storybook/focus';
+import {
+  finishPending,
+  PendingForm,
+} from '../../../../.storybook/pending-form';
 import { Radio } from './radio';
 
 const options = [
@@ -55,6 +60,58 @@ export const Disabled: Story = {
   args: {
     defaultValue: 'vue',
     disabled: true,
+  },
+};
+
+// 送信中もフォーカスを持ち続け、押しても矢印キーでも選び直さない。Enter で
+// 送ると、選んでいるラジオにフォーカスがあるまま送信中になる
+export const PendingKeepsFocus: Story = {
+  args: { onChange: fn() },
+  render: (props) => (
+    <PendingForm>
+      <p id={props['aria-labelledby']}>Framework</p>
+      <Radio
+        aria-labelledby={props['aria-labelledby']}
+        defaultValue="react"
+        name="framework"
+        onChange={props.onChange}
+        options={props.options}
+      />
+    </PendingForm>
+  ),
+  play: async ({ args, canvas, userEvent }) => {
+    const react = canvas.getByRole<HTMLInputElement>('radio', {
+      name: 'React',
+    });
+
+    try {
+      react.focus();
+      react.form?.requestSubmit();
+      await canvas.findByText('送信中');
+      await afterRenderingUpdate();
+
+      await expect(react).toHaveFocus();
+      await Promise.all(
+        canvas.getAllByRole('radio').map(async (radio) => {
+          await expect(radio).toHaveAttribute('aria-disabled', 'true');
+        }),
+      );
+
+      await userEvent.keyboard('{ArrowDown}');
+      await userEvent.click(canvas.getByText('Svelte'));
+      await expect(react).toBeChecked();
+    } finally {
+      finishPending();
+    }
+    await waitFor(async () => {
+      await expect(react).not.toHaveAttribute('aria-disabled');
+    });
+    await expect(args.onChange).not.toHaveBeenCalled();
+
+    // 送信中に選びかけたぶんを覚えていると、次に本当に選んでも知らせない
+    await userEvent.click(canvas.getByText('Vue'));
+    await expect(args.onChange).toHaveBeenCalledOnce();
+    await expect(args.onChange).toHaveBeenCalledWith('vue', expect.anything());
   },
 };
 

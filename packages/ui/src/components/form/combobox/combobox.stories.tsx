@@ -1,10 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
 import type { FC } from 'react';
-import { useFormStatus } from 'react-dom';
 import { expect, fn, waitFor } from 'storybook/test';
 
 import { afterRenderingUpdate } from '../../../../.storybook/focus';
+import {
+  finishPending,
+  PendingForm,
+} from '../../../../.storybook/pending-form';
 import type { Option } from '../../../types/variables';
 import { Combobox } from './combobox';
 import type { ComboboxSearch } from './combobox';
@@ -260,32 +263,15 @@ export const Controlled: Story = {
   },
 };
 
-// 返した Promise は play が finishPending を呼ぶまで解決しない。終わらない
-// action のままにすると、React が後から始まる action を同じ送信中として束ね、
-// 以降のストーリーの action も完了しなくなるので、見終わったら終わらせる
-let finishPending = (): void => {};
-
-const PendingNote: FC = () => {
-  const { pending } = useFormStatus();
-  return pending ? <p>送信中</p> : null;
-};
-
 const PendingRender: FC = () => (
-  <form
-    action={async () => {
-      await new Promise<void>((resolve) => {
-        finishPending = resolve;
-      });
-    }}
-  >
+  <PendingForm>
     <Combobox
       aria-label="都道府県"
       defaultValue="kyoto"
       name="prefecture"
       options={PREFECTURES}
     />
-    <PendingNote />
-  </form>
+  </PendingForm>
 );
 
 // 送信中も欄はフォーカスを持ち続け、値は変えさせない。Enter で送ると

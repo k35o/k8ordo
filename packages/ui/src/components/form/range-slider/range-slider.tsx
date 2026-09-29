@@ -13,6 +13,7 @@ import { useFormStatus } from 'react-dom';
 import { cn } from '../../../helpers/cn';
 import { getMessages } from '../../../i18n/current';
 import { HIGH_CONTRAST_EDGE } from '../../_internal/high-contrast';
+import { ignoreStepKeys } from '../../_internal/ignore-changes';
 import { rangeInputClass } from '../slider/range-input-class';
 
 type BaseProps = {
@@ -140,7 +141,9 @@ export const RangeSlider: FC<Props> = ({
   const thumbClass = (onTop: boolean) =>
     cn(
       rangeInputClass(invalid),
-      'pointer-events-none [&::-moz-range-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:pointer-events-auto',
+      'pointer-events-none',
+      !pending &&
+        '[&::-moz-range-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:pointer-events-auto',
       onTop ? 'z-20' : 'z-10',
     );
   const thumbValue = (edge: 0 | 1) =>
@@ -156,7 +159,7 @@ export const RangeSlider: FC<Props> = ({
       className={cn(
         'relative flex items-center justify-center',
         'block-8 inline-full vertical:inline-48',
-        disabledResolved && 'opacity-50',
+        disabledResolved && 'cursor-not-allowed opacity-50',
       )}
       ref={ref}
       role="group"
@@ -196,15 +199,17 @@ export const RangeSlider: FC<Props> = ({
       <input
         {...thumbValue(0)}
         aria-describedby={ariaDescribedBy}
+        aria-disabled={pending || undefined}
         aria-invalid={invalid}
         aria-labelledby={thumbName(startNameId)}
         aria-valuemax={end}
         className={thumbClass(startOnTop)}
-        disabled={disabledResolved}
+        disabled={disabled}
         max={max}
         min={min}
         name={name?.[0]}
         onChange={commit('start')}
+        onKeyDown={pending ? ignoreStepKeys : undefined}
         ref={startRef}
         required={required}
         step={step}
@@ -213,15 +218,17 @@ export const RangeSlider: FC<Props> = ({
       <input
         {...thumbValue(1)}
         aria-describedby={ariaDescribedBy}
+        aria-disabled={pending || undefined}
         aria-invalid={invalid}
         aria-labelledby={thumbName(endNameId)}
         aria-valuemin={start}
         className={thumbClass(!startOnTop)}
-        disabled={disabledResolved}
+        disabled={disabled}
         max={max}
         min={min}
         name={name?.[1]}
         onChange={commit('end')}
+        onKeyDown={pending ? ignoreStepKeys : undefined}
         ref={endRef}
         required={required}
         step={step}

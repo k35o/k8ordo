@@ -1,8 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useRef, useState } from 'react';
 import type { ComponentProps } from 'react';
-import { expect } from 'storybook/test';
+import { expect, fn, waitFor } from 'storybook/test';
 
+import { afterRenderingUpdate } from '../../../../.storybook/focus';
+import {
+  finishPending,
+  PendingForm,
+} from '../../../../.storybook/pending-form';
 import { Checkbox } from './checkbox';
 
 const meta: Meta<typeof Checkbox> = {
@@ -71,6 +76,47 @@ export const Disabled: Story = {
     disabled: true,
     defaultChecked: true,
     label: 'disabled checkbox',
+  },
+};
+
+// 送信中もフォーカスを持ち続け、押しても値は変えない。Enter で送ると
+// チェックボックスにフォーカスがあるまま送信中になる
+export const PendingKeepsFocus: Story = {
+  args: { onChange: fn() },
+  render: ({ label, onChange }) => (
+    <PendingForm>
+      <Checkbox label={label} name="agree" onChange={onChange} />
+    </PendingForm>
+  ),
+  play: async ({ args, canvas, userEvent }) => {
+    const checkbox = canvas.getByRole<HTMLInputElement>('checkbox', {
+      name: 'checkbox',
+    });
+
+    try {
+      checkbox.focus();
+      checkbox.form?.requestSubmit();
+      await canvas.findByText('送信中');
+      await afterRenderingUpdate();
+
+      await expect(checkbox).toHaveFocus();
+      await expect(checkbox).toHaveAttribute('aria-disabled', 'true');
+
+      await userEvent.keyboard(' ');
+      await userEvent.click(canvas.getByText('checkbox'));
+      await expect(checkbox).not.toBeChecked();
+    } finally {
+      finishPending();
+    }
+    await waitFor(async () => {
+      await expect(checkbox).not.toHaveAttribute('aria-disabled');
+    });
+    await expect(args.onChange).not.toHaveBeenCalled();
+
+    // 送信中に押したぶんを覚えていると、次に本当に切り替えても知らせない
+    await userEvent.click(checkbox);
+    await expect(args.onChange).toHaveBeenCalledOnce();
+    await expect(args.onChange).toHaveBeenCalledWith(true, expect.anything());
   },
 };
 

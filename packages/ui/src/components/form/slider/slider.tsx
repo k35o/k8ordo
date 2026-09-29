@@ -4,10 +4,12 @@ import { useEffect, useEffectEvent, useMemo, useRef } from 'react';
 import type { CSSProperties, FC, InputHTMLAttributes, Ref } from 'react';
 import { useFormStatus } from 'react-dom';
 
+import { chain } from '../../../helpers/chain';
 import { cn } from '../../../helpers/cn';
 import { mergeRefs } from '../../../helpers/merge-refs';
 import { useControllableState } from '../../../hooks/controllable-state';
 import { HIGH_CONTRAST_EDGE } from '../../_internal/high-contrast';
+import { ignoreStepKeys } from '../../_internal/ignore-changes';
 import { rangeInputClass } from './range-input-class';
 
 type BaseProps = {
@@ -60,6 +62,7 @@ export const Slider: FC<Props> = ({
   value,
   defaultValue,
   onChange,
+  onKeyDown,
   ref,
   step = 1,
   max: maxProp,
@@ -115,7 +118,7 @@ export const Slider: FC<Props> = ({
       className={cn(
         'relative flex items-center justify-center',
         'block-8 inline-full vertical:inline-48',
-        disabledResolved && 'opacity-50',
+        disabledResolved && 'cursor-not-allowed opacity-50',
       )}
       style={{ '--slider-progress': clampedProgress } as CSSProperties}
     >
@@ -139,17 +142,22 @@ export const Slider: FC<Props> = ({
         {...(isControlled
           ? { value: currentValue }
           : { defaultValue: initialValue })}
+        aria-disabled={pending || undefined}
         aria-invalid={invalid}
         aria-valuemax={max}
         aria-valuemin={min}
         aria-valuenow={currentValue}
-        className={rangeInputClass(invalid)}
-        disabled={disabledResolved}
+        className={cn(
+          rangeInputClass(invalid),
+          pending && 'pointer-events-none',
+        )}
+        disabled={disabled}
         max={max}
         min={min}
         onChange={(event) => {
           handleChange(Number(event.target.value));
         }}
+        onKeyDown={chain(onKeyDown, pending ? ignoreStepKeys : undefined)}
         ref={mergedRef}
         required={required}
         step={step}
