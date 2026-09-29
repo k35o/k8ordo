@@ -667,6 +667,10 @@ const densityState = defineCookieState(
 
 type DensityValues = { density: 'comfortable' | 'compact'; fontSize: number };
 
+// ほかのタブのストアも、サーバーの cookies().set も、値を 1 回エンコードして書く
+const densityCookie = (values: Partial<DensityValues>): string =>
+  encodeURIComponent(densityState.cookieValue(values));
+
 const Density: FC = () => {
   const [{ density, fontSize }, update] = useAppState(densityState);
   return (
@@ -759,7 +763,7 @@ const frame = async (): Promise<void> => {
 it('cookie state reads the cookie an earlier visit stored', async () => {
   await cookieStore.set(
     densityState.cookieName,
-    densityState.cookieValue({ density: 'compact', fontSize: 18 }),
+    densityCookie({ density: 'compact', fontSize: 18 }),
   );
 
   const screen = await render(<Density />);
@@ -818,7 +822,7 @@ it("another tab's write flows in through the change event", async () => {
 
   await cookieStore.set(
     densityState.cookieName,
-    densityState.cookieValue({ density: 'compact', fontSize: 20 }),
+    densityCookie({ density: 'compact', fontSize: 20 }),
   );
 
   await expect
@@ -840,7 +844,7 @@ it("the server render shows the request's cookie and hydration keeps it", async 
   committed.length = 0;
   await cookieStore.set(
     densityState.cookieName,
-    densityState.cookieValue({ density: 'compact' }),
+    densityCookie({ density: 'compact' }),
   );
   // サーバーでページが読む request.cookies は、値を復号済みで持っている
   const initialCookie = densityState.parseCookies(
@@ -863,7 +867,7 @@ it('without the request, the server renders the defaults and hydration takes the
   committed.length = 0;
   await cookieStore.set(
     densityState.cookieName,
-    densityState.cookieValue({ density: 'compact' }),
+    densityCookie({ density: 'compact' }),
   );
 
   const app = hydrate(<DensityProbe />);
@@ -880,6 +884,10 @@ const noteState = defineCookieState(
   z.object({ text: z.string().default('') }),
 );
 
+// RFC 6265 の cookie-octet に入らない文字（空白・`"`・`,`・`;`・`\`・非 ASCII）
+// と、エンコード済みに見える `%7B` をひととおり含む
+const ODD_NOTE = 'a; b, "c" \\ d ü %7B';
+
 const Note: FC = () => {
   const [{ text }, update] = useAppState(noteState);
   return (
@@ -893,9 +901,36 @@ const Note: FC = () => {
       >
         long note
       </button>
+      <button
+        type="button"
+        onClick={() => {
+          lastHandle = update({ text: ODD_NOTE });
+        }}
+      >
+        odd note
+      </button>
     </>
   );
 };
+
+it('writes any value as a cookie the server reads back after decoding it once', async () => {
+  const screen = await render(<Note />);
+
+  await screen.getByRole('button', { name: 'odd note' }).click();
+  await (lastHandle as UpdateHandle).finished;
+
+  const cookie = (await cookieStore.get(
+    noteState.cookieName,
+  )) as CookieListItem;
+  // サーバーの Cookie パーサー（@k8ordo/server の request.cookies）は値を
+  // 1 回だけ decodeURIComponent してから渡す
+  const requestCookies = new Map([
+    [noteState.cookieName, decodeURIComponent(cookie.value as string)],
+  ]);
+  expect(noteState.parseCookies(requestCookies)).toStrictEqual({
+    text: ODD_NOTE,
+  });
+});
 
 it('a cookie the store refuses rejects the handle but keeps the echo', async () => {
   const screen = await render(<Note />);
@@ -941,7 +976,7 @@ it('a change that lands while its own write is in flight does not roll the echo 
     });
     await realSet.call(cookieStore, {
       name: densityState.cookieName,
-      value: densityState.cookieValue({ fontSize: 24 }),
+      value: densityCookie({ fontSize: 24 }),
     });
     await changed;
     await frame();

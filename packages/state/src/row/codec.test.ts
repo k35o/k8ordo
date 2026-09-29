@@ -89,7 +89,7 @@ describe('version and migrate', () => {
   });
 
   it('writes the version together with the values', () => {
-    expect(decodeURIComponent(viewCookie.cookieValue({ view: 'table' }))).toBe(
+    expect(viewCookie.cookieValue({ view: 'table' })).toBe(
       '[2,{"view":"table","pageSize":20}]',
     );
   });

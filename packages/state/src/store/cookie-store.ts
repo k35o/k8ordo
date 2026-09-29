@@ -1,4 +1,4 @@
-import { cookieCodecOf, encodeCookie, parseCookieText } from '../cookie-state';
+import { cookieCodecOf, parseCookieText } from '../cookie-state';
 import type { CookieState } from '../cookie-state';
 import type { StateValues } from '../schema/object';
 import { createHandle, createStoreCore, resolvePatch } from './core';
@@ -81,8 +81,10 @@ const createCookieStore = (def: CookieState): Store => {
       // がそろったばかり）ので、型を足してから渡す
       const init: CookieInit & { maxAge: number } = {
         name: cookieName,
+        // Cookie Store API は値をそのまま書くので、JSON の `;` や `"` を自分で
+        // エンコードする。サーバーの Cookie パーサーが戻すのもこの符号化。
         // JSON にできない値（bigint など）はここで throw する
-        value: encodeCookie(codec.row(target)),
+        value: encodeURIComponent(JSON.stringify(codec.row(target))),
         path: '/',
         // 既定の strict では、ほかのサイトのリンクから来た最初のリクエストに
         // Cookie が付かず、サーバーが既定値で描いてしまう

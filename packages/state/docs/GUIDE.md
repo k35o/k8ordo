@@ -380,6 +380,25 @@ attributes above (`Path=/`, `SameSite=Lax`, `Max-Age=34560000`), never
 `HttpOnly`, or the browser store can no longer see it. Open tabs take the new
 values in through the `change` event.
 
+```ts
+'use server';
+import { cookies } from '@k8ordo/server/runtime';
+import { density } from './state';
+
+export async function compact() {
+  cookies().set(
+    density.cookieName,
+    density.cookieValue({ density: 'compact' }),
+    { httpOnly: false, maxAge: 34_560_000 },
+  );
+}
+```
+
+`cookieValue` returns the JSON unencoded: `cookies().set` percent-encodes the
+value on its way out (so does Next.js's), which is the one encoding
+`parseCookies` expects undone. Writing a `Set-Cookie` header by hand, pass
+the value through `encodeURIComponent` yourself — once.
+
 ## Client — subscribe and update
 
 ```tsx

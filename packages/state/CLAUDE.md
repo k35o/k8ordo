@@ -183,8 +183,12 @@ same field submits the same string.
   since `migrate` cannot run there either.
   A cookie definition likewise owns `cookieName` (`k8ordo-state.<key>` — `.`,
   not `:`, because a cookie name is an HTTP token, and a key that would break
-  the token is refused at define time) and `cookieValue()`, the
-  percent-encoded JSON a server writes when it sets the same cookie.
+  the token is refused at define time) and `cookieValue()`, the JSON a
+  server hands its cookie API when it sets the same cookie. It is left
+  unencoded because that API (`cookies().set`, Next.js's) percent-encodes on
+  the way out and `parseCookies` receives the value decoded once; only the
+  browser store encodes it itself, since the Cookie Store API writes a value
+  verbatim. `examples/server-basic`'s handler test is the round trip.
 - Duplicate definition keys within a kind are NOT detected at runtime: an
   HMR re-evaluation legitimately re-registers the same key, so a warning
   would cry wolf on every edit. The GUIDE tells users to treat keys as

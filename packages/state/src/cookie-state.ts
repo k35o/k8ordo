@@ -26,9 +26,11 @@ export type CookieState<Schema extends StateSchema = StateSchema> = {
    */
   parseCookies: (cookies: ReadonlyMap<string, string>) => output<Schema>;
   /**
-   * The cookie value the browser store would write for these values, for a
-   * server that writes the same cookie. Unspecified fields mean their default,
-   * and the values pass the schema first, as `update()` does.
+   * The value to hand a server's cookie API when it writes the same cookie
+   * (`cookies().set` under `@k8ordo/server`, Next.js's): the JSON of these
+   * values, left for that API to percent-encode, as the browser store
+   * encodes it before writing. Unspecified fields mean their default, and
+   * the values pass the schema first, as `update()` does.
    */
   cookieValue: (values?: Readonly<Partial<output<Schema>>>) => string;
 };
@@ -38,11 +40,6 @@ export type CookieState<Schema extends StateSchema = StateSchema> = {
 const COOKIE_NAME_PREFIX = 'k8ordo-state.';
 
 const TOKEN = /^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$/u;
-
-// JSON は Cookie の値に書けない `"` や `,` だらけなので、encodeURIComponent に
-// 通して書ける文字だけにする。サーバーの Cookie パーサーが戻すのもこの符号化
-export const encodeCookie = (row: unknown): string =>
-  encodeURIComponent(JSON.stringify(row));
 
 export const parseCookieText = (text: string | undefined): unknown => {
   if (text === undefined) return undefined;
@@ -89,7 +86,7 @@ export const defineCookieState = <Schema extends StateSchema>(
       codec.read(parseCookieText(cookies.get(cookieName)))
         .values as output<Schema>,
     cookieValue: (values) =>
-      encodeCookie(codec.row(codec.salvage(values ?? {}))),
+      JSON.stringify(codec.row(codec.salvage(values ?? {}))),
   };
   codecs.set(def, codec);
   return def;

@@ -72,42 +72,15 @@ describe('parseCookies', () => {
 });
 
 describe('cookieValue', () => {
-  it('writes the percent-encoded JSON of every field, defaults filled in', () => {
+  it('writes the JSON of every field, defaults filled in', () => {
     expect(density.cookieValue({ density: 'compact' })).toBe(
-      '%7B%22density%22%3A%22compact%22%2C%22fontSize%22%3A16%7D',
+      '{"density":"compact","fontSize":16}',
     );
   });
 
   it('runs the values through the schema first', () => {
     expect(density.cookieValue({ fontSize: 3 })).toBe(
-      '%7B%22density%22%3A%22comfortable%22%2C%22fontSize%22%3A16%7D',
+      '{"density":"comfortable","fontSize":16}',
     );
-  });
-
-  it('holds only characters a cookie value may carry, whatever the values are', () => {
-    const note = defineCookieState(
-      'note',
-      z.object({ text: z.string().default('') }),
-    );
-
-    // 入力は、RFC 6265 の cookie-octet に入らない文字（空白・`"`・`,`・`;`・
-    // `\`・非 ASCII）をひととおり含む
-    const value = note.cookieValue({ text: 'a; b, "c" \\ d ü' });
-
-    for (const outside of [' ', '"', ',', ';', '\\', 'ü']) {
-      expect(value).not.toContain(outside);
-    }
-  });
-
-  it('is read back by parseCookies once a server has decoded it', () => {
-    const value = density.cookieValue({ density: 'compact', fontSize: 20 });
-    // サーバーの Cookie パーサー（@k8ordo/server の request.cookies）は値を
-    // decodeURIComponent してから渡す
-    const cookies = new Map([[density.cookieName, decodeURIComponent(value)]]);
-
-    expect(density.parseCookies(cookies)).toStrictEqual({
-      density: 'compact',
-      fontSize: 20,
-    });
   });
 });
