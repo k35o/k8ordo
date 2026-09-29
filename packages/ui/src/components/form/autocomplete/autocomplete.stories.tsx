@@ -1,10 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useRef, useState } from 'react';
 import type { ComponentProps, FC } from 'react';
-import { useFormStatus } from 'react-dom';
 import { expect, fireEvent, waitFor } from 'storybook/test';
 
 import { afterRenderingUpdate } from '../../../../.storybook/focus';
+import {
+  finishPending,
+  PendingForm,
+} from '../../../../.storybook/pending-form';
 import { Autocomplete } from './autocomplete';
 
 const AutocompleteRender = ({
@@ -343,24 +346,8 @@ export const ValuesWithSpaces: Story = {
   },
 };
 
-// 返した Promise は play が finishPending を呼ぶまで解決しない。終わらない
-// action のままにすると、React が後から始まる action を同じ送信中として束ね、
-// 以降のストーリーの action も完了しなくなるので、見終わったら終わらせる
-let finishPending = (): void => {};
-
-const PendingNote: FC = () => {
-  const { pending } = useFormStatus();
-  return pending ? <p>送信中</p> : null;
-};
-
 const PendingRender: FC = () => (
-  <form
-    action={async () => {
-      await new Promise<void>((resolve) => {
-        finishPending = resolve;
-      });
-    }}
-  >
+  <PendingForm>
     <Autocomplete
       aria-label="基数"
       defaultValue={['2']}
@@ -371,8 +358,7 @@ const PendingRender: FC = () => (
         { value: '8', label: '8進数' },
       ]}
     />
-    <PendingNote />
-  </form>
+  </PendingForm>
 );
 
 // 送信中も欄はフォーカスを持ち続け、値は変えさせない。Enter で送ると
