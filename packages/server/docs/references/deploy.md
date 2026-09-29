@@ -130,7 +130,13 @@ and names that URL's host, which is what stops another site's form from
 calling your functions with your visitor's cookies; anything else is answered
 with a `403`. Behind a proxy that means passing the public host through;
 `serve` reads it from the request's own `Host` header, so a proxy in front of
-it has to pass the original `Host` on unchanged.
+it has to pass the original `Host` on unchanged, and the path alone, as a
+browser sends it: a request line that names a host of its own
+(`GET http://…`), or a `Host` that is not a host, is answered with a `400`.
+A host that builds the URL from a path itself appends the path to the origin
+as text instead of resolving it with `new URL(path, origin)`: resolved, the
+path of `https://example.com//evil.test/` is a URL on `evil.test`, and a form
+on evil.test would pass the check.
 
 ## Deploying to Vercel
 

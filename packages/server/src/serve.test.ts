@@ -92,14 +92,11 @@ afterAll(async () => {
   await rm(dist, { recursive: true, force: true });
 });
 
-// fetch は HEAD の答えに本文が付いていても読まずに捨てるので、本文が
-// 送られていないことは線上のバイトでしか確かめられない。条件付きの GET に
-// Cache-Control: no-cache を足して 304 を封じるのも fetch なので、それもここで送る
-const exchange = (
-  method: string,
-  pathname: string,
-  headers: Readonly<Record<string, string>> = {},
-): Promise<string> =>
+// 書いたとおりの要求を線に載せ、返ってきたバイトをそのまま読む。fetch は
+// HEAD の答えに本文が付いていても読まずに捨てるので、本文が送られていないことは
+// 線上でしか確かめられない。条件付きの GET に Cache-Control: no-cache を足して
+// 304 を封じるのも、パスでない要求対象や Host の無い要求を送れないのも fetch
+const send = (request: string): Promise<string> =>
   new Promise((resolve, reject) => {
     const socket = connect(server.port, 'localhost');
     let received = '';
@@ -111,13 +108,25 @@ const exchange = (
       resolve(received);
     });
     socket.on('error', reject);
-    const lines = Object.entries(headers).map(
-      ([name, value]) => `${name}: ${value}\r\n`,
-    );
-    socket.write(
-      `${method} ${pathname} HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n${lines.join('')}\r\n`,
-    );
+    socket.write(request);
   });
+
+// HTTP/1.0 の答えは chunked にならないので、本文はヘッダーの後ろそのまま
+const answerOf = (received: string): unknown =>
+  JSON.parse(received.split('\r\n\r\n')[1] ?? '');
+
+const exchange = (
+  method: string,
+  pathname: string,
+  headers: Readonly<Record<string, string>> = {},
+): Promise<string> => {
+  const lines = Object.entries(headers).map(
+    ([name, value]) => `${name}: ${value}\r\n`,
+  );
+  return send(
+    `${method} ${pathname} HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n${lines.join('')}\r\n`,
+  );
+};
 
 describe('serve', () => {
   it('listens on the port the system gave it and says so', () => {
@@ -181,6 +190,67 @@ describe('serve', () => {
       pathname: '/products/1',
       body: 'hello',
       host: `localhost:${String(server.port)}`,
+    });
+  });
+
+  it.each([
+    ['a scheme-relative path', '//evil.com/x'],
+    ['a path spelled with a backslash', '/\\evil.com/x'],
+  ])(
+    'keeps the host the Host header names when %s spells another',
+    async (_case, target) => {
+      // https://victim//evil.com/x のパスは //evil.com/x。URL として解決すると
+      // evil.com の URL になり、Server Action の同一オリジン検査が evil.com の
+      // Origin を通してしまう。\ は URL の解析が / と読む
+      const received = await send(
+        `GET ${target} HTTP/1.0\r\nHost: localhost\r\n\r\n`,
+      );
+      expect(answerOf(received)).toMatchObject({
+        pathname: '//evil.com/x',
+        host: 'localhost',
+      });
+    },
+  );
+
+  it.each([
+    ['the absolute-form a proxy is sent', 'GET', 'http://evil.com/x'],
+    ['the asterisk-form', 'OPTIONS', '*'],
+  ])(
+    'refuses a request target that is not a path, %s, with 400',
+    async (_form, method, target) => {
+      const received = await exchange(method, target);
+      expect(received).toMatch(/^HTTP\/1\.1 400 Bad Request\r\n/u);
+    },
+  );
+
+  it.each([
+    ['an IPv6 literal with a port', '[::1]:8080', '[::1]:8080'],
+    ['a name in capitals', 'EXAMPLE.test', 'example.test'],
+  ])(
+    'answers a Host header that is %s under that host',
+    async (_case, host, expected) => {
+      const received = await send(`GET /x HTTP/1.0\r\nHost: ${host}\r\n\r\n`);
+      expect(answerOf(received)).toMatchObject({ host: expected });
+    },
+  );
+
+  it.each([
+    ['empty', ''],
+    ['carrying a user before the host', 'localhost@evil.com'],
+    ['naming a port past the last one', 'localhost:99999'],
+  ])('refuses a Host header that is %s with 400', async (_case, host) => {
+    const received = await send(
+      `GET /x HTTP/1.1\r\nHost: ${host}\r\nConnection: close\r\n\r\n`,
+    );
+    expect(received).toMatch(/^HTTP\/1\.1 400 Bad Request\r\n/u);
+  });
+
+  it('answers a request without a Host header under localhost, whatever its path spells', async () => {
+    // Host を省けるのは HTTP/1.0 だけ。HTTP/1.1 で欠けていれば Node が 400 で断る
+    const received = await send('GET //evil.com/x HTTP/1.0\r\n\r\n');
+    expect(answerOf(received)).toMatchObject({
+      pathname: '//evil.com/x',
+      host: 'localhost',
     });
   });
 
