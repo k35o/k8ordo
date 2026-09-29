@@ -262,7 +262,7 @@ ParamsSchemaFor<pattern>`, lists per page pattern the schemas along its
   move in after hydration has started.
 - **The handler owns the methods.** A page answers `GET`, `HEAD` and `POST`,
   and anything else with a `405` and `Allow` (a `route.ts` answers what it
-  exports) — here, not in `@k8ordo/server`'s
+  exports, a `redirect.ts` `GET` and `HEAD`) — here, not in `@k8ordo/server`'s
   `serve`, because a host that calls the built handler directly has no
   `serve` in front of it. `HEAD` gets a `null` body: a not-found is answered
   before anything renders, and a page runs only as far as its own component,
@@ -310,7 +310,8 @@ src/
   runtime/params.ts          runs the paramsSchema exports along a matched stack, and above a not-found
   runtime/mount.ts           hydrate what was rendered for this pathname, render anything else afresh
   runtime/pathname.ts        decodePathname, before a pathname may name a file
-  runtime/redirect.ts        redirect() / redirect.ts targets
+  runtime/redirect.ts        redirect(), what a Server Action throws — bundled into the ./runtime entry
+  runtime/redirect-file.ts   where a redirect.ts sends a pathname the table matched to it
   runtime/request.ts         the read-only request a page receives
   runtime/request-scope.ts   the request in progress: phases, cookies() / responseHeaders() / requestHeaders(), nonce(), answer()
   runtime/cookies.ts         the per-request cookie jar and its Set-Cookie lines

@@ -201,7 +201,7 @@ export type EmitOptions = {
 
 const DEFAULT_VIA = '@k8ordo/static';
 
-/** What holds a route.ts's place in the table. */
+/** What holds a route.ts's or a redirect.ts's place in the table. */
 const ANSWERED = 'answered';
 const ROUTE_REQUEST_FROM = '@k8ordo/server/runtime';
 
@@ -371,8 +371,9 @@ type Guards = {
 
 /**
  * The guards along each pattern's directories. A redirect is left out: it
- * answers before any guard runs, since a directory that redirects has nothing
- * below it to guard. `/*` always carries the root's — a URL nothing answers is
+ * answers before any guard runs, since the URL it answers has no page to
+ * guard (the pages below its directory are guarded as usual). `/*` always
+ * carries the root's — a URL nothing answers is
  * still below the root, and the framework's own 404 is answered under them.
  */
 const guardsOf = (tree: RouteDir): Guards => {
