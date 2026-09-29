@@ -86,8 +86,8 @@ export const serverDescription = message({
 });
 
 export const migrationTitle = message({
-  ja: '3.x からの移行',
-  en: 'Migrating from 3.x',
+  ja: '2.x からの移行',
+  en: 'Migrating from 2.x',
 });
 
 export const migrationDescription = message({
