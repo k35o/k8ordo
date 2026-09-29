@@ -105,9 +105,11 @@ export default '/products';
 ```
 
 The target is a pattern the matched params fill in, so `/:locale/legacy` can
-send to `/:locale/new`. A redirect is consulted before the table — a
-directory that redirects has no page to render — and a directory cannot hold
-both. The answer is a `307`, or a `308` when `permanent`; a client navigation
+send to `/:locale/new`. A redirect holds its place in the table as a page
+does, so a literal directory beside a `[slug]/redirect.ts` keeps its URL; a
+directory that redirects has no page to render, so it cannot hold both. The
+answer to a `GET` or `HEAD` is a `307`, or a `308` when `permanent`, and any
+other method gets a `405`; a client navigation
 to it sees HTML come back instead of a payload, hands the URL to the browser,
 and the browser follows the redirect as a document load, so the address bar
 ends up right. The generated table checks the default export's shape;

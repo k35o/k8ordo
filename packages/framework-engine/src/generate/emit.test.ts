@@ -293,6 +293,32 @@ describe('unreachableRoutes', () => {
     ]);
   });
 
+  it('says nothing of a literal page beside a [slug]/redirect.ts', () => {
+    expect(
+      unreachableRoutes(
+        treeOf(['page.tsx', 'about/page.tsx', '[slug]/redirect.ts']),
+      ),
+    ).toStrictEqual([]);
+  });
+
+  it('names a redirect that a group puts before a page it shadows', () => {
+    const problems = unreachableRoutes(
+      treeOf([
+        'page.tsx',
+        'about/page.tsx',
+        '(legacy)/sale/page.tsx',
+        '(legacy)/[slug]/redirect.ts',
+      ]),
+    );
+    expect(problems).toStrictEqual([
+      {
+        path: 'about/page.tsx',
+        message:
+          '"/about" can never match — "/:slug" ((legacy)/[slug]/redirect.ts) is declared first and answers it',
+      },
+    ]);
+  });
+
   it('names a route the catch-all above it swallows', () => {
     const problems = unreachableRoutes(
       treeOf([
@@ -344,7 +370,7 @@ describe('redirect.ts in the emitted table', () => {
     '[locale]/page.tsx',
   ]);
 
-  it('lists each redirect under its pattern, outside the route table', () => {
+  it('lists each redirect under its pattern', () => {
     expect(source).toContain(
       "import old_redirect from './routes/old/redirect';",
     );
@@ -352,8 +378,13 @@ describe('redirect.ts in the emitted table', () => {
     expect(source).toContain(
       "'/:locale/legacy': locale_legacy_redirect satisfies Redirect,",
     );
-    // 表には出ない: リダイレクトは描画するものではない
-    expect(source).not.toMatch(/'\/old': old_redirect satisfies Page/u);
+  });
+
+  it('holds its place in the table with a component that renders nothing', () => {
+    // 描くものではないので、表に置くのは宣言した順番の中での位置だけ
+    expect(source).toContain('const answered = (): null => null;');
+    expect(source).toContain("'/old': answered,");
+    expect(source).not.toMatch(/old_redirect satisfies Page/u);
   });
 
   it('emits an empty map when nothing redirects', () => {

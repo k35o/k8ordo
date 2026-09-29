@@ -1,5 +1,10 @@
 {
   "extends": "../../tsconfig.json",
-  "include": ["src/**/*.ts", "src/**/*.tsx", "fixtures/**/*.tsx"],
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "fixtures/*.ts",
+    "fixtures/**/*.tsx"
+  ],
   "exclude": ["node_modules", "dist"]
 }
