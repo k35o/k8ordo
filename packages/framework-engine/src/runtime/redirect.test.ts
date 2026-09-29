@@ -1,4 +1,4 @@
-import { isRedirect, matchRedirects, redirect } from './redirect';
+import { isRedirect, redirect, resolveRedirects } from './redirect';
 
 // ハンドラが渡すのは URL が綴った pathname なので、テストも URL に綴らせる
 const pathnameOf = (spelled: string): string =>
@@ -19,65 +19,60 @@ describe('redirect', () => {
   });
 });
 
-describe('matchRedirects', () => {
+describe('resolveRedirects', () => {
   it('fills a target pattern with the matched params', () => {
-    const redirectFor = matchRedirects({ '/:locale/legacy': '/:locale/new' });
-    expect(redirectFor(pathnameOf('/ja/legacy'))).toStrictEqual({
-      to: '/ja/new',
-      permanent: false,
-    });
+    const redirectFor = resolveRedirects({ '/:locale/legacy': '/:locale/new' });
+    expect(
+      redirectFor('/:locale/legacy', pathnameOf('/ja/legacy')),
+    ).toStrictEqual({ to: '/ja/new', permanent: false });
   });
 
   it('carries permanent from the target', () => {
-    const redirectFor = matchRedirects({
+    const redirectFor = resolveRedirects({
       '/old': { to: '/new', permanent: true },
     });
-    expect(redirectFor(pathnameOf('/old'))).toStrictEqual({
+    expect(redirectFor('/old', pathnameOf('/old'))).toStrictEqual({
       to: '/new',
       permanent: true,
     });
   });
 
   it('moves a non-ASCII segment escaped once', () => {
-    const redirectFor = matchRedirects({ '/:slug/legacy': '/:slug/new' });
-    expect(redirectFor(pathnameOf('/café/legacy'))?.to).toBe('/caf%C3%A9/new');
-  });
-
-  it('keeps an escaped slash inside its segment', () => {
-    const redirectFor = matchRedirects({ '/:id/legacy': '/:id' });
-    expect(redirectFor(pathnameOf('/a%2Fb/legacy'))?.to).toBe('/a%2Fb');
-  });
-
-  it('moves an escape that does not decode as the URL spelled it', () => {
-    const redirectFor = matchRedirects({ '/:slug/legacy': '/:slug/new' });
-    expect(redirectFor(pathnameOf('/%E0%A4%A/legacy'))?.to).toBe(
-      '/%E0%A4%A/new',
+    const redirectFor = resolveRedirects({ '/:slug/legacy': '/:slug/new' });
+    expect(redirectFor('/:slug/legacy', pathnameOf('/café/legacy'))?.to).toBe(
+      '/caf%C3%A9/new',
     );
   });
 
-  it('answers the first declared pattern that matches', () => {
-    const redirectFor = matchRedirects({
-      '/docs/legacy': '/docs',
-      '/:section/legacy': '/:section',
-    });
-    expect(redirectFor(pathnameOf('/docs/legacy'))?.to).toBe('/docs');
+  it('keeps an escaped slash inside its segment', () => {
+    const redirectFor = resolveRedirects({ '/:id/legacy': '/:id' });
+    expect(redirectFor('/:id/legacy', pathnameOf('/a%2Fb/legacy'))?.to).toBe(
+      '/a%2Fb',
+    );
+  });
+
+  it('moves an escape that does not decode as the URL spelled it', () => {
+    const redirectFor = resolveRedirects({ '/:slug/legacy': '/:slug/new' });
+    expect(
+      redirectFor('/:slug/legacy', pathnameOf('/%E0%A4%A/legacy'))?.to,
+    ).toBe('/%E0%A4%A/new');
   });
 
   it.each(['/old/', '/old//'])(
-    'matches %s as the table matches it, without the trailing slash',
+    'reads %s as the table matches it, without the trailing slash',
     (spelled) => {
-      const redirectFor = matchRedirects({ '/old': '/new' });
-      expect(redirectFor(pathnameOf(spelled))?.to).toBe('/new');
+      const redirectFor = resolveRedirects({ '/old': '/new' });
+      expect(redirectFor('/old', pathnameOf(spelled))?.to).toBe('/new');
     },
   );
 
-  it('answers null for a pathname no redirect declares', () => {
-    const redirectFor = matchRedirects({ '/old': '/new' });
-    expect(redirectFor(pathnameOf('/products'))).toBeNull();
+  it('answers null for a pattern no redirect declares', () => {
+    const redirectFor = resolveRedirects({ '/old': '/new' });
+    expect(redirectFor('/products', pathnameOf('/products'))).toBeNull();
   });
 
   it('refuses a target that names a param the pattern did not match', () => {
-    const redirectFor = matchRedirects({ '/old': '/:missing' });
-    expect(() => redirectFor(pathnameOf('/old'))).toThrow(/:missing/u);
+    const redirectFor = resolveRedirects({ '/old': '/:missing' });
+    expect(() => redirectFor('/old', pathnameOf('/old'))).toThrow(/:missing/u);
   });
 });

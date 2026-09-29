@@ -101,8 +101,8 @@ export const redirectPattern = message({
 });
 
 export const redirectOrder = message({
-  ja: 'リダイレクトは表より先に調べられます。リダイレクトするディレクトリには描くページが無いので、同じディレクトリに `page.tsx` と `redirect.ts` を両方置くとビルドが拒みます。リダイレクトも宣言された URL として数えられるので、別のグループが同じ URL にページを置くことも拒まれます。',
-  en: 'A redirect is consulted before the table. A directory that redirects has no page to render, so one holding both `page.tsx` and `redirect.ts` fails the build — and since a redirect counts as a declared URL, another group putting a page at the same URL is refused too.',
+  ja: 'リダイレクトは、ページと同じく表の中に自分の位置を持ちます。`[slug]/redirect.ts` の隣にある文字どおりのディレクトリは、自分の URL を保ちます。リダイレクトするディレクトリには描くページが無いので、同じディレクトリに `page.tsx` と `redirect.ts` を両方置くとビルドが拒みます。リダイレクトも宣言された URL として数えられるので、別のグループが同じ URL にページを置くことも拒まれます。',
+  en: 'A redirect holds its place in the table as a page does, so a literal directory beside a `[slug]/redirect.ts` keeps its URL. A directory that redirects has no page to render, so one holding both `page.tsx` and `redirect.ts` fails the build — and since a redirect counts as a declared URL, another group putting a page at the same URL is refused too.',
 });
 
 export const pageNotFoundTitle = message({

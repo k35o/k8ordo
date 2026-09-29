@@ -27,13 +27,21 @@ export type TableNode<T> = T | TableBranch<T>;
 const ownFile = (dir: RouteDir): string | null => dir.page ?? dir.route;
 
 /**
- * A directory with nothing but a page (or a route.ts) is that, itself —
- * except a group: it adds no segment, so the router refuses it as a leaf (it
- * would redeclare its parent's index) and takes it only as a branch.
+ * What holds a directory's own place in the table. A redirect.ts renders
+ * nothing and is not what a guard or a schema answers for, but it matches in
+ * declaration order with the pages, literals before params, as they do.
+ */
+const placeOf = (dir: RouteDir): string | null => ownFile(dir) ?? dir.redirect;
+
+/**
+ * A directory with nothing but a page (or a route.ts, or a redirect.ts) is
+ * that, itself — except a group: it adds no segment, so the router refuses it
+ * as a leaf (it would redeclare its parent's index) and takes it only as a
+ * branch.
  */
 const isLeaf = (dir: RouteDir): boolean =>
   dir.kind !== 'group' &&
-  ownFile(dir) !== null &&
+  placeOf(dir) !== null &&
   dir.layout === null &&
   dir.error === null &&
   dir.loading === null &&
@@ -76,7 +84,7 @@ export const buildTable = <T>(
 ): Record<string, TableNode<T>> => {
   const entries = (dir: RouteDir): Record<string, TableNode<T>> => {
     const record: Record<string, TableNode<T>> = {};
-    const own = ownFile(dir);
+    const own = placeOf(dir);
     if (own !== null) record['/'] = resolve(own);
     for (const child of order(dir.children)) record[child.key] = node(child);
     // Last, because the table matches in declaration order: every route the
@@ -86,7 +94,7 @@ export const buildTable = <T>(
   };
 
   const node = (dir: RouteDir): TableNode<T> => {
-    if (isLeaf(dir)) return resolve(ownFile(dir) as string);
+    if (isLeaf(dir)) return resolve(placeOf(dir) as string);
     const branch: TableBranch<T> = { children: entries(dir) };
     if (dir.layout !== null) branch.layout = resolve(dir.layout);
     if (dir.error !== null) branch.error = resolve(dir.error);
@@ -399,10 +407,13 @@ export const emitRoutesModule = (
   options: EmitOptions,
 ): string => {
   const namer = createNamer();
-  // A route.ts is not a component: its place in the table is held by one
-  // that renders nothing, and the module itself goes to `routeModules`.
+  // A route.ts or a redirect.ts is not a component: its place in the table
+  // is held by one that renders nothing, and the module itself goes to
+  // `routeModules` or `redirects`.
   const table = buildTable(tree, (file) =>
-    slotOf(file) === 'route' ? ANSWERED : namer.take(file),
+    slotOf(file) === 'route' || slotOf(file) === 'redirect'
+      ? ANSWERED
+      : namer.take(file),
   );
   const routeFiles = declaredRouteFiles(tree).map((route) => ({
     pattern: route.pattern,
@@ -655,8 +666,13 @@ export const emitRoutesModule = (
           '] as const;',
           'void routeChecks;',
           '',
-          '// A route.ts in the table: the handler answers it from `routeModules`',
-          '// before anything renders, so its place here is only where it matches.',
+        ]
+      : []),
+    ...(hasRoutes || redirects.length > 0
+      ? [
+          '// A route.ts or a redirect.ts in the table: the handler answers it from',
+          '// `routeModules` or `redirects` before anything renders, so its place',
+          '// here is only where it matches.',
           `const ${ANSWERED} = (): null => null;`,
           '',
         ]
@@ -679,8 +695,8 @@ export const emitRoutesModule = (
     ...toMap(guardStacks),
     '} as const;',
     '',
-    '// Per pattern, where a redirect.ts sends the visitor. Consulted before the',
-    '// table: a directory that redirects has no page to render.',
+    '// Per pattern, where a redirect.ts sends the visitor, once the table',
+    '// matched the pattern: a directory that redirects has no page to render.',
     'export const redirects = {',
     ...redirects.map(
       ({ pattern, name }) =>

@@ -158,6 +158,21 @@ describe('a route.ts in the table', () => {
   });
 });
 
+describe('a redirect.ts in the table', () => {
+  const routes = tableFor(['page.tsx', '[slug]/redirect.ts', 'about/page.tsx']);
+
+  it('leaves a literal sibling its own page', () => {
+    expect(routes.match('/about')?.pattern).toBe('/about');
+  });
+
+  it('answers every other segment its parameter reaches', () => {
+    expect(routes.match('/elsewhere')).toMatchObject({
+      pattern: '/:slug',
+      stack: [stub('[slug]/redirect.ts')],
+    });
+  });
+});
+
 describe('a loading.tsx in the table', () => {
   const routes = tableFor([
     'layout.tsx',

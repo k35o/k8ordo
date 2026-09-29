@@ -161,10 +161,16 @@ ParamsSchemaFor<pattern>`, lists per page pattern the schemas along its
   the layout and the `error` boundary. Nothing keys it: a page change under
   one already showing keeps the page, as every page change does, and the
   router's `usePendingPathname()` is what says one is under way.
-- **`error.tsx` is the router's `error`; `redirect.ts` is answered before the
-  table.** The generator puts an error file on its branch (a page with an
-  error becomes a branch of its own) and lists redirects in `redirects`,
-  keyed by pattern, which the handler matches first. A Server Action's
+- **`error.tsx` is the router's `error`; `redirect.ts` holds its place in
+  the table.** The generator puts an error file on its branch (a page with an
+  error becomes a branch of its own), and a redirect in the table the way it
+  puts a `route.ts` — `answered` holds its place, so it matches in
+  declaration order, literals before params — with its target in
+  `redirects`, keyed by pattern. The handler, having matched a redirect's
+  pattern, answers a `GET` or `HEAD` with it, before the guards, and anything
+  else with a `405`; it reads the params again from the pathname
+  (`resolveRedirects`), because the router hands them decoded and a target
+  moves a segment as the URL spelled it. A Server Action's
   `redirect()` throws a `Symbol.for`-branded `Redirect` — never checked by
   `instanceof`, because the mode package holds two copies of this module —
   and the handler answers 303 (no JavaScript) or a payload with `redirect`.
@@ -316,9 +322,13 @@ src/
   runtime/virtual.d.ts       types of virtual:k8ordo/routes and K8ORDO_MODE
   index.ts
 fixtures/
+  build.ts                   builds an application below as @k8ordo/server
+                             does, from this package's source, and imports
+                             the handler it wrote
   bare-not-found/routes/     an application with no not-found.tsx, which
-                             runtime/not-found.test.ts builds from this
-                             package's source and opens in each engine
+                             runtime/not-found.test.ts opens in each engine
+  redirect-beside-literal/routes/  a [slug]/redirect.ts beside about/page.tsx,
+                             whose handler runtime/redirect-order.test.ts calls
 ```
 
 ## Conventions

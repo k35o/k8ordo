@@ -71,29 +71,34 @@ const resolveTarget = (
 };
 
 /**
- * The redirects `routes/` declared, matched in declaration order: where a
- * pathname is sent, with the matched params filled into the target, so
- * `/:locale/legacy` can send to `/:locale/new`. The pathname is normalized
- * as the table normalizes it, so `/old/` is `/old` here too.
+ * Where a `redirect.ts` sends a pathname the table matched to its pattern,
+ * with the matched params filled into the target, so `/:locale/legacy` can
+ * send to `/:locale/new`; `null` for a pattern no redirect declares. Which
+ * pattern answers is the table's to say — the redirect holds its place there
+ * — so this only reads the params again: the router hands them decoded, and a
+ * target moves a segment as the URL spelled it. The pathname is normalized as
+ * the table normalizes it, so `/old/` is `/old` here too.
  */
-export const matchRedirects = (
+export const resolveRedirects = (
   declared: Readonly<Record<string, RedirectTarget>>,
-): ((pathname: string) => ResolvedRedirect | null) => {
-  const matchers = Object.entries(declared).map(([pattern, target]) => ({
-    matcher: new URLPattern({ pathname: pattern }),
-    target,
-  }));
-  return (pathname) => {
-    const normalized = normalizePathname(pathname);
-    for (const { matcher, target } of matchers) {
-      const result = matcher.exec({ pathname: normalized });
-      if (result === null) continue;
-      const segments: Record<string, string> = {};
-      for (const [name, value] of Object.entries(result.pathname.groups)) {
-        if (!/^\d+$/u.test(name) && value !== undefined) segments[name] = value;
-      }
-      return resolveTarget(target, segments);
+): ((pattern: string, pathname: string) => ResolvedRedirect | null) => {
+  const matchers = new Map(
+    Object.entries(declared).map(([pattern, target]) => [
+      pattern,
+      { matcher: new URLPattern({ pathname: pattern }), target },
+    ]),
+  );
+  return (pattern, pathname) => {
+    const declaredHere = matchers.get(pattern);
+    if (declaredHere === undefined) return null;
+    const result = declaredHere.matcher.exec({
+      pathname: normalizePathname(pathname),
+    });
+    if (result === null) return null;
+    const segments: Record<string, string> = {};
+    for (const [name, value] of Object.entries(result.pathname.groups)) {
+      if (!/^\d+$/u.test(name) && value !== undefined) segments[name] = value;
     }
-    return null;
+    return resolveTarget(declaredHere.target, segments);
   };
 };
