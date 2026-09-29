@@ -168,11 +168,11 @@ catalogs:
       specifier: 0.18.5
       version: 0.18.5
     '@json-render/core':
-      specifier: 0.20.0
-      version: 0.20.0
+      specifier: 0.21.0
+      version: 0.21.0
     '@json-render/react':
-      specifier: 0.20.0
-      version: 0.20.0
+      specifier: 0.21.0
+      version: 0.21.0
     '@openuidev/lang-core':
       specifier: 0.3.0
       version: 0.3.0
@@ -481,10 +481,10 @@ importers:
         version: 4.0.108(react@19.3.0)(zod@4.6.5)
       '@json-render/core':
         specifier: 'catalog:'
-        version: 0.20.0(zod@4.6.5)
+        version: 0.21.0(zod@4.6.5)
       '@json-render/react':
         specifier: 'catalog:'
-        version: 0.20.0(react@19.3.0)(zod@4.6.5)
+        version: 0.21.0(react@19.3.0)(zod@4.6.5)
       '@k8ordo/ui':
         specifier: workspace:^
         version: link:../../packages/ui
@@ -542,10 +542,10 @@ importers:
     dependencies:
       '@json-render/core':
         specifier: 'catalog:'
-        version: 0.20.0(zod@4.6.5)
+        version: 0.21.0(zod@4.6.5)
       '@json-render/react':
         specifier: 'catalog:'
-        version: 0.20.0(react@19.3.0)(zod@4.6.5)
+        version: 0.21.0(react@19.3.0)(zod@4.6.5)
       '@k8ordo/ui':
         specifier: workspace:^
         version: link:../../packages/ui
@@ -982,10 +982,10 @@ importers:
         version: 5.3.1(storybook@10.6.0(@types/react@19.3.0)(react@19.3.0)(vite-plus@0.3.2(@arethetypeswrong/core@0.18.5)(@types/node@24.13.5)(@vitest/browser-playwright@5.0.1)(@vitest/coverage-v8@5.0.1)(@vitest/ui@5.0.1)(esbuild@0.28.2)(jiti@2.7.0)(publint@0.3.24)(typescript@7.0.2)))
       '@json-render/core':
         specifier: 'catalog:'
-        version: 0.20.0(zod@4.6.5)
+        version: 0.21.0(zod@4.6.5)
       '@json-render/react':
         specifier: 'catalog:'
-        version: 0.20.0(react@19.3.0)(zod@4.6.5)
+        version: 0.21.0(react@19.3.0)(zod@4.6.5)
       '@k8ordo/form':
         specifier: workspace:^
         version: link:../form
@@ -1805,13 +1805,13 @@ packages:
   '@jridgewell/trace-mapping@0.3.9':
     resolution: {integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==}
 
-  '@json-render/core@0.20.0':
-    resolution: {integrity: sha512-cXAXn7h3QaylefQgh85AEGPuVq4C8SJ3k9JqigWLJhaBSozF1Fmsrm43DP16RmkqNiVgj5pBRdmB48lEO5qlow==}
+  '@json-render/core@0.21.0':
+    resolution: {integrity: sha512-vysEbTjO1y8mEgAsp0tztRyaWCkNsBrG8MhAqbndGK3qmMXjMRdCNtk21+AQRNKdRelFGVAwBgtUNW8tfjQlsw==}
     peerDependencies:
       zod: ^4.0.0
 
-  '@json-render/react@0.20.0':
-    resolution: {integrity: sha512-arRrlf7zeIJYM6i2JHcTBKW5Kl+ErBtoNR29h4i6rG4AtTzLmaWDgPTs35pr3MdSCTp0UxKwY4O3vWMdUihpRQ==}
+  '@json-render/react@0.21.0':
+    resolution: {integrity: sha512-z/fZg0L8fJe2dnnQjWkmMw409iBclSWcOqdjoBy8eLHeBr/7F7VipzkY1CfgA2Fa5uW+zxZ54OvWMtdDcsp/yg==}
     peerDependencies:
       react: ^19.2.3
 
@@ -5866,13 +5866,13 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.6.0
 
-  '@json-render/core@0.20.0(zod@4.6.5)':
+  '@json-render/core@0.21.0(zod@4.6.5)':
     dependencies:
       zod: 4.6.5
 
-  '@json-render/react@0.20.0(react@19.3.0)(zod@4.6.5)':
+  '@json-render/react@0.21.0(react@19.3.0)(zod@4.6.5)':
     dependencies:
-      '@json-render/core': 0.20.0(zod@4.6.5)
+      '@json-render/core': 0.21.0(zod@4.6.5)
       react: 19.3.0
     transitivePeerDependencies:
       - zod
