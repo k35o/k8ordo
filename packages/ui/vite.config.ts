@@ -1,3 +1,4 @@
+import { globSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 import { storybookTest } from '@storybook/addon-vitest/vitest-plugin';
@@ -12,6 +13,18 @@ const browsers = (['chromium', 'firefox', 'webkit'] as const).filter(
     process.env.TEST_BROWSER === undefined ||
     process.env.TEST_BROWSER === browser,
 );
+
+// storybookTest の tags はストーリーを選ぶだけで、ファイルは選ばない（test.include
+// は plugin が上書きする）。含めるタグで絞ったプロジェクトも全ストーリーの
+// ファイルを 1 つずつ iframe に読み込み、0 件で飛ばしていた。WebKit はその
+// iframe をページが閉じるまで手放さないので、タグを書いていないファイルは外す。
+const filesWithoutTags = (tags: string[]) =>
+  globSync('src/**/*.stories.tsx', { cwd: import.meta.dirname }).filter(
+    (file) => {
+      const source = readFileSync(new URL(file, import.meta.url), 'utf8');
+      return tags.every((tag) => !source.includes(`'${tag}'`));
+    },
+  );
 
 const storiesProject = ({
   label,
@@ -41,6 +54,7 @@ const storiesProject = ({
   publicDir: fileURLToPath(new URL('./.storybook/public', import.meta.url)),
   test: {
     name: { label, color },
+    ...(tags.include && { exclude: filesWithoutTags(tags.include) }),
     browser: {
       enabled: true,
       provider: playwright({
