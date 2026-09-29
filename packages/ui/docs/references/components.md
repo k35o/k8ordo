@@ -1098,6 +1098,11 @@ A multi-select autocomplete over a fixed list of options, shown as removable
 tags. `value` and `onChange` are `string[]`. To pick one option, or to search a
 list that lives on a server, use `Combobox`.
 
+Typing filters `options` by label. `ArrowDown` / `ArrowUp` open the list and
+move through it, `Enter` adds or removes the active option, `Backspace` in an
+empty field removes the last tag, and `Escape` closes the list. Keys pressed
+while an IME is composing belong to the IME.
+
 With a `name`, the selection is submitted through a visually hidden
 `<select multiple>`: one entry per selected value, and `required` means at
 least one. It is always present — nothing selected included — so native

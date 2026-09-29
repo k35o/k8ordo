@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useRef, useState } from 'react';
 import type { ComponentProps } from 'react';
-import { expect, waitFor } from 'storybook/test';
+import { expect, fireEvent, waitFor } from 'storybook/test';
 
 import { Autocomplete } from './autocomplete';
 
@@ -134,7 +134,7 @@ export const FilteredKeyboardSelection: Story = {
 
     await expect(input).toHaveAttribute(
       'aria-activedescendant',
-      'autocomplete-filter_option_16',
+      canvas.getByRole('option', { name: '16進数' }).id,
     );
 
     await userEvent.keyboard('{Enter}');
@@ -237,19 +237,107 @@ export const ActiveDescendant: Story = {
 
     await expect(input).toHaveAttribute(
       'aria-activedescendant',
-      'autocomplete-active_option_2',
+      canvas.getByRole('option', { name: '2進数' }).id,
     );
 
     await userEvent.keyboard('{ArrowDown}');
 
     await expect(input).toHaveAttribute(
       'aria-activedescendant',
-      'autocomplete-active_option_8',
+      canvas.getByRole('option', { name: '8進数' }).id,
     );
-    await expect(canvas.getByRole('option', { name: '8進数' })).toHaveAttribute(
-      'id',
-      'autocomplete-active_option_8',
-    );
+  },
+};
+
+// 日本語を変換しているあいだの矢印キーと Enter は IME のもの。一覧の中を
+// 動かさず、ポインタを載せた候補も選ばない
+export const Composition: Story = {
+  args: {
+    id: 'autocomplete-composition',
+    'aria-describedby': undefined,
+    invalid: false,
+    disabled: false,
+    required: false,
+  },
+  play: async ({ canvas, userEvent }) => {
+    const input = canvas.getByRole('combobox');
+    await userEvent.type(input, '1');
+    await waitFor(async () => {
+      await expect(canvas.getAllByRole('option')).toHaveLength(2);
+    });
+    const hovered = canvas.getByRole('option', { name: '10進数' });
+    await userEvent.hover(hovered);
+    await waitFor(async () => {
+      await expect(input).toHaveAttribute('aria-activedescendant', hovered.id);
+    });
+
+    await fireEvent.keyDown(input, { key: 'ArrowDown', isComposing: true });
+    await fireEvent.keyDown(input, { key: 'Enter', isComposing: true });
+
+    await expect(input).toHaveAttribute('aria-activedescendant', hovered.id);
+    await expect(canvas.getByRole('listbox')).toBeVisible();
+    await expect(
+      canvas.queryByRole('button', { name: 'すべて削除' }),
+    ).not.toBeInTheDocument();
+  },
+};
+
+// 矢印キーは一覧の中を動かすもので、打った文字の中のキャレットは動かさない。
+// キャレットを行頭・行末へ送るのはキーの既定の動作なので、それを止めているかを見る
+export const ArrowKeysKeepTheCaret: Story = {
+  args: {
+    id: 'autocomplete-caret',
+    'aria-describedby': undefined,
+    invalid: false,
+    disabled: false,
+    required: false,
+  },
+  play: async ({ canvas, userEvent }) => {
+    const input = canvas.getByRole('combobox');
+    await userEvent.type(input, '進数');
+    const prevented: boolean[] = [];
+    const record = (event: KeyboardEvent) => {
+      prevented.push(event.defaultPrevented);
+    };
+
+    window.addEventListener('keydown', record);
+    try {
+      await userEvent.keyboard('{ArrowDown}{ArrowUp}');
+    } finally {
+      window.removeEventListener('keydown', record);
+    }
+
+    await expect(prevented).toStrictEqual([true, true]);
+  },
+};
+
+// 候補の id は値から作らない。id は空白を含められず、空白で区切って読む
+// 支援技術には、aria-activedescendant の指す候補が見つからない
+export const ValuesWithSpaces: Story = {
+  render: () => (
+    <Autocomplete
+      aria-label="都市"
+      id="autocomplete-spaces"
+      options={[
+        { value: 'new york', label: 'New York' },
+        { value: 'los angeles', label: 'Los Angeles' },
+      ]}
+    />
+  ),
+  play: async ({ canvas, userEvent }) => {
+    const input = canvas.getByRole('combobox', { name: '都市' });
+    await userEvent.click(input);
+    await userEvent.keyboard('{ArrowDown}');
+
+    const option = canvas.getByRole('option', { name: 'New York' });
+    await expect(option.id).not.toMatch(/\s/u);
+    await expect(input).toHaveAttribute('aria-activedescendant', option.id);
+
+    // 候補を押すと、欄を離れた扱いで一覧が閉じる前に選べる
+    await userEvent.click(canvas.getByRole('option', { name: 'Los Angeles' }));
+
+    await expect(canvas.queryByRole('listbox')).not.toBeInTheDocument();
+    await expect(canvas.getByText('Los Angeles')).toBeInTheDocument();
   },
 };
 

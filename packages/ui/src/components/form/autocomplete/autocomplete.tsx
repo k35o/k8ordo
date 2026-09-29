@@ -3,6 +3,7 @@
 import {
   useCallback,
   useDeferredValue,
+  useId,
   useMemo,
   useRef,
   useState,
@@ -95,6 +96,9 @@ export const Autocomplete: FC<Props> = ({
     defaultValue: defaultValue ?? [],
     onChange,
   });
+  const baseId = useId();
+  const listboxId = `${baseId}-listbox`;
+  const optionId = (index: number) => `${baseId}-option-${String(index)}`;
   const inputRef = useRef<HTMLInputElement>(null);
   const mergedRef = useMemo(() => mergeRefs(inputRef, ref), [ref]);
 
@@ -135,8 +139,6 @@ export const Autocomplete: FC<Props> = ({
     selectIndex === undefined || filteredOptions.length === 0
       ? undefined
       : Math.min(selectIndex, filteredOptions.length - 1);
-  const activeOption =
-    activeIndex === undefined ? undefined : filteredOptions[activeIndex];
   const { pending: formPending } = useFormStatus();
   const disabledResolved = disabled || formPending;
 
@@ -164,7 +166,7 @@ export const Autocomplete: FC<Props> = ({
   );
 
   const handleBlur: FocusEventHandler<HTMLInputElement> = (e) => {
-    if (e.relatedTarget?.id.startsWith(`${id}_option_`) === true) {
+    if (e.relatedTarget?.closest('[role="listbox"]')?.id === listboxId) {
       return;
     }
     setIsOpen(false);
@@ -180,6 +182,10 @@ export const Autocomplete: FC<Props> = ({
   };
 
   const handleKeyDown: KeyboardEventHandler<HTMLInputElement> = (e) => {
+    // IME の変換を確定する Enter や、変換候補を選ぶ矢印キーは欄のもの
+    if (e.nativeEvent.isComposing) {
+      return;
+    }
     if (e.key === 'Backspace' && text.length === 0) {
       reset();
       handleChange(currentValue.slice(0, -1));
@@ -194,6 +200,7 @@ export const Autocomplete: FC<Props> = ({
       return;
     }
     if (e.key === 'ArrowDown') {
+      e.preventDefault();
       setIsOpen(true);
       if (filteredOptions.length === 0) {
         return;
@@ -206,6 +213,7 @@ export const Autocomplete: FC<Props> = ({
       return;
     }
     if (e.key === 'ArrowUp') {
+      e.preventDefault();
       setIsOpen(true);
       if (filteredOptions.length === 0) {
         return;
@@ -291,12 +299,12 @@ export const Autocomplete: FC<Props> = ({
           <input
             {...rest}
             aria-activedescendant={
-              isOpen && activeOption !== undefined
-                ? `${id}_option_${activeOption.value}`
+              isOpen && activeIndex !== undefined
+                ? optionId(activeIndex)
                 : undefined
             }
             aria-autocomplete="list"
-            aria-controls={isOpen ? `${id}_listbox` : undefined}
+            aria-controls={isOpen ? listboxId : undefined}
             aria-expanded={isOpen}
             aria-invalid={invalid}
             aria-required={required}
@@ -348,7 +356,7 @@ export const Autocomplete: FC<Props> = ({
               'max-h-96 overflow-y-auto py-2 transition-opacity vertical:max-h-none vertical:max-w-96 vertical:overflow-x-auto vertical:overflow-y-visible',
               isPending && 'opacity-60',
             )}
-            id={`${id}_listbox`}
+            id={listboxId}
             role="listbox"
           >
             {filteredOptions.length === 0 && (
@@ -372,7 +380,7 @@ export const Autocomplete: FC<Props> = ({
                       selected &&
                       'bg-primary-bg-mute text-primary-fg',
                   )}
-                  id={`${id}_option_${option.value}`}
+                  id={optionId(idx)}
                   key={option.value}
                   ref={activeIndex === idx ? scrollActiveIntoView : undefined}
                   role="option"
