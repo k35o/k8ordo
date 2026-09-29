@@ -361,6 +361,28 @@ const Guarded: FC<{ action: (formData: FormData) => void }> = ({ action }) => {
   );
 };
 
+const newsletterFields = formFields(
+  z.object({ email: z.email('メールアドレスの形式で入力してください') }),
+);
+
+// 同意のチェックボックスはスキーマにない。サーバーは読まないが、書いた
+// required はブラウザの制約として残る
+const Newsletter: FC<{ action: (formData: FormData) => void }> = ({
+  action,
+}) => {
+  const form = useForm(newsletterFields);
+  const email = form.field('email');
+
+  return (
+    <form {...form.props} action={action}>
+      <input aria-label="email" {...email.input} />
+      <p data-testid="email-error">{email.error ?? ''}</p>
+      <input aria-label="agree" name="agree" required type="checkbox" />
+      <button type="submit">subscribe</button>
+    </form>
+  );
+};
+
 const review = defineForm(
   z.object({ status: z.enum(['approved', 'rejected']), reason: z.string() }),
   [
@@ -1086,6 +1108,40 @@ describe('useForm in a browser', () => {
     await screen.getByRole('button', { name: 'send' }).click();
 
     await expect.element(screen.getByLabelText('password')).toHaveFocus();
+  });
+
+  it('hands a failing field the schema does not know to the browser to report, since it has no message for it', async () => {
+    const action = vi.fn<(formData: FormData) => void>();
+    const screen = await render(<Newsletter action={action} />);
+    const agree = screen.getByLabelText('agree').element() as HTMLInputElement;
+    const reported = vi.fn<() => void>();
+    agree.addEventListener('invalid', reported);
+
+    await screen.getByLabelText('email').fill('k8o@example.com');
+    await screen.getByRole('button', { name: 'subscribe' }).click();
+
+    // noValidate の下で吹き出しを出すのは reportValidity() で、それが invalid
+    // を投げる。欄の値を読むだけ（validity）では投げない
+    await expect.poll(() => reported.mock.calls.length).toBe(1);
+    await expect.element(screen.getByLabelText('agree')).toHaveFocus();
+    expect(action).not.toHaveBeenCalled();
+  });
+
+  it('leaves the browser silent while a field it has a message for fails first', async () => {
+    const screen = await render(
+      <Newsletter action={vi.fn<(formData: FormData) => void>()} />,
+    );
+    const agree = screen.getByLabelText('agree').element() as HTMLInputElement;
+    const reported = vi.fn<() => void>();
+    agree.addEventListener('invalid', reported);
+
+    await screen.getByRole('button', { name: 'subscribe' }).click();
+
+    await expect
+      .element(screen.getByTestId('email-error'))
+      .toHaveTextContent('メールアドレスの形式で入力してください');
+    await expect.element(screen.getByLabelText('email')).toHaveFocus();
+    expect(reported).not.toHaveBeenCalled();
   });
 
   it('runs the cross-field rules on submit even when nothing was typed', async () => {

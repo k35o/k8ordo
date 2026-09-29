@@ -421,8 +421,15 @@ export const useForm = <
         return;
       }
       event.preventDefault();
-      setClientErrors(messagesIn(form, lookup));
+      const messages = messagesIn(form, lookup);
+      setClientErrors(messages);
       failed.focus();
+      // 文言を出せない欄（スキーマにない欄など）は、止めたうえに何も見せない
+      // ことになる。noValidate が外すのは送信時の検査だけで、要素の
+      // reportValidity() はブラウザ自身の吹き出しを出す
+      if (!Object.hasOwn(messages, failed.name)) {
+        failed.reportValidity();
+      }
     },
     [lookup],
   );
