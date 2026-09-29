@@ -38,7 +38,8 @@ import {
 } from './payload';
 import type { Payload } from './payload';
 import { isPayloadPath, pagePathFor } from './payload-path';
-import { isRedirect, resolveRedirects } from './redirect';
+import { isRedirect } from './redirect';
+import { resolveRedirects } from './redirect-file';
 import { renderMatch, renderNotFound } from './render';
 import { routeRequestOf } from './request';
 import { answer, inPhase, nonce, withRequest } from './request-scope';
