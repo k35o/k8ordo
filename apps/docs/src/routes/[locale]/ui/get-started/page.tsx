@@ -132,11 +132,11 @@ function MyComponent() {
             (optional: @k8ordo/ui/json-render)
           </li>
           <li className="list-disc">
-            @openuidev/lang-core &gt;= 0.2.10 &lt;0.3.0 (optional:
+            @openuidev/lang-core &gt;= 0.3.0 &lt;0.4.0 (optional:
             @k8ordo/ui/openui, @k8ordo/ui/openui/prompt)
           </li>
           <li className="list-disc">
-            @openuidev/react-lang &gt;= 0.2.9 &lt;0.3.0 (optional:
+            @openuidev/react-lang &gt;= 0.3.0 &lt;0.4.0 (optional:
             @k8ordo/ui/openui)
           </li>
           <li className="list-disc">

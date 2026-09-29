@@ -30,7 +30,7 @@ pnpm add @k8ordo/state zod
 | ---------------- | ------- | -------------------------------------------------------- |
 | `react`          | ≥19.3.0 | `useAppState`                                            |
 | `zod`            | ^4.4.3  | the schemas (`zod/mini` works, and is the lighter pick)  |
-| `@k8ordo/router` | ^0.1.0  | optional — typed `href` paths from the app's route table |
+| `@k8ordo/router` | ^0.2.0  | optional — typed `href` paths from the app's route table |
 | `typescript`     | ≥7.0.2  | the shipped type declarations                            |
 | `@types/react`   | ≥19.3.0 | the shipped type declarations                            |
 
