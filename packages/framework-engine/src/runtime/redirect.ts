@@ -1,3 +1,5 @@
+import { normalizePathname } from '@k8ordo/router';
+
 /**
  * A redirect thrown from a Server Action. Branded with a registry symbol
  * rather than a class: the mode package bundles this module once into the
@@ -71,7 +73,8 @@ const resolveTarget = (
 /**
  * The redirects `routes/` declared, matched in declaration order: where a
  * pathname is sent, with the matched params filled into the target, so
- * `/:locale/legacy` can send to `/:locale/new`.
+ * `/:locale/legacy` can send to `/:locale/new`. The pathname is normalized
+ * as the table normalizes it, so `/old/` is `/old` here too.
  */
 export const matchRedirects = (
   declared: Readonly<Record<string, RedirectTarget>>,
@@ -81,8 +84,9 @@ export const matchRedirects = (
     target,
   }));
   return (pathname) => {
+    const normalized = normalizePathname(pathname);
     for (const { matcher, target } of matchers) {
-      const result = matcher.exec({ pathname });
+      const result = matcher.exec({ pathname: normalized });
       if (result === null) continue;
       const segments: Record<string, string> = {};
       for (const [name, value] of Object.entries(result.pathname.groups)) {

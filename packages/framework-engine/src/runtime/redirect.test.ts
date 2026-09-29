@@ -63,6 +63,14 @@ describe('matchRedirects', () => {
     expect(redirectFor(pathnameOf('/docs/legacy'))?.to).toBe('/docs');
   });
 
+  it.each(['/old/', '/old//'])(
+    'matches %s as the table matches it, without the trailing slash',
+    (spelled) => {
+      const redirectFor = matchRedirects({ '/old': '/new' });
+      expect(redirectFor(pathnameOf(spelled))?.to).toBe('/new');
+    },
+  );
+
   it('answers null for a pathname no redirect declares', () => {
     const redirectFor = matchRedirects({ '/old': '/new' });
     expect(redirectFor(pathnameOf('/products'))).toBeNull();
