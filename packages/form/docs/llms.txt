@@ -45,7 +45,9 @@ row. Rules cannot target fields inside repeated rows.
   and the rules included — and stops a failing submission, a GET form with no
   action as much as one with (a `formNoValidate` button skips the check);
   after a submission stopped here or failed on the server, focus moves to the
-  first failure in document order. Also `useAsyncCheck` for server-answered
+  first failure in document order, and a first failure the hook has no
+  message for (a control outside the schema) is reported by the browser
+  itself through `reportValidity()`. Also `useAsyncCheck` for server-answered
   per-field checks and `HiddenValue` for components that render no input of
   their own. The types
   of the `formFields` result (`FormFields`, `DerivedField`, `DerivedArray`,

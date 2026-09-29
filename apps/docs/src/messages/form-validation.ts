@@ -136,8 +136,8 @@ export const lifeInput = message({
 });
 
 export const lifeSubmit = message({
-  ja: '送信したときは、触っていない欄も含めて全欄を検査し、ルールも走らせます。失敗した欄にはすべてメッセージを出し、送信を止めて、ページ上で最初に失敗した欄にフォーカスを移します。`formNoValidate` の付いた送信ボタンは、ブラウザの検証と同じくこの検査を飛ばします。',
-  en: 'On submit, every field is checked, the untouched ones included, and the rules run. Each failed field shows its message, the submission stops, and focus moves to the first failed field on the page. A submit button with `formNoValidate` skips this check, as it skips the browser’s.',
+  ja: '送信したときは、触っていない欄も含めて全欄を検査し、ルールも走らせます。失敗した欄にはすべてメッセージを出し、送信を止めて、ページ上で最初に失敗した欄にフォーカスを移します。その欄がスキーマにない欄（サーバーは読まない、`required` の同意のチェックボックスなど）で出せる文言が無ければ、フックが無いときと同じく、ブラウザ自身の吹き出しで知らせます（`reportValidity()`）。`formNoValidate` の付いた送信ボタンは、ブラウザの検証と同じくこの検査を飛ばします。',
+  en: 'On submit, every field is checked, the untouched ones included, and the rules run. Each failed field shows its message, the submission stops, and focus moves to the first failed field on the page. When that field has no message the hook can show — a control outside the schema, such as a `required` consent box the server never reads — the browser reports it with its own bubble (`reportValidity()`), as it would without the hook. A submit button with `formNoValidate` skips this check, as it skips the browser’s.',
 });
 
 export const lifeOrder = message({

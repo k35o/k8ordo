@@ -256,7 +256,10 @@ markup, so with scripts disabled or not yet loaded the browser's own checks
 stay on. Once the hook is live it runs the same check on every submit, in
 zod's wording: every field, the ones nobody touched included, and the
 cross-field [rules](#checks-html-has-no-attribute-for). A failure stops the submission, shows each failed field's message, and
-moves focus to the first failed field on the page. A submit button marked
+moves focus to the first failed field on the page. When that field is one the
+hook has no message for — a control outside the schema, say a `required`
+consent box the server never reads — the browser reports it with its own
+bubble (`reportValidity()`), as it would without the hook. A submit button marked
 `formNoValidate` skips the check, as it skips the browser's. The server stays
 the arbiter: what passes still goes to it, and the checks in `dropped` run
 there alone.
