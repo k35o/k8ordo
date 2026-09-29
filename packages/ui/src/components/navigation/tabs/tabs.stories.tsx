@@ -147,3 +147,80 @@ export const FollowsWritingMode: Story = {
     });
   },
 };
+
+const ThreeTabs: FC<{ label: string }> = ({ label }) => (
+  <Tabs.Root ids={['first', 'second', 'third']}>
+    <Tabs.List label={label}>
+      <Tabs.Tab id="first">一</Tabs.Tab>
+      <Tabs.Tab id="second">二</Tabs.Tab>
+      <Tabs.Tab id="third">三</Tabs.Tab>
+    </Tabs.List>
+    <Tabs.Panel id="first">
+      <p>一の内容</p>
+    </Tabs.Panel>
+    <Tabs.Panel id="second">
+      <p>二の内容</p>
+    </Tabs.Panel>
+    <Tabs.Panel id="third">
+      <p>三の内容</p>
+    </Tabs.Panel>
+  </Tabs.Root>
+);
+
+// Home と End は最初と最後のタブへ移り、そのタブを選ぶ。ページはスクロールさせない
+export const HomeAndEnd: Story = {
+  render: () => <ThreeTabs label="数字のタブ" />,
+  play: async ({ canvas, userEvent }) => {
+    canvas.getByRole('tab', { name: '一' }).focus();
+    const prevented: boolean[] = [];
+    const record = (event: KeyboardEvent) => {
+      prevented.push(event.defaultPrevented);
+    };
+    window.addEventListener('keydown', record);
+
+    await userEvent.keyboard('{End}');
+    await waitFor(() => {
+      expect(canvas.getByRole('tab', { name: '三' })).toHaveFocus();
+    });
+    await waitFor(() => {
+      expect(canvas.getByRole('tabpanel')).toHaveTextContent('三の内容');
+    });
+
+    await userEvent.keyboard('{Home}');
+    await waitFor(() => {
+      expect(canvas.getByRole('tab', { name: '一' })).toHaveFocus();
+    });
+    await waitFor(() => {
+      expect(canvas.getByRole('tabpanel')).toHaveTextContent('一の内容');
+    });
+
+    window.removeEventListener('keydown', record);
+    await expect(prevented).toStrictEqual([true, true]);
+  },
+};
+
+// 右から左へ書く中では次のタブが左にあるので、左右の矢印キーを入れ替える
+export const RightToLeft: Story = {
+  render: () => (
+    <div dir="rtl">
+      <ThreeTabs label="右から左のタブ" />
+    </div>
+  ),
+  play: async ({ canvas, userEvent }) => {
+    canvas.getByRole('tab', { name: '一' }).focus();
+
+    await userEvent.keyboard('{ArrowLeft}');
+    await waitFor(() => {
+      expect(canvas.getByRole('tab', { name: '二' })).toHaveFocus();
+    });
+    await expect(canvas.getByRole('tab', { name: '二' })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    );
+
+    await userEvent.keyboard('{ArrowRight}');
+    await waitFor(() => {
+      expect(canvas.getByRole('tab', { name: '一' })).toHaveFocus();
+    });
+  },
+};

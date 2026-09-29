@@ -158,16 +158,30 @@ export const Tab: FC<PropsWithChildren<{ id: string }>> = ({
     }
   }, [activeIndex, index, setFocusRef]);
 
-  const moveTo = (direction: 1 | -1) => {
-    const nextActiveIndex =
-      direction === 1
-        ? index === ids.length - 1
-          ? 0
-          : index + 1
-        : index === 0
-          ? ids.length - 1
-          : index - 1;
-    setSelectedId(ids[nextActiveIndex] ?? ids[0]);
+  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    // 縦書きでは tablist の inline 軸が縦になるので、前後を上下キーに割り当てる
+    const rtl = getComputedStyle(event.currentTarget).direction === 'rtl';
+    const [previousKey, nextKey] =
+      writingMode === 'vertical'
+        ? ['ArrowUp', 'ArrowDown']
+        : rtl
+          ? ['ArrowRight', 'ArrowLeft']
+          : ['ArrowLeft', 'ArrowRight'];
+    const target = {
+      [previousKey]: (index - 1 + ids.length) % ids.length,
+      [nextKey]: (index + 1) % ids.length,
+      Home: 0,
+      End: ids.length - 1,
+    }[event.key];
+    const targetId = target === undefined ? undefined : ids[target];
+    if (targetId === undefined) {
+      return;
+    }
+    event.preventDefault();
+    if (targetId === id) {
+      return;
+    }
+    setSelectedId(targetId);
     setFocusRef.current = true;
   };
 
@@ -184,18 +198,7 @@ export const Tab: FC<PropsWithChildren<{ id: string }>> = ({
       onClick={() => {
         setSelectedId(id);
       }}
-      onKeyDown={(e: KeyboardEvent) => {
-        // 縦書きでは tablist の inline 軸が縦になるので、prev/next を上下キーに割り当てる。
-        const prevKey = writingMode === 'vertical' ? 'ArrowUp' : 'ArrowLeft';
-        const nextKey = writingMode === 'vertical' ? 'ArrowDown' : 'ArrowRight';
-        if (e.key === prevKey) {
-          moveTo(-1);
-          return;
-        }
-        if (e.key === nextKey) {
-          moveTo(1);
-        }
-      }}
+      onKeyDown={handleKeyDown}
       ref={ref}
       role="tab"
       style={
