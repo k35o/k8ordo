@@ -35,6 +35,17 @@
     {
       "matchPackageNames": ["/^node$/"],
       "groupName": "node dependencies"
+    },
+    {
+      "matchDepTypes": ["peerDependencies"],
+      "enabled": false
+    },
+    {
+      "description": "0.x の minor は peer の範囲を越える。catalog だけが上がって自動マージされないよう、peer・docs・changeset を手で直す PR に分ける",
+      "matchPackageNames": ["/^@json-render/", "/^@openuidev/"],
+      "matchUpdateTypes": ["minor", "major"],
+      "groupName": "generative-UI peer dependencies",
+      "automerge": false
     }
   ]
 }
