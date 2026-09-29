@@ -555,6 +555,12 @@ Selecting a tab is a transition: the panels cross-fade through React's
 `<ViewTransition>` (off under `prefers-reduced-motion`), and a panel that
 suspends keeps the current one on screen until it is ready.
 
+The keys follow the WAI-ARIA tabs pattern, and focusing a tab selects it.
+`ArrowLeft` / `ArrowRight` move to the previous / next tab, wrapping at the
+ends, and swap under `dir="rtl"`; in vertical writing mode the list is
+vertical and `ArrowUp` / `ArrowDown` do the same. `Home` / `End` go to the
+first / last tab.
+
 Props (Tabs.Root):
 
 - `ids`: `[string, ...string[]]` (required)
@@ -1097,6 +1103,11 @@ goes back to it. With `required`, put a placeholder option whose `value` is
 A multi-select autocomplete over a fixed list of options, shown as removable
 tags. `value` and `onChange` are `string[]`. To pick one option, or to search a
 list that lives on a server, use `Combobox`.
+
+Typing filters `options` by label. `ArrowDown` / `ArrowUp` open the list and
+move through it, `Enter` adds or removes the active option, `Backspace` in an
+empty field removes the last tag, and `Escape` closes the list. Keys pressed
+while an IME is composing belong to the IME.
 
 With a `name`, the selection is submitted through a visually hidden
 `<select multiple>`: one entry per selected value, and `required` means at

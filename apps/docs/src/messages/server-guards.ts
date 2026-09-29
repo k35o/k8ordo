@@ -91,8 +91,8 @@ export const coversNotFound = message({
 });
 
 export const coversRedirect = message({
-  ja: '`redirect.ts` はどの guard よりも前に答えます。移転したディレクトリには、守るものが下にありません。',
-  en: 'A `redirect.ts` is answered before any guard runs: a directory that redirects has nothing below it to guard.',
+  ja: '`redirect.ts` はどの guard よりも前に答えます。それが答える URL には守るページが無く、そのディレクトリの下のページはふつうどおり guard が守ります。',
+  en: 'A `redirect.ts` is answered before any guard runs: the URL it answers has no page to guard, and the pages below its directory are guarded as usual.',
 });
 
 export const coversActions = message({

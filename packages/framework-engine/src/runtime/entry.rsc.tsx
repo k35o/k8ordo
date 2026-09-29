@@ -38,7 +38,8 @@ import {
 } from './payload';
 import type { Payload } from './payload';
 import { isPayloadPath, pagePathFor } from './payload-path';
-import { isRedirect, matchRedirects } from './redirect';
+import { isRedirect } from './redirect';
+import { resolveRedirects } from './redirect-file';
 import { renderMatch, renderNotFound } from './render';
 import { routeRequestOf } from './request';
 import { answer, inPhase, nonce, withRequest } from './request-scope';
@@ -51,11 +52,7 @@ type ActionResult = {
   redirect?: string;
 };
 
-/**
- * Consulted before the table, since a directory that redirects has no page to
- * render.
- */
-const redirectFor = matchRedirects(redirects);
+const redirectFor = resolveRedirects(redirects);
 
 const redirectResponse = (to: string, status: number): Response =>
   new Response(null, { status, headers: { location: to } });
@@ -207,20 +204,6 @@ const respond = async (request: Request): Promise<Response> => {
   }
   const wantsPayload = isPayloadPath(own);
   const pathname = wantsPayload ? pagePathFor(own) : own;
-  const reads = request.method === 'GET' || request.method === 'HEAD';
-
-  // A redirect.ts answers before anything renders. A payload request for it
-  // is sent to the page, not the payload: the client runtime sees HTML come
-  // back, gives the navigation to the browser, and the browser follows the
-  // redirect as a document load — the URL bar ends up right.
-  const declared = redirectFor(pathname);
-  if (declared !== null && reads) {
-    return redirectResponse(
-      locationOf(declared.to),
-      declared.permanent ? 308 : 307,
-    );
-  }
-
   // A param a schema refuses is a pathname the pattern does not answer, so
   // the walk goes on to whatever the table declares next — the catch-all in
   // the end. A catch-all answers whatever its params hold: a 404 is already
@@ -246,6 +229,27 @@ const respond = async (request: Request): Promise<Response> => {
     parsed = accepted;
     return true;
   });
+
+  // A redirect.ts holds its place in the table, so it answers only the URLs
+  // the walk reached it for — a literal page beside a [slug]/redirect.ts keeps
+  // its own — and before anything renders. It answers a read and nothing
+  // else. A payload request for it is sent to the page, not the payload: the
+  // client runtime sees HTML come back, gives the navigation to the browser,
+  // and the browser follows the redirect as a document load — the URL bar
+  // ends up right.
+  const declared = match === null ? null : redirectFor(match.pattern, pathname);
+  if (declared !== null) {
+    if (request.method !== 'GET' && request.method !== 'HEAD') {
+      return new Response('method not allowed', {
+        status: 405,
+        headers: { allow: 'GET, HEAD' },
+      });
+    }
+    return redirectResponse(
+      locationOf(declared.to),
+      declared.permanent ? 308 : 307,
+    );
+  }
 
   // A route.ts answers by its own methods, from anywhere: no origin check,
   // since what posts to it — a webhook — is not a form on this site, and it

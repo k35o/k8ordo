@@ -110,9 +110,10 @@ export default '/products';
 ```
 
 The target is a pattern the matched params fill in, so `/:locale/legacy` can
-send to `/:locale/new`. A redirect is consulted before the table — a
-directory that redirects has no page to render — and a directory cannot hold
-both. In this mode the redirect is written as a page that sends the visitor
+send to `/:locale/new`. A redirect holds its place in the table as a page
+does, so a literal directory beside a `[slug]/redirect.ts` keeps its URL; a
+directory that redirects has no page to render, so it cannot hold both. In
+this mode the redirect is written as a page that sends the visitor
 on (`<meta http-equiv="refresh">` and a link), because no server will ever
 send the status; there is no `index.rsc` beside it, so a client navigation to
 it hands the URL to the browser, which loads that page and follows it.

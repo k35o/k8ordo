@@ -25,7 +25,7 @@ export {
 } from './plugin/server-actions';
 export { payloadPathFor } from './runtime/payload-path';
 export { redirect } from './runtime/redirect';
-export type { RedirectTarget } from './runtime/redirect';
+export type { RedirectTarget } from './runtime/redirect-file';
 export type { RouteRequest } from './runtime/request';
 export type { Guard, GuardContext } from './runtime/guard';
 export {

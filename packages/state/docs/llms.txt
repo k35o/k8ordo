@@ -80,8 +80,9 @@ When installed via npm, these docs live under `node_modules/@k8ordo/state/docs/`
   cookie via one
   `cookieStore.set()`; memory applies per call), and returns
   `{ committed, finished }` promise handles (for non-navigating kinds they
-  settle once the write lands, and a write the browser refuses — a full
-  Web Storage area, a cookie over 4 KB — rejects them with its error;
+  settle once the write lands, and a write that fails — the browser refuses
+  it (a full Web Storage area, a cookie over 4 KB) or the schema throws on
+  it — rejects them with its error;
   `{ history: 'push' }` exists only on page state and takes effect only when
   a url value changes).
   `resetStateRegistry()` clears stores between tests. Augment

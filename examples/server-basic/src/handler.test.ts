@@ -212,6 +212,14 @@ describe('the built request handler', () => {
     expect(response.headers.get('location')).toBe('/products');
   });
 
+  it('answers a redirect.ts at its URL spelled with a trailing slash', async () => {
+    // クライアント遷移で /old/ へ行くと、HTML を受け取ったところで /old/ を
+    // 文書として読み直す。ここで 404 だと、リダイレクトはどこからも届かない
+    const response = await handler(new Request(`${ORIGIN}/old/`));
+    expect(response.status).toBe(307);
+    expect(response.headers.get('location')).toBe('/products');
+  });
+
   it('answers a form posted without JavaScript whose action redirected with a 303', async () => {
     // SSR した HTML の hidden input が action を名指す。それをそのまま POST する
     const html = await (await handler(new Request(`${ORIGIN}/`))).text();

@@ -3,6 +3,7 @@
 import {
   useCallback,
   useDeferredValue,
+  useId,
   useMemo,
   useRef,
   useState,
@@ -77,6 +78,7 @@ export const Autocomplete: FC<Props> = ({
   name,
   invalid = false,
   disabled = false,
+  readOnly = false,
   required = false,
   options,
   value,
@@ -95,6 +97,9 @@ export const Autocomplete: FC<Props> = ({
     defaultValue: defaultValue ?? [],
     onChange,
   });
+  const baseId = useId();
+  const listboxId = `${baseId}-listbox`;
+  const optionId = (index: number) => `${baseId}-option-${String(index)}`;
   const inputRef = useRef<HTMLInputElement>(null);
   const mergedRef = useMemo(() => mergeRefs(inputRef, ref), [ref]);
 
@@ -135,10 +140,11 @@ export const Autocomplete: FC<Props> = ({
     selectIndex === undefined || filteredOptions.length === 0
       ? undefined
       : Math.min(selectIndex, filteredOptions.length - 1);
-  const activeOption =
-    activeIndex === undefined ? undefined : filteredOptions[activeIndex];
-  const { pending: formPending } = useFormStatus();
-  const disabledResolved = disabled || formPending;
+  const { pending } = useFormStatus();
+  // 送信中は disabled にしない。Chromium はフォーカスのある要素が無効になると
+  // フォーカスを body へ落とすので、Enter で送った人が欄を見失う
+  const locked = readOnly || pending;
+  const expanded = isOpen && !locked;
 
   const reset = useCallback(() => {
     setText('');
@@ -164,13 +170,16 @@ export const Autocomplete: FC<Props> = ({
   );
 
   const handleBlur: FocusEventHandler<HTMLInputElement> = (e) => {
-    if (e.relatedTarget?.id.startsWith(`${id}_option_`) === true) {
+    if (e.relatedTarget?.closest('[role="listbox"]')?.id === listboxId) {
       return;
     }
     setIsOpen(false);
   };
 
   const handleClick: MouseEventHandler<HTMLInputElement> = () => {
+    if (locked) {
+      return;
+    }
     if (isOpen && text.length === 0) {
       setIsOpen(false);
       return;
@@ -180,6 +189,10 @@ export const Autocomplete: FC<Props> = ({
   };
 
   const handleKeyDown: KeyboardEventHandler<HTMLInputElement> = (e) => {
+    // IME の変換を確定する Enter や、変換候補を選ぶ矢印キーは欄のもの
+    if (e.nativeEvent.isComposing || locked) {
+      return;
+    }
     if (e.key === 'Backspace' && text.length === 0) {
       reset();
       handleChange(currentValue.slice(0, -1));
@@ -194,6 +207,7 @@ export const Autocomplete: FC<Props> = ({
       return;
     }
     if (e.key === 'ArrowDown') {
+      e.preventDefault();
       setIsOpen(true);
       if (filteredOptions.length === 0) {
         return;
@@ -206,6 +220,7 @@ export const Autocomplete: FC<Props> = ({
       return;
     }
     if (e.key === 'ArrowUp') {
+      e.preventDefault();
       setIsOpen(true);
       if (filteredOptions.length === 0) {
         return;
@@ -240,7 +255,9 @@ export const Autocomplete: FC<Props> = ({
         'relative rounded-xl border border-border-base bg-bg-base inline-full',
         FOCUS_RING_WITHIN,
         'has-aria-invalid:border-border-error',
-        'has-disabled:cursor-not-allowed has-disabled:border-border-mute has-disabled:bg-bg-mute hover:has-disabled:has-hover:bg-bg-mute',
+        (disabled || pending) &&
+          'cursor-not-allowed border-border-mute bg-bg-mute',
+        readOnly && 'bg-bg-subtle',
       )}
       ref={setReferenceRef}
     >
@@ -273,6 +290,7 @@ export const Autocomplete: FC<Props> = ({
               >
                 {label}
                 <IconButton
+                  disabled={disabled || locked}
                   label={messages.autocompleteRemoveTag}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -291,21 +309,21 @@ export const Autocomplete: FC<Props> = ({
           <input
             {...rest}
             aria-activedescendant={
-              isOpen && activeOption !== undefined
-                ? `${id}_option_${activeOption.value}`
+              expanded && activeIndex !== undefined
+                ? optionId(activeIndex)
                 : undefined
             }
             aria-autocomplete="list"
-            aria-controls={isOpen ? `${id}_listbox` : undefined}
-            aria-expanded={isOpen}
+            aria-controls={expanded ? listboxId : undefined}
+            aria-expanded={expanded}
             aria-invalid={invalid}
             aria-required={required}
             autoComplete="off"
             className={cn(
               'grow bg-transparent focus-visible:outline-hidden',
-              'disabled:cursor-not-allowed',
+              'disabled:cursor-not-allowed read-only:cursor-not-allowed',
             )}
-            disabled={disabledResolved}
+            disabled={disabled}
             id={id}
             onBlur={chain(handleBlur, onBlur)}
             onChange={(e) => {
@@ -316,6 +334,7 @@ export const Autocomplete: FC<Props> = ({
             onClick={chain(handleClick, onClick)}
             onKeyDown={chain(handleKeyDown, onKeyDown)}
             placeholder={placeholder ?? messages.autocompletePlaceholder}
+            readOnly={locked}
             ref={mergedRef}
             role="combobox"
             type="text"
@@ -324,6 +343,7 @@ export const Autocomplete: FC<Props> = ({
         </div>
         {currentValue.length > 0 && (
           <IconButton
+            disabled={disabled || locked}
             label={messages.autocompleteClear}
             onClick={(e) => {
               e.stopPropagation();
@@ -335,7 +355,7 @@ export const Autocomplete: FC<Props> = ({
           </IconButton>
         )}
       </div>
-      {isOpen && (
+      {expanded && (
         <div
           className="bg-bg-raised border-border-subtle z-10 rounded-xl border shadow-md"
           role="presentation"
@@ -348,7 +368,7 @@ export const Autocomplete: FC<Props> = ({
               'max-h-96 overflow-y-auto py-2 transition-opacity vertical:max-h-none vertical:max-w-96 vertical:overflow-x-auto vertical:overflow-y-visible',
               isPending && 'opacity-60',
             )}
-            id={`${id}_listbox`}
+            id={listboxId}
             role="listbox"
           >
             {filteredOptions.length === 0 && (
@@ -372,7 +392,7 @@ export const Autocomplete: FC<Props> = ({
                       selected &&
                       'bg-primary-bg-mute text-primary-fg',
                   )}
-                  id={`${id}_option_${option.value}`}
+                  id={optionId(idx)}
                   key={option.value}
                   ref={activeIndex === idx ? scrollActiveIntoView : undefined}
                   role="option"

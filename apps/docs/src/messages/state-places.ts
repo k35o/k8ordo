@@ -222,8 +222,8 @@ export const refusalsTable = {
   instead: message({ ja: '代わりに', en: 'Use instead' }),
   why: message({ ja: '理由', en: 'Why' }),
   booleanWhy: message({
-    ja: 'URL は文字列を運び、`"false"` は `z.boolean()` にとって `false` ではありません（`z.coerce.boolean()` では `true` になります）',
-    en: 'A URL carries strings, and `"false"` is not `false` to `z.boolean()` — `z.coerce.boolean()` reads it as `true`',
+    ja: 'URL は文字列を運び、`"false"` は `z.boolean()` にとって `false` ではありません（`z.coerce.boolean()` では `true` になります）。配列の要素でも同じです',
+    en: 'A URL carries strings, and `"false"` is not `false` to `z.boolean()` — `z.coerce.boolean()` reads it as `true`. The same goes for an array’s items',
   }),
   arrayWritten: message({
     ja: '既定値が `[]` でない配列、`z.optional()` の配列',

@@ -68,8 +68,9 @@ written, so a guard decides before the page starts, never after.
 **What a guard covers.** A guard runs before every URL below its directory —
 each page, its payload for a client navigation, a `HEAD`, a Server Action
 posted to it, and a `not-found.tsx` below it; the root's also runs for a URL
-nothing answers. A `redirect.ts` is answered before any guard runs: a
-directory that redirects has nothing below it to guard. A guard does not
+nothing answers. A `redirect.ts` is answered before any guard runs: the URL
+it answers has no page to guard, and the pages below its directory are
+guarded as usual. A guard does not
 protect a Server Action as such — an action is a function any page can call,
 posted to whichever URL calls it — so an action checks what it needs itself.
 

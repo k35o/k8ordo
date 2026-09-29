@@ -92,6 +92,7 @@ export const Combobox: FC<Props> = ({
   name,
   id,
   disabled = false,
+  readOnly = false,
   required = false,
   placeholder,
   onBlur,
@@ -123,7 +124,10 @@ export const Combobox: FC<Props> = ({
   // search の結果から選んだ候補は、次の検索で一覧から消えても表示名が要る
   const [picked, setPicked] = useState<Option | null>(null);
   const { pending } = useFormStatus();
-  const disabledResolved = disabled || pending;
+  // 送信中は disabled にしない。Chromium はフォーカスのある要素が無効になると
+  // フォーカスを body へ落とすので、Enter で送った人が欄を見失う
+  const locked = readOnly || pending;
+  const expanded = isOpen && !locked;
 
   const candidates =
     search === undefined
@@ -207,6 +211,9 @@ export const Combobox: FC<Props> = ({
   };
 
   const open = (index?: number) => {
+    if (locked) {
+      return;
+    }
     setIsOpen(true);
     setActiveIndex(index);
   };
@@ -241,7 +248,7 @@ export const Combobox: FC<Props> = ({
     switch (event.key) {
       case 'ArrowDown': {
         event.preventDefault();
-        if (!isOpen) {
+        if (!expanded) {
           open(
             event.altKey ? undefined : selectedIndex === -1 ? 0 : selectedIndex,
           );
@@ -256,7 +263,7 @@ export const Combobox: FC<Props> = ({
           close();
           return;
         }
-        if (!isOpen) {
+        if (!expanded) {
           open(selectedIndex === -1 ? last : selectedIndex);
           return;
         }
@@ -265,7 +272,7 @@ export const Combobox: FC<Props> = ({
       }
       case 'Enter': {
         const option = active === undefined ? undefined : candidates[active];
-        if (!isOpen || option === undefined) {
+        if (!expanded || option === undefined) {
           return;
         }
         // 開いた一覧から選ぶ Enter で、フォームを送らない
@@ -274,7 +281,7 @@ export const Combobox: FC<Props> = ({
         return;
       }
       case 'Escape': {
-        if (isOpen) {
+        if (expanded) {
           event.preventDefault();
           close();
           return;
@@ -303,7 +310,9 @@ export const Combobox: FC<Props> = ({
         'relative flex items-center rounded-xl border border-border-base bg-bg-base inline-full',
         FOCUS_RING_WITHIN,
         'has-aria-invalid:border-border-error',
-        'has-disabled:cursor-not-allowed has-disabled:border-border-mute has-disabled:bg-bg-mute',
+        (disabled || pending) &&
+          'cursor-not-allowed border-border-mute bg-bg-mute',
+        readOnly && 'bg-bg-subtle',
       )}
       ref={anchorRef}
     >
@@ -332,21 +341,21 @@ export const Combobox: FC<Props> = ({
       <input
         {...rest}
         aria-activedescendant={
-          isOpen && active !== undefined
+          expanded && active !== undefined
             ? `${baseId}-option-${String(active)}`
             : undefined
         }
         aria-autocomplete="list"
         aria-controls={listboxId}
-        aria-expanded={isOpen}
+        aria-expanded={expanded}
         aria-invalid={invalid}
         aria-required={required}
         autoComplete="off"
         className={cn(
           'min-w-0 grow bg-transparent py-2 ps-3 focus-visible:outline-hidden',
-          'disabled:cursor-not-allowed',
+          'disabled:cursor-not-allowed read-only:cursor-not-allowed',
         )}
-        disabled={disabledResolved}
+        disabled={disabled}
         id={id}
         onBlur={(event) => {
           // 打ちかけで離れたら選んだ候補の表示名に戻す。空にして離れたら選択を外す
@@ -364,12 +373,13 @@ export const Combobox: FC<Props> = ({
           runSearch(event.currentTarget.value);
         }}
         onClick={() => {
-          if (!isOpen) {
+          if (!expanded) {
             open(selectedIndex === -1 ? undefined : selectedIndex);
           }
         }}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
+        readOnly={locked}
         ref={mergedRef}
         role="combobox"
         type="text"
@@ -377,13 +387,13 @@ export const Combobox: FC<Props> = ({
       />
       <button
         aria-controls={listboxId}
-        aria-expanded={isOpen}
+        aria-expanded={expanded}
         aria-label={messages.comboboxToggle}
         className="text-fg-mute me-2 grid size-8 shrink-0 place-items-center rounded-md disabled:cursor-not-allowed"
-        disabled={disabledResolved}
+        disabled={disabled || locked}
         onClick={() => {
           inputRef.current?.focus();
-          if (isOpen) {
+          if (expanded) {
             close();
             return;
           }
@@ -396,15 +406,15 @@ export const Combobox: FC<Props> = ({
         tabIndex={-1}
         type="button"
       >
-        <ChevronIcon direction={isOpen ? 'up' : 'down'} size="sm" />
+        <ChevronIcon direction={expanded ? 'up' : 'down'} size="sm" />
       </button>
       <span className="sr-only" role="status">
-        {isOpen ? status : null}
+        {expanded ? status : null}
       </span>
       <div
         className={cn(
           'bg-bg-raised border-border-subtle z-10 rounded-xl border shadow-md',
-          !isOpen && 'hidden',
+          !expanded && 'hidden',
         )}
         // 候補を押しても欄からフォーカスを移さない。離れた扱いになると選ぶ前に閉じる
         onMouseDown={(event) => {
