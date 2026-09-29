@@ -235,7 +235,7 @@ import { PromptInput } from '@k8ordo/ui/ai';
 
 ### Attachments
 
-Pass `accept` to take files. It turns on all three ways in — the `Attach` button's file picker, dropping files onto the input, and pasting them into the textarea — and filters every one of them by the same rule as `<input accept>` (the browser applies it only to the picker). Without `accept` the input takes text only: `Attach` renders nothing, a pasted file is not taken, and a file dragged over the input shows the not-allowed cursor — the drop is still cancelled, so the browser never opens the file and leaves the chat.
+Pass `accept` to take files. It turns on all three ways in — the `Attach` button's file picker, dropping files onto the input, and pasting them into the textarea — and filters every one of them by the same rule as `<input accept>` (the browser applies it only to the picker). A dropped folder is skipped, as on `FileField.Dropzone`. Without `accept` the input takes text only: `Attach` renders nothing, a pasted file is not taken, and a file dragged over the input shows the not-allowed cursor — the drop is still cancelled, so the browser never opens the file and leaves the chat.
 
 `PromptInput.Attachments` lists the files waiting to be sent, image thumbnails included, each with a remove button. `onSubmit` receives them as a `FileList` in its second argument, which the AI SDK's `sendMessage` takes as is. The list empties after each submit, and a message with attachments but no text can be sent — pass `{ files }` alone then, since `sendMessage` turns `text: ''` into an empty text part that some providers reject.
 

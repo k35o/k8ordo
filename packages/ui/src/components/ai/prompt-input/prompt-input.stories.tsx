@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, fn, waitFor } from 'storybook/test';
+import { expect, fireEvent, fn, spyOn, waitFor } from 'storybook/test';
 
 import { PromptInput } from '.';
 
@@ -285,6 +285,79 @@ export const DropFiles: Story = {
     ).toBeVisible();
     // accept に当たらないファイルは受け取らない
     await expect(list.children).toHaveLength(1);
+  },
+};
+
+// 合成の DataTransfer にはフォルダーを載せられないので、名前で選んだ項目を
+// フォルダーの項目に見せる。項目のオブジェクトは読むたびに作り直されるので、
+// プロトタイプの側で差し替え、終わったら戻す
+const asFolders = async (names: string[], run: () => Promise<void>) => {
+  const entry = spyOn(
+    DataTransferItem.prototype,
+    'webkitGetAsEntry',
+  ).mockImplementation(function webkitGetAsEntry(this: DataTransferItem) {
+    const file = this.getAsFile();
+    return file !== null && names.includes(file.name)
+      ? ({ isDirectory: true } as FileSystemEntry)
+      : null;
+  });
+  try {
+    await run();
+  } finally {
+    entry.mockRestore();
+  }
+};
+
+// testing-library の fireEvent.drag* は渡した DataTransfer を空の複製に
+// 差し替えるので、ブラウザが渡すのと同じ DragEvent を組み立てて送る。
+// fireEvent に包むのは、React が描き終えてから見るため
+const sendDrag = async (
+  target: Element,
+  type: 'dragenter' | 'dragleave' | 'drop',
+  dataTransfer: DataTransfer,
+) => {
+  await fireEvent(
+    target,
+    new DragEvent(type, { bubbles: true, cancelable: true, dataTransfer }),
+  );
+};
+
+// フォルダーは中身を辿らないとファイルにならないので、ドロップでは受けない。
+// accept が空（どの種類も受ける）でも、FileField.Dropzone と同じく外す
+export const DropSkipsFolders: Story = {
+  args: { accept: '', onSubmit: onSubmitWithFiles },
+  render: withAttachments,
+  play: async ({ canvas }) => {
+    const folder = new File([], 'photos');
+    const transfer = transferOf([folder, note]);
+
+    await asFolders(['photos'], async () => {
+      await sendDrag(canvas.getByRole('textbox'), 'drop', transfer);
+    });
+
+    const list = await canvas.findByRole('list', { name: '添付ファイル' });
+    await expect(list.children).toHaveLength(1);
+    await expect(list).toHaveTextContent('note.txt');
+    await expect(list).not.toHaveTextContent('photos');
+  },
+};
+
+// 入った数より多い dragleave が届いても、数え上げは 0 で止める。負のまま
+// 数えると、次に入って出たときにハイライトが消えずに残る
+export const DragCountStopsAtZero: Story = {
+  args: { accept: 'image/*', onSubmit: onSubmitWithFiles },
+  render: withAttachments,
+  play: async ({ canvas, canvasElement }) => {
+    const form = canvasElement.querySelector('form');
+    const textarea = canvas.getByRole('textbox');
+    const transfer = transferOf([png]);
+
+    await sendDrag(textarea, 'dragleave', transfer);
+    await sendDrag(textarea, 'dragenter', transfer);
+    await expect(form).toHaveAttribute('data-dragging', 'true');
+
+    await sendDrag(textarea, 'dragleave', transfer);
+    await expect(form).not.toHaveAttribute('data-dragging');
   },
 };
 

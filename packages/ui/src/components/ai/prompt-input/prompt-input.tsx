@@ -15,6 +15,7 @@ import { useControllableState } from '../../../hooks/controllable-state';
 import { getMessages } from '../../../i18n/current';
 import { acceptsFile } from '../../../internal/accepts-file';
 import { carriesFiles } from '../../../internal/carries-files';
+import { droppedFiles } from '../../../internal/dropped-files';
 import { FOCUS_RING, FOCUS_RING_WITHIN } from '../../_internal/focus-ring';
 import { SendIcon } from '../../icons';
 import {
@@ -39,7 +40,7 @@ const [PromptInputProvider, usePromptInputContext] = createSafeContext<{
   maxFiles: number | undefined;
   files: AttachedFile[];
   /** accept に当たるファイルがあれば true（maxFiles で捨てたものも数える） */
-  addFiles: (files: FileList) => boolean;
+  addFiles: (files: Iterable<File>) => boolean;
   removeFile: (id: string) => void;
 }>('PromptInput.* must be used within <PromptInput.Root>');
 
@@ -76,13 +77,12 @@ export const Root: FC<RootProps> = ({
     onChange,
   });
   const [files, setFiles] = useState<AttachedFile[]>([]);
-  const [isDragging, setIsDragging] = useState(false);
-  // 子要素をまたぐたびに dragenter / dragleave が対で飛ぶので、入れ子の深さで
-  // 本当にフォームの外へ出たかを見分ける
-  const dragDepthRef = useRef(0);
+  // 子要素の上を通るたびに dragleave / dragenter が対で届くので、入った深さで数える
+  const [dragDepth, setDragDepth] = useState(0);
+  const isDragging = dragDepth > 0 && accept !== undefined;
 
   const addFiles = useCallback(
-    (incoming: FileList) => {
+    (incoming: Iterable<File>) => {
       if (accept === undefined) {
         return false;
       }
@@ -142,20 +142,17 @@ export const Root: FC<RootProps> = ({
         )}
         data-dragging={isDragging || undefined}
         onDragEnter={(event) => {
-          if (accept === undefined || !carriesFiles(event.dataTransfer)) {
+          if (!carriesFiles(event.dataTransfer)) {
             return;
           }
-          dragDepthRef.current += 1;
-          setIsDragging(true);
+          event.preventDefault();
+          setDragDepth((current) => current + 1);
         }}
         onDragLeave={(event) => {
-          if (accept === undefined || !carriesFiles(event.dataTransfer)) {
+          if (!carriesFiles(event.dataTransfer)) {
             return;
           }
-          dragDepthRef.current -= 1;
-          if (dragDepthRef.current === 0) {
-            setIsDragging(false);
-          }
+          setDragDepth((current) => Math.max(current - 1, 0));
         }}
         onDragOver={(event) => {
           if (!carriesFiles(event.dataTransfer)) {
@@ -172,9 +169,8 @@ export const Root: FC<RootProps> = ({
             return;
           }
           event.preventDefault();
-          dragDepthRef.current = 0;
-          setIsDragging(false);
-          addFiles(event.dataTransfer.files);
+          setDragDepth(0);
+          addFiles(droppedFiles(event.dataTransfer));
         }}
         onSubmit={(event) => {
           event.preventDefault();
