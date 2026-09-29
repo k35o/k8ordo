@@ -50,5 +50,7 @@ jobs:
       - name: Release
         uses: k35o/pnpm-release-action@5e009384bf5b1d2501f8405817b5d5578a90624e # v0.2.2
         with:
-          build: pnpm build
+          # ルートの `pnpm build` は docs サイトまで組むので、サイトだけの失敗で
+          # npm への公開が止まる。公開するパッケージだけを組む。
+          build: pnpm --filter './packages/*' build
           github-token: ${{ steps.app-token.outputs.token }}
