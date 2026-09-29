@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { FC, PropsWithChildren, Ref } from 'react';
 
 import type { ModalSide } from '../../../types/variables';
@@ -45,13 +45,6 @@ export const Modal: FC<
 
   const realDialogOpen =
     isOpen === true || isOpen === false ? isOpen : dialogOpen;
-  const realOnClose = useCallback(() => {
-    onClose?.();
-    if (isOpen === undefined) {
-      return;
-    }
-    setDialogOpen(false);
-  }, [isOpen, onClose]);
   const modalDialogContext = useMemo(
     () => ({
       registerLabelledBy: setRegisteredLabelledBy,
@@ -113,7 +106,7 @@ export const Modal: FC<
           dialogRef.current.close();
         }
       }}
-      onClose={realOnClose}
+      onClose={onClose}
       ref={mergedRef}
     >
       <ModalDialogProvider value={modalDialogContext}>
