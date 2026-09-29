@@ -95,7 +95,7 @@ already have.
 
 CI runs the same checks on every pull request into `main` and again on every
 push to `main`, where they gate the release: nothing is published from a commit
-that fails them. Browser tests run in one job per engine.
+that fails them. Browser tests run in separate jobs per engine.
 [`CONTRIBUTING.md`](CONTRIBUTING.md#ci) has the details.
 
 Run `pnpm build` and `pnpm build:examples` before `pnpm check` or

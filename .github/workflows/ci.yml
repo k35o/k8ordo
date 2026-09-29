@@ -19,16 +19,27 @@ permissions:
 jobs:
   # ブラウザのテストはエンジンごとにジョブを分けて並べる。1 ジョブで 3 つ
   # 回すと待ち時間が 3 倍になる。1 つが落ちても他のエンジンの結果は見たい。
+  # WebKit は、vitest がテストファイルごとに作って外す iframe を、ページが
+  # 閉じるまで手放さない。メモリがファイルの数だけ積み上がり、1 ジョブで
+  # 全部回すとランナーの 16 GB を使い切ってページが落ちるので、ファイルを
+  # 2 つのジョブに分ける。
   tests:
-    name: Tests (${{ matrix.browser }})
+    name: Tests (${{ matrix.browser }}${{ matrix.shard && format(' {0}', matrix.shard) || '' }})
     runs-on: ubuntu-latest
     timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
-        browser: [chromium, firefox, webkit]
+        include:
+          - browser: chromium
+          - browser: firefox
+          - browser: webkit
+            shard: 1/2
+          - browser: webkit
+            shard: 2/2
     env:
       TEST_BROWSER: ${{ matrix.browser }}
+      SHARD: ${{ matrix.shard }}
     steps:
       - name: Checkout branch
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -53,8 +64,9 @@ jobs:
       # どこが落ちるのかが 1 つずつしか見えない。全部回してから落とす。
       # 依存順に並べると、落ちたパッケージに依存するものは --no-bail でも黙って
       # 飛ばされる。ビルドは install で済んでいて、テストは互いを待たない。
+      # 分けたジョブでは、ファイルの少ないパッケージの取り分が 0 件になりうる。
       - name: Run tests
-        run: pnpm --filter './packages/*' --no-bail --no-sort test
+        run: pnpm --filter './packages/*' --no-bail --no-sort test ${SHARD:+--shard=$SHARD --passWithNoTests}
 
   lint:
     name: Lint
