@@ -6,6 +6,7 @@ import { useFormStatus } from 'react-dom';
 
 import { mergeRefs } from '../../../helpers/merge-refs';
 import { FOCUS_RING_PEER } from '../../_internal/focus-ring';
+import { ignoreClick } from '../../_internal/ignore-changes';
 import { CheckIcon, MinusIcon } from '../../icons';
 import { useCheckboxGroupContext } from '../checkbox-group/checkbox-group';
 import { cn } from './../../../helpers/cn';
@@ -77,8 +78,8 @@ export const Checkbox: FC<Props> = ({
     [ref, indeterminateRef],
   );
 
-  const disabledResolved =
-    disabled || groupContext?.disabled === true || pending;
+  const disabledNative = disabled || groupContext?.disabled === true;
+  const disabledResolved = disabledNative || pending;
   const isChecked = groupContext
     ? groupContext.value?.includes(groupItemValue)
     : checked;
@@ -93,15 +94,17 @@ export const Checkbox: FC<Props> = ({
         !labelHidden && 'gap-2',
         disabledResolved ? 'cursor-not-allowed text-fg-mute' : 'cursor-pointer',
       )}
+      onClickCapture={pending ? ignoreClick : undefined}
     >
       <input
         {...rest}
         {...(isChecked === undefined
           ? { defaultChecked: isDefaultChecked }
           : { checked: isChecked })}
+        aria-disabled={pending || undefined}
         aria-invalid={invalid}
         className="peer sr-only"
-        disabled={disabledResolved}
+        disabled={disabledNative}
         name={groupContext?.name ?? name}
         onChange={(event) => {
           if (groupContext) {

@@ -7,6 +7,7 @@ import { useFormStatus } from 'react-dom';
 import { cn } from '../../../helpers/cn';
 import { FOCUS_RING_PEER_NO_BORDER } from '../../_internal/focus-ring';
 import { HIGH_CONTRAST_EDGE } from '../../_internal/high-contrast';
+import { ignoreClick } from '../../_internal/ignore-changes';
 
 type BaseProps = {
   invalid?: boolean;
@@ -63,15 +64,17 @@ export const Switch: FC<Props> = ({
         disabledResolved ? 'cursor-not-allowed text-fg-mute' : 'cursor-pointer',
       )}
       htmlFor={inputId}
+      onClickCapture={pending ? ignoreClick : undefined}
     >
       <span className="relative inline-flex shrink-0">
         <input
           {...rest}
           {...(checked === undefined ? { defaultChecked } : { checked })}
+          aria-disabled={pending || undefined}
           aria-invalid={invalid}
           aria-required={required}
           className="peer sr-only"
-          disabled={disabledResolved}
+          disabled={disabled}
           id={inputId}
           onChange={(event) => {
             onChange?.(event.target.checked, event);

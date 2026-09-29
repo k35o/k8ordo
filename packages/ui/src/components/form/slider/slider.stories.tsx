@@ -2,6 +2,11 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useRef } from 'react';
 import { expect, fireEvent, waitFor } from 'storybook/test';
 
+import { afterRenderingUpdate } from '../../../../.storybook/focus';
+import {
+  finishPending,
+  PendingForm,
+} from '../../../../.storybook/pending-form';
 import { Slider } from './slider';
 
 const meta: Meta<typeof Slider> = {
@@ -38,6 +43,43 @@ export const Disabled: Story = {
   args: {
     disabled: true,
     defaultValue: 30,
+  },
+};
+
+// 送信中もフォーカスを持ち続け、値は動かさない。Enter で送ると、つまみに
+// フォーカスがあるまま送信中になる
+export const PendingKeepsFocus: Story = {
+  render: (props) => (
+    <PendingForm>
+      <Slider {...props} name="volume" />
+    </PendingForm>
+  ),
+  play: async ({ canvas }) => {
+    const slider = canvas.getByRole<HTMLInputElement>('slider', {
+      name: '音量',
+    });
+
+    try {
+      slider.focus();
+      slider.form?.requestSubmit();
+      await canvas.findByText('送信中');
+      await afterRenderingUpdate();
+
+      await expect(slider).toHaveFocus();
+      await expect(slider).toHaveAttribute('aria-disabled', 'true');
+      // userEvent は range のキー操作を再現しないので、キーで値を動かす
+      // ブラウザの既定の動作を止めたかを見る
+      await expect(fireEvent.keyDown(slider, { key: 'ArrowRight' })).toBe(
+        false,
+      );
+      await expect(fireEvent.keyDown(slider, { key: 'Tab' })).toBe(true);
+    } finally {
+      finishPending();
+    }
+    await waitFor(async () => {
+      await expect(slider).not.toHaveAttribute('aria-disabled');
+    });
+    await expect(fireEvent.keyDown(slider, { key: 'ArrowRight' })).toBe(true);
   },
 };
 

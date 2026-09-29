@@ -5,6 +5,7 @@ import { useFormStatus } from 'react-dom';
 
 import type { Option } from '../../../types/variables';
 import { FOCUS_RING_PEER } from '../../_internal/focus-ring';
+import { ignoreClick } from '../../_internal/ignore-changes';
 import { cn } from './../../../helpers/cn';
 
 type BaseProps = {
@@ -70,13 +71,15 @@ export const Radio: FC<Props> = ({
             disabledResolved ? 'cursor-not-allowed' : 'cursor-pointer',
           )}
           key={option.value}
+          onClickCapture={pending ? ignoreClick : undefined}
         >
           <input
             {...(isControlled
               ? { checked: value === option.value }
               : { defaultChecked: defaultValue === option.value })}
+            aria-disabled={pending || undefined}
             className="peer sr-only"
-            disabled={disabledResolved}
+            disabled={disabled}
             name={name ?? labelledbyId}
             onChange={(event) => {
               onChange?.(option.value, event);

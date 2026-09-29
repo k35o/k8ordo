@@ -6,7 +6,9 @@ import { useFormStatus } from 'react-dom';
 
 import type { Option } from '../../../types/variables';
 import { FOCUS_RING_WITHIN } from '../../_internal/focus-ring';
+import { ignoreSelectKeys } from '../../_internal/ignore-changes';
 import { ChevronIcon } from '../../icons';
+import { chain } from './../../../helpers/chain';
 import { cn } from './../../../helpers/cn';
 import { mergeRefs } from './../../../helpers/merge-refs';
 
@@ -21,6 +23,7 @@ export const Select: FC<Props> = ({
   options,
   disabled = false,
   defaultValue,
+  onKeyDown,
   ref,
   ...rest
 }) => {
@@ -58,13 +61,16 @@ export const Select: FC<Props> = ({
       )}
     >
       <select
+        aria-disabled={pending || undefined}
         aria-invalid={invalid}
         className={cn(
           'w-full grow appearance-none bg-transparent px-3 py-2 text-fg-base focus-visible:outline-hidden vertical:h-full vertical:w-auto',
           'disabled:cursor-not-allowed',
+          pending && 'pointer-events-none',
         )}
         defaultValue={defaultValue}
-        disabled={disabled || pending}
+        disabled={disabled}
+        onKeyDown={chain(onKeyDown, pending ? ignoreSelectKeys : undefined)}
         ref={mergedRef}
         {...rest}
       >

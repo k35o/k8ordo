@@ -1,7 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useRef } from 'react';
-import { expect } from 'storybook/test';
+import { expect, fireEvent, waitFor } from 'storybook/test';
 
+import { afterRenderingUpdate } from '../../../../.storybook/focus';
+import {
+  finishPending,
+  PendingForm,
+} from '../../../../.storybook/pending-form';
 import { Select } from './select';
 
 const meta: Meta<typeof Select> = {
@@ -45,6 +50,43 @@ export const Disabled: Story = {
     disabled: true,
     invalid: false,
     required: false,
+  },
+};
+
+// 送信中もフォーカスを持ち続け、一覧を開かず値も変えない。Enter で送ると、
+// 欄にフォーカスがあるまま送信中になる
+export const PendingKeepsFocus: Story = {
+  render: (props) => (
+    <PendingForm>
+      <Select {...props} name="radix" />
+    </PendingForm>
+  ),
+  play: async ({ canvas }) => {
+    const select = canvas.getByRole<HTMLSelectElement>('combobox', {
+      name: '基数',
+    });
+
+    try {
+      select.focus();
+      select.form?.requestSubmit();
+      await canvas.findByText('送信中');
+      await afterRenderingUpdate();
+
+      await expect(select).toHaveFocus();
+      await expect(select).toHaveAttribute('aria-disabled', 'true');
+      // userEvent は select のキー操作を再現しないので、一覧を開いたり値を
+      // 動かしたりするブラウザの既定の動作を止めたかを見る
+      await expect(fireEvent.keyDown(select, { key: 'ArrowDown' })).toBe(false);
+      await expect(fireEvent.keyDown(select, { key: ' ' })).toBe(false);
+      await expect(fireEvent.keyDown(select, { key: '8' })).toBe(false);
+      await expect(fireEvent.keyDown(select, { key: 'Tab' })).toBe(true);
+    } finally {
+      finishPending();
+    }
+    await waitFor(async () => {
+      await expect(select).not.toHaveAttribute('aria-disabled');
+    });
+    await expect(fireEvent.keyDown(select, { key: 'ArrowDown' })).toBe(true);
   },
 };
 
