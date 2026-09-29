@@ -48,6 +48,7 @@ afterEach(async () => {
   navigation.removeEventListener('navigate', interceptAsRouter);
   resetStateRegistry();
   localStorage.removeItem('k8ordo-state:prefs');
+  localStorage.removeItem('k8ordo-state:escaped');
   sessionStorage.removeItem('k8ordo-state:prefs');
   await cookieStore.delete('k8ordo-state.density');
   await cookieStore.delete('k8ordo-state.note');
@@ -563,6 +564,46 @@ it('failed persistence rejects the handle but keeps the echo', async () => {
   } finally {
     spy.mockRestore();
   }
+});
+
+// 自分の出力を読み直すと zod の issue ではなく素の例外を投げるスキーマ。
+// '100%25' の echo は '100%' で、書き込みで '100%' を decodeURIComponent に
+// 通すと URIError になる
+const escaped = defineLocalState(
+  'escaped',
+  z.object({
+    text: z
+      .string()
+      .default('')
+      .transform((value) => decodeURIComponent(value)),
+  }),
+);
+
+const Escaped: FC = () => {
+  const [{ text }, update] = useAppState(escaped);
+  return (
+    <>
+      <p data-testid="escaped">{text}</p>
+      <button
+        type="button"
+        onClick={() => {
+          lastHandle = update({ text: '100%25' });
+        }}
+      >
+        escaped
+      </button>
+    </>
+  );
+};
+
+it('a write the schema throws on rejects the handle but keeps the echo', async () => {
+  const screen = await render(<Escaped />);
+
+  await screen.getByRole('button', { name: 'escaped' }).click();
+
+  await expect.element(screen.getByTestId('escaped')).toHaveTextContent('100%');
+  await expect((lastHandle as UpdateHandle).finished).rejects.toThrow(URIError);
+  expect(localStorage.getItem('k8ordo-state:escaped')).toBeNull();
 });
 
 it('leaves params it does not own untouched', async () => {

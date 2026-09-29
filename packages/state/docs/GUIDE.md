@@ -448,8 +448,9 @@ same handler, say — rejects the handle with an `AbortError`; unawaited calls
 never surface it. Updates with no navigation behind them return the same
 shape: entry-only, local, session and no-change page handles settle once the
 batch is flushed, cookie handles once the Cookie Store API has written it,
-memory handles on the spot. A local, session or cookie write the browser
-refuses — a full quota, a cookie over 4 KB — rejects the handle with that
+memory handles on the spot. A local, session or cookie write that fails —
+the browser refuses it (a full quota, a cookie over 4 KB), or the schema
+throws on the values it was about to write — rejects the handle with that
 error while the rendered value stays.
 
 - **Patches are validated on the spot.** The merged state goes through the
