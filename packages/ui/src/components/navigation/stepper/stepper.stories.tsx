@@ -102,3 +102,56 @@ export const AllDone: Story = {
     }
   },
 };
+
+// 段の間の線。段の中身は li の子の button か span で、線はその次に並ぶ
+const connectorsOf = (canvasElement: HTMLElement) => [
+  ...canvasElement.querySelectorAll<HTMLElement>(
+    'li > span[aria-hidden="true"]',
+  ),
+];
+
+// 横書きの例（max-w-2xl）と同じだけの長さを、縦書きの行の向きに取る
+const writingVertical = (Story: () => React.JSX.Element) => (
+  <div className="writing-v h-168">
+    <Story />
+  </div>
+);
+
+// 縦書きの中では段が上から下へ並ぶので、段の間の線は縦に引く
+export const VerticalWritingMode: Story = {
+  args: {
+    defaultValue: 1,
+  },
+  decorators: [writingVertical],
+  play: async ({ canvasElement }) => {
+    const connectors = connectorsOf(canvasElement);
+    await expect(connectors).toHaveLength(2);
+    for (const connector of connectors) {
+      const { width, height } = connector.getBoundingClientRect();
+      // eslint-disable-next-line no-await-in-loop -- 2 本の線を順に確かめるだけ
+      await expect(width).toBeGreaterThanOrEqual(1);
+      // eslint-disable-next-line no-await-in-loop -- 同上
+      await expect(height).toBeGreaterThan(width);
+    }
+  },
+};
+
+// 縦書きで段を縦（ブロック方向）に積むと、段は右から左へ並ぶので、線は横に引く
+export const VerticalOrientationInVerticalWritingMode: Story = {
+  args: {
+    defaultValue: 1,
+    orientation: 'vertical',
+  },
+  decorators: [writingVertical],
+  play: async ({ canvasElement }) => {
+    const connectors = connectorsOf(canvasElement);
+    await expect(connectors).toHaveLength(2);
+    for (const connector of connectors) {
+      const { width, height } = connector.getBoundingClientRect();
+      // eslint-disable-next-line no-await-in-loop -- 2 本の線を順に確かめるだけ
+      await expect(height).toBeGreaterThanOrEqual(1);
+      // eslint-disable-next-line no-await-in-loop -- 同上
+      await expect(width).toBeGreaterThan(height);
+    }
+  },
+};

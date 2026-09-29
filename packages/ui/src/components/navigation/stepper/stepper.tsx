@@ -70,7 +70,8 @@ export const Stepper: FC<Props> = ({
             <span
               aria-hidden
               className={cn(
-                'grid size-8 shrink-0 place-items-center rounded-full border text-sm font-bold tabular-nums',
+                // 縦書きの中でも段の番号を横倒しにしない
+                'writing-h grid size-8 shrink-0 place-items-center rounded-full border text-sm font-bold tabular-nums',
                 status === 'complete' &&
                   'border-transparent bg-primary-bg text-primary-fg forced-colors:bg-[Highlight] forced-colors:text-[HighlightText]',
                 status === 'current' && 'border-primary-border text-primary-fg',
@@ -147,7 +148,9 @@ export const Stepper: FC<Props> = ({
                 aria-hidden
                 className={cn(
                   'rounded-full',
-                  vertical ? 'ms-4 min-h-4 w-px self-stretch' : 'h-px flex-1',
+                  vertical
+                    ? 'ms-4 min-block-4 inline-px self-stretch'
+                    : 'block-px flex-1',
                   status === 'complete' ? 'bg-primary-bg' : 'bg-border-base',
                   'forced-colors:bg-[CanvasText]',
                 )}
