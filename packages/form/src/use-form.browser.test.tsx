@@ -1115,7 +1115,12 @@ describe('useForm in a browser', () => {
     const screen = await render(<Newsletter action={action} />);
     const agree = screen.getByLabelText('agree').element() as HTMLInputElement;
     const reported = vi.fn<() => void>();
-    agree.addEventListener('invalid', reported);
+    // 吹き出しは止めて、届いたことだけを数える。Firefox の吹き出しは欄が
+    // 消えたあとも残り、あとのテストの操作を横取りする
+    agree.addEventListener('invalid', (event) => {
+      event.preventDefault();
+      reported();
+    });
 
     await screen.getByLabelText('email').fill('k8o@example.com');
     await screen.getByRole('button', { name: 'subscribe' }).click();
