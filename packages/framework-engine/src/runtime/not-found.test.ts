@@ -1,23 +1,14 @@
-import { mkdtemp, readFile, rm, symlink } from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 import { createServer } from 'node:http';
 import type { Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
-import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { chromium, firefox, webkit } from 'playwright';
 import type { Browser, Page } from 'playwright';
-import { createBuilder } from 'vite';
 
-import { engine } from '../plugin/core';
-
-type Handler = (request: Request) => Promise<Response>;
-
-const root = fileURLToPath(
-  new URL('../../fixtures/bare-not-found/', import.meta.url),
-);
-const out = path.join(root, 'dist');
+import { buildFixture } from '../../fixtures/build';
+import type { BuiltFixture } from '../../fixtures/build';
 
 // CI はエンジンごとにジョブを分けて並べるので、TEST_BROWSER で 1 つに絞れる
 const browserTypes = [chromium, firefox, webkit]
@@ -28,46 +19,16 @@ const browserTypes = [chromium, firefox, webkit]
   )
   .map((type) => ({ name: type.name(), type }));
 
-let runtimeDir = '';
+let built: BuiltFixture;
 let server: Server;
 let browser: Browser;
 let origin = '';
 
 // 素の NotFound はビルドされたアプリの中にしか現れないので、テストが
-// not-found.tsx を持たないアプリを実際にビルドする。ランタイムは dist では
-// なくこのパッケージのソースを指し、直した runtime がそのまま試される
+// not-found.tsx を持たないアプリを実際にビルドする
 beforeAll(async () => {
-  runtimeDir = await mkdtemp(path.join(tmpdir(), 'k8ordo-runtime-'));
-  // 再エクスポートするだけの .mjs では、このパッケージの sideEffects: false
-  // によって、何も export しない entry.browser が丸ごと落とされる。リンクなら
-  // Vite が実体へ解決し、ソースそのものがエントリになる
-  await Promise.all(
-    ['entry.rsc', 'entry.ssr', 'entry.browser'].map((name) =>
-      symlink(
-        fileURLToPath(new URL(`./${name}.tsx`, import.meta.url)),
-        path.join(runtimeDir, `${name}.mjs`),
-      ),
-    ),
-  );
-
-  const builder = await createBuilder({
-    root,
-    configFile: false,
-    logLevel: 'error',
-    plugins: [
-      engine({ routesDir: 'routes' }, { via: '@k8ordo/server', runtimeDir }),
-    ],
-    environments: {
-      rsc: { build: { outDir: path.join(out, 'rsc') } },
-      ssr: { build: { outDir: path.join(out, 'ssr') } },
-      client: { build: { outDir: path.join(out, 'client') } },
-    },
-  });
-  await builder.buildApp();
-
-  const { default: handler } = (await import(
-    pathToFileURL(path.join(out, 'rsc', 'index.js')).href
-  )) as { default: Handler };
+  built = await buildFixture('bare-not-found');
+  const { handler, out } = built;
 
   // ハッシュ付きの資産はファイルから、それ以外はハンドラが答える。
   // @k8ordo/server の serve と同じ分担
@@ -97,8 +58,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   server.close();
-  await rm(runtimeDir, { recursive: true, force: true });
-  await rm(out, { recursive: true, force: true });
+  await built.dispose();
 });
 
 // hydrate する前のリンクは JS なしの文書の読み込みになり、クライアント遷移の
