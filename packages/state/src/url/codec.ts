@@ -22,6 +22,7 @@ type Def = {
   type: string;
   innerType?: $ZodType;
   in?: $ZodType;
+  element?: $ZodType;
 };
 
 /* oxlint-disable no-underscore-dangle -- `_zod` is where the shared core
@@ -54,7 +55,7 @@ const readAll = (input: UrlInput, key: string): readonly string[] => {
 };
 
 /**
- * 真偽値は、フィールドのスキーマ自身が encode した綴りで書く。`String(true)` の
+ * 真偽値は、フィールド（配列なら要素）のスキーマ自身が encode した綴りで書く。`String(true)` の
  * `"true"` は `z.stringbool({ truthy: ['yes'] })` が読み返せず、既定値に落ちる。
  */
 const spellBoolean = (schema: $ZodType, value: boolean): string => {
@@ -70,13 +71,14 @@ const spellBoolean = (schema: $ZodType, value: boolean): string => {
   return String(value);
 };
 
-const serializeValue = (key: string, value: unknown): string => {
+const serializeValue = (
+  schema: $ZodType,
+  key: string,
+  value: unknown,
+): string => {
   if (typeof value === 'string') return value;
-  if (
-    typeof value === 'number' ||
-    typeof value === 'bigint' ||
-    typeof value === 'boolean'
-  ) {
+  if (typeof value === 'boolean') return spellBoolean(schema, value);
+  if (typeof value === 'number' || typeof value === 'bigint') {
     return String(value);
   }
   throw new TypeError(
@@ -84,29 +86,38 @@ const serializeValue = (key: string, value: unknown): string => {
   );
 };
 
+const refuseBoolean = (schema: $ZodType, name: string): void => {
+  if (baseDef(schema).type === 'boolean') {
+    throw new TypeError(
+      `url boolean fields must use z.stringbool() — a URL carries strings, and "false" is not false to z.boolean() or z.coerce.boolean(): ${name}`,
+    );
+  }
+};
+
 export const createUrlCodec = (schema: StateSchema): UrlCodec => {
   const info = analyzeSchema(schema, 'url');
   const { keys, defaults } = info;
-  const multi = new Set<string>();
+  const items = new Map<string, $ZodType>();
   for (const key of keys) {
-    const base = baseDef(info.shape[key] as $ZodType).type;
+    const base = baseDef(info.shape[key] as $ZodType);
     // A URL can only say "absent": an empty list and a missing param are the
     // same string, so a non-empty default would silently take the place of
     // every [] the app writes. A boolean has the mirror problem — every
     // string is truthy to coerce, and "false" comes back as true — so the
-    // string-shaped `z.stringbool()` is the only spelling that round-trips.
-    // Both are guaranteed surprises, so both fail at define time.
-    if (base === 'array') {
+    // string-shaped `z.stringbool()` is the only spelling that round-trips,
+    // as a field or as an array's item. Both are guaranteed surprises, so
+    // both fail at define time.
+    if (base.type === 'array') {
       if (!sameValue(defaults[key], [])) {
         throw new TypeError(
           `url array fields must default to [] — an absent param and an empty list are the same URL: ${key}`,
         );
       }
-      multi.add(key);
-    } else if (base === 'boolean') {
-      throw new TypeError(
-        `url boolean fields must use z.stringbool() — a URL carries strings, and "false" is not false to z.boolean() or z.coerce.boolean(): ${key}`,
-      );
+      const item = base.element as $ZodType;
+      refuseBoolean(item, `${key}[]`);
+      items.set(key, item);
+    } else {
+      refuseBoolean(info.shape[key] as $ZodType, key);
     }
   }
 
@@ -115,7 +126,7 @@ export const createUrlCodec = (schema: StateSchema): UrlCodec => {
     for (const key of keys) {
       const got = readAll(input, key);
       if (got.length === 0) continue;
-      raw[key] = multi.has(key) ? got : got[0];
+      raw[key] = items.has(key) ? got : got[0];
     }
     return parseWithSalvage(info, raw);
   };
@@ -125,15 +136,14 @@ export const createUrlCodec = (schema: StateSchema): UrlCodec => {
     for (const key of keys) {
       const value = key in values ? values[key] : defaults[key];
       if (value === undefined || sameValue(defaults[key], value)) continue;
+      const field = info.shape[key] as $ZodType;
       if (Array.isArray(value)) {
-        for (const item of value) params.append(key, serializeValue(key, item));
+        const item = items.get(key) ?? field;
+        for (const each of value) {
+          params.append(key, serializeValue(item, key, each));
+        }
       } else {
-        params.append(
-          key,
-          typeof value === 'boolean'
-            ? spellBoolean(info.shape[key] as $ZodType, value)
-            : serializeValue(key, value),
-        );
+        params.append(key, serializeValue(field, key, value));
       }
     }
     return params.toString();

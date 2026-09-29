@@ -182,6 +182,38 @@ describe('definePageState', () => {
     expect(flags.parseUrl(new URLSearchParams('gift=yes')).gift).toBe(true);
   });
 
+  it('rejects a url array of booleans that are not stringbool — "false" would read as true', () => {
+    expect(() =>
+      definePageState('flag-list', {
+        url: z.object({ flags: z.array(z.coerce.boolean()).default([]) }),
+      }),
+    ).toThrow(/url boolean fields must use z.stringbool\(\).*: flags\[\]$/u);
+    expect(() =>
+      definePageState('flag-list-mini', {
+        url: zm.object({
+          // oxlint-disable-next-line no-underscore-dangle -- `_default` is zod/mini's own spelling of `.default()`
+          flags: zm._default(zm.array(zm.boolean()), []),
+        }),
+      }),
+    ).toThrow(/stringbool/u);
+  });
+
+  it('writes each stringbool of a url array in its own spelling, so a custom one reads back', () => {
+    const answers = definePageState('answers', {
+      url: z.object({
+        answers: z
+          .array(z.stringbool({ truthy: ['yes'], falsy: ['no'] }))
+          .default([]),
+      }),
+    });
+    expect(answers.search({ answers: [true, false] })).toBe(
+      'answers=yes&answers=no',
+    );
+    expect(
+      answers.parseUrl(new URLSearchParams('answers=yes&answers=no')).answers,
+    ).toStrictEqual([true, false]);
+  });
+
   it('salvage cannot smuggle a combination an object-level refine forbids', () => {
     const range = definePageState('range', {
       url: z
