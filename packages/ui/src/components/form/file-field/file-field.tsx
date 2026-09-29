@@ -2,7 +2,6 @@
 
 import type {
   ChangeEvent,
-  DragEvent,
   FC,
   InputHTMLAttributes,
   PropsWithChildren,
@@ -25,6 +24,7 @@ import { cn } from '../../../helpers/cn';
 import { getMessages } from '../../../i18n/current';
 import { acceptsFile } from '../../../internal/accepts-file';
 import { carriesFiles } from '../../../internal/carries-files';
+import { droppedFiles } from '../../../internal/dropped-files';
 import { Button } from '../../buttons/button';
 import { IconButton } from '../../buttons/icon-button';
 import { CloseIcon } from '../../icons';
@@ -291,17 +291,6 @@ export const Trigger: FC<{
   });
 };
 
-// フォルダーは中身を辿らないとファイルにならないので、ドロップでは受けない
-// （フォルダーは webkitDirectory のピッカーで選ぶ）
-const droppedFiles = (event: DragEvent<HTMLElement>): File[] =>
-  Array.from(event.dataTransfer.items).flatMap((item) => {
-    if (item.kind !== 'file' || item.webkitGetAsEntry()?.isDirectory === true) {
-      return [];
-    }
-    const file = item.getAsFile();
-    return file === null ? [] : [file];
-  });
-
 export const Dropzone: FC<{ children?: ReactNode }> = ({ children }) => {
   const messages = getMessages();
   const { disabled, invalid, onFilesDrop, openFilePicker } =
@@ -347,7 +336,7 @@ export const Dropzone: FC<{ children?: ReactNode }> = ({ children }) => {
         event.preventDefault();
         setDepth(0);
         if (!disabled) {
-          onFilesDrop(droppedFiles(event));
+          onFilesDrop(droppedFiles(event.dataTransfer));
         }
       }}
     >
