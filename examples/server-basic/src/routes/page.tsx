@@ -1,6 +1,8 @@
 import { formFields } from '@k8ordo/form/server';
 import type { PageProps } from '@k8ordo/router';
 
+import { prefsState } from './_data/prefs-state';
+import { compact } from './_parts/compact';
 import { Counter } from './_parts/counter';
 import { listEntries } from './_parts/guestbook';
 import { GuestbookForm } from './_parts/guestbook-form';
@@ -16,6 +18,7 @@ const guestbookFields = formFields(guestbookSchema);
 export default async function HomePage({ request }: PageProps<'/'>) {
   // サーバーモードなのでリクエストごとに読み直される
   const entries = await listEntries();
+  const { density } = prefsState.parseCookies(request.cookies);
   return (
     <>
       <h1 data-testid="title">home</h1>
@@ -27,6 +30,10 @@ export default async function HomePage({ request }: PageProps<'/'>) {
       <GuestbookForm fields={guestbookFields} />
       <form action={leave} data-testid="leave-form">
         <button type="submit">leave</button>
+      </form>
+      <form action={compact} data-testid="density-form">
+        <p data-testid="density">{`density:${density}`}</p>
+        <button type="submit">compact</button>
       </form>
       <ul data-testid="entries">
         {entries.map((name, index) => (

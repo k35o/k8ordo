@@ -126,8 +126,8 @@ export const cookiesTitle = message({
 });
 
 export const cookiesDescription = message({
-  ja: '`cookies()` はリクエストの Cookie で、`guard.ts` か Server Action の中で読み書きできます。読むと、リクエストが運んできたものに、同じリクエストの中で先に書いたものが重なって見えます。guard が書いた値は、そのあとに走る Server Action が読みます。書いたものは、答えが何であれ、その答えの `Set-Cookie` になってブラウザに届きます。',
-  en: 'The request’s cookies, to read and to write, from a `guard.ts` or a Server Action. A read sees what the request carried with what was set or deleted earlier in the same request — a guard’s write is what a Server Action after it reads — and every write reaches the browser as a `Set-Cookie` on the answer, whatever the answer is.',
+  ja: '`cookies()` はリクエストの Cookie で、`guard.ts` か Server Action の中で読み書きできます。読むと、リクエストが運んできたものに、同じリクエストの中で先に書いたものが重なって見えます。guard が書いた値は、そのあとに走る Server Action が読みます。書いたものは、答えが何であれ、その答えの `Set-Cookie` になってブラウザに届きます。値は `Set-Cookie` に載せるときにパーセントエンコードされ、リクエストが運んできたときに戻るので、`set` にはどんな文字列もそのまま渡せます。エンコード済みの値を渡すと二重にエンコードされます。',
+  en: 'The request’s cookies, to read and to write, from a `guard.ts` or a Server Action. A read sees what the request carried with what was set or deleted earlier in the same request — a guard’s write is what a Server Action after it reads — and every write reaches the browser as a `Set-Cookie` on the answer, whatever the answer is. The value is percent-encoded on its way into `Set-Cookie` and decoded when a request brings it back, so `set` takes any string as it is — an already encoded one would be encoded twice.',
 });
 
 export const cookiesOptions = message({

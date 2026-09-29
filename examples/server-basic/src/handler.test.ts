@@ -319,6 +319,33 @@ describe('the built request handler', () => {
   });
 });
 
+describe('a cookie state a Server Action writes', () => {
+  it('is read on the next request as the values the action wrote', async () => {
+    const html = await (await handler(new Request(`${ORIGIN}/`))).text();
+    expect(html).toContain('density:comfortable');
+    const response = await handler(
+      new Request(`${ORIGIN}/`, {
+        method: 'POST',
+        headers: { origin: ORIGIN },
+        body: formDataOf(html, 'density-form'),
+      }),
+    );
+    // ブラウザのストアが書くのと同じ属性で、値は 1 回だけエンコードされる
+    const [line] = response.headers.getSetCookie();
+    expect(line).toBe(
+      'k8ordo-state.prefs=%7B%22density%22%3A%22compact%22%7D; Path=/; Max-Age=34560000; Secure; SameSite=Lax',
+    );
+
+    // ブラウザは Set-Cookie の名前と値の組を、そのまま次のリクエストに付ける
+    const next = await handler(
+      new Request(`${ORIGIN}/`, {
+        headers: { cookie: (line as string).split(';')[0] as string },
+      }),
+    );
+    expect(await next.text()).toContain('density:compact');
+  });
+});
+
 describe('a Server Action under serve', () => {
   let server: Server;
 

@@ -169,8 +169,8 @@ export const cookieWriteSecret = message({
 });
 
 export const cookieWriteSame = message({
-  ja: '同じ `cookies()` で Cookie の状態を書くこともできます（JavaScript 無しで好みを変えるフォームなど）。名前は `cookieName`、値は `cookieValue(values)` が返すもので、属性は `Path=/`・`SameSite=Lax`・`Max-Age=34560000` にそろえ、`HttpOnly` は付けません。付けるとブラウザのストアから見えなくなります。開いているタブには `change` イベントで届きます。',
-  en: 'The same `cookies()` can write a cookie state as well — for a form that changes a preference without JavaScript, say. The name is `cookieName`, the value is what `cookieValue(values)` returns, and the attributes match the browser’s: `Path=/`, `SameSite=Lax`, `Max-Age=34560000`, and never `HttpOnly`, which would hide it from the browser store. Open tabs take it in through the `change` event.',
+  ja: '同じ `cookies()` で Cookie の状態を書くこともできます（JavaScript 無しで好みを変えるフォームなど）。名前は `cookieName`、値は `cookieValue(values)` が返すもの（エンコードしていない JSON。`cookies().set` が書き出すときにパーセントエンコードし、`parseCookies` はそれを戻した値を読みます。`Set-Cookie` を自分で組み立てるなら `encodeURIComponent` を 1 回通します）で、属性は `Path=/`・`SameSite=Lax`・`Max-Age=34560000` にそろえ、`HttpOnly` は付けません。付けるとブラウザのストアから見えなくなります。開いているタブには `change` イベントで届きます。',
+  en: 'The same `cookies()` can write a cookie state as well — for a form that changes a preference without JavaScript, say. The name is `cookieName`, the value is what `cookieValue(values)` returns — the JSON unencoded, since `cookies().set` percent-encodes it on the way out and `parseCookies` reads it decoded again; a hand-written `Set-Cookie` passes it through `encodeURIComponent` once — and the attributes match the browser’s: `Path=/`, `SameSite=Lax`, `Max-Age=34560000`, and never `HttpOnly`, which would hide it from the browser store. Open tabs take it in through the `change` event.',
 });
 
 export const initialTitle = message({

@@ -66,9 +66,10 @@ When installed via npm, these docs live under `node_modules/@k8ordo/state/docs/`
   cookie definition exposes `cookieName` (`k8ordo-state.<key>`),
   `parseCookies(cookies)` — reads the values out of a request's
   percent-decoded cookies (`request.cookies` under `@k8ordo/server`), salvaged
-  like any read — and `cookieValue(values?)`, the value a server writes when
-  it sets the same cookie (`Path=/`, `SameSite=Lax`, `Max-Age=34560000`,
-  never `HttpOnly`). `useAppState(definition, keys?, { initialUrl? } |
+  like any read — and `cookieValue(values?)`, the unencoded JSON a server
+  hands its cookie API (`cookies().set`, which percent-encodes it) when it
+  sets the same cookie (`Path=/`, `SameSite=Lax`, `Max-Age=34560000`, never
+  `HttpOnly`). `useAppState(definition, keys?, { initialUrl? } |
   { initialCookie? })` (client) works on any kind and returns
   `[state, update]` — state is the flat merge of a page definition's slots;
   `initialUrl` / `initialCookie` seed the server and hydration renders with
