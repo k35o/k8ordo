@@ -94,7 +94,9 @@ A read sees what the request carried, with what was set or deleted earlier in
 the same request — a guard's write is what a Server Action after it reads —
 and every write reaches the browser as a `Set-Cookie` on the answer, whatever
 the answer is. A cookie written twice at the same path and domain is said
-once, the last way.
+once, the last way. The value is percent-encoded on its way into
+`Set-Cookie` and decoded when a request brings it back, so `set` takes any
+string as it is — an already encoded one would be encoded twice.
 
 `set` takes `path`, `domain`, `maxAge` (seconds), `expires`, `httpOnly`,
 `secure` and `sameSite` (`'strict' | 'lax' | 'none'`, the last only with
