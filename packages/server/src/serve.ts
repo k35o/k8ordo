@@ -87,6 +87,30 @@ const asRequest = (incoming: IncomingMessage, url: URL): Request => {
   } as RequestInit);
 };
 
+/**
+ * A host and port as RFC 3986 spells them. The Host header is written in
+ * front of the path rather than parsed on its own, so anything else there —
+ * a `/`, `?`, `#` or `@`, or nothing at all — would move where the host ends.
+ */
+const AUTHORITY = /^[\w.~%!$&'()*+,;=:[\]-]+$/u;
+
+/**
+ * The URL the browser asked for, or `null` for a request no browser sends.
+ * A browser sends an origin server the path alone and the host in `Host`, so
+ * the path is written after the host, not resolved against it: resolved,
+ * `//evil.com/x` is a URL on evil.com, and the handler would compare a Server
+ * Action's `Origin` with a host the request named itself. A target that is
+ * not a path — the absolute-form only a proxy is sent, `OPTIONS *` — would be
+ * a second place for the host to come from, so it gets no URL at all.
+ */
+const urlOf = (incoming: IncomingMessage): URL | null => {
+  const target = incoming.url ?? '/';
+  // Host を省けるのは HTTP/1.0 だけ（HTTP/1.1 で欠けていれば Node が 400 で断る）
+  const host = incoming.headers.host ?? 'localhost';
+  if (!target.startsWith('/') || !AUTHORITY.test(host)) return null;
+  return URL.parse(`http://${host}${target}`);
+};
+
 const isFile = async (candidate: string): Promise<boolean> => {
   try {
     return (await stat(candidate)).isFile();
@@ -309,10 +333,14 @@ export const serve = async (options: ServeOptions = {}): Promise<Server> => {
   const server = createServer(
     (incoming: IncomingMessage, response: ServerResponse) => {
       void (async () => {
-        const url = new URL(
-          incoming.url ?? '/',
-          `http://${incoming.headers.host ?? 'localhost'}`,
-        );
+        const url = urlOf(incoming);
+        if (url === null) {
+          response.writeHead(400, {
+            'content-type': 'text/plain;charset=utf-8',
+          });
+          response.end('bad request');
+          return;
+        }
         // ファイルで答えるのは読み取りだけ。ほかのメソッドは handler が答える
         // （POST は action、残りは 405）。先にファイルが答えると、そのパスで
         // だけ 405 が 200 に化ける。client/ はビルドの base に置かれる
