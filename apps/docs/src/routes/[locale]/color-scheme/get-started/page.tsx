@@ -10,7 +10,7 @@ import * as m from '../../../../messages';
 const t = m.colorSchemeGetStarted;
 
 const PEERS = [
-  { name: '@k8ordo/state', version: '^0.2.0', purpose: t.install.purposeState },
+  { name: '@k8ordo/state', version: '^0.3.0', purpose: t.install.purposeState },
   { name: 'react', version: '>=19.3.0', purpose: t.install.purposeReact },
   { name: 'zod', version: '^4.4.3', purpose: t.install.purposeZod },
   {
