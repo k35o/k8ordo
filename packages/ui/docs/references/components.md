@@ -74,7 +74,7 @@ ids, ARIA relationships, open/close handlers — and you supply the element that
 wiring belongs to. Those bags carry only the wiring, and they are required
 rather than optional.
 
-## Buttons and links
+## Buttons
 
 ### Button
 
@@ -283,64 +283,7 @@ Props (Toolbar.Item):
 
 - `renderItem`: `(props: ToolbarItemProps) => ReactElement` (required)
 
-### Anchor
-
-A text link. External links automatically get a new-tab icon.
-
-```tsx
-import { Anchor } from '@k8ordo/ui';
-
-<Anchor href="https://example.com">External link</Anchor>
-<Anchor href="/about">Internal link</Anchor>
-<Anchor href="/docs" openInNewTab>Open in a new tab</Anchor>
-```
-
-Props:
-
-- `children`: `ReactNode` (required)
-- `href`: `T` (required)
-- `openInNewTab`: `boolean` (default: `false`)
-- `renderAnchor`: `(props: RenderAnchorProps<T>) => ReactNode` (default: `defaultRenderAnchor`)
-- Other props are forwarded to `AnchorHTMLAttributes<HTMLAnchorElement>`, except `target` / `rel` / `className` / `style`.
-
-`renderAnchor` replaces the `<a>`; its bag is described under
-[Render props](#render-props).
-
-## Layout and navigation
-
-### Accordion
-
-A collapsible section, as a compound component.
-
-```tsx
-import { Accordion } from '@k8ordo/ui';
-
-<Accordion.Root>
-  <Accordion.Item>
-    <Accordion.Button>Section 1</Accordion.Button>
-    <Accordion.Panel>Content</Accordion.Panel>
-  </Accordion.Item>
-</Accordion.Root>;
-```
-
-Props (Accordion.Button):
-
-- `children`: `ReactNode`
-
-Props (Accordion.Item):
-
-- `children`: `ReactNode`
-- `defaultOpen`: `boolean` (default: `false`)
-- `isOpen`: `boolean`
-- `onChange`: `(isOpen: boolean) => void`
-
-Props (Accordion.Panel):
-
-- `children`: `ReactNode`
-
-Props (Accordion.Root):
-
-- `children`: `ReactNode`
+## Navigation
 
 ### Breadcrumb
 
@@ -589,161 +532,28 @@ Props (Tabs.Tab):
 - `id`: `string` (required)
 - `children`: `ReactNode`
 
-### Card
+### Anchor
 
-A card that groups content.
+A text link. External links automatically get a new-tab icon.
 
 ```tsx
-import { Card } from '@k8ordo/ui';
+import { Anchor } from '@k8ordo/ui';
 
-// Static card
-<Card width="full" variant="shadow">
-  <div className="p-6">Content</div>
-</Card>
-
-// Clickable card (hover:scale-[1.02], active:scale-[0.98])
-<Card variant="outline" interactive>
-  <div className="p-6">Content</div>
-</Card>
+<Anchor href="https://example.com">External link</Anchor>
+<Anchor href="/about">Internal link</Anchor>
+<Anchor href="/docs" openInNewTab>Open in a new tab</Anchor>
 ```
 
 Props:
 
-- `children`: `ReactNode`
-- `interactive`: `boolean` (default: `false`)
-- `variant`: `'shadow'` | `'outline'` (default: `'shadow'`)
-- `width`: `'full'` | `'fit'` (default: `'full'`)
-- Other props are forwarded to `HTMLAttributes<HTMLDivElement>`, except `className` / `style`.
+- `children`: `ReactNode` (required)
+- `href`: `T` (required)
+- `openInNewTab`: `boolean` (default: `false`)
+- `renderAnchor`: `(props: RenderAnchorProps<T>) => ReactNode` (default: `defaultRenderAnchor`)
+- Other props are forwarded to `AnchorHTMLAttributes<HTMLAnchorElement>`, except `target` / `rel` / `className` / `style`.
 
-### Separator
-
-A dividing rule.
-
-```tsx
-import { Separator } from '@k8ordo/ui';
-
-<Separator />
-<Separator color="mute" />
-<Separator color="subtle" />
-<Separator orientation="vertical" />
-```
-
-Props:
-
-- `color`: `'base'` | `'mute'` | `'subtle'` (default: `'base'`)
-- `orientation`: `'horizontal'` | `'vertical'` (default: `'horizontal'`)
-- Other props are forwarded to `HTMLAttributes<HTMLSpanElement>`, except `children` / `role` / `aria-orientation` / `className` / `style`.
-
-### Stack
-
-Lays children out along one axis. Pick `gap` from the spacing tokens.
-
-```tsx
-import { Stack } from '@k8ordo/ui';
-
-<Stack gap="lg">
-  <Card>1</Card>
-  <Card>2</Card>
-</Stack>
-
-<Stack direction="row" justify="between" align="center">
-  <Heading level="h2">Title</Heading>
-  <Button>Action</Button>
-</Stack>
-```
-
-Props:
-
-- `align`: `'start'` | `'center'` | `'end'` | `'stretch'`
-- `children`: `ReactNode`
-- `direction`: `'row'` | `'column'` (default: `'column'`)
-- `gap`: `GapSize` (default: `'md'`)
-- `justify`: `'start'` | `'center'` | `'end'` | `'between'`
-- `padding`: `PaddingSize`
-- Other props are forwarded to `HTMLAttributes<HTMLDivElement>`, except `className` / `style`.
-
-### Grid
-
-A grid layout. Passing `'auto-fill'` or `'auto-fit'` to `cols` wraps with `minItemSize` as the lower bound.
-
-```tsx
-import { Grid } from '@k8ordo/ui';
-
-<Grid cols={3} gap="md">
-  <Card>1</Card>
-  <Card>2</Card>
-  <Card>3</Card>
-</Grid>
-
-<Grid cols="auto-fill" minItemSize={64}>
-  {items.map((item) => (
-    <Card key={item.id}>{item.name}</Card>
-  ))}
-</Grid>
-```
-
-Props:
-
-- `children`: `ReactNode`
-- `cols`: `1` | `2` | `3` | `4` | `5` | `6` | `'auto-fill'` | `'auto-fit'` (default: `'auto-fill'`)
-- `gap`: `GapSize` (default: `'md'`)
-- `minItemSize`: `24` | `32` | `40` | `48` | `64` | `80` (default: `48`)
-- Other props are forwarded to `HTMLAttributes<HTMLDivElement>`, except `className` / `style`.
-
-### ResizablePanels
-
-Two panes with a divider between them that the user drags or moves with the
-arrow keys (the WAI-ARIA window splitter). `value` is the first pane's share in
-percent, kept between `min` and `max`; the second pane takes the rest. The root
-fills its parent, so give that parent a size — a vertical split needs a height.
-Each pane scrolls on its own.
-
-The divider is a focusable `separator` whose value is the first pane's size and
-whose `aria-controls` points at it. The arrow keys move it the way they point
-on screen — left/right when the panes sit side by side, up/down when they are
-stacked — so in a right-to-left page `ArrowLeft` widens a first pane that sits
-on the right; `Home` / `End` jump to `min` / `max`. `orientation="horizontal"`
-lays the panes along the line of text, so in vertical writing mode they stack.
-Name the divider after the first pane with `aria-labelledby` when it has a
-heading; otherwise it falls back to `resizablePanelsHandle` from the dictionary.
-
-```tsx
-import { ResizablePanels } from '@k8ordo/ui';
-
-<div className="h-96">
-  <ResizablePanels.Root defaultValue={25}>
-    <ResizablePanels.Panel>
-      <h2 id="files">Files</h2>
-    </ResizablePanels.Panel>
-    <ResizablePanels.Handle aria-labelledby="files" />
-    <ResizablePanels.Panel>…</ResizablePanels.Panel>
-  </ResizablePanels.Root>
-</div>;
-```
-
-Props (Root):
-
-- `children`: `ReactNode`
-- `defaultValue`: `number` (default: `50`)
-- `max`: `number` (default: `90`)
-- `min`: `number` (default: `10`)
-- `onChange`: `(value: number) => void`
-- `orientation`: `'horizontal'` | `'vertical'` (default: `'horizontal'`)
-- `ref`: `Ref<HTMLDivElement>`
-- `step`: `number` (default: `5`)
-- `value`: `number`
-- Other props are forwarded to `HTMLAttributes<HTMLDivElement>`, except `className` / `style`.
-
-Props (ResizablePanels.Panel):
-
-- `children`: `ReactNode`
-- `ref`: `Ref<HTMLDivElement>`
-- Other props are forwarded to `HTMLAttributes<HTMLDivElement>`, except `className` / `style`.
-
-Props (ResizablePanels.Handle):
-
-- _No props of its own._
-- Other props are forwarded to `HTMLAttributes<HTMLDivElement>`, except `className` / `style` / `role` / `children` / `tabIndex` / `aria-orientation` / `aria-valuenow` / `aria-valuemin` / `aria-valuemax` / `aria-controls`.
+`renderAnchor` replaces the `<a>`; its bag is described under
+[Render props](#render-props).
 
 ## Forms
 
@@ -2023,6 +1833,66 @@ Props:
 - `selectedId`: `string` | `null`
 - Other props are forwarded to `HTMLAttributes<HTMLUListElement>`, except `children` / `className` / `style` / `role` / `aria-label`.
 
+### Accordion
+
+A collapsible section, as a compound component.
+
+```tsx
+import { Accordion } from '@k8ordo/ui';
+
+<Accordion.Root>
+  <Accordion.Item>
+    <Accordion.Button>Section 1</Accordion.Button>
+    <Accordion.Panel>Content</Accordion.Panel>
+  </Accordion.Item>
+</Accordion.Root>;
+```
+
+Props (Accordion.Button):
+
+- `children`: `ReactNode`
+
+Props (Accordion.Item):
+
+- `children`: `ReactNode`
+- `defaultOpen`: `boolean` (default: `false`)
+- `isOpen`: `boolean`
+- `onChange`: `(isOpen: boolean) => void`
+
+Props (Accordion.Panel):
+
+- `children`: `ReactNode`
+
+Props (Accordion.Root):
+
+- `children`: `ReactNode`
+
+### Card
+
+A card that groups content.
+
+```tsx
+import { Card } from '@k8ordo/ui';
+
+// Static card
+<Card width="full" variant="shadow">
+  <div className="p-6">Content</div>
+</Card>
+
+// Clickable card (hover:scale-[1.02], active:scale-[0.98])
+<Card variant="outline" interactive>
+  <div className="p-6">Content</div>
+</Card>
+```
+
+Props:
+
+- `children`: `ReactNode`
+- `interactive`: `boolean` (default: `false`)
+- `variant`: `'shadow'` | `'outline'` (default: `'shadow'`)
+- `width`: `'full'` | `'fit'` (default: `'full'`)
+- Other props are forwarded to `HTMLAttributes<HTMLDivElement>`, except `className` / `style`.
+
 ## Feedback
 
 ### Alert
@@ -2173,76 +2043,6 @@ Props:
 - `shape`: `'rect'` | `'circle'` (default: `'rect'`)
 - `size`: `'sm'` | `'md'` | `'lg'` (default: `'md'`)
 - Other props are forwarded to `HTMLAttributes<HTMLDivElement>`, except `children` / `className` / `style`.
-
-## Observers
-
-Components that watch their children and report back without adding a wrapper
-element. They are built on React's Fragment refs, so whatever the children
-render is what gets observed — including host elements that mount later.
-
-### InView
-
-Reports whether its children are inside the viewport, or inside `root`.
-
-```tsx
-import { InView } from '@k8ordo/ui';
-
-const [isInView, setIsInView] = useState(false);
-
-<InView onChange={setIsInView}>
-  <section>…</section>
-</InView>;
-
-// inside a scroll container, and only until it has been seen once
-const [container, setContainer] = useState<HTMLElement | null>(null);
-
-<div ref={setContainer} style={{ overflowY: 'auto' }}>
-  <InView once onChange={reveal} root={container} rootMargin="0px 0px 24px 0px">
-    <img alt="" src="…" />
-  </InView>
-</div>;
-```
-
-- `onChange` reports the state as soon as a host element is observed, then again
-  each time it flips. The same value is never reported twice in a row, even
-  when `root` changes and the observer is re-created.
-- With several host elements, `isInView` is `true` while **any** of them
-  intersects, and it follows children that mount or unmount later. While the
-  children render no host element, `onChange` is not called at all — the first
-  report comes once one mounts.
-- `once` stops observing after the first `true`.
-- Hold `root` in state, not a `RefObject`: the observer has to be re-created
-  once the element exists.
-
-Props:
-
-- `children`: `ReactNode` (required)
-- `onChange`: `(isInView: boolean) => void` (required)
-- `once`: `boolean` (default: `false`)
-- `root`: `Element` | `null` (default: `null`)
-- `rootMargin`: `string` (default: `'0px'`)
-- `threshold`: `number` (default: `0`)
-
-### Resize
-
-Calls `onChange` when the size of its children changes.
-
-```tsx
-import { Resize } from '@k8ordo/ui';
-
-<Resize onChange={remeasure}>
-  <div>…</div>
-</Resize>;
-```
-
-- `onChange` is also called once when observation starts, as a native
-  `ResizeObserver` is.
-- It takes no argument; read what you need from the DOM in the handler.
-
-Props:
-
-- `children`: `ReactNode` (required)
-- `onChange`: `() => void` (required)
 
 ## Overlays
 
@@ -2614,6 +2414,208 @@ Props (ListBox.Trigger):
 - `label`: `string`
 - `size`: `ComponentProps<typeof Button>['size']` (default: `'md'`)
 
+## Layout
+
+### Separator
+
+A dividing rule.
+
+```tsx
+import { Separator } from '@k8ordo/ui';
+
+<Separator />
+<Separator color="mute" />
+<Separator color="subtle" />
+<Separator orientation="vertical" />
+```
+
+Props:
+
+- `color`: `'base'` | `'mute'` | `'subtle'` (default: `'base'`)
+- `orientation`: `'horizontal'` | `'vertical'` (default: `'horizontal'`)
+- Other props are forwarded to `HTMLAttributes<HTMLSpanElement>`, except `children` / `role` / `aria-orientation` / `className` / `style`.
+
+### Stack
+
+Lays children out along one axis. Pick `gap` from the spacing tokens.
+
+```tsx
+import { Stack } from '@k8ordo/ui';
+
+<Stack gap="lg">
+  <Card>1</Card>
+  <Card>2</Card>
+</Stack>
+
+<Stack direction="row" justify="between" align="center">
+  <Heading level="h2">Title</Heading>
+  <Button>Action</Button>
+</Stack>
+```
+
+Props:
+
+- `align`: `'start'` | `'center'` | `'end'` | `'stretch'`
+- `children`: `ReactNode`
+- `direction`: `'row'` | `'column'` (default: `'column'`)
+- `gap`: `GapSize` (default: `'md'`)
+- `justify`: `'start'` | `'center'` | `'end'` | `'between'`
+- `padding`: `PaddingSize`
+- Other props are forwarded to `HTMLAttributes<HTMLDivElement>`, except `className` / `style`.
+
+### Grid
+
+A grid layout. Passing `'auto-fill'` or `'auto-fit'` to `cols` wraps with `minItemSize` as the lower bound.
+
+```tsx
+import { Grid } from '@k8ordo/ui';
+
+<Grid cols={3} gap="md">
+  <Card>1</Card>
+  <Card>2</Card>
+  <Card>3</Card>
+</Grid>
+
+<Grid cols="auto-fill" minItemSize={64}>
+  {items.map((item) => (
+    <Card key={item.id}>{item.name}</Card>
+  ))}
+</Grid>
+```
+
+Props:
+
+- `children`: `ReactNode`
+- `cols`: `1` | `2` | `3` | `4` | `5` | `6` | `'auto-fill'` | `'auto-fit'` (default: `'auto-fill'`)
+- `gap`: `GapSize` (default: `'md'`)
+- `minItemSize`: `24` | `32` | `40` | `48` | `64` | `80` (default: `48`)
+- Other props are forwarded to `HTMLAttributes<HTMLDivElement>`, except `className` / `style`.
+
+### ResizablePanels
+
+Two panes with a divider between them that the user drags or moves with the
+arrow keys (the WAI-ARIA window splitter). `value` is the first pane's share in
+percent, kept between `min` and `max`; the second pane takes the rest. The root
+fills its parent, so give that parent a size — a vertical split needs a height.
+Each pane scrolls on its own.
+
+The divider is a focusable `separator` whose value is the first pane's size and
+whose `aria-controls` points at it. The arrow keys move it the way they point
+on screen — left/right when the panes sit side by side, up/down when they are
+stacked — so in a right-to-left page `ArrowLeft` widens a first pane that sits
+on the right; `Home` / `End` jump to `min` / `max`. `orientation="horizontal"`
+lays the panes along the line of text, so in vertical writing mode they stack.
+Name the divider after the first pane with `aria-labelledby` when it has a
+heading; otherwise it falls back to `resizablePanelsHandle` from the dictionary.
+
+```tsx
+import { ResizablePanels } from '@k8ordo/ui';
+
+<div className="h-96">
+  <ResizablePanels.Root defaultValue={25}>
+    <ResizablePanels.Panel>
+      <h2 id="files">Files</h2>
+    </ResizablePanels.Panel>
+    <ResizablePanels.Handle aria-labelledby="files" />
+    <ResizablePanels.Panel>…</ResizablePanels.Panel>
+  </ResizablePanels.Root>
+</div>;
+```
+
+Props (Root):
+
+- `children`: `ReactNode`
+- `defaultValue`: `number` (default: `50`)
+- `max`: `number` (default: `90`)
+- `min`: `number` (default: `10`)
+- `onChange`: `(value: number) => void`
+- `orientation`: `'horizontal'` | `'vertical'` (default: `'horizontal'`)
+- `ref`: `Ref<HTMLDivElement>`
+- `step`: `number` (default: `5`)
+- `value`: `number`
+- Other props are forwarded to `HTMLAttributes<HTMLDivElement>`, except `className` / `style`.
+
+Props (ResizablePanels.Panel):
+
+- `children`: `ReactNode`
+- `ref`: `Ref<HTMLDivElement>`
+- Other props are forwarded to `HTMLAttributes<HTMLDivElement>`, except `className` / `style`.
+
+Props (ResizablePanels.Handle):
+
+- _No props of its own._
+- Other props are forwarded to `HTMLAttributes<HTMLDivElement>`, except `className` / `style` / `role` / `children` / `tabIndex` / `aria-orientation` / `aria-valuenow` / `aria-valuemin` / `aria-valuemax` / `aria-controls`.
+
+## Observers
+
+Components that watch their children and report back without adding a wrapper
+element. They are built on React's Fragment refs, so whatever the children
+render is what gets observed — including host elements that mount later.
+
+### InView
+
+Reports whether its children are inside the viewport, or inside `root`.
+
+```tsx
+import { InView } from '@k8ordo/ui';
+
+const [isInView, setIsInView] = useState(false);
+
+<InView onChange={setIsInView}>
+  <section>…</section>
+</InView>;
+
+// inside a scroll container, and only until it has been seen once
+const [container, setContainer] = useState<HTMLElement | null>(null);
+
+<div ref={setContainer} style={{ overflowY: 'auto' }}>
+  <InView once onChange={reveal} root={container} rootMargin="0px 0px 24px 0px">
+    <img alt="" src="…" />
+  </InView>
+</div>;
+```
+
+- `onChange` reports the state as soon as a host element is observed, then again
+  each time it flips. The same value is never reported twice in a row, even
+  when `root` changes and the observer is re-created.
+- With several host elements, `isInView` is `true` while **any** of them
+  intersects, and it follows children that mount or unmount later. While the
+  children render no host element, `onChange` is not called at all — the first
+  report comes once one mounts.
+- `once` stops observing after the first `true`.
+- Hold `root` in state, not a `RefObject`: the observer has to be re-created
+  once the element exists.
+
+Props:
+
+- `children`: `ReactNode` (required)
+- `onChange`: `(isInView: boolean) => void` (required)
+- `once`: `boolean` (default: `false`)
+- `root`: `Element` | `null` (default: `null`)
+- `rootMargin`: `string` (default: `'0px'`)
+- `threshold`: `number` (default: `0`)
+
+### Resize
+
+Calls `onChange` when the size of its children changes.
+
+```tsx
+import { Resize } from '@k8ordo/ui';
+
+<Resize onChange={remeasure}>
+  <div>…</div>
+</Resize>;
+```
+
+- `onChange` is also called once when observation starts, as a native
+  `ResizeObserver` is.
+- It takes no argument; read what you need from the DOM in the handler.
+
+Props:
+
+- `children`: `ReactNode` (required)
+- `onChange`: `() => void` (required)
+
 ## Icons
 
 Decorative icons, all from the root entry. Each renders an `<svg>` with
@@ -2637,21 +2639,24 @@ Two of them also require a prop that picks the glyph:
 - `ChevronIcon`: `direction`: `Direction` (`'up'` | `'down'` | `'left'` | `'right'`)
 - `AlertIcon`: `status`: `Status` (`'success'` | `'info'` | `'warning'` | `'error'`)
 
+<!-- generated:icons -->
+
 The icons: `AccessibilityIcon`, `AIIcon`, `AlertIcon`, `AssistantIcon`,
 `AtomIcon`, `BadIcon`, `BlogIcon`, `BoringIcon`, `CheckIcon`, `ChevronIcon`,
 `ChromeIcon`, `CloseIcon`, `CodeXmlIcon`, `ColorContrastIcon`, `ColorInfoIcon`,
 `ColorScaleIcon`, `CopyIcon`, `DarkModeIcon`, `DifficultIcon`, `EasyIcon`,
 `EdgeIcon`, `ExternalLinkIcon`, `FirefoxIcon`, `FlaskIcon`, `ForkIcon`,
 `FormIcon`, `FullscreenIcon`, `GitHubIcon`, `GoodIcon`, `HistoryIcon`,
-`HorizontalWritingIcon`, `InformativeIcon`, `InterestingIcon`,
-`LightModeIcon`, `LinkIcon`, `ListIcon`, `LocationIcon`, `LockIcon`,
-`LockOpenIcon`, `LogoIcon`, `MailIcon`, `MinusIcon`, `MixedColorIcon`,
-`NavigationMenuIcon`, `NewsIcon`, `PackageIcon`, `PaletteIcon`, `PlusIcon`,
-`PrepareIcon`, `PublishDateIcon`, `QiitaIcon`, `RefreshIcon`, `RSSIcon`,
-`SafariIcon`, `SendIcon`, `ShallowIcon`, `ShieldCheckIcon`, `SlideIcon`,
-`SparklesIcon`, `SquircleIcon`, `SubscribeIcon`, `TableIcon`, `TagIcon`,
-`TwitterIcon`, `UpdateDateIcon`, `VerticalWritingIcon`, `ViewIcon`,
-`ViewOffIcon`.
+`HorizontalWritingIcon`, `InformativeIcon`, `InterestingIcon`, `LightModeIcon`,
+`LinkIcon`, `ListIcon`, `LocationIcon`, `LockIcon`, `LockOpenIcon`, `LogoIcon`,
+`MailIcon`, `MinusIcon`, `MixedColorIcon`, `NavigationMenuIcon`, `NewsIcon`,
+`PackageIcon`, `PaletteIcon`, `PlusIcon`, `PrepareIcon`, `PublishDateIcon`,
+`QiitaIcon`, `RefreshIcon`, `RSSIcon`, `SafariIcon`, `SendIcon`, `ShallowIcon`,
+`ShieldCheckIcon`, `SlideIcon`, `SparklesIcon`, `SquircleIcon`, `SubscribeIcon`,
+`TableIcon`, `TagIcon`, `TwitterIcon`, `UpdateDateIcon`, `VerticalWritingIcon`,
+`ViewIcon`, `ViewOffIcon`.
+
+<!-- /generated:icons -->
 
 `Logo` is the mark `LogoIcon` draws, as a bare `<svg>` without the sizing: it
 takes `className`, `aria-hidden`, and `focusable` (`Partial<IconRenderProps>`)

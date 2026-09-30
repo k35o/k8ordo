@@ -6,16 +6,16 @@ k8ordo is the monorepo for the `@k8ordo/*` packages. Vite+ (`vp`) is the unified
 
 `@k8ordo/*` holds **primary libraries only** — the ones an application imports and builds on. Tools that plug into someone else's ecosystem (lint configs, bundler plugins, Storybook addons) do not go here; they live in their own repositories under `@k8o/*` or unscoped names. Being a support tool is not a lesser thing — it is a different thing, and mixing the two makes the scope meaningless.
 
-The family's own framework is primary, not a support tool, even though it is delivered as Vite plugins. Vite+ is assumed infrastructure here — the layer everything already stands on — so a plugin that defines what an application *is* (its route grammar, its execution boundaries, how it is built and served) is the foundation an app builds on, not an addon to someone else's ecosystem. The test is who the artifact serves: `@k8ordo/static` and `@k8ordo/server` serve k8ordo applications, and an eslint config serves eslint.
+The family's own framework is primary, not a support tool, even though it is delivered as Vite plugins. Vite+ is assumed infrastructure here — the layer everything already stands on — so a plugin that defines what an application _is_ (its route grammar, its execution boundaries, how it is built and served) is the foundation an app builds on, not an addon to someone else's ecosystem. The test is who the artifact serves: `@k8ordo/static` and `@k8ordo/server` serve k8ordo applications, and an eslint config serves eslint.
 
-The same test admits `@k8ordo/ui`'s generative-UI adapters (`@k8ordo/ui/json-render`, `@k8ordo/ui/openui`, `@k8ordo/ui/ai-sdk`). They plug into other ecosystems, but what they serve is an application that already uses `@k8ordo/ui` and wants an LLM to compose *these* components: the catalog is a description of this library, and it would be a different, thinner thing published anywhere else. An adapter whose value would survive without `@k8ordo/ui` behind it does not belong here.
+The same test admits `@k8ordo/ui`'s generative-UI adapters (`@k8ordo/ui/json-render`, `@k8ordo/ui/openui`, `@k8ordo/ui/ai-sdk`). They plug into other ecosystems, but what they serve is an application that already uses `@k8ordo/ui` and wants an LLM to compose _these_ components: the catalog is a description of this library, and it would be a different, thinner thing published anywhere else. An adapter whose value would survive without `@k8ordo/ui` behind it does not belong here.
 
 `packages/framework-engine` is the one directory here that is not a member: a private workspace package both modes bundle at pack time, never published.
 
 Every package here shares the same discipline:
 
 - **React 19 and RSC are assumed.** No framework-agnostic core and no adapter layer for other frameworks — we would never use one, so building it would be an indirection nobody pays for.
-- **Anything at Baseline *newly available* is fair game, and nothing else is carried.** Newly available, not widely available: a feature is usable the moment all four core browsers ship it, without waiting the further 30 months. No polyfills, no fallbacks, no legacy branches. This is not a decision to drop old browsers — a library built out of the newest features never ran on them in the first place. `pnpm check:no-polyfills` enforces the dependency half of this in CI; the rest is on the author, since checking Baseline usage itself (JS *and* CSS) would take a linter of its own.
+- **Anything at Baseline _newly available_ is fair game, and nothing else is carried.** Newly available, not widely available: a feature is usable the moment all four core browsers ship it, without waiting the further 30 months. No polyfills, no fallbacks, no legacy branches. This is not a decision to drop old browsers — a library built out of the newest features never ran on them in the first place. `pnpm check:no-polyfills` enforces the dependency half of this in CI; the rest is on the author, since checking Baseline usage itself (JS _and_ CSS) would take a linter of its own.
 - **Identifiers name what the package owns, never the scope.** The scope already says `k8ordo`, so `UIProvider`, not `OrdoProvider`.
 
 ## Adding a package
@@ -37,7 +37,7 @@ English, because an AI coding assistant consumes it directly:
 - `CLAUDE.md` / `AGENTS.md` at every level
 - `packages/*/docs/**` — shipped inside every npm package and read out of `node_modules/@k8ordo/<name>/docs/`
 - `.claude/skills/**`
-- Any string a generator writes into those files (see `packages/ui/scripts/generate-components-md.ts`)
+- Any string a generator writes into those files (see `packages/ui/scripts/generate-component-docs.ts`)
 
 Japanese is fine elsewhere: commit messages, PR and issue text, code comments,
 tooling output meant for a developer, and the documentation site's own copy

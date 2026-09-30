@@ -179,96 +179,112 @@ stories and rendered props rather than relying on trained knowledge:
 
 ## Component Categories
 
+Every component, grouped by its folder in `src/components/`. Each links to its
+entry in [docs/references/components.md](docs/references/components.md).
+
+<!-- generated:component-categories -->
+
 ### Buttons
 
-- **Button** - Primary action button (use `renderItem` to render as a link)
-- **IconButton** - Button with icon only (use `renderItem` to render as a link)
-- **CopyButton** - Copies text to the clipboard, then shows and announces the result
-- **Toolbar** - Group of buttons that arrow keys move between
+- [Button](docs/references/components.md#button)
+- [CopyButton](docs/references/components.md#copybutton)
+- [IconButton](docs/references/components.md#iconbutton)
+- [Toolbar](docs/references/components.md#toolbar)
 
 ### Navigation
 
-- **Anchor** - Text link with external-link awareness
-- **Breadcrumb** - Navigation path indicator
-- **Pagination** - Page navigation controls
-- **Stepper** - Steps of a process, with the done and current ones marked
-- **SideNav** - Grouped side navigation links (use `renderAnchor` for a router link)
-- **TableOfContents** - On-page contents that marks the heading being read
-- **Tabs** - Tab-based content organization
+- [Anchor](docs/references/components.md#anchor)
+- [Breadcrumb](docs/references/components.md#breadcrumb)
+- [Pagination](docs/references/components.md#pagination)
+- [SideNav](docs/references/components.md#sidenav)
+- [Stepper](docs/references/components.md#stepper)
+- [TableOfContents](docs/references/components.md#tableofcontents)
+- [Tabs](docs/references/components.md#tabs)
 
-### Form Controls
+### Forms
 
-- **Autocomplete** - Pick several from a fixed list, shown as tags
-- **Calendar** - Month grid for picking a day
-- **Checkbox** / **CheckboxCard** / **CheckboxGroup** - Multi-selection inputs
-- **ColorPicker** - Hex color field with hue / saturation / lightness sliders and swatches
-- **Combobox** - Pick one from a list filtered as you type, or searched on a server
-- **DateField** / **DatePicker** - Native date input, alone or with a calendar popover
-- **FileField** - File upload with composite pattern, from a button or by dropping files
-- **Form** / **FormControl** - Form wrapper and field with label/validation
-- **NumberField** - Numeric input with controls
-- **PasswordInput** - Password input with show/hide toggle
-- **Radio** / **RadioCard** - Single-selection inputs
-- **Select** - Dropdown selection
-- **Slider** / **RangeSlider** - Slider input control, with one thumb or two
-- **Switch** - Toggle switch
-- **TextField** - Single-line text input
-- **Textarea** - Multi-line text input
+- [Autocomplete](docs/references/components.md#autocomplete)
+- [Calendar](docs/references/components.md#calendar)
+- [Checkbox](docs/references/components.md#checkbox)
+- [CheckboxCard](docs/references/components.md#checkboxcard)
+- [CheckboxGroup](docs/references/components.md#checkboxgroup)
+- [ColorPicker](docs/references/components.md#colorpicker)
+- [Combobox](docs/references/components.md#combobox)
+- [DateField](docs/references/components.md#datefield)
+- [DatePicker](docs/references/components.md#datepicker)
+- [FileField](docs/references/components.md#filefield)
+- [Form](docs/references/components.md#form)
+- [FormControl](docs/references/components.md#formcontrol)
+- [NumberField](docs/references/components.md#numberfield)
+- [PasswordInput](docs/references/components.md#passwordinput)
+- [Radio](docs/references/components.md#radio)
+- [RadioCard](docs/references/components.md#radiocard)
+- [RangeSlider](docs/references/components.md#rangeslider)
+- [Select](docs/references/components.md#select)
+- [Slider](docs/references/components.md#slider)
+- [Switch](docs/references/components.md#switch)
+- [Textarea](docs/references/components.md#textarea)
+- [TextField](docs/references/components.md#textfield)
 
-### Data Display
+### Data display
 
-- **Accordion** - Collapsible content panels
-- **Avatar** - User/entity avatar
-- **Badge** - Status/label indicator
-- **Card** - Flexible content container (hover interaction via `interactive`)
-- **Carousel** - Scroll-snapping slides with previous/next buttons
-- **Code** - Formatted code display
-- **DataTable** - Table with sorting, row selection, and column visibility (controlled)
-- **CodeBlock** (from `@k8ordo/ui/code-block`) - Code block highlighted on the server, with a copy button
-- **Heading** - Typography heading component
-- **Kbd** - Keyboard key cap for shortcuts
-- **Prose** - Typesetting for rendered Markdown/MDX, tuned for Japanese
-- **Table** - Tabular data display
-- **Tree** - Expandable hierarchy with WAI-ARIA tree keyboard navigation
+- [Accordion](docs/references/components.md#accordion)
+- [Avatar](docs/references/components.md#avatar)
+- [Badge](docs/references/components.md#badge)
+- [Card](docs/references/components.md#card)
+- [Carousel](docs/references/components.md#carousel)
+- [Code](docs/references/components.md#code)
+- [CodeBlock](docs/references/components.md#codeblock)
+- [DataTable](docs/references/components.md#datatable)
+- [Heading](docs/references/components.md#heading)
+- [Kbd](docs/references/components.md#kbd)
+- [Prose](docs/references/components.md#prose)
+- [Table](docs/references/components.md#table)
+- [Tree](docs/references/components.md#tree)
 
 ### Feedback
 
-- **Alert** - Important messages and notifications
-- **EmptyState** - What a list, table, or search shows when it is empty
-- **Progress** - Progress indication, or an animated bar when progress is unknown
-- **Skeleton** - Content loading placeholder
-- **Spinner** - Loading indicator
-- **ToastProvider** / **useToast** - Temporary notification messages
+- [Alert](docs/references/components.md#alert)
+- [EmptyState](docs/references/components.md#emptystate)
+- [Progress](docs/references/components.md#progress)
+- [Skeleton](docs/references/components.md#skeleton)
+- [Spinner](docs/references/components.md#spinner)
+- [ToastProvider](docs/references/components.md#toastprovider)
 
 ### Overlays
 
-- **CommandPalette** - Searchable list of commands in a modal
-- **ContextMenu** - Menu opened by right-click at the pointer
-- **Dialog** - Modal dialog boxes
-- **Drawer** - Slide-out panel
-- **DropdownMenu** - Action menu component
-- **ListBox** - Selectable list component
-- **Modal** - Overlay modal component
-- **Popover** - Floating content container
-- **Tooltip** - Contextual help text
+- [CommandPalette](docs/references/components.md#commandpalette)
+- [ContextMenu](docs/references/components.md#contextmenu)
+- [Dialog](docs/references/components.md#dialog)
+- [Drawer](docs/references/components.md#drawer)
+- [DropdownMenu](docs/references/components.md#dropdownmenu)
+- [ListBox](docs/references/components.md#listbox)
+- [Modal](docs/references/components.md#modal)
+- [Popover](docs/references/components.md#popover)
+- [Tooltip](docs/references/components.md#tooltip)
 
 ### Layout
 
-- **Grid** - CSS grid with token-based gaps and responsive auto-fill/auto-fit columns
-- **Stack** - Flex layout with token-based gaps
-- **Separator** - Visual content divider
-- **ResizablePanels** - Two panes with a divider dragged or moved with the arrow keys
+- [Grid](docs/references/components.md#grid)
+- [ResizablePanels](docs/references/components.md#resizablepanels)
+- [Separator](docs/references/components.md#separator)
+- [Stack](docs/references/components.md#stack)
 
 ### Observers
 
-- **InView** - Report whether children are in view (the viewport or a scroll container)
-- **Resize** - Report when children change size
+- [InView](docs/references/components.md#inview)
+- [Resize](docs/references/components.md#resize)
 
-### Utilities
+### Icons
 
-- **UIProvider** - Root provider for the library
-- **PortalRootProvider** / **usePortalRoot** - Share a portal container with your own `createPortal` calls (`Modal` provides its `<dialog>`; the library's own overlays do not read it)
-- **Icons** - Decorative icon components (`CloseIcon`, `ChevronIcon`, …; listed in `docs/references/components.md`)
+- [Icons](docs/references/components.md#icons) — decorative icon components (`CloseIcon`, `ChevronIcon`, …)
+
+### Providers
+
+- [PortalRootProvider](docs/references/components.md#portalrootprovider)
+- [UIProvider](docs/references/components.md#uiprovider)
+
+<!-- /generated:component-categories -->
 
 ## Usage Examples
 
