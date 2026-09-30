@@ -444,7 +444,7 @@ export const Combobox: FC<Props> = ({
               <li
                 aria-selected={selected}
                 className={cn(
-                  'cursor-pointer px-3 py-2 transition-colors outline-border-base -outline-offset-2',
+                  'cursor-pointer px-3 py-2 transition-colors duration-150 ease-out outline-border-base -outline-offset-2',
                   selected &&
                     'bg-primary-bg-subtle text-primary-fg forced-colors:bg-[Highlight] forced-colors:text-[HighlightText]',
                   active === index &&

@@ -113,7 +113,7 @@ export const Stepper: FC<Props> = ({
             {interactive && status === 'complete' ? (
               <button
                 className={cn(
-                  'flex items-center gap-2 rounded-lg transition-colors hover:bg-bg-subtle',
+                  'flex items-center gap-2 rounded-lg transition-colors duration-150 ease-out hover:bg-bg-subtle',
                   FOCUS_RING,
                 )}
                 onClick={(event) => {
