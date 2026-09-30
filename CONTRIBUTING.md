@@ -116,7 +116,7 @@ Separately, [`.github/workflows/chromatic.yml`](.github/workflows/chromatic.yml)
 
 ## CI
 
-[`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs on every pull request into `main`: lint and format, type checking, packaging (`check:package`), the design-token and prop checks, the docs site build, and the tests. Package tests and example tests run in one job per engine — `Tests (chromium)`, `Tests (firefox)`, `Tests (webkit)`, and the same for `Examples` — so waiting for three engines takes no longer than waiting for one.
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs on every pull request into `main`: lint and format, type checking, packaging (`check:package`), the design-token and prop checks, the docs site build, and the tests. Package tests and example tests run in separate jobs per engine — `Tests (chromium)`, `Tests (firefox)`, and the same for `Examples` — so waiting for three engines takes no longer than waiting for one. WebKit's package tests are split once more, into `Tests (webkit 1/2)` and `Tests (webkit 2/2)` (Vitest's `--shard`): WebKit keeps every iframe Vitest removes until the page closes, so its memory grows with each test file, and running every file in one job exhausts the runner's memory and crashes the page.
 
 Pull requests that pass on their own can still break `main` together, so a push to `main` runs the same workflow again, as the first stage of the release workflow. A push to `main` does not start `ci.yml` by itself; its results are under **Release**.
 
