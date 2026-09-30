@@ -202,7 +202,10 @@ same field submits the same string.
   loses `currentEntry`, which stops every test after it.
 - The browser tests are served over HTTPS (`@vitejs/plugin-basic-ssl`): the
   Cookie Store API always sets `Secure`, and WebKit drops a `Secure` cookie
-  from `http://localhost`.
+  from `http://localhost`. HTTPS puts Vite on Node's HTTP/2 server, which
+  resets a finished response stream nobody read the request of; with the send
+  queue backed up the reset overtakes the end of the body and Firefox fails
+  the module load, so the config drains every GET (`drainRequests`).
 - The `storage` event fires only in other tabs; tests simulate a foreign
   tab's write with `setItem` + a dispatched `StorageEvent`. The cookie
   `change` event fires in this tab too, so a test's own `cookieStore.set()`
