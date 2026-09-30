@@ -17,8 +17,8 @@
     "test:ui": "vp run -r test:ui",
     "test:coverage": "vp run -r test:coverage",
     "typecheck": "vp run -r typecheck",
-    "check": "vp run -r check",
-    "check:write": "vp run -r check:write",
+    "check": "vp run -r check && node scripts/sync-peer-tables.ts --check",
+    "check:write": "vp run -r check:write && node scripts/sync-peer-tables.ts",
     "check:no-polyfills": "node scripts/check-no-polyfills.mjs",
     "check:peer-copies": "node scripts/check-peer-copies.mjs",
     "inspect": "vp-inspect"
