@@ -12,4 +12,4 @@
 - `RadioCard` / `CheckboxCard` / `CheckboxGroup` の非制御の選択が、form の reset と、送信に失敗した値のエコーに追従します。`CheckboxCard` / `CheckboxGroup` の `onChange` は、チェックされた値を文書順で渡すようになりました。
 - `Select` が、マウント後に変わった `defaultValue` に reset で戻ります。
 - `PasswordInput` の表示切り替えが、広げた `type` に上書きされなくなりました。`Textarea` は `type` を受けて捨てます。
-- `FileField` は一覧から外したファイルを、`onChange` を渡していなくても入力から外し、reset で一覧を空にします。文字列の `defaultValue` を型として受けます。
+- `FileField` は一覧から外したファイルを、`onChange` を渡していなくても入力から外します。文字列の `defaultValue` を型として受けます。
