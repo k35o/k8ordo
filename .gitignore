@@ -17,14 +17,7 @@ storybook-static
 apps/docs/public/design.md
 
 # Copied at build from each package's docs (apps/docs/scripts/copy-reference-docs.ts)
-apps/docs/public/docs/
-apps/docs/public/form/
-apps/docs/public/state/
-apps/docs/public/router/
-apps/docs/public/static/
-apps/docs/public/server/
-apps/docs/public/i18n/
-apps/docs/public/color-scheme/
+apps/docs/public/**/docs/
 
 # Testing
 coverage
