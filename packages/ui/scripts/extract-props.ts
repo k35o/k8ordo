@@ -1,7 +1,9 @@
 /**
  * Generates `docs/props.generated.json` — the machine-readable props of every
  * exported component, used by both `docs/references/components.md` and the docs
- * site's `PropsTable`.
+ * site's `PropsTable`. Each component also carries its category: the folder
+ * under `src/components/` it is declared in, which the README, components.md,
+ * and the docs site's navigation are grouped by.
  *
  * Single source of truth:
  *   src/**\/*.tsx (the types themselves) ──(this)──► docs/props.generated.json
@@ -64,6 +66,9 @@ const OUT_PATH = fileURLToPath(
   new URL('../docs/props.generated.json', import.meta.url),
 );
 const SRC_DIR = fileURLToPath(new URL('../src/', import.meta.url));
+const COMPONENTS_DIR = fileURLToPath(
+  new URL('../src/components/', import.meta.url),
+);
 
 type Prop = {
   name: string;
@@ -74,6 +79,8 @@ type Prop = {
 
 type Component = {
   name: string;
+  /** The folder under `src/components/` it is declared in, e.g. `form`. */
+  category: string;
   props: Prop[];
   /** Base type the remaining props are forwarded to, e.g. `HTMLAttributes<HTMLElement>`. */
   inherits: string | null;
@@ -369,6 +376,19 @@ const resolveDeclaration = (symbol: TsSymbol): Node | undefined => {
 const isContext = (type: Type): boolean =>
   checker.typeToString(type).startsWith('Context<');
 
+const categoryOf = (name: string, declaration: Node): string => {
+  const file = declaration.getSourceFile().fileName;
+  const [category, ...rest] = file.startsWith(COMPONENTS_DIR)
+    ? file.slice(COMPONENTS_DIR.length).split('/')
+    : [];
+  if (category === undefined || rest.length === 0 || category.startsWith('_')) {
+    throw new Error(
+      `${name} is not declared under src/components/<category>/: ${file}`,
+    );
+  }
+  return category;
+};
+
 const byRequiredThenName = (a: Prop, b: Prop): number =>
   Number(b.required) - Number(a.required) || a.name.localeCompare(b.name);
 
@@ -379,6 +399,7 @@ const componentFrom = (name: string, symbol: TsSymbol): Component | null => {
   const type = checker.getTypeOfSymbolAtLocation(symbol, declaration);
   const [signature] = checker.getSignaturesOfType(type, SignatureKind.Call);
   if (!signature) return null;
+  const category = categoryOf(name, declaration);
 
   // A Context is callable through React's `Provider`, so it is a component
   // here — but its props are declared in @types/react, which the own-prop
@@ -409,11 +430,13 @@ const componentFrom = (name: string, symbol: TsSymbol): Component | null => {
         };
       })
       .toSorted(byRequiredThenName);
-    return { name, props, inherits: null, omitted: [] };
+    return { name, category, props, inherits: null, omitted: [] };
   }
 
   const [paramSymbol] = signature.getParameters();
-  if (!paramSymbol) return { name, props: [], inherits: null, omitted: [] };
+  if (!paramSymbol) {
+    return { name, category, props: [], inherits: null, omitted: [] };
+  }
 
   const propsType = checker.getTypeOfSymbolAtLocation(paramSymbol, declaration);
   const defaults = defaultsOf(declaration);
@@ -438,6 +461,7 @@ const componentFrom = (name: string, symbol: TsSymbol): Component | null => {
   const declared = new Set(props.map((prop) => prop.name));
   return {
     name,
+    category,
     props,
     inherits,
     omitted: omitted.filter((key) => !declared.has(key)),

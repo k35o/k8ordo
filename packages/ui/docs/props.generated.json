@@ -2,6 +2,7 @@
   "components": [
     {
       "name": "AccessibilityIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -15,6 +16,7 @@
     },
     {
       "name": "Accordion.Button",
+      "category": "data-display",
       "props": [
         {
           "name": "children",
@@ -28,6 +30,7 @@
     },
     {
       "name": "Accordion.Item",
+      "category": "data-display",
       "props": [
         {
           "name": "children",
@@ -59,6 +62,7 @@
     },
     {
       "name": "Accordion.Panel",
+      "category": "data-display",
       "props": [
         {
           "name": "children",
@@ -72,6 +76,7 @@
     },
     {
       "name": "Accordion.Root",
+      "category": "data-display",
       "props": [
         {
           "name": "children",
@@ -85,6 +90,7 @@
     },
     {
       "name": "AIIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -98,6 +104,7 @@
     },
     {
       "name": "Alert",
+      "category": "feedback",
       "props": [
         {
           "name": "message",
@@ -135,6 +142,7 @@
     },
     {
       "name": "AlertIcon",
+      "category": "icons",
       "props": [
         {
           "name": "status",
@@ -154,6 +162,7 @@
     },
     {
       "name": "Anchor",
+      "category": "navigation",
       "props": [
         {
           "name": "children",
@@ -185,6 +194,7 @@
     },
     {
       "name": "AssistantIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -198,6 +208,7 @@
     },
     {
       "name": "AtomIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -211,6 +222,7 @@
     },
     {
       "name": "Attachment.Item",
+      "category": "ai",
       "props": [
         {
           "name": "mediaType",
@@ -236,6 +248,7 @@
     },
     {
       "name": "Attachment.List",
+      "category": "ai",
       "props": [
         {
           "name": "children",
@@ -255,6 +268,7 @@
     },
     {
       "name": "Autocomplete",
+      "category": "form",
       "props": [
         {
           "name": "id",
@@ -315,6 +329,7 @@
     },
     {
       "name": "Avatar",
+      "category": "data-display",
       "props": [
         {
           "name": "alt",
@@ -370,6 +385,7 @@
     },
     {
       "name": "Badge",
+      "category": "data-display",
       "props": [
         {
           "name": "label",
@@ -407,6 +423,7 @@
     },
     {
       "name": "BadIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -420,6 +437,7 @@
     },
     {
       "name": "BlogIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -433,6 +451,7 @@
     },
     {
       "name": "BoringIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -446,6 +465,7 @@
     },
     {
       "name": "Breadcrumb.Item",
+      "category": "navigation",
       "props": [
         {
           "name": "children",
@@ -459,6 +479,7 @@
     },
     {
       "name": "Breadcrumb.Link",
+      "category": "navigation",
       "props": [
         {
           "name": "href",
@@ -490,6 +511,7 @@
     },
     {
       "name": "Breadcrumb.List",
+      "category": "navigation",
       "props": [
         {
           "name": "children",
@@ -509,12 +531,14 @@
     },
     {
       "name": "Breadcrumb.Separator",
+      "category": "navigation",
       "props": [],
       "inherits": null,
       "omitted": []
     },
     {
       "name": "Button",
+      "category": "buttons",
       "props": [
         {
           "name": "children",
@@ -588,6 +612,7 @@
     },
     {
       "name": "Calendar",
+      "category": "form",
       "props": [
         {
           "name": "defaultValue",
@@ -625,6 +650,7 @@
     },
     {
       "name": "Card",
+      "category": "data-display",
       "props": [
         {
           "name": "children",
@@ -656,6 +682,7 @@
     },
     {
       "name": "Carousel.Root",
+      "category": "data-display",
       "props": [
         {
           "name": "label",
@@ -681,6 +708,7 @@
     },
     {
       "name": "Carousel.Slide",
+      "category": "data-display",
       "props": [
         {
           "name": "children",
@@ -700,6 +728,7 @@
     },
     {
       "name": "Checkbox",
+      "category": "form",
       "props": [
         {
           "name": "label",
@@ -763,6 +792,7 @@
     },
     {
       "name": "CheckboxCard",
+      "category": "form",
       "props": [
         {
           "name": "aria-labelledby",
@@ -812,6 +842,7 @@
     },
     {
       "name": "CheckboxGroup.Item",
+      "category": "form",
       "props": [
         {
           "name": "label",
@@ -875,6 +906,7 @@
     },
     {
       "name": "CheckboxGroup.Root",
+      "category": "form",
       "props": [
         {
           "name": "aria-labelledby",
@@ -930,6 +962,7 @@
     },
     {
       "name": "CheckIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -943,6 +976,7 @@
     },
     {
       "name": "ChevronIcon",
+      "category": "icons",
       "props": [
         {
           "name": "direction",
@@ -962,6 +996,7 @@
     },
     {
       "name": "ChromeIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -975,6 +1010,7 @@
     },
     {
       "name": "CloseIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -988,6 +1024,7 @@
     },
     {
       "name": "Code",
+      "category": "data-display",
       "props": [
         {
           "name": "children",
@@ -1001,6 +1038,7 @@
     },
     {
       "name": "CodeBlock",
+      "category": "data-display",
       "props": [
         {
           "name": "code",
@@ -1038,6 +1076,7 @@
     },
     {
       "name": "CodeXmlIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -1051,6 +1090,7 @@
     },
     {
       "name": "ColorContrastIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -1064,6 +1104,7 @@
     },
     {
       "name": "ColorInfoIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -1077,6 +1118,7 @@
     },
     {
       "name": "ColorPicker",
+      "category": "form",
       "props": [
         {
           "name": "defaultValue",
@@ -1126,6 +1168,7 @@
     },
     {
       "name": "ColorScaleIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -1139,6 +1182,7 @@
     },
     {
       "name": "Combobox",
+      "category": "form",
       "props": [
         {
           "name": "defaultValue",
@@ -1204,6 +1248,7 @@
     },
     {
       "name": "CommandPalette",
+      "category": "overlays",
       "props": [
         {
           "name": "items",
@@ -1253,6 +1298,7 @@
     },
     {
       "name": "ContextMenu.Content",
+      "category": "overlays",
       "props": [
         {
           "name": "children",
@@ -1266,6 +1312,7 @@
     },
     {
       "name": "ContextMenu.Item",
+      "category": "overlays",
       "props": [
         {
           "name": "label",
@@ -1285,6 +1332,7 @@
     },
     {
       "name": "ContextMenu.Root",
+      "category": "overlays",
       "props": [
         {
           "name": "children",
@@ -1316,6 +1364,7 @@
     },
     {
       "name": "ContextMenu.SubMenu",
+      "category": "overlays",
       "props": [
         {
           "name": "label",
@@ -1335,6 +1384,7 @@
     },
     {
       "name": "ContextMenu.Trigger",
+      "category": "overlays",
       "props": [
         {
           "name": "renderItem",
@@ -1350,6 +1400,7 @@
     },
     {
       "name": "Conversation.Messages",
+      "category": "ai",
       "props": [
         {
           "name": "children",
@@ -1375,6 +1426,7 @@
     },
     {
       "name": "Conversation.Root",
+      "category": "ai",
       "props": [
         {
           "name": "children",
@@ -1388,6 +1440,7 @@
     },
     {
       "name": "Conversation.ScrollButton",
+      "category": "ai",
       "props": [
         {
           "name": "label",
@@ -1401,6 +1454,7 @@
     },
     {
       "name": "CopyButton",
+      "category": "buttons",
       "props": [
         {
           "name": "value",
@@ -1438,6 +1492,7 @@
     },
     {
       "name": "CopyIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -1451,6 +1506,7 @@
     },
     {
       "name": "DarkModeIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -1464,6 +1520,7 @@
     },
     {
       "name": "DataTable",
+      "category": "data-display",
       "props": [
         {
           "name": "columns",
@@ -1537,6 +1594,7 @@
     },
     {
       "name": "DateField",
+      "category": "form",
       "props": [
         {
           "name": "invalid",
@@ -1556,6 +1614,7 @@
     },
     {
       "name": "DatePicker",
+      "category": "form",
       "props": [
         {
           "name": "defaultValue",
@@ -1593,6 +1652,7 @@
     },
     {
       "name": "Dialog.Content",
+      "category": "overlays",
       "props": [
         {
           "name": "children",
@@ -1606,6 +1666,7 @@
     },
     {
       "name": "Dialog.Header",
+      "category": "overlays",
       "props": [
         {
           "name": "onClose",
@@ -1625,6 +1686,7 @@
     },
     {
       "name": "Dialog.Root",
+      "category": "overlays",
       "props": [
         {
           "name": "children",
@@ -1662,6 +1724,7 @@
     },
     {
       "name": "DifficultIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -1675,6 +1738,7 @@
     },
     {
       "name": "Drawer",
+      "category": "overlays",
       "props": [
         {
           "name": "title",
@@ -1718,6 +1782,7 @@
     },
     {
       "name": "DropdownMenu.Content",
+      "category": "overlays",
       "props": [
         {
           "name": "children",
@@ -1731,6 +1796,7 @@
     },
     {
       "name": "DropdownMenu.IconTrigger",
+      "category": "overlays",
       "props": [
         {
           "name": "icon",
@@ -1750,6 +1816,7 @@
     },
     {
       "name": "DropdownMenu.Item",
+      "category": "overlays",
       "props": [
         {
           "name": "label",
@@ -1769,6 +1836,7 @@
     },
     {
       "name": "DropdownMenu.Root",
+      "category": "overlays",
       "props": [
         {
           "name": "children",
@@ -1806,6 +1874,7 @@
     },
     {
       "name": "DropdownMenu.SubMenu",
+      "category": "overlays",
       "props": [
         {
           "name": "label",
@@ -1825,6 +1894,7 @@
     },
     {
       "name": "DropdownMenu.Trigger",
+      "category": "overlays",
       "props": [
         {
           "name": "label",
@@ -1850,6 +1920,7 @@
     },
     {
       "name": "EasyIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -1863,6 +1934,7 @@
     },
     {
       "name": "EdgeIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -1876,6 +1948,7 @@
     },
     {
       "name": "EmptyState",
+      "category": "feedback",
       "props": [
         {
           "name": "title",
@@ -1907,6 +1980,7 @@
     },
     {
       "name": "ExternalLinkIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -1920,6 +1994,7 @@
     },
     {
       "name": "FileField.Dropzone",
+      "category": "form",
       "props": [
         {
           "name": "children",
@@ -1933,6 +2008,7 @@
     },
     {
       "name": "FileField.ItemList",
+      "category": "form",
       "props": [
         {
           "name": "clearable",
@@ -1952,6 +2028,7 @@
     },
     {
       "name": "FileField.Root",
+      "category": "form",
       "props": [
         {
           "name": "children",
@@ -2003,6 +2080,7 @@
     },
     {
       "name": "FileField.Trigger",
+      "category": "form",
       "props": [
         {
           "name": "renderItem",
@@ -2018,6 +2096,7 @@
     },
     {
       "name": "FirefoxIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -2031,6 +2110,7 @@
     },
     {
       "name": "FlaskIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -2044,6 +2124,7 @@
     },
     {
       "name": "ForkIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -2057,6 +2138,7 @@
     },
     {
       "name": "Form",
+      "category": "form",
       "props": [
         {
           "name": "children",
@@ -2082,6 +2164,7 @@
     },
     {
       "name": "FormControl",
+      "category": "form",
       "props": [
         {
           "name": "label",
@@ -2145,6 +2228,7 @@
     },
     {
       "name": "FormIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -2158,6 +2242,7 @@
     },
     {
       "name": "FullscreenIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -2171,6 +2256,7 @@
     },
     {
       "name": "GitHubIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -2184,6 +2270,7 @@
     },
     {
       "name": "GoodIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -2197,6 +2284,7 @@
     },
     {
       "name": "Grid",
+      "category": "layout",
       "props": [
         {
           "name": "children",
@@ -2228,6 +2316,7 @@
     },
     {
       "name": "Heading",
+      "category": "data-display",
       "props": [
         {
           "name": "level",
@@ -2253,6 +2342,7 @@
     },
     {
       "name": "HistoryIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -2266,6 +2356,7 @@
     },
     {
       "name": "HorizontalWritingIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -2279,6 +2370,7 @@
     },
     {
       "name": "IconButton",
+      "category": "buttons",
       "props": [
         {
           "name": "label",
@@ -2334,6 +2426,7 @@
     },
     {
       "name": "InformativeIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -2347,6 +2440,7 @@
     },
     {
       "name": "InterestingIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -2360,6 +2454,7 @@
     },
     {
       "name": "InView",
+      "category": "observers",
       "props": [
         {
           "name": "children",
@@ -2403,6 +2498,7 @@
     },
     {
       "name": "Kbd",
+      "category": "data-display",
       "props": [
         {
           "name": "children",
@@ -2422,6 +2518,7 @@
     },
     {
       "name": "LightModeIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -2435,6 +2532,7 @@
     },
     {
       "name": "LinkIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -2448,6 +2546,7 @@
     },
     {
       "name": "ListBox.Content",
+      "category": "overlays",
       "props": [
         {
           "name": "helpContent",
@@ -2461,6 +2560,7 @@
     },
     {
       "name": "ListBox.IconTrigger",
+      "category": "overlays",
       "props": [
         {
           "name": "icon",
@@ -2486,6 +2586,7 @@
     },
     {
       "name": "ListBox.Root",
+      "category": "overlays",
       "props": [
         {
           "name": "options",
@@ -2529,6 +2630,7 @@
     },
     {
       "name": "ListBox.Trigger",
+      "category": "overlays",
       "props": [
         {
           "name": "label",
@@ -2548,6 +2650,7 @@
     },
     {
       "name": "ListIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -2561,6 +2664,7 @@
     },
     {
       "name": "LocationIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -2574,6 +2678,7 @@
     },
     {
       "name": "LockIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -2587,6 +2692,7 @@
     },
     {
       "name": "LockOpenIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -2600,6 +2706,7 @@
     },
     {
       "name": "Logo",
+      "category": "icons",
       "props": [
         {
           "name": "aria-hidden",
@@ -2625,6 +2732,7 @@
     },
     {
       "name": "LogoIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -2638,6 +2746,7 @@
     },
     {
       "name": "MailIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -2651,6 +2760,7 @@
     },
     {
       "name": "Message.Action",
+      "category": "ai",
       "props": [
         {
           "name": "children",
@@ -2682,6 +2792,7 @@
     },
     {
       "name": "Message.Actions",
+      "category": "ai",
       "props": [
         {
           "name": "children",
@@ -2701,6 +2812,7 @@
     },
     {
       "name": "Message.Content",
+      "category": "ai",
       "props": [
         {
           "name": "children",
@@ -2720,6 +2832,7 @@
     },
     {
       "name": "Message.Copy",
+      "category": "ai",
       "props": [
         {
           "name": "value",
@@ -2739,6 +2852,7 @@
     },
     {
       "name": "Message.Feedback",
+      "category": "ai",
       "props": [
         {
           "name": "defaultValue",
@@ -2764,6 +2878,7 @@
     },
     {
       "name": "Message.Regenerate",
+      "category": "ai",
       "props": [
         {
           "name": "onAction",
@@ -2789,6 +2904,7 @@
     },
     {
       "name": "Message.Root",
+      "category": "ai",
       "props": [
         {
           "name": "children",
@@ -2814,6 +2930,7 @@
     },
     {
       "name": "MinusIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -2827,6 +2944,7 @@
     },
     {
       "name": "MixedColorIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -2840,6 +2958,7 @@
     },
     {
       "name": "Modal",
+      "category": "overlays",
       "props": [
         {
           "name": "aria-describedby",
@@ -2901,6 +3020,7 @@
     },
     {
       "name": "NavigationMenuIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -2914,6 +3034,7 @@
     },
     {
       "name": "NewsIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -2927,6 +3048,7 @@
     },
     {
       "name": "NumberField",
+      "category": "form",
       "props": [
         {
           "name": "defaultValue",
@@ -2988,6 +3110,7 @@
     },
     {
       "name": "PackageIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -3001,6 +3124,7 @@
     },
     {
       "name": "Pagination",
+      "category": "navigation",
       "props": [
         {
           "name": "currentPage",
@@ -3056,6 +3180,7 @@
     },
     {
       "name": "PaletteIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -3069,6 +3194,7 @@
     },
     {
       "name": "PasswordInput",
+      "category": "form",
       "props": [
         {
           "name": "children",
@@ -3106,6 +3232,7 @@
     },
     {
       "name": "PlusIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -3119,6 +3246,7 @@
     },
     {
       "name": "Popover.Content",
+      "category": "overlays",
       "props": [
         {
           "name": "renderItem",
@@ -3138,6 +3266,7 @@
     },
     {
       "name": "Popover.Root",
+      "category": "overlays",
       "props": [
         {
           "name": "children",
@@ -3199,6 +3328,7 @@
     },
     {
       "name": "Popover.Trigger",
+      "category": "overlays",
       "props": [
         {
           "name": "renderItem",
@@ -3212,6 +3342,7 @@
     },
     {
       "name": "PortalRootProvider",
+      "category": "providers",
       "props": [
         {
           "name": "value",
@@ -3231,6 +3362,7 @@
     },
     {
       "name": "PrepareIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -3244,6 +3376,7 @@
     },
     {
       "name": "Progress",
+      "category": "feedback",
       "props": [
         {
           "name": "label",
@@ -3275,6 +3408,7 @@
     },
     {
       "name": "PromptInput.Attach",
+      "category": "ai",
       "props": [
         {
           "name": "label",
@@ -3288,6 +3422,7 @@
     },
     {
       "name": "PromptInput.Attachments",
+      "category": "ai",
       "props": [
         {
           "name": "label",
@@ -3301,6 +3436,7 @@
     },
     {
       "name": "PromptInput.Root",
+      "category": "ai",
       "props": [
         {
           "name": "children",
@@ -3362,6 +3498,7 @@
     },
     {
       "name": "PromptInput.Submit",
+      "category": "ai",
       "props": [
         {
           "name": "sendLabel",
@@ -3381,6 +3518,7 @@
     },
     {
       "name": "PromptInput.Textarea",
+      "category": "ai",
       "props": [
         {
           "name": "children",
@@ -3413,6 +3551,7 @@
     },
     {
       "name": "Prose",
+      "category": "data-display",
       "props": [
         {
           "name": "children",
@@ -3426,6 +3565,7 @@
     },
     {
       "name": "PublishDateIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -3439,6 +3579,7 @@
     },
     {
       "name": "QiitaIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -3452,6 +3593,7 @@
     },
     {
       "name": "Radio",
+      "category": "form",
       "props": [
         {
           "name": "aria-labelledby",
@@ -3521,6 +3663,7 @@
     },
     {
       "name": "RadioCard",
+      "category": "form",
       "props": [
         {
           "name": "aria-labelledby",
@@ -3576,6 +3719,7 @@
     },
     {
       "name": "RangeSlider",
+      "category": "form",
       "props": [
         {
           "name": "defaultValue",
@@ -3649,6 +3793,7 @@
     },
     {
       "name": "Reasoning",
+      "category": "ai",
       "props": [
         {
           "name": "children",
@@ -3686,6 +3831,7 @@
     },
     {
       "name": "RefreshIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -3699,6 +3845,7 @@
     },
     {
       "name": "ResizablePanels.Handle",
+      "category": "layout",
       "props": [],
       "inherits": "HTMLAttributes<HTMLDivElement>",
       "omitted": [
@@ -3716,6 +3863,7 @@
     },
     {
       "name": "ResizablePanels.Panel",
+      "category": "layout",
       "props": [
         {
           "name": "children",
@@ -3735,6 +3883,7 @@
     },
     {
       "name": "ResizablePanels.Root",
+      "category": "layout",
       "props": [
         {
           "name": "children",
@@ -3796,6 +3945,7 @@
     },
     {
       "name": "Resize",
+      "category": "observers",
       "props": [
         {
           "name": "children",
@@ -3815,6 +3965,7 @@
     },
     {
       "name": "Response",
+      "category": "ai",
       "props": [
         {
           "name": "children",
@@ -3834,6 +3985,7 @@
     },
     {
       "name": "RSSIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -3847,6 +3999,7 @@
     },
     {
       "name": "SafariIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -3860,6 +4013,7 @@
     },
     {
       "name": "Select",
+      "category": "form",
       "props": [
         {
           "name": "options",
@@ -3891,6 +4045,7 @@
     },
     {
       "name": "SendIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -3904,6 +4059,7 @@
     },
     {
       "name": "Separator",
+      "category": "layout",
       "props": [
         {
           "name": "color",
@@ -3923,6 +4079,7 @@
     },
     {
       "name": "ShallowIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -3936,6 +4093,7 @@
     },
     {
       "name": "ShieldCheckIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -3949,6 +4107,7 @@
     },
     {
       "name": "SideNav.Group",
+      "category": "navigation",
       "props": [
         {
           "name": "title",
@@ -3968,6 +4127,7 @@
     },
     {
       "name": "SideNav.Link",
+      "category": "navigation",
       "props": [
         {
           "name": "children",
@@ -3999,6 +4159,7 @@
     },
     {
       "name": "SideNav.Root",
+      "category": "navigation",
       "props": [
         {
           "name": "label",
@@ -4018,6 +4179,7 @@
     },
     {
       "name": "Skeleton",
+      "category": "feedback",
       "props": [
         {
           "name": "animate",
@@ -4043,6 +4205,7 @@
     },
     {
       "name": "SlideIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -4056,6 +4219,7 @@
     },
     {
       "name": "Slider",
+      "category": "form",
       "props": [
         {
           "name": "defaultValue",
@@ -4111,6 +4275,7 @@
     },
     {
       "name": "Source.Item",
+      "category": "ai",
       "props": [
         {
           "name": "href",
@@ -4130,6 +4295,7 @@
     },
     {
       "name": "Source.List",
+      "category": "ai",
       "props": [
         {
           "name": "children",
@@ -4149,6 +4315,7 @@
     },
     {
       "name": "SparklesIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -4162,6 +4329,7 @@
     },
     {
       "name": "Spinner",
+      "category": "feedback",
       "props": [
         {
           "name": "label",
@@ -4181,6 +4349,7 @@
     },
     {
       "name": "SquircleIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -4194,6 +4363,7 @@
     },
     {
       "name": "Stack",
+      "category": "layout",
       "props": [
         {
           "name": "align",
@@ -4237,6 +4407,7 @@
     },
     {
       "name": "Stepper",
+      "category": "navigation",
       "props": [
         {
           "name": "steps",
@@ -4286,6 +4457,7 @@
     },
     {
       "name": "SubscribeIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -4299,6 +4471,7 @@
     },
     {
       "name": "Suggestion.Item",
+      "category": "ai",
       "props": [
         {
           "name": "value",
@@ -4324,6 +4497,7 @@
     },
     {
       "name": "Suggestion.List",
+      "category": "ai",
       "props": [
         {
           "name": "children",
@@ -4343,6 +4517,7 @@
     },
     {
       "name": "Switch",
+      "category": "form",
       "props": [
         {
           "name": "label",
@@ -4388,6 +4563,7 @@
     },
     {
       "name": "Table.Body",
+      "category": "data-display",
       "props": [
         {
           "name": "children",
@@ -4401,6 +4577,7 @@
     },
     {
       "name": "Table.Caption",
+      "category": "data-display",
       "props": [
         {
           "name": "children",
@@ -4414,6 +4591,7 @@
     },
     {
       "name": "Table.Cell",
+      "category": "data-display",
       "props": [
         {
           "name": "align",
@@ -4439,6 +4617,7 @@
     },
     {
       "name": "Table.EmptyState",
+      "category": "data-display",
       "props": [
         {
           "name": "colSpan",
@@ -4476,6 +4655,7 @@
     },
     {
       "name": "Table.Head",
+      "category": "data-display",
       "props": [
         {
           "name": "children",
@@ -4489,6 +4669,7 @@
     },
     {
       "name": "Table.HeaderCell",
+      "category": "data-display",
       "props": [
         {
           "name": "align",
@@ -4514,6 +4695,7 @@
     },
     {
       "name": "Table.Root",
+      "category": "data-display",
       "props": [
         {
           "name": "children",
@@ -4527,6 +4709,7 @@
     },
     {
       "name": "Table.Row",
+      "category": "data-display",
       "props": [
         {
           "name": "children",
@@ -4552,6 +4735,7 @@
     },
     {
       "name": "TableIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -4565,6 +4749,7 @@
     },
     {
       "name": "TableOfContents",
+      "category": "navigation",
       "props": [
         {
           "name": "items",
@@ -4584,6 +4769,7 @@
     },
     {
       "name": "Tabs.List",
+      "category": "navigation",
       "props": [
         {
           "name": "label",
@@ -4603,6 +4789,7 @@
     },
     {
       "name": "Tabs.Panel",
+      "category": "navigation",
       "props": [
         {
           "name": "id",
@@ -4622,6 +4809,7 @@
     },
     {
       "name": "Tabs.Root",
+      "category": "navigation",
       "props": [
         {
           "name": "ids",
@@ -4659,6 +4847,7 @@
     },
     {
       "name": "Tabs.Tab",
+      "category": "navigation",
       "props": [
         {
           "name": "id",
@@ -4678,6 +4867,7 @@
     },
     {
       "name": "TagIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -4691,6 +4881,7 @@
     },
     {
       "name": "Textarea",
+      "category": "form",
       "props": [
         {
           "name": "autoResize",
@@ -4734,6 +4925,7 @@
     },
     {
       "name": "TextField",
+      "category": "form",
       "props": [
         {
           "name": "children",
@@ -4777,6 +4969,7 @@
     },
     {
       "name": "ToastProvider",
+      "category": "feedback",
       "props": [
         {
           "name": "children",
@@ -4802,6 +4995,7 @@
     },
     {
       "name": "Toolbar.Item",
+      "category": "buttons",
       "props": [
         {
           "name": "renderItem",
@@ -4815,6 +5009,7 @@
     },
     {
       "name": "Toolbar.Root",
+      "category": "buttons",
       "props": [
         {
           "name": "children",
@@ -4840,12 +5035,14 @@
     },
     {
       "name": "Toolbar.Separator",
+      "category": "buttons",
       "props": [],
       "inherits": null,
       "omitted": []
     },
     {
       "name": "ToolInvocation",
+      "category": "ai",
       "props": [
         {
           "name": "name",
@@ -4915,6 +5112,7 @@
     },
     {
       "name": "Tooltip.Content",
+      "category": "overlays",
       "props": [
         {
           "name": "children",
@@ -4928,6 +5126,7 @@
     },
     {
       "name": "Tooltip.Root",
+      "category": "overlays",
       "props": [
         {
           "name": "children",
@@ -4977,6 +5176,7 @@
     },
     {
       "name": "Tooltip.Trigger",
+      "category": "overlays",
       "props": [
         {
           "name": "renderItem",
@@ -4990,6 +5190,7 @@
     },
     {
       "name": "Tree",
+      "category": "data-display",
       "props": [
         {
           "name": "items",
@@ -5045,6 +5246,7 @@
     },
     {
       "name": "TwitterIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -5058,6 +5260,7 @@
     },
     {
       "name": "UIProvider",
+      "category": "providers",
       "props": [
         {
           "name": "children",
@@ -5071,6 +5274,7 @@
     },
     {
       "name": "UpdateDateIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -5084,6 +5288,7 @@
     },
     {
       "name": "VerticalWritingIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -5097,6 +5302,7 @@
     },
     {
       "name": "ViewIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
@@ -5110,6 +5316,7 @@
     },
     {
       "name": "ViewOffIcon",
+      "category": "icons",
       "props": [
         {
           "name": "size",
