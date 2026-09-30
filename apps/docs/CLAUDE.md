@@ -42,7 +42,7 @@ pnpm check:write       # Oxlint/Oxfmt lint/format auto-fix
   site needs something the packages do not give it, the fix belongs in the
   package, and the site is where the pressure is felt first.
 - **Navigation mirrors the URL layout**: the header's first row is the packages and nothing else; the second row is the sections of the package you are currently in (`src/components/navigation.tsx`). Both rows, the footer, the home page's package list, every `PackageLanding`'s "start here" links and every guide page's title and prev/next pager read one list, `PACKAGES` in `src/data/packages.ts` — a package's `sections` are in reading order, so adding a page to a package's guide is one line there plus the route. The side navigation on catalog pages is decided by `useMatch('/:locale/ui/components/*')` and its sibling for `/ui/ai/*` in `src/routes/[locale]/_parts/locale-shell.tsx` — a pattern from the generated table plus `/*`, checked by the generated `Register`, so a renamed section fails to compile rather than silently losing its sidebar. `/*` does not match the index page itself (`/ja/ui/components` has no trailing segment), which is what keeps the catalog pages sidebar-free. The footer is the same rule in columns — one column per package, headed by the package name (its landing) with its sections below. Never promote one package's sections to a site-wide row: with a single package it reads as convenience, with six it makes that package look like the site's spine.
-- **URL layout**: package-first. Everything a package documents lives under `/<package>/…` — `@k8ordo/ui` owns `/ui/get-started`, `/ui/components/*`, `/ui/ai/*`, and so on. `/<package>` itself is that package's landing page (`src/routes/[locale]/ui/page.tsx`): what it is, what it gives you, where to start. Only `/` is shared — it introduces k8ordo, lists the packages, and states what they all commit to. Add a new package by adding its own `/<package>` landing plus a `/<package>/…` subtree starting at `/<package>/get-started`, and an entry in `PACKAGES` (`src/data/packages.ts`); never put a package's sections at the top level, where they would sit at the same depth as package names.
+- **URL layout**: package-first. Everything a package documents lives under `/<package>/…` — `@k8ordo/ui` owns `/ui/get-started`, `/ui/components/*`, `/ui/ai/*`, and so on. `/<package>` itself is that package's landing page (`src/routes/[locale]/ui/page.tsx`): what it is, what it gives you, where to start. Only `/` is shared — it introduces k8ordo, lists the packages, and states what they all commit to. Add a new package by adding its own `/<package>` landing plus a `/<package>/…` subtree starting at `/<package>/get-started`, and an entry in `PACKAGES` (`src/data/packages.ts`) — its shipped docs are found from its `package.json` (see Markdown for agents below), and the build fails while `PACKAGES` lacks it; never put a package's sections at the top level, where they would sit at the same depth as package names.
 - **Unmatched routes**: `src/routes/[locale]/not-found.tsx` is rendered into a
   single `404.html`, which a static host serves for anything it does not have.
   One file for every locale, so the `:locale` it was rendered with is the build's
@@ -92,6 +92,25 @@ pnpm check:write       # Oxlint/Oxfmt lint/format auto-fix
   `grep -L "PageTitle\|PackageLanding\|DocPage\|<title" src/routes/**/page.tsx` should
   print nothing (the built HTML is the proof: every `index.html` under
   `dist/client/` carries exactly one `<title>`).
+- **Markdown for agents**: nothing here lists packages for it, and nothing
+  generated is committed. Which packages ship docs is `shipsDocs` in
+  `src/data/shipped-docs.ts` — not `private`, `docs` in `files`, read off
+  `packages/*/package.json` — and where the site serves them is `docsPathOf`
+  there: `/<name>/docs/`, except `@k8ordo/ui`'s `/docs/`.
+  `scripts/copy-reference-docs.ts` (run by `dev` and `build`) copies each
+  such package's `docs/**/*.md` into `public/` as the markdown twins,
+  git-ignored by the one `apps/docs/public/**/docs/` line.
+  `/llms.txt` and `/design.md` are `route.ts` files the build writes as the
+  file their `GET` answers. `src/routes/llms.txt/route.ts` joins every
+  shipped `docs/llms.txt` in `PACKAGES` order, swaps each one's
+  `When installed via npm, …` line for the site's, and points its
+  package-relative links at the twins under the request's origin — `site` in
+  the build, the dev server's own under `vp dev` — and it throws, failing the
+  build, when `PACKAGES` and the shipped `docs/llms.txt` files disagree, or
+  when an index links to anything but the markdown the twins hold. `src/routes/design.md/route.ts`
+  builds `@k8ordo/ui`'s design spec from `src/theme/design-tokens.ts`, the
+  same token view `/ui/theming` renders, plus the design rationale CSS does
+  not hold.
 - **Sitemap**: `framework({ site: 'https://ordo.k8o.me' })` in
   `vite.config.ts` makes the build write `dist/client/sitemap.xml` listing
   every page it rendered. Nothing here maintains a page list by hand.
@@ -151,6 +170,8 @@ src/
     layout.tsx         # <html>/<head>/<body> — the document itself, no <title>
     error.tsx          # the shell itself threw: full-screen ErrorFallback
     page.tsx           # / — detects the locale and redirects
+    llms.txt/route.ts  # /llms.txt — every shipped docs/llms.txt, one file at build
+    design.md/route.ts # /design.md — @k8ordo/ui's design spec, from the tokens
     [locale]/
       layout.tsx       # paramsSchema (locale) — a Server Component
       _parts/locale-shell.tsx  # providers, header, sidebar, footer (client)
@@ -165,12 +186,14 @@ src/
   constants.ts         # Shared constants (e.g. STORYBOOK_URL)
   components/          # Shared doc components (ComponentPreview, PropsTable, etc.)
     framework-guide/   # topics @k8ordo/static and @k8ordo/server share, rendered per mode
-  data/                # PACKAGES (packages.ts), the sidebars (components-nav, ai-nav), generated props (component-props)
+  data/                # PACKAGES (packages.ts), which packages ship docs (shipped-docs), the sidebars (components-nav, ai-nav), generated props (component-props)
   i18n.ts              # defineLocales + Register — the locale set
   links.ts             # href / navigateTo with the locale bound; SitePath
   messages/            # message() per export, one file per area, index.ts re-exports namespaces
   styles/              # CSS entry
-  theme/               # state.ts (writing-mode defineLocalState) + its context
+  theme/               # state.ts (writing-mode defineLocalState) + its context, design-tokens.ts (/ui/theming and /design.md)
+scripts/
+  copy-reference-docs.ts  # the markdown twins, into public/ (git-ignored)
 ```
 
 ## Page Patterns
