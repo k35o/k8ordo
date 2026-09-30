@@ -156,6 +156,9 @@ export const LETTER_SPACINGS: readonly NamedScale[] = namedScale(
 export const LINE_HEIGHTS: readonly NamedScale[] = namedScale(THEME['leading']);
 export const RADII: readonly NamedScale[] = namedScale(THEME['radius']);
 export const SHADOWS: readonly NamedScale[] = namedScale(THEME['shadow']);
+export const INSET_SHADOWS: readonly NamedScale[] = namedScale(
+  THEME['inset-shadow'],
+);
 
 // eslint-disable-next-line unicorn/prefer-number-coercion -- "64rem" のような単位付き文字列から数値部を取り出すため Number では NaN になる
 const remToPx = (rem: string): string => `${Number.parseFloat(rem) * 16}px`;

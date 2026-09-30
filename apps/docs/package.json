@@ -4,9 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "pnpm generate:design && pnpm generate:docs && vp dev",
-    "build": "pnpm generate:design && pnpm generate:docs && vp build",
-    "generate:design": "node scripts/generate-design-md.ts",
+    "dev": "pnpm generate:docs && vp dev",
+    "build": "pnpm generate:docs && vp build",
     "generate:docs": "node scripts/copy-reference-docs.ts",
     "typecheck": "tsc -b",
     "check": "vp check",
