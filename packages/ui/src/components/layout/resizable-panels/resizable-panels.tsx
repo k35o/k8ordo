@@ -292,7 +292,7 @@ export const Handle: FC<
       <span
         aria-hidden
         className={cn(
-          'bg-border-base rounded-full transition-colors forced-colors:bg-[CanvasText]',
+          'bg-border-base rounded-full transition-colors duration-150 ease-out forced-colors:bg-[CanvasText]',
           'group-hover:bg-border-emphasize group-data-dragging:bg-primary-border',
           axis === 'x' ? 'h-full w-px' : 'h-px w-full',
         )}
