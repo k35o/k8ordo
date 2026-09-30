@@ -129,7 +129,7 @@ function MyComponent() {
             zod &gt;= 4.4.3 &lt;5.0.0 (optional: generative-UI schemas)
           </li>
           <li className="list-disc">
-            @json-render/core, @json-render/react &gt;= 0.20.0 &lt;0.21.0
+            @json-render/core, @json-render/react &gt;= 0.21.0 &lt;0.22.0
             (optional: @k8ordo/ui/json-render)
           </li>
           <li className="list-disc">

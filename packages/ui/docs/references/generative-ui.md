@@ -20,7 +20,7 @@ on top of it. `@openuidev/react-lang` depends on it as well, but pnpm will not
 let your app resolve a dependency of a dependency — declare it yourself.
 
 Both frameworks are 0.x, where a minor bump is a breaking release, so
-`@k8ordo/ui` declares a range that stops at the next minor (`>=0.20.0 <0.21.0`
+`@k8ordo/ui` declares a range that stops at the next minor (`>=0.21.0 <0.22.0`
 for json-render, `>=0.3.0 <0.4.0` for OpenUI). Pick a version inside it.
 
 Within that range, resolve exactly **one copy** of each framework. The adapters
