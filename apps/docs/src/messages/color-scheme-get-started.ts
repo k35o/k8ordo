@@ -53,18 +53,6 @@ export const install = {
     ja: '`@k8ordo/state` と `zod` は peer dependency なので、一緒に入れます。設定は `@k8ordo/state` のローカル状態として保存され、そのスキーマが zod のスキーマだからです。',
     en: '`@k8ordo/state` and `zod` are peer dependencies, so install them alongside: the preference is stored as an `@k8ordo/state` local state, and its schema is a zod schema.',
   }),
-  columnPackage: message({
-    ja: 'パッケージ',
-    en: 'Package',
-  }),
-  columnVersion: message({
-    ja: 'バージョン',
-    en: 'Version',
-  }),
-  columnPurpose: message({
-    ja: '用途',
-    en: 'Needed for',
-  }),
   purposeState: message({
     ja: '設定の保存先（localStorage）',
     en: 'where the preference is kept (localStorage)',
@@ -78,12 +66,12 @@ export const install = {
     en: 'the one-field schema `@k8ordo/state` reads',
   }),
   purposeTypescript: message({
-    ja: '同梱の型定義（任意）',
-    en: 'the shipped type declarations (optional)',
+    ja: '同梱の型定義',
+    en: 'the shipped type declarations',
   }),
   purposeTypesReact: message({
-    ja: 'React の型（任意）',
-    en: 'React’s types (optional)',
+    ja: 'React の型',
+    en: 'React’s types',
   }),
 };
 

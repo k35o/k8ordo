@@ -26,12 +26,16 @@ about the application changes between them.
 
 ## Peer Dependencies
 
-| Package          | Version | Needed for                                 |
-| ---------------- | ------- | ------------------------------------------ |
-| `@k8ordo/router` | ^1.0.0  | the route table the framework generates    |
-| `react`          | ≥19.3.0 | rendering                                  |
-| `react-dom`      | ≥19.3.0 | rendering                                  |
-| `vite`           | ≥8.2.1  | the build (`framework()` is a Vite plugin) |
+<!-- peers -->
+
+| Package          | Version | Required | Needed for                                 |
+| ---------------- | ------- | -------- | ------------------------------------------ |
+| `@k8ordo/router` | ^1.0.0  | yes      | the route table the framework generates    |
+| `react`          | ≥19.3.0 | yes      | rendering                                  |
+| `react-dom`      | ≥19.3.0 | yes      | rendering                                  |
+| `vite`           | ≥8.2.1  | yes      | the build (`framework()` is a Vite plugin) |
+
+<!-- /peers -->
 
 ## Quick Start
 

@@ -4,6 +4,7 @@ import { CodeBlock } from '@k8ordo/ui/code-block';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { InstallTabs } from '../../../../components/install-tabs';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
+import { PeerTable } from '../../../../components/peer-table';
 import { Rich } from '../../../../components/rich';
 import * as m from '../../../../messages';
 
@@ -233,13 +234,15 @@ export default function RouterGetStartedPage() {
         <p className="text-fg-mute leading-relaxed">
           <Rich>{m.routerGetStarted.requirementsDescription()}</Rich>
         </p>
+        <PeerTable
+          name="@k8ordo/router"
+          neededFor={{
+            react: m.routerGetStarted.peerReact,
+            typescript: m.routerGetStarted.peerTypes,
+            '@types/react': m.routerGetStarted.peerTypes,
+          }}
+        />
         <ul className="text-fg-mute flex flex-col gap-2 pl-6">
-          <li className="list-disc">
-            <Rich>{m.routerGetStarted.requirementReact()}</Rich>
-          </li>
-          <li className="list-disc">
-            <Rich>{m.routerGetStarted.requirementTypes()}</Rich>
-          </li>
           <li className="list-disc">
             <Rich>{m.routerGetStarted.requirementPlatform()}</Rich>
           </li>

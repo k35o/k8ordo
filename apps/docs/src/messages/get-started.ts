@@ -60,6 +60,53 @@ export const requirementsDescription = message({
   en: 'k8ordo UI requires the following peer dependencies.',
 });
 
+export const peers = {
+  react: message({
+    ja: 'コンポーネントとフック',
+    en: 'The components and hooks',
+  }),
+  reactDom: message({
+    ja: 'ポータルと `useFormStatus`',
+    en: 'Portals and `useFormStatus`',
+  }),
+  i18n: message({
+    ja: 'コンポーネントの組み込みの文言を読むロケール',
+    en: 'The locale the components’ own wording is read in',
+  }),
+  types: message({
+    ja: '同梱の型定義',
+    en: 'The shipped type declarations',
+  }),
+  tailwindcss: message({
+    ja: '`tailwind.css` の入口',
+    en: 'The `tailwind.css` entry',
+  }),
+  zod: message({
+    ja: '生成 UI のスキーマ',
+    en: 'Generative-UI schemas',
+  }),
+  jsonRender: message({
+    ja: '`@k8ordo/ui/json-render`',
+    en: '`@k8ordo/ui/json-render`',
+  }),
+  openuiLangCore: message({
+    ja: '`@k8ordo/ui/openui` と `@k8ordo/ui/openui/prompt`',
+    en: '`@k8ordo/ui/openui` and `@k8ordo/ui/openui/prompt`',
+  }),
+  openuiReactLang: message({
+    ja: '`@k8ordo/ui/openui`',
+    en: '`@k8ordo/ui/openui`',
+  }),
+  ai: message({
+    ja: '`@k8ordo/ui/ai-sdk`',
+    en: '`@k8ordo/ui/ai-sdk`',
+  }),
+  streamdown: message({
+    ja: '`@k8ordo/ui/ai/response`',
+    en: '`@k8ordo/ui/ai/response`',
+  }),
+};
+
 export const nextStepsTitle = message({
   ja: '次のステップ',
   en: 'Next Steps',

@@ -375,6 +375,15 @@ export const prefetchSpeculation = message({
 
 /** 両モードの「はじめに」が共有する、設定と最小のルートの説明。 */
 export const setup = {
+  peerRouter: message({
+    ja: 'フレームワークが生成するルート表',
+    en: 'The route table the framework generates',
+  }),
+  peerReact: message({ ja: '描画', en: 'Rendering' }),
+  peerVite: message({
+    ja: 'ビルド（`framework()` は Vite のプラグイン）',
+    en: 'The build (`framework()` is a Vite plugin)',
+  }),
   configTitle: message({ ja: 'vite.config.ts', en: 'vite.config.ts' }),
   pluginsNote: message({
     ja: '`framework()` は Vite のプラグインの配列を返し、その中に React のプラグイン（Fast Refresh）と RSC のパイプラインがすでに入っています。`@vitejs/plugin-react` を自分で足す必要はありません。',

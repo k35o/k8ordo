@@ -22,33 +22,35 @@ yarn add @k8ordo/ui
 
 ## Peer Dependencies
 
-Only React and `@k8ordo/i18n` (the locale the components' own wording is read in) are required:
+Only React and `@k8ordo/i18n` are required:
 
 ```bash
 npm install react react-dom @k8ordo/i18n
 ```
 
-| Package        | Version |
-| -------------- | ------- |
-| `react`        | ≥19.3.0 |
-| `react-dom`    | ≥19.3.0 |
-| `@k8ordo/i18n` | ^1.0.0  |
-
 Everything else is an optional peer, needed only for the entry point that uses
 it. Install one when you import the entry it belongs to.
 
-| Package                                   | Version         | Needed for                                                                    |
-| ----------------------------------------- | --------------- | ----------------------------------------------------------------------------- |
-| `typescript`                              | ≥7.0.2          | the shipped type declarations                                                 |
-| `@types/react`                            | ≥19.3.0         | the shipped type declarations                                                 |
-| `@types/react-dom`                        | ≥19.3.0         | the shipped type declarations                                                 |
-| `tailwindcss`                             | ≥4.3.3          | the `tailwind.css` entry (see [Imports & Bundle Size](#imports--bundle-size)) |
-| `zod`                                     | ≥4.4.3 <5.0.0   | generative-UI schemas                                                         |
-| `@json-render/core`, `@json-render/react` | ≥0.21.0 <0.22.0 | `@k8ordo/ui/json-render`                                                      |
-| `@openuidev/lang-core`                    | ≥0.3.0 <0.4.0   | `@k8ordo/ui/openui`, `@k8ordo/ui/openui/prompt`                               |
-| `@openuidev/react-lang`                   | ≥0.3.0 <0.4.0   | `@k8ordo/ui/openui`                                                           |
-| `ai`                                      | ≥7.0.51         | `@k8ordo/ui/ai-sdk`                                                           |
-| `streamdown`                              | ≥2.5.0          | `@k8ordo/ui/ai/response`                                                      |
+<!-- peers -->
+
+| Package                 | Version         | Required | Needed for                                                                    |
+| ----------------------- | --------------- | -------- | ----------------------------------------------------------------------------- |
+| `react`                 | ≥19.3.0         | yes      | the components and hooks                                                      |
+| `react-dom`             | ≥19.3.0         | yes      | portals and `useFormStatus`                                                   |
+| `@k8ordo/i18n`          | ^1.0.0          | yes      | the locale the components' own wording is read in                             |
+| `typescript`            | ≥7.0.2          | optional | the shipped type declarations                                                 |
+| `@types/react`          | ≥19.3.0         | optional | the shipped type declarations                                                 |
+| `@types/react-dom`      | ≥19.3.0         | optional | the shipped type declarations                                                 |
+| `tailwindcss`           | ≥4.3.3          | optional | the `tailwind.css` entry (see [Imports & Bundle Size](#imports--bundle-size)) |
+| `zod`                   | ^4.4.3          | optional | generative-UI schemas                                                         |
+| `@json-render/core`     | ≥0.21.0 <0.22.0 | optional | `@k8ordo/ui/json-render`                                                      |
+| `@json-render/react`    | ≥0.21.0 <0.22.0 | optional | `@k8ordo/ui/json-render`                                                      |
+| `@openuidev/lang-core`  | ≥0.3.0 <0.4.0   | optional | `@k8ordo/ui/openui`, `@k8ordo/ui/openui/prompt`                               |
+| `@openuidev/react-lang` | ≥0.3.0 <0.4.0   | optional | `@k8ordo/ui/openui`                                                           |
+| `ai`                    | ≥7.0.51         | optional | `@k8ordo/ui/ai-sdk`                                                           |
+| `streamdown`            | ≥2.5.0          | optional | `@k8ordo/ui/ai/response`                                                      |
+
+<!-- /peers -->
 
 The generative-UI peers are 0.x, where a minor bump is a breaking release, so
 the declared range stops at the next minor: `@k8ordo/ui` only claims the line it

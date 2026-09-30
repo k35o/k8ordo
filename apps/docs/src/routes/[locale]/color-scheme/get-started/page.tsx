@@ -4,26 +4,11 @@ import { CodeBlock } from '@k8ordo/ui/code-block';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { InstallTabs } from '../../../../components/install-tabs';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
+import { PeerTable } from '../../../../components/peer-table';
 import { Rich } from '../../../../components/rich';
 import * as m from '../../../../messages';
 
 const t = m.colorSchemeGetStarted;
-
-const PEERS = [
-  { name: '@k8ordo/state', version: '^1.0.0', purpose: t.install.purposeState },
-  { name: 'react', version: '>=19.3.0', purpose: t.install.purposeReact },
-  { name: 'zod', version: '^4.4.3', purpose: t.install.purposeZod },
-  {
-    name: 'typescript',
-    version: '>=7.0.2',
-    purpose: t.install.purposeTypescript,
-  },
-  {
-    name: '@types/react',
-    version: '>=19.3.0',
-    purpose: t.install.purposeTypesReact,
-  },
-];
 
 const MEMBERS = [
   {
@@ -185,38 +170,16 @@ export default function ColorSchemeGetStartedPage() {
             />
           }
         />
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead>
-              <tr className="border-border-mute border-b">
-                <th className={thClass}>
-                  <Rich>{t.install.columnPackage()}</Rich>
-                </th>
-                <th className={thClass}>
-                  <Rich>{t.install.columnVersion()}</Rich>
-                </th>
-                <th className="py-3 font-medium whitespace-nowrap">
-                  <Rich>{t.install.columnPurpose()}</Rich>
-                </th>
-              </tr>
-            </thead>
-            <tbody className="text-fg-mute">
-              {PEERS.map((peer) => (
-                <tr className="border-border-mute border-b" key={peer.name}>
-                  <td className={`${tdClass} whitespace-nowrap`}>
-                    <Code>{peer.name}</Code>
-                  </td>
-                  <td className={`${tdClass} whitespace-nowrap`}>
-                    <Code>{peer.version}</Code>
-                  </td>
-                  <td className="py-3 align-top">
-                    <Rich>{peer.purpose()}</Rich>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <PeerTable
+          name="@k8ordo/color-scheme"
+          neededFor={{
+            '@k8ordo/state': t.install.purposeState,
+            react: t.install.purposeReact,
+            zod: t.install.purposeZod,
+            typescript: t.install.purposeTypescript,
+            '@types/react': t.install.purposeTypesReact,
+          }}
+        />
       </DocSection>
 
       <DocSection description={t.provider.description} title={t.provider.title}>

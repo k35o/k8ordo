@@ -260,6 +260,14 @@ export default function RouterLinksPage() {
   the messages around it.
 - A live demo is a `'use client'` component in the page's own `_parts/`, and
   only where touching it teaches something the prose cannot.
+- A `get-started` page lists the package's peers with `PeerTable`
+  (`@k8ordo/ui`'s included), given the package's `name` and `neededFor`, a
+  message per peer keyed by the peer's name. The versions and which peers are
+  optional are read from the package README's generated `<!-- peers -->`
+  table (`src/data/peers.ts`), never written on the site. A peer without a
+  message, or a message for a name that is not a peer, fails the build.
+  `PeerTable` stays a Server Component: the READMEs it reads must not reach
+  the client bundle.
 - `@k8ordo/static` and `@k8ordo/server` share their routing, params, errors,
   and boundaries topics: the words are `src/messages/framework-<topic>.ts`,
   the markup `src/components/framework-guide/<topic>.tsx` taking
@@ -282,6 +290,7 @@ grammar, which is why previews can live inside `routes/` at all.
 | `DocSection`       | A guide page's h2 section            |
 | `ComponentPreview` | Live preview + code block combo      |
 | `PropsTable`       | Props documentation table            |
+| `PeerTable`        | A package's peer dependencies        |
 | `Rich`             | Text with backtick spans as `<Code>` |
 | `InstallTabs`      | Package manager install command tabs |
 | `TokenCard`        | Design token display card            |

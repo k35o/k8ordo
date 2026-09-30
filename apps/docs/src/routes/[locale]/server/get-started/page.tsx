@@ -59,7 +59,7 @@ yarn add -D vite`}
           }
         />
         <Paragraph text={t.requirementsDescription} />
-        <Requirements />
+        <Requirements mode="server" />
       </DocSection>
 
       <SetupConfig description={t.configDescription} mode="server" />

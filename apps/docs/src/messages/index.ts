@@ -27,6 +27,7 @@ export * as sideNav from './side-nav';
 export * as notFound from './not-found';
 export * as error from './error';
 export * as docPage from './doc-page';
+export * as peers from './peers';
 // パッケージのガイドのページ。1 ページ 1 ファイルで、名前はパス（<package>-<section>）
 export * as formGetStarted from './form-get-started';
 export * as formFields from './form-fields';

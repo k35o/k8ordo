@@ -1,36 +1,12 @@
-import type { Message } from '@k8ordo/i18n';
 import { Code, Heading } from '@k8ordo/ui';
 import { CodeBlock } from '@k8ordo/ui/code-block';
 
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { InstallTabs } from '../../../../components/install-tabs';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
+import { PeerTable } from '../../../../components/peer-table';
 import { Rich } from '../../../../components/rich';
 import * as m from '../../../../messages';
-
-const PEERS: ReadonlyArray<{
-  name: string;
-  version: string;
-  purpose: Message;
-}> = [
-  { name: 'react', version: '>=19.3.0', purpose: m.formGetStarted.peerReact },
-  {
-    name: 'react-dom',
-    version: '>=19.3.0',
-    purpose: m.formGetStarted.peerReactDom,
-  },
-  { name: 'zod', version: '^4.4.3', purpose: m.formGetStarted.peerZod },
-  {
-    name: 'typescript',
-    version: '>=7.0.2',
-    purpose: m.formGetStarted.peerTypes,
-  },
-  {
-    name: '@types/react',
-    version: '>=19.3.0',
-    purpose: m.formGetStarted.peerTypes,
-  },
-];
 
 const ENTRIES: ReadonlyArray<{
   entry: string;
@@ -252,30 +228,16 @@ export default function FormGetStartedPage() {
         <p className="text-fg-mute leading-relaxed">
           <Rich>{m.formGetStarted.peersDescription()}</Rich>
         </p>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead>
-              <tr className="border-border-mute border-b">
-                <th className={TH}>{m.formGetStarted.peerColumn()}</th>
-                <th className={TH}>{m.formGetStarted.versionColumn()}</th>
-                <th className={TH}>{m.formGetStarted.purposeColumn()}</th>
-              </tr>
-            </thead>
-            <tbody className="text-fg-mute">
-              {PEERS.map((peer) => (
-                <tr className="border-border-mute border-b" key={peer.name}>
-                  <td className={`${TD} whitespace-nowrap`}>
-                    <Code>{peer.name}</Code>
-                  </td>
-                  <td className={`${TD} whitespace-nowrap`}>{peer.version}</td>
-                  <td className={TD}>
-                    <Rich>{peer.purpose()}</Rich>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <PeerTable
+          name="@k8ordo/form"
+          neededFor={{
+            react: m.formGetStarted.peerReact,
+            'react-dom': m.formGetStarted.peerReactDom,
+            zod: m.formGetStarted.peerZod,
+            typescript: m.formGetStarted.peerTypes,
+            '@types/react': m.formGetStarted.peerTypes,
+          }}
+        />
       </DocSection>
 
       <DocSection

@@ -22,13 +22,17 @@ pnpm add @k8ordo/form zod
 
 ## Peer Dependencies
 
-| Package        | Version | Needed for                    |
-| -------------- | ------- | ----------------------------- |
-| `react`        | ≥19.3.0 | `useForm` and Server Actions  |
-| `react-dom`    | ≥19.3.0 | rendering                     |
-| `zod`          | ^4.4.3  | the schema (`zod/mini` works) |
-| `typescript`   | ≥7.0.2  | the shipped type declarations |
-| `@types/react` | ≥19.3.0 | the shipped type declarations |
+<!-- peers -->
+
+| Package        | Version | Required | Needed for                    |
+| -------------- | ------- | -------- | ----------------------------- |
+| `react`        | ≥19.3.0 | yes      | `useForm` and Server Actions  |
+| `react-dom`    | ≥19.3.0 | yes      | rendering                     |
+| `zod`          | ^4.4.3  | yes      | the schema (`zod/mini` works) |
+| `typescript`   | ≥7.0.2  | optional | the shipped type declarations |
+| `@types/react` | ≥19.3.0 | optional | the shipped type declarations |
+
+<!-- /peers -->
 
 zod never reaches the browser: the schema is read on the server and crosses the
 RSC boundary as plain data. The client entry is ~2.8 kB gzipped.

@@ -70,21 +70,6 @@ export const peersTitle = message({
   en: 'Peer dependencies',
 });
 
-export const peersPackage = message({
-  ja: 'パッケージ',
-  en: 'Package',
-});
-
-export const peersVersion = message({
-  ja: 'バージョン',
-  en: 'Version',
-});
-
-export const peersNeededFor = message({
-  ja: '用途',
-  en: 'Needed for',
-});
-
 export const peerReact = message({
   ja: '`useAppState`',
   en: '`useAppState`',
@@ -96,13 +81,13 @@ export const peerZod = message({
 });
 
 export const peerRouter = message({
-  ja: '任意。`href` のパスをルート表で型付けするとき。型だけの依存で、実行時には読み込まれません',
-  en: 'Optional. Typed `href` paths from the route table. Types only; never loaded at runtime',
+  ja: '`href` のパスをルート表で型付けするとき。型だけの依存で、実行時には読み込まれません',
+  en: 'Typed `href` paths from the route table. Types only; never loaded at runtime',
 });
 
 export const peerTypes = message({
-  ja: '任意。同梱の型定義',
-  en: 'Optional. The shipped type declarations',
+  ja: '同梱の型定義',
+  en: 'The shipped type declarations',
 });
 
 export const baselineNote = message({
