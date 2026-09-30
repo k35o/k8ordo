@@ -65,21 +65,9 @@ export const install = {
     ja: 'ランタイムの依存はありません。React もスキーマライブラリも import しないので、peer dependency は同梱の型定義を読む TypeScript だけです。',
     en: 'It has no runtime dependencies. It imports neither React nor a schema library, so the only peer dependency is TypeScript, for the shipped type declarations.',
   }),
-  packageColumn: message({
-    ja: 'パッケージ',
-    en: 'Package',
-  }),
-  versionColumn: message({
-    ja: 'バージョン',
-    en: 'Version',
-  }),
-  neededForColumn: message({
-    ja: '用途',
-    en: 'Needed for',
-  }),
   typescript: message({
-    ja: '同梱の型定義（省略可）',
-    en: 'The shipped type declarations (optional)',
+    ja: '同梱の型定義',
+    en: 'The shipped type declarations',
   }),
   runtime: message({
     ja: 'サーバーでは、描画中のロケールを `node:async_hooks` の `AsyncLocalStorage` に載せます。import ではなく `process.getBuiltinModule` で取り出すので、同じビルドがブラウザでもそのまま動きます（フレームワークの 2 つのモードは Node 24 以降を求めます）。`process.getBuiltinModule` の無いランタイムではロケールを描画に結び付けられないので、`paramsSchema` の受理も `run` も throw します。',
