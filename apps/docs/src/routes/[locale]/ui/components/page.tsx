@@ -4,6 +4,7 @@ import { CodeBlock } from '@k8ordo/ui/code-block';
 import { ComponentCatalog } from '../../../../components/component-catalog';
 import { PageTitle } from '../../../../components/page-title';
 import { Rich } from '../../../../components/rich';
+import { componentGroups } from '../../../../data/component-groups';
 import * as m from '../../../../messages';
 
 export default function Components() {
@@ -17,6 +18,7 @@ export default function Components() {
         </p>
       </header>
       <ComponentCatalog
+        groups={componentGroups}
         serverPreviews={{
           CodeBlock: (
             <div className="w-full max-w-64">

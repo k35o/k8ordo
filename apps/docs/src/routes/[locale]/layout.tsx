@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 
+import { componentGroups } from '../../data/component-groups';
 import { locales } from '../../i18n';
 import { LocaleShell } from './_parts/locale-shell';
 
@@ -23,5 +24,9 @@ export default function LocaleLayout({
   params: { locale: string };
   children: ReactNode;
 }) {
-  return <LocaleShell locale={params.locale}>{children}</LocaleShell>;
+  return (
+    <LocaleShell componentGroups={componentGroups} locale={params.locale}>
+      {children}
+    </LocaleShell>
+  );
 }

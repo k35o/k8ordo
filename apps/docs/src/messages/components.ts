@@ -45,9 +45,9 @@ export const categoryObservers = message({
   en: 'Observers',
 });
 
-export const categoryMedia = message({
-  ja: 'Media',
-  en: 'Media',
+export const categoryIcons = message({
+  ja: 'Icons',
+  en: 'Icons',
 });
 
 export const common = {
