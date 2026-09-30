@@ -1,12 +1,9 @@
-'use client';
-
 import { Heading } from '@k8ordo/ui';
+import { CodeBlock } from '@k8ordo/ui/code-block';
 
-import { CatalogSections } from '../../../../components/catalog-sections';
-import { componentPreviews } from '../../../../components/component-previews';
+import { ComponentCatalog } from '../../../../components/component-catalog';
 import { PageTitle } from '../../../../components/page-title';
 import { Rich } from '../../../../components/rich';
-import { componentCategories } from '../../../../data/components-nav';
 import * as m from '../../../../messages';
 
 export default function Components() {
@@ -19,9 +16,14 @@ export default function Components() {
           <Rich>{m.components.description()}</Rich>
         </p>
       </header>
-      <CatalogSections
-        categories={componentCategories}
-        previews={componentPreviews}
+      <ComponentCatalog
+        serverPreviews={{
+          CodeBlock: (
+            <div className="w-full max-w-64">
+              <CodeBlock code="const sum = a + b;" lang="ts" />
+            </div>
+          ),
+        }}
       />
     </div>
   );

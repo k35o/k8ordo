@@ -19,7 +19,7 @@ import * as m from '../../../messages';
 import { WritingModeProvider } from '../../../theme/writing-mode-context';
 
 type SideNavConfig = {
-  categories: NavCategory[];
+  categories: readonly NavCategory[];
   title: Message;
   catalogPath: SitePath;
 };
