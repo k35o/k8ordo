@@ -4,9 +4,9 @@ import { CodeBlock } from '@k8ordo/ui/code-block';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { InstallTabs } from '../../../../components/install-tabs';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
+import { PeerTable } from '../../../../components/peer-table';
 import { Rich } from '../../../../components/rich';
 import * as m from '../../../../messages';
-import { DocTable } from '../_parts/doc-table';
 
 const DEFINITION = `// src/state/products.ts
 import { definePageState } from '@k8ordo/state';
@@ -230,54 +230,15 @@ export default function StateGetStartedPage() {
         <Heading level="h3">
           <Rich>{m.stateGetStarted.peersTitle()}</Rich>
         </Heading>
-        <DocTable
-          head={[
-            m.stateGetStarted.peersPackage(),
-            m.stateGetStarted.peersVersion(),
-            m.stateGetStarted.peersNeededFor(),
-          ]}
-          rows={[
-            {
-              key: 'react',
-              cells: [
-                'react',
-                '≥19.3.0',
-                <Rich key="needed">{m.stateGetStarted.peerReact()}</Rich>,
-              ],
-            },
-            {
-              key: 'zod',
-              cells: [
-                'zod',
-                '^4.4.3',
-                <Rich key="needed">{m.stateGetStarted.peerZod()}</Rich>,
-              ],
-            },
-            {
-              key: 'router',
-              cells: [
-                '@k8ordo/router',
-                '^1.0.0',
-                <Rich key="needed">{m.stateGetStarted.peerRouter()}</Rich>,
-              ],
-            },
-            {
-              key: 'typescript',
-              cells: [
-                'typescript',
-                '≥7.0.2',
-                <Rich key="needed">{m.stateGetStarted.peerTypes()}</Rich>,
-              ],
-            },
-            {
-              key: 'types-react',
-              cells: [
-                '@types/react',
-                '≥19.3.0',
-                <Rich key="needed">{m.stateGetStarted.peerTypes()}</Rich>,
-              ],
-            },
-          ]}
+        <PeerTable
+          name="@k8ordo/state"
+          neededFor={{
+            react: m.stateGetStarted.peerReact,
+            zod: m.stateGetStarted.peerZod,
+            '@k8ordo/router': m.stateGetStarted.peerRouter,
+            typescript: m.stateGetStarted.peerTypes,
+            '@types/react': m.stateGetStarted.peerTypes,
+          }}
         />
         <p className="text-fg-mute leading-relaxed">
           <Rich>{m.stateGetStarted.baselineNote()}</Rich>

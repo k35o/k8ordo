@@ -58,14 +58,14 @@ export const requirementsDescription = message({
   en: 'The peer dependencies are below. There are no runtime dependencies.',
 });
 
-export const requirementReact = message({
-  ja: '`react` >= 19.3.0',
-  en: '`react` >= 19.3.0',
+export const peerReact = message({
+  ja: '`<Router>` とフック',
+  en: '`<Router>` and the hooks',
 });
 
-export const requirementTypes = message({
-  ja: '`typescript` >= 7.0.2 と `@types/react` >= 19.3.0（どちらも任意。同梱の型定義を使うときに必要）',
-  en: '`typescript` >= 7.0.2 and `@types/react` >= 19.3.0 (both optional; needed for the shipped type declarations)',
+export const peerTypes = message({
+  ja: '同梱の型定義',
+  en: 'The shipped type declarations',
 });
 
 export const requirementPlatform = message({

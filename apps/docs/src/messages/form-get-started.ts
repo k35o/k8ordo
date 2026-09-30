@@ -46,23 +46,8 @@ export const installDescription = message({
 });
 
 export const peersDescription = message({
-  ja: 'peer dependencies は次のとおりです。TypeScript と `@types/react` は、同梱の型定義を使うときにだけ必要です。',
-  en: 'The peer dependencies are below. TypeScript and `@types/react` are needed only for the shipped type declarations.',
-});
-
-export const peerColumn = message({
-  ja: 'パッケージ',
-  en: 'Package',
-});
-
-export const versionColumn = message({
-  ja: 'バージョン',
-  en: 'Version',
-});
-
-export const purposeColumn = message({
-  ja: '用途',
-  en: 'Needed for',
+  ja: 'peer dependencies は次のとおりです。',
+  en: 'The peer dependencies are below.',
 });
 
 export const peerReact = message({
@@ -81,8 +66,8 @@ export const peerZod = message({
 });
 
 export const peerTypes = message({
-  ja: '同梱の型定義（任意）',
-  en: 'The shipped type declarations (optional)',
+  ja: '同梱の型定義',
+  en: 'The shipped type declarations',
 });
 
 export const zodTitle = message({

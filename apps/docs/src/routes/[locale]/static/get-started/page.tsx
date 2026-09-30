@@ -68,7 +68,7 @@ yarn add -D @k8ordo/static vite`}
           }
         />
         <Paragraph text={t.requirementsDescription} />
-        <Requirements />
+        <Requirements mode="static" />
       </DocSection>
 
       <SetupConfig description={t.configDescription} mode="static" />

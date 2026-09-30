@@ -4,6 +4,7 @@ import { CodeBlock } from '@k8ordo/ui/code-block';
 import { InstallTabs } from '../../../../components/install-tabs';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { PageTitle } from '../../../../components/page-title';
+import { PeerTable } from '../../../../components/peer-table';
 import { Rich } from '../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../constants';
 import * as m from '../../../../messages';
@@ -111,42 +112,25 @@ function MyComponent() {
         <p className="text-fg-mute">
           <Rich>{m.getStarted.requirementsDescription()}</Rich>
         </p>
-        <ul className="text-fg-mute flex flex-col gap-2 pl-6">
-          <li className="list-disc">React &gt;= 19.3.0</li>
-          <li className="list-disc">React DOM &gt;= 19.3.0</li>
-          <li className="list-disc">@k8ordo/i18n ^1.0.0</li>
-          <li className="list-disc">
-            Tailwind CSS &gt;= 4.3.3 (optional: tailwind.css)
-          </li>
-          <li className="list-disc">
-            TypeScript &gt;= 7.0.2 (optional: type declarations)
-          </li>
-          <li className="list-disc">
-            @types/react, @types/react-dom &gt;= 19.3.0 (optional: type
-            declarations)
-          </li>
-          <li className="list-disc">
-            zod &gt;= 4.4.3 &lt;5.0.0 (optional: generative-UI schemas)
-          </li>
-          <li className="list-disc">
-            @json-render/core, @json-render/react &gt;= 0.21.0 &lt;0.22.0
-            (optional: @k8ordo/ui/json-render)
-          </li>
-          <li className="list-disc">
-            @openuidev/lang-core &gt;= 0.3.0 &lt;0.4.0 (optional:
-            @k8ordo/ui/openui, @k8ordo/ui/openui/prompt)
-          </li>
-          <li className="list-disc">
-            @openuidev/react-lang &gt;= 0.3.0 &lt;0.4.0 (optional:
-            @k8ordo/ui/openui)
-          </li>
-          <li className="list-disc">
-            ai &gt;= 7.0.51 (optional: @k8ordo/ui/ai-sdk)
-          </li>
-          <li className="list-disc">
-            streamdown &gt;= 2.5.0 (optional: @k8ordo/ui/ai/response)
-          </li>
-        </ul>
+        <PeerTable
+          name="@k8ordo/ui"
+          neededFor={{
+            react: m.getStarted.peers.react,
+            'react-dom': m.getStarted.peers.reactDom,
+            '@k8ordo/i18n': m.getStarted.peers.i18n,
+            typescript: m.getStarted.peers.types,
+            '@types/react': m.getStarted.peers.types,
+            '@types/react-dom': m.getStarted.peers.types,
+            tailwindcss: m.getStarted.peers.tailwindcss,
+            zod: m.getStarted.peers.zod,
+            '@json-render/core': m.getStarted.peers.jsonRender,
+            '@json-render/react': m.getStarted.peers.jsonRender,
+            '@openuidev/lang-core': m.getStarted.peers.openuiLangCore,
+            '@openuidev/react-lang': m.getStarted.peers.openuiReactLang,
+            ai: m.getStarted.peers.ai,
+            streamdown: m.getStarted.peers.streamdown,
+          }}
+        />
       </section>
 
       <Separator color="mute" />

@@ -30,11 +30,15 @@ router for an application that renders in the browser.
 
 ## Peer Dependencies
 
-| Package        | Version | Needed for                    |
-| -------------- | ------- | ----------------------------- |
-| `react`        | ≥19.3.0 | `<Router>` and the hooks      |
-| `typescript`   | ≥7.0.2  | the shipped type declarations |
-| `@types/react` | ≥19.3.0 | the shipped type declarations |
+<!-- peers -->
+
+| Package        | Version | Required | Needed for                    |
+| -------------- | ------- | -------- | ----------------------------- |
+| `react`        | ≥19.3.0 | yes      | `<Router>` and the hooks      |
+| `typescript`   | ≥7.0.2  | optional | the shipped type declarations |
+| `@types/react` | ≥19.3.0 | optional | the shipped type declarations |
+
+<!-- /peers -->
 
 No runtime dependencies. The Navigation API and URLPattern are the platform's.
 

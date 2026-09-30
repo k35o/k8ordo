@@ -30,9 +30,13 @@ pnpm add @k8ordo/i18n
 
 ## Peer Dependencies
 
-| Package      | Version | Needed for                    |
-| ------------ | ------- | ----------------------------- |
-| `typescript` | ≥7.0.2  | the shipped type declarations |
+<!-- peers -->
+
+| Package      | Version | Required | Needed for                    |
+| ------------ | ------- | -------- | ----------------------------- |
+| `typescript` | ≥7.0.2  | optional | the shipped type declarations |
+
+<!-- /peers -->
 
 No React import and no schema library: a message is a plain function, and a
 locale set is a list that checks membership itself. `locales.paramsSchema`

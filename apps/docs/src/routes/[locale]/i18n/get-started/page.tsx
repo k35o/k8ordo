@@ -1,9 +1,10 @@
-import { Code, Heading } from '@k8ordo/ui';
+import { Heading } from '@k8ordo/ui';
 import { CodeBlock } from '@k8ordo/ui/code-block';
 
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { InstallTabs } from '../../../../components/install-tabs';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
+import { PeerTable } from '../../../../components/peer-table';
 import { Rich } from '../../../../components/rich';
 import * as m from '../../../../messages';
 
@@ -134,32 +135,10 @@ export default function I18nGetStartedPage() {
           pnpm={<CodeBlock code="pnpm add @k8ordo/i18n" lang="bash" />}
           yarn={<CodeBlock code="yarn add @k8ordo/i18n" lang="bash" />}
         />
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead>
-              <tr className="border-border-mute border-b">
-                <th className="py-3 pr-6 font-medium whitespace-nowrap">
-                  {s.install.packageColumn()}
-                </th>
-                <th className="py-3 pr-6 font-medium whitespace-nowrap">
-                  {s.install.versionColumn()}
-                </th>
-                <th className="py-3 font-medium whitespace-nowrap">
-                  {s.install.neededForColumn()}
-                </th>
-              </tr>
-            </thead>
-            <tbody className="text-fg-mute">
-              <tr className="border-border-mute border-b">
-                <td className="py-3 pr-6 whitespace-nowrap">
-                  <Code>typescript</Code>
-                </td>
-                <td className="py-3 pr-6 whitespace-nowrap">&gt;= 7.0.2</td>
-                <td className="py-3">{s.install.typescript()}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        <PeerTable
+          name="@k8ordo/i18n"
+          neededFor={{ typescript: s.install.typescript }}
+        />
         <p className="text-fg-mute leading-relaxed">
           <Rich>{s.install.runtime()}</Rich>
         </p>

@@ -4,6 +4,7 @@ import { CodeBlock } from '@k8ordo/ui/code-block';
 import * as m from '../../messages';
 import { DocSection } from '../doc-page';
 import { LocaleAnchor } from '../locale-anchor';
+import { PeerTable } from '../peer-table';
 import { packageOf } from './mode';
 import type { Mode } from './mode';
 import { Bullet, Bullets, Paragraph, SubHeading } from './prose';
@@ -39,16 +40,24 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({ plugins: [framework()] });`;
 
-/** The peers both mode packages declare, and the Node.js they need. */
-export function Requirements() {
+/** The peers a mode package declares, and the Node.js it needs. */
+export function Requirements({ mode }: { mode: Mode }) {
+  const t = m.frameworkRouting.setup;
   return (
-    <Bullets>
-      <Bullet>@k8ordo/router ^1.0.0</Bullet>
-      <Bullet>React &gt;= 19.3.0</Bullet>
-      <Bullet>React DOM &gt;= 19.3.0</Bullet>
-      <Bullet>Vite &gt;= 8.2.1</Bullet>
-      <Bullet>Node.js &gt;= 24</Bullet>
-    </Bullets>
+    <>
+      <PeerTable
+        name={packageOf(mode)}
+        neededFor={{
+          '@k8ordo/router': t.peerRouter,
+          react: t.peerReact,
+          'react-dom': t.peerReact,
+          vite: t.peerVite,
+        }}
+      />
+      <Bullets>
+        <Bullet>Node.js &gt;= 24</Bullet>
+      </Bullets>
+    </>
   );
 }
 
