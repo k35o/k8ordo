@@ -1,8 +1,9 @@
 /**
  * Rewrites the `Props:` blocks inside `docs/references/components.md` from
- * `docs/props.generated.json`.
+ * `docs/props.generated.json`, and the `Messages` key list between its
+ * `<!-- generated:message-keys -->` markers from `src/i18n/usage.ts`.
  *
- * Only the props lists are generated. The prose and the code examples around
+ * Only those lists are generated. The prose and the code examples around
  * them stay hand-written, because they carry judgement the types do not.
  * `ai-chat.md` is deliberately left out: its props bullets group controllable
  * props and describe pass-through behavior, which the generated form would
@@ -19,6 +20,10 @@
  */
 import { readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
+
+import { en } from '../src/i18n/en.ts';
+import type { Messages } from '../src/i18n/messages.ts';
+import { messageUsage } from '../src/i18n/usage.ts';
 
 const DOC_PATH = fileURLToPath(
   new URL('../docs/references/components.md', import.meta.url),
@@ -149,7 +154,57 @@ for (let i = 0; i < lines.length; i++) {
   i = j - 1;
 }
 
-const output = out.join('\n');
+/** A key whose text carries `{min}` gets that noted, since a translation keeps it. */
+const keyLabel = (key: keyof Messages): string => {
+  const placeholders = [...en[key].matchAll(/\{\w+\}/gu)].map(
+    ([placeholder]) => `\`${placeholder}\``,
+  );
+  if (placeholders.length === 0) return `\`${key}\``;
+  const verb = placeholders.length === 1 ? 'is' : 'are';
+  return `\`${key}\` (${placeholders.join(' and ')} ${verb} replaced)`;
+};
+
+/** One bullet per set of components, in the order the keys are declared. */
+const renderMessageKeys = (): string => {
+  const rows = new Map<string, string[]>();
+  for (const key of Object.keys(messageUsage) as Array<keyof Messages>) {
+    const usedBy = messageUsage[key].join(' / ');
+    rows.set(usedBy, [...(rows.get(usedBy) ?? []), keyLabel(key)]);
+  }
+  return [...rows]
+    .map(([usedBy, keys]) => `- ${usedBy}: ${keys.join(', ')}\n`)
+    .join('');
+};
+
+const fillGenerated = (
+  markdown: string,
+  name: string,
+  body: string,
+): string => {
+  const pattern = new RegExp(
+    `<!-- generated:${name} -->\\n[\\s\\S]*?<!-- /generated:${name} -->\\n`,
+    'gu',
+  );
+  const found = markdown.match(pattern)?.length ?? 0;
+  if (found !== 1) {
+    throw new Error(
+      `components.md: <!-- generated:${name} --> must appear exactly once, found ${String(found)}`,
+    );
+  }
+  // The formatter keeps a blank line after the opening marker; writing the
+  // formatted shape is what lets `--check` compare text.
+  return markdown.replace(
+    pattern,
+    () =>
+      `<!-- generated:${name} -->\n\n${body}\n<!-- /generated:${name} -->\n`,
+  );
+};
+
+const output = fillGenerated(
+  out.join('\n'),
+  'message-keys',
+  renderMessageKeys(),
+);
 
 // Stops before anything is written: the block would be filled in correctly but
 // read under the wrong component, which no amount of regenerating fixes.
@@ -165,7 +220,7 @@ const problems: string[] = [];
 if (process.argv.includes('--check')) {
   if (output !== source) {
     problems.push(
-      'docs/references/components.md props are stale. Run `pnpm generate:props`.',
+      'docs/references/components.md is stale. Run `pnpm generate:props`.',
     );
   }
 } else {
@@ -239,10 +294,28 @@ if (notInReadme.length > 0) {
   problems.push(`README.md の部品一覧に未掲載: ${notInReadme.join(', ')}`);
 }
 
+// A part (`Message.Copy`) counts, and so does the compound it belongs to
+// (`FileField`), which is not a component of its own.
+const componentNames = new Set(
+  components.flatMap((c) => [c.name, topLevel(c.name)]),
+);
+const unknownUsers = [
+  ...new Set(
+    Object.values(messageUsage)
+      .flat()
+      .map((user) => user.replace(/ \(.+\)$/u, '')),
+  ),
+].filter((name) => !componentNames.has(name));
+if (unknownUsers.length > 0) {
+  problems.push(
+    `src/i18n/usage.ts に export に無い部品名: ${unknownUsers.join(', ')}`,
+  );
+}
+
 if (problems.length > 0) {
   console.error(problems.join('\n'));
   process.exit(1);
 }
 if (process.argv.includes('--check')) {
-  console.warn('docs/references/components.md props are in sync.');
+  console.warn('docs/references/components.md is in sync.');
 }

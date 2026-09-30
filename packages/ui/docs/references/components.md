@@ -2736,6 +2736,7 @@ import {
   en,
   getMessages,
   ja,
+  messageUsage,
   registerMessages,
   type Messages,
 } from '@k8ordo/ui/i18n';
@@ -2760,52 +2761,60 @@ function DismissButton({ onDismiss }) {
 
 ### Key list
 
-Every key in the `Messages` type. All values are `string`.
+Every key in the `Messages` type, grouped by the components that draw it —
+the same mapping `messageUsage` exports. All values are `string`.
 
-| Category        | Keys                                                                                                                                                |
-| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Common          | `close`, `required`, `loading`, `avatar`, `color`                                                                                                   |
-| Alert           | `alertSuccess`, `alertInfo`, `alertWarning`, `alertError`                                                                                           |
-| Toast           | `toastRegion`                                                                                                                                       |
-| CopyButton      | `copy`, `copied`, `copyFailed`                                                                                                                      |
-| Autocomplete    | `autocompletePlaceholder`, `autocompleteRemoveTag`, `autocompleteClear`, `autocompleteEmpty`                                                        |
-| Combobox        | `comboboxToggle`, `comboboxEmpty`, `comboboxFailed`, and the common `loading` while searching                                                       |
-| FileField       | `fileFieldRemove`, `fileFieldTrigger`, `fileFieldDrop`                                                                                              |
-| NumberField     | `numberFieldIncrement`, `numberFieldDecrement`, `numberFieldRangeUnderflow` (`{min}` is replaced), `numberFieldRangeOverflow` (`{max}` is replaced) |
-| RangeSlider     | `rangeSliderStart`, `rangeSliderEnd`                                                                                                                |
-| Calendar        | `calendarPreviousMonth`, `calendarNextMonth`                                                                                                        |
-| DatePicker      | `datePickerOpen`, `datePickerDialog`                                                                                                                |
-| ColorPicker     | `colorPickerHue`, `colorPickerSaturation`, `colorPickerLightness`, `colorPickerSwatches`                                                            |
-| PasswordInput   | `passwordShow`, `passwordHide`                                                                                                                      |
-| ListBox         | `listBoxPlaceholder`                                                                                                                                |
-| Breadcrumb      | `breadcrumb`                                                                                                                                        |
-| Tabs            | `tabList`                                                                                                                                           |
-| Pagination      | `paginationLabel`, `paginationPrevious`, `paginationNext`                                                                                           |
-| Stepper         | `stepperComplete`                                                                                                                                   |
-| CommandPalette  | `commandPalette`, `commandPaletteSearch`, `commandPaletteEmpty`                                                                                     |
-| ResizablePanels | `resizablePanelsHandle`                                                                                                                             |
-| CodeBlock       | `codeBlockCopy` (announces with `CopyButton`'s `copied` / `copyFailed`)                                                                             |
-| TOC             | `tableOfContents`                                                                                                                                   |
-| DataTable       | `dataTableColumns`, `dataTableSelectAll`, `dataTableSelectRow`                                                                                      |
-| Carousel        | `carousel`, `carouselSlide`, `carouselPrevious`, `carouselNext`                                                                                     |
-| AI chat         | `chat`, `scrollToLatest`, `reasoning`, `reasoningStreaming`, `suggestions`, `send`, `stop`, `attach`                                                |
-| AI content      | `attachments`, `attachmentRemove`, `attachmentImage`, `sources`                                                                                     |
-| AI actions      | `messageActions`, `regenerate`, `feedbackPositive`, `feedbackNegative` (`Message.Copy` uses `CopyButton`'s)                                         |
-| AI tools        | `toolInput`, `toolOutput`, `toolError`, `toolDenied`, `toolApprovalRequest`, `toolApprove`, `toolDeny`                                              |
-| Response        | The `response*` keys below                                                                                                                          |
+<!-- generated:message-keys -->
+
+- Alert / Dialog / Drawer / Response: `close`
+- FormControl: `required`
+- Spinner / Progress / Combobox: `loading`
+- Avatar: `avatar`
+- Code: `color`
+- Alert: `alertSuccess`, `alertInfo`, `alertWarning`, `alertError`
+- ToastProvider: `toastRegion`
+- CopyButton / Message.Copy: `copy`
+- CopyButton / CodeBlock / Message.Copy: `copied`, `copyFailed`
+- Autocomplete: `autocompletePlaceholder`, `autocompleteRemoveTag`, `autocompleteClear`, `autocompleteEmpty`
+- Combobox: `comboboxToggle`, `comboboxEmpty`, `comboboxFailed`
+- FileField: `fileFieldRemove`
+- FileField.Dropzone / FileField (generative UI): `fileFieldTrigger`, `fileFieldDrop`
+- NumberField: `numberFieldIncrement`, `numberFieldDecrement`, `numberFieldRangeUnderflow` (`{min}` is replaced), `numberFieldRangeOverflow` (`{max}` is replaced)
+- RangeSlider: `rangeSliderStart`, `rangeSliderEnd`
+- Calendar / DatePicker: `calendarPreviousMonth`, `calendarNextMonth`
+- DatePicker: `datePickerOpen`, `datePickerDialog`
+- ColorPicker: `colorPickerHue`, `colorPickerSaturation`, `colorPickerLightness`, `colorPickerSwatches`
+- PasswordInput: `passwordShow`, `passwordHide`
+- ListBox: `listBoxPlaceholder`
+- Breadcrumb: `breadcrumb`
+- Tabs (generative UI): `tabList`
+- Pagination: `paginationLabel`, `paginationPrevious`, `paginationNext`
+- Stepper: `stepperComplete`
+- DataTable: `dataTableColumns`, `dataTableSelectAll`, `dataTableSelectRow`
+- CodeBlock: `codeBlockCopy`
+- Carousel: `carousel`, `carouselPrevious`, `carouselNext`
+- Carousel.Slide: `carouselSlide`
+- ResizablePanels.Handle: `resizablePanelsHandle`
+- TableOfContents: `tableOfContents`
+- CommandPalette: `commandPalette`, `commandPaletteSearch`, `commandPaletteEmpty`
+- Conversation.Messages: `chat`
+- Conversation.ScrollButton: `scrollToLatest`
+- Reasoning: `reasoning`, `reasoningStreaming`
+- Suggestion.List: `suggestions`
+- PromptInput: `send`, `stop`
+- PromptInput.Attach: `attach`
+- Attachment.List / PromptInput.Attachments: `attachments`
+- PromptInput.Attachments: `attachmentRemove`
+- Attachment.Item / PromptInput.Attachments: `attachmentImage`
+- Source.List: `sources`
+- Message.Actions: `messageActions`
+- Message.Regenerate: `regenerate`
+- Message.Feedback: `feedbackPositive`, `feedbackNegative`
+- ToolInvocation: `toolInput`, `toolOutput`, `toolError`, `toolDenied`, `toolApprovalRequest`, `toolApprove`, `toolDeny`
+- Response: `responseCopied`, `responseCopyCode`, `responseCopyLink`, `responseCopyTable`, `responseCopyTableAsCsv`, `responseCopyTableAsMarkdown`, `responseCopyTableAsTsv`, `responseDownloadDiagram`, `responseDownloadDiagramAsMmd`, `responseDownloadDiagramAsPng`, `responseDownloadDiagramAsSvg`, `responseDownloadFile`, `responseDownloadImage`, `responseDownloadTable`, `responseDownloadTableAsCsv`, `responseDownloadTableAsMarkdown`, `responseExitFullscreen`, `responseViewFullscreen`, `responseImageNotAvailable`, `responseOpenExternalLink`, `responseExternalLinkWarning`, `responseOpenLink`
+
+<!-- /generated:message-keys -->
 
 `fileFieldTrigger` is the button text of an empty `FileField.Dropzone`, and
 with `tabList` it is also what the generative-UI renderers fall back to when a
 spec leaves the trigger text or the tab-list name out.
-
-The `response*` keys label the controls `Response` draws (`@k8ordo/ui/ai/response`):
-`responseCopied`, `responseCopyCode`, `responseCopyLink`, `responseCopyTable`,
-`responseCopyTableAsCsv`, `responseCopyTableAsMarkdown`,
-`responseCopyTableAsTsv`, `responseDownloadDiagram`,
-`responseDownloadDiagramAsMmd`, `responseDownloadDiagramAsPng`,
-`responseDownloadDiagramAsSvg`, `responseDownloadFile`,
-`responseDownloadImage`, `responseDownloadTable`,
-`responseDownloadTableAsCsv`, `responseDownloadTableAsMarkdown`,
-`responseExitFullscreen`, `responseViewFullscreen`,
-`responseImageNotAvailable`, `responseOpenExternalLink`,
-`responseExternalLinkWarning`, `responseOpenLink`.

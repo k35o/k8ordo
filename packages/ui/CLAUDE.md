@@ -232,8 +232,11 @@ when the application has defined no locale set. It is a plain function, not a
 hook, so wording never makes a component a client module:
 `src/components/compound-rsc.test.ts` keeps the ones that only read wording
 (`Spinner`, `Breadcrumb`, `Code`, `Alert`, `Reasoning`, `ToolInvocation`) free
-of `'use client'`. A new key goes into `messages.ts`, `ja.ts`, and `en.ts`;
-there is no provider and no context.
+of `'use client'`. A new key goes into `messages.ts`, `ja.ts`, `en.ts`, and
+`usage.ts` (the components that draw it); there is no provider and no context.
+`pnpm generate:props` writes the key list in `docs/references/components.md`
+from `usage.ts`, and the docs site's i18n page reads it through the exported
+`messageUsage`.
 
 ### Pending state
 
@@ -327,7 +330,7 @@ The authoritative list is the `exports` map in `package.json`.
 
 ```
 @k8ordo/ui                     core UI components and public types (AI chat is under /ai)
-@k8ordo/ui/i18n                ja / en, registerMessages, getMessages, and the Messages type
+@k8ordo/ui/i18n                ja / en, registerMessages, getMessages, messageUsage, and the Messages type
 @k8ordo/ui/ai                  AI chat components
 @k8ordo/ui/ai/response         Response renderer only
 @k8ordo/ui/ai-sdk              AI SDK adapter
