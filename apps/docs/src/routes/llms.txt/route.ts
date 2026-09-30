@@ -21,23 +21,28 @@ const siteIndex = (name: string, raw: string, origin: string): string => {
     );
   }
   const base = `${origin}${docsPathOf(name)}`;
-  return (
-    raw
-      .replace(npmNote, `These docs are served from <${origin}>.`)
-      // npm では手元のファイル名で案内し、サイトでは下に並ぶリンクの名前で案内する
-      .replace('Start with GUIDE.md,', 'Start with the Design Guide,')
-      .replaceAll(/\]\(([^)]+)\)/gu, (link, target: string) => {
-        if (/^https?:/u.test(target)) return link;
-        const url = new URL(target, base);
-        if (!url.pathname.endsWith('.md')) {
-          throw new Error(
-            `${name}'s docs/llms.txt links "${target}", but the site serves only the markdown in docs/`,
-          );
-        }
-        return `](${url.href})`;
-      })
-      .trimEnd()
-  );
+  const section = raw
+    .replace(npmNote, `These docs are served from <${origin}>.`)
+    // npm では手元のファイル名で案内し、サイトでは下に並ぶリンクの名前で案内する
+    .replace('Start with GUIDE.md,', 'Start with the Design Guide,')
+    .replaceAll(/\]\(([^)]+)\)/gu, (link, target: string) => {
+      if (/^https?:/u.test(target)) return link;
+      const url = new URL(target, base);
+      if (!url.pathname.endsWith('.md')) {
+        throw new Error(
+          `${name}'s docs/llms.txt links "${target}", but the site serves only the markdown in docs/`,
+        );
+      }
+      return `](${url.href})`;
+    })
+    .trimEnd();
+  // 言い回しが変わって上の置き換えが空振りしても、黙ってファイル名の案内を残さない
+  if (/(?<![[/])GUIDE\.md/u.test(section)) {
+    throw new Error(
+      `${name}'s docs/llms.txt names GUIDE.md outside a link, and /llms.txt only knows to reword "Start with GUIDE.md,"`,
+    );
+  }
+  return section;
 };
 
 // サイトの URL は書かない。ビルドは site（vite.config.ts）を origin にした request で呼ぶ

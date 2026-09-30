@@ -106,8 +106,10 @@ pnpm check:write       # Oxlint/Oxfmt lint/format auto-fix
   `When installed via npm, …` line for the site's, and points its
   package-relative links at the twins under the request's origin — `site` in
   the build, the dev server's own under `vp dev` — and it throws, failing the
-  build, when `PACKAGES` and the shipped `docs/llms.txt` files disagree, or
-  when an index links to anything but the markdown the twins hold. `src/routes/design.md/route.ts`
+  build, when `PACKAGES` and the shipped `docs/llms.txt` files disagree,
+  when an index links to anything but the markdown the twins hold, or when
+  it names `GUIDE.md` outside a link in words other than
+  `Start with GUIDE.md,` (the one phrasing it rewords for the site). `src/routes/design.md/route.ts`
   builds `@k8ordo/ui`'s design spec from `src/theme/design-tokens.ts`, the
   same token view `/ui/theming` renders, plus the design rationale CSS does
   not hold.
