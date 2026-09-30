@@ -100,6 +100,11 @@ export default defineConfig({
   test: {
     globals: true,
     fsModuleCache: true,
+    // vitest はブラウザのプロジェクトごとに（コア数 - 1）枚のページを開く。
+    // 自分だけが走っている前提の数なので、6 つが同時に走る 4 コアの CI では
+    // WebKit のページが 18 枚並び、描画の更新が 1 秒以上止まって waitFor が
+    // 切れていた。WebKit だけはプロジェクトごとに 1 枚にする。
+    ...(process.env.TEST_BROWSER === 'webkit' && { maxWorkers: 1 }),
     coverage: {
       all: false,
       provider: 'v8',
