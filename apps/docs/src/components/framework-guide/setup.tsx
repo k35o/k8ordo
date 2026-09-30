@@ -43,7 +43,7 @@ export default defineConfig({ plugins: [framework()] });`;
 export function Requirements() {
   return (
     <Bullets>
-      <Bullet>@k8ordo/router</Bullet>
+      <Bullet>@k8ordo/router ^1.0.0</Bullet>
       <Bullet>React &gt;= 19.3.0</Bullet>
       <Bullet>React DOM &gt;= 19.3.0</Bullet>
       <Bullet>Vite &gt;= 8.2.1</Bullet>

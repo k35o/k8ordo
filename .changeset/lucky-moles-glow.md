@@ -1,5 +1,4 @@
 ---
-"@k8ordo/static": patch
 "@k8ordo/server": patch
 ---
 

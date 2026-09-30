@@ -2,7 +2,7 @@
 '@k8ordo/ui': major
 ---
 
-ルートのエントリから hooks を公開しなくなりました。残る hook は、Provider と対になる `useToast` / `usePortalRoot`（ルート）と `useMessages`（`@k8ordo/ui/i18n`）だけです。
+ルートのエントリから hooks を公開しなくなりました。残る hook は、Provider と対になる `useToast` / `usePortalRoot` だけです（`@k8ordo/ui/i18n` の `useMessages` は、hook ではない `getMessages()` に置き換えました。別の changeset を参照）。
 
 公開していた hooks は、いずれも「なぜ UI コンポーネントライブラリにあるのか」を説明できないか、標準 API や `useState` を包んだだけでした。要素の観測（`useInView` / `useIntersectionObserver` / `useResize`）は `InView` / `Resize` コンポーネントに置き換えています（別の changeset を参照）。
 

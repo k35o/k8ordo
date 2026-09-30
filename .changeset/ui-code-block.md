@@ -9,4 +9,4 @@
 - `lang` は shiki が同梱する言語名で、知らない名前は色を付けずに描きます（Markdown のフェンスの言語名をそのまま渡せます）。`title` を渡すと見出しの行に表示します（figure の figcaption）。
 - `marks` で行に `highlight` / `add`（`+`）/ `remove`（`−`）の印を、`callouts` で行の直後に注記（配列なら複数、その行の字下げに揃う）を付けます。コピーされるのは `code` そのものです。
 - `shiki` と `server-only` を `dependencies` に加えました（shiki のオブジェクトはパッケージの外に出ないので、peer にはしていません）。
-- 文言辞書に `codeBlockCopy` / `copied` / `copyFailed` を加えました。
+- 文言辞書に `codeBlockCopy` を加えました（コピーの結果の読み上げは `CopyButton` と同じ `copied` / `copyFailed`）。

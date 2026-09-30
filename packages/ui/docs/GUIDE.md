@@ -126,8 +126,8 @@ Components.
 
 ### Migrating from 2.x
 
-`UIProvider`'s `messages`, `MessagesProvider`, `useMessages`, and
-`dictionaries` are gone.
+`UIProvider`'s `messages`, `useMessages` from `@k8ordo/ui/i18n`, and the root
+entry's `Messages` type are gone.
 
 1. Drop `messages` from `UIProvider`; it stays, for toasts.
 2. The default is English now, not Japanese. An app that rendered in
@@ -140,6 +140,8 @@ Components.
    `registerMessages(locale, messages)`; to change a few keys, spread the
    built-in dictionary (`{ ...ja, close: '閉じる（Esc）' }`).
 4. `useMessages()` becomes `getMessages()`, which needs no `'use client'`.
+   Import the `Messages` type from `@k8ordo/ui/i18n` rather than the root
+   entry.
 
 ## Design direction
 
