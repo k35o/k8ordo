@@ -12,5 +12,5 @@ AI チャットの部品に、ツールの承認・添付・出典・メッセ�
 - **破壊的変更**: `Message.Root` が `avatar` を受け、子要素をアバターの隣に縦に積むようになりました。アバターを子として渡していた場合は `avatar` に移してください（子のままだと本文の上に積まれます）。
 - `Message.Actions` と、その中に置く `Message.Copy` / `Message.Regenerate` / `Message.Feedback` / `Message.Action` を足しました。`Message.Copy` はアイコンだけの `CopyButton` で、文言も `CopyButton` のもの（`copy` / `copied` / `copyFailed`）を使います。
 - 型 `ToolApproval` / `ToolApprovalResponse` / `MessageFeedback` を `@k8ordo/ui/ai` から export します（前の 2 つは `@k8ordo/ui/ai-sdk` からも）。
-- **破壊的変更**: 辞書（`Messages`）に文言を足しました。`registerMessages` で独自の辞書を登録している場合は `attach` / `attachments` / `attachmentRemove` / `attachmentImage` / `sources` / `messageActions` / `regenerate` / `feedbackPositive` / `feedbackNegative` / `toolApprovalRequest` / `toolApprove` / `toolDeny` を足してください。
+- 辞書（`Messages`）に `attach` / `attachments` / `attachmentRemove` / `attachmentImage` / `sources` / `messageActions` / `regenerate` / `feedbackPositive` / `feedbackNegative` / `toolApprovalRequest` / `toolApprove` / `toolDeny` を足しました。
 - `ToolInvocation`（client なのは承認のバーだけ）・`Attachment`・`Source` は Server Component から描けます。

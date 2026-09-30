@@ -114,6 +114,7 @@ function MyComponent() {
         <ul className="text-fg-mute flex flex-col gap-2 pl-6">
           <li className="list-disc">React &gt;= 19.3.0</li>
           <li className="list-disc">React DOM &gt;= 19.3.0</li>
+          <li className="list-disc">@k8ordo/i18n ^1.0.0</li>
           <li className="list-disc">
             Tailwind CSS &gt;= 4.3.3 (optional: tailwind.css)
           </li>

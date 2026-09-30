@@ -257,7 +257,7 @@ export default function StateGetStartedPage() {
               key: 'router',
               cells: [
                 '@k8ordo/router',
-                '^0.2.0',
+                '^1.0.0',
                 <Rich key="needed">{m.stateGetStarted.peerRouter()}</Rich>,
               ],
             },

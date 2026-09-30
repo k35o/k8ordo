@@ -2,7 +2,7 @@
 "@k8ordo/state": minor
 ---
 
-`defineSessionState(key, schema)` を追加。sessionStorage に置く状態で、`defineLocalState` と同じ作りです。
+`defineSessionState(key, schema)` を追加。sessionStorage に置く状態で、`defineLocalState` と同じ作りですが、`version` / `migrate` は取りません。
 
 - 値は sessionStorage の `k8ordo-state:<key>`（定義の `storageKey`）の 1 行に置きます。そのタブのリロードでは残り、タブを閉じると消え、ほかのタブとは共有されません。
 - サルベージ・書き込みのまとめ方・ハンドル・`inlineRead()` は local と同じです。`inlineRead()` は sessionStorage を読みます。

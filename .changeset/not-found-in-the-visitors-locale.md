@@ -1,7 +1,6 @@
 ---
 '@k8ordo/server': patch
 '@k8ordo/static': patch
-'@k8ordo/router': patch
 ---
 
 `/en/missing` のように既定でないロケールの URL の 404 を、その URL のロケールで描くようにした。
@@ -10,4 +9,4 @@
 
 - catch-all に落ちたとき、`not-found.tsx` の上にあるレイアウトのスキーマを params に通す。全部が受理すればその文脈で描くので、`/en/missing` はサーバーの HTML の時点で英語になる。拒まれても（`/fr/missing`）catch-all は答え、これまでどおりどの文脈にも入らずに描く。
 - not-found とレイアウトが受け取る params は文字列のまま。生成される `routes.gen.ts` に `catchAllSchemas` が増える（`paramSchemas` とは別。そちらはページの params とリンクの型になる）。
-- `@k8ordo/router`: `LayoutProps` と GUIDE の「`not-found.tsx` の下では何も検証されない」という説明を、スキーマは走るが拒んでも描かれる、に直した。型は変わらない。
+- `@k8ordo/static` のビルドが書く `404.html` は 1 つで、番兵の pathname で描くので既定のロケールのまま（ブラウザが訪問者の URL で描き直す）。`vite dev` では URL のロケールで描く。
