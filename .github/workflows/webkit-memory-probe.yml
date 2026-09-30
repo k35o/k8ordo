@@ -1,0 +1,113 @@
+name: WebKit memory probe
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    name: Probe (webkit ${{ matrix.shard }} ${{ matrix.rep }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        rep: [1, 2, 3, 4]
+        shard: [1/2, 2/2]
+    env:
+      TEST_BROWSER: webkit
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install
+        uses: ./.github/composite-actions/install
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-webkit-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps webkit
+
+      - name: Machine
+        run: |
+          nproc
+          free -m
+          cat /proc/sys/vm/overcommit_memory
+          swapon --show || true
+
+      - name: Start memory sampler
+        run: |
+          cat > /tmp/sampler.sh <<'EOF'
+          while true; do
+            echo "T $(date +%s) $(free -m | awk 'NR==2{print $3, $7}')"
+            ps -eo pid=,ppid=,rss=,comm= | awk '$3 > 51200 {print "P", $1, $2, $4, "-", $3}'
+            sleep 2
+          done
+          EOF
+          nohup bash /tmp/sampler.sh > /tmp/mem.log 2>&1 &
+
+      - name: Run tests
+        run: pnpm --filter './packages/*' --no-bail --no-sort test --shard=${{ matrix.shard }} --passWithNoTests
+
+      - name: Kernel log
+        if: always()
+        run: sudo dmesg -T | grep -iE 'oom|killed process|out of memory|webkit|wpe' || echo 'nothing in dmesg'
+
+      - name: Memory summary
+        if: always()
+        run: |
+          python3 - <<'EOF'
+          import collections
+          peak = {}
+          label = {}
+          comm = {}
+          first = {}
+          last = {}
+          t0 = None
+          t = 0
+          used = []
+          for line in open('/tmp/mem.log'):
+              f = line.split()
+              if not f:
+                  continue
+              if f[0] == 'T':
+                  t = int(f[1])
+                  if t0 is None:
+                      t0 = t
+                  if len(f) >= 4:
+                      used.append((t - t0, int(f[2]), int(f[3])))
+              elif f[0] == 'P' and len(f) >= 6 and f[5].isdigit():
+                  pid = f[1]
+                  rss = int(f[5]) // 1024
+                  comm[pid] = f[3]
+                  label[pid] = f[4]
+                  if rss > peak.get(pid, (0, 0))[0]:
+                      peak[pid] = (rss, t - t0)
+                  first.setdefault(pid, t - t0)
+                  last[pid] = t - t0
+          print('== used/available MiB over time (every ~20s)')
+          for i, (s, u, a) in enumerate(used):
+              if i % 10 == 0:
+                  print(f'{s:5d}s used={u} avail={a}')
+          print('peak used', max(u for _, u, _ in used), 'min avail', min(a for _, _, a in used))
+          print('== processes by peak RSS (MiB)')
+          for pid, (rss, at) in sorted(peak.items(), key=lambda x: -x[1][0])[:40]:
+              print(f'{pid:>7} {comm[pid]:<16} {label[pid]:<26} peak={rss:>5} at={at:>4}s alive={first[pid]}..{last[pid]}s')
+          EOF
+
+      - name: Upload memory log
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: mem-log-${{ matrix.rep }}-${{ strategy.job-index }}
+          path: /tmp/mem.log
