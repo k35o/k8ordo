@@ -1,7 +1,7 @@
 import * as m from '../messages';
 import type { NavCategory } from './nav-types';
 
-export const componentCategories: NavCategory[] = [
+export const componentCategories = [
   {
     title: m.components.categoryButtons,
     items: [
@@ -387,4 +387,7 @@ export const componentCategories: NavCategory[] = [
       },
     ],
   },
-];
+] as const satisfies readonly NavCategory[];
+
+export type ComponentNavName =
+  (typeof componentCategories)[number]['items'][number]['name'];

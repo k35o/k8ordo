@@ -8,7 +8,7 @@ import { href } from '../links';
 
 type Props = {
   label: string;
-  categories: NavCategory[];
+  categories: readonly NavCategory[];
   onNavigate?: () => void;
 };
 

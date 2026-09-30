@@ -10,7 +10,7 @@ import { CatalogCard } from './catalog-card';
 import { Rich } from './rich';
 
 type Props = {
-  categories: NavCategory[];
+  categories: readonly NavCategory[];
   previews?: Record<string, ReactNode>;
 };
 

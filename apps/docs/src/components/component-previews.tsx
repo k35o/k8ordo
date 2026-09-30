@@ -10,25 +10,34 @@ import {
   Badge,
   Breadcrumb,
   Button,
+  Calendar,
   Card,
   Carousel,
   Checkbox,
   CheckboxCard,
+  CheckboxGroup,
   CloseIcon,
   Code,
   ColorPicker,
   Combobox,
+  ContextMenu,
   CopyButton,
+  CopyIcon,
   DataTable,
+  DateField,
+  DatePicker,
   Dialog,
   DropdownMenu,
   EmptyState,
   FileField,
   Form,
   FormControl,
+  Grid,
   Heading,
   IconButton,
+  InView,
   Kbd,
+  LinkIcon,
   ListBox,
   NumberField,
   Pagination,
@@ -39,7 +48,9 @@ import {
   Progress,
   Radio,
   RadioCard,
+  RangeSlider,
   Select,
+  Resize,
   ResizablePanels,
   Separator,
   SideNav,
@@ -47,6 +58,8 @@ import {
   Slider,
   SparklesIcon,
   Spinner,
+  Stack,
+  Stepper,
   Switch,
   Table,
   TableIcon,
@@ -54,11 +67,14 @@ import {
   Tabs,
   TextField,
   Textarea,
+  Toolbar,
   Tooltip,
   Tree,
 } from '@k8ordo/ui';
 import type { ReactNode } from 'react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+
+import type { ComponentNavName } from '../data/components-nav';
 
 const selectOptions = [
   { label: 'Apple', value: 'apple' },
@@ -95,15 +111,21 @@ const listBoxOptions = [
 ];
 
 /**
- * Decorative, display-only previews keyed by component name (must match the
- * `name` field in components-nav). Rendered inside an `inert` card stage.
+ * Server Components: they cannot render in this client module, so the page
+ * renders them and hands them to the catalog.
+ */
+export type ServerPreviewName = 'CodeBlock';
+
+/**
+ * Decorative, display-only previews keyed by component name. Rendered inside
+ * an `inert` card stage.
  *
  * Most entries render the real component in a representative static state.
  * Transient/overlay components that would otherwise cover the page or require
  * open state (Drawer, Modal, Toast, Popover, DropdownMenu, ...) are shown via
  * their closed trigger instead.
  */
-export const componentPreviews: Record<string, ReactNode> = {
+export const componentPreviews = {
   Button: <Button color="primary">Button</Button>,
   IconButton: (
     <IconButton label="Close">
@@ -111,6 +133,32 @@ export const componentPreviews: Record<string, ReactNode> = {
     </IconButton>
   ),
   CopyButton: <CopyButton size="sm" value="pnpm add @k8ordo/ui" />,
+  Toolbar: (
+    <Toolbar.Root aria-label="Formatting">
+      <Toolbar.Item
+        renderItem={(props) => (
+          <IconButton {...props} label="Copy">
+            <CopyIcon size="sm" />
+          </IconButton>
+        )}
+      />
+      <Toolbar.Item
+        renderItem={(props) => (
+          <IconButton {...props} label="Link">
+            <LinkIcon size="sm" />
+          </IconButton>
+        )}
+      />
+      <Toolbar.Separator />
+      <Toolbar.Item
+        renderItem={(props) => (
+          <Button {...props} size="sm">
+            Save
+          </Button>
+        )}
+      />
+    </Toolbar.Root>
+  ),
   Anchor: (
     <Anchor href="https://example.com" openInNewTab>
       External Link
@@ -146,6 +194,15 @@ export const componentPreviews: Record<string, ReactNode> = {
     </Breadcrumb.List>
   ),
   Pagination: <PaginationPreview />,
+  Stepper: (
+    <div className="w-full">
+      <Stepper
+        aria-label="Sign-up"
+        defaultValue={1}
+        steps={[{ label: 'Cart' }, { label: 'Pay' }, { label: 'Done' }]}
+      />
+    </div>
+  ),
   SideNav: (
     <div className="w-40">
       <SideNav.Root label="SideNav">
@@ -171,6 +228,21 @@ export const componentPreviews: Record<string, ReactNode> = {
   TextField: <TextField placeholder="Enter your name" />,
   Textarea: <Textarea placeholder="Enter text" rows={3} />,
   NumberField: <NumberField placeholder="0" />,
+  DateField: (
+    <div className="w-56">
+      <DateField aria-label="Date" defaultValue="2026-09-30" />
+    </div>
+  ),
+  DatePicker: (
+    <div className="w-56">
+      <DatePicker aria-label="Check-in" defaultValue="2026-09-30" />
+    </div>
+  ),
+  Calendar: (
+    <div className="zoom-[0.5]">
+      <Calendar defaultValue="2026-09-30" />
+    </div>
+  ),
   Select: (
     <Select
       aria-describedby={undefined}
@@ -189,6 +261,21 @@ export const componentPreviews: Record<string, ReactNode> = {
         defaultValue={['comments']}
         options={checkboxCardOptions}
       />
+    </div>
+  ),
+  CheckboxGroup: (
+    <div className="w-full max-w-xs">
+      <p className="text-fg-base mb-2 font-medium" id="preview-checkbox-group">
+        Frameworks
+      </p>
+      <CheckboxGroup.Root
+        aria-labelledby="preview-checkbox-group"
+        defaultValue={['react']}
+        name="preview-frameworks"
+      >
+        <CheckboxGroup.Item itemValue="react" label="React" />
+        <CheckboxGroup.Item itemValue="vue" label="Vue" />
+      </CheckboxGroup.Root>
     </div>
   ),
   Switch: <Switch defaultChecked label="Switch" />,
@@ -230,6 +317,11 @@ export const componentPreviews: Record<string, ReactNode> = {
   Slider: (
     <div className="w-40">
       <Slider defaultValue={60} />
+    </div>
+  ),
+  RangeSlider: (
+    <div className="w-40">
+      <RangeSlider aria-label="Price" defaultValue={[20, 70]} />
     </div>
   ),
   FileField: (
@@ -413,6 +505,23 @@ export const componentPreviews: Record<string, ReactNode> = {
       />
     </Popover.Root>
   ),
+  ContextMenu: (
+    <ContextMenu.Root>
+      <ContextMenu.Trigger
+        renderItem={(props) => (
+          <div
+            {...props}
+            className="border-border-base text-fg-mute grid h-20 w-40 place-items-center rounded-lg border border-dashed text-sm"
+          >
+            report.pdf
+          </div>
+        )}
+      />
+      <ContextMenu.Content>
+        <ContextMenu.Item label="Rename" onAction={() => undefined} />
+      </ContextMenu.Content>
+    </ContextMenu.Root>
+  ),
   DropdownMenu: (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger label="Actions" />
@@ -463,6 +572,24 @@ export const componentPreviews: Record<string, ReactNode> = {
       <Kbd>K</Kbd>
     </span>
   ),
+  Stack: (
+    <div className="w-40">
+      <Stack gap="sm">
+        {['1', '2', '3'].map((item) => (
+          <div className="bg-bg-base h-6 rounded-md shadow-sm" key={item} />
+        ))}
+      </Stack>
+    </div>
+  ),
+  Grid: (
+    <div className="w-40">
+      <Grid cols={3} gap="sm">
+        {['1', '2', '3', '4', '5', '6'].map((item) => (
+          <div className="bg-bg-base h-8 rounded-md shadow-sm" key={item} />
+        ))}
+      </Grid>
+    </div>
+  ),
   Separator: (
     <div className="w-40">
       <Separator color="mute" />
@@ -481,6 +608,8 @@ export const componentPreviews: Record<string, ReactNode> = {
       </ResizablePanels.Root>
     </div>
   ),
+  InView: <InViewPreview />,
+  Resize: <ResizePreview />,
   Icons: (
     <div className="text-fg-base flex gap-3">
       <SparklesIcon size="lg" />
@@ -488,7 +617,7 @@ export const componentPreviews: Record<string, ReactNode> = {
       <AtomIcon size="lg" />
     </div>
   ),
-};
+} satisfies Record<Exclude<ComponentNavName, ServerPreviewName>, ReactNode>;
 
 function PaginationPreview(): ReactNode {
   const [page, setPage] = useState(1);
@@ -507,4 +636,37 @@ function PaginationPreview(): ReactNode {
 
 function PasswordInputPreview(): ReactNode {
   return <PasswordInput defaultValue="password" />;
+}
+
+function InViewPreview(): ReactNode {
+  const [isInView, setIsInView] = useState(false);
+  return (
+    <InView onChange={setIsInView}>
+      <Badge
+        label={isInView ? 'In view' : 'Out of view'}
+        tone={isInView ? 'success' : 'neutral'}
+      />
+    </InView>
+  );
+}
+
+function ResizePreview(): ReactNode {
+  const box = useRef<HTMLDivElement>(null);
+  const [width, setWidth] = useState<number | null>(null);
+  return (
+    <div className="w-full">
+      <Resize
+        onChange={() => {
+          setWidth(box.current?.offsetWidth ?? null);
+        }}
+      >
+        <div
+          className="bg-bg-base text-fg-mute rounded-lg p-4 text-center text-sm tabular-nums shadow-sm"
+          ref={box}
+        >
+          {width === null ? '—' : `${String(width)}px wide`}
+        </div>
+      </Resize>
+    </div>
+  );
 }
