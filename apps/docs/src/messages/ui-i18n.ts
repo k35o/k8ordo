@@ -91,8 +91,8 @@ export const migrationTitle = message({
 });
 
 export const migrationDescription = message({
-  ja: '`UIProvider` の `messages`、`useMessages`、`dictionaries` はなくなりました。手順は次のとおりです。',
-  en: '`UIProvider`’s `messages`, `useMessages` and `dictionaries` are gone. Move over in these steps:',
+  ja: '`UIProvider` の `messages`、`@k8ordo/ui/i18n` の `useMessages`、ルートの `Messages` 型はなくなりました。手順は次のとおりです。',
+  en: '`UIProvider`’s `messages`, `useMessages` from `@k8ordo/ui/i18n` and the root entry’s `Messages` type are gone. Move over in these steps:',
 });
 
 export const migrationProvider = message({
@@ -111,8 +111,8 @@ export const migrationRegister = message({
 });
 
 export const migrationRead = message({
-  ja: "`useMessages()` は `getMessages()` に置き換えます。hook ではないので、呼ぶための `'use client'` は要らなくなります。",
-  en: "Replace `useMessages()` with `getMessages()`. It is not a hook, so it needs no `'use client'` of its own.",
+  ja: "`useMessages()` は `getMessages()` に置き換えます。hook ではないので、呼ぶための `'use client'` は要らなくなります。ルートから import していた `Messages` 型は `@k8ordo/ui/i18n` から import します。",
+  en: "Replace `useMessages()` with `getMessages()`. It is not a hook, so it needs no `'use client'` of its own. Import the `Messages` type from `@k8ordo/ui/i18n` rather than the root entry.",
 });
 
 export const keysTitle = message({

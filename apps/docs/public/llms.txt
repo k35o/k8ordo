@@ -585,7 +585,10 @@ These docs are served from <https://ordo.k8o.me>.
   cookie? })` chooses for a `Request` — the named cookie (the visitor's
   earlier choice) first, then `Accept-Language` — through the same rule as
   `negotiate`. `parseAcceptLanguage(header)` turns an `Accept-Language`
-  header into a preference list. `message(variants)`
+  header into a preference list. `currentLocale()` returns the current locale as the
+  defined set resolves it — the one named, else the set's default — or `null`
+  where no set is defined in that environment; it is for a library rendering
+  inside an application it does not know (`@k8ordo/ui`'s built-in text). `message(variants)`
   declares one message — text in every locale, or a function of the same
   parameters in every locale — and returns `Message<Args>`, a function that
   renders the current locale's text. Types: `Locales`, `LocaleOf`, `LocaleDefinition`, `IntlFormats`, `LocaleDateTimeFormatOptions`, `Message`,
