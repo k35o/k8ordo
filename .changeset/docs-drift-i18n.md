@@ -4,6 +4,7 @@
 
 同梱ドキュメントを実装に追従させました。
 
-- `@k8ordo/server` でもページの描画中にはリダイレクトできないので、`/` の振り分けをサーバーでするには手前のプロキシかホストが要る、と直しました。
-- `@k8ordo/ui` との組み合わせを `dictionaries[locale]` で書くようにしました。`@k8ordo/form` の文言は `{ error: m.x }` で渡し、`formFields` は描画中に、`parseForm` は `locales.run` の中で呼ぶ、と書いています。
-- `locales.paths` が `:locale` 以外の param を持つパターンをどう扱うか、`localize` が既にロケールを持つパスを検査しないこと、テストでの注意（最後の `defineLocales` が勝つ、など）を実装どおりに書きました。
+- `localize` は、渡されたパスが既にロケールを持つかを検査しない（`localize('/en/ui', 'ja')` は `'/ja/en/ui'`）と書きました。
+- `parseAcceptLanguage` は数でない `q` を無視し、0 以下の重み（空の `q=` を含む）を捨てる、と書きました。関数の文言では、全ロケールの変種に同じ引数を宣言する（使わないものは `_count` のように）と書きました。
+- Testing に、最後に呼んだ `defineLocales` が文言の読む集合になること、ブラウザ環境では `run` が throw すること、`document` を定義する jsdom・happy-dom もブラウザ環境に数えられることを書きました。
+- README に、サーバーのロケールは `process.getBuiltinModule` から得る `AsyncLocalStorage` に載るので、サーバー側のランタイムがその API を持つ必要がある、と書きました。
