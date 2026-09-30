@@ -1,19 +1,8 @@
 /**
- * Copies each package's markdown docs into `apps/docs/public/` so the site
- * serves them verbatim as markdown twins of the HTML pages.
- *
- * Single source of truth, one mapping per package:
- *   packages/ui/docs/**\/*.md    ──(this)──► public/docs/**\/*.md
- *   packages/form/docs/**\/*.md  ──(this)──► public/form/docs/**\/*.md
- *   packages/state/docs/**\/*.md ──(this)──► public/state/docs/**\/*.md
- *   packages/router/docs/**\/*.md ─(this)──► public/router/docs/**\/*.md
- *   packages/static/docs/**\/*.md ─(this)──► public/static/docs/**\/*.md
- *   packages/server/docs/**\/*.md ─(this)──► public/server/docs/**\/*.md
- *   packages/i18n/docs/**\/*.md ──(this)──► public/i18n/docs/**\/*.md
- *   packages/color-scheme/docs/**\/*.md ─(this)──► public/color-scheme/docs/**\/*.md
- *
- * `@k8ordo/ui` predates the package-first URL rule and keeps `/docs/…` so its
- * published links stay alive; every later package lives under `/<package>/…`.
+ * Copies the markdown in every package that ships `docs/` into
+ * `apps/docs/public/`, so the site serves it verbatim as markdown twins:
+ *   packages/<name>/docs/**\/*.md ──(this)──► public/<name>/docs/**\/*.md
+ *   packages/ui/docs/**\/*.md     ──(this)──► public/docs/**\/*.md
  *
  * The copies are generated, never committed (see the root `.gitignore`). Links
  * inside the docs are package-relative (`references/typography.md`), and they
@@ -21,41 +10,35 @@
  *
  *   node scripts/copy-reference-docs.ts
  */
-import { cp, mkdir, readdir, rm } from 'node:fs/promises';
+import { cp, glob, readFile, rm } from 'node:fs/promises';
+import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const MAPPINGS = [
-  { out: '../public/docs/', src: '../../../packages/ui/docs/' },
-  { out: '../public/form/docs/', src: '../../../packages/form/docs/' },
-  { out: '../public/state/docs/', src: '../../../packages/state/docs/' },
-  { out: '../public/router/docs/', src: '../../../packages/router/docs/' },
-  { out: '../public/static/docs/', src: '../../../packages/static/docs/' },
-  { out: '../public/server/docs/', src: '../../../packages/server/docs/' },
-  { out: '../public/i18n/docs/', src: '../../../packages/i18n/docs/' },
-  {
-    out: '../public/color-scheme/docs/',
-    src: '../../../packages/color-scheme/docs/',
-  },
-];
+import { docsPathOf, shipsDocs } from '../src/data/shipped-docs.ts';
+import type { Manifest } from '../src/data/shipped-docs.ts';
 
-const counts = await Promise.all(
-  MAPPINGS.map(async (mapping) => {
-    const src = fileURLToPath(new URL(mapping.src, import.meta.url));
-    const out = fileURLToPath(new URL(mapping.out, import.meta.url));
+const root = fileURLToPath(new URL('../../../', import.meta.url));
+const publicDir = fileURLToPath(new URL('../public/', import.meta.url));
 
-    await rm(out, { force: true, recursive: true });
-    await mkdir(out, { recursive: true });
+// 載せなくなったパッケージの twin も残さないよう、写す前に全部消す
+for await (const twins of glob(['docs', '*/docs'], { cwd: publicDir })) {
+  await rm(join(publicDir, twins), { force: true, recursive: true });
+}
 
-    await cp(src, out, {
-      recursive: true,
-      filter: (source) =>
-        !source.endsWith('.txt') && !source.endsWith('props.generated.json'),
-    });
+let copied = 0;
+for await (const manifestPath of glob('packages/*/package.json', {
+  cwd: root,
+})) {
+  const manifest = JSON.parse(
+    await readFile(join(root, manifestPath), 'utf8'),
+  ) as Manifest;
+  if (!shipsDocs(manifest)) continue;
 
-    const copied = await readdir(out, { recursive: true });
-    return copied.filter((name) => name.endsWith('.md')).length;
-  }),
-);
-console.warn(
-  `Copied ${counts.reduce((sum, count) => sum + count, 0)} markdown docs into public/`,
-);
+  const src = join(root, dirname(manifestPath), 'docs');
+  const out = join(publicDir, docsPathOf(manifest.name));
+  for await (const file of glob('**/*.md', { cwd: src })) {
+    await cp(join(src, file), join(out, file));
+    copied += 1;
+  }
+}
+console.warn(`Copied ${String(copied)} markdown docs into public/`);

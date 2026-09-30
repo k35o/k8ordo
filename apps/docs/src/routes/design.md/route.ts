@@ -1,38 +1,29 @@
-/**
- * Generates `apps/docs/public/design.md` — the machine-readable design-system
- * spec served at `https://ordo.k8o.me/design.md`.
- *
- * Single source of truth:
- *   index.css ──tailwind-token-extractor──► tokens.generated.ts ──(this)──► design.md
- *
- * Token VALUES are read straight from the committed `tokens.generated.ts`
- * (a dependency-free literal, so this runs without building the package).
- * Only design rationale that does not exist in CSS is authored here. The
- * derivation mirrors `apps/docs/src/theme/design-tokens.ts`.
- *
- *   node scripts/generate-design-md.ts            # write public/design.md
- *   node scripts/generate-design-md.ts --check    # fail if the file is stale
- */
-import { readFile, writeFile } from 'node:fs/promises';
-import { fileURLToPath } from 'node:url';
+import type { RouteContext } from '@k8ordo/router';
+import { tokens } from '@k8ordo/ui/tokens';
 
-import { tokens } from '../../../packages/ui/src/styles/tokens.generated.ts';
+import {
+  BG_TOKENS,
+  BORDER_TOKENS,
+  BREAKPOINTS,
+  FG_TOKENS,
+  FONT_WEIGHTS,
+  GROUP_TOKENS,
+  INSET_SHADOWS,
+  LETTER_SPACINGS,
+  LINE_HEIGHTS,
+  PALETTE,
+  PRIMARY_TOKENS,
+  RADII,
+  SECONDARY_TOKENS,
+  SHADES,
+  SHADOWS,
+  TEXT_SIZES,
+  Z_INDICES,
+} from '../../theme/design-tokens';
+import type { NamedScale, SemanticToken } from '../../theme/design-tokens';
 
-const OUT_PATH = fileURLToPath(new URL('../public/design.md', import.meta.url));
-
-type Scalar = string | number;
-type VarValue = Scalar | { light: Scalar; dark: Scalar };
-
-const VARS = tokens.vars as Record<string, VarValue>;
-const THEME = tokens.theme as unknown as Record<
-  string,
-  Record<string, unknown>
->;
-const REFS = tokens.refs as Record<string, { light: string; dark: string }>;
-
-// ── authored knowledge (not derivable from CSS) ────────────────────────────
-
-/** Purpose of each lightness step, keyed by shade number. */
+// Token values come from design-tokens.ts; only the design rationale that
+// does not exist in CSS is written here.
 const SHADE_PURPOSE: Record<number, string> = {
   50: '最も薄い背景',
   100: '薄い背景',
@@ -47,7 +38,6 @@ const SHADE_PURPOSE: Record<number, string> = {
   950: '反転背景・最暗部',
 };
 
-/** Semantic role of each hue family, keyed by palette prefix. */
 const FAMILY_ROLE: Record<string, string> = {
   gray: 'ニュートラル（sky blue tint・低彩度）',
   red: 'error',
@@ -61,62 +51,12 @@ const FAMILY_ROLE: Record<string, string> = {
   orange: '—',
 };
 
-// ── derivation (mirrors apps/docs/src/theme/design-tokens.ts) ───────────────
-
-const scalar = (v: VarValue): string =>
-  typeof v === 'object' ? String(v.light) : String(v);
-const reqVar = (key: string): string => {
-  const value = VARS[key];
-  if (value === undefined) {
-    throw new Error(`design.md: missing CSS variable --${key}`);
-  }
-  return scalar(value);
-};
-const isColor = (s: string): boolean => /^(oklch|rgb|hsl|#)/iu.test(s);
 const oklchParts = (s: string): [string, string, string] => {
   const inner = /^oklch\(([^)]*)\)/iu.exec(s.trim())?.[1] ?? '';
   const [l = '', c = '', h = ''] = inner.trim().split(/\s+/u);
   return [l, c, h];
 };
 
-type Family = { prefix: string; hue: string; shades: Map<number, string> };
-
-const PALETTE_RE = /^([a-z]+)-(\d+)$/u;
-const families: Family[] = [];
-const familyByPrefix = new Map<string, Family>();
-const shadeSet = new Set<number>();
-for (const [name, value] of Object.entries(VARS)) {
-  const m = PALETTE_RE.exec(name);
-  const prefix = m?.[1];
-  const shadeStr = m?.[2];
-  if (prefix === undefined || shadeStr === undefined) continue;
-  const shade = Number(shadeStr);
-  const color = scalar(value);
-  if (!isColor(color)) continue;
-  shadeSet.add(shade);
-  let family = familyByPrefix.get(prefix);
-  if (!family) {
-    family = { prefix, hue: oklchParts(color)[2], shades: new Map() };
-    familyByPrefix.set(prefix, family);
-    families.push(family);
-  }
-  family.shades.set(shade, color);
-}
-const SHADES = Array.from(shadeSet).toSorted((a, b) => a - b);
-
-const refsByPrefix = (
-  prefix: string,
-): Array<[string, { light: string; dark: string }]> =>
-  Object.entries(REFS).filter(([name]) => name.startsWith(prefix));
-
-const namedScale = (
-  group: Record<string, unknown> | undefined,
-): Array<[string, string]> =>
-  Object.entries(group ?? {}).map(([name, v]) => [name, String(v)]);
-
-// ── markdown helpers ────────────────────────────────────────────────────────
-
-const cap = (s: string): string => s.charAt(0).toUpperCase() + s.slice(1);
 const table = (headers: string[], rows: string[][]): string => {
   const head = `| ${headers.join(' | ')} |`;
   const sep = `| ${headers.map(() => '---').join(' | ')} |`;
@@ -124,83 +64,70 @@ const table = (headers: string[], rows: string[][]): string => {
   return `${head}\n${sep}\n${body}`;
 };
 
-// ── token tables ────────────────────────────────────────────────────────────
-
+// L is shared across every family by design, so gray's stands for all of them
 const lightnessTable = (): string => {
-  // gray — L is shared across all families by design
-  const ref = families[0];
-  const rows = SHADES.map((shade) => [
-    String(shade),
-    ref ? oklchParts(ref.shades.get(shade) ?? '')[0] : '',
-    SHADE_PURPOSE[shade] ?? '',
-  ]);
-  return table(['Step', 'L', '意図'], rows);
+  const [gray] = PALETTE;
+  return table(
+    ['Step', 'L', '意図'],
+    SHADES.map((shade) => [
+      String(shade),
+      oklchParts(gray.shades[shade])[0],
+      SHADE_PURPOSE[shade] ?? '',
+    ]),
+  );
 };
 
 const hueTable = (): string =>
   table(
     ['色相', 'H', '役割'],
-    families.map((f) => [cap(f.prefix), f.hue, FAMILY_ROLE[f.prefix] ?? '']),
+    PALETTE.map((family) => [
+      family.name,
+      String(family.hue),
+      FAMILY_ROLE[family.prefix] ?? '',
+    ]),
   );
 
-const paletteMatrix = (): string => {
-  const headers = ['Step'];
-  for (const f of families) {
-    headers.push(`${cap(f.prefix)}·${f.hue}`);
-  }
-  const rows = SHADES.map((shade) => {
-    const row = [String(shade)];
-    for (const f of families) {
-      const [l, c] = oklchParts(f.shades.get(shade) ?? '');
-      row.push(`\`${l} ${c}\``);
-    }
-    return row;
-  });
-  return table(headers, rows);
-};
+const paletteMatrix = (): string =>
+  table(
+    [
+      'Step',
+      ...PALETTE.map((family) => `${family.name}·${String(family.hue)}`),
+    ],
+    SHADES.map((shade) =>
+      [String(shade)].concat(
+        PALETTE.map((family) => {
+          const [l, c] = oklchParts(family.shades[shade]);
+          return `\`${l} ${c}\``;
+        }),
+      ),
+    ),
+  );
 
-const semanticTable = (prefix: string): string =>
+const semanticTable = (entries: readonly SemanticToken[]): string =>
   table(
     ['Token', 'Light', 'Dark'],
-    refsByPrefix(prefix).map(([name, ref]) => [
-      `\`${name}\``,
-      ref.light,
-      ref.dark,
-    ]),
+    entries.map(({ name, light, dark }) => [`\`${name}\``, light, dark]),
   );
 
 const scaleTable = (
   headers: string[],
-  entries: Array<[string, string]>,
+  entries: readonly NamedScale[],
   fmt: (name: string, value: string) => string[],
 ): string =>
   table(
     headers,
-    entries.map(([n, v]) => fmt(n, v)),
+    entries.map(({ name, value }) => fmt(name, value)),
   );
 
-// ── compose ─────────────────────────────────────────────────────────────────
-
-function build(): string {
-  const text = THEME.text as Record<
-    string,
-    { value: string; lineHeightNumber?: number; lineHeight: Scalar }
-  >;
-  const textRows = Object.entries(text).map(([name, t]) => [
+const build = (): string => {
+  const textRows = TEXT_SIZES.map(({ name, fontSize, lineHeight }) => [
     `\`text-${name}\``,
-    t.value,
-    String(t.lineHeightNumber ?? t.lineHeight),
+    fontSize,
+    String(lineHeight),
   ]);
-
-  const zRows = Object.entries(VARS)
-    .filter(([n]) => n.startsWith('z-'))
-    .map(([n, v]) => [`\`${n}\``, scalar(v)]);
+  const zRows = Z_INDICES.map(({ name, value }) => [`\`z-${name}\``, value]);
 
   return `${[
-    `<!-- AUTO-GENERATED by apps/docs/scripts/generate-design-md.ts — DO NOT EDIT BY HAND.
-     Token values come from the design-system SSOT (tokens.generated.ts ← index.css).
-     Regenerate: pnpm --filter docs generate:design -->`,
-
     `# k8ordo UI Design System`,
 
     `\`@k8ordo/ui\` のデザインシステム仕様。デザイントークン・タイポグラフィ・コンポーネントの単一の参照元です。人間にも LLM／エージェントにも読めるよう、\`https://ordo.k8o.me/design.md\` として配信しています（人向けのトークン一覧は \`https://ordo.k8o.me/ja/ui/theming\`）。
@@ -243,7 +170,7 @@ function build(): string {
 
     `### 生パレット（OKLCH）
 
-各セルは \`L C\`（H は色相表の通り）。\`--white: ${reqVar('white')}\`。`,
+各セルは \`L C\`（H は色相表の通り）。\`--white: ${tokens.vars.white}\`。`,
     paletteMatrix(),
 
     `### セマンティックトークン
@@ -251,19 +178,19 @@ function build(): string {
 UI では必ず以下のトークンを使う（\`{prefix}-{token}\`、例: \`text-fg-base\`, \`bg-bg-subtle\`, \`border-border-mute\`）。Light / Dark はそのモードでエイリアスするパレット段階。
 
 #### Foreground（テキスト）`,
-    semanticTable('fg-'),
+    semanticTable(FG_TOKENS),
     `#### Background（サーフェス）`,
-    semanticTable('bg-'),
+    semanticTable(BG_TOKENS),
     `#### Border`,
-    semanticTable('border-'),
+    semanticTable(BORDER_TOKENS),
     `#### Primary（Teal）`,
-    semanticTable('primary-'),
+    semanticTable(PRIMARY_TOKENS),
     `#### Secondary（Cyan）`,
-    semanticTable('secondary-'),
+    semanticTable(SECONDARY_TOKENS),
     `#### Group（データ可視化）`,
-    semanticTable('group-'),
+    semanticTable(GROUP_TOKENS),
 
-    `その他: \`back-drop\`（\`${reqVar('back-drop')}\` オーバーレイ）, \`transparent\`。`,
+    `その他: \`back-drop\`（\`${tokens.vars['back-drop']}\` オーバーレイ）, \`transparent\`。`,
 
     `### ダークモード
 
@@ -291,18 +218,15 @@ font-family: 'Noto Sans JP', 'M PLUS 2', sans-serif;
     table(['Token', 'size', 'line-height'], textRows),
 
     `### ウェイト`,
-    scaleTable(['Token', '値'], namedScale(THEME['font-weight']), (n, v) => [
-      `\`font-${n}\``,
-      v,
-    ]),
+    scaleTable(['Token', '値'], FONT_WEIGHTS, (n, v) => [`\`font-${n}\``, v]),
     `\`font-normal\` (400) も使用。\`font-semibold\` (600) / \`font-extrabold\` (800) は使わない。\`font-medium\` は **450**（一般の 500 より軽い）。1 画面で 3 種類を超えて使わない。`,
 
     `### 行間 / 字間`,
-    scaleTable(['leading', '値'], namedScale(THEME.leading), (n, v) => [
+    scaleTable(['leading', '値'], LINE_HEIGHTS, (n, v) => [
       `\`leading-${n}\``,
       v,
     ]),
-    scaleTable(['tracking', '値'], namedScale(THEME.tracking), (n, v) => [
+    scaleTable(['tracking', '値'], LETTER_SPACINGS, (n, v) => [
       `\`tracking-${n}\``,
       v,
     ]),
@@ -328,10 +252,11 @@ font-family: 'Noto Sans JP', 'M PLUS 2', sans-serif;
     `余白の差で関連度を表す（近い \`mt-2\` / 標準 \`mt-4\` / セクション間 \`mt-8\` / ページ間 \`mt-12\`）。カード間は \`gap-6\`、縦セクションは \`gap-8\`〜\`gap-10\`。`,
 
     `### ブレークポイント`,
-    scaleTable(['Token', '値'], namedScale(THEME.breakpoint), (n, v) => [
-      `\`${n}\``,
-      v,
-    ]),
+    scaleTable(
+      ['Token', '値'],
+      BREAKPOINTS.map(({ name, rem }) => ({ name, value: rem })),
+      (n, v) => [`\`${n}\``, v],
+    ),
 
     `### ページ構造
 
@@ -340,10 +265,7 @@ font-family: 'Noto Sans JP', 'M PLUS 2', sans-serif;
 カスタムユーティリティ: \`grid-cols-auto-fill-*\` / \`grid-cols-auto-fit-*\`（レスポンシブ列）, \`writing-h\` / \`writing-v\`（縦書き）, \`z-overlay\` / \`z-modal\` / \`z-toast\`。`,
 
     `## 角丸`,
-    scaleTable(['Token', '値'], namedScale(THEME.radius), (n, v) => [
-      `\`rounded-${n}\``,
-      v,
-    ]),
+    scaleTable(['Token', '値'], RADII, (n, v) => [`\`rounded-${n}\``, v]),
     `要素の性格で使い分ける（「触れるものは柔らかく、読むものは端正に」）:
 
 | 用途 | 角丸 |
@@ -356,11 +278,11 @@ font-family: 'Noto Sans JP', 'M PLUS 2', sans-serif;
     `## エレベーション（シャドウ）
 
 ふんわり柔らかい影で奥行きを表現する。\`shadow-xl\` 以上は使わない。`,
-    scaleTable(['Token', '値'], namedScale(THEME.shadow), (n, v) => [
+    scaleTable(['Token', '値'], SHADOWS, (n, v) => [
       `\`shadow-${n}\``,
       `\`${v}\``,
     ]),
-    scaleTable(['inset', '値'], namedScale(THEME['inset-shadow']), (n, v) => [
+    scaleTable(['inset', '値'], INSET_SHADOWS, (n, v) => [
       `\`inset-shadow-${n}\``,
       `\`${v}\``,
     ]),
@@ -523,23 +445,10 @@ import { UIProvider } from '@k8ordo/ui';
 - Docs: <https://ordo.k8o.me>
 - npm: \`@k8ordo/ui\``,
   ].join('\n\n')}\n`;
-}
+};
 
-// ── entry ───────────────────────────────────────────────────────────────────
-
-const md = build();
-
-if (process.argv.includes('--check')) {
-  const current = await readFile(OUT_PATH, 'utf8').catch(() => '');
-  if (current !== md) {
-    process.stderr.write(
-      'design.md is out of sync with the design tokens.\n' +
-        'Fix with: pnpm --filter docs generate:design\n',
-    );
-    process.exit(1);
-  }
-  process.stdout.write('design.md is in sync.\n');
-} else {
-  await writeFile(OUT_PATH, md);
-  process.stdout.write(`Wrote ${OUT_PATH}\n`);
+export function GET(_context: RouteContext<'/design.md'>) {
+  return new Response(build(), {
+    headers: { 'content-type': 'text/markdown; charset=utf-8' },
+  });
 }
