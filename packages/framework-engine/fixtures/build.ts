@@ -13,6 +13,7 @@ export type BuiltFixture = {
   readonly handler: Handler;
   /** Where the build went: `rsc/`, `ssr/` and `client/` below it. */
   readonly out: string;
+  /** Removes the build, once every request the handler took is answered. */
   readonly dispose: () => Promise<void>;
 };
 
@@ -55,10 +56,19 @@ export const buildFixture = async (name: string): Promise<BuiltFixture> => {
   const { default: handler } = (await import(
     pathToFileURL(path.join(out, 'rsc', 'index.js')).href
   )) as { default: Handler };
+  const answers: Array<Promise<Response>> = [];
   return {
-    handler,
+    handler: (request) => {
+      const answer = handler(request);
+      answers.push(answer);
+      return answer;
+    },
     out,
     dispose: async () => {
+      // 打ち切られたテストのリクエストは、まだ答えている途中のことがある。
+      // 先に出力を消すと、その描画が読みに行ったチャンクが見つからず、
+      // 打ち切りの隣に「Cannot find module」が並んで出力が壊れたように見える
+      await Promise.allSettled(answers);
       await rm(runtimeDir, { recursive: true, force: true });
       await rm(out, { recursive: true, force: true });
     },
