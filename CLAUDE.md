@@ -37,7 +37,7 @@ English, because an AI coding assistant consumes it directly:
 - `CLAUDE.md` / `AGENTS.md` at every level
 - `packages/*/docs/**` — shipped inside every npm package and read out of `node_modules/@k8ordo/<name>/docs/`
 - `.claude/skills/**`
-- Any string a generator writes into those files (see `packages/ui/scripts/generate-components-md.ts`)
+- Any string a generator writes into those files (see `packages/ui/scripts/generate-component-docs.ts`)
 
 Japanese is fine elsewhere: commit messages, PR and issue text, code comments,
 tooling output meant for a developer, and the documentation site's own copy

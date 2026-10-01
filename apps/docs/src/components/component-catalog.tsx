@@ -2,17 +2,21 @@
 
 import type { ReactNode } from 'react';
 
-import { componentCategories } from '../data/components-nav';
+import { componentCategoriesOf } from '../data/components-nav';
+import type { ComponentGroups } from '../data/components-nav';
 import { CatalogSections } from './catalog-sections';
 import { componentPreviews } from './component-previews';
 import type { ServerPreviewName } from './component-previews';
 
-type Props = { serverPreviews: Record<ServerPreviewName, ReactNode> };
+type Props = {
+  groups: ComponentGroups;
+  serverPreviews: Record<ServerPreviewName, ReactNode>;
+};
 
-export function ComponentCatalog({ serverPreviews }: Props) {
+export function ComponentCatalog({ groups, serverPreviews }: Props) {
   return (
     <CatalogSections
-      categories={componentCategories}
+      categories={componentCategoriesOf(groups)}
       previews={{ ...componentPreviews, ...serverPreviews }}
     />
   );

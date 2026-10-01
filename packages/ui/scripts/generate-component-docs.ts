@@ -1,22 +1,15 @@
 /**
- * Rewrites the `Props:` blocks inside `docs/references/components.md` from
- * `docs/props.generated.json`, and the `Messages` key list between its
- * `<!-- generated:message-keys -->` markers from `src/i18n/usage.ts`.
- *
- * Only those lists are generated. The prose and the code examples around
- * them stay hand-written, because they carry judgement the types do not.
+ * Writes the generated parts of `docs/references/components.md` (where each
+ * component section sits, its `Props:` block, the icon list, the `Messages`
+ * key list) and the README's component list, from
+ * `docs/props.generated.json` and `src/i18n/usage.ts`. The prose and the
+ * examples stay hand-written, because they carry judgement the types do not.
  * `ai-chat.md` is deliberately left out: its props bullets group controllable
  * props and describe pass-through behavior, which the generated form would
  * flatten away.
  *
- * Both modes also fail when a component is missing from the hand-written
- * lists: a section in `components.md` (or `ai-chat.md`), the icon list in
- * `components.md`, and a bullet in the README. The README tells agents that a
- * component `components.md` does not list does not exist, so a component left
- * out is one no agent will use.
- *
- *   node scripts/generate-components-md.ts            # rewrite the blocks
- *   node scripts/generate-components-md.ts --check    # fail if any block is stale
+ *   node scripts/generate-component-docs.ts            # rewrite both files
+ *   node scripts/generate-component-docs.ts --check    # fail if either is stale
  */
 import { readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
@@ -24,6 +17,7 @@ import { fileURLToPath } from 'node:url';
 import { en } from '../src/i18n/en.ts';
 import type { Messages } from '../src/i18n/messages.ts';
 import { messageUsage } from '../src/i18n/usage.ts';
+import { fillGenerated, regroupSections, wrap } from './component-docs.ts';
 
 const DOC_PATH = fileURLToPath(
   new URL('../docs/references/components.md', import.meta.url),
@@ -36,6 +30,22 @@ const AI_CHAT_PATH = fileURLToPath(
 );
 const README_PATH = fileURLToPath(new URL('../README.md', import.meta.url));
 
+const CATEGORIES = new Map([
+  ['buttons', 'Buttons'],
+  ['navigation', 'Navigation'],
+  ['form', 'Forms'],
+  ['data-display', 'Data display'],
+  ['feedback', 'Feedback'],
+  ['overlays', 'Overlays'],
+  ['layout', 'Layout'],
+  ['observers', 'Observers'],
+  ['icons', 'Icons'],
+  ['providers', 'Providers'],
+]);
+// Documented in ai-chat.md and a hand-written README section, whose bullets
+// carry each component's parts.
+const AI_CATEGORY = 'ai';
+
 type Prop = {
   name: string;
   types: string[];
@@ -44,6 +54,7 @@ type Prop = {
 };
 type Component = {
   name: string;
+  category: string;
   props: Prop[];
   inherits: string | null;
   omitted: string[];
@@ -53,9 +64,23 @@ const { components } = JSON.parse(await readFile(PROPS_PATH, 'utf8')) as {
   components: Component[];
 };
 const byName = new Map(components.map((c) => [c.name, c]));
+const topLevel = (name: string) => name.split('.')[0] ?? '';
+const categoryOfTopLevel = new Map(
+  components.map((c) => [topLevel(c.name), c.category]),
+);
 
 /** Icons are covered as a group, not one section each. */
 const iconish = (name: string) => name.endsWith('Icon') || name === 'Logo';
+
+const unknownCategories = [
+  ...new Set(components.map((c) => c.category)),
+].filter((category) => category !== AI_CATEGORY && !CATEGORIES.has(category));
+if (unknownCategories.length > 0) {
+  console.error(
+    `CATEGORIES に見出しの無いフォルダ: ${unknownCategories.join(', ')}`,
+  );
+  process.exit(1);
+}
 
 const renderProps = (component: Component): string[] => {
   const except =
@@ -84,7 +109,9 @@ const renderProps = (component: Component): string[] => {
 };
 
 const source = await readFile(DOC_PATH, 'utf8');
-const lines = source.split('\n');
+const lines = regroupSections(source, CATEGORIES, (name) =>
+  categoryOfTopLevel.get(name),
+).split('\n');
 const out: string[] = [];
 
 let heading: string | null = null;
@@ -154,6 +181,15 @@ for (let i = 0; i < lines.length; i++) {
   i = j - 1;
 }
 
+const renderIcons = (): string => {
+  const icons = components
+    .filter((c) => c.category === 'icons' && c.name.endsWith('Icon'))
+    .map(
+      (c, index, all) => `\`${c.name}\`${index === all.length - 1 ? '.' : ','}`,
+    );
+  return wrap(['The', 'icons:', ...icons]);
+};
+
 /** A key whose text carries `{min}` gets that noted, since a translation keeps it. */
 const keyLabel = (key: keyof Messages): string => {
   const placeholders = [...en[key].matchAll(/\{\w+\}/gu)].map(
@@ -164,7 +200,6 @@ const keyLabel = (key: keyof Messages): string => {
   return `\`${key}\` (${placeholders.join(' and ')} ${verb} replaced)`;
 };
 
-/** One bullet per set of components, in the order the keys are declared. */
 const renderMessageKeys = (): string => {
   const rows = new Map<string, string[]>();
   for (const key of Object.keys(messageUsage) as Array<keyof Messages>) {
@@ -176,34 +211,47 @@ const renderMessageKeys = (): string => {
     .join('');
 };
 
-const fillGenerated = (
-  markdown: string,
-  name: string,
-  body: string,
-): string => {
-  const pattern = new RegExp(
-    `<!-- generated:${name} -->\\n[\\s\\S]*?<!-- /generated:${name} -->\\n`,
-    'gu',
-  );
-  const found = markdown.match(pattern)?.length ?? 0;
-  if (found !== 1) {
-    throw new Error(
-      `components.md: <!-- generated:${name} --> must appear exactly once, found ${String(found)}`,
-    );
-  }
-  // The formatter keeps a blank line after the opening marker; writing the
-  // formatted shape is what lets `--check` compare text.
-  return markdown.replace(
-    pattern,
-    () =>
-      `<!-- generated:${name} -->\n\n${body}\n<!-- /generated:${name} -->\n`,
-  );
-};
+const renderReadmeCategories = (): string =>
+  [...CATEGORIES]
+    .filter(([category]) => components.some((c) => c.category === category))
+    .map(([category, title]) => {
+      const names = [
+        ...new Set(
+          components
+            .filter((c) => c.category === category)
+            .map((c) => topLevel(c.name)),
+        ),
+      ];
+      const bullets =
+        category === 'icons'
+          ? [
+              '- [Icons](docs/references/components.md#icons) — decorative icon components (`CloseIcon`, `ChevronIcon`, …)',
+            ]
+          : names.map(
+              (name) =>
+                `- [${name}](docs/references/components.md#${name.toLowerCase()})`,
+            );
+      return `### ${title}\n\n${bullets.join('\n')}\n`;
+    })
+    .join('\n');
 
-const output = fillGenerated(
+const output = (
+  [
+    ['icons', renderIcons()],
+    ['message-keys', renderMessageKeys()],
+  ] as const
+).reduce(
+  (markdown, [name, body]) =>
+    fillGenerated('components.md', markdown, name, body),
   out.join('\n'),
-  'message-keys',
-  renderMessageKeys(),
+);
+
+const readmeSource = await readFile(README_PATH, 'utf8');
+const readmeOutput = fillGenerated(
+  'README.md',
+  readmeSource,
+  'component-categories',
+  renderReadmeCategories(),
 );
 
 // Stops before anything is written: the block would be filled in correctly but
@@ -223,12 +271,15 @@ if (process.argv.includes('--check')) {
       'docs/references/components.md is stale. Run `pnpm generate:props`.',
     );
   }
+  if (readmeOutput !== readmeSource) {
+    problems.push('README.md is stale. Run `pnpm generate:props`.');
+  }
 } else {
   await writeFile(DOC_PATH, output);
+  await writeFile(README_PATH, readmeOutput);
   console.warn(`Rewrote props for ${rewritten.size} components.`);
 }
 
-const topLevel = (name: string) => name.split('.')[0] ?? '';
 const headings = (markdown: string, level: '##' | '###') =>
   new Set(
     [...markdown.matchAll(new RegExp(`^${level} (\\S+)`, 'gmu'))].map(
@@ -244,14 +295,14 @@ const sections = (markdown: string) =>
 const backticked = (text: string) =>
   new Set([...text.matchAll(/`(\w+)`/gu)].map((m) => m[1] ?? ''));
 
-const documented = headings(source, '###');
+const documented = headings(output, '###');
 // The AI chat components are documented in ai-chat.md with hand-written
 // props bullets, so their absence from components.md is not a gap.
 const documentedElsewhere = headings(
   await readFile(AI_CHAT_PATH, 'utf8'),
   '##',
 );
-const listedIcons = backticked(sections(source).get('Icons') ?? '');
+const listedIcons = backticked(sections(output).get('Icons') ?? '');
 const covered = (name: string) =>
   iconish(name)
     ? listedIcons.has(name)
@@ -277,21 +328,27 @@ if (noBlock.length > 0) {
   problems.push(`Props ブロックが無い節: ${noBlock.join(', ')}`);
 }
 
-// The README's two component lists name each component in bold; the icons
-// share one bullet. Only those lists count, so a bold word elsewhere cannot
-// stand in for a missing bullet.
-const readme = sections(await readFile(README_PATH, 'utf8'));
-const readmeLists = ['Component Categories', 'AI Chat Components']
-  .map((title) => readme.get(title) ?? '')
-  .join('\n');
-const inReadme = new Set(
-  [...readmeLists.matchAll(/\*\*(\w+)\*\*/gu)].map((m) => m[1] ?? ''),
+// The README's AI chat list names each component in bold, with its parts and
+// behavior written by hand. Only that list counts, so a bold word elsewhere
+// cannot stand in for a missing bullet.
+const inAiList = new Set(
+  [
+    ...(sections(readmeOutput).get('AI Chat Components') ?? '').matchAll(
+      /\*\*(\w+)\*\*/gu,
+    ),
+  ].map((m) => m[1] ?? ''),
 );
-const notInReadme = [
-  ...new Set(components.map((c) => topLevel(c.name))),
-].filter((name) => !iconish(name) && !inReadme.has(name));
-if (notInReadme.length > 0) {
-  problems.push(`README.md の部品一覧に未掲載: ${notInReadme.join(', ')}`);
+const notInAiList = [
+  ...new Set(
+    components
+      .filter((c) => c.category === AI_CATEGORY)
+      .map((c) => topLevel(c.name)),
+  ),
+].filter((name) => !inAiList.has(name));
+if (notInAiList.length > 0) {
+  problems.push(
+    `README.md の AI Chat Components に未掲載: ${notInAiList.join(', ')}`,
+  );
 }
 
 // A part (`Message.Copy`) counts, and so does the compound it belongs to
@@ -317,5 +374,5 @@ if (problems.length > 0) {
   process.exit(1);
 }
 if (process.argv.includes('--check')) {
-  console.warn('docs/references/components.md is in sync.');
+  console.warn('docs/references/components.md and README.md are in sync.');
 }

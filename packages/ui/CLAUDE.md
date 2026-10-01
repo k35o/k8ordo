@@ -40,6 +40,12 @@ src/components/<category>/<name>/
 
 2. Add a re-export in `src/components/index.ts` if the component should be available from the root entry point (`src/index.ts` re-exports everything from there).
 
+3. Write its `### <Name>` section in `docs/references/components.md` — prose, an example, and a bare `Props:` line — under any of the category headings, then run `pnpm generate:props`. It records the props and the category (the `<category>` folder) in `docs/props.generated.json`, moves the section under its category's heading, fills the `Props:` block, and lists the component in the README. `check:props` fails in CI while any of that is stale. A new `<category>` folder also needs a title in `CATEGORIES` (`scripts/generate-component-docs.ts`) and in `categoryTitles` (`apps/docs/src/data/components-nav.ts`).
+
+4. On the docs site: a page under `apps/docs/src/routes/[locale]/ui/components/<name>/`, its entry in `pages` (`src/data/components-nav.ts`; `src/data/component-groups.ts` groups it by the generated category on the server), its `description` in `src/messages/components.ts`, and a preview in `src/components/component-previews.tsx`, which fails to type-check until there is one.
+
+5. Wording the component draws itself goes through the dictionary (see [Built-in wording](#built-in-wording)), and `src/integrations/coverage.test.ts` fails until the component is either in the generative-UI catalog or left out with a reason.
+
 ## Props Naming Conventions
 
 ### Boolean Props

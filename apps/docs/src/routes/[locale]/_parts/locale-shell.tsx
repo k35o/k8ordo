@@ -11,7 +11,8 @@ import { LocaleAnchor } from '../../../components/locale-anchor';
 import { Navigation } from '../../../components/navigation';
 import { SideNavigation } from '../../../components/side-navigation';
 import { aiCategories } from '../../../data/ai-nav';
-import { componentCategories } from '../../../data/components-nav';
+import { componentCategoriesOf } from '../../../data/components-nav';
+import type { ComponentGroups } from '../../../data/components-nav';
 import type { NavCategory } from '../../../data/nav-types';
 import { locales } from '../../../i18n';
 import type { SitePath } from '../../../links';
@@ -35,13 +36,15 @@ type Section = '/:locale/ui/components' | '/:locale/ui/ai';
 const useBelow = (pattern: Section): boolean =>
   useMatch(`${pattern}/*`) !== null;
 
-function useSideNavConfig(): SideNavConfig | null {
+function useSideNavConfig(
+  componentGroups: ComponentGroups,
+): SideNavConfig | null {
   const components = useBelow('/:locale/ui/components');
   const ai = useBelow('/:locale/ui/ai');
 
   if (components) {
     return {
-      categories: componentCategories,
+      categories: componentCategoriesOf(componentGroups),
       title: m.nav.components,
       catalogPath: '/:locale/ui/components',
     };
@@ -71,8 +74,14 @@ const PageTransition: FC<{ children: ReactNode }> = ({ children }) => (
   </ViewTransition>
 );
 
-function LayoutContent({ children }: { children: ReactNode }) {
-  const sideNavConfig = useSideNavConfig();
+function LayoutContent({
+  componentGroups,
+  children,
+}: {
+  componentGroups: ComponentGroups;
+  children: ReactNode;
+}) {
+  const sideNavConfig = useSideNavConfig(componentGroups);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   // documentをスクローラーにしたため、サイドバーは sticky で固定する。
   // ヘッダー高さはフォント読込やブレークポイントで変動するので実測して追従させる。
@@ -177,9 +186,11 @@ function LayoutContent({ children }: { children: ReactNode }) {
  */
 export function LocaleShell({
   locale: param,
+  componentGroups,
   children,
 }: {
   locale: string;
+  componentGroups: ComponentGroups;
   children: ReactNode;
 }) {
   const pathname = usePathname();
@@ -204,7 +215,9 @@ export function LocaleShell({
     <UIProvider>
       <WritingModeProvider>
         <div className="flex min-h-dvh flex-col">
-          <LayoutContent>{children}</LayoutContent>
+          <LayoutContent componentGroups={componentGroups}>
+            {children}
+          </LayoutContent>
         </div>
       </WritingModeProvider>
     </UIProvider>
