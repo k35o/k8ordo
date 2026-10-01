@@ -1,31 +1,303 @@
+"@k8ordo/color-scheme@1.0.0":
+  dir: packages/color-scheme
+  intents:
+    - bright-rice-serve
+    - docs-color-scheme-topics
+    - docs-drift-color-scheme
+    - modern-wolves-yell
+    - release-1-0-color-scheme
 "@k8ordo/form@0.1.1":
   dir: packages/form
   intents:
     - form-dropped-warning
+"@k8ordo/form@1.0.0":
+  dir: packages/form
+  intents:
+    - docs-drift-form
+    - form-derive-parse-parity
+    - form-report-unknown-invalid
+    - form-select-echo
+    - form-string-checkbox-input-type
+    - happy-jokes-cover
+    - honest-apes-live
+    - mighty-eggs-vanish
+    - neat-pandas-shout
+    - pretty-beds-scream
+    - react-19-3-form
+    - real-shirts-learn
+    - release-1-0-form
+    - silent-cooks-leave
+    - vast-geckos-love
+    - young-shirts-flow
+    - zod-4-5-iso-formats
+"@k8ordo/i18n@1.0.0":
+  dir: packages/i18n
+  intents:
+    - ancient-beds-sneeze
+    - docs-drift-i18n
+    - docs-not-found-locale
+    - early-squids-pay
+    - fluffy-tigers-sit
+    - i18n-locale-scope
+    - i18n-paths
+    - modern-wolves-yell
+    - new-seals-stare
+    - olive-moles-juggle
+    - release-1-0-i18n
+    - shaggy-hounds-beam
+    - tough-snails-start
+    - wide-jars-compete
 "@k8ordo/router@0.1.0":
   dir: packages/router
   intents:
     - framework-error-redirect-request
     - framework-params-schema
     - router-scroll-and-match
+"@k8ordo/router@1.0.0":
+  dir: packages/router
+  intents:
+    - afraid-trees-fail
+    - bind-params-router
+    - calm-falcons-occur
+    - docs-drift-router
+    - kind-teeth-hammer
+    - light-donkeys-kick
+    - new-cups-run
+    - polite-geese-press
+    - react-19-3-router
+    - release-1-0-router
+    - router-boundary-keeps-subtree
+    - router-testing-engines
+    - sour-pens-remember
 "@k8ordo/server@0.1.0":
   dir: packages/server
   intents:
     - framework-error-redirect-request
     - framework-params-schema
     - static-server-hardening
+"@k8ordo/server@1.0.0":
+  dir: packages/server
+  intents:
+    - big-lemons-tap
+    - bright-eggs-drop
+    - calm-moons-kiss
+    - curvy-bottles-wink
+    - docs-drift-framework
+    - docs-framework-references
+    - eager-camels-tease
+    - fast-knives-drop
+    - framework-layout-params
+    - framework-parse-exports
+    - framework-redirect-segments
+    - funny-birds-doubt
+    - happy-cats-relax
+    - hydrate-after-reveal
+    - i18n-locale-scope
+    - kind-teeth-hammer
+    - lazy-pandas-brake
+    - light-donkeys-kick
+    - lucky-moles-glow
+    - neat-ants-scream
+    - new-cups-run
+    - not-found-in-the-visitors-locale
+    - polite-geese-press
+    - react-19-3-framework
+    - react-19-3-framework-docs
+    - release-1-0-server
+    - server-redirect-options
+    - server-runtime-entry
+    - slow-trees-sell
+    - soft-eagles-bet
+    - soft-plums-arrive
+    - sour-pens-remember
+    - strong-carrots-jam
+    - thick-geese-wash
+    - thin-moons-switch
+    - vast-geckos-love
 "@k8ordo/state@0.2.0":
   dir: packages/state
   intents:
     - state-register-and-inline-read
     - state-url-round-trip
+"@k8ordo/state@1.0.0":
+  dir: packages/state
+  intents:
+    - afraid-trees-fail
+    - angry-grapes-remain
+    - docs-drift-state
+    - friendly-teeth-complain
+    - good-tigers-hammer
+    - lucky-jokes-obey
+    - mean-wasps-visit
+    - polite-geese-press
+    - react-19-3-state
+    - release-1-0-state
+    - smooth-falcons-peel
+    - spicy-birds-cry
+    - state-storage-write-throws
+    - state-url-array-booleans
 "@k8ordo/static@0.1.0":
   dir: packages/static
   intents:
     - framework-error-redirect-request
     - framework-params-schema
     - static-server-hardening
+"@k8ordo/static@1.0.0":
+  dir: packages/static
+  intents:
+    - brave-moles-live
+    - bright-eggs-drop
+    - calm-moons-kiss
+    - curly-pears-shave
+    - docs-drift-framework
+    - docs-framework-references
+    - eager-camels-tease
+    - framework-layout-params
+    - framework-parse-exports
+    - framework-redirect-segments
+    - funny-birds-doubt
+    - gentle-jars-sing
+    - hydrate-only-where-rendered
+    - i18n-locale-scope
+    - kind-teeth-hammer
+    - light-donkeys-kick
+    - neat-ants-scream
+    - new-cups-run
+    - not-found-in-the-visitors-locale
+    - polite-geese-press
+    - react-19-3-framework
+    - react-19-3-framework-docs
+    - release-1-0-static
+    - soft-plums-arrive
+    - sour-pens-remember
+    - static-dev-refuses-actions
+    - static-inline-boundaries
+    - static-sitemap-export
+    - strong-carrots-jam
+    - thick-geese-wash
+    - thin-moons-switch
+    - weak-hounds-mix
 "@k8ordo/ui@2.0.0":
   dir: packages/ui
   intents:
     - ui-two
+"@k8ordo/ui@3.0.0":
+  dir: packages/ui
+  intents:
+    - angry-kiwis-live
+    - breezy-crabs-thank
+    - bright-hues-mix
+    - button-render-item-passthrough
+    - calm-pigs-visit
+    - checkbox-standalone-item-value
+    - cool-walls-bake
+    - docs-drift-ui
+    - fluffy-plums-hang
+    - giant-peaches-vanish
+    - heavy-snakes-sit
+    - itchy-maps-run
+    - khaki-poets-walk
+    - light-cups-tease
+    - mean-plums-tease
+    - neat-waves-fly
+    - number-field-negative-decimal
+    - number-field-read-only
+    - number-field-round-to-precision
+    - plain-keys-point
+    - proud-seals-hope
+    - purple-buses-tease
+    - purple-tools-design
+    - quiet-lists-choose
+    - react-19-3-ui
+    - react-compiler-lint-conformance
+    - real-pigs-travel
+    - sharp-bats-end
+    - sharp-kids-sell
+    - small-chairs-rhyme
+    - smooth-moose-occur
+    - smooth-pumas-chew
+    - soft-deers-remember
+    - spicy-pandas-cry
+    - strong-ravens-count
+    - sweet-beans-explode
+    - sweet-dragons-pay
+    - swift-keys-command
+    - tall-toys-sleep
+    - thick-fireants-itch
+    - thick-rivers-speak
+    - tidy-boats-thank
+    - tiny-trees-hear
+    - tough-buses-happen
+    - ui-carousel
+    - ui-catalog-kbd-empty-state-carousel
+    - ui-checkbox-indeterminate
+    - ui-checked-follows-reset
+    - ui-code-block
+    - ui-code-block-forced-colors
+    - ui-data-table
+    - ui-empty-state
+    - ui-helpers
+    - ui-hooks-audit
+    - ui-kbd
+    - ui-messages-docs-keys
+    - ui-number-field-empty
+    - ui-number-field-reset
+    - ui-observers
+    - ui-openui-nesting
+    - ui-prose
+    - ui-radio-required
+    - ui-side-nav-table-of-contents
+    - ui-table-empty-state
+    - ui-testing-in-a-real-browser
+    - ui-toast-open-returns-id
+    - ui-tree
+    - warm-dodos-return
+    - wide-bats-return
+    - wide-panes-split
+    - wide-tools-shop
+    - writing-mode-first-render
+docs@0.0.10:
+  dir: apps/docs
+  intents:
+    - ancient-beds-sneeze
+    - big-lemons-tap
+    - calm-docs-divide
+    - cool-grapes-agree
+    - docs-code-block
+    - docs-color-scheme
+    - docs-color-scheme-topics
+    - docs-data-table
+    - docs-framework-references
+    - docs-i18n
+    - docs-kbd-empty-state-carousel
+    - docs-links
+    - docs-not-found-locale
+    - docs-package-guides
+    - docs-prose
+    - docs-side-nav
+    - docs-tree
+    - dry-eagles-relate
+    - early-squids-pay
+    - fluffy-tigers-sit
+    - form-report-unknown-invalid
+    - fresh-olives-leave
+    - gentle-docs-paint
+    - khaki-onions-complain
+    - lazy-pandas-brake
+    - lively-docs-palette
+    - neat-rings-crash
+    - quiet-zebras-relax
+    - react-19-3-docs
+    - real-squids-raise
+    - router-boundary-keeps-subtree
+    - shiny-boats-collect
+    - soft-docs-search
+    - soft-plums-arrive
+    - state-storage-write-throws
+    - state-url-array-booleans
+    - strong-ravens-count
+    - tame-wolves-live
+    - thin-pandas-tan
+    - vast-geckos-love
+    - warm-pots-lie
+    - wide-jars-compete
