@@ -25,7 +25,7 @@ export function TokenCard({
     <Card variant="shadow">
       <div className="flex items-start gap-3 p-4">
         <div
-          className="mt-0.5 size-6 shrink-0 rounded-md"
+          className="ring-border-mute mt-0.5 size-6 shrink-0 rounded-md ring-1"
           style={
             type === 'border'
               ? { border: `2px solid var(--${token.name})` }

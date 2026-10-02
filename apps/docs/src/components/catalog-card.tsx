@@ -18,10 +18,13 @@ export const CatalogCard: FC<{ item: NavItem; preview?: ReactNode }> = ({
     {preview === undefined ? null : (
       // The preview is purely decorative: `inert` removes its (focusable)
       // controls from the tab order and the accessibility tree, leaving only
-      // the card's stretched link as the interactive target.
+      // the card's stretched link as the interactive target. The stage keeps
+      // the card's own bg-base: the components are drawn for it, and one filled
+      // with bg-subtle (Toolbar, a base Button, a chat bubble) vanished on a
+      // bg-subtle stage.
       <div
         aria-hidden
-        className="bg-bg-subtle pointer-events-none flex h-36 items-center justify-center overflow-hidden px-5"
+        className="border-border-mute pointer-events-none flex h-36 items-center justify-center overflow-hidden border-b px-5"
         inert
       >
         {preview}
