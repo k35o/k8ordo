@@ -92,6 +92,7 @@ export default function CodeBlockPage() {
             <Rich>{m.components.codeBlock.marksDescription()}</Rich>
           </p>
           <ComponentPreview
+            stage="article"
             code={`<CodeBlock
   code={source}
   lang="ts"
@@ -116,6 +117,7 @@ export default function CodeBlockPage() {
             <Rich>{m.components.codeBlock.calloutsDescription()}</Rich>
           </p>
           <ComponentPreview
+            stage="article"
             code={`<CodeBlock
   callouts={{ 3: 'Guard the division when the list is empty' }}
   code={source}
