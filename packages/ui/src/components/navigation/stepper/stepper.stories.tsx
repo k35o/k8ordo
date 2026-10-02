@@ -116,6 +116,26 @@ const markersOf = (canvasElement: HTMLElement) => [
 ];
 
 // 狭い幅に長い文言を並べても、線は文言に幅を取られず、どの段の間でも同じ長さを保つ
+// 押せる段は印と文言の周りに余白を取り、段の間の線は押せる範囲に含めない
+export const InteractiveTarget: Story = {
+  args: {
+    defaultValue: 2,
+    interactive: true,
+  },
+  play: async ({ canvas, canvasElement }) => {
+    const button = canvas.getByRole('button', { name: /プラン/u });
+    const target = button.getBoundingClientRect();
+    const marker = markersOf(canvasElement)[0]?.getBoundingClientRect();
+
+    await expect((marker?.left ?? 0) - target.left).toBeGreaterThanOrEqual(8);
+    await expect((marker?.top ?? 0) - target.top).toBeGreaterThanOrEqual(8);
+    for (const connector of connectorsOf(canvasElement)) {
+      // eslint-disable-next-line no-await-in-loop -- 線を順に確かめるだけ
+      await expect(button).not.toContainElement(connector);
+    }
+  },
+};
+
 export const NarrowWithLongLabels: Story = {
   args: {
     defaultValue: 1,

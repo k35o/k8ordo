@@ -93,9 +93,11 @@ export const Stepper: FC<Props> = ({
             className={cn(
               'rounded-full',
               // 縦に並べるときは、段の印（size-8）の中心に 2px の線を通す
+              // 横に並べるときは押せる範囲の外に置き、印の中心の高さに、印の
+              // 後ろから段の終わりまで引く
               vertical
                 ? 'ms-3.75 min-block-4 inline-0.5 self-stretch'
-                : 'min-inline-4 block-0.5 flex-1',
+                : 'absolute inset-s-10 inset-e-0 block-0.5 [inset-block-start:calc(1rem-1px)]',
               status === 'complete' ? 'bg-primary-fg' : 'bg-border-base',
               'forced-colors:bg-[CanvasText]',
             )}
@@ -119,32 +121,28 @@ export const Stepper: FC<Props> = ({
             ) : null}
           </span>
         );
-        // 横に並べるときは、段の印と線だけで 1 行目を作り、文言はその下に置く。
-        // 線を文言の横に置くと、長い文言に幅を取られて線が潰れる
-        const body = vertical ? (
+        // 横に並べるときは、1 行目に段の印と線、その下に文言を置く。線を
+        // 文言の横に置くと、長い文言に幅を取られて線が潰れる
+        const body = (
           <>
             {marker}
             {text}
           </>
-        ) : (
-          <>
-            <span className="flex items-center gap-2">
-              {marker}
-              {connector}
-            </span>
-            {text}
-          </>
         );
-        const bodyLayout = vertical
-          ? 'flex items-center gap-2'
-          : 'flex flex-col gap-2';
+        // 押せる段は、負のマージンで位置を変えずに周りへ余白を取る
+        const bodyLayout = cn(
+          vertical
+            ? 'flex items-center gap-2'
+            : 'flex flex-col items-start gap-2',
+          interactive && '-m-2 self-start rounded-lg p-2',
+        );
         return (
           <li
             aria-current={status === 'current' ? 'step' : undefined}
             className={cn(
               'flex flex-col',
               // 段ごとに同じ幅の列を取り、線の長さを文言の長さから切り離す
-              vertical ? 'gap-2' : 'flex-1',
+              vertical ? 'gap-2' : 'relative flex-1',
             )}
             // 段は並びの位置そのものなので、位置を key にする
             // eslint-disable-next-line react/no-array-index-key
@@ -154,7 +152,7 @@ export const Stepper: FC<Props> = ({
               <button
                 className={cn(
                   bodyLayout,
-                  'rounded-lg transition-colors duration-150 ease-out hover:bg-bg-subtle',
+                  'transition-colors duration-150 ease-out hover:bg-bg-subtle',
                   FOCUS_RING,
                 )}
                 onClick={(event) => {
@@ -174,17 +172,14 @@ export const Stepper: FC<Props> = ({
               </button>
             ) : (
               <span
-                className={cn(
-                  bodyLayout,
-                  interactive && ['rounded-lg', FOCUS_RING],
-                )}
+                className={cn(bodyLayout, interactive && FOCUS_RING)}
                 ref={status === 'current' ? currentRef : undefined}
                 tabIndex={interactive && status === 'current' ? -1 : undefined}
               >
                 {body}
               </span>
             )}
-            {vertical ? connector : null}
+            {connector}
           </li>
         );
       })}
