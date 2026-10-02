@@ -430,10 +430,34 @@ Props (SideNav.Root):
 - `children`: `ReactNode`
 - Other props are forwarded to `HTMLAttributes<HTMLElement>`, except `className` / `style` / `aria-label`.
 
+A group can hold a level that opens and closes, `SideNav.Sub`, to make the
+navigation a tree. It is a `<details>`, so it opens and closes without
+JavaScript; open the one holding the current page with `defaultOpen`.
+
+```tsx
+<SideNav.Group title="Components">
+  <SideNav.Link href="/components">Overview</SideNav.Link>
+  <SideNav.Sub defaultOpen title="Buttons">
+    <SideNav.Link current href="/button">
+      Button
+    </SideNav.Link>
+  </SideNav.Sub>
+  <SideNav.Sub title="Navigation">
+    <SideNav.Link href="/tabs">Tabs</SideNav.Link>
+  </SideNav.Sub>
+</SideNav.Group>
+```
+
 Props (SideNav.Group):
 
 - `title`: `string` (required)
 - `children`: `ReactNode`
+
+Props (SideNav.Sub):
+
+- `title`: `string` (required)
+- `children`: `ReactNode`
+- `defaultOpen`: `boolean` (default: `false`)
 
 Props (SideNav.Link):
 
