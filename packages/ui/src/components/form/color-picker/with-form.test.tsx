@@ -63,6 +63,8 @@ const input = () =>
 const isDirty = () =>
   document.querySelector('[data-testid="dirty"]')?.textContent;
 
+const submitted = () => [...new FormData(input().form ?? undefined)];
+
 // range の矢印キーは userEvent が扱わないので、ブラウザがつまみを動かしたとき
 // と同じく値を置いて input を出す
 const slide = (name: string, value: number) => {
@@ -74,6 +76,18 @@ const slide = (name: string, value: number) => {
     'value',
   )?.set?.call(slider, String(value));
   slider.dispatchEvent(new Event('input', { bubbles: true }));
+};
+
+// ブラウザの色選びで選んだときと同じく、color の input に値を置いて input を出す
+const pick = (value: string) => {
+  const native = page
+    .getByLabelText('Choose from palette')
+    .element() as HTMLInputElement;
+  Object.getOwnPropertyDescriptor(
+    HTMLInputElement.prototype,
+    'value',
+  )?.set?.call(native, value);
+  native.dispatchEvent(new Event('input', { bubbles: true }));
 };
 
 beforeEach(() => {
@@ -107,6 +121,16 @@ describe('ColorPicker と formFields', () => {
 
     expect(input()).toHaveValue('#960d0d');
     await expect.poll(isDirty).toBe('true');
+  });
+
+  it('ブラウザの色選びで選んだ色はフォームに届き、送られるのは欄の値だけ', async () => {
+    await render(<ThemeForm />);
+
+    pick('#2563eb');
+
+    expect(input()).toHaveValue('#2563eb');
+    await expect.poll(isDirty).toBe('true');
+    expect(submitted()).toStrictEqual([['accent', '#2563eb']]);
   });
 
   it('reset で描画時の色に戻り、つまみと見本も追いつく', async () => {

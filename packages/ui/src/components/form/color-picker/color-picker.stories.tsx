@@ -91,6 +91,38 @@ export const Sliders: Story = {
   },
 };
 
+// ブラウザの色選びは開いたまま動かせないので、選んだときと同じく値を置いて
+// input を出す（ドラッグのあいだも input が続けて飛ぶ）
+const pick = (input: HTMLElement, value: string) => {
+  fireEvent.input(input, { target: { value } });
+};
+
+// 欄の横の色を押すとブラウザの色選びが開き、選んだ色はつまみと同じ道で欄に入る
+export const NativePicker: Story = {
+  args: { onChange: fn(), swatches: [] },
+  play: async ({ args, canvas }) => {
+    const input = canvas.getByRole('textbox', { name: 'テーマの色' });
+    const native = canvas.getByLabelText('パレットから選ぶ');
+    await expect(native).toHaveAccessibleName('パレットから選ぶ');
+    await expect(native).toHaveAttribute('type', 'color');
+    await expect(native).toHaveValue('#0d9488');
+    // 欄の値だけが送られる
+    await expect(native).not.toHaveAttribute('name');
+
+    pick(native, '#2563eb');
+    await expect(input).toHaveValue('#2563eb');
+    await expect(args.onChange).toHaveBeenLastCalledWith('#2563eb');
+    await expect(canvas.getByRole('slider', { name: '色相' })).toHaveValue(
+      '221',
+    );
+
+    // つまみで動かした色も、次に開いたときの色になる
+    slide(canvas.getByRole('slider', { name: '色相' }), 0);
+    await expect(input).toHaveValue('#eb2424');
+    await expect(native).toHaveValue('#eb2424');
+  },
+};
+
 export const Typing: Story = {
   args: { onChange: fn(), swatches: [] },
   play: async ({ args, canvas, userEvent }) => {
@@ -167,20 +199,46 @@ export const Empty: Story = {
         .getAllByRole('button')
         .filter((swatch) => swatch.getAttribute('aria-pressed') !== 'false'),
     ).toHaveLength(0);
+    // 色が無いあいだは、つまみの位置（灰色）からブラウザの色選びを開く
+    await expect(canvas.getByLabelText('パレットから選ぶ')).toHaveValue(
+      '#808080',
+    );
   },
 };
 
+// 欄の横の色も含め、色を変える操作はどれも押せない。無効な color の input は
+// ブラウザの色選びを開かない
+const changers = (canvasElement: HTMLElement) => [
+  ...canvasElement.querySelectorAll<HTMLInputElement | HTMLButtonElement>(
+    'input[type="range"], input[type="color"], button',
+  ),
+];
+
 export const Disabled: Story = {
   args: { disabled: true },
-  play: async ({ canvas }) => {
+  play: async ({ canvas, canvasElement }) => {
     await expect(
       canvas.getByRole('textbox', { name: 'テーマの色' }),
     ).toBeDisabled();
-    const enabled = [
-      ...canvas.getAllByRole('slider'),
-      ...canvas.getAllByRole('button'),
-    ].filter((control) => !control.matches(':disabled'));
-    await expect(enabled).toHaveLength(0);
+    const controls = changers(canvasElement);
+    // 3 本のつまみ・欄の横の色・5 つの見本
+    await expect(controls).toHaveLength(9);
+    await expect(controls.filter((control) => !control.disabled)).toHaveLength(
+      0,
+    );
+  },
+};
+
+// 読み取り専用でも欄は読めてフォーカスも受けるが、色を変える操作は押せない
+export const ReadOnly: Story = {
+  args: { readOnly: true },
+  play: async ({ canvas, canvasElement }) => {
+    await expect(
+      canvas.getByRole('textbox', { name: 'テーマの色' }),
+    ).toHaveAttribute('readonly');
+    await expect(
+      changers(canvasElement).filter((control) => !control.disabled),
+    ).toHaveLength(0);
   },
 };
 
