@@ -78,6 +78,28 @@ export const Disabled: Story = {
   },
 };
 
+// 無効の枠（bg-mute）の中でも、選んだ値のチップが枠の地に溶けない
+export const DisabledWithValues: Story = {
+  render: () => (
+    <Autocomplete
+      defaultValue={['16']}
+      disabled
+      id="autocomplete-disabled-values"
+      options={[
+        { value: '2', label: '2進数' },
+        { value: '16', label: '16進数' },
+      ]}
+    />
+  ),
+  play: async ({ canvas }) => {
+    const chip = canvas.getByText('16進数').closest('div');
+    const box = chip?.parentElement?.closest('div.rounded-xl');
+    await expect(getComputedStyle(chip as Element).backgroundColor).not.toBe(
+      getComputedStyle(box as Element).backgroundColor,
+    );
+  },
+};
+
 // 回帰: チップ行が min-w-0 で縮まないと「すべて削除」が枠外へ押し出される
 export const NarrowContainer: Story = {
   render: () => (
