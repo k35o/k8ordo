@@ -28,27 +28,25 @@ export const CodeBlock: FC<Props> = async ({
 }) => {
   const html = await highlight(code, { lang, marks, callouts });
 
-  // figcaption は figure の最初の子でないと名前にならないので、見出しの
-  // 行は入れ子にせず、グリッドの 1 行目に並べる。親に引き伸ばされたときは、
-  // 余った高さを見出しの行ではなくコードの行が受ける
+  // figcaption は figure の最初の子でないと名前にならないので、ラベルを先に
+  // 置き、コピーボタンは面の右上に重ねる。親に引き伸ばされたときは、余った
+  // 高さをラベルではなくコードが受ける
   return (
     <figure
       {...rest}
       className={cn(
-        'ao-code-block writing-h grid grid-cols-[minmax(0,1fr)_auto] grid-rows-[auto_1fr] overflow-hidden rounded-lg',
+        'ao-code-block writing-h relative grid grid-rows-[auto_1fr] rounded-xl',
         HIGH_CONTRAST_EDGE,
       )}
     >
       {title === undefined ? (
-        <span className="flex items-center bg-(--ao-code-header) py-2 ps-4 text-xs text-(--ao-code-label) lowercase select-none">
-          {lang}
-        </span>
+        <span className="ao-code-label select-none">{lang}</span>
       ) : (
-        <figcaption className="flex items-center bg-(--ao-code-header) py-2 ps-4 text-[0.8rem] text-(--ao-code-caption)">
+        <figcaption className="ao-code-label">
           <code>{title}</code>
         </figcaption>
       )}
-      <div className="flex items-center bg-(--ao-code-header) py-1 pe-2">
+      <div className="ao-code-copy absolute inset-e-1.5 top-1.5">
         <CopyButton
           iconOnly
           label={getMessages().codeBlockCopy}
@@ -57,7 +55,7 @@ export const CodeBlock: FC<Props> = async ({
         />
       </div>
       <div
-        className="col-span-2"
+        className="min-w-0"
         // shiki が組んだ HTML をそのまま差し込む。コードは shiki が
         // エスケープし、注記の文字列もテキストノードとして渡している
         // oxlint-disable-next-line eslint-plugin-react/no-danger

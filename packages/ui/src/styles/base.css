@@ -287,24 +287,36 @@
   }
 
   /*
- * CodeBlock。k8o のブログのコードブロックに合わせ、色はトークンではなく固定の
- * 値で持つ。コードの地とトークンの色は shiki の one-light（ライト）と plastic
- * （ダーク）で、light-dark() で書くので、.dark が切り替える color-scheme に
- * 従う。見出しの行の地は、ライトではコードの地より一段暗く、ダークでは一段
- * 明るくして、線を引かずに段差で分ける。
+ * CodeBlock。k8o のブログのコードブロックと同じ見た目にする。面は bg-surface
+ * の 1 枚で、ラベルとコピーボタンはその上に置き、帯も線も引かない。トークンの
+ * 色は shiki の one-light（ライト）と plastic（ダーク）で、light-dark() で
+ * 書くので .dark が切り替える color-scheme に従う。
  * 行の印（data-mark）と注記（data-callout）は、CodeBlock の変換器が付ける。
  */
   .ao-code-block {
-    --ao-code-header: light-dark(#edeef0, #2c313b);
-    --ao-code-label: light-dark(#696c77, #a9b2c3);
-    --ao-code-caption: light-dark(#383a42, #dcdfe4);
-    background-color: light-dark(#fafafa, #21252b);
+    background-color: var(--bg-surface);
+  }
+  .ao-code-block .ao-code-label {
+    display: block;
+    padding: 0.75rem 3rem 0 1.25rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.75rem;
+    line-height: 1;
+    color: var(--fg-mute);
+  }
+  /* 長い 1 行目の右端と重なったときに文字を隠せるよう、面と同じ色を敷く */
+  .ao-code-block .ao-code-copy {
+    border-radius: 0.5rem;
+    background-color: var(--bg-surface);
   }
   .ao-code-block pre {
     overflow-x: auto;
-    padding-block: 1rem;
+    padding: 0.375rem 1.25rem 1rem;
+    /* shiki が pre に書くテーマの地は使わず、面の色を通す */
+    background-color: transparent !important;
     font-size: var(--text-sm);
-    line-height: var(--leading-relaxed);
+    line-height: 1.75rem;
+    tab-size: 2;
   }
   /* 強制カラーでは box-shadow が消えるので、フォーカスは outline で描く */
   .ao-code-block pre:focus-visible {
@@ -314,17 +326,16 @@
   .ao-code-block .line {
     display: inline-block;
     min-inline-size: 100%;
-    padding-inline: 1rem;
   }
-  /* 印のある行が 1 つでもあれば、全行に印の幅だけ余白を取って桁を揃える */
+  /* 印か注記が 1 つでもあれば、全行に印の幅だけ余白を取って桁を揃える */
   .ao-code-block pre[data-marked] .line {
     position: relative;
-    padding-inline-start: 2rem;
+    padding-inline-start: 1.2em;
   }
   .ao-code-block :is([data-mark], [data-has-callout]) {
     background-color: var(--mark-bg);
   }
-  /* 行の頭の線は疑似要素の border で描く。強制カラーでは影と地の色が
+  /* 行の頭の帯は疑似要素の border で描く。強制カラーでは影と地の色が
      消えるが、border はシステムの色で塗り直されて残る */
   .ao-code-block :is([data-mark], [data-has-callout])::after {
     content: '';
@@ -334,48 +345,49 @@
     border-inline-start: 6px solid var(--mark-border);
   }
   .ao-code-block [data-mark='highlight'] {
-    --mark-bg: light-dark(rgb(191 135 0 / 0.14), rgb(245 200 80 / 0.16));
-    --mark-border: light-dark(rgb(191 135 0), rgb(245 200 80));
+    --mark-bg: color-mix(in oklab, var(--border-warning) 16%, transparent);
+    --mark-border: var(--border-warning);
   }
   .ao-code-block [data-mark='add'] {
-    --mark-bg: light-dark(rgb(46 160 67 / 0.14), rgb(120 220 130 / 0.16));
-    --mark-border: light-dark(rgb(46 160 67), rgb(120 220 130));
+    --mark-bg: color-mix(in oklab, var(--border-success) 14%, transparent);
+    --mark-border: var(--border-success);
   }
   .ao-code-block [data-mark='remove'] {
-    --mark-bg: light-dark(rgb(207 34 46 / 0.12), rgb(245 110 110 / 0.16));
-    --mark-border: light-dark(rgb(207 34 46), rgb(245 110 110));
+    --mark-bg: color-mix(in oklab, var(--border-error) 12%, transparent);
+    --mark-border: var(--border-error);
   }
   /* 注記の指す行。印と重なったら注記の色にする */
   .ao-code-block [data-has-callout] {
-    --mark-bg: light-dark(rgb(80 140 220 / 0.18), rgb(120 180 245 / 0.3));
-    --mark-border: light-dark(rgb(80 140 220), rgb(120 180 245));
+    --mark-bg: color-mix(in oklab, var(--border-info) 18%, transparent);
+    --mark-border: var(--border-info);
   }
   .ao-code-block [data-mark='add']::before,
   .ao-code-block [data-mark='remove']::before {
     position: absolute;
-    inset-inline-start: 0.75rem;
-    color: var(--mark-border);
+    inset-inline-start: 0.4em;
     font-weight: var(--font-weight-bold);
   }
   .ao-code-block [data-mark='add']::before {
-    content: '+';
+    content: '＋';
+    color: var(--fg-success);
   }
   .ao-code-block [data-mark='remove']::before {
-    content: '−';
+    content: '－';
+    color: var(--fg-error);
   }
-  /* 注記は、指す行の下に置く吹き出し。上向きの三角でその行を指す */
+  /* 注記は、指す行の下に置く吹き出し。上向きの三角でその行を指す。字は
+     0.9em なので、行の桁（印の余白と字下げ）に合わせる位置も 0.9 で割る */
   .ao-code-block [data-callout] {
     position: relative;
     display: inline-block;
     margin-block: 0.6em 0.3em;
-    margin-inline: calc(1rem + var(--ao-callout-indent)) 1rem;
+    margin-inline-start: calc((1.2em + var(--ao-callout-indent)) / 0.9);
     padding: 0.5em 1em;
     /* 強制カラーでは地が消えるので、透明な枠をシステムの色で残す */
     border: 1px solid transparent;
     border-radius: 0.5em;
-    background-color: rgb(80 140 220);
-    box-shadow: 0 4px 12px rgb(0 0 0 / 0.35);
-    color: rgb(255 255 255);
+    background-color: var(--fg-info);
+    color: var(--fg-inverse);
     font-size: 0.9em;
     font-weight: var(--font-weight-medium);
     line-height: 1.4;
@@ -387,10 +399,7 @@
     inset-block-start: -0.5em;
     inset-inline-start: 1em;
     border-inline: 0.5em solid transparent;
-    border-block-end: 0.5em solid rgb(80 140 220);
-  }
-  .ao-code-block pre[data-marked] [data-callout] {
-    margin-inline-start: calc(2rem + var(--ao-callout-indent));
+    border-block-end: 0.5em solid var(--fg-info);
   }
   @media (forced-colors: active) {
     .ao-code-block [data-callout]::before {

@@ -1527,17 +1527,18 @@ import { CodeBlock } from '@k8ordo/ui/code-block';
   does not know renders as plain text rather than failing, so a Markdown fence
   can pass its info string through as it is. The header shows `title` when
   given (as the figure's `figcaption`), and the language otherwise.
-- The colors are fixed values rather than design tokens: shiki's `one-light`
-  theme in light and `plastic` in dark, unchanged, the same as k8o's blog. Some
-  of them, the comments among them, fall short of 4.5:1 on their ground; the
-  library's own accessibility checks exempt the code's text from the contrast
-  rule and nothing else. They are written as `light-dark()`, so they follow the `color-scheme` the stylesheet
-  sets with `.dark`. There is no outer border: the header (the language in
-  lowercase, or `title` in monospace, and the copy button) sits on a ground a
-  step off the code's, with no line between them. Stretched by its parent, the
-  block gives the extra height to the code, never to the header.
-- `marks` marks lines by their 1-based number: `highlight`, `add` (drawn with a
-  `+`), or `remove` (drawn with a `−`). `callouts` puts a note under a line
+- It looks like the code blocks on k8o's blog: one surface in `bg-surface`
+  with no border, the language (or `title`, in monospace) as a small label at
+  its top, and the copy button over its top corner. The syntax colors are
+  shiki's `one-light` in light and `plastic` in dark, unchanged, written as
+  `light-dark()` so they follow the `color-scheme` the stylesheet sets with
+  `.dark`. Some of them, the comments among them, fall short of 4.5:1 on the
+  surface; the library's own accessibility checks exempt the code's text from
+  the contrast rule and nothing else. Stretched by its parent, the block gives
+  the extra height to the code, never to the label.
+- `marks` marks lines by their 1-based number, with a bar and a tint in the
+  status tokens: `highlight`, `add` (drawn with a `＋`), or `remove` (drawn
+  with a `－`). `callouts` puts a note under a line
   (an array puts several, in order) as a bubble pointing up at it, indented
   like the line, and tints the line it points at. A line can carry both; the
   note's tint wins. Neither is part of the copied text: the button copies

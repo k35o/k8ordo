@@ -57,15 +57,22 @@ export const Default: Story = {
 // ダークは plastic で、見出しの行は線ではなく地の段差でコードと分ける
 const colorsOf = (canvasElement: HTMLElement) => {
   const figure = canvasElement.querySelector('figure') as HTMLElement;
-  const header = figure.firstElementChild as HTMLElement;
+  const label = figure.firstElementChild as HTMLElement;
+  const pre = figure.querySelector('pre') as HTMLElement;
   const keyword = [...figure.querySelectorAll('pre span span')].find(
     (token) => token.textContent === 'import',
   ) as HTMLElement;
+  // 面の色は bg-surface のトークンそのもの。計算済みの値で比べる
+  const probe = document.createElement('div');
+  probe.style.backgroundColor = 'var(--bg-surface)';
+  figure.append(probe);
+  const surface = getComputedStyle(probe).backgroundColor;
+  probe.remove();
   return {
-    surface: getComputedStyle(figure).backgroundColor,
+    surfaceIsToken: getComputedStyle(figure).backgroundColor === surface,
     border: getComputedStyle(figure).borderTopWidth,
-    header: getComputedStyle(header).backgroundColor,
-    headerDivider: getComputedStyle(header).borderBottomWidth,
+    label: getComputedStyle(label).backgroundColor,
+    code: getComputedStyle(pre).backgroundColor,
     keyword: getComputedStyle(keyword).color,
   };
 };
@@ -75,10 +82,10 @@ export const LightColors: Story = {
   parameters: { theme: 'light' },
   play: async ({ canvasElement }) => {
     await expect(colorsOf(canvasElement)).toStrictEqual({
-      surface: 'rgb(250, 250, 250)',
+      surfaceIsToken: true,
       border: '0px',
-      header: 'rgb(237, 238, 240)',
-      headerDivider: '0px',
+      label: 'rgba(0, 0, 0, 0)',
+      code: 'rgba(0, 0, 0, 0)',
       keyword: 'rgb(166, 38, 164)',
     });
   },
@@ -89,10 +96,10 @@ export const DarkColors: Story = {
   parameters: { theme: 'dark' },
   play: async ({ canvasElement }) => {
     await expect(colorsOf(canvasElement)).toStrictEqual({
-      surface: 'rgb(33, 37, 43)',
+      surfaceIsToken: true,
       border: '0px',
-      header: 'rgb(44, 49, 59)',
-      headerDivider: '0px',
+      label: 'rgba(0, 0, 0, 0)',
+      code: 'rgba(0, 0, 0, 0)',
       // plastic の #e06c75 そのまま
       keyword: 'rgb(224, 108, 117)',
     });
@@ -180,7 +187,7 @@ const rate = total === 0 ? 0 : done / total;`,
 
     await expect(removed).toHaveTextContent('const rate = done / total;');
     await expect(getComputedStyle(removed as Element, '::before').content).toBe(
-      '"−"',
+      '"－"',
     );
   },
 };
