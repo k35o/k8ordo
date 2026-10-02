@@ -60,7 +60,11 @@ const TR = 'border-border-mute border-b';
 export default function I18nFormattingPage() {
   return (
     <DocPage introduction={s.introduction} path="/:locale/i18n/formatting">
-      <DocSection description={s.members.description} title={s.members.title}>
+      <DocSection
+        id="members"
+        description={s.members.description}
+        title={s.members.title}
+      >
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>
@@ -91,7 +95,11 @@ export default function I18nFormattingPage() {
         </p>
       </DocSection>
 
-      <DocSection description={s.timeZone.description} title={s.timeZone.title}>
+      <DocSection
+        id="time-zone"
+        description={s.timeZone.description}
+        title={s.timeZone.title}
+      >
         <CodeBlock code={PUBLISHED_AT} lang="tsx" />
         <p className="text-fg-mute leading-relaxed">
           <Rich>{s.timeZone.why()}</Rich>
@@ -106,13 +114,18 @@ export default function I18nFormattingPage() {
       </DocSection>
 
       <DocSection
+        id="in-messages"
         description={s.inMessages.description}
         title={s.inMessages.title}
       >
         <CodeBlock code={CART} lang="ts" />
       </DocSection>
 
-      <DocSection description={s.cache.description} title={s.cache.title}>
+      <DocSection
+        id="cache"
+        description={s.cache.description}
+        title={s.cache.title}
+      >
         <p className="text-fg-mute leading-relaxed">
           <Rich>{s.cache.key()}</Rich>
         </p>

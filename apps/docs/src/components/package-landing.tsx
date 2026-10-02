@@ -2,7 +2,7 @@ import type { Message } from '@k8ordo/i18n';
 import { GitHubIcon, Heading } from '@k8ordo/ui';
 import type { ReactNode } from 'react';
 
-import { PACKAGES } from '../data/packages';
+import { PACKAGES, sectionsOf } from '../data/packages';
 import { href } from '../links';
 import * as m from '../messages';
 import { LinkButton } from './link-button';
@@ -46,7 +46,8 @@ export function PackageLanding({
 }: PackageLandingProps) {
   const pkg = PACKAGES.find((entry) => entry.name === name);
   if (pkg === undefined) throw new Error(`${name} is not in PACKAGES`);
-  const [firstSection] = pkg.sections;
+  const sections = sectionsOf(pkg);
+  const [firstSection] = pkg.groups[0].sections;
 
   return (
     <div className="flex flex-1 flex-col">
@@ -107,7 +108,7 @@ export function PackageLanding({
       <section className="mx-auto w-full max-w-6xl px-6 pb-24 md:px-8">
         <Heading level="h2">{docsTitle()}</Heading>
         <ol className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {pkg.sections.map((section, index) => (
+          {sections.map((section, index) => (
             <li key={section.path}>
               <LocaleAnchor
                 className="border-border-mute hover:bg-bg-mute focus-visible:ring-border-info flex items-baseline gap-3 rounded-lg border p-5 transition-colors duration-150 ease-out focus-visible:ring-2 focus-visible:outline-hidden"

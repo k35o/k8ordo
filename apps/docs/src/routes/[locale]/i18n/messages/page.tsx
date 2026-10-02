@@ -166,14 +166,22 @@ const TR = 'border-border-mute border-b';
 export default function I18nMessagesPage() {
   return (
     <DocPage introduction={s.introduction} path="/:locale/i18n/messages">
-      <DocSection description={s.text.description} title={s.text.title}>
+      <DocSection
+        id="text"
+        description={s.text.description}
+        title={s.text.title}
+      >
         <CodeBlock code={NAV} lang="ts" />
         <p className="text-fg-mute leading-relaxed">
           <Rich>{s.text.fallback()}</Rich>
         </p>
       </DocSection>
 
-      <DocSection description={s.values.description} title={s.values.title}>
+      <DocSection
+        id="values"
+        description={s.values.description}
+        title={s.values.title}
+      >
         <CodeBlock code={CART} lang="ts" />
         <p className="text-fg-mute leading-relaxed">
           <Rich>{s.values.grammar()}</Rich>
@@ -199,7 +207,11 @@ export default function I18nMessagesPage() {
         </p>
       </DocSection>
 
-      <DocSection description={s.types.description} title={s.types.title}>
+      <DocSection
+        id="types"
+        description={s.types.description}
+        title={s.types.title}
+      >
         <p className="text-fg-mute leading-relaxed">
           <Rich>{s.types.props()}</Rich>
         </p>
@@ -210,7 +222,11 @@ export default function I18nMessagesPage() {
         <CodeBlock code={LOCALE_NAMES} lang="ts" />
       </DocSection>
 
-      <DocSection description={s.checks.description} title={s.checks.title}>
+      <DocSection
+        id="checks"
+        description={s.checks.description}
+        title={s.checks.title}
+      >
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>
@@ -245,6 +261,7 @@ export default function I18nMessagesPage() {
       </DocSection>
 
       <DocSection
+        id="render-time"
         description={s.renderTime.description}
         title={s.renderTime.title}
       >
@@ -266,7 +283,11 @@ export default function I18nMessagesPage() {
         </p>
       </DocSection>
 
-      <DocSection description={s.where.description} title={s.where.title}>
+      <DocSection
+        id="where"
+        description={s.where.description}
+        title={s.where.title}
+      >
         <CodeBlock code={INDEX} lang="ts" />
         <CodeBlock code={HEADER} lang="tsx" />
         <p className="text-fg-mute leading-relaxed">
@@ -280,7 +301,11 @@ export default function I18nMessagesPage() {
         </p>
       </DocSection>
 
-      <DocSection description={s.boundary.description} title={s.boundary.title}>
+      <DocSection
+        id="boundary"
+        description={s.boundary.description}
+        title={s.boundary.title}
+      >
         <Heading level="h3">
           <Rich>{s.boundary.stringTitle()}</Rich>
         </Heading>
@@ -304,7 +329,11 @@ export default function I18nMessagesPage() {
         </p>
       </DocSection>
 
-      <DocSection description={s.bundle.description} title={s.bundle.title}>
+      <DocSection
+        id="bundle"
+        description={s.bundle.description}
+        title={s.bundle.title}
+      >
         <ul className="text-fg-mute flex flex-col gap-2 pl-6">
           <li className="list-disc">
             <Rich>{s.bundle.client()}</Rich>

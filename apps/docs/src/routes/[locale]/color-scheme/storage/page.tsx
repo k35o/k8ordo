@@ -67,6 +67,7 @@ export default function ColorSchemeStoragePage() {
   return (
     <DocPage introduction={t.introduction} path="/:locale/color-scheme/storage">
       <DocSection
+        id="definition"
         description={t.definition.description}
         title={t.definition.title}
       >
@@ -76,7 +77,11 @@ export default function ColorSchemeStoragePage() {
         </p>
       </DocSection>
 
-      <DocSection description={t.rows.description} title={t.rows.title}>
+      <DocSection
+        id="rows"
+        description={t.rows.description}
+        title={t.rows.title}
+      >
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>
@@ -108,7 +113,11 @@ export default function ColorSchemeStoragePage() {
         </p>
       </DocSection>
 
-      <DocSection description={t.read.description} title={t.read.title}>
+      <DocSection
+        id="read"
+        description={t.read.description}
+        title={t.read.title}
+      >
         <CodeBlock code={READ_ELSEWHERE} lang="tsx" />
         <p className="text-fg-mute leading-relaxed">
           <Rich>{t.read.caveat()}</Rich>
@@ -121,13 +130,21 @@ export default function ColorSchemeStoragePage() {
         </p>
       </DocSection>
 
-      <DocSection description={t.tabs.description} title={t.tabs.title}>
+      <DocSection
+        id="tabs"
+        description={t.tabs.description}
+        title={t.tabs.title}
+      >
         <p className="text-fg-mute leading-relaxed">
           <Rich>{t.tabs.sameTab()}</Rich>
         </p>
       </DocSection>
 
-      <DocSection description={t.beside.description} title={t.beside.title}>
+      <DocSection
+        id="beside"
+        description={t.beside.description}
+        title={t.beside.title}
+      >
         <CodeBlock code={BESIDE} lang="ts" />
         <p className="text-fg-mute leading-relaxed">
           <Rich>{t.beside.collision()}</Rich>

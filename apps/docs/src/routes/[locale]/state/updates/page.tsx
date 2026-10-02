@@ -135,6 +135,7 @@ export default function StateUpdatesPage() {
       path="/:locale/state/updates"
     >
       <DocSection
+        id="hook"
         description={m.stateUpdates.hookDescription}
         title={m.stateUpdates.hookTitle}
       >
@@ -190,6 +191,7 @@ export default function StateUpdatesPage() {
       </DocSection>
 
       <DocSection
+        id="update"
         description={m.stateUpdates.updateDescription}
         title={m.stateUpdates.updateTitle}
       >
@@ -217,6 +219,7 @@ export default function StateUpdatesPage() {
       </DocSection>
 
       <DocSection
+        id="batch"
         description={m.stateUpdates.batchDescription}
         title={m.stateUpdates.batchTitle}
       >
@@ -294,6 +297,7 @@ export default function StateUpdatesPage() {
       </DocSection>
 
       <DocSection
+        id="handle"
         description={m.stateUpdates.handleDescription}
         title={m.stateUpdates.handleTitle}
       >
@@ -334,6 +338,7 @@ export default function StateUpdatesPage() {
       </DocSection>
 
       <DocSection
+        id="history"
         description={m.stateUpdates.historyDescription}
         title={m.stateUpdates.historyTitle}
       >
@@ -354,6 +359,7 @@ export default function StateUpdatesPage() {
       </DocSection>
 
       <DocSection
+        id="keys"
         description={m.stateUpdates.keysDescription}
         title={m.stateUpdates.keysTitle}
       >
@@ -371,6 +377,7 @@ export default function StateUpdatesPage() {
       </DocSection>
 
       <DocSection
+        id="demo"
         description={m.stateUpdates.demoDescription}
         title={m.stateUpdates.demoTitle}
       >
@@ -378,6 +385,7 @@ export default function StateUpdatesPage() {
       </DocSection>
 
       <DocSection
+        id="draft"
         description={m.stateUpdates.draftDescription}
         title={m.stateUpdates.draftTitle}
       >

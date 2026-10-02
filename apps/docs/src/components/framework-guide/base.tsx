@@ -20,7 +20,7 @@ const REFUSED = `k8ordo serves its pages under Vite's base, so base has to be a 
 export function BaseGuide({ mode }: { mode: Mode }) {
   const t = m.frameworkBase;
   return (
-    <DocSection description={t.description} title={t.title}>
+    <DocSection id="title" description={t.description} title={t.title}>
       <CodeBlock code={CONFIG(mode)} lang="ts" />
       <Paragraph text={t.table} />
       <Bullets>

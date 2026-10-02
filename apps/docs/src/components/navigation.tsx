@@ -27,22 +27,15 @@ export function Navigation() {
   const pathname = usePathname();
   const current = packageOf(pathname);
 
-  /**
-   * DropdownMenu.Content は子に index を注入するため Fragment で包めず、平坦な
-   * 配列である必要がある。並びはデスクトップと同じで、パッケージのあとに今いる
-   * パッケージのセクションが続く。
-   */
-  const mobileEntries: Array<{ path: SitePath; label: string }> = [
-    ...PACKAGES.map((pkg) => ({ path: pkg.path, label: pkg.label })),
-    ...(current?.sections ?? []).map((item) => ({
-      path: item.path,
-      label: item.label(),
-    })),
-  ];
+  // ページの一覧はサイドバー（狭い幅ではドロワー）が持つので、メニューは
+  // パッケージだけを並べる
+  const mobileEntries: Array<{ path: SitePath; label: string }> = PACKAGES.map(
+    (pkg) => ({ path: pkg.path, label: pkg.label }),
+  );
 
   return (
     <header className="border-border-mute bg-bg-surface border-b">
-      <nav className="mx-auto flex max-w-6xl items-center gap-3 p-4 md:gap-6 md:px-8">
+      <nav className="flex items-center gap-3 px-4 py-3 md:gap-6 md:px-6">
         <LocaleAnchor
           className="focus-visible:ring-border-info flex shrink-0 items-baseline gap-1 rounded-md focus-visible:ring-2 focus-visible:outline-hidden"
           path="/:locale"
@@ -98,26 +91,6 @@ export function Navigation() {
           </div>
         </div>
       </nav>
-      {current !== undefined && (
-        <div className="border-border-subtle hidden border-t md:block">
-          <ul className="mx-auto flex max-w-6xl items-center gap-1 overflow-x-auto px-4 py-2 md:px-8">
-            {current.sections.map((item) => {
-              const isActive = matchPath(item.path, pathname) !== null;
-              return (
-                <li key={item.path}>
-                  <a
-                    aria-current={isActive ? 'page' : undefined}
-                    className={itemClass(isActive)}
-                    href={href(item.path)}
-                  >
-                    {item.label()}
-                  </a>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      )}
     </header>
   );
 }

@@ -296,6 +296,7 @@ export default function RouterNavigationPage() {
       path="/:locale/router/navigation"
     >
       <DocSection
+        id="claim"
         description={m.routerNavigation.claimDescription}
         title={m.routerNavigation.claimTitle}
       >
@@ -332,6 +333,7 @@ export default function RouterNavigationPage() {
       </DocSection>
 
       <DocSection
+        id="timeline"
         description={m.routerNavigation.timelineDescription}
         title={m.routerNavigation.timelineTitle}
       >
@@ -345,6 +347,7 @@ export default function RouterNavigationPage() {
       </DocSection>
 
       <DocSection
+        id="guarantees"
         description={m.routerNavigation.guaranteesDescription}
         title={m.routerNavigation.guaranteesTitle}
       >
@@ -388,6 +391,7 @@ export default function RouterNavigationPage() {
       </DocSection>
 
       <DocSection
+        id="history"
         description={m.routerNavigation.historyDescription}
         title={m.routerNavigation.historyTitle}
       >
@@ -424,6 +428,7 @@ export default function RouterNavigationPage() {
       </DocSection>
 
       <DocSection
+        id="pending"
         description={m.routerNavigation.pendingDescription}
         title={m.routerNavigation.pendingTitle}
       >
@@ -435,6 +440,7 @@ export default function RouterNavigationPage() {
       </DocSection>
 
       <DocSection
+        id="animate"
         description={m.routerNavigation.animateDescription}
         title={m.routerNavigation.animateTitle}
       >
@@ -472,6 +478,7 @@ export default function RouterNavigationPage() {
       </DocSection>
 
       <DocSection
+        id="primitive"
         description={m.routerNavigation.primitiveDescription}
         title={m.routerNavigation.primitiveTitle}
       >
@@ -498,6 +505,7 @@ export default function RouterNavigationPage() {
       </DocSection>
 
       <DocSection
+        id="testing"
         description={m.routerNavigation.testingDescription}
         title={m.routerNavigation.testingTitle}
       >

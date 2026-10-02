@@ -89,17 +89,25 @@ export default function StaticDeployPage() {
   const t = m.staticDeploy;
   return (
     <DocPage introduction={t.introduction} path="/:locale/static/deploy">
-      <DocSection description={t.outputDescription} title={t.outputTitle}>
+      <DocSection
+        id="output"
+        description={t.outputDescription}
+        title={t.outputTitle}
+      >
         <CodeBlock code={OUTPUT} lang="bash" />
         <Paragraph text={t.outputLog} />
         <CodeBlock code={LOG} lang="bash" />
       </DocSection>
 
-      <DocSection description={t.arriveDescription} title={t.arriveTitle}>
+      <DocSection
+        id="arrive"
+        description={t.arriveDescription}
+        title={t.arriveTitle}
+      >
         <Paragraph text={t.arrivePath} />
       </DocSection>
 
-      <DocSection description={t.hostDescription} title={t.hostTitle}>
+      <DocSection id="host" description={t.hostDescription} title={t.hostTitle}>
         <Bullets>
           <Bullet>
             <Rich>{t.hostIndex()}</Rich>
@@ -115,7 +123,11 @@ export default function StaticDeployPage() {
         <Paragraph text={t.hostDownload} />
       </DocSection>
 
-      <DocSection description={t.notFoundDescription} title={t.notFoundTitle}>
+      <DocSection
+        id="not-found"
+        description={t.notFoundDescription}
+        title={t.notFoundTitle}
+      >
         <Paragraph text={t.notFoundOne} />
         <CodeBlock code={TWO_NOT_FOUND} lang="bash" />
         <Paragraph text={t.notFoundParams} />
@@ -126,19 +138,27 @@ export default function StaticDeployPage() {
 
       <BaseGuide mode="static" />
 
-      <DocSection description={t.sitemapDescription} title={t.sitemapTitle}>
+      <DocSection
+        id="sitemap"
+        description={t.sitemapDescription}
+        title={t.sitemapTitle}
+      >
         <CodeBlock code={SITE} lang="ts" />
         <CodeBlock code={SITEMAP} lang="md" />
         <Paragraph text={t.sitemapDetails} />
       </DocSection>
 
-      <DocSection description={t.cspDescription} title={t.cspTitle}>
+      <DocSection id="csp" description={t.cspDescription} title={t.cspTitle}>
         <CodeBlock code={CSP} lang="ts" />
         <Paragraph text={t.cspApp} />
         <Paragraph text={t.cspRefuses} />
       </DocSection>
 
-      <DocSection description={t.optionsDescription} title={t.optionsTitle}>
+      <DocSection
+        id="options"
+        description={t.optionsDescription}
+        title={t.optionsTitle}
+      >
         <GuideTable
           head={[
             t.optionsTable.option,
@@ -196,7 +216,11 @@ export default function StaticDeployPage() {
         <CodeBlock code={ROUTES_DIR} lang="ts" />
       </DocSection>
 
-      <DocSection description={t.stopsDescription} title={t.stopsTitle}>
+      <DocSection
+        id="stops"
+        description={t.stopsDescription}
+        title={t.stopsTitle}
+      >
         <Bullets>
           <Bullet>
             <Rich>{t.stopsGrammar()}</Rich> —{' '}
@@ -267,7 +291,11 @@ export default function StaticDeployPage() {
         </Bullets>
       </DocSection>
 
-      <DocSection description={t.cannotDescription} title={t.cannotTitle}>
+      <DocSection
+        id="cannot"
+        description={t.cannotDescription}
+        title={t.cannotTitle}
+      >
         <Paragraph text={t.cannotServer}>
           <LocaleAnchor path="/:locale/server">@k8ordo/server</LocaleAnchor>
         </Paragraph>

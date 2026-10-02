@@ -121,7 +121,11 @@ export default function ColorSchemeGetStartedPage() {
       introduction={t.introduction}
       path="/:locale/color-scheme/get-started"
     >
-      <DocSection description={t.owns.description} title={t.owns.title}>
+      <DocSection
+        id="owns"
+        description={t.owns.description}
+        title={t.owns.title}
+      >
         <ul className="text-fg-mute flex flex-col gap-2 pl-6">
           <li className="list-disc">
             <Rich>{t.owns.choice()}</Rich>
@@ -149,7 +153,11 @@ export default function ColorSchemeGetStartedPage() {
         </ul>
       </DocSection>
 
-      <DocSection description={t.install.description} title={t.install.title}>
+      <DocSection
+        id="install"
+        description={t.install.description}
+        title={t.install.title}
+      >
         <InstallTabs
           npm={
             <CodeBlock
@@ -182,7 +190,11 @@ export default function ColorSchemeGetStartedPage() {
         />
       </DocSection>
 
-      <DocSection description={t.provider.description} title={t.provider.title}>
+      <DocSection
+        id="provider"
+        description={t.provider.description}
+        title={t.provider.title}
+      >
         <CodeBlock code={LAYOUT} lang="tsx" />
         <Heading level="h3">
           <Rich>{t.provider.bodyTitle()}</Rich>
@@ -198,7 +210,11 @@ export default function ColorSchemeGetStartedPage() {
         </p>
       </DocSection>
 
-      <DocSection description={t.switcher.description} title={t.switcher.title}>
+      <DocSection
+        id="switcher"
+        description={t.switcher.description}
+        title={t.switcher.title}
+      >
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>
@@ -266,14 +282,18 @@ export default function ColorSchemeGetStartedPage() {
         <CodeBlock code={OUTSIDE_ERROR} lang="md" />
       </DocSection>
 
-      <DocSection description={t.defaults.description} title={t.defaults.title}>
+      <DocSection
+        id="defaults"
+        description={t.defaults.description}
+        title={t.defaults.title}
+      >
         <CodeBlock code={DEFAULT_DARK} lang="tsx" />
         <p className="text-fg-mute leading-relaxed">
           <Rich>{t.defaults.notStored()}</Rich>
         </p>
       </DocSection>
 
-      <DocSection title={t.next.title}>
+      <DocSection id="next" title={t.next.title}>
         <ul className="flex flex-col gap-3 pl-6">
           <li className="list-disc">
             <LocaleAnchor path="/:locale/color-scheme/styling">

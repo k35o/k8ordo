@@ -198,7 +198,11 @@ export default function ServerActionsPage() {
   const t = m.serverActions;
   return (
     <DocPage introduction={t.introduction} path="/:locale/server/actions">
-      <DocSection description={t.declareDescription} title={t.declareTitle}>
+      <DocSection
+        id="declare"
+        description={t.declareDescription}
+        title={t.declareTitle}
+      >
         <CodeBlock code={TALKS} lang="ts" />
         <CodeBlock code={ACTIONS} lang="ts" />
         <Paragraph text={t.declareForm} />
@@ -206,20 +210,30 @@ export default function ServerActionsPage() {
       </DocSection>
 
       <DocSection
+        id="round-trip"
         description={t.roundTripDescription}
         title={t.roundTripTitle}
       />
 
-      <DocSection description={t.noJsDescription} title={t.noJsTitle} />
+      <DocSection
+        id="no-js"
+        description={t.noJsDescription}
+        title={t.noJsTitle}
+      />
 
       <DocSection
+        id="directives"
         description={t.directivesDescription}
         title={t.directivesTitle}
       >
         <Paragraph text={t.directivesName} />
       </DocSection>
 
-      <DocSection description={t.redirectDescription} title={t.redirectTitle}>
+      <DocSection
+        id="redirect"
+        description={t.redirectDescription}
+        title={t.redirectTitle}
+      >
         <CodeBlock code={LEAVE} lang="ts" />
         <CodeBlock code={LEAVE_PAGE} lang="tsx" />
         <Paragraph text={t.redirectAnswers} />
@@ -231,7 +245,11 @@ export default function ServerActionsPage() {
         </Paragraph>
       </DocSection>
 
-      <DocSection description={t.contextDescription} title={t.contextTitle}>
+      <DocSection
+        id="context"
+        description={t.contextDescription}
+        title={t.contextTitle}
+      >
         <CodeBlock code={SIGN_IN} lang="ts" />
         <Paragraph text={t.contextAnswer}>
           <LocaleAnchor path="/:locale/server/guards">
@@ -241,7 +259,11 @@ export default function ServerActionsPage() {
         <Paragraph text={t.contextLocale} />
       </DocSection>
 
-      <DocSection description={t.requestDescription} title={t.requestTitle}>
+      <DocSection
+        id="request"
+        description={t.requestDescription}
+        title={t.requestTitle}
+      >
         <CodeBlock code={REQUEST} lang="tsx" />
         <GuideTable
           head={[
@@ -283,7 +305,11 @@ export default function ServerActionsPage() {
         <Paragraph text={t.requestStatic} />
       </DocSection>
 
-      <DocSection description={t.originDescription} title={t.originTitle}>
+      <DocSection
+        id="origin"
+        description={t.originDescription}
+        title={t.originTitle}
+      >
         <Paragraph text={t.originProxy}>
           <LocaleAnchor path="/:locale/server/deploy">
             {m.server.navDeploy()}
@@ -291,7 +317,7 @@ export default function ServerActionsPage() {
         </Paragraph>
       </DocSection>
 
-      <DocSection description={t.formDescription} title={t.formTitle}>
+      <DocSection id="form" description={t.formDescription} title={t.formTitle}>
         <CodeBlock code={GUESTBOOK_SCHEMA} lang="ts" />
         <CodeBlock code={GUESTBOOK_ACTION} lang="ts" />
         <CodeBlock code={GUESTBOOK_FORM} lang="tsx" />
@@ -301,7 +327,7 @@ export default function ServerActionsPage() {
         </Paragraph>
       </DocSection>
 
-      <DocSection description={t.buysDescription} title={t.buysTitle}>
+      <DocSection id="buys" description={t.buysDescription} title={t.buysTitle}>
         <Bullets>
           <Bullet>
             <Rich>{t.buys404()}</Rich>

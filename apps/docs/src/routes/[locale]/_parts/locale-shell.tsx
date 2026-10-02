@@ -1,44 +1,43 @@
 'use client';
 
 import type { Message } from '@k8ordo/i18n';
-import { useMatch, usePathname } from '@k8ordo/router';
+import { matchPath, useMatch, usePathname } from '@k8ordo/router';
 import { UIProvider, Drawer, Heading, IconButton, ListIcon } from '@k8ordo/ui';
 import { useEffect, useRef, useState, ViewTransition } from 'react';
-import type { FC, ReactNode } from 'react';
+import type { CSSProperties, FC, ReactNode } from 'react';
 
 import { Footer } from '../../../components/footer';
 import { LocaleAnchor } from '../../../components/locale-anchor';
 import { Navigation } from '../../../components/navigation';
+import { PackageSidebar } from '../../../components/package-sidebar';
 import { SideNavigation } from '../../../components/side-navigation';
 import { aiCategories } from '../../../data/ai-nav';
 import { componentCategoriesOf } from '../../../data/components-nav';
 import type { ComponentGroups } from '../../../data/components-nav';
 import type { NavCategory } from '../../../data/nav-types';
+import { PACKAGES } from '../../../data/packages';
+import type { PackageEntry } from '../../../data/packages';
 import { locales } from '../../../i18n';
-import type { SitePath } from '../../../links';
 import * as m from '../../../messages';
 import { WritingModeProvider } from '../../../theme/writing-mode-context';
 
-type SideNavConfig = {
+type CatalogConfig = {
   categories: readonly NavCategory[];
   title: Message;
-  catalogPath: SitePath;
 };
 
-type Section = '/:locale/ui/components' | '/:locale/ui/ai';
+type Catalog = '/:locale/ui/components' | '/:locale/ui/ai';
 
 /**
  * `pattern` の配下のページが開いているか。`/:locale/ui/components/*` は
  * /ja/ui/components/button に合い、一覧ページの /ja/ui/components 自身には
- * 合わない（末尾のスラッシュは正規化で落ちる）ので、一覧ページはサイドナビ
- * 無しのまま。パターンは生成された表に対して型で検査される。
+ * 合わない（末尾のスラッシュは正規化で落ちる）。パターンは生成された表に
+ * 対して型で検査される。
  */
-const useBelow = (pattern: Section): boolean =>
+const useBelow = (pattern: Catalog): boolean =>
   useMatch(`${pattern}/*`) !== null;
 
-function useSideNavConfig(
-  componentGroups: ComponentGroups,
-): SideNavConfig | null {
+function useCatalog(componentGroups: ComponentGroups): CatalogConfig | null {
   const components = useBelow('/:locale/ui/components');
   const ai = useBelow('/:locale/ui/ai');
 
@@ -46,18 +45,22 @@ function useSideNavConfig(
     return {
       categories: componentCategoriesOf(componentGroups),
       title: m.nav.components,
-      catalogPath: '/:locale/ui/components',
     };
   }
   if (ai) {
-    return {
-      categories: aiCategories,
-      title: m.nav.ai,
-      catalogPath: '/:locale/ui/ai',
-    };
+    return { categories: aiCategories, title: m.nav.ai };
   }
   return null;
 }
+
+/**
+ * 開いているパッケージのドキュメントのページ。ランディング（`/:locale/form`
+ * そのもの）は `/*` に合わないので、サイドバーを持たない全幅のページのまま。
+ */
+const useDocPackage = (): PackageEntry | undefined => {
+  const pathname = usePathname();
+  return PACKAGES.find((pkg) => matchPath(`${pkg.path}/*`, pathname) !== null);
+};
 
 /**
  * ページの差し替えをクロスフェードする。ルーターが付ける `navigation` の型で
@@ -74,6 +77,23 @@ const PageTransition: FC<{ children: ReactNode }> = ({ children }) => (
   </ViewTransition>
 );
 
+const Sidebar: FC<{
+  pkg: PackageEntry;
+  catalog: CatalogConfig | null;
+  onNavigate?: () => void;
+}> = ({ pkg, catalog, onNavigate }) => (
+  <div className="flex flex-col gap-6">
+    <PackageSidebar onNavigate={onNavigate} pkg={pkg} />
+    {catalog !== null && (
+      <SideNavigation
+        categories={catalog.categories}
+        label={catalog.title()}
+        onNavigate={onNavigate}
+      />
+    )}
+  </div>
+);
+
 function LayoutContent({
   componentGroups,
   children,
@@ -81,10 +101,12 @@ function LayoutContent({
   componentGroups: ComponentGroups;
   children: ReactNode;
 }) {
-  const sideNavConfig = useSideNavConfig(componentGroups);
+  const pkg = useDocPackage();
+  const catalog = useCatalog(componentGroups);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  // documentをスクローラーにしたため、サイドバーは sticky で固定する。
-  // ヘッダー高さはフォント読込やブレークポイントで変動するので実測して追従させる。
+  // documentをスクローラーにしたため、サイドバーと目次は sticky で固定する。
+  // ヘッダー高さはフォント読込やブレークポイントで変動するので実測し、
+  // ページ側の目次と見出しの scroll-margin にも --header-h で渡す。
   const headerRef = useRef<HTMLDivElement>(null);
   const [headerHeight, setHeaderHeight] = useState(0);
   useEffect(() => {
@@ -103,12 +125,15 @@ function LayoutContent({
   // ページが throw したときは routes/[locale]/error.tsx がこの children の
   // 位置に描かれる（枠は残る）。境界はフレームワークが表に持つので、ここに
   // ErrorBoundary は無い。
-  return sideNavConfig ? (
-    <>
+  return (
+    <div
+      className="flex flex-1 flex-col"
+      style={{ '--header-h': `${String(headerHeight)}px` } as CSSProperties}
+    >
       <div className="bg-bg-surface sticky top-0 z-30 shrink-0" ref={headerRef}>
         <Navigation />
-        <div className="lg:hidden">
-          <div className="border-border-mute bg-bg-surface flex items-center border-b px-4 py-2">
+        {pkg !== undefined && (
+          <div className="border-border-mute bg-bg-surface flex items-center gap-2 border-b px-4 py-2 lg:hidden">
             <IconButton
               label={m.sideNav.openNavigation()}
               onClick={() => {
@@ -117,66 +142,62 @@ function LayoutContent({
             >
               <ListIcon />
             </IconButton>
+            <span className="text-fg-mute text-sm">{pkg.name}</span>
           </div>
-        </div>
+        )}
       </div>
-      <div className="flex flex-1">
-        <aside
-          className="border-border-mute sticky hidden w-60 shrink-0 self-start overflow-y-auto border-r px-3 py-4 lg:block"
-          style={{
-            top: `${headerHeight}px`,
-            height: `calc(100dvh - ${headerHeight}px)`,
-          }}
-        >
-          <SideNavigation
-            categories={sideNavConfig.categories}
-            label={sideNavConfig.title()}
-          />
-        </aside>
+      {pkg === undefined ? (
+        // ラッパーはブロックのまま保つ。flexにするとページ側の mx-auto コンテナが
+        // flexアイテム化し、stretchが効かず中身のmin-content幅で横にあふれる
         <main className="flex min-w-0 flex-1 flex-col">
-          <div className="flex-1">
+          <div className="min-w-0 flex-1">
             <PageTransition>{children}</PageTransition>
           </div>
           <Footer />
         </main>
-      </div>
-      <Drawer
-        isOpen={isDrawerOpen}
-        onClose={() => {
-          setIsDrawerOpen(false);
-        }}
-        side="left"
-        title={
-          <Heading level="h3">
-            <LocaleAnchor path={sideNavConfig.catalogPath}>
-              {sideNavConfig.title()}
-            </LocaleAnchor>
-          </Heading>
-        }
-      >
-        <SideNavigation
-          categories={sideNavConfig.categories}
-          label={sideNavConfig.title()}
-          onNavigate={() => {
-            setIsDrawerOpen(false);
-          }}
-        />
-      </Drawer>
-    </>
-  ) : (
-    <>
-      <div className="bg-bg-surface sticky top-0 z-30 shrink-0" ref={headerRef}>
-        <Navigation />
-      </div>
-      {/* ラッパーはブロックのまま保つ。flexにするとページ側の mx-auto コンテナが
-          flexアイテム化し、stretchが効かず中身のmin-content幅で横にあふれる */}
-      <main className="flex min-w-0 flex-1 flex-col">
-        <div className="min-w-0 flex-1">
-          <PageTransition>{children}</PageTransition>
-        </div>
-        <Footer />
-      </main>
-    </>
+      ) : (
+        <>
+          <div className="flex flex-1">
+            <aside
+              aria-label={m.nav.packageNavigation()}
+              className="border-border-mute sticky hidden w-64 shrink-0 self-start overflow-y-auto border-r px-4 py-8 lg:block"
+              style={{
+                top: `${String(headerHeight)}px`,
+                height: `calc(100dvh - ${String(headerHeight)}px)`,
+              }}
+            >
+              <Sidebar catalog={catalog} pkg={pkg} />
+            </aside>
+            <main className="flex min-w-0 flex-1 flex-col">
+              <div className="min-w-0 flex-1">
+                <PageTransition>{children}</PageTransition>
+              </div>
+              <Footer />
+            </main>
+          </div>
+          <Drawer
+            isOpen={isDrawerOpen}
+            onClose={() => {
+              setIsDrawerOpen(false);
+            }}
+            side="left"
+            title={
+              <Heading level="h3">
+                <LocaleAnchor path={pkg.path}>{pkg.name}</LocaleAnchor>
+              </Heading>
+            }
+          >
+            <Sidebar
+              catalog={catalog}
+              onNavigate={() => {
+                setIsDrawerOpen(false);
+              }}
+              pkg={pkg}
+            />
+          </Drawer>
+        </>
+      )}
+    </div>
   );
 }
 

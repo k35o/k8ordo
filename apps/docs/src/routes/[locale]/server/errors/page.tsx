@@ -27,7 +27,11 @@ export default function ServerErrorsPage() {
     <DocPage introduction={t.introduction} path="/:locale/server/errors">
       <ErrorsGuide mode="server" />
 
-      <DocSection description={t.statusesDescription} title={t.statusesTitle}>
+      <DocSection
+        id="statuses"
+        description={t.statusesDescription}
+        title={t.statusesTitle}
+      >
         <GuideTable head={[t.statusesTable.when, t.statusesTable.status]}>
           {STATUSES.map((row) => (
             <Row key={row.when()}>

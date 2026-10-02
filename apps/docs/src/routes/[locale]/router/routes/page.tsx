@@ -303,6 +303,7 @@ export default function RouterRoutesPage() {
       path="/:locale/router/routes"
     >
       <DocSection
+        id="shape"
         description={m.routerRoutes.shapeDescription}
         title={m.routerRoutes.shapeTitle}
       >
@@ -324,6 +325,7 @@ export default function RouterRoutesPage() {
       </DocSection>
 
       <DocSection
+        id="grammar"
         description={m.routerRoutes.grammarDescription}
         title={m.routerRoutes.grammarTitle}
       >
@@ -407,6 +409,7 @@ export default function RouterRoutesPage() {
       </DocSection>
 
       <DocSection
+        id="order"
         description={m.routerRoutes.orderDescription}
         title={m.routerRoutes.orderTitle}
       >
@@ -434,6 +437,7 @@ export default function RouterRoutesPage() {
       </DocSection>
 
       <DocSection
+        id="refused"
         description={m.routerRoutes.refusedDescription}
         title={m.routerRoutes.refusedTitle}
       >
@@ -474,6 +478,7 @@ export default function RouterRoutesPage() {
       </DocSection>
 
       <DocSection
+        id="error"
         description={m.routerRoutes.errorDescription}
         title={m.routerRoutes.errorTitle}
       >
@@ -500,6 +505,7 @@ export default function RouterRoutesPage() {
       </DocSection>
 
       <DocSection
+        id="types"
         description={m.routerRoutes.typesDescription}
         title={m.routerRoutes.typesTitle}
       >

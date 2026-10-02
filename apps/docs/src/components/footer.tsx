@@ -71,14 +71,14 @@ export function Footer() {
                 {pkg.name}
               </LocaleAnchor>
               <ul className="flex flex-col gap-2">
-                {pkg.sections.map((section) => (
-                  <li key={section.path}>
+                {pkg.groups.map(({ label, sections: [first] }) => (
+                  <li key={first.path}>
                     <LocaleAnchor
                       className={linkClass}
-                      path={section.path}
+                      path={first.path}
                       unstyled
                     >
-                      {section.label()}
+                      {label()}
                     </LocaleAnchor>
                   </li>
                 ))}

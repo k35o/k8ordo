@@ -55,11 +55,12 @@ export default function ColorSchemeStylingPage() {
   return (
     <DocPage introduction={t.introduction} path="/:locale/color-scheme/styling">
       <DocSection
+        id="class-section"
         description={t.classSection.description}
         title={t.classSection.title}
       />
 
-      <DocSection description={t.ui.description} title={t.ui.title}>
+      <DocSection id="ui" description={t.ui.description} title={t.ui.title}>
         <CodeBlock code={UI_CSS} lang="css" />
         <p className="text-fg-mute leading-relaxed">
           <Rich>{t.ui.variants()}</Rich>
@@ -67,14 +68,22 @@ export default function ColorSchemeStylingPage() {
         <CodeBlock code={UI_MARKUP} lang="tsx" />
       </DocSection>
 
-      <DocSection description={t.property.description} title={t.property.title}>
+      <DocSection
+        id="property"
+        description={t.property.description}
+        title={t.property.title}
+      >
         <CodeBlock code={UI_PROPERTY} lang="css" />
         <p className="text-fg-mute leading-relaxed">
           <Rich>{t.property.why()}</Rich>
         </p>
       </DocSection>
 
-      <DocSection description={t.contrast.description} title={t.contrast.title}>
+      <DocSection
+        id="contrast"
+        description={t.contrast.description}
+        title={t.contrast.title}
+      >
         <p className="text-fg-mute leading-relaxed">
           <Rich>{t.contrast.ui()}</Rich>
         </p>
@@ -88,11 +97,19 @@ export default function ColorSchemeStylingPage() {
         </p>
       </DocSection>
 
-      <DocSection description={t.tailwind.description} title={t.tailwind.title}>
+      <DocSection
+        id="tailwind"
+        description={t.tailwind.description}
+        title={t.tailwind.title}
+      >
         <CodeBlock code={TAILWIND_CSS} lang="css" />
       </DocSection>
 
-      <DocSection description={t.plain.description} title={t.plain.title}>
+      <DocSection
+        id="plain"
+        description={t.plain.description}
+        title={t.plain.title}
+      >
         <CodeBlock code={PLAIN_CSS} lang="css" />
       </DocSection>
     </DocPage>

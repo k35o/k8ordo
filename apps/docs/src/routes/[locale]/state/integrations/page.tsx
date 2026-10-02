@@ -147,6 +147,7 @@ export default function StateIntegrationsPage() {
       path="/:locale/state/integrations"
     >
       <DocSection
+        id="routers"
         description={m.stateIntegrations.routersDescription}
         title={m.stateIntegrations.routersTitle}
       >
@@ -227,6 +228,7 @@ export default function StateIntegrationsPage() {
       </DocSection>
 
       <DocSection
+        id="form"
         description={m.stateIntegrations.formDescription}
         title={m.stateIntegrations.formTitle}
       >
@@ -256,6 +258,7 @@ export default function StateIntegrationsPage() {
       </DocSection>
 
       <DocSection
+        id="color"
         description={m.stateIntegrations.colorDescription}
         title={m.stateIntegrations.colorTitle}
       >
@@ -277,6 +280,7 @@ export default function StateIntegrationsPage() {
       </DocSection>
 
       <DocSection
+        id="testing"
         description={m.stateIntegrations.testingDescription}
         title={m.stateIntegrations.testingTitle}
       >

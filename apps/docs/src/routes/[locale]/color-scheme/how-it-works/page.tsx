@@ -208,7 +208,11 @@ export default function ColorSchemeHowItWorksPage() {
       introduction={t.introduction}
       path="/:locale/color-scheme/how-it-works"
     >
-      <DocSection description={t.rule.description} title={t.rule.title}>
+      <DocSection
+        id="rule"
+        description={t.rule.description}
+        title={t.rule.title}
+      >
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>
@@ -265,7 +269,11 @@ export default function ColorSchemeHowItWorksPage() {
         <SchemeInspector />
       </DocSection>
 
-      <DocSection description={t.script.description} title={t.script.title}>
+      <DocSection
+        id="script"
+        description={t.script.description}
+        title={t.script.title}
+      >
         <Heading level="h3">
           <Rich>{t.script.readsTitle()}</Rich>
         </Heading>
@@ -314,7 +322,11 @@ export default function ColorSchemeHowItWorksPage() {
         </p>
       </DocSection>
 
-      <DocSection description={t.step.description} title={t.step.title}>
+      <DocSection
+        id="step"
+        description={t.step.description}
+        title={t.step.title}
+      >
         <Bullets
           items={[t.step.choice, t.step.system, t.step.tabs, t.step.hydration]}
         />
@@ -327,6 +339,7 @@ export default function ColorSchemeHowItWorksPage() {
       </DocSection>
 
       <DocSection
+        id="guarantees"
         description={t.guarantees.description}
         title={t.guarantees.title}
       >
@@ -352,7 +365,11 @@ export default function ColorSchemeHowItWorksPage() {
         />
       </DocSection>
 
-      <DocSection description={t.types.description} title={t.types.title}>
+      <DocSection
+        id="types"
+        description={t.types.description}
+        title={t.types.title}
+      >
         <CodeBlock code={TYPES} lang="ts" />
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
@@ -382,7 +399,11 @@ export default function ColorSchemeHowItWorksPage() {
         </div>
       </DocSection>
 
-      <DocSection description={t.testing.description} title={t.testing.title}>
+      <DocSection
+        id="testing"
+        description={t.testing.description}
+        title={t.testing.title}
+      >
         <p className="text-fg-mute leading-relaxed">
           <Rich>{t.testing.codeDescription()}</Rich>
         </p>

@@ -193,7 +193,11 @@ function ReferenceTable({
 export default function I18nLocalesPage() {
   return (
     <DocPage introduction={s.introduction} path="/:locale/i18n/locales">
-      <DocSection description={s.define.description} title={s.define.title}>
+      <DocSection
+        id="define"
+        description={s.define.description}
+        title={s.define.title}
+      >
         <CodeBlock code={DEFINE} lang="ts" />
         <p className="text-fg-mute leading-relaxed">
           <Rich>{s.define.default()}</Rich>
@@ -226,6 +230,7 @@ export default function I18nLocalesPage() {
       </DocSection>
 
       <DocSection
+        id="definition"
         description={s.definition.description}
         title={s.definition.title}
       >
@@ -241,13 +246,21 @@ export default function I18nLocalesPage() {
         <CodeBlock code={HTML_DIR} lang="tsx" />
       </DocSection>
 
-      <DocSection description={s.oneSet.description} title={s.oneSet.title}>
+      <DocSection
+        id="one-set"
+        description={s.oneSet.description}
+        title={s.oneSet.title}
+      >
         <p className="text-fg-mute leading-relaxed">
           <Rich>{s.oneSet.last()}</Rich>
         </p>
       </DocSection>
 
-      <DocSection description={s.members.description} title={s.members.title}>
+      <DocSection
+        id="members"
+        description={s.members.description}
+        title={s.members.title}
+      >
         <ReferenceTable codeColumn={s.members.memberColumn} rows={MEMBERS} />
         <p className="text-fg-mute leading-relaxed">
           <Rich>{s.members.more()}</Rich>
@@ -261,13 +274,18 @@ export default function I18nLocalesPage() {
         <ReferenceTable codeColumn={s.members.typeColumn} rows={TYPES} />
       </DocSection>
 
-      <DocSection description={s.bcp47.description} title={s.bcp47.title}>
+      <DocSection
+        id="bcp47"
+        description={s.bcp47.description}
+        title={s.bcp47.title}
+      >
         <p className="text-fg-mute leading-relaxed">
           <Rich>{s.bcp47.spelling()}</Rich>
         </p>
       </DocSection>
 
       <DocSection
+        id="negotiation"
         description={s.negotiation.description}
         title={s.negotiation.title}
       >
@@ -339,6 +357,7 @@ export default function I18nLocalesPage() {
       </DocSection>
 
       <DocSection
+        id="accept-language"
         description={s.acceptLanguage.description}
         title={s.acceptLanguage.title}
       >
@@ -386,7 +405,11 @@ export default function I18nLocalesPage() {
         </div>
       </DocSection>
 
-      <DocSection description={s.demo.description} title={s.demo.title}>
+      <DocSection
+        id="demo"
+        description={s.demo.description}
+        title={s.demo.title}
+      >
         <NegotiationDemo />
       </DocSection>
     </DocPage>

@@ -80,12 +80,20 @@ export function ErrorsGuide({ mode }: { mode: Mode }) {
 
   return (
     <>
-      <DocSection description={t.errorDescription} title={t.errorTitle}>
+      <DocSection
+        id="error"
+        description={t.errorDescription}
+        title={t.errorTitle}
+      >
         <CodeBlock code={ERROR} lang="tsx" />
         <Paragraph text={t.errorProps} />
       </DocSection>
 
-      <DocSection description={t.scopeDescription} title={t.scopeTitle}>
+      <DocSection
+        id="scope"
+        description={t.scopeDescription}
+        title={t.scopeTitle}
+      >
         <CodeBlock code={SCOPE_TREE} lang="bash" />
         <Paragraph text={t.scopeExample} />
         <Paragraph text={t.scopeSite} />
@@ -93,6 +101,7 @@ export function ErrorsGuide({ mode }: { mode: Mode }) {
       </DocSection>
 
       <DocSection
+        id="demo"
         description={() => t.demoDescription(m.error.retry())}
         title={t.demoTitle}
       >
@@ -100,6 +109,7 @@ export function ErrorsGuide({ mode }: { mode: Mode }) {
       </DocSection>
 
       <DocSection
+        id="server-render"
         description={own.serverRenderDescription}
         title={own.serverRenderTitle}
       >
@@ -108,11 +118,19 @@ export function ErrorsGuide({ mode }: { mode: Mode }) {
         <Paragraph text={own.serverRenderBrowser} />
       </DocSection>
 
-      <DocSection description={t.withoutDescription} title={t.withoutTitle}>
+      <DocSection
+        id="without"
+        description={t.withoutDescription}
+        title={t.withoutTitle}
+      >
         <Paragraph text={own.withoutNote} />
       </DocSection>
 
-      <DocSection description={t.notFoundDescription} title={t.notFoundTitle}>
+      <DocSection
+        id="not-found"
+        description={t.notFoundDescription}
+        title={t.notFoundTitle}
+      >
         <CodeBlock code={NOT_FOUND} lang="tsx" />
         <Paragraph text={t.notFoundParams} />
         <Paragraph text={own.notFoundNote} />
@@ -129,6 +147,7 @@ export function ErrorsGuide({ mode }: { mode: Mode }) {
       </DocSection>
 
       <DocSection
+        id="page-not-found"
         description={t.pageNotFoundDescription}
         title={t.pageNotFoundTitle}
       >
@@ -145,7 +164,11 @@ export function ErrorsGuide({ mode }: { mode: Mode }) {
         )}
       </DocSection>
 
-      <DocSection description={t.redirectDescription} title={t.redirectTitle}>
+      <DocSection
+        id="redirect"
+        description={t.redirectDescription}
+        title={t.redirectTitle}
+      >
         <CodeBlock code={REDIRECT} lang="ts" />
         <CodeBlock code={REDIRECT_PATTERN} lang="ts" />
         <Paragraph text={t.redirectPattern} />

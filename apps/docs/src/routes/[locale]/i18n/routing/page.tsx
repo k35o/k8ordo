@@ -185,7 +185,11 @@ const TR = 'border-border-mute border-b';
 export default function I18nRoutingPage() {
   return (
     <DocPage introduction={s.introduction} path="/:locale/i18n/routing">
-      <DocSection description={s.sources.description} title={s.sources.title}>
+      <DocSection
+        id="sources"
+        description={s.sources.description}
+        title={s.sources.title}
+      >
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>
@@ -224,7 +228,11 @@ export default function I18nRoutingPage() {
         </p>
       </DocSection>
 
-      <DocSection description={s.schema.description} title={s.schema.title}>
+      <DocSection
+        id="schema"
+        description={s.schema.description}
+        title={s.schema.title}
+      >
         <CodeBlock code={LOCALE_LAYOUT} lang="tsx" />
         <ul className="text-fg-mute flex flex-col gap-2 pl-6">
           <li className="list-disc">
@@ -248,7 +256,7 @@ export default function I18nRoutingPage() {
         </ul>
       </DocSection>
 
-      <DocSection description={s.run.description} title={s.run.title}>
+      <DocSection id="run" description={s.run.description} title={s.run.title}>
         <CodeBlock code={RUN} lang="ts" />
         <p className="text-fg-mute leading-relaxed">
           <Rich>{s.run.throws()}</Rich>
@@ -256,6 +264,7 @@ export default function I18nRoutingPage() {
       </DocSection>
 
       <DocSection
+        id="get-locale"
         description={s.getLocale.description}
         title={s.getLocale.title}
       >
@@ -274,7 +283,11 @@ export default function I18nRoutingPage() {
         </ul>
       </DocSection>
 
-      <DocSection description={s.switcher.description} title={s.switcher.title}>
+      <DocSection
+        id="switcher"
+        description={s.switcher.description}
+        title={s.switcher.title}
+      >
         <CodeBlock code={SWITCHER} lang="tsx" />
         <ul className="text-fg-mute flex flex-col gap-2 pl-6">
           <li className="list-disc">
@@ -295,7 +308,11 @@ export default function I18nRoutingPage() {
         </p>
       </DocSection>
 
-      <DocSection description={s.root.description} title={s.root.title}>
+      <DocSection
+        id="root"
+        description={s.root.description}
+        title={s.root.title}
+      >
         <CodeBlock code={ROOT_PAGE} lang="tsx" />
         <ul className="text-fg-mute flex flex-col gap-2 pl-6">
           <li className="list-disc">
@@ -318,7 +335,11 @@ export default function I18nRoutingPage() {
         </p>
       </DocSection>
 
-      <DocSection description={s.htmlLang.description} title={s.htmlLang.title}>
+      <DocSection
+        id="html-lang"
+        description={s.htmlLang.description}
+        title={s.htmlLang.title}
+      >
         <CodeBlock code={ROOT_LAYOUT} lang="tsx" />
         <p className="text-fg-mute leading-relaxed">
           <Rich>{s.htmlLang.same()}</Rich>
@@ -326,6 +347,7 @@ export default function I18nRoutingPage() {
       </DocSection>
 
       <DocSection
+        id="static-build"
         description={s.staticBuild.description}
         title={s.staticBuild.title}
       >
@@ -351,7 +373,11 @@ export default function I18nRoutingPage() {
         </p>
       </DocSection>
 
-      <DocSection description={s.links.description} title={s.links.title}>
+      <DocSection
+        id="links"
+        description={s.links.description}
+        title={s.links.title}
+      >
         <CodeBlock code={LINKS} lang="ts" />
         <CodeBlock code={PRODUCT_LINK} lang="tsx" />
         <ul className="text-fg-mute flex flex-col gap-2 pl-6">

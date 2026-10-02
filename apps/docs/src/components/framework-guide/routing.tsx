@@ -289,7 +289,7 @@ export function RoutingGuide({ mode }: { mode: Mode }) {
 
   return (
     <>
-      <DocSection description={t.treeDescription} title={t.treeTitle}>
+      <DocSection id="tree" description={t.treeDescription} title={t.treeTitle}>
         <CodeBlock code={TREE} lang="bash" />
         <GuideTable head={[t.urlTable.file, t.urlTable.url, t.urlTable.role]}>
           <Row>
@@ -397,7 +397,11 @@ export function RoutingGuide({ mode }: { mode: Mode }) {
         </GuideTable>
       </DocSection>
 
-      <DocSection description={t.filesDescription} title={t.filesTitle}>
+      <DocSection
+        id="files"
+        description={t.filesDescription}
+        title={t.filesTitle}
+      >
         <GuideTable
           head={[t.filesTable.file, t.filesTable.role, t.filesTable.receives]}
         >
@@ -503,7 +507,11 @@ export function RoutingGuide({ mode }: { mode: Mode }) {
         </Paragraph>
       </DocSection>
 
-      <DocSection description={t.segmentsDescription} title={t.segmentsTitle}>
+      <DocSection
+        id="segments"
+        description={t.segmentsDescription}
+        title={t.segmentsTitle}
+      >
         <GuideTable
           head={[
             t.segmentsTable.form,
@@ -559,20 +567,32 @@ export function RoutingGuide({ mode }: { mode: Mode }) {
         <Paragraph text={t.segmentsNoRest} />
       </DocSection>
 
-      <DocSection description={t.propsDescription} title={t.propsTitle}>
+      <DocSection
+        id="props"
+        description={t.propsDescription}
+        title={t.propsTitle}
+      >
         <CodeBlock code={PAGE_PROPS} lang="tsx" />
         <Paragraph text={t.propsTypes} />
         <Paragraph text={t.propsSite} />
         <CodeBlock code={ROOT_LAYOUT} lang="tsx" />
       </DocSection>
 
-      <DocSection description={t.orderDescription} title={t.orderTitle}>
+      <DocSection
+        id="order"
+        description={t.orderDescription}
+        title={t.orderTitle}
+      >
         <Paragraph text={t.orderGroups} />
         <CodeBlock code={SHADOW_TREE} lang="bash" />
         <CodeBlock code={SHADOW_ERROR} lang="bash" />
       </DocSection>
 
-      <DocSection description={t.refusesDescription} title={t.refusesTitle}>
+      <DocSection
+        id="refuses"
+        description={t.refusesDescription}
+        title={t.refusesTitle}
+      >
         <CodeBlock code={REFUSED} lang="bash" />
         <GuideTable head={[t.refusesTable.contains, t.refusesTable.error]}>
           {REFUSALS.map((refusal) => (
@@ -631,7 +651,11 @@ export function RoutingGuide({ mode }: { mode: Mode }) {
         )}
       </DocSection>
 
-      <DocSection description={t.loadingDescription} title={t.loadingTitle}>
+      <DocSection
+        id="loading"
+        description={t.loadingDescription}
+        title={t.loadingTitle}
+      >
         <CodeBlock code={LOADING} lang="tsx" />
         <Paragraph text={t.loadingWhen}>
           <LocaleAnchor path="/:locale/router/navigation">
@@ -647,7 +671,11 @@ export function RoutingGuide({ mode }: { mode: Mode }) {
         />
       </DocSection>
 
-      <DocSection description={t.routeDescription} title={t.routeTitle}>
+      <DocSection
+        id="route"
+        description={t.routeDescription}
+        title={t.routeTitle}
+      >
         <CodeBlock code={ROUTE} lang="ts" />
         <Paragraph text={t.routeReceives} />
         <Paragraph text={t.routeOrder} />
@@ -660,7 +688,11 @@ export function RoutingGuide({ mode }: { mode: Mode }) {
         />
       </DocSection>
 
-      <DocSection description={t.generatedDescription} title={t.generatedTitle}>
+      <DocSection
+        id="generated"
+        description={t.generatedDescription}
+        title={t.generatedTitle}
+      >
         <GuideTable head={[t.generatedTable.file, t.generatedTable.holds]}>
           <Row>
             <Cell nowrap>
@@ -697,12 +729,20 @@ export function RoutingGuide({ mode }: { mode: Mode }) {
         <Paragraph text={t.generatedTypecheck} />
       </DocSection>
 
-      <DocSection description={t.titlesDescription} title={t.titlesTitle}>
+      <DocSection
+        id="titles"
+        description={t.titlesDescription}
+        title={t.titlesTitle}
+      >
         <CodeBlock code={TITLE} lang="tsx" />
         <Paragraph text={t.titlesOne} />
       </DocSection>
 
-      <DocSection description={t.linksDescription} title={t.linksTitle}>
+      <DocSection
+        id="links"
+        description={t.linksDescription}
+        title={t.linksTitle}
+      >
         <CodeBlock code={LINKS} lang="tsx" />
         <Paragraph text={t.linksMore}>
           <LocaleAnchor path="/:locale/router/links">
@@ -715,7 +755,11 @@ export function RoutingGuide({ mode }: { mode: Mode }) {
         </Paragraph>
       </DocSection>
 
-      <DocSection description={t.prefetchDescription} title={t.prefetchTitle}>
+      <DocSection
+        id="prefetch"
+        description={t.prefetchDescription}
+        title={t.prefetchTitle}
+      >
         <Bullets>
           <Bullet>
             <Rich>{t.prefetchSameOrigin()}</Rich>

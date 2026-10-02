@@ -204,6 +204,7 @@ export default function RouterFrameworkPage() {
       path="/:locale/router/framework"
     >
       <DocSection
+        id="no-table"
         description={m.routerFramework.noTableDescription}
         title={m.routerFramework.noTableTitle}
       >
@@ -246,6 +247,7 @@ export default function RouterFrameworkPage() {
       </DocSection>
 
       <DocSection
+        id="location"
         description={m.routerFramework.locationDescription}
         title={m.routerFramework.locationTitle}
       >
@@ -262,6 +264,7 @@ export default function RouterFrameworkPage() {
       </DocSection>
 
       <DocSection
+        id="props"
         description={m.routerFramework.propsDescription}
         title={m.routerFramework.propsTitle}
       >
@@ -286,6 +289,7 @@ export default function RouterFrameworkPage() {
       </DocSection>
 
       <DocSection
+        id="schema"
         description={m.routerFramework.schemaDescription}
         title={m.routerFramework.schemaTitle}
       >
@@ -330,6 +334,7 @@ export default function RouterFrameworkPage() {
       </DocSection>
 
       <DocSection
+        id="provider"
         description={m.routerFramework.providerDescription}
         title={m.routerFramework.providerTitle}
       >
@@ -345,6 +350,7 @@ export default function RouterFrameworkPage() {
       </DocSection>
 
       <DocSection
+        id="writes"
         description={m.routerFramework.writesDescription}
         title={m.routerFramework.writesTitle}
       >
@@ -400,13 +406,14 @@ export default function RouterFrameworkPage() {
       </DocSection>
 
       <DocSection
+        id="transition"
         description={m.routerFramework.transitionDescription}
         title={m.routerFramework.transitionTitle}
       >
         <CodeBlock code={ROOT_LAYOUT} lang="tsx" />
       </DocSection>
 
-      <DocSection title={m.routerFramework.nextTitle}>
+      <DocSection id="next" title={m.routerFramework.nextTitle}>
         <ul className="flex flex-col gap-3 pl-6">
           <li className="list-disc">
             <LocaleAnchor path="/:locale/static/routing">

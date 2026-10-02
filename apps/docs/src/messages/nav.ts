@@ -49,3 +49,33 @@ export const aiAgents = message({
   ja: 'AIエージェント',
   en: 'AI Agents',
 });
+
+export const groupStart = message({
+  ja: 'はじめに',
+  en: 'Getting started',
+});
+
+export const groupGuides = message({
+  ja: 'ガイド',
+  en: 'Guides',
+});
+
+export const groupConcepts = message({
+  ja: '仕組み',
+  en: 'Concepts',
+});
+
+export const groupReference = message({
+  ja: 'リファレンス',
+  en: 'Reference',
+});
+
+export const groupCatalog = message({
+  ja: 'カタログ',
+  en: 'Catalog',
+});
+
+export const packageNavigation = message({
+  ja: 'ドキュメント',
+  en: 'Documentation',
+});
