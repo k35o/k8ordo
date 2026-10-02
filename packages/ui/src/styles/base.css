@@ -321,17 +321,17 @@
     position: relative;
     padding-inline-start: 2rem;
   }
-  .ao-code-block [data-mark] {
+  .ao-code-block :is([data-mark], [data-has-callout]) {
     background-color: var(--mark-bg);
   }
   /* 行の頭の線は疑似要素の border で描く。強制カラーでは影と地の色が
      消えるが、border はシステムの色で塗り直されて残る */
-  .ao-code-block [data-mark]::after {
+  .ao-code-block :is([data-mark], [data-has-callout])::after {
     content: '';
     position: absolute;
     inset-block: 0;
     inset-inline-start: 0;
-    border-inline-start: 3px solid var(--mark-border);
+    border-inline-start: 6px solid var(--mark-border);
   }
   .ao-code-block [data-mark='highlight'] {
     --mark-bg: light-dark(rgb(191 135 0 / 0.14), rgb(245 200 80 / 0.16));
@@ -344,6 +344,11 @@
   .ao-code-block [data-mark='remove'] {
     --mark-bg: light-dark(rgb(207 34 46 / 0.12), rgb(245 110 110 / 0.16));
     --mark-border: light-dark(rgb(207 34 46), rgb(245 110 110));
+  }
+  /* 注記の指す行。印と重なったら注記の色にする */
+  .ao-code-block [data-has-callout] {
+    --mark-bg: light-dark(rgb(80 140 220 / 0.18), rgb(120 180 245 / 0.3));
+    --mark-border: light-dark(rgb(80 140 220), rgb(120 180 245));
   }
   .ao-code-block [data-mark='add']::before,
   .ao-code-block [data-mark='remove']::before {
@@ -358,24 +363,39 @@
   .ao-code-block [data-mark='remove']::before {
     content: '−';
   }
-  /* 注記はコードの行ではないので、行の流れの中に置いたまま箱として見せる */
+  /* 注記は、指す行の下に置く吹き出し。上向きの三角でその行を指す */
   .ao-code-block [data-callout] {
+    position: relative;
     display: inline-block;
-    box-sizing: border-box;
-    min-inline-size: calc(100% - 2rem - var(--ao-callout-indent));
-    margin-block: 0.25rem 0.5rem;
+    margin-block: 0.6em 0.3em;
     margin-inline: calc(1rem + var(--ao-callout-indent)) 1rem;
-    padding: 0.375rem 0.75rem;
-    border-inline-start: 3px solid var(--border-info);
-    border-start-end-radius: 0.5rem;
-    border-end-end-radius: 0.5rem;
-    background-color: var(--bg-info);
-    color: var(--fg-info);
+    padding: 0.5em 1em;
+    /* 強制カラーでは地が消えるので、透明な枠をシステムの色で残す */
+    border: 1px solid transparent;
+    border-radius: 0.5em;
+    background-color: rgb(80 140 220);
+    box-shadow: 0 4px 12px rgb(0 0 0 / 0.35);
+    color: rgb(255 255 255);
+    font-size: 0.9em;
+    font-weight: var(--font-weight-medium);
+    line-height: 1.4;
     white-space: normal;
   }
+  .ao-code-block [data-callout]::before {
+    content: '';
+    position: absolute;
+    inset-block-start: -0.5em;
+    inset-inline-start: 1em;
+    border-inline: 0.5em solid transparent;
+    border-block-end: 0.5em solid rgb(80 140 220);
+  }
   .ao-code-block pre[data-marked] [data-callout] {
-    min-inline-size: calc(100% - 3rem - var(--ao-callout-indent));
     margin-inline-start: calc(2rem + var(--ao-callout-indent));
+  }
+  @media (forced-colors: active) {
+    .ao-code-block [data-callout]::before {
+      display: none;
+    }
   }
 
   /*

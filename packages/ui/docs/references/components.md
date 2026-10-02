@@ -1538,8 +1538,9 @@ import { CodeBlock } from '@k8ordo/ui/code-block';
   block gives the extra height to the code, never to the header.
 - `marks` marks lines by their 1-based number: `highlight`, `add` (drawn with a
   `+`), or `remove` (drawn with a `−`). `callouts` puts a note under a line
-  (an array puts several, in order), indented like the line it points at. A
-  line can carry both. Neither is part of the copied text: the button copies
+  (an array puts several, in order) as a bubble pointing up at it, indented
+  like the line, and tints the line it points at. A line can carry both; the
+  note's tint wins. Neither is part of the copied text: the button copies
   `code` exactly.
 
 ```tsx

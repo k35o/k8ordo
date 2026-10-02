@@ -21,7 +21,11 @@ const annotate = (
 ): ShikiTransformer => ({
   name: 'k8ordo-ui:annotate',
   pre(node) {
-    if (marks !== undefined && Object.keys(marks).length > 0) {
+    // 印と注記の指す行は頭に帯を引くので、どちらかがあれば全行に帯の幅を取る
+    const annotated = [marks, callouts].some(
+      (entries) => entries !== undefined && Object.keys(entries).length > 0,
+    );
+    if (annotated) {
       node.properties['data-marked'] = '';
     }
   },
@@ -40,7 +44,8 @@ const annotate = (
     );
     for (const [index, lineNode] of lines.entries()) {
       const notes = callouts[index + 1];
-      if (notes === undefined) continue;
+      if (notes === undefined || lineNode.type !== 'element') continue;
+      lineNode.properties['data-has-callout'] = '';
       // 注記は、それが指す行の字下げに揃える
       const indent = /^\s*/u.exec(sourceLines[index] ?? '')?.[0].length ?? 0;
       const position = node.children.indexOf(lineNode);

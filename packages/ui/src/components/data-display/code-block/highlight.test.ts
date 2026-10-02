@@ -77,7 +77,7 @@ describe('highlight', () => {
     });
 
     expect(html).toMatch(
-      /<span class="line"><span>a<\/span><\/span>\n<span data-callout="" [^>]*>ここがポイント<\/span>\n<span class="line"><span>b<\/span><\/span>/u,
+      /<span class="line" data-has-callout=""><span>a<\/span><\/span>\n<span data-callout="" [^>]*>ここがポイント<\/span>\n<span class="line"><span>b<\/span><\/span>/u,
     );
   });
 
