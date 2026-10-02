@@ -1,7 +1,6 @@
 'use client';
 
-import type { Message } from '@k8ordo/i18n';
-import { matchPath, useMatch, usePathname } from '@k8ordo/router';
+import { matchPath, usePathname } from '@k8ordo/router';
 import { UIProvider, Drawer, Heading, IconButton, ListIcon } from '@k8ordo/ui';
 import { useEffect, useRef, useState, ViewTransition } from 'react';
 import type { CSSProperties, FC, ReactNode } from 'react';
@@ -10,48 +9,15 @@ import { Footer } from '../../../components/footer';
 import { LocaleAnchor } from '../../../components/locale-anchor';
 import { Navigation } from '../../../components/navigation';
 import { PackageSidebar } from '../../../components/package-sidebar';
-import { SideNavigation } from '../../../components/side-navigation';
+import type { Catalogs } from '../../../components/package-sidebar';
 import { aiCategories } from '../../../data/ai-nav';
 import { componentCategoriesOf } from '../../../data/components-nav';
 import type { ComponentGroups } from '../../../data/components-nav';
-import type { NavCategory } from '../../../data/nav-types';
 import { PACKAGES } from '../../../data/packages';
 import type { PackageEntry } from '../../../data/packages';
 import { locales } from '../../../i18n';
 import * as m from '../../../messages';
 import { WritingModeProvider } from '../../../theme/writing-mode-context';
-
-type CatalogConfig = {
-  categories: readonly NavCategory[];
-  title: Message;
-};
-
-type Catalog = '/:locale/ui/components' | '/:locale/ui/ai';
-
-/**
- * `pattern` の配下のページが開いているか。`/:locale/ui/components/*` は
- * /ja/ui/components/button に合い、一覧ページの /ja/ui/components 自身には
- * 合わない（末尾のスラッシュは正規化で落ちる）。パターンは生成された表に
- * 対して型で検査される。
- */
-const useBelow = (pattern: Catalog): boolean =>
-  useMatch(`${pattern}/*`) !== null;
-
-function useCatalog(componentGroups: ComponentGroups): CatalogConfig | null {
-  const components = useBelow('/:locale/ui/components');
-  const ai = useBelow('/:locale/ui/ai');
-
-  if (components) {
-    return {
-      categories: componentCategoriesOf(componentGroups),
-      title: m.nav.components,
-    };
-  }
-  if (ai) {
-    return { categories: aiCategories, title: m.nav.ai };
-  }
-  return null;
-}
 
 /**
  * 開いているパッケージのドキュメントのページ。ランディング（`/:locale/form`
@@ -77,23 +43,6 @@ const PageTransition: FC<{ children: ReactNode }> = ({ children }) => (
   </ViewTransition>
 );
 
-const Sidebar: FC<{
-  pkg: PackageEntry;
-  catalog: CatalogConfig | null;
-  onNavigate?: () => void;
-}> = ({ pkg, catalog, onNavigate }) => (
-  <div className="flex flex-col gap-6">
-    <PackageSidebar onNavigate={onNavigate} pkg={pkg} />
-    {catalog !== null && (
-      <SideNavigation
-        categories={catalog.categories}
-        label={catalog.title()}
-        onNavigate={onNavigate}
-      />
-    )}
-  </div>
-);
-
 function LayoutContent({
   componentGroups,
   children,
@@ -102,7 +51,11 @@ function LayoutContent({
   children: ReactNode;
 }) {
   const pkg = useDocPackage();
-  const catalog = useCatalog(componentGroups);
+  // 部品と AI のページは、カテゴリごとに開閉できる段にして並べる
+  const catalogs: Catalogs = {
+    '/:locale/ui/components': componentCategoriesOf(componentGroups),
+    '/:locale/ui/ai': aiCategories,
+  };
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   // documentをスクローラーにしたため、サイドバーと目次は sticky で固定する。
   // ヘッダー高さはフォント読込やブレークポイントで変動するので実測し、
@@ -166,7 +119,7 @@ function LayoutContent({
                 height: `calc(100dvh - ${String(headerHeight)}px)`,
               }}
             >
-              <Sidebar catalog={catalog} pkg={pkg} />
+              <PackageSidebar catalogs={catalogs} pkg={pkg} />
             </aside>
             <main className="flex min-w-0 flex-1 flex-col">
               <div className="min-w-0 flex-1">
@@ -187,8 +140,8 @@ function LayoutContent({
               </Heading>
             }
           >
-            <Sidebar
-              catalog={catalog}
+            <PackageSidebar
+              catalogs={catalogs}
               onNavigate={() => {
                 setIsDrawerOpen(false);
               }}
