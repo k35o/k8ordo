@@ -1,4 +1,4 @@
-import { bundledLanguages, codeToHtml, createCssVariablesTheme } from 'shiki';
+import { bundledLanguages, codeToHtml } from 'shiki';
 import type { ShikiTransformer } from 'shiki';
 
 type LineMark = 'highlight' | 'add' | 'remove';
@@ -9,14 +9,26 @@ type Options = {
   callouts?: Readonly<Record<number, string | readonly string[]>> | undefined;
 };
 
-// 色は --shiki-token-* の変数で出し、値は ui のトークンに結びつける
-// （base.css の .ao-code-block）。.dark でトークンが切り替わるので、
-// ダーク用のテーマを別に持たない
-const theme = createCssVariablesTheme({
-  name: 'k8ordo-ui',
-  variablePrefix: '--shiki-',
-  fontStyle: true,
-});
+// one-light と plastic には、コードの地（#fafafa / #21252b）や行の印の地に
+// 対して 4.5:1 に届かない色がある。それだけを、色相と彩度を保ったまま
+// 明度をずらした色に置き換える
+const AA_REPLACEMENTS = {
+  'one-light': {
+    '#0184bc': '#0072a9',
+    '#4078f2': '#2e64dc',
+    '#50a14f': '#287b2a',
+    '#696c77': '#686b76',
+    '#986801': '#926200',
+    '#a0a1a7': '#6a6b71',
+    '#c18401': '#995e00',
+    '#e45649': '#c5382f',
+  },
+  plastic: {
+    '#5f6672': '#949ba8',
+    '#b57edc': '#bb84e3',
+    '#e06c75': '#ec777f',
+  },
+};
 
 // 知らない言語名はエラーにせず、色を付けずに出す。Markdown のフェンスから
 // 来る名前は書き手次第なので、ここで落とすとページごと描けなくなる
@@ -73,9 +85,14 @@ const annotate = (
   },
 });
 
+// 色は light-dark() で出す。base.css が .dark で color-scheme を切り替えるので、
+// ライトとダークの 2 つのテーマを、クラスの切り替えだけで出し分けられる
 export const highlight = (code: string, options: Options): Promise<string> =>
   codeToHtml(code, {
     lang: resolveLang(options.lang),
-    theme,
+    themes: { light: 'one-light', dark: 'plastic' },
+    defaultColor: 'light-dark()',
+    colorsRendering: 'none',
+    colorReplacements: AA_REPLACEMENTS,
     transformers: [annotate(code, options.marks, options.callouts)],
   });

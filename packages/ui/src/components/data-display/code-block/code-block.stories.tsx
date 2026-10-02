@@ -38,11 +38,100 @@ export const Default: Story = {
     code: SAMPLE,
     lang: 'tsx',
   },
-  play: async ({ canvas, canvasElement }) => {
+  play: async ({ canvas }) => {
     await expect(canvas.getByText('tsx')).toBeInTheDocument();
-    await expect(
-      canvasElement.querySelector('pre [style*="--shiki-token-keyword"]'),
-    ).toHaveTextContent('import');
+  },
+};
+
+// 色はトークンではなく、k8o のブログと同じ固定の値。ライトは one-light、
+// ダークは plastic で、見出しの行は線ではなく地の段差でコードと分ける
+const colorsOf = (canvasElement: HTMLElement) => {
+  const figure = canvasElement.querySelector('figure') as HTMLElement;
+  const header = figure.firstElementChild as HTMLElement;
+  const keyword = [...figure.querySelectorAll('pre span span')].find(
+    (token) => token.textContent === 'import',
+  ) as HTMLElement;
+  return {
+    surface: getComputedStyle(figure).backgroundColor,
+    border: getComputedStyle(figure).borderTopWidth,
+    header: getComputedStyle(header).backgroundColor,
+    headerDivider: getComputedStyle(header).borderBottomWidth,
+    keyword: getComputedStyle(keyword).color,
+  };
+};
+
+export const LightColors: Story = {
+  args: { code: SAMPLE, lang: 'tsx' },
+  parameters: { theme: 'light' },
+  play: async ({ canvasElement }) => {
+    await expect(colorsOf(canvasElement)).toStrictEqual({
+      surface: 'rgb(250, 250, 250)',
+      border: '0px',
+      header: 'rgb(237, 238, 240)',
+      headerDivider: '0px',
+      keyword: 'rgb(166, 38, 164)',
+    });
+  },
+};
+
+export const DarkColors: Story = {
+  args: { code: SAMPLE, lang: 'tsx' },
+  parameters: { theme: 'dark' },
+  play: async ({ canvasElement }) => {
+    await expect(colorsOf(canvasElement)).toStrictEqual({
+      surface: 'rgb(33, 37, 43)',
+      border: '0px',
+      header: 'rgb(44, 49, 59)',
+      headerDivider: '0px',
+      // plastic の #e06c75 を、地に対して 4.5:1 に届くよう明るくした色
+      keyword: 'rgb(236, 119, 127)',
+    });
+  },
+};
+
+// 並べた 2 つの高さを親がそろえても、見出しの行は自分の高さのまま。
+// 余った高さはコードの行が受ける
+const SHORT = { code: 'pnpm add @k8ordo/ui', lang: 'bash' };
+const LONG = {
+  code: Array.from(
+    { length: 12 },
+    (_, index) => `line ${String(index + 1)}`,
+  ).join('\n'),
+  lang: 'text',
+};
+
+const heightOf = (element: Element | null | undefined) =>
+  element?.getBoundingClientRect().height ?? 0;
+
+export const StretchedByParent: Story = {
+  args: SHORT,
+  loaders: [
+    async () => ({
+      short: await CodeBlock(SHORT),
+      long: await CodeBlock(LONG),
+    }),
+  ],
+  render: (_args, { loaded }) => {
+    const { short, long } = loaded as {
+      short: ReactElement;
+      long: ReactElement;
+    };
+    return (
+      <div className="grid grid-cols-2 gap-4 *:min-w-0">
+        {short}
+        {long}
+      </div>
+    );
+  },
+  play: async ({ canvas }) => {
+    const [short, long] = await canvas.findAllByRole('figure');
+
+    // 親のグリッドが短い方を長い方の高さまで引き伸ばしている
+    await expect(heightOf(short)).toBeCloseTo(heightOf(long), 0);
+    await expect(heightOf(short?.firstElementChild)).toBeCloseTo(
+      heightOf(long?.firstElementChild),
+      0,
+    );
   },
 };
 
@@ -53,11 +142,14 @@ export const WithTitle: Story = {
     title: 'save.tsx',
   },
   play: async ({ canvas }) => {
-    const caption = await canvas.findByText('save.tsx');
+    const name = await canvas.findByText('save.tsx');
+    const caption = name.parentElement;
 
     // figure の名前になるのは、最初（か最後）の子の figcaption だけ
-    await expect(caption.tagName).toBe('FIGCAPTION');
+    await expect(caption?.tagName).toBe('FIGCAPTION');
     await expect(canvas.getByRole('figure').firstElementChild).toBe(caption);
+    // ファイル名はコードの識別子なので、等幅の code で見せる
+    await expect(name.tagName).toBe('CODE');
   },
 };
 

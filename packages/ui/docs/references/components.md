@@ -1527,9 +1527,14 @@ import { CodeBlock } from '@k8ordo/ui/code-block';
   does not know renders as plain text rather than failing, so a Markdown fence
   can pass its info string through as it is. The header shows `title` when
   given (as the figure's `figcaption`), and the language otherwise.
-- The colors come from the design tokens (shiki's `css-variables` theme, mapped
-  to tokens in the stylesheet), so dark mode follows `.dark` with no second
-  theme.
+- The colors are fixed values rather than design tokens: shiki's `one-light`
+  theme in light and `plastic` in dark, with the few colors that fall short of
+  4.5:1 on their ground shifted in lightness until they reach it. They are
+  written as `light-dark()`, so they follow the `color-scheme` the stylesheet
+  sets with `.dark`. There is no outer border: the header (the language in
+  lowercase, or `title` in monospace, and the copy button) sits on a ground a
+  step off the code's, with no line between them. Stretched by its parent, the
+  block gives the extra height to the code, never to the header.
 - `marks` marks lines by their 1-based number: `highlight`, `add` (drawn with a
   `+`), or `remove` (drawn with a `−`). `callouts` puts a note under a line
   (an array puts several, in order), indented like the line it points at. A

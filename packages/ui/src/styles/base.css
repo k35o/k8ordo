@@ -287,25 +287,18 @@
   }
 
   /*
- * CodeBlock。shiki の css-variables テーマが出す --shiki-* を ui のトークンに
- * 結びつける。トークンは .dark で切り替わるので、ダーク用の指定は要らない。
+ * CodeBlock。k8o のブログのコードブロックに合わせ、色はトークンではなく固定の
+ * 値で持つ。コードの地とトークンの色は shiki の one-light（ライト）と plastic
+ * （ダーク）で、light-dark() で書くので、.dark が切り替える color-scheme に
+ * 従う。見出しの行の地は、ライトではコードの地より一段暗く、ダークでは一段
+ * 明るくして、線を引かずに段差で分ける。
  * 行の印（data-mark）と注記（data-callout）は、CodeBlock の変換器が付ける。
  */
   .ao-code-block {
-    --shiki-foreground: var(--fg-base);
-    --shiki-background: transparent;
-    --shiki-token-keyword: var(--group-tertiary);
-    --shiki-token-function: var(--group-quaternary);
-    --shiki-token-constant: var(--fg-info);
-    --shiki-token-string: var(--primary-fg);
-    --shiki-token-string-expression: var(--primary-fg);
-    --shiki-token-parameter: var(--fg-warning);
-    --shiki-token-comment: var(--fg-subtle);
-    --shiki-token-punctuation: var(--fg-mute);
-    --shiki-token-link: var(--secondary-fg);
-    --shiki-token-inserted: var(--fg-success);
-    --shiki-token-deleted: var(--fg-error);
-    --shiki-token-changed: var(--fg-warning);
+    --ao-code-header: light-dark(#edeef0, #2c313b);
+    --ao-code-label: light-dark(#696c77, #a9b2c3);
+    --ao-code-caption: light-dark(#383a42, #dcdfe4);
+    background-color: light-dark(#fafafa, #21252b);
   }
   .ao-code-block pre {
     overflow-x: auto;
@@ -340,30 +333,32 @@
     inset-inline-start: 0;
     border-inline-start: 3px solid var(--mark-border);
   }
+  /* 地はブログの半分の濃さにする。濃くすると、地とのコントラストが 4.5:1
+     ぎりぎりのトークンの色が、印の付いた行で届かなくなる */
   .ao-code-block [data-mark='highlight'] {
-    --mark-bg: var(--bg-mute);
-    --mark-border: var(--primary-border);
+    --mark-bg: light-dark(rgb(191 135 0 / 0.07), rgb(245 200 80 / 0.08));
+    --mark-border: light-dark(rgb(191 135 0), rgb(245 200 80));
   }
   .ao-code-block [data-mark='add'] {
-    --mark-bg: var(--bg-success);
-    --mark-border: var(--border-success);
+    --mark-bg: light-dark(rgb(46 160 67 / 0.07), rgb(120 220 130 / 0.08));
+    --mark-border: light-dark(rgb(46 160 67), rgb(120 220 130));
   }
   .ao-code-block [data-mark='remove'] {
-    --mark-bg: var(--bg-error);
-    --mark-border: var(--border-error);
+    --mark-bg: light-dark(rgb(207 34 46 / 0.06), rgb(245 110 110 / 0.08));
+    --mark-border: light-dark(rgb(207 34 46), rgb(245 110 110));
   }
   .ao-code-block [data-mark='add']::before,
   .ao-code-block [data-mark='remove']::before {
     position: absolute;
     inset-inline-start: 0.75rem;
+    color: var(--mark-border);
+    font-weight: var(--font-weight-bold);
   }
   .ao-code-block [data-mark='add']::before {
     content: '+';
-    color: var(--fg-success);
   }
   .ao-code-block [data-mark='remove']::before {
     content: '−';
-    color: var(--fg-error);
   }
   /* 注記はコードの行ではないので、行の流れの中に置いたまま箱として見せる */
   .ao-code-block [data-callout] {
