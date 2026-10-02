@@ -135,7 +135,7 @@ import { en, registerMessages } from '@k8ordo/ui/i18n';
 registerMessages('en', { ...en, close: 'Dismiss' });
 ```
 
-Resolution order is **component prop > registered dictionary > built-in dictionary**. Components that expose a wording prop of their own — `Spinner`'s `label`, `Alert`'s `closeLabel`, `PasswordInput`'s `showLabel` / `hideLabel`, `Pagination`'s `prevLabel` / `nextLabel` — take it over the dictionary. `getMessages()` returns the wording in effect for elements you draw yourself; it is not a hook, so a Server Component calls it too. See [docs/references/components.md](docs/references/components.md) for the full key list, and [docs/GUIDE.md](docs/GUIDE.md) for migrating from `UIProvider`'s `messages`.
+Resolution order is **component prop > registered dictionary > built-in dictionary**. Components that expose a wording prop of their own — `Spinner`'s `label`, `Alert`'s `closeLabel`, `PasswordInput`'s `showLabel` / `hideLabel`, `Pagination`'s `prevLabel` / `nextLabel` — take it over the dictionary. `getMessages()` returns the wording in effect for elements you draw yourself; it is not a hook, so a Server Component calls it too. See [docs/references/components.md](docs/references/components.md) for the full key list.
 
 ## AI Agent Documentation
 
