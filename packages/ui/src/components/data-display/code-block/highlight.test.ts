@@ -11,45 +11,6 @@ const textColorsOf = (html: string): Array<{ light: string; dark: string }> =>
     ),
   ].map(([, light = '', dark = '']) => ({ light, dark }));
 
-// WCAG 2 のコントラスト比
-const luminance = (hex: string): number => {
-  const [r = 0, g = 0, b = 0] = [1, 3, 5].map((start) => {
-    const channel = Number.parseInt(hex.slice(start, start + 2), 16) / 255;
-    return channel <= 0.04045
-      ? channel / 12.92
-      : ((channel + 0.055) / 1.055) ** 2.4;
-  });
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-};
-const contrast = (a: string, b: string): number => {
-  const [x, y] = [luminance(a), luminance(b)];
-  return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
-};
-
-// トークンの種類が多く出るよう、言語を変えて書いたコード
-const SAMPLES: ReadonlyArray<readonly [code: string, lang: string]> = [
-  [
-    `import { Button } from '@k8ordo/ui';
-// 保存中は二重送信を防ぐ
-export function Save({ onSave }: { onSave: () => Promise<void> }) {
-  return <Button disabled={false} onAction={onSave}>保存 {1 + 2}</Button>;
-}`,
-    'tsx',
-  ],
-  [
-    `/** 型 */
-type T = Readonly<Record<string, number | null>>;
-const rate = total === 0 ? 0 : done / total; // 割合
-class A extends B { #x = /re+/gu; get y() { return this.#x; } }`,
-    'ts',
-  ],
-  ['pnpm add @k8ordo/ui # 入れる\nexport FOO="bar" && echo $FOO', 'bash'],
-  ['.a:hover { color: #fff; --x: calc(1px + 2em); } /* c */', 'css'],
-  ['{ "a": 1, "b": [true, null, "s"] }', 'json'],
-  ['<div class="a" id=b>&amp;<!-- c --></div>', 'html'],
-  ['# 見出し\n\n- **太字** と `code` と [リンク](https://example.com)', 'md'],
-];
-
 describe('highlight', () => {
   it('色をライトは one-light、ダークは plastic の light-dark() で出す', async () => {
     const html = await highlight('const a = 1;', { lang: 'ts' });
@@ -62,19 +23,14 @@ describe('highlight', () => {
     expect(html).toContain('background-color:light-dark(#FAFAFA, #21252B)');
   });
 
-  it('コードの地に 4.5:1 で届かない色は使わない', async () => {
-    const htmls = await Promise.all(
-      SAMPLES.map(([code, lang]) => highlight(code, { lang })),
-    );
-    const colors = htmls.flatMap((html) => textColorsOf(html));
+  it('トークンの色は k8o のブログと同じ one-light と plastic のまま使う', async () => {
+    const html = await highlight('// note', { lang: 'ts' });
 
-    expect(colors.length).toBeGreaterThan(SAMPLES.length);
-    expect(
-      colors.filter(({ light }) => contrast(light, '#fafafa') < 4.5),
-    ).toStrictEqual([]);
-    expect(
-      colors.filter(({ dark }) => contrast(dark, '#21252b') < 4.5),
-    ).toStrictEqual([]);
+    // コメントは地に対して 4.5:1 に届かないが、ブログと同じ色のまま出す
+    expect(textColorsOf(html)).toContainEqual({
+      light: '#A0A1A7',
+      dark: '#5F6672',
+    });
   });
 
   it('知らない言語名は色を付けずに描く', async () => {

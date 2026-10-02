@@ -333,18 +333,16 @@
     inset-inline-start: 0;
     border-inline-start: 3px solid var(--mark-border);
   }
-  /* 地はブログの半分の濃さにする。濃くすると、地とのコントラストが 4.5:1
-     ぎりぎりのトークンの色が、印の付いた行で届かなくなる */
   .ao-code-block [data-mark='highlight'] {
-    --mark-bg: light-dark(rgb(191 135 0 / 0.07), rgb(245 200 80 / 0.08));
+    --mark-bg: light-dark(rgb(191 135 0 / 0.14), rgb(245 200 80 / 0.16));
     --mark-border: light-dark(rgb(191 135 0), rgb(245 200 80));
   }
   .ao-code-block [data-mark='add'] {
-    --mark-bg: light-dark(rgb(46 160 67 / 0.07), rgb(120 220 130 / 0.08));
+    --mark-bg: light-dark(rgb(46 160 67 / 0.14), rgb(120 220 130 / 0.16));
     --mark-border: light-dark(rgb(46 160 67), rgb(120 220 130));
   }
   .ao-code-block [data-mark='remove'] {
-    --mark-bg: light-dark(rgb(207 34 46 / 0.06), rgb(245 110 110 / 0.08));
+    --mark-bg: light-dark(rgb(207 34 46 / 0.12), rgb(245 110 110 / 0.16));
     --mark-border: light-dark(rgb(207 34 46), rgb(245 110 110));
   }
   .ao-code-block [data-mark='add']::before,

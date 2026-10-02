@@ -1528,9 +1528,10 @@ import { CodeBlock } from '@k8ordo/ui/code-block';
   can pass its info string through as it is. The header shows `title` when
   given (as the figure's `figcaption`), and the language otherwise.
 - The colors are fixed values rather than design tokens: shiki's `one-light`
-  theme in light and `plastic` in dark, with the few colors that fall short of
-  4.5:1 on their ground shifted in lightness until they reach it. They are
-  written as `light-dark()`, so they follow the `color-scheme` the stylesheet
+  theme in light and `plastic` in dark, unchanged, the same as k8o's blog. Some
+  of them, the comments among them, fall short of 4.5:1 on their ground; the
+  library's own accessibility checks exempt the code's text from the contrast
+  rule and nothing else. They are written as `light-dark()`, so they follow the `color-scheme` the stylesheet
   sets with `.dark`. There is no outer border: the header (the language in
   lowercase, or `title` in monospace, and the copy button) sits on a ground a
   step off the code's, with no line between them. Stretched by its parent, the
