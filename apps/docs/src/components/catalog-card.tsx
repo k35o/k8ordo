@@ -5,26 +5,28 @@ import type { FC, ReactNode } from 'react';
 
 import type { NavItem } from '../data/nav-types';
 import { LocaleAnchor } from './locale-anchor';
+import type { Stage } from './preview-area';
 import { Rich } from './rich';
 
+// 本文の白いカードの中に置くので、白いカードを重ねず、部品が想定する
+// ページの地（bg-surface）の面にする。ダークでは影が見えないので、白い
+// カードは本文のカードに溶けていた
 const cardClass =
-  'group bg-bg-base focus-within:ring-border-info relative flex flex-col overflow-hidden rounded-xl shadow-sm motion-safe:transition-shadow motion-safe:duration-150 motion-safe:ease-out hover:shadow-md focus-within:ring-2';
+  'group bg-bg-surface focus-within:ring-border-info hover:ring-border-base relative flex flex-col overflow-hidden rounded-xl focus-within:ring-2 hover:ring-1';
 
-export const CatalogCard: FC<{ item: NavItem; preview?: ReactNode }> = ({
-  item,
-  preview,
-}) => (
+export const CatalogCard: FC<{
+  item: NavItem;
+  preview?: ReactNode;
+  stage?: Stage;
+}> = ({ item, preview, stage = 'page' }) => (
   <div className={cardClass}>
     {preview === undefined ? null : (
       // The preview is purely decorative: `inert` removes its (focusable)
       // controls from the tab order and the accessibility tree, leaving only
-      // the card's stretched link as the interactive target. The stage keeps
-      // the card's own bg-base: the components are drawn for it, and one filled
-      // with bg-subtle (Toolbar, a base Button, a chat bubble) vanished on a
-      // bg-subtle stage.
+      // the card's stretched link as the interactive target.
       <div
         aria-hidden
-        className="border-border-mute pointer-events-none flex h-36 items-center justify-center overflow-hidden border-b px-5"
+        className={`border-border-mute pointer-events-none flex h-36 items-center justify-center overflow-hidden border-b px-5${stage === 'article' ? ' bg-bg-base' : ''}`}
         inert
       >
         {preview}

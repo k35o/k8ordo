@@ -57,7 +57,10 @@ export default function CodeBlockPage() {
           <Heading level="h2">
             <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
-          <ComponentPreview code='<CodeBlock code={source} lang="tsx" />'>
+          <ComponentPreview
+            stage="article"
+            code='<CodeBlock code={source} lang="tsx" />'
+          >
             <div className="w-full">
               <CodeBlock code={SAMPLE} lang="tsx" />
             </div>
@@ -71,7 +74,10 @@ export default function CodeBlockPage() {
           <p className="text-fg-mute">
             <Rich>{m.components.codeBlock.titleDescription()}</Rich>
           </p>
-          <ComponentPreview code='<CodeBlock code={source} lang="tsx" title="total.tsx" />'>
+          <ComponentPreview
+            stage="article"
+            code='<CodeBlock code={source} lang="tsx" title="total.tsx" />'
+          >
             <div className="w-full">
               <CodeBlock code={SAMPLE} lang="tsx" title="total.tsx" />
             </div>

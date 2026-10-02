@@ -1,7 +1,6 @@
 'use client';
 
 import type { Message } from '@k8ordo/i18n';
-import { Card } from '@k8ordo/ui';
 
 import * as m from '../messages';
 import type { SemanticToken } from '../theme/design-tokens';
@@ -22,7 +21,8 @@ export function TokenCard({
   const description = descriptionOf(token.name);
 
   return (
-    <Card variant="shadow">
+    // 本文の白いカードの中に置くので、白いカードを重ねず、ページの地の面にする
+    <div className="bg-bg-surface rounded-xl">
       <div className="flex items-start gap-3 p-4">
         <div
           className="ring-border-mute mt-0.5 size-6 shrink-0 rounded-md ring-1"
@@ -46,6 +46,6 @@ export function TokenCard({
           )}
         </div>
       </div>
-    </Card>
+    </div>
   );
 }
