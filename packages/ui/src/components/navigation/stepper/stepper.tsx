@@ -54,7 +54,12 @@ export const Stepper: FC<Props> = ({
   return (
     <ol
       {...rest}
-      className={cn('flex gap-2', vertical ? 'flex-col' : 'items-start')}
+      className={cn(
+        'flex gap-2',
+        // 横並びは段を等分するので、置かれた先が flex の行でも幅いっぱいに取る。
+        // 取らないと中身の最小幅まで縮み、文言が 1 語ずつ折り返す
+        vertical ? 'flex-col' : 'items-start inline-full',
+      )}
       ref={ref}
     >
       {steps.map((step, index) => {

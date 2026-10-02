@@ -154,6 +154,33 @@ export const NarrowWithLongLabels: Story = {
   },
 };
 
+// flex の行の中に置かれても、横並びは置かれた先の幅いっぱいに広がる
+export const InFlexRow: Story = {
+  args: {
+    defaultValue: 1,
+    steps: [
+      { label: 'Plan', description: 'Pick what fits' },
+      { label: 'Payment', description: 'Card or invoice' },
+      { label: 'Review', description: 'Check and send' },
+    ],
+  },
+  decorators: [
+    (Story) => (
+      <div
+        className="flex w-160 flex-wrap items-center gap-4"
+        data-testid="row"
+      >
+        <Story />
+      </div>
+    ),
+  ],
+  play: async ({ canvas }) => {
+    const row = canvas.getByTestId('row').getBoundingClientRect();
+    const list = canvas.getByRole('list').getBoundingClientRect();
+    await expect(list.width).toBeCloseTo(row.width, 0);
+  },
+};
+
 // 横書きの例（max-w-2xl）と同じだけの長さを、縦書きの行の向きに取る
 const writingVertical: Decorator = (Story) => (
   <div className="writing-v h-168">
