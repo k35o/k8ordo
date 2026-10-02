@@ -35,7 +35,7 @@ export const CodeBlock: FC<Props> = async ({
     <figure
       {...rest}
       className={cn(
-        'ao-code-block writing-h relative grid grid-rows-[auto_1fr] rounded-xl',
+        'ao-code-block writing-h relative grid grid-rows-[auto_1fr] rounded-lg',
         HIGH_CONTRAST_EDGE,
       )}
     >
