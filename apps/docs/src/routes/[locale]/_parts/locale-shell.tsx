@@ -20,6 +20,13 @@ import * as m from '../../../messages';
 import { WritingModeProvider } from '../../../theme/writing-mode-context';
 
 /**
+ * 本文は、灰色の地に置いた白いカードに載せる（k8o のブログの記事と同じ）。
+ * CodeBlock や Playground の面は地と同じ bg-surface なので、カードが無いと
+ * ライトでは地に溶ける。
+ */
+const CONTENT_CARD = 'bg-bg-base/90 m-2 min-w-0 flex-1 rounded-xl sm:m-3';
+
+/**
  * 開いているパッケージのドキュメントのページ。ランディング（`/:locale/form`
  * そのもの）は `/*` に合わないので、サイドバーを持たない全幅のページのまま。
  */
@@ -103,7 +110,7 @@ function LayoutContent({
         // ラッパーはブロックのまま保つ。flexにするとページ側の mx-auto コンテナが
         // flexアイテム化し、stretchが効かず中身のmin-content幅で横にあふれる
         <main className="flex min-w-0 flex-1 flex-col">
-          <div className="min-w-0 flex-1">
+          <div className={CONTENT_CARD}>
             <PageTransition>{children}</PageTransition>
           </div>
           <Footer />
@@ -113,7 +120,7 @@ function LayoutContent({
           <div className="flex flex-1">
             <aside
               aria-label={m.nav.packageNavigation()}
-              className="border-border-mute sticky hidden w-64 shrink-0 self-start overflow-y-auto border-r px-4 py-8 lg:block"
+              className="sticky hidden w-64 shrink-0 self-start overflow-y-auto px-4 py-8 lg:block"
               style={{
                 top: `${String(headerHeight)}px`,
                 height: `calc(100dvh - ${String(headerHeight)}px)`,
@@ -122,7 +129,7 @@ function LayoutContent({
               <PackageSidebar catalogs={catalogs} pkg={pkg} />
             </aside>
             <main className="flex min-w-0 flex-1 flex-col">
-              <div className="min-w-0 flex-1">
+              <div className={`${CONTENT_CARD} lg:ms-0`}>
                 <PageTransition>{children}</PageTransition>
               </div>
               <Footer />
