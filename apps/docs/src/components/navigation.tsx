@@ -23,7 +23,8 @@ const itemClass = (isActive: boolean) =>
     ? 'text-fg-base decoration-primary-border rounded-md px-3 py-1.5 text-sm font-medium whitespace-nowrap underline decoration-2 underline-offset-8'
     : 'text-fg-mute hover:bg-bg-mute hover:text-fg-base rounded-md px-3 py-1.5 text-sm whitespace-nowrap transition-colors duration-150 ease-out';
 
-export function Navigation() {
+/** `wide`: サイドバーのあるページでは、枠を画面いっぱいに広げる。 */
+export function Navigation({ wide }: { wide: boolean }) {
   const pathname = usePathname();
   const current = packageOf(pathname);
 
@@ -35,7 +36,9 @@ export function Navigation() {
 
   return (
     <header className="border-border-mute bg-page border-b">
-      <nav className="mx-auto flex max-w-6xl items-center gap-3 px-6 py-3 md:gap-6 md:px-8">
+      <nav
+        className={`flex items-center gap-3 px-6 py-3 md:gap-6 md:px-8${wide ? '' : ' mx-auto max-w-6xl'}`}
+      >
         <LocaleAnchor
           className="focus-visible:ring-border-info flex shrink-0 items-baseline gap-1 rounded-md focus-visible:ring-2 focus-visible:outline-hidden"
           path="/:locale"

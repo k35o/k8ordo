@@ -107,8 +107,8 @@ export function DocPage({ path, introduction, children }: DocPageProps) {
   const outline = outlineOf(children);
 
   return (
-    <div className="flex gap-8 py-12">
-      <article className="min-w-0 flex-1 [&_[id]]:scroll-mt-[calc(var(--header-h)+1.5rem)]">
+    <div className="flex gap-10 py-12">
+      <article className="max-w-[46rem] min-w-0 flex-1 [&_[id]]:scroll-mt-[calc(var(--header-h)+1.5rem)]">
         <PageTitle name={`${section.label()} — ${pkg.name}`} />
         <header className="flex flex-col gap-4">
           <Breadcrumb.List size="sm">
@@ -159,7 +159,7 @@ export function DocPage({ path, introduction, children }: DocPageProps) {
         </footer>
       </article>
       {outline.length > 0 && (
-        <aside className="sticky top-[calc(var(--header-h)+2.5rem)] hidden max-h-[calc(100dvh-var(--header-h)-5rem)] w-48 shrink-0 self-start overflow-y-auto xl:block">
+        <aside className="sticky top-[calc(var(--header-h)+2.5rem)] hidden max-h-[calc(100dvh-var(--header-h)-5rem)] w-56 shrink-0 self-start overflow-y-auto xl:block">
           <TableOfContents items={outline} label={m.docPage.onThisPage()} />
         </aside>
       )}

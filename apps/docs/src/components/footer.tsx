@@ -12,10 +12,12 @@ const RESOURCE_LINKS = [
 const linkClass =
   'text-fg-mute hover:text-fg-base text-sm transition-colors duration-150 ease-out';
 
-export function Footer() {
+/** `wide`: サイドバーのあるページでは、枠を画面いっぱいに広げる。 */
+export function Footer({ wide }: { wide: boolean }) {
+  const frame = wide ? '' : ' mx-auto max-w-6xl';
   return (
     <footer className="border-border-mute bg-page border-t">
-      <div className="mx-auto flex max-w-6xl flex-col gap-12 px-6 py-16 md:px-8">
+      <div className={`flex flex-col gap-12 px-6 py-16 md:px-8${frame}`}>
         <div className="flex flex-col gap-12 md:flex-row md:justify-between md:gap-20">
           <div className="flex flex-col gap-4">
             <span className="flex items-baseline gap-1">
@@ -99,7 +101,9 @@ export function Footer() {
           ))}
         </div>
       </div>
-      <div className="border-border-subtle mx-auto flex max-w-6xl flex-wrap items-baseline justify-between gap-4 border-t p-6 md:px-8">
+      <div
+        className={`border-border-subtle flex flex-wrap items-baseline justify-between gap-4 border-t p-6 md:px-8${frame}`}
+      >
         <p className="text-fg-subtle text-xs">
           <span className="tabular-nums">© 2026</span> k8o — MIT License
         </p>
