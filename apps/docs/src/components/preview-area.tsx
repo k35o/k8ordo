@@ -25,9 +25,7 @@ export const PreviewArea: FC<Props> = ({ children, stage = 'page' }) => {
   return (
     <div
       className={
-        stage === 'page'
-          ? 'border-border-mute bg-bg-surface relative rounded-lg border'
-          : 'border-border-mute bg-bg-base relative rounded-lg border'
+        stage === 'page' ? 'bg-bg-surface relative' : 'bg-bg-base relative'
       }
     >
       {locale === 'ja' && (

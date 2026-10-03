@@ -17,7 +17,10 @@ export const ComponentPreview: FC<Props> = ({
   lang = 'tsx',
   stage,
 }) => (
-  <div className="flex flex-col gap-2">
+  // CodeBlock は className を受け取らないので、子セレクタで角丸と枠を外し、
+  // 上の線だけをプレビューとの区切りに残す。子孫にしないのは、CodeBlock の
+  // ページのプレビューに描く CodeBlock まで枠を失うから
+  <div className="border-border-mute overflow-hidden rounded-lg border [&>.ao-code-block]:rounded-none [&>.ao-code-block]:border-x-0 [&>.ao-code-block]:border-b-0">
     <PreviewArea stage={stage}>{children}</PreviewArea>
     <CodeBlock code={code} lang={lang} />
   </div>
