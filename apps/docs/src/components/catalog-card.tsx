@@ -8,9 +8,8 @@ import { LocaleAnchor } from './locale-anchor';
 import type { Stage } from './preview-area';
 import { Rich } from './rich';
 
-// 本文の白いカードの中に置くので、白いカードを重ねず、部品が想定する
-// ページの地（bg-surface）の面にする。ダークでは影が見えないので、白い
-// カードは本文のカードに溶けていた
+// 白いページの上に白いカードを置くと、ダークでは影が見えずに地に溶ける。
+// 部品が想定するページの地（bg-surface）の面にする
 const cardClass =
   'group bg-bg-surface focus-within:ring-border-info hover:ring-border-base relative flex flex-col overflow-hidden rounded-xl focus-within:ring-2 hover:ring-1';
 

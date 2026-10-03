@@ -34,7 +34,7 @@ export function Navigation() {
   );
 
   return (
-    <header className="border-border-mute bg-bg-surface border-b">
+    <header className="border-border-mute bg-bg-base border-b">
       <nav className="flex items-center gap-3 px-4 py-3 md:gap-6 md:px-6">
         <LocaleAnchor
           className="focus-visible:ring-border-info flex shrink-0 items-baseline gap-1 rounded-md focus-visible:ring-2 focus-visible:outline-hidden"

@@ -21,7 +21,7 @@ export function TokenCard({
   const description = descriptionOf(token.name);
 
   return (
-    // 本文の白いカードの中に置くので、白いカードを重ねず、ページの地の面にする
+    // 白いページの上に白いカードを置くと、ダークでは影が見えずに地に溶けるので、ページの地の面にする
     <div className="bg-bg-surface rounded-xl">
       <div className="flex items-start gap-3 p-4">
         <div

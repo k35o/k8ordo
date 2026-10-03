@@ -35,7 +35,7 @@ export default function Root({
       </head>
       {/* Provider が hydrate 前に dark を付けるスクリプトを先頭に描くので、
           body の中で全部を包む */}
-      <body className="bg-bg-surface text-fg-base antialiased">
+      <body className="bg-bg-base text-fg-base antialiased">
         <ColorSchemeProvider>{children}</ColorSchemeProvider>
       </body>
     </html>

@@ -20,13 +20,6 @@ import * as m from '../../../messages';
 import { WritingModeProvider } from '../../../theme/writing-mode-context';
 
 /**
- * 本文は、灰色の地に置いた白いカードに載せる（k8o のブログの記事と同じ）。
- * CodeBlock や Playground の面は地と同じ bg-surface なので、カードが無いと
- * ライトでは地に溶ける。
- */
-const CONTENT_CARD = 'bg-bg-base/90 m-2 min-w-0 flex-1 rounded-xl sm:m-3';
-
-/**
  * 開いているパッケージのドキュメントのページ。ランディング（`/:locale/form`
  * そのもの）は `/*` に合わないので、サイドバーを持たない全幅のページのまま。
  */
@@ -90,10 +83,10 @@ function LayoutContent({
       className="flex flex-1 flex-col"
       style={{ '--header-h': `${String(headerHeight)}px` } as CSSProperties}
     >
-      <div className="bg-bg-surface sticky top-0 z-30 shrink-0" ref={headerRef}>
+      <div className="bg-bg-base sticky top-0 z-30 shrink-0" ref={headerRef}>
         <Navigation />
         {pkg !== undefined && (
-          <div className="border-border-mute bg-bg-surface flex items-center gap-2 border-b px-4 py-2 lg:hidden">
+          <div className="border-border-mute bg-bg-base flex items-center gap-2 border-b px-4 py-2 lg:hidden">
             <IconButton
               label={m.sideNav.openNavigation()}
               onClick={() => {
@@ -110,7 +103,7 @@ function LayoutContent({
         // ラッパーはブロックのまま保つ。flexにするとページ側の mx-auto コンテナが
         // flexアイテム化し、stretchが効かず中身のmin-content幅で横にあふれる
         <main className="flex min-w-0 flex-1 flex-col">
-          <div className={CONTENT_CARD}>
+          <div className="min-w-0 flex-1">
             <PageTransition>{children}</PageTransition>
           </div>
           <Footer />
@@ -120,7 +113,7 @@ function LayoutContent({
           <div className="flex flex-1">
             <aside
               aria-label={m.nav.packageNavigation()}
-              className="sticky hidden w-64 shrink-0 self-start overflow-y-auto px-4 py-8 lg:block"
+              className="border-border-mute sticky hidden w-64 shrink-0 self-start overflow-y-auto border-e px-4 py-8 lg:block"
               style={{
                 top: `${String(headerHeight)}px`,
                 height: `calc(100dvh - ${String(headerHeight)}px)`,
@@ -129,7 +122,7 @@ function LayoutContent({
               <PackageSidebar catalogs={catalogs} pkg={pkg} />
             </aside>
             <main className="flex min-w-0 flex-1 flex-col">
-              <div className={`${CONTENT_CARD} lg:ms-0`}>
+              <div className="min-w-0 flex-1">
                 <PageTransition>{children}</PageTransition>
               </div>
               <Footer />
