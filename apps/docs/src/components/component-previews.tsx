@@ -11,6 +11,7 @@ import {
   Breadcrumb,
   Button,
   Calendar,
+  Callout,
   Card,
   Carousel,
   Checkbox,
@@ -469,6 +470,11 @@ export const componentPreviews = {
     </div>
   ),
   Alert: <Alert message="This is an info alert." tone="info" />,
+  Callout: (
+    <Callout label="Note" tone="info">
+      <p>Values stay in the DOM, so typing never re-renders.</p>
+    </Callout>
+  ),
   EmptyState: (
     <EmptyState icon={<TableIcon size="md" />} title="Nothing here yet" />
   ),

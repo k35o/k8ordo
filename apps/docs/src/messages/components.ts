@@ -1068,6 +1068,33 @@ export const alert = {
   }),
 };
 
+export const callout = {
+  description: message({
+    ja: '本文の中に置く注記。補足や落とし穴を、段落やコードを含めて書ける',
+    en: 'A note inside the content. Its body can hold paragraphs, code and links.',
+  }),
+  tonesTitle: message({
+    ja: 'ステータス',
+    en: 'Statuses',
+  }),
+  richTitle: message({
+    ja: '本文にコードやリンクを書く',
+    en: 'Code and links in the body',
+  }),
+  richDescription: message({
+    ja: '本文は `children` なので、段落を重ねたり `Code` や `Anchor` を入れたりできます。`label` を省くと、アイコンと本文だけになります。',
+    en: 'The body is `children`, so it can hold several paragraphs, `Code` and `Anchor`. Leave out `label` and only the icon and the body remain.',
+  }),
+  versusAlertTitle: message({
+    ja: 'Alert との使い分け',
+    en: 'Callout or Alert',
+  }),
+  versusAlertDescription: message({
+    ja: '`Alert` は操作の結果やアプリの状態を知らせる部品で、表示されるとスクリーンリーダーが読み上げます。記事やガイドの本文に置く補足には `Callout` を使います。`role="note"` なので、ページの読み込みやクライアント側の遷移で差し込まれても読み上げられません。',
+    en: '`Alert` reports the result of an action or the state of the application, and a screen reader announces it when it appears. For a note in an article or a guide, use `Callout`. It has `role="note"`, so it is not announced when the page loads or a client navigation brings it in.',
+  }),
+};
+
 export const skeleton = {
   description: message({
     ja: '読み込み前のプレースホルダー',
