@@ -24,6 +24,7 @@ const SERVER_COMPONENTS = [
   'ai/tool-invocation/tool-invocation.tsx',
   'data-display/code/code.tsx',
   'feedback/alert/alert.tsx',
+  'feedback/callout/callout.tsx',
   'feedback/spinner/spinner.tsx',
   'navigation/breadcrumb/breadcrumb.tsx',
 ];

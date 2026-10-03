@@ -53,6 +53,11 @@ export const catalog = defineCatalog(schema, {
       description:
         'Alert that reports a status. message is a string or an array of strings.',
     },
+    Callout: {
+      props: s.calloutProps,
+      description:
+        'Note inside the content (a tip, a caveat). Unlike Alert, it is not announced as a status. content is plain text; label is an optional bold line above it.',
+    },
     Spinner: { props: s.spinnerProps, description: 'Loading spinner.' },
     Separator: { props: s.separatorProps, description: 'Divider line.' },
     TextField: {

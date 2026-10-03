@@ -1921,6 +1921,11 @@ Props:
 
 ### Alert
 
+Reports a status: the result of something the user did, or a state the
+application is in. It is a live region (`role="alert"` for `warning` and
+`error`, `role="status"` otherwise), so a screen reader announces it when it
+appears. For a note that is part of the content, use `Callout`.
+
 ```tsx
 import { Alert } from '@k8ordo/ui';
 
@@ -1940,6 +1945,33 @@ Props:
 `action` is an `AlertAction`, `{ label: string; renderItem: (props: { children: ReactNode }) => ReactNode }`.
 `renderItem` receives `label` as `children`; render your own button or link
 around it.
+
+### Callout
+
+A note that sits in the content: a tip beside a paragraph, a pitfall in a
+guide, a dated-content notice at the top of an article. Unlike `Alert`, it is
+not a live region (`role="note"`), so a page that renders one, or a client
+navigation that brings one in, does not have it announced as a warning. The
+body is `children`, so it can hold paragraphs, `Code`, and links; `label` is an
+optional bold line above it.
+
+```tsx
+import { Callout, Code } from '@k8ordo/ui';
+
+<Callout label="Pitfall" tone="warning">
+  <p>
+    Passing <Code>value</Code> makes the field controlled, and a form reset no
+    longer restores it.
+  </p>
+</Callout>;
+```
+
+Props:
+
+- `children`: `ReactNode` (required)
+- `tone`: `Status` (required)
+- `label`: `string`
+- Other props are forwarded to `HTMLAttributes<HTMLDivElement>`, except `role` / `className` / `style`.
 
 ### EmptyState
 
@@ -2800,7 +2832,7 @@ the same mapping `messageUsage` exports. All values are `string`.
 - Spinner / Progress / Combobox: `loading`
 - Avatar: `avatar`
 - Code: `color`
-- Alert: `alertSuccess`, `alertInfo`, `alertWarning`, `alertError`
+- Alert / Callout: `alertSuccess`, `alertInfo`, `alertWarning`, `alertError`
 - ToastProvider: `toastRegion`
 - CopyButton / Message.Copy: `copy`
 - CopyButton / CodeBlock / Message.Copy: `copied`, `copyFailed`

@@ -237,7 +237,7 @@ which looks the dictionary up in `@k8ordo/i18n`'s `currentLocale()` — English
 when the application has defined no locale set. It is a plain function, not a
 hook, so wording never makes a component a client module:
 `src/components/compound-rsc.test.ts` keeps the ones that only read wording
-(`Spinner`, `Breadcrumb`, `Code`, `Alert`, `Reasoning`, `ToolInvocation`) free
+(`Spinner`, `Breadcrumb`, `Code`, `Alert`, `Callout`, `Reasoning`, `ToolInvocation`) free
 of `'use client'`. A new key goes into `messages.ts`, `ja.ts`, `en.ts`, and
 `usage.ts` (the components that draw it); there is no provider and no context.
 `pnpm generate:props` writes the key list in `docs/references/components.md`

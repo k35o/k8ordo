@@ -1,8 +1,12 @@
 import type { FC, HTMLAttributes, ReactNode } from 'react';
 
 import { getMessages } from '../../../i18n/current';
-import type { Messages } from '../../../i18n/messages';
 import { HIGH_CONTRAST_EDGE } from '../../_internal/high-contrast';
+import {
+  STATUS_ICON,
+  STATUS_MESSAGE_KEY,
+  STATUS_SURFACE,
+} from '../../_internal/status-tone';
 import { IconButton } from '../../buttons/icon-button';
 import { AlertIcon, CloseIcon } from '../../icons';
 import { cn } from './../../../helpers/cn';
@@ -23,13 +27,6 @@ type Props = {
   HTMLAttributes<HTMLDivElement>,
   'children' | 'role' | 'className' | 'style'
 >;
-
-const STATUS_MESSAGE_KEY = {
-  success: 'alertSuccess',
-  info: 'alertInfo',
-  warning: 'alertWarning',
-  error: 'alertError',
-} as const satisfies Record<Status, keyof Messages>;
 
 export const Alert: FC<Props> = ({
   tone,
@@ -80,22 +77,11 @@ export const Alert: FC<Props> = ({
       className={cn(
         'flex items-center gap-3 rounded-lg p-4',
         HIGH_CONTRAST_EDGE,
-        tone === 'success' && 'bg-bg-success',
-        tone === 'info' && 'bg-bg-info',
-        tone === 'warning' && 'bg-bg-warning',
-        tone === 'error' && 'bg-bg-error',
+        STATUS_SURFACE[tone],
       )}
       role={tone === 'error' || tone === 'warning' ? 'alert' : 'status'}
     >
-      <span
-        className={cn(
-          'shrink-0',
-          tone === 'success' && 'text-fg-success',
-          tone === 'info' && 'text-fg-info',
-          tone === 'warning' && 'text-fg-warning',
-          tone === 'error' && 'text-fg-error',
-        )}
-      >
+      <span className={cn('shrink-0', STATUS_ICON[tone])}>
         <AlertIcon size="md" status={tone} />
         <span className="sr-only">{messages[STATUS_MESSAGE_KEY[tone]]}</span>
       </span>

@@ -19,7 +19,7 @@ import type {
 type Status = 'success' | 'info' | 'warning' | 'error';
 ```
 
-Used for the status of `Alert`, `Toast`, and `AlertIcon`. `Badge` takes its own `tone`, which also allows `'neutral'`.
+Used for the status of `Alert`, `Callout`, `Toast`, and `AlertIcon`. `Badge` takes its own `tone`, which also allows `'neutral'`.
 
 ## Direction
 

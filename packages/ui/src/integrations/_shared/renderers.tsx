@@ -21,6 +21,7 @@ import { Table } from '../../components/data-display/table';
 import { Tree } from '../../components/data-display/tree';
 import type { TreeItem } from '../../components/data-display/tree';
 import { Alert } from '../../components/feedback/alert';
+import { Callout } from '../../components/feedback/callout';
 import { EmptyState } from '../../components/feedback/empty-state';
 import { Progress } from '../../components/feedback/progress';
 import { Skeleton } from '../../components/feedback/skeleton';
@@ -123,6 +124,7 @@ import { getMessages } from '../../i18n/current';
 import type {
   AccordionProps,
   AlertProps,
+  CalloutProps,
   AnchorProps,
   AutocompleteProps,
   ComboboxProps,
@@ -300,6 +302,14 @@ export function renderHeading(props: HeadingProps): ReactNode {
 
 export function renderAlert(props: AlertProps): ReactNode {
   return <Alert message={props.message} tone={props.tone} />;
+}
+
+export function renderCallout(props: CalloutProps): ReactNode {
+  return (
+    <Callout label={u(props.label)} tone={props.tone}>
+      <p>{props.content}</p>
+    </Callout>
+  );
 }
 
 export function renderSpinner(props: SpinnerProps): ReactNode {
