@@ -25,12 +25,20 @@
 }
 
 /*
- * サイトのページの地（bg-page）。ライトは bg-base（白）で、CodeBlock や
- * Playground の bg-surface の面が一段沈んで見える。ダークの bg-base は明るい
- * 灰色なので一段暗い bg-subtle にし、同じ面がそこから沈むようにする。
+ * サイトのページの地（bg-page）。ライトは bg-base（白）、ダークはいちばん暗い
+ * bg-surface。部品を見せる面（bg-surface）はダークで地と同じ色になるので、
+ * どちらのモードでも枠線で区切る。
  */
 @theme inline {
-  --color-page: light-dark(var(--bg-base), var(--bg-subtle));
+  --color-page: light-dark(var(--bg-base), var(--bg-surface));
+}
+
+/*
+ * CodeBlock の面は bg-surface で、ダークではページの地と同じ色になる。サイト
+ * では部品を見せるほかの面と同じく、枠線で区切る。
+ */
+.ao-code-block {
+  border: 1px solid var(--border-mute);
 }
 
 @layer base {

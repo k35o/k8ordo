@@ -26,7 +26,7 @@ export const PreviewArea: FC<Props> = ({ children, stage = 'page' }) => {
     <div
       className={
         stage === 'page'
-          ? 'bg-bg-surface relative rounded-lg'
+          ? 'border-border-mute bg-bg-surface relative rounded-lg border'
           : 'border-border-mute bg-bg-base relative rounded-lg border'
       }
     >

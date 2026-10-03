@@ -22,7 +22,7 @@ export function TokenCard({
 
   return (
     // 白いページの上に白いカードを置くと、ダークでは影が見えずに地に溶けるので、ページの地の面にする
-    <div className="bg-bg-surface rounded-xl">
+    <div className="border-border-mute bg-bg-surface rounded-xl border">
       <div className="flex items-start gap-3 p-4">
         <div
           className="ring-border-mute mt-0.5 size-6 shrink-0 rounded-md ring-1"

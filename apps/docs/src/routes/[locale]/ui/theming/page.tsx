@@ -184,7 +184,7 @@ export default function Theming() {
           <Heading level="h3">
             <Rich>{m.theming.textSizesTitle()}</Rich>
           </Heading>
-          <div className="bg-bg-surface rounded-xl">
+          <div className="border-border-mute bg-bg-surface rounded-xl border">
             <div className="flex flex-col gap-3 p-4">
               {TEXT_SIZES.map((size) => {
                 const ratio = lineHeightToNumber(size.lineHeight);
@@ -215,7 +215,7 @@ export default function Theming() {
           <Heading level="h3">
             <Rich>{m.theming.fontWeightsTitle()}</Rich>
           </Heading>
-          <div className="bg-bg-surface rounded-xl">
+          <div className="border-border-mute bg-bg-surface rounded-xl border">
             <div className="flex flex-col gap-3 p-4">
               {FONT_WEIGHTS.map((weight) => (
                 <div className="flex items-baseline gap-4" key={weight.name}>
@@ -241,7 +241,7 @@ export default function Theming() {
           <Heading level="h3">
             <Rich>{m.theming.letterSpacingTitle()}</Rich>
           </Heading>
-          <div className="bg-bg-surface rounded-xl">
+          <div className="border-border-mute bg-bg-surface rounded-xl border">
             <div className="flex flex-col gap-3 p-4">
               {LETTER_SPACINGS.map((ls) => (
                 <div className="flex items-baseline gap-4" key={ls.name}>
@@ -264,7 +264,7 @@ export default function Theming() {
           <Heading level="h3">
             <Rich>{m.theming.lineHeightTitle()}</Rich>
           </Heading>
-          <div className="bg-bg-surface rounded-xl">
+          <div className="border-border-mute bg-bg-surface rounded-xl border">
             <div className="flex flex-col gap-3 p-4">
               {LINE_HEIGHTS.map((lh) => (
                 <div className="flex items-center gap-4" key={lh.name}>
@@ -344,7 +344,7 @@ export default function Theming() {
         <p className="text-fg-mute">
           <Rich>{m.theming.spacingDescription()}</Rich>
         </p>
-        <div className="bg-bg-surface rounded-xl">
+        <div className="border-border-mute bg-bg-surface rounded-xl border">
           <div className="flex flex-col gap-2 p-4">
             {SPACING_SCALE.map((space) => (
               <div className="flex items-center gap-3" key={space.step}>
@@ -372,7 +372,7 @@ export default function Theming() {
         <p className="text-fg-mute">
           <Rich>{m.theming.breakpointsDescription()}</Rich>
         </p>
-        <div className="bg-bg-surface rounded-xl">
+        <div className="border-border-mute bg-bg-surface rounded-xl border">
           <div className="flex flex-col gap-2 p-4">
             {BREAKPOINTS.map((bp) => (
               <div className="flex items-center gap-4" key={bp.name}>
@@ -396,7 +396,7 @@ export default function Theming() {
         <p className="text-fg-mute">
           <Rich>{m.theming.zIndexDescription()}</Rich>
         </p>
-        <div className="bg-bg-surface rounded-xl">
+        <div className="border-border-mute bg-bg-surface rounded-xl border">
           <div className="flex flex-col gap-2 p-4">
             {Z_INDICES.map((z) => (
               <div className="flex items-center gap-4" key={z.name}>

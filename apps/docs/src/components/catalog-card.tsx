@@ -11,7 +11,7 @@ import { Rich } from './rich';
 // 白いページの上に白いカードを置くと、ダークでは影が見えずに地に溶ける。
 // 部品が想定するページの地（bg-surface）の面にする
 const cardClass =
-  'group bg-bg-surface focus-within:ring-border-info hover:ring-border-base relative flex flex-col overflow-hidden rounded-xl focus-within:ring-2 hover:ring-1';
+  'group border-border-mute hover:border-border-base bg-bg-surface focus-within:ring-border-info relative flex flex-col overflow-hidden rounded-xl border focus-within:ring-2';
 
 export const CatalogCard: FC<{
   item: NavItem;

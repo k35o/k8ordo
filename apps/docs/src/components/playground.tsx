@@ -30,7 +30,7 @@ export function Playground({
 }: PlaygroundProps) {
   return (
     <section aria-labelledby={id}>
-      <div className="writing-h bg-bg-surface rounded-xl p-2">
+      <div className="writing-h border-border-mute bg-bg-surface rounded-xl border p-2">
         <header className="flex flex-col gap-1.5 px-3 pt-2 pb-3">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
             <span className="text-primary-fg bg-primary-bg-subtle inline-flex items-center gap-1 rounded-full py-1 ps-2 pe-2.5 text-xs font-bold">
@@ -47,7 +47,9 @@ export function Playground({
             </p>
           )}
         </header>
-        <div className="bg-page min-w-0 rounded-lg p-6 sm:p-8">{children}</div>
+        <div className="bg-bg-base dark:bg-bg-subtle min-w-0 rounded-lg p-6 sm:p-8">
+          {children}
+        </div>
         {steps !== undefined && steps.length > 0 && (
           <div className="flex flex-col gap-2 px-3 pt-4 pb-2">
             <p className="text-fg-base text-sm font-bold">
