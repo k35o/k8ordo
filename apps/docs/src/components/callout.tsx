@@ -9,7 +9,7 @@ type CalloutProps = { children: ReactNode };
 /** Something worth knowing beside the main path. */
 export function Note({ children }: CalloutProps) {
   return (
-    <aside className="bg-bg-info rounded-lg px-5 py-4">
+    <aside className="border-border-info bg-border-info/10 rounded-lg border-s-4 px-5 py-4">
       <p className="text-fg-info mb-1 text-sm font-bold">{m.docPage.note()}</p>
       <Prose>{children}</Prose>
     </aside>
@@ -19,7 +19,7 @@ export function Note({ children }: CalloutProps) {
 /** A mistake that is easy to make, and what to do instead. */
 export function Pitfall({ children }: CalloutProps) {
   return (
-    <aside className="bg-bg-warning rounded-lg px-5 py-4">
+    <aside className="border-border-warning bg-border-warning/10 rounded-lg border-s-4 px-5 py-4">
       <p className="text-fg-warning mb-1 text-sm font-bold">
         {m.docPage.pitfall()}
       </p>
