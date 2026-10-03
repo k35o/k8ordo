@@ -74,7 +74,7 @@ export function FormDemo({ fields }: Props) {
           </Button>
         </div>
       </form>
-      <dl className="bg-bg-subtle grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-2 rounded-lg px-4 py-3 text-sm">
+      <dl className="bg-bg-surface grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-2 rounded-lg px-4 py-3 text-sm">
         <dt className="text-fg-mute">URL</dt>
         <dd className="break-all">
           <Code>{search === '' ? m.form.demoUrlEmpty() : `?${search}`}</Code>

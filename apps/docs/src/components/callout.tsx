@@ -9,7 +9,7 @@ type CalloutProps = { children: ReactNode };
 /** Something worth knowing beside the main path. */
 export function Note({ children }: CalloutProps) {
   return (
-    <aside className="bg-bg-surface rounded-lg px-5 py-4">
+    <aside className="bg-bg-info rounded-lg px-5 py-4">
       <p className="text-fg-info mb-1 text-sm font-bold">{m.docPage.note()}</p>
       <Prose>{children}</Prose>
     </aside>
@@ -37,7 +37,7 @@ type DeepDiveProps = {
 /** Why it works this way: folded, for the reader who wants it. */
 export function DeepDive({ title, children }: DeepDiveProps) {
   return (
-    <details className="bg-bg-surface group rounded-lg px-5 py-4">
+    <details className="border-border-mute group rounded-lg border px-5 py-4">
       <summary className="cursor-pointer list-none">
         <span className="text-fg-mute block text-sm font-bold">
           {m.docPage.deepDive()}
