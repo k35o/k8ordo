@@ -44,7 +44,7 @@ const ITEMS = () => [
 
 export default function TableOfContentsPage() {
   return (
-    <div className="mx-auto flex max-w-4xl flex-col gap-8 px-6 py-12 md:px-8">
+    <div className="flex flex-col gap-8 py-12">
       <PageTitle name="TableOfContents" />
       <div className="flex flex-col gap-4">
         <Heading level="h1">TableOfContents</Heading>

@@ -23,7 +23,7 @@ export const PackageExample: FC<Props> = ({
   code,
   lang = 'tsx',
 }) => (
-  <section className="mx-auto w-full max-w-6xl px-6 pb-24 md:px-8">
+  <section className="pb-24">
     <Heading level="h2">
       <Rich>{title()}</Rich>
     </Heading>

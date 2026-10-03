@@ -84,7 +84,7 @@ export default function I18nPage() {
       featuresTitle={m.i18n.featuresTitle}
       name="@k8ordo/i18n"
     >
-      <section className="mx-auto w-full max-w-6xl px-6 pb-24 md:px-8">
+      <section className="pb-24">
         <Heading level="h2">
           <Rich>{m.i18n.demoTitle()}</Rich>
         </Heading>

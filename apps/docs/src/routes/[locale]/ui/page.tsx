@@ -67,7 +67,7 @@ export default function Ui() {
   return (
     <div className="flex flex-1 flex-col">
       <PageTitle name="@k8ordo/ui" />
-      <section className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-12 px-6 py-20 md:grid-cols-[1fr_auto] md:gap-16 md:px-8 md:py-28">
+      <section className="grid grid-cols-1 gap-12 py-20 md:grid-cols-[1fr_auto] md:gap-16 md:py-28">
         <div className="flex max-w-xl flex-col justify-center gap-8">
           <Heading level="h1">@k8ordo/ui</Heading>
           {/* md 以上はタグラインを縦書き短冊が担う */}
@@ -121,7 +121,7 @@ export default function Ui() {
         </div>
       </section>
 
-      <section className="mx-auto w-full max-w-6xl px-6 pb-24 md:px-8">
+      <section className="pb-24">
         <Heading level="h2">{m.ui.featuresTitle()}</Heading>
         <ol className="mt-8">
           {FEATURES.map((feature) => (

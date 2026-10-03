@@ -68,7 +68,7 @@ export default function ColorSchemePage() {
       featuresTitle={m.colorScheme.featuresTitle}
       name="@k8ordo/color-scheme"
     >
-      <section className="mx-auto w-full max-w-6xl px-6 pb-24 md:px-8">
+      <section className="pb-24">
         <Heading level="h2">
           <Rich>{m.colorScheme.demoTitle()}</Rich>
         </Heading>

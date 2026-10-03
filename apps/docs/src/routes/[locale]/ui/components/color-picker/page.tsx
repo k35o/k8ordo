@@ -39,7 +39,7 @@ const accent = form.field('accent');
 
 export default function ColorPickerPage() {
   return (
-    <div className="mx-auto flex max-w-4xl flex-col gap-8 px-6 py-12 md:px-8">
+    <div className="flex flex-col gap-8 py-12">
       <PageTitle name="ColorPicker" />
       <div className="flex flex-col gap-4">
         <Heading level="h1">ColorPicker</Heading>

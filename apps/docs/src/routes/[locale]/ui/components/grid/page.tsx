@@ -19,7 +19,7 @@ function Cell({ children }: { children: string }) {
 
 export default function GridPage() {
   return (
-    <div className="mx-auto flex max-w-4xl flex-col gap-8 px-6 py-12 md:px-8">
+    <div className="flex flex-col gap-8 py-12">
       <PageTitle name="Grid" />
       <div className="flex flex-col gap-4">
         <Heading level="h1">Grid</Heading>

@@ -39,7 +39,7 @@ export function LandingHero({
   const [start] = pkg.groups[0].sections;
 
   return (
-    <section className="mx-auto grid w-full max-w-6xl items-center gap-12 px-6 pt-16 pb-20 md:px-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:pt-24">
+    <section className="grid items-center gap-12 pt-16 pb-20 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:pt-24">
       <PageTitle name={name} />
       <div className="flex flex-col gap-6">
         <Heading level="h1">{name}</Heading>
@@ -88,7 +88,7 @@ type LandingClaimProps = {
 /** One thing the package promises: the claim, a few sentences, and the proof beside them. */
 export function LandingClaim({ title, body, children }: LandingClaimProps) {
   return (
-    <section className="mx-auto grid w-full max-w-6xl gap-8 px-6 py-14 md:px-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:gap-12">
+    <section className="grid gap-8 py-14 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:gap-12">
       <div className="flex flex-col gap-4">
         <Heading level="h2">
           <Rich>{title()}</Rich>
@@ -115,7 +115,7 @@ type NextStepsProps = {
 /** Where to go from the landing: a plain list, one line each. */
 export function NextSteps({ steps, directory }: NextStepsProps) {
   return (
-    <section className="mx-auto w-full max-w-6xl px-6 pt-14 pb-24 md:px-8">
+    <section className="pt-14 pb-24">
       <Heading level="h2">{m.landing.nextTitle()}</Heading>
       <ul className="border-border-mute mt-6 flex flex-col border-t">
         {steps.map((step) => (

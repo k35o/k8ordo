@@ -35,7 +35,7 @@ export function Navigation() {
 
   return (
     <header className="border-border-mute bg-page border-b">
-      <nav className="flex items-center gap-3 px-4 py-3 md:gap-6 md:px-6">
+      <nav className="mx-auto flex max-w-6xl items-center gap-3 px-6 py-3 md:gap-6 md:px-8">
         <LocaleAnchor
           className="focus-visible:ring-border-info flex shrink-0 items-baseline gap-1 rounded-md focus-visible:ring-2 focus-visible:outline-hidden"
           path="/:locale"

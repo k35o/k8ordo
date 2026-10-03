@@ -20,6 +20,12 @@ import * as m from '../../../messages';
 import { WritingModeProvider } from '../../../theme/writing-mode-context';
 
 /**
+ * サイトの枠。ホームと同じ幅・余白に、ヘッダー・サイドバー・本文をそろえる。
+ * ページは枠の中で縦の余白だけを持ち、幅と左右の余白は持たない。
+ */
+const FRAME = 'mx-auto w-full max-w-6xl px-6 md:px-8';
+
+/**
  * 開いているパッケージのドキュメントのページ。ランディング（`/:locale/form`
  * そのもの）は `/*` に合わないので、サイドバーを持たない全幅のページのまま。
  */
@@ -86,34 +92,34 @@ function LayoutContent({
       <div className="bg-page sticky top-0 z-30 shrink-0" ref={headerRef}>
         <Navigation />
         {pkg !== undefined && (
-          <div className="border-border-mute bg-page flex items-center gap-2 border-b px-4 py-2 lg:hidden">
-            <IconButton
-              label={m.sideNav.openNavigation()}
-              onClick={() => {
-                setIsDrawerOpen(true);
-              }}
-            >
-              <ListIcon />
-            </IconButton>
-            <span className="text-fg-mute text-sm">{pkg.name}</span>
+          <div className="border-border-mute bg-page border-b lg:hidden">
+            <div className={`${FRAME} flex items-center gap-2 py-2`}>
+              <IconButton
+                label={m.sideNav.openNavigation()}
+                onClick={() => {
+                  setIsDrawerOpen(true);
+                }}
+              >
+                <ListIcon />
+              </IconButton>
+              <span className="text-fg-mute text-sm">{pkg.name}</span>
+            </div>
           </div>
         )}
       </div>
       {pkg === undefined ? (
-        // ラッパーはブロックのまま保つ。flexにするとページ側の mx-auto コンテナが
-        // flexアイテム化し、stretchが効かず中身のmin-content幅で横にあふれる
-        <main className="flex min-w-0 flex-1 flex-col">
-          <div className="min-w-0 flex-1">
+        <>
+          <main className={`${FRAME} flex-1`}>
             <PageTransition>{children}</PageTransition>
-          </div>
+          </main>
           <Footer />
-        </main>
+        </>
       ) : (
         <>
-          <div className="flex flex-1">
+          <div className={`${FRAME} flex flex-1 gap-8`}>
             <aside
               aria-label={m.nav.packageNavigation()}
-              className="border-border-mute sticky hidden w-64 shrink-0 self-start overflow-y-auto border-e px-4 py-8 lg:block"
+              className="border-border-mute sticky hidden w-56 shrink-0 self-start overflow-y-auto border-e py-8 pe-4 lg:block"
               style={{
                 top: `${String(headerHeight)}px`,
                 height: `calc(100dvh - ${String(headerHeight)}px)`,
@@ -121,13 +127,11 @@ function LayoutContent({
             >
               <PackageSidebar catalogs={catalogs} pkg={pkg} />
             </aside>
-            <main className="flex min-w-0 flex-1 flex-col">
-              <div className="min-w-0 flex-1">
-                <PageTransition>{children}</PageTransition>
-              </div>
-              <Footer />
+            <main className="min-w-0 flex-1">
+              <PageTransition>{children}</PageTransition>
             </main>
           </div>
+          <Footer />
           <Drawer
             isOpen={isDrawerOpen}
             onClose={() => {

@@ -52,7 +52,7 @@ export function PackageLanding({
   return (
     <div className="flex flex-1 flex-col">
       <PageTitle name={name} />
-      <section className="mx-auto w-full max-w-6xl px-6 py-20 md:px-8 md:py-28">
+      <section className="py-20 md:py-28">
         <div className="flex max-w-2xl flex-col justify-center gap-8">
           <Heading level="h1">{name}</Heading>
           <p className="text-fg-mute break-phrase text-lg leading-relaxed">
@@ -83,7 +83,7 @@ export function PackageLanding({
 
       {children}
 
-      <section className="mx-auto w-full max-w-6xl px-6 pb-24 md:px-8">
+      <section className="pb-24">
         <Heading level="h2">{featuresTitle()}</Heading>
         <ul className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2">
           {features.map((feature) => (
@@ -105,7 +105,7 @@ export function PackageLanding({
         </ul>
       </section>
 
-      <section className="mx-auto w-full max-w-6xl px-6 pb-24 md:px-8">
+      <section className="pb-24">
         <Heading level="h2">{docsTitle()}</Heading>
         <ol className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {sections.map((section, index) => (

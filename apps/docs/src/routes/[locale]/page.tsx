@@ -34,7 +34,7 @@ export default function Home() {
     <div className="flex flex-1 flex-col">
       {/* サイトの表紙だけは「k8ordo · k8ordo」にならないよう素の title */}
       <title>k8ordo</title>
-      <section className="mx-auto w-full max-w-6xl px-6 py-20 md:px-8 md:py-28">
+      <section className="py-20 md:py-28">
         <div className="flex max-w-xl flex-col justify-center gap-8">
           {/* Heading は className を受けないため、ヒーローのみ生 h1（サイト内この1箇所限定） */}
           {/* 320px級の画面でも1語の "k8ordo" がはみ出さないよう、
@@ -83,7 +83,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="mx-auto w-full max-w-6xl px-6 pb-16 md:px-8">
+      <section className="pb-16">
         <Heading level="h2">{m.home.membersTitle()}</Heading>
         <ul className="mt-8 flex flex-col gap-4">
           {PACKAGES.map((pkg) => (
@@ -102,7 +102,7 @@ export default function Home() {
         </ul>
       </section>
 
-      <section className="mx-auto w-full max-w-6xl px-6 pb-24 md:px-8">
+      <section className="pb-24">
         <Heading level="h2">{m.home.disciplineTitle()}</Heading>
         <ol className="mt-8">
           {DISCIPLINES.map((discipline) => (

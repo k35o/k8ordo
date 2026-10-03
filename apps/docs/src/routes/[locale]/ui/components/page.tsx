@@ -9,7 +9,7 @@ import * as m from '../../../../messages';
 
 export default function Components() {
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-12 px-6 py-16 md:px-8">
+    <div className="flex flex-col gap-12 py-16">
       <PageTitle title={m.nav.components} />
       <header className="flex flex-col gap-4">
         <Heading level="h1">{m.nav.components()}</Heading>
