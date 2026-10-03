@@ -83,10 +83,10 @@ function LayoutContent({
       className="flex flex-1 flex-col"
       style={{ '--header-h': `${String(headerHeight)}px` } as CSSProperties}
     >
-      <div className="bg-bg-base sticky top-0 z-30 shrink-0" ref={headerRef}>
+      <div className="bg-page sticky top-0 z-30 shrink-0" ref={headerRef}>
         <Navigation />
         {pkg !== undefined && (
-          <div className="border-border-mute bg-bg-base flex items-center gap-2 border-b px-4 py-2 lg:hidden">
+          <div className="border-border-mute bg-page flex items-center gap-2 border-b px-4 py-2 lg:hidden">
             <IconButton
               label={m.sideNav.openNavigation()}
               onClick={() => {

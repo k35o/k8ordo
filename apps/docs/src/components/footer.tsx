@@ -14,7 +14,7 @@ const linkClass =
 
 export function Footer() {
   return (
-    <footer className="border-border-mute bg-bg-base border-t">
+    <footer className="border-border-mute bg-page border-t">
       <div className="mx-auto flex max-w-6xl flex-col gap-12 px-6 py-16 md:px-8">
         <div className="flex flex-col gap-12 md:flex-row md:justify-between md:gap-20">
           <div className="flex flex-col gap-4">

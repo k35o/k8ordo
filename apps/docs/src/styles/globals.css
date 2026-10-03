@@ -24,6 +24,15 @@
   --font-m-plus-2: 'M PLUS 2 Variable', 'Noto Sans JP Variable', sans-serif;
 }
 
+/*
+ * サイトのページの地（bg-page）。ライトは bg-base（白）で、CodeBlock や
+ * Playground の bg-surface の面が一段沈んで見える。ダークの bg-base は明るい
+ * 灰色なので一段暗い bg-subtle にし、同じ面がそこから沈むようにする。
+ */
+@theme inline {
+  --color-page: light-dark(var(--bg-base), var(--bg-subtle));
+}
+
 @layer base {
   body {
     font-family: var(--font-noto-sans-jp);
