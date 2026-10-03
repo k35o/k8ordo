@@ -40,11 +40,6 @@ export const pitfall = message({
   en: 'Pitfall',
 });
 
-export const deepDive = message({
-  ja: 'もっと詳しく',
-  en: 'Deep dive',
-});
-
 export const tryIt = message({
   ja: '試してみる',
   en: 'Try it',
