@@ -107,7 +107,7 @@ export function DocPage({ path, introduction, children }: DocPageProps) {
   const outline = outlineOf(children);
 
   return (
-    <div className="flex gap-8 py-10">
+    <div className="flex gap-8 py-12">
       <article className="min-w-0 flex-1 [&_[id]]:scroll-mt-[calc(var(--header-h)+1.5rem)]">
         <PageTitle name={`${section.label()} — ${pkg.name}`} />
         <header className="flex flex-col gap-4">
