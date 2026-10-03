@@ -11,6 +11,7 @@ import type { Card } from '../../components/data-display/card';
 import type { Carousel } from '../../components/data-display/carousel';
 import type { Heading } from '../../components/data-display/heading';
 import type { Alert } from '../../components/feedback/alert';
+import type { Callout } from '../../components/feedback/callout';
 import type { EmptyState } from '../../components/feedback/empty-state';
 import type { Skeleton } from '../../components/feedback/skeleton';
 import type { Spinner } from '../../components/feedback/spinner';
@@ -422,6 +423,19 @@ export const alertProps = z.object({
   tone: z.enum(['success', 'info', 'warning', 'error']),
   message: z.union([z.string(), z.array(z.string())]),
 }) satisfies z.ZodType<AlertIntegrationProps>;
+
+type CalloutIntegrationProps = {
+  tone: ComponentProps<typeof Callout>['tone'];
+  label?: ComponentProps<typeof Callout>['label'];
+  // Integration-only: a spec cannot write the `children` the bare Callout
+  // takes, so the body is plain text.
+  content: string;
+};
+export const calloutProps = z.object({
+  tone: z.enum(['success', 'info', 'warning', 'error']),
+  label: z.string().optional(),
+  content: z.string(),
+}) satisfies z.ZodType<CalloutIntegrationProps>;
 
 type SpinnerIntegrationProps = {
   label?: ComponentProps<typeof Spinner>['label'];
@@ -1142,6 +1156,7 @@ export type ButtonProps = z.infer<typeof buttonProps>;
 export type BadgeProps = z.infer<typeof badgeProps>;
 export type HeadingProps = z.infer<typeof headingProps>;
 export type AlertProps = z.infer<typeof alertProps>;
+export type CalloutProps = z.infer<typeof calloutProps>;
 export type SpinnerProps = z.infer<typeof spinnerProps>;
 export type SeparatorProps = z.infer<typeof separatorProps>;
 export type StackProps = z.infer<typeof stackProps>;
@@ -1251,6 +1266,12 @@ export type _EnumCoverage = [
   >,
   AssertCovered<
     CoversComponent<ComponentProps<typeof Alert>['tone'], AlertProps['tone']>
+  >,
+  AssertCovered<
+    CoversComponent<
+      ComponentProps<typeof Callout>['tone'],
+      CalloutProps['tone']
+    >
   >,
   AssertCovered<
     CoversComponent<

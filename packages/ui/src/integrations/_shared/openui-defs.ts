@@ -74,6 +74,11 @@ export const buildComponentLibrary = <C>(
     'Alert that reports a status. message is a string or an array of strings.',
     s.alertProps,
   );
+  const Callout = def(
+    'Callout',
+    'Note inside the content (a tip, a caveat). Unlike Alert, it is not announced as a status. content is plain text; label is an optional bold line above it.',
+    s.calloutProps,
+  );
   const Spinner = def('Spinner', 'Loading spinner.', s.spinnerProps);
   const Progress = def(
     'Progress',
@@ -269,6 +274,7 @@ export const buildComponentLibrary = <C>(
     ChevronIcon.ref,
     StatusIcon.ref,
     Alert.ref,
+    Callout.ref,
     Spinner.ref,
     Progress.ref,
     Skeleton.ref,
@@ -444,6 +450,7 @@ export const buildComponentLibrary = <C>(
       ChevronIcon,
       StatusIcon,
       Alert,
+      Callout,
       Spinner,
       Progress,
       Skeleton,

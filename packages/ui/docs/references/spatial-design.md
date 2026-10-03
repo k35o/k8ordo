@@ -51,6 +51,7 @@ Vary the radius with the element's role.
 | Use      | Class          | Value                          |
 | -------- | -------------- | ------------------------------ |
 | Alert    | `rounded-lg`   | 0.75rem                        |
+| Callout  | `rounded-lg`   | 0.75rem                        |
 | Badge    | `rounded-full` | Pill (fine, since it is small) |
 | Tabs     | As-is          |                                |
 | Checkbox | `rounded-md`   | 0.5rem                         |
