@@ -80,6 +80,10 @@ export const PACKAGES: PackageEntry[] = [
           { path: '/:locale/form/errors', label: m.form.navErrors },
           { path: '/:locale/form/rules', label: m.form.navRules },
           { path: '/:locale/form/edit', label: m.form.navEdit },
+          {
+            path: '/:locale/form/async-check',
+            label: m.form.navAsyncCheck,
+          },
         ],
       },
       {

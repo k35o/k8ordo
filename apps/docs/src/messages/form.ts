@@ -153,6 +153,11 @@ export const navEdit = message({
   en: 'Edit existing data',
 });
 
+export const navAsyncCheck = message({
+  ja: '入力中にサーバーへ問い合わせる',
+  en: 'Check with the server',
+});
+
 export const navErrors = message({
   ja: 'エラーを表示する',
   en: 'Show errors',
