@@ -1,8 +1,5 @@
-import { Code } from '@k8ordo/ui';
-
 import { ApiEntry } from '../../../../../components/api-entry';
 import { DocPage } from '../../../../../components/doc-page';
-import { Rich } from '../../../../../components/rich';
 import * as m from '../../../../../messages';
 
 const t = m.formReferenceServer;
@@ -19,11 +16,7 @@ const RULE_PARAMS = {
 
 const RULE_RETURNS = { type: 'Rule', description: t.ruleReturns } as const;
 
-const FORM_STATE: ReadonlyArray<{
-  name: string;
-  type: string;
-  description: () => string;
-}> = [
+const FORM_STATE = [
   {
     name: 'errors',
     type: 'Record<string, string>',
@@ -41,7 +34,7 @@ const FORM_STATE: ReadonlyArray<{
   },
   { name: 'formError', type: 'string', description: t.formStateFormError },
   { name: 'token', type: 'string', description: t.formStateToken },
-];
+] as const;
 
 export default function FormReferenceServerPage() {
   return (
@@ -150,6 +143,7 @@ export default function FormReferenceServerPage() {
       />
 
       <ApiEntry
+        fields={FORM_STATE}
         from={FROM}
         id="form-state"
         name="FormState"
@@ -161,21 +155,7 @@ export default function FormReferenceServerPage() {
   token?: string;
 };`}
         summary={t.formStateSummary}
-      >
-        <dl className="flex flex-col gap-3">
-          {FORM_STATE.map((field) => (
-            <div className="flex flex-col gap-1" key={field.name}>
-              <dt className="flex flex-wrap items-baseline gap-2">
-                <Code>{field.name}</Code>
-                <span className="text-fg-mute text-sm">{field.type}</span>
-              </dt>
-              <dd className="leading-relaxed">
-                <Rich>{field.description()}</Rich>
-              </dd>
-            </div>
-          ))}
-        </dl>
-      </ApiEntry>
+      />
     </DocPage>
   );
 }

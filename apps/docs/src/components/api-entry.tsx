@@ -8,6 +8,23 @@ import { Rich } from './rich';
 
 type Param = { name: string; type: string; description: Message };
 
+/** One named thing with a type: a parameter, or a field of what is returned. */
+const NamedList = ({ items }: { items: readonly Param[] }) => (
+  <dl className="flex flex-col gap-3">
+    {items.map((item) => (
+      <div className="flex flex-col gap-1" key={item.name}>
+        <dt className="flex flex-wrap items-baseline gap-2">
+          <Code>{item.name}</Code>
+          <span className="text-fg-mute text-sm">{item.type}</span>
+        </dt>
+        <dd className="text-fg-base leading-relaxed">
+          <Rich>{item.description()}</Rich>
+        </dd>
+      </div>
+    ))}
+  </dl>
+);
+
 export type ApiEntryProps = {
   /** The anchor, the same in every locale. */
   id: string;
@@ -19,6 +36,8 @@ export type ApiEntryProps = {
   signature: string;
   params?: readonly Param[];
   returns?: { type: string; description: Message };
+  /** The fields of a type, or of the object a function returns. */
+  fields?: readonly Param[];
   caveats?: readonly Message[];
   /** An example, or anything else that belongs to this entry. */
   children?: ReactNode;
@@ -40,6 +59,7 @@ export function ApiEntry({
   signature,
   params,
   returns,
+  fields,
   caveats,
   children,
 }: ApiEntryProps) {
@@ -65,19 +85,7 @@ export function ApiEntry({
       {params !== undefined && params.length > 0 && (
         <div className="flex flex-col gap-3">
           <Label>{m.reference.parameters()}</Label>
-          <dl className="flex flex-col gap-3">
-            {params.map((param) => (
-              <div className="flex flex-col gap-1" key={param.name}>
-                <dt className="flex flex-wrap items-baseline gap-2">
-                  <Code>{param.name}</Code>
-                  <span className="text-fg-mute text-sm">{param.type}</span>
-                </dt>
-                <dd className="text-fg-base leading-relaxed">
-                  <Rich>{param.description()}</Rich>
-                </dd>
-              </div>
-            ))}
-          </dl>
+          <NamedList items={params} />
         </div>
       )}
       {returns !== undefined && (
@@ -86,6 +94,12 @@ export function ApiEntry({
           <p className="leading-relaxed">
             <Code>{returns.type}</Code> — <Rich>{returns.description()}</Rich>
           </p>
+        </div>
+      )}
+      {fields !== undefined && fields.length > 0 && (
+        <div className="flex flex-col gap-3">
+          <Label>{m.reference.fields()}</Label>
+          <NamedList items={fields} />
         </div>
       )}
       {caveats !== undefined && caveats.length > 0 && (
