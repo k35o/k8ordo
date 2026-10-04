@@ -5,89 +5,87 @@ export const description = message({
   en: 'Builds an application into files. Every route is rendered ahead of time, and what ships is a directory a static host can serve — no server at run time.',
 });
 
-export const featuresTitle = message({
-  ja: '特徴',
-  en: 'Features',
+export const tagline = message({
+  ja: 'React Server Components のアプリを、ビルドの時点ですべてのページを描いてファイルにする。',
+  en: 'Build a React Server Components app into files, every page rendered ahead of time.',
 });
 
-export const featureRoutes = message({
-  ja: 'routes/ が URL 空間',
-  en: 'routes/ is the URL space',
+export const claimRoutesTitle = message({
+  ja: 'ディレクトリの形が、そのまま URL になる',
+  en: 'The directory tree is the URL space',
 });
 
-export const featureRoutesDescription = message({
-  ja: 'ディレクトリ木がそのまま pathname 空間です。page/layout/not-found/error/redirect・`[param]`・`(group)`・`_` の私物だけを認め、規約から外れたものはビルドを落とします。',
-  en: 'The directory tree is the pathname space: page/layout/not-found/error/redirect, `[param]`, `(group)`, and `_`-prefixed privates. Anything outside the grammar fails the build.',
+export const claimRoutesBody = [
+  message({
+    ja: '`src/routes/` の下のディレクトリが URL の区間、`[id]` がパラメータ、`page.tsx` がページです。ルート表と `href` の型は、そこから `.k8ordo/` に生成されます。',
+    en: 'Under `src/routes/`, a directory is a URL segment, `[id]` is a parameter, and `page.tsx` is a page. The route table and the types `href` checks against are generated from it into `.k8ordo/`.',
+  }),
+  message({
+    ja: '決まったファイル名のほかは `_` で始まるディレクトリに置きます。届かないページや取り合いになる URL は、ビルドがファイル名を挙げて止めます。',
+    en: 'Anything that is not one of the route file names lives under a `_` directory. A page nothing can reach, or two files claiming one URL, stops the build with the files named.',
+  }),
+] as const;
+
+export const claimPathsTitle = message({
+  ja: 'パラメータのあるページは、値を並べるまで出さない',
+  en: 'A page with parameters ships only once its values are listed',
 });
 
-export const featureGenerated = message({
-  ja: '配線は書かない',
-  en: 'The wiring is not yours to write',
+export const claimPathsBody = [
+  message({
+    ja: 'ビルドはパラメータの値を思いつけないので、`paths` に URL を並べます。データから組み立てる関数も渡せます。',
+    en: 'A build cannot invent parameter values, so `paths` lists the URLs. It can be a function that builds them from your data.',
+  }),
+  message({
+    ja: '値の無いページがあれば、ビルドは失敗します。半分のページが抜けたサイトを黙って出すより、止まるほうがましだからです。',
+    en: 'A page left without values fails the build: stopping beats quietly shipping a site missing half its pages.',
+  }),
+] as const;
+
+export const claimRefuseTitle = message({
+  ja: 'サーバーが要るものは、ビルドが名指しで断る',
+  en: 'What needs a server, the build refuses by name',
 });
 
-export const featureGeneratedDescription = message({
-  ja: 'ルート表と、router / state への型の配線は生成されます。生成物はルーターの公開 API を使ったただのソースで、diff で読めます。',
-  en: 'The route table and the typed-path wiring into router and state are generated — as ordinary source using the public API, readable in a diff.',
+export const claimRefuseBody = [
+  message({
+    ja: "ファイルはフォームの送信を受け取れません。`'use server'` のモジュールや `guard.ts` があれば、ビルドも `vite dev` もそのファイルを挙げて止まります。",
+    en: "A file cannot receive a form submission. A `'use server'` module or a `guard.ts` stops both the build and `vite dev`, naming the file.",
+  }),
+  message({
+    ja: 'それが要るなら `@k8ordo/server` に入れ替えます。ルートの書き方も境界も同じなので、変わるのは import 1 行です。',
+    en: 'If the app needs them, install `@k8ordo/server` instead. The route grammar and the boundaries are the same, so the change is one import.',
+  }),
+] as const;
+
+export const nextGetStarted = message({
+  ja: 'プラグインを足し、レイアウトとページを置いて、ビルドするまでです。',
+  en: 'Add the plugin, place a layout and a page, and build.',
 });
 
-export const featureBoundary = message({
-  ja: '境界は検査される',
-  en: 'Boundaries are checked',
+export const nextRouting = message({
+  ja: 'ファイル名とディレクトリ名の文法と、ビルドが拒む形です。',
+  en: 'The file and directory grammar, and what the build refuses.',
 });
 
-export const featureBoundaryDescription = message({
-  ja: "実行環境は React 自身の `'use client'` で宣言します。`server-only` を import したモジュールがクライアントに届いた時点でビルドが落ちるので、秘密は間に何段挟まっても渡りません。",
-  en: "Execution is declared with React's own `'use client'`. The build fails the moment a `server-only` module reaches the client, so secrets cannot cross however many imports sit in between.",
+export const nextParams = message({
+  ja: '`paramsSchema` での型付けと、`paths` での値の並べ方です。',
+  en: 'Typing parameters with `paramsSchema`, and listing values with `paths`.',
 });
 
-export const featureFiles = message({
-  ja: 'モードは依存で決まる',
-  en: 'The mode is the dependency',
+export const nextErrors = message({
+  ja: '`error.tsx`・`not-found.tsx`・`redirect.ts` と、ビルドを止める失敗です。',
+  en: '`error.tsx`, `not-found.tsx`, `redirect.ts`, and what stops the build.',
 });
 
-export const featureFilesDescription = message({
-  ja: 'このパッケージを入れることが「静的である」ことです。リクエスト依存は、守るべき規則ではなく存在しない API です。RSC のパイプラインがそれでもコンパイルする Server Action は、ビルドと `vite dev` が名指しで拒否します。パラメータ付きルートは列挙必須で、欠けたままビルドは通りません。`site` を渡せば sitemap.xml も書きます。',
-  en: 'Installing this package is what makes the application static: request-time data is not a rule to remember but an API that does not exist, and a Server Action, which the RSC pipeline still compiles, is refused by name in the build and in `vite dev`. Parameterised routes must be enumerated, or the build stops. Pass `site` and the build writes sitemap.xml too.',
+export const nextBoundaries = message({
+  ja: "`'use client'` と `server-only` で、実行する場所を分けます。",
+  en: "Where code runs, with `'use client'` and `server-only`.",
 });
 
-export const featureRouteFiles = message({
-  ja: 'error.tsx と redirect.ts',
-  en: 'error.tsx and redirect.ts',
-});
-
-export const featureRouteFilesDescription = message({
-  ja: 'ページが throw したら `error.tsx` が layout の内側に描かれ、枠は残ります。ビルド中に throw した Server Component はビルドを止めます。移転したディレクトリには `redirect.ts` を 1 行置くだけです。',
-  en: 'When a page throws, `error.tsx` renders inside the layout and the frame survives; a Server Component that throws during the build stops it. A directory that moved keeps a one-line `redirect.ts`.',
-});
-
-export const featureParams = message({
-  ja: 'パラメータにスキーマ',
-  en: 'Parameters take a schema',
-});
-
-export const featureParamsDescription = message({
-  ja: '`page.tsx` や `layout.tsx` が `paramsSchema` を export すると、合わない値はそのパターンが答えず、not-found に落ちます。リンクはスキーマの出力型で書けます。',
-  en: 'A `page.tsx` or `layout.tsx` that exports `paramsSchema` makes a refused value a pathname the pattern does not answer, so it falls through to not-found. Links take what the page receives, typed by the schema.',
-});
-
-export const exampleTitle = message({
-  ja: 'ディレクトリが URL',
-  en: 'Directories are the URL',
-});
-
-export const exampleDescription = message({
-  ja: 'routes/ の木がそのまま pathname 空間になり、表と型の配線は生成されます。',
-  en: 'The routes/ tree is the pathname space; the table and the type wiring are generated from it.',
-});
-
-export const docsTitle = message({
-  ja: 'ドキュメント',
-  en: 'Documentation',
-});
-
-export const docsDescription = message({
-  ja: '設計ガイドは npm パッケージに同梱されています。AIコーディングエージェントは `node_modules/@k8ordo/static/docs/` からインストールした版そのものを読みます。',
-  en: 'The guide ships inside the npm package. An AI coding assistant reads the exact installed version out of `node_modules/@k8ordo/static/docs/`.',
+export const nextDeploy = message({
+  ja: '出力されるファイルと、静的ホスティングへの置き方です。',
+  en: 'What the build writes, and putting it on a static host.',
 });
 
 export const navRouting = message({
