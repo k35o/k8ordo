@@ -21,7 +21,7 @@ export const renderTitle = message({
 });
 
 export const renderDescription = message({
-  ja: '`JsonRenderUI`がプロバイダー・レンダラー・registryを内部結線済みなので、specを渡すだけで描画できます。',
+  ja: '`JsonRenderUI`がプロバイダー、レンダラー、registryを内部結線済みなので、specを渡すだけで描画できます。',
   en: '`JsonRenderUI` wires the provider, renderer, and registry for you — just pass a spec.',
 });
 
@@ -31,7 +31,7 @@ export const validateTitle = message({
 });
 
 export const validateDescription = message({
-  ja: '`validateGeneratedSpec`が機械修正・構造検証・コンポーネントごとのprops検証を行い、失敗時はそのまま投げ返せる修復プロンプトを返します。',
+  ja: '`validateGeneratedSpec`が機械修正、構造検証、コンポーネントごとのprops検証を行い、失敗時はそのまま投げ返せる修復プロンプトを返します。',
   en: '`validateGeneratedSpec` auto-fixes, checks structure, and validates props per component, returning a ready-to-resend repair prompt on failure.',
 });
 
@@ -41,7 +41,7 @@ export const typedTitle = message({
 });
 
 export const typedDescription = message({
-  ja: '`satisfies UISpec`で書くと、component名・propsのtypoがコンパイル時に検出されます。',
+  ja: '`satisfies UISpec`で書くと、component名、propsのtypoがコンパイル時に検出されます。',
   en: 'Write specs with `satisfies UISpec` so component names and props are checked at compile time.',
 });
 

@@ -295,7 +295,7 @@ export const highContrastTitle = message({
 });
 
 export const highContrastDescription = message({
-  ja: 'OSで選ぶコントラストの設定にも、スタイルシートが従います。`prefers-contrast: more`では文字と線のトークンが地の色から一段遠ざかり、影だけで縁取っていたカードやモーダルに線が付きます。`forced-colors: active`（Windowsのハイコントラストなど）では、境界線・フォーカスリング・選択状態をシステムカラーで描きます。どちらもOSの設定なので、アプリが切り替えたり保存したりするものはありません。',
+  ja: 'OSで選ぶコントラストの設定にも、スタイルシートが従います。`prefers-contrast: more`では文字と線のトークンが地の色から一段遠ざかり、影だけで縁取っていたカードやモーダルに線が付きます。`forced-colors: active`（Windowsのハイコントラストなど）では、境界線、フォーカスリング、選択状態をシステムカラーで描きます。どちらもOSの設定なので、アプリが切り替えたり保存したりするものはありません。',
   en: 'The stylesheet also follows the contrast settings a user makes in the OS. Under `prefers-contrast: more`, the text and border tokens move a step further from the ground, and cards and modals that were outlined only by a shadow gain a line. Under `forced-colors: active` (such as Windows high contrast), boundaries, focus rings, and selected states are drawn with system colors. Both are OS settings, so there is nothing for an application to toggle or store.',
 });
 

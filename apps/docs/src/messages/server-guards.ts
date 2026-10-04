@@ -1,7 +1,7 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: 'ページは描画であって、応答を書きません。リクエストを通すかどうかと、応答にページ以外の何を付けるかは、ページより前に走る `guard.ts` が決めます。このページは、`guard.ts` の書き方、打ち切り方と通し方、`responseHeaders()` での添え方、guard が受け持つ範囲、`cookies()` での Cookie の読み書き、`nonce()` での Content-Security-Policy を説明します。',
+  ja: 'ページは描画であって、応答を書きません。リクエストを通すかどうかと、応答にページ以外の何を付けるかは、ページより前に走る`guard.ts`が決めます。このページは、`guard.ts`の書き方、打ち切り方と通し方、`responseHeaders()`での添え方、guardが受け持つ範囲、`cookies()`でのCookieの読み書き、`nonce()`でのContent-Security-Policyを説明します。',
   en: 'A page is a render; it does not write the response. Whether a request gets through, and what the answer carries beyond the page, is decided before the page by a `guard.ts`. This page covers writing one, ending a request and letting it through, adding to the answer with `responseHeaders()`, what a guard covers, reading and writing cookies with `cookies()`, and a Content-Security-Policy with `nonce()`.',
 });
 
@@ -11,12 +11,12 @@ export const guardTitle = message({
 });
 
 export const guardDescription = message({
-  ja: '`guard.ts` はどの階層のディレクトリにも置け、そのディレクトリより下で答えるものの前に走ります。URL に沿って複数あれば、外側から 1 つずつ順に走ります。',
+  ja: '`guard.ts`はどの階層のディレクトリにも置け、そのディレクトリより下で答えるものの前に走ります。URLに沿って複数あれば、外側から1つずつ順に走ります。',
   en: 'A `guard.ts` can sit in a directory at any level, and runs before whatever answers below that directory. When several lie along a URL, they run outer first, one at a time.',
 });
 
 export const guardReceives = message({
-  ja: '受け取るのは `{ request, params }` です。`request` は届いたままの `Request`、`params` はそのディレクトリのパターンの params で、URL が運んだ文字列のままです。guard はどのレイアウトよりも上で走るので、スキーマが型を付ける前にいます。型は `@k8ordo/server/runtime` の `Guard<P>` で、生成された表も各 `guard.ts` をそのディレクトリのパターンで検査します。',
+  ja: '受け取るのは`{ request, params }`です。`request`は届いたままの`Request`、`params`はそのディレクトリのパターンのparamsで、URLが運んだ文字列のままです。guardはどのレイアウトよりも上で走るので、スキーマが型を付ける前にいます。型は`@k8ordo/server/runtime`の`Guard<P>`で、生成された表も各`guard.ts`をそのディレクトリのパターンで検査します。',
   en: 'It receives `{ request, params }`: the `Request` as it arrived, and the params of the pattern its directory puts it under, as the strings the URL carried — a guard runs above every layout, before any schema has typed them. The type is `Guard<P>` from `@k8ordo/server/runtime`, and the generated table checks each `guard.ts` against its directory’s pattern either way.',
 });
 
@@ -26,12 +26,12 @@ export const endTitle = message({
 });
 
 export const endDescription = message({
-  ja: '`Response` を返すと、それが答えになります。リダイレクトでも `401` でも `403` でもかまいません。その内側の guard も、下のページも走りません。何も返さなければ次の guard へ、最後の guard のあとは URL に答えるものへ渡ります。',
+  ja: '`Response`を返すと、それが答えになります。リダイレクトでも`401`でも`403`でもかまいません。その内側のguardも、下のページも走りません。何も返さなければ次のguardへ、最後のguardのあとはURLに答えるものへ渡ります。',
   en: 'Returning a `Response` makes it the answer — a redirect, a `401`, a `403`, whatever it is — and neither the guards inside it nor the page below run. Returning nothing hands the request on to the next guard, and after the last one to whatever answers the URL.',
 });
 
 export const endLocation = message({
-  ja: 'リダイレクトの `location` は、guard が書いたまま送られます。`redirect.ts` の行き先のような表のパターンではなく URL なので、`href()` で作ります。`href()` なら、アプリを Vite の `base` の下に置いたときも、それが付きます。ほかの方法で作った pathname には、`@k8ordo/router` の `withBase()` で base を付けます。',
+  ja: 'リダイレクトの`location`は、guardが書いたまま送られます。`redirect.ts`の行き先のような表のパターンではなくURLなので、`href()`で作ります。`href()`なら、アプリをViteの`base`の下に置いたときも、それが付きます。ほかの方法で作ったpathnameには、`@k8ordo/router`の`withBase()`でbaseを付けます。',
   en: 'A redirect’s `location` goes out as the guard wrote it. It is a URL, not a pattern in the table’s terms like a `redirect.ts` target, so build it with `href()`, which carries Vite’s `base` when the application is served under one. A pathname built some other way gets its base from `withBase()` in `@k8ordo/router`.',
 });
 
@@ -41,32 +41,32 @@ export const addTitle = message({
 });
 
 export const addDescription = message({
-  ja: '通すときでも、最終的な応答に付けるものは添えられます。`responseHeaders()` は、何が答えるかにかかわらず最終的な応答が持つ `Headers` です。ページでも、そのペイロードでも、not-found でも、さらに内側の guard が打ち切った応答でも同じです。',
+  ja: '通すときでも、最終的な応答に付けるものは添えられます。`responseHeaders()`は、何が答えるかにかかわらず最終的な応答が持つ`Headers`です。ページでも、そのペイロードでも、not-foundでも、さらに内側のguardが打ち切った応答でも同じです。',
   en: 'Letting a request through can still add to its answer. `responseHeaders()` is the `Headers` the final response will carry, whatever answers — the page, its payload, the not-found, or a guard further in that ends the request.',
 });
 
 export const addReplace = message({
-  ja: '答えがすでに持っているヘッダーは置き換えます。`responseHeaders()` は guard か Server Action が走っている間だけ使え、それ以外の場所では throw します。ページは描画で、応答を書く描画は 2 つ目のハンドラになってしまうからです。',
+  ja: '答えがすでに持っているヘッダーは置き換えます。`responseHeaders()`はguardかServer Actionが走っている間だけ使え、それ以外の場所ではthrowします。ページは描画で、応答を書く描画は2つ目のハンドラになってしまうからです。',
   en: 'A header the answer already carries is replaced. `responseHeaders()` works while a guard or a Server Action runs and throws anywhere else: a page is a render, and a render that wrote the response would be a second handler.',
 });
 
 export const nextTitle = message({
-  ja: '`next()` は無い',
+  ja: '`next()`は無い',
   en: 'There is no `next()`',
 });
 
 export const nextDescription = message({
-  ja: 'ページを走らせてその答えを受け取り、書き換えてから返す `next()` はありません。ページはストリーミングで返り、本文を書き終える前にヘッダーが送られます。だから guard が決められるのは、ページが始まる前だけです。',
+  ja: 'ページを走らせてその答えを受け取り、書き換えてから返す`next()`はありません。ページはストリーミングで返り、本文を書き終える前にヘッダーが送られます。だからguardが決められるのは、ページが始まる前だけです。',
   en: 'There is no `next()` that runs the page and hands its answer back to be rewritten. A page streams, and its headers are on the wire before its body is written — so a guard decides before the page starts, never after.',
 });
 
 export const coversTitle = message({
-  ja: 'guard が受け持つもの',
+  ja: 'guardが受け持つもの',
   en: 'What a guard covers',
 });
 
 export const coversDescription = message({
-  ja: 'guard は、そのディレクトリより下のすべての URL の前に走ります。',
+  ja: 'guardは、そのディレクトリより下のすべてのURLの前に走ります。',
   en: 'A guard runs before every URL below its directory:',
 });
 
@@ -76,27 +76,27 @@ export const coversPage = message({
 });
 
 export const coversHead = message({
-  ja: 'そのページへの `HEAD`',
+  ja: 'そのページへの`HEAD`',
   en: 'a `HEAD` for it',
 });
 
 export const coversAction = message({
-  ja: 'そのページへ送られた Server Action',
+  ja: 'そのページへ送られたServer Action',
   en: 'a Server Action posted to it',
 });
 
 export const coversNotFound = message({
-  ja: '下にある `not-found.tsx`。ルートの guard は、どれも答えない URL にも走ります',
+  ja: '下にある`not-found.tsx`。ルートのguardは、どれも答えないURLにも走ります',
   en: 'a `not-found.tsx` below it — and the root’s guard also runs for a URL nothing answers',
 });
 
 export const coversRedirect = message({
-  ja: '`redirect.ts` はどの guard よりも前に答えます。それが答える URL には守るページが無く、そのディレクトリの下のページはふつうどおり guard が守ります。',
+  ja: '`redirect.ts`はどのguardよりも前に答えます。それが答えるURLには守るページが無く、そのディレクトリの下のページはふつうどおりguardが守ります。',
   en: 'A `redirect.ts` is answered before any guard runs: the URL it answers has no page to guard, and the pages below its directory are guarded as usual.',
 });
 
 export const coversActions = message({
-  ja: 'guard は Server Action そのものを守りません。アクションはどのページからでも呼べる関数で、呼んだページの URL へ送られます。アクションが要るものは、アクションの中で確かめます。',
+  ja: 'guardはServer Actionそのものを守りません。アクションはどのページからでも呼べる関数で、呼んだページのURLへ送られます。アクションが要るものは、アクションの中で確かめます。',
   en: 'A guard does not protect a Server Action as such: an action is a function any page can call, posted to whichever URL calls it. An action checks what it needs itself.',
 });
 
@@ -106,17 +106,17 @@ export const orderTitle = message({
 });
 
 export const orderDescription = message({
-  ja: 'guard は params のスキーマが URL を照合したあと、POST が運ぶ Server Action と描画より前に走ります。`[locale]` の下の guard は、URL が名指すロケールの中で走ります。',
+  ja: 'guardはparamsのスキーマがURLを照合したあと、POSTが運ぶServer Actionと描画より前に走ります。`[locale]`の下のguardは、URLが名指すロケールの中で走ります。',
   en: 'The guards run after the params schemas have matched the URL, and before the Server Action a `POST` carries and before the render — so a guard under `[locale]` runs in the locale the URL names.',
 });
 
 export const staticTitle = message({
-  ja: '`@k8ordo/static` では',
+  ja: '`@k8ordo/static`では',
   en: 'Under `@k8ordo/static`',
 });
 
 export const staticDescription = message({
-  ja: 'ファイルには守るリクエストがありません。`@k8ordo/static` は `guard.ts` を名指しで拒みます。ビルドでも `vite dev` でもです。',
+  ja: 'ファイルには守るリクエストがありません。`@k8ordo/static`は`guard.ts`を名指しで拒みます。ビルドでも`vite dev`でもです。',
   en: 'A file has no request to guard. `@k8ordo/static` refuses a `guard.ts` by name, in the build and in `vite dev`.',
 });
 
@@ -126,36 +126,36 @@ export const cookiesTitle = message({
 });
 
 export const cookiesDescription = message({
-  ja: '`cookies()` はリクエストの Cookie で、`guard.ts` か Server Action の中で読み書きできます。読むと、リクエストが運んできたものに、同じリクエストの中で先に書いたものが重なって見えます。guard が書いた値は、そのあとに走る Server Action が読みます。書いたものは、答えが何であれ、その答えの `Set-Cookie` になってブラウザに届きます。値は `Set-Cookie` に載せるときにパーセントエンコードされ、リクエストが運んできたときに戻るので、`set` にはどんな文字列もそのまま渡せます。エンコード済みの値を渡すと二重にエンコードされます。',
+  ja: '`cookies()`はリクエストのCookieで、`guard.ts`かServer Actionの中で読み書きできます。読むと、リクエストが運んできたものに、同じリクエストの中で先に書いたものが重なって見えます。guardが書いた値は、そのあとに走るServer Actionが読みます。書いたものは、答えが何であれ、その答えの`Set-Cookie`になってブラウザに届きます。値は`Set-Cookie`に載せるときにパーセントエンコードされ、リクエストが運んできたときに戻るので、`set`にはどんな文字列もそのまま渡せます。エンコード済みの値を渡すと二重にエンコードされます。',
   en: 'The request’s cookies, to read and to write, from a `guard.ts` or a Server Action. A read sees what the request carried with what was set or deleted earlier in the same request — a guard’s write is what a Server Action after it reads — and every write reaches the browser as a `Set-Cookie` on the answer, whatever the answer is. The value is percent-encoded on its way into `Set-Cookie` and decoded when a request brings it back, so `set` takes any string as it is — an already encoded one would be encoded twice.',
 });
 
 export const cookiesOptions = message({
-  ja: "`set` は `path`・`domain`・`maxAge`（秒）・`expires`・`httpOnly`・`secure`・`sameSite` を受け取ります。既定はセッションに合わせた `path: '/'`・`httpOnly: true`・`secure: true`・`sameSite: 'lax'` です。ただし素の HTTP でこの機械（`localhost`・`127.0.0.1`・`[::1]`）に届いたリクエストでは `secure` の既定が `false` になります。Chromium と Firefox はそこでも `Secure` の Cookie を保ちますが、Safari は捨てるからです。それ以外を素の HTTP で配るなら `secure: false` を渡します。`sameSite: 'none'` はどこでも `Secure` のままです。`delete` には、書いたときの `path` と `domain` を渡します。ブラウザは Cookie をそれで見分けるからです。",
+  ja: "`set`は`path`、`domain`、`maxAge`（秒）、`expires`、`httpOnly`、`secure`、`sameSite`を受け取ります。既定はセッションに合わせた`path: '/'`、`httpOnly: true`、`secure: true`、`sameSite: 'lax'`です。ただし素のHTTPでこの機械（`localhost`、`127.0.0.1`、`[::1]`）に届いたリクエストでは`secure`の既定が`false`になります。ChromiumとFirefoxはそこでも`Secure`のCookieを保ちますが、Safariは捨てるからです。それ以外を素のHTTPで配るなら`secure: false`を渡します。`sameSite: 'none'`はどこでも`Secure`のままです。`delete`には、書いたときの`path`と`domain`を渡します。ブラウザはCookieをそれで見分けるからです。",
   en: "`set` takes `path`, `domain`, `maxAge` (seconds), `expires`, `httpOnly`, `secure` and `sameSite`. The defaults are what a session wants: `path: '/'`, `httpOnly: true`, `secure: true` and `sameSite: 'lax'`. Over plain HTTP to this machine (`localhost`, `127.0.0.1`, `[::1]`), `secure` defaults to `false` instead: Chromium and Firefox keep a `Secure` cookie there, but Safari drops it. Anywhere else served over plain HTTP, pass `secure: false`; `sameSite: 'none'` stays `Secure` everywhere. `delete` takes the `path` and `domain` the cookie was set with, since a browser keys it by those.",
 });
 
 export const cookiesPage = message({
-  ja: 'ページは Cookie を書きません。props の `request.cookies` から、リクエストが運んできた Cookie を読むだけです。',
+  ja: 'ページはCookieを書きません。propsの`request.cookies`から、リクエストが運んできたCookieを読むだけです。',
   en: 'A page never writes a cookie: it reads `request.cookies` from its props, the cookies the request carried.',
 });
 
 export const cspTitle = message({
-  ja: 'Content-Security-Policy と `nonce()`',
+  ja: 'Content-Security-Policyと`nonce()`',
   en: 'A Content-Security-Policy, and `nonce()`',
 });
 
 export const cspDescription = message({
-  ja: 'フレームワークはポリシーを決めません。自分が出すインラインスクリプト（hydration 用に HTML へ書くペイロードと、React のもの）と起動のモジュールに、リクエストごとに作った nonce を付けるだけです。`nonce()` はその nonce で、guard はそれを名指すポリシーをヘッダーに書きます。',
+  ja: 'フレームワークはポリシーを決めません。自分が出すインラインスクリプト（hydration用にHTMLへ書くペイロードと、Reactのもの）と起動のモジュールに、リクエストごとに作ったnonceを付けるだけです。`nonce()`はそのnonceで、guardはそれを名指すポリシーをヘッダーに書きます。',
   en: 'The framework decides no policy. It puts a nonce, new for every request, on the inline scripts it writes itself — the payload it puts into the HTML for hydration, and React’s — and on its module script. `nonce()` is that nonce, and a guard writes the policy that names it.',
 });
 
 export const cspSign = message({
-  ja: 'アプリ自身のインラインスクリプトは、アプリが同じ nonce で署名します。`@k8ordo/color-scheme` なら、ルートレイアウトで `nonce={nonce()}` を渡します。`nonce()` はリクエストに答えている間ならどこでも、描画の中でも同じ値を返します。スクリプトに署名するのは応答を書くことではないからです。リクエストの外では throw します。',
+  ja: 'アプリ自身のインラインスクリプトは、アプリが同じnonceで署名します。`@k8ordo/color-scheme`なら、ルートレイアウトで`nonce={nonce()}`を渡します。`nonce()`はリクエストに答えている間ならどこでも、描画の中でも同じ値を返します。スクリプトに署名するのは応答を書くことではないからです。リクエストの外ではthrowします。',
   en: 'An inline script of the application’s own is signed by the application with the same nonce — for `@k8ordo/color-scheme`, `nonce={nonce()}` in the root layout. `nonce()` returns the same value anywhere the request is being answered, the render included, since signing a script is not writing the response; it throws outside a request.',
 });
 
 export const cspCache = message({
-  ja: "起動のモジュールにも nonce が付くので、`'strict-dynamic'` の下ではそこから残りのクライアントが読み込まれます。nonce は新しいうちしか意味を持たないので、nonce を持つ答えを共有キャッシュに置かないでください。",
+  ja: "起動のモジュールにもnonceが付くので、`'strict-dynamic'`の下ではそこから残りのクライアントが読み込まれます。nonceは新しいうちしか意味を持たないので、nonceを持つ答えを共有キャッシュに置かないでください。",
   en: "The module script carries the nonce too, so under `'strict-dynamic'` it loads the rest of the client. A nonce is worth something only while it is new: an answer that carries one is not one to keep in a shared cache.",
 });

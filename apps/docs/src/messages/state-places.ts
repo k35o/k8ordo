@@ -1,7 +1,7 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: '定義はそれぞれ 1 つの置き場所を名指しします。値がいつまで残るか、誰に見えるか、サーバーから読めるかを決めるのは置き場所です。このページでは置き場所ごとの違いと、スキーマの書き方を説明します。',
+  ja: '定義はそれぞれ1つの置き場所を名指しします。値がいつまで残るか、誰に見えるか、サーバーから読めるかを決めるのは置き場所です。このページでは置き場所ごとの違いと、スキーマの書き方を説明します。',
   en: 'Each definition names one place, and the place decides how long the values live, who sees them and whether the server can read them. This page covers how the places differ and how to write the schema for each.',
 });
 
@@ -11,7 +11,7 @@ export const overviewTitle = message({
 });
 
 export const overviewDescription = message({
-  ja: '`url` と `entry` は同じ履歴エントリの 2 つの面（見えて共有できる面と、隠れた面）なので、1 つの定義にまとまり、原子的に更新されます。Web Storage・Cookie・メモリはページではなくアプリ全体に属するので、それぞれ別の種類の定義になっています。',
+  ja: '`url`と`entry`は同じ履歴エントリの2つの面（見えて共有できる面と、隠れた面）なので、1つの定義にまとまり、原子的に更新されます。Web Storage、Cookie、メモリはページではなくアプリ全体に属するので、それぞれ別の種類の定義になっています。',
   en: '`url` and `entry` are the two faces of one history entry — one visible and shareable, one hidden — so they share a definition and update atomically. Web Storage, cookies and memory belong to the app rather than the page, which is why they are definition kinds of their own.',
 });
 
@@ -23,23 +23,23 @@ export const overviewTable = {
   server: message({ ja: 'サーバー', en: 'Server' }),
   urlLivesIn: message({ ja: 'search params', en: 'search params' }),
   urlSurvives: message({
-    ja: '戻る・進む、リンクの共有',
+    ja: '戻る/進む、リンクの共有',
     en: 'back/forward, shared links',
   }),
   urlSharedWith: message({
-    ja: 'URL を受け取った人',
+    ja: 'URLを受け取った人',
     en: 'anyone given the URL',
   }),
   urlServer: message({
-    ja: '`parseUrl` で読める（search を渡すルーターのとき）',
+    ja: '`parseUrl`で読める（searchを渡すルーターのとき）',
     en: 'reads it with `parseUrl` (under a router that hands it the search)',
   }),
   entryLivesIn: message({
-    ja: '履歴エントリの state',
+    ja: '履歴エントリのstate',
     en: 'history entry state',
   }),
   entrySurvives: message({
-    ja: '戻る・進む、リロード',
+    ja: '戻る/進む、リロード',
     en: 'back/forward, reload',
   }),
   entrySharedWith: message({
@@ -58,15 +58,15 @@ export const overviewTable = {
   }),
   cookieLivesIn: message({ ja: 'Cookie', en: 'a cookie' }),
   cookieSurvives: message({
-    ja: '最後の書き込みから 400 日',
+    ja: '最後の書き込みから400日',
     en: '400 days from the last write',
   }),
   cookieServer: message({
-    ja: '`parseCookies` で読める（リクエストの Cookie を受け取るページのとき）',
+    ja: '`parseCookies`で読める（リクエストのCookieを受け取るページのとき）',
     en: 'reads it with `parseCookies` (where the page receives the request’s cookies)',
   }),
   memoryLivesIn: message({
-    ja: 'JavaScript の実行環境',
+    ja: 'JavaScriptの実行環境',
     en: 'the JavaScript runtime',
   }),
   memorySurvives: message({ ja: 'リロードまで', en: 'until reload' }),
@@ -83,57 +83,57 @@ export const chooseTitle = message({
 });
 
 export const chooseUrl = message({
-  ja: 'URL — リンクで開いたときに再現されるべきもの。検索語、絞り込み、ページ番号、選択中のタブ。サーバーが描画に使う値もここに置きます。',
+  ja: 'URL：リンクで開いたときに再現されるべきもの。検索語、絞り込み、ページ番号、選択中のタブ。サーバーが描画に使う値もここに置きます。',
   en: 'URL — whatever a link should reproduce: a search term, filters, a page number, the selected tab. Values the server renders from go here too.',
 });
 
 export const chooseEntry = message({
-  ja: 'エントリ — 戻る・進むで元に戻ってほしいが、共有するリンクには載せたくないもの。開いている行、詳細表示の有無など、そのページを見ている間だけの UI の状態。',
+  ja: 'エントリ：戻る/進むで元に戻ってほしいが、共有するリンクには載せたくないもの。開いている行、詳細表示の有無など、そのページを見ている間だけのUIの状態。',
   en: 'Entry — whatever back and forward should bring back but a shared link should not carry: which rows are expanded, whether details are showing, UI state that belongs to this visit of the page.',
 });
 
 export const chooseLocal = message({
-  ja: 'localStorage — その端末を使う人の好み。表示形式、1 ページの件数、カラースキーム。',
+  ja: 'localStorage：その端末を使う人の好み。表示形式、1ページの件数、カラースキーム。',
   en: 'localStorage — the preferences of whoever uses the device: a view mode, a page size, a colour scheme.',
 });
 
 export const chooseSession = message({
-  ja: 'sessionStorage — リロードでは消えてほしくないが、ほかのタブには見せず、タブを閉じたら消えてよいもの。閉じたお知らせ、そのタブで書きかけの下書き。',
+  ja: 'sessionStorage：リロードでは消えてほしくないが、ほかのタブには見せず、タブを閉じたら消えてよいもの。閉じたお知らせ、そのタブで書きかけの下書き。',
   en: 'sessionStorage — whatever a reload must keep but no other tab should see, and closing the tab may discard: dismissed notices, a draft in progress in that tab.',
 });
 
 export const chooseCookie = message({
-  ja: 'Cookie — localStorage に置くような好みのうち、サーバーの描画に既定値が出てはいけないもの。表示密度、文字の大きさ。秘密は置けません。',
+  ja: 'Cookie：localStorageに置くような好みのうち、サーバーの描画に既定値が出てはいけないもの。表示密度、文字の大きさ。秘密は置けません。',
   en: 'Cookie — a preference of the localStorage kind that the server render must not show at its default: a density, a font size. Never a secret.',
 });
 
 export const chooseMemory = message({
-  ja: 'メモリ — 離れたコンポーネントどうしで共有したいが、リロードで消えてよいもの。コマンドパレットの開閉、デバッグ用のパネル。',
+  ja: 'メモリ：離れたコンポーネントどうしで共有したいが、リロードで消えてよいもの。コマンドパレットの開閉、デバッグ用のパネル。',
   en: 'Memory — whatever distant components share but a reload may discard: whether a command palette is open, a debug panel.',
 });
 
 export const demoTitle = message({
-  ja: '2 つの面を触って確かめる',
+  ja: '2つの面を触って確かめる',
   en: 'Try both faces',
 });
 
 export const demoDescription = message({
-  ja: '下のデモは本物の `definePageState` で、`scope` を URL に、開いている行を履歴エントリに置いています。',
+  ja: '下のデモは本物の`definePageState`で、`scope`をURLに、開いている行を履歴エントリに置いています。',
   en: 'The demo below is a real `definePageState` that keeps `scope` in the URL and the open rows in the history entry.',
 });
 
 export const demoHint = message({
-  ja: '行を開いても URL は変わりません（`updateCurrentEntry` で現在のエントリに書かれます）。`scope` を切り替えると push で新しいエントリが作られ、開いていた行もそのエントリに持ち越されます。ブラウザの戻るで、`scope` と開いていた行が一緒に戻ります。リロードしても両方残りますが、URL を新しいタブに貼ると残るのは `scope` だけです。',
+  ja: '行を開いてもURLは変わりません（`updateCurrentEntry`で現在のエントリに書かれます）。`scope`を切り替えるとpushで新しいエントリが作られ、開いていた行もそのエントリに持ち越されます。ブラウザの戻るで、`scope`と開いていた行が一緒に戻ります。リロードしても両方残りますが、URLを新しいタブに貼ると残るのは`scope`だけです。',
   en: 'Opening a row leaves the URL alone — it is written into the current entry with `updateCurrentEntry`. Switching `scope` pushes a new entry and carries the open rows into it. Press back and `scope` and the rows you had open come back together. Both survive a reload, but paste the URL into a new tab and only `scope` comes along.',
 });
 
 export const demoRowUrl = message({
-  ja: 'search params。共有でき、search を渡すルーターならサーバーで読めます。',
+  ja: 'search params。共有でき、searchを渡すルーターならサーバーで読めます。',
   en: 'Search params. Shareable, and readable on the server under a router that hands it the search.',
 });
 
 export const demoRowEntry = message({
-  ja: '履歴エントリの隠れた状態。戻る・進む・リロードで残ります。',
+  ja: '履歴エントリの隠れた状態。戻る/進む、リロードで残ります。',
   en: 'Hidden history-entry state. Survives back, forward and reload.',
 });
 
@@ -163,27 +163,27 @@ export const demoUrlEmpty = message({
 });
 
 export const urlTitle = message({
-  ja: '`url` スロット',
+  ja: '`url`スロット',
   en: 'The `url` slot',
 });
 
 export const urlDescription = message({
-  ja: 'search params に置く状態です。URL は文字列しか運ばないので、スキーマは文字列から自分の型を読み出せる書き方にします。',
+  ja: 'search paramsに置く状態です。URLは文字列しか運ばないので、スキーマは文字列から自分の型を読み出せる書き方にします。',
   en: 'State kept in the search params. A URL carries only strings, so the schema has to be one that reads its own types back out of a string.',
 });
 
 export const urlRuleNumber = message({
-  ja: '数値は `z.coerce.number()`。`?page=2` の `"2"` が `2` になります。',
+  ja: '数値は`z.coerce.number()`。`?page=2`の`"2"`が`2`になります。',
   en: 'Numbers: `z.coerce.number()`, so the `"2"` of `?page=2` becomes `2`.',
 });
 
 export const urlRuleBoolean = message({
-  ja: '真偽値は `z.stringbool()`。`"false"` を `false` として読み、`false` を `"false"` と書きます。',
+  ja: '真偽値は`z.stringbool()`。`"false"`を`false`として読み、`false`を`"false"`と書きます。',
   en: 'Booleans: `z.stringbool()`, which reads `"false"` as `false` and writes `false` as `"false"`.',
 });
 
 export const urlRuleArray = message({
-  ja: '配列は同じ名前のパラメータの繰り返し（`?tags=sale&tags=new`）で、既定値は `[]` だけが許されます。',
+  ja: '配列は同じ名前のパラメータの繰り返し（`?tags=sale&tags=new`）で、既定値は`[]`だけが許されます。',
   en: 'Arrays: the param repeated (`?tags=sale&tags=new`), and the only default allowed is `[]`.',
 });
 
@@ -193,17 +193,17 @@ export const urlRuleScalar = message({
 });
 
 export const urlRuleSerialize = message({
-  ja: 'URL に書ける値は、文字列・数値・bigint・真偽値と、それらの配列です。',
+  ja: 'URLに書ける値は、文字列、数値、bigint、真偽値と、それらの配列です。',
   en: 'What a URL can hold: strings, numbers, bigints, booleans, and arrays of those.',
 });
 
 export const urlRuleDefault = message({
-  ja: '既定値のフィールドはクエリに書かれません。誰かが `?page=1` と書いても、`url` のフィールドを変える次の `update()` で省かれます。',
+  ja: '既定値のフィールドはクエリに書かれません。誰かが`?page=1`と書いても、`url`のフィールドを変える次の`update()`で省かれます。',
   en: 'A field at its default is never written into the query: even if someone types `?page=1`, the next `update()` that changes a `url` field leaves it out.',
 });
 
 export const urlMoreTypes = message({
-  ja: '真偽値・配列の列挙値・日付を持つ定義は、たとえば次のように書きます。',
+  ja: '真偽値、配列の列挙値、日付を持つ定義は、たとえば次のように書きます。',
   en: 'A definition holding a boolean, an array of enum values and a date looks like this:',
 });
 
@@ -213,7 +213,7 @@ export const refusalsTitle = message({
 });
 
 export const refusalsDescription = message({
-  ja: '`update()` は書いた値を、URL から戻ってくるのと同じ道（クエリ文字列に書いて読み直す）で確かめます。自分が書いたクエリ文字列を読み戻せないフィールドは、書き込むたびに既定値に落ちます。そうなることが確実な書き方は、最初のクリックを待たずにモジュールの読み込み時に拒まれます。',
+  ja: '`update()`は書いた値を、URLから戻ってくるのと同じ道（クエリ文字列に書いて読み直す）で確かめます。自分が書いたクエリ文字列を読み戻せないフィールドは、書き込むたびに既定値に落ちます。そうなることが確実な書き方は、最初のクリックを待たずにモジュールの読み込み時に拒まれます。',
   en: '`update()` checks the values it writes by the road they will come back on: written into a query string and read again. A field that cannot read back its own query-string spelling would land on its default after every write, so the spellings certain to do that are refused when the module loads rather than at the first click.',
 });
 
@@ -222,52 +222,52 @@ export const refusalsTable = {
   instead: message({ ja: '代わりに', en: 'Use instead' }),
   why: message({ ja: '理由', en: 'Why' }),
   booleanWhy: message({
-    ja: 'URL は文字列を運び、`"false"` は `z.boolean()` にとって `false` ではありません（`z.coerce.boolean()` では `true` になります）。配列の要素でも同じです',
+    ja: 'URLは文字列を運び、`"false"`は`z.boolean()`にとって`false`ではありません（`z.coerce.boolean()`では`true`になります）。配列の要素でも同じです',
     en: 'A URL carries strings, and `"false"` is not `false` to `z.boolean()` — `z.coerce.boolean()` reads it as `true`. The same goes for an array’s items',
   }),
   arrayWritten: message({
-    ja: '既定値が `[]` でない配列、`z.optional()` の配列',
+    ja: '既定値が`[]`でない配列、`z.optional()`の配列',
     en: 'An array defaulting to anything but `[]`, or a `z.optional()` array',
   }),
   arrayWhy: message({
-    ja: 'パラメータが無いことと空の配列は同じ URL なので、既定値が `[]` でなければ `[]` を書けません',
+    ja: 'パラメータが無いことと空の配列は同じURLなので、既定値が`[]`でなければ`[]`を書けません',
     en: 'An absent param and an empty list are the same URL, so with any other default `[]` could never be written',
   }),
   absenceWritten: message({
-    ja: '`z._default()` も `z.optional()` も無いフィールド',
+    ja: '`z._default()`も`z.optional()`も無いフィールド',
     en: 'A field with neither `z._default()` nor `z.optional()`',
   }),
   absenceWhy: message({
-    ja: 'パラメータはいつでも欠けえます。`url` に限らず、スキーマを持つすべての置き場所の規則です',
+    ja: 'パラメータはいつでも欠けえます。`url`に限らず、スキーマを持つすべての置き場所の規則です',
     en: 'A param can always be missing. This rule holds for every place with a schema, not just `url`',
   }),
   dateInstead: message({
-    ja: '`z.iso.date()` などの文字列のフィールド',
+    ja: '`z.iso.date()`などの文字列のフィールド',
     en: 'A string field such as `z.iso.date()`',
   }),
   dateWhy: message({
-    ja: 'URL に綴りがありません。これだけは定義時ではなく、値を書こうとしたとき（`href`・`search`・`update()`）に throw します',
+    ja: 'URLに綴りがありません。これだけは定義時ではなく、値を書こうとしたとき（`href`、`search`、`update()`）にthrowします',
     en: 'A URL has no spelling for it. This one throws when something writes a value (`href`, `search`, `update()`), not at definition time',
   }),
 };
 
 export const entryTitle = message({
-  ja: '`entry` スロット',
+  ja: '`entry`スロット',
   en: 'The `entry` slot',
 });
 
 export const entryDescription = message({
-  ja: '履歴エントリに付く隠れた状態です。URL には出ず、Navigation API のエントリ状態（`navigation.currentEntry.getState()`）の中に、定義のキーを名前空間として保存されます。',
+  ja: '履歴エントリに付く隠れた状態です。URLには出ず、Navigation APIのエントリ状態（`navigation.currentEntry.getState()`）の中に、定義のキーを名前空間として保存されます。',
   en: 'Hidden state attached to the history entry. It never shows in the URL; it is stored in the Navigation API’s entry state (`navigation.currentEntry.getState()`) under the definition’s key as its namespace.',
 });
 
 export const entryTypes = message({
-  ja: '値は文字列にされず、エントリにそのまま保存されるので、`z.number()` や `z.boolean()` を書いたとおりに使えます。`url` スロットのような書き方の制限はありません。ただし、スキーマは自分の出力を入力として受け付けなければなりません（下の「スキーマの規則」）。',
+  ja: '値は文字列にされず、エントリにそのまま保存されるので、`z.number()`や`z.boolean()`を書いたとおりに使えます。`url`スロットのような書き方の制限はありません。ただし、スキーマは自分の出力を入力として受け付けなければなりません（下の「スキーマの規則」）。',
   en: 'Values are not turned into strings — the entry keeps them as they are — so `z.number()` and `z.boolean()` work as written, with none of the `url` slot’s spelling restrictions. The schema must still accept its own output (see Schema rules below).',
 });
 
 export const entryHistory = message({
-  ja: "エントリの値だけを変える `update()` は遷移を起こさず、`navigation.updateCurrentEntry()` で現在のエントリを書き換えるので、どのルーターの下でも動きます。その代わり新しい履歴エントリは作られず、`{ history: 'push' }` を渡しても無視されます。戻るボタンで 1 段ずつ戻したい状態（ウィザードの手順など）は `url` に置きます。",
+  ja: "エントリの値だけを変える`update()`は遷移を起こさず、`navigation.updateCurrentEntry()`で現在のエントリを書き換えるので、どのルーターの下でも動きます。その代わり新しい履歴エントリは作られず、`{ history: 'push' }`を渡しても無視されます。戻るボタンで1段ずつ戻したい状態（ウィザードの手順など）は`url`に置きます。",
   en: "An `update()` that changes only entry fields does not navigate: it rewrites the current entry with `navigation.updateCurrentEntry()`, which is why it works under any router. It also never creates a history entry, and `{ history: 'push' }` is ignored there. State the back button should step back through — the steps of a wizard, say — belongs in `url`.",
 });
 
@@ -282,32 +282,32 @@ export const entryStale = message({
 });
 
 export const bothTitle = message({
-  ja: '`url` と `entry` を 1 つの定義に',
+  ja: '`url`と`entry`を1つの定義に',
   en: 'Both in one definition',
 });
 
 export const bothDescription = message({
-  ja: '1 つの定義に両方を書くと、`useAppState` が返す状態は 2 つのスロットを平らにマージしたものになります。フィールドをスロット間で移しても、変わるのは定義だけで、呼び出し側は変わりません。',
+  ja: '1つの定義に両方を書くと、`useAppState`が返す状態は2つのスロットを平らにマージしたものになります。フィールドをスロット間で移しても、変わるのは定義だけで、呼び出し側は変わりません。',
   en: 'Declare both in one definition and the state `useAppState` returns is the flat merge of the two slots. Moving a field from one slot to the other changes only the definition, and nothing at the call sites.',
 });
 
 export const bothAtomic = message({
-  ja: '両方のスロットにまたがる更新は、1 回の `navigation.navigate()` に URL とエントリ状態をまとめて渡すので、片方だけが反映された状態は見えません。戻るボタンでも両方が一緒に戻ります。',
+  ja: '両方のスロットにまたがる更新は、1回の`navigation.navigate()`にURLとエントリ状態をまとめて渡すので、片方だけが反映された状態は見えません。戻るボタンでも両方が一緒に戻ります。',
   en: 'An update that spans both slots hands the URL and the entry state to a single `navigation.navigate()`, so a half-applied state is never visible, and the back button restores both together.',
 });
 
 export const bothCarry = message({
-  ja: '`update()` が URL を書き換える遷移は、そのときのエントリ状態を新しいエントリに持ち越します。ほかの定義の名前空間など、エントリ状態にあるほかの値も残ります。',
+  ja: '`update()`がURLを書き換える遷移は、そのときのエントリ状態を新しいエントリに持ち越します。ほかの定義の名前空間など、エントリ状態にあるほかの値も残ります。',
   en: 'A navigation `update()` makes to rewrite the URL carries the current entry state into the new entry, including other definitions’ namespaces and anything else the entry state holds.',
 });
 
 export const bothDisjoint = message({
-  ja: '同じ名前のフィールドを両方に書くと型エラーになり（メッセージにフィールド名が出ます）、実行時にも throw します。どちらのスロットも持たない定義も同様です。',
+  ja: '同じ名前のフィールドを両方に書くと型エラーになり（メッセージにフィールド名が出ます）、実行時にもthrowします。どちらのスロットも持たない定義も同様です。',
   en: 'Declaring a field name in both slots is a type error that names the field, and it throws at runtime too. So does a definition with neither slot.',
 });
 
 export const bothCaveat = message({
-  ja: 'ただし、スロットごとの規則はフィールドに付いて回ります。`entry` で `z.boolean()` だったフィールドを `url` に移すなら `z.stringbool()` に、`url` から `entry` に移すなら `z.boolean()` に書き換えます。`entry` は型付きの値をそのままスキーマに戻すので、`z.stringbool()` のままでは `update()` のたびに既定値に戻ります。',
+  ja: 'ただし、スロットごとの規則はフィールドに付いて回ります。`entry`で`z.boolean()`だったフィールドを`url`に移すなら`z.stringbool()`に、`url`から`entry`に移すなら`z.boolean()`に書き換えます。`entry`は型付きの値をそのままスキーマに戻すので、`z.stringbool()`のままでは`update()`のたびに既定値に戻ります。',
   en: 'The per-slot rules do follow the field, though: `z.boolean()` in `entry` becomes `z.stringbool()` in `url`, and back to `z.boolean()` when it moves to `entry`. `entry` hands the typed value straight back to the schema, so a `z.stringbool()` left there lands on its default on every `update()`.',
 });
 
@@ -317,32 +317,32 @@ export const localTitle = message({
 });
 
 export const localDescription = message({
-  ja: 'localStorage に置く、アプリ全体の状態です。同じブラウザのタブ間で共有され、消されるまで残ります。',
+  ja: 'localStorageに置く、アプリ全体の状態です。同じブラウザのタブ間で共有され、消されるまで残ります。',
   en: 'App-wide state kept in localStorage: shared by the tabs of the same browser and kept until deleted.',
 });
 
 export const localStorageKey = message({
-  ja: '値は `k8ordo-state:<key>`（定義の `storageKey`）の 1 行に、スキーマが宣言したフィールドだけの JSON として保存されます。上の定義なら、`k8ordo-state:prefs` に `{"view":"grid","pageSize":20}` のような行です。',
+  ja: '値は`k8ordo-state:<key>`（定義の`storageKey`）の1行に、スキーマが宣言したフィールドだけのJSONとして保存されます。上の定義なら、`k8ordo-state:prefs`に`{"view":"grid","pageSize":20}`のような行です。',
   en: 'The values are stored as one row under `k8ordo-state:<key>` — the definition’s `storageKey` — as JSON holding only the fields the schema declares. For the definition above, that is `k8ordo-state:prefs` with a row like `{"view":"grid","pageSize":20}`.',
 });
 
 export const localJson = message({
-  ja: '保存は JSON を通るので、フィールドは JSON で表せる型にします。`z.date()` の値は書き込みの直後には表示されますが、次に読み込んだときには文字列になっていて、既定値に戻ります。`entry` と同じく、スキーマは自分の出力を入力として受け付けなければなりません。',
+  ja: '保存はJSONを通るので、フィールドはJSONで表せる型にします。`z.date()`の値は書き込みの直後には表示されますが、次に読み込んだときには文字列になっていて、既定値に戻ります。`entry`と同じく、スキーマは自分の出力を入力として受け付けなければなりません。',
   en: 'Storage goes through JSON, so keep the fields to types JSON can represent. A `z.date()` value shows right after the write, but the next load finds a string and falls back to the default. As in `entry`, the schema must accept its own output.',
 });
 
 export const localTabs = message({
-  ja: 'ほかのタブの書き込みは `storage` イベントで届き、変わったキーを購読しているコンポーネントだけが再描画されます。',
+  ja: 'ほかのタブの書き込みは`storage`イベントで届き、変わったキーを購読しているコンポーネントだけが再描画されます。',
   en: 'Writes from other tabs arrive through the `storage` event, and only components subscribed to a changed key re-render.',
 });
 
 export const localStale = message({
-  ja: '古いスキーマが書いた行はフィールドごとにサルベージされ、壊れた JSON は既定値から始まります。',
+  ja: '古いスキーマが書いた行はフィールドごとにサルベージされ、壊れたJSONは既定値から始まります。',
   en: 'A row an older schema wrote is salvaged field by field, and corrupt JSON starts from the defaults.',
 });
 
 export const localServer = message({
-  ja: 'サーバーには localStorage が無いので、サーバーの描画とハイドレーションの描画は既定値です。最初の描画より前に値が要るなら、ハイドレーションの前に読みます。',
+  ja: 'サーバーにはlocalStorageが無いので、サーバーの描画とハイドレーションの描画は既定値です。最初の描画より前に値が要るなら、ハイドレーションの前に読みます。',
   en: 'The server has no localStorage, so the server render and the hydration render use the defaults. When a value is needed before the first paint, read it before hydration.',
 });
 
@@ -357,27 +357,27 @@ export const sessionTitle = message({
 });
 
 export const sessionDescription = message({
-  ja: 'sessionStorage に置く、アプリ全体の状態です。`defineLocalState` と同じ作りで、置き場所だけが違います。そのタブのリロードや、同じタブの中でのページ移動では残り、タブを閉じると消えます。ほかのタブとは共有されません。',
+  ja: 'sessionStorageに置く、アプリ全体の状態です。`defineLocalState`と同じ作りで、置き場所だけが違います。そのタブのリロードや、同じタブの中でのページ移動では残り、タブを閉じると消えます。ほかのタブとは共有されません。',
   en: 'App-wide state kept in sessionStorage, built exactly like `defineLocalState` over the other storage area. It survives reloads and page changes within the tab, goes when the tab closes, and no other tab shares it.',
 });
 
 export const sessionSame = message({
-  ja: '保存の形は localStorage と同じです。`k8ordo-state:<key>`（定義の `storageKey`）の 1 行に、宣言したフィールドの JSON を置きます。古い行のサルベージ、書き込みのまとめ方、ハンドル、`inlineRead()` も同じで、`inlineRead()` は sessionStorage を読みます。',
+  ja: '保存の形はlocalStorageと同じです。`k8ordo-state:<key>`（定義の`storageKey`）の1行に、宣言したフィールドのJSONを置きます。古い行のサルベージ、書き込みのまとめ方、ハンドル、`inlineRead()`も同じで、`inlineRead()`はsessionStorageを読みます。',
   en: 'It is stored the way localStorage is: one row under `k8ordo-state:<key>` — the definition’s `storageKey` — holding the JSON of the declared fields. Salvage of an old row, batching, handles and `inlineRead()` are the same too; its `inlineRead()` reads sessionStorage.',
 });
 
 export const sessionKeys = message({
-  ja: '種類が違えばキーが同じでも別の状態です。`defineLocalState` と `defineSessionState` に同じキーを付けても、行も値も共有しません。',
+  ja: '種類が違えばキーが同じでも別の状態です。`defineLocalState`と`defineSessionState`に同じキーを付けても、行も値も共有しません。',
   en: 'Different kinds never collide: a `defineLocalState` and a `defineSessionState` under the same key share neither a row nor a value.',
 });
 
 export const sessionTabs = message({
-  ja: 'sessionStorage はタブごとなので、`storage` イベントが届くのはそのタブのほかのフレームだけです。',
+  ja: 'sessionStorageはタブごとなので、`storage`イベントが届くのはそのタブのほかのフレームだけです。',
   en: 'sessionStorage belongs to one tab, so its `storage` event reaches only other frames of that tab.',
 });
 
 export const sessionServer = message({
-  ja: 'サーバーには sessionStorage が無いので、サーバーの描画とハイドレーションの描画は既定値です。最初の描画より前に値が要るなら、localStorage と同じくハイドレーションの前に読みます。',
+  ja: 'サーバーにはsessionStorageが無いので、サーバーの描画とハイドレーションの描画は既定値です。最初の描画より前に値が要るなら、localStorageと同じくハイドレーションの前に読みます。',
   en: 'The server has no sessionStorage, so the server render and the hydration render use the defaults. When a value is needed before the first paint, read it before hydration, as with localStorage.',
 });
 
@@ -387,42 +387,42 @@ export const cookieTitle = message({
 });
 
 export const cookieDescription = message({
-  ja: 'Cookie に置く、アプリ全体の状態です。localStorage と同じく端末の持ち主の好みを置く場所で、違いはサーバーが読めることです。Cookie はリクエストごとに届くので、リクエストを受け取るページがその値で描き、既定値がちらつきません。',
+  ja: 'Cookieに置く、アプリ全体の状態です。localStorageと同じく端末の持ち主の好みを置く場所で、違いはサーバーが読めることです。Cookieはリクエストごとに届くので、リクエストを受け取るページがその値で描き、既定値がちらつきません。',
   en: 'App-wide state kept in a cookie. It holds the same kind of thing localStorage does — a preference of whoever uses the device — and differs in that the server can read it: every request carries the cookie, so a page that receives the request renders the real value and the default never flashes.',
 });
 
 export const cookieName = message({
-  ja: '値は `k8ordo-state.<key>`（定義の `cookieName`）という 1 つの Cookie に、スキーマが宣言したフィールドだけの JSON をパーセントエンコードして保存されます。Cookie の名前は HTTP の token なので、区切りは `:` ではなく `.` です。空白・`;`・`=`・`:` など、token に使えない文字を含むキーは定義時に throw します。',
+  ja: '値は`k8ordo-state.<key>`（定義の`cookieName`）という1つのCookieに、スキーマが宣言したフィールドだけのJSONをパーセントエンコードして保存されます。Cookieの名前はHTTPのtokenなので、区切りは`:`ではなく`.`です。空白、`;`、`=`、`:`など、tokenに使えない文字を含むキーは定義時にthrowします。',
   en: 'The values are stored as one cookie named `k8ordo-state.<key>` — the definition’s `cookieName` — holding the percent-encoded JSON of the fields the schema declares. A cookie name is an HTTP token, which is why the separator is `.` rather than `:`, and a key holding a character a token cannot — a space, `;`, `=`, `:` and the like — throws at definition time.',
 });
 
 export const cookieWrite = message({
-  ja: 'ブラウザは Cookie Store API で書き込みます。属性は `Path=/`・`SameSite=Lax`・`Max-Age` 400 日（ブラウザが Cookie を保つ上限）で、API が必ず `Secure` を付けるので、HTTPS で動かします。Chromium と Firefox は `http://localhost` でも保ちますが、Safari はそこでも `Secure` の Cookie を捨てるので、Safari で確かめるなら開発中も HTTPS で配ります。書き込むたびに期限が延びます。',
+  ja: 'ブラウザはCookie Store APIで書き込みます。属性は`Path=/`、`SameSite=Lax`、`Max-Age` 400日（ブラウザがCookieを保つ上限）で、APIが必ず`Secure`を付けるので、HTTPSで動かします。ChromiumとFirefoxは`http://localhost`でも保ちますが、Safariはそこでも`Secure`のCookieを捨てるので、Safariで確かめるなら開発中もHTTPSで配ります。書き込むたびに期限が延びます。',
   en: 'The browser writes it through the Cookie Store API with `Path=/`, `SameSite=Lax` and a `Max-Age` of 400 days — the longest a browser keeps a cookie — renewed by every write. The API always adds `Secure`, so the page runs on HTTPS. Chromium and Firefox also keep it on `http://localhost`, but Safari drops a `Secure` cookie there, so serve over HTTPS while developing to see it persist in Safari.',
 });
 
 export const cookieLax = message({
-  ja: '`SameSite` を API の既定の `Strict` にしないのは、ほかのサイトのリンクから来た最初のリクエストにも Cookie を付けるためです。`Strict` では、まさにそのリクエストでサーバーが既定値を描きます。',
+  ja: '`SameSite`をAPIの既定の`Strict`にしないのは、ほかのサイトのリンクから来た最初のリクエストにもCookieを付けるためです。`Strict`では、まさにそのリクエストでサーバーが既定値を描きます。',
   en: '`SameSite` is `Lax` rather than the API’s default `Strict` so that the first request arriving from a link on another site carries the cookie too; under `Strict` the server would render the defaults on exactly that request.',
 });
 
 export const cookieTabs = message({
-  ja: 'ほかのタブの書き込みも、サーバーの応答が設定した Cookie も、Cookie Store API の `change` イベントで届きます。',
+  ja: 'ほかのタブの書き込みも、サーバーの応答が設定したCookieも、Cookie Store APIの`change`イベントで届きます。',
   en: 'Writes from other tabs, and cookies a server response set, arrive through the Cookie Store API’s `change` event.',
 });
 
 export const cookieSmall = message({
-  ja: 'Cookie はリクエストのたびに送られるので、小さく保ちます。名前と値で 4 KB を超える Cookie は拒まれ、`update()` のハンドルが reject します（描画された値は残ります）。',
+  ja: 'Cookieはリクエストのたびに送られるので、小さく保ちます。名前と値で4 KBを超えるCookieは拒まれ、`update()`のハンドルがrejectします（描画された値は残ります）。',
   en: 'Every request carries the cookie, so keep it small. One over 4 KB, name and value together, is refused and the `update()` handle rejects, while the rendered value stays.',
 });
 
 export const cookieSecret = message({
-  ja: 'ブラウザが書く Cookie なので `HttpOnly` にはできません。ページ上のスクリプトから読み書きでき、利用者は URL と同じように書き換えられます。セッションやトークンなど、漏れても偽造されても困るものは置かないでください。サーバーでも入力として扱い、`parseCookies` はスキーマを通してから値を返します。',
+  ja: 'ブラウザが書くCookieなので`HttpOnly`にはできません。ページ上のスクリプトから読み書きでき、利用者はURLと同じように書き換えられます。セッションやトークンなど、漏れても偽造されても困るものは置かないでください。サーバーでも入力として扱い、`parseCookies`はスキーマを通してから値を返します。',
   en: 'A cookie the browser writes can never be `HttpOnly`: any script on the page reads and rewrites it, and a visitor can edit it as freely as a URL. Keep sessions, tokens and anything else that must not leak or be forged out of it. The server treats it as input too — `parseCookies` returns values that have passed the schema.',
 });
 
 export const cookieServer = message({
-  ja: 'サーバーでの読み取りと、サーバーから書く Cookie との関係',
+  ja: 'サーバーでの読み取りと、サーバーから書くCookieとの関係',
   en: 'Reading it on the server, and cookies the server writes',
 });
 
@@ -432,22 +432,22 @@ export const memoryTitle = message({
 });
 
 export const memoryDescription = message({
-  ja: 'JavaScript の実行環境に置く、型付きの共有の箱です。そのタブの中だけで共有され、リロードで初期値に戻ります。',
+  ja: 'JavaScriptの実行環境に置く、型付きの共有の箱です。そのタブの中だけで共有され、リロードで初期値に戻ります。',
   en: 'A typed shared box that lives in the JavaScript runtime: shared within the tab, back to its initial values on reload.',
 });
 
 export const memoryNoSchema = message({
-  ja: 'スキーマを持たない唯一の種類です。値が境界を越えて戻ってくることがなく、型付きの `update()` だけが書き手なので、検証し直すものがありません。型は初期値から推論されます。ユニオン型のように初期値から推論できない型は、上の例のように型引数で書きます。',
+  ja: 'スキーマを持たない唯一の種類です。値が境界を越えて戻ってくることがなく、型付きの`update()`だけが書き手なので、検証し直すものがありません。型は初期値から推論されます。ユニオン型のように初期値から推論できない型は、上の例のように型引数で書きます。',
   en: 'The one kind without a schema: its values never come back across a boundary, and the typed `update()` is the only writer, so there is nothing to re-validate. The type is inferred from the initial values; a type they cannot express, such as a union, goes in the type argument as above.',
 });
 
 export const memoryImmutable = message({
-  ja: '値は不変として扱ってください。変更の検出は `update()` に渡されたフィールドを前の値と比べて行うので、ネストしたオブジェクトをその場で書き換えても誰にも通知されません。',
+  ja: '値は不変として扱ってください。変更の検出は`update()`に渡されたフィールドを前の値と比べて行うので、ネストしたオブジェクトをその場で書き換えても誰にも通知されません。',
   en: 'Treat the values as immutable. Change detection compares the fields `update()` receives with the previous values, so mutating a nested object in place notifies nobody.',
 });
 
 export const memoryDetails = message({
-  ja: 'フィールドは初期値のキーで固定されます。`update()` はすぐに反映され、まとめられることはありません。サーバーの描画は初期値で行われます。',
+  ja: 'フィールドは初期値のキーで固定されます。`update()`はすぐに反映され、まとめられることはありません。サーバーの描画は初期値で行われます。',
   en: 'The field set is fixed by the keys of the initial values. `update()` applies immediately, with no batching, and the server renders the initial values.',
 });
 
@@ -457,32 +457,32 @@ export const keyTitle = message({
 });
 
 export const keyDescription = message({
-  ja: '定義の第 1 引数は、その状態の識別子です。',
+  ja: '定義の第1引数は、その状態の識別子です。',
   en: 'A definition’s first argument is the identity of the state.',
 });
 
 export const keyRegistry = message({
-  ja: 'ブラウザのストアはこの文字列で登録されます。定義オブジェクトではなく文字列で引くので、HMR でモジュールが評価し直されても、同じ状態につながります。',
+  ja: 'ブラウザのストアはこの文字列で登録されます。定義オブジェクトではなく文字列で引くので、HMRでモジュールが評価し直されても、同じ状態につながります。',
   en: 'The browser’s store is registered under this string. Because it is looked up by the string rather than by the definition object, a module re-evaluated by HMR reconnects to the state it already had.',
 });
 
 export const keyEntry = message({
-  ja: '`definePageState` では、エントリ状態の中の名前空間です。',
+  ja: '`definePageState`では、エントリ状態の中の名前空間です。',
   en: 'For `definePageState`, it is the namespace inside the entry state.',
 });
 
 export const keyLocal = message({
-  ja: '`defineLocalState` と `defineSessionState` では、それぞれ localStorage・sessionStorage のキー `k8ordo-state:<key>` になります。',
+  ja: '`defineLocalState`と`defineSessionState`では、それぞれlocalStorage、sessionStorageのキー`k8ordo-state:<key>`になります。',
   en: 'For `defineLocalState` and `defineSessionState`, it becomes the key `k8ordo-state:<key>` in localStorage or sessionStorage.',
 });
 
 export const keyCookie = message({
-  ja: '`defineCookieState` では、Cookie の名前 `k8ordo-state.<key>` になります。',
+  ja: '`defineCookieState`では、Cookieの名前`k8ordo-state.<key>`になります。',
   en: 'For `defineCookieState`, it becomes the cookie name `k8ordo-state.<key>`.',
 });
 
 export const keyRename = message({
-  ja: 'キーを変えると、保存されたデータの名前も変わります。同じ種類の定義が同じキーを使うと、1 つのストア（local と session なら 1 つの行、cookie なら 1 つの Cookie）を黙って共有します。モジュールシステムはこれを検出できないので、アプリ全体のグローバル名として扱ってください。',
+  ja: 'キーを変えると、保存されたデータの名前も変わります。同じ種類の定義が同じキーを使うと、1つのストア（localとsessionなら1つの行、cookieなら1つのCookie）を黙って共有します。モジュールシステムはこれを検出できないので、アプリ全体のグローバル名として扱ってください。',
   en: 'Renaming the key renames the data. Two definitions of the same kind that share a key silently share one store — and, for local and session state, one storage row; for cookie state, one cookie. The module system cannot catch this, so treat the key as an app-wide global name.',
 });
 
@@ -492,32 +492,32 @@ export const schemaTitle = message({
 });
 
 export const schemaDescription = message({
-  ja: 'スキーマが要るのは、データが境界を越えて戻ってくる場所だけです。利用者が書き換えられる URL、古いスキーマが書いた Web Storage や Cookie、セッション復元で戻ってきたエントリ状態。そこから来る値は、信頼済みの状態ではなく入力として扱われます。',
+  ja: 'スキーマが要るのは、データが境界を越えて戻ってくる場所だけです。利用者が書き換えられるURL、古いスキーマが書いたWeb StorageやCookie、セッション復元で戻ってきたエントリ状態。そこから来る値は、信頼済みの状態ではなく入力として扱われます。',
   en: 'Schemas appear exactly where data comes back across a boundary: a URL the user can edit, Web Storage or a cookie an older schema wrote, entry state a session restore brought back. What comes from there is treated as input, not as trusted state.',
 });
 
 export const schemaObject = message({
-  ja: 'スキーマは `z.object()` です。`zod` と `zod/mini` のどちらで書いてもかまいません。',
+  ja: 'スキーマは`z.object()`です。`zod`と`zod/mini`のどちらで書いてもかまいません。',
   en: 'A schema is a `z.object()`, written with either `zod` or `zod/mini`.',
 });
 
 export const schemaAbsence = message({
-  ja: 'どのフィールドも、欠けたまま読めなければなりません。`z._default()`（`.default()`）も `z.optional()` も無いフィールドは、定義時にフィールド名付きで throw します。`z.optional()` のフィールドの既定値は `undefined` です。',
+  ja: 'どのフィールドも、欠けたまま読めなければなりません。`z._default()`（`.default()`）も`z.optional()`も無いフィールドは、定義時にフィールド名付きでthrowします。`z.optional()`のフィールドの既定値は`undefined`です。',
   en: 'Every field must parse from nothing. A field with neither `z._default()` (`.default()`) nor `z.optional()` throws at definition time, naming the field. The default of a `z.optional()` field is `undefined`.',
 });
 
 export const schemaRefine = message({
-  ja: 'オブジェクト全体への `refine` は、すべてのフィールドが既定値の状態を受け付けなければなりません。受け付けないと定義時に throw します。',
+  ja: 'オブジェクト全体への`refine`は、すべてのフィールドが既定値の状態を受け付けなければなりません。受け付けないと定義時にthrowします。',
   en: 'An object-level `refine` must accept the value where every field is at its default, or the definition throws.',
 });
 
 export const schemaOwnOutput = message({
-  ja: '`entry`・Web Storage・Cookie のスキーマは、自分の出力をそのまま入力として受け付けなければなりません。保存された値は型付きのまま戻ってきてスキーマを通り直すので、`z.stringbool()` や型を変える変換は、書き込むたびに既定値に戻ります。`url` では値がクエリ文字列を通って戻るので、`z.stringbool()` が使えます。',
+  ja: '`entry`、Web Storage、Cookieのスキーマは、自分の出力をそのまま入力として受け付けなければなりません。保存された値は型付きのまま戻ってきてスキーマを通り直すので、`z.stringbool()`や型を変える変換は、書き込むたびに既定値に戻ります。`url`では値がクエリ文字列を通って戻るので、`z.stringbool()`が使えます。',
   en: 'In `entry`, Web Storage and a cookie the schema must accept its own output as input: stored values come back typed and go through the schema again, so a `z.stringbool()` or a type-changing transform lands on its default on every write. In `url` the values come back through the query string, which is why `z.stringbool()` works there.',
 });
 
 export const schemaSalvage = message({
-  ja: 'スキーマが受け付けない値はそのフィールドだけが既定値に戻り、読み取りが throw することはありません。',
+  ja: 'スキーマが受け付けない値はそのフィールドだけが既定値に戻り、読み取りがthrowすることはありません。',
   en: 'A value the schema rejects falls back to that field’s own default, and reading never throws.',
 });
 
@@ -532,22 +532,22 @@ export const versionTitle = message({
 });
 
 export const versionDescription = message({
-  ja: 'localStorage の行や Cookie は、書いたコードより長く残ります。何もしなければ、古いスキーマが書いた行はフィールドごとにサルベージされます。フィールドを足した・制約を厳しくしたときはそれで正しいのですが、フィールドの名前や意味を変えたときは、何も言わずに既定値に戻ります。そのときは `defineLocalState` か `defineCookieState` に版と移行を渡します。',
+  ja: 'localStorageの行やCookieは、書いたコードより長く残ります。何もしなければ、古いスキーマが書いた行はフィールドごとにサルベージされます。フィールドを足した、制約を厳しくしたときはそれで正しいのですが、フィールドの名前や意味を変えたときは、何も言わずに既定値に戻ります。そのときは`defineLocalState`か`defineCookieState`に版と移行を渡します。',
   en: 'A localStorage row or a cookie outlives the code that wrote it. On its own, a row an older schema wrote is salvaged field by field — right for an added field or a tightened constraint, but a renamed field or a changed meaning resets to its default without a word. For those, give `defineLocalState` or `defineCookieState` a version and a migration.',
 });
 
 export const versionEnvelope = message({
-  ja: '版を持つ行は `[version, values]` の形で保存されます。版の無い行（定義が版を宣言する前に書かれた行）は版 `0` として読むので、形が初めて変わったときに `version: 1` を宣言すれば、今ある行は `0` から移行されます。次に変えるときは版を上げ、`migrate` の 2 つ目の引数 `fromVersion` で分けます。',
+  ja: '版を持つ行は`[version, values]`の形で保存されます。版の無い行（定義が版を宣言する前に書かれた行）は版`0`として読むので、形が初めて変わったときに`version: 1`を宣言すれば、今ある行は`0`から移行されます。次に変えるときは版を上げ、`migrate`の2つ目の引数`fromVersion`で分けます。',
   en: 'A versioned row is stored as `[version, values]`. A row with no version — written before the definition declared one — reads as version `0`, so declaring `version: 1` when the shape first changes migrates the existing rows from `0`. On the next change, raise the version and branch on `migrate`’s second argument, `fromVersion`.',
 });
 
 export const versionMigrate = message({
-  ja: '`version` より古い行は、`migrate(old, fromVersion)` を通ってから、ほかの読み取りと同じくスキーマでフィールドごとにサルベージされ、ブラウザのストアが今の版で書き戻します。`migrate` が返すのはスキーマのキーで（ほかのキーは型エラーです）、値は古い値をそのまま渡してかまいません。合わない値はスキーマが既定値に落とします。',
+  ja: '`version`より古い行は、`migrate(old, fromVersion)`を通ってから、ほかの読み取りと同じくスキーマでフィールドごとにサルベージされ、ブラウザのストアが今の版で書き戻します。`migrate`が返すのはスキーマのキーで（ほかのキーは型エラーです）、値は古い値をそのまま渡してかまいません。合わない値はスキーマが既定値に落とします。',
   en: 'A row older than `version` goes through `migrate(old, fromVersion)`, then through the schema field by field like any read, and the browser store writes it back in the current version. `migrate` returns the schema’s keys — any other key is a type error — with values as they are: hand old values over and the schema drops what does not fit to its default.',
 });
 
 export const versionServer = message({
-  ja: 'サーバーの `parseCookies` も移行して読みますが、書き戻しません（ページは応答に `Set-Cookie` を書けません）。ハイドレーションの後にブラウザが書き戻し、サーバーとブラウザが同じ値を読むので、ちらつきは出ません。',
+  ja: 'サーバーの`parseCookies`も移行して読みますが、書き戻しません（ページは応答に`Set-Cookie`を書けません）。ハイドレーションの後にブラウザが書き戻し、サーバーとブラウザが同じ値を読むので、ちらつきは出ません。',
   en: 'The server’s `parseCookies` migrates too but never writes back — a page cannot answer with `Set-Cookie`. The browser writes back after hydration, and since both read the same values, nothing flashes.',
 });
 
@@ -557,27 +557,27 @@ export const versionNewer = message({
 });
 
 export const versionThrow = message({
-  ja: '`migrate` が throw した行は、何も保存されていないものとして既定値で読み、行には触りません。直した `migrate` が次の読み込みでやり直せます。',
+  ja: '`migrate`がthrowした行は、何も保存されていないものとして既定値で読み、行には触りません。直した`migrate`が次の読み込みでやり直せます。',
   en: 'A row whose `migrate` throws reads as nothing stored: the defaults show, and the row stays as it was for a fixed `migrate` to try again.',
 });
 
 export const versionShape = message({
-  ja: '版を宣言すると行の形が変わります。宣言する前のコードで動いているタブは、再読み込みするまで `[version, values]` を何も保存されていないものとして読みます。',
+  ja: '版を宣言すると行の形が変わります。宣言する前のコードで動いているタブは、再読み込みするまで`[version, values]`を何も保存されていないものとして読みます。',
   en: 'Declaring a version changes the row’s shape: a tab still running code from before reads `[version, values]` as nothing stored until it reloads.',
 });
 
 export const versionNone = message({
-  ja: '渡さなければ今までどおりで、行は値のオブジェクトそのもの、古い行はフィールドごとにサルベージされます。`defineSessionState` は版を取りません。行はタブと一緒に消えるので、デプロイをまたいで開いていたタブの行もサルベージで足ります。',
+  ja: '渡さなければ今までどおりで、行は値のオブジェクトそのもの、古い行はフィールドごとにサルベージされます。`defineSessionState`は版を取りません。行はタブと一緒に消えるので、デプロイをまたいで開いていたタブの行もサルベージで足ります。',
   en: 'Leave the option out and nothing changes: the row is the bare values object, and an old row is salvaged field by field. `defineSessionState` takes no version — its rows go with the tab, and salvage covers one kept open across a deploy.',
 });
 
 export const zodTitle = message({
-  ja: '`zod` と `zod/mini`',
+  ja: '`zod`と`zod/mini`',
   en: '`zod` or `zod/mini`',
 });
 
 export const zodDescription = message({
-  ja: '解析は zod の共通のコアで行うので、どちらの入口で書いたスキーマでも動きます。クライアントはスキーマそのもので解析と書き出しを行い、スキーマを持つモジュールはブラウザにも届きます。アプリがすでに classic の `zod` を読み込んでいるのでなければ、`zod/mini` を選んでください。スキーマがサーバーに留まる `@k8ordo/form` とは、ここが違います。',
+  ja: '解析はzodの共通のコアで行うので、どちらの入口で書いたスキーマでも動きます。クライアントはスキーマそのもので解析と書き出しを行い、スキーマを持つモジュールはブラウザにも届きます。アプリがすでにclassicの`zod`を読み込んでいるのでなければ、`zod/mini`を選んでください。スキーマがサーバーに留まる`@k8ordo/form`とは、ここが違います。',
   en: 'Parsing runs on zod’s shared core, so a schema written with either entry works. The client parses and serializes with the schema itself, so the module holding it ships to the browser: choose `zod/mini` unless the app already pays for classic `zod`. This is where it differs from `@k8ordo/form`, whose schema stays on the server.',
 });
 
@@ -592,7 +592,7 @@ export const typesTitle = message({
 });
 
 export const typesDescription = message({
-  ja: '定義は、スキーマ（メモリなら初期値）と純粋な関数だけのオブジェクトです。型はすべて `@k8ordo/state` から export されています。',
+  ja: '定義は、スキーマ（メモリなら初期値）と純粋な関数だけのオブジェクトです。型はすべて`@k8ordo/state`からexportされています。',
   en: 'A definition is an object of schemas (initial values, for memory) and pure functions. Every type below is exported from `@k8ordo/state`.',
 });
 
@@ -600,35 +600,35 @@ export const typesTable = {
   type: message({ ja: '型', en: 'Type' }),
   holds: message({ ja: '中身', en: 'Holds' }),
   pageState: message({
-    ja: "`kind: 'page'`・`key`・`url`・`entry`・`parseUrl`・`href`・`search`。`url` と `entry` は渡したスキーマそのもの（書かなかった方は `undefined`）",
+    ja: "`kind: 'page'`、`key`、`url`、`entry`、`parseUrl`、`href`、`search`。`url`と`entry`は渡したスキーマそのもの（書かなかった方は`undefined`）",
     en: "`kind: 'page'`, `key`, `url`, `entry`, `parseUrl`, `href`, `search`. `url` and `entry` are the schemas as passed (`undefined` for the one left out)",
   }),
   localState: message({
-    ja: "`kind: 'local'`・`key`・`schema`・`storageKey`・`inlineRead`",
+    ja: "`kind: 'local'`、`key`、`schema`、`storageKey`、`inlineRead`",
     en: "`kind: 'local'`, `key`, `schema`, `storageKey`, `inlineRead`",
   }),
   sessionState: message({
-    ja: "`kind: 'session'`・`key`・`schema`・`storageKey`・`inlineRead`",
+    ja: "`kind: 'session'`、`key`、`schema`、`storageKey`、`inlineRead`",
     en: "`kind: 'session'`, `key`, `schema`, `storageKey`, `inlineRead`",
   }),
   cookieState: message({
-    ja: "`kind: 'cookie'`・`key`・`schema`・`cookieName`・`parseCookies`・`cookieValue`",
+    ja: "`kind: 'cookie'`、`key`、`schema`、`cookieName`、`parseCookies`、`cookieValue`",
     en: "`kind: 'cookie'`, `key`, `schema`, `cookieName`, `parseCookies`, `cookieValue`",
   }),
   memoryState: message({
-    ja: "`kind: 'memory'`・`key`・`initial`。`initial` は渡した初期値の浅いコピー",
+    ja: "`kind: 'memory'`、`key`、`initial`。`initial`は渡した初期値の浅いコピー",
     en: "`kind: 'memory'`, `key`, `initial`. `initial` is a shallow copy of the values passed",
   }),
   stateSchema: message({
-    ja: '`url`・`entry`・`defineLocalState`・`defineSessionState`・`defineCookieState` が受け取るスキーマの型。`zod` と `zod/mini` の `z.object()` に共通する部分です',
+    ja: '`url`、`entry`、`defineLocalState`、`defineSessionState`、`defineCookieState`が受け取るスキーマの型。`zod`と`zod/mini`の`z.object()`に共通する部分です',
     en: 'The schema type `url`, `entry`, `defineLocalState`, `defineSessionState` and `defineCookieState` accept: what a `z.object()` from `zod` and one from `zod/mini` have in common',
   }),
   versioning: message({
-    ja: '`defineLocalState`・`defineCookieState` の 3 つ目の引数の型。`version`（正の整数）と `migrate(old, fromVersion)`',
+    ja: '`defineLocalState`、`defineCookieState`の3つ目の引数の型。`version`（正の整数）と`migrate(old, fromVersion)`',
     en: 'The type of the third argument to `defineLocalState` and `defineCookieState`: `version` (a positive integer) and `migrate(old, fromVersion)`',
   }),
   outputOf: message({
-    ja: 'スキーマの出力型（`undefined` なら空のオブジェクト型）。props の型に `OutputOf<typeof catalogState.url>` のように使います',
+    ja: 'スキーマの出力型（`undefined`なら空のオブジェクト型）。propsの型に`OutputOf<typeof catalogState.url>`のように使います',
     en: 'A schema’s output type, or an empty object type for `undefined`. Use it for props: `OutputOf<typeof catalogState.url>`',
   }),
 };

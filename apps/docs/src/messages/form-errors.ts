@@ -1,7 +1,7 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: 'ブラウザの検査で見つかった失敗も、サーバーからの返事も、同じ `error` に届きます。どこに表示するかと、失敗したときのフォーカスの動きを扱います。',
+  ja: 'ブラウザの検査で見つかった失敗も、サーバーからの返事も、同じ`error`に届きます。どこに表示するかと、失敗したときのフォーカスの動きを扱います。',
   en: 'A failure the browser finds and one the server returns both arrive in the same `error`. This page covers where to show them and where focus goes.',
 });
 
@@ -11,7 +11,7 @@ export const fieldTitle = message({
 });
 
 export const fieldDescription = message({
-  ja: '`field()` は、その欄のエラーを `error` に、失敗しているかを `invalid` に持ちます。',
+  ja: '`field()`は、その欄のエラーを`error`に、失敗しているかを`invalid`に持ちます。',
   en: '`field()` returns the field’s error in `error`, and whether it failed in `invalid`.',
 });
 
@@ -26,7 +26,7 @@ export const wordingTitle = message({
 });
 
 export const wordingDescription = message({
-  ja: '表示される文言は、zod が出すメッセージそのものです。変えるときは、スキーマに書きます。',
+  ja: '表示される文言は、zodが出すメッセージそのものです。変えるときは、スキーマに書きます。',
   en: 'What is shown is zod’s own message. To change it, write it in the schema.',
 });
 
@@ -36,7 +36,7 @@ export const wordingBoth = message({
 });
 
 export const wordingLocale = message({
-  ja: 'リクエストのロケールに合わせるなら、文言を関数で渡し、`formFields` を描画の中で呼びます。モジュールスコープで呼ぶと、最初の 1 回のロケールで固定されます。',
+  ja: 'リクエストのロケールに合わせるなら、文言を関数で渡し、`formFields`を描画の中で呼びます。モジュールスコープで呼ぶと、最初の1回のロケールで固定されます。',
   en: 'To follow the request’s locale, pass the message as a function and call `formFields` during the render. Called at module scope, it is fixed to whichever locale ran first.',
 });
 
@@ -56,7 +56,7 @@ export const focusOrder = message({
 });
 
 export const focusPitfall = message({
-  ja: '自分で組み立てた state を返すときは、新しい `token` を入れます。同じ内容の失敗が 2 度続くと、`token` が無ければ同じ返事とみなされ、フォーカスが移りません。',
+  ja: '自分で組み立てたstateを返すときは、新しい`token`を入れます。同じ内容の失敗が2度続くと、`token`が無ければ同じ返事とみなされ、フォーカスが移りません。',
   en: 'When you build a state by hand, give it a new `token`. Without one, two identical failures in a row read as the same response, and focus does not move.',
 });
 
@@ -66,12 +66,12 @@ export const formErrorTitle = message({
 });
 
 export const formErrorDescription = message({
-  ja: 'どの欄にも属さない失敗は `form.formError` に入ります。たとえば、`path` を指定していないスキーマ全体の `.refine()` です。',
+  ja: 'どの欄にも属さない失敗は`form.formError`に入ります。たとえば、`path`を指定していないスキーマ全体の`.refine()`です。',
   en: 'A failure that belongs to no field goes to `form.formError` — for example, a `.refine()` on the whole schema with no `path`.',
 });
 
 export const formErrorProps = message({
-  ja: '表示する要素に `formError.props` を広げます。フォーカスを受け取れるようになり、読み上げにも伝わります。',
+  ja: '表示する要素に`formError.props`を広げます。フォーカスを受け取れるようになり、読み上げにも伝わります。',
   en: 'Spread `formError.props` onto the element that shows it. That lets it take focus, so a screen reader announces it.',
 });
 
@@ -86,12 +86,12 @@ export const serverTitle = message({
 });
 
 export const serverDescription = message({
-  ja: 'タイトルがすでに使われている、のような失敗は、データベースを見るまで分かりません。`parseForm` が成功したあとに見つけたら、`parsed.state` にエラーを足して返します。',
+  ja: 'タイトルがすでに使われている、のような失敗は、データベースを見るまで分かりません。`parseForm`が成功したあとに見つけたら、`parsed.state`にエラーを足して返します。',
   en: 'Some failures, such as a title that is already taken, only show up once you look in the database. When you find one after `parseForm` succeeds, add the error to `parsed.state` and return it.',
 });
 
 export const serverState = message({
-  ja: '`parsed.state` には、入力した値と新しい `token` が入っています。そのため値は欄に戻り、フォーカスもその欄に移ります。',
+  ja: '`parsed.state`には、入力した値と新しい`token`が入っています。そのため値は欄に戻り、フォーカスもその欄に移ります。',
   en: '`parsed.state` already holds what was typed and a fresh `token`, so the values come back and focus moves to that field.',
 });
 
@@ -107,7 +107,7 @@ export const demoDescription = message({
 
 export const demoSteps = [
   message({
-    ja: 'ハンドルに `ab` と入れて欄を離れます。3 文字以上、というエラーが出ます。',
+    ja: 'ハンドルに`ab`と入れて欄を離れます。3文字以上、というエラーが出ます。',
     en: 'Type `ab` as the handle and leave the field. The error asks for at least 3 characters.',
   }),
   message({
@@ -146,22 +146,22 @@ export const demoSent = message({
 });
 
 export const demoHandleTooShort = message({
-  ja: 'ハンドルは 3 文字以上にしてください',
+  ja: 'ハンドルは3文字以上にしてください',
   en: 'Use at least 3 characters for the handle',
 });
 
 export const demoHandleTooLong = message({
-  ja: 'ハンドルは 20 文字までです',
+  ja: 'ハンドルは20文字までです',
   en: 'Keep the handle to 20 characters',
 });
 
 export const demoHandlePattern = message({
-  ja: '小文字の英字・数字・アンダースコアだけを使ってください',
+  ja: '小文字の英字、数字、アンダースコアだけを使ってください',
   en: 'Use only lowercase letters, digits and underscores',
 });
 
 export const demoPasswordTooShort = message({
-  ja: 'パスワードは 8 文字以上にしてください',
+  ja: 'パスワードは8文字以上にしてください',
   en: 'Use at least 8 characters for the password',
 });
 

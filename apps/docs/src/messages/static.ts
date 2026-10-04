@@ -6,22 +6,22 @@ export const description = message({
 });
 
 export const tagline = message({
-  ja: 'React Server Components のアプリを、ビルドの時点ですべてのページを描いてファイルにする。',
+  ja: 'React Server Componentsのアプリを、ビルドの時点ですべてのページを描いてファイルにする。',
   en: 'Build a React Server Components app into files, every page rendered ahead of time.',
 });
 
 export const claimRoutesTitle = message({
-  ja: 'ディレクトリの形が、そのまま URL になる',
+  ja: 'ディレクトリの形が、そのままURLになる',
   en: 'The directory tree is the URL space',
 });
 
 export const claimRoutesBody = [
   message({
-    ja: '`src/routes/` の下のディレクトリが URL の区間、`[id]` がパラメータ、`page.tsx` がページです。ルート表と `href` の型は、そこから `.k8ordo/` に生成されます。',
+    ja: '`src/routes/`の下のディレクトリがURLの区間、`[id]`がパラメータ、`page.tsx`がページです。ルート表と`href`の型は、そこから`.k8ordo/`に生成されます。',
     en: 'Under `src/routes/`, a directory is a URL segment, `[id]` is a parameter, and `page.tsx` is a page. The route table and the types `href` checks against are generated from it into `.k8ordo/`.',
   }),
   message({
-    ja: '決まったファイル名のほかは `_` で始まるディレクトリに置きます。届かないページや取り合いになる URL は、ビルドがファイル名を挙げて止めます。',
+    ja: '決まったファイル名のほかは`_`で始まるディレクトリに置きます。届かないページや取り合いになるURLは、ビルドがファイル名を挙げて止めます。',
     en: 'Anything that is not one of the route file names lives under a `_` directory. A page nothing can reach, or two files claiming one URL, stops the build with the files named.',
   }),
 ] as const;
@@ -33,7 +33,7 @@ export const claimPathsTitle = message({
 
 export const claimPathsBody = [
   message({
-    ja: 'ビルドはパラメータの値を思いつけないので、`paths` に URL を並べます。データから組み立てる関数も渡せます。',
+    ja: 'ビルドはパラメータの値を思いつけないので、`paths`にURLを並べます。データから組み立てる関数も渡せます。',
     en: 'A build cannot invent parameter values, so `paths` lists the URLs. It can be a function that builds them from your data.',
   }),
   message({
@@ -49,11 +49,11 @@ export const claimRefuseTitle = message({
 
 export const claimRefuseBody = [
   message({
-    ja: "ファイルはフォームの送信を受け取れません。`'use server'` のモジュールや `guard.ts` があれば、ビルドも `vite dev` もそのファイルを挙げて止まります。",
+    ja: "ファイルはフォームの送信を受け取れません。`'use server'`のモジュールや`guard.ts`があれば、ビルドも`vite dev`もそのファイルを挙げて止まります。",
     en: "A file cannot receive a form submission. A `'use server'` module or a `guard.ts` stops both the build and `vite dev`, naming the file.",
   }),
   message({
-    ja: 'それが要るなら `@k8ordo/server` に入れ替えます。ルートの書き方も境界も同じなので、変わるのは import 1 行です。',
+    ja: 'それが要るなら`@k8ordo/server`に入れ替えます。ルートの書き方も境界も同じなので、変わるのはimport 1行です。',
     en: 'If the app needs them, install `@k8ordo/server` instead. The route grammar and the boundaries are the same, so the change is one import.',
   }),
 ] as const;
@@ -69,17 +69,17 @@ export const nextRouting = message({
 });
 
 export const nextParams = message({
-  ja: '`paramsSchema` での型付けと、`paths` での値の並べ方です。',
+  ja: '`paramsSchema`での型付けと、`paths`での値の並べ方です。',
   en: 'Typing parameters with `paramsSchema`, and listing values with `paths`.',
 });
 
 export const nextErrors = message({
-  ja: '`error.tsx`・`not-found.tsx`・`redirect.ts` と、ビルドを止める失敗です。',
+  ja: '`error.tsx`、`not-found.tsx`、`redirect.ts`と、ビルドを止める失敗です。',
   en: '`error.tsx`, `not-found.tsx`, `redirect.ts`, and what stops the build.',
 });
 
 export const nextBoundaries = message({
-  ja: "`'use client'` と `server-only` で、実行する場所を分けます。",
+  ja: "`'use client'`と`server-only`で、実行する場所を分けます。",
   en: "Where code runs, with `'use client'` and `server-only`.",
 });
 

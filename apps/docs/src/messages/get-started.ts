@@ -66,7 +66,7 @@ export const peers = {
     en: 'The components and hooks',
   }),
   reactDom: message({
-    ja: 'ポータルと `useFormStatus`',
+    ja: 'ポータルと`useFormStatus`',
     en: 'Portals and `useFormStatus`',
   }),
   i18n: message({
@@ -78,11 +78,11 @@ export const peers = {
     en: 'The shipped type declarations',
   }),
   tailwindcss: message({
-    ja: '`tailwind.css` の入口',
+    ja: '`tailwind.css`の入口',
     en: 'The `tailwind.css` entry',
   }),
   zod: message({
-    ja: '生成 UI のスキーマ',
+    ja: '生成UIのスキーマ',
     en: 'Generative-UI schemas',
   }),
   jsonRender: message({
@@ -90,7 +90,7 @@ export const peers = {
     en: '`@k8ordo/ui/json-render`',
   }),
   openuiLangCore: message({
-    ja: '`@k8ordo/ui/openui` と `@k8ordo/ui/openui/prompt`',
+    ja: '`@k8ordo/ui/openui`と`@k8ordo/ui/openui/prompt`',
     en: '`@k8ordo/ui/openui` and `@k8ordo/ui/openui/prompt`',
   }),
   openuiReactLang: message({
@@ -123,7 +123,7 @@ export const nextStepsTheming = message({
 });
 
 export const nextStepsI18n = message({
-  ja: '組み込み文言の言語を決める・差し替える',
+  ja: '組み込み文言の言語を決める、差し替える',
   en: 'Choose the language of the built-in wording, or replace it',
 });
 

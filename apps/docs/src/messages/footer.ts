@@ -11,6 +11,6 @@ export const tagline = message({
 });
 
 export const typesetting = message({
-  ja: '組版 — Noto Sans JP / M PLUS 2',
+  ja: '組版：Noto Sans JP / M PLUS 2',
   en: 'Typeset in Noto Sans JP & M PLUS 2',
 });

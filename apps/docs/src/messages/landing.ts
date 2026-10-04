@@ -6,6 +6,6 @@ export const nextTitle = message({
 });
 
 export const agents = message({
-  ja: 'AI エージェントには、パッケージに同梱した網羅的なガイドがあります。',
+  ja: 'AIエージェントには、パッケージに同梱した網羅的なガイドがあります。',
   en: 'For AI agents, the package ships a complete guide:',
 });

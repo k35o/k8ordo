@@ -41,7 +41,7 @@ export const inputTitle = message({
 });
 
 export const inputDescription = message({
-  ja: 'Enterで送信、Shift+Enterで改行、そしてIME変換を確定するEnterでは送信しません。`status`に応じて送信 / 停止ボタンが切り替わります。',
+  ja: 'Enterで送信、Shift+Enterで改行、そしてIME変換を確定するEnterでは送信しません。`status`に応じて送信/停止ボタンが切り替わります。',
   en: 'Enter sends, Shift+Enter inserts a newline, and the Enter that confirms an IME composition never submits. `status` switches the button between send and stop.',
 });
 
@@ -51,7 +51,7 @@ export const attachmentsTitle = message({
 });
 
 export const attachmentsDescription = message({
-  ja: '`PromptInput.Root`に`accept`を渡すと、`Attach`の選択・ドロップ・貼り付けのどれでもファイルを受け取り、同じ`accept`で選り分けます。待機中の添付は`PromptInput.Attachments`に並び、`onSubmit`の第2引数に`FileList`で届くので、AI SDKの`sendMessage`にそのまま渡せます。添付だけを送るときは`text`を渡さないでください。',
+  ja: '`PromptInput.Root`に`accept`を渡すと、`Attach`の選択、ドロップ、貼り付けのどれでもファイルを受け取り、同じ`accept`で選り分けます。待機中の添付は`PromptInput.Attachments`に並び、`onSubmit`の第2引数に`FileList`で届くので、AI SDKの`sendMessage`にそのまま渡せます。添付だけを送るときは`text`を渡さないでください。',
   en: 'Pass `accept` to `PromptInput.Root` and it takes files from the `Attach` picker, a drop, or a paste, filtering all three by the same `accept`. Pending files line up in `PromptInput.Attachments` and reach `onSubmit` as a `FileList` in its second argument, ready for the AI SDK’s `sendMessage`. When sending files alone, leave `text` out.',
 });
 
@@ -101,7 +101,7 @@ export const actionsTitle = message({
 });
 
 export const actionsDescription = message({
-  ja: '`Message.Actions`はメッセージの下に置く操作の列です。`Copy`・`Regenerate`・`Feedback`はアイコンと文言を持っていて、それ以外の操作は`Action`で足せます。`onAction`が返すPromiseが終わるまでボタンは止まります。',
+  ja: '`Message.Actions`はメッセージの下に置く操作の列です。`Copy`、`Regenerate`、`Feedback`はアイコンと文言を持っていて、それ以外の操作は`Action`で足せます。`onAction`が返すPromiseが終わるまでボタンは止まります。',
   en: '`Message.Actions` is the row of actions under a message. `Copy`, `Regenerate`, and `Feedback` come with their own icons and labels, and `Action` adds anything else. A button stays busy until the promise its `onAction` returns settles.',
 });
 
@@ -111,7 +111,7 @@ export const aiSdkTitle = message({
 });
 
 export const aiSdkDescription = message({
-  ja: '`mapMessageParts`（`@k8ordo/ui/ai-sdk`）はAI SDKの`UIMessage.parts`を、自分で描画しやすい素朴な配列に変換します。テキスト・思考・ツール（承認を含む）・ファイル・出典・dataパーツを順に返します。optional peerの`ai`が必要です。',
+  ja: '`mapMessageParts`（`@k8ordo/ui/ai-sdk`）はAI SDKの`UIMessage.parts`を、自分で描画しやすい素朴な配列に変換します。テキスト、思考、ツール（承認を含む）、ファイル、出典、dataパーツを順に返します。optional peerの`ai`が必要です。',
   en: '`mapMessageParts` (from `@k8ordo/ui/ai-sdk`) turns an AI SDK `UIMessage.parts` array into a flat list you render yourself: text, reasoning, tools (approval included), files, sources, and data parts, in order. It needs the `ai` optional peer.',
 });
 
@@ -140,7 +140,7 @@ export const demo = {
     en: 'Where should I start when building an AI chat in React?',
   }),
   seedReasoning: message({
-    ja: 'まず会話の器・吹き出し・入力欄の3つが土台。Markdownやツール表示は後段で足せる。',
+    ja: 'まず会話の器、吹き出し、入力欄の3つが土台。Markdownやツール表示は後段で足せる。',
     en: 'The conversation area, message bubbles, and the input are the foundation. Markdown and tool views can come later.',
   }),
   seedToolOutput: message({
@@ -148,7 +148,7 @@ export const demo = {
     en: 'Starting with Conversation, Message, and PromptInput is recommended.',
   }),
   seedAnswer: message({
-    ja: 'まずはConversation・Message・PromptInputの3つで会話の骨組みを作り、そのあとResponse（Markdown）やToolInvocationを足していくのがおすすめです。',
+    ja: 'まずはConversation、Message、PromptInputの3つで会話の骨組みを作り、そのあとResponse（Markdown）やToolInvocationを足していくのがおすすめです。',
     en: 'Start with Conversation, Message, and PromptInput to frame the conversation, then add Response (Markdown) and ToolInvocation on top.',
   }),
   seedApprovalReason: message({

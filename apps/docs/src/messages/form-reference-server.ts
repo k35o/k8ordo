@@ -1,28 +1,28 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: '`@k8ordo/form/server` が提供する関数と型です。どれもサーバーで呼びます。zod をブラウザに送らないためです。',
+  ja: '`@k8ordo/form/server`が提供する関数と型です。どれもサーバーで呼びます。zodをブラウザに送らないためです。',
   en: 'The functions and types that `@k8ordo/form/server` provides. Call them on the server, which keeps zod out of the browser.',
 });
 
 export const formFieldsSummary = message({
-  ja: 'スキーマから、各欄の属性・文言・ルールを導きます。',
+  ja: 'スキーマから、各欄の属性、文言、ルールを導きます。',
   en: 'Derives each field’s attributes, messages and rules from the schema.',
 });
 
 export const formFieldsInput = message({
-  ja: 'zod のオブジェクト、または `defineForm` で作った定義。',
+  ja: 'zodのオブジェクト、または`defineForm`で作った定義。',
   en: 'A zod object, or a definition made with `defineForm`.',
 });
 
 export const formFieldsReturns = message({
-  ja: '`fields`・`arrays`・`rules`・`dropped` を持つ JSON。そのまま `useForm` に渡します。',
+  ja: '`fields`、`arrays`、`rules`、`dropped`を持つJSON。そのまま`useForm`に渡します。',
   en: 'JSON holding `fields`, `arrays`, `rules` and `dropped`. Pass it to `useForm` as it is.',
 });
 
 export const formFieldsCaveats = [
   message({
-    ja: 'Server Component か、モジュールスコープで呼びます。結果は JSON なので、props でクライアントへ渡せます。',
+    ja: 'Server Componentか、モジュールスコープで呼びます。結果はJSONなので、propsでクライアントへ渡せます。',
     en: 'Call it in a Server Component or at module scope. The result is JSON, so it crosses to the client as props.',
   }),
   message({
@@ -30,46 +30,46 @@ export const formFieldsCaveats = [
     en: 'Messages are fixed when it runs. To follow the request’s locale, call it during the render.',
   }),
   message({
-    ja: 'フォームで表せないスキーマ（`z.record`・タプル・`z.number()` など）には、理由を添えて例外を投げます。',
+    ja: 'フォームで表せないスキーマ（`z.record`、タプル、`z.number()`など）には、理由を添えて例外を投げます。',
     en: 'It throws, with the reason, on a schema a form cannot express (`z.record`, tuples, `z.number()` and so on).',
   }),
   message({
-    ja: 'HTML の属性で表せない検査は `dropped` に入ります。本番以外では `console.warn` でも知らせます。',
+    ja: 'HTMLの属性で表せない検査は`dropped`に入ります。本番以外では`console.warn`でも知らせます。',
     en: 'Checks no HTML attribute can express go into `dropped`. Outside production it also reports them with `console.warn`.',
   }),
 ] as const;
 
 export const parseFormSummary = message({
-  ja: '送信された `FormData` を、スキーマで検証します。',
+  ja: '送信された`FormData`を、スキーマで検証します。',
   en: 'Validates a submitted `FormData` against the schema.',
 });
 
 export const parseFormInput = message({
-  ja: '`formFields` に渡したものと同じスキーマか定義。',
+  ja: '`formFields`に渡したものと同じスキーマか定義。',
   en: 'The same schema or definition you passed to `formFields`.',
 });
 
 export const parseFormFormData = message({
-  ja: 'Server Action が受け取った `FormData`。',
+  ja: 'Server Actionが受け取った`FormData`。',
   en: 'The `FormData` the Server Action received.',
 });
 
 export const parseFormReturns = message({
-  ja: '成功なら `{ success: true, data, state }`、失敗なら `{ success: false, state }`。`data` は型の付いた値です。',
+  ja: '成功なら`{ success: true, data, state }`、失敗なら`{ success: false, state }`。`data`は型の付いた値です。',
   en: '`{ success: true, data, state }` on success, `{ success: false, state }` on failure. `data` is typed.',
 });
 
 export const parseFormCaveats = [
   message({
-    ja: 'チェックの無いチェックボックスや、同じ名前で送られた値をまとめてから、スキーマに渡します。文字列から数への変換は、スキーマの `z.coerce` が行います。',
+    ja: 'チェックの無いチェックボックスや、同じ名前で送られた値をまとめてから、スキーマに渡します。文字列から数への変換は、スキーマの`z.coerce`が行います。',
     en: 'It gathers unchecked checkboxes and repeated names before handing the values to the schema. Turning strings into numbers is the schema’s job, through `z.coerce`.',
   }),
   message({
-    ja: 'スキーマにある欄が `FormData` に無いと、例外を投げます。`input` の広げ忘れだからです。何も選ばなければ送られない欄（ラジオ・`<select>`・チェックボックス）は除きます。',
+    ja: 'スキーマにある欄が`FormData`に無いと、例外を投げます。`input`の広げ忘れだからです。何も選ばなければ送られない欄（ラジオ、`<select>`、チェックボックス）は除きます。',
     en: 'It throws when a field in the schema is missing from the `FormData`, since that means an `input` was never spread. Controls that send nothing when left alone (radio buttons, `<select>`, checkboxes) are the exception.',
   }),
   message({
-    ja: 'パスワードとファイルの値は、`state.values` に入りません。',
+    ja: 'パスワードとファイルの値は、`state.values`に入りません。',
     en: 'Passwords and files are never included in `state.values`.',
   }),
 ] as const;
@@ -80,17 +80,17 @@ export const defineFormSummary = message({
 });
 
 export const defineFormSchema = message({
-  ja: 'zod のオブジェクト。',
+  ja: 'zodのオブジェクト。',
   en: 'A zod object.',
 });
 
 export const defineFormRules = message({
-  ja: '`sameAs`・`minChecked`・`requiredWhen` で作ったルール。欄のパスは型で検査されます。',
+  ja: '`sameAs`、`minChecked`、`requiredWhen`で作ったルール。欄のパスは型で検査されます。',
   en: 'Rules made with `sameAs`, `minChecked` and `requiredWhen`. Field paths are type-checked.',
 });
 
 export const defineFormReturns = message({
-  ja: 'スキーマの代わりに `formFields` と `parseForm` へ渡します。',
+  ja: 'スキーマの代わりに`formFields`と`parseForm`へ渡します。',
   en: 'Pass it to `formFields` and `parseForm` in place of the schema.',
 });
 
@@ -102,17 +102,17 @@ export const defineFormCaveats = [
 ] as const;
 
 export const sameAsSummary = message({
-  ja: '`field` の値が `other` の値と同じであることを求めます。パスワードの確認に使います。',
+  ja: '`field`の値が`other`の値と同じであることを求めます。パスワードの確認に使います。',
   en: 'Requires `field` to equal `other`. Use it to confirm a password.',
 });
 
 export const minCheckedSummary = message({
-  ja: '同じ名前のチェックボックスのうち、`min` 個以上がチェックされていることを求めます。',
+  ja: '同じ名前のチェックボックスのうち、`min`個以上がチェックされていることを求めます。',
   en: 'Requires at least `min` of the checkboxes sharing a name to be checked.',
 });
 
 export const requiredWhenSummary = message({
-  ja: '`when` の値が `equals` であるあいだだけ、`field` を必須にします。',
+  ja: '`when`の値が`equals`であるあいだだけ、`field`を必須にします。',
   en: 'Makes `field` required only while `when` holds `equals`.',
 });
 
@@ -137,7 +137,7 @@ export const ruleWhen = message({
 });
 
 export const ruleEquals = message({
-  ja: '`field` を必須にする、`when` の値。',
+  ja: '`field`を必須にする、`when`の値。',
   en: 'The value of `when` that makes `field` required.',
 });
 
@@ -147,17 +147,17 @@ export const ruleMessage = message({
 });
 
 export const ruleReturns = message({
-  ja: '`defineForm` の 2 つ目の引数に並べます。',
+  ja: '`defineForm`の2つ目の引数に並べます。',
   en: 'List it in `defineForm`’s second argument.',
 });
 
 export const formStateSummary = message({
-  ja: 'Server Action がフォームに返す値です。`parseForm` が作り、`useForm` が読みます。',
+  ja: 'Server Actionがフォームに返す値です。`parseForm`が作り、`useForm`が読みます。',
   en: 'What a Server Action hands back to the form. `parseForm` builds it and `useForm` reads it.',
 });
 
 export const formStateErrors = message({
-  ja: '欄ごとのエラー。キーは `items[1].name` のようなパスです。',
+  ja: '欄ごとのエラー。キーは`items[1].name`のようなパスです。',
   en: 'Errors per field, keyed by path such as `items[1].name`.',
 });
 
@@ -167,7 +167,7 @@ export const formStateValues = message({
 });
 
 export const formStateRows = message({
-  ja: '繰り返し行ごとの行数。JavaScript が無くても、同じ数の行を描き直せます。',
+  ja: '繰り返し行ごとの行数。JavaScriptが無くても、同じ数の行を描き直せます。',
   en: 'How many rows each array had, so the same rows render again without JavaScript.',
 });
 
@@ -177,6 +177,6 @@ export const formStateFormError = message({
 });
 
 export const formStateToken = message({
-  ja: '1 回の検証を見分ける値。同じ内容の失敗が続いても、別の返事として扱えます。',
+  ja: '1回の検証を見分ける値。同じ内容の失敗が続いても、別の返事として扱えます。',
   en: 'Identifies one parse, so two identical failures still read as two responses.',
 });

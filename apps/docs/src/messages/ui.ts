@@ -1,7 +1,7 @@
 import { message } from '@k8ordo/i18n';
 
 export const tagline = message({
-  ja: '触れるものは柔らかく、読むものは端正に。React Server Components で使える部品集。',
+  ja: '触れるものは柔らかく、読むものは端正に。React Server Componentsで使える部品集。',
   en: 'Soft where you touch, precise where you read: React components that work in Server Components.',
 });
 
@@ -12,11 +12,11 @@ export const claimPlatformTitle = message({
 
 export const claimPlatformBody = [
   message({
-    ja: 'ポップオーバーは Popover API で最前面の層に開き、位置は CSS Anchor Positioning で決めます。z-index を調整する必要はありません。',
+    ja: 'ポップオーバーはPopover APIで最前面の層に開き、位置はCSS Anchor Positioningで決めます。z-indexを調整する必要はありません。',
     en: 'Overlays open in the top layer through the Popover API and are placed with CSS Anchor Positioning. There is no z-index to tune.',
   }),
   message({
-    ja: '使うのは Baseline に入ったブラウザの機能だけです。ポリフィルも、古いブラウザ向けの分岐も入っていません。',
+    ja: '使うのはBaselineに入ったブラウザの機能だけです。ポリフィルも、古いブラウザ向けの分岐も入っていません。',
     en: 'Only browser features that have reached Baseline are used. Nothing ships for polyfills or old browsers.',
   }),
 ] as const;
@@ -27,17 +27,17 @@ export const demoOverlayTitle = message({
 });
 
 export const demoOverlayDescription = message({
-  ja: 'どちらも `@k8ordo/ui` の部品をそのまま置いたものです。',
+  ja: 'どちらも`@k8ordo/ui`の部品をそのまま置いたものです。',
   en: 'Both are `@k8ordo/ui` components, placed as they are.',
 });
 
 export const demoOverlaySteps = [
   message({
-    ja: '「操作」を押してメニューを開き、矢印キーで項目を移ってから Esc で閉じます。',
+    ja: '「操作」を押してメニューを開き、矢印キーで項目を移ってからEscで閉じます。',
     en: 'Press “Actions” to open the menu, move through it with the arrow keys, then close it with Esc.',
   }),
   message({
-    ja: '封筒のボタンにマウスを載せるか、Tab でフォーカスを移すと、名前がツールチップで出ます。',
+    ja: '封筒のボタンにマウスを載せるか、Tabでフォーカスを移すと、名前がツールチップで出ます。',
     en: 'Hover the envelope button, or Tab to it, and its name shows in a tooltip.',
   }),
 ] as const;
@@ -79,7 +79,7 @@ export const claimVerticalTitle = message({
 
 export const claimVerticalBody = [
   message({
-    ja: '余白や角丸は、上下左右ではなく文の流れに沿った論理プロパティで書いています。`writing-v` で縦書きにすると、部品もその向きに組み替わります。',
+    ja: '余白や角丸は、上下左右ではなく文の流れに沿った論理プロパティで書いています。`writing-v`で縦書きにすると、部品もその向きに組み替わります。',
     en: 'Spacing and corners are written with logical properties that follow the text, not top and left. Switch to vertical writing with `writing-v`, and the components turn with it.',
   }),
   message({
@@ -94,7 +94,7 @@ export const demoVerticalTitle = message({
 });
 
 export const demoVerticalDescription = message({
-  ja: 'スイッチで、下のカードの `writing-mode` を切り替えます。',
+  ja: 'スイッチで、下のカードの`writing-mode`を切り替えます。',
   en: 'The switch toggles the `writing-mode` of the card below.',
 });
 
@@ -124,17 +124,17 @@ export const demoButton = message({
 });
 
 export const claimAgentsTitle = message({
-  ja: 'エージェントが読める文書と、生成 UI のカタログ',
+  ja: 'エージェントが読める文書と、生成UIのカタログ',
   en: 'Docs an agent can read, and a catalog for generative UI',
 });
 
 export const claimAgentsBody = [
   message({
-    ja: '設計の指針とリファレンスは npm パッケージに入っています。エージェントは `node_modules/@k8ordo/ui/docs/` から、入れた版そのものを読みます。',
+    ja: '設計の指針とリファレンスはnpmパッケージに入っています。エージェントは`node_modules/@k8ordo/ui/docs/`から、入れた版そのものを読みます。',
     en: 'The design guide and references ship inside the npm package, so an agent reads the exact installed version from `node_modules/@k8ordo/ui/docs/`.',
   }),
   message({
-    ja: 'LLM に画面を組ませるときは、json-render か OpenUI のカタログを使います。カタログは部品の props と型で突き合わせてあるので、部品と食い違いません。',
+    ja: 'LLMに画面を組ませるときは、json-renderかOpenUIのカタログを使います。カタログは部品のpropsと型で突き合わせてあるので、部品と食い違いません。',
     en: 'To let an LLM compose a screen, use the json-render or OpenUI catalog. It is type-checked against the components’ own props, so the two never drift.',
   }),
 ] as const;
@@ -145,12 +145,12 @@ export const nextGetStarted = message({
 });
 
 export const nextComponents = message({
-  ja: 'すべての部品を、動く例と props の表で見られます。',
+  ja: 'すべての部品を、動く例とpropsの表で見られます。',
   en: 'Every component, with live examples and its props.',
 });
 
 export const nextTheming = message({
-  ja: '色・余白・文字のトークンと、ダークモードです。',
+  ja: '色、余白、文字のトークンと、ダークモードです。',
   en: 'Colour, spacing and type tokens, and dark mode.',
 });
 
@@ -160,6 +160,6 @@ export const nextI18n = message({
 });
 
 export const nextAi = message({
-  ja: 'チャットの部品と、生成 UI のカタログです。',
+  ja: 'チャットの部品と、生成UIのカタログです。',
   en: 'Chat components, and the catalogs for generative UI.',
 });

@@ -16,17 +16,17 @@ export const membersTitle = message({
 });
 
 export const memberUiDescription = message({
-  ja: 'セマンティックなデザイントークン・i18n・生成UIアダプタを備えたReactコンポーネント。',
+  ja: 'セマンティックなデザイントークン、i18n、生成UIアダプタを備えたReactコンポーネント。',
   en: 'React components with semantic design tokens, i18n, and generative-UI adapters.',
 });
 
 export const memberFormDescription = message({
-  ja: 'スキーマ1つから HTML の制約属性・メッセージ・サーバー検証を導く。値は DOM が持つので、JavaScript が無くても動く。',
+  ja: 'スキーマ1つからHTMLの制約属性、メッセージ、サーバー検証を導く。値はDOMが持つので、JavaScriptが無くても動く。',
   en: 'Derives HTML constraint attributes, messages, and server-side validation from one zod schema. The DOM holds the values, so it works without JavaScript.',
 });
 
 export const memberStateDescription = message({
-  ja: '状態を置き場所で宣言する。URL・履歴エントリ・localStorage・sessionStorage・Cookie はそれぞれスキーマ1つで型付けし、メモリはスキーマのない型付きの箱にする。Navigation API に載せる。',
+  ja: '状態を置き場所で宣言する。URL、履歴エントリ、localStorage、sessionStorage、Cookieはそれぞれスキーマ1つで型付けし、メモリはスキーマのない型付きの箱にする。Navigation APIに載せる。',
   en: 'Declares state by where it lives — URL, history entry, localStorage, sessionStorage, a cookie, memory — with one zod schema for each boundary place and a typed box for memory, riding the Navigation API.',
 });
 

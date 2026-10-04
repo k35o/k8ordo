@@ -21,7 +21,7 @@ export const surfacesTitle = message({
 });
 
 export const surfacesDescription = message({
-  ja: '`GUIDE.md`・リファレンス・`llms.txt`は、パッケージ内（node_modules）とこのサイトの両方から取得できます。`design.md`はこのサイトだけで配信し、`props.json`はパッケージ内にだけあります（サイトでは同じpropsをコンポーネントのリファレンスに載せています）。',
+  ja: '`GUIDE.md`、リファレンス、`llms.txt`は、パッケージ内（node_modules）とこのサイトの両方から取得できます。`design.md`はこのサイトだけで配信し、`props.json`はパッケージ内にだけあります（サイトでは同じpropsをコンポーネントのリファレンスに載せています）。',
   en: '`GUIDE.md`, the references and `llms.txt` are available both inside the package (node_modules) and from this site. `design.md` is served only from this site, and `props.json` exists only inside the package — on this site the same props appear in the component reference.',
 });
 

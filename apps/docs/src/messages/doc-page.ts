@@ -21,7 +21,7 @@ export const onThisPage = message({
 });
 
 export const editOnGitHub = message({
-  ja: 'GitHub でこのページを編集',
+  ja: 'GitHubでこのページを編集',
   en: 'Edit this page on GitHub',
 });
 

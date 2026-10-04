@@ -1,7 +1,7 @@
 import { message } from '@k8ordo/i18n';
 
 export const importFrom = message({
-  ja: 'import 元',
+  ja: 'import元',
   en: 'Import from',
 });
 

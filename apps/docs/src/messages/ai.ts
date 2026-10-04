@@ -6,7 +6,7 @@ export const description = message({
 });
 
 export const chatSummary = message({
-  ja: 'Conversation・Message・PromptInputでチャット画面を組み立てるpresentationalな部品集。',
+  ja: 'Conversation、Message、PromptInputでチャット画面を組み立てるpresentationalな部品集。',
   en: 'Presentational parts — Conversation, Message and PromptInput — for composing chat screens.',
 });
 
@@ -16,6 +16,6 @@ export const generativeUiSummary = message({
 });
 
 export const agentsSummary = message({
-  ja: '設計指針・リファレンス・propsをAIコーディングエージェントに読ませるためのドキュメント面。',
+  ja: '設計指針、リファレンス、propsをAIコーディングエージェントに読ませるためのドキュメント面。',
   en: 'Documentation surfaces that feed the design guide, references and props to AI coding agents.',
 });

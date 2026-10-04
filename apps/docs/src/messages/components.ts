@@ -237,7 +237,7 @@ export const numberField = {
     en: 'Step & Precision',
   }),
   minMaxTitle: message({
-    ja: '最小値 / 最大値',
+    ja: '最小値/最大値',
     en: 'Min / Max',
   }),
   disabledTitle: message({
@@ -321,7 +321,7 @@ export const checkboxGroup = {
 // `switch` は予約語なので、この 1 つだけ Input を付ける
 export const switchInput = {
   description: message({
-    ja: 'オン・オフを切り替えるスイッチ',
+    ja: 'オンとオフを切り替えるスイッチ',
     en: 'A switch component for binary on/off state.',
   }),
   defaultCheckedTitle: message({
@@ -382,18 +382,18 @@ export const radioCard = {
     en: 'Form Integration',
   }),
   formDescription: message({
-    ja: '中身は本物のinput[type=radio] なので、nameを渡せばブラウザが同じ名前のラジオをグループにまとめ、選択値はFormDataからそのまま取り出せます。',
+    ja: '中身は本物のinput[type=radio]なので、nameを渡せばブラウザが同じ名前のラジオをグループにまとめ、選択値はFormDataからそのまま取り出せます。',
     en: 'The cards are backed by real input[type=radio] elements, so passing name lets the browser group them and the selected value comes straight out of FormData.',
   }),
 };
 
 export const combobox = {
   description: message({
-    ja: '候補から 1 つを選ぶ入力欄。打った文字で絞り込むか、サーバーに問い合わせて探す',
+    ja: '候補から1つを選ぶ入力欄。打った文字で絞り込むか、サーバーに問い合わせて探す',
     en: 'A field for picking one option: typing filters the list, or searches a server.',
   }),
   usageDescription: message({
-    ja: '打つと一覧が開き、クリックか `Enter` で選ぶまで値は変わりません。打ちかけで離れると選んだ候補の表示名に戻り、空にして離れると選択を外します。`↓` / `↑` で一覧を開いて移り（`Alt+↓` は開くだけ）、`Escape` で閉じ、もう一度で打った文字を戻します。複数を選ぶなら `Autocomplete` を使います。',
+    ja: '打つと一覧が開き、クリックか`Enter`で選ぶまで値は変わりません。打ちかけで離れると選んだ候補の表示名に戻り、空にして離れると選択を外します。`↓` / `↑`で一覧を開いて移り（`Alt+↓`は開くだけ）、`Escape`で閉じ、もう一度で打った文字を戻します。複数を選ぶなら`Autocomplete`を使います。',
     en: 'Typing opens the list, and the value changes only when an option is picked with a click or `Enter`. Leaving half-typed text puts the chosen label back; leaving the field empty clears the choice. `↓` / `↑` open the list and move through it (`Alt+↓` only opens it), `Escape` closes it and, pressed again, drops what was typed. To pick several, use `Autocomplete`.',
   }),
   asyncTitle: message({
@@ -401,15 +401,15 @@ export const combobox = {
     en: 'Searching a server',
   }),
   asyncDescription: message({
-    ja: '`search` を渡すと、打つたびに呼んで候補を受け取ります。打ち直すと前の呼び出しの `signal` が打ち切られるので、`fetch` に渡してください。探している間は一覧が busy になり、失敗や 0 件は一覧と読み上げで知らせます。`options` は打つ前に見せる候補になります。',
+    ja: '`search`を渡すと、打つたびに呼んで候補を受け取ります。打ち直すと前の呼び出しの`signal`が打ち切られるので、`fetch`に渡してください。探している間は一覧がbusyになり、失敗や0件は一覧と読み上げで知らせます。`options`は打つ前に見せる候補になります。',
     en: 'With `search`, each keystroke calls it for the options. Typing again aborts the previous call’s `signal`, so pass it on to `fetch`. While a search runs the list is busy, and a failure or an empty result is shown and announced. `options` becomes what is shown before anything is typed.',
   }),
   formTitle: message({
-    ja: '@k8ordo/form と使う',
+    ja: '@k8ordo/formと使う',
     en: 'With @k8ordo/form',
   }),
   formDescription: message({
-    ja: '`z.enum()` から導いた `input` をそのまま spread できます。選んだ値は見えない `<select>` で送られるので、`required`・ルール・reset・送信に失敗したときのフォーカスの移動がそのまま効きます。',
+    ja: '`z.enum()`から導いた`input`をそのままspreadできます。選んだ値は見えない`<select>`で送られるので、`required`、ルール、reset、送信に失敗したときのフォーカスの移動がそのまま効きます。',
     en: 'Spread the `input` derived from `z.enum()` as is. The choice submits through a hidden `<select>`, so `required`, rules, reset, and moving focus after a failed submission all work on it.',
   }),
 };
@@ -443,7 +443,7 @@ export const toolbar = {
     en: 'A group of buttons that arrow keys move between.',
   }),
   keyboardDescription: message({
-    ja: 'Tab で入れるのは 1 つだけで、中は矢印キーで移ります（`Home` / `End` で端へ、無効な項目は飛ばす）。出て戻ると、最後にいた項目へ戻ります。各項目は `Toolbar.Item` の `renderItem` が渡す `ref` / `tabIndex` / `onFocus` を、`Button` や `IconButton` に広げて作ります。',
+    ja: 'Tabで入れるのは1つだけで、中は矢印キーで移ります（`Home` / `End`で端へ、無効な項目は飛ばす）。出て戻ると、最後にいた項目へ戻ります。各項目は`Toolbar.Item`の`renderItem`が渡す`ref` / `tabIndex` / `onFocus`を、`Button`や`IconButton`に広げて作ります。',
     en: 'It takes one Tab stop; arrow keys move inside (`Home` / `End` to the ends, skipping disabled items), and coming back lands on the item last focused. Each item spreads the `ref` / `tabIndex` / `onFocus` that `Toolbar.Item`’s `renderItem` passes onto a `Button` or an `IconButton`.',
   }),
   toggleTitle: message({
@@ -451,7 +451,7 @@ export const toolbar = {
     en: 'Toggles',
   }),
   toggleDescription: message({
-    ja: '押した状態は `aria-pressed` で渡します。ツールバーは押した項目の地を濃くします。',
+    ja: '押した状態は`aria-pressed`で渡します。ツールバーは押した項目の地を濃くします。',
     en: 'Pass the pressed state as `aria-pressed`; the toolbar shades a pressed item.',
   }),
   verticalTitle: message({
@@ -466,14 +466,14 @@ export const contextMenu = {
     en: 'A menu that opens where you right-click.',
   }),
   usageDescription: message({
-    ja: '中身は `DropdownMenu` と同じ（`Content` / `Item` / `SubMenu`）で、違うのは開き方と出す位置だけです。キーボードからは、フォーカスのある領域で Shift+F10 やコンテキストメニューキーで開きます。閉じると、開く前にいた要素へフォーカスが戻ります。',
+    ja: '中身は`DropdownMenu`と同じ（`Content` / `Item` / `SubMenu`）で、違うのは開き方と出す位置だけです。キーボードからは、フォーカスのある領域でShift+F10やコンテキストメニューキーで開きます。閉じると、開く前にいた要素へフォーカスが戻ります。',
     en: 'The inside is `DropdownMenu`’s (`Content` / `Item` / `SubMenu`); only how it opens and where differ. From the keyboard, press Shift+F10 or the context-menu key on the focused area. When it closes, focus returns to where it was before it opened.',
   }),
 };
 
 export const rangeSlider = {
   description: message({
-    ja: '2 つのつまみで範囲を選ぶスライダー',
+    ja: '2つのつまみで範囲を選ぶスライダー',
     en: 'A slider with two thumbs for picking a range.',
   }),
   controlledTitle: message({
@@ -485,7 +485,7 @@ export const rangeSlider = {
     en: 'In a form',
   }),
   formDescription: message({
-    ja: 'つまみはそれぞれ本物の `<input type="range">` で、`name` の組の 2 つの欄として送られます。非制御のときは値を DOM に持つので、フォームの reset と変更の有無の判定がそのまま効きます。',
+    ja: 'つまみはそれぞれ本物の`<input type="range">`で、`name`の組の2つの欄として送られます。非制御のときは値をDOMに持つので、フォームのresetと変更の有無の判定がそのまま効きます。',
     en: 'Each thumb is a real `<input type="range">` and submits as one of the two fields named by the `name` pair. Uncontrolled, the values stay in the DOM, so a form’s reset and its dirty check work on them as on any input.',
   }),
   disabledTitle: message({
@@ -496,15 +496,15 @@ export const rangeSlider = {
 
 export const dateField = {
   description: message({
-    ja: 'ブラウザの日付入力（`type="date"`）をそのまま使う入力欄。値は `YYYY-MM-DD`',
+    ja: 'ブラウザの日付入力（`type="date"`）をそのまま使う入力欄。値は`YYYY-MM-DD`',
     en: 'A field on the browser’s own date input (`type="date"`). The value is `YYYY-MM-DD`.',
   }),
   minMaxTitle: message({
-    ja: '最小値 / 最大値',
+    ja: '最小値/最大値',
     en: 'Min / Max',
   }),
   minMaxDescription: message({
-    ja: '範囲の判定はブラウザが持ちます。範囲の外の日付は `rangeUnderflow` / `rangeOverflow` になります。',
+    ja: '範囲の判定はブラウザが持ちます。範囲の外の日付は`rangeUnderflow` / `rangeOverflow`になります。',
     en: 'The browser checks the range itself: a date outside it reports `rangeUnderflow` / `rangeOverflow`.',
   }),
   disabledTitle: message({
@@ -516,22 +516,22 @@ export const dateField = {
     en: 'Invalid',
   }),
   formTitle: message({
-    ja: '@k8ordo/form と使う',
+    ja: '@k8ordo/formと使う',
     en: 'With @k8ordo/form',
   }),
   formDescription: message({
-    ja: '`z.iso.date()` から導いた `input` をそのまま spread できます。`type` を取り除く必要はありません。',
+    ja: '`z.iso.date()`から導いた`input`をそのままspreadできます。`type`を取り除く必要はありません。',
     en: 'Spread the `input` derived from `z.iso.date()` as is. There is no need to take `type` out.',
   }),
 };
 
 export const colorPicker = {
   description: message({
-    ja: '色を `#rrggbb` で選ぶ入力欄。色相・彩度・明度のつまみと見本から選べる',
+    ja: '色を`#rrggbb`で選ぶ入力欄。色相、彩度、明度のつまみと見本から選べる',
     en: 'A field for picking a color as `#rrggbb`, with hue / saturation / lightness sliders and swatches.',
   }),
   usageDescription: message({
-    ja: '値を運ぶのは `name` を持つテキスト欄です。つまみや見本で選んだ色はその欄に書き込まれ、打ち込んだときと同じく `input` イベントで知らされます。欄の横の色を押すとブラウザの色選びが開き、そこで選んだ色も同じように欄に入ります。打っている間は 6 桁そろって初めて色として扱い、離れるときと Enter で小文字の `#rrggbb` にそろえます（3 桁の `#f80` もそこで広げます）。',
+    ja: '値を運ぶのは`name`を持つテキスト欄です。つまみや見本で選んだ色はその欄に書き込まれ、打ち込んだときと同じく`input`イベントで知らされます。欄の横の色を押すとブラウザの色選びが開き、そこで選んだ色も同じように欄に入ります。打っている間は6桁そろって初めて色として扱い、離れるときとEnterで小文字の`#rrggbb`にそろえます（3桁の`#f80`もそこで広げます）。',
     en: 'The value travels in a text field that carries `name`. A color picked with the sliders or a swatch is written into it and announced with an `input` event, just as if it had been typed. Pressing the color chip beside the field opens the browser’s own color picker, and a color chosen there goes into the field the same way. While typing, the text counts as a color only once it has six digits; on blur and on Enter it is tidied to lowercase `#rrggbb` (a three-digit `#f80` is expanded there).',
   }),
   swatchesTitle: message({
@@ -539,7 +539,7 @@ export const colorPicker = {
     en: 'Swatches',
   }),
   swatchesDescription: message({
-    ja: '見本はそれぞれ `label` を名前に持つトグルボタンで、いまの色と同じものが押された状態になります。',
+    ja: '見本はそれぞれ`label`を名前に持つトグルボタンで、いまの色と同じものが押された状態になります。',
     en: 'Each swatch is a toggle button named by its `label`; the one matching the current color is pressed.',
   }),
   controlledTitle: message({
@@ -547,7 +547,7 @@ export const colorPicker = {
     en: 'Controlled',
   }),
   controlledDescription: message({
-    ja: "`onChange` は `#rrggbb` を受け取ります。欄を空にしたときは `''` です。",
+    ja: "`onChange`は`#rrggbb`を受け取ります。欄を空にしたときは`''`です。",
     en: "`onChange` receives `#rrggbb`, or `''` when the field is emptied.",
   }),
   disabledTitle: message({
@@ -555,11 +555,11 @@ export const colorPicker = {
     en: 'Disabled',
   }),
   formTitle: message({
-    ja: '@k8ordo/form と使う',
+    ja: '@k8ordo/formと使う',
     en: 'With @k8ordo/form',
   }),
   formDescription: message({
-    ja: '`formFields` が導いた `input` をそのまま spread できます。スキーマの `.regex()` は `pattern` として届き、組み込みの `#[0-9a-fA-F]{6}` を置き換えます。つまみや見本での変更も、フォームには打ち込んだときと同じように伝わります（変更の有無、ルール、エラーの解除、reset）。',
+    ja: '`formFields`が導いた`input`をそのままspreadできます。スキーマの`.regex()`は`pattern`として届き、組み込みの`#[0-9a-fA-F]{6}`を置き換えます。つまみや見本での変更も、フォームには打ち込んだときと同じように伝わります（変更の有無、ルール、エラーの解除、reset）。',
     en: 'Spread the `input` that `formFields` derives as is. A `.regex()` in the schema arrives as `pattern` and replaces the built-in `#[0-9a-fA-F]{6}`. A change made with the sliders or a swatch reaches the form just as typing does (dirty state, rules, clearing an error, reset).',
   }),
 };
@@ -574,11 +574,11 @@ export const datePicker = {
     en: 'Controlled',
   }),
   controlledDescription: message({
-    ja: "`onChange` は値（`YYYY-MM-DD`、空なら `''`）を受け取ります。カレンダーで選んだときも、打ち込んだときも同じです。",
+    ja: "`onChange`は値（`YYYY-MM-DD`、空なら`''`）を受け取ります。カレンダーで選んだときも、打ち込んだときも同じです。",
     en: "`onChange` receives the value (`YYYY-MM-DD`, `''` when empty), whether the date was typed or picked from the calendar.",
   }),
   minMaxTitle: message({
-    ja: '最小値 / 最大値',
+    ja: '最小値/最大値',
     en: 'Min / Max',
   }),
   disabledTitle: message({
@@ -586,22 +586,22 @@ export const datePicker = {
     en: 'Disabled',
   }),
   formTitle: message({
-    ja: '@k8ordo/form と使う',
+    ja: '@k8ordo/formと使う',
     en: 'With @k8ordo/form',
   }),
   formDescription: message({
-    ja: 'カレンダーで選んだ日付は入力欄に書き込まれ、`input` イベントで知らされます。フォームには打ち込んだときと同じように伝わります（変更の有無、ルール、エラーの解除）。',
+    ja: 'カレンダーで選んだ日付は入力欄に書き込まれ、`input`イベントで知らされます。フォームには打ち込んだときと同じように伝わります（変更の有無、ルール、エラーの解除）。',
     en: 'A date picked from the calendar is written into the input and announced with an `input` event, so the form hears it just as if it had been typed (dirty state, rules, clearing an error).',
   }),
   firefoxNote: message({
-    ja: 'Firefox は日付入力の中に自前のカレンダーボタンを描き、それを消す方法がありません。そのため Firefox ではカレンダーのボタンが 2 つ並びます。',
+    ja: 'Firefoxは日付入力の中に自前のカレンダーボタンを描き、それを消す方法がありません。そのためFirefoxではカレンダーのボタンが2つ並びます。',
     en: 'Firefox draws its own calendar button inside every date input and offers no way to hide it, so there the field shows two calendar buttons.',
   }),
 };
 
 export const calendar = {
   description: message({
-    ja: '月の表から日付を 1 つ選ぶカレンダー。値は `YYYY-MM-DD`',
+    ja: '月の表から日付を1つ選ぶカレンダー。値は`YYYY-MM-DD`',
     en: 'A month grid for picking one day. The value is `YYYY-MM-DD`.',
   }),
   keyboardTitle: message({
@@ -609,11 +609,11 @@ export const calendar = {
     en: 'Keyboard',
   }),
   keyboardDescription: message({
-    ja: '矢印キーで日と週を、`Home` / `End` で週の端を、`PageUp` / `PageDown` で月を（`Shift` と一緒なら年を）移り、`Enter` / `Space` で選びます。',
+    ja: '矢印キーで日と週を、`Home` / `End`で週の端を、`PageUp` / `PageDown`で月を（`Shift`と一緒なら年を）移り、`Enter` / `Space`で選びます。',
     en: 'Arrow keys move by day and week, `Home` / `End` to the ends of the week, `PageUp` / `PageDown` by month (by year with `Shift`), and `Enter` / `Space` select.',
   }),
   minMaxTitle: message({
-    ja: '最小値 / 最大値',
+    ja: '最小値/最大値',
     en: 'Min / Max',
   }),
   localeTitle: message({
@@ -621,7 +621,7 @@ export const calendar = {
     en: 'Language and today',
   }),
   localeDescription: message({
-    ja: '月名・曜日名・週の始まりは、組み込みの文言と同じロケール（`@k8ordo/i18n` の今のロケール）に従います。今日は閲覧者のタイムゾーンでしか決まらないので、カレンダーはブラウザでだけ描かれ、サーバーは同じ寸法の空の箱を書きます。',
+    ja: '月名、曜日名、週の始まりは、組み込みの文言と同じロケール（`@k8ordo/i18n`の今のロケール）に従います。今日は閲覧者のタイムゾーンでしか決まらないので、カレンダーはブラウザでだけ描かれ、サーバーは同じ寸法の空の箱を書きます。',
     en: 'Month and weekday names, and the first day of the week, follow the same locale as the built-in wording (`@k8ordo/i18n`’s current locale). Today depends on the visitor’s time zone, so the calendar renders in the browser alone; the server writes an empty box of the same size.',
   }),
 };
@@ -632,7 +632,7 @@ export const stepper = {
     en: 'The steps of a process, marking the done ones and the current one.',
   }),
   usageDescription: message({
-    ja: '`value` はいまの段の位置（0 始まり）です。済んだ段にはチェックが付き、読み上げでは「完了」と添えます。いまの段は `aria-current="step"` で伝えます。',
+    ja: '`value`はいまの段の位置（0始まり）です。済んだ段にはチェックが付き、読み上げでは「完了」と添えます。いまの段は`aria-current="step"`で伝えます。',
     en: '`value` is the index of the current step (0-based). Done steps show a check and are read as completed; the current step carries `aria-current="step"`.',
   }),
   interactiveTitle: message({
@@ -640,7 +640,7 @@ export const stepper = {
     en: 'Going back to a done step',
   }),
   interactiveDescription: message({
-    ja: '`interactive` を付けると、済んだ段がボタンになり、押すと `onChange` にその位置が届きます。先の段へは飛べません。',
+    ja: '`interactive`を付けると、済んだ段がボタンになり、押すと`onChange`にその位置が届きます。先の段へは飛べません。',
     en: 'With `interactive`, done steps become buttons and `onChange` receives the index of the one pressed. Steps ahead cannot be jumped to.',
   }),
   verticalTitle: message({
@@ -655,7 +655,7 @@ export const slider = {
     en: 'A single-thumb slider input with a styled track and handle.',
   }),
   minMaxStepTitle: message({
-    ja: '最小値 / 最大値 / ステップ',
+    ja: '最小値/最大値/ステップ',
     en: 'Min / Max / Step',
   }),
   disabledTitle: message({
@@ -674,7 +674,7 @@ export const fileField = {
     en: 'Adding files by dropping them',
   }),
   dropzoneDescription: message({
-    ja: '`FileField.Dropzone` にドロップしたファイルは、選んだときと同じく一覧と送信に加わり、`input` イベントでフォームに知らされます。中身を渡さないと、組み込みの案内と「ファイルを選択」のボタンが入るので、キーボードでも選べます。フォルダーはドロップでは受けません。ブラウザが `accept` を当てるのはファイル選択だけなので、ドロップしたファイルには FileField が同じ規則で当て、当たらないファイルは加えません。',
+    ja: '`FileField.Dropzone`にドロップしたファイルは、選んだときと同じく一覧と送信に加わり、`input`イベントでフォームに知らされます。中身を渡さないと、組み込みの案内と「ファイルを選択」のボタンが入るので、キーボードでも選べます。フォルダーはドロップでは受けません。ブラウザが`accept`を当てるのはファイル選択だけなので、ドロップしたファイルにはFileFieldが同じ規則で当て、当たらないファイルは加えません。',
     en: 'Files dropped on `FileField.Dropzone` join the list and the submission just as picked ones do, and an `input` event tells the form. Left empty, it holds the built-in hint and a choose-files button, so it works by keyboard too. Folders are skipped on drop. The browser applies `accept` only to the picker, so the field applies it to dropped files by the same rules and leaves out any it does not match.',
   }),
   acceptTypesTitle: message({
@@ -788,7 +788,7 @@ export const card = {
     en: 'Width',
   }),
   interactiveDescription: message({
-    ja: 'interactiveを付けるとホバー・アクティブ時にスケールする。カード全体をリンクやボタンにする際に使う。',
+    ja: 'interactiveを付けるとホバー、アクティブ時にスケールする。カード全体をリンクやボタンにする際に使う。',
     en: 'With the interactive prop, the card scales on hover and active. Use it to make the whole card a link or button.',
   }),
 };
@@ -810,7 +810,7 @@ export const codeBlock = {
     en: 'A code block highlighted on the server, with a copy button.',
   }),
   importDescription: message({
-    ja: 'ハイライトはサーバーで済ませ、shiki はブラウザに送らない。`server-only` を import しているので、Client Component から読み込むとビルドが止まる。そのためルートとは別の入口にある。',
+    ja: 'ハイライトはサーバーで済ませ、shikiはブラウザに送らない。`server-only`をimportしているので、Client Componentから読み込むとビルドが止まる。そのためルートとは別の入口にある。',
     en: 'Highlighting happens on the server, and shiki never reaches the browser. It imports `server-only`, so importing it from a Client Component fails the build, which is why it has an entry of its own.',
   }),
   titleTitle: message({
@@ -818,7 +818,7 @@ export const codeBlock = {
     en: 'File Name',
   }),
   titleDescription: message({
-    ja: '`title` を渡すと、見出しの行に言語の代わりに表示する（figure の figcaption になる）。',
+    ja: '`title`を渡すと、見出しの行に言語の代わりに表示する（figureのfigcaptionになる）。',
     en: 'With `title`, the header shows it in place of the language, as the figure’s figcaption.',
   }),
   marksTitle: message({
@@ -826,7 +826,7 @@ export const codeBlock = {
     en: 'Line Marks',
   }),
   marksDescription: message({
-    ja: '`marks` は 1 始まりの行番号ごとに `highlight`・`add`・`remove` を付ける。追加と削除は色だけでなく `+` と `−` でも示す。',
+    ja: '`marks`は1始まりの行番号ごとに`highlight`、`add`、`remove`を付ける。追加と削除は色だけでなく`+`と`−`でも示す。',
     en: '`marks` marks lines by their 1-based number with `highlight`, `add`, or `remove`. Additions and removals are shown with `+` and `−`, not by color alone.',
   }),
   calloutsTitle: message({
@@ -834,7 +834,7 @@ export const codeBlock = {
     en: 'Callouts',
   }),
   calloutsDescription: message({
-    ja: '`callouts` は行の直後に、その行の字下げに揃えて注記を置く（配列なら書いた順に重ねる）。コピーされるのは `code` そのもので、印や注記は含まれない。',
+    ja: '`callouts`は行の直後に、その行の字下げに揃えて注記を置く（配列なら書いた順に重ねる）。コピーされるのは`code`そのもので、印や注記は含まれない。',
     en: '`callouts` puts a note right under a line, indented like the line (an array puts several, in order). The copy button copies `code` exactly, without the marks or the notes.',
   }),
   colorsTitle: message({
@@ -842,7 +842,7 @@ export const codeBlock = {
     en: 'Colors and Dark Mode',
   }),
   colorsDescription: message({
-    ja: '色はデザイントークンではなく、k8o のブログと同じ固定の値で持つ。ライトは shiki の `one-light`、ダークは `plastic` で、地に対して 4.5:1 に届かないいくつかの色だけを明度をずらして置き換えている。色は `light-dark()` で書くので、`.dark` が切り替える `color-scheme` に従う。外枠の線は無く、見出しの行（言語名かファイル名）は線ではなく地の段差でコードと分ける。知らない言語名は色を付けずに描く。',
+    ja: '色はデザイントークンではなく、k8oのブログと同じ固定の値で持つ。ライトはshikiの`one-light`、ダークは`plastic`で、地に対して4.5:1に届かないいくつかの色だけを明度をずらして置き換えている。色は`light-dark()`で書くので、`.dark`が切り替える`color-scheme`に従う。外枠の線は無く、見出しの行（言語名かファイル名）は線ではなく地の段差でコードと分ける。知らない言語名は色を付けずに描く。',
     en: 'The colors are fixed values matching k8o’s blog, not design tokens: shiki’s `one-light` in light and `plastic` in dark, with the few colors that fall short of 4.5:1 on their ground shifted in lightness until they reach it. They are written as `light-dark()`, so they follow the `color-scheme` that `.dark` switches. There is no outer border; the header (the language or the file name) is set apart from the code by a step in the ground rather than a line. A language name shiki does not know renders as plain text.',
   }),
 };
@@ -857,7 +857,7 @@ export const kbd = {
     en: 'Key Combinations',
   }),
   combinationDescription: message({
-    ja: '同時に押すキーは、1 キーずつ `Kbd` を並べる。',
+    ja: '同時に押すキーは、1キーずつ`Kbd`を並べる。',
     en: 'For keys pressed together, place one `Kbd` per key side by side.',
   }),
   labelTitle: message({
@@ -865,18 +865,18 @@ export const kbd = {
     en: 'Symbol Keys',
   }),
   labelDescription: message({
-    ja: '`⌘` や `⇧` のような記号は、読み上げると意味が通らない。`label` を渡すと、見た目は記号のまま、読み上げには `label` が使われる。',
+    ja: '`⌘`や`⇧`のような記号は、読み上げると意味が通らない。`label`を渡すと、見た目は記号のまま、読み上げには`label`が使われる。',
     en: 'A symbol such as `⌘` or `⇧` makes no sense read aloud. Pass `label`: the symbol stays on screen, and the label is what a screen reader says.',
   }),
 };
 
 export const carousel = {
   description: message({
-    ja: 'スクロールスナップで 1 枚ずつ止まるスライドと、前後のボタン',
+    ja: 'スクロールスナップで1枚ずつ止まるスライドと、前後のボタン',
     en: 'Slides that snap one at a time as they scroll, with previous and next buttons.',
   }),
   basicDescription: message({
-    ja: 'トラックはスクロール領域そのもの。ボタンのほかに、トラックパッドやスワイプ、トラックにフォーカスを置いた矢印キーでも送れる。1 枚ずつ見せるときは「2 / 4」のように位置を示す。',
+    ja: 'トラックはスクロール領域そのもの。ボタンのほかに、トラックパッドやスワイプ、トラックにフォーカスを置いた矢印キーでも送れる。1枚ずつ見せるときは「2 / 4」のように位置を示す。',
     en: 'The track is itself a scroll container, so besides the buttons it moves with a trackpad, a swipe, or the arrow keys once the track has focus. When one slide shows at a time, the position is shown as "2 / 4".',
   }),
   slideSizeTitle: message({
@@ -884,18 +884,18 @@ export const carousel = {
     en: 'Slide Size',
   }),
   slideSizeDescription: message({
-    ja: '`slideSize` は 1 枚がトラックに占める幅。`full`（1 枚）、`lg`（次の 1 枚がのぞく）、`md`（2 枚）、`sm`（3 枚）。複数枚並べるときは「今の 1 枚」が決まらないので、位置は出さない。',
+    ja: '`slideSize`は1枚がトラックに占める幅。`full`（1枚）、`lg`（次の1枚がのぞく）、`md`（2枚）、`sm`（3枚）。複数枚並べるときは「今の1枚」が決まらないので、位置は出さない。',
     en: '`slideSize` is how much of the track one slide takes: `full` (one), `lg` (the next one peeks in), `md` (two), `sm` (three). With several in view there is no single current slide, so no position is shown.',
   }),
 };
 
 export const prose = {
   description: message({
-    ja: 'Markdown や MDX が描いた本文に、組版を戻す入れ物',
+    ja: 'MarkdownやMDXが描いた本文に、組版を戻す入れ物',
     en: 'A container that puts typesetting back into rendered Markdown or MDX.',
   }),
   basicDescription: message({
-    ja: 'ベースのスタイルは見出し・リスト・余白・強調をリセットする。`Prose` の中だけ本文の組版を戻す。行間は広め（`leading-loose`）、見出しは詰め組み（`palt`）、日本語の `em` は傍点にする。',
+    ja: 'ベースのスタイルは見出し、リスト、余白、強調をリセットする。`Prose`の中だけ本文の組版を戻す。行間は広め（`leading-loose`）、見出しは詰め組み（`palt`）、日本語の`em`は傍点にする。',
     en: 'The base styles reset headings, lists, margins, and emphasis. Inside `Prose`, the typesetting of body text comes back: loose leading (`leading-loose`), proportional kana in headings (`palt`), and emphasis dots for Japanese `em`.',
   }),
   componentsTitle: message({
@@ -903,7 +903,7 @@ export const prose = {
     en: 'Components Inside',
   }),
   componentsDescription: message({
-    ja: '組版を効かせるのは、クラスの無い素の要素だけ。部品（どれもクラスを持つ）は自分の見た目のまま、前後の間だけが本文と同じに空く。MDX で要素を部品に対応づければ部品の見た目に、素のままなら本文の見た目になる。',
+    ja: '組版を効かせるのは、クラスの無い素の要素だけ。部品（どれもクラスを持つ）は自分の見た目のまま、前後の間だけが本文と同じに空く。MDXで要素を部品に対応づければ部品の見た目に、素のままなら本文の見た目になる。',
     en: 'Only bare elements, without a class, are typeset. A component (every one has a class) keeps its own look, and only the space around it follows the text. Map an MDX element to a component to make it look like the component, or leave it bare to make it look like text.',
   }),
   verticalTitle: message({
@@ -911,26 +911,26 @@ export const prose = {
     en: 'Vertical Writing',
   }),
   verticalDescription: message({
-    ja: '`.writing-v` の中では、段落の頭を 1 字下げる（本の組み方）。',
+    ja: '`.writing-v`の中では、段落の頭を1字下げる（本の組み方）。',
     en: 'Under `.writing-v`, each paragraph’s first line is indented one character, as a book is set.',
   }),
 };
 
 export const dataTable = {
   description: message({
-    ja: '並べ替え・行の選択・列の表示切り替えができる表。状態はすべて外から渡す',
+    ja: '並べ替え、行の選択、列の表示切り替えができる表。状態はすべて外から渡す',
     en: 'A table with sorting, row selection, and column visibility, all driven by state you own.',
   }),
   basicDescription: message({
-    ja: '状態はすべて呼び出し側が持つ（制御型）。並べ替えの状態を受けても DataTable は並べ替えず、渡された順に描くので、サーバーで並べ替えるときも同じ部品で済む。機能は、その変化を受け取る関数を渡したときだけ現れる。',
+    ja: '状態はすべて呼び出し側が持つ（制御型）。並べ替えの状態を受けてもDataTableは並べ替えず、渡された順に描くので、サーバーで並べ替えるときも同じ部品で済む。機能は、その変化を受け取る関数を渡したときだけ現れる。',
     en: 'Every piece of state is yours (controlled). DataTable takes the sort state but does not sort — it draws `rows` in the order given, so the same component works when the server sorts. Each feature appears only when you pass the handler that receives its changes.',
   }),
   urlTitle: message({
-    ja: '並べ替えとページを URL に持つ',
+    ja: '並べ替えとページをURLに持つ',
     en: 'Keeping the Sort and the Page in the URL',
   }),
   urlDescription: message({
-    ja: '`@k8ordo/state` の url スロットに並べ替えとページを置く例。並べ替えるとアドレスバーが変わり、リンクを渡した相手にも同じ並びの同じページが見え、戻るで前の並びに戻る。',
+    ja: '`@k8ordo/state`のurlスロットに並べ替えとページを置く例。並べ替えるとアドレスバーが変わり、リンクを渡した相手にも同じ並びの同じページが見え、戻るで前の並びに戻る。',
     en: 'This example keeps the sort and the page in `@k8ordo/state`’s url slot. Sort, and the address bar changes: whoever you send the link to sees the same order on the same page, and Back returns to the previous order.',
   }),
   emptyTitle: message({
@@ -938,18 +938,18 @@ export const dataTable = {
     en: 'No Rows',
   }),
   emptyDescription: message({
-    ja: '`rows` が空のときは、`emptyState` を列をまたぐ行に描く。`EmptyState` を渡す。',
+    ja: '`rows`が空のときは、`emptyState`を列をまたぐ行に描く。`EmptyState`を渡す。',
     en: 'When `rows` is empty, `emptyState` is drawn in a row spanning the columns. Pass an `EmptyState`.',
   }),
 };
 
 export const tree = {
   description: message({
-    ja: '枝を開閉できる階層。WAI-ARIA の tree のキーボード操作に従う',
+    ja: '枝を開閉できる階層。WAI-ARIAのtreeのキーボード操作に従う',
     en: 'A hierarchy whose branches open and close, with the WAI-ARIA tree keyboard model.',
   }),
   basicDescription: message({
-    ja: '項目は `{ id, label, icon?, children? }` の木で渡す。上下で見えている項目を移り、右で枝を開いて最初の子へ、左で枝を閉じて親へ戻る。Home / End、Enter / Space での選択、先頭の文字での移動もできる。',
+    ja: '項目は`{ id, label, icon?, children? }`の木で渡す。上下で見えている項目を移り、右で枝を開いて最初の子へ、左で枝を閉じて親へ戻る。Home / End、Enter / Spaceでの選択、先頭の文字での移動もできる。',
     en: 'Pass the nodes as a tree of `{ id, label, icon?, children? }`. Up and Down move between the visible nodes, Right opens a branch and then moves to its first child, and Left closes it or moves to the parent. Home / End, Enter / Space to select, and typing a first letter work too.',
   }),
   controlledTitle: message({
@@ -957,7 +957,7 @@ export const tree = {
     en: 'Owning the Open Branches and the Selection',
   }),
   controlledDescription: message({
-    ja: '開いている枝（`expandedIds`）と選択（`selectedId`）は外から渡せる。`onChange` には選んだ項目の `id` が届く。',
+    ja: '開いている枝（`expandedIds`）と選択（`selectedId`）は外から渡せる。`onChange`には選んだ項目の`id`が届く。',
     en: 'The open branches (`expandedIds`) and the selection (`selectedId`) can be yours. `onChange` receives the `id` of the node picked.',
   }),
 };
@@ -972,7 +972,7 @@ export const table = {
     en: 'Empty State',
   }),
   emptyStateDescription: message({
-    ja: '行が無いときは `Table.Body` に `Table.EmptyState` を置く。`colSpan` 列をまたぐ行に `EmptyState` を描く。',
+    ja: '行が無いときは`Table.Body`に`Table.EmptyState`を置く。`colSpan`列をまたぐ行に`EmptyState`を描く。',
     en: 'When there are no rows, put `Table.EmptyState` in `Table.Body`. It draws an `EmptyState` in a row spanning `colSpan` columns.',
   }),
 };
@@ -1010,7 +1010,7 @@ export const progress = {
     en: 'When progress is unknown',
   }),
   indeterminateDescription: message({
-    ja: '`value` を省くと、帯が溝の中を行き来する表示になります。読み上げでは値を持たず、名前は `label`（省くと組み込みの「読み込み中」）です。動きを減らす設定では、移動をやめて明滅だけにします。',
+    ja: '`value`を省くと、帯が溝の中を行き来する表示になります。読み上げでは値を持たず、名前は`label`（省くと組み込みの「読み込み中」）です。動きを減らす設定では、移動をやめて明滅だけにします。',
     en: 'Leave `value` out and the bar slides back and forth. It carries no value for assistive technology and is named by `label` (the built-in “loading” wording when omitted). With reduced motion it stops sliding and only pulses.',
   }),
 };
@@ -1040,7 +1040,7 @@ export const emptyState = {
     en: 'Icon and Action',
   }),
   inTableDescription: message({
-    ja: '表の中では `Table.EmptyState` を使う。列をまたぐ行の中に、同じ内容を描く。',
+    ja: '表の中では`Table.EmptyState`を使う。列をまたぐ行の中に、同じ内容を描く。',
     en: 'Inside a table, use `Table.EmptyState`: it draws the same content in a row that spans the columns.',
   }),
 };
@@ -1082,15 +1082,15 @@ export const callout = {
     en: 'Code and links in the body',
   }),
   richDescription: message({
-    ja: '本文は `children` なので、段落を重ねたり `Code` や `Anchor` を入れたりできます。`label` を省くと、アイコンと本文だけになります。',
+    ja: '本文は`children`なので、段落を重ねたり`Code`や`Anchor`を入れたりできます。`label`を省くと、アイコンと本文だけになります。',
     en: 'The body is `children`, so it can hold several paragraphs, `Code` and `Anchor`. Leave out `label` and only the icon and the body remain.',
   }),
   versusAlertTitle: message({
-    ja: 'Alert との使い分け',
+    ja: 'Alertとの使い分け',
     en: 'Callout or Alert',
   }),
   versusAlertDescription: message({
-    ja: '`Alert` は操作の結果やアプリの状態を知らせる部品で、表示されるとスクリーンリーダーが読み上げます。記事やガイドの本文に置く補足には `Callout` を使います。`role="note"` なので、ページの読み込みやクライアント側の遷移で差し込まれても読み上げられません。',
+    ja: '`Alert`は操作の結果やアプリの状態を知らせる部品で、表示されるとスクリーンリーダーが読み上げます。記事やガイドの本文に置く補足には`Callout`を使います。`role="note"`なので、ページの読み込みやクライアント側の遷移で差し込まれても読み上げられません。',
     en: '`Alert` reports the result of an action or the state of the application, and a screen reader announces it when it appears. For a note in an article or a guide, use `Callout`. It has `role="note"`, so it is not announced when the page loads or a client navigation brings it in.',
   }),
 };
@@ -1179,7 +1179,7 @@ export const commandPalette = {
     en: 'A palette that filters commands as you type and runs them from the keyboard.',
   }),
   usageDescription: message({
-    ja: '`label` と `keywords` を大文字小文字を区別せずに絞り込みます。`↓` / `↑` で移り（端で反対側へ回る）、`Enter` かクリックでパレットを閉じてから `onSelect` を呼びます。フォーカスは検索欄に置いたままです。同じ `group` の項目は見出しの下にまとまり、`shortcut` のキーは `Kbd` で添えます。',
+    ja: '`label`と`keywords`を大文字小文字を区別せずに絞り込みます。`↓` / `↑`で移り（端で反対側へ回る）、`Enter`かクリックでパレットを閉じてから`onSelect`を呼びます。フォーカスは検索欄に置いたままです。同じ`group`の項目は見出しの下にまとまり、`shortcut`のキーは`Kbd`で添えます。',
     en: 'It filters on `label` and `keywords`, ignoring case. `↓` / `↑` move through the matches and wrap around; `Enter` or a click closes the palette and then calls `onSelect`. Focus stays in the search field. Items that share a `group` gather under its heading, and `shortcut` keys are drawn with `Kbd`.',
   }),
   shortcutTitle: message({
@@ -1187,7 +1187,7 @@ export const commandPalette = {
     en: 'Opening from a key',
   }),
   shortcutDescription: message({
-    ja: '開閉は `Modal` と同じく `isOpen` / `onClose` で、⌘K / Ctrl+K のようなキーはアプリが配線します。閉じるとフォーカスは開く前の場所へ戻り、次に開いたときは空の検索から始まります。',
+    ja: '開閉は`Modal`と同じく`isOpen` / `onClose`で、⌘K / Ctrl+Kのようなキーはアプリが配線します。閉じるとフォーカスは開く前の場所へ戻り、次に開いたときは空の検索から始まります。',
     en: 'Open and close it like `Modal`, with `isOpen` / `onClose`; a key such as ⌘K / Ctrl+K is the application’s to wire. Closing returns focus to where it was, and the next opening starts from an empty search.',
   }),
 };
@@ -1293,18 +1293,18 @@ export const grid = {
     en: 'Auto-fill',
   }),
   autoFillDescription: message({
-    ja: 'cols="auto-fill" / "auto-fit" のとき、minItemSizeで各セルの最小幅を指定するとグリッドがレスポンシブにリフローする。',
+    ja: 'cols="auto-fill" / "auto-fit"のとき、minItemSizeで各セルの最小幅を指定するとグリッドがレスポンシブにリフローする。',
     en: 'With cols="auto-fill" or "auto-fit", minItemSize controls the minimum width of each cell so the grid reflows responsively.',
   }),
 };
 
 export const resizablePanels = {
   description: message({
-    ja: '仕切りをドラッグするか矢印キーで動かして、2 枚のパネルの大きさを分ける',
+    ja: '仕切りをドラッグするか矢印キーで動かして、2枚のパネルの大きさを分ける',
     en: 'Two panes split by a divider you drag or move with the arrow keys.',
   }),
   usageDescription: message({
-    ja: '`value` は 1 枚目が占める割合（%）で、2 枚目は残りを取ります。根は親いっぱいに広がるので、親に大きさを与えてください（縦に分けるなら高さが要ります）。仕切りはフォーカスでき、矢印キーは画面上の向きのとおりに動かし、`Home` / `End` で `min` / `max` の端へ移ります。右から左の言語では 1 枚目が右に付くので、`ArrowLeft` で広がります。並びは文字の行に沿うので、縦書きの中では `orientation="horizontal"` が上下に並びます。',
+    ja: '`value`は1枚目が占める割合（%）で、2枚目は残りを取ります。根は親いっぱいに広がるので、親に大きさを与えてください（縦に分けるなら高さが要ります）。仕切りはフォーカスでき、矢印キーは画面上の向きのとおりに動かし、`Home` / `End`で`min` / `max`の端へ移ります。右から左の言語では1枚目が右に付くので、`ArrowLeft`で広がります。並びは文字の行に沿うので、縦書きの中では`orientation="horizontal"`が上下に並びます。',
     en: '`value` is the first pane’s share in percent; the second pane takes the rest. The root fills its parent, so give the parent a size (a vertical split needs a height). The divider takes focus; the arrow keys move it the way they point on screen, and `Home` / `End` jump to `min` / `max`. In a right-to-left page the first pane sits on the right, so `ArrowLeft` widens it. The panes follow the line of text, so in vertical writing mode `orientation="horizontal"` stacks them.',
   }),
   verticalTitle: message({
@@ -1312,7 +1312,7 @@ export const resizablePanels = {
     en: 'Vertical',
   }),
   verticalDescription: message({
-    ja: '`orientation="vertical"` は 2 枚を上下に並べます。仕切りは上下の矢印キーで動き、値は上のパネルが高さに占める割合です。',
+    ja: '`orientation="vertical"`は2枚を上下に並べます。仕切りは上下の矢印キーで動き、値は上のパネルが高さに占める割合です。',
     en: '`orientation="vertical"` stacks the two panes. The divider moves with the up and down arrow keys, and its value is the top pane’s share of the height.',
   }),
   labelTitle: message({
@@ -1320,7 +1320,7 @@ export const resizablePanels = {
     en: 'Naming the divider',
   }),
   labelDescription: message({
-    ja: '仕切りの値は 1 枚目の大きさなので、名前も 1 枚目に合わせます。1 枚目に見出しがあれば `aria-labelledby` で指してください。指さなければ辞書の `resizablePanelsHandle` を使います。',
+    ja: '仕切りの値は1枚目の大きさなので、名前も1枚目に合わせます。1枚目に見出しがあれば`aria-labelledby`で指してください。指さなければ辞書の`resizablePanelsHandle`を使います。',
     en: 'The divider’s value is the first pane’s size, so name it after the first pane: point `aria-labelledby` at its heading. Without one it falls back to `resizablePanelsHandle` from the dictionary.',
   }),
   controlledTitle: message({
@@ -1328,7 +1328,7 @@ export const resizablePanels = {
     en: 'Controlled',
   }),
   controlledDescription: message({
-    ja: '`onChange` はドラッグの間も割合を受け取ります。キーボードでは `step` ずつ動きます。',
+    ja: '`onChange`はドラッグの間も割合を受け取ります。キーボードでは`step`ずつ動きます。',
     en: '`onChange` receives the share while dragging, too. From the keyboard it moves by `step`.',
   }),
 };
@@ -1376,7 +1376,7 @@ export const sideNav = {
     en: 'Side navigation: links grouped under titles, with the current page marked by a bar.',
   }),
   basicDescription: message({
-    ja: 'ui はルーターを持たないので、どのリンクが今のページかは `current` で渡す。`aria-current="page"` が付き、傍線で示される。',
+    ja: 'uiはルーターを持たないので、どのリンクが今のページかは`current`で渡す。`aria-current="page"`が付き、傍線で示される。',
     en: 'The library has no router, so you say which link is current with `current`. It gets `aria-current="page"` and the bar.',
   }),
   renderAnchorTitle: message({
@@ -1384,7 +1384,7 @@ export const sideNav = {
     en: 'Using Your Router’s Link',
   }),
   renderAnchorDescription: message({
-    ja: '`renderAnchor` は要素そのものを差し替える。束には `href`・`className`・`children`・`aria-current` と、渡した属性（ドロワーを閉じる `onClick` など）がすべて入っている。このサイトのサイドナビもこれで組んでいる。',
+    ja: '`renderAnchor`は要素そのものを差し替える。束には`href`、`className`、`children`、`aria-current`と、渡した属性（ドロワーを閉じる`onClick`など）がすべて入っている。このサイトのサイドナビもこれで組んでいる。',
     en: '`renderAnchor` replaces the element itself. Its bag holds `href`, `className`, `children`, `aria-current`, and every attribute you passed (an `onClick` that closes a drawer, say). This site’s side navigation is built with it.',
   }),
 };
@@ -1395,7 +1395,7 @@ export const tableOfContents = {
     en: 'The contents of the page, marking the heading being read.',
   }),
   basicDescription: message({
-    ja: '見出しを `{ id, label, children? }` の木で渡す。下の目次はこのページ自身の見出しを指していて、スクロールすると今の見出しが動く。',
+    ja: '見出しを`{ id, label, children? }`の木で渡す。下の目次はこのページ自身の見出しを指していて、スクロールすると今の見出しが動く。',
     en: 'Pass the headings as a tree of `{ id, label, children? }`. The contents below point at this page’s own headings; scroll, and the current one moves.',
   }),
   activeTitle: message({
@@ -1403,7 +1403,7 @@ export const tableOfContents = {
     en: 'How the Current Heading Is Chosen',
   }),
   activeDescription: message({
-    ja: '見出しの `scroll-margin-block-start` を読み取り位置にし、それを最後に越えた見出しを今の見出しにする。固定ヘッダーの高さを見出しの scroll-margin に指定すれば、目次から飛んだ見出しがそのまま今の見出しになる。文書の終わりまで来たら、最後の節が短くても最後の見出しにする。縦書きの文書では、vertical-rl なら右から左、vertical-lr なら左から右へ読む向きで決める。',
+    ja: '見出しの`scroll-margin-block-start`を読み取り位置にし、それを最後に越えた見出しを今の見出しにする。固定ヘッダーの高さを見出しのscroll-marginに指定すれば、目次から飛んだ見出しがそのまま今の見出しになる。文書の終わりまで来たら、最後の節が短くても最後の見出しにする。縦書きの文書では、vertical-rlなら右から左、vertical-lrなら左から右へ読む向きで決める。',
     en: 'Each heading’s `scroll-margin-block-start` is the reading line, and the last heading to pass it is the current one. Give the headings the scroll margin your sticky header needs, and a heading reached from the contents becomes current. At the end of the document the last heading is current even if its section is short. In a vertical document it reads from right to left (`vertical-rl`) or left to right (`vertical-lr`).',
   }),
 };

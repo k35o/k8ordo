@@ -1,7 +1,7 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: 'ページに search を渡すルーターの下では、サーバーが `url` スロットを `parseUrl` で読みます。リクエストの Cookie を受け取るページでは、Cookie に置いた状態を `parseCookies` で読みます。リンクは定義から組み立てます。Web Storage の値も、ハイドレーションより前に読めます。',
+  ja: 'ページにsearchを渡すルーターの下では、サーバーが`url`スロットを`parseUrl`で読みます。リクエストのCookieを受け取るページでは、Cookieに置いた状態を`parseCookies`で読みます。リンクは定義から組み立てます。Web Storageの値も、ハイドレーションより前に読めます。',
   en: 'Under a router that hands a page its search, the server reads the `url` slot with `parseUrl`; where a page receives the request’s cookies, it reads cookie state with `parseCookies`. Links are built from the definition, and Web Storage values can be read before hydration, too.',
 });
 
@@ -11,7 +11,7 @@ export const parseTitle = message({
 });
 
 export const parseDescription = message({
-  ja: '`parseUrl(input)` は `url` スロットを読み、スキーマの出力型の値を返します。`input` は `URLSearchParams` か、フレームワークがページに渡すオブジェクトの形（`Record<string, string | string[] | undefined>`、型は `UrlInput`）です。宣言していないパラメータは無視されます。',
+  ja: '`parseUrl(input)`は`url`スロットを読み、スキーマの出力型の値を返します。`input`は`URLSearchParams`か、フレームワークがページに渡すオブジェクトの形（`Record<string, string | string[] | undefined>`、型は`UrlInput`）です。宣言していないパラメータは無視されます。',
   en: '`parseUrl(input)` reads the `url` slot and returns a value of the schema’s output type. `input` is a `URLSearchParams` or the object shape frameworks hand a page (`Record<string, string | string[] | undefined>`, typed as `UrlInput`). Params the schema does not declare are ignored.',
 });
 
@@ -22,7 +22,7 @@ export const parseTableIntro = message({
 
 export const parseTable = {
   query: message({ ja: 'クエリ', en: 'Query' }),
-  result: message({ ja: '`parseUrl` の結果', en: '`parseUrl` returns' }),
+  result: message({ ja: '`parseUrl`の結果', en: '`parseUrl` returns' }),
   why: message({ ja: '理由', en: 'Why' }),
   empty: message({ ja: '（なし）', en: '(none)' }),
   emptyWhy: message({
@@ -30,11 +30,11 @@ export const parseTable = {
     en: 'Every field at its default',
   }),
   coerceWhy: message({
-    ja: '`"3"` は `z.coerce.number()` で `3` になる',
+    ja: '`"3"`は`z.coerce.number()`で`3`になる',
     en: '`"3"` is coerced to `3`',
   }),
   unreadableWhy: message({
-    ja: '読めない `page` だけが既定値に戻る',
+    ja: '読めない`page`だけが既定値に戻る',
     en: 'Only the unreadable `page` falls back',
   }),
   constraintWhy: message({
@@ -42,7 +42,7 @@ export const parseTable = {
     en: 'A constraint violation (`z.gte(1)`) is treated the same',
   }),
   intWhy: message({
-    ja: '`z.int()` の違反',
+    ja: '`z.int()`の違反',
     en: 'Fails `z.int()`',
   }),
   arrayWhy: message({
@@ -64,7 +64,7 @@ export const parseTable = {
 };
 
 export const parseRecord = message({
-  ja: "オブジェクトの形でも同じです。`parseUrl({ q: 'shoes', tags: ['sale', 'new'] })` は `{ q: 'shoes', page: 1, tags: ['sale', 'new'], sort: 'new' }` を返します。戻り値の型は `{ q: string; page: number; tags: string[]; sort: 'new' | 'price' }` です。",
+  ja: "オブジェクトの形でも同じです。`parseUrl({ q: 'shoes', tags: ['sale', 'new'] })`は`{ q: 'shoes', page: 1, tags: ['sale', 'new'], sort: 'new' }`を返します。戻り値の型は`{ q: string; page: number; tags: string[]; sort: 'new' | 'price' }`です。",
   en: "The object shape reads the same way: `parseUrl({ q: 'shoes', tags: ['sale', 'new'] })` returns `{ q: 'shoes', page: 1, tags: ['sale', 'new'], sort: 'new' }`, typed as `{ q: string; page: number; tags: string[]; sort: 'new' | 'price' }`.",
 });
 
@@ -74,102 +74,102 @@ export const salvageTitle = message({
 });
 
 export const salvageDescription = message({
-  ja: 'まずスキーマ全体で解析し、失敗したときだけフィールドごとに解析し直します。受け付けられないフィールドは自分の既定値に戻り、ほかのフィールドは読めた値を保ちます。1 つの壊れた値がほかを巻き込むことはなく、読み取りが throw することもありません。',
+  ja: 'まずスキーマ全体で解析し、失敗したときだけフィールドごとに解析し直します。受け付けられないフィールドは自分の既定値に戻り、ほかのフィールドは読めた値を保ちます。1つの壊れた値がほかを巻き込むことはなく、読み取りがthrowすることもありません。',
   en: 'The whole schema parses first; only when that fails does each field parse on its own. A field the schema rejects falls back to its own default and the others keep what they read, so one broken value does not take the rest down, and reading never throws.',
 });
 
 export const salvageArray = message({
-  ja: '配列は 1 つのフィールドです。要素が 1 つでも受け付けられなければ、配列全体が既定値の `[]` に戻ります。',
+  ja: '配列は1つのフィールドです。要素が1つでも受け付けられなければ、配列全体が既定値の`[]`に戻ります。',
   en: 'An array is one field: if any element is rejected, the whole array falls back to its default `[]`.',
 });
 
 export const salvageRefine = message({
-  ja: 'フィールドごとの解析には、オブジェクト全体への `refine` が見えません。そこでサルベージした組み合わせを最後にスキーマ全体で確かめ、`refine` が拒むなら全体を既定値に戻します。',
+  ja: 'フィールドごとの解析には、オブジェクト全体への`refine`が見えません。そこでサルベージした組み合わせを最後にスキーマ全体で確かめ、`refine`が拒むなら全体を既定値に戻します。',
   en: 'Per-field parsing cannot see an object-level `refine`. So the salvaged combination is checked against the whole schema at the end, and if the `refine` rejects it, everything falls back to the defaults.',
 });
 
 export const salvageTable = {
   asWritten: message({ ja: '書かれたとおり', en: 'As written' }),
   maxAlone: message({
-    ja: '`max` だけが既定値に戻り、組み合わせも成り立つ',
+    ja: '`max`だけが既定値に戻り、組み合わせも成り立つ',
     en: '`max` falls back alone, and the combination still holds',
   }),
   maxBreaks: message({
-    ja: '`max` を既定値に戻すと `min <= max` が崩れるので、全体が既定値',
+    ja: '`max`を既定値に戻すと`min <= max`が崩れるので、全体が既定値',
     en: 'With `max` back at its default, `min <= max` fails, so everything falls back',
   }),
   combination: message({
-    ja: 'どちらのフィールドも正しいが、組み合わせが `refine` に反する',
+    ja: 'どちらのフィールドも正しいが、組み合わせが`refine`に反する',
     en: 'Each field is valid; the combination is not',
   }),
   minAlone: message({
-    ja: '`min` だけが既定値に戻る',
+    ja: '`min`だけが既定値に戻る',
     en: 'Only `min` falls back',
   }),
 };
 
 export const salvageSame = message({
-  ja: '同じサルベージは、エントリ状態・Web Storage の行・Cookie・`definePageState`・`defineLocalState`・`defineSessionState`・`defineCookieState` の `update()` に渡した値にも適用されます。',
+  ja: '同じサルベージは、エントリ状態、Web Storageの行、Cookie、`definePageState`、`defineLocalState`、`defineSessionState`、`defineCookieState`の`update()`に渡した値にも適用されます。',
   en: 'The same salvage applies to entry state, to Web Storage rows, to cookies, and to the values passed to `update()` on `definePageState`, `defineLocalState`, `defineSessionState` and `defineCookieState`.',
 });
 
 export const frameworkTitle = message({
-  ja: '`@k8ordo/static`・`@k8ordo/server` のページ',
+  ja: '`@k8ordo/static`、`@k8ordo/server`のページ',
   en: 'Pages under `@k8ordo/static` and `@k8ordo/server`',
 });
 
 export const frameworkDescription = message({
-  ja: 'このフレームワークのページが受け取るのは `params` と `pathname`（`@k8ordo/server` ではさらに、ヘッダーと Cookie を持つ `request`。Cookie の状態はここから読めます）で、search は受け取りません。pathname はルーターのもので、search は `useAppState` がブラウザで読みます。例外は、`@k8ordo/server` で読む url スキーマを `export const search = listState.url` と宣言したページで、`parseUrl` と同じ読み方の `search` を受け取ります。',
+  ja: 'このフレームワークのページが受け取るのは`params`と`pathname`（`@k8ordo/server`ではさらに、ヘッダーとCookieを持つ`request`。Cookieの状態はここから読めます）で、searchは受け取りません。pathnameはルーターのもので、searchは`useAppState`がブラウザで読みます。例外は、`@k8ordo/server`で読むurlスキーマを`export const search = listState.url`と宣言したページで、`parseUrl`と同じ読み方の`search`を受け取ります。',
   en: 'Pages under the framework receive `params` and `pathname` — plus a `request` with headers and cookies under `@k8ordo/server`, which is where cookie state is read — and not the search: the pathname is the router’s, and the search is read in the browser by `useAppState`. The exception is a page under `@k8ordo/server` that declares the url schema it reads, `export const search = listState.url`: it receives `search`, read the way `parseUrl` reads it.',
 });
 
 export const frameworkWhy = message({
-  ja: 'search を宣言していないページでは、サーバーの描画は `url` スロットの既定値で行われ、ハイドレーションの次の描画から実際の URL が使われます。ルーターは pathname が変わらない遷移を何も読み込まずに intercept するからです。宣言したページは search を受け取るので、search が変わる遷移（GET フォーム・リンク・url の `update()`）でルーターがそのページをその場で取り直します。スクロールもフォーカスもそのままで、`update().finished` はそのページが画面に出てから決着します。`@k8ordo/static` は宣言を拒みます。ファイルは search がどうであれ同じだからです。',
+  ja: 'searchを宣言していないページでは、サーバーの描画は`url`スロットの既定値で行われ、ハイドレーションの次の描画から実際のURLが使われます。ルーターはpathnameが変わらない遷移を何も読み込まずにinterceptするからです。宣言したページはsearchを受け取るので、searchが変わる遷移（GETフォーム、リンク、urlの`update()`）でルーターがそのページをその場で取り直します。スクロールもフォーカスもそのままで、`update().finished`はそのページが画面に出てから決着します。`@k8ordo/static`は宣言を拒みます。ファイルはsearchがどうであれ同じだからです。',
   en: 'For a page that does not declare it, the server render uses the `url` slot’s defaults and the live URL takes over one render after hydration, because the router intercepts a navigation that keeps the pathname without loading anything. A page that declares it receives the search, so a navigation that moves the search — a GET form, a link, a url `update()` — loads that page again in place: scroll and focus stay, and `update().finished` settles once the page is on screen. `@k8ordo/static` refuses the declaration: a file is the same whatever the search holds.',
 });
 
 export const frameworkLinks = message({
-  ja: '`href` と `search` は純粋な関数なので、この制約を受けず、Server Component でもそのまま使えます。',
+  ja: '`href`と`search`は純粋な関数なので、この制約を受けず、Server Componentでもそのまま使えます。',
   en: '`href` and `search` are pure functions, so none of this affects them; they run in a Server Component as they are.',
 });
 
 export const cookieTitle = message({
-  ja: '`parseCookies` と `initialCookie`',
+  ja: '`parseCookies`と`initialCookie`',
   en: '`parseCookies` and `initialCookie`',
 });
 
 export const cookieDescription = message({
-  ja: '`defineCookieState` の値は Cookie に入っていて、リクエストごとにサーバーへ届きます。`@k8ordo/server` のページとレイアウトが受け取る `request.cookies` を `parseCookies` に渡すと、スキーマの出力型の値が返ります。それをクライアントコンポーネントに渡して `useAppState` の `initialCookie` にすると、サーバーの描画とハイドレーションの描画が実際の値で行われ、既定値がちらつきません。',
+  ja: '`defineCookieState`の値はCookieに入っていて、リクエストごとにサーバーへ届きます。`@k8ordo/server`のページとレイアウトが受け取る`request.cookies`を`parseCookies`に渡すと、スキーマの出力型の値が返ります。それをクライアントコンポーネントに渡して`useAppState`の`initialCookie`にすると、サーバーの描画とハイドレーションの描画が実際の値で行われ、既定値がちらつきません。',
   en: 'A `defineCookieState` keeps its values in a cookie, which every request carries to the server. Hand `parseCookies` the `request.cookies` that `@k8ordo/server` gives a page or a layout and it returns a value of the schema’s output type. Pass that down to a client component as `useAppState`’s `initialCookie`, and the server render and the hydration render show the real values instead of flashing the defaults.',
 });
 
 export const cookieInput = message({
-  ja: '`parseCookies` が受け取るのは、値がパーセントデコード済みの `ReadonlyMap<string, string>` で、`request.cookies` がそのまま渡せます。Cookie が無い・JSON が壊れている・スキーマが受け付けない値は、フィールドごとに既定値に戻ります。',
+  ja: '`parseCookies`が受け取るのは、値がパーセントデコード済みの`ReadonlyMap<string, string>`で、`request.cookies`がそのまま渡せます。Cookieが無い、JSONが壊れている、スキーマが受け付けない値は、フィールドごとに既定値に戻ります。',
   en: '`parseCookies` takes a `ReadonlyMap<string, string>` of percent-decoded values, which is exactly what `request.cookies` is. A missing cookie, corrupt JSON, or a value the schema rejects falls back to the defaults, field by field.',
 });
 
 export const cookieSeedEach = message({
-  ja: '`initialCookie` が効くのは、渡した `useAppState` だけです。サーバーで描かれるのに受け取っていないコンポーネントは、サーバーでは既定値を描きます。レイアウトのような上の方で一度読み、下へ渡してください。',
+  ja: '`initialCookie`が効くのは、渡した`useAppState`だけです。サーバーで描かれるのに受け取っていないコンポーネントは、サーバーでは既定値を描きます。レイアウトのような上の方で一度読み、下へ渡してください。',
   en: '`initialCookie` seeds only the `useAppState` call it is passed to; a component that renders on the server without it shows the defaults there. Read the cookie once, high up — in a layout, say — and pass it down.',
 });
 
 export const cookieStatic = message({
-  ja: '`@k8ordo/static` ではページがリクエストを受け取らないので、サーバーの描画は既定値で行われ、ハイドレーションの後に Cookie の値に置き換わります。localStorage と同じ振る舞いです。',
+  ja: '`@k8ordo/static`ではページがリクエストを受け取らないので、サーバーの描画は既定値で行われ、ハイドレーションの後にCookieの値に置き換わります。localStorageと同じ振る舞いです。',
   en: 'Under `@k8ordo/static` a page receives no request, so the server render shows the defaults and the cookie takes over after hydration — the same as localStorage.',
 });
 
 export const cookieWriteTitle = message({
-  ja: 'サーバーから書く Cookie との関係',
+  ja: 'サーバーから書くCookieとの関係',
   en: 'Cookies the server writes',
 });
 
 export const cookieWriteSecret = message({
-  ja: '`defineCookieState` はブラウザが書く Cookie なので、`HttpOnly` にはできません。セッションのような秘密の Cookie は、リクエストに答える場所（`@k8ordo/server` の `guard.ts`・`route.ts`・Server Action）でフレームワークの `cookies()` を使って `HttpOnly` で書きます。ページは描画なので、応答に Cookie を書くことはできません。',
+  ja: '`defineCookieState`はブラウザが書くCookieなので、`HttpOnly`にはできません。セッションのような秘密のCookieは、リクエストに答える場所（`@k8ordo/server`の`guard.ts`、`route.ts`、Server Action）でフレームワークの`cookies()`を使って`HttpOnly`で書きます。ページは描画なので、応答にCookieを書くことはできません。',
   en: 'A `defineCookieState` is a cookie the browser writes, so it can never be `HttpOnly`. A secret cookie such as a session is written `HttpOnly` with the framework’s `cookies()`, from the places that answer a request — `guard.ts`, `route.ts` and Server Actions under `@k8ordo/server`. A page is a render and never writes cookies onto the response.',
 });
 
 export const cookieWriteSame = message({
-  ja: '同じ `cookies()` で Cookie の状態を書くこともできます（JavaScript 無しで好みを変えるフォームなど）。名前は `cookieName`、値は `cookieValue(values)` が返すもの（エンコードしていない JSON。`cookies().set` が書き出すときにパーセントエンコードし、`parseCookies` はそれを戻した値を読みます。`Set-Cookie` を自分で組み立てるなら `encodeURIComponent` を 1 回通します）で、属性は `Path=/`・`SameSite=Lax`・`Max-Age=34560000` にそろえ、`HttpOnly` は付けません。付けるとブラウザのストアから見えなくなります。開いているタブには `change` イベントで届きます。',
+  ja: '同じ`cookies()`でCookieの状態を書くこともできます（JavaScript無しで好みを変えるフォームなど）。名前は`cookieName`、値は`cookieValue(values)`が返すもの（エンコードしていないJSON。`cookies().set`が書き出すときにパーセントエンコードし、`parseCookies`はそれを戻した値を読みます。`Set-Cookie`を自分で組み立てるなら`encodeURIComponent`を1回通します）で、属性は`Path=/`、`SameSite=Lax`、`Max-Age=34560000`にそろえ、`HttpOnly`は付けません。付けるとブラウザのストアから見えなくなります。開いているタブには`change`イベントで届きます。',
   en: 'The same `cookies()` can write a cookie state as well — for a form that changes a preference without JavaScript, say. The name is `cookieName`, the value is what `cookieValue(values)` returns — the JSON unencoded, since `cookies().set` percent-encodes it on the way out and `parseCookies` reads it decoded again; a hand-written `Set-Cookie` passes it through `encodeURIComponent` once — and the attributes match the browser’s: `Path=/`, `SameSite=Lax`, `Max-Age=34560000`, and never `HttpOnly`, which would hide it from the browser store. Open tabs take it in through the `change` event.',
 });
 
@@ -179,17 +179,17 @@ export const initialTitle = message({
 });
 
 export const initialDescription = message({
-  ja: 'ページに search を渡すルーター（Next.js の App Router など）では、`parseUrl` の結果をクライアントコンポーネントに渡し、`useAppState` の `initialUrl` にします。サーバーの描画とハイドレーションの描画が実際の URL の値で行われ、既定値からのちらつきが出ません。',
+  ja: 'ページにsearchを渡すルーター（Next.jsのApp Routerなど）では、`parseUrl`の結果をクライアントコンポーネントに渡し、`useAppState`の`initialUrl`にします。サーバーの描画とハイドレーションの描画が実際のURLの値で行われ、既定値からのちらつきが出ません。',
   en: 'Under a router that hands a page its search — the Next.js App Router, for example — pass what `parseUrl` returned down to the client component and give it to `useAppState` as `initialUrl`. The server render and the hydration render then show the real URL values instead of flashing the defaults.',
 });
 
 export const initialType = message({
-  ja: '`initialUrl` を受け取れるのは `url` スロットを持つ `definePageState` だけです。エントリの値はサーバーに存在しないので、常に既定値から始まります。props の型は `OutputOf<typeof catalogState.url>` で書けます。',
+  ja: '`initialUrl`を受け取れるのは`url`スロットを持つ`definePageState`だけです。エントリの値はサーバーに存在しないので、常に既定値から始まります。propsの型は`OutputOf<typeof catalogState.url>`で書けます。',
   en: 'Only a `definePageState` with a `url` slot accepts `initialUrl`. The entry slot has no server-side source and always starts from its defaults. The prop’s type is `OutputOf<typeof catalogState.url>`.',
 });
 
 export const initialRouter = message({
-  ja: 'Navigation API を intercept しないルーターでは、URL を書き換える `update()` はドキュメントの読み込みになります。そこでの URL の変更は、リンクと GET フォームで行うのが向いています。',
+  ja: 'Navigation APIをinterceptしないルーターでは、URLを書き換える`update()`はドキュメントの読み込みになります。そこでのURLの変更は、リンクとGETフォームで行うのが向いています。',
   en: 'On a router that does not intercept the Navigation API, an `update()` that changes the URL is a full document load; there, links and GET forms are the better way to change the URL.',
 });
 
@@ -199,12 +199,12 @@ export const initialRouterLink = message({
 });
 
 export const hrefTitle = message({
-  ja: '`href` と `search`',
+  ja: '`href`と`search`',
   en: '`href` and `search`',
 });
 
 export const hrefDescription = message({
-  ja: '`href(path, values?)` はリンクを組み立てます。指定しなかったフィールドは既定値として扱われ、既定値のフィールドはクエリから省かれます。同じ状態からはいつも同じ最短の URL ができるので、リンク・ブックマーク・キャッシュが一致します。',
+  ja: '`href(path, values?)`はリンクを組み立てます。指定しなかったフィールドは既定値として扱われ、既定値のフィールドはクエリから省かれます。同じ状態からはいつも同じ最短のURLができるので、リンク、ブックマーク、キャッシュが一致します。',
   en: '`href(path, values?)` builds a link. A field you leave out means its default, and fields at their default are left out of the query, so the same state always yields the same, shortest URL — links, bookmarks and caches agree.',
 });
 
@@ -215,22 +215,22 @@ export const hrefTable = {
 };
 
 export const hrefOrder = message({
-  ja: 'パラメータはスキーマで宣言した順に並び、値は `URLSearchParams` の規則でエンコードされます（空白は `+`）。',
+  ja: 'パラメータはスキーマで宣言した順に並び、値は`URLSearchParams`の規則でエンコードされます（空白は`+`）。',
   en: 'Params follow the order the schema declares them in and are encoded by `URLSearchParams` rules (a space becomes `+`).',
 });
 
 export const hrefSpread = message({
-  ja: "指定しないフィールドは既定値になるので、`href('/catalog', { page: 2 })` は今の検索語を落とします。一部だけを変えて残りを保つリンクは、今の状態を展開してから上書きします。",
+  ja: "指定しないフィールドは既定値になるので、`href('/catalog', { page: 2 })`は今の検索語を落とします。一部だけを変えて残りを保つリンクは、今の状態を展開してから上書きします。",
   en: "Because a field you leave out means its default, `href('/catalog', { page: 2 })` drops the current search term. A link that changes one field and keeps the rest spreads the current state first.",
 });
 
 export const hrefPager = message({
-  ja: '`@k8ordo/router` の下では素の `<a>` がクライアント遷移なので、このリンクも pathname の変わらない状態の変更として処理されます。リンクのクリックは `push` です。',
+  ja: '`@k8ordo/router`の下では素の`<a>`がクライアント遷移なので、このリンクもpathnameの変わらない状態の変更として処理されます。リンクのクリックは`push`です。',
   en: 'Under `@k8ordo/router` a plain `<a>` is a client navigation, so this link too is handled as a state change that keeps the pathname. A link click pushes.',
 });
 
 export const hrefThrows = message({
-  ja: 'URL に書けない値（`Date` など）を渡すと、`href` と `search` は throw します。',
+  ja: 'URLに書けない値（`Date`など）を渡すと、`href`と`search`はthrowします。',
   en: 'Given a value a URL cannot hold, such as a `Date`, `href` and `search` throw.',
 });
 
@@ -240,17 +240,17 @@ export const hrefType = message({
 });
 
 export const searchDescription = message({
-  ja: '`search(values?)` はクエリ文字列だけ（`?` なし）を返します。パスを自分で組み立てるとき、たとえばルート表に無いファイルのダウンロードに同じ条件を付けるときに使います。',
+  ja: '`search(values?)`はクエリ文字列だけ（`?`なし）を返します。パスを自分で組み立てるとき、たとえばルート表に無いファイルのダウンロードに同じ条件を付けるときに使います。',
   en: '`search(values?)` returns the query string alone, with no `?`. Use it when the path is yours to compose — a file download outside the route table, for instance.',
 });
 
 export const entryOnlyLinks = message({
-  ja: '`entry` だけの定義では、`href` はクエリを付けずにパスをリンクにし（Vite の `base` は付きます）、`search` は空文字列を返します。',
+  ja: '`entry`だけの定義では、`href`はクエリを付けずにパスをリンクにし（Viteの`base`は付きます）、`search`は空文字列を返します。',
   en: 'For an entry-only definition, `href` makes a link of the path with no query — Vite’s `base` still goes in front — and `search` returns an empty string.',
 });
 
 export const hrefBase = message({
-  ja: "`href` が受け取るパスは、ルート表と同じくアプリの根から書きます。返すリンクには Vite の `base` が前に付くので、`base: '/docs/'` のもとでは `catalogState.href('/catalog', { page: 2 })` が `/docs/catalog?page=2` になります。`@k8ordo/router` の `href` が返したものは、すでに base を持っているので渡さないでください。Vite の外（Next.js など）では何も付かず、basePath はそのフレームワークの `<Link>` が付けます。",
+  ja: "`href`が受け取るパスは、ルート表と同じくアプリの根から書きます。返すリンクにはViteの`base`が前に付くので、`base: '/docs/'`のもとでは`catalogState.href('/catalog', { page: 2 })`が`/docs/catalog?page=2`になります。`@k8ordo/router`の`href`が返したものは、すでにbaseを持っているので渡さないでください。Viteの外（Next.jsなど）では何も付かず、basePathはそのフレームワークの`<Link>`が付けます。",
   en: "The path `href` takes is written from the application’s root, the way the route table is, and the link it returns carries Vite’s `base` in front: under `base: '/docs/'`, `catalogState.href('/catalog', { page: 2 })` is `/docs/catalog?page=2`. Do not hand it what `@k8ordo/router`’s `href` returned, which carries the base already. Outside Vite (Next.js, say) nothing is added, and a basePath is the framework’s own `<Link>`’s to add.",
 });
 
@@ -260,37 +260,37 @@ export const typedTitle = message({
 });
 
 export const typedDescription = message({
-  ja: '`Register` を一度だけ拡張すると、アプリの中のすべての `href` が、ルーターの知らないパスを拒むようになります。`@k8ordo/router` の拡張と同じ 1 行です。',
+  ja: '`Register`を一度だけ拡張すると、アプリの中のすべての`href`が、ルーターの知らないパスを拒むようになります。`@k8ordo/router`の拡張と同じ1行です。',
   en: 'Augment `Register` once and every `href` in the app rejects a path its router does not know. It is the same line as the `@k8ordo/router` augmentation.',
 });
 
 export const typedParam = message({
-  ja: '渡したパスを、表のパターンと区間ごとに照合します。`:param` の区間には空でない 1 区間ならどんな文字列でも入るので、`/products/:id` には `/products/42` も、テンプレートリテラルで組んだパスも渡せます。どのパターンとも区間が合わないパスは、`/:locale` のように先頭が `:param` の表でも型エラーになります。',
+  ja: '渡したパスを、表のパターンと区間ごとに照合します。`:param`の区間には空でない1区間ならどんな文字列でも入るので、`/products/:id`には`/products/42`も、テンプレートリテラルで組んだパスも渡せます。どのパターンとも区間が合わないパスは、`/:locale`のように先頭が`:param`の表でも型エラーになります。',
   en: 'The path is checked against the table’s patterns, segment by segment. A `:param` segment takes any one non-empty segment, so `/products/:id` accepts `/products/42`, and a path built with a template literal too. A path whose segments no pattern matches is a type error, even under a table that starts with a param such as `/:locale`.',
 });
 
 export const typedWildcard = message({
-  ja: '`*` のワイルドカードは照合には使われますが、リンク先にはなりません。',
+  ja: '`*`のワイルドカードは照合には使われますが、リンク先にはなりません。',
   en: 'A `*` wildcard is matched, never linked.',
 });
 
 export const typedRuntime = message({
-  ja: '検査は `@k8ordo/router` の `NavigablePath` を型として使うだけなので、ルーターは任意の peer のままで、実行時には読み込まれません。',
+  ja: '検査は`@k8ordo/router`の`NavigablePath`を型として使うだけなので、ルーターは任意のpeerのままで、実行時には読み込まれません。',
   en: 'The check uses `NavigablePath` from `@k8ordo/router` as a type only, so the router stays an optional peer and is never loaded at runtime.',
 });
 
 export const typedFramework = message({
-  ja: '`@k8ordo/static` と `@k8ordo/server` では、アプリ自身の `package.json` の `dependencies` か `devDependencies` に `@k8ordo/state` があれば、この拡張が `routes/` から `.k8ordo/register.gen.ts` に生成されます（推移的な依存は数えません）。生成された宣言と重なるので、そこでは手書きしないでください。',
+  ja: '`@k8ordo/static`と`@k8ordo/server`では、アプリ自身の`package.json`の`dependencies`か`devDependencies`に`@k8ordo/state`があれば、この拡張が`routes/`から`.k8ordo/register.gen.ts`に生成されます（推移的な依存は数えません）。生成された宣言と重なるので、そこでは手書きしないでください。',
   en: 'Under `@k8ordo/static` and `@k8ordo/server` this augmentation is generated into `.k8ordo/register.gen.ts` from `routes/` when the application’s own `package.json` lists `@k8ordo/state` in `dependencies` or `devDependencies` — a transitive dependency does not count. Do not hand-write it there: it would duplicate the generated declaration.',
 });
 
 export const typedPath = message({
-  ja: '表を持たないルーターでは、そのルーターのパスの union を `path` に登録します。Next.js なら `next` の `Route` です。',
+  ja: '表を持たないルーターでは、そのルーターのパスのunionを`path`に登録します。Next.jsなら`next`の`Route`です。',
   en: 'A router without a table registers its own path union under `path` — `Route` from `next`, for instance.',
 });
 
 export const typedRules = message({
-  ja: '両方があれば `routes` が優先され、どちらも無ければ `/` で始まる任意の文字列が通ります。検査は `RegisteredPath<Path>` として export されています（受け付けるなら `Path`、拒むなら `never`）。拡張はアプリケーションでだけ行ってください。共有ライブラリが拡張すると、その制約がすべての利用者に漏れます。',
+  ja: '両方があれば`routes`が優先され、どちらも無ければ`/`で始まる任意の文字列が通ります。検査は`RegisteredPath<Path>`としてexportされています（受け付けるなら`Path`、拒むなら`never`）。拡張はアプリケーションでだけ行ってください。共有ライブラリが拡張すると、その制約がすべての利用者に漏れます。',
   en: 'When both are present, `routes` wins; with neither, any `/`-prefixed string is accepted. The check is exported as `RegisteredPath<Path>` — `Path` when accepted, `never` when refused. Augment only in an application — a shared library that augments `Register` leaks its constraint to every consumer.',
 });
 
@@ -300,17 +300,17 @@ export const beforeTitle = message({
 });
 
 export const beforeDescription = message({
-  ja: '最初の描画より前に要る値があります。`<html>` に付ける表示密度の属性や、既定値で一瞬表示されてはいけないカラースキームです。`useAppState` はハイドレーションの後に動くので間に合わず、かといってインラインスクリプトにキーと JSON の形を文字列で手書きすると、どちらかが変わった時点でずれます。',
+  ja: '最初の描画より前に要る値があります。`<html>`に付ける表示密度の属性や、既定値で一瞬表示されてはいけないカラースキームです。`useAppState`はハイドレーションの後に動くので間に合わず、かといってインラインスクリプトにキーとJSONの形を文字列で手書きすると、どちらかが変わった時点でずれます。',
   en: 'Some values are needed before the first paint: a density attribute on `<html>`, say, or a colour scheme that must not flash its default. `useAppState` runs after hydration, which is too late, and an inline script with the storage key and the JSON shape hand-written into a string drifts the moment either changes.',
 });
 
 export const beforeApi = message({
-  ja: '`defineLocalState` と `defineSessionState` の定義はその両方を持っています。`storageKey` はストアが書き込むキーで、`inlineRead()` はインラインの `<script>` に埋め込む JavaScript の式を返します。この式は、ブラウザでその定義の置き場所（localStorage か sessionStorage）に保存されたオブジェクトに評価されます。',
+  ja: '`defineLocalState`と`defineSessionState`の定義はその両方を持っています。`storageKey`はストアが書き込むキーで、`inlineRead()`はインラインの`<script>`に埋め込むJavaScriptの式を返します。この式は、ブラウザでその定義の置き場所（localStorageかsessionStorage）に保存されたオブジェクトに評価されます。',
   en: 'A `defineLocalState` or `defineSessionState` definition carries both halves. `storageKey` is the key the store writes under, and `inlineRead()` returns a JavaScript expression for an inline `<script>` that evaluates, in the browser, to the object stored in the definition’s own area — localStorage or sessionStorage.',
 });
 
 export const beforeNull = message({
-  ja: '次のときは throw せず、`null` になります。',
+  ja: '次のときはthrowせず、`null`になります。',
   en: 'It evaluates to `null`, without throwing, when:',
 });
 
@@ -320,12 +320,12 @@ export const beforeNullNothing = message({
 });
 
 export const beforeNullCorrupt = message({
-  ja: 'JSON が壊れている',
+  ja: 'JSONが壊れている',
   en: 'the JSON is corrupt',
 });
 
 export const beforeNullNotObject = message({
-  ja: '値がオブジェクトではない（数値・文字列・配列・`null`）',
+  ja: '値がオブジェクトではない（数値、文字列、配列、`null`）',
   en: 'the value is not an object (a number, a string, an array, `null`)',
 });
 
@@ -340,26 +340,26 @@ export const beforeNullBlocked = message({
 });
 
 export const beforeUntrusted = message({
-  ja: 'そこではまだどのモジュールも読み込まれていないので、スキーマは走りません。返るのはサルベージ済みの状態ではなく、保存された生の行です。信頼せず、必要なフィールドだけを、それぞれフォールバック付きで読んでください。上の例が `density` が `"compact"` かどうかだけを確かめているのはそのためです。',
+  ja: 'そこではまだどのモジュールも読み込まれていないので、スキーマは走りません。返るのはサルベージ済みの状態ではなく、保存された生の行です。信頼せず、必要なフィールドだけを、それぞれフォールバック付きで読んでください。上の例が`density`が`"compact"`かどうかだけを確かめているのはそのためです。',
   en: 'No module has loaded yet, so the schema does not run: what comes back is the raw stored row, not the salvaged state `useAppState` will show. Treat it as untrusted and read only the fields you need, each with its own fallback — which is why the example checks nothing but whether `density` is `"compact"`.',
 });
 
 export const beforeEscape = message({
-  ja: 'キーは `<` も含めてスクリプトの文脈向けにエスケープされるので、どんなキーでも安全に埋め込めます。式は即時実行関数なので、代入の右辺・引数・三項演算子など、どの位置にも置けます。',
+  ja: 'キーは`<`も含めてスクリプトの文脈向けにエスケープされるので、どんなキーでも安全に埋め込めます。式は即時実行関数なので、代入の右辺、引数、三項演算子など、どの位置にも置けます。',
   en: 'The key is escaped for a script context, `<` included, so any key is safe to emit. The expression is a self-invoking function, so it fits any position: the right-hand side of an assignment, an argument, a ternary.',
 });
 
 export const beforeAfter = message({
-  ja: 'ハイドレーションの後は、ストアを正とします。スクリプトは React より先に `<html>` の属性を変えるので、`<html>` には `suppressHydrationWarning` を付けます。その属性をハイドレーションの描画で消さずに保ち続ける書き方は、`@k8ordo/color-scheme` の実装がそのまま例になります。',
+  ja: 'ハイドレーションの後は、ストアを正とします。スクリプトはReactより先に`<html>`の属性を変えるので、`<html>`には`suppressHydrationWarning`を付けます。その属性をハイドレーションの描画で消さずに保ち続ける書き方は、`@k8ordo/color-scheme`の実装がそのまま例になります。',
   en: 'After hydration the store is the source of truth. The script changes an attribute on `<html>` before React sees it, so `<html>` carries `suppressHydrationWarning`. `@k8ordo/color-scheme` is a worked example of keeping the attribute in step without the hydration render undoing what the script did.',
 });
 
 export const beforeAfterLink = message({
-  ja: '@k8ordo/color-scheme の仕組み',
+  ja: '@k8ordo/color-schemeの仕組み',
   en: 'How @k8ordo/color-scheme works',
 });
 
 export const frameworkSearch = message({
-  ja: '読み方だけが要るときは `urlReader(schema)` です。url スキーマを受け取り、`(input) => 値` を返します（codec は 1 度だけ作ります）。フレームワークが生成する表は、これで宣言されたページの search を読みます。',
+  ja: '読み方だけが要るときは`urlReader(schema)`です。urlスキーマを受け取り、`(input) => 値`を返します（codecは1度だけ作ります）。フレームワークが生成する表は、これで宣言されたページのsearchを読みます。',
   en: 'The reading on its own is `urlReader(schema)`: a url schema in, `(input) => values` out, the codec built once. The framework’s generated table reads a declaring page’s search through it.',
 });
