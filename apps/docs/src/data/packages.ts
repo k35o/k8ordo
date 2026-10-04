@@ -84,6 +84,10 @@ export const PACKAGES: PackageEntry[] = [
             path: '/:locale/form/async-check',
             label: m.form.navAsyncCheck,
           },
+          {
+            path: '/:locale/form/custom-inputs',
+            label: m.form.navCustomInputs,
+          },
         ],
       },
       {

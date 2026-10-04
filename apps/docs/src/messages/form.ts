@@ -158,6 +158,11 @@ export const navAsyncCheck = message({
   en: 'Check with the server',
 });
 
+export const navCustomInputs = message({
+  ja: '独自の入力部品の値を送る',
+  en: 'Custom inputs',
+});
+
 export const navErrors = message({
   ja: 'エラーを表示する',
   en: 'Show errors',
