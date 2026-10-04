@@ -19,14 +19,14 @@ export function SchemeDemo() {
   const { scheme, preference, setPreference } = useColorScheme();
 
   return (
-    <div className="border-border-mute flex flex-col gap-6 rounded-lg border p-6">
+    <div className="flex flex-col gap-6">
       <div className="flex flex-wrap gap-3">
         {CHOICES.map((choice) => (
           <Button
             aria-pressed={preference === choice.value}
             color={preference === choice.value ? 'primary' : 'base'}
             key={choice.value}
-            onClick={() => {
+            onAction={() => {
               setPreference(choice.value);
             }}
             variant={preference === choice.value ? 'solid' : 'outline'}
@@ -35,19 +35,15 @@ export function SchemeDemo() {
           </Button>
         ))}
       </div>
-      <dl className="flex flex-col gap-1 text-sm">
-        <div className="flex gap-3">
-          <dt className="text-fg-mute">{m.colorScheme.demoScheme()}</dt>
-          <dd>
-            <Code>{scheme}</Code>
-          </dd>
-        </div>
-        <div className="flex gap-3">
-          <dt className="text-fg-mute">{m.colorScheme.demoPreference()}</dt>
-          <dd>
-            <Code>{preference}</Code>
-          </dd>
-        </div>
+      <dl className="bg-bg-surface grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-2 rounded-lg px-4 py-3 text-sm">
+        <dt className="text-fg-mute">scheme</dt>
+        <dd>
+          <Code>{scheme}</Code>
+        </dd>
+        <dt className="text-fg-mute">preference</dt>
+        <dd>
+          <Code>{preference}</Code>
+        </dd>
       </dl>
     </div>
   );
