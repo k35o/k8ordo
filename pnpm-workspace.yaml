@@ -96,6 +96,20 @@ overrides:
   '@vitest/ui': 'catalog:'
   '@vitest/utils': 'catalog:'
 
+# catalog の vite は vite-plus-core の別名なので、版は vite-plus のもの (0.3.x) に
+# なり、vite を peer に持つパッケージ (vitest・plugin-react・@k8ordo/static など)
+# の範囲をどれも満たさない。中身は vite-plus が同梱する vite で、別名の版で互換を
+# 確かめても意味がないため、vite の peer だけ版を問わない (Vite+ の移行ツールが
+# 書くのと同じ設定)。
+peerDependencyRules:
+  allowAny:
+    - vite
+  # storybook (10.6.1 時点の最新でも) の vite-plus の peer は ^0.1.15 || ^0.2.0 のまま。
+  # ここの Storybook (VRT・Chromatic) は 0.3 で動いているので 0.3 だけ足す。
+  # vite-plus を上げて警告が戻ったら、その版で Storybook が動くか確かめてから広げる。
+  allowedVersions:
+    storybook>vite-plus: '0.3'
+
 minimumReleaseAgeExclude:
   - '@k8o/*'
   - 'storybook-addon-determinism'
