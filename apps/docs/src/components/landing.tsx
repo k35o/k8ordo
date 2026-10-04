@@ -4,6 +4,7 @@ import { CodeBlock } from '@k8ordo/ui/code-block';
 import type { ReactNode } from 'react';
 
 import { PACKAGES } from '../data/packages';
+import { docsPathOf } from '../data/shipped-docs';
 import { href } from '../links';
 import type { SitePath } from '../links';
 import * as m from '../messages';
@@ -108,12 +109,12 @@ type NextStep = { path: SitePath; label: Message; description: Message };
 
 type NextStepsProps = {
   steps: readonly NextStep[];
-  /** The directory under `packages/`, for the shipped GUIDE.md. */
-  directory: string;
+  /** The published name, for where the site serves its shipped GUIDE.md. */
+  name: string;
 };
 
 /** Where to go from the landing: a plain list, one line each. */
-export function NextSteps({ steps, directory }: NextStepsProps) {
+export function NextSteps({ steps, name }: NextStepsProps) {
   return (
     <section className="pt-14 pb-24">
       <Heading level="h2">{m.landing.nextTitle()}</Heading>
@@ -139,7 +140,7 @@ export function NextSteps({ steps, directory }: NextStepsProps) {
         {m.landing.agents()}{' '}
         <a
           className="text-fg-base underline underline-offset-4"
-          href={`/${directory}/docs/GUIDE.md`}
+          href={`${docsPathOf(name)}GUIDE.md`}
         >
           GUIDE.md
         </a>

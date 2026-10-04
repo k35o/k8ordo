@@ -96,7 +96,7 @@ export default function I18nPage() {
         <CodeBlock code={CLAIM_BUNDLE} lang="tsx" title="greeting.tsx" />
       </LandingClaim>
       <NextSteps
-        directory="i18n"
+        name="@k8ordo/i18n"
         steps={[
           {
             path: '/:locale/i18n/get-started',

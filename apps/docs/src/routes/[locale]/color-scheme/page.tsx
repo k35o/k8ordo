@@ -19,10 +19,14 @@ const HERO_TOGGLE = `const { scheme, setPreference } = useColorScheme();
 
 setPreference(scheme === 'dark' ? 'light' : 'dark');`;
 
-const CLAIM_CSP_SERVER = `<ColorSchemeProvider nonce={nonce()}>{children}</ColorSchemeProvider>`;
+const CLAIM_CSP_SERVER = `<ColorSchemeProvider nonce={nonce()}>
+  {children}
+</ColorSchemeProvider>`;
 
 const CLAIM_CSP_STATIC = `framework({
-  csp: { 'script-src': ["'self'", await colorSchemeScriptHash()] },
+  csp: {
+    'script-src': ["'self'", await colorSchemeScriptHash()],
+  },
 });`;
 
 const CLAIM_STORAGE = `colorSchemeState.storageKey;
@@ -85,7 +89,7 @@ export default function ColorSchemePage() {
         <CodeBlock code={CLAIM_STORAGE} lang="tsx" title="preference.tsx" />
       </LandingClaim>
       <NextSteps
-        directory="color-scheme"
+        name="@k8ordo/color-scheme"
         steps={[
           {
             path: '/:locale/color-scheme/get-started',

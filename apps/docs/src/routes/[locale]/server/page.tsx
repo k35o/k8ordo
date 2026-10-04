@@ -18,7 +18,10 @@ node serve.js`;
 
 const CLAIM_ACTION = `'use server';
 
-export async function createTalk(_previous: FormState, formData: FormData) {
+export async function createTalk(
+  _previous: FormState,
+  formData: FormData,
+) {
   const parsed = parseForm(talkSchema, formData);
   if (!parsed.success) return parsed.state;
 
@@ -61,7 +64,7 @@ export default function ServerPage() {
           </>
         }
         directory="server"
-        install="@k8ordo/server @k8ordo/router react react-dom server-only vite"
+        install="@k8ordo/server @k8ordo/router"
         name="@k8ordo/server"
         tagline={m.server.tagline}
       />
@@ -104,7 +107,7 @@ export default function ServerPage() {
         />
       </LandingClaim>
       <NextSteps
-        directory="server"
+        name="@k8ordo/server"
         steps={[
           {
             path: '/:locale/server/get-started',

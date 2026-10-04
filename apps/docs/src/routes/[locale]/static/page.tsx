@@ -30,7 +30,7 @@ const CLAIM_ROUTES = `src/routes/
 const CLAIM_PATHS = `framework({
   paths: async () => {
     const products = await readCatalog();
-    return products.map((product) => \`/products/\${product.id}\`);
+    return products.map(({ id }) => \`/products/\${id}\`);
   },
 });`;
 
@@ -56,7 +56,7 @@ export default function StaticPage() {
           </>
         }
         directory="static"
-        install="@k8ordo/static @k8ordo/router react react-dom server-only vite"
+        install="@k8ordo/static @k8ordo/router"
         name="@k8ordo/static"
         tagline={m.static.tagline}
       />
@@ -82,7 +82,7 @@ export default function StaticPage() {
         <CodeBlock code={CLAIM_REFUSE} lang="text" title="vite build" />
       </LandingClaim>
       <NextSteps
-        directory="static"
+        name="@k8ordo/static"
         steps={[
           {
             path: '/:locale/static/get-started',

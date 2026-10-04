@@ -86,7 +86,7 @@ export default function FormPage() {
         <CodeBlock code={CLAIM_SERVER} lang="ts" title="actions.ts" />
       </LandingClaim>
       <NextSteps
-        directory="form"
+        name="@k8ordo/form"
         steps={[
           {
             path: '/:locale/form/get-started',

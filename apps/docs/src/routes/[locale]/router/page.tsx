@@ -23,7 +23,10 @@ const CLAIM_ANCHOR = `export function ProductsLink({ children }: { children: Rea
   const current = useMatch('/products/*', { inclusive: true });
 
   return (
-    <a aria-current={current ? 'page' : undefined} href={href('/products')}>
+    <a
+      aria-current={current ? 'page' : undefined}
+      href={href('/products')}
+    >
       {children}
     </a>
   );
@@ -47,7 +50,10 @@ startTransition(async () => {
   await navigateTo('/products/:id', { id }).finished;
 });`;
 
-const CLAIM_NAVIGATION_ANIMATE = `<ViewTransition default="none" update={{ navigation: 'auto', default: 'none' }}>
+const CLAIM_NAVIGATION_ANIMATE = `<ViewTransition
+  default="none"
+  update={{ navigation: 'auto', default: 'none' }}
+>
   <Outlet />
 </ViewTransition>`;
 
@@ -112,7 +118,7 @@ export default function RouterPage() {
         </div>
       </LandingClaim>
       <NextSteps
-        directory="router"
+        name="@k8ordo/router"
         steps={[
           {
             path: '/:locale/router/get-started',

@@ -23,8 +23,12 @@ update({ page: page + 1 }, { history: 'push' });`;
 const HERO_URL = `/products?q=lamp&page=2`;
 
 const CLAIM_PLACES = `export const listState = definePageState('product-list', {
-  url: z.object({ page: z.coerce.number().int().min(1).default(1) }),
-  entry: z.object({ expanded: z.array(z.string()).default([]) }),
+  url: z.object({
+    page: z.coerce.number().int().min(1).default(1),
+  }),
+  entry: z.object({
+    expanded: z.array(z.string()).default([]),
+  }),
 });
 
 export const prefs = defineLocalState(
@@ -34,12 +38,16 @@ export const prefs = defineLocalState(
 
 export const density = defineCookieState(
   'density',
-  z.object({ density: z.enum(['comfortable', 'compact']).default('comfortable') }),
+  z.object({
+    density: z.enum(['comfortable', 'compact']).default('comfortable'),
+  }),
 );`;
 
 const CLAIM_SERVER_PAGE = `export const search = listState.url;
 
-export default async function ProductsPage({ search }: PageProps<'/products'>) {
+export default async function ProductsPage({
+  search,
+}: PageProps<'/products'>) {
   const products = await fetchProducts(search);
   return <ProductList products={products} />;
 }`;
@@ -96,7 +104,7 @@ export default function StatePage() {
         </div>
       </LandingClaim>
       <NextSteps
-        directory="state"
+        name="@k8ordo/state"
         steps={[
           {
             path: '/:locale/state/get-started',
