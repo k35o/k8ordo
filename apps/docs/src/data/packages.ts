@@ -76,6 +76,7 @@ export const PACKAGES: PackageEntry[] = [
         label: m.nav.groupGuides,
         sections: [
           { path: '/:locale/form/field-types', label: m.form.navFieldTypes },
+          { path: '/:locale/form/nested', label: m.form.navNested },
           { path: '/:locale/form/errors', label: m.form.navErrors },
         ],
       },

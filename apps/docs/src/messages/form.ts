@@ -128,6 +128,11 @@ export const navFieldTypes = message({
   en: 'Field types',
 });
 
+export const navNested = message({
+  ja: '入れ子と繰り返し行',
+  en: 'Nested objects and rows',
+});
+
 export const navErrors = message({
   ja: 'エラーを表示する',
   en: 'Show errors',
