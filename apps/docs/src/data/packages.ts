@@ -110,6 +110,10 @@ export const PACKAGES: PackageEntry[] = [
             path: '/:locale/form/reference/client',
             label: m.form.navReferenceClient,
           },
+          {
+            path: '/:locale/form/reference/schema',
+            label: m.form.navReferenceSchema,
+          },
         ],
       },
     ],

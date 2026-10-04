@@ -188,6 +188,11 @@ export const navErrors = message({
   en: 'Show errors',
 });
 
+export const navReferenceSchema = message({
+  ja: 'スキーマと入力欄の対応',
+  en: 'Schema mapping',
+});
+
 export const navReferenceServer = message({
   ja: 'サーバーAPI',
   en: 'Server API',
