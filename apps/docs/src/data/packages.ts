@@ -89,6 +89,7 @@ export const PACKAGES: PackageEntry[] = [
             label: m.form.navCustomInputs,
           },
           { path: '/:locale/form/multi-step', label: m.form.navMultiStep },
+          { path: '/:locale/form/search', label: m.form.navSearch },
         ],
       },
       {

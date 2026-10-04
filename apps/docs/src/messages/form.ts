@@ -168,6 +168,11 @@ export const navMultiStep = message({
   en: 'Multi-step forms',
 });
 
+export const navSearch = message({
+  ja: '検索や絞り込みのフォーム',
+  en: 'Search and filter forms',
+});
+
 export const navErrors = message({
   ja: 'エラーを表示する',
   en: 'Show errors',
