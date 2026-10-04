@@ -35,6 +35,7 @@ export * as formGetStarted from './form-get-started';
 export * as formFieldTypes from './form-field-types';
 export * as formErrors from './form-errors';
 export * as formReferenceServer from './form-reference-server';
+export * as formReferenceClient from './form-reference-client';
 export * as stateGetStarted from './state-get-started';
 export * as statePlaces from './state-places';
 export * as stateReading from './state-reading';

@@ -137,3 +137,8 @@ export const navReferenceServer = message({
   ja: 'サーバー API',
   en: 'Server API',
 });
+
+export const navReferenceClient = message({
+  ja: 'クライアント API',
+  en: 'Client API',
+});
