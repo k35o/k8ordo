@@ -279,6 +279,31 @@ Complex interactive previews live in the sibling `_previews/<name>-previews.tsx`
 and are imported by the page. A `_`-prefixed directory is invisible to the route
 grammar, which is why previews can live inside `routes/` at all.
 
+## Writing the Japanese copy
+
+The site's Japanese reads like k8o's blog (`k35o/k8o`,
+`apps/main/src/app/blog/(articles)/*/page.mdx`); read two or three articles
+there before writing a page. Concretely:
+
+- です/ます throughout. Open with the situation and why it matters, then what
+  to do; join sentences with connectives (そのため、ただし、一方で) rather
+  than stacking short assertions. Give the reason when there is one
+  (〜ためです、〜からです).
+- No space between Japanese and Latin letters, digits, or inline code:
+  `zodのスキーマ1つで`, `` `useForm`が返す ``. Keep the spaces inside code.
+- At most three 読点 in a sentence; split a longer one. Avoid runs of seven or
+  more kanji.
+- List words with 、 or と, never 中黒 (・). Define a term with a full-width
+  colon (`用語：説明`), never a dash.
+- No bold and no tables in prose, and none of the stock AI phrases
+  (重要なのは、シームレス、強力な、することができる).
+- Prefer the words a Japanese developer would say over translations of the
+  English: 展開する (spread), 作る (derive), 入力欄 (a form field),
+  検証する／確かめる (validate, check).
+
+The English copy says the same things in natural English; it is not a word
+for word translation of the Japanese, nor the other way round.
+
 ## Shared Doc Components
 
 | Component          | Purpose                              |
