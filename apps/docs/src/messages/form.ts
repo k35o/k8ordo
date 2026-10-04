@@ -148,6 +148,11 @@ export const navRules = message({
   en: 'Cross-field rules',
 });
 
+export const navEdit = message({
+  ja: '既存のデータを編集する',
+  en: 'Edit existing data',
+});
+
 export const navErrors = message({
   ja: 'エラーを表示する',
   en: 'Show errors',

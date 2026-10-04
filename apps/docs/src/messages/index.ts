@@ -36,6 +36,7 @@ export * as formFieldTypes from './form-field-types';
 export * as formErrors from './form-errors';
 export * as formNested from './form-nested';
 export * as formRules from './form-rules';
+export * as formEdit from './form-edit';
 export * as formReferenceServer from './form-reference-server';
 export * as formReferenceClient from './form-reference-client';
 export * as stateGetStarted from './state-get-started';

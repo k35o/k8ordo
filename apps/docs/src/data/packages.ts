@@ -79,6 +79,7 @@ export const PACKAGES: PackageEntry[] = [
           { path: '/:locale/form/nested', label: m.form.navNested },
           { path: '/:locale/form/errors', label: m.form.navErrors },
           { path: '/:locale/form/rules', label: m.form.navRules },
+          { path: '/:locale/form/edit', label: m.form.navEdit },
         ],
       },
       {
