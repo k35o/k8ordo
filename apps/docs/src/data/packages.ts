@@ -90,6 +90,7 @@ export const PACKAGES: PackageEntry[] = [
           },
           { path: '/:locale/form/multi-step', label: m.form.navMultiStep },
           { path: '/:locale/form/search', label: m.form.navSearch },
+          { path: '/:locale/form/with-ui', label: m.form.navWithUi },
         ],
       },
       {

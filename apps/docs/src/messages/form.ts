@@ -173,6 +173,11 @@ export const navSearch = message({
   en: 'Search and filter forms',
 });
 
+export const navWithUi = message({
+  ja: '@k8ordo/uiと組み合わせる',
+  en: 'With @k8ordo/ui',
+});
+
 export const navErrors = message({
   ja: 'エラーを表示する',
   en: 'Show errors',
