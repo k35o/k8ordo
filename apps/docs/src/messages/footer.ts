@@ -1,10 +1,5 @@
 import { message } from '@k8ordo/i18n';
 
-export const docs = message({
-  ja: 'ドキュメント',
-  en: 'Documentation',
-});
-
 export const resources = message({
   ja: 'リソース',
   en: 'Resources',
