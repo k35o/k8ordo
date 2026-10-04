@@ -39,6 +39,7 @@ export * as formRules from './form-rules';
 export * as formEdit from './form-edit';
 export * as formAsyncCheck from './form-async-check';
 export * as formCustomInputs from './form-custom-inputs';
+export * as formMultiStep from './form-multi-step';
 export * as formReferenceServer from './form-reference-server';
 export * as formReferenceClient from './form-reference-client';
 export * as stateGetStarted from './state-get-started';

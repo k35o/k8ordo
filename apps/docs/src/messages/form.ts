@@ -163,6 +163,11 @@ export const navCustomInputs = message({
   en: 'Custom inputs',
 });
 
+export const navMultiStep = message({
+  ja: '複数ステップのフォーム',
+  en: 'Multi-step forms',
+});
+
 export const navErrors = message({
   ja: 'エラーを表示する',
   en: 'Show errors',
