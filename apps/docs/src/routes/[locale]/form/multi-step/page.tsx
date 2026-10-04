@@ -43,7 +43,9 @@ const ERRORS = `const STEP_OF: Record<string, number> = {
 const [shownState, setShownState] = useState(state);
 if (state !== shownState) {
   setShownState(state);
-  const failed = Object.keys(state.errors ?? {}).map((key) => STEP_OF[key] ?? 0);
+  const failed = Object.keys(state.errors ?? {}).map(
+    (key) => STEP_OF[key] ?? 0,
+  );
   if (failed.length > 0) setStep(Math.min(...failed));
 }`;
 
