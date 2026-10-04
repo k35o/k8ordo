@@ -143,6 +143,11 @@ export const navNested = message({
   en: 'Nested objects and rows',
 });
 
+export const navRules = message({
+  ja: '複数の入力欄にまたがる検証',
+  en: 'Cross-field rules',
+});
+
 export const navErrors = message({
   ja: 'エラーを表示する',
   en: 'Show errors',
