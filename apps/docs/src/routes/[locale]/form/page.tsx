@@ -99,6 +99,11 @@ export default function FormPage() {
             description: m.form.nextFieldTypes,
           },
           {
+            path: '/:locale/form/nested',
+            label: m.form.navNested,
+            description: m.form.nextNested,
+          },
+          {
             path: '/:locale/form/errors',
             label: m.form.navErrors,
             description: m.form.nextErrors,
@@ -107,6 +112,11 @@ export default function FormPage() {
             path: '/:locale/form/reference/server',
             label: m.form.navReferenceServer,
             description: m.form.nextReferenceServer,
+          },
+          {
+            path: '/:locale/form/reference/client',
+            label: m.form.navReferenceClient,
+            description: m.form.nextReferenceClient,
           },
         ]}
       />

@@ -1,8 +1,8 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: '登壇の申し込みフォームを作りながら、使い方を一通りたどります。スキーマを1つ書き、ブラウザとサーバーの検証をそれに任せます。',
-  en: 'Build a form for submitting a talk, start to finish. You write one schema and let it drive validation in the browser and on the server.',
+  ja: '登壇の申し込みフォームを1つ作りながら、`@k8ordo/form`の使い方を最初から最後までたどります。フォームの制約はzodのスキーマに1度だけ書き、ブラウザでの検証もサーバーでの検証も、そのスキーマに任せます。',
+  en: 'Build a form for submitting a talk, from start to finish. You write the form’s constraints once, in a zod schema, and let that schema drive validation in the browser and on the server.',
 });
 
 export const installTitle = message({
@@ -11,13 +11,13 @@ export const installTitle = message({
 });
 
 export const installDescription = message({
-  ja: '`@k8ordo/form`とzodを入れます。',
-  en: 'Add `@k8ordo/form` and zod.',
+  ja: '`@k8ordo/form`と、スキーマを書くためのzodをインストールします。',
+  en: 'Install `@k8ordo/form`, and zod to write the schema with.',
 });
 
 export const peersDescription = message({
-  ja: '次のパッケージをpeer dependencyとして使います。',
-  en: 'It relies on these peer dependencies:',
+  ja: 'このほかに、次のパッケージをpeer dependenciesとして使います。',
+  en: 'It also relies on these peer dependencies.',
 });
 
 export const peerReact = message({
@@ -31,17 +31,17 @@ export const peerReactDom = message({
 });
 
 export const peerZod = message({
-  ja: 'スキーマ。`zod`と`zod/mini`のどちらでも書けます',
+  ja: 'スキーマの記述。`zod`と`zod/mini`のどちらでも書けます',
   en: 'The schema, written with either `zod` or `zod/mini`',
 });
 
 export const peerTypes = message({
-  ja: '同梱の型定義',
-  en: 'The shipped type declarations',
+  ja: '同梱している型定義',
+  en: 'The type declarations it ships',
 });
 
 export const zodMini = message({
-  ja: 'スキーマは`zod/mini`で書いても同じように動きます。スキーマのモジュールをクライアントからもimportするなら、バンドルが小さくなる`zod/mini`を選びます。',
+  ja: 'スキーマは`zod/mini`で書いても同じように動きます。スキーマを書いたモジュールをクライアントのコードからもimportするなら、バンドルが小さく済む`zod/mini`を選んでください。',
   en: 'A schema written with `zod/mini` works the same way. If client code imports the schema module too, choose `zod/mini` for the smaller bundle.',
 });
 
@@ -51,28 +51,28 @@ export const schemaTitle = message({
 });
 
 export const schemaDescription = message({
-  ja: 'フォームの欄と、その制約をzodで書きます。',
-  en: 'Describe the fields and their constraints with zod.',
+  ja: 'まず、フォームにどんな入力欄があり、それぞれにどんな制約があるかを、zodのスキーマで書きます。',
+  en: 'First, describe the form’s fields and their constraints in a zod schema.',
 });
 
 export const schemaCoerce = message({
-  ja: 'フォームはどの値も文字列で送ります。数値の欄は`z.coerce.number()`にして、文字列を数に変えます。',
-  en: 'A form submits every value as a string, so a numeric field uses `z.coerce.number()` to turn it into a number.',
+  ja: 'フォームは、数値の入力欄の値も文字列として送ります。そのため数値の欄は`z.coerce.number()`で受け、文字列を数に変換してから検証します。',
+  en: 'A form submits even a numeric field as a string, so a number field uses `z.coerce.number()`, which turns the string into a number before checking it.',
 });
 
 export const deriveTitle = message({
-  ja: '欄を導く',
+  ja: '入力欄の属性を作る',
   en: 'Derive the fields',
 });
 
 export const deriveDescription = message({
-  ja: 'Server Componentで`formFields`を呼び、結果をフォームに渡します。',
-  en: 'Call `formFields` in a Server Component and pass the result to the form.',
+  ja: '次に、Server Componentで`formFields`を呼びます。スキーマから、入力欄に付ける`required`や`maxlength`などの属性と、エラーの文言が作られます。',
+  en: 'Next, call `formFields` in a Server Component. From the schema it builds the attributes for each control, such as `required` and `maxlength`, along with the error messages.',
 });
 
 export const deriveJson = message({
-  ja: '結果はただのJSONなので、propsとしてクライアントへ渡せます。zodそのものはブラウザに届きません。',
-  en: 'The result is plain JSON, so it crosses to the client as props. zod itself never reaches the browser.',
+  ja: '`formFields`の戻り値はただのJSONなので、そのままpropsとしてClient Componentに渡せます。zodを使うのはサーバー側だけで、ブラウザには届きません。',
+  en: 'What `formFields` returns is plain JSON, so it goes to a Client Component as props. Only the server uses zod; it never reaches the browser.',
 });
 
 export const actionTitle = message({
@@ -81,13 +81,13 @@ export const actionTitle = message({
 });
 
 export const actionDescription = message({
-  ja: 'Server Actionで`parseForm`を呼びます。',
-  en: 'Call `parseForm` in a Server Action.',
+  ja: '送信されたフォームは、Server Actionの中で`parseForm`に渡して検証します。',
+  en: 'A submitted form is validated in a Server Action, by handing it to `parseForm`.',
 });
 
 export const actionResult = message({
-  ja: '成功すると、`parsed.data`に型の付いた値が入ります。失敗したら`parsed.state`をそのまま返します。エラーと入力した値がフォームに戻ります。',
-  en: 'On success, `parsed.data` holds the typed values. On failure, return `parsed.state` as it is, and the errors and what was typed go back to the form.',
+  ja: '検証に通れば、`parsed.data`に型の付いた値が入ります。通らなかったときは`parsed.state`をそのまま返してください。エラーと入力していた値がフォームに戻るので、直してすぐに送り直せます。',
+  en: 'When it passes, `parsed.data` holds the typed values. When it fails, return `parsed.state` as it is: the errors and what was typed go back to the form, so the person can fix them and send again.',
 });
 
 export const formTitle = message({
@@ -96,18 +96,18 @@ export const formTitle = message({
 });
 
 export const formDescription = message({
-  ja: 'Server Actionを`useActionState`で包み、そのstateを`useForm`に渡します。',
-  en: 'Wrap the Server Action in `useActionState` and pass its state to `useForm`.',
+  ja: '最後に、Server Actionを`useActionState`でフォームにつなぎ、返ってくるstateを`useForm`に渡します。',
+  en: 'Finally, connect the Server Action to the form with `useActionState`, and pass the state it returns to `useForm`.',
 });
 
 export const formSpread = message({
-  ja: '`form.props`を`<form>`に、各欄の`input`を入力欄に広げます。エラーがあれば`error`に入るので、欄の近くに表示します。',
-  en: 'Spread `form.props` onto the `<form>` and each field’s `input` onto its control. A field’s error is in `error`; show it next to the field.',
+  ja: '`form.props`は`<form>`に、各欄の`input`は対応する入力欄に展開します。エラーがあると`error`に入るので、入力欄のすぐ近くに表示します。',
+  en: 'Spread `form.props` onto the `<form>`, and each field’s `input` onto its control. A field’s error arrives in `error`; show it right next to the control.',
 });
 
 export const formDom = message({
-  ja: '欄ごとの登録も、値を持つstateもありません。値はDOMが持ちます。',
-  en: 'There is no per-field registration and no state holding the values. The DOM holds them.',
+  ja: '入力欄を1つずつ登録する手順も、入力値を持つstateもありません。値はDOMが持っているので、キーを押すたびに再描画されることもありません。',
+  en: 'There is no per-field registration and no state holding the values. The DOM keeps them, so typing never re-renders.',
 });
 
 export const tryTitle = message({
@@ -116,22 +116,22 @@ export const tryTitle = message({
 });
 
 export const tryDescription = message({
-  ja: 'ここまでに作ったフォームです。このサイトにはServer Actionが無いので、送信できる値になったところで止めています。',
-  en: 'The form you just built. This site has no Server Action, so it stops once the values could be sent.',
+  ja: 'ここまでで作ったフォームです。このサイトには送信先のServer Actionが無いので、送信できる状態になったところで止めています。',
+  en: 'The form you just built. This site has no Server Action to send it to, so it stops once the values are ready to be sent.',
 });
 
 export const trySteps = [
   message({
-    ja: '何も入れずに「申し込む」を押します。最初の欄にフォーカスが移り、エラーが出ます。',
-    en: 'Press “Submit” with nothing filled in. Focus moves to the first field and its error appears.',
+    ja: '何も入力せずに「申し込む」を押してみてください。最初の欄にフォーカスが移り、エラーが表示されます。',
+    en: 'Press “Submit” with nothing filled in. Focus moves to the first field, and its error appears.',
   }),
   message({
-    ja: '「イベントのURL」に`example`と入れて欄を離れます。URLの形ではない、というエラーが出ます。',
+    ja: '「イベントのURL」に`example`と入力して欄から離れると、URLの形式ではないというエラーが出ます。',
     en: 'Type `example` into “Event URL” and leave the field. The error says it is not a URL.',
   }),
   message({
-    ja: '「長さ（分）」に`90`と入れます。上限の60を超えた、というエラーが出ます。',
-    en: 'Type `90` into “Length (minutes)”. The error says it is over the limit of 60.',
+    ja: '「長さ（分）」に`90`と入力して欄から離れると、上限の60分を超えているというエラーが出ます。',
+    en: 'Type `90` into “Length (minutes)” and leave the field. The error says it is over the 60-minute limit.',
   }),
 ] as const;
 
@@ -196,7 +196,7 @@ export const nextTitle = message({
 });
 
 export const nextFieldTypes = message({
-  ja: '数値、選択肢、チェックボックス、ファイルの欄を足す。',
+  ja: '数値や選択肢、チェックボックス、ファイルの入力欄を足す。',
   en: 'Add numbers, choices, checkboxes and files.',
 });
 
@@ -206,6 +206,6 @@ export const nextErrors = message({
 });
 
 export const nextReference = message({
-  ja: '`formFields`と`parseForm`の引数と戻り値を調べる。',
+  ja: '`formFields`や`parseForm`が受け取るものと返すものを調べる。',
   en: 'Look up what `formFields` and `parseForm` take and return.',
 });

@@ -1,12 +1,12 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: '`@k8ordo/form/server`が提供する関数と型です。どれもサーバーで呼びます。zodをブラウザに送らないためです。',
+  ja: '`@k8ordo/form/server`から使える関数と型の一覧です。どれもサーバーで呼びます。サーバーだけで呼ぶことで、zodをブラウザに送らずに済みます。',
   en: 'The functions and types that `@k8ordo/form/server` provides. Call them on the server, which keeps zod out of the browser.',
 });
 
 export const formFieldsSummary = message({
-  ja: 'スキーマから、各欄の属性、文言、ルールを導きます。',
+  ja: 'スキーマから、入力欄ごとの属性と文言、ルールを作ります。',
   en: 'Derives each field’s attributes, messages and rules from the schema.',
 });
 
@@ -22,19 +22,19 @@ export const formFieldsReturns = message({
 
 export const formFieldsCaveats = [
   message({
-    ja: 'Server Componentか、モジュールスコープで呼びます。結果はJSONなので、propsでクライアントへ渡せます。',
+    ja: 'Server Componentの中か、モジュールのトップレベルで呼びます。戻り値はJSONなので、propsでクライアントへ渡せます。',
     en: 'Call it in a Server Component or at module scope. The result is JSON, so it crosses to the client as props.',
   }),
   message({
-    ja: '文言は呼んだ時点で決まります。リクエストのロケールに合わせるなら、描画の中で呼びます。',
+    ja: '文言は呼んだ時点で決まります。リクエストの言語に合わせるなら、描画の中で呼んでください。',
     en: 'Messages are fixed when it runs. To follow the request’s locale, call it during the render.',
   }),
   message({
-    ja: 'フォームで表せないスキーマ（`z.record`、タプル、`z.number()`など）には、理由を添えて例外を投げます。',
+    ja: 'フォームで表せないスキーマ（`z.record`やタプル、`z.number()`など）を渡すと、理由を添えてエラーを投げます。',
     en: 'It throws, with the reason, on a schema a form cannot express (`z.record`, tuples, `z.number()` and so on).',
   }),
   message({
-    ja: 'HTMLの属性で表せない検査は`dropped`に入ります。本番以外では`console.warn`でも知らせます。',
+    ja: 'HTMLの属性で表せない検証は、`dropped`に入ります。本番環境以外では、`console.warn`でも知らせます。',
     en: 'Checks no HTML attribute can express go into `dropped`. Outside production it also reports them with `console.warn`.',
   }),
 ] as const;
@@ -61,11 +61,11 @@ export const parseFormReturns = message({
 
 export const parseFormCaveats = [
   message({
-    ja: 'チェックの無いチェックボックスや、同じ名前で送られた値をまとめてから、スキーマに渡します。文字列から数への変換は、スキーマの`z.coerce`が行います。',
+    ja: 'チェックの無いチェックボックスや、同じ名前で送られた複数の値をまとめてから、スキーマに渡します。文字列から数への変換は、スキーマの`z.coerce`が受け持ちます。',
     en: 'It gathers unchecked checkboxes and repeated names before handing the values to the schema. Turning strings into numbers is the schema’s job, through `z.coerce`.',
   }),
   message({
-    ja: 'スキーマにある欄が`FormData`に無いと、例外を投げます。`input`の広げ忘れだからです。何も選ばなければ送られない欄（ラジオ、`<select>`、チェックボックス）は除きます。',
+    ja: 'スキーマにある入力欄が`FormData`に無いと、エラーを投げます。`input`を展開し忘れていると考えられるからです。ただし、何も選ばなければ値を送らない入力欄（ラジオボタン、`<select>`、チェックボックス）は除きます。',
     en: 'It throws when a field in the schema is missing from the `FormData`, since that means an `input` was never spread. Controls that send nothing when left alone (radio buttons, `<select>`, checkboxes) are the exception.',
   }),
   message({
@@ -75,7 +75,7 @@ export const parseFormCaveats = [
 ] as const;
 
 export const defineFormSummary = message({
-  ja: 'スキーマに、複数の欄にまたがるルールを添えます。',
+  ja: 'スキーマに、複数の入力欄にまたがるルールを添えます。',
   en: 'Attaches rules that span several fields to a schema.',
 });
 
@@ -85,19 +85,19 @@ export const defineFormSchema = message({
 });
 
 export const defineFormRules = message({
-  ja: '`sameAs`、`minChecked`、`requiredWhen`で作ったルール。欄のパスは型で検査されます。',
+  ja: '`sameAs`、`minChecked`、`requiredWhen`で作ったルール。入力欄のパスは型で確かめられます。',
   en: 'Rules made with `sameAs`, `minChecked` and `requiredWhen`. Field paths are type-checked.',
 });
 
 export const defineFormReturns = message({
-  ja: 'スキーマの代わりに`formFields`と`parseForm`へ渡します。',
+  ja: 'スキーマの代わりに、`formFields`と`parseForm`へ渡します。',
   en: 'Pass it to `formFields` and `parseForm` in place of the schema.',
 });
 
 export const defineFormCaveats = [
   message({
-    ja: 'ルールはブラウザとサーバーで同じ評価器が実行します。同じ欄で複数のルールが破れたときは、先に宣言したルールの文言を出します。',
-    en: 'The same evaluator runs the rules in the browser and on the server. When several rules break on one field, the first one declared is shown.',
+    ja: 'ルールは、ブラウザでもサーバーでも同じ判定の処理で確かめます。1つの入力欄で複数のルールを満たさないときは、先に宣言したルールの文言を出します。',
+    en: 'Both the browser and the server check the rules with the same evaluator. When several rules break on one field, the message of the one declared first is shown.',
   }),
 ] as const;
 
@@ -117,12 +117,12 @@ export const requiredWhenSummary = message({
 });
 
 export const ruleField = message({
-  ja: 'ルールを適用する欄のパス。破れたときのエラーはこの欄に出ます。',
+  ja: 'ルールを当てる入力欄のパス。ルールを満たさないときのエラーは、この欄に出ます。',
   en: 'The path of the field the rule applies to. A breach is reported on it.',
 });
 
 export const ruleOther = message({
-  ja: '比べる相手の欄のパス。',
+  ja: '比べる相手の入力欄のパス。',
   en: 'The path of the field to compare with.',
 });
 
@@ -132,7 +132,7 @@ export const ruleMin = message({
 });
 
 export const ruleWhen = message({
-  ja: '条件にする欄のパス。',
+  ja: '条件にする入力欄のパス。',
   en: 'The path of the field the condition reads.',
 });
 
@@ -142,7 +142,7 @@ export const ruleEquals = message({
 });
 
 export const ruleMessage = message({
-  ja: '破れたときの文言。関数を渡すと、報告するときに呼ばれます。',
+  ja: 'ルールを満たさないときの文言。関数を渡すと、エラーを報告するときに呼ばれます。',
   en: 'The message for a breach. A function is called when the breach is reported.',
 });
 
@@ -157,26 +157,26 @@ export const formStateSummary = message({
 });
 
 export const formStateErrors = message({
-  ja: '欄ごとのエラー。キーは`items[1].name`のようなパスです。',
+  ja: '入力欄ごとのエラー。キーは`items[1].name`のようなパスです。',
   en: 'Errors per field, keyed by path such as `items[1].name`.',
 });
 
 export const formStateValues = message({
-  ja: '送られた値。失敗したあと、欄の初期値として戻ります。',
+  ja: '送信された値。送信に失敗したあと、入力欄の初期値として戻ります。',
   en: 'The submitted values, restored as the fields’ defaults after a failure.',
 });
 
 export const formStateRows = message({
-  ja: '繰り返し行ごとの行数。JavaScriptが無くても、同じ数の行を描き直せます。',
+  ja: '繰り返しの行ごとの行数。JavaScriptが無くても、同じ数の行を描き直せます。',
   en: 'How many rows each array had, so the same rows render again without JavaScript.',
 });
 
 export const formStateFormError = message({
-  ja: 'どの欄にも属さないエラー。',
+  ja: 'どの入力欄にも属さないエラー。',
   en: 'An error that belongs to no field.',
 });
 
 export const formStateToken = message({
-  ja: '1回の検証を見分ける値。同じ内容の失敗が続いても、別の返事として扱えます。',
+  ja: '1回の検証を見分けるための値。同じ内容の失敗が続いても、別の返事として扱えます。',
   en: 'Identifies one parse, so two identical failures still read as two responses.',
 });
