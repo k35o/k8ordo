@@ -46,6 +46,7 @@ export * as formHowItWorks from './form-how-it-works';
 export * as formReferenceServer from './form-reference-server';
 export * as formReferenceClient from './form-reference-client';
 export * as formReferenceSchema from './form-reference-schema';
+export * as formTroubleshooting from './form-troubleshooting';
 export * as stateGetStarted from './state-get-started';
 export * as statePlaces from './state-places';
 export * as stateReading from './state-reading';

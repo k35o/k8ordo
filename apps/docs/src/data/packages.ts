@@ -114,6 +114,10 @@ export const PACKAGES: PackageEntry[] = [
             path: '/:locale/form/reference/schema',
             label: m.form.navReferenceSchema,
           },
+          {
+            path: '/:locale/form/troubleshooting',
+            label: m.form.navTroubleshooting,
+          },
         ],
       },
     ],

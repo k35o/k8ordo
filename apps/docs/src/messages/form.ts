@@ -193,6 +193,11 @@ export const navReferenceSchema = message({
   en: 'Schema mapping',
 });
 
+export const navTroubleshooting = message({
+  ja: 'うまく動かないとき',
+  en: 'Troubleshooting',
+});
+
 export const navReferenceServer = message({
   ja: 'サーバーAPI',
   en: 'Server API',
