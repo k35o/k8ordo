@@ -42,6 +42,7 @@ export * as formCustomInputs from './form-custom-inputs';
 export * as formMultiStep from './form-multi-step';
 export * as formSearch from './form-search';
 export * as formWithUi from './form-with-ui';
+export * as formHowItWorks from './form-how-it-works';
 export * as formReferenceServer from './form-reference-server';
 export * as formReferenceClient from './form-reference-client';
 export * as stateGetStarted from './state-get-started';

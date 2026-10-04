@@ -178,6 +178,11 @@ export const navWithUi = message({
   en: 'With @k8ordo/ui',
 });
 
+export const navHowItWorks = message({
+  ja: '仕組み',
+  en: 'How it works',
+});
+
 export const navErrors = message({
   ja: 'エラーを表示する',
   en: 'Show errors',

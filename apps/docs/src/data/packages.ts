@@ -94,6 +94,12 @@ export const PACKAGES: PackageEntry[] = [
         ],
       },
       {
+        label: m.nav.groupConcepts,
+        sections: [
+          { path: '/:locale/form/how-it-works', label: m.form.navHowItWorks },
+        ],
+      },
+      {
         label: m.nav.groupReference,
         sections: [
           {
