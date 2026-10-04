@@ -39,7 +39,7 @@ export const prefs = defineLocalState(
 export const density = defineCookieState(
   'density',
   z.object({
-    density: z.enum(['comfortable', 'compact']).default('comfortable'),
+    density: z.enum(['cozy', 'compact']).default('cozy'),
   }),
 );`;
 

@@ -19,7 +19,7 @@ const HERO_LINK = `<a href={href('/products/:id', { id: product.id })}>
   {product.name}
 </a>`;
 
-const CLAIM_ANCHOR = `export function ProductsLink({ children }: { children: ReactNode }) {
+const CLAIM_ANCHOR = `export function ProductsLink({ children }: PropsWithChildren) {
   const current = useMatch('/products/*', { inclusive: true });
 
   return (
