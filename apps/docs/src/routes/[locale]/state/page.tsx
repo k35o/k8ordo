@@ -33,7 +33,9 @@ const CLAIM_PLACES = `export const listState = definePageState('product-list', {
 
 export const prefs = defineLocalState(
   'prefs',
-  z.object({ view: z.enum(['grid', 'table']).default('grid') }),
+  z.object({
+    view: z.enum(['grid', 'table']).default('grid'),
+  }),
 );
 
 export const density = defineCookieState(
