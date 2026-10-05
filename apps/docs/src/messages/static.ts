@@ -127,3 +127,8 @@ export const navReference = message({
   ja: '設定とファイル',
   en: 'Options and files',
 });
+
+export const navCsp = message({
+  ja: 'CSPを設定する',
+  en: 'Set a CSP',
+});
