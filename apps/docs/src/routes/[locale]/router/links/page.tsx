@@ -57,11 +57,7 @@ const DOWNLOAD = `<a download href="/report.pdf">
 export default function RouterLinksPage() {
   return (
     <DocPage introduction={t.introduction} path="/:locale/router/links">
-      <DocSection
-        description={t.hrefDescription}
-        id="href"
-        title={t.hrefTitle}
-      >
+      <DocSection description={t.hrefDescription} id="href" title={t.hrefTitle}>
         <CodeBlock code={HREF} lang="ts" />
         <p>
           <Rich>{t.hrefValues()}</Rich>

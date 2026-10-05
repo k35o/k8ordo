@@ -138,11 +138,7 @@ export default function RouterHowItWorksPage() {
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.hookDescription}
-        id="hook"
-        title={t.hookTitle}
-      >
+      <DocSection description={t.hookDescription} id="hook" title={t.hookTitle}>
         <p>
           <Rich>{t.hookHandler()}</Rich>
         </p>

@@ -87,11 +87,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
 export default function RouterAnimatePage() {
   return (
     <DocPage introduction={t.introduction} path="/:locale/router/animate">
-      <DocSection
-        description={t.fadeDescription}
-        id="fade"
-        title={t.fadeTitle}
-      >
+      <DocSection description={t.fadeDescription} id="fade" title={t.fadeTitle}>
         <CodeBlock
           code={FADE}
           lang="tsx"

@@ -146,6 +146,6 @@ export const navigablePathSlash = message({
 });
 
 export const navigablePathWhy = message({
-  ja: '表のすべてのパスを並べた型を作って比べないのは、`/:locale`のようなページがあると、その型が`/${string}`になってしまうからです。`/${string}`は、どんなパスでも受け付けてしまいます。',
-  en: 'It does not build a type listing every path in the table to compare against, because a page such as `/:locale` would turn that type into `/${string}`, which takes every path there is.',
+  ja: `表のすべてのパスを並べた型を作って比べないのは、\`/:locale\`のようなページがあると、その型が\`/\${string}\`になってしまうからです。\`/\${string}\`は、どんなパスでも受け付けてしまいます。`,
+  en: `It does not build a type listing every path in the table to compare against, because a page such as \`/:locale\` would turn that type into \`/\${string}\`, which takes every path there is.`,
 });

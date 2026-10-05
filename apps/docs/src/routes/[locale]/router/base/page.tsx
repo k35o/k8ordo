@@ -65,11 +65,7 @@ export default function RouterBasePage() {
         </Pitfall>
       </DocSection>
 
-      <DocSection
-        description={t.readDescription}
-        id="read"
-        title={t.readTitle}
-      >
+      <DocSection description={t.readDescription} id="read" title={t.readTitle}>
         <p>
           <Rich>{t.readCompare()}</Rich>
         </p>

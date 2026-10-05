@@ -28,11 +28,7 @@ navigateTo('/:locale', { history: 'replace' });`;
 export default function RouterBindParamsPage() {
   return (
     <DocPage introduction={t.introduction} path="/:locale/router/bind-params">
-      <DocSection
-        description={t.bindDescription}
-        id="bind"
-        title={t.bindTitle}
-      >
+      <DocSection description={t.bindDescription} id="bind" title={t.bindTitle}>
         <CodeBlock
           code={LINKS}
           lang="ts"

@@ -233,11 +233,7 @@ export default function RouterGetStartedPage() {
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.linkDescription}
-        id="link"
-        title={t.linkTitle}
-      >
+      <DocSection description={t.linkDescription} id="link" title={t.linkTitle}>
         <CodeBlock
           code={PRODUCT_LIST}
           lang="tsx"

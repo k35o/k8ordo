@@ -132,11 +132,7 @@ export default function RouterBoundariesPage() {
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.lazyDescription}
-        id="lazy"
-        title={t.lazyTitle}
-      >
+      <DocSection description={t.lazyDescription} id="lazy" title={t.lazyTitle}>
         <CodeBlock
           code={LAZY}
           lang="ts"
