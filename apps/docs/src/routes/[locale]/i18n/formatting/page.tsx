@@ -1,15 +1,25 @@
-import type { Message } from '@k8ordo/i18n';
-import { Code } from '@k8ordo/ui';
 import { CodeBlock } from '@k8ordo/ui/code-block';
 
+import { Note } from '../../../../components/callout';
 import { DocPage, DocSection } from '../../../../components/doc-page';
+import { Playground } from '../../../../components/playground';
 import { Rich } from '../../../../components/rich';
 import * as m from '../../../../messages';
+import { TimeZoneDemo } from './_parts/time-zone-demo';
 
-const s = m.i18nFormatting;
+const t = m.i18nFormatting;
 
-const PUBLISHED_AT = `// src/components/published-at.tsx
-import { locales } from '../i18n';
+const PRICE = `import { locales } from '../i18n';
+
+export function Price({ amount }: { amount: number }) {
+  const yen = locales.numberFormat({
+    style: 'currency',
+    currency: 'JPY',
+  });
+  return <span>{yen.format(amount)}</span>;
+}`;
+
+const PUBLISHED_AT = `import { locales } from '../i18n';
 
 export function PublishedAt({ date }: { date: Date }) {
   return (
@@ -19,115 +29,107 @@ export function PublishedAt({ date }: { date: Date }) {
   );
 }`;
 
-const REFUSED = `// the type refuses it — the locale's time zone is the only one
-locales.dateTimeFormat({ dateStyle: 'medium', timeZone: 'UTC' });`;
-
-const CART = `// src/messages/cart.ts
-import { message } from '@k8ordo/i18n';
+const CART = `import { message } from '@k8ordo/i18n';
 
 import { locales } from '../i18n';
 
+const long = () => locales.dateTimeFormat({ dateStyle: 'long' });
+
 export const items = message({
-  ja: (count: number) => \`\${locales.numberFormat().format(count)} 件\`,
+  ja: (count: number) => \`\${String(count)}件\`,
   en: (count) =>
-    \`\${locales.numberFormat().format(count)} \${locales.pluralRules().select(count) === 'one' ? 'item' : 'items'}\`,
+    locales.pluralRules().select(count) === 'one'
+      ? \`\${String(count)} item\`
+      : \`\${String(count)} items\`,
 });
 
 export const updated = message({
-  ja: (date: Date) =>
-    \`\${locales.dateTimeFormat({ dateStyle: 'long' }).format(date)} 更新\`,
-  en: (date) =>
-    \`Updated \${locales.dateTimeFormat({ dateStyle: 'long' }).format(date)}\`,
+  ja: (date: Date) => \`\${long().format(date)}に更新\`,
+  en: (date) => \`Updated \${long().format(date)}\`,
 });`;
-
-const MEMBERS: ReadonlyArray<{ code: string; returns: Message }> = [
-  {
-    code: 'dateTimeFormat(options?)',
-    returns: s.members.dateTimeFormat,
-  },
-  { code: 'numberFormat(options?)', returns: s.members.numberFormat },
-  {
-    code: 'relativeTimeFormat(options?)',
-    returns: s.members.relativeTimeFormat,
-  },
-  { code: 'pluralRules(options?)', returns: s.members.pluralRules },
-  { code: 'listFormat(options?)', returns: s.members.listFormat },
-];
-
-const TH = 'py-3 pr-6 font-medium whitespace-nowrap';
-const TR = 'border-border-mute border-b';
 
 export default function I18nFormattingPage() {
   return (
-    <DocPage introduction={s.introduction} path="/:locale/i18n/formatting">
+    <DocPage introduction={t.introduction} path="/:locale/i18n/formatting">
       <DocSection
-        id="members"
-        description={s.members.description}
-        title={s.members.title}
+        description={t.membersDescription}
+        id="intl"
+        title={t.membersTitle}
       >
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead>
-              <tr className={TR}>
-                <th className={TH}>{s.members.memberColumn()}</th>
-                <th className={TH}>{s.members.returnsColumn()}</th>
-              </tr>
-            </thead>
-            <tbody className="text-fg-mute">
-              {MEMBERS.map((row) => (
-                <tr className={TR} key={row.code}>
-                  <td className="py-3 pr-6 align-top whitespace-nowrap">
-                    <Code>{row.code}</Code>
-                  </td>
-                  <td className="py-3">
-                    <Rich>{row.returns()}</Rich>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <p className="text-fg-mute leading-relaxed">
-          <Rich>{s.members.itself()}</Rich>
+        <ul>
+          {t.membersList.map((item) => (
+            <li key={item()}>
+              <Rich>{item()}</Rich>
+            </li>
+          ))}
+        </ul>
+        <CodeBlock
+          code={PRICE}
+          lang="tsx"
+          marks={{ 4: 'highlight' }}
+          title="price.tsx"
+        />
+        <p>
+          <Rich>{t.membersItself()}</Rich>
         </p>
-        <p className="text-fg-mute leading-relaxed">
-          <Rich>{s.members.others()}</Rich>
+        <p>
+          <Rich>{t.membersOthers()}</Rich>
         </p>
       </DocSection>
 
       <DocSection
-        id="time-zone"
-        description={s.timeZone.description}
-        title={s.timeZone.title}
+        description={t.datesDescription}
+        id="dates"
+        title={t.datesTitle}
       >
-        <CodeBlock code={PUBLISHED_AT} lang="tsx" />
-        <p className="text-fg-mute leading-relaxed">
-          <Rich>{s.timeZone.why()}</Rich>
+        <CodeBlock
+          code={PUBLISHED_AT}
+          lang="tsx"
+          marks={{ 6: 'highlight' }}
+          title="published-at.tsx"
+        />
+        <p>
+          <Rich>{t.datesRefuse()}</Rich>
         </p>
-        <p className="text-fg-mute leading-relaxed">
-          <Rich>{s.timeZone.refused()}</Rich>
-        </p>
-        <CodeBlock code={REFUSED} lang="ts" />
-        <p className="text-fg-mute leading-relaxed">
-          <Rich>{s.timeZone.visitor()}</Rich>
-        </p>
+        <Note>
+          <p>
+            <Rich>{t.datesVisitor()}</Rich>
+          </p>
+        </Note>
       </DocSection>
 
+      <Playground
+        description={t.demoDescription}
+        id="demo"
+        steps={t.demoSteps}
+        title={t.demoTitle}
+      >
+        <TimeZoneDemo />
+      </Playground>
+
       <DocSection
+        description={t.inMessagesDescription}
         id="in-messages"
-        description={s.inMessages.description}
-        title={s.inMessages.title}
+        title={t.inMessagesTitle}
       >
-        <CodeBlock code={CART} lang="ts" />
+        <CodeBlock
+          code={CART}
+          lang="ts"
+          marks={{ 10: 'highlight', 16: 'highlight', 17: 'highlight' }}
+          title="messages/cart.ts"
+        />
+        <p>
+          <Rich>{t.inMessagesPlural()}</Rich>
+        </p>
       </DocSection>
 
       <DocSection
+        description={t.cacheDescription}
         id="cache"
-        description={s.cache.description}
-        title={s.cache.title}
+        title={t.cacheTitle}
       >
-        <p className="text-fg-mute leading-relaxed">
-          <Rich>{s.cache.key()}</Rich>
+        <p>
+          <Rich>{t.cacheKey()}</Rich>
         </p>
       </DocSection>
     </DocPage>

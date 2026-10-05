@@ -104,8 +104,8 @@ export const navMessages = message({
 });
 
 export const navFormatting = message({
-  ja: '日付と数値',
-  en: 'Dates & numbers',
+  ja: '日付や数値を書式化する',
+  en: 'Format dates and numbers',
 });
 
 export const navRouting = message({
