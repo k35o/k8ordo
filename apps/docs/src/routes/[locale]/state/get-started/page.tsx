@@ -1,359 +1,260 @@
-import { Heading } from '@k8ordo/ui';
 import { CodeBlock } from '@k8ordo/ui/code-block';
 
+import { Note } from '../../../../components/callout';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { InstallTabs } from '../../../../components/install-tabs';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { PeerTable } from '../../../../components/peer-table';
+import { Playground } from '../../../../components/playground';
 import { Rich } from '../../../../components/rich';
 import * as m from '../../../../messages';
+import { ProductsDemo } from './_parts/products-demo';
 
-const DEFINITION = `// src/state/products.ts
-import { definePageState } from '@k8ordo/state';
-import * as z from 'zod/mini';
+const t = m.stateGetStarted;
 
-export const productListState = definePageState('product-list', {
+const STATE = `import { definePageState } from '@k8ordo/state';
+import * as z from 'zod';
+
+export const listState = definePageState('product-list', {
   url: z.object({
-    q: z._default(z.string(), ''),
-    page: z._default(z.coerce.number().check(z.int(), z.gte(1)), 1),
-    sort: z._default(z.enum(['new', 'price']), 'new'),
+    inStock: z.stringbool().default(false),
+    page: z.coerce.number().int().min(1).default(1),
   }),
 });`;
 
-const COMPONENT = `// src/routes/products/_parts/product-list.tsx
-'use client';
+const FILTERS = `'use client';
 
 import { useAppState } from '@k8ordo/state';
 
-import type { Product } from '../../../data/products';
-import { productListState } from '../../../state/products';
+import { listState } from './state';
 
-const PAGE_SIZE = 20;
-
-type Props = {
-  products: readonly Product[];
-};
-
-export function ProductList({ products }: Props) {
-  const [{ q, page, sort }, update] = useAppState(productListState);
-
-  const visible = products
-    .filter((product) => product.name.includes(q))
-    .toSorted((a, b) =>
-      sort === 'price' ? a.price - b.price : b.createdAt - a.createdAt,
-    )
-    .slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+export function Filters() {
+  const [{ inStock, page }, update] = useAppState(listState);
 
   return (
-    <section>
-      <button
-        onClick={() => {
-          update({ sort: sort === 'new' ? 'price' : 'new', page: 1 });
-        }}
-        type="button"
-      >
-        {sort === 'new' ? 'Sort by price' : 'Sort by newest'}
-      </button>
-      <ul>
-        {visible.map((product) => (
-          <li key={product.id}>{product.name}</li>
-        ))}
-      </ul>
-      <button
-        disabled={page === 1}
-        onClick={() => {
-          update({ page: page - 1 }, { history: 'push' });
-        }}
-        type="button"
-      >
-        Previous
-      </button>
+    <div>
+      <label>
+        <input
+          checked={inStock}
+          onChange={(event) => {
+            update({ inStock: event.target.checked, page: 1 });
+          }}
+          type="checkbox"
+        />
+        In stock only
+      </label>
       <button
         onClick={() => {
           update({ page: page + 1 }, { history: 'push' });
         }}
         type="button"
       >
-        Next
+        Next page
       </button>
-    </section>
+    </div>
   );
 }`;
 
-const PAGE = `// src/routes/products/page.tsx
-import { products } from '../../data/products';
-import { productListState } from '../../state/products';
-import { ProductList } from './_parts/product-list';
+const PAGE = `import type { PageProps } from '@k8ordo/router';
 
-export default function ProductsPage() {
+import { Filters } from './filters';
+import { ProductList } from './product-list';
+import { listState } from './state';
+
+export const search = listState.url;
+
+export default async function ProductsPage({
+  search,
+}: PageProps<'/products'>) {
+  const products = await findProducts(search);
+
   return (
     <>
-      <nav>
-        <a href={productListState.href('/products')}>All products</a>
-        <a href={productListState.href('/products', { sort: 'price' })}>
-          Cheapest first
-        </a>
-      </nav>
+      <Filters initialUrl={search} />
       <ProductList products={products} />
     </>
   );
 }`;
 
-const SERVER_PAGE = `// src/app/products/page.tsx
-import { products } from '../../data/products';
-import { productListState } from '../../state/products';
-import { ProductList } from './product-list';
-
-type Props = {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-};
-
-export default async function ProductsPage({ searchParams }: Props) {
-  const url = productListState.parseUrl(await searchParams);
-
-  return <ProductList initialUrl={url} products={products} />;
-}`;
-
-const SERVER_COMPONENT = `// src/app/products/product-list.tsx
-'use client';
-
-import { useAppState } from '@k8ordo/state';
+const SEED = `import { useAppState } from '@k8ordo/state';
 import type { OutputOf } from '@k8ordo/state';
 
-import type { Product } from '../../data/products';
-import { productListState } from '../../state/products';
-
-const PAGE_SIZE = 20;
-
 type Props = {
-  products: readonly Product[];
-  initialUrl: OutputOf<typeof productListState.url>;
+  initialUrl: OutputOf<typeof listState.url>;
 };
 
-export function ProductList({ products, initialUrl }: Props) {
-  const [{ q, page, sort }, update] = useAppState(productListState, {
+export function Filters({ initialUrl }: Props) {
+  const [{ inStock, page }, update] = useAppState(listState, {
     initialUrl,
-  });
+  });`;
 
-  const visible = products
-    .filter((product) => product.name.includes(q))
-    .toSorted((a, b) =>
-      sort === 'price' ? a.price - b.price : b.createdAt - a.createdAt,
-    )
-    .slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+const LINKS = `listState.href('/products', { inStock: true });
+// '/products?inStock=true'
 
-  return (
-    <section>
-      <button
-        onClick={() => {
-          update({ sort: sort === 'new' ? 'price' : 'new', page: 1 });
-        }}
-        type="button"
-      >
-        {sort === 'new' ? 'Sort by price' : 'Sort by newest'}
-      </button>
-      <ul>
-        {visible.map((product) => (
-          <li key={product.id}>{product.name}</li>
-        ))}
-      </ul>
-      <button
-        disabled={page === 1}
-        onClick={() => {
-          update({ page: page - 1 }, { history: 'push' });
-        }}
-        type="button"
-      >
-        Previous
-      </button>
-      <button
-        onClick={() => {
-          update({ page: page + 1 }, { history: 'push' });
-        }}
-        type="button"
-      >
-        Next
-      </button>
-    </section>
-  );
-}`;
+listState.href('/products', { inStock: false, page: 1 });
+// '/products'`;
+
+const NEXT = [
+  {
+    path: '/:locale/state/places',
+    label: m.state.navPlaces,
+    description: t.nextPlaces,
+  },
+  {
+    path: '/:locale/state/updates',
+    label: m.state.navUpdates,
+    description: t.nextUpdates,
+  },
+  {
+    path: '/:locale/state/reading',
+    label: m.state.navReading,
+    description: t.nextReading,
+  },
+] as const;
 
 export default function StateGetStartedPage() {
   return (
-    <DocPage
-      introduction={m.stateGetStarted.introduction}
-      path="/:locale/state/get-started"
-    >
+    <DocPage introduction={t.introduction} path="/:locale/state/get-started">
       <DocSection
-        id="idea"
-        description={m.stateGetStarted.ideaDescription}
-        title={m.stateGetStarted.ideaTitle}
-      >
-        <ul className="text-fg-mute flex flex-col gap-2 pl-6">
-          <li className="list-disc">
-            <Rich>{m.stateGetStarted.placeUrl()}</Rich>
-          </li>
-          <li className="list-disc">
-            <Rich>{m.stateGetStarted.placeEntry()}</Rich>
-          </li>
-          <li className="list-disc">
-            <Rich>{m.stateGetStarted.placeLocal()}</Rich>
-          </li>
-          <li className="list-disc">
-            <Rich>{m.stateGetStarted.placeSession()}</Rich>
-          </li>
-          <li className="list-disc">
-            <Rich>{m.stateGetStarted.placeCookie()}</Rich>
-          </li>
-          <li className="list-disc">
-            <Rich>{m.stateGetStarted.placeMemory()}</Rich>
-          </li>
-        </ul>
-        <p className="text-fg-mute leading-relaxed">
-          <Rich>{m.stateGetStarted.ideaNoProvider()}</Rich>
-        </p>
-        <p>
-          <LocaleAnchor path="/:locale/state/places">
-            <Rich>{m.stateGetStarted.ideaMore()}</Rich>
-          </LocaleAnchor>
-        </p>
-      </DocSection>
-
-      <DocSection
+        description={t.installDescription}
         id="install"
-        description={m.stateGetStarted.installDescription}
-        title={m.stateGetStarted.installTitle}
+        title={t.installTitle}
       >
         <InstallTabs
           npm={<CodeBlock code="npm install @k8ordo/state zod" lang="bash" />}
           pnpm={<CodeBlock code="pnpm add @k8ordo/state zod" lang="bash" />}
           yarn={<CodeBlock code="yarn add @k8ordo/state zod" lang="bash" />}
         />
-        <Heading level="h3">
-          <Rich>{m.stateGetStarted.peersTitle()}</Rich>
-        </Heading>
+        <p>
+          <Rich>{t.peersDescription()}</Rich>
+        </p>
         <PeerTable
           name="@k8ordo/state"
           neededFor={{
-            react: m.stateGetStarted.peerReact,
-            zod: m.stateGetStarted.peerZod,
-            '@k8ordo/router': m.stateGetStarted.peerRouter,
-            typescript: m.stateGetStarted.peerTypes,
-            '@types/react': m.stateGetStarted.peerTypes,
+            react: t.peerReact,
+            zod: t.peerZod,
+            '@k8ordo/router': t.peerRouter,
+            typescript: t.peerTypes,
+            '@types/react': t.peerTypes,
           }}
         />
-        <p className="text-fg-mute leading-relaxed">
-          <Rich>{m.stateGetStarted.baselineNote()}</Rich>
-        </p>
-      </DocSection>
-
-      <DocSection
-        id="define"
-        description={m.stateGetStarted.defineDescription}
-        title={m.stateGetStarted.defineTitle}
-      >
-        <CodeBlock code={DEFINITION} lang="ts" />
-        <ul className="text-fg-mute flex flex-col gap-2 pl-6">
-          <li className="list-disc">
-            <Rich>{m.stateGetStarted.defineWhyNoDirective()}</Rich>
-          </li>
-          <li className="list-disc">
-            <Rich>{m.stateGetStarted.defineKey()}</Rich>
-          </li>
-          <li className="list-disc">
-            <Rich>{m.stateGetStarted.defineAbsence()}</Rich>
-          </li>
-        </ul>
-      </DocSection>
-
-      <DocSection
-        id="component"
-        description={m.stateGetStarted.componentDescription}
-        title={m.stateGetStarted.componentTitle}
-      >
-        <CodeBlock code={COMPONENT} lang="tsx" />
-        <p className="text-fg-mute leading-relaxed">
-          <Rich>{m.stateGetStarted.componentHistory()}</Rich>
-        </p>
-      </DocSection>
-
-      <DocSection
-        id="page"
-        description={m.stateGetStarted.pageDescription}
-        title={m.stateGetStarted.pageTitle}
-      >
-        <CodeBlock code={PAGE} lang="tsx" />
-        <p className="text-fg-mute leading-relaxed">
-          <Rich>{m.stateGetStarted.pageSearch()}</Rich>
-        </p>
-      </DocSection>
-
-      <DocSection
-        id="server"
-        description={m.stateGetStarted.serverDescription}
-        title={m.stateGetStarted.serverTitle}
-      >
-        <CodeBlock code={SERVER_PAGE} lang="tsx" />
-        <ul className="text-fg-mute flex flex-col gap-2 pl-6">
-          <li className="list-disc">
-            <Rich>{m.stateGetStarted.serverExample()}</Rich>
-          </li>
-          <li className="list-disc">
-            <Rich>{m.stateGetStarted.serverInitialUrl()}</Rich>
-          </li>
-        </ul>
-        <CodeBlock code={SERVER_COMPONENT} lang="tsx" />
         <p>
-          <LocaleAnchor path="/:locale/state/reading">
-            <Rich>{m.stateGetStarted.serverMore()}</Rich>
-          </LocaleAnchor>
+          <Rich>{t.navigationApi()}</Rich>
+        </p>
+        <Note>
+          <p>
+            <Rich>{t.zodMini()}</Rich>
+          </p>
+        </Note>
+      </DocSection>
+
+      <DocSection
+        description={t.defineDescription}
+        id="define"
+        title={t.defineTitle}
+      >
+        <CodeBlock
+          code={STATE}
+          lang="ts"
+          marks={{ 6: 'highlight', 7: 'highlight' }}
+          title="state.ts"
+        />
+        <p>
+          <Rich>{t.defineFields()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.defineModule()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.defineKey()}</Rich>
         </p>
       </DocSection>
 
       <DocSection
-        id="router"
-        description={m.stateGetStarted.routerDescription}
-        title={m.stateGetStarted.routerTitle}
+        description={t.componentDescription}
+        id="component"
+        title={t.componentTitle}
       >
-        <p className="text-fg-mute leading-relaxed">
-          <Rich>{m.stateGetStarted.routerElse()}</Rich>
+        <CodeBlock
+          callouts={{
+            16: t.componentReplaceCallout(),
+            24: t.componentPushCallout(),
+          }}
+          code={FILTERS}
+          lang="tsx"
+          marks={{ 8: 'highlight', 16: 'highlight', 24: 'highlight' }}
+          title="filters.tsx"
+        />
+        <p>
+          <Rich>{t.componentSync()}</Rich>
         </p>
-        <ul className="flex flex-col gap-2 pl-6">
-          <li className="list-disc">
-            <LocaleAnchor path="/:locale/router">
-              <Rich>{m.stateGetStarted.routerLinkRouter()}</Rich>
-            </LocaleAnchor>
-          </li>
-          <li className="list-disc">
-            <LocaleAnchor path="/:locale/state/integrations">
-              <Rich>{m.stateGetStarted.routerLinkIntegrations()}</Rich>
-            </LocaleAnchor>
-          </li>
-        </ul>
+        <p>
+          <Rich>{t.componentHistory()}</Rich>
+        </p>
       </DocSection>
 
-      <DocSection id="next" title={m.stateGetStarted.nextTitle}>
-        <ul className="flex flex-col gap-3 pl-6">
-          <li className="list-disc">
-            <LocaleAnchor path="/:locale/state/places">
-              <Rich>{m.stateGetStarted.nextPlaces()}</Rich>
-            </LocaleAnchor>
-          </li>
-          <li className="list-disc">
-            <LocaleAnchor path="/:locale/state/reading">
-              <Rich>{m.stateGetStarted.nextReading()}</Rich>
-            </LocaleAnchor>
-          </li>
-          <li className="list-disc">
-            <LocaleAnchor path="/:locale/state/updates">
-              <Rich>{m.stateGetStarted.nextUpdates()}</Rich>
-            </LocaleAnchor>
-          </li>
-          <li className="list-disc">
-            <LocaleAnchor path="/:locale/state/integrations">
-              <Rich>{m.stateGetStarted.nextIntegrations()}</Rich>
-            </LocaleAnchor>
-          </li>
+      <DocSection
+        description={t.serverDescription}
+        id="server"
+        title={t.serverTitle}
+      >
+        <CodeBlock
+          code={PAGE}
+          lang="tsx"
+          marks={{ 7: 'highlight', 10: 'highlight', 16: 'highlight' }}
+          title="page.tsx"
+        />
+        <p>
+          <Rich>{t.serverParsed()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.serverReload()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.serverSeed()}</Rich>
+        </p>
+        <CodeBlock
+          code={SEED}
+          lang="tsx"
+          marks={{ 5: 'highlight', 10: 'highlight' }}
+          title="filters.tsx"
+        />
+        <Note>
+          <p>
+            <Rich>{t.serverStatic()}</Rich>
+          </p>
+        </Note>
+      </DocSection>
+
+      <DocSection
+        description={t.linksDescription}
+        id="links"
+        title={t.linksTitle}
+      >
+        <CodeBlock code={LINKS} lang="ts" title="links.ts" />
+        <p>
+          <Rich>{t.linksCanonical()}</Rich>
+        </p>
+      </DocSection>
+
+      <Playground
+        description={t.tryDescription}
+        id="try"
+        steps={t.trySteps}
+        title={t.tryTitle}
+      >
+        <ProductsDemo />
+      </Playground>
+
+      <DocSection id="next" title={t.nextTitle}>
+        <ul>
+          {NEXT.map((step) => (
+            <li key={step.path}>
+              <LocaleAnchor path={step.path}>{step.label()}</LocaleAnchor>
+              {' — '}
+              <Rich>{step.description()}</Rich>
+            </li>
+          ))}
         </ul>
       </DocSection>
     </DocPage>
