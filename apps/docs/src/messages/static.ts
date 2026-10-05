@@ -109,8 +109,8 @@ export const navBoundaries = message({
 });
 
 export const navDeploy = message({
-  ja: 'ビルドと配信',
-  en: 'Build & deploy',
+  ja: 'デプロイする',
+  en: 'Deploy',
 });
 
 export const navHowItWorks = message({

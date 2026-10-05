@@ -114,8 +114,8 @@ export const navGuards = message({
 });
 
 export const navDeploy = message({
-  ja: '実行と配信',
-  en: 'Run & deploy',
+  ja: 'デプロイする',
+  en: 'Deploy',
 });
 
 export const navHowItWorks = message({

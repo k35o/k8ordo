@@ -1,22 +1,16 @@
-import { Code } from '@k8ordo/ui';
+import type { Message } from '@k8ordo/i18n';
 import { CodeBlock } from '@k8ordo/ui/code-block';
 
+import { Note } from '../../../../components/callout';
 import { DocPage, DocSection } from '../../../../components/doc-page';
-import { BaseGuide } from '../../../../components/framework-guide/base';
 import {
-  Bullet,
-  Bullets,
-  Cell,
-  GuideTable,
-  Paragraph,
-  Row,
-} from '../../../../components/framework-guide/prose';
-import { SITE_SHELL } from '../../../../components/framework-guide/site-samples';
-import { LocaleAnchor } from '../../../../components/locale-anchor';
+  baseSection,
+  tabsSection,
+} from '../../../../components/framework-guide/deploy';
 import { Rich } from '../../../../components/rich';
 import * as m from '../../../../messages';
 
-const DEFAULT_ROUTES_DIR = "'src/routes'";
+const t = m.staticDeploy;
 
 const OUTPUT = `dist/
   client/
@@ -36,12 +30,11 @@ const OUTPUT = `dist/
   rsc/
   ssr/`;
 
-const LOG = `k8ordo: wrote 4 routes and 404.html and sitemap.xml`;
+const LOG = 'k8ordo: wrote 4 routes and 404.html and sitemap.xml';
 
-const TWO_NOT_FOUND = `a static host answers every unknown URL from one file, so only one not-found.tsx can be represented — this table declares /docs/*, /*`;
+const DOWNLOAD = '<a download href="/report.csv">Report</a>';
 
-const SITE = `// vite.config.ts
-import { framework } from '@k8ordo/static';
+const SITE = `import { framework } from '@k8ordo/static';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
@@ -60,246 +53,94 @@ const SITEMAP = `<?xml version="1.0" encoding="UTF-8"?>
   <url><loc>https://example.com/products/1</loc></url>
 </urlset>`;
 
-const CSP = `// vite.config.ts
-import { colorSchemeScriptHash } from '@k8ordo/color-scheme';
-import { framework } from '@k8ordo/static';
-import { defineConfig } from 'vite';
-
-export default defineConfig({
-  plugins: [
-    framework({
-      csp: {
-        'script-src': ["'self'", await colorSchemeScriptHash()],
-        'object-src': ["'none'"],
-        'base-uri': ["'none'"],
-      },
-    }),
-  ],
-});`;
-
-const ROUTES_DIR = `// vite.config.ts
-import { framework } from '@k8ordo/static';
-import { defineConfig } from 'vite';
-
-export default defineConfig({
-  plugins: [framework({ routesDir: 'app/routes' })],
-});`;
+const Items = ({ items }: { items: readonly Message[] }) => (
+  <ul>
+    {items.map((item) => (
+      <li key={item()}>
+        <Rich>{item()}</Rich>
+      </li>
+    ))}
+  </ul>
+);
 
 export default function StaticDeployPage() {
-  const t = m.staticDeploy;
   return (
     <DocPage introduction={t.introduction} path="/:locale/static/deploy">
       <DocSection
-        id="output"
         description={t.outputDescription}
+        id="output"
         title={t.outputTitle}
       >
-        <CodeBlock code={OUTPUT} lang="bash" />
-        <Paragraph text={t.outputLog} />
-        <CodeBlock code={LOG} lang="bash" />
+        <CodeBlock code={OUTPUT} lang="text" />
+        <Items items={t.outputList} />
+        <p>
+          <Rich>{t.outputLog()}</Rich>
+        </p>
+        <CodeBlock code={LOG} lang="text" title="vite build" />
       </DocSection>
 
       <DocSection
-        id="arrive"
         description={t.arriveDescription}
+        id="arrive"
         title={t.arriveTitle}
       >
-        <Paragraph text={t.arrivePath} />
-      </DocSection>
-
-      <DocSection id="host" description={t.hostDescription} title={t.hostTitle}>
-        <Bullets>
-          <Bullet>
-            <Rich>{t.hostIndex()}</Rich>
-          </Bullet>
-          <Bullet>
-            <Rich>{t.hostRsc()}</Rich>
-          </Bullet>
-          <Bullet>
-            <Rich>{t.host404()}</Rich>
-          </Bullet>
-        </Bullets>
-        <Paragraph text={t.hostUnknown} />
-        <Paragraph text={t.hostDownload} />
+        <p>
+          <Rich>{t.arriveNavigate()}</Rich>
+        </p>
       </DocSection>
 
       <DocSection
-        id="not-found"
+        description={t.hostDescription}
+        id="host"
+        title={t.hostTitle}
+      >
+        <Items items={t.hostList} />
+        <p>
+          <Rich>{t.hostUnknown()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.hostDownload()}</Rich>
+        </p>
+        <CodeBlock code={DOWNLOAD} lang="html" />
+        <Note>
+          <p>
+            <Rich>{t.hostStatus()}</Rich>
+          </p>
+        </Note>
+      </DocSection>
+
+      <DocSection
         description={t.notFoundDescription}
+        id="not-found"
         title={t.notFoundTitle}
       >
-        <Paragraph text={t.notFoundOne} />
-        <CodeBlock code={TWO_NOT_FOUND} lang="bash" />
-        <Paragraph text={t.notFoundParams} />
-        <Paragraph text={t.notFoundSite} />
-        <CodeBlock code={SITE_SHELL} lang="tsx" />
-        <Paragraph text={t.notFoundNone} />
+        <p>
+          <Rich>{t.notFoundHydrate()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.notFoundSite()}</Rich>
+        </p>
       </DocSection>
 
-      <BaseGuide mode="static" />
-
       <DocSection
-        id="sitemap"
         description={t.sitemapDescription}
+        id="sitemap"
         title={t.sitemapTitle}
       >
-        <CodeBlock code={SITE} lang="ts" />
-        <CodeBlock code={SITEMAP} lang="md" />
-        <Paragraph text={t.sitemapDetails} />
+        <CodeBlock
+          code={SITE}
+          lang="ts"
+          marks={{ 8: 'highlight' }}
+          title="vite.config.ts"
+        />
+        <CodeBlock code={SITEMAP} lang="xml" title="dist/client/sitemap.xml" />
+        <p>
+          <Rich>{t.sitemapNone()}</Rich>
+        </p>
       </DocSection>
 
-      <DocSection id="csp" description={t.cspDescription} title={t.cspTitle}>
-        <CodeBlock code={CSP} lang="ts" />
-        <Paragraph text={t.cspApp} />
-        <Paragraph text={t.cspRefuses} />
-      </DocSection>
-
-      <DocSection
-        id="options"
-        description={t.optionsDescription}
-        title={t.optionsTitle}
-      >
-        <GuideTable
-          head={[
-            t.optionsTable.option,
-            t.optionsTable.defaultValue,
-            t.optionsTable.meaning,
-          ]}
-        >
-          <Row>
-            <Cell nowrap>
-              <Code>routesDir</Code>
-            </Cell>
-            <Cell nowrap>
-              <Code>{DEFAULT_ROUTES_DIR}</Code>
-            </Cell>
-            <Cell>
-              <Rich>{t.optionsTable.routesDir()}</Rich>
-            </Cell>
-          </Row>
-          <Row>
-            <Cell nowrap>
-              <LocaleAnchor path="/:locale/static/params">
-                <Code>paths</Code>
-              </LocaleAnchor>
-            </Cell>
-            <Cell nowrap>
-              <Rich>{t.optionsTable.none()}</Rich>
-            </Cell>
-            <Cell>
-              <Rich>{t.optionsTable.paths()}</Rich>
-            </Cell>
-          </Row>
-          <Row>
-            <Cell nowrap>
-              <Code>site</Code>
-            </Cell>
-            <Cell nowrap>
-              <Rich>{t.optionsTable.none()}</Rich>
-            </Cell>
-            <Cell>
-              <Rich>{t.optionsTable.site()}</Rich>
-            </Cell>
-          </Row>
-          <Row>
-            <Cell nowrap>
-              <Code>csp</Code>
-            </Cell>
-            <Cell nowrap>
-              <Rich>{t.optionsTable.none()}</Rich>
-            </Cell>
-            <Cell>
-              <Rich>{t.optionsTable.csp()}</Rich>
-            </Cell>
-          </Row>
-        </GuideTable>
-        <CodeBlock code={ROUTES_DIR} lang="ts" />
-      </DocSection>
-
-      <DocSection
-        id="stops"
-        description={t.stopsDescription}
-        title={t.stopsTitle}
-      >
-        <Bullets>
-          <Bullet>
-            <Rich>{t.stopsGrammar()}</Rich> —{' '}
-            <LocaleAnchor path="/:locale/static/routing">
-              {m.static.navRouting()}
-            </LocaleAnchor>
-          </Bullet>
-          <Bullet>
-            <Rich>{t.stopsPaths()}</Rich> —{' '}
-            <LocaleAnchor path="/:locale/static/params">
-              {m.static.navParams()}
-            </LocaleAnchor>
-          </Bullet>
-          <Bullet>
-            <Rich>{t.stopsAsyncSchema()}</Rich> —{' '}
-            <LocaleAnchor path="/:locale/static/params">
-              {m.static.navParams()}
-            </LocaleAnchor>
-          </Bullet>
-          <Bullet>
-            <Rich>{t.stopsNotFound()}</Rich> —{' '}
-            <LocaleAnchor path="/:locale/static/errors">
-              {m.static.navErrors()}
-            </LocaleAnchor>
-          </Bullet>
-          <Bullet>
-            <Rich>{t.stopsRedirectTarget()}</Rich> —{' '}
-            <LocaleAnchor path="/:locale/static/errors">
-              {m.static.navErrors()}
-            </LocaleAnchor>
-          </Bullet>
-          <Bullet>
-            <Rich>{t.stopsActions()}</Rich> —{' '}
-            <LocaleAnchor path="/:locale/static/get-started">
-              {m.nav.getStarted()}
-            </LocaleAnchor>
-          </Bullet>
-          <Bullet>
-            <Rich>{t.stopsGuards()}</Rich> —{' '}
-            <LocaleAnchor path="/:locale/static/get-started">
-              {m.nav.getStarted()}
-            </LocaleAnchor>
-          </Bullet>
-          <Bullet>
-            <Rich>{t.stopsRoute()}</Rich> —{' '}
-            <LocaleAnchor path="/:locale/static/routing">
-              {m.static.navRouting()}
-            </LocaleAnchor>
-          </Bullet>
-          <Bullet>
-            <Rich>{t.stopsSearch()}</Rich> —{' '}
-            <LocaleAnchor path="/:locale/static/boundaries">
-              {m.static.navBoundaries()}
-            </LocaleAnchor>
-          </Bullet>
-          <Bullet>
-            <Rich>{t.stopsThrow()}</Rich> —{' '}
-            <LocaleAnchor path="/:locale/static/errors">
-              {m.static.navErrors()}
-            </LocaleAnchor>
-          </Bullet>
-          <Bullet>
-            <Rich>{t.stopsServerOnly()}</Rich> —{' '}
-            <LocaleAnchor path="/:locale/static/boundaries">
-              {m.static.navBoundaries()}
-            </LocaleAnchor>
-          </Bullet>
-        </Bullets>
-      </DocSection>
-
-      <DocSection
-        id="cannot"
-        description={t.cannotDescription}
-        title={t.cannotTitle}
-      >
-        <Paragraph text={t.cannotServer}>
-          <LocaleAnchor path="/:locale/server">@k8ordo/server</LocaleAnchor>
-        </Paragraph>
-      </DocSection>
+      {tabsSection('static')}
+      {baseSection('static')}
     </DocPage>
   );
 }
