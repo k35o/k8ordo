@@ -1,20 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import type { FC } from 'react';
+import type { ComponentProps, FC } from 'react';
 import { expect, waitFor } from 'storybook/test';
 
 import { TableOfContents } from '.';
 import type { TableOfContentsItem } from '.';
-
-const meta: Meta<typeof TableOfContents> = {
-  title: 'components/navigation/table-of-contents',
-  component: TableOfContents,
-  parameters: {
-    layout: 'padded',
-  },
-};
-
-export default meta;
-type Story = StoryObj<typeof TableOfContents>;
 
 const ITEMS: TableOfContentsItem[] = [
   { id: 'install', label: 'インストール' },
@@ -63,22 +52,40 @@ const Article: FC<{ shortLastSection?: boolean }> = ({
   </article>
 );
 
-const Layout: FC<{ shortLastSection?: boolean }> = ({ shortLastSection }) => (
+// 目次は文書をスクロールして今の見出しを決めるので、どのストーリーも
+// 本文と並べたページ全体で描く
+const Layout: FC<
+  ComponentProps<typeof TableOfContents> & { shortLastSection?: boolean }
+> = ({ shortLastSection, ...props }) => (
   <div className="flex gap-10">
     <div className="flex-1">
       <Article shortLastSection={shortLastSection} />
     </div>
     <aside className="sticky top-6 w-56 self-start">
-      <TableOfContents items={ITEMS} />
+      <TableOfContents {...props} />
     </aside>
   </div>
 );
+
+const meta: Meta<typeof TableOfContents> = {
+  title: 'components/navigation/table-of-contents',
+  component: TableOfContents,
+  parameters: {
+    layout: 'padded',
+  },
+  args: {
+    items: ITEMS,
+  },
+  render: (args) => <Layout {...args} />,
+};
+
+export default meta;
+type Story = StoryObj<typeof TableOfContents>;
 
 const currentLink = (canvasElement: HTMLElement) =>
   canvasElement.querySelector('a[aria-current="location"]');
 
 export const Default: Story = {
-  render: () => <Layout />,
   play: async ({ canvas, canvasElement }) => {
     await expect(
       canvas.getByRole('navigation', { name: '目次' }),
@@ -106,7 +113,7 @@ export const Default: Story = {
 // 最後の節が短くて見出しが読み取り位置まで来なくても、文書の終わりまで
 // 来たら最後の見出しを今の見出しにする
 export const LastShortSection: Story = {
-  render: () => <Layout shortLastSection />,
+  render: (args) => <Layout {...args} shortLastSection />,
   play: async ({ canvasElement }) => {
     const root = document.scrollingElement ?? document.documentElement;
     root.scrollTo({ top: root.scrollHeight });
@@ -127,7 +134,6 @@ export const VerticalDocument: Story = {
       root.style.writingMode = previous;
     };
   },
-  render: () => <Layout />,
   play: async ({ canvasElement }) => {
     document.querySelector('#usage')?.scrollIntoView();
     await waitFor(() => {
@@ -144,7 +150,6 @@ export const VerticalDocument: Story = {
 
 export const CustomLabel: Story = {
   args: {
-    items: ITEMS,
     label: 'この記事の内容',
   },
   play: async ({ canvas }) => {
