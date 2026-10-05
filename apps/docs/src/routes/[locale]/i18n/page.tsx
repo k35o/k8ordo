@@ -104,11 +104,6 @@ export default function I18nPage() {
             description: m.i18n.nextGetStarted,
           },
           {
-            path: '/:locale/i18n/locales',
-            label: m.i18n.navLocales,
-            description: m.i18n.nextLocales,
-          },
-          {
             path: '/:locale/i18n/messages',
             label: m.i18n.navMessages,
             description: m.i18n.nextMessages,
@@ -119,14 +114,19 @@ export default function I18nPage() {
             description: m.i18n.nextFormatting,
           },
           {
-            path: '/:locale/i18n/routing',
-            label: m.i18n.navRouting,
-            description: m.i18n.nextRouting,
+            path: '/:locale/i18n/switch',
+            label: m.i18n.navSwitch,
+            description: m.i18n.nextSwitch,
           },
           {
-            path: '/:locale/i18n/integrations',
-            label: m.i18n.navIntegrations,
-            description: m.i18n.nextIntegrations,
+            path: '/:locale/i18n/negotiate',
+            label: m.i18n.navNegotiate,
+            description: m.i18n.nextNegotiate,
+          },
+          {
+            path: '/:locale/i18n/reference',
+            label: m.i18n.navReference,
+            description: m.i18n.nextReference,
           },
         ]}
       />

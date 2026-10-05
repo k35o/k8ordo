@@ -68,14 +68,9 @@ export const nextGetStarted = message({
   en: 'Define the locale set, and render a first message on the server and in the browser.',
 });
 
-export const nextLocales = message({
-  ja: '`defineLocales`が返す値と、ブラウザやリクエストから言語を選ぶ方法です。',
-  en: 'What `defineLocales` returns, and negotiating from the browser or a request.',
-});
-
 export const nextMessages = message({
-  ja: '`message`の書き方と置き場所、ブラウザに届く文言の決まり方です。',
-  en: 'Writing messages, where they live, and what reaches the browser.',
+  ja: '値を差し込む文言の書き方と置き場所、Server Componentからの渡し方です。',
+  en: 'Messages that take values, where they live, and passing them from a Server Component.',
 });
 
 export const nextFormatting = message({
@@ -83,14 +78,19 @@ export const nextFormatting = message({
   en: 'Plurals, dates and numbers with the locale’s `Intl`.',
 });
 
-export const nextRouting = message({
-  ja: 'URLの区間とロケールの関係、言語の切り替え、`/`からの振り分けです。',
-  en: 'The URL segment, switching languages, and sending `/` somewhere.',
+export const nextSwitch = message({
+  ja: '`localize`と`delocalize`で言語の切り替えを作り、選んだ言語をCookieに覚えます。',
+  en: 'Build a language switcher with `localize` and `delocalize`, and remember the choice in a cookie.',
 });
 
-export const nextIntegrations = message({
-  ja: 'ほかのk8ordoのパッケージとの組み合わせ方と、テストの書き方です。',
-  en: 'Wiring it to the other k8ordo packages, and testing.',
+export const nextNegotiate = message({
+  ja: '`/`を開いた人を、ブラウザやリクエストの希望から選んだ言語のページへ送ります。',
+  en: 'Send whoever opens `/` to the language their browser or request asks for.',
+});
+
+export const nextReference = message({
+  ja: '`defineLocales`と`message`をはじめ、exportする関数と型の一覧です。',
+  en: 'Every function and type it exports, from `defineLocales` and `message` on.',
 });
 
 export const navLocales = message({
@@ -128,6 +128,11 @@ export const navStatic = message({
   en: 'Static builds',
 });
 
+export const navIntegrations = message({
+  ja: 'ほかのパッケージと組み合わせる',
+  en: 'Use with other packages',
+});
+
 export const navTesting = message({
   ja: 'テストする',
   en: 'Testing',
@@ -146,9 +151,4 @@ export const navReference = message({
 export const navTroubleshooting = message({
   ja: 'うまく動かないとき',
   en: 'Troubleshooting',
-});
-
-export const navIntegrations = message({
-  ja: 'ほかのパッケージと組み合わせる',
-  en: 'Use with other packages',
 });
