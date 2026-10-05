@@ -8,6 +8,7 @@ import type { PackageEntry } from '../data/packages';
 import { href, navigateTo } from '../links';
 import type { SitePath } from '../links';
 import * as m from '../messages';
+import { FRAME } from './frame';
 import { LanguageSwitcher } from './language-switcher';
 import { LocaleAnchor } from './locale-anchor';
 import { ThemeSwitcher } from './theme-switcher';
@@ -23,8 +24,7 @@ const itemClass = (isActive: boolean) =>
     ? 'text-fg-base decoration-primary-border rounded-md px-3 py-1.5 text-sm font-medium whitespace-nowrap underline decoration-2 underline-offset-8'
     : 'text-fg-mute hover:bg-bg-mute hover:text-fg-base rounded-md px-3 py-1.5 text-sm whitespace-nowrap transition-colors duration-150 ease-out';
 
-/** `wide`: サイドバーのあるページでは、枠を画面いっぱいに広げる。 */
-export function Navigation({ wide }: { wide: boolean }) {
+export function Navigation() {
   const pathname = usePathname();
   const current = packageOf(pathname);
 
@@ -36,9 +36,7 @@ export function Navigation({ wide }: { wide: boolean }) {
 
   return (
     <header className="border-border-mute bg-page border-b">
-      <nav
-        className={`flex items-center gap-3 px-6 py-3 md:gap-6 md:px-8${wide ? '' : ' mx-auto max-w-6xl'}`}
-      >
+      <nav className={`${FRAME} flex items-center gap-3 py-3 md:gap-6`}>
         <LocaleAnchor
           className="focus-visible:ring-border-info flex shrink-0 items-baseline gap-1 rounded-md focus-visible:ring-2 focus-visible:outline-hidden"
           path="/:locale"

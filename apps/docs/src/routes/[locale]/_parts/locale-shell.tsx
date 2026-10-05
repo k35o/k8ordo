@@ -6,6 +6,7 @@ import { useEffect, useRef, useState, ViewTransition } from 'react';
 import type { CSSProperties, FC, ReactNode } from 'react';
 
 import { Footer } from '../../../components/footer';
+import { FRAME } from '../../../components/frame';
 import { LocaleAnchor } from '../../../components/locale-anchor';
 import { Navigation } from '../../../components/navigation';
 import { PackageSidebar } from '../../../components/package-sidebar';
@@ -18,14 +19,6 @@ import type { PackageEntry } from '../../../data/packages';
 import { locales } from '../../../i18n';
 import * as m from '../../../messages';
 import { WritingModeProvider } from '../../../theme/writing-mode-context';
-
-/**
- * サイトの枠。サイドバーの無いページ（ホームとランディング）はホームと同じ幅、
- * サイドバーのあるページは画面いっぱいにし、左右の余白はどちらも同じにする。
- * ページは枠の中で縦の余白だけを持ち、幅と左右の余白は持たない。
- */
-const frameOf = (wide: boolean): string =>
-  wide ? 'w-full px-6 md:px-8' : 'mx-auto w-full max-w-6xl px-6 md:px-8';
 
 /**
  * 開いているパッケージのドキュメントのページ。ランディング（`/:locale/form`
@@ -92,10 +85,10 @@ function LayoutContent({
       style={{ '--header-h': `${String(headerHeight)}px` } as CSSProperties}
     >
       <div className="bg-page sticky top-0 z-30 shrink-0" ref={headerRef}>
-        <Navigation wide={pkg !== undefined} />
+        <Navigation />
         {pkg !== undefined && (
           <div className="border-border-mute bg-page border-b lg:hidden">
-            <div className={`${frameOf(true)} flex items-center gap-2 py-2`}>
+            <div className={`${FRAME} flex items-center gap-2 py-2`}>
               <IconButton
                 label={m.sideNav.openNavigation()}
                 onClick={() => {
@@ -111,14 +104,18 @@ function LayoutContent({
       </div>
       {pkg === undefined ? (
         <>
-          <main className={`${frameOf(false)} flex-1`}>
-            <PageTransition>{children}</PageTransition>
+          {/* ホームとランディングの本文は、枠の中でさらに狭い幅に置く。ヘッダーは
+              どのページでも同じ枠なので、ページを移っても位置が変わらない */}
+          <main className={`${FRAME} flex-1`}>
+            <div className="mx-auto w-full max-w-6xl">
+              <PageTransition>{children}</PageTransition>
+            </div>
           </main>
-          <Footer wide={false} />
+          <Footer />
         </>
       ) : (
         <>
-          <div className={`${frameOf(true)} flex flex-1 gap-8`}>
+          <div className={`${FRAME} flex flex-1 gap-8`}>
             <aside
               aria-label={m.nav.packageNavigation()}
               className="border-border-mute sticky hidden w-64 shrink-0 self-start overflow-y-auto border-e py-8 pe-4 lg:block"
@@ -133,7 +130,7 @@ function LayoutContent({
               <PageTransition>{children}</PageTransition>
             </main>
           </div>
-          <Footer wide />
+          <Footer />
           <Drawer
             isOpen={isDrawerOpen}
             onClose={() => {
