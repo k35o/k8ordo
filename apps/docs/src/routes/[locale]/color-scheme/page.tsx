@@ -102,6 +102,11 @@ export default function ColorSchemePage() {
             description: m.colorScheme.nextStyling,
           },
           {
+            path: '/:locale/color-scheme/switcher',
+            label: m.colorScheme.navSwitcher,
+            description: m.colorScheme.nextSwitcher,
+          },
+          {
             path: '/:locale/color-scheme/storage',
             label: m.colorScheme.navStorage,
             description: m.colorScheme.nextStorage,

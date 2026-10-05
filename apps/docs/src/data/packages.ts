@@ -264,6 +264,10 @@ export const PACKAGES: PackageEntry[] = [
             label: m.colorScheme.navStyling,
           },
           {
+            path: '/:locale/color-scheme/switcher',
+            label: m.colorScheme.navSwitcher,
+          },
+          {
             path: '/:locale/color-scheme/storage',
             label: m.colorScheme.navStorage,
           },

@@ -108,6 +108,11 @@ export const nextStyling = message({
   en: 'Colouring under the `dark` class with `@k8ordo/ui`, Tailwind CSS, or plain CSS.',
 });
 
+export const nextSwitcher = message({
+  ja: '2択のトグルと、「システム」を含む3択の作り方です。',
+  en: 'A two-way toggle, and a three-way choice that includes the system.',
+});
+
 export const nextStorage = message({
   ja: '保存する行の中身と、フックを通さずに設定を読む方法です。',
   en: 'What the stored row holds, and reading it without the hook.',
@@ -126,6 +131,11 @@ export const nextHowItWorks = message({
 export const navStyling = message({
   ja: 'スタイル',
   en: 'Styling',
+});
+
+export const navSwitcher = message({
+  ja: '切り替えのボタンを作る',
+  en: 'Build a switch',
 });
 
 export const navStorage = message({
