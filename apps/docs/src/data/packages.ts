@@ -165,6 +165,10 @@ export const PACKAGES: PackageEntry[] = [
         label: m.nav.groupReference,
         sections: [
           { path: '/:locale/state/reference', label: m.state.navReference },
+          {
+            path: '/:locale/state/troubleshooting',
+            label: m.state.navTroubleshooting,
+          },
         ],
       },
     ],
