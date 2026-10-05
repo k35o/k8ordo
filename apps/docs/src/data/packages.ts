@@ -1,6 +1,5 @@
 import type { Message } from '@k8ordo/i18n';
 
-import { STORYBOOK_URL } from '../constants';
 import type { SitePath } from '../links';
 import * as m from '../messages';
 
@@ -20,10 +19,8 @@ export type PackageEntry = {
   path: SitePath;
   /** What the home page says about it. */
   description: Message;
-  /** In reading order: the sidebar, the footer column, and the pager all follow it. */
+  /** In reading order: the sidebar and the pager both follow it. */
   groups: [PackageGroup, ...PackageGroup[]];
-  /** Links off the site that belong in the package's footer column. */
-  external?: Array<{ href: string; label: string }>;
 };
 
 /**
@@ -58,7 +55,6 @@ export const PACKAGES: PackageEntry[] = [
         ],
       },
     ],
-    external: [{ href: STORYBOOK_URL, label: 'Storybook' }],
   },
   {
     name: '@k8ordo/form',

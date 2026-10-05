@@ -36,12 +36,13 @@ pnpm check:write       # Oxlint/Oxfmt lint/format auto-fix
   which expands every `/:locale` pattern the build hands it once per locale
   rather than listing pages twice.
 - **Nothing here works around the framework.** Scroll-to-top after a
-  navigation, the error boundary around a page, and "is a page under
-  `/ui/components/*` showing" are all the router's and the framework's job
-  now (`useMatch`, `error.tsx`, the router's own scroll handling). When the
+  navigation, the error boundary around a page, and "which package's pages
+  are showing" are all the router's and the framework's job now
+  (`matchPath` on `usePathname()`, `error.tsx`, the router's own scroll
+  handling). When the
   site needs something the packages do not give it, the fix belongs in the
   package, and the site is where the pressure is felt first.
-- **Navigation mirrors the URL layout**: the header's first row is the packages and nothing else; the second row is the sections of the package you are currently in (`src/components/navigation.tsx`). Both rows, the home page's package list, every `PackageLanding`'s "start here" links and every guide page's title and prev/next pager read one list, `PACKAGES` in `src/data/packages.ts` — a package's `sections` are in reading order, so adding a page to a package's guide is one line there plus the route. The side navigation on catalog pages is decided by `useMatch('/:locale/ui/components/*')` and its sibling for `/ui/ai/*` in `src/routes/[locale]/_parts/locale-shell.tsx` — a pattern from the generated table plus `/*`, checked by the generated `Register`, so a renamed section fails to compile rather than silently losing its sidebar. `/*` does not match the index page itself (`/ja/ui/components` has no trailing segment), which is what keeps the catalog pages sidebar-free. The footer lists no packages or sections: it is the site's name, its tagline and the GitHub and npm links. Never promote one package's sections to a site-wide row: with a single package it reads as convenience, with six it makes that package look like the site's spine.
+- **Navigation mirrors the URL layout**: the header lists the packages and nothing else (`src/components/navigation.tsx`). Inside a package (`/<package>/*`, but not its landing) the shell in `src/routes/[locale]/_parts/locale-shell.tsx` adds a left sidebar, `src/components/package-sidebar.tsx`, which lists that package's pages under its groups; below `lg` the same sidebar opens in a `Drawer`. The header, the sidebar, the home page's package list, every landing's `NextSteps` and every guide page's breadcrumb, title and prev/next pager read one list, `PACKAGES` in `src/data/packages.ts` — a package's `groups` and their `sections` are in reading order, so adding a page to a package's guide is one line there plus the route. A section with a catalog (`/ui/components`, `/ui/ai`) becomes a group of its own in the sidebar, its categories levels that open and close; the shell's `catalogs` maps the section to its categories. The footer lists no packages or sections: it is the site's name, its tagline and the GitHub and npm links. Never promote one package's pages to a site-wide row: with a single package it reads as convenience, with six it makes that package look like the site's spine.
 - **URL layout**: package-first. Everything a package documents lives under `/<package>/…` — `@k8ordo/ui` owns `/ui/get-started`, `/ui/components/*`, `/ui/ai/*`, and so on. `/<package>` itself is that package's landing page (`src/routes/[locale]/ui/page.tsx`): what it is, what it gives you, where to start. Only `/` is shared — it introduces k8ordo, lists the packages, and states what they all commit to. Add a new package by adding its own `/<package>` landing plus a `/<package>/…` subtree starting at `/<package>/get-started`, and an entry in `PACKAGES` (`src/data/packages.ts`) — its shipped docs are found from its `package.json` (see Markdown for agents below), and the build fails while `PACKAGES` lacks it; never put a package's sections at the top level, where they would sit at the same depth as package names.
 - **Unmatched routes**: `src/routes/[locale]/not-found.tsx` is rendered into a
   single `404.html`, which a static host serves for anything it does not have.
@@ -84,12 +85,12 @@ pnpm check:write       # Oxlint/Oxfmt lint/format auto-fix
   `react-error-boundary` and no `<ErrorBoundary>` in the layout.
 - **Titles**: every `page.tsx` renders its own `<title>` through
   `src/components/page-title.tsx` (`<PageTitle name="Button" />` or
-  `<PageTitle title={m.nav.theming} />` → `Button · k8ordo`); `PackageLanding` does it
+  `<PageTitle title={m.nav.theming} />` → `Button · k8ordo`); `LandingHero` does it
   for the landings and `DocPage` for guide pages (`Links & location — @k8ordo/router · k8ordo`), `not-found.tsx` renders its own, and the home page and the
   `/` redirect page write a bare `<title>k8ordo</title>`. The root layout
   renders none — React 19 hoists a `<title>` from anywhere, and two on screen
   is two, not a fallback. A new page without one is a regression:
-  `grep -L "PageTitle\|PackageLanding\|DocPage\|<title" src/routes/**/page.tsx` should
+  `grep -L "PageTitle\|LandingHero\|DocPage\|<title" src/routes/**/page.tsx` should
   print nothing (the built HTML is the proof: every `index.html` under
   `dist/client/` carries exactly one `<title>`).
 - **Markdown for agents**: nothing here lists packages for it, and nothing
@@ -138,8 +139,9 @@ pnpm check:write       # Oxlint/Oxfmt lint/format auto-fix
   key type — a prop that carries text carries a `Message` (a function) and
   the consumer calls it (`item.label()`), or, where a Server Component hands
   text to a Client Component, the string (`title={m.x.y()}`): a function
-  does not cross that boundary, which is why `PageTitle` and
-  `PackageLanding` are shared components without a directive. `<Rich>` takes
+  does not cross that boundary, which is why `PageTitle`,
+  `DocPage` and the landing components are shared components without a
+  directive. `<Rich>` takes
   the text as children and renders its backtick spans as `<Code>`. The
   bundler keeps only the messages a client module names — measure it with
   `grep -c "ja:" dist/client/assets/*.js` after a build; a Server Component's
@@ -227,10 +229,11 @@ export default function ButtonPage() {
 
 ### Package Guide Page
 
-Every package other than `@k8ordo/ui` documents itself as a guide: a
-`get-started` page, then topic pages, each a directory under
-`src/routes/[locale]/<package>/` listed in that package's `sections` in
-`PACKAGES`. The page is a Server Component:
+Every package documents itself as a guide: a `get-started` page, then topic
+pages, each a directory under `src/routes/[locale]/<package>/` listed in one
+of that package's `groups` in `PACKAGES`. `@k8ordo/ui`'s guide is
+`get-started`, `theming` and `i18n`; its catalog pages keep their own layout
+(below). The page is a Server Component:
 
 ```tsx
 export default function RouterLinksPage() {
@@ -240,8 +243,9 @@ export default function RouterLinksPage() {
       path="/:locale/router/links"
     >
       <DocSection
-        title={m.routerLinks.hrefTitle}
         description={m.routerLinks.hrefDescription}
+        id="href"
+        title={m.routerLinks.hrefTitle}
       >
         <CodeBlock code={HREF_EXAMPLE} lang="tsx" />
       </DocSection>
@@ -251,15 +255,24 @@ export default function RouterLinksPage() {
 ```
 
 - `DocPage` takes its title from the section's label in `PACKAGES`, so the
-  header, footer, pager and `<title>` cannot disagree; it renders the
-  prev/next pager itself.
+  sidebar, breadcrumb, pager and `<title>` cannot disagree; it renders the
+  prev/next pager itself, and the contents on the right from its own
+  `DocSection`, `DocSubsection`, `Playground` and `ApiEntry` children.
 - Its words live in `src/messages/<package>-<section>.ts` (namespace
   `m.<package><Section>`), with `introduction` as the page's lead.
 - Code samples carry no natural-language comments — both locales see the same
-  sample — apart from a leading file-path comment; the explanation belongs in
-  the messages around it.
-- A live demo is a `'use client'` component in the page's own `_parts/`, and
-  only where touching it teaches something the prose cannot.
+  sample — and the explanation belongs in the messages around them. A file
+  name goes in the `CodeBlock`'s `title`; point at lines with `marks`, and
+  with `callouts` when a line needs a localized note. Keep lines short enough
+  not to scroll in the 46rem column (about 70 characters).
+- Asides are `Note` and `Pitfall` (`src/components/callout.tsx`), which render
+  `@k8ordo/ui`'s `Callout`.
+- A live demo is a `'use client'` component in the page's own `_parts/`,
+  shown in a `Playground` with `steps` the reader can follow, and only where
+  touching it teaches something the prose cannot. The site is static, so a
+  demo simulates the server in the browser and says so.
+- An API reference page is a run of `ApiEntry`s (name, entry point,
+  signature, params, returns, fields).
 - A `get-started` page lists the package's peers with `PeerTable`
   (`@k8ordo/ui`'s included), given the package's `name` and `neededFor`, a
   message per peer keyed by the peer's name. The versions and which peers are
@@ -309,10 +322,15 @@ for word translation of the Japanese, nor the other way round.
 | Component          | Purpose                              |
 | ------------------ | ------------------------------------ |
 | `PageTitle`        | The page's `<title>` (`… · k8ordo`)  |
-| `PackageLanding`   | A package's `/<package>` landing     |
-| `PackageExample`   | A landing's worked example           |
+| `LandingHero`      | A package landing's opening          |
+| `LandingClaim`     | A landing's claim with its example   |
+| `NextSteps`        | A landing's links into the guide     |
 | `DocPage`          | A package guide page, with its pager |
 | `DocSection`       | A guide page's h2 section            |
+| `DocSubsection`    | An h3 inside a `DocSection`          |
+| `Playground`       | A live demo with steps to follow     |
+| `ApiEntry`         | One export on an API reference page  |
+| `Note` / `Pitfall` | An aside, as `@k8ordo/ui`'s Callout  |
 | `ComponentPreview` | Live preview + code block combo      |
 | `PropsTable`       | Props documentation table            |
 | `PeerTable`        | A package's peer dependencies        |
