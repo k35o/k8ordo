@@ -1,292 +1,191 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: 'ルート表は、アプリが答えるpathnameを1か所に並べたものです。このページでは表の文法、照合の順序、定義した時点で拒まれる書き方、表に書くエラー境界、そして表から導かれる型を扱います。',
-  en: 'The route table lists every pathname the application answers, in one place. This page covers the table’s grammar, the order it matches in, what is refused as soon as the table is defined, the error boundaries you write into it, and the types that come out of it.',
+  ja: 'ルート表は、アプリが答えるすべてのパスを1か所に並べたものです。このページでは、パターンの書き方と照合の順序、ページのまとめ方、定義した時点でエラーになる書き方を説明します。',
+  en: 'The route table lists every path the app answers, in one place. This page covers how patterns are written, the order they match in, how pages are grouped, and what fails as soon as the table is defined.',
 });
 
 export const shapeTitle = message({
-  ja: 'leafとbranch',
-  en: 'Leaves and branches',
+  ja: 'ページとページのまとまり',
+  en: 'Pages, and groups of pages',
 });
 
 export const shapeDescription = message({
-  ja: '表の値は2種類です。leafは描画するコンポーネントそのもので、branchは`{ layout?, error?, children }`です。branchの`children`は同じ形の表で、キーは親のパターンに続けて読みます。',
-  en: 'A value in the table is one of two things. A leaf is the component to render; a branch is `{ layout?, error?, children }`, where `children` is a table of the same shape whose keys continue the parent’s pattern.',
+  ja: 'ルート表の値は2種類です。1つはページのコンポーネントそのもので、もう1つは`children`を持つオブジェクトです。オブジェクトは下のページをまとめ、`layout`があればそのコンポーネントで包みます。',
+  en: 'A value in the route table is one of two things: the page component itself, or an object with `children`. The object groups the pages below it, and wraps them in its `layout` when it has one.',
 });
 
-export const shapeIndex = message({
-  ja: '子のキー`/`はbranch自身のindexページです。ルートに置いた`/`のbranchはURLに何も足さないので、全ページを包むレイアウトになります。',
-  en: 'A child key of `/` is the branch’s own index page. A branch at the root key `/` adds nothing to the URL, which makes its layout the one around every page.',
+export const shapeKeys = message({
+  ja: '`children`のキーは、親のパターンに続けて読みます。上の表では、`/:id`は`/products/:id`のページで、`/`は`/products`そのもののページです。',
+  en: 'A key in `children` continues its parent’s pattern. In the table above, `/:id` is the page at `/products/:id`, and `/` is the page at `/products` itself.',
 });
 
-export const shapeStack = message({
-  ja: '照合の結果は、外側のレイアウトから順に並べ、最後にleafを置いたスタックです。レイアウトは次の要素を`<Outlet />`で描きます。`/products/42`なら`RootLayout` → `ProductsLayout` → `ProductPage`の順に入れ子になります。',
-  en: 'A match is a stack: the layouts outer-first, then the leaf. Each layout renders the next element through `<Outlet />`, so `/products/42` nests as `RootLayout` → `ProductsLayout` → `ProductPage`.',
+export const shapeNest = message({
+  ja: '`/products/42`を開くと、`ProductsLayout`の`<Outlet />`の位置に`ProductPage`が描かれます。オブジェクトは入れ子にでき、レイアウトも外側から順に入れ子になります。',
+  en: 'At `/products/42`, `ProductPage` renders where `ProductsLayout` puts its `<Outlet />`. Objects nest, and their layouts nest with them, outermost first.',
 });
 
-export const shapeProps = message({
-  ja: '`<Router>`はleafにもレイアウトにもpropsを渡しません。paramsは`useParams`で読みます。表が受け付けるコンポーネントの型`RouteComponent`は`ComponentType<never>`なので、フレームワークがpropsを渡すコンポーネントも同じ表に入ります。',
-  en: '`<Router>` passes no props to leaves or layouts; params are read with `useParams`. The component type the table accepts, `RouteComponent`, is `ComponentType<never>`, so a component the framework does pass props to fits the same table.',
+export const shapeTrailingSlash = message({
+  ja: '末尾のスラッシュは無いものとして照合します。`/products/`を開いても、`/products`と同じページになります。',
+  en: 'A trailing slash is ignored when matching, so `/products/` is the same page as `/products`.',
 });
 
-export const shapeLazy = message({
-  ja: '`React.lazy`の戻り値もleafとして置けます。branchは`children`キーの有無で見分けるので、関数ではないlazyコンポーネントをbranchと取り違えません。chunkが届くまでの間にfallbackを出す場所として、上のレイアウトに`<Suspense>`を置きます。fallbackが出るのは、最初の描画と、その`<Suspense>`を新しくマウントするナビゲーションのときです。すでに画面にある`<Suspense>`の下でページが切り替わるときは、背景での描画が前のページを残します。',
-  en: 'A `React.lazy` component works as a leaf. A branch is recognised by its `children` key, so a lazy component — an object, not a function — is never mistaken for one. Put a `<Suspense>` in a layout above it so there is somewhere to fall back to while the chunk arrives. The fallback shows on the first render and on a navigation that newly mounts that `<Suspense>`; when the page changes under a `<Suspense>` already on screen, the background render keeps the previous page instead.',
+export const shapeMore = message({
+  ja: 'オブジェクトには、エラーと読み込み中の表示も書けます。書き方は「エラーと読み込み中の表示を出す」で説明します。',
+  en: 'The object can also say what to show on an error and while loading; see “Errors and loading states”.',
 });
-
-export const grammarTitle = message({
-  ja: 'パターンの文法',
-  en: 'Pattern grammar',
-});
-
-export const grammarDescription = message({
-  ja: 'パターンはURLPatternのpathnameとして照合します。表で使う記法は、固定の区間、`:name`、末尾の`/*`、そしてURLに現れないグループ`/(name)`です。',
-  en: 'Patterns are matched as URLPattern pathnames. The table uses literal segments, `:name`, a trailing `/*`, and the group `/(name)`, which never appears in the URL.',
-});
-
-export const grammarTable = {
-  pattern: message({ ja: 'パターン', en: 'Pattern' }),
-  pathname: message({ ja: 'pathname', en: 'Pathname' }),
-  params: message({ ja: 'params', en: 'Params' }),
-  note: message({ ja: '備考', en: 'Note' }),
-  trailingSlash: message({
-    ja: '末尾のスラッシュは同じpathname',
-    en: 'A trailing slash is the same pathname',
-  }),
-  param: message({
-    ja: '`:name`は1区間を捕まえる',
-    en: '`:name` captures one segment',
-  }),
-  decoded: message({
-    ja: '値はデコードされる',
-    en: 'The value is decoded',
-  }),
-  oneSegment: message({
-    ja: '`/`をまたがない',
-    en: 'It never spans a `/`',
-  }),
-  empty: message({
-    ja: '空の区間には合わない',
-    en: 'An empty segment does not match',
-  }),
-  wildcard: message({
-    ja: 'ワイルドカードの中身はparamsに入らない',
-    en: 'What the wildcard captured is not a param',
-  }),
-  wildcardIndex: message({
-    ja: '`/*`より前の部分そのものには合わない',
-    en: 'It does not match the part before `/*` on its own',
-  }),
-  group: message({
-    ja: 'グループはURLに区間を足さない',
-    en: 'A group adds no URL segment',
-  }),
-  noMatch: message({ ja: '一致しない', en: 'No match' }),
-};
 
 export const paramTitle = message({
-  ja: '`:param`',
-  en: '`:param`',
+  ja: 'パスの一部をparamで受け取る',
+  en: 'Take part of the path as a param',
 });
 
 export const paramDescription = message({
-  ja: '`:name`は空でない1区間を捕まえ、`decodeURIComponent`でデコードした文字列を返します。デコードできない綴りは書かれたまま残します。型はパターン文字列から推論され、`/:locale/products/:id`のparamsは`{ locale: string; id: string }`です。',
-  en: '`:name` captures one non-empty segment and hands it back decoded with `decodeURIComponent`; a spelling that cannot be decoded is kept as written. The type is inferred from the pattern string: the params of `/:locale/products/:id` are `{ locale: string; id: string }`.',
+  ja: '`:name`の形の区間は、パスのその位置にある文字列を受け取ります。受け取るのは空でない1区間だけで、`/`をまたぐことはありません。',
+  en: 'A segment written `:name` takes the string at that place in the path: exactly one non-empty segment, never anything across a `/`.',
+});
+
+export const paramMatch = message({
+  ja: '`match`は、`<Router>`が内部で行う照合をそのまま呼ぶ関数です。ブラウザが無くても動くので、パスがどのページになるかをこうして確かめられます。',
+  en: '`match` is the very matching `<Router>` performs, as a plain function. It needs no browser, so it shows which page a path lands on.',
+});
+
+export const paramDecoded = message({
+  ja: '受け取った値はデコードされるので、`%2F`は`/`に戻ります。paramの型はパターンの文字列から決まり、`/:locale/products/:id`なら`{ locale: string; id: string }`です。',
+  en: 'The value is decoded, so `%2F` comes back as `/`. The params’ type comes from the pattern string: `/:locale/products/:id` gives `{ locale: string; id: string }`.',
 });
 
 export const wildcardTitle = message({
-  ja: 'ワイルドカード`/*`',
-  en: 'Wildcards: `/*`',
+  ja: 'どのパターンにも合わないパスを受ける',
+  en: 'Catch the paths nothing else matched',
 });
 
 export const wildcardDescription = message({
-  ja: '`/*`はそれより前の何にも合わなかったpathnameを受けます。1区間ではなく、下に続く任意の区間に合います。照合には使えますがリンク先にはならないので、`href`と`navigateTo`は実行時に`TypeError`で拒みます。`Register`を宣言していれば、型の段階でも拒みます。',
-  en: '`/*` takes what nothing before it matched — not one segment but anything below. It is something to match, never something to link to, so `href` and `navigateTo` refuse it at run time with a `TypeError`, and in the types as well once `Register` is declared.',
+  ja: '`/*`は、それより前のどのパターンにも合わなかったパスを受けます。`:name`と違って区間の数を問わないので、存在しないページへのパスを1つのコンポーネントで受け止められます。',
+  en: '`/*` takes whatever path no pattern above it matched. Unlike `:name`, it takes any number of segments, so one component can answer every page that does not exist.',
 });
 
-export const wildcardRoot = message({
-  ja: 'ルートの`/*`は`/`自身にも合います。表の最後に置くのはこのためでもあります。',
-  en: 'At the root, `/*` matches `/` itself as well — one more reason it goes last.',
+export const wildcardNotParam = message({
+  ja: '`/*`が受けた部分は、paramsに入りません。また、`/*`は照合のためのパターンで、リンク先にはなりません。`href`に渡すと、実行時に`TypeError`を投げます。',
+  en: 'What `/*` takes does not become a param. It is also a pattern to match, never one to link to: handed to `href`, it throws a `TypeError` at run time.',
+});
+
+export const wildcardBelow = message({
+  ja: '`/products/*`のように途中に書くと、`/products`より下のパスだけを受けます。`/products`そのものには合いません。',
+  en: 'Written after a prefix, as in `/products/*`, it takes only the paths below `/products`, never `/products` itself.',
+});
+
+export const wildcardDownload = message({
+  ja: '表の最後に`/*`を置くと、ホストが配るファイルへのリンクもこのパターンに合います。`/report.pdf`のようなリンクには`download`属性を付けてください。詳しくは「リンクを張り、移動する」で説明します。',
+  en: 'With `/*` at the end of the table, a link to a file the host serves matches it too. Give a link such as `/report.pdf` the `download` attribute; “Link and navigate” explains why.',
 });
 
 export const groupTitle = message({
-  ja: 'グループ`/(name)`',
-  en: 'Groups: `/(name)`',
+  ja: 'パスを変えずにページをまとめる',
+  en: 'Group pages without changing the path',
 });
 
 export const groupDescription = message({
-  ja: 'グループは表を構造化します。自分のレイアウトと部分木を持ちますが、URLに区間を足しません。1つのオブジェクトに`/`は1度しか書けないので、同じ深さの2つの区画に別々のレイアウトを持たせるにはグループが要ります。',
-  en: 'A group structures the table — its own layout, its own subtree — without adding a URL segment. `/` can appear only once in an object, so two sections at the same depth could not otherwise have different layouts.',
+  ja: '`/(name)`の形のキーはグループです。下のページをまとめてレイアウトで包みますが、パスには何も足しません。',
+  en: 'A key written `/(name)` is a group. It gathers the pages below it and wraps them in a layout, but adds nothing to the path.',
 });
 
-export const groupNested = message({
-  ja: '上の表で`/pricing`は`MarketingLayout`の中、`/guide`は`DocsLayout`の中に描かれ、URLには`marketing`も`docs`も現れません。グループはbranchの中にも置けます。',
-  en: 'In this table `/pricing` renders inside `MarketingLayout` and `/guide` inside `DocsLayout`, and neither `marketing` nor `docs` appears in the URL. A group can sit inside a branch as well.',
+export const groupResult = message({
+  ja: '`/pricing`は`MarketingLayout`の中に、`/guide`は`DocsLayout`の中に描かれます。パスに`marketing`や`docs`は現れません。',
+  en: '`/pricing` renders inside `MarketingLayout` and `/guide` inside `DocsLayout`, and neither `marketing` nor `docs` appears in the path.',
+});
+
+export const groupWhy = message({
+  ja: 'グループが要るのは、同じ深さにある2つのまとまりに、別々のレイアウトを付けたいときです。1つのオブジェクトに`/`のキーは1度しか書けないので、`/`のオブジェクトを2つ並べることはできません。',
+  en: 'A group is what lets two sets of pages at the same depth have different layouts. An object can hold the `/` key only once, so two `/` objects side by side are not possible.',
 });
 
 export const orderTitle = message({
-  ja: '書いた順が規則',
-  en: 'Order is the rule',
+  ja: '上から順に照合する',
+  en: 'Patterns match from the top down',
 });
 
 export const orderDescription = message({
-  ja: '照合は表を上から順にたどり、最初に合ったパターンを採ります。優先順位は書いた順そのもので、特異度のランキングはありません。表はコードと同じように上から読めば答えが分かります。',
-  en: 'Matching walks the table top to bottom and takes the first pattern that fits. Precedence is what you wrote; there is no specificity ranking to reason backwards from, so the table reads like the code it is.',
+  ja: '照合はルート表を上から順にたどり、最初に合ったパターンを選びます。より具体的なパターンを優先する規則は無く、書いた順がそのまま優先順位です。',
+  en: 'Matching walks the route table from the top and takes the first pattern that fits. No rule prefers the more specific pattern: the order you wrote is the order of precedence.',
+});
+
+export const orderShadowed = message({
+  ja: 'このパターンには、どのパスも届かない',
+  en: 'No path ever reaches this pattern',
 });
 
 export const orderWrong = message({
-  ja: 'この順では`/products/new`が`ProductPage`に合い、`id`が`new`になります。',
-  en: 'In this order `/products/new` matches `ProductPage`, with `id` set to `new`.',
+  ja: "この順では、`/products/new`も`/products/:id`に合います。そのため、`id`が`'new'`の`ProductPage`が描かれます。",
+  en: "In this order, `/products/new` matches `/products/:id` as well, so `ProductPage` renders with `id` set to `'new'`.",
 });
 
 export const orderRight = message({
-  ja: '固定の区間を先に書けば、`/products/new`は`NewProduct`に、それ以外の`/products/…`は`ProductPage`に届きます。',
-  en: 'With the literal segment first, `/products/new` reaches `NewProduct` and every other `/products/…` reaches `ProductPage`.',
+  ja: '決まった区間のパターンを先に書けば、`/products/new`は`NewProduct`に届き、それ以外の商品のパスは`ProductPage`に届きます。',
+  en: 'Write the literal pattern first, and `/products/new` reaches `NewProduct` while every other product path reaches `ProductPage`.',
 });
 
-export const matchTitle = message({
-  ja: '表を直接引く',
-  en: 'Reading the table directly',
+export const orderRead = message({
+  ja: '順番だけで決まるので、ルート表はコードと同じように上から読めば、どのパスがどのページになるか分かります。`/*`を最後に置くのも同じ理由です。',
+  en: 'Since order alone decides, you read the table top to bottom like any other code to know which page a path becomes. It is also why `/*` goes last.',
 });
 
-export const matchDescription = message({
-  ja: '`defineRoutes`が返す`Routes`の操作は`match(pathname, accept?)`の1つです。勝ったパターン、params、スタックを`Match`として返し、何にも合わなければ`null`を返します。ブラウザを必要としないので、テストで表の形と優先順位を直接確かめられます。',
-  en: 'The `Routes` object `defineRoutes` returns has one operation, `match(pathname, accept?)`. It returns a `Match` — the winning pattern, its params and its stack — or `null` when nothing fits. It needs no browser, so a test can assert a table’s shape and precedence directly.',
+export const unmatchedTitle = message({
+  ja: '表に無いパスはブラウザに任せる',
+  en: 'Paths outside the table go to the browser',
 });
 
-export const matchAccept = message({
-  ja: '`accept`は合ったものを呼び出し側が断るための関数で、`false`を返すと照合はそのパターンが合わなかったものとして次へ進みます。フレームワークはこれで、スキーマが拒んだparamsを「そのパターンが答えないpathname」として扱っています。',
-  en: '`accept` lets the caller decline a fit: when it returns `false`, the walk goes on as if that pattern had not matched. The framework uses it so that a param a schema refuses is a pathname the pattern does not answer.',
+export const unmatchedDescription = message({
+  ja: '`/*`を置かない表では、どのパターンにも合わないパスがあります。`<Router>`はそうしたパスへのナビゲーションを引き受けず、ブラウザのふつうのページの読み込みに任せます。',
+  en: 'A table without `/*` leaves some paths unmatched. `<Router>` does not take navigations to them, and leaves them to the browser as an ordinary page load.',
+});
+
+export const unmatchedServer = message({
+  ja: 'そのため、サーバーが返す本物の404がそのまま表示されます。また、表に無いパスでページを開いたとき、`<Router>`は何も描きません。推測でほかのページを出すことはしません。',
+  en: 'The server’s real 404 is then what shows. And when the app is opened at a path the table lacks, `<Router>` renders nothing rather than guessing at another page.',
 });
 
 export const refusedTitle = message({
-  ja: '定義した時点で拒まれるもの',
-  en: 'What fails at definition time',
+  ja: '定義した時点でエラーになる書き方',
+  en: 'What fails as soon as the table is defined',
 });
 
 export const refusedDescription = message({
-  ja: '表はモジュールが読み込まれたときに検査されます。誰かが最初にそのページへ移動したときではありません。どのエラーも`TypeError`です。',
-  en: 'A table is checked when its module loads, not when someone first navigates to the page. Every one of these is a `TypeError`.',
+  ja: 'ルート表は、`defineRoutes`を呼んだ時点で検査されます。誰かがそのページを最初に開いたときではないので、書き間違いはアプリを起動したときに分かります。エラーはどれも`TypeError`です。',
+  en: 'The route table is checked when `defineRoutes` runs, not when someone first opens the page, so a mistake shows up as soon as the app starts. Every one of these is a `TypeError`.',
 });
 
-export const refusedTable = {
-  written: message({ ja: '書いたもの', en: 'Written' }),
-  error: message({ ja: 'エラー', en: 'Error' }),
-  noSlash: message({
-    ja: '`/`で始まらないキー',
-    en: 'A key that does not start with `/`',
-  }),
-  parentheses: message({
-    ja: 'グループそのものではない括弧',
-    en: 'Parentheses that are not exactly a group',
-  }),
-  groupLeaf: message({
-    ja: '`children`を持たないグループ',
-    en: 'A group without `children`',
-  }),
-  twice: message({
-    ja: '同じ完全パターンの2度目（入れ子の位置が違っても）',
-    en: 'The same full pattern twice, wherever the copies nest',
-  }),
-  unparsable: message({
-    ja: 'URLPatternが解釈できないパターン',
-    en: 'A pattern URLPattern cannot parse',
-  }),
-  unparsableError: message({
-    ja: 'URLPattern自身の`TypeError`',
-    en: 'URLPattern’s own `TypeError`',
-  }),
-};
+export const refusedNoSlash = message({
+  ja: '`/`で始まらないキー',
+  en: 'A key that does not start with `/`',
+});
+
+export const refusedParentheses = message({
+  ja: 'グループの形になっていない括弧（`/(admin)/new`など）',
+  en: 'Parentheses that are not exactly a group, such as `/(admin)/new`',
+});
+
+export const refusedGroupLeaf = message({
+  ja: '`children`を持たないグループ',
+  en: 'A group without `children`',
+});
+
+export const refusedTwice = message({
+  ja: '同じパターンの2度目の宣言（入れ子の位置が違っても数えます）',
+  en: 'The same pattern declared twice, wherever the copies nest',
+});
+
+export const refusedUnparsable = message({
+  ja: 'URLPatternが解釈できないパターン：URLPattern自身の`TypeError`になります',
+  en: 'A pattern URLPattern cannot parse: URLPattern’s own `TypeError`',
+});
 
 export const refusedWhy = message({
-  ja: '括弧を拒むのは、URLPatternが`(…)`を正規表現のグループとして読むからです。`/(admin)/new`を通すと、名前の無いparamを捕まえながら`/admin/new`に黙って合ってしまいます。文法での括弧の意味はグループの1つだけです。グループに`children`を求めるのは、区間を足さないleafが親のindexの2度目の宣言になってしまうからです。',
-  en: 'Parentheses are refused because URLPattern reads `(…)` as a regular-expression group: `/(admin)/new` would quietly match `/admin/new` and capture a nameless param. In the grammar, parentheses mean a group and nothing else. A group must have `children` because a leaf that adds no segment would be a second declaration of the parent’s index.',
+  ja: '括弧を拒むのは、URLPatternが`(…)`を正規表現として読むからです。`/(admin)/new`を通すと、名前の無いparamを受け取りながら`/admin/new`に黙って合ってしまいます。',
+  en: 'Parentheses are refused because URLPattern reads `(…)` as a regular expression: `/(admin)/new` would quietly match `/admin/new` while capturing a nameless param.',
 });
 
-export const errorTitle = message({
-  ja: 'エラー境界',
-  en: 'Error boundaries',
-});
-
-export const errorDescription = message({
-  ja: 'branchには`layout`と並べて`error`を書けます。その下のどこかが描画中にthrowすると、レイアウトの穴に`error`のコンポーネントが代わりに描かれ、レイアウトという枠はそのまま残ります。',
-  en: 'A branch can name an `error` beside its `layout`. When anything below throws while rendering, the `error` component renders in the layout’s hole instead, and the frame the layout draws survives.',
-});
-
-export const errorProps = message({
-  ja: '`error`のコンポーネントは`ErrorProps`（`{ error, reset }`）を受け取ります。型は`ErrorComponent`です。`error`はthrowされた値そのもので`unknown`型です。`reset()`はその場で部分木をもう一度描画し、再びthrowすればまた`error`が出ます。',
-  en: 'The component receives `ErrorProps` — `{ error, reset }` — and its type is `ErrorComponent`. `error` is whatever was thrown, typed `unknown`. `reset()` renders the subtree again in place; if it throws again, the error component comes back.',
-});
-
-export const errorLeave = message({
-  ja: '失敗したページを離れると、失敗は消えます。境界は`NavigationGeneration`（新しい木が画面に適用されるたびに変わる番号）が変わったときに失敗を手放します。pathnameで判断しないのは、URLが木より先に確定するからです。境界の内側は作り直さないので、ページが替わってもその下のレイアウトの状態は残ります。searchだけが変わる状態の更新では木が変わらないので、失敗もそのまま残ります。',
-  en: 'Leaving the page that failed leaves the failure behind. The boundary lets it go when `NavigationGeneration` — a number that changes each time a new tree is applied — moves. It does not go by the pathname because the URL commits before the tree does. Nothing inside the boundary is recreated, so the layouts below it keep their state across a page change. A state change that only moves the search changes no tree, so the failure stays.',
-});
-
-export const errorScope = message({
-  ja: '境界はレイアウトの内側にあるので、レイアウト自身のthrowは同じbranchの`error`では受け止められず、さらに外側のbranchの`error`に届きます。どこにも境界が無ければ、エラーは`<Router>`の外へ出ます。',
-  en: 'The boundary sits inside the layout, so a throw from the layout itself is not caught by its own branch’s `error`; it reaches the `error` of a branch further out. With no boundary anywhere, the error leaves `<Router>`.',
-});
-
-export const errorSuspense = message({
-  ja: '境界は下の部分木を`fallback`が`null`の`<Suspense>`でも包みます（サーバーでの描画でthrowした部分木をブラウザに任せるため）。そのため`error`を持つbranchの下にある`React.lazy`のページは、最初の描画やそのbranchに入るナビゲーションでchunkを待つ間、上のレイアウトの`<Suspense>`ではなくこの境界の中で何も描きません。fallbackを見せたいなら、`<Suspense>`をそのbranchより下のレイアウトに置くか、lazyコンポーネントを直接包みます。',
-  en: 'The boundary also wraps what is below in a `<Suspense>` whose `fallback` is `null`, so that a subtree which throws during a server render is left for the browser. A `React.lazy` page under a branch that names `error` therefore renders nothing inside that boundary while its chunk loads on the first render or on a navigation that enters that branch, instead of reaching a `<Suspense>` in a layout above. To show a fallback, put the `<Suspense>` in a layout below that branch, or wrap the lazy component in one directly.',
-});
-
-export const errorFramework = message({
-  ja: '`@k8ordo/static`と`@k8ordo/server`では、`error.tsx`が生成された表のこの`error`になります。',
-  en: 'Under `@k8ordo/static` and `@k8ordo/server`, `error.tsx` becomes this same `error` in the generated table.',
-});
-
-export const typesTitle = message({
-  ja: '表から導かれる型',
-  en: 'Types derived from the table',
-});
-
-export const typesDescription = message({
-  ja: '表の型はパターン文字列からの推論だけで決まり、コード生成を使いません。`routes`をGet Startedで作った表（`/`、`/products`、`/products/:id`、`/*`）とすると、3つの型は2つ目のコードのとおりに解決されます。',
-  en: 'The table’s types come from inferring the pattern strings alone, with no code generation. With `routes` as the table built in Get Started (`/`, `/products`, `/products/:id`, `/*`), the three types resolve to what the second block shows.',
-});
-
-export const typesTable = {
-  type: message({ ja: '型', en: 'Type' }),
-  meaning: message({ ja: '意味', en: 'Meaning' }),
-  patternOf: message({
-    ja: '表のすべてのleafパターン（書いたとおりの綴り）',
-    en: 'Every leaf pattern in the table, as written',
-  }),
-  navigablePatternOf: message({
-    ja: 'リンク先にできるパターン。ワイルドカードを除いたもの',
-    en: 'The patterns a link can point at: the wildcards excluded',
-  }),
-  navigablePath: message({
-    ja: '`Path`を表のリンク可能なパターンと区間ごとに照合した結果。合えば`Path`、合わなければ`never`',
-    en: '`Path` checked against the table’s linkable patterns, segment by segment: `Path` when one matches, `never` when none does',
-  }),
-  routes: message({
-    ja: '`defineRoutes`の戻り値。`kind`、`record`（渡した表）、`match`を持つ',
-    en: 'What `defineRoutes` returns: `kind`, `record` (the table as passed) and `match`',
-  }),
-  routesRecord: message({
-    ja: '表そのものの型。キーは`/`で始まる文字列',
-    en: 'The type of a table: keys are strings starting with `/`',
-  }),
-  routeNode: message({
-    ja: '表の値。`RouteComponent`かbranch',
-    en: 'A value in the table: a `RouteComponent` or a branch',
-  }),
-  routeComponent: message({
-    ja: 'leafとレイアウトの型。`ComponentType<never>`',
-    en: 'The type of a leaf or layout: `ComponentType<never>`',
-  }),
-  match: message({
-    ja: '`match`の戻り値。`pattern`、`params`、`stack`（外側から順、leafが最後）',
-    en: 'What `match` returns: `pattern`, `params` and `stack` (outer-first, the leaf last)',
-  }),
-};
-
-export const typesNavigablePath = message({
-  ja: '`NavigablePath`は、`@k8ordo/state`の`href`がパスの検査に使う型です。',
-  en: '`NavigablePath` is what `@k8ordo/state`’s `href` checks its paths with.',
+export const refusedGroupWhy = message({
+  ja: 'グループに`children`を求めるのは、パスに何も足さないページが、親の`/`のページの2度目の宣言になってしまうからです。',
+  en: 'A group needs `children` because a page that adds nothing to the path would declare its parent’s `/` page a second time.',
 });

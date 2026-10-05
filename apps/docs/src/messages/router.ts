@@ -94,8 +94,8 @@ export const nextFramework = message({
 });
 
 export const navRoutes = message({
-  ja: 'ルート表',
-  en: 'Route table',
+  ja: 'ルート表を書く',
+  en: 'Write the route table',
 });
 
 export const navLinks = message({
