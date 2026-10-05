@@ -123,6 +123,11 @@ export const navNegotiate = message({
   en: 'Choose the first language',
 });
 
+export const navStatic = message({
+  ja: '静的に書き出す',
+  en: 'Static builds',
+});
+
 export const navIntegrations = message({
   ja: '組み合わせ',
   en: 'Integrations',
