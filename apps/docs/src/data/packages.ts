@@ -254,6 +254,15 @@ export const PACKAGES: PackageEntry[] = [
           },
         ],
       },
+      {
+        label: m.nav.groupReference,
+        sections: [
+          {
+            path: '/:locale/static/troubleshooting',
+            label: m.static.navTroubleshooting,
+          },
+        ],
+      },
     ],
   },
   {
@@ -286,6 +295,15 @@ export const PACKAGES: PackageEntry[] = [
           {
             path: '/:locale/server/how-it-works',
             label: m.server.navHowItWorks,
+          },
+        ],
+      },
+      {
+        label: m.nav.groupReference,
+        sections: [
+          {
+            path: '/:locale/server/troubleshooting',
+            label: m.server.navTroubleshooting,
           },
         ],
       },

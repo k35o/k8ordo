@@ -117,3 +117,8 @@ export const navHowItWorks = message({
   ja: '仕組み',
   en: 'How it works',
 });
+
+export const navTroubleshooting = message({
+  ja: 'うまく動かないとき',
+  en: 'Troubleshooting',
+});
