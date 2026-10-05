@@ -70,6 +70,8 @@ export type Messages = {
   colorPickerLightness: string;
   /** ColorPicker の見本のボタンをまとめる group の名前 */
   colorPickerSwatches: string;
+  /** ColorPicker の欄の横の色。押すとブラウザの色選びを開く */
+  colorPickerOpen: string;
 
   passwordShow: string;
   passwordHide: string;

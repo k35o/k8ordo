@@ -47,6 +47,7 @@ export const ja: Messages = {
   colorPickerSaturation: '彩度',
   colorPickerLightness: '明度',
   colorPickerSwatches: '色の見本',
+  colorPickerOpen: 'パレットから選ぶ',
   passwordShow: 'パスワードを表示',
   passwordHide: 'パスワードを非表示',
 

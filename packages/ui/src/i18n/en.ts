@@ -47,6 +47,7 @@ export const en: Messages = {
   colorPickerSaturation: 'Saturation',
   colorPickerLightness: 'Lightness',
   colorPickerSwatches: 'Swatches',
+  colorPickerOpen: 'Choose from palette',
   passwordShow: 'Show password',
   passwordHide: 'Hide password',
 
