@@ -142,6 +142,10 @@ export const PACKAGES: PackageEntry[] = [
           { path: '/:locale/state/reading', label: m.state.navReading },
           { path: '/:locale/state/migrate', label: m.state.navMigrate },
           {
+            path: '/:locale/state/before-hydration',
+            label: m.state.navBeforeHydration,
+          },
+          {
             path: '/:locale/state/integrations',
             label: m.state.navIntegrations,
           },

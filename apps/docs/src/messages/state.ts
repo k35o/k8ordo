@@ -158,6 +158,11 @@ export const navMigrate = message({
   en: 'Change a stored shape',
 });
 
+export const navBeforeHydration = message({
+  ja: 'ハイドレーションの前に読む',
+  en: 'Read before hydration',
+});
+
 export const navIntegrations = message({
   ja: '組み合わせ',
   en: 'Integrations',
