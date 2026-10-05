@@ -1,136 +1,149 @@
 import { message } from '@k8ordo/i18n';
 
 export const description = message({
-  ja: 'アプリを動かします。リクエストのたびに描画するので、パラメータの値を事前に列挙する必要がなく、知らない URL には本物の 404 を返し、フォームは Server Action に届きます。',
+  ja: 'アプリをサーバーで動かします。リクエストのたびに描画するので、パラメータの値を前もって並べる必要がありません。知らないURLには本物の404を返し、フォームはServer Actionに届きます。',
   en: 'Runs an application. Every request is answered by rendering, so route parameters need no list of values, an unknown URL is a real 404, and a form can post to a Server Action.',
 });
 
-export const featuresTitle = message({
-  ja: '特徴',
-  en: 'Features',
+export const tagline = message({
+  ja: 'React Server Componentsのアプリを、リクエストのたびに描いて動かす。',
+  en: 'Run a React Server Components app, rendering on every request.',
 });
 
-export const featureRequest = message({
-  ja: '値はリクエストと来る',
-  en: 'Values arrive with the request',
+export const claimActionsTitle = message({
+  ja: 'フォームはServer Actionに送る',
+  en: 'Forms post to Server Actions',
 });
 
-export const featureRequestDescription = message({
-  ja: 'パラメータの値はリクエストと一緒に来るので、事前に列挙する必要がありません。知らない URL には、ホスティングのエラーページではなく自分の not-found を本物の 404 で返します。ページと layout は `request` からヘッダーと cookie を読み取り専用で読めます。',
-  en: "Parameter values arrive with the request, so nothing has to be enumerated ahead of time. An unknown URL gets your not-found page under a genuine 404 rather than the host's error page. A page or layout reads the request's headers and cookies from `request`, read-only.",
+export const claimActionsBody = [
+  message({
+    ja: "`'use server'`を付けた関数が、フォームの送信先になります。JavaScriptが届く前でも、ふつうのフォームの送信として動きます。",
+    en: "A `'use server'` function is where a form posts. It works as an ordinary form submission before JavaScript arrives.",
+  }),
+  message({
+    ja: '送信のあとは、描き直したページとアクションの戻り値が1往復で返ってきます。アクションを`redirect()`で終えれば、そのまま別のページへ移ります。',
+    en: 'The re-rendered page and the return value come back in one round trip. End with `redirect()`, and the visitor moves on to another page.',
+  }),
+] as const;
+
+export const claimGuardsTitle = message({
+  ja: 'ページを描く前に、guard.tsでリクエストを止める',
+  en: 'Stop a request in guard.ts, before the page renders',
 });
 
-export const featureRoutes = message({
-  ja: 'routes/ が URL 空間',
-  en: 'routes/ is the URL space',
+export const claimGuardsBody = [
+  message({
+    ja: '`guard.ts`は、そのディレクトリより下のURLに応答する前に実行されます。`Response`を返せばそれがそのまま応答になり、何も返さなければリクエストを先へ通します。',
+    en: 'A `guard.ts` runs before any URL below its directory is answered. Return a `Response` and that is the answer; return nothing and the request goes on.',
+  }),
+  message({
+    ja: 'ページを開くときも、クライアント側の遷移でデータを取りに来るときも、Server Actionが呼ばれるときも、同じguardが効きます。そのため、ログインの確認を書き忘れる入口ができません。',
+    en: 'The same guard covers the page, its payload for a client navigation, and any Server Action posted to it, so no entrance skips the sign-in check.',
+  }),
+] as const;
+
+export const claimModeTitle = message({
+  ja: '静的なサイトから、importの1行で移れる',
+  en: 'From a static site, it is one import away',
 });
 
-export const featureRoutesDescription = message({
-  ja: 'ディレクトリ木がそのまま pathname 空間です。page/layout/not-found/error/redirect/guard・`[param]`・`(group)`・`_` の私物だけを認め、規約から外れたものはビルドを落とします。',
-  en: 'The directory tree is the pathname space: page/layout/not-found/error/redirect/guard, `[param]`, `(group)`, and `_`-prefixed privates. Anything outside the grammar fails the build.',
+export const claimModeBody = [
+  message({
+    ja: '`@k8ordo/static`と`@k8ordo/server`は、ルートの書き方も実行の境界も、リクエストを処理するハンドラも共通です。違うのは、そのハンドラをビルドのときに呼ぶか、リクエストのたびに呼ぶかだけです。',
+    en: '`@k8ordo/static` and `@k8ordo/server` share the route grammar, the boundaries and the request handler. The only difference is whether the handler is called at build time or on every request.',
+  }),
+  message({
+    ja: 'ビルドしたハンドラは`Request`を受けて`Response`を返す関数なので、Node.jsの`serve`だけでなく、DenoやBunでも動きます。Vercel向けには、出力をVercelの形式で書き出す`vercel()`を用意しています。',
+    en: 'The built handler takes a `Request` and returns a `Response`, so it runs under Node.js with `serve`, and under Deno or Bun too. For Vercel, `vercel()` writes the output in its format.',
+  }),
+] as const;
+
+export const nextGetStarted = message({
+  ja: 'プラグインを足し、ページを置いて、`serve`で動かすところまで作ります。',
+  en: 'Add the plugin, place a page, and run it with `serve`.',
 });
 
-export const featureActions = message({
-  ja: 'フォームが届く',
-  en: 'Forms have somewhere to arrive',
+export const nextRouting = message({
+  ja: 'ファイル名とディレクトリ名の文法と、ページが応答をストリーミングする仕組みです。',
+  en: 'The file and directory grammar, and how a page answers and streams.',
 });
 
-export const featureActionsDescription = message({
-  ja: 'Server Actions の宛先があります。@k8ordo/form と組み合わせれば、検証もメッセージも同じ 1 つのスキーマから出ます。',
-  en: 'Server Actions have a destination. Paired with @k8ordo/form, the validation and the messages come from the same single schema.',
+export const nextActions = message({
+  ja: 'Server Actionの書き方と、JavaScriptが届く前から動くフォームです。',
+  en: 'Writing Server Actions, and forms that work before JavaScript.',
 });
 
-export const featureSameHandler = message({
-  ja: 'static と同じハンドラ',
-  en: 'The same handler as static',
+export const nextGuards = message({
+  ja: '`guard.ts`でリクエストを止めたり通したりし、応答にヘッダーを足します。',
+  en: 'Stop a request or let it through in `guard.ts`, and add headers to the answer.',
 });
 
-export const featureSameHandlerDescription = message({
-  ja: 'リクエストをページに変える関数は static と同じもので、モードごとにコンパイルされ、違いは主に呼ぶ時期です。両モードで描画が食い違うなら、それは何かが漏れています。',
-  en: 'The function that turns a request into a page is the same one, compiled for each mode; what differs is chiefly when it is called. If a page renders differently under the two modes, something has leaked.',
+export const nextRequest = message({
+  ja: 'ページからリクエストを読み、`cookies()`でCookieを読み書きします。',
+  en: 'Read the request from a page, and read and write cookies with `cookies()`.',
 });
 
-export const featureRouteFiles = message({
-  ja: 'error.tsx と redirect.ts',
-  en: 'error.tsx and redirect.ts',
-});
-
-export const featureRouteFilesDescription = message({
-  ja: 'ページが throw したら `error.tsx` が layout の内側に描かれ、枠は残ります。移転したディレクトリには `redirect.ts` を 1 行置き、Server Action は `redirect()` で送り先を告げます。',
-  en: 'When a page throws, `error.tsx` renders inside the layout and the frame survives. A directory that moved keeps a one-line `redirect.ts`, and a Server Action ends with `redirect()` to say where next.',
-});
-
-export const featureGuards = message({
-  ja: 'guard.ts が先に決める',
-  en: 'guard.ts decides first',
-});
-
-export const featureGuardsDescription = message({
-  ja: 'どの階層にも置ける `guard.ts` が、その下で答えるものより前に外から順に走ります。`Response` を返せばそこで打ち切り、通すときは最終的な応答に付けるヘッダーを添えられます。ページは描画のままです。',
-  en: 'A `guard.ts` at any level runs, outer first, before whatever answers below it. Returning a `Response` ends the request there; letting it through can still add headers to the final answer. A page stays a render.',
-});
-
-export const featureParams = message({
-  ja: 'パラメータにスキーマ',
-  en: 'Parameters take a schema',
-});
-
-export const featureParamsDescription = message({
-  ja: '`page.tsx` や `layout.tsx` が `paramsSchema` を export すると、合わない値はそのパターンが答えず、本物の 404 になります。リンクはスキーマの出力型で書けます。',
-  en: 'A `page.tsx` or `layout.tsx` that exports `paramsSchema` makes a refused value a pathname the pattern does not answer — a genuine 404. Links take what the page receives, typed by the schema.',
-});
-
-export const exampleTitle = message({
-  ja: 'Server Action',
-  en: 'A Server Action',
-});
-
-export const exampleDescription = message({
-  ja: '`use server` を付けた関数はクライアントから呼べて、実行はサーバーで起きます。JavaScript が無くても、同じフォームがそのまま動きます。',
-  en: 'A function marked `use server` is callable from the client, and runs on the server. The same form still works with no JavaScript at all.',
-});
-
-export const docsTitle = message({
-  ja: 'ドキュメント',
-  en: 'Documentation',
-});
-
-export const docsDescription = message({
-  ja: '設計ガイドは npm パッケージに同梱されています。AIコーディングエージェントは `node_modules/@k8ordo/server/docs/` からインストールした版そのものを読みます。',
-  en: 'The guide ships inside the npm package. An AI coding assistant reads the exact installed version out of `node_modules/@k8ordo/server/docs/`.',
+export const nextDeploy = message({
+  ja: '`serve`での起動と、ほかのランタイムやVercelへのデプロイです。',
+  en: 'Running with `serve`, and deploying to other runtimes or Vercel.',
 });
 
 export const navRouting = message({
-  ja: 'routes/',
-  en: 'routes/',
+  ja: 'ルートを書く',
+  en: 'Write routes',
 });
 
 export const navParams = message({
-  ja: 'パラメータ',
-  en: 'Parameters',
+  ja: 'パラメータを受け取る',
+  en: 'Receive parameters',
 });
 
 export const navErrors = message({
-  ja: 'エラーとリダイレクト',
-  en: 'Errors & redirects',
+  ja: 'エラーとリダイレクトを扱う',
+  en: 'Handle errors and redirects',
 });
 
 export const navBoundaries = message({
-  ja: '実行境界',
-  en: 'Boundaries',
+  ja: 'サーバーとブラウザの境界を書く',
+  en: 'Server and browser boundaries',
 });
 
 export const navActions = message({
-  ja: 'アクションとリクエスト',
-  en: 'Actions & requests',
+  ja: 'Server Actionでフォームを受け取る',
+  en: 'Receive forms with Server Actions',
 });
 
 export const navGuards = message({
-  ja: 'ガードと応答',
-  en: 'Guards & responses',
+  ja: 'リクエストをguard.tsで止める',
+  en: 'Stop requests in guard.ts',
 });
 
 export const navDeploy = message({
-  ja: '実行と配信',
-  en: 'Run & deploy',
+  ja: 'デプロイする',
+  en: 'Deploy',
+});
+
+export const navHowItWorks = message({
+  ja: '仕組み',
+  en: 'How it works',
+});
+
+export const navTroubleshooting = message({
+  ja: 'うまく動かないとき',
+  en: 'Troubleshooting',
+});
+
+export const navReference = message({
+  ja: '設定とファイル',
+  en: 'Options and files',
+});
+
+export const navCsp = message({
+  ja: 'CSPを設定する',
+  en: 'Set a CSP',
+});
+
+export const navRequest = message({
+  ja: 'リクエストとCookieを読む',
+  en: 'Read the request and cookies',
 });

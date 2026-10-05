@@ -10,14 +10,9 @@ export const language = message({
   en: 'Language',
 });
 
-export const switchToDarkMode = message({
-  ja: 'ダークモードに切り替え',
-  en: 'Switch to dark mode',
-});
-
-export const switchToLightMode = message({
-  ja: 'ライトモードに切り替え',
-  en: 'Switch to light mode',
+export const toggleColorScheme = message({
+  ja: '配色を切り替える',
+  en: 'Toggle the colour scheme',
 });
 
 export const switchToVerticalWriting = message({

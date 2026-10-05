@@ -1,5 +1,5 @@
 import { DocPage } from '../../../../components/doc-page';
-import { RoutingGuide } from '../../../../components/framework-guide/routing';
+import { routingSections } from '../../../../components/framework-guide/routing';
 import * as m from '../../../../messages';
 
 export default function ServerRoutingPage() {
@@ -8,7 +8,7 @@ export default function ServerRoutingPage() {
       introduction={m.serverRouting.introduction}
       path="/:locale/server/routing"
     >
-      <RoutingGuide mode="server" />
+      {routingSections('server')}
     </DocPage>
   );
 }

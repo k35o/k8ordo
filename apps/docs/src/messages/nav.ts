@@ -1,32 +1,32 @@
 import { message } from '@k8ordo/i18n';
 
 export const home = message({
-  ja: 'Home',
+  ja: 'ホーム',
   en: 'Home',
 });
 
 export const getStarted = message({
-  ja: 'Get Started',
+  ja: 'はじめる',
   en: 'Get Started',
 });
 
 export const components = message({
-  ja: 'Components',
+  ja: 'コンポーネント',
   en: 'Components',
 });
 
 export const theming = message({
-  ja: 'Theming',
+  ja: 'テーマ',
   en: 'Theming',
 });
 
 export const i18n = message({
-  ja: 'i18n',
+  ja: 'コンポーネントの文言',
   en: 'i18n',
 });
 
 export const generativeUi = message({
-  ja: 'Generative UI',
+  ja: '生成UI',
   en: 'Generative UI',
 });
 
@@ -48,4 +48,34 @@ export const ai = message({
 export const aiAgents = message({
   ja: 'AIエージェント',
   en: 'AI Agents',
+});
+
+export const groupStart = message({
+  ja: 'はじめに',
+  en: 'Getting started',
+});
+
+export const groupGuides = message({
+  ja: 'ガイド',
+  en: 'Guides',
+});
+
+export const groupConcepts = message({
+  ja: '仕組み',
+  en: 'Concepts',
+});
+
+export const groupReference = message({
+  ja: 'リファレンス',
+  en: 'Reference',
+});
+
+export const groupCatalog = message({
+  ja: 'カタログ',
+  en: 'Catalog',
+});
+
+export const packageNavigation = message({
+  ja: 'ドキュメント',
+  en: 'Documentation',
 });

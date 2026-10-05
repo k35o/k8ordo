@@ -1,51 +1,66 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: '何かが throw したときの `error.tsx`、何も一致しなかったときの `not-found.tsx`、移転した URL の `redirect.ts`。このモードでは、ビルド中に throw した Server Component はビルドを止め、not-found は `404.html` になり、リダイレクトは訪問者を送り出すページとして書かれます。',
-  en: '`error.tsx` for when something throws, `not-found.tsx` for when nothing matched, and `redirect.ts` for a URL that moved. In this mode a Server Component that throws during the build stops it, the not-found page becomes `404.html`, and a redirect is written as a page that sends the visitor on.',
+  ja: 'ページが例外を投げたとき、URLがどこにも当たらなかったとき、URLを移したときの扱い方を説明します。このモードでは、ビルド中に起きた失敗はビルドを止めるので、ブラウザで起きる失敗と分けて考えます。',
+  en: 'What to do when a page throws, when a URL matches nothing, and when a URL has moved. In this mode a failure during the build stops the build, so it is handled apart from what fails in the browser.',
 });
 
-export const serverRenderTitle = message({
-  ja: 'ビルド中に throw したとき',
-  en: 'When it throws during the build',
+export const scopeMode = message({
+  ja: 'このモードで読み込まれるのは、ホストが配るそのページのファイルです。',
+  en: 'In this mode, that load gets the page’s file from the host.',
 });
 
-export const serverRenderDescription = message({
-  ja: 'ビルド中に Server Component が throw したページは、ページとして書かれません。訪問者のブラウザで描かれて初めてエラーが見える HTML を書く代わりに、ビルドが止まります。throw されたメッセージはページの URL と一緒にログに出て、ビルドは失敗したページをすべて挙げた次の行で終わります。上に Suspense の境界（`error.tsx` もその 1 つ）があってもなくても同じです。throw したのが `not-found.tsx` なら、`404.html` として挙がります。',
-  en: "A page whose Server Component throws while the build renders it is not written as a page: the build stops rather than writing an HTML whose error would only show once a visitor's browser rendered it. The thrown message is logged beside the page's URL, and the build ends with the line below, naming every page that failed — whether or not a Suspense boundary sits above the throw (an `error.tsx` is one). A `not-found.tsx` that throws is named as `404.html`.",
+export const buildTitle = message({
+  ja: 'ビルド中に例外が起きたとき',
+  en: 'When something throws during the build',
 });
 
-export const serverRenderClient = message({
-  ja: 'クライアントコンポーネントは事情が違います。ビルドが HTML を作る途中でクライアントコンポーネントが throw しても、上に Suspense の境界（`error.tsx` もその 1 つ）があれば、その部分はブラウザに任されてファイルは書かれ、ブラウザが描き直します。そこでも throw すれば、hydration の後にいちばん近い `error.tsx` が出ます。上に Suspense の境界が無ければ、Server Component と同じようにビルドが止まります。',
-  en: 'A client component is different. When one throws while the build renders the HTML inside a Suspense boundary — an `error.tsx` is one — that part is left to the browser: the file is written, and the browser renders it again, showing the nearest `error.tsx` after hydration if it throws there too. With no Suspense boundary above it, it stops the build the same way a Server Component does.',
+export const buildDescription = message({
+  ja: 'ビルド中にServer Componentが例外を投げたページは、ファイルに書かれません。訪問者のブラウザで初めてエラーが見えるHTMLを書く代わりに、ビルドが止まります。',
+  en: 'A page whose Server Component throws during the build is not written. Rather than writing HTML whose error would only show in a visitor’s browser, the build stops.',
 });
 
-export const serverRenderBrowser = message({
-  ja: 'つまりこのモードの `error.tsx` は、主にブラウザで起きる失敗のためにあります。hydration の後やクライアント遷移の後に、クライアントコンポーネントが throw した場合です。',
-  en: 'So under this mode `error.tsx` is mostly for what fails in the browser: a client component that throws after hydration or after a client navigation.',
+export const buildLog = message({
+  ja: '投げられたメッセージはページのURLと一緒にログに出て、ビルドは失敗したページをすべて挙げた`static build could not render /broken — see the error above`で終わります。上に`error.tsx`があっても同じです。',
+  en: 'The thrown message is logged beside the page’s URL, and the build ends with `static build could not render /broken — see the error above`, naming every page that failed. An `error.tsx` above it changes nothing.',
 });
 
-export const withoutNote = message({
-  ja: 'このモードでは、読み込み直した文書はホストが配るそのページのファイルで、500 やエラーページで答えるサーバーはありません。サイトが持たない URL への答えも HTML の `404.html` なので、同じく文書の読み込みになります。',
-  en: "In this mode the document load gets the page's prerendered file from the host — there is no server to answer with a 500 or an error page of its own — and a URL the site does not have comes back as `404.html`, which is HTML and so a document load too.",
+export const buildClient = message({
+  ja: 'クライアントコンポーネントは扱いが違います。上にSuspenseの境界（`error.tsx`もその1つ）があれば、その部分はブラウザに任されてファイルは書かれ、ブラウザで描き直したときに`error.tsx`が出ます。上にSuspenseの境界が無ければ、Server Componentと同じくビルドが止まります。',
+  en: 'A client component is different. With a Suspense boundary above it — an `error.tsx` is one — that part is left to the browser and the file is written; the browser renders it again and shows `error.tsx`. With none above it, it stops the build as a Server Component does.',
 });
 
-export const notFoundNote = message({
-  ja: 'このモードでは、`not-found.tsx` は `404.html` という 1 枚のファイルに描かれます。静的ホスティングは知らない URL すべてに 1 つのファイルで答えるので、表せる `not-found.tsx` は 1 つだけです。置く場所はロケールの区間の下でも構いません。2 つ以上宣言するとビルドが止まり、1 つも無ければ `404.html` は書かれず、知らない URL への答えはホスティング次第になります。',
-  en: 'In this mode `not-found.tsx` is rendered into one file, `404.html`. A static host answers every unknown URL from one file, so only one `not-found.tsx` can be represented — under a locale segment is fine. Declaring two stops the build; declaring none writes no `404.html`, and the host decides what an unknown URL gets.',
+export const buildBrowser = message({
+  ja: 'そのため、このモードの`error.tsx`が受け止めるのは、主にブラウザで起きる失敗です。',
+  en: 'So in this mode `error.tsx` is mostly for what fails in the browser.',
+});
+
+export const notFoundMode = message({
+  ja: 'このモードでは、`not-found.tsx`は`404.html`という1つのファイルに書き出されます。静的ホスティングは知らないURLすべてに1つのファイルで答えるので、置ける`not-found.tsx`は1つだけです。ロケールの区間の下に置いても構いません。',
+  en: 'In this mode `not-found.tsx` is written as one file, `404.html`. A static host answers every unknown URL from one file, so there can be only one `not-found.tsx` — under a locale segment is fine.',
+});
+
+export const notFoundCount = message({
+  ja: '2つ以上置くと、ビルドは`a static host answers every unknown URL from one file`で始まるエラーで止まります。1つも置かなければ`404.html`は書かれず、知らないURLへの答えはホスティング次第になります。',
+  en: 'Two or more stop the build with an error that begins `a static host answers every unknown URL from one file`. With none, no `404.html` is written, and the host decides what an unknown URL gets.',
 });
 
 export const notFoundMore = message({
-  ja: '`404.html` がどう描かれ、そこでのパラメータをどう扱うかは、リンク先にあります。',
-  en: 'How `404.html` is rendered, and what its parameters hold, is covered here.',
+  ja: '`404.html`がブラウザでどう描かれるかは、次のページで説明しています。',
+  en: 'How `404.html` renders in the browser is covered here:',
 });
 
-export const redirectNote = message({
-  ja: 'このモードでは、ステータスを送るサーバーはいないので、リダイレクトは訪問者を送り出すページとして書かれます（`<meta http-equiv="refresh">` とリンク）。横に `index.rsc` は無いので、クライアント遷移はそこで URL をブラウザに渡し、ブラウザがそのページを読み込んで従います。`permanent` は書かれるファイルを変えません。リダイレクトは `sitemap.xml` に載らず、パラメータの下の `redirect.ts` には `paths` で値を渡します。',
-  en: 'In this mode no server will ever send the status, so a redirect is written as a page that sends the visitor on — `<meta http-equiv="refresh">` and a link. There is no `index.rsc` beside it, so a client navigation hands the URL to the browser, which loads that page and follows it. `permanent` changes nothing about the file written. Redirects are left out of `sitemap.xml`, and a `redirect.ts` under a parameter takes its values from `paths`.',
+export const pageNotFoundMode = message({
+  ja: 'ビルドはページ全体が描き終わるのを待つので、ページのどこで投げても効きます。ただし、`paths`で渡したURLのページが`notFound()`を投げると、そのURLを挙げてビルドが止まります。サイトにあるはずのURLに、404のページを書くことになるからです。',
+  en: 'A build waits for the whole page, so `notFound()` counts from anywhere in it. A URL handed over through `paths` whose page throws it stops the build, naming the URL: it would put a 404 page at a URL the site claims to have.',
 });
 
-export const pageNotFoundBuild = message({
-  ja: 'ビルドはページ全体を待つので、`notFound()` はページのどこから投げても効きます。`paths` が渡した pathname のページがそう言うと、その pathname を挙げてビルドが止まります。そのまま書けば、サイトが持っていると言う URL に 404 のページを置くことになるからです。',
-  en: 'A build waits for the whole page, so `notFound()` counts from anywhere in it. A pathname the `paths` option supplied whose page says it stops the build, naming the pathname — it would otherwise be written as a 404 page under a URL the site claims to have.',
+export const redirectMode = message({
+  ja: 'このモードでは、ステータスを返すサーバーがいないので、リダイレクトは訪問者を行き先へ送るページとして書かれます。`<meta http-equiv="refresh">`とリンクを持つHTMLで、`permanent`を付けても書かれるファイルは変わりません。',
+  en: 'In this mode there is no server to send a status, so a redirect is written as a page that sends the visitor on: HTML with a `<meta http-equiv="refresh">` and a link. `permanent` changes nothing about the file.',
+});
+
+export const redirectNavigation = message({
+  ja: '横に`index.rsc`は書かれないので、クライアント側の遷移はそのURLをブラウザに渡し、ブラウザがページを読み込んで行き先へ移ります。リダイレクトは`sitemap.xml`にも載りません。',
+  en: 'No `index.rsc` is written beside it, so a client navigation hands the URL to the browser, which loads the page and moves on. Redirects are left out of `sitemap.xml`.',
 });

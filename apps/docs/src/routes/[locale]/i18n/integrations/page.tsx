@@ -1,15 +1,14 @@
-import { Heading } from '@k8ordo/ui';
 import { CodeBlock } from '@k8ordo/ui/code-block';
 
+import { Pitfall } from '../../../../components/callout';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Rich } from '../../../../components/rich';
 import * as m from '../../../../messages';
 
-const s = m.i18nIntegrations;
+const t = m.i18nIntegrations;
 
-const UI_LOCALES = `// src/i18n.ts
-import { defineLocales } from '@k8ordo/i18n';
+const UI_LOCALES = `import { defineLocales } from '@k8ordo/i18n';
 import { registerMessages } from '@k8ordo/ui/i18n';
 
 import { fr } from './ui-messages/fr';
@@ -22,23 +21,9 @@ export const locales = defineLocales({
 
 registerMessages('fr', fr);`;
 
-const TALK_MESSAGES = `// src/messages/talk.ts
-import { message } from '@k8ordo/i18n';
+const TALK_SCHEMA = `import * as z from 'zod';
 
-export const titleRequired = message({
-  ja: 'タイトルを入力してください',
-  en: 'Enter a title',
-});
-
-export const titleTooLong = message({
-  ja: (max: number) => \`\${String(max)} 文字以内で入力してください\`,
-  en: (max) => \`Use at most \${String(max)} characters\`,
-});`;
-
-const TALK_SCHEMA = `// src/routes/[locale]/talks/new/_parts/schema.ts
-import * as z from 'zod';
-
-import * as m from '../../../../../messages';
+import * as m from '../messages';
 
 export const talkSchema = z.object({
   title: z
@@ -47,251 +32,131 @@ export const talkSchema = z.object({
     .max(120, { error: () => m.talk.titleTooLong(120) }),
 });`;
 
-const TALK_PAGE = `// src/routes/[locale]/talks/new/page.tsx
-import { formFields } from '@k8ordo/form/server';
-
-import { createTalk } from './_parts/actions';
-import { talkSchema } from './_parts/schema';
-import { TalkForm } from './_parts/talk-form';
-
-export default function NewTalkPage() {
-  return <TalkForm action={createTalk} fields={formFields(talkSchema)} />;
+const TALK_PAGE = `export default function NewTalkPage() {
+  const talkFields = formFields(talkSchema);
+  return <TalkForm action={createTalk} fields={talkFields} />;
 }`;
 
-const TALK_ACTION = `// src/routes/[locale]/talks/new/_parts/actions.ts
-'use server';
-
-import { parseForm } from '@k8ordo/form/server';
-import type { FormState } from '@k8ordo/form/server';
-
-import { saveTalk } from '../../../../../db/talks';
-import { talkSchema } from './schema';
-
-// Posted from /ja/talks/new, it runs in ja: the zod messages are Japanese.
-export async function createTalk(
-  _previous: FormState,
-  formData: FormData,
-): Promise<FormState> {
-  const parsed = parseForm(talkSchema, formData);
-  if (parsed.success) await saveTalk(parsed.data);
-  return parsed.state;
-}`;
-
-const SERVER_ROOT_GUARD = `// src/routes/(home)/guard.ts
-import { withBase } from '@k8ordo/router';
-import type { Guard } from '@k8ordo/server/runtime';
-
-import { locales } from '../../i18n';
-
-const guard: Guard<'/'> = ({ request }) => {
-  const locale = locales.negotiateRequest(request, { cookie: 'locale' });
-  return new Response(null, {
-    status: 307,
-    headers: { location: withBase(locales.localize('/', locale)) },
-  });
-};
-
-export default guard;`;
-
-const SERVER_ROOT_PAGE = `// src/routes/(home)/page.tsx
-export default function RootPage() {
-  return null;
-}`;
-
-const NODE_TEST = `// src/messages/messages.test.ts
-import { describe, expect, expectTypeOf, it } from 'vitest';
-
-import { locales } from '../i18n';
-import * as cart from './cart';
-import * as nav from './nav';
-
-describe('messages', () => {
-  it('renders in the default locale unless run names another', () => {
-    expect(nav.home()).toBe('ホーム');
-    expect(locales.run('en', () => nav.home())).toBe('Home');
-  });
-
-  it('keeps the locale across awaits', async () => {
-    const text = await locales.run('en', async () => {
-      await Promise.resolve();
-      return nav.home();
-    });
-    expect(text).toBe('Home');
-  });
-
-  it('types the arguments of a message', () => {
-    expectTypeOf(cart.items).parameters.toEqualTypeOf<[count: number]>();
-  });
-});`;
-
-const SCHEMA_TEST = `// src/i18n.test.ts
-import { expect, it } from 'vitest';
+const LINKS = `import { bindParams } from '@k8ordo/router';
 
 import { locales } from './i18n';
 
-it('accepts only the listed locales', () => {
-  const { validate } = locales.paramsSchema['~standard'];
-  expect(locales.run('ja', () => validate({ locale: 'en' }))).toStrictEqual({
-    value: { locale: 'en' },
-  });
-  expect(validate({ locale: 'fr' })).toMatchObject({
-    issues: [{ path: ['locale'] }],
-  });
-});`;
+export const { href, navigateTo } = bindParams(() => ({
+  locale: locales.getLocale(),
+}));`;
 
-const BROWSER_TEST = `// src/messages/messages.browser.test.ts
-import { afterEach, expect, it } from 'vitest';
+const HREF = `href('/:locale/products/:id', { id: '42' });
+// '/en/products/42'
 
-import { locales } from '../i18n';
-import * as nav from './nav';
-
-const initial = location.pathname;
-
-afterEach(() => {
-  history.replaceState(null, '', initial);
-});
-
-it('renders in the locale the URL spells', () => {
-  history.replaceState(null, '', '/en/cart');
-  expect(locales.getLocale()).toBe('en');
-  expect(nav.home()).toBe('Home');
-});`;
+navigateTo('/:locale', { locale: 'ja' }, { history: 'replace' });`;
 
 export default function I18nIntegrationsPage() {
   return (
-    <DocPage introduction={s.introduction} path="/:locale/i18n/integrations">
-      <DocSection description={s.ui.description} title={s.ui.title}>
-        <CodeBlock code={UI_LOCALES} lang="ts" />
-        <ul className="text-fg-mute flex flex-col gap-2 pl-6">
-          <li className="list-disc">
-            <Rich>{s.ui.clientGraph()}</Rich>
-          </li>
-          <li className="list-disc">
-            <Rich>{s.ui.notFound()}</Rich>
-          </li>
-          <li className="list-disc">
-            <Rich>{s.ui.otherLocales()}</Rich>
-          </li>
-          <li className="list-disc">
-            <Rich>{s.ui.props()}</Rich>
-          </li>
-        </ul>
+    <DocPage introduction={t.introduction} path="/:locale/i18n/integrations">
+      <DocSection description={t.uiDescription} id="ui" title={t.uiTitle}>
+        <p>
+          <Rich>{t.uiBuiltIn()}</Rich>
+        </p>
+        <CodeBlock
+          code={UI_LOCALES}
+          lang="ts"
+          marks={{ 2: 'highlight', 12: 'highlight' }}
+          title="i18n.ts"
+        />
+        <p>
+          <Rich>{t.uiTypes()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.uiProps()}</Rich>
+        </p>
+        <Pitfall>
+          <p>
+            <Rich>{t.uiPitfall()}</Rich>
+          </p>
+        </Pitfall>
         <p>
           <LocaleAnchor path="/:locale/ui/i18n">
-            <Rich>{s.ui.link()}</Rich>
+            <Rich>{t.uiLink()}</Rich>
           </LocaleAnchor>
         </p>
       </DocSection>
 
-      <DocSection description={s.form.description} title={s.form.title}>
-        <ol className="text-fg-mute flex flex-col gap-2 pl-6">
-          <li className="list-decimal">
-            <Rich>{s.form.errorMap()}</Rich>
-          </li>
-          <li className="list-decimal">
-            <Rich>{s.form.derive()}</Rich>
-          </li>
-          <li className="list-decimal">
-            <Rich>{s.form.action()}</Rich>
-          </li>
-        </ol>
-        <CodeBlock code={TALK_MESSAGES} lang="ts" />
-        <CodeBlock code={TALK_SCHEMA} lang="ts" />
-        <CodeBlock code={TALK_PAGE} lang="tsx" />
-        <CodeBlock code={TALK_ACTION} lang="ts" />
-        <p className="text-fg-mute leading-relaxed">
-          <Rich>{s.form.staticNote()}</Rich>
+      <DocSection description={t.formDescription} id="form" title={t.formTitle}>
+        <CodeBlock
+          code={TALK_SCHEMA}
+          lang="ts"
+          marks={{ 8: 'highlight', 9: 'highlight' }}
+          title="schema.ts"
+        />
+        <p>
+          <Rich>{t.formRule()}</Rich>
+        </p>
+        <Pitfall>
+          <p>
+            <Rich>{t.formFieldsPitfall()}</Rich>
+          </p>
+        </Pitfall>
+        <CodeBlock
+          code={TALK_PAGE}
+          lang="tsx"
+          marks={{ 2: 'highlight' }}
+          title="page.tsx"
+        />
+        <p>
+          <Rich>{t.formAction()}</Rich>
         </p>
         <p>
-          <LocaleAnchor path="/:locale/form/get-started">
-            <Rich>{s.form.guideLink()}</Rich>
-          </LocaleAnchor>
+          <Rich>{t.formOutside()}</Rich>
         </p>
-      </DocSection>
-
-      <DocSection description={s.router.description} title={s.router.title}>
-        <ul className="text-fg-mute flex flex-col gap-2 pl-6">
-          <li className="list-disc">
-            <Rich>{s.router.links()}</Rich>
-          </li>
-          <li className="list-disc">
-            <Rich>{s.router.switcher()}</Rich>
-          </li>
-          <li className="list-disc">
-            <Rich>{s.router.match()}</Rich>
-          </li>
-        </ul>
         <p>
-          <LocaleAnchor path="/:locale/i18n/routing">
-            <Rich>{s.router.link()}</Rich>
+          <LocaleAnchor path="/:locale/form/errors">
+            <Rich>{t.formLink()}</Rich>
           </LocaleAnchor>
         </p>
       </DocSection>
 
       <DocSection
-        description={s.staticMode.description}
-        title={s.staticMode.title}
+        description={t.routerDescription}
+        id="router"
+        title={t.routerTitle}
       >
-        <ul className="text-fg-mute flex flex-col gap-2 pl-6">
-          <li className="list-disc">
-            <Rich>{s.staticMode.paths()}</Rich>
-          </li>
-          <li className="list-disc">
-            <Rich>{s.staticMode.notFound()}</Rich>
-          </li>
-        </ul>
-      </DocSection>
-
-      <DocSection description={s.server.description} title={s.server.title}>
-        <ul className="text-fg-mute flex flex-col gap-2 pl-6">
-          <li className="list-disc">
-            <Rich>{s.server.negotiate()}</Rich>
-          </li>
-          <li className="list-disc">
-            <Rich>{s.server.group()}</Rich>
-          </li>
-          <li className="list-disc">
-            <Rich>{s.server.status()}</Rich>
-          </li>
-          <li className="list-disc">
-            <Rich>{s.server.actions()}</Rich>
-          </li>
-        </ul>
-        <CodeBlock code={SERVER_ROOT_GUARD} lang="ts" />
-        <CodeBlock code={SERVER_ROOT_PAGE} lang="tsx" />
+        <CodeBlock
+          code={LINKS}
+          lang="ts"
+          marks={{ 5: 'highlight', 6: 'highlight' }}
+          title="links.ts"
+        />
+        <CodeBlock code={HREF} lang="ts" />
         <p>
-          <LocaleAnchor path="/:locale/server/guards">
-            <Rich>{s.server.guardsLink()}</Rich>
+          <Rich>{t.routerSource()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.routerOverride()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.routerTyped()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.routerMatch()}</Rich>
+        </p>
+        <p>
+          <LocaleAnchor path="/:locale/router/bind-params">
+            <Rich>{t.routerLink()}</Rich>
           </LocaleAnchor>
         </p>
       </DocSection>
 
-      <DocSection description={s.testing.description} title={s.testing.title}>
-        <Heading level="h3">{s.testing.nodeTitle()}</Heading>
-        <p className="text-fg-mute leading-relaxed">
-          <Rich>{s.testing.nodeDescription()}</Rich>
-        </p>
-        <CodeBlock code={NODE_TEST} lang="ts" />
-        <p className="text-fg-mute leading-relaxed">
-          <Rich>{s.testing.nodeSchema()}</Rich>
-        </p>
-        <CodeBlock code={SCHEMA_TEST} lang="ts" />
-        <Heading level="h3">{s.testing.browserTitle()}</Heading>
-        <p className="text-fg-mute leading-relaxed">
-          <Rich>{s.testing.browserDescription()}</Rich>
-        </p>
-        <CodeBlock code={BROWSER_TEST} lang="ts" />
-        <p className="text-fg-mute leading-relaxed">
-          <Rich>{s.testing.dom()}</Rich>
-        </p>
-        <Heading level="h3">{s.testing.setTitle()}</Heading>
-        <ul className="text-fg-mute flex flex-col gap-2 pl-6">
-          <li className="list-disc">
-            <Rich>{s.testing.otherSet()}</Rich>
-          </li>
-          <li className="list-disc">
-            <Rich>{s.testing.typeTests()}</Rich>
-          </li>
+      <DocSection
+        description={t.frameworkDescription}
+        id="framework"
+        title={t.frameworkTitle}
+      >
+        <ul>
+          {t.frameworkList.map((item) => (
+            <li key={item()}>
+              <Rich>{item()}</Rich>
+            </li>
+          ))}
         </ul>
       </DocSection>
     </DocPage>

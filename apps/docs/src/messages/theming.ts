@@ -1,53 +1,53 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: 'k8ordo UIは、CSS変数ベースのデザイントークンシステムを使用しています。ライトモードとダークモードの両方に対応し、カスタマイズが容易です。',
-  en: 'k8ordo UI uses a CSS variable-based design token system. It supports both light and dark modes and is easy to customize.',
+  ja: '`@k8ordo/ui`の色や余白、文字の大きさは、すべてCSS変数のデザイントークンで決まっています。このページでは、どんなトークンがあり、どう使い分けるかと、トークンを上書きしてアプリの色に合わせる方法を紹介します。',
+  en: '`@k8ordo/ui`’s colours, spacing and type sizes all come from design tokens defined as CSS variables. This page lists the tokens, how to choose between them, and how to override them to fit your application.',
 });
 
 export const colorPaletteTitle = message({
-  ja: 'カラーパレット',
-  en: 'Color Palette',
+  ja: '基本の色',
+  en: 'The base palette',
 });
 
 export const colorPaletteDescription = message({
-  ja: '10色のベースカラーファミリーがあり、各色に50〜950の11段階のシェードが用意されています。',
-  en: 'There are 10 base color families, each with 11 shades from 50 to 950.',
+  ja: '10の色相それぞれに、50から950まで11段階の明るさがあります。コンポーネントはこの色を直接使わず、次に紹介する用途別のトークンを通して使います。',
+  en: 'Ten hues, each with eleven shades from 50 to 950. Components never use them directly; they go through the purpose-named tokens below.',
 });
 
 export const semanticColorsTitle = message({
-  ja: 'セマンティックカラー',
-  en: 'Semantic Colors',
+  ja: '用途別の色',
+  en: 'Colours by purpose',
 });
 
 export const semanticColorsDescription = message({
-  ja: 'ベースカラーをもとにした用途別のカラートークンです。テーマ切り替え時に自動的に適切な値に変わります。',
-  en: 'Purpose-specific color tokens derived from the base colors. They automatically adapt when switching themes.',
+  ja: '文字、背景、線のように、用途ごとに名前を付けた色のトークンです。ライトとダークで別の値を持ち、テーマが切り替わると自動で値が変わるので、コンポーネントの側でダークモードを意識する必要はありません。',
+  en: 'Colour tokens named for what they are used for: text, backgrounds, borders. Each has a light and a dark value and switches with the theme, so a component never has to think about dark mode.',
 });
 
 export const foregroundTitle = message({
-  ja: '前景色（Foreground）',
-  en: 'Foreground',
+  ja: '文字の色',
+  en: 'Text',
 });
 
 export const backgroundTitle = message({
-  ja: '背景色（Background）',
-  en: 'Background',
+  ja: '背景の色',
+  en: 'Backgrounds',
 });
 
 export const borderTitle = message({
-  ja: 'ボーダー（Border）',
-  en: 'Border',
+  ja: '線の色',
+  en: 'Borders',
 });
 
 export const brandColorsTitle = message({
-  ja: 'ブランドカラー',
-  en: 'Brand Colors',
+  ja: 'ブランドの色',
+  en: 'Brand colours',
 });
 
 export const brandColorsDescription = message({
-  ja: 'PrimaryはTeal、SecondaryはCyanをベースとしたブランドカラーです。',
-  en: 'Primary uses Teal and Secondary uses Cyan as their base brand colors.',
+  ja: '`primary`はティール、`secondary`はシアンをもとにしたブランドの色です。`group`の4色は、グラフのようにいくつかの系列を描き分けるのに使います。',
+  en: '`primary` is built on teal and `secondary` on cyan. The four `group` colours tell several series apart, as in a chart.',
 });
 
 export const token = {
@@ -229,104 +229,129 @@ export const token = {
   }),
 };
 
+export const primaryTitle = message({
+  ja: '`primary`',
+  en: '`primary`',
+});
+
+export const secondaryTitle = message({
+  ja: '`secondary`',
+  en: '`secondary`',
+});
+
+export const groupTitle = message({
+  ja: '`group`',
+  en: '`group`',
+});
+
 export const typographyTitle = message({
-  ja: 'タイポグラフィ',
+  ja: '文字',
   en: 'Typography',
 });
 
 export const typographyDescription = message({
-  ja: 'テキストサイズ、フォントウェイト、レタースペーシング、行の高さのデザイントークンです。',
-  en: 'Design tokens for text sizes, font weights, letter spacing, and line heights.',
+  ja: '文字の大きさ、太さ、字間、行の高さのトークンです。',
+  en: 'Tokens for text size, weight, letter spacing and line height.',
 });
 
 export const textSizesTitle = message({
-  ja: 'テキストサイズ',
-  en: 'Text Sizes',
+  ja: '文字の大きさ',
+  en: 'Text sizes',
 });
 
 export const fontWeightsTitle = message({
-  ja: 'フォントウェイト',
-  en: 'Font Weights',
+  ja: '文字の太さ',
+  en: 'Font weights',
 });
 
 export const letterSpacingTitle = message({
-  ja: 'レタースペーシング',
-  en: 'Letter Spacing',
+  ja: '字間',
+  en: 'Letter spacing',
 });
 
 export const lineHeightTitle = message({
   ja: '行の高さ',
-  en: 'Line Height',
+  en: 'Line height',
 });
 
 export const shadowTitle = message({
-  ja: 'シャドウ',
-  en: 'Shadow',
+  ja: '影',
+  en: 'Shadows',
 });
 
 export const shadowDescription = message({
-  ja: 'ボックスシャドウのデザイントークンです。',
-  en: 'Design tokens for box shadows.',
+  ja: 'カードやポップオーバーのように、面を浮かせて見せるための影です。',
+  en: 'Shadows that lift a surface, such as a card or a popover.',
 });
 
 export const borderRadiusTitle = message({
-  ja: 'ボーダーラディウス',
-  en: 'Border Radius',
+  ja: '角丸',
+  en: 'Corner radius',
 });
 
 export const borderRadiusDescription = message({
-  ja: '角丸のデザイントークンです。',
-  en: 'Design tokens for border radius values.',
+  ja: '触れる要素ほど大きく、読む要素ほど小さな角丸を使います。',
+  en: 'Larger radii for what you touch, smaller ones for what you read.',
 });
 
 export const darkModeTitle = message({
   ja: 'ダークモード',
-  en: 'Dark Mode',
+  en: 'Dark mode',
 });
 
 export const darkModeDescription = message({
-  ja: 'ルート要素にdarkクラスを追加することで、ダークモードが有効になります。セマンティックカラートークンは自動的にダークモード用の値に切り替わり、CSSの`color-scheme`プロパティも`dark`になるので、スクロールバーやフォーム部品も暗く描かれます。k8ordoのアプリケーションでは、クラスの付け外しは`@k8ordo/color-scheme`が受け持ちます。',
-  en: 'Add the dark class to the root element to enable dark mode. Semantic color tokens automatically switch to their dark mode values, and the CSS `color-scheme` property becomes `dark`, so scrollbars and form controls are drawn dark too. In a k8ordo application, `@k8ordo/color-scheme` adds and removes the class.',
+  ja: '`<html>`に`dark`クラスが付くと、用途別の色のトークンがダークの値に切り替わります。CSSの`color-scheme`プロパティも`dark`になるので、スクロールバーやフォームの部品も暗く描かれます。',
+  en: 'A `dark` class on `<html>` switches the purpose-named colour tokens to their dark values. The CSS `color-scheme` property becomes `dark` too, so scrollbars and form controls are drawn dark as well.',
+});
+
+export const darkModeColorScheme = message({
+  ja: 'k8ordoのアプリでは、このクラスの付け外しを`@k8ordo/color-scheme`が受け持ちます。',
+  en: 'In a k8ordo application, `@k8ordo/color-scheme` adds and removes the class.',
 });
 
 export const highContrastTitle = message({
-  ja: '高コントラストと強制カラー',
-  en: 'High Contrast and Forced Colors',
+  ja: 'ハイコントラストと強制カラー',
+  en: 'High contrast and forced colours',
 });
 
 export const highContrastDescription = message({
-  ja: 'OSで選ぶコントラストの設定にも、スタイルシートが従います。`prefers-contrast: more`では文字と線のトークンが地の色から一段遠ざかり、影だけで縁取っていたカードやモーダルに線が付きます。`forced-colors: active`（Windowsのハイコントラストなど）では、境界線・フォーカスリング・選択状態をシステムカラーで描きます。どちらもOSの設定なので、アプリが切り替えたり保存したりするものはありません。',
-  en: 'The stylesheet also follows the contrast settings a user makes in the OS. Under `prefers-contrast: more`, the text and border tokens move a step further from the ground, and cards and modals that were outlined only by a shadow gain a line. Under `forced-colors: active` (such as Windows high contrast), boundaries, focus rings, and selected states are drawn with system colors. Both are OS settings, so there is nothing for an application to toggle or store.',
+  ja: 'スタイルシートは、OSのコントラストの設定にも従います。`prefers-contrast: more`では文字と線の色が背景から一段離れ、影だけで縁取っていたカードやモーダルに線が付きます。`forced-colors: active`（Windowsのハイコントラストなど）では、境界線やフォーカスの輪、選択状態をシステムカラーで描きます。',
+  en: 'The stylesheet follows the OS contrast settings too. Under `prefers-contrast: more`, text and border colours move one step further from the background, and cards and modals outlined only by a shadow gain a border. Under `forced-colors: active` (Windows High Contrast, for one), borders, focus rings and selected states are drawn in system colours.',
 });
 
 export const highContrastOwnUiDescription = message({
-  ja: '自前のUIでは`contrast-more:`と`forced-colors:`のバリアントを使います。強制カラーではシステムカラー以外は塗り替えられるので、状態は`Highlight`などで描きます。境界やフォーカスを`box-shadow`だけで描かず、`text-transparent`で隠さないでください（強制カラーで塗られて見えてしまうので、`invisible`を使います）。',
-  en: 'In your own UI, use the `contrast-more:` and `forced-colors:` variants. Under forced colors every color except a system color is repainted, so draw state with one such as `Highlight`. Do not draw a boundary or a focus ring with `box-shadow` alone, and do not hide something with `text-transparent` (forced colors paints it, so use `invisible`).',
+  ja: '自分で作るUIでは、`contrast-more:`と`forced-colors:`のバリアントを使います。強制カラーではシステムカラー以外の色が塗り替えられるので、選択状態は`Highlight`のようなシステムカラーで描いてください。',
+  en: 'In your own UI, use the `contrast-more:` and `forced-colors:` variants. Forced colours repaint everything but system colours, so draw a selected state with one such as `Highlight`.',
+});
+
+export const highContrastAvoid = message({
+  ja: '境界やフォーカスを`box-shadow`だけで描かないでください。強制カラーでは影が消えます。要素を隠すときも`text-transparent`ではなく`invisible`を使います。透明の色は塗り替えられて見えてしまうからです。',
+  en: 'Never draw a boundary or focus with `box-shadow` alone: forced colours drop shadows. Hide with `invisible`, not `text-transparent`, since a transparent colour is repainted and shows.',
 });
 
 export const customizeTitle = message({
   ja: 'トークンを上書きする',
-  en: 'Overriding Tokens',
+  en: 'Override the tokens',
 });
 
 export const customizeDescription = message({
-  ja: 'すべてのトークンはCSS変数なので、k8ordo UIのスタイルシートより後に読み込むCSSで同名の変数を再定義すれば上書きできます。ベースカラーの変数（`--purple-200`など）も定義済みなので、参照を差し替えるだけでブランドカラーを丸ごと切り替えられます。ダークモードの値は`.dark`側で、高コントラストの値は`@media (prefers-contrast: more)`の中の`:root`と`.dark`で再定義します。',
-  en: 'Every token is a CSS variable, so redefining the same variable in CSS loaded after the k8ordo UI stylesheet overrides it. The base color variables (such as `--purple-200`) are also defined, so swapping the references switches the whole brand color at once. Redefine the dark mode values under `.dark`, and the high-contrast values on `:root` and `.dark` inside `@media (prefers-contrast: more)`.',
+  ja: 'トークンはどれもCSS変数なので、`@k8ordo/ui`のスタイルシートより後に読み込むCSSで同じ名前の変数を定義し直せば上書きできます。基本の色の変数（`--purple-200`など）も定義済みなので、参照先を差し替えるだけでブランドの色をまとめて変えられます。',
+  en: 'Every token is a CSS variable, so redefining the same name in CSS loaded after `@k8ordo/ui`’s stylesheet overrides it. The base palette (`--purple-200` and so on) is defined too, so swapping the references changes the whole brand colour at once.',
 });
 
 export const customizeValueDescription = message({
-  ja: 'シェードの参照ではなく、値そのものを直接指定することもできます。',
-  en: 'You can also assign a raw value directly instead of referencing a shade.',
+  ja: '色の段階を参照する代わりに、値そのものを書くこともできます。ダークモードの値は`.dark`の中で、ハイコントラストの値は`@media (prefers-contrast: more)`の中の`:root`と`.dark`で定義し直します。',
+  en: 'You can also write a value instead of referring to a shade. Redefine dark values under `.dark`, and high-contrast values on `:root` and `.dark` inside `@media (prefers-contrast: more)`.',
 });
 
 export const spacingTitle = message({
-  ja: 'スペーシング',
+  ja: '余白',
   en: 'Spacing',
 });
 
 export const spacingDescription = message({
-  ja: 'スペーシングスケールです。基本単位は0.25rem（4px）で、p-{n}やgap-{n}はn × 0.25remに計算されます。',
-  en: 'The spacing scale. The base unit is 0.25rem (4px), and p-{n} or gap-{n} computes to n × 0.25rem.',
+  ja: '余白の基本の単位は0.25rem（4px）です。`p-4`や`gap-6`のようなクラスは、数字×0.25remの大きさになります。',
+  en: 'The base unit of spacing is 0.25rem (4px): a class such as `p-4` or `gap-6` is the number times 0.25rem.',
 });
 
 export const breakpointsTitle = message({
@@ -335,16 +360,16 @@ export const breakpointsTitle = message({
 });
 
 export const breakpointsDescription = message({
-  ja: 'レスポンシブブレイクポイントです。',
-  en: 'Responsive breakpoints.',
+  ja: '画面の幅でレイアウトを切り替えるときの境目です。',
+  en: 'The widths at which layouts change.',
 });
 
 export const zIndexTitle = message({
-  ja: 'Z-Indexレイヤ',
-  en: 'Z-Index Layers',
+  ja: '重なり順',
+  en: 'Stacking order',
 });
 
 export const zIndexDescription = message({
-  ja: 'オーバーレイ系コンポーネントに付く3層のz-indexスケールです。ただしtriggerに紐付く浮遊UI（Popover / DropdownMenu / ListBox / Tooltip）とModal / Drawerはブラウザのトップレイヤーに表示され、z-indexに関係なく開いた順に重なるため、overlayとmodalはトップレイヤーの中では効きません。toastが効くのは文書内でのToastの重なりだけで、Modalの中のToastはModal自身のToastProviderが`dialog`要素の中に表示します。',
-  en: 'A three-tier z-index scale carried by the overlay components. Anchored floating UI (Popover / DropdownMenu / ListBox / Tooltip) and Modal / Drawer render in the browser top layer, where they stack in the order they opened regardless of z-index, so overlay and modal have no effect there. toast only orders Toast within the document; a Toast inside a Modal is shown within its `dialog` element by the Modal’s own ToastProvider.',
+  ja: '重なり順のトークンは3つあります。ただし、ポップオーバーとツールチップ、モーダルとドロワーはブラウザの最前面の層（top layer）に開きます。この層の中では開いた順に重なるので、`overlay`と`modal`は効きません。`toast`が効くのは、ページの中でのトーストの重なりだけです。',
+  en: 'There are three stacking tokens. Popovers, tooltips, modals and drawers, though, open in the browser’s top layer, where they stack in the order they opened, so `overlay` and `modal` have no effect there. `toast` only orders toasts within the page.',
 });

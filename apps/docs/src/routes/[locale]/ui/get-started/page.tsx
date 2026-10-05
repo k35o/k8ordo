@@ -1,167 +1,139 @@
-import { Anchor, Heading, Separator } from '@k8ordo/ui';
+import { Anchor } from '@k8ordo/ui';
 import { CodeBlock } from '@k8ordo/ui/code-block';
 
-import { InstallTabs } from '../../../../components/install-tabs';
+import { Note } from '../../../../components/callout';
+import { DocPage, DocSection } from '../../../../components/doc-page';
+import { PackageInstall, peerVersionOf } from '../../../../components/install';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
-import { PageTitle } from '../../../../components/page-title';
-import { PeerTable } from '../../../../components/peer-table';
 import { Rich } from '../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../constants';
 import * as m from '../../../../messages';
 
-export default function GetStarted() {
+const t = m.getStarted;
+
+const STYLES = `import '@k8ordo/ui/styles.css';`;
+
+const TAILWIND = `@import '@k8ordo/ui/tailwind.css';`;
+
+const PROVIDER = `<UIProvider>
+  <App />
+</UIProvider>`;
+
+const COMPONENT = `<FormControl
+  label="Email"
+  renderInput={(props) => <TextField {...props} type="email" />}
+/>
+<Button type="submit" variant="solid">
+  Subscribe
+</Button>`;
+
+const NEXT = [
+  {
+    path: '/:locale/ui/components',
+    label: m.nav.components,
+    description: t.nextComponents,
+  },
+  {
+    path: '/:locale/ui/theming',
+    label: m.nav.theming,
+    description: t.nextTheming,
+  },
+  {
+    path: '/:locale/ui/i18n',
+    label: m.nav.i18n,
+    description: t.nextI18n,
+  },
+] as const;
+
+export default function UiGetStartedPage() {
   return (
-    <div className="mx-auto flex max-w-4xl flex-col gap-8 px-6 py-12 md:px-8">
-      <PageTitle title={m.nav.getStarted} />
-      <div className="flex flex-col gap-4">
-        <Heading level="h1">
-          <Rich>{m.nav.getStarted()}</Rich>
-        </Heading>
-        <p className="text-fg-mute text-lg">
-          <Rich>{m.getStarted.introduction()}</Rich>
+    <DocPage introduction={t.introduction} path="/:locale/ui/get-started">
+      <DocSection
+        description={t.installDescription}
+        id="install"
+        title={t.installTitle}
+      >
+        <PackageInstall name="@k8ordo/ui" />
+        <p>
+          <Rich>{t.installFeatures()}</Rich>{' '}
+          <LocaleAnchor path="/:locale/ui/ai">{m.nav.ai()}</LocaleAnchor>
         </p>
-      </div>
-      <Separator color="mute" />
+      </DocSection>
 
-      <section className="flex flex-col gap-4">
-        <Heading level="h2">
-          <Rich>{m.getStarted.installationTitle()}</Rich>
-        </Heading>
-        <p className="text-fg-mute">
-          <Rich>{m.getStarted.installationDescription()}</Rich>
+      <DocSection
+        description={t.stylesDescription}
+        id="styles"
+        title={t.stylesTitle}
+      >
+        <CodeBlock code={STYLES} lang="tsx" title="main.tsx" />
+        <p>
+          <Rich>
+            {t.stylesTailwind(peerVersionOf('@k8ordo/ui', 'tailwindcss'))}
+          </Rich>
         </p>
-        <InstallTabs
-          npm={<CodeBlock code="npm install @k8ordo/ui" lang="bash" />}
-          pnpm={<CodeBlock code="pnpm add @k8ordo/ui" lang="bash" />}
-          yarn={<CodeBlock code="yarn add @k8ordo/ui" lang="bash" />}
-        />
-      </section>
-
-      <Separator color="mute" />
-
-      <section className="flex flex-col gap-4">
-        <Heading level="h2">
-          <Rich>{m.getStarted.setupTitle()}</Rich>
-        </Heading>
-        <p className="text-fg-mute">
-          <Rich>{m.getStarted.setupDescription()}</Rich>
-        </p>
-
-        <div className="flex flex-col gap-2">
-          <Heading level="h3">1. CSS</Heading>
-          <p className="text-fg-mute">
-            <Rich>{m.getStarted.setupCssDescription()}</Rich>
+        <CodeBlock code={TAILWIND} lang="css" title="app.css" />
+        <Note>
+          <p>
+            <Rich>{t.stylesBase()}</Rich>
           </p>
-          <CodeBlock code="import '@k8ordo/ui/styles.css';" lang="tsx" />
-          <p className="text-fg-mute">
-            <Rich>{m.getStarted.setupCssTailwindDescription()}</Rich>
-          </p>
-          <CodeBlock code="import '@k8ordo/ui/tailwind.css';" lang="tsx" />
-        </div>
+        </Note>
+      </DocSection>
 
-        <div className="flex flex-col gap-2">
-          <Heading level="h3">2. Provider</Heading>
-          <p className="text-fg-mute">
-            <Rich>{m.getStarted.setupProviderDescription()}</Rich>
-          </p>
-          <CodeBlock
-            code={`import { UIProvider } from '@k8ordo/ui';
-
-function App({ children }) {
-  return (
-    <UIProvider>
-      {children}
-    </UIProvider>
-  );
-}`}
-            lang="tsx"
-          />
-        </div>
-      </section>
-
-      <Separator color="mute" />
-
-      <section className="flex flex-col gap-4">
-        <Heading level="h2">
-          <Rich>{m.getStarted.usageTitle()}</Rich>
-        </Heading>
-        <p className="text-fg-mute">
-          <Rich>{m.getStarted.usageDescription()}</Rich>
+      <DocSection
+        description={t.providerDescription}
+        id="provider"
+        title={t.providerTitle}
+      >
+        <CodeBlock code={PROVIDER} lang="tsx" title="main.tsx" />
+        <p>
+          <Rich>{t.providerWording()}</Rich>
         </p>
-        <CodeBlock
-          code={`import { Button, Heading } from '@k8ordo/ui';
+      </DocSection>
 
-function MyComponent() {
-  return (
-    <div>
-      <Heading level="h1">Hello k8ordo UI</Heading>
-      <Button variant="solid">Click me</Button>
-    </div>
-  );
-}`}
-          lang="tsx"
-        />
-      </section>
-
-      <Separator color="mute" />
-
-      <section className="flex flex-col gap-4">
-        <Heading level="h2">
-          <Rich>{m.getStarted.requirementsTitle()}</Rich>
-        </Heading>
-        <p className="text-fg-mute">
-          <Rich>{m.getStarted.requirementsDescription()}</Rich>
+      <DocSection
+        description={t.componentDescription}
+        id="component"
+        title={t.componentTitle}
+      >
+        <CodeBlock code={COMPONENT} lang="tsx" title="subscribe-form.tsx" />
+        <p>
+          <Rich>{t.componentProps()}</Rich>
         </p>
-        <PeerTable
-          name="@k8ordo/ui"
-          neededFor={{
-            react: m.getStarted.peers.react,
-            'react-dom': m.getStarted.peers.reactDom,
-            '@k8ordo/i18n': m.getStarted.peers.i18n,
-            typescript: m.getStarted.peers.types,
-            '@types/react': m.getStarted.peers.types,
-            '@types/react-dom': m.getStarted.peers.types,
-            tailwindcss: m.getStarted.peers.tailwindcss,
-            zod: m.getStarted.peers.zod,
-            '@json-render/core': m.getStarted.peers.jsonRender,
-            '@json-render/react': m.getStarted.peers.jsonRender,
-            '@openuidev/lang-core': m.getStarted.peers.openuiLangCore,
-            '@openuidev/react-lang': m.getStarted.peers.openuiReactLang,
-            ai: m.getStarted.peers.ai,
-            streamdown: m.getStarted.peers.streamdown,
-          }}
-        />
-      </section>
+      </DocSection>
 
-      <Separator color="mute" />
+      <DocSection description={t.darkDescription} id="dark" title={t.darkTitle}>
+        <p>
+          <Rich>{t.darkColorScheme()}</Rich>{' '}
+          <LocaleAnchor path="/:locale/color-scheme">
+            @k8ordo/color-scheme
+          </LocaleAnchor>
+        </p>
+      </DocSection>
 
-      <section className="flex flex-col gap-4">
-        <Heading level="h2">
-          <Rich>{m.getStarted.nextStepsTitle()}</Rich>
-        </Heading>
-        <ul className="flex flex-col gap-3 pl-6">
-          <li className="list-disc">
-            <LocaleAnchor path="/:locale/ui/components">
-              <Rich>{m.getStarted.nextStepsComponents()}</Rich>
-            </LocaleAnchor>
-          </li>
-          <li className="list-disc">
-            <LocaleAnchor path="/:locale/ui/theming">
-              <Rich>{m.getStarted.nextStepsTheming()}</Rich>
-            </LocaleAnchor>
-          </li>
-          <li className="list-disc">
-            <LocaleAnchor path="/:locale/ui/i18n">
-              <Rich>{m.getStarted.nextStepsI18n()}</Rich>
-            </LocaleAnchor>
-          </li>
-          <li className="list-disc">
+      <DocSection
+        description={t.wordingDescription}
+        id="wording"
+        title={t.wordingTitle}
+      />
+
+      <DocSection id="next" title={t.nextTitle}>
+        <ul>
+          {NEXT.map((step) => (
+            <li key={step.path}>
+              <LocaleAnchor path={step.path}>{step.label()}</LocaleAnchor>
+              {m.docPage.termSeparator()}
+              <Rich>{step.description()}</Rich>
+            </li>
+          ))}
+          <li>
             <Anchor href={STORYBOOK_URL} openInNewTab>
-              <Rich>{m.getStarted.nextStepsStorybook()}</Rich>
+              Storybook
             </Anchor>
+            {m.docPage.termSeparator()}
+            <Rich>{t.nextStorybook()}</Rich>
           </li>
         </ul>
-      </section>
-    </div>
+      </DocSection>
+    </DocPage>
   );
 }

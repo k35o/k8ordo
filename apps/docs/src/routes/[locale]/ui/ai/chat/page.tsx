@@ -2,6 +2,10 @@ import { Heading, Separator } from '@k8ordo/ui';
 import { CodeBlock } from '@k8ordo/ui/code-block';
 
 import { ComponentPreview } from '../../../../../components/component-preview';
+import {
+  InstallCommand,
+  peerVersionOf,
+} from '../../../../../components/install';
 import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
 import { Rich } from '../../../../../components/rich';
@@ -11,7 +15,7 @@ import { ChatDemo } from '../_previews/chat-demo';
 
 export default function AiChat() {
   return (
-    <div className="mx-auto flex max-w-4xl flex-col gap-8 px-6 py-12 md:px-8">
+    <div className="flex flex-col gap-8 py-12">
       <PageTitle title={m.nav.aiChat} />
       <div className="flex flex-col gap-4">
         <Heading level="h1">
@@ -149,11 +153,9 @@ export function Chat() {
           <Rich>{m.aiChat.inputDescription()}</Rich>
         </p>
         <CodeBlock
-          code={`// Enter to send, Shift+Enter for a newline, IME-confirm Enter never submits.
-// status: 'ready' | 'submitted' | 'streaming' | 'error' (matches AI SDK).
-<PromptInput.Root status={status} onSubmit={send} onStop={stop}>
+          code={`<PromptInput.Root status={status} onSubmit={send} onStop={stop}>
   <PromptInput.Textarea placeholder="Type a message" />
-  <PromptInput.Submit /> {/* send when ready, stop while streaming */}
+  <PromptInput.Submit />
 </PromptInput.Root>`}
           lang="tsx"
         />
@@ -215,9 +217,16 @@ export function Chat() {
         <p className="text-fg-mute">
           <Rich>{m.aiChat.responseDescription()}</Rich>
         </p>
+        <p className="text-fg-mute">
+          <Rich>
+            {m.aiChat.responseInstall(
+              peerVersionOf('@k8ordo/ui', 'streamdown'),
+            )}
+          </Rich>
+        </p>
+        <InstallCommand packages="streamdown" />
         <CodeBlock
-          code={`// pnpm add streamdown
-import { Response } from '@k8ordo/ui/ai/response';
+          code={`import { Response } from '@k8ordo/ui/ai/response';
 import 'streamdown/styles.css';
 
 <Message.Content>
@@ -243,8 +252,6 @@ import 'streamdown/styles.css';
 
 <ToolInvocation
   name="search_web"
-  // 'input-streaming' | 'input-available' | 'approval-requested' | 'approval-responded'
-  // | 'output-available' | 'output-error' | 'output-denied'
   state="output-available"
   input={{ query: 'k8ordo UI' }}
   output="…"
@@ -338,6 +345,11 @@ const { addToolApprovalResponse } = useChat({
         <p className="text-fg-mute">
           <Rich>{m.aiChat.aiSdkDescription()}</Rich>
         </p>
+        <p className="text-fg-mute">
+          <Rich>
+            {m.aiChat.aiSdkVersion(peerVersionOf('@k8ordo/ui', 'ai'))}
+          </Rich>
+        </p>
         <CodeBlock
           code={`import { mapMessageParts } from '@k8ordo/ui/ai-sdk';
 import { Attachment, Reasoning, Source, ToolInvocation } from '@k8ordo/ui/ai';
@@ -406,7 +418,6 @@ const sources = parts.filter((part) => part.kind === 'source');
 import { Message } from '@k8ordo/ui/ai';
 import { JsonRenderUI } from '@k8ordo/ui/json-render/registry';
 
-// An LLM returned a UI spec as a tool result — render it inside the bubble.
 <Message.Root from="assistant">
   <Message.Content>
     <JsonRenderUI spec={spec} />

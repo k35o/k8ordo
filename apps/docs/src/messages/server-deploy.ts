@@ -1,176 +1,189 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: '`vite build` は、リクエストハンドラと、ブラウザに配るファイルを書きます。`serve()` はそれを Node.js で動かし、ほかのホストはハンドラを直接呼べます。このページは、出力の形、`serve()` の答え方、ほかのホストでの動かし方を説明します。',
-  en: '`vite build` writes a request handler and the files the browser is served. `serve()` runs them on Node.js, and any other host can call the handler directly. This page covers the shape of the output, how `serve()` answers, and running the handler elsewhere.',
+  ja: '`vite build`は、リクエストハンドラとブラウザに配るファイルを`dist/`に書き出します。Node.jsでは`serve()`がそれを動かし、ほかのランタイムやVercelでは、ハンドラを直接渡して動かします。',
+  en: '`vite build` writes the request handler and the files the browser is served into `dist/`. On Node.js `serve()` runs them; other runtimes and Vercel are handed the handler itself.',
 });
 
 export const outputTitle = message({
-  ja: 'ビルドの出力',
-  en: 'The build output',
+  ja: 'ビルドが書き出すもの',
+  en: 'What the build writes',
 });
 
 export const outputDescription = message({
-  ja: '`dist/rsc/index.js` がリクエストハンドラ、`dist/ssr/` はハンドラがペイロードを HTML にするのに使う部分、`dist/client/` がブラウザに配るファイルです。圧縮の効く型のファイルには、ビルドが Brotli と gzip で圧縮したコピー（`.br` と `.gz`）を隣に置きます。このモードではページを前もって描かないので、`dist/client/` にページの HTML はありません。',
-  en: '`dist/rsc/index.js` is the request handler, `dist/ssr/` is what it turns payloads into HTML with, and `dist/client/` holds the files the browser is served — each one whose type compresses with a Brotli and a gzip copy (`.br`, `.gz`) the build wrote beside it. Nothing is rendered ahead of time in this mode, so there is no page HTML in `dist/client/`.',
+  ja: 'このモードではページを前もって描かないので、`dist/client/`にページのHTMLはありません。代わりに、リクエストのたびにページを描くハンドラが書かれます。',
+  en: 'Nothing is rendered ahead of time in this mode, so there is no page HTML in `dist/client/`. A handler that renders pages per request is written instead.',
 });
 
+export const outputList = [
+  message({
+    ja: '`dist/rsc/index.js`：リクエストハンドラです。',
+    en: '`dist/rsc/index.js`: the request handler.',
+  }),
+  message({
+    ja: '`dist/ssr/`：ハンドラがペイロードをHTMLにするときに使います。',
+    en: '`dist/ssr/`: what the handler turns payloads into HTML with.',
+  }),
+  message({
+    ja: '`dist/client/`：ブラウザに配るファイルです。圧縮の効く種類のファイルには、Brotliとgzipで圧縮したコピー（`.br`と`.gz`）が隣に置かれます。',
+    en: '`dist/client/`: the files the browser is served. Each one whose type compresses gets a Brotli and a gzip copy beside it, `.br` and `.gz`.',
+  }),
+] as const;
+
 export const outputDeps = message({
-  ja: 'ハンドラは、アプリの依存を実行時に `node_modules` から import します。サーバーを動かす場所には、アプリの依存をインストールしておきます。`vite` はビルドにしか使わないので、`pnpm install --prod` のように開発時の依存を省いたインストールで動きます。',
-  en: "The handler imports the application's dependencies from `node_modules` at run time, so install them where the server runs. `vite` is only for the build, so an install without dev dependencies (`pnpm install --prod`) is enough.",
+  ja: 'ハンドラは、アプリの依存を実行時に`node_modules`から読み込みます。サーバーを動かす場所にも依存をインストールしておきます。`vite`はビルドにしか使わないので、`pnpm install --prod`のように開発時の依存を省いても動きます。',
+  en: 'The handler imports the application’s dependencies from `node_modules` at run time, so install them where the server runs. `vite` is only for the build, so an install without development dependencies, such as `pnpm install --prod`, is enough.',
 });
 
 export const serveTitle = message({
-  ja: '`serve()`',
-  en: '`serve()`',
+  ja: '`serve()`で動かす',
+  en: 'Run it with `serve()`',
 });
 
 export const serveDescription = message({
-  ja: '`serve()` はビルドを Node.js の HTTP サーバーで動かします。待ち受けを始めてから、どこで待ち受けているかと止め方を返し、`k8ordo: serving <dist> on <url>` をログに出します。オプションの型は `ServeOptions`、返り値の型は `Server` です。',
-  en: '`serve()` runs the build on a Node.js HTTP server. Once it is listening it hands back where it listens and a way to stop it, and logs `k8ordo: serving <dist> on <url>`. Its options are typed `ServeOptions`, and what it returns `Server`.',
+  ja: '`@k8ordo/server/serve`の`serve()`は、ビルドをNode.jsのHTTPサーバーで動かします。待ち受けを始めると、待ち受けている場所と止め方を返します。',
+  en: '`serve()` from `@k8ordo/server/serve` runs the build on a Node.js HTTP server. Once it is listening, it returns where it listens and how to stop it.',
 });
 
-export const optionsTable = {
-  option: message({ ja: 'オプション', en: 'Option' }),
-  defaultValue: message({ ja: '既定値', en: 'Default' }),
-  meaning: message({ ja: '意味', en: 'Meaning' }),
-  dist: message({
-    ja: 'ビルドの出力ディレクトリ（`rsc/` と `client/` を持つもの）。現在の作業ディレクトリから解決します。',
-    en: 'The build output directory — the one holding `rsc/` and `client/` — resolved from the current working directory.',
+export const serveOptions = [
+  message({
+    ja: '`dist`：ビルドの出力ディレクトリです。既定は`dist`で、今の作業ディレクトリから解決します。',
+    en: '`dist`: the build output directory; `dist` by default, resolved from the working directory.',
   }),
-  port: message({
-    ja: '待ち受けるポート。`0` ならシステムが空いているポートを選び、返り値の `port` がどれかを教えます。',
-    en: 'The port to listen on. `0` asks the system for a free one, and the returned `port` says which.',
+  message({
+    ja: '`port`：待ち受けるポートです。既定は`3000`で、`0`を渡すと空いているポートをシステムが選びます。',
+    en: '`port`: the port to listen on; `3000` by default. `0` lets the system pick a free one.',
   }),
-  host: message({
-    ja: '待ち受けるホスト。既定では同じマシンからしか届かないので、コンテナの中などで外から届かせるには `0.0.0.0` を渡します。',
-    en: 'The host to listen on. The default is reachable from the same machine only; pass `0.0.0.0` to be reachable from outside, as inside a container.',
+  message({
+    ja: '`host`：待ち受けるホストです。既定の`localhost`には同じマシンからしか届かないので、コンテナの中などでは`0.0.0.0`を渡します。',
+    en: '`host`: the host to listen on. The default, `localhost`, is reachable from the same machine only; inside a container and the like, pass `0.0.0.0`.',
   }),
-};
-
-export const handleTable = {
-  field: message({ ja: '返り値（`Server`）', en: 'Returned (`Server`)' }),
-  meaning: message({ ja: '意味', en: 'Meaning' }),
-  port: message({
-    ja: '実際に待ち受けているポート',
-    en: 'The port it actually listens on',
-  }),
-  url: message({
-    ja: '`http://<host>:<port>`',
-    en: '`http://<host>:<port>`',
-  }),
-  close: message({
-    ja: 'サーバーを止め、止まったら解決する Promise を返す',
-    en: 'Stops the server, returning a promise that settles once it has stopped',
-  }),
-};
+] as const;
 
 export const serveTest = message({
-  ja: '`port: 0` と `close()` があるので、テストはビルドに対して自分のサーバーを立て、終わったら止められます。',
-  en: 'With `port: 0` and `close()`, a test can start its own server against a build and stop what it started.',
+  ja: '返り値の`port`と`url`、`close()`を使えば、テストからビルドに対してサーバーを立て、終わったら止められます。',
+  en: 'With the returned `port`, `url` and `close()`, a test can start a server against the build and stop it when done.',
 });
 
 export const answersTitle = message({
-  ja: '`serve()` の答え方',
+  ja: '`serve()`の答え方',
   en: 'How `serve()` answers',
 });
 
-export const answersFiles = message({
-  ja: 'GET と HEAD のうち、`dist/client/` の中のファイルを指すものには、そのファイルをそのまま返します。`content-type` は拡張子に登録された型で、テキストには `charset=utf-8` が付き、登録のない拡張子は `application/octet-stream` です。`/assets/` の下はファイル名に内容のハッシュが入っているので `cache-control: public, max-age=31536000, immutable`、それ以外は `no-cache` です。HEAD には、ファイルでもハンドラでも、GET と同じヘッダーだけを本文なしで返します。',
-  en: 'A GET or HEAD naming a file inside `dist/client/` is answered with that file as it is. Its `content-type` is the type registered for its extension, with `charset=utf-8` on text, or `application/octet-stream` when none is registered. Everything under `/assets/` carries a content hash in its name, so it gets `cache-control: public, max-age=31536000, immutable`; anything else gets `no-cache`. A HEAD gets the headers a GET would and no body, whether a file or the handler answers it.',
+export const answersDescription = message({
+  ja: '`GET`と`HEAD`のうち、`dist/client/`の中のファイルを指すリクエストには、そのファイルを返します。それ以外のリクエストは、すべてハンドラに渡します。',
+  en: 'A `GET` or `HEAD` naming a file in `dist/client/` is answered with that file. Every other request goes to the handler.',
 });
 
-export const answersEncoding = message({
-  ja: '圧縮したコピーがあるファイルには、リクエストの `Accept-Encoding` が選ぶほうを `Vary: Accept-Encoding` を付けて返します。両方を同じだけ受け付けるなら `br` です。コピーはビルドのときに一番小さくなる設定で一度だけ作り、元より小さくならなかったものは書きません。リクエストのたびに同じファイルを圧縮し直すことはありません。',
-  en: "A file with compressed copies is answered with the one the request's `Accept-Encoding` prefers — `br` when both are equally welcome — under `Vary: Accept-Encoding`. The copies are made once, at build time and at the smallest setting, and one that came out no smaller than the file is not written; nothing is compressed again per request.",
-});
-
-export const answersRevalidation = message({
-  ja: 'ファイルには中身から作った `ETag` が付きます。更新時刻ではないので、ファイルを変えなかったデプロイの後でも、同じソースから別々にビルドしたサーバーに対しても、再検証は `304` で終わります。中身を読むのは 1 ファイルにつき 1 回です。1 つの範囲を求める `Range` には `206` で答えます。Safari が `<video>` を再生するにはこれが要ります。末尾より先から始まる範囲には `416`、複数の範囲・読めない `Range`・別の版を指す `If-Range` には、ファイル全体を返します。',
-  en: 'Every file carries an `ETag` taken from its contents rather than its modification time, so a revalidation after a deploy that did not change the file, or against another server built from the same source, ends in a `304`; the contents are read for it once per file. A `Range` asking for one span is answered with `206` — what Safari needs before it will play a `<video>` — a range starting past the end with `416`, and anything else (several spans, a `Range` that cannot be read, an `If-Range` naming another version) with the whole file.',
-});
-
-export const answersStream = message({
-  ja: 'ページとそのペイロードは、同じ選び方でストリームのまま圧縮します。React が書いた部分はそのたびに押し出すので、いちばん遅い境界が描き終わるのを待たずにシェルがブラウザに届きます。すでに圧縮された型（画像など）、ハンドラが自分で符号化したもの、`Cache-Control: no-transform` が付いたものは、そのまま返します。',
-  en: 'A page and its payload are compressed as they stream, under the same negotiation: every part React writes is flushed as it is written, so the shell reaches the browser before the slowest boundary has finished. An answer in a type that is compressed already (an image), one the handler encoded itself, or one marked `Cache-Control: no-transform` is sent as it is.',
-});
-
-export const answersHandler = message({
-  ja: 'それ以外はすべてハンドラに渡ります。GET と HEAD 以外のメソッドは、ファイルと同じパスでもかならずハンドラが答えます。ハンドラのステータスとヘッダーはそのまま返り、複数の `Set-Cookie` も 1 つにまとめられません。ハンドラが例外を投げたときは `500` と本文 `internal error` だけを返し、中身は訪問者ではなくサーバーのログに出します。本文を送り始めてから失敗したときは、もうステータスを変えられないので、ページの途中で繋いだままにせず接続を切ります。',
-  en: "Everything else goes to the handler, and any method but GET and HEAD always does, even to a path that names a file. The handler's status and headers pass through as they are, several `Set-Cookie` headers included. When the handler throws, the answer is a `500` with the body `internal error`; the details go to the server's log, not to the visitor. A body that fails after it has started streaming can no longer change its status, so the connection is cut rather than left open on half a page.",
-});
+export const answersList = [
+  message({
+    ja: 'キャッシュ：`/assets/`の下はファイル名に中身のハッシュが入っているので、`immutable`を付けて1年キャッシュさせます。それ以外のファイルは`no-cache`です。',
+    en: 'Caching: files under `/assets/` carry their contents’ hash in their names, so they go out `immutable`, cached for a year. Anything else is `no-cache`.',
+  }),
+  message({
+    ja: '圧縮：圧縮したコピーがあるファイルは、`Accept-Encoding`が選ぶほうを返します。ページとペイロードは、描いたそばから圧縮して流します。',
+    en: 'Compression: a file with compressed copies is sent in the one `Accept-Encoding` prefers. Pages and payloads are compressed as they stream.',
+  }),
+  message({
+    ja: '再検証：ファイルには中身から作った`ETag`が付くので、同じソースから別々にビルドしたサーバーでも、再検証は`304`で終わります。',
+    en: 'Revalidation: a file’s `ETag` comes from its contents, so a revalidation ends in a `304` even against another server built from the same source.',
+  }),
+  message({
+    ja: '範囲：1つの範囲を求める`Range`には`206`で答えます。Safariが`<video>`を再生するのに必要です。',
+    en: 'Ranges: a `Range` asking for one span gets a `206`, which Safari needs before it plays a `<video>`.',
+  }),
+  message({
+    ja: '失敗：ハンドラが例外を投げたときは、`500`と本文`internal error`だけを返します。投げられた内容は、訪問者ではなくサーバーのログに出ます。',
+    en: 'Failure: when the handler throws, the answer is a `500` with the body `internal error`. What was thrown goes to the server’s log, not to the visitor.',
+  }),
+] as const;
 
 export const answersSafe = message({
-  ja: 'リクエストの pathname は、どう綴られていても `dist/client/` の中のファイルしか指せません。`..`・`%2e%2e`・`%2f` を使った綴りは中に留まり、復号できないエスケープや NUL バイトはファイル名として扱われません。外へ出ることは、リクエストごとに判定する場合ではなく、パスの解決が作り出せない結果です。',
-  en: 'A request pathname can only ever name a file inside `dist/client/`, whatever it is spelled like: spellings with `..`, `%2e%2e` or `%2f` stay inside, and an escape that cannot be decoded or a NUL byte is not a file name at all. Traversal is not a case weighed per request but an outcome the path resolution cannot produce.',
-});
-
-export const answersStatuses = message({
-  ja: 'ハンドラが返すステータスの一覧は、リンク先にあります。',
-  en: 'The statuses the handler answers with are listed here.',
+  ja: 'リクエストのパスは、どう綴られていても`dist/client/`の外のファイルを指せません。`..`や`%2e%2e`を使った綴りも中に留まります。',
+  en: 'A request path can never name a file outside `dist/client/`, however it is spelled: spellings with `..` or `%2e%2e` stay inside.',
 });
 
 export const handlerTitle = message({
-  ja: 'リクエストハンドラ',
-  en: 'The request handler',
+  ja: 'ほかのランタイムで動かす',
+  en: 'Run it on another runtime',
 });
 
 export const handlerDescription = message({
-  ja: '`serve()` はビルドを動かすホストの 1 つです。動かされているアプリそのものはリクエストハンドラで、リクエストを `Request` にして渡し、返った `Response` で答えられる環境なら、どこでもホストになれます。ハンドラは `dist/rsc/index.js` が default export する `(request: Request) => Promise<Response>` という、ただの関数です。`@k8ordo/static` がビルド時に作って呼ぶのも、同じハンドラをそのモード向けにコンパイルしたものです。ハンドラは隣の `dist/ssr/` を読み込むので 2 つは一緒に置きます。アプリの依存は名前で import するので、動かす場所で解決できるようにしておくか、Wrangler のように bundle に含めます。',
-  en: "`serve()` is one host for the build. What it hosts — the application itself — is the request handler, and anything that can turn a request into a `Request` and answer with the `Response` it gets back can host it. The handler is a plain function, `(request: Request) => Promise<Response>`, default-exported from `dist/rsc/index.js`; `@k8ordo/static` builds and calls the same handler at build time, compiled for that mode. It loads `dist/ssr/` from beside itself, so the two travel together, and it imports the application's dependencies by name, so they have to resolve where it runs — or be bundled in, as Wrangler does.",
+  ja: '`serve()`は、ビルドを動かすホストの1つにすぎません。アプリそのものはリクエストハンドラで、`dist/rsc/index.js`が`(request: Request) => Promise<Response>`の関数をdefault exportしています。',
+  en: '`serve()` is only one host for the build. The application itself is the request handler: `dist/rsc/index.js` default-exports a function, `(request: Request) => Promise<Response>`.',
 });
 
-export const handlerRuntimes = message({
-  ja: 'Web の `Request`・`Response`・ストリームのほかに、ハンドラが実行環境から借りるのは `node:async_hooks` の `AsyncLocalStorage` だけです。React は描画ごとの状態をそこに持ち、`paramsSchema` もそこに書きます。Node.js・Bun・Deno・`nodejs_compat` を付けた Cloudflare Workers はどれもこれを持っていて、import したハンドラをそのまま受け取ります。',
-  en: "Past the web platform's `Request`, `Response` and streams, the one thing the handler takes from its runtime is `AsyncLocalStorage` from `node:async_hooks`: React keeps each render's state in it, and a `paramsSchema` writes to it. Node.js, Bun, Deno, and Cloudflare Workers with the `nodejs_compat` flag all have it, and each takes the imported handler as it is.",
-});
-
-export const handlerImports = message({
-  ja: 'この約束は、ハンドラが走らせるコードも Node にしか無いものを import しない限りで成り立ちます。`redirect()` と型が `@k8ordo/server/runtime` から、`serve()` が別の入口 `@k8ordo/server/serve` から来るのはそのためです。`node:fs` を読む route ファイルや Server Action は、アプリをそれを持つ実行環境に縛ります。',
-  en: 'What the handler runs keeps that promise only as long as it imports nothing that needs Node either — which is why `redirect()` and the types come from `@k8ordo/server/runtime`, and `serve()` from an entry of its own, `@k8ordo/server/serve`. A route file or a Server Action that reads `node:fs` ties the application to a runtime that has it.',
-});
-
-export const handlerMethods = message({
-  ja: 'ハンドラが答えるメソッドは GET・HEAD・POST です。ほかのメソッドには、`Allow` ヘッダーでその 3 つを示した `405` を返すので、ホストの側でメソッドを絞る必要はありません。HEAD には GET と同じステータスとヘッダーを本文 `null` で返し、ページは描きません。',
-  en: 'The handler answers GET, HEAD and POST, and any other method with a `405` whose `Allow` header names those three, so a host needs no method filter of its own. A HEAD gets the status and headers a GET would, with a `null` body, and the page is not rendered for it.',
+export const handlerRuntime = message({
+  ja: 'Webの`Request`と`Response`、ストリームのほかに、ハンドラが実行環境から借りるのは`node:async_hooks`の`AsyncLocalStorage`だけです。Node.jsとBun、Deno、`nodejs_compat`を付けたCloudflare Workersなら、importしたハンドラをそのまま渡せます。',
+  en: 'Beyond the web’s `Request`, `Response` and streams, the only thing the handler takes from its runtime is `AsyncLocalStorage` from `node:async_hooks`. Node.js, Bun, Deno, and Cloudflare Workers with `nodejs_compat` all take the imported handler as it is.',
 });
 
 export const handlerFiles = message({
-  ja: 'ハンドラはファイルを配りません。`dist/client/` をハンドラの前で配信し（`assets/` の下は名前に中身のハッシュが入っているので `Cache-Control: public, max-age=31536000, immutable`）、どのファイルも指さないリクエストをハンドラに渡します。Workers では、クライアントのビルドを指す static assets がそれにあたり、Worker が動く前に答えます。',
-  en: "The handler serves no files. Put `dist/client/` in front of it — the files under `assets/` with `Cache-Control: public, max-age=31536000, immutable`, since their names carry their contents' hash — and hand it every request that names none. On Workers that is static assets pointed at the client build, which answer before the Worker runs.",
+  ja: 'ハンドラはファイルを配りません。ハンドラの前で`dist/client/`を配り、どのファイルにも当たらないリクエストだけをハンドラに渡します。Workersでは、static assetsにクライアントのビルドを指定します。',
+  en: 'The handler serves no files. Serve `dist/client/` in front of it, and hand it only the requests that name no file. On Workers, point static assets at the client build.',
 });
 
-export const handlerOrigin = message({
-  ja: '`Request` は、訪問者が求めた URL で作ります。ハンドラは、POST の `Origin` ヘッダーがあり、そのホストがその URL のホストと一致するときだけ受け付け、それ以外の POST には `403` で答えるからです。プロキシの後ろでは、公開されているホストをそのまま渡します。`serve()` はリクエスト自身の `Host` ヘッダーから URL を作り、転送用のヘッダーは読まないので、前に置くプロキシは元の `Host` を書き換えずに、パスはブラウザが送るとおりパスだけで渡します。リクエスト行が自分でホストを名乗るもの（`GET http://…`）や、`Host` がホストでないものには `400` で答えます。パスから URL を自分で作るホストは、`new URL(path, origin)` で解決せず、オリジンの後ろに文字列としてつなぎます。解決すると `https://example.com//evil.test/` のパスは `evil.test` の URL になり、evil.test のフォームがこの検査を通ってしまいます。',
-  en: "Build the `Request` with the URL the visitor asked for: the handler accepts a POST only when its `Origin` header is present and names that URL's host, and answers any other POST with a `403`. Behind a proxy that means passing the public host through — `serve()` builds the URL from the request's own `Host` header and reads no forwarded header, so a proxy in front of it has to pass the original `Host` on unchanged, and the path alone, as a browser sends it: a request line that names a host of its own (`GET http://…`), or a `Host` that is not a host, is answered with a `400`. A host that builds the URL from a path itself appends the path to the origin as text instead of resolving it with `new URL(path, origin)`: resolved, the path of `https://example.com//evil.test/` is a URL on `evil.test`, and a form on evil.test would pass the check.",
+export const handlerTogether = message({
+  ja: 'ハンドラは隣の`dist/ssr/`を読み込むので、2つは一緒に置きます。アプリの依存は名前でimportするので、動かす場所で解決できるようにするか、Wranglerのようにバンドルに含めます。',
+  en: 'The handler loads `dist/ssr/` from beside itself, so the two travel together. It imports the application’s dependencies by name, so they must resolve where it runs, or be bundled in, as Wrangler does.',
+});
+
+export const handlerNode = message({
+  ja: 'どのランタイムでも動くのは、ハンドラが動かすコードもNode.jsにしか無いものをimportしない間だけです。`node:fs`を読む`route.ts`やServer Actionを書くと、アプリはそれを持つランタイムに縛られます。',
+  en: 'It runs anywhere only while the code the handler runs imports nothing that needs Node.js either. A `route.ts` or a Server Action that reads `node:fs` ties the application to a runtime that has it.',
+});
+
+export const proxyTitle = message({
+  ja: 'プロキシの後ろに置く',
+  en: 'Run it behind a proxy',
+});
+
+export const proxyDescription = message({
+  ja: 'ハンドラは、`POST`の`Origin`ヘッダーのホストが、答えているURLのホストと一致するときだけ受け付けます。それ以外の`POST`には`403`で答えるので、`Request`は訪問者が求めたURLで作ります。',
+  en: 'The handler accepts a `POST` only when its `Origin` header names the host of the URL it is answering, and answers any other with a `403`. So the `Request` has to carry the URL the visitor asked for.',
+});
+
+export const proxyServe = message({
+  ja: '`serve()`はリクエストの`Host`ヘッダーからURLを作り、転送用のヘッダーは読みません。前に置くプロキシは、元の`Host`を書き換えずに渡してください。ホストを自分で名乗るリクエスト行（`GET http://…`）や、ホストとして読めない`Host`には`400`で答えます。',
+  en: '`serve()` builds the URL from the request’s `Host` header and reads no forwarded header, so a proxy in front of it has to pass the original `Host` on unchanged. A request line naming a host of its own (`GET http://…`), or a `Host` that is not a host, gets a `400`.',
+});
+
+export const proxyBuild = message({
+  ja: 'パスからURLを自分で作るホストは、`new URL(path, origin)`で解決せず、originの後ろに文字列としてつなぎます。解決すると、`//evil.test/`で始まるパスが`evil.test`のURLになり、別のサイトのフォームがこの検査を通ってしまいます。',
+  en: 'A host that builds the URL from a path itself appends the path to the origin as text rather than resolving it with `new URL(path, origin)`. Resolved, a path starting `//evil.test/` becomes a URL on `evil.test`, and a form there would pass the check.',
 });
 
 export const vercelTitle = message({
-  ja: 'Vercel にデプロイする',
-  en: 'Deploying to Vercel',
+  ja: 'Vercelにデプロイする',
+  en: 'Deploy to Vercel',
 });
 
 export const vercelDescription = message({
-  ja: '`@k8ordo/server/vercel` の `vercel()` を `framework()` の隣に置くと、`vite build` は Vercel の Build Output API（v3）の形で `.vercel/output/` も書きます。`vercel build` と `vercel deploy --prebuilt` は、それをそのままデプロイします。',
-  en: "Put `vercel()` from `@k8ordo/server/vercel` beside `framework()`, and `vite build` also writes `.vercel/output/` in the shape of Vercel's Build Output API (v3), which `vercel build` and `vercel deploy --prebuilt` deploy as it is.",
+  ja: '`@k8ordo/server/vercel`の`vercel()`を`framework()`の隣に足すと、`vite build`はVercelのBuild Output API（v3）の形で`.vercel/output/`も書きます。`vercel deploy --prebuilt`で、それをそのままデプロイできます。',
+  en: 'Add `vercel()` from `@k8ordo/server/vercel` beside `framework()`, and `vite build` also writes `.vercel/output/` in the shape of Vercel’s Build Output API (v3), which `vercel deploy --prebuilt` deploys as it is.',
 });
 
 export const vercelOutput = message({
-  ja: 'クライアントのビルドは Vercel の CDN に置く静的ファイルになります。`assets/` の下は、ファイルが答えたときにだけ `immutable` を付けるので、無いファイルの 404 が 1 年キャッシュされることはありません。どのファイルも指さないリクエストは、Node.js の関数 1 つが受けます。中身はリクエストハンドラで、`fetch` として Vercel に渡し、答えをストリームのまま返します。`base` を指定したビルドでは、`serve()` と同じく静的ファイルをその下に置き、base の外の URL にはハンドラが `404` で答えます。`serve()` 向けに圧縮したコピーは入れません。Vercel は自分で圧縮し、コピーの分だけアップロードするファイルが増えるからです。',
-  en: "The client build becomes static files on Vercel's CDN — a file under `assets/` is sent `immutable` only once a file has answered, so a missing one is never cached for a year — and every request that names no file goes to one Node.js function: the request handler, handed to Vercel as `fetch` and streaming its answer. Under a `base` the static files sit below it, as `serve()` hands them out, and the handler answers every URL outside it with a `404`. The copies compressed for `serve()` are left out: Vercel compresses on its own, and each is one more file to upload.",
+  ja: 'クライアントのビルドはVercelのCDNに置く静的ファイルになり、どのファイルにも当たらないリクエストはNode.jsの関数1つが受けます。その関数の中身が、リクエストハンドラです。`serve()`のために圧縮したコピーは入れません。Vercelが自分で圧縮するからです。',
+  en: 'The client build becomes static files on Vercel’s CDN, and every request that names no file goes to one Node.js function — the request handler. The copies compressed for `serve()` are left out, since Vercel compresses on its own.',
 });
 
-export const vercelBundled = message({
-  ja: 'Vercel の関数が持てるのは自分のディレクトリの中身だけなので、`vercel()` の下ではハンドラをすべての依存ごと bundle してビルドします。ネイティブのバイナリを持つ依存や、自分のファイルをパスで読む依存は、そうして束ねられないので動きません。ビルドのたびに書き直すのは `.vercel/output/` だけで、その隣に `vercel pull` が書いたプロジェクトのリンクは残します。',
-  en: 'A Vercel function holds nothing but its own directory, so under `vercel()` the handler is built with every dependency bundled in. A dependency that ships a native binary, or that reads its own files by path, cannot be bundled that way and does not work there. Each build replaces `.vercel/output/` and nothing else: the project link `vercel pull` writes beside it stays.',
+export const vercelBundle = message({
+  ja: 'Vercelの関数は自分のディレクトリの中身しか持てないので、`vercel()`の下ではハンドラをすべての依存ごとバンドルします。ネイティブのバイナリを持つ依存や、自分のファイルをパスで読む依存は、この形では動きません。',
+  en: 'A Vercel function holds nothing but its own directory, so under `vercel()` the handler is bundled with every dependency. One that ships a native binary, or reads its own files by path, does not work there.',
 });
 
-export const routesDirTitle = message({
-  ja: '`routesDir`',
-  en: '`routesDir`',
+export const tabsMode = message({
+  ja: 'このモードでは、Server Actionの答えにも同じ決まりが掛かります。スクリプトが合わなければ、答えを当てはめずにページを読み込み直します。',
+  en: 'In this mode a Server Action’s answer is held to the same rule: when the script does not match, the page is loaded again rather than the answer applied.',
 });
 
-export const routesDirDescription = message({
-  ja: '`framework()` が受け取るオプションは `routesDir` だけです（型は `ServerOptions`）。ルートのディレクトリをプロジェクトのルートからの相対パスで指定し、既定は `src/routes` です。生成されるファイルは変わらず `.k8ordo/` に書かれ、問題の行も `routes/` から始まります。',
-  en: '`routesDir` is the one option `framework()` takes (typed `ServerOptions`): the route directory, relative to the project root, `src/routes` by default. The generated files still go to `.k8ordo/`, and problem lines still begin with `routes/`.',
+export const baseMode = message({
+  ja: '`serve()`は、ビルドが使った`base`を`dist/rsc/index.js`から読み、クライアントのファイルをその下で配ります。ハンドラを自分で呼ぶホストは、訪問者が求めたとおり`base`を含めたURLを渡します。',
+  en: '`serve()` reads the base the build was made for from `dist/rsc/index.js`, and hands out the client files below it. A host that calls the handler itself passes the URL as the visitor asked for it, base included.',
+});
+
+export const baseRedirect = message({
+  ja: 'このモードでアプリが自分で作るリダイレクトは、書いたまま送られます。Server Actionの`redirect()`と、`guard.ts`が返す`Response`の`location`です。どちらもURLなので`href()`で作ります。ほかの方法で作ったパスには、`@k8ordo/router`の`withBase()`で`base`を付けます。',
+  en: 'A redirect the application builds itself in this mode is sent as written: `redirect()` from a Server Action, and the `location` of a `Response` a `guard.ts` returns. Build both with `href()`, or give a path built some other way its base with `withBase()` from `@k8ordo/router`.',
 });

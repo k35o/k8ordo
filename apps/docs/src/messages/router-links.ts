@@ -1,347 +1,121 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: 'ページは表を import しません。リンクもナビゲーションも現在地の問い合わせも、パターンの文字列だけで書きます。このページでは `href` と `navigateTo`、共有の params を束ねる `bindParams`、その型の出どころである `Register`、そして現在地を読むフックを扱います。',
-  en: 'Pages never import the table. Links, navigation and questions about where the browser is are all written with the pattern string alone. This page covers `href` and `navigateTo`, `bindParams` for params every link shares, `Register` where their types come from, and the hooks that read the location.',
+  ja: 'ページへのリンクは、ルート表のパターンから`href`でURLを作り、ふつうの`<a>`に渡します。ボタンを押したあとのように、コードからページを移るときは`navigateTo`を使います。',
+  en: 'A link to a page is a plain `<a>` whose URL `href` builds from a pattern in the route table. To change pages from code, after a button press for instance, use `navigateTo`.',
 });
 
 export const hrefTitle = message({
-  ja: '`href` でパスを作る',
-  en: 'Building a path with `href`',
+  ja: '`href`でリンク先を作る',
+  en: 'Build a link with `href`',
 });
 
 export const hrefDescription = message({
-  ja: '`href(pattern, params?)` はパターンと params から具体的なパスを作ります。表は使わないので、どのコンポーネントからでも呼べます。params はパターン文字列から推論され、params を持たないパターンは第 2 引数を取りません。',
-  en: '`href(pattern, params?)` builds a concrete path from a pattern and its params. It uses no table, so any component can call it. Params are inferred from the pattern string, and a pattern without params takes no second argument.',
+  ja: '`href`は、パターンとparamからリンク先のURLを作ります。paramの無いパターンには、2つ目の引数を渡しません。',
+  en: '`href` builds the URL a link points at from a pattern and its params. A pattern without params takes no second argument.',
 });
 
 export const hrefValues = message({
-  ja: '`Register` が params の型を持たないとき（`<Router>` を自分でマウントするアプリ、またはどのスキーマもかからないパターン）、値は `string`・`number`・`bigint`・`boolean` のどれでも渡せます（型 `ParamValue`）。どれも綴りが 1 つに決まるからです。値は `encodeURIComponent` で符号化されるので `a/b` は `a%2Fb` になり、照合で params を読むときに再びデコードされます（戻るのは文字列です）。',
-  en: 'Where `Register` carries no param types — an application that mounts `<Router>`, or a pattern no schema covers — a value may be a `string`, `number`, `bigint` or `boolean` (the `ParamValue` type): each has exactly one spelling. It is encoded with `encodeURIComponent`, so `a/b` becomes `a%2Fb`, and matching decodes it again on the way out, as a string.',
+  ja: 'paramの値には、文字列のほかに数値と`bigint`、真偽値も渡せます。どれもURLでの書き方が1通りに決まる値だからです。値は`encodeURIComponent`で符号化されるので、`/`を含む値も1つの区間に収まります。',
+  en: 'Besides strings, a param takes numbers, `bigint`s and booleans: each has exactly one way to be written in a URL. Values are encoded with `encodeURIComponent`, so one containing `/` still fits in a single segment.',
 });
 
 export const hrefReturn = message({
-  ja: '戻り値の型はパスの形を保ちます。`:param` の位置が任意の文字列になったテンプレートリテラル型なので、型付きのパスを受け取る側（`@k8ordo/state` など）にそのまま渡せます。',
-  en: 'The return type keeps the path’s shape — a template literal type with any string where each `:param` was — so a typed-path consumer such as `@k8ordo/state` accepts it as it is.',
+  ja: '`href`が返すのは、`<a>`の`href`属性にそのまま渡せるURLの文字列です。アプリをサブパスの下で配信しているときは、その分も前に付きます。',
+  en: 'What `href` returns is a URL string ready for an `<a>`’s `href` attribute. When the app is served below a base path, that comes in front too.',
 });
 
 export const hrefErrors = message({
-  ja: '型を迂回して呼んだ場合、`href` は実行時にも `TypeError` で拒みます。',
-  en: 'Called around the types, `href` refuses at run time as well, with a `TypeError`:',
+  ja: '型の検査をすり抜けて呼んだときは、実行時に`TypeError`を投げます。`/*`を含むパターン、値の無いparam、オブジェクトのようにURLでの書き方が無い値の3つです。',
+  en: 'Called around the type checks, it throws a `TypeError` at run time for three things: a pattern with `/*`, a param without a value, and a value with no URL spelling, such as an object.',
 });
 
-export const hrefErrorWildcard = message({
-  ja: 'ワイルドカードを含むパターン',
-  en: 'A pattern with a wildcard',
+export const anchorTitle = message({
+  ja: 'リンクは`<a>`のまま書く',
+  en: 'Links stay plain `<a>` elements',
 });
 
-export const hrefErrorMissing = message({
-  ja: 'param の値が無い',
-  en: 'A param without a value',
+export const anchorDescription = message({
+  ja: 'このルーターには`<Link>`コンポーネントがありません。`<a>`がクリックされるとブラウザがそれを`navigate`イベントで知らせ、ルーターはそのイベントを受け取ってページを切り替えるからです。',
+  en: 'This router has no `<Link>` component. When an `<a>` is clicked, the browser announces it with a `navigate` event, and the router takes that event and changes the page.',
 });
 
-export const hrefErrorSpelling = message({
-  ja: 'オブジェクトなど、URL の綴りを持たない値',
-  en: 'A value with no URL spelling, such as an object',
+export const anchorWhy = message({
+  ja: '`<a>`を包むコンポーネントを用意しても、同じことを書く方法が2つに増えるだけです。そのため、パターンの検査は`href`が受け持ち、リンクは`<a>`のまま書きます。',
+  en: 'A component wrapping `<a>` would only add a second way to write the same thing, so `href` does the checking and links stay plain `<a>` elements.',
 });
 
-export const noLinkTitle = message({
-  ja: '`<Link>` が無い理由',
-  en: 'Why there is no `<Link>`',
+export const anchorOthers = message({
+  ja: 'ほかのオリジンへのリンクや、ルート表に無いパスへのリンクは、ルーターが引き受けません。ブラウザのふつうのページの読み込みになります。',
+  en: 'The router does not take a link to another origin or to a path the route table lacks; it is an ordinary page load.',
 });
 
-export const noLinkDescription = message({
-  ja: 'Navigation API の下では、素の `<a>` がすでにクライアント遷移です。ブラウザはリンクのクリックで navigate イベントを送り、ルーターはそのイベントを intercept します。`<a>` を包むコンポーネントを作っても同じことを書く方法が 2 つになるだけなので、型の検査は `href` が受け持ちます。',
-  en: 'Under the Navigation API a plain `<a>` is already a client navigation: the browser sends a navigate event for the click, and the router intercepts it. A component wrapping the anchor would add a second way to write the same thing, so the type check lives in `href` instead.',
-});
-
-export const noLinkNotClaimed = message({
-  ja: '表が答えない pathname へのリンクは intercept されず、ブラウザの通常の文書読み込みになります。ただし表の最後に `/*` があれば、表はどの pathname にも答えます。そのときホストが配るファイルへのリンクには `download` 属性を付けてください。ブラウザがクリックの時点でダウンロードだと伝えるので、ルーターは手を出しません。',
-  en: 'A link to a pathname the table does not answer is not intercepted: it is an ordinary document load. With a `/*` at the end of the table, though, the table answers every pathname, so mark a link to a file the host serves with `download`: the browser then says it is a download at the click, and the router leaves it alone.',
+export const anchorCurrent = message({
+  ja: 'いま開いているページへのリンクに印を付けるときも、リンクの属性ではなく`useMatch`に尋ねて決めます。書き方は「いまいる場所を調べる」で説明します。',
+  en: 'Marking the link to the page you are on is also a question you ask `useMatch`, not an attribute of the link; see “Find where you are”.',
 });
 
 export const navigateTitle = message({
-  ja: '`navigateTo` で移動する',
-  en: 'Going somewhere with `navigateTo`',
+  ja: '`navigateTo`でページを移る',
+  en: 'Change pages with `navigateTo`',
 });
 
 export const navigateDescription = message({
-  ja: '`navigateTo(pattern, params?, options?)` は `href` で作ったパスへ `navigation.navigate()` で移動します。戻り値はプラットフォームの `{ committed, finished }` そのものです。',
-  en: '`navigateTo(pattern, params?, options?)` goes to the path `href` would build, through `navigation.navigate()`, and returns the platform’s own `{ committed, finished }`.',
+  ja: '`navigateTo`は、`href`と同じ引数でURLを作り、そのページへ移ります。履歴には新しいエントリが積まれるので、ブラウザの戻るで前のページに戻れます。',
+  en: '`navigateTo` builds the URL from the same arguments as `href` and goes there. It adds a new history entry, so the browser’s back button returns to the previous page.',
 });
 
-export const navigateOptions = message({
-  ja: "オプションは `NavigateToOptions` の `history` だけで、`'push'`（既定）か `'replace'` です。params を持たないパターンでは、オプションが第 2 引数になります。",
-  en: "The one option, `history` in `NavigateToOptions`, is `'push'` (the default) or `'replace'`. For a pattern without params, the options are the second argument.",
+export const navigateReplace = message({
+  ja: "いまのエントリを置き換えたいときは、`{ history: 'replace' }`を渡します。paramの無いパターンでは、オプションが2つ目の引数になります。",
+  en: "To replace the current entry instead, pass `{ history: 'replace' }`. For a pattern without params, the options are the second argument.",
 });
 
-export const navigateDefault = message({
-  ja: '既定が `push` なのは、ページの移動は戻るボタンで取り消せるべきだからです。`@k8ordo/state` の `update()` は逆に `replace` が既定で、理由も同じです。ページの中身を絞り込む操作を戻るボタンで 1 つずつ戻したくはありません。ページを変えるのは `navigateTo`、状態を変えるのは `update` です。',
-  en: 'The default is `push` because going to a page is what the back button should undo. `@k8ordo/state`’s `update()` defaults the other way for the same reason: refining what is on the page is not something the back button should step through. Changing pages goes through `navigateTo`; changing state goes through `update`.',
+export const navigatePush = message({
+  ja: '既定が`push`なのは、ページを移ったことは戻るボタンで取り消せるべきだからです。一方で、`@k8ordo/state`の`update()`は`replace`が既定です。ページの中の絞り込みを変えるたびに履歴が増えると、戻るボタンで1つずつたどることになるからです。',
+  en: 'The default is `push` because moving to a page is what the back button should undo. `@k8ordo/state`’s `update()` defaults to `replace` instead, since stepping back through every change to a filter on the same page is not what the back button is for.',
 });
 
-export const navigateFinished = message({
-  ja: '`finished` は新しいページが画面に出たときに解決します。非同期アクションの中で待てば、移動を待つ間は `isPending` が立ちます。',
-  en: '`finished` resolves once the new page is on screen. Await it inside an async action, and `isPending` shows that a navigation is under way:',
+export const navigateSplit = message({
+  ja: 'ページを変えるときは`navigateTo`を、ページの中の状態を変えるときは`@k8ordo/state`の`update()`を使ってください。',
+  en: 'Change pages with `navigateTo`, and change the state within a page with `@k8ordo/state`’s `update()`.',
 });
 
-export const navigateInAction = message({
-  ja: 'ページの切り替えはアクションに加わらないので、`@k8ordo/ui` の `Button` の `onAction` や `<form action>` の中で待っても、`finished` はページが画面に出た時点で解決します。無関係な非同期アクションが保留中の間に始まったページの切り替えも、そのアクションを待たずに画面に出ます。イベントハンドラの中で待つこともできます。',
-  en: 'A page change never joins the action, so awaiting `finished` inside `@k8ordo/ui`’s `Button` `onAction` or a `<form action>` settles as soon as the page is on screen. A page change that starts while some unrelated async action is pending reaches the screen without waiting for it. An event handler can await it just the same.',
+export const finishedTitle = message({
+  ja: '移り終わるのを待つ',
+  en: 'Wait until the page is on screen',
 });
 
-export const navigateAbort = message({
-  ja: '別のナビゲーションが追い越すと、`finished` は abort の理由（名前が `AbortError` の `DOMException`）で reject します。追い越されうる場所で待つコードは、上の例のように abort だけを無視し、それ以外のエラーは投げ直します。',
-  en: 'When another navigation overtakes this one, `finished` rejects with the abort reason, a `DOMException` named `AbortError`. Code that awaits it where it can be overtaken ignores the abort and rethrows anything else, as the example above does.',
+export const finishedDescription = message({
+  ja: '`navigateTo`は、Navigation APIの`navigation.navigate()`と同じ`{ committed, finished }`を返します。`finished`が解決するのは、新しいページが画面に出たときです。',
+  en: '`navigateTo` returns the same `{ committed, finished }` as the Navigation API’s `navigation.navigate()`. `finished` resolves once the new page is on screen.',
 });
 
-export const registerTitle = message({
-  ja: '`Register` で表と照合する',
-  en: 'Checking patterns with `Register`',
+export const finishedAction = message({
+  ja: '`useTransition`のアクションの中で`finished`を待つと、ページが画面に出るまでの間、`isPending`が`true`になります。ページの切り替えはアクションに加わらないので、待っていても止まることはありません。',
+  en: 'Await `finished` inside a `useTransition` action, and `isPending` stays `true` until the page is on screen. The page change never joins the action, so awaiting it never stalls.',
 });
 
-export const registerDescription = message({
-  ja: 'params の推論は設定なしで働きます。パターンそのものを実際の表と照合するには、アプリで 1 度だけ `Register` に `routes` を宣言します。',
-  en: 'Param inference works with no setup. To check the pattern itself against the application’s real table, declare `routes` on `Register` once, in the application.',
+export const finishedAbort = message({
+  ja: '待っている間に別のナビゲーションが始まると、`finished`は`AbortError`という名前の`DOMException`でrejectします。上の例のように、中断だけを無視して、ほかのエラーは投げ直してください。',
+  en: 'If another navigation starts while you wait, `finished` rejects with a `DOMException` named `AbortError`. As in the example, ignore the abort and rethrow anything else.',
 });
 
-export const registerEffect = message({
-  ja: '宣言すると、`href`・`navigateTo`・`useParams`・`useMatch`・`matchPath` に渡すパターンが表のものに限られます。宣言の前は `/` で始まる任意の文字列が通ります。',
-  en: 'Once declared, the patterns `href`, `navigateTo`, `useParams`, `useMatch` and `matchPath` accept are the table’s. Before it, any string starting with `/` passes.',
+export const downloadTitle = message({
+  ja: 'ファイルへのリンクには`download`を付ける',
+  en: 'Give a file link `download`',
 });
 
-export const registerFramework = message({
-  ja: '`@k8ordo/static` と `@k8ordo/server` では、この宣言が `.k8ordo/register.gen.ts` に生成されます。そこで手書きすると、すでに答えのある問いに 2 つ目の答えを書くことになります。',
-  en: 'Under `@k8ordo/static` and `@k8ordo/server` this declaration is generated into `.k8ordo/register.gen.ts`; writing it by hand there is a second answer to a question already answered.',
+export const downloadDescription = message({
+  ja: 'ルート表の最後に`/*`を置くと、表はどのパスにも答えます。そのため、ホストが配るファイルへのリンクもルーターが引き受け、`/report.pdf`を開くとファイルではなく`/*`のページが描かれます。',
+  en: 'With `/*` at the end of the route table, the table answers every path. A link to a file the host serves is then taken by the router too, and `/report.pdf` renders the `/*` page instead of the file.',
 });
 
-export const registerTypesTable = {
-  type: message({ ja: '型', en: 'Type' }),
-  meaning: message({ ja: '意味', en: 'Meaning' }),
-  registeredPattern: message({
-    ja: '表のすべての leaf パターン（各ページと各 `/*`。自分の位置にページを持たない接頭辞は含まない）。宣言の前は `/` で始まる任意の文字列',
-    en: 'Every leaf pattern in the registered table — each page and each `/*`, never a prefix with no page of its own; before the declaration, any string starting with `/`',
-  }),
-  registeredNavigablePattern: message({
-    ja: 'リンク先にできるパターン（ワイルドカードを除く）。宣言の前は `/` で始まる任意の文字列',
-    en: 'The linkable patterns, wildcards excluded; before the declaration, any string starting with `/`',
-  }),
-  registeredParams: message({
-    ja: 'リンクが受け取る params の型。スキーマのかかるパターンでは、スキーマが型を決めた param はその型、残りはページと同じ文字列。スキーマのかからないパターンでは、どの param も `ParamValue`',
-    en: 'The params a link takes. On a pattern a schema covers, a param the schema typed takes that type and the rest take a string, as the page receives them; on a pattern no schema covers, every param takes a `ParamValue`',
-  }),
-  paramsOf: message({
-    ja: "パターンの params。`ParamsOf<'/:locale/products/:id'>` は `{ locale: string; id: string }`",
-    en: "A pattern’s params: `ParamsOf<'/:locale/products/:id'>` is `{ locale: string; id: string }`",
-  }),
-  pathFor: message({
-    ja: 'パターンに合うパスの型。`:param` の位置を任意の文字列にしたテンプレートリテラル型',
-    en: 'The path type a pattern stands for: a template literal type with any string where each `:param` was',
-  }),
-  paramValue: message({
-    ja: 'URL の綴りが 1 つに決まる値。`string | number | bigint | boolean`',
-    en: 'A value with one URL spelling: `string | number | bigint | boolean`',
-  }),
-};
-
-export const bindTitle = message({
-  ja: '共有の params を `bindParams` で束ねる',
-  en: 'Binding shared params with `bindParams`',
+export const downloadFix = message({
+  ja: '`download`属性を付けると、ブラウザはクリックの時点でダウンロードだと知らせます。ルーターはダウンロードを引き受けないので、ファイルがそのまま保存されます。',
+  en: 'With the `download` attribute, the browser reports a download at the click. The router leaves downloads alone, so the file is saved as it is.',
 });
 
-export const bindDescription = message({
-  ja: 'ロケールやテナントのように、すべてのリンクが繰り返すことになる区間は、関数から供給します。`bindParams(source)` は、`source` が返す params を毎回補う `href` と `navigateTo` を返します。このサイト自身の `src/links.ts` がそのまま例です。',
-  en: 'A segment every link would otherwise repeat — a locale, a tenant — is supplied by a function instead. `bindParams(source)` returns an `href` and a `navigateTo` that fill in the params `source` returns. This site’s own `src/links.ts` is exactly that:',
-});
-
-export const bindUsage = message({
-  ja: 'パターンは `/:locale/…` と綴ったままなので、表の型はそのまま効きます。束ねた param は省略でき、渡せば上書きできます。',
-  en: 'Patterns keep their full `/:locale/…` spelling, so the table’s types apply unchanged. A bound param may be left out, or given to override the source.',
-});
-
-export const bindSource = message({
-  ja: '`source` は呼び出しのたびに読まれます。リクエストや URL ごとに違う値も、その時点の値になります。どのパッケージが値を供給するかはアプリが決めることで、ルーターが知っているのは param の名前だけです。',
-  en: '`source` is read at every call, so a value that differs per request or per URL is read where it is current. Which package supplies the value is the application’s business; the router knows a param name and nothing more.',
-});
-
-export const bindPitfall = message({
-  ja: 'すべての param が束ねられたパターンでも、`navigateTo` のオプションは第 2 引数ではなく第 3 引数です。params もオプションも素のオブジェクトなので、どちらかを決めるのはパターンが param を持つかどうかだけです。params の位置には `undefined` を渡してから、オプションを渡します。第 2 引数にオプションを書くと型エラーになります。',
-  en: 'Even when every param of a pattern is bound, `navigateTo`’s options are the third argument, not the second: params and options are both plain objects, and only whether the pattern names a param decides which is which. Pass `undefined` in the params slot, then the options. Options in second place are a type error.',
-});
-
-export const bindTypes = message({
-  ja: '戻り値の型は `BoundLinks<Bound>`、`source` が返す値の型は `BoundParams`（`ParamValue` の読み取り専用レコード）です。',
-  en: 'The return type is `BoundLinks<Bound>`, and what `source` returns is a `BoundParams` — a read-only record of `ParamValue`s.',
-});
-
-export const paramsTitle = message({
-  ja: '`useParams` と `useRoute`',
-  en: '`useParams` and `useRoute`',
-});
-
-export const paramsDescription = message({
-  ja: '`<Router>` の下のコンポーネントは、今描かれているルートの params をコンテキストから読みます。`useParams(pattern)` はパターン文字列から型の付いた params を返します。値は常に文字列です。',
-  en: 'A component under `<Router>` reads the current route’s params from context. `useParams(pattern)` returns them typed by the pattern string. The values are always strings.',
-});
-
-export const paramsBelief = message({
-  ja: '`useParams` に渡すパターンは「このコンポーネントはこのパターンの下で描かれる」という宣言で、実行時に確かめられます。別のパターンの下で描かれると、形の違う params を黙って返すのではなく throw します。',
-  en: 'The pattern given to `useParams` is a claim — this component renders under this pattern — and it is checked at run time: rendered under any other pattern, it throws instead of silently returning params of the wrong shape.',
-});
-
-export const paramsRoute = message({
-  ja: '`useRoute()` は型の無い形で、勝ったパターンと params を返します。いくつものルートで使い回すコンポーネントが、どのルートの下にいるかを見分けるときに使います。照合結果が無ければ throw します。',
-  en: '`useRoute()` is the untyped form: the winning pattern and its params. Use it in a component shared by several routes that needs to tell which one it is under. It throws when there is no match to read.',
-});
-
-export const paramsFramework = message({
-  ja: '`@k8ordo/static` と `@k8ordo/server` の下では、ブラウザに表が無いのでどちらも使えません。ページは `params` を props で受け取ります。',
-  en: 'Under `@k8ordo/static` and `@k8ordo/server` neither works — the browser holds no table — and a page receives `params` as a prop.',
-});
-
-export const pathnameTitle = message({
-  ja: '`usePathname` で現在地を読む',
-  en: 'Reading the location with `usePathname`',
-});
-
-export const pathnameDescription = message({
-  ja: '`usePathname()` はブラウザが今いる pathname を、末尾のスラッシュを落とした形で返します。表ではなくプラットフォームを読むので、`<Router>` を自分でマウントしたアプリでもフレームワークの下でも同じように動きます。',
-  en: '`usePathname()` returns the pathname the browser is on, with the trailing slash dropped. It reads the platform rather than the table, so it works the same in an application that mounts `<Router>` and under the framework.',
-});
-
-export const pathnameNoSearch = message({
-  ja: 'pathname が変わったときだけ再描画され、search が変わっても再描画されません。search を返さないのは意図したものです。search が変わるたびに再描画されるコンポーネントは `@k8ordo/state` のキー単位の購読を台無しにするからで、`?` で分けることが 2 つのパッケージの境界そのものです。',
-  en: 'It re-renders when the pathname changes and never on the search. Leaving the search out is deliberate: a component re-rendering on every search change would defeat `@k8ordo/state`’s keyed subscriptions, and the split at the `?` is the boundary between the two packages.',
-});
-
-export const pathnameTiming = message({
-  ja: '`usePathname` は新しいページが出たときではなく、URL が変わったときに変わります。intercept では URL が先に確定し、木は読み込みが終わってから届くので、遅いナビゲーションではリンクが先に選択状態になり、前のページがまだ画面に残ります。ブラウザのアドレスバーと同じ順序です。待ちを見せたいなら、上のように `navigateTo` の `finished` を待ちます。',
-  en: '`usePathname` changes when the URL changes, not when the new page appears. Interception commits the URL first and the tree arrives once it has loaded, so on a slow navigation a link marks itself active while the previous page is still on screen — the same order as the browser’s own address bar. If the wait needs showing, await `navigateTo`’s `finished`, as above.',
-});
-
-export const pathnameRaw = message({
-  ja: '値は URL の綴りのままで、デコードしません。ASCII 以外の文字はパーセント符号化された形で返ります。',
-  en: 'The value is the URL’s own spelling and is not decoded: characters outside ASCII come back percent-encoded.',
-});
-
-export const pathnameServer = message({
-  ja: 'サーバーでの描画とハイドレーションの間は Navigation API を読めないので、描画した側が `<PathnameProvider>` で pathname を渡します。`<Router>` と両モードのランタイムが自分でマウントするので、アプリが書くことはありません。',
-  en: 'During a server render and hydration there is no Navigation API to read, so the renderer supplies the pathname through `<PathnameProvider>`. `<Router>` and both mode runtimes mount it themselves; an application never writes it.',
-});
-
-export const matchTitle = message({
-  ja: '`useMatch` と `matchPath` で選択状態を尋ねる',
-  en: 'Asking about active links with `useMatch` and `matchPath`',
-});
-
-export const matchDescription = message({
-  ja: 'リンクが選択状態かどうかは props ではなく、尋ねる問いです。`useMatch(pattern, options?)` は、今の pathname がそのパターンに合えば params を、合わなければ `null` を返します。',
-  en: 'Whether a link is active is a question you ask, not a prop. `useMatch(pattern, options?)` returns the params when the current pathname fits the pattern, and `null` when it does not.',
-});
-
-export const matchWildcard = message({
-  ja: 'パターンは表のもの、または表のパターンに `/*` を続けたもので、後者は「その下のどこか」を意味します（型 `MatchablePattern`）。パターン自身のページは「下」に含まれず、`/products/*` は `/products/42` に合い、`/products` には合いません。index でも下でも選択状態にしたい区画のリンクは `{ inclusive: true }`（型 `MatchOptions`）を渡します。`inclusive` は `/*` で終わらないパターンには影響しません。',
-  en: 'The pattern is one from the table, or a table pattern followed by `/*` to mean “anywhere below it” (the `MatchablePattern` type). The pattern’s own page is not below it: `/products/*` matches `/products/42` and not `/products`. A section link that should be active on the index as much as below it passes `{ inclusive: true }` (the `MatchOptions` type), which changes nothing for a pattern that does not end in `/*`.',
-});
-
-export const matchPure = message({
-  ja: '`matchPath(pattern, pathname, options?)` は同じ判定を行う純粋関数で、手元にある pathname を調べます。`useMatch` は `usePathname` の上に作られているので、再描画されるのは pathname が変わったときだけで、表も要りません。このサイトのサイドナビゲーションも `useMatch` で「`/ui/components` の下が開いているか」を尋ねています。',
-  en: '`matchPath(pattern, pathname, options?)` is the same test as a pure function, for a pathname you have in hand. `useMatch` is built on `usePathname`, so it re-renders on the pathname only and needs no table — this site’s own sidebar asks `useMatch` whether a page under `/ui/components` is showing.',
-});
-
-export const demoTitle = message({
-  ja: '`matchPath` を試す',
-  en: 'Try `matchPath`',
-});
-
-export const demoDescription = message({
-  ja: 'パターンと pathname を書き換えると、本物の `matchPath` と `normalizePathname` の結果がその場で変わります。最初の値は、このページが属する区画のパターン `/:locale/router/*` と、今いる pathname です。',
-  en: 'Edit the pattern and the pathname, and the real `matchPath` and `normalizePathname` answer as you type. It starts with the pattern for this page’s section, `/:locale/router/*`, and the pathname you are on.',
-});
-
-export const demo = {
-  pattern: message({ ja: 'パターン', en: 'Pattern' }),
-  pathname: message({ ja: 'pathname', en: 'Pathname' }),
-  inclusive: message({ ja: 'inclusive', en: 'inclusive' }),
-  examples: message({ ja: '例', en: 'Examples' }),
-  reset: message({ ja: '最初の値に戻す', en: 'Reset' }),
-  call: message({ ja: '呼び出し', en: 'Call' }),
-  normalized: message({
-    ja: 'normalizePathname',
-    en: 'normalizePathname',
-  }),
-  result: message({ ja: '結果', en: 'Result' }),
-  miss: message({
-    ja: '一致しない',
-    en: 'No match',
-  }),
-  invalid: message({
-    ja: 'URLPattern がパターンを解釈できません',
-    en: 'URLPattern could not parse the pattern',
-  }),
-};
-
-export const normalizeTitle = message({
-  ja: '`normalizePathname` と末尾のスラッシュ',
-  en: '`normalizePathname` and the trailing slash',
-});
-
-export const normalizeDescription = message({
-  ja: 'URLPattern は `/products` と `/products/` を別の pathname として扱いますが、ルーターは同じものとして扱います。`normalizePathname(pathname)` はその規則そのもので、末尾のスラッシュをすべて落とし、ルートの `/` だけは残します。表の照合・`matchPath`・`usePathname`・`<PathnameProvider>` はどれもこの形に揃えてから比べます。',
-  en: 'URLPattern treats `/products` and `/products/` as different pathnames; the router does not. `normalizePathname(pathname)` is that rule on its own: every trailing slash is dropped, and the root `/` is kept. Table matching, `matchPath`, `usePathname` and `<PathnameProvider>` all bring a pathname to this form before comparing.',
-});
-
-export const normalizeScope = message({
-  ja: '落とすのは末尾のスラッシュだけです。途中の連続したスラッシュ、パーセント符号化、search や fragment には触れません。pathname を表と同じ規則で比べるコードで使います。',
-  en: 'It drops trailing slashes and nothing else: repeated slashes in the middle, percent-encoding, a search or a fragment are left as they are. Use it in code that compares pathnames the way the table does.',
-});
-
-export const normalizeTable = {
-  input: message({ ja: '入力', en: 'Input' }),
-  output: message({ ja: '出力', en: 'Output' }),
-};
-
-export const baseTitle = message({
-  ja: 'サブパスに置く（Vite の base）',
-  en: 'Served under a base',
-});
-
-export const baseDescription = message({
-  ja: '表はアプリの根から書いたままです。アプリをその下（Vite の `base`、たとえば `/docs/`）に置いたときは、ルーターが `import.meta.env.BASE_URL` を読んで残りを受け持ちます。',
-  en: 'The table stays written from the application’s root. When the application is served below one — Vite’s `base`, `/docs/` say — the router reads `import.meta.env.BASE_URL` and does the rest.',
-});
-
-export const baseLinks = message({
-  ja: '`href` と `navigateTo` は、すべてのリンクの前に base を付けます。`href` が返すのはリンク先の URL なので、型は表のパスではなく `string` です',
-  en: '`href` and `navigateTo` put it in front of every link. What `href` returns is the URL a link points at, so it is typed `string`, not as a path in the table',
-});
-
-export const basePathname = message({
-  ja: '`usePathname` は base を外して返すので、パターンとそのまま比べられます。`useMatch` もそれに従い、`<Router>` は base の下の pathname で表を照合します',
-  en: '`usePathname` takes it off, so what it returns compares with the patterns; `useMatch` follows, and `<Router>` matches the table against the pathname below the base',
-});
-
-export const baseOutside = message({
-  ja: 'base の外の URL はアプリのものではないので、表が何と言っても `<Router>` はブラウザに任せます',
-  en: 'A URL outside the base is not the application’s, and `<Router>` leaves it to the browser whatever the table says',
-});
-
-export const baseHelpers = message({
-  ja: '`withBase(pathname)` と `withoutBase(pathname)` は、この 2 つの手順を自分のコードで使うためのものです。`withoutBase` は base の外の URL に `null` を返します。Vite が処理しないコード（`import.meta.env` が無い）では、2 つ目の引数で base を渡します。相対の base（`./`）はパスを名指さないので、何も付け外ししません。',
-  en: '`withBase(pathname)` and `withoutBase(pathname)` are those two steps for code of your own; `withoutBase` answers `null` for a URL outside the base. Code Vite does not process has no `import.meta.env` and passes the base as the second argument. A relative base (`./`) names no path, so it adds and removes nothing.',
-});
-
-export const stateTitle = message({
-  ja: '`@k8ordo/state` と同じパスの型を使う',
-  en: 'Sharing typed paths with `@k8ordo/state`',
-});
-
-export const stateDescription = message({
-  ja: '`@k8ordo/state` の `Register` にも、このルーターと同じ 1 行を書きます。両方に同じ表を宣言すると、`@k8ordo/state` のリンクも、このルーターが照合するのと同じ表で検査され、2 つのパッケージが「パス」について同じ答えを持ちます。',
-  en: '`@k8ordo/state`’s `Register` takes the same line this router does. Declare the same table on both, and `@k8ordo/state`’s links are checked against the table this router matches against — the two packages agree on what a path is.',
-});
-
-export const stateNavigablePath = message({
-  ja: '`NavigablePath<typeof routes, Path>` は、渡したパスを表のリンク可能なパターンと区間ごとに照合する型です。どれかに合えば `Path` そのもの、どれにも合わなければ `never` になります。`@k8ordo/state` の `href` はこれでパスを検査しています。ほかに型付きのパスを受け取るものがあれば、同じ型を使えます。',
-  en: '`NavigablePath<typeof routes, Path>` checks the path it is given against the table’s linkable patterns, segment by segment: `Path` itself when one matches, `never` when none does. `@k8ordo/state`’s `href` checks its paths through it, and any other typed-path consumer can use the same type.',
+export const downloadFramework = message({
+  ja: '`@k8ordo/static`や`@k8ordo/server`の下では、同じオリジンのURLはいったんすべて引き受け、ページではないと分かった時点で読み込み直してファイルを開きます。`download`を付けておけば、この往復を省けます。',
+  en: 'Under `@k8ordo/static` and `@k8ordo/server`, every same-origin URL is taken at first, and once it turns out not to be a page, the browser reloads into the file. `download` saves that round trip.',
 });

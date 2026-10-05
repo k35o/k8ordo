@@ -1,33 +1,16 @@
-import { Code } from '@k8ordo/ui';
 import { CodeBlock } from '@k8ordo/ui/code-block';
 
+import { Pitfall } from '../../../../components/callout';
 import { DocPage, DocSection } from '../../../../components/doc-page';
-import {
-  Bullet,
-  Bullets,
-  Cell,
-  GuideTable,
-  Paragraph,
-  Row,
-} from '../../../../components/framework-guide/prose';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Rich } from '../../../../components/rich';
 import * as m from '../../../../messages';
 
-const TALKS = `// src/routes/_data/talks.server.ts
-import 'server-only';
+const t = m.serverActions;
 
-const talks: string[] = [];
+const ACTIONS = `'use server';
 
-export const saveTalk = (title: string): Promise<void> => {
-  talks.push(title);
-  return Promise.resolve();
-};`;
-
-const ACTIONS = `// src/routes/_parts/actions.ts
-'use server';
-
-import { saveTalk } from '../_data/talks.server';
+import { saveTalk } from '../../_data/talks.server';
 
 export type TalkState = { error?: string };
 
@@ -37,14 +20,13 @@ export async function createTalk(
 ): Promise<TalkState> {
   const title = formData.get('title');
   if (typeof title !== 'string' || title === '') {
-    return { error: 'a title is required' };
+    return { error: 'Enter a title' };
   }
   await saveTalk(title);
   return {};
 }`;
 
-const TALK_FORM = `// src/routes/_parts/talk-form.tsx
-'use client';
+const TALK_FORM = `'use client';
 
 import { useActionState } from 'react';
 
@@ -54,270 +36,195 @@ export function TalkForm() {
   const [state, formAction, pending] = useActionState(createTalk, {});
   return (
     <form action={formAction}>
-      <input aria-label="title" name="title" />
+      <input aria-label="Title" name="title" />
       <button disabled={pending} type="submit">
-        add
+        Add
       </button>
-      {state.error === undefined ? null : <p role="alert">{state.error}</p>}
+      {state.error !== undefined && (
+        <p role="alert">{state.error}</p>
+      )}
     </form>
   );
 }`;
 
-const LEAVE = `// src/routes/_parts/leave.ts
-'use server';
+const ADD_TALK = `'use server';
 
 import { href } from '@k8ordo/router';
 import { redirect } from '@k8ordo/server/runtime';
 
-import { saveTalk } from '../_data/talks.server';
+import { saveTalk } from '../../_data/talks.server';
 
-export async function addAndLeave(formData: FormData): Promise<void> {
+export async function addTalk(formData: FormData): Promise<void> {
   const title = formData.get('title');
   if (typeof title === 'string' && title !== '') {
     await saveTalk(title);
   }
-  redirect(href('/products'));
+  redirect(href('/talks'));
 }`;
 
-const LEAVE_PAGE = `// src/routes/page.tsx
-import { addAndLeave } from './_parts/leave';
+const NEW_TALK = `import { addTalk } from '../_parts/add-talk';
 
-export default function HomePage() {
+export default function NewTalkPage() {
   return (
-    <form action={addAndLeave}>
-      <input aria-label="title" name="title" />
-      <button type="submit">add and leave</button>
+    <form action={addTalk}>
+      <input aria-label="Title" name="title" />
+      <button type="submit">Add</button>
     </form>
   );
 }`;
 
-const SIGN_IN = `// src/routes/_parts/sign-in.ts
-'use server';
-
-import { href } from '@k8ordo/router';
-import { cookies, redirect } from '@k8ordo/server/runtime';
-
-import { startSession } from '../_data/sessions.server';
-
-export type SignInState = { error?: string };
-
-export async function signIn(
-  _previous: SignInState,
-  formData: FormData,
-): Promise<SignInState> {
-  const session = await startSession(formData);
-  if (session === null) return { error: 'wrong password' };
-  cookies().set('session', session.token, { maxAge: 60 * 60 * 24 * 30 });
-  redirect(href('/account'));
-}`;
-
-const REQUEST = `// src/routes/layout.tsx
-import type { LayoutProps } from '@k8ordo/router';
-
-export default function RootLayout({ children, request }: LayoutProps<'/'>) {
-  const theme = request.cookies.get('theme') === 'dark' ? 'dark' : 'light';
-  const language = request.headers.get('accept-language') ?? 'en';
-  return (
-    <html data-theme={theme} lang={language.split(',')[0]}>
-      <body>{children}</body>
-    </html>
-  );
-}`;
-
-const REQUEST_PROP = `// src/routes/_parts/greeting.tsx
-import type { RouteRequest } from '@k8ordo/server/runtime';
-
-export function Greeting({ request }: { request: RouteRequest }) {
-  return <p>{request.cookies.get('name') ?? 'welcome'}</p>;
-}`;
-
-const GUESTBOOK_SCHEMA = `// src/routes/_parts/guestbook-schema.ts
-import * as z from 'zod/mini';
-
-z.config(z.locales.en());
-
-export const guestbookSchema = z.object({
-  name: z.string().check(z.minLength(1), z.maxLength(40)),
-});`;
-
-const GUESTBOOK_ACTION = `// src/routes/_parts/guestbook.ts
-'use server';
+const WITH_FORM = `'use server';
 
 import { parseForm } from '@k8ordo/form/server';
 import type { FormState } from '@k8ordo/form/server';
 
-import { guestbookSchema } from './guestbook-schema';
+import { insertTalk } from '../../_data/talks.server';
+import { talkSchema } from './talk-schema';
 
-const entries: string[] = [];
-
-export async function sign(
+export async function createTalk(
   _previous: FormState,
   formData: FormData,
 ): Promise<FormState> {
-  const parsed = parseForm(guestbookSchema, formData);
+  const parsed = parseForm(talkSchema, formData);
   if (!parsed.success) return parsed.state;
-  entries.push(parsed.data.name);
+  await insertTalk(parsed.data);
   return {};
 }`;
 
-const GUESTBOOK_FORM = `// src/routes/_parts/guestbook-form.tsx
-'use client';
-
-import { useForm } from '@k8ordo/form';
-import type { FormFields } from '@k8ordo/form';
-import { useActionState } from 'react';
-
-import { sign } from './guestbook';
-
-export function GuestbookForm({ fields }: { fields: FormFields<'name'> }) {
-  const [state, formAction] = useActionState(sign, {});
-  const form = useForm(fields, state);
-  const name = form.field('name');
-  return (
-    <form {...form.props} action={formAction}>
-      <input aria-label="name" {...name.input} />
-      <button type="submit">sign</button>
-      {name.error === undefined ? null : <p>{name.error}</p>}
-    </form>
-  );
-}`;
-
-const GUESTBOOK_PAGE = `// src/routes/page.tsx
-import { formFields } from '@k8ordo/form/server';
-
-import { GuestbookForm } from './_parts/guestbook-form';
-import { guestbookSchema } from './_parts/guestbook-schema';
-
-const guestbookFields = formFields(guestbookSchema);
-
-export default function HomePage() {
-  return <GuestbookForm fields={guestbookFields} />;
-}`;
-
 export default function ServerActionsPage() {
-  const t = m.serverActions;
   return (
     <DocPage introduction={t.introduction} path="/:locale/server/actions">
-      <DocSection description={t.declareDescription} title={t.declareTitle}>
-        <CodeBlock code={TALKS} lang="ts" />
-        <CodeBlock code={ACTIONS} lang="ts" />
-        <Paragraph text={t.declareForm} />
-        <CodeBlock code={TALK_FORM} lang="tsx" />
+      <DocSection
+        description={t.declareDescription}
+        id="declare"
+        title={t.declareTitle}
+      >
+        <CodeBlock
+          code={ACTIONS}
+          lang="ts"
+          marks={{ 1: 'highlight' }}
+          title="src/routes/talks/_parts/actions.ts"
+        />
+        <p>
+          <Rich>{t.declareState()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.declareForm()}</Rich>
+        </p>
+        <CodeBlock
+          code={TALK_FORM}
+          lang="tsx"
+          marks={{ 8: 'highlight', 10: 'highlight' }}
+          title="src/routes/talks/_parts/talk-form.tsx"
+        />
       </DocSection>
 
       <DocSection
         description={t.roundTripDescription}
+        id="round-trip"
         title={t.roundTripTitle}
       />
 
-      <DocSection description={t.noJsDescription} title={t.noJsTitle} />
+      <DocSection
+        description={t.noJsDescription}
+        id="no-js"
+        title={t.noJsTitle}
+      >
+        <p>
+          <Rich>{t.noJsSame()}</Rich>
+        </p>
+      </DocSection>
 
       <DocSection
         description={t.directivesDescription}
+        id="directives"
         title={t.directivesTitle}
       >
-        <Paragraph text={t.directivesName} />
+        <p>
+          <Rich>{t.directivesWhere()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.directivesName()}</Rich>
+        </p>
       </DocSection>
 
-      <DocSection description={t.redirectDescription} title={t.redirectTitle}>
-        <CodeBlock code={LEAVE} lang="ts" />
-        <CodeBlock code={LEAVE_PAGE} lang="tsx" />
-        <Paragraph text={t.redirectAnswers} />
-        <Paragraph text={t.redirectCatch} />
-        <Paragraph text={t.redirectPages}>
-          <LocaleAnchor path="/:locale/server/errors">
-            {m.server.navErrors()}
+      <DocSection
+        description={t.redirectDescription}
+        id="redirect"
+        title={t.redirectTitle}
+      >
+        <CodeBlock
+          code={ADD_TALK}
+          lang="ts"
+          marks={{ 13: 'highlight' }}
+          title="src/routes/talks/_parts/add-talk.ts"
+        />
+        <CodeBlock
+          code={NEW_TALK}
+          lang="tsx"
+          marks={{ 5: 'highlight' }}
+          title="src/routes/talks/new/page.tsx"
+        />
+        <Pitfall>
+          <p>
+            <Rich>{t.redirectThrow()}</Rich>
+          </p>
+        </Pitfall>
+        <p>
+          <Rich>{t.redirectAnswer()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.redirectHref()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.redirectPages()}</Rich>
+        </p>
+      </DocSection>
+
+      <DocSection
+        description={t.contextDescription}
+        id="context"
+        title={t.contextTitle}
+      >
+        <p>
+          <Rich>{t.contextLocale()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.contextApi()}</Rich>{' '}
+          <LocaleAnchor path="/:locale/server/request">
+            {m.server.navRequest()}
           </LocaleAnchor>
-        </Paragraph>
+        </p>
       </DocSection>
 
-      <DocSection description={t.contextDescription} title={t.contextTitle}>
-        <CodeBlock code={SIGN_IN} lang="ts" />
-        <Paragraph text={t.contextAnswer}>
-          <LocaleAnchor path="/:locale/server/guards">
-            {m.server.navGuards()}
-          </LocaleAnchor>
-        </Paragraph>
-        <Paragraph text={t.contextLocale} />
-      </DocSection>
-
-      <DocSection description={t.requestDescription} title={t.requestTitle}>
-        <CodeBlock code={REQUEST} lang="tsx" />
-        <GuideTable
-          head={[
-            t.requestTable.field,
-            t.requestTable.type,
-            t.requestTable.holds,
-          ]}
-        >
-          <Row>
-            <Cell nowrap>
-              <Code>headers</Code>
-            </Cell>
-            <Cell nowrap>
-              <Code>Headers</Code>
-            </Cell>
-            <Cell>
-              <Rich>{t.requestTable.headers()}</Rich>
-            </Cell>
-          </Row>
-          <Row>
-            <Cell nowrap>
-              <Code>cookies</Code>
-            </Cell>
-            <Cell nowrap>
-              <Code>{'ReadonlyMap<string, string>'}</Code>
-            </Cell>
-            <Cell>
-              <Rich>{t.requestTable.cookies()}</Rich>
-            </Cell>
-          </Row>
-        </GuideTable>
-        <Paragraph text={t.requestType} />
-        <CodeBlock code={REQUEST_PROP} lang="tsx" />
-        <Paragraph text={t.requestReadOnly}>
-          <LocaleAnchor path="/:locale/server/guards">
-            {m.server.navGuards()}
-          </LocaleAnchor>
-        </Paragraph>
-        <Paragraph text={t.requestStatic} />
-      </DocSection>
-
-      <DocSection description={t.originDescription} title={t.originTitle}>
-        <Paragraph text={t.originProxy}>
+      <DocSection
+        description={t.originDescription}
+        id="origin"
+        title={t.originTitle}
+      >
+        <p>
+          <Rich>{t.originCheck()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.originProxy()}</Rich>{' '}
           <LocaleAnchor path="/:locale/server/deploy">
             {m.server.navDeploy()}
           </LocaleAnchor>
-        </Paragraph>
+        </p>
       </DocSection>
 
-      <DocSection description={t.formDescription} title={t.formTitle}>
-        <CodeBlock code={GUESTBOOK_SCHEMA} lang="ts" />
-        <CodeBlock code={GUESTBOOK_ACTION} lang="ts" />
-        <CodeBlock code={GUESTBOOK_FORM} lang="tsx" />
-        <CodeBlock code={GUESTBOOK_PAGE} lang="tsx" />
-        <Paragraph text={t.formFieldsNote}>
-          <LocaleAnchor path="/:locale/form">@k8ordo/form</LocaleAnchor>
-        </Paragraph>
-      </DocSection>
-
-      <DocSection description={t.buysDescription} title={t.buysTitle}>
-        <Bullets>
-          <Bullet>
-            <Rich>{t.buys404()}</Rich>
-          </Bullet>
-          <Bullet>
-            <Rich>{t.buysValues()}</Rich>
-          </Bullet>
-          <Bullet>
-            <Rich>{t.buysActions()}</Rich>
-          </Bullet>
-          <Bullet>
-            <Rich>{t.buysRequest()}</Rich>
-          </Bullet>
-        </Bullets>
+      <DocSection description={t.formDescription} id="form" title={t.formTitle}>
+        <CodeBlock
+          code={WITH_FORM}
+          lang="ts"
+          marks={{ 13: 'highlight', 14: 'highlight' }}
+          title="src/routes/talks/_parts/actions.ts"
+        />
         <p>
-          <LocaleAnchor path="/:locale/static">@k8ordo/static</LocaleAnchor>
+          <Rich>{t.formMore()}</Rich>{' '}
+          <LocaleAnchor path="/:locale/form/get-started">
+            @k8ordo/form
+          </LocaleAnchor>
         </p>
       </DocSection>
     </DocPage>

@@ -1,11 +1,14 @@
-import { Code, Heading, Separator } from '@k8ordo/ui';
+import { Code } from '@k8ordo/ui';
 import { CodeBlock } from '@k8ordo/ui/code-block';
 import { en, ja, messageUsage } from '@k8ordo/ui/i18n';
 import type { Messages } from '@k8ordo/ui/i18n';
 
-import { PageTitle } from '../../../../components/page-title';
+import { Note } from '../../../../components/callout';
+import { DocPage, DocSection } from '../../../../components/doc-page';
 import { Rich } from '../../../../components/rich';
 import * as m from '../../../../messages';
+
+const t = m.uiI18n;
 
 type MessageRow = {
   key: keyof Messages;
@@ -23,84 +26,29 @@ const MESSAGE_ROWS: readonly MessageRow[] =
     enValue: en[key],
   }));
 
-export default function I18n() {
-  return (
-    <div className="mx-auto flex max-w-4xl flex-col gap-8 px-6 py-12 md:px-8">
-      <PageTitle title={m.nav.i18n} />
-      <div className="flex flex-col gap-4">
-        <Heading level="h1">
-          <Rich>{m.nav.i18n()}</Rich>
-        </Heading>
-        <p className="text-fg-mute text-lg">
-          <Rich>{m.uiI18n.introduction()}</Rich>
-        </p>
-      </div>
-      <Separator color="mute" />
-
-      <section className="flex flex-col gap-4">
-        <Heading level="h2">
-          <Rich>{m.uiI18n.localeTitle()}</Rich>
-        </Heading>
-        <p className="text-fg-mute">
-          <Rich>{m.uiI18n.localeDescription()}</Rich>
-        </p>
-        <CodeBlock
-          code={`// src/i18n.ts
-import { defineLocales } from '@k8ordo/i18n';
+const LOCALES = `import { defineLocales } from '@k8ordo/i18n';
 
 export const locales = defineLocales({
   ja: { timeZone: 'Asia/Tokyo', dir: 'ltr' },
   en: { timeZone: 'UTC', dir: 'ltr' },
-});`}
-          lang="ts"
-        />
-        <p className="text-fg-mute">
-          <Rich>{m.uiI18n.clientGraph()}</Rich>
-        </p>
-      </section>
+});`;
 
-      <Separator color="mute" />
-
-      <section className="flex flex-col gap-4">
-        <Heading level="h2">
-          <Rich>{m.uiI18n.englishTitle()}</Rich>
-        </Heading>
-        <p className="text-fg-mute">
-          <Rich>{m.uiI18n.englishDescription()}</Rich>
-        </p>
-        <CodeBlock
-          code={`// src/i18n.ts
-import { defineLocales } from '@k8ordo/i18n';
+const JAPANESE_ONLY = `import { defineLocales } from '@k8ordo/i18n';
 
 export const locales = defineLocales({
   ja: { timeZone: 'Asia/Tokyo', dir: 'ltr' },
-});`}
-          lang="ts"
-        />
-      </section>
+});`;
 
-      <Separator color="mute" />
-
-      <section className="flex flex-col gap-4">
-        <Heading level="h2">
-          <Rich>{m.uiI18n.registerTitle()}</Rich>
-        </Heading>
-        <p className="text-fg-mute">
-          <Rich>{m.uiI18n.registerDescription()}</Rich>
-        </p>
-        <CodeBlock
-          code={`// src/ui-messages/fr.ts
-import type { Messages } from '@k8ordo/ui/i18n';
+const FRENCH = `import type { Messages } from '@k8ordo/ui/i18n';
 
 export const fr: Messages = {
   close: 'Fermer',
   required: 'Requis',
   loading: 'Chargement',
   // ...
-};
+};`;
 
-// src/i18n.ts
-import { defineLocales } from '@k8ordo/i18n';
+const REGISTER = `import { defineLocales } from '@k8ordo/i18n';
 import { registerMessages } from '@k8ordo/ui/i18n';
 
 import { fr } from './ui-messages/fr';
@@ -110,90 +58,108 @@ export const locales = defineLocales({
   fr: { timeZone: 'Europe/Paris', dir: 'ltr' },
 });
 
-registerMessages('fr', fr);`}
-          lang="ts"
-        />
-        <p className="text-fg-mute">
-          <Rich>{m.uiI18n.regional()}</Rich>
-        </p>
-      </section>
+registerMessages('fr', fr);`;
 
-      <Separator color="mute" />
-
-      <section className="flex flex-col gap-4">
-        <Heading level="h2">
-          <Rich>{m.uiI18n.overrideTitle()}</Rich>
-        </Heading>
-        <p className="text-fg-mute">
-          <Rich>{m.uiI18n.overrideDescription()}</Rich>
-        </p>
-        <CodeBlock
-          code={`import { en, ja, registerMessages } from '@k8ordo/ui/i18n';
+const OVERRIDE = `import { en, ja, registerMessages } from '@k8ordo/ui/i18n';
 
 registerMessages('ja', { ...ja, close: '閉じる (Esc)' });
-registerMessages('en', { ...en, autocompleteEmpty: 'No matches' });`}
-          lang="ts"
-        />
-      </section>
+registerMessages('en', { ...en, autocompleteEmpty: 'No matches' });`;
 
-      <Separator color="mute" />
+const READ = `import { getMessages } from '@k8ordo/ui/i18n';
 
-      <section className="flex flex-col gap-4">
-        <Heading level="h2">
-          <Rich>{m.uiI18n.priorityTitle()}</Rich>
-        </Heading>
-        <p className="text-fg-mute">
-          <Rich>{m.uiI18n.priorityDescription()}</Rich>
-        </p>
-        <CodeBlock
-          code={`// 1. prop
-<Spinner label="送信中" />
-// -> 送信中
-
-// 2. registerMessages('ja', { ...ja, loading: 'ロード中' })
-<Spinner />
-// -> ロード中
-
-// 3. built-in
-<Spinner />
-// -> 読み込み中`}
-          lang="tsx"
-        />
-      </section>
-
-      <Separator color="mute" />
-
-      <section className="flex flex-col gap-4">
-        <Heading level="h2">
-          <Rich>{m.uiI18n.readTitle()}</Rich>
-        </Heading>
-        <p className="text-fg-mute">
-          <Rich>{m.uiI18n.readDescription()}</Rich>
-        </p>
-        <CodeBlock
-          code={`import { getMessages } from '@k8ordo/ui/i18n';
-
-function DismissButton({ onDismiss }) {
+export function DismissButton({ onDismiss }) {
   const { close } = getMessages();
   return (
     <button aria-label={close} onClick={onDismiss} type="button">
       ×
     </button>
   );
-}`}
-          lang="tsx"
-        />
-      </section>
+}`;
 
-      <Separator color="mute" />
+export default function UiI18nPage() {
+  return (
+    <DocPage introduction={t.introduction} path="/:locale/ui/i18n">
+      <DocSection
+        description={t.localeDescription}
+        id="locale"
+        title={t.localeTitle}
+      >
+        <CodeBlock code={LOCALES} lang="ts" title="src/i18n.ts" />
+        <Note>
+          <p>
+            <Rich>{t.clientGraph()}</Rich>
+          </p>
+        </Note>
+      </DocSection>
 
-      <section className="flex flex-col gap-4">
-        <Heading level="h2">
-          <Rich>{m.uiI18n.keysTitle()}</Rich>
-        </Heading>
-        <p className="text-fg-mute">
-          <Rich>{m.uiI18n.keysDescription()}</Rich>
+      <DocSection
+        description={t.englishDescription}
+        id="english"
+        title={t.englishTitle}
+      >
+        <p>
+          <Rich>{t.englishJapanese()}</Rich>
         </p>
+        <CodeBlock code={JAPANESE_ONLY} lang="ts" title="src/i18n.ts" />
+      </DocSection>
+
+      <DocSection
+        description={t.registerDescription}
+        id="register"
+        title={t.registerTitle}
+      >
+        <CodeBlock code={FRENCH} lang="ts" title="src/ui-messages/fr.ts" />
+        <p>
+          <Rich>{t.registerTyped()}</Rich>
+        </p>
+        <CodeBlock
+          code={REGISTER}
+          lang="ts"
+          marks={{ 11: 'highlight' }}
+          title="src/i18n.ts"
+        />
+        <p>
+          <Rich>{t.regional()}</Rich>
+        </p>
+      </DocSection>
+
+      <DocSection
+        description={t.overrideDescription}
+        id="override"
+        title={t.overrideTitle}
+      >
+        <CodeBlock code={OVERRIDE} lang="ts" title="src/i18n.ts" />
+      </DocSection>
+
+      <DocSection
+        description={t.priorityDescription}
+        id="priority"
+        title={t.priorityTitle}
+      >
+        <ol>
+          <li>
+            <Rich>{t.priorityProp()}</Rich>
+          </li>
+          <li>
+            <Rich>{t.priorityRegistered()}</Rich>
+          </li>
+          <li>
+            <Rich>{t.priorityBuiltIn()}</Rich>
+          </li>
+        </ol>
+        <p>
+          <Rich>{t.priorityHint()}</Rich>
+        </p>
+      </DocSection>
+
+      <DocSection description={t.readDescription} id="read" title={t.readTitle}>
+        <CodeBlock code={READ} lang="tsx" title="dismiss-button.tsx" />
+        <p>
+          <Rich>{t.readWhy()}</Rich>
+        </p>
+      </DocSection>
+
+      <DocSection description={t.keysDescription} id="keys" title={t.keysTitle}>
         <dl className="flex flex-col gap-4 md:hidden">
           {MESSAGE_ROWS.map((row) => (
             <div
@@ -204,21 +170,18 @@ function DismissButton({ onDismiss }) {
                 <Code>{row.key}</Code>
               </dt>
               <dd className="text-fg-mute text-sm">
-                <span className="text-fg-subtle">
-                  <Rich>{m.uiI18n.usedByColumn()}</Rich>:{' '}
-                </span>
+                {t.usedByColumn()}
+                {m.docPage.termSeparator()}
                 {row.usedBy}
               </dd>
               <dd className="text-fg-mute text-sm">
-                <span className="text-fg-subtle">
-                  <Rich>{m.uiI18n.jaColumn()}</Rich>:{' '}
-                </span>
+                {t.jaColumn()}
+                {m.docPage.termSeparator()}
                 {row.jaValue}
               </dd>
               <dd className="text-fg-mute text-sm">
-                <span className="text-fg-subtle">
-                  <Rich>{m.uiI18n.enColumn()}</Rich>:{' '}
-                </span>
+                {t.enColumn()}
+                {m.docPage.termSeparator()}
                 {row.enValue}
               </dd>
             </div>
@@ -229,16 +192,16 @@ function DismissButton({ onDismiss }) {
             <thead>
               <tr className="border-border-mute border-b">
                 <th className="py-3 pr-6 font-medium whitespace-nowrap">
-                  <Rich>{m.uiI18n.keyColumn()}</Rich>
+                  {t.keyColumn()}
                 </th>
                 <th className="py-3 pr-6 font-medium whitespace-nowrap">
-                  <Rich>{m.uiI18n.usedByColumn()}</Rich>
+                  {t.usedByColumn()}
                 </th>
                 <th className="py-3 pr-6 font-medium whitespace-nowrap">
-                  <Rich>{m.uiI18n.jaColumn()}</Rich>
+                  {t.jaColumn()}
                 </th>
                 <th className="py-3 font-medium whitespace-nowrap">
-                  <Rich>{m.uiI18n.enColumn()}</Rich>
+                  {t.enColumn()}
                 </th>
               </tr>
             </thead>
@@ -248,7 +211,7 @@ function DismissButton({ onDismiss }) {
                   <td className="py-3 pr-6 whitespace-nowrap">
                     <Code>{row.key}</Code>
                   </td>
-                  <td className="py-3 pr-6 whitespace-nowrap">{row.usedBy}</td>
+                  <td className="py-3 pr-6">{row.usedBy}</td>
                   <td className="py-3 pr-6">{row.jaValue}</td>
                   <td className="py-3">{row.enValue}</td>
                 </tr>
@@ -256,7 +219,7 @@ function DismissButton({ onDismiss }) {
             </tbody>
           </table>
         </div>
-      </section>
-    </div>
+      </DocSection>
+    </DocPage>
   );
 }

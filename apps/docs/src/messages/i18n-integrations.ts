@@ -1,192 +1,132 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: '`@k8ordo/i18n` はほかの k8ordo パッケージを import しません。組み合わせる行はアプリケーションが書き、どれも数行で済みます。このページでは `@k8ordo/ui`・`@k8ordo/form`・`@k8ordo/router`・`@k8ordo/static`・`@k8ordo/server` との結び方と、テストの書き方を扱います。',
-  en: "`@k8ordo/i18n` imports no other k8ordo package. The lines that combine them are the application's, and each takes a few lines. This page covers `@k8ordo/ui`, `@k8ordo/form`, `@k8ordo/router`, `@k8ordo/static` and `@k8ordo/server`, and how to test.",
+  ja: '`@k8ordo/i18n`は、ほかのk8ordoのパッケージをimportしません。組み合わせるための数行は、アプリの側に書きます。このページでは、`@k8ordo/ui`と`@k8ordo/form`、`@k8ordo/router`、`@k8ordo/static`と`@k8ordo/server`との組み合わせ方を説明します。',
+  en: '`@k8ordo/i18n` imports no other k8ordo package; the few lines that combine them are the app’s. This page covers `@k8ordo/ui`, `@k8ordo/form`, `@k8ordo/router`, and `@k8ordo/static` and `@k8ordo/server`.',
 });
 
-export const ui = {
-  title: message({
-    ja: '`@k8ordo/ui`',
-    en: '`@k8ordo/ui`',
-  }),
-  description: message({
-    ja: 'コンポーネントが自前で描く文言（閉じるボタンのラベル、必須の表示、読み込み中の読み上げ）は、`@k8ordo/ui` が `@k8ordo/i18n` の今のロケールで引きます。Provider に渡すものはありません。`ja` と `en` は `@k8ordo/ui` が持ち、それ以外のロケールは集合の隣で `registerMessages` に登録します。',
-    en: "Wording the components render on their own — close button labels, the required marker, the loading announcement — is looked up by `@k8ordo/ui` in `@k8ordo/i18n`'s current locale. Nothing is passed to a provider. `@k8ordo/ui` ships `ja` and `en`; register any other locale with `registerMessages`, next to the set.",
-  }),
-  clientGraph: message({
-    ja: '集合を定義するモジュールは、ブラウザ側でも読み込まれている必要があります。集合が無い環境では `@k8ordo/ui` は英語で描くので、サーバーの HTML と食い違います。Client Component が `links.ts`（`bindParams`）や言語切替で `locales` を import していれば満たされます。',
-    en: "The module that defines the set has to be loaded in the browser as well: where no set is defined `@k8ordo/ui` speaks English, which would disagree with the server's HTML. A Client Component importing `locales` — through `links.ts` (`bindParams`) or a language switcher — is enough.",
-  }),
-  otherLocales: message({
-    ja: '`en-US` のような地域つきのタグは、登録が無ければ言語（`en`）の辞書を読みます。登録も組み込みも無いロケールで描くと、登録を促すエラーを投げます。登録する辞書に `@k8ordo/ui/i18n` の `Messages` 型を注釈すれば、キーの漏れが型で分かります。',
-    en: 'A regional tag such as `en-US` without a registration reads its language’s (`en`) dictionary. Rendering in a locale nothing has text for throws, naming how to register it. Annotate a registered dictionary with the `Messages` type from `@k8ordo/ui/i18n` and a missing key is a type error.',
-  }),
-  notFound: message({
-    ja: '404 でも、コンポーネントは文言と同じロケールで描きます。静的ビルドの `404.html` は番兵の区間で 1 回だけ描かれるので既定のロケールで届き、ブラウザが訪問者の URL で描き直したときに訪問者のロケールになります。',
-    en: "On a 404 the components speak the same locale the messages do. A static build's `404.html`, rendered once under a sentinel segment, arrives in the default, and follows the visitor's locale once the browser renders it afresh at their URL.",
-  }),
-  props: message({
-    ja: 'コンポーネントの props に渡すテキストは文字列です。`<Button>{m.form.submit()}</Button>` のように、文言を呼んだ結果を渡します。',
-    en: "Text passed to a component's props is a string: call the message, as in `<Button>{m.form.submit()}</Button>`.",
-  }),
-  link: message({
-    ja: '`@k8ordo/ui` の文言辞書のページを読む',
-    en: "Read `@k8ordo/ui`'s page on its wording",
-  }),
-};
+export const uiTitle = message({
+  ja: '`@k8ordo/ui`の文言を合わせる',
+  en: 'Match `@k8ordo/ui`’s wording',
+});
 
-export const form = {
-  title: message({
-    ja: '`@k8ordo/form`',
-    en: '`@k8ordo/form`',
-  }),
-  description: message({
-    ja: '`@k8ordo/form` が表示する文言は zod のエラー文言です。`formFields` は導出の時点でスキーマに値を通して文字列にし、`parseForm` は検証の時点で作ります。どちらもその瞬間のロケールで作られるので、押さえる点は 3 つです。',
-    en: "The messages `@k8ordo/form` shows are zod's error messages: `formFields` turns them into strings by probing the schema when it derives the fields, and `parseForm` produces them when it validates. Both are made in the locale current at that moment, which leaves three things to get right.",
-  }),
-  errorMap: message({
-    ja: 'zod には文字列ではなく文言の関数を `error` として渡します。zod が issue を報告するときに呼ぶので、その時点のロケールの文になります。`min(1, m.talk.titleRequired())` のように宣言で呼ぶと、その時点のロケール（多くの場合は既定のロケール）の文字列で固定されます。`defineForm` のルールの文言も同じで、`requiredWhen(…, m.talk.reasonRequired)` のように関数のまま渡せば、ルールを報告するときに呼ばれます。',
-    en: 'Give zod the message function as `error`, not a string. Zod calls it when it reports the issue, so the text is in the locale current then. Calling the message in the declaration, as in `min(1, m.talk.titleRequired())`, freezes the string of whatever locale was current then, usually the default. The same goes for a `defineForm` rule’s message: pass the function, as in `requiredWhen(…, m.talk.reasonRequired)`, and it is called when the rule is reported.',
-  }),
-  derive: message({
-    ja: '`formFields(schema)` は、モジュールの先頭ではなくページの描画の中で呼びます。モジュールの先頭は 1 回しか走らず、多くの場合リクエストの外なので、どのロケールのページにも同じ文言（たいていは既定のロケールのもの）が渡ります。',
-    en: "Call `formFields(schema)` inside the page's render, not at module scope. Module scope runs once, usually outside any request, so every locale's page would be handed the same messages, most likely the default locale's.",
-  }),
-  action: message({
-    ja: '`[locale]` のページから送られた Server Action は、そのページのロケールで走ります。フレームワークが action のリクエストでもページの `paramsSchema` を通すからです。だから `parseForm` の文言はページの言語になり、ロケールを `bind` したり `locales.run` で囲んだりする必要はありません。',
-    en: 'A Server Action posted from a `[locale]` page runs in that page’s locale: the framework runs the page’s `paramsSchema` for the action’s request as well. So the messages `parseForm` produces are in the page’s language, with no locale to bind to the action and no `locales.run` around it.',
-  }),
-  guideLink: message({
-    ja: '`@k8ordo/form` のガイドを読む',
-    en: "Read `@k8ordo/form`'s guide",
-  }),
-  staticNote: message({
-    ja: 'Server Action は `@k8ordo/server` にしかありません。`@k8ordo/static` のサイトに当てはまるのは、1 つ目と 2 つ目です。',
-    en: 'Server Actions exist only under `@k8ordo/server`; on an `@k8ordo/static` site, only the first two points apply.',
-  }),
-};
+export const uiDescription = message({
+  ja: '閉じるボタンのラベルのように、`@k8ordo/ui`のコンポーネントが自分で描く文言は、`@k8ordo/i18n`の今のロケールで選ばれます。プロバイダに渡すものはありません。',
+  en: 'The text `@k8ordo/ui`’s components render on their own, such as a close button’s label, follows `@k8ordo/i18n`’s current locale. Nothing is passed to a provider.',
+});
 
-export const router = {
-  title: message({
-    ja: '`@k8ordo/router`',
-    en: '`@k8ordo/router`',
-  }),
-  description: message({
-    ja: 'ロケールは、すべてのパターンの `:locale` param です。ルーターに i18n のための設定はありません。',
-    en: 'The locale is the `:locale` parameter of every pattern. The router has no i18n settings.',
-  }),
-  links: message({
-    ja: 'リンクとナビゲーションは、`bindParams(() => ({ locale: locales.getLocale() }))` が返す `href` / `navigateTo` で書きます。',
-    en: 'Links and navigation use the `href` / `navigateTo` that `bindParams(() => ({ locale: locales.getLocale() }))` returns.',
-  }),
-  switcher: message({
-    ja: '言語切替は、`usePathname()` で今の pathname を読み、`delocalize` と `localize` で別のロケールの URL を作ります。',
-    en: "A language switcher reads the current pathname with `usePathname()` and builds the other locale's URL with `delocalize` and `localize`.",
-  }),
-  match: message({
-    ja: "`useMatch('/:locale/docs/*')` のように、ロケールを含むパターンのまま区画を判定できます。`:locale` は区間の値を問わず一致します。",
-    en: "Section checks work on patterns that include the locale, as in `useMatch('/:locale/docs/*')`; `:locale` matches whatever the segment holds.",
-  }),
-  link: message({
-    ja: 'リンク、言語切替、`/` の振り分けの書き方を読む',
-    en: 'Read how links, the language switcher and the `/` page are written',
-  }),
-};
+export const uiBuiltIn = message({
+  ja: '`ja`と`en`の文言は、`@k8ordo/ui`に入っています。ほかのロケールは、集合を定義するモジュールで`registerMessages`に登録します。',
+  en: '`@k8ordo/ui` ships text for `ja` and `en`. Register any other locale with `registerMessages`, in the module that defines the set.',
+});
 
-export const staticMode = {
-  title: message({
-    ja: '`@k8ordo/static`',
-    en: '`@k8ordo/static`',
-  }),
-  description: message({
-    ja: '静的化で i18n に関わるのは 2 点です。',
-    en: 'Two things matter for i18n in a static build.',
-  }),
-  paths: message({
-    ja: '`framework({ paths: locales.paths })` で、ロケールの区間をロケールの数だけ展開します。ほかの param があれば、同じ関数の中で展開します。',
-    en: '`framework({ paths: locales.paths })` expands the locale segment once per locale; any other parameter is expanded in the same function.',
-  }),
-  notFound: message({
-    ja: '`404.html` は番兵の区間で 1 回だけ、既定のロケールで描かれます。ブラウザはこれをハイドレーションせず（別の URL 用に描かれたものなので）、訪問者の URL で描き直します。`not-found.tsx` の文言を Client Component で描けば、そこで訪問者のロケールになります。このサイトは、`<html lang>` も描いた後に effect で `document.documentElement.lang` を直しています。',
-    en: "`404.html` is rendered once under a sentinel segment, in the default locale. The browser does not hydrate it — it was rendered for another URL — but renders it afresh at the visitor's, so render the text of `not-found.tsx` in a Client Component and it comes out in the visitor's locale. This site also corrects `<html lang>` from an effect once it has rendered, through `document.documentElement.lang`.",
-  }),
-};
+export const uiTypes = message({
+  ja: '登録する文言に`@k8ordo/ui/i18n`の`Messages`型を付けておけば、キーの漏れが型エラーになります。`fr-CA`のように地域の付いたタグは、登録が無ければ言語の`fr`の文言を読みます。',
+  en: 'Annotate the registered text with the `Messages` type from `@k8ordo/ui/i18n`, and a missing key is a type error. A regional tag such as `fr-CA` without a registration of its own reads its language’s, `fr`.',
+});
 
-export const server = {
-  title: message({
-    ja: '`@k8ordo/server`',
-    en: '`@k8ordo/server`',
-  }),
-  description: message({
-    ja: 'リクエストごとに描くので、`paramsSchema` と文言の働きは静的化と同じです。違うのは、ページの前に走る `guard.ts` がリクエストに答えられることと、Server Action があることです。',
-    en: 'Rendering happens per request, so `paramsSchema` and messages work exactly as in a static build. What differs is that a `guard.ts` running before the page can answer the request, and that there are Server Actions.',
-  }),
-  negotiate: message({
-    ja: '`/` には、何かを描く前に `guard.ts` が答えます。`locales.negotiateRequest(request, { cookie })` が、訪問者が前に選んだロケールの Cookie を先に、無ければ `Accept-Language` を読んでロケールを選び、guard はそのロケールの URL への `307` で応答を終えます。JavaScript の無い訪問者も、`/` へのクライアント遷移も、同じように振り分けられます。',
-    en: '`/` is answered by a `guard.ts`, before anything renders. `locales.negotiateRequest(request, { cookie })` chooses — the cookie holding the locale the visitor chose before, then `Accept-Language` — and the guard ends the request with a `307` to that locale. A visitor without JavaScript is sent on the same way, and so is a client navigation to `/`.',
-  }),
-  group: message({
-    ja: 'guard と `/` のページはルートグループ（`(home)/`）に入れます。`guard.ts` は自分のディレクトリより下のすべての URL の前に走るので、`src/routes/` の直下に置くと `/en/…` まで振り分けてしまいます。ページは描かれませんが、guard が走るのはページが宣言した URL の前なので、`null` を返すページを置きます。',
-    en: 'Put the guard and the `/` page in a route group (`(home)/`): a `guard.ts` runs before every URL below its directory, so one directly in `src/routes/` would send `/en/…` away too. The page never renders, but a guard runs before a URL a page declares, so one returning `null` has to be there.',
-  }),
-  status: message({
-    ja: '`308` ではなく `307` にするのは、行き先が訪問者によって変わるからです。`localize` が返すのは Vite の `base` を除いた pathname なので、`withBase` で付け直します。',
-    en: "`307` rather than `308`, because where it sends depends on the visitor. `localize` returns the pathname without Vite's `base`, so `withBase` puts it back in front.",
-  }),
-  guardsLink: message({
-    ja: '`guard.ts` の書き方を読む',
-    en: 'Read how a `guard.ts` is written',
-  }),
-  actions: message({
-    ja: '`[locale]` のページから送られた Server Action は、上の `@k8ordo/form` の例のとおりそのページのロケールで走るので、中で文言をそのまま呼べます。',
-    en: 'A Server Action posted from a `[locale]` page runs in that page’s locale, as in the `@k8ordo/form` example above, so messages can be called in it as they are.',
-  }),
-};
+export const uiPitfall = message({
+  ja: '集合を定義するモジュールは、ブラウザでも読み込まれている必要があります。集合が定義されていない環境では`@k8ordo/ui`は英語で描くので、サーバーのHTMLと食い違います。`bindParams`のリンクや言語の切り替えのように、Client Componentが`locales`をimportしていれば満たされます。',
+  en: 'The module that defines the set has to be loaded in the browser as well. Where no set is defined, `@k8ordo/ui` speaks English and disagrees with the server’s HTML. A Client Component importing `locales`, as the `bindParams` links or a language switcher do, is enough.',
+});
 
-export const testing = {
-  title: message({
-    ja: 'テスト',
-    en: 'Testing',
+export const uiProps = message({
+  ja: 'コンポーネントに渡すテキストは文字列なので、`<Button>{m.cart.add()}</Button>`のように、文言を呼んだ結果を渡します。',
+  en: 'Text handed to a component is a string, so pass what the message returns: `<Button>{m.cart.add()}</Button>`.',
+});
+
+export const uiLink = message({
+  ja: '`@k8ordo/ui`の文言のキーと登録の仕方を見る',
+  en: 'See `@k8ordo/ui`’s keys and how to register them',
+});
+
+export const formTitle = message({
+  ja: '`@k8ordo/form`のエラー文言を訳す',
+  en: 'Translate `@k8ordo/form`’s errors',
+});
+
+export const formDescription = message({
+  ja: '`@k8ordo/form`が表示するエラーの文言は、zodのエラー文言です。文言をその場で呼んで文字列にせず、関数のままzodに渡すと、エラーを報告するときのロケールで作られます。',
+  en: 'The errors `@k8ordo/form` shows are zod’s messages. Hand zod the message as a function rather than the string it returns, and it is worded in the locale current when the error is reported.',
+});
+
+export const formRule = message({
+  ja: "`defineForm`のルールの文言も同じです。`requiredWhen('reason', 'status', 'rejected', m.talk.reasonRequired)`のように関数のまま渡せば、ルールを報告するときに呼ばれます。",
+  en: "A `defineForm` rule’s message works the same way: pass the function, as in `requiredWhen('reason', 'status', 'rejected', m.talk.reasonRequired)`, and it is called when the rule is reported.",
+});
+
+export const formFieldsPitfall = message({
+  ja: '`formFields`は、モジュールのトップレベルではなく、ページの描画の中で呼びます。`formFields`は呼んだ時点でエラーの文言を作るので、トップレベルで呼ぶと、最初に読み込んだときのロケールで固定されます。',
+  en: 'Call `formFields` inside the page’s render, not at the top of a module. It words the errors when it is called, so at module scope they stay in whatever locale was current when the module first loaded.',
+});
+
+export const formAction = message({
+  ja: '`[locale]`のページから送ったServer Actionは、`@k8ordo/server`の下ではそのページのロケールで動きます。フレームワークが、アクションのリクエストでもページの`paramsSchema`を走らせるからです。そのため、`parseForm`が作る文言もページの言語になります。',
+  en: 'A Server Action posted from a `[locale]` page runs in that page’s locale under `@k8ordo/server`, because the framework runs the page’s `paramsSchema` for the action’s request too. So the messages `parseForm` produces are in the page’s language.',
+});
+
+export const formOutside = message({
+  ja: 'フレームワークの外で動くアクションやジョブで`parseForm`を呼ぶときは、`locales.run`の中で呼びます。',
+  en: 'An action or a job running outside the framework calls `parseForm` inside `locales.run`.',
+});
+
+export const formLink = message({
+  ja: '`@k8ordo/form`のエラーの表示の仕方を見る',
+  en: 'See how `@k8ordo/form` shows errors',
+});
+
+export const routerTitle = message({
+  ja: '`@k8ordo/router`で型の付いたリンクを書く',
+  en: 'Write typed links with `@k8ordo/router`',
+});
+
+export const routerDescription = message({
+  ja: 'ロケールは、すべてのパターンの`:locale`パラメータです。`@k8ordo/router`の`bindParams`にロケールを返す関数を1回渡すと、リンクのたびにロケールを書かずに済みます。',
+  en: 'The locale is the `:locale` parameter of every pattern. Hand `@k8ordo/router`’s `bindParams` a function returning it once, and no link has to spell the locale again.',
+});
+
+export const routerSource = message({
+  ja: '渡した関数は、`href`を呼ぶたびに読まれます。サーバーではそのリクエストの、ブラウザでは今のURLのロケールが入ります。上の`href`の値は、英語のページで呼んだときのものです。',
+  en: 'The function is read every time `href` is called: the request’s locale on the server, the current URL’s in the browser. The `href` value above is what an English page gets.',
+});
+
+export const routerOverride = message({
+  ja: 'ロケールを書けば、渡した関数より優先されます。上の`navigateTo`は、日本語のトップページへ移動します。',
+  en: 'A locale written out overrides the function: the `navigateTo` above goes to the Japanese top page.',
+});
+
+export const routerTyped = message({
+  ja: 'パターンは`/:locale/…`と書いたままなので、ルートの表に照らした型の検査もそのまま効きます。2つのパッケージは互いをimportせず、結んでいるのはアプリのこの1行です。',
+  en: 'Patterns keep their `/:locale/…` spelling, so they are still checked against the route table. Neither package imports the other; this one line in the app is what ties them.',
+});
+
+export const routerMatch = message({
+  ja: "`useMatch('/:locale/docs/*')`のように、ロケールを含むパターンのまま、いまどの区画にいるかを確かめられます。",
+  en: "Which section is showing can be asked with the locale still in the pattern, as in `useMatch('/:locale/docs/*')`.",
+});
+
+export const routerLink = message({
+  ja: '`@k8ordo/router`の`bindParams`の使い方を見る',
+  en: 'See how `@k8ordo/router`’s `bindParams` works',
+});
+
+export const frameworkTitle = message({
+  ja: '`@k8ordo/static`と`@k8ordo/server`',
+  en: '`@k8ordo/static` and `@k8ordo/server`',
+});
+
+export const frameworkDescription = message({
+  ja: 'どちらのモードでも、`[locale]`のレイアウトがexportした`paramsSchema`をフレームワークが走らせ、受け付けたロケールでページを描きます。違うのは、書き出すpathnameの一覧と、`/`の振り分け方です。',
+  en: 'In either mode the framework runs the `paramsSchema` the `[locale]` layout exports, and renders the page in the locale it accepts. What differs is the list of pathnames to write, and how `/` sends visitors on.',
+});
+
+export const frameworkList = [
+  message({
+    ja: '`@k8ordo/static`：`framework({ paths: locales.paths })`で、ロケールの数だけページを書き出します（「静的に書き出す」）。`/`のページは、ブラウザで交渉してから移動します（「最初の言語を選ぶ」）。',
+    en: '`@k8ordo/static`: `framework({ paths: locales.paths })` writes a page per locale (“Static builds”). The `/` page negotiates in the browser and moves on (“Choose the first language”).',
   }),
-  description: message({
-    ja: 'テストでロケールを決める方法は、テストがサーバーとブラウザのどちらの経路で走るかで変わります。',
-    en: 'How a test sets the locale depends on whether it runs on the server path or the browser path.',
+  message({
+    ja: '`@k8ordo/server`：リクエストごとに描くので、`paths`は要りません。`/`には、`guard.ts`が`307`で答えます（「最初の言語を選ぶ」）。Server Actionも、送ったページのロケールで動きます。',
+    en: '`@k8ordo/server`: pages render per request, so there is no `paths`. A `guard.ts` answers `/` with a `307` (“Choose the first language”), and a Server Action runs in the locale of the page that posted it.',
   }),
-  nodeTitle: message({
-    ja: 'Node で走るテスト',
-    en: 'Tests that run under Node',
-  }),
-  nodeDescription: message({
-    ja: '何も指名しなければ、文言は既定のロケールで返ります。別のロケールは `locales.run` の中で呼びます。async の関数を渡せば `await` をまたいで保たれ、並行に走る `run` 同士は混ざりません。',
-    en: 'With nothing named, messages return the default locale. Call them inside `locales.run` for another locale. An async function keeps the locale across its awaits, and concurrent `run` calls stay apart.',
-  }),
-  nodeSchema: message({
-    ja: '`paramsSchema` で検証すると、受理したロケールが、それを呼んだ非同期の流れの残り全体に設定されます。スキーマを検証するテストは `run` で囲み、後に続くテストへ漏れないようにします。',
-    en: 'Validating with `paramsSchema` sets the accepted locale for the rest of the async flow that called it. Wrap a test that validates in `run` so the locale does not leak into the tests after it.',
-  }),
-  browserTitle: message({
-    ja: 'ブラウザで走るテスト',
-    en: 'Tests that run in a browser',
-  }),
-  browserDescription: message({
-    ja: 'Vitest のブラウザモードのような本物のブラウザでは、URL がロケールです。`history.replaceState` で pathname を変え、終わったら元に戻します。`run` は throw します。',
-    en: "In a real browser, such as Vitest's browser mode, the URL is the locale. Change the pathname with `history.replaceState` and put it back afterwards. `run` throws there.",
-  }),
-  dom: message({
-    ja: 'jsdom や happy-dom のように `document` を定義する環境も、このパッケージにとってはブラウザです。`run` は throw し、ロケールは `location.pathname` から読まれます。',
-    en: 'An environment that defines `document`, such as jsdom or happy-dom, is a browser as far as this package is concerned: `run` throws, and the locale is read from `location.pathname`.',
-  }),
-  setTitle: message({
-    ja: '集合と型',
-    en: 'The set, and types',
-  }),
-  otherSet: message({
-    ja: 'テストの中で別の集合を `defineLocales` すると、それ以降の文言はその集合を読みます。アプリケーションの `locales` を import して使うか、別の集合を作るテストがあるなら、`beforeEach` でアプリケーションの集合を定義し直します。',
-    en: "Defining another set with `defineLocales` in a test makes the messages after it read that set. Import the application's `locales`, or, if some test defines its own set, define the application's set again in `beforeEach`.",
-  }),
-  typeTests: message({
-    ja: '型の保証は、型のテストで固定できます。`expectTypeOf(cart.items).parameters.toEqualTypeOf<[count: number]>()` で引数を、ロケールを欠いた宣言に付けた `// @ts-expect-error` で、欠けがコンパイルエラーになることを確かめます。',
-    en: 'Pin the type guarantees with type tests: `expectTypeOf(cart.items).parameters.toEqualTypeOf<[count: number]>()` for the arguments, and a `// @ts-expect-error` on a declaration missing a locale to prove that it does not compile.',
-  }),
-};
+] as const;

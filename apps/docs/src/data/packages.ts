@@ -1,10 +1,15 @@
 import type { Message } from '@k8ordo/i18n';
 
-import { STORYBOOK_URL } from '../constants';
 import type { SitePath } from '../links';
 import * as m from '../messages';
 
 export type PackageSection = { path: SitePath; label: Message };
+
+/** A heading in the package's sidebar, with its pages in reading order. */
+export type PackageGroup = {
+  label: Message;
+  sections: [PackageSection, ...PackageSection[]];
+};
 
 export type PackageEntry = {
   /** The published name, e.g. `@k8ordo/router`. */
@@ -14,10 +19,8 @@ export type PackageEntry = {
   path: SitePath;
   /** What the home page says about it. */
   description: Message;
-  /** In reading order: the header's second row, the footer column, and the pager all follow it. */
-  sections: [PackageSection, ...PackageSection[]];
-  /** Links off the site that belong in the package's footer column. */
-  external?: Array<{ href: string; label: string }>;
+  /** In reading order: the sidebar and the pager both follow it. */
+  groups: [PackageGroup, ...PackageGroup[]];
 };
 
 /**
@@ -30,25 +33,89 @@ export const PACKAGES: PackageEntry[] = [
     label: 'UI',
     path: '/:locale/ui',
     description: m.home.memberUiDescription,
-    sections: [
-      { path: '/:locale/ui/get-started', label: m.nav.getStarted },
-      { path: '/:locale/ui/theming', label: m.nav.theming },
-      { path: '/:locale/ui/i18n', label: m.nav.i18n },
-      { path: '/:locale/ui/components', label: m.nav.components },
-      { path: '/:locale/ui/ai', label: m.nav.ai },
+    groups: [
+      {
+        label: m.nav.groupStart,
+        sections: [
+          { path: '/:locale/ui/get-started', label: m.nav.getStarted },
+        ],
+      },
+      {
+        label: m.nav.groupGuides,
+        sections: [
+          { path: '/:locale/ui/theming', label: m.nav.theming },
+          { path: '/:locale/ui/i18n', label: m.nav.i18n },
+        ],
+      },
+      {
+        label: m.nav.groupCatalog,
+        sections: [
+          { path: '/:locale/ui/components', label: m.nav.components },
+          { path: '/:locale/ui/ai', label: m.nav.ai },
+        ],
+      },
     ],
-    external: [{ href: STORYBOOK_URL, label: 'Storybook' }],
   },
   {
     name: '@k8ordo/form',
     label: 'Form',
     path: '/:locale/form',
     description: m.home.memberFormDescription,
-    sections: [
-      { path: '/:locale/form/get-started', label: m.nav.getStarted },
-      { path: '/:locale/form/fields', label: m.form.navFields },
-      { path: '/:locale/form/validation', label: m.form.navValidation },
-      { path: '/:locale/form/patterns', label: m.form.navPatterns },
+    groups: [
+      {
+        label: m.nav.groupStart,
+        sections: [
+          { path: '/:locale/form/get-started', label: m.nav.getStarted },
+        ],
+      },
+      {
+        label: m.nav.groupGuides,
+        sections: [
+          { path: '/:locale/form/field-types', label: m.form.navFieldTypes },
+          { path: '/:locale/form/nested', label: m.form.navNested },
+          { path: '/:locale/form/errors', label: m.form.navErrors },
+          { path: '/:locale/form/rules', label: m.form.navRules },
+          { path: '/:locale/form/edit', label: m.form.navEdit },
+          {
+            path: '/:locale/form/async-check',
+            label: m.form.navAsyncCheck,
+          },
+          {
+            path: '/:locale/form/custom-inputs',
+            label: m.form.navCustomInputs,
+          },
+          { path: '/:locale/form/multi-step', label: m.form.navMultiStep },
+          { path: '/:locale/form/search', label: m.form.navSearch },
+          { path: '/:locale/form/with-ui', label: m.form.navWithUi },
+        ],
+      },
+      {
+        label: m.nav.groupConcepts,
+        sections: [
+          { path: '/:locale/form/how-it-works', label: m.form.navHowItWorks },
+        ],
+      },
+      {
+        label: m.nav.groupReference,
+        sections: [
+          {
+            path: '/:locale/form/reference/server',
+            label: m.form.navReferenceServer,
+          },
+          {
+            path: '/:locale/form/reference/client',
+            label: m.form.navReferenceClient,
+          },
+          {
+            path: '/:locale/form/reference/schema',
+            label: m.form.navReferenceSchema,
+          },
+          {
+            path: '/:locale/form/troubleshooting',
+            label: m.form.navTroubleshooting,
+          },
+        ],
+      },
     ],
   },
   {
@@ -56,12 +123,50 @@ export const PACKAGES: PackageEntry[] = [
     label: 'State',
     path: '/:locale/state',
     description: m.home.memberStateDescription,
-    sections: [
-      { path: '/:locale/state/get-started', label: m.nav.getStarted },
-      { path: '/:locale/state/places', label: m.state.navPlaces },
-      { path: '/:locale/state/reading', label: m.state.navReading },
-      { path: '/:locale/state/updates', label: m.state.navUpdates },
-      { path: '/:locale/state/integrations', label: m.state.navIntegrations },
+    groups: [
+      {
+        label: m.nav.groupStart,
+        sections: [
+          { path: '/:locale/state/get-started', label: m.nav.getStarted },
+        ],
+      },
+      {
+        label: m.nav.groupGuides,
+        sections: [
+          { path: '/:locale/state/places', label: m.state.navPlaces },
+          { path: '/:locale/state/url', label: m.state.navUrl },
+          { path: '/:locale/state/entry', label: m.state.navEntry },
+          { path: '/:locale/state/storage', label: m.state.navStorage },
+          { path: '/:locale/state/cookie', label: m.state.navCookie },
+          { path: '/:locale/state/updates', label: m.state.navUpdates },
+          { path: '/:locale/state/reading', label: m.state.navReading },
+          { path: '/:locale/state/migrate', label: m.state.navMigrate },
+          {
+            path: '/:locale/state/before-hydration',
+            label: m.state.navBeforeHydration,
+          },
+          { path: '/:locale/state/testing', label: m.state.navTesting },
+        ],
+      },
+      {
+        label: m.nav.groupConcepts,
+        sections: [
+          {
+            path: '/:locale/state/how-it-works',
+            label: m.state.navHowItWorks,
+          },
+        ],
+      },
+      {
+        label: m.nav.groupReference,
+        sections: [
+          { path: '/:locale/state/reference', label: m.state.navReference },
+          {
+            path: '/:locale/state/troubleshooting',
+            label: m.state.navTroubleshooting,
+          },
+        ],
+      },
     ],
   },
   {
@@ -69,12 +174,53 @@ export const PACKAGES: PackageEntry[] = [
     label: 'Router',
     path: '/:locale/router',
     description: m.router.description,
-    sections: [
-      { path: '/:locale/router/get-started', label: m.nav.getStarted },
-      { path: '/:locale/router/routes', label: m.router.navRoutes },
-      { path: '/:locale/router/links', label: m.router.navLinks },
-      { path: '/:locale/router/navigation', label: m.router.navNavigation },
-      { path: '/:locale/router/framework', label: m.router.navFramework },
+    groups: [
+      {
+        label: m.nav.groupStart,
+        sections: [
+          { path: '/:locale/router/get-started', label: m.nav.getStarted },
+        ],
+      },
+      {
+        label: m.nav.groupGuides,
+        sections: [
+          { path: '/:locale/router/routes', label: m.router.navRoutes },
+          { path: '/:locale/router/boundaries', label: m.router.navBoundaries },
+          { path: '/:locale/router/links', label: m.router.navLinks },
+          { path: '/:locale/router/location', label: m.router.navLocation },
+          {
+            path: '/:locale/router/bind-params',
+            label: m.router.navBindParams,
+          },
+          {
+            path: '/:locale/router/typed-paths',
+            label: m.router.navTypedPaths,
+          },
+          { path: '/:locale/router/base', label: m.router.navBase },
+          { path: '/:locale/router/animate', label: m.router.navAnimate },
+          { path: '/:locale/router/framework', label: m.router.navFramework },
+          { path: '/:locale/router/testing', label: m.router.navTesting },
+        ],
+      },
+      {
+        label: m.nav.groupConcepts,
+        sections: [
+          {
+            path: '/:locale/router/how-it-works',
+            label: m.router.navHowItWorks,
+          },
+        ],
+      },
+      {
+        label: m.nav.groupReference,
+        sections: [
+          { path: '/:locale/router/reference', label: m.router.navReference },
+          {
+            path: '/:locale/router/troubleshooting',
+            label: m.router.navTroubleshooting,
+          },
+        ],
+      },
     ],
   },
   {
@@ -82,13 +228,46 @@ export const PACKAGES: PackageEntry[] = [
     label: 'Static',
     path: '/:locale/static',
     description: m.static.description,
-    sections: [
-      { path: '/:locale/static/get-started', label: m.nav.getStarted },
-      { path: '/:locale/static/routing', label: m.static.navRouting },
-      { path: '/:locale/static/params', label: m.static.navParams },
-      { path: '/:locale/static/errors', label: m.static.navErrors },
-      { path: '/:locale/static/boundaries', label: m.static.navBoundaries },
-      { path: '/:locale/static/deploy', label: m.static.navDeploy },
+    groups: [
+      {
+        label: m.nav.groupStart,
+        sections: [
+          { path: '/:locale/static/get-started', label: m.nav.getStarted },
+        ],
+      },
+      {
+        label: m.nav.groupGuides,
+        sections: [
+          { path: '/:locale/static/routing', label: m.static.navRouting },
+          { path: '/:locale/static/params', label: m.static.navParams },
+          { path: '/:locale/static/errors', label: m.static.navErrors },
+          { path: '/:locale/static/boundaries', label: m.static.navBoundaries },
+          { path: '/:locale/static/csp', label: m.static.navCsp },
+          { path: '/:locale/static/deploy', label: m.static.navDeploy },
+        ],
+      },
+      {
+        label: m.nav.groupConcepts,
+        sections: [
+          {
+            path: '/:locale/static/how-it-works',
+            label: m.static.navHowItWorks,
+          },
+        ],
+      },
+      {
+        label: m.nav.groupReference,
+        sections: [
+          {
+            path: '/:locale/static/reference',
+            label: m.static.navReference,
+          },
+          {
+            path: '/:locale/static/troubleshooting',
+            label: m.static.navTroubleshooting,
+          },
+        ],
+      },
     ],
   },
   {
@@ -96,15 +275,49 @@ export const PACKAGES: PackageEntry[] = [
     label: 'Server',
     path: '/:locale/server',
     description: m.server.description,
-    sections: [
-      { path: '/:locale/server/get-started', label: m.nav.getStarted },
-      { path: '/:locale/server/routing', label: m.server.navRouting },
-      { path: '/:locale/server/params', label: m.server.navParams },
-      { path: '/:locale/server/errors', label: m.server.navErrors },
-      { path: '/:locale/server/boundaries', label: m.server.navBoundaries },
-      { path: '/:locale/server/actions', label: m.server.navActions },
-      { path: '/:locale/server/guards', label: m.server.navGuards },
-      { path: '/:locale/server/deploy', label: m.server.navDeploy },
+    groups: [
+      {
+        label: m.nav.groupStart,
+        sections: [
+          { path: '/:locale/server/get-started', label: m.nav.getStarted },
+        ],
+      },
+      {
+        label: m.nav.groupGuides,
+        sections: [
+          { path: '/:locale/server/routing', label: m.server.navRouting },
+          { path: '/:locale/server/params', label: m.server.navParams },
+          { path: '/:locale/server/errors', label: m.server.navErrors },
+          { path: '/:locale/server/boundaries', label: m.server.navBoundaries },
+          { path: '/:locale/server/actions', label: m.server.navActions },
+          { path: '/:locale/server/guards', label: m.server.navGuards },
+          { path: '/:locale/server/request', label: m.server.navRequest },
+          { path: '/:locale/server/csp', label: m.server.navCsp },
+          { path: '/:locale/server/deploy', label: m.server.navDeploy },
+        ],
+      },
+      {
+        label: m.nav.groupConcepts,
+        sections: [
+          {
+            path: '/:locale/server/how-it-works',
+            label: m.server.navHowItWorks,
+          },
+        ],
+      },
+      {
+        label: m.nav.groupReference,
+        sections: [
+          {
+            path: '/:locale/server/reference',
+            label: m.server.navReference,
+          },
+          {
+            path: '/:locale/server/troubleshooting',
+            label: m.server.navTroubleshooting,
+          },
+        ],
+      },
     ],
   },
   {
@@ -112,13 +325,43 @@ export const PACKAGES: PackageEntry[] = [
     label: 'i18n',
     path: '/:locale/i18n',
     description: m.i18n.description,
-    sections: [
-      { path: '/:locale/i18n/get-started', label: m.nav.getStarted },
-      { path: '/:locale/i18n/locales', label: m.i18n.navLocales },
-      { path: '/:locale/i18n/messages', label: m.i18n.navMessages },
-      { path: '/:locale/i18n/formatting', label: m.i18n.navFormatting },
-      { path: '/:locale/i18n/routing', label: m.i18n.navRouting },
-      { path: '/:locale/i18n/integrations', label: m.i18n.navIntegrations },
+    groups: [
+      {
+        label: m.nav.groupStart,
+        sections: [
+          { path: '/:locale/i18n/get-started', label: m.nav.getStarted },
+        ],
+      },
+      {
+        label: m.nav.groupGuides,
+        sections: [
+          { path: '/:locale/i18n/locales', label: m.i18n.navLocales },
+          { path: '/:locale/i18n/messages', label: m.i18n.navMessages },
+          { path: '/:locale/i18n/formatting', label: m.i18n.navFormatting },
+          { path: '/:locale/i18n/routing', label: m.i18n.navRouting },
+          { path: '/:locale/i18n/switch', label: m.i18n.navSwitch },
+          { path: '/:locale/i18n/negotiate', label: m.i18n.navNegotiate },
+          { path: '/:locale/i18n/static', label: m.i18n.navStatic },
+          { path: '/:locale/i18n/integrations', label: m.i18n.navIntegrations },
+          { path: '/:locale/i18n/testing', label: m.i18n.navTesting },
+        ],
+      },
+      {
+        label: m.nav.groupConcepts,
+        sections: [
+          { path: '/:locale/i18n/how-it-works', label: m.i18n.navHowItWorks },
+        ],
+      },
+      {
+        label: m.nav.groupReference,
+        sections: [
+          { path: '/:locale/i18n/reference', label: m.i18n.navReference },
+          {
+            path: '/:locale/i18n/troubleshooting',
+            label: m.i18n.navTroubleshooting,
+          },
+        ],
+      },
     ],
   },
   {
@@ -126,49 +369,98 @@ export const PACKAGES: PackageEntry[] = [
     label: 'Color scheme',
     path: '/:locale/color-scheme',
     description: m.colorScheme.description,
-    sections: [
-      { path: '/:locale/color-scheme/get-started', label: m.nav.getStarted },
+    groups: [
       {
-        path: '/:locale/color-scheme/styling',
-        label: m.colorScheme.navStyling,
+        label: m.nav.groupStart,
+        sections: [
+          {
+            path: '/:locale/color-scheme/get-started',
+            label: m.nav.getStarted,
+          },
+        ],
       },
       {
-        path: '/:locale/color-scheme/storage',
-        label: m.colorScheme.navStorage,
+        label: m.nav.groupGuides,
+        sections: [
+          {
+            path: '/:locale/color-scheme/styling',
+            label: m.colorScheme.navStyling,
+          },
+          {
+            path: '/:locale/color-scheme/switcher',
+            label: m.colorScheme.navSwitcher,
+          },
+          {
+            path: '/:locale/color-scheme/storage',
+            label: m.colorScheme.navStorage,
+          },
+          { path: '/:locale/color-scheme/csp', label: m.colorScheme.navCsp },
+          {
+            path: '/:locale/color-scheme/testing',
+            label: m.colorScheme.navTesting,
+          },
+        ],
       },
-      { path: '/:locale/color-scheme/csp', label: m.colorScheme.navCsp },
       {
-        path: '/:locale/color-scheme/how-it-works',
-        label: m.colorScheme.navHowItWorks,
+        label: m.nav.groupConcepts,
+        sections: [
+          {
+            path: '/:locale/color-scheme/how-it-works',
+            label: m.colorScheme.navHowItWorks,
+          },
+        ],
+      },
+      {
+        label: m.nav.groupReference,
+        sections: [
+          {
+            path: '/:locale/color-scheme/reference',
+            label: m.colorScheme.navReference,
+          },
+          {
+            path: '/:locale/color-scheme/troubleshooting',
+            label: m.colorScheme.navTroubleshooting,
+          },
+        ],
       },
     ],
   },
 ];
 
+/** A package's pages in reading order, across its groups. */
+export const sectionsOf = (pkg: PackageEntry): PackageSection[] =>
+  pkg.groups.flatMap((group) => group.sections);
+
 /**
- * Where a section page sits: its package, itself, and its neighbours in
- * reading order. The first section's previous page is the package's landing.
+ * Where a section page sits: its package, its group, itself, and its
+ * neighbours in reading order. The first section's previous page is the
+ * package's landing.
  */
 export const locateSection = (
   path: SitePath,
 ): {
   pkg: PackageEntry;
+  group: PackageGroup;
   section: PackageSection;
   previous: PackageSection;
   next: PackageSection | undefined;
 } => {
   for (const pkg of PACKAGES) {
-    const index = pkg.sections.findIndex((section) => section.path === path);
+    const sections = sectionsOf(pkg);
+    const index = sections.findIndex((section) => section.path === path);
     // at(-1) は末尾を返すので、見つからない場合と先頭の前は index で弾く
-    const section = index === -1 ? undefined : pkg.sections.at(index);
+    const section = index === -1 ? undefined : sections.at(index);
     if (section === undefined) continue;
+    const group = pkg.groups.find((entry) => entry.sections.includes(section));
+    if (group === undefined) continue;
     return {
       pkg,
+      group,
       section,
       previous:
-        (index === 0 ? undefined : pkg.sections.at(index - 1)) ??
+        (index === 0 ? undefined : sections.at(index - 1)) ??
         ({ path: pkg.path, label: () => pkg.name } satisfies PackageSection),
-      next: pkg.sections.at(index + 1),
+      next: sections.at(index + 1),
     };
   }
   throw new Error(`${path} is not a section of any package in PACKAGES`);

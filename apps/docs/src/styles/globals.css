@@ -24,6 +24,23 @@
   --font-m-plus-2: 'M PLUS 2 Variable', 'Noto Sans JP Variable', sans-serif;
 }
 
+/*
+ * サイトのページの地（bg-page）。ライトは bg-base（白）、ダークはいちばん暗い
+ * bg-surface。部品を見せる面（bg-surface）はダークで地と同じ色になるので、
+ * どちらのモードでも枠線で区切る。
+ */
+@theme inline {
+  --color-page: light-dark(var(--bg-base), var(--bg-surface));
+}
+
+/*
+ * CodeBlock の面は bg-surface で、ダークではページの地と同じ色になる。サイト
+ * では部品を見せるほかの面と同じく、枠線で区切る。
+ */
+.ao-code-block {
+  border: 1px solid var(--border-mute);
+}
+
 @layer base {
   body {
     font-family: var(--font-noto-sans-jp);

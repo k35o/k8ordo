@@ -1,23 +1,17 @@
 import { CodeBlock } from '@k8ordo/ui/code-block';
 
 import { DocPage, DocSection } from '../../../../components/doc-page';
-import { ParamsGuide } from '../../../../components/framework-guide/params';
+import {
+  paramsTypingSections,
+  paramsUsingSections,
+} from '../../../../components/framework-guide/params';
+import { LocaleAnchor } from '../../../../components/locale-anchor';
+import { Rich } from '../../../../components/rich';
 import * as m from '../../../../messages';
 
-const CATALOG = `// src/routes/_data/catalog.server.ts
-import 'server-only';
+const t = m.serverParams;
 
-export type Product = { id: number; name: string };
-
-const CATALOG: readonly Product[] = [
-  { id: 1, name: 'first product' },
-  { id: 2, name: 'second product' },
-];
-
-export const findProduct = (id: number): Product | undefined =>
-  CATALOG.find((product) => product.id === id);`;
-
-const PAGE = `// src/routes/products/[id]/page.tsx
+const EXIST = `import { notFound } from '@k8ordo/router';
 import type { PageProps } from '@k8ordo/router';
 import * as z from 'zod/mini';
 
@@ -27,29 +21,47 @@ export const paramsSchema = z.object({
   id: z.coerce.number().check(z.int(), z.positive()),
 });
 
-export default function ProductPage({ params }: PageProps<'/products/:id'>) {
-  const product = findProduct(params.id);
-  const name = product?.name ?? 'unknown product';
-  return (
-    <>
-      <title>{name}</title>
-      <h1>{name}</h1>
-    </>
-  );
+export default async function ProductPage({
+  params,
+}: PageProps<'/products/:id'>) {
+  const product = await findProduct(params.id);
+  if (product === undefined) notFound();
+  return <h1>{product.name}</h1>;
 }`;
 
 export default function ServerParamsPage() {
-  const t = m.serverParams;
   return (
     <DocPage introduction={t.introduction} path="/:locale/server/params">
-      <ParamsGuide mode="server" />
+      {paramsTypingSections()}
+      {paramsUsingSections('server')}
 
-      <DocSection description={t.noListDescription} title={t.noListTitle}>
-        <CodeBlock code={CATALOG} lang="ts" />
-        <CodeBlock code={PAGE} lang="tsx" />
+      <DocSection
+        description={t.noListDescription}
+        id="no-list"
+        title={t.noListTitle}
+      />
+
+      <DocSection
+        description={t.existDescription}
+        id="exist"
+        title={t.existTitle}
+      >
+        <CodeBlock
+          code={EXIST}
+          lang="tsx"
+          marks={{ 14: 'highlight', 15: 'highlight' }}
+          title="src/routes/products/[id]/page.tsx"
+        />
+        <p>
+          <Rich>{t.existAnswer()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.existMore()}</Rich>{' '}
+          <LocaleAnchor path="/:locale/server/errors">
+            {m.server.navErrors()}
+          </LocaleAnchor>
+        </p>
       </DocSection>
-
-      <DocSection description={t.existDescription} title={t.existTitle} />
     </DocPage>
   );
 }

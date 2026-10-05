@@ -14,3 +14,38 @@ export const next = message({
   ja: '次へ',
   en: 'Next',
 });
+
+export const onThisPage = message({
+  ja: 'このページの内容',
+  en: 'On this page',
+});
+
+export const editOnGitHub = message({
+  ja: 'GitHubでこのページを編集',
+  en: 'Edit this page on GitHub',
+});
+
+export const breadcrumb = message({
+  ja: 'パンくずリスト',
+  en: 'Breadcrumb',
+});
+
+export const note = message({
+  ja: 'メモ',
+  en: 'Note',
+});
+
+export const pitfall = message({
+  ja: '落とし穴',
+  en: 'Pitfall',
+});
+
+export const tryIt = message({
+  ja: '試してみる',
+  en: 'Try it',
+});
+
+export const termSeparator = message({
+  ja: '：',
+  en: ': ',
+});

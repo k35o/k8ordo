@@ -1,10 +1,5 @@
 import { message } from '@k8ordo/i18n';
 
-export const docs = message({
-  ja: 'ドキュメント',
-  en: 'Documentation',
-});
-
 export const resources = message({
   ja: 'リソース',
   en: 'Resources',
@@ -16,6 +11,6 @@ export const tagline = message({
 });
 
 export const typesetting = message({
-  ja: '組版 — Noto Sans JP / M PLUS 2',
+  ja: '組版：Noto Sans JP / M PLUS 2',
   en: 'Typeset in Noto Sans JP & M PLUS 2',
 });

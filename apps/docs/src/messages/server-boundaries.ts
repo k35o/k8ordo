@@ -1,26 +1,26 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: "何も書かなければサーバー、ブラウザ側は `'use client'` で入る。境界は React 自身の語で宣言し、ビルドが検査します。このページは、このモードで Server Component がいつ動くか、境界を越えられるもの、ブラウザにしか無いものの読み方、クライアントに届いてはいけないモジュールを説明します。",
-  en: "Server by default, the browser opted into with `'use client'`: boundaries are declared in React's own words, and the build checks them. This page covers when a Server Component runs in this mode, what crosses the boundary, reading what only a browser has, and modules that must never reach the client.",
+  ja: 'コードがサーバーで動くか、ブラウザで動くかは、Reactのディレクティブで書き分けます。このページでは、その境界の書き方と、境界を越えられるもの、クライアントに届いてはいけないモジュールの守り方を説明します。',
+  en: 'Whether code runs on the server or in the browser is written with React’s directives. This page covers drawing that boundary, what can cross it, and keeping modules that must never reach the client away from it.',
 });
 
 export const serverWhen = message({
-  ja: 'このモードでは、Server Component はリクエストのたびに動き、その時点のデータを読みます。',
-  en: 'In this mode a Server Component runs per request, reading the data as it is at that moment.',
-});
-
-export const propsFunction = message({
-  ja: "関数を渡すと、そのページの描画が React のエラー（`Functions cannot be passed directly to Client Components`）で失敗します。例外は Server Action で、`'use server'` の関数は参照として境界を越えます。",
-  en: "Passing a function fails that page's render with React's error (`Functions cannot be passed directly to Client Components`). The exception is a Server Action: a `'use server'` function crosses as a reference.",
+  ja: 'このモードでは、Server Componentはリクエストのたびに動き、その時点のデータを読みます。',
+  en: 'In this mode a Server Component runs for every request, reading the data as it is at that moment.',
 });
 
 export const directiveNote = message({
-  ja: "`'use server'` はクライアントが呼べるサーバーの関数を宣言するもので、`server-only` とは別のことを言っています。",
-  en: "`'use server'` declares a server function the client may call — a different thing from `server-only`.",
+  ja: "`'use server'`は、ブラウザから呼べるサーバーの関数を宣言するものです。ブラウザに届いてはいけないモジュールに付ける`server-only`とは、言っていることが違います。",
+  en: "`'use server'` declares a server function the browser may call. That is a different statement from `server-only`, the mark of a module that must never reach the browser.",
 });
 
-export const searchNote = message({
-  ja: 'このモードでページが受け取る `request` にも、search は含まれません。search を受け取るのは、読む url スキーマを `export const search = listState.url` と宣言したページだけで、search が変わるとルーターがそのページをその場で取り直します。',
-  en: 'The `request` a page receives in this mode carries no search either. The one page that receives it is a page that declares the url schema it reads, `export const search = listState.url`, and the router loads that page again in place when the search moves.',
+export const propsFunction = message({
+  ja: "関数を渡すと、そのページの描画がReactのエラー（`Functions cannot be passed directly to Client Components`）で失敗します。例外はServer Actionで、`'use server'`の関数は参照として境界を越えます。",
+  en: "Passing a function fails the page’s render with React’s error, `Functions cannot be passed directly to Client Components`. A Server Action is the exception: a `'use server'` function crosses as a reference.",
+});
+
+export const searchMode = message({
+  ja: 'このモードには、例外が1つあります。`export const search = listState.url`のように、読むurlスキーマを宣言したページは、そのスロットを`search`として受け取ります。searchが変わると、ルーターがそのページをその場で取り直します。',
+  en: 'This mode has one exception: a page that declares the url schema it reads, as `export const search = listState.url`, receives that slot as `search`, and the router loads the page again in place when the search moves.',
 });

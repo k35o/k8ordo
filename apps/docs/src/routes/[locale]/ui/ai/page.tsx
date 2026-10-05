@@ -13,7 +13,7 @@ export default function Ai() {
   const items = aiCategories.flatMap((category) => category.items);
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-12 px-6 py-16 md:px-8">
+    <div className="flex flex-col gap-12 py-12">
       <PageTitle title={m.nav.ai} />
       <header className="flex flex-col gap-4">
         <Heading level="h1">{m.nav.ai()}</Heading>

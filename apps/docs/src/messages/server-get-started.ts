@@ -1,43 +1,13 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: '`@k8ordo/server` を入れて `vite.config.ts` にプラグインを 1 つ足し、`routes/` にレイアウトとページを置けば、`vite build` の出力を `serve()` が動かします。このページはそこまでの最短の道筋と、このモードを選ぶことが何を意味するかを説明します。',
-  en: 'Install `@k8ordo/server`, add one plugin to `vite.config.ts`, put a layout and a page under `routes/`, and `serve()` runs what `vite build` produced. This page walks the shortest path there, and what choosing this mode means.',
-});
-
-export const modeTitle = message({
-  ja: 'モードは依存で決まる',
-  en: 'The mode is the dependency',
-});
-
-export const modeDescription = message({
-  ja: 'このパッケージを入れることが、アプリを「動くもの」にすることです。リクエストのたびに描画して答えるので、パラメータの値を列挙する必要がなく、知らない URL は本物の 404 になり、フォームは Server Action に届きます。',
-  en: 'Installing this package is what makes an application one that runs. Every request is answered by rendering, which is what makes route parameters need no list of values, an unknown URL a real 404, and a Server Action something a form can post to.',
-});
-
-export const modeSame = message({
-  ja: 'もう一方の `@k8ordo/static` は、全ルートをビルド時に描いてファイルを出荷します。両者のあいだでアプリのほかの部分は何も変わりません。ルートの文法も、境界も、リクエストハンドラも同じで、ハンドラがリクエストごとに呼ばれるか、ビルド時にルートごとに呼ばれるかだけが違います。プラグインが両方のパッケージで `framework()` という名前なのはそのためで、モードを決めるのは import だけです。',
-  en: 'The alternative, `@k8ordo/static`, renders every route at build time and ships files. Nothing else about the application changes between them — the same route grammar, the same boundaries, the same request handler, called per request instead of for each route at build time. That is why the plugin is called `framework()` in both packages: the mode is the import, and `vite.config.ts` reads the same either way.',
-});
-
-export const installTitle = message({
-  ja: 'インストール',
-  en: 'Install',
+  ja: '`@k8ordo/server`でアプリを1つ作りながら、インストールから`serve()`で動かすところまでをたどります。ページは`src/routes/`の下にファイルとして置き、リクエストのたびにサーバーで描きます。',
+  en: 'Build an application with `@k8ordo/server`, from installing it to running it with `serve()`. Pages are files under `src/routes/`, rendered on the server for every request.',
 });
 
 export const installDescription = message({
-  ja: '`@k8ordo/server` は実行時の依存です。デプロイしたアプリが動かすのは `serve()` とビルドされたハンドラだからです。`@k8ordo/server` はプラグインで Vite を読みますが、ハンドラの中のコードが import する `redirect()` と型は `@k8ordo/server/runtime` から、Node.js のサーバー `serve()` は `@k8ordo/server/serve` から来て、どちらも Vite を読まないので、`vite` は開発時の依存で足ります。`server-only` は、サーバー専用のモジュールに付ける import を TypeScript が解決できるようにするためのものです。',
-  en: '`@k8ordo/server` is a runtime dependency: `serve()` and the built handler are what the deployed application runs. `@k8ordo/server` itself is the plugin and loads Vite, but what code inside the handler imports — `redirect()` and the types — comes from `@k8ordo/server/runtime`, and the Node.js server `serve()` from `@k8ordo/server/serve`; neither loads Vite, so `vite` is a dev dependency. `server-only` is there so TypeScript can resolve the import that marks a server-only module.',
-});
-
-export const requirementsDescription = message({
-  ja: 'ピア依存と、ビルドとサーバーを動かす Node.js の要件です。',
-  en: 'The peer dependencies, and the Node.js the build and the server run on.',
-});
-
-export const configDescription = message({
-  ja: 'プラグインは `framework()` 1 つです。オプションは `routesDir`（ルートのディレクトリ、既定は `src/routes`）だけです。',
-  en: 'The plugin is `framework()`. Its one option is `routesDir`, the route directory (default `src/routes`).',
+  ja: '`@k8ordo/server`は、デプロイした後も`serve()`とリクエストハンドラとして動くので、実行時の依存に入れます。Viteはビルドにしか使わないので、開発時の依存に入れます。',
+  en: '`@k8ordo/server` keeps running after the deploy, as `serve()` and the request handler, so it is a runtime dependency. Vite is only used to build, so it is a development dependency.',
 });
 
 export const runTitle = message({
@@ -46,71 +16,36 @@ export const runTitle = message({
 });
 
 export const runDescription = message({
-  ja: '`vite dev` は本番と同じパイプラインで、Fast Refresh も効きます。`vite build` が `dist/` を書き、`serve()` を呼ぶ小さなスクリプトがそれを動かします。',
-  en: '`vite dev` runs the same pipeline as production, with Fast Refresh. `vite build` writes `dist/`, and a small script that calls `serve()` runs it.',
+  ja: '開発中は`vite dev`で動かします。本番では、`vite build`が書き出したリクエストハンドラを、`serve()`を呼ぶ小さなスクリプトで起動します。',
+  en: 'During development, run `vite dev`. In production, a small script that calls `serve()` starts the request handler `vite build` wrote.',
 });
 
-export const chooseTitle = message({
-  ja: '`@k8ordo/static` を選ぶとき',
-  en: 'When to choose `@k8ordo/static`',
+export const runDev = message({
+  ja: '`vite dev`は、本番と同じ仕組みでリクエストに答えます。Fast Refreshも効くので、ファイルを保存すると表示がすぐに変わります。',
+  en: '`vite dev` answers requests through the same pipeline as production, with Fast Refresh: save a file, and the change shows right away.',
 });
 
-export const chooseDescription = message({
-  ja: 'リクエストを必要とするものが 1 つも無いなら、`@k8ordo/static` が同じアプリをファイルに書き出し、サーバーを動かし続ける必要はなくなります。次のどれも要らないアプリがそれに当たります。',
-  en: 'If nothing needs the request, `@k8ordo/static` writes the same application out as files, and there is no server to keep running. That is an application that needs none of the following.',
+export const runServe = message({
+  ja: '`serve()`は`@k8ordo/server/serve`からimportします。`dist/`のビルドを読み込み、既定では`http://localhost:3000`で待ち受けます。',
+  en: '`serve()` comes from `@k8ordo/server/serve`. It loads the build in `dist/` and listens on `http://localhost:3000` by default.',
 });
 
-export const chooseActions = message({
-  ja: 'フォームの送信先になる Server Action と、そこからの `redirect()`',
-  en: 'Server Actions a form can post to, and `redirect()` from them',
-});
-
-export const chooseRequest = message({
-  ja: 'ページがリクエストのヘッダーや cookie を読むこと',
-  en: "A page reading the request's headers and cookies",
-});
-
-export const chooseStatus = message({
-  ja: 'アプリ自身が返す本物の 404',
-  en: 'A real 404 answered by the application itself',
-});
-
-export const chooseValues = message({
-  ja: '前もって列挙できないパラメータの値',
-  en: 'Parameter values that cannot be listed ahead of time',
-});
-
-export const nextTitle = message({
-  ja: '次のステップ',
-  en: 'Next steps',
+export const runProd = message({
+  ja: '`serve()`も、ハンドラの中のコードが使う`@k8ordo/server/runtime`も、Viteを読み込みません。そのため本番の環境には、開発時の依存を入れなくても動きます。',
+  en: 'Neither `serve()` nor `@k8ordo/server/runtime`, which code inside the handler uses, loads Vite, so production runs without the development dependencies installed.',
 });
 
 export const nextRouting = message({
-  ja: '`routes/` の文法と、ビルドが拒むもの',
-  en: 'The `routes/` grammar, and what the build refuses',
-});
-
-export const nextParams = message({
-  ja: 'パラメータのスキーマと、本物の 404',
-  en: 'Parameter schemas, and the real 404',
-});
-
-export const nextErrors = message({
-  ja: '`error.tsx`・`not-found.tsx`・`redirect.ts` と、返るステータス',
-  en: '`error.tsx`, `not-found.tsx`, `redirect.ts`, and the statuses they answer with',
-});
-
-export const nextBoundaries = message({
-  ja: 'Server Component とクライアントコンポーネントの境界',
-  en: 'The boundary between Server and client components',
+  ja: 'ファイルとディレクトリの名前の決まりと、ビルドが受け付けない形を知る。',
+  en: 'Learn the naming rules for files and directories, and what the build refuses.',
 });
 
 export const nextActions = message({
-  ja: 'Server Action と、リクエストの読み方',
-  en: 'Server Actions, and reading the request',
+  ja: 'フォームの送信を、Server Actionで受け取る。',
+  en: 'Receive a form’s submission in a Server Action.',
 });
 
 export const nextDeploy = message({
-  ja: '`serve()` と、ほかのホストでハンドラを動かす方法',
-  en: '`serve()`, and running the handler on another host',
+  ja: '`serve()`のほか、DenoやBun、Vercelでも動かす。',
+  en: 'Run it with `serve()`, or on Deno, Bun or Vercel.',
 });

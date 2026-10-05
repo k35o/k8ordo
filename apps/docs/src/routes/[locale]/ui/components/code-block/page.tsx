@@ -20,7 +20,7 @@ const rate = items.length === 0 ? 0 : done / items.length;`;
 
 export default function CodeBlockPage() {
   return (
-    <div className="mx-auto flex max-w-4xl flex-col gap-8 px-6 py-12 md:px-8">
+    <div className="flex flex-col gap-8 py-12">
       <PageTitle name="CodeBlock" />
       <div className="flex flex-col gap-4">
         <Heading level="h1">CodeBlock</Heading>
@@ -57,7 +57,10 @@ export default function CodeBlockPage() {
           <Heading level="h2">
             <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
-          <ComponentPreview code='<CodeBlock code={source} lang="tsx" />'>
+          <ComponentPreview
+            stage="article"
+            code='<CodeBlock code={source} lang="tsx" />'
+          >
             <div className="w-full">
               <CodeBlock code={SAMPLE} lang="tsx" />
             </div>
@@ -71,7 +74,10 @@ export default function CodeBlockPage() {
           <p className="text-fg-mute">
             <Rich>{m.components.codeBlock.titleDescription()}</Rich>
           </p>
-          <ComponentPreview code='<CodeBlock code={source} lang="tsx" title="total.tsx" />'>
+          <ComponentPreview
+            stage="article"
+            code='<CodeBlock code={source} lang="tsx" title="total.tsx" />'
+          >
             <div className="w-full">
               <CodeBlock code={SAMPLE} lang="tsx" title="total.tsx" />
             </div>
@@ -86,6 +92,7 @@ export default function CodeBlockPage() {
             <Rich>{m.components.codeBlock.marksDescription()}</Rich>
           </p>
           <ComponentPreview
+            stage="article"
             code={`<CodeBlock
   code={source}
   lang="ts"
@@ -110,6 +117,7 @@ export default function CodeBlockPage() {
             <Rich>{m.components.codeBlock.calloutsDescription()}</Rich>
           </p>
           <ComponentPreview
+            stage="article"
             code={`<CodeBlock
   callouts={{ 3: 'Guard the division when the list is empty' }}
   code={source}

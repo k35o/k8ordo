@@ -1,7 +1,11 @@
-import { Card, Heading, Separator } from '@k8ordo/ui';
 import { CodeBlock } from '@k8ordo/ui/code-block';
 
-import { PageTitle } from '../../../../components/page-title';
+import { Pitfall } from '../../../../components/callout';
+import {
+  DocPage,
+  DocSection,
+  DocSubsection,
+} from '../../../../components/doc-page';
 import { Rich } from '../../../../components/rich';
 import { TokenCard } from '../../../../components/token-card';
 import * as m from '../../../../messages';
@@ -26,6 +30,38 @@ import {
   lineHeightToNumber,
 } from '../../../../theme/design-tokens';
 
+const t = m.theming;
+
+const DARK = `document.documentElement.classList.add('dark');`;
+
+const CONTRAST = `const pressedStyles = [
+  'aria-pressed:bg-primary-bg-emphasize',
+  'forced-colors:aria-pressed:bg-[Highlight]',
+  'forced-colors:aria-pressed:text-[HighlightText]',
+].join(' ');`;
+
+const OVERRIDE = `:root {
+  --primary-fg: var(--purple-800);
+  --primary-bg: var(--purple-200);
+  --primary-bg-subtle: var(--purple-50);
+  --primary-bg-mute: var(--purple-100);
+  --primary-bg-emphasize: var(--purple-300);
+  --primary-border: var(--purple-500);
+}
+
+.dark {
+  --primary-fg: var(--purple-300);
+  --primary-bg: var(--purple-800);
+  --primary-bg-subtle: var(--purple-950);
+  --primary-bg-mute: var(--purple-900);
+  --primary-bg-emphasize: var(--purple-700);
+  --primary-border: var(--purple-500);
+}`;
+
+const OVERRIDE_VALUE = `:root {
+  --primary-border: oklch(0.55 0.15 300);
+}`;
+
 const Z_INDEX_USAGE = {
   overlay: 'Popover, DropdownMenu, ListBox, Tooltip',
   modal: 'Modal, Drawer',
@@ -34,30 +70,81 @@ const Z_INDEX_USAGE = {
 
 export default function Theming() {
   return (
-    <div className="mx-auto flex max-w-4xl flex-col gap-8 px-6 py-12 md:px-8">
-      <PageTitle title={m.nav.theming} />
-      <div className="flex flex-col gap-4">
-        <Heading level="h1">
-          <Rich>{m.nav.theming()}</Rich>
-        </Heading>
-        <p className="text-fg-mute text-lg">
-          <Rich>{m.theming.introduction()}</Rich>
-        </p>
-      </div>
-      <Separator color="mute" />
+    <DocPage introduction={t.introduction} path="/:locale/ui/theming">
+      <DocSection
+        description={t.semanticColorsDescription}
+        id="semantic"
+        title={t.semanticColorsTitle}
+      >
+        <DocSubsection id="foreground" title={t.foregroundTitle}>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {FG_TOKENS.map((token) => (
+              <TokenCard key={token.name} token={token} />
+            ))}
+          </div>
+        </DocSubsection>
+        <DocSubsection id="background" title={t.backgroundTitle}>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {BG_TOKENS.map((token) => (
+              <TokenCard key={token.name} token={token} />
+            ))}
+          </div>
+        </DocSubsection>
+        <DocSubsection id="border" title={t.borderTitle}>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {BORDER_TOKENS.map((token) => (
+              <TokenCard key={token.name} token={token} type="border" />
+            ))}
+          </div>
+        </DocSubsection>
+      </DocSection>
 
-      <section className="flex flex-col gap-4">
-        <Heading level="h2">
-          <Rich>{m.theming.colorPaletteTitle()}</Rich>
-        </Heading>
-        <p className="text-fg-mute">
-          <Rich>{m.theming.colorPaletteDescription()}</Rich>
-        </p>
+      <DocSection
+        description={t.brandColorsDescription}
+        id="brand"
+        title={t.brandColorsTitle}
+      >
+        <DocSubsection id="primary" title={t.primaryTitle}>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {PRIMARY_TOKENS.map((token) => (
+              <TokenCard
+                key={token.name}
+                token={token}
+                type={token.name.includes('border') ? 'border' : 'fill'}
+              />
+            ))}
+          </div>
+        </DocSubsection>
+        <DocSubsection id="secondary" title={t.secondaryTitle}>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {SECONDARY_TOKENS.map((token) => (
+              <TokenCard
+                key={token.name}
+                token={token}
+                type={token.name.includes('border') ? 'border' : 'fill'}
+              />
+            ))}
+          </div>
+        </DocSubsection>
+        <DocSubsection id="group" title={t.groupTitle}>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {GROUP_TOKENS.map((token) => (
+              <TokenCard key={token.name} token={token} />
+            ))}
+          </div>
+        </DocSubsection>
+      </DocSection>
+
+      <DocSection
+        description={t.colorPaletteDescription}
+        id="palette"
+        title={t.colorPaletteTitle}
+      >
         <div className="flex flex-col gap-4">
           {PALETTE.map((family) => (
             <div className="flex flex-col gap-1" key={family.prefix}>
               <span className="text-sm font-medium">{family.name}</span>
-              <div className="grid grid-cols-5 gap-2 sm:grid-cols-11">
+              <div className="grid grid-cols-6 gap-1.5 sm:grid-cols-11">
                 {SHADES.map((shade) => (
                   <div
                     className="flex flex-col items-center gap-1"
@@ -75,116 +162,27 @@ export default function Theming() {
             </div>
           ))}
         </div>
-      </section>
-      <Separator color="mute" />
+      </DocSection>
 
-      <section className="flex flex-col gap-6">
-        <div className="flex flex-col gap-4">
-          <Heading level="h2">
-            <Rich>{m.theming.semanticColorsTitle()}</Rich>
-          </Heading>
-          <p className="text-fg-mute">
-            <Rich>{m.theming.semanticColorsDescription()}</Rich>
-          </p>
-        </div>
+      <DocSection
+        description={t.customizeDescription}
+        id="customize"
+        title={t.customizeTitle}
+      >
+        <CodeBlock code={OVERRIDE} lang="css" title="app.css" />
+        <p>
+          <Rich>{t.customizeValueDescription()}</Rich>
+        </p>
+        <CodeBlock code={OVERRIDE_VALUE} lang="css" title="app.css" />
+      </DocSection>
 
-        <div className="flex flex-col gap-3">
-          <Heading level="h3">
-            <Rich>{m.theming.foregroundTitle()}</Rich>
-          </Heading>
-          <div className="grid gap-2 sm:grid-cols-2">
-            {FG_TOKENS.map((token) => (
-              <TokenCard key={token.name} token={token} />
-            ))}
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-3">
-          <Heading level="h3">
-            <Rich>{m.theming.backgroundTitle()}</Rich>
-          </Heading>
-          <div className="grid gap-2 sm:grid-cols-2">
-            {BG_TOKENS.map((token) => (
-              <TokenCard key={token.name} token={token} />
-            ))}
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-3">
-          <Heading level="h3">
-            <Rich>{m.theming.borderTitle()}</Rich>
-          </Heading>
-          <div className="grid gap-2 sm:grid-cols-2">
-            {BORDER_TOKENS.map((token) => (
-              <TokenCard key={token.name} token={token} type="border" />
-            ))}
-          </div>
-        </div>
-      </section>
-      <Separator color="mute" />
-
-      <section className="flex flex-col gap-6">
-        <div className="flex flex-col gap-4">
-          <Heading level="h2">
-            <Rich>{m.theming.brandColorsTitle()}</Rich>
-          </Heading>
-          <p className="text-fg-mute">
-            <Rich>{m.theming.brandColorsDescription()}</Rich>
-          </p>
-        </div>
-
-        <div className="flex flex-col gap-3">
-          <Heading level="h3">Primary</Heading>
-          <div className="grid gap-2 sm:grid-cols-2">
-            {PRIMARY_TOKENS.map((token) => (
-              <TokenCard
-                key={token.name}
-                token={token}
-                type={token.name.includes('border') ? 'border' : 'fill'}
-              />
-            ))}
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-3">
-          <Heading level="h3">Secondary</Heading>
-          <div className="grid gap-2 sm:grid-cols-2">
-            {SECONDARY_TOKENS.map((token) => (
-              <TokenCard
-                key={token.name}
-                token={token}
-                type={token.name.includes('border') ? 'border' : 'fill'}
-              />
-            ))}
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-3">
-          <Heading level="h3">Group</Heading>
-          <div className="grid gap-2 sm:grid-cols-2">
-            {GROUP_TOKENS.map((token) => (
-              <TokenCard key={token.name} token={token} />
-            ))}
-          </div>
-        </div>
-      </section>
-      <Separator color="mute" />
-
-      <section className="flex flex-col gap-6">
-        <div className="flex flex-col gap-4">
-          <Heading level="h2">
-            <Rich>{m.theming.typographyTitle()}</Rich>
-          </Heading>
-          <p className="text-fg-mute">
-            <Rich>{m.theming.typographyDescription()}</Rich>
-          </p>
-        </div>
-
-        <div className="flex flex-col gap-3">
-          <Heading level="h3">
-            <Rich>{m.theming.textSizesTitle()}</Rich>
-          </Heading>
-          <Card>
+      <DocSection
+        description={t.typographyDescription}
+        id="typography"
+        title={t.typographyTitle}
+      >
+        <DocSubsection id="text-sizes" title={t.textSizesTitle}>
+          <div className="border-border-mute bg-bg-surface rounded-xl border">
             <div className="flex flex-col gap-3 p-4">
               {TEXT_SIZES.map((size) => {
                 const ratio = lineHeightToNumber(size.lineHeight);
@@ -208,14 +206,10 @@ export default function Theming() {
                 );
               })}
             </div>
-          </Card>
-        </div>
-
-        <div className="flex flex-col gap-3">
-          <Heading level="h3">
-            <Rich>{m.theming.fontWeightsTitle()}</Rich>
-          </Heading>
-          <Card>
+          </div>
+        </DocSubsection>
+        <DocSubsection id="font-weights" title={t.fontWeightsTitle}>
+          <div className="border-border-mute bg-bg-surface rounded-xl border">
             <div className="flex flex-col gap-3 p-4">
               {FONT_WEIGHTS.map((weight) => (
                 <div className="flex items-baseline gap-4" key={weight.name}>
@@ -234,14 +228,10 @@ export default function Theming() {
                 </div>
               ))}
             </div>
-          </Card>
-        </div>
-
-        <div className="flex flex-col gap-3">
-          <Heading level="h3">
-            <Rich>{m.theming.letterSpacingTitle()}</Rich>
-          </Heading>
-          <Card>
+          </div>
+        </DocSubsection>
+        <DocSubsection id="letter-spacing" title={t.letterSpacingTitle}>
+          <div className="border-border-mute bg-bg-surface rounded-xl border">
             <div className="flex flex-col gap-3 p-4">
               {LETTER_SPACINGS.map((ls) => (
                 <div className="flex items-baseline gap-4" key={ls.name}>
@@ -257,14 +247,10 @@ export default function Theming() {
                 </div>
               ))}
             </div>
-          </Card>
-        </div>
-
-        <div className="flex flex-col gap-3">
-          <Heading level="h3">
-            <Rich>{m.theming.lineHeightTitle()}</Rich>
-          </Heading>
-          <Card>
+          </div>
+        </DocSubsection>
+        <DocSubsection id="line-height" title={t.lineHeightTitle}>
+          <div className="border-border-mute bg-bg-surface rounded-xl border">
             <div className="flex flex-col gap-3 p-4">
               {LINE_HEIGHTS.map((lh) => (
                 <div className="flex items-center gap-4" key={lh.name}>
@@ -284,18 +270,15 @@ export default function Theming() {
                 </div>
               ))}
             </div>
-          </Card>
-        </div>
-      </section>
-      <Separator color="mute" />
+          </div>
+        </DocSubsection>
+      </DocSection>
 
-      <section className="flex flex-col gap-4">
-        <Heading level="h2">
-          <Rich>{m.theming.borderRadiusTitle()}</Rich>
-        </Heading>
-        <p className="text-fg-mute">
-          <Rich>{m.theming.borderRadiusDescription()}</Rich>
-        </p>
+      <DocSection
+        description={t.borderRadiusDescription}
+        id="radius"
+        title={t.borderRadiusTitle}
+      >
         <div className="grid grid-cols-3 gap-4 sm:grid-cols-5 sm:gap-6">
           {RADII.map((radius) => (
             <div className="flex flex-col items-center gap-2" key={radius.name}>
@@ -310,16 +293,13 @@ export default function Theming() {
             </div>
           ))}
         </div>
-      </section>
-      <Separator color="mute" />
+      </DocSection>
 
-      <section className="flex flex-col gap-4">
-        <Heading level="h2">
-          <Rich>{m.theming.shadowTitle()}</Rich>
-        </Heading>
-        <p className="text-fg-mute">
-          <Rich>{m.theming.shadowDescription()}</Rich>
-        </p>
+      <DocSection
+        description={t.shadowDescription}
+        id="shadow"
+        title={t.shadowTitle}
+      >
         <div className="grid gap-4 sm:grid-cols-2">
           {SHADOWS.map((shadow) => (
             <div className="flex flex-col items-center gap-2" key={shadow.name}>
@@ -334,17 +314,14 @@ export default function Theming() {
             </div>
           ))}
         </div>
-      </section>
-      <Separator color="mute" />
+      </DocSection>
 
-      <section className="flex flex-col gap-4">
-        <Heading level="h2">
-          <Rich>{m.theming.spacingTitle()}</Rich>
-        </Heading>
-        <p className="text-fg-mute">
-          <Rich>{m.theming.spacingDescription()}</Rich>
-        </p>
-        <Card>
+      <DocSection
+        description={t.spacingDescription}
+        id="spacing"
+        title={t.spacingTitle}
+      >
+        <div className="border-border-mute bg-bg-surface rounded-xl border">
           <div className="flex flex-col gap-2 p-4">
             {SPACING_SCALE.map((space) => (
               <div className="flex items-center gap-3" key={space.step}>
@@ -361,18 +338,15 @@ export default function Theming() {
               </div>
             ))}
           </div>
-        </Card>
-      </section>
-      <Separator color="mute" />
+        </div>
+      </DocSection>
 
-      <section className="flex flex-col gap-4">
-        <Heading level="h2">
-          <Rich>{m.theming.breakpointsTitle()}</Rich>
-        </Heading>
-        <p className="text-fg-mute">
-          <Rich>{m.theming.breakpointsDescription()}</Rich>
-        </p>
-        <Card>
+      <DocSection
+        description={t.breakpointsDescription}
+        id="breakpoints"
+        title={t.breakpointsTitle}
+      >
+        <div className="border-border-mute bg-bg-surface rounded-xl border">
           <div className="flex flex-col gap-2 p-4">
             {BREAKPOINTS.map((bp) => (
               <div className="flex items-center gap-4" key={bp.name}>
@@ -385,18 +359,15 @@ export default function Theming() {
               </div>
             ))}
           </div>
-        </Card>
-      </section>
-      <Separator color="mute" />
+        </div>
+      </DocSection>
 
-      <section className="flex flex-col gap-4">
-        <Heading level="h2">
-          <Rich>{m.theming.zIndexTitle()}</Rich>
-        </Heading>
-        <p className="text-fg-mute">
-          <Rich>{m.theming.zIndexDescription()}</Rich>
-        </p>
-        <Card>
+      <DocSection
+        description={t.zIndexDescription}
+        id="z-index"
+        title={t.zIndexTitle}
+      >
+        <div className="border-border-mute bg-bg-surface rounded-xl border">
           <div className="flex flex-col gap-2 p-4">
             {Z_INDICES.map((z) => (
               <div className="flex items-center gap-4" key={z.name}>
@@ -412,85 +383,35 @@ export default function Theming() {
               </div>
             ))}
           </div>
-        </Card>
-      </section>
-      <Separator color="mute" />
+        </div>
+      </DocSection>
 
-      <section className="flex flex-col gap-4">
-        <Heading level="h2">
-          <Rich>{m.theming.darkModeTitle()}</Rich>
-        </Heading>
-        <p className="text-fg-mute">
-          <Rich>{m.theming.darkModeDescription()}</Rich>
+      <DocSection
+        description={t.darkModeDescription}
+        id="dark-mode"
+        title={t.darkModeTitle}
+      >
+        <CodeBlock code={DARK} lang="ts" />
+        <p>
+          <Rich>{t.darkModeColorScheme()}</Rich>
         </p>
-        <CodeBlock
-          code={`// Enable dark mode
-document.documentElement.classList.add('dark');
+      </DocSection>
 
-// Disable dark mode
-document.documentElement.classList.remove('dark');`}
-          lang="ts"
-        />
-      </section>
-      <Separator color="mute" />
-
-      <section className="flex flex-col gap-4">
-        <Heading level="h2">
-          <Rich>{m.theming.highContrastTitle()}</Rich>
-        </Heading>
-        <p className="text-fg-mute">
-          <Rich>{m.theming.highContrastDescription()}</Rich>
+      <DocSection
+        description={t.highContrastDescription}
+        id="high-contrast"
+        title={t.highContrastTitle}
+      >
+        <p>
+          <Rich>{t.highContrastOwnUiDescription()}</Rich>
         </p>
-        <p className="text-fg-mute">
-          <Rich>{m.theming.highContrastOwnUiDescription()}</Rich>
-        </p>
-        <CodeBlock
-          code={`<button className="bg-primary-bg aria-pressed:bg-primary-bg-emphasize forced-colors:aria-pressed:bg-[Highlight] forced-colors:aria-pressed:text-[HighlightText]">
-  Bold
-</button>`}
-          lang="tsx"
-        />
-      </section>
-      <Separator color="mute" />
-
-      <section className="flex flex-col gap-4">
-        <Heading level="h2">
-          <Rich>{m.theming.customizeTitle()}</Rich>
-        </Heading>
-        <p className="text-fg-mute">
-          <Rich>{m.theming.customizeDescription()}</Rich>
-        </p>
-        <CodeBlock
-          code={`/* app.css — import after the k8ordo UI stylesheet */
-:root {
-  --primary-fg: var(--purple-800);
-  --primary-bg: var(--purple-200);
-  --primary-bg-subtle: var(--purple-50);
-  --primary-bg-mute: var(--purple-100);
-  --primary-bg-emphasize: var(--purple-300);
-  --primary-border: var(--purple-500);
-}
-
-.dark {
-  --primary-fg: var(--purple-300);
-  --primary-bg: var(--purple-800);
-  --primary-bg-subtle: var(--purple-950);
-  --primary-bg-mute: var(--purple-900);
-  --primary-bg-emphasize: var(--purple-700);
-  --primary-border: var(--purple-500);
-}`}
-          lang="css"
-        />
-        <p className="text-fg-mute">
-          <Rich>{m.theming.customizeValueDescription()}</Rich>
-        </p>
-        <CodeBlock
-          code={`:root {
-  --primary-border: oklch(0.55 0.15 300);
-}`}
-          lang="css"
-        />
-      </section>
-    </div>
+        <CodeBlock code={CONTRAST} lang="ts" title="toggle-button.tsx" />
+        <Pitfall>
+          <p>
+            <Rich>{t.highContrastAvoid()}</Rich>
+          </p>
+        </Pitfall>
+      </DocSection>
+    </DocPage>
   );
 }

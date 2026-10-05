@@ -8,7 +8,7 @@ import * as m from '../../messages';
 
 export default function NotFound() {
   return (
-    <div className="mx-auto flex max-w-4xl flex-col items-start gap-8 px-6 py-12 md:px-8">
+    <div className="flex flex-col items-start gap-8 py-12">
       <PageTitle title={m.notFound.title} />
       <div className="flex flex-col gap-4">
         <Heading level="h1">{m.notFound.title()}</Heading>

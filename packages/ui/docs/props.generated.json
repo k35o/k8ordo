@@ -4204,6 +4204,32 @@
       "omitted": ["className", "style", "aria-label"]
     },
     {
+      "name": "SideNav.Sub",
+      "category": "navigation",
+      "props": [
+        {
+          "name": "title",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "children",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "defaultOpen",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
       "name": "Skeleton",
       "category": "feedback",
       "props": [

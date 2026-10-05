@@ -1,299 +1,271 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: 'Provider が何を材料に、いつ、どう決めているかを説明します。1 つの規則、それを最初の描画の前に当てるインラインスクリプト、その後の追従、そこから導かれる保証、export される型、そしてテストの書き方です。',
-  en: 'What the provider decides, from what, and when: the one rule, the inline script that applies it before the first paint, how it stays in step afterwards, what all of that guarantees, the exported types, and how to test it.',
+  ja: '`@k8ordo/color-scheme`が、何を材料に、いつ配色を決めているかを説明します。使い方を覚えるのに必要な内容ではありませんが、なぜそう書くのかが分かると、迷ったときに判断しやすくなります。',
+  en: 'How `@k8ordo/color-scheme` decides the scheme, from what, and when. None of it is needed to use the package, but knowing why it is written this way makes the edge cases easier to reason about.',
 });
 
-export const rule = {
-  title: message({
-    ja: '1 つの規則',
-    en: 'One rule',
-  }),
-  description: message({
-    ja: "訪問者が選んだものが最優先で、次に Provider の `defaultPreference`、それが `'system'` ならシステムに尋ねます。画面に出るのは、この規則で解決した `scheme` だけです。",
-    en: "What the visitor chose wins; then the provider’s `defaultPreference`; and when that is `'system'`, the system is asked. What reaches the screen is the `scheme` this rule resolves to, and nothing else.",
-  }),
-  columnStored: message({
-    ja: '保存された `preference`',
-    en: 'Stored `preference`',
-  }),
-  none: message({
-    ja: 'なし',
-    en: 'none',
-  }),
-  any: message({
-    ja: 'どれでも',
-    en: 'any',
-  }),
-  matches: message({
-    ja: '一致する',
-    en: 'matches',
-  }),
-  doesNotMatch: message({
-    ja: '一致しない',
-    en: 'does not match',
-  }),
-  invalid: message({
-    ja: '保存行が JSON のオブジェクトでないときも、`preference` が `\'light\'` でも `\'dark\'` でもないとき（たとえば `{"preference":"sepia"}` や `{}`）も、「なし」として読みます。インラインスクリプトもストアも同じで、行にあるほかのフィールドはどちらも読みません。',
-    en: 'A row that is not a JSON object, or whose `preference` is neither `\'light\'` nor `\'dark\'` (`{"preference":"sepia"}` or `{}`, say), reads as none, by the inline script and by the store alike. Neither reads any other field in the row.',
-  }),
-  notPinned: message({
-    ja: "「なし」は、初回訪問時にシステムが答えた値を保存したものではありません。既定値が `'system'` なら、選んでいない訪問者は、あとで OS の設定を変えてもそれに従います。",
-    en: "“None” is not a snapshot of what the system said on the first visit: with a `'system'` default, a visitor who never chose keeps following the OS when its setting changes later.",
-  }),
-};
+export const ruleTitle = message({
+  ja: '配色を決める1つの規則',
+  en: 'One rule decides the scheme',
+});
 
-export const panel = {
-  title: message({
-    ja: 'このページで見る',
-    en: 'On this page',
-  }),
-  description: message({
-    ja: "このページが今読んでいる材料と、その結果です。このサイトのルートレイアウトは `defaultPreference` を渡していないので `'system'` です。ヘッダーの切替を押す、OS の設定を変える、別のタブでこのサイトの設定を変える、のどれでも、対応する行がその場で変わります。`localStorage.getItem` の行は、一度も選んでいなければ `null`、`'system'` に戻したあとは `'{}'` です。",
-    en: "The inputs this page reads right now, and the result. This site’s root layout passes no `defaultPreference`, so it is `'system'`. Press the switcher in the header, change the OS setting, or change the setting in another tab of this site, and the rows it affects change in place. The `localStorage.getItem` row is `null` if nothing was ever chosen, and `'{}'` after going back to `'system'`.",
-  }),
-  landingLink: message({
-    ja: "`'system'` に戻す選択肢は、@k8ordo/color-scheme のトップにある実演で試せます。",
-    en: "The choice that goes back to `'system'` is in the demo on the @k8ordo/color-scheme landing page.",
-  }),
-};
+export const ruleDescription = message({
+  ja: '配色は、訪問者の選択、プロバイダの既定値、OSの設定の順に見て決まります。',
+  en: 'The scheme comes from the visitor’s choice, then the provider’s default, then the OS setting, in that order.',
+});
 
-// 実演（クライアント）が名指すのはこのグループだけなので、バンドルに載る文言もこれだけで済む。
-export const inspector = {
-  inputs: message({
-    ja: '材料',
-    en: 'Inputs',
-  }),
-  result: message({
-    ja: '結果',
-    en: 'Result',
-  }),
-  unknown: message({
-    ja: 'ブラウザで読みます',
-    en: 'read in the browser',
-  }),
-};
+export const ruleChoice = message({
+  ja: "訪問者が`'light'`か`'dark'`を選んでいれば、その配色になります。",
+  en: "If the visitor chose `'light'` or `'dark'`, that is the scheme.",
+});
 
-export const script = {
-  title: message({
-    ja: '最初の描画の前',
-    en: 'Before the first paint',
-  }),
-  description: message({
-    ja: 'React が動くのは JavaScript が読み込まれてからで、その時点でブラウザはもう描画しているかもしれません。クラスを付けるのが effect だけなら、ページはまず既定値で描かれてから切り替わり、ダークを選んだ訪問者にはライトの画面が一瞬光ります。そこで Provider は同じ規則をもう一度インラインスクリプトとして書き、最初の子として描きます。',
-    en: 'React runs only once its JavaScript has loaded, and by then the browser may already have painted. If an effect were the only thing putting the class on, the page would paint with the default and then flip, a flash of light for a visitor who chose dark. So the provider states the same rule a second time, as an inline script, and renders it as its first child.',
-  }),
-  readsTitle: message({
-    ja: 'スクリプトが読むもの',
-    en: 'What the script reads',
-  }),
-  readsRow: message({
-    ja: '`colorSchemeState.inlineRead()` で読む `k8ordo-state:color-scheme` の行。ストアが書くのと同じ行です。',
-    en: 'The `k8ordo-state:color-scheme` row, through `colorSchemeState.inlineRead()`: the same row the store writes.',
-  }),
-  readsValue: message({
-    ja: "行の `preference` が `'light'` か `'dark'` のどちらかならその値、そうでなければ Provider に渡した `defaultPreference`。既定値はスクリプトの文字列に埋め込まれます。ここではスキーマが走らないので、値は手で確かめています。",
-    en: "The row’s `preference` if it is exactly `'light'` or `'dark'`; otherwise the `defaultPreference` given to the provider, which is written into the script’s text. The schema does not run here, so the value is checked by hand.",
-  }),
-  readsSystem: message({
-    ja: "こうして決まった値が `'system'` のときだけ、`matchMedia('(prefers-color-scheme: dark)')` の結果。",
-    en: "`matchMedia('(prefers-color-scheme: dark)')`, only when the value picked that way is `'system'`.",
-  }),
-  writes: message({
-    ja: "結果がダークなら `document.documentElement.classList.add('dark')`。クラスを外すことはなく、そのあとは何もしません。",
-    en: "If the result is dark, `document.documentElement.classList.add('dark')`. It never removes the class, and does nothing after that.",
-  }),
-  codeDescription: message({
-    ja: "`defaultPreference` が `'system'` のときに HTML に書かれるスクリプトを、読みやすく整形したものです。",
-    en: "The script written into the HTML when `defaultPreference` is `'system'`, formatted for reading.",
-  }),
-  hydration: message({
-    ja: 'hydrate のとき、React はこの `<script>` 要素をそのまま引き継ぎ、もう一度実行することはありません。',
-    en: 'On hydration React adopts the `<script>` element in place and does not run it again.',
-  }),
-  csp: message({
-    ja: 'インラインスクリプトなので、スクリプトを制限する Content-Security-Policy の下では、Provider の `nonce` か `colorSchemeScriptHash()` のハッシュで許します。',
-    en: 'Being an inline script, it runs under a Content-Security-Policy that restricts scripts only when allowed, by the provider’s `nonce` or by the hash `colorSchemeScriptHash()` gives.',
-  }),
-  cspLink: message({
-    ja: 'Content-Security-Policy の下で使う',
-    en: 'Under a Content-Security-Policy',
-  }),
-  serverTitle: message({
-    ja: 'サーバーが描くもの',
-    en: 'What the server renders',
-  }),
-  serverDescription: message({
-    ja: "サーバーには localStorage も、尋ねるシステムもありません。Provider は「何も保存されておらず、システムはライト」として描きます。`preference` は `'system'`、`scheme` は `defaultPreference`（それが `'system'` なら `'light'`）です。HTML の `<html>` に `dark` クラスは無く、付けるのはスクリプトです。Cookie やヘッダーで先回りして推測することはしません。",
-    en: "A server has no localStorage and no system to ask. The provider renders as if nothing were stored and the system were light: `preference` is `'system'`, and `scheme` is the `defaultPreference`, or `'light'` when that is `'system'`. `<html>` carries no `dark` class in the HTML; the script adds it. There is no cookie or header to guess earlier.",
-  }),
-  serverConsequence: message({
-    ja: 'クラスを読む CSS は最初の描画から正しく出ます。一方、`scheme` から選んだマークアップ（アイコンやラベル）は、hydrate されるまでサーバーの値を表示します。最初から正しくなければならないものは、両方を描いて CSS で片方を隠します。',
-    en: 'CSS that reads the class is right from the first paint. Markup chosen from `scheme`, such as an icon or a label, shows the server’s value until hydration. Anything that must be right from the start renders both and lets CSS hide one.',
-  }),
-  darkVariant: message({
-    ja: 'この例は、クラスを読む `dark:` バリアント（@k8ordo/ui の `tailwind.css` が宣言するもの）を前提にしています。Tailwind CSS 4 の既定の `dark:` は `prefers-color-scheme` を読みます。',
-    en: 'This example relies on a `dark:` variant that reads the class, as @k8ordo/ui’s `tailwind.css` declares. Tailwind CSS 4’s default `dark:` reads `prefers-color-scheme` instead.',
-  }),
-  darkVariantLink: message({
-    ja: 'スタイル: Tailwind CSS だけで使う',
-    en: 'Styling: With Tailwind CSS alone',
-  }),
-  serverBrowserOnly: message({
-    ja: 'CSS で出し分けられないものは、React の `use(browser())`（`browser` は `react-dom` から）を `<Suspense>` の下で使うと、サーバーの HTML に含めずに済みます。サーバーは推測を書く代わりに fallback を書き、中身はブラウザで描かれます。',
-    en: 'What CSS cannot switch can be left out of the server HTML with React’s `use(browser())` (`browser` from `react-dom`) under a `<Suspense>`: the server writes the fallback instead of a guess, and the content is rendered in the browser.',
-  }),
-  browserOnlyLink: message({
-    ja: '@k8ordo/static: ブラウザが必要なコンポーネント',
-    en: '@k8ordo/static: Components that need a browser',
-  }),
-};
+export const ruleDefault = message({
+  ja: "選んでいなければ、プロバイダの`defaultPreference`を見ます。`'light'`か`'dark'`なら、その配色になります。",
+  en: "If not, the provider’s `defaultPreference` is used when it is `'light'` or `'dark'`.",
+});
 
-export const step = {
-  title: message({
-    ja: 'その後の追従',
-    en: 'Staying in step',
-  }),
-  description: message({
-    ja: 'hydrate したあと、クラスを書くのは Provider だけです。材料のどれかが変わるたびに規則で解決し直し、`scheme` が変わったら effect で `<html>` の `dark` を付け外しします。',
-    en: 'After hydration the provider is the only thing that writes the class. Whenever one of its inputs changes it resolves the rule again, and when `scheme` changes an effect toggles `dark` on `<html>`.',
-  }),
-  choice: message({
-    ja: '訪問者が選んだとき: `setPreference` がストアを更新します。新しい値はすぐ次の描画に反映され、localStorage への書き込みはその直後にまとめて行われます。',
-    en: 'The visitor chooses: `setPreference` updates the store. The new value is in the very next render, and the write to localStorage follows right after, batched.',
-  }),
-  system: message({
-    ja: "システムが変わったとき: Provider は `matchMedia('(prefers-color-scheme: dark)')` の `change` を購読しています。何も選ばれておらず既定値が `'system'` なら、ページを開いたまま OS の設定を変えても、どちら向きにも追従します。",
-    en: "The system changes: the provider subscribes to `change` on `matchMedia('(prefers-color-scheme: dark)')`. With nothing chosen and a `'system'` default, the page follows an OS change in either direction while it is open.",
-  }),
-  tabs: message({
-    ja: '別のタブで変わったとき: @k8ordo/state のローカル状態は、このキーの `storage` イベントを購読しています。別のタブで選んだ設定も、別のタブで localStorage を消したことも、このタブの Provider に届きます。',
-    en: 'Another tab changes it: @k8ordo/state’s local state listens for `storage` events on this key. A choice made in another tab, or localStorage cleared there, reaches this tab’s provider.',
-  }),
-  hydration: message({
-    ja: 'hydrate のとき: hydrate する描画はサーバーと同じ推測を読み、何も書きません。クラスを書くのは、その直後にストアを読む描画です。スクリプトが付けたクラスが途中で外れることはありません。',
-    en: 'Hydration: the render that hydrates reads the server’s guesses and writes nothing; the render straight after reads the store, and that one writes. The class the script put on is never taken off along the way.',
-  }),
-  oneProviderTitle: message({
-    ja: 'Provider は 1 つ',
-    en: 'One provider',
-  }),
-  oneProvider: message({
-    ja: 'Provider はルートレイアウトに 1 つだけ置きます。Provider はそれぞれがスクリプトを描いてクラスを書くので、`defaultPreference` の違う Provider が 2 つあれば食い違います。`useColorScheme()` が読むのは一番近い Provider です。',
-    en: 'Put exactly one provider in the root layout. Each provider renders its own script and writes the class, so two providers with different `defaultPreference` values would disagree. `useColorScheme()` reads the nearest one.',
-  }),
-};
+export const ruleSystem = message({
+  ja: "既定値も`'system'`なら、`(prefers-color-scheme: dark)`に一致するかどうかで、ダークかライトかが決まります。",
+  en: "If the default is `'system'` too, `(prefers-color-scheme: dark)` decides between dark and light.",
+});
 
-export const guarantees = {
-  title: message({
-    ja: '保証すること',
-    en: 'What it guarantees',
-  }),
-  description: message({
-    ja: 'ここまでの仕組みを合わせると、次のことが成り立ちます。',
-    en: 'Put together, the mechanics above guarantee the following.',
-  }),
-  noFlash: message({
-    ja: 'ちらつきません。スクリプトは最初の描画の前に走り、Provider が書くのと同じ行を読みます。ダークのページはダークで読み込まれます。',
-    en: 'No flash. The script runs before the first paint and reads the same row the provider writes; a dark page loads dark.',
-  }),
-  defaults: message({
-    ja: "選んでいなければ既定値に、既定値が `'system'` ならシステムに従います。初回訪問時のシステムの値に固定されることはなく、JSON のオブジェクトでない行や、`preference` が `'light'` でも `'dark'` でもない行は「選んでいない」として読みます。",
-    en: "Nothing chosen follows the default, and a `'system'` default follows the system. A visitor is never pinned to what the system said on their first visit, and a row that is not a JSON object, or whose `preference` is neither `'light'` nor `'dark'`, reads as nothing chosen.",
-  }),
-  server: message({
-    ja: 'サーバーは既定値を描き、hydrate は document に触れません。hydrate する描画は何も書かず、そのあとの描画が、スクリプトがすでに付けたものと同じクラスを書きます。',
-    en: 'The server renders the default, and hydration does not touch the document. The render that hydrates writes nothing; the render after it writes the class the script already put there.',
-  }),
-  tabs: message({
-    ja: 'タブ同士が揃います。設定は、@k8ordo/state のほかのローカル状態と同じく `storage` イベントでタブ間に伝わります。',
-    en: 'Tabs agree. The preference travels between tabs through the `storage` event, as any @k8ordo/state local state does.',
-  }),
-  limitsTitle: message({
-    ja: 'しないこと',
-    en: 'What it does not do',
-  }),
-  limitCookie: message({
-    ja: 'サーバーで推測すること。Cookie もヘッダーも読みません。',
-    en: 'Guess on the server: it reads no cookie and no header.',
-  }),
-  limitClass: message({
-    ja: 'クラス名や付け先を変えること。付けるのは常に `<html>` の `dark` です。',
-    en: 'Change the class or where it goes: it is always `dark`, on `<html>`.',
-  }),
-  limitProperty: message({
-    ja: 'CSS の `color-scheme` プロパティを設定すること。@k8ordo/ui のスタイルシートがトークンと並べて宣言します。',
-    en: 'Set the CSS `color-scheme` property: @k8ordo/ui’s stylesheet declares it next to its tokens.',
-  }),
-  limitContrast: message({
-    ja: 'コントラストを保存すること。`prefers-contrast` と `forced-colors` は OS の設定で、スタイルシートがそれに従います。',
-    en: 'Store a contrast preference: `prefers-contrast` and `forced-colors` are the OS’s settings, and the stylesheet follows them.',
-  }),
-  limitPolicy: message({
-    ja: 'Content-Security-Policy を決めること。スクリプトに付ける nonce も、ポリシーに書くハッシュも、アプリが渡します。',
-    en: 'Decide a Content-Security-Policy: the application gives the nonce the script carries, or writes its hash into the policy.',
-  }),
-};
+export const ruleNone = message({
+  ja: "保存された行がJSONのオブジェクトでないときや、`preference`が`'light'`でも`'dark'`でもないときは、「選んでいない」として読みます。行にあるほかのフィールドは読みません。",
+  en: "A row that is not a JSON object, or whose `preference` is neither `'light'` nor `'dark'`, reads as nothing chosen. No other field in the row is read.",
+});
 
-export const types = {
-  title: message({
-    ja: 'export される型',
-    en: 'Exported types',
-  }),
-  description: message({
-    ja: '値の export は `ColorSchemeProvider`、`useColorScheme`、`colorSchemeState`、`colorSchemeScriptHash` の 4 つで、型の export は次の 4 つです。宣言どおりに示します。',
-    en: 'The value exports are `ColorSchemeProvider`, `useColorScheme`, `colorSchemeState` and `colorSchemeScriptHash`; the type exports are these four, shown as declared.',
-  }),
-  columnName: message({
-    ja: '型',
-    en: 'Type',
-  }),
-  columnUse: message({
-    ja: '使いどころ',
-    en: 'What it is for',
-  }),
-  colorScheme: message({
-    ja: '画面に出るもの。`scheme` の型です。',
-    en: 'What can be on screen; the type of `scheme`.',
-  }),
-  preference: message({
-    ja: "訪問者が選べるもの。`'system'` は何も選ばないことです。`preference` と `defaultPreference` の型です。",
-    en: "What a visitor can choose, where `'system'` is choosing nothing; the type of `preference` and `defaultPreference`.",
-  }),
-  providerProps: message({
-    ja: '`<ColorSchemeProvider>` の props。Provider を包む自前のコンポーネントに使います。',
-    en: 'The props of `<ColorSchemeProvider>`, for a component of your own that wraps it.',
-  }),
-  hook: message({
-    ja: '`useColorScheme()` の戻り値。それを props で受け取るコンポーネントに使います。',
-    en: 'What `useColorScheme()` returns, for a component that receives it as a prop.',
-  }),
-};
+export const ruleNotPinned = message({
+  ja: "「選んでいない」は、初めて訪れたときのOSの答えを保存したものではありません。既定値が`'system'`なら、選んでいない訪問者はあとでOSの設定を変えても、そのまま追従します。",
+  en: "“Nothing chosen” is not a snapshot of what the OS said on the first visit. With a `'system'` default, a visitor who never chose keeps following the OS when its setting changes later.",
+});
 
-export const testing = {
-  title: message({
-    ja: 'テスト',
-    en: 'Testing',
+export const readersTitle = message({
+  ja: '規則を読む2か所',
+  en: 'Two places apply the rule',
+});
+
+export const readersDescription = message({
+  ja: 'この規則は2か所に書かれています。ハイドレーションのあとはプロバイダが使い、最初の描画の前はインラインスクリプトが使います。',
+  en: 'The rule is written down twice: the provider applies it after hydration, and the inline script applies it before the first paint.',
+});
+
+export const readersWhy = message({
+  ja: 'Reactが動き始めるのはJavaScriptを読み込んだあとで、その時点でブラウザはもう描画を始めているかもしれません。プロバイダのeffectだけでクラスを付けると、ページはまず既定値で描かれてから切り替わり、ダークを選んだ訪問者にはライトの画面が一瞬見えます。そのため、同じ規則をインラインスクリプトとしてもう一度書いています。',
+  en: 'React only starts once its JavaScript has loaded, and by then the browser may already have painted. If the provider’s effect alone put the class on, the page would paint with the default and then flip, a flash of light for a visitor who chose dark. So the same rule is written a second time, as an inline script.',
+});
+
+export const readersScript = message({
+  ja: "下は、`defaultPreference`が`'system'`のときにHTMLに書かれるスクリプトを、読みやすく整形したものです。",
+  en: "Below is the script written into the HTML when `defaultPreference` is `'system'`, formatted for reading.",
+});
+
+export const readersScriptDefault = message({
+  ja: 'プロバイダの既定値がここに入る',
+  en: 'The provider’s default goes here',
+});
+
+export const readersHand = message({
+  ja: "スクリプトの中ではスキーマが走らないので、保存された値は手で確かめています。`'light'`と`'dark'`以外を「選んでいない」として読むのは、ストアがスキーマで行を読んだときと同じ結果にするためです。",
+  en: "No schema runs inside the script, so it checks the stored value by hand. It reads anything other than `'light'` or `'dark'` as nothing chosen, so that it agrees with what the store makes of the row through the schema.",
+});
+
+export const readersRow = message({
+  ja: '行を読む部分は、`colorSchemeState.inlineRead()`が作った式です。localStorageのキーも行の形も`@k8ordo/state`の定義から取るので、プロバイダが書く行とずれることはありません。',
+  en: 'The part that reads the row is the expression `colorSchemeState.inlineRead()` produces. The localStorage key and the row’s shape both come from the `@k8ordo/state` definition, so it cannot drift from the row the provider writes.',
+});
+
+export const firstChildTitle = message({
+  ja: 'スクリプトはプロバイダの最初の子',
+  en: 'The script is the provider’s first child',
+});
+
+export const firstChildDescription = message({
+  ja: 'プロバイダは、受け取った`children`より前に`<script>`を描きます。ブラウザはHTMLを読み進めて`<script>`にたどり着いた時点でそれを実行するので、ページの中身にたどり着く前に`<html>`へクラスが付きます。',
+  en: 'The provider renders the `<script>` ahead of the `children` it receives. The browser runs a `<script>` the moment the parser reaches it, so the class is on `<html>` before the parser reaches the page’s content.',
+});
+
+export const firstChildBody = message({
+  ja: 'プロバイダを`<body>`の中でページ全体を包むように置くのは、このためです。プロバイダより前に置いたものは、クラスが付く前に描かれることがあります。スクリプトはプロバイダが自分で描くので、`<head>`に置くものはありません。',
+  en: 'That is why the provider goes inside `<body>`, around the whole page: anything placed before it may be painted before the class is on. The provider renders the script itself, so nothing goes in `<head>`.',
+});
+
+export const firstChildHydration = message({
+  ja: 'ハイドレーションのとき、Reactはこの`<script>`要素をそのまま引き継ぎ、もう一度実行することはありません。',
+  en: 'On hydration React adopts the `<script>` element in place and does not run it again.',
+});
+
+export const hydrationTitle = message({
+  ja: 'ハイドレーションの描画は何も書かない',
+  en: 'The hydration render writes nothing',
+});
+
+export const hydrationDescription = message({
+  ja: "サーバーにはlocalStorageも、尋ねるOSもありません。そのためプロバイダは、何も保存されておらずOSはライトだと仮定して描きます。`preference`は`'system'`で、`scheme`は既定値です。既定値が`'system'`なら`'light'`になります。",
+  en: "A server has no localStorage and no OS to ask, so the provider renders as if nothing were stored and the OS were light: `preference` is `'system'`, and `scheme` is the default, or `'light'` when the default is `'system'`.",
+});
+
+export const hydrationGuess = message({
+  ja: 'ブラウザでの最初の描画、つまりハイドレーションの描画も、サーバーと同じ推測を読みます。この推測をそのまま`<html>`に書くと、スクリプトがすでに正しく付けたクラスを外してしまいます。そこでプロバイダは、ハイドレーションの描画かどうかを`useSyncExternalStore`で見分け、その描画ではクラスを書きません。',
+  en: 'The first render in the browser, the hydration render, reads the same guesses as the server. Writing them onto `<html>` would take off a class the script had already put right, so the provider tells the hydration render apart with `useSyncExternalStore` and writes nothing during it.',
+});
+
+export const hydrationNext = message({
+  ja: '`useSyncExternalStore`は、ハイドレーションの描画ではサーバー用の値（`false`）を返し、そのすぐあとの描画からブラウザの値（`true`）を返します。ストアとOSの設定を読むのもその描画からなので、クラスを書くのは、スクリプトと同じ答えを知っている描画だけです。',
+  en: '`useSyncExternalStore` returns the server value (`false`) in the hydration render and the browser value (`true`) from the render straight after. That is also the render from which the store and the OS setting are read, so the only renders that write the class know the same answer the script did.',
+});
+
+export const hydrationSuppress = message({
+  ja: '`<html>`の`class`がサーバーのHTMLと食い違うのは、スクリプトが付けたからです。ハイドレーションは属性を書き戻さないのでクラスは残り、`suppressHydrationWarning`は開発時の警告だけを止めます。',
+  en: 'The `class` on `<html>` differs from the server’s HTML because the script put it there. Hydration does not write attributes back, so the class stays; `suppressHydrationWarning` only silences the development warning.',
+});
+
+export const hydrationNoGuess = message({
+  ja: 'Cookieやヘッダーを使って、サーバーで先回りして推測することはしません。サーバーが`scheme`から選んで描いたマークアップは、ハイドレーションが終わるまで推測のままです。',
+  en: 'There is no cookie or header for the server to guess from earlier. Markup the server chose from `scheme` stays a guess until hydration.',
+});
+
+export const hydrationLink = message({
+  ja: 'サーバーの推測を表示しない方法',
+  en: 'Keeping the server’s guess off screen',
+});
+
+export const afterTitle = message({
+  ja: 'その後の追従',
+  en: 'Staying in step',
+});
+
+export const afterDescription = message({
+  ja: 'ハイドレーションのあと、クラスを書くのはプロバイダだけです。材料のどれかが変わるたびに規則で決め直し、`scheme`が変わればeffectが`<html>`の`dark`を付け外しします。',
+  en: 'After hydration the provider is the only thing that writes the class. Whenever an input changes it applies the rule again, and when `scheme` changes an effect adds or removes `dark` on `<html>`.',
+});
+
+export const afterChoice = message({
+  ja: '訪問者が選んだとき：`setPreference`がストアを更新します。新しい値は次の描画から使われ、localStorageへの書き込みはその直後に行われます。',
+  en: 'The visitor chooses: `setPreference` updates the store. The new value is used from the next render, and the write to localStorage follows right after.',
+});
+
+export const afterSystem = message({
+  ja: "OSの設定が変わったとき：プロバイダは`matchMedia('(prefers-color-scheme: dark)')`の`change`を購読しています。既定値が`'system'`で何も選んでいなければ、ページを開いたままOSの設定を変えても追従します。",
+  en: "The OS setting changes: the provider listens for `change` on `matchMedia('(prefers-color-scheme: dark)')`. With a `'system'` default and nothing chosen, the page follows the OS while it stays open.",
+});
+
+export const afterTabs = message({
+  ja: '別のタブで変わったとき：`@k8ordo/state`のローカル状態は、このキーの`storage`イベントを購読しています。別のタブでの選択も、別のタブでlocalStorageを消したことも、このタブのプロバイダに届きます。',
+  en: 'Another tab changes it: `@k8ordo/state`’s local state listens for `storage` events on this key. A choice made in another tab, or localStorage cleared there, reaches this tab’s provider.',
+});
+
+export const afterOne = message({
+  ja: 'プロバイダは、アプリに1つだけ置きます。プロバイダはそれぞれがスクリプトを描いてクラスを書くので、`defaultPreference`の違うプロバイダが2つあると食い違います。`useColorScheme()`が読むのは、いちばん近いプロバイダです。',
+  en: 'Put exactly one provider in the application. Each provider renders its own script and writes the class, so two with different `defaultPreference` values disagree. `useColorScheme()` reads the nearest one.',
+});
+
+export const inspectorTitle = message({
+  ja: '材料と結果を見る',
+  en: 'Watch the inputs and the result',
+});
+
+export const inspectorDescription = message({
+  ja: "このページがいま読んでいる材料と、プロバイダが出した結果です。このサイトのプロバイダには`defaultPreference`を渡していないので、既定値は`'system'`です。",
+  en: "What this page reads right now, and what the provider made of it. This site’s provider is given no `defaultPreference`, so the default is `'system'`.",
+});
+
+export const inspectorSteps = [
+  message({
+    ja: 'ヘッダーにある配色の切り替えボタンを押すと、`localStorage.getItem`と`useAppState`の行が変わり、結果の3行も変わります。',
+    en: 'Press the colour scheme switch in the header. The `localStorage.getItem` and `useAppState` rows change, and so do all three results.',
   }),
-  description: message({
-    ja: 'このパッケージは localStorage、`<html>` のクラス、`matchMedia` を使うので、テストはブラウザで走らせます。テストの間では localStorage を消し、`<html>` から `dark` を外し、@k8ordo/state の `resetStateRegistry()` でストアを捨てます。hook は `<ColorSchemeProvider>` を wrapper にして描きます。',
-    en: 'The package uses localStorage, the class on `<html>` and `matchMedia`, so test in a browser. Between tests, clear localStorage, remove `dark` from `<html>`, and drop the stores with @k8ordo/state’s `resetStateRegistry()`; render the hook with `<ColorSchemeProvider>` as the wrapper.',
+  message({
+    ja: "「システムに戻す」を押すと、`localStorage.getItem`の行は`'{}'`になり、`preference`は`system`になります。行は消えずに残ります。",
+    en: "Press “Back to system”. The `localStorage.getItem` row becomes `'{}'`, and `preference` becomes `system`. The row stays rather than disappearing.",
   }),
-  codeDescription: message({
-    ja: 'Vitest のブラウザモードと vitest-browser-react で書いた例です。',
-    en: 'An example with Vitest’s browser mode and vitest-browser-react.',
+  message({
+    ja: 'その状態でOSの外観の設定を切り替えると、`matchMedia`の行と、結果の`scheme`とクラスの行が変わります。',
+    en: 'Now switch your OS’s appearance setting. The `matchMedia` row changes, and so do the `scheme` and class results.',
   }),
-  system: message({
-    ja: "`'system'` が解決される先は、テストを走らせるブラウザの `prefers-color-scheme` です。ダークを好むブラウザで確かめるときは、`@vitest/browser-playwright` の `playwright()` に `contextOptions: { colorScheme: 'dark' }` を渡します。",
-    en: "What `'system'` resolves to is the test browser’s `prefers-color-scheme`. To test against a browser that prefers dark, pass `contextOptions: { colorScheme: 'dark' }` to `playwright()` from `@vitest/browser-playwright`.",
+  message({
+    ja: 'このサイトを別のタブで開いて配色を切り替えると、こちらのタブの行もその場で変わります。',
+    en: 'Open this site in another tab and switch the scheme there. The rows in this tab change in place.',
   }),
-  script: message({
-    ja: 'テストのようにクライアントだけで描くと、インラインスクリプトは実行されません。React はブラウザで自分が作ったインラインの `<script>` を実行せず、開発時にはそのことをコンソールにエラーとして出します。テストで確かめる `<html>` のクラスは、Provider の effect が書いたものです。',
-    en: 'A client-only render, as in a test, does not run the inline script: React never executes an inline `<script>` it creates in the browser, and in development it logs an error saying so. The class a test sees on `<html>` is the one the provider’s effect wrote.',
-  }),
-  unmount: message({
-    ja: '`resetStateRegistry()` の前にコンポーネントをアンマウントします。マウントされたままの hook は古いストアを持ち続けるからです。vitest-browser-react は、各テストの前に前のテストの描画を片付けます。',
-    en: 'Unmount before `resetStateRegistry()`, because a hook that stays mounted keeps its old store. vitest-browser-react cleans up the previous test’s render before each test.',
-  }),
-};
+] as const;
+
+// 実演（クライアント）が名指すのはここから下の文言だけなので、バンドルに載るのもこれだけで済む
+export const inspectorInputs = message({
+  ja: '材料',
+  en: 'Inputs',
+});
+
+export const inspectorResult = message({
+  ja: '結果',
+  en: 'Result',
+});
+
+export const inspectorUnknown = message({
+  ja: 'ブラウザで読みます',
+  en: 'read in the browser',
+});
+
+export const inspectorReset = message({
+  ja: 'システムに戻す',
+  en: 'Back to system',
+});
+
+export const guaranteesTitle = message({
+  ja: '保証すること',
+  en: 'What it guarantees',
+});
+
+export const guaranteesDescription = message({
+  ja: 'ここまでの仕組みから、次のことが成り立ちます。',
+  en: 'Put together, the mechanics above guarantee the following.',
+});
+
+export const guaranteeNoFlash = message({
+  ja: 'ちらつかない：スクリプトは最初の描画の前に走り、プロバイダが書くのと同じ行を読みます。ダークのページは、最初からダークで読み込まれます。',
+  en: 'No flash: the script runs before the first paint and reads the same row the provider writes, so a dark page loads dark.',
+});
+
+export const guaranteeDefault = message({
+  ja: "選んでいなければ既定値に従う：既定値が`'system'`ならOSの設定に従い、初めて訪れたときのOSの答えに固定されることはありません。",
+  en: "Nothing chosen follows the default: a `'system'` default follows the OS, and a visitor is never pinned to what the OS said on the first visit.",
+});
+
+export const guaranteeServer = message({
+  ja: 'ハイドレーションでクラスが外れない：サーバーは既定値で描き、ハイドレーションの描画は何も書きません。クラスを書くのはそのあとの描画で、書くのはスクリプトがすでに付けたものと同じクラスです。',
+  en: 'Hydration never takes the class off: the server renders the default and the hydration render writes nothing. The render after it writes the class, the same one the script already put there.',
+});
+
+export const guaranteeTabs = message({
+  ja: 'タブ同士がそろう：選択は、`@k8ordo/state`のほかのローカル状態と同じく、`storage`イベントでタブの間を伝わります。',
+  en: 'Tabs agree: the choice travels between tabs through the `storage` event, as any `@k8ordo/state` local state does.',
+});
+
+export const limitsTitle = message({
+  ja: 'しないこと',
+  en: 'What it does not do',
+});
+
+export const limitGuess = message({
+  ja: 'サーバーで推測すること：Cookieもヘッダーも読みません。',
+  en: 'Guess on the server: it reads no cookie and no header.',
+});
+
+export const limitClass = message({
+  ja: 'クラスの名前や付ける要素を変えること：付けるのはいつも`<html>`の`dark`です。',
+  en: 'Change the class or where it goes: it is always `dark`, on `<html>`.',
+});
+
+export const limitProperty = message({
+  ja: 'CSSの`color-scheme`プロパティを設定すること：@k8ordo/uiのスタイルシートか、アプリのスタイルシートが宣言します。',
+  en: 'Set the CSS `color-scheme` property: @k8ordo/ui’s stylesheet or the application’s declares it.',
+});
+
+export const limitContrast = message({
+  ja: 'コントラストを保存すること：`prefers-contrast`と`forced-colors`はOSの設定で、スタイルシートがそれに従います。',
+  en: 'Store a contrast preference: `prefers-contrast` and `forced-colors` are the OS’s settings, and the stylesheet follows them.',
+});
+
+export const limitPolicy = message({
+  ja: 'CSPを決めること：スクリプトに付けるnonceも、ポリシーに書くハッシュも、アプリが渡します。',
+  en: 'Decide a CSP: the application gives the nonce the script carries, or writes its hash into the policy.',
+});

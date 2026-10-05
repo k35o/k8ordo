@@ -1,28 +1,18 @@
-import { Code } from '@k8ordo/ui';
+import type { Message } from '@k8ordo/i18n';
 import { CodeBlock } from '@k8ordo/ui/code-block';
 
 import * as m from '../../messages';
 import { DocSection } from '../doc-page';
 import { LocaleAnchor } from '../locale-anchor';
+import { Playground } from '../playground';
 import { Rich } from '../rich';
 import type { Mode } from './mode';
-import {
-  Bullet,
-  Bullets,
-  Cell,
-  GuideTable,
-  Paragraph,
-  Row,
-  SubHeading,
-} from './prose';
+import { PrefetchDemo } from './prefetch-demo';
 
 const TREE = `src/routes/
   layout.tsx
   page.tsx
   not-found.tsx
-  error.tsx
-  old/
-    redirect.ts
   products/
     page.tsx
     [id]/
@@ -34,8 +24,7 @@ const TREE = `src/routes/
   _parts/
     counter.tsx`;
 
-const PAGE_PROPS = `// src/routes/products/[id]/page.tsx
-import type { PageProps } from '@k8ordo/router';
+const PAGE_PROPS = `import type { PageProps } from '@k8ordo/router';
 
 export default function ProductPage({
   params,
@@ -49,28 +38,7 @@ export default function ProductPage({
   );
 }`;
 
-const ROOT_LAYOUT = `// src/routes/layout.tsx
-import type { ReactNode } from 'react';
-
-import { locales } from '../i18n';
-
-export default function Root({
-  children,
-  pathname,
-}: {
-  children: ReactNode;
-  pathname: string;
-}) {
-  const locale = locales.delocalize(pathname).locale ?? locales.default;
-  return (
-    <html dir={locales.definitions[locale].dir} lang={locale}>
-      <body>{children}</body>
-    </html>
-  );
-}`;
-
 const SHADOW_TREE = `src/routes/
-  page.tsx
   about/
     page.tsx
   (shop)/
@@ -79,100 +47,32 @@ const SHADOW_TREE = `src/routes/
     [id]/
       page.tsx`;
 
-const SHADOW_ERROR = `routes/ is not a valid pathname space:
-  routes/about/page.tsx: "/about" can never match — "/:id" ((shop)/[id]/page.tsx) is declared first and answers it`;
+const LOADING = `export default function ProductsLoading() {
+  return <p>Loading products…</p>;
+}`;
 
-const REFUSED = `routes/ is not a valid pathname space:
-  routes/[123]: "[123]" is not a valid param directory — use [name] with a letter or underscore first
-  routes/products/helper.ts: routes/ holds only page.tsx, layout.tsx, not-found.tsx, error.tsx, redirect.ts, guard.ts, route.ts, loading.tsx — move "helper.ts" under a _-prefixed directory`;
+const PENDING = `'use client';
 
-type Refusal = { contains: string | (() => string); error: string };
+import { usePendingPathname } from '@k8ordo/router';
 
-const REFUSALS: readonly Refusal[] = [
-  {
-    contains: '`products/helper.ts`',
-    error:
-      'routes/ holds only page.tsx, layout.tsx, not-found.tsx, error.tsx, redirect.ts, guard.ts, route.ts, loading.tsx — move "helper.ts" under a _-prefixed directory',
-  },
-  {
-    contains: '`[123]/page.tsx`',
-    error:
-      '"[123]" is not a valid param directory — use [name] with a letter or underscore first',
-  },
-  {
-    contains: '`(docs/page.tsx`',
-    error: '"(docs" is not a valid route group — use (name)',
-  },
-  {
-    contains: '`pro ducts/page.tsx`',
-    error:
-      '"pro ducts" cannot be a URL segment — use letters, digits, . _ ~ or -',
-  },
-  {
-    contains: '`[id]/things/[id]/page.tsx`',
-    error:
-      '":id" is already taken by an ancestor — params must be unique within a path',
-  },
-  {
-    contains: m.frameworkRouting.refusesTable.noPageBelow,
-    error: 'has a layout but no page.tsx below it, so it can never render',
-  },
-  {
-    contains: m.frameworkRouting.refusesTable.nothingBelow,
-    error:
-      'declares no route — every directory needs a page.tsx (or a redirect.ts or route.ts) somewhere below it',
-  },
-  {
-    contains: m.frameworkRouting.refusesTable.twoGroups,
-    error:
-      '"/" is already declared by (a)/page.tsx — route groups do not separate URLs',
-  },
-  {
-    contains: m.frameworkRouting.refusesTable.pageAndRedirect,
-    error: '"old" cannot both render page.tsx and redirect — keep one',
-  },
-  {
-    contains: m.frameworkRouting.refusesTable.pageAndRoute,
-    error:
-      '"api" cannot both render page.tsx and answer from route.ts — keep one',
-  },
-  {
-    contains: m.frameworkRouting.refusesTable.redirectAndRoute,
-    error: '"old" cannot both redirect and answer from route.ts — keep one',
-  },
-  {
-    contains: m.frameworkRouting.refusesTable.silentRoute,
-    error:
-      'exports none of GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS — a route.ts answers the methods it exports',
-  },
-  {
-    contains: m.frameworkRouting.refusesTable.searchWithoutState,
-    error:
-      'exports search, which is read through @k8ordo/state — add it to the application’s dependencies',
-  },
-  {
-    contains: m.frameworkRouting.refusesTable.groupShadow,
-    error:
-      '"/about" can never match — "/:id" ((shop)/[id]/page.tsx) is declared first and answers it',
-  },
-  {
-    contains: m.frameworkRouting.refusesTable.catchAllShadow,
-    error:
-      '"/about" can never match — "/*" ((shell)/not-found.tsx) is declared first and answers it',
-  },
-];
+export function Progress() {
+  const pending = usePendingPathname();
+  if (pending === null) return null;
+  return <p role="status">Loading {pending}…</p>;
+}`;
 
-const GENERATED_TREE = `src/routes/
-  layout.tsx
-  page.tsx
-  not-found.tsx
-  products/
-    page.tsx
-    [id]/
-      page.tsx`;
+const ROUTE = `import type { RouteContext } from '@k8ordo/router';
 
-const GENERATED_ROUTES = `// .k8ordo/routes.gen.ts
-export const routes = defineRoutes({
+import { renderFeed } from '../_data/feed.server';
+
+export async function GET({ request }: RouteContext<'/feed.xml'>) {
+  const { origin } = new URL(request.url);
+  return new Response(await renderFeed(origin), {
+    headers: { 'content-type': 'application/rss+xml' },
+  });
+}`;
+
+const GENERATED = `export const routes = defineRoutes({
   '/': {
     layout: layout satisfies Layout<'/'>,
     children: {
@@ -183,561 +83,287 @@ export const routes = defineRoutes({
           '/:id': products_id_page satisfies Page<'/products/:id'>,
         },
       },
-      '/*': not_found satisfies Page<'/*'>,
     },
   },
 });`;
 
-const generatedRegister = (mode: Mode): string => {
-  const request = mode === 'server';
-  return [
-    '// .k8ordo/register.gen.ts',
-    "import type { ParsedParamsMap } from '@k8ordo/router';",
-    ...(request
-      ? ["import type { RouteRequest } from '@k8ordo/server/runtime';"]
-      : []),
-    "import type { paramSchemas, routes } from './routes.gen';",
-    '',
-    "declare module '@k8ordo/router' {",
-    '  interface Register {',
-    '    routes: typeof routes;',
-    '    params: ParsedParamsMap<typeof paramSchemas>;',
-    ...(request ? ['    request: RouteRequest;'] : []),
-    '  }',
-    '}',
-  ].join('\n');
-};
+const TITLE = `import type { PageProps } from '@k8ordo/router';
 
-const TSCONFIG = `{
-  "include": ["src/**/*.ts", "src/**/*.tsx", ".k8ordo/**/*.ts"]
-}`;
-
-const TITLE = `// src/routes/products/[id]/page.tsx
-import type { PageProps } from '@k8ordo/router';
-
-export default function ProductPage({ params }: PageProps<'/products/:id'>) {
+export default function ProductPage({
+  params,
+}: PageProps<'/products/:id'>) {
   return (
     <>
       <title>{\`Product \${params.id}\`}</title>
-      <meta content="One product from the catalog" name="description" />
+      <meta content="One product" name="description" />
       <h1>{params.id}</h1>
     </>
   );
 }`;
 
-const LINKS = `// src/routes/products/page.tsx
-import { href } from '@k8ordo/router';
-
-export default function ProductsPage() {
-  return (
-    <ul>
-      <li>
-        <a href={href('/products/:id', { id: 1 })}>first product</a>
-      </li>
-      <li>
-        <a href={href('/guide')}>guide</a>
-      </li>
-    </ul>
-  );
-}`;
-
 const PREFETCH = `<nav data-k8ordo-prefetch={false}>
-  <a href={href('/reports')}>reports</a>
+  <a href={href('/reports')}>Reports</a>
   <a data-k8ordo-prefetch href={href('/')}>
-    home
+    Home
   </a>
 </nav>`;
 
-const LOADING = `// src/routes/products/loading.tsx
-export default function ProductsLoading() {
-  return <p>loading products…</p>;
-}`;
+const Items = ({ items }: { items: readonly Message[] }) => (
+  <ul>
+    {items.map((item) => (
+      <li key={item()}>
+        <Rich>{item()}</Rich>
+      </li>
+    ))}
+  </ul>
+);
 
-const ROUTE = `// src/routes/feed.xml/route.ts
-import type { RouteContext } from '@k8ordo/router';
-
-import { listProducts } from '../_data/catalog.server';
-
-export async function GET({ request }: RouteContext<'/feed.xml'>) {
-  const origin = new URL(request.url).origin;
-  const items = (await listProducts())
-    .map((product) => \`<item><link>\${origin}/products/\${product.id}</link></item>\`)
-    .join('');
-  return new Response(\`<rss version="2.0"><channel>\${items}</channel></rss>\`, {
-    headers: { 'content-type': 'application/rss+xml;charset=utf-8' },
-  });
-}`;
-
-/** Inline code names, comma separated. */
-function Names({ names }: { names: readonly string[] }) {
-  return names.map((name, index) => (
-    <span key={name}>
-      {index === 0 ? null : ', '}
-      <Code>{name}</Code>
-    </span>
+const Paragraphs = ({ items }: { items: readonly Message[] }) =>
+  items.map((item) => (
+    <p key={item()}>
+      <Rich>{item()}</Rich>
+    </p>
   ));
-}
 
 /**
- * The `routes/` grammar, shared by `/static/routing` and `/server/routing`.
- * Where the two modes differ it reads the mode's own messages.
+ * The `routes/` grammar, shared by `/static/routing` and `/server/routing`;
+ * where the modes differ it reads the mode's own messages. A function rather
+ * than a component, so `DocPage` sees the sections it returns and lists them
+ * in the contents.
  */
-export function RoutingGuide({ mode }: { mode: Mode }) {
+export const routingSections = (mode: Mode) => {
   const t = m.frameworkRouting;
   const own = mode === 'static' ? m.staticRouting : m.serverRouting;
-  const request = mode === 'server' ? ['request'] : [];
+  const routeOwn =
+    mode === 'static'
+      ? [
+          m.staticRouting.routeMode,
+          m.staticRouting.routeSite,
+          m.staticRouting.routeLimits,
+          m.staticRouting.routeSitemap,
+        ]
+      : [
+          m.serverRouting.routeMode,
+          m.serverRouting.routeGuard,
+          m.serverRouting.routeApi,
+        ];
+  const loadingOwn =
+    mode === 'static'
+      ? [m.staticRouting.loadingMode]
+      : [m.serverRouting.loadingMode, m.serverRouting.loadingNav];
 
   return (
     <>
-      <DocSection description={t.treeDescription} title={t.treeTitle}>
-        <CodeBlock code={TREE} lang="bash" />
-        <GuideTable head={[t.urlTable.file, t.urlTable.url, t.urlTable.role]}>
-          <Row>
-            <Cell nowrap>
-              <Code>layout.tsx</Code>
-            </Cell>
-            <Cell nowrap>—</Cell>
-            <Cell>
-              <Rich>{t.urlTable.rootLayout()}</Rich>
-            </Cell>
-          </Row>
-          <Row>
-            <Cell nowrap>
-              <Code>page.tsx</Code>
-            </Cell>
-            <Cell nowrap>
-              <Code>/</Code>
-            </Cell>
-            <Cell>
-              <Rich>{t.urlTable.rootPage()}</Rich>
-            </Cell>
-          </Row>
-          <Row>
-            <Cell nowrap>
-              <Code>not-found.tsx</Code>
-            </Cell>
-            <Cell nowrap>
-              <Code>{'/*'}</Code>
-            </Cell>
-            <Cell>
-              <Rich>{t.urlTable.notFound()}</Rich>
-            </Cell>
-          </Row>
-          <Row>
-            <Cell nowrap>
-              <Code>error.tsx</Code>
-            </Cell>
-            <Cell nowrap>—</Cell>
-            <Cell>
-              <Rich>{t.urlTable.error()}</Rich>
-            </Cell>
-          </Row>
-          <Row>
-            <Cell nowrap>
-              <Code>old/redirect.ts</Code>
-            </Cell>
-            <Cell nowrap>
-              <Code>/old</Code>
-            </Cell>
-            <Cell>
-              <Rich>{t.urlTable.redirect()}</Rich>
-            </Cell>
-          </Row>
-          <Row>
-            <Cell nowrap>
-              <Code>products/page.tsx</Code>
-            </Cell>
-            <Cell nowrap>
-              <Code>/products</Code>
-            </Cell>
-            <Cell>
-              <Rich>{t.urlTable.literal()}</Rich>
-            </Cell>
-          </Row>
-          <Row>
-            <Cell nowrap>
-              <Code>products/[id]/page.tsx</Code>
-            </Cell>
-            <Cell nowrap>
-              <Code>/products/:id</Code>
-            </Cell>
-            <Cell>
-              <Rich>{t.urlTable.param()}</Rich>
-            </Cell>
-          </Row>
-          <Row>
-            <Cell nowrap>
-              <Code>(docs)/layout.tsx</Code>
-            </Cell>
-            <Cell nowrap>—</Cell>
-            <Cell>
-              <Rich>{t.urlTable.groupLayout()}</Rich>
-            </Cell>
-          </Row>
-          <Row>
-            <Cell nowrap>
-              <Code>(docs)/guide/page.tsx</Code>
-            </Cell>
-            <Cell nowrap>
-              <Code>/guide</Code>
-            </Cell>
-            <Cell>
-              <Rich>{t.urlTable.groupPage()}</Rich>
-            </Cell>
-          </Row>
-          <Row>
-            <Cell nowrap>
-              <Code>_parts/counter.tsx</Code>
-            </Cell>
-            <Cell nowrap>—</Cell>
-            <Cell>
-              <Rich>{t.urlTable.private()}</Rich>
-            </Cell>
-          </Row>
-        </GuideTable>
+      <DocSection description={t.treeDescription} id="tree" title={t.treeTitle}>
+        <CodeBlock code={TREE} lang="text" />
+        <Items items={t.treeMap} />
+        <p>
+          <Rich>{t.treeChecked()}</Rich>
+        </p>
       </DocSection>
 
-      <DocSection description={t.filesDescription} title={t.filesTitle}>
-        <GuideTable
-          head={[t.filesTable.file, t.filesTable.role, t.filesTable.receives]}
-        >
-          <Row>
-            <Cell nowrap>
-              <Code>page.tsx</Code>
-            </Cell>
-            <Cell>
-              <Rich>{t.filesTable.page()}</Rich>
-            </Cell>
-            <Cell>
-              <Names names={['params', 'pathname', ...request]} />
-            </Cell>
-          </Row>
-          <Row>
-            <Cell nowrap>
-              <Code>layout.tsx</Code>
-            </Cell>
-            <Cell>
-              <Rich>{t.filesTable.layout()}</Rich>
-            </Cell>
-            <Cell>
-              <Names names={['children', 'params', 'pathname', ...request]} />
-            </Cell>
-          </Row>
-          <Row>
-            <Cell nowrap>
-              <Code>not-found.tsx</Code>
-            </Cell>
-            <Cell>
-              <Rich>{t.filesTable.notFound()}</Rich>
-            </Cell>
-            <Cell>
-              <Names names={['params', 'pathname', ...request]} />
-            </Cell>
-          </Row>
-          <Row>
-            <Cell nowrap>
-              <Code>error.tsx</Code>
-            </Cell>
-            <Cell>
-              <Rich>{t.filesTable.error()}</Rich>
-            </Cell>
-            <Cell>
-              <Names names={['error', 'reset']} />
-            </Cell>
-          </Row>
-          <Row>
-            <Cell nowrap>
-              <Code>loading.tsx</Code>
-            </Cell>
-            <Cell>
-              <Rich>{t.filesTable.loading()}</Rich>
-            </Cell>
-            <Cell>
-              <Rich>{t.filesTable.noProps()}</Rich>
-            </Cell>
-          </Row>
-          <Row>
-            <Cell nowrap>
-              <Code>redirect.ts</Code>
-            </Cell>
-            <Cell>
-              <Rich>{t.filesTable.redirect()}</Rich>
-            </Cell>
-            <Cell>
-              <Rich>{t.filesTable.nothing()}</Rich>
-            </Cell>
-          </Row>
-          <Row>
-            <Cell nowrap>
-              <Code>route.ts</Code>
-            </Cell>
-            <Cell>
-              <Rich>{t.filesTable.route()}</Rich>
-            </Cell>
-            <Cell>
-              <Names names={['request', 'params']} />
-            </Cell>
-          </Row>
-          <Row>
-            <Cell nowrap>
-              <Code>guard.ts</Code>
-            </Cell>
-            <Cell>
-              <Rich>{t.filesTable.guard()}</Rich>
-            </Cell>
-            <Cell>
-              <Names names={['request', 'params']} />
-            </Cell>
-          </Row>
-        </GuideTable>
-        <Paragraph text={own.filesNote}>
-          {mode === 'static' ? (
-            <LocaleAnchor path="/:locale/static/errors">
-              {m.static.navErrors()}
-            </LocaleAnchor>
-          ) : (
-            <LocaleAnchor path="/:locale/server/actions">
-              {m.server.navActions()}
-            </LocaleAnchor>
+      <DocSection
+        description={t.namesDescription}
+        id="names"
+        title={t.namesTitle}
+      >
+        <Items items={t.namesList} />
+        <p>
+          <Rich>{t.namesNoRest()}</Rich>
+        </p>
+      </DocSection>
+
+      <DocSection
+        description={t.filesDescription}
+        id="files"
+        title={t.filesTitle}
+      >
+        <Items items={[...t.filesList, own.guardFile]} />
+        <p>
+          <Rich>{t.filesOther()}</Rich>
+        </p>
+      </DocSection>
+
+      <DocSection
+        description={t.propsDescription}
+        id="props"
+        title={t.propsTitle}
+      >
+        <CodeBlock
+          code={PAGE_PROPS}
+          lang="tsx"
+          marks={{ 4: 'highlight', 5: 'highlight' }}
+          title="src/routes/products/[id]/page.tsx"
+        />
+        <p>
+          <Rich>{t.propsPathname()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.propsTypes()}</Rich>
+        </p>
+        <p>
+          <Rich>{own.propsRequest()}</Rich>
+          {mode === 'server' && (
+            <>
+              {' '}
+              <LocaleAnchor path="/:locale/server/request">
+                {m.server.navRequest()}
+              </LocaleAnchor>
+            </>
           )}
-        </Paragraph>
+        </p>
       </DocSection>
 
-      <DocSection description={t.segmentsDescription} title={t.segmentsTitle}>
-        <GuideTable
-          head={[
-            t.segmentsTable.form,
-            t.segmentsTable.adds,
-            t.segmentsTable.meaning,
-          ]}
-        >
-          <Row>
-            <Cell nowrap>
-              <Code>products</Code>
-            </Cell>
-            <Cell nowrap>
-              <Code>/products</Code>
-            </Cell>
-            <Cell>
-              <Rich>{t.segmentsTable.literal()}</Rich>
-            </Cell>
-          </Row>
-          <Row>
-            <Cell nowrap>
-              <Code>[id]</Code>
-            </Cell>
-            <Cell nowrap>
-              <Code>/:id</Code>
-            </Cell>
-            <Cell>
-              <Rich>{t.segmentsTable.param()}</Rich>
-            </Cell>
-          </Row>
-          <Row>
-            <Cell nowrap>
-              <Code>(docs)</Code>
-            </Cell>
-            <Cell nowrap>
-              <Rich>{t.segmentsTable.none()}</Rich>
-            </Cell>
-            <Cell>
-              <Rich>{t.segmentsTable.group()}</Rich>
-            </Cell>
-          </Row>
-          <Row>
-            <Cell nowrap>
-              <Code>_parts</Code>
-            </Cell>
-            <Cell nowrap>
-              <Rich>{t.segmentsTable.none()}</Rich>
-            </Cell>
-            <Cell>
-              <Rich>{t.segmentsTable.private()}</Rich>
-            </Cell>
-          </Row>
-        </GuideTable>
-        <Paragraph text={t.segmentsNoRest} />
+      <DocSection
+        description={t.orderDescription}
+        id="order"
+        title={t.orderTitle}
+      >
+        <p>
+          <Rich>{t.orderGroup()}</Rich>
+        </p>
+        <CodeBlock code={SHADOW_TREE} lang="text" />
+        <p>
+          <Rich>{t.orderShadow()}</Rich>
+        </p>
       </DocSection>
 
-      <DocSection description={t.propsDescription} title={t.propsTitle}>
-        <CodeBlock code={PAGE_PROPS} lang="tsx" />
-        <Paragraph text={t.propsTypes} />
-        <Paragraph text={t.propsSite} />
-        <CodeBlock code={ROOT_LAYOUT} lang="tsx" />
+      <DocSection
+        description={t.refusesDescription}
+        id="refuses"
+        title={t.refusesTitle}
+      >
+        <Items items={t.refusesList} />
+        <p>
+          <Rich>{t.refusesDev()}</Rich>
+        </p>
+        <p>
+          <Rich>{own.refusesMode()}</Rich>
+          {mode === 'static' && (
+            <>
+              {' '}
+              <LocaleAnchor path="/:locale/static/how-it-works">
+                {m.static.navHowItWorks()}
+              </LocaleAnchor>
+            </>
+          )}
+        </p>
       </DocSection>
 
-      <DocSection description={t.orderDescription} title={t.orderTitle}>
-        <Paragraph text={t.orderGroups} />
-        <CodeBlock code={SHADOW_TREE} lang="bash" />
-        <CodeBlock code={SHADOW_ERROR} lang="bash" />
+      <DocSection
+        description={t.loadingDescription}
+        id="loading"
+        title={t.loadingTitle}
+      >
+        <CodeBlock
+          code={LOADING}
+          lang="tsx"
+          title="src/routes/products/loading.tsx"
+        />
+        <p>
+          <Rich>{t.loadingWhen()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.loadingKeep()}</Rich>
+        </p>
+        <CodeBlock
+          code={PENDING}
+          lang="tsx"
+          title="src/routes/_parts/progress.tsx"
+        />
+        <Paragraphs items={loadingOwn} />
       </DocSection>
 
-      <DocSection description={t.refusesDescription} title={t.refusesTitle}>
-        <CodeBlock code={REFUSED} lang="bash" />
-        <GuideTable head={[t.refusesTable.contains, t.refusesTable.error]}>
-          {REFUSALS.map((refusal) => (
-            <Row key={refusal.error}>
-              <Cell>
-                <Rich>
-                  {typeof refusal.contains === 'string'
-                    ? refusal.contains
-                    : refusal.contains()}
-                </Rich>
-              </Cell>
-              <Cell>
-                <Code>{refusal.error}</Code>
-              </Cell>
-            </Row>
-          ))}
-        </GuideTable>
-        <Paragraph text={t.refusesShadowing} />
-        <Paragraph text={own.refusesNote} />
-        {mode === 'static' && (
-          <Bullets>
-            <Bullet>
-              <Rich>{m.staticRouting.refusesPaths()}</Rich> —{' '}
-              <LocaleAnchor path="/:locale/static/params">
-                {m.static.navParams()}
-              </LocaleAnchor>
-            </Bullet>
-            <Bullet>
-              <Rich>{m.staticRouting.refusesNotFound()}</Rich> —{' '}
-              <LocaleAnchor path="/:locale/static/deploy">
-                {m.static.navDeploy()}
-              </LocaleAnchor>
-            </Bullet>
-            <Bullet>
-              <Rich>{m.staticRouting.refusesActions()}</Rich> —{' '}
-              <LocaleAnchor path="/:locale/static/get-started">
-                {m.nav.getStarted()}
-              </LocaleAnchor>
-            </Bullet>
-            <Bullet>
-              <Rich>{m.staticRouting.refusesGuards()}</Rich> —{' '}
-              <LocaleAnchor path="/:locale/static/get-started">
-                {m.nav.getStarted()}
-              </LocaleAnchor>
-            </Bullet>
-            <Bullet>
-              <Rich>{m.staticRouting.refusesRouteMethods()}</Rich>
-            </Bullet>
-            <Bullet>
-              <Rich>{m.staticRouting.refusesThrow()}</Rich> —{' '}
-              <LocaleAnchor path="/:locale/static/errors">
-                {m.static.navErrors()}
-              </LocaleAnchor>
-            </Bullet>
-          </Bullets>
+      <DocSection
+        description={t.routeDescription}
+        id="route"
+        title={t.routeTitle}
+      >
+        <CodeBlock
+          code={ROUTE}
+          lang="ts"
+          title="src/routes/feed.xml/route.ts"
+        />
+        <p>
+          <Rich>{t.routeContext()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.routeName()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.routeAlone()}</Rich>
+        </p>
+        <Paragraphs items={routeOwn} />
+      </DocSection>
+
+      <DocSection
+        description={t.generatedDescription}
+        id="generated"
+        title={t.generatedTitle}
+      >
+        <Items items={t.generatedFiles} />
+        <CodeBlock code={GENERATED} lang="ts" title=".k8ordo/routes.gen.ts" />
+        <p>
+          <Rich>{t.generatedRead()}</Rich>
+        </p>
+        {mode === 'server' && (
+          <p>
+            <Rich>{m.serverRouting.generatedMode()}</Rich>
+          </p>
         )}
+        <p>
+          <Rich>{t.generatedTsc()}</Rich>
+        </p>
       </DocSection>
 
-      <DocSection description={t.loadingDescription} title={t.loadingTitle}>
-        <CodeBlock code={LOADING} lang="tsx" />
-        <Paragraph text={t.loadingWhen}>
-          <LocaleAnchor path="/:locale/router/navigation">
-            {m.router.navNavigation()}
-          </LocaleAnchor>
-        </Paragraph>
-        <Paragraph
-          text={
-            mode === 'static'
-              ? m.staticRouting.loadingStatic
-              : m.serverRouting.loadingServer
-          }
+      <DocSection
+        description={t.titlesDescription}
+        id="titles"
+        title={t.titlesTitle}
+      >
+        <CodeBlock
+          code={TITLE}
+          lang="tsx"
+          marks={{ 8: 'highlight', 9: 'highlight' }}
+          title="src/routes/products/[id]/page.tsx"
         />
+        <p>
+          <Rich>{t.titlesOne()}</Rich>
+        </p>
       </DocSection>
 
-      <DocSection description={t.routeDescription} title={t.routeTitle}>
-        <CodeBlock code={ROUTE} lang="ts" />
-        <Paragraph text={t.routeReceives} />
-        <Paragraph text={t.routeOrder} />
-        <Paragraph
-          text={
-            mode === 'static'
-              ? m.staticRouting.routeStatic
-              : m.serverRouting.routeServer
-          }
-        />
-      </DocSection>
-
-      <DocSection description={t.generatedDescription} title={t.generatedTitle}>
-        <GuideTable head={[t.generatedTable.file, t.generatedTable.holds]}>
-          <Row>
-            <Cell nowrap>
-              <Code>routes.gen.ts</Code>
-            </Cell>
-            <Cell>
-              <Rich>{t.generatedTable.routes()}</Rich>
-            </Cell>
-          </Row>
-          <Row>
-            <Cell nowrap>
-              <Code>register.gen.ts</Code>
-            </Cell>
-            <Cell>
-              <Rich>{t.generatedTable.register()}</Rich>
-            </Cell>
-          </Row>
-          <Row>
-            <Cell nowrap>
-              <Code>.gitignore</Code>
-            </Cell>
-            <Cell>
-              <Rich>{t.generatedTable.gitignore()}</Rich>
-            </Cell>
-          </Row>
-        </GuideTable>
-        <Paragraph text={t.generatedExample} />
-        <CodeBlock code={GENERATED_TREE} lang="bash" />
-        <CodeBlock code={GENERATED_ROUTES} lang="ts" />
-        <CodeBlock code={generatedRegister(mode)} lang="ts" />
-        <SubHeading text={t.setup.tsconfigTitle} />
-        <Paragraph text={t.generatedTsconfig} />
-        <CodeBlock code={TSCONFIG} lang="json" />
-        <Paragraph text={t.generatedTypecheck} />
-      </DocSection>
-
-      <DocSection description={t.titlesDescription} title={t.titlesTitle}>
-        <CodeBlock code={TITLE} lang="tsx" />
-        <Paragraph text={t.titlesOne} />
-      </DocSection>
-
-      <DocSection description={t.linksDescription} title={t.linksTitle}>
-        <CodeBlock code={LINKS} lang="tsx" />
-        <Paragraph text={t.linksMore}>
-          <LocaleAnchor path="/:locale/router/links">
-            {m.router.navLinks()}
-          </LocaleAnchor>
-          {' · '}
-          <LocaleAnchor path="/:locale/router/framework">
-            {m.router.navFramework()}
-          </LocaleAnchor>
-        </Paragraph>
-      </DocSection>
-
-      <DocSection description={t.prefetchDescription} title={t.prefetchTitle}>
-        <Bullets>
-          <Bullet>
-            <Rich>{t.prefetchSameOrigin()}</Rich>
-          </Bullet>
-          <Bullet>
-            <Rich>{t.prefetchInPlace()}</Rich>
-          </Bullet>
-          <Bullet>
-            <Rich>{t.prefetchOnScreen()}</Rich>
-          </Bullet>
-        </Bullets>
-        <SubHeading text={t.prefetchStopTitle} />
-        <Paragraph text={t.prefetchStop} />
+      <DocSection
+        description={t.prefetchDescription}
+        id="prefetch"
+        title={t.prefetchTitle}
+      >
+        <p>
+          <Rich>{t.prefetchAny()}</Rich>
+        </p>
+        <Items items={t.prefetchSkipped} />
+        <p>
+          <Rich>{t.prefetchStop()}</Rich>
+        </p>
         <CodeBlock code={PREFETCH} lang="tsx" />
-        <SubHeading text={t.prefetchReuseTitle} />
-        <Paragraph text={t.prefetchReuse} />
-        <Paragraph text={t.prefetchDropped} />
-        <Paragraph
-          text={mode === 'static' ? t.prefetchStatic : t.prefetchServer}
-        />
-        <Paragraph text={t.prefetchSpeculation} />
+        <p>
+          <Rich>{t.prefetchOnce()}</Rich>
+        </p>
+        <p>
+          <Rich>{own.prefetchMode()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.prefetchSpeculation()}</Rich>
+        </p>
       </DocSection>
+
+      <Playground
+        description={t.demoDescription}
+        id="prefetch-demo"
+        steps={t.demoSteps}
+        title={t.demoTitle}
+      >
+        <PrefetchDemo mode={mode} />
+      </Playground>
     </>
   );
-}
+};
