@@ -133,6 +133,11 @@ export const navEntry = message({
   en: 'State in the history entry',
 });
 
+export const navStorage = message({
+  ja: '端末に好みを保存する',
+  en: 'Save preferences on the device',
+});
+
 export const navReading = message({
   ja: '読み取りとリンク',
   en: 'Reading & links',
