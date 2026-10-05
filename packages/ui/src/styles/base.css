@@ -298,7 +298,8 @@
   }
   .ao-code-block .ao-code-label {
     display: block;
-    padding: 0.75rem 3rem 0 1.25rem;
+    padding-block: 0.75rem 0;
+    padding-inline: 1.25rem 3rem;
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     font-size: 0.75rem;
     line-height: 1;
