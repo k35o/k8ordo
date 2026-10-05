@@ -57,6 +57,7 @@ export * as routerRoutes from './router-routes';
 export * as routerBoundaries from './router-boundaries';
 export * as routerLinks from './router-links';
 export * as routerLocation from './router-location';
+export * as routerBindParams from './router-bind-params';
 export * as routerNavigation from './router-navigation';
 export * as routerFramework from './router-framework';
 export * as staticGetStarted from './static-get-started';

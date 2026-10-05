@@ -113,6 +113,11 @@ export const navLocation = message({
   en: 'Find where you are',
 });
 
+export const navBindParams = message({
+  ja: 'すべてのリンクに共通のparamを束ねる',
+  en: 'Bind a param every link shares',
+});
+
 export const navNavigation = message({
   ja: 'ナビゲーション',
   en: 'Navigation',

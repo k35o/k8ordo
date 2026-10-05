@@ -163,6 +163,10 @@ export const PACKAGES: PackageEntry[] = [
           { path: '/:locale/router/boundaries', label: m.router.navBoundaries },
           { path: '/:locale/router/links', label: m.router.navLinks },
           { path: '/:locale/router/location', label: m.router.navLocation },
+          {
+            path: '/:locale/router/bind-params',
+            label: m.router.navBindParams,
+          },
           { path: '/:locale/router/navigation', label: m.router.navNavigation },
           { path: '/:locale/router/framework', label: m.router.navFramework },
         ],
