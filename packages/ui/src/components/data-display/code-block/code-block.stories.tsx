@@ -13,6 +13,16 @@ const meta: Meta<typeof CodeBlock> = {
   component: CodeBlock,
   parameters: {
     layout: 'padded',
+    // トークンの色は k8o のブログと同じ one-light / plastic のままで、コメント
+    // などは地に対して 4.5:1 に届かない。コントラストの検査はコードの中だけ
+    // 外し、見出しの行の文字は検査する
+    a11y: {
+      config: {
+        rules: [
+          { id: 'color-contrast', selector: '*:not(.ao-code-block pre *)' },
+        ],
+      },
+    },
   },
   loaders: [
     async ({ args }) => ({
@@ -38,11 +48,107 @@ export const Default: Story = {
     code: SAMPLE,
     lang: 'tsx',
   },
-  play: async ({ canvas, canvasElement }) => {
+  play: async ({ canvas }) => {
     await expect(canvas.getByText('tsx')).toBeInTheDocument();
-    await expect(
-      canvasElement.querySelector('pre [style*="--shiki-token-keyword"]'),
-    ).toHaveTextContent('import');
+  },
+};
+
+// 色はトークンではなく、k8o のブログと同じ固定の値。ライトは one-light、
+// ダークは plastic で、見出しの行は線ではなく地の段差でコードと分ける
+const colorsOf = (canvasElement: HTMLElement) => {
+  const figure = canvasElement.querySelector('figure') as HTMLElement;
+  const label = figure.firstElementChild as HTMLElement;
+  const pre = figure.querySelector('pre') as HTMLElement;
+  const keyword = [...figure.querySelectorAll('pre span span')].find(
+    (token) => token.textContent === 'import',
+  ) as HTMLElement;
+  // 面の色は bg-surface のトークンそのもの。計算済みの値で比べる
+  const probe = document.createElement('div');
+  probe.style.backgroundColor = 'var(--bg-surface)';
+  figure.append(probe);
+  const surface = getComputedStyle(probe).backgroundColor;
+  probe.remove();
+  return {
+    surfaceIsToken: getComputedStyle(figure).backgroundColor === surface,
+    border: getComputedStyle(figure).borderTopWidth,
+    label: getComputedStyle(label).backgroundColor,
+    code: getComputedStyle(pre).backgroundColor,
+    keyword: getComputedStyle(keyword).color,
+  };
+};
+
+export const LightColors: Story = {
+  args: { code: SAMPLE, lang: 'tsx' },
+  parameters: { theme: 'light' },
+  play: async ({ canvasElement }) => {
+    await expect(colorsOf(canvasElement)).toStrictEqual({
+      surfaceIsToken: true,
+      border: '0px',
+      label: 'rgba(0, 0, 0, 0)',
+      code: 'rgba(0, 0, 0, 0)',
+      keyword: 'rgb(166, 38, 164)',
+    });
+  },
+};
+
+export const DarkColors: Story = {
+  args: { code: SAMPLE, lang: 'tsx' },
+  parameters: { theme: 'dark' },
+  play: async ({ canvasElement }) => {
+    await expect(colorsOf(canvasElement)).toStrictEqual({
+      surfaceIsToken: true,
+      border: '0px',
+      label: 'rgba(0, 0, 0, 0)',
+      code: 'rgba(0, 0, 0, 0)',
+      // plastic の #e06c75 そのまま
+      keyword: 'rgb(224, 108, 117)',
+    });
+  },
+};
+
+// 並べた 2 つの高さを親がそろえても、見出しの行は自分の高さのまま。
+// 余った高さはコードの行が受ける
+const SHORT = { code: 'pnpm add @k8ordo/ui', lang: 'bash' };
+const LONG = {
+  code: Array.from(
+    { length: 12 },
+    (_, index) => `line ${String(index + 1)}`,
+  ).join('\n'),
+  lang: 'text',
+};
+
+const heightOf = (element: Element | null | undefined) =>
+  element?.getBoundingClientRect().height ?? 0;
+
+export const StretchedByParent: Story = {
+  args: SHORT,
+  loaders: [
+    async () => ({
+      short: await CodeBlock(SHORT),
+      long: await CodeBlock(LONG),
+    }),
+  ],
+  render: (_args, { loaded }) => {
+    const { short, long } = loaded as {
+      short: ReactElement;
+      long: ReactElement;
+    };
+    return (
+      <div className="grid grid-cols-2 gap-4 *:min-w-0">
+        {short}
+        {long}
+      </div>
+    );
+  },
+  play: async ({ canvas }) => {
+    const [short, long] = await canvas.findAllByRole('figure');
+
+    // 親のグリッドが短い方を長い方の高さまで引き伸ばしている
+    await expect(heightOf(short)).toBeCloseTo(heightOf(long), 0);
+    await expect(heightOf(short?.firstElementChild)).toBeCloseTo(
+      heightOf(long?.firstElementChild),
+      0,
+    );
   },
 };
 
@@ -53,11 +159,14 @@ export const WithTitle: Story = {
     title: 'save.tsx',
   },
   play: async ({ canvas }) => {
-    const caption = await canvas.findByText('save.tsx');
+    const name = await canvas.findByText('save.tsx');
+    const caption = name.parentElement;
 
     // figure の名前になるのは、最初（か最後）の子の figcaption だけ
-    await expect(caption.tagName).toBe('FIGCAPTION');
+    await expect(caption?.tagName).toBe('FIGCAPTION');
     await expect(canvas.getByRole('figure').firstElementChild).toBe(caption);
+    // ファイル名はコードの識別子なので、等幅の code で見せる
+    await expect(name.tagName).toBe('CODE');
   },
 };
 
@@ -78,7 +187,7 @@ const rate = total === 0 ? 0 : done / total;`,
 
     await expect(removed).toHaveTextContent('const rate = done / total;');
     await expect(getComputedStyle(removed as Element, '::before').content).toBe(
-      '"−"',
+      '"－"',
     );
   },
 };

@@ -842,8 +842,8 @@ export const codeBlock = {
     en: 'Colors and Dark Mode',
   }),
   colorsDescription: message({
-    ja: 'shiki の css-variables テーマを使い、`--shiki-token-*` を ui のトークンに結びつけている。トークンが `.dark` で切り替わるので、ダーク用のテーマは持たない。知らない言語名は色を付けずに描く。',
-    en: 'It uses shiki’s css-variables theme, with each `--shiki-token-*` mapped to a design token. The tokens switch under `.dark`, so there is no second theme. A language name shiki does not know renders as plain text.',
+    ja: '色はデザイントークンではなく、k8o のブログと同じ固定の値で持つ。ライトは shiki の `one-light`、ダークは `plastic` で、地に対して 4.5:1 に届かないいくつかの色だけを明度をずらして置き換えている。色は `light-dark()` で書くので、`.dark` が切り替える `color-scheme` に従う。外枠の線は無く、見出しの行（言語名かファイル名）は線ではなく地の段差でコードと分ける。知らない言語名は色を付けずに描く。',
+    en: 'The colors are fixed values matching k8o’s blog, not design tokens: shiki’s `one-light` in light and `plastic` in dark, with the few colors that fall short of 4.5:1 on their ground shifted in lightness until they reach it. They are written as `light-dark()`, so they follow the `color-scheme` that `.dark` switches. There is no outer border; the header (the language or the file name) is set apart from the code by a step in the ground rather than a line. A language name shiki does not know renders as plain text.',
   }),
 };
 
