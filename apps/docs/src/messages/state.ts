@@ -119,8 +119,8 @@ export const nextIntegrations = message({
 });
 
 export const navPlaces = message({
-  ja: '置き場所',
-  en: 'Places',
+  ja: '置き場所を選ぶ',
+  en: 'Choose a place',
 });
 
 export const navReading = message({
