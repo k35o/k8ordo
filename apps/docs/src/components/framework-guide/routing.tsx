@@ -658,8 +658,8 @@ export function RoutingGuide({ mode }: { mode: Mode }) {
       >
         <CodeBlock code={LOADING} lang="tsx" />
         <Paragraph text={t.loadingWhen}>
-          <LocaleAnchor path="/:locale/router/navigation">
-            {m.router.navNavigation()}
+          <LocaleAnchor path="/:locale/router/location">
+            {m.router.navLocation()}
           </LocaleAnchor>
         </Paragraph>
         <Paragraph

@@ -61,7 +61,6 @@ export * as routerBindParams from './router-bind-params';
 export * as routerTypedPaths from './router-typed-paths';
 export * as routerBase from './router-base';
 export * as routerAnimate from './router-animate';
-export * as routerNavigation from './router-navigation';
 export * as routerFramework from './router-framework';
 export * as routerTesting from './router-testing';
 export * as routerHowItWorks from './router-how-it-works';

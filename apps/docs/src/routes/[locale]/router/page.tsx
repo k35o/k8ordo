@@ -136,9 +136,9 @@ export default function RouterPage() {
             description: m.router.nextLinks,
           },
           {
-            path: '/:locale/router/navigation',
-            label: m.router.navNavigation,
-            description: m.router.nextNavigation,
+            path: '/:locale/router/location',
+            label: m.router.navLocation,
+            description: m.router.nextLocation,
           },
           {
             path: '/:locale/router/framework',

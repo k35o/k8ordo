@@ -204,7 +204,7 @@ export default function StateIntegrationsPage() {
           </LocaleAnchor>
         </p>
         <p>
-          <LocaleAnchor path="/:locale/router/navigation">
+          <LocaleAnchor path="/:locale/router/how-it-works">
             <Rich>{m.stateIntegrations.kRouterLink()}</Rich>
           </LocaleAnchor>
         </p>

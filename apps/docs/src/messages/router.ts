@@ -69,28 +69,28 @@ export const claimNavigationBody = [
 ] as const;
 
 export const nextGetStarted = message({
-  ja: 'ルート表を書き、ブラウザでマウントし、リンクを表で確かめるところまで作ります。',
-  en: 'Write a table, mount it in the browser, and check links against it.',
+  ja: 'ルート表を書いてから、型で確かめたリンクを張るまでを、一通り作ります。',
+  en: 'Build an app end to end, from the route table to links checked by the types.',
 });
 
 export const nextRoutes = message({
-  ja: 'ルート表の文法と照合の順序、エラー境界と読み込み中の表示です。',
-  en: 'The table’s grammar, matching order, error boundaries and loading states.',
+  ja: 'パターンの書き方と照合の順序、ページのまとめ方です。',
+  en: 'How patterns are written, the order they match in, and how pages are grouped.',
 });
 
 export const nextLinks = message({
-  ja: '`href`と`navigateTo`、`bindParams`、現在地を読むフックです。',
-  en: '`href`, `navigateTo`, `bindParams`, and the hooks that read where you are.',
+  ja: '`href`でリンクを作り、`navigateTo`でページを移ります。',
+  en: 'Build links with `href`, and change pages with `navigateTo`.',
 });
 
-export const nextNavigation = message({
-  ja: 'どの移動をルーターが引き受け、何を保証するかと、アニメーション、テストの書き方です。',
-  en: 'Which navigations it takes, what it guarantees, animation and testing.',
+export const nextLocation = message({
+  ja: '`useMatch`や`usePathname`で、いま開いているページを調べます。',
+  en: 'Find the page you are on with `useMatch` and `usePathname`.',
 });
 
 export const nextFramework = message({
-  ja: '`@k8ordo/static`や`@k8ordo/server`の下で使う部分と、生成される型です。',
-  en: 'What you use under `@k8ordo/static` and `@k8ordo/server`, and the generated types.',
+  ja: '`@k8ordo/static`や`@k8ordo/server`の下で使う部分と、propsの型です。',
+  en: 'What you use under `@k8ordo/static` and `@k8ordo/server`, and the props types.',
 });
 
 export const navRoutes = message({
@@ -131,11 +131,6 @@ export const navBase = message({
 export const navAnimate = message({
   ja: 'ページの切り替えをアニメーションする',
   en: 'Animate page changes',
-});
-
-export const navNavigation = message({
-  ja: 'ナビゲーション',
-  en: 'Navigation',
 });
 
 export const navFramework = message({
