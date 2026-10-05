@@ -51,8 +51,8 @@ export const rowsLight = message({
 });
 
 export const rowsSystem = message({
-  ja: '`setPreference(\'system\')`：`{}`が書かれます。行は消えず、`preference`の無いオブジェクトが残ります。',
-  en: '`setPreference(\'system\')`: `{}` is written. The row stays, holding an object with no `preference`.',
+  ja: "`setPreference('system')`：`{}`が書かれます。行は消えず、`preference`の無いオブジェクトが残ります。",
+  en: "`setPreference('system')`: `{}` is written. The row stays, holding an object with no `preference`.",
 });
 
 export const rowsSame = message({

@@ -41,8 +41,8 @@ export const hydrationTitle = message({
 });
 
 export const hydrationCause = message({
-  ja: "インラインスクリプトが付けた`class=\"dark\"`は、サーバーのHTMLにはありません。開発時のReactは`<html>`の属性を描画するpropsと比べ、この`class`を`A tree hydrated but some attributes of the server rendered HTML didn't match`という警告で報告します。",
-  en: "The `class=\"dark\"` the inline script added is not in the server’s HTML. In development React compares `<html>`’s attributes with the props it renders and reports the `class` as `A tree hydrated but some attributes of the server rendered HTML didn't match`.",
+  ja: 'インラインスクリプトが付けた`class="dark"`は、サーバーのHTMLにはありません。開発時のReactは`<html>`の属性を描画するpropsと比べ、この`class`を`A tree hydrated but some attributes of the server rendered HTML didn\'t match`という警告で報告します。',
+  en: 'The `class="dark"` the inline script added is not in the server’s HTML. In development React compares `<html>`’s attributes with the props it renders and reports the `class` as `A tree hydrated but some attributes of the server rendered HTML didn\'t match`.',
 });
 
 export const hydrationFix = message({

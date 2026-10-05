@@ -111,11 +111,7 @@ export default function ColorSchemeCspPage() {
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.hashDescription}
-        id="hash"
-        title={t.hashTitle}
-      >
+      <DocSection description={t.hashDescription} id="hash" title={t.hashTitle}>
         <CodeBlock
           code={VITE_CONFIG}
           lang="ts"

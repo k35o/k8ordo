@@ -116,19 +116,13 @@ export default function ColorSchemeSwitcherPage() {
       introduction={t.introduction}
       path="/:locale/color-scheme/switcher"
     >
-      <DocSection
-        description={t.hookDescription}
-        id="hook"
-        title={t.hookTitle}
-      >
+      <DocSection description={t.hookDescription} id="hook" title={t.hookTitle}>
         <ul>
-          {[t.hookScheme, t.hookPreference, t.hookSetPreference].map(
-            (item) => (
-              <li key={item()}>
-                <Rich>{item()}</Rich>
-              </li>
-            ),
-          )}
+          {[t.hookScheme, t.hookPreference, t.hookSetPreference].map((item) => (
+            <li key={item()}>
+              <Rich>{item()}</Rich>
+            </li>
+          ))}
         </ul>
         <p>
           <Rich>{t.hookOnlyReads()}</Rich>

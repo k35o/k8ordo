@@ -26,7 +26,7 @@ function Toggle() {
       }}
       variant="outline"
     >
-      <span className="dark:hidden">{t.demoToDark()}</span>
+      <span className="inline dark:hidden">{t.demoToDark()}</span>
       <span className="hidden dark:inline">{t.demoToLight()}</span>
     </Button>
   );

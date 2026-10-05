@@ -57,19 +57,13 @@ export default function ColorSchemeStoragePage() {
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.rowsDescription}
-        id="rows"
-        title={t.rowsTitle}
-      >
+      <DocSection description={t.rowsDescription} id="rows" title={t.rowsTitle}>
         <ul>
-          {[t.rowsNever, t.rowsDark, t.rowsLight, t.rowsSystem].map(
-            (item) => (
-              <li key={item()}>
-                <Rich>{item()}</Rich>
-              </li>
-            ),
-          )}
+          {[t.rowsNever, t.rowsDark, t.rowsLight, t.rowsSystem].map((item) => (
+            <li key={item()}>
+              <Rich>{item()}</Rich>
+            </li>
+          ))}
         </ul>
         <p>
           <Rich>{t.rowsSame()}</Rich>
@@ -82,11 +76,7 @@ export default function ColorSchemeStoragePage() {
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.readDescription}
-        id="read"
-        title={t.readTitle}
-      >
+      <DocSection description={t.readDescription} id="read" title={t.readTitle}>
         <CodeBlock
           code={READ}
           lang="tsx"
@@ -106,11 +96,7 @@ export default function ColorSchemeStoragePage() {
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.tabsDescription}
-        id="tabs"
-        title={t.tabsTitle}
-      >
+      <DocSection description={t.tabsDescription} id="tabs" title={t.tabsTitle}>
         <Pitfall>
           <p>
             <Rich>{t.tabsSameTab()}</Rich>

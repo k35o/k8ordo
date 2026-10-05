@@ -87,10 +87,7 @@ export default defineConfig({
 
 export default function ColorSchemeTestingPage() {
   return (
-    <DocPage
-      introduction={t.introduction}
-      path="/:locale/color-scheme/testing"
-    >
+    <DocPage introduction={t.introduction} path="/:locale/color-scheme/testing">
       <DocSection
         description={t.resetDescription}
         id="reset"

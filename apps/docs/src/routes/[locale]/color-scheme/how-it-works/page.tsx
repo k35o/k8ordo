@@ -76,11 +76,7 @@ export default function ColorSchemeHowItWorksPage() {
       introduction={t.introduction}
       path="/:locale/color-scheme/how-it-works"
     >
-      <DocSection
-        description={t.ruleDescription}
-        id="rule"
-        title={t.ruleTitle}
-      >
+      <DocSection description={t.ruleDescription} id="rule" title={t.ruleTitle}>
         <ol>
           {[t.ruleChoice, t.ruleDefault, t.ruleSystem].map((item) => (
             <li key={item()}>
