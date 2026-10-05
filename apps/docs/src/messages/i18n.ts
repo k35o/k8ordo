@@ -113,6 +113,11 @@ export const navRouting = message({
   en: 'URLs & locale',
 });
 
+export const navSwitch = message({
+  ja: '言語を切り替える',
+  en: 'Switch languages',
+});
+
 export const navIntegrations = message({
   ja: '組み合わせ',
   en: 'Integrations',
