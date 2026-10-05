@@ -87,6 +87,7 @@ export * as i18nFormatting from './i18n-formatting';
 export * as i18nRouting from './i18n-routing';
 export * as i18nIntegrations from './i18n-integrations';
 export * as i18nSwitch from './i18n-switch';
+export * as i18nNegotiate from './i18n-negotiate';
 export * as colorSchemeCsp from './color-scheme-csp';
 export * as colorSchemeGetStarted from './color-scheme-get-started';
 export * as colorSchemeHowItWorks from './color-scheme-how-it-works';

@@ -268,6 +268,7 @@ export const PACKAGES: PackageEntry[] = [
           { path: '/:locale/i18n/formatting', label: m.i18n.navFormatting },
           { path: '/:locale/i18n/routing', label: m.i18n.navRouting },
           { path: '/:locale/i18n/switch', label: m.i18n.navSwitch },
+          { path: '/:locale/i18n/negotiate', label: m.i18n.navNegotiate },
           { path: '/:locale/i18n/integrations', label: m.i18n.navIntegrations },
         ],
       },

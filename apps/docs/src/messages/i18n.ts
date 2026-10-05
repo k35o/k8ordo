@@ -118,6 +118,11 @@ export const navSwitch = message({
   en: 'Switch languages',
 });
 
+export const navNegotiate = message({
+  ja: '最初の言語を選ぶ',
+  en: 'Choose the first language',
+});
+
 export const navIntegrations = message({
   ja: '組み合わせ',
   en: 'Integrations',
