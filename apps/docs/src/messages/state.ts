@@ -144,8 +144,8 @@ export const navCookie = message({
 });
 
 export const navReading = message({
-  ja: '読み取りとリンク',
-  en: 'Reading & links',
+  ja: 'サーバーで読み、リンクを作る',
+  en: 'Read on the server, build links',
 });
 
 export const navUpdates = message({
