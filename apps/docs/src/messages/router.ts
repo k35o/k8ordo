@@ -147,3 +147,8 @@ export const navTesting = message({
   ja: 'テストする',
   en: 'Testing',
 });
+
+export const navHowItWorks = message({
+  ja: '仕組み',
+  en: 'How it works',
+});

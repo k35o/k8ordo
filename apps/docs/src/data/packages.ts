@@ -178,6 +178,15 @@ export const PACKAGES: PackageEntry[] = [
           { path: '/:locale/router/testing', label: m.router.navTesting },
         ],
       },
+      {
+        label: m.nav.groupConcepts,
+        sections: [
+          {
+            path: '/:locale/router/how-it-works',
+            label: m.router.navHowItWorks,
+          },
+        ],
+      },
     ],
   },
   {
