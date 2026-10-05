@@ -33,7 +33,7 @@ about the application changes between them.
 | `@k8ordo/router` | ^1.0.0  | yes      | the route table the framework generates    |
 | `react`          | ≥19.3.0 | yes      | rendering                                  |
 | `react-dom`      | ≥19.3.0 | yes      | rendering                                  |
-| `vite`           | ≥8.2.1  | yes      | the build (`framework()` is a Vite plugin) |
+| `vite`           | ≥8.0.0  | yes      | the build (`framework()` is a Vite plugin) |
 
 <!-- /peers -->
 
