@@ -75,46 +75,6 @@ export const readDescription = message({
   en: '`getMessages()` from `@k8ordo/ui/i18n` returns the wording in the current locale. It is not a hook, so a Server Component calls it as readily as a Client Component. Read from it in an element you draw through `renderItem`, or in a component of your own beside the library, and it follows the same language and replacements the components do.',
 });
 
-export const serverTitle = message({
-  ja: 'Server Component のまま描ける',
-  en: 'Rendered as Server Components',
-});
-
-export const serverDescription = message({
-  ja: '文言を読むのが hook ではなくなったので、文言のためだけに Client Component だった `Spinner`・`Breadcrumb`・`Code`・`Alert`・`Reasoning`・`ToolInvocation` は Server Component に戻りました。Server Component から描けば、ブラウザに JavaScript を送りません。',
-  en: 'Reading the wording is no longer a hook, so `Spinner`, `Breadcrumb`, `Code`, `Alert`, `Reasoning` and `ToolInvocation`, which were Client Components only for their wording, are Server Components again. Rendered from a Server Component, they send the browser no JavaScript.',
-});
-
-export const migrationTitle = message({
-  ja: '2.x からの移行',
-  en: 'Migrating from 2.x',
-});
-
-export const migrationDescription = message({
-  ja: '`UIProvider` の `messages`、`@k8ordo/ui/i18n` の `useMessages`、ルートの `Messages` 型はなくなりました。手順は次のとおりです。',
-  en: '`UIProvider`’s `messages`, `useMessages` from `@k8ordo/ui/i18n` and the root entry’s `Messages` type are gone. Move over in these steps:',
-});
-
-export const migrationProvider = message({
-  ja: '`UIProvider` から `messages` を外します。`UIProvider` は Toast のために残ります。',
-  en: 'Drop `messages` from `UIProvider`. `UIProvider` stays, for toasts.',
-});
-
-export const migrationLocale = message({
-  ja: '既定が日本語から英語に変わりました。日本語で描いていたアプリは、`@k8ordo/i18n` で集合を定義します（日本語だけなら `ja` 1 つ）。そのモジュールを、サーバーの描画とブラウザの両方で読み込まれる場所から import します。',
-  en: 'The default is now English rather than Japanese. An application that rendered in Japanese defines a set with `@k8ordo/i18n` (just `ja`, for a Japanese-only one) and imports that module from somewhere both the server render and the browser load.',
-});
-
-export const migrationRegister = message({
-  ja: '`messages` に渡していた辞書や差し替えは、`registerMessages(locale, messages)` で登録します。一部だけの差し替えは、組み込みの辞書を展開して重ねます。',
-  en: 'A dictionary or replacement once passed as `messages` is registered with `registerMessages(locale, messages)`; to replace a few keys, spread the built-in dictionary and lay them over it.',
-});
-
-export const migrationRead = message({
-  ja: "`useMessages()` は `getMessages()` に置き換えます。hook ではないので、呼ぶための `'use client'` は要らなくなります。ルートから import していた `Messages` 型は `@k8ordo/ui/i18n` から import します。",
-  en: "Replace `useMessages()` with `getMessages()`. It is not a hook, so it needs no `'use client'` of its own. Import the `Messages` type from `@k8ordo/ui/i18n` rather than the root entry.",
-});
-
 export const keysTitle = message({
   ja: 'キー一覧',
   en: 'Key reference',

@@ -99,4 +99,3 @@ code around it:
 | `StepperStep`                                                         | A step in `Stepper`: `label`, plus `description`                                                        |
 | `CellAlign`                                                           | A table cell's `align`: `'left'`, `'center'`, or `'right'`                                              |
 | `BaseIconProps` / `IconRenderProps`                                   | An icon's `size`, and the props an icon puts on its `<svg>`                                             |
-| `Messages`                                                            | The wording dictionary; `UIProvider`'s `messages` takes a `Partial<Messages>`                           |

@@ -189,43 +189,6 @@ function DismissButton({ onDismiss }) {
 
       <section className="flex flex-col gap-4">
         <Heading level="h2">
-          <Rich>{m.uiI18n.serverTitle()}</Rich>
-        </Heading>
-        <p className="text-fg-mute">
-          <Rich>{m.uiI18n.serverDescription()}</Rich>
-        </p>
-      </section>
-
-      <Separator color="mute" />
-
-      <section className="flex flex-col gap-4">
-        <Heading level="h2">
-          <Rich>{m.uiI18n.migrationTitle()}</Rich>
-        </Heading>
-        <p className="text-fg-mute">
-          <Rich>{m.uiI18n.migrationDescription()}</Rich>
-        </p>
-        <ol className="text-fg-mute flex flex-col gap-2 pl-6">
-          <li className="list-decimal">
-            <Rich>{m.uiI18n.migrationProvider()}</Rich>
-          </li>
-          <li className="list-decimal">
-            <Rich>{m.uiI18n.migrationLocale()}</Rich>
-          </li>
-          <li className="list-decimal">
-            <Rich>{m.uiI18n.migrationRegister()}</Rich>
-          </li>
-          <li className="list-decimal">
-            <Rich>{m.uiI18n.migrationRead()}</Rich>
-          </li>
-        </ol>
-        <CodeBlock code="<UIProvider>{children}</UIProvider>" lang="tsx" />
-      </section>
-
-      <Separator color="mute" />
-
-      <section className="flex flex-col gap-4">
-        <Heading level="h2">
           <Rich>{m.uiI18n.keysTitle()}</Rich>
         </Heading>
         <p className="text-fg-mute">
