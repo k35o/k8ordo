@@ -94,8 +94,8 @@ export const nextIntegrations = message({
 });
 
 export const navLocales = message({
-  ja: 'ロケール',
-  en: 'Locales',
+  ja: 'ロケールを定義する',
+  en: 'Define locales',
 });
 
 export const navMessages = message({
