@@ -1,6 +1,6 @@
-import { Heading } from '@k8ordo/ui';
 import { CodeBlock } from '@k8ordo/ui/code-block';
 
+import { Note, Pitfall } from '../../../../components/callout';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { InstallTabs } from '../../../../components/install-tabs';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
@@ -8,8 +8,9 @@ import { PeerTable } from '../../../../components/peer-table';
 import { Rich } from '../../../../components/rich';
 import * as m from '../../../../messages';
 
-const I18N_MODULE = `// src/i18n.ts
-import { defineLocales } from '@k8ordo/i18n';
+const t = m.i18nGetStarted;
+
+const LOCALES = `import { defineLocales } from '@k8ordo/i18n';
 import type { LocaleOf } from '@k8ordo/i18n';
 
 export const locales = defineLocales({
@@ -23,21 +24,23 @@ declare module '@k8ordo/i18n' {
   }
 }`;
 
-// 文字列の中の `export const { paramsSchema }` は生成器に拾われない
-// （ファイルをパースして export を読む）ので、コード例として置ける。
-const LOCALE_LAYOUT = `// src/routes/[locale]/layout.tsx
-import type { ReactNode } from 'react';
+// コード例の中の `export const { paramsSchema }` は文字列なので、生成器
+// （ファイルをパースして export を読む）はこのページの export と取り違えない
+const LAYOUT = `import type { ReactNode } from 'react';
 
 import { locales } from '../../i18n';
 
 export const { paramsSchema } = locales;
 
-export default function LocaleLayout({ children }: { children: ReactNode }) {
+export default function LocaleLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
   return children;
 }`;
 
-const HOME_MESSAGES = `// src/messages/home.ts
-import { message } from '@k8ordo/i18n';
+const MESSAGES = `import { message } from '@k8ordo/i18n';
 
 export const title = message({ ja: 'ようこそ', en: 'Welcome' });
 
@@ -48,8 +51,7 @@ export const greeting = message({
   en: (name) => \`Hello, \${name}\`,
 });`;
 
-const SERVER_PAGE = `// src/routes/[locale]/page.tsx
-import * as home from '../../messages/home';
+const PAGE = `import * as home from '../../messages/home';
 import { Greeting } from './_parts/greeting';
 
 export default function HomePage() {
@@ -61,8 +63,7 @@ export default function HomePage() {
   );
 }`;
 
-const CLIENT_COMPONENT = `// src/routes/[locale]/_parts/greeting.tsx
-'use client';
+const GREETING = `'use client';
 
 import { useState } from 'react';
 
@@ -87,186 +88,145 @@ export function Greeting() {
   );
 }`;
 
+const NEXT = [
+  {
+    path: '/:locale/i18n/messages',
+    label: m.i18n.navMessages,
+    description: t.nextMessages,
+  },
+  {
+    path: '/:locale/i18n/switch',
+    label: m.i18n.navSwitch,
+    description: t.nextSwitch,
+  },
+  {
+    path: '/:locale/i18n/negotiate',
+    label: m.i18n.navNegotiate,
+    description: t.nextNegotiate,
+  },
+] as const;
+
 export default function I18nGetStartedPage() {
-  const s = m.i18nGetStarted;
-
   return (
-    <DocPage introduction={s.introduction} path="/:locale/i18n/get-started">
+    <DocPage introduction={t.introduction} path="/:locale/i18n/get-started">
       <DocSection
-        id="scope"
-        description={s.scope.description}
-        title={s.scope.title}
-      >
-        <ul className="text-fg-mute flex flex-col gap-2 pl-6">
-          <li className="list-disc">
-            <Rich>{s.scope.set()}</Rich>
-          </li>
-          <li className="list-disc">
-            <Rich>{s.scope.segment()}</Rich>
-          </li>
-          <li className="list-disc">
-            <Rich>{s.scope.negotiation()}</Rich>
-          </li>
-          <li className="list-disc">
-            <Rich>{s.scope.current()}</Rich>
-          </li>
-          <li className="list-disc">
-            <Rich>{s.scope.messages()}</Rich>
-          </li>
-        </ul>
-        <Heading level="h3">
-          <Rich>{s.scope.notOwnedTitle()}</Rich>
-        </Heading>
-        <ul className="text-fg-mute flex flex-col gap-2 pl-6">
-          <li className="list-disc">
-            <Rich>{s.scope.notPathname()}</Rich>
-          </li>
-          <li className="list-disc">
-            <Rich>{s.scope.notGrammar()}</Rich>
-          </li>
-          <li className="list-disc">
-            <Rich>{s.scope.notLoading()}</Rich>
-          </li>
-        </ul>
-        <p className="text-fg-mute leading-relaxed">
-          <Rich>{s.scope.why()}</Rich>
-        </p>
-      </DocSection>
-
-      <DocSection
+        description={t.installDescription}
         id="install"
-        description={s.install.description}
-        title={s.install.title}
+        title={t.installTitle}
       >
         <InstallTabs
           npm={<CodeBlock code="npm install @k8ordo/i18n" lang="bash" />}
           pnpm={<CodeBlock code="pnpm add @k8ordo/i18n" lang="bash" />}
           yarn={<CodeBlock code="yarn add @k8ordo/i18n" lang="bash" />}
         />
+        <p>
+          <Rich>{t.peersDescription()}</Rich>
+        </p>
         <PeerTable
           name="@k8ordo/i18n"
-          neededFor={{ typescript: s.install.typescript }}
+          neededFor={{ typescript: t.peerTypes }}
         />
-        <p className="text-fg-mute leading-relaxed">
-          <Rich>{s.install.runtime()}</Rich>
-        </p>
+        <Note>
+          <p>
+            <Rich>{t.runtimeNote()}</Rich>
+          </p>
+        </Note>
       </DocSection>
 
       <DocSection
-        id="define-set"
-        description={s.defineSet.description}
-        title={s.defineSet.title}
+        description={t.localesDescription}
+        id="locales"
+        title={t.localesTitle}
       >
-        <CodeBlock code={I18N_MODULE} lang="ts" />
-        <p className="text-fg-mute leading-relaxed">
-          <Rich>{s.defineSet.default()}</Rich>
-        </p>
-        <p className="text-fg-mute leading-relaxed">
-          <Rich>{s.defineSet.register()}</Rich>
+        <CodeBlock
+          code={LOCALES}
+          lang="ts"
+          marks={{ 5: 'highlight', 6: 'highlight' }}
+          title="i18n.ts"
+        />
+        <p>
+          <Rich>{t.localesDefault()}</Rich>
         </p>
         <p>
-          <LocaleAnchor path="/:locale/i18n/locales">
-            {s.defineSet.more()}
-          </LocaleAnchor>
+          <Rich>{t.localesRegister()}</Rich>
         </p>
       </DocSection>
 
       <DocSection
+        description={t.segmentDescription}
         id="segment"
-        description={s.segment.description}
-        title={s.segment.title}
+        title={t.segmentTitle}
       >
-        <CodeBlock code={LOCALE_LAYOUT} lang="tsx" />
-        <ul className="text-fg-mute flex flex-col gap-2 pl-6">
-          <li className="list-disc">
-            <Rich>{s.segment.refuses()}</Rich>
-          </li>
-          <li className="list-disc">
-            <Rich>{s.segment.accepts()}</Rich>
-          </li>
-          <li className="list-disc">
-            <Rich>{s.segment.serverFile()}</Rich>
-          </li>
-        </ul>
+        <CodeBlock
+          code={LAYOUT}
+          lang="tsx"
+          marks={{ 5: 'highlight' }}
+          title="routes/[locale]/layout.tsx"
+        />
         <p>
-          <LocaleAnchor path="/:locale/i18n/routing">
-            {s.segment.more()}
-          </LocaleAnchor>
+          <Rich>{t.segmentRefuse()}</Rich>
+        </p>
+        <Pitfall>
+          <p>
+            <Rich>{t.segmentPitfall()}</Rich>
+          </p>
+        </Pitfall>
+      </DocSection>
+
+      <DocSection
+        description={t.messagesDescription}
+        id="messages"
+        title={t.messagesTitle}
+      >
+        <CodeBlock
+          code={MESSAGES}
+          lang="ts"
+          marks={{ 8: 'highlight', 9: 'highlight' }}
+          title="messages/home.ts"
+        />
+        <p>
+          <Rich>{t.messagesTypes()}</Rich>
         </p>
       </DocSection>
 
       <DocSection
-        id="first-message"
-        description={s.firstMessage.description}
-        title={s.firstMessage.title}
+        description={t.serverDescription}
+        id="server"
+        title={t.serverTitle}
       >
-        <CodeBlock code={HOME_MESSAGES} lang="ts" />
-        <p className="text-fg-mute leading-relaxed">
-          <Rich>{s.firstMessage.args()}</Rich>
-        </p>
-        <Heading level="h3">
-          <Rich>{s.firstMessage.serverTitle()}</Rich>
-        </Heading>
-        <p className="text-fg-mute leading-relaxed">
-          <Rich>{s.firstMessage.serverDescription()}</Rich>
-        </p>
-        <CodeBlock code={SERVER_PAGE} lang="tsx" />
-        <Heading level="h3">
-          <Rich>{s.firstMessage.clientTitle()}</Rich>
-        </Heading>
-        <p className="text-fg-mute leading-relaxed">
-          <Rich>{s.firstMessage.clientDescription()}</Rich>
-        </p>
-        <CodeBlock code={CLIENT_COMPONENT} lang="tsx" />
-        <p className="text-fg-mute leading-relaxed">
-          <Rich>{s.firstMessage.boundary()}</Rich>
-        </p>
+        <CodeBlock
+          code={PAGE}
+          lang="tsx"
+          marks={{ 7: 'highlight' }}
+          title="routes/[locale]/page.tsx"
+        />
+      </DocSection>
+
+      <DocSection
+        description={t.clientDescription}
+        id="client"
+        title={t.clientTitle}
+      >
+        <CodeBlock
+          code={GREETING}
+          lang="tsx"
+          marks={{ 13: 'highlight', 21: 'highlight' }}
+          title="routes/[locale]/_parts/greeting.tsx"
+        />
         <p>
-          <LocaleAnchor path="/:locale/i18n/messages">
-            {s.firstMessage.more()}
-          </LocaleAnchor>
+          <Rich>{t.clientBoundary()}</Rich>
         </p>
       </DocSection>
 
-      <DocSection id="guarantees" title={s.guarantees.title}>
-        <ul className="text-fg-mute flex flex-col gap-2 pl-6">
-          <li className="list-disc">
-            <Rich>{s.guarantees.schema()}</Rich>
-          </li>
-          <li className="list-disc">
-            <Rich>{s.guarantees.compile()}</Rich>
-          </li>
-          <li className="list-disc">
-            <Rich>{s.guarantees.args()}</Rich>
-          </li>
-          <li className="list-disc">
-            <Rich>{s.guarantees.locale()}</Rich>
-          </li>
-        </ul>
-      </DocSection>
-
-      <DocSection id="next-steps" title={s.nextSteps.title}>
-        <ul className="flex flex-col gap-3 pl-6">
-          <li className="list-disc">
-            <LocaleAnchor path="/:locale/i18n/locales">
-              <Rich>{s.nextSteps.locales()}</Rich>
-            </LocaleAnchor>
-          </li>
-          <li className="list-disc">
-            <LocaleAnchor path="/:locale/i18n/messages">
-              <Rich>{s.nextSteps.messages()}</Rich>
-            </LocaleAnchor>
-          </li>
-          <li className="list-disc">
-            <LocaleAnchor path="/:locale/i18n/routing">
-              <Rich>{s.nextSteps.routing()}</Rich>
-            </LocaleAnchor>
-          </li>
-          <li className="list-disc">
-            <LocaleAnchor path="/:locale/i18n/integrations">
-              <Rich>{s.nextSteps.integrations()}</Rich>
-            </LocaleAnchor>
-          </li>
+      <DocSection id="next" title={t.nextTitle}>
+        <ul>
+          {NEXT.map((step) => (
+            <li key={step.path}>
+              <LocaleAnchor path={step.path}>{step.label()}</LocaleAnchor>
+              {' — '}
+              <Rich>{step.description()}</Rich>
+            </li>
+          ))}
         </ul>
       </DocSection>
     </DocPage>
