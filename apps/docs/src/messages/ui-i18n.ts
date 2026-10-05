@@ -1,88 +1,123 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: 'コンポーネントが自前で描画する文言（閉じるボタンのラベル、必須バッジ、読み込み中の読み上げなど）は、`@k8ordo/i18n`の今のロケールで引かれます。Providerに渡すものはありません。`ja`と`en`の辞書はライブラリが持ち、それ以外の言語はアプリケーションが登録します。',
-  en: "Wording the components render on their own — close button labels, the required badge, the loading announcement — is looked up in `@k8ordo/i18n`'s current locale. Nothing is passed to a provider. The library ships `ja` and `en`; the application registers any other language.",
+  ja: '閉じるボタンのラベルや必須の印、読み込み中の読み上げのように、コンポーネントが自分で描く文言があります。これらは`@k8ordo/i18n`のいまのロケールで表示されるので、プロバイダに言語を渡す必要はありません。日本語と英語の辞書はライブラリが持ち、それ以外の言語はアプリが登録します。',
+  en: 'Some wording is drawn by the components themselves: the label of a close button, the required marker, the loading announcement. It follows `@k8ordo/i18n`’s current locale, so there is no language to hand a provider. The library ships Japanese and English; any other language is registered by the application.',
 });
 
 export const localeTitle = message({
-  ja: 'ロケールは`@k8ordo/i18n`から',
-  en: 'The locale comes from `@k8ordo/i18n`',
+  ja: 'ロケールに従う',
+  en: 'Follow the locale',
 });
 
 export const localeDescription = message({
-  ja: 'アプリケーションが`defineLocales`で集合を定義していれば、コンポーネントは文言と同じロケールで描きます。URLが名指すロケール、名指さなければ集合の既定です。',
-  en: 'Once the application defines its set with `defineLocales`, the components speak the same locale its messages do: the one the URL names, or the default of the set when it names none.',
+  ja: 'アプリが`defineLocales`でロケールの一覧を定義していれば、コンポーネントはアプリの文言と同じロケールで描きます。URLがロケールを含んでいればそのロケール、含んでいなければ一覧の既定のロケールです。',
+  en: 'When the application defines its locale set with `defineLocales`, the components draw in the same locale as its messages: the one the URL names, or the set’s default.',
 });
 
 export const clientGraph = message({
-  ja: '集合を定義するモジュールは、ブラウザ側でも読み込まれている必要があります。集合が無い環境ではコンポーネントは英語で描くので、サーバーのHTMLと食い違います。Client Componentが`bindParams`のリンクや言語切替で`locales`をimportしていれば、それで足ります。',
-  en: 'The module that defines the set has to be loaded in the browser as well: where no set is defined the components speak English, which would disagree with the server’s HTML. A Client Component that imports `locales` — for `bindParams` links or a language switcher — is enough.',
+  ja: '一覧を定義したモジュールは、ブラウザでも読み込まれている必要があります。一覧が無い環境ではコンポーネントが英語で描くので、サーバーが描いたHTMLと食い違ってしまうからです。リンクを作る`bindParams`や言語の切り替えで、Client Componentがすでに`locales`をimportしていれば、それで足ります。',
+  en: 'The module that defines the set has to load in the browser too. Where no set is defined the components speak English, and would disagree with the server’s HTML. A client component that already imports `locales` — for `bindParams` links or a language switcher — is enough.',
 });
 
 export const englishTitle = message({
-  ja: '集合が無ければ英語',
-  en: 'English without a set',
+  ja: 'ロケールの一覧が無ければ英語になる',
+  en: 'English when there is no locale set',
 });
 
 export const englishDescription = message({
-  ja: '`@k8ordo/i18n`で集合を定義していないアプリケーション（Next.jsや素のViteのアプリなど）では、コンポーネントは英語で描きます。URLがたまたま`/ja/…`で始まっていても変わらないので、サーバーとブラウザで食い違いません。日本語だけのアプリは、ロケールが1つの集合を定義します。',
-  en: 'In an application that defines no set with `@k8ordo/i18n` — a Next.js or plain Vite application — the components speak English. That holds even when the URL happens to start with `/ja/…`, so the server and the browser agree. A Japanese-only application defines a set of one locale.',
+  ja: '`@k8ordo/i18n`でロケールの一覧を定義していないアプリ（Next.jsや素のViteのアプリなど）では、コンポーネントは英語で描きます。URLがたまたま`/ja/`で始まっていても変わらないので、サーバーとブラウザで食い違うことはありません。',
+  en: 'An application that defines no set with `@k8ordo/i18n` — a Next.js or plain Vite app — gets English, whatever its URL starts with, so the server and the browser agree.',
+});
+
+export const englishJapanese = message({
+  ja: '日本語だけのアプリでは、ロケールが1つだけの一覧を定義します。',
+  en: 'A Japanese-only application defines a set of one.',
 });
 
 export const registerTitle = message({
   ja: 'ほかの言語を登録する',
-  en: 'Registering another language',
+  en: 'Register another language',
 });
 
 export const registerDescription = message({
-  ja: '`ja`と`en`以外のロケールは、`@k8ordo/ui/i18n`の`registerMessages(locale, messages)`で辞書を登録します。集合を定義するモジュールの隣で呼んでください。`Messages`型を注釈すれば、キーの過不足はコンパイル時に分かり、ライブラリにキーが増えたときも型エラーで気付けます。',
-  en: 'For a locale other than `ja` and `en`, register a dictionary with `registerMessages(locale, messages)` from `@k8ordo/ui/i18n`, next to where the set is defined. Annotated with the `Messages` type, a missing or misspelled key is a compile error — including when the library adds one.',
+  ja: '日本語と英語以外のロケールでは、`@k8ordo/ui/i18n`の`registerMessages`で辞書を登録します。ロケールの一覧を定義するモジュールの隣で呼んでください。',
+  en: 'For a locale other than Japanese and English, register a dictionary with `registerMessages` from `@k8ordo/ui/i18n`, next to where the locale set is defined.',
+});
+
+export const registerTyped = message({
+  ja: '辞書に`Messages`型を付けておくと、キーの過不足を型で確かめられます。ライブラリにキーが増えたときも、型エラーで気づけます。',
+  en: 'Annotate the dictionary with `Messages`, and missing or extra keys fail to compile, including keys the library adds later.',
 });
 
 export const regional = message({
-  ja: '`en-US`のように地域のついたタグは、そのタグの辞書が無ければ言語（`en`）の辞書を読みます。登録も組み込みも無いロケールで描くと、登録を促すエラーを投げます。',
-  en: 'A regional tag such as `en-US` without a dictionary of its own reads its language’s (`en`). Rendering in a locale nothing has text for throws, naming how to register it.',
+  ja: '`en-US`のように地域の付いたタグは、そのタグの辞書が無ければ言語（`en`）の辞書を使います。登録も組み込みの辞書も無いロケールで描こうとすると、登録を促すエラーを投げます。',
+  en: 'A regional tag such as `en-US` falls back to its language’s dictionary (`en`) when it has none of its own. Rendering in a locale nothing has text for throws, naming how to register it.',
 });
 
 export const overrideTitle = message({
-  ja: '一部だけ差し替える',
-  en: 'Replacing some of the wording',
+  ja: '一部の文言だけ差し替える',
+  en: 'Replace a few words',
 });
 
 export const overrideDescription = message({
-  ja: '登録した辞書は組み込みの辞書より優先されます。組み込みの辞書を展開してから、変えたいキーを重ねて登録します。',
-  en: 'A registered dictionary wins over the built-in one. Spread the built-in dictionary, lay the keys you want over it, and register the result.',
+  ja: '登録した辞書は、組み込みの辞書より優先されます。組み込みの辞書を展開し、変えたいキーだけを重ねて登録します。',
+  en: 'A registered dictionary wins over a built-in one. Spread the built-in dictionary and register it with the keys you want to change on top.',
 });
 
 export const priorityTitle = message({
-  ja: '優先順位',
-  en: 'Resolution order',
+  ja: 'どの文言が使われるか',
+  en: 'Which wording wins',
 });
 
 export const priorityDescription = message({
-  ja: '同じ文言を決める経路は3つあり、prop >登録した辞書>組み込みの辞書 の順に強くなります。個別のprops（Spinnerのlabelなど）は常に辞書より優先されるので、1か所だけ違う文言にしたいときはそちらを使ってください。',
-  en: 'Three sources can decide a string, and they win in the order prop > registered dictionary > built-in dictionary. Per-instance props (such as the Spinner label) always beat a dictionary, so reach for them when only one place should read differently.',
+  ja: '1つの文言を決める経路は3つあり、次の順に優先されます。',
+  en: 'Three sources decide a piece of wording, in this order:',
+});
+
+export const priorityProp = message({
+  ja: '個別のprops：`Spinner`の`label`のように、コンポーネントが文言のpropsを持っていれば、それが最も優先されます',
+  en: 'A prop: when a component has a wording prop of its own, such as `Spinner`’s `label`, it wins',
+});
+
+export const priorityRegistered = message({
+  ja: '登録した辞書：`registerMessages`で登録した辞書',
+  en: 'A registered dictionary: one passed to `registerMessages`',
+});
+
+export const priorityBuiltIn = message({
+  ja: '組み込みの辞書：ライブラリが持つ日本語と英語の辞書',
+  en: 'The built-in dictionary: the Japanese and English the library ships',
+});
+
+export const priorityHint = message({
+  ja: '1か所だけ違う文言にしたいときは、辞書ではなくpropsを使います。',
+  en: 'To change the wording in one place only, use the prop rather than a dictionary.',
 });
 
 export const readTitle = message({
-  ja: '自分の要素で文言を読む',
-  en: 'Reading the wording in your own elements',
+  ja: '自分で描く要素でも同じ文言を使う',
+  en: 'Use the same wording in your own elements',
 });
 
 export const readDescription = message({
-  ja: '`@k8ordo/ui/i18n`の`getMessages()`は、いまのロケールの文言を返します。hookではないので、Server ComponentからもClient Componentからも呼べます。`renderItem`で描く要素や、コンポーネントの隣に置く自作の部品でここから読めば、言語も差し替えもコンポーネントと揃います。',
-  en: '`getMessages()` from `@k8ordo/ui/i18n` returns the wording in the current locale. It is not a hook, so a Server Component calls it as readily as a Client Component. Read from it in an element you draw through `renderItem`, or in a component of your own beside the library, and it follows the same language and replacements the components do.',
+  ja: '`@k8ordo/ui/i18n`の`getMessages()`は、いまのロケールの文言を返します。フックではないので、Server ComponentからもClient Componentからも呼べます。',
+  en: '`getMessages()` from `@k8ordo/ui/i18n` returns the wording in effect. It is not a hook, so a Server Component calls it as well as a Client Component.',
+});
+
+export const readWhy = message({
+  ja: '`renderItem`で描く要素や、コンポーネントの隣に置く自作の部品でここから文言を読めば、言語も差し替えもコンポーネントとそろいます。',
+  en: 'Read from it in an element drawn with `renderItem`, or a part of your own beside the components, and the language and any replacement stay in step with them.',
 });
 
 export const keysTitle = message({
-  ja: 'キー一覧',
-  en: 'Key reference',
+  ja: '文言のキーの一覧',
+  en: 'Every key',
 });
 
 export const keysDescription = message({
-  ja: 'Messagesが持つキーの全てです。値はライブラリの辞書そのものを読み込んで表示しています。',
-  en: 'Every key in Messages. The values below are read from the shipped dictionaries themselves.',
+  ja: '`Messages`が持つすべてのキーです。値は、ライブラリの辞書をそのまま読み込んで表示しています。',
+  en: 'Every key `Messages` holds. The values are read from the library’s own dictionaries.',
 });
 
 export const keyColumn = message({
@@ -101,6 +136,6 @@ export const jaColumn = message({
 });
 
 export const enColumn = message({
-  ja: 'en（集合が無いとき）',
-  en: 'en (without a set)',
+  ja: 'en（一覧が無いとき）',
+  en: 'en (no locale set)',
 });
