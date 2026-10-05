@@ -138,6 +138,11 @@ export const navStorage = message({
   en: 'Save preferences on the device',
 });
 
+export const navCookie = message({
+  ja: 'サーバーが読む設定をCookieに置く',
+  en: 'Preferences the server renders',
+});
+
 export const navReading = message({
   ja: '読み取りとリンク',
   en: 'Reading & links',

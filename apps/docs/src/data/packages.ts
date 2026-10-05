@@ -137,6 +137,7 @@ export const PACKAGES: PackageEntry[] = [
           { path: '/:locale/state/url', label: m.state.navUrl },
           { path: '/:locale/state/entry', label: m.state.navEntry },
           { path: '/:locale/state/storage', label: m.state.navStorage },
+          { path: '/:locale/state/cookie', label: m.state.navCookie },
           { path: '/:locale/state/reading', label: m.state.navReading },
           { path: '/:locale/state/updates', label: m.state.navUpdates },
           {
