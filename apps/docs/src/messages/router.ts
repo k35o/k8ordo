@@ -142,3 +142,8 @@ export const navFramework = message({
   ja: 'フレームワークの下で使う',
   en: 'Use it under the framework',
 });
+
+export const navTesting = message({
+  ja: 'テストする',
+  en: 'Testing',
+});

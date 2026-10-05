@@ -175,6 +175,7 @@ export const PACKAGES: PackageEntry[] = [
           { path: '/:locale/router/animate', label: m.router.navAnimate },
           { path: '/:locale/router/navigation', label: m.router.navNavigation },
           { path: '/:locale/router/framework', label: m.router.navFramework },
+          { path: '/:locale/router/testing', label: m.router.navTesting },
         ],
       },
     ],

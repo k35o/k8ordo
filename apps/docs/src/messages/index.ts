@@ -63,6 +63,7 @@ export * as routerBase from './router-base';
 export * as routerAnimate from './router-animate';
 export * as routerNavigation from './router-navigation';
 export * as routerFramework from './router-framework';
+export * as routerTesting from './router-testing';
 export * as staticGetStarted from './static-get-started';
 export * as staticRouting from './static-routing';
 export * as staticParams from './static-params';
