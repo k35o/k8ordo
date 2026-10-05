@@ -138,6 +138,11 @@ export const navHowItWorks = message({
   en: 'How it works',
 });
 
+export const navReference = message({
+  ja: 'API',
+  en: 'API',
+});
+
 export const navIntegrations = message({
   ja: '組み合わせ',
   en: 'Integrations',

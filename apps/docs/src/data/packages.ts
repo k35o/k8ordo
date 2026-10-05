@@ -280,6 +280,12 @@ export const PACKAGES: PackageEntry[] = [
           { path: '/:locale/i18n/how-it-works', label: m.i18n.navHowItWorks },
         ],
       },
+      {
+        label: m.nav.groupReference,
+        sections: [
+          { path: '/:locale/i18n/reference', label: m.i18n.navReference },
+        ],
+      },
     ],
   },
   {
