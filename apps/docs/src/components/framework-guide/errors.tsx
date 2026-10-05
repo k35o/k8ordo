@@ -3,21 +3,21 @@ import { CodeBlock } from '@k8ordo/ui/code-block';
 import * as m from '../../messages';
 import { DocSection } from '../doc-page';
 import { LocaleAnchor } from '../locale-anchor';
+import { Playground } from '../playground';
+import { Rich } from '../rich';
 import { ErrorDemo } from './error-demo';
 import type { Mode } from './mode';
-import { Paragraph } from './prose';
 
-const ERROR = `// src/routes/error.tsx
-'use client';
+const ERROR = `'use client';
 
 import type { ErrorProps } from '@k8ordo/router';
 
-export default function RouteError({ error, reset }: ErrorProps) {
+export default function RouteError({ reset }: ErrorProps) {
   return (
     <section role="alert">
-      <p>{error instanceof Error ? error.message : 'something went wrong'}</p>
+      <p>Something went wrong.</p>
       <button onClick={reset} type="button">
-        try again
+        Try again
       </button>
     </section>
   );
@@ -34,10 +34,7 @@ const SCOPE_TREE = `src/routes/
     [id]/
       page.tsx`;
 
-const STATIC_STOP = `static build could not render /broken — see the error above`;
-
-const NOT_FOUND = `// src/routes/not-found.tsx
-export default function NotFoundPage() {
+const NOT_FOUND = `export default function NotFoundPage() {
   return (
     <>
       <title>Not found</title>
@@ -46,8 +43,7 @@ export default function NotFoundPage() {
   );
 }`;
 
-const PAGE_NOT_FOUND = `// src/routes/products/[id]/page.tsx
-import { notFound } from '@k8ordo/router';
+const PAGE_NOT_FOUND = `import { notFound } from '@k8ordo/router';
 import type { PageProps } from '@k8ordo/router';
 
 import { findProduct } from '../../_data/catalog.server';
@@ -60,128 +56,202 @@ export default async function ProductPage({
   return <h1>{product.name}</h1>;
 }`;
 
-const STATIC_PAGE_NOT_FOUND = `the "paths" option supplied pathnames whose page called notFound(): /products/3`;
+const REDIRECT = `export default '/products';`;
 
-const STATIC_TWO_NOT_FOUND = `a static host answers every unknown URL from one file, so only one not-found.tsx can be represented — this table declares /docs/*, /*`;
+const REDIRECT_PATTERN = `export default { to: '/:locale/new', permanent: true };`;
 
-const REDIRECT = `// src/routes/old/redirect.ts
-export default '/products';`;
+const staticBuild = () => {
+  const t = m.staticErrors;
+  return (
+    <DocSection description={t.buildDescription} id="build" title={t.buildTitle}>
+      <p>
+        <Rich>{t.buildLog()}</Rich>
+      </p>
+      <p>
+        <Rich>{t.buildClient()}</Rich>
+      </p>
+      <p>
+        <Rich>{t.buildBrowser()}</Rich>
+      </p>
+    </DocSection>
+  );
+};
 
-const REDIRECT_PATTERN = `// src/routes/[locale]/legacy/redirect.ts
-export default { to: '/:locale/new', permanent: true };`;
+const serverRender = () => {
+  const t = m.serverErrors;
+  return (
+    <DocSection
+      description={t.renderDescription}
+      id="server-render"
+      title={t.renderTitle}
+    >
+      <p>
+        <Rich>{t.renderBrowser()}</Rich>
+      </p>
+      <p>
+        <Rich>{t.renderMessage()}</Rich>
+      </p>
+      <p>
+        <Rich>{t.renderNoBoundary()}</Rich>
+      </p>
+    </DocSection>
+  );
+};
 
 /**
- * `error.tsx`, `not-found.tsx` and `redirect.ts`, shared by `/static/errors`
- * and `/server/errors`. What happens on the server side is the mode's own.
+ * `error.tsx`, `not-found.tsx`, `notFound()` and `redirect.ts`, shared by
+ * `/static/errors` and `/server/errors`; what happens when something fails
+ * on the server side is the mode's own. A function rather than a component,
+ * so `DocPage` sees the sections it returns and lists them in the contents.
  */
-export function ErrorsGuide({ mode }: { mode: Mode }) {
+export const errorsSections = (mode: Mode) => {
   const t = m.frameworkErrors;
   const own = mode === 'static' ? m.staticErrors : m.serverErrors;
-
   return (
     <>
       <DocSection
-        id="error"
         description={t.errorDescription}
+        id="error"
         title={t.errorTitle}
       >
-        <CodeBlock code={ERROR} lang="tsx" />
-        <Paragraph text={t.errorProps} />
+        <CodeBlock code={ERROR} lang="tsx" title="src/routes/error.tsx" />
+        <p>
+          <Rich>{t.errorClient()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.errorAway()}</Rich>
+        </p>
       </DocSection>
 
       <DocSection
-        id="scope"
         description={t.scopeDescription}
+        id="scope"
         title={t.scopeTitle}
       >
-        <CodeBlock code={SCOPE_TREE} lang="bash" />
-        <Paragraph text={t.scopeExample} />
-        <Paragraph text={t.scopeSite} />
-        <Paragraph text={t.scopeReset} />
+        <CodeBlock code={SCOPE_TREE} lang="text" />
+        <p>
+          <Rich>{t.scopeExample()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.scopeNone()}</Rich>
+        </p>
+        <p>
+          <Rich>{own.scopeMode()}</Rich>
+        </p>
       </DocSection>
 
-      <DocSection
+      <Playground
+        description={t.demoDescription}
         id="demo"
-        description={() => t.demoDescription(m.error.retry())}
+        steps={t.demoSteps}
         title={t.demoTitle}
       >
         <ErrorDemo label={t.demoButton()} />
-      </DocSection>
+      </Playground>
+
+      {mode === 'static' ? staticBuild() : serverRender()}
 
       <DocSection
-        id="server-render"
-        description={own.serverRenderDescription}
-        title={own.serverRenderTitle}
-      >
-        {mode === 'static' && <CodeBlock code={STATIC_STOP} lang="bash" />}
-        <Paragraph text={own.serverRenderClient} />
-        <Paragraph text={own.serverRenderBrowser} />
-      </DocSection>
-
-      <DocSection
-        id="without"
-        description={t.withoutDescription}
-        title={t.withoutTitle}
-      >
-        <Paragraph text={own.withoutNote} />
-      </DocSection>
-
-      <DocSection
-        id="not-found"
         description={t.notFoundDescription}
+        id="not-found"
         title={t.notFoundTitle}
       >
-        <CodeBlock code={NOT_FOUND} lang="tsx" />
-        <Paragraph text={t.notFoundParams} />
-        <Paragraph text={own.notFoundNote} />
-        {mode === 'static' && (
+        <CodeBlock code={NOT_FOUND} lang="tsx" title="src/routes/not-found.tsx" />
+        <p>
+          <Rich>{t.notFoundProps()}</Rich>
+        </p>
+        <p>
+          <Rich>{own.notFoundMode()}</Rich>
+        </p>
+        {mode === 'static' ? (
           <>
-            <CodeBlock code={STATIC_TWO_NOT_FOUND} lang="bash" />
-            <Paragraph text={m.staticErrors.notFoundMore}>
+            <p>
+              <Rich>{m.staticErrors.notFoundCount()}</Rich>
+            </p>
+            <p>
+              <Rich>{m.staticErrors.notFoundMore()}</Rich>{' '}
               <LocaleAnchor path="/:locale/static/deploy">
                 {m.static.navDeploy()}
               </LocaleAnchor>
-            </Paragraph>
-          </>
-        )}
-      </DocSection>
-
-      <DocSection
-        id="page-not-found"
-        description={t.pageNotFoundDescription}
-        title={t.pageNotFoundTitle}
-      >
-        <CodeBlock code={PAGE_NOT_FOUND} lang="tsx" />
-        <Paragraph text={t.pageNotFoundAnswer} />
-        <Paragraph text={t.pageNotFoundOwn} />
-        {mode === 'static' ? (
-          <>
-            <Paragraph text={m.staticErrors.pageNotFoundBuild} />
-            <CodeBlock code={STATIC_PAGE_NOT_FOUND} lang="bash" />
+            </p>
           </>
         ) : (
-          <Paragraph text={m.serverErrors.pageNotFoundWait} />
+          <p>
+            <Rich>{m.serverErrors.notFoundNone()}</Rich>
+          </p>
         )}
       </DocSection>
 
       <DocSection
-        id="redirect"
+        description={t.pageNotFoundDescription}
+        id="page-not-found"
+        title={t.pageNotFoundTitle}
+      >
+        <CodeBlock
+          code={PAGE_NOT_FOUND}
+          lang="tsx"
+          marks={{ 10: 'highlight' }}
+          title="src/routes/products/[id]/page.tsx"
+        />
+        <p>
+          <Rich>{t.pageNotFoundAnswer()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.pageNotFoundRouter()}</Rich>
+        </p>
+        <p>
+          <Rich>{own.pageNotFoundMode()}</Rich>
+        </p>
+        {mode === 'server' && (
+          <>
+            <p>
+              <Rich>{m.serverErrors.pageNotFoundNavigation()}</Rich>
+            </p>
+            <p>
+              <Rich>{m.serverErrors.pageNotFoundDeep()}</Rich>
+            </p>
+          </>
+        )}
+      </DocSection>
+
+      <DocSection
         description={t.redirectDescription}
+        id="redirect"
         title={t.redirectTitle}
       >
-        <CodeBlock code={REDIRECT} lang="ts" />
-        <CodeBlock code={REDIRECT_PATTERN} lang="ts" />
-        <Paragraph text={t.redirectPattern} />
-        <Paragraph text={t.redirectOrder} />
-        <Paragraph text={own.redirectNote} />
-        {mode === 'server' && (
-          <Paragraph text={m.serverErrors.redirectAction}>
-            <LocaleAnchor path="/:locale/server/actions">
-              {m.server.navActions()}
-            </LocaleAnchor>
-          </Paragraph>
+        <CodeBlock code={REDIRECT} lang="ts" title="src/routes/old/redirect.ts" />
+        <CodeBlock
+          code={REDIRECT_PATTERN}
+          lang="ts"
+          title="src/routes/[locale]/legacy/redirect.ts"
+        />
+        <p>
+          <Rich>{t.redirectPattern()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.redirectAlone()}</Rich>
+        </p>
+        <p>
+          <Rich>{own.redirectMode()}</Rich>
+        </p>
+        {mode === 'static' ? (
+          <p>
+            <Rich>{m.staticErrors.redirectNavigation()}</Rich>
+          </p>
+        ) : (
+          <>
+            <p>
+              <Rich>{m.serverErrors.redirectType()}</Rich>
+            </p>
+            <p>
+              <Rich>{m.serverErrors.redirectAction()}</Rich>{' '}
+              <LocaleAnchor path="/:locale/server/actions">
+                {m.server.navActions()}
+              </LocaleAnchor>
+            </p>
+          </>
         )}
       </DocSection>
     </>
   );
-}
+};

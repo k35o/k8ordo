@@ -99,8 +99,8 @@ export const navParams = message({
 });
 
 export const navErrors = message({
-  ja: 'エラーとリダイレクト',
-  en: 'Errors & redirects',
+  ja: 'エラーとリダイレクトを扱う',
+  en: 'Handle errors and redirects',
 });
 
 export const navBoundaries = message({

@@ -1,95 +1,76 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: '何かがthrowしたときの`error.tsx`、何も一致しなかったときの`not-found.tsx`、移転したURLの`redirect.ts`。このモードでは、知らないURLは本物の404になり、リダイレクトは`307`か`308`で答え、サーバーでthrowしたページも枠を持ったまま届いて、`error.tsx`をブラウザに任せます。',
-  en: '`error.tsx` for when something throws, `not-found.tsx` for when nothing matched, and `redirect.ts` for a URL that moved. In this mode an unknown URL is a real 404, a redirect is answered with a `307` or `308`, and a page that throws on the server still arrives with its frame, leaving `error.tsx` to the browser.',
+  ja: 'ページが例外を投げたとき、URLがどこにも当たらなかったとき、URLを移したときの扱い方を説明します。このモードでは、知らないURLに本物の404を返し、リダイレクトにも`307`か`308`のステータスで答えます。',
+  en: 'What to do when a page throws, when a URL matches nothing, and when a URL has moved. In this mode an unknown URL gets a real 404, and a redirect is answered with a `307` or `308`.',
 });
 
-export const serverRenderTitle = message({
-  ja: 'サーバーでの描画中にthrowしたとき',
-  en: 'When it throws during the server render',
+export const scopeMode = message({
+  ja: 'このモードでは、`serve()`がその読み込みに答えます。描けないページなら`500`です。',
+  en: 'In this mode `serve()` answers that load — with a `500` when the page cannot render.',
 });
 
-export const serverRenderDescription = message({
-  ja: 'サーバーでの描画にはエラー境界がありません。あるのは「Suspenseの境界の中でthrowした部分木はブラウザに描かせる」という規則で、`error.tsx`の境界はそのSuspenseの境界を兼ねています。そのためHTMLは枠を持ち、ページのあった位置を空けたまま届きます。ブラウザが同じ位置でthrowし、hydrationの後に`error.tsx`が出ます。応答のステータスは200のままです。',
-  en: 'A server render has no error boundaries. What it has is the rule that a subtree which throws inside a Suspense boundary is left for the browser to render, and the boundary of an `error.tsx` is one. So the HTML arrives with the frame in place and a hole where the page was; the browser throws at the same spot, and `error.tsx` shows after hydration. The response status stays 200.',
+export const renderTitle = message({
+  ja: 'サーバーで描いている途中に例外が起きたとき',
+  en: 'When something throws while the server renders',
 });
 
-export const serverRenderClient = message({
-  ja: '本番では、ブラウザが受け取るエラーのメッセージはReactの汎用の文言に置き換わり、throwされたメッセージはサーバーのログ（`k8ordo: rendering /broken failed`）にだけ出ます。フレームワークはdigestを設定しないので、`error.digest`は空文字列です。訪問者が読む文言は`error.tsx`自身が持ちます。',
-  en: "In production the error the browser receives carries React's generic message instead of the thrown one, which appears only in the server's log, as `k8ordo: rendering /broken failed`. The framework sets no digest, so `error.digest` is an empty string. What the visitor reads is whatever `error.tsx` says.",
+export const renderDescription = message({
+  ja: 'サーバーでの描画は、例外を`error.tsx`で受け止められません。代わりに、Suspenseの境界の中で例外を投げた部分をブラウザに描かせます。`error.tsx`の境界はSuspenseの境界も兼ねているので、HTMLは枠を持ち、ページのあった位置を空けたまま届きます。',
+  en: 'A server render cannot catch with `error.tsx`. What it does instead is leave a part that threw inside a Suspense boundary for the browser to render, and an `error.tsx` boundary is one. So the HTML arrives with its frame and a hole where the page was.',
 });
 
-export const serverRenderBrowser = message({
-  ja: '上にSuspenseの境界（`error.tsx`もその1つ）が無い場所でthrowすると、その部分を空けておく場所が無いのでHTMLを作れず、`serve()`はそのリクエストに`500`で答えます。',
-  en: 'A throw with no Suspense boundary above it — an `error.tsx` is one — has nowhere to leave a hole, so the HTML cannot be produced, and `serve()` answers that request with a `500`.',
+export const renderBrowser = message({
+  ja: 'ブラウザが同じ位置で例外を投げ直し、hydrationの後に`error.tsx`が出ます。応答のステータスは200のままです。',
+  en: 'The browser throws again at the same spot, and `error.tsx` shows after hydration. The status stays 200.',
 });
 
-export const withoutNote = message({
-  ja: 'このモードでは、読み込み直した文書は`serve()`自身の答えで、描けないページなら`500`です。アプリが持たないURLは文書の読み込みになりません。ハンドラがnot-foundのペイロードを404で返し、その場で描かれます。',
-  en: "In this mode the document load is `serve()`'s own answer — a `500` when the page cannot be rendered. A URL the application does not have is not a document load: the handler answers it with the not-found payload under a 404, and it renders in place.",
+export const renderMessage = message({
+  ja: '本番では、ブラウザに届くエラーのメッセージはReactの汎用の文言に置き換わります。投げられたメッセージは、サーバーのログに`k8ordo: rendering /broken failed`として出ます。',
+  en: 'In production the error the browser receives carries React’s generic message. The thrown one goes to the server’s log, as `k8ordo: rendering /broken failed`.',
 });
 
-export const notFoundNote = message({
-  ja: 'このモードでは、`not-found.tsx`の答えは本物の404ステータスを持ちます。ディレクトリごとに置けるので、`docs/not-found.tsx`は`/docs`の下の知らないURLを`docs/layout.tsx`の内側で描けます。1つも宣言しなければ、表にないpathnameには`404`という見出しと1行だけの最小のページが、ルートレイアウトの内側に描かれて404で返ります。サイトの枠も`<html lang>`もスタイルシートも残ります。',
-  en: 'In this mode `not-found.tsx` is answered under a genuine 404 status. Each directory may declare its own, so `docs/not-found.tsx` can render an unknown URL under `/docs` inside `docs/layout.tsx`. With none declared, an unknown pathname gets a minimal page — a `404` heading and one line — rendered inside the root layout under a 404, so the site’s frame, its `<html lang>` and its stylesheets stay.',
+export const renderNoBoundary = message({
+  ja: '上にSuspenseの境界が1つも無い場所で例外が起きると、空けておく場所が無いのでHTMLを作れません。`serve()`はそのリクエストに`500`で答えます。',
+  en: 'A throw with no Suspense boundary above it has nowhere to leave a hole, so no HTML can be made, and `serve()` answers that request with a `500`.',
 });
 
-export const redirectNote = message({
-  ja: 'このモードでは、答えは`307`、`permanent`なら`308`で、`location`ヘッダーが行き先です。クライアント遷移がリダイレクトに当たると、ペイロードではなくHTMLの答えが返るのでURLをブラウザに渡し、ブラウザが文書の読み込みとしてリダイレクトに従います。アドレスバーは正しいURLになります。default exportの形は`RedirectTarget`としてexportされています。',
-  en: 'In this mode the answer is a `307`, or a `308` when `permanent`, with the target in `location`. A client navigation that meets a redirect gets HTML back instead of a payload, hands the URL to the browser, and the browser follows the redirect as a document load, so the address bar ends up right. The shape of the default export is exported as `RedirectTarget`.',
+export const notFoundMode = message({
+  ja: 'このモードでは、`not-found.tsx`の答えは本物の404ステータスを持ちます。ディレクトリごとに置けるので、`docs/not-found.tsx`は`/docs`の下の知らないURLを、`docs/layout.tsx`の内側に描きます。',
+  en: 'In this mode a `not-found.tsx` answers under a real 404 status. Each directory may have its own, so `docs/not-found.tsx` renders an unknown URL under `/docs` inside `docs/layout.tsx`.',
+});
+
+export const notFoundNone = message({
+  ja: '`not-found.tsx`を1つも置かなければ、フレームワークが用意した最小のページが、ルートレイアウトの内側に404で描かれます。`404`という見出しと1行の説明だけのページですが、サイトの枠と`<html lang>`、スタイルシートは残ります。',
+  en: 'With no `not-found.tsx` at all, a minimal page of the framework’s own renders inside the root layout under a 404: a `404` heading and a line. The site’s frame, its `<html lang>` and its stylesheets stay.',
+});
+
+export const pageNotFoundMode = message({
+  ja: 'このモードでは、ページ自身のコンポーネントが答えを返すまで、文書を送りません。ステータスは本文より先に送るものなので、`notFound()`が来るかもしれない間は待つ必要があるからです。',
+  en: 'In this mode a document is not sent until the page’s own component has answered. A status goes out before the body, so it has to wait while `notFound()` may still come.',
+});
+
+export const pageNotFoundNavigation = message({
+  ja: 'クライアント側の遷移ではステータスを待たないので、ペイロードを最初から流します。そこでページが`notFound()`を投げると、ブラウザが同じURLを文書として読み込み直し、サーバーが404で答えます。',
+  en: 'A client navigation has no status to wait for, so its payload streams from the start. A page that throws `notFound()` there sends the browser back for a document load of the same URL, which the server answers with the 404.',
+});
+
+export const pageNotFoundDeep = message({
+  ja: 'ページが答えを返して応答が始まった後に、`<Suspense>`の下の子から`notFound()`を投げても、404にはなりません。ほかの例外と同じく、いちばん近い`error.tsx`が受け止めます。',
+  en: 'Thrown from further down, under a `<Suspense>`, after the page has answered and the response has started, `notFound()` is no 404: like any other error, the nearest `error.tsx` catches it.',
+});
+
+export const redirectMode = message({
+  ja: 'このモードでは、`GET`と`HEAD`に`307`で答え、`permanent`なら`308`で答えます。ほかのメソッドには`405`です。クライアント側の遷移がリダイレクトに当たると、ブラウザが文書として読み込み直して行き先へ移るので、アドレスバーも正しいURLになります。',
+  en: 'In this mode a `GET` or `HEAD` gets a `307`, or a `308` when `permanent`, and any other method a `405`. A client navigation that meets a redirect has the browser load it as a document and follow it, so the address bar ends up right.',
+});
+
+export const redirectType = message({
+  ja: "default exportの型は、`@k8ordo/server/runtime`の`RedirectTarget`です。`export default '/products' satisfies RedirectTarget`と書けば、書いたその場で形を検査できます。",
+  en: "The default export’s type is `RedirectTarget` from `@k8ordo/server/runtime`. Write `export default '/products' satisfies RedirectTarget` to check the shape right where it is written.",
 });
 
 export const redirectAction = message({
-  ja: 'Server Actionから訪問者を送るのは`redirect()`で、リンク先で説明します。',
-  en: 'A Server Action sends the visitor elsewhere with `redirect()`, covered here.',
-});
-
-export const statusesTitle = message({
-  ja: 'アプリが答えるステータス',
-  en: 'The statuses the application answers with',
-});
-
-export const statusesDescription = message({
-  ja: 'ページはステータスを決めません。ステータスは、どのルートがどう答えたかで決まります。',
-  en: 'A page never decides its status; which route answered, and how, does.',
-});
-
-export const statusesTable = {
-  when: message({ ja: 'いつ', en: 'When' }),
-  status: message({ ja: 'ステータス', en: 'Status' }),
-  page: message({ ja: 'ページが描かれた', en: 'A page rendered' }),
-  thrown: message({
-    ja: 'Server Componentが`error.tsx`の下でthrowした（その部分はブラウザに任される）',
-    en: 'A Server Component threw under an `error.tsx` (that part is left to the browser)',
-  }),
-  missing: message({
-    ja: '表にないpathname、またはスキーマが拒んだ値',
-    en: 'A pathname the table does not have, or a value a schema refused',
-  }),
-  redirect: message({
-    ja: '`redirect.ts`（`permanent`なら`308`）',
-    en: '`redirect.ts` (`308` when `permanent`)',
-  }),
-  action: message({
-    ja: 'JavaScriptなしで送られたフォームのアクションが`redirect()`した',
-    en: 'An action posted by a form without JavaScript called `redirect()`',
-  }),
-  crossOrigin: message({
-    ja: '`Origin`ヘッダーが無いか、そのホストが一致しないPOST',
-    en: 'A POST with no `Origin` header, or one whose host does not match',
-  }),
-  method: message({
-    ja: 'GET、HEAD、POST以外のメソッド（`Allow`ヘッダーがその3つを示す）',
-    en: 'A method other than GET, HEAD or POST (the `Allow` header names those three)',
-  }),
-  failed: message({
-    ja: 'ハンドラが答えを作れなかった（`serve()`の場合）',
-    en: 'The handler could not produce an answer (under `serve()`)',
-  }),
-};
-
-export const pageNotFoundWait = message({
-  ja: 'ステータスは本文より先に送られるので、ページのHTMLは、ページ自身のコンポーネントが答える（要るものを取って返すか、`notFound()`と言う）まで送りません。そのあとに流れるのは、ページが自分の`<Suspense>`の下に置いたものです。クライアント遷移には正しくすべきステータスが無いので、ペイロードは最初から流れます。そこでページが`notFound()`と言うと、ブラウザは同じURLを文書として読み込み直し、サーバーが404で答えます。ページが返して応答が始まったあとに、それより下から投げた`notFound()`は、ほかのエラーと同じくいちばん近い`error.tsx`が受けます。',
-  en: 'A status leaves before the body it heads, so a page’s HTML is not sent until the page’s own component has answered — fetched what it needs and returned, or said `notFound()`. What streams after that is what the page puts under a `<Suspense>` of its own. A client navigation has no status to get right, so its payload streams from the start; a page that says `notFound()` there sends the browser back to the server for a document load of the same URL, which is answered with the 404. Thrown from further down, once the page has returned and its response has started, `notFound()` is an error like any other, and the nearest `error.tsx` answers it.',
+  ja: 'Server Actionの最後に訪問者を別のページへ送るときは、`redirect()`を使います。使い方は次のページで説明しています。',
+  en: 'To send the visitor elsewhere at the end of a Server Action, use `redirect()`, covered here:',
 });

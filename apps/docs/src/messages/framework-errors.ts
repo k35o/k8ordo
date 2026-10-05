@@ -4,18 +4,23 @@ import { message } from '@k8ordo/i18n';
 // static-errors.ts / server-errors.ts が持つ。
 
 export const errorTitle = message({
-  ja: '`error.tsx`',
-  en: '`error.tsx`',
+  ja: '例外を`error.tsx`で受け止める',
+  en: 'Catch what throws with `error.tsx`',
 });
 
 export const errorDescription = message({
-  ja: 'レイアウト（またはページ）の横に置いた`error.tsx`は、その下がthrowしたときに代わりに表示されます。描かれるのはレイアウトの内側なので、失敗しても枠はそのまま残ります。描画中のエラーを捕まえられるのはブラウザだけなので、`error.tsx`はクライアントコンポーネントです。',
-  en: 'An `error.tsx` beside a `layout.tsx` (or a `page.tsx`) is what shows in place of what is below it when that throws — inside the layout, so the frame survives the failure. Catching a render error is something only the browser can do, so `error.tsx` is a client component.',
+  ja: 'レイアウトやページの横に`error.tsx`を置くと、その下で例外が投げられたときに代わりに描かれます。描かれる場所はレイアウトの内側なので、ヘッダーのような枠は失敗しても残ります。',
+  en: 'An `error.tsx` beside a layout or a page is rendered in place of what is below it when that throws. It renders inside the layout, so the frame around it, a header say, survives the failure.',
 });
 
-export const errorProps = message({
-  ja: '受け取るのは`error`（throwされたもの）と`reset`（その部分木をその場で描き直す関数）だけで、`params`は受け取りません。型は`@k8ordo/router`の`ErrorProps`で、生成された表は各`error.tsx`を`satisfies ErrorComponent`で検査します。文言がURLに依存するなら、コンポーネント自身がURLから読みます。',
-  en: 'It receives `error`, whatever was thrown, and `reset`, which renders the subtree again in place — and no `params`. The type is `ErrorProps` from `@k8ordo/router`, and the generated table checks each `error.tsx` with `satisfies ErrorComponent`. Wording that depends on the URL reads the URL itself.',
+export const errorClient = message({
+  ja: '描画中の例外を受け止められるのはブラウザだけなので、`error.tsx`はクライアントコンポーネントにします。受け取るのは、投げられた値の`error`と、その部分をその場で描き直す`reset`です。`params`は受け取りません。',
+  en: 'Only the browser can catch an error thrown while rendering, so `error.tsx` is a client component. It receives `error`, whatever was thrown, and `reset`, which renders that part again in place — and no `params`.',
+});
+
+export const errorAway = message({
+  ja: '別のページへ移れば、失敗した表示は何もしなくても消えます。',
+  en: 'Navigating to another page clears the failure on its own.',
 });
 
 export const scopeTitle = message({
@@ -24,103 +29,97 @@ export const scopeTitle = message({
 });
 
 export const scopeDescription = message({
-  ja: '`error.tsx`の境界は、同じディレクトリのレイアウトの内側に置かれます。受け持つのは横の`page.tsx`と、下のディレクトリにあるものすべて（そのレイアウトを含む）です。横のレイアウト自身がthrowしたときは、1つ上の`error.tsx`が受けます。throwした場所の上でいちばん近い`error.tsx`が答えます。',
-  en: 'The boundary of an `error.tsx` sits inside the layout of its own directory. It covers the `page.tsx` beside it and everything in the directories below, their layouts included; when the layout beside it throws, the `error.tsx` one level up answers. The nearest one above the throw is the one that shows.',
+  ja: '例外を受け止めるのは、投げられた場所より上でいちばん近い`error.tsx`です。`error.tsx`は同じディレクトリの`layout.tsx`の内側に置かれるので、そのレイアウト自身の例外は1つ上の`error.tsx`が受け止めます。',
+  en: 'The nearest `error.tsx` above the throw catches it. An `error.tsx` sits inside the `layout.tsx` of its own directory, so that layout’s own failure is caught one level up.',
 });
 
 export const scopeExample = message({
-  ja: 'この木では、`shop/error.tsx`が`shop/page.tsx`と`shop/[id]/page.tsx`の失敗を`shop/layout.tsx`の内側で受け、`shop/layout.tsx`自身の失敗はルートの`error.tsx`がルートレイアウトの内側で受けます。ルートの`page.tsx`の失敗も、ルートの`error.tsx`が受けます。',
-  en: 'In this tree `shop/error.tsx` catches a failure in `shop/page.tsx` or `shop/[id]/page.tsx` inside `shop/layout.tsx`, while a failure in `shop/layout.tsx` itself is caught by the root `error.tsx`, inside the root layout — as is a failure in the root `page.tsx`.',
+  ja: 'この木では、`shop/page.tsx`と`shop/[id]/page.tsx`の例外を、`shop/error.tsx`が`shop/layout.tsx`の内側で受け止めます。`shop/layout.tsx`自身の例外は、ルートの`error.tsx`が受け止めます。',
+  en: 'In this tree `shop/error.tsx` catches a failure in `shop/page.tsx` or `shop/[id]/page.tsx`, inside `shop/layout.tsx`. A failure in `shop/layout.tsx` itself is caught by the root `error.tsx`.',
 });
 
-export const scopeSite = message({
-  ja: 'このサイトには2つあります。`src/routes/[locale]/error.tsx`はページがthrowしたとき、ヘッダーとフッターを残したまま中身の位置に描かれます。`src/routes/error.tsx`は、`[locale]`のレイアウト自身がthrowしたときの、枠の無い全画面の受け皿です。',
-  en: 'This site has two. `src/routes/[locale]/error.tsx` renders where the page was when a page throws, with the header and footer still around it; `src/routes/error.tsx` is the frameless full-screen last resort for when the `[locale]` layout itself throws.',
-});
-
-export const scopeReset = message({
-  ja: '`reset`はその部分木をその場で描き直します。別のページへ移動すれば、失敗は何もしなくても消えます。境界は、ページを画面に出したナビゲーションごとに作り直されるからです。',
-  en: '`reset` renders the subtree again where it is. Navigating to another page clears the failure on its own, because the boundary is recreated for each navigation that puts a page on screen.',
+export const scopeNone = message({
+  ja: '受け止める`error.tsx`が無いときは、クライアント側の遷移で届いたページが描けなかった場合に、フレームワークが同じURLを文書として読み込み直します。',
+  en: 'With no `error.tsx` to catch it, a page that failed after a client navigation becomes a document load of the same URL.',
 });
 
 export const demoTitle = message({
-  ja: '触って確かめる',
-  en: 'Try it',
+  ja: '例外を投げてみる',
+  en: 'Throw an error',
 });
 
-export const demoDescription = message<[retry: string]>({
-  ja: (retry) =>
-    `下のボタンは、描画中にthrowするクライアントコンポーネントを出します。このページの中身は\`src/routes/[locale]/error.tsx\`に置き換わり、ヘッダーとフッターはそのまま残ります。「${retry}」を押すと\`reset\`が呼ばれ、このページがその場で描き直されます。`,
-  en: (retry) =>
-    `The button below mounts a client component that throws while rendering. This page's content is replaced by \`src/routes/[locale]/error.tsx\` while the header and footer stay; pressing "${retry}" calls \`reset\`, and the page renders again in place.`,
+export const demoDescription = message({
+  ja: 'このサイトにも`src/routes/[locale]/error.tsx`があります。下のボタンを押すと、描画中に例外を投げるクライアントコンポーネントが現れます。',
+  en: 'This site has its own `src/routes/[locale]/error.tsx`. The button below mounts a client component that throws while rendering.',
 });
 
 export const demoButton = message({
-  ja: '描画中にthrowする',
+  ja: '描画中に例外を投げる',
   en: 'Throw while rendering',
 });
 
-export const withoutTitle = message({
-  ja: '`error.tsx`が受けないとき',
-  en: 'When no `error.tsx` catches it',
-});
-
-export const withoutDescription = message({
-  ja: 'クライアント遷移で届いたページが描画に失敗し、それを受ける`error.tsx`が無ければ、フレームワークは同じURLを文書として読み込み直します。ネットワークの失敗や、ペイロードではない答え（ホストが配るファイルなど）も同じく文書の読み込みになります。hydration中の失敗は読み込み直しません。すでに描かれたHTMLを取り直しても良くはならず、繰り返すだけだからです。',
-  en: 'When a page that arrived by client navigation fails to render and no `error.tsx` catches it, the framework loads the same URL as a document instead. A network failure, or an answer that is not a payload — a file the host serves — becomes a document load the same way. A failure during hydration is not reloaded: asking again for HTML that was already rendered cannot make it better, and would only loop.',
-});
+export const demoSteps = [
+  message({
+    ja: '「描画中に例外を投げる」を押すと、このページの本文が「問題が発生しました」という表示に置き換わります。ヘッダーやサイドバーは、そのまま残ります。',
+    en: 'Press “Throw while rendering”. This page’s content is replaced by “Something went wrong”, while the header and the sidebar stay.',
+  }),
+  message({
+    ja: '「再読み込み」を押すと`reset`が呼ばれ、このページがその場で描き直されます。',
+    en: 'Press “Retry”. `reset` is called, and this page renders again in place.',
+  }),
+] as const;
 
 export const notFoundTitle = message({
-  ja: '`not-found.tsx`',
-  en: '`not-found.tsx`',
+  ja: 'どこにも当たらないURLに`not-found.tsx`で答える',
+  en: 'Answer a URL nothing matched with `not-found.tsx`',
 });
 
 export const notFoundDescription = message({
-  ja: '`not-found.tsx`は、そのディレクトリ以下でほかのどれも答えなかったpathnameに答えるcatch-all（`/*`）です。表では枝の最後に置かれるので、宣言されたルートがかならず先に試されます。ページと同じく`params`と`pathname`を受け取り、自分の`<title>`を描きます。',
-  en: 'A `not-found.tsx` is the catch-all (`/*`) for any pathname below its directory that nothing else answered. It comes last in its branch, so every declared route is tried first. Like a page it receives `params` and `pathname`, and renders its own `<title>`.',
+  ja: '`not-found.tsx`は、そのディレクトリより下でどのルートにも当たらなかったURLに答えます。ルート表ではその枝の最後に置かれるので、宣言したルートがかならず先に試されます。',
+  en: 'A `not-found.tsx` answers any URL below its directory that no route matched. It comes last in its branch of the route table, so every declared route is tried first.',
 });
 
-export const notFoundParams = message({
-  ja: 'catch-allは、パラメータが何であっても答えます。上のスキーマは走りますが、拒んでもcatch-allは止まりません。そのため`/:locale/*`の`not-found.tsx`が受け取る`params.locale`は、どんな文字列でもありえます。使う前に確かめます。',
-  en: 'A catch-all answers whatever its parameters hold: the schemas above it run, but a refusal does not stop it. So the `params.locale` a `not-found.tsx` at `/:locale/*` receives can be any string. Check it before using it.',
-});
-
-export const redirectTitle = message({
-  ja: '`redirect.ts`',
-  en: '`redirect.ts`',
-});
-
-export const redirectDescription = message({
-  ja: '移転したディレクトリには、`page.tsx`の代わりに`redirect.ts`を置きます。default exportは行き先の文字列か、`{ to, permanent }`です。',
-  en: 'A directory that has moved keeps a `redirect.ts` instead of a `page.tsx`. It default-exports the target: a string, or `{ to, permanent }`.',
-});
-
-export const redirectPattern = message({
-  ja: '行き先はパターンで、一致したパラメータで埋められます。`/:locale/legacy`は`/:locale/new`へ送れます。自分のパターンに無いパラメータを行き先で名指すと、そのリダイレクトに答える時点で失敗します。',
-  en: 'The target is a pattern the matched params fill in, so `/:locale/legacy` can send to `/:locale/new`. A target naming a param its own pattern does not have fails when the redirect is answered.',
-});
-
-export const redirectOrder = message({
-  ja: 'リダイレクトは、ページと同じく表の中に自分の位置を持ちます。`[slug]/redirect.ts`の隣にある文字どおりのディレクトリは、自分のURLを保ちます。リダイレクトするディレクトリには描くページが無いので、同じディレクトリに`page.tsx`と`redirect.ts`を両方置くとビルドが拒みます。リダイレクトも宣言されたURLとして数えられるので、別のグループが同じURLにページを置くことも拒まれます。',
-  en: 'A redirect holds its place in the table as a page does, so a literal directory beside a `[slug]/redirect.ts` keeps its URL. A directory that redirects has no page to render, so one holding both `page.tsx` and `redirect.ts` fails the build — and since a redirect counts as a declared URL, another group putting a page at the same URL is refused too.',
+export const notFoundProps = message({
+  ja: 'ページと同じく`params`と`pathname`を受け取り、自分の`<title>`を描きます。',
+  en: 'Like a page, it receives `params` and `pathname`, and renders its own `<title>`.',
 });
 
 export const pageNotFoundTitle = message({
-  ja: '`notFound()`：そこに無いページ',
-  en: '`notFound()` — a page that is not there',
+  ja: 'データが無いページから`notFound()`を投げる',
+  en: 'Throw `notFound()` from a page whose data is missing',
 });
 
 export const pageNotFoundDescription = message({
-  ja: 'paramsのスキーマが決めるのはURLのparamsの形までで、それが名指すものが存在するかどうかはページが言います。`@k8ordo/router`の`notFound()`がそれを言います。',
-  en: 'A params schema decides what a URL’s params look like; whether the thing they name exists is the page’s to say. `notFound()` from `@k8ordo/router` says it.',
+  ja: 'スキーマが決めるのはパラメータの形までで、そのデータがあるかどうかはページにしか分かりません。無いときは、`@k8ordo/router`の`notFound()`を投げます。',
+  en: 'A schema decides what a parameter looks like; whether its data exists, only the page knows. When it does not, throw `notFound()` from `@k8ordo/router`.',
 });
 
 export const pageNotFoundAnswer = message({
-  ja: '`notFound()`はthrowするので、その後の行は走りません。ページの代わりに、そこで何にも当たらなかったURLに表が答えるもの、つまりいちばん近い上の`not-found.tsx`が、その上のレイアウトの内側で404として答えます。`not-found.tsx`が1つも無ければ、フレームワーク自身のものが答えます。モードのパッケージではなくルーターから来るので、ページはどちらのモードでも同じに読めます。',
-  en: 'It throws, so the lines after it never run, and the page is answered instead by what the table answers for a URL nothing matched there — the nearest `not-found.tsx` above it, inside the layouts above that — under a 404. With no `not-found.tsx` at all, the framework’s own answers. It comes from the router rather than the mode package, so the page reads the same under either.',
+  ja: '`notFound()`は例外を投げるので、その後の行は走りません。ページの代わりに、いちばん近い上の`not-found.tsx`が、その上のレイアウトの内側に404として描かれます。',
+  en: '`notFound()` throws, so the lines after it never run. In place of the page, the nearest `not-found.tsx` above renders inside the layouts above it, under a 404.',
 });
 
-export const pageNotFoundOwn = message({
-  ja: '`notFound()`はページが自分について言う言葉です。ページ自身のコンポーネントから、返す前に投げます。',
-  en: '`notFound()` is the page’s word about itself: thrown from the page’s own component, before it returns.',
+export const pageNotFoundRouter = message({
+  ja: '`notFound()`はモードのパッケージではなくルーターのAPIなので、ページはどちらのモードでも同じに書けます。',
+  en: '`notFound()` comes from the router, not from the mode package, so the page reads the same under either mode.',
+});
+
+export const redirectTitle = message({
+  ja: '移転したURLを`redirect.ts`で転送する',
+  en: 'Send a moved URL on with `redirect.ts`',
+});
+
+export const redirectDescription = message({
+  ja: 'URLを移したときは、古いディレクトリに`page.tsx`の代わりに`redirect.ts`を置きます。default exportするのは、行き先の文字列か`{ to, permanent }`です。',
+  en: 'When a URL moves, its old directory keeps a `redirect.ts` instead of a `page.tsx`. It default-exports the target: a string, or `{ to, permanent }`.',
+});
+
+export const redirectPattern = message({
+  ja: '行き先はルート表のパターンで書き、当たったパラメータで埋められます。そのため`/:locale/legacy`から`/:locale/new`へ、ロケールを保ったまま送れます。',
+  en: 'The target is a pattern of the route table, filled with the matched parameters, so `/:locale/legacy` can send to `/:locale/new` keeping the locale.',
+});
+
+export const redirectAlone = message({
+  ja: 'リダイレクトするディレクトリには描くページが無いので、同じディレクトリに`page.tsx`と`redirect.ts`を両方置くと、ビルドが止まります。',
+  en: 'A directory that redirects has no page to render, so holding both `page.tsx` and `redirect.ts` stops the build.',
 });
