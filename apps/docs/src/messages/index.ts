@@ -60,6 +60,7 @@ export * as routerLocation from './router-location';
 export * as routerBindParams from './router-bind-params';
 export * as routerTypedPaths from './router-typed-paths';
 export * as routerBase from './router-base';
+export * as routerAnimate from './router-animate';
 export * as routerNavigation from './router-navigation';
 export * as routerFramework from './router-framework';
 export * as staticGetStarted from './static-get-started';

@@ -128,6 +128,11 @@ export const navBase = message({
   en: 'Serve under a base path',
 });
 
+export const navAnimate = message({
+  ja: 'ページの切り替えをアニメーションする',
+  en: 'Animate page changes',
+});
+
 export const navNavigation = message({
   ja: 'ナビゲーション',
   en: 'Navigation',
