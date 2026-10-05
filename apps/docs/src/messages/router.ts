@@ -98,6 +98,11 @@ export const navRoutes = message({
   en: 'Write the route table',
 });
 
+export const navBoundaries = message({
+  ja: 'エラーと読み込み中の表示を出す',
+  en: 'Errors and loading states',
+});
+
 export const navLinks = message({
   ja: 'リンクと現在地',
   en: 'Links & location',

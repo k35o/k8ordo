@@ -54,6 +54,7 @@ export * as stateUpdates from './state-updates';
 export * as stateIntegrations from './state-integrations';
 export * as routerGetStarted from './router-get-started';
 export * as routerRoutes from './router-routes';
+export * as routerBoundaries from './router-boundaries';
 export * as routerLinks from './router-links';
 export * as routerNavigation from './router-navigation';
 export * as routerFramework from './router-framework';
