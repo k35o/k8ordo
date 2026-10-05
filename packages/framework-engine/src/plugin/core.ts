@@ -45,7 +45,22 @@ const CLIENT_DEPS = [
   'react/jsx-dev-runtime',
   'react-dom',
   'react-dom/client',
+];
+
+/**
+ * 'use client' のモジュールを持つ @k8ordo/* は、client の事前バンドルに入れない。
+ * どれも入口が 'use client' のモジュールを束ねる形で、RSC プラグインは入口から
+ * 辿ったそれを事前バンドルを通さずファイルのままブラウザに読ませる。事前バンドル
+ * にも入ると、ページにコピーが 2 つ載り、サーバーで描いた Provider の context を
+ * client コンポーネントのフックが読めない。アプリが入れていない名前を挙げても
+ * 何も起きないので、family のものは全部挙げる
+ */
+const CLIENT_UNBUNDLED = [
+  '@k8ordo/color-scheme',
+  '@k8ordo/form',
   '@k8ordo/router',
+  '@k8ordo/state',
+  '@k8ordo/ui',
 ];
 
 /**
@@ -107,7 +122,7 @@ export const engine = (
             },
           },
           client: {
-            optimizeDeps: { include: CLIENT_DEPS },
+            optimizeDeps: { include: CLIENT_DEPS, exclude: CLIENT_UNBUNDLED },
             build: {
               rolldownOptions: { input: { index: runtime('entry.browser') } },
             },
