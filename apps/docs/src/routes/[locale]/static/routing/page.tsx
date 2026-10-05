@@ -1,5 +1,5 @@
 import { DocPage } from '../../../../components/doc-page';
-import { RoutingGuide } from '../../../../components/framework-guide/routing';
+import { routingSections } from '../../../../components/framework-guide/routing';
 import * as m from '../../../../messages';
 
 export default function StaticRoutingPage() {
@@ -8,7 +8,7 @@ export default function StaticRoutingPage() {
       introduction={m.staticRouting.introduction}
       path="/:locale/static/routing"
     >
-      <RoutingGuide mode="static" />
+      {routingSections('static')}
     </DocPage>
   );
 }

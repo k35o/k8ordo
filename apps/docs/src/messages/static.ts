@@ -89,8 +89,8 @@ export const nextDeploy = message({
 });
 
 export const navRouting = message({
-  ja: 'routes/',
-  en: 'routes/',
+  ja: 'ルートを書く',
+  en: 'Write routes',
 });
 
 export const navParams = message({

@@ -1,26 +1,56 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: '`src/routes/`のディレクトリ木が、そのままアプリのURLです。このページは、ファイル名とディレクトリ名の文法、照合の順序、ビルドが拒むもの、生成されるファイル、ページがタイトルを描く方法を説明します。',
-  en: "The directory tree under `src/routes/` is the application's URL space. This page covers the grammar of file and directory names, the order patterns are tried in, what the build refuses, the generated files, and how a page renders its title.",
+  ja: '`src/routes/`の下のディレクトリが、そのままアプリのURLになります。このページでは、ルートを書くときの決まりと、ルートのファイルでできることを説明します。',
+  en: 'The directories under `src/routes/` are the application’s URLs. This page covers the rules for writing routes, and what route files can do.',
 });
 
-export const filesNote = message({
-  ja: 'このモードでは、`page.tsx`、`layout.tsx`、`not-found.tsx`がリクエストのヘッダーとcookieも`request`として受け取ります。`not-found.tsx`はディレクトリごとに置けて、その答えは本物の404です。',
-  en: "In this mode `page.tsx`, `layout.tsx` and `not-found.tsx` also receive the request's headers and cookies as `request`. Each directory may declare its own `not-found.tsx`, and its answer is a real 404.",
+export const guardFile = message({
+  ja: '`guard.ts`：その下のURLに答える前に走り、リクエストを止めたり通したりします。',
+  en: '`guard.ts`: runs before any URL below it is answered, and stops the request or lets it through.',
 });
 
-export const refusesNote = message({
-  ja: 'このモードでは、`routes/`の形についてビルドが止まる理由は上の表と隠されたルートだけです。パラメータの値はリクエストと一緒に届くので、列挙を求められることはありません。',
-  en: 'In this mode the table above and shadowed routes are the only reasons the shape of `routes/` stops the build: parameter values arrive with the request, so nothing asks for them to be listed.',
+export const propsRequest = message({
+  ja: 'このモードでは、ページとレイアウトは`request`も受け取ります。リクエストのヘッダーとCookieが入っていて、読み方は次のページで説明しています。',
+  en: 'In this mode a page and a layout also receive `request`, holding the request’s headers and cookies. Reading it is covered here:',
 });
 
-export const routeServer = message({
-  ja: '実行中のサーバーでは、7つのメソッドのどれをexportしてもよく、それぞれは自分のメソッドにだけ答えます。自分の`HEAD`が無ければ、`GET`の答えから本文を外したものが`HEAD`の答えです。exportしていないメソッドには、exportしたものを`Allow`に並べた`405`を返します。上のguardが先に走ります。`route.ts`への`POST`はServer Actionと違い、同じoriginからであることを求めません。送ってくるもの（webhook）はこのサイトのフォームではないので、要ることは`route.ts`が自分で確かめます。guardと同じく応答に答える側なので、`cookies()`、`responseHeaders()`、`requestHeaders()`が使えます。',
-  en: 'Any of the seven methods may be exported, and each answers only its own; a `HEAD` with no export of its own is its `GET` with the body left off, and a method it does not export gets a `405` whose `Allow` names the ones it does. The guards above it run first. A `POST` to a `route.ts` is not held to the same-origin rule a Server Action is — what posts to one, a webhook, is not a form on this site — so it checks what it needs itself. It answers the request as much as a guard does: `cookies()`, `responseHeaders()` and `requestHeaders()` work inside it.',
+export const refusesMode = message({
+  ja: 'このモードで、`routes/`の形が原因でビルドが止まるのは上の場合だけです。パラメータの値はリクエストと一緒に届くので、並べるように求められることもありません。',
+  en: 'In this mode these are the only reasons the shape of `routes/` stops the build. Parameter values arrive with the request, so nothing asks for them to be listed.',
 });
 
-export const loadingServer = message({
-  ja: '文書は、ページ自身のコンポーネントが答えるまで何も送りません（`notFound()`と言うかもしれないため）。なのでHTMLで`loading.tsx`が出るのは、ページが自分の`<Suspense>`の下に置いたものだけで、ステータスを待つ必要の無いクライアント遷移では、ページのペイロードが届くまで出ます。',
-  en: 'A document waits for the page’s own component before anything is sent — it may still say `notFound()` — so in the HTML a `loading.tsx` shows only for what the page leaves under a `<Suspense>` of its own; a client navigation, which has no status to wait for, shows it while the page’s payload streams in.',
+export const loadingMode = message({
+  ja: 'このモードでは、ページ自身のコンポーネントが答えを返すまで、文書を送りません。ページが`notFound()`を投げるかもしれず、まだステータスが決まらないからです。そのためHTMLに`loading.tsx`が出るのは、ページが自分の`<Suspense>`の下に置いた部分を待つ間だけです。',
+  en: 'In this mode a document is not sent until the page’s own component has answered: the page may still throw `notFound()`, and the status is not settled. So in the HTML a `loading.tsx` shows only for what the page put under a `<Suspense>` of its own.',
+});
+
+export const loadingNav = message({
+  ja: 'クライアント側の遷移ではステータスを待たないので、ペイロードが届くまでの間に`loading.tsx`が出ます。',
+  en: 'A client navigation has no status to wait for, so it shows `loading.tsx` while the payload streams in.',
+});
+
+export const routeMode = message({
+  ja: 'このモードでは、HTTPの7つのメソッドのどれをexportしても構いません。exportしていないメソッドには、exportしたものを`Allow`に並べた`405`で答えます。`HEAD`をexportしていなければ、`GET`の答えから本文を外して返します。',
+  en: 'In this mode any of the seven HTTP methods may be exported. A method it does not export gets a `405` whose `Allow` lists the ones it does, and without a `HEAD` of its own, the `GET` answer goes back with its body left off.',
+});
+
+export const routeGuard = message({
+  ja: '上にある`guard.ts`は、`route.ts`より先に走ります。`route.ts`への`POST`は、Server Actionと違って同じoriginかどうかを確かめません。Webhookのように、別の場所から送られてくるものだからです。必要な検証は、`route.ts`の中で行います。',
+  en: 'The `guard.ts` files above it run first. A `POST` to a `route.ts` is not checked for the same origin, unlike a Server Action’s: what posts there, a webhook, comes from elsewhere. Check what you need inside the `route.ts`.',
+});
+
+export const routeApi = message({
+  ja: '`route.ts`もリクエストに答える側なので、`cookies()`と`responseHeaders()`、`requestHeaders()`が使えます。',
+  en: 'A `route.ts` answers the request, so `cookies()`, `responseHeaders()` and `requestHeaders()` work inside it.',
+});
+
+export const generatedMode = message({
+  ja: 'このモードの`register.gen.ts`は、ルートのファイルが`request`を受け取ることも`Register`に書きます。`PageProps`に`request`があるのは、このためです。',
+  en: 'In this mode `register.gen.ts` also writes into `Register` that route files receive `request`, which is how `PageProps` comes to carry it.',
+});
+
+export const prefetchMode = message({
+  ja: 'このモードでの先読みは、遷移と同じくサーバーでの描画です。描くのが重いページへのリンクで先読みを止めるのは、このためです。',
+  en: 'In this mode a prefetch is a render on the server, as a navigation is — the reason to stop it for a link to an expensive page.',
 });
