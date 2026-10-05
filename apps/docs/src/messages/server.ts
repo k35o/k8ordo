@@ -127,3 +127,8 @@ export const navTroubleshooting = message({
   ja: 'うまく動かないとき',
   en: 'Troubleshooting',
 });
+
+export const navReference = message({
+  ja: '設定とファイル',
+  en: 'Options and files',
+});

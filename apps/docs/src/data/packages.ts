@@ -258,6 +258,10 @@ export const PACKAGES: PackageEntry[] = [
         label: m.nav.groupReference,
         sections: [
           {
+            path: '/:locale/static/reference',
+            label: m.static.navReference,
+          },
+          {
             path: '/:locale/static/troubleshooting',
             label: m.static.navTroubleshooting,
           },
@@ -301,6 +305,10 @@ export const PACKAGES: PackageEntry[] = [
       {
         label: m.nav.groupReference,
         sections: [
+          {
+            path: '/:locale/server/reference',
+            label: m.server.navReference,
+          },
           {
             path: '/:locale/server/troubleshooting',
             label: m.server.navTroubleshooting,
