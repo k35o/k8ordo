@@ -1,6 +1,6 @@
-import { Code, Heading, Table } from '@k8ordo/ui';
 import { CodeBlock } from '@k8ordo/ui/code-block';
 
+import { Note } from '../../../../components/callout';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { InstallTabs } from '../../../../components/install-tabs';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
@@ -8,20 +8,40 @@ import { PeerTable } from '../../../../components/peer-table';
 import { Rich } from '../../../../components/rich';
 import * as m from '../../../../messages';
 
-const INSTALL = '@k8ordo/router react react-dom';
+const t = m.routerGetStarted;
 
-const ROUTES = `// src/routes.ts
-import { defineRoutes } from '@k8ordo/router';
+const ROUTES = `import { defineRoutes } from '@k8ordo/router';
 
 import { Home } from './pages/home';
 import { NotFound } from './pages/not-found';
 import { ProductList } from './pages/product-list';
 import { ProductPage } from './pages/product-page';
-import { RootLayout } from './root-layout';
 
 export const routes = defineRoutes({
+  '/': Home,
+  '/products': ProductList,
+  '/products/:id': ProductPage,
+  '/*': NotFound,
+});`;
+
+const MAIN = `import { Router } from '@k8ordo/router';
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+
+import { routes } from './routes';
+
+const root = document.querySelector('#root');
+if (root === null) throw new Error('#root is missing');
+
+createRoot(root).render(
+  <StrictMode>
+    <Router routes={routes} />
+  </StrictMode>,
+);`;
+
+const ROUTES_WITH_LAYOUT = `export const routes = defineRoutes({
   '/': {
-    layout: RootLayout,
+    layout: Shell,
     children: {
       '/': Home,
       '/products': ProductList,
@@ -31,34 +51,15 @@ export const routes = defineRoutes({
   },
 });`;
 
-const MAIN = `// src/main.tsx
-import { Router } from '@k8ordo/router';
-import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
+const SHELL = `import { Outlet } from '@k8ordo/router';
 
-import { routes } from './routes';
-
-const root = document.querySelector('#root');
-if (root === null) {
-  throw new Error('#root is missing');
-}
-
-createRoot(root).render(
-  <StrictMode>
-    <Router routes={routes} />
-  </StrictMode>,
-);`;
-
-const LAYOUT = `// src/root-layout.tsx
-import { href, Outlet } from '@k8ordo/router';
-
-export function RootLayout() {
+export function Shell() {
   return (
     <>
-      <nav>
-        <a href={href('/')}>Home</a>
-        <a href={href('/products')}>Products</a>
-      </nav>
+      <header>
+        <a href="/">Shop</a>
+        <a href="/products">Products</a>
+      </header>
       <main>
         <Outlet />
       </main>
@@ -66,8 +67,7 @@ export function RootLayout() {
   );
 }`;
 
-const PRODUCT_LIST = `// src/pages/product-list.tsx
-import { href } from '@k8ordo/router';
+const PRODUCT_LIST = `import { href } from '@k8ordo/router';
 
 const products = [
   { id: '1', name: 'Desk lamp' },
@@ -88,41 +88,20 @@ export function ProductList() {
   );
 }`;
 
-const PRODUCT_PAGE = `// src/pages/product-page.tsx
-import { href, navigateTo, useParams } from '@k8ordo/router';
+const PRODUCT_PAGE = `import { href, useParams } from '@k8ordo/router';
 
 export function ProductPage() {
   const { id } = useParams('/products/:id');
+
   return (
     <article>
       <h1>Product {id}</h1>
       <a href={href('/products')}>Back to the list</a>
-      <button
-        onClick={() => {
-          navigateTo('/');
-        }}
-        type="button"
-      >
-        Home
-      </button>
     </article>
   );
 }`;
 
-const HOME = `// src/pages/home.tsx
-export function Home() {
-  return <h1>Home</h1>;
-}`;
-
-const NOT_FOUND = `// src/pages/not-found.tsx
-import { usePathname } from '@k8ordo/router';
-
-export function NotFound() {
-  return <p>Nothing at {usePathname()}</p>;
-}`;
-
-const REGISTER = `// types/k8ordo-router.d.ts
-import type { routes } from '../src/routes';
+const REGISTER = `import type { routes } from './routes';
 
 declare module '@k8ordo/router' {
   interface Register {
@@ -130,223 +109,180 @@ declare module '@k8ordo/router' {
   }
 }`;
 
-const TSCONFIG = `{
-  "include": ["src", "types"]
-}`;
-
-const CHECKED = `import { href } from '@k8ordo/router';
-
-href('/products/:id', { id: '1' });
-
-// @ts-expect-error
-href('/product/:id', { id: '1' });
-
-// @ts-expect-error
+const CHECKED = `href('/products/:id', { id: '42' });
+href('/prodcuts/:id', { id: '42' });
 href('/products/:id');`;
 
-const URL_PARTS = [
+const NEXT = [
   {
-    part: m.routerGetStarted.scopeTable.pathname,
-    example: '/products/42',
-    owner: '@k8ordo/router',
+    path: '/:locale/router/routes',
+    label: m.router.navRoutes,
+    description: t.nextRoutes,
   },
   {
-    part: m.routerGetStarted.scopeTable.search,
-    example: '?sort=price',
-    owner: '@k8ordo/state',
+    path: '/:locale/router/links',
+    label: m.router.navLinks,
+    description: t.nextLinks,
   },
   {
-    part: m.routerGetStarted.scopeTable.entryState,
-    example: null,
-    owner: '@k8ordo/state',
-  },
-  {
-    part: m.routerGetStarted.scopeTable.fragment,
-    example: '#reviews',
-    owner: null,
+    path: '/:locale/router/location',
+    label: m.router.navLocation,
+    description: t.nextLocation,
   },
 ] as const;
 
 export default function RouterGetStartedPage() {
   return (
-    <DocPage
-      introduction={m.routerGetStarted.introduction}
-      path="/:locale/router/get-started"
-    >
+    <DocPage introduction={t.introduction} path="/:locale/router/get-started">
       <DocSection
-        id="scope"
-        description={m.routerGetStarted.scopeDescription}
-        title={m.routerGetStarted.scopeTitle}
-      >
-        <Table.Root>
-          <Table.Head>
-            <Table.Row>
-              <Table.HeaderCell>
-                {m.routerGetStarted.scopeTable.part()}
-              </Table.HeaderCell>
-              <Table.HeaderCell>
-                {m.routerGetStarted.scopeTable.example()}
-              </Table.HeaderCell>
-              <Table.HeaderCell>
-                {m.routerGetStarted.scopeTable.owner()}
-              </Table.HeaderCell>
-            </Table.Row>
-          </Table.Head>
-          <Table.Body>
-            {URL_PARTS.map((row) => (
-              <Table.Row key={row.part()}>
-                <Table.Cell>{row.part()}</Table.Cell>
-                <Table.Cell color="mute">
-                  {row.example === null ? (
-                    m.routerGetStarted.scopeTable.entryStateExample()
-                  ) : (
-                    <Code>{row.example}</Code>
-                  )}
-                </Table.Cell>
-                <Table.Cell color="mute">
-                  {row.owner === null ? (
-                    m.routerGetStarted.scopeTable.fragmentOwner()
-                  ) : (
-                    <Code>{row.owner}</Code>
-                  )}
-                </Table.Cell>
-              </Table.Row>
-            ))}
-          </Table.Body>
-        </Table.Root>
-        <p className="text-fg-mute leading-relaxed">
-          <Rich>{m.routerGetStarted.scopeNoSearch()}</Rich>{' '}
-          <LocaleAnchor path="/:locale/state">@k8ordo/state</LocaleAnchor>
-        </p>
-        <p className="text-fg-mute leading-relaxed">
-          <Rich>{m.routerGetStarted.scopeNoFetch()}</Rich>
-        </p>
-      </DocSection>
-
-      <DocSection
+        description={t.installDescription}
         id="install"
-        description={m.routerGetStarted.installDescription}
-        title={m.routerGetStarted.installTitle}
+        title={t.installTitle}
       >
         <InstallTabs
-          npm={<CodeBlock code={`npm install ${INSTALL}`} lang="bash" />}
-          pnpm={<CodeBlock code={`pnpm add ${INSTALL}`} lang="bash" />}
-          yarn={<CodeBlock code={`yarn add ${INSTALL}`} lang="bash" />}
+          npm={<CodeBlock code="npm install @k8ordo/router" lang="bash" />}
+          pnpm={<CodeBlock code="pnpm add @k8ordo/router" lang="bash" />}
+          yarn={<CodeBlock code="yarn add @k8ordo/router" lang="bash" />}
         />
-        <p className="text-fg-mute leading-relaxed">
-          <Rich>{m.routerGetStarted.requirementsDescription()}</Rich>
+        <p>
+          <Rich>{t.peersDescription()}</Rich>
         </p>
         <PeerTable
           name="@k8ordo/router"
           neededFor={{
-            react: m.routerGetStarted.peerReact,
-            typescript: m.routerGetStarted.peerTypes,
-            '@types/react': m.routerGetStarted.peerTypes,
+            react: t.peerReact,
+            typescript: t.peerTypes,
+            '@types/react': t.peerTypes,
           }}
         />
-        <ul className="text-fg-mute flex flex-col gap-2 pl-6">
-          <li className="list-disc">
-            <Rich>{m.routerGetStarted.requirementPlatform()}</Rich>
-          </li>
-          <li className="list-disc">
-            <Rich>{m.routerGetStarted.requirementEsm()}</Rich>
-          </li>
-        </ul>
+        <Note>
+          <p>
+            <Rich>{t.platform()}</Rich>
+          </p>
+        </Note>
       </DocSection>
 
       <DocSection
-        id="build"
-        description={m.routerGetStarted.buildDescription}
-        title={m.routerGetStarted.buildTitle}
+        description={t.tableDescription}
+        id="table"
+        title={t.tableTitle}
       >
-        <div className="flex flex-col gap-4">
-          <Heading level="h3">
-            <Rich>{m.routerGetStarted.stepTableTitle()}</Rich>
-          </Heading>
-          <p className="text-fg-mute leading-relaxed">
-            <Rich>{m.routerGetStarted.stepTableDescription()}</Rich>
-          </p>
-          <CodeBlock code={ROUTES} lang="ts" />
-        </div>
-
-        <div className="flex flex-col gap-4">
-          <Heading level="h3">
-            <Rich>{m.routerGetStarted.stepMountTitle()}</Rich>
-          </Heading>
-          <p className="text-fg-mute leading-relaxed">
-            <Rich>{m.routerGetStarted.stepMountDescription()}</Rich>
-          </p>
-          <CodeBlock code={MAIN} lang="tsx" />
-          <CodeBlock code={LAYOUT} lang="tsx" />
-        </div>
-
-        <div className="flex flex-col gap-4">
-          <Heading level="h3">
-            <Rich>{m.routerGetStarted.stepPagesTitle()}</Rich>
-          </Heading>
-          <p className="text-fg-mute leading-relaxed">
-            <Rich>{m.routerGetStarted.stepPagesDescription()}</Rich>
-          </p>
-          <CodeBlock code={PRODUCT_LIST} lang="tsx" />
-          <CodeBlock code={PRODUCT_PAGE} lang="tsx" />
-          <p className="text-fg-mute leading-relaxed">
-            <Rich>{m.routerGetStarted.stepPagesPlainAnchor()}</Rich>
-          </p>
-          <CodeBlock code={HOME} lang="tsx" />
-          <CodeBlock code={NOT_FOUND} lang="tsx" />
-        </div>
-
-        <div className="flex flex-col gap-4">
-          <Heading level="h3">
-            <Rich>{m.routerGetStarted.stepRegisterTitle()}</Rich>
-          </Heading>
-          <p className="text-fg-mute leading-relaxed">
-            <Rich>{m.routerGetStarted.stepRegisterDescription()}</Rich>
-          </p>
-          <CodeBlock code={REGISTER} lang="ts" />
-          <p className="text-fg-mute leading-relaxed">
-            <Rich>{m.routerGetStarted.stepRegisterInclude()}</Rich>
-          </p>
-          <CodeBlock code={TSCONFIG} lang="json" />
-          <CodeBlock code={CHECKED} lang="ts" />
-          <p className="text-fg-mute leading-relaxed">
-            <Rich>{m.routerGetStarted.stepRegisterResult()}</Rich>
-          </p>
-        </div>
+        <CodeBlock
+          code={ROUTES}
+          lang="ts"
+          marks={{ 11: 'highlight', 12: 'highlight' }}
+          title="src/routes.ts"
+        />
+        <p>
+          <Rich>{t.tableParam()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.tableWildcard()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.tablePages()}</Rich>
+        </p>
       </DocSection>
 
-      <DocSection id="next" title={m.routerGetStarted.nextTitle}>
-        <ul className="flex flex-col gap-3 pl-6">
-          <li className="list-disc">
-            <LocaleAnchor path="/:locale/router/routes">
-              <Rich>{m.routerGetStarted.nextRoutes()}</Rich>
-            </LocaleAnchor>
-          </li>
-          <li className="list-disc">
-            <LocaleAnchor path="/:locale/router/links">
-              <Rich>{m.routerGetStarted.nextLinks()}</Rich>
-            </LocaleAnchor>
-          </li>
-          <li className="list-disc">
-            <LocaleAnchor path="/:locale/router/navigation">
-              <Rich>{m.routerGetStarted.nextNavigation()}</Rich>
-            </LocaleAnchor>
-          </li>
-          <li className="list-disc">
-            <LocaleAnchor path="/:locale/router/framework">
-              <Rich>{m.routerGetStarted.nextFramework()}</Rich>
-            </LocaleAnchor>
-          </li>
-          <li className="list-disc">
-            <LocaleAnchor path="/:locale/static">
-              <Rich>{m.routerGetStarted.nextStatic()}</Rich>
-            </LocaleAnchor>
-          </li>
-          <li className="list-disc">
-            <LocaleAnchor path="/:locale/server">
-              <Rich>{m.routerGetStarted.nextServer()}</Rich>
-            </LocaleAnchor>
-          </li>
+      <DocSection
+        description={t.mountDescription}
+        id="mount"
+        title={t.mountTitle}
+      >
+        <CodeBlock
+          code={MAIN}
+          lang="tsx"
+          marks={{ 12: 'highlight' }}
+          title="src/main.tsx"
+        />
+        <p>
+          <Rich>{t.mountResult()}</Rich>
+        </p>
+        <Note>
+          <p>
+            <Rich>{t.mountBrowserOnly()}</Rich>
+          </p>
+        </Note>
+      </DocSection>
+
+      <DocSection
+        description={t.layoutDescription}
+        id="layout"
+        title={t.layoutTitle}
+      >
+        <CodeBlock
+          code={ROUTES_WITH_LAYOUT}
+          lang="ts"
+          marks={{ 3: 'highlight' }}
+          title="src/routes.ts"
+        />
+        <CodeBlock
+          code={SHELL}
+          lang="tsx"
+          marks={{ 11: 'highlight' }}
+          title="src/shell.tsx"
+        />
+        <p>
+          <Rich>{t.layoutOutlet()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.layoutRoot()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.layoutAnchor()}</Rich>
+        </p>
+      </DocSection>
+
+      <DocSection
+        description={t.linkDescription}
+        id="link"
+        title={t.linkTitle}
+      >
+        <CodeBlock
+          code={PRODUCT_LIST}
+          lang="tsx"
+          marks={{ 13: 'highlight' }}
+          title="src/pages/product-list.tsx"
+        />
+        <p>
+          <Rich>{t.linkParams()}</Rich>
+        </p>
+        <CodeBlock
+          code={PRODUCT_PAGE}
+          lang="tsx"
+          marks={{ 4: 'highlight' }}
+          title="src/pages/product-page.tsx"
+        />
+        <p>
+          <Rich>{t.linkNoImport()}</Rich>
+        </p>
+      </DocSection>
+
+      <DocSection
+        description={t.registerDescription}
+        id="register"
+        title={t.registerTitle}
+      >
+        <CodeBlock code={REGISTER} lang="ts" title="src/k8ordo-router.d.ts" />
+        <CodeBlock
+          callouts={{ 2: t.registerTypo(), 3: t.registerMissing() }}
+          code={CHECKED}
+          lang="ts"
+        />
+        <p>
+          <Rich>{t.registerOnce()}</Rich>
+        </p>
+      </DocSection>
+
+      <DocSection id="next" title={t.nextTitle}>
+        <ul>
+          {NEXT.map((step) => (
+            <li key={step.path}>
+              <LocaleAnchor path={step.path}>{step.label()}</LocaleAnchor>
+              {' — '}
+              <Rich>{step.description()}</Rich>
+            </li>
+          ))}
         </ul>
       </DocSection>
     </DocPage>
