@@ -1,32 +1,32 @@
 import { message } from '@k8ordo/i18n';
 
 export const home = message({
-  ja: 'Home',
+  ja: 'ホーム',
   en: 'Home',
 });
 
 export const getStarted = message({
-  ja: 'Get Started',
+  ja: 'はじめる',
   en: 'Get Started',
 });
 
 export const components = message({
-  ja: 'Components',
+  ja: 'コンポーネント',
   en: 'Components',
 });
 
 export const theming = message({
-  ja: 'Theming',
+  ja: 'テーマ',
   en: 'Theming',
 });
 
 export const i18n = message({
-  ja: 'i18n',
+  ja: 'コンポーネントの文言',
   en: 'i18n',
 });
 
 export const generativeUi = message({
-  ja: 'Generative UI',
+  ja: '生成UI',
   en: 'Generative UI',
 });
 
