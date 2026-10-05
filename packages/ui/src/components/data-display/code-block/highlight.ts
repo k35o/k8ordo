@@ -1,4 +1,4 @@
-import { bundledLanguages, codeToHtml, createCssVariablesTheme } from 'shiki';
+import { bundledLanguages, codeToHtml } from 'shiki';
 import type { ShikiTransformer } from 'shiki';
 
 type LineMark = 'highlight' | 'add' | 'remove';
@@ -8,15 +8,6 @@ type Options = {
   marks?: Readonly<Record<number, LineMark>> | undefined;
   callouts?: Readonly<Record<number, string | readonly string[]>> | undefined;
 };
-
-// 色は --shiki-token-* の変数で出し、値は ui のトークンに結びつける
-// （base.css の .ao-code-block）。.dark でトークンが切り替わるので、
-// ダーク用のテーマを別に持たない
-const theme = createCssVariablesTheme({
-  name: 'k8ordo-ui',
-  variablePrefix: '--shiki-',
-  fontStyle: true,
-});
 
 // 知らない言語名はエラーにせず、色を付けずに出す。Markdown のフェンスから
 // 来る名前は書き手次第なので、ここで落とすとページごと描けなくなる
@@ -30,7 +21,11 @@ const annotate = (
 ): ShikiTransformer => ({
   name: 'k8ordo-ui:annotate',
   pre(node) {
-    if (marks !== undefined && Object.keys(marks).length > 0) {
+    // 印と注記の指す行は頭に帯を引くので、どちらかがあれば全行に帯の幅を取る
+    const annotated = [marks, callouts].some(
+      (entries) => entries !== undefined && Object.keys(entries).length > 0,
+    );
+    if (annotated) {
       node.properties['data-marked'] = '';
     }
   },
@@ -49,7 +44,8 @@ const annotate = (
     );
     for (const [index, lineNode] of lines.entries()) {
       const notes = callouts[index + 1];
-      if (notes === undefined) continue;
+      if (notes === undefined || lineNode.type !== 'element') continue;
+      lineNode.properties['data-has-callout'] = '';
       // 注記は、それが指す行の字下げに揃える
       const indent = /^\s*/u.exec(sourceLines[index] ?? '')?.[0].length ?? 0;
       const position = node.children.indexOf(lineNode);
@@ -73,9 +69,13 @@ const annotate = (
   },
 });
 
+// 色は light-dark() で出す。base.css が .dark で color-scheme を切り替えるので、
+// ライトとダークの 2 つのテーマを、クラスの切り替えだけで出し分けられる
 export const highlight = (code: string, options: Options): Promise<string> =>
   codeToHtml(code, {
     lang: resolveLang(options.lang),
-    theme,
+    themes: { light: 'one-light', dark: 'plastic' },
+    defaultColor: 'light-dark()',
+    colorsRendering: 'none',
     transformers: [annotate(code, options.marks, options.callouts)],
   });

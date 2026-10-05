@@ -3,18 +3,43 @@ import { highlight } from './highlight';
 const linesOf = (html: string): string[] =>
   [...html.matchAll(/<span class="line"[^>]*>/gu)].map((match) => match[0]);
 
+// 文字色（背景色ではない）の light-dark() の組
+const textColorsOf = (html: string): Array<{ light: string; dark: string }> =>
+  [
+    ...html.matchAll(
+      /(?<!background-)color:light-dark\((#[0-9a-f]{6}), (#[0-9a-f]{6})\)/giu,
+    ),
+  ].map(([, light = '', dark = '']) => ({ light, dark }));
+
 describe('highlight', () => {
-  it('色を ui のトークンに結びつく CSS 変数で出す', async () => {
+  it('色をライトは one-light、ダークは plastic の light-dark() で出す', async () => {
     const html = await highlight('const a = 1;', { lang: 'ts' });
 
-    expect(html).toContain('color:var(--shiki-token-keyword)');
-    expect(html).not.toMatch(/color:#[0-9a-f]{3,8}/iu);
+    // const はライトで one-light の紫、ダークで plastic の青
+    expect(textColorsOf(html)).toContainEqual({
+      light: '#A626A4',
+      dark: '#61AFEF',
+    });
+    expect(html).toContain('background-color:light-dark(#FAFAFA, #21252B)');
+  });
+
+  it('トークンの色は k8o のブログと同じ one-light と plastic のまま使う', async () => {
+    const html = await highlight('// note', { lang: 'ts' });
+
+    // コメントは地に対して 4.5:1 に届かないが、ブログと同じ色のまま出す
+    expect(textColorsOf(html)).toContainEqual({
+      light: '#A0A1A7',
+      dark: '#5F6672',
+    });
   });
 
   it('知らない言語名は色を付けずに描く', async () => {
     const html = await highlight('const a = 1;', { lang: 'no-such-language' });
 
-    expect(html).not.toContain('--shiki-token-');
+    // 地の文字色のほかに、トークンごとの色が無い
+    expect(new Set(textColorsOf(html).map(({ light }) => light))).toStrictEqual(
+      new Set(['#383A42']),
+    );
     expect(html).toContain('const a = 1;');
   });
 
@@ -52,7 +77,7 @@ describe('highlight', () => {
     });
 
     expect(html).toMatch(
-      /<span class="line"><span>a<\/span><\/span>\n<span data-callout="" [^>]*>ここがポイント<\/span>\n<span class="line"><span>b<\/span><\/span>/u,
+      /<span class="line" data-has-callout=""><span>a<\/span><\/span>\n<span data-callout="" [^>]*>ここがポイント<\/span>\n<span class="line"><span>b<\/span><\/span>/u,
     );
   });
 
