@@ -57,6 +57,7 @@ export * as stateMigrate from './state-migrate';
 export * as stateBeforeHydration from './state-before-hydration';
 export * as stateTesting from './state-testing';
 export * as stateHowItWorks from './state-how-it-works';
+export * as stateReference from './state-reference';
 export * as stateReading from './state-reading';
 export * as stateUpdates from './state-updates';
 export * as stateIntegrations from './state-integrations';
