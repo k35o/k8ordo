@@ -1,92 +1,121 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: 'このパッケージが画面に出すのは、`<html>`の`dark`クラス1つだけです。そのクラスの下で何がどう変わるかはCSSが決めます。@k8ordo/uiと使うとき、Tailwind CSSだけのとき、素のCSSのときの当て方と、CSSの`color-scheme`プロパティ、OSのコントラストの設定との関係を説明します。',
-  en: 'What this package puts on screen is one class, `dark` on `<html>`, and nothing else. What changes under it is decided by CSS. This page covers styling with @k8ordo/ui, with Tailwind CSS alone and with plain CSS, and how the class relates to the CSS `color-scheme` property and to the contrast settings of the OS.',
+  ja: 'このパッケージが画面に出すのは、`<html>`に付ける`dark`クラスだけです。そのクラスの下で何がどう変わるかは、スタイルシートが決めます。このページでは、@k8ordo/uiやTailwind CSS、素のCSSでの書き方を紹介します。あわせて、CSSの`color-scheme`プロパティとOSのコントラストの設定との関係も説明します。',
+  en: 'All this package puts on screen is the `dark` class on `<html>`; what changes under it is the stylesheet’s business. This page covers writing it with @k8ordo/ui, with Tailwind CSS and with plain CSS, then how the class relates to the CSS `color-scheme` property and to the OS’s contrast settings.',
 });
 
-export const classSection = {
-  title: message({
-    ja: '`<html>`の`dark`クラス',
-    en: 'The `dark` class on `<html>`',
-  }),
-  description: message({
-    ja: 'クラスの名前も付け先も変えられず、結果がダークのときだけ`<html>`に`dark`が付きます。ライトのときは何も付かず、`light`というクラスはありません。最初の描画の前にインラインスクリプトが付け、そのあとはProviderのeffectが付け外しします。どのスタイルシートも、このクラスを読めば訪問者の選択に従います。',
-    en: 'Neither the name nor where it goes can change: `<html>` carries `dark` when the result is dark, and nothing when it is light — there is no `light` class. The inline script puts it on before the first paint, and the provider’s effect toggles it afterwards. Any stylesheet that reads the class follows the visitor’s choice.',
-  }),
-};
+export const classTitle = message({
+  ja: 'クラスが付く場所',
+  en: 'Where the class goes',
+});
 
-export const ui = {
-  title: message({
-    ja: '@k8ordo/uiと使う',
-    en: 'With @k8ordo/ui',
-  }),
-  description: message({
-    ja: '@k8ordo/uiのセマンティックトークンは、`:root`にライトの値を、`.dark`にダークの値を持ちます。`styles.css`でも`tailwind.css`でも同じなので、コンポーネントも`bg-bg-base`のようなユーティリティも、追加の設定なしでクラスに従います。@k8ordo/uiが自分でクラスを付けることはなく、付けるのはこのパッケージです。',
-    en: '@k8ordo/ui’s semantic tokens hold the light values on `:root` and the dark ones on `.dark`, in `styles.css` and `tailwind.css` alike, so the components and utilities such as `bg-bg-base` follow the class with nothing else to set up. @k8ordo/ui never adds the class itself; this package does.',
-  }),
-  variants: message({
-    ja: '`tailwind.css`は`dark:`と`light:`のバリアントもクラスを読むように宣言しています。`dark:`は`.dark`の下で、`light:`はそれ以外で効くので、自前のマークアップでもそのまま使えます。',
-    en: '`tailwind.css` also declares the `dark:` and `light:` variants to read the class — `dark:` applies under `.dark` and `light:` everywhere else — so they work in your own markup as they are.',
-  }),
-};
+export const classDescription = message({
+  ja: '配色がダークに決まったときだけ、`<html>`に`dark`クラスが付きます。ライトのときは何も付かず、`light`というクラスはありません。クラスの名前も、付ける要素も変えられません。',
+  en: 'When the scheme resolves to dark, `<html>` carries the `dark` class; when it is light, it carries nothing. There is no `light` class, and neither the name nor the element can be changed.',
+});
 
-export const property = {
-  title: message({
-    ja: 'CSSの`color-scheme`プロパティ',
-    en: 'The CSS `color-scheme` property',
-  }),
-  description: message({
-    ja: '`color-scheme`プロパティは、スクロールバー、フォーム部品、`<dialog>`の既定の色のような、ブラウザ自身が描くものをライトとダークのどちらで描くかを決めます。このパッケージはこれを設定しません。@k8ordo/uiのベースレイヤーが、トークンと並べて宣言しています。',
-    en: 'The `color-scheme` property decides whether the browser draws what it draws itself — scrollbars, form controls, a `<dialog>`’s default colours — light or dark. This package does not set it; @k8ordo/ui’s base layer declares it next to its tokens.',
-  }),
-  why: message({
-    ja: '`color-scheme: light dark`と書かないのは、そう書くとブラウザがOSの`prefers-color-scheme`で選び、訪問者がこのサイトで選んだものとずれるからです。OSがダークでも訪問者がライトを選んでいれば、スクロールバーもライトのままでなければなりません。プロパティもトークンと同じクラスに従わせます。',
-    en: 'Not `color-scheme: light dark`, because then the browser picks by the OS’s `prefers-color-scheme` and disagrees with what the visitor chose here: with the OS dark and the visitor on light, the scrollbars have to stay light too. The property follows the same class as the tokens.',
-  }),
-};
+export const classTiming = message({
+  ja: '最初の描画の前にインラインスクリプトがクラスを付け、そのあとはプロバイダのeffectが付け外しします。スタイルシートはこのクラスを読むだけで、訪問者の選択に従います。',
+  en: 'The inline script puts the class on before the first paint, and the provider’s effect adds and removes it from then on. A stylesheet that reads the class follows the visitor’s choice with nothing else to do.',
+});
 
-export const contrast = {
-  title: message({
-    ja: '高コントラストはOSの設定に従う',
-    en: 'High contrast follows the OS',
-  }),
-  description: message({
-    ja: 'コントラストは、このパッケージが持つ軸ではありません。`prefers-contrast: more`と`forced-colors: active`は訪問者がOSで決める設定で、アプリが保存したり切り替えたりするものではないので、`useColorScheme()`にも保存行にも出てきません。',
-    en: 'Contrast is not an axis this package owns. `prefers-contrast: more` and `forced-colors: active` are settings a visitor makes in the OS, not something an application stores or toggles, so neither appears in `useColorScheme()` or in the stored row.',
-  }),
-  ui: message({
-    ja: '@k8ordo/uiのスタイルシートは、この2つに自分で従います。`prefers-contrast: more`ではテキストと境界のトークンを地の色から遠ざけ、それを`:root`と`.dark`の両方に用意しているので、訪問者がライトを選んでいてもダークを選んでいても効きます。`forced-colors: active`ではブラウザが色を訪問者のパレットで塗り直し、部品は境界、フォーカスリング、選択状態をシステムカラーで保ちます。',
-    en: '@k8ordo/ui’s stylesheet follows both on its own. Under `prefers-contrast: more` it moves the text and border tokens further from the ground, on `:root` and on `.dark` alike, so it applies whichever scheme the visitor chose. Under `forced-colors: active` the browser repaints every colour from the visitor’s palette, and the components keep their boundaries, focus rings and selected states in system colours.',
-  }),
-  combined: message({
-    ja: '2つの軸は組み合わさります。ダークを選んだ訪問者がOSで高コントラストを求めていれば、ダークの高コントラストの値で描かれます。',
-    en: 'The two axes combine: a visitor who chose dark and asks the OS for more contrast gets the dark high-contrast values.',
-  }),
-  link: message({
-    ja: '@k8ordo/uiのテーマ:高コントラストと強制カラー、自前のUIでの書き方',
-    en: '@k8ordo/ui theming: high contrast, forced colours, and your own UI under them',
-  }),
-};
+export const uiTitle = message({
+  ja: '@k8ordo/uiと使う',
+  en: 'With @k8ordo/ui',
+});
 
-export const tailwind = {
-  title: message({
-    ja: 'Tailwind CSSだけで使う',
-    en: 'With Tailwind CSS alone',
-  }),
-  description: message({
-    ja: 'Tailwind CSS 4の`dark:`バリアントは、既定では`prefers-color-scheme`を読みます。そのままではOSの設定に従い、訪問者の選択を無視します。クラスを読むように宣言し直します。@k8ordo/uiの`tailwind.css`がしている宣言と同じものです。',
-    en: 'Tailwind CSS 4’s `dark:` variant reads `prefers-color-scheme` by default, so on its own it follows the OS and ignores the visitor’s choice. Redeclare it to read the class — the same declaration @k8ordo/ui’s `tailwind.css` makes.',
-  }),
-};
+export const uiDescription = message({
+  ja: '@k8ordo/uiのトークンは、`:root`にライトの値を、`.dark`にダークの値を持っています。そのため、スタイルシートを読み込むだけで、部品も`bg-bg-base`のようなユーティリティもクラスに従います。',
+  en: '@k8ordo/ui’s tokens hold the light values on `:root` and the dark ones on `.dark`. Load the stylesheet, and the components and utilities such as `bg-bg-base` follow the class.',
+});
 
-export const plain = {
-  title: message({
-    ja: '素のCSSで使う',
-    en: 'With plain CSS',
-  }),
-  description: message({
-    ja: '色をクラスに結びつけます。@k8ordo/uiを使わないなら`color-scheme`プロパティを宣言するものは無いので、フォーム部品やスクロールバーのようなブラウザ自身の描画も合わせたいなら、色と一緒に宣言します。',
-    en: 'Tie the colours to the class. Without @k8ordo/ui nothing declares the `color-scheme` property, so declare it next to the colours if the browser’s own rendering, such as form controls and scrollbars, should follow too.',
-  }),
-};
+export const uiBoth = message({
+  ja: '`styles.css`と`tailwind.css`のどちらを読み込んでも同じです。@k8ordo/uiが自分でクラスを付けることはなく、付けるのはこのパッケージです。',
+  en: '`styles.css` and `tailwind.css` behave the same. @k8ordo/ui never adds the class itself; this package does.',
+});
+
+export const uiVariants = message({
+  ja: '`tailwind.css`を読み込んでいれば、自分のマークアップでも`dark:`と`light:`のバリアントが使えます。`dark:`は`.dark`の下で、`light:`はそれ以外で効きます。',
+  en: 'With `tailwind.css`, your own markup gets the `dark:` and `light:` variants: `dark:` applies under `.dark`, and `light:` everywhere else.',
+});
+
+export const tailwindTitle = message({
+  ja: 'Tailwind CSSだけで使う',
+  en: 'With Tailwind CSS alone',
+});
+
+export const tailwindDescription = message({
+  ja: 'Tailwind CSS 4の`dark:`は、既定では`prefers-color-scheme`を読みます。そのままではOSの設定に従い、訪問者の選択を無視するので、クラスを読むように宣言し直します。',
+  en: 'Tailwind CSS 4’s `dark:` reads `prefers-color-scheme` by default, which follows the OS and ignores the visitor’s choice. Redeclare it to read the class.',
+});
+
+export const tailwindSame = message({
+  ja: 'これは、@k8ordo/uiの`tailwind.css`がしている宣言と同じものです。Tailwind CSSだけで使うときは、あとで説明する`color-scheme`プロパティも自分で宣言します。',
+  en: 'It is the same declaration @k8ordo/ui’s `tailwind.css` makes. With Tailwind CSS alone, also declare the `color-scheme` property described below.',
+});
+
+export const plainTitle = message({
+  ja: '素のCSSで使う',
+  en: 'With plain CSS',
+});
+
+export const plainDescription = message({
+  ja: '素のCSSでは、色をカスタムプロパティに置き、`:root.dark`で値を切り替えます。',
+  en: 'In plain CSS, keep the colours in custom properties and switch their values under `:root.dark`.',
+});
+
+export const plainSelector = message({
+  ja: '`.dark`ではなく`:root.dark`と書くと、詳細度が`:root`より高くなります。そのため、ライトの値をどこに書いても、ダークのときはダークの値が使われます。',
+  en: 'Written as `:root.dark` rather than `.dark`, the selector is more specific than `:root`, so the dark values win in dark wherever the light ones are written.',
+});
+
+export const propertyTitle = message({
+  ja: 'CSSの`color-scheme`プロパティ',
+  en: 'The CSS `color-scheme` property',
+});
+
+export const propertyDescription = message({
+  ja: '`color-scheme`プロパティは、スクロールバーやフォーム部品、`<dialog>`の既定の色のような、ブラウザが自分で描くものの配色を決めます。このパッケージは、このプロパティを設定しません。',
+  en: 'The `color-scheme` property decides the scheme of what the browser draws itself: scrollbars, form controls, a `<dialog>`’s default colours. This package does not set it.',
+});
+
+export const propertyUi = message({
+  ja: '@k8ordo/uiは、ベースのレイヤーでトークンと並べて宣言しています。@k8ordo/uiを使わないなら、色と一緒に自分で宣言します。',
+  en: '@k8ordo/ui declares it in its base layer, next to its tokens. Without @k8ordo/ui, declare it yourself, next to your colours.',
+});
+
+export const propertyWhy = message({
+  ja: '`color-scheme: light dark`と書かないのは、そう書くとブラウザがOSの`prefers-color-scheme`で配色を選ぶからです。OSがダークでも訪問者がライトを選んでいれば、スクロールバーもライトのままでなければなりません。そのため、プロパティも色と同じクラスに従わせます。',
+  en: 'Not `color-scheme: light dark`, because then the browser picks by the OS’s `prefers-color-scheme`. With the OS dark and the visitor on light, the scrollbars have to stay light too, so the property follows the same class as the colours.',
+});
+
+export const propertyLightDark = message({
+  ja: '`color-scheme`がクラスに従っていれば、CSSの`light-dark()`関数もクラスに従います。`color: light-dark(#1f1f1f, #f5f5f5)`のように、1つの宣言でライトとダークの値を書き分けられます。',
+  en: 'Once `color-scheme` follows the class, so does the CSS `light-dark()` function, which gives the light and dark values in one declaration, as in `color: light-dark(#1f1f1f, #f5f5f5)`.',
+});
+
+export const contrastTitle = message({
+  ja: 'OSのコントラストの設定',
+  en: 'The OS’s contrast settings',
+});
+
+export const contrastDescription = message({
+  ja: 'コントラストは、このパッケージが受け持つものではありません。`prefers-contrast: more`と`forced-colors: active`は訪問者がOSで決める設定で、アプリが保存したり切り替えたりするものではないからです。',
+  en: 'Contrast is not something this package owns: `prefers-contrast: more` and `forced-colors: active` are settings the visitor makes in the OS, not something an application stores or toggles.',
+});
+
+export const contrastUi = message({
+  ja: '@k8ordo/uiのスタイルシートは、この2つに自分で従います。高コントラストの値を`:root`と`.dark`の両方に用意しているので、ライトとダークのどちらを選んでいても効きます。ダークを選んだ訪問者がOSで高コントラストを求めていれば、ダークの高コントラストの値で描かれます。',
+  en: '@k8ordo/ui’s stylesheet follows both on its own. Its high-contrast values exist for `:root` and for `.dark`, so they apply whichever scheme the visitor chose: a visitor on dark who asks the OS for more contrast gets the dark high-contrast values.',
+});
+
+export const contrastOwn = message({
+  ja: '自分のCSSで高コントラストに対応するときも、ライトとダークの両方に値を用意します。',
+  en: 'In CSS of your own, give the high-contrast values for both schemes as well.',
+});
+
+export const contrastLink = message({
+  ja: '@k8ordo/uiの高コントラストと強制カラー',
+  en: '@k8ordo/ui under high contrast and forced colours',
+});

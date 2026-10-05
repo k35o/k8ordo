@@ -129,8 +129,8 @@ export const nextHowItWorks = message({
 });
 
 export const navStyling = message({
-  ja: 'スタイル',
-  en: 'Styling',
+  ja: 'darkクラスに色を当てる',
+  en: 'Styling the dark class',
 });
 
 export const navSwitcher = message({
