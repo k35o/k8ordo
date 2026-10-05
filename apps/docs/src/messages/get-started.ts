@@ -123,8 +123,8 @@ export const nextStepsTheming = message({
 });
 
 export const nextStepsI18n = message({
-  ja: '組み込み文言を英語にする・差し替える',
-  en: 'Switch the built-in wording to English or replace it',
+  ja: '組み込み文言の言語を決める・差し替える',
+  en: 'Choose the language of the built-in wording, or replace it',
 });
 
 export const nextStepsStorybook = message({

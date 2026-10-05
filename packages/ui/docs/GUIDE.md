@@ -124,25 +124,6 @@ are Server Components.
 
 > [Full key list and details](references/components.md) (the "i18n (message dictionary)" section)
 
-### Migrating from 2.x
-
-`UIProvider`'s `messages`, `useMessages` from `@k8ordo/ui/i18n`, and the root
-entry's `Messages` type are gone.
-
-1. Drop `messages` from `UIProvider`; it stays, for toasts.
-2. The default is English now, not Japanese. An app that rendered in
-   Japanese defines a set with `@k8ordo/i18n` — just `ja` for a Japanese-only
-   one — and imports the module that defines it from somewhere both the
-   server render and the browser load (for a Next.js app: a module a
-   `'use client'` component in the root layout imports, as well as the
-   server code).
-3. A dictionary or override once passed as `messages` is registered with
-   `registerMessages(locale, messages)`; to change a few keys, spread the
-   built-in dictionary (`{ ...ja, close: '閉じる（Esc）' }`).
-4. `useMessages()` becomes `getMessages()`, which needs no `'use client'`.
-   Import the `Messages` type from `@k8ordo/ui/i18n` rather than the root
-   entry.
-
 ## Design direction
 
 ### Core concept
