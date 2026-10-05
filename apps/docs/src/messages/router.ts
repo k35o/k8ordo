@@ -93,6 +93,11 @@ export const nextFramework = message({
   en: 'What you use under `@k8ordo/static` and `@k8ordo/server`, and the props types.',
 });
 
+export const nextReference = message({
+  ja: 'すべての関数とコンポーネント、型の一覧です。',
+  en: 'Every function, component and type.',
+});
+
 export const navRoutes = message({
   ja: 'ルート表を書く',
   en: 'Write the route table',
@@ -146,4 +151,9 @@ export const navTesting = message({
 export const navHowItWorks = message({
   ja: '仕組み',
   en: 'How it works',
+});
+
+export const navReference = message({
+  ja: 'API',
+  en: 'API',
 });

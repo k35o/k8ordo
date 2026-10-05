@@ -186,6 +186,12 @@ export const PACKAGES: PackageEntry[] = [
           },
         ],
       },
+      {
+        label: m.nav.groupReference,
+        sections: [
+          { path: '/:locale/router/reference', label: m.router.navReference },
+        ],
+      },
     ],
   },
   {

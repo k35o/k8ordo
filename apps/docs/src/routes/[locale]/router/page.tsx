@@ -145,6 +145,11 @@ export default function RouterPage() {
             label: m.router.navFramework,
             description: m.router.nextFramework,
           },
+          {
+            path: '/:locale/router/reference',
+            label: m.router.navReference,
+            description: m.router.nextReference,
+          },
         ]}
       />
     </div>
