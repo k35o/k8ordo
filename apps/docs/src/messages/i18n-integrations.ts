@@ -106,8 +106,8 @@ export const routerMatch = message({
 });
 
 export const routerLink = message({
-  ja: '`@k8ordo/router`のリンクの書き方を見る',
-  en: 'See how `@k8ordo/router` writes links',
+  ja: '`@k8ordo/router`の`bindParams`の使い方を見る',
+  en: 'See how `@k8ordo/router`’s `bindParams` works',
 });
 
 export const frameworkTitle = message({

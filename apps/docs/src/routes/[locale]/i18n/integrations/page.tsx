@@ -140,7 +140,7 @@ export default function I18nIntegrationsPage() {
           <Rich>{t.routerMatch()}</Rich>
         </p>
         <p>
-          <LocaleAnchor path="/:locale/router/links">
+          <LocaleAnchor path="/:locale/router/bind-params">
             <Rich>{t.routerLink()}</Rich>
           </LocaleAnchor>
         </p>
