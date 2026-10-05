@@ -117,3 +117,8 @@ export const navDeploy = message({
   ja: '実行と配信',
   en: 'Run & deploy',
 });
+
+export const navHowItWorks = message({
+  ja: '仕組み',
+  en: 'How it works',
+});

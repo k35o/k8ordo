@@ -245,6 +245,15 @@ export const PACKAGES: PackageEntry[] = [
           { path: '/:locale/static/deploy', label: m.static.navDeploy },
         ],
       },
+      {
+        label: m.nav.groupConcepts,
+        sections: [
+          {
+            path: '/:locale/static/how-it-works',
+            label: m.static.navHowItWorks,
+          },
+        ],
+      },
     ],
   },
   {
@@ -269,6 +278,15 @@ export const PACKAGES: PackageEntry[] = [
           { path: '/:locale/server/actions', label: m.server.navActions },
           { path: '/:locale/server/guards', label: m.server.navGuards },
           { path: '/:locale/server/deploy', label: m.server.navDeploy },
+        ],
+      },
+      {
+        label: m.nav.groupConcepts,
+        sections: [
+          {
+            path: '/:locale/server/how-it-works',
+            label: m.server.navHowItWorks,
+          },
         ],
       },
     ],

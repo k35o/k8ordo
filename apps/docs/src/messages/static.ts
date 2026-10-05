@@ -112,3 +112,8 @@ export const navDeploy = message({
   ja: 'ビルドと配信',
   en: 'Build & deploy',
 });
+
+export const navHowItWorks = message({
+  ja: '仕組み',
+  en: 'How it works',
+});
