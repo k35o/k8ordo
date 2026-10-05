@@ -118,6 +118,7 @@ export * as colorSchemeStyling from './color-scheme-styling';
 export * as colorSchemeSwitcher from './color-scheme-switcher';
 export * as colorSchemeTesting from './color-scheme-testing';
 export * as colorSchemeTroubleshooting from './color-scheme-troubleshooting';
+export * as frameworkGetStarted from './framework-get-started';
 export * as frameworkRouting from './framework-routing';
 export * as frameworkParams from './framework-params';
 export * as frameworkErrors from './framework-errors';
