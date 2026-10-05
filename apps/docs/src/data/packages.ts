@@ -273,6 +273,10 @@ export const PACKAGES: PackageEntry[] = [
           },
           { path: '/:locale/color-scheme/csp', label: m.colorScheme.navCsp },
           {
+            path: '/:locale/color-scheme/testing',
+            label: m.colorScheme.navTesting,
+          },
+          {
             path: '/:locale/color-scheme/how-it-works',
             label: m.colorScheme.navHowItWorks,
           },
