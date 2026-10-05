@@ -107,12 +107,16 @@ export function Filters({ initialUrl }: FiltersProps) {
 }
 ```
 
-`parseUrl` needs a router that hands the page its search, as Next.js does;
-under `@k8ordo/static` and `@k8ordo/server` a page never sees it, and
-`useAppState` reads the url slot in the browser. A preference the server
-should render goes in `defineCookieState` instead of `defineLocalState`:
-under `@k8ordo/server`, `parseCookies(request.cookies)` reads it and
-`initialCookie` seeds the first render, so the default never flashes.
+`parseUrl` needs a router that hands the page its search, as Next.js does.
+Under `@k8ordo/server` a page asks for it by exporting the url schema —
+`export const search = listState.url` — and receives the slot already parsed
+as its `search` prop, ready to pass as `initialUrl`. `@k8ordo/static` refuses
+that export at build time, since a file is the same whatever the search
+holds; there, and on any page that does not export `search`, `useAppState`
+reads the url slot in the browser. A preference the server should render goes
+in `defineCookieState` instead of `defineLocalState`: under `@k8ordo/server`,
+`parseCookies(request.cookies)` reads it and `initialCookie` seeds the first
+render, so the default never flashes.
 
 `update()` applies synchronously, batches per handler into one write (memory
 applies per call), and returns `{ committed, finished }` handles. `href` omits
