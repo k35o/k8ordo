@@ -92,6 +92,7 @@ export * as i18nStatic from './i18n-static';
 export * as i18nTesting from './i18n-testing';
 export * as i18nHowItWorks from './i18n-how-it-works';
 export * as i18nReference from './i18n-reference';
+export * as i18nTroubleshooting from './i18n-troubleshooting';
 export * as colorSchemeCsp from './color-scheme-csp';
 export * as colorSchemeGetStarted from './color-scheme-get-started';
 export * as colorSchemeHowItWorks from './color-scheme-how-it-works';

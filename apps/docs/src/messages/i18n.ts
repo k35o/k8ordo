@@ -143,6 +143,11 @@ export const navReference = message({
   en: 'API',
 });
 
+export const navTroubleshooting = message({
+  ja: 'うまく動かないとき',
+  en: 'Troubleshooting',
+});
+
 export const navIntegrations = message({
   ja: '組み合わせ',
   en: 'Integrations',
