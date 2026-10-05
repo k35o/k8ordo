@@ -130,6 +130,11 @@ export const demoNoKey = message({
   en: 'not stored',
 });
 
+export const demoIncrement = message({
+  ja: (place: string) => `${place}の数を1増やす`,
+  en: (place) => `Add 1 to the ${place} count`,
+});
+
 export const demoReset = message({
   ja: 'すべて0に戻す',
   en: 'Reset all to 0',

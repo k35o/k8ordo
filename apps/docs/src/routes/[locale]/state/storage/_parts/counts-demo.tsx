@@ -38,16 +38,13 @@ function Row({ place, storageKey, value, onIncrement }: RowProps) {
       <div className="flex flex-col gap-1">
         <span className="font-bold">{place}</span>
         <span className="text-fg-mute text-xs break-all">
-          {storageKey === undefined ? (
-            t.demoNoKey()
-          ) : (
-            <Code>{storageKey}</Code>
-          )}
+          {storageKey === undefined ? t.demoNoKey() : <Code>{storageKey}</Code>}
         </span>
       </div>
       <div className="flex items-center gap-3">
         <span className="min-w-8 text-end text-lg tabular-nums">{value}</span>
         <Button
+          aria-label={t.demoIncrement(place)}
           color="base"
           onClick={onIncrement}
           size="sm"
