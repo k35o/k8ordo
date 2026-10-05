@@ -18,8 +18,9 @@ export function InstallCommand({ packages }: { packages: string }) {
 // アプリがすでに持っているもの。インストールのコマンドには並べず、動く環境に書く
 const HOST = new Set(['react', 'react-dom', 'vite']);
 
-// README の範囲（`≥19.3.0`）と engines（`>=24.0.0`）から下限だけを取り出す。
-// 上限のある範囲は「以上」と書けないので、ここで止めて書き方を考え直させる
+// README の範囲（`≥19.3.0`）と engines（`>=24.0.0`）から下限だけを取り出し、
+// 末尾の `.0` を落として `19.3`、`24` のように人が書く形にする。上限のある
+// 範囲は「以上」と書けないので、ここで止めて書き方を考え直させる
 const lowerBound = (name: string, range: string): string => {
   const bound = /^(?:≥|>=)(?<version>\d+\.\d+\.\d+)$/u.exec(range)?.groups
     ?.version;
@@ -28,10 +29,10 @@ const lowerBound = (name: string, range: string): string => {
       `${name}: ${range} is not a bare lower bound, which the requirements list can say`,
     );
   }
-  return bound;
+  return bound.replace(/(?:\.0)+$/u, '');
 };
 
-/** The lower bound of one of a `@k8ordo/*` package's peers, e.g. `4.3.3`. */
+/** The lower bound of one of a `@k8ordo/*` package's peers, e.g. `4.3.3` or `19.3`. */
 export const peerVersionOf = (name: string, peer: string): string => {
   const range = peersOf(name).find((entry) => entry.name === peer)?.version;
   if (range === undefined) {
