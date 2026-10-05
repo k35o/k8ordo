@@ -281,10 +281,17 @@ export default function RouterLinksPage() {
   message, or a message for a name that is not a peer, fails the build.
   `PeerTable` stays a Server Component: the READMEs it reads must not reach
   the client bundle.
-- `@k8ordo/static` and `@k8ordo/server` share their routing, params, errors,
-  and boundaries topics: the words are `src/messages/framework-<topic>.ts`,
-  the markup `src/components/framework-guide/<topic>.tsx` taking
-  `mode: 'static' | 'server'`, and each mode's page adds only what is its own.
+- `@k8ordo/static` and `@k8ordo/server` have the same guide apart from the
+  server-only pages (actions, guards, request), and share what the two modes
+  say alike. The shared words are `src/messages/framework-<topic>.ts`, with
+  words only one mode uses in `src/messages/{static,server}-<topic>.ts`; the
+  shared markup is `src/components/framework-guide/<topic>.tsx`, whose exports
+  are functions returning `DocSection`s, whole topics
+  (`routingSections(mode)`) or single sections (`tabsSection(mode)`), taking
+  `mode: 'static' | 'server'` where the wording differs. They are functions
+  and not components because `DocPage` builds its contents from its direct
+  children, and sections behind a component would be missing from them. Each
+  mode's page adds only what is its own.
 
 ### Preview Components
 
