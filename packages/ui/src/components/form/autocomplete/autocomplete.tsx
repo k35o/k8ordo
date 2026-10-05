@@ -284,7 +284,11 @@ export const Autocomplete: FC<Props> = ({
             )?.label;
             return (
               <div
-                className="bg-bg-mute inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium"
+                className={cn(
+                  'inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium',
+                  // 無効のあいだは枠が bg-mute になるので、チップは枠と同じ色を避ける
+                  disabled || pending ? 'bg-bg-base' : 'bg-bg-mute',
+                )}
                 key={selectedValue}
                 tabIndex={-1}
               >
