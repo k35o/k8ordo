@@ -119,8 +119,8 @@ dictionary**. For a component with a wording prop of its own, such as
 `getMessages()` from `@k8ordo/ui/i18n` returns the wording in effect for your
 own elements (a `renderItem`, a component beside the library). It is not a
 hook, so it works in a Server Component — which is also why `Spinner`,
-`Breadcrumb`, `Code`, `Alert`, `Reasoning`, and `ToolInvocation` are Server
-Components.
+`Breadcrumb`, `Code`, `Alert`, `Callout`, `Reasoning`, and `ToolInvocation`
+are Server Components.
 
 > [Full key list and details](references/components.md) (the "i18n (message dictionary)" section)
 

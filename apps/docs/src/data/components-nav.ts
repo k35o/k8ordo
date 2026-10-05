@@ -45,6 +45,10 @@ export const pages = {
     path: '/:locale/ui/components/calendar',
     description: m.components.calendar.description,
   },
+  Callout: {
+    path: '/:locale/ui/components/callout',
+    description: m.components.callout.description,
+  },
   Card: {
     path: '/:locale/ui/components/card',
     description: m.components.card.description,
