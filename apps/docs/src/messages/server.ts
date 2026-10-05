@@ -109,8 +109,8 @@ export const navActions = message({
 });
 
 export const navGuards = message({
-  ja: 'ガードと応答',
-  en: 'Guards & responses',
+  ja: 'リクエストをguard.tsで止める',
+  en: 'Stop requests in guard.ts',
 });
 
 export const navDeploy = message({

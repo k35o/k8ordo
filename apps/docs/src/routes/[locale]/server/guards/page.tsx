@@ -1,18 +1,16 @@
 import { CodeBlock } from '@k8ordo/ui/code-block';
 
+import { Note } from '../../../../components/callout';
 import { DocPage, DocSection } from '../../../../components/doc-page';
-import {
-  Bullet,
-  Bullets,
-  Paragraph,
-} from '../../../../components/framework-guide/prose';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Rich } from '../../../../components/rich';
 import * as m from '../../../../messages';
 
+const t = m.serverGuards;
+
 const TREE = `src/routes/
-  layout.tsx
   guard.ts
+  layout.tsx
   page.tsx
   admin/
     guard.ts
@@ -20,8 +18,7 @@ const TREE = `src/routes/
     [id]/
       page.tsx`;
 
-const ADMIN = `// src/routes/admin/guard.ts
-import { href } from '@k8ordo/router';
+const ADMIN = `import { href } from '@k8ordo/router';
 import { cookies } from '@k8ordo/server/runtime';
 import type { Guard } from '@k8ordo/server/runtime';
 
@@ -35,138 +32,113 @@ const guard: Guard<'/admin'> = () => {
 
 export default guard;`;
 
-const ROOT = `// src/routes/guard.ts
-import { responseHeaders } from '@k8ordo/server/runtime';
+const ROOT = `import { responseHeaders } from '@k8ordo/server/runtime';
 
 export default function guard() {
   responseHeaders().set('x-content-type-options', 'nosniff');
 }`;
 
-const COOKIES = `import { cookies } from '@k8ordo/server/runtime';
-
-cookies().get('session');
-cookies().set('session', token, { maxAge: 60 * 60 * 24 });
-cookies().delete('session');`;
-
-const CSP = `// src/routes/guard.ts
-import { nonce, responseHeaders } from '@k8ordo/server/runtime';
-
-export default function guard() {
-  responseHeaders().set(
-    'content-security-policy',
-    \`script-src 'nonce-\${nonce()}' 'strict-dynamic'; object-src 'none'; base-uri 'none'\`,
-  );
-}`;
-
-const CSP_LAYOUT = `// src/routes/layout.tsx
-import { ColorSchemeProvider } from '@k8ordo/color-scheme';
-import { nonce } from '@k8ordo/server/runtime';
-import type { LayoutProps } from '@k8ordo/router';
-
-export default function RootLayout({ children }: LayoutProps<'/'>) {
-  return (
-    <html lang="en" suppressHydrationWarning>
-      <body>
-        <ColorSchemeProvider nonce={nonce()}>{children}</ColorSchemeProvider>
-      </body>
-    </html>
-  );
-}`;
-
 export default function ServerGuardsPage() {
-  const t = m.serverGuards;
   return (
     <DocPage introduction={t.introduction} path="/:locale/server/guards">
       <DocSection
-        id="guard"
-        description={t.guardDescription}
-        title={t.guardTitle}
+        description={t.placeDescription}
+        id="place"
+        title={t.placeTitle}
       >
-        <CodeBlock code={TREE} lang="bash" />
-        <CodeBlock code={ADMIN} lang="ts" />
-        <Paragraph text={t.guardReceives} />
-      </DocSection>
-
-      <DocSection id="end" description={t.endDescription} title={t.endTitle}>
-        <Paragraph text={t.endLocation}>
-          <LocaleAnchor path="/:locale/server/deploy">
-            {m.server.navDeploy()}
-          </LocaleAnchor>
-        </Paragraph>
-      </DocSection>
-
-      <DocSection id="add" description={t.addDescription} title={t.addTitle}>
-        <CodeBlock code={ROOT} lang="ts" />
-        <Paragraph text={t.addReplace} />
-      </DocSection>
-
-      <DocSection
-        id="next"
-        description={t.nextDescription}
-        title={t.nextTitle}
-      />
-
-      <DocSection
-        id="covers"
-        description={t.coversDescription}
-        title={t.coversTitle}
-      >
-        <Bullets>
-          <Bullet>
-            <Rich>{t.coversPage()}</Rich>
-          </Bullet>
-          <Bullet>
-            <Rich>{t.coversHead()}</Rich>
-          </Bullet>
-          <Bullet>
-            <Rich>{t.coversAction()}</Rich>
-          </Bullet>
-          <Bullet>
-            <Rich>{t.coversNotFound()}</Rich>
-          </Bullet>
-        </Bullets>
-        <Paragraph text={t.coversRedirect} />
-        <Paragraph text={t.coversActions}>
-          <LocaleAnchor path="/:locale/server/actions">
-            {m.server.navActions()}
-          </LocaleAnchor>
-        </Paragraph>
-      </DocSection>
-
-      <DocSection
-        id="order"
-        description={t.orderDescription}
-        title={t.orderTitle}
-      />
-
-      <DocSection
-        id="cookies"
-        description={t.cookiesDescription}
-        title={t.cookiesTitle}
-      >
-        <CodeBlock code={COOKIES} lang="ts" />
-        <Paragraph text={t.cookiesOptions} />
-        <Paragraph text={t.cookiesPage} />
-      </DocSection>
-
-      <DocSection id="csp" description={t.cspDescription} title={t.cspTitle}>
-        <CodeBlock code={CSP} lang="ts" />
-        <Paragraph text={t.cspSign} />
-        <CodeBlock code={CSP_LAYOUT} lang="tsx" />
-        <Paragraph text={t.cspCache} />
-      </DocSection>
-
-      <DocSection
-        id="static"
-        description={t.staticDescription}
-        title={t.staticTitle}
-      >
+        <CodeBlock code={TREE} lang="text" />
         <p>
-          <LocaleAnchor path="/:locale/static/get-started">
-            @k8ordo/static
+          <Rich>{t.placeExample()}</Rich>
+        </p>
+        <CodeBlock
+          code={ADMIN}
+          lang="ts"
+          marks={{ 6: 'highlight', 7: 'highlight' }}
+          title="src/routes/admin/guard.ts"
+        />
+        <p>
+          <Rich>{t.placeContext()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.placeType()}</Rich>
+        </p>
+        <Note>
+          <p>
+            <Rich>{t.staticNote()}</Rich>
+          </p>
+        </Note>
+      </DocSection>
+
+      <DocSection description={t.endDescription} id="end" title={t.endTitle}>
+        <p>
+          <Rich>{t.endLocation()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.endOther()}</Rich>
+        </p>
+      </DocSection>
+
+      <DocSection
+        description={t.headersDescription}
+        id="headers"
+        title={t.headersTitle}
+      >
+        <CodeBlock
+          code={ROOT}
+          lang="ts"
+          marks={{ 4: 'highlight' }}
+          title="src/routes/guard.ts"
+        />
+        <p>
+          <Rich>{t.headersReplace()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.headersWhere()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.headersCsp()}</Rich>{' '}
+          <LocaleAnchor path="/:locale/server/csp">
+            {m.server.navCsp()}
           </LocaleAnchor>
         </p>
       </DocSection>
+
+      <DocSection
+        description={t.noNextDescription}
+        id="no-next"
+        title={t.noNextTitle}
+      />
+
+      <DocSection
+        description={t.coversDescription}
+        id="covers"
+        title={t.coversTitle}
+      >
+        <ul>
+          {t.coversList.map((item) => (
+            <li key={item()}>
+              <Rich>{item()}</Rich>
+            </li>
+          ))}
+        </ul>
+        <p>
+          <Rich>{t.coversRoot()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.coversRedirect()}</Rich>
+        </p>
+        <Note>
+          <p>
+            <Rich>{t.coversActions()}</Rich>
+          </p>
+        </Note>
+      </DocSection>
+
+      <DocSection
+        description={t.orderDescription}
+        id="order"
+        title={t.orderTitle}
+      />
     </DocPage>
   );
 }
