@@ -155,13 +155,21 @@ export function BoundariesGuide({ mode }: { mode: Mode }) {
 
   return (
     <>
-      <DocSection description={t.serverDescription} title={t.serverTitle}>
+      <DocSection
+        id="server"
+        description={t.serverDescription}
+        title={t.serverTitle}
+      >
         <Paragraph text={own.serverWhen} />
         <CodeBlock code={CATALOG} lang="ts" />
         <CodeBlock code={PRODUCTS} lang="tsx" />
       </DocSection>
 
-      <DocSection description={t.clientDescription} title={t.clientTitle}>
+      <DocSection
+        id="client"
+        description={t.clientDescription}
+        title={t.clientTitle}
+      >
         <CodeBlock code={COUNTER} lang="tsx" />
         <CodeBlock code={HOME} lang="tsx" />
         <Paragraph text={t.clientSsr} />
@@ -178,27 +186,40 @@ export function BoundariesGuide({ mode }: { mode: Mode }) {
         </Paragraph>
       </DocSection>
 
-      <DocSection description={t.propsDescription} title={t.propsTitle}>
+      <DocSection
+        id="props"
+        description={t.propsDescription}
+        title={t.propsTitle}
+      >
         <CodeBlock code={GREETING_PAGE} lang="tsx" />
         <CodeBlock code={GREETING} lang="tsx" />
         <Paragraph text={own.propsFunction} />
         <Paragraph text={t.propsSite} />
       </DocSection>
 
-      <DocSection description={t.shellDescription} title={t.shellTitle}>
+      <DocSection
+        id="shell"
+        description={t.shellDescription}
+        title={t.shellTitle}
+      >
         <CodeBlock code={SITE_LAYOUT} lang="tsx" />
         <CodeBlock code={SITE_SHELL} lang="tsx" />
         <Paragraph text={t.shellExcerpt} />
         <Paragraph text={t.shellWhy} />
       </DocSection>
 
-      <DocSection description={t.browserDescription} title={t.browserTitle}>
+      <DocSection
+        id="browser"
+        description={t.browserDescription}
+        title={t.browserTitle}
+      >
         <CodeBlock code={BROWSER} lang="tsx" />
         <Paragraph text={t.browserHow} />
         <Paragraph text={t.browserSuspense} />
       </DocSection>
 
       <DocSection
+        id="server-only"
         description={t.serverOnlyDescription}
         title={t.serverOnlyTitle}
       >
@@ -208,7 +229,11 @@ export function BoundariesGuide({ mode }: { mode: Mode }) {
         <Paragraph text={t.serverOnlyName} />
       </DocSection>
 
-      <DocSection description={t.whereDescription} title={t.whereTitle}>
+      <DocSection
+        id="where"
+        description={t.whereDescription}
+        title={t.whereTitle}
+      >
         <CodeBlock code={WHERE} lang="tsx" />
         <Paragraph text={t.whereMore}>
           <LocaleAnchor path="/:locale/router/framework">
@@ -217,7 +242,11 @@ export function BoundariesGuide({ mode }: { mode: Mode }) {
         </Paragraph>
       </DocSection>
 
-      <DocSection description={t.searchDescription} title={t.searchTitle}>
+      <DocSection
+        id="search"
+        description={t.searchDescription}
+        title={t.searchTitle}
+      >
         <Paragraph text={t.searchRegister}>
           <LocaleAnchor path="/:locale/state">@k8ordo/state</LocaleAnchor>
         </Paragraph>

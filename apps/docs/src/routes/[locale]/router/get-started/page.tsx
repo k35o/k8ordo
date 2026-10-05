@@ -174,6 +174,7 @@ export default function RouterGetStartedPage() {
       path="/:locale/router/get-started"
     >
       <DocSection
+        id="scope"
         description={m.routerGetStarted.scopeDescription}
         title={m.routerGetStarted.scopeTitle}
       >
@@ -223,6 +224,7 @@ export default function RouterGetStartedPage() {
       </DocSection>
 
       <DocSection
+        id="install"
         description={m.routerGetStarted.installDescription}
         title={m.routerGetStarted.installTitle}
       >
@@ -253,6 +255,7 @@ export default function RouterGetStartedPage() {
       </DocSection>
 
       <DocSection
+        id="build"
         description={m.routerGetStarted.buildDescription}
         title={m.routerGetStarted.buildTitle}
       >
@@ -312,7 +315,7 @@ export default function RouterGetStartedPage() {
         </div>
       </DocSection>
 
-      <DocSection title={m.routerGetStarted.nextTitle}>
+      <DocSection id="next" title={m.routerGetStarted.nextTitle}>
         <ul className="flex flex-col gap-3 pl-6">
           <li className="list-disc">
             <LocaleAnchor path="/:locale/router/routes">

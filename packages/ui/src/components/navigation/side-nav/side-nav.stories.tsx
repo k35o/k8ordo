@@ -86,3 +86,36 @@ export const RenderAnchor: Story = {
     await expect(navigate).toHaveBeenCalledOnce();
   },
 };
+
+// 開閉できる段で木にする。今のページを含む段だけを開いておく
+export const Nested: Story = {
+  render: () => (
+    <div className="w-60">
+      <SideNav.Root label="UI">
+        <SideNav.Group title="コンポーネント">
+          <SideNav.Link href="/components">一覧</SideNav.Link>
+          <SideNav.Sub title="ボタン">
+            <SideNav.Link href="/button">Button</SideNav.Link>
+            <SideNav.Link href="/icon-button">IconButton</SideNav.Link>
+          </SideNav.Sub>
+          <SideNav.Sub defaultOpen title="ナビゲーション">
+            <SideNav.Link current href="/side-nav">
+              SideNav
+            </SideNav.Link>
+            <SideNav.Link href="/tabs">Tabs</SideNav.Link>
+          </SideNav.Sub>
+        </SideNav.Group>
+      </SideNav.Root>
+    </div>
+  ),
+  play: async ({ canvas, userEvent }) => {
+    await expect(canvas.getByRole('link', { name: 'SideNav' })).toBeVisible();
+    // 閉じた段のリンクは描かれているが見えない（読み上げにも出ない）
+    const button = canvas.getByRole('link', { name: 'Button', hidden: true });
+    await expect(button).not.toBeVisible();
+
+    // 段の名前を押すと開く
+    await userEvent.click(canvas.getByText('ボタン'));
+    await expect(button).toBeVisible();
+  },
+};

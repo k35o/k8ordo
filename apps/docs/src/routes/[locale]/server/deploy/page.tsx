@@ -82,12 +82,20 @@ export default function ServerDeployPage() {
   const t = m.serverDeploy;
   return (
     <DocPage introduction={t.introduction} path="/:locale/server/deploy">
-      <DocSection description={t.outputDescription} title={t.outputTitle}>
+      <DocSection
+        id="output"
+        description={t.outputDescription}
+        title={t.outputTitle}
+      >
         <CodeBlock code={OUTPUT} lang="bash" />
         <Paragraph text={t.outputDeps} />
       </DocSection>
 
-      <DocSection description={t.serveDescription} title={t.serveTitle}>
+      <DocSection
+        id="serve"
+        description={t.serveDescription}
+        title={t.serveTitle}
+      >
         <CodeBlock code={SERVE} lang="ts" />
         <GuideTable
           head={[
@@ -160,7 +168,11 @@ export default function ServerDeployPage() {
         <CodeBlock code={SMOKE} lang="ts" />
       </DocSection>
 
-      <DocSection description={t.answersFiles} title={t.answersTitle}>
+      <DocSection
+        id="answers"
+        description={t.answersFiles}
+        title={t.answersTitle}
+      >
         <Paragraph text={t.answersEncoding} />
         <Paragraph text={t.answersRevalidation} />
         <Paragraph text={t.answersHandler} />
@@ -173,7 +185,11 @@ export default function ServerDeployPage() {
         </Paragraph>
       </DocSection>
 
-      <DocSection description={t.handlerDescription} title={t.handlerTitle}>
+      <DocSection
+        id="handler"
+        description={t.handlerDescription}
+        title={t.handlerTitle}
+      >
         <CodeBlock code={HANDLER} lang="ts" />
         <Paragraph text={t.handlerRuntimes} />
         <CodeBlock code={RUNTIMES} lang="ts" />
@@ -184,7 +200,11 @@ export default function ServerDeployPage() {
         <Paragraph text={t.handlerOrigin} />
       </DocSection>
 
-      <DocSection description={t.vercelDescription} title={t.vercelTitle}>
+      <DocSection
+        id="vercel"
+        description={t.vercelDescription}
+        title={t.vercelTitle}
+      >
         <CodeBlock code={VERCEL} lang="ts" />
         <Paragraph text={t.vercelOutput} />
         <Paragraph text={t.vercelBundled} />
@@ -192,7 +212,11 @@ export default function ServerDeployPage() {
 
       <BaseGuide mode="server" />
 
-      <DocSection description={t.routesDirDescription} title={t.routesDirTitle}>
+      <DocSection
+        id="routes-dir"
+        description={t.routesDirDescription}
+        title={t.routesDirTitle}
+      >
         <CodeBlock code={ROUTES_DIR} lang="ts" />
       </DocSection>
     </DocPage>

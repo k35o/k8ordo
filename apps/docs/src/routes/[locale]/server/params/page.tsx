@@ -44,12 +44,20 @@ export default function ServerParamsPage() {
     <DocPage introduction={t.introduction} path="/:locale/server/params">
       <ParamsGuide mode="server" />
 
-      <DocSection description={t.noListDescription} title={t.noListTitle}>
+      <DocSection
+        id="no-list"
+        description={t.noListDescription}
+        title={t.noListTitle}
+      >
         <CodeBlock code={CATALOG} lang="ts" />
         <CodeBlock code={PAGE} lang="tsx" />
       </DocSection>
 
-      <DocSection description={t.existDescription} title={t.existTitle} />
+      <DocSection
+        id="exist"
+        description={t.existDescription}
+        title={t.existTitle}
+      />
     </DocPage>
   );
 }

@@ -5,15 +5,19 @@ import type { FC, ReactNode } from 'react';
 
 import type { NavItem } from '../data/nav-types';
 import { LocaleAnchor } from './locale-anchor';
+import type { Stage } from './preview-area';
 import { Rich } from './rich';
 
+// 白いページの上に白いカードを置くと、ダークでは影が見えずに地に溶ける。
+// 部品が想定するページの地（bg-surface）の面にする
 const cardClass =
-  'group bg-bg-base focus-within:ring-border-info relative flex flex-col overflow-hidden rounded-xl shadow-sm motion-safe:transition-shadow motion-safe:duration-150 motion-safe:ease-out hover:shadow-md focus-within:ring-2';
+  'group border-border-mute hover:border-border-base bg-bg-surface focus-within:ring-border-info relative flex flex-col overflow-hidden rounded-xl border focus-within:ring-2';
 
-export const CatalogCard: FC<{ item: NavItem; preview?: ReactNode }> = ({
-  item,
-  preview,
-}) => (
+export const CatalogCard: FC<{
+  item: NavItem;
+  preview?: ReactNode;
+  stage?: Stage;
+}> = ({ item, preview, stage = 'page' }) => (
   <div className={cardClass}>
     {preview === undefined ? null : (
       // The preview is purely decorative: `inert` removes its (focusable)
@@ -21,7 +25,7 @@ export const CatalogCard: FC<{ item: NavItem; preview?: ReactNode }> = ({
       // the card's stretched link as the interactive target.
       <div
         aria-hidden
-        className="bg-bg-subtle pointer-events-none flex h-36 items-center justify-center overflow-hidden px-5"
+        className={`border-border-mute pointer-events-none flex h-36 items-center justify-center overflow-hidden border-b px-5${stage === 'article' ? ' bg-bg-base' : ''}`}
         inert
       >
         {preview}

@@ -1,223 +1,124 @@
-import { Code, Heading } from '@k8ordo/ui';
+import { formFields } from '@k8ordo/form/server';
 import { CodeBlock } from '@k8ordo/ui/code-block';
 
+import { Note } from '../../../../components/callout';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { InstallTabs } from '../../../../components/install-tabs';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { PeerTable } from '../../../../components/peer-table';
+import { Playground } from '../../../../components/playground';
 import { Rich } from '../../../../components/rich';
 import * as m from '../../../../messages';
-
-const ENTRIES: ReadonlyArray<{
-  entry: string;
-  values: readonly string[];
-  types: readonly string[];
-}> = [
-  {
-    entry: '@k8ordo/form/server',
-    values: [
-      'formFields',
-      'parseForm',
-      'defineForm',
-      'sameAs',
-      'minChecked',
-      'requiredWhen',
-    ],
-    types: ['ParseResult', 'FormDefinition'],
-  },
-  {
-    entry: '@k8ordo/form',
-    values: ['useForm', 'useAsyncCheck', 'HiddenValue'],
-    types: ['UseFormReturn', 'FieldView', 'ArrayView', 'RowView', 'AsyncCheck'],
-  },
-];
-
-const SHARED_TYPES = [
-  'FormFields',
-  'FormState',
-  'DerivedField',
-  'DerivedArray',
-  'DroppedCheck',
-  'FieldInput',
-  'StringCheckboxInput',
-  'ValidityFlag',
-  'Rule',
-] as const;
-
-const TH = 'py-3 pr-6 font-medium whitespace-nowrap';
-const TD = 'py-3 pr-6 align-top';
-
-const codeList = (names: readonly string[]) =>
-  names.map((name, index) => (
-    <span key={name}>
-      {index > 0 && ', '}
-      <Code>{name}</Code>
-    </span>
-  ));
-
-const SCHEMA_ZOD = `import * as z from 'zod';
-
-export const talkSchema = z.object({
-  title: z
-    .string()
-    .min(1, 'Enter a title')
-    .max(120, 'Use 120 characters or fewer'),
-});`;
-
-const SCHEMA_MINI = `import * as z from 'zod/mini';
-
-export const talkSchema = z.object({
-  title: z
-    .string()
-    .check(
-      z.minLength(1, 'Enter a title'),
-      z.maxLength(120, 'Use 120 characters or fewer'),
-    ),
-});`;
-
-const EXAMPLE_SCHEMA = `// src/routes/talks/new/_parts/talk-schema.ts
-import * as z from 'zod';
-
-export const talkSchema = z.object({
-  title: z
-    .string()
-    .min(1, 'Enter a title')
-    .max(120, 'Use 120 characters or fewer'),
-  eventUrl: z.url('Enter the event URL'),
-  minutes: z.coerce
-    .number('Enter the length in minutes')
-    .int('Use whole minutes')
-    .min(5, 'A talk is at least 5 minutes'),
-  recorded: z.boolean(),
-});`;
-
-const EXAMPLE_PAGE = `// src/routes/talks/new/page.tsx
-import { formFields } from '@k8ordo/form/server';
-
-import { TalkForm } from './_parts/talk-form';
+import { TalkDemo } from './_parts/talk-demo';
 import { talkSchema } from './_parts/talk-schema';
+
+const SCHEMA = `import * as z from 'zod';
+
+export const talkSchema = z.object({
+  title: z.string().min(1, 'Enter a title').max(120),
+  eventUrl: z.url('Enter the event URL'),
+  minutes: z.coerce.number().int().min(5).max(60),
+});`;
+
+const PAGE = `import { formFields } from '@k8ordo/form/server';
+
+import { createTalk } from './actions';
+import { talkSchema } from './schema';
+import { TalkForm } from './talk-form';
 
 const talkFields = formFields(talkSchema);
 
 export default function NewTalkPage() {
-  return <TalkForm fields={talkFields} />;
+  return <TalkForm action={createTalk} fields={talkFields} />;
 }`;
 
-const EXAMPLE_ACTION = `// src/routes/talks/new/_parts/actions.ts
-'use server';
+const ACTION = `'use server';
 
 import { parseForm } from '@k8ordo/form/server';
 import type { FormState } from '@k8ordo/form/server';
 import { href } from '@k8ordo/router';
 import { redirect } from '@k8ordo/server/runtime';
 
-import { talkSchema } from './talk-schema';
-import { insertTalk } from './talks.server';
+import { talkSchema } from './schema';
 
 export async function createTalk(
-  _previous: FormState,
+  _prev: FormState,
   formData: FormData,
-): Promise<FormState> {
+) {
   const parsed = parseForm(talkSchema, formData);
   if (!parsed.success) return parsed.state;
-  await insertTalk(parsed.data);
+
+  await saveTalk(parsed.data);
   redirect(href('/talks'));
 }`;
 
-const EXAMPLE_FORM = `// src/routes/talks/new/_parts/talk-form.tsx
-'use client';
+const FORM = `'use client';
 
 import { useForm } from '@k8ordo/form';
-import type { FormFields } from '@k8ordo/form';
+import type { FormFields, FormState } from '@k8ordo/form';
 import { useActionState } from 'react';
 
-import { createTalk } from './actions';
-
 type Props = {
-  fields: FormFields<'title' | 'eventUrl' | 'minutes' | 'recorded', never>;
+  action: (prev: FormState, formData: FormData) => Promise<FormState>;
+  fields: FormFields<'title' | 'eventUrl' | 'minutes', never>;
 };
 
-export function TalkForm({ fields }: Props) {
-  const [state, formAction] = useActionState(createTalk, {});
+export function TalkForm({ action, fields }: Props) {
+  const [state, formAction] = useActionState(action, {});
   const form = useForm(fields, state);
   const title = form.field('title');
   const eventUrl = form.field('eventUrl');
   const minutes = form.field('minutes');
-  const recorded = form.field('recorded');
 
   return (
     <form {...form.props} action={formAction}>
-      {form.formError.message !== undefined && (
-        <p {...form.formError.props}>{form.formError.message}</p>
-      )}
-
       <label>
-        Title
-        <input {...title.input} aria-invalid={title.invalid} />
+        Title <input {...title.input} />
       </label>
       {title.error !== undefined && <p>{title.error}</p>}
-
       <label>
-        Event URL
-        <input {...eventUrl.input} aria-invalid={eventUrl.invalid} />
+        Event URL <input {...eventUrl.input} />
       </label>
       {eventUrl.error !== undefined && <p>{eventUrl.error}</p>}
-
       <label>
-        Minutes
-        <input {...minutes.input} aria-invalid={minutes.invalid} />
+        Length (minutes) <input {...minutes.input} />
       </label>
       {minutes.error !== undefined && <p>{minutes.error}</p>}
-
-      <label>
-        <input {...recorded.input} />
-        Recorded
-      </label>
-
-      <button type="submit">Register</button>
+      <button type="submit">Submit</button>
     </form>
   );
 }`;
 
-const EXAMPLE_FORM_TYPES = `// src/routes/talks/new/_parts/talk-form.tsx
-'use client';
-
-import type { formFields } from '@k8ordo/form/server';
-
-import type { talkSchema } from './talk-schema';
-
-type Props = {
-  fields: ReturnType<typeof formFields<typeof talkSchema>>;
-};`;
+const NEXT = [
+  {
+    path: '/:locale/form/field-types',
+    label: m.form.navFieldTypes,
+    description: m.formGetStarted.nextFieldTypes,
+  },
+  {
+    path: '/:locale/form/errors',
+    label: m.form.navErrors,
+    description: m.formGetStarted.nextErrors,
+  },
+  {
+    path: '/:locale/form/reference/server',
+    label: m.form.navReferenceServer,
+    description: m.formGetStarted.nextReference,
+  },
+] as const;
 
 export default function FormGetStartedPage() {
+  // 文言はロケールに従うので、描画のたびに導く（モジュールスコープでは導かない）
+  const talkFields = formFields(talkSchema);
+
   return (
     <DocPage
       introduction={m.formGetStarted.introduction}
       path="/:locale/form/get-started"
     >
       <DocSection
-        description={m.formGetStarted.ideaDescription}
-        title={m.formGetStarted.ideaTitle}
-      >
-        <ul className="text-fg-mute flex flex-col gap-2 pl-6">
-          <li className="list-disc">
-            <Rich>{m.formGetStarted.ideaSchema()}</Rich>
-          </li>
-          <li className="list-disc">
-            <Rich>{m.formGetStarted.ideaDom()}</Rich>
-          </li>
-          <li className="list-disc">
-            <Rich>{m.formGetStarted.ideaNoJs()}</Rich>
-          </li>
-          <li className="list-disc">
-            <Rich>{m.formGetStarted.ideaServer()}</Rich>
-          </li>
-        </ul>
-      </DocSection>
-
-      <DocSection
         description={m.formGetStarted.installDescription}
+        id="install"
         title={m.formGetStarted.installTitle}
       >
         <InstallTabs
@@ -225,7 +126,7 @@ export default function FormGetStartedPage() {
           pnpm={<CodeBlock code="pnpm add @k8ordo/form zod" lang="bash" />}
           yarn={<CodeBlock code="yarn add @k8ordo/form zod" lang="bash" />}
         />
-        <p className="text-fg-mute leading-relaxed">
+        <p>
           <Rich>{m.formGetStarted.peersDescription()}</Rich>
         </p>
         <PeerTable
@@ -238,157 +139,104 @@ export default function FormGetStartedPage() {
             '@types/react': m.formGetStarted.peerTypes,
           }}
         />
+        <Note>
+          <p>
+            <Rich>{m.formGetStarted.zodMini()}</Rich>
+          </p>
+        </Note>
       </DocSection>
 
       <DocSection
-        description={m.formGetStarted.zodDescription}
-        title={m.formGetStarted.zodTitle}
+        description={m.formGetStarted.schemaDescription}
+        id="schema"
+        title={m.formGetStarted.schemaTitle}
       >
-        <div className="grid gap-4 *:min-w-0 md:grid-cols-2">
-          <CodeBlock code={SCHEMA_ZOD} lang="ts" />
-          <CodeBlock code={SCHEMA_MINI} lang="ts" />
-        </div>
-        <p className="text-fg-mute leading-relaxed">
-          <Rich>{m.formGetStarted.zodMessages()}</Rich>
+        <CodeBlock
+          code={SCHEMA}
+          lang="ts"
+          marks={{ 6: 'highlight' }}
+          title="schema.ts"
+        />
+        <p>
+          <Rich>{m.formGetStarted.schemaCoerce()}</Rich>
         </p>
       </DocSection>
 
       <DocSection
-        description={m.formGetStarted.splitDescription}
-        title={m.formGetStarted.splitTitle}
+        description={m.formGetStarted.deriveDescription}
+        id="derive"
+        title={m.formGetStarted.deriveTitle}
       >
-        <ol className="text-fg-mute flex list-decimal flex-col gap-2 pl-6">
-          <li>
-            <Rich>{m.formGetStarted.splitDerive()}</Rich>
-          </li>
-          <li>
-            <Rich>{m.formGetStarted.splitProps()}</Rich>
-          </li>
-          <li>
-            <Rich>{m.formGetStarted.splitParse()}</Rich>
-          </li>
-        </ol>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead>
-              <tr className="border-border-mute border-b">
-                <th className={TH}>{m.formGetStarted.entryColumn()}</th>
-                <th className={TH}>{m.formGetStarted.valuesColumn()}</th>
-                <th className={TH}>{m.formGetStarted.typesColumn()}</th>
-              </tr>
-            </thead>
-            <tbody className="text-fg-mute">
-              {ENTRIES.map((row) => (
-                <tr className="border-border-mute border-b" key={row.entry}>
-                  <td className={`${TD} whitespace-nowrap`}>
-                    <Code>{row.entry}</Code>
-                  </td>
-                  <td className={TD}>{codeList(row.values)}</td>
-                  <td className={TD}>{codeList(row.types)}</td>
-                </tr>
-              ))}
-              <tr className="border-border-mute border-b">
-                <td className={`${TD} whitespace-nowrap`}>
-                  {m.formGetStarted.bothEntries()}
-                </td>
-                <td className={TD}>—</td>
-                <td className={TD}>{codeList(SHARED_TYPES)}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <p className="text-fg-mute leading-relaxed">
-          <Rich>{m.formGetStarted.splitTypes()}</Rich>
+        <CodeBlock
+          code={PAGE}
+          lang="tsx"
+          marks={{ 7: 'highlight' }}
+          title="page.tsx"
+        />
+        <p>
+          <Rich>{m.formGetStarted.deriveJson()}</Rich>
         </p>
       </DocSection>
 
       <DocSection
-        description={m.formGetStarted.exampleDescription}
-        title={m.formGetStarted.exampleTitle}
+        description={m.formGetStarted.actionDescription}
+        id="action"
+        title={m.formGetStarted.actionTitle}
       >
-        <div className="flex flex-col gap-2">
-          <Heading level="h3">{m.formGetStarted.exampleSchemaTitle()}</Heading>
-          <p className="text-fg-mute leading-relaxed">
-            <Rich>{m.formGetStarted.exampleSchemaDescription()}</Rich>
-          </p>
-          <CodeBlock code={EXAMPLE_SCHEMA} lang="ts" />
-        </div>
-        <div className="flex flex-col gap-2">
-          <Heading level="h3">{m.formGetStarted.examplePageTitle()}</Heading>
-          <p className="text-fg-mute leading-relaxed">
-            <Rich>{m.formGetStarted.examplePageDescription()}</Rich>
-          </p>
-          <CodeBlock code={EXAMPLE_PAGE} lang="tsx" />
-        </div>
-        <div className="flex flex-col gap-2">
-          <Heading level="h3">{m.formGetStarted.exampleActionTitle()}</Heading>
-          <p className="text-fg-mute leading-relaxed">
-            <Rich>{m.formGetStarted.exampleActionDescription()}</Rich>
-          </p>
-          <CodeBlock code={EXAMPLE_ACTION} lang="ts" />
-          <p className="text-fg-mute text-sm">
-            <LocaleAnchor path="/:locale/server/actions">
-              {m.formGetStarted.nextServer()}
-            </LocaleAnchor>
-          </p>
-        </div>
-        <div className="flex flex-col gap-2">
-          <Heading level="h3">{m.formGetStarted.exampleFormTitle()}</Heading>
-          <p className="text-fg-mute leading-relaxed">
-            <Rich>{m.formGetStarted.exampleFormDescription()}</Rich>
-          </p>
-          <CodeBlock code={EXAMPLE_FORM} lang="tsx" />
-          <p className="text-fg-mute leading-relaxed">
-            <Rich>{m.formGetStarted.exampleFormProps()}</Rich>
-          </p>
-          <p className="text-fg-mute leading-relaxed">
-            <Rich>{m.formGetStarted.exampleFormTypes()}</Rich>
-          </p>
-          <CodeBlock code={EXAMPLE_FORM_TYPES} lang="tsx" />
-        </div>
-      </DocSection>
-
-      <DocSection title={m.formGetStarted.flowTitle}>
-        <ul className="text-fg-mute flex flex-col gap-2 pl-6">
-          <li className="list-disc">
-            <Rich>{m.formGetStarted.flowNoJs()}</Rich>
-          </li>
-          <li className="list-disc">
-            <Rich>{m.formGetStarted.flowJs()}</Rich>
-          </li>
-          <li className="list-disc">
-            <Rich>{m.formGetStarted.flowServer()}</Rich>
-          </li>
-        </ul>
-        <p className="text-fg-mute leading-relaxed">
-          <LocaleAnchor path="/:locale/form/validation">
-            <Rich>{m.formGetStarted.flowMore()}</Rich>
-          </LocaleAnchor>
+        <CodeBlock
+          code={ACTION}
+          lang="ts"
+          marks={{ 11: 'highlight', 12: 'highlight' }}
+          title="actions.ts"
+        />
+        <p>
+          <Rich>{m.formGetStarted.actionResult()}</Rich>
         </p>
       </DocSection>
 
-      <DocSection title={m.formGetStarted.nextTitle}>
-        <ul className="flex flex-col gap-3 pl-6">
-          <li className="list-disc">
-            <LocaleAnchor path="/:locale/form/fields">
-              <Rich>{m.formGetStarted.nextFields()}</Rich>
-            </LocaleAnchor>
-          </li>
-          <li className="list-disc">
-            <LocaleAnchor path="/:locale/form/validation">
-              <Rich>{m.formGetStarted.nextValidation()}</Rich>
-            </LocaleAnchor>
-          </li>
-          <li className="list-disc">
-            <LocaleAnchor path="/:locale/form/patterns">
-              <Rich>{m.formGetStarted.nextPatterns()}</Rich>
-            </LocaleAnchor>
-          </li>
-          <li className="list-disc">
-            <LocaleAnchor path="/:locale/form">
-              <Rich>{m.formGetStarted.nextDemo()}</Rich>
-            </LocaleAnchor>
-          </li>
+      <DocSection
+        description={m.formGetStarted.formDescription}
+        id="form"
+        title={m.formGetStarted.formTitle}
+      >
+        <CodeBlock
+          code={FORM}
+          lang="tsx"
+          marks={{
+            13: 'highlight',
+            14: 'highlight',
+            20: 'highlight',
+            22: 'highlight',
+            24: 'highlight',
+          }}
+          title="talk-form.tsx"
+        />
+        <p>
+          <Rich>{m.formGetStarted.formSpread()}</Rich>
+        </p>
+        <p>
+          <Rich>{m.formGetStarted.formDom()}</Rich>
+        </p>
+      </DocSection>
+
+      <Playground
+        description={m.formGetStarted.tryDescription}
+        id="try"
+        steps={m.formGetStarted.trySteps}
+        title={m.formGetStarted.tryTitle}
+      >
+        <TalkDemo fields={talkFields} />
+      </Playground>
+
+      <DocSection id="next" title={m.formGetStarted.nextTitle}>
+        <ul>
+          {NEXT.map((step) => (
+            <li key={step.path}>
+              <LocaleAnchor path={step.path}>{step.label()}</LocaleAnchor>
+              {' — '}
+              <Rich>{step.description()}</Rich>
+            </li>
+          ))}
         </ul>
       </DocSection>
     </DocPage>

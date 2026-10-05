@@ -1,90 +1,141 @@
-import {
-  AtomIcon,
-  FormIcon,
-  LocationIcon,
-  PrepareIcon,
-  SendIcon,
-  RefreshIcon,
-  ShieldCheckIcon,
-} from '@k8ordo/ui';
+import { CodeBlock } from '@k8ordo/ui/code-block';
 
-import { PackageExample } from '../../../components/package-example';
-import { PackageLanding } from '../../../components/package-landing';
-import type { PackageFeature } from '../../../components/package-landing';
+import {
+  LandingClaim,
+  LandingHero,
+  NextSteps,
+} from '../../../components/landing';
 import * as m from '../../../messages';
 
-const FEATURES: PackageFeature[] = [
-  {
-    title: m.server.featureRequest,
-    description: m.server.featureRequestDescription,
-    icon: <SendIcon />,
-  },
-  {
-    title: m.server.featureRoutes,
-    description: m.server.featureRoutesDescription,
-    icon: <LocationIcon />,
-  },
-  {
-    title: m.server.featureActions,
-    description: m.server.featureActionsDescription,
-    icon: <FormIcon />,
-  },
-  {
-    title: m.server.featureSameHandler,
-    description: m.server.featureSameHandlerDescription,
-    icon: <AtomIcon />,
-  },
-  {
-    title: m.server.featureRouteFiles,
-    description: m.server.featureRouteFilesDescription,
-    icon: <RefreshIcon />,
-  },
-  {
-    title: m.server.featureParams,
-    description: m.server.featureParamsDescription,
-    icon: <ShieldCheckIcon />,
-  },
-  {
-    title: m.server.featureGuards,
-    description: m.server.featureGuardsDescription,
-    icon: <PrepareIcon />,
-  },
-];
+const HERO_CONFIG = `export default defineConfig({ plugins: [framework()] });`;
 
-const EXAMPLE = `// src/routes/_parts/actions.ts
-'use server';
+const HERO_PAGE = `export default function ProductsPage() {
+  return <h1>Products</h1>;
+}`;
 
-export async function createTalk(_previous: FormState, formData: FormData) {
+const HERO_RUN = `vite build
+node serve.js`;
+
+const CLAIM_ACTION = `'use server';
+
+export async function createTalk(
+  _previous: FormState,
+  formData: FormData,
+) {
   const parsed = parseForm(talkSchema, formData);
   if (!parsed.success) return parsed.state;
+
   await insertTalk(parsed.data);
-  redirect(href('/talks')); // throw されるので、この後の行は走らない
-}
-
-// src/routes/_parts/talk-form.tsx
-'use client';
-
-export function TalkForm() {
-  const [state, formAction] = useActionState(createTalk, {});
-  return <form action={formAction}>…</form>;
+  redirect(href('/talks'));
 }`;
+
+const CLAIM_ACTION_FORM = `const [state, formAction] = useActionState(createTalk, {});
+
+<form action={formAction}>…</form>`;
+
+const CLAIM_GUARD = `const guard: Guard<'/admin'> = () => {
+  if (cookies().has('session')) return;
+  return new Response(null, {
+    status: 303,
+    headers: { location: href('/login') },
+  });
+};
+
+export default guard;`;
+
+const CLAIM_MODE = `import { framework } from '@k8ordo/static';
+import { framework } from '@k8ordo/server';
+
+export default defineConfig({ plugins: [framework()] });`;
 
 export default function ServerPage() {
   return (
-    <PackageLanding
-      description={m.server.description}
-      directory="server"
-      docsDescription={m.server.docsDescription}
-      docsTitle={m.server.docsTitle}
-      features={FEATURES}
-      featuresTitle={m.server.featuresTitle}
-      name="@k8ordo/server"
-    >
-      <PackageExample
-        code={EXAMPLE}
-        description={m.server.exampleDescription}
-        title={m.server.exampleTitle}
+    <div className="flex flex-1 flex-col">
+      <LandingHero
+        code={
+          <>
+            <CodeBlock code={HERO_CONFIG} lang="ts" title="vite.config.ts" />
+            <CodeBlock
+              code={HERO_PAGE}
+              lang="tsx"
+              title="src/routes/products/page.tsx"
+            />
+            <CodeBlock code={HERO_RUN} lang="bash" title="Terminal" />
+          </>
+        }
+        directory="server"
+        install="@k8ordo/server @k8ordo/router"
+        name="@k8ordo/server"
+        tagline={m.server.tagline}
       />
-    </PackageLanding>
+      <LandingClaim
+        body={m.server.claimActionsBody}
+        title={m.server.claimActionsTitle}
+      >
+        <div className="flex flex-col gap-3">
+          <CodeBlock
+            code={CLAIM_ACTION}
+            lang="ts"
+            title="src/routes/talks/_parts/actions.ts"
+          />
+          <CodeBlock
+            code={CLAIM_ACTION_FORM}
+            lang="tsx"
+            title="src/routes/talks/_parts/talk-form.tsx"
+          />
+        </div>
+      </LandingClaim>
+      <LandingClaim
+        body={m.server.claimGuardsBody}
+        title={m.server.claimGuardsTitle}
+      >
+        <CodeBlock
+          code={CLAIM_GUARD}
+          lang="ts"
+          title="src/routes/admin/guard.ts"
+        />
+      </LandingClaim>
+      <LandingClaim
+        body={m.server.claimModeBody}
+        title={m.server.claimModeTitle}
+      >
+        <CodeBlock
+          code={CLAIM_MODE}
+          lang="ts"
+          marks={{ 1: 'remove', 2: 'add' }}
+          title="vite.config.ts"
+        />
+      </LandingClaim>
+      <NextSteps
+        name="@k8ordo/server"
+        steps={[
+          {
+            path: '/:locale/server/get-started',
+            label: m.nav.getStarted,
+            description: m.server.nextGetStarted,
+          },
+          {
+            path: '/:locale/server/routing',
+            label: m.server.navRouting,
+            description: m.server.nextRouting,
+          },
+          {
+            path: '/:locale/server/actions',
+            label: m.server.navActions,
+            description: m.server.nextActions,
+          },
+          {
+            path: '/:locale/server/guards',
+            label: m.server.navGuards,
+            description: m.server.nextGuards,
+          },
+          {
+            path: '/:locale/server/deploy',
+            label: m.server.navDeploy,
+            description: m.server.nextDeploy,
+          },
+        ]}
+      />
+    </div>
   );
 }

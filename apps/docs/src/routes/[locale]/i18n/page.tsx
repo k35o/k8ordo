@@ -1,105 +1,135 @@
+import { CodeBlock } from '@k8ordo/ui/code-block';
+
 import {
-  AtomIcon,
-  CodeXmlIcon,
-  Heading,
-  ListIcon,
-  LocationIcon,
-  SendIcon,
-  ShieldCheckIcon,
-} from '@k8ordo/ui';
-
-import { PackageExample } from '../../../components/package-example';
-import { PackageLanding } from '../../../components/package-landing';
-import type { PackageFeature } from '../../../components/package-landing';
-import { Rich } from '../../../components/rich';
+  LandingClaim,
+  LandingHero,
+  NextSteps,
+} from '../../../components/landing';
 import * as m from '../../../messages';
-import { I18nDemo } from './_parts/i18n-demo';
 
-// 文字列の中の `export const paramsSchema` を生成器は拾わない（ファイルを
-// パースして export を読む）ので、コード例はページに置ける。
-const EXAMPLE = `// i18n.ts — 一覧はここにしか書かない
-export const locales = defineLocales({
+const HERO_LOCALES = `export const locales = defineLocales({
   ja: { timeZone: 'Asia/Tokyo', dir: 'ltr' },
   en: { timeZone: 'UTC', dir: 'ltr' },
-});
-declare module '@k8ordo/i18n' {
-  interface Register { locale: LocaleOf<typeof locales> }
-}
+});`;
 
-// messages/nav.ts — 文言は 1 つずつ関数。全ロケールが揃わないと通らない
-export const home = message({ ja: 'ホーム', en: 'Home' });
-export const greeting = message({
+const HERO_MESSAGE = `export const home = message({ ja: 'ホーム', en: 'Home' });`;
+
+const HERO_USE = `<a href="/">{nav.home()}</a>`;
+
+// コード例の中の `export const { paramsSchema }` は文字列なので、生成器
+// （ファイルをパースして export を読む）はこのページの export と取り違えない
+const CLAIM_SERVER_LAYOUT = `export const { paramsSchema } = locales;`;
+
+const CLAIM_SERVER_PAGE = `export default function Page() {
+  return <h1>{nav.home()}</h1>;
+}`;
+
+const CLAIM_TYPES_REGISTER = `declare module '@k8ordo/i18n' {
+  interface Register {
+    locale: LocaleOf<typeof locales>;
+  }
+}`;
+
+const CLAIM_TYPES_MESSAGES = `export const greeting = message({
   ja: (name: string) => \`こんにちは、\${name}さん\`,
-  en: (name) => \`Hello, \${name}\`, // 引数の型は ja から流れる
+  en: (name) => \`Hello, \${name}\`,
 });
 
-// routes/[locale]/layout.tsx — 受理したロケールがこの描画のロケールになる
-export const paramsSchema = locales.paramsSchema; // /fr/… は 404
+export const save = message({ ja: '保存' });`;
 
-// Server Component でも Client Component でも、同じ 1 行
-<h1>{nav.home()}</h1>
-<p>{nav.greeting(name)}</p>`;
+const CLAIM_BUNDLE = `'use client';
 
-const FEATURES: PackageFeature[] = [
-  {
-    title: m.i18n.featureLocales,
-    description: m.i18n.featureLocalesDescription,
-    icon: <ListIcon />,
-  },
-  {
-    title: m.i18n.featureSegment,
-    description: m.i18n.featureSegmentDescription,
-    icon: <LocationIcon />,
-  },
-  {
-    title: m.i18n.featureNegotiate,
-    description: m.i18n.featureNegotiateDescription,
-    icon: <SendIcon />,
-  },
-  {
-    title: m.i18n.featureDictionary,
-    description: m.i18n.featureDictionaryDescription,
-    icon: <AtomIcon />,
-  },
-  {
-    title: m.i18n.featureFunctions,
-    description: m.i18n.featureFunctionsDescription,
-    icon: <CodeXmlIcon />,
-  },
-  {
-    title: m.i18n.featureBoundary,
-    description: m.i18n.featureBoundaryDescription,
-    icon: <ShieldCheckIcon />,
-  },
-];
+import { greeting } from '../messages/nav';
+
+export function Greeting({ name }: { name: string }) {
+  return <p>{greeting(name)}</p>;
+}`;
 
 export default function I18nPage() {
   return (
-    <PackageLanding
-      description={m.i18n.description}
-      directory="i18n"
-      docsDescription={m.i18n.docsDescription}
-      docsTitle={m.i18n.docsTitle}
-      features={FEATURES}
-      featuresTitle={m.i18n.featuresTitle}
-      name="@k8ordo/i18n"
-    >
-      <section className="mx-auto w-full max-w-6xl px-6 pb-24 md:px-8">
-        <Heading level="h2">
-          <Rich>{m.i18n.demoTitle()}</Rich>
-        </Heading>
-        <p className="text-fg-mute mt-4 max-w-2xl text-sm leading-relaxed">
-          <Rich>{m.i18n.demoDescription()}</Rich>
-        </p>
-        <div className="mt-6 max-w-2xl">
-          <I18nDemo />
-        </div>
-      </section>
-      <PackageExample
-        code={EXAMPLE}
-        description={m.i18n.exampleDescription}
-        title={m.i18n.exampleTitle}
+    <div className="flex flex-1 flex-col">
+      <LandingHero
+        code={
+          <>
+            <CodeBlock code={HERO_LOCALES} lang="ts" title="i18n.ts" />
+            <CodeBlock code={HERO_MESSAGE} lang="ts" title="messages/nav.ts" />
+            <CodeBlock code={HERO_USE} lang="tsx" title="header.tsx" />
+          </>
+        }
+        directory="i18n"
+        install="@k8ordo/i18n"
+        name="@k8ordo/i18n"
+        tagline={m.i18n.tagline}
       />
-    </PackageLanding>
+      <LandingClaim
+        body={m.i18n.claimServerBody}
+        title={m.i18n.claimServerTitle}
+      >
+        <div className="flex flex-col gap-3">
+          <CodeBlock
+            code={CLAIM_SERVER_LAYOUT}
+            lang="tsx"
+            title="routes/[locale]/layout.tsx"
+          />
+          <CodeBlock
+            code={CLAIM_SERVER_PAGE}
+            lang="tsx"
+            title="routes/[locale]/page.tsx"
+          />
+        </div>
+      </LandingClaim>
+      <LandingClaim body={m.i18n.claimTypesBody} title={m.i18n.claimTypesTitle}>
+        <div className="flex flex-col gap-3">
+          <CodeBlock code={CLAIM_TYPES_REGISTER} lang="ts" title="i18n.ts" />
+          <CodeBlock
+            callouts={{ 6: m.i18n.claimTypesMissing() }}
+            code={CLAIM_TYPES_MESSAGES}
+            lang="ts"
+            title="messages/nav.ts"
+          />
+        </div>
+      </LandingClaim>
+      <LandingClaim
+        body={m.i18n.claimBundleBody}
+        title={m.i18n.claimBundleTitle}
+      >
+        <CodeBlock code={CLAIM_BUNDLE} lang="tsx" title="greeting.tsx" />
+      </LandingClaim>
+      <NextSteps
+        name="@k8ordo/i18n"
+        steps={[
+          {
+            path: '/:locale/i18n/get-started',
+            label: m.nav.getStarted,
+            description: m.i18n.nextGetStarted,
+          },
+          {
+            path: '/:locale/i18n/locales',
+            label: m.i18n.navLocales,
+            description: m.i18n.nextLocales,
+          },
+          {
+            path: '/:locale/i18n/messages',
+            label: m.i18n.navMessages,
+            description: m.i18n.nextMessages,
+          },
+          {
+            path: '/:locale/i18n/formatting',
+            label: m.i18n.navFormatting,
+            description: m.i18n.nextFormatting,
+          },
+          {
+            path: '/:locale/i18n/routing',
+            label: m.i18n.navRouting,
+            description: m.i18n.nextRouting,
+          },
+          {
+            path: '/:locale/i18n/integrations',
+            label: m.i18n.navIntegrations,
+            description: m.i18n.nextIntegrations,
+          },
+        ]}
+      />
+    </div>
   );
 }

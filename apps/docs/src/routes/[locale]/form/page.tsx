@@ -1,81 +1,115 @@
 import { formFields } from '@k8ordo/form/server';
-import {
-  AccessibilityIcon,
-  AtomIcon,
-  FormIcon,
-  Heading,
-  LockIcon,
-  ShieldCheckIcon,
-  SparklesIcon,
-} from '@k8ordo/ui';
+import { CodeBlock } from '@k8ordo/ui/code-block';
 
-import { PackageLanding } from '../../../components/package-landing';
-import type { PackageFeature } from '../../../components/package-landing';
-import { Rich } from '../../../components/rich';
+import {
+  LandingClaim,
+  LandingHero,
+  NextSteps,
+} from '../../../components/landing';
+import { Playground } from '../../../components/playground';
 import * as m from '../../../messages';
 import { demoState } from './_parts/demo-state';
 import { FormDemo } from './_parts/form-demo';
 
-const FEATURES: PackageFeature[] = [
-  {
-    title: m.form.featureSchema,
-    description: m.form.featureSchemaDescription,
-    icon: <FormIcon />,
-  },
-  {
-    title: m.form.featureNoJs,
-    description: m.form.featureNoJsDescription,
-    icon: <SparklesIcon />,
-  },
-  {
-    title: m.form.featureDom,
-    description: m.form.featureDomDescription,
-    icon: <AtomIcon />,
-  },
-  {
-    title: m.form.featureTypes,
-    description: m.form.featureTypesDescription,
-    icon: <ShieldCheckIcon />,
-  },
-  {
-    title: m.form.featureLoud,
-    description: m.form.featureLoudDescription,
-    icon: <AccessibilityIcon />,
-  },
-  {
-    title: m.form.featureSecrets,
-    description: m.form.featureSecretsDescription,
-    icon: <LockIcon />,
-  },
-];
+const HERO_SCHEMA = `export const talkSchema = z.object({
+  title: z.string().min(1).max(120),
+});`;
 
-// Server Component（このファイルにディレクティブは無い）。スキーマから制約属性を
-// 導くのはここで、結果は JSON なので props としてクライアントに渡り、zod は
-// ブラウザに届かない。URL 状態のスキーマ（@k8ordo/state）と同じ 1 つを渡す。
+const HERO_FORM = `const title = form.field('title');
+
+<input {...title.input} />`;
+
+const HERO_HTML = `<input name="title" type="text" required
+  minlength="1" maxlength="120">`;
+
+const CLAIM_SCHEMA = `const fields = formFields(talkSchema);
+
+fields.fields.title.input;
+// { name: 'title', type: 'text', required: true,
+//   minLength: 1, maxLength: 120 }
+
+fields.fields.title.messages.tooLong;
+// 'Too big: expected string to have <=120 characters'`;
+
+const CLAIM_SERVER = `export async function createTalk(
+  _prev: FormState,
+  formData: FormData,
+) {
+  const parsed = parseForm(talkSchema, formData);
+  if (!parsed.success) return parsed.state;
+
+  await insertTalk(parsed.data);
+  redirect(href('/talks'));
+}`;
+
+// Server Component（このファイルにディレクティブは無い）。デモの制約属性は
+// ここで導き、JSON として props でクライアントに渡すので、zod はブラウザに
+// 届かない。URL 状態のスキーマ（@k8ordo/state）と同じ 1 つを渡す。
 const demoFields = formFields(demoState.url);
 
 export default function FormPage() {
   return (
-    <PackageLanding
-      description={m.form.description}
-      directory="form"
-      docsDescription={m.form.docsDescription}
-      docsTitle={m.form.docsTitle}
-      features={FEATURES}
-      featuresTitle={m.form.featuresTitle}
-      name="@k8ordo/form"
-    >
-      <section className="mx-auto w-full max-w-6xl px-6 pb-24 md:px-8">
-        <Heading level="h2">
-          <Rich>{m.form.demoTitle()}</Rich>
-        </Heading>
-        <p className="text-fg-mute mt-4 max-w-2xl text-sm leading-relaxed">
-          <Rich>{m.form.demoDescription()}</Rich>
-        </p>
-        <div className="mt-6 max-w-2xl">
+    <div className="flex flex-1 flex-col">
+      <LandingHero
+        code={
+          <>
+            <CodeBlock code={HERO_SCHEMA} lang="ts" title="schema.ts" />
+            <CodeBlock code={HERO_FORM} lang="tsx" title="talk-form.tsx" />
+            <CodeBlock code={HERO_HTML} lang="html" title="HTML" />
+          </>
+        }
+        directory="form"
+        install="@k8ordo/form zod"
+        name="@k8ordo/form"
+        tagline={m.form.tagline}
+      />
+      <LandingClaim
+        body={m.form.claimSchemaBody}
+        title={m.form.claimSchemaTitle}
+      >
+        <CodeBlock code={CLAIM_SCHEMA} lang="ts" title="page.tsx" />
+      </LandingClaim>
+      <LandingClaim body={m.form.claimNoJsBody} title={m.form.claimNoJsTitle}>
+        <Playground
+          description={m.form.demoDescription}
+          id="demo"
+          steps={m.form.demoSteps}
+          title={m.form.demoTitle}
+        >
           <FormDemo fields={demoFields} />
-        </div>
-      </section>
-    </PackageLanding>
+        </Playground>
+      </LandingClaim>
+      <LandingClaim
+        body={m.form.claimServerBody}
+        title={m.form.claimServerTitle}
+      >
+        <CodeBlock code={CLAIM_SERVER} lang="ts" title="actions.ts" />
+      </LandingClaim>
+      <NextSteps
+        name="@k8ordo/form"
+        steps={[
+          {
+            path: '/:locale/form/get-started',
+            label: m.nav.getStarted,
+            description: m.form.nextGetStarted,
+          },
+          {
+            path: '/:locale/form/field-types',
+            label: m.form.navFieldTypes,
+            description: m.form.nextFieldTypes,
+          },
+          {
+            path: '/:locale/form/errors',
+            label: m.form.navErrors,
+            description: m.form.nextErrors,
+          },
+          {
+            path: '/:locale/form/reference/server',
+            label: m.form.navReferenceServer,
+            description: m.form.nextReferenceServer,
+          },
+        ]}
+      />
+    </div>
   );
 }

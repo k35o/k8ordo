@@ -71,7 +71,11 @@ export function SetupConfig({
 }) {
   const t = m.frameworkRouting;
   return (
-    <DocSection description={description} title={t.setup.configTitle}>
+    <DocSection
+      id="config"
+      description={description}
+      title={t.setup.configTitle}
+    >
       <CodeBlock code={config(mode)} lang="ts" />
       <Paragraph text={t.setup.pluginsNote} />
       <SubHeading text={t.setup.tsconfigTitle} />
@@ -85,7 +89,11 @@ export function SetupConfig({
 export function SetupRoutes() {
   const t = m.frameworkRouting.setup;
   return (
-    <DocSection description={t.routesDescription} title={t.routesTitle}>
+    <DocSection
+      id="routes"
+      description={t.routesDescription}
+      title={t.routesTitle}
+    >
       <CodeBlock code={LAYOUT} lang="tsx" />
       <CodeBlock code={PAGE} lang="tsx" />
       <SubHeading text={t.documentTitle} />
@@ -99,6 +107,7 @@ export function SetupGenerated({ mode }: { mode: Mode }) {
   const t = m.frameworkRouting;
   return (
     <DocSection
+      id="generated"
       description={t.setup.generatedDescription}
       title={t.setup.generatedTitle}
     >

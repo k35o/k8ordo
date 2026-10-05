@@ -7,6 +7,8 @@ export * as ui from './ui';
 export * as common from './common';
 export * as footer from './footer';
 export * as form from './form';
+export * as landing from './landing';
+export * as reference from './reference';
 export * as state from './state';
 export * as router from './router';
 //  は予約語なので、名前空間だけ文字列名で出す（ES2022）
@@ -30,9 +32,9 @@ export * as docPage from './doc-page';
 export * as peers from './peers';
 // パッケージのガイドのページ。1 ページ 1 ファイルで、名前はパス（<package>-<section>）
 export * as formGetStarted from './form-get-started';
-export * as formFields from './form-fields';
-export * as formValidation from './form-validation';
-export * as formPatterns from './form-patterns';
+export * as formFieldTypes from './form-field-types';
+export * as formErrors from './form-errors';
+export * as formReferenceServer from './form-reference-server';
 export * as stateGetStarted from './state-get-started';
 export * as statePlaces from './state-places';
 export * as stateReading from './state-reading';

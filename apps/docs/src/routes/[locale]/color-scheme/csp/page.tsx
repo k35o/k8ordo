@@ -58,13 +58,21 @@ const DEFAULT_DARK = `// src/routes/layout.tsx
 export default function ColorSchemeCspPage() {
   return (
     <DocPage introduction={t.introduction} path="/:locale/color-scheme/csp">
-      <DocSection description={t.blocked.description} title={t.blocked.title}>
+      <DocSection
+        id="blocked"
+        description={t.blocked.description}
+        title={t.blocked.title}
+      >
         <p className="text-fg-mute leading-relaxed">
           <Rich>{t.blocked.unsafeInline()}</Rich>
         </p>
       </DocSection>
 
-      <DocSection description={t.nonce.description} title={t.nonce.title}>
+      <DocSection
+        id="nonce"
+        description={t.nonce.description}
+        title={t.nonce.title}
+      >
         <CodeBlock code={GUARD} lang="ts" />
         <CodeBlock code={LAYOUT} lang="tsx" />
         <p className="text-fg-mute leading-relaxed">
@@ -77,7 +85,11 @@ export default function ColorSchemeCspPage() {
         </p>
       </DocSection>
 
-      <DocSection description={t.hash.description} title={t.hash.title}>
+      <DocSection
+        id="hash"
+        description={t.hash.description}
+        title={t.hash.title}
+      >
         <CodeBlock code={VITE_CONFIG} lang="ts" />
         <p className="text-fg-mute leading-relaxed">
           <Rich>{t.hash.computed()}</Rich>
@@ -89,7 +101,11 @@ export default function ColorSchemeCspPage() {
         </p>
       </DocSection>
 
-      <DocSection description={t.defaults.description} title={t.defaults.title}>
+      <DocSection
+        id="defaults"
+        description={t.defaults.description}
+        title={t.defaults.title}
+      >
         <CodeBlock code={DEFAULT_DARK} lang="tsx" />
       </DocSection>
     </DocPage>

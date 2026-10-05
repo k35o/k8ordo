@@ -1,63 +1,40 @@
 'use client';
 
-import type { Message } from '@k8ordo/i18n';
-import { useMatch, usePathname } from '@k8ordo/router';
+import { matchPath, usePathname } from '@k8ordo/router';
 import { UIProvider, Drawer, Heading, IconButton, ListIcon } from '@k8ordo/ui';
 import { useEffect, useRef, useState, ViewTransition } from 'react';
-import type { FC, ReactNode } from 'react';
+import type { CSSProperties, FC, ReactNode } from 'react';
 
 import { Footer } from '../../../components/footer';
 import { LocaleAnchor } from '../../../components/locale-anchor';
 import { Navigation } from '../../../components/navigation';
-import { SideNavigation } from '../../../components/side-navigation';
+import { PackageSidebar } from '../../../components/package-sidebar';
+import type { Catalogs } from '../../../components/package-sidebar';
 import { aiCategories } from '../../../data/ai-nav';
 import { componentCategoriesOf } from '../../../data/components-nav';
 import type { ComponentGroups } from '../../../data/components-nav';
-import type { NavCategory } from '../../../data/nav-types';
+import { PACKAGES } from '../../../data/packages';
+import type { PackageEntry } from '../../../data/packages';
 import { locales } from '../../../i18n';
-import type { SitePath } from '../../../links';
 import * as m from '../../../messages';
 import { WritingModeProvider } from '../../../theme/writing-mode-context';
 
-type SideNavConfig = {
-  categories: readonly NavCategory[];
-  title: Message;
-  catalogPath: SitePath;
-};
-
-type Section = '/:locale/ui/components' | '/:locale/ui/ai';
+/**
+ * サイトの枠。サイドバーの無いページ（ホームとランディング）はホームと同じ幅、
+ * サイドバーのあるページは画面いっぱいにし、左右の余白はどちらも同じにする。
+ * ページは枠の中で縦の余白だけを持ち、幅と左右の余白は持たない。
+ */
+const frameOf = (wide: boolean): string =>
+  wide ? 'w-full px-6 md:px-8' : 'mx-auto w-full max-w-6xl px-6 md:px-8';
 
 /**
- * `pattern` の配下のページが開いているか。`/:locale/ui/components/*` は
- * /ja/ui/components/button に合い、一覧ページの /ja/ui/components 自身には
- * 合わない（末尾のスラッシュは正規化で落ちる）ので、一覧ページはサイドナビ
- * 無しのまま。パターンは生成された表に対して型で検査される。
+ * 開いているパッケージのドキュメントのページ。ランディング（`/:locale/form`
+ * そのもの）は `/*` に合わないので、サイドバーを持たない全幅のページのまま。
  */
-const useBelow = (pattern: Section): boolean =>
-  useMatch(`${pattern}/*`) !== null;
-
-function useSideNavConfig(
-  componentGroups: ComponentGroups,
-): SideNavConfig | null {
-  const components = useBelow('/:locale/ui/components');
-  const ai = useBelow('/:locale/ui/ai');
-
-  if (components) {
-    return {
-      categories: componentCategoriesOf(componentGroups),
-      title: m.nav.components,
-      catalogPath: '/:locale/ui/components',
-    };
-  }
-  if (ai) {
-    return {
-      categories: aiCategories,
-      title: m.nav.ai,
-      catalogPath: '/:locale/ui/ai',
-    };
-  }
-  return null;
-}
+const useDocPackage = (): PackageEntry | undefined => {
+  const pathname = usePathname();
+  return PACKAGES.find((pkg) => matchPath(`${pkg.path}/*`, pathname) !== null);
+};
 
 /**
  * ページの差し替えをクロスフェードする。ルーターが付ける `navigation` の型で
@@ -81,10 +58,16 @@ function LayoutContent({
   componentGroups: ComponentGroups;
   children: ReactNode;
 }) {
-  const sideNavConfig = useSideNavConfig(componentGroups);
+  const pkg = useDocPackage();
+  // 部品と AI のページは、カテゴリごとに開閉できる段にして並べる
+  const catalogs: Catalogs = {
+    '/:locale/ui/components': componentCategoriesOf(componentGroups),
+    '/:locale/ui/ai': aiCategories,
+  };
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  // documentをスクローラーにしたため、サイドバーは sticky で固定する。
-  // ヘッダー高さはフォント読込やブレークポイントで変動するので実測して追従させる。
+  // documentをスクローラーにしたため、サイドバーと目次は sticky で固定する。
+  // ヘッダー高さはフォント読込やブレークポイントで変動するので実測し、
+  // ページ側の目次と見出しの scroll-margin にも --header-h で渡す。
   const headerRef = useRef<HTMLDivElement>(null);
   const [headerHeight, setHeaderHeight] = useState(0);
   useEffect(() => {
@@ -103,80 +86,77 @@ function LayoutContent({
   // ページが throw したときは routes/[locale]/error.tsx がこの children の
   // 位置に描かれる（枠は残る）。境界はフレームワークが表に持つので、ここに
   // ErrorBoundary は無い。
-  return sideNavConfig ? (
-    <>
-      <div className="bg-bg-surface sticky top-0 z-30 shrink-0" ref={headerRef}>
-        <Navigation />
-        <div className="lg:hidden">
-          <div className="border-border-mute bg-bg-surface flex items-center border-b px-4 py-2">
-            <IconButton
-              label={m.sideNav.openNavigation()}
-              onClick={() => {
-                setIsDrawerOpen(true);
+  return (
+    <div
+      className="flex flex-1 flex-col"
+      style={{ '--header-h': `${String(headerHeight)}px` } as CSSProperties}
+    >
+      <div className="bg-page sticky top-0 z-30 shrink-0" ref={headerRef}>
+        <Navigation wide={pkg !== undefined} />
+        {pkg !== undefined && (
+          <div className="border-border-mute bg-page border-b lg:hidden">
+            <div className={`${frameOf(true)} flex items-center gap-2 py-2`}>
+              <IconButton
+                label={m.sideNav.openNavigation()}
+                onClick={() => {
+                  setIsDrawerOpen(true);
+                }}
+              >
+                <ListIcon />
+              </IconButton>
+              <span className="text-fg-mute text-sm">{pkg.name}</span>
+            </div>
+          </div>
+        )}
+      </div>
+      {pkg === undefined ? (
+        <>
+          <main className={`${frameOf(false)} flex-1`}>
+            <PageTransition>{children}</PageTransition>
+          </main>
+          <Footer wide={false} />
+        </>
+      ) : (
+        <>
+          <div className={`${frameOf(true)} flex flex-1 gap-8`}>
+            <aside
+              aria-label={m.nav.packageNavigation()}
+              className="border-border-mute sticky hidden w-64 shrink-0 self-start overflow-y-auto border-e py-8 pe-4 lg:block"
+              style={{
+                top: `${String(headerHeight)}px`,
+                height: `calc(100dvh - ${String(headerHeight)}px)`,
               }}
             >
-              <ListIcon />
-            </IconButton>
+              <PackageSidebar catalogs={catalogs} pkg={pkg} />
+            </aside>
+            <main className="min-w-0 flex-1">
+              <PageTransition>{children}</PageTransition>
+            </main>
           </div>
-        </div>
-      </div>
-      <div className="flex flex-1">
-        <aside
-          className="border-border-mute sticky hidden w-60 shrink-0 self-start overflow-y-auto border-r px-3 py-4 lg:block"
-          style={{
-            top: `${headerHeight}px`,
-            height: `calc(100dvh - ${headerHeight}px)`,
-          }}
-        >
-          <SideNavigation
-            categories={sideNavConfig.categories}
-            label={sideNavConfig.title()}
-          />
-        </aside>
-        <main className="flex min-w-0 flex-1 flex-col">
-          <div className="flex-1">
-            <PageTransition>{children}</PageTransition>
-          </div>
-          <Footer />
-        </main>
-      </div>
-      <Drawer
-        isOpen={isDrawerOpen}
-        onClose={() => {
-          setIsDrawerOpen(false);
-        }}
-        side="left"
-        title={
-          <Heading level="h3">
-            <LocaleAnchor path={sideNavConfig.catalogPath}>
-              {sideNavConfig.title()}
-            </LocaleAnchor>
-          </Heading>
-        }
-      >
-        <SideNavigation
-          categories={sideNavConfig.categories}
-          label={sideNavConfig.title()}
-          onNavigate={() => {
-            setIsDrawerOpen(false);
-          }}
-        />
-      </Drawer>
-    </>
-  ) : (
-    <>
-      <div className="bg-bg-surface sticky top-0 z-30 shrink-0" ref={headerRef}>
-        <Navigation />
-      </div>
-      {/* ラッパーはブロックのまま保つ。flexにするとページ側の mx-auto コンテナが
-          flexアイテム化し、stretchが効かず中身のmin-content幅で横にあふれる */}
-      <main className="flex min-w-0 flex-1 flex-col">
-        <div className="min-w-0 flex-1">
-          <PageTransition>{children}</PageTransition>
-        </div>
-        <Footer />
-      </main>
-    </>
+          <Footer wide />
+          <Drawer
+            isOpen={isDrawerOpen}
+            onClose={() => {
+              setIsDrawerOpen(false);
+            }}
+            side="left"
+            title={
+              <Heading level="h3">
+                <LocaleAnchor path={pkg.path}>{pkg.name}</LocaleAnchor>
+              </Heading>
+            }
+          >
+            <PackageSidebar
+              catalogs={catalogs}
+              onNavigate={() => {
+                setIsDrawerOpen(false);
+              }}
+              pkg={pkg}
+            />
+          </Drawer>
+        </>
+      )}
+    </div>
   );
 }
 

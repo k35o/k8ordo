@@ -192,6 +192,7 @@ export default function StatePlacesPage() {
       path="/:locale/state/places"
     >
       <DocSection
+        id="overview"
         description={m.statePlaces.overviewDescription}
         title={m.statePlaces.overviewTitle}
       >
@@ -292,6 +293,7 @@ export default function StatePlacesPage() {
       </DocSection>
 
       <DocSection
+        id="demo"
         description={m.statePlaces.demoDescription}
         title={m.statePlaces.demoTitle}
       >
@@ -299,6 +301,7 @@ export default function StatePlacesPage() {
       </DocSection>
 
       <DocSection
+        id="url"
         description={m.statePlaces.urlDescription}
         title={m.statePlaces.urlTitle}
       >
@@ -373,6 +376,7 @@ export default function StatePlacesPage() {
       </DocSection>
 
       <DocSection
+        id="entry"
         description={m.statePlaces.entryDescription}
         title={m.statePlaces.entryTitle}
       >
@@ -394,6 +398,7 @@ export default function StatePlacesPage() {
       </DocSection>
 
       <DocSection
+        id="both"
         description={m.statePlaces.bothDescription}
         title={m.statePlaces.bothTitle}
       >
@@ -416,6 +421,7 @@ export default function StatePlacesPage() {
       </DocSection>
 
       <DocSection
+        id="local"
         description={m.statePlaces.localDescription}
         title={m.statePlaces.localTitle}
       >
@@ -443,6 +449,7 @@ export default function StatePlacesPage() {
       </DocSection>
 
       <DocSection
+        id="session"
         description={m.statePlaces.sessionDescription}
         title={m.statePlaces.sessionTitle}
       >
@@ -467,6 +474,7 @@ export default function StatePlacesPage() {
       </DocSection>
 
       <DocSection
+        id="cookie"
         description={m.statePlaces.cookieDescription}
         title={m.statePlaces.cookieTitle}
       >
@@ -500,6 +508,7 @@ export default function StatePlacesPage() {
       </DocSection>
 
       <DocSection
+        id="memory"
         description={m.statePlaces.memoryDescription}
         title={m.statePlaces.memoryTitle}
       >
@@ -519,6 +528,7 @@ export default function StatePlacesPage() {
       </DocSection>
 
       <DocSection
+        id="key"
         description={m.statePlaces.keyDescription}
         title={m.statePlaces.keyTitle}
       >
@@ -542,6 +552,7 @@ export default function StatePlacesPage() {
       </DocSection>
 
       <DocSection
+        id="schema"
         description={m.statePlaces.schemaDescription}
         title={m.statePlaces.schemaTitle}
       >
@@ -568,6 +579,7 @@ export default function StatePlacesPage() {
       </DocSection>
 
       <DocSection
+        id="version"
         description={m.statePlaces.versionDescription}
         title={m.statePlaces.versionTitle}
       >
@@ -598,6 +610,7 @@ export default function StatePlacesPage() {
       </DocSection>
 
       <DocSection
+        id="zod"
         description={m.statePlaces.zodDescription}
         title={m.statePlaces.zodTitle}
       >
@@ -609,6 +622,7 @@ export default function StatePlacesPage() {
       </DocSection>
 
       <DocSection
+        id="types"
         description={m.statePlaces.typesDescription}
         title={m.statePlaces.typesTitle}
       >

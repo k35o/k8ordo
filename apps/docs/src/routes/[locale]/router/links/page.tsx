@@ -284,6 +284,7 @@ export default function RouterLinksPage() {
       path="/:locale/router/links"
     >
       <DocSection
+        id="href"
         description={m.routerLinks.hrefDescription}
         title={m.routerLinks.hrefTitle}
       >
@@ -314,6 +315,7 @@ export default function RouterLinksPage() {
       </DocSection>
 
       <DocSection
+        id="no-link"
         description={m.routerLinks.noLinkDescription}
         title={m.routerLinks.noLinkTitle}
       >
@@ -323,6 +325,7 @@ export default function RouterLinksPage() {
       </DocSection>
 
       <DocSection
+        id="navigate"
         description={m.routerLinks.navigateDescription}
         title={m.routerLinks.navigateTitle}
       >
@@ -352,6 +355,7 @@ export default function RouterLinksPage() {
       </DocSection>
 
       <DocSection
+        id="register"
         description={m.routerLinks.registerDescription}
         title={m.routerLinks.registerTitle}
       >
@@ -393,6 +397,7 @@ export default function RouterLinksPage() {
       </DocSection>
 
       <DocSection
+        id="bind"
         description={m.routerLinks.bindDescription}
         title={m.routerLinks.bindTitle}
       >
@@ -421,6 +426,7 @@ export default function RouterLinksPage() {
       </DocSection>
 
       <DocSection
+        id="params"
         description={m.routerLinks.paramsDescription}
         title={m.routerLinks.paramsTitle}
       >
@@ -447,6 +453,7 @@ export default function RouterLinksPage() {
       </DocSection>
 
       <DocSection
+        id="pathname"
         description={m.routerLinks.pathnameDescription}
         title={m.routerLinks.pathnameTitle}
       >
@@ -465,6 +472,7 @@ export default function RouterLinksPage() {
       </DocSection>
 
       <DocSection
+        id="match"
         description={m.routerLinks.matchDescription}
         title={m.routerLinks.matchTitle}
       >
@@ -488,6 +496,7 @@ export default function RouterLinksPage() {
       </DocSection>
 
       <DocSection
+        id="normalize"
         description={m.routerLinks.normalizeDescription}
         title={m.routerLinks.normalizeTitle}
       >
@@ -504,6 +513,7 @@ export default function RouterLinksPage() {
       </DocSection>
 
       <DocSection
+        id="base"
         description={m.routerLinks.baseDescription}
         title={m.routerLinks.baseTitle}
       >
@@ -525,6 +535,7 @@ export default function RouterLinksPage() {
       </DocSection>
 
       <DocSection
+        id="state"
         description={m.routerLinks.stateDescription}
         title={m.routerLinks.stateTitle}
       >

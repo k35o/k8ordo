@@ -92,7 +92,11 @@ export default function I18nGetStartedPage() {
 
   return (
     <DocPage introduction={s.introduction} path="/:locale/i18n/get-started">
-      <DocSection description={s.scope.description} title={s.scope.title}>
+      <DocSection
+        id="scope"
+        description={s.scope.description}
+        title={s.scope.title}
+      >
         <ul className="text-fg-mute flex flex-col gap-2 pl-6">
           <li className="list-disc">
             <Rich>{s.scope.set()}</Rich>
@@ -129,7 +133,11 @@ export default function I18nGetStartedPage() {
         </p>
       </DocSection>
 
-      <DocSection description={s.install.description} title={s.install.title}>
+      <DocSection
+        id="install"
+        description={s.install.description}
+        title={s.install.title}
+      >
         <InstallTabs
           npm={<CodeBlock code="npm install @k8ordo/i18n" lang="bash" />}
           pnpm={<CodeBlock code="pnpm add @k8ordo/i18n" lang="bash" />}
@@ -145,6 +153,7 @@ export default function I18nGetStartedPage() {
       </DocSection>
 
       <DocSection
+        id="define-set"
         description={s.defineSet.description}
         title={s.defineSet.title}
       >
@@ -162,7 +171,11 @@ export default function I18nGetStartedPage() {
         </p>
       </DocSection>
 
-      <DocSection description={s.segment.description} title={s.segment.title}>
+      <DocSection
+        id="segment"
+        description={s.segment.description}
+        title={s.segment.title}
+      >
         <CodeBlock code={LOCALE_LAYOUT} lang="tsx" />
         <ul className="text-fg-mute flex flex-col gap-2 pl-6">
           <li className="list-disc">
@@ -183,6 +196,7 @@ export default function I18nGetStartedPage() {
       </DocSection>
 
       <DocSection
+        id="first-message"
         description={s.firstMessage.description}
         title={s.firstMessage.title}
       >
@@ -214,7 +228,7 @@ export default function I18nGetStartedPage() {
         </p>
       </DocSection>
 
-      <DocSection title={s.guarantees.title}>
+      <DocSection id="guarantees" title={s.guarantees.title}>
         <ul className="text-fg-mute flex flex-col gap-2 pl-6">
           <li className="list-disc">
             <Rich>{s.guarantees.schema()}</Rich>
@@ -231,7 +245,7 @@ export default function I18nGetStartedPage() {
         </ul>
       </DocSection>
 
-      <DocSection title={s.nextSteps.title}>
+      <DocSection id="next-steps" title={s.nextSteps.title}>
         <ul className="flex flex-col gap-3 pl-6">
           <li className="list-disc">
             <LocaleAnchor path="/:locale/i18n/locales">

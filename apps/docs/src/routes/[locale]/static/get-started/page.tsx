@@ -34,7 +34,7 @@ export default function StaticGetStartedPage() {
   const t = m.staticGetStarted;
   return (
     <DocPage introduction={t.introduction} path="/:locale/static/get-started">
-      <DocSection description={t.modeDescription} title={t.modeTitle}>
+      <DocSection id="mode" description={t.modeDescription} title={t.modeTitle}>
         <Paragraph text={t.modeActions} />
         <CodeBlock code={REFUSED} lang="bash" />
         <Paragraph text={t.modeDev} />
@@ -43,7 +43,11 @@ export default function StaticGetStartedPage() {
         <Paragraph text={t.modeSame} />
       </DocSection>
 
-      <DocSection description={t.installDescription} title={t.installTitle}>
+      <DocSection
+        id="install"
+        description={t.installDescription}
+        title={t.installTitle}
+      >
         <InstallTabs
           npm={
             <CodeBlock
@@ -75,7 +79,7 @@ yarn add -D @k8ordo/static vite`}
 
       <SetupRoutes />
 
-      <DocSection description={t.runDescription} title={t.runTitle}>
+      <DocSection id="run" description={t.runDescription} title={t.runTitle}>
         <CodeBlock code={RUN} lang="bash" />
         <Paragraph text={t.runDev} />
         <Paragraph text={t.runLog} />
@@ -84,7 +88,11 @@ yarn add -D @k8ordo/static vite`}
 
       <SetupGenerated mode="static" />
 
-      <DocSection description={t.chooseDescription} title={t.chooseTitle}>
+      <DocSection
+        id="choose"
+        description={t.chooseDescription}
+        title={t.chooseTitle}
+      >
         <Bullets>
           <Bullet>
             <Rich>{t.chooseActions()}</Rich>
@@ -104,7 +112,7 @@ yarn add -D @k8ordo/static vite`}
         </p>
       </DocSection>
 
-      <DocSection title={t.nextTitle}>
+      <DocSection id="next" title={t.nextTitle}>
         <Bullets>
           <Bullet>
             <LocaleAnchor path="/:locale/static/routing">

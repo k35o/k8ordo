@@ -5,70 +5,83 @@ export const description = message({
   en: 'Owns the colour-scheme axis of an application. The visitor’s preference (light, dark, or nothing, which follows the default: the system unless told otherwise) lives in localStorage, is resolved against the system, and becomes the `dark` class on `<html>`. One provider in the root layout renders the inline script that puts it there before the first paint and keeps it there after hydration; a hook reads it.',
 });
 
-export const featuresTitle = message({
-  ja: '特徴',
-  en: 'Features',
+export const tagline = message({
+  ja: 'ダークモードを、最初の描画からちらつかせずに切り替える。',
+  en: 'Dark mode that is right from the first paint, with no flash.',
 });
 
-export const featureNoFlash = message({
-  ja: '最初の描画から正しい',
-  en: 'Right from the first paint',
+export const claimNoFlashTitle = message({
+  ja: '暗いページは、最初の描画から暗い',
+  en: 'A dark page is dark from the first paint',
 });
 
-export const featureNoFlashDescription = message({
-  ja: '`<ColorSchemeProvider>` が先頭にインラインスクリプトを描く。Provider が書く行と同じ行を読み、React が読み込まれる前に `dark` を付けるので、ダークのページが一瞬ライトで光らない。`<head>` に置くものは無い。',
-  en: '`<ColorSchemeProvider>` renders an inline script as its first child. It reads the row the provider writes and puts `dark` on before React loads, so a dark page never flashes light. Nothing goes in `<head>`.',
+export const claimNoFlashBody = [
+  message({
+    ja: 'プロバイダは、ほかの何よりも先にインラインのスクリプトを描きます。スクリプトは保存された設定を読み、最初の描画の前に `<html>` へ `dark` クラスを付けます。',
+    en: 'The provider renders an inline script ahead of everything else. It reads the saved preference and puts the `dark` class on `<html>` before the first paint.',
+  }),
+  message({
+    ja: '何も選んでいない人は、OS の設定に追従します。`@k8ordo/ui` の色は、このクラスで切り替わります。',
+    en: 'A visitor who never chose follows the system setting. `@k8ordo/ui`’s colours switch on that class.',
+  }),
+] as const;
+
+export const claimCspTitle = message({
+  ja: 'CSP の下でも、許すのはこのスクリプトだけ',
+  en: 'Under a CSP, allow this one script and nothing more',
 });
 
-export const featureSystem = message({
-  ja: '未設定は既定でシステムに追従',
-  en: 'Absence follows the system by default',
+export const claimCspBody = [
+  message({
+    ja: 'インラインのスクリプトは、nonce かハッシュで許します。`@k8ordo/server` なら応答の `nonce()` を渡し、ファイルに nonce を書けない `@k8ordo/static` なら `colorSchemeScriptHash()` をポリシーに入れます。',
+    en: 'The inline script is allowed by nonce or by hash. Under `@k8ordo/server`, pass the response’s `nonce()`; under `@k8ordo/static`, whose files cannot carry a nonce, put `colorSchemeScriptHash()` in the policy.',
+  }),
+  message({
+    ja: '`unsafe-inline` は要りません。ハッシュは入っている版のスクリプトから毎回計算するので、更新しても古い値が残りません。',
+    en: 'No `unsafe-inline` needed. The hash is computed from the installed script every time, so an update never leaves a stale value behind.',
+  }),
+] as const;
+
+export const claimStorageTitle = message({
+  ja: '設定は localStorage の 1 行',
+  en: 'The preference is one row in localStorage',
 });
 
-export const featureSystemDescription = message({
-  ja: '保存されるのは訪問者が選んだときだけ。選んでいなければ Provider の `defaultPreference` に従う。既定の `system` は `prefers-color-scheme` の変化にその場で追従し、初回に見たシステムの値に固定されない。',
-  en: 'A preference is stored only when the visitor chose one. Otherwise the provider’s `defaultPreference` applies; `system`, the default unless told otherwise, follows `prefers-color-scheme` as it changes — never pinned to what the system said on the first visit.',
-});
-
-export const featureState = message({
-  ja: '保存先は @k8ordo/state',
-  en: 'Stored through @k8ordo/state',
-});
-
-export const featureStateDescription = message({
-  ja: "`defineLocalState('color-scheme')` の 1 行が保存先。localStorage のキーも行の JSON もここには書かれず、タブ間の同期も古い行のサルベージも state のもの。",
-  en: "One `defineLocalState('color-scheme')` is where it lives. Neither the localStorage key nor the row’s JSON is spelled here; cross-tab sync and salvage of an old row are state’s.",
-});
-
-export const featureHook = message({
-  ja: '決めるのは 1 か所、読むのはどこでも',
-  en: 'One place decides, any place reads',
-});
-
-export const featureHookDescription = message({
-  ja: 'クラスを書くのは Provider だけ。`useColorScheme()` は `{ scheme, preference, setPreference }` を読むだけの hook なので、切替ボタンとプレビューがずれようがない。',
-  en: 'Only the provider writes the class. `useColorScheme()` is a hook that reads `{ scheme, preference, setPreference }` and nothing more, so a switcher and a preview cannot disagree.',
-});
+export const claimStorageBody = [
+  message({
+    ja: '選んだ設定は `@k8ordo/state` の `defineLocalState` で保存します。何も選んでいない人の行は無く、既定値は保存しません。',
+    en: 'The choice is stored through `@k8ordo/state`’s `defineLocalState`. A visitor who never chose has no row, and the default is never stored.',
+  }),
+  message({
+    ja: 'あとから `defaultPreference` を変えれば、選んでいない人全員の表示が変わります。タブをまたいでも、設定は 1 つにそろいます。',
+    en: 'Change `defaultPreference` later, and everyone who never chose moves with it. Every tab agrees on one preference.',
+  }),
+] as const;
 
 export const demoTitle = message({
-  ja: 'このサイト自身が実演',
-  en: 'This site is the demo',
+  ja: 'このサイトの配色を切り替える',
+  en: 'Switch this site’s colour scheme',
 });
 
 export const demoDescription = message({
-  ja: 'ヘッダーの切替ボタンも、このページの選択肢も、同じ `useColorScheme()` です。「システム」に戻すと保存した設定が外れ、OS の設定に追従します。',
-  en: 'The switcher in the header and the choices below are the same `useColorScheme()`. Choosing “system” drops the stored preference and follows the OS again.',
+  ja: 'ヘッダーの切り替えと同じ `useColorScheme()` です。',
+  en: 'The same `useColorScheme()` as the switch in the header.',
 });
 
-export const demoScheme = message({
-  ja: '今の表示',
-  en: 'On screen',
-});
-
-export const demoPreference = message({
-  ja: '設定',
-  en: 'Preference',
-});
+export const demoSteps = [
+  message({
+    ja: '「ダーク」を押してから、ページを再読み込みします。白く光らずに、最初から暗いまま出ます。',
+    en: 'Press “Dark”, then reload the page. It comes back dark from the start, with no white flash.',
+  }),
+  message({
+    ja: '「システム」を押してから OS の外観の設定を切り替えると、ページもそれに合わせて変わります。',
+    en: 'Press “System”, then change the appearance setting of your OS. The page follows it.',
+  }),
+  message({
+    ja: 'このページを別のタブでも開いて選び直すと、こちらのタブも変わります。',
+    en: 'Open this page in another tab and choose again there. This tab changes too.',
+  }),
+] as const;
 
 export const demoSystem = message({
   ja: 'システム',
@@ -85,24 +98,29 @@ export const demoDark = message({
   en: 'Dark',
 });
 
-export const exampleTitle = message({
-  ja: '全体像',
-  en: 'The whole of it',
+export const nextGetStarted = message({
+  ja: 'プロバイダを置き、切り替えのボタンを 1 つ作るまでの手順です。',
+  en: 'Place the provider and build one switch.',
 });
 
-export const exampleDescription = message({
-  ja: "ルートレイアウトに Provider を 1 つ、切替に hook を 1 つ。それ以外に書くものはありません。`setPreference('system')` で保存した設定を外すと、Provider の `defaultPreference` がまた適用されます。既定の `'system'` なら OS の設定に追従します。",
-  en: "One provider in the root layout, one hook in the switcher. There is nothing else to write. `setPreference('system')` drops the stored preference, and the provider’s `defaultPreference` applies again; with the default, `'system'`, that means following the OS.",
+export const nextStyling = message({
+  ja: '`dark` クラスに色を当てる方法です。`@k8ordo/ui`・Tailwind CSS・素の CSS それぞれで説明します。',
+  en: 'Colouring under the `dark` class with `@k8ordo/ui`, Tailwind CSS, or plain CSS.',
 });
 
-export const docsTitle = message({
-  ja: '設計ガイド',
-  en: 'Design guide',
+export const nextStorage = message({
+  ja: '保存する行の中身と、フックを通さずに読む方法です。',
+  en: 'What the stored row holds, and reading it without the hook.',
 });
 
-export const docsDescription = message({
-  ja: '設計ガイドは npm パッケージに同梱されています。AIコーディングエージェントは `node_modules/@k8ordo/color-scheme/docs/` からインストールした版そのものを読みます。',
-  en: 'The guide ships inside the npm package. An AI coding assistant reads the exact installed version out of `node_modules/@k8ordo/color-scheme/docs/`.',
+export const nextCsp = message({
+  ja: 'nonce とハッシュで、インラインのスクリプトを許す方法です。',
+  en: 'Allowing the inline script by nonce or by hash.',
+});
+
+export const nextHowItWorks = message({
+  ja: '配色を決める規則と、ハイドレーションの前後で何が起きるかです。',
+  en: 'The rule that decides the scheme, and what happens around hydration.',
 });
 
 export const navStyling = message({

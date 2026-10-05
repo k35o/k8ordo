@@ -160,7 +160,7 @@ it('renders in the locale the URL spells', () => {
 export default function I18nIntegrationsPage() {
   return (
     <DocPage introduction={s.introduction} path="/:locale/i18n/integrations">
-      <DocSection description={s.ui.description} title={s.ui.title}>
+      <DocSection id="ui" description={s.ui.description} title={s.ui.title}>
         <CodeBlock code={UI_LOCALES} lang="ts" />
         <ul className="text-fg-mute flex flex-col gap-2 pl-6">
           <li className="list-disc">
@@ -183,7 +183,11 @@ export default function I18nIntegrationsPage() {
         </p>
       </DocSection>
 
-      <DocSection description={s.form.description} title={s.form.title}>
+      <DocSection
+        id="form"
+        description={s.form.description}
+        title={s.form.title}
+      >
         <ol className="text-fg-mute flex flex-col gap-2 pl-6">
           <li className="list-decimal">
             <Rich>{s.form.errorMap()}</Rich>
@@ -209,7 +213,11 @@ export default function I18nIntegrationsPage() {
         </p>
       </DocSection>
 
-      <DocSection description={s.router.description} title={s.router.title}>
+      <DocSection
+        id="router"
+        description={s.router.description}
+        title={s.router.title}
+      >
         <ul className="text-fg-mute flex flex-col gap-2 pl-6">
           <li className="list-disc">
             <Rich>{s.router.links()}</Rich>
@@ -229,6 +237,7 @@ export default function I18nIntegrationsPage() {
       </DocSection>
 
       <DocSection
+        id="static-mode"
         description={s.staticMode.description}
         title={s.staticMode.title}
       >
@@ -242,7 +251,11 @@ export default function I18nIntegrationsPage() {
         </ul>
       </DocSection>
 
-      <DocSection description={s.server.description} title={s.server.title}>
+      <DocSection
+        id="server"
+        description={s.server.description}
+        title={s.server.title}
+      >
         <ul className="text-fg-mute flex flex-col gap-2 pl-6">
           <li className="list-disc">
             <Rich>{s.server.negotiate()}</Rich>
@@ -266,7 +279,11 @@ export default function I18nIntegrationsPage() {
         </p>
       </DocSection>
 
-      <DocSection description={s.testing.description} title={s.testing.title}>
+      <DocSection
+        id="testing"
+        description={s.testing.description}
+        title={s.testing.title}
+      >
         <Heading level="h3">{s.testing.nodeTitle()}</Heading>
         <p className="text-fg-mute leading-relaxed">
           <Rich>{s.testing.nodeDescription()}</Rich>

@@ -1,4 +1,4 @@
-import { Card, Heading, Separator } from '@k8ordo/ui';
+import { Heading, Separator } from '@k8ordo/ui';
 import { CodeBlock } from '@k8ordo/ui/code-block';
 
 import { PageTitle } from '../../../../components/page-title';
@@ -34,7 +34,7 @@ const Z_INDEX_USAGE = {
 
 export default function Theming() {
   return (
-    <div className="mx-auto flex max-w-4xl flex-col gap-8 px-6 py-12 md:px-8">
+    <div className="flex flex-col gap-8 py-12">
       <PageTitle title={m.nav.theming} />
       <div className="flex flex-col gap-4">
         <Heading level="h1">
@@ -184,7 +184,7 @@ export default function Theming() {
           <Heading level="h3">
             <Rich>{m.theming.textSizesTitle()}</Rich>
           </Heading>
-          <Card>
+          <div className="border-border-mute bg-bg-surface rounded-xl border">
             <div className="flex flex-col gap-3 p-4">
               {TEXT_SIZES.map((size) => {
                 const ratio = lineHeightToNumber(size.lineHeight);
@@ -208,14 +208,14 @@ export default function Theming() {
                 );
               })}
             </div>
-          </Card>
+          </div>
         </div>
 
         <div className="flex flex-col gap-3">
           <Heading level="h3">
             <Rich>{m.theming.fontWeightsTitle()}</Rich>
           </Heading>
-          <Card>
+          <div className="border-border-mute bg-bg-surface rounded-xl border">
             <div className="flex flex-col gap-3 p-4">
               {FONT_WEIGHTS.map((weight) => (
                 <div className="flex items-baseline gap-4" key={weight.name}>
@@ -234,14 +234,14 @@ export default function Theming() {
                 </div>
               ))}
             </div>
-          </Card>
+          </div>
         </div>
 
         <div className="flex flex-col gap-3">
           <Heading level="h3">
             <Rich>{m.theming.letterSpacingTitle()}</Rich>
           </Heading>
-          <Card>
+          <div className="border-border-mute bg-bg-surface rounded-xl border">
             <div className="flex flex-col gap-3 p-4">
               {LETTER_SPACINGS.map((ls) => (
                 <div className="flex items-baseline gap-4" key={ls.name}>
@@ -257,14 +257,14 @@ export default function Theming() {
                 </div>
               ))}
             </div>
-          </Card>
+          </div>
         </div>
 
         <div className="flex flex-col gap-3">
           <Heading level="h3">
             <Rich>{m.theming.lineHeightTitle()}</Rich>
           </Heading>
-          <Card>
+          <div className="border-border-mute bg-bg-surface rounded-xl border">
             <div className="flex flex-col gap-3 p-4">
               {LINE_HEIGHTS.map((lh) => (
                 <div className="flex items-center gap-4" key={lh.name}>
@@ -284,7 +284,7 @@ export default function Theming() {
                 </div>
               ))}
             </div>
-          </Card>
+          </div>
         </div>
       </section>
       <Separator color="mute" />
@@ -344,7 +344,7 @@ export default function Theming() {
         <p className="text-fg-mute">
           <Rich>{m.theming.spacingDescription()}</Rich>
         </p>
-        <Card>
+        <div className="border-border-mute bg-bg-surface rounded-xl border">
           <div className="flex flex-col gap-2 p-4">
             {SPACING_SCALE.map((space) => (
               <div className="flex items-center gap-3" key={space.step}>
@@ -361,7 +361,7 @@ export default function Theming() {
               </div>
             ))}
           </div>
-        </Card>
+        </div>
       </section>
       <Separator color="mute" />
 
@@ -372,7 +372,7 @@ export default function Theming() {
         <p className="text-fg-mute">
           <Rich>{m.theming.breakpointsDescription()}</Rich>
         </p>
-        <Card>
+        <div className="border-border-mute bg-bg-surface rounded-xl border">
           <div className="flex flex-col gap-2 p-4">
             {BREAKPOINTS.map((bp) => (
               <div className="flex items-center gap-4" key={bp.name}>
@@ -385,7 +385,7 @@ export default function Theming() {
               </div>
             ))}
           </div>
-        </Card>
+        </div>
       </section>
       <Separator color="mute" />
 
@@ -396,7 +396,7 @@ export default function Theming() {
         <p className="text-fg-mute">
           <Rich>{m.theming.zIndexDescription()}</Rich>
         </p>
-        <Card>
+        <div className="border-border-mute bg-bg-surface rounded-xl border">
           <div className="flex flex-col gap-2 p-4">
             {Z_INDICES.map((z) => (
               <div className="flex items-center gap-4" key={z.name}>
@@ -412,7 +412,7 @@ export default function Theming() {
               </div>
             ))}
           </div>
-        </Card>
+        </div>
       </section>
       <Separator color="mute" />
 

@@ -377,6 +377,7 @@ export default function StateReadingPage() {
       path="/:locale/state/reading"
     >
       <DocSection
+        id="parse"
         description={m.stateReading.parseDescription}
         title={m.stateReading.parseTitle}
       >
@@ -405,6 +406,7 @@ export default function StateReadingPage() {
       </DocSection>
 
       <DocSection
+        id="salvage"
         description={m.stateReading.salvageDescription}
         title={m.stateReading.salvageTitle}
       >
@@ -432,6 +434,7 @@ export default function StateReadingPage() {
       </DocSection>
 
       <DocSection
+        id="framework"
         description={m.stateReading.frameworkDescription}
         title={m.stateReading.frameworkTitle}
       >
@@ -448,6 +451,7 @@ export default function StateReadingPage() {
       </DocSection>
 
       <DocSection
+        id="initial"
         description={m.stateReading.initialDescription}
         title={m.stateReading.initialTitle}
       >
@@ -467,6 +471,7 @@ export default function StateReadingPage() {
       </DocSection>
 
       <DocSection
+        id="cookie"
         description={m.stateReading.cookieDescription}
         title={m.stateReading.cookieTitle}
       >
@@ -495,6 +500,7 @@ export default function StateReadingPage() {
       </DocSection>
 
       <DocSection
+        id="href"
         description={m.stateReading.hrefDescription}
         title={m.stateReading.hrefTitle}
       >
@@ -548,6 +554,7 @@ export default function StateReadingPage() {
       </DocSection>
 
       <DocSection
+        id="typed"
         description={m.stateReading.typedDescription}
         title={m.stateReading.typedTitle}
       >
@@ -576,6 +583,7 @@ export default function StateReadingPage() {
       </DocSection>
 
       <DocSection
+        id="before"
         description={m.stateReading.beforeDescription}
         title={m.stateReading.beforeTitle}
       >

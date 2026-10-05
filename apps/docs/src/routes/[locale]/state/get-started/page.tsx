@@ -185,6 +185,7 @@ export default function StateGetStartedPage() {
       path="/:locale/state/get-started"
     >
       <DocSection
+        id="idea"
         description={m.stateGetStarted.ideaDescription}
         title={m.stateGetStarted.ideaTitle}
       >
@@ -219,6 +220,7 @@ export default function StateGetStartedPage() {
       </DocSection>
 
       <DocSection
+        id="install"
         description={m.stateGetStarted.installDescription}
         title={m.stateGetStarted.installTitle}
       >
@@ -246,6 +248,7 @@ export default function StateGetStartedPage() {
       </DocSection>
 
       <DocSection
+        id="define"
         description={m.stateGetStarted.defineDescription}
         title={m.stateGetStarted.defineTitle}
       >
@@ -264,6 +267,7 @@ export default function StateGetStartedPage() {
       </DocSection>
 
       <DocSection
+        id="component"
         description={m.stateGetStarted.componentDescription}
         title={m.stateGetStarted.componentTitle}
       >
@@ -274,6 +278,7 @@ export default function StateGetStartedPage() {
       </DocSection>
 
       <DocSection
+        id="page"
         description={m.stateGetStarted.pageDescription}
         title={m.stateGetStarted.pageTitle}
       >
@@ -284,6 +289,7 @@ export default function StateGetStartedPage() {
       </DocSection>
 
       <DocSection
+        id="server"
         description={m.stateGetStarted.serverDescription}
         title={m.stateGetStarted.serverTitle}
       >
@@ -305,6 +311,7 @@ export default function StateGetStartedPage() {
       </DocSection>
 
       <DocSection
+        id="router"
         description={m.stateGetStarted.routerDescription}
         title={m.stateGetStarted.routerTitle}
       >
@@ -325,7 +332,7 @@ export default function StateGetStartedPage() {
         </ul>
       </DocSection>
 
-      <DocSection title={m.stateGetStarted.nextTitle}>
+      <DocSection id="next" title={m.stateGetStarted.nextTitle}>
         <ul className="flex flex-col gap-3 pl-6">
           <li className="list-disc">
             <LocaleAnchor path="/:locale/state/places">

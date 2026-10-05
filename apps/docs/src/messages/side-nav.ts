@@ -4,3 +4,8 @@ export const openNavigation = message({
   ja: 'ナビゲーションを開く',
   en: 'Open navigation',
 });
+
+export const overview = message({
+  ja: '一覧',
+  en: 'Overview',
+});

@@ -7,7 +7,7 @@ import * as m from '../../../../../messages';
 // 渡すので、描画の中で formFields が呼んだときのロケールで引かれる。
 const password = z
   .string()
-  .check(z.minLength(8, { error: m.formValidation.demoPasswordTooShort }));
+  .check(z.minLength(8, { error: m.formErrors.demoPasswordTooShort }));
 z.globalRegistry.add(password, { input: 'password' });
 const confirm = z.string();
 z.globalRegistry.add(confirm, { input: 'password' });
@@ -17,12 +17,12 @@ export const signupDefinition = defineForm(
     handle: z
       .string()
       .check(
-        z.minLength(3, { error: m.formValidation.demoHandleTooShort }),
-        z.maxLength(20, { error: m.formValidation.demoHandleTooLong }),
-        z.regex(/^[a-z0-9_]+$/u, { error: m.formValidation.demoHandlePattern }),
+        z.minLength(3, { error: m.formErrors.demoHandleTooShort }),
+        z.maxLength(20, { error: m.formErrors.demoHandleTooLong }),
+        z.regex(/^[a-z0-9_]+$/u, { error: m.formErrors.demoHandlePattern }),
       ),
     password,
     confirm,
   }),
-  [sameAs('confirm', 'password', m.formValidation.demoMismatch)],
+  [sameAs('confirm', 'password', m.formErrors.demoMismatch)],
 );

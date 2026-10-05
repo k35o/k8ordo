@@ -1395,8 +1395,8 @@ export const tableOfContents = {
     en: 'The contents of the page, marking the heading being read.',
   }),
   basicDescription: message({
-    ja: '見出しを `{ id, label, children? }` の木で渡す。右の目次はこのページの見出しを指していて、スクロールすると今の見出しが動く。',
-    en: 'Pass the headings as a tree of `{ id, label, children? }`. The contents here point at this page’s own headings; scroll, and the current one moves.',
+    ja: '見出しを `{ id, label, children? }` の木で渡す。下の目次はこのページ自身の見出しを指していて、スクロールすると今の見出しが動く。',
+    en: 'Pass the headings as a tree of `{ id, label, children? }`. The contents below point at this page’s own headings; scroll, and the current one moves.',
   }),
   activeTitle: message({
     ja: '今の見出しの決め方',

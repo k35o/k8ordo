@@ -99,11 +99,19 @@ export function ParamsGuide({ mode }: { mode: Mode }) {
 
   return (
     <>
-      <DocSection description={t.stringsDescription} title={t.stringsTitle}>
+      <DocSection
+        id="strings"
+        description={t.stringsDescription}
+        title={t.stringsTitle}
+      >
         <CodeBlock code={STRINGS} lang="tsx" />
       </DocSection>
 
-      <DocSection description={t.schemaDescription} title={t.schemaTitle}>
+      <DocSection
+        id="schema"
+        description={t.schemaDescription}
+        title={t.schemaTitle}
+      >
         <CodeBlock code={SCHEMA} lang="tsx" />
         <Paragraph text={t.schemaLibraries}>
           <Anchor href="https://standardschema.dev" openInNewTab>
@@ -113,23 +121,35 @@ export function ParamsGuide({ mode }: { mode: Mode }) {
         <Paragraph text={t.schemaParsing} />
       </DocSection>
 
-      <DocSection description={t.stackDescription} title={t.stackTitle}>
+      <DocSection
+        id="stack"
+        description={t.stackDescription}
+        title={t.stackTitle}
+      >
         <Paragraph text={t.stackExample} />
         <CodeBlock code={STACK_LOCALES} lang="ts" />
         <CodeBlock code={STACK_LAYOUT} lang="tsx" />
         <CodeBlock code={STACK_PAGE} lang="tsx" />
       </DocSection>
 
-      <DocSection description={t.refusedDescription} title={t.refusedTitle}>
+      <DocSection
+        id="refused"
+        description={t.refusedDescription}
+        title={t.refusedTitle}
+      >
         <Paragraph text={own.refusedNote} />
         <Paragraph text={t.refusedCatchAll} />
       </DocSection>
 
-      <DocSection description={t.syncDescription} title={t.syncTitle}>
+      <DocSection id="sync" description={t.syncDescription} title={t.syncTitle}>
         <CodeBlock code={SYNC_ERROR} lang="bash" />
       </DocSection>
 
-      <DocSection description={t.clientDescription} title={t.clientTitle}>
+      <DocSection
+        id="client"
+        description={t.clientDescription}
+        title={t.clientTitle}
+      >
         <CodeBlock code={SITE_LAYOUT} lang="tsx" />
         <Paragraph text={t.clientMore}>
           {mode === 'static' ? (
@@ -144,12 +164,20 @@ export function ParamsGuide({ mode }: { mode: Mode }) {
         </Paragraph>
       </DocSection>
 
-      <DocSection description={t.typesDescription} title={t.typesTitle}>
+      <DocSection
+        id="types"
+        description={t.typesDescription}
+        title={t.typesTitle}
+      >
         <CodeBlock code={LINKS} lang="tsx" />
         <Paragraph text={t.typesCheck} />
       </DocSection>
 
-      <DocSection description={t.layoutDescription} title={t.layoutTitle}>
+      <DocSection
+        id="layout"
+        description={t.layoutDescription}
+        title={t.layoutTitle}
+      >
         <CodeBlock code={LAYOUT_STRINGS} lang="tsx" />
         <Paragraph text={t.layoutPropsPage} />
       </DocSection>

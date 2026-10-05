@@ -1,89 +1,123 @@
-import {
-  AtomIcon,
-  DarkModeIcon,
-  Heading,
-  LightModeIcon,
-  ShieldCheckIcon,
-} from '@k8ordo/ui';
+import { CodeBlock } from '@k8ordo/ui/code-block';
 
-import { PackageExample } from '../../../components/package-example';
-import { PackageLanding } from '../../../components/package-landing';
-import type { PackageFeature } from '../../../components/package-landing';
-import { Rich } from '../../../components/rich';
+import {
+  LandingClaim,
+  LandingHero,
+  NextSteps,
+} from '../../../components/landing';
+import { Playground } from '../../../components/playground';
 import * as m from '../../../messages';
 import { SchemeDemo } from './_parts/scheme-demo';
 
-const FEATURES: PackageFeature[] = [
-  {
-    title: m.colorScheme.featureNoFlash,
-    description: m.colorScheme.featureNoFlashDescription,
-    icon: <DarkModeIcon />,
-  },
-  {
-    title: m.colorScheme.featureSystem,
-    description: m.colorScheme.featureSystemDescription,
-    icon: <LightModeIcon />,
-  },
-  {
-    title: m.colorScheme.featureState,
-    description: m.colorScheme.featureStateDescription,
-    icon: <ShieldCheckIcon />,
-  },
-  {
-    title: m.colorScheme.featureHook,
-    description: m.colorScheme.featureHookDescription,
-    icon: <AtomIcon />,
-  },
-];
-
-const EXAMPLE = `// routes/layout.tsx — Provider を body の中で全部に被せる。
-// 先頭に描くインラインスクリプトが、最初の描画の前に dark を付けるかを決める
-import { ColorSchemeProvider } from '@k8ordo/color-scheme';
-
-<html suppressHydrationWarning>
+const HERO_LAYOUT = `<html lang="ja" suppressHydrationWarning>
   <body>
     <ColorSchemeProvider>{children}</ColorSchemeProvider>
   </body>
-</html>
+</html>`;
 
-// components/scheme-switcher.tsx
-'use client';
-import { useColorScheme } from '@k8ordo/color-scheme';
+const HERO_TOGGLE = `const { scheme, setPreference } = useColorScheme();
 
-const { scheme, preference, setPreference } = useColorScheme();
-setPreference(scheme === 'dark' ? 'light' : 'dark'); // 切り替える
-setPreference('system'); // 保存した設定を外す
+setPreference(scheme === 'dark' ? 'light' : 'dark');`;
 
-// 訪問者が選ぶまでダークで始めたいなら、1 回だけ言う
-<ColorSchemeProvider defaultPreference="dark">`;
+const CLAIM_CSP_SERVER = `<ColorSchemeProvider nonce={nonce()}>
+  {children}
+</ColorSchemeProvider>`;
+
+const CLAIM_CSP_STATIC = `framework({
+  csp: {
+    'script-src': ["'self'", await colorSchemeScriptHash()],
+  },
+});`;
+
+const CLAIM_STORAGE = `colorSchemeState.storageKey;
+// 'k8ordo-state:color-scheme'
+
+localStorage.getItem(colorSchemeState.storageKey);
+// '{"preference":"dark"}'
+
+const [{ preference }] = useAppState(colorSchemeState);`;
 
 export default function ColorSchemePage() {
   return (
-    <PackageLanding
-      description={m.colorScheme.description}
-      directory="color-scheme"
-      docsDescription={m.colorScheme.docsDescription}
-      docsTitle={m.colorScheme.docsTitle}
-      features={FEATURES}
-      featuresTitle={m.colorScheme.featuresTitle}
-      name="@k8ordo/color-scheme"
-    >
-      <section className="mx-auto w-full max-w-6xl px-6 pb-24 md:px-8">
-        <Heading level="h2">
-          <Rich>{m.colorScheme.demoTitle()}</Rich>
-        </Heading>
-        <p className="text-fg-mute mt-4 max-w-2xl text-sm leading-relaxed">
-          <Rich>{m.colorScheme.demoDescription()}</Rich>
-        </p>
-        <div className="mt-6 max-w-2xl">
-          <SchemeDemo />
-        </div>
-      </section>
-      <PackageExample
-        code={EXAMPLE}
-        description={m.colorScheme.exampleDescription}
-        title={m.colorScheme.exampleTitle}
+    <div className="flex flex-1 flex-col">
+      <LandingHero
+        code={
+          <>
+            <CodeBlock
+              code={HERO_LAYOUT}
+              lang="tsx"
+              title="routes/layout.tsx"
+            />
+            <CodeBlock code={HERO_TOGGLE} lang="tsx" title="theme-toggle.tsx" />
+          </>
+        }
+        directory="color-scheme"
+        install="@k8ordo/color-scheme @k8ordo/state zod"
+        name="@k8ordo/color-scheme"
+        tagline={m.colorScheme.tagline}
       />
-    </PackageLanding>
+      <LandingClaim
+        body={m.colorScheme.claimNoFlashBody}
+        title={m.colorScheme.claimNoFlashTitle}
+      >
+        <Playground
+          description={m.colorScheme.demoDescription}
+          id="demo"
+          steps={m.colorScheme.demoSteps}
+          title={m.colorScheme.demoTitle}
+        >
+          <SchemeDemo />
+        </Playground>
+      </LandingClaim>
+      <LandingClaim
+        body={m.colorScheme.claimCspBody}
+        title={m.colorScheme.claimCspTitle}
+      >
+        <div className="flex flex-col gap-3">
+          <CodeBlock
+            code={CLAIM_CSP_SERVER}
+            lang="tsx"
+            title="routes/layout.tsx"
+          />
+          <CodeBlock code={CLAIM_CSP_STATIC} lang="ts" title="vite.config.ts" />
+        </div>
+      </LandingClaim>
+      <LandingClaim
+        body={m.colorScheme.claimStorageBody}
+        title={m.colorScheme.claimStorageTitle}
+      >
+        <CodeBlock code={CLAIM_STORAGE} lang="tsx" title="preference.tsx" />
+      </LandingClaim>
+      <NextSteps
+        name="@k8ordo/color-scheme"
+        steps={[
+          {
+            path: '/:locale/color-scheme/get-started',
+            label: m.nav.getStarted,
+            description: m.colorScheme.nextGetStarted,
+          },
+          {
+            path: '/:locale/color-scheme/styling',
+            label: m.colorScheme.navStyling,
+            description: m.colorScheme.nextStyling,
+          },
+          {
+            path: '/:locale/color-scheme/storage',
+            label: m.colorScheme.navStorage,
+            description: m.colorScheme.nextStorage,
+          },
+          {
+            path: '/:locale/color-scheme/csp',
+            label: m.colorScheme.navCsp,
+            description: m.colorScheme.nextCsp,
+          },
+          {
+            path: '/:locale/color-scheme/how-it-works',
+            label: m.colorScheme.navHowItWorks,
+            description: m.colorScheme.nextHowItWorks,
+          },
+        ]}
+      />
+    </div>
   );
 }

@@ -133,13 +133,21 @@ export default function StaticParamsPage() {
     <DocPage introduction={t.introduction} path="/:locale/static/params">
       <ParamsGuide mode="static" />
 
-      <DocSection description={t.pathsDescription} title={t.pathsTitle}>
+      <DocSection
+        id="paths"
+        description={t.pathsDescription}
+        title={t.pathsTitle}
+      >
         <CodeBlock code={PATHS} lang="ts" />
         <Paragraph text={t.pathsTaken} />
         <Paragraph text={t.pathsRedirects} />
       </DocSection>
 
-      <DocSection description={t.expandDescription} title={t.expandTitle}>
+      <DocSection
+        id="expand"
+        description={t.expandDescription}
+        title={t.expandTitle}
+      >
         <CodeBlock code={EXPAND} lang="ts" />
         <Paragraph text={t.expandSite} />
         <CodeBlock code={SITE_CONFIG} lang="ts" />
@@ -147,7 +155,11 @@ export default function StaticParamsPage() {
         <CodeBlock code={PARTIAL} lang="ts" />
       </DocSection>
 
-      <DocSection description={t.stopsDescription} title={t.stopsTitle}>
+      <DocSection
+        id="stops"
+        description={t.stopsDescription}
+        title={t.stopsTitle}
+      >
         <GuideTable head={[t.stopsTable.when, t.stopsTable.error]}>
           {STOPS.map((stop) => (
             <Row key={stop.error}>

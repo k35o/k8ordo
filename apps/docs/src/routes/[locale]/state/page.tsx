@@ -1,176 +1,140 @@
-'use client';
+import { CodeBlock } from '@k8ordo/ui/code-block';
 
-import { colorSchemeState } from '@k8ordo/color-scheme';
-import { definePageState, useAppState } from '@k8ordo/state';
 import {
-  AtomIcon,
-  Button,
-  Code,
-  Heading,
-  HistoryIcon,
-  LinkIcon,
-  ListIcon,
-  LocationIcon,
-  MinusIcon,
-  PlusIcon,
-  ShieldCheckIcon,
-} from '@k8ordo/ui';
-import * as z from 'zod/mini';
-
-import { PackageLanding } from '../../../components/package-landing';
-import type { PackageFeature } from '../../../components/package-landing';
-import { Rich } from '../../../components/rich';
+  LandingClaim,
+  LandingHero,
+  NextSteps,
+} from '../../../components/landing';
+import { Playground } from '../../../components/playground';
 import * as m from '../../../messages';
+import { StateDemo } from './_parts/state-demo';
 
-const FEATURES: PackageFeature[] = [
-  {
-    title: m.state.featurePlaces,
-    description: m.state.featurePlacesDescription,
-    icon: <LocationIcon />,
-  },
-  {
-    title: m.state.featureSchema,
-    description: m.state.featureSchemaDescription,
-    icon: <AtomIcon />,
-  },
-  {
-    title: m.state.featureNavigation,
-    description: m.state.featureNavigationDescription,
-    icon: <HistoryIcon />,
-  },
-  {
-    title: m.state.featureKeys,
-    description: m.state.featureKeysDescription,
-    icon: <ListIcon />,
-  },
-  {
-    title: m.state.featureCanonical,
-    description: m.state.featureCanonicalDescription,
-    icon: <ShieldCheckIcon />,
-  },
-  {
-    title: m.state.featureServer,
-    description: m.state.featureServerDescription,
-    icon: <LinkIcon />,
-  },
-];
-
-// このページ自身が使い方の実演で、URL を書き換えるのは本物の
-// definePageState。サイトのルーター（@k8ordo/router）が Navigation API を
-// intercept しているので、update() はクライアント遷移として流れる。
-/* oxlint-disable no-underscore-dangle -- `_default` は zod/mini における
-   `.default()` の綴り */
-const demoState = definePageState('state-demo', {
+const HERO_DEFINE = `export const listState = definePageState('product-list', {
   url: z.object({
-    tab: z._default(z.enum(['overview', 'details', 'reviews']), 'overview'),
-    page: z._default(z.coerce.number().check(z.int(), z.gte(1)), 1),
+    q: z.string().default(''),
+    page: z.coerce.number().int().min(1).default(1),
+  }),
+});`;
+
+const HERO_USE = `const [{ q, page }, update] = useAppState(listState);
+
+update({ page: page + 1 }, { history: 'push' });`;
+
+const HERO_URL = `/products?q=lamp&page=2`;
+
+const CLAIM_PLACES = `export const listState = definePageState('product-list', {
+  url: z.object({
+    page: z.coerce.number().int().min(1).default(1),
+  }),
+  entry: z.object({
+    expanded: z.array(z.string()).default([]),
   }),
 });
-/* oxlint-enable no-underscore-dangle */
 
-const TABS = ['overview', 'details', 'reviews'] as const;
+export const prefs = defineLocalState(
+  'prefs',
+  z.object({
+    view: z.enum(['grid', 'table']).default('grid'),
+  }),
+);
 
-function Demo() {
-  const [{ tab, page }, update] = useAppState(demoState);
-  // ヘッダーの切替が書く行そのもの。定義は @k8ordo/color-scheme のもので、
-  // ここでは読むだけ
-  const [{ preference }] = useAppState(colorSchemeState);
+export const density = defineCookieState(
+  'density',
+  z.object({
+    density: z.enum(['cozy', 'compact']).default('cozy'),
+  }),
+);`;
 
-  const search = demoState.search({ tab, page });
+const CLAIM_SERVER_PAGE = `export const search = listState.url;
 
+export default async function ProductsPage({
+  search,
+}: PageProps<'/products'>) {
+  const products = await fetchProducts(search);
+  return <ProductList products={products} />;
+}`;
+
+const CLAIM_SERVER_HREF = `listState.href('/products', { q: 'lamp', page: 1 });
+// '/products?q=lamp'`;
+
+export default function StatePage() {
   return (
-    <div className="border-border-mute flex flex-col gap-6 rounded-lg border p-6">
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="w-16 text-sm">
-          <Code>tab</Code>
-        </span>
-        {TABS.map((value) => (
-          <Button
-            color={value === tab ? 'primary' : 'base'}
-            key={value}
-            onClick={() => {
-              update({ tab: value });
-            }}
-            size="sm"
-            variant={value === tab ? 'solid' : 'outline'}
-          >
-            {value}
-          </Button>
-        ))}
-      </div>
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="w-16 text-sm">
-          <Code>page</Code>
-        </span>
-        <Button
-          aria-label="-1"
-          color="base"
-          onClick={() => {
-            update({ page: page - 1 }, { history: 'push' });
-          }}
-          size="sm"
-          startIcon={<MinusIcon />}
-          variant="outline"
+    <div className="flex flex-1 flex-col">
+      <LandingHero
+        code={
+          <>
+            <CodeBlock code={HERO_DEFINE} lang="ts" title="state.ts" />
+            <CodeBlock code={HERO_USE} lang="tsx" title="filters.tsx" />
+            <CodeBlock code={HERO_URL} lang="text" title="URL" />
+          </>
+        }
+        directory="state"
+        install="@k8ordo/state zod"
+        name="@k8ordo/state"
+        tagline={m.state.tagline}
+      />
+      <LandingClaim
+        body={m.state.claimPlacesBody}
+        title={m.state.claimPlacesTitle}
+      >
+        <CodeBlock code={CLAIM_PLACES} lang="ts" title="state.ts" />
+      </LandingClaim>
+      <LandingClaim
+        body={m.state.claimHistoryBody}
+        title={m.state.claimHistoryTitle}
+      >
+        <Playground
+          description={m.state.demoDescription}
+          id="demo"
+          steps={m.state.demoSteps}
+          title={m.state.demoTitle}
         >
-          1
-        </Button>
-        <span className="text-fg-base min-w-8 text-center text-sm">{page}</span>
-        <Button
-          aria-label="+1"
-          color="base"
-          onClick={() => {
-            update({ page: page + 1 }, { history: 'push' });
-          }}
-          size="sm"
-          startIcon={<PlusIcon />}
-          variant="outline"
-        >
-          1
-        </Button>
-      </div>
-      <dl className="flex flex-col gap-1 text-sm">
-        <div className="flex gap-3">
-          <dt className="text-fg-mute">URL</dt>
-          <dd className="break-all">
-            <Code>{search === '' ? m.state.demoUrlEmpty() : `?${search}`}</Code>
-          </dd>
+          <StateDemo />
+        </Playground>
+      </LandingClaim>
+      <LandingClaim
+        body={m.state.claimServerBody}
+        title={m.state.claimServerTitle}
+      >
+        <div className="flex flex-col gap-3">
+          <CodeBlock
+            code={CLAIM_SERVER_PAGE}
+            lang="tsx"
+            title="routes/products/page.tsx"
+          />
+          <CodeBlock code={CLAIM_SERVER_HREF} lang="ts" title="links.ts" />
         </div>
-        <div className="flex gap-3">
-          <dt className="text-fg-mute">color-scheme</dt>
-          <dd>
-            <Code>{preference ?? m.state.demoThemeSystem()}</Code>
-          </dd>
-        </div>
-      </dl>
-      <p className="text-fg-mute text-sm leading-relaxed">
-        <Rich>{m.state.demoHint()}</Rich>
-      </p>
+      </LandingClaim>
+      <NextSteps
+        name="@k8ordo/state"
+        steps={[
+          {
+            path: '/:locale/state/get-started',
+            label: m.nav.getStarted,
+            description: m.state.nextGetStarted,
+          },
+          {
+            path: '/:locale/state/places',
+            label: m.state.navPlaces,
+            description: m.state.nextPlaces,
+          },
+          {
+            path: '/:locale/state/reading',
+            label: m.state.navReading,
+            description: m.state.nextReading,
+          },
+          {
+            path: '/:locale/state/updates',
+            label: m.state.navUpdates,
+            description: m.state.nextUpdates,
+          },
+          {
+            path: '/:locale/state/integrations',
+            label: m.state.navIntegrations,
+            description: m.state.nextIntegrations,
+          },
+        ]}
+      />
     </div>
-  );
-}
-
-export default function State() {
-  return (
-    <PackageLanding
-      description={m.state.description}
-      directory="state"
-      docsDescription={m.state.docsDescription}
-      docsTitle={m.state.docsTitle}
-      features={FEATURES}
-      featuresTitle={m.state.featuresTitle}
-      name="@k8ordo/state"
-    >
-      <section className="mx-auto w-full max-w-6xl px-6 pb-24 md:px-8">
-        <Heading level="h2">
-          <Rich>{m.state.demoTitle()}</Rich>
-        </Heading>
-        <p className="text-fg-mute mt-4 max-w-2xl text-sm leading-relaxed">
-          <Rich>{m.state.demoDescription()}</Rich>
-        </p>
-        <div className="mt-6 max-w-2xl">
-          <Demo />
-        </div>
-      </section>
-    </PackageLanding>
   );
 }

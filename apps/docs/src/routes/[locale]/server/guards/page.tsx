@@ -77,13 +77,17 @@ export default function ServerGuardsPage() {
   const t = m.serverGuards;
   return (
     <DocPage introduction={t.introduction} path="/:locale/server/guards">
-      <DocSection description={t.guardDescription} title={t.guardTitle}>
+      <DocSection
+        id="guard"
+        description={t.guardDescription}
+        title={t.guardTitle}
+      >
         <CodeBlock code={TREE} lang="bash" />
         <CodeBlock code={ADMIN} lang="ts" />
         <Paragraph text={t.guardReceives} />
       </DocSection>
 
-      <DocSection description={t.endDescription} title={t.endTitle}>
+      <DocSection id="end" description={t.endDescription} title={t.endTitle}>
         <Paragraph text={t.endLocation}>
           <LocaleAnchor path="/:locale/server/deploy">
             {m.server.navDeploy()}
@@ -91,14 +95,22 @@ export default function ServerGuardsPage() {
         </Paragraph>
       </DocSection>
 
-      <DocSection description={t.addDescription} title={t.addTitle}>
+      <DocSection id="add" description={t.addDescription} title={t.addTitle}>
         <CodeBlock code={ROOT} lang="ts" />
         <Paragraph text={t.addReplace} />
       </DocSection>
 
-      <DocSection description={t.nextDescription} title={t.nextTitle} />
+      <DocSection
+        id="next"
+        description={t.nextDescription}
+        title={t.nextTitle}
+      />
 
-      <DocSection description={t.coversDescription} title={t.coversTitle}>
+      <DocSection
+        id="covers"
+        description={t.coversDescription}
+        title={t.coversTitle}
+      >
         <Bullets>
           <Bullet>
             <Rich>{t.coversPage()}</Rich>
@@ -121,22 +133,34 @@ export default function ServerGuardsPage() {
         </Paragraph>
       </DocSection>
 
-      <DocSection description={t.orderDescription} title={t.orderTitle} />
+      <DocSection
+        id="order"
+        description={t.orderDescription}
+        title={t.orderTitle}
+      />
 
-      <DocSection description={t.cookiesDescription} title={t.cookiesTitle}>
+      <DocSection
+        id="cookies"
+        description={t.cookiesDescription}
+        title={t.cookiesTitle}
+      >
         <CodeBlock code={COOKIES} lang="ts" />
         <Paragraph text={t.cookiesOptions} />
         <Paragraph text={t.cookiesPage} />
       </DocSection>
 
-      <DocSection description={t.cspDescription} title={t.cspTitle}>
+      <DocSection id="csp" description={t.cspDescription} title={t.cspTitle}>
         <CodeBlock code={CSP} lang="ts" />
         <Paragraph text={t.cspSign} />
         <CodeBlock code={CSP_LAYOUT} lang="tsx" />
         <Paragraph text={t.cspCache} />
       </DocSection>
 
-      <DocSection description={t.staticDescription} title={t.staticTitle}>
+      <DocSection
+        id="static"
+        description={t.staticDescription}
+        title={t.staticTitle}
+      >
         <p>
           <LocaleAnchor path="/:locale/static/get-started">
             @k8ordo/static

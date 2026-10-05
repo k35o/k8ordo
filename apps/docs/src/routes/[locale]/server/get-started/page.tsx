@@ -30,11 +30,15 @@ export default function ServerGetStartedPage() {
   const t = m.serverGetStarted;
   return (
     <DocPage introduction={t.introduction} path="/:locale/server/get-started">
-      <DocSection description={t.modeDescription} title={t.modeTitle}>
+      <DocSection id="mode" description={t.modeDescription} title={t.modeTitle}>
         <Paragraph text={t.modeSame} />
       </DocSection>
 
-      <DocSection description={t.installDescription} title={t.installTitle}>
+      <DocSection
+        id="install"
+        description={t.installDescription}
+        title={t.installTitle}
+      >
         <InstallTabs
           npm={
             <CodeBlock
@@ -66,14 +70,18 @@ yarn add -D vite`}
 
       <SetupRoutes />
 
-      <DocSection description={t.runDescription} title={t.runTitle}>
+      <DocSection id="run" description={t.runDescription} title={t.runTitle}>
         <CodeBlock code={SERVE} lang="ts" />
         <CodeBlock code={RUN} lang="bash" />
       </DocSection>
 
       <SetupGenerated mode="server" />
 
-      <DocSection description={t.chooseDescription} title={t.chooseTitle}>
+      <DocSection
+        id="choose"
+        description={t.chooseDescription}
+        title={t.chooseTitle}
+      >
         <Bullets>
           <Bullet>
             <Rich>{t.chooseActions()}</Rich>
@@ -93,7 +101,7 @@ yarn add -D vite`}
         </p>
       </DocSection>
 
-      <DocSection title={t.nextTitle}>
+      <DocSection id="next" title={t.nextTitle}>
         <Bullets>
           <Bullet>
             <LocaleAnchor path="/:locale/server/routing">

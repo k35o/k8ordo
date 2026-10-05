@@ -9,6 +9,9 @@ import * as m from '../messages';
 import { CatalogCard } from './catalog-card';
 import { Rich } from './rich';
 
+// 記事の中に置く前提の部品。ページの地の上では溶けるので、白い台で見せる
+const ARTICLE_STAGE: ReadonlySet<string> = new Set(['CodeBlock']);
+
 type Props = {
   categories: readonly NavCategory[];
   previews?: Record<string, ReactNode>;
@@ -56,6 +59,7 @@ export function CatalogSections({ categories, previews }: Props) {
                   item={item}
                   key={item.name}
                   preview={previews?.[item.name]}
+                  stage={ARTICLE_STAGE.has(item.name) ? 'article' : 'page'}
                 />
               ))}
             </div>

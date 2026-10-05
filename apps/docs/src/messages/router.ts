@@ -5,89 +5,92 @@ export const description = message({
   en: "The URL's pathname axis, owned. The route table is the application's pathname schema, and from it come the types, the matching, the links and the navigation. Search params and history-entry state belong to @k8ordo/state — the division is the URL's own \"?\".",
 });
 
-export const featuresTitle = message({
-  ja: '特徴',
-  en: 'Features',
+export const tagline = message({
+  ja: 'ルート表 1 つから、リンクの型と画面遷移までを導く、Navigation API のルーター。',
+  en: 'A router on the Navigation API that derives typed links and navigation from one route table.',
 });
 
-export const featureTable = message({
-  ja: '表が pathname スキーマ',
-  en: 'The table is the schema',
+export const claimAnchorTitle = message({
+  ja: 'リンクは `<a>` のまま書く',
+  en: 'Links stay plain `<a>` elements',
 });
 
-export const featureTableDescription = message({
-  ja: 'leaf・branch・`:param`・ワイルドカード・URL に出ないグループを 1 つの表で書きます。照合は宣言順で先勝ち。特異度ランキングのような、あとから逆算しないと分からない規則を持ちません。',
-  en: 'Leaves, branches, `:param` segments, wildcards and groups that structure without appearing in the URL, all in one table. Matching is in declaration order, first match wins — no specificity ranking to reason backwards from.',
+export const claimAnchorBody = [
+  message({
+    ja: 'Navigation API が `<a>` のクリックを受け取り、ルート表にあるパスならブラウザの中で画面を切り替えます。`<Link>` 部品はありません。',
+    en: 'The Navigation API hands the router every `<a>` click, and a path in the route table changes the page in the browser. There is no `<Link>` component.',
+  }),
+  message({
+    ja: '再読み込み・POST の送信・ダウンロード・ページ内リンクと、表に無いパスはブラウザに任せます。今いる場所は `useMatch` に問い合わせます。',
+    en: 'Reloads, POST submissions, downloads, in-page links and paths outside the table are left to the browser. Where you are is a question for `useMatch`.',
+  }),
+] as const;
+
+export const claimTypesTitle = message({
+  ja: 'パスの書き間違いは型エラーになる',
+  en: 'A mistyped path does not compile',
 });
 
-export const featureTypes = message({
-  ja: 'パターンから型が生える',
-  en: 'Types come from the pattern',
+export const claimTypesBody = [
+  message({
+    ja: '`href` と `navigateTo` は、ルート表のパターンを文字列で受け取ります。`Register` に表を登録すると、表に無いパターンや足りない param が型エラーになります。',
+    en: '`href` and `navigateTo` take a pattern from the route table as a string. Register the table once, and a pattern it lacks or a missing param fails to compile.',
+  }),
+  message({
+    ja: 'ページはルート表を import しません。パターンの文字列だけで書くので、表とページが互いを読み込む循環が起きません。',
+    en: 'Pages never import the table. They work from the pattern string alone, so the table and its pages never import each other.',
+  }),
+] as const;
+
+export const claimTypesTypo = message({
+  ja: '表に無いパターンなので型エラー',
+  en: 'Not a pattern in the table: a type error',
 });
 
-export const featureTypesDescription = message({
-  ja: 'params はパターン文字列から推論され、`Register` を宣言すれば表に無いパターンもコンパイルで落ちます。コード生成はありません。',
-  en: 'Params are inferred from the pattern literal, and once `Register` is declared a pattern the table does not have fails to compile. No code generation.',
+export const claimTypesMissing = message({
+  ja: ':id が無いので型エラー',
+  en: 'Missing :id: a type error',
 });
 
-export const featureNavigation = message({
-  ja: 'finished は「画面に出た」',
-  en: 'finished means on screen',
+export const claimNavigationTitle = message({
+  ja: '新しいページが出るまで待てる',
+  en: 'Wait until the new page is on screen',
 });
 
-export const featureNavigationDescription = message({
-  ja: 'intercept のハンドラは React が新しい木を commit した後に解決します。search だけが変わったときはルート木に触れず、スクロールもフォーカスも動かしません。ページが変わったときは、先頭へ戻すのもルーターです。',
-  en: 'The intercept handler resolves after React commits the new tree. When only the search moved, the route tree is left alone and neither scroll nor focus is disturbed; when the page changed, the router is what puts it at the top.',
+export const claimNavigationBody = [
+  message({
+    ja: '`navigateTo` が返す `finished` は、新しいページが画面に出たときに解決します。`useTransition` の中で待てば、`isPending` が切り替えの間だけ立ちます。',
+    en: 'The `finished` promise from `navigateTo` resolves once the new page is on screen. Await it inside `useTransition`, and `isPending` covers exactly the switch.',
+  }),
+  message({
+    ja: 'ページの切り替えには `navigation` という種類が付きます。`<ViewTransition>` をそれに結びつければ、ページの切り替えだけをアニメーションできます。',
+    en: 'Every page change is tagged `navigation`. Key a `<ViewTransition>` on it, and only page changes animate.',
+  }),
+] as const;
+
+export const nextGetStarted = message({
+  ja: '表を書き、ブラウザでマウントし、リンクを表で確かめるまでを作ります。',
+  en: 'Write a table, mount it in the browser, and check links against it.',
 });
 
-export const featureNoLink = message({
-  ja: 'Link を作らない',
-  en: 'No Link component',
+export const nextRoutes = message({
+  ja: '表の文法、照合の順序、エラー境界と読み込み中の表示です。',
+  en: 'The table’s grammar, matching order, error boundaries and loading states.',
 });
 
-export const featureNoLinkDescription = message({
-  ja: 'Navigation API の下では素の `<a>` がすでにクライアント遷移です。包んでも 2 つ目の書き方が増えるだけなので、型は `href` が守ります。',
-  en: 'Under the Navigation API a plain `<a>` is already a client navigation. Wrapping it would add a second way to write the same thing; `href` is what makes it typed.',
+export const nextLinks = message({
+  ja: '`href`・`navigateTo`・`bindParams` と、現在地を読むフックです。',
+  en: '`href`, `navigateTo`, `bindParams`, and the hooks that read where you are.',
 });
 
-export const featureMatch = message({
-  ja: '今どこかは尋ねる',
-  en: 'Ask where you are',
+export const nextNavigation = message({
+  ja: 'どの移動を引き受けるか、何を保証するか、アニメーションとテストです。',
+  en: 'Which navigations it takes, what it guarantees, animation and testing.',
 });
 
-export const featureMatchDescription = message({
-  ja: "`useMatch('/products/*')` で「この区画の配下が開いているか」を聞けます。ブラウザに表が無くても動くので、フレームワークの下のサイドナビもこれで書きます。",
-  en: "`useMatch('/products/*')` answers whether a page under a section is showing. It needs no table in the browser, which is why a sidebar under the framework asks with it too.",
-});
-
-export const featureError = message({
-  ja: 'エラー境界も表に書く',
-  en: 'Error boundaries live in the table',
-});
-
-export const featureErrorDescription = message({
-  ja: '`{ layout, error, children }` と並べれば、配下が throw したとき枠を残したまま error が描かれます。新しいページを先頭（または #fragment）へ戻すスクロールもルーターの仕事です。',
-  en: 'Name an `error` beside a `layout` and, when what is below throws, it renders inside the layout with the frame intact. Scrolling a new page to the top — or to its #fragment — is the router’s job too.',
-});
-
-export const exampleTitle = message({
-  ja: '表とリンク',
-  en: 'The table, and a link',
-});
-
-export const exampleDescription = message({
-  ja: '表は 1 か所。ページは表を import せず、パターン文字列だけで型付きのリンクを書きます。',
-  en: 'The table lives in one place. Pages never import it — a typed link needs only the pattern string.',
-});
-
-export const docsTitle = message({
-  ja: 'ドキュメント',
-  en: 'Documentation',
-});
-
-export const docsDescription = message({
-  ja: '設計ガイドは npm パッケージに同梱されています。AIコーディングエージェントは `node_modules/@k8ordo/router/docs/` からインストールした版そのものを読みます。',
-  en: 'The guide ships inside the npm package. An AI coding assistant reads the exact installed version out of `node_modules/@k8ordo/router/docs/`.',
+export const nextFramework = message({
+  ja: '`@k8ordo/static`・`@k8ordo/server` の下で使う部分と、生成される型です。',
+  en: 'What you use under `@k8ordo/static` and `@k8ordo/server`, and the generated types.',
 });
 
 export const navRoutes = message({
