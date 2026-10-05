@@ -52,6 +52,7 @@ export const messageUsage: Readonly<Record<keyof Messages, readonly string[]>> =
     colorPickerSaturation: ['ColorPicker'],
     colorPickerLightness: ['ColorPicker'],
     colorPickerSwatches: ['ColorPicker'],
+    colorPickerOpen: ['ColorPicker'],
     passwordShow: ['PasswordInput'],
     passwordHide: ['PasswordInput'],
 

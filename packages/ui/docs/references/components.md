@@ -965,7 +965,13 @@ A color field whose value is `#rrggbb`. The value lives in a text input that
 carries `name`, so it submits and resets like any other field; hue, saturation,
 and lightness sliders and optional `swatches` (toggle buttons named by their
 `label`) write into it and announce the change with an `input` event, as if it
-had been typed. Typing reports a color only once it has six digits; on blur and
+had been typed. The color chip beside the text input is a native
+`<input type="color">`, named by the built-in `colorPickerOpen` wording: pressing
+it opens the browser's own color picker, which writes into the text input the
+same way, while it is dragged too. It carries no `name`, so only the text input
+submits; with no color yet it opens on the sliders' gray. The chip, sliders,
+and swatches are all disabled while the field is `disabled`, `readOnly`, or its
+form is pending. Typing reports a color only once it has six digits; on blur and
 on Enter the text is tidied to lowercase `#rrggbb`, and a three-digit `#f80` is
 expanded. Emptying the field reports `''`. Spread `@k8ordo/form`'s `input` onto
 it as is: a `.regex()` in the schema arrives as `pattern` and replaces the
@@ -2824,7 +2830,7 @@ the same mapping `messageUsage` exports. All values are `string`.
 - RangeSlider: `rangeSliderStart`, `rangeSliderEnd`
 - Calendar / DatePicker: `calendarPreviousMonth`, `calendarNextMonth`
 - DatePicker: `datePickerOpen`, `datePickerDialog`
-- ColorPicker: `colorPickerHue`, `colorPickerSaturation`, `colorPickerLightness`, `colorPickerSwatches`
+- ColorPicker: `colorPickerHue`, `colorPickerSaturation`, `colorPickerLightness`, `colorPickerSwatches`, `colorPickerOpen`
 - PasswordInput: `passwordShow`, `passwordHide`
 - ListBox: `listBoxPlaceholder`
 - Breadcrumb: `breadcrumb`

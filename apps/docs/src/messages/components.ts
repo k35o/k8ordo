@@ -531,8 +531,8 @@ export const colorPicker = {
     en: 'A field for picking a color as `#rrggbb`, with hue / saturation / lightness sliders and swatches.',
   }),
   usageDescription: message({
-    ja: '値を運ぶのは `name` を持つテキスト欄です。つまみや見本で選んだ色はその欄に書き込まれ、打ち込んだときと同じく `input` イベントで知らされます。打っている間は 6 桁そろって初めて色として扱い、離れるときと Enter で小文字の `#rrggbb` にそろえます（3 桁の `#f80` もそこで広げます）。',
-    en: 'The value travels in a text field that carries `name`. A color picked with the sliders or a swatch is written into it and announced with an `input` event, just as if it had been typed. While typing, the text counts as a color only once it has six digits; on blur and on Enter it is tidied to lowercase `#rrggbb` (a three-digit `#f80` is expanded there).',
+    ja: '値を運ぶのは `name` を持つテキスト欄です。つまみや見本で選んだ色はその欄に書き込まれ、打ち込んだときと同じく `input` イベントで知らされます。欄の横の色を押すとブラウザの色選びが開き、そこで選んだ色も同じように欄に入ります。打っている間は 6 桁そろって初めて色として扱い、離れるときと Enter で小文字の `#rrggbb` にそろえます（3 桁の `#f80` もそこで広げます）。',
+    en: 'The value travels in a text field that carries `name`. A color picked with the sliders or a swatch is written into it and announced with an `input` event, just as if it had been typed. Pressing the color chip beside the field opens the browser’s own color picker, and a color chosen there goes into the field the same way. While typing, the text counts as a color only once it has six digits; on blur and on Enter it is tidied to lowercase `#rrggbb` (a three-digit `#f80` is expanded there).',
   }),
   swatchesTitle: message({
     ja: '見本',

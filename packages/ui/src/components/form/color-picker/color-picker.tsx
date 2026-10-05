@@ -23,7 +23,11 @@ import { getMessages } from '../../../i18n/current';
 import { commitInputValue } from '../../../internal/commit-input-value';
 import { hexToHsl, hslToHex, parseHex } from '../../../internal/hex-color';
 import type { Hsl } from '../../../internal/hex-color';
-import { FOCUS_RING, FOCUS_RING_NO_BORDER } from '../../_internal/focus-ring';
+import {
+  FOCUS_RING,
+  FOCUS_RING_NO_BORDER,
+  FOCUS_RING_PEER,
+} from '../../_internal/focus-ring';
 import { HIGH_CONTRAST_EDGE } from '../../_internal/high-contrast';
 import { rangeInputClass } from '../slider/range-input-class';
 
@@ -250,14 +254,33 @@ export const ColorPicker: FC<Props> = ({
   return (
     <div className="writing-h flex flex-col gap-3 inline-full">
       <div className="flex items-center gap-3">
-        <span
-          aria-hidden
-          className={cn(
-            'size-10 shrink-0 rounded-lg border border-border-base forced-color-adjust-none forced-colors:border-[CanvasText]',
-            shown === null && 'border-dashed',
-          )}
-          style={shown === null ? undefined : { backgroundColor: shown }}
-        />
+        <span className="relative size-10 shrink-0">
+          {/* color の input は常に何かの色を持ち「まだ色が無い」を描けないので、
+              透明にして見本の上に重ね、見た目は下の span に任せる。ボタンから
+              showPicker() で開かないのは、iOS の Safari が color に対応しないため */}
+          <input
+            aria-label={messages.colorPickerOpen}
+            className="peer absolute inset-0 size-full cursor-pointer opacity-0 disabled:cursor-not-allowed"
+            disabled={locked}
+            onChange={(event) => {
+              const hex = parseHex(event.currentTarget.value);
+              if (hex !== null) {
+                apply(hexToHsl(hex, hsl.h), hex);
+              }
+            }}
+            type="color"
+            value={shown ?? hslToHex(hsl)}
+          />
+          <span
+            aria-hidden
+            className={cn(
+              'block rounded-lg border border-border-base forced-color-adjust-none size-full forced-colors:border-[CanvasText]',
+              shown === null && 'border-dashed',
+              FOCUS_RING_PEER,
+            )}
+            style={shown === null ? undefined : { backgroundColor: shown }}
+          />
+        </span>
         <input
           autoComplete="off"
           maxLength={7}
