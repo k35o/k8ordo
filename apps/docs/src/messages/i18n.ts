@@ -149,6 +149,6 @@ export const navTroubleshooting = message({
 });
 
 export const navIntegrations = message({
-  ja: '組み合わせ',
-  en: 'Integrations',
+  ja: 'ほかのパッケージと組み合わせる',
+  en: 'Use with other packages',
 });
