@@ -163,6 +163,11 @@ export const navBeforeHydration = message({
   en: 'Read before hydration',
 });
 
+export const navTesting = message({
+  ja: 'テストする',
+  en: 'Testing',
+});
+
 export const navIntegrations = message({
   ja: '組み合わせ',
   en: 'Integrations',

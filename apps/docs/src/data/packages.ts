@@ -145,6 +145,7 @@ export const PACKAGES: PackageEntry[] = [
             path: '/:locale/state/before-hydration',
             label: m.state.navBeforeHydration,
           },
+          { path: '/:locale/state/testing', label: m.state.navTesting },
           {
             path: '/:locale/state/integrations',
             label: m.state.navIntegrations,
