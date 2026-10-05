@@ -61,8 +61,15 @@ export const responseTitle = message({
 });
 
 export const responseDescription = message({
-  ja: '`Response`は、届いている途中のMarkdownを描きます。閉じていないコードブロックがあっても崩れません。ほかの部品とは別のサブパスにあり、optional peerの`streamdown`とそのスタイルシートが必要です。',
-  en: '`Response` renders Markdown while it is still arriving, and an unclosed code block does not break it. It lives in its own subpath and needs the `streamdown` optional peer and its stylesheet.',
+  ja: '`Response`は、届いている途中のMarkdownを描きます。閉じていないコードブロックがあっても崩れません。ほかの部品とは別のサブパスにあります。',
+  en: '`Response` renders Markdown while it is still arriving, and an unclosed code block does not break it. It lives in its own subpath.',
+});
+
+export const responseInstall = message({
+  ja: (version: string) =>
+    `この部品だけは\`streamdown\`で描くので、${version}以上を入れ、そのスタイルシートも読み込みます。`,
+  en: (version) =>
+    `This part alone renders with \`streamdown\`: install ${version} or later, and load its stylesheet too.`,
 });
 
 export const toolTitle = message({
@@ -111,8 +118,13 @@ export const aiSdkTitle = message({
 });
 
 export const aiSdkDescription = message({
-  ja: '`@k8ordo/ui/ai-sdk`の`mapMessageParts`は、AI SDKの`UIMessage.parts`を、自分で描きやすい平らな配列に変えます。テキストと思考、ツール、ファイルと出典、dataのパートが届いた順に並びます。ツールのパートには承認の情報も入っています。optional peerの`ai`が必要です。',
-  en: '`mapMessageParts` from `@k8ordo/ui/ai-sdk` turns an AI SDK `UIMessage.parts` array into a flat list you render yourself: text, reasoning, tools with their approval, files, sources and data parts, in the order they came. It needs the `ai` optional peer.',
+  ja: '`@k8ordo/ui/ai-sdk`の`mapMessageParts`は、AI SDKの`UIMessage.parts`を、自分で描きやすい平らな配列に変えます。テキストと思考、ツール、ファイルと出典、dataのパートが届いた順に並びます。ツールのパートには承認の情報も入っています。',
+  en: '`mapMessageParts` from `@k8ordo/ui/ai-sdk` turns an AI SDK `UIMessage.parts` array into a flat list you render yourself: text, reasoning, tools with their approval, files, sources and data parts, in the order they came.',
+});
+
+export const aiSdkVersion = message({
+  ja: (version: string) => `AI SDKの\`ai\`は、${version}以上に対応しています。`,
+  en: (version) => `It supports the AI SDK’s \`ai\` ${version} or later.`,
 });
 
 export const jsonRenderTitle = message({

@@ -2,6 +2,10 @@ import { Heading, Separator } from '@k8ordo/ui';
 import { CodeBlock } from '@k8ordo/ui/code-block';
 
 import { ComponentPreview } from '../../../../../components/component-preview';
+import {
+  InstallCommand,
+  peerVersionOf,
+} from '../../../../../components/install';
 import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
 import { Rich } from '../../../../../components/rich';
@@ -213,6 +217,14 @@ export function Chat() {
         <p className="text-fg-mute">
           <Rich>{m.aiChat.responseDescription()}</Rich>
         </p>
+        <p className="text-fg-mute">
+          <Rich>
+            {m.aiChat.responseInstall(
+              peerVersionOf('@k8ordo/ui', 'streamdown'),
+            )}
+          </Rich>
+        </p>
+        <InstallCommand packages="streamdown" />
         <CodeBlock
           code={`import { Response } from '@k8ordo/ui/ai/response';
 import 'streamdown/styles.css';
@@ -332,6 +344,11 @@ const { addToolApprovalResponse } = useChat({
         </Heading>
         <p className="text-fg-mute">
           <Rich>{m.aiChat.aiSdkDescription()}</Rich>
+        </p>
+        <p className="text-fg-mute">
+          <Rich>
+            {m.aiChat.aiSdkVersion(peerVersionOf('@k8ordo/ui', 'ai'))}
+          </Rich>
         </p>
         <CodeBlock
           code={`import { mapMessageParts } from '@k8ordo/ui/ai-sdk';

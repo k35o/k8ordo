@@ -15,31 +15,6 @@ export const installDescription = message({
   en: 'Install `@k8ordo/form`, and zod to write the schema with.',
 });
 
-export const peersDescription = message({
-  ja: 'このほかに、次のパッケージをpeer dependenciesとして使います。',
-  en: 'It also relies on these peer dependencies.',
-});
-
-export const peerReact = message({
-  ja: '`useForm`などのフック',
-  en: 'The hooks, such as `useForm`',
-});
-
-export const peerReactDom = message({
-  ja: 'フォームの描画',
-  en: 'Rendering the form',
-});
-
-export const peerZod = message({
-  ja: 'スキーマの記述。`zod`と`zod/mini`のどちらでも書けます',
-  en: 'The schema, written with either `zod` or `zod/mini`',
-});
-
-export const peerTypes = message({
-  ja: '同梱している型定義',
-  en: 'The type declarations it ships',
-});
-
 export const zodMini = message({
   ja: 'スキーマは`zod/mini`で書いても同じように動きます。スキーマを書いたモジュールをクライアントのコードからもimportするなら、バンドルが小さく済む`zod/mini`を選んでください。',
   en: 'A schema written with `zod/mini` works the same way. If client code imports the schema module too, choose `zod/mini` for the smaller bundle.',

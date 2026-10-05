@@ -15,16 +15,6 @@ export const installDescription = message({
   en: 'Install `@k8ordo/i18n`. Nothing else is loaded at run time: it imports neither React nor a schema library.',
 });
 
-export const peersDescription = message({
-  ja: 'peer dependenciesは、同梱している型定義を読むためのTypeScriptだけです。',
-  en: 'Its only peer dependency is TypeScript, for the type declarations it ships.',
-});
-
-export const peerTypes = message({
-  ja: '同梱している型定義',
-  en: 'The type declarations it ships',
-});
-
 export const runtimeNote = message({
   ja: 'サーバーでは、描画中のロケールを`AsyncLocalStorage`に置きます。`process.getBuiltinModule`でこれを取り出せるランタイムが必要です。`@k8ordo/static`と`@k8ordo/server`が求めるNode 24は、この条件を満たします。',
   en: 'On a server the locale of the render in progress lives in `AsyncLocalStorage`, so the runtime has to hand it out through `process.getBuiltinModule`. Node 24, which `@k8ordo/static` and `@k8ordo/server` require, does.',

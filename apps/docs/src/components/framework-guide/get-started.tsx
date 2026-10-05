@@ -5,9 +5,9 @@ import type { SitePath } from '../../links';
 import * as m from '../../messages';
 import { Note, Pitfall } from '../callout';
 import { DocSection } from '../doc-page';
+import { Requirements } from '../install';
 import { InstallTabs } from '../install-tabs';
 import { LocaleAnchor } from '../locale-anchor';
-import { PeerTable } from '../peer-table';
 import { Rich } from '../rich';
 import { packageOf } from './mode';
 import type { Mode } from './mode';
@@ -213,18 +213,7 @@ export const getStartedSections = (mode: Mode) => {
         <p>
           <Rich>{t.serverOnly()}</Rich>
         </p>
-        <p>
-          <Rich>{t.peersDescription()}</Rich>
-        </p>
-        <PeerTable
-          name={packageOf(mode)}
-          neededFor={{
-            '@k8ordo/router': t.peerRouter,
-            react: t.peerReact,
-            'react-dom': t.peerReactDom,
-            vite: t.peerVite,
-          }}
-        />
+        <Requirements name={packageOf(mode)} />
       </DocSection>
 
       <DocSection

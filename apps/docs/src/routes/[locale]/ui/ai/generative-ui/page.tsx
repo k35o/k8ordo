@@ -1,6 +1,10 @@
 import { Heading, Separator } from '@k8ordo/ui';
 import { CodeBlock } from '@k8ordo/ui/code-block';
 
+import {
+  InstallCommand,
+  peerSeriesOf,
+} from '../../../../../components/install';
 import { PageTitle } from '../../../../../components/page-title';
 import { Rich } from '../../../../../components/rich';
 import * as m from '../../../../../messages';
@@ -17,6 +21,32 @@ export default function GenerativeUi() {
           <Rich>{m.generativeUi.introduction()}</Rich>
         </p>
       </div>
+      <Separator color="mute" />
+
+      <section className="flex flex-col gap-4">
+        <Heading level="h2">
+          <Rich>{m.generativeUi.installTitle()}</Rich>
+        </Heading>
+        <p className="text-fg-mute">
+          <Rich>{m.generativeUi.installDescription()}</Rich>
+        </p>
+        <Heading level="h3">{m.generativeUi.installJsonRender()}</Heading>
+        <InstallCommand packages="@json-render/core @json-render/react zod" />
+        <Heading level="h3">{m.generativeUi.installOpenUi()}</Heading>
+        <InstallCommand packages="@openuidev/react-lang @openuidev/lang-core zod" />
+        <p className="text-fg-mute">
+          <Rich>
+            {m.generativeUi.installSeries(
+              peerSeriesOf('@k8ordo/ui', '@json-render/core'),
+              peerSeriesOf('@k8ordo/ui', '@openuidev/lang-core'),
+            )}
+          </Rich>
+        </p>
+        <p className="text-fg-mute">
+          <Rich>{m.generativeUi.installOneCopy()}</Rich>
+        </p>
+      </section>
+
       <Separator color="mute" />
 
       <section className="flex flex-col gap-4">

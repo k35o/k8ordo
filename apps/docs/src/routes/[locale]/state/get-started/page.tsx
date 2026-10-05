@@ -2,9 +2,8 @@ import { CodeBlock } from '@k8ordo/ui/code-block';
 
 import { Note } from '../../../../components/callout';
 import { DocPage, DocSection } from '../../../../components/doc-page';
-import { InstallTabs } from '../../../../components/install-tabs';
+import { PackageInstall } from '../../../../components/install';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
-import { PeerTable } from '../../../../components/peer-table';
 import { Playground } from '../../../../components/playground';
 import { Rich } from '../../../../components/rich';
 import * as m from '../../../../messages';
@@ -120,24 +119,7 @@ export default function StateGetStartedPage() {
         id="install"
         title={t.installTitle}
       >
-        <InstallTabs
-          npm={<CodeBlock code="npm install @k8ordo/state zod" lang="bash" />}
-          pnpm={<CodeBlock code="pnpm add @k8ordo/state zod" lang="bash" />}
-          yarn={<CodeBlock code="yarn add @k8ordo/state zod" lang="bash" />}
-        />
-        <p>
-          <Rich>{t.peersDescription()}</Rich>
-        </p>
-        <PeerTable
-          name="@k8ordo/state"
-          neededFor={{
-            react: t.peerReact,
-            zod: t.peerZod,
-            '@k8ordo/router': t.peerRouter,
-            typescript: t.peerTypes,
-            '@types/react': t.peerTypes,
-          }}
-        />
+        <PackageInstall name="@k8ordo/state" />
         <p>
           <Rich>{t.navigationApi()}</Rich>
         </p>

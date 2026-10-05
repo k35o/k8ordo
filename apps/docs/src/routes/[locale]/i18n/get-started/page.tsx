@@ -2,9 +2,8 @@ import { CodeBlock } from '@k8ordo/ui/code-block';
 
 import { Note, Pitfall } from '../../../../components/callout';
 import { DocPage, DocSection } from '../../../../components/doc-page';
-import { InstallTabs } from '../../../../components/install-tabs';
+import { PackageInstall } from '../../../../components/install';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
-import { PeerTable } from '../../../../components/peer-table';
 import { Rich } from '../../../../components/rich';
 import * as m from '../../../../messages';
 
@@ -114,18 +113,7 @@ export default function I18nGetStartedPage() {
         id="install"
         title={t.installTitle}
       >
-        <InstallTabs
-          npm={<CodeBlock code="npm install @k8ordo/i18n" lang="bash" />}
-          pnpm={<CodeBlock code="pnpm add @k8ordo/i18n" lang="bash" />}
-          yarn={<CodeBlock code="yarn add @k8ordo/i18n" lang="bash" />}
-        />
-        <p>
-          <Rich>{t.peersDescription()}</Rich>
-        </p>
-        <PeerTable
-          name="@k8ordo/i18n"
-          neededFor={{ typescript: t.peerTypes }}
-        />
+        <PackageInstall name="@k8ordo/i18n" />
         <Note>
           <p>
             <Rich>{t.runtimeNote()}</Rich>

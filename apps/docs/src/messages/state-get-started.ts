@@ -15,31 +15,6 @@ export const installDescription = message({
   en: 'Install `@k8ordo/state`, and zod to write the schemas with.',
 });
 
-export const peersDescription = message({
-  ja: 'このほかに、次のパッケージをpeer dependenciesとして使います。',
-  en: 'It also relies on these peer dependencies.',
-});
-
-export const peerReact = message({
-  ja: '`useAppState`',
-  en: '`useAppState`',
-});
-
-export const peerZod = message({
-  ja: 'スキーマの記述。`zod`と`zod/mini`のどちらでも書けます',
-  en: 'The schemas, written with either `zod` or `zod/mini`',
-});
-
-export const peerRouter = message({
-  ja: '`href`に渡すパスを、ルート表で型付けするとき。型だけを読むので、実行時には読み込みません',
-  en: 'Checking the paths `href` takes against the route table. Only its types are read, so it never loads at runtime',
-});
-
-export const peerTypes = message({
-  ja: '同梱している型定義',
-  en: 'The type declarations it ships',
-});
-
 export const navigationApi = message({
   ja: 'ブラウザでは、URLの書き換えにNavigation APIを使います。2026年1月にBaselineに入った機能なので、polyfillもフォールバックもありません。',
   en: 'In the browser it rewrites the URL through the Navigation API. That reached Baseline in January 2026, so there is no polyfill and no fallback.',

@@ -2,9 +2,8 @@ import { CodeBlock } from '@k8ordo/ui/code-block';
 
 import { Note } from '../../../../components/callout';
 import { DocPage, DocSection } from '../../../../components/doc-page';
-import { InstallTabs } from '../../../../components/install-tabs';
+import { PackageInstall } from '../../../../components/install';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
-import { PeerTable } from '../../../../components/peer-table';
 import { Rich } from '../../../../components/rich';
 import * as m from '../../../../messages';
 
@@ -139,22 +138,7 @@ export default function RouterGetStartedPage() {
         id="install"
         title={t.installTitle}
       >
-        <InstallTabs
-          npm={<CodeBlock code="npm install @k8ordo/router" lang="bash" />}
-          pnpm={<CodeBlock code="pnpm add @k8ordo/router" lang="bash" />}
-          yarn={<CodeBlock code="yarn add @k8ordo/router" lang="bash" />}
-        />
-        <p>
-          <Rich>{t.peersDescription()}</Rich>
-        </p>
-        <PeerTable
-          name="@k8ordo/router"
-          neededFor={{
-            react: t.peerReact,
-            typescript: t.peerTypes,
-            '@types/react': t.peerTypes,
-          }}
-        />
+        <PackageInstall name="@k8ordo/router" />
         <Note>
           <p>
             <Rich>{t.platform()}</Rich>

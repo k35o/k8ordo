@@ -13,31 +13,6 @@ export const serverOnly = message({
   en: '`server-only` is the mark a server-only module carries. The build resolves the specifier itself; installing it is what lets TypeScript resolve it too.',
 });
 
-export const peersDescription = message({
-  ja: 'このほかに、次のパッケージをpeer dependenciesとして使います。Node.jsは24以上が必要です。',
-  en: 'It also relies on these peer dependencies, and needs Node.js 24 or later.',
-});
-
-export const peerRouter = message({
-  ja: '生成されるルート表と、型の付いたリンク',
-  en: 'The generated route table, and typed links',
-});
-
-export const peerReact = message({
-  ja: 'ページの描画',
-  en: 'Rendering the pages',
-});
-
-export const peerReactDom = message({
-  ja: 'HTMLへの描画と、ブラウザでのhydration',
-  en: 'Rendering to HTML, and hydrating in the browser',
-});
-
-export const peerVite = message({
-  ja: 'ビルドと開発サーバー。`framework()`はViteのプラグインです',
-  en: 'The build and the dev server; `framework()` is a Vite plugin',
-});
-
 export const configTitle = message({
   ja: 'プラグインを足す',
   en: 'Add the plugin',

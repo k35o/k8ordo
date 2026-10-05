@@ -5,6 +5,38 @@ export const introduction = message({
   en: 'A model left to build UI tends to reach for off-brand colours and components that do not exist. `@k8ordo/ui` ships adapters that let it build UI out of this library’s components only, for json-render and for OpenUI. Generate the prompt on the server, check what comes back, then render it in the browser.',
 });
 
+export const installTitle = message({
+  ja: 'インストールする',
+  en: 'Install',
+});
+
+export const installDescription = message({
+  ja: 'json-renderとOpenUIのうち、使うほうのパッケージをzodと一緒に入れます。両方を入れる必要はありません。',
+  en: 'Install the packages of whichever you use, json-render or OpenUI, together with zod. There is no need for both.',
+});
+
+export const installJsonRender = message({
+  ja: 'json-renderを使うとき',
+  en: 'For json-render',
+});
+
+export const installOpenUi = message({
+  ja: 'OpenUIを使うとき',
+  en: 'For OpenUI',
+});
+
+export const installSeries = message({
+  ja: (jsonRender: string, openUi: string) =>
+    `どちらも0.x系で、マイナーバージョンが上がると互換性が変わります。そのため、対応している版はjson-renderが${jsonRender}、OpenUIが${openUi}に限られます。`,
+  en: (jsonRender, openUi) =>
+    `Both are 0.x, where a minor release can break compatibility, so the versions supported are json-render ${jsonRender} and OpenUI ${openUi}.`,
+});
+
+export const installOneCopy = message({
+  ja: 'アダプタはフレームワーク自身のReactのコンテキストを読みます。アプリと`@k8ordo/ui`で別の版が解決されると、型もビルドも通るのに、フォームの部品が描画のときに例外を投げます。版はアプリの中で1つにそろえてください。',
+  en: 'The adapters read the framework’s own React context. If your app and `@k8ordo/ui` resolve two different copies, the types and the build pass, and the form parts throw at render time. Keep one version in the app.',
+});
+
 export const promptTitle = message({
   ja: 'プロンプトをサーバーで作る',
   en: 'Generate the prompt on the server',

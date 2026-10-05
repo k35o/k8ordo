@@ -19,9 +19,20 @@ const BLOCK = /<!-- peers -->\n(?<table>[\s\S]*?)<!-- \/peers -->/u;
 const ROW =
   /^\| `(?<name>[^`]+)` +\| (?<version>.+?) +\| (?<required>yes|optional) +\|/u;
 
+const manifests = import.meta.glob<{ engines?: { node?: string } }>(
+  '../../../../packages/*/package.json',
+  { eager: true, import: 'default' },
+);
+
+const dirOf = (name: string): string => name.replace(/^@k8ordo\//u, '');
+
+/** The Node.js range a `@k8ordo/*` package declares in `engines`, if any. */
+export const nodeOf = (name: string): string | undefined =>
+  manifests[`../../../../packages/${dirOf(name)}/package.json`]?.engines?.node;
+
 /** The peer dependencies of a `@k8ordo/*` package, in its README's order. */
 export const peersOf = (name: string): readonly Peer[] => {
-  const dir = name.replace(/^@k8ordo\//u, '');
+  const dir = dirOf(name);
   const table = BLOCK.exec(
     readmes[`../../../../packages/${dir}/README.md`] ?? '',
   )?.groups?.table;

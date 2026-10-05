@@ -2,17 +2,14 @@ import { CodeBlock } from '@k8ordo/ui/code-block';
 
 import { Note } from '../../../../components/callout';
 import { DocPage, DocSection } from '../../../../components/doc-page';
-import { InstallTabs } from '../../../../components/install-tabs';
+import { PackageInstall } from '../../../../components/install';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
-import { PeerTable } from '../../../../components/peer-table';
 import { Playground } from '../../../../components/playground';
 import { Rich } from '../../../../components/rich';
 import * as m from '../../../../messages';
 import { ToggleDemo } from './_parts/toggle-demo';
 
 const t = m.colorSchemeGetStarted;
-
-const INSTALL = '@k8ordo/color-scheme @k8ordo/state zod';
 
 const LAYOUT = `import { ColorSchemeProvider } from '@k8ordo/color-scheme';
 import type { ReactNode } from 'react';
@@ -97,24 +94,7 @@ export default function ColorSchemeGetStartedPage() {
         id="install"
         title={t.installTitle}
       >
-        <InstallTabs
-          npm={<CodeBlock code={`npm install ${INSTALL}`} lang="bash" />}
-          pnpm={<CodeBlock code={`pnpm add ${INSTALL}`} lang="bash" />}
-          yarn={<CodeBlock code={`yarn add ${INSTALL}`} lang="bash" />}
-        />
-        <p>
-          <Rich>{t.peersDescription()}</Rich>
-        </p>
-        <PeerTable
-          name="@k8ordo/color-scheme"
-          neededFor={{
-            '@k8ordo/state': t.peerState,
-            react: t.peerReact,
-            zod: t.peerZod,
-            typescript: t.peerTypes,
-            '@types/react': t.peerTypes,
-          }}
-        />
+        <PackageInstall name="@k8ordo/color-scheme" />
         <Note>
           <p>
             <Rich>{t.installState()}</Rich>

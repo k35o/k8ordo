@@ -15,31 +15,6 @@ export const installDescription = message({
   en: 'Install `@k8ordo/color-scheme`, along with `@k8ordo/state` and zod, which store the preference.',
 });
 
-export const peersDescription = message({
-  ja: 'peer dependenciesとそれぞれの用途は、次のとおりです。',
-  en: 'The peer dependencies, and what each is for.',
-});
-
-export const peerState = message({
-  ja: '設定の保存先（localStorage）',
-  en: 'Where the preference is kept (localStorage)',
-});
-
-export const peerReact = message({
-  ja: 'プロバイダとフック',
-  en: 'The provider and the hook',
-});
-
-export const peerZod = message({
-  ja: '`@k8ordo/state`が読む、設定のスキーマ',
-  en: 'The preference’s schema, which `@k8ordo/state` reads',
-});
-
-export const peerTypes = message({
-  ja: '同梱している型定義',
-  en: 'The type declarations it ships',
-});
-
 export const installState = message({
   ja: 'プロバイダは、訪問者の選択を`@k8ordo/state`のローカル状態としてlocalStorageに保存します。そのスキーマがzodで書かれているので、この2つも必要です。',
   en: 'The provider keeps the visitor’s choice in localStorage as an `@k8ordo/state` local state, whose schema is written in zod. That is why both are needed.',

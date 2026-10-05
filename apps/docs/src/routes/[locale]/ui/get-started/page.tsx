@@ -3,9 +3,8 @@ import { CodeBlock } from '@k8ordo/ui/code-block';
 
 import { Note } from '../../../../components/callout';
 import { DocPage, DocSection } from '../../../../components/doc-page';
-import { InstallTabs } from '../../../../components/install-tabs';
+import { PackageInstall, peerVersionOf } from '../../../../components/install';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
-import { PeerTable } from '../../../../components/peer-table';
 import { Rich } from '../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../constants';
 import * as m from '../../../../messages';
@@ -54,39 +53,11 @@ export default function UiGetStartedPage() {
         id="install"
         title={t.installTitle}
       >
-        <InstallTabs
-          npm={
-            <CodeBlock code="npm install @k8ordo/ui @k8ordo/i18n" lang="bash" />
-          }
-          pnpm={
-            <CodeBlock code="pnpm add @k8ordo/ui @k8ordo/i18n" lang="bash" />
-          }
-          yarn={
-            <CodeBlock code="yarn add @k8ordo/ui @k8ordo/i18n" lang="bash" />
-          }
-        />
+        <PackageInstall name="@k8ordo/ui" />
         <p>
-          <Rich>{t.peersDescription()}</Rich>
+          <Rich>{t.installFeatures()}</Rich>{' '}
+          <LocaleAnchor path="/:locale/ui/ai">{m.nav.ai()}</LocaleAnchor>
         </p>
-        <PeerTable
-          name="@k8ordo/ui"
-          neededFor={{
-            react: t.peers.react,
-            'react-dom': t.peers.reactDom,
-            '@k8ordo/i18n': t.peers.i18n,
-            typescript: t.peers.types,
-            '@types/react': t.peers.types,
-            '@types/react-dom': t.peers.types,
-            tailwindcss: t.peers.tailwindcss,
-            zod: t.peers.zod,
-            '@json-render/core': t.peers.jsonRender,
-            '@json-render/react': t.peers.jsonRender,
-            '@openuidev/lang-core': t.peers.openuiLangCore,
-            '@openuidev/react-lang': t.peers.openuiReactLang,
-            ai: t.peers.ai,
-            streamdown: t.peers.streamdown,
-          }}
-        />
       </DocSection>
 
       <DocSection
@@ -96,7 +67,9 @@ export default function UiGetStartedPage() {
       >
         <CodeBlock code={STYLES} lang="tsx" title="main.tsx" />
         <p>
-          <Rich>{t.stylesTailwind()}</Rich>
+          <Rich>
+            {t.stylesTailwind(peerVersionOf('@k8ordo/ui', 'tailwindcss'))}
+          </Rich>
         </p>
         <CodeBlock code={TAILWIND} lang="css" title="app.css" />
         <Note>

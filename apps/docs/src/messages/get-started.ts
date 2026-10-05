@@ -15,57 +15,10 @@ export const installDescription = message({
   en: 'Install `@k8ordo/ui`, and `@k8ordo/i18n`, which decides the language of the components’ own wording.',
 });
 
-export const peersDescription = message({
-  ja: 'このほかに、次のパッケージをpeer dependenciesとして使います。生成UIやAIのチャットに使うパッケージは、その機能を使うときだけ入れます。',
-  en: 'It also relies on these peer dependencies. The ones for generative UI and AI chat are needed only when you use those features.',
+export const installFeatures = message({
+  ja: '生成UIやAIのチャットで使うパッケージは、その機能を使うときだけ入れます。入れ方は、それぞれのページで説明しています。',
+  en: 'The packages for generative UI and AI chat are needed only when you use those features; their pages say how to install them.',
 });
-
-export const peers = {
-  react: message({
-    ja: 'コンポーネントとフック',
-    en: 'The components and hooks',
-  }),
-  reactDom: message({
-    ja: 'ポータルと`useFormStatus`',
-    en: 'Portals and `useFormStatus`',
-  }),
-  i18n: message({
-    ja: 'コンポーネントが自分で描く文言のロケール',
-    en: 'The locale the components’ own wording is read in',
-  }),
-  types: message({
-    ja: '同梱している型定義',
-    en: 'The type declarations it ships',
-  }),
-  tailwindcss: message({
-    ja: '`tailwind.css`の読み込み',
-    en: 'The `tailwind.css` entry',
-  }),
-  zod: message({
-    ja: '生成UIのスキーマ',
-    en: 'Generative-UI schemas',
-  }),
-  jsonRender: message({
-    ja: '`@k8ordo/ui/json-render`',
-    en: '`@k8ordo/ui/json-render`',
-  }),
-  openuiLangCore: message({
-    ja: '`@k8ordo/ui/openui`と`@k8ordo/ui/openui/prompt`',
-    en: '`@k8ordo/ui/openui` and `@k8ordo/ui/openui/prompt`',
-  }),
-  openuiReactLang: message({
-    ja: '`@k8ordo/ui/openui`',
-    en: '`@k8ordo/ui/openui`',
-  }),
-  ai: message({
-    ja: '`@k8ordo/ui/ai-sdk`',
-    en: '`@k8ordo/ui/ai-sdk`',
-  }),
-  streamdown: message({
-    ja: '`@k8ordo/ui/ai/response`',
-    en: '`@k8ordo/ui/ai/response`',
-  }),
-};
 
 export const stylesTitle = message({
   ja: 'スタイルシートを読み込む',
@@ -78,8 +31,10 @@ export const stylesDescription = message({
 });
 
 export const stylesTailwind = message({
-  ja: 'Tailwind CSS 4を使っているプロジェクトでは、代わりに`tailwind.css`を読み込みます。デザイントークンが`bg-bg-base`のようなTailwindのクラスになり、自分のマークアップでも使えるようになります。',
-  en: 'A project on Tailwind CSS 4 imports `tailwind.css` instead. The design tokens then become Tailwind classes such as `bg-bg-base`, usable in your own markup too.',
+  ja: (version: string) =>
+    `Tailwind CSS ${version}以上を使っているプロジェクトでは、代わりに\`tailwind.css\`を読み込みます。デザイントークンが\`bg-bg-base\`のようなTailwindのクラスになり、自分のマークアップでも使えるようになります。`,
+  en: (version) =>
+    `A project on Tailwind CSS ${version} or later imports \`tailwind.css\` instead. The design tokens then become Tailwind classes such as \`bg-bg-base\`, usable in your own markup too.`,
 });
 
 export const stylesBase = message({

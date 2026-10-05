@@ -273,14 +273,19 @@ export default function RouterLinksPage() {
   demo simulates the server in the browser and says so.
 - An API reference page is a run of `ApiEntry`s (name, entry point,
   signature, params, returns, fields).
-- A `get-started` page lists the package's peers with `PeerTable`
-  (`@k8ordo/ui`'s included), given the package's `name` and `neededFor`, a
-  message per peer keyed by the peer's name. The versions and which peers are
-  optional are read from the package README's generated `<!-- peers -->`
-  table (`src/data/peers.ts`), never written on the site. A peer without a
-  message, or a message for a name that is not a peer, fails the build.
-  `PeerTable` stays a Server Component: the READMEs it reads must not reach
-  the client bundle.
+- A `get-started` page installs the package with `PackageInstall`
+  (`src/components/install.tsx`): the command adds the package's required
+  peers apart from what an application already has (React, Vite), and below
+  it `Requirements` lists what it runs with (React, Vite, Node.js,
+  TypeScript). The site shows no table of peers — no library's
+  documentation does — and never mentions the `@types/*` peers, which go
+  with TypeScript. An optional peer that a feature needs is installed on that
+  feature's page (`InstallCommand`). The versions are read from the package
+  README's generated `<!-- peers -->` table and its `engines`
+  (`src/data/peers.ts`), never written on the site; a range that is not a
+  bare lower bound fails the build, since the list can only say "or later".
+  These stay Server Components: the READMEs they read must not reach the
+  client bundle.
 - `@k8ordo/static` and `@k8ordo/server` have the same guide apart from the
   server-only pages (actions, guards, request), and share what the two modes
   say alike. The shared words are `src/messages/framework-<topic>.ts`, with
@@ -340,7 +345,7 @@ for word translation of the Japanese, nor the other way round.
 | `Note` / `Pitfall` | An aside, as `@k8ordo/ui`'s Callout  |
 | `ComponentPreview` | Live preview + code block combo      |
 | `PropsTable`       | Props documentation table            |
-| `PeerTable`        | A package's peer dependencies        |
+| `PackageInstall`   | Install command and requirements     |
 | `Rich`             | Text with backtick spans as `<Code>` |
 | `InstallTabs`      | Package manager install command tabs |
 | `TokenCard`        | Design token display card            |

@@ -3,9 +3,8 @@ import { CodeBlock } from '@k8ordo/ui/code-block';
 
 import { Note } from '../../../../components/callout';
 import { DocPage, DocSection } from '../../../../components/doc-page';
-import { InstallTabs } from '../../../../components/install-tabs';
+import { PackageInstall } from '../../../../components/install';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
-import { PeerTable } from '../../../../components/peer-table';
 import { Playground } from '../../../../components/playground';
 import { Rich } from '../../../../components/rich';
 import * as m from '../../../../messages';
@@ -121,24 +120,7 @@ export default function FormGetStartedPage() {
         id="install"
         title={m.formGetStarted.installTitle}
       >
-        <InstallTabs
-          npm={<CodeBlock code="npm install @k8ordo/form zod" lang="bash" />}
-          pnpm={<CodeBlock code="pnpm add @k8ordo/form zod" lang="bash" />}
-          yarn={<CodeBlock code="yarn add @k8ordo/form zod" lang="bash" />}
-        />
-        <p>
-          <Rich>{m.formGetStarted.peersDescription()}</Rich>
-        </p>
-        <PeerTable
-          name="@k8ordo/form"
-          neededFor={{
-            react: m.formGetStarted.peerReact,
-            'react-dom': m.formGetStarted.peerReactDom,
-            zod: m.formGetStarted.peerZod,
-            typescript: m.formGetStarted.peerTypes,
-            '@types/react': m.formGetStarted.peerTypes,
-          }}
-        />
+        <PackageInstall name="@k8ordo/form" />
         <Note>
           <p>
             <Rich>{m.formGetStarted.zodMini()}</Rich>

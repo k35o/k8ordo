@@ -15,21 +15,6 @@ export const installDescription = message({
   en: 'Add `@k8ordo/router` to an app built with Vite and React.',
 });
 
-export const peersDescription = message({
-  ja: 'このほかに、次のパッケージをpeer dependenciesとして使います。',
-  en: 'It also relies on these peer dependencies.',
-});
-
-export const peerReact = message({
-  ja: '`<Router>`と、`usePathname`などのフック',
-  en: '`<Router>` and the hooks, such as `usePathname`',
-});
-
-export const peerTypes = message({
-  ja: '同梱している型定義',
-  en: 'The type declarations it ships',
-});
-
 export const platform = message({
   ja: 'ナビゲーションにはブラウザのNavigation APIを、パスの照合にはURLPatternを、そのまま使います。どちらもBaselineのNewly availableに達しているので、polyfillは同梱していません。',
   en: 'Navigation runs on the browser’s Navigation API and matching on URLPattern, both used as they are. Both have reached Baseline Newly available, so no polyfill ships with the package.',
