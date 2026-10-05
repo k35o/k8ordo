@@ -8,18 +8,21 @@ import * as m from '../messages';
 export function ThemeSwitcher() {
   const { scheme, setPreference } = useColorScheme();
 
+  // アイコンは scheme から選ばず両方を描く。dark クラスは最初の描画の前に
+  // 付いているので、ハイドレーションを待たずに正しいほうが見える
   return (
     <IconButton
-      label={
-        scheme === 'light'
-          ? m.common.switchToDarkMode()
-          : m.common.switchToLightMode()
-      }
+      label={m.common.toggleColorScheme()}
       onClick={() => {
         setPreference(scheme === 'light' ? 'dark' : 'light');
       }}
     >
-      {scheme === 'light' ? <DarkModeIcon /> : <LightModeIcon />}
+      <span className="contents dark:hidden">
+        <DarkModeIcon />
+      </span>
+      <span className="hidden dark:contents">
+        <LightModeIcon />
+      </span>
     </IconButton>
   );
 }
