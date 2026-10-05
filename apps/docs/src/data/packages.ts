@@ -146,10 +146,6 @@ export const PACKAGES: PackageEntry[] = [
             label: m.state.navBeforeHydration,
           },
           { path: '/:locale/state/testing', label: m.state.navTesting },
-          {
-            path: '/:locale/state/integrations',
-            label: m.state.navIntegrations,
-          },
         ],
       },
       {

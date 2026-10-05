@@ -94,28 +94,33 @@ export const demoUrlEmpty = message({
 });
 
 export const nextGetStarted = message({
-  ja: 'URLに検索条件を置き、コンポーネントとサーバーで読むところまで作ります。',
-  en: 'Put search filters in the URL, and read them in a component and on the server.',
+  ja: '商品一覧の絞り込みをURLに置き、読み書きしてサーバーでも読むまでを、一通り作ります。',
+  en: 'Put a product list’s filters in the URL, from the definition to reading it on the server.',
 });
 
 export const nextPlaces = message({
-  ja: '置き場所ごとの状態の残り方と、スキーマの書き方です。',
-  en: 'How long each place lasts, and how to write its schema.',
+  ja: '6つの置き場所の残り方と、どれを選ぶかの考え方です。',
+  en: 'How long each of the six places lasts, and how to choose.',
 });
 
 export const nextReading = message({
-  ja: '`parseUrl`と`parseCookies`での読み取りと、`href`でのリンクの作り方です。',
-  en: 'Reading with `parseUrl` and `parseCookies`, and building links with `href`.',
+  ja: '`@k8ordo/server`の`search`や`parseUrl`での読み取りと、`href`でのリンクの作り方です。',
+  en: 'Reading with `@k8ordo/server`’s `search` or `parseUrl`, and building links with `href`.',
 });
 
 export const nextUpdates = message({
-  ja: '`update`での検証と書き込みのまとめ方、履歴の扱いです。',
-  en: 'How `update` validates, batches, and treats history.',
+  ja: '`update()`が値を描画に出すときと書き込むとき、書き込みのまとめ方です。',
+  en: 'When `update()` renders and when it writes, and how writes are batched.',
 });
 
-export const nextIntegrations = message({
-  ja: 'ルーターや`@k8ordo/form`のGETフォームとの組み合わせ方と、テストの書き方です。',
-  en: 'Routers, GET forms with `@k8ordo/form`, and testing.',
+export const nextUrl = message({
+  ja: 'URLのスキーマの書き方と、書き換えられた値の読まれ方です。',
+  en: 'How to write the url schema, and how a hand-edited URL is read.',
+});
+
+export const nextReference = message({
+  ja: '定義の関数と`useAppState`、更新のハンドル、型の一覧です。',
+  en: 'The definition functions, `useAppState`, update handles and the types.',
 });
 
 export const navPlaces = message({
@@ -183,7 +188,3 @@ export const navTroubleshooting = message({
   en: 'Troubleshooting',
 });
 
-export const navIntegrations = message({
-  ja: '組み合わせ',
-  en: 'Integrations',
-});

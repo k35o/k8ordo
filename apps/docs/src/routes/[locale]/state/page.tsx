@@ -119,9 +119,9 @@ export default function StatePage() {
             description: m.state.nextPlaces,
           },
           {
-            path: '/:locale/state/reading',
-            label: m.state.navReading,
-            description: m.state.nextReading,
+            path: '/:locale/state/url',
+            label: m.state.navUrl,
+            description: m.state.nextUrl,
           },
           {
             path: '/:locale/state/updates',
@@ -129,9 +129,14 @@ export default function StatePage() {
             description: m.state.nextUpdates,
           },
           {
-            path: '/:locale/state/integrations',
-            label: m.state.navIntegrations,
-            description: m.state.nextIntegrations,
+            path: '/:locale/state/reading',
+            label: m.state.navReading,
+            description: m.state.nextReading,
+          },
+          {
+            path: '/:locale/state/reference',
+            label: m.state.navReference,
+            description: m.state.nextReference,
           },
         ]}
       />
