@@ -38,7 +38,7 @@ it. Install one when you import the entry it belongs to.
 | `react`                 | ≥19.3.0         | yes      | the components and hooks                                                      |
 | `react-dom`             | ≥19.3.0         | yes      | portals and `useFormStatus`                                                   |
 | `@k8ordo/i18n`          | ^1.0.0          | yes      | the locale the components' own wording is read in                             |
-| `typescript`            | ≥7.0.2          | optional | the shipped type declarations                                                 |
+| `typescript`            | ≥7.0.0          | optional | the shipped type declarations                                                 |
 | `@types/react`          | ≥19.3.0         | optional | the shipped type declarations                                                 |
 | `@types/react-dom`      | ≥19.3.0         | optional | the shipped type declarations                                                 |
 | `tailwindcss`           | ≥4.3.3          | optional | the `tailwind.css` entry (see [Imports & Bundle Size](#imports--bundle-size)) |
