@@ -276,6 +276,11 @@ export const PACKAGES: PackageEntry[] = [
             path: '/:locale/color-scheme/testing',
             label: m.colorScheme.navTesting,
           },
+        ],
+      },
+      {
+        label: m.nav.groupConcepts,
+        sections: [
           {
             path: '/:locale/color-scheme/how-it-works',
             label: m.colorScheme.navHowItWorks,

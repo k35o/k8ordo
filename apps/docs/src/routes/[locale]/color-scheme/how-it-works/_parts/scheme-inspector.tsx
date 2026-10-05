@@ -2,7 +2,7 @@
 
 import { colorSchemeState, useColorScheme } from '@k8ordo/color-scheme';
 import { useAppState } from '@k8ordo/state';
-import { Code } from '@k8ordo/ui';
+import { Button, Code } from '@k8ordo/ui';
 import { Suspense, use, useSyncExternalStore } from 'react';
 import { browser } from 'react-dom';
 
@@ -92,12 +92,12 @@ function Panel({
     <>
       <Group
         labels={INPUT_LABELS}
-        title={m.colorSchemeHowItWorks.inspector.inputs()}
+        title={m.colorSchemeHowItWorks.inspectorInputs()}
         values={inputs}
       />
       <Group
         labels={RESULT_LABELS}
-        title={m.colorSchemeHowItWorks.inspector.result()}
+        title={m.colorSchemeHowItWorks.inspectorResult()}
         values={result}
       />
     </>
@@ -112,25 +112,39 @@ function LivePanel() {
   const rootDark = useSyncExternalStore(subscribeRootClass, readRootDark);
   const row = useSyncExternalStore(subscribeRow, readRow);
   const [stored] = useAppState(colorSchemeState);
-  const { preference, scheme } = useColorScheme();
+  const { preference, scheme, setPreference } = useColorScheme();
 
   return (
-    <Panel
-      inputs={[
-        String(systemDark),
-        row === null ? 'null' : `'${row}'`,
-        JSON.stringify(stored),
-      ]}
-      result={[preference, scheme, String(rootDark)]}
-    />
+    <>
+      <Panel
+        inputs={[
+          String(systemDark),
+          row === null ? 'null' : `'${row}'`,
+          JSON.stringify(stored),
+        ]}
+        result={[preference, scheme, String(rootDark)]}
+      />
+      <div>
+        <Button
+          color="base"
+          onClick={() => {
+            setPreference('system');
+          }}
+          size="sm"
+          variant="outline"
+        >
+          {m.colorSchemeHowItWorks.inspectorReset()}
+        </Button>
+      </div>
+    </>
   );
 }
 
 export function SchemeInspector() {
-  const unknown = m.colorSchemeHowItWorks.inspector.unknown();
+  const unknown = m.colorSchemeHowItWorks.inspectorUnknown();
 
   return (
-    <div className="border-border-mute flex flex-col gap-6 rounded-lg border p-6">
+    <div className="flex flex-col gap-6">
       <Suspense
         fallback={
           <Panel
