@@ -81,11 +81,7 @@ export default function I18nIntegrationsPage() {
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.formDescription}
-        id="form"
-        title={t.formTitle}
-      >
+      <DocSection description={t.formDescription} id="form" title={t.formTitle}>
         <CodeBlock
           code={TALK_SCHEMA}
           lang="ts"

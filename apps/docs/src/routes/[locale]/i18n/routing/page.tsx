@@ -160,11 +160,7 @@ export default function I18nRoutingPage() {
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.baseDescription}
-        id="base"
-        title={t.baseTitle}
-      >
+      <DocSection description={t.baseDescription} id="base" title={t.baseTitle}>
         <p>
           <Rich>{t.baseTerms()}</Rich>
         </p>

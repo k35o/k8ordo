@@ -86,11 +86,7 @@ it('refuses a message without every locale', () => {
 export default function I18nTestingPage() {
   return (
     <DocPage introduction={t.introduction} path="/:locale/i18n/testing">
-      <DocSection
-        description={t.nodeDescription}
-        id="node"
-        title={t.nodeTitle}
-      >
+      <DocSection description={t.nodeDescription} id="node" title={t.nodeTitle}>
         <CodeBlock
           code={NODE}
           lang="ts"

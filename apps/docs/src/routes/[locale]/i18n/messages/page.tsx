@@ -119,11 +119,7 @@ export function CopyLink() {
 export default function I18nMessagesPage() {
   return (
     <DocPage introduction={t.introduction} path="/:locale/i18n/messages">
-      <DocSection
-        description={t.textDescription}
-        id="text"
-        title={t.textTitle}
-      >
+      <DocSection description={t.textDescription} id="text" title={t.textTitle}>
         <CodeBlock code={NAV} lang="ts" title="messages/nav.ts" />
         <p>
           <Rich>{t.textCheck()}</Rich>
@@ -152,11 +148,7 @@ export default function I18nMessagesPage() {
         <p>
           <Rich>{t.valuesTemplate()}</Rich>
         </p>
-        <CodeBlock
-          callouts={{ 2: t.valuesCallout() }}
-          code={CALL}
-          lang="ts"
-        />
+        <CodeBlock callouts={{ 2: t.valuesCallout() }} code={CALL} lang="ts" />
         <p>
           <Rich>{t.valuesFormat()}</Rich>
         </p>
