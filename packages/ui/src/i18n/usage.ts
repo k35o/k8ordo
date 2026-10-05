@@ -12,10 +12,10 @@ export const messageUsage: Readonly<Record<keyof Messages, readonly string[]>> =
     avatar: ['Avatar'],
     color: ['Code'],
 
-    alertSuccess: ['Alert'],
-    alertInfo: ['Alert'],
-    alertWarning: ['Alert'],
-    alertError: ['Alert'],
+    alertSuccess: ['Alert', 'Callout'],
+    alertInfo: ['Alert', 'Callout'],
+    alertWarning: ['Alert', 'Callout'],
+    alertError: ['Alert', 'Callout'],
 
     toastRegion: ['ToastProvider'],
 

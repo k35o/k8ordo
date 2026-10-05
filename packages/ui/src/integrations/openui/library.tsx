@@ -126,6 +126,8 @@ const renderers = {
     ui.renderStatusIcon(props),
   Alert: ({ props }: ComponentRenderProps<sc.AlertProps>) =>
     ui.renderAlert(props),
+  Callout: ({ props }: ComponentRenderProps<sc.CalloutProps>) =>
+    ui.renderCallout(props),
   Spinner: ({ props }: ComponentRenderProps<sc.SpinnerProps>) =>
     ui.renderSpinner(props),
   Progress: ({ props }: ComponentRenderProps<sc.ProgressProps>) =>

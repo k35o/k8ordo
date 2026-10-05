@@ -168,7 +168,7 @@ In dark, `bg-emphasize` moves a step darker as well, because white text on the
 usual gray-600 would stay near 5:1.
 
 Surfaces outlined only by a shadow or a ground — `Card`'s `shadow` variant,
-`Modal`, `Drawer`, `Dialog`, `Alert` and `Toast`, a user `Message` — gain a
+`Modal`, `Drawer`, `Dialog`, `Alert`, `Callout` and `Toast`, a user `Message` — gain a
 1px `border-base` outline, as do the `Switch` track and thumb and the `Slider`
 and `Progress` tracks. A focused `DropdownMenu` or `ListBox` item and the
 active `Autocomplete` option draw a 2px outline on top of their ground.

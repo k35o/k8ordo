@@ -45,6 +45,7 @@ export const { registry } = defineRegistry(catalog, {
     Badge: ({ props }) => ui.renderBadge(props),
     Heading: ({ props }) => ui.renderHeading(props),
     Alert: ({ props }) => ui.renderAlert(props),
+    Callout: ({ props }) => ui.renderCallout(props),
     Spinner: ({ props }) => ui.renderSpinner(props),
     Separator: ({ props }) => ui.renderSeparator(props),
     Tabs: ({ props }) => ui.renderTabs(props),
