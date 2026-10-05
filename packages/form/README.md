@@ -29,7 +29,7 @@ pnpm add @k8ordo/form zod
 | `react`        | ≥19.3.0 | yes      | `useForm` and Server Actions  |
 | `react-dom`    | ≥19.3.0 | yes      | rendering                     |
 | `zod`          | ^4.4.3  | yes      | the schema (`zod/mini` works) |
-| `typescript`   | ≥7.0.2  | optional | the shipped type declarations |
+| `typescript`   | ≥7.0.0  | optional | the shipped type declarations |
 | `@types/react` | ≥19.3.0 | optional | the shipped type declarations |
 
 <!-- /peers -->

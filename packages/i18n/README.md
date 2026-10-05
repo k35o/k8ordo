@@ -34,7 +34,7 @@ pnpm add @k8ordo/i18n
 
 | Package      | Version | Required | Needed for                    |
 | ------------ | ------- | -------- | ----------------------------- |
-| `typescript` | ≥7.0.2  | optional | the shipped type declarations |
+| `typescript` | ≥7.0.0  | optional | the shipped type declarations |
 
 <!-- /peers -->
 

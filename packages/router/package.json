@@ -65,7 +65,7 @@
   "peerDependencies": {
     "@types/react": ">=19.3.0",
     "react": ">=19.3.0",
-    "typescript": ">=7.0.2"
+    "typescript": ">=7.0.0"
   },
   "peerDependenciesMeta": {
     "@types/react": {
