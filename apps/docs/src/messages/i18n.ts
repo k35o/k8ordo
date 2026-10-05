@@ -99,8 +99,8 @@ export const navLocales = message({
 });
 
 export const navMessages = message({
-  ja: 'メッセージ',
-  en: 'Messages',
+  ja: '文言を書く',
+  en: 'Write messages',
 });
 
 export const navFormatting = message({
