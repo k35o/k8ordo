@@ -130,6 +130,11 @@ export default function ServerPage() {
             description: m.server.nextGuards,
           },
           {
+            path: '/:locale/server/request',
+            label: m.server.navRequest,
+            description: m.server.nextRequest,
+          },
+          {
             path: '/:locale/server/deploy',
             label: m.server.navDeploy,
             description: m.server.nextDeploy,

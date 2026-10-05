@@ -74,8 +74,13 @@ export const nextActions = message({
 });
 
 export const nextGuards = message({
-  ja: '`guard.ts`とCookie、応答ヘッダー、ページから読めるリクエストです。',
-  en: '`guard.ts`, cookies, response headers, and the request a page may read.',
+  ja: '`guard.ts`でリクエストを止めたり通したりし、応答にヘッダーを足します。',
+  en: 'Stop a request or let it through in `guard.ts`, and add headers to the answer.',
+});
+
+export const nextRequest = message({
+  ja: 'ページからリクエストを読み、`cookies()`でCookieを読み書きします。',
+  en: 'Read the request from a page, and read and write cookies with `cookies()`.',
 });
 
 export const nextDeploy = message({
