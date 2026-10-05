@@ -123,6 +123,11 @@ export const navPlaces = message({
   en: 'Choose a place',
 });
 
+export const navUrl = message({
+  ja: 'URLに状態を置く',
+  en: 'State in the URL',
+});
+
 export const navReading = message({
   ja: '読み取りとリンク',
   en: 'Reading & links',
