@@ -109,8 +109,8 @@ export const navFormatting = message({
 });
 
 export const navRouting = message({
-  ja: 'URLとロケール',
-  en: 'URLs & locale',
+  ja: 'URLにロケールを置く',
+  en: 'Put the locale in the URL',
 });
 
 export const navSwitch = message({
