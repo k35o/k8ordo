@@ -213,11 +213,7 @@ export default function ServerActionsPage() {
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.formDescription}
-        id="form"
-        title={t.formTitle}
-      >
+      <DocSection description={t.formDescription} id="form" title={t.formTitle}>
         <CodeBlock
           code={WITH_FORM}
           lang="ts"

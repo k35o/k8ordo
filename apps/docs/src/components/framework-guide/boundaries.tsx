@@ -267,7 +267,11 @@ export const boundariesSections = (mode: Mode) => {
         <p>
           <Rich>{t.whereUse()}</Rich>
         </p>
-        <CodeBlock code={WHERE} lang="tsx" title="src/routes/_parts/where.tsx" />
+        <CodeBlock
+          code={WHERE}
+          lang="tsx"
+          title="src/routes/_parts/where.tsx"
+        />
       </DocSection>
 
       <DocSection

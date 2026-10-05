@@ -26,7 +26,9 @@ const DEPENDENCIES: Readonly<Record<Mode, { run: string; dev: string }>> = {
 const install = (mode: Mode, add: string, addDev: string): string =>
   `${add} ${DEPENDENCIES[mode].run}\n${addDev} ${DEPENDENCIES[mode].dev}`;
 
-const config = (mode: Mode): string => `import { framework } from '${packageOf(mode)}';
+const config = (
+  mode: Mode,
+): string => `import { framework } from '${packageOf(mode)}';
 import { defineConfig } from 'vite';
 
 export default defineConfig({

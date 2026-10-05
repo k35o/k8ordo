@@ -170,4 +170,3 @@ export const bothList = [
     en: 'A Vite `base` that is not a path from the root',
   }),
 ] as const;
-

@@ -89,11 +89,7 @@ export default function StaticDeployPage() {
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.hostDescription}
-        id="host"
-        title={t.hostTitle}
-      >
+      <DocSection description={t.hostDescription} id="host" title={t.hostTitle}>
         <Items items={t.hostList} />
         <p>
           <Rich>{t.hostUnknown()}</Rich>

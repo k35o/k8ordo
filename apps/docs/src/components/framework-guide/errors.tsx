@@ -63,7 +63,11 @@ const REDIRECT_PATTERN = `export default { to: '/:locale/new', permanent: true }
 const staticBuild = () => {
   const t = m.staticErrors;
   return (
-    <DocSection description={t.buildDescription} id="build" title={t.buildTitle}>
+    <DocSection
+      description={t.buildDescription}
+      id="build"
+      title={t.buildTitle}
+    >
       <p>
         <Rich>{t.buildLog()}</Rich>
       </p>
@@ -156,7 +160,11 @@ export const errorsSections = (mode: Mode) => {
         id="not-found"
         title={t.notFoundTitle}
       >
-        <CodeBlock code={NOT_FOUND} lang="tsx" title="src/routes/not-found.tsx" />
+        <CodeBlock
+          code={NOT_FOUND}
+          lang="tsx"
+          title="src/routes/not-found.tsx"
+        />
         <p>
           <Rich>{t.notFoundProps()}</Rich>
         </p>
@@ -219,7 +227,11 @@ export const errorsSections = (mode: Mode) => {
         id="redirect"
         title={t.redirectTitle}
       >
-        <CodeBlock code={REDIRECT} lang="ts" title="src/routes/old/redirect.ts" />
+        <CodeBlock
+          code={REDIRECT}
+          lang="ts"
+          title="src/routes/old/redirect.ts"
+        />
         <CodeBlock
           code={REDIRECT_PATTERN}
           lang="ts"

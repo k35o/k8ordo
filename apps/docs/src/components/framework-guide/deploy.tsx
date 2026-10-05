@@ -6,7 +6,9 @@ import { Rich } from '../rich';
 import { packageOf } from './mode';
 import type { Mode } from './mode';
 
-const base = (mode: Mode): string => `import { framework } from '${packageOf(mode)}';
+const base = (
+  mode: Mode,
+): string => `import { framework } from '${packageOf(mode)}';
 import { defineConfig } from 'vite';
 
 export default defineConfig({

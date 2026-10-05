@@ -76,7 +76,11 @@ const filesOf = (mode: Mode): readonly RouteFile[] => {
 export const filesSection = (mode: Mode) => {
   const t = m.frameworkReference;
   return (
-    <DocSection description={t.filesDescription} id="files" title={t.filesTitle}>
+    <DocSection
+      description={t.filesDescription}
+      id="files"
+      title={t.filesTitle}
+    >
       {filesOf(mode).map((file) => (
         <DocSubsection id={file.id} key={file.id} title={named(file.name)}>
           <ul>
