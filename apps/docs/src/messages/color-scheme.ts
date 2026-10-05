@@ -139,8 +139,8 @@ export const navSwitcher = message({
 });
 
 export const navStorage = message({
-  ja: '保存',
-  en: 'Storage',
+  ja: '設定の保存先',
+  en: 'Where it is stored',
 });
 
 export const navCsp = message({
