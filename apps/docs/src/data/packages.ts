@@ -152,6 +152,15 @@ export const PACKAGES: PackageEntry[] = [
           },
         ],
       },
+      {
+        label: m.nav.groupConcepts,
+        sections: [
+          {
+            path: '/:locale/state/how-it-works',
+            label: m.state.navHowItWorks,
+          },
+        ],
+      },
     ],
   },
   {

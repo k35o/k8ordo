@@ -168,6 +168,11 @@ export const navTesting = message({
   en: 'Testing',
 });
 
+export const navHowItWorks = message({
+  ja: '仕組み',
+  en: 'How it works',
+});
+
 export const navIntegrations = message({
   ja: '組み合わせ',
   en: 'Integrations',
