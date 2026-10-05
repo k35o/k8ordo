@@ -118,6 +118,11 @@ export const navBindParams = message({
   en: 'Bind a param every link shares',
 });
 
+export const navTypedPaths = message({
+  ja: 'パスを型で確かめる',
+  en: 'Check paths with types',
+});
+
 export const navNavigation = message({
   ja: 'ナビゲーション',
   en: 'Navigation',

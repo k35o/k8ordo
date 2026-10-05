@@ -167,6 +167,10 @@ export const PACKAGES: PackageEntry[] = [
             path: '/:locale/router/bind-params',
             label: m.router.navBindParams,
           },
+          {
+            path: '/:locale/router/typed-paths',
+            label: m.router.navTypedPaths,
+          },
           { path: '/:locale/router/navigation', label: m.router.navNavigation },
           { path: '/:locale/router/framework', label: m.router.navFramework },
         ],
