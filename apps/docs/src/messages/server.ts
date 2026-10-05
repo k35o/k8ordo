@@ -137,3 +137,8 @@ export const navCsp = message({
   ja: 'CSPを設定する',
   en: 'Set a CSP',
 });
+
+export const navRequest = message({
+  ja: 'リクエストとCookieを読む',
+  en: 'Read the request and cookies',
+});

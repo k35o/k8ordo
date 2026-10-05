@@ -291,6 +291,7 @@ export const PACKAGES: PackageEntry[] = [
           { path: '/:locale/server/boundaries', label: m.server.navBoundaries },
           { path: '/:locale/server/actions', label: m.server.navActions },
           { path: '/:locale/server/guards', label: m.server.navGuards },
+          { path: '/:locale/server/request', label: m.server.navRequest },
           { path: '/:locale/server/csp', label: m.server.navCsp },
           { path: '/:locale/server/deploy', label: m.server.navDeploy },
         ],
