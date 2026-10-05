@@ -90,7 +90,7 @@ export default function ColorSchemeStoragePage() {
           <Rich>{t.readInline()}</Rich>
         </p>
         <p>
-          <LocaleAnchor path="/:locale/state/reading">
+          <LocaleAnchor path="/:locale/state/before-hydration">
             {t.readInlineLink()}
           </LocaleAnchor>
         </p>
