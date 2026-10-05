@@ -271,6 +271,7 @@ export const PACKAGES: PackageEntry[] = [
           { path: '/:locale/i18n/negotiate', label: m.i18n.navNegotiate },
           { path: '/:locale/i18n/static', label: m.i18n.navStatic },
           { path: '/:locale/i18n/integrations', label: m.i18n.navIntegrations },
+          { path: '/:locale/i18n/testing', label: m.i18n.navTesting },
         ],
       },
     ],

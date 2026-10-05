@@ -128,6 +128,11 @@ export const navStatic = message({
   en: 'Static builds',
 });
 
+export const navTesting = message({
+  ja: 'テストする',
+  en: 'Testing',
+});
+
 export const navIntegrations = message({
   ja: '組み合わせ',
   en: 'Integrations',
