@@ -86,7 +86,7 @@ pnpm check:write       # Oxlint/Oxfmt lint/format auto-fix
 - **Titles**: every `page.tsx` renders its own `<title>` through
   `src/components/page-title.tsx` (`<PageTitle name="Button" />` or
   `<PageTitle title={m.nav.theming} />` → `Button · k8ordo`); `LandingHero` does it
-  for the landings and `DocPage` for guide pages (`Links & location — @k8ordo/router · k8ordo`), `not-found.tsx` renders its own, and the home page and the
+  for the landings and `DocPage` for guide pages (`Link and navigate — @k8ordo/router · k8ordo`), `not-found.tsx` renders its own, and the home page and the
   `/` redirect page write a bare `<title>k8ordo</title>`. The root layout
   renders none — React 19 hoists a `<title>` from anywhere, and two on screen
   is two, not a fallback. A new page without one is a regression:
