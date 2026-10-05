@@ -105,7 +105,7 @@ export default function ColorSchemeCspPage() {
           <Rich>{t.nonceCache()}</Rich>
         </p>
         <p>
-          <LocaleAnchor path="/:locale/server/guards">
+          <LocaleAnchor path="/:locale/server/csp">
             {t.nonceLink()}
           </LocaleAnchor>
         </p>
@@ -131,9 +131,7 @@ export default function ColorSchemeCspPage() {
           <Rich>{t.hashHeader()}</Rich>
         </p>
         <p>
-          <LocaleAnchor path="/:locale/static/deploy">
-            {t.hashLink()}
-          </LocaleAnchor>
+          <LocaleAnchor path="/:locale/static/csp">{t.hashLink()}</LocaleAnchor>
         </p>
       </DocSection>
 

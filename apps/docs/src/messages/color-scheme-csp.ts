@@ -46,8 +46,8 @@ export const nonceCache = message({
 });
 
 export const nonceLink = message({
-  ja: '@k8ordo/serverのガードでヘッダーを書く',
-  en: 'Writing headers from a guard in @k8ordo/server',
+  ja: '@k8ordo/serverでCSPを設定する',
+  en: 'Setting a CSP with @k8ordo/server',
 });
 
 export const hashTitle = message({
