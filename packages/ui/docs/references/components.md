@@ -362,7 +362,11 @@ never buttons. Name the list with `aria-label`.
 `orientation` is logical: `horizontal` lays the steps along the line and
 `vertical` stacks them, so inside `writing-v` they run top to bottom and right
 to left respectively, with the connecting lines drawn to match and the step
-numbers kept upright.
+numbers kept upright. In `horizontal`, every step takes an equal share of the
+width: the first row holds only the step markers and the lines between them,
+and each step's label and description sit under its marker, wrapping within
+that share. The lines keep their length however long the labels are, and a
+narrow container wraps the text rather than squeezing the lines.
 
 In a multi-step form (see `@k8ordo/form`'s guide), keep every step mounted and
 drive `value` from the step you show.

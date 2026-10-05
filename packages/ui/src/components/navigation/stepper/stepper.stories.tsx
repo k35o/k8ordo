@@ -103,12 +103,103 @@ export const AllDone: Story = {
   },
 };
 
-// 段の間の線。段の中身は li の子の button か span で、線はその次に並ぶ
+// 段の間の線と段の印。どちらも読み上げない飾りで、線だけが中身を持たない
 const connectorsOf = (canvasElement: HTMLElement) => [
   ...canvasElement.querySelectorAll<HTMLElement>(
-    'li > span[aria-hidden="true"]',
+    'li span[aria-hidden="true"]:empty',
   ),
 ];
+const markersOf = (canvasElement: HTMLElement) => [
+  ...canvasElement.querySelectorAll<HTMLElement>(
+    'li span[aria-hidden="true"]:not(:empty)',
+  ),
+];
+
+// 狭い幅に長い文言を並べても、線は文言に幅を取られず、どの段の間でも同じ長さを保つ
+// 押せる段は印と文言の周りに余白を取り、段の間の線は押せる範囲に含めない
+export const InteractiveTarget: Story = {
+  args: {
+    defaultValue: 2,
+    interactive: true,
+  },
+  play: async ({ canvas, canvasElement }) => {
+    const button = canvas.getByRole('button', { name: /プラン/u });
+    const target = button.getBoundingClientRect();
+    const marker = markersOf(canvasElement)[0]?.getBoundingClientRect();
+
+    await expect((marker?.left ?? 0) - target.left).toBeGreaterThanOrEqual(8);
+    await expect((marker?.top ?? 0) - target.top).toBeGreaterThanOrEqual(8);
+    for (const connector of connectorsOf(canvasElement)) {
+      // eslint-disable-next-line no-await-in-loop -- 線を順に確かめるだけ
+      await expect(button).not.toContainElement(connector);
+    }
+  },
+};
+
+export const NarrowWithLongLabels: Story = {
+  args: {
+    defaultValue: 1,
+    steps: [
+      { label: 'プラン', description: '使い方に合わせて選ぶ' },
+      {
+        label: '支払いの方法と請求先',
+        description: 'カードか請求書。請求書なら宛名と送り先も書く',
+      },
+      { label: '確認', description: '内容を見直して送る' },
+    ],
+  },
+  decorators: [
+    (Story) => (
+      <div className="w-80">
+        <Story />
+      </div>
+    ),
+  ],
+  play: async ({ args, canvas, canvasElement }) => {
+    const [first, second] = connectorsOf(canvasElement).map(
+      (connector) => connector.getBoundingClientRect().width,
+    );
+    await expect(first).toBeGreaterThanOrEqual(32);
+    await expect(second).toBeCloseTo(first ?? 0, 0);
+
+    // 文言は段の印の下に置き、1 行目は印と線だけにする
+    const markers = markersOf(canvasElement);
+    await expect(markers).toHaveLength(args.steps.length);
+    for (const [index, step] of args.steps.entries()) {
+      const { top } = canvas.getByText(step.label).getBoundingClientRect();
+      const { bottom } = markers[index]?.getBoundingClientRect() ?? {};
+      // eslint-disable-next-line no-await-in-loop -- 3 つの段を順に確かめるだけ
+      await expect(top).toBeGreaterThanOrEqual(bottom ?? Infinity);
+    }
+  },
+};
+
+// flex の行の中に置かれても、横並びは置かれた先の幅いっぱいに広がる
+export const InFlexRow: Story = {
+  args: {
+    defaultValue: 1,
+    steps: [
+      { label: 'Plan', description: 'Pick what fits' },
+      { label: 'Payment', description: 'Card or invoice' },
+      { label: 'Review', description: 'Check and send' },
+    ],
+  },
+  decorators: [
+    (Story) => (
+      <div
+        className="flex w-160 flex-wrap items-center gap-4"
+        data-testid="row"
+      >
+        <Story />
+      </div>
+    ),
+  ],
+  play: async ({ canvas }) => {
+    const row = canvas.getByTestId('row').getBoundingClientRect();
+    const list = canvas.getByRole('list').getBoundingClientRect();
+    await expect(list.width).toBeCloseTo(row.width, 0);
+  },
+};
 
 // 横書きの例（max-w-2xl）と同じだけの長さを、縦書きの行の向きに取る
 const writingVertical: Decorator = (Story) => (
