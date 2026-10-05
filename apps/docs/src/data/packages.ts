@@ -171,6 +171,7 @@ export const PACKAGES: PackageEntry[] = [
             path: '/:locale/router/typed-paths',
             label: m.router.navTypedPaths,
           },
+          { path: '/:locale/router/base', label: m.router.navBase },
           { path: '/:locale/router/navigation', label: m.router.navNavigation },
           { path: '/:locale/router/framework', label: m.router.navFramework },
         ],

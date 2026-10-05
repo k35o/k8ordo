@@ -123,6 +123,11 @@ export const navTypedPaths = message({
   en: 'Check paths with types',
 });
 
+export const navBase = message({
+  ja: 'サブパスの下で配信する',
+  en: 'Serve under a base path',
+});
+
 export const navNavigation = message({
   ja: 'ナビゲーション',
   en: 'Navigation',
