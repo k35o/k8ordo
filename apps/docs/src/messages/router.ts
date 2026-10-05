@@ -139,6 +139,6 @@ export const navNavigation = message({
 });
 
 export const navFramework = message({
-  ja: 'フレームワーク配下',
-  en: 'Under the framework',
+  ja: 'フレームワークの下で使う',
+  en: 'Use it under the framework',
 });

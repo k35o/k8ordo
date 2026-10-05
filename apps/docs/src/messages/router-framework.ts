@@ -1,314 +1,186 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: '`@k8ordo/static`と`@k8ordo/server`は、このルーターの上に作られています。表は`src/routes/`から生成され、ページはサーバーで描かれます。このページでは、フレームワークの下でアプリが使うルーターの部分と使わない部分、ルートファイルのpropsの型、そしてアプリが書くものと生成されるものの境目を扱います。',
-  en: '`@k8ordo/static` and `@k8ordo/server` are built on this router. The table is generated from `src/routes/`, and pages render on the server. This page covers which parts of the router an application uses under the framework and which it does not, the types of a route file’s props, and where what the application writes ends and what is generated begins.',
+  ja: '`@k8ordo/static`と`@k8ordo/server`は、このルーターの上に作られています。ルート表は`src/routes/`のディレクトリから生成され、ページはサーバーで描かれます。このページでは、フレームワークの下でアプリが使う部分と使わない部分、そしてルートのファイルが受け取るpropsの型を説明します。',
+  en: '`@k8ordo/static` and `@k8ordo/server` are built on this router. The route table is generated from the `src/routes/` directories, and pages render on the server. This page covers which parts an app uses under the framework and which it does not, and the types of the props a route file receives.',
 });
 
 export const noTableTitle = message({
-  ja: 'ブラウザは表を持たない',
-  en: 'The browser holds no table',
+  ja: 'ブラウザはルート表を持たない',
+  en: 'The browser holds no route table',
 });
 
 export const noTableDescription = message({
-  ja: 'フレームワークの下では、ページはサーバーで描かれ、ブラウザは表から木を組み立てるのではなく、描かれた木を受け取ります。クライアントのバンドルにルート表は含まれず、レイアウトは`<Outlet />`ではなく`children`で入れ子になります。',
-  en: 'Under the framework pages render on the server, and the browser receives a tree instead of building one from a table. There is no route table in the client bundle at all, and layouts nest through `children` instead of `<Outlet />`.',
+  ja: 'フレームワークの下では、ページはサーバーで描かれ、ブラウザは描かれたページを受け取ります。ルート表はクライアントのバンドルに入らず、レイアウトは`<Outlet />`ではなく`children`でページを包みます。',
+  en: 'Under the framework, pages render on the server and the browser receives them rendered. The route table never enters the client bundle, and a layout wraps its page through `children` instead of `<Outlet />`.',
 });
 
 export const noTableNavigation = message({
-  ja: 'ナビゲーションは引き続きこのルーターのものです。フレームワークのランタイムは`useInterceptedNavigation`の上に作られていて、同一オリジンのURLを引き受け、`load`で次のページのRSCペイロードを取得し、背景で描きます。`finished`が画面に出た時点で解決すること、状態の変更がページの切り替えにならないこと、スクロール、transitionの型、追い越されたナビゲーションのabortは、そのまま引き継がれます。',
-  en: 'Navigation is still this router’s. The framework’s runtime is built on `useInterceptedNavigation`: it claims same-origin URLs, fetches the next page’s RSC payload in `load`, and renders it in the background. `finished` meaning on screen, state changes not being page changes, scrolling, transition types and aborting superseded navigations all carry over unchanged.',
+  ja: 'それでも、ナビゲーションはこのルーターのものです。フレームワークのランタイムは、`<Router>`と同じ`useInterceptedNavigation`の上に作られています。次のページを背景で描くことや、`finished`がページが出たときに解決すること、新しいページが先頭から始まることは、そのまま成り立ちます。',
+  en: 'Navigation is still this router’s. The framework’s runtime is built on `useInterceptedNavigation`, the same hook `<Router>` uses, so the next page still renders in the background, `finished` still waits for it to be on screen, and a new page still starts at the top.',
 });
 
-export const compareTable = {
-  api: message({ ja: 'API', en: 'API' }),
-  client: message({
-    ja: '`<Router>`を自分でマウントするアプリ',
-    en: 'An application that mounts `<Router>`',
-  }),
-  framework: message({
-    ja: '`@k8ordo/static` / `@k8ordo/server`',
-    en: '`@k8ordo/static` / `@k8ordo/server`',
-  }),
-  handWritten: message({ ja: '手書きする', en: 'Written by hand' }),
-  generatedTable: message({
-    ja: '`src/routes/`から`.k8ordo/routes.gen.ts`に生成',
-    en: 'Generated from `src/routes/` into `.k8ordo/routes.gen.ts`',
-  }),
-  mountYourself: message({ ja: '自分で使う', en: 'You use them' }),
-  notUsed: message({
-    ja: '使わない（ランタイムが描き、レイアウトは`children`で入れ子）',
-    en: 'Not used: the runtime renders, and layouts nest through `children`',
-  }),
-  same: message({ ja: '同じ', en: 'The same' }),
-  sameTyped: message({
-    ja: '同じ。paramsはスキーマの型で受け取る',
-    en: 'The same, with params typed by the schemas',
-  }),
-  readParams: message({
-    ja: '使う（paramsはいつも文字列）',
-    en: 'Used; params are always strings',
-  }),
-  paramsProp: message({
-    ja: '使えない。ページが`params`をpropsで受け取る',
-    en: 'Not available: a page receives `params` as a prop',
-  }),
-  registerHand: message({
-    ja: '`types/`に手書き',
-    en: 'Written by hand in `types/`',
-  }),
-  registerGenerated: message({
-    ja: '`.k8ordo/register.gen.ts`に生成',
-    en: 'Generated into `.k8ordo/register.gen.ts`',
-  }),
-  errorKey: message({
-    ja: '表のbranchに`error`を書く',
-    en: 'An `error` key on a branch',
-  }),
-  errorFile: message({
-    ja: '`error.tsx`が表の`error`になる',
-    en: '`error.tsx` becomes the table’s `error`',
-  }),
-  mountedByRouter: message({
-    ja: '`<Router>`がマウントする',
-    en: 'Mounted by `<Router>`',
-  }),
-  mountedByRuntime: message({
-    ja: 'モードのランタイムがマウントする',
-    en: 'Mounted by the mode’s runtime',
-  }),
-  notApplicable: message({ ja: '—', en: '—' }),
-  routeFileProps: message({
-    ja: 'ルートファイルのpropsの型',
-    en: 'The types of a route file’s props',
-  }),
-};
-
-export const locationTitle = message({
-  ja: '現在地は`usePathname`と`useMatch`で読む',
-  en: '`usePathname` and `useMatch` are the location hooks',
+export const carryTitle = message({
+  ja: 'そのまま使えるもの',
+  en: 'What carries over',
 });
 
-export const locationDescription = message({
-  ja: '`usePathname`と`useMatch`は表ではなくプラットフォームを読むので、フレームワークの下でもそのまま動きます。`useRoute`と`useParams`はコンテキストの照合結果を読みますが、ブラウザには読むべき照合結果が無いのでthrowします。',
-  en: '`usePathname` and `useMatch` read the platform rather than a table, so they work unchanged under the framework. `useRoute` and `useParams` read the match from context, and there is no match in the browser to read, so they throw.',
+export const carryDescription = message({
+  ja: '次のものは、ルート表を手元に持たなくても動きます。そのため、ブラウザに表が無いフレームワークの下でも、そのまま使えます。',
+  en: 'These work without the route table in hand, so they work unchanged under the framework, where the browser has none.',
 });
 
-export const locationServerComponent = message({
-  ja: 'フックはclient componentでしか使えません。Server Componentのページやレイアウトは、自分の描画の`pathname`をpropsで受け取ります。',
-  en: 'Hooks work only in client components. A page or layout that is a Server Component receives the `pathname` of its render as a prop.',
+export const carryLinks = message({
+  ja: '`href`と`navigateTo`、`bindParams`：リンクを作り、ページを移る',
+  en: '`href`, `navigateTo` and `bindParams`: building links and changing pages',
 });
 
-export const locationThisSite = message({
-  ja: "このサイトのサイドナビゲーションも、ロケール配下のシェル（client component）で`useMatch('/:locale/ui/components/*')`に「部品のページが開いているか」を尋ねて出し分けています。パターンは生成された表のものなので、区画の名前を変えればコンパイルで落ちます。",
-  en: "This site’s own sidebar is decided the same way: the locale shell, a client component, asks `useMatch('/:locale/ui/components/*')` whether a component page is showing. The pattern comes from the generated table, so renaming the section fails to compile.",
+export const carryLocation = message({
+  ja: '`usePathname`と`useMatch`、`matchPath`、`usePendingPathname`：いまいる場所を調べる',
+  en: '`usePathname`, `useMatch`, `matchPath` and `usePendingPathname`: finding where you are',
 });
 
-export const propsTitle = message({
-  ja: '`PageProps`と`LayoutProps`',
-  en: '`PageProps` and `LayoutProps`',
+export const carryPaths = message({
+  ja: '`withBase`と`withoutBase`、`normalizePathname`：パスの付け外しと比較',
+  en: '`withBase`, `withoutBase` and `normalizePathname`: adding, removing and comparing paths',
 });
 
-export const propsDescription = message({
-  ja: 'ルートファイルが受け取るpropsの型は、そのファイルを置いたディレクトリが表すパターンで決まります。`src/routes/products/[id]/page.tsx`のパターンは`/products/:id`です。',
-  en: 'The props a route file receives are typed by the pattern its directory stands for: `src/routes/products/[id]/page.tsx` is `/products/:id`.',
+export const carryProps = message({
+  ja: '`PageProps`と`LayoutProps`、`RouteContext`：ルートのファイルが受け取るものの型',
+  en: '`PageProps`, `LayoutProps` and `RouteContext`: the types of what a route file receives',
 });
 
-export const propsPage = message({
-  ja: '`PageProps<P>`は`{ params, pathname }`です。`params`はそのページまでのスキーマが作った型で、スキーマが扱わないparamは文字列のままです。`pathname`はこの描画のURLのpathnameです。',
-  en: '`PageProps<P>` is `{ params, pathname }`. `params` has the types the schemas along the page’s stack produced, and a param no schema covers stays a string. `pathname` is the pathname this render is for.',
+export const carryNotFound = message({
+  ja: '`notFound`と`isNotFound`：そのパスにページが無いことを伝える',
+  en: '`notFound` and `isNotFound`: saying a path has no page',
 });
 
-export const propsLayout = message({
-  ja: '`LayoutProps<P>`はそれに`children`を足したものです（下の例は`src/routes/products/page.tsx`もあるものとします）。`LayoutProps`は、スキーマを宣言していても`params`を文字列（`ParamsOf<P>`）として型付けします。`not-found.tsx`の下では、スキーマが受理したかどうかに関わらずレイアウトが描かれるからです。ただし検証を通ったページの描画では、実行時にはスキーマの出力がレイアウトにも渡ります。値が文字列であることに頼らないでください。',
-  en: '`LayoutProps<P>` adds `children` (the example below assumes `src/routes/products/page.tsx` exists too). `LayoutProps` types a layout’s `params` as strings (`ParamsOf<P>`) whatever the schemas declare, because a layout also renders under `not-found.tsx`, whether or not its schemas accepted. At run time, though, a layout rendered for a validated page receives the schemas’ output, so do not rely on the values being strings.',
+export const carryClient = message({
+  ja: 'フックを使えるのはClient Componentの中だけです。Server Componentのページやレイアウトは、描画しているパスを`pathname`のpropsで受け取ります。',
+  en: 'The hooks work only in Client Components. A page or layout that is a Server Component receives the path it renders for as its `pathname` prop.',
 });
 
-export const propsRequest = message({
-  ja: '`@k8ordo/server`では、生成される`Register`が`request`も持つので、どちらの型にも`request`が加わります。`@k8ordo/static`のビルドにはリクエストが無いので、`request`を読むページはそこで型エラーになります。',
-  en: 'Under `@k8ordo/server` the generated `Register` carries the `request` too, so both types gain `request`. A build into files has no request, so a page that reads it fails to type-check under `@k8ordo/static`.',
+export const notUsedTitle = message({
+  ja: 'フレームワークが受け持つもの',
+  en: 'What the framework takes care of',
 });
 
-export const propsInline = message({
-  ja: '`P`は生成された表にページがあるパターンでなければなりません。自分の位置にページを持たないレイアウトは、propsをインラインで宣言します。インラインで宣言しても、生成された表がimportの位置で同じことを検査します。',
-  en: '`P` must be a pattern the generated table has a page at, so a layout with no page of its own at that prefix declares its props inline. Inline props are checked by the generated table at the import all the same.',
+export const notUsedDescription = message({
+  ja: '次のものは、フレームワークが代わりに受け持つので、アプリでは書きません。',
+  en: 'These the framework handles for you, so the app does not write them.',
 });
 
-export const propsNotFound = message({
-  ja: 'フレームワークのページは、自分のpathnameが実はページではないことを`notFound()`で言います。idが名指す商品が無い、といった場合です。throwするのでその後は走らず、フレームワークがいちばん近い`not-found.tsx`で404として答えます。ページがどちらのモードでも同じに読めるよう、モードのパッケージではなくここにあります。`isNotFound(value)`は投げられたものを見分けます。クライアントの`<Router>`には答えるステータスが無いので、そこでの`notFound()`はほかのエラーと同じです。',
-  en: 'A framework page says its pathname is not a page after all with `notFound()` — the product its id names does not exist. It throws, so nothing after it runs, and the framework answers with the nearest `not-found.tsx` under a 404. It lives here rather than in a mode package so a page reads the same under either; `isNotFound(value)` recognises what it throws. Under a client `<Router>` there is no status to answer with, and `notFound()` is an error like any other.',
+export const notUsedTable = message({
+  ja: '`defineRoutes`：ルート表は`src/routes/`から`.k8ordo/routes.gen.ts`に生成されます',
+  en: '`defineRoutes`: the route table is generated from `src/routes/` into `.k8ordo/routes.gen.ts`',
 });
 
-export const schemaTitle = message({
-  ja: '`paramsSchema`とparamsの型',
-  en: '`paramsSchema` and typed params',
+export const notUsedRouter = message({
+  ja: '`<Router>`と`<Outlet />`：ページはランタイムが描き、レイアウトは`children`でページを包みます',
+  en: '`<Router>` and `<Outlet />`: the runtime renders the pages, and a layout wraps its page through `children`',
 });
 
-export const schemaDescription = message({
-  ja: 'ページやレイアウトは`paramsSchema`をexportして、paramsをどう読むかを宣言できます。ルーター自身はスキーマを走らせません。走らせるのはフレームワークで、このパッケージが受け持つのは出てくる値の型です。',
-  en: 'A page or layout can export a `paramsSchema` to say how its params are read. The router itself never runs a schema — the framework does — and this package types what comes out.',
+export const notUsedBoundaries = message({
+  ja: '表の`error`と`loading`：`error.tsx`と`loading.tsx`を置くと、生成された表のその位置に入ります',
+  en: 'The table’s `error` and `loading`: an `error.tsx` or a `loading.tsx` goes into the generated table at its place',
 });
 
-export const schemaLinks = message({
-  ja: '生成される`Register`は、スキーマのかかるパターンごとにスキーマの出力型を`params`として持ちます。そのため`href`と`navigateTo`は、ページが受け取るのと同じ型でparamを受け取り、スキーマが読み戻す綴りに変換します。スキーマが`number`にした`:id`には`{ id: 42 }`を渡し、文字列を渡すと型エラーになります。スキーマのかかるパターンで、どのスキーマも扱わないparamは、ページと同じく文字列で受け取ります。生成より前、あるいはどのスキーマもかからないパターンでは、綴りが1つに決まる値ならどれでも渡せます。',
-  en: 'The generated `Register` carries, for each pattern a schema covers, the schema output as `params`, so `href` and `navigateTo` take a param as the page receives it and spell it the one way the schema reads back: an `:id` the schema made a `number` takes `{ id: 42 }`, and a string there is a type error. On such a pattern, a param the schemas leave alone takes a string, as the page receives it. Before the file is generated, or for a pattern no schema along its stack covers, any value with one spelling is accepted.',
+export const notUsedRegister = message({
+  ja: '`Register`の登録：`.k8ordo/register.gen.ts`に生成されます',
+  en: 'Registering on `Register`: it is generated into `.k8ordo/register.gen.ts`',
 });
 
-export const schemaGenerated = message({
-  ja: '生成されるファイルは次のような形です（このサイトのものから抜粋）。',
-  en: 'The generated file looks like this, taken from this site:',
+export const notUsedHost = message({
+  ja: '`PathnameProvider`と`NavigationGeneration`、`useInterceptedNavigation`：ランタイムが使います',
+  en: '`PathnameProvider`, `NavigationGeneration` and `useInterceptedNavigation`: the runtime uses them',
 });
 
-export const schemaTypesTable = {
-  type: message({ ja: '型', en: 'Type' }),
-  meaning: message({ ja: '意味', en: 'Meaning' }),
-  parsedParams: message({
-    ja: 'パターンのparamsに、スキーマの列（外側のレイアウトから順、ページが最後）の出力を順に重ねた型',
-    en: 'A pattern’s params after a list of schemas — outer layouts first, the page last — each replacing the strings it names with what it produced',
-  }),
-  parsedParamsMap: message({
-    ja: '`{ パターン: スキーマの列 }`を`{ パターン: ParsedParams }`にした型。生成される`Register`の`params`',
-    en: '`{ pattern: schemas }` turned into `{ pattern: ParsedParams }`: the `params` of the generated `Register`',
-  }),
-  paramsSchemaFor: message({
-    ja: 'そのパターンのスキーマとして書けるもの。出力のキーはパターンのparamsの部分集合',
-    en: 'What may serve as a schema for the pattern: its output’s keys are a subset of the pattern’s params',
-  }),
-  standardSchemaLike: message({
-    ja: 'Standard Schemaの形（`~standard`の`types.output`）。zod、zod/miniなど、実装するライブラリならどれでも',
-    en: 'The Standard Schema shape (`types.output` under `~standard`); any library that implements it — zod, zod/mini or another',
-  }),
-  schemaOutput: message({
-    ja: 'スキーマの出力の型',
-    en: 'What a schema produces',
-  }),
-  registeredPageParams: message({
-    ja: 'そのパターンのページが受け取る`params`。`PageProps`の`params`',
-    en: 'The `params` a page under the pattern receives: `PageProps`’s `params`',
-  }),
-};
-
-export const schemaTypesNote = message({
-  ja: 'これらは主に生成されるコードのための型です。アプリが直接書くのは`PageProps`と`LayoutProps`で足ります。',
-  en: 'These are mostly for the generated code; what an application writes by hand is `PageProps` and `LayoutProps`.',
+export const notUsedParams = message({
+  ja: '`useParams`と`useRoute`は、`<Router>`が持つ照合の結果を読みます。フレームワークの下ではブラウザに照合の結果が無いので、どちらも例外を投げます。ページは`params`をpropsで受け取ります。',
+  en: '`useParams` and `useRoute` read the match `<Router>` holds. Under the framework there is no match in the browser, so both throw; a page receives `params` as a prop instead.',
 });
 
-export const providerTitle = message({
-  ja: '`PathnameProvider`はアプリが書かない',
-  en: '`PathnameProvider` is never the application’s',
+export const pagePropsTitle = message({
+  ja: 'ページのpropsに型を付ける',
+  en: 'Type a page’s props',
 });
 
-export const providerDescription = message({
-  ja: 'client componentの最初の描画は、Navigation APIの無い場所（サーバーと、ハイドレーション）で起きます。そのため`usePathname`の値は、それを知っている描画側から`<PathnameProvider pathname>`で届ける必要があります。`<Router>`は自分でマウントし、両モードのランタイムも自分でマウントします。アプリが書くことはありません。書くのは`useInterceptedNavigation`で自前の継ぎ目を作るホストだけです。',
-  en: 'A client component’s first render happens where there is no Navigation API — on the server, and again during hydration — so `usePathname`’s value has to arrive from the renderer that knew it, through `<PathnameProvider pathname>`. `<Router>` mounts one itself, and both mode runtimes mount one; an application never writes it. Only a host building its own seam out of `useInterceptedNavigation` does.',
+export const pagePropsDescription = message({
+  ja: '`PageProps`は、ページが受け取るpropsの型です。型引数には、ページのファイルを置いたディレクトリが表すパターンを渡します。',
+  en: '`PageProps` is the type of a page’s props. Its type argument is the pattern the page file’s directory stands for.',
 });
 
-export const providerMissing = message({
-  ja: 'どれの下にも無いままサーバーやハイドレーションで`usePathname`を呼ぶと、次のエラーになります。',
-  en: 'Calling `usePathname` on the server or during hydration with none of them above it throws:',
+export const pagePropsParams = message({
+  ja: '`params`には、`paramsSchema`が作った型が付きます。上の例では、スキーマが数値にした`id`は`number`です。スキーマを書いていないparamは文字列のままです。`pathname`には、この描画のパスが入ります。',
+  en: '`params` has the types the `paramsSchema` produced: above, the schema made `id` a `number`. A param no schema covers stays a string. `pathname` is the path this render is for.',
 });
 
-export const providerHydration = message({
-  ja: 'ハイドレーションではサーバーのpathnameで描き、その後ブラウザのpathnameに切り替わります。2つが違えば1度描き直されるだけで、不一致のエラーにはなりません。このサイトの`404.html`は1枚で全ロケールに答えるので、表示中のURLのロケールへこの描き直しで切り替わります。',
-  en: 'Hydration renders with the server’s pathname and then switches to the browser’s; when the two differ, that is one re-render, not a mismatch. This site’s single `404.html` answers for every locale, and this re-render is how it switches to the locale of the URL it is shown at.',
+export const pagePropsLinks = message({
+  ja: '`href`も、同じ型でparamを受け取ります。`id`には数値を渡し、スキーマが読み戻せる書き方でURLに入ります。文字列を渡すと型エラーになります。',
+  en: '`href` takes the param with the same type: `id` takes a number, written into the URL the one way the schema reads back. A string there is a type error.',
 });
 
-export const writesTitle = message({
-  ja: 'アプリが書くもの、生成されるもの',
-  en: 'What the application writes, and what is generated',
+export const pagePropsNotFound = message({
+  ja: '`notFound()`は、パスはパターンに合ったものの、そのページが実は無いことを伝える関数です。例外を投げるので後ろの行は走らず、フレームワークがいちばん近い`not-found.tsx`を404で返します。',
+  en: '`notFound()` says that although the path fit the pattern, there is no page after all. It throws, so nothing after it runs, and the framework answers with the nearest `not-found.tsx` under a 404.',
 });
 
-export const writesDescription = message({
-  ja: 'フレームワークの下では、ルーターに関わるものの多くが生成されるか、ランタイムに含まれています。',
-  en: 'Under the framework, much of what touches the router is generated or lives in the runtime.',
+export const pagePropsNotFoundWhy = message({
+  ja: '`notFound`がモードのパッケージではなくこのルーターにあるのは、どちらのモードでもページを同じように書けるようにするためです。`<Router>`で描くアプリには返すステータスが無いので、ほかの例外と同じ扱いになります。',
+  en: '`notFound` lives in this router rather than in a mode package so a page reads the same under either mode. An app rendered by `<Router>` has no status to answer with, so there it is an error like any other.',
 });
 
-export const writesApp = message({
-  ja: 'アプリが書く',
-  en: 'The application writes',
+export const layoutPropsTitle = message({
+  ja: 'レイアウトのpropsに型を付ける',
+  en: 'Type a layout’s props',
 });
 
-export const writesAppRoutes = message({
-  ja: '`src/routes/`のルートファイル（`page.tsx`、`layout.tsx`、`error.tsx`、`not-found.tsx`、`redirect.ts`）と`paramsSchema`',
-  en: 'The route files under `src/routes/` (`page.tsx`, `layout.tsx`, `error.tsx`, `not-found.tsx`, `redirect.ts`) and their `paramsSchema`',
+export const layoutPropsDescription = message({
+  ja: '`LayoutProps`は、`params`と`pathname`に`children`を加えた型です。型引数には、レイアウトを置いたディレクトリが表すパターンを渡します。',
+  en: '`LayoutProps` adds `children` to `params` and `pathname`. Its type argument is the pattern the layout file’s directory stands for.',
 });
 
-export const writesAppLinks = message({
-  ja: '`href` / `navigateTo`のリンク。共有のparamがあれば`bindParams`のモジュール',
-  en: 'Links with `href` / `navigateTo`, and a `bindParams` module for params every link shares',
+export const layoutPropsStrings = message({
+  ja: 'レイアウトの`params`は、スキーマを書いていても文字列として型が付きます。`not-found.tsx`は、スキーマが値を受け付けたかどうかにかかわらずレイアウトの中に描かれるので、スキーマの型を約束できないからです。',
+  en: 'A layout’s `params` are typed as strings even when a schema is written. `not-found.tsx` renders inside the layout whether or not the schemas accepted, so the schemas’ types cannot be promised there.',
 });
 
-export const writesAppLocation = message({
-  ja: 'client componentでの`usePathname` / `useMatch`',
-  en: '`usePathname` / `useMatch` in client components',
+export const layoutPropsPage = message({
+  ja: '型引数に渡せるのは、ページのあるパターンだけです。`src/routes/products/page.tsx`が無ければ`/products`は渡せないので、そのレイアウトはpropsの型を自分で書きます。',
+  en: 'Only a pattern with a page can be the type argument. Without `src/routes/products/page.tsx`, `/products` is not accepted, and that layout writes its props type itself.',
 });
 
-export const writesAppTransition = message({
-  ja: 'ページの切り替えをアニメーションするなら、レイアウトの`children`を包む`<ViewTransition>`',
-  en: 'A `<ViewTransition>` around a layout’s `children`, to animate page changes',
+export const requestTitle = message({
+  ja: '`@k8ordo/server`で`request`を受け取る',
+  en: 'Receive `request` under `@k8ordo/server`',
 });
 
-export const writesGenerated = message({
-  ja: '生成される、またはランタイムが持つ',
-  en: 'Generated, or part of the runtime',
+export const requestDescription = message({
+  ja: '`@k8ordo/server`では、生成される`Register`が`request`も持ちます。そのため、`PageProps`と`LayoutProps`のどちらにも`request`が加わります。',
+  en: 'Under `@k8ordo/server`, the generated `Register` carries `request` too, so both `PageProps` and `LayoutProps` gain `request`.',
 });
 
-export const writesGeneratedTable = message({
-  ja: '`.k8ordo/routes.gen.ts`：`defineRoutes`の表と、パターンごとのスキーマの列',
-  en: '`.k8ordo/routes.gen.ts`: the `defineRoutes` table and each pattern’s list of schemas',
+export const requestStatic = message({
+  ja: '`@k8ordo/static`のビルドにはリクエストが無いので、`request`は加わりません。`request`を読むページは、`@k8ordo/static`では型エラーになります。',
+  en: 'A `@k8ordo/static` build has no request, so `request` is not added there, and a page that reads it fails to type-check.',
 });
 
-export const writesGeneratedRegister = message({
-  ja: '`.k8ordo/register.gen.ts`：このルーターの`Register`（アプリが`@k8ordo/state`に依存していればその`Register`も）',
-  en: '`.k8ordo/register.gen.ts`: this router’s `Register` — and `@k8ordo/state`’s, when the application depends on it',
+export const requestSearch = message({
+  ja: '`search`をexportしたページは、読み取った値も`search`のpropsで受け取ります。これも`PageProps`に加わります。',
+  en: 'A page that exports `search` also receives what it reads as its `search` prop, which `PageProps` adds as well.',
 });
 
-export const writesGeneratedRuntime = message({
-  ja: 'ランタイム：`useInterceptedNavigation`、`<NavigationGeneration>`、`<PathnameProvider>`',
-  en: 'The runtime: `useInterceptedNavigation`, `<NavigationGeneration>` and `<PathnameProvider>`',
+export const routeTitle = message({
+  ja: '`route.ts`の引数に型を付ける',
+  en: 'Type a `route.ts` handler',
 });
 
-export const writesNever = message({
-  ja: 'アプリが書かない',
-  en: 'The application never writes',
+export const routeDescription = message({
+  ja: 'フィードやJSONのように、ページではない答えを返す`route.ts`は、リクエストのメソッドごとに関数をexportします。`RouteContext`は、その関数が受け取る引数の型です。',
+  en: 'A `route.ts` that answers with something other than a page, such as a feed or JSON, exports a function per request method. `RouteContext` is the type of what each receives.',
 });
 
-export const writesNeverList = message({
-  ja: '`<Router>`、`<Outlet />`、`useRoute`、`useParams`、そして手書きの`Register`（生成されたものと2つ目の答えになる）',
-  en: '`<Router>`, `<Outlet />`, `useRoute`, `useParams`, or a hand-written `Register` — a second answer to one already generated',
-});
-
-export const writesTsconfig = message({
-  ja: '生成された型を効かせるには、`tsconfig.json`の`include`に`.k8ordo/**/*.ts`のグロブを書きます。`.k8ordo`はドットで始まるので、ディレクトリ名だけを書くと黙って読み飛ばされ、`href`が表と照合されなくなります。',
-  en: 'For the generated types to apply, put the glob `.k8ordo/**/*.ts` in `include` in `tsconfig.json`. `.k8ordo` starts with a dot, and a bare directory entry silently skips it — `href` simply stops being checked against the table.',
-});
-
-export const transitionTitle = message({
-  ja: 'ページの切り替えのアニメーション',
-  en: 'Animating page changes',
-});
-
-export const transitionDescription = message({
-  ja: 'レイアウトで`children`を`<ViewTransition>`で包みます。`<ViewTransition>`はRSCペイロードでそのまま送られるので、Server Componentのレイアウトが直接描けます。このサイトがclient componentの中に置いているのは、シェルがフックを使うからです。',
-  en: 'A layout wraps its `children` in `<ViewTransition>`. React sends a `<ViewTransition>` through the RSC payload as it is, so a Server Component layout can render it directly; this site keeps it in a client component only because its shell uses hooks.',
-});
-
-export const nextTitle = message({
-  ja: 'モードごとのルーティング',
-  en: 'Routing in each mode',
-});
-
-export const nextStatic = message({
-  ja: '`@k8ordo/static`のルーティング',
-  en: 'Routing in `@k8ordo/static`',
-});
-
-export const nextServer = message({
-  ja: '`@k8ordo/server`のルーティング',
-  en: 'Routing in `@k8ordo/server`',
-});
-
-export const nextParams = message({
-  ja: '`paramsSchema`の詳細（`@k8ordo/static`）',
-  en: '`paramsSchema` in depth, in `@k8ordo/static`',
+export const routeFields = message({
+  ja: '受け取るのは、`request`と`params`です。`params`には、ページと同じくスキーマが作った型が付きます。',
+  en: 'Each receives `request` and `params`, with `params` typed by the schemas as a page’s are.',
 });
