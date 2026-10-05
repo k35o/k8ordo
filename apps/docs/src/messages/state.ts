@@ -128,6 +128,11 @@ export const navUrl = message({
   en: 'State in the URL',
 });
 
+export const navEntry = message({
+  ja: '履歴エントリに状態を置く',
+  en: 'State in the history entry',
+});
+
 export const navReading = message({
   ja: '読み取りとリンク',
   en: 'Reading & links',
