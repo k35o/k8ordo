@@ -149,11 +149,9 @@ export function Chat() {
           <Rich>{m.aiChat.inputDescription()}</Rich>
         </p>
         <CodeBlock
-          code={`// Enter to send, Shift+Enter for a newline, IME-confirm Enter never submits.
-// status: 'ready' | 'submitted' | 'streaming' | 'error' (matches AI SDK).
-<PromptInput.Root status={status} onSubmit={send} onStop={stop}>
+          code={`<PromptInput.Root status={status} onSubmit={send} onStop={stop}>
   <PromptInput.Textarea placeholder="Type a message" />
-  <PromptInput.Submit /> {/* send when ready, stop while streaming */}
+  <PromptInput.Submit />
 </PromptInput.Root>`}
           lang="tsx"
         />
@@ -216,8 +214,7 @@ export function Chat() {
           <Rich>{m.aiChat.responseDescription()}</Rich>
         </p>
         <CodeBlock
-          code={`// pnpm add streamdown
-import { Response } from '@k8ordo/ui/ai/response';
+          code={`import { Response } from '@k8ordo/ui/ai/response';
 import 'streamdown/styles.css';
 
 <Message.Content>
@@ -243,8 +240,6 @@ import 'streamdown/styles.css';
 
 <ToolInvocation
   name="search_web"
-  // 'input-streaming' | 'input-available' | 'approval-requested' | 'approval-responded'
-  // | 'output-available' | 'output-error' | 'output-denied'
   state="output-available"
   input={{ query: 'k8ordo UI' }}
   output="…"
@@ -406,7 +401,6 @@ const sources = parts.filter((part) => part.kind === 'source');
 import { Message } from '@k8ordo/ui/ai';
 import { JsonRenderUI } from '@k8ordo/ui/json-render/registry';
 
-// An LLM returned a UI spec as a tool result — render it inside the bubble.
 <Message.Root from="assistant">
   <Message.Content>
     <JsonRenderUI spec={spec} />

@@ -1,8 +1,8 @@
 import { message } from '@k8ordo/i18n';
 
 export const description = message({
-  ja: 'k8ordo UIが提供するUIコンポーネントの一覧です。',
-  en: 'A catalog of UI components provided by k8ordo UI.',
+  ja: '`@k8ordo/ui`のすべてのコンポーネントです。カードを選ぶと、動く例とpropsの一覧が見られます。',
+  en: 'Every component in `@k8ordo/ui`. Pick a card to see it working, with its props.',
 });
 
 export const categoryButtons = message({

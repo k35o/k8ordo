@@ -29,9 +29,20 @@ export default function GenerativeUi() {
         <CodeBlock
           code={`import { catalog, uiRules } from '@k8ordo/ui/json-render';
 
-// Runs on the server. customRules injects constraints the model tends to break.
 const systemPrompt = catalog.prompt({ customRules: [...uiRules] });`}
-          lang="tsx"
+          lang="ts"
+          title="system-prompt.ts"
+        />
+        <p className="text-fg-mute">
+          <Rich>{m.generativeUi.promptLanguage()}</Rich>
+        </p>
+        <CodeBlock
+          code={`const systemPrompt = catalog.prompt({
+  customRules: [...uiRules, 'Write all UI text in Japanese.'],
+});`}
+          lang="ts"
+          marks={{ 2: 'highlight' }}
+          title="system-prompt.ts"
         />
       </section>
 
@@ -53,6 +64,7 @@ export function GenUi({ spec }: { spec: UISpec }) {
   return <JsonRenderUI spec={spec} />;
 }`}
           lang="tsx"
+          title="gen-ui.tsx"
         />
       </section>
 
@@ -72,7 +84,7 @@ const result = validateGeneratedSpec(JSON.parse(llmOutput));
 if (result.ok) {
   return <JsonRenderUI spec={result.spec} />;
 }
-const retried = await llm(result.repairPrompt); // fix and retry`}
+const retried = await llm(result.repairPrompt);`}
           lang="tsx"
         />
       </section>
@@ -118,13 +130,17 @@ export function GenUi({ response }: { response: string }) {
   return <Renderer library={library} response={response} />;
 }`}
           lang="tsx"
+          title="gen-ui.tsx"
         />
+        <p className="text-fg-mute">
+          <Rich>{m.generativeUi.openuiPrompt()}</Rich>
+        </p>
         <CodeBlock
-          code={`// Server-safe prompt generation (symmetric with catalog.prompt()).
-import { prompt } from '@k8ordo/ui/openui/prompt';
+          code={`import { prompt } from '@k8ordo/ui/openui/prompt';
 
 const systemPrompt = prompt();`}
-          lang="tsx"
+          lang="ts"
+          title="system-prompt.ts"
         />
       </section>
     </div>
