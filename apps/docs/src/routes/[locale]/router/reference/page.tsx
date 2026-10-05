@@ -4,6 +4,9 @@ import { ApiEntry } from '../../../../components/api-entry';
 import { DocPage } from '../../../../components/doc-page';
 import * as m from '../../../../messages';
 
+// `${string}` を JSX の属性に直接書くと、整形で普通の文字列に戻されて lint に当たる
+const ROUTES_RECORD = `type RoutesRecord = Record<\`/\${string}\`, RouteNode>;`;
+
 const t = m.routerReference;
 const FROM = '@k8ordo/router';
 
@@ -428,7 +431,7 @@ export default function RouterReferencePage() {
         from={FROM}
         id="routes-record"
         name="RoutesRecord"
-        signature="type RoutesRecord = Record<`/${string}`, RouteNode>;"
+        signature={ROUTES_RECORD}
         summary={t.routesRecordTypeSummary}
       />
 
