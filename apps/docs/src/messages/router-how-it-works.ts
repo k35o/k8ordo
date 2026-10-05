@@ -81,8 +81,8 @@ export const stateDescription = message({
 });
 
 export const stateKeep = message({
-  ja: 'ページは描き直されず、スクロールの位置もフォーカスもそのままです。検索の条件を変えてもページの先頭に戻らないのは、このためです。待つ描画が無いので、`finished`はURLが書き換わった時点で解決します。`@k8ordo/state`の`update()`が返す`finished`も同じです。',
-  en: 'Nothing renders again, and neither scroll nor focus moves; this is why changing a search does not jump back to the top. With no render to wait for, `finished` resolves as soon as the URL changes, and so does the one `@k8ordo/state`’s `update()` returns.',
+  ja: 'ページは作り直されず、スクロールの位置もフォーカスもそのままです。検索の条件を変えてもページの先頭に戻らないのは、このためです。待つ描画が無いので、`finished`はURLが書き換わった時点で解決します。`@k8ordo/state`の`update()`が返す`finished`も同じです。',
+  en: 'Nothing remounts, and neither scroll nor focus moves; this is why changing a search does not jump back to the top. With no render to wait for, `finished` resolves as soon as the URL changes, and so does the one `@k8ordo/state`’s `update()` returns.',
 });
 
 export const stateShown = message({
@@ -171,23 +171,23 @@ export const hookHandler = message({
 });
 
 export const hookClaim = message({
-  ja: '`claim(url)`：このナビゲーションを引き受けるかどうか。インターセプトできるのはイベントの間だけなので、同期的に答えます',
-  en: '`claim(url)`: whether to take this navigation. Interception is only possible during the event, so it answers synchronously',
+  ja: '`claim(url)`：このナビゲーションを引き受けるかどうか。インターセプトできるのはイベントの間だけなので、同期的に答えます。',
+  en: '`claim(url)`: whether to take this navigation. Interception is only possible during the event, so it answers synchronously.',
 });
 
 export const hookLoad = message({
-  ja: '`load(url, signal)`：そのURLで描くものを作ります。値かPromiseを返し、追い越されると`signal`が中断されます',
-  en: '`load(url, signal)`: produces what to render for the URL, as a value or a promise. `signal` aborts when the navigation is overtaken',
+  ja: '`load(url, signal)`：そのURLで描くものを作ります。値かPromiseを返し、追い越されると`signal`が中断されます。',
+  en: '`load(url, signal)`: produces what to render for the URL, as a value or a promise. `signal` aborts when the navigation is overtaken.',
 });
 
 export const hookApply = message({
-  ja: '`apply(value)`：作ったものを反映します。transitionの外で、ふつうの更新として呼ばれます',
-  en: '`apply(value)`: applies it, as an ordinary update outside any transition',
+  ja: '`apply(value)`：作ったものを反映します。transitionの外で、ふつうの更新として呼ばれます。',
+  en: '`apply(value)`: applies it, as an ordinary update outside any transition.',
 });
 
 export const hookRefresh = message({
-  ja: '`refresh(url)`：省略できます。パスが変わらないナビゲーションでも、読み込み直すかどうかを答えます',
-  en: '`refresh(url)`: optional. Whether a navigation that keeps the path should still load',
+  ja: '`refresh(url)`：省略できます。パスが変わらないナビゲーションでも、読み込み直すかどうかを答えます。',
+  en: '`refresh(url)`: optional. Whether a navigation that keeps the path should still load.',
 });
 
 export const hookDeferred = message({

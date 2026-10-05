@@ -76,12 +76,12 @@ export const typesList = message({
 });
 
 export const typesPattern = message({
-  ja: '`RegisteredPattern`：表のすべてのページのパターン。`/*`のパターンも含みます',
+  ja: '`RegisteredPattern`：表のすべてのページのパターン（`/*`のパターンも含む）',
   en: '`RegisteredPattern`: the pattern of every page in the table, `/*` patterns included',
 });
 
 export const typesNavigable = message({
-  ja: '`RegisteredNavigablePattern`：リンク先にできるパターン。`/*`を含むものを除きます',
+  ja: '`RegisteredNavigablePattern`：リンク先にできるパターン（`/*`を含むものを除く）',
   en: '`RegisteredNavigablePattern`: the patterns a link can point at, which leaves out those with `/*`',
 });
 

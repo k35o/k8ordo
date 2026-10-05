@@ -66,7 +66,7 @@ export const traverseTitle = message({
 });
 
 export const traverseDescription = message({
-  ja: 'Vitestのブラウザモードは、テストをiframeの中で動かします。iframeの中では、FirefoxとWebKitは戻ると進むでスクロールの位置を戻しません。また、Firefoxは戻るときのハンドラを2回走らせます。',
+  ja: 'Vitestのブラウザモードは、テストをiframeの中で動かします。iframeの中では、FirefoxとWebKitは戻ると進むでスクロールの位置を戻しません。また、Firefoxは戻ると進むのハンドラを2回走らせます。',
   en: 'Vitest’s browser mode runs a test inside an iframe. There, Firefox and WebKit do not restore the scroll position on back and forward, and Firefox runs a traversal’s handler twice.',
 });
 

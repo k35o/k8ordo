@@ -71,8 +71,8 @@ export const mountDescription = message({
 });
 
 export const mountResult = message({
-  ja: 'これで、`/products`を開くと`ProductList`が、`/nowhere`のような表に無いパスを開くと`NotFound`が描かれます。',
-  en: 'Now `/products` renders `ProductList`, and a path the table lacks, such as `/nowhere`, renders `NotFound`.',
+  ja: 'これで、`/products`を開くと`ProductList`が描かれます。`/nowhere`のように、ほかのどのパターンにも合わないパスを開くと`NotFound`が描かれます。',
+  en: 'Now `/products` renders `ProductList`, and a path no other pattern fits, such as `/nowhere`, renders `NotFound`.',
 });
 
 export const mountBrowserOnly = message({

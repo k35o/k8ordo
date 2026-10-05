@@ -41,8 +41,8 @@ export const typesWhy = message({
 });
 
 export const typesState = message({
-  ja: 'クエリ文字列だけを変える状態の更新は、ページを描き直さないので、アニメーションしません。',
-  en: 'An update that changes only the query string does not render a new page, so it never animates.',
+  ja: 'クエリ文字列だけを変える状態の更新は、ページを切り替えないので、アニメーションしません。',
+  en: 'An update that changes only the query string does not change the page, so it never animates.',
 });
 
 export const directionTitle = message({
