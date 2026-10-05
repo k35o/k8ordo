@@ -149,8 +149,8 @@ export const navReading = message({
 });
 
 export const navUpdates = message({
-  ja: '更新',
-  en: 'Updates',
+  ja: '状態を更新する',
+  en: 'Update state',
 });
 
 export const navIntegrations = message({
