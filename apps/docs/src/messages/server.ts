@@ -104,8 +104,8 @@ export const navBoundaries = message({
 });
 
 export const navActions = message({
-  ja: 'アクションとリクエスト',
-  en: 'Actions & requests',
+  ja: 'Server Actionでフォームを受け取る',
+  en: 'Receive forms with Server Actions',
 });
 
 export const navGuards = message({
