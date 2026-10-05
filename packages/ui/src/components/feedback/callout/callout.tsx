@@ -30,7 +30,11 @@ export const Callout: FC<Props> = ({ tone, label, children, ...rest }) => {
       )}
       role="note"
     >
-      <span className={cn('shrink-0', STATUS_ICON[tone])}>
+      {/* アイコンの箱を本文の 1 行の高さにして、1 行目（見出し）の縦の真ん中に置く。
+          箱全体の真ん中に置くと、本文が長いときに見出しから離れる */}
+      <span
+        className={cn('flex h-lh shrink-0 items-center', STATUS_ICON[tone])}
+      >
         <AlertIcon size="md" status={tone} />
         <span className="sr-only">{messages[STATUS_MESSAGE_KEY[tone]]}</span>
       </span>
