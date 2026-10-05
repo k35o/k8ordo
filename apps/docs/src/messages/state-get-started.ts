@@ -66,13 +66,13 @@ export const defineFields = message({
 });
 
 export const defineModule = message({
-  ja: '定義は`\'use client\'`の無いモジュールに書きます。Server Componentとクライアントの両方からimportするためです。`\'use client\'`のファイルからexportすると、Server Componentには定義ではなくclient referenceが届き、`href`などを呼べません。',
-  en: 'Write the definition in a module without `\'use client\'`, since Server Components and client code both import it. Exported from a `\'use client\'` file, it would reach a Server Component as a client reference rather than the definition, and `href` and the rest could not be called.',
+  ja: "定義は`'use client'`の無いモジュールに書きます。Server Componentとクライアントの両方からimportするためです。`'use client'`のファイルからexportすると、Server Componentには定義ではなくclient referenceが届き、`href`などを呼べません。",
+  en: "Write the definition in a module without `'use client'`, since Server Components and client code both import it. Exported from a `'use client'` file, it would reach a Server Component as a client reference rather than the definition, and `href` and the rest could not be called.",
 });
 
 export const defineKey = message({
-  ja: '1つ目の引数の`\'product-list\'`は、この状態の名前です。同じ種類の定義が同じ名前を使うと、1つの状態を黙って共有します。アプリの中で重ならない名前を付けてください。',
-  en: 'The first argument, `\'product-list\'`, names this state. Two definitions of the same kind under one name silently share one state, so pick a name nothing else in the app uses.',
+  ja: "1つ目の引数の`'product-list'`は、この状態の名前です。同じ種類の定義が同じ名前を使うと、1つの状態を黙って共有します。アプリの中で重ならない名前を付けてください。",
+  en: "The first argument, `'product-list'`, names this state. Two definitions of the same kind under one name silently share one state, so pick a name nothing else in the app uses.",
 });
 
 export const componentTitle = message({
@@ -101,8 +101,8 @@ export const componentSync = message({
 });
 
 export const componentHistory = message({
-  ja: '絞り込みを変える更新は、今の履歴エントリを書き換えます。一方でページ送りには`{ history: \'push\' }`を付けているので、ブラウザの戻るで1つ前のページに戻れます。',
-  en: 'Changing the filter rewrites the current history entry. Paging passes `{ history: \'push\' }`, so the browser’s back button returns to the previous page.',
+  ja: "絞り込みを変える更新は、今の履歴エントリを書き換えます。一方でページ送りには`{ history: 'push' }`を付けているので、ブラウザの戻るで1つ前のページに戻れます。",
+  en: "Changing the filter rewrites the current history entry. Paging passes `{ history: 'push' }`, so the browser’s back button returns to the previous page.",
 });
 
 export const serverTitle = message({

@@ -41,8 +41,8 @@ export const tabsDescription = message({
 });
 
 export const tabsKeys = message({
-  ja: '読み直したときに再描画されるのは、変わったキーを購読しているコンポーネントだけです。ほかのタブが`pageSize`だけを変えたなら、`[\'view\']`だけを購読しているコンポーネントは描き直されません。',
-  en: 'Only the components subscribed to a key that changed re-render. When another tab changes only `pageSize`, a component subscribed to `[\'view\']` alone is left as it is.',
+  ja: "読み直したときに再描画されるのは、変わったキーを購読しているコンポーネントだけです。ほかのタブが`pageSize`だけを変えたなら、`['view']`だけを購読しているコンポーネントは描き直されません。",
+  en: "Only the components subscribed to a key that changed re-render. When another tab changes only `pageSize`, a component subscribed to `['view']` alone is left as it is.",
 });
 
 export const sessionTitle = message({
@@ -66,8 +66,8 @@ export const sessionSame = message({
 });
 
 export const sessionKinds = message({
-  ja: '種類が違えば、キーが同じでも別の状態です。`defineLocalState`と`defineSessionState`に同じ`\'prefs\'`を付けても、行も値も共有しません。',
-  en: 'Different kinds are different states, even under the same key. A `defineLocalState` and a `defineSessionState` both named `\'prefs\'` share neither a row nor a value.',
+  ja: "種類が違えば、キーが同じでも別の状態です。`defineLocalState`と`defineSessionState`に同じ`'prefs'`を付けても、行も値も共有しません。",
+  en: "Different kinds are different states, even under the same key. A `defineLocalState` and a `defineSessionState` both named `'prefs'` share neither a row nor a value.",
 });
 
 export const memoryTitle = message({

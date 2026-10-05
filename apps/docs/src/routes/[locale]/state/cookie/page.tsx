@@ -85,11 +85,7 @@ export default function StateCookiePage() {
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.readDescription}
-        id="read"
-        title={t.readTitle}
-      >
+      <DocSection description={t.readDescription} id="read" title={t.readTitle}>
         <CodeBlock
           code={LAYOUT}
           lang="tsx"
@@ -110,11 +106,7 @@ export default function StateCookiePage() {
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.seedDescription}
-        id="seed"
-        title={t.seedTitle}
-      >
+      <DocSection description={t.seedDescription} id="seed" title={t.seedTitle}>
         <p>
           <Rich>{t.seedHigh()}</Rich>
         </p>

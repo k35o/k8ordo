@@ -77,11 +77,7 @@ export default function StateBeforeHydrationPage() {
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.nullDescription}
-        id="null"
-        title={t.nullTitle}
-      >
+      <DocSection description={t.nullDescription} id="null" title={t.nullTitle}>
         <ul>
           {[
             t.nullNothing,

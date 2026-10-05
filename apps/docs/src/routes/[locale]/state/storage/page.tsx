@@ -66,11 +66,7 @@ export default function StateStoragePage() {
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.tabsDescription}
-        id="tabs"
-        title={t.tabsTitle}
-      >
+      <DocSection description={t.tabsDescription} id="tabs" title={t.tabsTitle}>
         <p>
           <Rich>{t.tabsKeys()}</Rich>
         </p>

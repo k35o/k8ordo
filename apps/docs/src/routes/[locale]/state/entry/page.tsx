@@ -58,11 +58,7 @@ export default function StateEntryPage() {
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.bothDescription}
-        id="both"
-        title={t.bothTitle}
-      >
+      <DocSection description={t.bothDescription} id="both" title={t.bothTitle}>
         <CodeBlock code={BOTH} lang="tsx" marks={{ 10: 'highlight' }} />
         <p>
           <Rich>{t.bothMove()}</Rich>

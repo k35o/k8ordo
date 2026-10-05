@@ -187,4 +187,3 @@ export const navTroubleshooting = message({
   ja: 'うまく動かないとき',
   en: 'Troubleshooting',
 });
-

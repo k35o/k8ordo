@@ -111,8 +111,8 @@ export const baseDescription = message({
 });
 
 export const baseExample = message({
-  ja: 'たとえば、`base`が`\'/docs/\'`のときは次のようになります。',
-  en: 'With `base` set to `\'/docs/\'`, for example:',
+  ja: "たとえば、`base`が`'/docs/'`のときは次のようになります。",
+  en: "With `base` set to `'/docs/'`, for example:",
 });
 
 export const baseRouterHref = message({
@@ -141,8 +141,8 @@ export const typedGenerated = message({
 });
 
 export const typedMatch = message({
-  ja: 'パスは、表のパターンと区切りごとに照らし合わせます。文字どおりの区切りはパターンと同じ綴りでなければならず、`:param`の区切りには、空でない1区切りなら何でも入ります。テンプレートリテラルで作った`${string}`も入ります。`*`のワイルドカードは照合には使いますが、リンク先にはなりません。どのパターンにも当たらないパスは型エラーで、`/:locale`で始まる表でも`\'/ja/nowhere\'`は拒まれます。',
-  en: 'The path is matched against the table’s patterns segment by segment. A literal segment must be spelled as the pattern spells it, and a `:param` takes any one non-empty segment, a `${string}` from a template literal included. A `*` wildcard is matched but never linked. A path no pattern matches is a type error, so even a `/:locale` table refuses `\'/ja/nowhere\'`.',
+  ja: `パスは、表のパターンと区切りごとに照らし合わせます。文字どおりの区切りはパターンと同じ綴りでなければならず、\`:param\`の区切りには、空でない1区切りなら何でも入ります。テンプレートリテラルで作った\`\${string}\`も入ります。\`*\`のワイルドカードは照合には使いますが、リンク先にはなりません。どのパターンにも当たらないパスは型エラーで、\`/:locale\`で始まる表でも\`'/ja/nowhere'\`は拒まれます。`,
+  en: `The path is matched against the table’s patterns segment by segment. A literal segment must be spelled as the pattern spells it, and a \`:param\` takes any one non-empty segment, a \`\${string}\` from a template literal included. A \`*\` wildcard is matched but never linked. A path no pattern matches is a type error, so even a \`/:locale\` table refuses \`'/ja/nowhere'\`.`,
 });
 
 export const typedRuntime = message({

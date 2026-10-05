@@ -72,11 +72,7 @@ const COOKIE_CHANGE = `await cookieStore.set(
 export default function StateTestingPage() {
   return (
     <DocPage introduction={t.introduction} path="/:locale/state/testing">
-      <DocSection
-        description={t.pureDescription}
-        id="pure"
-        title={t.pureTitle}
-      >
+      <DocSection description={t.pureDescription} id="pure" title={t.pureTitle}>
         <CodeBlock code={PURE} lang="ts" title="state.test.ts" />
         <p>
           <Rich>{t.pureInput()}</Rich>
@@ -120,11 +116,7 @@ export default function StateTestingPage() {
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.tabsDescription}
-        id="tabs"
-        title={t.tabsTitle}
-      >
+      <DocSection description={t.tabsDescription} id="tabs" title={t.tabsTitle}>
         <p>
           <Rich>{t.tabsStorage()}</Rich>
         </p>

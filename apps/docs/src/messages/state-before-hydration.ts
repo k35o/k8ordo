@@ -91,8 +91,8 @@ export const rawDescription = message({
 });
 
 export const rawFields = message({
-  ja: '中身を信頼せず、必要なフィールドだけを、それぞれ自分で確かめて読んでください。上の例が`s && s.mode === \'dark\'`と書いているのは、そのためです。',
-  en: 'Treat it as untrusted: read only the fields you need, each with its own check and fallback. That is why the example above writes `s && s.mode === \'dark\'`.',
+  ja: "中身を信頼せず、必要なフィールドだけを、それぞれ自分で確かめて読んでください。上の例が`s && s.mode === 'dark'`と書いているのは、そのためです。",
+  en: "Treat it as untrusted: read only the fields you need, each with its own check and fallback. That is why the example above writes `s && s.mode === 'dark'`.",
 });
 
 export const rawColorScheme = message({

@@ -51,8 +51,8 @@ export const versionDescription = message({
 });
 
 export const versionStory = message({
-  ja: 'この例では、版を宣言する前の行が`{ layout: \'list\' | \'cards\' }`の形を持っていました。`migrate`は、その`layout`を今の`view`に読み替えています。',
-  en: 'In this example, rows written before the version existed held `{ layout: \'list\' | \'cards\' }`, and `migrate` turns that `layout` into today’s `view`.',
+  ja: "この例では、版を宣言する前の行が`{ layout: 'list' | 'cards' }`の形を持っていました。`migrate`は、その`layout`を今の`view`に読み替えています。",
+  en: "In this example, rows written before the version existed held `{ layout: 'list' | 'cards' }`, and `migrate` turns that `layout` into today’s `view`.",
 });
 
 export const versionEnvelope = message({

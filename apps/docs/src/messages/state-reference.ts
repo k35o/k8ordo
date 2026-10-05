@@ -361,8 +361,8 @@ export const optionsSummary = message({
 });
 
 export const optionsHistory = message({
-  ja: '既定は`\'replace\'`です。`\'push\'`は、`url`の値が変わるときだけ新しい履歴エントリを積みます。',
-  en: '`\'replace\'` by default. `\'push\'` adds a history entry, and only when a `url` value changes.',
+  ja: "既定は`'replace'`です。`'push'`は、`url`の値が変わるときだけ新しい履歴エントリを積みます。",
+  en: "`'replace'` by default. `'push'` adds a history entry, and only when a `url` value changes.",
 });
 
 export const optionsCaveats = [

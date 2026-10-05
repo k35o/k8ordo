@@ -192,11 +192,7 @@ export default function StateUpdatesPage() {
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.keysDescription}
-        id="keys"
-        title={t.keysTitle}
-      >
+      <DocSection description={t.keysDescription} id="keys" title={t.keysTitle}>
         <CodeBlock
           callouts={{
             1: t.keysAllCallout(),

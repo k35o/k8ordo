@@ -71,8 +71,8 @@ export const historyPushCallout = message({
 });
 
 export const historyPush = message({
-  ja: 'ブラウザの戻るで取り消したい更新にだけ、`{ history: \'push\' }`を付けます。ページ送りがその例です。同じバッチの中で1回でも`push`を指定すれば、そのバッチの遷移は`push`になります。',
-  en: 'Pass `{ history: \'push\' }` only for an update the back button should undo, such as paging. If any call in a batch asks for `push`, the batch’s navigation is a push.',
+  ja: "ブラウザの戻るで取り消したい更新にだけ、`{ history: 'push' }`を付けます。ページ送りがその例です。同じバッチの中で1回でも`push`を指定すれば、そのバッチの遷移は`push`になります。",
+  en: "Pass `{ history: 'push' }` only for an update the back button should undo, such as paging. If any call in a batch asks for `push`, the batch’s navigation is a push.",
 });
 
 export const historyPageOnly = message({
@@ -290,8 +290,8 @@ export const demoSteps = [
     en: 'Press “c + 1”. The URL stays as it is, and `updateCurrentEntry` is added to the log.',
   }),
   message({
-    ja: '「b + 1」を押すと、`[\'a\']`を購読している行の描画回数は増えず、ほかの2行だけが増えます。',
-    en: 'Press “b + 1”. The render count of the `[\'a\']` subscription stays the same, and only the other two go up.',
+    ja: "「b + 1」を押すと、`['a']`を購読している行の描画回数は増えず、ほかの2行だけが増えます。",
+    en: "Press “b + 1”. The render count of the `['a']` subscription stays the same, and only the other two go up.",
   }),
   message({
     ja: '「a = -1」を押すと、`a`は既定値の`0`になります。スキーマが負の数を拒むからです。',

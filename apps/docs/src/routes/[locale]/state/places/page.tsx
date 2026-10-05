@@ -124,13 +124,11 @@ export default function StatePlacesPage() {
 
       <DocSection description={t.keyDescription} id="key" title={t.keyTitle}>
         <ul>
-          {[t.keyPage, t.keyStorage, t.keyCookie, t.keyRegistry].map(
-            (item) => (
-              <li key={item()}>
-                <Rich>{item()}</Rich>
-              </li>
-            ),
-          )}
+          {[t.keyPage, t.keyStorage, t.keyCookie, t.keyRegistry].map((item) => (
+            <li key={item()}>
+              <Rich>{item()}</Rich>
+            </li>
+          ))}
         </ul>
         <p>
           <Rich>{t.keyRename()}</Rich>

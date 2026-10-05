@@ -76,8 +76,8 @@ export const atomicUrl = message({
 });
 
 export const atomicEntryOnly = message({
-  ja: '`entry`の値だけが変わるとき：`navigation.updateCurrentEntry()`で今のエントリを書き換えます。遷移を伴わないので、どのルーターの下でも動きます。`{ history: \'push\' }`を付けても、新しいエントリは作られません。',
-  en: 'When only `entry` values change: `navigation.updateCurrentEntry()` rewrites the current entry. No navigation is involved, so it works under any router, and `{ history: \'push\' }` creates no new entry.',
+  ja: "`entry`の値だけが変わるとき：`navigation.updateCurrentEntry()`で今のエントリを書き換えます。遷移を伴わないので、どのルーターの下でも動きます。`{ history: 'push' }`を付けても、新しいエントリは作られません。",
+  en: "When only `entry` values change: `navigation.updateCurrentEntry()` rewrites the current entry. No navigation is involved, so it works under any router, and `{ history: 'push' }` creates no new entry.",
 });
 
 export const atomicCarry = message({

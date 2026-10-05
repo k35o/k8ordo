@@ -103,11 +103,7 @@ export default function StateMigratePage() {
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.flowDescription}
-        id="flow"
-        title={t.flowTitle}
-      >
+      <DocSection description={t.flowDescription} id="flow" title={t.flowTitle}>
         <ol>
           {[t.flowMigrate, t.flowSalvage, t.flowWriteBack].map((item) => (
             <li key={item()}>
@@ -123,11 +119,7 @@ export default function StateMigratePage() {
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.nextDescription}
-        id="next"
-        title={t.nextTitle}
-      >
+      <DocSection description={t.nextDescription} id="next" title={t.nextTitle}>
         <CodeBlock
           code={V2}
           lang="ts"

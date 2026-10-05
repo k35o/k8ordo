@@ -130,11 +130,7 @@ export default function StateReadingPage() {
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.hrefDescription}
-        id="href"
-        title={t.hrefTitle}
-      >
+      <DocSection description={t.hrefDescription} id="href" title={t.hrefTitle}>
         <CodeBlock code={HREF} lang="ts" />
         <p>
           <Rich>{t.hrefSearch()}</Rich>
@@ -144,11 +140,7 @@ export default function StateReadingPage() {
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.baseDescription}
-        id="base"
-        title={t.baseTitle}
-      >
+      <DocSection description={t.baseDescription} id="base" title={t.baseTitle}>
         <p>
           <Rich>{t.baseExample()}</Rich>
         </p>

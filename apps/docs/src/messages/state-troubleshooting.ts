@@ -56,13 +56,13 @@ export const clientModuleTitle = message({
 });
 
 export const clientModuleCause = message({
-  ja: '定義を`\'use client\'`のファイルからexportしています。Server Componentには、定義そのものではなくclient referenceが届きます。',
-  en: 'The definition is exported from a `\'use client\'` file, so a Server Component receives a client reference instead of the definition.',
+  ja: "定義を`'use client'`のファイルからexportしています。Server Componentには、定義そのものではなくclient referenceが届きます。",
+  en: "The definition is exported from a `'use client'` file, so a Server Component receives a client reference instead of the definition.",
 });
 
 export const clientModuleFix = message({
-  ja: '定義を、`\'use client\'`の無いモジュールに移します。定義は純粋なので、サーバーとクライアントのどちらからimportしてもかまいません。',
-  en: 'Move the definition to a module without `\'use client\'`. It is pure, so both sides can import it.',
+  ja: "定義を、`'use client'`の無いモジュールに移します。定義は純粋なので、サーバーとクライアントのどちらからimportしてもかまいません。",
+  en: "Move the definition to a module without `'use client'`. It is pure, so both sides can import it.",
 });
 
 export const staticSearchTitle = message({

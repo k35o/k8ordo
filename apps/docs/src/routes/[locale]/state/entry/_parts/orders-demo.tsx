@@ -91,7 +91,9 @@ export function OrdersDemo() {
                     }));
                   }}
                   size="sm"
-                  startIcon={<ChevronIcon direction={open ? 'down' : 'right'} />}
+                  startIcon={
+                    <ChevronIcon direction={open ? 'down' : 'right'} />
+                  }
                   variant="skeleton"
                 >
                   {order.id}

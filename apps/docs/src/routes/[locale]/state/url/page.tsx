@@ -103,11 +103,7 @@ export default function StateUrlPage() {
         id="refused"
         title={t.refusedTitle}
       >
-        <CodeBlock
-          code={BOOLEAN}
-          lang="ts"
-          marks={{ 1: 'remove', 2: 'add' }}
-        />
+        <CodeBlock code={BOOLEAN} lang="ts" marks={{ 1: 'remove', 2: 'add' }} />
         <p>
           <Rich>{t.refusedBoolean()}</Rich>
         </p>
