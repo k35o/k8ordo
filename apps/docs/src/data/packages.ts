@@ -282,6 +282,15 @@ export const PACKAGES: PackageEntry[] = [
           },
         ],
       },
+      {
+        label: m.nav.groupReference,
+        sections: [
+          {
+            path: '/:locale/color-scheme/reference',
+            label: m.colorScheme.navReference,
+          },
+        ],
+      },
     ],
   },
 ];

@@ -157,3 +157,8 @@ export const navHowItWorks = message({
   ja: '仕組み',
   en: 'How it works',
 });
+
+export const navReference = message({
+  ja: 'API',
+  en: 'API',
+});
