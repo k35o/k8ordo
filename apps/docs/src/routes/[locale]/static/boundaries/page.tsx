@@ -1,5 +1,5 @@
 import { DocPage } from '../../../../components/doc-page';
-import { BoundariesGuide } from '../../../../components/framework-guide/boundaries';
+import { boundariesSections } from '../../../../components/framework-guide/boundaries';
 import * as m from '../../../../messages';
 
 export default function StaticBoundariesPage() {
@@ -8,7 +8,7 @@ export default function StaticBoundariesPage() {
       introduction={m.staticBoundaries.introduction}
       path="/:locale/static/boundaries"
     >
-      <BoundariesGuide mode="static" />
+      {boundariesSections('static')}
     </DocPage>
   );
 }

@@ -4,136 +4,160 @@ import { message } from '@k8ordo/i18n';
 // static-boundaries.ts / server-boundaries.ts が持つ。
 
 export const serverTitle = message({
-  ja: '既定はServer Component',
-  en: 'Server Components by default',
+  ja: '何も書かなければServer Component',
+  en: 'No directive means a Server Component',
 });
 
 export const serverDescription = message({
-  ja: 'ディレクティブの無いファイルはServer Componentです。サーバー側でだけ動き、`async`にでき、データを直接読めます。コードはブラウザに送られず、送られるのは描いた結果だけです。',
-  en: 'A file with no directive is a Server Component. It runs on the server side only, may be `async`, and reads its data directly; its code never reaches the browser, only what it rendered.',
+  ja: 'ディレクティブを書いていないファイルは、Server Componentとして描かれます。`async`にでき、データを直接読めます。コードはブラウザに送られず、送られるのは描いた結果だけです。',
+  en: 'A file with no directive renders as a Server Component. It may be `async` and read its data directly. Its code never reaches the browser; only what it rendered does.',
 });
 
 export const clientTitle = message({
   ja: "`'use client'`でブラウザ側に入る",
-  en: "`'use client'` opts into the browser",
+  en: "Move into the browser with `'use client'`",
 });
 
 export const clientDescription = message({
-  ja: "ブラウザ側はReact自身の語`'use client'`で宣言します。Server Componentはそれを普通にimportでき、境界を越えるのはそのコンポーネントだけで、ページはサーバーに残ります。`'use client'`のファイルがimportするものは、すべてクライアントのバンドルに一緒に入ります。",
-  en: "The browser side is opted into with React's own word, `'use client'`. A Server Component imports such a component like anything else, and only that component crosses; the page stays on the server. Whatever a `'use client'` file imports goes into the client bundle with it.",
+  ja: "ブラウザで動かしたいコンポーネントは、ファイルの先頭に`'use client'`を書きます。Server Componentはそれを普通にimportでき、ブラウザへ送られるのはそのコンポーネントと、それがimportするものだけです。",
+  en: "A component that has to run in the browser starts its file with `'use client'`. A Server Component imports it like anything else, and only that component, with what it imports, is sent to the browser.",
 });
 
 export const clientSsr = message({
-  ja: 'クライアントコンポーネントも、サーバーで一度HTMLに描かれてから、ブラウザでhydrateされます。サーバーでの描画では読めないもの（`localStorage`など）を読むときは、下の「ブラウザが必要なコンポーネント」の形にします。',
-  en: 'A client component is also rendered to HTML once on the server, then hydrated in the browser. One that reads something the server render cannot have — `localStorage`, say — takes the form in "Components that need a browser" below.',
+  ja: 'クライアントコンポーネントも、一度サーバー側でHTMLに描かれてから、ブラウザでhydrateされます。そのため`localStorage`のように、サーバー側の描画では読めないものは、描画の中でそのまま読めません。読み方は下の「ブラウザでしか読めない値を使う」で説明します。',
+  en: 'A client component is also rendered to HTML on the server side first, then hydrated in the browser. Something the server render cannot read, such as `localStorage`, cannot be read straight in its render: “Use what only the browser has” below shows how.',
 });
 
 export const propsTitle = message({
   ja: '境界を越えるprops',
-  en: 'What crosses the boundary',
+  en: 'What props can cross',
 });
 
 export const propsDescription = message({
-  ja: 'Server Componentからクライアントコンポーネントへ渡すpropsは、シリアライズされて運ばれます。渡せるのは文字列、数値、真偽値、`null`、プレーンなオブジェクトと配列、`Date`、`Map`、`Set`、`Promise`、JSX（Server Componentが描いた`children`を含む）です。関数とクラスのインスタンスは渡せません。',
-  en: 'Props from a Server Component to a client component are serialized on the way. Strings, numbers, booleans, `null`, plain objects and arrays, `Date`, `Map`, `Set`, `Promise` and JSX — including `children` a Server Component rendered — cross; functions and class instances do not.',
+  ja: 'Server Componentからクライアントコンポーネントへ渡すpropsは、シリアライズして運ばれます。そのため、渡せる値には決まりがあります。',
+  en: 'Props from a Server Component to a client component are serialized on the way, so what can be passed is limited.',
+});
+
+export const propsList = [
+  message({
+    ja: '値：文字列と数値、真偽値、`null`、`Date`',
+    en: 'Values: strings, numbers, booleans, `null` and `Date`',
+  }),
+  message({
+    ja: 'まとまり：プレーンなオブジェクトと配列、`Map`、`Set`',
+    en: 'Collections: plain objects and arrays, `Map` and `Set`',
+  }),
+  message({
+    ja: '`Promise`：クライアントコンポーネントが`use()`で待てます',
+    en: '`Promise`: the client component can wait on it with `use()`',
+  }),
+  message({
+    ja: 'JSX：Server Componentが描いた`children`も、JSXとして渡せます',
+    en: 'JSX: including `children` a Server Component rendered',
+  }),
+] as const;
+
+export const propsNo = message({
+  ja: '関数とクラスのインスタンスは渡せません。',
+  en: 'Functions and class instances cannot cross.',
 });
 
 export const propsSite = message({
-  ja: 'このサイトの文言は`message()`で、呼ぶと文字列を返す関数です。Server Componentからクライアントコンポーネントへ文言を渡すときは、関数ではなく、呼んだ結果の文字列を渡しています（`label={m.x.y()}`）。',
-  en: 'Every piece of text on this site is a `message()` — a function that returns the string when called. Where a Server Component hands text to a client component, it passes the string it called for (`label={m.x.y()}`), never the function.',
+  ja: 'このサイトの文言は、呼ぶと文字列を返す`message()`の関数です。Server Componentからクライアントコンポーネントへ文言を渡すときは、関数ではなく、呼んだ結果の文字列を渡しています。',
+  en: 'Every piece of text on this site is a `message()`, a function that returns the string when called. Where a Server Component hands text to a client component, it passes the string, not the function.',
 });
 
 export const shellTitle = message({
-  ja: 'レイアウトを2つのファイルに割る',
-  en: 'Splitting a layout across two files',
+  ja: 'レイアウトを2つのファイルに分ける',
+  en: 'Split a layout across two files',
 });
 
 export const shellDescription = message({
-  ja: '`paramsSchema`はServer Componentのファイルからしかexportできません。一方で、フックやプロバイダを使うレイアウトはクライアントコンポーネントです。このサイトの`[locale]`レイアウトは、これを2つのファイルに割っています。`layout.tsx`はスキーマを持つServer Componentで、`_parts/locale-shell.tsx`がプロバイダ、ヘッダー、フックを持つクライアント側の殻です。',
-  en: "A `paramsSchema` can only be exported from a Server Component file, while a layout that uses hooks or providers is a client component. This site's `[locale]` layout splits the two across files: `layout.tsx` is the Server Component that holds the schema, and `_parts/locale-shell.tsx` is the client shell with the providers, the header and the hooks.",
+  ja: "`paramsSchema`は、`'use client'`の無いファイルからしかexportできません。一方で、フックやプロバイダを使うレイアウトはクライアントコンポーネントです。両方が要るときは、スキーマを持つ`layout.tsx`と、そこから描くクライアント側の殻に分けます。",
+  en: "`paramsSchema` can only be exported from a file without `'use client'`, while a layout that uses hooks or providers is a client component. When you need both, split the layout into a `layout.tsx` holding the schema and a client shell it renders.",
 });
 
-export const shellWhy = message({
-  ja: 'レイアウトの`params.locale`は文字列として型が付きます。ページのまわりではスキーマがすでに受け付けた値ですが、`not-found.tsx`のまわりではスキーマが受け付けたかどうかに関わらず描かれ、どんな値でもありうるからです。そこで殻は`locales.is()`で確かめ、ロケールでなければURLから読み直します。サーバーが描いた`children`は、JSXとして境界を越えます。',
-  en: "The layout's `params.locale` is typed as a string: around a page its schema has already accepted it, but around `not-found.tsx` it renders whether or not the schema accepted, and can be anything — so the shell checks it with `locales.is()` and otherwise reads the locale from the URL. The `children` the server rendered cross the boundary as JSX.",
-});
-
-export const shellExcerpt = message({
-  ja: 'どちらのファイルも、この節に関わる部分だけを抜き出しています。実際の殻は、ヘッダー、サイドバー、フッターも描きます。',
-  en: 'Both files are cut down to the part this section is about; the real shell also renders the header, the sidebar and the footer.',
+export const shellChildren = message({
+  ja: 'サーバーで描いた`children`は、JSXとして境界を越えます。このサイトの`[locale]`のレイアウトも、この形で書いています。',
+  en: 'The `children` the server rendered cross the boundary as JSX. This site’s `[locale]` layout is built this way.',
 });
 
 export const browserTitle = message({
-  ja: 'ブラウザが必要なコンポーネント',
-  en: 'Components that need a browser',
+  ja: 'ブラウザでしか読めない値を使う',
+  en: 'Use what only the browser has',
 });
 
 export const browserDescription = message({
-  ja: 'ブラウザにしか無いもの（`localStorage`、訪問者のタイムゾーン、`navigator`）を読むクライアントコンポーネントは、`react-dom`の`browser`を使って`use(browser())`でそう言い、`<Suspense>`の中に置きます。`browser`はReact 19.3で入ったAPIです。',
-  en: "A client component that reads something only a browser has — `localStorage`, the visitor's time zone, `navigator` — says so with React's `use(browser())` (`browser` from `react-dom`, added in React 19.3), under a `<Suspense>`.",
+  ja: '`localStorage`や訪問者のタイムゾーンのように、ブラウザにしか無いものを読むクライアントコンポーネントは、`react-dom`の`browser()`を`use()`に渡します。そのうえで、`<Suspense>`の中に置きます。',
+  en: 'A client component that reads something only a browser has — `localStorage`, the visitor’s time zone — passes `browser()` from `react-dom` to `use()`, and sits inside a `<Suspense>`.',
 });
 
 export const browserHow = message({
-  ja: 'サーバーでの描画は、ファイルへのビルドでもリクエストへの応答でも、fallbackをHTMLに残し、ブラウザがhydrationの後にコンポーネントを描きます。これは失敗ではありません。ビルドは止まらず、ハンドラも何もログに出しません。`typeof window`の検査や「マウント済み」のフラグが担っていた役目で、どちらも要りません。',
-  en: 'The server render — a build into files as much as a request — leaves the fallback in the HTML, and the browser renders the component after hydration. That is not a failure: the build does not stop for it and the handler logs nothing. This is what a `typeof window` check or a "mounted" flag used to do; neither is needed.',
+  ja: 'サーバー側の描画は、ビルドでもリクエストへの応答でも、fallbackをHTMLに残します。ブラウザはhydrationの後に、そのコンポーネントを描きます。これは失敗ではないので、ビルドは止まらず、ログにも何も出ません。',
+  en: 'The server render, a build as much as a request, leaves the fallback in the HTML, and the browser renders the component after hydration. That is not a failure: the build does not stop, and nothing is logged.',
 });
 
 export const browserSuspense = message({
-  ja: '`<Suspense>`はfallbackを置く場所を決めるもので、省けません。上にSuspenseの境界が1つも無ければ、サーバーでの描画はfallbackを残す場所が無く、失敗します。',
-  en: 'The `<Suspense>` is what says where the fallback goes, and it is not optional: with no Suspense boundary above the component, the server render has nowhere to leave one, and fails.',
+  ja: '`<Suspense>`は省けません。上にSuspenseの境界が無いと、サーバー側の描画はfallbackを残す場所が無く、失敗します。',
+  en: 'The `<Suspense>` is not optional: without one above it, the server render has nowhere to leave the fallback, and fails.',
+});
+
+export const browserNoFlag = message({
+  ja: '`typeof window`で分岐したり、マウントしたかどうかのフラグを持ったりする必要はありません。',
+  en: 'There is no need for a `typeof window` check, or a flag saying whether it has mounted.',
 });
 
 export const serverOnlyTitle = message({
-  ja: 'サーバー専用のモジュール',
-  en: 'Server-only modules',
+  ja: 'サーバー専用のモジュールを守る',
+  en: 'Keep server-only modules on the server',
 });
 
 export const serverOnlyDescription = message({
-  ja: '`server-only`をimportしたモジュールは、クライアントに届いてはいけません。',
-  en: 'A module that imports `server-only` may never reach the client.',
+  ja: '秘密の値やデータベースのクライアントを持つモジュールは、先頭で`server-only`をimportします。このモジュールがクライアントのバンドルに入りそうになると、ビルドが止まります。',
+  en: 'A module holding secrets or a database client imports `server-only` at the top. If it is ever on its way into the client bundle, the build stops.',
 });
 
-export const serverOnlyFails = message({
-  ja: '届いてしまうとビルドが失敗し、そこへ至ったimportの連鎖を名指します。クライアントコンポーネントのグラフは入口からたどるのではなく描画中に組み立てられますが、その経路も含みます。',
-  en: "The build fails when one does, and names the chain of imports that got it there — including through a client component's graph, which is assembled while rendering rather than crawled from an entry.",
-});
-
-export const serverOnlyWhy = message({
-  ja: '秘密やデータベースのクライアントをこのimportの後ろに置けば、間に何段のモジュールを挟んでも渡りません。`server-only`はReactのエコシステムがこのために使うパッケージで、指定子はビルドが自分で解決します。インストールするのは、TypeScriptに解決させるためです。',
-  en: "Secrets and database clients behind that import cannot cross, however many modules sit in between. `server-only` is the package React's ecosystem uses for this; the build resolves the specifier itself, and installing it is what lets TypeScript resolve it.",
+export const serverOnlyChain = message({
+  ja: 'エラーは、そのモジュールに至ったimportの連鎖をすべて挙げます。間に何段のモジュールを挟んでも、`server-only`の後ろに置いたものはクライアントに渡りません。',
+  en: 'The error names the whole chain of imports that got there. However many modules sit in between, what is behind `server-only` never reaches the client.',
 });
 
 export const serverOnlyName = message({
-  ja: 'そうしたファイルは`*.server.ts`と名付けます。保証はimportから来るもので、名前はファイルを開かなくても、ディレクトリ木とimport文の上で読み手に見えるようにするためのものです。自分では印を付けないサードパーティのモジュールも、こうしたファイルで包めば同じ検査の下に入ります。',
-  en: 'Name such a file `*.server.ts`. The guarantee comes from the import; the name is so a reader sees it in the directory tree and at every import site without opening the file. A third-party module that does not mark itself comes under the same check once wrapped in one.',
+  ja: 'こうしたファイルは`*.server.ts`と名付けます。守っているのはimportのほうで、名前は、ファイルを開かなくてもサーバー専用だと分かるようにするためのものです。',
+  en: 'Name such a file `*.server.ts`. The import is what protects it; the name is there so a reader knows it is server-only without opening it.',
 });
 
 export const whereTitle = message({
-  ja: 'ブラウザで「今どこか」を知る',
-  en: 'Where the browser is',
+  ja: 'ブラウザで現在地を知る',
+  en: 'Know where the browser is',
 });
 
 export const whereDescription = message({
-  ja: 'フレームワークの下では、ブラウザはルート表を持ちません。ツリーはサーバーから届き、ブラウザにあるのはナビゲーションだけです。そのため`useRoute()`と`useParams()`は読むべき一致が無く、throwします。ページは`params`をpropとして受け取り、クライアントコンポーネントには要るものをpropsで渡します。現在地は`usePathname()`で、ある区画が開いているかは`useMatch()`で尋ねます。',
-  en: 'Under the framework the browser holds no route table: the tree comes from the server, and the browser has only navigation. `useRoute()` and `useParams()` therefore have no match to read, and throw. A page receives `params` as a prop and passes what a client component needs down as props; the current location is `usePathname()`, and whether a section is showing is `useMatch()`.',
+  ja: 'フレームワークの下では、ブラウザはルート表を持ちません。ページの木はサーバーから届くからです。そのため`useRoute()`と`useParams()`は、読むルートが無く例外を投げます。',
+  en: 'Under the framework the browser holds no route table, since the tree comes from the server. `useRoute()` and `useParams()` have no route to read, and throw.',
 });
 
-export const whereMore = message({
-  ja: 'フレームワークの下でのルーターの振る舞いは、リンク先にあります。',
-  en: 'How the router behaves under the framework is covered here.',
+export const whereUse = message({
+  ja: 'ページは`params`をpropsで受け取り、クライアントコンポーネントには必要な値をpropsで渡します。今のURLは`usePathname()`で、ある範囲のページが開いているかどうかは`useMatch()`で調べます。',
+  en: 'A page receives `params` as props and passes what a client component needs down as props. The current URL is `usePathname()`, and whether a part of the site is showing is `useMatch()`.',
 });
 
 export const searchTitle = message({
-  ja: 'searchは@k8ordo/stateのもの',
-  en: "The search is @k8ordo/state's",
+  ja: '`?`から後ろは`@k8ordo/state`が持つ',
+  en: 'Everything after the `?` belongs to `@k8ordo/state`',
 });
 
 export const searchDescription = message({
-  ja: 'ページはsearchを見ません（`@k8ordo/server`で読むものを宣言したページは例外です）。フレームワークが持つのはpathnameで、`?`から後ろは`@k8ordo/state`のものです。`useAppState`はブラウザでsearchを読むので、サーバーでの描画はurlスロットの既定値を描き、hydrationで実際のURLに切り替わります。searchだけが変わってもページは変わらず、何も再マウントされず、スクロール位置もそのままです。',
-  en: "A page never sees the search (under `@k8ordo/server`, one that declares what it reads is the exception). The pathname is the framework's, and everything after the `?` is `@k8ordo/state`'s: `useAppState` reads the search in the browser, so a server render shows the url slot's defaults and the live URL takes over on hydration. Changing only the search does not change the page — nothing remounts, and the scroll position stays where it was.",
+  ja: 'フレームワークが扱うのはURLのpathnameまでで、`?`から後ろのsearchは`@k8ordo/state`のものです。ページはsearchを受け取らず、`useAppState`がブラウザでsearchを読みます。',
+  en: 'The framework handles the URL up to its pathname; the search after the `?` is `@k8ordo/state`’s. A page does not receive it, and `useAppState` reads it in the browser.',
+});
+
+export const searchRender = message({
+  ja: 'そのため、サーバー側の描画ではurlスロットの既定値が描かれ、hydrationのときに実際のURLの値へ切り替わります。searchだけが変わってもページは変わらないので、何も再マウントされず、スクロール位置もそのままです。',
+  en: 'So the server render shows the url slot’s defaults, and the real URL takes over on hydration. Changing only the search does not change the page: nothing remounts, and the scroll position stays.',
 });
 
 export const searchRegister = message({
-  ja: 'アプリが`@k8ordo/state`に依存していれば、生成される`register.gen.ts`がその`Register`も書くので、状態の定義も同じルート表に対して型が付きます。',
+  ja: 'アプリが`@k8ordo/state`に依存していれば、生成される`register.gen.ts`がstateの`Register`も書きます。状態の定義も、同じルート表に対して型が付きます。',
   en: 'When the application depends on `@k8ordo/state`, the generated `register.gen.ts` writes its `Register` too, so state definitions are typed against the same route table.',
 });

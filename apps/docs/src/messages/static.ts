@@ -104,8 +104,8 @@ export const navErrors = message({
 });
 
 export const navBoundaries = message({
-  ja: '実行境界',
-  en: 'Boundaries',
+  ja: 'サーバーとブラウザの境界を書く',
+  en: 'Server and browser boundaries',
 });
 
 export const navDeploy = message({
