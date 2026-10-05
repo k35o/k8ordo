@@ -274,6 +274,12 @@ export const PACKAGES: PackageEntry[] = [
           { path: '/:locale/i18n/testing', label: m.i18n.navTesting },
         ],
       },
+      {
+        label: m.nav.groupConcepts,
+        sections: [
+          { path: '/:locale/i18n/how-it-works', label: m.i18n.navHowItWorks },
+        ],
+      },
     ],
   },
   {
