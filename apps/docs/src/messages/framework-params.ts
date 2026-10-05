@@ -9,111 +9,111 @@ export const stringsTitle = message({
 });
 
 export const stringsDescription = message({
-  ja: 'URLが運べるのは文字列だけなので、何も宣言しなければ`params`の値はすべて文字列です。`[id]`の下のページは`params.id: string`を受け取ります。',
-  en: 'A URL carries nothing but strings, so without a declaration every value in `params` is one: a page under `[id]` receives `params.id: string`.',
+  ja: '`[id]`のディレクトリの下のページは、URLの区間を`params.id`として受け取ります。URLが運べるのは文字列だけなので、何も宣言しなければ値はいつも文字列です。',
+  en: 'A page under an `[id]` directory receives that URL segment as `params.id`. A URL carries nothing but strings, so without a declaration the value is always one.',
 });
 
 export const schemaTitle = message({
-  ja: 'スキーマで形を言う',
-  en: 'Saying what it expects with a schema',
+  ja: 'スキーマで型を付ける',
+  en: 'Type it with a schema',
 });
 
 export const schemaDescription = message({
-  ja: '`page.tsx`か`layout.tsx`は`paramsSchema`をexportして、受け取るものの形を言えます。レイアウトのスキーマは、その下のすべてのページに効きます。名前が`params`でないのは、ページ自身のpropが`params`で、同じ名前のモジュール変数はそれを隠してしまうからです。',
-  en: "A `page.tsx` or a `layout.tsx` may export `paramsSchema` to say what it expects; a layout's applies to every page below it. It is not called `params` because the page's own prop is, and a module-level binding of the same name would shadow it.",
+  ja: '受け取る値の形を決めたいときは、`page.tsx`から`paramsSchema`をexportします。ページが描かれる前にスキーマが値を検証し、ページは変換した後の値を受け取ります。',
+  en: 'To say what shape the value takes, export `paramsSchema` from the `page.tsx`. The schema validates the value before the page renders, and the page receives what it produced.',
 });
 
-export const schemaLibraries = message({
-  ja: 'Standard Schemaを実装したライブラリなら何でも使えます。zod、zod/mini、ほかのライブラリ、そして`@k8ordo/i18n`の`locales.paramsSchema`もそうです。仕様はリンク先にあります。',
-  en: "Any library that implements Standard Schema works — zod, zod/mini, another library, or `@k8ordo/i18n`'s `locales.paramsSchema`. The specification is linked here.",
+export const schemaTyped = message({
+  ja: "`PageProps<'/products/:id'>`の`params.id`は、スキーマの出力に合わせて`number`になります。型は生成されたルート表から引くので、ページに型を書き足す必要はありません。",
+  en: "`params.id` in `PageProps<'/products/:id'>` follows the schema’s output and is a `number`. The type comes from the generated route table, so there is nothing to add to the page.",
 });
 
-export const schemaParsing = message({
-  ja: 'exportはファイルを構文解析して見つけるので、書き方は問いません。`export const paramsSchema = …`、`export { paramsSchema }`、分割代入の`export const { paramsSchema } = locales`のどれもexportです。文字列やコメントの中の同じ単語と`export type`は数えません。読まれるのは`page.tsx`と`layout.tsx`だけで、構文として解析できないファイルは何も宣言していないものとして扱われます。',
-  en: 'The export is found by parsing the file, so its spelling does not matter: `export const paramsSchema = …`, `export { paramsSchema }` and a destructured `export const { paramsSchema } = locales` all count, while the same word inside a string or a comment, or an `export type`, does not. Only `page.tsx` and `layout.tsx` are read, and a file that does not parse declares nothing.',
+export const schemaName = message({
+  ja: '名前が`params`ではなく`paramsSchema`なのは、ページ自身が受け取るpropも`params`だからです。同じ名前のモジュール変数を置くと、propの名前を隠してしまいます。',
+  en: 'It is `paramsSchema` rather than `params` because the page’s own prop is `params`, and a module-level binding of the same name would shadow it.',
+});
+
+export const schemaLibrary = message({
+  ja: 'スキーマには、Standard Schemaを実装したものなら何でも使えます。zodやzod/miniのほか、`@k8ordo/i18n`の`locales.paramsSchema`もその1つです。',
+  en: 'Anything that implements Standard Schema works: zod, zod/mini, or `@k8ordo/i18n`’s `locales.paramsSchema`.',
+});
+
+export const schemaFound = message({
+  ja: 'フレームワークはファイルを構文解析して`paramsSchema`のexportを探すので、`export const { paramsSchema } = locales`のような分割代入でも見つかります。',
+  en: 'The framework finds the export by parsing the file, so a destructured `export const { paramsSchema } = locales` counts as well.',
+});
+
+export const schemaSync = message({
+  ja: 'スキーマは同期的に検証するものにします。どのルートがURLに答えるかは描画の前に決めるので、非同期のスキーマは`a params schema must validate synchronously`というエラーになります。',
+  en: 'The schema has to validate synchronously. Which route answers a URL is decided before anything renders, so an asynchronous one fails with `a params schema must validate synchronously`.',
+});
+
+export const schemaServerFile = message({
+  ja: "また、`paramsSchema`は`'use client'`の無いファイルからexportします。`'use client'`のモジュールからexportした値は、サーバー側にはスキーマではなく、クライアントの参照として届くからです。",
+  en: "Export `paramsSchema` from a file without `'use client'`, too: a value exported from a `'use client'` module reaches the server side as a client reference, not as a schema.",
 });
 
 export const stackTitle = message({
-  ja: 'スタックに沿ってスキーマが順に走る',
-  en: 'The schemas along a stack run in order',
+  ja: 'レイアウトのスキーマと組み合わせる',
+  en: 'Combine it with a layout’s schema',
 });
 
 export const stackDescription = message({
-  ja: 'ページが描かれる前に、そのページの上で宣言されたスキーマが外側のレイアウトから順に走り、最後にページ自身のものが走ります。それぞれは自分が名指した文字列を自分の出力で置き換え、どのスキーマも名指さなかったパラメータは文字列のまま残ります。',
-  en: 'Before a page renders, the schemas declared along its stack run — every layout above it that declared one, outermost first, then its own. Each replaces the strings it names with what it produced, and a parameter no schema names stays a string.',
+  ja: '`layout.tsx`も`paramsSchema`をexportできます。ページが描かれる前に、上のレイアウトから順にスキーマが走り、最後にページ自身のスキーマが走ります。',
+  en: 'A `layout.tsx` may export `paramsSchema` too. Before a page renders, the schemas run from the outermost layout down, and the page’s own runs last.',
+});
+
+export const stackEach = message({
+  ja: 'それぞれのスキーマは、自分が名指したパラメータだけを置き換えます。どのスキーマも名指さなかったパラメータは、文字列のまま残ります。',
+  en: 'Each replaces only the parameters it names, and one no schema names stays a string.',
 });
 
 export const stackExample = message({
-  ja: '次の例では、`[locale]`のレイアウトがロケールを、ページが`id`を検証し、ページは両方の結果を受け取ります。',
-  en: 'Below, the `[locale]` layout validates the locale, the page validates `id`, and the page receives both results.',
+  ja: 'この例では、`[locale]`のレイアウトがロケールを、ページが`id`を検証します。ページは両方の結果を`params`で受け取ります。',
+  en: 'Here the `[locale]` layout validates the locale and the page validates `id`. The page receives both results in `params`.',
 });
 
 export const refusedTitle = message({
-  ja: '拒まれた値には、そのパターンが答えない',
-  en: 'A refused value is a pathname the pattern does not answer',
+  ja: 'スキーマが値を拒んだとき',
+  en: 'When a schema refuses a value',
 });
 
 export const refusedDescription = message({
-  ja: 'スキーマが値を拒んでも、`/products/shoes`が`NaN`を持ったページになることはありません。照合はそのパターンが一致しなかったものとして表の次へ進み、最後は`not-found.tsx`が404として答えます。ディレクトリが最初から一致しなかったのと同じです。',
-  en: 'When a schema refuses, `/products/shoes` does not become a page rendering `NaN`. The walk goes on as if the pattern had never matched, to whatever the table declares next — in the end `not-found.tsx`, under a 404.',
+  ja: 'スキーマが値を拒むと、そのルートは最初からURLに当たらなかったものとして扱われます。`/products/shoes`が`NaN`を持ったページになることはなく、ルート表の次の候補が試され、最後は`not-found.tsx`が404として答えます。',
+  en: 'When a schema refuses, the route is treated as if it had never matched. `/products/shoes` never becomes a page holding `NaN`: the table tries what comes next, and in the end `not-found.tsx` answers under a 404.',
 });
 
 export const refusedCatchAll = message({
-  ja: 'catch-allは拒まれません。ほかのどれも答えなかったものに答えるので、値を拒んだときに返るはずの404がすでにそこにあります。それでも`not-found.tsx`の上にあるレイアウトのスキーマは、描画に書き込むもののために走ります。`/en/missing`は`@k8ordo/i18n`のスキーマが受理したロケールで描かれ、拒まれたとき（`/fr/missing`）は、どれも走らなかったかのように描かれます。`/:locale/*`の`not-found.tsx`が受け取る`params.locale`は文字列のままで、どんな文字列でもありえます。',
-  en: "A catch-all is never refused: it answers what nothing else did, and a 404 is already what a refusal means. The schemas of the layouts above `not-found.tsx` still run, for what they write to the render — `/en/missing` renders in the locale `@k8ordo/i18n`'s schema accepted — and a refusal (`/fr/missing`) leaves the not-found as if none had run. The `params.locale` a `not-found.tsx` at `/:locale/*` receives stays a string, and can be any string.",
+  ja: '`not-found.tsx`自身は、どんな値も拒みません。そのため`/:locale/*`の`not-found.tsx`が受け取る`params.locale`は、`fr`のように、どのロケールにも当たらない文字列のこともあります。使う前に確かめてください。',
+  en: 'A `not-found.tsx` refuses nothing, so the `params.locale` one at `/:locale/*` receives can be a string such as `fr` that names no locale. Check it before using it.',
 });
 
-export const syncTitle = message({
-  ja: 'スキーマは同期的に',
-  en: 'The schema is synchronous',
+export const linksTitle = message({
+  ja: 'リンクにもスキーマの型を使う',
+  en: 'Links take the schema’s type too',
 });
 
-export const syncDescription = message({
-  ja: 'どのパターンがpathnameに答えるかは、何かが描かれる前に決まり、その判断は待てません。非同期に検証するスキーマは、描画の前に次のエラーで拒まれます。値が形として正しいかはスキーマが、データとして存在するかはページが確かめます。',
-  en: "Which pattern answers a pathname is decided before anything renders, and that decision cannot wait. A schema that validates asynchronously is refused with the error below. Whether a value has the right shape is the schema's question; whether it exists in your data is the page's.",
+export const linksDescription = message({
+  ja: "生成されたルート表は、パターンごとにスキーマの出力の型を持っています。そのため`href()`もページと同じ型の値を受け取り、`href('/products/:id', { id: 42 })`には数値を渡します。文字列を渡すと型エラーです。",
+  en: "The generated route table carries each pattern’s schema output type, so `href()` takes what the page receives: `href('/products/:id', { id: 42 })` takes a number, and a string there is a type error.",
 });
 
-export const clientTitle = message({
-  ja: 'スキーマはServer Componentのファイルに置く',
-  en: 'The schema lives in a Server Component file',
-});
-
-export const clientDescription = message({
-  ja: "`'use client'`のモジュールからexportした値は、RSC側にはスキーマではなくclient referenceとして届き、ハンドラはそれを走らせられません。クライアントコンポーネントにしたいレイアウトは、スキーマをServer Componentの`layout.tsx`に置き、そこからクライアント側の殻を描きます。このサイトの`[locale]`レイアウトがその形です。",
-  en: "A value exported from a `'use client'` module reaches the RSC side as a client reference, not a schema, and the handler cannot run it. A layout that has to be a client component keeps its schema in a Server Component `layout.tsx` that renders the client shell — which is how this site's `[locale]` layout is built.",
-});
-
-export const clientMore = message({
-  ja: '殻の側の書き方は、リンク先にあります。',
-  en: 'How the shell side is written is covered here.',
-});
-
-export const typesTitle = message({
-  ja: 'ページもリンクも、スキーマの出力を受け取る',
-  en: 'The page and its links take the output',
-});
-
-export const typesDescription = message({
-  ja: "生成された`Register`は、パターンごとにスキーマの出力型を持っています。`PageProps<'/products/:id'>`の`params.id`はnumberになり、`href('/products/:id', { id: 42 })`もnumberを受け取って、スキーマが読み戻せる1通りの綴りで書きます。そこに文字列やオブジェクトを渡すと型エラーです。",
-  en: "The generated `Register` carries each pattern's schema output type. `params.id` in `PageProps<'/products/:id'>` is a number, and `href('/products/:id', { id: 42 })` takes the number too, spelling it the one way the schema will read back; a string or an object there is a type error.",
-});
-
-export const typesCheck = message({
-  ja: '生成された表は各スキーマを`satisfies ParamsSchemaFor<pattern>`で検査しますが、この検査は緩やかです。パラメータを持つパターンで、そのどれも名指さないスキーマは、`tsc`が`.k8ordo/routes.gen.ts`でエラーにします。一方、実在するパラメータと一緒にパターンに無いキーを名指すスキーマは通ります。そうしたキーは無害ではありません。パターンに無いパラメータを必須にしたスキーマはすべてのpathnameを拒むので、そのページは決して答えません。`vite build`は型を検査しないので、上のエラーも`tsc`を走らせたときにしか出ません。',
-  en: 'The generated table checks each schema with `satisfies ParamsSchemaFor<pattern>`, and only loosely: on a pattern that has params, a schema naming none of them is an error `tsc` reports in `.k8ordo/routes.gen.ts`, while one naming a real param beside a key the pattern lacks passes. Such a key is not harmless — a schema that requires a param its pattern does not have refuses every pathname, so that page never answers. `vite build` does not type-check, so even the error above surfaces only under `tsc`.',
+export const linksSpelling = message({
+  ja: '`href()`は値を、スキーマが読み戻せる1通りの綴りでURLに書きます。',
+  en: '`href()` spells the value the one way the schema will read back.',
 });
 
 export const layoutTitle = message({
-  ja: 'レイアウトのparamsは文字列として型が付く',
-  en: "A layout's params are typed as strings",
+  ja: 'レイアウトの`params`は文字列として型が付く',
+  en: 'A layout’s `params` are typed as strings',
 });
 
 export const layoutDescription = message({
-  ja: 'レイアウトの`params`は、自分でスキーマを宣言していても文字列として型が付きます（`LayoutProps`でも、生成された`Layout`でも）。同じレイアウトは`not-found.tsx`のまわりでも、スキーマが受理したかどうかに関わらず描かれるからです。ただし実行時の値はこの型のとおりではありません。ページのまわりではスタックのスキーマが出したページの値（スキーマが数値にしたなら数値）が届き、`not-found.tsx`のまわりではURLの文字列がそのまま届きます。型が文字列だからといって文字列のメソッドを呼ばず、1つの形が要るならレイアウト自身が`String()`で揃えるか、型の付いた値は下のページに受け取らせます。',
-  en: "A layout's `params` are typed as strings — in `LayoutProps` and in the generated `Layout` — even when it declared a schema, because the same layout also renders around `not-found.tsx`, whether or not its schema accepted. The run-time value does not follow that type: around a page the layout receives the page's parsed params (a number where a schema coerced one), and around `not-found.tsx` the raw strings. Do not call a string method on a param because the type says string; a layout that needs one form converts the value itself (`String(params.id)`), or leaves the typed value to the pages below.",
+  ja: 'レイアウトが受け取る`params`は、スキーマを宣言していても文字列として型が付きます。同じレイアウトが`not-found.tsx`のまわりでも描かれ、そこではスキーマが値を受け付けたとは限らないからです。',
+  en: 'A layout’s `params` are typed as strings even when it declares a schema. The same layout also renders around `not-found.tsx`, where the schema may not have accepted anything.',
 });
 
-export const layoutPropsPage = message({
-  ja: '`LayoutProps<pattern>`が受け取るのは、表がその位置にページを持つパターンだけです。型の制約がページのパターンだからです。自分の位置にページが無いレイアウト（ページがすべて`shop/[id]/`の下にある`shop/layout.tsx`など）は、propsをインラインで書きます。',
-  en: '`LayoutProps<pattern>` takes only a pattern the table has a page for, since its constraint is the page patterns. A layout with no page at its own prefix — a `shop/layout.tsx` whose pages all sit under `shop/[id]/`, say — declares its props inline.',
+export const layoutValue = message({
+  ja: 'ただし、実行時の値はこの型どおりとは限りません。ページのまわりではスキーマが変換した値（数値など）が届き、`not-found.tsx`のまわりではURLの文字列がそのまま届きます。型の付いた値が要るときは、下のページで受け取ってください。',
+  en: 'The value at run time does not follow that type, though: around a page it is what the schema produced, a number say, and around `not-found.tsx` it is the URL’s string. When you need the typed value, take it in the page below.',
 });

@@ -94,8 +94,8 @@ export const navRouting = message({
 });
 
 export const navParams = message({
-  ja: 'パラメータ',
-  en: 'Parameters',
+  ja: 'パラメータを受け取る',
+  en: 'Receive parameters',
 });
 
 export const navErrors = message({
