@@ -140,6 +140,7 @@ export const PACKAGES: PackageEntry[] = [
           { path: '/:locale/state/cookie', label: m.state.navCookie },
           { path: '/:locale/state/updates', label: m.state.navUpdates },
           { path: '/:locale/state/reading', label: m.state.navReading },
+          { path: '/:locale/state/migrate', label: m.state.navMigrate },
           {
             path: '/:locale/state/integrations',
             label: m.state.navIntegrations,

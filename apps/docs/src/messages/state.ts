@@ -153,6 +153,11 @@ export const navUpdates = message({
   en: 'Update state',
 });
 
+export const navMigrate = message({
+  ja: '保存した形を変える',
+  en: 'Change a stored shape',
+});
+
 export const navIntegrations = message({
   ja: '組み合わせ',
   en: 'Integrations',
