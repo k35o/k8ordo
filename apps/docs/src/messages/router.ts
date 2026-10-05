@@ -104,8 +104,8 @@ export const navBoundaries = message({
 });
 
 export const navLinks = message({
-  ja: 'リンクと現在地',
-  en: 'Links & location',
+  ja: 'リンクを張り、移動する',
+  en: 'Link and navigate',
 });
 
 export const navLocation = message({
