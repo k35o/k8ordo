@@ -289,6 +289,10 @@ export const PACKAGES: PackageEntry[] = [
             path: '/:locale/color-scheme/reference',
             label: m.colorScheme.navReference,
           },
+          {
+            path: '/:locale/color-scheme/troubleshooting',
+            label: m.colorScheme.navTroubleshooting,
+          },
         ],
       },
     ],

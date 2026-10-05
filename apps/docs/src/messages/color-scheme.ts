@@ -162,3 +162,8 @@ export const navReference = message({
   ja: 'API',
   en: 'API',
 });
+
+export const navTroubleshooting = message({
+  ja: 'うまく動かないとき',
+  en: 'Troubleshooting',
+});
