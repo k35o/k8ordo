@@ -108,6 +108,11 @@ export const navLinks = message({
   en: 'Links & location',
 });
 
+export const navLocation = message({
+  ja: 'いまいる場所を調べる',
+  en: 'Find where you are',
+});
+
 export const navNavigation = message({
   ja: 'ナビゲーション',
   en: 'Navigation',

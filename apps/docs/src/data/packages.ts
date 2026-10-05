@@ -160,11 +160,9 @@ export const PACKAGES: PackageEntry[] = [
         label: m.nav.groupGuides,
         sections: [
           { path: '/:locale/router/routes', label: m.router.navRoutes },
-          {
-            path: '/:locale/router/boundaries',
-            label: m.router.navBoundaries,
-          },
+          { path: '/:locale/router/boundaries', label: m.router.navBoundaries },
           { path: '/:locale/router/links', label: m.router.navLinks },
+          { path: '/:locale/router/location', label: m.router.navLocation },
           { path: '/:locale/router/navigation', label: m.router.navNavigation },
           { path: '/:locale/router/framework', label: m.router.navFramework },
         ],
