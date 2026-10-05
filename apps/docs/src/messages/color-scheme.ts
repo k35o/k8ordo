@@ -144,8 +144,8 @@ export const navStorage = message({
 });
 
 export const navCsp = message({
-  ja: 'CSP',
-  en: 'CSP',
+  ja: 'CSPの下で使う',
+  en: 'Under a CSP',
 });
 
 export const navTesting = message({
