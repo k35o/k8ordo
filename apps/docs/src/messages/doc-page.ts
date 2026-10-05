@@ -44,3 +44,8 @@ export const tryIt = message({
   ja: '試してみる',
   en: 'Try it',
 });
+
+export const termSeparator = message({
+  ja: '：',
+  en: ': ',
+});

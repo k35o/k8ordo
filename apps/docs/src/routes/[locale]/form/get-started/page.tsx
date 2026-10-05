@@ -233,7 +233,7 @@ export default function FormGetStartedPage() {
           {NEXT.map((step) => (
             <li key={step.path}>
               <LocaleAnchor path={step.path}>{step.label()}</LocaleAnchor>
-              {' — '}
+              {m.docPage.termSeparator()}
               <Rich>{step.description()}</Rich>
             </li>
           ))}
