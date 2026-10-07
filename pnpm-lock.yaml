@@ -281,8 +281,8 @@ importers:
         specifier: 'catalog:'
         version: 0.3.2(@arethetypeswrong/core@0.18.5)(@types/node@24.13.6)(@vitest/browser-playwright@5.0.2)(@vitest/coverage-v8@5.0.2)(@vitest/ui@5.0.2)(esbuild@0.28.2)(jiti@2.7.0)(publint@0.3.24)(typescript@7.0.2)
       vite-plus-inspector:
-        specifier: 0.1.1
-        version: 0.1.1
+        specifier: 1.0.0
+        version: 1.0.0
       wrangler:
         specifier: 4.136.3
         version: 4.136.3(@types/node@24.13.6)
@@ -5064,8 +5064,8 @@ packages:
   vfile@6.0.3:
     resolution: {integrity: sha512-KzIbH/9tXat2u30jf+smMwFCsno4wHVdNmzFyL+T/L3UGqqk6JKfVqOFOZEpZSHADH1k40ab6NUIXZq422ov3Q==}
 
-  vite-plus-inspector@0.1.1:
-    resolution: {integrity: sha512-djKnSjbDhiM2ZbzME8pPkq2UC2pP9uMxeoUuPy9r5WJFvEkB4jsZYh9ERk8A6rRa3u4yvUZox6g/YX6W8ry37A==}
+  vite-plus-inspector@1.0.0:
+    resolution: {integrity: sha512-kdHZzfDPGJ5Yr4A2EL11k9hh9lC4hxbbnJH2bib/O5XIQjAtTK3LycB4gs6JUCB/a2jMF2UDCX8XptqM0f5YTA==}
     engines: {node: '>=24.13.0'}
     hasBin: true
 
@@ -8854,7 +8854,7 @@ snapshots:
       '@types/unist': 3.0.3
       vfile-message: 4.0.3
 
-  vite-plus-inspector@0.1.1:
+  vite-plus-inspector@1.0.0:
     dependencies:
       cac: 7.0.0
       jiti: 2.7.0
