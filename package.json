@@ -31,7 +31,7 @@
     "playwright": "catalog:",
     "typescript": "catalog:",
     "vite-plus": "catalog:",
-    "vite-plus-inspector": "0.1.1",
+    "vite-plus-inspector": "1.0.0",
     "wrangler": "4.136.3"
   },
   "engines": {
