@@ -24,7 +24,7 @@
     "inspect": "vp-inspect"
   },
   "devDependencies": {
-    "@k8o/oxc-config": "0.3.0",
+    "@k8o/oxc-config": "1.0.0",
     "@types/node": "catalog:",
     "@vitest/browser": "catalog:",
     "oxlint-tailwindcss": "1.13.0",
