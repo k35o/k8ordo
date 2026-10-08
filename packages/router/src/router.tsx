@@ -97,11 +97,18 @@ export function Router({ routes }: { routes: Routes }): ReactNode {
   );
 }
 
-/** The winning pattern and its params, untyped — `useParams` narrows. */
+/**
+ * The winning pattern and its params, untyped — `useParams` narrows. It reads
+ * the match `<Router>` provides, so under `@k8ordo/framework`, which mounts
+ * no `<Router>`, a page receives `params` as a prop and a component below it
+ * reads them with `useMatch`.
+ */
 export function useRoute(): Pick<Match, 'pattern' | 'params'> {
   const current = use(RouterContext)?.match ?? null;
   if (current === null) {
-    throw new Error('useRoute must render inside a matched <Router>');
+    throw new Error(
+      'useRoute must render inside a matched <Router> — under @k8ordo/framework a page receives params as a prop, and useMatch reads them below it',
+    );
   }
   return { pattern: current.pattern, params: current.params };
 }
@@ -111,7 +118,9 @@ export function useRoute(): Pick<Match, 'pattern' | 'params'> {
  * inferred from the pattern literal, verified against `Register`, and read
  * from context at runtime, so no component imports the route table. The
  * belief is checked: rendering under any other pattern throws instead of
- * silently returning params of the wrong shape.
+ * silently returning params of the wrong shape. Like `useRoute`, it needs a
+ * `<Router>` above it: under `@k8ordo/framework` a page receives `params` as
+ * a prop, and a component below it reads them with `useMatch`.
  */
 export function useParams<P extends RegisteredPattern>(
   pattern: P,
