@@ -1,9 +1,10 @@
 # @k8ordo/framework
 
 Turns `src/routes/` into an application of React Server Components, built
-with Vite. The application is either built into files ahead of time
-(`mode: 'static'`) or rendered per request (`mode: 'server'`); the routes,
-the boundaries and the request handler are the same in both.
+with Vite, that runs with or without a server: `mode: 'static'` renders every
+page at build time and needs no server, and `mode: 'server'` renders per
+request on one. The routes, the boundaries and the request handler are the
+same in both.
 
 Like every k8ordo package it assumes React 19 and Server Components, uses only
 what has reached Baseline newly available, and ships no polyfills or legacy
@@ -28,9 +29,15 @@ Switching takes more than changing `mode`. Towards `mode: 'server'`:
 - run the build with `node dist/server.js`, or hand its request handler to
   a host of your own ([Running and deploying](references/deploy.md)).
 
+A `fallback.tsx` may stay: server mode renders every value with its page
+and never renders it. Its placement is still checked, so a misplaced one
+fails either build.
+
 Towards `mode: 'static'`:
 
-- list the values of every route with parameters in `paths`,
+- list the values of every route with parameters in `paths` — and, for
+  values the build cannot know, put a `fallback.tsx` beside the page
+  ([Values the build did not write](references/params.md#values-the-build-did-not-write)),
 - remove what static mode refuses (below), and every read of the `request`
   prop.
 
@@ -38,6 +45,7 @@ Towards `mode: 'static'`:
 | ------------------------------- | ------------------------------------------------ | --------------------------------------- |
 | What ships                      | `dist/client/`, files any static host serves     | `dist/`, run with `node dist/server.js` |
 | A route with parameters         | its values listed by the `paths` option          | any value, arriving with the request    |
+| A value `paths` does not list   | `404.html`, or a `fallback.tsx`'s shell          | rendered by its page                    |
 | A URL nothing answers           | the host serves `404.html`                       | the application answers with a real 404 |
 | `redirect.ts`                   | written as a page that sends the visitor on      | answered with `307` / `308`             |
 | `route.ts`                      | written as the file its `GET` answers            | answers every method it exports         |
@@ -60,7 +68,7 @@ So a build stopped by the first can stop again on the second.
 
 ```
 static build cannot ship Server Actions — a file cannot receive one, and these declare 'use server':
-  src/routes/_parts/guestbook.ts
+  src/lib/guestbook.ts
 this application wants mode: 'server'
 ```
 
@@ -77,7 +85,7 @@ The same refusal, with the same last line, is said for:
 
 ```
 static build cannot answer a request — a file is written once for every visitor, and these import @k8ordo/framework/server:
-  src/routes/_parts/session.ts
+  src/lib/session.ts
 this application wants mode: 'server'
 ```
 
@@ -116,16 +124,8 @@ A server of your own that imports `@k8ordo/framework/serve` is the one
 exception, and puts the framework in `dependencies`
 ([Running and deploying](references/deploy.md#running-the-build)).
 
-Neither mode needs `"type": "module"` in the application's `package.json`:
-the build writes `dist/package.json`, which says the `.js` files in `dist/`
-are ES modules. Vite still loads its config by the application's `type`,
-though, so an application without `type: module` names it
-`vite.config.mts`: as `vite.config.ts` it warns on every build and every
-`vite dev` that it is ESM in a file loaded as CommonJS, and a config using
-top-level `await` does not load at all.
-
 ```ts
-// vite.config.ts (vite.config.mts without "type": "module")
+// vite.config.ts
 import { framework } from '@k8ordo/framework/vite';
 import { defineConfig } from 'vite';
 
@@ -133,41 +133,14 @@ export default defineConfig({ plugins: [framework({ mode: 'static' })] });
 // or framework({ mode: 'server' })
 ```
 
-```json
-// tsconfig.json — the generated type wiring lives in .k8ordo/
-{
-  "compilerOptions": {
-    "jsx": "react-jsx",
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "strict": true,
-    "noEmit": true,
-    "types": ["vite/client"]
-  },
-  "include": ["src/**/*.ts", "src/**/*.tsx", ".k8ordo/**/*.ts", "*.ts", "*.mts"]
-}
-```
-
-That is a complete `tsconfig.json` for a new application; to an existing
-one, add what it lacks. Without `jsx`, `tsc` cannot read the route files
-the generated table imports, and `vite/client` is what types
-`import.meta.env`.
-
-`moduleResolution` is `bundler`, the way Vite resolves: the generated files
-import without file extensions, and under `nodenext` none of those imports
-resolve, so the table they register is lost along with them.
-
-`.k8ordo` starts with a dot, and a bare directory entry in `include` silently
-skips it — the glob is what makes the generated types apply. Without them
-the build still works, but `tsc` checks against no table, and under
-`mode: 'server'` a page reading `request` or `search` fails to type-check. A
-fresh clone has no `.k8ordo/` until `vite build` or `vite dev` writes it, so
-CI runs the build before `tsc`
+The framework writes the route table and its types into `.k8ordo/`. Add it
+to `include` in `tsconfig.json` as a glob, `.k8ordo/**/*.ts` (an entry
+naming only the dot-directory leaves its files out), and `href()`'s paths
+and a page's `params` are typed. The generated files import without file
+extensions, so they resolve under `moduleResolution: "bundler"`, as Vite
+does. A fresh clone has no `.k8ordo/` until `vite build` or `vite dev`
+writes it, so CI runs the build before `tsc`
 ([The generated files](references/routing.md#the-generated-files)).
-`*.ts` and `*.mts` are what take in `vite.config.ts` or `vite.config.mts`,
-so a missing `mode`, or an option the mode does not take, is a type error
-in the editor as well as the error `framework()` throws when the config
-loads.
 
 ```tsx
 // src/routes/layout.tsx — no directive, so this is a Server Component
@@ -188,6 +161,11 @@ export default function HomePage() {
   return <h1>hello</h1>;
 }
 ```
+
+`src/routes/` holds route files and nothing else. Components go in
+`src/components/`, and every other module — Server Actions, schemas, state
+definitions, data, helpers — in `src/lib/`
+([Routing](references/routing.md#routes)).
 
 ```bash
 vite dev     # renders per request, with Fast Refresh (the framework brings
@@ -214,18 +192,23 @@ the same origin rather than linking them from another one.
 
 `vite dev` runs the handler per request in either mode, and writes no files.
 Under `mode: 'static'` that makes it not quite the build: a parameter value
-`paths` does not list still renders, a `redirect.ts` answers with a `307`
-(`308` when `permanent`) rather than a page that sends the visitor on, an
-unknown URL gets the handler's 404 rather than the host's `404.html`, and a
-page whose Server Component throws answers a `500` carrying the thrown
-message, where the build would stop.
+`paths` does not list still renders with its page, a `redirect.ts` answers
+with a `307` (`308` when `permanent`) rather than a page that sends the
+visitor on, an unknown URL gets the handler's 404 rather than the host's
+`404.html`, and a page whose Server Component throws answers a `500`
+carrying the thrown message, where the build would stop.
 
-`vite preview` after a static build is not the host either. It serves what
-exists in `dist/client/` as a file — `/old/index.html`, `404.html`,
-`sitemap.xml` — and hands every other URL, a page's own URL included, to the
-same handler compiled into `dist/rsc/`, which answers as `vite dev` does
-above. To see what a host will serve, serve `dist/client/` with a static file
-server.
+Beside a `fallback.tsx`, a value `paths` does not list gets the shell
+instead, as a host's rewrite would answer it, and `vite dev` says so once
+per `fallback.tsx`. It calls `paths` only for an application with a
+`fallback.tsx`, and again only when the patterns it hands in change, so a
+value added to the data since is answered as an unlisted one.
+
+`vite preview` after a static build serves it as a static host does: the
+files in `dist/client/`, the rewrites in its `_redirects`, and `404.html`
+under a `404`. It never calls the handler, so a page is the file the build
+wrote, with its Content-Security-Policy `<meta>`
+([Serving a static build](references/deploy.md#serving-a-static-build)).
 
 ## The entries
 
@@ -244,11 +227,11 @@ The package is split by where the code runs.
   request handler imports: `cookies()`, `responseHeaders()`,
   `requestHeaders()`, `redirect()`, `nonce()`, and the types `Guard`,
   `GuardContext`, `RouteRequest` and `RedirectTarget`.
-- `@k8ordo/framework/serve` — server mode only. `serve`, the Node.js server
-  for a build: what `dist/server.js` runs, for a server of your own to
-  import.
-- `@k8ordo/framework/vercel` — server mode only. `vercel()`, the plugin that
-  writes a build for Vercel.
+- `@k8ordo/framework/serve` — `serve`, the Node.js server for a build: what
+  `dist/server.js` runs, for a server of your own to import. A static build
+  it serves as a static host does, its `_redirects` applied.
+- `@k8ordo/framework/vercel` — `vercel()`, the plugin that writes a build
+  of either mode for Vercel.
 - `@k8ordo/framework/generated` — what the generated `.k8ordo/` files
   import. Not for code written by hand.
 
@@ -264,7 +247,8 @@ directory (default `src/routes`). Three more describe files, so only
 `mode: 'static'` takes them — passing them with `mode: 'server'` is a type
 error:
 
-- `paths` — the pathnames of routes with parameters
+- `paths` — the pathnames of routes with parameters, and where a
+  `fallback.tsx`'s shell stands
   ([Parameters](references/params.md#routes-with-parameters)).
 - `site` — the origin the site is served from, `https://example.com`. With
   it the build also writes `sitemap.xml`, listing every page it rendered;
@@ -282,7 +266,8 @@ Each topic has a reference of its own. Read the one the task needs:
   generated `.k8ordo/` files, titles, and fetching the next page ahead.
 - [Parameters](references/params.md): typing parameters with `paramsSchema`,
   what a refused value becomes, and, under static mode, supplying the
-  pathnames with `paths`.
+  pathnames with `paths` and answering the values it does not list with a
+  `fallback.tsx`.
 - [Errors and redirects](references/errors.md): `error.tsx`, what fails a
   static build, `notFound()` and `not-found.tsx`, and `redirect.ts`.
 - [Execution boundaries](references/boundaries.md): `'use client'`,
@@ -297,5 +282,6 @@ Each topic has a reference of its own. Read the one the task needs:
 - [Content Security Policy](references/csp.md): `nonce()` under server
   mode, the `csp` option and hashes under static mode.
 - [Running and deploying](references/deploy.md): what a static build
-  writes, `serve`, the request handler on other runtimes, `vercel()`, a tab
+  writes, the rewrites that reach its shells on each host, `serve` and
+  `vite preview`, the request handler on other runtimes, `vercel()`, a tab
   opened before a deploy, and serving under Vite's `base`.

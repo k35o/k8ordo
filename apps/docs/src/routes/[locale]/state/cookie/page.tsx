@@ -21,8 +21,8 @@ export const density = defineCookieState(
 
 const LAYOUT = `import type { LayoutProps } from '@k8ordo/framework';
 
+import { Shell } from '../components/shell';
 import { density } from '../state';
-import { Shell } from './shell';
 
 export default function Layout({
   request,
@@ -58,7 +58,7 @@ const ACTION = `'use server';
 
 import { cookies } from '@k8ordo/framework/server';
 
-import { density } from './state';
+import { density } from '../state';
 
 export async function compact() {
   cookies().set(
@@ -76,7 +76,7 @@ export default function StateCookiePage() {
         id="define"
         title={t.defineTitle}
       >
-        <CodeBlock code={DEFINE} lang="ts" title="state.ts" />
+        <CodeBlock code={DEFINE} lang="ts" title="src/state.ts" />
         <p>
           <Rich>{t.defineName()}</Rich>
         </p>
@@ -90,13 +90,13 @@ export default function StateCookiePage() {
           code={LAYOUT}
           lang="tsx"
           marks={{ 11: 'highlight' }}
-          title="routes/layout.tsx"
+          title="src/routes/layout.tsx"
         />
         <CodeBlock
           code={SHELL}
           lang="tsx"
           marks={{ 15: 'highlight' }}
-          title="routes/shell.tsx"
+          title="src/components/shell.tsx"
         />
         <p>
           <Rich>{t.readMap()}</Rich>
@@ -152,7 +152,7 @@ export default function StateCookiePage() {
           code={ACTION}
           lang="ts"
           marks={{ 9: 'highlight', 10: 'highlight', 11: 'highlight' }}
-          title="actions.ts"
+          title="src/lib/actions.ts"
         />
         <p>
           <Rich>{t.serverWriteHttpOnly()}</Rich>

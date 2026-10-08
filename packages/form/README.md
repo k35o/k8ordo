@@ -43,7 +43,7 @@ One schema drives everything — the attributes, the messages, and the
 server-side validation:
 
 ```ts
-// schema.ts
+// src/lib/schema.ts
 export const talkSchema = z.object({
   title: z.string().min(1, 'タイトルを入力してください').max(120),
   eventUrl: z.url(),
@@ -51,7 +51,7 @@ export const talkSchema = z.object({
 ```
 
 ```tsx
-// page.tsx — Server Component
+// src/routes/talks/new/page.tsx — Server Component
 import { formFields } from '@k8ordo/form/server';
 
 const talkFields = formFields(talkSchema); // derived once, plain data
@@ -62,7 +62,7 @@ export default function Page() {
 ```
 
 ```tsx
-// talk-form.tsx
+// src/components/talk-form.tsx
 'use client';
 import { useForm } from '@k8ordo/form';
 
@@ -82,7 +82,7 @@ export const TalkForm = ({ action, fields }: TalkFormProps) => {
 ```
 
 ```ts
-// actions.ts
+// src/lib/actions.ts
 'use server';
 import { parseForm } from '@k8ordo/form/server';
 import { href } from '@k8ordo/framework';

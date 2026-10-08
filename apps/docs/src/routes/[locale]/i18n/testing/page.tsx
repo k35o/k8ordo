@@ -91,7 +91,7 @@ export default function I18nTestingPage() {
           code={NODE}
           lang="ts"
           marks={{ 11: 'highlight', 15: 'highlight' }}
-          title="messages/nav.test.ts"
+          title="src/messages/nav.test.ts"
         />
         <p>
           <Rich>{t.nodeAsync()}</Rich>
@@ -107,7 +107,7 @@ export default function I18nTestingPage() {
           code={SCHEMA}
           lang="ts"
           marks={{ 8: 'highlight' }}
-          title="i18n.test.ts"
+          title="src/i18n.test.ts"
         />
         <p>
           <Rich>{t.schemaRun()}</Rich>
@@ -123,7 +123,7 @@ export default function I18nTestingPage() {
           code={BROWSER}
           lang="ts"
           marks={{ 9: 'highlight', 13: 'highlight' }}
-          title="messages/nav.browser.test.ts"
+          title="src/messages/nav.browser.test.ts"
         />
         <p>
           <Rich>{t.browserRun()}</Rich>
@@ -146,7 +146,7 @@ export default function I18nTestingPage() {
           code={TYPES}
           lang="ts"
           marks={{ 13: 'highlight', 14: 'highlight' }}
-          title="messages/cart.test.ts"
+          title="src/messages/cart.test.ts"
         />
         <p>
           <Rich>{t.typesExpect()}</Rich>

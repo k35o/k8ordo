@@ -91,8 +91,8 @@ export const notUsedRegister = message({
 });
 
 export const notUsedHost = message({
-  ja: '`PathnameProvider`と`NavigationGeneration`、`useInterceptedNavigation`：ランタイムが使います',
-  en: '`PathnameProvider`, `NavigationGeneration` and `useInterceptedNavigation`: the runtime uses them',
+  ja: '`PathnameProvider`と`BrowserPathname`、`NavigationGeneration`、`useInterceptedNavigation`：ランタイムが使います',
+  en: '`PathnameProvider`, `BrowserPathname`, `NavigationGeneration` and `useInterceptedNavigation`: the runtime uses them',
 });
 
 export const notUsedParams = message({

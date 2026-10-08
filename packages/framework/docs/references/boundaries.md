@@ -4,7 +4,7 @@ Server is the default: a file with no directive is a Server Component. The
 browser side is opted into with React's own word for it.
 
 ```tsx
-// src/routes/_parts/counter.tsx
+// src/components/counter.tsx
 'use client';
 
 import { useState } from 'react';
@@ -19,7 +19,8 @@ A Server Component imports it like anything else, and only that component
 crosses:
 
 ```tsx
-import { Counter } from './_parts/counter';
+// src/routes/page.tsx
+import { Counter } from '../components/counter';
 
 export default function HomePage() {
   return <Counter />; // the page stays on the server
@@ -59,12 +60,19 @@ nothing. The `<Suspense>` is not optional: without one above it the server
 render has nowhere to leave the fallback, and fails. This is what a
 `typeof window` check or a "mounted" flag used to do; neither is needed.
 
+Under a `fallback.tsx` the URL is one of those things. Its shell is
+rendered once for every value it answers, so the value exists only in the
+visitor's address bar, and `useMatch()` and `usePathname()` below it wait
+for the browser on their own: a component reading them there needs the
+`<Suspense>`, not the `use(browser())`
+([Values the build did not write](params.md#values-the-build-did-not-write)).
+
 ## Server-only modules
 
 A module that imports `server-only` may never reach the client:
 
 ```ts
-// src/routes/_data/catalog.server.ts
+// src/lib/catalog.server.ts
 import 'server-only';
 
 export const listProducts = () => db.query('select …');
@@ -76,8 +84,8 @@ rendering rather than crawled from an entry:
 
 ```
 'server-only' cannot be imported in client build ('ssr' environment):
- imported by src/routes/_data/catalog.server.ts
-  imported by src/routes/_parts/counter.tsx
+ imported by src/lib/catalog.server.ts
+  imported by src/components/counter.tsx
    imported by virtual:vite-rsc/client-references
 ```
 
@@ -121,7 +129,7 @@ the url schema:
 // src/routes/products/page.tsx
 import type { PageProps } from '@k8ordo/framework';
 
-import { listState } from '../_data/list-state';
+import { listState } from '../../lib/list-state';
 
 export const search = listState.url;
 

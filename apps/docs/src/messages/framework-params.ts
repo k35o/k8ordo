@@ -91,8 +91,8 @@ export const existTitle = message({
 });
 
 export const existSchema = message({
-  ja: 'スキーマが確かめるのは値の形だけです。serverモードでは、データに無い`/products/999`をページが`notFound()`で404にします。staticモードでは、`paths`に無い値のページは書き出されず、`404.html`が返ります。`paths`に入れた値のページが`notFound()`を呼ぶと、ビルドが止まります（「`paths`のエラー」の節）。`notFound()`の動きは',
-  en: 'A schema checks only the shape of the value. Under server mode, for `/products/999`, which your data does not have, the page gives a 404 with `notFound()`. Under static mode a value missing from `paths` is never written, and `404.html` answers it. A page that calls `notFound()` for a value in `paths` stops the build (see “`paths` errors”). What `notFound()` does is covered in ',
+  ja: 'スキーマが確かめるのは値の形だけです。serverモードでは、データに無い`/products/999`をページが`notFound()`で404にします。staticモードでは、`paths`に無い値のページは書き出されず、`404.html`が返ります。横に`fallback.tsx`を置けば、ブラウザで描くページがその値に答えます（「ビルドしていない値」の節）。`paths`に入れた値のページが`notFound()`を呼ぶと、ビルドできません（「`paths`のエラー」の節）。`notFound()`の動きは',
+  en: 'A schema checks only the shape of the value. Under server mode, for `/products/999`, which your data does not have, the page gives a 404 with `notFound()`. Under static mode a value missing from `paths` is never written, and `404.html` answers it, unless a `fallback.tsx` beside the page answers it with a page rendered in the browser (see “Values the build did not write”). A page that calls `notFound()` for a value in `paths` stops the build (see “`paths` errors”). What `notFound()` does is covered in ',
 });
 
 export const see = message({
@@ -141,7 +141,7 @@ export const pathsRole = message({
 });
 
 export const pathsFunction = message({
-  ja: '`paths`は値の要るパターンの一覧を受け取り、URLの配列かそのPromiseを返す関数です。パラメータの無いルートはルート表から分かるので、渡す必要はありません。`paths`が返すURLに誤りがあるとビルドが止まります。エラー文は「`paths`のエラー」の節にまとめています。',
+  ja: '`paths`は値の要るパターンの一覧を受け取り、URLの配列かそのPromiseを返す関数です。パラメータの無いルートはルート表から分かるので、渡す必要はありません。`paths`が返すURLに誤りがあるとビルドできません。エラー文は「`paths`のエラー」の節にまとめています。',
   en: '`paths` is a function that receives the patterns needing values and returns an array of URLs, or a promise of one. Routes without parameters come from the route table and need nothing. A mistake in the URLs it returns stops the build. The messages are listed under “`paths` errors”.',
 });
 
@@ -171,8 +171,8 @@ export const partialTitle = message({
 });
 
 export const expandPartial = message({
-  ja: 'パラメータを2つ持つパターンで片方だけを展開すると、`/ja/blog/:slug`のようなパスが残ります。これはURLではないので、`/:locale/blog/:slug`に当てはまるURLが無いとしてビルドが止まります。残ったパラメータも、同じ関数の中で展開してから返します。',
-  en: 'Expanding only one of two parameters leaves paths such as `/ja/blog/:slug`. That is not a URL, so the build stops, reporting no URLs for `/:locale/blog/:slug`. Expand the remaining parameter in the same function before returning.',
+  ja: 'パラメータを2つ持つパターンで片方だけを展開すると、`/ja/blog/:slug`のようなパスが残ります。これはURLではないので、ビルドがエラーになります。残ったパラメータも、同じ関数の中で展開してから返します。ただし、横に`fallback.tsx`のあるページなら、このパスはシェルの場所になります（「ビルドしていない値」の節）。',
+  en: 'Expanding only one of two parameters leaves paths such as `/ja/blog/:slug`. That is not a URL, so the build stops. Expand the remaining parameter in the same function before returning. For a page with a `fallback.tsx` beside it, though, such a path is where its shell goes (see “Values the build did not write”).',
 });
 
 export const stopsTitle = message({
@@ -181,7 +181,7 @@ export const stopsTitle = message({
 });
 
 export const stopsIntro = message({
-  ja: '`paths`が次のどれかに当たると、ビルドが止まります。エラー文には、原因のパターンかURLが入ります。',
+  ja: '`paths`が次のどれかに当たると、ビルドできません。エラー文には、原因のパターンかURLが入ります。',
   en: 'The build stops when `paths` hits any of these. Each error message includes the pattern or URL at fault.',
 });
 
@@ -193,6 +193,10 @@ export const stopsList = [
   message({
     ja: 'どのルートとも一致しないURL：`the "paths" option supplied pathnames no route wants: /produtcs/2`',
     en: 'A URL no route matches: `the "paths" option supplied pathnames no route wants: /produtcs/2`',
+  }),
+  message({
+    ja: 'パラメータの残ったパス：`the "paths" option supplied pathnames that still hold a parameter, and only a page with a fallback.tsx beside it takes one: /ja/blog/:slug ([locale]/blog/[slug]/page.tsx has none)`',
+    en: 'A path with a parameter left in it: `the "paths" option supplied pathnames that still hold a parameter, and only a page with a fallback.tsx beside it takes one: /ja/blog/:slug ([locale]/blog/[slug]/page.tsx has none)`',
   }),
   message({
     ja: 'スキーマに合わないURL：`the "paths" option supplied pathnames a params schema refused: /products/shoes`',
@@ -209,6 +213,183 @@ export const stopsList = [
   message({
     ja: 'デコードすると出力の外を指すURL：`the "paths" option supplied a pathname that leaves the output: /products/..%2F..`',
     en: 'A URL that, decoded, points outside the output: `the "paths" option supplied a pathname that leaves the output: /products/..%2F..`',
+  }),
+] as const;
+
+export const fallbackTitle = message({
+  ja: 'ビルドしていない値',
+  en: 'Values the build did not write',
+});
+
+export const fallbackStatic = message({
+  ja: 'staticモードだけで使えます。`page.tsx`の横に`fallback.tsx`を置くと、`paths`に無い値のURLにはこれが答えます。ビルドの後に増えた記事のように、ビルドの時点で並べられない値に使います。serverモードでは描かれず、`page.tsx`がどの値もリクエストごとに描きます。置き場所の検査は、どちらのモードでも行います。',
+  en: 'Static mode only. Put a `fallback.tsx` beside a `page.tsx`, and it answers every URL whose value `paths` did not list. It is for values the build cannot know, such as posts published after it ran. Server mode never renders it: there `page.tsx` renders every value per request. Its placement is checked in both modes.',
+});
+
+export const fallbackShell = message({
+  ja: 'ビルドは、レイアウトの中に`fallback.tsx`を描いたページを書きます。これをシェルと呼びます。ホスティングはファイルの無い`/posts/3`にシェルを返し、ブラウザがURLの値を読んで本文を描きます。そのための書き換えのルールは、ビルドが`_redirects`に書きます。ホスティングの設定は',
+  en: 'The build writes a page holding the layouts with `fallback.tsx` inside them: the shell. The host answers `/posts/3`, which has no file, with the shell, and the browser reads the value from the URL and renders the post. The build writes the rewrite rules for this into `_redirects`; setting up the host is covered in ',
+});
+
+export const fallbackShared = message({
+  ja: '`postId`と`PostArticle`は、ページと同じものを使います。`readPost`はブラウザからAPIを読みます。`use()`に渡すPromiseは描画のたびに作らず、値ごとに1つを使い回します。',
+  en: '`postId` and `PostArticle` are the ones the page uses. `readPost` reads the API from the browser, and the promise it hands `use()` is made once per value and reused, never once per render.',
+});
+
+export const fallbackLeavingCallout = message({
+  ja: '次のページより先にURLが変わったとき',
+  en: 'The URL moved before the next page arrived',
+});
+
+export const fallbackReceivesTitle = message({
+  ja: '受け取るもの',
+  en: 'What it receives',
+});
+
+export const fallbackProps = message({
+  ja: "`fallback.tsx`はpropsを受け取りません。シェルは値を持たないためです。Server Componentにも`'use client'`のコンポーネントにもできます。Server Componentはビルドのときに動くので、どの値にも同じものを描きます。",
+  en: "A `fallback.tsx` receives no props: a shell has no value to give it. It may be a Server Component or a `'use client'` one. A Server Component runs at build time, so it renders the same thing for every value.",
+});
+
+export const fallbackBrowser = message({
+  ja: '値を読むのはClient Componentです。シェルの中では、`useMatch`と`usePathname`を読む部分をサーバーで描かず、ブラウザに任せます。そのためHTMLには、`fallback.tsx`の`<Suspense>`のfallbackが入ります。`useMatch`が`null`を返すのは、次のページを受け取る前にURLだけが変わったときです。そのときは何も描きません。',
+  en: 'A Client Component reads the value. Inside a shell, whatever reads `useMatch` or `usePathname` is left to the browser by the server render, so the HTML holds the fallback of the `<Suspense>` in `fallback.tsx`. `useMatch` returns `null` when the URL has moved before the next page arrived; render nothing then.',
+});
+
+export const fallbackSchemas = message({
+  ja: 'ページの`paramsSchema`は、シェルでは動きません。値は、ブラウザで同じスキーマを通して確かめます。一方でレイアウトの`paramsSchema`は、シェルが埋めたパラメータに対して動きます。そのためロケールのスキーマは、ページでなくレイアウトに置きます。',
+  en: 'A page’s `paramsSchema` does not run for a shell, so check the value in the browser with the same schema. A layout’s `paramsSchema` does run, over the parameters the shell fills, which is why a locale schema belongs on a layout rather than a page.',
+});
+
+export const shellPathsTitle = message({
+  ja: 'シェルの場所',
+  en: 'Where shells go',
+});
+
+export const shellPathsCallout = message({
+  ja: 'このパスをシェルの場所として残す',
+  en: 'Keeps this path as a shell’s location',
+});
+
+export const shellPathsBare = message({
+  ja: '上にパラメータを受け取るレイアウトが無ければ、`paths`は書き出す値だけを返せば足ります。シェルはビルドがパターンから作り、`/posts/!fallback/`に書きます。',
+  en: 'When no layout above the page receives a parameter, `paths` returns just the values to write. The build makes the shell from the pattern and writes it at `/posts/!fallback/`.',
+});
+
+export const shellPathsLayout = message({
+  ja: '`[locale]/layout.tsx`のようにパラメータを受け取るレイアウトがあると、シェルでもその値が要ります。レイアウトをHTMLとして書くためです。この例のように、`:id`だけを残した`/ja/posts/:id`の形のパスも返します。これがシェルの場所になり、ロケールごとにシェルが書かれます。',
+  en: 'When a layout such as `[locale]/layout.tsx` receives a parameter, the shell needs that value too, since the layout is written as HTML. Return the path with only `:id` left as well, `/ja/posts/:id`, as this example does. Each such path is where a shell goes, one per locale.',
+});
+
+export const shellPathsBelow = message({
+  ja: '`fallback.tsx`が答えるのは、横の`page.tsx`のURLだけです。`/posts/:id/comments`のように下にあるルートは、これまでどおり値を`paths`に並べます。下のページにも`fallback.tsx`を置けば、そのページのシェルが書かれます。',
+  en: 'A `fallback.tsx` answers only for the `page.tsx` beside it. A route below it, such as `/posts/:id/comments`, still takes every value from `paths`, unless it is a page with a `fallback.tsx` of its own.',
+});
+
+export const shellPathsDev = message({
+  ja: '`vite dev`も、`paths`に無い値にはシェルで答えます。ビルドしなくても、手元で試せます。`vite dev`が`paths`を呼ぶのは`fallback.tsx`のあるアプリだけで、パターンが変わったときに読み直します。',
+  en: '`vite dev` answers a value `paths` does not list with the shell too, so you can try it without building. It calls `paths` only when the application has a `fallback.tsx`, and again only when the patterns change.',
+});
+
+export const shellNotFoundTitle = message({
+  ja: 'シェルでの`notFound()`',
+  en: '`notFound()` in a shell',
+});
+
+export const shellNotFoundInPlace = message({
+  ja: 'シェルの中のClient Componentが描画中に`notFound()`を呼ぶと、いちばん近い`not-found.tsx`がページの代わりに描かれます。URLはそのままです。その`not-found.tsx`はビルドがシェルと一緒に描いているので、新たなリクエストはしません。どの値にも同じものを出すので、シェルがブラウザに任せるパラメータを受け取る`not-found.tsx`は使いません。`fallback.tsx`の横のものなどは飛ばして、その上でいちばん近いものを使います。受け取る`pathname`もシェルのもの（`/ja/posts/!fallback`）なので、訪問者のURLを出すときはClient Componentで読みます。',
+  en: 'When a Client Component in the shell calls `notFound()` while it renders, the nearest `not-found.tsx` renders in the page’s place, and the URL stays. The build rendered that `not-found.tsx` along with the shell, so nothing more is requested. Since it is the same for every value, a `not-found.tsx` that would receive a parameter the shell leaves to the browser, such as one beside the `fallback.tsx`, is passed over for the nearest one above it. It also receives the shell’s `pathname` (`/ja/posts/!fallback`), so read the visitor’s URL in a Client Component when it shows it.',
+});
+
+export const shellNotFoundStatus = message({
+  ja: 'ただし、ホスティングはシェルを`200`で返しています。データに無い値でも、ステータスは`200`のままです。また`notFound()`が効くのは、描画の中で呼んだときだけです。effectやイベントハンドラーから呼んでも、どの境界も受け止めません。',
+  en: 'The host has already answered with the shell under a `200`, though, so a value your data does not have still gets a `200`. And `notFound()` works only during render: called from an effect or an event handler, no boundary sees it.',
+});
+
+export const shellErrorsTitle = message({
+  ja: 'シェルのエラー',
+  en: 'Shell errors',
+});
+
+export const shellErrorsIntro = message({
+  ja: 'シェルの場所か描画に誤りがあると、ビルドできません。',
+  en: 'The build stops when a shell’s location or its render goes wrong:',
+});
+
+export const shellErrorsList = [
+  message({
+    ja: '上のレイアウトがパラメータを受け取るのに、シェルの場所が無いパターン：`static build needs shell locations for /:locale/posts/:id — [locale]/layout.tsx receives :locale, …`',
+    en: 'A pattern with no shell location while a layout above receives a parameter: `static build needs shell locations for /:locale/posts/:id — [locale]/layout.tsx receives :locale, …`',
+  }),
+  message({
+    ja: '上のレイアウトが受け取るパラメータを残した場所：`the "paths" option supplied shell locations that leave out a parameter a layout above their fallback.tsx receives: /:locale/posts/:id (…)`',
+    en: 'A location that leaves out a parameter a layout above receives: `the "paths" option supplied shell locations that leave out a parameter a layout above their fallback.tsx receives: /:locale/posts/:id (…)`',
+  }),
+  message({
+    ja: 'パターンと名前の違うパラメータ：`the "paths" option supplied shell locations whose parameter names are not their pattern\'s: /en/posts/:slug (/:locale/posts/:id)`',
+    en: 'A parameter named differently from the pattern’s: `the "paths" option supplied shell locations whose parameter names are not their pattern\'s: /en/posts/:slug (/:locale/posts/:id)`',
+  }),
+  message({
+    ja: 'レイアウトのスキーマが拒んだ場所：`the "paths" option supplied shell locations a params schema refused: /xx/posts/:id`',
+    en: 'A location a layout’s schema rejects: `the "paths" option supplied shell locations a params schema refused: /xx/posts/:id`',
+  }),
+  message({
+    ja: '`!fallback`という区間を含むパス：`the "paths" option supplied pathnames with a segment named !fallback, …`',
+    en: 'A path with a segment named `!fallback`: `the "paths" option supplied pathnames with a segment named !fallback, …`',
+  }),
+  message({
+    ja: '先に宣言したルートのURLにも答えるシェル：`the shell for /ja/posts/:id ([locale]/posts/[id]/fallback.tsx) would also answer …`',
+    en: 'A shell that would also answer URLs a route declared earlier is for: `the shell for /ja/posts/:id ([locale]/posts/[id]/fallback.tsx) would also answer …`',
+  }),
+  message({
+    ja: 'ビルドの描画で`notFound()`を呼んだシェル：`the shell for /ja/posts/:id called notFound() while it rendered, …`',
+    en: 'A shell that calls `notFound()` while the build renders it: `the shell for /ja/posts/:id called notFound() while it rendered, …`',
+  }),
+  message({
+    ja: '別のルートが答えたシェル：`the shell for /ja/posts/:id (…) was answered by …`',
+    en: 'A shell another route answered: `the shell for /ja/posts/:id (…) was answered by …`',
+  }),
+] as const;
+
+export const shellErrorsFix = message({
+  ja: 'それぞれの直し方は',
+  en: 'How to fix each is covered in ',
+});
+
+export const shellCostsTitle = message({
+  ja: 'シェルの制約',
+  en: 'What a shell gives up',
+});
+
+export const shellCostsIntro = message({
+  ja: 'シェルが答える値には、書き出したページと比べて次の制約があります。',
+  en: 'Compared with a page the build wrote, a value the shell answers gives up the following.',
+});
+
+export const shellCostsList = [
+  message({
+    ja: '本文はブラウザで描きます。値ごとの本文を、Server Componentでは描けません。',
+    en: 'The body is rendered in the browser. No Server Component renders it per value.',
+  }),
+  message({
+    ja: '最初のHTMLには本文がありません。値ごとの`<title>`やOGPも無いので、JavaScriptを動かさないクローラーには読めません。',
+    en: 'The first HTML has no body, and no per-value `<title>` or OGP either, so a crawler that runs no JavaScript sees none of it.',
+  }),
+  message({
+    ja: 'データに無い値にも、ホスティングは`200`で答えます。`not-found.tsx`で`<meta name="robots" content="noindex">`を描くと、検索結果に載りません。',
+    en: 'A value your data does not have is still answered with a `200`. Render `<meta name="robots" content="noindex">` in `not-found.tsx` to keep it out of search results.',
+  }),
+  message({
+    ja: 'データは、ブラウザから読めるAPIに置きます。`csp`を書いているなら、`connect-src`にAPIのoriginを足します。',
+    en: 'The data has to be on an API the browser can reach. If you set `csp`, add the API’s origin to `connect-src`.',
+  }),
+  message({
+    ja: 'レイアウトは、`pathname`としてシェルのURL（`/posts/!fallback`）を受け取ります。canonicalや`hreflang`のようにURLから作るものは、Client Componentで描きます。HTMLに`!fallback`が残ると、ビルドが警告します。',
+    en: 'Layouts receive the shell’s URL, `/posts/!fallback`, as `pathname`. Render anything made from the URL, such as a canonical link or `hreflang`, in a Client Component. The build warns when `!fallback` is left in the HTML.',
+  }),
+  message({
+    ja: '書き換えのルールを読めないホスティングでは使えません。GitHub Pagesでは、ビルドしていない値に`404.html`が返ります。',
+    en: 'It needs a host that rewrites. On GitHub Pages, a value the build did not write gets `404.html`.',
   }),
 ] as const;
 

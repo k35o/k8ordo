@@ -10,7 +10,7 @@ const t = m.frameworkActions;
 
 const ACTIONS = `'use server';
 
-import { saveTalk } from '../../_data/talks.server';
+import { saveTalk } from './talks.server';
 
 export type TalkState = { error?: string };
 
@@ -30,7 +30,7 @@ const TALK_FORM = `'use client';
 
 import { useActionState } from 'react';
 
-import { createTalk } from './actions';
+import { createTalk } from '../lib/actions';
 
 export function TalkForm() {
   const [state, formAction, pending] = useActionState(createTalk, {});
@@ -52,7 +52,7 @@ const ADD_TALK = `'use server';
 import { href } from '@k8ordo/framework';
 import { redirect } from '@k8ordo/framework/server';
 
-import { saveTalk } from '../../_data/talks.server';
+import { saveTalk } from './talks.server';
 
 export async function addTalk(formData: FormData): Promise<void> {
   const title = formData.get('title');
@@ -62,7 +62,7 @@ export async function addTalk(formData: FormData): Promise<void> {
   redirect(href('/talks'));
 }`;
 
-const NEW_TALK = `import { addTalk } from '../_parts/add-talk';
+const NEW_TALK = `import { addTalk } from '../../../lib/add-talk';
 
 export default function NewTalkPage() {
   return (
@@ -78,8 +78,8 @@ const WITH_FORM = `'use server';
 import { parseForm } from '@k8ordo/form/server';
 import type { FormState } from '@k8ordo/form/server';
 
-import { insertTalk } from '../../_data/talks.server';
 import { talkSchema } from './talk-schema';
+import { insertTalk } from './talks.server';
 
 export async function createTalk(
   _previous: FormState,
@@ -104,7 +104,7 @@ export default function FrameworkActionsPage() {
             8: 'highlight',
             9: 'highlight',
           }}
-          title="src/routes/talks/_parts/actions.ts"
+          title="src/lib/actions.ts"
         />
         <p>
           <Rich>{t.declareModule()}</Rich>
@@ -116,7 +116,7 @@ export default function FrameworkActionsPage() {
           code={TALK_FORM}
           lang="tsx"
           marks={{ 8: 'highlight', 10: 'highlight' }}
-          title="src/routes/talks/_parts/talk-form.tsx"
+          title="src/components/talk-form.tsx"
         />
         <p>
           <Rich>{t.declareForm()}</Rich>
@@ -160,7 +160,7 @@ export default function FrameworkActionsPage() {
           code={ADD_TALK}
           lang="ts"
           marks={{ 13: 'highlight' }}
-          title="src/routes/talks/_parts/add-talk.ts"
+          title="src/lib/add-talk.ts"
         />
         <CodeBlock
           code={NEW_TALK}
@@ -222,7 +222,7 @@ export default function FrameworkActionsPage() {
           code={WITH_FORM}
           lang="ts"
           marks={{ 13: 'highlight', 14: 'highlight' }}
-          title="src/routes/talks/_parts/actions.ts"
+          title="src/lib/actions.ts"
         />
         <p>
           <Rich>{t.formParse()}</Rich>

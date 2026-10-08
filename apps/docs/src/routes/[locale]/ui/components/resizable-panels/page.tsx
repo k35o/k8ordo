@@ -7,8 +7,8 @@ import { PropsTable } from '../../../../../components/props-table';
 import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
+import { ResizablePanelsControlledPreview } from '../../../../../demos/ui/components/resizable-panels-previews';
 import * as m from '../../../../../messages';
-import { ResizablePanelsControlledPreview } from '../_previews/resizable-panels-previews';
 
 const FRAME =
   'border-border-base h-48 w-full overflow-hidden rounded-lg border';

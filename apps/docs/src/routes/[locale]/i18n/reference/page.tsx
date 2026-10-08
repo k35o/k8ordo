@@ -55,7 +55,7 @@ export default function I18nReferencePage() {
 ): Locales<L, D>`}
         summary={t.defineLocalesSummary}
       >
-        <CodeBlock code={DEFINE_EXAMPLE} lang="ts" title="i18n.ts" />
+        <CodeBlock code={DEFINE_EXAMPLE} lang="ts" title="src/i18n.ts" />
       </ApiEntry>
 
       <ApiEntry
@@ -212,7 +212,11 @@ function message<A extends readonly unknown[]>(
 ): Message<A>;`}
         summary={t.messageSummary}
       >
-        <CodeBlock code={MESSAGE_EXAMPLE} lang="ts" title="messages/nav.ts" />
+        <CodeBlock
+          code={MESSAGE_EXAMPLE}
+          lang="ts"
+          title="src/messages/nav.ts"
+        />
       </ApiEntry>
 
       <ApiEntry

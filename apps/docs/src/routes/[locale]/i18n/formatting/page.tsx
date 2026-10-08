@@ -4,8 +4,8 @@ import { Note } from '../../../../components/callout';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { Playground } from '../../../../components/playground';
 import { Rich } from '../../../../components/rich';
+import { TimeZoneDemo } from '../../../../demos/i18n/formatting/time-zone-demo';
 import * as m from '../../../../messages';
-import { TimeZoneDemo } from './_parts/time-zone-demo';
 
 const t = m.i18nFormatting;
 
@@ -67,7 +67,7 @@ export default function I18nFormattingPage() {
           code={PRICE}
           lang="tsx"
           marks={{ 4: 'highlight' }}
-          title="price.tsx"
+          title="src/components/price.tsx"
         />
         <p>
           <Rich>{t.membersItself()}</Rich>
@@ -86,7 +86,7 @@ export default function I18nFormattingPage() {
           code={PUBLISHED_AT}
           lang="tsx"
           marks={{ 6: 'highlight' }}
-          title="published-at.tsx"
+          title="src/components/published-at.tsx"
         />
         <p>
           <Rich>{t.datesRefuse()}</Rich>
@@ -116,7 +116,7 @@ export default function I18nFormattingPage() {
           code={CART}
           lang="ts"
           marks={{ 10: 'highlight', 16: 'highlight', 17: 'highlight' }}
-          title="messages/cart.ts"
+          title="src/messages/cart.ts"
         />
         <p>
           <Rich>{t.inMessagesPlural()}</Rich>

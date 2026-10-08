@@ -13,8 +13,8 @@ import { PropsTable } from '../../../../../components/props-table';
 import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { propsOf } from '../../../../../data/component-props';
+import { CheckboxGroupControlledPreview } from '../../../../../demos/ui/components/checkbox-group-previews';
 import * as m from '../../../../../messages';
-import { CheckboxGroupControlledPreview } from '../_previews/checkbox-group-previews';
 
 export default function CheckboxGroupPage() {
   return (

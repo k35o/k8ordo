@@ -7,9 +7,9 @@ import {
   NextSteps,
 } from '../../../components/landing';
 import { Playground } from '../../../components/playground';
+import { demoState } from '../../../demos/form/demo-state';
+import { FormDemo } from '../../../demos/form/form-demo';
 import * as m from '../../../messages';
-import { demoState } from './_parts/demo-state';
-import { FormDemo } from './_parts/form-demo';
 
 const HERO_SCHEMA = `export const talkSchema = z.object({
   title: z.string().min(1).max(120),

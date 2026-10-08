@@ -56,6 +56,26 @@ const SITEMAP = `<?xml version="1.0" encoding="UTF-8"?>
   <url><loc>https://example.com/products/1</loc></url>
 </urlset>`;
 
+const REDIRECTS = `# @k8ordo/framework: built URLs the rules below would also catch
+/posts/1 /posts/1 200
+/posts/1/index.rsc /posts/1/index.rsc 200
+/posts/2 /posts/2 200
+/posts/2/index.rsc /posts/2/index.rsc 200
+# @k8ordo/framework: values the build did not write, answered by their fallback.tsx's shell
+/posts/:p1 /posts/!fallback/ 200
+/posts/:p1/index.rsc /posts/!fallback/index.rsc 200`;
+
+const STATIC_VERCEL = `import { framework } from '@k8ordo/framework/vite';
+import { vercel } from '@k8ordo/framework/vercel';
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+  plugins: [framework({ mode: 'static' }), vercel()],
+});`;
+
+const PREVIEW = `vite build
+vite preview`;
+
 const SERVER_OUTPUT = `dist/
   server.js
   package.json
@@ -206,6 +226,75 @@ export default function FrameworkDeployPage() {
           </p>
           <p>
             <Rich>{t.sitemapNone()}</Rich>
+          </p>
+        </DocSubsection>
+        <DocSubsection id="redirects" title={t.redirectsTitle}>
+          <CodeBlock
+            code={REDIRECTS}
+            lang="text"
+            title="dist/client/_redirects"
+          />
+          <p>
+            <Rich>{t.redirectsWrite()}</Rich>
+            <LocaleAnchor path="/:locale/framework/params">
+              {m.framework.navParams()}
+            </LocaleAnchor>
+            <Rich>{t.see()}</Rich>
+          </p>
+          <p>
+            <Rich>{t.redirectsBuilt()}</Rich>
+          </p>
+          <p>
+            <Rich>{t.redirectsOwn()}</Rich>
+          </p>
+          <p>
+            <Rich>{t.redirectsBase()}</Rich>
+          </p>
+          <Note>
+            <p>
+              <Rich>{t.redirectsAssets()}</Rich>
+            </p>
+          </Note>
+        </DocSubsection>
+        <DocSubsection id="cloudflare" title={t.cloudflareTitle}>
+          <p>
+            <Rich>{t.cloudflareWorkers()}</Rich>
+          </p>
+          <p>
+            <Rich>{t.cloudflareNotFound()}</Rich>
+          </p>
+          <p>
+            <Rich>{t.cloudflareLimits()}</Rich>
+          </p>
+        </DocSubsection>
+        <DocSubsection id="static-vercel" title={t.staticVercelTitle}>
+          <CodeBlock code={STATIC_VERCEL} lang="ts" title="vite.config.ts" />
+          <p>
+            <Rich>{t.staticVercelOutput()}</Rich>
+          </p>
+          <p>
+            <Rich>{t.staticVercelWarn()}</Rich>
+          </p>
+        </DocSubsection>
+        <DocSubsection id="other-hosts" title={t.otherHostsTitle}>
+          <p>
+            <Rich>{t.otherHostsRules()}</Rich>
+          </p>
+          <Items items={t.otherHostsList} />
+          <p>
+            <Rich>{t.otherHostsMore()}</Rich>
+          </p>
+          <p>
+            <Rich>{t.otherHostsPages()}</Rich>
+          </p>
+        </DocSubsection>
+        <DocSubsection id="preview" title={t.localTitle}>
+          <CodeBlock code={PREVIEW} lang="bash" />
+          <p>
+            <Rich>{t.localPreview()}</Rich>
+          </p>
+          <p>
+            <Rich>{t.localFiles()}</Rich>
           </p>
         </DocSubsection>
       </DocSection>

@@ -7,11 +7,11 @@ import { PropsTable } from '../../../../../components/props-table';
 import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { propsOf } from '../../../../../data/component-props';
-import * as m from '../../../../../messages';
 import {
   TooltipBasicPreview,
   TooltipPlacementPreview,
-} from '../_previews/tooltip-previews';
+} from '../../../../../demos/ui/components/tooltip-previews';
+import * as m from '../../../../../messages';
 
 export default function TooltipPage() {
   return (

@@ -7,8 +7,8 @@ import { PropsTable } from '../../../../../components/props-table';
 import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { propsOf } from '../../../../../data/component-props';
+import { ResizeBasicPreview } from '../../../../../demos/ui/components/resize-previews';
 import * as m from '../../../../../messages';
-import { ResizeBasicPreview } from '../_previews/resize-previews';
 
 export default function ResizePage() {
   return (

@@ -1,6 +1,7 @@
+import type { Message } from '@k8ordo/i18n';
 import { CodeBlock } from '@k8ordo/ui/code-block';
 
-import { Pitfall } from '../../../../components/callout';
+import { Note, Pitfall } from '../../../../components/callout';
 import {
   DocPage,
   DocSection,
@@ -64,7 +65,7 @@ const EXIST = `import { notFound } from '@k8ordo/framework';
 import type { PageProps } from '@k8ordo/framework';
 import * as z from 'zod/mini';
 
-import { findProduct } from '../../_data/catalog.server';
+import { findProduct } from '../../../lib/catalog.server';
 
 export const paramsSchema = z.object({
   id: z.coerce.number().check(z.int(), z.positive()),
@@ -97,7 +98,7 @@ export default function ProductsPage() {
 const PATHS = `import { framework } from '@k8ordo/framework/vite';
 import { defineConfig } from 'vite';
 
-import { listProductIds } from './src/routes/_data/catalog';
+import { listProductIds } from './src/lib/catalog';
 
 export default defineConfig({
   plugins: [
@@ -132,11 +133,84 @@ framework({
     ),
 });`;
 
+const FALLBACK = `import { Suspense } from 'react';
+
+import { PostFromUrl } from '../../../components/post-from-url';
+
+export default function PostFallback() {
+  return (
+    <Suspense fallback={<p>Loading the post…</p>}>
+      <PostFromUrl />
+    </Suspense>
+  );
+}`;
+
+const FROM_URL = `'use client';
+
+import { notFound, useMatch } from '@k8ordo/framework';
+import { use } from 'react';
+
+import { postId } from '../lib/post-params';
+import { readPost } from '../lib/posts';
+import { PostArticle } from './post';
+
+export function PostFromUrl() {
+  const match = useMatch('/posts/:id');
+  if (match === null) return null;
+  const id = postId.safeParse(match.id);
+  if (!id.success) notFound();
+  const post = use(readPost(id.data));
+  if (post === null) notFound();
+  return <PostArticle post={post} />;
+}`;
+
+const READ_POST = `import type { Post } from '../components/post';
+
+const API = 'https://api.example.com/posts';
+const posts = new Map<number, Promise<Post | null>>();
+
+const load = async (id: number): Promise<Post | null> => {
+  const response = await fetch(\`\${API}/\${String(id)}\`);
+  if (response.status === 404) return null;
+  if (!response.ok) throw new Error(response.statusText);
+  return (await response.json()) as Post;
+};
+
+export const readPost = (id: number): Promise<Post | null> => {
+  const cached = posts.get(id);
+  if (cached !== undefined) return cached;
+  const post = load(id);
+  posts.set(id, post);
+  return post;
+};`;
+
+const SHELL_PATHS = `const ids = ['1', '2'];
+
+framework({
+  mode: 'static',
+  paths: (patterns) =>
+    locales.paths(patterns).flatMap((pathname) =>
+      pathname.endsWith('/posts/:id')
+        ? [pathname, ...ids.map((id) => pathname.replace(':id', id))]
+        : [pathname],
+    ),
+});`;
+
+const Items = ({ items }: { items: readonly Message[] }) => (
+  <ul>
+    {items.map((item) => (
+      <li key={item()}>
+        <Rich>{item()}</Rich>
+      </li>
+    ))}
+  </ul>
+);
+
 const SEARCH = `import type { PageProps } from '@k8ordo/framework';
 
-import { fetchProducts } from '../_data/catalog.server';
-import { listState } from '../_data/list-state';
-import { ProductList } from './_parts/product-list';
+import { ProductList } from '../../components/product-list';
+import { fetchProducts } from '../../lib/catalog.server';
+import { listState } from '../../lib/list-state';
 
 export const search = listState.url;
 
@@ -305,13 +379,96 @@ export default function FrameworkParamsPage() {
           <p>
             <Rich>{t.stopsIntro()}</Rich>
           </p>
-          <ul>
-            {t.stopsList.map((item) => (
-              <li key={item()}>
-                <Rich>{item()}</Rich>
-              </li>
-            ))}
-          </ul>
+          <Items items={t.stopsList} />
+        </DocSubsection>
+      </DocSection>
+
+      <DocSection id="fallback" title={t.fallbackTitle}>
+        <CodeBlock
+          code={FALLBACK}
+          lang="tsx"
+          title="src/routes/posts/[id]/fallback.tsx"
+        />
+        <CodeBlock
+          callouts={{ 12: t.fallbackLeavingCallout() }}
+          code={FROM_URL}
+          lang="tsx"
+          marks={{ 11: 'highlight', 14: 'highlight', 16: 'highlight' }}
+          title="src/components/post-from-url.tsx"
+        />
+        <CodeBlock code={READ_POST} lang="ts" title="src/lib/posts.ts" />
+        <p>
+          <Rich>{t.fallbackStatic()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.fallbackShell()}</Rich>
+          <LocaleAnchor path="/:locale/framework/deploy">
+            {m.framework.navDeploy()}
+          </LocaleAnchor>
+          <Rich>{t.see()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.fallbackShared()}</Rich>
+        </p>
+        <DocSubsection id="fallback-receives" title={t.fallbackReceivesTitle}>
+          <p>
+            <Rich>{t.fallbackProps()}</Rich>
+          </p>
+          <p>
+            <Rich>{t.fallbackBrowser()}</Rich>
+          </p>
+          <p>
+            <Rich>{t.fallbackSchemas()}</Rich>
+          </p>
+        </DocSubsection>
+        <DocSubsection id="shell-paths" title={t.shellPathsTitle}>
+          <CodeBlock
+            callouts={{ 8: t.shellPathsCallout() }}
+            code={SHELL_PATHS}
+            lang="ts"
+            marks={{ 8: 'highlight' }}
+          />
+          <p>
+            <Rich>{t.shellPathsLayout()}</Rich>
+          </p>
+          <p>
+            <Rich>{t.shellPathsBare()}</Rich>
+          </p>
+          <p>
+            <Rich>{t.shellPathsBelow()}</Rich>
+          </p>
+          <Note>
+            <p>
+              <Rich>{t.shellPathsDev()}</Rich>
+            </p>
+          </Note>
+        </DocSubsection>
+        <DocSubsection id="shell-not-found" title={t.shellNotFoundTitle}>
+          <p>
+            <Rich>{t.shellNotFoundInPlace()}</Rich>
+          </p>
+          <p>
+            <Rich>{t.shellNotFoundStatus()}</Rich>
+          </p>
+        </DocSubsection>
+        <DocSubsection id="shell-errors" title={t.shellErrorsTitle}>
+          <p>
+            <Rich>{t.shellErrorsIntro()}</Rich>
+          </p>
+          <Items items={t.shellErrorsList} />
+          <p>
+            <Rich>{t.shellErrorsFix()}</Rich>
+            <LocaleAnchor path="/:locale/framework/troubleshooting">
+              {m.framework.navTroubleshooting()}
+            </LocaleAnchor>
+            <Rich>{t.see()}</Rich>
+          </p>
+        </DocSubsection>
+        <DocSubsection id="shell-costs" title={t.shellCostsTitle}>
+          <p>
+            <Rich>{t.shellCostsIntro()}</Rich>
+          </p>
+          <Items items={t.shellCostsList} />
         </DocSubsection>
       </DocSection>
 

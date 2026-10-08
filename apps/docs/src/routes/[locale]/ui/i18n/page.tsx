@@ -51,7 +51,7 @@ export const fr: Messages = {
 const REGISTER = `import { defineLocales } from '@k8ordo/i18n';
 import { registerMessages } from '@k8ordo/ui/i18n';
 
-import { fr } from './ui-messages/fr';
+import { fr } from './messages/ui-fr';
 
 export const locales = defineLocales({
   ja: { timeZone: 'Asia/Tokyo', dir: 'ltr' },
@@ -108,7 +108,7 @@ export default function UiI18nPage() {
         id="register"
         title={t.registerTitle}
       >
-        <CodeBlock code={FRENCH} lang="ts" title="src/ui-messages/fr.ts" />
+        <CodeBlock code={FRENCH} lang="ts" title="src/messages/ui-fr.ts" />
         <p>
           <Rich>{t.registerTyped()}</Rich>
         </p>

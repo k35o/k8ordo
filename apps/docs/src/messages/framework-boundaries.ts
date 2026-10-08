@@ -75,7 +75,7 @@ export const propsList = [
 ] as const;
 
 export const propsFunction = message({
-  ja: "関数とクラスのインスタンスは渡せません。関数を渡すと、そのページの描画がReactのエラー（`Functions cannot be passed directly to Client Components`）で失敗します。staticモードではビルドが止まります。例外はServer Actionで、serverモードでは`'use server'`の関数を参照として渡せます。",
+  ja: "関数とクラスのインスタンスは渡せません。関数を渡すと、そのページの描画がReactのエラー（`Functions cannot be passed directly to Client Components`）で失敗します。staticモードではビルドできません。例外はServer Actionで、serverモードでは`'use server'`の関数を参照として渡せます。",
   en: "Functions and class instances cannot be passed. Passing a function fails the page’s render with React’s error `Functions cannot be passed directly to Client Components`. In static mode the build stops. A Server Action is the exception: in server mode a `'use server'` function is passed as a reference.",
 });
 
@@ -120,7 +120,7 @@ export const browserHow = message({
 });
 
 export const browserRender = message({
-  ja: 'サーバー側の描画は、HTMLに`fallback`を残します。ブラウザはハイドレーションの後に、そのコンポーネントを描画します。これは失敗ではないので、ビルドは止まらず、ログにも何も出ません。',
+  ja: 'サーバー側の描画は、HTMLに`fallback`を残します。ブラウザはハイドレーションの後に、そのコンポーネントを描画します。これは失敗ではないので、ビルドのエラーにはならず、ログにも何も出ません。',
   en: 'The server render leaves the `fallback` in the HTML, and the browser renders the component after hydration. That is not a failure: the build does not stop, and nothing is logged.',
 });
 
@@ -140,12 +140,12 @@ export const serverOnlyInstall = message({
 });
 
 export const serverOnlyImport = message({
-  ja: '秘密の値やデータベースのクライアントを持つモジュールは、先頭で`server-only`をimportします。このモジュールがクライアントのバンドルに入ると、ビルドが上のエラーで止まります。エラーには、そのモジュールに至ったimportの連鎖がすべて並びます。',
+  ja: '秘密の値やデータベースのクライアントを持つモジュールは、先頭で`server-only`をimportします。このモジュールがクライアントのバンドルに入ると、上のエラーになり、ビルドできません。エラーには、そのモジュールに至ったimportの連鎖がすべて並びます。',
   en: 'A module that holds secrets or a database client imports `server-only` at the top. If the module ends up in the client bundle, the build stops with the error above, which lists the whole chain of imports that led to it.',
 });
 
 export const serverOnlyName = message({
-  ja: '間に何段のモジュールを挟んでも、ビルドは同じエラーで止まります。こうしたファイルは`*.server.ts`と名付けると、開かなくてもサーバー専用だと分かります。',
+  ja: '間に何段のモジュールを挟んでも、同じエラーになります。こうしたファイルは`*.server.ts`と名付けると、開かなくてもサーバー専用だと分かります。',
   en: 'However many modules sit in between, the build stops with the same error. Naming such a file `*.server.ts` tells a reader it is server-only without opening it.',
 });
 
@@ -185,7 +185,7 @@ export const searchMode = message({
 });
 
 export const searchStatic = message({
-  ja: 'staticモードで`search`をexportすると、ビルドが`static build cannot hand a page the search`で始まるエラーで止まります。`vite dev`も同じです。検索や絞り込みを作るなら、JavaScriptが読み込まれる前から動くGETのフォームが向いています。書き方は',
+  ja: 'staticモードで`search`をexportすると、`static build cannot hand a page the search`で始まるエラーになり、ビルドできません。`vite dev`も同じです。検索や絞り込みを作るなら、JavaScriptが読み込まれる前から動くGETのフォームが向いています。書き方は',
   en: 'In static mode, a page that exports `search` stops the build with an error starting `static build cannot hand a page the search`, and `vite dev` refuses it too. For search and filtering, a GET form, which works before JavaScript loads, is the right fit. See ',
 });
 

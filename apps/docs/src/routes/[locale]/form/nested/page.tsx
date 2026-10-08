@@ -5,9 +5,9 @@ import { Note, Pitfall } from '../../../../components/callout';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { Playground } from '../../../../components/playground';
 import { Rich } from '../../../../components/rich';
+import { OrderDemo } from '../../../../demos/form/nested/order-demo';
+import { orderSchema } from '../../../../demos/form/nested/order-schema';
 import * as m from '../../../../messages';
-import { OrderDemo } from './_parts/order-demo';
-import { orderSchema } from './_parts/order-schema';
 
 const t = m.formNested;
 

@@ -27,10 +27,6 @@ export const treeMap = [
     ja: '`(docs)/guide/page.tsx`：`/guide`のページです。',
     en: '`(docs)/guide/page.tsx`: the page at `/guide`.',
   }),
-  message({
-    ja: '`_parts/counter.tsx`：URLになりません。',
-    en: '`_parts/counter.tsx`: no URL.',
-  }),
 ] as const;
 
 export const namesTitle = message({
@@ -57,8 +53,8 @@ export const namesList = [
     en: '`(docs)`: a group, which adds no segment. Use it to give part of `routes/` a layout or an `error.tsx` of its own.',
   }),
   message({
-    ja: '`_parts`：`_`か`.`で始まる名前は、ディレクトリでもファイルでもルートになりません。',
-    en: '`_parts`: a name starting with `_` or `.`, directory or file, is never a route.',
+    ja: '`.`で始まる名前：ディレクトリでもファイルでも、フレームワークは読みません。`.DS_Store`やエディタの一時ファイルがあっても、ビルドできます。',
+    en: 'A name starting with `.`: never read, directory or file. A `.DS_Store` or an editor’s temporary file does not break the build.',
   }),
 ] as const;
 
@@ -73,8 +69,8 @@ export const filesTitle = message({
 });
 
 export const filesLead = message({
-  ja: 'ディレクトリに置けるのは、次の8つの名前のファイルだけです。拡張子まで一致させます。`page.ts`のように拡張子が違うだけでも、ビルドがエラーになります。',
-  en: 'A directory may hold only files with these eight names, extension included. Even a `page.ts`, with only the extension wrong, fails the build.',
+  ja: 'ディレクトリに置けるのは、次の9つの名前のファイルだけです。拡張子まで一致させます。`page.ts`のように拡張子が違うだけでも、ビルドがエラーになります。',
+  en: 'A directory may hold only files with these nine names, extension included. Even a `page.ts`, with only the extension wrong, fails the build.',
 });
 
 export const filesList = [
@@ -113,9 +109,14 @@ export const guardFile = message({
   en: '`guard.ts`: runs before any request below it is handled, and stops it or lets it through. Server mode only.',
 });
 
+export const fallbackFile = message({
+  ja: '`fallback.tsx`：`paths`に無い値のURLに、横の`page.tsx`の代わりに答えます。staticモードだけで使えます。',
+  en: '`fallback.tsx`: answers a URL whose value `paths` did not list, in place of the `page.tsx` beside it. Static mode only.',
+});
+
 export const filesOther = message({
-  ja: 'これ以外のファイルは、`_`で始まるディレクトリに置きます。',
-  en: 'Anything else goes under a directory whose name starts with `_`.',
+  ja: '`src/routes/`に置くのは、ルートのファイルとディレクトリだけです。部品は`src/components/`に、それ以外のモジュールは`src/lib/`に置きます。Server Actionもスキーマも状態の定義も、データやヘルパーも`src/lib/`です。',
+  en: '`src/routes/` holds route files and directories, nothing else. Components go in `src/components/`, and every other module — Server Actions, schemas, state definitions, data, helpers — in `src/lib/`.',
 });
 
 export const propsTitle = message({
@@ -199,8 +200,8 @@ export const orderShadow = message({
 });
 
 export const refusesTitle = message({
-  ja: '拒まれる形',
-  en: 'Refused shapes',
+  ja: 'エラーになる構成',
+  en: 'Invalid structure',
 });
 
 export const refusesLead = message({
@@ -210,7 +211,7 @@ export const refusesLead = message({
 
 export const refusesList = [
   message({
-    ja: 'ルートのファイル名ではないファイル（`products/helper.ts`）',
+    ja: 'ルートのファイル名でないファイル（`products/helper.ts`）',
     en: 'A file that is not a route file (`products/helper.ts`)',
   }),
   message({
@@ -240,6 +241,22 @@ export const refusesList = [
   message({
     ja: 'グループの中のルートが先に当たって、表示されることのないページ',
     en: 'A page that never shows because a route inside a group answers first',
+  }),
+  message({
+    ja: '横に`page.tsx`が無い`fallback.tsx`',
+    en: 'A `fallback.tsx` with no `page.tsx` beside it',
+  }),
+  message({
+    ja: '`layout.tsx`と同じディレクトリに置いた`fallback.tsx`',
+    en: 'A `fallback.tsx` in the same directory as a `layout.tsx`',
+  }),
+  message({
+    ja: 'パラメータの無いページの`fallback.tsx`',
+    en: 'A `fallback.tsx` for a page with no parameter',
+  }),
+  message({
+    ja: 'すべてのパラメータを上のレイアウトが受け取るページの`fallback.tsx`',
+    en: 'A `fallback.tsx` for a page whose every parameter a layout above receives',
   }),
 ] as const;
 

@@ -7,11 +7,11 @@ import { PropsTable } from '../../../../../components/props-table';
 import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { propsOf } from '../../../../../data/component-props';
-import * as m from '../../../../../messages';
 import {
   PopoverBasicPreview,
   PopoverPlacementPreview,
-} from '../_previews/popover-previews';
+} from '../../../../../demos/ui/components/popover-previews';
+import * as m from '../../../../../messages';
 
 export default function PopoverPage() {
   return (

@@ -1,13 +1,13 @@
 import { message } from '@k8ordo/i18n';
 
 export const description = message({
-  ja: "React Server ComponentsのアプリをViteでビルドするフレームワークです。`mode: 'static'`ならすべてのページを静的なファイルに書き出し、`mode: 'server'`ならリクエストごとにサーバーで描画します。`src/routes/`のディレクトリが、そのままURLになります。",
-  en: "A framework that builds a React Server Components app with Vite. With `mode: 'static'` it writes every page into static files, and with `mode: 'server'` it renders per request on a server. The directories under `src/routes/` are the URLs.",
+  ja: "React Server ComponentsのアプリをViteでビルドするフレームワークです。同じ書き方のまま、`mode: 'static'`でサーバーなしのアプリに、`mode: 'server'`でサーバーありのアプリにできます。`src/routes/`のディレクトリが、そのままURLになります。",
+  en: "A framework that builds a React Server Components app with Vite. The same code becomes an app with no server under `mode: 'static'`, or one with a server under `mode: 'server'`. The directories under `src/routes/` are the URLs.",
 });
 
 export const tagline = message({
-  ja: '静的サイトもサーバーも作れるReact Server Componentsのフレームワーク',
-  en: 'A React Server Components framework on Vite that ships as static files or a server',
+  ja: '同じ書き方のまま、サーバーなしかサーバーありかを選べるReact Server Componentsのフレームワーク',
+  en: 'A React Server Components framework that lets the same code run with or without a server',
 });
 
 export const claimRoutesTitle = message({
@@ -21,40 +21,24 @@ export const claimRoutesBody = [
     en: 'Under `src/routes/`, a directory is a URL segment and `page.tsx` is the page at that URL. `[id]` is a parameter.',
   }),
   message({
-    ja: 'ほかのルートが先に一致して表示されないページや、同じURLになるファイルが2つあると、ビルドがファイル名を挙げて止まります。',
-    en: 'A page another route always answers first, or two files for the same URL, stops the build with the file names.',
+    ja: 'ほかのルートが先に一致して表示されないページや、同じURLになるファイルが2つあると、ビルドできません。エラーにはファイル名が出ます。',
+    en: 'A page another route always answers first, or two files for the same URL, fail the build, and the error names the files.',
   }),
 ] as const;
 
 export const claimModeTitle = message({
-  ja: '1行で切り替えるモード',
-  en: 'One line to switch modes',
+  ja: 'アプリごとに選ぶ2つのモード',
+  en: 'Two modes, chosen per app',
 });
 
 export const claimModeBody = [
   message({
-    ja: "`mode: 'static'`はビルドの時点で全ページを描画し、どの静的ホスティングにも置けるファイルにします。`mode: 'server'`はリクエストのたびに描画します。",
-    en: "`mode: 'static'` renders every page at build time into files any static host can serve. `mode: 'server'` renders on every request.",
+    ja: "`mode: 'static'`はページをビルド時に描画し、サーバーなしで静的ホスティングに置けるアプリにします。`mode: 'server'`はリクエストごとにサーバーで描画し、Server ActionやCookieも使えるアプリにします。",
+    en: "`mode: 'static'` renders the pages at build time, into an app that goes on a static host with no server. `mode: 'server'` renders on a server per request, into an app that can also use Server Actions and cookies.",
   }),
   message({
-    ja: '切り替えるのは`vite.config.ts`の`mode`だけです。ルートのファイルの書き方は変わりません。',
-    en: 'Switching is the `mode` in `vite.config.ts` and nothing else. Route files are written the same way in both modes.',
-  }),
-] as const;
-
-export const claimRefuseTitle = message({
-  ja: 'サーバー用コードを拒むstaticビルド',
-  en: 'A static build that refuses server code',
-});
-
-export const claimRefuseBody = [
-  message({
-    ja: "静的なファイルは、リクエストごとに処理を動かせません。`mode: 'static'`では、`'use server'`のモジュールや`guard.ts`をビルドがファイル名を挙げて拒みます。",
-    en: "Static files cannot run code per request. Under `mode: 'static'`, the build refuses a `'use server'` module or a `guard.ts`, naming the file.",
-  }),
-  message({
-    ja: "`vite dev`もファイルを読み込んだ時点で同じエラーを出します。エラーはどれも`this application wants mode: 'server'`の行で終わります。",
-    en: "`vite dev` reports the same error as soon as it loads the file. Every such error ends with the line `this application wants mode: 'server'`.",
+    ja: 'ページやレイアウトの書き方は、どちらのモードでも同じです。',
+    en: 'Pages and layouts are written the same way in both modes.',
   }),
 ] as const;
 

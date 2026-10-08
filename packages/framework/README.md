@@ -1,11 +1,11 @@
 # @k8ordo/framework
 
 Turns `src/routes/` into an application of React Server Components, built
-with Vite — either built into files ahead of time for any static host
-(`mode: 'static'`), or rendered per request, which is what gives an
-application Server Actions, guards, cookies and a real 404
-(`mode: 'server'`). Switching is changing `mode`; the routes, the boundaries
-and the request handler stay as they are.
+with Vite, and lets the same routes run with or without a server.
+`mode: 'static'` renders every page at build time into files any static host
+serves. `mode: 'server'` renders per request, which is what gives an
+application Server Actions, guards, cookies and a real 404. The routes, the
+boundaries and the request handler are the same in both.
 
 Like every [k8ordo](https://ordo.k8o.me) package it assumes React 19 and Server
 Components, uses only what has reached Baseline newly available, and ships no
@@ -67,7 +67,9 @@ src/routes/
   page.tsx              /
   not-found.tsx         static: 404.html — server: a real 404
   error.tsx             shown in place of what is below when it throws
-  products/[id]/page.tsx   /products/:id — `export const paramsSchema` types :id
+  products/[id]/
+    page.tsx            /products/:id — `export const paramsSchema` types :id
+    fallback.tsx        static: the shell for the ids paths does not list
   old/redirect.ts       /old sends the visitor elsewhere
   feed.xml/route.ts     /feed.xml answered by its GET — a Response, not a page
   admin/guard.ts        server mode: runs before everything under /admin
@@ -103,7 +105,7 @@ PORT=3000 node dist/server.js
 ```
 
 ```ts
-// src/routes/_parts/actions.ts
+// src/lib/actions.ts
 'use server';
 
 import { href } from '@k8ordo/framework';
@@ -128,6 +130,12 @@ whatever needs one — a `'use server'` module, a `guard.ts`, an import of
 `@k8ordo/framework/server` — in `vite dev` as well: `this application wants
 mode: 'server'`.
 
+A value `paths` does not list — a product added after the build — is
+answered by a `fallback.tsx` beside the page: the build writes it once as a
+shell, the layouts in HTML, and the browser draws the page from the URL.
+The build also writes the `_redirects` through which Netlify and Cloudflare
+reach the shell, and `vercel()` the same rewrites for Vercel.
+
 ## Migrating from `@k8ordo/static` or `@k8ordo/server`
 
 Both 0.1.0 packages are this one now, and `mode` says which of them an
@@ -146,6 +154,13 @@ imports:
 
 `useParams` and `useRoute` are not re-exported: a page takes `params` from
 its props. `.k8ordo/` is rewritten by the next `vite dev` or `vite build`.
+
+`src/routes/` holds only route files now. A `_parts/` or `_data/` directory
+there is no longer private: `_` is an ordinary character, so the directory is
+a URL segment and a file in it is refused. Move what it holds out of
+`routes/` — components to `src/components/`, every other module to
+`src/lib/` — and update the imports.
+
 Everything else that changed since 0.1.0 — `redirect()` lost its options,
 `sitemap()` is gone, the static mode refuses what needs a request — is in the
 [1.0.0 entry of the changelog](https://github.com/k35o/k8ordo/blob/main/packages/framework/CHANGELOG.md).
@@ -164,11 +179,14 @@ This application is built with `@k8ordo/framework` (see `mode` in
 `node_modules/@k8ordo/framework/docs/GUIDE.md`, then only the
 `docs/references/*.md` it lists that the task needs. `src/routes/` is the
 pathname space and holds only page.tsx, layout.tsx, not-found.tsx,
-error.tsx, loading.tsx, redirect.ts, guard.ts and route.ts; everything else
-goes under a `_`-prefixed directory. Never edit `.k8ordo/` — it is
-generated. Import from `@k8ordo/framework` (never `@k8ordo/router`), and the
-request API from `@k8ordo/framework/server`, which `mode: 'static'` refuses.
-Build links with `href()`; search params are `@k8ordo/state`'s.
+error.tsx, loading.tsx, fallback.tsx, redirect.ts, guard.ts and route.ts;
+components go in `src/components/` and every other module (Server Actions,
+schemas, state definitions, data, helpers) in `src/lib/`, since a
+`_`-prefixed directory there is a URL segment, not a private one. Never
+edit `.k8ordo/` — it is generated. Import from `@k8ordo/framework` (never
+`@k8ordo/router`), and the request API from `@k8ordo/framework/server`,
+which `mode: 'static'` refuses. Build links with `href()`; search params
+are `@k8ordo/state`'s.
 ```
 
 What each surface gives an agent:

@@ -331,8 +331,8 @@ misspelled one fails to compile with no setup at all. To have the **pattern**
 checked against the app's actual table as well, augment `Register` once:
 
 ```ts
-// types/k8ordo-router.d.ts
-import type { routes } from '../src/routes';
+// src/k8ordo-router.d.ts
+import type { routes } from './routes';
 
 declare module '@k8ordo/router' {
   interface Register {
@@ -589,7 +589,12 @@ package. `usePathname` needs one thing on the server,
 where there is no Navigation API to read: the pathname the render is for,
 supplied by `<PathnameProvider pathname>`. `<Router>` mounts one itself and
 the framework's runtime supplies it in either mode, so an application never writes it — only a host
-building its own seam out of `useInterceptedNavigation` has to. What does not
+building its own seam out of `useInterceptedNavigation` has to. Its
+counterpart, `<BrowserPathname>`, says a render has no pathname to give:
+below it, `usePathname` — and `useMatch`, which reads it — asks for the
+browser with `use(browser())` in a server render, so the nearest
+`<Suspense>` is left for the browser to fill. The framework's runtime wraps
+a `fallback.tsx` in it, and an application never writes it either. What does not
 carry across is `useRoute` and `useParams` —
 both read the match from context, and under the framework there is no match in
 the browser to read. A framework page receives its `params` as a prop from the

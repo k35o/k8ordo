@@ -6,12 +6,12 @@ import { PropsTable } from '../../../../../components/props-table';
 import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { propsOf } from '../../../../../data/component-props';
-import * as m from '../../../../../messages';
 import {
   BreadcrumbBasicPreview,
   BreadcrumbCurrentPagePreview,
   BreadcrumbSizesPreview,
-} from '../_previews/breadcrumb-previews';
+} from '../../../../../demos/ui/components/breadcrumb-previews';
+import * as m from '../../../../../messages';
 
 export default function BreadcrumbPage() {
   return (

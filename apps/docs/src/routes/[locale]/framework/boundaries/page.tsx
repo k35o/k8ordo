@@ -23,7 +23,7 @@ export const listProducts = async (): Promise<readonly Product[]> =>
 
 const PRODUCTS = `import { href } from '@k8ordo/framework';
 
-import { listProducts } from '../_data/catalog.server';
+import { listProducts } from '../../lib/catalog.server';
 
 export default async function ProductsPage() {
   const products = await listProducts();
@@ -58,7 +58,7 @@ export function Counter() {
   );
 }`;
 
-const HOME = `import { Counter } from './_parts/counter';
+const HOME = `import { Counter } from '../components/counter';
 
 export default function HomePage() {
   return (
@@ -71,8 +71,8 @@ export default function HomePage() {
 
 const LAYOUT = `import type { ReactNode } from 'react';
 
+import { LocaleShell } from '../../components/locale-shell';
 import { locales } from '../../i18n';
-import { LocaleShell } from './_parts/locale-shell';
 
 export const { paramsSchema } = locales;
 
@@ -113,8 +113,8 @@ export function Editor() {
 }`;
 
 const SERVER_ONLY = `'server-only' cannot be imported in client build ('ssr' environment):
- imported by src/routes/_data/catalog.server.ts
-  imported by src/routes/_parts/counter.tsx
+ imported by src/lib/catalog.server.ts
+  imported by src/components/counter.tsx
    imported by virtual:vite-rsc/client-references`;
 
 const WHERE = `'use client';
@@ -135,7 +135,7 @@ export default function FrameworkBoundariesPage() {
           code={CATALOG}
           lang="ts"
           marks={{ 1: 'highlight' }}
-          title="src/routes/_data/catalog.server.ts"
+          title="src/lib/catalog.server.ts"
         />
         <CodeBlock
           callouts={{ 5: t.serverAsyncCallout() }}
@@ -157,7 +157,7 @@ export default function FrameworkBoundariesPage() {
           code={COUNTER}
           lang="tsx"
           marks={{ 1: 'highlight' }}
-          title="src/routes/_parts/counter.tsx"
+          title="src/components/counter.tsx"
         />
         <CodeBlock
           code={HOME}
@@ -208,7 +208,7 @@ export default function FrameworkBoundariesPage() {
           code={SHELL}
           lang="tsx"
           marks={{ 1: 'highlight' }}
-          title="src/routes/[locale]/_parts/locale-shell.tsx"
+          title="src/components/locale-shell.tsx"
         />
         <p>
           <Rich>{t.shellWhy()}</Rich>
@@ -227,7 +227,7 @@ export default function FrameworkBoundariesPage() {
           code={BROWSER}
           lang="tsx"
           marks={{ 7: 'highlight', 14: 'highlight' }}
-          title="src/routes/_parts/editor.tsx"
+          title="src/components/editor.tsx"
         />
         <p>
           <Rich>{t.browserHow()}</Rich>
@@ -260,7 +260,7 @@ export default function FrameworkBoundariesPage() {
           code={WHERE}
           lang="tsx"
           marks={{ 3: 'highlight', 6: 'highlight', 7: 'highlight' }}
-          title="src/routes/_parts/where.tsx"
+          title="src/components/where.tsx"
         />
         <p>
           <Rich>{t.whereNoTable()}</Rich>

@@ -7,12 +7,12 @@ import { PropsTable } from '../../../../../components/props-table';
 import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { propsOf } from '../../../../../data/component-props';
-import * as m from '../../../../../messages';
 import {
   AlertDialogPreview,
   DialogBasicPreview,
   DialogWithModalPreview,
-} from '../_previews/dialog-previews';
+} from '../../../../../demos/ui/components/dialog-previews';
+import * as m from '../../../../../messages';
 
 export default function DialogPage() {
   return (

@@ -4,8 +4,8 @@ import { Pitfall } from '../../../../components/callout';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { Playground } from '../../../../components/playground';
 import { Rich } from '../../../../components/rich';
+import { CountsDemo } from '../../../../demos/state/storage/counts-demo';
 import * as m from '../../../../messages';
-import { CountsDemo } from './_parts/counts-demo';
 
 const t = m.stateStorage;
 

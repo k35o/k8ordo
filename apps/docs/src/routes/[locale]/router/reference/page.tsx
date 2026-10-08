@@ -368,6 +368,15 @@ export default function RouterReferencePage() {
       />
 
       <ApiEntry
+        caveats={t.browserPathnameCaveats}
+        from={FROM}
+        id="browser-pathname"
+        name="BrowserPathname"
+        signature="<BrowserPathname>{children}</BrowserPathname>"
+        summary={t.browserPathnameSummary}
+      />
+
+      <ApiEntry
         caveats={t.generationCaveats}
         from={FROM}
         id="navigation-generation"

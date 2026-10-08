@@ -109,6 +109,16 @@ as a 404 page under a URL the site claims to have (see
 is the host's to send: `not-found.tsx` is written as `404.html`
 ([The output](deploy.md#the-output)).
 
+**Under a `fallback.tsx` it is shown in place.** A host answers an unbuilt
+value with the shell, under `200`, before anything knows whether the value
+exists, so the shell carries its nearest `not-found.tsx` in its payload. A
+client component below the `fallback.tsx` that says `notFound()` while it
+renders puts that in the shell's place, with the URL and the status as they
+were; said from an effect or an event handler, it reaches nothing. Said
+while the build renders the shell — from the `fallback.tsx` itself or a
+layout above it — it stops the build, since a shell has no value to disown
+([`notFound()` in a shell](params.md#notfound-in-a-shell)).
+
 ## Redirects
 
 A directory that has moved keeps a `redirect.ts` instead of a `page.tsx`:

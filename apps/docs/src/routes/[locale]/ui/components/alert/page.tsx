@@ -7,13 +7,13 @@ import { PropsTable } from '../../../../../components/props-table';
 import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
-import * as m from '../../../../../messages';
 import {
   AlertActionButtonPreview,
   AlertActionLinkPreview,
   AlertDismissiblePreview,
   AlertWithActionPreview,
-} from '../_previews/alert-previews';
+} from '../../../../../demos/ui/components/alert-previews';
+import * as m from '../../../../../messages';
 
 export default function AlertPage() {
   return (

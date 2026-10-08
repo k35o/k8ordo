@@ -104,6 +104,11 @@ const FILES: readonly RouteFile[] = [
   },
   { id: 'loading-tsx', name: 'loading.tsx', items: [t.loadingDefault] },
   {
+    id: 'fallback-tsx',
+    name: 'fallback.tsx',
+    items: [t.fallbackDefault, t.fallbackPlace, t.fallbackNote],
+  },
+  {
     id: 'redirect-ts',
     name: 'redirect.ts',
     items: [t.redirectDefault, t.redirectNote],

@@ -7,12 +7,12 @@ import { PropsTable } from '../../../../../components/props-table';
 import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
-import * as m from '../../../../../messages';
 import {
   DataTableEmptyPreview,
   DataTablePreview,
   DataTableUrlStatePreview,
-} from '../_previews/data-table-previews';
+} from '../../../../../demos/ui/components/data-table-previews';
+import * as m from '../../../../../messages';
 
 const BASIC = `const [sort, setSort] = useState<DataTableSort | null>(null);
 const [selectedIds, setSelectedIds] = useState<string[]>([]);

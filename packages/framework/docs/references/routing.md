@@ -20,36 +20,48 @@ src/routes/
   products/
     page.tsx            /products
     [id]/page.tsx       /products/:id
+    [id]/fallback.tsx   the ids a static build did not write (static mode)
   (docs)/               a route group: its own layout, no URL segment
     layout.tsx
     guide/page.tsx      /guide
-  _parts/               private to the route above it; never a route
-  _data/                the same, for anything that is not a component
+src/components/         components: outside routes/, so never a route
+src/lib/                every other module, flat
 ```
 
 - `page.tsx`, `layout.tsx`, `not-found.tsx`, `error.tsx`, `loading.tsx`,
-  `redirect.ts`, `guard.ts` and `route.ts` are the only filenames the grammar
-  accepts, and `mode: 'static'` refuses `guard.ts`
-  ([Choosing a mode](../GUIDE.md#what-static-mode-refuses)). Anything else
-  lives under a `_`-prefixed directory. A file or directory whose name starts
-  with `_` or `.` is skipped entirely.
-- A directory name is a literal URL segment, `[name]` is a parameter, `(name)`
-  is a group, and `_name` (or `.name`) is private.
+  `fallback.tsx`, `redirect.ts`, `guard.ts` and `route.ts` are the only
+  filenames the grammar accepts. `mode: 'static'` refuses `guard.ts`
+  ([Choosing a mode](../GUIDE.md#what-static-mode-refuses)), and
+  `mode: 'server'` never renders `fallback.tsx`, though it checks where one
+  sits ([Values the build did not write](#values-the-build-did-not-write)). Any
+  other file is refused: components live outside `routes/` in
+  `src/components/` and every other module — Server Actions, schemas, state
+  definitions, data, helpers — in `src/lib/`, and a route file imports them
+  from there. Only a file or directory whose name starts with `.` is
+  skipped, so a `.DS_Store` or an editor's swap file does not break the
+  build.
+- A directory name is a literal URL segment of letters, digits, `.`, `_`, `~`
+  and `-`; `[name]` is a parameter and `(name)` is a group. `_` is an
+  ordinary character, so `_drafts/page.tsx` answers `/_drafts`. A name that
+  starts with `.` is never read, so `/.well-known` cannot be declared as a
+  route.
 - **A page receives `params`; a layout receives `children`.** Server Components
   cannot read context, so nesting is by prop. Both also receive `pathname` —
   the URL this render is for, which is how a component above a parameter can
-  see the value that parameter names. Under `mode: 'server'` both also
+  see the value that parameter names (above a `fallback.tsx`, the shell's
+  own, `/posts/!fallback`). Under `mode: 'server'` both also
   receive `request` ([Reading the request](guards.md#reading-the-request)).
 - A parameter's values arrive with the request under `mode: 'server'`, and
   need no list. Under `mode: 'static'` the build has no request to take them
   from, and the `paths` option lists them
-  ([Routes with parameters](params.md#routes-with-parameters)).
+  ([Routes with parameters](params.md#routes-with-parameters)); a
+  `fallback.tsx` beside the page answers the ones it does not list.
 
 ```tsx
 // src/routes/products/[id]/page.tsx
 import type { PageProps } from '@k8ordo/framework';
 
-import { findProduct } from '../../_data/catalog.server';
+import { findProduct } from '../../../lib/catalog.server';
 
 export default async function ProductPage({
   params,
@@ -105,22 +117,26 @@ carries a hole for a script to fill after hydration has started.
 
 Every problem is reported, not just the first, and each names the file:
 
-| routes/ contains                                                          | error                                                                                                                                                             |
-| ------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `products/helper.ts`                                                      | `routes/ holds only page.tsx, layout.tsx, not-found.tsx, error.tsx, redirect.ts, guard.ts, route.ts, loading.tsx — move "helper.ts" under a _-prefixed directory` |
-| `[123]/page.tsx`                                                          | `"[123]" is not a valid param directory — use [name] with a letter or underscore first`                                                                           |
-| `pro ducts/page.tsx`                                                      | `"pro ducts" cannot be a URL segment — use letters, digits, . _ ~ or -`                                                                                           |
-| `[id]/things/[id]/page.tsx`                                               | `":id" is already taken by an ancestor — params must be unique within a path`                                                                                     |
-| `orphan/layout.tsx` and no page below                                     | `has a layout but no page.tsx below it, so it can never render`                                                                                                   |
-| `(a)/page.tsx` and `(b)/page.tsx`                                         | `"/" is already declared by (a)/page.tsx — route groups do not separate URLs`                                                                                     |
-| `(docs/page.tsx`                                                          | `"(docs" is not a valid route group — use (name)`                                                                                                                 |
-| `empty/error.tsx` and no page, redirect or route below                    | `declares no route — every directory needs a page.tsx (or a redirect.ts or route.ts) somewhere below it`                                                          |
-| `(shop)/sale/page.tsx` and `(shop)/[id]/page.tsx` beside `about/page.tsx` | `"/about" can never match — "/:id" ((shop)/[id]/page.tsx) is declared first and answers it`                                                                       |
-| `old/page.tsx` and `old/redirect.ts`                                      | `"old" cannot both render page.tsx and redirect — keep one`                                                                                                       |
-| `api/page.tsx` and `api/route.ts`                                         | `"api" cannot both render page.tsx and answer from route.ts — keep one`                                                                                           |
-| `old/redirect.ts` and `old/route.ts`                                      | `"old" cannot both redirect and answer from route.ts — keep one`                                                                                                  |
-| `api/route.ts` exporting no method                                        | `exports none of GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS — a route.ts answers the methods it exports`                                                        |
-| `products/page.tsx` exporting `search`, without `@k8ordo/state`           | `exports search, which is read through @k8ordo/state — add it to the application’s dependencies`                                                                  |
+| routes/ contains                                                          | error                                                                                                                                                                                                               |
+| ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `products/helper.ts`                                                      | `routes/ holds only page.tsx, layout.tsx, not-found.tsx, error.tsx, redirect.ts, guard.ts, route.ts, loading.tsx, fallback.tsx — move "helper.ts" out of routes/`                                                   |
+| `[123]/page.tsx`                                                          | `"[123]" is not a valid param directory — use [name] with a letter or underscore first`                                                                                                                             |
+| `pro ducts/page.tsx`                                                      | `"pro ducts" cannot be a URL segment — use letters, digits, . _ ~ or -`                                                                                                                                             |
+| `[id]/things/[id]/page.tsx`                                               | `":id" is already taken by an ancestor — params must be unique within a path`                                                                                                                                       |
+| `orphan/layout.tsx` and no page below                                     | `has a layout but no page.tsx below it, so it can never render`                                                                                                                                                     |
+| `(a)/page.tsx` and `(b)/page.tsx`                                         | `"/" is already declared by (a)/page.tsx — route groups do not separate URLs`                                                                                                                                       |
+| `(docs/page.tsx`                                                          | `"(docs" is not a valid route group — use (name)`                                                                                                                                                                   |
+| `empty/error.tsx` and no page, redirect or route below                    | `declares no route — every directory needs a page.tsx (or a redirect.ts or route.ts) somewhere below it`                                                                                                            |
+| `(shop)/sale/page.tsx` and `(shop)/[id]/page.tsx` beside `about/page.tsx` | `"/about" can never match — "/:id" ((shop)/[id]/page.tsx) is declared first and answers it`                                                                                                                         |
+| `old/page.tsx` and `old/redirect.ts`                                      | `"old" cannot both render page.tsx and redirect — keep one`                                                                                                                                                         |
+| `api/page.tsx` and `api/route.ts`                                         | `"api" cannot both render page.tsx and answer from route.ts — keep one`                                                                                                                                             |
+| `old/redirect.ts` and `old/route.ts`                                      | `"old" cannot both redirect and answer from route.ts — keep one`                                                                                                                                                    |
+| `api/route.ts` exporting no method                                        | `exports none of GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS — a route.ts answers the methods it exports`                                                                                                          |
+| `products/page.tsx` exporting `search`, without `@k8ordo/state`           | `exports search, which is read through @k8ordo/state — add it to the application’s dependencies`                                                                                                                    |
+| `feed/[id]/route.ts` and `feed/[id]/fallback.tsx`                         | `fallback.tsx stands in for the page.tsx beside it, and "feed/[id]" has none`                                                                                                                                       |
+| `posts/[id]/layout.tsx` beside `posts/[id]/fallback.tsx`                  | `fallback.tsx cannot sit beside layout.tsx — that layout receives every parameter of "posts/[id]", so no shell could leave one to the browser; move the layout one directory up, or into page.tsx and fallback.tsx` |
+| `about/page.tsx` and `about/fallback.tsx`                                 | `fallback.tsx stands in for values the build did not write, and "/about" has no parameter; remove it`                                                                                                               |
+| `[locale]/layout.tsx` above `[locale]/about/fallback.tsx`                 | `fallback.tsx has nothing to leave to the browser — [locale]/layout.tsx receives every parameter of "/:locale/about"; remove fallback.tsx and list the values in paths`                                             |
 
 The generated table lists literal segments before parameters, so `about/`
 beside `[slug]/` is reachable without saying anything. A route group holds
@@ -128,8 +144,42 @@ both kinds under one key and the table cannot interleave across it, which is
 the one shape where a declared route can still be shadowed — so it is reported
 rather than shipped.
 
-`mode: 'static'` refuses more on top of these: whatever needs a request
-([What static mode refuses](../GUIDE.md#what-static-mode-refuses)).
+The `fallback.tsx` rows hold in both modes, so switching modes needs no
+change to the files. `mode: 'static'` refuses more on top of these: whatever
+needs a request ([What static mode refuses](../GUIDE.md#what-static-mode-refuses)),
+and the `paths` its shells are placed by
+([What else stops the build](params.md#what-else-stops-the-build)).
+
+## Values the build did not write
+
+Under `mode: 'static'`, a `fallback.tsx` beside a `page.tsx` is what the
+values `paths` does not list are answered with: a shell, the layouts above
+written as HTML with the `fallback.tsx` in the page's place, which a host
+serves for any such value and the browser fills in from the URL. What it
+renders, how it reads the value and what it costs are in
+[Values the build did not write](params.md#values-the-build-did-not-write);
+the grammar's part is where it may sit.
+
+- **Beside a `page.tsx`.** It stands in for that page, so a directory that
+  redirects or answers from a `route.ts` cannot have one.
+- **Under a pattern with a parameter**, at least one of which no layout
+  above it receives. A layout above is written into the shell once, as
+  HTML, for every value the shell answers, so a parameter it receives is one
+  the shell has to know — supplied by `paths`, in a shell location
+  (`/ja/posts/:id`). The parameters left to the browser are the rest.
+- **With no `layout.tsx` beside it.** That layout would receive every
+  parameter, and leave the browser none. Move it one directory up, where it
+  no longer receives the parameter, or put its markup inside `page.tsx` and
+  `fallback.tsx`.
+
+It receives no props, and an `error.tsx` or `loading.tsx` beside it or above
+wraps it as it wraps the page. It answers its own page's pattern and nothing
+below it: `posts/[id]/comments/page.tsx` needs its own values in `paths`, or
+a `fallback.tsx` of its own, and a `redirect.ts` or `route.ts` there can only
+have its values listed.
+
+Under `mode: 'server'` every value is rendered by its page, per request, and
+nothing of a `fallback.tsx` is built.
 
 ## While a page loads
 
@@ -243,7 +293,7 @@ this application wants mode: 'server'
 
 The methods are read by name, so a `route.ts` that re-exports another
 module with `export * from` is refused too: what it brings could be a `POST`
-the build never sees. `export { GET } from './get'` names it.
+the build never sees. `export { GET } from '../../lib/feed'` names it.
 
 A `route.ts` at `/` cannot be a file (the host serves `/` from `index.html`),
 nor one with pages written below it, which would need a directory of the same
@@ -286,6 +336,8 @@ export const guards = {} as const;
 
 export const redirects = {} as const;
 
+export const fallbacks = {} as const;
+
 export const routes = defineRoutes({
   '/': {
     layout: layout satisfies Layout<'/'>,
@@ -312,9 +364,12 @@ sends the visitor once the walk of `routes` reaches its pattern,
 reaches that pattern, before the page renders, `routeModules` the `route.ts`
 that answers a pattern (the place of each, and of each `redirect.ts`, in
 `routes` is held by a component that renders nothing), `guards` the
-`guard.ts` files that run before a pattern answers, outer first, and
-`searchReaders` what reads the search for a page that exports `search`; all
-five are empty here because no route file declares any.
+`guard.ts` files that run before a pattern answers, outer first,
+`searchReaders` what reads the search for a page that exports `search`, and
+`fallbacks`, under `mode: 'static'`, the `fallback.tsx` beside a page and the
+parameters its shell may leave to the browser (under `mode: 'server'` it is
+always empty, and no `fallback.tsx` is imported); all six are empty here
+because no route file declares any.
 
 `.k8ordo/register.gen.ts` registers that table with the framework — and with
 `@k8ordo/state` when the application depends on it — so typed paths work

@@ -9,8 +9,8 @@ import {
 import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Playground } from '../../../../components/playground';
 import { Rich } from '../../../../components/rich';
+import { SchemeInspector } from '../../../../demos/color-scheme/how-it-works/scheme-inspector';
 import * as m from '../../../../messages';
-import { SchemeInspector } from './_parts/scheme-inspector';
 
 const t = m.colorSchemeHowItWorks;
 

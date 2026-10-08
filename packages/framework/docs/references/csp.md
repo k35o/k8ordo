@@ -94,3 +94,10 @@ It refuses `frame-ancestors`, `report-uri` and `sandbox` too, which a
 `<meta>` ignores: set those as headers at the host. Without `csp`, no policy
 is written. There is no `nonce()` for this mode: what an application signed
 with it would land in the file, and make every build differ.
+
+A `fallback.tsx`'s shell draws its page in the browser from data the
+browser fetches
+([Values the build did not write](params.md#values-the-build-did-not-write)),
+so a policy that restricts `connect-src`, or `default-src` in its place,
+names the API's origin there:
+`'connect-src': ["'self'", 'https://api.example.com']`.

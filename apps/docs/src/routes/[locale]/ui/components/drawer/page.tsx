@@ -7,11 +7,11 @@ import { PropsTable } from '../../../../../components/props-table';
 import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { propsOf } from '../../../../../data/component-props';
-import * as m from '../../../../../messages';
 import {
   DrawerBasicPreview,
   DrawerCustomContentPreview,
-} from '../_previews/drawer-previews';
+} from '../../../../../demos/ui/components/drawer-previews';
+import * as m from '../../../../../messages';
 
 export default function DrawerPage() {
   return (

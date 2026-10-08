@@ -91,13 +91,13 @@ export default function ColorSchemeCspPage() {
           code={GUARD}
           lang="ts"
           marks={{ 5: 'highlight' }}
-          title="routes/guard.ts"
+          title="src/routes/guard.ts"
         />
         <CodeBlock
           code={LAYOUT}
           lang="tsx"
           marks={{ 13: 'highlight' }}
-          title="routes/layout.tsx"
+          title="src/routes/layout.tsx"
         />
         <p>
           <Rich>{t.nonceRender()}</Rich>
@@ -147,7 +147,7 @@ export default function ColorSchemeCspPage() {
           code={DEFAULT_LAYOUT}
           lang="tsx"
           marks={{ 1: 'highlight' }}
-          title="routes/layout.tsx"
+          title="src/routes/layout.tsx"
         />
         <CodeBlock
           code={DEFAULT_CONFIG}

@@ -36,8 +36,8 @@ export const handlerModes = message({
 });
 
 export const handlerDev = message({
-  ja: '`vite dev`は、どちらのモードでもリクエストのたびにハンドラを呼びます。そのためstaticモードでも、`paths`に無い値のページが開発中は表示されます。開発中とビルドのほかの違いは',
-  en: '`vite dev` calls the handler for every request under either mode. So under static mode too, a page for a value `paths` does not list still renders in development. For the other ways development differs from the build, see ',
+  ja: '`vite dev`は、どちらのモードでもリクエストのたびにハンドラを呼びます。そのためstaticモードでも、`paths`に無い値のページが開発中は表示されます。`fallback.tsx`のあるページでは、その値にシェルが答えます。開発中とビルドのほかの違いは',
+  en: '`vite dev` calls the handler for every request under either mode. So under static mode too, a page for a value `paths` does not list still renders in development, or its shell does, for a page with a `fallback.tsx`. For the other ways development differs from the build, see ',
 });
 
 export const see = message({
@@ -71,7 +71,7 @@ export const staticNoRequest = message({
 });
 
 export const staticWhen = message({
-  ja: "`guard.ts`と`search`をexportするページ、`GET`以外をexportする`route.ts`は、ビルドを始める前にエラーになります。`@k8ordo/framework/server`のimportと`'use server'`は、各環境をコンパイルしたあとにエラーになります。どちらも、ページを1つも書き出す前に止まります。",
+  ja: "`guard.ts`と`search`をexportするページ、`GET`以外をexportする`route.ts`は、ビルドを始める前にエラーになります。`@k8ordo/framework/server`のimportと`'use server'`は、各環境をコンパイルしたあとにエラーになります。どちらも、ページを1つも書き出す前にエラーになります。",
   en: "A `guard.ts`, a page that exports `search` and a `route.ts` that exports anything but `GET` fail before the build starts. An import of `@k8ordo/framework/server` or `'use server'` fails once the environments are compiled. Both stop the build before any page is written.",
 });
 

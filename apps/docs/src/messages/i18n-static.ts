@@ -36,13 +36,18 @@ export const otherDescription = message({
 });
 
 export const otherError = message({
-  ja: 'ビルドはパラメータの残ったpathnameを書き出せないので、`static build needs pathnames for /:locale/blog/:slug — supply them with the "paths" option`というエラーで止まります。',
-  en: 'The build cannot write a pathname that still holds a parameter, so it stops with `static build needs pathnames for /:locale/blog/:slug — supply them with the "paths" option`.',
+  ja: 'パラメータの残ったpathnameを受け取れるのは、横に`fallback.tsx`を置いたページだけです。それ以外のルートでは、ビルドは`the "paths" option supplied pathnames that still hold a parameter, and only a page with a fallback.tsx beside it takes one: /ja/blog/:slug ([locale]/blog/[slug]/page.tsx has none)`というエラーで止まります。',
+  en: 'Only a page with a `fallback.tsx` beside it takes a pathname that still holds a parameter. For any other route the build stops with `the "paths" option supplied pathnames that still hold a parameter, and only a page with a fallback.tsx beside it takes one: /ja/blog/:slug ([locale]/blog/[slug]/page.tsx has none)`.',
 });
 
 export const otherExpand = message({
   ja: '先に`locales.paths`でロケールを展開し、残ったパラメータを同じ関数の中で展開します。`paths`には`Promise`を返す関数も渡せるので、記事の一覧を読み込んでから答えられます。',
   en: 'Expand the locale with `locales.paths` first, then the remaining parameter in the same function. `paths` may return a `Promise`, so it can read the list of posts before it answers.',
+});
+
+export const otherShell = message({
+  ja: '`fallback.tsx`のあるページでは、`/ja/blog/:slug`がシェルの場所になります。ロケールごとにシェルが書かれ、ビルドしていないslugにはブラウザが本文を描きます。シェルではページの`paramsSchema`は動かず、上のレイアウトのスキーマだけが動きます。`locales`のスキーマを`[locale]/layout.tsx`に置いておけば、シェルの文言もそのロケールで書かれます。',
+  en: 'For a page with a `fallback.tsx`, `/ja/blog/:slug` is where its shell goes: one shell per locale, and the browser renders the body for a slug the build did not write. A shell runs no `paramsSchema` of its page, only those of the layouts above it. With the `locales` schema on `[locale]/layout.tsx`, the shell’s messages come out in its locale too.',
 });
 
 export const notFoundTitle = message({

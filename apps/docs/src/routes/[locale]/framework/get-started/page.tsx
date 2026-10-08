@@ -1,6 +1,6 @@
 import { CodeBlock } from '@k8ordo/ui/code-block';
 
-import { Note, Pitfall } from '../../../../components/callout';
+import { Note } from '../../../../components/callout';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { InstallCommand, Requirements } from '../../../../components/install';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
@@ -17,15 +17,10 @@ export default defineConfig({
 });`;
 
 const TSCONFIG = `{
-  "compilerOptions": {
-    "jsx": "react-jsx",
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "strict": true,
-    "noEmit": true,
-    "types": ["vite/client"]
-  },
-  "include": ["src/**/*.ts", "src/**/*.tsx", ".k8ordo/**/*.ts", "*.ts", "*.mts"]
+  "include": [
+    // ...
+    ".k8ordo/**/*.ts"
+  ]
 }`;
 
 const LAYOUT = `import type { LayoutProps } from '@k8ordo/framework';
@@ -59,17 +54,11 @@ export default function FrameworkGetStartedPage() {
       path="/:locale/framework/get-started"
     >
       <DocSection id="install" title={t.installTitle}>
-        <InstallCommand packages="react react-dom" />
+        <InstallCommand packages="react react-dom server-only" />
         <InstallCommand packages="-D @k8ordo/framework @k8ordo/router vite typescript @types/node @types/react @types/react-dom" />
         <Requirements name="@k8ordo/framework" />
         <p>
           <Rich>{m.install.agentDocs('@k8ordo/framework')}</Rich>
-        </p>
-        <p>
-          <Rich>{t.installRouter()}</Rich>
-        </p>
-        <p>
-          <Rich>{t.installDev()}</Rich>
         </p>
       </DocSection>
 
@@ -91,49 +80,24 @@ export default function FrameworkGetStartedPage() {
           </LocaleAnchor>
           <Rich>{t.see()}</Rich>
         </p>
-        <p>
-          <Rich>{t.configModuleType()}</Rich>
-        </p>
       </DocSection>
 
       <DocSection id="tsconfig" title={t.tsconfigTitle}>
         <CodeBlock
           code={TSCONFIG}
           lang="json"
-          marks={{ 5: 'highlight', 10: 'highlight' }}
+          marks={{ 4: 'highlight' }}
           title="tsconfig.json"
         />
         <p>
           <Rich>{t.tsconfigTypes()}</Rich>
         </p>
-        <p>
-          <Rich>{t.tsconfigCompiler()}</Rich>
-        </p>
-        <p>
-          <Rich>{t.tsconfigConfig()}</Rich>
-        </p>
-        <p>
-          <Rich>{t.tsconfigGit()}</Rich>
-        </p>
-        <Pitfall>
-          <p>
-            <Rich>{t.tsconfigPitfall()}</Rich>
-          </p>
-        </Pitfall>
       </DocSection>
 
       <DocSection id="layout" title={t.layoutTitle}>
-        <CodeBlock
-          code={LAYOUT}
-          lang="tsx"
-          marks={{ 1: 'highlight' }}
-          title="src/routes/layout.tsx"
-        />
+        <CodeBlock code={LAYOUT} lang="tsx" title="src/routes/layout.tsx" />
         <p>
           <Rich>{t.layoutDocument()}</Rich>
-        </p>
-        <p>
-          <Rich>{t.layoutProps()}</Rich>
         </p>
         <Note>
           <p>

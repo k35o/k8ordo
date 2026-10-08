@@ -1,8 +1,8 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: '`framework()`の`mode`で、アプリを静的なファイルに書き出すか、リクエストごとにサーバーで描画するかを選びます。決め手は、アプリがリクエストを必要とするかどうかです。',
-  en: 'The `mode` of `framework()` decides whether the application is written out as static files or rendered on a server per request. The choice comes down to whether the application needs the request.',
+  ja: '`framework()`の`mode`で、アプリをサーバーなしで動かすか、サーバーありで動かすかを選びます。決め手は、アプリがリクエストを必要とするかどうかです。',
+  en: 'The `mode` of `framework()` decides whether the application runs without a server or with one. The choice comes down to whether the application needs the request.',
 });
 
 export const chooseTitle = message({
@@ -33,8 +33,8 @@ export const chooseList = [
     en: 'Exporting `search` from a page to receive the query',
   }),
   message({
-    ja: 'パラメータの値を前もって並べられない（利用者が作る記事のIDなど）',
-    en: 'Using parameter values that cannot be listed ahead of time, such as the IDs of posts users create',
+    ja: '前もって並べられない値のページを、サーバーで描く（利用者が作る記事のIDなど）',
+    en: 'Rendering pages on the server for values that cannot be listed ahead of time, such as the IDs of posts users create',
   }),
   message({
     ja: '`route.ts`で`GET`以外のメソッドに応答する',
@@ -43,8 +43,13 @@ export const chooseList = [
 ] as const;
 
 export const chooseStatic = message({
-  ja: "どれにも当てはまらないなら、`mode: 'static'`を選びます。ビルドがすべてのページをファイルに書き出すので、サーバーを動かさずに静的ホスティングに置けます。記事が増えるなど中身が変わったときは、ビルドし直します。ドキュメントやブログのように、訪問者によって中身が変わらないサイトに向いています。",
-  en: "If none of them applies, pick `mode: 'static'`. The build writes every page into files, so the site goes on a static host with no server to run. When the content changes, such as a new post, you build again. It suits a site whose content is the same for every visitor, such as documentation or a blog.",
+  ja: "どれにも当てはまらないなら、`mode: 'static'`を選びます。ページをビルドの時点で描画しておくので、サーバーなしで静的ホスティングに置けます。記事が増えるなど中身が変わったときは、ビルドし直します。ドキュメントやブログのように、訪問者によって中身が変わらないサイトに向いています。",
+  en: "If none of them applies, pick `mode: 'static'`. Pages are rendered at build time, so the site goes on a static host with no server. When the content changes, such as a new post, you build again. It suits a site whose content is the same for every visitor, such as documentation or a blog.",
+});
+
+export const chooseFallback = message({
+  ja: 'staticモードでも、前もって並べられない値に答えることはできます。`page.tsx`の横に`fallback.tsx`を置くと、ビルドしていない値の本文をブラウザで描きます。最初のHTMLに本文が要らないページなら、staticモードのままで足ります。書き方は',
+  en: 'Static mode can still answer values that cannot be listed ahead of time. With a `fallback.tsx` beside a `page.tsx`, a value the build did not write has its body rendered in the browser. A page that does not need its body in the first HTML can stay in static mode. How to write one is covered in ',
 });
 
 export const chooseStart = message({
@@ -63,8 +68,8 @@ export const differencesList = [
     en: 'Build output: files in `dist/client/` in static mode, a request handler in server mode.',
   }),
   message({
-    ja: 'パラメータのあるルート：staticモードでは値を`paths`で並べます。serverモードではリクエストと一緒に受け取るので、値が増えてもビルドし直しません。',
-    en: 'A route with parameters: in static mode its values are listed in `paths`. In server mode they arrive with the request, so new values need no rebuild.',
+    ja: 'パラメータのあるルート：staticモードでは値を`paths`で並べます。並べなかった値には、`fallback.tsx`を置けばブラウザで描くシェルが答えます。serverモードではリクエストと一緒に受け取るので、値が増えてもビルドし直しません。',
+    en: 'A route with parameters: in static mode its values are listed in `paths`, and a `fallback.tsx` answers the rest with a shell rendered in the browser. In server mode they arrive with the request, so new values need no rebuild.',
   }),
   message({
     ja: 'どのルートにも当たらないURL：staticモードではホスティングが`404.html`を返し、serverモードではアプリが404のステータスで返します。',
@@ -94,8 +99,8 @@ export const switchTitle = message({
 });
 
 export const switchMode = message({
-  ja: '`src/routes/`のファイルと`@k8ordo/framework`からのimportは、どちらのモードでもそのまま使えます。',
-  en: 'The files under `src/routes/` and the imports from `@k8ordo/framework` work as they are in either mode.',
+  ja: '`src/routes/`のファイルと`@k8ordo/framework`からのimportは、どちらのモードでもそのまま使えます。`fallback.tsx`もserverモードでは使われないだけなので、消す必要はありません。',
+  en: 'The files under `src/routes/` and the imports from `@k8ordo/framework` work as they are in either mode. A `fallback.tsx` is simply unused under server mode, so there is no need to remove it.',
 });
 
 export const switchOptions = message({
@@ -104,8 +109,8 @@ export const switchOptions = message({
 });
 
 export const switchToStatic = message({
-  ja: 'staticモードへ移るときは、パラメータのあるルートの値を`paths`で並べます。下の拒まれる書き方と、ページの`request`を読むコードも消します。',
-  en: 'When moving to static mode, list the values of each route with parameters in `paths`. Remove the refused code below too, and any read of a page’s `request`.',
+  ja: 'staticモードへ移るときは、パラメータのあるルートの値を`paths`で並べるか、`fallback.tsx`を置きます。下の拒まれる書き方と、ページの`request`を読むコードも消します。',
+  en: 'When moving to static mode, list the values of each route with parameters in `paths`, or give the page a `fallback.tsx`. Remove the refused code below too, and any read of a page’s `request`.',
 });
 
 export const switchDeploy = message({

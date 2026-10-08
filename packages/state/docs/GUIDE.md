@@ -247,7 +247,7 @@ exports the url schema it reads, and receives that slot, parsed, as `search`:
 // src/routes/products/page.tsx
 import type { PageProps } from '@k8ordo/framework';
 
-import { listState } from '../_data/list-state';
+import { listState } from '../../state';
 
 export const search = listState.url;
 
@@ -303,10 +303,10 @@ and `initialCookie` seeds the server render and the hydration render with
 them, so the default never flashes.
 
 ```tsx
-// routes/layout.tsx — server mode
+// src/routes/layout.tsx — server mode
 import type { LayoutProps } from '@k8ordo/framework';
+import { Shell } from '../components/shell';
 import { density } from '../state';
-import { Shell } from './shell';
 
 export default function Layout({ request, children }: LayoutProps<'/'>) {
   return (
@@ -318,7 +318,7 @@ export default function Layout({ request, children }: LayoutProps<'/'>) {
 ```
 
 ```tsx
-// routes/shell.tsx
+// src/components/shell.tsx
 'use client';
 import type { ReactNode } from 'react';
 import { useAppState } from '@k8ordo/state';
@@ -384,9 +384,10 @@ attributes above (`Path=/`, `SameSite=Lax`, `Max-Age=34560000`), never
 values in through the `change` event.
 
 ```ts
+// src/lib/actions.ts
 'use server';
 import { cookies } from '@k8ordo/framework/server';
-import { density } from './state';
+import { density } from '../state';
 
 export async function compact() {
   cookies().set(
@@ -405,9 +406,10 @@ the value through `encodeURIComponent` yourself — once.
 ## Client — subscribe and update
 
 ```tsx
+// src/components/filters.tsx
 'use client';
 import { useAppState } from '@k8ordo/state';
-import { listState, prefs } from './state';
+import { listState, prefs } from '../state';
 
 export function Filters({ initialUrl }: FiltersProps) {
   const [{ q, page, expanded }, update] = useAppState(listState, {
@@ -560,8 +562,8 @@ strip a query from and verify. To constrain paths app-wide, augment `Register`
 once, with the same line the `@k8ordo/router` augmentation takes:
 
 ```ts
-// e.g. types/k8ordo.d.ts
-import type { routes } from '../routes';
+// src/k8ordo.d.ts
+import type { routes } from './routes';
 
 declare module '@k8ordo/router' {
   interface Register {

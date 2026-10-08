@@ -14,8 +14,8 @@ import { PropsTable } from '../../../../../components/props-table';
 import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
+import { ButtonAsLinkPreview } from '../../../../../demos/ui/components/button-previews';
 import * as m from '../../../../../messages';
-import { ButtonAsLinkPreview } from '../_previews/button-previews';
 
 export default function ButtonPage() {
   return (

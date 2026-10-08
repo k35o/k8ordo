@@ -5,8 +5,8 @@ import { DocPage, DocSection } from '../../../../components/doc-page';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Playground } from '../../../../components/playground';
 import { Rich } from '../../../../components/rich';
+import { ErrorDemo } from '../../../../demos/framework/errors/error-demo';
 import * as m from '../../../../messages';
-import { ErrorDemo } from './_parts/error-demo';
 
 const t = m.frameworkErrors;
 
@@ -48,7 +48,7 @@ const NOT_FOUND = `export default function NotFoundPage() {
 const PAGE_NOT_FOUND = `import { notFound } from '@k8ordo/framework';
 import type { PageProps } from '@k8ordo/framework';
 
-import { findProduct } from '../../_data/catalog.server';
+import { findProduct } from '../../../lib/catalog.server';
 
 export default async function ProductPage({
   params,
@@ -165,6 +165,13 @@ export default function FrameworkErrorsPage() {
         </p>
         <p>
           <Rich>{t.pageNotFoundStatic()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.pageNotFoundShell()}</Rich>
+          <LocaleAnchor path="/:locale/framework/params">
+            {m.framework.navParams()}
+          </LocaleAnchor>
+          <Rich>{t.see()}</Rich>
         </p>
         <p>
           <Rich>{t.pageNotFoundServer()}</Rich>

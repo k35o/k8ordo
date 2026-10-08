@@ -7,9 +7,9 @@ import { PackageInstall } from '../../../../components/install';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Playground } from '../../../../components/playground';
 import { Rich } from '../../../../components/rich';
+import { TalkDemo } from '../../../../demos/form/get-started/talk-demo';
+import { talkSchema } from '../../../../demos/form/get-started/talk-schema';
 import * as m from '../../../../messages';
-import { TalkDemo } from './_parts/talk-demo';
-import { talkSchema } from './_parts/talk-schema';
 
 const SCHEMA = `import * as z from 'zod';
 
@@ -21,9 +21,9 @@ export const talkSchema = z.object({
 
 const PAGE = `import { formFields } from '@k8ordo/form/server';
 
-import { createTalk } from './actions';
-import { talkSchema } from './schema';
-import { TalkForm } from './talk-form';
+import { TalkForm } from '../../../components/talk-form';
+import { createTalk } from '../../../lib/actions';
+import { talkSchema } from '../../../lib/schema';
 
 const talkFields = formFields(talkSchema);
 
@@ -39,6 +39,7 @@ import { href } from '@k8ordo/framework';
 import { redirect } from '@k8ordo/framework/server';
 
 import { talkSchema } from './schema';
+import { saveTalk } from './talks.server';
 
 export async function createTalk(
   _prev: FormState,
@@ -137,7 +138,7 @@ export default function FormGetStartedPage() {
           code={SCHEMA}
           lang="ts"
           marks={{ 6: 'highlight' }}
-          title="schema.ts"
+          title="src/lib/schema.ts"
         />
         <p>
           <Rich>{m.formGetStarted.schemaCoerce()}</Rich>
@@ -153,7 +154,7 @@ export default function FormGetStartedPage() {
           code={PAGE}
           lang="tsx"
           marks={{ 7: 'highlight' }}
-          title="page.tsx"
+          title="src/routes/talks/new/page.tsx"
         />
         <p>
           <Rich>{m.formGetStarted.deriveJson()}</Rich>
@@ -168,8 +169,8 @@ export default function FormGetStartedPage() {
         <CodeBlock
           code={ACTION}
           lang="ts"
-          marks={{ 11: 'highlight', 12: 'highlight' }}
-          title="actions.ts"
+          marks={{ 12: 'highlight', 13: 'highlight' }}
+          title="src/lib/actions.ts"
         />
         <p>
           <Rich>{m.formGetStarted.actionResult()}</Rich>
@@ -191,7 +192,7 @@ export default function FormGetStartedPage() {
             22: 'highlight',
             24: 'highlight',
           }}
-          title="talk-form.tsx"
+          title="src/components/talk-form.tsx"
         />
         <p>
           <Rich>{m.formGetStarted.formSpread()}</Rich>

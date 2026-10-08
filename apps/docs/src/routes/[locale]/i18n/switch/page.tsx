@@ -4,8 +4,8 @@ import { Note, Pitfall } from '../../../../components/callout';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { Playground } from '../../../../components/playground';
 import { Rich } from '../../../../components/rich';
+import { LocalizeDemo } from '../../../../demos/i18n/switch/localize-demo';
 import * as m from '../../../../messages';
-import { LocalizeDemo } from './_parts/localize-demo';
 
 const t = m.i18nSwitch;
 
@@ -46,7 +46,7 @@ export function LanguageSwitcher() {
   );
 }`;
 
-const REMEMBER = `import type { Locale } from './i18n';
+const REMEMBER = `import type { Locale } from '../i18n';
 
 const MAX_AGE = 400 * 24 * 60 * 60 * 1000;
 
@@ -105,7 +105,7 @@ export default function I18nSwitchPage() {
           code={SWITCHER}
           lang="tsx"
           marks={{ 11: 'highlight', 20: 'highlight' }}
-          title="language-switcher.tsx"
+          title="src/components/language-switcher.tsx"
         />
         <p>
           <Rich>{t.switcherPathname()}</Rich>
@@ -134,7 +134,11 @@ export default function I18nSwitchPage() {
         id="remember"
         title={t.rememberTitle}
       >
-        <CodeBlock code={REMEMBER} lang="ts" title="remember-locale.ts" />
+        <CodeBlock
+          code={REMEMBER}
+          lang="ts"
+          title="src/lib/remember-locale.ts"
+        />
         <p>
           <Rich>{t.rememberCall()}</Rich>
         </p>
@@ -142,7 +146,7 @@ export default function I18nSwitchPage() {
           code={REMEMBER_CALL}
           lang="tsx"
           marks={{ 6: 'add', 7: 'add', 8: 'add' }}
-          title="language-switcher.tsx"
+          title="src/components/language-switcher.tsx"
         />
         <p>
           <Rich>{t.rememberDefaults()}</Rich>

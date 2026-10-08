@@ -3,8 +3,8 @@ import { CodeBlock } from '@k8ordo/ui/code-block';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { Playground } from '../../../../components/playground';
 import { Rich } from '../../../../components/rich';
+import { QueryDemo } from '../../../../demos/state/url/query-demo';
 import * as m from '../../../../messages';
-import { QueryDemo } from './_parts/query-demo';
 
 const t = m.stateUrl;
 

@@ -53,7 +53,7 @@ are shown in and the direction its text runs in — registered once so every
 message is held to it:
 
 ```ts
-// i18n.ts
+// src/i18n.ts
 import { defineLocales } from '@k8ordo/i18n';
 import type { LocaleOf } from '@k8ordo/i18n';
 
@@ -72,7 +72,7 @@ declare module '@k8ordo/i18n' {
 Each message is one export, with its text in every locale:
 
 ```ts
-// messages/nav.ts
+// src/messages/nav.ts
 import { message } from '@k8ordo/i18n';
 
 export const home = message({ ja: 'ホーム', en: 'Home' });
@@ -86,7 +86,7 @@ The `[locale]` route's layout declares the schema; accepting a locale makes it
 the locale of that render:
 
 ```tsx
-// routes/[locale]/layout.tsx
+// src/routes/[locale]/layout.tsx
 import { locales } from '../../i18n';
 
 export const { paramsSchema } = locales; // /fr/… is a 404
@@ -95,7 +95,7 @@ export const { paramsSchema } = locales; // /fr/… is a 404
 And a message is called the same way everywhere:
 
 ```tsx
-// routes/[locale]/page.tsx — a Server Component
+// src/routes/[locale]/page.tsx — a Server Component
 import * as nav from '../../messages/nav';
 
 export default function Page() {
@@ -104,7 +104,7 @@ export default function Page() {
 ```
 
 ```tsx
-// components/toolbar.tsx — a Client Component, the same line
+// src/components/toolbar.tsx — a Client Component, the same line
 'use client';
 import * as nav from '../messages/nav';
 

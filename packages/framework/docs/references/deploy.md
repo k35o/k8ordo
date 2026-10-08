@@ -19,8 +19,12 @@ dist/
       index.rsc
       1/index.html        /products/1
       1/index.rsc
+      !fallback/          the shell of [id]/fallback.tsx, for every other id
+        index.html
+        index.rsc
     404.html              not-found.tsx, rendered
     sitemap.xml           every page above, when `site` is set
+    _redirects            how a host reaches the shells, when there are any
     assets/…              the client bundle
   rsc/  ssr/              the machinery that produced the above
   package.json            { "type": "module" }
@@ -39,7 +43,9 @@ varies on neither.
 
 A URL the site does not have is nobody's to render in the browser: the answer
 is not a payload, so the navigation becomes an ordinary document load and the
-host answers it — with `404.html` and a real 404. That is also what happens
+host answers it — with `404.html` and a real 404. A value a `fallback.tsx`
+stands for is the exception: the host's rewrite answers it with the shell
+([Rewrites to a shell](#rewrites-to-a-shell)). That is also what happens
 for the files sitting beside the site, so a link to `/robots.txt` fetches the
 file rather than disappearing into the router. Mark a link the host answers
 with a download as `<a href="/report.csv" download>`: the navigate event then
@@ -72,6 +78,186 @@ while it renders (`@k8ordo/i18n`'s messages read the locale segment) would
 disagree with it. The browser renders it afresh instead, where the visitor is,
 and a client component sees their URL from its first render. A visitor
 without JavaScript keeps whatever the build's render produced.
+
+## Rewrites to a shell
+
+Static mode only. A shell
+([Values the build did not write](params.md#values-the-build-did-not-write))
+is written at its own URL — `posts/!fallback/` — and reached through a
+rewrite: the host answers a URL no file answers with the shell's file,
+under `200`, the URL left as the visitor asked for it. Whenever it writes a
+shell, the build writes the rules into `dist/client/_redirects`, in the
+format Netlify and Cloudflare both read. For
+`[locale]/posts/[id]/fallback.tsx`, with `paths` supplying `/en/posts/:id`
+and `/ja/posts/:id`, the ids `1` and `2`, and a
+`[locale]/posts/first/redirect.ts` beside them:
+
+```
+# @k8ordo/framework: built URLs the rules below would also catch
+/en/posts/1 /en/posts/1 200
+/en/posts/1/index.rsc /en/posts/1/index.rsc 200
+/en/posts/2 /en/posts/2 200
+/en/posts/2/index.rsc /en/posts/2/index.rsc 200
+/en/posts/first /en/posts/first 200
+/en/posts/first/index.rsc /en/posts/!fallback/ 200
+/ja/posts/1 /ja/posts/1 200
+/ja/posts/1/index.rsc /ja/posts/1/index.rsc 200
+/ja/posts/2 /ja/posts/2 200
+/ja/posts/2/index.rsc /ja/posts/2/index.rsc 200
+/ja/posts/first /ja/posts/first 200
+/ja/posts/first/index.rsc /ja/posts/!fallback/ 200
+# @k8ordo/framework: values the build did not write, answered by their fallback.tsx's shell
+/en/posts/:p1 /en/posts/!fallback/ 200
+/ja/posts/:p1 /ja/posts/!fallback/ 200
+/en/posts/:p1/index.rsc /en/posts/!fallback/index.rsc 200
+/ja/posts/:p1/index.rsc /ja/posts/!fallback/index.rsc 200
+```
+
+The last block is the shells': for each location, a rule for its page and
+one for its payload. A client navigation to `/en/posts/3` fetches
+`/en/posts/3/index.rsc`, gets the shell's payload and stays in place;
+without the payload rule it becomes a document load, which the page rule
+answers. Placeholders are named by position, `:p1`, `:p2`, …, because
+Cloudflare reads a `:` as one only before a letter. Every page rule comes
+before every payload rule, which matters only past Cloudflare's limits
+(below).
+
+The first block lists the built URLs those rules would also catch, each
+answered by itself, for a host that applies rules before files and would
+otherwise answer `/en/posts/1` with the shell. A built `redirect.ts` or
+`route.ts` has no payload, so its payload URL is answered with the shell's
+HTML instead: a client navigation to `/en/posts/first` then gets HTML,
+loads the document, and the redirect answers it — where the shell's payload
+would have rendered in its place. A built value whose URL holds a `:`
+before a letter, or a `*`, cannot be listed, since both hosts read it as a
+placeholder or a splat:
+
+```
+k8ordo: _redirects cannot list /en/posts/a:b — Cloudflare and Netlify read ":b" as a placeholder, so on Cloudflare a shell answers it
+```
+
+Between the two blocks go the application's own rules, its
+`public/_redirects` as written: its specific rules then win over the
+shells', and on Cloudflare its static rules stay static. One with a
+placeholder or a splat that catches a shell's URL hides that shell, and the
+build names it:
+
+```
+k8ordo: public/_redirects line "/* /index.html 200" matches /en/posts/:id before its shell's rule, so that shell is never served
+```
+
+A rule catches every URL of its shape that no file answers. A bare shell of
+two segments both left open, `/:a/:b`, therefore also answers a missing
+`/assets/x.js` — with HTML, where the host would have sent a 404.
+
+### Netlify
+
+Netlify reads `_redirects` from the root of what it publishes and tries
+files before rules. Nothing else is needed.
+
+### Cloudflare Workers static assets
+
+Rules come before files there, which is what the first block is for, and
+the assets' settings decide whether the rules work:
+
+```jsonc
+// wrangler.jsonc
+{
+  "assets": {
+    "directory": "dist/client",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page",
+  },
+}
+```
+
+- `html_handling` has to be `auto-trailing-slash`, the default, or
+  `force-trailing-slash`. The shell rules rewrite to `…/!fallback/`, a
+  directory's own URL under those two. Under `drop-trailing-slash` that URL
+  is redirected to `…/!fallback`, which the same rule catches again, and
+  under `none` it is a 404.
+- `404.html` is served only under `not_found_handling: "404-page"`.
+- A Worker that runs before the assets bypasses `_redirects`, and the
+  shells with it.
+
+A built page still redirects to its slash form, `/en/posts/1` to
+`/en/posts/1/`, as it does without `_redirects`. An unbuilt value is matched
+as written: `/en/posts/3/` matches no rule and is a 404 there, where
+Netlify, Vercel, `serve` and `vite preview` answer it with the shell.
+
+**Cloudflare reads at most 2,000 static rules and 100 dynamic ones**,
+counted in file order: a rule is static while it has no placeholder and no
+rule before it had one, and every rule after the first dynamic one counts
+as dynamic, the application's own included. Past the static limit a rule
+is skipped, so a built page past it is answered by its shell; past the
+dynamic limit the rest of the file is ignored. Each built value a shell
+rule would catch costs two static rules, its page's and its payload's, so
+beside its shells a site keeps about 1,000 such pages on Cloudflare. The
+build counts the file Cloudflare's way and warns past either limit:
+
+```
+k8ordo: _redirects has 2412 rules Cloudflare counts as static; it reads 2,000 and skips the rest, so a built page past them is answered by its shell there
+k8ordo: _redirects has 130 rules Cloudflare counts as dynamic; it reads 100 and ignores the rest of the file — the shell payload rules go first (navigations to those values become document loads), then document rules (those values 404)
+```
+
+### Cloudflare Pages
+
+Pages reads the same file, with the same parser and limits. Its handler is
+the older one: it re-encodes no target, and handles a trailing slash the
+way `auto-trailing-slash` does, with nothing to set.
+
+### Vercel
+
+Vercel never reads `_redirects`; `vercel()` writes the same rewrites as
+routes ([Deploying to Vercel](#deploying-to-vercel)). A build that runs on
+Vercel and writes shells without it says so:
+
+```
+k8ordo: this build runs on Vercel, which does not read _redirects — add vercel() from @k8ordo/framework/vercel, or the shells are never served
+```
+
+### Other hosts
+
+For each shell location `L` with shell pathname `S` — `/en/posts/:id` and
+`/en/posts/!fallback` — two rewrites, status `200` and the URL unchanged,
+each applied only when no file answers the request:
+
+1. `<base>L` → `<base>S/index.html`, or `<base>S/` where the host serves a
+   directory's index;
+2. `<base>L/index.rsc` → `<base>S/index.rsc`, for client navigations.
+   Without it a navigation to an unbuilt value becomes a document load, and
+   still arrives.
+
+A `:name` matches exactly one segment. A built `redirect.ts` or `route.ts`
+whose payload URL rule 2 would catch has no payload file, so that URL needs
+a rule of its own ahead of rule 2, answering with an HTML file — the
+shell's. A host that applies rules before files also needs, listed first, a
+rule answering each built file those rules would match with itself: the
+first block of `_redirects`.
+
+A host without rewrites — GitHub Pages — cannot serve a shell: an unbuilt
+value gets its `404.html`.
+
+## Serving a static build
+
+Static mode only. `vite preview` serves the build as a static host does,
+reading `_redirects` the way Netlify reads it: the file a URL names, a
+directory's `index.html`, the target of the first `200` rule in
+`dist/client/_redirects` that matches, when that is a file, then `404.html`
+under a `404`. It answers a `GET` or a `HEAD`, and any other method with a
+`405`. The request handler is never called: a page is the file the build
+wrote, with its Content-Security-Policy `<meta>`, so what preview shows is
+what a host serves.
+
+A static build writes no `dist/server.js`, but `serve` from
+`@k8ordo/framework/serve` serves it the same way
+([Running the build](#running-the-build) has its options). It reads the
+build's mode from `dist/rsc/index.js`, and the build's `_redirects` only for
+a static one: Vite copies `public/_redirects` into a server build too, and
+its rules are not that server's to apply. Each file is sent as any file
+`serve` sends, and whether it is `immutable` is decided by the file sent
+rather than the URL, so a shell a rule answers at `/assets/x.js` is not
+cached for a year. A URL outside the base gets a plain `404`.
 
 ## Running the build
 
@@ -153,9 +339,11 @@ directory); `port` (default `3000`); and `host` (default `localhost` —
 inside a container, `'0.0.0.0'`). Stopping it on a signal is up to the
 server that calls it: `await server.close()`.
 
-`serve` hands out the client build's files as they are and passes everything
-else to the request handler: HTML for a page, its RSC payload for a client
-navigation, and `not-found.tsx` under a genuine 404. Only a `GET` or `HEAD`
+For a server build, `serve` hands out the client build's files as they are
+and passes everything else to the request handler: HTML for a page, its RSC
+payload for a client navigation, and `not-found.tsx` under a genuine 404. A
+static build it serves as a static host does, and never calls the handler
+([Serving a static build](#serving-a-static-build)). Only a `GET` or `HEAD`
 is answered from a file; any other method reaches the handler, even at a path
 that names a file. A file is sent with the type registered for its extension
 — with `charset=utf-8` on text — or as `application/octet-stream` when none
@@ -273,9 +461,7 @@ on evil.test would pass the check.
 
 ## Deploying to Vercel
 
-Server mode only: beside `framework({ mode: 'static' })`, `vercel()` stops
-the build when the config loads. A static build is `dist/client/`, which
-Vercel serves as files without an adapter.
+`vercel()` takes either mode, on either side of `framework()`:
 
 ```ts
 // vite.config.ts
@@ -290,11 +476,15 @@ export default defineConfig({
 
 With `vercel()` beside `framework()`, `vite build` also writes
 `.vercel/output/` in the shape of Vercel's Build Output API (v3), which
-`vercel build` and `vercel deploy --prebuilt` deploy as it is. The client
-build becomes static files on Vercel's CDN — a file under `assets/` is sent
-`immutable` once a file has answered, so a missing one is never cached — and
-every request that names no file goes to one Node.js function, the request
-handler, handed to Vercel as `fetch` and streaming its answer. Under a
+`vercel build` and `vercel deploy --prebuilt` deploy as it is. Each build
+replaces `.vercel/output/` and nothing else: the project link `vercel pull`
+writes beside it stays.
+
+**Under `mode: 'server'`** the client build becomes static files on
+Vercel's CDN — a file under `assets/` is sent `immutable` once a file has
+answered, so a missing one is never cached — and every request that names
+no file goes to one Node.js function, the request handler, handed to Vercel
+as `fetch` and streaming its answer. Under a
 `base` the static files sit below it, as `serve` hands them out, and the
 handler answers every URL outside it with a `404`. The copies compressed for
 `serve` are left out: Vercel compresses on its own, and each is one more file
@@ -303,9 +493,17 @@ to upload.
 **The function carries everything it imports.** A Vercel function holds
 nothing but its own directory, which is all the handler needs: server mode
 bundles every dependency into it. A dependency left out with
-`resolve.external` is not in the function, so it does not work there. Each
-build replaces `.vercel/output/` and nothing else: the project link
-`vercel pull` writes beside it stays.
+`resolve.external` is not in the function, so it does not work there.
+
+**Under `mode: 'static'`** there is no function. The client build becomes
+static files at the base — a file under `assets/` sent `immutable`, and
+`_redirects` left out, since Vercel never reads it and would serve it as a
+file — and its rewrites become routes Vercel tries only when no file
+answered: the payload URL of a built `redirect.ts` or `route.ts`, then each
+shell's page (with or without a trailing slash) and its payload, all matched
+case-sensitively, as the route table matches; then `404.html` under a `404`,
+when the build wrote one. `vercel()` writes them once the last page is
+written, whichever side of `framework()` it sits.
 
 ## A tab opened before a deploy
 
@@ -359,7 +557,10 @@ the way:
 Under `mode: 'static'` the pages are written into `dist/client/` at their
 pathnames in the table, so the host serves that directory at `/docs/`; the
 `paths` option takes pathnames without the base, and `sitemap.xml` lists
-each page at its URL, base included. Under `mode: 'server'`, `serve` reads
+each page at its URL, base included. `_redirects` is written at the root of
+`dist/client/` too, with the base in every line
+(`/docs/posts/:p1 /docs/posts/!fallback/ 200`), but a host reads it only at
+the root of what it publishes: move it there. Under `mode: 'server'`, `serve` reads
 the base the build was made for from `dist/rsc/index.js` and hands out the
 client build's files below it; a host calling the handler itself passes the
 URL as the visitor asked for it, base included.

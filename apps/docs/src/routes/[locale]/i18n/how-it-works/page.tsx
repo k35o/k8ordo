@@ -37,7 +37,7 @@ export default function I18nHowItWorksPage() {
           callouts={{ 6: t.functionCallout() }}
           code={SAVE}
           lang="tsx"
-          title="save-button.tsx"
+          title="src/components/save-button.tsx"
         />
         <p>
           <Rich>{t.functionBundle()}</Rich>

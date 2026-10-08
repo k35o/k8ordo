@@ -10,8 +10,8 @@ import {
 import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Playground } from '../../../../components/playground';
 import { Rich } from '../../../../components/rich';
+import { PrefetchDemo } from '../../../../demos/framework/routing/prefetch-demo';
 import * as m from '../../../../messages';
-import { PrefetchDemo } from './_parts/prefetch-demo';
 
 const t = m.frameworkRouting;
 
@@ -26,9 +26,7 @@ const TREE = `src/routes/
   (docs)/
     layout.tsx
     guide/
-      page.tsx
-  _parts/
-    counter.tsx`;
+      page.tsx`;
 
 const PAGE_PROPS = `import type { PageProps } from '@k8ordo/framework';
 
@@ -96,7 +94,7 @@ export function Progress() {
 
 const ROUTE = `import type { RouteContext } from '@k8ordo/framework';
 
-import { renderFeed } from '../_data/feed.server';
+import { renderFeed } from '../../lib/feed.server';
 
 export async function GET({ request }: RouteContext<'/feed.xml'>) {
   const { origin } = new URL(request.url);
@@ -176,7 +174,7 @@ export default function FrameworkRoutingPage() {
         <p>
           <Rich>{t.filesLead()}</Rich>
         </p>
-        <Items items={[...t.filesList, t.guardFile]} />
+        <Items items={[...t.filesList, t.guardFile, t.fallbackFile]} />
         <p>
           <Rich>{t.filesOther()}</Rich>
         </p>
@@ -209,7 +207,7 @@ export default function FrameworkRoutingPage() {
           code={ROUTER_API}
           lang="tsx"
           marks={{ 3: 'highlight', 6: 'highlight', 8: 'highlight' }}
-          title="src/routes/_parts/products-link.tsx"
+          title="src/components/products-link.tsx"
         />
         <p>
           <Rich>{t.routerCarry()}</Rich>
@@ -301,7 +299,7 @@ export default function FrameworkRoutingPage() {
         <CodeBlock
           code={PENDING}
           lang="tsx"
-          title="src/routes/_parts/progress.tsx"
+          title="src/components/progress.tsx"
         />
         <p>
           <Rich>{t.loadingKeep()}</Rich>

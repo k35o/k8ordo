@@ -34,11 +34,12 @@ renders in the browser.
 
 <!-- peers -->
 
-| Package        | Version | Required | Needed for                    |
-| -------------- | ------- | -------- | ----------------------------- |
-| `react`        | ≥19.3.0 | yes      | `<Router>` and the hooks      |
-| `typescript`   | ≥7.0.0  | optional | the shipped type declarations |
-| `@types/react` | ≥19.3.0 | optional | the shipped type declarations |
+| Package        | Version | Required | Needed for                      |
+| -------------- | ------- | -------- | ------------------------------- |
+| `react`        | ≥19.3.0 | yes      | `<Router>` and the hooks        |
+| `react-dom`    | ≥19.3.0 | yes      | `BrowserPathname` (`browser()`) |
+| `typescript`   | ≥7.0.0  | optional | the shipped type declarations   |
+| `@types/react` | ≥19.3.0 | optional | the shipped type declarations   |
 
 <!-- /peers -->
 

@@ -34,7 +34,7 @@ const SIGN_IN = `'use server';
 import { href } from '@k8ordo/framework';
 import { cookies, redirect } from '@k8ordo/framework/server';
 
-import { startSession } from '../../_data/sessions.server';
+import { startSession } from './sessions.server';
 
 export type SignInState = { error?: string };
 
@@ -54,7 +54,7 @@ const REPORT = `'use server';
 
 import { requestHeaders } from '@k8ordo/framework/server';
 
-import { saveReport } from '../_data/reports.server';
+import { saveReport } from './reports.server';
 
 export async function report(formData: FormData): Promise<void> {
   const agent = requestHeaders().get('user-agent') ?? 'unknown';
@@ -65,8 +65,8 @@ const OPTIONS = `cookies().set('session', token, { maxAge: 3600, sameSite: 'stri
 
 const STATE_LAYOUT = `import type { LayoutProps } from '@k8ordo/framework';
 
+import { Shell } from '../components/shell';
 import { density } from '../state';
-import { Shell } from './_parts/shell';
 
 export default function RootLayout({
   children,
@@ -83,7 +83,7 @@ const STATE_ACTION = `'use server';
 
 import { cookies } from '@k8ordo/framework/server';
 
-import { density } from '../../../state';
+import { density } from '../state';
 
 export async function compact() {
   cookies().set(
@@ -125,7 +125,7 @@ export default function FrameworkRequestPage() {
           code={GREETING}
           lang="tsx"
           marks={{ 3: 'highlight' }}
-          title="src/routes/_parts/greeting.tsx"
+          title="src/components/greeting.tsx"
         />
         <p>
           <Rich>{t.readProp()}</Rich>
@@ -144,7 +144,7 @@ export default function FrameworkRequestPage() {
           code={SIGN_IN}
           lang="ts"
           marks={{ 16: 'highlight', 17: 'highlight', 18: 'highlight' }}
-          title="src/routes/login/_parts/sign-in.ts"
+          title="src/lib/sign-in.ts"
         />
         <p>
           <Rich>{t.cookiesWhere()}</Rich>
@@ -199,7 +199,7 @@ export default function FrameworkRequestPage() {
           code={STATE_ACTION}
           lang="ts"
           marks={{ 9: 'highlight', 10: 'highlight', 11: 'highlight' }}
-          title="src/routes/settings/_parts/compact.ts"
+          title="src/lib/compact.ts"
         />
         <p>
           <Rich>{t.stateWrite()}</Rich>
@@ -217,7 +217,7 @@ export default function FrameworkRequestPage() {
           code={REPORT}
           lang="ts"
           marks={{ 8: 'highlight' }}
-          title="src/routes/_parts/report.ts"
+          title="src/lib/report.ts"
         />
         <p>
           <Rich>{t.headersArguments()}</Rich>

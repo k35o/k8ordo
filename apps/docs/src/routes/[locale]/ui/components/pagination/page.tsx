@@ -7,11 +7,11 @@ import { PropsTable } from '../../../../../components/props-table';
 import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
-import * as m from '../../../../../messages';
 import {
   PaginationDisabledPreview,
   PaginationPreview,
-} from '../_previews/pagination-previews';
+} from '../../../../../demos/ui/components/pagination-previews';
+import * as m from '../../../../../messages';
 
 export default function PaginationPage() {
   return (

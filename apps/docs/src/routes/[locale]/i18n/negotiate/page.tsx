@@ -4,8 +4,8 @@ import { Note } from '../../../../components/callout';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { Playground } from '../../../../components/playground';
 import { Rich } from '../../../../components/rich';
+import { NegotiationDemo } from '../../../../demos/i18n/negotiate/negotiation-demo';
 import * as m from '../../../../messages';
-import { NegotiationDemo } from './_parts/negotiation-demo';
 
 const t = m.i18nNegotiate;
 
@@ -60,7 +60,7 @@ const STATIC_PAGE = `'use client';
 import { useEffect } from 'react';
 
 import { locales } from '../i18n';
-import { navigateTo } from '../links';
+import { navigateTo } from '../lib/links';
 
 export default function RootRedirect() {
   useEffect(() => {
@@ -165,9 +165,13 @@ export default function I18nNegotiatePage() {
           code={GUARD}
           lang="ts"
           marks={{ 7: 'highlight', 11: 'highlight', 12: 'highlight' }}
-          title="routes/(home)/guard.ts"
+          title="src/routes/(home)/guard.ts"
         />
-        <CodeBlock code={HOME_PAGE} lang="tsx" title="routes/(home)/page.tsx" />
+        <CodeBlock
+          code={HOME_PAGE}
+          lang="tsx"
+          title="src/routes/(home)/page.tsx"
+        />
         <p>
           <Rich>{t.serverTree()}</Rich>
         </p>
@@ -192,7 +196,7 @@ export default function I18nNegotiatePage() {
           code={STATIC_PAGE}
           lang="tsx"
           marks={{ 12: 'highlight' }}
-          title="routes/page.tsx"
+          title="src/routes/page.tsx"
         />
         <p>
           <Rich>{t.staticLinks()}</Rich>
@@ -218,7 +222,7 @@ export default function I18nNegotiatePage() {
           code={STATIC_COOKIE}
           lang="tsx"
           marks={{ 2: 'highlight', 7: 'highlight', 8: 'highlight' }}
-          title="routes/page.tsx"
+          title="src/routes/page.tsx"
         />
       </DocSection>
     </DocPage>

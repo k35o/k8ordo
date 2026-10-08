@@ -23,8 +23,7 @@ const CLAIM_ROUTES = `src/routes/
   not-found.tsx
   products/
     page.tsx
-    [id]/page.tsx
-  _parts/`;
+    [id]/page.tsx`;
 
 const CLAIM_STATIC = `framework({ mode: 'static' });`;
 
@@ -34,10 +33,6 @@ const CLAIM_SERVER = `framework({ mode: 'server' });`;
 
 const CLAIM_SERVER_RUN = `vite build
 node dist/server.js`;
-
-const CLAIM_REFUSE = `static build cannot ship Server Actions — a file cannot receive one, and this declares 'use server':
-  src/routes/_parts/guestbook.ts
-this application wants mode: 'server'`;
 
 export default function FrameworkPage() {
   return (
@@ -63,7 +58,7 @@ export default function FrameworkPage() {
         body={m.framework.claimRoutesBody}
         title={m.framework.claimRoutesTitle}
       >
-        <CodeBlock code={CLAIM_ROUTES} lang="text" title="src/routes/" />
+        <CodeBlock code={CLAIM_ROUTES} lang="text" />
       </LandingClaim>
       <LandingClaim
         body={m.framework.claimModeBody}
@@ -75,12 +70,6 @@ export default function FrameworkPage() {
           <CodeBlock code={CLAIM_SERVER} lang="ts" title="vite.config.ts" />
           <CodeBlock code={CLAIM_SERVER_RUN} lang="bash" title="Terminal" />
         </div>
-      </LandingClaim>
-      <LandingClaim
-        body={m.framework.claimRefuseBody}
-        title={m.framework.claimRefuseTitle}
-      >
-        <CodeBlock code={CLAIM_REFUSE} lang="text" title="vite build" />
       </LandingClaim>
     </div>
   );

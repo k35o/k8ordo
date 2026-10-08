@@ -32,7 +32,7 @@ legacy fallbacks.
 ## The shape of it
 
 ```ts
-// i18n.ts — the one place the list is spelled
+// src/i18n.ts — the one place the list is spelled
 import { defineLocales } from '@k8ordo/i18n';
 import type { LocaleOf } from '@k8ordo/i18n';
 
@@ -49,7 +49,7 @@ declare module '@k8ordo/i18n' {
 ```
 
 ```ts
-// messages/nav.ts — each message is one export
+// src/messages/nav.ts — each message is one export
 import { message } from '@k8ordo/i18n';
 
 export const home = message({ ja: 'ホーム', en: 'Home' });
@@ -60,7 +60,7 @@ export const greeting = message({
 ```
 
 ```tsx
-// routes/[locale]/layout.tsx — a Server Component
+// src/routes/[locale]/layout.tsx — a Server Component
 import { locales } from '../../i18n';
 
 export const { paramsSchema } = locales;
@@ -207,11 +207,11 @@ component translating on another's behalf.
 
 ### Where messages live
 
-Anywhere. A file per area (`messages/nav.ts`, `messages/form.ts`) with a
+Anywhere. A file per area in `src/messages/` (`nav.ts`, `form.ts`) with a
 barrel that re-exports each as a namespace reads well at the call site:
 
 ```ts
-// messages/index.ts
+// src/messages/index.ts
 export * as nav from './nav';
 export * as form from './form';
 ```
@@ -221,10 +221,10 @@ import * as m from '../messages';
 <h1>{m.nav.home()}</h1>;
 ```
 
-A message that belongs to one component can sit next to that component.
-Grouping related messages in an object (`export const button = { label:
-message(…), hint: message(…) }`) is fine too; the bundler then keeps the
-group together.
+A message that belongs to one component can be declared in that
+component's own module. Grouping related messages in an object (`export const
+button = { label: message(…), hint: message(…) }`) is fine too; the bundler
+then keeps the group together.
 
 ### Across the Server Component boundary
 
@@ -422,11 +422,25 @@ framework({ mode: 'static', paths: locales.paths });
 ```
 
 `/:locale` in every pattern becomes one pathname per locale. A pattern with
-another parameter comes back still holding it (`/ja/blog/:slug`), which the
-build does not render: it stops with `static build needs pathnames for
-/:locale/blog/:slug`. A site with a second parameter expands the rest in the
-same function: `paths: (patterns) =>
-locales.paths(patterns).flatMap(expandSlug)`.
+another parameter comes back still holding it (`/ja/blog/:slug`). Only a
+page with a `fallback.tsx` beside it takes such a pathname, as the location
+of its shell: one per locale, answering in the browser the slugs the build
+did not write. For any other route the build stops:
+
+```
+the "paths" option supplied pathnames that still hold a parameter, and only a page with a fallback.tsx beside it takes one: /ja/blog/:slug ([locale]/blog/[slug]/page.tsx has none)
+```
+
+A site with a second parameter expands the rest in the same function:
+`paths: (patterns) => locales.paths(patterns).flatMap(expandSlug)`, where
+`expandSlug` keeps `/ja/blog/:slug` beside the slugs for a page that has a
+`fallback.tsx`.
+
+A shell runs the schemas of the layouts above it, never its page's: there
+is no value for the page's to parse. With the schema on
+`[locale]/layout.tsx`, as in [The shape of it](#the-shape-of-it), the
+locale is set for every page below it, shells included, and a shell's
+messages come out in the locale its location fills.
 
 Each path is rendered as its own request, so the schema names the locale
 for each and the messages come out in that locale; the build renders several
@@ -448,7 +462,7 @@ without JavaScript keeps the default.
   the locale:
 
   ```ts
-  // links.ts
+  // src/lib/links.ts
   import { bindParams } from '@k8ordo/framework'; // '@k8ordo/router' without the framework
 
   export const { href, navigateTo } = bindParams(() => ({

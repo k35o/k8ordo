@@ -16,7 +16,7 @@ export default defineConfig({
 });`;
 
 const REFUSED = `static build cannot answer a request — a file is written once for every visitor, and these import @k8ordo/framework/server:
-  src/routes/_parts/session.ts
+  src/lib/session.ts
 this application wants mode: 'server'`;
 
 const Items = ({ items }: { items: readonly Message[] }) => (
@@ -39,6 +39,13 @@ export default function FrameworkModesPage() {
         <Items items={t.chooseList} />
         <p>
           <Rich>{t.chooseStatic()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.chooseFallback()}</Rich>
+          <LocaleAnchor path="/:locale/framework/params">
+            {m.framework.navParams()}
+          </LocaleAnchor>
+          <Rich>{t.see()}</Rich>
         </p>
         <p>
           <Rich>{t.chooseStart()}</Rich>

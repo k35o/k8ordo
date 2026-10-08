@@ -67,7 +67,7 @@ export default function I18nRoutingPage() {
           code={LAYOUT}
           lang="tsx"
           marks={{ 3: 'highlight' }}
-          title="routes/[locale]/layout.tsx"
+          title="src/routes/[locale]/layout.tsx"
         />
         <p>
           <Rich>{t.serverScope()}</Rich>
@@ -92,7 +92,7 @@ export default function I18nRoutingPage() {
           code={RUN}
           lang="ts"
           marks={{ 6: 'highlight' }}
-          title="emails/welcome.ts"
+          title="src/lib/welcome.ts"
         />
         <p>
           <Rich>{t.runReturns()}</Rich>
@@ -129,7 +129,7 @@ export default function I18nRoutingPage() {
           code={REGION}
           lang="tsx"
           marks={{ 4: 'highlight' }}
-          title="region-name.tsx"
+          title="src/components/region-name.tsx"
         />
         <p>
           <Rich>{t.getLocaleDestructure()}</Rich>
@@ -150,7 +150,7 @@ export default function I18nRoutingPage() {
           code={ROOT_LAYOUT}
           lang="tsx"
           marks={{ 12: 'highlight', 13: 'highlight', 16: 'highlight' }}
-          title="routes/layout.tsx"
+          title="src/routes/layout.tsx"
         />
         <p>
           <Rich>{t.htmlNull()}</Rich>

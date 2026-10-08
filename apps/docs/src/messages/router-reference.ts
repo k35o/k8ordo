@@ -398,6 +398,18 @@ export const pathnameProviderCaveats = [
   }),
 ] as const;
 
+export const browserPathnameSummary = message({
+  ja: 'この下では、サーバーでの描画にパスがありません。`usePathname`と、それを読む`useMatch`は`use(browser())`でブラウザを待ち、いちばん近い`<Suspense>`の中身はブラウザが描きます。',
+  en: 'Below it, a server render has no path to give: `usePathname`, and `useMatch`, which reads it, wait for the browser with `use(browser())`, so the browser renders what is inside the nearest `<Suspense>`.',
+});
+
+export const browserPathnameCaveats = [
+  message({
+    ja: 'フレームワークのランタイムが、`fallback.tsx`のまわりに置きます。アプリが書くことはありません。',
+    en: 'The framework’s runtime puts it around a `fallback.tsx`. An app never writes it.',
+  }),
+] as const;
+
 export const generationSummary = message({
   ja: '新しいページが画面に出たことを、ルート表の`error`に伝えるコンテキストです。',
   en: 'A context that tells the route table’s `error` a new page is on screen.',

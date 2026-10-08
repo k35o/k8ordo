@@ -12,7 +12,7 @@ the colour scheme is `@k8ordo/color-scheme`'s (`<ColorSchemeProvider>` in
 the root layout's `<body>`, `useColorScheme()` in the header's switcher),
 `/state`'s live demo is a real `definePageState` on the page's own URL,
 `/form`'s live demo is a GET filter form whose constraints and URL state come
-from one schema (`src/routes/[locale]/form/_parts/`), and every word on the
+from one schema (`src/demos/form/`), and every word on the
 site is a `message()` under `src/messages/` — the locale set in `src/i18n.ts`
 is what the `[locale]` layout's `paramsSchema`, the root layout's `<html
 lang>`, `vite.config.ts`'s path expansion, the `/` redirect, and every
@@ -43,7 +43,7 @@ pnpm check:write       # Oxlint/Oxfmt lint/format auto-fix
   handling). When the
   site needs something the packages do not give it, the fix belongs in the
   package, and the site is where the pressure is felt first.
-- **Navigation mirrors the URL layout**: the header lists the packages and nothing else (`src/components/navigation.tsx`). Inside a package (`/<package>/*`, but not its landing) the shell in `src/routes/[locale]/_parts/locale-shell.tsx` adds a left sidebar, `src/components/package-sidebar.tsx`, which lists that package's pages under its groups; below `lg` the same sidebar opens in a `Drawer`. The header, the sidebar, the home page's package list and every guide page's breadcrumb, title and prev/next pager read one list, `PACKAGES` in `src/data/packages.ts` — a package's `groups` and their `sections` are in reading order, so adding a page to a package's guide is one line there plus the route. A landing's `NextSteps` is the exception: it is a hand-picked excerpt written in the landing's own `steps`, so a new page does not appear there by itself. Its paths are `SitePath`, so a removed page fails to compile. A section with a catalog (`/ui/components`, `/ui/ai`) becomes a group of its own in the sidebar, its categories levels that open and close; the shell's `catalogs` maps the section to its categories. The footer lists no packages or sections: it is the site's name, its tagline and the GitHub and npm links. Never promote one package's pages to a site-wide row: with a single package it reads as convenience, with six it makes that package look like the site's spine.
+- **Navigation mirrors the URL layout**: the header lists the packages and nothing else (`src/components/navigation.tsx`). Inside a package (`/<package>/*`, but not its landing) the shell in `src/components/locale-shell.tsx` adds a left sidebar, `src/components/package-sidebar.tsx`, which lists that package's pages under its groups; below `lg` the same sidebar opens in a `Drawer`. The header, the sidebar, the home page's package list and every guide page's breadcrumb, title and prev/next pager read one list, `PACKAGES` in `src/data/packages.ts` — a package's `groups` and their `sections` are in reading order, so adding a page to a package's guide is one line there plus the route. A landing's `NextSteps` is the exception: it is a hand-picked excerpt written in the landing's own `steps`, so a new page does not appear there by itself. Its paths are `SitePath`, so a removed page fails to compile. A section with a catalog (`/ui/components`, `/ui/ai`) becomes a group of its own in the sidebar, its categories levels that open and close; the shell's `catalogs` maps the section to its categories. The footer lists no packages or sections: it is the site's name, its tagline and the GitHub and npm links. Never promote one package's pages to a site-wide row: with a single package it reads as convenience, with six it makes that package look like the site's spine.
 - **URL layout**: package-first. Everything a package documents lives under `/<package>/…` — `@k8ordo/ui` owns `/ui/get-started`, `/ui/components/*`, `/ui/ai/*`, and so on. `/<package>` itself is that package's landing page (`src/routes/[locale]/ui/page.tsx`): what it is, what it gives you, where to start. Only `/` is shared — it introduces k8ordo, lists the packages, and states what they all commit to. Add a new package by adding its own `/<package>` landing plus a `/<package>/…` subtree starting at `/<package>/get-started`, and an entry in `PACKAGES` (`src/data/packages.ts`) — its shipped docs are found from its `package.json` (see Markdown for agents below), and the build fails while `PACKAGES` lacks it; never put a package's sections at the top level, where they would sit at the same depth as package names.
 - **Unmatched routes**: `src/routes/[locale]/not-found.tsx` is rendered into a
   single `404.html`, which a static host serves for anything it does not have.
@@ -75,7 +75,8 @@ pnpm check:write       # Oxlint/Oxfmt lint/format auto-fix
   Component on purpose: a value exported from a `'use client'` module reaches
   the RSC side as a client reference, not a schema, which is why the layout
   is split into `layout.tsx` (schema, Server Component) and
-  `_parts/locale-shell.tsx` (providers, header, hooks — the client part).
+  `src/components/locale-shell.tsx` (providers, header, hooks — the client
+  part).
   Accepting the locale there is also what makes it the locale of that
   render for every message, on the server side.
 - **Errors**: `src/routes/[locale]/error.tsx` renders `ErrorFallback` in the
@@ -158,7 +159,7 @@ pnpm check:write       # Oxlint/Oxfmt lint/format auto-fix
   that one component's group is `switchInput`.
 - **Styling**: Tailwind CSS 4, uses `@k8ordo/ui` design tokens
 - **Root provider**: `UIProvider` wraps each locale subtree in
-  `src/routes/[locale]/_parts/locale-shell.tsx`, for toasts. Component
+  `src/components/locale-shell.tsx`, for toasts. Component
   built-in strings follow the site locale on their own: `@k8ordo/ui` reads
   `@k8ordo/i18n`'s current locale, and the shell importing `locales` is what
   defines the set in the browser
@@ -171,7 +172,7 @@ pnpm check:write       # Oxlint/Oxfmt lint/format auto-fix
 
 ```
 src/
-  routes/              # the URL space, and nothing else
+  routes/              # the URL space, and nothing else: only route files
     layout.tsx         # <html>/<head>/<body> — the document itself, no <title>
     error.tsx          # the shell itself threw: full-screen ErrorFallback
     page.tsx           # / — detects the locale and redirects
@@ -179,17 +180,18 @@ src/
     design.md/route.ts # /design.md — @k8ordo/ui's design spec, from the tokens
     [locale]/
       layout.tsx       # paramsSchema (locale) — a Server Component
-      _parts/locale-shell.tsx  # providers, header, sidebar, footer (client)
       error.tsx        # a page threw: ErrorFallback inside the shell
       page.tsx         # /:locale
       not-found.tsx    # /:locale/* — becomes 404.html
-      form/_parts/     # the /form GET-form demo: state definition + form
       <package>/<section>/page.tsx  # a guide page: <DocPage> + <DocSection>s
-      <package>/<section>/_parts/   # that page's live demo, if it has one
       ui/components/<name>/page.tsx
-      ui/components/_previews/      # `_` never appears in a URL
   constants.ts         # Shared constants (e.g. STORYBOOK_URL)
   components/          # Shared doc components (ComponentPreview, PropsTable, etc.)
+    locale-shell.tsx   # the [locale] layout's client part: providers, header, sidebar, footer
+  demos/               # live demos and previews, at the URL path they appear on, minus [locale]
+    form/              # the /form GET-form demo: state definition + form
+    <package>/<section>/  # that page's live demo, if it has one
+    ui/components/     # the catalog's interactive previews, <name>-previews.tsx
   data/                # PACKAGES (packages.ts), which packages ship docs (shipped-docs), the sidebars (components-nav, ai-nav), generated props (component-props)
   i18n.ts              # defineLocales + Register — the locale set
   links.ts             # href / navigateTo with the locale bound; SitePath
@@ -265,10 +267,25 @@ export default function RouterLinksPage() {
   name goes in the `CodeBlock`'s `title`; point at lines with `marks`, and
   with `callouts` when a line needs a localized note. Keep lines short enough
   not to scroll in the 46rem column (about 70 characters).
+- A sample that shows a framework application's files places them as
+  `examples/static-basic` and `examples/server-basic` do: route files in
+  `src/routes/`, components in `src/components/`, and every other module —
+  Server Actions, schemas, state definitions, data, helpers — in `src/lib/`,
+  both flat. Two files that would collide in one sample are named by their
+  feature (`talk-actions.ts`). What a package's docs give a place of its own
+  keeps it: `src/i18n.ts` and `src/state.ts` at the root, and messages in
+  `src/messages/`, a file per area behind an `index.ts` barrel. A title
+  names a file by its path from the project root (`src/routes/page.tsx`,
+  `src/i18n.ts`, `vite.config.ts`); a bare name (`talk-form.tsx`) is for a
+  file whose place the sample does not depend on. The site's own `src/` —
+  `demos/`, `components/`, `data/`, `messages/` and the rest — is its
+  implementation, not a sample, and keeps its own layout.
 - Asides are `Note` and `Pitfall` (`src/components/callout.tsx`), which render
   `@k8ordo/ui`'s `Callout`.
-- A live demo is a `'use client'` component in the page's own `_parts/`,
-  shown in a `Playground` with `steps` the reader can follow, and only where
+- A live demo is a `'use client'` component under `src/demos/` at the page's
+  URL path without the locale (`/form/get-started` →
+  `src/demos/form/get-started/`), shown in a `Playground` with `steps` the
+  reader can follow, and only where
   touching it teaches something the prose cannot. The site is static, so a
   demo simulates the server in the browser and says so.
 - An API reference page is a run of `ApiEntry`s (name, entry point,
@@ -300,9 +317,11 @@ export default function RouterLinksPage() {
 
 ### Preview Components
 
-Complex interactive previews live in the sibling `_previews/<name>-previews.tsx`
-and are imported by the page. A `_`-prefixed directory is invisible to the route
-grammar, which is why previews can live inside `routes/` at all.
+Complex interactive previews live in
+`src/demos/ui/components/<name>-previews.tsx` and are imported by the page.
+`routes/` holds only route files (any other file there fails the build), so
+previews and live demos sit under `src/demos/`, at the path of the page that
+shows them.
 
 ## Writing the Japanese copy
 

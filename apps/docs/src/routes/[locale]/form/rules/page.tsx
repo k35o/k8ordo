@@ -5,9 +5,9 @@ import { Pitfall } from '../../../../components/callout';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { Playground } from '../../../../components/playground';
 import { Rich } from '../../../../components/rich';
+import { reviewDefinition } from '../../../../demos/form/rules/review-definition';
+import { ReviewDemo } from '../../../../demos/form/rules/review-demo';
 import * as m from '../../../../messages';
-import { reviewDefinition } from './_parts/review-definition';
-import { ReviewDemo } from './_parts/review-demo';
 
 const t = m.formRules;
 

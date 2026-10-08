@@ -17,7 +17,7 @@ Every package here commits to the same four things:
 | [`@k8ordo/form`](packages/form) | HTML constraint attributes, messages, and server-side validation from one zod schema |
 | [`@k8ordo/state`](packages/state) | State declared by where it lives — URL, history entry, localStorage, sessionStorage, a cookie (one zod schema each), memory (a typed box) |
 | [`@k8ordo/router`](packages/router) | The URL's pathname axis: one route table, typed paths, over the Navigation API |
-| [`@k8ordo/framework`](packages/framework) | The application framework: routes from `src/routes/`, built into files ahead of time (`mode: 'static'`) or run as RSC per request with Server Actions (`mode: 'server'`) |
+| [`@k8ordo/framework`](packages/framework) | The application framework: routes from `src/routes/`, rendered at build time to run with no server (`mode: 'static'`) or per request on a server with Server Actions (`mode: 'server'`) |
 | [`@k8ordo/i18n`](packages/i18n) | The locale axis: one locale set for the URL segment, negotiation, and the params schema; each message a function that reads the locale where it is called, on either side of the network |
 | [`@k8ordo/color-scheme`](packages/color-scheme) | The colour-scheme axis: the visitor's light / dark / system preference, stored through `@k8ordo/state`, on `<html>` before the first paint |
 

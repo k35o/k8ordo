@@ -8,11 +8,11 @@ import { PropsTable } from '../../../../../components/props-table';
 import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
-import * as m from '../../../../../messages';
 import {
   ToastBasicPreview,
   ToastCloseAllPreview,
-} from '../_previews/toast-previews';
+} from '../../../../../demos/ui/components/toast-previews';
+import * as m from '../../../../../messages';
 
 // useToast の戻り値はコンポーネントではないので生成の対象外。
 const toastReturnProps: PropItem[] = [

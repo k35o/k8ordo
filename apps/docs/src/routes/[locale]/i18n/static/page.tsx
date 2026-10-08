@@ -23,7 +23,7 @@ const SLUGS = `import { framework } from '@k8ordo/framework/vite';
 import { defineConfig } from 'vite';
 
 import { locales } from './src/i18n';
-import { readSlugs } from './src/posts';
+import { readSlugs } from './src/lib/posts';
 
 const expandSlugs = async (paths: string[]) => {
   const slugs = await readSlugs();
@@ -96,6 +96,9 @@ export default function I18nStaticPage() {
         <p>
           <Rich>{t.otherExpand()}</Rich>
         </p>
+        <p>
+          <Rich>{t.otherShell()}</Rich>
+        </p>
       </DocSection>
 
       <DocSection
@@ -116,7 +119,7 @@ export default function I18nStaticPage() {
           code={NOT_FOUND}
           lang="tsx"
           marks={{ 1: 'highlight' }}
-          title="routes/[locale]/not-found.tsx"
+          title="src/routes/[locale]/not-found.tsx"
         />
         <p>
           <Rich>{t.notFoundLang()}</Rich>

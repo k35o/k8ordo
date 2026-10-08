@@ -92,7 +92,7 @@ export const buildServer = message({
 });
 
 export const buildClient = message({
-  ja: 'Client Componentは扱いが違います。上にSuspenseの境界があれば、その部分を空けたままファイルが書き出されます。ブラウザで描画したときに例外が起き、`error.tsx`が表示されます。`error.tsx`もSuspenseの境界の1つです。上に境界が無ければ、Server Componentと同じくビルドが止まります。',
+  ja: 'Client Componentは扱いが違います。上にSuspenseの境界があれば、その部分を空けたままファイルが書き出されます。ブラウザで描画したときに例外が起き、`error.tsx`が表示されます。`error.tsx`もSuspenseの境界の1つです。上に境界が無ければ、Server Componentと同じくビルドできません。',
   en: 'A Client Component is different. With a Suspense boundary above it, the file is written with that part left empty. The error happens when the browser renders it, and `error.tsx` shows. An `error.tsx` is itself a Suspense boundary. With no boundary above it, the build stops as it does for a Server Component.',
 });
 
@@ -127,7 +127,7 @@ export const notFoundAnswers = message({
 });
 
 export const notFoundStatic = message({
-  ja: 'staticモードでは、`not-found.tsx`は`404.html`という1つのファイルに書き出されます。静的ホスティングは、存在しないURLすべてに1つのファイルを返します。そのため置ける`not-found.tsx`は1つだけです。ロケールの区間の下に置いても構いません。2つ以上置くと、ビルドは`a static host answers every unknown URL from one file`で始まるエラーで止まります。1つも置かなければ`404.html`は書かれず、存在しないURLに何を返すかは静的ホスティング次第です。`404.html`がブラウザでどう描画されるかは',
+  ja: 'staticモードでは、`not-found.tsx`は`404.html`という1つのファイルに書き出されます。静的ホスティングは、存在しないURLすべてに1つのファイルを返します。そのため置ける`not-found.tsx`は1つだけです。ロケールの区間の下に置いても構いません。2つ以上置くと、`a static host answers every unknown URL from one file`で始まるエラーになり、ビルドできません。1つも置かなければ`404.html`は書かれず、存在しないURLに何を返すかは静的ホスティング次第です。`404.html`がブラウザでどう描画されるかは',
   en: 'Under static mode, `not-found.tsx` is written as one file, `404.html`. A static host returns one file for every URL that does not exist, so there can be only one `not-found.tsx`. Under a locale segment is fine. Two or more stop the build with an error that begins `a static host answers every unknown URL from one file`. With none, no `404.html` is written, and the static host decides what a URL that does not exist gets. How `404.html` renders in the browser is covered in ',
 });
 
@@ -157,8 +157,13 @@ export const pageNotFoundSchema = message({
 });
 
 export const pageNotFoundStatic = message({
-  ja: 'staticモードでは、ページのどこで`notFound()`を呼んでも404になります。ただし`paths`で渡したURLのページが`notFound()`を呼ぶと、そのURLを挙げてビルドが止まります。サイトにあるはずのURLに、404のページを書くことになるからです。',
+  ja: 'staticモードでは、ページのどこで`notFound()`を呼んでも404になります。ただし`paths`で渡したURLのページが`notFound()`を呼ぶと、そのURLを挙げたエラーになり、ビルドできません。サイトにあるはずのURLに、404のページを書くことになるからです。',
   en: 'Under static mode, `notFound()` gives a 404 from anywhere in the page. A URL passed through `paths` whose page calls it stops the build, naming the URL: it would write a 404 page at a URL the site claims to have.',
+});
+
+export const pageNotFoundShell = message({
+  ja: '`fallback.tsx`のシェルの中でブラウザが`notFound()`を呼んだときは、404になりません。いちばん近い`not-found.tsx`がその場に描かれ、ステータスは`200`のままです。詳しくは',
+  en: 'In a `fallback.tsx` shell, a `notFound()` called in the browser gives no 404: the nearest `not-found.tsx` renders in place, and the status stays `200`. More on this in ',
 });
 
 export const pageNotFoundServer = message({
@@ -177,7 +182,7 @@ export const redirectTitle = message({
 });
 
 export const redirectFile = message({
-  ja: 'URLを移したときは、古いディレクトリに`page.tsx`の代わりに`redirect.ts`を置きます。default exportは、行き先の文字列か`{ to, permanent }`です。同じディレクトリに`page.tsx`と`redirect.ts`を両方置くと、ビルドは`"old" cannot both render page.tsx and redirect — keep one`で止まります。',
+  ja: 'URLを移したときは、古いディレクトリに`page.tsx`の代わりに`redirect.ts`を置きます。default exportは、行き先の文字列か`{ to, permanent }`です。同じディレクトリに`page.tsx`と`redirect.ts`を両方置くと、`"old" cannot both render page.tsx and redirect — keep one`というエラーになり、ビルドできません。',
   en: 'When a URL moves, its old directory holds a `redirect.ts` instead of a `page.tsx`. The default export is the target: a string, or `{ to, permanent }`. A directory holding both `page.tsx` and `redirect.ts` stops the build with `"old" cannot both render page.tsx and redirect — keep one`.',
 });
 

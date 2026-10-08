@@ -61,8 +61,8 @@ export function NavList({ items }: { items: readonly NavItem[] }) {
   );
 }`;
 
-const SHARE_PAGE = `import * as m from '../../../messages';
-import { CopyLink } from './_parts/copy-link';
+const SHARE_PAGE = `import { CopyLink } from '../../../components/copy-link';
+import * as m from '../../../messages';
 
 export default function SharePage() {
   return (
@@ -97,7 +97,7 @@ const COPY_LINK_IMPORT = `'use client';
 
 import { useState } from 'react';
 
-import * as m from '../../../../messages';
+import * as m from '../messages';
 
 export function CopyLink() {
   const [done, setDone] = useState(false);
@@ -120,7 +120,7 @@ export default function I18nMessagesPage() {
   return (
     <DocPage introduction={t.introduction} path="/:locale/i18n/messages">
       <DocSection description={t.textDescription} id="text" title={t.textTitle}>
-        <CodeBlock code={NAV} lang="ts" title="messages/nav.ts" />
+        <CodeBlock code={NAV} lang="ts" title="src/messages/nav.ts" />
         <p>
           <Rich>{t.textCheck()}</Rich>
         </p>
@@ -143,7 +143,7 @@ export default function I18nMessagesPage() {
           code={CART}
           lang="ts"
           marks={{ 4: 'highlight', 5: 'highlight' }}
-          title="messages/cart.ts"
+          title="src/messages/cart.ts"
         />
         <p>
           <Rich>{t.valuesTemplate()}</Rich>
@@ -169,12 +169,12 @@ export default function I18nMessagesPage() {
         id="where"
         title={t.whereTitle}
       >
-        <CodeBlock code={INDEX} lang="ts" title="messages/index.ts" />
+        <CodeBlock code={INDEX} lang="ts" title="src/messages/index.ts" />
         <CodeBlock
           code={HEADER}
           lang="tsx"
           marks={{ 4: 'highlight' }}
-          title="header.tsx"
+          title="src/components/header.tsx"
         />
         <p>
           <Rich>{t.whereNear()}</Rich>
@@ -195,7 +195,7 @@ export default function I18nMessagesPage() {
           code={MENU}
           lang="ts"
           marks={{ 5: 'remove', 6: 'add' }}
-          title="data/menu.ts"
+          title="src/lib/menu.ts"
         />
         <p>
           <Rich>{t.renderWhy()}</Rich>
@@ -211,7 +211,7 @@ export default function I18nMessagesPage() {
           code={NAV_LIST}
           lang="tsx"
           marks={{ 3: 'highlight', 10: 'highlight' }}
-          title="nav-list.tsx"
+          title="src/components/nav-list.tsx"
         />
         <p>
           <Rich>{t.propsArgs()}</Rich>
@@ -234,12 +234,12 @@ export default function I18nMessagesPage() {
             code={SHARE_PAGE}
             lang="tsx"
             marks={{ 6: 'highlight' }}
-            title="routes/[locale]/share/page.tsx"
+            title="src/routes/[locale]/share/page.tsx"
           />
           <CodeBlock
             code={COPY_LINK_PROPS}
             lang="tsx"
-            title="routes/[locale]/share/_parts/copy-link.tsx"
+            title="src/components/copy-link.tsx"
           />
         </DocSubsection>
         <DocSubsection id="import" title={t.boundaryImportTitle}>
@@ -250,7 +250,7 @@ export default function I18nMessagesPage() {
             code={COPY_LINK_IMPORT}
             lang="tsx"
             marks={{ 5: 'highlight', 19: 'highlight' }}
-            title="routes/[locale]/share/_parts/copy-link.tsx"
+            title="src/components/copy-link.tsx"
           />
           <p>
             <Rich>{t.boundaryMore()}</Rich>

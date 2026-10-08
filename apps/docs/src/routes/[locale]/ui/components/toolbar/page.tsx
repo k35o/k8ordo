@@ -7,8 +7,8 @@ import { PropsTable } from '../../../../../components/props-table';
 import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
+import { ToolbarPreview } from '../../../../../demos/ui/components/toolbar-previews';
 import * as m from '../../../../../messages';
-import { ToolbarPreview } from '../_previews/toolbar-previews';
 
 const CODE = `<Toolbar.Root aria-label="Formatting">
   <Toolbar.Item

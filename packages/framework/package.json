@@ -1,7 +1,7 @@
 {
   "name": "@k8ordo/framework",
   "version": "1.0.0",
-  "description": "The k8ordo framework: routes/ compiled into React Server Components, either built into files ahead of time or rendered per request.",
+  "description": "The k8ordo framework: routes/ compiled into React Server Components, run with or without a server.",
   "keywords": [
     "k8ordo",
     "react",

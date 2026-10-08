@@ -6,8 +6,8 @@ import {
   NextSteps,
 } from '../../../components/landing';
 import { Playground } from '../../../components/playground';
+import { StateDemo } from '../../../demos/state/state-demo';
 import * as m from '../../../messages';
-import { StateDemo } from './_parts/state-demo';
 
 const HERO_DEFINE = `export const listState = definePageState('product-list', {
   url: z.object({
@@ -63,8 +63,12 @@ export default function StatePage() {
       <LandingHero
         code={
           <>
-            <CodeBlock code={HERO_DEFINE} lang="ts" title="state.ts" />
-            <CodeBlock code={HERO_USE} lang="tsx" title="filters.tsx" />
+            <CodeBlock code={HERO_DEFINE} lang="ts" title="src/state.ts" />
+            <CodeBlock
+              code={HERO_USE}
+              lang="tsx"
+              title="src/components/filters.tsx"
+            />
             <CodeBlock code={HERO_URL} lang="text" title="URL" />
           </>
         }
@@ -77,7 +81,7 @@ export default function StatePage() {
         body={m.state.claimPlacesBody}
         title={m.state.claimPlacesTitle}
       >
-        <CodeBlock code={CLAIM_PLACES} lang="ts" title="state.ts" />
+        <CodeBlock code={CLAIM_PLACES} lang="ts" title="src/state.ts" />
       </LandingClaim>
       <LandingClaim
         body={m.state.claimHistoryBody}
@@ -100,9 +104,13 @@ export default function StatePage() {
           <CodeBlock
             code={CLAIM_SERVER_PAGE}
             lang="tsx"
-            title="routes/products/page.tsx"
+            title="src/routes/products/page.tsx"
           />
-          <CodeBlock code={CLAIM_SERVER_HREF} lang="ts" title="links.ts" />
+          <CodeBlock
+            code={CLAIM_SERVER_HREF}
+            lang="ts"
+            title="src/lib/links.ts"
+          />
         </div>
       </LandingClaim>
       <NextSteps

@@ -56,7 +56,7 @@ and around everything, so the script it renders comes before anything the
 page paints:
 
 ```tsx
-// routes/layout.tsx
+// src/routes/layout.tsx
 import { ColorSchemeProvider } from '@k8ordo/color-scheme';
 import type { ReactNode } from 'react';
 

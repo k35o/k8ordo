@@ -145,7 +145,7 @@ src/
   links.ts          href / navigateTo / bindParams (the side that needs no table)
   register.ts       Register (module augmentation) + PageProps / LayoutProps / RouteContext
   navigation.ts     useInterceptedNavigation (intercept and the commit contract), usePendingPathname
-  location.tsx      usePathname / PathnameProvider (where you are, without the table)
+  location.tsx      usePathname / PathnameProvider / BrowserPathname (where you are, without the table)
   match.ts          matchPath / useMatch ("which section am I in", without the table)
   boundary.tsx      RouteErrorBoundary (the boundary that renders the table's error)
   router.tsx        Router / Outlet / useRoute / useParams

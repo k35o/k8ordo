@@ -6,7 +6,7 @@ build refuses every `'use server'` module by name
 ([What static mode refuses](../GUIDE.md#what-static-mode-refuses)).
 
 ```ts
-// src/routes/_parts/actions.ts
+// src/lib/actions.ts
 'use server';
 
 export async function createTalk(_previous: FormState, formData: FormData) {
@@ -18,12 +18,12 @@ export async function createTalk(_previous: FormState, formData: FormData) {
 ```
 
 ```tsx
-// src/routes/_parts/talk-form.tsx
+// src/components/talk-form.tsx
 'use client';
 
 import { useActionState } from 'react';
 
-import { createTalk } from './actions';
+import { createTalk } from '../lib/actions';
 
 export function TalkForm() {
   const [state, formAction] = useActionState(createTalk, {});

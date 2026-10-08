@@ -65,7 +65,7 @@ pnpm check         # check:write to auto-fix
   code it is handed: that transform prepends its runtime import, so the file
   has stopped beginning with the directive by the time anyone downstream sees
   it. A `guard.ts` is found through the engine's grammar (`slotOf`), never by
-  the file name alone, since a `_private/guard.ts` is not one.
+  the file name alone, since one under a `.`-prefixed directory is not one.
 - **The handler is the engine's, not ours.** Prerendering calls
   `dist/rsc/index.js`, the engine's request handler compiled for
   `mode: 'static'` — once for each page's HTML and once for its payload —
@@ -156,9 +156,49 @@ pnpm check         # check:write to auto-fix
   its `rsc` output beside its `package.json` and checks the file is
   untouched; `examples/server-basic`'s `deployed.test.ts` starts the one
   built without `type`.
-- **An uncovered parameterised route fails a static build.** Never warn,
-  never skip: a site missing half its pages is worse than a build that
-  stopped.
+- **An uncovered parameterised route fails a static build** — unless its
+  page has a `fallback.tsx`, whose shell answers the values the build did
+  not write. Never warn, never skip: a site missing half its pages is worse
+  than a build that stopped.
+- **A shell stands where `paths` says, or at its bare pattern.** `planPaths`
+  gives a supplied pathname that still holds `:name` segments to the first
+  pattern in table order it fits; with a fallback.tsx it is a shell
+  location (its open params only — those no layout above receives), without
+  one it is refused naming the file. A fallback pattern given no location
+  gets its bare pattern, unless a layout receives one of its params.
+  Shell pathnames replace the left-open segments with `!fallback`, which a
+  supplied pathname may not hold, escaped or not. `shadowedShells` refuses a
+  shell whose host rule would answer URLs a pattern declared first is given
+  (a shared parameter position, or one URL the build did not write).
+  `planRefusals` words every refusal; `vite dev` logs the same words.
+- **A shell is written only when its own pattern answered.** The build asks
+  the handler for each shell pathname, HTML and payload, and writes them
+  only on a 200 carrying `SHELL_HEADER` for that pattern; anything else
+  stops the build naming the location (a params schema, a `notFound()`,
+  another route). A shell is never in the sitemap. Its HTML
+  outside scripts is searched for `!fallback`, which a layout writing its
+  `pathname` leaves, and the build warns.
+- **`_redirects` is how a static host reaches a shell.** Written to the
+  client build only when there are shells, after every file is in place
+  (`rewrites.ts`): the built URLs a shell rule would also catch, listed as
+  themselves (Cloudflare applies rules before files), and the payload URL of
+  a built `redirect.ts`/`route.ts` answered with the shell's HTML; then the
+  application's own `public/_redirects` verbatim (read from `publicDir`,
+  never from the output, which a build with `emptyOutDir: false` already
+  merged); then the shells' document rules and payload rules, placeholders
+  named by position. Targets are spelled as Cloudflare re-encodes them. The
+  build warns about what a host would get wrong reading it: Cloudflare's
+  static and dynamic limits, a built URL a rule cannot list, an own rule
+  that hides a shell, a Vercel build without `vercel()`. A `k8ordo:vercel`
+  plugin is handed `StaticOutput` through `api.writeStatic` once the files
+  are written.
+- **`vite dev` answers an unlisted value with the shell.** `k8ordo:static`'s
+  `configureServer` (`pre`, so its middleware runs after Vite's own and
+  before the RSC handler) rewrites a request a shell rule matches, for a
+  value `paths` does not list, to the shell pathname. It reads the routes,
+  and `paths` only for an application with a fallback.tsx, once per change
+  (`watchChange`) — `paths` again only when the patterns handed to it
+  changed — and a URL no fallback pattern could match never waits on it.
 - **A supplied pathname the site then disowns fails the build.** A 404 for
   a pathname `paths` supplied is either a params schema refusing it or the
   page saying `notFound()`; the handler marks the second with
@@ -218,7 +258,7 @@ pnpm check         # check:write to auto-fix
   two cannot disagree — and takes it off a request (`withoutBase`, the base
   passed in: Node has no `import.meta.env`) before looking for a file or
   deciding `immutable`. A URL outside the base never names a file; the
-  handler answers it.
+  handler answers it, or for a static build a plain 404.
 - **`serve` hands back a handle.** `{ port, url, close }`, so a test can
   listen on port 0 and stop what it started (`serve.test.ts` runs it against
   a fixture `dist`, no real build needed).
@@ -233,15 +273,38 @@ pnpm check         # check:write to auto-fix
   to end in a `304`.
 - **Vercel is the one host with an adapter.** `vercel()` exists because
   k8o, the family's real consumer, deploys there; another host gets the
-  handler (`dist/rsc/index.js`) and no adapter until something here runs on
-  it. The adapter writes the Build Output API directory and nothing more — no
-  launcher of its own (Vercel calls the handler as `fetch`) and no dependency
-  tracing (server mode builds the handler with every dependency bundled in).
-  It is for `mode: 'server'`, and refuses the static plugin in `configResolved`,
-  where every plugin is listed whichever side of `framework()` it was put:
-  the function would render every URL the files do not (a parameter value
-  `paths` never listed), and placed first it copies the client before a
-  page is written.
+  handler (`dist/rsc/index.js`) or `_redirects` and no adapter until
+  something here runs on it. The adapter writes the Build Output API
+  directory and nothing more — no launcher of its own (Vercel calls the
+  handler as `fetch`) and no dependency tracing (server mode builds the
+  handler with every dependency bundled in). It takes either mode, read in
+  `configResolved`, where every plugin is listed whichever side of
+  `framework()` it was put. Under `mode: 'server'` its own `buildApp` writes
+  the client and the function. Under `mode: 'static'` its own `buildApp`
+  does nothing — placed first it would copy the client before a page is
+  written — and `k8ordo:static` calls its `api.writeStatic` once every file
+  is in place: the client without `_redirects` (Vercel never reads it, and
+  would serve it), no function, and the rewrites as routes after
+  `handle: 'filesystem'` — the payload URL of a built non-page, the shells'
+  documents (`…/index.html`, a trailing slash allowed) and payloads —
+  case-sensitive, then `404.html` under 404 when it was written.
+- **`serve` and `vite preview` serve a static build as a static host.**
+  One resolver, `resolveStatic` (`static-host.ts`), in Netlify's order: the
+  file, a directory's `index.html`, the first `200` rule of the build's
+  `_redirects` (read by `parseRedirects`), then `404.html` under 404;
+  anything but `GET`/`HEAD` is 405. Neither ever calls the handler for a
+  static build — it wrote every file there is, and a render would carry a
+  nonce the files do not. `serve` tells the builds apart by the entry's
+  `mode` export and reads `_redirects` only for a static one: Vite copies
+  `public/_redirects` into a server build too, and its `200` rules are not
+  this server's to apply. Under either, `immutable` is decided by the file
+  sent, never the URL, so a shell a rule answers at `/assets/x.js` is not
+  cached for a year. The preview middleware is registered directly in
+  `configurePreviewServer`, ahead of Vite's own, and hands Vite's static
+  files the file's own URL (they resolve no directory index) or answers
+  itself: the 404, and a file whose name holds `?` or `#`, which Vite's
+  static files cannot be handed in any spelling (they undo only
+  `decodeURI`'s escapes).
 
 ## Layout
 
@@ -251,11 +314,18 @@ src/
   generated.ts      ./generated: what .k8ordo/ imports (defineRoutes, Register, …)
   vite.ts           ./vite: framework() — the engine, plus static mode or server mode
   static.ts         staticMode: the refusals (dev in resolveId / transform, the
-                    build's in buildApp) and prerendering into files
+                    build's in buildApp), prerendering into files, vite dev's
+                    shells and vite preview's static host
   paths.ts          patternsOf / patternsNeedingPaths / planPaths /
                     catchAllPatterns / catchAllPath / dirFor / isConcrete /
-                    answeredByRoute — pure functions (supplied pathnames
+                    answeredByRoute / shellPathname / shadowedShells /
+                    planRefusals — pure functions (supplied pathnames
                     matched with URLPattern)
+  rewrites.ts       the _redirects rules: shellRules / builtRules /
+                    formatRedirects / cloudflareCounts, and parseRedirects /
+                    rewriteFor, which apply them — pure functions
+  static-host.ts    resolveStatic / readRules — what a static host serves for
+                    a URL of a static build; serve and vite preview share it
   documents.ts      sitemap / redirectPage — the two files the build writes
                     itself rather than taking from the handler, escaped as
                     markup; asFile / policyProblems — a page as a file: its
@@ -268,9 +338,10 @@ src/
                     dist/server.js bundled from serve, and the client
                     precompressed
   precompress.ts    the client build's .br / .gz copies, written at build time
-  serve.ts          ./serve: the node:http server (static files + handing off to the handler)
-  vercel-output.ts  the build as Vercel's Build Output API directory
-  vercel.ts         ./vercel: the plugin that bundles the handler and writes it
+  serve.ts          ./serve: the node:http server (static files + handing off to
+                    the handler; a static build as a static host)
+  vercel-output.ts  the build as Vercel's Build Output API directory, either mode
+  vercel.ts         ./vercel: the plugin that writes it
 ```
 
 ## Conventions

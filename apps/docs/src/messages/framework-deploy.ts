@@ -58,8 +58,8 @@ export const outputServe = message({
 });
 
 export const outputLog = message({
-  ja: 'ビルドは最後に、書いたルートの数と、`404.html`と`sitemap.xml`を書いたかどうかを1行で出します。数にはリダイレクトのページも含まれます。',
-  en: 'The build ends with one line: how many routes it wrote, and whether it wrote `404.html` and `sitemap.xml`. Redirect pages count among the routes.',
+  ja: 'ビルドは最後に、書いたルートの数と、`404.html`と`sitemap.xml`を書いたかどうかを1行で出します。数にはリダイレクトのページも含まれます。シェルを書いたときは、その数と場所、`_redirects`も並びます。',
+  en: 'The build ends with one line: how many routes it wrote, and whether it wrote `404.html` and `sitemap.xml`. Redirect pages count among the routes. When it wrote shells, the line also gives how many and where, and `_redirects`.',
 });
 
 export const outputPayload = message({
@@ -145,6 +145,117 @@ export const sitemapWrite = message({
 export const sitemapNone = message({
   ja: '`site`を渡さなければ、`sitemap.xml`は書かれません。',
   en: 'Without `site`, no `sitemap.xml` is written.',
+});
+
+export const redirectsTitle = message({
+  ja: '`_redirects`',
+  en: '`_redirects`',
+});
+
+export const redirectsWrite = message({
+  ja: '`fallback.tsx`のあるページがあると、ビルドはシェルと一緒に`dist/client/_redirects`も書きます。NetlifyとCloudflareが読む書き換えのルールです。ファイルの無い`/posts/3`にはシェルを、そのペイロードにはシェルのペイロードを、URLを変えずに返します。シェルについては、',
+  en: 'When a page has a `fallback.tsx`, the build writes `dist/client/_redirects` along with the shell: rewrite rules that Netlify and Cloudflare read. `/posts/3`, which has no file, gets the shell, and its payload URL the shell’s payload, with the URL left as it is. Shells are covered in ',
+});
+
+export const redirectsBuilt = message({
+  ja: '前半のルールは、書き出したURLにそのURLのファイルを返します。Cloudflareはファイルより先にルールを当てるので、これが無いと書き出したページにもシェルが返ります。ファイルを先に返すNetlifyでは使われません。',
+  en: 'The first block answers each URL the build wrote with its own file. Cloudflare applies rules before files, and without these it would answer written pages with the shell too. Netlify serves files first and never reaches them.',
+});
+
+export const redirectsOwn = message({
+  ja: '`public/_redirects`があれば、その中身を2つのブロックの間に入れます。そこに`/* /index.html 200`のようなルールがあると、シェルより先に当たるので、ビルドが警告します。',
+  en: 'A `public/_redirects` of your own goes between the two blocks. A rule there such as `/* /index.html 200` matches before the shells’ rules, and the build warns about it.',
+});
+
+export const redirectsBase = message({
+  ja: 'Viteの`base`を設定していても、`_redirects`は`dist/client/`の直下に書かれ、どのルールにも`base`が付きます。ホスティングは公開するディレクトリの直下の`_redirects`しか読まないので、そこへ移します。',
+  en: 'Under a Vite `base`, `_redirects` is still written at the top of `dist/client/`, with the base on every rule. A host reads `_redirects` only at the top of what it publishes, so move it there.',
+});
+
+export const redirectsAssets = message({
+  ja: '`/:lang/:id`のように区間がパラメータ2つだけのパターンでは、シェルのルールが無くなった`/assets/x.js`にも当たり、HTMLを返します。',
+  en: 'For a pattern of two parameters and nothing else, such as `/:lang/:id`, the shell’s rule also matches a missing `/assets/x.js`, and answers it with HTML.',
+});
+
+export const cloudflareTitle = message({
+  ja: 'Cloudflare',
+  en: 'Cloudflare',
+});
+
+export const cloudflareWorkers = message({
+  ja: 'Workersの静的アセットで配信するときは、`html_handling`を既定の`auto-trailing-slash`か`force-trailing-slash`にします。シェルのルールは、スラッシュで終わるディレクトリのURLへ書き換えるためです。`drop-trailing-slash`ではリダイレクトがループし、`none`では404になります。またCloudflareでは、ビルドしていない値の`/posts/3/`のように末尾にスラッシュがあるとシェルのルールが当たらず、404になります。',
+  en: 'On Workers static assets, keep `html_handling` at the default `auto-trailing-slash`, or set `force-trailing-slash`: the shell rules rewrite to a directory URL that ends in a slash. Under `drop-trailing-slash` the redirects loop, and under `none` the shell is a 404. Cloudflare also tells a trailing slash apart: a value the build did not write, asked for as `/posts/3/`, matches no shell rule and gets a 404, where other hosts answer it with the shell.',
+});
+
+export const cloudflareNotFound = message({
+  ja: '`404.html`を返すには、`not_found_handling`を`"404-page"`にします。ファイルより先に動くWorkerのスクリプトがあると、`_redirects`は読まれません。Pagesのスラッシュの扱いは`auto-trailing-slash`と同じで、変える設定はありません。',
+  en: 'To serve `404.html`, set `not_found_handling` to `"404-page"`. A Worker script that runs before the files bypasses `_redirects`. Pages handles slashes as `auto-trailing-slash` does, with no setting to change it.',
+});
+
+export const cloudflareLimits = message({
+  ja: 'Cloudflareが読むルールは、固定のURLが2,000個、パラメータを含むものが100個までです。書き出した値1つに固定のルールが2つ要るので、シェルのあるパターンの下に書き出せるページはおよそ1,000です。超えるとビルドが警告します。',
+  en: 'Cloudflare reads at most 2,000 rules for fixed URLs and 100 with parameters. Each value written under a pattern with a shell takes two fixed rules, so about 1,000 such pages fit. The build warns when a limit is passed.',
+});
+
+export const staticVercelTitle = message({
+  ja: 'Vercel',
+  en: 'Vercel',
+});
+
+export const staticVercelOutput = message({
+  ja: 'Vercelは`_redirects`を読みません。`vercel()`を`framework()`の隣に置くと、ビルドは`.vercel/output/`も書きます。書き出したファイルを静的ファイルとして置き、`_redirects`と同じ書き換えをルートとして書きます。関数は作りません。',
+  en: 'Vercel does not read `_redirects`. Put `vercel()` beside `framework()`, and the build also writes `.vercel/output/`: the written files as static files, and the same rewrites as routes, with no function.',
+});
+
+export const staticVercelWarn = message({
+  ja: 'Vercelの上で`vercel()`の無いビルドがシェルを書くと、ビルドが警告します。そのままでは、シェルを返すものが無いためです。',
+  en: 'A build on Vercel that writes shells without `vercel()` warns: nothing would serve them.',
+});
+
+export const otherHostsTitle = message({
+  ja: 'ほかのホスティング',
+  en: 'Other hosts',
+});
+
+export const otherHostsRules = message({
+  ja: '`_redirects`を読まないホスティングでは、シェルの場所ごとに次の2つを設定します。どちらもURLを変えずにファイルを返す書き換えで、ファイルが無いときにだけ当てます。',
+  en: 'On a host that does not read `_redirects`, set up these two rewrites for each shell location. Both answer with a file and leave the URL as it is, and apply only when no file answers.',
+});
+
+export const otherHostsList = [
+  message({
+    ja: '`/posts/:id`を`/posts/!fallback/index.html`へ',
+    en: '`/posts/:id` to `/posts/!fallback/index.html`',
+  }),
+  message({
+    ja: '`/posts/:id/index.rsc`を`/posts/!fallback/index.rsc`へ（無いと、遷移が文書の読み込みに変わります）',
+    en: '`/posts/:id/index.rsc` to `/posts/!fallback/index.rsc` (without it, a navigation turns into a document load)',
+  }),
+] as const;
+
+export const otherHostsMore = message({
+  ja: '`:id`は区間1つに当たります。シェルの場所の下に`redirect.ts`か`route.ts`を書き出したときは、そのペイロードのURLにシェルのHTMLを返すルールを、2つ目より先に置きます。ルールをファイルより先に当てるホスティングでは、書き出したファイルにそのファイルを返すルールを先頭に並べます。',
+  en: '`:id` matches one segment. When a `redirect.ts` or `route.ts` was written under a shell location, answer its payload URL with the shell’s HTML, in a rule placed before the second one. A host that applies rules before files needs, first of all, a rule answering each written file with itself.',
+});
+
+export const otherHostsPages = message({
+  ja: 'GitHub Pagesのように書き換えの無いホスティングでは、シェルは使えません。ビルドしていない値には`404.html`が返ります。',
+  en: 'A host without rewrites, such as GitHub Pages, cannot use shells: a value the build did not write gets `404.html`.',
+});
+
+export const localTitle = message({
+  ja: '手元での確認',
+  en: 'Checking locally',
+});
+
+export const localPreview = message({
+  ja: '`vite preview`は、staticモードのビルドをホスティングと同じように配信します。`dist/client/`のファイルを返し、無ければ`_redirects`の書き換えをNetlifyと同じ順で当てます。どれにも当たらなければ`404.html`を404で返し、`GET`と`HEAD`のほかには`405`を返します。',
+  en: '`vite preview` serves a static build the way a host does: the files in `dist/client/`, then the rewrites in `_redirects`, applied as Netlify applies them. When nothing matches it answers `404.html` with a 404, and any method but `GET` and `HEAD` with a `405`.',
+});
+
+export const localFiles = message({
+  ja: 'ページを描き直すことはないので、書き出したファイルとCSPの`<meta>`をそのまま確かめられます。`@k8ordo/framework/serve`の`serve()`も、staticモードのビルドを同じように配信します。',
+  en: 'Nothing is rendered again, so what you check is the files as written, CSP `<meta>` included. `serve()` from `@k8ordo/framework/serve` serves a static build the same way.',
 });
 
 export const serverTitle = message({
@@ -355,8 +466,8 @@ export const vercelTitle = message({
 });
 
 export const vercelOutput = message({
-  ja: "`@k8ordo/framework/vercel`の`vercel()`を`framework()`の隣に足すと、`vite build`はVercelのBuild Output API（v3）の形で`.vercel/output/`も書きます。`vercel deploy --prebuilt`で、それをそのままデプロイできます。`mode: 'static'`と並べると、設定を読み込んだ時点でエラーになります。staticモードのビルドは、`dist/client/`をファイルとして置くだけで足ります。",
-  en: "Add `vercel()` from `@k8ordo/framework/vercel` beside `framework()`, and `vite build` also writes `.vercel/output/` in the shape of Vercel’s Build Output API (v3). `vercel deploy --prebuilt` deploys it as it is. Beside `mode: 'static'` it fails when the config loads; a static build is `dist/client/`, served as files.",
+  ja: '`@k8ordo/framework/vercel`の`vercel()`を`framework()`の隣に足すと、`vite build`はVercelのBuild Output API（v3）の形で`.vercel/output/`も書きます。`vercel deploy --prebuilt`で、それをそのままデプロイできます。',
+  en: 'Add `vercel()` from `@k8ordo/framework/vercel` beside `framework()`, and `vite build` also writes `.vercel/output/` in the shape of Vercel’s Build Output API (v3). `vercel deploy --prebuilt` deploys it as it is.',
 });
 
 export const vercelFunction = message({
@@ -438,6 +549,6 @@ export const baseServer = message({
 });
 
 export const baseRefused = message({
-  ja: "`base`はルートから始まるパスにします。`./`のような相対パスや別のoriginでは、ビルドが`k8ordo serves its pages under Vite's base, so base has to be a path from the root`で始まるエラーで止まります。",
+  ja: "`base`はルートから始まるパスにします。`./`のような相対パスや別のoriginでは、`k8ordo serves its pages under Vite's base, so base has to be a path from the root`で始まるエラーになり、ビルドできません。",
   en: "`base` has to be a path from the root. With a relative path like `./`, or another origin, the build stops with an error that begins `k8ordo serves its pages under Vite's base, so base has to be a path from the root`.",
 });

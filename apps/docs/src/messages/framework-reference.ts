@@ -29,12 +29,12 @@ export const entriesList = [
     en: '`@k8ordo/framework/server`: server mode only. The functions and types that code inside the handler imports. In static mode, a module that imports a value from it fails the build. It needs nothing from Node.js but `AsyncLocalStorage`, so it runs wherever the handler does.',
   }),
   message({
-    ja: '`@k8ordo/framework/serve`：serverモードのビルドをNode.jsで動かす`serve()`です。`dist/server.js`が呼ぶ関数で、自前のサーバーからも使えます。',
-    en: '`@k8ordo/framework/serve`: `serve()`, which runs a server mode build on Node.js. `dist/server.js` calls it, and a server of your own can too.',
+    ja: '`@k8ordo/framework/serve`：ビルドをNode.jsで動かす`serve()`です。serverモードの`dist/server.js`が呼ぶ関数で、自前のサーバーからも使えます。staticモードのビルドは、静的ホスティングと同じように配信します。',
+    en: '`@k8ordo/framework/serve`: `serve()`, which runs a build on Node.js. A server mode build’s `dist/server.js` calls it, and a server of your own can too. A static mode build it serves the way a static host does.',
   }),
   message({
-    ja: '`@k8ordo/framework/vercel`：serverモードのビルドをVercel向けに書き出すプラグイン`vercel()`です。',
-    en: '`@k8ordo/framework/vercel`: `vercel()`, the plugin that writes a server mode build for Vercel.',
+    ja: '`@k8ordo/framework/vercel`：ビルドをVercel向けに書き出すプラグイン`vercel()`です。どちらのモードでも使えます。',
+    en: '`@k8ordo/framework/vercel`: `vercel()`, the plugin that writes the build for Vercel, in either mode.',
   }),
   message({
     ja: '`@k8ordo/framework/generated`：生成される`.k8ordo/`のファイルだけがimportする型と関数です。手で書くコードからはimportしません。',
@@ -48,8 +48,8 @@ export const frameworkSummary = message({
 });
 
 export const frameworkMode = message({
-  ja: "`'static'`か`'server'`です。省略できません。`'static'`はすべてのページをファイルに書き出し、`'server'`はリクエストごとに描画します。",
-  en: "`'static'` or `'server'`, with no default. `'static'` writes every page into files, and `'server'` renders per request.",
+  ja: "`'static'`か`'server'`です。省略できません。`'static'`はページをビルド時に描画し、サーバーなしで動くアプリにします。`'server'`はページをリクエストごとに描画し、サーバーで動くアプリにします。",
+  en: "`'static'` or `'server'`, with no default. `'static'` renders pages at build time, into an app that runs with no server. `'server'` renders pages per request, in an app that runs on a server.",
 });
 
 export const frameworkRoutesDir = message({
@@ -58,8 +58,8 @@ export const frameworkRoutesDir = message({
 });
 
 export const frameworkPaths = message({
-  ja: 'staticモードだけ。パラメータを持つルートのパス名を返す関数です。値の要るパターンの一覧を受け取り、パス名の配列かそのPromiseを返します。パス名にViteの`base`は含めません。',
-  en: 'Static mode only. A function that returns the pathnames of routes with parameters. It receives the patterns that need values and returns an array of pathnames, or a promise of one. The pathnames carry no Vite `base`.',
+  ja: 'staticモードだけ。パラメータを持つルートのパス名を返す関数です。値の要るパターンの一覧を受け取り、パス名の配列かそのPromiseを返します。パス名にViteの`base`は含めません。`fallback.tsx`のあるページには、`/ja/posts/:id`のように値を残したシェルの場所も返せます。',
+  en: 'Static mode only. A function that returns the pathnames of routes with parameters. It receives the patterns that need values and returns an array of pathnames, or a promise of one. The pathnames carry no Vite `base`. For a page with a `fallback.tsx`, it may also return shell locations that leave a value open, such as `/ja/posts/:id`.',
 });
 
 export const frameworkSite = message({
@@ -94,8 +94,8 @@ export const filesTitle = message({
 });
 
 export const filesDescription = message({
-  ja: '`src/routes/`の下に置けるファイルと、それぞれがexportするものと受け取るものの一覧です。これ以外の名前のファイルは、`_`で始まるディレクトリに置きます。',
-  en: 'The files a directory under `src/routes/` may hold, with what each exports and receives. A file with any other name goes under a directory whose name starts with `_`.',
+  ja: '`src/routes/`の下に置けるファイルと、それぞれがexportするものと受け取るものの一覧です。これ以外のファイルは、部品なら`src/components/`に、それ以外のモジュールなら`src/lib/`に置きます。',
+  en: 'The files a directory under `src/routes/` may hold, with what each exports and receives. Any other file lives outside `src/routes/`: components in `src/components/`, every other module in `src/lib/`.',
 });
 
 export const pageDefault = message({
@@ -151,6 +151,21 @@ export const errorDefault = message({
 export const loadingDefault = message({
   ja: 'default export：propsを受け取らないコンポーネントです。その下のページを待つ間、`<Suspense>`のfallbackとして描画されます。',
   en: 'Default export: a component with no props. It renders as the `<Suspense>` fallback while the page below it loads.',
+});
+
+export const fallbackDefault = message({
+  ja: 'default export：propsを受け取らないコンポーネントです。staticモードで、`paths`に無い値のURLに横の`page.tsx`の代わりに描かれます。',
+  en: 'Default export: a component with no props. Under static mode it renders in place of the `page.tsx` beside it, for a URL whose value `paths` did not list.',
+});
+
+export const fallbackPlace = message({
+  ja: 'パラメータを持つ`page.tsx`の横に置きます。同じディレクトリに`layout.tsx`は置けません。',
+  en: 'It sits beside a `page.tsx` that has a parameter. Its directory may not hold a `layout.tsx`.',
+});
+
+export const fallbackNote = message({
+  ja: 'serverモードでは使われず、`page.tsx`がどの値もリクエストごとに描きます。',
+  en: 'Server mode does not use it: `page.tsx` renders every value per request.',
 });
 
 export const redirectDefault = message({
@@ -384,8 +399,8 @@ export const redirectTargetSummary = message({
 });
 
 export const serveSummary = message({
-  ja: 'serverモードだけ。ビルドをNode.jsのHTTPサーバーで動かします。待ち受けを始めると、URLと止める関数を返します。',
-  en: 'Server mode only. Runs the build on a Node.js HTTP server. Once it is listening, it returns its URL and a function to stop it.',
+  ja: 'ビルドをNode.jsのHTTPサーバーで動かします。待ち受けを始めると、URLと止める関数を返します。',
+  en: 'Runs the build on a Node.js HTTP server. Once it is listening, it returns its URL and a function to stop it.',
 });
 
 export const serveDist = message({
@@ -425,22 +440,26 @@ export const serveClose = message({
 
 export const serveCaveats = [
   message({
-    ja: '自前のサーバーから呼ぶときは、`@k8ordo/framework`を`dependencies`に入れ、実行時にもインストールします。ビルドが書く`dist/server.js`は、この関数をバンドル済みで持っています。',
-    en: 'To call it from a server of your own, put `@k8ordo/framework` in `dependencies` and install it for run time as well. The `dist/server.js` the build writes has it bundled in.',
+    ja: '自前のサーバーから呼ぶときは、`@k8ordo/framework`を`dependencies`に入れ、実行時にもインストールします。serverモードのビルドが書く`dist/server.js`は、この関数をバンドル済みで持っています。',
+    en: 'To call it from a server of your own, put `@k8ordo/framework` in `dependencies` and install it for run time as well. The `dist/server.js` a server mode build writes has it bundled in.',
   }),
   message({
-    ja: '`GET`と`HEAD`のうち、`dist/client/`の中のファイルを指すものにはそのファイルを返します。それ以外はハンドラに渡します。',
-    en: 'A `GET` or `HEAD` that names a file in `dist/client/` gets that file. Everything else goes to the handler.',
+    ja: 'serverモードのビルドでは、`GET`と`HEAD`のうち、`dist/client/`の中のファイルを指すものにはそのファイルを返します。それ以外はハンドラに渡します。',
+    en: 'For a server mode build, a `GET` or `HEAD` that names a file in `dist/client/` gets that file. Everything else goes to the handler.',
   }),
   message({
     ja: 'ハンドラでエラーが起きたときは、`500`と本文`internal error`だけを返し、内容はサーバーのログに出します。',
     en: 'When the handler throws, it responds with a `500` and the body `internal error` and logs what was thrown.',
   }),
+  message({
+    ja: 'staticモードのビルドでは、ハンドラを呼びません。ファイルと`_redirects`の書き換え、`404.html`の順に探して返します。`GET`と`HEAD`のほかには`405`を返します。',
+    en: 'For a static mode build, the handler is never called. It looks for the file, then a rewrite in `_redirects`, then `404.html`, and answers any method but `GET` and `HEAD` with a `405`.',
+  }),
 ] as const;
 
 export const vercelSummary = message({
-  ja: 'serverモードだけ。`vite build`に、VercelのBuild Output API（v3）の形で`.vercel/output/`も書かせるプラグインです。`framework()`の隣に置きます。',
-  en: 'Server mode only. A plugin that has `vite build` also write `.vercel/output/` in the shape of Vercel’s Build Output API (v3). Put it beside `framework()`.',
+  ja: '`vite build`に、VercelのBuild Output API（v3）の形で`.vercel/output/`も書かせるプラグインです。`framework()`の隣に置きます。どちらのモードでも使えます。',
+  en: 'A plugin that has `vite build` also write `.vercel/output/` in the shape of Vercel’s Build Output API (v3). Put it beside `framework()`, in either mode.',
 });
 
 export const vercelReturns = message({
@@ -450,11 +469,11 @@ export const vercelReturns = message({
 
 export const vercelCaveats = [
   message({
-    ja: '関数になるのは、依存をすべてバンドルしたハンドラです。`resolve.external`でバンドルから外した依存は関数に入らないので、Vercelでは動きません。',
-    en: 'The function is the handler, with every dependency bundled in. A dependency left out with `resolve.external` is not in the function, and does not work on Vercel.',
+    ja: 'serverモードでは、依存をすべてバンドルしたハンドラが関数になります。`resolve.external`でバンドルから外した依存は関数に入らないので、Vercelでは動きません。',
+    en: 'Under server mode the function is the handler, with every dependency bundled in. A dependency left out with `resolve.external` is not in the function, and does not work on Vercel.',
   }),
   message({
-    ja: "`mode: 'static'`と組み合わせると、設定を読み込んだ時点でエラーになります。staticモードのビルドは`dist/client/`なので、Vercelにはファイルのままデプロイします。",
-    en: "Beside `mode: 'static'` it fails the build when the config loads. A static build is `dist/client/`, which Vercel serves as files.",
+    ja: 'staticモードでは関数を作りません。書き出したファイルと、ビルドしていない値をシェルに書き換えるルートだけを書きます。Vercelは`_redirects`を読みません。',
+    en: 'Under static mode there is no function: only the written files, and routes that rewrite a value the build did not write to its shell. Vercel does not read `_redirects`.',
   }),
 ] as const;
