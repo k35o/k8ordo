@@ -22,6 +22,7 @@ import {
 } from 'react';
 import type { ReactNode, RefObject } from 'react';
 
+import { ShowNotFound } from './fallback-boundary';
 import { isPayload } from './is-payload';
 import { ACTION_ID_HEADER } from './payload';
 import type { Payload } from './payload';
@@ -138,15 +139,43 @@ const fetchPage = async (
   return payload;
 };
 
-type Streaming = { readonly tree: ReactNode; readonly cancel: () => void };
+/**
+ * A payload's trees still streaming in on its request: the page, and a
+ * shell's not-found, which is serialized after it and may be what is on
+ * screen once the shell swapped it in.
+ */
+type Streaming = {
+  readonly trees: readonly ReactNode[];
+  readonly cancel: () => void;
+};
 
 /** Takes over the request of a payload whose tree is being applied. */
 const hold = (streaming: Streaming[], payload: Payload): void => {
   const stream = streams.get(payload);
   if (stream === undefined) return;
   stream.keep();
-  streaming.push({ tree: payload.tree, cancel: stream.cancel });
+  streaming.push({
+    trees:
+      payload.notFound === undefined
+        ? [payload.tree]
+        : [payload.tree, payload.notFound],
+    cancel: stream.cancel,
+  });
 };
+
+/**
+ * What is applied: a page's tree, and — a shell's only — the not-found its
+ * fallback.tsx shows in place when the value turns out to have nothing.
+ */
+type Applied = {
+  readonly tree: ReactNode;
+  readonly notFound: ReactNode | undefined;
+};
+
+const appliedOf = (payload: Payload): Applied => ({
+  tree: payload.tree,
+  notFound: payload.notFound,
+});
 
 /**
  * The router's prefetch cache, made the first time it is asked for. It is
@@ -185,13 +214,16 @@ export function AppRouter({
   pathname,
   search,
   tree,
+  notFound,
 }: {
   pathname: string;
   /** The search the page was rendered with, when it reads the search. */
   search?: string | undefined;
   tree: ReactNode;
+  /** A shell's not-found, when the tree is a shell. */
+  notFound?: ReactNode | undefined;
 }): ReactNode {
-  const [latest, setLatest] = useState(tree);
+  const [latest, setLatest] = useState<Applied>(() => ({ tree, notFound }));
   const current = useDeferredValue(latest);
   const prefetched = useRef<PrefetchCache<Payload | null>>(null);
   // The search the tree last applied was rendered with — `undefined` when its
@@ -200,12 +232,25 @@ export function AppRouter({
   const searchApplied = useRef(search);
   // The trees applied whose requests may still be streaming.
   const streaming = useRef<Streaming[]>([]);
+  // Navigations whose page has not arrived. The URL commits before the next
+  // tree does, so a shell still on screen reads the URL it is being left for
+  // and may find nothing there: its not-found is not shown meanwhile.
+  // Counted here rather than read from `usePendingPathname`, which clears in
+  // a layout effect of this component — after the boundary's
+  // `componentDidCatch` in the same commit, which would refuse the swap the
+  // applied shell asks for.
+  const loading = useRef(0);
 
   // A tree neither asked for nor on screen will never render again, so what
   // it is still receiving is cancelled.
   useEffect(() => {
     streaming.current = streaming.current.filter((entry) => {
-      if (entry.tree === latest || entry.tree === current) return true;
+      if (
+        entry.trees.includes(latest.tree) ||
+        entry.trees.includes(current.tree)
+      ) {
+        return true;
+      }
       entry.cancel();
       return false;
     });
@@ -216,7 +261,7 @@ export function AppRouter({
       apply: (payload) => {
         searchApplied.current = payload.search;
         startTransition(() => {
-          setLatest(payload.tree);
+          setLatest(appliedOf(payload));
         });
       },
       forgetPrefetched: () => {
@@ -265,7 +310,7 @@ export function AppRouter({
       hold(streaming.current, payload);
       searchApplied.current = payload.search;
       startTransition(() => {
-        setLatest(payload.tree);
+        setLatest(appliedOf(payload));
       });
     };
     const listener = (): void => {
@@ -305,34 +350,41 @@ export function AppRouter({
     claim: (url) =>
       url.origin === location.origin && withoutBase(url.pathname) !== null,
     load: async (url, signal) => {
-      const payloadPath = payloadUrlFor(url);
-      let payload: Payload | null;
+      loading.current += 1;
       try {
-        payload = await (cacheIn(prefetched).take(payloadPath, signal) ??
-          fetchPage(payloadPath, signal));
-      } catch (error) {
-        if (signal.aborted) throw error;
-        // The network, or a server that could not answer: the same rule as
-        // a URL that is not a page — the document load shows the truth.
-        return reloadInstead<Payload>();
+        const payloadPath = payloadUrlFor(url);
+        let payload: Payload | null;
+        try {
+          payload = await (cacheIn(prefetched).take(payloadPath, signal) ??
+            fetchPage(payloadPath, signal));
+        } catch (error) {
+          if (signal.aborted) throw error;
+          // The network, or a server that could not answer: the same rule
+          // as a URL that is not a page — the document load shows the truth.
+          return await reloadInstead<Payload>();
+        }
+        // A second navigation may have taken over while this was in flight —
+        // the body read, the client components it names imported — and
+        // reloading then would fetch the URL that already lost.
+        signal.throwIfAborted();
+        // Not a page of this application. Interception already committed
+        // the URL, so reloading asks the server for exactly what the browser
+        // would have asked for had this never been claimed — its real status
+        // included.
+        if (payload === null) return await reloadInstead<Payload>();
+        if (!canRender(payload)) return await reloadInstead<Payload>();
+        return payload;
+      } finally {
+        // The router applies what this returned right after it settles, so
+        // the applied tree renders with the count back where it was.
+        loading.current -= 1;
       }
-      // A second navigation may have taken over while this was in flight —
-      // the body read, the client components it names imported — and
-      // reloading then would fetch the URL that already lost.
-      signal.throwIfAborted();
-      // Not a page of this application. Interception already committed the
-      // URL, so reloading asks the server for exactly what the browser would
-      // have asked for had this never been claimed — its real status
-      // included.
-      if (payload === null) return reloadInstead<Payload>();
-      if (!canRender(payload)) return reloadInstead<Payload>();
-      return payload;
     },
     apply: (next) => {
       markNavigated();
       hold(streaming.current, next);
       searchApplied.current = next.search;
-      setLatest(next.tree);
+      setLatest(appliedOf(next));
     },
     // A page that reads the search is rendered for the one it was given, so
     // a navigation that moves it loads the page again; a page that does not
@@ -342,13 +394,33 @@ export function AppRouter({
       url.search !== searchApplied.current,
   });
 
+  // A shell's fallback.tsx says notFound() in the browser; what it then shows
+  // is the not-found its payload carries, in place of the shell on screen —
+  // unless a navigation is under way, whose page replaces both, or a newer
+  // tree was applied meanwhile, which is left alone. Not a navigation: the
+  // URL and the history stay as they are.
+  const shown = current;
+  const show = (): boolean => {
+    if (loading.current > 0) return false;
+    setLatest((previous) =>
+      previous === shown
+        ? { tree: shown.notFound, notFound: undefined }
+        : previous,
+    );
+    return true;
+  };
+
   // The tree comes from the server, so a client component in it cannot ask a
   // table where it is. The pathname the server rendered for is what seeds
   // `usePathname` until the browser can answer for itself.
   return (
     <PathnameProvider pathname={pathname}>
       <NavigationGeneration value={generation}>
-        <Recover>{current}</Recover>
+        <Recover>
+          <ShowNotFound value={current.notFound === undefined ? null : show}>
+            {current.tree}
+          </ShowNotFound>
+        </Recover>
       </NavigationGeneration>
     </PathnameProvider>
   );

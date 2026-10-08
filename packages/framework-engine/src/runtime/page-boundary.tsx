@@ -1,18 +1,12 @@
 'use client';
 
-import { isNotFound } from '@k8ordo/router';
 import { Component } from 'react';
 import type { ReactNode } from 'react';
 
-import { NOT_FOUND_DIGEST } from './payload';
+import { FallbackCatch } from './fallback-boundary';
 import { isNavigated } from './recover';
 import { reloadDocument } from './reload';
-
-const saysNotFound = (error: unknown): boolean =>
-  isNotFound(error) ||
-  (typeof error === 'object' &&
-    error !== null &&
-    (error as { digest?: unknown }).digest === NOT_FOUND_DIGEST);
+import { saysNotFound } from './says-not-found';
 
 /** Whether the boundary answers `error` with a document load. */
 const sendsBack = (error: unknown): boolean =>
@@ -22,13 +16,20 @@ const sendsBack = (error: unknown): boolean =>
  * What the root reports of an error a boundary caught: what React would —
  * the error, and under `vite dev` where in the tree — except a navigation's
  * `notFound()`, which is no failure: the document load this boundary asks
- * for answers it, under a 404.
+ * for answers it, under a 404. Nor a shell's, which its `FallbackBoundary`
+ * answers in place.
  */
 export const reportCaught = (
   error: unknown,
-  info: { readonly componentStack?: string | undefined },
+  info: {
+    readonly componentStack?: string | undefined;
+    readonly errorBoundary?: unknown;
+  },
 ): void => {
   if (sendsBack(error)) return;
+  if (saysNotFound(error) && info.errorBoundary instanceof FallbackCatch) {
+    return;
+  }
   if (import.meta.env.DEV) console.error(error, info.componentStack);
   else console.error(error);
 };

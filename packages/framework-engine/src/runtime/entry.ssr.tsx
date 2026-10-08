@@ -41,6 +41,7 @@ export async function renderHtml(
   const htmlStream = await renderToReadableStream(
     <PageShownContext value={() => shown.resolve(undefined)}>
       <AppRouter
+        notFound={payload.notFound}
         pathname={payload.pathname}
         search={payload.search}
         tree={payload.tree}

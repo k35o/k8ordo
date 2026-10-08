@@ -13,9 +13,10 @@ import {
   loadServerAction,
   renderToReadableStream,
 } from '@vitejs/plugin-rsc/rsc/server';
-import type { ReactNode } from 'react';
+import type { ComponentType, ReactNode } from 'react';
 import {
   catchAllSchemas,
+  fallbacks,
   guards,
   paramSchemas,
   redirects,
@@ -24,6 +25,7 @@ import {
   searchReaders,
 } from 'virtual:k8ordo/routes';
 
+import type { Mode } from '../host';
 import { noticeCancel } from './cancel';
 import type * as SsrEntry from './entry.ssr';
 import { runGuards } from './guard';
@@ -31,12 +33,13 @@ import { PageShown } from './page-shown';
 import { watchPage } from './page-watch';
 import { parseCatchAllParams, parseParams } from './params';
 import type { ParsedParams } from './params';
-import { NOT_FOUND_SEGMENT } from './pathname';
+import { FALLBACK_SEGMENT, NOT_FOUND_SEGMENT } from './pathname';
 import {
   ACTION_ID_HEADER,
   NOT_FOUND_DIGEST,
   NONCE_HEADER,
   NOT_FOUND_HEADER,
+  SHELL_HEADER,
 } from './payload';
 import type { Payload } from './payload';
 import { isPayloadPath, pagePathFor } from './payload-path';
@@ -52,6 +55,7 @@ import {
   writingFile,
 } from './request-scope';
 import { methodNotAllowed, routeAnswerFor, runRoute } from './route';
+import { shellParams } from './shell';
 
 type ActionResult = {
   returnValue?: unknown;
@@ -71,6 +75,22 @@ const redirectResponse = (to: string, status: number): Response =>
  * from here, so it cannot disagree with the handler it runs.
  */
 export const base = import.meta.env.BASE_URL;
+
+/**
+ * The mode the handler was built for. `serve` reads it to know whether it
+ * serves a build into files — as a static host would — or runs the handler.
+ */
+export const mode: Mode =
+  import.meta.env.K8ORDO_MODE === 'static' ? 'static' : 'server';
+
+/** A request for a shell: the URL is the shell pathname itself. */
+type Shell = {
+  /** The pattern whose fallback.tsx renders it. */
+  readonly pattern: string;
+  readonly component: ComponentType<never>;
+  /** The params the shell fills; the rest are left to the browser. */
+  readonly known: Readonly<Record<string, string>>;
+};
 
 /**
  * A `redirect.ts` target is written the way the route table is: a pathname
@@ -227,6 +247,9 @@ const respond = async (request: Request): Promise<Response> => {
   // the pattern that answered wrote to the async context, and nothing a
   // refused pattern's did.
   let parsed: ParsedParams = { params: {}, enter: (fn) => fn() };
+  // 宣言の型のまま置く。コールバックの中でしか代入しないので、初期値で
+  // undefined に絞られると後ろで読めない
+  let shell = undefined as Shell | undefined;
   const match = routes.match(pathname, (found) => {
     if (found.pattern.endsWith('/*')) {
       parsed = parseCatchAllParams(
@@ -235,6 +258,21 @@ const respond = async (request: Request): Promise<Response> => {
       );
       return true;
     }
+    // A shell pathname (`/ja/posts/!fallback`) of a pattern with a
+    // fallback.tsx: the page's own schema never runs — there is no value —
+    // and the layouts' run over the params the shell fills, for what they
+    // write; one refusing is this pattern not answering, as for a page.
+    const fallback = fallbacks[found.pattern];
+    const known =
+      fallback === undefined ? null : shellParams(found.params, fallback.open);
+    if (fallback !== undefined && known !== null) {
+      const accepted = parseParams(fallback.schemas, known);
+      if (accepted === null) return false;
+      parsed = accepted;
+      shell = { pattern: found.pattern, component: fallback.component, known };
+      return true;
+    }
+    shell = undefined;
     const accepted = parseParams(
       paramSchemas[found.pattern] ?? [],
       found.params,
@@ -359,19 +397,43 @@ const respond = async (request: Request): Promise<Response> => {
   // the way @k8ordo/state reads a url schema; the payload says which search
   // it was rendered with, so the browser loads the page again when it moves.
   const readSearch =
-    match === null || missing ? undefined : searchReaders[match.pattern];
+    match === null || missing || shell !== undefined
+      ? undefined
+      : searchReaders[match.pattern];
   const search = readSearch?.(url.searchParams);
+
+  // What the table answers for a URL nothing matched here — the nearest
+  // not-found.tsx — and the context its layouts' schemas leave.
+  const nearestNotFound = (): {
+    readonly tree: ReactNode;
+    readonly enter: ParsedParams['enter'];
+  } => {
+    const nearest = matchNotFound(pathname, shell !== undefined);
+    return {
+      tree:
+        nearest.match === null
+          ? renderNotFound(routes, pathname, routeRequest)
+          : renderMatch(nearest.match, {
+              pathname,
+              params: nearest.parsed.params,
+              request: routeRequest,
+            }),
+      enter: nearest.parsed.enter,
+    };
+  };
 
   const render = (
     tree: ReactNode,
     enter: ParsedParams['enter'],
     renderedSearch?: string,
+    notFound?: ReactNode,
   ): Rendered =>
     renderPayload(
       {
         tree,
         pathname,
         search: renderedSearch,
+        notFound,
         client: ssr.clientEntry,
         returnValue: action.returnValue,
         formState: action.formState,
@@ -387,7 +449,10 @@ const respond = async (request: Request): Promise<Response> => {
   const page =
     match === null || missing || action.redirect !== undefined
       ? null
-      : watchPage(match.stack.at(-1) as RouteComponent, <PageShown />);
+      : watchPage(
+          shell?.component ?? (match.stack.at(-1) as RouteComponent),
+          <PageShown />,
+        );
   // Whether the answer is the page, followed: the HTML render waits for it.
   let showsPage = page?.followed === true;
   let status = missing ? 404 : 200;
@@ -398,16 +463,27 @@ const respond = async (request: Request): Promise<Response> => {
     action.redirect === undefined
       ? match === null
         ? renderNotFound(routes, pathname, routeRequest)
-        : renderMatch(match, {
-            pathname,
-            params: parsed.params,
-            request: routeRequest,
-            page: page?.Page,
-            search,
-          })
+        : renderMatch(
+            // A shell's layouts receive the params it fills, and nothing
+            // for the ones it leaves to the browser.
+            shell === undefined ? match : { ...match, params: shell.known },
+            {
+              pathname,
+              params: parsed.params,
+              request: routeRequest,
+              page: page?.Page,
+              search,
+              shell: shell !== undefined,
+            },
+          )
       : null,
     enter,
     readSearch === undefined ? undefined : url.search,
+    // A shell carries the nearest not-found, rendered with it in the context
+    // its layouts' schemas left: its client code finds out only in the
+    // browser that the value has nothing behind it, and a file cannot be
+    // asked for another answer then.
+    shell === undefined ? undefined : nearestNotFound().tree,
   );
 
   // A document's status leaves before its body, so it waits for the page to
@@ -430,20 +506,11 @@ const respond = async (request: Request): Promise<Response> => {
       // The page's own answer: what the table answers for a URL nothing
       // matched here — the nearest not-found.tsx, in the context its
       // layouts' schemas leave.
-      const nearest = matchNotFound(pathname);
+      const nearest = nearestNotFound();
       status = 404;
       showsPage = false;
-      ({ enter } = nearest.parsed);
-      rendered = render(
-        nearest.match === null
-          ? renderNotFound(routes, pathname, routeRequest)
-          : renderMatch(nearest.match, {
-              pathname,
-              params: nearest.parsed.params,
-              request: routeRequest,
-            }),
-        enter,
-      );
+      ({ enter } = nearest);
+      rendered = render(nearest.tree, enter);
     }
   }
   // A build into files is told a page said notFound() apart from a refused
@@ -453,17 +520,28 @@ const respond = async (request: Request): Promise<Response> => {
     import.meta.env.K8ORDO_MODE === 'static' && status === 404 && !missing
       ? { [NOT_FOUND_HEADER]: 'page' }
       : {};
+  // ビルドは頼んだ殻のパターンと比べる。表は自分の順で歩くので、先の
+  // パターンが同じ殻の pathname を取ることがある
+  const shellSaid: Record<string, string> =
+    import.meta.env.K8ORDO_MODE === 'static' &&
+    shell !== undefined &&
+    status === 200
+      ? { [SHELL_HEADER]: shell.pattern }
+      : {};
   if (request.method === 'HEAD') {
     rendered.abort();
     return new Response(null, {
       status,
-      headers: { 'content-type': answersPayload ? PAYLOAD_TYPE : HTML_TYPE },
+      headers: {
+        'content-type': answersPayload ? PAYLOAD_TYPE : HTML_TYPE,
+        ...shellSaid,
+      },
     });
   }
   if (answersPayload) {
     return new Response(rendered.stream, {
       status,
-      headers: { 'content-type': PAYLOAD_TYPE },
+      headers: { 'content-type': PAYLOAD_TYPE, ...shellSaid },
     });
   }
 
@@ -495,6 +573,7 @@ const respond = async (request: Request): Promise<Response> => {
         'content-type': HTML_TYPE,
         [NONCE_HEADER]: signingNonce(),
         ...saidByPage,
+        ...shellSaid,
       },
     });
   }
@@ -511,10 +590,13 @@ const respond = async (request: Request): Promise<Response> => {
  * Where a page that said notFound() is sent: the catch-all the table answers
  * for a URL nothing matched here. Asked with a segment below the pathname,
  * because `/:locale/*` does not match `/en` itself, and only a catch-all may
- * answer.
+ * answer. For a shell, only one that takes none of the params the shell
+ * leaves to the browser: its not-found is rendered at build time, for every
+ * value the shell answers.
  */
 const matchNotFound = (
   pathname: string,
+  forShell: boolean,
 ): { match: Match | null; parsed: ParsedParams } => {
   let parsed: ParsedParams = { params: {}, enter: (fn) => fn() };
   const page = normalizePathname(pathname);
@@ -522,6 +604,11 @@ const matchNotFound = (
     `${page === '/' ? '' : page}/${NOT_FOUND_SEGMENT}`,
     (found) => {
       if (!found.pattern.endsWith('/*')) return false;
+      // 殻の pathname では、開いたパラメータに !fallback が入っている。それを
+      // 受け取る not-found は、訪問者の値の代わりに !fallback を描いてしまう
+      if (forShell && Object.values(found.params).includes(FALLBACK_SEGMENT)) {
+        return false;
+      }
       parsed = parseCatchAllParams(
         catchAllSchemas[found.pattern] ?? [],
         found.params,

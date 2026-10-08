@@ -1,5 +1,5 @@
-import { Counter } from './_parts/counter';
-import { TimeZone } from './_parts/time-zone';
+import { Counter } from '../components/counter';
+import { TimeZone } from '../components/time-zone';
 
 export default function HomePage() {
   return (

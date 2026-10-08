@@ -2,6 +2,10 @@ import { cp, rm, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import { sharedDir } from '@k8ordo/framework-engine';
+import { withBase } from '@k8ordo/router';
+
+import type { Rewrite } from './rewrites';
+import type { StaticOutput } from './static';
 
 /** Where the build writes the environments, all absolute. */
 export type BuildDirs = {
@@ -14,21 +18,74 @@ export type BuildDirs = {
 const FUNCTION = 'handler';
 
 /**
- * Files first, and whatever names none goes to the handler. The hashed
- * assets are marked immutable in the `hit` phase — only once a file answered —
- * so a missing one is the handler's 404 and never cached for a year.
+ * The hashed assets are marked immutable in the `hit` phase — only once a
+ * file answered — so a missing one is never cached for a year.
  */
+const immutableAssets = (base: string) => ({
+  src: `^${RegExp.escape(`${base}assets/`)}`,
+  headers: { 'cache-control': 'public, max-age=31536000, immutable' },
+  continue: true,
+});
+
+/** Files first, and whatever names none goes to the handler. */
 const configFor = (base: string) => ({
   version: 3,
   routes: [
     { handle: 'filesystem' },
     { src: '^/.*$', dest: `/${FUNCTION}` },
     { handle: 'hit' },
-    {
-      src: `^${RegExp.escape(`${base}assets/`)}`,
-      headers: { 'cache-control': 'public, max-age=31536000, immutable' },
-      continue: true,
-    },
+    immutableAssets(base),
+  ],
+});
+
+/** A `from` placeholder of `_redirects`: one segment. */
+const PLACEHOLDER = /^:[A-Za-z]\w*$/u;
+
+/**
+ * A `_redirects` rule as a route of Vercel's: `from` as an anchored regex —
+ * a placeholder one segment, every literal run escaped whole, so it starts
+ * with `/` rather than with a letter `RegExp.escape` would spell in hex — and
+ * a directory target as its `index.html`, since Vercel serves a rewrite's
+ * `dest` as the file it names. A page's URL takes a trailing slash, as a
+ * directory does; a payload URL does not. Case-sensitive, as the table's
+ * matching is.
+ */
+const routeOf = (rule: Rewrite) => {
+  let source = '';
+  let literal = '';
+  for (const [index, segment] of rule.from.split('/').entries()) {
+    const run = index === 0 ? segment : `/${segment}`;
+    if (index > 0 && PLACEHOLDER.test(segment)) {
+      source += `${RegExp.escape(`${literal}/`)}[^/]+`;
+      literal = '';
+    } else {
+      literal += run;
+    }
+  }
+  source += RegExp.escape(literal);
+  const page = !rule.from.endsWith('/index.rsc');
+  return {
+    src: `^${source}${page ? '/?' : ''}$`,
+    dest: rule.to.endsWith('/') ? `${rule.to}index.html` : rule.to,
+    caseSensitive: true,
+  };
+};
+
+/**
+ * Files first; only what names none is rewritten — a value the build did
+ * not write to its shell, the payload URL of a built URL that is not a page
+ * to HTML — and what nothing rewrote is the build's `404.html`.
+ */
+const staticConfigFor = ({ base, rewrites, notFound }: StaticOutput) => ({
+  version: 3,
+  routes: [
+    { handle: 'filesystem' },
+    ...rewrites.map((rule) => routeOf(rule)),
+    ...(notFound
+      ? [{ src: '^/.*$', dest: withBase('/404.html', base), status: 404 }]
+      : []),
+    { handle: 'hit' },
+    immutableAssets(base),
   ],
 });
 
@@ -99,4 +156,23 @@ export const writeVercelOutput = async (
   await writeFile(path.join(func, 'package.json'), json({ type: 'module' }));
   await writeFile(path.join(func, '.vc-config.json'), json(FUNCTION_CONFIG));
   await writeFile(path.join(output, 'config.json'), json(configFor(base)));
+};
+
+/**
+ * A static build laid out as Vercel's Build Output API (v3) reads it: the
+ * client build as static files at Vite's `base`, and the rewrites a host
+ * applies once no file answered as routes — no function. `_redirects` stays
+ * behind: Vercel never reads it, and would serve it as a file.
+ */
+export const writeStaticVercelOutput = async (
+  output: StaticOutput,
+): Promise<void> => {
+  const dir = path.join(output.root, '.vercel', 'output');
+  await rm(dir, { recursive: true, force: true });
+  const redirects = path.join(output.client, '_redirects');
+  await cp(output.client, path.join(dir, 'static', output.base), {
+    recursive: true,
+    filter: (source) => source !== redirects,
+  });
+  await writeFile(path.join(dir, 'config.json'), json(staticConfigFor(output)));
 };

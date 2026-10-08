@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
@@ -188,5 +188,49 @@ describe('pagesReadingSearch', () => {
         ]),
       ),
     ]).toStrictEqual(['products/page.tsx']);
+  });
+});
+
+// fallback.tsx は static でだけ表に載る。server のビルドには何も入らない
+const generatedTableIn = async (mode: 'static' | 'server'): Promise<string> => {
+  const root = await mkdtemp(path.join(tmpdir(), 'k8ordo-fallback-'));
+  try {
+    const routesDir = path.join(root, 'src/routes');
+    await mkdir(path.join(routesDir, 'posts/[id]'), { recursive: true });
+    await writeFile(path.join(root, 'package.json'), '{}');
+    await writeFile(
+      path.join(routesDir, 'page.tsx'),
+      'export default function Page() { return null; }\n',
+    );
+    await writeFile(
+      path.join(routesDir, 'posts/[id]/page.tsx'),
+      'export default function Page() { return null; }\n',
+    );
+    await writeFile(
+      path.join(routesDir, 'posts/[id]/fallback.tsx'),
+      'export default function Shell() { return null; }\n',
+    );
+    const outDir = path.join(root, '.k8ordo');
+    const { problems } = await generate({ root, routesDir, outDir, mode });
+    expect(problems).toStrictEqual([]);
+    return await readFile(path.join(outDir, 'routes.gen.ts'), 'utf8');
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+};
+
+describe('generate, for a page with a fallback.tsx', () => {
+  it('writes its shell into the table under a build into files', async () => {
+    const source = await generatedTableIn('static');
+    expect(source).toContain(
+      "import posts_id_fallback from '../src/routes/posts/[id]/fallback';",
+    );
+    expect(source).toContain("  '/posts/:id': {");
+  });
+
+  it('writes no shell, and imports nothing of it, under a running server', async () => {
+    const source = await generatedTableIn('server');
+    expect(source).toContain('export const fallbacks = {} as const;');
+    expect(source).not.toContain('posts/[id]/fallback');
   });
 });

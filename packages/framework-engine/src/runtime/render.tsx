@@ -1,6 +1,7 @@
 import type { Match, RouteNode, Routes } from '@k8ordo/router';
 import type { ComponentType, ReactNode } from 'react';
 
+import { FallbackBoundary } from './fallback-boundary';
 import { PageBoundary } from './page-boundary';
 import type { RouteRequest } from './request';
 
@@ -38,6 +39,12 @@ export type Rendering = {
   readonly page?: ComponentType<never>;
   /** The page's search, when it declared what it reads. */
   readonly search?: unknown;
+  /**
+   * The leaf is a fallback.tsx standing in for its page: rendered with no
+   * props, inside the boundary that answers its client-side `notFound()` in
+   * place and leaves its URL reads to the browser.
+   */
+  readonly shell?: boolean;
 };
 
 /**
@@ -56,14 +63,34 @@ export type Rendering = {
  * the boundary that sends a client navigation's `notFound()` back to the
  * server. `search` goes to the leaf alone, and only when given: a page that
  * did not declare it never sees the search.
+ *
+ * Under `shell`, `page` is a fallback.tsx: it stands in for every value its
+ * page could be asked for, so it is handed nothing, and the layouts above get
+ * the params the shell knows (`match.params`) and its own pathname.
  */
 export const renderMatch = (
   match: Match,
-  { pathname, params = match.params, request, page, search }: Rendering,
+  {
+    pathname,
+    params = match.params,
+    request,
+    page,
+    search,
+    shell = false,
+  }: Rendering,
 ): ReactNode => {
   let node: ReactNode = null;
   for (let index = match.stack.length - 1; index >= 0; index -= 1) {
     const leaf = index === match.stack.length - 1;
+    if (leaf && shell && page !== undefined) {
+      const Shell = page as ComponentType;
+      node = (
+        <FallbackBoundary>
+          <Shell />
+        </FallbackBoundary>
+      );
+      continue;
+    }
     // The table stores components of every shape; this renderer is the one
     // that states what it passes.
     const Component = (

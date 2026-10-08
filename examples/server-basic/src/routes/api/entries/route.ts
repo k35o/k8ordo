@@ -1,7 +1,7 @@
 import type { RouteContext } from '@k8ordo/framework';
 import { cookies } from '@k8ordo/framework/server';
 
-import { addEntry, readEntries } from '../../_data/entries.server';
+import { addEntry, readEntries } from '../../../lib/entries.server';
 
 // JSON で読み書きする口。ページの POST（Server Action）と違い、ほかの origin
 // からも届く。確かめたいことは route.ts が自分で確かめる

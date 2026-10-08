@@ -107,7 +107,10 @@ export type Locales<
    * `framework({ mode: 'static', paths: locales.paths })` is the whole
    * answer for a site whose only parameter is the locale. A pattern with
    * another parameter comes back still holding it (`/ja/blog/:slug`), which
-   * the build does not render: expand the rest in the same function.
+   * the build renders only as the location of a `fallback.tsx`'s shell, and
+   * otherwise refuses: expand the rest in the same function. A shell runs
+   * only its layouts' schemas, so it renders in its locale when this set's
+   * `paramsSchema` sits on `[locale]/layout.tsx`.
    */
   readonly paths: (patterns: readonly string[]) => string[];
   /**

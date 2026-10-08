@@ -3,8 +3,8 @@ import { href } from '@k8ordo/framework';
 import { nonce } from '@k8ordo/framework/server';
 import type { ReactNode } from 'react';
 
-import { SchemeToggle } from './_parts/scheme';
-import { Where } from './_parts/where';
+import { SchemeToggle } from '../components/scheme';
+import { Where } from '../components/where';
 
 // ディレクティブなし = Server Component（既定）
 export default function RootLayout({ children }: { children: ReactNode }) {

@@ -1,4 +1,4 @@
-import { wait } from '../_parts/wait';
+import { wait } from '../../lib/wait';
 
 // loading.tsx の無い、データを待つページ
 export default async function SlowPage() {

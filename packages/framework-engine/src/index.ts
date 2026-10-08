@@ -4,12 +4,20 @@
  * this package's `./server`. This is internal and never published: an application installs
  * `@k8ordo/framework`, which bundles this package at pack time.
  */
-export { parseRouteTree, slotOf } from './grammar/tree';
-export type { RouteDir, Slot } from './grammar/tree';
+export { fallbackShapes, parseRouteTree, slotOf } from './grammar/tree';
+export type { FallbackShape, RouteDir, Slot } from './grammar/tree';
 export { buildTable, declaredPatterns } from './generate/emit';
 export type { DeclaredPattern } from './generate/emit';
-export { decodePathname, NOT_FOUND_SEGMENT } from './runtime/pathname';
-export { NONCE_HEADER, NOT_FOUND_HEADER } from './runtime/payload';
+export {
+  decodePathname,
+  FALLBACK_SEGMENT,
+  NOT_FOUND_SEGMENT,
+} from './runtime/pathname';
+export {
+  NONCE_HEADER,
+  NOT_FOUND_HEADER,
+  SHELL_HEADER,
+} from './runtime/payload';
 export {
   exportsOf,
   pagesReadingSearch,
@@ -25,4 +33,8 @@ export {
   isServerActionModule,
   serverActionModules,
 } from './plugin/server-actions';
-export { payloadPathFor } from './runtime/payload-path';
+export {
+  isPayloadPath,
+  pagePathFor,
+  payloadPathFor,
+} from './runtime/payload-path';

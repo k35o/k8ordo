@@ -37,9 +37,15 @@ beforeAll(async () => {
   await writeFile(path.join(dist, 'client', 'clip.mp4'), '0123456789');
   await writeFile(path.join(dist, 'client', 'stable.txt'), 'stable');
   await writeFile(path.join(dist, 'client', 'edited.txt'), 'first');
+  // Vite は public/_redirects を server ビルドにも写す
+  await writeFile(
+    path.join(dist, 'client', '_redirects'),
+    '/products/:id /index.html 200\n',
+  );
   await writeFile(
     path.join(dist, 'rsc', 'index.js'),
     `export const base = '/';
+    export const mode = 'server';
     export default async (request) => {
       const url = new URL(request.url);
       if (url.pathname === '/throws') {
@@ -178,6 +184,11 @@ describe('serve', () => {
       expect(rest.join('\r\n\r\n')).toBe('');
     },
   );
+
+  it('never applies a 200 rule of the _redirects a server build carries', async () => {
+    const response = await fetch(`${server.url}/products/1`);
+    expect(await response.json()).toMatchObject({ pathname: '/products/1' });
+  });
 
   it('hands everything else to the handler, with the request intact', async () => {
     const response = await fetch(`${server.url}/products/1`, {
@@ -483,6 +494,7 @@ describe('serve under a base', () => {
     await writeFile(
       path.join(under, 'rsc', 'index.js'),
       `export const base = '/site/';
+      export const mode = 'server';
       export default async (request) =>
         new Response(new URL(request.url).pathname, {
           headers: { 'content-type': 'text/plain' },
@@ -514,5 +526,151 @@ describe('serve under a base', () => {
   it('hands a page under the base to the handler with the URL as asked', async () => {
     const response = await fetch(`${served.url}/site/products/1`);
     expect(await response.text()).toBe('/site/products/1');
+  });
+});
+
+describe('serve a static build', () => {
+  let built: string;
+  let served: Server;
+
+  const SHELL = '<p>shell</p>';
+
+  // 静的ビルドの dist。handler は呼ばれたら投げる: 静的ビルドのファイルは
+  // すべて書かれていて、答えられないものを handler に回すことはない
+  beforeAll(async () => {
+    built = await mkdtemp(path.join(tmpdir(), 'k8ordo-serve-static-'));
+    const put = async (file: string, body: string): Promise<void> => {
+      const at = path.join(built, file);
+      await mkdir(path.dirname(at), { recursive: true });
+      await writeFile(at, body);
+    };
+    await put('client/index.html', '<p>home</p>');
+    await put('client/assets/app-abc123.js', SCRIPT);
+    await put('client/posts/1/index.html', '<p>post 1</p>');
+    await put('client/posts/1/index.rsc', 'post 1 payload');
+    await put('client/posts/!fallback/index.html', SHELL);
+    await put('client/posts/!fallback/index.rsc', 'shell payload');
+    await put('client/404.html', '<p>not found</p>');
+    await put(
+      'client/_redirects',
+      [
+        '# @k8ordo/framework: built URLs the rules below would also catch',
+        '/posts/1 /posts/1 200',
+        '/posts/1/index.rsc /posts/1/index.rsc 200',
+        "# @k8ordo/framework: values the build did not write, answered by their fallback.tsx's shell",
+        '/posts/:p1 /posts/!fallback/ 200',
+        '/assets/:p1 /posts/!fallback/ 200',
+        '/posts/:p1/index.rsc /posts/!fallback/index.rsc 200',
+        '',
+      ].join('\n'),
+    );
+    await put(
+      'rsc/index.js',
+      `export const base = '/';
+      export const mode = 'static';
+      export default async () => {
+        throw new Error('a static build is never rendered while it is served');
+      };`,
+    );
+    served = await serve({ dist: built, port: 0 });
+  });
+
+  afterAll(async () => {
+    await served.close();
+    await rm(built, { recursive: true, force: true });
+  });
+
+  it('answers a value the build did not write with its shell, as HTML', async () => {
+    const response = await fetch(`${served.url}/posts/3`);
+    expect(response.status).toBe(200);
+    expect(response.headers.get('content-type')).toBe(
+      'text/html; charset=utf-8',
+    );
+    expect(await response.text()).toBe(SHELL);
+  });
+
+  it('answers its payload with the shell’s payload', async () => {
+    const response = await fetch(`${served.url}/posts/3/index.rsc`);
+    expect(response.status).toBe(200);
+    expect(await response.text()).toBe('shell payload');
+  });
+
+  it('answers a built page from its own file, before any rule', async () => {
+    expect(await (await fetch(`${served.url}/posts/1`)).text()).toBe(
+      '<p>post 1</p>',
+    );
+    expect(await (await fetch(`${served.url}/posts/1/index.rsc`)).text()).toBe(
+      'post 1 payload',
+    );
+  });
+
+  it('answers what no file or rule does with 404.html under 404', async () => {
+    const response = await fetch(`${served.url}/nope`);
+    expect(response.status).toBe(404);
+    expect(response.headers.get('content-type')).toBe(
+      'text/html; charset=utf-8',
+    );
+    expect(await response.text()).toBe('<p>not found</p>');
+  });
+
+  it('never makes a missing asset a rule answered immutable', async () => {
+    const response = await fetch(`${served.url}/assets/gone-123.js`);
+    expect(await response.text()).toBe(SHELL);
+    expect(response.headers.get('cache-control')).toBe('no-cache');
+  });
+
+  it.each(['POST', 'PUT', 'DELETE'])(
+    'refuses a %s with 405, since a file answers only reading it',
+    async (method) => {
+      const response = await fetch(`${served.url}/posts/3`, { method });
+      expect(response.status).toBe(405);
+      expect(response.headers.get('allow')).toBe('GET, HEAD');
+    },
+  );
+});
+
+describe('serve a static build under a base', () => {
+  let built: string;
+  let served: Server;
+
+  beforeAll(async () => {
+    built = await mkdtemp(path.join(tmpdir(), 'k8ordo-serve-static-base-'));
+    const put = async (file: string, body: string): Promise<void> => {
+      const at = path.join(built, file);
+      await mkdir(path.dirname(at), { recursive: true });
+      await writeFile(at, body);
+    };
+    await put('client/index.html', '<p>home</p>');
+    await put('client/posts/!fallback/index.html', '<p>shell</p>');
+    await put(
+      'client/_redirects',
+      '/site/posts/:p1 /site/posts/!fallback/ 200\n',
+    );
+    await put(
+      'rsc/index.js',
+      `export const base = '/site/';
+      export const mode = 'static';
+      export default async () => {
+        throw new Error('a static build is never rendered while it is served');
+      };`,
+    );
+    served = await serve({ dist: built, port: 0 });
+  });
+
+  afterAll(async () => {
+    await served.close();
+    await rm(built, { recursive: true, force: true });
+  });
+
+  it('answers a value the build did not write with its shell under the base', async () => {
+    expect(await (await fetch(`${served.url}/site/posts/3`)).text()).toBe(
+      '<p>shell</p>',
+    );
+  });
+
+  it('answers a plain 404 outside the base, where the build has no file', async () => {
+    const response = await fetch(`${served.url}/posts/3`);
+    expect(response.status).toBe(404);
+    expect(await response.text()).toBe('not found');
   });
 });

@@ -1,7 +1,7 @@
 import type { PageProps } from '@k8ordo/framework';
 
+import { GreetForm } from '../../../components/greet-form';
 import { locales } from '../../../i18n';
-import { GreetForm } from '../../_parts/greet-form';
 
 // /en/greeting と /ja/greeting だけに答える。受理したロケールは、この
 // ページの描画にも、このページに送られた Server Action にも効く

@@ -17,6 +17,8 @@ const WITHHELD: Readonly<Record<string, string>> = {
   useParams:
     'reads the match a <Router> provides; a framework page receives its params as a prop',
   PathnameProvider: "the framework's runtimes supply the pathname themselves",
+  BrowserPathname:
+    'the framework wraps a fallback.tsx in it; an application never writes it',
   NavigationGeneration: "a seam the framework's client runtime is built from",
   useInterceptedNavigation:
     "a seam the framework's client runtime is built from",

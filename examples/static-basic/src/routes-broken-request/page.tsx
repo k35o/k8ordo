@@ -1,7 +1,7 @@
 import { nonce } from '@k8ordo/framework/server';
 
-import { home } from './_parts/home';
-import { visits } from './_parts/visits';
+import { home } from '../broken-parts/request/home';
+import { visits } from '../broken-parts/request/visits';
 
 export default function HomePage() {
   return (

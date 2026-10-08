@@ -16,6 +16,7 @@
 - `redirect(to, { permanent })` の第 2 引数と `RedirectOptions` 型を削除した。
 - `@k8ordo/static` の `sitemap(site, pathnames)` を削除した。`sitemap.xml` は引き続き `site` オプションでビルドが書く。
 - `.k8ordo/` の生成物は、次の `vite dev` か `vite build` で `@k8ordo/framework` を指す形に書き直される。
+- `src/routes/` に置けるのはルートのファイルとディレクトリだけになった。`_` で始まる名前も URL の区間になり（`_parts/` は `/_parts`）、ルートのファイルでないものはどこにあってもビルドが断る。部品は `src/components/` へ、それ以外のモジュール（Server Action、スキーマ、状態の定義、データ、ヘルパー）は `src/lib/` へ移し、import を書き換える。`.` で始まる名前はこれまでどおり読まない。
 - `redirect.ts` を、表より先ではなく、表の中で宣言した順番（文字どおりの区間が先）に照合する。
 - Vite の `base` が根からのパスでない（`./` や別オリジン）ときは、ビルドを止める。
 - `mode: 'server'` の `vite build` は、`dist/` だけで動く形で書き出す。ハンドラと `serve()` が使う依存をすべて `dist/` に同梱し（外に残るのは Node.js の組み込みモジュールだけ）、起動の入口 `dist/server.js` と、`.js` を ES Module として読ませる `dist/package.json` を書く。デプロイは `dist/` を置いて `node dist/server.js` を起動するだけで、`npm install` も `node_modules` も要らない。待ち受ける先は環境変数 `PORT`（既定 `3000`）と `HOST`（既定 `localhost`）で変える。`SIGTERM` と `SIGINT` を受けると処理中の応答を返し終えてから終了コード 0 で終わるので、コンテナの PID 1 で動かしても `docker stop` ですぐ止まる。`serve()` を呼ぶだけの `serve.js` は消してよい。
@@ -25,4 +26,10 @@
 - `mode: 'server'` のリクエストハンドラは、GET・HEAD・POST 以外のメソッドに `405` で答える。`serve()` は、リクエスト行がパスでないもの（絶対形式や `OPTIONS *`）と、ホストとして読めない `Host` に `400` で答える。
 - `mode: 'static'` は、リクエストが要るものをビルドと `vite dev` で名指しして止める。対象は `'use server'` のモジュール、`guard.ts`、`search` を export するページ、GET 以外を export する `route.ts`、`@k8ordo/framework/server` の import。エラーの最後の行は `this application wants mode: 'server'`。
 
-0.1.0 から足した主なもの: `guard.ts`・`route.ts`・`loading.tsx`、`cookies()` / `requestHeaders()` / `responseHeaders()` / `nonce()`、`notFound()`、ページの型付きの `search`、`csp` オプション、Vercel のアダプタ（`@k8ordo/framework/vercel`）、成果物だけで動く server モードの出力（`node dist/server.js`）、Node.js 以外のランタイムでも動くリクエストハンドラ、Vite の `base` の下への配置、リンクの先読み。
+0.1.0 から足した主なもの:
+
+- `guard.ts`・`route.ts`・`loading.tsx`、`cookies()` / `requestHeaders()` / `responseHeaders()` / `nonce()`、`notFound()`、ページの型付きの `search`、`csp` オプション。
+- `fallback.tsx`。static モードで、`paths` に無い値（ビルドの後に増えた記事など）に答えるシェルを書く。ページの横に置くと、レイアウトは HTML のまま 1 度だけ書き、本文はブラウザが URL から値を読んで描く。値が無ければ、クライアントコンポーネントの `notFound()` でいちばん近い `not-found.tsx` をその場に出す。シェルの置き場所は `paths` に `/ja/posts/:id` のようなパラメータを残したパスで渡す（渡さなければパターンそのもの）。ホストがシェルに届くように、ビルドが `dist/client/_redirects`（Netlify と Cloudflare が読む）を書く。`vite dev` も `paths` に無い値にシェルで答える。server モードではシェルを描かず、どの値もページが描く（置き場所の検査はどちらのモードでも行う）。
+- Vercel のアダプタ（`@k8ordo/framework/vercel`）。static と server のどちらのモードにも使える。static モードでは関数を書かず、シェルへの書き換えを Vercel のルートにする。
+- `@k8ordo/framework/serve` と `vite preview` は、static モードのビルドを静的ホストと同じ形で配る。ファイル、`_redirects` の書き換え、`404.html` の順に答え、リクエストハンドラは呼ばない。
+- 成果物だけで動く server モードの出力（`node dist/server.js`）、Node.js 以外のランタイムでも動くリクエストハンドラ、Vite の `base` の下への配置、リンクの先読み。

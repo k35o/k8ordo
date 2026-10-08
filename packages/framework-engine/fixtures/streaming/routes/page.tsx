@@ -1,4 +1,4 @@
-import { touch } from './_parts/actions';
+import { touch } from '../lib/actions';
 
 export default function HomePage() {
   return (

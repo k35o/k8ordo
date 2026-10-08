@@ -1,0 +1,5 @@
+{
+  "private": true,
+  "description": "An application with fallback.tsx shells, which runtime/fallback.test.ts builds in both modes.",
+  "type": "module"
+}

@@ -156,7 +156,7 @@ describe('vite dev in static mode', () => {
       transform('rsc', '/src/routes/page.tsx'),
     ).resolves.not.toBeNull();
     await expect(
-      transform('rsc', '/src/routes/_data/catalog.server.ts'),
+      transform('rsc', '/src/lib/catalog.server.ts'),
     ).resolves.not.toBeNull();
   });
 });
@@ -185,6 +185,64 @@ describe('vite dev under a route taken away', () => {
       { timeout: 10_000 },
     );
     expect(logged).toStrictEqual([]);
+  }, 30_000);
+});
+
+describe('vite dev under a value paths does not list', () => {
+  const answerOf = async (
+    pathname: string,
+  ): Promise<{ status: number; body: string }> => {
+    const response = await fetch(new URL(pathname, origin()));
+    return { status: response.status, body: await response.text() };
+  };
+
+  it('answers it with the shell, as a host would, its body left to the browser', async () => {
+    const { status, body } = await answerOf('/en/posts/3');
+
+    expect(status).toBe(200);
+    expect(body).toContain('loading the post…');
+    expect(body).not.toContain('third post');
+  });
+
+  it('answers its payload with the shell’s', async () => {
+    const { status, body } = await answerOf('/en/posts/3/index.rsc');
+
+    expect(status).toBe(200);
+    expect(body).toContain('loading the post');
+  });
+
+  it('renders a value paths lists with its page', async () => {
+    const { status, body } = await answerOf('/en/posts/1');
+
+    expect(status).toBe(200);
+    expect(body).toContain('<h1 data-testid="title">first post</h1>');
+  });
+});
+
+describe.each(browserTypes)('vite dev in $name', ({ type }) => {
+  let browser: Browser;
+
+  beforeAll(async () => {
+    browser = await type.launch();
+  });
+
+  afterAll(async () => {
+    await browser.close();
+  });
+
+  it('shows a value paths does not list, read from the URL in the browser', async () => {
+    const page = await browser.newPage();
+
+    await page.goto(new URL('/en/posts/3', origin()).href);
+
+    await page
+      .getByRole('heading', { name: 'third post' })
+      .waitFor({ timeout: 15_000 });
+    expect({
+      pathname: new URL(page.url()).pathname,
+      loading: await page.getByTestId('shell').count(),
+    }).toStrictEqual({ pathname: '/en/posts/3', loading: 0 });
+    await page.close();
   }, 30_000);
 });
 

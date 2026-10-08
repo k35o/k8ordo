@@ -1,6 +1,11 @@
+import { notFound, usePathname } from '@k8ordo/router';
+import { Component, use } from 'react';
+import type { ReactNode } from 'react';
 import { cleanup, render } from 'vitest-browser-react';
 
 import { AppRouter, setDocumentClient } from './app-router';
+import { FallbackBoundary, ShowNotFound } from './fallback-boundary';
+import { reportCaught } from './page-boundary';
 import type { Payload } from './payload';
 import { reloadDocument } from './reload';
 
@@ -13,7 +18,28 @@ const rsc = vi.hoisted(() => ({
   // 名指しするクライアントコンポーネントの読み込みにあたる
   imports: Promise.resolve(),
   decoding: 0,
+  // JSON では運べない木（React の要素）を持つペイロード。本文の
+  // {"$payload": 名前} を、読み解くたびにここで作った新しいペイロードに替える
+  payloads: new Map<string, () => unknown>(),
 }));
+
+// 届いた分だけで JSON になれば、ストリームの終わりを待たずに読み終える。
+// ペイロードは頭が届いた時点で解決し、残りは同じリクエストで後から届く
+const readJson = async (
+  reader: ReadableStreamDefaultReader<Uint8Array>,
+  text = '',
+): Promise<string> => {
+  const { done, value } = await reader.read();
+  const next =
+    value === undefined ? text : text + new TextDecoder().decode(value);
+  if (done) return next;
+  try {
+    JSON.parse(next);
+    return next;
+  } catch {
+    return readJson(reader, next);
+  }
+};
 
 // 復号は RSC の配線(ビルドが作る仮想モジュール)ごと差し替え、JSON で運ぶ。
 // ここで確かめたいのは、届いたペイロードをどう扱うかだけ
@@ -21,10 +47,13 @@ vi.mock('@vitejs/plugin-rsc/browser', () => ({
   createFromReadableStream: async (
     stream: ReadableStream<Uint8Array>,
   ): Promise<unknown> => {
-    const text = await new Response(stream).text();
+    const text = await readJson(stream.getReader());
     rsc.decoding += 1;
     await rsc.imports;
-    return JSON.parse(text);
+    const parsed = JSON.parse(text) as { $payload?: string };
+    return parsed.$payload === undefined
+      ? parsed
+      : rsc.payloads.get(parsed.$payload)?.();
   },
   createFromFetch: async (response: Promise<Response>): Promise<unknown> =>
     JSON.parse(await (await response).text()),
@@ -130,6 +159,7 @@ beforeEach(() => {
   setDocumentClient(RUNNING);
   rsc.imports = Promise.resolve();
   rsc.decoding = 0;
+  rsc.payloads.clear();
 });
 
 afterEach(async () => {
@@ -748,3 +778,286 @@ describe('a page that reads the search', () => {
     expect(requested()).toBe(0);
   });
 });
+
+// 殻の fallback.tsx がブラウザで描くもの。値を URL から読み、データに無ければ
+// notFound() と言う。データはテストが持つ
+const posts = new Set<string>();
+
+function PostFromUrl(): ReactNode {
+  const id = usePathname().split('/').at(-1) ?? '';
+  if (!posts.has(id)) notFound();
+  return <p>post {id}</p>;
+}
+
+// テストが error.tsx の代わりに置く境界
+class Errors extends Component<{ children: ReactNode }, { failed: boolean }> {
+  override state = { failed: false };
+
+  static getDerivedStateFromError(): { failed: boolean } {
+    return { failed: true };
+  }
+
+  override render(): ReactNode {
+    return this.state.failed ? 'error.tsx' : this.props.children;
+  }
+}
+
+const shellTree = (leaf: ReactNode = <PostFromUrl />): ReactNode => (
+  <Errors>
+    <FallbackBoundary>{leaf}</FallbackBoundary>
+  </Errors>
+);
+
+// /posts/:id の殻のペイロード。読み解くたびに同じ形の新しい木を返す
+const SHELL = { $payload: 'shell' };
+const shellPayload = (notFoundTree: ReactNode = 'nothing here'): Payload => ({
+  tree: shellTree(),
+  notFound: notFoundTree,
+  pathname: '/posts/!fallback',
+  client: RUNNING,
+});
+
+const jsonResponse = (body: unknown): Response =>
+  new Response(JSON.stringify(body), {
+    headers: { 'content-type': 'text/x-component;charset=utf-8' },
+  });
+
+// ページのペイロードを pathname ごとに答える。答えを待たせたいものは
+// 約束で渡す
+const answerByPathname = (
+  answers: Record<string, () => Promise<Response>>,
+): void => {
+  vi.stubGlobal('fetch', (input: RequestInfo | URL, init?: RequestInit) => {
+    if (!asksForPayload(input)) return passThrough(input, init);
+    const answer = answers[urlOf(input).pathname];
+    if (answer === undefined) {
+      throw new Error(`no answer for ${urlOf(input).pathname}`);
+    }
+    return answer();
+  });
+};
+
+const held = (): {
+  readonly answer: () => Promise<Response>;
+  readonly release: (response: Response) => void;
+} => {
+  const { promise, resolve } = Promise.withResolvers<Response>();
+  return { answer: () => promise, release: resolve };
+};
+
+const renderRouter = (tree: ReactNode = 'first page') =>
+  render(<AppRouter pathname="/" tree={tree} />, {
+    createRootOptions: { onCaughtError: reportCaught },
+  });
+
+describe('a shell', () => {
+  let errors: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(() => {
+    posts.clear();
+    posts.add('3');
+    rsc.payloads.set('shell', () => shellPayload());
+    errors = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+  });
+
+  afterEach(() => {
+    errors.mockRestore();
+  });
+
+  it('shows the not-found its payload carries in place when its fallback.tsx says notFound()', async () => {
+    answerByPathname({
+      '/posts/999/index.rsc': () => Promise.resolve(jsonResponse(SHELL)),
+    });
+    const screen = await renderRouter();
+
+    await navigation.navigate('/posts/999').finished;
+
+    await vi.waitFor(() => {
+      expect(screen.container.textContent).toBe('nothing here');
+    });
+    expect(location.pathname).toBe('/posts/999');
+    expect(reloadDocument).not.toHaveBeenCalled();
+    expect(errors).not.toHaveBeenCalled();
+  });
+
+  it('hands anything else it throws on to error.tsx', async () => {
+    rsc.payloads.set('shell', () => ({
+      ...shellPayload(),
+      tree: shellTree(<Broken />),
+    }));
+    answerByPathname({
+      '/posts/3/index.rsc': () => Promise.resolve(jsonResponse(SHELL)),
+    });
+    const screen = await renderRouter();
+
+    await navigation.navigate('/posts/3').finished;
+
+    await vi.waitFor(() => {
+      expect(screen.container.textContent).toBe('error.tsx');
+    });
+    expect(reloadDocument).not.toHaveBeenCalled();
+  });
+
+  it('hands a notFound() on to error.tsx when the payload carries no not-found', async () => {
+    rsc.payloads.set('shell', () => ({
+      ...shellPayload(),
+      notFound: undefined,
+    }));
+    answerByPathname({
+      '/posts/999/index.rsc': () => Promise.resolve(jsonResponse(SHELL)),
+    });
+    const screen = await renderRouter();
+
+    await navigation.navigate('/posts/999').finished;
+
+    await vi.waitFor(() => {
+      expect(screen.container.textContent).toBe('error.tsx');
+    });
+  });
+
+  it('renders the next value of the same shell once its navigation applies, after a notFound() said on the way', async () => {
+    const next = held();
+    answerByPathname({
+      '/posts/3/index.rsc': () => Promise.resolve(jsonResponse(SHELL)),
+      '/posts/4/index.rsc': next.answer,
+    });
+    const screen = await renderRouter();
+    await navigation.navigate('/posts/3').finished;
+    await vi.waitFor(() => {
+      expect(screen.container.textContent).toBe('post 3');
+    });
+
+    // URL は先に移る。画面の殻は 4 を読み、まだデータに無いので notFound()
+    const arrived = navigation.navigate('/posts/4').finished;
+    await vi.waitFor(() => {
+      expect(screen.container.textContent).toBe('');
+    });
+    posts.add('4');
+    next.release(jsonResponse(SHELL));
+    await arrived;
+
+    await vi.waitFor(() => {
+      expect(screen.container.textContent).toBe('post 4');
+    });
+  });
+
+  it('shows no not-found while a navigation to another page is under way', async () => {
+    const about = held();
+    answerByPathname({
+      '/posts/3/index.rsc': () => Promise.resolve(jsonResponse(SHELL)),
+      '/about/index.rsc': about.answer,
+    });
+    const screen = await renderRouter();
+    await navigation.navigate('/posts/3').finished;
+    await vi.waitFor(() => {
+      expect(screen.container.textContent).toBe('post 3');
+    });
+    const inserted: string[] = [];
+    const observer = new MutationObserver(() => {
+      inserted.push(screen.container.textContent);
+    });
+    observer.observe(screen.container, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+    });
+
+    const arrived = navigation.navigate('/about').finished;
+    await vi.waitFor(() => {
+      expect(screen.container.textContent).toBe('');
+    });
+    about.release(
+      jsonResponse({ tree: 'about page', pathname: '/about', client: RUNNING }),
+    );
+    await arrived;
+
+    await vi.waitFor(() => {
+      expect(screen.container.textContent).toBe('about page');
+    });
+    observer.disconnect();
+    expect(inserted).not.toContain('nothing here');
+    expect(inserted).not.toContain('error.tsx');
+  });
+
+  it('leaves a newer page alone when a swap is asked for after it applied', async () => {
+    const shown: Array<(() => boolean) | null> = [];
+    rsc.payloads.set('shell', () => ({
+      ...shellPayload(),
+      tree: shellTree(
+        <Remember
+          onShow={(show) => {
+            shown.push(show);
+          }}
+        />,
+      ),
+    }));
+    answerByPathname({
+      '/posts/3/index.rsc': () => Promise.resolve(jsonResponse(SHELL)),
+      '/next/index.rsc': () => Promise.resolve(jsonResponse(NEXT)),
+    });
+    const screen = await renderRouter();
+    await navigation.navigate('/posts/3').finished;
+    await vi.waitFor(() => {
+      expect(screen.container.textContent).toBe('post 3');
+    });
+    const stale = shown.at(-1);
+    expect(stale).toBeTypeOf('function');
+
+    await navigation.navigate('/next').finished;
+    await vi.waitFor(() => {
+      expect(screen.container.textContent).toBe('next page');
+    });
+    (stale as () => boolean)();
+    await nextTask();
+
+    expect(screen.container.textContent).toBe('next page');
+  });
+
+  it('keeps the request of the shell its not-found came with', async () => {
+    const signalOf = answerHeldOpen(SHELL);
+    const screen = await renderRouter();
+
+    await navigation.navigate('/posts/999').finished;
+    await vi.waitFor(() => {
+      expect(screen.container.textContent).toBe('nothing here');
+    });
+    await nextTask();
+
+    expect(signalOf()?.aborted).toBe(false);
+  });
+});
+
+function Broken(): ReactNode {
+  throw new Error('broken');
+}
+
+// 描かれた殻が受け取った、その場で not-found を出す関数をテストに渡す
+function Remember({
+  onShow,
+}: {
+  onShow: (show: (() => boolean) | null) => void;
+}): ReactNode {
+  onShow(use(ShowNotFound));
+  return <PostFromUrl />;
+}
+
+// ペイロードの頭だけを届け、残りはまだ同じリクエストで届く途中のままにする。
+// そのリクエストの signal を返す
+function answerHeldOpen(body: unknown): () => AbortSignal | undefined {
+  let signal: AbortSignal | undefined;
+  vi.stubGlobal('fetch', (input: RequestInfo | URL, init?: RequestInit) => {
+    if (!asksForPayload(input)) return passThrough(input, init);
+    signal = init?.signal ?? undefined;
+    return Promise.resolve(
+      new Response(
+        new ReadableStream<Uint8Array>({
+          start(controller) {
+            controller.enqueue(new TextEncoder().encode(JSON.stringify(body)));
+          },
+        }),
+        { headers: { 'content-type': 'text/x-component;charset=utf-8' } },
+      ),
+    );
+  });
+  return () => signal;
+}

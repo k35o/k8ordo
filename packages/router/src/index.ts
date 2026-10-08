@@ -13,7 +13,7 @@ export type {
 } from './define-routes';
 export { bindParams, href, navigateTo } from './links';
 export type { BoundLinks, BoundParams } from './links';
-export { PathnameProvider, usePathname } from './location';
+export { BrowserPathname, PathnameProvider, usePathname } from './location';
 export { matchPath, useMatch } from './match';
 export { isNotFound, notFound } from './not-found';
 export type { MatchablePattern, MatchOptions } from './match';

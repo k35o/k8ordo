@@ -1,4 +1,4 @@
-import { slotOf } from '../grammar/tree';
+import { fallbackShapes, slotOf } from '../grammar/tree';
 import type { Problem, RouteDir } from '../grammar/tree';
 import { FRAMEWORK } from '../host';
 import type { Mode } from '../host';
@@ -286,7 +286,14 @@ const believed = (
 type Belief = {
   /** The pattern the directories put the file under. */
   readonly pattern: string;
-  readonly kind: 'page' | 'route' | 'layout' | 'notFound' | 'error' | 'loading';
+  readonly kind:
+    | 'page'
+    | 'route'
+    | 'layout'
+    | 'notFound'
+    | 'error'
+    | 'loading'
+    | 'fallback';
   /** Schema-declaring files along the stack, outer-first, the file's own last. */
   readonly schemas: readonly string[];
 };
@@ -303,7 +310,9 @@ type Belief = {
  * renders: every layout's above it that declared one, then its own. A
  * not-found's carries the layouts' above it, which run for what they write to
  * the render's context and never refuse it — a catch-all answers what nothing
- * else did, so its params stay strings.
+ * else did, so its params stay strings. A fallback's carries the layouts'
+ * above it too: a shell runs them over the params it fills, and its page's
+ * own never, since a shell has no value.
  */
 const beliefs = (
   tree: RouteDir,
@@ -350,6 +359,13 @@ const beliefs = (
     }
     if (dir.loading !== null) {
       found.set(dir.loading, { pattern: own, kind: 'loading', schemas: [] });
+    }
+    if (dir.fallback !== null) {
+      found.set(dir.fallback, {
+        pattern: own,
+        kind: 'fallback',
+        schemas: layoutSchemas,
+      });
     }
     for (const child of dir.children) {
       walk(
@@ -426,6 +442,10 @@ export const emitRoutesModule = (
     file: route.file,
     name: namer.take(route.file),
   }));
+  // A shell exists only in a build into files; a running server renders
+  // every value with its page, so nothing of a fallback.tsx is compiled in.
+  const shells = options.mode === 'static' ? fallbackShapes(tree) : [];
+  for (const shape of shells) namer.take(shape.file);
   const withParams = options.withParams ?? new Set<string>();
   const withSearch = options.withSearch ?? new Set<string>();
 
@@ -445,7 +465,9 @@ export const emitRoutesModule = (
       asserted.set(name, `Layout<'${belief.pattern}'>`);
     } else if (belief.kind === 'error') {
       asserted.set(name, 'ErrorComponent');
-    } else if (belief.kind === 'loading') {
+    } else if (belief.kind === 'loading' || belief.kind === 'fallback') {
+      // A fallback.tsx renders with no props at all: it stands in for every
+      // value, so it is handed none.
       asserted.set(name, 'ComponentType');
     } else if (belief.kind === 'notFound') {
       asserted.set(name, `Page<'${belief.pattern}'>`);
@@ -709,6 +731,28 @@ export const emitRoutesModule = (
         `${pad(1)}'${pattern}': ${name} satisfies Redirect,`,
     ),
     '} as const;',
+    '',
+    ...(options.mode === 'static'
+      ? [
+          '// Per page pattern with a fallback.tsx: what renders its shell for a value',
+          '// the build did not write, the params a shell may leave to the browser, and',
+          '// the schemas of the layouts above it, which run over the params it fills.',
+          'export const fallbacks = {',
+          ...shells.flatMap(({ pattern, file, open }) => [
+            `${pad(1)}'${pattern}': {`,
+            `${pad(2)}component: ${believed(namer.take(file), asserted)},`,
+            `${pad(2)}open: [${open.map((param) => `'${param}'`).join(', ')}],`,
+            `${pad(2)}schemas: [${(byFile.get(file) as Belief).schemas
+              .map((layout) => schemaName(namer.take(layout)))
+              .join(', ')}],`,
+            `${pad(1)}},`,
+          ]),
+          '} as const;',
+        ]
+      : [
+          '// A running server renders every value with its page: no shells.',
+          'export const fallbacks = {} as const;',
+        ]),
     '',
     'export const routes = defineRoutes({',
     ...body,

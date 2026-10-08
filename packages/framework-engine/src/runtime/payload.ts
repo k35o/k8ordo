@@ -40,6 +40,12 @@ export type Payload = {
    * SSR entry hands it straight back to `renderToReadableStream`.
    */
   formState?: unknown;
+  /**
+   * A shell's only: the nearest not-found, rendered for the shell. What its
+   * fallback.tsx's client code shows in place when it says notFound(), since a
+   * file cannot be asked for another answer.
+   */
+  notFound?: ReactNode;
 };
 
 /** The header a client-invoked Server Action is addressed with. */
@@ -65,3 +71,11 @@ export const NOT_FOUND_HEADER = 'x-k8ordo-not-found';
  * everyone reads the same one.
  */
 export const NONCE_HEADER = 'x-k8ordo-nonce';
+
+/**
+ * Said by the handler under mode: 'static' alone, on a shell's HTML and
+ * payload: the pattern whose fallback.tsx rendered it. The table walks in its
+ * own order, so a shell pathname can be answered by another pattern than the
+ * one the build asked for, and the build compares instead of guessing.
+ */
+export const SHELL_HEADER = 'x-k8ordo-shell';

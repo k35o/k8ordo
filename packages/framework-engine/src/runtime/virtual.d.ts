@@ -3,6 +3,7 @@
 
 declare module 'virtual:k8ordo/routes' {
   import type { Routes } from '@k8ordo/router';
+  import type { ComponentType } from 'react';
 
   export const routes: Routes;
   /** Per pattern, where a `redirect.ts` sends the visitor. */
@@ -45,6 +46,23 @@ declare module 'virtual:k8ordo/routes' {
           readonly params: Readonly<Record<string, string>>;
         }) => unknown
       >
+    >
+  >;
+
+  /**
+   * Per page pattern with a `fallback.tsx`, under a build into files: what
+   * renders its shell, the params a shell may leave to the browser, and the
+   * schemas of the layouts above it. Empty under a running server.
+   */
+  export const fallbacks: Readonly<
+    Record<
+      string,
+      | {
+          readonly component: ComponentType<never>;
+          readonly open: readonly string[];
+          readonly schemas: SchemaStacks[string];
+        }
+      | undefined
     >
   >;
 

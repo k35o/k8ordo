@@ -1,6 +1,6 @@
 import type { RouteContext } from '@k8ordo/framework';
 
-import { listProducts } from '../_data/catalog.server';
+import { listProducts } from '../../lib/catalog.server';
 
 // ビルドはこの GET を 1 度呼び、答えを dist/client/feed.xml に書く。
 // site を渡したビルドでは、request の origin がサイトの配信元になる

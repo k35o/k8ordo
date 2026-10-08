@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-import { Hydrated } from './_parts/hydrated';
+import { Hydrated } from '../components/hydrated';
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (

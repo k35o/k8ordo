@@ -1,4 +1,4 @@
-import { wait } from '../_parts/wait';
+import { wait } from '../../lib/wait';
 
 // フィクスチャのビルドは @k8ordo/state をこの読み方そのものに差し替える
 export const search = (params: URLSearchParams): { q: string } => ({

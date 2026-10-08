@@ -1,10 +1,16 @@
-import { mkdir, writeFile, readFile } from 'node:fs/promises';
+import { mkdir, readdir, writeFile, readFile } from 'node:fs/promises';
+import type { ServerResponse } from 'node:http';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 import {
+  decodePathname,
   exportsOf,
+  FALLBACK_SEGMENT,
+  fallbackShapes,
+  isPayloadPath,
   isServerActionModule,
+  pagePathFor,
   pagesReadingSearch,
   NONCE_HEADER,
   NOT_FOUND_HEADER,
@@ -15,11 +21,17 @@ import {
   ROUTE_METHODS,
   scanRoutes,
   serverActionModules,
+  SHELL_HEADER,
   slotOf,
 } from '@k8ordo/framework-engine';
-import type { EngineOptions } from '@k8ordo/framework-engine';
-import { withBase } from '@k8ordo/router';
-import type { Plugin, ResolvedConfig } from 'vite';
+import type {
+  EngineOptions,
+  FallbackShape,
+  RouteDir,
+} from '@k8ordo/framework-engine';
+import { normalizePathname, withBase, withoutBase } from '@k8ordo/router';
+import { contentType } from 'mime-types';
+import type { Connect, Logger, Plugin, ResolvedConfig } from 'vite';
 
 import { asFile, policyProblems, redirectPage, sitemap } from './documents';
 import type { ContentSecurityPolicy } from './documents';
@@ -30,7 +42,21 @@ import {
   dirFor,
   patternsNeedingPaths,
   planPaths,
+  planRefusals,
+  shadowedShells,
 } from './paths';
+import type { Shell } from './paths';
+import {
+  builtRules,
+  cloudflareCounts,
+  cloudflareMatches,
+  formatRedirects,
+  rewriteFor,
+  rulesOf,
+  shellRules,
+} from './rewrites';
+import type { Rewrite } from './rewrites';
+import { readRules, resolveStatic } from './static-host';
 
 export type StaticOptions = EngineOptions & {
   /**
@@ -47,6 +73,11 @@ export type StaticOptions = EngineOptions & {
    * The patterns that need covering are handed in, so a site whose parameter
    * takes the same values everywhere — a locale segment, say — expands them
    * rather than listing every page twice.
+   *
+   * For a page with a `fallback.tsx` beside it, a pathname that still holds
+   * a parameter (`/ja/posts/:id`) is where its shell stands: the values the
+   * build did not write are answered there. Without one, the bare pattern
+   * is the shell's location.
    */
   readonly paths?: (
     patterns: readonly string[],
@@ -71,6 +102,63 @@ export type StaticOptions = EngineOptions & {
 };
 
 type Handler = (request: Request) => Promise<Response>;
+
+/**
+ * What a host adapter writes a static build from, once every file is in
+ * place: `vercel()`'s `api.writeStatic` is handed it.
+ */
+export type StaticOutput = {
+  readonly root: string;
+  /** The client build, absolute: the files to publish. */
+  readonly client: string;
+  readonly base: string;
+  /**
+   * The rewrites a host applies only when no file answers: the payload URL
+   * of a built URL that is not a page answered with HTML, then the shells'
+   * rules — `_redirects`' order, its built URLs' own rules aside.
+   */
+  readonly rewrites: readonly Rewrite[];
+  /** Whether `404.html` was written. */
+  readonly notFound: boolean;
+};
+
+/** What the plugin `vercel()` adds lends the static build. */
+type VercelApi = {
+  readonly writeStatic?: (output: StaticOutput) => void | Promise<void>;
+};
+
+/** What `vite dev` reads of the routes: the tree, and its shells' shapes. */
+type DevRoutes = {
+  readonly tree: RouteDir;
+  readonly failed: boolean;
+  readonly shapes: readonly FallbackShape[];
+};
+
+/** What `vite dev` reads of `paths`: what the build would write. */
+type DevShells = {
+  readonly paths: ReadonlySet<string>;
+  readonly shells: readonly Shell[];
+};
+
+const NO_SHELLS: DevShells = { paths: new Set(), shells: [] };
+
+/** What a script element holds is never what a layout wrote into the page. */
+const SCRIPT = /<script\b[^>]*>[\s\S]*?<\/script>/giu;
+
+/** Every file below a directory, relative to it, POSIX separators. */
+const filesBelow = async (dir: string): Promise<string[]> =>
+  (await readdir(dir, { recursive: true, withFileTypes: true }))
+    .filter((entry) => entry.isFile())
+    .map((entry) =>
+      path
+        .relative(dir, path.join(entry.parentPath, entry.name))
+        .split(path.sep)
+        .join('/'),
+    )
+    .toSorted();
+
+const messageOf = (error: unknown): string =>
+  error instanceof Error ? error.message : String(error);
 
 const ORIGIN = 'http://k8ordo.localhost';
 
@@ -139,7 +227,7 @@ const reexportRefusal = (files: readonly string[]): string =>
     .map((file) => `  ${file}`)
     .join(
       '\n',
-    )}\nname what ${files.length === 1 ? 'it exports' : 'they export'}, as export { GET } from './get' does`;
+    )}\nname what ${files.length === 1 ? 'it exports' : 'they export'}, as export { GET } from '../../lib/feed' does`;
 
 /** The route files whose exports static mode reads. */
 const READ_BY_NAME = new Set(['route', 'page']);
@@ -163,6 +251,8 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
   }
   let root = '';
   let routesDir = '';
+  let base = '/';
+  let logger: Logger | undefined;
   // The plugin list the RSC pipeline's registry is reached through, kept the
   // way `root` is: empty until Vite resolves the config, which is before any
   // module is compiled.
@@ -172,12 +262,327 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
   // it was written as.
   const serverImporters = new Set<string>();
 
+  // vite dev: what the routes and `paths` say, read once per change. `paths`
+  // is called only for an application with a fallback.tsx, and again only
+  // when the patterns handed to it changed.
+  let routesRead: Promise<DevRoutes> | undefined;
+  let shellsRead: Promise<DevShells> | undefined;
+  let suppliedFor: string | undefined;
+  let suppliedInDev: Promise<readonly string[]> = Promise.resolve([]);
+  const noticed = new Set<string>();
+
+  const devRoutes = (): Promise<DevRoutes> =>
+    (routesRead ??= (async () => {
+      const { tree, problems } = parseRouteTree(await scanRoutes(routesDir));
+      const failed = problems.length > 0;
+      return { tree, failed, shapes: failed ? [] : fallbackShapes(tree) };
+    })());
+
+  const devShells = (): Promise<DevShells> =>
+    (shellsRead ??= (async () => {
+      const { tree } = await devRoutes();
+      const patterns = patternsNeedingPaths(tree);
+      const key = JSON.stringify(patterns);
+      if (key !== suppliedFor) {
+        suppliedFor = key;
+        noticed.clear();
+        suppliedInDev = (async () => (await options.paths?.(patterns)) ?? [])();
+      }
+      let given: readonly string[];
+      try {
+        given = await suppliedInDev;
+      } catch (error) {
+        // 次の変更でもう一度呼ぶ
+        suppliedFor = undefined;
+        logger?.error(
+          `k8ordo: the "paths" option failed, so vite dev renders every value with page.tsx: ${messageOf(error)}`,
+        );
+        return NO_SHELLS;
+      }
+      const plan = planPaths(tree, given);
+      for (const refusal of planRefusals(
+        plan,
+        shadowedShells(tree, plan.shells, new Set(plan.paths)),
+      )) {
+        logger?.warn(`k8ordo: the build will refuse "paths": ${refusal}`);
+      }
+      return { paths: new Set(plan.paths), shells: plan.shells };
+    })());
+
+  /**
+   * Under `vite dev`, a value of a fallback.tsx's pattern that `paths` does
+   * not list is answered with the shell, as a host's rule answers it — so it
+   * can be tried locally. The URL is rewritten to the shell pathname before
+   * the RSC plugin's handler reads it; everything else passes untouched.
+   */
+  const answerUnbuilt = async (
+    request: Connect.IncomingMessage,
+    next: Connect.NextFunction,
+  ): Promise<void> => {
+    try {
+      await rewriteUnbuilt(request);
+    } catch (error) {
+      next(error);
+      return;
+    }
+    next();
+  };
+
+  const rewriteUnbuilt = async (
+    request: Connect.IncomingMessage,
+  ): Promise<void> => {
+    if (request.method !== 'GET' && request.method !== 'HEAD') {
+      return;
+    }
+    // RSC プラグインと同じく originalUrl を読む。base はそちらに残っている
+    const url = new URL(
+      request.originalUrl ?? request.url ?? '/',
+      'http://k8ordo.localhost',
+    );
+    const own = withoutBase(url.pathname, base);
+    if (own === null) {
+      return;
+    }
+    const payload = isPayloadPath(own);
+    const page = payload ? pagePathFor(own) : own;
+    const routes = await devRoutes();
+    if (routes.failed || routes.shapes.length === 0) {
+      return;
+    }
+    // 殻の形に合わない URL は、遅い paths を待たせない
+    if (
+      !routes.shapes.some((shape) =>
+        new URLPattern({ pathname: shape.pattern }).test({ pathname: page }),
+      )
+    ) {
+      return;
+    }
+    const state = await devShells();
+    if (state.shells.length === 0) {
+      return;
+    }
+    const pathname = normalizePathname(page);
+    if (
+      state.paths.has(pathname) ||
+      pathname
+        .split('/')
+        .some((segment) => decodePathname(segment) === FALLBACK_SEGMENT)
+    ) {
+      return;
+    }
+    // ホストと同じ規則を同じ順に試す。殻を渡された順に試すと、具体的な場所を
+    // 先に並べた _redirects とは別の殻で答えることがある。ペイロードもページの
+    // pathname で比べるので、文書の規則だけで足りる
+    const answered = shellRules(state.shells, '/')
+      .filter((rule) => rule.to.endsWith('/'))
+      .find((rule) => rewriteFor([rule], page) !== null);
+    if (answered === undefined) {
+      return;
+    }
+    const shell = answered.to.slice(0, -1);
+    const target = `${withBase(payload ? `${shell}/index.rsc` : shell, base)}${url.search}`;
+    request.originalUrl = target;
+    request.url = target;
+    const pattern = state.shells.find((each) =>
+      shellRules([each], '/').some((rule) => rule.from === answered.from),
+    )?.pattern;
+    const fallback = routes.shapes.find(
+      (shape) => shape.pattern === pattern,
+    )?.file;
+    if (fallback !== undefined && !noticed.has(fallback)) {
+      noticed.add(fallback);
+      logger?.info(
+        `k8ordo: ${pathname} is not in "paths", so vite dev answers it with ${fallback}'s shell — list it in "paths" to render page.tsx`,
+      );
+    }
+  };
+
+  /**
+   * Writes `dist/client/_redirects` once every file is in place — the
+   * built URLs a shell rule would also catch, the application's own rules
+   * from `public/_redirects`, then the shells' — and says what a host would
+   * get wrong reading it. Returns the rewrites a host adapter applies after
+   * its files: the payload URLs of built non-pages, then the shells'.
+   */
+  const writeRedirects = async ({
+    clientDir,
+    shells,
+    notPages,
+    publicDir,
+  }: {
+    readonly clientDir: string;
+    readonly shells: readonly Shell[];
+    readonly notPages: readonly string[];
+    readonly publicDir: string | null;
+  }): Promise<Rewrite[]> => {
+    const warn = (message: string): void => {
+      logger?.warn(message);
+    };
+    const shellRewrites = shellRules(shells, base);
+    // dist/client/ のものは、emptyOutDir: false なら前のビルドが重ねた後の
+    // ファイルが残っている。アプリのものは public から読む
+    const ownFile =
+      publicDir === null ? null : path.join(publicDir, '_redirects');
+    let own: string | null = null;
+    if (ownFile !== null) {
+      try {
+        own = await readFile(ownFile, 'utf8');
+      } catch {
+        own = null;
+      }
+    }
+    const ownRules = own === null ? [] : rulesOf(own);
+    const hiding = ownRules.flatMap(({ line, from }) => {
+      if (!from.includes('*') && !/:[A-Za-z]/u.test(from)) return [];
+      const hidden = shells.find((shell) =>
+        cloudflareMatches(from, withBase(shell.pathname, base)),
+      );
+      return hidden === undefined
+        ? []
+        : [
+            `k8ordo: ${path
+              .relative(root, ownFile ?? '')
+              .split(path.sep)
+              .join(
+                '/',
+              )} line "${line}" matches ${hidden.location} before its shell's rule, so that shell is never served`,
+          ];
+    });
+    for (const message of hiding) warn(message);
+    const built = builtRules(
+      await filesBelow(clientDir),
+      notPages,
+      shellRewrites,
+      ownRules.map(({ from }) => from),
+      base,
+    );
+    for (const from of built.unlisted) {
+      const read = from.includes('*')
+        ? '"*" as a splat'
+        : `"${/:[A-Za-z]\w*/u.exec(from)?.[0] ?? ':'}" as a placeholder`;
+      warn(
+        `k8ordo: _redirects cannot list ${from} — Cloudflare and Netlify read ${read}, so on Cloudflare a shell answers it`,
+      );
+    }
+    const text = formatRedirects(built.rules, own, shellRewrites);
+    await writeFile(path.join(clientDir, '_redirects'), text);
+    const counted = cloudflareCounts(text);
+    if (counted.static > 2000) {
+      warn(
+        `k8ordo: _redirects has ${String(counted.static)} rules Cloudflare counts as static; it reads 2,000 and skips the rest, so a built page past them is answered by its shell there`,
+      );
+    }
+    if (counted.dynamic > 100) {
+      warn(
+        `k8ordo: _redirects has ${String(counted.dynamic)} rules Cloudflare counts as dynamic; it reads 100 and ignores the rest of the file — the shell payload rules go first (navigations to those values become document loads), then document rules (those values 404)`,
+      );
+    }
+    // ファイルが先に答えるホストには、ページでない URL のペイロードの規則だけが要る
+    return [
+      ...built.rules.filter(
+        (rule) => rule.from.endsWith('/index.rsc') && rule.to.endsWith('/'),
+      ),
+      ...shellRewrites,
+    ];
+  };
+
   const prerender: Plugin = {
     name: 'k8ordo:static',
 
     configResolved(config) {
-      ({ root, plugins } = config);
+      ({ root, plugins, base, logger } = config);
       routesDir = path.resolve(root, options.routesDir ?? 'src/routes');
+    },
+
+    configureServer: {
+      // pre の返す関数は、Vite の内部ミドルウェアの後、RSC プラグインの
+      // ハンドラの前に入る。モジュールの URL を殻の規則が取ることはない
+      order: 'pre',
+      handler(server) {
+        void devRoutes()
+          .then((routes) =>
+            routes.shapes.length > 0 ? devShells() : undefined,
+          )
+          .catch(() => undefined);
+        return () => {
+          server.middlewares.use((request, _response, next) => {
+            void answerUnbuilt(request, next);
+          });
+        };
+      },
+    },
+
+    // vite preview serves a static build the way a host does: the written
+    // files with their policy <meta>, the build's `_redirects`, a real
+    // 404.html — never a render of the handler, which only the build runs.
+    // Ahead of Vite's own middlewares, so the base is still on the URL and
+    // the RSC plugin's handler is never reached under it.
+    async configurePreviewServer(server) {
+      const { config } = server;
+      const client = path.resolve(
+        config.root,
+        config.environments['client']?.build.outDir ?? 'dist/client',
+      );
+      const rules = await readRules(client);
+      const answeredHere = async (
+        request: Connect.IncomingMessage,
+        response: ServerResponse,
+      ): Promise<boolean> => {
+        const url = new URL(`${ORIGIN}${request.url ?? '/'}`);
+        if (withoutBase(url.pathname, config.base) === null) return false;
+        if (request.method !== 'GET' && request.method !== 'HEAD') {
+          response.writeHead(405, { allow: 'GET, HEAD' }).end();
+          return true;
+        }
+        const served = await resolveStatic(
+          client,
+          rules,
+          url.pathname,
+          config.base,
+        );
+        if (served === null) {
+          response.writeHead(404).end();
+          return true;
+        }
+        const file = path
+          .relative(client, served.file)
+          .split(path.sep)
+          .join('/');
+        // Vite の静的ファイルはディレクトリの index.html を引かないので、
+        // ファイルそのものの URL に書き換えて渡す。ただし Vite（sirv）は
+        // decodeURI でしか戻さず、? と # を含む名前はどう綴っても届かない
+        if (served.status === 200 && !/[?#]/u.test(file)) {
+          request.url = `${withBase(encodeURI(`/${file}`), config.base)}${url.search}`;
+          return false;
+        }
+        const type = contentType(path.extname(served.file));
+        response.writeHead(served.status, {
+          'content-type': type === false ? 'application/octet-stream' : type,
+        });
+        response.end(
+          request.method === 'HEAD' ? undefined : await readFile(served.file),
+        );
+        return true;
+      };
+      server.middlewares.use((request, response, next) => {
+        void (async () => {
+          let answered: boolean;
+          try {
+            answered = await answeredHere(request, response);
+          } catch (error) {
+            next(error);
+            return;
+          }
+          if (!answered) next();
+        })();
+      });
+    },
+
+    watchChange(file) {
+      // `routes` と `routes-x` を取り違えないよう、区切りまで含めて見る
+      if (!path.resolve(file).startsWith(`${routesDir}${path.sep}`)) return;
+      routesRead = undefined;
+      shellsRead = undefined;
     },
 
     // Ahead of Vite's own resolver, which would answer the specifier first.
@@ -254,16 +659,10 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
         const plan = planPaths(tree, supplied);
         const catchAlls = catchAllPatterns(tree);
         const unplanned = [
-          ...(plan.unresolved.length > 0
-            ? [
-                `static build needs pathnames for ${plan.unresolved.join(', ')} — supply them with the "paths" option`,
-              ]
-            : []),
-          ...(plan.unusable.length > 0
-            ? [
-                `the "paths" option supplied pathnames no route wants: ${plan.unusable.join(', ')}`,
-              ]
-            : []),
+          ...planRefusals(
+            plan,
+            shadowedShells(tree, plan.shells, new Set(plan.paths)),
+          ),
           ...(catchAlls.length > 1
             ? [
                 `a static host answers every unknown URL from one file, so only one not-found.tsx can be represented — this table declares ${catchAlls.join(', ')}`,
@@ -288,16 +687,15 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
         }
 
         const rscOut = builder.environments['rsc']?.config.build.outDir;
-        const clientOut = builder.environments['client']?.config.build.outDir;
-        if (rscOut === undefined || clientOut === undefined) {
+        const client = builder.environments['client']?.config;
+        if (rscOut === undefined || client === undefined) {
           throw new Error('static build ran without the rsc/client builds');
         }
 
         // outDir はすでに絶対パスのことがあるので resolve で受ける
-        const clientDir = path.resolve(root, clientOut);
+        const clientDir = path.resolve(root, client.build.outDir);
         // ページは表の pathname で数え、ハンドラには base を付けた URL で頼む。
         // 書き出す先は client/ の中の表の pathname（client/ が base に置かれる）
-        const { base } = builder.config;
         // With `site`, what a route.ts reads off its request is where the site
         // is served — an RSS feed's links are absolute.
         const origin =
@@ -308,11 +706,16 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
         const byRoute = new Set(
           plan.paths.filter((pathname) => answeredByRoute(tree, pathname)),
         );
+        // 殻もディレクトリとして書くので、route.ts のファイルの下に来てはいけない
+        const directories = [
+          ...plan.paths,
+          ...plan.shells.map((shell) => shell.pathname),
+        ];
         const unfileable = [...byRoute].flatMap((route) => {
           if (route === '/') {
             return [`${route} — a static host serves / from index.html`];
           }
-          const below = plan.paths.find((pathname) =>
+          const below = directories.find((pathname) =>
             pathname.startsWith(`${route}/`),
           );
           return below === undefined
@@ -407,6 +810,53 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
           );
           if (status === 500) failed.push('404.html');
         }
+
+        // A value the build did not write is answered by its fallback.tsx's
+        // shell: rendered once for the shell pathname, HTML and payload,
+        // where a host's rule finds it. Only an answer that says it is this
+        // pattern's shell is written — the table walks in its own order.
+        const fallbacks = new Map(
+          fallbackShapes(tree).map((shape) => [shape.pattern, shape.file]),
+        );
+        const shellRefused: string[] = [];
+        const shellDisowned: string[] = [];
+        const shellTaken: string[] = [];
+        await inParallel(
+          plan.shells.map((shell) => async () => {
+            const dir = path.join(clientDir, dirFor(shell.pathname));
+            const answered = await write(
+              path.join(dir, 'index.html'),
+              handler,
+              urlFor(shell.pathname),
+              csp,
+              { notFoundIsPage: false, shell: shell.pattern },
+            );
+            const named = `${shell.location} (${fallbacks.get(shell.pattern) ?? ''})`;
+            if (answered.status === 500) {
+              failed.push(shell.location);
+            } else if (answered.status === 404) {
+              (answered.notFound ? shellDisowned : shellRefused).push(
+                shell.location,
+              );
+            } else if (answered.shell === null) {
+              shellTaken.push(
+                `the shell for ${named} was answered by another route, which took "${FALLBACK_SEGMENT}" as a value`,
+              );
+            } else if (answered.shell === shell.pattern) {
+              await write(
+                path.join(dir, 'index.rsc'),
+                handler,
+                urlFor(payloadPathFor(shell.pathname)),
+                csp,
+                { notFoundIsPage: false, shell: shell.pattern },
+              );
+            } else {
+              shellTaken.push(
+                `the shell for ${named} was answered by ${fallbacks.get(answered.shell) ?? answered.shell}, which the table tries first — supply shell locations that pattern cannot match`,
+              );
+            }
+          }),
+        );
         // Each kind is a different mistake, and fixing one should not be
         // what reveals the next.
         const unwritten = [
@@ -430,11 +880,50 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
                 `the "paths" option supplied pathnames whose page called notFound(): ${disowned.toSorted().join(', ')}`,
               ]
             : []),
+          ...(shellRefused.length > 0
+            ? [
+                `the "paths" option supplied shell locations a params schema refused: ${shellRefused.toSorted().join(', ')}`,
+              ]
+            : []),
+          ...(shellDisowned.length > 0
+            ? [
+                shellDisowned
+                  .toSorted()
+                  .map(
+                    (location) =>
+                      `the shell for ${location} called notFound() while it rendered, and a shell has no value to disown — call notFound() from the client component that reads the value in the browser`,
+                  )
+                  .join('\n'),
+              ]
+            : []),
+          ...(shellTaken.length > 0 ? [shellTaken.toSorted().join('\n')] : []),
         ];
         if (unwritten.length > 0) throw new Error(unwritten.join('\n\n'));
+
+        // Every layout renders a shell with the shell pathname as `pathname`.
+        // What one wrote of it into the page is the same for every value the
+        // shell answers — a link, a canonical URL — so the build says so.
+        const leaking = await Promise.all(
+          plan.shells.map(async (shell) => {
+            const html = await readFile(
+              path.join(clientDir, dirFor(shell.pathname), 'index.html'),
+              'utf8',
+            );
+            return html.replaceAll(SCRIPT, '').includes(FALLBACK_SEGMENT)
+              ? [shell.location]
+              : [];
+          }),
+        );
+        for (const location of leaking.flat()) {
+          builder.config.logger.warn(
+            `k8ordo: the shell for ${location} has "${FALLBACK_SEGMENT}" in its HTML — a layout wrote the shell's pathname into the page (a link, a canonical URL); derive what depends on the URL in a client component`,
+          );
+        }
+
         // The build knows every page it wrote, which is what a sitemap is.
-        // Redirects and route.ts files are not pages, and a not-found is not a
-        // URL to offer.
+        // Redirects and route.ts files are not pages, a not-found is not a
+        // URL to offer, and a shell is not one either — it stands for values
+        // the build never saw.
         if (options.site !== undefined) {
           await writeFile(
             path.join(clientDir, 'sitemap.xml'),
@@ -449,8 +938,49 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
             ),
           );
         }
+
+        const rewrites =
+          plan.shells.length === 0
+            ? []
+            : await writeRedirects({
+                clientDir,
+                shells: plan.shells,
+                notPages: [...redirected, ...byRoute],
+                publicDir:
+                  client.build.copyPublicDir && builder.config.publicDir !== ''
+                    ? builder.config.publicDir
+                    : null,
+              });
+
+        const vercel = builder.config.plugins.find(
+          (plugin) => plugin.name === 'k8ordo:vercel',
+        );
+        // Vite の型では api は any なので、静的ビルドが呼ぶ形をここで言う
+        const writeStatic = (vercel?.api as VercelApi | undefined)?.writeStatic;
+        if (writeStatic !== undefined) {
+          await writeStatic({
+            root,
+            client: clientDir,
+            base,
+            rewrites,
+            notFound: unmatched !== null,
+          });
+        } else if (
+          vercel === undefined &&
+          process.env['VERCEL'] !== undefined &&
+          plan.shells.length > 0
+        ) {
+          builder.config.logger.warn(
+            'k8ordo: this build runs on Vercel, which does not read _redirects — add vercel() from @k8ordo/framework/vercel, or the shells are never served',
+          );
+        }
+
+        const shells =
+          plan.shells.length === 0
+            ? ''
+            : `, ${String(plan.shells.length)} ${plan.shells.length === 1 ? 'shell' : 'shells'} (${plan.shells.map((shell) => shell.location).join(', ')})`;
         builder.config.logger.info(
-          `k8ordo: wrote ${String(plan.paths.length)} routes${unmatched === null ? '' : ' and 404.html'}${options.site === undefined ? '' : ' and sitemap.xml'}`,
+          `k8ordo: wrote ${String(plan.paths.length)} routes${shells}${unmatched === null ? '' : ' and 404.html'}${options.site === undefined ? '' : ' and sitemap.xml'}${plan.shells.length === 0 ? '' : ' and _redirects'}`,
         );
       },
     },
@@ -527,6 +1057,8 @@ type Written = {
   readonly status: number;
   /** The page itself said notFound(), rather than a schema refusing it. */
   readonly notFound: boolean;
+  /** The pattern whose shell the handler said it rendered, if any. */
+  readonly shell: string | null;
 };
 
 /**
@@ -539,19 +1071,29 @@ const write = async (
   handler: Handler,
   url: string,
   csp: ContentSecurityPolicy | undefined,
-  { notFoundIsPage }: { readonly notFoundIsPage: boolean },
+  {
+    notFoundIsPage,
+    shell,
+  }: {
+    readonly notFoundIsPage: boolean;
+    /** For a shell: the pattern that has to have answered, or nothing is written. */
+    readonly shell?: string;
+  },
 ): Promise<Written> => {
   const response = await handler(new Request(url));
   const notFound = response.headers.has(NOT_FOUND_HEADER);
+  const answered = response.headers.get(SHELL_HEADER);
+  const written = { status: response.status, notFound, shell: answered };
   // A page that failed to render is not a page, and neither is a 404 anywhere
   // but the not-found's own file: nothing is written, and the caller stops
   // the build with its name.
   if (response.status === 500) {
     console.error(`k8ordo: ${url} — ${await response.text()}`);
-    return { status: response.status, notFound };
+    return written;
   }
-  if (response.status === 404 && !notFoundIsPage) {
-    return { status: response.status, notFound };
+  if (response.status === 404 && !notFoundIsPage) return written;
+  if (shell !== undefined && (response.status !== 200 || answered !== shell)) {
+    return written;
   }
   await mkdir(path.dirname(file), { recursive: true });
   const location = response.headers.get('location');
@@ -560,7 +1102,7 @@ const write = async (
     location !== null
   ) {
     await writeFile(file, redirectPage(location));
-    return { status: response.status, notFound };
+    return written;
   }
   const nonce = response.headers.get(NONCE_HEADER);
   if (nonce === null) {
@@ -568,7 +1110,7 @@ const write = async (
   } else {
     await writeFile(file, asFile(await response.text(), nonce, csp));
   }
-  return { status: response.status, notFound };
+  return written;
 };
 
 /**

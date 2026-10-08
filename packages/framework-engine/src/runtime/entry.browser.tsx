@@ -31,6 +31,7 @@ await whenRevealed();
 mount(
   document,
   <AppRouter
+    notFound={payload.notFound}
     pathname={payload.pathname}
     search={payload.search}
     tree={payload.tree}

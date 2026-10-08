@@ -609,3 +609,61 @@ describe('a page that exports search', () => {
     expect(plain).not.toContain("from '@k8ordo/state'");
   });
 });
+
+const tableOf = (source: string): string =>
+  source.slice(source.indexOf('export const routes'));
+
+describe('fallback.tsx in the emitted table', () => {
+  const files = [
+    'layout.tsx',
+    'page.tsx',
+    '[locale]/layout.tsx',
+    '[locale]/posts/[id]/page.tsx',
+    '[locale]/posts/[id]/fallback.tsx',
+  ];
+  const withParams = new Set(['layout.tsx', '[locale]/layout.tsx']);
+  const emitIn = (mode: 'static' | 'server'): string =>
+    emitRoutesModule(parseRouteTree(files).tree, {
+      importPrefix: './routes',
+      mode,
+      withParams,
+    });
+
+  it('is emitted from a table the grammar accepted', () => {
+    expect(parseRouteTree(files).problems).toStrictEqual([]);
+  });
+
+  it('lists, under a build into files, the shell per pattern with its open params and the layouts’ schemas', () => {
+    const source = emitIn('static');
+    expect(source).toContain(
+      "import locale_posts_id_fallback from './routes/[locale]/posts/[id]/fallback';",
+    );
+    expect(source).toContain(
+      [
+        'export const fallbacks = {',
+        "  '/:locale/posts/:id': {",
+        '    component: locale_posts_id_fallback satisfies ComponentType,',
+        "    open: ['id'],",
+        '    schemas: [layout_params, locale_layout_params],',
+        '  },',
+        '} as const;',
+      ].join('\n'),
+    );
+  });
+
+  it('lists no shell and imports no fallback.tsx under a running server', () => {
+    const source = emitIn('server');
+    expect(source).toContain('export const fallbacks = {} as const;');
+    expect(source).not.toContain('fallback.tsx');
+    expect(source).not.toContain('/fallback');
+  });
+
+  it('leaves the route table as it is without the fallback.tsx', () => {
+    const without = emitRoutesModule(
+      parseRouteTree(files.filter((file) => !file.endsWith('fallback.tsx')))
+        .tree,
+      { importPrefix: './routes', mode: 'static', withParams },
+    );
+    expect(tableOf(emitIn('static'))).toBe(tableOf(without));
+  });
+});

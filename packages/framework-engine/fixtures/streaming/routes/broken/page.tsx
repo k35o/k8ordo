@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 
-import { wait } from '../_parts/wait';
+import { wait } from '../../lib/wait';
 
 async function Fails(): Promise<never> {
   await wait(50);

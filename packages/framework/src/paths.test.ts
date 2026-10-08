@@ -10,6 +10,9 @@ import {
   patternsNeedingPaths,
   patternsOf,
   planPaths,
+  planRefusals,
+  shadowedShells,
+  shellPathname,
 } from './paths';
 
 const treeOf = (files: readonly string[]) => {
@@ -74,14 +77,29 @@ describe('planPaths', () => {
     expect(plan.paths).toStrictEqual(['/', '/products/1']);
   });
 
-  it('refuses a supplied path that still holds a parameter', () => {
+  it('refuses a supplied path that still holds a parameter, naming the page that has no fallback.tsx', () => {
     // パラメータが 2 つある表を 1 つだけ展開すると、こういう値が残る
     const plan = planPaths(
       treeOf(['page.tsx', '[locale]/blog/[slug]/page.tsx']),
       ['/ja/blog/:slug'],
     );
-    expect(plan.unusable).toStrictEqual(['/ja/blog/:slug']);
+    expect(plan.held).toStrictEqual([
+      { location: '/ja/blog/:slug', file: '[locale]/blog/[slug]/page.tsx' },
+    ]);
+    expect(plan.unusable).toStrictEqual([]);
     expect(plan.unresolved).toStrictEqual(['/:locale/blog/:slug']);
+    expect(planRefusals(plan, [])).toContain(
+      'the "paths" option supplied pathnames that still hold a parameter, and only a page with a fallback.tsx beside it takes one: /ja/blog/:slug ([locale]/blog/[slug]/page.tsx has none)',
+    );
+  });
+
+  it('says a route.ts holding a parameter cannot have a fallback.tsx', () => {
+    const plan = planPaths(treeOf(['page.tsx', 'feed/[id]/route.ts']), [
+      '/feed/:id',
+    ]);
+    expect(planRefusals(plan, [])).toContain(
+      'the "paths" option supplied pathnames that still hold a parameter, and only a page with a fallback.tsx beside it takes one: /feed/:id (feed/[id]/route.ts cannot have one)',
+    );
   });
 
   it('never renders the catch-all as a page of its own', () => {
@@ -201,5 +219,235 @@ describe('answeredByRoute', () => {
   it('says a page answers what it takes, in the matcher’s order', () => {
     expect(answeredByRoute(tree, '/')).toBe(false);
     expect(answeredByRoute(tree, '/api/special')).toBe(false);
+  });
+});
+
+describe('planPaths for a page with a fallback.tsx', () => {
+  const posts = [
+    'layout.tsx',
+    'page.tsx',
+    'posts/[id]/page.tsx',
+    'posts/[id]/fallback.tsx',
+  ];
+  const localized = [
+    'layout.tsx',
+    'page.tsx',
+    '[locale]/layout.tsx',
+    '[locale]/posts/[id]/page.tsx',
+    '[locale]/posts/[id]/fallback.tsx',
+  ];
+
+  it('stands the bare shell at the pattern when nothing is supplied', () => {
+    const plan = planPaths(treeOf(posts), []);
+    expect(plan.unresolved).toStrictEqual([]);
+    expect(plan.paths).toStrictEqual(['/']);
+    expect(plan.shells).toStrictEqual([
+      {
+        pattern: '/posts/:id',
+        location: '/posts/:id',
+        pathname: '/posts/!fallback',
+      },
+    ]);
+  });
+
+  it('builds the values supplied beside the bare shell', () => {
+    const plan = planPaths(treeOf(posts), ['/posts/1', '/posts/2']);
+    expect(plan.paths).toStrictEqual(['/', '/posts/1', '/posts/2']);
+    expect(plan.shells.map((shell) => shell.location)).toStrictEqual([
+      '/posts/:id',
+    ]);
+  });
+
+  it('stands the shells at the supplied locations instead of the bare pattern', () => {
+    const plan = planPaths(treeOf(localized), [
+      '/en/posts/:id',
+      '/ja/posts/:id',
+      '/en/posts/1',
+    ]);
+    expect(plan.paths).toStrictEqual(['/', '/en/posts/1']);
+    expect(plan.shells).toStrictEqual([
+      {
+        pattern: '/:locale/posts/:id',
+        location: '/en/posts/:id',
+        pathname: '/en/posts/!fallback',
+      },
+      {
+        pattern: '/:locale/posts/:id',
+        location: '/ja/posts/:id',
+        pathname: '/ja/posts/!fallback',
+      },
+    ]);
+  });
+
+  it('gives a location to the first pattern in table order it fits', () => {
+    const plan = planPaths(
+      treeOf([
+        'page.tsx',
+        '[locale]/posts/[id]/page.tsx',
+        '[locale]/posts/[id]/fallback.tsx',
+        '[section]/[slug]/[id]/page.tsx',
+        '[section]/[slug]/[id]/fallback.tsx',
+      ]),
+      ['/en/posts/:id', '/en/news/:id'],
+    );
+    expect(
+      plan.shells.map(({ pattern, location }) => [pattern, location]),
+    ).toStrictEqual([
+      ['/:locale/posts/:id', '/en/posts/:id'],
+      ['/:section/:slug/:id', '/en/news/:id'],
+    ]);
+  });
+
+  it('refuses a location whose parameter names are not its pattern’s', () => {
+    const plan = planPaths(treeOf(localized), ['/en/posts/:slug']);
+    expect(plan.misnamed).toStrictEqual([
+      { location: '/en/posts/:slug', pattern: '/:locale/posts/:id' },
+    ]);
+    expect(planRefusals(plan, [])).toContain(
+      'the "paths" option supplied shell locations whose parameter names are not their pattern\'s: /en/posts/:slug (/:locale/posts/:id)',
+    );
+  });
+
+  it('refuses a supplied location that leaves open a parameter a layout above receives', () => {
+    const plan = planPaths(treeOf(localized), ['/:locale/posts/:id']);
+    expect(plan.closed).toStrictEqual([
+      {
+        location: '/:locale/posts/:id',
+        params: ['locale'],
+        layout: '[locale]/layout.tsx',
+        supplied: true,
+      },
+    ]);
+    expect(planRefusals(plan, [])).toContain(
+      'the "paths" option supplied shell locations that leave out a parameter a layout above their fallback.tsx receives: /:locale/posts/:id (:locale, received by [locale]/layout.tsx)',
+    );
+  });
+
+  it('refuses the bare shell when a layout above receives one of its parameters', () => {
+    const plan = planPaths(treeOf(localized), ['/en/posts/1']);
+    expect(plan.shells).toStrictEqual([]);
+    expect(plan.closed).toStrictEqual([
+      {
+        location: '/:locale/posts/:id',
+        params: ['locale'],
+        layout: '[locale]/layout.tsx',
+        supplied: false,
+      },
+    ]);
+    expect(planRefusals(plan, [])).toContain(
+      'static build needs shell locations for /:locale/posts/:id — [locale]/layout.tsx receives :locale, so the "paths" option has to fill it, as in /<locale>/posts/:id',
+    );
+  });
+
+  it.each([
+    ['a value', '/posts/!fallback'],
+    ['a shell location', '/!fallback/posts/:id'],
+    ['an escaped spelling', '/posts/%21fallback'],
+  ])('refuses %s with a segment the build keeps for shells', (_, path) => {
+    const plan = planPaths(treeOf(posts), [path]);
+    expect(plan.reserved).toStrictEqual([path]);
+    expect(planRefusals(plan, [])).toContain(
+      `the "paths" option supplied pathnames with a segment named !fallback, which the build keeps for shells: ${path}`,
+    );
+  });
+
+  it('writes a shell once however often its location is supplied, a trailing slash included', () => {
+    const plan = planPaths(treeOf(localized), [
+      '/en/posts/:id',
+      '/en/posts/:id/',
+    ]);
+    expect(plan.shells.map((shell) => shell.pathname)).toStrictEqual([
+      '/en/posts/!fallback',
+    ]);
+  });
+});
+
+describe('shellPathname', () => {
+  it('puts the reserved segment in place of each parameter left open', () => {
+    expect(shellPathname('/ja/posts/:id')).toBe('/ja/posts/!fallback');
+    expect(shellPathname('/posts/:year/:slug')).toBe(
+      '/posts/!fallback/!fallback',
+    );
+  });
+});
+
+describe('shadowedShells', () => {
+  it('names a pattern declared first whose parameter the shell would answer at the same position', () => {
+    const tree = treeOf([
+      'page.tsx',
+      'docs/[section]/page.tsx',
+      '[lang]/[id]/page.tsx',
+      '[lang]/[id]/fallback.tsx',
+    ]);
+    const plan = planPaths(tree, ['/docs/intro']);
+    const shadowed = shadowedShells(tree, plan.shells, new Set(plan.paths));
+    expect(shadowed).toStrictEqual([
+      {
+        location: '/:lang/:id',
+        fallback: '[lang]/[id]/fallback.tsx',
+        pattern: '/docs/:section',
+        file: 'docs/[section]/page.tsx',
+        url: null,
+      },
+    ]);
+    expect(planRefusals(plan, shadowed)).toContain(
+      'the shell for /:lang/:id ([lang]/[id]/fallback.tsx) would also answer URLs /docs/:section (docs/[section]/page.tsx) is declared first for — give docs/[section]/page.tsx a fallback.tsx too, or supply shell locations it cannot match',
+    );
+  });
+
+  const besideNew = [
+    'page.tsx',
+    '[locale]/posts/new/page.tsx',
+    '[locale]/posts/[id]/page.tsx',
+    '[locale]/posts/[id]/fallback.tsx',
+  ];
+
+  it('names the one URL a pattern declared first meets the shell at, when the build did not write it', () => {
+    const tree = treeOf(besideNew);
+    const plan = planPaths(tree, ['/ja/posts/:id', '/en/posts/new']);
+    const shadowed = shadowedShells(tree, plan.shells, new Set(plan.paths));
+    expect(shadowed).toStrictEqual([
+      {
+        location: '/ja/posts/:id',
+        fallback: '[locale]/posts/[id]/fallback.tsx',
+        pattern: '/:locale/posts/new',
+        file: '[locale]/posts/new/page.tsx',
+        url: '/ja/posts/new',
+      },
+    ]);
+    expect(planRefusals(plan, shadowed)).toContain(
+      'the shell for /ja/posts/:id ([locale]/posts/[id]/fallback.tsx) would also answer /ja/posts/new, which [locale]/posts/new/page.tsx is declared first for and the build did not write — list /ja/posts/new in "paths", or supply shell locations it cannot match',
+    );
+  });
+
+  it('says nothing of a URL the build wrote, which its file answers', () => {
+    const tree = treeOf([
+      'page.tsx',
+      '[locale]/posts/first/redirect.ts',
+      '[locale]/posts/[id]/page.tsx',
+      '[locale]/posts/[id]/fallback.tsx',
+    ]);
+    const plan = planPaths(tree, [
+      '/ja/posts/:id',
+      '/ja/posts/first',
+      '/ja/posts/1',
+    ]);
+    expect(
+      shadowedShells(tree, plan.shells, new Set(plan.paths)),
+    ).toStrictEqual([]);
+  });
+
+  it('says nothing of a pattern declared first that has a fallback.tsx of its own', () => {
+    const tree = treeOf([
+      'page.tsx',
+      'docs/[section]/page.tsx',
+      'docs/[section]/fallback.tsx',
+      '[lang]/[id]/page.tsx',
+      '[lang]/[id]/fallback.tsx',
+    ]);
+    const plan = planPaths(tree, []);
+    expect(
+      shadowedShells(tree, plan.shells, new Set(plan.paths)),
+    ).toStrictEqual([]);
   });
 });

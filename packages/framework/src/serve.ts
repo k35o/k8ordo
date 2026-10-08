@@ -28,7 +28,9 @@ import {
   SUFFIX,
 } from './encoding';
 import type { Encoding } from './encoding';
+import type { Rewrite } from './rewrites';
 import { safeJoin } from './static-file';
+import { readRules, resolveStatic } from './static-host';
 
 export type ServeOptions = {
   /** Build output directory, the one holding `rsc/` and `client/`. */
@@ -47,17 +49,25 @@ export type Server = {
 
 type Handler = (request: Request) => Promise<Response>;
 
-/** What `dist/rsc/index.js` exports: the handler, and the base it was built for. */
-type Entry = { readonly default: Handler; readonly base: string };
+/**
+ * What `dist/rsc/index.js` exports: the handler, and the base and mode it was
+ * built for.
+ */
+type Entry = {
+  readonly default: Handler;
+  readonly base: string;
+  readonly mode: 'static' | 'server';
+};
 
 /**
  * Vite writes the hash of the contents into the name of everything under
  * `assets/`, so those files can never change under a URL — anything else
- * might, and says so. The pathname is the one below the base, where the
- * client build's own layout starts.
+ * might, and says so. Asked of the file sent, relative to the client build:
+ * a rule that answers a missing `/assets/x.js` with a shell's HTML must not
+ * make that answer last a year.
  */
-const cacheFor = (pathname: string): string =>
-  pathname.startsWith('/assets/')
+const cacheFor = (file: string): string =>
+  file.startsWith('/assets/')
     ? 'public, max-age=31536000, immutable'
     : 'no-cache';
 
@@ -228,14 +238,20 @@ const sendAnswer = async (
 };
 
 /**
- * Serves a built application: the client build's files as they are, and
- * everything else through the RSC handler.
+ * Serves a built application. A server build: the client build's files as
+ * they are, and everything else through the RSC handler. A static build: as
+ * a static host with Netlify's `_redirects` does — files, then the build's
+ * `200` rules, then `404.html` — never calling the handler, which wrote
+ * every file there is.
  */
 export const serve = async (options: ServeOptions = {}): Promise<Server> => {
   const dist = path.resolve(process.cwd(), options.dist ?? 'dist');
   const clientDir = path.join(dist, 'client');
   const entry = pathToFileURL(path.join(dist, 'rsc', 'index.js')).href;
-  const { default: handler, base } = (await import(entry)) as Entry;
+  const { default: handler, base, mode } = (await import(entry)) as Entry;
+  // server ビルドにも public/_redirects が写るが、その 200 はこのサーバーが
+  // 当てるものではない。静的ビルドのものだけを読む
+  const rules = mode === 'static' ? await readRules(clientDir) : null;
 
   // ETag は更新時刻ではなく中身から作る。別々にビルドしたサーバーどうしでも、
   // 何も変えなかったデプロイの前後でも同じ値になり、再検証が 304 で終わる。
@@ -260,11 +276,15 @@ export const serve = async (options: ServeOptions = {}): Promise<Server> => {
     return etag;
   };
 
+  /**
+   * A file of the client build, under 200 or — the static build's
+   * `404.html` — 404, which no revalidation or range turns into another.
+   */
   const sendFile = async (
     incoming: IncomingMessage,
     response: ServerResponse,
     file: string,
-    pathname: string,
+    status: 200 | 404 = 200,
   ): Promise<void> => {
     const variants = await variantsOf(file);
     const encoding = negotiateEncoding(incoming.headers['accept-encoding'], [
@@ -278,11 +298,13 @@ export const serve = async (options: ServeOptions = {}): Promise<Server> => {
     // 304 にも、200 なら付けたキャッシュのヘッダーを付ける。キャッシュは
     // 304 を受けて持っているコピーのヘッダーをこれで更新する
     const cache: OutgoingHttpHeaders = {
-      'cache-control': cacheFor(pathname),
+      'cache-control': cacheFor(
+        `/${path.relative(clientDir, file).split(path.sep).join('/')}`,
+      ),
       etag,
       ...(variants.size > 0 ? { vary: 'Accept-Encoding' } : {}),
     };
-    if (fresh(incoming.headers, { etag })) {
+    if (status === 200 && fresh(incoming.headers, { etag })) {
       response.writeHead(304, cache);
       response.end();
       return;
@@ -296,7 +318,7 @@ export const serve = async (options: ServeOptions = {}): Promise<Server> => {
     };
     // Range を定義しているのは GET だけ。HEAD には全体の長さを答える
     const range =
-      incoming.method === 'GET'
+      incoming.method === 'GET' && status === 200
         ? rangeOf(incoming.headers, size, etag)
         : 'whole';
     if (range === 'unsatisfiable') {
@@ -309,7 +331,7 @@ export const serve = async (options: ServeOptions = {}): Promise<Server> => {
     }
     const { start, end } =
       range === 'whole' ? { start: 0, end: size - 1 } : range;
-    response.writeHead(range === 'whole' ? 200 : 206, {
+    response.writeHead(range === 'whole' ? status : 206, {
       ...headers,
       'content-length': end - start + 1,
       ...(range === 'whole'
@@ -330,6 +352,37 @@ export const serve = async (options: ServeOptions = {}): Promise<Server> => {
     );
   };
 
+  // handler には頼らない。ビルドが書かなかった URL を描いて答えると、
+  // デプロイ先の静的ホストとは違うものを返してしまう
+  const answerStatic = async (
+    incoming: IncomingMessage,
+    response: ServerResponse,
+    url: URL,
+    reading: boolean,
+    staticRules: readonly Rewrite[],
+  ): Promise<void> => {
+    if (!reading) {
+      response.writeHead(405, {
+        allow: 'GET, HEAD',
+        'content-type': 'text/plain;charset=utf-8',
+      });
+      response.end('method not allowed');
+      return;
+    }
+    const answer = await resolveStatic(
+      clientDir,
+      staticRules,
+      url.pathname,
+      base,
+    );
+    if (answer === null) {
+      response.writeHead(404, { 'content-type': 'text/plain;charset=utf-8' });
+      response.end('not found');
+      return;
+    }
+    await sendFile(incoming, response, answer.file, answer.status);
+  };
+
   const server = createServer(
     (incoming: IncomingMessage, response: ServerResponse) => {
       void (async () => {
@@ -341,17 +394,19 @@ export const serve = async (options: ServeOptions = {}): Promise<Server> => {
           response.end('bad request');
           return;
         }
+        const reading = incoming.method === 'GET' || incoming.method === 'HEAD';
+        if (rules !== null) {
+          await answerStatic(incoming, response, url, reading, rules);
+          return;
+        }
         // ファイルで答えるのは読み取りだけ。ほかのメソッドは handler が答える
         // （POST は action、残りは 405）。先にファイルが答えると、そのパスで
         // だけ 405 が 200 に化ける。client/ はビルドの base に置かれる
         const own = withoutBase(url.pathname, base);
         const file =
-          own !== null &&
-          (incoming.method === 'GET' || incoming.method === 'HEAD')
-            ? await fileFor(clientDir, own)
-            : null;
-        if (own !== null && file !== null) {
-          await sendFile(incoming, response, file, own);
+          own !== null && reading ? await fileFor(clientDir, own) : null;
+        if (file !== null) {
+          await sendFile(incoming, response, file);
           return;
         }
         await sendAnswer(
