@@ -1,8 +1,14 @@
 import { glob, readFile } from 'node:fs/promises';
 import path from 'node:path';
 
-import { parseSync } from 'vite';
-import type { ConfigEnv, Plugin, ResolvedConfig, UserConfig } from 'vite';
+import { createFilter, parseSync } from 'vite';
+import type {
+  ConfigEnv,
+  FilterPattern,
+  Plugin,
+  ResolvedConfig,
+  UserConfig,
+} from 'vite';
 
 import { engine } from './core';
 
@@ -38,7 +44,29 @@ const clientOptimizeDeps = (): { include: string[]; exclude: string[] } => {
   };
 };
 
+// rsc と ssr で外部に残さないパッケージの指定
+const serverNoExternal = (name: 'rsc' | 'ssr'): FilterPattern => {
+  const hook = enginePlugin()?.config as
+    | ((config: UserConfig, env: ConfigEnv) => UserConfig)
+    | undefined;
+  return hook?.({}, { command: 'serve', mode: 'development' }).environments?.[
+    name
+  ]?.resolve?.noExternal as FilterPattern;
+};
+
 const packagesDir = path.resolve(import.meta.dirname, '../../..');
+
+// 公開している @k8ordo/* の名前
+const publishedPackages = async (): Promise<string[]> => {
+  const names: string[] = [];
+  for await (const manifest of glob('*/package.json', { cwd: packagesDir })) {
+    const { name, private: unpublished } = JSON.parse(
+      await readFile(path.join(packagesDir, manifest), 'utf8'),
+    ) as { name: string; private?: boolean };
+    if (unpublished !== true) names.push(name);
+  }
+  return names;
+};
 
 // RSC プラグインと同じく、先頭の指令で見る。文字列やコメントの中は数えない。
 // 型でない再 export の先も拾う。'use client' のモジュールを再 export する入口は、
@@ -125,4 +153,17 @@ describe('the engine plugin', () => {
     expect(exclude.toSorted()).toStrictEqual(shipping.toSorted());
     expect(include.filter((name) => shipping.includes(name))).toStrictEqual([]);
   });
+
+  // router はフレームワークの peer としてだけアプリに入ることがある
+  it.each(['rsc', 'ssr'] as const)(
+    'bundles every published package into %s, even one the application does not list',
+    async (name) => {
+      // Vite と同じく、noExternal に当たる名前は外部に残らない
+      const external = createFilter(undefined, serverNoExternal(name), {
+        resolve: false,
+      });
+      const kept = (await publishedPackages()).filter((pkg) => external(pkg));
+      expect(kept).toStrictEqual([]);
+    },
+  );
 });

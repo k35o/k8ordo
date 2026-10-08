@@ -73,6 +73,14 @@ const CLIENT_UNBUNDLED = [
 ];
 
 /**
+ * RSC プラグインは、rsc と ssr で外部に残さないパッケージをアプリの
+ * dependencies と devDependencies から辿って決め、peerDependencies は辿らない。
+ * router はフレームワークの peer としてだけアプリに入ることがあり、外部に残ると
+ * Node がそのまま読んで import.meta.env が無く落ちる。family は名前で必ず通す
+ */
+const FAMILY = /^@k8ordo\//u;
+
+/**
  * The machinery both modes stand on: the route grammar compiled into a
  * table, the RSC pipeline configured, and the execution boundary enforced.
  * The framework's static and server modes add only what makes them
@@ -126,6 +134,7 @@ export const engine = (
         resolve: { dedupe: ['react', 'react-dom'] },
         environments: {
           rsc: {
+            resolve: { noExternal: [FAMILY] },
             build: {
               rolldownOptions: {
                 input: { index: runtime('entry.rsc') },
@@ -147,6 +156,7 @@ export const engine = (
             },
           },
           ssr: {
+            resolve: { noExternal: [FAMILY] },
             build: {
               rolldownOptions: {
                 input: { index: runtime('entry.ssr') },

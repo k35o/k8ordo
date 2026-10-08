@@ -402,9 +402,6 @@ importers:
       '@k8ordo/i18n':
         specifier: workspace:^
         version: link:../../packages/i18n
-      '@k8ordo/router':
-        specifier: workspace:^
-        version: link:../../packages/router
       '@k8ordo/state':
         specifier: workspace:^
         version: link:../../packages/state
@@ -424,6 +421,9 @@ importers:
       '@k8ordo/framework':
         specifier: workspace:^
         version: link:../../packages/framework
+      '@k8ordo/router':
+        specifier: workspace:^
+        version: link:../../packages/router
       '@types/react':
         specifier: 'catalog:'
         version: 19.3.0
