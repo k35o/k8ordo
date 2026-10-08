@@ -1,0 +1,158 @@
+# @k8ordo/framework
+
+> Turns `src/routes/` into an application of React Server Components, built
+> with Vite, in one of two modes chosen in `vite.config.ts`:
+> `framework({ mode: 'static' })` renders every route at build time into
+> files a static host serves, and `framework({ mode: 'server' })` renders per
+> request. Switching is changing `mode` (and dropping `paths`, `site` and
+> `csp`, which server mode refuses); nothing else in the application
+> changes. Pick `server` when the application needs the request — Server
+> Actions, `guard.ts`, the `request` prop, cookies, a page that exports
+> `search`, parameter values with no list — and `static` otherwise; static
+> mode refuses all of those by name, in the build and in `vite dev` (`this
+> application wants mode: 'server'`). `src/routes/` is the pathname space
+> (page/layout/not-found/error/loading/redirect/guard/route, `[param]`,
+> `(group)`, `_private`); a page or layout may `export const paramsSchema`
+> (any Standard Schema, synchronous) to type its parameters — a refused value
+> makes the pattern not answer, so the walk goes on to `not-found.tsx` — a
+> page that says `notFound()` is answered by the nearest `not-found.tsx`, an
+> `error.tsx` shows in place of what throws below it, a `loading.tsx` shows
+> while what is below it suspends, a `redirect.ts` answers 307/308 (server)
+> or is written as a page that sends the visitor on (static), and a
+> `route.ts` answers its URL with a `Response` (server: every method it
+> exports; static: written as the file its `GET` answers). Under server mode a
+> Server Action ends with `redirect()`, a `guard.ts` runs before whatever
+> answers below it, `cookies()` reads and writes cookies, and a page receives
+> `request`. Static mode lists parameter values with `paths`, writes
+> `404.html` and `sitemap.xml`, and puts a Content-Security-Policy in a
+> `<meta>` by hash (`csp`). Application code imports from
+> `@k8ordo/framework` (the router's `href`, `notFound`, `PageProps`, …);
+> `@k8ordo/router` is a required peer but never named. Boundaries are React's
+> own `'use client'` with `server-only` modules barred from the client
+> bundle, and the route table and type wiring are generated rather than
+> hand-written.
+>
+> Like every k8ordo package it assumes React 19 and Server Components, uses
+> only what has reached Baseline newly available, and ships no polyfills or
+> legacy fallbacks.
+
+When installed via npm, these docs live under `node_modules/@k8ordo/framework/docs/`.
+Start with GUIDE.md, then follow the reference most relevant to the task.
+
+## Guide
+
+- [Design Guide](GUIDE.md): choosing a mode and what static mode refuses,
+  setup (install, `vite.config.ts`, `tsconfig.json`, the root layout as the
+  document), `vite dev` against a static build, the entries, and the
+  plugin's options.
+
+## References
+
+- [Routing](references/routing.md): the `routes/` grammar and every refusal
+  the build names, how a page is sent in each mode, `loading.tsx`,
+  `route.ts` (methods and `405` under server mode, a file under static
+  mode), the generated `.k8ordo/` files, titles, and fetching the next page
+  ahead (`data-k8ordo-prefetch`).
+- [Parameters](references/params.md): `paramsSchema` — a refused value is a
+  pathname the pattern does not answer — and, under static mode, the `paths`
+  option: supplying pathnames, expanding a parameter every page shares, and
+  what fails the build.
+- [Errors and redirects](references/errors.md): `error.tsx`, a Server
+  Component that throws stopping a static build, `notFound()` and
+  `not-found.tsx` (a document waits for its page under server mode), and
+  `redirect.ts` in each mode.
+- [Execution boundaries](references/boundaries.md): `'use client'`,
+  `use(browser())` for a component that needs a browser, `server-only`
+  modules, the search — `@k8ordo/state`'s, or handed to a page that exports
+  `search` under server mode — and forms.
+- [Server Actions](references/actions.md): server mode only. `'use server'`
+  against `server-only`, `cookies()` / `responseHeaders()` /
+  `requestHeaders()` in an action, the page context an action runs in, forms
+  before JavaScript, and ending with `redirect()`.
+- [Guards, cookies and the request](references/guards.md): server mode only.
+  `guard.ts` (outer first; a `Response` ends the request),
+  `responseHeaders()`, `cookies()` and its defaults, and the read-only
+  `request` a page receives.
+- [Content Security Policy](references/csp.md): `nonce()` in a header a
+  guard writes under server mode; the `csp` option and
+  `colorSchemeScriptHash()` under static mode.
+- [Running and deploying](references/deploy.md): a static build's
+  `dist/client/` (HTML, `index.rsc` payloads, `404.html`, `sitemap.xml`);
+  under server mode, a `dist/` that runs on its own with
+  `node dist/server.js` (`PORT`, `HOST`, every dependency bundled in, and
+  `resolve.external` for one that cannot be), `serve` (compression, `ETag`,
+  `Range`), the request handler under Node.js, Bun, Deno and Cloudflare
+  Workers, the same-origin rule for a `POST`, and `vercel()`; a tab opened
+  before a deploy, and Vite's `base`.
+
+## Entry points
+
+- `@k8ordo/framework` — what application code imports, re-exported from
+  `@k8ordo/router` (which stays a peer, one copy): `href`, `navigateTo`,
+  `bindParams`, `notFound`, `isNotFound`, `usePathname`,
+  `usePendingPathname`, `useMatch`, `matchPath`, `normalizePathname`,
+  `withBase`, and the types `PageProps`, `LayoutProps`, `RouteContext`,
+  `ErrorProps`, `BoundLinks`, `BoundParams`, `MatchablePattern`,
+  `MatchOptions`, `NavigateToOptions` and the `Registered*` types. Not
+  `useParams` or `useRoute`: a page receives `params` as a prop.
+- `@k8ordo/framework/vite` — `framework(options)` returns the Vite plugins;
+  `options.mode` (`'static' | 'server'`) is required, `options.routesDir`
+  moves the route directory (default `src/routes`). Only with
+  `mode: 'static'`: `options.paths` supplies concrete pathnames for routes
+  with parameters (a parameterised route left uncovered fails the build),
+  `options.site` (the origin) makes the build also write `sitemap.xml`, and
+  `options.csp` (directives → sources, `ContentSecurityPolicy`) is the
+  Content-Security-Policy written into each page's `<meta>`, first in
+  `<head>`, with the hashes of the framework's own inline scripts on that
+  page added to `script-src` (or `default-src` made into it) and
+  `script-src-elem`; a policy with `'strict-dynamic'`, `frame-ancestors`,
+  `report-uri` or `sandbox` is refused. `FrameworkOptions` is
+  `StaticOptions | ServerOptions`. This entry loads Vite and is for
+  `vite.config.ts` only.
+- `@k8ordo/framework/server` — server mode only; a static build refuses any
+  module that imports a value from it. What code inside the request handler
+  imports, needing nothing from Node but `AsyncLocalStorage`: `redirect(to)`
+  ends a Server Action by sending the visitor to `to`; `responseHeaders()`
+  is the `Headers` the final response carries, `cookies()` the request's
+  cookies to read and write (`get`, `has`, `set(name, value,
+  CookieOptions)`, `delete(name, CookieScope)`; defaults `path: '/'`,
+  `httpOnly`, `secure` (not over plain HTTP to `localhost`),
+  `sameSite: 'lax'`; every write a `Set-Cookie` on the answer), and
+  `requestHeaders()` the headers the request arrived with — all three from
+  a `guard.ts`, a `route.ts` or a Server Action, and they throw anywhere
+  else; `nonce()` is the nonce this answer's inline scripts carry, new per
+  request and readable anywhere the request is answered, the render
+  included; `Guard<P>` is the type of what a `guard.ts` default-exports
+  (`({ request, params }) => Response | void`) and `GuardContext<P>` its
+  argument; `RedirectTarget` is the type of what a `redirect.ts`
+  default-exports, and `RouteRequest` the type of the `request` prop.
+- `@k8ordo/framework/serve` — server mode only. The Node.js server for a
+  build. `serve({ dist?, port?, host? })` (`ServeOptions`: `dist` defaults
+  to `dist` under the working directory, `port` to `3000`, `host` to
+  `localhost`) serves a build and returns a `Server`, `{ port, url, close }`
+  (`port: 0` takes a free port): the client build's files as they are,
+  everything else through the request handler. `dist/server.js` runs it;
+  a server of your own imports it, with `@k8ordo/framework` in
+  `dependencies`.
+- `dist/server.js` — under server mode, what the build writes to start
+  `serve` on the build it sits in: `node dist/server.js`, listening on
+  `PORT` (default `3000`) and `HOST` (default `localhost`), closing and
+  exiting with `0` on `SIGTERM` or `SIGINT`. `serve` and every
+  dependency of the handler are bundled into `dist/`, with
+  `dist/package.json` (written in either mode) marking it ES modules, so
+  `dist/` runs with nothing installed and the framework is a dev
+  dependency.
+- `dist/rsc/index.js` — under server mode, the built request handler, a
+  plain `(request: Request) => Promise<Response>` default export with every
+  dependency bundled in, that needs nothing from its runtime but
+  `AsyncLocalStorage` (`node:async_hooks`), so Node.js, Bun, Deno and
+  Cloudflare Workers with `nodejs_compat` run it directly; the host serves
+  `dist/client/` in front of it.
+- `@k8ordo/framework/vercel` — server mode only. `vercel()` returns a Vite
+  plugin to put beside `framework()`: `vite build` then also writes
+  `.vercel/output/` (Build Output API v3) for `vercel build` /
+  `vercel deploy --prebuilt` — the client build as static files at Vite's
+  `base` (`assets/` immutable), and the request handler as one streaming
+  Node.js function.
+- `@k8ordo/framework/generated` — what the generated `.k8ordo/` files
+  import (`defineRoutes`, `Register`, …). Not for code written by hand.
