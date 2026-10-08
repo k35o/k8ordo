@@ -33,6 +33,11 @@ export interface Register {}
 // to the union, which leaves every pattern rejected where the union is
 // compared against (`useMatch`), while `href` only survives through generic
 // inference taking another path.
+//
+// The union is rebuilt through a mapped type rather than named as
+// `PatternOf<R>`: a type an alias produced is printed by that alias, so a
+// pattern the table lacks would be reported as not assignable to
+// `PatternsIn<{ …the whole table… }>` instead of to the patterns themselves.
 
 /**
  * Every leaf pattern in the registered table — each page and each `/*`, not a
@@ -41,14 +46,14 @@ export interface Register {}
 export type RegisteredPattern = Register extends {
   routes: Routes<infer R extends RoutesRecord>;
 }
-  ? PatternOf<R>
+  ? { [K in PatternOf<R>]: K }[PatternOf<R>]
   : `/${string}`;
 
 /** Linkable patterns of the registered table (wildcards excluded). */
 export type RegisteredNavigablePattern = Register extends {
   routes: Routes<infer R extends RoutesRecord>;
 }
-  ? NavigablePatternOf<R>
+  ? { [K in NavigablePatternOf<R>]: K }[NavigablePatternOf<R>]
   : `/${string}`;
 
 type RegisteredParamsMap = Register extends { params: infer M } ? M : null;
