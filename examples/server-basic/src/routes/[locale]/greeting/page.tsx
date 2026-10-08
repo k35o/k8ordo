@@ -1,4 +1,4 @@
-import type { PageProps } from '@k8ordo/router';
+import type { PageProps } from '@k8ordo/framework';
 
 import { locales } from '../../../i18n';
 import { GreetForm } from '../../_parts/greet-form';

@@ -1,4 +1,4 @@
-import { framework } from '@k8ordo/static';
+import { framework } from '@k8ordo/framework/vite';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite';
 
@@ -11,6 +11,7 @@ export default defineConfig({
   },
   plugins: [
     framework({
+      mode: 'static',
       // 配信元。これがあるとビルドが sitemap.xml も書く
       site: 'https://ordo.k8o.me',
       // ロケールは全ページに掛かる区間で、集合が自分で展開する

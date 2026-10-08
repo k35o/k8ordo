@@ -7,7 +7,7 @@ import type { ConfigEnv, Plugin, ResolvedConfig, UserConfig } from 'vite';
 import { engine } from './core';
 
 const enginePlugin = (): Plugin | undefined =>
-  engine({}, { via: '@k8ordo/static', runtimeDir: '/runtime' })
+  engine({}, { mode: 'static', runtimeDir: '/runtime' })
     .flat()
     .find(
       (each): each is Plugin =>
@@ -40,32 +40,67 @@ const clientOptimizeDeps = (): { include: string[]; exclude: string[] } => {
 
 const packagesDir = path.resolve(import.meta.dirname, '../../..');
 
-// RSC プラグインと同じく、先頭の指令で見る。文字列やコメントの中は数えない
-const isClientModule = (file: string, source: string): boolean =>
-  parseSync(file, source, { sourceType: 'module' }).program.body.some(
-    (statement) =>
-      statement.type === 'ExpressionStatement' &&
-      statement.directive === 'use client',
-  );
+// RSC プラグインと同じく、先頭の指令で見る。文字列やコメントの中は数えない。
+// 型でない再 export の先も拾う。'use client' のモジュールを再 export する入口は、
+// 事前バンドルに入るとそのモジュールのコピーをもう 1 つ作る
+const readModule = (
+  file: string,
+  source: string,
+): { client: boolean; reexported: string[] } => {
+  const { program, module } = parseSync(file, source, {
+    sourceType: 'module',
+  });
+  return {
+    client: program.body.some(
+      (statement) =>
+        statement.type === 'ExpressionStatement' &&
+        statement.directive === 'use client',
+    ),
+    reexported: module.staticExports.flatMap((statement) =>
+      statement.entries.flatMap((entry) =>
+        entry.isType || entry.moduleRequest === null
+          ? []
+          : [entry.moduleRequest.value],
+      ),
+    ),
+  };
+};
 
-// 公開している @k8ordo/* のうち、'use client' のモジュールを出荷するもの
+// 公開している @k8ordo/* のうち、'use client' のモジュールを出荷するものと、
+// それを再 export するもの
 const packagesShippingClientModules = async (): Promise<string[]> => {
-  const names: string[] = [];
+  const shipping = new Set<string>();
+  const reexportedFrom = new Map<string, ReadonlySet<string>>();
   for await (const manifest of glob('*/package.json', { cwd: packagesDir })) {
     const { name, private: unpublished } = JSON.parse(
       await readFile(path.join(packagesDir, manifest), 'utf8'),
     ) as { name: string; private?: boolean };
     if (unpublished === true) continue;
     const dir = path.join(packagesDir, path.dirname(manifest));
+    const from = new Set<string>();
     for await (const file of glob('src/**/*.{ts,tsx}', { cwd: dir })) {
       if (/\.(?:test|stories)\.tsx?$/u.test(file)) continue;
-      if (isClientModule(file, await readFile(path.join(dir, file), 'utf8'))) {
-        names.push(name);
-        break;
+      const { client, reexported } = readModule(
+        file,
+        await readFile(path.join(dir, file), 'utf8'),
+      );
+      if (client) shipping.add(name);
+      for (const specifier of reexported) from.add(specifier);
+    }
+    reexportedFrom.set(name, from);
+  }
+  // 再 export の再 export も同じなので、増えなくなるまで辿る
+  for (let grew = true; grew;) {
+    grew = false;
+    for (const [name, from] of reexportedFrom) {
+      if (shipping.has(name)) continue;
+      if ([...shipping].some((each) => from.has(each))) {
+        shipping.add(name);
+        grew = true;
       }
     }
   }
-  return names;
+  return [...shipping];
 };
 
 describe('the engine plugin', () => {
@@ -84,7 +119,7 @@ describe('the engine plugin', () => {
     },
   );
 
-  it('keeps every published package that ships a client module out of the browser prebundle', async () => {
+  it('keeps every published package that ships or re-exports a client module out of the browser prebundle', async () => {
     const shipping = await packagesShippingClientModules();
     const { include, exclude } = clientOptimizeDeps();
     expect(exclude.toSorted()).toStrictEqual(shipping.toSorted());

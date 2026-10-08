@@ -1,6 +1,6 @@
 'use server';
 
-import { cookies } from '@k8ordo/server/runtime';
+import { cookies } from '@k8ordo/framework/server';
 
 import { prefsState } from '../_data/prefs-state';
 

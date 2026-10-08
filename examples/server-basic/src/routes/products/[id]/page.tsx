@@ -1,5 +1,5 @@
-import { notFound } from '@k8ordo/router';
-import type { PageProps } from '@k8ordo/router';
+import { notFound } from '@k8ordo/framework';
+import type { PageProps } from '@k8ordo/framework';
 import * as z from 'zod/mini';
 
 import { findProduct } from '../../_data/catalog.server';

@@ -18,7 +18,10 @@ export type PageProps = {
    * from the locale segment is the case that asked for it.
    */
   readonly pathname: string;
-  /** The request, under `@k8ordo/server` only; a build into files has none. */
+  /**
+   * The request under mode: 'server'; under a build into files, one that
+   * refuses to be read.
+   */
   readonly request?: RouteRequest;
   /** What of the search a page that exports `search` reads — that page only. */
   readonly search?: unknown;

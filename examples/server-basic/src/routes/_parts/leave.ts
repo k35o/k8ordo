@@ -1,7 +1,7 @@
 'use server';
 
-import { href } from '@k8ordo/router';
-import { redirect } from '@k8ordo/server/runtime';
+import { href } from '@k8ordo/framework';
+import { redirect } from '@k8ordo/framework/server';
 
 // 戻り値の代わりに redirect() で終わる action。JS なしの POST は 303 で、
 // クライアント経由の呼び出しはペイロードの指示で、それぞれ products へ向かう。

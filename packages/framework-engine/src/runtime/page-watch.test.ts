@@ -1,4 +1,5 @@
 import type { RouteComponent } from '@k8ordo/router';
+import { createElement, Fragment } from 'react';
 
 import { watchPage } from './page-watch';
 
@@ -62,6 +63,24 @@ describe('watchPage', () => {
     expect(await settledNow(settled)).toBe(false);
   });
 
+  it('renders what follows it behind what a synchronous page returned', () => {
+    const { Page, followed } = watchPage(describeProduct, 'after');
+    expect(followed).toBe(true);
+    expect(call(Page, { id: '7' })).toStrictEqual(
+      createElement(Fragment, null, 'page 7', 'after'),
+    );
+  });
+
+  it('renders what follows it behind what an async page resolved to, and only then', async () => {
+    const { promise, resolve } = Promise.withResolvers<string>();
+    const { Page } = watchPage((() => promise) as RouteComponent, 'after');
+    const returned = call(Page) as Promise<unknown>;
+    resolve('page');
+    await expect(returned).resolves.toStrictEqual(
+      createElement(Fragment, null, 'page', 'after'),
+    );
+  });
+
   it('keeps the page’s name, for the render’s own messages', () => {
     expect(watchPage(ProductPage).Page.name).toBe('ProductPage');
   });
@@ -70,8 +89,9 @@ describe('watchPage', () => {
     const reference = Object.assign(() => null, {
       $$typeof: Symbol.for('react.client.reference'),
     });
-    const watched = watchPage(reference);
+    const watched = watchPage(reference, 'after');
     expect(watched.Page).toBe(reference);
+    expect(watched.followed).toBe(false);
     expect(await settledNow(watched.settled)).toBe(true);
   });
 });

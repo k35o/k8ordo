@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
-import { createBuilder } from 'vite';
+import { createBuilder, createLogger } from 'vite';
 
 import { engine } from '../src/plugin/core';
 
@@ -13,12 +13,14 @@ export type BuiltFixture = {
   readonly handler: Handler;
   /** Where the build went: `rsc/`, `ssr/` and `client/` below it. */
   readonly out: string;
+  /** What the build warned about, as Vite would have printed it. */
+  readonly warnings: readonly string[];
   /** Removes the build, once every request the handler took is answered. */
   readonly dispose: () => Promise<void>;
 };
 
 /**
- * Builds the application under `fixtures/<name>/` as `@k8ordo/server` builds
+ * Builds the application under `fixtures/<name>/` as mode: 'server' builds
  * one, and imports the handler it wrote. The runtime is this package's
  * source, not `dist`, so a fix to the runtime is what gets tried.
  */
@@ -38,13 +40,33 @@ export const buildFixture = async (name: string): Promise<BuiltFixture> => {
     ),
   );
 
+  const warnings: string[] = [];
+  const logger = createLogger('error');
   const builder = await createBuilder({
     root,
     configFile: false,
     logLevel: 'error',
-    plugins: [
-      engine({ routesDir: 'routes' }, { via: '@k8ordo/server', runtimeDir }),
-    ],
+    // 警告は出さずに数えておく
+    customLogger: {
+      ...logger,
+      warn: (message) => {
+        warnings.push(message);
+      },
+      warnOnce: (message) => {
+        warnings.push(message);
+      },
+    },
+    plugins: [engine({ routesDir: 'routes' }, { mode: 'server', runtimeDir })],
+    // 生成された表は @k8ordo/framework/generated から読むが、このパッケージは
+    // それに同梱される側なので依存に持てない。その入口は router の再 export
+    // だけなので、router を直接読ませる。search を読むページの表が import
+    // する @k8ordo/state も依存に無いので、フィクスチャの読み方に差し替える
+    resolve: {
+      alias: {
+        '@k8ordo/framework/generated': '@k8ordo/router',
+        '@k8ordo/state': fileURLToPath(new URL('./state.ts', import.meta.url)),
+      },
+    },
     environments: {
       rsc: { build: { outDir: path.join(out, 'rsc') } },
       ssr: { build: { outDir: path.join(out, 'ssr') } },
@@ -64,6 +86,7 @@ export const buildFixture = async (name: string): Promise<BuiltFixture> => {
       return answer;
     },
     out,
+    warnings,
     dispose: async () => {
       // 打ち切られたテストのリクエストは、まだ答えている途中のことがある。
       // 先に出力を消すと、その描画が読みに行ったチャンクが見つからず、

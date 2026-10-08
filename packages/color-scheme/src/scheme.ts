@@ -57,7 +57,7 @@ export const scriptFor = (defaultPreference: ColorSchemePreference): string =>
 
 /**
  * The inline script's hash as a CSP source, `'sha256-…'`, for a policy that
- * allows it by what it is rather than by a nonce — `@k8ordo/static`'s `csp`
+ * allows it by what it is rather than by a nonce — the static mode's `csp`
  * option, or a header that names no nonce. Give it the default the provider
  * is given: the script carries it.
  */

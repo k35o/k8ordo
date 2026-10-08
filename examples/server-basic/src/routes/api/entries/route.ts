@@ -1,5 +1,5 @@
-import type { RouteContext } from '@k8ordo/router';
-import { cookies } from '@k8ordo/server/runtime';
+import type { RouteContext } from '@k8ordo/framework';
+import { cookies } from '@k8ordo/framework/server';
 
 import { addEntry, readEntries } from '../../_data/entries.server';
 

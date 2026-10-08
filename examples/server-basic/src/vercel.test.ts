@@ -3,7 +3,7 @@ import { cp, mkdtemp, readdir, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
-import { vercel } from '@k8ordo/server/vercel';
+import { vercel } from '@k8ordo/framework/vercel';
 import { createBuilder } from 'vite';
 
 const root = path.resolve(import.meta.dirname, '..');

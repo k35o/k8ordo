@@ -1,5 +1,5 @@
 import { formFields } from '@k8ordo/form/server';
-import type { PageProps } from '@k8ordo/router';
+import type { PageProps } from '@k8ordo/framework';
 
 import { prefsState } from './_data/prefs-state';
 import { compact } from './_parts/compact';
@@ -14,7 +14,7 @@ import { leave } from './_parts/leave';
 const guestbookFields = formFields(guestbookSchema);
 
 // request は server モードでだけ生成器が Register に書くので、この型は
-// @k8ordo/static の下では request を持たず、読むページは型で落ちる
+// static モードでは request を持たず、読むページは型で落ちる
 export default async function HomePage({ request }: PageProps<'/'>) {
   // サーバーモードなのでリクエストごとに読み直される
   const entries = await listEntries();

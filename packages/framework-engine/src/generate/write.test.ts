@@ -8,6 +8,7 @@ import {
   exportsOf,
   generate,
   pagesReadingSearch,
+  REEXPORTS_ALL,
   silentRoutes,
 } from './write';
 
@@ -96,6 +97,18 @@ describe('exportsOf', () => {
       true,
     );
   });
+
+  it('says that export * brings names it cannot list, rather than a default', () => {
+    expect([
+      ...exportsOf(
+        [
+          'export function GET() { return new Response(); }',
+          "export * from './more';",
+          "export * as helpers from './helpers';",
+        ].join('\n'),
+      ),
+    ]).toStrictEqual(['GET', REEXPORTS_ALL, 'helpers']);
+  });
 });
 
 // search は @k8ordo/state の urlReader で読むので、アプリの依存が要る
@@ -118,7 +131,7 @@ const generateWith = async (
       root,
       routesDir,
       outDir: path.join(root, '.k8ordo'),
-      via: '@k8ordo/server',
+      mode: 'server',
     });
     return problems;
   } finally {
@@ -128,7 +141,7 @@ const generateWith = async (
 
 describe('generate, for a page that exports search', () => {
   it('refuses it by name in an application that does not depend on @k8ordo/state', async () => {
-    expect(await generateWith({ '@k8ordo/server': '*' })).toStrictEqual([
+    expect(await generateWith({ '@k8ordo/framework': '*' })).toStrictEqual([
       {
         path: 'products/page.tsx',
         message:
@@ -139,7 +152,7 @@ describe('generate, for a page that exports search', () => {
 
   it('accepts it once the application depends on @k8ordo/state', async () => {
     expect(
-      await generateWith({ '@k8ordo/server': '*', '@k8ordo/state': '*' }),
+      await generateWith({ '@k8ordo/framework': '*', '@k8ordo/state': '*' }),
     ).toStrictEqual([]);
   });
 });

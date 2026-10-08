@@ -2,7 +2,7 @@
 
 import { parseForm } from '@k8ordo/form/server';
 import type { FormState } from '@k8ordo/form/server';
-import { cookies } from '@k8ordo/server/runtime';
+import { cookies } from '@k8ordo/framework/server';
 
 import { addEntry, readEntries } from '../_data/entries.server';
 import { guestbookSchema } from './guestbook-schema';

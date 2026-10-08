@@ -1,5 +1,5 @@
 import { colorSchemeScriptHash } from '@k8ordo/color-scheme';
-import { framework } from '@k8ordo/static';
+import { framework } from '@k8ordo/framework/vite';
 import { defineConfig } from 'vite';
 
 import { locales } from './src/i18n';
@@ -7,6 +7,7 @@ import { locales } from './src/i18n';
 export default defineConfig({
   plugins: [
     framework({
+      mode: 'static',
       // 静的化ではパラメータを発明できないので、宣言しなければビルドが落ちる。
       // /:locale はロケールの定義が展開し、残る商品の id はここで並べる
       paths: (patterns) =>

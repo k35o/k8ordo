@@ -1,5 +1,5 @@
-import { href } from '@k8ordo/router';
-import type { PageProps } from '@k8ordo/router';
+import { href } from '@k8ordo/framework';
+import type { PageProps } from '@k8ordo/framework';
 
 import { listProducts } from '../_data/catalog.server';
 import { listState } from '../_data/list-state';

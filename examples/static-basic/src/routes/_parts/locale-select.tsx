@@ -1,6 +1,6 @@
 'use client';
 
-import { navigateTo } from '@k8ordo/router';
+import { navigateTo } from '@k8ordo/framework';
 
 import { locales } from '../../i18n';
 import { language } from '../_data/about';

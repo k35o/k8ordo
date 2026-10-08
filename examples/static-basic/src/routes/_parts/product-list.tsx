@@ -1,6 +1,6 @@
 'use client';
 
-import { href } from '@k8ordo/router';
+import { href } from '@k8ordo/framework';
 import { useAppState } from '@k8ordo/state';
 
 import { listState } from '../_data/list-state';

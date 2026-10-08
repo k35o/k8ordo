@@ -28,7 +28,9 @@ export const mount = (
   ) {
     return hydrateRoot(container, app, options);
   }
-  const root = createRoot(container);
+  // Every option but `formState`, which only hydration has.
+  const { formState: _, ...rootOptions } = options ?? {};
+  const root = createRoot(container, rootOptions);
   root.render(app);
   return root;
 };

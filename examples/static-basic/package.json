@@ -21,7 +21,7 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@k8ordo/static": "workspace:^",
+    "@k8ordo/framework": "workspace:^",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "playwright": "1.63.0",

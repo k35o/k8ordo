@@ -52,14 +52,14 @@ export const ACTION_ID_HEADER = 'x-k8ordo-action';
 export const NOT_FOUND_DIGEST = 'K8ORDO_NOT_FOUND';
 
 /**
- * Said by the handler under `@k8ordo/static` alone, on the not-found a page
+ * Said by the handler under mode: 'static' alone, on the not-found a page
  * answered with `notFound()`: the build tells it apart from a param a schema
  * refused, which is a 404 as well.
  */
 export const NOT_FOUND_HEADER = 'x-k8ordo-not-found';
 
 /**
- * Said by the handler under `@k8ordo/static` alone, on a page's HTML: the
+ * Said by the handler under mode: 'static' alone, on a page's HTML: the
  * nonce its inline scripts were signed with, which the build turns into the
  * hashes a `Content-Security-Policy` names. A file cannot carry a nonce —
  * everyone reads the same one.

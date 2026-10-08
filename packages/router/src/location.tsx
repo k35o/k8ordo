@@ -62,7 +62,7 @@ export function usePathname(): string {
   return useSyncExternalStore(subscribe, appPathname, () => {
     if (fromServer === null) {
       throw new Error(
-        'usePathname needs <Router> above it, or a page rendered by @k8ordo/static or @k8ordo/server',
+        'usePathname needs <Router> above it, or a page rendered by @k8ordo/framework',
       );
     }
     return fromServer;

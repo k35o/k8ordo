@@ -91,7 +91,7 @@ export type RegisteredPageParams<P extends string> = Register extends {
   : ParamsOf<P>;
 
 /**
- * The request a route file receives — under `@k8ordo/server` only, where the
+ * The request a route file receives — under the framework's server mode only, where the
  * generated `Register` says so. A build into files has none, and a page that
  * reads it fails to type-check there rather than at run time.
  */
@@ -115,7 +115,7 @@ type RegisteredSearch = Register extends { search: infer M }
 /**
  * The props a `page.tsx` receives under the framework, by the pattern its
  * directory puts it under: `params` typed by the schemas along its stack,
- * the `pathname` this render is for, under `@k8ordo/server` the `request`,
+ * the `pathname` this render is for, in server mode the `request`,
  * and for a page that exports `search`, the `search` it reads. The generated
  * table checks the same thing at the import, so a page may equally declare
  * its props inline; this is the spelling that names the pattern once and

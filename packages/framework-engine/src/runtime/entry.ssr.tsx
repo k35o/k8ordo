@@ -6,6 +6,8 @@ import { renderToReadableStream } from 'react-dom/server.edge';
 import { injectRSCPayload } from 'rsc-html-stream/server';
 
 import { AppRouter } from './app-router';
+import { noticeCancel } from './cancel';
+import { PageShownContext } from './page-shown';
 import type { Payload } from './payload';
 
 type SsrOptions = NonNullable<Parameters<typeof renderToReadableStream>[1]>;
@@ -29,16 +31,21 @@ export async function renderHtml(
   // The request's: every script written here carries it. What else does, the
   // application signed, and the policy that names it is the application's.
   nonce: string,
+  // Whether the payload holds the page, followed by `PageShown`.
+  showsPage: boolean,
 ): Promise<ReadableStream> {
   const [forHtml, forHydration] = rscStream.tee();
   const payload = await createFromReadableStream<Payload>(forHtml, { nonce });
-  const toFile = import.meta.env.K8ORDO_MODE === '@k8ordo/static';
+  const shown = Promise.withResolvers<undefined>();
+  let readerLeft = false;
   const htmlStream = await renderToReadableStream(
-    <AppRouter
-      pathname={payload.pathname}
-      search={payload.search}
-      tree={payload.tree}
-    />,
+    <PageShownContext value={() => shown.resolve(undefined)}>
+      <AppRouter
+        pathname={payload.pathname}
+        search={payload.search}
+        tree={payload.tree}
+      />
+    </PageShownContext>,
     {
       bootstrapModules: [clientEntry],
       nonce,
@@ -47,15 +54,37 @@ export async function renderHtml(
       formState: payload.formState as SsrOptions['formState'],
       // React outlines a large boundary even once it is complete — a hidden
       // copy plus a script that moves it in, so a stream can paint what came
-      // before it. A file arrives whole, and the move is deferred to an
-      // animation frame, which hydration can beat: a context that changes
-      // as it hydrates then renders the boundary again beside the hidden
-      // copy, with a second `<title>`. Nothing is outlined into a file.
-      progressiveChunkSize: toFile ? Number.POSITIVE_INFINITY : undefined,
+      // before it. Without JavaScript nothing moves it in, and with it the
+      // move is deferred to an animation frame, which hydration can beat: a
+      // context that changes as it hydrates then renders the boundary again
+      // beside the hidden copy, with a second `<title>`. A boundary complete
+      // when the HTML is first read is written in place.
+      progressiveChunkSize: Number.POSITIVE_INFINITY,
+      // A visitor who left cancels the render, which then reports whatever it
+      // was still rendering as failed. That is not a failure.
+      onError: (error: unknown) => {
+        if (!readerLeft) console.error(error);
+      },
     },
   );
-  // Reading only once every boundary has completed writes each in place;
-  // one still pending when the shell is read is outlined whatever its size.
-  if (toFile) await htmlStream.allReady;
-  return htmlStream.pipeThrough(injectRSCPayload(forHydration, { nonce }));
+  // Reading only once a boundary has completed writes it in place; one still
+  // pending when the shell is read is outlined, and shows its fallback to a
+  // visitor without JavaScript. A file waits for every boundary. A document
+  // waits for the page's own content — a `loading.tsx` above it is a
+  // boundary, and the handler already waited for the page's data — but not
+  // for what the page put under a `<Suspense>` of its own, which streams.
+  if (import.meta.env.K8ORDO_MODE === 'static') await htmlStream.allReady;
+  else if (showsPage) {
+    // A page that threw never shows; its error.tsx is in place once all is.
+    await Promise.race([
+      shown.promise,
+      htmlStream.allReady.catch(() => undefined),
+    ]);
+  }
+  return noticeCancel(
+    htmlStream.pipeThrough(injectRSCPayload(forHydration, { nonce })),
+    () => {
+      readerLeft = true;
+    },
+  );
 }

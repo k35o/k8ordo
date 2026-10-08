@@ -69,6 +69,6 @@ declare module 'virtual:k8ordo/routes' {
 }
 
 type ImportMetaEnv = {
-  /** The mode package the application installed. */
-  readonly K8ORDO_MODE: '@k8ordo/static' | '@k8ordo/server';
+  /** The mode the application chose in `framework({ mode })`. */
+  readonly K8ORDO_MODE: 'static' | 'server';
 };

@@ -24,8 +24,10 @@ import {
   searchReaders,
 } from 'virtual:k8ordo/routes';
 
+import { noticeCancel } from './cancel';
 import type * as SsrEntry from './entry.ssr';
 import { runGuards } from './guard';
+import { PageShown } from './page-shown';
 import { watchPage } from './page-watch';
 import { parseCatchAllParams, parseParams } from './params';
 import type { ParsedParams } from './params';
@@ -41,8 +43,14 @@ import { isPayloadPath, pagePathFor } from './payload-path';
 import { isRedirect } from './redirect';
 import { resolveRedirects } from './redirect-file';
 import { renderMatch, renderNotFound } from './render';
-import { routeRequestOf } from './request';
-import { answer, inPhase, nonce, withRequest } from './request-scope';
+import { fileRequest, routeRequestOf } from './request';
+import {
+  answer,
+  inPhase,
+  signingNonce,
+  withRequest,
+  writingFile,
+} from './request-scope';
 import { methodNotAllowed, routeAnswerFor, runRoute } from './route';
 
 type ActionResult = {
@@ -163,7 +171,7 @@ const sameOrigin = (request: Request, url: URL): boolean => {
 };
 
 /**
- * A page that could not be rendered, as `@k8ordo/static` receives it: the
+ * A page that could not be rendered, as mode: 'static' receives it: the
  * build writes nothing for a 500 and stops with the message.
  */
 const renderFailed = (error: unknown): Response =>
@@ -180,8 +188,8 @@ const renderFailed = (error: unknown): Response =>
   );
 
 /**
- * The one entry both modes share: a request in, a page out. `@k8ordo/server`
- * calls it per request; `@k8ordo/static` calls it at build time, for each
+ * The one entry both modes share: a request in, a page out. mode: 'server'
+ * calls it per request; mode: 'static' calls it at build time, for each
  * route's HTML and again for its payload, and writes the answers to files.
  * What it knows of the mode is compiled in (`K8ORDO_MODE`): whether a page
  * gets the request, and whether a failed render may still stream.
@@ -189,7 +197,13 @@ const renderFailed = (error: unknown): Response =>
 export default function handler(request: Request): Promise<Response> {
   // What answers the request may add to the response — a guard's headers —
   // and what it adds goes on whatever the answer turns out to be.
-  return withRequest(request, async () => answer(await respond(request)));
+  return withRequest(request, async () =>
+    answer(
+      await (import.meta.env.K8ORDO_MODE === 'static'
+        ? writingFile(() => respond(request))
+        : respond(request)),
+    ),
+  );
 }
 
 const respond = async (request: Request): Promise<Response> => {
@@ -333,9 +347,9 @@ const respond = async (request: Request): Promise<Response> => {
   }
   // A build into files has no request to hand a page; a running server does.
   const routeRequest =
-    import.meta.env.K8ORDO_MODE === '@k8ordo/server'
+    import.meta.env.K8ORDO_MODE === 'server'
       ? routeRequestOf(request)
-      : undefined;
+      : fileRequest;
   const ssr = await import.meta.viteRsc.loadModule<typeof SsrEntry>(
     'ssr',
     'index',
@@ -367,11 +381,15 @@ const respond = async (request: Request): Promise<Response> => {
       isAction ? temporaryReferences : undefined,
     );
 
-  // A page is watched, so what it says of itself can still decide the answer.
+  // A page is watched, so what it says of itself can still decide the answer,
+  // and followed by what tells the HTML render it has arrived. Followed in a
+  // payload too, so a navigation's tree has the shape the document's had.
   const page =
     match === null || missing || action.redirect !== undefined
       ? null
-      : watchPage(match.stack.at(-1) as RouteComponent);
+      : watchPage(match.stack.at(-1) as RouteComponent, <PageShown />);
+  // Whether the answer is the page, followed: the HTML render waits for it.
+  let showsPage = page?.followed === true;
   let status = missing ? 404 : 200;
   let { enter } = parsed;
   let rendered = render(
@@ -404,7 +422,7 @@ const respond = async (request: Request): Promise<Response> => {
     const drained = drain(forWatch);
     // 読み終えてもページが呼ばれていないことがある（children を描かない
     // レイアウト）。そのときは待たない
-    const threw = await (import.meta.env.K8ORDO_MODE === '@k8ordo/static'
+    const threw = await (import.meta.env.K8ORDO_MODE === 'static'
       ? drained.then(() => Promise.race([page.settled, Promise.resolve()]))
       : Promise.race([page.settled, rendered.saidNotFound, drained]));
     if (rendered.notFound() || isNotFound(threw)) {
@@ -414,6 +432,7 @@ const respond = async (request: Request): Promise<Response> => {
       // layouts' schemas leave.
       const nearest = matchNotFound(pathname);
       status = 404;
+      showsPage = false;
       ({ enter } = nearest.parsed);
       rendered = render(
         nearest.match === null
@@ -431,9 +450,7 @@ const respond = async (request: Request): Promise<Response> => {
   // param: both are a 404, and only the page's is a pathname the application
   // named and then disowned.
   const saidByPage: Record<string, string> =
-    import.meta.env.K8ORDO_MODE === '@k8ordo/static' &&
-    status === 404 &&
-    !missing
+    import.meta.env.K8ORDO_MODE === 'static' && status === 404 && !missing
       ? { [NOT_FOUND_HEADER]: 'page' }
       : {};
   if (request.method === 'HEAD') {
@@ -450,7 +467,7 @@ const respond = async (request: Request): Promise<Response> => {
     });
   }
 
-  if (import.meta.env.K8ORDO_MODE === '@k8ordo/static') {
+  if (import.meta.env.K8ORDO_MODE === 'static') {
     // A build into files can afford to wait for the whole page, and has to:
     // a Server Component that threw would otherwise be written as a page whose
     // error shows only once a visitor's browser has rendered it. Under a
@@ -458,7 +475,9 @@ const respond = async (request: Request): Promise<Response> => {
     // at build time it is a build that stops, naming the page.
     let body: ArrayBuffer;
     try {
-      const html = await enter(() => ssr.renderHtml(rendered.stream, nonce()));
+      const html = await enter(() =>
+        ssr.renderHtml(rendered.stream, signingNonce(), showsPage),
+      );
       body = await new Response(html).arrayBuffer();
     } catch (error) {
       // With no Suspense boundary above the throw the HTML render itself
@@ -474,12 +493,14 @@ const respond = async (request: Request): Promise<Response> => {
       status,
       headers: {
         'content-type': HTML_TYPE,
-        [NONCE_HEADER]: nonce(),
+        [NONCE_HEADER]: signingNonce(),
         ...saidByPage,
       },
     });
   }
-  const html = await enter(() => ssr.renderHtml(rendered.stream, nonce()));
+  const html = await enter(() =>
+    ssr.renderHtml(rendered.stream, signingNonce(), showsPage),
+  );
   return new Response(html, {
     status,
     headers: { 'content-type': HTML_TYPE },
@@ -533,7 +554,7 @@ const renderPayload = (
   let said = false;
   const { promise: saidNotFound, resolve } = Promise.withResolvers<undefined>();
   const controller = new AbortController();
-  const stream = enter(() =>
+  const flight = enter(() =>
     renderToReadableStream(payload, {
       temporaryReferences,
       signal: controller.signal,
@@ -547,7 +568,8 @@ const renderPayload = (
           resolve(undefined);
           return NOT_FOUND_DIGEST;
         }
-        // 捨てた描画を止めると、その理由がここに届く。失敗ではない
+        // 捨てた描画を止めると、その理由がここに届く。読み手が去って止めた
+        // ときも同じ。どちらも失敗ではない
         if (controller.signal.aborted) return undefined;
         failures.push(error);
         // pathname は引数として渡す。第 1 引数はフォーマット文字列なので、
@@ -557,6 +579,11 @@ const renderPayload = (
       },
     }),
   );
+  // A reader that gives up stops the render first, so what it was still
+  // rendering is not reported as failed.
+  const stream = noticeCancel(flight, (reason) => {
+    controller.abort(reason);
+  });
   return {
     stream,
     failures,

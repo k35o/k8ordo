@@ -1,6 +1,6 @@
 import { ColorSchemeProvider } from '@k8ordo/color-scheme';
-import { href } from '@k8ordo/router';
-import { nonce } from '@k8ordo/server/runtime';
+import { href } from '@k8ordo/framework';
+import { nonce } from '@k8ordo/framework/server';
 import type { ReactNode } from 'react';
 
 import { SchemeToggle } from './_parts/scheme';

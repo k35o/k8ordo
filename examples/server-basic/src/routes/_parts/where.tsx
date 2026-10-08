@@ -1,6 +1,6 @@
 'use client';
 
-import { usePathname, usePendingPathname } from '@k8ordo/router';
+import { usePathname, usePendingPathname } from '@k8ordo/framework';
 
 /**
  * クライアントコンポーネントから見た現在地。フレームワークの下ではブラウザに

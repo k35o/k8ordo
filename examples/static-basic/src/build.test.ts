@@ -1,6 +1,16 @@
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { cpSync, existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import {
+  cpSync,
+  existsSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  renameSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { createServer } from 'node:http';
 import type { Server } from 'node:http';
@@ -33,12 +43,16 @@ let brokenNotFoundStderr = '';
 let noBoundaryStderr = '';
 // guard.ts を置いた構成。ファイルには守るリクエストが無い
 let guardStderr = '';
-// notFound() と言うページのパスを列挙した構成
+// notFound() と言うページのパスと、スキーマが拒むパスを列挙した構成
 let notFoundPageStderr = '';
+// その構成のビルドが止まったあと、dist/client に残っていたもの
+let leftByNotFoundPage: string[] = [];
 // GET 以外を export する route.ts を置いた構成
 let routeStderr = '';
 // search を読むと宣言したページを置いた構成
 let searchStderr = '';
+// リクエストの API を import したページを置いた構成
+let requestStderr = '';
 
 // ひとつ前のデプロイの dist/client。アプリは同じで、クライアントの
 // スクリプトだけが違う。タブを開いた後にデプロイがあった、を再現する
@@ -70,8 +84,12 @@ beforeAll(() => {
   noBoundaryStderr = failingBuild('vite.broken-no-boundary.config.ts');
   guardStderr = failingBuild('vite.broken-guard.config.ts');
   notFoundPageStderr = failingBuild('vite.not-found-page.config.ts');
+  leftByNotFoundPage = ['3', 'x'].filter((id) =>
+    existsSync(path.join(client, 'products', id)),
+  );
   routeStderr = failingBuild('vite.broken-route.config.ts');
   searchStderr = failingBuild('vite.broken-search.config.ts');
+  requestStderr = failingBuild('vite.broken-request.config.ts');
   // 圧縮しないだけで、スクリプトの中身とハッシュの入った名前が変わる
   execFileSync('pnpm', ['exec', 'vp', 'build', '--minify', 'false'], BUILD);
   previous = mkdtempSync(path.join(tmpdir(), 'k8ordo-previous-'));
@@ -196,7 +214,7 @@ describe('the static build', () => {
 
   it('refuses guard.ts, naming every one and the mode that runs them', () => {
     expect(guardStderr).toContain(
-      'static build cannot run guard.ts — a file has no request to guard, and these are guards:\n  src/routes-broken-guard/admin/guard.ts\n  src/routes-broken-guard/guard.ts\nthis application wants @k8ordo/server',
+      "static build cannot run guard.ts — a file has no request to guard, and these are guards:\n  src/routes-broken-guard/admin/guard.ts\n  src/routes-broken-guard/guard.ts\nthis application wants mode: 'server'",
     );
   });
 
@@ -204,6 +222,16 @@ describe('the static build', () => {
     expect(notFoundPageStderr).toContain(
       'the "paths" option supplied pathnames whose page called notFound(): /products/3',
     );
+  });
+
+  it('names a pathname a schema refused in the same error as one whose page said notFound()', () => {
+    expect(notFoundPageStderr).toContain(
+      'the "paths" option supplied pathnames a params schema refused: /products/x\n\nthe "paths" option supplied pathnames whose page called notFound(): /products/3',
+    );
+  });
+
+  it('writes nothing for a supplied pathname that turned out not to be a page', () => {
+    expect(leftByNotFoundPage).toStrictEqual([]);
   });
 
   it('writes a route.ts as the file its GET answered, with the site as its origin', () => {
@@ -220,10 +248,26 @@ describe('the static build', () => {
     );
   });
 
+  it('refuses a route.ts that re-exports with export *, whose methods it cannot read', () => {
+    expect(routeStderr).toContain(
+      "static build reads a route.ts's methods and a page's search by name, and export * names none of them — this re-exports another module whole:\n  src/routes-broken-route/feed/route.ts\n",
+    );
+  });
+
   it('refuses a page that reads the search, naming it', () => {
     expect(searchStderr).toContain(
-      'static build cannot hand a page the search — a file is the same for every search, and these pages export search:\n  src/routes-broken-search/products/page.tsx\nthis application wants @k8ordo/server',
+      "static build cannot hand a page the search — a file is the same for every search, and these pages export search:\n  src/routes-broken-search/products/page.tsx\nthis application wants mode: 'server'",
     );
+  });
+
+  it('refuses the request API, naming every module that imports it', () => {
+    expect(requestStderr).toContain(
+      "static build cannot answer a request — a file is written once for every visitor, and these import @k8ordo/framework/server:\n  src/routes-broken-request/_parts/home.ts\n  src/routes-broken-request/_parts/visits.ts\n  src/routes-broken-request/page.tsx\nthis application wants mode: 'server'",
+    );
+  });
+
+  it('lets an `import type` of the request API through, since nothing of it is loaded', () => {
+    expect(read('old', 'index.html')).toContain('url=/products');
   });
 
   it('writes a redirect.ts as a page that sends the visitor on', () => {
@@ -323,6 +367,120 @@ describe('the static build under a base', () => {
 
   it('sends a redirect.ts on to its target under the base', () => {
     expect(readUnderBase('old', 'index.html')).toContain('url=/site/products');
+  });
+});
+
+// 書かれたファイルごとの中身のハッシュ
+const filesIn = (dir: string): Map<string, string> =>
+  new Map(
+    readdirSync(dir, { recursive: true, withFileTypes: true })
+      .filter((entry) => entry.isFile())
+      .map((entry) => {
+        const file = path.join(entry.parentPath, entry.name);
+        return [
+          path.relative(dir, file),
+          createHash('sha256').update(readFileSync(file)).digest('hex'),
+        ] as const;
+      })
+      .toSorted(([a], [b]) => a.localeCompare(b)),
+  );
+
+// アプリを一時ディレクトリに写す。設定はトップレベルの await を使うので、
+// CommonJS のアプリがそうするように .mts で置く
+const copyApp = (): string => {
+  const app = mkdtempSync(path.join(tmpdir(), 'k8ordo-app-'));
+  cpSync(path.join(root, 'vite.config.ts'), path.join(app, 'vite.config.mts'));
+  cpSync(path.join(root, 'src'), path.join(app, 'src'), {
+    recursive: true,
+    filter: (source) => !source.endsWith('.test.ts'),
+  });
+  symlinkSync(path.join(root, 'node_modules'), path.join(app, 'node_modules'));
+  return app;
+};
+
+const buildIn = (app: string, ...args: string[]): void => {
+  execFileSync(
+    path.join(root, 'node_modules', '.bin', 'vp'),
+    ['build', ...args],
+    { ...BUILD, cwd: app },
+  );
+};
+
+describe('an application whose package.json does not say type: module', () => {
+  let app = '';
+
+  // type の無い package.json を Node は CommonJS と読み、Vite は入口を
+  // .mjs で書く。type の有無だけを変えて 2 度組む。dist と比べないのは、
+  // クライアント参照の名前が root からのパスで決まり、置き場所が変わるだけで
+  // 中身が変わるから
+  beforeAll(() => {
+    app = copyApp();
+    const { type: _type, ...untyped } = JSON.parse(
+      readFileSync(path.join(root, 'package.json'), 'utf8'),
+    ) as Record<string, unknown>;
+    const buildAs = (manifest: Record<string, unknown>): void => {
+      writeFileSync(path.join(app, 'package.json'), JSON.stringify(manifest));
+      buildIn(app);
+    };
+    buildAs({ ...untyped, type: 'module' });
+    renameSync(path.join(app, 'dist'), path.join(app, 'dist-module'));
+    buildAs(untyped);
+  }, 120_000);
+
+  afterAll(() => {
+    rmSync(app, { recursive: true, force: true });
+  });
+
+  it('writes the same files as when it says it', () => {
+    expect(filesIn(path.join(app, 'dist', 'client'))).toStrictEqual(
+      filesIn(path.join(app, 'dist-module', 'client')),
+    );
+  });
+});
+
+describe('an application whose rsc build is a directory beside its package.json', () => {
+  let app = '';
+  let manifest = '';
+  let stderr = '';
+
+  // rsc と ssr が出会うのはアプリのルートで、そこにある package.json は
+  // アプリのもの
+  beforeAll(() => {
+    app = copyApp();
+    manifest = readFileSync(path.join(root, 'package.json'), 'utf8');
+    writeFileSync(path.join(app, 'package.json'), manifest);
+    writeFileSync(
+      path.join(app, 'vite.rsc-beside.config.mts'),
+      [
+        "import { mergeConfig } from 'vite';",
+        '',
+        "import config from './vite.config.mts';",
+        '',
+        'export default mergeConfig(config, {',
+        "  environments: { rsc: { build: { outDir: 'build-rsc' } } },",
+        '});',
+        '',
+      ].join('\n'),
+    );
+    try {
+      buildIn(app, '--config', 'vite.rsc-beside.config.mts');
+    } catch (error) {
+      stderr = String((error as { stderr?: Buffer }).stderr ?? '');
+    }
+  }, 120_000);
+
+  afterAll(() => {
+    rmSync(app, { recursive: true, force: true });
+  });
+
+  it('stops, naming where the two builds meet', () => {
+    expect(stderr).toContain(
+      'the rsc and ssr builds share ., which holds the application',
+    );
+  });
+
+  it("leaves the application's package.json as it was", () => {
+    expect(readFileSync(path.join(app, 'package.json'), 'utf8')).toBe(manifest);
   });
 });
 

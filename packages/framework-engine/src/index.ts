@@ -1,8 +1,8 @@
 /**
- * What the two mode packages and their tests need from the engine, and
- * nothing else. This is internal and never published: an application installs
- * `@k8ordo/static` or `@k8ordo/server`, and each of those bundles this package
- * at pack time.
+ * What `@k8ordo/framework` and its tests need from the engine, and nothing
+ * else, apart from the request API its `./server` entry re-exports, which is
+ * this package's `./server`. This is internal and never published: an application installs
+ * `@k8ordo/framework`, which bundles this package at pack time.
  */
 export { parseRouteTree, slotOf } from './grammar/tree';
 export type { RouteDir, Slot } from './grammar/tree';
@@ -14,24 +14,15 @@ export {
   exportsOf,
   pagesReadingSearch,
   readExports,
+  REEXPORTS_ALL,
   scanRoutes,
 } from './generate/write';
 export { ROUTE_METHODS } from './runtime/route';
 export { engine } from './plugin/core';
-export type { EngineOptions } from './plugin/core';
+export { sharedDir } from './plugin/shared-dir';
+export type { EngineOptions } from './host';
 export {
   isServerActionModule,
   serverActionModules,
 } from './plugin/server-actions';
 export { payloadPathFor } from './runtime/payload-path';
-export { redirect } from './runtime/redirect';
-export type { RedirectTarget } from './runtime/redirect-file';
-export type { RouteRequest } from './runtime/request';
-export type { Guard, GuardContext } from './runtime/guard';
-export {
-  cookies,
-  nonce,
-  requestHeaders,
-  responseHeaders,
-} from './runtime/request-scope';
-export type { CookieOptions, Cookies, CookieScope } from './runtime/cookies';

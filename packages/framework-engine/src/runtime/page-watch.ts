@@ -1,5 +1,6 @@
 import type { RouteComponent } from '@k8ordo/router';
-import type { ComponentType } from 'react';
+import { createElement, Fragment } from 'react';
+import type { ComponentType, ReactNode } from 'react';
 
 const CLIENT_REFERENCE = Symbol.for('react.client.reference');
 
@@ -33,6 +34,8 @@ export type WatchedPage = {
    * once it gets round to the page again, so the reason is handed over here.
    */
   readonly settled: Promise<unknown>;
+  /** Whether the page renders `after` behind what it returned. */
+  readonly followed: boolean;
 };
 
 /**
@@ -45,12 +48,27 @@ export type WatchedPage = {
  * A synchronous throw settles nothing here: a suspension is thrown too, and
  * the render calls again once it resolves. A real one reaches the render's
  * `onError` at once, which is where it is read.
+ *
+ * `after`, when given, is rendered behind what the page returned, inside the
+ * same row of the payload — so wherever the payload is read, it renders only
+ * once the page's own content has arrived.
  */
-export const watchPage = (page: RouteComponent): WatchedPage => {
+export const watchPage = (
+  page: RouteComponent,
+  after?: ReactNode,
+): WatchedPage => {
   if (!isServerFunction(page)) {
-    return { Page: page, settled: Promise.resolve(undefined) };
+    return {
+      Page: page,
+      settled: Promise.resolve(undefined),
+      followed: false,
+    };
   }
   const { promise, resolve } = Promise.withResolvers<unknown>();
+  const follow = (content: unknown): unknown =>
+    after === undefined
+      ? content
+      : createElement(Fragment, null, content as ReactNode, after);
   const Watched = (props: unknown): unknown => {
     const result = page(props);
     if (isThenable(result)) {
@@ -60,11 +78,15 @@ export const watchPage = (page: RouteComponent): WatchedPage => {
           (error: unknown) => error,
         )
         .then(resolve, resolve);
-    } else {
-      resolve(undefined);
+      return after === undefined ? result : result.then(follow);
     }
-    return result;
+    resolve(undefined);
+    return follow(result);
   };
   Object.defineProperty(Watched, 'name', { value: page.name });
-  return { Page: Watched as ComponentType<never>, settled: promise };
+  return {
+    Page: Watched as ComponentType<never>,
+    settled: promise,
+    followed: after !== undefined,
+  };
 };

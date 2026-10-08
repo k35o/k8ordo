@@ -1,7 +1,7 @@
 import path from 'node:path';
 
-import { serve } from '@k8ordo/server/serve';
-import type { Server } from '@k8ordo/server/serve';
+import { serve } from '@k8ordo/framework/serve';
+import type { Server } from '@k8ordo/framework/serve';
 import { chromium, firefox, webkit } from 'playwright';
 import type { Browser, Page } from 'playwright';
 
@@ -188,6 +188,21 @@ describe.each(browserTypes)('the built application in $name', ({ type }) => {
     expect(await page.getByTestId('loading').count()).toBe(0);
     expect(await page.getByTestId('pending').count()).toBe(0);
     await page.close();
+  }, 30_000);
+
+  it('sends a page under loading.tsx in place, so a visitor without JavaScript reads it and filters it', async () => {
+    const context = await browser.newContext({ javaScriptEnabled: false });
+    const page = await context.newPage();
+    await page.goto(`${server.url}/products`);
+
+    await page.getByRole('heading', { name: 'products' }).waitFor();
+    expect(await page.getByText('loading products…').count()).toBe(0);
+    await page.getByLabel('filter').fill('second');
+    await page.getByRole('button', { name: 'filter' }).click();
+
+    await page.waitForURL((url) => url.search === '?q=second');
+    expect(await page.getByTestId('list').textContent()).toBe('second product');
+    await context.close();
   }, 30_000);
 
   it('loads a page that reads the search again when a GET form moves it, in place', async () => {

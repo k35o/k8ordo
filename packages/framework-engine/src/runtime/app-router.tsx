@@ -88,6 +88,25 @@ setServerCallback(async (id: string, args: unknown[]) => {
   return payload.returnValue;
 });
 
+type Stream = {
+  /** Stops the request: nothing will render what is still to come. */
+  readonly cancel: () => void;
+  /** Unties the request from the signal it was fetched under. */
+  readonly keep: () => void;
+};
+
+/**
+ * The request each fetched payload is still streaming in on. A payload
+ * resolves once its top arrives, and a page that awaits its data arrives
+ * after — so once its tree is applied, what is still to come is part of a
+ * page React is rendering. Cancelled then, the abort would be thrown inside
+ * that page, where `Recover` takes it for a page that failed and loads the
+ * document. The signal a payload was fetched under cancels it only until its
+ * tree is applied (`keep`); after that, the router cancels it once another
+ * tree has replaced it.
+ */
+const streams = new WeakMap<Payload, Stream>();
+
 /**
  * A page's payload, or `null` when what came back is not one — a file the
  * host serves, or a URL nothing answers. Reading it imports the client
@@ -97,11 +116,36 @@ const fetchPage = async (
   payloadPath: string,
   signal: AbortSignal,
 ): Promise<Payload | null> => {
-  const response = await fetch(payloadPath, { signal });
+  signal.throwIfAborted();
+  const request = new AbortController();
+  const cancel = (): void => {
+    request.abort(signal.reason);
+  };
+  signal.addEventListener('abort', cancel, { once: true });
+  const response = await fetch(payloadPath, { signal: request.signal });
   if (!isPayload(response)) return null;
-  return createFromReadableStream<Payload>(
+  const payload = await createFromReadableStream<Payload>(
     response.body as ReadableStream<Uint8Array>,
   );
+  streams.set(payload, {
+    cancel: () => {
+      request.abort();
+    },
+    keep: () => {
+      signal.removeEventListener('abort', cancel);
+    },
+  });
+  return payload;
+};
+
+type Streaming = { readonly tree: ReactNode; readonly cancel: () => void };
+
+/** Takes over the request of a payload whose tree is being applied. */
+const hold = (streaming: Streaming[], payload: Payload): void => {
+  const stream = streams.get(payload);
+  if (stream === undefined) return;
+  stream.keep();
+  streaming.push({ tree: payload.tree, cancel: stream.cancel });
 };
 
 /**
@@ -154,6 +198,18 @@ export function AppRouter({
   // page does not read the search, which is every page that did not declare
   // it. Only for such a page does a navigation that keeps the pathname load.
   const searchApplied = useRef(search);
+  // The trees applied whose requests may still be streaming.
+  const streaming = useRef<Streaming[]>([]);
+
+  // A tree neither asked for nor on screen will never render again, so what
+  // it is still receiving is cancelled.
+  useEffect(() => {
+    streaming.current = streaming.current.filter((entry) => {
+      if (entry.tree === latest || entry.tree === current) return true;
+      entry.cancel();
+      return false;
+    });
+  }, [latest, current]);
 
   useEffect(() => {
     mounted = {
@@ -169,6 +225,56 @@ export function AppRouter({
     };
     return () => {
       mounted = null;
+    };
+  }, []);
+
+  // `vite dev` only: a server module changed, so the page on screen was
+  // rendered from code that is gone. The RSC plugin says so and leaves
+  // fetching it again to the framework; the new tree replaces the old in a
+  // transition, so client components keep their state, the way Fast Refresh
+  // keeps it for an edit of their own.
+  useEffect(() => {
+    // Spelled out at every use: Vite hands a module its HMR context only
+    // where the source says `import.meta.hot`, so a destructured `hot` is
+    // never there.
+    if (import.meta.hot === undefined) return undefined;
+    let inFlight: AbortController | undefined;
+    const onServerUpdate = async (): Promise<void> => {
+      inFlight?.abort();
+      const controller = new AbortController();
+      inFlight = controller;
+      // What was fetched ahead was rendered from the old code too.
+      cacheIn(prefetched).clear();
+      const url = location.href;
+      let payload: Payload | null;
+      try {
+        payload = await fetchPage(
+          payloadUrlFor(new URL(url)),
+          controller.signal,
+        );
+      } catch (error) {
+        // A later edit took over; its own fetch is on the way.
+        if (controller.signal.aborted) return;
+        throw error;
+      }
+      // The visitor navigated meanwhile, and that navigation loaded the page
+      // from the new code already.
+      if (payload === null || location.href !== url) return;
+      if (!canRender(payload)) return reloadInstead();
+      markNavigated();
+      hold(streaming.current, payload);
+      searchApplied.current = payload.search;
+      startTransition(() => {
+        setLatest(payload.tree);
+      });
+    };
+    const listener = (): void => {
+      void onServerUpdate();
+    };
+    import.meta.hot.on('rsc:update', listener);
+    return () => {
+      inFlight?.abort();
+      import.meta.hot?.off('rsc:update', listener);
     };
   }, []);
 
@@ -224,6 +330,7 @@ export function AppRouter({
     },
     apply: (next) => {
       markNavigated();
+      hold(streaming.current, next);
       searchApplied.current = next.search;
       setLatest(next.tree);
     },

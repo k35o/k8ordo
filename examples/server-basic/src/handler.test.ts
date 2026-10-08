@@ -4,43 +4,21 @@ import { isBuiltin } from 'node:module';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
-import { serve } from '@k8ordo/server/serve';
-import type { Server } from '@k8ordo/server/serve';
+import { serve } from '@k8ordo/framework/serve';
+import type { Server } from '@k8ordo/framework/serve';
 import { parseSync } from 'vite';
 
+import { formDataOf } from './form-data';
+
 type Handler = (request: Request) => Promise<Response>;
-
-// 属性値の中で React がエスケープした文字を戻す。useActionState が仕込む
-// hidden input の値は JSON なので、&quot; を戻さないと action が復号できない
-const unescapeAttribute = (value: string): string =>
-  value
-    .replaceAll('&quot;', '"')
-    .replaceAll('&#x27;', "'")
-    .replaceAll('&lt;', '<')
-    .replaceAll('&gt;', '>')
-    .replaceAll('&amp;', '&');
-
-// SSR した HTML の中の <form> を、ブラウザが送るのと同じ FormData にする
-const formDataOf = (html: string, testId: string): FormData => {
-  const form =
-    new RegExp(`<form[^>]*data-testid="${testId}"[\\s\\S]*?</form>`, 'u').exec(
-      html,
-    )?.[0] ?? '';
-  const body = new FormData();
-  for (const input of form.matchAll(/<input[^>]*>/gu)) {
-    const name = /name="([^"]+)"/u.exec(input[0])?.[1];
-    const value = /value="([^"]*)"/u.exec(input[0])?.[1] ?? '';
-    if (name !== undefined) body.set(name, unescapeAttribute(value));
-  }
-  return body;
-};
 
 // ページの entries リストだけを切り出す
 const entriesOf = (html: string): string =>
   /<ul[^>]*data-testid="entries"[\s\S]*?<\/ul>/u.exec(html)?.[0] ?? '';
 
-// pnpm install --prod で入れたアプリには、ビルドにしか使わない vite も
-// @vitejs/* も無い。子プロセスでそれらの解決を拒んだうえで、serve に 1 枚返させる
+// 自前のサーバーから serve を呼ぶアプリは、@k8ordo/framework を本番にも入れる。
+// そこにビルドにしか使わない vite や @vitejs/* があるとは限らない。子プロセスで
+// それらの解決を拒んだうえで、serve に 1 枚返させる
 const WITHOUT_BUILD_TOOLING = `
 import { registerHooks } from 'node:module';
 
@@ -57,7 +35,7 @@ registerHooks({
   },
 });
 
-const { serve } = await import('@k8ordo/server/serve');
+const { serve } = await import('@k8ordo/framework/serve');
 const server = await serve({ port: 0 });
 try {
   const response = await fetch(server.url);
@@ -66,32 +44,6 @@ try {
   await server.close();
 }
 `;
-
-// 組み上がったハンドラを Deno で呼び、答えを JSON で書き出す。読むのは
-// ファイルだけで、ネットワークも環境変数も許さない
-const UNDER_DENO = `
-const { default: handler } = await import('./dist/rsc/index.js');
-const answers = [];
-for (const pathname of ['/', '/products/2', '/products/index.rsc', '/products/shoes', '/old']) {
-  const response = await handler(new Request('https://example.test' + pathname));
-  answers.push({
-    pathname,
-    status: response.status,
-    type: response.headers.get('content-type'),
-    location: response.headers.get('location'),
-    body: await response.text(),
-  });
-}
-console.log(JSON.stringify(answers));
-`;
-
-type Answer = {
-  pathname: string;
-  status: number;
-  type: string | null;
-  location: string | null;
-  body: string;
-};
 
 const root = path.resolve(import.meta.dirname, '..');
 
@@ -130,7 +82,7 @@ const ORIGIN = 'https://example.test';
 let handler: Handler;
 
 // ビルドは global-setup.ts が済ませている。組み上がったハンドラは
-// @k8ordo/static が事前描画で呼ぶのと同じ関数でもある
+// static モードが事前描画で呼ぶのと同じ関数でもある
 beforeAll(async () => {
   const entry = pathToFileURL(path.join(root, 'dist', 'rsc', 'index.js')).href;
   ({ default: handler } = (await import(entry)) as { default: Handler });
@@ -621,58 +573,9 @@ describe('the built request handler, outside Node', () => {
     );
     expect(builtins).toStrictEqual(['node:async_hooks']);
   });
-
-  it('answers under Deno as it does under Node', () => {
-    const answers = JSON.parse(
-      execFileSync(
-        'deno',
-        ['run', '--allow-read', '--no-lock', '--node-modules-dir=manual', '-'],
-        { cwd: root, encoding: 'utf8', input: UNDER_DENO, stdio: 'pipe' },
-      ),
-    ) as Answer[];
-    expect(
-      answers.map(({ pathname, status, type, location }) => ({
-        pathname,
-        status,
-        type,
-        location,
-      })),
-    ).toStrictEqual([
-      {
-        pathname: '/',
-        status: 200,
-        type: 'text/html;charset=utf-8',
-        location: null,
-      },
-      {
-        pathname: '/products/2',
-        status: 200,
-        type: 'text/html;charset=utf-8',
-        location: null,
-      },
-      {
-        pathname: '/products/index.rsc',
-        status: 200,
-        type: 'text/x-component;charset=utf-8',
-        location: null,
-      },
-      {
-        pathname: '/products/shoes',
-        status: 404,
-        type: 'text/html;charset=utf-8',
-        location: null,
-      },
-      { pathname: '/old', status: 307, type: null, location: '/products' },
-    ]);
-    const [home, product, payload] = answers;
-    expect(home?.body).toContain('rendered on the server');
-    // スキーマが AsyncLocalStorage の文脈の中で走り、id を数にしてから描いた
-    expect(product?.body).toContain('number:2');
-    expect(payload?.body).toContain('second product');
-  });
 });
 
-describe('the deployed application', () => {
+describe('the client build', () => {
   it('ships every script compressed ahead of time, beside itself', async () => {
     const assets = await readdir(path.join(root, 'dist', 'client', 'assets'));
     const scripts = assets.filter((name) => name.endsWith('.js'));
@@ -684,8 +587,10 @@ describe('the deployed application', () => {
       scripts.map((name) => `${name}.gz`),
     );
   });
+});
 
-  it('serves a page with only its production dependencies installed', () => {
+describe('a server of its own', () => {
+  it('serves a page through @k8ordo/framework/serve without Vite installed', () => {
     const output = execFileSync(
       process.execPath,
       ['--input-type=module', '--eval', WITHOUT_BUILD_TOOLING],

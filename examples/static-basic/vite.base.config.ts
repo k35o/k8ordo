@@ -1,4 +1,4 @@
-import { framework } from '@k8ordo/static';
+import { framework } from '@k8ordo/framework/vite';
 import { defineConfig } from 'vite';
 
 import { locales } from './src/i18n';
@@ -9,6 +9,7 @@ export default defineConfig({
   base: '/site/',
   plugins: [
     framework({
+      mode: 'static',
       paths: (patterns) =>
         locales
           .paths(patterns)
