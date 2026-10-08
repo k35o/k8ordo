@@ -54,7 +54,7 @@ export function Filters() {
   );
 }`;
 
-const PAGE = `import type { PageProps } from '@k8ordo/router';
+const PAGE = `import type { PageProps } from '@k8ordo/framework';
 
 import { Filters } from './filters';
 import { ProductList } from './product-list';

@@ -1,6 +1,6 @@
 'use client';
 
-import { matchPath, usePathname } from '@k8ordo/router';
+import { matchPath, usePathname } from '@k8ordo/framework';
 import { SideNav } from '@k8ordo/ui';
 import { useState } from 'react';
 

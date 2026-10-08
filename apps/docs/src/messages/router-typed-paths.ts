@@ -51,8 +51,8 @@ export const registerOnce = message({
 });
 
 export const registerFramework = message({
-  ja: '`@k8ordo/static`と`@k8ordo/server`では、この登録が`.k8ordo/register.gen.ts`に生成されます。自分で書くと同じ登録が2つになるので、書かないでください。',
-  en: 'Under `@k8ordo/static` and `@k8ordo/server`, this registration is generated into `.k8ordo/register.gen.ts`. Writing it by hand makes two of the same, so leave it out.',
+  ja: '`@k8ordo/framework`では、この登録が`.k8ordo/register.gen.ts`に生成されます。自分で書くと同じ登録が2つになるので、書かないでください。',
+  en: 'Under `@k8ordo/framework`, this registration is generated into `.k8ordo/register.gen.ts`. Writing it by hand makes two of the same, so leave it out.',
 });
 
 export const typesTitle = message({

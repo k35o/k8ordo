@@ -24,6 +24,7 @@ const CLAIM_CSP_SERVER = `<ColorSchemeProvider nonce={nonce()}>
 </ColorSchemeProvider>`;
 
 const CLAIM_CSP_STATIC = `framework({
+  mode: 'static',
   csp: {
     'script-src': ["'self'", await colorSchemeScriptHash()],
   },

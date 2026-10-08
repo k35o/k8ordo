@@ -1,8 +1,8 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: '`@k8ordo/static`と`@k8ordo/server`は、このルーターの上に作られています。ルート表は`src/routes/`のディレクトリから生成され、ページはサーバーで描かれます。このページでは、フレームワークの下でアプリが使う部分と使わない部分、そしてルートのファイルが受け取るpropsの型を説明します。',
-  en: '`@k8ordo/static` and `@k8ordo/server` are built on this router. The route table is generated from the `src/routes/` directories, and pages render on the server. This page covers which parts an app uses under the framework and which it does not, and the types of the props a route file receives.',
+  ja: '`@k8ordo/framework`は、このルーターの上に作られています。ルート表は`src/routes/`のディレクトリから生成され、ページはサーバーで描かれます。このページでは、フレームワークの下でアプリが使う部分と使わない部分、そしてルートのファイルが受け取るpropsの型を説明します。',
+  en: '`@k8ordo/framework` is built on this router. The route table is generated from the `src/routes/` directories, and pages render on the server. This page covers which parts an app uses under the framework and which it does not, and the types of the props a route file receives.',
 });
 
 export const noTableTitle = message({
@@ -26,8 +26,8 @@ export const carryTitle = message({
 });
 
 export const carryDescription = message({
-  ja: '次のものは、ルート表を手元に持たなくても動きます。そのため、ブラウザに表が無いフレームワークの下でも、そのまま使えます。',
-  en: 'These work without the route table in hand, so they work unchanged under the framework, where the browser has none.',
+  ja: '次のものは、ルート表を手元に持たなくても動きます。そのため、ブラウザに表が無いフレームワークの下でも、そのまま使えます。アプリは、これらを`@k8ordo/framework`からimportします。',
+  en: 'These work without the route table in hand, so they work unchanged under the framework, where the browser has none. An app imports them from `@k8ordo/framework`.',
 });
 
 export const carryLinks = message({
@@ -41,8 +41,8 @@ export const carryLocation = message({
 });
 
 export const carryPaths = message({
-  ja: '`withBase`と`withoutBase`、`normalizePathname`：パスの付け外しと比較',
-  en: '`withBase`, `withoutBase` and `normalizePathname`: adding, removing and comparing paths',
+  ja: '`withBase`と`normalizePathname`：パスの付け足しと比較',
+  en: '`withBase` and `normalizePathname`: adding and comparing paths',
 });
 
 export const carryProps = message({
@@ -126,8 +126,8 @@ export const pagePropsNotFound = message({
 });
 
 export const pagePropsNotFoundWhy = message({
-  ja: '`notFound`がモードのパッケージではなくこのルーターにあるのは、どちらのモードでもページを同じように書けるようにするためです。`<Router>`で描くアプリには返すステータスが無いので、ほかの例外と同じ扱いになります。',
-  en: '`notFound` lives in this router rather than in a mode package so a page reads the same under either mode. An app rendered by `<Router>` has no status to answer with, so there it is an error like any other.',
+  ja: '`notFound`の実体はこのルーターにあり、`@k8ordo/framework`はそれを再exportしています。`<Router>`で描くアプリには返すステータスが無いので、ほかの例外と同じ扱いになります。',
+  en: '`notFound` lives in this router, and `@k8ordo/framework` re-exports it. An app rendered by `<Router>` has no status to answer with, so there it is an error like any other.',
 });
 
 export const layoutPropsTitle = message({
@@ -151,18 +151,18 @@ export const layoutPropsPage = message({
 });
 
 export const requestTitle = message({
-  ja: '`@k8ordo/server`で`request`を受け取る',
-  en: 'Receive `request` under `@k8ordo/server`',
+  ja: 'serverモードで`request`を受け取る',
+  en: 'Receive `request` in server mode',
 });
 
 export const requestDescription = message({
-  ja: '`@k8ordo/server`では、生成される`Register`が`request`も持ちます。そのため、`PageProps`と`LayoutProps`のどちらにも`request`が加わります。',
-  en: 'Under `@k8ordo/server`, the generated `Register` carries `request` too, so both `PageProps` and `LayoutProps` gain `request`.',
+  ja: 'serverモードでは、生成される`Register`が`request`も持ちます。そのため、`PageProps`と`LayoutProps`のどちらにも`request`が加わります。',
+  en: 'In server mode, the generated `Register` carries `request` too, so both `PageProps` and `LayoutProps` gain `request`.',
 });
 
 export const requestStatic = message({
-  ja: '`@k8ordo/static`のビルドにはリクエストが無いので、`request`は加わりません。`request`を読むページは、`@k8ordo/static`では型エラーになります。',
-  en: 'A `@k8ordo/static` build has no request, so `request` is not added there, and a page that reads it fails to type-check.',
+  ja: 'staticモードのビルドにはリクエストが無いので、`request`は加わりません。`request`を読むページは、staticモードでは型エラーになります。',
+  en: 'A static-mode build has no request, so `request` is not added there, and a page that reads it fails to type-check.',
 });
 
 export const requestSearch = message({

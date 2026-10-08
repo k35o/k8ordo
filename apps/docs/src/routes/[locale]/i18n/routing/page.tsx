@@ -50,7 +50,7 @@ export default function RootLayout({
   );
 }`;
 
-const BASE = `import { withBase } from '@k8ordo/router';
+const BASE = `import { withBase } from '@k8ordo/framework';
 
 withBase(locales.localize('/ui', 'en'));
 // '/docs/en/ui'`;

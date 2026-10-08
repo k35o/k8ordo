@@ -355,8 +355,8 @@ export const notFoundCaveats = [
     en: 'It throws, so nothing after it runs.',
   }),
   message({
-    ja: '`@k8ordo/static`と`@k8ordo/server`では、いちばん近い`not-found.tsx`が404で答えます。',
-    en: 'Under `@k8ordo/static` and `@k8ordo/server`, the nearest `not-found.tsx` answers under a 404.',
+    ja: '`@k8ordo/framework`では、いちばん近い`not-found.tsx`が404で答えます。',
+    en: 'Under `@k8ordo/framework`, the nearest `not-found.tsx` answers under a 404.',
   }),
   message({
     ja: '`<Router>`の下では、ほかの例外と同じ扱いです。',
@@ -624,8 +624,8 @@ export const registerCaveats = [
     en: 'Register once, in the app.',
   }),
   message({
-    ja: '`@k8ordo/static`と`@k8ordo/server`では`.k8ordo/register.gen.ts`に生成され、`params`と`search`、`@k8ordo/server`では`request`も加わります。',
-    en: 'Under `@k8ordo/static` and `@k8ordo/server` it is generated into `.k8ordo/register.gen.ts`, with `params` and `search`, and under `@k8ordo/server` `request` too.',
+    ja: '`@k8ordo/framework`では`.k8ordo/register.gen.ts`に生成され、`params`と`search`、serverモードでは`request`も加わります。',
+    en: 'Under `@k8ordo/framework` it is generated into `.k8ordo/register.gen.ts`, with `params` and `search`, and in server mode `request` too.',
   }),
 ] as const;
 
@@ -665,8 +665,8 @@ export const pagePropsPathname = message({
 });
 
 export const pagePropsRequest = message({
-  ja: 'リクエスト。`@k8ordo/server`でだけ加わります。',
-  en: 'The request; only under `@k8ordo/server`.',
+  ja: 'リクエスト。`@k8ordo/framework`のserverモードでだけ加わります。',
+  en: 'The request; only in `@k8ordo/framework`’s server mode.',
 });
 
 export const pagePropsSearch = message({

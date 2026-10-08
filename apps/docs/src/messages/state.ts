@@ -44,8 +44,8 @@ export const claimServerTitle = message({
 
 export const claimServerBody = [
   message({
-    ja: '`@k8ordo/server`のページは、URLのスキーマを`search`として書き出しておくと、検証済みの値を受け取れます。Cookieは`parseCookies`で読むので、保存した設定が最初の描画から反映されます。',
-    en: 'A page under `@k8ordo/server` exports the url schema as `search` and receives the parsed values. Cookies are read with `parseCookies`, so a saved preference is there from the first render.',
+    ja: '`@k8ordo/framework`のserverモードでは、URLのスキーマを`search`として書き出しておくと、ページが検証済みの値を受け取れます。Cookieは`parseCookies`で読むので、保存した設定が最初の描画から反映されます。',
+    en: 'In `@k8ordo/framework`’s server mode, a page exports the url schema as `search` and receives the parsed values. Cookies are read with `parseCookies`, so a saved preference is there from the first render.',
   }),
   message({
     ja: '`href`は、既定値の項目を省いたリンクを作ります。同じ状態はいつも同じURLになり、JavaScriptが届く前からリンクとして使えます。',
@@ -104,8 +104,8 @@ export const nextPlaces = message({
 });
 
 export const nextReading = message({
-  ja: '`@k8ordo/server`の`search`や`parseUrl`での読み取りと、`href`でのリンクの作り方です。',
-  en: 'Reading with `@k8ordo/server`’s `search` or `parseUrl`, and building links with `href`.',
+  ja: '`@k8ordo/framework`の`search`や`parseUrl`での読み取りと、`href`でのリンクの作り方です。',
+  en: 'Reading with `@k8ordo/framework`’s `search` or `parseUrl`, and building links with `href`.',
 });
 
 export const nextUpdates = message({

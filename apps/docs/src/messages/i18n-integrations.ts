@@ -1,8 +1,8 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: '`@k8ordo/i18n`は、ほかのk8ordoのパッケージをimportしません。組み合わせるための数行は、アプリの側に書きます。このページでは、`@k8ordo/ui`と`@k8ordo/form`、`@k8ordo/router`、`@k8ordo/static`と`@k8ordo/server`との組み合わせ方を説明します。',
-  en: '`@k8ordo/i18n` imports no other k8ordo package; the few lines that combine them are the app’s. This page covers `@k8ordo/ui`, `@k8ordo/form`, `@k8ordo/router`, and `@k8ordo/static` and `@k8ordo/server`.',
+  ja: '`@k8ordo/i18n`は、ほかのk8ordoのパッケージをimportしません。組み合わせるための数行は、アプリの側に書きます。このページでは、`@k8ordo/ui`と`@k8ordo/form`、`@k8ordo/router`、`@k8ordo/framework`との組み合わせ方を説明します。',
+  en: '`@k8ordo/i18n` imports no other k8ordo package; the few lines that combine them are the app’s. This page covers `@k8ordo/ui`, `@k8ordo/form`, `@k8ordo/router` and `@k8ordo/framework`.',
 });
 
 export const uiTitle = message({
@@ -61,8 +61,8 @@ export const formFieldsPitfall = message({
 });
 
 export const formAction = message({
-  ja: '`[locale]`のページから送ったServer Actionは、`@k8ordo/server`の下ではそのページのロケールで動きます。フレームワークが、アクションのリクエストでもページの`paramsSchema`を走らせるからです。そのため、`parseForm`が作る文言もページの言語になります。',
-  en: 'A Server Action posted from a `[locale]` page runs in that page’s locale under `@k8ordo/server`, because the framework runs the page’s `paramsSchema` for the action’s request too. So the messages `parseForm` produces are in the page’s language.',
+  ja: '`[locale]`のページから送ったServer Actionは、`@k8ordo/framework`のserverモードではそのページのロケールで動きます。フレームワークが、アクションのリクエストでもページの`paramsSchema`を走らせるからです。そのため、`parseForm`が作る文言もページの言語になります。',
+  en: 'A Server Action posted from a `[locale]` page runs in that page’s locale in `@k8ordo/framework`’s server mode, because the framework runs the page’s `paramsSchema` for the action’s request too. So the messages `parseForm` produces are in the page’s language.',
 });
 
 export const formOutside = message({
@@ -111,8 +111,8 @@ export const routerLink = message({
 });
 
 export const frameworkTitle = message({
-  ja: '`@k8ordo/static`と`@k8ordo/server`',
-  en: '`@k8ordo/static` and `@k8ordo/server`',
+  ja: '`@k8ordo/framework`',
+  en: '`@k8ordo/framework`',
 });
 
 export const frameworkDescription = message({
@@ -122,11 +122,11 @@ export const frameworkDescription = message({
 
 export const frameworkList = [
   message({
-    ja: '`@k8ordo/static`：`framework({ paths: locales.paths })`で、ロケールの数だけページを書き出します（「静的に書き出す」）。`/`のページは、ブラウザで交渉してから移動します（「最初の言語を選ぶ」）。',
-    en: '`@k8ordo/static`: `framework({ paths: locales.paths })` writes a page per locale (“Static builds”). The `/` page negotiates in the browser and moves on (“Choose the first language”).',
+    ja: "staticモード：`framework({ mode: 'static', paths: locales.paths })`で、ロケールの数だけページを書き出します（「静的に書き出す」）。`/`のページは、ブラウザで交渉してから移動します（「最初の言語を選ぶ」）。",
+    en: "Static mode: `framework({ mode: 'static', paths: locales.paths })` writes a page per locale (“Static builds”). The `/` page negotiates in the browser and moves on (“Choose the first language”).",
   }),
   message({
-    ja: '`@k8ordo/server`：リクエストごとに描くので、`paths`は要りません。`/`には、`guard.ts`が`307`で答えます（「最初の言語を選ぶ」）。Server Actionも、送ったページのロケールで動きます。',
-    en: '`@k8ordo/server`: pages render per request, so there is no `paths`. A `guard.ts` answers `/` with a `307` (“Choose the first language”), and a Server Action runs in the locale of the page that posted it.',
+    ja: 'serverモード：リクエストごとに描くので、`paths`は要りません。`/`には、`guard.ts`が`307`で答えます（「最初の言語を選ぶ」）。Server Actionも、送ったページのロケールで動きます。',
+    en: 'Server mode: pages render per request, so there is no `paths`. A `guard.ts` answers `/` with a `307` (“Choose the first language”), and a Server Action runs in the locale of the page that posted it.',
   }),
 ] as const;

@@ -91,8 +91,8 @@ export const storageCause = message({
 });
 
 export const storageFix = message({
-  ja: "`process.getBuiltinModule('node:async_hooks')`を持つランタイムで動かします。`@k8ordo/static`と`@k8ordo/server`が求めるNode 24は、これを持っています。",
-  en: "Run on a runtime with `process.getBuiltinModule('node:async_hooks')`. Node 24, which `@k8ordo/static` and `@k8ordo/server` require, has it.",
+  ja: "`process.getBuiltinModule('node:async_hooks')`を持つランタイムで動かします。`@k8ordo/framework`が求めるNode 24は、これを持っています。",
+  en: "Run on a runtime with `process.getBuiltinModule('node:async_hooks')`. Node 24, which `@k8ordo/framework` requires, has it.",
 });
 
 export const runTitle = message({

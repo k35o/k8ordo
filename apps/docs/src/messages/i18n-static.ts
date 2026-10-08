@@ -1,8 +1,8 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: '`@k8ordo/static`は、パラメータを持つページのpathnameを、ビルドの時点で知る必要があります。ロケールの区間はどのページでも同じ値を取るので、その一覧はロケールの集合が作ります。このページでは、`locales.paths`の渡し方と、ほかのパラメータがあるときの書き方、404ページの言語を説明します。',
-  en: '`@k8ordo/static` has to know, at build time, the pathnames of every page with a parameter. The locale segment takes the same values on every page, so the locale set makes that list itself. This page covers passing `locales.paths`, pages with another parameter, and the language of the 404 page.',
+  ja: '`@k8ordo/framework`のstaticモードは、パラメータを持つページのpathnameを、ビルドの時点で知る必要があります。ロケールの区間はどのページでも同じ値を取るので、その一覧はロケールの集合が作ります。このページでは、`locales.paths`の渡し方と、ほかのパラメータがあるときの書き方、404ページの言語を説明します。',
+  en: '`@k8ordo/framework`’s static mode has to know, at build time, the pathnames of every page with a parameter. The locale segment takes the same values on every page, so the locale set makes that list itself. This page covers passing `locales.paths`, pages with another parameter, and the language of the 404 page.',
 });
 
 export const pathsTitle = message({
@@ -76,6 +76,6 @@ export const notFoundLang = message({
 });
 
 export const notFoundServer = message({
-  ja: '開発サーバーと`@k8ordo/server`では、404は訪問者のURLで描かれます。URLの区間が集合のロケールなら、サーバーが書いたHTMLの時点でそのロケールです。',
-  en: 'Under the dev server and `@k8ordo/server`, a 404 is rendered at the visitor’s URL. When its segment is a locale of the set, the page is in that locale from the server’s HTML on.',
+  ja: '開発サーバーとserverモードでは、404は訪問者のURLで描かれます。URLの区間が集合のロケールなら、サーバーが書いたHTMLの時点でそのロケールです。',
+  en: 'Under the dev server and in server mode, a 404 is rendered at the visitor’s URL. When its segment is a locale of the set, the page is in that locale from the server’s HTML on.',
 });

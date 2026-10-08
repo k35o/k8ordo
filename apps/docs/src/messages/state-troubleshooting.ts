@@ -66,18 +66,18 @@ export const clientModuleFix = message({
 });
 
 export const staticSearchTitle = message({
-  ja: '@k8ordo/staticのビルドが「static build cannot hand a page the search」で止まる',
-  en: 'The @k8ordo/static build stops with “static build cannot hand a page the search”',
+  ja: 'staticモードのビルドが「static build cannot hand a page the search」で止まる',
+  en: 'A static-mode build stops with “static build cannot hand a page the search”',
 });
 
 export const staticSearchCause = message({
-  ja: 'ページが`search`をexportしています。`@k8ordo/static`はページをファイルとして書き出すので、クエリごとに違う中身を返せません。',
-  en: 'A page exports `search`. `@k8ordo/static` writes pages out as files, and a file cannot differ per query.',
+  ja: 'ページが`search`をexportしています。staticモードはページをファイルとして書き出すので、クエリごとに違う中身を返せません。',
+  en: 'A page exports `search`. Static mode writes pages out as files, and a file cannot differ per query.',
 });
 
 export const staticSearchFix = message({
-  ja: '`search`のexportを外し、クエリで変わる部分はクライアントコンポーネントで`useAppState`から読みます。サーバーで読む必要があるなら、`@k8ordo/server`に移ります。',
-  en: 'Drop the `search` export, and read what depends on the query with `useAppState` in a client component. If the server really has to read it, move to `@k8ordo/server`.',
+  ja: '`search`のexportを外し、クエリで変わる部分はクライアントコンポーネントで`useAppState`から読みます。サーバーで読む必要があるなら、serverモードに切り替えます。',
+  en: 'Drop the `search` export, and read what depends on the query with `useAppState` in a client component. If the server really has to read it, switch to server mode.',
 });
 
 export const serializationTitle = message({
@@ -106,8 +106,8 @@ export const fullLoadCause = message({
 });
 
 export const fullLoadFix = message({
-  ja: 'そのルーターでは、URLの変更をリンクとGETフォームで行います。`@k8ordo/router`の上で動く`@k8ordo/static`と`@k8ordo/server`では、ドキュメントの読み込みにはなりません。',
-  en: 'Under that router, change the URL with links and GET forms. On `@k8ordo/static` and `@k8ordo/server`, which run on `@k8ordo/router`, it is never a document load.',
+  ja: 'そのルーターでは、URLの変更をリンクとGETフォームで行います。`@k8ordo/router`の上で動く`@k8ordo/framework`では、ドキュメントの読み込みにはなりません。',
+  en: 'Under that router, change the URL with links and GET forms. On `@k8ordo/framework`, which runs on `@k8ordo/router`, it is never a document load.',
 });
 
 export const stringboolTitle = message({
@@ -166,8 +166,8 @@ export const urlFlashCause = message({
 });
 
 export const urlFlashFix = message({
-  ja: '`@k8ordo/server`なら、ページで`search`をexportし、受け取った値を`initialUrl`として渡します。ほかのフレームワークなら、`parseUrl`の結果を渡します。`@k8ordo/static`ではサーバーがクエリを読めないので、この切り替わりは避けられません。',
-  en: 'Under `@k8ordo/server`, export `search` from the page and pass what it receives as `initialUrl`; elsewhere, pass what `parseUrl` returned. Under `@k8ordo/static` the server cannot read the query, so the switch cannot be avoided.',
+  ja: '`@k8ordo/framework`のserverモードなら、ページで`search`をexportし、受け取った値を`initialUrl`として渡します。ほかのフレームワークなら、`parseUrl`の結果を渡します。staticモードではサーバーがクエリを読めないので、この切り替わりは避けられません。',
+  en: 'In `@k8ordo/framework`’s server mode, export `search` from the page and pass what it receives as `initialUrl`; elsewhere, pass what `parseUrl` returned. In static mode the server cannot read the query, so the switch cannot be avoided.',
 });
 
 export const cookieFlashTitle = message({
@@ -176,8 +176,8 @@ export const cookieFlashTitle = message({
 });
 
 export const cookieFlashCause = message({
-  ja: '`initialCookie`が効くのは、渡した`useAppState`だけです。渡していないコンポーネントは、サーバーでは既定値を描きます。`@k8ordo/static`には、そもそもリクエストがありません。',
-  en: '`initialCookie` seeds only the `useAppState` it is passed to, so a component without it renders the defaults on the server. And `@k8ordo/static` has no request to read at all.',
+  ja: '`initialCookie`が効くのは、渡した`useAppState`だけです。渡していないコンポーネントは、サーバーでは既定値を描きます。staticモードには、そもそもリクエストがありません。',
+  en: '`initialCookie` seeds only the `useAppState` it is passed to, so a component without it renders the defaults on the server. And static mode has no request to read at all.',
 });
 
 export const cookieFlashFix = message({

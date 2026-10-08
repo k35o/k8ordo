@@ -70,8 +70,8 @@ export const switcherTitle = message({
 });
 
 export const switcherDescription = message({
-  ja: '切り替えのリンクは、今いるページのpathnameから作ります。pathnameは`@k8ordo/router`の`usePathname()`で読むので、切り替えはClient Componentにします。',
-  en: 'The switcher’s links are built from the pathname of the page it is on. That pathname comes from `@k8ordo/router`’s `usePathname()`, so the switcher is a Client Component.',
+  ja: '切り替えのリンクは、今いるページのpathnameから作ります。pathnameは`@k8ordo/framework`の`usePathname()`で読むので、切り替えはClient Componentにします。',
+  en: 'The switcher’s links are built from the pathname of the page it is on. That pathname comes from `@k8ordo/framework`’s `usePathname()`, so the switcher is a Client Component.',
 });
 
 export const switcherPathname = message({
@@ -110,8 +110,8 @@ export const rememberTitle = message({
 });
 
 export const rememberDescription = message({
-  ja: '選んだ言語をCookieに書いておくと、次に`/`を開いたときに使えます。`@k8ordo/server`で`/`に答えるguardが呼ぶ`negotiateRequest`は、このCookieを`Accept-Language`より先に読むからです。',
-  en: 'Write the chosen language to a cookie, and the next visit to `/` can use it: under `@k8ordo/server`, the `negotiateRequest` that the guard answering `/` calls reads that cookie before `Accept-Language`.',
+  ja: '選んだ言語をCookieに書いておくと、次に`/`を開いたときに使えます。`@k8ordo/framework`のserverモードで`/`に答えるguardが呼ぶ`negotiateRequest`は、このCookieを`Accept-Language`より先に読むからです。',
+  en: 'Write the chosen language to a cookie, and the next visit to `/` can use it: in `@k8ordo/framework`’s server mode, the `negotiateRequest` that the guard answering `/` calls reads that cookie before `Accept-Language`.',
 });
 
 export const rememberCall = message({
@@ -130,6 +130,6 @@ export const rememberName = message({
 });
 
 export const rememberStatic = message({
-  ja: '`@k8ordo/static`のサイトには、`/`を開いたときにCookieを読むサーバーがありません。`/`のページがブラウザでCookieを読む書き方も、「最初の言語を選ぶ」で説明します。',
-  en: 'An `@k8ordo/static` site has no server to read the cookie when `/` is opened. “Choose the first language” also shows the `/` page reading it in the browser.',
+  ja: 'staticモードのサイトには、`/`を開いたときにCookieを読むサーバーがありません。`/`のページがブラウザでCookieを読む書き方も、「最初の言語を選ぶ」で説明します。',
+  en: 'A site in static mode has no server to read the cookie when `/` is opened. “Choose the first language” also shows the `/` page reading it in the browser.',
 });

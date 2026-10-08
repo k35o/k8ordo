@@ -37,6 +37,7 @@ const STATE_EXAMPLE = `const [{ preference }] = useAppState(colorSchemeState);
 // 'light' | 'dark' | undefined`;
 
 const HASH_EXAMPLE = `framework({
+  mode: 'static',
   csp: {
     'script-src': ["'self'", await colorSchemeScriptHash()],
   },

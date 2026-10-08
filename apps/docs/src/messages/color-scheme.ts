@@ -33,8 +33,8 @@ export const claimCspTitle = message({
 
 export const claimCspBody = [
   message({
-    ja: 'インラインのスクリプトは、nonceかハッシュで許可します。`@k8ordo/server`なら応答ごとの`nonce()`を渡します。ファイルにnonceを書けない`@k8ordo/static`なら、`colorSchemeScriptHash()`をポリシーに入れます。',
-    en: 'The inline script is allowed by nonce or by hash. Under `@k8ordo/server`, pass the response’s `nonce()`; under `@k8ordo/static`, whose files cannot carry a nonce, put `colorSchemeScriptHash()` in the policy.',
+    ja: 'インラインのスクリプトは、nonceかハッシュで許可します。`@k8ordo/framework`のserverモードなら応答ごとの`nonce()`を渡します。ファイルにnonceを書けないstaticモードなら、`colorSchemeScriptHash()`をポリシーに入れます。',
+    en: 'The inline script is allowed by nonce or by hash. In `@k8ordo/framework`’s server mode, pass the response’s `nonce()`; in its static mode, whose files cannot carry a nonce, put `colorSchemeScriptHash()` in the policy.',
   }),
   message({
     ja: '`unsafe-inline`で許可する必要はありません。ハッシュはインストールした版のスクリプトから毎回計算するので、更新しても古い値が残りません。',

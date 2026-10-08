@@ -76,13 +76,13 @@ export const serverTitle = message({
 });
 
 export const serverDescription = message({
-  ja: '`@k8ordo/server`では、ページで`search`としてURLのスキーマを書き出すと、検証済みの条件を受け取って描画できます。JavaScriptが届く前から、検索結果を含んだページを返せます。',
-  en: 'Under `@k8ordo/server`, a page that exports the url schema as `search` receives the parsed conditions and renders with them, so the results are in the page before JavaScript arrives.',
+  ja: '`@k8ordo/framework`のserverモードでは、ページで`search`としてURLのスキーマを書き出すと、検証済みの条件を受け取って描画できます。JavaScriptが届く前から、検索結果を含んだページを返せます。',
+  en: 'In `@k8ordo/framework`’s server mode, a page that exports the url schema as `search` receives the parsed conditions and renders with them, so the results are in the page before JavaScript arrives.',
 });
 
 export const serverStatic = message({
-  ja: '`@k8ordo/static`のようにサーバーで条件を読めない場合は、サーバーの描画には既定値が使われ、ハイドレーションのあとで送信した条件が反映されます。',
-  en: 'Where the server cannot read them, as under `@k8ordo/static`, the server render shows the defaults and the submitted conditions appear after hydration.',
+  ja: 'staticモードでは、サーバーで条件を読めません。その場合、サーバーの描画には既定値が使われ、ハイドレーションのあとで送信した条件が反映されます。',
+  en: 'Where the server cannot read them, as in static mode, the server render shows the defaults and the submitted conditions appear after hydration.',
 });
 
 export const demoTitle = message({

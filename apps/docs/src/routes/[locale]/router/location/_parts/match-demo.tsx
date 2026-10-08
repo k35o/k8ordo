@@ -1,7 +1,7 @@
 'use client';
 
-import { matchPath, usePathname } from '@k8ordo/router';
-import type { MatchablePattern } from '@k8ordo/router';
+import { matchPath, usePathname } from '@k8ordo/framework';
+import type { MatchablePattern } from '@k8ordo/framework';
 import { Button, Code, FormControl, Switch, TextField } from '@k8ordo/ui';
 import { useState } from 'react';
 

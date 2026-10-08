@@ -31,8 +31,8 @@ export const readTitle = message({
 });
 
 export const readDescription = message({
-  ja: '`@k8ordo/server`では、ページとレイアウトがリクエストを`request`として受け取ります。その`request.cookies`を`parseCookies`に渡すと、スキーマを通した値が返ります。',
-  en: 'Under `@k8ordo/server`, pages and layouts receive the request as `request`. Hand its `request.cookies` to `parseCookies`, and the values come back through the schema.',
+  ja: '`@k8ordo/framework`のserverモードでは、ページとレイアウトがリクエストを`request`として受け取ります。その`request.cookies`を`parseCookies`に渡すと、スキーマを通した値が返ります。',
+  en: 'In `@k8ordo/framework`’s server mode, pages and layouts receive the request as `request`. Hand its `request.cookies` to `parseCookies`, and the values come back through the schema.',
 });
 
 export const readMap = message({
@@ -61,8 +61,8 @@ export const seedHigh = message({
 });
 
 export const seedStatic = message({
-  ja: '`@k8ordo/static`にはリクエストがありません。サーバーの描画は既定値で行われ、ハイドレーションのあとでCookieの値に切り替わります。localStorageと同じ振る舞いです。',
-  en: '`@k8ordo/static` has no request. The server render shows the defaults, and the cookie takes over after hydration, just as localStorage does.',
+  ja: 'staticモードにはリクエストがありません。サーバーの描画は既定値で行われ、ハイドレーションのあとでCookieの値に切り替わります。localStorageと同じ振る舞いです。',
+  en: 'Static mode has no request. The server render shows the defaults, and the cookie takes over after hydration, just as localStorage does.',
 });
 
 export const attributesTitle = message({
@@ -111,8 +111,8 @@ export const serverWriteTitle = message({
 });
 
 export const serverWriteDescription = message({
-  ja: 'ページは描画するだけで、応答にCookieを書きません。Cookieを書くのは、リクエストに答える場所です。`@k8ordo/server`では、`guard.ts`と`route.ts`、Server Actionがフレームワークの`cookies()`で書きます。',
-  en: 'A page only renders; it never writes the response. Cookies are written where a request is answered: under `@k8ordo/server`, that is `guard.ts`, `route.ts` and Server Actions, through the framework’s `cookies()`.',
+  ja: 'ページは描画するだけで、応答にCookieを書きません。Cookieを書くのは、リクエストに答える場所です。serverモードでは、`guard.ts`と`route.ts`、Server Actionがフレームワークの`cookies()`で書きます。',
+  en: 'A page only renders; it never writes the response. Cookies are written where a request is answered: in server mode, that is `guard.ts`, `route.ts` and Server Actions, through the framework’s `cookies()`.',
 });
 
 export const serverWriteForm = message({

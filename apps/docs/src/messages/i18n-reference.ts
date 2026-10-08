@@ -86,8 +86,8 @@ export const localesDelocalize = message({
 });
 
 export const localesPaths = message({
-  ja: '`@k8ordo/static`の`paths`オプション。`/:locale`の区間を持つパターンを、ロケールの数だけ展開します。',
-  en: '`@k8ordo/static`’s `paths` option: every pattern with a `/:locale` segment, once per locale.',
+  ja: '`@k8ordo/framework`のstaticモードで使う`paths`オプション。`/:locale`の区間を持つパターンを、ロケールの数だけ展開します。',
+  en: 'The `paths` option of `@k8ordo/framework`’s static mode: every pattern with a `/:locale` segment, once per locale.',
 });
 
 export const localesParamsSchema = message({

@@ -51,8 +51,8 @@ export const runReturns = message({
 });
 
 export const runAction = message({
-  ja: '`[locale]`のページから送ったServer Actionは、`@k8ordo/server`の下ではそのページのロケールで動きます。そのため、`run`で囲む必要はありません。',
-  en: 'A Server Action posted from a `[locale]` page already runs in that page’s locale under `@k8ordo/server`, so it needs no `run`.',
+  ja: '`[locale]`のページから送ったServer Actionは、`@k8ordo/framework`のserverモードではそのページのロケールで動きます。そのため、`run`で囲む必要はありません。',
+  en: 'A Server Action posted from a `[locale]` page already runs in that page’s locale in `@k8ordo/framework`’s server mode, so it needs no `run`.',
 });
 
 export const runBrowser = message({
@@ -96,8 +96,8 @@ export const getLocaleDestructure = message({
 });
 
 export const getLocaleNoSubscribe = message({
-  ja: '`getLocale()`は、URLの変化を購読しません。Client Componentで呼ぶと、その瞬間のURLを読むだけです。ロケールはページの移動で変わり、移動すればページが描き直されるので、ふつうはこれで足ります。URLの変化に合わせて自分から描き直したいコンポーネントは、`@k8ordo/router`の`usePathname()`を読みます。',
-  en: '`getLocale()` does not subscribe to the URL; in a Client Component it reads the URL at that moment. The locale changes by navigating, which renders the page again, so that is usually enough. A component that has to render again on its own when the URL changes reads `usePathname()` from `@k8ordo/router`.',
+  ja: '`getLocale()`は、URLの変化を購読しません。Client Componentで呼ぶと、その瞬間のURLを読むだけです。ロケールはページの移動で変わり、移動すればページが描き直されるので、ふつうはこれで足ります。URLの変化に合わせて自分から描き直したいコンポーネントは、`@k8ordo/framework`の`usePathname()`を読みます。',
+  en: '`getLocale()` does not subscribe to the URL; in a Client Component it reads the URL at that moment. The locale changes by navigating, which renders the page again, so that is usually enough. A component that has to render again on its own when the URL changes reads `usePathname()` from `@k8ordo/framework`.',
 });
 
 export const htmlTitle = message({
@@ -136,6 +136,6 @@ export const baseTerms = message({
 });
 
 export const baseLinks = message({
-  ja: '移動先のURLにするときは、`@k8ordo/router`の`withBase`で`base`を付け直します。`bindParams`で作った`href`には、最初から`base`が付いています。',
-  en: 'To turn one into a URL to navigate to, put the `base` back with `withBase` from `@k8ordo/router`. An `href` made with `bindParams` already carries it.',
+  ja: '移動先のURLにするときは、`@k8ordo/framework`の`withBase`で`base`を付け直します。`bindParams`で作った`href`には、最初から`base`が付いています。',
+  en: 'To turn one into a URL to navigate to, put the `base` back with `withBase` from `@k8ordo/framework`. An `href` made with `bindParams` already carries it.',
 });

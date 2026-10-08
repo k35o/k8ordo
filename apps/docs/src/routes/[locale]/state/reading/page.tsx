@@ -6,7 +6,7 @@ import * as m from '../../../../messages';
 
 const t = m.stateReading;
 
-const SERVER_PAGE = `import type { PageProps } from '@k8ordo/router';
+const SERVER_PAGE = `import type { PageProps } from '@k8ordo/framework';
 
 import { listState } from '../_data/list-state';
 

@@ -224,34 +224,41 @@ export const PACKAGES: PackageEntry[] = [
     ],
   },
   {
-    name: '@k8ordo/static',
-    label: 'Static',
-    path: '/:locale/static',
-    description: m.static.description,
+    name: '@k8ordo/framework',
+    label: 'Framework',
+    path: '/:locale/framework',
+    description: m.framework.description,
     groups: [
       {
         label: m.nav.groupStart,
         sections: [
-          { path: '/:locale/static/get-started', label: m.nav.getStarted },
+          { path: '/:locale/framework/get-started', label: m.nav.getStarted },
+          { path: '/:locale/framework/modes', label: m.framework.navModes },
         ],
       },
       {
         label: m.nav.groupGuides,
         sections: [
-          { path: '/:locale/static/routing', label: m.static.navRouting },
-          { path: '/:locale/static/params', label: m.static.navParams },
-          { path: '/:locale/static/errors', label: m.static.navErrors },
-          { path: '/:locale/static/boundaries', label: m.static.navBoundaries },
-          { path: '/:locale/static/csp', label: m.static.navCsp },
-          { path: '/:locale/static/deploy', label: m.static.navDeploy },
+          { path: '/:locale/framework/routing', label: m.framework.navRouting },
+          { path: '/:locale/framework/params', label: m.framework.navParams },
+          { path: '/:locale/framework/errors', label: m.framework.navErrors },
+          {
+            path: '/:locale/framework/boundaries',
+            label: m.framework.navBoundaries,
+          },
+          { path: '/:locale/framework/actions', label: m.framework.navActions },
+          { path: '/:locale/framework/guards', label: m.framework.navGuards },
+          { path: '/:locale/framework/request', label: m.framework.navRequest },
+          { path: '/:locale/framework/csp', label: m.framework.navCsp },
+          { path: '/:locale/framework/deploy', label: m.framework.navDeploy },
         ],
       },
       {
         label: m.nav.groupConcepts,
         sections: [
           {
-            path: '/:locale/static/how-it-works',
-            label: m.static.navHowItWorks,
+            path: '/:locale/framework/how-it-works',
+            label: m.framework.navHowItWorks,
           },
         ],
       },
@@ -259,62 +266,12 @@ export const PACKAGES: PackageEntry[] = [
         label: m.nav.groupReference,
         sections: [
           {
-            path: '/:locale/static/reference',
-            label: m.static.navReference,
+            path: '/:locale/framework/reference',
+            label: m.framework.navReference,
           },
           {
-            path: '/:locale/static/troubleshooting',
-            label: m.static.navTroubleshooting,
-          },
-        ],
-      },
-    ],
-  },
-  {
-    name: '@k8ordo/server',
-    label: 'Server',
-    path: '/:locale/server',
-    description: m.server.description,
-    groups: [
-      {
-        label: m.nav.groupStart,
-        sections: [
-          { path: '/:locale/server/get-started', label: m.nav.getStarted },
-        ],
-      },
-      {
-        label: m.nav.groupGuides,
-        sections: [
-          { path: '/:locale/server/routing', label: m.server.navRouting },
-          { path: '/:locale/server/params', label: m.server.navParams },
-          { path: '/:locale/server/errors', label: m.server.navErrors },
-          { path: '/:locale/server/boundaries', label: m.server.navBoundaries },
-          { path: '/:locale/server/actions', label: m.server.navActions },
-          { path: '/:locale/server/guards', label: m.server.navGuards },
-          { path: '/:locale/server/request', label: m.server.navRequest },
-          { path: '/:locale/server/csp', label: m.server.navCsp },
-          { path: '/:locale/server/deploy', label: m.server.navDeploy },
-        ],
-      },
-      {
-        label: m.nav.groupConcepts,
-        sections: [
-          {
-            path: '/:locale/server/how-it-works',
-            label: m.server.navHowItWorks,
-          },
-        ],
-      },
-      {
-        label: m.nav.groupReference,
-        sections: [
-          {
-            path: '/:locale/server/reference',
-            label: m.server.navReference,
-          },
-          {
-            path: '/:locale/server/troubleshooting',
-            label: m.server.navTroubleshooting,
+            path: '/:locale/framework/troubleshooting',
+            label: m.framework.navTroubleshooting,
           },
         ],
       },

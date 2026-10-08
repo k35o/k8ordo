@@ -18,7 +18,7 @@ locales.localize('/products/42', 'en');
 const SWITCHER = `'use client';
 
 import type { Variants } from '@k8ordo/i18n';
-import { usePathname } from '@k8ordo/router';
+import { usePathname } from '@k8ordo/framework';
 
 import { locales } from '../i18n';
 

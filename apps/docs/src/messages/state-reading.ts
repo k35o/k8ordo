@@ -6,13 +6,13 @@ export const introduction = message({
 });
 
 export const serverTitle = message({
-  ja: '@k8ordo/serverのページで読む',
-  en: 'Read it in a @k8ordo/server page',
+  ja: 'serverモードのページで読む',
+  en: 'Read it in a server-mode page',
 });
 
 export const serverDescription = message({
-  ja: '`@k8ordo/server`のページは、クエリのうち何を読むかを`search`のexportで宣言します。宣言したページは、`url`のスキーマで読んだ値を`search`として受け取ります。',
-  en: 'A page under `@k8ordo/server` declares what of the query it reads by exporting `search`. A page that does receives the values read with that url schema, as `search`.',
+  ja: '`@k8ordo/framework`のserverモードでは、ページがクエリのうち何を読むかを`search`のexportで宣言します。宣言したページは、`url`のスキーマで読んだ値を`search`として受け取ります。',
+  en: 'In `@k8ordo/framework`’s server mode, a page declares what of the query it reads by exporting `search`. A page that does receives the values read with that url schema, as `search`.',
 });
 
 export const serverParse = message({
@@ -36,18 +36,18 @@ export const serverSeed = message({
 });
 
 export const staticTitle = message({
-  ja: '@k8ordo/staticでは読まない',
-  en: 'Under @k8ordo/static, the server does not read it',
+  ja: 'staticモードでは読まない',
+  en: 'In static mode, the server does not read it',
 });
 
 export const staticDescription = message({
-  ja: '`@k8ordo/static`は、`search`をexportしたページがあると、`static build cannot hand a page the search`で始まるエラーでビルドを止めます。ファイルの中身は、クエリによって変えられないからです。',
-  en: '`@k8ordo/static` stops the build when a page exports `search`, with an error beginning `static build cannot hand a page the search`, because a file cannot change with the query.',
+  ja: 'staticモードは、`search`をexportしたページがあると、`static build cannot hand a page the search`で始まるエラーでビルドを止めます。ファイルの中身は、クエリによって変えられないからです。',
+  en: 'Static mode stops the build when a page exports `search`, with an error beginning `static build cannot hand a page the search`, because a file cannot change with the query.',
 });
 
 export const staticDefaults = message({
-  ja: 'そのため、サーバーの描画は`url`の既定値で行われ、ハイドレーションの次の描画から実際のURLの値に切り替わります。`@k8ordo/server`でも、`search`を宣言しないページは同じです。クエリで変わる部分は、クライアントコンポーネントの中で`useAppState`から読んで描きます。',
-  en: 'There the server renders the url slot’s defaults, and the live URL takes over one render after hydration, as it does for any `@k8ordo/server` page that declares no `search`. Render what depends on the query in a client component, reading it with `useAppState`.',
+  ja: 'そのため、サーバーの描画は`url`の既定値で行われ、ハイドレーションの次の描画から実際のURLの値に切り替わります。serverモードでも、`search`を宣言しないページは同じです。クエリで変わる部分は、クライアントコンポーネントの中で`useAppState`から読んで描きます。',
+  en: 'There the server renders the url slot’s defaults, and the live URL takes over one render after hydration, as it does for any server-mode page that declares no `search`. Render what depends on the query in a client component, reading it with `useAppState`.',
 });
 
 export const staticLinks = message({
@@ -76,8 +76,8 @@ export const parseUrlNavigation = message({
 });
 
 export const parseUrlReader = message({
-  ja: '定義ではなくスキーマだけを渡されたコードには、`urlReader(schema)`があります。スキーマを受け取り、`parseUrl`と同じ読み方をする関数を返します。`@k8ordo/server`は、`search`をexportしたページのクエリをこれで読んでいます。',
-  en: 'Code handed a schema without its definition has `urlReader(schema)`, which returns a function that reads the way `parseUrl` does. `@k8ordo/server` reads the query of a page that exports `search` through it.',
+  ja: '定義ではなくスキーマだけを渡されたコードには、`urlReader(schema)`があります。スキーマを受け取り、`parseUrl`と同じ読み方をする関数を返します。`@k8ordo/framework`のserverモードは、`search`をexportしたページのクエリをこれで読んでいます。',
+  en: 'Code handed a schema without its definition has `urlReader(schema)`, which returns a function that reads the way `parseUrl` does. `@k8ordo/framework`’s server mode reads the query of a page that exports `search` through it.',
 });
 
 export const hrefTitle = message({
@@ -136,8 +136,8 @@ export const typedDescription = message({
 });
 
 export const typedGenerated = message({
-  ja: '`@k8ordo/static`と`@k8ordo/server`では、この拡張が`routes/`から`.k8ordo/register.gen.ts`に生成されます。生成されるのは、アプリ自身の`package.json`の`dependencies`か`devDependencies`に`@k8ordo/state`があるときです。ほかのパッケージを経由した依存は数えません。生成された宣言と重なるので、そうしたアプリでは自分で書かないでください。',
-  en: 'Under `@k8ordo/static` and `@k8ordo/server` it is generated from `routes/` into `.k8ordo/register.gen.ts`, when the application’s own `package.json` lists `@k8ordo/state` in `dependencies` or `devDependencies` (a transitive dependency does not count). Do not hand-write it in such an application; it would duplicate the generated declaration.',
+  ja: '`@k8ordo/framework`では、この拡張が`routes/`から`.k8ordo/register.gen.ts`に生成されます。生成されるのは、アプリ自身の`package.json`の`dependencies`か`devDependencies`に`@k8ordo/state`があるときです。ほかのパッケージを経由した依存は数えません。生成された宣言と重なるので、そうしたアプリでは自分で書かないでください。',
+  en: 'Under `@k8ordo/framework` it is generated from `routes/` into `.k8ordo/register.gen.ts`, when the application’s own `package.json` lists `@k8ordo/state` in `dependencies` or `devDependencies` (a transitive dependency does not count). Do not hand-write it in such an application; it would duplicate the generated declaration.',
 });
 
 export const typedMatch = message({

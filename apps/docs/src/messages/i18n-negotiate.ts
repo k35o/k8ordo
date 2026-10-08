@@ -1,8 +1,8 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: '`/`は、ロケールを持たない唯一のURLです。ここを開いた訪問者は、その人の言語のページへ送ります。このページでは、訪問者の希望からロケールを1つ選ぶ`negotiate`と、`@k8ordo/server`と`@k8ordo/static`それぞれでの`/`の書き方を説明します。',
-  en: '`/` is the one URL without a locale, and whoever opens it is sent on to the page in their language. This page covers `negotiate`, which picks one locale from what the visitor asks for, and how `/` is written under `@k8ordo/server` and under `@k8ordo/static`.',
+  ja: '`/`は、ロケールを持たない唯一のURLです。ここを開いた訪問者は、その人の言語のページへ送ります。このページでは、訪問者の希望からロケールを1つ選ぶ`negotiate`と、serverモードとstaticモードそれぞれでの`/`の書き方を説明します。',
+  en: '`/` is the one URL without a locale, and whoever opens it is sent on to the page in their language. This page covers `negotiate`, which picks one locale from what the visitor asks for, and how `/` is written in `@k8ordo/framework`’s server mode and in its static mode.',
 });
 
 export const negotiateTitle = message({
@@ -195,13 +195,13 @@ export const requestWriter = message({
 });
 
 export const serverTitle = message({
-  ja: '`@k8ordo/server`で`/`に答える',
-  en: 'Answer `/` under `@k8ordo/server`',
+  ja: 'serverモードで`/`に答える',
+  en: 'Answer `/` in server mode',
 });
 
 export const serverDescription = message({
-  ja: '`@k8ordo/server`では、ページを描く前に`guard.ts`が`/`に答えます。`negotiateRequest`でロケールを選び、そのロケールのURLへの`307`を返します。',
-  en: 'Under `@k8ordo/server`, a `guard.ts` answers `/` before any page renders. It picks a locale with `negotiateRequest` and returns a `307` to that locale’s URL.',
+  ja: '`@k8ordo/framework`のserverモードでは、ページを描く前に`guard.ts`が`/`に答えます。`negotiateRequest`でロケールを選び、そのロケールのURLへの`307`を返します。',
+  en: 'In `@k8ordo/framework`’s server mode, a `guard.ts` answers `/` before any page renders. It picks a locale with `negotiateRequest` and returns a `307` to that locale’s URL.',
 });
 
 export const serverTree = message({
@@ -230,18 +230,18 @@ export const serverPayload = message({
 });
 
 export const staticTitle = message({
-  ja: '`@k8ordo/static`で`/`に答える',
-  en: 'Answer `/` under `@k8ordo/static`',
+  ja: 'staticモードで`/`に答える',
+  en: 'Answer `/` in static mode',
 });
 
 export const staticDescription = message({
-  ja: '`@k8ordo/static`には、リクエストに答えるサーバーがありません。`guard.ts`も置けないので、`/`のページは何も描かず、ブラウザで交渉してから移動します。',
-  en: '`@k8ordo/static` has no server to answer a request, and refuses a `guard.ts`. So the `/` page renders nothing, and negotiates and moves on in the browser.',
+  ja: '`@k8ordo/framework`のstaticモードには、リクエストに答えるサーバーがありません。`guard.ts`も置けないので、`/`のページは何も描かず、ブラウザで交渉してから移動します。',
+  en: '`@k8ordo/framework`’s static mode has no server to answer a request, and refuses a `guard.ts`. So the `/` page renders nothing, and negotiates and moves on in the browser.',
 });
 
 export const staticLinks = message({
-  ja: '`navigateTo`は、`@k8ordo/router`の`bindParams`で作ったものです。作り方は「ほかのパッケージと組み合わせる」で説明します。',
-  en: '`navigateTo` is the one made with `@k8ordo/router`’s `bindParams`; “Use with other packages” shows how.',
+  ja: '`navigateTo`は、`@k8ordo/framework`の`bindParams`で作ったものです。作り方は「ほかのパッケージと組み合わせる」で説明します。',
+  en: '`navigateTo` is the one made with `@k8ordo/framework`’s `bindParams`; “Use with other packages” shows how.',
 });
 
 export const staticEffect = message({

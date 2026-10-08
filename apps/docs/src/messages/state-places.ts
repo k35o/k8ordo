@@ -16,8 +16,8 @@ export const sixDescription = message({
 });
 
 export const sixUrl = message({
-  ja: '`definePageState`の`url`：URLのクエリに置きます。戻る/進むで元に戻り、リンクを受け取った人にも同じ値が見えます。`@k8ordo/server`のページなら、サーバーでも読めます。',
-  en: 'The `url` slot of `definePageState`: the URL’s query. Back and forward bring it back, and anyone given the link sees the same values. A page under `@k8ordo/server` can read it on the server too.',
+  ja: '`definePageState`の`url`：URLのクエリに置きます。戻る/進むで元に戻り、リンクを受け取った人にも同じ値が見えます。`@k8ordo/framework`のserverモードなら、サーバーでも読めます。',
+  en: 'The `url` slot of `definePageState`: the URL’s query. Back and forward bring it back, and anyone given the link sees the same values. A page in `@k8ordo/framework`’s server mode can read it on the server too.',
 });
 
 export const sixEntry = message({

@@ -1,10 +1,11 @@
 # Agent guide — apps/docs
 
 Documentation site for the `@k8ordo/*` packages (`ui`, `form`, `state`,
-`router`, `static`, `server`, `i18n`, `color-scheme`), built with
-`@k8ordo/static` — the site runs on the family's own framework, so a change to
-it is felt here first. The `framework-engine` is internal and has no page: an
-application installs a mode package, never the engine. The site also dogfoods
+`router`, `framework`, `i18n`, `color-scheme`), built with
+`@k8ordo/framework` in `mode: 'static'` — the site runs on the family's own
+framework, so a change to it is felt here first. The `framework-engine` is
+internal and has no page: an application installs `@k8ordo/framework`, never
+the engine. The site also dogfoods
 `@k8ordo/state`, `@k8ordo/form`, `@k8ordo/i18n`, and `@k8ordo/color-scheme`:
 the writing-mode preference is a `defineLocalState` (`src/theme/state.ts`),
 the colour scheme is `@k8ordo/color-scheme`'s (`<ColorSchemeProvider>` in
@@ -29,7 +30,7 @@ pnpm check:write       # Oxlint/Oxfmt lint/format auto-fix
 
 ## Architecture
 
-- **Routing**: file-based. `src/routes/` _is_ the URL space (`@k8ordo/static`),
+- **Routing**: file-based. `src/routes/` _is_ the URL space (`@k8ordo/framework`),
   and `.k8ordo/` holds the generated route table and type wiring — generated,
   git-ignored, and readable. Everything sits under `[locale]`, so every pattern
   needs pathnames at build time; `vite.config.ts` passes `paths: locales.paths`,
@@ -57,14 +58,14 @@ pnpm check:write       # Oxlint/Oxfmt lint/format auto-fix
   when its param is the sentinel, falling back to `locales.default` only when
   the URL has none either. The file becomes English the moment it renders on
   an `/en/…` URL. A visitor with JavaScript off keeps the Japanese one; one
-  file cannot be both. Under the dev server (and `@k8ordo/server`) a 404 is
+  file cannot be both. Under the dev server (and `mode: 'server'`) a 404 is
   rendered at the visitor's URL, where the schema accepts `en`, so it is
   English from the server's HTML on.
 - **An unknown locale is a 404.** `src/routes/[locale]/layout.tsx` exports
   `const { paramsSchema } = locales` — the generator parses the file for the
   export, so any spelling of it counts — so `/fr/ui` is a
   pathname the `/:locale/…` patterns do not answer: the walk falls through to
-  `not-found.tsx` under a real 404, under `@k8ordo/server` as much as on the
+  `not-found.tsx` under a real 404, under `mode: 'server'` as much as on the
   static host (where `404.html` was already what got served). The layout
   still receives `params.locale` as a string — a layout's params are never
   typed by its schema, because `not-found.tsx` renders under it whether or not
@@ -114,7 +115,7 @@ pnpm check:write       # Oxlint/Oxfmt lint/format auto-fix
   builds `@k8ordo/ui`'s design spec from `src/theme/design-tokens.ts`, the
   same token view `/ui/theming` renders, plus the design rationale CSS does
   not hold.
-- **Sitemap**: `framework({ site: 'https://ordo.k8o.me' })` in
+- **Sitemap**: `framework({ mode: 'static', site: 'https://ordo.k8o.me' })` in
   `vite.config.ts` makes the build write `dist/client/sitemap.xml` listing
   every page it rendered. Nothing here maintains a page list by hand.
 - **The colour scheme is `@k8ordo/color-scheme`'s.** The root layout wraps
@@ -161,7 +162,7 @@ pnpm check:write       # Oxlint/Oxfmt lint/format auto-fix
   built-in strings follow the site locale on their own: `@k8ordo/ui` reads
   `@k8ordo/i18n`'s current locale, and the shell importing `locales` is what
   defines the set in the browser
-- **Where the browser is**: `usePathname()` from `@k8ordo/router`. Under the
+- **Where the browser is**: `usePathname()` from `@k8ordo/framework`. Under the
   framework the browser holds no route table, so `useRoute` / `useParams` have
   no match to read — a page receives `params` as a prop, and anything else asks
   the platform.
@@ -189,7 +190,6 @@ src/
       ui/components/_previews/      # `_` never appears in a URL
   constants.ts         # Shared constants (e.g. STORYBOOK_URL)
   components/          # Shared doc components (ComponentPreview, PropsTable, etc.)
-    framework-guide/   # topics @k8ordo/static and @k8ordo/server share, rendered per mode
   data/                # PACKAGES (packages.ts), which packages ship docs (shipped-docs), the sidebars (components-nav, ai-nav), generated props (component-props)
   i18n.ts              # defineLocales + Register — the locale set
   links.ts             # href / navigateTo with the locale bound; SitePath
@@ -286,17 +286,17 @@ export default function RouterLinksPage() {
   bare lower bound fails the build, since the list can only say "or later".
   These stay Server Components: the READMEs they read must not reach the
   client bundle.
-- `@k8ordo/static` and `@k8ordo/server` have the same guide apart from the
-  server-only pages (actions, guards, request), and share what the two modes
-  say alike. The shared words are `src/messages/framework-<topic>.ts`, with
-  words only one mode uses in `src/messages/{static,server}-<topic>.ts`; the
-  shared markup is `src/components/framework-guide/<topic>.tsx`, whose exports
-  are functions returning `DocSection`s, whole topics
-  (`routingSections(mode)`) or single sections (`tabsSection(mode)`), taking
-  `mode: 'static' | 'server'` where the wording differs. They are functions
-  and not components because `DocPage` builds its contents from its direct
-  children, and sections behind a component would be missing from them. Each
-  mode's page adds only what is its own.
+- `@k8ordo/framework` documents both of its modes in one guide, and
+  `/framework/modes` is where a reader chooses between them. A section that
+  holds for one mode only says so in its first sentence
+  (「serverモードだけで使えます。」); where the modes differ inside a section,
+  each mode gets its own paragraph beginning 「staticモードでは」 or
+  「serverモードでは」, or, on a page that is two halves
+  (`/framework/csp`, `/framework/deploy`), its own `DocSection` with the topics
+  as `DocSubsection`s. Code samples import as an application does: the
+  router's names from `@k8ordo/framework`, the plugin from
+  `@k8ordo/framework/vite`, the request API from `@k8ordo/framework/server` —
+  never from `@k8ordo/router`.
 
 ### Preview Components
 
@@ -355,8 +355,8 @@ highlighted on the server; the site keeps no highlighter of its own.
 
 ## The framework it runs on
 
-`@k8ordo/static` and `@k8ordo/router` live in this repository
-([packages/static](../../packages/static), [packages/router](../../packages/router)),
+`@k8ordo/framework` and `@k8ordo/router` live in this repository
+([packages/framework](../../packages/framework), [packages/router](../../packages/router)),
 as do `@k8ordo/state`, `@k8ordo/form`, `@k8ordo/i18n` and
 `@k8ordo/color-scheme`, which the site's demos, its words and its own
 preferences run on. Their guides are `docs/GUIDE.md` in each package. Being the framework's own
@@ -365,7 +365,7 @@ framework is designed against.
 
 ## Key Dependencies
 
-- **@k8ordo/static** + **@k8ordo/router** (workspace) for the framework itself
+- **@k8ordo/framework** + **@k8ordo/router** (workspace) for the framework itself
 - **@k8ordo/ui** (workspace) for UI components
 - **@k8ordo/state** + **@k8ordo/form** (workspace) for the preferences and the live demos
 - **@k8ordo/i18n** + **@k8ordo/color-scheme** (workspace) for every message and the colour scheme

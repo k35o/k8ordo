@@ -81,8 +81,8 @@ export const frameworkTitle = message({
 });
 
 export const frameworkDescription = message({
-  ja: '`@k8ordo/static`や`@k8ordo/server`では、レイアウトの`children`を同じように`<ViewTransition>`で包みます。',
-  en: 'Under `@k8ordo/static` and `@k8ordo/server`, wrap a layout’s `children` in the same `<ViewTransition>`.',
+  ja: '`@k8ordo/framework`では、レイアウトの`children`を同じように`<ViewTransition>`で包みます。',
+  en: 'Under `@k8ordo/framework`, wrap a layout’s `children` in the same `<ViewTransition>`.',
 });
 
 export const frameworkServer = message({

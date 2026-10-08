@@ -7,19 +7,19 @@ import * as m from '../../../../messages';
 
 const t = m.i18nStatic;
 
-const CONFIG = `import { framework } from '@k8ordo/static';
+const CONFIG = `import { framework } from '@k8ordo/framework/vite';
 import { defineConfig } from 'vite';
 
 import { locales } from './src/i18n';
 
 export default defineConfig({
-  plugins: [framework({ paths: locales.paths })],
+  plugins: [framework({ mode: 'static', paths: locales.paths })],
 });`;
 
 const PATHS = `locales.paths(['/:locale', '/:locale/about']);
 // ['/ja', '/en', '/ja/about', '/en/about']`;
 
-const SLUGS = `import { framework } from '@k8ordo/static';
+const SLUGS = `import { framework } from '@k8ordo/framework/vite';
 import { defineConfig } from 'vite';
 
 import { locales } from './src/i18n';
@@ -37,6 +37,7 @@ const expandSlugs = async (paths: string[]) => {
 export default defineConfig({
   plugins: [
     framework({
+      mode: 'static',
       paths: (patterns) => expandSlugs(locales.paths(patterns)),
     }),
   ],
@@ -89,7 +90,7 @@ export default function I18nStaticPage() {
         <CodeBlock
           code={SLUGS}
           lang="ts"
-          marks={{ 19: 'highlight' }}
+          marks={{ 20: 'highlight' }}
           title="vite.config.ts"
         />
         <p>

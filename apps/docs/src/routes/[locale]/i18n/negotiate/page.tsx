@@ -26,8 +26,8 @@ parseAcceptLanguage('en-US;q=0.8, ja, en;q=0.9');
 
 const REQUEST = `locales.negotiateRequest(request, { cookie: 'locale' });`;
 
-const GUARD = `import { withBase } from '@k8ordo/router';
-import type { Guard } from '@k8ordo/server/runtime';
+const GUARD = `import { withBase } from '@k8ordo/framework';
+import type { Guard } from '@k8ordo/framework/server';
 
 import { locales } from '../../i18n';
 

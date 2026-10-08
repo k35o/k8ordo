@@ -1,4 +1,4 @@
-import type { RouteContext } from '@k8ordo/router';
+import type { RouteContext } from '@k8ordo/framework';
 import { tokens } from '@k8ordo/ui/tokens';
 
 import {

@@ -8,7 +8,7 @@ import * as m from '../../../../messages';
 
 const t = m.colorSchemeCsp;
 
-const GUARD = `import { nonce, responseHeaders } from '@k8ordo/server/runtime';
+const GUARD = `import { nonce, responseHeaders } from '@k8ordo/framework/server';
 
 export default function guard() {
   const policy = [
@@ -20,7 +20,7 @@ export default function guard() {
 }`;
 
 const LAYOUT = `import { ColorSchemeProvider } from '@k8ordo/color-scheme';
-import { nonce } from '@k8ordo/server/runtime';
+import { nonce } from '@k8ordo/framework/server';
 import type { ReactNode } from 'react';
 
 export default function RootLayout({
@@ -40,12 +40,13 @@ export default function RootLayout({
 }`;
 
 const VITE_CONFIG = `import { colorSchemeScriptHash } from '@k8ordo/color-scheme';
-import { framework } from '@k8ordo/static';
+import { framework } from '@k8ordo/framework/vite';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
   plugins: [
     framework({
+      mode: 'static',
       csp: {
         'script-src': ["'self'", await colorSchemeScriptHash()],
         'object-src': ["'none'"],
@@ -105,7 +106,7 @@ export default function ColorSchemeCspPage() {
           <Rich>{t.nonceCache()}</Rich>
         </p>
         <p>
-          <LocaleAnchor path="/:locale/server/csp">
+          <LocaleAnchor path="/:locale/framework/csp">
             {t.nonceLink()}
           </LocaleAnchor>
         </p>
@@ -115,7 +116,7 @@ export default function ColorSchemeCspPage() {
         <CodeBlock
           code={VITE_CONFIG}
           lang="ts"
-          marks={{ 9: 'highlight' }}
+          marks={{ 10: 'highlight' }}
           title="vite.config.ts"
         />
         <p>
@@ -131,7 +132,9 @@ export default function ColorSchemeCspPage() {
           <Rich>{t.hashHeader()}</Rich>
         </p>
         <p>
-          <LocaleAnchor path="/:locale/static/csp">{t.hashLink()}</LocaleAnchor>
+          <LocaleAnchor path="/:locale/framework/csp">
+            {t.hashLink()}
+          </LocaleAnchor>
         </p>
       </DocSection>
 

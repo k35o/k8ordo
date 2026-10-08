@@ -24,3 +24,10 @@ export const typescript = message({
   ja: (version: string) => `TypeScriptで書くなら、TypeScript ${version}以上`,
   en: (version) => `TypeScript ${version} or later, when you write TypeScript`,
 });
+
+export const agentDocs = message({
+  ja: (name: string) =>
+    `エージェント向けのガイドは\`node_modules/${name}/docs/GUIDE.md\`に入っています。AGENTS.mdなどからこのパスを参照させてください。`,
+  en: (name) =>
+    `The guide for AI agents ships at \`node_modules/${name}/docs/GUIDE.md\`. Point your AGENTS.md or the like at that path.`,
+});

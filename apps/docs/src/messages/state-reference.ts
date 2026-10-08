@@ -51,8 +51,8 @@ export const pageReturns = message({
 });
 
 export const pageUrl = message({
-  ja: '渡した`url`のスキーマ。`@k8ordo/server`の`search`や、`@k8ordo/form`の`formFields`に渡します。',
-  en: 'The `url` schema as passed, for `@k8ordo/server`’s `search` export or `@k8ordo/form`’s `formFields`.',
+  ja: '渡した`url`のスキーマ。`@k8ordo/framework`のserverモードでページがexportする`search`や、`@k8ordo/form`の`formFields`に渡します。',
+  en: 'The `url` schema as passed, for a page’s `search` export in `@k8ordo/framework`’s server mode, or for `@k8ordo/form`’s `formFields`.',
 });
 
 export const pageEntry = message({
@@ -111,8 +111,8 @@ export const readerReturns = message({
 
 export const readerCaveats = [
   message({
-    ja: '`@k8ordo/server`は、`search`をexportしたページのクエリをこれで読んでいます。',
-    en: '`@k8ordo/server` reads the query of a page that exports `search` through it.',
+    ja: '`@k8ordo/framework`のserverモードは、`search`をexportしたページのクエリをこれで読んでいます。',
+    en: '`@k8ordo/framework`’s server mode reads the query of a page that exports `search` through it.',
   }),
 ] as const;
 
@@ -217,8 +217,8 @@ export const cookieName = message({
 });
 
 export const cookieParse = message({
-  ja: 'リクエストのCookieから値を読みます。値をパーセントデコードした`Map`を渡し、`@k8ordo/server`なら`request.cookies`をそのまま渡せます。古い版の値は移行して読みますが、書き戻しません。',
-  en: 'Reads the values out of a request’s cookies, given as a `Map` of percent-decoded values, which `request.cookies` under `@k8ordo/server` already is. An older row is migrated as it is read, but never written back.',
+  ja: 'リクエストのCookieから値を読みます。値をパーセントデコードした`Map`を渡し、`@k8ordo/framework`のserverモードなら`request.cookies`をそのまま渡せます。古い版の値は移行して読みますが、書き戻しません。',
+  en: 'Reads the values out of a request’s cookies, given as a `Map` of percent-decoded values, which `request.cookies` in `@k8ordo/framework`’s server mode already is. An older row is migrated as it is read, but never written back.',
 });
 
 export const cookieValue = message({
@@ -415,8 +415,8 @@ export const registerPath = message({
 
 export const registerCaveats = [
   message({
-    ja: '`@k8ordo/static`と`@k8ordo/server`では、`.k8ordo/register.gen.ts`に生成されます。',
-    en: 'Under `@k8ordo/static` and `@k8ordo/server`, it is generated into `.k8ordo/register.gen.ts`.',
+    ja: '`@k8ordo/framework`では、`.k8ordo/register.gen.ts`に生成されます。',
+    en: 'Under `@k8ordo/framework`, it is generated into `.k8ordo/register.gen.ts`.',
   }),
   message({
     ja: '拡張はアプリケーションの中でだけ行います。',

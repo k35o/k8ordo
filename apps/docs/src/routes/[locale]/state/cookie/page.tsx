@@ -19,7 +19,7 @@ export const density = defineCookieState(
   }),
 );`;
 
-const LAYOUT = `import type { LayoutProps } from '@k8ordo/router';
+const LAYOUT = `import type { LayoutProps } from '@k8ordo/framework';
 
 import { density } from '../state';
 import { Shell } from './shell';
@@ -56,7 +56,7 @@ export function Shell({ initialCookie, children }: Props) {
 
 const ACTION = `'use server';
 
-import { cookies } from '@k8ordo/server/runtime';
+import { cookies } from '@k8ordo/framework/server';
 
 import { density } from './state';
 
