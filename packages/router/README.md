@@ -21,12 +21,14 @@ npm install @k8ordo/router
 pnpm add @k8ordo/router
 ```
 
-Under `@k8ordo/static` or `@k8ordo/server` this package is what the framework
-builds on: the table is generated from `src/routes/`, and what an application
-uses of it is the half that needs no table — `href`, `navigateTo` and
-`bindParams`; `usePathname`, `useMatch` and `matchPath` — plus the route
-files' props types, `PageProps` and `LayoutProps`. On its own it is the whole
-router for an application that renders in the browser.
+Under `@k8ordo/framework` this package is what the framework builds on: the
+table is generated from `src/routes/`, and what an application uses of it is
+the half that needs no table — `href`, `navigateTo` and `bindParams`;
+`usePathname`, `useMatch` and `matchPath` — plus the route files' props types,
+`PageProps` and `LayoutProps`. There it is installed as the framework's peer,
+and the application imports that half from `@k8ordo/framework`, which
+re-exports it. On its own it is the whole router for an application that
+renders in the browser.
 
 ## Peer Dependencies
 

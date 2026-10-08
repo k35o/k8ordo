@@ -34,10 +34,11 @@ When installed via npm, these docs live under `node_modules/@k8ordo/color-scheme
   `<script>` that puts `dark` on `<html>` before the first paint from the
   stored preference, the default (`'system'` unless told otherwise), or the
   system, and keeps the class in step; `nonce` signs that script for a
-  Content-Security-Policy (under `@k8ordo/server`, `nonce()`).
+  Content-Security-Policy (in `@k8ordo/framework`'s server mode, `nonce()`
+  from `@k8ordo/framework/server`).
   `colorSchemeScriptHash(defaultPreference?)` resolves to the script's hash
   as a CSP source (`'sha256-…'`), for a policy that allows it by hash —
-  `@k8ordo/static`'s `csp` option. `useColorScheme()` returns
+  the `csp` option of `@k8ordo/framework`'s static mode. `useColorScheme()` returns
   `{ scheme, preference, setPreference }`: `scheme` is `'light' | 'dark'`
   on screen, `preference` is `'light' | 'dark' | 'system'`, and
   `setPreference('system')` clears the stored preference, so the default

@@ -17,8 +17,7 @@ Every package here commits to the same four things:
 | [`@k8ordo/form`](packages/form) | HTML constraint attributes, messages, and server-side validation from one zod schema |
 | [`@k8ordo/state`](packages/state) | State declared by where it lives — URL, history entry, localStorage, sessionStorage, a cookie (one zod schema each), memory (a typed box) |
 | [`@k8ordo/router`](packages/router) | The URL's pathname axis: one route table, typed paths, over the Navigation API |
-| [`@k8ordo/static`](packages/static) | Builds an application into files — every route rendered ahead of time |
-| [`@k8ordo/server`](packages/server) | Runs an application — RSC per request, with Server Actions |
+| [`@k8ordo/framework`](packages/framework) | The application framework: routes from `src/routes/`, built into files ahead of time (`mode: 'static'`) or run as RSC per request with Server Actions (`mode: 'server'`) |
 | [`@k8ordo/i18n`](packages/i18n) | The locale axis: one locale set for the URL segment, negotiation, and the params schema; each message a function that reads the locale where it is called, on either side of the network |
 | [`@k8ordo/color-scheme`](packages/color-scheme) | The colour-scheme axis: the visitor's light / dark / system preference, stored through `@k8ordo/state`, on `<html>` before the first paint |
 
@@ -56,27 +55,26 @@ pnpm build
 
 ```
 apps/
-  docs/                  # ordo.k8o.me (@k8ordo/static でビルドしている)
+  docs/                  # ordo.k8o.me (@k8ordo/framework の static モードでビルドしている)
 packages/
   ui/                    # @k8ordo/ui
   form/                  # @k8ordo/form
   state/                 # @k8ordo/state
   router/                # @k8ordo/router
-  framework-engine/      # private engine, bundled into static and server
-  static/                # @k8ordo/static
-  server/                # @k8ordo/server
+  framework/             # @k8ordo/framework
+  framework-engine/      # private engine, bundled into @k8ordo/framework
   i18n/                  # @k8ordo/i18n
   color-scheme/          # @k8ordo/color-scheme
 examples/
   ui-integrations/       # @k8ordo/ui × generative UI adapters (Vite)
   ui-nextjs/             # @k8ordo/ui × Next.js
   ui-css-modules/        # @k8ordo/ui with prebuilt CSS, no Tailwind
-  static-basic/          # an application on @k8ordo/static
-  server-basic/          # an application on @k8ordo/server, with @k8ordo/form
+  static-basic/          # an application on @k8ordo/framework, mode: 'static'
+  server-basic/          # an application on @k8ordo/framework, mode: 'server', with @k8ordo/form
 ```
 
-Examples are applications built from k8ordo's own pieces — `@k8ordo/static` or
-`@k8ordo/server`, plus whichever `@k8ordo/*` packages they need. Only
+Examples are applications built from k8ordo's own pieces — `@k8ordo/framework`
+in either mode, plus whichever `@k8ordo/*` packages they need. Only
 `@k8ordo/ui` also shows itself inside someone else's framework (Next.js, plain
 Vite), since a component library is what people add to an application they
 already have.

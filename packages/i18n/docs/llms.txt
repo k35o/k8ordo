@@ -5,7 +5,7 @@
 > dates are shown in and its text direction — and derives membership,
 > negotiation, the URL segment
 > (`localize` / `delocalize`), the `[locale]` params schema in the shape
-> `@k8ordo/static` / `@k8ordo/server` run, and the current locale
+> `@k8ordo/framework` runs, and the current locale
 > (`getLocale()`). Each message is a function — `message({ ja, en })` — that
 > reads the locale where it is called: on the server the request the schema
 > accepted, in the browser the URL. The same call renders in a Server
@@ -27,8 +27,8 @@ When installed via npm, these docs live under `node_modules/@k8ordo/i18n/docs/`.
   drawn for the current locale, dates in its time zone), the Server
   Component boundary (a message is called before it is passed to a
   `'use client'` component), what reaches the browser, where the locale comes
-  from on each side, `/` (a `307` from a `guard.ts` under `@k8ordo/server`,
-  an effect under `@k8ordo/static`) and `<html lang>` / `dir`, static path
+  from on each side, `/` (a `307` from a `guard.ts` in server mode,
+  an effect in static mode) and `<html lang>` / `dir`, static path
   expansion, and pairing with `@k8ordo/router` / `@k8ordo/ui` /
   `@k8ordo/form`.
 
@@ -43,8 +43,9 @@ When installed via npm, these docs live under `node_modules/@k8ordo/i18n/docs/`.
   options, and `dateTimeFormat` always in that locale's `timeZone` (its
   options type refuses one); `paths(patterns)` is the static build's `paths` option
   with `/:locale` expanded to every locale; typed links come from
-  `@k8ordo/router`'s `bindParams(() => ({ locale: locales.getLocale() }))`,
-  written by the application; the first entry is the default unless told otherwise (and `default` is then typed as the whole union), every tag
+  the router's `bindParams(() => ({ locale: locales.getLocale() }))`,
+  written by the application (imported from `@k8ordo/framework` in a
+  framework application); the first entry is the default unless told otherwise (and `default` is then typed as the whole union), every tag
   must be BCP 47, `negotiate(list)` tries each requested tag in order (exact,
   then language) before falling back to the default, `getLocale()` is the
   locale of the render in progress (not a hook), and `run(locale, fn)`

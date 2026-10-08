@@ -171,7 +171,11 @@ same field submits the same string.
   `href` is handed through `NavigablePath` from `@k8ordo/router` — a
   type-only import, so the router is an optional peer that never loads at
   runtime. `href` infers the path from the argument and checks that, never
-  a union of every path the table has. The older
+  a union of every path the table has. A refused path resolves to
+  what the form accepts instead — the table's linkable patterns, the `path`
+  union, `/${string}` — never `never`, so the type error lists the
+  alternatives the way the router's `href` does; each pattern's own spelling
+  is a path the table accepts, so this lets nothing through. The older
   `{ path: P }` form stays accepted (other routers, and what the framework's
   generator emitted before `routes`); `routes` wins when both are present.
 - **A local or session definition owns its storage key.** `storageKey` on the

@@ -40,8 +40,8 @@ pnpm add @k8ordo/i18n
 
 No React import and no schema library: a message is a plain function, and a
 locale set is a list that checks membership itself. `locales.paramsSchema`
-speaks Standard Schema, which is what `@k8ordo/static` and `@k8ordo/server`
-run for a route's params. On a server the current locale rides on
+speaks Standard Schema, which is what `@k8ordo/framework` runs for a
+route's params. On a server the current locale rides on
 `AsyncLocalStorage`, reached through `process.getBuiltinModule`, so a server
 runtime has to provide that API; Node 24, which the framework modes require,
 does.
@@ -118,8 +118,8 @@ the message and passes the string: a function does not cross that boundary.
 
 `/` negotiates and redirects; `<html lang>` and a language switcher read
 `locales.getLocale()`, and `<html dir>` its `locales.definitions[…].dir`; a static build passes `paths: locales.paths`. Links
-stay `@k8ordo/router`'s: `bindParams(() => ({ locale: locales.getLocale() }))`
-gives an `href` that spells `/:locale/…` patterns without the locale.
+stay the router's: `bindParams(() => ({ locale: locales.getLocale() }))`
+(imported from `@k8ordo/framework` in a framework application) gives an `href` that spells `/:locale/…` patterns without the locale.
 
 ## AI Agent Documentation
 

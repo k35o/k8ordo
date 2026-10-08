@@ -109,8 +109,13 @@ pnpm check         # check:write to auto-fix
   `@k8ordo/i18n` is the application's `links.ts`. Nothing locale-shaped
   belongs here.
 - **`PageProps` reads `Register`, never the mode.** `request` appears only
-  because the generator wrote it into `Register` under `@k8ordo/server`; the
-  type has no idea which package did.
+  because the generator wrote it into `Register` in server mode; the type
+  has no idea which mode did.
+- **A new export is also a decision for `@k8ordo/framework`.** Its `.` entry
+  re-exports the application half of this package by name, so an application
+  on the framework never names this one; `packages/framework/src/index.test.ts`
+  fails until a new export here is either re-exported there or listed in its
+  `WITHHELD`, with the reason.
 - **The table is written from the root; Vite's `base` lives at the edges.**
   `withBase` (in `href` / `navigateTo` / `bindParams`) puts
   `import.meta.env.BASE_URL` in front of what leaves for the browser, and
@@ -118,7 +123,7 @@ pnpm check         # check:write to auto-fix
   what comes back; nothing between ever sees it. `href` returns `string`
   because its result is a URL: typed as a table path it could be handed to
   something that adds the base itself (`@k8ordo/state`'s `href`) and carry
-  it twice. Code Node loads without Vite (`@k8ordo/static`'s build, `serve`)
+  it twice. Code Node loads without Vite (static mode's build, `serve`)
   has no `import.meta.env` and passes the base explicitly.
 - **The type mirrors the runtime walk.** `Below` resets a branch that landed
   on the root, exactly as `walk` does; without it every route under a root

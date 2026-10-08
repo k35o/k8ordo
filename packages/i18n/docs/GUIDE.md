@@ -325,7 +325,8 @@ Under Vite's `base` (`base: '/docs/'`), the segment read is the first one
 below it — `/docs/en/ui` is in `en` — as the route table's `[locale]` sits
 below it too. `localize` and `delocalize` work on pathnames in the table's
 terms, which is what `usePathname` returns; the one you navigate to gets the
-base back from `@k8ordo/router`'s `withBase`.
+base back from the router's `withBase` (imported from `@k8ordo/framework` in
+a framework application).
 
 A first segment that is not one of the set's locales is no locale, and the
 default applies; before the set has been defined in that environment, a
@@ -340,14 +341,14 @@ draw.
 
 `/` is the one URL without a locale; all it does is send the visitor to one.
 
-Under `@k8ordo/server` a `guard.ts` answers it before anything renders. It
+In server mode a `guard.ts` answers it before anything renders. It
 chooses from the request — the cookie holding the locale the visitor chose
 before, then `Accept-Language` — and ends the request with a `307`:
 
 ```ts
 // src/routes/(home)/guard.ts
-import { withBase } from '@k8ordo/router';
-import type { Guard } from '@k8ordo/server/runtime';
+import { withBase } from '@k8ordo/framework';
+import type { Guard } from '@k8ordo/framework/server';
 
 import { locales } from '../../i18n';
 
@@ -380,9 +381,9 @@ asks; `withBase` puts back the Vite `base` that `localize` leaves out. A
 visitor without JavaScript is redirected all the same, and so is a client
 navigation to `/`, whose payload request the guard answers too.
 
-`@k8ordo/static` refuses a `guard.ts` — a file has no request to guard — so
+Static mode refuses a `guard.ts` — a file has no request to guard — so
 there the page renders nothing and redirects from an effect: through the
-bound `navigateTo` where the router is `@k8ordo/router` (below), or
+bound `navigateTo` where the router is `@k8ordo/router`'s (below), or
 `locales.localize` otherwise:
 
 ```tsx
@@ -413,11 +414,11 @@ const locale = locales.delocalize(pathname).locale ?? locales.default;
 
 ## Static builds
 
-`@k8ordo/static` asks for the pathnames of every pattern with a parameter.
+Static mode asks for the pathnames of every pattern with a parameter.
 The set answers for its own segment:
 
 ```ts
-framework({ paths: locales.paths });
+framework({ mode: 'static', paths: locales.paths });
 ```
 
 `/:locale` in every pattern becomes one pathname per locale. A pattern with
@@ -448,6 +449,8 @@ without JavaScript keeps the default.
 
   ```ts
   // links.ts
+  import { bindParams } from '@k8ordo/framework'; // '@k8ordo/router' without the framework
+
   export const { href, navigateTo } = bindParams(() => ({
     locale: locales.getLocale(),
   }));
@@ -489,7 +492,7 @@ without JavaScript keeps the default.
   The definition stays at module scope; what has to happen per request is
   calling it. Call `formFields` during the page's render, not at module
   scope. A Server Action posted from a `[locale]` page runs in that page's
-  locale under `@k8ordo/server` — the framework runs the page's params
+  locale in server mode — the framework runs the page's params
   schemas for the action's request too — so `parseForm` in it needs nothing
   more. Anywhere else — an action run outside the framework, a job — call it
   inside `locales.run`.
