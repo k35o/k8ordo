@@ -457,6 +457,42 @@ describe('the shells a build writes', () => {
 
     expect(said.warn).toStrictEqual([]);
   });
+
+  it('says nothing of the shell pathname inside a script tagged in another case, with whitespace before its end tag’s `>`', async () => {
+    await routeFiles(POSTS);
+    await handlerAnswering(
+      site({
+        '/posts/!fallback': {
+          headers: SHELL_HEADER,
+          body: '<SCRIPT>"/posts/!fallback"</Script\n><p>shell</p>',
+        },
+      }),
+    );
+    const { build, said } = hooks();
+
+    await build();
+
+    expect(said.warn).toStrictEqual([]);
+  });
+
+  it('warns about the shell pathname between two scripts, after an end tag spelled `</script >`', async () => {
+    await routeFiles(POSTS);
+    await handlerAnswering(
+      site({
+        '/posts/!fallback': {
+          headers: SHELL_HEADER,
+          body: '<script>a</script ><a href="/posts/!fallback">post</a><script>b</script>',
+        },
+      }),
+    );
+    const { build, said } = hooks();
+
+    await build();
+
+    expect(said.warn).toStrictEqual([
+      'k8ordo: the shell for /posts/:id has "!fallback" in its HTML — a layout wrote the shell\'s pathname into the page (a link, a canonical URL); derive what depends on the URL in a client component',
+    ]);
+  });
 });
 
 describe('the _redirects a build writes', () => {

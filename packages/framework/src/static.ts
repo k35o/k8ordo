@@ -142,8 +142,48 @@ type DevShells = {
 
 const NO_SHELLS: DevShells = { paths: new Set(), shells: [] };
 
-/** What a script element holds is never what a layout wrote into the page. */
-const SCRIPT = /<script\b[^>]*>[\s\S]*?<\/script>/giu;
+/**
+ * What ends a tag's name in HTML: `</script` followed by anything else is
+ * still the script's text.
+ */
+const ENDS_TAG_NAME = new Set(['\t', '\n', '\f', '\r', ' ', '/', '>']);
+
+/** Where the next `<script` or `</script` tag starts, in any case. */
+const tagAt = (html: string, tag: string, from: number): number => {
+  for (
+    let at = html.indexOf('<', from);
+    at !== -1;
+    at = html.indexOf('<', at + 1)
+  ) {
+    if (
+      html.slice(at, at + tag.length).toLowerCase() === tag &&
+      ENDS_TAG_NAME.has(html.charAt(at + tag.length))
+    ) {
+      return at;
+    }
+  }
+  return -1;
+};
+
+/**
+ * Whether `text` is in the HTML outside its script elements — what a layout
+ * wrote into the page, not the payload the page hydrates from. Scanned rather
+ * than stripped with a pattern: an end tag may be `</SCRIPT >`, and a pattern
+ * that misses one swallows the page up to the next script's.
+ */
+const outsideScripts = (html: string, text: string): boolean => {
+  for (let from = 0; ;) {
+    const open = tagAt(html, '<script', from);
+    const written = open === -1 ? html.slice(from) : html.slice(from, open);
+    if (written.includes(text)) return true;
+    if (open === -1) return false;
+    const close = tagAt(html, '</script', open + 1);
+    if (close === -1) return false;
+    const end = html.indexOf('>', close);
+    if (end === -1) return false;
+    from = end + 1;
+  }
+};
 
 /** Every file below a directory, relative to it, POSIX separators. */
 const filesBelow = async (dir: string): Promise<string[]> =>
@@ -909,7 +949,7 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
               path.join(clientDir, dirFor(shell.pathname), 'index.html'),
               'utf8',
             );
-            return html.replaceAll(SCRIPT, '').includes(FALLBACK_SEGMENT)
+            return outsideScripts(html, FALLBACK_SEGMENT)
               ? [shell.location]
               : [];
           }),
