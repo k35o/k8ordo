@@ -1,5 +1,5 @@
 import { notFound, usePathname } from '@k8ordo/router';
-import { Component, use } from 'react';
+import { Component, Suspense, use, useLayoutEffect } from 'react';
 import type { ReactNode } from 'react';
 import { cleanup, render } from 'vitest-browser-react';
 
@@ -1026,6 +1026,99 @@ describe('a shell', () => {
     expect(signalOf()?.aborted).toBe(false);
   });
 });
+
+describe('a page still streaming in', () => {
+  it('keeps its request when it is applied right after the page before it went on screen', async () => {
+    const signalOf = answerEachHeldOpen();
+    rsc.payloads.set('/a/index.rsc', () => ({
+      tree: <LeavesOnceShown to="/b" />,
+      pathname: '/a',
+      client: RUNNING,
+    }));
+    rsc.payloads.set('/b/index.rsc', () => ({
+      tree: (
+        <>
+          page b
+          <Suspense fallback={null}>
+            <StillToCome on={signalOf('/b/index.rsc')} />
+          </Suspense>
+        </>
+      ),
+      pathname: '/b',
+      client: RUNNING,
+    }));
+    const screen = await renderRouter();
+
+    navigation.navigate('/a').finished?.catch(() => undefined);
+
+    await vi.waitFor(() => {
+      expect(screen.container.textContent).toBe('page b');
+    });
+    await nextTask();
+    expect(signalOf('/b/index.rsc')?.aborted).toBe(false);
+    expect(reloadDocument).not.toHaveBeenCalled();
+    // 置き換えられたページの分は、次のページが画面に出たら取り消される
+    expect(signalOf('/a/index.rsc')?.aborted).toBe(true);
+  });
+});
+
+// 画面に出たところで、訪問者が次のページへ移るページ。それを画面に出した
+// コミットが React の持ち時間（5ms）を使い切るので、React は手を返し、
+// コミットの passive effect は次のタスクに回る。次のページはその前に当たる。
+// 負荷の高いマシンで、データを待つページの本体が届いた直後にクリックが
+// 来たときの順番
+function LeavesOnceShown({ to }: { to: string }): ReactNode {
+  useLayoutEffect(() => {
+    navigation.navigate(to).finished?.catch(() => undefined);
+    const start = performance.now();
+    while (performance.now() - start < 20) {
+      // コミットを長引かせる
+    }
+  }, [to]);
+  return 'page a';
+}
+
+// ペイロードの頭のあとで、同じリクエストに乗って届く部分。リクエストが
+// 取り消されると、届くはずだった所に中断が投げられる（Flight がそうする）
+const stillToCome = new WeakMap<AbortSignal, Promise<never>>();
+function StillToCome({ on }: { on: AbortSignal | undefined }): ReactNode {
+  if (on === undefined) throw new Error('the request was not made');
+  let rest = stillToCome.get(on);
+  if (rest === undefined) {
+    rest = new Promise<never>((_resolve, reject) => {
+      on.addEventListener('abort', () => {
+        reject(on.reason as Error);
+      });
+    });
+    stillToCome.set(on, rest);
+  }
+  return use(rest);
+}
+
+// どのページのペイロードにも、頭だけを届けて残りは届く途中のままにする。
+// ペイロードは rsc.payloads にその URL の pathname で置く。頼まれたリクエストの
+// signal を pathname ごとに返す
+function answerEachHeldOpen(): (pathname: string) => AbortSignal | undefined {
+  const signals = new Map<string, AbortSignal>();
+  vi.stubGlobal('fetch', (input: RequestInfo | URL, init?: RequestInit) => {
+    if (!asksForPayload(input)) return passThrough(input, init);
+    const { pathname } = urlOf(input);
+    if (init?.signal instanceof AbortSignal) signals.set(pathname, init.signal);
+    return Promise.resolve(
+      new Response(
+        new ReadableStream<Uint8Array>({
+          start(controller) {
+            controller.enqueue(
+              new TextEncoder().encode(JSON.stringify({ $payload: pathname })),
+            );
+          },
+        }),
+        { headers: { 'content-type': 'text/x-component;charset=utf-8' } },
+      ),
+    );
+  });
+  return (pathname) => signals.get(pathname);
+}
 
 function Broken(): ReactNode {
   throw new Error('broken');

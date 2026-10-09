@@ -147,20 +147,8 @@ const fetchPage = async (
 type Streaming = {
   readonly trees: readonly ReactNode[];
   readonly cancel: () => void;
-};
-
-/** Takes over the request of a payload whose tree is being applied. */
-const hold = (streaming: Streaming[], payload: Payload): void => {
-  const stream = streams.get(payload);
-  if (stream === undefined) return;
-  stream.keep();
-  streaming.push({
-    trees:
-      payload.notFound === undefined
-        ? [payload.tree]
-        : [payload.tree, payload.notFound],
-    cancel: stream.cancel,
-  });
+  /** The `order` of what was applied with it. */
+  readonly order: number;
 };
 
 /**
@@ -170,12 +158,33 @@ const hold = (streaming: Streaming[], payload: Payload): void => {
 type Applied = {
   readonly tree: ReactNode;
   readonly notFound: ReactNode | undefined;
+  /** How many payloads this document had applied, this one included. */
+  readonly order: number;
 };
 
-const appliedOf = (payload: Payload): Applied => ({
-  tree: payload.tree,
-  notFound: payload.notFound,
-});
+/** How many payloads this document has applied. It has one router. */
+let applies = 0;
+
+/**
+ * Takes over the request of a payload whose tree is being applied, and
+ * returns what applying it puts in state.
+ */
+const hold = (streaming: Streaming[], payload: Payload): Applied => {
+  applies += 1;
+  const stream = streams.get(payload);
+  if (stream !== undefined) {
+    stream.keep();
+    streaming.push({
+      trees:
+        payload.notFound === undefined
+          ? [payload.tree]
+          : [payload.tree, payload.notFound],
+      cancel: stream.cancel,
+      order: applies,
+    });
+  }
+  return { tree: payload.tree, notFound: payload.notFound, order: applies };
+};
 
 /**
  * The router's prefetch cache, made the first time it is asked for. It is
@@ -223,7 +232,11 @@ export function AppRouter({
   /** A shell's not-found, when the tree is a shell. */
   notFound?: ReactNode | undefined;
 }): ReactNode {
-  const [latest, setLatest] = useState<Applied>(() => ({ tree, notFound }));
+  const [latest, setLatest] = useState<Applied>(() => ({
+    tree,
+    notFound,
+    order: 0,
+  }));
   const current = useDeferredValue(latest);
   const prefetched = useRef<PrefetchCache<Payload | null>>(null);
   // The search the tree last applied was rendered with — `undefined` when its
@@ -245,6 +258,10 @@ export function AppRouter({
   // it is still receiving is cancelled.
   useEffect(() => {
     streaming.current = streaming.current.filter((entry) => {
+      // 木を当てた時点で並べるので、このコミットの後に当てた木の分もある。
+      // コミットの passive effect は次の木が当たってから走ることがあり、
+      // その木はまだ latest にも current にも無い
+      if (entry.order > latest.order) return true;
       if (
         entry.trees.includes(latest.tree) ||
         entry.trees.includes(current.tree)
@@ -260,8 +277,9 @@ export function AppRouter({
     mounted = {
       apply: (payload) => {
         searchApplied.current = payload.search;
+        const next = hold(streaming.current, payload);
         startTransition(() => {
-          setLatest(appliedOf(payload));
+          setLatest(next);
         });
       },
       forgetPrefetched: () => {
@@ -307,10 +325,10 @@ export function AppRouter({
       if (payload === null || location.href !== url) return;
       if (!canRender(payload)) return reloadInstead();
       markNavigated();
-      hold(streaming.current, payload);
+      const next = hold(streaming.current, payload);
       searchApplied.current = payload.search;
       startTransition(() => {
-        setLatest(appliedOf(payload));
+        setLatest(next);
       });
     };
     const listener = (): void => {
@@ -382,9 +400,8 @@ export function AppRouter({
     },
     apply: (next) => {
       markNavigated();
-      hold(streaming.current, next);
       searchApplied.current = next.search;
-      setLatest(appliedOf(next));
+      setLatest(hold(streaming.current, next));
     },
     // A page that reads the search is rendered for the one it was given, so
     // a navigation that moves it loads the page again; a page that does not
@@ -404,7 +421,7 @@ export function AppRouter({
     if (loading.current > 0) return false;
     setLatest((previous) =>
       previous === shown
-        ? { tree: shown.notFound, notFound: undefined }
+        ? { tree: shown.notFound, notFound: undefined, order: shown.order }
         : previous,
     );
     return true;
