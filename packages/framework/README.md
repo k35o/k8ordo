@@ -136,35 +136,6 @@ shell, the layouts in HTML, and the browser draws the page from the URL.
 The build also writes the `_redirects` through which Netlify and Cloudflare
 reach the shell, and `vercel()` the same rewrites for Vercel.
 
-## Migrating from `@k8ordo/static` or `@k8ordo/server`
-
-Both 0.1.0 packages are this one now, and `mode` says which of them an
-application was. Swap the dependency for `@k8ordo/framework` in
-`devDependencies`, keep `@k8ordo/router` at `^1.0.0` there too, and move the
-imports:
-
-| 0.1.0                                                              | 1.0.0                                                         |
-| ------------------------------------------------------------------ | ------------------------------------------------------------- |
-| `framework()` from `@k8ordo/static`                                | `framework({ mode: 'static' })` from `@k8ordo/framework/vite` |
-| `framework()` from `@k8ordo/server`                                | `framework({ mode: 'server' })` from `@k8ordo/framework/vite` |
-| a `serve.js` calling `serve` from `@k8ordo/server`                 | `node dist/server.js`, which the build writes                 |
-| `serve` from `@k8ordo/server` in a server of your own              | `@k8ordo/framework/serve`, in `dependencies`                  |
-| `redirect`, `RedirectTarget`, `RouteRequest` from `@k8ordo/server` | `@k8ordo/framework/server`                                    |
-| `href`, `notFound`, `PageProps`, … from `@k8ordo/router`           | `@k8ordo/framework`                                           |
-
-`useParams` and `useRoute` are not re-exported: a page takes `params` from
-its props. `.k8ordo/` is rewritten by the next `vite dev` or `vite build`.
-
-`src/routes/` holds only route files now. A `_parts/` or `_data/` directory
-there is no longer private: `_` is an ordinary character, so the directory is
-a URL segment and a file in it is refused. Move what it holds out of
-`routes/` — components to `src/components/`, every other module to
-`src/lib/` — and update the imports.
-
-Everything else that changed since 0.1.0 — `redirect()` lost its options,
-`sitemap()` is gone, the static mode refuses what needs a request — is in the
-[1.0.0 entry of the changelog](https://github.com/k35o/k8ordo/blob/main/packages/framework/CHANGELOG.md).
-
 ## AI Agent Documentation
 
 The docs ship **inside the package**, so an agent always reads the exact
