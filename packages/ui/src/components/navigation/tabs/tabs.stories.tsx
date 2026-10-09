@@ -142,9 +142,7 @@ export const FollowsWritingMode: Story = {
     const first = canvas.getByRole('tab', { name: '一' });
     first.focus();
     await userEvent.keyboard('{ArrowDown}');
-    await waitFor(() => {
-      expect(canvas.getByRole('tab', { name: '二' })).toHaveFocus();
-    });
+    await expect(canvas.getByRole('tab', { name: '二' })).toHaveFocus();
   },
 };
 
@@ -167,7 +165,8 @@ const ThreeTabs: FC<{ label: string }> = ({ label }) => (
   </Tabs.Root>
 );
 
-// Home と End は最初と最後のタブへ移り、そのタブを選ぶ。ページはスクロールさせない
+// Home と End は最初と最後のタブへ移り、そのタブを選ぶ。ページはスクロールさせない。
+// フォーカスはキーを押したその場で移り、選択は transition なのでパネルは後から入れ替わる
 export const HomeAndEnd: Story = {
   render: () => <ThreeTabs label="数字のタブ" />,
   play: async ({ canvas, userEvent }) => {
@@ -179,17 +178,13 @@ export const HomeAndEnd: Story = {
     window.addEventListener('keydown', record);
 
     await userEvent.keyboard('{End}');
-    await waitFor(() => {
-      expect(canvas.getByRole('tab', { name: '三' })).toHaveFocus();
-    });
+    await expect(canvas.getByRole('tab', { name: '三' })).toHaveFocus();
     await waitFor(() => {
       expect(canvas.getByRole('tabpanel')).toHaveTextContent('三の内容');
     });
 
     await userEvent.keyboard('{Home}');
-    await waitFor(() => {
-      expect(canvas.getByRole('tab', { name: '一' })).toHaveFocus();
-    });
+    await expect(canvas.getByRole('tab', { name: '一' })).toHaveFocus();
     await waitFor(() => {
       expect(canvas.getByRole('tabpanel')).toHaveTextContent('一の内容');
     });
@@ -210,17 +205,15 @@ export const RightToLeft: Story = {
     canvas.getByRole('tab', { name: '一' }).focus();
 
     await userEvent.keyboard('{ArrowLeft}');
+    await expect(canvas.getByRole('tab', { name: '二' })).toHaveFocus();
     await waitFor(() => {
-      expect(canvas.getByRole('tab', { name: '二' })).toHaveFocus();
+      expect(canvas.getByRole('tab', { name: '二' })).toHaveAttribute(
+        'aria-selected',
+        'true',
+      );
     });
-    await expect(canvas.getByRole('tab', { name: '二' })).toHaveAttribute(
-      'aria-selected',
-      'true',
-    );
 
     await userEvent.keyboard('{ArrowRight}');
-    await waitFor(() => {
-      expect(canvas.getByRole('tab', { name: '一' })).toHaveFocus();
-    });
+    await expect(canvas.getByRole('tab', { name: '一' })).toHaveFocus();
   },
 };
