@@ -3,7 +3,6 @@
 import {
   startTransition,
   useCallback,
-  useEffect,
   useId,
   useMemo,
   useRef,
@@ -96,7 +95,7 @@ export const Root: FC<
 };
 
 const [TabsListProvider, useTabsListState] = createSafeContext<{
-  setFocusRef: RefObject<boolean>;
+  tabsRef: RefObject<Map<string, HTMLDivElement>>;
   writingMode: WritingMode;
 }>('useTabListState must be used within a TabListProvider');
 
@@ -106,11 +105,11 @@ export const List: FC<
   }>
 > = ({ label, children }) => {
   const { rootId } = useTabsState();
-  const setFocusRef = useRef<boolean>(false);
+  const tabsRef = useRef(new Map<string, HTMLDivElement>());
   const [tablist, setTablist] = useState<HTMLDivElement | null>(null);
   const writingMode = useWritingMode(tablist);
   const listContextValue = useMemo(
-    () => ({ setFocusRef, writingMode }),
+    () => ({ tabsRef, writingMode }),
     [writingMode],
   );
   return (
@@ -146,17 +145,9 @@ export const Tab: FC<PropsWithChildren<{ id: string }>> = ({
   children,
 }) => {
   const { rootId, ids, selectedId, setSelectedId } = useTabsState();
-  const { setFocusRef, writingMode } = useTabsListState();
-  const ref = useRef<HTMLAnchorElement & HTMLDivElement>(null);
+  const { tabsRef, writingMode } = useTabsListState();
   const activeIndex = ids.indexOf(selectedId);
   const index = ids.indexOf(id);
-
-  useEffect(() => {
-    if (activeIndex === index && setFocusRef.current) {
-      ref.current?.focus();
-      setFocusRef.current = false;
-    }
-  }, [activeIndex, index, setFocusRef]);
 
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     // 縦書きでは tablist の inline 軸が縦になるので、前後を上下キーに割り当てる
@@ -181,8 +172,11 @@ export const Tab: FC<PropsWithChildren<{ id: string }>> = ({
     if (targetId === id) {
       return;
     }
+    // 選択を effect で追ってフォーカスを移すと遅れる。選択は transition で、React は
+    // <ViewTransition> の animate が終わるまで effect を走らせず、その間に押した
+    // キーが元のタブに届いて取りこぼす
+    tabsRef.current.get(targetId)?.focus();
     setSelectedId(targetId);
-    setFocusRef.current = true;
   };
 
   return (
@@ -199,7 +193,13 @@ export const Tab: FC<PropsWithChildren<{ id: string }>> = ({
         setSelectedId(id);
       }}
       onKeyDown={handleKeyDown}
-      ref={ref}
+      ref={(element) => {
+        if (element === null) {
+          tabsRef.current.delete(id);
+          return;
+        }
+        tabsRef.current.set(id, element);
+      }}
       role="tab"
       style={
         // 選択中のタブをインジケータ(ao-tab-indicator)のアンカーにする
