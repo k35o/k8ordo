@@ -5,9 +5,9 @@ import { Pitfall } from '../../../../components/callout';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { Playground } from '../../../../components/playground';
 import { Rich } from '../../../../components/rich';
+import { EntryDemo } from '../../../../demos/form/multi-step/entry-demo';
+import { entrySchema } from '../../../../demos/form/multi-step/entry-schema';
 import * as m from '../../../../messages';
-import { EntryDemo } from './_parts/entry-demo';
-import { entrySchema } from './_parts/entry-schema';
 
 const t = m.formMultiStep;
 

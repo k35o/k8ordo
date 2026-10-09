@@ -89,8 +89,8 @@ export const nextLocation = message({
 });
 
 export const nextFramework = message({
-  ja: '`@k8ordo/static`や`@k8ordo/server`の下で使う部分と、propsの型です。',
-  en: 'What you use under `@k8ordo/static` and `@k8ordo/server`, and the props types.',
+  ja: '`@k8ordo/framework`の下で使う部分と、propsの型です。',
+  en: 'What you use under `@k8ordo/framework`, and the props types.',
 });
 
 export const nextReference = message({

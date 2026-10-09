@@ -64,7 +64,7 @@ export default function StateReferencePage() {
 ): PageState<Url, Entry>`}
         summary={t.pageSummary}
       >
-        <CodeBlock code={PAGE_EXAMPLE} lang="ts" title="state.ts" />
+        <CodeBlock code={PAGE_EXAMPLE} lang="ts" title="src/state.ts" />
       </ApiEntry>
 
       <ApiEntry

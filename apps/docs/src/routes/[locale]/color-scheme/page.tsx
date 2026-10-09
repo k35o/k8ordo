@@ -6,8 +6,8 @@ import {
   NextSteps,
 } from '../../../components/landing';
 import { Playground } from '../../../components/playground';
+import { SchemeDemo } from '../../../demos/color-scheme/scheme-demo';
 import * as m from '../../../messages';
-import { SchemeDemo } from './_parts/scheme-demo';
 
 const HERO_LAYOUT = `<html lang="ja" suppressHydrationWarning>
   <body>
@@ -24,6 +24,7 @@ const CLAIM_CSP_SERVER = `<ColorSchemeProvider nonce={nonce()}>
 </ColorSchemeProvider>`;
 
 const CLAIM_CSP_STATIC = `framework({
+  mode: 'static',
   csp: {
     'script-src': ["'self'", await colorSchemeScriptHash()],
   },
@@ -46,7 +47,7 @@ export default function ColorSchemePage() {
             <CodeBlock
               code={HERO_LAYOUT}
               lang="tsx"
-              title="routes/layout.tsx"
+              title="src/routes/layout.tsx"
             />
             <CodeBlock code={HERO_TOGGLE} lang="tsx" title="theme-toggle.tsx" />
           </>
@@ -77,7 +78,7 @@ export default function ColorSchemePage() {
           <CodeBlock
             code={CLAIM_CSP_SERVER}
             lang="tsx"
-            title="routes/layout.tsx"
+            title="src/routes/layout.tsx"
           />
           <CodeBlock code={CLAIM_CSP_STATIC} lang="ts" title="vite.config.ts" />
         </div>

@@ -5,9 +5,9 @@ import { Pitfall } from '../../../../components/callout';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { Playground } from '../../../../components/playground';
 import { Rich } from '../../../../components/rich';
+import { EditDemo } from '../../../../demos/form/edit/edit-demo';
+import { talkSchema } from '../../../../demos/form/edit/talk-schema';
 import * as m from '../../../../messages';
-import { EditDemo } from './_parts/edit-demo';
-import { talkSchema } from './_parts/talk-schema';
 
 const t = m.formEdit;
 

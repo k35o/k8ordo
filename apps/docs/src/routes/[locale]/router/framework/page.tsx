@@ -8,8 +8,8 @@ import * as m from '../../../../messages';
 
 const t = m.routerFramework;
 
-const PAGE = `import { href, notFound } from '@k8ordo/router';
-import type { PageProps } from '@k8ordo/router';
+const PAGE = `import { href, notFound } from '@k8ordo/framework';
+import type { PageProps } from '@k8ordo/framework';
 import * as z from 'zod/mini';
 
 export const paramsSchema = z.object({
@@ -30,7 +30,7 @@ export default async function ProductPage({
   );
 }`;
 
-const LAYOUT = `import type { LayoutProps } from '@k8ordo/router';
+const LAYOUT = `import type { LayoutProps } from '@k8ordo/framework';
 
 export default function ProductsLayout({
   children,
@@ -38,7 +38,7 @@ export default function ProductsLayout({
   return <section>{children}</section>;
 }`;
 
-const ROUTE = `import type { RouteContext } from '@k8ordo/router';
+const ROUTE = `import type { RouteContext } from '@k8ordo/framework';
 
 export async function GET({ request }: RouteContext<'/feed.xml'>) {
   const origin = new URL(request.url).origin;

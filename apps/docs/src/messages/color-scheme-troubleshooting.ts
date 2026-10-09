@@ -31,8 +31,8 @@ export const cspCause = message({
 });
 
 export const cspFix = message({
-  ja: "`@k8ordo/server`なら、プロバイダの`nonce`に`nonce()`を渡します。ハッシュで許可するなら、プロバイダと同じ`defaultPreference`を`colorSchemeScriptHash()`に渡し、ポリシーを書く場所で毎回計算します。`'unsafe-inline'`は、ページに紛れ込んだほかのインラインスクリプトまで許可してしまうので使いません。",
-  en: "Under `@k8ordo/server`, give the provider `nonce={nonce()}`. By hash, pass `colorSchemeScriptHash()` the provider’s `defaultPreference` and compute it wherever the policy is written, every time. Do not reach for `'unsafe-inline'`, which also allows any other inline script that reaches the page.",
+  ja: "`@k8ordo/framework`のserverモードなら、プロバイダの`nonce`に`nonce()`を渡します。ハッシュで許可するなら、プロバイダと同じ`defaultPreference`を`colorSchemeScriptHash()`に渡し、ポリシーを書く場所で毎回計算します。`'unsafe-inline'`は、ページに紛れ込んだほかのインラインスクリプトまで許可してしまうので使いません。",
+  en: "In `@k8ordo/framework`’s server mode, give the provider `nonce={nonce()}`. By hash, pass `colorSchemeScriptHash()` the provider’s `defaultPreference` and compute it wherever the policy is written, every time. Do not reach for `'unsafe-inline'`, which also allows any other inline script that reaches the page.",
 });
 
 export const hydrationTitle = message({

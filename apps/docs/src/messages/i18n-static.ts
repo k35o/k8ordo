@@ -1,8 +1,8 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: '`@k8ordo/static`は、パラメータを持つページのpathnameを、ビルドの時点で知る必要があります。ロケールの区間はどのページでも同じ値を取るので、その一覧はロケールの集合が作ります。このページでは、`locales.paths`の渡し方と、ほかのパラメータがあるときの書き方、404ページの言語を説明します。',
-  en: '`@k8ordo/static` has to know, at build time, the pathnames of every page with a parameter. The locale segment takes the same values on every page, so the locale set makes that list itself. This page covers passing `locales.paths`, pages with another parameter, and the language of the 404 page.',
+  ja: '`@k8ordo/framework`のstaticモードは、パラメータを持つページのpathnameを、ビルドの時点で知る必要があります。ロケールの区間はどのページでも同じ値を取るので、その一覧はロケールの集合が作ります。このページでは、`locales.paths`の渡し方と、ほかのパラメータがあるときの書き方、404ページの言語を説明します。',
+  en: '`@k8ordo/framework`’s static mode has to know, at build time, the pathnames of every page with a parameter. The locale segment takes the same values on every page, so the locale set makes that list itself. This page covers passing `locales.paths`, pages with another parameter, and the language of the 404 page.',
 });
 
 export const pathsTitle = message({
@@ -36,13 +36,18 @@ export const otherDescription = message({
 });
 
 export const otherError = message({
-  ja: 'ビルドはパラメータの残ったpathnameを書き出せないので、`static build needs pathnames for /:locale/blog/:slug — supply them with the "paths" option`というエラーで止まります。',
-  en: 'The build cannot write a pathname that still holds a parameter, so it stops with `static build needs pathnames for /:locale/blog/:slug — supply them with the "paths" option`.',
+  ja: 'パラメータの残ったpathnameを受け取れるのは、横に`fallback.tsx`を置いたページだけです。それ以外のルートでは、ビルドは`the "paths" option supplied pathnames that still hold a parameter, and only a page with a fallback.tsx beside it takes one: /ja/blog/:slug ([locale]/blog/[slug]/page.tsx has none)`というエラーで止まります。',
+  en: 'Only a page with a `fallback.tsx` beside it takes a pathname that still holds a parameter. For any other route the build stops with `the "paths" option supplied pathnames that still hold a parameter, and only a page with a fallback.tsx beside it takes one: /ja/blog/:slug ([locale]/blog/[slug]/page.tsx has none)`.',
 });
 
 export const otherExpand = message({
   ja: '先に`locales.paths`でロケールを展開し、残ったパラメータを同じ関数の中で展開します。`paths`には`Promise`を返す関数も渡せるので、記事の一覧を読み込んでから答えられます。',
   en: 'Expand the locale with `locales.paths` first, then the remaining parameter in the same function. `paths` may return a `Promise`, so it can read the list of posts before it answers.',
+});
+
+export const otherShell = message({
+  ja: '`fallback.tsx`のあるページでは、`/ja/blog/:slug`がシェルの場所になります。ロケールごとにシェルが書かれ、ビルドしていないslugにはブラウザが本文を描きます。シェルではページの`paramsSchema`は動かず、上のレイアウトのスキーマだけが動きます。`locales`のスキーマを`[locale]/layout.tsx`に置いておけば、シェルの文言もそのロケールで書かれます。',
+  en: 'For a page with a `fallback.tsx`, `/ja/blog/:slug` is where its shell goes: one shell per locale, and the browser renders the body for a slug the build did not write. A shell runs no `paramsSchema` of its page, only those of the layouts above it. With the `locales` schema on `[locale]/layout.tsx`, the shell’s messages come out in its locale too.',
 });
 
 export const notFoundTitle = message({
@@ -76,6 +81,6 @@ export const notFoundLang = message({
 });
 
 export const notFoundServer = message({
-  ja: '開発サーバーと`@k8ordo/server`では、404は訪問者のURLで描かれます。URLの区間が集合のロケールなら、サーバーが書いたHTMLの時点でそのロケールです。',
-  en: 'Under the dev server and `@k8ordo/server`, a 404 is rendered at the visitor’s URL. When its segment is a locale of the set, the page is in that locale from the server’s HTML on.',
+  ja: '開発サーバーとserverモードでは、404は訪問者のURLで描かれます。URLの区間が集合のロケールなら、サーバーが書いたHTMLの時点でそのロケールです。',
+  en: 'Under the dev server and in server mode, a 404 is rendered at the visitor’s URL. When its segment is a locale of the set, the page is in that locale from the server’s HTML on.',
 });

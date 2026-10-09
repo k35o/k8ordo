@@ -5,7 +5,9 @@ import {
   nonce,
   requestHeaders,
   responseHeaders,
+  signingNonce,
   withRequest,
+  writingFile,
 } from './request-scope';
 
 const request = new Request('https://example.test/');
@@ -199,5 +201,40 @@ describe('nonce()', () => {
       Array.from({ length: 50 }, () => withRequest(request, nonce)),
     );
     expect(signed.size).toBe(50);
+  });
+});
+
+describe('a request answered into a file', () => {
+  const REFUSAL =
+    /answers a request, and under mode: 'static' a file is written once for every visitor[\s\S]*this application wants mode: 'server'$/u;
+
+  describe.each([
+    ['responseHeaders()', responseHeaders],
+    ['cookies()', cookies],
+    ['requestHeaders()', requestHeaders],
+    ['nonce()', nonce],
+  ])('%s', (name, api) => {
+    it.each(['route', 'render'] as const)(
+      'refuses in a %s, naming static mode, rather than writing one visitor’s answer for all',
+      (phase) => {
+        withRequest(request, () => {
+          writingFile(() => {
+            inPhase(phase, () => {
+              expect(() => api()).toThrow(name);
+              expect(() => api()).toThrow(REFUSAL);
+            });
+          });
+        });
+      },
+    );
+  });
+
+  it('still lets the handler sign its own scripts, which the file says as hashes', () => {
+    withRequest(request, () => {
+      const signed = signingNonce();
+      writingFile(() => {
+        expect(signingNonce()).toBe(signed);
+      });
+    });
   });
 });

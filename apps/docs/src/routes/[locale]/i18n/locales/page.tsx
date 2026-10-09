@@ -45,7 +45,7 @@ export default function I18nLocalesPage() {
           code={DEFINE}
           lang="ts"
           marks={{ 6: 'highlight', 7: 'highlight', 8: 'highlight' }}
-          title="i18n.ts"
+          title="src/i18n.ts"
         />
         <p>
           <Rich>{t.defineTag()}</Rich>

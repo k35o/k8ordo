@@ -16,8 +16,8 @@ export const providerDefault = message({
 });
 
 export const providerNonce = message({
-  ja: 'インラインスクリプトに付けるnonceです。`@k8ordo/server`では`nonce()`を渡します。ハッシュで許可するときは渡しません。',
-  en: 'The nonce to put on the inline script; under `@k8ordo/server`, pass `nonce()`. Leave it out when the script is allowed by hash.',
+  ja: 'インラインスクリプトに付けるnonceです。`@k8ordo/framework`のserverモードでは`nonce()`を渡します。ハッシュで許可するときは渡しません。',
+  en: 'The nonce to put on the inline script; in `@k8ordo/framework`’s server mode, pass `nonce()`. Leave it out when the script is allowed by hash.',
 });
 
 export const providerChildren = message({
@@ -155,8 +155,8 @@ export const hashCaveats = [
     en: 'Call it wherever the policy is written, every time, rather than copying its value: the script is the installed version’s, and an update may change it.',
   }),
   message({
-    ja: '`@k8ordo/server`のように応答ごとのnonceを付けられるなら、ハッシュは要りません。',
-    en: 'Where every response can carry a nonce, as under `@k8ordo/server`, the hash is not needed.',
+    ja: '`@k8ordo/framework`のserverモードのように応答ごとのnonceを付けられるなら、ハッシュは要りません。',
+    en: 'Where every response can carry a nonce, as in `@k8ordo/framework`’s server mode, the hash is not needed.',
   }),
 ] as const;
 

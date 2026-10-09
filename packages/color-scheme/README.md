@@ -45,7 +45,7 @@ The provider goes in the root layout, inside `<body>`, around everything. It
 renders the inline script itself, so nothing goes in `<head>`:
 
 ```tsx
-// routes/layout.tsx — a Server Component
+// src/routes/layout.tsx — a Server Component
 import { ColorSchemeProvider } from '@k8ordo/color-scheme';
 
 export default function RootLayout({ children }) {

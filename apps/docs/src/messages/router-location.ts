@@ -26,8 +26,8 @@ export const pathnameEncoded = message({
 });
 
 export const pathnameFramework = message({
-  ja: '`usePathname`はルート表ではなくブラウザのURLを読むので、`@k8ordo/static`や`@k8ordo/server`の下でも同じように使えます。',
-  en: '`usePathname` reads the browser’s URL rather than the route table, so it works the same under `@k8ordo/static` and `@k8ordo/server`.',
+  ja: '`usePathname`はルート表ではなくブラウザのURLを読むので、`@k8ordo/framework`の下でも同じように使えます。',
+  en: '`usePathname` reads the browser’s URL rather than the route table, so it works the same under `@k8ordo/framework`.',
 });
 
 export const matchTitle = message({
@@ -121,8 +121,8 @@ export const paramsRoute = message({
 });
 
 export const paramsFramework = message({
-  ja: '`useParams`と`useRoute`は、`<Router>`が持つ照合の結果を読みます。`@k8ordo/static`や`@k8ordo/server`の下ではブラウザにルート表が無いので、どちらも使えません。ページは`params`をpropsで受け取ります。',
-  en: '`useParams` and `useRoute` read the match `<Router>` holds. Under `@k8ordo/static` and `@k8ordo/server` the browser has no route table, so neither works there; a page receives `params` as a prop.',
+  ja: '`useParams`と`useRoute`は、`<Router>`が持つ照合の結果を読みます。`@k8ordo/framework`の下ではブラウザにルート表が無いので、どちらも使えません。ページは`params`をpropsで受け取ります。',
+  en: '`useParams` and `useRoute` read the match `<Router>` holds. Under `@k8ordo/framework` the browser has no route table, so neither works there; a page receives `params` as a prop.',
 });
 
 export const demoTitle = message({

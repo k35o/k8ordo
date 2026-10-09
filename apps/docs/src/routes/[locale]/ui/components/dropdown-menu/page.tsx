@@ -7,13 +7,13 @@ import { PropsTable } from '../../../../../components/props-table';
 import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { propsOf } from '../../../../../data/component-props';
-import * as m from '../../../../../messages';
 import {
   DropdownMenuBasicPreview,
   DropdownMenuIconTriggerPreview,
   DropdownMenuPlacementPreview,
   DropdownMenuSizesPreview,
-} from '../_previews/dropdown-menu-previews';
+} from '../../../../../demos/ui/components/dropdown-menu-previews';
+import * as m from '../../../../../messages';
 
 export default function DropdownMenuPage() {
   return (

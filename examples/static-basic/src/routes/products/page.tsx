@@ -1,5 +1,5 @@
-import { listProducts } from '../_data/catalog.server';
-import { ProductList } from '../_parts/product-list';
+import { ProductList } from '../../components/product-list';
+import { listProducts } from '../../lib/catalog.server';
 
 export default async function ProductsPage() {
   // Server Component なので、データは直接読む。絞り込みはブラウザの仕事

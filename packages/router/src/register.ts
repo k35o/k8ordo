@@ -33,6 +33,11 @@ export interface Register {}
 // to the union, which leaves every pattern rejected where the union is
 // compared against (`useMatch`), while `href` only survives through generic
 // inference taking another path.
+//
+// The union is rebuilt through a mapped type rather than named as
+// `PatternOf<R>`: a type an alias produced is printed by that alias, so a
+// pattern the table lacks would be reported as not assignable to
+// `PatternsIn<{ …the whole table… }>` instead of to the patterns themselves.
 
 /**
  * Every leaf pattern in the registered table — each page and each `/*`, not a
@@ -41,14 +46,14 @@ export interface Register {}
 export type RegisteredPattern = Register extends {
   routes: Routes<infer R extends RoutesRecord>;
 }
-  ? PatternOf<R>
+  ? { [K in PatternOf<R>]: K }[PatternOf<R>]
   : `/${string}`;
 
 /** Linkable patterns of the registered table (wildcards excluded). */
 export type RegisteredNavigablePattern = Register extends {
   routes: Routes<infer R extends RoutesRecord>;
 }
-  ? NavigablePatternOf<R>
+  ? { [K in NavigablePatternOf<R>]: K }[NavigablePatternOf<R>]
   : `/${string}`;
 
 type RegisteredParamsMap = Register extends { params: infer M } ? M : null;
@@ -91,7 +96,7 @@ export type RegisteredPageParams<P extends string> = Register extends {
   : ParamsOf<P>;
 
 /**
- * The request a route file receives — under `@k8ordo/server` only, where the
+ * The request a route file receives — under the framework's server mode only, where the
  * generated `Register` says so. A build into files has none, and a page that
  * reads it fails to type-check there rather than at run time.
  */
@@ -115,7 +120,7 @@ type RegisteredSearch = Register extends { search: infer M }
 /**
  * The props a `page.tsx` receives under the framework, by the pattern its
  * directory puts it under: `params` typed by the schemas along its stack,
- * the `pathname` this render is for, under `@k8ordo/server` the `request`,
+ * the `pathname` this render is for, in server mode the `request`,
  * and for a page that exports `search`, the `search` it reads. The generated
  * table checks the same thing at the import, so a page may equally declare
  * its props inline; this is the spelling that names the pattern once and

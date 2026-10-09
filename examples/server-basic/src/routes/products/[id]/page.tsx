@@ -1,8 +1,8 @@
-import { notFound } from '@k8ordo/router';
-import type { PageProps } from '@k8ordo/router';
+import { notFound } from '@k8ordo/framework';
+import type { PageProps } from '@k8ordo/framework';
 import * as z from 'zod/mini';
 
-import { findProduct } from '../../_data/catalog.server';
+import { findProduct } from '../../../lib/catalog.server';
 
 // [id] が受け取る値の形。合わないパスはこのルートが答えない（404）
 export const paramsSchema = z.object({

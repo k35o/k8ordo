@@ -71,8 +71,8 @@ export const frameworkTitle = message({
 });
 
 export const frameworkCause = message({
-  ja: '`@k8ordo/static`や`@k8ordo/server`では、ブラウザにルート表も照合の結果もありません。2つのフックは`<Router>`が持つ照合の結果を読むので、読むものが無く例外を投げます。',
-  en: 'Under `@k8ordo/static` and `@k8ordo/server`, the browser has neither the route table nor a match. Both hooks read the match `<Router>` holds, so they find nothing and throw.',
+  ja: '`@k8ordo/framework`では、ブラウザにルート表も照合の結果もありません。2つのフックは`<Router>`が持つ照合の結果を読むので、読むものが無く例外を投げます。',
+  en: 'Under `@k8ordo/framework`, the browser has neither the route table nor a match. Both hooks read the match `<Router>` holds, so they find nothing and throw.',
 });
 
 export const frameworkFix = message({

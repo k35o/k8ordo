@@ -86,8 +86,8 @@ export const serverTitle = message({
 });
 
 export const serverDescription = message({
-  ja: '`@k8ordo/server`のページは、`url`のスキーマを`search`という名前でexportできます。すると、URLから読んだ値を`search`として受け取ります。',
-  en: 'A page under `@k8ordo/server` can export the url schema under the name `search`. It then receives what was read from the URL, as `search`.',
+  ja: '`@k8ordo/framework`のserverモードでは、ページが`url`のスキーマを`search`という名前でexportできます。すると、URLから読んだ値を`search`として受け取ります。',
+  en: 'In `@k8ordo/framework`’s server mode, a page can export the url schema under the name `search`. It then receives what was read from the URL, as `search`.',
 });
 
 export const serverParsed = message({
@@ -106,8 +106,8 @@ export const serverSeed = message({
 });
 
 export const serverStatic = message({
-  ja: '`@k8ordo/static`は、`search`をexportしたページを見つけるとビルドを止めます。ファイルの中身はクエリによって変えられないからです。そこではサーバーの描画は既定値で行われ、ハイドレーションのあとにURLの値へ切り替わります。',
-  en: '`@k8ordo/static` stops the build when a page exports `search`, because a file cannot change with the query. There the server render shows the defaults, and the URL’s values take over after hydration.',
+  ja: 'staticモードは、`search`をexportしたページを見つけるとビルドを止めます。ファイルの中身はクエリによって変えられないからです。そこではサーバーの描画は既定値で行われ、ハイドレーションのあとにURLの値へ切り替わります。',
+  en: 'Static mode stops the build when a page exports `search`, because a file cannot change with the query. There the server render shows the defaults, and the URL’s values take over after hydration.',
 });
 
 export const linksTitle = message({
@@ -131,8 +131,8 @@ export const tryTitle = message({
 });
 
 export const tryDescription = message({
-  ja: 'このページのURLを実際に書き換える、本物の`definePageState`です。このサイトは`@k8ordo/static`で動いていてサーバーが`search`を受け取れないので、一覧の絞り込みはブラウザで行っています。',
-  en: 'A real `definePageState` that rewrites this page’s URL. This site runs on `@k8ordo/static`, where the server cannot receive `search`, so the list is filtered in the browser.',
+  ja: 'このページのURLを実際に書き換える、本物の`definePageState`です。このサイトは`@k8ordo/framework`のstaticモードで動いていてサーバーが`search`を受け取れないので、一覧の絞り込みはブラウザで行っています。',
+  en: 'A real `definePageState` that rewrites this page’s URL. This site runs in `@k8ordo/framework`’s static mode, where the server cannot receive `search`, so the list is filtered in the browser.',
 });
 
 export const trySteps = [

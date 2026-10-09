@@ -72,8 +72,8 @@ export type ColorSchemeProviderProps = {
   readonly defaultPreference?: ColorSchemePreference;
   /**
    * The nonce the page's `Content-Security-Policy` lets inline scripts run
-   * with, put on the inline script — under `@k8ordo/server`, `nonce()` from
-   * `@k8ordo/server/runtime`. A policy that allows the script by its hash
+   * with, put on the inline script — under `@k8ordo/framework`'s server mode,
+   * `nonce()` from `@k8ordo/framework/server`. A policy that allows the script by its hash
    * instead names `colorSchemeScriptHash()`.
    */
   readonly nonce?: string;

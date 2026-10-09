@@ -1,9 +1,9 @@
 import { ColorSchemeProvider } from '@k8ordo/color-scheme';
-import { href } from '@k8ordo/router';
-import type { LayoutProps } from '@k8ordo/router';
+import { href } from '@k8ordo/framework';
+import type { LayoutProps } from '@k8ordo/framework';
 
+import { SchemeToggle } from '../components/scheme';
 import { locales } from '../i18n';
-import { SchemeToggle } from './_parts/scheme';
 
 // ディレクティブなし = Server Component（既定）
 export default function RootLayout({ children, pathname }: LayoutProps<'/'>) {

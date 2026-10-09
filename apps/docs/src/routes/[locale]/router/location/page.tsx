@@ -4,8 +4,8 @@ import { Pitfall } from '../../../../components/callout';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { Playground } from '../../../../components/playground';
 import { Rich } from '../../../../components/rich';
+import { MatchDemo } from '../../../../demos/router/location/match-demo';
 import * as m from '../../../../messages';
-import { MatchDemo } from './_parts/match-demo';
 
 const t = m.routerLocation;
 

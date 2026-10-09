@@ -21,13 +21,13 @@ export type CookieState<Schema extends StateSchema = StateSchema> = {
   cookieName: string;
   /**
    * Reads the values out of a request's cookies on the server —
-   * `request.cookies` under `@k8ordo/server`, whose values arrive
+   * `request.cookies` under `@k8ordo/framework`'s server mode, whose values arrive
    * percent-decoded. Absent, corrupt, or rejected fields get their defaults.
    */
   parseCookies: (cookies: ReadonlyMap<string, string>) => output<Schema>;
   /**
    * The value to hand a server's cookie API when it writes the same cookie
-   * (`cookies().set` under `@k8ordo/server`, Next.js's): the JSON of these
+   * (`cookies().set` from `@k8ordo/framework/server`, Next.js's): the JSON of these
    * values, left for that API to percent-encode, as the browser store
    * encodes it before writing. Unspecified fields mean their default, and
    * the values pass the schema first, as `update()` does.

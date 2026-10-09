@@ -5,8 +5,8 @@ import { DocPage, DocSection } from '../../../../components/doc-page';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Playground } from '../../../../components/playground';
 import { Rich } from '../../../../components/rich';
+import { WritesDemo } from '../../../../demos/state/updates/writes-demo';
 import * as m from '../../../../messages';
-import { WritesDemo } from './_parts/writes-demo';
 
 const t = m.stateUpdates;
 

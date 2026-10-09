@@ -32,7 +32,7 @@ legacy fallbacks.
 ## The shape of it
 
 ```ts
-// i18n.ts — the one place the list is spelled
+// src/i18n.ts — the one place the list is spelled
 import { defineLocales } from '@k8ordo/i18n';
 import type { LocaleOf } from '@k8ordo/i18n';
 
@@ -49,7 +49,7 @@ declare module '@k8ordo/i18n' {
 ```
 
 ```ts
-// messages/nav.ts — each message is one export
+// src/messages/nav.ts — each message is one export
 import { message } from '@k8ordo/i18n';
 
 export const home = message({ ja: 'ホーム', en: 'Home' });
@@ -60,7 +60,7 @@ export const greeting = message({
 ```
 
 ```tsx
-// routes/[locale]/layout.tsx — a Server Component
+// src/routes/[locale]/layout.tsx — a Server Component
 import { locales } from '../../i18n';
 
 export const { paramsSchema } = locales;
@@ -207,11 +207,11 @@ component translating on another's behalf.
 
 ### Where messages live
 
-Anywhere. A file per area (`messages/nav.ts`, `messages/form.ts`) with a
+Anywhere. A file per area in `src/messages/` (`nav.ts`, `form.ts`) with a
 barrel that re-exports each as a namespace reads well at the call site:
 
 ```ts
-// messages/index.ts
+// src/messages/index.ts
 export * as nav from './nav';
 export * as form from './form';
 ```
@@ -221,10 +221,10 @@ import * as m from '../messages';
 <h1>{m.nav.home()}</h1>;
 ```
 
-A message that belongs to one component can sit next to that component.
-Grouping related messages in an object (`export const button = { label:
-message(…), hint: message(…) }`) is fine too; the bundler then keeps the
-group together.
+A message that belongs to one component can be declared in that
+component's own module. Grouping related messages in an object (`export const
+button = { label: message(…), hint: message(…) }`) is fine too; the bundler
+then keeps the group together.
 
 ### Across the Server Component boundary
 
@@ -325,7 +325,8 @@ Under Vite's `base` (`base: '/docs/'`), the segment read is the first one
 below it — `/docs/en/ui` is in `en` — as the route table's `[locale]` sits
 below it too. `localize` and `delocalize` work on pathnames in the table's
 terms, which is what `usePathname` returns; the one you navigate to gets the
-base back from `@k8ordo/router`'s `withBase`.
+base back from the router's `withBase` (imported from `@k8ordo/framework` in
+a framework application).
 
 A first segment that is not one of the set's locales is no locale, and the
 default applies; before the set has been defined in that environment, a
@@ -340,14 +341,14 @@ draw.
 
 `/` is the one URL without a locale; all it does is send the visitor to one.
 
-Under `@k8ordo/server` a `guard.ts` answers it before anything renders. It
+In server mode a `guard.ts` answers it before anything renders. It
 chooses from the request — the cookie holding the locale the visitor chose
 before, then `Accept-Language` — and ends the request with a `307`:
 
 ```ts
 // src/routes/(home)/guard.ts
-import { withBase } from '@k8ordo/router';
-import type { Guard } from '@k8ordo/server/runtime';
+import { withBase } from '@k8ordo/framework';
+import type { Guard } from '@k8ordo/framework/server';
 
 import { locales } from '../../i18n';
 
@@ -380,9 +381,9 @@ asks; `withBase` puts back the Vite `base` that `localize` leaves out. A
 visitor without JavaScript is redirected all the same, and so is a client
 navigation to `/`, whose payload request the guard answers too.
 
-`@k8ordo/static` refuses a `guard.ts` — a file has no request to guard — so
+Static mode refuses a `guard.ts` — a file has no request to guard — so
 there the page renders nothing and redirects from an effect: through the
-bound `navigateTo` where the router is `@k8ordo/router` (below), or
+bound `navigateTo` where the router is `@k8ordo/router`'s (below), or
 `locales.localize` otherwise:
 
 ```tsx
@@ -413,19 +414,33 @@ const locale = locales.delocalize(pathname).locale ?? locales.default;
 
 ## Static builds
 
-`@k8ordo/static` asks for the pathnames of every pattern with a parameter.
+Static mode asks for the pathnames of every pattern with a parameter.
 The set answers for its own segment:
 
 ```ts
-framework({ paths: locales.paths });
+framework({ mode: 'static', paths: locales.paths });
 ```
 
 `/:locale` in every pattern becomes one pathname per locale. A pattern with
-another parameter comes back still holding it (`/ja/blog/:slug`), which the
-build does not render: it stops with `static build needs pathnames for
-/:locale/blog/:slug`. A site with a second parameter expands the rest in the
-same function: `paths: (patterns) =>
-locales.paths(patterns).flatMap(expandSlug)`.
+another parameter comes back still holding it (`/ja/blog/:slug`). Only a
+page with a `fallback.tsx` beside it takes such a pathname, as the location
+of its shell: one per locale, answering in the browser the slugs the build
+did not write. For any other route the build stops:
+
+```
+the "paths" option supplied pathnames that still hold a parameter, and only a page with a fallback.tsx beside it takes one: /ja/blog/:slug ([locale]/blog/[slug]/page.tsx has none)
+```
+
+A site with a second parameter expands the rest in the same function:
+`paths: (patterns) => locales.paths(patterns).flatMap(expandSlug)`, where
+`expandSlug` keeps `/ja/blog/:slug` beside the slugs for a page that has a
+`fallback.tsx`.
+
+A shell runs the schemas of the layouts above it, never its page's: there
+is no value for the page's to parse. With the schema on
+`[locale]/layout.tsx`, as in [The shape of it](#the-shape-of-it), the
+locale is set for every page below it, shells included, and a shell's
+messages come out in the locale its location fills.
 
 Each path is rendered as its own request, so the schema names the locale
 for each and the messages come out in that locale; the build renders several
@@ -447,7 +462,9 @@ without JavaScript keeps the default.
   the locale:
 
   ```ts
-  // links.ts
+  // src/lib/links.ts
+  import { bindParams } from '@k8ordo/framework'; // '@k8ordo/router' without the framework
+
   export const { href, navigateTo } = bindParams(() => ({
     locale: locales.getLocale(),
   }));
@@ -489,7 +506,7 @@ without JavaScript keeps the default.
   The definition stays at module scope; what has to happen per request is
   calling it. Call `formFields` during the page's render, not at module
   scope. A Server Action posted from a `[locale]` page runs in that page's
-  locale under `@k8ordo/server` — the framework runs the page's params
+  locale in server mode — the framework runs the page's params
   schemas for the action's request too — so `parseForm` in it needs nothing
   more. Anywhere else — an action run outside the framework, a job — call it
   inside `locales.run`.

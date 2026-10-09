@@ -1,6 +1,6 @@
 'use client';
 
-import { matchPath, usePathname } from '@k8ordo/router';
+import { matchPath, usePathname } from '@k8ordo/framework';
 import { DropdownMenu, NavigationMenuIcon } from '@k8ordo/ui';
 
 import { PACKAGES } from '../data/packages';

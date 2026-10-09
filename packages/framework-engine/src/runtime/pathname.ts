@@ -20,3 +20,12 @@ export const decodePathname = (pathname: string): string | null => {
  * for the not-found nearest a page that said `notFound()`.
  */
 export const NOT_FOUND_SEGMENT = '__k8ordo-not-found__';
+
+/**
+ * The segment a shell is written under, in place of each value it leaves to
+ * the browser: `/ja/posts/!fallback`. No route directory can be named it (`!`
+ * is outside the grammar's literal segments), and neither
+ * `encodeURIComponent` nor the URL parser rewrites `!`, so a host that
+ * re-encodes a rewrite target finds the directory under the same spelling.
+ */
+export const FALLBACK_SEGMENT = '!fallback';

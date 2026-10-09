@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
@@ -8,6 +8,7 @@ import {
   exportsOf,
   generate,
   pagesReadingSearch,
+  REEXPORTS_ALL,
   silentRoutes,
 } from './write';
 
@@ -96,6 +97,18 @@ describe('exportsOf', () => {
       true,
     );
   });
+
+  it('says that export * brings names it cannot list, rather than a default', () => {
+    expect([
+      ...exportsOf(
+        [
+          'export function GET() { return new Response(); }',
+          "export * from './more';",
+          "export * as helpers from './helpers';",
+        ].join('\n'),
+      ),
+    ]).toStrictEqual(['GET', REEXPORTS_ALL, 'helpers']);
+  });
 });
 
 // search は @k8ordo/state の urlReader で読むので、アプリの依存が要る
@@ -118,7 +131,7 @@ const generateWith = async (
       root,
       routesDir,
       outDir: path.join(root, '.k8ordo'),
-      via: '@k8ordo/server',
+      mode: 'server',
     });
     return problems;
   } finally {
@@ -128,7 +141,7 @@ const generateWith = async (
 
 describe('generate, for a page that exports search', () => {
   it('refuses it by name in an application that does not depend on @k8ordo/state', async () => {
-    expect(await generateWith({ '@k8ordo/server': '*' })).toStrictEqual([
+    expect(await generateWith({ '@k8ordo/framework': '*' })).toStrictEqual([
       {
         path: 'products/page.tsx',
         message:
@@ -139,7 +152,7 @@ describe('generate, for a page that exports search', () => {
 
   it('accepts it once the application depends on @k8ordo/state', async () => {
     expect(
-      await generateWith({ '@k8ordo/server': '*', '@k8ordo/state': '*' }),
+      await generateWith({ '@k8ordo/framework': '*', '@k8ordo/state': '*' }),
     ).toStrictEqual([]);
   });
 });
@@ -175,5 +188,49 @@ describe('pagesReadingSearch', () => {
         ]),
       ),
     ]).toStrictEqual(['products/page.tsx']);
+  });
+});
+
+// fallback.tsx は static でだけ表に載る。server のビルドには何も入らない
+const generatedTableIn = async (mode: 'static' | 'server'): Promise<string> => {
+  const root = await mkdtemp(path.join(tmpdir(), 'k8ordo-fallback-'));
+  try {
+    const routesDir = path.join(root, 'src/routes');
+    await mkdir(path.join(routesDir, 'posts/[id]'), { recursive: true });
+    await writeFile(path.join(root, 'package.json'), '{}');
+    await writeFile(
+      path.join(routesDir, 'page.tsx'),
+      'export default function Page() { return null; }\n',
+    );
+    await writeFile(
+      path.join(routesDir, 'posts/[id]/page.tsx'),
+      'export default function Page() { return null; }\n',
+    );
+    await writeFile(
+      path.join(routesDir, 'posts/[id]/fallback.tsx'),
+      'export default function Shell() { return null; }\n',
+    );
+    const outDir = path.join(root, '.k8ordo');
+    const { problems } = await generate({ root, routesDir, outDir, mode });
+    expect(problems).toStrictEqual([]);
+    return await readFile(path.join(outDir, 'routes.gen.ts'), 'utf8');
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+};
+
+describe('generate, for a page with a fallback.tsx', () => {
+  it('writes its shell into the table under a build into files', async () => {
+    const source = await generatedTableIn('static');
+    expect(source).toContain(
+      "import posts_id_fallback from '../src/routes/posts/[id]/fallback';",
+    );
+    expect(source).toContain("  '/posts/:id': {");
+  });
+
+  it('writes no shell, and imports nothing of it, under a running server', async () => {
+    const source = await generatedTableIn('server');
+    expect(source).toContain('export const fallbacks = {} as const;');
+    expect(source).not.toContain('posts/[id]/fallback');
   });
 });

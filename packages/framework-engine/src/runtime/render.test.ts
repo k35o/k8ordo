@@ -4,6 +4,7 @@ import type { FC, ReactElement, ReactNode } from 'react';
 
 import { buildTable } from '../generate/emit';
 import { parseRouteTree } from '../grammar/tree';
+import { FallbackBoundary } from './fallback-boundary';
 import { renderMatch, renderNotFound } from './render';
 
 type Rendered = ReactElement<{
@@ -63,6 +64,28 @@ describe('renderMatch with a search', () => {
     }) as ReactElement<{ children?: ReactNode }>;
     const page = rendered.props.children as ReactElement<object>;
     expect('search' in page.props).toBe(false);
+  });
+});
+
+const shell: FC = () => null;
+
+describe('renderMatch for a shell', () => {
+  it('hands the layouts the params the shell knows and its own pathname, and the fallback.tsx nothing', () => {
+    const match = routes.match('/products/!fallback') as Match;
+
+    const rendered = renderMatch(
+      { ...match, params: {} },
+      { pathname: '/products/!fallback', page: shell, shell: true },
+    ) as Rendered & ReactElement<{ pathname: string }>;
+
+    expect(rendered.type).toBe(component('layout.tsx'));
+    expect(rendered.props.params).toStrictEqual({});
+    expect(rendered.props.pathname).toBe('/products/!fallback');
+    const boundary = rendered.props.children as Rendered;
+    expect(boundary.type).toBe(FallbackBoundary);
+    const leaf = boundary.props.children as ReactElement<object>;
+    expect(leaf.type).toBe(shell);
+    expect(leaf.props).toStrictEqual({});
   });
 });
 

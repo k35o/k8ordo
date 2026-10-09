@@ -7,8 +7,8 @@ import { PropsTable } from '../../../../../components/props-table';
 import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
+import { StepperInteractivePreview } from '../../../../../demos/ui/components/stepper-previews';
 import * as m from '../../../../../messages';
-import { StepperInteractivePreview } from '../_previews/stepper-previews';
 
 const STEPS = [
   { label: 'Plan', description: 'Pick what fits' },

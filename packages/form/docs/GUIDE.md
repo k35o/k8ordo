@@ -43,7 +43,7 @@ with `@k8ordo/i18n`), call `formFields` during the render instead.
 ## Writing a form
 
 ```ts
-// schema.ts
+// src/lib/schema.ts
 export const talkSchema = z.object({
   title: z.string().min(1).max(120),
   eventUrl: z.url(),
@@ -88,7 +88,7 @@ Each leaf derives the control that submits what it validates:
 | anything else (`z.uuid()`, `z.coerce.date()`, …) | `type="text"`                                                                                          |
 
 ```tsx
-// page.tsx — Server Component
+// src/routes/talks/new/page.tsx — Server Component
 const talkFields = formFields(talkSchema); // module scope: derived once
 
 export default function Page() {
@@ -100,7 +100,7 @@ export default function Page() {
 report travel together.
 
 ```tsx
-// talk-form.tsx
+// src/components/talk-form.tsx
 'use client';
 
 export const TalkForm = ({ action, fields }: TalkFormProps) => {
@@ -132,11 +132,11 @@ and leaves the state out. It is still checked on submit, so a filter that
 breaks its schema never reaches the URL.
 
 ```ts
-// actions.ts
+// src/lib/actions.ts
 'use server';
 
-import { href } from '@k8ordo/router';
-import { redirect } from '@k8ordo/server/runtime';
+import { href } from '@k8ordo/framework';
+import { redirect } from '@k8ordo/framework/server';
 
 export async function createTalk(_prev: FormState, formData: FormData) {
   const parsed = parseForm(talkSchema, formData);

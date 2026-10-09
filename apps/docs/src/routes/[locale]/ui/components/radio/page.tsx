@@ -7,8 +7,8 @@ import { PropsTable } from '../../../../../components/props-table';
 import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
+import { RadioControlledPreview } from '../../../../../demos/ui/components/radio-previews';
 import * as m from '../../../../../messages';
-import { RadioControlledPreview } from '../_previews/radio-previews';
 
 const options = [
   { label: 'React', value: 'react' },

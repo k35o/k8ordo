@@ -6,8 +6,8 @@ import { PackageInstall } from '../../../../components/install';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Playground } from '../../../../components/playground';
 import { Rich } from '../../../../components/rich';
+import { ToggleDemo } from '../../../../demos/color-scheme/get-started/toggle-demo';
 import * as m from '../../../../messages';
-import { ToggleDemo } from './_parts/toggle-demo';
 
 const t = m.colorSchemeGetStarted;
 
@@ -111,7 +111,7 @@ export default function ColorSchemeGetStartedPage() {
           code={LAYOUT}
           lang="tsx"
           marks={{ 10: 'highlight', 12: 'highlight' }}
-          title="routes/layout.tsx"
+          title="src/routes/layout.tsx"
         />
         <p>
           <Rich>{t.providerFirst()}</Rich>

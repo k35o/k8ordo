@@ -7,8 +7,8 @@ import { PropsTable } from '../../../../../components/props-table';
 import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
+import { SwitchControlledPreview } from '../../../../../demos/ui/components/switch-previews';
 import * as m from '../../../../../messages';
-import { SwitchControlledPreview } from '../_previews/switch-previews';
 
 export default function SwitchPage() {
   return (

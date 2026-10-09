@@ -7,8 +7,8 @@ import { PropsTable } from '../../../../../components/props-table';
 import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
+import { ContextMenuPreview } from '../../../../../demos/ui/components/context-menu-previews';
 import * as m from '../../../../../messages';
-import { ContextMenuPreview } from '../_previews/context-menu-previews';
 
 const CODE = `<ContextMenu.Root>
   <ContextMenu.Trigger

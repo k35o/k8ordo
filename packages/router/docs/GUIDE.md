@@ -331,8 +331,8 @@ misspelled one fails to compile with no setup at all. To have the **pattern**
 checked against the app's actual table as well, augment `Register` once:
 
 ```ts
-// types/k8ordo-router.d.ts
-import type { routes } from '../src/routes';
+// src/k8ordo-router.d.ts
+import type { routes } from './routes';
 
 declare module '@k8ordo/router' {
   interface Register {
@@ -351,7 +351,7 @@ Without the augmentation the constraint is any `/`-prefixed string. Augment
 only in an application — a library doing it would impose its table on every
 consumer.
 
-Under `@k8ordo/static` or `@k8ordo/server` this file is generated into
+Under `@k8ordo/framework` this file is generated into
 `.k8ordo/register.gen.ts` from `routes/` — for `@k8ordo/state` too, when the
 application depends on it — so hand-writing it there is writing a second
 answer to a question already answered. Hand-write it in a client application
@@ -529,7 +529,7 @@ and its precedence can all be asserted directly.
 
 ## Under the framework
 
-`@k8ordo/static` and `@k8ordo/server` render pages on the server, so the
+`@k8ordo/framework` renders pages on the server, so the
 browser receives a tree rather than building one from a table — there is no
 route table in the client bundle at all, and layouts nest through `children`
 instead of `<Outlet />`. What stays is navigation: both build on
@@ -575,7 +575,7 @@ what each receives: the `Request`, and `params` typed as a page's are.
 A page under the framework says it is not there with `notFound()` — the
 product its id names does not exist. It throws, so nothing after it runs, and
 the framework answers with the nearest `not-found.tsx` under a 404. It lives
-here rather than in a mode package so a page reads the same under either;
+here, next to the table it answers for, and `@k8ordo/framework` re-exports it;
 `isNotFound(value)` recognises what it throws, by a registry brand rather than
 a class, since a page and the framework may hold two copies of this package.
 Under a client `<Router>` there is no status to answer with, and `notFound()`
@@ -583,11 +583,18 @@ is an error like any other.
 
 What carries across unchanged is everything that needs no table: `href`,
 `navigateTo` and `bindParams`, `usePathname`, `useMatch` and `matchPath`, and
-`normalizePathname`. `usePathname` needs one thing on the server,
+`normalizePathname` — an application on the framework imports them from
+`@k8ordo/framework`, which re-exports them by name, and never names this
+package. `usePathname` needs one thing on the server,
 where there is no Navigation API to read: the pathname the render is for,
 supplied by `<PathnameProvider pathname>`. `<Router>` mounts one itself and
-both mode runtimes supply it, so an application never writes it — only a host
-building its own seam out of `useInterceptedNavigation` has to. What does not
+the framework's runtime supplies it in either mode, so an application never writes it — only a host
+building its own seam out of `useInterceptedNavigation` has to. Its
+counterpart, `<BrowserPathname>`, says a render has no pathname to give:
+below it, `usePathname` — and `useMatch`, which reads it — asks for the
+browser with `use(browser())` in a server render, so the nearest
+`<Suspense>` is left for the browser to fill. The framework's runtime wraps
+a `fallback.tsx` in it, and an application never writes it either. What does not
 carry across is `useRoute` and `useParams` —
 both read the match from context, and under the framework there is no match in
 the browser to read. A framework page receives its `params` as a prop from the
@@ -599,7 +606,7 @@ typed by the schemas the framework ran (the generated `Register` carries
 them), plus `search` for a page that exports `search` (typed by what it
 reads), and `LayoutProps<'/products'>` adds `children` — with `params` left as
 strings whatever the schemas say, since `not-found.tsx` renders under a layout
-whether or not its schemas accepted. Under `@k8ordo/server` the generated `Register` also carries
+whether or not its schemas accepted. In server mode the generated `Register` also carries
 the `request`, so both types gain `request` there and a page that reads it
 fails to type-check under a build into files. A route file may equally declare
 its props inline — the generated table checks them at the import either way —

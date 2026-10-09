@@ -7,8 +7,8 @@ import { PropsTable } from '../../../../../components/props-table';
 import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
+import { DatePickerControlledPreview } from '../../../../../demos/ui/components/date-previews';
 import * as m from '../../../../../messages';
-import { DatePickerControlledPreview } from '../_previews/date-previews';
 
 const FORM_EXAMPLE = `// schema.ts
 export const bookingSchema = z.object({ checkIn: z.iso.date() });

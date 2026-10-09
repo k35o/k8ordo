@@ -8,23 +8,11 @@
     - framework-error-redirect-request
     - framework-params-schema
     - router-scroll-and-match
-"@k8ordo/server@0.1.0":
-  dir: packages/server
-  intents:
-    - framework-error-redirect-request
-    - framework-params-schema
-    - static-server-hardening
 "@k8ordo/state@0.2.0":
   dir: packages/state
   intents:
     - state-register-and-inline-read
     - state-url-round-trip
-"@k8ordo/static@0.1.0":
-  dir: packages/static
-  intents:
-    - framework-error-redirect-request
-    - framework-params-schema
-    - static-server-hardening
 "@k8ordo/ui@2.0.0":
   dir: packages/ui
   intents:

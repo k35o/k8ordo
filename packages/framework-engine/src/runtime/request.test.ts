@@ -1,4 +1,4 @@
-import { routeRequestOf } from './request';
+import { fileRequest, routeRequestOf } from './request';
 
 describe('routeRequestOf', () => {
   it('hands the headers through and parses the cookies by name', () => {
@@ -29,5 +29,21 @@ describe('routeRequestOf', () => {
     expect(
       routeRequestOf(new Request('https://example.test/')).cookies.size,
     ).toBe(0);
+  });
+});
+
+describe('fileRequest', () => {
+  it.each(['headers', 'cookies'] as const)(
+    'refuses a page reading %s, naming static mode, rather than rendering a fallback for every visitor',
+    (name) => {
+      expect(() => fileRequest[name]).toThrow(
+        `a page read request.${name}, and under mode: 'static' a page is a file written once for every visitor, with no request to read\nthis application wants mode: 'server'`,
+      );
+    },
+  );
+
+  it('is an empty object to whatever hands the props on', () => {
+    expect(Object.keys(fileRequest)).toStrictEqual([]);
+    expect(JSON.stringify({ request: fileRequest })).toBe('{"request":{}}');
   });
 });

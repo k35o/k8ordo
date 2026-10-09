@@ -10,8 +10,8 @@ import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
 import { Rich } from '../../../../../components/rich';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
+import { ChatDemo } from '../../../../../demos/ui/ai/chat-demo';
 import * as m from '../../../../../messages';
-import { ChatDemo } from '../_previews/chat-demo';
 
 export default function AiChat() {
   return (

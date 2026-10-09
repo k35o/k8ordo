@@ -97,7 +97,7 @@ overrides:
   '@vitest/utils': 'catalog:'
 
 # catalog の vite は vite-plus-core の別名なので、版は vite-plus のもの (0.3.x) に
-# なり、vite を peer に持つパッケージ (vitest・plugin-react・@k8ordo/static など)
+# なり、vite を peer に持つパッケージ (vitest・plugin-react・@k8ordo/framework など)
 # の範囲をどれも満たさない。中身は vite-plus が同梱する vite で、別名の版で互換を
 # 確かめても意味がないため、vite の peer だけ版を問わない (Vite+ の移行ツールが
 # 書くのと同じ設定)。

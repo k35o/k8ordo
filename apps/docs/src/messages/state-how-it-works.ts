@@ -71,18 +71,18 @@ export const routerUrlUpdate = message({
 });
 
 export const routerServer = message({
-  ja: 'サーバーで`url`を読むこと：ページにクエリを渡すルーターが要ります。`@k8ordo/server`なら、`search`のexportです。',
-  en: 'Reading `url` on the server: a router that hands the page its query. Under `@k8ordo/server`, that is the `search` export.',
+  ja: 'サーバーで`url`を読むこと：ページにクエリを渡すルーターが要ります。`@k8ordo/framework`のserverモードなら、`search`のexportです。',
+  en: 'Reading `url` on the server: a router that hands the page its query. In `@k8ordo/framework`’s server mode, that is the `search` export.',
 });
 
 export const routerStateChange = message({
-  ja: 'URLを変える`update()`は`navigation.navigate()`を呼びます。`@k8ordo/router`の下では、`@k8ordo/static`や`@k8ordo/server`のページも含めて、pathnameが変わらない遷移はページの切り替えではなく状態の変更です。ルーターは何も読み込まずに受け止め、何も再マウントせず、スクロールもフォーカスも動かしません。`update()`がすでに新しい値を描いているので、`finished`はその遷移が落ち着いた時点で解決します。',
-  en: 'An `update()` that changes the URL calls `navigation.navigate()`. Under `@k8ordo/router`, pages rendered by `@k8ordo/static` or `@k8ordo/server` included, a navigation that keeps the pathname is a state change, not a page change: the router intercepts it without a load, nothing remounts, and scroll and focus stay put. `update()` has already rendered the new values, so `finished` settles once that navigation does.',
+  ja: 'URLを変える`update()`は`navigation.navigate()`を呼びます。`@k8ordo/router`の下では、`@k8ordo/framework`のページも含めて、pathnameが変わらない遷移はページの切り替えではなく状態の変更です。ルーターは何も読み込まずに受け止め、何も再マウントせず、スクロールもフォーカスも動かしません。`update()`がすでに新しい値を描いているので、`finished`はその遷移が落ち着いた時点で解決します。',
+  en: 'An `update()` that changes the URL calls `navigation.navigate()`. Under `@k8ordo/router`, pages rendered by `@k8ordo/framework` included, a navigation that keeps the pathname is a state change, not a page change: the router intercepts it without a load, nothing remounts, and scroll and focus stay put. `update()` has already rendered the new values, so `finished` settles once that navigation does.',
 });
 
 export const routerSearchPage = message({
-  ja: 'ただし、`@k8ordo/server`で`search`をexportしたページのクエリが変わったときは、ページがその場で読み込み直されます。`finished`は、それが表示されるまで待ちます。pathnameはルーターが受け持ち、`?`から後ろはこのパッケージが受け持つという分け方です。',
-  en: 'The exception is a page that exports `search` under `@k8ordo/server`: when its query moves, the page loads again in place, and `finished` waits until it is on screen. The pathname is the router’s, and everything from the `?` on is this package’s.',
+  ja: 'ただし、`@k8ordo/framework`のserverモードで`search`をexportしたページのクエリが変わったときは、ページがその場で読み込み直されます。`finished`は、それが表示されるまで待ちます。pathnameはルーターが受け持ち、`?`から後ろはこのパッケージが受け持つという分け方です。',
+  en: 'The exception is a page that exports `search` in `@k8ordo/framework`’s server mode: when its query moves, the page loads again in place, and `finished` waits until it is on screen. The pathname is the router’s, and everything from the `?` on is this package’s.',
 });
 
 export const routerOthers = message({

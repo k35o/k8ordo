@@ -1,7 +1,7 @@
 import { normalizePathname } from '@k8ordo/router';
 
 // redirect() と同じモジュールに置かない。redirect() はアプリが
-// @k8ordo/server/runtime から import する入口に束ねられ、外部パッケージの
+// @k8ordo/framework/server から import する入口に束ねられ、外部パッケージの
 // import はそこに副作用の import として残るので、router を持ち込んでしまう
 
 /** What a `redirect.ts` route file default-exports. */

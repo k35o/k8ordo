@@ -7,8 +7,8 @@ import { PropsTable } from '../../../../../components/props-table';
 import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
+import { RangeSliderControlledPreview } from '../../../../../demos/ui/components/range-slider-previews';
 import * as m from '../../../../../messages';
-import { RangeSliderControlledPreview } from '../_previews/range-slider-previews';
 
 const FORM_EXAMPLE = `// schema.ts
 export const filterSchema = z.object({

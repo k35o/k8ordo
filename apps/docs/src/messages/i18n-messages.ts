@@ -71,13 +71,13 @@ export const whereTitle = message({
 });
 
 export const whereDescription = message({
-  ja: '文言はどのファイルに置いてもかまいません。読みやすいのは、領域ごとに1つのファイルにまとめ、索引のモジュールから名前空間として再exportする形です。',
-  en: 'Anywhere. What reads well is one file per area, re-exported as a namespace from an index module.',
+  ja: '文言はどのファイルに置いてもかまいません。読みやすいのは、`src/messages/`に領域ごとに1つのファイルを置き、索引のモジュールから名前空間として再exportする形です。',
+  en: 'Anywhere. What reads well is one file per area in `src/messages/`, re-exported as a namespace from an index module.',
 });
 
 export const whereNear = message({
-  ja: '1つのコンポーネントだけが使う文言は、そのコンポーネントの隣に置いてもかまいません。関係の深い文言をオブジェクトにまとめることもできますが、その場合バンドラはオブジェクトを丸ごと残します。',
-  en: 'A message only one component uses can sit next to that component. Related messages can be grouped in an object too, but the bundler then keeps the object whole.',
+  ja: '1つのコンポーネントだけが使う文言は、そのコンポーネントのモジュールの中に書いてもかまいません。関係の深い文言をオブジェクトにまとめることもできますが、その場合バンドラはオブジェクトを丸ごと残します。',
+  en: "A message only one component uses can be declared in that component's own module. Related messages can be grouped in an object too, but the bundler then keeps the object whole.",
 });
 
 export const whereReserved = message({

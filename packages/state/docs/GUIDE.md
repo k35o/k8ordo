@@ -239,14 +239,15 @@ export default async function Page({ searchParams }: PageProps<'/products'>) {
 }
 ```
 
-**Under `@k8ordo/server` a page says what of the search it reads.** A page
+**In `@k8ordo/framework`'s server mode a page says what of the search it
+reads.** A page
 exports the url schema it reads, and receives that slot, parsed, as `search`:
 
 ```tsx
 // src/routes/products/page.tsx
-import type { PageProps } from '@k8ordo/router';
+import type { PageProps } from '@k8ordo/framework';
 
-import { listState } from '../_data/list-state';
+import { listState } from '../../state';
 
 export const search = listState.url;
 
@@ -270,7 +271,7 @@ A page that does not export `search` never sees the search, and neither does
 a layout: the pathname axis is the router's, and the search is read in the
 browser by `useAppState`, so such a server render shows the url slot's
 defaults and the live URL takes over one render after hydration.
-`@k8ordo/static` refuses the export: a file is the same whatever the search
+Static mode refuses the export: a file is the same whatever the search
 holds. Building links is unaffected — `href` and `search` are pure and run
 anywhere, including in a Server Component.
 
@@ -296,15 +297,16 @@ the framework's own `<Link>`'s to add.
 localStorage never reaches the server, so a preference kept there renders its
 default on the server and flips to the real value after hydration. A cookie
 goes with every request: where the page receives the request's cookies —
-`request.cookies` under `@k8ordo/server` — `parseCookies` reads the values
+`request.cookies` in `@k8ordo/framework`'s server mode — `parseCookies` reads
+the values
 and `initialCookie` seeds the server render and the hydration render with
 them, so the default never flashes.
 
 ```tsx
-// routes/layout.tsx — @k8ordo/server
-import type { LayoutProps } from '@k8ordo/router';
+// src/routes/layout.tsx — server mode
+import type { LayoutProps } from '@k8ordo/framework';
+import { Shell } from '../components/shell';
 import { density } from '../state';
-import { Shell } from './shell';
 
 export default function Layout({ request, children }: LayoutProps<'/'>) {
   return (
@@ -316,7 +318,7 @@ export default function Layout({ request, children }: LayoutProps<'/'>) {
 ```
 
 ```tsx
-// routes/shell.tsx
+// src/components/shell.tsx
 'use client';
 import type { ReactNode } from 'react';
 import { useAppState } from '@k8ordo/state';
@@ -344,8 +346,8 @@ export function Shell({ initialCookie, children }: ShellProps) {
   `useAppState` call it is passed to: a component that renders on the server
   without it shows the defaults there. Read the cookie once, high up — a
   layout receives `request` too — and pass the result down.
-- **Without the request, it is local state.** Under `@k8ordo/static` there is
-  no request: the server render shows the defaults and hydration takes the
+- **Without the request, it is local state.** In static mode there is no
+  request: the server render shows the defaults and hydration takes the
   cookie over, exactly as localStorage does.
 - **The browser writes it with the Cookie Store API** (Baseline since Firefox
   140 shipped it in June 2025): `Path=/`, `SameSite=Lax`, `Max-Age` of 400
@@ -370,7 +372,7 @@ forged out of it — and on the server, treat what `parseCookies` returns as
 input, which is why it passes the schema before you see it.
 
 **Cookies the server writes are a different tool.** A page is a render and
-never writes the response; under `@k8ordo/server` the framework's
+never writes the response; in server mode the framework's
 `cookies()` writes cookies from the places that answer a request — `guard.ts`,
 `route.ts` and Server Actions. That is where a session cookie belongs, as
 `HttpOnly`, and this package never sees it. The same `cookies()` can also
@@ -382,9 +384,10 @@ attributes above (`Path=/`, `SameSite=Lax`, `Max-Age=34560000`), never
 values in through the `change` event.
 
 ```ts
+// src/lib/actions.ts
 'use server';
-import { cookies } from '@k8ordo/server/runtime';
-import { density } from './state';
+import { cookies } from '@k8ordo/framework/server';
+import { density } from '../state';
 
 export async function compact() {
   cookies().set(
@@ -403,9 +406,10 @@ the value through `encodeURIComponent` yourself — once.
 ## Client — subscribe and update
 
 ```tsx
+// src/components/filters.tsx
 'use client';
 import { useAppState } from '@k8ordo/state';
-import { listState, prefs } from './state';
+import { listState, prefs } from '../state';
 
 export function Filters({ initialUrl }: FiltersProps) {
   const [{ q, page, expanded }, update] = useAppState(listState, {
@@ -526,21 +530,21 @@ definition is the subscription boundary.
 
 Two operations depend on the router; everything else works under any router:
 
-| operation                                                               | needs                                                                             |
-| ----------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
-| `href` / `search` links, GET forms                                      | nothing — the router or the browser handles the click or the submission           |
-| updates that change only entry, local, session, cookie or memory values | nothing — no navigation is involved                                               |
-| url `update()` on the client                                            | a router that intercepts the Navigation API                                       |
-| `parseUrl` on the server                                                | a router that hands the page its search (`@k8ordo/server`: `export const search`) |
+| operation                                                               | needs                                                                                               |
+| ----------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `href` / `search` links, GET forms                                      | nothing — the router or the browser handles the click or the submission                             |
+| updates that change only entry, local, session, cookie or memory values | nothing — no navigation is involved                                                                 |
+| url `update()` on the client                                            | a router that intercepts the Navigation API                                                         |
+| `parseUrl` on the server                                                | a router that hands the page its search (`@k8ordo/framework` in server mode: `export const search`) |
 
 A url `update()` calls `navigation.navigate()`. Under `@k8ordo/router` —
-including a page rendered by `@k8ordo/static` or `@k8ordo/server` — a
+including a page rendered by `@k8ordo/framework` — a
 navigation that keeps the pathname is a state change and not a page change:
 the router intercepts it without a load, nothing remounts, and scroll and
 focus stay where they are. `finished` therefore resolves once that navigation
 settles, with no fetch or render behind it, since `update()` already rendered
-the new values — unless the page showing exports `search` under
-`@k8ordo/server` and the search moved: then the page loads again, in place,
+the new values — unless the page showing exports `search` in
+server mode and the search moved: then the page loads again, in place,
 and `finished` waits for it to be on screen. On a router that does not intercept the Navigation API
 (Next.js today), the same call is a full document load: use links and GET
 forms for url changes there, which is this package's preferred grain anyway.
@@ -558,8 +562,8 @@ strip a query from and verify. To constrain paths app-wide, augment `Register`
 once, with the same line the `@k8ordo/router` augmentation takes:
 
 ```ts
-// e.g. types/k8ordo.d.ts
-import type { routes } from '../routes';
+// src/k8ordo.d.ts
+import type { routes } from './routes';
 
 declare module '@k8ordo/router' {
   interface Register {
@@ -580,10 +584,20 @@ spells it, a `:param` takes any one non-empty segment — a `${string}` from a
 template literal such as `` `/${locale}/products` `` included — and a `*`
 wildcard is matched but never linked. A path no pattern matches is a type
 error, a `/:locale` table included: `'/ja/nowhere'` is refused even though
-`/:locale` takes any first segment. The check goes through `NavigablePath`
+`/:locale` takes any first segment. The error lists what would be accepted —
+the table's linkable patterns. With a table of `/`, `/members` and
+`/posts/:id`, `listState.href('/membrs')` reports:
+
+```
+Argument of type '"/membrs"' is not assignable to parameter of type '"/" | "/members" | "/posts/:id"'.
+```
+
+The check is exported as `RegisteredPath<Path>`: `Path` when accepted, and
+that union of patterns when refused. Each pattern's own spelling is a path
+the table accepts, so the union lets nothing through that the check refuses.
+It goes through `NavigablePath`
 from `@k8ordo/router` as a type only, so the router stays an optional peer and
-never loads at runtime. Under `@k8ordo/static` or
-`@k8ordo/server` this is generated for you into `.k8ordo/register.gen.ts` from
+never loads at runtime. Under `@k8ordo/framework` this is generated for you into `.k8ordo/register.gen.ts` from
 `routes/` when the application's own `package.json` lists `@k8ordo/state` in
 `dependencies` or `devDependencies` — a transitive dependency does not count.
 Do not hand-write it in such an application: it would duplicate the generated
@@ -604,8 +618,9 @@ declare module '@k8ordo/state' {
 ```
 
 When both are present, `routes` wins. Every `href` in the app now rejects a
-path its router does not know. Without the augmentation the constraint is any
-`/`-prefixed string. Augment only in an application — a shared library
+path its router does not know, and the error lists the registered union.
+Without the augmentation the constraint is any `/`-prefixed string, and a path
+without the leading `/` is reported against `` `/${string}` ``. Augment only in an application — a shared library
 augmenting `Register` leaks the constraint to every consumer.
 
 ## Reading before hydration
@@ -662,16 +677,18 @@ tab, so its `storage` event reaches only other frames of that tab.
 
 **SSR sees real url values when your router hands you the search.** Pass the
 RSC-parsed url as `initialUrl` and the server render and the hydration render
-show the actual URL state. Under `@k8ordo/server` a page that exports
+show the actual URL state. In `@k8ordo/framework`'s server mode a page that
+exports
 `search = listState.url` receives it already parsed — pass that as
 `initialUrl`. Where a page receives no search — any other page, and every page
-under `@k8ordo/static` — the url slot renders its defaults and the live URL
+in static mode — the url slot renders its defaults and the live URL
 takes over on hydration.
 
 **SSR sees real cookie values when the page receives the request.** Pass what
-`parseCookies(request.cookies)` returned as `initialCookie` — under
-`@k8ordo/server`, say — and neither render shows the defaults. Without a
-request (`@k8ordo/static`), the cookie takes over on hydration.
+`parseCookies(request.cookies)` returned as `initialCookie` — in
+`@k8ordo/framework`'s server mode, say — and neither render shows the
+defaults. Without a request (static mode), the cookie takes over on
+hydration.
 
 Everything else — entry, local, session, memory — renders its defaults on the
 server by construction: those places do not exist there.
@@ -692,10 +709,10 @@ of `true` that `update()` writes, so a checked box submits `inStock=true` —
 the URL state itself would write. The form submits as GET, which writes the
 URL with or without JavaScript.
 Where the router hands the page its search, the RSC reads it back with
-`parseUrl` and the whole loop works before JavaScript loads — under
-`@k8ordo/server`, a page that exports `search = listState.url` is that page,
+`parseUrl` and the whole loop works before JavaScript loads — in
+`@k8ordo/framework`'s server mode, a page that exports `search = listState.url` is that page,
 and with JavaScript the submission loads it again in place. Anywhere else
-(`@k8ordo/static`, a page that does not declare `search`) the server render
+(static mode, a page that does not declare `search`) the server render
 shows the defaults, and the submitted values appear once the page hydrates.
 
 ## Testing

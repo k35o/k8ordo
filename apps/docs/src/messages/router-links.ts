@@ -116,6 +116,6 @@ export const downloadFix = message({
 });
 
 export const downloadFramework = message({
-  ja: '`@k8ordo/static`や`@k8ordo/server`の下では、同じオリジンのURLはいったんすべて引き受け、ページではないと分かった時点で読み込み直してファイルを開きます。`download`を付けておけば、この往復を省けます。',
-  en: 'Under `@k8ordo/static` and `@k8ordo/server`, every same-origin URL is taken at first, and once it turns out not to be a page, the browser reloads into the file. `download` saves that round trip.',
+  ja: '`@k8ordo/framework`の下では、同じオリジンのURLはいったんすべて引き受け、ページではないと分かった時点で読み込み直してファイルを開きます。`download`を付けておけば、この往復を省けます。',
+  en: 'Under `@k8ordo/framework`, every same-origin URL is taken at first, and once it turns out not to be a page, the browser reloads into the file. `download` saves that round trip.',
 });

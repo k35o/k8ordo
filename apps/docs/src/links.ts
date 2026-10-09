@@ -1,5 +1,5 @@
-import { bindParams } from '@k8ordo/router';
-import type { RegisteredNavigablePattern } from '@k8ordo/router';
+import { bindParams } from '@k8ordo/framework';
+import type { RegisteredNavigablePattern } from '@k8ordo/framework';
 
 import { locales } from './i18n';
 

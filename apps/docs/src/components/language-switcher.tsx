@@ -1,6 +1,6 @@
 'use client';
 
-import { usePathname } from '@k8ordo/router';
+import { usePathname } from '@k8ordo/framework';
 import { DropdownMenu } from '@k8ordo/ui';
 
 import { getLocale, locales } from '../i18n';

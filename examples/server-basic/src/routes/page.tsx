@@ -1,20 +1,20 @@
 import { formFields } from '@k8ordo/form/server';
-import type { PageProps } from '@k8ordo/router';
+import type { PageProps } from '@k8ordo/framework';
 
-import { prefsState } from './_data/prefs-state';
-import { compact } from './_parts/compact';
-import { Counter } from './_parts/counter';
-import { listEntries } from './_parts/guestbook';
-import { GuestbookForm } from './_parts/guestbook-form';
-import { guestbookSchema } from './_parts/guestbook-schema';
-import { leave } from './_parts/leave';
+import { Counter } from '../components/counter';
+import { GuestbookForm } from '../components/guestbook-form';
+import { compact } from '../lib/compact';
+import { listEntries } from '../lib/guestbook';
+import { guestbookSchema } from '../lib/guestbook-schema';
+import { leave } from '../lib/leave';
+import { prefsState } from '../lib/prefs-state';
 
 // スキーマから属性と文言を導くのは Server Component 側。モジュールスコープで
 // 一度だけ導き、素の JSON として props でクライアントに渡す
 const guestbookFields = formFields(guestbookSchema);
 
 // request は server モードでだけ生成器が Register に書くので、この型は
-// @k8ordo/static の下では request を持たず、読むページは型で落ちる
+// static モードでは request を持たず、読むページは型で落ちる
 export default async function HomePage({ request }: PageProps<'/'>) {
   // サーバーモードなのでリクエストごとに読み直される
   const entries = await listEntries();

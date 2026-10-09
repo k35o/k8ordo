@@ -310,38 +310,61 @@ describe('href and search', () => {
       '/:locale': RouteComponent;
       '/:locale/products': RouteComponent;
     }>;
+    type LocalePatterns = '/:locale' | '/:locale/products';
     expectTypeOf<
       AcceptedPath<{ routes: LocaleRoutes }, '/ja/products'>
     >().toEqualTypeOf<'/ja/products'>();
     expectTypeOf<
       AcceptedPath<{ routes: LocaleRoutes }, '/ja/nowhere'>
-    >().toBeNever();
+    >().toEqualTypeOf<LocalePatterns>();
     expectTypeOf<
       AcceptedPath<{ routes: LocaleRoutes }, '/ja/products/42'>
-    >().toBeNever();
+    >().toEqualTypeOf<LocalePatterns>();
   });
 
-  it('checks the path against whichever form Register was given', () => {
+  it('checks the path against whichever form Register was given, refusing with what that form accepts', () => {
+    type AppPatterns = '/products' | '/items' | '/signup' | '/posts/:slug';
     // `routes` — the same line the router's augmentation uses
     expectTypeOf<
       AcceptedPath<{ routes: AppRoutes }, '/signup'>
     >().toEqualTypeOf<'/signup'>();
-    expectTypeOf<AcceptedPath<{ routes: AppRoutes }, '/a'>>().toBeNever();
+    expectTypeOf<
+      AcceptedPath<{ routes: AppRoutes }, '/a'>
+    >().toEqualTypeOf<AppPatterns>();
     // `path` — another router's own union, e.g. `Route` from next
     type NextRoute = '/a' | `/b/${string}`;
     expectTypeOf<
       AcceptedPath<{ path: NextRoute }, '/b/1'>
     >().toEqualTypeOf<'/b/1'>();
-    expectTypeOf<AcceptedPath<{ path: NextRoute }, '/c'>>().toBeNever();
+    expectTypeOf<
+      AcceptedPath<{ path: NextRoute }, '/c'>
+    >().toEqualTypeOf<NextRoute>();
     // `routes` wins when both are present
     expectTypeOf<
       AcceptedPath<{ routes: AppRoutes; path: '/a' }, '/a'>
-    >().toBeNever();
+    >().toEqualTypeOf<AppPatterns>();
     // neither — any `/`-path
     expectTypeOf<
       AcceptedPath<object, '/anything'>
     >().toEqualTypeOf<'/anything'>();
-    expectTypeOf<AcceptedPath<object, 'anything'>>().toBeNever();
+    expectTypeOf<
+      AcceptedPath<object, 'anything'>
+    >().toEqualTypeOf<`/${string}`>();
+  });
+
+  it('refuses with paths it accepts, so a refused path never fits what it is refused with', () => {
+    type AppPatterns = '/products' | '/items' | '/signup' | '/posts/:slug';
+    expectTypeOf<
+      AcceptedPath<{ routes: AppRoutes }, AppPatterns>
+    >().toEqualTypeOf<AppPatterns>();
+    // 1 つでも外れるメンバーがあれば、和集合ごと拒む
+    expectTypeOf<
+      AcceptedPath<{ routes: AppRoutes }, '/signup' | '/nowhere'>
+    >().toEqualTypeOf<AppPatterns>();
+    // ワイルドカードのパターンの綴りはリンクできるパスではない
+    expectTypeOf<
+      AcceptedPath<{ routes: AppRoutes }, '/files/*'>
+    >().toEqualTypeOf<AppPatterns>();
   });
 });
 

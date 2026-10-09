@@ -7,8 +7,11 @@ import { PropsTable } from '../../../../../components/props-table';
 import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
+import {
+  TreeControlledPreview,
+  TreePreview,
+} from '../../../../../demos/ui/components/tree-previews';
 import * as m from '../../../../../messages';
-import { TreeControlledPreview, TreePreview } from '../_previews/tree-previews';
 
 export default function TreePage() {
   return (

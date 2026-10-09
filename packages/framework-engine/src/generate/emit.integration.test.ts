@@ -205,3 +205,20 @@ describe('a loading.tsx in the table', () => {
     ]);
   });
 });
+
+describe('a fallback.tsx, given to the router', () => {
+  it('leaves the table the router matches with as it is without it', () => {
+    const files = [
+      'layout.tsx',
+      'page.tsx',
+      '[locale]/layout.tsx',
+      '[locale]/posts/[id]/page.tsx',
+    ];
+    const withShell = tableFor([...files, '[locale]/posts/[id]/fallback.tsx']);
+    const without = tableFor(files);
+    expect(withShell.match('/en/posts/3')).toStrictEqual(
+      without.match('/en/posts/3'),
+    );
+    expect(withShell.record).toStrictEqual(without.record);
+  });
+});

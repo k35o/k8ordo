@@ -7,8 +7,8 @@ import { PropsTable } from '../../../../../components/props-table';
 import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
+import { CommandPalettePreview } from '../../../../../demos/ui/components/command-palette-previews';
 import * as m from '../../../../../messages';
-import { CommandPalettePreview } from '../_previews/command-palette-previews';
 
 const USAGE = `const [isOpen, setIsOpen] = useState(false);
 

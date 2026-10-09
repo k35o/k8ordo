@@ -7,8 +7,8 @@ import { PropsTable } from '../../../../../components/props-table';
 import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
+import { CheckboxCardControlledPreview } from '../../../../../demos/ui/components/checkbox-card-previews';
 import * as m from '../../../../../messages';
-import { CheckboxCardControlledPreview } from '../_previews/checkbox-card-previews';
 
 const options = [
   {

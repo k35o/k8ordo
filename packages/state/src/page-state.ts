@@ -148,7 +148,7 @@ export function definePageState(
  * Reads the url slot a schema describes out of a URL's search, the way
  * `parseUrl` reads it for the definition the schema came from — defaults
  * applied, repeated params gathered, a rejected field salvaged to its
- * default. For code handed the schema alone: `@k8ordo/server` reads the
+ * default. For code handed the schema alone: `@k8ordo/framework` reads the
  * search of a page that exports `search = listState.url` through it. The
  * codec is built once, when this is called.
  */

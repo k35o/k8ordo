@@ -40,8 +40,8 @@ pnpm add @k8ordo/i18n
 
 No React import and no schema library: a message is a plain function, and a
 locale set is a list that checks membership itself. `locales.paramsSchema`
-speaks Standard Schema, which is what `@k8ordo/static` and `@k8ordo/server`
-run for a route's params. On a server the current locale rides on
+speaks Standard Schema, which is what `@k8ordo/framework` runs for a
+route's params. On a server the current locale rides on
 `AsyncLocalStorage`, reached through `process.getBuiltinModule`, so a server
 runtime has to provide that API; Node 24, which the framework modes require,
 does.
@@ -53,7 +53,7 @@ are shown in and the direction its text runs in — registered once so every
 message is held to it:
 
 ```ts
-// i18n.ts
+// src/i18n.ts
 import { defineLocales } from '@k8ordo/i18n';
 import type { LocaleOf } from '@k8ordo/i18n';
 
@@ -72,7 +72,7 @@ declare module '@k8ordo/i18n' {
 Each message is one export, with its text in every locale:
 
 ```ts
-// messages/nav.ts
+// src/messages/nav.ts
 import { message } from '@k8ordo/i18n';
 
 export const home = message({ ja: 'ホーム', en: 'Home' });
@@ -86,7 +86,7 @@ The `[locale]` route's layout declares the schema; accepting a locale makes it
 the locale of that render:
 
 ```tsx
-// routes/[locale]/layout.tsx
+// src/routes/[locale]/layout.tsx
 import { locales } from '../../i18n';
 
 export const { paramsSchema } = locales; // /fr/… is a 404
@@ -95,7 +95,7 @@ export const { paramsSchema } = locales; // /fr/… is a 404
 And a message is called the same way everywhere:
 
 ```tsx
-// routes/[locale]/page.tsx — a Server Component
+// src/routes/[locale]/page.tsx — a Server Component
 import * as nav from '../../messages/nav';
 
 export default function Page() {
@@ -104,7 +104,7 @@ export default function Page() {
 ```
 
 ```tsx
-// components/toolbar.tsx — a Client Component, the same line
+// src/components/toolbar.tsx — a Client Component, the same line
 'use client';
 import * as nav from '../messages/nav';
 
@@ -118,8 +118,8 @@ the message and passes the string: a function does not cross that boundary.
 
 `/` negotiates and redirects; `<html lang>` and a language switcher read
 `locales.getLocale()`, and `<html dir>` its `locales.definitions[…].dir`; a static build passes `paths: locales.paths`. Links
-stay `@k8ordo/router`'s: `bindParams(() => ({ locale: locales.getLocale() }))`
-gives an `href` that spells `/:locale/…` patterns without the locale.
+stay the router's: `bindParams(() => ({ locale: locales.getLocale() }))`
+(imported from `@k8ordo/framework` in a framework application) gives an `href` that spells `/:locale/…` patterns without the locale.
 
 ## AI Agent Documentation
 

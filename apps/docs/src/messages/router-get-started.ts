@@ -61,8 +61,8 @@ export const mountResult = message({
 });
 
 export const mountBrowserOnly = message({
-  ja: '`<Router>`は、ブラウザの中で描くアプリのためのものです。サーバーやビルドの時点でページを描くなら、`@k8ordo/static`か`@k8ordo/server`を使います。',
-  en: '`<Router>` is for an app that renders in the browser. To render pages on a server or at build time, use `@k8ordo/static` or `@k8ordo/server`.',
+  ja: '`<Router>`は、ブラウザの中で描くアプリのためのものです。サーバーやビルドの時点でページを描くなら、`@k8ordo/framework`を使います。',
+  en: '`<Router>` is for an app that renders in the browser. To render pages on a server or at build time, use `@k8ordo/framework`.',
 });
 
 export const layoutTitle = message({

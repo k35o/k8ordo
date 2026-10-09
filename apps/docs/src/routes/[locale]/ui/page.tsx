@@ -6,9 +6,9 @@ import {
   NextSteps,
 } from '../../../components/landing';
 import { Playground } from '../../../components/playground';
+import { OverlayDemo } from '../../../demos/ui/overlay-demo';
+import { VerticalDemo } from '../../../demos/ui/vertical-demo';
 import * as m from '../../../messages';
-import { OverlayDemo } from './_parts/overlay-demo';
-import { VerticalDemo } from './_parts/vertical-demo';
 
 const HERO_STYLES = `import '@k8ordo/ui/styles.css';`;
 

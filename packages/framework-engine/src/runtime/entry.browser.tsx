@@ -4,6 +4,7 @@ import { rscStream } from 'rsc-html-stream/client';
 import { AppRouter, setDocumentClient } from './app-router';
 import { mount } from './mount';
 import type { HydrateOptions } from './mount';
+import { reportCaught } from './page-boundary';
 import type { Payload } from './payload';
 import { whenRevealed } from './revealed';
 
@@ -30,10 +31,14 @@ await whenRevealed();
 mount(
   document,
   <AppRouter
+    notFound={payload.notFound}
     pathname={payload.pathname}
     search={payload.search}
     tree={payload.tree}
   />,
   payload.pathname,
-  { formState: payload.formState as HydrateOptions['formState'] },
+  {
+    formState: payload.formState as HydrateOptions['formState'],
+    onCaughtError: reportCaught,
+  },
 );

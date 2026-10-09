@@ -86,6 +86,6 @@ export const statePitfall = message({
 });
 
 export const frameworkNote = message({
-  ja: '`@k8ordo/static`や`@k8ordo/server`の下でも同じです。Server Actionの`redirect()`に渡すURLも、`href`で作るとサブパスが付きます。',
-  en: 'The same holds under `@k8ordo/static` and `@k8ordo/server`. A URL handed to a Server Action’s `redirect()` gets its base path when `href` builds it, too.',
+  ja: '`@k8ordo/framework`の下でも同じです。Server Actionの`redirect()`に渡すURLも、`href`で作るとサブパスが付きます。',
+  en: 'The same holds under `@k8ordo/framework`. A URL handed to a Server Action’s `redirect()` gets its base path when `href` builds it, too.',
 });

@@ -5,9 +5,9 @@ import { Pitfall } from '../../../../components/callout';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { Playground } from '../../../../components/playground';
 import { Rich } from '../../../../components/rich';
+import { signupDefinition } from '../../../../demos/form/errors/signup-definition';
+import { SignupDemo } from '../../../../demos/form/errors/signup-demo';
 import * as m from '../../../../messages';
-import { signupDefinition } from './_parts/signup-definition';
-import { SignupDemo } from './_parts/signup-demo';
 
 const t = m.formErrors;
 

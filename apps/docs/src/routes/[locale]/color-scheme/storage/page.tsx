@@ -109,7 +109,7 @@ export default function ColorSchemeStoragePage() {
         id="beside"
         title={t.besideTitle}
       >
-        <CodeBlock code={BESIDE} lang="ts" title="state.ts" />
+        <CodeBlock code={BESIDE} lang="ts" title="src/state.ts" />
         <p>
           <Rich>{t.besideModule()}</Rich>
         </p>

@@ -1,7 +1,7 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: '日本語と英語のページを持つ小さなアプリを作りながら、`@k8ordo/i18n`の使い方を最初から最後までたどります。ロケールの一覧を1か所に書き、`[locale]`の区間で受け取り、最初の文言をServer ComponentとClient Componentの両方で描きます。',
+  ja: '日本語と英語のページを持つ小さなアプリを作りながら、`@k8ordo/i18n`の使い方を最初から最後までたどります。ロケールの一覧は1か所に書き、`[locale]`の区間で受け取ります。最初の文言は、Server ComponentとClient Componentの両方で描きます。',
   en: 'Build a small app with Japanese and English pages, from start to finish. You list the locales in one place, accept them on the `[locale]` segment, and render a first message from a Server Component and from a Client Component.',
 });
 
@@ -16,8 +16,8 @@ export const installDescription = message({
 });
 
 export const runtimeNote = message({
-  ja: 'サーバーでは、描画中のロケールを`AsyncLocalStorage`に置きます。`process.getBuiltinModule`でこれを取り出せるランタイムが必要です。`@k8ordo/static`と`@k8ordo/server`が求めるNode 24は、この条件を満たします。',
-  en: 'On a server the locale of the render in progress lives in `AsyncLocalStorage`, so the runtime has to hand it out through `process.getBuiltinModule`. Node 24, which `@k8ordo/static` and `@k8ordo/server` require, does.',
+  ja: 'サーバーでは、描画中のロケールを`AsyncLocalStorage`に置きます。`process.getBuiltinModule`でこれを取り出せるランタイムが必要です。`@k8ordo/framework`が求めるNode 24は、この条件を満たします。',
+  en: 'On a server the locale of the render in progress lives in `AsyncLocalStorage`, so the runtime has to hand it out through `process.getBuiltinModule`. Node 24, which `@k8ordo/framework` requires, does.',
 });
 
 export const localesTitle = message({
@@ -36,8 +36,8 @@ export const localesDefault = message({
 });
 
 export const localesRegister = message({
-  ja: '後半の`Register`は、ロケールの型をパッケージに伝える宣言です。これを書くと、このあと書く文言がすべてのロケールの文を求めるようになります。`Register`はマージされるための型なので、`type`ではなく`interface`で書きます。',
-  en: 'The `Register` block at the end tells the package your locales’ type. With it, every message you write next has to carry text for every locale. `Register` exists to be merged, so it is an `interface` rather than a `type`.',
+  ja: '後半の`Register`は、ロケールの型をパッケージに伝える宣言です。これを書くと、このあと書く文言がすべてのロケールの文を求めるようになります。`Register`はマージされるための型なので、`interface`で書きます。',
+  en: 'The `Register` block at the end tells the package your locales’ type. With it, every message you write next has to carry text for every locale. `Register` exists to be merged, so it is an `interface`.',
 });
 
 export const segmentTitle = message({
@@ -46,8 +46,8 @@ export const segmentTitle = message({
 });
 
 export const segmentDescription = message({
-  ja: '次に、すべてのページを`routes/[locale]/`の下に置き、その区間のレイアウトから`paramsSchema`をexportします。`/ja/…`と`/en/…`だけが受け付けられ、受け付けたロケールがそのページの描画のロケールになります。',
-  en: 'Next, put every page under `routes/[locale]/` and export `paramsSchema` from that segment’s layout. Only `/ja/…` and `/en/…` are accepted, and the accepted locale becomes the locale that page renders in.',
+  ja: '次に、すべてのページを`src/routes/[locale]/`の下に置き、その区間のレイアウトから`paramsSchema`をexportします。`/ja/…`と`/en/…`だけが受け付けられ、受け付けたロケールがそのページの描画のロケールになります。',
+  en: 'Next, put every page under `src/routes/[locale]/` and export `paramsSchema` from that segment’s layout. Only `/ja/…` and `/en/…` are accepted, and the accepted locale becomes the locale that page renders in.',
 });
 
 export const segmentRefuse = message({
@@ -56,8 +56,8 @@ export const segmentRefuse = message({
 });
 
 export const segmentPitfall = message({
-  ja: "このレイアウトに`'use client'`を付けてはいけません。Client Componentのモジュールからexportした値は、スキーマではなくclient referenceとしてフレームワークに届くからです。フックを使う枠が要るときは、`_parts/`のClient Componentに分けて、レイアウトから描きます。",
-  en: "Do not mark this layout `'use client'`: a value exported from a client module reaches the framework as a client reference, not as a schema. If the frame needs hooks, move it into a Client Component under `_parts/` and render that from the layout.",
+  ja: "このレイアウトに`'use client'`を付けてはいけません。付けると、exportしたスキーマはclient referenceとしてフレームワークに渡り、スキーマとして読めなくなります。フックを使う枠が要るときは、`src/components/`のClient Componentに分けて、レイアウトから描きます。",
+  en: "Do not mark this layout `'use client'`: the schema it exports would then reach the framework as a client reference, which cannot be read as a schema. If the frame needs hooks, move it into a Client Component under `src/components/` and render that from the layout.",
 });
 
 export const messagesTitle = message({
@@ -96,8 +96,8 @@ export const clientDescription = message({
 });
 
 export const clientBoundary = message({
-  ja: 'Server ComponentからClient Componentへpropsで文言を渡すときは、呼んだ結果の文字列を渡します。関数はServer Componentの境界を越えられないためです。詳しくは「文言を書く」で説明します。',
-  en: 'To hand text from a Server Component to a Client Component as a prop, pass the string you get by calling the message: a function cannot cross the Server Component boundary. “Write messages” covers this.',
+  ja: 'Server ComponentからClient Componentへpropsで文言を渡すときは、呼んだ結果の文字列を渡します。関数はpropsとしてClient Componentに渡せないためです。詳しくは「文言を書く」で説明します。',
+  en: 'To hand text from a Server Component to a Client Component as a prop, pass the string you get by calling the message: a function cannot be passed to a Client Component as a prop. “Write messages” covers this.',
 });
 
 export const nextTitle = message({

@@ -64,7 +64,7 @@ export default function StatePlacesPage() {
   return (
     <DocPage introduction={t.introduction} path="/:locale/state/places">
       <DocSection description={t.sixDescription} id="six" title={t.sixTitle}>
-        <CodeBlock code={SIX} lang="ts" title="state.ts" />
+        <CodeBlock code={SIX} lang="ts" title="src/state.ts" />
         <ul>
           {[
             t.sixUrl,
@@ -164,7 +164,7 @@ export default function StatePlacesPage() {
           code={MINI}
           lang="ts"
           marks={{ 1: 'highlight', 5: 'highlight', 6: 'highlight' }}
-          title="state.ts"
+          title="src/state.ts"
         />
         <p>
           <Rich>{t.miniSpelling()}</Rich>

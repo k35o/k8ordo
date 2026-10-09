@@ -7,7 +7,7 @@ import type { IntlFormats } from './format';
 
 /**
  * The one shape every validation library agrees on (Standard Schema), as far
- * as `@k8ordo/static` / `@k8ordo/server` read it for a route's `paramsSchema`.
+ * as `@k8ordo/framework` reads it for a route's `paramsSchema`.
  * Declared here rather than depended on so the package carries no schema
  * library: a locale set is a list, and a list can check membership itself.
  */
@@ -103,16 +103,19 @@ export type Locales<
   readonly delocalize: (pathname: string) => Delocalized<L>;
   /**
    * The static build's `paths` option: every pattern that has a `/:locale`
-   * segment, once per locale, so `framework({ paths: locales.paths })` is
-   * the whole answer for a site whose only parameter is the locale. A
-   * pattern with another parameter comes back still holding it
-   * (`/ja/blog/:slug`), which the build does not render: expand the rest in
-   * the same function.
+   * segment, once per locale, so
+   * `framework({ mode: 'static', paths: locales.paths })` is the whole
+   * answer for a site whose only parameter is the locale. A pattern with
+   * another parameter comes back still holding it (`/ja/blog/:slug`), which
+   * the build renders only as the location of a `fallback.tsx`'s shell, and
+   * otherwise refuses: expand the rest in the same function. A shell runs
+   * only its layouts' schemas, so it renders in its locale when this set's
+   * `paramsSchema` sits on `[locale]/layout.tsx`.
    */
   readonly paths: (patterns: readonly string[]) => string[];
   /**
    * A params schema for a `[locale]` route segment, in the shape
-   * `@k8ordo/static` / `@k8ordo/server` run: `export const paramsSchema =
+   * `@k8ordo/framework` runs: `export const paramsSchema =
    * locales.paramsSchema` makes `/fr/…` a pathname the pattern does not
    * answer. On a server, accepting a locale also makes it the current one for
    * the render of the page that accepted it, which is how `getLocale()` knows

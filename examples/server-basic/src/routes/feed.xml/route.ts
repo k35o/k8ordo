@@ -1,6 +1,6 @@
-import type { RouteContext } from '@k8ordo/router';
+import type { RouteContext } from '@k8ordo/framework';
 
-import { listProducts } from '../_data/catalog.server';
+import { listProducts } from '../../lib/catalog.server';
 
 const escape = (text: string): string =>
   text.replaceAll('&', '&amp;').replaceAll('<', '&lt;');

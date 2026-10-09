@@ -1,4 +1,4 @@
-import { framework } from '@k8ordo/static';
+import { framework } from '@k8ordo/framework/vite';
 import { defineConfig } from 'vite';
 
 import { locales } from './src/i18n';
@@ -9,14 +9,21 @@ export default defineConfig({
   base: '/site/',
   plugins: [
     framework({
+      mode: 'static',
       paths: (patterns) =>
-        locales
-          .paths(patterns)
-          .flatMap((pathname) =>
-            pathname === '/products/:id'
-              ? ['/products/1', '/products/2']
-              : [pathname],
-          ),
+        locales.paths(patterns).flatMap((pathname) => {
+          if (pathname === '/products/:id') {
+            return ['/products/1', '/products/2'];
+          }
+          if (pathname.endsWith('/posts/:id')) {
+            return [
+              pathname,
+              pathname.replace(':id', '1'),
+              pathname.replace(':id', '2'),
+            ];
+          }
+          return [pathname];
+        }),
       site: 'https://example.test',
     }),
   ],

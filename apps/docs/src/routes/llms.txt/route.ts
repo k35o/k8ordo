@@ -1,4 +1,4 @@
-import type { RouteContext } from '@k8ordo/router';
+import type { RouteContext } from '@k8ordo/framework';
 
 import { PACKAGES } from '../../data/packages';
 import { docsPathOf, shipsDocs } from '../../data/shipped-docs';

@@ -7,8 +7,8 @@ import { PropsTable } from '../../../../../components/props-table';
 import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { propsOf } from '../../../../../data/component-props';
+import { CopyButtonLazyValuePreview } from '../../../../../demos/ui/components/copy-button-previews';
 import * as m from '../../../../../messages';
-import { CopyButtonLazyValuePreview } from '../_previews/copy-button-previews';
 
 export default function CopyButtonPage() {
   return (

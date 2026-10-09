@@ -21,22 +21,25 @@ npm install @k8ordo/router
 pnpm add @k8ordo/router
 ```
 
-Under `@k8ordo/static` or `@k8ordo/server` this package is what the framework
-builds on: the table is generated from `src/routes/`, and what an application
-uses of it is the half that needs no table — `href`, `navigateTo` and
-`bindParams`; `usePathname`, `useMatch` and `matchPath` — plus the route
-files' props types, `PageProps` and `LayoutProps`. On its own it is the whole
-router for an application that renders in the browser.
+Under `@k8ordo/framework` this package is what the framework builds on: the
+table is generated from `src/routes/`, and what an application uses of it is
+the half that needs no table — `href`, `navigateTo` and `bindParams`;
+`usePathname`, `useMatch` and `matchPath` — plus the route files' props types,
+`PageProps` and `LayoutProps`. There it is installed as the framework's peer,
+and the application imports that half from `@k8ordo/framework`, which
+re-exports it. On its own it is the whole router for an application that
+renders in the browser.
 
 ## Peer Dependencies
 
 <!-- peers -->
 
-| Package        | Version | Required | Needed for                    |
-| -------------- | ------- | -------- | ----------------------------- |
-| `react`        | ≥19.3.0 | yes      | `<Router>` and the hooks      |
-| `typescript`   | ≥7.0.0  | optional | the shipped type declarations |
-| `@types/react` | ≥19.3.0 | optional | the shipped type declarations |
+| Package        | Version | Required | Needed for                      |
+| -------------- | ------- | -------- | ------------------------------- |
+| `react`        | ≥19.3.0 | yes      | `<Router>` and the hooks        |
+| `react-dom`    | ≥19.3.0 | yes      | `BrowserPathname` (`browser()`) |
+| `typescript`   | ≥7.0.0  | optional | the shipped type declarations   |
+| `@types/react` | ≥19.3.0 | optional | the shipped type declarations   |
 
 <!-- /peers -->
 

@@ -50,8 +50,8 @@ export const greeting = message({
   en: (name) => \`Hello, \${name}\`,
 });`;
 
-const PAGE = `import * as home from '../../messages/home';
-import { Greeting } from './_parts/greeting';
+const PAGE = `import { Greeting } from '../../components/greeting';
+import * as home from '../../messages/home';
 
 export default function HomePage() {
   return (
@@ -66,7 +66,7 @@ const GREETING = `'use client';
 
 import { useState } from 'react';
 
-import * as home from '../../../messages/home';
+import * as home from '../messages/home';
 
 export function Greeting() {
   const [name, setName] = useState('k8o');
@@ -130,7 +130,7 @@ export default function I18nGetStartedPage() {
           code={LOCALES}
           lang="ts"
           marks={{ 5: 'highlight', 6: 'highlight' }}
-          title="i18n.ts"
+          title="src/i18n.ts"
         />
         <p>
           <Rich>{t.localesDefault()}</Rich>
@@ -149,7 +149,7 @@ export default function I18nGetStartedPage() {
           code={LAYOUT}
           lang="tsx"
           marks={{ 5: 'highlight' }}
-          title="routes/[locale]/layout.tsx"
+          title="src/routes/[locale]/layout.tsx"
         />
         <p>
           <Rich>{t.segmentRefuse()}</Rich>
@@ -170,7 +170,7 @@ export default function I18nGetStartedPage() {
           code={MESSAGES}
           lang="ts"
           marks={{ 8: 'highlight', 9: 'highlight' }}
-          title="messages/home.ts"
+          title="src/messages/home.ts"
         />
         <p>
           <Rich>{t.messagesTypes()}</Rich>
@@ -186,7 +186,7 @@ export default function I18nGetStartedPage() {
           code={PAGE}
           lang="tsx"
           marks={{ 7: 'highlight' }}
-          title="routes/[locale]/page.tsx"
+          title="src/routes/[locale]/page.tsx"
         />
       </DocSection>
 
@@ -199,7 +199,7 @@ export default function I18nGetStartedPage() {
           code={GREETING}
           lang="tsx"
           marks={{ 13: 'highlight', 21: 'highlight' }}
-          title="routes/[locale]/_parts/greeting.tsx"
+          title="src/components/greeting.tsx"
         />
         <p>
           <Rich>{t.clientBoundary()}</Rich>

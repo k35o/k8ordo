@@ -62,12 +62,12 @@ export default function StateBeforeHydrationPage() {
         id="embed"
         title={t.embedTitle}
       >
-        <CodeBlock code={THEME} lang="ts" title="state.ts" />
+        <CodeBlock code={THEME} lang="ts" title="src/state.ts" />
         <CodeBlock
           code={LAYOUT}
           lang="tsx"
           marks={{ 6: 'highlight', 18: 'highlight', 20: 'highlight' }}
-          title="routes/layout.tsx"
+          title="src/routes/layout.tsx"
         />
         <p>
           <Rich>{t.embedSuppress()}</Rich>

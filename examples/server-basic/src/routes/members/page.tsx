@@ -1,4 +1,4 @@
-import type { PageProps } from '@k8ordo/router';
+import type { PageProps } from '@k8ordo/framework';
 
 // guard.ts が通したリクエストでだけ描かれる
 export default function MembersPage({ request }: PageProps<'/members'>) {

@@ -66,7 +66,7 @@ const REDUCED_MOTION = `@media (prefers-reduced-motion: reduce) {
   }
 }`;
 
-const FRAMEWORK = `import type { LayoutProps } from '@k8ordo/router';
+const FRAMEWORK = `import type { LayoutProps } from '@k8ordo/framework';
 import { ViewTransition } from 'react';
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {

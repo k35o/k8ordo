@@ -1,18 +1,38 @@
 'use client';
 
-import { isNotFound } from '@k8ordo/router';
 import { Component } from 'react';
 import type { ReactNode } from 'react';
 
-import { NOT_FOUND_DIGEST } from './payload';
+import { FallbackCatch } from './fallback-boundary';
 import { isNavigated } from './recover';
 import { reloadDocument } from './reload';
+import { saysNotFound } from './says-not-found';
 
-const saysNotFound = (error: unknown): boolean =>
-  isNotFound(error) ||
-  (typeof error === 'object' &&
-    error !== null &&
-    (error as { digest?: unknown }).digest === NOT_FOUND_DIGEST);
+/** Whether the boundary answers `error` with a document load. */
+const sendsBack = (error: unknown): boolean =>
+  saysNotFound(error) && isNavigated();
+
+/**
+ * What the root reports of an error a boundary caught: what React would —
+ * the error, and under `vite dev` where in the tree — except a navigation's
+ * `notFound()`, which is no failure: the document load this boundary asks
+ * for answers it, under a 404. Nor a shell's, which its `FallbackBoundary`
+ * answers in place.
+ */
+export const reportCaught = (
+  error: unknown,
+  info: {
+    readonly componentStack?: string | undefined;
+    readonly errorBoundary?: unknown;
+  },
+): void => {
+  if (sendsBack(error)) return;
+  if (saysNotFound(error) && info.errorBoundary instanceof FallbackCatch) {
+    return;
+  }
+  if (import.meta.env.DEV) console.error(error, info.componentStack);
+  else console.error(error);
+};
 
 type State = { readonly error: unknown; readonly caught: boolean };
 
@@ -37,12 +57,12 @@ export class PageBoundary extends Component<{ children: ReactNode }, State> {
   }
 
   override componentDidCatch(error: unknown): void {
-    if (saysNotFound(error) && isNavigated()) reloadDocument();
+    if (sendsBack(error)) reloadDocument();
   }
 
   override render(): ReactNode {
     if (!this.state.caught) return this.props.children;
-    if (saysNotFound(this.state.error) && isNavigated()) return null;
+    if (sendsBack(this.state.error)) return null;
     throw this.state.error;
   }
 }

@@ -2,11 +2,15 @@
 
 import { createContext, use, useMemo, useSyncExternalStore } from 'react';
 import type { ReactNode } from 'react';
+import { browser } from 'react-dom';
 
 import { withoutBase } from './base';
 import { normalizePathname } from './paths';
 
-const ServerPathname = createContext<string | null>(null);
+/** Below `BrowserPathname`: the render has no pathname, the browser does. */
+const IN_BROWSER = Symbol('k8ordo.browser-pathname');
+
+const ServerPathname = createContext<string | typeof IN_BROWSER | null>(null);
 
 /**
  * The pathname the render started from. A client component's first render can
@@ -26,6 +30,19 @@ export const PathnameProvider = ({
   const value = useMemo(() => normalizePathname(pathname), [pathname]);
   return <ServerPathname value={value}>{children}</ServerPathname>;
 };
+
+/**
+ * Below this, a server render has no pathname to give: `usePathname` — and
+ * `useMatch`, which reads it — asks for the browser with `use(browser())`, so
+ * the nearest `<Suspense>` is left for the browser to render. Under
+ * `@k8ordo/framework` a fallback.tsx renders inside it; an application never
+ * writes this itself.
+ */
+export const BrowserPathname = ({
+  children,
+}: {
+  children: ReactNode;
+}): ReactNode => <ServerPathname value={IN_BROWSER}>{children}</ServerPathname>;
 
 const subscribe = (onChange: () => void): (() => void) => {
   navigation.addEventListener('currententrychange', onChange);
@@ -59,10 +76,19 @@ export const appPathname = (): string =>
  */
 export function usePathname(): string {
   const fromServer = use(ServerPathname);
+  if (fromServer === IN_BROWSER) {
+    use(
+      browser(
+        'usePathname reads the URL in the browser here: the server render was for a pathname no visitor is at',
+      ),
+    );
+  }
   return useSyncExternalStore(subscribe, appPathname, () => {
+    // 殻の自分の URL を開いたときだけ、ここで hydrate する
+    if (fromServer === IN_BROWSER) return appPathname();
     if (fromServer === null) {
       throw new Error(
-        'usePathname needs <Router> above it, or a page rendered by @k8ordo/static or @k8ordo/server',
+        'usePathname needs <Router> above it, or a page rendered by @k8ordo/framework',
       );
     }
     return fromServer;

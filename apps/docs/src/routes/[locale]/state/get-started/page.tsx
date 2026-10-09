@@ -6,8 +6,8 @@ import { PackageInstall } from '../../../../components/install';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Playground } from '../../../../components/playground';
 import { Rich } from '../../../../components/rich';
+import { ProductsDemo } from '../../../../demos/state/get-started/products-demo';
 import * as m from '../../../../messages';
-import { ProductsDemo } from './_parts/products-demo';
 
 const t = m.stateGetStarted;
 
@@ -25,7 +25,7 @@ const FILTERS = `'use client';
 
 import { useAppState } from '@k8ordo/state';
 
-import { listState } from './state';
+import { listState } from '../state';
 
 export function Filters() {
   const [{ inStock, page }, update] = useAppState(listState);
@@ -54,11 +54,11 @@ export function Filters() {
   );
 }`;
 
-const PAGE = `import type { PageProps } from '@k8ordo/router';
+const PAGE = `import type { PageProps } from '@k8ordo/framework';
 
-import { Filters } from './filters';
-import { ProductList } from './product-list';
-import { listState } from './state';
+import { Filters } from '../../components/filters';
+import { ProductList } from '../../components/product-list';
+import { listState } from '../../state';
 
 export const search = listState.url;
 
@@ -139,7 +139,7 @@ export default function StateGetStartedPage() {
           code={STATE}
           lang="ts"
           marks={{ 6: 'highlight', 7: 'highlight' }}
-          title="state.ts"
+          title="src/state.ts"
         />
         <p>
           <Rich>{t.defineFields()}</Rich>
@@ -165,7 +165,7 @@ export default function StateGetStartedPage() {
           code={FILTERS}
           lang="tsx"
           marks={{ 8: 'highlight', 16: 'highlight', 24: 'highlight' }}
-          title="filters.tsx"
+          title="src/components/filters.tsx"
         />
         <p>
           <Rich>{t.componentSync()}</Rich>
@@ -184,7 +184,7 @@ export default function StateGetStartedPage() {
           code={PAGE}
           lang="tsx"
           marks={{ 7: 'highlight', 10: 'highlight', 16: 'highlight' }}
-          title="page.tsx"
+          title="src/routes/products/page.tsx"
         />
         <p>
           <Rich>{t.serverParsed()}</Rich>
@@ -199,7 +199,7 @@ export default function StateGetStartedPage() {
           code={SEED}
           lang="tsx"
           marks={{ 5: 'highlight', 10: 'highlight' }}
-          title="filters.tsx"
+          title="src/components/filters.tsx"
         />
         <Note>
           <p>
@@ -213,7 +213,7 @@ export default function StateGetStartedPage() {
         id="links"
         title={t.linksTitle}
       >
-        <CodeBlock code={LINKS} lang="ts" title="links.ts" />
+        <CodeBlock code={LINKS} lang="ts" title="src/lib/links.ts" />
         <p>
           <Rich>{t.linksCanonical()}</Rich>
         </p>

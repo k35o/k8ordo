@@ -33,6 +33,13 @@ describe('the emitted table', () => {
     );
   });
 
+  it('reads the router through the framework, never naming the router', () => {
+    expect(source).toContain(
+      "import { defineRoutes } from '@k8ordo/framework/generated';",
+    );
+    expect(source).not.toContain('@k8ordo/router');
+  });
+
   it('wraps everything in the root layout through the transparent key', () => {
     expect(source).toContain('export const routes = defineRoutes({');
     expect(source).toMatch(
@@ -122,10 +129,11 @@ describe('what a route file is promised', () => {
 });
 
 describe('the emitted register', () => {
-  it('wires the table into the router', () => {
+  it('wires the table into the router through the framework, never naming the router', () => {
     const source = emitRegisterModule({ routesModule: './routes.gen' });
-    expect(source).toContain("declare module '@k8ordo/router' {");
+    expect(source).toContain("declare module '@k8ordo/framework/generated' {");
     expect(source).toContain('routes: typeof routes;');
+    expect(source).not.toContain('@k8ordo/router');
   });
 
   it('wires the same table into state only when the app depends on it', () => {
@@ -140,19 +148,27 @@ describe('the emitted register', () => {
     expect(without).not.toContain('@k8ordo/state');
   });
 
+  it('loads state itself, so the augmentation holds before any file imports it', () => {
+    const source = emitRegisterModule({
+      routesModule: './routes.gen',
+      stateModule: '@k8ordo/state',
+    });
+    expect(source).toContain("import type {} from '@k8ordo/state';");
+  });
+
   it('hands route files the request under a running server only', () => {
     const server = emitRegisterModule({
       routesModule: './routes.gen',
-      via: '@k8ordo/server',
+      mode: 'server',
     });
     expect(server).toContain(
-      "import type { RouteRequest } from '@k8ordo/server/runtime';",
+      "import type { RouteRequest } from '@k8ordo/framework/server';",
     );
     expect(server).toContain('request: RouteRequest;');
 
     const files = emitRegisterModule({
       routesModule: './routes.gen',
-      via: '@k8ordo/static',
+      mode: 'static',
     });
     expect(files).not.toContain('request');
   });
@@ -399,10 +415,10 @@ describe('the request a page receives', () => {
     const { tree } = parseRouteTree(['layout.tsx', 'page.tsx']);
     const source = emitRoutesModule(tree, {
       importPrefix: './routes',
-      via: '@k8ordo/server',
+      mode: 'server',
     });
     expect(source).toContain(
-      "import type { RouteRequest } from '@k8ordo/server/runtime';",
+      "import type { RouteRequest } from '@k8ordo/framework/server';",
     );
     expect(source).toMatch(/type Page<[\s\S]*?request: RouteRequest;/u);
     expect(source).toMatch(/type Layout<[\s\S]*?request: RouteRequest;/u);
@@ -412,7 +428,7 @@ describe('the request a page receives', () => {
     const { tree } = parseRouteTree(['page.tsx']);
     const source = emitRoutesModule(tree, {
       importPrefix: './routes',
-      via: '@k8ordo/static',
+      mode: 'static',
     });
     expect(source).not.toContain('RouteRequest');
   });
@@ -591,5 +607,63 @@ describe('a page that exports search', () => {
     expect(plain).toContain("page satisfies Page<'/'>");
     expect(plain).toContain('export const searchReaders = {\n} as const;');
     expect(plain).not.toContain("from '@k8ordo/state'");
+  });
+});
+
+const tableOf = (source: string): string =>
+  source.slice(source.indexOf('export const routes'));
+
+describe('fallback.tsx in the emitted table', () => {
+  const files = [
+    'layout.tsx',
+    'page.tsx',
+    '[locale]/layout.tsx',
+    '[locale]/posts/[id]/page.tsx',
+    '[locale]/posts/[id]/fallback.tsx',
+  ];
+  const withParams = new Set(['layout.tsx', '[locale]/layout.tsx']);
+  const emitIn = (mode: 'static' | 'server'): string =>
+    emitRoutesModule(parseRouteTree(files).tree, {
+      importPrefix: './routes',
+      mode,
+      withParams,
+    });
+
+  it('is emitted from a table the grammar accepted', () => {
+    expect(parseRouteTree(files).problems).toStrictEqual([]);
+  });
+
+  it('lists, under a build into files, the shell per pattern with its open params and the layouts’ schemas', () => {
+    const source = emitIn('static');
+    expect(source).toContain(
+      "import locale_posts_id_fallback from './routes/[locale]/posts/[id]/fallback';",
+    );
+    expect(source).toContain(
+      [
+        'export const fallbacks = {',
+        "  '/:locale/posts/:id': {",
+        '    component: locale_posts_id_fallback satisfies ComponentType,',
+        "    open: ['id'],",
+        '    schemas: [layout_params, locale_layout_params],',
+        '  },',
+        '} as const;',
+      ].join('\n'),
+    );
+  });
+
+  it('lists no shell and imports no fallback.tsx under a running server', () => {
+    const source = emitIn('server');
+    expect(source).toContain('export const fallbacks = {} as const;');
+    expect(source).not.toContain('fallback.tsx');
+    expect(source).not.toContain('/fallback');
+  });
+
+  it('leaves the route table as it is without the fallback.tsx', () => {
+    const without = emitRoutesModule(
+      parseRouteTree(files.filter((file) => !file.endsWith('fallback.tsx')))
+        .tree,
+      { importPrefix: './routes', mode: 'static', withParams },
+    );
+    expect(tableOf(emitIn('static'))).toBe(tableOf(without));
   });
 });

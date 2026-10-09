@@ -9,8 +9,8 @@ import {
 import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Playground } from '../../../../components/playground';
 import { Rich } from '../../../../components/rich';
+import { SwitcherDemo } from '../../../../demos/color-scheme/switcher/switcher-demo';
 import * as m from '../../../../messages';
-import { SwitcherDemo } from './_parts/switcher-demo';
 
 const t = m.colorSchemeSwitcher;
 

@@ -7,11 +7,11 @@ import { PropsTable } from '../../../../../components/props-table';
 import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
-import * as m from '../../../../../messages';
 import {
   RadioCardControlledPreview,
   RadioCardFormPreview,
-} from '../_previews/radio-card-previews';
+} from '../../../../../demos/ui/components/radio-card-previews';
+import * as m from '../../../../../messages';
 
 const options = [
   {

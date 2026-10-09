@@ -7,8 +7,8 @@ import { PropsTable } from '../../../../../components/props-table';
 import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
+import { PasswordInputControlledPreview } from '../../../../../demos/ui/components/password-input-previews';
 import * as m from '../../../../../messages';
-import { PasswordInputControlledPreview } from '../_previews/password-input-previews';
 
 export default function PasswordInputPage() {
   return (

@@ -1,8 +1,8 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: 'プロバイダが最初の描画の前に走らせるのは、インラインスクリプトです。スクリプトを制限するContent-Security-Policy（CSP）の下では、ポリシーでnonceかハッシュを使って許可しないと、このスクリプトは実行されません。このページでは、`@k8ordo/server`でnonceを使う方法と、`@k8ordo/static`やほかのヘッダーでハッシュを使う方法を説明します。',
-  en: 'What the provider runs before the first paint is an inline script. Under a Content-Security-Policy (CSP) that restricts scripts, it does not run unless the policy allows it by nonce or by hash. This page covers a nonce under `@k8ordo/server`, and a hash under `@k8ordo/static` or any other header.',
+  ja: 'プロバイダが最初の描画の前に走らせるのは、インラインスクリプトです。スクリプトを制限するContent-Security-Policy（CSP）の下では、ポリシーでnonceかハッシュを使って許可しないと、このスクリプトは実行されません。このページでは、`@k8ordo/framework`のserverモードでnonceを使う方法と、staticモードやほかのヘッダーでハッシュを使う方法を説明します。',
+  en: 'What the provider runs before the first paint is an inline script. Under a Content-Security-Policy (CSP) that restricts scripts, it does not run unless the policy allows it by nonce or by hash. This page covers a nonce in `@k8ordo/framework`’s server mode, and a hash in its static mode or under any other header.',
 });
 
 export const blockedTitle = message({
@@ -26,13 +26,13 @@ export const blockedUnsafe = message({
 });
 
 export const nonceTitle = message({
-  ja: '`@k8ordo/server`ではnonceで許可する',
-  en: 'By nonce, under `@k8ordo/server`',
+  ja: 'serverモードではnonceで許可する',
+  en: 'By nonce, in server mode',
 });
 
 export const nonceDescription = message({
-  ja: '`@k8ordo/server`は応答ごとに新しいnonceを作り、フレームワーク自身のインラインスクリプトに付けます。その値は`@k8ordo/server/runtime`の`nonce()`で読めるので、ルートの`guard.ts`でポリシーに書き、ルートレイアウトでプロバイダの`nonce`に渡します。',
-  en: '`@k8ordo/server` makes a new nonce for every response and puts it on the framework’s own inline scripts. `nonce()` from `@k8ordo/server/runtime` reads it, so the root `guard.ts` writes it into the policy, and the root layout hands it to the provider’s `nonce`.',
+  ja: 'serverモードは応答ごとに新しいnonceを作り、フレームワーク自身のインラインスクリプトに付けます。その値は`@k8ordo/framework/server`の`nonce()`で読めるので、ルートの`guard.ts`でポリシーに書き、ルートレイアウトでプロバイダの`nonce`に渡します。',
+  en: 'Server mode makes a new nonce for every response and puts it on the framework’s own inline scripts. `nonce()` from `@k8ordo/framework/server` reads it, so the root `guard.ts` writes it into the policy, and the root layout hands it to the provider’s `nonce`.',
 });
 
 export const nonceRender = message({
@@ -46,13 +46,13 @@ export const nonceCache = message({
 });
 
 export const nonceLink = message({
-  ja: '@k8ordo/serverでCSPを設定する',
-  en: 'Setting a CSP with @k8ordo/server',
+  ja: '@k8ordo/frameworkでCSPを設定する',
+  en: 'Setting a CSP with @k8ordo/framework',
 });
 
 export const hashTitle = message({
-  ja: '`@k8ordo/static`ではハッシュで許可する',
-  en: 'By hash, under `@k8ordo/static`',
+  ja: 'staticモードではハッシュで許可する',
+  en: 'By hash, in static mode',
 });
 
 export const hashDescription = message({
@@ -66,8 +66,8 @@ export const hashMeta = message({
 });
 
 export const hashStrictDynamic = message({
-  ja: "`@k8ordo/static`のビルドは、`'strict-dynamic'`を含むポリシーを受け付けません。フレームワークの起動用のモジュールにはファイルの中でnonceを付けられないので、`'self'`で許可しているからです。",
-  en: "`@k8ordo/static`’s build refuses a policy with `'strict-dynamic'`: nothing in a file can sign the framework’s module script, so it is allowed by `'self'`.",
+  ja: "staticモードのビルドは、`'strict-dynamic'`を含むポリシーを受け付けません。フレームワークの起動用のモジュールにはファイルの中でnonceを付けられないので、`'self'`で許可しているからです。",
+  en: "A static-mode build refuses a policy with `'strict-dynamic'`: nothing in a file can sign the framework’s module script, so it is allowed by `'self'`.",
 });
 
 export const hashComputed = message({
@@ -81,8 +81,8 @@ export const hashHeader = message({
 });
 
 export const hashLink = message({
-  ja: '@k8ordo/staticでCSPを書く',
-  en: 'Writing a CSP with @k8ordo/static',
+  ja: '@k8ordo/frameworkでCSPを書く',
+  en: 'Writing a CSP with @k8ordo/framework',
 });
 
 export const defaultTitle = message({

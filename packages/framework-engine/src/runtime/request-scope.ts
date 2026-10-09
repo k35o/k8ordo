@@ -26,10 +26,12 @@ type Scope = {
   readonly outgoing: Outgoing;
   /** What this answer's inline scripts are signed with. */
   readonly nonce: string;
+  /** Whether the answer is written to a file, the same for every visitor. */
+  readonly file?: boolean;
 };
 
 /**
- * The mode package bundles this module twice — into the runtime the handler
+ * The framework bundles this module twice — into the runtime the handler
  * is built from, and into the entry an application imports the response API
  * from — and both copies have to find the one request in progress. So the
  * storage lives on `globalThis` under a registry symbol, as `@k8ordo/i18n`'s
@@ -75,6 +77,23 @@ export const inPhase = <T>(phase: Phase, fn: () => T): T => {
 };
 
 /**
+ * Runs `fn` as the request in progress answered into a file — mode: 'static'
+ * — where the request API refuses whoever reads it. The build names every
+ * module of the application that imports it; one inside a dependency it
+ * never compiles is only seen here, when it is called.
+ */
+export const writingFile = <T>(fn: () => T): T => {
+  const current = storage().getStore();
+  if (current === undefined) return fn();
+  return storage().run({ ...current, file: true }, fn);
+};
+
+const fileRefusal = (caller: string): Error =>
+  new Error(
+    `${caller} answers a request, and under mode: 'static' a file is written once for every visitor — it was called through an import of @k8ordo/framework/server the build cannot name, such as a dependency's\nthis application wants mode: 'server'`,
+  );
+
+/**
  * `response`, carrying what the request in progress added to the final
  * response. Built anew rather than changed in place: `Response.redirect()`
  * and a fetched response hand out headers that cannot be written.
@@ -114,6 +133,7 @@ const answering = (caller: string): Scope => {
       `${caller} needs a request — call it from a guard.ts, a route.ts or a Server Action, while the request is being answered`,
     );
   }
+  if (scope.file === true) throw fileRefusal(caller);
   if (scope.phase === 'render') {
     throw new Error(
       `${caller} belongs to what answers the request, and a page is a render — call it from a guard.ts, a route.ts or a Server Action; a page reads the request from its props`,
@@ -163,6 +183,21 @@ export const nonce = (): string => {
   if (scope === undefined) {
     throw new Error(
       'nonce() needs a request — call it while one is answered: from a guard.ts, a layout or page, or a Server Action',
+    );
+  }
+  if (scope.file === true) throw fileRefusal('nonce()');
+  return scope.nonce;
+};
+
+/**
+ * The nonce the handler signs its own inline scripts with, in either mode: a
+ * build into files turns what it signed into hashes.
+ */
+export const signingNonce = (): string => {
+  const scope = storage().getStore();
+  if (scope === undefined) {
+    throw new Error(
+      'the handler signs its scripts while a request is answered',
     );
   }
   return scope.nonce;

@@ -963,7 +963,7 @@ it('writes any value as a cookie the server reads back after decoding it once', 
   const cookie = (await cookieStore.get(
     noteState.cookieName,
   )) as CookieListItem;
-  // サーバーの Cookie パーサー（@k8ordo/server の request.cookies）は値を
+  // サーバーの Cookie パーサー（@k8ordo/framework の request.cookies）は値を
   // 1 回だけ decodeURIComponent してから渡す
   const requestCookies = new Map([
     [noteState.cookieName, decodeURIComponent(cookie.value as string)],

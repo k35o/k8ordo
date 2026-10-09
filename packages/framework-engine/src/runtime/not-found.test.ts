@@ -30,7 +30,7 @@ beforeAll(async () => {
   const { handler, out } = (built = await buildFixture('bare-not-found'));
 
   // ハッシュ付きの資産はファイルから、それ以外はハンドラが答える。
-  // @k8ordo/server の serve と同じ分担
+  // @k8ordo/framework/serve と同じ分担
   const answer = async (url: URL): Promise<Response> => {
     if (!url.pathname.startsWith('/assets/')) return handler(new Request(url));
     try {

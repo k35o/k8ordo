@@ -1,4 +1,4 @@
-import { parseRouteTree, slotOf } from './tree';
+import { fallbackShapes, parseRouteTree, slotOf } from './tree';
 import type { RouteDir } from './tree';
 
 const childOf = (dir: RouteDir, name: string): RouteDir => {
@@ -6,6 +6,9 @@ const childOf = (dir: RouteDir, name: string): RouteDir => {
   if (found === undefined) throw new Error(`no child "${name}"`);
   return found;
 };
+
+const stray = (basename: string): string =>
+  `routes/ holds only page.tsx, layout.tsx, not-found.tsx, error.tsx, redirect.ts, guard.ts, route.ts, loading.tsx, fallback.tsx — move "${basename}" out of routes/`;
 
 describe('the directory tree becomes the pathname space', () => {
   const { tree, problems } = parseRouteTree([
@@ -57,17 +60,44 @@ describe('what routes/ refuses to hold', () => {
       'products/page.tsx',
       'products/helper.ts',
     ]);
-    expect(problems).toHaveLength(1);
-    expect(problems[0]).toMatchObject({ path: 'products/helper.ts' });
-    expect(problems[0]?.message).toMatch(/_-prefixed directory/u);
+    expect(problems).toStrictEqual([
+      { path: 'products/helper.ts', message: stray('helper.ts') },
+    ]);
   });
 
-  it('ignores anything under a _-prefixed directory', () => {
-    const { problems, tree } = parseRouteTree([
+  it('rejects a file under a _-prefixed directory too', () => {
+    const { problems } = parseRouteTree([
       'page.tsx',
-      '_parts/filters.tsx',
       'products/page.tsx',
       'products/_parts/table.tsx',
+    ]);
+    expect(problems).toStrictEqual([
+      { path: 'products/_parts/table.tsx', message: stray('table.tsx') },
+      {
+        path: 'products/_parts',
+        message:
+          'declares no route — every directory needs a page.tsx (or a redirect.ts or route.ts) somewhere below it',
+      },
+    ]);
+  });
+
+  it('reads a _-prefixed directory as an ordinary URL segment', () => {
+    const { problems, tree } = parseRouteTree(['page.tsx', '_drafts/page.tsx']);
+    expect(problems).toStrictEqual([]);
+    expect(childOf(tree, '_drafts')).toMatchObject({
+      kind: 'literal',
+      key: '/_drafts',
+      page: '_drafts/page.tsx',
+    });
+  });
+
+  it('ignores dotfiles, which the system or an editor leaves behind', () => {
+    const { problems, tree } = parseRouteTree([
+      '.DS_Store',
+      'page.tsx',
+      'products/.page.tsx.swp',
+      'products/page.tsx',
+      '.cache/page.tsx',
     ]);
     expect(problems).toStrictEqual([]);
     expect(tree.children.map((child) => child.name)).toStrictEqual([
@@ -189,12 +219,14 @@ describe('slotOf', () => {
     ['admin/guard.ts', 'guard'],
     ['(auth)/[id]/page.tsx', 'page'],
     ['old/redirect.ts', 'redirect'],
+    ['_parts/guard.ts', 'guard'],
+    ['[locale]/posts/[id]/fallback.tsx', 'fallback'],
   ])('reads %s as the %s slot', (file, slot) => {
     expect(slotOf(file)).toBe(slot);
   });
 
-  it.each(['_parts/guard.ts', 'admin/_lib/page.tsx', '.cache/guard.ts'])(
-    'reads nothing from %s, which is private',
+  it.each(['.cache/guard.ts', 'admin/.drafts/page.tsx'])(
+    'reads nothing from %s, which is hidden',
     (file) => {
       expect(slotOf(file)).toBeNull();
     },
@@ -270,5 +302,150 @@ describe('loading.tsx', () => {
   it('declares no route of its own', () => {
     const { problems } = parseRouteTree(['page.tsx', 'empty/loading.tsx']);
     expect(problems.map((problem) => problem.path)).toStrictEqual(['empty']);
+  });
+});
+
+describe('fallback.tsx', () => {
+  it('fills the fallback slot of the directory it sits in, and declares no URL of its own', () => {
+    const { tree, problems } = parseRouteTree([
+      'page.tsx',
+      'posts/[id]/page.tsx',
+      'posts/[id]/fallback.tsx',
+    ]);
+    expect(problems).toStrictEqual([]);
+    expect(childOf(childOf(tree, 'posts'), '[id]').fallback).toBe(
+      'posts/[id]/fallback.tsx',
+    );
+  });
+
+  it('reports a lone fallback.tsx only as a directory that declares no route', () => {
+    const { problems } = parseRouteTree(['page.tsx', 'x/fallback.tsx']);
+    expect(problems).toStrictEqual([
+      {
+        path: 'x',
+        message:
+          'declares no route — every directory needs a page.tsx (or a redirect.ts or route.ts) somewhere below it',
+      },
+    ]);
+  });
+
+  it('refuses one with no page.tsx beside it, a route.ts not counting', () => {
+    const { problems } = parseRouteTree([
+      'page.tsx',
+      'feed/[id]/route.ts',
+      'feed/[id]/fallback.tsx',
+    ]);
+    expect(problems).toStrictEqual([
+      {
+        path: 'feed/[id]/fallback.tsx',
+        message:
+          'fallback.tsx stands in for the page.tsx beside it, and "feed/[id]" has none',
+      },
+    ]);
+  });
+
+  it('refuses one beside a layout.tsx, before anything else about it', () => {
+    const { problems } = parseRouteTree([
+      'page.tsx',
+      'posts/[id]/layout.tsx',
+      'posts/[id]/page.tsx',
+      'posts/[id]/fallback.tsx',
+    ]);
+    expect(problems).toStrictEqual([
+      {
+        path: 'posts/[id]/fallback.tsx',
+        message:
+          'fallback.tsx cannot sit beside layout.tsx — that layout receives every parameter of "posts/[id]", so no shell could leave one to the browser; move the layout one directory up, or into page.tsx and fallback.tsx',
+      },
+    ]);
+  });
+
+  it('refuses one whose pattern has no parameter', () => {
+    const { problems } = parseRouteTree([
+      'page.tsx',
+      'about/page.tsx',
+      'about/fallback.tsx',
+    ]);
+    expect(problems).toStrictEqual([
+      {
+        path: 'about/fallback.tsx',
+        message:
+          'fallback.tsx stands in for values the build did not write, and "/about" has no parameter; remove it',
+      },
+    ]);
+  });
+
+  it('refuses one whose every parameter reaches a layout above it', () => {
+    const { problems } = parseRouteTree([
+      'page.tsx',
+      '[locale]/about/layout.tsx',
+      '[locale]/about/(x)/page.tsx',
+      '[locale]/about/(x)/fallback.tsx',
+    ]);
+    expect(problems).toStrictEqual([
+      {
+        path: '[locale]/about/(x)/fallback.tsx',
+        message:
+          'fallback.tsx has nothing to leave to the browser — [locale]/about/layout.tsx receives every parameter of "/:locale/about"; remove fallback.tsx and list the values in paths',
+      },
+    ]);
+  });
+
+  it.each([['error.tsx'], ['loading.tsx']])('accepts one beside %s', (file) => {
+    const { problems } = parseRouteTree([
+      'page.tsx',
+      `posts/[id]/${file}`,
+      'posts/[id]/page.tsx',
+      'posts/[id]/fallback.tsx',
+    ]);
+    expect(problems).toStrictEqual([]);
+  });
+});
+
+describe('fallbackShapes', () => {
+  it('leaves every parameter open under a layout that sits in a group', () => {
+    const { tree } = parseRouteTree([
+      '(blog)/layout.tsx',
+      '(blog)/[section]/posts/[id]/page.tsx',
+      '(blog)/[section]/posts/[id]/fallback.tsx',
+    ]);
+    expect(fallbackShapes(tree)).toStrictEqual([
+      {
+        pattern: '/:section/posts/:id',
+        file: '(blog)/[section]/posts/[id]/fallback.tsx',
+        page: '(blog)/[section]/posts/[id]/page.tsx',
+        params: ['section', 'id'],
+        open: ['section', 'id'],
+        layout: '(blog)/layout.tsx',
+      },
+    ]);
+  });
+
+  it('closes the parameters the deepest layout above it receives', () => {
+    const { tree } = parseRouteTree([
+      'layout.tsx',
+      '[section]/layout.tsx',
+      '[section]/posts/[id]/page.tsx',
+      '[section]/posts/[id]/fallback.tsx',
+    ]);
+    expect(fallbackShapes(tree)).toStrictEqual([
+      {
+        pattern: '/:section/posts/:id',
+        file: '[section]/posts/[id]/fallback.tsx',
+        page: '[section]/posts/[id]/page.tsx',
+        params: ['section', 'id'],
+        open: ['id'],
+        layout: '[section]/layout.tsx',
+      },
+    ]);
+  });
+
+  it('leaves out a fallback.tsx the grammar refuses', () => {
+    const { tree } = parseRouteTree([
+      'page.tsx',
+      'about/page.tsx',
+      'about/fallback.tsx',
+    ]);
+    expect(fallbackShapes(tree)).toStrictEqual([]);
   });
 });

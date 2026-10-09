@@ -7,8 +7,8 @@ import { PropsTable } from '../../../../../components/props-table';
 import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
+import { ComboboxAsyncPreview } from '../../../../../demos/ui/components/combobox-previews';
 import * as m from '../../../../../messages';
-import { ComboboxAsyncPreview } from '../_previews/combobox-previews';
 
 const PREFECTURES = [
   { value: 'hokkaido', label: 'Hokkaido' },

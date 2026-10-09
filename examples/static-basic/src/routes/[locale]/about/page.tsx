@@ -1,11 +1,11 @@
+import { LocaleSelect } from '../../../components/locale-select';
+import { TimeZone } from '../../../components/time-zone';
 import { locales } from '../../../i18n';
-import { aboutTitle, openedOn } from '../../_data/about';
-import { LocaleSelect } from '../../_parts/locale-select';
-import { TimeZone } from '../../_parts/time-zone';
+import { aboutTitle, openedOn } from '../../../messages/about';
 
 // /en/about と /ja/about だけのページ。/:locale は vite.config.ts の paths で
-// locales.paths がロケールの数だけ展開し、ビルドはロケールごとに 1 枚書く
-export const { paramsSchema } = locales;
+// locales.paths がロケールの数だけ展開し、ビルドはロケールごとに 1 枚書く。
+// ロケールを受け取るスキーマは [locale]/layout.tsx にある
 
 // 開いた時刻。ロケールの timeZone で書くので、en（UTC）では 9 月 1 日、
 // ja（Asia/Tokyo）では 9 月 2 日になる

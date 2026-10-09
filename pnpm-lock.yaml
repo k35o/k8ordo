@@ -323,9 +323,9 @@ importers:
         specifier: 'catalog:'
         version: 4.6.5
     devDependencies:
-      '@k8ordo/static':
+      '@k8ordo/framework':
         specifier: workspace:^
-        version: link:../../packages/static
+        version: link:../../packages/framework
       '@types/react':
         specifier: 'catalog:'
         version: 19.3.0
@@ -353,12 +353,6 @@ importers:
       '@k8ordo/i18n':
         specifier: workspace:^
         version: link:../../packages/i18n
-      '@k8ordo/router':
-        specifier: workspace:^
-        version: link:../../packages/router
-      '@k8ordo/server':
-        specifier: workspace:^
-        version: link:../../packages/server
       '@k8ordo/state':
         specifier: workspace:^
         version: link:../../packages/state
@@ -375,6 +369,12 @@ importers:
         specifier: 'catalog:'
         version: 4.6.5
     devDependencies:
+      '@k8ordo/framework':
+        specifier: workspace:^
+        version: link:../../packages/framework
+      '@k8ordo/router':
+        specifier: workspace:^
+        version: link:../../packages/router
       '@types/react':
         specifier: 'catalog:'
         version: 19.3.0
@@ -402,9 +402,6 @@ importers:
       '@k8ordo/i18n':
         specifier: workspace:^
         version: link:../../packages/i18n
-      '@k8ordo/router':
-        specifier: workspace:^
-        version: link:../../packages/router
       '@k8ordo/state':
         specifier: workspace:^
         version: link:../../packages/state
@@ -421,9 +418,12 @@ importers:
         specifier: 'catalog:'
         version: 4.6.5
     devDependencies:
-      '@k8ordo/static':
+      '@k8ordo/framework':
         specifier: workspace:^
-        version: link:../../packages/static
+        version: link:../../packages/framework
+      '@k8ordo/router':
+        specifier: workspace:^
+        version: link:../../packages/router
       '@types/react':
         specifier: 'catalog:'
         version: 19.3.0
@@ -668,6 +668,79 @@ importers:
         specifier: 'catalog:'
         version: 4.6.5
 
+  packages/framework:
+    dependencies:
+      '@vitejs/plugin-react':
+        specifier: 'catalog:'
+        version: 6.1.1(@voidzero-dev/vite-plus-core@0.3.2(@arethetypeswrong/core@0.18.5)(@types/node@24.13.6)(esbuild@0.28.2)(jiti@2.7.0)(publint@0.3.24)(typescript@7.0.2))
+      '@vitejs/plugin-rsc':
+        specifier: 0.5.35
+        version: 0.5.35(@voidzero-dev/vite-plus-core@0.3.2(@arethetypeswrong/core@0.18.5)(@types/node@24.13.6)(esbuild@0.28.2)(jiti@2.7.0)(publint@0.3.24)(typescript@7.0.2))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      compressible:
+        specifier: 2.0.18
+        version: 2.0.18
+      fresh:
+        specifier: 2.0.0
+        version: 2.0.0
+      mime-types:
+        specifier: 3.0.2
+        version: 3.0.2
+      negotiator:
+        specifier: 1.1.0
+        version: 1.1.0
+      range-parser:
+        specifier: 1.3.0
+        version: 1.3.0
+      rsc-html-stream:
+        specifier: 0.0.8
+        version: 0.0.8
+    devDependencies:
+      '@arethetypeswrong/cli':
+        specifier: 'catalog:'
+        version: 0.18.5
+      '@k8ordo/framework-engine':
+        specifier: workspace:^
+        version: link:../framework-engine
+      '@k8ordo/router':
+        specifier: workspace:^
+        version: link:../router
+      '@types/compressible':
+        specifier: 2.0.3
+        version: 2.0.3
+      '@types/fresh':
+        specifier: 0.5.3
+        version: 0.5.3
+      '@types/mime-types':
+        specifier: 3.0.1
+        version: 3.0.1
+      '@types/range-parser':
+        specifier: 1.2.7
+        version: 1.2.7
+      '@types/react':
+        specifier: 'catalog:'
+        version: 19.3.0
+      publint:
+        specifier: 'catalog:'
+        version: 0.3.24
+      react:
+        specifier: 'catalog:'
+        version: 19.3.0
+      react-dom:
+        specifier: 'catalog:'
+        version: 19.3.0(react@19.3.0)
+      typescript:
+        specifier: 'catalog:'
+        version: 7.0.2
+      vite:
+        specifier: 'catalog:'
+        version: '@voidzero-dev/vite-plus-core@0.3.2(@arethetypeswrong/core@0.18.5)(@types/node@24.13.6)(esbuild@0.28.2)(jiti@2.7.0)(publint@0.3.24)(typescript@7.0.2)'
+      vite-plus:
+        specifier: 'catalog:'
+        version: 0.3.2(@arethetypeswrong/core@0.18.5)(@types/node@24.13.6)(@vitest/browser-playwright@5.0.2)(@vitest/coverage-v8@5.0.2)(@vitest/ui@5.0.2)(esbuild@0.28.2)(jiti@2.7.0)(publint@0.3.24)(typescript@7.0.2)
+      vitest:
+        specifier: 5.0.2
+        version: 5.0.2(@types/node@24.13.6)(@vitest/browser-playwright@5.0.2)(@vitest/browser-preview@5.0.2)(@vitest/coverage-v8@5.0.2)(@vitest/ui@5.0.2)(@voidzero-dev/vite-plus-core@0.3.2(@arethetypeswrong/core@0.18.5)(@types/node@24.13.6)(esbuild@0.28.2)(jiti@2.7.0)(publint@0.3.24)(typescript@7.0.2))
+
   packages/framework-engine:
     dependencies:
       '@vitejs/plugin-react':
@@ -786,76 +859,6 @@ importers:
         specifier: 'catalog:'
         version: 2.3.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(vitest@5.0.2)
 
-  packages/server:
-    dependencies:
-      '@vitejs/plugin-react':
-        specifier: 'catalog:'
-        version: 6.1.1(@voidzero-dev/vite-plus-core@0.3.2(@arethetypeswrong/core@0.18.5)(@types/node@24.13.6)(esbuild@0.28.2)(jiti@2.7.0)(publint@0.3.24)(typescript@7.0.2))
-      '@vitejs/plugin-rsc':
-        specifier: 0.5.35
-        version: 0.5.35(@voidzero-dev/vite-plus-core@0.3.2(@arethetypeswrong/core@0.18.5)(@types/node@24.13.6)(esbuild@0.28.2)(jiti@2.7.0)(publint@0.3.24)(typescript@7.0.2))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
-      compressible:
-        specifier: 2.0.18
-        version: 2.0.18
-      fresh:
-        specifier: 2.0.0
-        version: 2.0.0
-      mime-types:
-        specifier: 3.0.2
-        version: 3.0.2
-      negotiator:
-        specifier: 1.1.0
-        version: 1.1.0
-      range-parser:
-        specifier: 1.3.0
-        version: 1.3.0
-      rsc-html-stream:
-        specifier: 0.0.8
-        version: 0.0.8
-    devDependencies:
-      '@arethetypeswrong/cli':
-        specifier: 'catalog:'
-        version: 0.18.5
-      '@k8ordo/framework-engine':
-        specifier: workspace:^
-        version: link:../framework-engine
-      '@k8ordo/router':
-        specifier: workspace:^
-        version: link:../router
-      '@types/compressible':
-        specifier: 2.0.3
-        version: 2.0.3
-      '@types/fresh':
-        specifier: 0.5.3
-        version: 0.5.3
-      '@types/mime-types':
-        specifier: 3.0.1
-        version: 3.0.1
-      '@types/range-parser':
-        specifier: 1.2.7
-        version: 1.2.7
-      publint:
-        specifier: 'catalog:'
-        version: 0.3.24
-      react:
-        specifier: 'catalog:'
-        version: 19.3.0
-      react-dom:
-        specifier: 'catalog:'
-        version: 19.3.0(react@19.3.0)
-      typescript:
-        specifier: 'catalog:'
-        version: 7.0.2
-      vite:
-        specifier: 'catalog:'
-        version: '@voidzero-dev/vite-plus-core@0.3.2(@arethetypeswrong/core@0.18.5)(@types/node@24.13.6)(esbuild@0.28.2)(jiti@2.7.0)(publint@0.3.24)(typescript@7.0.2)'
-      vite-plus:
-        specifier: 'catalog:'
-        version: 0.3.2(@arethetypeswrong/core@0.18.5)(@types/node@24.13.6)(@vitest/browser-playwright@5.0.2)(@vitest/coverage-v8@5.0.2)(@vitest/ui@5.0.2)(esbuild@0.28.2)(jiti@2.7.0)(publint@0.3.24)(typescript@7.0.2)
-      vitest:
-        specifier: 5.0.2
-        version: 5.0.2(@types/node@24.13.6)(@vitest/browser-playwright@5.0.2)(@vitest/browser-preview@5.0.2)(@vitest/coverage-v8@5.0.2)(@vitest/ui@5.0.2)(@voidzero-dev/vite-plus-core@0.3.2(@arethetypeswrong/core@0.18.5)(@types/node@24.13.6)(esbuild@0.28.2)(jiti@2.7.0)(publint@0.3.24)(typescript@7.0.2))
-
   packages/state:
     devDependencies:
       '@arethetypeswrong/cli':
@@ -909,52 +912,6 @@ importers:
       zod:
         specifier: 'catalog:'
         version: 4.6.5
-
-  packages/static:
-    dependencies:
-      '@vitejs/plugin-react':
-        specifier: 'catalog:'
-        version: 6.1.1(@voidzero-dev/vite-plus-core@0.3.2(@arethetypeswrong/core@0.18.5)(@types/node@24.13.6)(esbuild@0.28.2)(jiti@2.7.0)(publint@0.3.24)(typescript@7.0.2))
-      '@vitejs/plugin-rsc':
-        specifier: 0.5.35
-        version: 0.5.35(@voidzero-dev/vite-plus-core@0.3.2(@arethetypeswrong/core@0.18.5)(@types/node@24.13.6)(esbuild@0.28.2)(jiti@2.7.0)(publint@0.3.24)(typescript@7.0.2))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
-      rsc-html-stream:
-        specifier: 0.0.8
-        version: 0.0.8
-    devDependencies:
-      '@arethetypeswrong/cli':
-        specifier: 'catalog:'
-        version: 0.18.5
-      '@k8ordo/framework-engine':
-        specifier: workspace:^
-        version: link:../framework-engine
-      '@k8ordo/router':
-        specifier: workspace:^
-        version: link:../router
-      '@types/react':
-        specifier: 'catalog:'
-        version: 19.3.0
-      publint:
-        specifier: 'catalog:'
-        version: 0.3.24
-      react:
-        specifier: 'catalog:'
-        version: 19.3.0
-      react-dom:
-        specifier: 'catalog:'
-        version: 19.3.0(react@19.3.0)
-      typescript:
-        specifier: 'catalog:'
-        version: 7.0.2
-      vite:
-        specifier: 'catalog:'
-        version: '@voidzero-dev/vite-plus-core@0.3.2(@arethetypeswrong/core@0.18.5)(@types/node@24.13.6)(esbuild@0.28.2)(jiti@2.7.0)(publint@0.3.24)(typescript@7.0.2)'
-      vite-plus:
-        specifier: 'catalog:'
-        version: 0.3.2(@arethetypeswrong/core@0.18.5)(@types/node@24.13.6)(@vitest/browser-playwright@5.0.2)(@vitest/coverage-v8@5.0.2)(@vitest/ui@5.0.2)(esbuild@0.28.2)(jiti@2.7.0)(publint@0.3.24)(typescript@7.0.2)
-      vitest:
-        specifier: 5.0.2
-        version: 5.0.2(@types/node@24.13.6)(@vitest/browser-playwright@5.0.2)(@vitest/browser-preview@5.0.2)(@vitest/coverage-v8@5.0.2)(@vitest/ui@5.0.2)(@voidzero-dev/vite-plus-core@0.3.2(@arethetypeswrong/core@0.18.5)(@types/node@24.13.6)(esbuild@0.28.2)(jiti@2.7.0)(publint@0.3.24)(typescript@7.0.2))
 
   packages/ui:
     dependencies:

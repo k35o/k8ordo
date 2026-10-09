@@ -1,8 +1,8 @@
-import { href } from '@k8ordo/router';
-import type { PageProps } from '@k8ordo/router';
+import { href } from '@k8ordo/framework';
+import type { PageProps } from '@k8ordo/framework';
 
-import { listProducts } from '../_data/catalog.server';
-import { listState } from '../_data/list-state';
+import { listProducts } from '../../lib/catalog.server';
+import { listState } from '../../lib/list-state';
 
 // このページが search の何を読むかの宣言。宣言したページだけが型付きの
 // search を受け取り、search が変わるとルーターがページを取り直す

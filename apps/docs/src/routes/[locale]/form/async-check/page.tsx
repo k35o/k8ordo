@@ -5,9 +5,9 @@ import { Note } from '../../../../components/callout';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { Playground } from '../../../../components/playground';
 import { Rich } from '../../../../components/rich';
+import { HandleDemo } from '../../../../demos/form/async-check/handle-demo';
+import { handleSchema } from '../../../../demos/form/async-check/handle-schema';
 import * as m from '../../../../messages';
-import { HandleDemo } from './_parts/handle-demo';
-import { handleSchema } from './_parts/handle-schema';
 
 const t = m.formAsyncCheck;
 

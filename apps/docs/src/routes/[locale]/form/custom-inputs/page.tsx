@@ -5,9 +5,9 @@ import { Note, Pitfall } from '../../../../components/callout';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { Playground } from '../../../../components/playground';
 import { Rich } from '../../../../components/rich';
+import { RatingDemo } from '../../../../demos/form/custom-inputs/rating-demo';
+import { ratingSchema } from '../../../../demos/form/custom-inputs/rating-schema';
 import * as m from '../../../../messages';
-import { RatingDemo } from './_parts/rating-demo';
-import { ratingSchema } from './_parts/rating-schema';
 
 const t = m.formCustomInputs;
 

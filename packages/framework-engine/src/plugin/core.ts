@@ -1,31 +1,38 @@
+import { writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import react from '@vitejs/plugin-react';
 import rsc from '@vitejs/plugin-rsc';
-import type { Plugin, PluginOption } from 'vite';
+import type { Logger, Plugin, PluginOption, ViteDevServer } from 'vite';
 
 import { generate } from '../generate/write';
+import { FRAMEWORK } from '../host';
+import type { EngineOptions, Mode } from '../host';
+import { sharedDir } from './shared-dir';
 
-export type EngineOptions = {
-  /** Where the route files live, relative to the project root. */
-  readonly routesDir?: string;
-};
-
-/**
- * The package the application actually installed. This engine is bundled
- * into it rather than published on its own, so the mode package is the only
- * name resolvable from the project root: anything the optimizer is asked to
- * prebundle is addressed through it, the generated files name it, and the
- * runtime entries are read from the directory it ships them in.
- */
+/** What the framework tells the engine about the application it is building. */
 export type EngineHost = {
-  readonly via: string;
+  readonly mode: Mode;
   /** Absolute path of the directory holding `entry.{rsc,ssr,browser}.mjs`. */
   readonly runtimeDir: string;
 };
 
 const VIRTUAL_ROUTES = 'virtual:k8ordo/routes';
+
+/**
+ * The warning a module gets when the RSC plugin's list of Server Actions is
+ * the only thing importing it dynamically. Another dynamic importer beside
+ * it keeps the warning, since that one is the application's.
+ */
+const SERVER_REFERENCES_ONLY =
+  /dynamically imported by \S*virtual:vite-rsc\/server-references but /u;
 const OUT_DIR = '.k8ordo';
+
+// Vite は package.json の type が module でないアプリで入口を .mjs にするが、
+// RSC プラグインは ../ssr/index.js を、静的化・serve・vercel() は
+// rsc/index.js を名指しする。.js に固定し、ESM であることは
+// dist/package.json が言う
+const ESM_ENTRY = '[name].js';
 
 /** Vite's own answer, so nothing downstream can disagree with it. */
 const isProduction = (mode: string): boolean =>
@@ -48,25 +55,36 @@ const CLIENT_DEPS = [
 ];
 
 /**
- * 'use client' のモジュールを持つ @k8ordo/* は、client の事前バンドルに入れない。
- * どれも入口が 'use client' のモジュールを束ねる形で、RSC プラグインは入口から
- * 辿ったそれを事前バンドルを通さずファイルのままブラウザに読ませる。事前バンドル
- * にも入ると、ページにコピーが 2 つ載り、サーバーで描いた Provider の context を
- * client コンポーネントのフックが読めない。アプリが入れていない名前を挙げても
- * 何も起きないので、family のものは全部挙げる
+ * 'use client' のモジュールを持つ、またはそれを再 export する @k8ordo/* は、
+ * client の事前バンドルに入れない。どれも入口が 'use client' のモジュールを
+ * 束ねる形（@k8ordo/framework は router のそれを再 export する形）で、RSC
+ * プラグインは入口から辿ったそれを事前バンドルを通さずファイルのままブラウザに
+ * 読ませる。事前バンドルにも入ると、ページにコピーが 2 つ載り、サーバーで描いた
+ * Provider の context を client コンポーネントのフックが読めない。アプリが
+ * 入れていない名前を挙げても何も起きないので、family のものは全部挙げる
  */
 const CLIENT_UNBUNDLED = [
   '@k8ordo/color-scheme',
   '@k8ordo/form',
+  FRAMEWORK,
   '@k8ordo/router',
   '@k8ordo/state',
   '@k8ordo/ui',
 ];
 
 /**
+ * RSC プラグインは、rsc と ssr で外部に残さないパッケージをアプリの
+ * dependencies と devDependencies から辿って決め、peerDependencies は辿らない。
+ * router はフレームワークの peer としてだけアプリに入ることがあり、外部に残ると
+ * Node がそのまま読んで import.meta.env が無く落ちる。family は名前で必ず通す
+ */
+const FAMILY = /^@k8ordo\//u;
+
+/**
  * The machinery both modes stand on: the route grammar compiled into a
  * table, the RSC pipeline configured, and the execution boundary enforced.
- * `@k8ordo/static` and `@k8ordo/server` add only what makes them different.
+ * The framework's static and server modes add only what makes them
+ * different.
  */
 export const engine = (
   options: EngineOptions,
@@ -75,9 +93,13 @@ export const engine = (
   let root = '';
   let routesDir = '';
   let outDir = '';
+  let logger: Logger;
+  let devServer: ViteDevServer | undefined;
+  let generating: Promise<void> = Promise.resolve();
   const runtime = (name: string): string =>
     path.join(host.runtimeDir, `${name}.mjs`);
-  const generateOptions = () => ({ root, routesDir, outDir, via: host.via });
+  const routesModule = (): string => path.join(outDir, 'routes.gen.ts');
+  const generateOptions = () => ({ root, routesDir, outDir, mode: host.mode });
 
   const plugin: Plugin = {
     name: 'k8ordo:engine',
@@ -103,7 +125,7 @@ export const engine = (
           ),
           // The handler is the same function in both modes; this is how it
           // knows whether there is a request to hand a page.
-          'import.meta.env.K8ORDO_MODE': JSON.stringify(host.via),
+          'import.meta.env.K8ORDO_MODE': JSON.stringify(host.mode),
         },
         // The engine's runtime lives in node_modules while the application's
         // pages live in its own tree; without this they resolve React
@@ -112,13 +134,34 @@ export const engine = (
         resolve: { dedupe: ['react', 'react-dom'] },
         environments: {
           rsc: {
+            resolve: { noExternal: [FAMILY] },
             build: {
-              rolldownOptions: { input: { index: runtime('entry.rsc') } },
+              rolldownOptions: {
+                input: { index: runtime('entry.rsc') },
+                output: { entryFileNames: ESM_ENTRY },
+                onLog(level, log, handle) {
+                  // The RSC plugin imports every 'use server' module
+                  // dynamically, so a Server Component importing an action
+                  // — the ordinary way to hand one to a form — would warn on
+                  // every build that the dynamic import moves nothing.
+                  if (
+                    log.code === 'INEFFECTIVE_DYNAMIC_IMPORT' &&
+                    SERVER_REFERENCES_ONLY.test(log.message)
+                  ) {
+                    return;
+                  }
+                  handle(level, log);
+                },
+              },
             },
           },
           ssr: {
+            resolve: { noExternal: [FAMILY] },
             build: {
-              rolldownOptions: { input: { index: runtime('entry.ssr') } },
+              rolldownOptions: {
+                input: { index: runtime('entry.ssr') },
+                output: { entryFileNames: ESM_ENTRY },
+              },
             },
           },
           client: {
@@ -132,17 +175,17 @@ export const engine = (
     },
 
     configEnvironment(_name, config) {
-      // The RSC plugin is the mode package's dependency, not the
-      // application's, so the entries it asks the optimizer to prebundle
-      // cannot be resolved from the project root. Pointing them through the
-      // mode package is how it documents framework use.
+      // The RSC plugin is the framework's dependency, not the application's,
+      // so the entries it asks the optimizer to prebundle cannot be resolved
+      // from the project root. Pointing them through the framework is how it
+      // documents framework use.
       const include = config.optimizeDeps?.include;
       if (include !== undefined) {
         config.optimizeDeps = {
           ...config.optimizeDeps,
           include: include.map((entry) =>
             entry.startsWith('@vitejs/plugin-rsc')
-              ? `${host.via} > ${entry}`
+              ? `${FRAMEWORK} > ${entry}`
               : entry,
           ),
         };
@@ -157,9 +200,42 @@ export const engine = (
           `k8ordo serves its pages under Vite's base, so base has to be a path from the root, like '/docs/' — got '${config.base}'`,
         );
       }
-      ({ root } = config);
+      ({ root, logger } = config);
       routesDir = path.resolve(root, options.routesDir ?? 'src/routes');
       outDir = path.resolve(root, OUT_DIR);
+    },
+
+    // The `.js` entries are ES modules whatever the application's own
+    // package.json says, and a `dist/` copied out of the application has no
+    // package.json above it at all. This plugin is `enforce: 'pre'`, so the
+    // file is there before the modes' own `post` hooks — static mode imports
+    // the handler in one.
+    buildApp: {
+      // After the RSC plugin's own buildApp, which builds every environment.
+      order: 'post',
+      async handler(builder) {
+        const dirOf = (name: string): string => {
+          const out = builder.environments[name]?.config.build.outDir;
+          if (out === undefined) {
+            throw new Error(`the build ran without the ${name} environment`);
+          }
+          return path.resolve(root, out);
+        };
+        // The RSC entry imports the SSR one by a relative path, so the file
+        // goes where both are below it. Where that is the application's own
+        // directory, or above it, the file there is the application's.
+        const shared = sharedDir(dirOf('rsc'), dirOf('ssr'));
+        const toRoot = path.relative(shared, root);
+        if (!toRoot.startsWith('..') && !path.isAbsolute(toRoot)) {
+          throw new Error(
+            `the rsc and ssr builds share ${path.relative(root, shared) || '.'}, which holds the application, and the build writes a package.json saying type: module where they meet — put both in a directory of their own, as dist/rsc and dist/ssr`,
+          );
+        }
+        await writeFile(
+          path.join(shared, 'package.json'),
+          `${JSON.stringify({ type: 'module' }, null, 2)}\n`,
+        );
+      },
     },
 
     async buildStart() {
@@ -177,29 +253,40 @@ export const engine = (
 
     configureServer(server) {
       server.watcher.add(routesDir);
-      const regenerate = (file: string): void => {
-        // `routes` と `routes-x` を取り違えないよう、区切りまで含めて見る
-        if (!file.startsWith(`${routesDir}${path.sep}`)) return;
-        void (async () => {
-          const { problems } = await generate(generateOptions());
-          for (const problem of problems) {
-            server.config.logger.error(
-              `routes/${problem.path}: ${problem.message}`,
-            );
-          }
-        })();
-      };
-      server.watcher.on('add', (file: string) => {
-        regenerate(file);
-      });
-      server.watcher.on('unlink', (file: string) => {
-        regenerate(file);
-      });
-      // A file gaining or losing its `paramsSchema` export changes the table too;
-      // writeIfChanged keeps an edit that changed nothing from restarting HMR.
-      server.watcher.on('change', (file: string) => {
-        regenerate(file);
-      });
+      devServer = server;
+    },
+
+    // Vite waits for this hook before it moves a change through the module
+    // graph. A route file deleted while the old table still imports it would
+    // otherwise be re-imported from that table, and fail, before the table
+    // caught up. A file gaining or losing its `paramsSchema` export changes
+    // the table too; writeIfChanged keeps an edit that changed nothing from
+    // restarting HMR.
+    async watchChange(file) {
+      // `routes` と `routes-x` を取り違えないよう、区切りまで含めて見る
+      if (!path.resolve(file).startsWith(`${routesDir}${path.sep}`)) return;
+      // One at a time: Vite does not wait for one change before the next, and
+      // a run that read the directory before a deletion would otherwise write
+      // its table after the deletion's own.
+      const run = generating.then(() => generate(generateOptions()));
+      generating = run.then(
+        () => undefined,
+        () => undefined,
+      );
+      const { problems } = await run;
+      for (const problem of problems) {
+        logger.error(`routes/${problem.path}: ${problem.message}`);
+      }
+      // The update that follows only soft-invalidates the table, as an
+      // importer of the file that changed: it keeps the code it compiled
+      // from the old table, imports of a deleted file included.
+      for (const environment of Object.values(devServer?.environments ?? {})) {
+        const { moduleGraph } = environment;
+        for (const module of moduleGraph.getModulesByFile(routesModule()) ??
+          []) {
+          moduleGraph.invalidateModule(module);
+        }
+      }
     },
 
     resolveId(source) {
@@ -207,7 +294,7 @@ export const engine = (
         // Resolves to the real generated file rather than an in-memory
         // module, so the table is something a person can open, TypeScript can
         // check, and HMR can invalidate like any other source.
-        return path.join(outDir, 'routes.gen.ts');
+        return routesModule();
       }
       return null;
     },

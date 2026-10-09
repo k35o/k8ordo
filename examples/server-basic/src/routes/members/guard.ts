@@ -1,5 +1,5 @@
-import { cookies } from '@k8ordo/server/runtime';
-import type { Guard } from '@k8ordo/server/runtime';
+import { cookies } from '@k8ordo/framework/server';
+import type { Guard } from '@k8ordo/framework/server';
 
 // ゲストブックに署名した cookie が無ければ、ページを描く前にここで 401 を
 // 返して打ち切る

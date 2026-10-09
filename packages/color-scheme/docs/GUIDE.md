@@ -56,7 +56,7 @@ and around everything, so the script it renders comes before anything the
 page paints:
 
 ```tsx
-// routes/layout.tsx
+// src/routes/layout.tsx
 import { ColorSchemeProvider } from '@k8ordo/color-scheme';
 import type { ReactNode } from 'react';
 
@@ -88,9 +88,9 @@ the page shows the default, and a visitor who chose dark sees the flash the
 script exists to prevent. Do not reach for `'unsafe-inline'`, which allows
 every inline script that reaches the page; name this one.
 
-`nonce` puts the answer's nonce on it — under
-`@k8ordo/server`, `nonce()` from `@k8ordo/server/runtime`, which the render
-may read (signing a script is not writing the response):
+`nonce` puts the answer's nonce on it — in `@k8ordo/framework`'s server
+mode, `nonce()` from `@k8ordo/framework/server`, which the render may read
+(signing a script is not writing the response):
 
 ```tsx
 <ColorSchemeProvider nonce={nonce()}>{children}</ColorSchemeProvider>
@@ -98,13 +98,16 @@ may read (signing a script is not writing the response):
 
 `colorSchemeScriptHash(defaultPreference?)` resolves to its hash as a CSP
 source, `'sha256-…'`, for a policy that allows it by what it is — the
-`csp` option of `@k8ordo/static`, whose files cannot carry a nonce, or a
+`csp` option of its static mode, whose files cannot carry a nonce, or a
 header that names none. Pass it the `defaultPreference` the provider is
 given: the script carries it, so the hash depends on it.
 
 ```ts
-// vite.config.ts, under @k8ordo/static
-csp: { 'script-src': ["'self'", await colorSchemeScriptHash()] },
+// vite.config.ts
+framework({
+  mode: 'static',
+  csp: { 'script-src': ["'self'", await colorSchemeScriptHash()] },
+});
 ```
 
 Compute the hash where the policy is written, every time, rather than

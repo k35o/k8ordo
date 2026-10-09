@@ -19,7 +19,9 @@ When installed via npm, these docs live under `node_modules/@k8ordo/router/docs/
   sections, `Register` for checked patterns, what navigation guarantees
   (`finished` after commit, scroll to top or fragment on a new page), how
   a `<ViewTransition>` animates page changes by the router's transition
-  types, and how the framework reuses the navigation half.
+  types, and how the framework reuses the navigation half (an application on
+  `@k8ordo/framework` imports that half from `@k8ordo/framework`, which
+  re-exports it, with this package installed as its peer).
 
 ## Entry point
 
@@ -77,8 +79,11 @@ When installed via npm, these docs live under `node_modules/@k8ordo/router/docs/
   page after all — the framework answers with the nearest `not-found.tsx`
   under a 404 — and `isNotFound(value)` recognises what it throws.
   `<PathnameProvider pathname>` seeds it for a server render and hydration,
-  and is mounted by `<Router>` and by both mode runtimes, never by an
-  application. Every page change renders in the background, outside any
+  and is mounted by `<Router>` and by the framework's runtime, never by an
+  application; `<BrowserPathname>` is the opposite seed — below it a server
+  render's `usePathname` (and `useMatch`) waits for the browser with
+  `use(browser())`, leaving the nearest `<Suspense>` to it — mounted by the
+  framework's runtime around a `fallback.tsx`, never by an application. Every page change renders in the background, outside any
   pending async action (so awaiting `finished` inside one settles), tagged
   `navigation` and `navigation-push` / `navigation-replace` /
   `navigation-traverse` (`addTransitionType`), so a `<ViewTransition

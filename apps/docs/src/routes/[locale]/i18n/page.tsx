@@ -51,9 +51,17 @@ export default function I18nPage() {
       <LandingHero
         code={
           <>
-            <CodeBlock code={HERO_LOCALES} lang="ts" title="i18n.ts" />
-            <CodeBlock code={HERO_MESSAGE} lang="ts" title="messages/nav.ts" />
-            <CodeBlock code={HERO_USE} lang="tsx" title="header.tsx" />
+            <CodeBlock code={HERO_LOCALES} lang="ts" title="src/i18n.ts" />
+            <CodeBlock
+              code={HERO_MESSAGE}
+              lang="ts"
+              title="src/messages/nav.ts"
+            />
+            <CodeBlock
+              code={HERO_USE}
+              lang="tsx"
+              title="src/components/header.tsx"
+            />
           </>
         }
         directory="i18n"
@@ -69,23 +77,27 @@ export default function I18nPage() {
           <CodeBlock
             code={CLAIM_SERVER_LAYOUT}
             lang="tsx"
-            title="routes/[locale]/layout.tsx"
+            title="src/routes/[locale]/layout.tsx"
           />
           <CodeBlock
             code={CLAIM_SERVER_PAGE}
             lang="tsx"
-            title="routes/[locale]/page.tsx"
+            title="src/routes/[locale]/page.tsx"
           />
         </div>
       </LandingClaim>
       <LandingClaim body={m.i18n.claimTypesBody} title={m.i18n.claimTypesTitle}>
         <div className="flex flex-col gap-3">
-          <CodeBlock code={CLAIM_TYPES_REGISTER} lang="ts" title="i18n.ts" />
+          <CodeBlock
+            code={CLAIM_TYPES_REGISTER}
+            lang="ts"
+            title="src/i18n.ts"
+          />
           <CodeBlock
             callouts={{ 6: m.i18n.claimTypesMissing() }}
             code={CLAIM_TYPES_MESSAGES}
             lang="ts"
-            title="messages/nav.ts"
+            title="src/messages/nav.ts"
           />
         </div>
       </LandingClaim>
@@ -93,7 +105,11 @@ export default function I18nPage() {
         body={m.i18n.claimBundleBody}
         title={m.i18n.claimBundleTitle}
       >
-        <CodeBlock code={CLAIM_BUNDLE} lang="tsx" title="greeting.tsx" />
+        <CodeBlock
+          code={CLAIM_BUNDLE}
+          lang="tsx"
+          title="src/components/greeting.tsx"
+        />
       </LandingClaim>
       <NextSteps
         name="@k8ordo/i18n"

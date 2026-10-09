@@ -11,7 +11,7 @@ const t = m.i18nIntegrations;
 const UI_LOCALES = `import { defineLocales } from '@k8ordo/i18n';
 import { registerMessages } from '@k8ordo/ui/i18n';
 
-import { fr } from './ui-messages/fr';
+import { fr } from './messages/ui-fr';
 
 export const locales = defineLocales({
   ja: { timeZone: 'Asia/Tokyo', dir: 'ltr' },
@@ -39,7 +39,7 @@ const TALK_PAGE = `export default function NewTalkPage() {
 
 const LINKS = `import { bindParams } from '@k8ordo/router';
 
-import { locales } from './i18n';
+import { locales } from '../i18n';
 
 export const { href, navigateTo } = bindParams(() => ({
   locale: locales.getLocale(),
@@ -61,7 +61,7 @@ export default function I18nIntegrationsPage() {
           code={UI_LOCALES}
           lang="ts"
           marks={{ 2: 'highlight', 12: 'highlight' }}
-          title="i18n.ts"
+          title="src/i18n.ts"
         />
         <p>
           <Rich>{t.uiTypes()}</Rich>
@@ -86,7 +86,7 @@ export default function I18nIntegrationsPage() {
           code={TALK_SCHEMA}
           lang="ts"
           marks={{ 8: 'highlight', 9: 'highlight' }}
-          title="schema.ts"
+          title="src/lib/schema.ts"
         />
         <p>
           <Rich>{t.formRule()}</Rich>
@@ -100,7 +100,7 @@ export default function I18nIntegrationsPage() {
           code={TALK_PAGE}
           lang="tsx"
           marks={{ 2: 'highlight' }}
-          title="page.tsx"
+          title="src/routes/[locale]/talks/new/page.tsx"
         />
         <p>
           <Rich>{t.formAction()}</Rich>
@@ -124,7 +124,7 @@ export default function I18nIntegrationsPage() {
           code={LINKS}
           lang="ts"
           marks={{ 5: 'highlight', 6: 'highlight' }}
-          title="links.ts"
+          title="src/lib/links.ts"
         />
         <CodeBlock code={HREF} lang="ts" />
         <p>

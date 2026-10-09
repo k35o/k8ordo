@@ -4,7 +4,7 @@ import { normalizePathname, withoutBase } from '@k8ordo/router';
  * How long a prefetched page stays usable, from the moment it was asked for.
  * Long enough to cover a pointer resting on a link and then clicking it; short
  * enough that a page hovered and left alone is not shown, much later, as it was
- * then — under `@k8ordo/server` a page is rendered per request, and its data
+ * then — under mode: 'server' a page is rendered per request, and its data
  * may have moved on.
  */
 export const PREFETCH_LIFETIME = 30_000;

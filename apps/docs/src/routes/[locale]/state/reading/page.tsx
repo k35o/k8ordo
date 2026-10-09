@@ -6,9 +6,9 @@ import * as m from '../../../../messages';
 
 const t = m.stateReading;
 
-const SERVER_PAGE = `import type { PageProps } from '@k8ordo/router';
+const SERVER_PAGE = `import type { PageProps } from '@k8ordo/framework';
 
-import { listState } from '../_data/list-state';
+import { listState } from '../../state';
 
 export const search = listState.url;
 
@@ -45,7 +45,7 @@ listState.search({ page: 2 });
 const BASE = `listState.href('/products', { page: 2 });
 // '/docs/products?page=2'`;
 
-const REGISTER_ROUTES = `import type { routes } from '../routes';
+const REGISTER_ROUTES = `import type { routes } from './routes';
 
 declare module '@k8ordo/router' {
   interface Register {
@@ -79,7 +79,7 @@ export default function StateReadingPage() {
           code={SERVER_PAGE}
           lang="tsx"
           marks={{ 5: 'highlight', 8: 'highlight' }}
-          title="routes/products/page.tsx"
+          title="src/routes/products/page.tsx"
         />
         <p>
           <Rich>{t.serverParse()}</Rich>
@@ -162,7 +162,7 @@ export default function StateReadingPage() {
           code={REGISTER_ROUTES}
           lang="ts"
           marks={{ 9: 'highlight', 10: 'highlight', 11: 'highlight' }}
-          title="types/k8ordo.d.ts"
+          title="src/k8ordo.d.ts"
         />
         <p>
           <Rich>{t.typedGenerated()}</Rich>

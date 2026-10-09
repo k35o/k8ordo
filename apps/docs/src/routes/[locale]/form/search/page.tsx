@@ -5,9 +5,9 @@ import { Note, Pitfall } from '../../../../components/callout';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { Playground } from '../../../../components/playground';
 import { Rich } from '../../../../components/rich';
+import { demoState } from '../../../../demos/form/demo-state';
+import { FormDemo } from '../../../../demos/form/form-demo';
 import * as m from '../../../../messages';
-import { demoState } from '../_parts/demo-state';
-import { FormDemo } from '../_parts/form-demo';
 
 const t = m.formSearch;
 
@@ -56,8 +56,12 @@ export default function FormSearchPage() {
         id="share"
         title={t.shareTitle}
       >
-        <CodeBlock code={SHARE} lang="ts" title="list-state.ts" />
-        <CodeBlock code={SHARE_PAGE} lang="tsx" title="page.tsx" />
+        <CodeBlock code={SHARE} lang="ts" title="src/lib/list-state.ts" />
+        <CodeBlock
+          code={SHARE_PAGE}
+          lang="tsx"
+          title="src/routes/products/page.tsx"
+        />
         <Note>
           <p>
             <Rich>{t.shareMini()}</Rich>
@@ -70,7 +74,7 @@ export default function FormSearchPage() {
           code={FORM}
           lang="tsx"
           marks={{ 1: 'highlight' }}
-          title="filters.tsx"
+          title="src/components/filters.tsx"
         />
         <p>
           <Rich>{t.formCheck()}</Rich>
@@ -118,7 +122,11 @@ export default function FormSearchPage() {
         id="server"
         title={t.serverTitle}
       >
-        <CodeBlock code={SERVER} lang="tsx" title="routes/products/page.tsx" />
+        <CodeBlock
+          code={SERVER}
+          lang="tsx"
+          title="src/routes/products/page.tsx"
+        />
         <p>
           <Rich>{t.serverStatic()}</Rich>
         </p>

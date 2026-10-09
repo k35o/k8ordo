@@ -7,12 +7,12 @@ import { PropsTable } from '../../../../../components/props-table';
 import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { propsOf } from '../../../../../data/component-props';
-import * as m from '../../../../../messages';
 import {
   DefaultOpenPreview,
   ModalBasicPreview,
   ModalSidesPreview,
-} from '../_previews/modal-previews';
+} from '../../../../../demos/ui/components/modal-previews';
+import * as m from '../../../../../messages';
 
 export default function ModalPage() {
   return (
