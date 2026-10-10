@@ -1,84 +1,84 @@
 import { message } from '@k8ordo/i18n';
 
 export const description = message({
-  ja: 'アプリの配色を受け持ちます。訪問者が選んだ設定（ライト、ダーク、または未設定）をlocalStorageに保存し、OSの設定と合わせて`<html>`の`dark`クラスに反映します。ルートレイアウトに置く1つのプロバイダが、最初の描画の前に走るスクリプトも、その後の追従も担います。',
-  en: 'Owns the colour-scheme axis of an application. The visitor’s preference (light, dark, or nothing, which follows the default: the system unless told otherwise) lives in localStorage, is resolved against the system, and becomes the `dark` class on `<html>`. One provider in the root layout renders the inline script that puts it there before the first paint and keeps it there after hydration; a hook reads it.',
+  ja: '訪問者が選んだ配色をlocalStorageに保存し、OSの設定と合わせて`<html>`の`dark`クラスに反映するReactのダークモードです。ルートレイアウトに置く1つのプロバイダが、最初の描画の前に`dark`クラスを付けます。その後もOSの設定や保存した選択が変わると、クラスを更新します。',
+  en: 'React dark mode that stores the visitor’s choice in localStorage, resolves it against the OS setting, and puts the `dark` class on `<html>`. One provider in the root layout sets the `dark` class before the first paint, then updates it when the OS setting or the saved preference changes.',
 });
 
 export const tagline = message({
-  ja: 'ダークモードを、最初の描画からちらつかせずに切り替えるライブラリ。',
-  en: 'Dark mode that is right from the first paint, with no flash.',
+  ja: 'クラスベースのReactのダークモード切り替え',
+  en: 'Class-based dark mode switching for React',
 });
 
 export const claimNoFlashTitle = message({
-  ja: '暗いページは、最初の描画から暗い',
-  en: 'A dark page is dark from the first paint',
+  ja: '最初の表示から正しい配色',
+  en: 'The right colors from the first paint',
 });
 
 export const claimNoFlashBody = [
   message({
-    ja: 'プロバイダは、ほかの何よりも先にインラインのスクリプトを描きます。このスクリプトが保存された設定を読み、最初の描画の前に`<html>`へ`dark`クラスを付けます。',
-    en: 'The provider renders an inline script ahead of everything else. It reads the saved preference and puts the `dark` class on `<html>` before the first paint.',
+    ja: 'プロバイダは、子要素より前にインラインスクリプトを出力します。このスクリプトが、保存した選択を読み、最初の描画の前に`<html>`へ`dark`クラスを付けます。',
+    en: 'The provider outputs an inline script ahead of its children. The script reads the saved preference and puts the `dark` class on `<html>` before the first paint.',
   }),
   message({
-    ja: '何も選んでいない訪問者には、OSの設定に合わせた配色を出します。`@k8ordo/ui`の色は、このクラスで切り替わります。',
-    en: 'A visitor who never chose follows the system setting. `@k8ordo/ui`’s colours switch on that class.',
+    ja: '何も選んでいない訪問者には、OSの設定に合わせた配色が出ます。',
+    en: 'A visitor who has not chosen gets the scheme that matches the OS setting.',
   }),
 ] as const;
 
 export const claimCspTitle = message({
-  ja: 'CSPの下でも、許可するのはこのスクリプトだけ',
-  en: 'Under a CSP, allow this one script and nothing more',
+  ja: 'CSPで許可できるスクリプト',
+  en: 'A script a CSP can allow',
 });
 
 export const claimCspBody = [
   message({
-    ja: 'インラインのスクリプトは、nonceかハッシュで許可します。`@k8ordo/framework`のserverモードなら応答ごとの`nonce()`を渡します。ファイルにnonceを書けないstaticモードなら、`colorSchemeScriptHash()`をポリシーに入れます。',
-    en: 'The inline script is allowed by nonce or by hash. In `@k8ordo/framework`’s server mode, pass the response’s `nonce()`; in its static mode, whose files cannot carry a nonce, put `colorSchemeScriptHash()` in the policy.',
+    ja: "インラインスクリプトは、プロバイダに渡す`nonce`か、スクリプトのハッシュでCSPに許可させます。`'unsafe-inline'`は要りません。",
+    en: "A CSP can allow the inline script by the `nonce` you pass to the provider or by the script’s hash. No `'unsafe-inline'` is needed.",
   }),
   message({
-    ja: '`unsafe-inline`で許可する必要はありません。ハッシュはインストールした版のスクリプトから毎回計算するので、更新しても古い値が残りません。',
-    en: 'No `unsafe-inline` needed. The hash is computed from the installed script every time, so an update never leaves a stale value behind.',
+    ja: '`colorSchemeScriptHash()`は、インストールしたバージョンのスクリプトからハッシュを計算します。ポリシーを書く場所で毎回呼べば、更新しても古い値が残りません。',
+    en: '`colorSchemeScriptHash()` computes the hash from the installed version’s script. Call it where the policy is written, and an update never leaves a stale value behind.',
   }),
 ] as const;
 
 export const claimStorageTitle = message({
-  ja: '設定はlocalStorageに1行だけ',
-  en: 'The preference is one row in localStorage',
+  ja: '選んだ配色の保存',
+  en: 'Saving the chosen scheme',
 });
 
 export const claimStorageBody = [
   message({
-    ja: '選んだ設定は、`@k8ordo/state`の`defineLocalState`で保存します。何も選んでいない訪問者の行は無く、既定値は保存しません。',
-    en: 'The choice is stored through `@k8ordo/state`’s `defineLocalState`. A visitor who never chose has no row, and the default is never stored.',
+    ja: '訪問者の選択は`@k8ordo/state`の`defineLocalState`でlocalStorageに保存します。訪問者が選ぶまでは何も保存しません。',
+    en: 'The choice is stored in localStorage through `@k8ordo/state`’s `defineLocalState`. Nothing is stored until the visitor chooses.',
   }),
   message({
-    ja: 'そのため、あとから`defaultPreference`を変えれば、まだ選んでいない訪問者全員の表示が変わります。複数のタブを開いていても、設定は1つにそろいます。',
-    en: 'Change `defaultPreference` later, and everyone who never chose moves with it. Every tab agrees on one preference.',
+    ja: 'あとから`defaultPreference`を変えると、まだ選んでいない訪問者全員の表示が変わります。複数のタブを開いていても、選択は1つにそろいます。',
+    en: 'Change `defaultPreference` later, and every visitor who has not chosen follows it. A choice made in one tab applies to every open tab.',
   }),
 ] as const;
 
 export const demoTitle = message({
-  ja: 'このサイトの配色を切り替える',
-  en: 'Switch this site’s colour scheme',
+  ja: '配色の切り替えのデモ',
+  en: 'Scheme switch demo',
 });
 
 export const demoDescription = message({
   ja: 'ヘッダーの切り替えボタンと同じ`useColorScheme()`を使っています。',
-  en: 'The same `useColorScheme()` as the switch in the header.',
+  en: 'It uses the same `useColorScheme()` as the switch in the header.',
 });
 
 export const demoSteps = [
   message({
-    ja: '「ダーク」を押してから、ページを再読み込みしてみてください。白く光ることなく、最初から暗いまま表示されます。',
-    en: 'Press “Dark”, then reload the page. It comes back dark from the start, with no white flash.',
+    ja: '「ダーク」を押してからページを再読み込みすると、最初から暗いまま表示されます。',
+    en: 'Press “Dark”, then reload the page. It comes back dark from the start.',
   }),
   message({
-    ja: '「システム」を押してからOSの外観の設定を切り替えると、ページの配色もそれに合わせて変わります。',
+    ja: '「システム」を押してからOSの外観の設定を切り替えると、ページの配色も変わります。',
     en: 'Press “System”, then change the appearance setting of your OS. The page follows it.',
   }),
   message({
-    ja: 'このページを別のタブでも開いて選び直すと、こちらのタブの配色も変わります。',
+    ja: 'このページを別のタブで開いて選び直すと、こちらのタブの配色も変わります。',
     en: 'Open this page in another tab and choose again there. This tab changes too.',
   }),
 ] as const;
@@ -98,58 +98,28 @@ export const demoDark = message({
   en: 'Dark',
 });
 
-export const nextGetStarted = message({
-  ja: 'プロバイダを置き、切り替えのボタンを1つ作るところまでの手順です。',
-  en: 'Place the provider and build one switch.',
-});
-
-export const nextStyling = message({
-  ja: '`dark`クラスに色を当てる方法を、`@k8ordo/ui`とTailwind CSS、素のCSSのそれぞれで説明します。',
-  en: 'Colouring under the `dark` class with `@k8ordo/ui`, Tailwind CSS, or plain CSS.',
-});
-
-export const nextSwitcher = message({
-  ja: '2択のトグルと、「システム」を含む3択の作り方です。',
-  en: 'A two-way toggle, and a three-way choice that includes the system.',
-});
-
-export const nextStorage = message({
-  ja: '保存する行の中身と、フックを通さずに設定を読む方法です。',
-  en: 'What the stored row holds, and reading it without the hook.',
-});
-
-export const nextCsp = message({
-  ja: 'nonceやハッシュで、インラインのスクリプトを許可する方法です。',
-  en: 'Allowing the inline script by nonce or by hash.',
-});
-
-export const nextHowItWorks = message({
-  ja: '配色を決める規則と、ハイドレーションの前後で何が起きるかです。',
-  en: 'The rule that decides the scheme, and what happens around hydration.',
-});
-
 export const navStyling = message({
-  ja: 'darkクラスに色を当てる',
-  en: 'Styling the dark class',
+  ja: 'darkクラスのスタイル',
+  en: 'Styling',
 });
 
 export const navSwitcher = message({
-  ja: '切り替えのボタンを作る',
-  en: 'Build a switch',
+  ja: '切り替えボタン',
+  en: 'Switch',
 });
 
 export const navStorage = message({
   ja: '設定の保存先',
-  en: 'Where it is stored',
+  en: 'Storage',
 });
 
 export const navCsp = message({
-  ja: 'CSPの下で使う',
-  en: 'Under a CSP',
+  ja: 'CSP',
+  en: 'CSP',
 });
 
 export const navTesting = message({
-  ja: 'テストする',
+  ja: 'テスト',
   en: 'Testing',
 });
 
@@ -164,6 +134,6 @@ export const navReference = message({
 });
 
 export const navTroubleshooting = message({
-  ja: 'うまく動かないとき',
+  ja: 'トラブルシューティング',
   en: 'Troubleshooting',
 });

@@ -1,8 +1,8 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: '訪問者が選んだ配色は、`@k8ordo/state`のローカル状態としてlocalStorageに保存されます。このパッケージが持っているのは定義1つだけで、キーの決め方もタブ同士の同期も`@k8ordo/state`の仕組みです。このページでは、保存される行の中身とフックを通さずに読む方法を説明します。あわせて、タブ同士がそろう仕組みと、アプリのほかの設定との並べ方も紹介します。',
-  en: 'The visitor’s choice is stored in localStorage as an `@k8ordo/state` local state. This package holds one definition and nothing more; how the key is built and how tabs stay in sync are `@k8ordo/state`’s. This page covers what the row holds and reading it without the hook, then how tabs agree and keeping the application’s other preferences beside it.',
+  ja: '訪問者が選んだ配色は、`@k8ordo/state`のローカル状態としてlocalStorageに保存されます。保存される値の形と、プロバイダを通さずに読む方法が分かります。',
+  en: 'The visitor’s choice is stored in localStorage as an `@k8ordo/state` local state. You will learn the stored shape and how to read it without the provider.',
 });
 
 export const definitionTitle = message({
@@ -10,127 +10,137 @@ export const definitionTitle = message({
   en: 'The `colorSchemeState` definition',
 });
 
-export const definitionDescription = message({
-  ja: '保存先の定義は`colorSchemeState`としてexportしていて、中身はこれですべてです。',
-  en: 'The definition is exported as `colorSchemeState`, and this is all of it.',
+export const definitionKeyCallout = message({
+  ja: '状態の名前。localStorageのキーは`k8ordo-state:color-scheme`',
+  en: 'The state’s name. The localStorage key is `k8ordo-state:color-scheme`',
+});
+
+export const definitionOptionalCallout = message({
+  ja: '省略できる。無いときは「何も選んでいない」',
+  en: 'Optional. Absent means “nothing chosen”',
+});
+
+export const definitionStateBefore = message({
+  ja: '`@k8ordo/color-scheme`は保存先の定義を`colorSchemeState`としてexportしています。定義はこれですべてです。`defineLocalState`の仕組みは`@k8ordo/state`の',
+  en: '`@k8ordo/color-scheme` exports this definition as `colorSchemeState`; there is nothing more to it. How `defineLocalState` works is covered in ',
+});
+
+export const definitionStateAfter = message({
+  ja: 'を見てください。',
+  en: ' in `@k8ordo/state`.',
 });
 
 export const definitionKey = message({
-  ja: '名前が`color-scheme`なので、localStorageのキーは`k8ordo-state:color-scheme`になります。キーは`colorSchemeState.storageKey`で読めるので、文字列で書く必要はありません。',
-  en: 'The name is `color-scheme`, so the localStorage key is `k8ordo-state:color-scheme`. It can be read as `colorSchemeState.storageKey`, with no need to spell it out.',
+  ja: 'キーは`colorSchemeState.storageKey`で読めるので、文字列で書く必要はありません。',
+  en: 'Read the key as `colorSchemeState.storageKey` instead of spelling it out.',
 });
 
 export const definitionOptional = message({
-  ja: '`preference`は省略できるフィールドで、省略されていることが「何も選んでいない」を表します。そのため、初めて訪れたときのOSの設定が、選択として残ることはありません。',
-  en: '`preference` is optional, and its absence is what “nothing chosen” means. What the OS said on the first visit is therefore never kept as a choice.',
+  ja: '初めて訪れたときのOSの設定が、選択として保存されることはありません。',
+  en: 'The OS setting on the first visit is never stored as a choice.',
 });
 
 export const rowsTitle = message({
-  ja: '保存される行',
-  en: 'What the row holds',
+  ja: '保存される値',
+  en: 'What is stored',
 });
 
-export const rowsDescription = message({
-  ja: '行が書かれるのは、`setPreference`を呼んだときだけです。呼び方ごとに、行は次のようになります。',
-  en: 'A row is written only when `setPreference` is called. Here is the row after each call.',
+export const rowsWhen = message({
+  ja: 'localStorageに書き込むのは、`setPreference`を呼んだときだけです。呼び方ごとに、保存される値は次のようになります。',
+  en: 'localStorage is written only when `setPreference` is called. Here is what each call stores.',
 });
 
 export const rowsNever = message({
-  ja: '一度も選んでいない：行がありません。`localStorage.getItem`は`null`を返します。',
-  en: 'Never chose: there is no row, and `localStorage.getItem` returns `null`.',
+  ja: '一度も選んでいない：何も保存されていません。`localStorage.getItem`は`null`を返します。',
+  en: 'Never chose: nothing is stored, and `localStorage.getItem` returns `null`.',
 });
 
 export const rowsDark = message({
-  ja: '`setPreference(\'dark\')`：`{"preference":"dark"}`が書かれます。',
-  en: '`setPreference(\'dark\')`: `{"preference":"dark"}` is written.',
+  ja: '`setPreference(\'dark\')`：`{"preference":"dark"}`が保存されます。',
+  en: '`setPreference(\'dark\')`: `{"preference":"dark"}` is stored.',
 });
 
 export const rowsLight = message({
-  ja: '`setPreference(\'light\')`：`{"preference":"light"}`が書かれます。',
-  en: '`setPreference(\'light\')`: `{"preference":"light"}` is written.',
+  ja: '`setPreference(\'light\')`：`{"preference":"light"}`が保存されます。',
+  en: '`setPreference(\'light\')`: `{"preference":"light"}` is stored.',
 });
 
 export const rowsSystem = message({
-  ja: "`setPreference('system')`：`{}`が書かれます。行は消えず、`preference`の無いオブジェクトが残ります。",
-  en: "`setPreference('system')`: `{}` is written. The row stays, holding an object with no `preference`.",
+  ja: "`setPreference('system')`：`{}`が保存されます。",
+  en: "`setPreference('system')`: `{}` is stored.",
 });
 
 export const rowsSame = message({
-  ja: '`preference`の無い`{}`は、読む側にとっては行が無いのと同じです。どちらも「何も選んでいない」として読まれ、プロバイダの既定値が使われます。',
-  en: 'To a reader, `{}` with no `preference` is the same as no row: both read as nothing chosen, and the provider’s default applies.',
+  ja: '`preference`の無い`{}`は、読む側には何も保存されていないのと同じです。どちらも「何も選んでいない」として読まれ、プロバイダの既定値が使われます。',
+  en: 'When read, `{}` is the same as nothing stored. Both mean nothing chosen, and the provider’s default applies.',
 });
 
-export const rowsDefault = message({
-  ja: '既定値は保存されません。そのため、あとで`defaultPreference`を変えると、まだ選んでいない訪問者はみな新しい既定値に移ります。',
-  en: 'The default is never stored, so changing `defaultPreference` later moves every visitor who has not chosen.',
+export const rowsDefaultBefore = message({
+  ja: '既定値は保存されません。`defaultPreference`を変えたときの動作は',
+  en: 'The default is never stored. What changing `defaultPreference` does is covered in ',
 });
 
-export const rowsTiming = message({
-  ja: '`setPreference`を呼ぶと、新しい値は次の描画からすぐに使われます。localStorageへの書き込みはその直後に、同じタイミングのほかの更新とまとめて行われます。',
-  en: 'After `setPreference`, the new value is used from the very next render. The write to localStorage follows right after, batched with any other update made at the same time.',
+export const rowsDefaultAfter = message({
+  ja: 'を見てください。',
+  en: '.',
 });
 
 export const readTitle = message({
-  ja: 'フックを通さずに読む',
-  en: 'Read it without the hook',
+  ja: 'プロバイダを通さない読み取り',
+  en: 'Reading without the provider',
 });
 
-export const readDescription = message({
-  ja: '保存された選択だけが欲しいときは、どのClient Componentからでも`useAppState(colorSchemeState)`で読めます。`@k8ordo/state`のストアはキーごとに1つなので、プロバイダと同じ値を読みます。',
-  en: 'When only the stored choice is wanted, any Client Component can read it with `useAppState(colorSchemeState)`. `@k8ordo/state` keeps one store per key, so it reads what the provider reads.',
+export const readHook = message({
+  ja: "どのClient Componentでも、`useAppState(colorSchemeState)`でプロバイダと同じ値を読めます。返るのは保存した`preference`で、`'light'`か`'dark'`か`undefined`です。サーバーの描画とハイドレーションの描画では`undefined`です。",
+  en: "Any Client Component reads the same value as the provider with `useAppState(colorSchemeState)`. It returns the stored `preference`: `'light'`, `'dark'` or `undefined`. In the server render and the hydration render, it is `undefined`.",
 });
 
-export const readCaveat = message({
-  ja: "返るのは保存された`preference`で、`'light'`か`'dark'`か`undefined`です。解決した`scheme`ではないので、画面に出ている配色が欲しいなら`useColorScheme()`を使います。サーバーでの描画とハイドレーションの描画では、何も保存されていないときの値である`undefined`を返します。",
-  en: "What comes back is the stored `preference`: `'light'`, `'dark'` or `undefined`. It is not the resolved `scheme`; for what is on screen, use `useColorScheme()`. In the server render and the hydration render it is `undefined`, the value for nothing stored.",
+export const readScheme = message({
+  ja: '画面に適用中の配色を読むときは、`useColorScheme()`の`scheme`を使います。',
+  en: 'For the scheme currently applied, use `scheme` from `useColorScheme()`.',
 });
 
-export const readInline = message({
-  ja: '最初の描画の前に動く自分のインラインスクリプトで同じ行を読むなら、`colorSchemeState.inlineRead()`を使います。保存された行のオブジェクトに評価されるJavaScriptの式を返し、行が読めないときは`null`になります。スクリプトの中ではスキーマが走らないので、使うフィールドは自分で確かめてください。',
-  en: 'An inline script of your own that runs before the first paint reads the same row with `colorSchemeState.inlineRead()`. It returns a JavaScript expression that evaluates to the stored object, or to `null` when the row cannot be read. No schema runs inside a script, so check each field you use.',
+export const readInlineBefore = message({
+  ja: '最初の描画の前に動く自前のインラインスクリプトでは、`colorSchemeState.inlineRead()`を使います。返るのは、保存した値か`null`になるJavaScriptの式です。スキーマは通らないので、使うフィールドは自分で確かめます。詳しくは`@k8ordo/state`の',
+  en: 'An inline script of your own that runs before the first paint uses `colorSchemeState.inlineRead()`. It returns a JavaScript expression that evaluates to the stored object or `null`. No schema runs there, so check each field you use. See ',
 });
 
-export const readInlineLink = message({
-  ja: '@k8ordo/stateでハイドレーションの前に値を読む',
-  en: 'Reading a value before hydration with @k8ordo/state',
+export const readInlineAfter = message({
+  ja: 'を見てください。',
+  en: ' in `@k8ordo/state`.',
 });
 
 export const tabsTitle = message({
-  ja: 'タブ同士がそろう',
-  en: 'Tabs agree',
+  ja: 'ほかのタブとの同期',
+  en: 'Syncing across tabs',
 });
 
-export const tabsDescription = message({
-  ja: '`@k8ordo/state`のローカル状態は、自分のキーについての`storage`イベントを購読しています。そのため、別のタブで選び直した配色はこのタブのプロバイダにも届き、`<html>`のクラスもその場で変わります。別のタブでlocalStorageを消した場合も同じです。',
-  en: '`@k8ordo/state`’s local state listens for `storage` events on its key. A choice made in another tab therefore reaches this tab’s provider too, and the class on `<html>` changes in place. The same goes for localStorage cleared in another tab.',
+export const tabsSync = message({
+  ja: '別のタブで選び直した配色は、`storage`イベントでこのタブのプロバイダにも反映されます。`<html>`のクラスもその場で変わります。別のタブでlocalStorageを消した場合も同じです。',
+  en: 'A choice made in another tab reaches this tab’s provider through the `storage` event, and the class on `<html>` changes in place. The same happens when another tab clears localStorage.',
 });
 
 export const tabsSameTab = message({
-  ja: '`storage`イベントは、書き込んだタブ自身には届きません。同じタブで`localStorage.setItem`を直接呼んでも、プロバイダは再読み込みするまで気づかないので、選択を変えるときは`setPreference`を使います。',
-  en: 'A `storage` event never reaches the tab that wrote. A `localStorage.setItem` in the same tab goes unnoticed by the provider until a reload, so change the choice through `setPreference`.',
+  ja: '`storage`イベントは、書き込んだタブ自身では発火しません。同じタブで`localStorage.setItem`を直接呼んでも、再読み込みするまでプロバイダには反映されません。選択を変えるときは`setPreference`を使います。',
+  en: 'The `storage` event does not fire in the tab that wrote. A direct `localStorage.setItem` in the same tab is not reflected in the provider until a reload. Change the choice through `setPreference`.',
 });
 
 export const besideTitle = message({
-  ja: 'ほかの設定と並べる',
-  en: 'Other preferences beside it',
+  ja: 'ほかの設定',
+  en: 'Other preferences',
 });
 
-export const besideDescription = message({
-  ja: 'アプリがほかにも表示の設定を持つなら、別の名前で自分の`defineLocalState`を定義します。このサイトの縦書きと横書きの設定もそうで、配色とは別の行に保存しています。',
-  en: 'When the application has other display preferences, give each its own `defineLocalState` under another name. This site’s writing-mode preference is one, stored in a row apart from the colour scheme.',
+export const besideOwnBefore = message({
+  ja: 'ほかの表示の設定は、別の名前で定義した自前の`defineLocalState`に保存します。書き方は`@k8ordo/state`の',
+  en: 'Store other display preferences in a `defineLocalState` of your own under another name. See ',
 });
 
-export const besideModule = message({
-  ja: "定義は`'use client'`の無いモジュールに置きます。`'use client'`のファイルからexportすると、Server Componentには定義ではなくclient referenceが届くからです。",
-  en: "Keep the definition in a module without `'use client'`: exported from a `'use client'` file, it reaches a Server Component as a client reference, not as the definition.",
+export const besideOwnAfter = message({
+  ja: 'を見てください。',
+  en: ' in `@k8ordo/state`.',
 });
 
 export const besideCollision = message({
-  ja: "アプリの中で`defineLocalState('color-scheme', …)`をもう1つ定義しないでください。`@k8ordo/state`のストアは名前で共有されるので、2つの定義が同じ行とストアを取り合います。",
-  en: "Do not define another `defineLocalState('color-scheme', …)` in the application. `@k8ordo/state` shares stores by name, so the two definitions would fight over one row and one store.",
-});
-
-export const besideLink = message({
-  ja: '@k8ordo/stateの状態の置き場所',
-  en: 'Where @k8ordo/state keeps state',
+  ja: "アプリの中で`defineLocalState('color-scheme', …)`をもう1つ定義しないでください。ストアは名前で共有されるので、2つの定義が同じlocalStorageのキーを読み書きします。",
+  en: "Do not define another `defineLocalState('color-scheme', …)` in the application. Stores are shared by name, so both definitions read and write the same localStorage key.",
 });

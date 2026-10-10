@@ -1,101 +1,91 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: 'プロバイダが最初の描画の前に走らせるのは、インラインスクリプトです。スクリプトを制限するContent-Security-Policy（CSP）の下では、ポリシーでnonceかハッシュを使って許可しないと、このスクリプトは実行されません。このページでは、`@k8ordo/framework`のserverモードでnonceを使う方法と、staticモードやほかのヘッダーでハッシュを使う方法を説明します。',
-  en: 'What the provider runs before the first paint is an inline script. Under a Content-Security-Policy (CSP) that restricts scripts, it does not run unless the policy allows it by nonce or by hash. This page covers a nonce in `@k8ordo/framework`’s server mode, and a hash in its static mode or under any other header.',
+  ja: 'プロバイダは最初の描画の前にインラインスクリプトを実行します。Content-Security-Policy（CSP）の下では、nonceかハッシュをポリシーに書いて許可します。',
+  en: 'The provider runs an inline script before the first paint. Allow it under a Content-Security-Policy (CSP) with a nonce or a hash.',
 });
 
 export const blockedTitle = message({
-  ja: '許可しないとどうなるか',
-  en: 'What happens when it is not allowed',
+  ja: '許可しないときの動作',
+  en: 'Behavior when blocked',
 });
 
-export const blockedDescription = message({
-  ja: 'ブラウザはスクリプトを実行せず、ポリシーの違反をコンソールに出します。ページが壊れるわけではなく、ハイドレーションのあとでプロバイダのeffectがクラスを付けるので、最後には正しい配色になります。',
-  en: 'The browser refuses to run the script and reports the violation in the console. The page does not break: after hydration the provider’s effect puts the class on, so it ends up in the right scheme.',
+export const blockedEffect = message({
+  ja: 'ポリシーが許可していないスクリプトは実行されず、ブラウザは違反をコンソールに出します。ハイドレーションのあとでプロバイダのeffectがクラスを付けるので、最終的な配色は正しくなります。',
+  en: 'The browser does not run a script the policy has not allowed, and reports the violation in the console. After hydration the provider’s effect puts the class on, so the page ends up in the right scheme.',
 });
 
 export const blockedFlash = message({
-  ja: 'ただし、それまでは既定値の配色で描かれるので、ダークを選んだ訪問者にはライトの画面が一瞬見えます。インラインスクリプトは、まさにこれを防ぐためのものです。',
-  en: 'Until then, though, it paints in the default scheme, and a visitor who chose dark sees a flash of light: exactly what the inline script is there to prevent.',
+  ja: 'それまでは`<html>`に`dark`クラスが付かないので、ライトの配色で描かれます。ダークになる訪問者には、ライトの画面が一瞬見えます。',
+  en: 'Until then `<html>` has no `dark` class, so the page is painted light. A visitor who gets dark briefly sees the light scheme.',
 });
 
 export const blockedUnsafe = message({
-  ja: "`'unsafe-inline'`を足しても動きますが、ページに紛れ込んだほかのインラインスクリプトもすべて動くようになり、ポリシーを書いた意味がなくなります。このスクリプトだけを、nonceかハッシュで名指しして許可します。",
-  en: "Adding `'unsafe-inline'` makes it run, along with every other inline script that reaches the page, which defeats the policy. Name this one script, by nonce or by hash.",
+  ja: "`'unsafe-inline'`を足せば動きますが、ページにあるほかのインラインスクリプトもすべて動きます。このスクリプトだけを、nonceかハッシュで許可してください。",
+  en: "`'unsafe-inline'` makes it run, along with every other inline script that reaches the page. Allow only this script, by nonce or hash.",
 });
 
 export const nonceTitle = message({
-  ja: 'serverモードではnonceで許可する',
-  en: 'By nonce, in server mode',
+  ja: 'nonceでの許可',
+  en: 'Allowing by nonce',
 });
 
-export const nonceDescription = message({
-  ja: 'serverモードは応答ごとに新しいnonceを作り、フレームワーク自身のインラインスクリプトに付けます。その値は`@k8ordo/framework/server`の`nonce()`で読めるので、ルートの`guard.ts`でポリシーに書き、ルートレイアウトでプロバイダの`nonce`に渡します。',
-  en: 'Server mode makes a new nonce for every response and puts it on the framework’s own inline scripts. `nonce()` from `@k8ordo/framework/server` reads it, so the root `guard.ts` writes it into the policy, and the root layout hands it to the provider’s `nonce`.',
+export const nonceCallout = message({
+  ja: '応答ごとのnonce。ポリシーに書いた値と同じもの',
+  en: 'The per-response nonce, the same value the policy names',
 });
 
-export const nonceRender = message({
-  ja: "`nonce()`は、レイアウトの描画の中でも読めます。スクリプトにnonceを付けることは、応答を書き換えることではないからです。フレームワークの起動用のモジュールにも同じnonceが付くので、`'strict-dynamic'`の下でも残りのクライアントのコードが読み込まれます。",
-  en: "`nonce()` can be read during the layout’s render too, since putting a nonce on a script is not writing the response. The framework’s module script carries the same nonce, so under `'strict-dynamic'` it loads the rest of the client code.",
+export const nonceProp = message({
+  ja: "ポリシーに書いたnonceを、プロバイダの`nonce` propに渡します。スクリプトの`nonce`属性にその値が付き、`script-src 'nonce-…'`の下で実行されます。",
+  en: "Pass the nonce the policy names to the provider’s `nonce` prop. The script gets it as its `nonce` attribute and runs under `script-src 'nonce-…'`.",
 });
 
-export const nonceCache = message({
-  ja: 'nonceは新しいうちしか意味が無いので、nonceを含む応答は共有キャッシュに置かないでください。',
-  en: 'A nonce is worth something only while it is new, so do not keep a response that carries one in a shared cache.',
+export const nonceServerBefore = message({
+  ja: '`@k8ordo/framework`のserverモードでのポリシーの書き方は',
+  en: 'For the policy in `@k8ordo/framework`’s server mode, see ',
 });
 
-export const nonceLink = message({
-  ja: '@k8ordo/frameworkでCSPを設定する',
-  en: 'Setting a CSP with @k8ordo/framework',
+export const frameworkLink = message({
+  ja: '@k8ordo/frameworkのCSP',
+  en: 'CSP in @k8ordo/framework',
+});
+
+export const see = message({
+  ja: 'を見てください。',
+  en: '.',
 });
 
 export const hashTitle = message({
-  ja: 'staticモードではハッシュで許可する',
-  en: 'By hash, in static mode',
+  ja: 'ハッシュでの許可',
+  en: 'Allowing by hash',
 });
 
-export const hashDescription = message({
-  ja: "ファイルとして配るページは誰が読んでも同じなので、応答ごとのnonceを持てません。そこでハッシュを使います。`colorSchemeScriptHash()`は、スクリプトのSHA-256をCSPのソースの形（`'sha256-…'`）で返すPromiseです。",
-  en: "A page delivered as a file is the same for everyone, so it cannot carry a per-response nonce; use the hash instead. `colorSchemeScriptHash()` resolves to the script’s SHA-256 as a CSP source, `'sha256-…'`.",
-});
-
-export const hashMeta = message({
-  ja: '`framework()`の`csp`に渡したポリシーは、各ページの`<head>`の先頭に`<meta http-equiv="Content-Security-Policy">`として書かれます。フレームワークは、そのページで使う自分のスクリプトのハッシュをそこへ足します。',
-  en: 'The policy given to `framework()`’s `csp` is written first in each page’s `<head>`, as a `<meta http-equiv="Content-Security-Policy">`, and the framework adds the hashes of its own scripts on that page.',
-});
-
-export const hashStrictDynamic = message({
-  ja: "staticモードのビルドは、`'strict-dynamic'`を含むポリシーを受け付けません。フレームワークの起動用のモジュールにはファイルの中でnonceを付けられないので、`'self'`で許可しているからです。",
-  en: "A static-mode build refuses a policy with `'strict-dynamic'`: nothing in a file can sign the framework’s module script, so it is allowed by `'self'`.",
+export const hashFunction = message({
+  ja: "`colorSchemeScriptHash()`は、スクリプトのSHA-256をCSPのソースの形（`'sha256-…'`）で返します。戻り値はPromiseなので`await`します。静的なファイルとして配信するページのように応答ごとのnonceが無いときは、この値を`script-src`に書きます。",
+  en: "`colorSchemeScriptHash()` returns the script’s SHA-256 as a CSP source, `'sha256-…'`. The return value is a Promise, so `await` it. When a page has no per-response nonce, such as a page served as a static file, put this value in `script-src`.",
 });
 
 export const hashComputed = message({
-  ja: 'ハッシュの値はポリシーに書き写さず、設定の中で毎回計算します。スクリプトの文字列はインストールした版のもので、更新で変わることがあるからです。計算していれば、ポリシーとスクリプトがずれることはありません。',
-  en: 'Compute the hash in the config every time rather than copying its value. The script’s text is the installed version’s and may change with an update, and a computed hash cannot fall out of step with it.',
+  ja: 'ハッシュの値は書き写さず、ポリシーを組み立てるコードの中で毎回計算します。スクリプトの文字列はインストールしたバージョンのもので、更新で変わることがあります。',
+  en: 'Compute the hash in the code that builds the policy, every time, rather than copying its value. The script’s text is the installed version’s, and an update may change it.',
 });
 
-export const hashHeader = message({
-  ja: 'nonceを使わずにヘッダーでポリシーを書くときも同じです。ポリシーを組み立てるコードの中で`colorSchemeScriptHash()`を呼び、返った値を`script-src`に入れます。',
-  en: 'The same goes for a policy sent as a header without a nonce: call `colorSchemeScriptHash()` in the code that builds the policy, and put what it returns in `script-src`.',
-});
-
-export const hashLink = message({
-  ja: '@k8ordo/frameworkでCSPを書く',
-  en: 'Writing a CSP with @k8ordo/framework',
+export const hashStaticBefore = message({
+  ja: 'staticモードで`framework()`の`csp`オプションに書く方法は',
+  en: 'For the `csp` option of `framework()` in static mode, see ',
 });
 
 export const defaultTitle = message({
-  ja: '既定値を変えたら同じ値を渡す',
-  en: 'Pass the same default to both',
+  ja: '既定値とハッシュ',
+  en: 'The default and the hash',
 });
 
-export const defaultDescription = message({
+export const defaultSame = message({
   ja: 'スクリプトの文字列にはプロバイダの既定値が入るので、ハッシュは既定値ごとに違います。プロバイダに`defaultPreference`を渡しているなら、`colorSchemeScriptHash()`にも同じ値を渡します。',
-  en: 'The provider’s default is written into the script, so the hash differs by default. When the provider is given a `defaultPreference`, give `colorSchemeScriptHash()` the same one.',
+  en: 'The provider’s default is written into the script, so each default gives a different hash. When the provider is given a `defaultPreference`, give `colorSchemeScriptHash()` the same value.',
 });
 
 export const defaultNonce = message({
-  ja: 'nonceで許可しているときは、既定値を変えてもポリシーを書き換える必要はありません。',
-  en: 'Allowed by nonce, the policy does not change with the default.',
+  ja: 'nonceで許可しているときは、既定値を変えてもポリシーはそのままです。',
+  en: 'A policy that allows the script by nonce does not change with the default.',
 });

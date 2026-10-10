@@ -1,10 +1,6 @@
 import { CodeBlock } from '@k8ordo/ui/code-block';
 
-import {
-  LandingClaim,
-  LandingHero,
-  NextSteps,
-} from '../../../components/landing';
+import { LandingClaim, LandingHero } from '../../../components/landing';
 import { Playground } from '../../../components/playground';
 import { SchemeDemo } from '../../../demos/color-scheme/scheme-demo';
 import * as m from '../../../messages';
@@ -19,16 +15,11 @@ const HERO_TOGGLE = `const { scheme, setPreference } = useColorScheme();
 
 setPreference(scheme === 'dark' ? 'light' : 'dark');`;
 
-const CLAIM_CSP_SERVER = `<ColorSchemeProvider nonce={nonce()}>
+const CLAIM_CSP_NONCE = `<ColorSchemeProvider nonce={nonce}>
   {children}
 </ColorSchemeProvider>`;
 
-const CLAIM_CSP_STATIC = `framework({
-  mode: 'static',
-  csp: {
-    'script-src': ["'self'", await colorSchemeScriptHash()],
-  },
-});`;
+const CLAIM_CSP_HASH = `const scriptSrc = ["'self'", await colorSchemeScriptHash()];`;
 
 const CLAIM_STORAGE = `colorSchemeState.storageKey;
 // 'k8ordo-state:color-scheme'
@@ -76,11 +67,11 @@ export default function ColorSchemePage() {
       >
         <div className="flex flex-col gap-3">
           <CodeBlock
-            code={CLAIM_CSP_SERVER}
+            code={CLAIM_CSP_NONCE}
             lang="tsx"
             title="src/routes/layout.tsx"
           />
-          <CodeBlock code={CLAIM_CSP_STATIC} lang="ts" title="vite.config.ts" />
+          <CodeBlock code={CLAIM_CSP_HASH} lang="ts" title="csp.ts" />
         </div>
       </LandingClaim>
       <LandingClaim
@@ -89,41 +80,6 @@ export default function ColorSchemePage() {
       >
         <CodeBlock code={CLAIM_STORAGE} lang="tsx" title="preference.tsx" />
       </LandingClaim>
-      <NextSteps
-        name="@k8ordo/color-scheme"
-        steps={[
-          {
-            path: '/:locale/color-scheme/get-started',
-            label: m.nav.getStarted,
-            description: m.colorScheme.nextGetStarted,
-          },
-          {
-            path: '/:locale/color-scheme/styling',
-            label: m.colorScheme.navStyling,
-            description: m.colorScheme.nextStyling,
-          },
-          {
-            path: '/:locale/color-scheme/switcher',
-            label: m.colorScheme.navSwitcher,
-            description: m.colorScheme.nextSwitcher,
-          },
-          {
-            path: '/:locale/color-scheme/storage',
-            label: m.colorScheme.navStorage,
-            description: m.colorScheme.nextStorage,
-          },
-          {
-            path: '/:locale/color-scheme/csp',
-            label: m.colorScheme.navCsp,
-            description: m.colorScheme.nextCsp,
-          },
-          {
-            path: '/:locale/color-scheme/how-it-works',
-            label: m.colorScheme.navHowItWorks,
-            description: m.colorScheme.nextHowItWorks,
-          },
-        ]}
-      />
     </div>
   );
 }

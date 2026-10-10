@@ -65,106 +65,90 @@ export function SchemeToggle() {
   );
 }`;
 
-const NEXT = [
-  {
-    path: '/:locale/color-scheme/styling',
-    label: m.colorScheme.navStyling,
-    description: t.nextStyling,
-  },
-  {
-    path: '/:locale/color-scheme/switcher',
-    label: m.colorScheme.navSwitcher,
-    description: t.nextSwitcher,
-  },
-  {
-    path: '/:locale/color-scheme/csp',
-    label: m.colorScheme.navCsp,
-    description: t.nextCsp,
-  },
-] as const;
-
 export default function ColorSchemeGetStartedPage() {
   return (
     <DocPage
       introduction={t.introduction}
       path="/:locale/color-scheme/get-started"
     >
-      <DocSection
-        description={t.installDescription}
-        id="install"
-        title={t.installTitle}
-      >
+      <DocSection id="install" title={t.installTitle}>
         <PackageInstall name="@k8ordo/color-scheme" />
         <Note>
           <p>
-            <Rich>{t.installState()}</Rich>
+            <Rich>{t.installStateBefore()}</Rich>
+            <LocaleAnchor path="/:locale/color-scheme/storage">
+              {m.colorScheme.navStorage()}
+            </LocaleAnchor>
+            <Rich>{t.installStateAfter()}</Rich>
           </p>
         </Note>
       </DocSection>
 
-      <DocSection
-        description={t.providerDescription}
-        id="provider"
-        title={t.providerTitle}
-      >
+      <DocSection id="provider" title={t.providerTitle}>
         <CodeBlock
+          callouts={{
+            10: t.providerSuppressCallout(),
+            12: t.providerWrapCallout(),
+          }}
           code={LAYOUT}
           lang="tsx"
           marks={{ 10: 'highlight', 12: 'highlight' }}
           title="src/routes/layout.tsx"
         />
         <p>
-          <Rich>{t.providerFirst()}</Rich>
+          <Rich>{t.providerPlace()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.providerScript()}</Rich>
         </p>
         <p>
           <Rich>{t.providerSuppress()}</Rich>
         </p>
-        <p>
-          <Rich>{t.providerServer()}</Rich>
-        </p>
       </DocSection>
 
-      <DocSection
-        description={t.colorDescription}
-        id="color"
-        title={t.colorTitle}
-      >
+      <DocSection id="color" title={t.colorTitle}>
         <CodeBlock
+          callouts={{ 7: t.colorDarkCallout() }}
           code={CSS}
           lang="css"
           marks={{ 7: 'highlight', 8: 'highlight' }}
           title="globals.css"
         />
         <p>
+          <Rich>{t.colorClass()}</Rich>
+        </p>
+        <p>
           <Rich>{t.colorProperty()}</Rich>
         </p>
         <Note>
           <p>
-            <Rich>{t.colorUi()}</Rich>
+            <Rich>{t.colorUiBefore()}</Rich>
+            <LocaleAnchor path="/:locale/color-scheme/styling">
+              {m.colorScheme.navStyling()}
+            </LocaleAnchor>
+            <Rich>{t.colorUiAfter()}</Rich>
           </p>
         </Note>
       </DocSection>
 
-      <DocSection
-        description={t.switchDescription}
-        id="switch"
-        title={t.switchTitle}
-      >
+      <DocSection id="switch" title={t.switchTitle}>
         <CodeBlock
+          callouts={{ 6: t.switchSchemeCallout(), 12: t.switchSetCallout() }}
           code={TOGGLE}
           lang="tsx"
           marks={{ 6: 'highlight', 7: 'highlight', 12: 'highlight' }}
           title="scheme-toggle.tsx"
         />
         <p>
-          <Rich>{t.switchExplain()}</Rich>
-        </p>
-        <p>
-          <Rich>{t.switchReload()}</Rich>
+          <Rich>{t.switchHook()}</Rich>
         </p>
         <Note>
           <p>
-            <Rich>{t.switchGuess()}</Rich>
+            <Rich>{t.switchGuessBefore()}</Rich>
+            <LocaleAnchor path="/:locale/color-scheme/switcher">
+              {m.colorScheme.navSwitcher()}
+            </LocaleAnchor>
+            <Rich>{t.switchGuessAfter()}</Rich>
           </p>
         </Note>
       </DocSection>
@@ -177,18 +161,6 @@ export default function ColorSchemeGetStartedPage() {
       >
         <ToggleDemo />
       </Playground>
-
-      <DocSection id="next" title={t.nextTitle}>
-        <ul>
-          {NEXT.map((step) => (
-            <li key={step.path}>
-              <LocaleAnchor path={step.path}>{step.label()}</LocaleAnchor>
-              {' — '}
-              <Rich>{step.description()}</Rich>
-            </li>
-          ))}
-        </ul>
-      </DocSection>
     </DocPage>
   );
 }

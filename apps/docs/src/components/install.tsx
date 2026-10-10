@@ -3,6 +3,7 @@ import { CodeBlock } from '@k8ordo/ui/code-block';
 import { nodeOf, peersOf } from '../data/peers';
 import * as m from '../messages';
 import { InstallTabs } from './install-tabs';
+import { Rich } from './rich';
 
 /** The same packages as `npm install`, `pnpm add` and `yarn add`, in tabs. */
 export function InstallCommand({ packages }: { packages: string }) {
@@ -108,6 +109,9 @@ export function PackageInstall({ name }: { name: string }) {
     <>
       <InstallCommand packages={[name, ...required].join(' ')} />
       <Requirements name={name} />
+      <p>
+        <Rich>{m.install.agentDocs(name)}</Rich>
+      </p>
     </>
   );
 }
