@@ -15,7 +15,7 @@ const HERO_TOGGLE = `const { scheme, setPreference } = useColorScheme();
 
 setPreference(scheme === 'dark' ? 'light' : 'dark');`;
 
-const CLAIM_CSP_NONCE = `<ColorSchemeProvider nonce={nonce}>
+const CLAIM_CSP_NONCE = `<ColorSchemeProvider nonce={nonce()}>
   {children}
 </ColorSchemeProvider>`;
 
