@@ -24,15 +24,15 @@
     "inspect": "vp-inspect"
   },
   "devDependencies": {
-    "@k8o/oxc-config": "0.3.0",
+    "@k8o/oxc-config": "0.4.0",
     "@types/node": "catalog:",
     "@vitest/browser": "catalog:",
-    "oxlint-tailwindcss": "1.13.0",
+    "oxlint-tailwindcss": "1.14.0",
     "playwright": "catalog:",
     "typescript": "catalog:",
     "vite-plus": "catalog:",
-    "vite-plus-inspector": "0.1.1",
-    "wrangler": "4.136.3"
+    "vite-plus-inspector": "0.2.0",
+    "wrangler": "4.147.0"
   },
   "engines": {
     "node": ">=24.13.0"
