@@ -300,7 +300,9 @@ export default function RouterLinksPage() {
   the `get-started` button) and two or three `LandingClaim`s, one of which
   may hold the `Playground`: what the package alone promises its user, never
   what it does with another package of the family. It has no 次に読む list
-  and no link to the agent guide.
+  and no link to the agent guide. `NextSteps` (`src/components/landing.tsx`)
+  is still there only for the landings not yet rewritten to this shape; a
+  new or rewritten landing does not use it, and it goes once none does.
 - Its words live in `src/messages/<package>-<section>.ts` (namespace
   `m.<package><Section>`), with `introduction` as the page's lead.
 - Code samples carry no natural-language comments — both locales see the same
@@ -419,6 +421,7 @@ for word translation of the Japanese, nor the other way round.
 | `PageTitle`        | The page's `<title>` (`… · k8ordo`)  |
 | `LandingHero`      | A package landing's opening          |
 | `LandingClaim`     | A landing's claim with its example   |
+| `NextSteps`        | Only for landings not yet rewritten  |
 | `DocPage`          | A package guide page, with its pager |
 | `DocSection`       | A guide page's h2 section            |
 | `DocSubsection`    | An h3 inside a `DocSection`          |
