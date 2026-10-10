@@ -47,6 +47,36 @@ const NAVIGABLE_PATH_EXAMPLE = `type A = NavigablePath<typeof routes, '/products
 type B = NavigablePath<typeof routes, '/products/42/reviews'>;
 // never`;
 
+const HOST_EXAMPLE = `'use client';
+
+import {
+  NavigationGeneration,
+  PathnameProvider,
+  useInterceptedNavigation,
+} from '@k8ordo/router';
+import { useDeferredValue, useState } from 'react';
+import type { ReactNode } from 'react';
+
+type Props = { initial: ReactNode; pathname: string };
+
+export function ArticleHost({ initial, pathname }: Props) {
+  const [latest, setLatest] = useState(initial);
+  const { generation } = useInterceptedNavigation<ReactNode>({
+    claim: (url) => url.pathname.startsWith('/articles/'),
+    load: (url, signal) => loadArticle(url, signal),
+    apply: setLatest,
+  });
+  const shown = useDeferredValue(latest);
+
+  return (
+    <PathnameProvider pathname={pathname}>
+      <NavigationGeneration value={generation}>
+        {shown}
+      </NavigationGeneration>
+    </PathnameProvider>
+  );
+}`;
+
 export default function RouterReferencePage() {
   return (
     <DocPage introduction={t.introduction} path="/:locale/router/reference">
@@ -410,7 +440,13 @@ export default function RouterReferencePage() {
   handler: NavigationHandler<T>,
 ): { readonly generation: number }`}
         summary={t.interceptHookSummary}
-      />
+      >
+        <CodeBlock
+          code={HOST_EXAMPLE}
+          lang="tsx"
+          title="src/article-host.tsx"
+        />
+      </ApiEntry>
 
       <ApiEntry
         fields={[
@@ -844,6 +880,7 @@ export default function RouterReferencePage() {
       />
 
       <ApiEntry
+        caveats={[t.generatedTypesNote]}
         from={FROM}
         id="standard-schema-like"
         name="StandardSchemaLike"
@@ -886,7 +923,6 @@ export default function RouterReferencePage() {
       />
 
       <ApiEntry
-        caveats={[t.generatedTypesNote]}
         from={FROM}
         id="parsed-params-map"
         name="ParsedParamsMap"

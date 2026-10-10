@@ -2,6 +2,7 @@ import { CodeBlock } from '@k8ordo/ui/code-block';
 
 import { Note, Pitfall } from '../../../../components/callout';
 import { DocPage, DocSection } from '../../../../components/doc-page';
+import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Rich } from '../../../../components/rich';
 import * as m from '../../../../messages';
 
@@ -69,11 +70,7 @@ export const routes = defineRoutes({
 export default function RouterBoundariesPage() {
   return (
     <DocPage introduction={t.introduction} path="/:locale/router/boundaries">
-      <DocSection
-        description={t.errorDescription}
-        id="error"
-        title={t.errorTitle}
-      >
+      <DocSection id="error" title={t.errorTitle}>
         <CodeBlock
           code={ERROR_TABLE}
           lang="ts"
@@ -81,22 +78,20 @@ export default function RouterBoundariesPage() {
           title="src/routes.ts"
         />
         <CodeBlock
+          callouts={{ 3: t.errorPropsCallout() }}
           code={ERROR_COMPONENT}
           lang="tsx"
           marks={{ 3: 'highlight' }}
           title="src/products-error.tsx"
         />
         <p>
+          <Rich>{t.errorBoundary()}</Rich>
+        </p>
+        <p>
           <Rich>{t.errorProps()}</Rich>
         </p>
         <p>
-          <Rich>{t.errorReset()}</Rich>
-        </p>
-        <p>
           <Rich>{t.errorLeave()}</Rich>
-        </p>
-        <p>
-          <Rich>{t.errorStateChange()}</Rich>
         </p>
         <Note>
           <p>
@@ -105,11 +100,7 @@ export default function RouterBoundariesPage() {
         </Note>
       </DocSection>
 
-      <DocSection
-        description={t.loadingDescription}
-        id="loading"
-        title={t.loadingTitle}
-      >
+      <DocSection id="loading" title={t.loadingTitle}>
         <CodeBlock
           code={LOADING_TABLE}
           lang="ts"
@@ -122,23 +113,30 @@ export default function RouterBoundariesPage() {
           title="src/products-loading.tsx"
         />
         <p>
+          <Rich>{t.loadingComponent()}</Rich>
+        </p>
+        <p>
           <Rich>{t.loadingSuspense()}</Rich>
         </p>
         <p>
           <Rich>{t.loadingWhen()}</Rich>
-        </p>
-        <p>
-          <Rich>{t.loadingKeep()}</Rich>
+          <LocaleAnchor path="/:locale/router/location">
+            {m.router.navLocation()}
+          </LocaleAnchor>
+          <Rich>{t.see()}</Rich>
         </p>
       </DocSection>
 
-      <DocSection description={t.lazyDescription} id="lazy" title={t.lazyTitle}>
+      <DocSection id="lazy" title={t.lazyTitle}>
         <CodeBlock
           code={LAZY}
           lang="ts"
           marks={{ 4: 'highlight', 9: 'highlight' }}
           title="src/routes.ts"
         />
+        <p>
+          <Rich>{t.lazyTable()}</Rich>
+        </p>
         <p>
           <Rich>{t.lazyFallback()}</Rich>
         </p>

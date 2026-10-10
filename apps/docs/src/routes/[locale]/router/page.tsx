@@ -1,10 +1,6 @@
 import { CodeBlock } from '@k8ordo/ui/code-block';
 
-import {
-  LandingClaim,
-  LandingHero,
-  NextSteps,
-} from '../../../components/landing';
+import { LandingClaim, LandingHero } from '../../../components/landing';
 import * as m from '../../../messages';
 
 const HERO_ROUTES = `export const routes = defineRoutes({
@@ -117,41 +113,6 @@ export default function RouterPage() {
           />
         </div>
       </LandingClaim>
-      <NextSteps
-        name="@k8ordo/router"
-        steps={[
-          {
-            path: '/:locale/router/get-started',
-            label: m.nav.getStarted,
-            description: m.router.nextGetStarted,
-          },
-          {
-            path: '/:locale/router/routes',
-            label: m.router.navRoutes,
-            description: m.router.nextRoutes,
-          },
-          {
-            path: '/:locale/router/links',
-            label: m.router.navLinks,
-            description: m.router.nextLinks,
-          },
-          {
-            path: '/:locale/router/location',
-            label: m.router.navLocation,
-            description: m.router.nextLocation,
-          },
-          {
-            path: '/:locale/router/framework',
-            label: m.router.navFramework,
-            description: m.router.nextFramework,
-          },
-          {
-            path: '/:locale/router/reference',
-            label: m.router.navReference,
-            description: m.router.nextReference,
-          },
-        ]}
-      />
     </div>
   );
 }

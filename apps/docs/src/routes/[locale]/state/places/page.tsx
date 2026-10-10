@@ -2,6 +2,7 @@ import { CodeBlock } from '@k8ordo/ui/code-block';
 
 import { Note, Pitfall } from '../../../../components/callout';
 import { DocPage, DocSection } from '../../../../components/doc-page';
+import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Rich } from '../../../../components/rich';
 import * as m from '../../../../messages';
 
@@ -48,6 +49,14 @@ export const palette = defineMemoryState('command-palette', {
   open: false,
 });`;
 
+const ABSENCE = `import * as z from 'zod';
+
+export const listState = definePageState('product-list', {
+  url: z.object({
+    page: z.coerce.number().int().min(1),
+  }),
+});`;
+
 const MINI = `import * as z from 'zod/mini';
 
 export const listState = definePageState('product-list', {
@@ -63,8 +72,11 @@ export const listState = definePageState('product-list', {
 export default function StatePlacesPage() {
   return (
     <DocPage introduction={t.introduction} path="/:locale/state/places">
-      <DocSection description={t.sixDescription} id="six" title={t.sixTitle}>
+      <DocSection id="six" title={t.sixTitle}>
         <CodeBlock code={SIX} lang="ts" title="src/state.ts" />
+        <p>
+          <Rich>{t.sixFunction()}</Rich>
+        </p>
         <ul>
           {[
             t.sixUrl,
@@ -84,11 +96,7 @@ export default function StatePlacesPage() {
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.scopeDescription}
-        id="scope"
-        title={t.scopeTitle}
-      >
+      <DocSection id="scope" title={t.scopeTitle}>
         <p>
           <Rich>{t.scopePage()}</Rich>
         </p>
@@ -97,11 +105,10 @@ export default function StatePlacesPage() {
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.chooseDescription}
-        id="choose"
-        title={t.chooseTitle}
-      >
+      <DocSection id="choose" title={t.chooseTitle}>
+        <p>
+          <Rich>{t.chooseOrder()}</Rich>
+        </p>
         <ol>
           {[
             t.chooseUrl,
@@ -118,11 +125,18 @@ export default function StatePlacesPage() {
         <Pitfall>
           <p>
             <Rich>{t.chooseSecret()}</Rich>
+            <LocaleAnchor path="/:locale/state/cookie">
+              {m.state.navCookie()}
+            </LocaleAnchor>
+            <Rich>{t.see()}</Rich>
           </p>
         </Pitfall>
       </DocSection>
 
-      <DocSection description={t.keyDescription} id="key" title={t.keyTitle}>
+      <DocSection id="key" title={t.keyTitle}>
+        <p>
+          <Rich>{t.keyFirstArgument()}</Rich>
+        </p>
         <ul>
           {[t.keyPage, t.keyStorage, t.keyCookie, t.keyRegistry].map((item) => (
             <li key={item()}>
@@ -143,11 +157,13 @@ export default function StatePlacesPage() {
         </Note>
       </DocSection>
 
-      <DocSection
-        description={t.schemaDescription}
-        id="schema"
-        title={t.schemaTitle}
-      >
+      <DocSection id="schema" title={t.schemaTitle}>
+        <CodeBlock
+          code={ABSENCE}
+          lang="ts"
+          marks={{ 5: 'highlight' }}
+          title="src/state.ts"
+        />
         <p>
           <Rich>{t.schemaInput()}</Rich>
         </p>
@@ -159,13 +175,16 @@ export default function StatePlacesPage() {
         </p>
       </DocSection>
 
-      <DocSection description={t.miniDescription} id="mini" title={t.miniTitle}>
+      <DocSection id="mini" title={t.miniTitle}>
         <CodeBlock
           code={MINI}
           lang="ts"
           marks={{ 1: 'highlight', 5: 'highlight', 6: 'highlight' }}
           title="src/state.ts"
         />
+        <p>
+          <Rich>{t.miniBundle()}</Rich>
+        </p>
         <p>
           <Rich>{t.miniSpelling()}</Rich>
         </p>

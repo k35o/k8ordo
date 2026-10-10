@@ -2,6 +2,7 @@ import { CodeBlock } from '@k8ordo/ui/code-block';
 
 import { Pitfall } from '../../../../components/callout';
 import { DocPage, DocSection } from '../../../../components/doc-page';
+import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Playground } from '../../../../components/playground';
 import { Rich } from '../../../../components/rich';
 import { MatchDemo } from '../../../../demos/router/location/match-demo';
@@ -58,11 +59,7 @@ const ROUTE = 'const { pattern, params } = useRoute();';
 export default function RouterLocationPage() {
   return (
     <DocPage introduction={t.introduction} path="/:locale/router/location">
-      <DocSection
-        description={t.pathnameDescription}
-        id="pathname"
-        title={t.pathnameTitle}
-      >
+      <DocSection id="pathname" title={t.pathnameTitle}>
         <CodeBlock
           code={PATHNAME}
           lang="tsx"
@@ -70,21 +67,21 @@ export default function RouterLocationPage() {
           title="src/current-path.tsx"
         />
         <p>
-          <Rich>{t.pathnameQuery()}</Rich>
+          <Rich>{t.pathnameReturns()}</Rich>
         </p>
         <p>
-          <Rich>{t.pathnameEncoded()}</Rich>
+          <Rich>{t.pathnameQuery()}</Rich>
+          <LocaleAnchor path="/:locale/state/url">
+            <Rich>{t.pathnameQueryLink()}</Rich>
+          </LocaleAnchor>
+          <Rich>{t.pathnameQueryAfter()}</Rich>
         </p>
         <p>
           <Rich>{t.pathnameFramework()}</Rich>
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.matchDescription}
-        id="match"
-        title={t.matchTitle}
-      >
+      <DocSection id="match" title={t.matchTitle}>
         <CodeBlock
           code={MATCH}
           lang="tsx"
@@ -92,27 +89,23 @@ export default function RouterLocationPage() {
           title="src/products-link.tsx"
         />
         <p>
-          <Rich>{t.matchNoProp()}</Rich>
+          <Rich>{t.matchReturns()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.matchNoLink()}</Rich>
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.sectionDescription}
-        id="section"
-        title={t.sectionTitle}
-      >
+      <DocSection id="section" title={t.sectionTitle}>
         <CodeBlock code={SECTION} lang="ts" />
         <p>
+          <Rich>{t.sectionWildcard()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.sectionInclusive()}</Rich>
+        </p>
+        <p>
           <Rich>{t.sectionMatchPath()}</Rich>
-        </p>
-        <p>
-          <Rich>{t.sectionOwnPage()}</Rich>
-        </p>
-        <p>
-          <Rich>{t.sectionPatterns()}</Rich>
-        </p>
-        <p>
-          <Rich>{t.sectionCost()}</Rich>
         </p>
       </DocSection>
 
@@ -125,14 +118,7 @@ export default function RouterLocationPage() {
         <MatchDemo />
       </Playground>
 
-      <DocSection
-        description={t.pendingDescription}
-        id="pending"
-        title={t.pendingTitle}
-      >
-        <p>
-          <Rich>{t.pendingHook()}</Rich>
-        </p>
+      <DocSection id="pending" title={t.pendingTitle}>
         <CodeBlock
           code={PENDING}
           lang="tsx"
@@ -140,18 +126,17 @@ export default function RouterLocationPage() {
           title="src/progress.tsx"
         />
         <p>
-          <Rich>{t.pendingWhen()}</Rich>
+          <Rich>{t.pendingReturns()}</Rich>
         </p>
         <p>
-          <Rich>{t.pendingState()}</Rich>
+          <Rich>{t.pendingWhy()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.pendingWhen()}</Rich>
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.paramsDescription}
-        id="params"
-        title={t.paramsTitle}
-      >
+      <DocSection id="params" title={t.paramsTitle}>
         <CodeBlock
           code={PARAMS}
           lang="tsx"
@@ -159,7 +144,10 @@ export default function RouterLocationPage() {
           title="src/pages/product-page.tsx"
         />
         <p>
-          <Rich>{t.paramsBelief()}</Rich>
+          <Rich>{t.paramsHook()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.paramsError()}</Rich>
         </p>
         <CodeBlock code={PARAMS_ERROR} lang="text" />
         <p>
@@ -168,7 +156,11 @@ export default function RouterLocationPage() {
         <CodeBlock code={ROUTE} lang="ts" />
         <Pitfall>
           <p>
-            <Rich>{t.paramsFramework()}</Rich>
+            <Rich>{t.paramsFrameworkBefore()}</Rich>
+            <LocaleAnchor path="/:locale/framework/params">
+              {m.framework.navParams()}
+            </LocaleAnchor>
+            <Rich>{t.paramsFrameworkAfter()}</Rich>
           </p>
         </Pitfall>
       </DocSection>

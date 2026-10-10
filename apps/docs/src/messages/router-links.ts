@@ -1,121 +1,136 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: 'ページへのリンクは、ルート表のパターンから`href`でURLを作り、ふつうの`<a>`に渡します。ボタンを押したあとのように、コードからページを移るときは`navigateTo`を使います。',
-  en: 'A link to a page is a plain `<a>` whose URL `href` builds from a pattern in the route table. To change pages from code, after a button press for instance, use `navigateTo`.',
+  ja: 'ルート表のパターンから`href`でリンクのURLを作り、ふつうの`<a>`に渡します。ボタンを押したあとなど、コードからページを移るときは`navigateTo`を使います。',
+  en: 'Build a link’s URL with `href` from a pattern in the route table and hand it to a plain `<a>`. To change pages from code, after a button press for instance, use `navigateTo`.',
 });
 
 export const hrefTitle = message({
-  ja: '`href`でリンク先を作る',
-  en: 'Build a link with `href`',
+  ja: 'リンク先のURL',
+  en: 'Link URLs',
 });
 
-export const hrefDescription = message({
-  ja: '`href`は、パターンとparamからリンク先のURLを作ります。paramの無いパターンには、2つ目の引数を渡しません。',
-  en: '`href` builds the URL a link points at from a pattern and its params. A pattern without params takes no second argument.',
+export const hrefArguments = message({
+  ja: '`href`は、パターンとparamからURLの文字列を作ります。paramの無いパターンには、2つ目の引数を渡しません。',
+  en: '`href` builds a URL string from a pattern and its params. A pattern without params takes no second argument.',
 });
 
 export const hrefValues = message({
-  ja: 'paramの値には、文字列のほかに数値と`bigint`、真偽値も渡せます。どれもURLでの書き方が1通りに決まる値だからです。値は`encodeURIComponent`で符号化されるので、`/`を含む値も1つの区間に収まります。',
-  en: 'Besides strings, a param takes numbers, `bigint`s and booleans: each has exactly one way to be written in a URL. Values are encoded with `encodeURIComponent`, so one containing `/` still fits in a single segment.',
+  ja: 'paramの値には、文字列のほかに数値と`bigint`と真偽値を渡せます。値は`encodeURIComponent`で符号化されるので、`/`を含む値もパスの1つの区間になります。',
+  en: 'A param value is a string, a number, a `bigint` or a boolean. Values are encoded with `encodeURIComponent`, so one containing `/` still becomes a single path segment.',
 });
 
 export const hrefReturn = message({
-  ja: '`href`が返すのは、`<a>`の`href`属性にそのまま渡せるURLの文字列です。アプリをサブパスの下で配信しているときは、その分も前に付きます。',
-  en: 'What `href` returns is a URL string ready for an `<a>`’s `href` attribute. When the app is served below a base path, that comes in front too.',
+  ja: '返り値は、`<a>`の`href`属性にそのまま渡せます。アプリをベースパスの下で配信しているときは、ベースパスが先頭に付きます。詳しくは',
+  en: 'The result goes straight into an `<a>`’s `href` attribute. When the app is served under a base path, the base path comes first. See ',
+});
+
+export const see = message({
+  ja: 'を見てください。',
+  en: '.',
 });
 
 export const hrefErrors = message({
-  ja: '型の検査をすり抜けて呼んだときは、実行時に`TypeError`を投げます。`/*`を含むパターン、値の無いparam、オブジェクトのようにURLでの書き方が無い値の3つです。',
-  en: 'Called around the type checks, it throws a `TypeError` at run time for three things: a pattern with `/*`, a param without a value, and a value with no URL spelling, such as an object.',
+  ja: '型エラーを無視して呼ぶと、次の3つの場合に実行時に`TypeError`になります。',
+  en: 'If a call gets past the type checks, it throws a `TypeError` at run time in three cases:',
 });
+
+export const hrefErrorList = [
+  message({
+    ja: '`/*`を含むパターン：`is a wildcard — it has no href`',
+    en: 'A pattern containing `/*`: `is a wildcard — it has no href`',
+  }),
+  message({
+    ja: '値の無いparam：`needs a value for ":id"`',
+    en: 'A param without a value: `needs a value for ":id"`',
+  }),
+  message({
+    ja: 'オブジェクトなど、URLに書けない値：`has no URL spelling`',
+    en: 'A value with no URL form, such as an object: `has no URL spelling`',
+  }),
+];
 
 export const anchorTitle = message({
-  ja: 'リンクは`<a>`のまま書く',
-  en: 'Links stay plain `<a>` elements',
+  ja: 'リンクの書き方',
+  en: 'Writing a link',
 });
 
-export const anchorDescription = message({
-  ja: 'このルーターには`<Link>`コンポーネントがありません。`<a>`がクリックされるとブラウザがそれを`navigate`イベントで知らせ、ルーターはそのイベントを受け取ってページを切り替えるからです。',
-  en: 'This router has no `<Link>` component. When an `<a>` is clicked, the browser announces it with a `navigate` event, and the router takes that event and changes the page.',
-});
-
-export const anchorWhy = message({
-  ja: '`<a>`を包むコンポーネントを用意しても、同じことを書く方法が2つに増えるだけです。そのため、パターンの検査は`href`が受け持ち、リンクは`<a>`のまま書きます。',
-  en: 'A component wrapping `<a>` would only add a second way to write the same thing, so `href` does the checking and links stay plain `<a>` elements.',
+export const anchorNoLink = message({
+  ja: 'このルーターに`<Link>`コンポーネントはありません。`<a>`をクリックするとブラウザが`navigate`イベントを発火し、ルーターがそれを受け取ってページを切り替えます。パターンの検査は`href`が行うので、リンクは`<a>`のまま書きます。',
+  en: 'This router has no `<Link>` component. Clicking an `<a>` fires the browser’s `navigate` event, and the router handles that event and changes the page. `href` checks the pattern, so links stay plain `<a>` elements.',
 });
 
 export const anchorOthers = message({
-  ja: 'ほかのオリジンへのリンクや、ルート表に無いパスへのリンクは、ルーターが引き受けません。ブラウザのふつうのページの読み込みになります。',
-  en: 'The router does not take a link to another origin or to a path the route table lacks; it is an ordinary page load.',
+  ja: 'ほかのオリジンやルート表に無いパスへのリンクは、ブラウザがふつうに読み込みます（',
+  en: 'A link to another origin, or to a path missing from the route table, is an ordinary page load (see ',
+});
+
+export const anchorOthersAfter = message({
+  ja: '）。',
+  en: ').',
 });
 
 export const anchorCurrent = message({
-  ja: 'いま開いているページへのリンクに印を付けるときも、リンクの属性ではなく`useMatch`に尋ねて決めます。書き方は「いまいる場所を調べる」で説明します。',
-  en: 'Marking the link to the page you are on is also a question you ask `useMatch`, not an attribute of the link; see “Find where you are”.',
+  ja: '今開いているページへのリンクに印を付けるには、`useMatch`を使います。書き方は',
+  en: 'To mark the link to the page that is open, use `useMatch`. See ',
 });
 
 export const navigateTitle = message({
-  ja: '`navigateTo`でページを移る',
-  en: 'Change pages with `navigateTo`',
+  ja: 'コードからの遷移',
+  en: 'Navigation from code',
 });
 
-export const navigateDescription = message({
-  ja: '`navigateTo`は、`href`と同じ引数でURLを作り、そのページへ移ります。履歴には新しいエントリが積まれるので、ブラウザの戻るで前のページに戻れます。',
-  en: '`navigateTo` builds the URL from the same arguments as `href` and goes there. It adds a new history entry, so the browser’s back button returns to the previous page.',
+export const navigateArguments = message({
+  ja: '`navigateTo`は、`href`と同じ引数でURLを作り、そのページへ移ります。既定では履歴に新しいエントリを追加するので、ブラウザの戻るボタンで前のページに戻れます。',
+  en: '`navigateTo` builds the URL from the same arguments as `href` and goes to that page. By default it adds a new history entry, so the browser’s back button returns to the previous page.',
 });
 
 export const navigateReplace = message({
-  ja: "いまのエントリを置き換えたいときは、`{ history: 'replace' }`を渡します。paramの無いパターンでは、オプションが2つ目の引数になります。",
+  ja: "今のエントリを置き換えるには、`{ history: 'replace' }`を渡します。paramの無いパターンでは、オプションが2つ目の引数になります。",
   en: "To replace the current entry instead, pass `{ history: 'replace' }`. For a pattern without params, the options are the second argument.",
 });
 
-export const navigatePush = message({
-  ja: '既定が`push`なのは、ページを移ったことは戻るボタンで取り消せるべきだからです。一方で、`@k8ordo/state`の`update()`は`replace`が既定です。ページの中の絞り込みを変えるたびに履歴が増えると、戻るボタンで1つずつたどることになるからです。',
-  en: 'The default is `push` because moving to a page is what the back button should undo. `@k8ordo/state`’s `update()` defaults to `replace` instead, since stepping back through every change to a filter on the same page is not what the back button is for.',
-});
-
 export const navigateSplit = message({
-  ja: 'ページを変えるときは`navigateTo`を、ページの中の状態を変えるときは`@k8ordo/state`の`update()`を使ってください。',
-  en: 'Change pages with `navigateTo`, and change the state within a page with `@k8ordo/state`’s `update()`.',
+  ja: 'ページの中の状態だけを変えるときは、`@k8ordo/state`の`update()`を使います。詳しくは',
+  en: 'To change only the state within a page, use `@k8ordo/state`’s `update()`. See ',
 });
 
 export const finishedTitle = message({
-  ja: '移り終わるのを待つ',
-  en: 'Wait until the page is on screen',
+  ja: '`finished`の待ち方',
+  en: 'Awaiting `finished`',
 });
 
-export const finishedDescription = message({
-  ja: '`navigateTo`は、Navigation APIの`navigation.navigate()`と同じ`{ committed, finished }`を返します。`finished`が解決するのは、新しいページが画面に出たときです。',
+export const finishedReturn = message({
+  ja: '`navigateTo`は、Navigation APIの`navigation.navigate()`と同じ`{ committed, finished }`を返します。`finished`は、新しいページが画面に表示されたときに解決します。',
   en: '`navigateTo` returns the same `{ committed, finished }` as the Navigation API’s `navigation.navigate()`. `finished` resolves once the new page is on screen.',
 });
 
 export const finishedAction = message({
-  ja: '`useTransition`のアクションの中で`finished`を待つと、ページが画面に出るまでの間、`isPending`が`true`になります。ページの切り替えはアクションに加わらないので、待っていても止まることはありません。',
-  en: 'Await `finished` inside a `useTransition` action, and `isPending` stays `true` until the page is on screen. The page change never joins the action, so awaiting it never stalls.',
+  ja: '`useTransition`のアクションの中で`finished`を待つと、ページが表示されるまで`isPending`が`true`になります。',
+  en: 'Await `finished` inside a `useTransition` action, and `isPending` is `true` until the page is on screen.',
 });
 
 export const finishedAbort = message({
-  ja: '待っている間に別のナビゲーションが始まると、`finished`は`AbortError`という名前の`DOMException`でrejectします。上の例のように、中断だけを無視して、ほかのエラーは投げ直してください。',
+  ja: '待っている間に別のナビゲーションが始まると、`finished`は`AbortError`という名前の`DOMException`でrejectします。例のように中断だけを無視して、ほかのエラーは`throw`し直します。',
   en: 'If another navigation starts while you wait, `finished` rejects with a `DOMException` named `AbortError`. As in the example, ignore the abort and rethrow anything else.',
 });
 
 export const downloadTitle = message({
-  ja: 'ファイルへのリンクには`download`を付ける',
-  en: 'Give a file link `download`',
+  ja: 'ファイルへのリンク',
+  en: 'File links',
 });
 
-export const downloadDescription = message({
-  ja: 'ルート表の最後に`/*`を置くと、表はどのパスにも答えます。そのため、ホストが配るファイルへのリンクもルーターが引き受け、`/report.pdf`を開くとファイルではなく`/*`のページが描かれます。',
-  en: 'With `/*` at the end of the route table, the table answers every path. A link to a file the host serves is then taken by the router too, and `/report.pdf` renders the `/*` page instead of the file.',
+export const downloadProblem = message({
+  ja: 'ルート表の最後に`/*`を置くと、表はどのパスにも一致します。ホストが配信するファイルへのリンクもルーターが扱うので、`/report.pdf`を開くとファイルでなく`/*`のページが描画されます。',
+  en: 'With `/*` at the end of the route table, the table matches every path. The router then handles a link to a file the host serves too, so opening `/report.pdf` renders the `/*` page instead of the file.',
 });
 
 export const downloadFix = message({
-  ja: '`download`属性を付けると、ブラウザはクリックの時点でダウンロードだと知らせます。ルーターはダウンロードを引き受けないので、ファイルがそのまま保存されます。',
-  en: 'With the `download` attribute, the browser reports a download at the click. The router leaves downloads alone, so the file is saved as it is.',
+  ja: '`download`属性を付けると、`navigate`イベントの`downloadRequest`が`null`でなくなります。ルーターはこのイベントを扱わないので、ファイルがそのまま保存されます。',
+  en: 'With the `download` attribute, the `navigate` event’s `downloadRequest` is no longer `null`. The router does not handle that event, so the file is saved as is.',
 });
 
 export const downloadFramework = message({
-  ja: '`@k8ordo/framework`の下では、同じオリジンのURLはいったんすべて引き受け、ページではないと分かった時点で読み込み直してファイルを開きます。`download`を付けておけば、この往復を省けます。',
-  en: 'Under `@k8ordo/framework`, every same-origin URL is taken at first, and once it turns out not to be a page, the browser reloads into the file. `download` saves that round trip.',
+  ja: '`@k8ordo/framework`の下でも、`download`を付けると読み込み直しの往復を省けます。詳しくは',
+  en: 'Under `@k8ordo/framework`, `download` also saves a reload. See ',
 });

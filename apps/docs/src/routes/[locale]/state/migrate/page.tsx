@@ -1,10 +1,14 @@
 import { CodeBlock } from '@k8ordo/ui/code-block';
 
 import { DocPage, DocSection } from '../../../../components/doc-page';
+import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Rich } from '../../../../components/rich';
 import * as m from '../../../../messages';
 
 const t = m.stateMigrate;
+
+const SALVAGE = `{"layout":"list","pageSize":50}
+{"view":"grid","pageSize":50}`;
 
 const V1 = `export const prefs = defineLocalState(
   'prefs',
@@ -47,11 +51,18 @@ const V2 = `export const prefs = defineLocalState(
 export default function StateMigratePage() {
   return (
     <DocPage introduction={t.introduction} path="/:locale/state/migrate">
-      <DocSection
-        description={t.salvageDescription}
-        id="salvage"
-        title={t.salvageTitle}
-      >
+      <DocSection id="salvage" title={t.salvageTitle}>
+        <CodeBlock
+          callouts={{
+            1: t.salvageBeforeCallout(),
+            2: t.salvageAfterCallout(),
+          }}
+          code={SALVAGE}
+          lang="json"
+        />
+        <p>
+          <Rich>{t.salvageField()}</Rich>
+        </p>
         <ul>
           {[
             t.salvageAdded,
@@ -69,11 +80,7 @@ export default function StateMigratePage() {
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.versionDescription}
-        id="version"
-        title={t.versionTitle}
-      >
+      <DocSection id="version" title={t.versionTitle}>
         <CodeBlock
           code={V1}
           lang="ts"
@@ -103,7 +110,10 @@ export default function StateMigratePage() {
         </p>
       </DocSection>
 
-      <DocSection description={t.flowDescription} id="flow" title={t.flowTitle}>
+      <DocSection id="flow" title={t.flowTitle}>
+        <p>
+          <Rich>{t.flowLead()}</Rich>
+        </p>
         <ol>
           {[t.flowMigrate, t.flowSalvage, t.flowWriteBack].map((item) => (
             <li key={item()}>
@@ -119,7 +129,7 @@ export default function StateMigratePage() {
         </p>
       </DocSection>
 
-      <DocSection description={t.nextDescription} id="next" title={t.nextTitle}>
+      <DocSection id="second-change" title={t.secondChangeTitle}>
         <CodeBlock
           code={V2}
           lang="ts"
@@ -127,31 +137,31 @@ export default function StateMigratePage() {
           title="prefs.ts"
         />
         <p>
-          <Rich>{t.nextStory()}</Rich>
+          <Rich>{t.secondChangeStory()}</Rich>
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.edgesDescription}
-        id="edges"
-        title={t.edgesTitle}
-      >
+      <DocSection id="edges" title={t.edgesTitle}>
+        <p>
+          <Rich>{t.edgesLead()}</Rich>
+        </p>
         <ul>
-          {[
-            t.edgesNewer,
-            t.edgesThrow,
-            t.edgesAdopt,
-            t.edgesInlineRead,
-            t.edgesSession,
-          ].map((item) => (
+          {[t.edgesNewer, t.edgesThrow, t.edgesAdopt].map((item) => (
             <li key={item()}>
               <Rich>{item()}</Rich>
             </li>
           ))}
+          <li>
+            <Rich>{t.edgesInlineRead()}</Rich>
+            <LocaleAnchor path="/:locale/state/before-hydration">
+              {m.state.navBeforeHydration()}
+            </LocaleAnchor>
+            <Rich>{t.see()}</Rich>
+          </li>
+          <li>
+            <Rich>{t.edgesSession()}</Rich>
+          </li>
         </ul>
-        <p>
-          <Rich>{t.edgesWithout()}</Rich>
-        </p>
       </DocSection>
     </DocPage>
   );

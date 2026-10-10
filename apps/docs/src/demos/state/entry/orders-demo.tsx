@@ -6,6 +6,7 @@ import { Badge, Button, ChevronIcon, Code } from '@k8ordo/ui';
 import { useId } from 'react';
 import * as z from 'zod/mini';
 
+import { jsLiteral } from '../../../components/js-literal';
 import * as m from '../../../messages';
 
 const t = m.stateEntry;
@@ -117,7 +118,7 @@ export function OrdersDemo() {
         </dd>
         <dt className="text-fg-mute">entry</dt>
         <dd className="break-all">
-          <Code>{JSON.stringify({ expanded })}</Code>
+          <Code>{jsLiteral({ expanded })}</Code>
         </dd>
       </dl>
     </div>

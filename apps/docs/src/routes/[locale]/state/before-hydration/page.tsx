@@ -16,6 +16,12 @@ export const themeState = defineLocalState(
   z.object({ mode: z.enum(['light', 'dark']).optional() }),
 );`;
 
+const ACCESSORS = `themeState.storageKey;
+// 'k8ordo-state:theme'
+
+themeState.inlineRead();
+// '(()=>{try{const v=JSON.parse(localStorage.getItem("k8ordo-state:theme"));…})()'`;
+
 const LAYOUT = `import type { ReactNode } from 'react';
 
 import { themeState } from '../state';
@@ -48,21 +54,30 @@ export default function StateBeforeHydrationPage() {
       introduction={t.introduction}
       path="/:locale/state/before-hydration"
     >
-      <DocSection description={t.whyDescription} id="why" title={t.whyTitle}>
+      <DocSection id="why" title={t.whyTitle}>
+        <CodeBlock code={THEME} lang="ts" title="src/state.ts" />
+        <CodeBlock
+          code={ACCESSORS}
+          lang="ts"
+          marks={{ 1: 'highlight', 4: 'highlight' }}
+        />
         <p>
-          <Rich>{t.whyHalves()}</Rich>
+          <Rich>{t.whyKey()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.whyDrift()}</Rich>
         </p>
         <p>
           <Rich>{t.whyCookie()}</Rich>
+          <Rich>{t.whyCookieSee()}</Rich>
+          <LocaleAnchor path="/:locale/framework/request">
+            {m.framework.navRequest()}
+          </LocaleAnchor>
+          <Rich>{t.see()}</Rich>
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.embedDescription}
-        id="embed"
-        title={t.embedTitle}
-      >
-        <CodeBlock code={THEME} lang="ts" title="src/state.ts" />
+      <DocSection id="embed" title={t.embedTitle}>
         <CodeBlock
           code={LAYOUT}
           lang="tsx"
@@ -70,14 +85,17 @@ export default function StateBeforeHydrationPage() {
           title="src/routes/layout.tsx"
         />
         <p>
-          <Rich>{t.embedSuppress()}</Rich>
+          <Rich>{t.embedValue()}</Rich>
         </p>
         <p>
-          <Rich>{t.embedAnywhere()}</Rich>
+          <Rich>{t.embedSuppress()}</Rich>
         </p>
       </DocSection>
 
-      <DocSection description={t.nullDescription} id="null" title={t.nullTitle}>
+      <DocSection id="null" title={t.nullTitle}>
+        <p>
+          <Rich>{t.nullLead()}</Rich>
+        </p>
         <ul>
           {[
             t.nullNothing,
@@ -93,7 +111,10 @@ export default function StateBeforeHydrationPage() {
         </ul>
       </DocSection>
 
-      <DocSection description={t.rawDescription} id="raw" title={t.rawTitle}>
+      <DocSection id="raw" title={t.rawTitle}>
+        <p>
+          <Rich>{t.rawSchema()}</Rich>
+        </p>
         <p>
           <Rich>{t.rawFields()}</Rich>
         </p>

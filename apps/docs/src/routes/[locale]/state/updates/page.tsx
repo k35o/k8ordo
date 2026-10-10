@@ -1,6 +1,6 @@
 import { CodeBlock } from '@k8ordo/ui/code-block';
 
-import { Pitfall } from '../../../../components/callout';
+import { Note, Pitfall } from '../../../../components/callout';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Playground } from '../../../../components/playground';
@@ -13,6 +13,8 @@ const t = m.stateUpdates;
 const PATCH = `const [{ inStock, page }, update] = useAppState(listState);
 
 update({ inStock: true, page: 1 });`;
+
+const VALIDATE = `update({ page: 0 });`;
 
 const HISTORY = `update({ inStock: true, page: 1 });
 update({ page: page + 1 }, { history: 'push' });`;
@@ -58,12 +60,11 @@ const SEARCH_BOX = `export function SearchBox() {
 export default function StateUpdatesPage() {
   return (
     <DocPage introduction={t.introduction} path="/:locale/state/updates">
-      <DocSection
-        description={t.patchDescription}
-        id="patch"
-        title={t.patchTitle}
-      >
+      <DocSection id="patch" title={t.patchTitle}>
         <CodeBlock code={PATCH} lang="tsx" marks={{ 3: 'highlight' }} />
+        <p>
+          <Rich>{t.patchObject()}</Rich>
+        </p>
         <p>
           <Rich>{t.patchSync()}</Rich>
         </p>
@@ -72,13 +73,14 @@ export default function StateUpdatesPage() {
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.validateDescription}
-        id="validate"
-        title={t.validateTitle}
-      >
+      <DocSection id="validate" title={t.validateTitle}>
+        <CodeBlock
+          callouts={{ 1: t.validateCallout() }}
+          code={VALIDATE}
+          lang="tsx"
+        />
         <p>
-          <Rich>{t.validateUrl()}</Rich>
+          <Rich>{t.validateSchema()}</Rich>
         </p>
         <p>
           <Rich>{t.validateThrow()}</Rich>
@@ -88,11 +90,7 @@ export default function StateUpdatesPage() {
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.historyDescription}
-        id="history"
-        title={t.historyTitle}
-      >
+      <DocSection id="history" title={t.historyTitle}>
         <CodeBlock
           callouts={{
             1: t.historyReplaceCallout(),
@@ -112,14 +110,13 @@ export default function StateUpdatesPage() {
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.batchDescription}
-        id="batch"
-        title={t.batchTitle}
-      >
+      <DocSection id="batch" title={t.batchTitle}>
         <CodeBlock code={BATCH} lang="tsx" />
         <p>
-          <Rich>{t.batchAwait()}</Rich>
+          <Rich>{t.batchOne()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.batchBy()}</Rich>
         </p>
         <ul>
           {[
@@ -136,18 +133,18 @@ export default function StateUpdatesPage() {
         </ul>
         <p>
           <Rich>{t.batchSame()}</Rich>
-        </p>
-        <p>
-          <Rich>{t.batchShared()}</Rich>
+          <LocaleAnchor path="/:locale/state/how-it-works">
+            {m.state.navHowItWorks()}
+          </LocaleAnchor>
+          <Rich>{t.see()}</Rich>
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.handleDescription}
-        id="handle"
-        title={t.handleTitle}
-      >
+      <DocSection id="handle" title={t.handleTitle}>
         <CodeBlock code={HANDLE} lang="ts" />
+        <p>
+          <Rich>{t.handleShape()}</Rich>
+        </p>
         <ul>
           {[t.handleCommitted, t.handleFinished].map((item) => (
             <li key={item()}>
@@ -155,9 +152,6 @@ export default function StateUpdatesPage() {
             </li>
           ))}
         </ul>
-        <p>
-          <Rich>{t.handleIgnore()}</Rich>
-        </p>
         <p>
           <Rich>{t.handleWait()}</Rich>
         </p>
@@ -168,36 +162,39 @@ export default function StateUpdatesPage() {
           title="pager.tsx"
         />
         <p>
-          <Rich>{t.handleAbort()}</Rich>
-        </p>
-        <p>
           <Rich>{t.handleSettle()}</Rich>
         </p>
-        <p>
-          <Rich>{t.handleFail()}</Rich>
-        </p>
-        <p>
-          <Rich>{t.handleAction()}</Rich>
-        </p>
+        <ul>
+          {[t.handleAbort, t.handleFail].map((item) => (
+            <li key={item()}>
+              <Rich>{item()}</Rich>
+            </li>
+          ))}
+        </ul>
+        <Note>
+          <p>
+            <Rich>{t.handleAction()}</Rich>
+          </p>
+        </Note>
       </DocSection>
 
-      <DocSection
-        description={t.functionalDescription}
-        id="functional"
-        title={t.functionalTitle}
-      >
+      <DocSection id="functional" title={t.functionalTitle}>
         <CodeBlock code={FUNCTIONAL} lang="tsx" />
         <p>
           <Rich>{t.functionalBatch()}</Rich>
         </p>
+        <p>
+          <Rich>{t.functionalTwice()}</Rich>
+        </p>
       </DocSection>
 
-      <DocSection description={t.keysDescription} id="keys" title={t.keysTitle}>
+      <DocSection id="keys" title={t.keysTitle}>
         <CodeBlock
           callouts={{
             1: t.keysAllCallout(),
             2: t.keysPageCallout(),
             3: t.keysNoneCallout(),
+            4: t.keysOptionsCallout(),
           }}
           code={KEYS}
           lang="tsx"
@@ -207,23 +204,26 @@ export default function StateUpdatesPage() {
         </p>
         <p>
           <Rich>{t.keysCompare()}</Rich>
+          <LocaleAnchor path="/:locale/state/how-it-works">
+            {m.state.navHowItWorks()}
+          </LocaleAnchor>
+          <Rich>{t.see()}</Rich>
         </p>
         <p>
           <Rich>{t.keysSplit()}</Rich>
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.draftsDescription}
-        id="drafts"
-        title={t.draftsTitle}
-      >
+      <DocSection id="drafts" title={t.draftsTitle}>
         <CodeBlock
           code={SEARCH_BOX}
           lang="tsx"
           marks={{ 9: 'highlight', 12: 'highlight' }}
           title="search-box.tsx"
         />
+        <p>
+          <Rich>{t.draftsCommit()}</Rich>
+        </p>
         <p>
           <Rich>{t.draftsKey()}</Rich>
         </p>

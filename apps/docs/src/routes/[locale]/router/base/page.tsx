@@ -1,7 +1,8 @@
 import { CodeBlock } from '@k8ordo/ui/code-block';
 
-import { Note, Pitfall } from '../../../../components/callout';
+import { Pitfall } from '../../../../components/callout';
 import { DocPage, DocSection } from '../../../../components/doc-page';
+import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Rich } from '../../../../components/rich';
 import * as m from '../../../../messages';
 
@@ -18,21 +19,19 @@ export default defineConfig({
 const LINKS = `href('/products'); // '/docs/products'
 href('/'); // '/docs/'`;
 
+const READ = `// at /docs/products
+usePathname(); // '/products'`;
+
 const HELPERS = `withBase('/products'); // '/docs/products'
 withoutBase('/docs/products'); // '/products'
 withoutBase('/docs'); // '/'
-withoutBase('/elsewhere'); // null`;
-
-const EXPLICIT = "withBase('/products', '/docs/'); // '/docs/products'";
+withoutBase('/elsewhere'); // null
+withBase('/products', '/docs/'); // '/docs/products'`;
 
 export default function RouterBasePage() {
   return (
     <DocPage introduction={t.introduction} path="/:locale/router/base">
-      <DocSection
-        description={t.configDescription}
-        id="config"
-        title={t.configTitle}
-      >
+      <DocSection id="config" title={t.configTitle}>
         <CodeBlock
           code={CONFIG}
           lang="ts"
@@ -40,53 +39,62 @@ export default function RouterBasePage() {
           title="vite.config.ts"
         />
         <p>
+          <Rich>{t.configRead()}</Rich>
+        </p>
+        <p>
           <Rich>{t.configTable()}</Rich>
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.linksDescription}
-        id="links"
-        title={t.linksTitle}
-      >
+      <DocSection id="links" title={t.linksTitle}>
         <CodeBlock code={LINKS} lang="ts" />
         <p>
-          <Rich>{t.linksString()}</Rich>
+          <Rich>{t.linksPrefix()}</Rich>
         </p>
-        <Note>
-          <p>
-            <Rich>{t.frameworkNote()}</Rich>
-          </p>
-        </Note>
+        <p>
+          <Rich>{t.frameworkBefore()}</Rich>
+          <LocaleAnchor path="/:locale/framework/deploy">
+            {m.framework.navDeploy()}
+          </LocaleAnchor>
+          <Rich>{t.frameworkAfter()}</Rich>
+        </p>
         <Pitfall>
           <p>
             <Rich>{t.statePitfall()}</Rich>
+            <LocaleAnchor path="/:locale/state/links">
+              {m.state.navLinks()}
+            </LocaleAnchor>
+            <Rich>{t.statePitfallAfter()}</Rich>
           </p>
         </Pitfall>
       </DocSection>
 
-      <DocSection description={t.readDescription} id="read" title={t.readTitle}>
+      <DocSection id="read" title={t.readTitle}>
+        <CodeBlock code={READ} lang="ts" />
         <p>
-          <Rich>{t.readCompare()}</Rich>
+          <Rich>{t.readPathname()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.readMatch()}</Rich>
         </p>
         <p>
           <Rich>{t.readOutside()}</Rich>
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.helpersDescription}
-        id="helpers"
-        title={t.helpersTitle}
-      >
-        <CodeBlock code={HELPERS} lang="ts" />
+      <DocSection id="helpers" title={t.helpersTitle}>
+        <CodeBlock
+          callouts={{ 5: t.helpersExplicitCallout() }}
+          code={HELPERS}
+          lang="ts"
+          marks={{ 5: 'highlight' }}
+        />
         <p>
-          <Rich>{t.helpersNull()}</Rich>
+          <Rich>{t.helpersSteps()}</Rich>
         </p>
         <p>
           <Rich>{t.helpersExplicit()}</Rich>
         </p>
-        <CodeBlock code={EXPLICIT} lang="ts" />
         <p>
           <Rich>{t.helpersRelative()}</Rich>
         </p>

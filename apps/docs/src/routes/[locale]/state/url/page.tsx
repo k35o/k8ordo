@@ -1,12 +1,16 @@
 import { CodeBlock } from '@k8ordo/ui/code-block';
 
 import { DocPage, DocSection } from '../../../../components/doc-page';
+import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Playground } from '../../../../components/playground';
 import { Rich } from '../../../../components/rich';
 import { QueryDemo } from '../../../../demos/state/url/query-demo';
 import * as m from '../../../../messages';
 
 const t = m.stateUrl;
+
+const ABSENCE = `page: z.coerce.number().int().min(1).default(1),
+sort: z.enum(['price', 'name']).optional(),`;
 
 const CATALOG = `import { definePageState } from '@k8ordo/state';
 import * as z from 'zod';
@@ -65,25 +69,25 @@ catalogState.search({ tags: ['sale'], q: 'desk lamp' });
 export default function StateUrlPage() {
   return (
     <DocPage introduction={t.introduction} path="/:locale/state/url">
-      <DocSection
-        description={t.absenceDescription}
-        id="absence"
-        title={t.absenceTitle}
-      >
+      <DocSection id="absence" title={t.absenceTitle}>
+        <CodeBlock code={ABSENCE} lang="ts" />
         <p>
           <Rich>{t.absenceDefault()}</Rich>
+          <LocaleAnchor path="/:locale/state/places">
+            {m.state.navPlaces()}
+          </LocaleAnchor>
+          <Rich>{t.see()}</Rich>
         </p>
         <p>
           <Rich>{t.absenceOptional()}</Rich>
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.typesDescription}
-        id="types"
-        title={t.typesTitle}
-      >
+      <DocSection id="types" title={t.typesTitle}>
         <CodeBlock code={CATALOG} lang="ts" title="catalog-state.ts" />
+        <p>
+          <Rich>{t.typesLead()}</Rich>
+        </p>
         <ul>
           {[t.typesString, t.typesNumber, t.typesBoolean, t.typesArray].map(
             (item) => (
@@ -98,11 +102,7 @@ export default function StateUrlPage() {
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.refusedDescription}
-        id="refused"
-        title={t.refusedTitle}
-      >
+      <DocSection id="refused" title={t.refusedTitle}>
         <CodeBlock code={BOOLEAN} lang="ts" marks={{ 1: 'remove', 2: 'add' }} />
         <p>
           <Rich>{t.refusedBoolean()}</Rich>
@@ -116,17 +116,13 @@ export default function StateUrlPage() {
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.salvageDescription}
-        id="salvage"
-        title={t.salvageTitle}
-      >
+      <DocSection id="salvage" title={t.salvageTitle}>
         <CodeBlock code={SALVAGE} lang="ts" />
         <p>
-          <Rich>{t.salvageArray()}</Rich>
+          <Rich>{t.salvageField()}</Rich>
         </p>
         <p>
-          <Rich>{t.salvageRefine()}</Rich>
+          <Rich>{t.salvageArray()}</Rich>
         </p>
         <CodeBlock
           code={REFINE}
@@ -134,14 +130,16 @@ export default function StateUrlPage() {
           marks={{ 7: 'highlight' }}
           title="price-state.ts"
         />
+        <p>
+          <Rich>{t.salvageRefine()}</Rich>
+        </p>
       </DocSection>
 
-      <DocSection
-        description={t.canonicalDescription}
-        id="canonical"
-        title={t.canonicalTitle}
-      >
+      <DocSection id="canonical" title={t.canonicalTitle}>
         <CodeBlock code={CANONICAL} lang="ts" />
+        <p>
+          <Rich>{t.canonicalOmit()}</Rich>
+        </p>
         <p>
           <Rich>{t.canonicalOrder()}</Rich>
         </p>

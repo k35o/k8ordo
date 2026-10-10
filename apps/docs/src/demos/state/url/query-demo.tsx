@@ -5,6 +5,7 @@ import { Code, FormControl, TextField } from '@k8ordo/ui';
 import { useState } from 'react';
 import * as z from 'zod/mini';
 
+import { jsLiteral } from '../../../components/js-literal';
 import * as m from '../../../messages';
 
 const t = m.stateUrl;
@@ -51,7 +52,7 @@ export function QueryDemo() {
               <Code>{key}</Code>
             </dt>
             <dd className="break-all">
-              <Code>{JSON.stringify(value)}</Code>
+              <Code>{jsLiteral(value)}</Code>
             </dd>
           </div>
         ))}

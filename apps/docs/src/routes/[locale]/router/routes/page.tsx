@@ -4,6 +4,7 @@ import { CodeBlock } from '@k8ordo/ui/code-block';
 
 import { Note, Pitfall } from '../../../../components/callout';
 import { DocPage, DocSection } from '../../../../components/doc-page';
+import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Rich } from '../../../../components/rich';
 import * as m from '../../../../messages';
 
@@ -83,11 +84,7 @@ const REFUSED: readonly Refused[] = [
 export default function RouterRoutesPage() {
   return (
     <DocPage introduction={t.introduction} path="/:locale/router/routes">
-      <DocSection
-        description={t.shapeDescription}
-        id="shape"
-        title={t.shapeTitle}
-      >
+      <DocSection id="shape" title={t.shapeTitle}>
         <CodeBlock
           code={SHAPE}
           lang="ts"
@@ -95,59 +92,61 @@ export default function RouterRoutesPage() {
           title="src/routes.ts"
         />
         <p>
-          <Rich>{t.shapeKeys()}</Rich>
+          <Rich>{t.shapeValues()}</Rich>
         </p>
         <p>
-          <Rich>{t.shapeNest()}</Rich>
+          <Rich>{t.shapeKeys()}</Rich>
         </p>
         <p>
           <Rich>{t.shapeTrailingSlash()}</Rich>
         </p>
         <Note>
           <p>
-            <Rich>{t.shapeMore()}</Rich>
+            <Rich>{t.shapeMoreBefore()}</Rich>
+            <LocaleAnchor path="/:locale/router/boundaries">
+              {m.router.navBoundaries()}
+            </LocaleAnchor>
+            <Rich>{t.shapeMoreAfter()}</Rich>
           </p>
         </Note>
       </DocSection>
 
-      <DocSection
-        description={t.paramDescription}
-        id="param"
-        title={t.paramTitle}
-      >
+      <DocSection id="param" title={t.paramTitle}>
         <CodeBlock code={PARAM} lang="ts" />
+        <p>
+          <Rich>{t.paramSegment()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.paramType()}</Rich>
+        </p>
         <p>
           <Rich>{t.paramMatch()}</Rich>
         </p>
-        <p>
-          <Rich>{t.paramDecoded()}</Rich>
-        </p>
       </DocSection>
 
-      <DocSection
-        description={t.wildcardDescription}
-        id="wildcard"
-        title={t.wildcardTitle}
-      >
+      <DocSection id="wildcard" title={t.wildcardTitle}>
         <CodeBlock code={WILDCARD} lang="ts" marks={{ 4: 'highlight' }} />
         <p>
-          <Rich>{t.wildcardNotParam()}</Rich>
+          <Rich>{t.wildcardRest()}</Rich>
         </p>
         <p>
           <Rich>{t.wildcardBelow()}</Rich>
         </p>
+        <p>
+          <Rich>{t.wildcardNotLink()}</Rich>
+        </p>
         <Pitfall>
           <p>
-            <Rich>{t.wildcardDownload()}</Rich>
+            <Rich>{t.wildcardDownloadBefore()}</Rich>
+            <LocaleAnchor path="/:locale/router/links">
+              {m.router.navLinks()}
+            </LocaleAnchor>
+            <Rich>{t.wildcardDownloadAfter()}</Rich>
           </p>
         </Pitfall>
       </DocSection>
 
-      <DocSection
-        description={t.groupDescription}
-        id="group"
-        title={t.groupTitle}
-      >
+      <DocSection id="group" title={t.groupTitle}>
         <CodeBlock
           code={GROUP}
           lang="ts"
@@ -162,11 +161,7 @@ export default function RouterRoutesPage() {
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.orderDescription}
-        id="order"
-        title={t.orderTitle}
-      >
+      <DocSection id="order" title={t.orderTitle}>
         <CodeBlock
           callouts={{ 3: t.orderShadowed() }}
           code={ORDER_WRONG}
@@ -179,26 +174,21 @@ export default function RouterRoutesPage() {
         <p>
           <Rich>{t.orderRight()}</Rich>
         </p>
+      </DocSection>
+
+      <DocSection id="unmatched" title={t.unmatchedTitle}>
         <p>
-          <Rich>{t.orderRead()}</Rich>
+          <Rich>{t.unmatchedBrowser()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.unmatchedRender()}</Rich>
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.unmatchedDescription}
-        id="unmatched"
-        title={t.unmatchedTitle}
-      >
+      <DocSection id="refused" title={t.refusedTitle}>
         <p>
-          <Rich>{t.unmatchedServer()}</Rich>
+          <Rich>{t.refusedWhen()}</Rich>
         </p>
-      </DocSection>
-
-      <DocSection
-        description={t.refusedDescription}
-        id="refused"
-        title={t.refusedTitle}
-      >
         <ul>
           {REFUSED.map((item) => (
             <li key={item.label()}>
@@ -213,9 +203,6 @@ export default function RouterRoutesPage() {
         </ul>
         <p>
           <Rich>{t.refusedWhy()}</Rich>
-        </p>
-        <p>
-          <Rich>{t.refusedGroupWhy()}</Rich>
         </p>
       </DocSection>
     </DocPage>
