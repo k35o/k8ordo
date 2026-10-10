@@ -3,6 +3,7 @@ import { CodeBlock } from '@k8ordo/ui/code-block';
 
 import { Note, Pitfall } from '../../../../components/callout';
 import { DocPage, DocSection } from '../../../../components/doc-page';
+import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Playground } from '../../../../components/playground';
 import { Rich } from '../../../../components/rich';
 import { OrderDemo } from '../../../../demos/form/nested/order-demo';
@@ -79,13 +80,17 @@ export default function FormNestedPage() {
 
   return (
     <DocPage introduction={t.introduction} path="/:locale/form/nested">
-      <DocSection
-        description={t.nestedDescription}
-        id="nested"
-        title={t.nestedTitle}
-      >
+      <DocSection id="nested" title={t.nestedTitle}>
         <CodeBlock code={NESTED_SCHEMA} lang="ts" title="schema.ts" />
-        <CodeBlock code={NESTED_FIELD} lang="tsx" title="profile-form.tsx" />
+        <CodeBlock
+          code={NESTED_FIELD}
+          lang="tsx"
+          marks={{ 1: 'highlight' }}
+          title="profile-form.tsx"
+        />
+        <p>
+          <Rich>{t.nestedPath()}</Rich>
+        </p>
         <p>
           <Rich>{t.nestedOptional()}</Rich>
         </p>
@@ -96,9 +101,28 @@ export default function FormNestedPage() {
         </Pitfall>
       </DocSection>
 
-      <DocSection description={t.rowsDescription} id="rows" title={t.rowsTitle}>
-        <CodeBlock code={ROWS_SCHEMA} lang="ts" title="schema.ts" />
-        <CodeBlock code={ROWS_FORM} lang="tsx" title="order-form.tsx" />
+      <DocSection id="rows" title={t.rowsTitle}>
+        <CodeBlock
+          code={ROWS_SCHEMA}
+          lang="ts"
+          marks={{ 9: 'highlight', 10: 'highlight' }}
+          title="schema.ts"
+        />
+        <CodeBlock
+          callouts={{ 4: t.rowsKeyCallout() }}
+          code={ROWS_FORM}
+          lang="tsx"
+          marks={{
+            1: 'highlight',
+            4: 'highlight',
+            7: 'highlight',
+            14: 'highlight',
+          }}
+          title="order-form.tsx"
+        />
+        <p>
+          <Rich>{t.rowsApi()}</Rich>
+        </p>
         <p>
           <Rich>{t.rowsBounds()}</Rich>
         </p>
@@ -116,17 +140,16 @@ export default function FormNestedPage() {
         <OrderDemo fields={orderFields} />
       </Playground>
 
-      <DocSection
-        description={t.arrayErrorDescription}
-        id="array-error"
-        title={t.arrayErrorTitle}
-      >
+      <DocSection id="array-error" title={t.arrayErrorTitle}>
         <CodeBlock
           code={ARRAY_ERROR}
           lang="tsx"
           marks={{ 2: 'highlight', 3: 'highlight', 4: 'highlight' }}
           title="order-form.tsx"
         />
+        <p>
+          <Rich>{t.arrayErrorOwner()}</Rich>
+        </p>
         <p>
           <Rich>{t.arrayErrorProps()}</Rich>
         </p>
@@ -135,12 +158,11 @@ export default function FormNestedPage() {
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.namesDescription}
-        id="names"
-        title={t.namesTitle}
-      >
+      <DocSection id="names" title={t.namesTitle}>
         <CodeBlock code={NAMES} lang="ts" />
+        <p>
+          <Rich>{t.namesIndex()}</Rich>
+        </p>
         <p>
           <Rich>{t.namesRemove()}</Rich>
         </p>
@@ -151,11 +173,10 @@ export default function FormNestedPage() {
         </Pitfall>
       </DocSection>
 
-      <DocSection
-        description={t.initialDescription}
-        id="initial"
-        title={t.initialTitle}
-      >
+      <DocSection id="initial" title={t.initialTitle}>
+        <p>
+          <Rich>{t.initialCount()}</Rich>
+        </p>
         <p>
           <Rich>{t.initialNoJs()}</Rich>
         </p>
@@ -164,28 +185,34 @@ export default function FormNestedPage() {
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.scalarDescription}
-        id="scalar"
-        title={t.scalarTitle}
-      >
-        <CodeBlock code={SCALAR} lang="tsx" title="tags-form.tsx" />
+      <DocSection id="scalar" title={t.scalarTitle}>
+        <CodeBlock
+          code={SCALAR}
+          lang="tsx"
+          marks={{ 4: 'highlight' }}
+          title="tags-form.tsx"
+        />
+        <p>
+          <Rich>{t.scalarField()}</Rich>
+        </p>
         <Note>
           <p>
-            <Rich>{t.scalarEnum()}</Rich>
+            <Rich>{t.scalarEnumBefore()}</Rich>
+            <LocaleAnchor path="/:locale/form/field-types">
+              {m.form.navFieldTypes()}
+            </LocaleAnchor>
+            <Rich>{t.scalarEnumAfter()}</Rich>
           </p>
         </Note>
       </DocSection>
 
       <DocSection id="limits" title={t.limitsTitle}>
-        <ul>
-          <li>
-            <Rich>{t.limitsNested()}</Rich>
-          </li>
-          <li>
-            <Rich>{t.limitsRules()}</Rich>
-          </li>
-        </ul>
+        <p>
+          <Rich>{t.limitsNested()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.limitsRules()}</Rich>
+        </p>
       </DocSection>
     </DocPage>
   );

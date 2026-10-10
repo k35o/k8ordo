@@ -1,98 +1,68 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: '検索や絞り込みのフォームは、送信した条件がURLに残るGETのフォームにすると、リンクを共有したりブラウザの戻るで前の条件に戻ったりできます。`@k8ordo/state`と組み合わせると、フォームの制約とURLの状態を1つのスキーマで書けます。',
-  en: 'A search or filter form works best as a GET form: the conditions land in the URL, so the link can be shared and the back button returns to the previous ones. With `@k8ordo/state`, one schema describes both the form’s constraints and the URL state.',
+  ja: '検索や絞り込みの条件をURLに残すGETのフォームを書けるようになります。フォームと`@k8ordo/state`が1つのスキーマを共有します。',
+  en: 'Build a GET form that keeps search and filter conditions in the URL. The form and `@k8ordo/state` share one schema.',
 });
 
 export const shareTitle = message({
-  ja: 'URLの状態とスキーマを共有する',
-  en: 'Share one schema with the URL state',
+  ja: 'スキーマの共有',
+  en: 'Sharing the schema',
 });
 
-export const shareDescription = message({
-  ja: '`@k8ordo/state`の`definePageState`で、URLに置く状態の`url`スキーマを書きます。同じスキーマを`formFields`に渡せば、フォームの制約もそこから作られます。',
-  en: 'Write the `url` schema of a `definePageState` from `@k8ordo/state`, and pass the same schema to `formFields`. The form’s constraints come from it too.',
+export const sharePageState = message({
+  ja: 'URLに置く状態は、`@k8ordo/state`の`definePageState`に`url`スキーマとして書きます。スキーマの書き方は',
+  en: 'Describe URL state as the `url` schema of `definePageState` from `@k8ordo/state`. How to write that schema is covered in ',
 });
 
-export const shareMini = message({
-  ja: 'このスキーマは、`useAppState`がブラウザで値を読むときにも使うので、クライアントのバンドルに入ります。`zod/mini`で書くとバンドルを小さくできます。',
-  en: '`useAppState` reads the URL with this schema in the browser, so it ends up in the client bundle. Writing it with `zod/mini` keeps that small.',
+export const see = message({
+  ja: 'を見てください。',
+  en: '.',
+});
+
+export const shareFields = message({
+  ja: 'そのスキーマをそのまま`formFields`に渡します。',
+  en: 'Pass that same schema to `formFields`.',
+});
+
+export const shareServer = message({
+  ja: '`@k8ordo/framework`のserverモードでは、同じスキーマを`search`としてexportすると、ページが検証済みの条件を受け取ります。詳しくは',
+  en: 'In `@k8ordo/framework`’s server mode, a page that exports the same schema as `search` receives the validated conditions. See ',
 });
 
 export const formTitle = message({
-  ja: 'stateを渡さずにuseFormを呼ぶ',
-  en: 'Call useForm without a state',
+  ja: 'GETのフォーム',
+  en: 'GET form',
 });
 
-export const formDescription = message({
-  ja: '送信を受け取るServer Actionが無いので、`useForm`には入力欄の情報だけを渡します。入力欄の初期値には、`useAppState`で読んだいまの状態を`defaultValue`で渡します。',
-  en: 'There is no Server Action to receive the submission, so `useForm` takes the fields alone. Each field starts from the current state, read with `useAppState` and handed over as `defaultValue`.',
+export const formNoState = message({
+  ja: '送信を受け取るServer Actionが無いので、`useForm`には`fields`だけを渡します。第2引数（Server Actionが返す`state`）が無くても、送信のときの検証は行われます。スキーマに合わない条件はURLに書かれません。',
+  en: 'There is no Server Action to receive the submission, so `useForm` takes `fields` alone. Without the second argument (the `state` an action returns), the form is still checked on submit. A condition that does not match the schema is never written to the URL.',
 });
 
-export const formCheck = message({
-  ja: 'stateが無くても、送信のときの検証は行います。スキーマに合わない条件は、URLに書き込まれる前に止まります。',
-  en: 'Without a state it is still checked on submit, so a filter that breaks its schema never reaches the URL.',
+export const formDefault = message({
+  ja: '入力欄には、`useAppState`で読んだ現在の値を`defaultValue`と`defaultChecked`で渡します。',
+  en: 'Each field starts from the current value read with `useAppState`, passed as `defaultValue` or `defaultChecked`.',
+});
+
+export const formRouter = message({
+  ja: '`@k8ordo/router`を使うと、同じパスへのGETの送信は状態の更新として扱われます。仕組みは',
+  en: 'With `@k8ordo/router`, a GET submission to the same path becomes a state update. See ',
 });
 
 export const formTraverse = message({
-  ja: '入力欄の値はDOMが持つので、ブラウザの戻るでURLが変わっても、入力欄の値は変わりません。入力欄もURLの条件に合わせたいときは、`<form key={search}>`のようにURLが変わるたびにフォームを作り直します。',
-  en: 'The DOM keeps the values, so going back changes the URL but not what the fields show. To make the fields follow the URL too, rebuild the form whenever it changes, with `<form key={search}>`.',
-});
-
-export const routerTitle = message({
-  ja: '送信はページの読み込みにならない',
-  en: 'The submission is not a page load',
-});
-
-export const routerDescription = message({
-  ja: '`@k8ordo/router`の下では、同じパスへのGETのフォームの送信をルーターが受け取り、ページの読み込みではなく状態の更新として扱います。スクロールの位置もフォーカスもそのまま保たれます。',
-  en: 'Under `@k8ordo/router`, a GET submission to the same pathname is taken by the router and treated as a state update, not a page load. Scroll position and focus stay where they were.',
-});
-
-export const routerNoJs = message({
-  ja: 'JavaScriptが無いときは、ふつうのGETのフォームとして送信され、同じURLにたどり着きます。',
-  en: 'Without JavaScript it is an ordinary GET form, and it arrives at the same URL.',
-});
-
-export const booleanTitle = message({
-  ja: '真偽値は`z.stringbool()`で書く',
-  en: 'Write booleans with `z.stringbool()`',
-});
-
-export const booleanDescription = message({
-  ja: 'URLに置く真偽値は、`z.stringbool()`で書きます。チェックボックスは`update()`が書くのと同じ`true`の綴りを送るので、フォームの送信でできるURLと、`update()`が書くURLが一致します。',
-  en: 'A boolean in the URL is a `z.stringbool()`. Its checkbox submits the same spelling of `true` that `update()` writes, so the URL the form lands on and the one `update()` writes agree.',
-});
-
-export const booleanUi = message({
-  ja: '`@k8ordo/ui`の`Checkbox`には、展開した`value`が届きません。`z.stringbool()`の欄は、素の`<input>`に`input`を展開して描いてください。',
-  en: 'A spread `value` does not reach `@k8ordo/ui`’s `Checkbox`. Draw a `z.stringbool()` field as a plain `<input>` with `input` spread onto it.',
-});
-
-export const serverTitle = message({
-  ja: 'サーバーで条件を読む',
-  en: 'Read the conditions on the server',
-});
-
-export const serverDescription = message({
-  ja: '`@k8ordo/framework`のserverモードでは、ページで`search`としてURLのスキーマを書き出すと、検証済みの条件を受け取って描画できます。JavaScriptが届く前から、検索結果を含んだページを返せます。',
-  en: 'In `@k8ordo/framework`’s server mode, a page that exports the url schema as `search` receives the parsed conditions and renders with them, so the results are in the page before JavaScript arrives.',
-});
-
-export const serverStatic = message({
-  ja: 'staticモードでは、サーバーで条件を読めません。その場合、サーバーの描画には既定値が使われ、ハイドレーションのあとで送信した条件が反映されます。',
-  en: 'Where the server cannot read them, as in static mode, the server render shows the defaults and the submitted conditions appear after hydration.',
+  ja: '`defaultValue`と`defaultChecked`は最初の描画でしか使われません。そのため、戻るボタンでURLが変わっても入力欄の値は変わりません。入力欄もURLに合わせるには、`<form key={search}>`のようにURLが変わるたびにフォームを作り直します。',
+  en: '`defaultValue` and `defaultChecked` only apply on the first render, so the back button changes the URL but not the fields. To make the fields follow the URL, rebuild the form whenever it changes, with `<form key={search}>`.',
 });
 
 export const demoTitle = message({
-  ja: '絞り込みのフォームを試す',
-  en: 'Try a filter form',
+  ja: '絞り込みのデモ',
+  en: 'Filter demo',
 });
 
 export const demoDescription = message({
-  ja: '@k8ordo/formのランディングと同じデモです。送信すると、このページのURLが書き換わります。',
-  en: 'The same demo as on the @k8ordo/form landing. Submitting it rewrites this page’s URL.',
+  ja: 'このページのURLを実際に書き換えるGETのフォームです。',
+  en: 'A GET form that rewrites this page’s actual URL.',
 });
 
 export const demoSteps = [
@@ -101,11 +71,26 @@ export const demoSteps = [
     en: 'Type a keyword and press “Filter”. The URL gains `?q=`, and the page does not reload.',
   }),
   message({
-    ja: '「在庫ありのみ」にチェックして送ると、URLに`inStock=true`が付きます。',
+    ja: '「在庫ありのみ」にチェックして送信すると、URLに`inStock=true`が付きます。',
     en: 'Check “In stock only” and submit. The URL gains `inStock=true`.',
   }),
   message({
-    ja: 'ブラウザの戻るを押すと、URLとstateの行が前の条件に戻ります。入力欄の値はそのまま残ります。',
-    en: 'Press the browser’s back button. The URL and the state line return to the previous conditions; the fields keep what you entered.',
+    ja: 'ブラウザの戻るボタンを押すと、URLとstateの値が前の条件に戻ります。',
+    en: 'Press the browser’s back button. The URL and the state values return to the previous conditions.',
   }),
 ] as const;
+
+export const booleanTitle = message({
+  ja: '文字列のチェックボックス',
+  en: 'Checkbox that submits a string',
+});
+
+export const boolean = message({
+  ja: 'URLに置く真偽値は`z.stringbool()`で書きます。チェックボックスは、`update()`が`true`を書くときと同じ文字列を送ります。そのため、送信でできるURLと`update()`が書くURLは一致します。',
+  en: 'A boolean in the URL is a `z.stringbool()`. Its checkbox submits the same string `update()` writes for `true`, so a submission produces the same URL as `update()`.',
+});
+
+export const booleanUi = message({
+  ja: '`@k8ordo/ui`の`Checkbox`は、`input`に含まれる`value`を`<input>`に渡しません。この欄は素の`<input>`で描画します。詳しくは',
+  en: '`@k8ordo/ui`’s `Checkbox` does not pass the `value` in `input` to its `<input>`. Render this field as a plain `<input>`. See ',
+});

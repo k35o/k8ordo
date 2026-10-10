@@ -34,11 +34,7 @@ export default function FormAsyncCheckPage() {
 
   return (
     <DocPage introduction={t.introduction} path="/:locale/form/async-check">
-      <DocSection
-        description={t.attachDescription}
-        id="attach"
-        title={t.attachTitle}
-      >
+      <DocSection id="attach" title={t.attachTitle}>
         <CodeBlock code={ACTION} lang="ts" title="actions.ts" />
         <CodeBlock
           code={ATTACH}
@@ -47,21 +43,26 @@ export default function FormAsyncCheckPage() {
           title="signup-form.tsx"
         />
         <p>
-          <Rich>{t.attachAction()}</Rich>
+          <Rich>{t.attachFunction()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.attachProps()}</Rich>
         </p>
       </DocSection>
 
-      <DocSection description={t.pathDescription} id="path" title={t.pathTitle}>
+      <DocSection id="path" title={t.pathTitle}>
+        <p>
+          <Rich>{t.pathValidity()}</Rich>
+        </p>
         <p>
           <Rich>{t.pathSubmit()}</Rich>
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.timingDescription}
-        id="timing"
-        title={t.timingTitle}
-      >
+      <DocSection id="timing" title={t.timingTitle}>
+        <p>
+          <Rich>{t.timingBlur()}</Rich>
+        </p>
         <p>
           <Rich>{t.timingRules()}</Rich>
         </p>

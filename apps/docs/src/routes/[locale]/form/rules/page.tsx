@@ -3,6 +3,7 @@ import { CodeBlock } from '@k8ordo/ui/code-block';
 
 import { Pitfall } from '../../../../components/callout';
 import { DocPage, DocSection } from '../../../../components/doc-page';
+import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Playground } from '../../../../components/playground';
 import { Rich } from '../../../../components/rich';
 import { reviewDefinition } from '../../../../demos/form/rules/review-definition';
@@ -17,10 +18,9 @@ const DECLARE = `export const signup = defineForm(
     confirm: z.string(),
   }),
   [sameAs('confirm', 'password', 'The passwords do not match')],
-);`;
+);
 
-const PASS = `const signupFields = formFields(signup);
-
+const signupFields = formFields(signup);
 const parsed = parseForm(signup, formData);`;
 
 const KINDS = `defineForm(schema, [
@@ -47,26 +47,26 @@ export default function FormRulesPage() {
 
   return (
     <DocPage introduction={t.introduction} path="/:locale/form/rules">
-      <DocSection
-        description={t.declareDescription}
-        id="declare"
-        title={t.declareTitle}
-      >
-        <CodeBlock code={DECLARE} lang="ts" title="schema.ts" />
+      <DocSection id="declare" title={t.declareTitle}>
+        <CodeBlock
+          callouts={{ 6: t.declareRuleCallout(), 9: t.declarePassCallout() }}
+          code={DECLARE}
+          lang="ts"
+          marks={{ 6: 'highlight', 9: 'highlight', 10: 'highlight' }}
+        />
         <p>
-          <Rich>{t.declarePass()}</Rich>
+          <Rich>{t.declareForm()}</Rich>
         </p>
-        <CodeBlock code={PASS} lang="ts" />
+        <p>
+          <Rich>{t.declareData()}</Rich>
+        </p>
         <p>
           <Rich>{t.declareTyped()}</Rich>
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.kindsDescription}
-        id="kinds"
-        title={t.kindsTitle}
-      >
+      <DocSection id="kinds" title={t.kindsTitle}>
+        <CodeBlock code={KINDS} lang="ts" />
         <ul>
           <li>
             <Rich>{t.kindSameAs()}</Rich>
@@ -78,7 +78,6 @@ export default function FormRulesPage() {
             <Rich>{t.kindRequiredWhen()}</Rich>
           </li>
         </ul>
-        <CodeBlock code={KINDS} lang="ts" title="schema.ts" />
       </DocSection>
 
       <Playground
@@ -90,7 +89,10 @@ export default function FormRulesPage() {
         <ReviewDemo fields={reviewFields} />
       </Playground>
 
-      <DocSection description={t.sameDescription} id="same" title={t.sameTitle}>
+      <DocSection id="same" title={t.sameTitle}>
+        <p>
+          <Rich>{t.sameEvaluator()}</Rich>
+        </p>
         <p>
           <Rich>{t.sameCustomValidity()}</Rich>
         </p>
@@ -99,23 +101,30 @@ export default function FormRulesPage() {
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.localeDescription}
-        id="locale"
-        title={t.localeTitle}
-      >
-        <CodeBlock code={LOCALE} lang="ts" title="schema.ts" />
+      <DocSection id="locale" title={t.localeTitle}>
+        <CodeBlock
+          code={LOCALE}
+          lang="ts"
+          marks={{ 2: 'highlight', 3: 'highlight' }}
+          title="schema.ts"
+        />
         <p>
-          <Rich>{t.localeRender()}</Rich>
+          <Rich>{t.localeFunction()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.localeZodBefore()}</Rich>
+          <LocaleAnchor path="/:locale/form/errors">
+            {m.form.navErrors()}
+          </LocaleAnchor>
+          <Rich>{t.localeZodAfter()}</Rich>
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.refineDescription}
-        id="refine"
-        title={t.refineTitle}
-      >
-        <CodeBlock code={REFINE} lang="ts" title="schema.ts" />
+      <DocSection id="refine" title={t.refineTitle}>
+        <CodeBlock code={REFINE} lang="ts" marks={{ 4: 'highlight' }} />
+        <p>
+          <Rich>{t.refineServer()}</Rich>
+        </p>
         <p>
           <Rich>{t.refineWhole()}</Rich>
         </p>

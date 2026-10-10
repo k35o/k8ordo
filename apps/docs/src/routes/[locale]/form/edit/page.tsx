@@ -36,17 +36,16 @@ export default function FormEditPage() {
 
   return (
     <DocPage introduction={t.introduction} path="/:locale/form/edit">
-      <DocSection
-        description={t.defaultsDescription}
-        id="defaults"
-        title={t.defaultsTitle}
-      >
+      <DocSection id="defaults" title={t.defaultsTitle}>
         <CodeBlock
           code={DEFAULTS}
           lang="tsx"
           marks={{ 4: 'highlight', 5: 'highlight' }}
           title="edit-talk-form.tsx"
         />
+        <p>
+          <Rich>{t.defaultsHow()}</Rich>
+        </p>
         <p>
           <Rich>{t.defaultsOrder()}</Rich>
         </p>
@@ -57,18 +56,22 @@ export default function FormEditPage() {
         </Pitfall>
       </DocSection>
 
-      <DocSection
-        description={t.dirtyDescription}
-        id="dirty"
-        title={t.dirtyTitle}
-      >
-        <p>
-          <Rich>{t.dirtyCost()}</Rich>
-        </p>
+      <DocSection id="dirty" title={t.dirtyTitle}>
+        <CodeBlock
+          code={LEAVE}
+          lang="tsx"
+          marks={{ 2: 'highlight' }}
+          title="edit-talk-form.tsx"
+        />
         <p>
           <Rich>{t.dirtyLeave()}</Rich>
         </p>
-        <CodeBlock code={LEAVE} lang="tsx" title="edit-talk-form.tsx" />
+        <p>
+          <Rich>{t.dirtyMeaning()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.dirtyCost()}</Rich>
+        </p>
         <Pitfall>
           <p>
             <Rich>{t.dirtyPitfall()}</Rich>
@@ -76,12 +79,11 @@ export default function FormEditPage() {
         </Pitfall>
       </DocSection>
 
-      <DocSection
-        description={t.resetDescription}
-        id="reset"
-        title={t.resetTitle}
-      >
+      <DocSection id="reset" title={t.resetTitle}>
         <CodeBlock code={RESET} lang="tsx" />
+        <p>
+          <Rich>{t.resetButton()}</Rich>
+        </p>
         <p>
           <Rich>{t.resetAction()}</Rich>
         </p>

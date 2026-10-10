@@ -5,6 +5,7 @@ import type { FormFields } from '@k8ordo/form';
 import { useAppState } from '@k8ordo/state';
 import { Button, Code, FormControl, TextField } from '@k8ordo/ui';
 
+import { jsLiteral } from '../../components/js-literal';
 import * as m from '../../messages';
 import { demoState } from './demo-state';
 
@@ -81,7 +82,7 @@ export function FormDemo({ fields }: Props) {
         </dd>
         <dt className="text-fg-mute">state</dt>
         <dd className="break-all">
-          <Code>{JSON.stringify(current)}</Code>
+          <Code>{jsLiteral(current)}</Code>
         </dd>
       </dl>
     </div>

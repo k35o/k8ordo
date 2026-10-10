@@ -2,6 +2,7 @@ import { CodeBlock } from '@k8ordo/ui/code-block';
 
 import { ApiEntry } from '../../../../../components/api-entry';
 import { DocPage } from '../../../../../components/doc-page';
+import { LocaleAnchor } from '../../../../../components/locale-anchor';
 import { Rich } from '../../../../../components/rich';
 import * as m from '../../../../../messages';
 
@@ -88,7 +89,15 @@ export default function FormReferenceClientPage() {
       >
         <CodeBlock code={USE_FORM_EXAMPLE} lang="tsx" title="talk-form.tsx" />
         <p className="leading-relaxed">
-          <Rich>{t.formHookExample()}</Rich>
+          <Rich>{t.formHookExampleFlow()}</Rich>
+          <LocaleAnchor path="/:locale/form/get-started">
+            {m.nav.getStarted()}
+          </LocaleAnchor>
+          <Rich>{t.formHookExampleErrors()}</Rich>
+          <LocaleAnchor path="/:locale/form/errors">
+            {m.form.navErrors()}
+          </LocaleAnchor>
+          <Rich>{t.formHookExampleEnd()}</Rich>
         </p>
       </ApiEntry>
 

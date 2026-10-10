@@ -1,78 +1,83 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: 'リッチテキストエディタや独自の選択UIのように、`<input name>`を描かないコンポーネントの値は、そのままでは`FormData`に入りません。このページでは、こうした値を`HiddenValue`で送信に載せる方法を紹介します。',
-  en: 'A component that renders no `<input name>` — a rich text editor, a custom picker — never reaches the `FormData` on its own. This page shows how `HiddenValue` puts such a value into the submission.',
+  ja: 'リッチテキストエディタや独自の選択UIのように、`<input name>`を描画しないコンポーネントの値を`HiddenValue`で送信に含めます。',
+  en: 'Put the value of a component that renders no `<input name>`, such as a rich text editor or a custom picker, into the submission with `HiddenValue`.',
 });
 
 export const placeTitle = message({
-  ja: '値を隠れた入力欄に置く',
-  en: 'Park the value in a hidden field',
+  ja: '値の送信',
+  en: 'Submitting the value',
 });
 
-export const placeDescription = message({
-  ja: 'コンポーネントの値はstateに持ち、同じ値を`HiddenValue`に渡します。`name`には、スキーマでのパスを書きます。',
-  en: 'Keep the component’s value in state, and hand the same value to `HiddenValue`. Its `name` is the field’s path in the schema.',
+export const placeState = message({
+  ja: 'コンポーネントの値はstateに持ち、同じ値を`HiddenValue`に渡します。`name`にはスキーマでのパスを書きます。',
+  en: 'Keep the component’s value in state and pass the same value to `HiddenValue`. Its `name` is the field’s path in the schema.',
 });
 
 export const placeSubmit = message({
-  ja: '`HiddenValue`はただの`<input type="hidden">`を描くので、値はほかの入力欄と一緒に送信されます。送信のときに値を集めるコードは要りません。',
-  en: '`HiddenValue` renders a plain `<input type="hidden">`, so the value goes out with the rest of the form. No code gathers it at submit time.',
+  ja: '`HiddenValue`は`<input type="hidden">`を描画します。値はほかの入力欄と一緒に送信されるので、送信時に値を集めるコードは要りません。',
+  en: '`HiddenValue` renders an `<input type="hidden">`. The value is submitted with the other inputs, so it needs no submit-time code to gather it.',
+});
+
+export const placeUiBefore = message({
+  ja: '`@k8ordo/ui`の部品は自分の値を送信に含めるので、`HiddenValue`は要りません（',
+  en: '`@k8ordo/ui` components put their own values into the submission and need no `HiddenValue` (see ',
+});
+
+export const placeUiAfter = message({
+  ja: '）。',
+  en: ').',
 });
 
 export const whyTitle = message({
-  ja: 'propsではなくコンポーネントになっている理由',
-  en: 'Why it is a component, not a props helper',
+  ja: '値の変化の検知',
+  en: 'Change detection',
 });
 
-export const whyDescription = message({
-  ja: 'Reactが`value`を書き換えても、DOMのイベントは起きません。そのため、ただの隠れた入力欄では、複数の入力欄にまたがるルールも`isDirty`も、値が変わったことに気づけません。',
-  en: 'React updates a controlled `value` without any DOM event, so with a bare hidden input neither the cross-field rules nor `isDirty` would notice the change.',
+export const whyNoEvent = message({
+  ja: 'Reactが`value`を書き換えても、DOMのイベントは発火しません。そのため、`<input type="hidden">`を直接置くと、複数の入力欄にまたがるルールと`isDirty`は更新されません。',
+  en: 'When React updates `value`, no DOM event fires. So with an `<input type="hidden">` placed directly, cross-field rules and `isDirty` are not updated.',
 });
 
 export const whyEvent = message({
-  ja: '`HiddenValue`は、値が変わるたびに`input`イベントを出します。これで、キー入力と同じようにルールの判定と`isDirty`が更新されます。',
-  en: '`HiddenValue` fires an `input` event on every change, so the rules and `isDirty` update just as they do for a keystroke.',
+  ja: '`HiddenValue`は値が変わるたびに`input`イベントを発火します。キー入力と同じように、ルールの判定と`isDirty`が更新されます。',
+  en: '`HiddenValue` fires an `input` event on every change, so the rules and `isDirty` update as they do for a keystroke.',
 });
 
 export const cautionTitle = message({
-  ja: '気をつけること',
-  en: 'Things to watch',
-});
-
-export const cautionValidation = message({
-  ja: '隠れた入力欄は、ブラウザの検証の対象になりません。`required`や`min`のような制約は、ブラウザでは確かめられず、送信されたあとにサーバーで初めて確かめます。',
-  en: 'A hidden input is barred from the browser’s constraint validation. Constraints such as `required` or `min` are not checked in the browser; the server checks them after the submission.',
+  ja: 'リセットとブラウザの検証',
+  en: 'Reset and browser validation',
 });
 
 export const cautionReset = message({
-  ja: 'フォームをリセットしても、`HiddenValue`の値は戻りません。値は呼び出し側のstateにあるからです。リセットに合わせてstateも戻すなら、`onReset`で`form.props.onReset()`を呼んだあとに戻します。',
-  en: 'Resetting the form does not restore a `HiddenValue`: the value is the caller’s state. To put the state back as well, call `form.props.onReset()` from your own `onReset`, then reset it.',
+  ja: '値は呼び出し側のstateにあるので、フォームをリセットしても`HiddenValue`の値は戻りません。stateを戻すまで`isDirty`も`true`のままです。`onReset`で`form.props.onReset()`を呼んだあとに、stateを既定値に戻してください。',
+  en: 'The value lives in the caller’s state, so resetting the form does not restore a `HiddenValue`, and `isDirty` stays `true` until that state is reset. In your own `onReset`, call `form.props.onReset()` and then reset the state.',
 });
 
-export const cautionUi = message({
-  ja: '`@k8ordo/ui`のコンポーネントは、値を自分で送信に載せます。`Autocomplete`のように見た目と送信する要素が違うものも、`HiddenValue`は要りません。',
-  en: '`@k8ordo/ui`’s components put their values into the submission themselves. Even `Autocomplete`, whose visible part is not what submits, needs no `HiddenValue`.',
+export const cautionValidation = message({
+  ja: '`<input type="hidden">`は、ブラウザの検証の対象になりません。`required`や`min`のような制約はブラウザでは確かめられず、送信後にサーバーで確かめます。',
+  en: 'A hidden input is excluded from the browser’s constraint validation. Constraints such as `required` or `min` are not checked in the browser; the server checks them after the submission.',
 });
 
 export const demoTitle = message({
-  ja: '星の評価を送る',
-  en: 'Submit a star rating',
+  ja: '星の評価のデモ',
+  en: 'Star rating demo',
 });
 
 export const demoDescription = message({
-  ja: '星のボタンは`<input>`を持たない自前の入力部品です。選んだ値を`HiddenValue`で送信に載せています。',
-  en: 'The star buttons are a hand-made control with no `<input>`. The chosen value goes into the submission through `HiddenValue`.',
+  ja: '星のボタンは`<input>`を持たない自前の入力部品で、選んだ値を`HiddenValue`で送信に含めます。',
+  en: 'The star buttons are a custom control with no `<input>`. The chosen value goes into the submission through `HiddenValue`.',
 });
 
 export const demoSteps = [
   message({
-    ja: '星を選ぶと、`isDirty`が`true`に変わります。値の変化を`HiddenValue`がイベントで知らせているためです。',
-    en: 'Choose a star. `isDirty` turns `true`, because `HiddenValue` announces the change with an event.',
+    ja: '星を選ぶと、`HiddenValue`が`input`イベントを発火し、`isDirty`が`true`になります。',
+    en: 'Choose a star. `HiddenValue` fires an `input` event and `isDirty` turns `true`.',
   }),
   message({
     ja: '「送信」を押すと、送られる値が`rating=3`のように表示されます。',
-    en: 'Press “Submit”. The value that would be sent shows, as in `rating=3`.',
+    en: 'Press “Submit”. The value that would be sent is shown, as in `rating=3`.',
   }),
   message({
     ja: '「元に戻す」を押すと、星の選択も`isDirty`も元に戻ります。',

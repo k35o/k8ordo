@@ -1,88 +1,103 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: '入力欄が多いフォームは、いくつかのステップに分けると入力しやすくなります。`@k8ordo/form`では値をDOMが持つので、ステップごとに値を受け渡す仕組みは要りません。すべてのステップを描いたまま、いま表示しないものを隠すだけで作れます。',
-  en: 'A long form is easier to fill in when split into steps. Since `@k8ordo/form` keeps the values in the DOM, nothing has to carry them from step to step: render every step, and hide the ones not in view.',
+  ja: '入力欄の多いフォームを、いくつかのステップに分けて作ります。すべてのステップを描画したまま、いまのステップ以外を隠します。',
+  en: 'Build a long form as a sequence of steps. Every step stays rendered, and all but the current one are hidden.',
 });
 
 export const keepTitle = message({
-  ja: 'すべてのステップを描いたまま隠す',
-  en: 'Keep every step rendered, and hide the rest',
+  ja: 'ステップの隠し方',
+  en: 'Hiding steps',
 });
 
-export const keepDescription = message({
-  ja: 'ステップごとに`<fieldset>`で囲み、いまのステップ以外に`hidden`を付けます。隠れたステップの入力欄もDOMに残るので、ステップを行き来しても値は消えず、送信も最後に1回で済みます。',
-  en: 'Wrap each step in a `<fieldset>` and mark every step but the current one `hidden`. The hidden steps’ fields stay in the DOM, so moving between steps loses nothing and the form is sent once, at the end.',
+export const keepHydratedCallout = message({
+  ja: 'ハイドレーションが終わると`true`になる',
+  en: 'Becomes `true` once hydrated',
+});
+
+export const keepHiddenCallout = message({
+  ja: 'いまのステップ以外に`hidden`を付ける',
+  en: 'Every step but the current one is `hidden`',
+});
+
+export const keepFieldset = message({
+  ja: 'ステップごとに`<fieldset>`で囲み、いまのステップ以外に`hidden`を付けます。隠れた入力欄もDOMに残るので、ステップを行き来しても値は消えません。送信は最後に1回です。',
+  en: 'Wrap each step in a `<fieldset>` and mark every step but the current one `hidden`. The hidden controls stay in the DOM, so moving between steps loses nothing, and the form is sent once at the end.',
 });
 
 export const keepHydrated = message({
-  ja: 'ステップを隠すのは、ハイドレーションが終わってからにします。サーバーが描いたHTMLの時点で隠してしまうと、JavaScriptが無い環境では後のステップにたどり着けません。',
-  en: 'Hide steps only once hydrated. Hidden in the server’s HTML, the later steps would be out of reach without JavaScript.',
-});
-
-export const keepNoJs = message({
-  ja: '隠さずにおけば、JavaScriptが無いときは1枚の長いフォームになり、1回のリクエストで送信されます。これは壊れているのではなく、正しい動きです。',
-  en: 'Left visible, the form degrades to one long page that submits in a single request without JavaScript. That is the correct behaviour, not a broken one.',
+  ja: '隠すのは、ハイドレーションが終わってからです。JavaScriptが無いときは1枚の長いフォームになり、1回のリクエストで送信されます。',
+  en: 'Hide steps only once hydrated. Without JavaScript the form is one long page, submitted in a single request.',
 });
 
 export const validateTitle = message({
-  ja: '次へ進む前に、いまのステップを確かめる',
-  en: 'Check the current step before moving on',
+  ja: 'ステップごとの検証',
+  en: 'Per-step validation',
 });
 
-export const validateDescription = message({
-  ja: '次へ進む前に、いまのステップの中にある入力欄だけを`checkValidity()`で確かめます。まだ入力していない後のステップまで含めて確かめると、必ず失敗するからです。',
-  en: 'Before moving on, check only the controls inside the current step with `checkValidity()`. The later steps are not filled in yet, so checking the whole form would always fail.',
+export const validateScopeCallout = message({
+  ja: 'いまのステップの中の入力欄だけ',
+  en: 'Only the controls inside the current step',
+});
+
+export const validateScope = message({
+  ja: '「次へ」では、いまのステップの中の入力欄だけを`checkValidity()`で確かめます。後のステップはまだ入力していないので、フォーム全体を確かめると必ず失敗します。',
+  en: '“Next” checks only the controls inside the current step with `checkValidity()`. The later steps are not filled in yet, so checking the whole form would always fail.',
 });
 
 export const validateFocus = message({
-  ja: '`useForm`がエラーを表示するのは、入力欄から離れたときです。失敗した入力欄にフォーカスを移しておけば、その欄を離れたときにエラーが表示されます。',
-  en: '`useForm` shows an error when the person leaves a field. Move focus to the first failed field, and its error appears once they leave it.',
+  ja: '`useForm`は、入力欄を離れたときにエラーを表示します。最初に失敗した入力欄へフォーカスを移しておけば、そこを離れたときにエラーが出ます。',
+  en: '`useForm` shows an error when the person leaves a control. Move focus to the first failed control, and its error appears once they leave it.',
 });
 
 export const submitTitle = message({
-  ja: '送信ボタンは最後のステップにだけ描く',
-  en: 'Render the submit button on the last step only',
+  ja: '送信ボタン',
+  en: 'The submit button',
 });
 
-export const submitDescription = message({
-  ja: 'ハイドレーションが終わったら、送信ボタンは最後のステップにだけ描きます。',
+export const submitLast = message({
+  ja: 'ハイドレーションが終わったら、送信ボタンは最後のステップにだけ描画します。',
   en: 'Once hydrated, render the submit button on the last step only.',
 });
 
 export const submitEnter = message({
-  ja: 'テキストの入力欄でEnterキーを押すと、ブラウザはフォームの最初の送信ボタンが押されたものとして扱います。そのボタンが隠れたステップにあっても送信されてしまい、ステップごとの確認を飛ばしてフォーム全体が送られます。',
-  en: 'Enter in a text field clicks the form’s first submit button, even when it sits in a hidden step. The whole form would be sent from an earlier step, skipping the per-step check.',
+  ja: 'テキストの入力欄でEnterキーを押すと、ブラウザはフォームの最初の送信ボタンを押します。隠れたステップにあるボタンでも押されるので、前のステップからフォーム全体が送られます。',
+  en: 'Enter in a text field clicks the form’s first submit button, even one inside a hidden step. The whole form would be sent from an earlier step.',
 });
 
 export const errorsTitle = message({
-  ja: '送信に失敗したら、エラーのあるステップへ戻す',
-  en: 'Return to the step holding the error',
+  ja: '送信後のエラー',
+  en: 'Errors after submit',
 });
 
-export const errorsDescription = message({
-  ja: '送信に失敗すると、`useForm`はページの中で最初に失敗した入力欄へフォーカスを移します。ただし、隠れたステップの入力欄はフォーカスを受け取れません。',
-  en: 'After a failed submission `useForm` moves focus to the first failed field on the page, but a field inside a hidden step cannot take focus.',
+export const errorsSwitchCallout = message({
+  ja: '新しい`state`を受け取った描画で、エラーのあるステップへ切り替える',
+  en: 'In the render that receives a new `state`, switch to the step holding the error',
+});
+
+export const errorsFocus = message({
+  ja: '送信に失敗すると、`useForm`はページで最初に失敗した入力欄にフォーカスを移します。隠れたステップの入力欄は、フォーカスを受け取れません。',
+  en: 'After a failed submission, `useForm` moves focus to the first failed control on the page. A control inside a hidden step cannot take focus.',
 });
 
 export const errorsSwitch = message({
-  ja: 'そこで新しいstateが届いたら、`state.errors`のキーを持つステップのうち最も前のものへ、描画の中で切り替えます。フォーカスが移る前に入力欄が表示されるので、エラーのある欄にフォーカスが届きます。',
-  en: 'When a new state arrives, switch during render to the earliest step holding a key of `state.errors`. The field is visible by the time focus moves, so focus reaches it.',
+  ja: '`state.errors`に入力欄があるステップのうち、最も前のステップへ描画の中で切り替えます。入力欄が先に表示されるので、フォーカスはその欄に移ります。',
+  en: 'Switch during render to the earliest step with a control in `state.errors`. The control is visible first, so focus lands on it.',
 });
 
 export const errorsBrowser = message({
-  ja: '送信のときのブラウザでの検証は、隠れたステップの入力欄も対象にします。そこで失敗すると、エラーを見せられないまま送信が止まります。ステップごとに確かめてから進めば、前のステップが最後になって失敗することはありません。',
-  en: 'The browser-side check on submit covers the hidden steps too, and stops the submission for a failure there without being able to show it. Checking each step before moving on is what keeps the earlier steps from failing at the end.',
+  ja: '送信時の検証は、隠れたステップの入力欄も対象です。そこで失敗すると、エラーを表示できないまま送信が止まります。',
+  en: 'The check on submit covers the hidden steps too. A failure there stops the submission without a visible error.',
 });
 
 export const demoTitle = message({
-  ja: '2ステップの申し込みフォームを試す',
-  en: 'Try a two-step form',
+  ja: '2ステップのデモ',
+  en: 'Two-step demo',
 });
 
 export const demoDescription = message({
-  ja: '1ステップ目で連絡先を、2ステップ目で登壇の内容を入力します。どちらのステップも同じ`<form>`の中にあります。',
-  en: 'The first step asks for contact details, the second for the talk. Both steps live in the same `<form>`.',
+  ja: '1ステップ目で連絡先を、2ステップ目で登壇の内容を入力する、1つの`<form>`です。',
+  en: 'One `<form>` that asks for contact details on the first step and the talk on the second.',
 });
 
 export const demoSteps = [

@@ -3,6 +3,7 @@ import { CodeBlock } from '@k8ordo/ui/code-block';
 
 import { Pitfall } from '../../../../components/callout';
 import { DocPage, DocSection } from '../../../../components/doc-page';
+import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Playground } from '../../../../components/playground';
 import { Rich } from '../../../../components/rich';
 import { signupDefinition } from '../../../../demos/form/errors/signup-definition';
@@ -61,42 +62,69 @@ export default function FormErrorsPage() {
 
   return (
     <DocPage introduction={t.introduction} path="/:locale/form/errors">
-      <DocSection
-        description={t.fieldDescription}
-        id="field"
-        title={t.fieldTitle}
-      >
-        <CodeBlock code={FIELD} lang="tsx" marks={{ 5: 'highlight' }} />
+      <DocSection id="field" title={t.fieldTitle}>
+        <CodeBlock
+          callouts={{ 5: t.fieldCallout() }}
+          code={FIELD}
+          lang="tsx"
+          marks={{ 5: 'highlight' }}
+        />
+        <p>
+          <Rich>{t.fieldView()}</Rich>
+        </p>
         <p>
           <Rich>{t.fieldWhen()}</Rich>
         </p>
+        <p>
+          <Rich>{t.fieldServer()}</Rich>
+        </p>
       </DocSection>
 
-      <DocSection
-        description={t.wordingDescription}
-        id="wording"
-        title={t.wordingTitle}
-      >
+      <DocSection id="wording" title={t.wordingTitle}>
         <CodeBlock code={WORDING} lang="ts" />
+        <p>
+          <Rich>{t.wordingSchema()}</Rich>
+        </p>
         <p>
           <Rich>{t.wordingBoth()}</Rich>
         </p>
-        <p>
-          <Rich>{t.wordingLocale()}</Rich>
-        </p>
+      </DocSection>
+
+      <DocSection id="translation" title={t.translationTitle}>
         <CodeBlock
           code={WORDING_LOCALE}
           lang="tsx"
           marks={{ 2: 'highlight', 6: 'highlight' }}
-          title="page.tsx"
+          title="src/routes/[locale]/talks/new/page.tsx"
         />
+        <p>
+          <Rich>{t.translationFunction()}</Rich>
+          <LocaleAnchor path="/:locale/i18n/messages">
+            {m.i18n.navMessages()}
+          </LocaleAnchor>
+          <Rich>{t.see()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.translationRule()}</Rich>
+        </p>
+        <Pitfall>
+          <p>
+            <Rich>{t.translationTop()}</Rich>
+          </p>
+        </Pitfall>
+        <p>
+          <Rich>{t.translationAction()}</Rich>
+          <LocaleAnchor path="/:locale/i18n/routing">
+            {m.i18n.navRouting()}
+          </LocaleAnchor>
+          <Rich>{t.see()}</Rich>
+        </p>
       </DocSection>
 
-      <DocSection
-        description={t.focusDescription}
-        id="focus"
-        title={t.focusTitle}
-      >
+      <DocSection id="focus" title={t.focusTitle}>
+        <p>
+          <Rich>{t.focusAuto()}</Rich>
+        </p>
         <p>
           <Rich>{t.focusOrder()}</Rich>
         </p>
@@ -107,12 +135,16 @@ export default function FormErrorsPage() {
         </Pitfall>
       </DocSection>
 
-      <DocSection
-        description={t.formErrorDescription}
-        id="form-error"
-        title={t.formErrorTitle}
-      >
-        <CodeBlock code={FORM_ERROR} lang="tsx" marks={{ 3: 'highlight' }} />
+      <DocSection id="form-error" title={t.formErrorTitle}>
+        <CodeBlock
+          callouts={{ 3: t.formErrorCallout() }}
+          code={FORM_ERROR}
+          lang="tsx"
+          marks={{ 3: 'highlight' }}
+        />
+        <p>
+          <Rich>{t.formErrorWhere()}</Rich>
+        </p>
         <p>
           <Rich>{t.formErrorProps()}</Rich>
         </p>
@@ -121,25 +153,19 @@ export default function FormErrorsPage() {
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.serverDescription}
-        id="server"
-        title={t.serverTitle}
-      >
+      <DocSection id="server" title={t.serverTitle}>
         <CodeBlock
+          callouts={{ 11: t.serverCallout() }}
           code={SERVER}
           lang="ts"
-          marks={{
-            5: 'highlight',
-            6: 'highlight',
-            7: 'highlight',
-            8: 'highlight',
-            9: 'highlight',
-          }}
+          marks={{ 9: 'highlight', 10: 'highlight', 11: 'highlight' }}
           title="actions.ts"
         />
         <p>
           <Rich>{t.serverState()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.serverEcho()}</Rich>
         </p>
       </DocSection>
 

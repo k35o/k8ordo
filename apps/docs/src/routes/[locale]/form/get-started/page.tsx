@@ -11,6 +11,8 @@ import { TalkDemo } from '../../../../demos/form/get-started/talk-demo';
 import { talkSchema } from '../../../../demos/form/get-started/talk-schema';
 import * as m from '../../../../messages';
 
+const t = m.formGetStarted;
+
 const SCHEMA = `import * as z from 'zod';
 
 export const talkSchema = z.object({
@@ -89,51 +91,25 @@ export function TalkForm({ action, fields }: Props) {
   );
 }`;
 
-const NEXT = [
-  {
-    path: '/:locale/form/field-types',
-    label: m.form.navFieldTypes,
-    description: m.formGetStarted.nextFieldTypes,
-  },
-  {
-    path: '/:locale/form/errors',
-    label: m.form.navErrors,
-    description: m.formGetStarted.nextErrors,
-  },
-  {
-    path: '/:locale/form/reference/server',
-    label: m.form.navReferenceServer,
-    description: m.formGetStarted.nextReference,
-  },
-] as const;
-
 export default function FormGetStartedPage() {
   // 文言はロケールに従うので、描画のたびに導く（モジュールスコープでは導かない）
   const talkFields = formFields(talkSchema);
 
   return (
-    <DocPage
-      introduction={m.formGetStarted.introduction}
-      path="/:locale/form/get-started"
-    >
-      <DocSection
-        description={m.formGetStarted.installDescription}
-        id="install"
-        title={m.formGetStarted.installTitle}
-      >
+    <DocPage introduction={t.introduction} path="/:locale/form/get-started">
+      <DocSection id="install" title={t.installTitle}>
         <PackageInstall name="@k8ordo/form" />
+        <p>
+          <Rich>{t.serverOnly()}</Rich>
+        </p>
         <Note>
           <p>
-            <Rich>{m.formGetStarted.zodMini()}</Rich>
+            <Rich>{t.zodMini()}</Rich>
           </p>
         </Note>
       </DocSection>
 
-      <DocSection
-        description={m.formGetStarted.schemaDescription}
-        id="schema"
-        title={m.formGetStarted.schemaTitle}
-      >
+      <DocSection id="schema" title={t.schemaTitle}>
         <CodeBlock
           code={SCHEMA}
           lang="ts"
@@ -141,48 +117,54 @@ export default function FormGetStartedPage() {
           title="src/lib/schema.ts"
         />
         <p>
-          <Rich>{m.formGetStarted.schemaCoerce()}</Rich>
+          <Rich>{t.schemaFields()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.schemaCoerce()}</Rich>
         </p>
       </DocSection>
 
-      <DocSection
-        description={m.formGetStarted.deriveDescription}
-        id="derive"
-        title={m.formGetStarted.deriveTitle}
-      >
+      <DocSection id="derive" title={t.deriveTitle}>
         <CodeBlock
+          callouts={{ 7: t.deriveCallout() }}
           code={PAGE}
           lang="tsx"
           marks={{ 7: 'highlight' }}
           title="src/routes/talks/new/page.tsx"
         />
         <p>
-          <Rich>{m.formGetStarted.deriveJson()}</Rich>
+          <Rich>{t.deriveFields()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.deriveJson()}</Rich>
         </p>
       </DocSection>
 
-      <DocSection
-        description={m.formGetStarted.actionDescription}
-        id="action"
-        title={m.formGetStarted.actionTitle}
-      >
+      <DocSection id="action" title={t.actionTitle}>
         <CodeBlock
           code={ACTION}
           lang="ts"
-          marks={{ 12: 'highlight', 13: 'highlight' }}
+          marks={{ 15: 'highlight', 16: 'highlight', 19: 'highlight' }}
           title="src/lib/actions.ts"
         />
         <p>
-          <Rich>{m.formGetStarted.actionResult()}</Rich>
+          <Rich>{t.actionParse()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.actionResult()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.actionRedirectBefore()}</Rich>
+          <LocaleAnchor path="/:locale/framework/actions">
+            {m.framework.navActions()}
+          </LocaleAnchor>
+          <Rich>{t.actionRedirectAfter()}</Rich>
         </p>
       </DocSection>
 
-      <DocSection
-        description={m.formGetStarted.formDescription}
-        id="form"
-        title={m.formGetStarted.formTitle}
-      >
+      <DocSection id="form" title={t.formTitle}>
         <CodeBlock
+          callouts={{ 14: t.formHookCallout(), 20: t.formPropsCallout() }}
           code={FORM}
           lang="tsx"
           marks={{
@@ -195,33 +177,24 @@ export default function FormGetStartedPage() {
           title="src/components/talk-form.tsx"
         />
         <p>
-          <Rich>{m.formGetStarted.formSpread()}</Rich>
+          <Rich>{t.formHook()}</Rich>
         </p>
         <p>
-          <Rich>{m.formGetStarted.formDom()}</Rich>
+          <Rich>{t.formSpread()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.formDom()}</Rich>
         </p>
       </DocSection>
 
       <Playground
-        description={m.formGetStarted.tryDescription}
+        description={t.tryDescription}
         id="try"
-        steps={m.formGetStarted.trySteps}
-        title={m.formGetStarted.tryTitle}
+        steps={t.trySteps}
+        title={t.tryTitle}
       >
         <TalkDemo fields={talkFields} />
       </Playground>
-
-      <DocSection id="next" title={m.formGetStarted.nextTitle}>
-        <ul>
-          {NEXT.map((step) => (
-            <li key={step.path}>
-              <LocaleAnchor path={step.path}>{step.label()}</LocaleAnchor>
-              {m.docPage.termSeparator()}
-              <Rich>{step.description()}</Rich>
-            </li>
-          ))}
-        </ul>
-      </DocSection>
     </DocPage>
   );
 }
