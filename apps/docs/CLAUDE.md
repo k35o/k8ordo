@@ -317,12 +317,14 @@ export default function RouterLinksPage() {
   both flat. Two files that would collide in one sample are named by their
   feature (`talk-actions.ts`). What a package's docs give a place of its own
   keeps it: `src/i18n.ts` and `src/state.ts` at the root, and messages in
-  `src/messages/`, a file per area behind an `index.ts` barrel. A title
-  names a file by its path from the project root (`src/routes/page.tsx`,
-  `src/i18n.ts`, `vite.config.ts`); a bare name (`talk-form.tsx`) is for a
-  file whose place the sample does not depend on. The site's own `src/` —
-  `demos/`, `components/`, `data/`, `messages/` and the rest — is its
-  implementation, not a sample, and keeps its own layout.
+  `src/messages/`, a file per area that a sample imports by name
+  (`import { home } from '../messages/nav'`, then `home()`), never as a
+  namespace or through an `index.ts` barrel; a sample that calls a message
+  shows that import. A title names a file by its path from the project root
+  (`src/routes/page.tsx`, `src/i18n.ts`, `vite.config.ts`); a bare name
+  (`talk-form.tsx`) is for a file whose place the sample does not depend on.
+  The site's own `src/` — `demos/`, `components/`, `data/`, `messages/` and
+  the rest — is its implementation, not a sample, and keeps its own layout.
 - Asides are `Note` and `Pitfall` (`src/components/callout.tsx`), which render
   `@k8ordo/ui`'s `Callout`.
 - A live demo is a `'use client'` component under `src/demos/` at the page's
