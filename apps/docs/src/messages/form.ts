@@ -1,110 +1,80 @@
 import { message } from '@k8ordo/i18n';
 
 export const tagline = message({
-  ja: 'zodのスキーマを1つ書くだけで、ブラウザとサーバーの検証がそろうフォームのライブラリ。',
-  en: 'One zod schema validates your form in the browser and on the server.',
+  ja: 'zodのスキーマからHTMLの制約属性とサーバーの検証を作るReactのフォームライブラリ',
+  en: 'A React form library that derives HTML constraint attributes and server-side validation from a zod schema',
 });
 
 export const claimSchemaTitle = message({
-  ja: '制約はスキーマに1度だけ書く',
-  en: 'Write each constraint once, in the schema',
+  ja: 'スキーマに1度だけ書く制約',
+  en: 'Constraints written once, in the schema',
 });
 
 export const claimSchemaBody = [
   message({
-    ja: 'スキーマからは、`required`や`maxlength`といった入力欄の属性と、zodのエラー文言が作られます。',
-    en: 'The schema gives you the input attributes, such as `required` and `maxlength`, along with zod’s own error messages.',
+    ja: '`formFields`はスキーマから、`required`や`maxlength`といった入力欄の属性とzodのエラー文言を作ります。',
+    en: 'From the schema, `formFields` derives the input attributes (such as `required` and `maxlength`) and zod’s error messages.',
   }),
   message({
-    ja: '送信を受け取ったサーバーも、同じスキーマで検証します。JSXとサーバーの両方に同じ制約を書き写す必要はありません。',
-    en: 'The server checks the submission against the same schema, so no constraint is written twice.',
+    ja: '`parseForm`は、送信された`FormData`を同じスキーマで検証します。JSXとサーバーに制約を書き写すことはありません。',
+    en: '`parseForm` checks the submitted `FormData` against the same schema. No constraint is copied into JSX or the server.',
   }),
 ] as const;
 
 export const claimNoJsTitle = message({
-  ja: 'JavaScriptが届く前から入力を確かめる',
-  en: 'Validation works before JavaScript arrives',
+  ja: 'JavaScriptの読み込み前に動く検証',
+  en: 'Validation before JavaScript loads',
 });
 
 export const claimNoJsBody = [
   message({
-    ja: '制約はサーバーが描いたHTMLの属性に入っているので、ページの読み込みが終わる前からブラウザが入力を確かめます。',
-    en: 'Constraints are attributes in the server-rendered HTML, so the browser checks input while the page is still loading.',
+    ja: '制約は、サーバーが返すHTMLに属性として入っています。ページの読み込みが終わる前から、ブラウザが入力を確かめます。',
+    en: 'The constraints are attributes in the server-rendered HTML, so the browser checks the input before the page finishes loading.',
   }),
   message({
-    ja: '読み込みが終わると、同じ検証をzodの文言で行います。値はDOMが持っているので、入力のたびに再描画されることもありません。',
-    en: 'Once the page is hydrated, the same checks run with zod’s wording. Values stay in the DOM, so typing never re-renders.',
+    ja: '読み込みが終わると、入力欄から離れたときと送信のときに、同じスキーマで検証してzodのエラー文言を表示します。入力した値はReactのstateに保存しないので、キー入力のたびに再描画されることはありません。',
+    en: 'Once the page has loaded, leaving a field and submitting both run the same schema check and show zod’s error messages. Values are not kept in React state, so typing does not re-render on every keystroke.',
   }),
 ] as const;
 
 export const claimServerTitle = message({
-  ja: 'サーバーのエラーは入力欄に戻る',
-  en: 'Server errors land on their fields',
+  ja: '入力欄ごとに出るサーバーのエラー',
+  en: 'Server errors shown on their fields',
 });
 
 export const claimServerBody = [
   message({
-    ja: '`parseForm`は、検証に失敗した理由を入力欄ごとのエラーとして返します。',
-    en: '`parseForm` returns each failure keyed by its field.',
+    ja: '`parseForm`は、検証に失敗した理由を入力欄ごとのエラーとして返します。送信された値も一緒に返します。',
+    en: '`parseForm` returns each failure keyed by its field, together with the submitted values.',
   }),
   message({
-    ja: '`useForm`はそのエラーを該当する入力欄に表示し、最初に失敗した欄へフォーカスを移します。入力した値も残るので、直してすぐに送り直せます。',
-    en: '`useForm` shows it on that field and moves focus to the first one that failed. What the person typed is kept, so they can fix it and send again.',
+    ja: '`useForm`はエラーを該当する入力欄に表示し、最初に失敗した入力欄へフォーカスを移します。入力した値は残るので、直してすぐに送り直せます。',
+    en: '`useForm` shows each error on its field and moves focus to the first field that failed. What was typed stays, ready to be fixed and sent again.',
   }),
 ] as const;
 
-export const nextGetStarted = message({
-  ja: 'スキーマを書いてから送信を受け取るまでを、一通り作ります。',
-  en: 'Build a form end to end, from the schema to the submission.',
-});
-
-export const nextFieldTypes = message({
-  ja: 'テキストや数値、選択肢、チェックボックス、ファイルの入力欄を作ります。',
-  en: 'Text, numbers, choices, checkboxes and files.',
-});
-
-export const nextErrors = message({
-  ja: 'エラーを入力欄に表示し、失敗した欄へフォーカスを移します。',
-  en: 'Show errors on their fields, and move focus to the first failure.',
-});
-
-export const nextReferenceServer = message({
-  ja: '`formFields`と`parseForm`、`defineForm`、ルールの一覧です。',
-  en: '`formFields`, `parseForm`, `defineForm` and the rules.',
-});
-
-export const nextNested = message({
-  ja: 'オブジェクトの中の入力欄と、行を足したり消したりできる配列を扱います。',
-  en: 'Fields inside objects, and arrays whose rows can be added and removed.',
-});
-
-export const nextReferenceClient = message({
-  ja: '`useForm`と、それが返す値、`useAsyncCheck`、`HiddenValue`の一覧です。',
-  en: '`useForm` and what it returns, `useAsyncCheck`, and `HiddenValue`.',
-});
-
 export const demoTitle = message({
-  ja: '絞り込みのフォームを試す',
-  en: 'Try a search form',
+  ja: '絞り込みフォームのデモ',
+  en: 'Filter form demo',
 });
 
 export const demoDescription = message({
-  ja: 'スキーマから作ったGETのフォームです。送信すると、このページのURLが書き換わります。',
-  en: 'A GET form derived from a schema. Submitting it changes this page’s URL.',
+  ja: 'スキーマから作ったGETのフォームで、送信するとこのページのURLが書き換わります。',
+  en: 'A GET form derived from a schema; submitting it rewrites this page’s URL.',
 });
 
 export const demoSteps = [
   message({
-    ja: '「最小値」に`-1`と入力して欄から離れると、スキーマに書いた文言でエラーが出ます。',
-    en: 'Type `-1` into “Minimum” and leave the field. The error is the schema’s message.',
+    ja: '「最小値」に`-1`と入力して入力欄から離れると、zodのエラー文言が表示されます。',
+    en: 'Type `-1` into “Minimum” and leave the field. zod’s error message appears.',
   }),
   message({
-    ja: 'そのまま「絞り込む」を押すと、送信が止まり、フォーカスが入力欄に戻ります。',
-    en: 'Press “Filter” anyway. The submission stops and focus returns to the field.',
+    ja: 'そのまま「絞り込む」を押すと、送信が止まり、フォーカスがその入力欄に戻ります。',
+    en: 'Press “Filter” anyway. The submission stops, and focus returns to that field.',
   }),
   message({
-    ja: '正しい値にして送ると、URLとstateの行に同じ値が表示されます。',
-    en: 'Submit valid values. The URL and the state line show the same values.',
+    ja: '正しい値にして送ると、URLとその下の`state`に同じ値が表示されます。',
+    en: 'Submit valid values. The URL and the `state` below it show the same values.',
   }),
 ] as const;
 
@@ -140,26 +110,26 @@ export const navFieldTypes = message({
 
 export const navNested = message({
   ja: '入れ子と繰り返し行',
-  en: 'Nested objects and rows',
+  en: 'Nested and repeated rows',
 });
 
 export const navRules = message({
-  ja: '複数の入力欄にまたがる検証',
+  ja: '複数の入力欄の検証',
   en: 'Cross-field rules',
 });
 
 export const navEdit = message({
-  ja: '既存のデータを編集する',
-  en: 'Edit existing data',
+  ja: '既存データの編集',
+  en: 'Editing',
 });
 
 export const navAsyncCheck = message({
-  ja: '入力中にサーバーへ問い合わせる',
-  en: 'Check with the server',
+  ja: 'サーバーへの問い合わせ',
+  en: 'Async checks',
 });
 
 export const navCustomInputs = message({
-  ja: '独自の入力部品の値を送る',
+  ja: '独自の入力部品',
   en: 'Custom inputs',
 });
 
@@ -169,13 +139,8 @@ export const navMultiStep = message({
 });
 
 export const navSearch = message({
-  ja: '検索や絞り込みのフォーム',
-  en: 'Search and filter forms',
-});
-
-export const navWithUi = message({
-  ja: '@k8ordo/uiと組み合わせる',
-  en: 'With @k8ordo/ui',
+  ja: '検索フォーム',
+  en: 'Search forms',
 });
 
 export const navHowItWorks = message({
@@ -184,17 +149,17 @@ export const navHowItWorks = message({
 });
 
 export const navErrors = message({
-  ja: 'エラーを表示する',
-  en: 'Show errors',
+  ja: 'エラーの表示',
+  en: 'Errors',
 });
 
 export const navReferenceSchema = message({
-  ja: 'スキーマと入力欄の対応',
+  ja: 'スキーマの対応',
   en: 'Schema mapping',
 });
 
 export const navTroubleshooting = message({
-  ja: 'うまく動かないとき',
+  ja: 'トラブルシューティング',
   en: 'Troubleshooting',
 });
 

@@ -6,6 +6,7 @@ import {
   DocSection,
   DocSubsection,
 } from '../../../../components/doc-page';
+import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Rich } from '../../../../components/rich';
 import { TokenCard } from '../../../../components/token-card';
 import * as m from '../../../../messages';
@@ -71,11 +72,10 @@ const Z_INDEX_USAGE = {
 export default function Theming() {
   return (
     <DocPage introduction={t.introduction} path="/:locale/ui/theming">
-      <DocSection
-        description={t.semanticColorsDescription}
-        id="semantic"
-        title={t.semanticColorsTitle}
-      >
+      <DocSection id="semantic" title={t.semanticColorsTitle}>
+        <p>
+          <Rich>{t.semanticColorsIntro()}</Rich>
+        </p>
         <DocSubsection id="foreground" title={t.foregroundTitle}>
           <div className="grid gap-2 sm:grid-cols-2">
             {FG_TOKENS.map((token) => (
@@ -99,11 +99,10 @@ export default function Theming() {
         </DocSubsection>
       </DocSection>
 
-      <DocSection
-        description={t.brandColorsDescription}
-        id="brand"
-        title={t.brandColorsTitle}
-      >
+      <DocSection id="brand" title={t.brandColorsTitle}>
+        <p>
+          <Rich>{t.brandColorsIntro()}</Rich>
+        </p>
         <DocSubsection id="primary" title={t.primaryTitle}>
           <div className="grid gap-2 sm:grid-cols-2">
             {PRIMARY_TOKENS.map((token) => (
@@ -135,11 +134,7 @@ export default function Theming() {
         </DocSubsection>
       </DocSection>
 
-      <DocSection
-        description={t.colorPaletteDescription}
-        id="palette"
-        title={t.colorPaletteTitle}
-      >
+      <DocSection id="palette" title={t.colorPaletteTitle}>
         <div className="flex flex-col gap-4">
           {PALETTE.map((family) => (
             <div className="flex flex-col gap-1" key={family.prefix}>
@@ -162,25 +157,29 @@ export default function Theming() {
             </div>
           ))}
         </div>
-      </DocSection>
-
-      <DocSection
-        description={t.customizeDescription}
-        id="customize"
-        title={t.customizeTitle}
-      >
-        <CodeBlock code={OVERRIDE} lang="css" title="app.css" />
         <p>
-          <Rich>{t.customizeValueDescription()}</Rich>
+          <Rich>{t.colorPaletteShades()}</Rich>
         </p>
-        <CodeBlock code={OVERRIDE_VALUE} lang="css" title="app.css" />
+        <p>
+          <Rich>{t.colorPaletteUsage()}</Rich>
+        </p>
       </DocSection>
 
-      <DocSection
-        description={t.typographyDescription}
-        id="typography"
-        title={t.typographyTitle}
-      >
+      <DocSection id="customize" title={t.customizeTitle}>
+        <CodeBlock code={OVERRIDE} lang="css" title="app.css" />
+        <CodeBlock code={OVERRIDE_VALUE} lang="css" title="app.css" />
+        <p>
+          <Rich>{t.customizeHow()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.customizePalette()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.customizeContrast()}</Rich>
+        </p>
+      </DocSection>
+
+      <DocSection id="typography" title={t.typographyTitle}>
         <DocSubsection id="text-sizes" title={t.textSizesTitle}>
           <div className="border-border-mute bg-bg-surface rounded-xl border">
             <div className="flex flex-col gap-3 p-4">
@@ -229,6 +228,9 @@ export default function Theming() {
               ))}
             </div>
           </div>
+          <p>
+            <Rich>{t.fontWeightsNote()}</Rich>
+          </p>
         </DocSubsection>
         <DocSubsection id="letter-spacing" title={t.letterSpacingTitle}>
           <div className="border-border-mute bg-bg-surface rounded-xl border">
@@ -274,11 +276,7 @@ export default function Theming() {
         </DocSubsection>
       </DocSection>
 
-      <DocSection
-        description={t.borderRadiusDescription}
-        id="radius"
-        title={t.borderRadiusTitle}
-      >
+      <DocSection id="radius" title={t.borderRadiusTitle}>
         <div className="grid grid-cols-3 gap-4 sm:grid-cols-5 sm:gap-6">
           {RADII.map((radius) => (
             <div className="flex flex-col items-center gap-2" key={radius.name}>
@@ -293,13 +291,12 @@ export default function Theming() {
             </div>
           ))}
         </div>
+        <p>
+          <Rich>{t.borderRadiusRoles()}</Rich>
+        </p>
       </DocSection>
 
-      <DocSection
-        description={t.shadowDescription}
-        id="shadow"
-        title={t.shadowTitle}
-      >
+      <DocSection id="shadow" title={t.shadowTitle}>
         <div className="grid gap-4 sm:grid-cols-2">
           {SHADOWS.map((shadow) => (
             <div className="flex flex-col items-center gap-2" key={shadow.name}>
@@ -314,13 +311,12 @@ export default function Theming() {
             </div>
           ))}
         </div>
+        <p>
+          <Rich>{t.shadowUsage()}</Rich>
+        </p>
       </DocSection>
 
-      <DocSection
-        description={t.spacingDescription}
-        id="spacing"
-        title={t.spacingTitle}
-      >
+      <DocSection id="spacing" title={t.spacingTitle}>
         <div className="border-border-mute bg-bg-surface rounded-xl border">
           <div className="flex flex-col gap-2 p-4">
             {SPACING_SCALE.map((space) => (
@@ -339,13 +335,12 @@ export default function Theming() {
             ))}
           </div>
         </div>
+        <p>
+          <Rich>{t.spacingUnit()}</Rich>
+        </p>
       </DocSection>
 
-      <DocSection
-        description={t.breakpointsDescription}
-        id="breakpoints"
-        title={t.breakpointsTitle}
-      >
+      <DocSection id="breakpoints" title={t.breakpointsTitle}>
         <div className="border-border-mute bg-bg-surface rounded-xl border">
           <div className="flex flex-col gap-2 p-4">
             {BREAKPOINTS.map((bp) => (
@@ -360,13 +355,12 @@ export default function Theming() {
             ))}
           </div>
         </div>
+        <p>
+          <Rich>{t.breakpointsUsage()}</Rich>
+        </p>
       </DocSection>
 
-      <DocSection
-        description={t.zIndexDescription}
-        id="z-index"
-        title={t.zIndexTitle}
-      >
+      <DocSection id="z-index" title={t.zIndexTitle}>
         <div className="border-border-mute bg-bg-surface rounded-xl border">
           <div className="flex flex-col gap-2 p-4">
             {Z_INDICES.map((z) => (
@@ -384,28 +378,39 @@ export default function Theming() {
             ))}
           </div>
         </div>
+        <p>
+          <Rich>{t.zIndexTopLayer()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.zIndexToast()}</Rich>
+        </p>
       </DocSection>
 
-      <DocSection
-        description={t.darkModeDescription}
-        id="dark-mode"
-        title={t.darkModeTitle}
-      >
+      <DocSection id="dark-mode" title={t.darkModeTitle}>
         <CodeBlock code={DARK} lang="ts" />
+        <p>
+          <Rich>{t.darkModeClass()}</Rich>
+        </p>
         <p>
           <Rich>{t.darkModeColorScheme()}</Rich>
         </p>
+        <p>
+          <Rich>{t.darkModeLibraryBefore()}</Rich>
+          <LocaleAnchor path="/:locale/color-scheme">
+            @k8ordo/color-scheme
+          </LocaleAnchor>
+          <Rich>{t.darkModeLibraryAfter()}</Rich>
+        </p>
       </DocSection>
 
-      <DocSection
-        description={t.highContrastDescription}
-        id="high-contrast"
-        title={t.highContrastTitle}
-      >
-        <p>
-          <Rich>{t.highContrastOwnUiDescription()}</Rich>
-        </p>
+      <DocSection id="high-contrast" title={t.highContrastTitle}>
         <CodeBlock code={CONTRAST} lang="ts" title="toggle-button.tsx" />
+        <p>
+          <Rich>{t.highContrastOwnUi()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.highContrastStylesheet()}</Rich>
+        </p>
         <Pitfall>
           <p>
             <Rich>{t.highContrastAvoid()}</Rich>

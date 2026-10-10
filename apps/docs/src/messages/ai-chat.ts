@@ -1,145 +1,217 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: 'AIのチャット画面を組み立てる部品です。通信やメッセージの状態は持たないので、アプリが持つメッセージの配列を`messages.map()`で描くだけで使えます。そのため、AI SDKにも自前のバックエンドにもつなげます。どれも`@k8ordo/ui/ai`からimportします。',
-  en: 'Parts for building an AI chat screen. They hold no requests and no message state: map over the messages your application already has, and they draw them. That is why they connect to the AI SDK and to a backend of your own alike. Everything is imported from `@k8ordo/ui/ai`.',
+  ja: 'AIのチャット画面を組み立てるコンポーネントです。通信とメッセージの状態はアプリが持ち、コンポーネントはメッセージの配列を表示します。AI SDKにも自前のバックエンドにもつなげます。',
+  en: 'Components for building an AI chat screen. Your application holds the requests and the message state, and the components display the message array. They work with the AI SDK and with a backend of your own.',
 });
 
 export const demoTitle = message({
-  ja: '動かしてみる',
-  en: 'Try it',
+  ja: 'チャット画面のデモ',
+  en: 'Chat demo',
 });
 
 export const demoDescription = message({
-  ja: '部品を組み合わせた、実際に動くチャット画面です。ツールの実行を許可すると、回答と出典が届きます。候補を選ぶか、メッセージを書いて送ると、吹き出しが会話に積まれていきます。ファイルを添えたり、回答をコピーしたり評価したりもできます。',
-  en: 'A working chat screen made of these parts. Allow the tool call and the answer arrives with its sources. Pick a suggestion or write a message and send it, and bubbles stack up in the conversation. You can attach files, and copy or rate an answer.',
-});
-
-export const suggestionTitle = message({
-  ja: '質問の候補を並べる',
-  en: 'Offer suggested prompts',
-});
-
-export const suggestionDescription = message({
-  ja: '`Suggestion`は、よくある質問をチップで並べます。選ばれたチップの値は、そのまま送信の関数に渡ります。',
-  en: '`Suggestion` lays out common prompts as chips. The value of the chip picked goes straight to your send function.',
+  ja: 'これらのコンポーネントで組んだチャット画面です。ツールの実行を許可すると、回答と出典が表示されます。メッセージの送信、ファイルの添付、回答のコピーや評価もできます。',
+  en: 'A chat screen made of these components. Allow the tool call and the answer appears with its sources. You can also send messages, attach files, and copy or rate an answer.',
 });
 
 export const overviewTitle = message({
-  ja: '会話を組み立てる',
-  en: 'Compose a conversation',
+  ja: '基本の構成',
+  en: 'Basic structure',
 });
 
-export const overviewDescription = message({
-  ja: '`Conversation`は会話のスクロール領域で、新しいメッセージが来ると末尾に追従し、遡っているときは「最新へ」のボタンを出します。`Message`はroleごとの吹き出しで、`PromptInput`は入力欄です。`Message.Root`の`avatar`は吹き出しの横に置かれ、子要素はその隣に縦に積まれます。',
-  en: '`Conversation` is the scroll region: it follows the end as messages arrive, and shows a button back to the latest while you read back. `Message` is a bubble per role, and `PromptInput` is the composer. `Message.Root` puts its `avatar` beside the bubble and stacks its children next to it.',
+export const overviewConversation = message({
+  ja: '`Conversation`は会話のスクロール領域です。新しいメッセージが来ると末尾までスクロールします。上にスクロールしているあいだは、`ScrollButton`で最新のメッセージに戻れます。',
+  en: '`Conversation` is the scroll region of the log. It scrolls to the end as messages arrive. While you have scrolled up, `ScrollButton` takes you back to the latest one.',
+});
+
+export const overviewMessage = message({
+  ja: '`Message.Root`は1つのメッセージです。`from="user"`は右寄せの吹き出しに、`from="assistant"`は吹き出しの無い本文になります。`avatar`はメッセージの横に置かれ、子要素はその隣に縦に並びます。',
+  en: '`Message.Root` is one message. `from="user"` renders as a right-aligned bubble and `from="assistant"` as plain text without a bubble. `avatar` sits beside the message, and the children stack in a column next to it.',
+});
+
+export const overviewInput = message({
+  ja: '`PromptInput`は入力欄です。3つとも`@k8ordo/ui/ai`からimportします。',
+  en: '`PromptInput` is the input box. All three are imported from `@k8ordo/ui/ai`.',
 });
 
 export const inputTitle = message({
-  ja: '入力欄で送る',
-  en: 'Send from the composer',
+  ja: '入力欄',
+  en: 'Prompt input',
 });
 
-export const inputDescription = message({
-  ja: 'Enterで送信し、Shift+Enterで改行します。ただし、IMEの変換を確定するEnterでは送信しません。`status`はAI SDKと同じく`ready`と`submitted`、`streaming`、`error`のどれかです。応答を待つあいだは、ボタンが送信から停止に変わります。',
-  en: 'Enter sends and Shift+Enter starts a new line, but the Enter that confirms an IME composition never sends. `status` takes the AI SDK’s values, `ready`, `submitted`, `streaming` and `error`, and while a reply is on its way the button turns from send into stop.',
+export const inputKeys = message({
+  ja: 'Enterで送信し、Shift+Enterで改行します。IMEの変換を確定するEnterでは送信しません。本文は前後の空白を除いて`onSubmit`に渡されます。本文も添付も無いメッセージは送信しません。',
+  en: 'Enter sends and Shift+Enter inserts a newline. The Enter that confirms an IME composition does not send. The body reaches `onSubmit` trimmed. A message with neither text nor attachments is not sent.',
+});
+
+export const inputStatus = message({
+  ja: '`status`の値はAI SDKの`status`と同じで、`ready`か`submitted`か`streaming`か`error`です。`submitted`と`streaming`のあいだは`Submit`が停止ボタンになり、押すと`onStop`が呼ばれます。',
+  en: '`status` takes the AI SDK’s values: `ready`, `submitted`, `streaming` or `error`. While it is `submitted` or `streaming`, `Submit` turns into a stop button that calls `onStop`.',
 });
 
 export const attachmentsTitle = message({
-  ja: 'ファイルを添える',
-  en: 'Attach files',
+  ja: 'ファイルの添付',
+  en: 'Attaching files',
 });
 
-export const attachmentsDescription = message({
-  ja: '`PromptInput.Root`に`accept`を渡すと、`Attach`での選択、ドロップ、貼り付けのどれでもファイルを受け取ります。どの経路でも、同じ`accept`で選り分けます。送る前の添付は`PromptInput.Attachments`に並び、`onSubmit`の第2引数に`FileList`で届きます。そのため、AI SDKの`sendMessage`にそのまま渡せます。添付だけを送るときは、`text`を渡さないでください。',
-  en: 'Pass `accept` to `PromptInput.Root` and it takes files from the `Attach` picker, a drop and a paste, filtering all three by the same `accept`. Files waiting to be sent line up in `PromptInput.Attachments` and reach `onSubmit` as a `FileList` in its second argument, ready for the AI SDK’s `sendMessage`. When sending files alone, leave `text` out.',
+export const attachmentsAccept = message({
+  ja: '`accept`を渡すと、`Attach`のファイル選択とドロップ、貼り付けでファイルを受け取ります。どの経路も、`<input accept>`と同じ規則で絞られます。`accept`が無いときはテキストだけを受け取り、`Attach`は何も表示しません。',
+  en: 'Pass `accept` and files come in from the `Attach` picker, a drop and a paste. Every route is filtered by the same rule as `<input accept>`. Without `accept` the input takes text only, and `Attach` renders nothing.',
+});
+
+export const attachmentsList = message({
+  ja: '送る前のファイルは`PromptInput.Attachments`に並び、それぞれに削除ボタンが付きます。`Textarea`の上に1行を使うので、先頭に置きます。`maxFiles`を超えた分は受け取りません。',
+  en: 'Files waiting to be sent are listed in `PromptInput.Attachments`, each with a remove button. It takes a row of its own above the `Textarea`, so put it first. Files beyond `maxFiles` are not accepted.',
+});
+
+export const attachmentsSubmit = message({
+  ja: "`onSubmit`の第2引数が`FileList`で、AI SDKの`sendMessage`にそのまま渡せます。添付だけを送るときは`{ files }`だけを渡します。`text: ''`を渡すと空のテキストパートになり、プロバイダによってはエラーになります。",
+  en: "`onSubmit` receives them as a `FileList` in its second argument, which the AI SDK’s `sendMessage` takes as it is. To send files alone, pass `{ files }` only. Passing `text: ''` creates an empty text part, which some providers reject with an error.",
+});
+
+export const suggestionTitle = message({
+  ja: '質問の候補',
+  en: 'Suggested prompts',
+});
+
+export const suggestionDescription = message({
+  ja: '`Suggestion.Item`は候補のチップです。押すと`value`が`onSelect`に渡ります。`children`を省くと、`value`がそのまま表示の文字になります。',
+  en: '`Suggestion.Item` is a chip for one prompt. Pressing it passes `value` to `onSelect`. Without `children`, `value` is also the visible text.',
 });
 
 export const responseTitle = message({
-  ja: '流れてくるMarkdownを描く',
-  en: 'Render streaming Markdown',
+  ja: 'Markdownの表示',
+  en: 'Markdown',
 });
 
 export const responseDescription = message({
-  ja: '`Response`は、届いている途中のMarkdownを描きます。閉じていないコードブロックがあっても崩れません。ほかの部品とは別のサブパスにあります。',
-  en: '`Response` renders Markdown while it is still arriving, and an unclosed code block does not break it. It lives in its own subpath.',
+  ja: '`Response`は、ストリーミング中のMarkdownを表示します。閉じていないコードブロックがあっても崩れません。`@k8ordo/ui/ai/response`からimportします。',
+  en: '`Response` renders Markdown while it is still arriving, and an unclosed code block does not break it. It is imported from `@k8ordo/ui/ai/response`.',
 });
 
 export const responseInstall = message({
   ja: (version: string) =>
-    `この部品だけは\`streamdown\`で描くので、${version}以上を入れ、そのスタイルシートも読み込みます。`,
+    `\`streamdown\`の${version}以上を入れ、そのスタイルシートを読み込みます。`,
   en: (version) =>
-    `This part alone renders with \`streamdown\`: install ${version} or later, and load its stylesheet too.`,
+    `Install \`streamdown\` ${version} or later, and load its stylesheet.`,
+});
+
+export const responseTailwind = message({
+  ja: "`streamdown`のスタイルは`styles.css`に含まれません。`Response`を使うアプリでは、`@k8ordo/ui/tailwind.css`を読み込むTailwindのビルドが必要です。アプリのCSSに`@source '../node_modules/streamdown/dist/*.js';`を足します。パスはそのCSSファイルから`node_modules`への相対パスです。",
+  en: "`streamdown`’s styles are not part of `styles.css`. An app that uses `Response` needs a Tailwind build that loads `@k8ordo/ui/tailwind.css`. Add `@source '../node_modules/streamdown/dist/*.js';` to the app’s CSS; the path is relative from that CSS file to `node_modules`.",
 });
 
 export const toolTitle = message({
-  ja: 'ツールの呼び出しと思考を見せる',
-  en: 'Show tool calls and reasoning',
+  ja: 'ツールと思考の表示',
+  en: 'Tool calls and reasoning',
 });
 
-export const toolDescription = message({
-  ja: '`ToolInvocation`と`Reasoning`は、ツールの実行や思考の過程を折りたためる形で見せます。`ToolInvocation`の`state`は、AI SDKのツールのパートと同じ値です。',
-  en: '`ToolInvocation` and `Reasoning` show tool activity and thinking in a panel that folds away. `ToolInvocation`’s `state` takes the same values as the AI SDK’s tool parts.',
+export const toolInvocation = message({
+  ja: '`ToolInvocation`はツールの呼び出しを折りたたみで表示します。アイコンは`state`に応じて変わります。実行中はスピナーで、終わると成功かエラーか拒否のアイコンになります。`state`の値はAI SDKのツールのパートと同じです。',
+  en: '`ToolInvocation` shows a tool call in a collapsible panel. The icon follows `state`: a spinner while it runs, then success, error or denied. The values of `state` are the AI SDK’s tool part states.',
+});
+
+export const toolIo = message({
+  ja: '`input`は文字列以外ならJSONで表示されます。`output`は文字列なら`pre`に、要素ならそのまま表示されます。`Reasoning`は思考の過程を折りたたみで表示します。`isStreaming`のあいだは、ラベルが「思考中…」になります。',
+  en: '`input` is shown as JSON unless it is a string. A string `output` goes in a `pre`, and an element renders as it is. `Reasoning` shows the model’s reasoning in a collapsible panel. While `isStreaming`, its label says it is thinking.',
 });
 
 export const approvalTitle = message({
-  ja: 'ツールの実行を承認する',
-  en: 'Approve a tool call',
+  ja: 'ツールの承認',
+  en: 'Tool approval',
 });
 
-export const approvalDescription = message({
-  ja: '`state`が`approval-requested`のときに`approval`と`onApprovalResponse`を渡すと、折りたたみの外に問いと「拒否」「許可」のボタンが出ます。答えは`{ id, approved }`の形で返るので、AI SDKの`addToolApprovalResponse`をそのまま渡せます。自動で判断された承認（`isAutomatic`）には、ボタンを出しません。',
-  en: 'When `state` is `approval-requested`, pass `approval` and `onApprovalResponse` and a question with Deny and Allow buttons appears outside the folded panel. The answer comes back as `{ id, approved }`, so the AI SDK’s `addToolApprovalResponse` can be passed as it is. An automatic decision (`isAutomatic`) shows no buttons.',
+export const approvalButtons = message({
+  ja: '`state`が`approval-requested`のときは、`approval`と`onApprovalResponse`を渡します。折りたたみの外に、問いと「拒否」「許可」のボタンが出ます。問いは`approval.requestReason`で、無ければ既定の文言です。押すと`onApprovalResponse({ id, approved })`が呼ばれます。',
+  en: 'When `state` is `approval-requested`, pass `approval` and `onApprovalResponse`. A question with Deny and Allow buttons appears outside the folded panel. The question is `approval.requestReason`, or the default wording without one. Pressing a button calls `onApprovalResponse({ id, approved })`.',
+});
+
+export const approvalSdk = message({
+  ja: 'この形はAI SDKの`addToolApprovalResponse`の引数と同じなので、そのまま渡せます。答えを自動で送り返すには、`useChat`に`sendAutomaticallyWhen`を渡します。無ければ、答えたあとに何も起きません。',
+  en: 'That is what the AI SDK’s `addToolApprovalResponse` takes, so pass it as it is. To send the answer back automatically, give `useChat` a `sendAutomaticallyWhen`; without it nothing happens after the user answers.',
+});
+
+export const approvalCases = message({
+  ja: '`approval.isAutomatic`のときは問いもボタンも出ません。`onApprovalResponse`が無ければ、問いだけが出ます。`output-denied`では`approval.reason`が理由として表示されます。',
+  en: 'With `approval.isAutomatic` neither the question nor the buttons appear. Without `onApprovalResponse` only the question appears. In `output-denied`, `approval.reason` is shown as the reason.',
 });
 
 export const partsTitle = message({
-  ja: '添付ファイルと出典を見せる',
-  en: 'Show attachments and sources',
+  ja: '添付ファイルと出典',
+  en: 'Attachments and sources',
 });
 
-export const partsDescription = message({
-  ja: '`Attachment`は、メッセージに添えられたファイルを見せます。画像ならサムネイルで、それ以外は名前と種類のチップです。`Source`は回答の出典を並べ、http(s)のURLだけをリンクにします。',
-  en: '`Attachment` shows the files on a message: a thumbnail for an image, and a chip with the name and media type for anything else. `Source` lists what an answer cites, and links only http(s) URLs.',
+export const partsAttachment = message({
+  ja: '`Attachment.Item`は、メッセージに添えられたファイルです。画像は`filename`を代替テキストにしたサムネイルに、それ以外は名前と種類のチップになります。画像の`url`は描画と同時に読み込まれるので、自分のサーバーが作ったURLかdata URLを渡します。',
+  en: '`Attachment.Item` is a file attached to a message. An image shows as a thumbnail with `filename` as its alt text, and anything else as a chip with the name and media type. An image `url` is loaded as soon as it renders, so pass a URL your own server produced or a data URL.',
+});
+
+export const partsSource = message({
+  ja: '`Source.Item`は回答の出典です。`href`がhttp(s)のURLなら、新しいタブで開くリンクになります。表示する文字列は`title`で、無ければホスト名です。それ以外は文字だけで表示されます。',
+  en: '`Source.Item` is a source the answer cites. With an http(s) `href` it is a link that opens in a new tab. Its text is `title`, or the host name without one. Anything else is plain text.',
 });
 
 export const actionsTitle = message({
-  ja: 'メッセージに操作を付ける',
-  en: 'Add actions to a message',
+  ja: 'メッセージの操作',
+  en: 'Message actions',
 });
 
-export const actionsDescription = message({
-  ja: '`Message.Actions`は、メッセージの下に置く操作の列です。`Copy`と`Regenerate`、`Feedback`はアイコンと文言を持っていて、それ以外の操作は`Action`で足せます。`onAction`がPromiseを返すと、それが終わるまでボタンは押せなくなります。',
-  en: '`Message.Actions` is the row of actions under a message. `Copy`, `Regenerate` and `Feedback` bring their own icons and labels, and `Action` adds anything else. When `onAction` returns a promise, the button stays busy until it settles.',
+export const actionsRow = message({
+  ja: '`Message.Actions`は、メッセージの下に置くアイコンボタンの列です。`Copy`と`Regenerate`と`Feedback`は、アイコンと文言を持っています。ほかの操作は、`Action`に`label`とアイコンを渡して足します。`label`はツールチップにも出ます。',
+  en: '`Message.Actions` is the row of icon buttons under a message. `Copy`, `Regenerate` and `Feedback` bring their own icons and labels. Any other action is an `Action` with a `label` and an icon. The `label` is also the tooltip.',
+});
+
+export const actionsBehavior = message({
+  ja: '`onAction`がPromiseを返すと、終わるまでボタンは押せなくなります。`Feedback`は2つのトグルです。押したものをもう一度押すと解除され、`onChange`に`null`が渡ります。',
+  en: 'When `onAction` returns a promise, the button stays busy until it settles. `Feedback` is a pair of toggles. Pressing the pressed one again clears it, and `onChange` receives `null`.',
 });
 
 export const aiSdkTitle = message({
-  ja: 'AI SDKのメッセージを描く',
-  en: 'Render AI SDK messages',
+  ja: 'AI SDKとの連携',
+  en: 'AI SDK integration',
 });
 
-export const aiSdkDescription = message({
-  ja: '`@k8ordo/ui/ai-sdk`の`mapMessageParts`は、AI SDKの`UIMessage.parts`を、自分で描きやすい平らな配列に変えます。テキストと思考、ツール、ファイルと出典、dataのパートが届いた順に並びます。ツールのパートには承認の情報も入っています。',
-  en: '`mapMessageParts` from `@k8ordo/ui/ai-sdk` turns an AI SDK `UIMessage.parts` array into a flat list you render yourself: text, reasoning, tools with their approval, files, sources and data parts, in the order they came.',
+export const aiSdkMap = message({
+  ja: '`@k8ordo/ui/ai-sdk`の`mapMessageParts`は、AI SDKの`UIMessage.parts`を表示しやすい1次元の配列に変えます。パートは種類にかかわらず元の順に並びます。',
+  en: '`mapMessageParts` from `@k8ordo/ui/ai-sdk` turns the AI SDK’s `UIMessage.parts` into a single array that is easy to render. Parts of every kind stay in their original order.',
+});
+
+export const aiSdkRender = message({
+  ja: 'ツールのパートは`approval`も含むので、`ToolInvocation`にそのまま渡せます。ファイルと出典は`filter`で先に取り出し、それぞれ1つの一覧にまとめます。`data`のパートは`name`で選び、中身を検証してから表示します。',
+  en: 'A tool part carries its `approval`, so it can be handed to `ToolInvocation` as it is. Pull the files and sources out with `filter` first and show each as one list. Pick `data` parts by `name` and validate their contents before rendering them.',
 });
 
 export const aiSdkVersion = message({
-  ja: (version: string) => `AI SDKの\`ai\`は、${version}以上に対応しています。`,
-  en: (version) => `It supports the AI SDK’s \`ai\` ${version} or later.`,
+  ja: (version: string) =>
+    `\`ai\`は任意のpeer dependencyです。${version}以上を入れます。`,
+  en: (version) =>
+    `\`ai\` is an optional peer dependency. Install ${version} or later.`,
 });
 
 export const jsonRenderTitle = message({
-  ja: '吹き出しの中に生成UIを描く',
-  en: 'Render generated UI in a bubble',
+  ja: '吹き出しの中の生成UI',
+  en: 'Generative UI in a bubble',
 });
 
 export const jsonRenderDescription = message({
-  ja: '`Message.Content`は任意の子要素を受け取ります。そのため、LLMがツールの結果として返したUIのspecを、json-renderのアダプタで吹き出しの中に描けます。',
-  en: '`Message.Content` takes any children, so a UI spec the model returned as a tool result can be drawn inside the bubble with the json-render adapter.',
+  ja: '`Message.Content`の子要素は自由です。LLMがツールの結果として返したUIのspecを、json-renderのアダプタで吹き出しの中に表示できます。',
+  en: '`Message.Content` takes any children. A UI spec the model returned as a tool result can be rendered inside the bubble with the json-render adapter.',
+});
+
+export const jsonRenderAdapter = message({
+  ja: 'アダプタの使い方は',
+  en: 'For how to use the adapter, see ',
+});
+
+export const see = message({
+  ja: 'を見てください。',
+  en: '.',
 });
 
 export const propsDescription = message({
-  ja: 'コンポーネントの型から作ったpropsの一覧です。開閉する`Reasoning`と`ToolInvocation`は`isOpen`と`defaultOpen`、`onChange`を受け取ります。`Message.Feedback`は`value`と`defaultValue`、`onChange`です。どれも、状態を外から渡しても中に任せても使えます。',
-  en: 'The props, derived from the component types. `Reasoning` and `ToolInvocation`, which fold, take `isOpen`, `defaultOpen` and `onChange`, and `Message.Feedback` takes `value`, `defaultValue` and `onChange`. Each works controlled or uncontrolled.',
+  ja: 'コンポーネントの型から作ったpropsの一覧です。`label`や`sendLabel`を省くと、`@k8ordo/i18n`の現在のロケールの辞書の文言になります。`Reasoning`と`ToolInvocation`の開閉、`Message.Feedback`の値は、制御と非制御のどちらでも使えます。',
+  en: 'The props, derived from the component types. Leave out `label` or `sendLabel` and the text comes from the current `@k8ordo/i18n` locale’s dictionary. The open state of `Reasoning` and `ToolInvocation` and the value of `Message.Feedback` work controlled or uncontrolled.',
 });
 
 export const demo = {
@@ -168,8 +240,8 @@ export const demo = {
     en: 'Searches the k8ordo UI docs.',
   }),
   seedSourceTitle: message({
-    ja: 'AIチャット — k8ordo',
-    en: 'AI chat — k8ordo',
+    ja: 'AIチャット · k8ordo',
+    en: 'AI chat · k8ordo',
   }),
   reply: message({
     ja: 'なるほど。ドキュメントの該当箇所をまとめますね。',

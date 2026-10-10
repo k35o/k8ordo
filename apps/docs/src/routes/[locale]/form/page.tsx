@@ -1,11 +1,7 @@
 import { formFields } from '@k8ordo/form/server';
 import { CodeBlock } from '@k8ordo/ui/code-block';
 
-import {
-  LandingClaim,
-  LandingHero,
-  NextSteps,
-} from '../../../components/landing';
+import { LandingClaim, LandingHero } from '../../../components/landing';
 import { Playground } from '../../../components/playground';
 import { demoState } from '../../../demos/form/demo-state';
 import { FormDemo } from '../../../demos/form/form-demo';
@@ -85,41 +81,6 @@ export default function FormPage() {
       >
         <CodeBlock code={CLAIM_SERVER} lang="ts" title="actions.ts" />
       </LandingClaim>
-      <NextSteps
-        name="@k8ordo/form"
-        steps={[
-          {
-            path: '/:locale/form/get-started',
-            label: m.nav.getStarted,
-            description: m.form.nextGetStarted,
-          },
-          {
-            path: '/:locale/form/field-types',
-            label: m.form.navFieldTypes,
-            description: m.form.nextFieldTypes,
-          },
-          {
-            path: '/:locale/form/nested',
-            label: m.form.navNested,
-            description: m.form.nextNested,
-          },
-          {
-            path: '/:locale/form/errors',
-            label: m.form.navErrors,
-            description: m.form.nextErrors,
-          },
-          {
-            path: '/:locale/form/reference/server',
-            label: m.form.navReferenceServer,
-            description: m.form.nextReferenceServer,
-          },
-          {
-            path: '/:locale/form/reference/client',
-            label: m.form.navReferenceClient,
-            description: m.form.nextReferenceClient,
-          },
-        ]}
-      />
     </div>
   );
 }

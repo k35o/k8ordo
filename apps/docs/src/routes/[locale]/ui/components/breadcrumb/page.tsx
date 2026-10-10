@@ -2,6 +2,7 @@ import { Anchor, Heading, Separator } from '@k8ordo/ui';
 import { CodeBlock } from '@k8ordo/ui/code-block';
 
 import { ComponentPreview } from '../../../../../components/component-preview';
+import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
 import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
@@ -16,6 +17,7 @@ import * as m from '../../../../../messages';
 export default function BreadcrumbPage() {
   return (
     <div className="flex flex-col gap-8 py-12">
+      <PageTitle name="Breadcrumb" />
       <div className="flex flex-col gap-4">
         <Heading level="h1">Breadcrumb</Heading>
         <p className="text-fg-mute text-lg">

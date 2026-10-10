@@ -25,6 +25,11 @@ export const i18n = message({
   en: 'i18n',
 });
 
+export const uiForm = message({
+  ja: 'フォーム',
+  en: 'Forms',
+});
+
 export const generativeUi = message({
   ja: '生成UI',
   en: 'Generative UI',

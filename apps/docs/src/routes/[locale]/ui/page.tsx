@@ -1,10 +1,6 @@
 import { CodeBlock } from '@k8ordo/ui/code-block';
 
-import {
-  LandingClaim,
-  LandingHero,
-  NextSteps,
-} from '../../../components/landing';
+import { LandingClaim, LandingHero } from '../../../components/landing';
 import { Playground } from '../../../components/playground';
 import { OverlayDemo } from '../../../demos/ui/overlay-demo';
 import { VerticalDemo } from '../../../demos/ui/vertical-demo';
@@ -72,36 +68,6 @@ export default function UiPage() {
       <LandingClaim body={m.ui.claimAgentsBody} title={m.ui.claimAgentsTitle}>
         <CodeBlock code={CLAIM_GENERATIVE} lang="tsx" title="gen-ui.tsx" />
       </LandingClaim>
-      <NextSteps
-        name="@k8ordo/ui"
-        steps={[
-          {
-            path: '/:locale/ui/get-started',
-            label: m.nav.getStarted,
-            description: m.ui.nextGetStarted,
-          },
-          {
-            path: '/:locale/ui/components',
-            label: m.nav.components,
-            description: m.ui.nextComponents,
-          },
-          {
-            path: '/:locale/ui/theming',
-            label: m.nav.theming,
-            description: m.ui.nextTheming,
-          },
-          {
-            path: '/:locale/ui/i18n',
-            label: m.nav.i18n,
-            description: m.ui.nextI18n,
-          },
-          {
-            path: '/:locale/ui/ai',
-            label: m.nav.ai,
-            description: m.ui.nextAi,
-          },
-        ]}
-      />
     </div>
   );
 }

@@ -2,7 +2,9 @@ import type { Message } from '@k8ordo/i18n';
 import { Heading } from '@k8ordo/ui';
 
 import { DocPage, DocSection } from '../../../../components/doc-page';
+import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Rich } from '../../../../components/rich';
+import type { SitePath } from '../../../../links';
 import * as m from '../../../../messages';
 
 const t = m.formTroubleshooting;
@@ -12,6 +14,7 @@ type Symptom = {
   title: Message;
   cause: Message;
   fix: Message;
+  see?: { path: SitePath; label: Message };
 };
 
 const SYMPTOMS: readonly Symptom[] = [
@@ -35,18 +38,7 @@ const SYMPTOMS: readonly Symptom[] = [
     title: t.hiddenTitle,
     cause: t.hiddenCause,
     fix: t.hiddenFix,
-  },
-  {
-    id: 'stringbool',
-    title: t.stringboolTitle,
-    cause: t.stringboolCause,
-    fix: t.stringboolFix,
-  },
-  {
-    id: 'number',
-    title: t.numberTitle,
-    cause: t.numberCause,
-    fix: t.numberFix,
+    see: { path: '/:locale/form/multi-step', label: m.form.navMultiStep },
   },
 ];
 
@@ -62,6 +54,14 @@ export default function FormTroubleshootingPage() {
           <Heading level="h3">{t.fixLabel()}</Heading>
           <p>
             <Rich>{symptom.fix()}</Rich>
+            {symptom.see !== undefined && (
+              <>
+                <LocaleAnchor path={symptom.see.path}>
+                  {symptom.see.label()}
+                </LocaleAnchor>
+                <Rich>{t.see()}</Rich>
+              </>
+            )}
           </p>
         </DocSection>
       ))}

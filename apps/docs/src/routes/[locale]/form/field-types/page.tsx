@@ -1,5 +1,3 @@
-import type { Message } from '@k8ordo/i18n';
-import { Code } from '@k8ordo/ui';
 import { CodeBlock } from '@k8ordo/ui/code-block';
 
 import { Note, Pitfall } from '../../../../components/callout';
@@ -8,30 +6,23 @@ import {
   DocSection,
   DocSubsection,
 } from '../../../../components/doc-page';
+import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Rich } from '../../../../components/rich';
 import * as m from '../../../../messages';
 
 const t = m.formFieldTypes;
 
-const OVERVIEW: ReadonlyArray<{
-  schema: string | Message;
-  input: string | Message;
-}> = [
-  { schema: 'z.string()', input: 'type="text"' },
-  { schema: 'z.email() / z.url()', input: 'type="email" / type="url"' },
-  { schema: 'z.iso.date() / z.iso.time()', input: 'type="date" / type="time"' },
-  {
-    schema: 'z.iso.datetime({ local: true })',
-    input: 'type="datetime-local"',
-  },
-  { schema: 'z.coerce.number()', input: 'type="number"' },
-  { schema: 'z.boolean() / z.literal(true)', input: 'type="checkbox"' },
-  { schema: 'z.stringbool()', input: 'type="checkbox" value="true"' },
-  { schema: 'z.file()', input: 'type="file"' },
-  { schema: 'z.enum([…])', input: t.rowSelect },
-  { schema: 'z.array(z.enum([…]))', input: t.rowCheckboxGroup },
-  { schema: t.rowOther, input: 'type="text"' },
-];
+const OVERVIEW = `z.string()                        → type="text"
+z.email() / z.url()               → type="email" / type="url"
+z.iso.date() / z.iso.time()       → type="date" / type="time"
+z.iso.datetime({ local: true })   → type="datetime-local"
+z.coerce.number()                 → type="number"
+z.boolean() / z.literal(true)     → type="checkbox"
+z.stringbool()                    → type="checkbox" value="true"
+z.file()                          → type="file"
+z.enum([…])                       → <select>
+z.array(z.enum([…]))              → type="checkbox"
+z.uuid()                          → type="text"`;
 
 const TEXT = `z.object({
   handle: z.string().min(3).max(20).regex(/^[a-z0-9_]+$/),
@@ -121,43 +112,21 @@ const PASSWORD_MINI = `password: z.string().check(z.minLength(8), z.meta({ input
 export default function FormFieldTypesPage() {
   return (
     <DocPage introduction={t.introduction} path="/:locale/form/field-types">
-      <DocSection
-        description={t.overviewDescription}
-        id="overview"
-        title={t.overviewTitle}
-      >
-        <table>
-          <thead>
-            <tr>
-              <th>{t.columnSchema()}</th>
-              <th>{t.columnInput()}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {OVERVIEW.map((row) => (
-              <tr key={typeof row.schema === 'string' ? row.schema : 'other'}>
-                <td>
-                  {typeof row.schema === 'string' ? (
-                    <Code>{row.schema}</Code>
-                  ) : (
-                    <Rich>{row.schema()}</Rich>
-                  )}
-                </td>
-                <td>
-                  {typeof row.input === 'string' ? (
-                    <Code>{row.input}</Code>
-                  ) : (
-                    <Rich>{row.input()}</Rich>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <DocSection id="overview" title={t.overviewTitle}>
+        <CodeBlock code={OVERVIEW} lang="ts" />
+        <p>
+          <Rich>{t.overview()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.overviewNoType()}</Rich>
+        </p>
       </DocSection>
 
-      <DocSection description={t.textDescription} id="text" title={t.textTitle}>
-        <CodeBlock code={TEXT} lang="ts" />
+      <DocSection id="text" title={t.textTitle}>
+        <CodeBlock code={TEXT} lang="ts" marks={{ 2: 'highlight' }} />
+        <p>
+          <Rich>{t.text()}</Rich>
+        </p>
         <p>
           <Rich>{t.textFormats()}</Rich>
         </p>
@@ -176,23 +145,25 @@ export default function FormFieldTypesPage() {
         </Pitfall>
       </DocSection>
 
-      <DocSection
-        description={t.datesDescription}
-        id="dates"
-        title={t.datesTitle}
-      >
+      <DocSection id="dates" title={t.datesTitle}>
         <CodeBlock code={DATES} lang="ts" />
+        <p>
+          <Rich>{t.dates()}</Rich>
+        </p>
         <p>
           <Rich>{t.datesCoerce()}</Rich>
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.numbersDescription}
-        id="numbers"
-        title={t.numbersTitle}
-      >
-        <CodeBlock code={NUMBERS} lang="ts" />
+      <DocSection id="numbers" title={t.numbersTitle}>
+        <CodeBlock
+          code={NUMBERS}
+          lang="ts"
+          marks={{ 6: 'highlight', 7: 'highlight' }}
+        />
+        <p>
+          <Rich>{t.numbers()}</Rich>
+        </p>
         <p>
           <Rich>{t.numbersStep()}</Rich>
         </p>
@@ -206,74 +177,76 @@ export default function FormFieldTypesPage() {
         </Pitfall>
       </DocSection>
 
-      <DocSection
-        description={t.selectDescription}
-        id="select"
-        title={t.selectTitle}
-      >
+      <DocSection id="select" title={t.selectTitle}>
         <CodeBlock code={SELECT} lang="tsx" marks={{ 4: 'highlight' }} />
+        <p>
+          <Rich>{t.select()}</Rich>
+        </p>
         <p>
           <Rich>{t.selectOptional()}</Rich>
         </p>
         <DocSubsection id="radio" title={t.radioTitle}>
-          <p>
-            <Rich>{t.radioDescription()}</Rich>
-          </p>
           <CodeBlock
             code={RADIO}
             lang="tsx"
             marks={{ 6: 'highlight', 7: 'highlight', 8: 'highlight' }}
           />
+          <p>
+            <Rich>{t.radio()}</Rich>
+          </p>
+          <p>
+            <Rich>{t.radioUiBefore()}</Rich>
+            <LocaleAnchor path="/:locale/ui/form">
+              {m.nav.uiForm()}
+            </LocaleAnchor>
+            <Rich>{t.radioUiAfter()}</Rich>
+          </p>
           <Pitfall>
             <p>
               <Rich>{t.radioPitfall()}</Rich>
             </p>
           </Pitfall>
-          <Note>
-            <p>
-              <Rich>{t.radioUi()}</Rich>
-            </p>
-          </Note>
         </DocSubsection>
       </DocSection>
 
-      <DocSection
-        description={t.checkboxDescription}
-        id="checkbox"
-        title={t.checkboxTitle}
-      >
+      <DocSection id="checkbox" title={t.checkboxTitle}>
+        <CodeBlock code={CHECKBOX} lang="ts" marks={{ 3: 'highlight' }} />
+        <p>
+          <Rich>{t.checkbox()}</Rich>
+        </p>
         <p>
           <Rich>{t.checkboxConsent()}</Rich>
         </p>
-        <CodeBlock code={CHECKBOX} lang="ts" />
         <DocSubsection id="stringbool" title={t.stringboolTitle}>
+          <CodeBlock code={STRINGBOOL} lang="ts" marks={{ 5: 'highlight' }} />
           <p>
-            <Rich>{t.stringboolDescription()}</Rich>
+            <Rich>{t.stringbool()}</Rich>
           </p>
-          <CodeBlock code={STRINGBOOL} lang="ts" />
           <p>
             <Rich>{t.stringboolUnchecked()}</Rich>
           </p>
         </DocSubsection>
       </DocSection>
 
-      <DocSection
-        description={t.groupDescription}
-        id="checkbox-group"
-        title={t.groupTitle}
-      >
+      <DocSection id="checkbox-group" title={t.groupTitle}>
         <CodeBlock code={GROUP} lang="tsx" marks={{ 7: 'highlight' }} />
         <p>
-          <Rich>{t.groupMin()}</Rich>
+          <Rich>{t.group()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.groupMinBefore()}</Rich>
+          <LocaleAnchor path="/:locale/form/rules">
+            {m.form.navRules()}
+          </LocaleAnchor>
+          <Rich>{t.groupMinAfter()}</Rich>
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.filesDescription}
-        id="files"
-        title={t.filesTitle}
-      >
-        <CodeBlock code={FILES} lang="ts" />
+      <DocSection id="files" title={t.filesTitle}>
+        <CodeBlock code={FILES} lang="ts" marks={{ 5: 'highlight' }} />
+        <p>
+          <Rich>{t.files()}</Rich>
+        </p>
         <p>
           <Rich>{t.filesServer()}</Rich>
         </p>
@@ -282,12 +255,11 @@ export default function FormFieldTypesPage() {
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.passwordDescription}
-        id="password"
-        title={t.passwordTitle}
-      >
+      <DocSection id="password" title={t.passwordTitle}>
         <CodeBlock code={PASSWORD} lang="ts" />
+        <p>
+          <Rich>{t.password()}</Rich>
+        </p>
         <p>
           <Rich>{t.passwordEcho()}</Rich>
         </p>

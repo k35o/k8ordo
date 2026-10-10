@@ -55,33 +55,43 @@ export default function FormMultiStepPage() {
 
   return (
     <DocPage introduction={t.introduction} path="/:locale/form/multi-step">
-      <DocSection description={t.keepDescription} id="keep" title={t.keepTitle}>
-        <CodeBlock code={KEEP} lang="tsx" title="entry-form.tsx" />
+      <DocSection id="keep" title={t.keepTitle}>
+        <CodeBlock
+          callouts={{ 2: t.keepHydratedCallout(), 4: t.keepHiddenCallout() }}
+          code={KEEP}
+          lang="tsx"
+          marks={{ 2: 'highlight', 4: 'highlight', 7: 'highlight' }}
+          title="entry-form.tsx"
+        />
+        <p>
+          <Rich>{t.keepFieldset()}</Rich>
+        </p>
         <p>
           <Rich>{t.keepHydrated()}</Rich>
         </p>
-        <p>
-          <Rich>{t.keepNoJs()}</Rich>
-        </p>
       </DocSection>
 
-      <DocSection
-        description={t.validateDescription}
-        id="validate"
-        title={t.validateTitle}
-      >
-        <CodeBlock code={VALIDATE} lang="tsx" title="entry-form.tsx" />
+      <DocSection id="validate" title={t.validateTitle}>
+        <CodeBlock
+          callouts={{ 2: t.validateScopeCallout() }}
+          code={VALIDATE}
+          lang="tsx"
+          marks={{ 2: 'highlight', 3: 'highlight', 5: 'highlight' }}
+          title="entry-form.tsx"
+        />
+        <p>
+          <Rich>{t.validateScope()}</Rich>
+        </p>
         <p>
           <Rich>{t.validateFocus()}</Rich>
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.submitDescription}
-        id="submit"
-        title={t.submitTitle}
-      >
+      <DocSection id="submit" title={t.submitTitle}>
         <CodeBlock code={SUBMIT} lang="tsx" title="entry-form.tsx" />
+        <p>
+          <Rich>{t.submitLast()}</Rich>
+        </p>
         <Pitfall>
           <p>
             <Rich>{t.submitEnter()}</Rich>
@@ -89,15 +99,20 @@ export default function FormMultiStepPage() {
         </Pitfall>
       </DocSection>
 
-      <DocSection
-        description={t.errorsDescription}
-        id="errors"
-        title={t.errorsTitle}
-      >
+      <DocSection id="errors" title={t.errorsTitle}>
+        <CodeBlock
+          callouts={{ 9: t.errorsSwitchCallout() }}
+          code={ERRORS}
+          lang="tsx"
+          marks={{ 9: 'highlight', 14: 'highlight' }}
+          title="entry-form.tsx"
+        />
+        <p>
+          <Rich>{t.errorsFocus()}</Rich>
+        </p>
         <p>
           <Rich>{t.errorsSwitch()}</Rich>
         </p>
-        <CodeBlock code={ERRORS} lang="tsx" title="entry-form.tsx" />
         <p>
           <Rich>{t.errorsBrowser()}</Rich>
         </p>

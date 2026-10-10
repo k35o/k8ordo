@@ -23,11 +23,10 @@ export default function FormReferenceSchemaPage() {
       introduction={t.introduction}
       path="/:locale/form/reference/schema"
     >
-      <DocSection
-        description={t.typesDescription}
-        id="types"
-        title={t.typesTitle}
-      >
+      <DocSection id="types" title={t.typesTitle}>
+        <p>
+          <Rich>{t.typesLead()}</Rich>
+        </p>
         <List
           items={[
             t.typeString,
@@ -49,11 +48,10 @@ export default function FormReferenceSchemaPage() {
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.attrsDescription}
-        id="attributes"
-        title={t.attrsTitle}
-      >
+      <DocSection id="attributes" title={t.attrsTitle}>
+        <p>
+          <Rich>{t.attrsLead()}</Rich>
+        </p>
         <List
           items={[
             t.attrLength,
@@ -66,27 +64,26 @@ export default function FormReferenceSchemaPage() {
         />
       </DocSection>
 
-      <DocSection
-        description={t.emptyDescription}
-        id="empty"
-        title={t.emptyTitle}
-      >
+      <DocSection id="empty" title={t.emptyTitle}>
+        <p>
+          <Rich>{t.emptyLead()}</Rich>
+        </p>
         <List
           items={[
             t.emptyText,
             t.emptyCheckbox,
             t.emptyNothing,
+            t.emptyUnselected,
             t.emptyStringbool,
             t.emptyGroup,
           ]}
         />
       </DocSection>
 
-      <DocSection
-        description={t.droppedDescription}
-        id="dropped"
-        title={t.droppedTitle}
-      >
+      <DocSection id="dropped" title={t.droppedTitle}>
+        <p>
+          <Rich>{t.droppedLead()}</Rich>
+        </p>
         <List
           items={[
             t.droppedRefine,
@@ -94,6 +91,8 @@ export default function FormReferenceSchemaPage() {
             t.droppedRegex,
             t.droppedPattern,
             t.droppedMime,
+            t.droppedFileSize,
+            t.droppedDatetime,
             t.droppedGroupMin,
             t.droppedTransform,
           ]}
@@ -105,15 +104,15 @@ export default function FormReferenceSchemaPage() {
         </Pitfall>
       </DocSection>
 
-      <DocSection
-        description={t.refusedDescription}
-        id="refused"
-        title={t.refusedTitle}
-      >
+      <DocSection id="refused" title={t.refusedTitle}>
+        <p>
+          <Rich>{t.refusedLead()}</Rich>
+        </p>
         <List
           items={[
             t.refusedNumber,
             t.refusedShape,
+            t.refusedNested,
             t.refusedKey,
             t.refusedStringbool,
           ]}

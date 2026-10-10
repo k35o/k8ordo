@@ -1,8 +1,8 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: 'zodのスキーマが、どんな入力欄と属性になるかの一覧です。あわせて、空のときに送られる値と、ブラウザで確かめない検証、扱えないスキーマをまとめています。',
-  en: 'What each zod schema becomes as a control and its attributes, along with what an empty control submits, the checks the browser does not run, and the schemas it cannot take.',
+  ja: 'zodのスキーマから導かれる入力欄の種類と属性、空のときに送られる値の一覧です。ブラウザで確かめない検証と、エラーになるスキーマも分かります。',
+  en: 'The control and attributes each zod schema derives, and what an empty control submits. It also lists the checks the browser skips and the schemas that are rejected.',
 });
 
 export const typesTitle = message({
@@ -10,8 +10,8 @@ export const typesTitle = message({
   en: 'Control types',
 });
 
-export const typesDescription = message({
-  ja: 'スキーマの型ごとに、`input`の`type`は次のようになります。',
+export const typesLead = message({
+  ja: 'スキーマの型ごとに、`input`の`type`は次のとおりです。',
   en: 'The `type` in `input` for each kind of schema:',
 });
 
@@ -47,7 +47,7 @@ export const typeBoolean = message({
 
 export const typeStringbool = message({
   ja: '`z.stringbool()`：`type="checkbox"`と、チェックしたときに送る`value`',
-  en: '`z.stringbool()`: `type="checkbox"`, with the `value` a checked box submits',
+  en: '`z.stringbool()`: `type="checkbox"` with the `value` a checked box submits',
 });
 
 export const typeFile = message({
@@ -77,7 +77,7 @@ export const typeOther = message({
 
 export const typesFormat = message({
   ja: '`z.email()`や`z.iso.date()`に`.regex()`などの検証を重ねても、入力欄の種類は変わりません。',
-  en: 'Stacking a check such as `.regex()` on `z.email()` or `z.iso.date()` does not change the control type.',
+  en: 'A check such as `.regex()` stacked on `z.email()` or `z.iso.date()` does not change the control type.',
 });
 
 export const attrsTitle = message({
@@ -85,7 +85,7 @@ export const attrsTitle = message({
   en: 'Constraints and attributes',
 });
 
-export const attrsDescription = message({
+export const attrsLead = message({
   ja: 'スキーマの制約は、次の属性になります。',
   en: 'Schema constraints become these attributes:',
 });
@@ -116,18 +116,18 @@ export const attrMime = message({
 });
 
 export const attrRequired = message({
-  ja: '空のときに送る値をスキーマが拒むとき：`required`',
-  en: 'When the schema rejects what an empty control submits: `required`',
+  ja: '空のときに送られる値がスキーマに合わないとき：`required`',
+  en: 'When what an empty control submits does not match the schema: `required`',
 });
 
 export const emptyTitle = message({
   ja: '空のときに送られる値',
-  en: 'What an empty control submits',
+  en: 'Empty values',
 });
 
-export const emptyDescription = message({
-  ja: '`required`を付けるかどうかも、`parseForm`がスキーマに渡す値も、ここで決まります。',
-  en: 'This decides both whether `required` is emitted and what `parseForm` hands the schema.',
+export const emptyLead = message({
+  ja: '`parseForm`は、空の入力欄を次の値としてスキーマに渡します。',
+  en: '`parseForm` hands the schema these values for an empty control:',
 });
 
 export const emptyText = message({
@@ -141,13 +141,18 @@ export const emptyCheckbox = message({
 });
 
 export const emptyNothing = message({
-  ja: '数値と`z.coerce.bigint()`、ファイル、選択肢：何も送らない（`undefined`）',
-  en: 'A number, a `z.coerce.bigint()`, a file or a choice: nothing (`undefined`)',
+  ja: '数値、`z.coerce.bigint()`、ファイル：何も送らない（`undefined`）',
+  en: 'A number, a `z.coerce.bigint()` or a file: nothing (`undefined`)',
+});
+
+export const emptyUnselected = message({
+  ja: '未選択のラジオと、プレースホルダーのままの`<select>`：何も送らない（`undefined`）',
+  en: 'A radio group with nothing selected, or a `<select>` left on its placeholder: nothing (`undefined`)',
 });
 
 export const emptyStringbool = message({
   ja: 'チェックの無い`z.stringbool()`のチェックボックス：何も送らない（`undefined`）',
-  en: 'An unchecked `z.stringbool()` box: nothing (`undefined`)',
+  en: 'An unchecked `z.stringbool()` checkbox: nothing (`undefined`)',
 });
 
 export const emptyGroup = message({
@@ -157,12 +162,12 @@ export const emptyGroup = message({
 
 export const droppedTitle = message({
   ja: 'ブラウザで確かめない検証',
-  en: 'Checks the browser does not run',
+  en: 'Checks the browser skips',
 });
 
-export const droppedDescription = message({
+export const droppedLead = message({
   ja: '次の検証はHTMLの属性で表せないので、`dropped`に載ります。どれもサーバーでは確かめます。',
-  en: 'These cannot be expressed as HTML attributes, so they are listed in `dropped`. The server still runs every one.',
+  en: 'These checks cannot be expressed as HTML attributes, so they are listed in `dropped`. The server still runs every one.',
 });
 
 export const droppedRefine = message({
@@ -171,13 +176,13 @@ export const droppedRefine = message({
 });
 
 export const droppedExclusive = message({
-  ja: '小数の範囲の、境界を含まない指定（`.gt()`、`.lt()`）',
+  ja: '小数に付けた`.gt()`、`.lt()`（境界を含まない範囲）',
   en: 'An exclusive bound on a float (`.gt()`, `.lt()`)',
 });
 
 export const droppedRegex = message({
-  ja: 'フラグ付きの正規表現と、1つの文字列に重ねた複数の正規表現',
-  en: 'A regex with flags, and several regexes on one string',
+  ja: 'フラグやアンカーを持つ正規表現と、1つの文字列に重ねた複数の正規表現',
+  en: 'A regex with flags or anchors, and several regexes on one string',
 });
 
 export const droppedPattern = message({
@@ -186,48 +191,63 @@ export const droppedPattern = message({
 });
 
 export const droppedMime = message({
-  ja: 'ファイルの`.mime()`と、大きさの`.min()`、`.max()`',
-  en: '`.mime()` on a file, and its size bounds',
+  ja: 'ファイルの`.mime()`。`accept`は選択画面の候補を絞るだけで、ブラウザは種類を確かめません',
+  en: '`.mime()` on a file. `accept` only filters the file picker, and the browser never checks the type',
+});
+
+export const droppedFileSize = message({
+  ja: 'ファイルの大きさの`.min()`、`.max()`',
+  en: 'Size bounds (`.min()`, `.max()`) on a file',
+});
+
+export const droppedDatetime = message({
+  ja: '`datetime-local`の入力欄では満たせない`z.iso.datetime()`',
+  en: 'A `z.iso.datetime()` that no `datetime-local` control can satisfy',
 });
 
 export const droppedGroupMin = message({
-  ja: 'チェックボックスの集まりの`.min()`。`minChecked`でブラウザでも確かめられます',
+  ja: 'チェックボックスの集まりの`.min()`。`minChecked`を宣言するとブラウザでも確かめます',
   en: '`.min()` on a checkbox group; declare `minChecked` to run it in the browser too',
 });
 
 export const droppedTransform = message({
-  ja: '`.transform()`や`z.custom()`の後ろにあって、中身を読めない制約',
-  en: 'Constraints behind a `.transform()` or a `z.custom()`, which cannot be read',
+  ja: '`.transform()`や`z.custom()`を通したあとの制約。スキーマから読み取れません',
+  en: 'Constraints after a `.transform()` or `z.custom()`, which the schema does not expose',
 });
 
 export const droppedNotYet = message({
-  ja: '1つの入力欄や入れ子のオブジェクト、配列の行に付けた`.refine()`は、まだ`dropped`に載りません。ブラウザでは何も知らせずに通し、サーバーでだけ確かめます。',
-  en: 'A `.refine()` on a single field, a nested object or a row is not listed in `dropped` yet. The browser lets it through without a word, and only the server checks it.',
+  ja: '1つのフィールドや入れ子のオブジェクト、配列の行に付けた`.refine()`は、まだ`dropped`に載りません。ブラウザでは確かめず、サーバーでだけ確かめます。',
+  en: 'A `.refine()` on a single field, a nested object or a row is not listed in `dropped` yet. The browser lets it through, and only the server checks it.',
 });
 
 export const refusedTitle = message({
   ja: 'エラーになるスキーマ',
-  en: 'Schemas it refuses',
+  en: 'Rejected schemas',
 });
 
-export const refusedDescription = message({
-  ja: '次のスキーマを渡すと、`formFields`と`parseForm`が理由を添えてエラーを投げます。',
-  en: '`formFields` and `parseForm` throw, with the reason, on these:',
+export const refusedLead = message({
+  ja: "次のスキーマを渡すと、`formFields`と`parseForm`はエラーになります。エラー文には場所と理由が入ります（例：`[@k8ordo/form] 'rows.tags': 繰り返しの中の繰り返しは name の添字が一意に決まらないため表現できません`）。",
+  en: "`formFields` and `parseForm` throw on these schemas. The message names the path and the reason, for example `[@k8ordo/form] 'rows.tags': 繰り返しの中の繰り返しは name の添字が一意に決まらないため表現できません`.",
 });
 
 export const refusedNumber = message({
-  ja: '`z.number()`と`z.bigint()`、`z.date()`、`z.literal(1)`：どの値も文字列で届くので、どんな入力も通りません。`z.coerce`を使います',
-  en: '`z.number()`, `z.bigint()`, `z.date()`, `z.literal(1)`: every value arrives as a string, so nothing could pass. Use `z.coerce`',
+  ja: '`z.number()`と`z.bigint()`と`z.date()`と`z.literal(1)`：送られる値はすべて文字列なので、どの入力も通りません。`z.coerce`を使います',
+  en: '`z.number()`, `z.bigint()`, `z.date()`, `z.literal(1)`: every submitted value is a string, so nothing could pass. Use `z.coerce`',
 });
 
 export const refusedShape = message({
-  ja: '`z.record`、タプル、nullableなオブジェクト、行の中の行：送信する名前が1つに決まりません',
-  en: '`z.record`, tuples, nullable objects, a repeat inside a repeat: there is no single name to submit under',
+  ja: '`z.record`、タプル、nullableなオブジェクト：`name`が1つに決まりません',
+  en: '`z.record`, tuples, nullable objects: there is no single `name` to submit under',
+});
+
+export const refusedNested = message({
+  ja: '繰り返しの中の繰り返し：`name`の添字が1つに決まりません',
+  en: 'A repeat nested inside a repeat: the indexes in `name` cannot be determined',
 });
 
 export const refusedKey = message({
-  ja: '`.`や`[`、`]`を含むキー：名前の区切りと区別できません',
-  en: 'Keys holding `.` or brackets: they cannot be told apart from the path separators',
+  ja: '`.`や`[`、`]`を含むキー：`name`の中の区切りと区別できません',
+  en: 'Keys holding `.` or brackets: they cannot be told apart from the separators in `name`',
 });
 
 export const refusedStringbool = message({
@@ -237,11 +257,11 @@ export const refusedStringbool = message({
 
 export const notYetTitle = message({
   ja: 'まだできないこと',
-  en: 'What it does not do yet',
+  en: 'Not supported yet',
 });
 
 export const notYetFiles = message({
-  ja: '1つの入力欄で複数のファイルを受け取ること。`z.array(z.file())`は、1ファイルずつの繰り返しの行になります',
+  ja: '1つの入力欄で複数のファイルを受け取ること。`z.array(z.file())`は、ファイル1つずつの行の繰り返しになります',
   en: 'Several files in one control. `z.array(z.file())` derives repeated single-file rows',
 });
 
@@ -251,6 +271,6 @@ export const notYetRowRules = message({
 });
 
 export const notYetMask = message({
-  ja: '入力のマスク。値を書き換えることはできますが、カーソル位置の管理はフォームとは別の問題として扱っていません',
-  en: 'Input masking. Rewriting the value works, but managing the caret is a separate problem from wiring a form',
+  ja: '入力のマスク。値は書き換えられますが、カーソル位置は保ちません',
+  en: 'Input masking. The value can be rewritten, but the caret position is not kept',
 });

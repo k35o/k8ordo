@@ -1,112 +1,137 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: '登壇の申し込みフォームを1つ作りながら、`@k8ordo/form`の使い方を最初から最後までたどります。フォームの制約はzodのスキーマに1度だけ書き、ブラウザでの検証もサーバーでの検証も、そのスキーマに任せます。',
-  en: 'Build a form for submitting a talk, from start to finish. You write the form’s constraints once, in a zod schema, and let that schema drive validation in the browser and on the server.',
+  ja: '登壇の申し込みフォームを例に、zodのスキーマを1つ書き、入力欄の属性とサーバーでの検証をそこから作ります。',
+  en: 'Build a talk submission form: write one zod schema, then derive the input attributes and the server-side validation from it.',
 });
 
 export const installTitle = message({
-  ja: 'インストールする',
+  ja: 'インストール',
   en: 'Install',
 });
 
-export const installDescription = message({
-  ja: '`@k8ordo/form`と、スキーマを書くためのzodをインストールします。',
-  en: 'Install `@k8ordo/form`, and zod to write the schema with.',
+export const serverOnly = message({
+  ja: 'スキーマを読む`formFields`と`parseForm`はサーバーで動き、`useForm`はClient Componentで動きます。',
+  en: '`formFields` and `parseForm` read the schema on the server, and `useForm` runs in a Client Component.',
 });
 
 export const zodMini = message({
-  ja: 'スキーマは`zod/mini`で書いても同じように動きます。スキーマを書いたモジュールをクライアントのコードからもimportするなら、バンドルが小さく済む`zod/mini`を選んでください。',
+  ja: 'スキーマは`zod/mini`で書いても同じように動きます。クライアントのコードもスキーマのモジュールをimportするなら、バンドルの小さい`zod/mini`を選んでください。',
   en: 'A schema written with `zod/mini` works the same way. If client code imports the schema module too, choose `zod/mini` for the smaller bundle.',
 });
 
 export const schemaTitle = message({
-  ja: 'スキーマを書く',
-  en: 'Write the schema',
+  ja: 'スキーマの定義',
+  en: 'Defining the schema',
 });
 
-export const schemaDescription = message({
-  ja: 'まず、フォームにどんな入力欄があり、それぞれにどんな制約があるかを、zodのスキーマで書きます。',
-  en: 'First, describe the form’s fields and their constraints in a zod schema.',
+export const schemaFields = message({
+  ja: 'フォームの入力欄と、それぞれの制約をzodのスキーマに書きます。`min`や`url`に渡した文言は、そのままエラーの表示に使われます。',
+  en: 'Describe the form’s fields and their constraints in a zod schema. The wording passed to `min` or `url` is what the error shows.',
 });
 
 export const schemaCoerce = message({
-  ja: 'フォームは、数値の入力欄の値も文字列として送ります。そのため数値の欄は`z.coerce.number()`で受け、文字列を数に変換してから検証します。',
-  en: 'A form submits even a numeric field as a string, so a number field uses `z.coerce.number()`, which turns the string into a number before checking it.',
+  ja: 'フォームは数値の入力欄の値も文字列として送ります。数値の入力欄は`z.coerce.number()`で定義し、文字列を数値に変換してから検証します。',
+  en: 'A form submits every value as a string, numbers included. Declare a number field with `z.coerce.number()` so the string is converted before it is checked.',
 });
 
 export const deriveTitle = message({
-  ja: '入力欄の属性を作る',
-  en: 'Derive the fields',
+  ja: '入力欄の属性',
+  en: 'Input attributes',
 });
 
-export const deriveDescription = message({
-  ja: '次に、Server Componentで`formFields`を呼びます。スキーマから、入力欄に付ける`required`や`maxlength`などの属性と、エラーの文言が作られます。',
-  en: 'Next, call `formFields` in a Server Component. From the schema it builds the attributes for each control, such as `required` and `maxlength`, along with the error messages.',
+export const deriveCallout = message({
+  ja: 'モジュールスコープで1回だけ作る',
+  en: 'Built once, at module scope',
+});
+
+export const deriveFields = message({
+  ja: 'Server Componentで`formFields`にスキーマを渡します。入力欄に付ける`required`や`maxlength`などの属性と、エラーの文言が作られます。',
+  en: 'Hand the schema to `formFields` in a Server Component. It builds the attributes for each input, such as `required` and `maxlength`, along with the error messages.',
 });
 
 export const deriveJson = message({
-  ja: '`formFields`の戻り値はただのJSONなので、そのままpropsとしてClient Componentに渡せます。zodを使うのはサーバー側だけで、ブラウザには届きません。',
-  en: 'What `formFields` returns is plain JSON, so it goes to a Client Component as props. Only the server uses zod; it never reaches the browser.',
+  ja: '戻り値はJSONなので、propsとしてClient Componentに渡せます。zodはブラウザのバンドルに入りません。',
+  en: 'The result is plain JSON, so it can go to a Client Component as props. zod stays out of the browser bundle.',
 });
 
 export const actionTitle = message({
-  ja: '送信を受け取る',
-  en: 'Receive the submission',
+  ja: '送信の検証',
+  en: 'Validating the submission',
 });
 
-export const actionDescription = message({
-  ja: '送信されたフォームは、Server Actionの中で`parseForm`に渡して検証します。',
-  en: 'A submitted form is validated in a Server Action, by handing it to `parseForm`.',
+export const actionParse = message({
+  ja: '送信はServer Actionで受け取り、`parseForm`に同じスキーマと`formData`を渡します。',
+  en: 'A Server Action receives the submission and hands the same schema and the `formData` to `parseForm`.',
 });
 
 export const actionResult = message({
-  ja: '検証に通れば、`parsed.data`に型の付いた値が入ります。通らなかったときは`parsed.state`をそのまま返してください。エラーと入力していた値がフォームに戻るので、直してすぐに送り直せます。',
-  en: 'When it passes, `parsed.data` holds the typed values. When it fails, return `parsed.state` as it is: the errors and what was typed go back to the form, so the person can fix them and send again.',
+  ja: '検証に通ると、`parsed.data`に型の付いた値が入ります。通らないときは`parsed.state`を返します。エラーと入力した値がフォームに戻り、最初にエラーになった入力欄にフォーカスが移ります。',
+  en: 'When it passes, `parsed.data` holds the typed values. When it fails, return `parsed.state`. The errors and the values the user entered go back to the form, and focus moves to the first field with an error.',
+});
+
+export const actionRedirectBefore = message({
+  ja: '保存のあとの移動は`@k8ordo/framework/server`の`redirect()`で行います。詳しくは',
+  en: 'After saving, move on with `redirect()` from `@k8ordo/framework/server`. See ',
+});
+
+export const actionRedirectAfter = message({
+  ja: 'を見てください。',
+  en: '.',
 });
 
 export const formTitle = message({
-  ja: 'フォームを描く',
-  en: 'Render the form',
+  ja: 'フォームの描画',
+  en: 'Rendering the form',
 });
 
-export const formDescription = message({
-  ja: '最後に、Server Actionを`useActionState`でフォームにつなぎ、返ってくるstateを`useForm`に渡します。',
-  en: 'Finally, connect the Server Action to the form with `useActionState`, and pass the state it returns to `useForm`.',
+export const formHookCallout = message({
+  ja: '入力欄の属性と、Server Actionが返したstate',
+  en: 'The derived fields and the state the Server Action returned',
+});
+
+export const formPropsCallout = message({
+  ja: '`<form>`にだけ展開する',
+  en: 'Spread onto the `<form>` only',
+});
+
+export const formHook = message({
+  ja: '`useActionState`にServer Actionを渡します。返ってくる`state`と、propsの`fields`を`useForm`に渡します。',
+  en: 'Pass the Server Action to `useActionState`. Then pass the `state` it returns and the `fields` prop to `useForm`.',
 });
 
 export const formSpread = message({
-  ja: '`form.props`は`<form>`に、各欄の`input`は対応する入力欄に展開します。エラーがあると`error`に入るので、入力欄のすぐ近くに表示します。',
-  en: 'Spread `form.props` onto the `<form>`, and each field’s `input` onto its control. A field’s error arrives in `error`; show it right next to the control.',
+  ja: '`form.props`は`<form>`に、各欄の`input`は対応する入力欄に展開します。エラーは`error`に入るので、入力欄のすぐ近くに表示します。',
+  en: 'Spread `form.props` onto the `<form>`, and each field’s `input` onto its control. The error is in `error`; show it right next to the control.',
 });
 
 export const formDom = message({
-  ja: '入力欄を1つずつ登録する手順も、入力値を持つstateもありません。値はDOMが持っているので、キーを押すたびに再描画されることもありません。',
-  en: 'There is no per-field registration and no state holding the values. The DOM keeps them, so typing never re-renders.',
+  ja: '入力した値はReactのstateで管理しないので、キーを押すたびに再描画されることはありません。入力欄を1つずつ登録する手順もありません。',
+  en: 'The typed values are not kept in React state, so typing never re-renders the form. There is no per-field registration either.',
 });
 
 export const tryTitle = message({
-  ja: '動かしてみる',
-  en: 'Try it',
+  ja: '申し込みのデモ',
+  en: 'Talk form demo',
 });
 
 export const tryDescription = message({
-  ja: 'ここまでで作ったフォームです。このサイトには送信先のServer Actionが無いので、送信できる状態になったところで止めています。',
-  en: 'The form you just built. This site has no Server Action to send it to, so it stops once the values are ready to be sent.',
+  ja: 'ここまでで作ったフォームです。送信先が無いので、送信できる値になった時点で止まります。',
+  en: 'The form built above. With nowhere to send it, it stops once the values are valid.',
 });
 
 export const trySteps = [
   message({
-    ja: '何も入力せずに「申し込む」を押してみてください。最初の欄にフォーカスが移り、エラーが表示されます。',
-    en: 'Press “Submit” with nothing filled in. Focus moves to the first field, and its error appears.',
+    ja: '何も入力せずに「申し込む」を押します。最初の欄にフォーカスが移り、エラーが表示されます。',
+    en: 'Press “Submit” with nothing filled in. Focus moves to the first field, and each field’s error appears.',
   }),
   message({
-    ja: '「イベントのURL」に`example`と入力して欄から離れると、URLの形式ではないというエラーが出ます。',
-    en: 'Type `example` into “Event URL” and leave the field. The error says it is not a URL.',
+    ja: '「イベントのURL」に`example`と入力して欄から離れます。「イベントのURLを入力してください」と表示されます。',
+    en: 'Type `example` into “Event URL” and leave the field. “Enter the event URL” appears.',
   }),
   message({
-    ja: '「長さ（分）」に`90`と入力して欄から離れると、上限の60分を超えているというエラーが出ます。',
-    en: 'Type `90` into “Length (minutes)” and leave the field. The error says it is over the 60-minute limit.',
+    ja: '「長さ（分）」に`90`と入力して欄から離れます。「60分以下にしてください」と表示されます。',
+    en: 'Type `90` into “Length (minutes)” and leave the field. “Make it 60 minutes or less” appears.',
   }),
 ] as const;
 
@@ -147,7 +172,7 @@ export const tryErrorTitleLong = message({
 
 export const tryErrorEventUrl = message({
   ja: 'イベントのURLを入力してください',
-  en: 'Enter the event’s URL',
+  en: 'Enter the event URL',
 });
 
 export const tryErrorMinutes = message({
@@ -163,24 +188,4 @@ export const tryErrorMinutesMin = message({
 export const tryErrorMinutesMax = message({
   ja: '60分以下にしてください',
   en: 'Make it 60 minutes or less',
-});
-
-export const nextTitle = message({
-  ja: '次のステップ',
-  en: 'Next steps',
-});
-
-export const nextFieldTypes = message({
-  ja: '数値や選択肢、チェックボックス、ファイルの入力欄を足す。',
-  en: 'Add numbers, choices, checkboxes and files.',
-});
-
-export const nextErrors = message({
-  ja: 'フォーム全体のエラーや、サーバーでしか分からない失敗を表示する。',
-  en: 'Show errors about the whole form, and failures only the server can find.',
-});
-
-export const nextReference = message({
-  ja: '`formFields`や`parseForm`が受け取るものと返すものを調べる。',
-  en: 'Look up what `formFields` and `parseForm` take and return.',
 });

@@ -3,6 +3,7 @@ import { CodeBlock } from '@k8ordo/ui/code-block';
 
 import { Note, Pitfall } from '../../../../components/callout';
 import { DocPage, DocSection } from '../../../../components/doc-page';
+import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Playground } from '../../../../components/playground';
 import { Rich } from '../../../../components/rich';
 import { RatingDemo } from '../../../../demos/form/custom-inputs/rating-demo';
@@ -30,11 +31,7 @@ export default function FormCustomInputsPage() {
 
   return (
     <DocPage introduction={t.introduction} path="/:locale/form/custom-inputs">
-      <DocSection
-        description={t.placeDescription}
-        id="use"
-        title={t.placeTitle}
-      >
+      <DocSection id="use" title={t.placeTitle}>
         <CodeBlock
           code={USE}
           lang="tsx"
@@ -42,31 +39,46 @@ export default function FormCustomInputsPage() {
           title="post-form.tsx"
         />
         <p>
+          <Rich>{t.placeState()}</Rich>
+        </p>
+        <p>
           <Rich>{t.placeSubmit()}</Rich>
         </p>
+        <Note>
+          <p>
+            <Rich>{t.placeUiBefore()}</Rich>
+            <LocaleAnchor path="/:locale/ui/form">
+              {m.nav.uiForm()}
+            </LocaleAnchor>
+            <Rich>{t.placeUiAfter()}</Rich>
+          </p>
+        </Note>
       </DocSection>
 
-      <DocSection description={t.whyDescription} id="why" title={t.whyTitle}>
+      <DocSection id="why" title={t.whyTitle}>
+        <p>
+          <Rich>{t.whyNoEvent()}</Rich>
+        </p>
         <p>
           <Rich>{t.whyEvent()}</Rich>
         </p>
       </DocSection>
 
       <DocSection id="caution" title={t.cautionTitle}>
+        <CodeBlock
+          code={RESET}
+          lang="tsx"
+          marks={{ 4: 'highlight', 5: 'highlight' }}
+          title="post-form.tsx"
+        />
+        <p>
+          <Rich>{t.cautionReset()}</Rich>
+        </p>
         <Pitfall>
           <p>
             <Rich>{t.cautionValidation()}</Rich>
           </p>
         </Pitfall>
-        <p>
-          <Rich>{t.cautionReset()}</Rich>
-        </p>
-        <CodeBlock code={RESET} lang="tsx" title="post-form.tsx" />
-        <Note>
-          <p>
-            <Rich>{t.cautionUi()}</Rich>
-          </p>
-        </Note>
       </DocSection>
 
       <Playground

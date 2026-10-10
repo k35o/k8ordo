@@ -43,7 +43,7 @@ pnpm check:write       # Oxlint/Oxfmt lint/format auto-fix
   handling). When the
   site needs something the packages do not give it, the fix belongs in the
   package, and the site is where the pressure is felt first.
-- **Navigation mirrors the URL layout**: the header lists the packages and nothing else (`src/components/navigation.tsx`). Inside a package (`/<package>/*`, but not its landing) the shell in `src/components/locale-shell.tsx` adds a left sidebar, `src/components/package-sidebar.tsx`, which lists that package's pages under its groups; below `lg` the same sidebar opens in a `Drawer`. The header, the sidebar, the home page's package list and every guide page's breadcrumb, title and prev/next pager read one list, `PACKAGES` in `src/data/packages.ts` — a package's `groups` and their `sections` are in reading order, so adding a page to a package's guide is one line there plus the route. A landing's `NextSteps` is the exception: it is a hand-picked excerpt written in the landing's own `steps`, so a new page does not appear there by itself. Its paths are `SitePath`, so a removed page fails to compile. A section with a catalog (`/ui/components`, `/ui/ai`) becomes a group of its own in the sidebar, its categories levels that open and close; the shell's `catalogs` maps the section to its categories. The footer lists no packages or sections: it is the site's name, its tagline and the GitHub and npm links. Never promote one package's pages to a site-wide row: with a single package it reads as convenience, with six it makes that package look like the site's spine.
+- **Navigation mirrors the URL layout**: the header lists the packages and nothing else (`src/components/navigation.tsx`). Inside a package (`/<package>/*`, but not its landing) the shell in `src/components/locale-shell.tsx` adds a left sidebar, `src/components/package-sidebar.tsx`, which lists that package's pages under its groups; below `lg` the same sidebar opens in a `Drawer`. The header, the sidebar, the home page's package list and every guide page's breadcrumb, title and prev/next pager read one list, `PACKAGES` in `src/data/packages.ts` — a package's `groups` and their `sections` are in reading order, so adding a page to a package's guide is one line there plus the route. A landing keeps no list of pages of its own: its hero links to `get-started`, and the sidebar is where the rest of the guide is found. A section with a catalog (`/ui/components`, `/ui/ai`) becomes a group of its own in the sidebar, its categories levels that open and close; the shell's `catalogs` maps the section to its categories. The footer lists no packages or sections: it is the site's name, its tagline and the GitHub and npm links. Never promote one package's pages to a site-wide row: with a single package it reads as convenience, with six it makes that package look like the site's spine.
 - **URL layout**: package-first. Everything a package documents lives under `/<package>/…` — `@k8ordo/ui` owns `/ui/get-started`, `/ui/components/*`, `/ui/ai/*`, and so on. `/<package>` itself is that package's landing page (`src/routes/[locale]/ui/page.tsx`): what it is, what it gives you, where to start. Only `/` is shared — it introduces k8ordo, lists the packages, and states what they all commit to. Add a new package by adding its own `/<package>` landing plus a `/<package>/…` subtree starting at `/<package>/get-started`, and an entry in `PACKAGES` (`src/data/packages.ts`) — its shipped docs are found from its `package.json` (see Markdown for agents below), and the build fails while `PACKAGES` lacks it; never put a package's sections at the top level, where they would sit at the same depth as package names.
 - **Unmatched routes**: `src/routes/[locale]/not-found.tsx` is rendered into a
   single `404.html`, which a static host serves for anything it does not have.
@@ -88,11 +88,11 @@ pnpm check:write       # Oxlint/Oxfmt lint/format auto-fix
 - **Titles**: every `page.tsx` renders its own `<title>` through
   `src/components/page-title.tsx` (`<PageTitle name="Button" />` or
   `<PageTitle title={m.nav.theming} />` → `Button · k8ordo`); `LandingHero` does it
-  for the landings and `DocPage` for guide pages (`Link and navigate — @k8ordo/router · k8ordo`), `not-found.tsx` renders its own, and the home page and the
+  for the landings and `DocPage` for guide pages (`Links and navigation — @k8ordo/router · k8ordo`), `not-found.tsx` renders its own, and the home page and the
   `/` redirect page write a bare `<title>k8ordo</title>`. The root layout
   renders none — React 19 hoists a `<title>` from anywhere, and two on screen
   is two, not a fallback. A new page without one is a regression:
-  `grep -L "PageTitle\|LandingHero\|DocPage\|<title" src/routes/**/page.tsx` should
+  `grep -L "<PageTitle\|<LandingHero\|<DocPage\|<title" src/routes/**/page.tsx` should
   print nothing (the built HTML is the proof: every `index.html` under
   `dist/client/` carries exactly one `<title>`).
 - **Markdown for agents**: nothing here lists packages for it, and nothing
@@ -236,8 +236,8 @@ export default function ButtonPage() {
 Every package documents itself as a guide: a `get-started` page, then topic
 pages, each a directory under `src/routes/[locale]/<package>/` listed in one
 of that package's `groups` in `PACKAGES`. `@k8ordo/ui`'s guide is
-`get-started`, `theming` and `i18n`; its catalog pages keep their own layout
-(below). The page is a Server Component:
+`get-started`, `theming`, `i18n` and `form`; its catalog pages keep their own
+layout (below). The page is a Server Component:
 
 ```tsx
 export default function RouterLinksPage() {
@@ -246,12 +246,11 @@ export default function RouterLinksPage() {
       introduction={m.routerLinks.introduction}
       path="/:locale/router/links"
     >
-      <DocSection
-        description={m.routerLinks.hrefDescription}
-        id="href"
-        title={m.routerLinks.hrefTitle}
-      >
+      <DocSection id="href" title={m.routerLinks.hrefTitle}>
         <CodeBlock code={HREF_EXAMPLE} lang="tsx" />
+        <p>
+          <Rich>{m.routerLinks.hrefArguments()}</Rich>
+        </p>
       </DocSection>
     </DocPage>
   );
@@ -262,6 +261,48 @@ export default function RouterLinksPage() {
   sidebar, breadcrumb, pager and `<title>` cannot disagree; it renders the
   prev/next pager itself, and the contents on the right from its own
   `DocSection`, `DocSubsection`, `Playground` and `ApiEntry` children.
+- A package's guide documents that package alone. What it does together with
+  another package of the family — `@k8ordo/framework` handing a page its
+  `search` or `request.cookies`, say — belongs in that other package's guide,
+  not here; a page here may name it in one sentence. A framework outside the
+  family has no guide here to host it, so wiring the package into one gets a
+  page of the package's own (`/state/nextjs`). A `get-started` page is
+  the introduction and nothing more: install, define, read and update in a
+  component, and the demo.
+- A `how-it-works` page (仕組み) has one job in every package: the premises
+  of the package's behaviour — when and where it does what — and what it
+  guarantees and does not. It is what a reader opens when something behaves
+  unexpectedly or to learn why a constraint exists, so it holds no usage (that
+  is the guide's), no API listing and no fixes (troubleshooting's); where one
+  of those touches it, one sentence and a link. Its `introduction` is one
+  sentence, 「`@k8ordo/<name>`が〈主題〉をいつ、どこで行うかと、保証することとしないことが分かります。」,
+  and it ends with the sections 保証すること (`guarantees`) and 保証しないこと
+  (`non-guarantees`), each a list of facts the package's source backs.
+- The shape of a page (`@k8ordo/state`'s pages are the model): `introduction`
+  is one or two sentences saying what the page lets the reader do, never an
+  announcement of what the page explains. A section leads with its code and
+  explains after it, in one to three paragraphs that point at the code's lines
+  (`marks`, `callouts`); a section with no code is its paragraphs alone. At
+  most one `Note` or `Pitfall` per section. A page
+  ends with its last section — no 次のステップ list, since the pager and the
+  sidebar already give the order.
+- Titles are short noun phrases naming the subject, never a claim: a page's
+  label in `PACKAGES` (置き場所, URL, 履歴エントリ, Cookie, 更新, テスト,
+  API, トラブルシューティング) is at most about eight characters, a
+  `DocSection` heading about twelve (6つの置き場所, 既定値, 拒まれる書き方).
+  An `ApiEntry` is headed by its export's name; a troubleshooting entry by the
+  error text alone when there is one. No title is a sentence — not the
+  landing's tagline or claims, not a `Playground`'s, not a troubleshooting
+  entry's: `戻るボタンのデモ`, not `戻るボタンで元に戻す`;
+  `再読み込みで既定値に戻る日付`, not `日付が再読み込みで既定値に戻る`. A
+  reader skims titles to decide what to read, and a sentence gives no gist.
+- A landing is `LandingHero` (name, tagline, install, the point in code and
+  the `get-started` button) and two or three `LandingClaim`s, one of which
+  may hold the `Playground`: what the package alone promises its user, never
+  what it does with another package of the family. It has no 次に読む list
+  and no link to the agent guide. `NextSteps` (`src/components/landing.tsx`)
+  is still there only for the landings not yet rewritten to this shape; a
+  new or rewritten landing does not use it, and it goes once none does.
 - Its words live in `src/messages/<package>-<section>.ts` (namespace
   `m.<package><Section>`), with `introduction` as the page's lead.
 - Code samples carry no natural-language comments — both locales see the same
@@ -289,14 +330,19 @@ export default function RouterLinksPage() {
   `src/demos/form/get-started/`), shown in a `Playground` with `steps` the
   reader can follow, and only where
   touching it teaches something the prose cannot. The site is static, so a
-  demo simulates the server in the browser and says so.
+  demo simulates the server in the browser and says so. A demo that prints
+  a value prints it as source would spell it, with `jsLiteral`
+  (`src/components/js-literal.ts`): `{ page: 1 }`, not `JSON.stringify`'s
+  `{"page":1}`.
 - An API reference page is a run of `ApiEntry`s (name, entry point,
   signature, params, returns, fields).
 - A `get-started` page installs the package with `PackageInstall`
   (`src/components/install.tsx`): the command adds the package's required
   peers apart from what an application already has (React, Vite), and below
   it `Requirements` lists what it runs with (React, Vite, Node.js,
-  TypeScript). The site shows no table of peers — no library's
+  TypeScript), and one sentence says where the agent guide ships
+  (`node_modules/@k8ordo/<name>/docs/GUIDE.md`) so an AGENTS.md can point at
+  it — a path to copy, not a link. The site shows no table of peers — no library's
   documentation does — and never mentions the `@types/*` peers, which go
   with TypeScript. An optional peer that a feature needs is installed on that
   feature's page (`InstallCommand`). The versions are read from the package
@@ -329,25 +375,43 @@ shows them.
 
 The site's Japanese reads like k8o's blog (`k35o/k8o`,
 `apps/main/src/app/blog/(articles)/*/page.mdx`); read two or three articles
-there before writing a page. Concretely:
+there before writing a page, and read two or three of `@k8ordo/state`'s pages,
+which were rewritten to this standard. Concretely:
 
-- です/ます throughout. Open with the situation and why it matters, then what
-  to do; join sentences with connectives (そのため、ただし、一方で) rather
-  than stacking short assertions. Give the reason when there is one
-  (〜ためです、〜からです).
+- です/ます. One fact per sentence: at most two 読点 and about seventy
+  characters; split a sentence rather than joining three things with 、. Do
+  not stack short assertions either — a sentence says one thing in full.
+- Say it with the API's names and the ordinary technical words, never a
+  metaphor or a paraphrase: not 型の付いた箱 but スキーマを持たない状態, not
+  受け持つ but 扱う (or what it does), not 残り方 but いつまで残るか, not
+  〜がそこから決まる but a sentence with its subject (〜から作る), not
+  隠れた面／2つの面 but `url`と`entry`, not 境界を越える but
+  URLやストレージから読み戻す, not 黙って共有 but 同じストアを共有, not 拾う
+  but 読めたフィールドだけを残す, not 行 (a storage row) but 保存した値.
+  置き場所 is the package's own concept and stays.
+- Give a reason (〜からです, 〜ためです, 〜のです) only where the reader
+  cannot use the feature correctly without it: at most once per message, and
+  never as a paragraph's closing flourish.
+- No translationese: 投げる is エラーになる with the error text quoted, 描画に出る
+  is 次の描画に反映される, 履歴エントリを積む is 追加する, 言語の交渉 is
+  言語の選択, and 届く only where nothing more precise (受け取る, 発火する)
+  fits. Prefer the words a Japanese developer would say: 展開する (spread),
+  作る (derive), 入力欄 (a form field), 検証する／確かめる (validate, check).
+- The same word for the same thing on every page: 既定値 (never デフォルト;
+  初期値 only for memory state's `initial`), スキーマに合わない値,
+  フィールドごとに既定値に戻る, 履歴エントリ, 購読する／再描画,
+  クエリ／パラメータ, Server Component／Client Component.
 - No space between Japanese and Latin letters, digits, or inline code:
   `zodのスキーマ1つで`, `` `useForm`が返す ``. Keep the spaces inside code.
-- At most three 読点 in a sentence; split a longer one. Avoid runs of seven or
-  more kanji.
 - List words with 、 or と, never 中黒 (・). Define a term with a full-width
-  colon (`用語：説明`), never a dash.
-- No bold and no tables in prose, and none of the stock AI phrases
-  (重要なのは、シームレス、強力な、することができる).
-- Prefer the words a Japanese developer would say over translations of the
-  English: 展開する (spread), 作る (derive), 入力欄 (a form field),
-  検証する／確かめる (validate, check).
+  colon (`用語：説明`), never a dash. No bold, tables or dashes in prose; no
+  runs of seven or more kanji; none of the stock phrases (重要なのは、
+  シームレス、強力な、することができる、このページでは〜を説明します).
+- Say a fact once per page. Where another page explains it, one sentence and
+  a `LocaleAnchor` to that page.
 
-The English copy says the same things in natural English; it is not a word
+The English copy says the same things in natural English — the same
+structure, short sentences, the API's names, no metaphors; it is not a word
 for word translation of the Japanese, nor the other way round.
 
 ## Shared Doc Components
@@ -357,7 +421,7 @@ for word translation of the Japanese, nor the other way round.
 | `PageTitle`        | The page's `<title>` (`… · k8ordo`)  |
 | `LandingHero`      | A package landing's opening          |
 | `LandingClaim`     | A landing's claim with its example   |
-| `NextSteps`        | A landing's links into the guide     |
+| `NextSteps`        | Only for landings not yet rewritten  |
 | `DocPage`          | A package guide page, with its pager |
 | `DocSection`       | A guide page's h2 section            |
 | `DocSubsection`    | An h3 inside a `DocSection`          |

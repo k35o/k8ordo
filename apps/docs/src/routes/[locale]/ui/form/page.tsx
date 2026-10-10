@@ -2,10 +2,11 @@ import { CodeBlock } from '@k8ordo/ui/code-block';
 
 import { Pitfall } from '../../../../components/callout';
 import { DocPage, DocSection } from '../../../../components/doc-page';
+import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Rich } from '../../../../components/rich';
 import * as m from '../../../../messages';
 
-const t = m.formWithUi;
+const t = m.uiForm;
 
 const BASIC = `const title = form.field('title');
 
@@ -43,20 +44,23 @@ const FORM_ERROR = `{form.formError.message !== undefined && (
   />
 )}`;
 
-export default function FormWithUiPage() {
+export default function UiFormPage() {
   return (
-    <DocPage introduction={t.introduction} path="/:locale/form/with-ui">
-      <DocSection
-        description={t.basicDescription}
-        id="basic"
-        title={t.basicTitle}
-      >
+    <DocPage introduction={t.introduction} path="/:locale/ui/form">
+      <DocSection id="basic" title={t.basicTitle}>
         <CodeBlock
           code={BASIC}
           lang="tsx"
           marks={{ 8: 'highlight' }}
           title="talk-form.tsx"
         />
+        <p>
+          <Rich>{t.basicForm()}</Rich>
+          <LocaleAnchor path="/:locale/form/get-started">
+            {m.nav.getStarted()}
+          </LocaleAnchor>
+          <Rich>{t.see()}</Rich>
+        </p>
         <p>
           <Rich>{t.basicSpread()}</Rich>
         </p>
@@ -65,7 +69,10 @@ export default function FormWithUiPage() {
         </p>
       </DocSection>
 
-      <DocSection description={t.mapDescription} id="map" title={t.mapTitle}>
+      <DocSection id="map" title={t.mapTitle}>
+        <p>
+          <Rich>{t.mapLead()}</Rich>
+        </p>
         <ul>
           {[
             t.mapText,
@@ -84,18 +91,20 @@ export default function FormWithUiPage() {
       </DocSection>
 
       <DocSection id="choice" title={t.choiceTitle}>
+        <CodeBlock
+          code={GROUP}
+          lang="tsx"
+          marks={{ 13: 'highlight' }}
+          title="tags-field.tsx"
+        />
+        <p>
+          <Rich>{t.choiceGroup()}</Rich>
+        </p>
         <p>
           <Rich>{t.choiceRadio()}</Rich>
         </p>
         <p>
           <Rich>{t.choiceSelect()}</Rich>
-        </p>
-        <p>
-          <Rich>{t.choiceGroup()}</Rich>
-        </p>
-        <CodeBlock code={GROUP} lang="tsx" title="tags-field.tsx" />
-        <p>
-          <Rich>{t.choiceAutocomplete()}</Rich>
         </p>
       </DocSection>
 
@@ -116,12 +125,11 @@ export default function FormWithUiPage() {
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.formErrorDescription}
-        id="form-error"
-        title={t.formErrorTitle}
-      >
+      <DocSection id="form-error" title={t.formErrorTitle}>
         <CodeBlock code={FORM_ERROR} lang="tsx" title="talk-form.tsx" />
+        <p>
+          <Rich>{t.formErrorAlert()}</Rich>
+        </p>
         <p>
           <Rich>{t.formErrorTwice()}</Rich>
         </p>
