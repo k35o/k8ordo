@@ -104,20 +104,20 @@ And a message is called the same way everywhere:
 
 ```tsx
 // src/routes/[locale]/page.tsx — a Server Component
-import * as nav from '../../messages/nav';
+import { home } from '../../messages/nav';
 
 export default function Page() {
-  return <h1>{nav.home()}</h1>;
+  return <h1>{home()}</h1>;
 }
 ```
 
 ```tsx
 // src/components/toolbar.tsx — a Client Component, the same line
 'use client';
-import * as nav from '../messages/nav';
+import { greeting } from '../messages/nav';
 
 export function Toolbar() {
-  return <button>{nav.greeting('k8o')}</button>;
+  return <button>{greeting('k8o')}</button>;
 }
 ```
 

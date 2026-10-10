@@ -22,8 +22,10 @@ const WORDING = `z.object({
   title: z.string().min(1, 'Enter a title').max(120, 'Keep it to 120 characters'),
 });`;
 
-const WORDING_LOCALE = `const talkSchema = z.object({
-  title: z.string().min(1, { error: () => m.talk.titleMissing() }),
+const WORDING_LOCALE = `import { titleMissing } from '../../../../messages/talk';
+
+const talkSchema = z.object({
+  title: z.string().min(1, { error: () => titleMissing() }),
 });
 
 export default function NewTalkPage() {
@@ -94,7 +96,7 @@ export default function FormErrorsPage() {
         <CodeBlock
           code={WORDING_LOCALE}
           lang="tsx"
-          marks={{ 2: 'highlight', 6: 'highlight' }}
+          marks={{ 4: 'highlight', 8: 'highlight' }}
           title="src/routes/[locale]/talks/new/page.tsx"
         />
         <p>

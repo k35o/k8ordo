@@ -60,11 +60,11 @@ export const { paramsSchema } = locales;
 ```
 
 ```tsx
-// anywhere — a Server Component or a Client Component, the same line
-import * as nav from '../messages/nav';
+// src/components/header.tsx — a Server or a Client Component, the same lines
+import { greeting, home } from '../messages/nav';
 
-<h1>{nav.home()}</h1>
-<p>{nav.greeting(name)}</p>
+<h1>{home()}</h1>
+<p>{greeting(name)}</p>
 ```
 
 That is all a working setup needs under `@k8ordo/framework`:
@@ -217,8 +217,13 @@ string` for a function. That type is what a component that takes a message
 as a prop should accept —
 
 ```tsx
+// src/components/nav-list.tsx
+import type { Message } from '@k8ordo/i18n';
+
+import { home } from '../messages/nav';
+
 type NavItem = { path: string; label: Message };
-const items: NavItem[] = [{ path: '/ui', label: nav.ui }];
+const items: NavItem[] = [{ path: '/', label: home }];
 …
 <a href={item.path}>{item.label()}</a>
 ```
@@ -228,18 +233,17 @@ component translating on another's behalf.
 
 ### Where messages live
 
-Anywhere. A file per area in `src/messages/` (`nav.ts`, `form.ts`) with a
-barrel that re-exports each as a namespace reads well at the call site:
-
-```ts
-// src/messages/index.ts
-export * as nav from './nav';
-export * as form from './form';
-```
+Anywhere. A file per area in `src/messages/` (`nav.ts`, `cart.ts`) reads
+well: a module imports the messages it uses by name, and renames one on import
+where two files export the same name:
 
 ```tsx
-import * as m from '../messages';
-<h1>{m.nav.home()}</h1>;
+// src/components/cart-summary.tsx
+import { title as cartTitle } from '../messages/cart';
+import { home } from '../messages/nav';
+
+<a href="/">{home()}</a>
+<h2>{cartTitle()}</h2>
 ```
 
 A message that belongs to one component can be declared in that
@@ -252,10 +256,18 @@ then keeps the group together.
 A message is a function, and a function does not cross from a Server
 Component to a Client Component as a prop. Where a Server Component hands
 text to a `'use client'` component, it calls the message and passes the
-string — `<Dialog title={m.dialog.title()} />` — which is the rule the rest
-of k8ordo already follows: only input crosses the boundary. Nothing further
-down needs the string threaded through it, because any component, on either
-side, can import a message and call it itself.
+string:
+
+```tsx
+// src/components/settings.tsx — a Server Component
+import { title } from '../messages/dialog';
+
+<Dialog title={title()} />;
+```
+
+That is the rule the rest of k8ordo already follows: only input crosses the
+boundary. Nothing further down needs the string threaded through it, because
+any component, on either side, can import a message and call it itself.
 
 A component without a directive is shared: rendered by a Server Component it
 runs on the server, rendered by a Client Component it runs in the browser,
@@ -511,16 +523,23 @@ without JavaScript keeps the default.
   when the rule is reported:
 
   ```ts
+  // src/lib/talk-form.ts
+  import {
+    reasonRequired,
+    titleRequired,
+    titleTooLong,
+  } from '../messages/talk';
+
   export const talkForm = defineForm(
     z.object({
       title: z
         .string()
-        .min(1, { error: m.talk.titleRequired })
-        .max(120, { error: () => m.talk.titleTooLong(120) }),
+        .min(1, { error: titleRequired })
+        .max(120, { error: () => titleTooLong(120) }),
       status: z.enum(['draft', 'rejected']),
       reason: z.string(),
     }),
-    [requiredWhen('reason', 'status', 'rejected', m.talk.reasonRequired)],
+    [requiredWhen('reason', 'status', 'rejected', reasonRequired)],
   );
   ```
 
@@ -552,7 +571,7 @@ without JavaScript keeps the default.
 
 ## Testing
 
-Under Node, `locales.run('en', () => nav.home())` renders in `en`; without
+Under Node, `locales.run('en', () => home())` renders in `en`; without
 it, the default. Called directly, `paramsSchema` sets the locale for the
 rest of the caller's async context — the framework gives each pattern's
 schemas a context of their own, a test does not — so wrap a test that
