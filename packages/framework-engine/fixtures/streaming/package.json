@@ -3,6 +3,6 @@
   "description": "Says the application depends on @k8ordo/state, so its search page is accepted; fixtures/build.ts resolves the name to fixtures/state.ts.",
   "type": "module",
   "dependencies": {
-    "@k8ordo/state": "*"
+    "@k8ordo/state": "0.2.0"
   }
 }
