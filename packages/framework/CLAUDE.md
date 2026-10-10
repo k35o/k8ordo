@@ -87,11 +87,15 @@ pnpm check         # check:write to auto-fix
   `useRoute` are withheld because the framework never renders a `<Router>`.
   The router stays a peer and is never bundled, so a page and the framework
   share its one copy.
-- **The generated files name only this package.** They import from
-  `./generated` (`defineRoutes`, the shape types, `Register`), and
+- **The generated files name this package, never the router.** They import
+  from `./generated` (`defineRoutes`, the shape types, `Register`), and
   `register.gen.ts` augments `Register` there; the re-export carries the
   merge to the router's. `Register` is not on the root because nothing an
-  application writes by hand augments it.
+  application writes by hand augments it. `register.gen.ts` also augments
+  `@k8ordo/state`'s `Register` (the table) and `@k8ordo/i18n`'s (the
+  `locales` that `src/i18n.ts` exports) by those packages' own names, when
+  the application has them: they are the application's dependencies, not
+  this package's, and the application would otherwise write both by hand.
 - **Entries by where the code runs.** `./vite` is the plugin and loads Vite,
   which a deployed application does not have installed. `./server`
   (`src/server.ts`) is what code inside the handler imports — `redirect`,

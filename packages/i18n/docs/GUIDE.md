@@ -34,18 +34,11 @@ legacy fallbacks.
 ```ts
 // src/i18n.ts — the one place the list is spelled
 import { defineLocales } from '@k8ordo/i18n';
-import type { LocaleOf } from '@k8ordo/i18n';
 
 export const locales = defineLocales({
   ja: { timeZone: 'Asia/Tokyo', dir: 'ltr' },
   en: { timeZone: 'UTC', dir: 'ltr' },
 });
-
-declare module '@k8ordo/i18n' {
-  interface Register {
-    locale: LocaleOf<typeof locales>;
-  }
-}
 ```
 
 ```ts
@@ -74,8 +67,36 @@ import * as nav from '../messages/nav';
 <p>{nav.greeting(name)}</p>
 ```
 
-That is all a working setup needs: `defineLocales`, `Register` (with
-`LocaleOf`), `message`, and `paramsSchema` on the `[locale]` segment.
+That is all a working setup needs under `@k8ordo/framework`:
+`defineLocales`, `message`, and `paramsSchema` on the `[locale]` segment.
+
+`Register` is what holds every message to the set. Under the framework it is
+generated: when the application's `package.json` lists `@k8ordo/i18n` and
+`src/i18n.ts` exports the set as `locales`, the framework writes the
+augmentation into `.k8ordo/register.gen.ts` beside the route table,
+rewrites it as that file changes under `vite dev`, and the application
+writes none. It reads the export from the file's syntax, so the set has to
+be exported by that name from that file — `export const locales` or
+`export { locales } from './locales'`, not a type-only export and not
+`export *`. A `src/i18n.ts` without it gets a warning from the build and no
+`Register`.
+
+Anywhere else — Next.js, a framework of your own — write it once, beside the
+set:
+
+```ts
+// src/i18n.ts, outside @k8ordo/framework
+import type { LocaleOf } from '@k8ordo/i18n';
+
+declare module '@k8ordo/i18n' {
+  interface Register {
+    locale: LocaleOf<typeof locales>;
+  }
+}
+```
+
+A hand-written one left in a framework application still compiles, since
+both declare the same type, and can be deleted.
 
 ## The locale set
 
@@ -514,7 +535,8 @@ without JavaScript keeps the default.
 ## What it guarantees
 
 - A locale outside the list never reaches a page: the schema refuses it.
-- A message missing a locale does not compile once `Register` is merged.
+- A message missing a locale does not compile once `Register` is merged —
+  by `@k8ordo/framework`'s generated files, or by hand.
   From JavaScript, or through `as`, it throws where it is read, naming the
   locale and the variants present — never `undefined`.
 - Arguments to a function message are typed by the function.

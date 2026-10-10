@@ -1,6 +1,7 @@
 /**
- * Merged by the application once, so `message()` knows which locales every
- * message must carry — without each message naming the set:
+ * Merged once, so `message()` knows which locales every message must carry —
+ * without each message naming the set. `@k8ordo/framework` generates it from
+ * the `locales` export of `src/i18n.ts`; any other application writes it:
  *
  * ```ts
  * declare module '@k8ordo/i18n' {

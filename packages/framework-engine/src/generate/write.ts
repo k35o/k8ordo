@@ -1,4 +1,5 @@
 import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
+import { findPackageJSON } from 'node:module';
 import path from 'node:path';
 
 import { parseSync } from 'vite';
@@ -11,6 +12,7 @@ import { ROUTE_METHODS } from '../runtime/route';
 import {
   emitRegisterModule,
   emitRoutesModule,
+  LOCALES_MODULE,
   unreachableRoutes,
 } from './emit';
 
@@ -48,6 +50,8 @@ export type GenerateOptions = {
 
 export type GenerateResult = {
   readonly problems: readonly Problem[];
+  /** What the build goes on without, said rather than refused. */
+  readonly warnings: readonly string[];
   /** Absolute path of the generated route table. */
   readonly routesModule: string;
 };
@@ -65,12 +69,16 @@ export const REEXPORTS_ALL = '*';
  * person reads the file: `export const paramsSchema`, `export {
  * paramsSchema }`, and a destructured `export const { paramsSchema } =
  * locales` are all an export; the same words inside a string or a comment
- * are not, and `export type paramsSchema` is a type. A file that does not
- * parse exports nothing; the build reports the syntax error itself, where it
- * can name the line.
+ * are not, and `export type paramsSchema` is a type. `file` is the module's
+ * name, whose extension says whether it is TSX. A file that does not parse
+ * exports nothing; the build reports the syntax error itself, where it can
+ * name the line.
  */
-export const exportsOf = (source: string): ReadonlySet<string> => {
-  const { errors, module } = parseSync('route.tsx', source, {
+export const exportsOf = (
+  source: string,
+  file: string,
+): ReadonlySet<string> => {
+  const { errors, module } = parseSync(file, source, {
     sourceType: 'module',
   });
   if (errors.length > 0) return new Set();
@@ -93,7 +101,7 @@ export const exportsOf = (source: string): ReadonlySet<string> => {
  * binding of the same name is a shadow every linter flags.
  */
 export const declaresParams = (source: string): boolean =>
-  exportsOf(source).has('paramsSchema');
+  exportsOf(source, 'page.tsx').has('paramsSchema');
 
 /** The route files whose exports say something: pages, layouts, route.ts. */
 const READS_EXPORTS = new Set(['page', 'layout', 'route']);
@@ -114,7 +122,10 @@ export const readExports = async (
           try {
             return [
               file,
-              exportsOf(await readFile(path.join(routesDir, file), 'utf8')),
+              exportsOf(
+                await readFile(path.join(routesDir, file), 'utf8'),
+                file,
+              ),
             ];
           } catch {
             // 読めないファイルは何も export しないものとして扱う
@@ -164,7 +175,8 @@ export const silentRoutes = (
       message: `exports none of ${ROUTE_METHODS.join(', ')} — a route.ts answers the methods it exports`,
     }));
 
-const dependsOnState = async (root: string): Promise<boolean> => {
+/** Whether the application's manifest lists `name`. */
+const dependsOn = async (root: string, name: string): Promise<boolean> => {
   try {
     const manifest = JSON.parse(
       await readFile(path.join(root, 'package.json'), 'utf8'),
@@ -174,13 +186,53 @@ const dependsOnState = async (root: string): Promise<boolean> => {
     };
     // どちらに置くかはアプリの流儀で、意味は変わらない
     return (
-      '@k8ordo/state' in (manifest.dependencies ?? {}) ||
-      '@k8ordo/state' in (manifest.devDependencies ?? {})
+      name in (manifest.dependencies ?? {}) ||
+      name in (manifest.devDependencies ?? {})
     );
   } catch {
     return false;
   }
 };
+
+/** {@link LOCALES_MODULE} of an application that uses `@k8ordo/i18n`. */
+export type LocaleSet = {
+  /** Absolute path of the module. */
+  readonly module: string;
+  /**
+   * Whether it exports `locales`, read from its syntax as a route file's
+   * exports are — what `@k8ordo/i18n`'s `Register` is generated from.
+   */
+  readonly exportsLocales: boolean;
+};
+
+/**
+ * Where the application declares its locale set: `null` when it does not
+ * depend on `@k8ordo/i18n`, the package does not resolve from the root, or
+ * there is no {@link LOCALES_MODULE}.
+ */
+export const localeSetOf = async (root: string): Promise<LocaleSet | null> => {
+  // @k8ordo/ui の peer として hoist された @k8ordo/i18n は、アプリが使って
+  // いなくてもルートから解決できる。解決だけでは決めない
+  if (!(await dependsOn(root, '@k8ordo/i18n'))) return null;
+  const module = path.join(root, LOCALES_MODULE);
+  let source: string;
+  try {
+    // 生成する augmentation はこのパッケージを名指しするので、依存に挙げて
+    // いても入っていなければ型チェックがそれ自体をエラーにする。解決できな
+    // ければ投げる
+    findPackageJSON('@k8ordo/i18n', module);
+    source = await readFile(module, 'utf8');
+  } catch {
+    return null;
+  }
+  return { module, exportsLocales: exportsOf(source, module).has('locales') };
+};
+
+/**
+ * Without the generated `Register`, `@k8ordo/i18n` holds a message to no
+ * locale set, and nothing else would say so.
+ */
+const LOCALES_UNEXPORTED = `${LOCALES_MODULE} does not export \`locales\` by name (\`export *\` and a type-only export do not count), so @k8ordo/i18n's Register is not generated and a message missing a locale compiles — export the locale set from it as \`locales\``;
 
 /**
  * Writes what the application would otherwise hand-write: the route table
@@ -196,7 +248,7 @@ export const generate = async (
   // (`(foo` など)は URLPattern にならないので、壊れた木の上で走らせると報告
   // ではなく例外になる。だから文法が通ってからだけ見る。
   const exported = await readExports(options.routesDir, files);
-  const withState = await dependsOnState(options.root);
+  const withState = await dependsOn(options.root, '@k8ordo/state');
   const withSearch = pagesReadingSearch(exported);
   const problems = [
     ...parsed.problems,
@@ -210,15 +262,15 @@ export const generate = async (
   if (problems.length > 0) {
     return {
       problems,
+      warnings: [],
       routesModule: path.join(options.outDir, 'routes.gen.ts'),
     };
   }
 
-  const toRoutes = path
-    .relative(options.outDir, options.routesDir)
-    .replaceAll(path.sep, '/');
+  const toRoutes = importPath(options.outDir, options.routesDir);
+  const localeSet = await localeSetOf(options.root);
   const routesSource = emitRoutesModule(tree, {
-    importPrefix: toRoutes.startsWith('.') ? toRoutes : `./${toRoutes}`,
+    importPrefix: toRoutes,
     mode: options.mode,
     withParams: new Set(
       [...exported]
@@ -230,6 +282,10 @@ export const generate = async (
   const registerSource = emitRegisterModule({
     routesModule: './routes.gen',
     stateModule: withState ? '@k8ordo/state' : null,
+    localesModule:
+      localeSet?.exportsLocales === true
+        ? importPath(options.outDir, localeSet.module.replace(/\.ts$/u, ''))
+        : null,
     mode: options.mode,
   });
 
@@ -248,7 +304,17 @@ export const generate = async (
     `# Generated by ${FRAMEWORK}.\n*\n`,
   );
 
-  return { problems, routesModule };
+  return {
+    problems,
+    warnings: localeSet?.exportsLocales === false ? [LOCALES_UNEXPORTED] : [],
+    routesModule,
+  };
+};
+
+/** The relative specifier the generated files import `to` by, from `from`. */
+const importPath = (from: string, to: string): string => {
+  const relative = path.relative(from, to).replaceAll(path.sep, '/');
+  return relative.startsWith('.') ? relative : `./${relative}`;
 };
 
 /** Rewriting an unchanged file would restart HMR for no reason. */

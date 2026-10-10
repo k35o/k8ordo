@@ -59,7 +59,9 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
 - [Routing](references/routing.md): the `routes/` grammar and every refusal
   the build names, where a `fallback.tsx` may sit, how a page is sent in
   each mode, `loading.tsx`, `route.ts` (methods and `405` under server
-  mode, a file under static mode), the generated `.k8ordo/` files, titles,
+  mode, a file under static mode), the generated `.k8ordo/` files (the
+  route table, and the `Register`s: the table's, and `@k8ordo/i18n`'s when
+  `src/i18n.ts` exports `locales` by name), titles,
   and fetching the next page ahead (`data-k8ordo-prefetch`).
 - [Parameters](references/params.md): `paramsSchema` — a refused value is a
   pathname the pattern does not answer — and, under static mode, the `paths`

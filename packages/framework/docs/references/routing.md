@@ -384,6 +384,34 @@ import { href } from '@k8ordo/framework';
 <a href={href('/products/:id', { id })}>…</a>; // checked against routes/
 ```
 
+It registers the locale set with `@k8ordo/i18n` too, when the application
+has one: its `package.json` lists `@k8ordo/i18n` (in `dependencies` or
+`devDependencies`), and `src/i18n.ts` exports the set as `locales`. That is
+the `Register` an application outside the framework writes by hand, so here
+it writes none, and a message missing a locale does not compile:
+
+```ts
+// .k8ordo/register.gen.ts (the part for @k8ordo/i18n)
+import type { LocaleOf } from '@k8ordo/i18n';
+import type { locales } from '../src/i18n';
+
+declare module '@k8ordo/i18n' {
+  interface Register {
+    locale: LocaleOf<typeof locales>;
+  }
+}
+```
+
+The export is read from the file's syntax, as a route file's are, and never
+by running it: `export const locales = defineLocales(…)` and
+`export { locales } from './locales'` count, a type-only export and
+`export *` do not. A `src/i18n.ts` without the export gets nothing
+generated and a warning naming it, since every message would compile
+unchecked; an application that keeps its set elsewhere writes the
+`Register` by hand. `vite dev` writes the file again as `src/i18n.ts` comes,
+goes, or gains or loses the export. A hand-written augmentation left in the
+application still compiles beside it, since both declare the same type.
+
 Neither file names `@k8ordo/router`: they import from
 `@k8ordo/framework/generated`, so the application's code, generated or not,
 reads only the framework.
@@ -397,7 +425,8 @@ vite build && tsc --noEmit
 ```
 
 Without the files, `tsc` checks against no table: `href` takes any string,
-params typed by a `paramsSchema` are strings, and under `mode: 'server'` the
+params typed by a `paramsSchema` are strings, a message missing a locale
+compiles, and under `mode: 'server'` the
 `request` and `search` props are not in `PageProps` or `LayoutProps`, so a
 page that reads them fails with `Property 'request' does not exist`. That is
 the error static mode gives on purpose, but here the mode is not the cause.

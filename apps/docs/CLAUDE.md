@@ -131,8 +131,10 @@ pnpm check:write       # Oxlint/Oxfmt lint/format auto-fix
   neither do their pages.
 - **i18n**: `@k8ordo/i18n`. `src/i18n.ts` is `defineLocales({ ja: …, en: … })`
   — the one place the list is spelled, with each locale's `timeZone`
-  (`Asia/Tokyo`, `UTC`) and `dir` — plus the `Register` augmentation
-  that types every message against it, and `getLocale`. Messages live in
+  (`Asia/Tokyo`, `UTC`) and `dir` — exported as `locales`, from which the
+  framework generates the `Register` augmentation that types every message
+  against it (`.k8ordo/register.gen.ts`; never write one here), and
+  `getLocale`. Messages live in
   `src/messages/<area>.ts`, one `message({ ja, en })` per export (a 3-level
   key became a group object: `m.components.button.description`), re-exported
   as namespaces from `src/messages/index.ts` so a call site reads
@@ -193,7 +195,7 @@ src/
     <package>/<section>/  # that page's live demo, if it has one
     ui/components/     # the catalog's interactive previews, <name>-previews.tsx
   data/                # PACKAGES (packages.ts), which packages ship docs (shipped-docs), the sidebars (components-nav, ai-nav), generated props (component-props)
-  i18n.ts              # defineLocales + Register — the locale set
+  i18n.ts              # defineLocales — the locale set (its Register is generated)
   links.ts             # href / navigateTo with the locale bound; SitePath
   messages/            # message() per export, one file per area, index.ts re-exports namespaces
   styles/              # CSS entry
