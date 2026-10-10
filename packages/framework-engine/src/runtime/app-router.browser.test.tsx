@@ -1054,11 +1054,14 @@ describe('a page still streaming in', () => {
     await vi.waitFor(() => {
       expect(screen.container.textContent).toBe('page b');
     });
-    await nextTask();
+    // 置き換えられたページの分は、次のページが画面に出たら取り消される。
+    // WebKit ではその effect が次のタスクより後に回ることがあるので、取り消し
+    // まで待ってから、次のページの分が残っていることを確かめる
+    await vi.waitFor(() => {
+      expect(signalOf('/a/index.rsc')?.aborted).toBe(true);
+    });
     expect(signalOf('/b/index.rsc')?.aborted).toBe(false);
     expect(reloadDocument).not.toHaveBeenCalled();
-    // 置き換えられたページの分は、次のページが画面に出たら取り消される
-    expect(signalOf('/a/index.rsc')?.aborted).toBe(true);
   });
 });
 
