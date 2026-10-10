@@ -1,10 +1,6 @@
 import { CodeBlock } from '@k8ordo/ui/code-block';
 
-import {
-  LandingClaim,
-  LandingHero,
-  NextSteps,
-} from '../../../components/landing';
+import { LandingClaim, LandingHero } from '../../../components/landing';
 import { Playground } from '../../../components/playground';
 import { StateDemo } from '../../../demos/state/state-demo';
 import * as m from '../../../messages';
@@ -24,6 +20,7 @@ const HERO_URL = `/products?q=lamp&page=2`;
 
 const CLAIM_PLACES = `export const listState = definePageState('product-list', {
   url: z.object({
+    q: z.string().default(''),
     page: z.coerce.number().int().min(1).default(1),
   }),
   entry: z.object({
@@ -44,18 +41,6 @@ export const density = defineCookieState(
     density: z.enum(['cozy', 'compact']).default('cozy'),
   }),
 );`;
-
-const CLAIM_SERVER_PAGE = `export const search = listState.url;
-
-export default async function ProductsPage({
-  search,
-}: PageProps<'/products'>) {
-  const products = await fetchProducts(search);
-  return <ProductList products={products} />;
-}`;
-
-const CLAIM_SERVER_HREF = `listState.href('/products', { q: 'lamp', page: 1 });
-// '/products?q=lamp'`;
 
 export default function StatePage() {
   return (
@@ -84,8 +69,8 @@ export default function StatePage() {
         <CodeBlock code={CLAIM_PLACES} lang="ts" title="src/state.ts" />
       </LandingClaim>
       <LandingClaim
-        body={m.state.claimHistoryBody}
-        title={m.state.claimHistoryTitle}
+        body={m.state.claimSchemaBody}
+        title={m.state.claimSchemaTitle}
       >
         <Playground
           description={m.state.demoDescription}
@@ -96,58 +81,6 @@ export default function StatePage() {
           <StateDemo />
         </Playground>
       </LandingClaim>
-      <LandingClaim
-        body={m.state.claimServerBody}
-        title={m.state.claimServerTitle}
-      >
-        <div className="flex flex-col gap-3">
-          <CodeBlock
-            code={CLAIM_SERVER_PAGE}
-            lang="tsx"
-            title="src/routes/products/page.tsx"
-          />
-          <CodeBlock
-            code={CLAIM_SERVER_HREF}
-            lang="ts"
-            title="src/lib/links.ts"
-          />
-        </div>
-      </LandingClaim>
-      <NextSteps
-        name="@k8ordo/state"
-        steps={[
-          {
-            path: '/:locale/state/get-started',
-            label: m.nav.getStarted,
-            description: m.state.nextGetStarted,
-          },
-          {
-            path: '/:locale/state/places',
-            label: m.state.navPlaces,
-            description: m.state.nextPlaces,
-          },
-          {
-            path: '/:locale/state/url',
-            label: m.state.navUrl,
-            description: m.state.nextUrl,
-          },
-          {
-            path: '/:locale/state/updates',
-            label: m.state.navUpdates,
-            description: m.state.nextUpdates,
-          },
-          {
-            path: '/:locale/state/reading',
-            label: m.state.navReading,
-            description: m.state.nextReading,
-          },
-          {
-            path: '/:locale/state/reference',
-            label: m.state.navReference,
-            description: m.state.nextReference,
-          },
-        ]}
-      />
     </div>
   );
 }

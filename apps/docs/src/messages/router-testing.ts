@@ -1,76 +1,81 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: 'このルーターは何もモックせず、ブラウザのNavigation APIとURLPatternをそのまま使います。このページでは、ブラウザ無しで確かめられる部分と、ブラウザの中でナビゲーションを確かめるときの注意を説明します。',
-  en: 'This router mocks nothing: it uses the browser’s Navigation API and URLPattern as they are. This page covers what can be checked without a browser, and what to watch for when checking navigation inside one.',
+  ja: 'ルート表の`match`はNodeで、`<Router>`を描画してページを移るテストはブラウザで書けるようになります。ルート表に無いURLへ移るときと、履歴の移動を確かめるときの注意もわかります。',
+  en: 'You will be able to test a route table’s `match` under Node and test page changes through `<Router>` in a browser. You will also know what to watch for when moving to a URL outside the route table and when checking history traversal.',
 });
 
 export const matchTitle = message({
-  ja: 'ルート表をブラウザ無しで確かめる',
-  en: 'Check the route table without a browser',
-});
-
-export const matchDescription = message({
-  ja: '`defineRoutes`が返すルート表は、`match`でパスを照合できます。`match`はただの関数です。そのため、どのパスがどのページになるかや受け取るparams、照合の順序を、ブラウザ無しで確かめられます。',
-  en: 'The route table `defineRoutes` returns matches a path with `match`. It is a plain function, so which page a path lands on, the params it takes and the order patterns match in can all be checked without a browser.',
+  ja: 'ルート表のテスト',
+  en: 'Route table tests',
 });
 
 export const matchPure = message({
-  ja: '`matchPath`も同じく、ブラウザ無しで呼べる関数です。いまいる場所によってリンクの見た目を変えるコードは、パスを引数で受け取る形にしておくと、`matchPath`ごと確かめられます。',
-  en: '`matchPath` is likewise a function you can call without a browser. Code that marks a link by where you are can take the path as an argument, and be checked along with `matchPath`.',
+  ja: '`defineRoutes`が返すルート表の`match`は、ブラウザ無しで動く関数です。どのパターンに当たるかと受け取る`params`を、Nodeで動くふつうのテストで確かめられます。照合の順序も同じように確かめられます。',
+  en: 'The `match` of the route table `defineRoutes` returns is a plain function that needs no browser. Which pattern a path matches, the `params` it yields, and the order patterns are tried in can all be checked by an ordinary test under Node.',
+});
+
+export const matchPath = message({
+  ja: '`matchPath`も同じです。今のパスによってリンクの見た目を変えるコードは、パスを引数で受け取る形にするとNodeで確かめられます。',
+  en: '`matchPath` is the same. Code that styles a link by the current path can take the path as an argument, and then it can be tested under Node too.',
 });
 
 export const browserTitle = message({
-  ja: 'ブラウザの中でページを移る',
-  en: 'Change pages inside a browser',
+  ja: 'ブラウザでのテスト',
+  en: 'Tests in a browser',
 });
 
-export const browserDescription = message({
-  ja: '`<Router>`を描いてページを移るテストは、Navigation APIのあるブラウザの中で動かします。このパッケージ自身のテストは、VitestのブラウザモードでChromiumとFirefox、WebKitの3つを使っています。',
-  en: 'A test that renders `<Router>` and changes pages runs inside a browser with the Navigation API. This package’s own tests use Vitest’s browser mode on Chromium, Firefox and WebKit.',
+export const browserFinishedCallout = message({
+  ja: '新しいページが画面に出るまで待つ',
+  en: 'Waits until the new page is on screen',
+});
+
+export const browserRuns = message({
+  ja: '`<Router>`を描画してページを移るテストは、Navigation APIのあるブラウザで動かします。このパッケージ自身はVitestのブラウザモードで、ChromiumとFirefox、WebKitでテストしています。',
+  en: 'A test that renders `<Router>` and changes pages runs in a browser with the Navigation API. This package tests itself with Vitest’s browser mode on Chromium, Firefox and WebKit.',
 });
 
 export const browserFinished = message({
-  ja: '`finished`は新しいページが画面に出たときに解決するので、待ったあとは、繰り返し確かめる書き方をしなくても画面を確かめられます。',
-  en: '`finished` resolves once the new page is on screen, so after awaiting it the screen can be checked straight away, with no retrying.',
+  ja: '`finished`は、新しいページが画面に出たときに解決します。待ったあとは、通るまで繰り返す書き方をしなくても画面を確かめられます。',
+  en: '`finished` resolves once the new page is on screen. After awaiting it, the screen can be checked without retrying.',
 });
 
 export const browserEffects = message({
-  ja: 'ただし、ページの`useEffect`は、画面に出たあとで走ります。effectの結果を確かめるときは、`expect.element`や`vi.waitFor`のように、通るまで繰り返す書き方にしてください。',
-  en: 'A page’s `useEffect` runs after it is on screen, though. To check what an effect did, use a form that retries until it passes, such as `expect.element` or `vi.waitFor`.',
+  ja: 'ページの`useEffect`は、画面に出たあとに走ります。`useEffect`の結果は、`expect.element`や`vi.waitFor`のように通るまで繰り返す書き方で確かめます。',
+  en: 'A page’s `useEffect` runs after the page is on screen. Check what an effect did with a form that retries until it passes, such as `expect.element` or `vi.waitFor`.',
 });
 
 export const interceptTitle = message({
-  ja: '表の外へ移るときはテストが自分で引き受ける',
-  en: 'Intercept navigations outside the table yourself',
+  ja: 'ルート表に無いURL',
+  en: 'URLs outside the route table',
 });
 
-export const interceptDescription = message({
-  ja: '`<Router>`が引き受けないナビゲーションは、ブラウザのふつうのページの読み込みになります。テストの中でそれが起きると、テストを動かしているページそのものが別のページに移ってしまいます。',
-  en: 'A navigation `<Router>` does not take becomes an ordinary page load. Inside a test, that moves the very page the tests run in somewhere else.',
+export const interceptLoad = message({
+  ja: '`<Router>`が扱わないナビゲーションは、ブラウザのふつうのページの読み込みになります。テストの中で起きると、テストを動かしているページごと移動してしまいます。',
+  en: 'A navigation `<Router>` does not handle becomes an ordinary page load. Inside a test, it navigates the page that runs the tests away from the runner.',
 });
 
 export const interceptWhen = message({
-  ja: 'テストの前に表に無いURLへ移る準備や、テストのあとで元のURLに戻す後片付けが、これにあたります。そうしたナビゲーションの間だけ、テストが自分で`navigate`イベントをインターセプトします。',
-  en: 'Moving to a URL outside the table before a test, or back to the original URL afterwards, is exactly that. For those navigations only, the test intercepts the `navigate` event itself.',
+  ja: 'テストの前にルート表に無いURLへ移るときと、テストのあとに元のURLへ戻すときのナビゲーションがこれにあたります。その間だけ`navigate`イベントにリスナーを追加して、テスト自身が`intercept()`します。終わったら`removeEventListener`で外します。',
+  en: 'Moving to a URL outside the route table before a test, and back to the original URL after it, are such navigations. For those only, the test adds a `navigate` listener and calls `intercept()` itself. When done, `removeEventListener` takes the listener off.',
 });
 
 export const interceptRouter = message({
-  ja: '`<Router>`を描いたあとの、表にあるパスへのナビゲーションは、`<Router>`が引き受けます。テストが自分で引き受ける必要はありません。',
-  en: 'Once `<Router>` is rendered, it takes navigations to paths in the table itself; the test has nothing to intercept there.',
+  ja: '`<Router>`を描画したあとの、ルート表にあるパスへのナビゲーションは`<Router>`が扱います。テストが`intercept()`する必要はありません。',
+  en: 'Once `<Router>` is rendered, it handles navigations to paths in the route table. The test does not need to call `intercept()` for those.',
 });
 
 export const traverseTitle = message({
-  ja: '戻ると進むはトップレベルのページで確かめる',
-  en: 'Check back and forward in a top-level page',
+  ja: '履歴の移動',
+  en: 'History traversal',
 });
 
-export const traverseDescription = message({
-  ja: 'Vitestのブラウザモードは、テストをiframeの中で動かします。iframeの中では、FirefoxとWebKitは戻ると進むでスクロールの位置を戻しません。また、Firefoxは戻ると進むのハンドラを2回走らせます。',
-  en: 'Vitest’s browser mode runs a test inside an iframe. There, Firefox and WebKit do not restore the scroll position on back and forward, and Firefox runs a traversal’s handler twice.',
+export const traverseIframe = message({
+  ja: 'Vitestのブラウザモードは、テストをiframeの中で動かします。iframeの中では、FirefoxとWebKitは履歴を移動してもスクロールの位置を戻しません。Firefoxは履歴の移動のハンドラを2回走らせます。',
+  en: 'Vitest’s browser mode runs a test inside an iframe. There, Firefox and WebKit do not restore the scroll position on back and forward. Firefox also runs the traversal handler twice.',
 });
 
 export const traversePlaywright = message({
-  ja: 'そのためこのパッケージでは、戻ると進むのテストだけを、Playwrightでトップレベルに開いたページで行っています。戻ったときのスクロールの位置まで確かめるなら、同じようにiframeの外で確かめてください。',
-  en: 'This package therefore checks going back and forward only in a top-level page it opens with Playwright. To check the scroll position after going back, do the same and leave the iframe.',
+  ja: 'このパッケージは、履歴の移動のテストだけをPlaywrightでトップレベルに開いたページで行っています。戻ったときのスクロールの位置まで確かめるなら、同じようにiframeの外で確かめてください。',
+  en: 'This package runs only its back and forward tests in a top-level page opened with Playwright. To check the scroll position after going back, do the same and test outside the iframe.',
 });

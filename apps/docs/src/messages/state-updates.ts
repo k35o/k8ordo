@@ -1,48 +1,48 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: '`useAppState`が返す`update()`は、どの置き場所でも同じ書き方で状態を変えます。このページでは、書いた値がいつ画面に出て、いつ置き場所に書き込まれるのかと、それに合わせた書き方を説明します。',
-  en: 'The `update()` that `useAppState` returns changes state the same way, wherever it lives. This page covers when a value shows on screen, when it is written to its place, and how to write updates around that.',
+  ja: '`useAppState`が返す`update()`は、どの置き場所でも同じ書き方で状態を変えます。値が画面に反映される時点と置き場所に書き込まれる時点を知り、それに合わせた書き方ができるようになります。',
+  en: 'The `update()` that `useAppState` returns changes state the same way in every place. You will know when a value reaches the next render and when it is written to its place, and write updates accordingly.',
 });
 
 export const patchTitle = message({
-  ja: '変えたいフィールドだけを渡す',
-  en: 'Pass only the fields that change',
+  ja: '変えるフィールドだけ',
+  en: 'Changed fields only',
 });
 
-export const patchDescription = message({
-  ja: '`update()`には、変えたいフィールドだけのオブジェクトを渡します。渡さなかったフィールドは、今の値のまま残ります。',
-  en: 'Hand `update()` an object with just the fields to change. Every field you leave out keeps its current value.',
+export const patchObject = message({
+  ja: '`update()`には、変えるフィールドだけのオブジェクトを渡します。渡さなかったフィールドは今の値のまま残ります。',
+  en: 'Pass `update()` an object with only the fields to change. Every field you leave out keeps its current value.',
 });
 
 export const patchSync = message({
-  ja: '渡した値は、`update()`を呼んだその場で状態に入り、次の描画に出ます。置き場所への書き込みはそのあとで行われるので、画面がURLやストレージへの書き込みを待つことはありません。',
-  en: 'The values enter the state the moment `update()` is called, and the next render shows them. The write to the place comes afterwards, so the screen never waits for the URL or storage.',
+  ja: '渡した値はその場で状態に入り、次の描画に反映されます。置き場所への書き込みはそのあとに行われるので、画面がURLやストレージの書き込みを待つことはありません。',
+  en: 'The values enter the state at once, and the next render shows them. The write to the place happens afterwards, so the screen never waits for the URL or storage.',
 });
 
 export const patchUnknown = message({
-  ja: '定義に無いフィールドは型エラーになります。型を迂回して渡されたときは、`"product-list" has no field "sort"`のような`TypeError`を投げます。',
-  en: 'A field the definition does not declare is a type error. Slipped past the types, it throws a `TypeError` such as `"product-list" has no field "sort"`.',
+  ja: '定義に無いフィールドは型エラーになります。型チェックを通さずに渡すと、`"product-list" has no field "sort"`のような`TypeError`になります。',
+  en: 'A field the definition does not declare is a type error. Passed in a way that bypasses the type check, it raises a `TypeError` such as `"product-list" has no field "sort"`.',
 });
 
 export const validateTitle = message({
-  ja: '書いた値もスキーマを通る',
-  en: 'What you write passes the schema too',
+  ja: '書き込みの検証',
+  en: 'Validation on write',
 });
 
-export const validateDescription = message({
-  ja: '`update()`は、まとめた状態をその場でスキーマに通してから描画に出します。そのため、スキーマが拒む値が画面に出ることはありません。',
-  en: '`update()` runs the merged state through the schema before rendering it, so a value the schema rejects never reaches the screen.',
+export const validateCallout = message({
+  ja: '`page`が`.min(1)`なら、既定値の`1`になる',
+  en: 'With `page` at `.min(1)`, lands on the default `1`',
 });
 
-export const validateUrl = message({
-  ja: '`url`のフィールドは、URLから届く値と同じ道を通ります。`page`が`.min(1)`なら、`update({ page: 0 })`は`?page=0`を開いたときと同じく、既定値の`1`になります。',
-  en: 'A `url` field takes the same road as a value arriving from the URL. With `page` at `.min(1)`, `update({ page: 0 })` lands on the default `1`, exactly as opening `?page=0` would.',
+export const validateSchema = message({
+  ja: '`update()`は、まとめた状態をスキーマに通してから次の描画に反映します。`url`のフィールドはURLから読むときと同じ手順で検証されるので、`update({ page: 0 })`は`?page=0`を開いたときと同じ結果になります。',
+  en: '`update()` runs the merged state through the schema before the next render. A `url` field is validated the same way as a value read from the URL, so `update({ page: 0 })` ends up where opening `?page=0` would.',
 });
 
 export const validateThrow = message({
-  ja: 'URLで表せない値を渡すと、何も書き込む前に`update()`そのものが投げます。ハンドルをrejectするだけでは、ハンドルを待たない普通の呼び方では誰も気づけないからです。',
-  en: 'A value no URL can spell makes `update()` itself throw before anything is written. A rejected handle would go unnoticed by the usual caller, who never awaits it.',
+  ja: 'URLで表せない値を渡すと、`update()`の呼び出しそのものが`has no URL serialization`で終わる`TypeError`になります。何も書き込まれません。',
+  en: 'A value no URL can carry makes the `update()` call itself fail with a `TypeError` ending in `has no URL serialization`. Nothing is written.',
 });
 
 export const validateMemory = message({
@@ -51,98 +51,88 @@ export const validateMemory = message({
 });
 
 export const historyTitle = message({
-  ja: '履歴に積むかどうかを決める',
-  en: 'Decide whether it goes in the history',
-});
-
-export const historyDescription = message({
-  ja: '`update()`は、既定では今の履歴エントリを書き換えます。状態の変更は、今いる画面を少し変えるものだからです。',
-  en: 'By default `update()` rewrites the current history entry, because a state change refines the screen you are on.',
+  ja: '`replace`と`push`',
+  en: '`replace` and `push`',
 });
 
 export const historyReplaceCallout = message({
-  ja: '今のエントリを書き換える',
-  en: 'Rewrites the current entry',
+  ja: '今の履歴エントリを書き換える',
+  en: 'Rewrites the current history entry',
 });
 
 export const historyPushCallout = message({
-  ja: '新しいエントリを積む',
-  en: 'Adds a new entry',
+  ja: '新しい履歴エントリを追加する',
+  en: 'Adds a new history entry',
 });
 
 export const historyPush = message({
-  ja: "ブラウザの戻るで取り消したい更新にだけ、`{ history: 'push' }`を付けます。ページ送りがその例です。同じバッチの中で1回でも`push`を指定すれば、そのバッチの遷移は`push`になります。",
-  en: "Pass `{ history: 'push' }` only for an update the back button should undo, such as paging. If any call in a batch asks for `push`, the batch’s navigation is a push.",
+  ja: "`update()`は、既定では今の履歴エントリを書き換えます。ブラウザの戻るで取り消したい更新にだけ、`{ history: 'push' }`を付けます。ページ送りがその例です。",
+  en: "By default `update()` rewrites the current history entry. Pass `{ history: 'push' }` only for an update the back button should undo, such as paging.",
 });
 
 export const historyPageOnly = message({
-  ja: 'このオプションは、`definePageState`の`update()`にしかありません。遷移を伴うのはページの状態だけだからです。また、効くのは`url`の値が変わるときだけです。`entry`の値だけを変える更新は、今のエントリをその場で書き換えます。',
-  en: 'The option exists only on `definePageState`’s `update()`, the one kind with a navigation behind it, and it takes effect only when a `url` value changes. An update that changes only `entry` values rewrites the current entry in place.',
+  ja: 'このオプションは`definePageState`の`update()`にだけあり、`url`の値が変わるときにだけ効きます。`entry`の値だけを変える更新は、今の履歴エントリをその場で書き換えます。同じバッチで1回でも`push`を指定すれば、そのバッチの遷移は`push`になります。',
+  en: 'The option exists only on `definePageState`’s `update()`, and takes effect only when a `url` value changes. An update that changes only `entry` values rewrites the current history entry in place. If any call in a batch asks for `push`, the batch’s navigation is a push.',
 });
 
 export const historyNavigateTo = message({
-  ja: 'ページを移るときは、`update()`ではなく`@k8ordo/router`の`navigateTo`を使います。こちらは既定で`push`です。',
-  en: 'To move to another page, use `@k8ordo/router`’s `navigateTo` rather than `update()`. It pushes by default.',
+  ja: 'ページを移るときは、`@k8ordo/router`の`navigateTo`を使います。こちらは既定で`push`です。',
+  en: 'To move to another page, use `@k8ordo/router`’s `navigateTo`. It pushes by default.',
 });
 
 export const batchTitle = message({
-  ja: '1つのハンドラで、書き込みは1回',
-  en: 'One handler, one write',
+  ja: '書き込みのまとめ',
+  en: 'Writes in one handler',
 });
 
-export const batchDescription = message({
-  ja: '同じハンドラの中で続けて呼んだ`update()`は、定義ごとに1回の書き込みにまとまります。どの呼び出しも、同じハンドルを返します。',
-  en: 'Calls to `update()` made one after another in the same handler go out as one write per definition, and every one of them returns the same handle.',
+export const batchOne = message({
+  ja: '同じハンドラの中で続けて呼んだ`update()`は、Reactの`setState`と同じように1回にまとまります。上の2回の呼び出しも、書き込みは1回です。',
+  en: 'Several `update()` calls in one handler are batched, as `setState` calls are. The two calls above are one write.',
 });
 
-export const batchAwait = message({
-  ja: '上の2回の呼び出しは、1回の書き込みになります。間に`await`を挟むと、そこから先は別のバッチになり、書き込みもハンドルも別々になります。1回の書き込みが何になるかは、置き場所と変わった値で決まります。',
-  en: 'The two calls above make one write. An `await` between them starts a new batch, with a write and a handle of its own. What that one write is depends on the place, and on what changed.',
+export const batchBy = message({
+  ja: '1回の書き込みが何になるかは、置き場所と変わった値で決まります。',
+  en: 'What that one write is depends on the place and on what changed.',
 });
 
 export const batchUrl = message({
-  ja: '`url`の値が変わるとき：`navigation.navigate()`を1回呼びます。`entry`の変更も一緒に運びます。',
+  ja: '`url`の値が変わるとき：`navigation.navigate()`を1回。`entry`の変更も一緒に書き込みます。',
   en: 'A `url` value changes: one `navigation.navigate()`, carrying any `entry` changes with it.',
 });
 
 export const batchEntry = message({
-  ja: '`entry`の値だけが変わるとき：`navigation.updateCurrentEntry()`を1回呼びます。',
+  ja: '`entry`の値だけが変わるとき：`navigation.updateCurrentEntry()`を1回。',
   en: 'Only `entry` values change: one `navigation.updateCurrentEntry()`.',
 });
 
 export const batchStorage = message({
-  ja: 'localStorageとsessionStorage：`setItem`を1回呼びます。',
+  ja: 'localStorageとsessionStorage：`setItem`を1回。',
   en: 'localStorage and sessionStorage: one `setItem`.',
 });
 
 export const batchCookie = message({
-  ja: 'Cookie：`cookieStore.set()`を1回呼びます。',
+  ja: 'Cookie：`cookieStore.set()`を1回。',
   en: 'A cookie: one `cookieStore.set()`.',
 });
 
 export const batchMemory = message({
-  ja: 'メモリ：まとめずに、呼ぶたびにその場で置き換えます。ハンドルも呼ぶたびに作られます。',
-  en: 'Memory: nothing is batched. Each call applies on the spot and returns a handle of its own.',
+  ja: 'メモリ：まとめません。呼ぶたびにその場で置き換え、呼ぶたびに解決済みのハンドルを返します。',
+  en: 'Memory: nothing is batched. Each call applies on the spot and returns a handle of its own, already settled.',
 });
 
 export const batchSame = message({
-  ja: 'ページの状態のバッチが、今の値と同じところで終われば、遷移もエントリの書き換えも起きません。一方でlocalStorageとsessionStorage、Cookieは、値が変わらなくても行を書き直し、まだ行が無ければ作ります。',
-  en: 'A page state batch that ends where it started neither navigates nor touches the entry. localStorage, sessionStorage and cookies still write their row, creating it if none was stored.',
-});
-
-export const batchShared = message({
-  ja: 'URLとエントリの状態は、ほかの定義と分け合う場所です。書き換えるのは自分のパラメータと自分の名前空間だけなので、`utm_source`のように誰のものでもないパラメータも残ります。',
-  en: 'The URL and the entry state are shared ground. A write touches only its own parameters and its own namespace, so a parameter nobody owns, such as `utm_source`, survives it.',
+  ja: 'ページの状態のバッチの結果が今の値と同じなら、遷移も履歴エントリの書き換えも起きません。localStorageとsessionStorage、Cookieは、値が変わらなくても保存した値を書き直します。ほかの定義やルーターのパラメータが残る仕組みは',
+  en: 'A page state batch whose result equals the current values neither navigates nor rewrites the history entry. localStorage, sessionStorage and cookies rewrite their stored value even when nothing changed. How parameters of other definitions and of the router are kept is explained on ',
 });
 
 export const handleTitle = message({
-  ja: '書き込みを待つ',
-  en: 'Wait for the write',
+  ja: '`committed`と`finished`',
+  en: '`committed` and `finished`',
 });
 
-export const handleDescription = message({
-  ja: '`update()`は、`navigation.navigate()`と同じ形の、2つのPromiseを持つオブジェクトを返します。',
-  en: '`update()` returns an object holding two promises, the same shape `navigation.navigate()` returns.',
+export const handleShape = message({
+  ja: '`update()`は、`navigation.navigate()`と同じ形の、2つのPromiseを持つオブジェクトを返します。Promiseそのものではないので、無視しても`no-floating-promises`のlintには掛かりません。無視するのが普通の使い方です。',
+  en: '`update()` returns an object holding two promises, the same shape `navigation.navigate()` returns. It is not a promise itself, so ignoring it does not trip `no-floating-promises`. Ignoring it is the normal case.',
 });
 
 export const handleCommitted = message({
@@ -151,63 +141,53 @@ export const handleCommitted = message({
 });
 
 export const handleFinished = message({
-  ja: '`finished`：書き込みのあとでルーターがする処理まで、すべて終わったときに解決します。',
-  en: '`finished`: settles once whatever the router does after the write is done too.',
-});
-
-export const handleIgnore = message({
-  ja: 'Promiseそのものではないので、無視してもfloating promiseのlintに掛かりません。ハンドルは無視するのが普通の使い方です。',
-  en: 'It is not a promise itself, so ignoring it trips no floating-promise lint. Ignoring it is the normal case.',
+  ja: '`finished`：書き込みのあとにルーターが行う処理まで終わったときに解決します。',
+  en: '`finished`: settles once the router has finished whatever follows the write.',
 });
 
 export const handleWait = message({
-  ja: '書き込みを待ちたいときは、`finished`を待ちます。次の例では、次のページに移ったあとで見出しにフォーカスを移しています。',
-  en: 'When you do need to wait, await `finished`. Here, focus moves to the heading once the next page is in place.',
-});
-
-export const handleAbort = message({
-  ja: 'あとから来た遷移に追い越された遷移のハンドルは、`AbortError`でrejectします。たとえば、同じハンドラで別のページの状態も書いたときです。ハンドルを待たない呼び方では、このrejectは表に出ません。',
-  en: 'A navigation overtaken by a later one, such as another page state’s write from the same handler, rejects its handle with an `AbortError`. A caller that never awaits the handle never sees it.',
+  ja: '書き込みを待つときは`finished`を待ちます。下の例では、ページ送りのあとに見出しへフォーカスを移しています。',
+  en: 'To wait for the write, await `finished`. Here, focus moves to the heading once the next page is in place.',
 });
 
 export const handleSettle = message({
-  ja: '遷移を伴わない書き込みも、同じ形のハンドルを返します。`entry`だけの書き込みとlocalStorage、sessionStorage、変わる値の無いページの状態は、バッチを書き込んだ時点で解決します。Cookieは、Cookie Store APIが書き終えた時点です。メモリは、その場で解決します。',
-  en: 'Writes with no navigation behind them return the same shape. Entry-only, local, session and no-change page handles settle once the batch is written, cookie handles once the Cookie Store API has written it, and memory handles on the spot.',
+  ja: '遷移を伴わない書き込みのハンドルは、バッチを書き込んだ時点で解決します。Cookieは、Cookie Store APIが書き終えた時点です。ハンドルがrejectするのは次の2つの場合です。',
+  en: 'A handle for a write with no navigation behind it settles once the batch is written; a cookie handle once the Cookie Store API has written it. A handle rejects in two cases.',
+});
+
+export const handleAbort = message({
+  ja: 'あとから来た遷移に追い越された遷移：`AbortError`。たとえば同じハンドラで別のページの状態も書いたときです。ハンドルを待たなければ気づくことはありません。',
+  en: 'A navigation overtaken by a later one: an `AbortError`, for example when the same handler also writes another page state. A caller that never awaits the handle never sees it.',
 });
 
 export const handleFail = message({
-  ja: 'localStorageやsessionStorage、Cookieへの書き込みが失敗すると、ハンドルはそのエラーでrejectします。容量の上限に達したときや、4KBを超えるCookie、書き込む値でスキーマが投げたときです。描画した値はそのまま残ります。',
-  en: 'When a local, session or cookie write fails, the handle rejects with that error: a full quota, a cookie over 4 KB, a schema that throws on the values it was about to write. The rendered value stays.',
+  ja: 'localStorage、sessionStorage、Cookieへの書き込みの失敗：その書き込みのエラーでrejectします。容量の上限、4KBを超えるCookie、書き込む値でスキーマが例外を出したときです。描画した値はそのまま残ります。',
+  en: 'A failed localStorage, sessionStorage or cookie write: the handle rejects with that error. A full quota, a cookie over 4 KB, or a schema that throws on the values about to be written. The rendered value stays.',
 });
 
 export const handleAction = message({
-  ja: '非同期のアクションの中でも、同じように待てます。`startTransition(async …)`や`useTransition`、`@k8ordo/ui`の`Button`の`onAction`がそうです。ただし`@k8ordo/router`の下では、別のページを読み込んでいる最中の`url`の更新はページの切り替えになり、アクションには加わりません。そのため`finished`は、アクションの終わりを待たずに、そのページが表示された時点で解決します。',
-  en: 'An async action can await it the same way: `startTransition(async …)`, `useTransition`, or `@k8ordo/ui`’s `Button` `onAction`. Under `@k8ordo/router`, though, a url update issued while another page is still loading is a page change, which never joins the action, so `finished` settles once that page is on screen rather than when the action ends.',
+  ja: '非同期のアクションの中でも同じように待てます。`startTransition(async …)`や`useTransition`、`@k8ordo/ui`の`Button`の`onAction`がそうです。ただし`@k8ordo/router`の下では、別のページを読み込んでいる最中の`url`の更新はページの切り替えになります。その`finished`は、アクションの終わりを待たずに、そのページが表示された時点で解決します。',
+  en: 'An async action can await it the same way: `startTransition(async …)`, `useTransition`, or `@k8ordo/ui`’s `Button` `onAction`. Under `@k8ordo/router`, though, a `url` update issued while another page is still loading is a page change. Its `finished` settles once that page is on screen, without waiting for the action to end.',
 });
 
 export const functionalTitle = message({
-  ja: '今の値から次の値を作る',
-  en: 'Derive the next value from the current one',
-});
-
-export const functionalDescription = message({
-  ja: '今の値をもとに次の値を作るときは、`update()`に関数を渡します。',
-  en: 'To derive the next value from the current one, hand `update()` a function.',
+  ja: '関数形式の更新',
+  en: 'Functional updates',
 });
 
 export const functionalBatch = message({
-  ja: '関数が受け取るのは、同じバッチでまだ書き込まれていない更新も反映した状態です。描画のときに読んだ値で`update({ page: page + 1 })`を同じハンドラで2回呼ぶと、1つしか増えません。関数で書けば、2つ増えます。',
-  en: 'The function receives the batched state, including updates not yet written. Calling `update({ page: page + 1 })` twice in one handler with the value read during render adds one; written as a function, it adds two.',
+  ja: '今の値を元に次の値を作るときは、`update()`に関数を渡します。関数が受け取るのは、同じバッチでまだ書き込まれていない更新も反映した状態です。',
+  en: 'To derive the next value from the current one, pass `update()` a function. The function receives the batched state, including updates not yet written.',
+});
+
+export const functionalTwice = message({
+  ja: '描画で読んだ`page`を使って`update({ page: page + 1 })`を同じハンドラで2回呼ぶと、1つしか増えません。関数で書けば2つ増えます。',
+  en: 'Calling `update({ page: page + 1 })` twice in one handler with the `page` read during render adds one. Written as a function, it adds two.',
 });
 
 export const keysTitle = message({
-  ja: '一部のキーだけを購読する',
-  en: 'Subscribe to some keys only',
-});
-
-export const keysDescription = message({
-  ja: '`useAppState`の2つ目の引数にキーの配列を渡すと、そのキーが変わったときだけ再描画されます。',
-  en: 'Pass `useAppState` an array of keys as its second argument, and it re-renders only when one of those keys changes.',
+  ja: 'キーの購読',
+  en: 'Key subscriptions',
 });
 
 export const keysAllCallout = message({
@@ -216,8 +196,8 @@ export const keysAllCallout = message({
 });
 
 export const keysPageCallout = message({
-  ja: 'pageが変わったときだけ再描画',
-  en: 'Only page re-renders it',
+  ja: '`page`が変わったときだけ再描画',
+  en: 'Only `page` re-renders it',
 });
 
 export const keysNoneCallout = message({
@@ -225,59 +205,69 @@ export const keysNoneCallout = message({
   en: 'Subscribes to nothing (write-only)',
 });
 
+export const keysOptionsCallout = message({
+  ja: 'オプションはキーの配列のあと',
+  en: 'Options come after the key array',
+});
+
 export const keysInline = message({
-  ja: '配列はインラインで書いてかまいません。内部でそろえてから比べるので、`useMemo`は要りません。`initialUrl`や`initialCookie`は、キーの配列のあとの3つ目の引数に渡します。',
-  en: 'Write the array inline; it is normalized internally, so there is no need for `useMemo`. With a key array, `initialUrl` or `initialCookie` goes in the third argument.',
+  ja: '`useAppState`の2つ目の引数にキーの配列を渡すと、そのキーが変わったときだけ再描画されます。配列はインラインで書いてかまいません。内部で正規化してから比べるので、`useMemo`は要りません。',
+  en: 'Pass `useAppState` an array of keys as its second argument, and it re-renders only when one of those keys changes. The array can be written inline. It is normalized internally, so `useMemo` is not needed.',
 });
 
 export const keysCompare = message({
-  ja: '変わったかどうかは、フィールドごとに比べて決めます。配列とプレーンなオブジェクトは中身を、`Date`や`Map`、クラスのインスタンスは参照を比べます。変わらなかったフィールドは前と同じ参照を保つので、`memo`や依存配列にそのまま渡せます。',
-  en: 'Change is decided per field. Arrays and plain objects compare by content; a `Date`, a `Map` or a class instance by reference. A field that did not change keeps its previous reference, so it goes straight into `memo` or a dependency array.',
+  ja: '変わらなかったフィールドは前と同じ参照を保つので、`memo`や依存配列にそのまま渡せます。フィールドの比べ方は',
+  en: 'A field that did not change keeps its previous reference, so it goes straight into `memo` or a dependency array. How fields are compared is explained on ',
+});
+
+export const see = message({
+  ja: 'を見てください。',
+  en: '.',
 });
 
 export const keysSplit = message({
-  ja: '更新の頻度が大きく違う状態は、定義を分けてください。購読の境目は定義です。',
-  en: 'When two pieces of state change at very different rates, give them separate definitions: the definition is the subscription boundary.',
+  ja: '更新の頻度が大きく違う状態は、定義を分けます。再描画は定義の単位で決まるからです。',
+  en: 'Give state that changes at very different rates separate definitions. Re-rendering is decided per definition.',
 });
 
 export const draftsTitle = message({
-  ja: '入力のたびに書き込まない',
-  en: 'Do not write on every keystroke',
+  ja: '入力中の値',
+  en: 'Drafts',
 });
 
-export const draftsDescription = message({
-  ja: 'キーを押すたびに`update()`を呼ぶと、URLの書き換えも1文字ごとに起きます。入力中の値はDOMかReactのローカルな状態に任せ、送信やページ送りのような区切りで`update()`を呼びます。`@k8ordo/form`と同じ線の引き方です。',
-  en: 'Calling `update()` on every keystroke rewrites the URL once per character. Let the DOM or local React state hold the draft, and call `update()` at commit points such as submit or paging, the same line `@k8ordo/form` draws.',
+export const draftsCommit = message({
+  ja: 'キーを押すたびに`update()`を呼ぶと、URLの書き換えも1文字ごとに起きます。入力中の値はDOMかReactのローカルな状態に持たせ、送信やページ送りの区切りで`update()`を呼びます。',
+  en: 'Calling `update()` on every keystroke rewrites the URL once per character. Keep the draft in the DOM or in local React state, and call `update()` at a commit point such as submit or paging.',
 });
 
 export const draftsKey = message({
-  ja: '`key={q}`は、戻るボタンなどで外から`q`が変わったときに、入力欄を新しい`defaultValue`で作り直すためのものです。',
+  ja: '`key={q}`は、戻るボタンなどで外から`q`が変わったときに、入力欄を新しい`defaultValue`で作り直します。',
   en: '`key={q}` remounts the input with the new `defaultValue` when `q` changes from outside, through the back button for example.',
 });
 
 export const draftsGetBefore = message({
-  ja: 'JavaScriptが届く前から動かしたいなら、GETフォームでURLを書き換えます。`@k8ordo/form`と組み合わせる書き方は、「',
-  en: 'For a form that works before JavaScript arrives, let a GET form write the URL. Pairing it with `@k8ordo/form` is covered in “',
+  ja: 'JavaScriptが読み込まれる前から動かすなら、GETフォームでURLを書き換えます。`@k8ordo/form`と組み合わせる書き方は「',
+  en: 'For a form that works before JavaScript loads, let a GET form write the URL. Pairing it with `@k8ordo/form` is covered in “',
 });
 
 export const draftsGetAfter = message({
-  ja: '」で説明しています。',
+  ja: '」にあります。',
   en: '”.',
 });
 
 export const draftsMirror = message({
-  ja: '定義の値を`useState`に写して、同期させようとしないでください。写した値は、戻るボタンやほかのタブの書き込みに追いつきません。値が要るところで`useAppState`を呼びます。',
-  en: 'Never copy a definition’s values into `useState` to keep them in sync: the copy falls behind the back button and other tabs’ writes. Call `useAppState` wherever the value is needed.',
+  ja: '定義の値を`useState`に写して同期させないでください。写した値は、戻るボタンやほかのタブの書き込みで更新されません。値が要るところで`useAppState`を呼びます。',
+  en: 'Do not copy a definition’s values into `useState` and try to keep them in sync. The copy is not updated by the back button or by other tabs’ writes. Call `useAppState` wherever the value is needed.',
 });
 
 export const demoTitle = message({
-  ja: '書き込みを見る',
-  en: 'Watch the writes',
+  ja: '書き込みの記録',
+  en: 'Write log',
 });
 
 export const demoDescription = message({
-  ja: 'このページのURLと履歴エントリを実際に書き換える、本物の`definePageState`です。`a`と`b`はURLに、`c`は履歴エントリに置いています。ボタンは何も購読しないコンポーネントにあり、その下に購読ごとの描画回数と、ブラウザが受け取った書き込みを新しい順に並べています。',
-  en: 'A real `definePageState` that rewrites this page’s URL and history entry, with `a` and `b` in the URL and `c` in the entry. The buttons sit in a component that subscribes to nothing; below them are the render counts of three subscriptions, and the writes the browser received, newest first.',
+  ja: 'このページのURLと履歴エントリを実際に書き換える`definePageState`で、`a`と`b`はURLに、`c`は履歴エントリに置いています。',
+  en: 'A real `definePageState` that rewrites this page’s URL and history entry, with `a` and `b` in the URL and `c` in the entry.',
 });
 
 export const demoSteps = [

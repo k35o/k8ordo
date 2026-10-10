@@ -5,6 +5,7 @@ import type { MatchablePattern } from '@k8ordo/framework';
 import { Button, Code, FormControl, Switch, TextField } from '@k8ordo/ui';
 import { useState } from 'react';
 
+import { jsLiteral } from '../../../components/js-literal';
 import * as m from '../../../messages';
 
 type Outcome =
@@ -26,7 +27,7 @@ const evaluate = ({ pattern, pathname, inclusive }: Input): Outcome => {
     });
     return params === null
       ? { kind: 'miss' }
-      : { kind: 'match', params: JSON.stringify(params) };
+      : { kind: 'match', params: jsLiteral(params) };
   } catch {
     // URLPattern が解釈できないパターンは TypeError になる
     return { kind: 'invalid' };

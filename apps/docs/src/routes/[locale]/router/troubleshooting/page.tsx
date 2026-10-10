@@ -2,7 +2,9 @@ import type { Message } from '@k8ordo/i18n';
 import { Heading } from '@k8ordo/ui';
 
 import { DocPage, DocSection } from '../../../../components/doc-page';
+import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Rich } from '../../../../components/rich';
+import type { SitePath } from '../../../../links';
 import * as m from '../../../../messages';
 
 const t = m.routerTroubleshooting;
@@ -12,6 +14,7 @@ type Symptom = {
   title: Message;
   cause: Message;
   fix: Message;
+  fixLink?: { path: SitePath; label: Message; after: Message };
 };
 
 const SYMPTOMS: readonly Symptom[] = [
@@ -34,6 +37,11 @@ const SYMPTOMS: readonly Symptom[] = [
     title: t.frameworkTitle,
     cause: t.frameworkCause,
     fix: t.frameworkFix,
+    fixLink: {
+      path: '/:locale/framework/params',
+      label: m.framework.navParams,
+      after: t.frameworkFixAfter,
+    },
   },
   {
     id: 'use-pathname',
@@ -75,6 +83,14 @@ export default function RouterTroubleshootingPage() {
           <Heading level="h3">{t.fixLabel()}</Heading>
           <p>
             <Rich>{symptom.fix()}</Rich>
+            {symptom.fixLink === undefined ? null : (
+              <>
+                <LocaleAnchor path={symptom.fixLink.path}>
+                  {symptom.fixLink.label()}
+                </LocaleAnchor>
+                <Rich>{symptom.fixLink.after()}</Rich>
+              </>
+            )}
           </p>
         </DocSection>
       ))}

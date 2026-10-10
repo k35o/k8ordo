@@ -40,12 +40,6 @@ const SYMPTOMS: readonly Symptom[] = [
     fix: t.clientModuleFix,
   },
   {
-    id: 'static-search',
-    title: t.staticSearchTitle,
-    cause: t.staticSearchCause,
-    fix: t.staticSearchFix,
-  },
-  {
     id: 'serialization',
     title: t.serializationTitle,
     cause: t.serializationCause,
@@ -69,18 +63,6 @@ const SYMPTOMS: readonly Symptom[] = [
     title: t.sharedKeyTitle,
     cause: t.sharedKeyCause,
     fix: t.sharedKeyFix,
-  },
-  {
-    id: 'url-flash',
-    title: t.urlFlashTitle,
-    cause: t.urlFlashCause,
-    fix: t.urlFlashFix,
-  },
-  {
-    id: 'cookie-flash',
-    title: t.cookieFlashTitle,
-    cause: t.cookieFlashCause,
-    fix: t.cookieFlashFix,
   },
   {
     id: 'safari-cookie',

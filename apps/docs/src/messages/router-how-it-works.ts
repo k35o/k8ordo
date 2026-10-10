@@ -1,211 +1,236 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: '`@k8ordo/router`がナビゲーションをどう扱っているかを説明します。使い方を覚えるのに必要な内容ではありませんが、なぜそう動くのかが分かると、思ったとおりに動かないときに原因を探しやすくなります。',
-  en: 'How `@k8ordo/router` handles navigation. None of it is needed to use the package, but knowing why it behaves as it does makes it easier to find the cause when something does not.',
+  ja: '`@k8ordo/router`がナビゲーションの処理をいつ、どこで行うかと、保証することとしないことが分かります。',
+  en: 'When and where `@k8ordo/router` handles a navigation, and what it does and does not guarantee.',
+});
+
+export const whereTitle = message({
+  ja: '処理する場所',
+  en: 'Where it runs',
+});
+
+export const whereHook = message({
+  ja: 'ナビゲーションを処理するのは、`useInterceptedNavigation`というフックです。`<Router>`はルート表を使ってこのフックを呼びます。`@k8ordo/framework`のランタイムも、同じフックを呼びます。',
+  en: 'Navigations are handled by one hook, `useInterceptedNavigation`. `<Router>` calls it with its route table, and the runtime of `@k8ordo/framework` calls the same hook.',
+});
+
+export const whereSame = message({
+  ja: '2つで違うのは、どのナビゲーションを扱うかと、何を読み込むかだけです。このページのほかの動きは、どちらの下でも同じです。',
+  en: 'The two differ only in which navigations they handle and what they load. Everything else on this page holds under both.',
+});
+
+export const whereOwnBefore = message({
+  ja: 'このフックで自分のホストを作るときの書き方は、',
+  en: 'To build a host of your own on this hook, see ',
 });
 
 export const claimTitle = message({
-  ja: 'ルーターが引き受けるナビゲーション',
-  en: 'Which navigations the router takes',
+  ja: 'インターセプトの対象',
+  en: 'Intercepted navigations',
 });
 
-export const claimDescription = message({
-  ja: 'リンクのクリックも`navigateTo`も、ブラウザの戻ると進むも、GETのフォームの送信も、ブラウザは同じ`navigate`イベントで知らせます。ルーターはこのイベントを受け取り、行き先のパスにルート表が答えるものだけをインターセプトします。',
-  en: 'A link click, `navigateTo`, the browser’s back and forward, and a GET form submission all reach the page as the same `navigate` event. The router takes that event and intercepts only the navigations whose destination the route table answers.',
+export const claimEvent = message({
+  ja: 'リンクのクリックや`navigateTo`、戻る操作と進む操作は、どれも同じ`navigate`イベントを発火させます。`<Router>`はこのイベントを受け取り、行き先のパスがルート表にあるものだけをインターセプトします。',
+  en: 'A link click, `navigateTo`, and the browser’s back and forward all reach the page as the same `navigate` event. `<Router>` listens to it and intercepts only the navigations whose destination path is in the route table.',
 });
 
 export const claimNever = message({
-  ja: '次の4つは、ルート表に何が書いてあっても引き受けず、ブラウザに任せます。',
-  en: 'These four it never takes, whatever the route table says, and leaves to the browser.',
+  ja: '次の4つは、フックがインターセプトしません。ルート表に何が書いてあっても、ブラウザがそのまま処理します。',
+  en: 'The hook never intercepts these four. Whatever the route table says, the browser handles them as usual.',
 });
 
 export const claimReload = message({
-  ja: '再読み込み：新しいページの取得を求める操作だからです',
-  en: 'A reload: it asks for a fresh copy of the page',
+  ja: '再読み込み：新しいページをサーバーから取得する操作',
+  en: 'A reload: it fetches a fresh page from the server',
 });
 
 export const claimPost = message({
-  ja: '本文を持つフォームの送信（POST）：本文を扱えるのはサーバーだけだからです',
+  ja: '本文を持つフォームの送信（POST）：本文を扱えるのはサーバーだけ',
   en: 'A form submitted with a body (POST): only the server can act on the body',
 });
 
 export const claimDownload = message({
-  ja: 'ダウンロード：ファイルを保存する操作だからです',
+  ja: 'ダウンロード：ファイルを保存する操作',
   en: 'A download: it saves a file',
 });
 
 export const claimFragment = message({
-  ja: 'フラグメント（URLの`#`より後ろ）だけの変更：同じページの中の移動だからです',
+  ja: 'フラグメント（URLの`#`より後ろ）だけの変更：同じページの中の移動',
   en: 'A change to the fragment alone (what follows `#`): it moves within the same page',
 });
 
-export const claimWhy = message({
-  ja: 'これらを引き受けると、ブラウザなら当然そうする動作の代わりに、何も起きなくなってしまいます。別のオリジンへの移動のように、ブラウザがインターセプトを許さないナビゲーションも引き受けません。',
-  en: 'Taking any of them would make nothing happen where the browser would have done the obvious thing. Navigations the browser does not let a page intercept, such as one to another origin, are not taken either.',
+export const claimOther = message({
+  ja: '別のオリジンへの移動のように、ブラウザがインターセプトを許さないナビゲーションも対象外です。',
+  en: 'A navigation the browser does not allow a page to intercept, such as one to another origin, is not intercepted either.',
 });
 
 export const claimGet = message({
-  ja: 'GETのフォームは本文を持たないので引き受けます。`@k8ordo/state`が組み立てる、クエリ文字列を書き換えるだけの送信も、ここを通ります。',
-  en: 'A GET form carries no body, so it is taken. The submissions `@k8ordo/state` builds, which only rewrite the query string, come through here too.',
+  ja: 'GETのフォームは本文を持たないので、インターセプトします。',
+  en: ' A GET form carries no body, so it is intercepted.',
+});
+
+export const claimStateBefore = message({
+  ja: '`@k8ordo/state`の`update()`によるURLの書き換えも、同じイベントで処理されます。詳しくは',
+  en: ' URL rewrites by `@k8ordo/state`’s `update()` go through the same event. See ',
 });
 
 export const finishedTitle = message({
-  ja: '`finished`はページが画面に出たときに解決する',
-  en: '`finished` means the page is on screen',
+  ja: '`finished`の解決',
+  en: 'When `finished` resolves',
 });
 
-export const finishedDescription = message({
-  ja: 'ルーターは、インターセプトしたナビゲーションを、新しいページが画面に出るまで終わらせません。そのため、`navigateTo`が返す`finished`は、URLが書き換わったときではなく、ページが描かれたときに解決します。',
-  en: 'The router does not let an intercepted navigation finish until the new page is on screen. So the `finished` that `navigateTo` returns resolves when the page has rendered, not when the URL changed.',
+export const finishedScreen = message({
+  ja: '`navigateTo`が返す`finished`は、URLが書き換わったあと、新しいページが描画された時点で解決します。',
+  en: 'The `finished` promise that `navigateTo` returns resolves when the new page has rendered, not when the URL changed.',
 });
 
 export const finishedPaint = message({
-  ja: '正確には、Reactが新しいページを反映したあと、ブラウザがそれを描く前に解決します。描く前なので、新しいページが前のスクロール位置で1フレームだけ見えることもありません。',
-  en: 'Precisely, it resolves after React has committed the new page and before the browser paints it, which also means the new page never shows for a frame at the old scroll position.',
+  ja: '正確には、Reactが新しいページをコミットしたあと、ブラウザが画面に描く前です。前のスクロール位置で新しいページが1フレーム見えることはありません。',
+  en: 'More precisely, after React commits the new page and before the browser paints it, so the new page never shows for a frame at the old scroll position.',
 });
 
 export const finishedLazy = message({
-  ja: '待つのは新しいページの最初の反映です。ナビゲーションで新しく現れた`<Suspense>`の中で`React.lazy`のページがサスペンドしたときは、fallbackが描かれた時点で解決し、コードが届くのは待ちません。',
-  en: 'What it waits for is the new page’s first commit. When a `React.lazy` page suspends into a `<Suspense>` the navigation newly mounted, `finished` resolves once the fallback is drawn, without waiting for the code.',
+  ja: '待つのは新しいページの最初のコミットです。ナビゲーションで新しくマウントされた`<Suspense>`の中で`React.lazy`のページがサスペンドすると、fallbackをコミットした時点で解決します。コードの読み込みは待ちません。',
+  en: 'What it waits for is the new page’s first commit. When a `React.lazy` page suspends inside a `<Suspense>` the navigation newly mounted, `finished` resolves once the fallback is committed. It does not wait for the code to load.',
 });
 
 export const stateTitle = message({
-  ja: '状態の更新はページの切り替えではない',
-  en: 'A state update is not a page change',
+  ja: '状態だけの更新',
+  en: 'State-only updates',
 });
 
-export const stateDescription = message({
-  ja: 'クエリ文字列や履歴エントリの状態だけが変わったナビゲーションでは、パスは画面に出ているページと同じです。ルーターはこれをページの切り替えとは扱わず、何も読み込まずにインターセプトします。',
-  en: 'When only the query string or the history entry’s state changes, the path is that of the page on screen. The router does not treat this as a page change, and intercepts it without loading anything.',
+export const stateInPlace = message({
+  ja: 'クエリや履歴エントリの状態だけが変わるナビゲーションでは、パスは画面に出ているページと同じです。ルーターはこれをページの切り替えとして扱わず、何も読み込まずにインターセプトします。ページは作り直されず、スクロール位置とフォーカスも動きません。`finished`はURLが書き換わった時点で解決します。',
+  en: 'When only the query or the history entry’s state changes, the path is that of the page on screen. The router does not treat this as a page change, and intercepts it without loading anything. Nothing remounts, scroll and focus stay where they are, and `finished` resolves as soon as the URL changes.',
 });
 
-export const stateKeep = message({
-  ja: 'ページは作り直されず、スクロールの位置もフォーカスもそのままです。検索の条件を変えてもページの先頭に戻らないのは、このためです。待つ描画が無いので、`finished`はURLが書き換わった時点で解決します。`@k8ordo/state`の`update()`が返す`finished`も同じです。',
-  en: 'Nothing remounts, and neither scroll nor focus moves; this is why changing a search does not jump back to the top. With no render to wait for, `finished` resolves as soon as the URL changes, and so does the one `@k8ordo/state`’s `update()` returns.',
+export const stateRefresh = message({
+  ja: '例外は、`useInterceptedNavigation`に渡した`refresh`が`true`を返したときです。同じパスのページを読み込み直し、`finished`はその描画を待ちます。スクロールとフォーカスは動かさず、トランジションの種類も付けません。`<Router>`は読み込み直しませんが、`@k8ordo/framework`は`search`をexportしたページを読み込み直します。',
+  en: 'The exception is a `refresh` passed to `useInterceptedNavigation` that returns `true`. The page at the same path then loads again, and `finished` waits for it to render. Scroll and focus stay put, and no transition types are added. `<Router>` never loads again in place, while `@k8ordo/framework` does for a page that exports `search`.',
 });
 
 export const stateShown = message({
-  ja: '比べる相手は、アドレスバーのパスではなく、画面に出ているページのパスです。別のページを読み込んでいる最中に、そのページのURLへ状態の更新が来たときは、ページの切り替えとして扱います。読み込み中のページはそのまま届き、その`finished`もページの描画を待ちます。',
-  en: 'The comparison is with the page on screen, not with the address bar. A state update aimed at a page that is still loading counts as a page change: that page still arrives, and the update’s `finished` waits for it to render.',
+  ja: '比べる相手は画面に出ているページのパスで、アドレスバーのパスとは限りません。読み込み中のページのURLで状態だけを更新すると、ルーターはページの切り替えとして扱います。そのページの読み込みはそのまま続き、更新の`finished`もそのページの描画を待ちます。',
+  en: 'The comparison is with the page on screen, which is not always what the address bar shows. A state-only update to the URL of a page that is still loading counts as a page change. That page still arrives, and the update’s `finished` waits for it to render.',
 });
 
 export const backgroundTitle = message({
-  ja: '次のページは背景で描く',
-  en: 'The next page renders in the background',
+  ja: '描画の優先度',
+  en: 'Render priority',
 });
 
-export const backgroundDescription = message({
-  ja: '新しいページは、`useDeferredValue`の優先度で描かれます。そのため、次のページの準備ができるまで前のページが画面に残り、操作もできます。',
-  en: 'The new page renders at the priority `useDeferredValue` gives it, so the previous page stays on screen, and stays usable, until the next one is ready.',
+export const backgroundDeferred = message({
+  ja: '新しいページは、`useDeferredValue`と同じ優先度で描画されます。次のページの準備ができるまで前のページが画面に残り、操作もできます。',
+  en: 'The new page renders at the priority `useDeferredValue` gives it. The previous page stays on screen, and stays usable, until the next one is ready.',
 });
 
-export const backgroundWhy = message({
-  ja: 'transitionにしないのは、非同期のアクションが保留中の間、Reactがすべてのtransitionをそのアクションが終わるまで止めるからです。transitionにすると、アクションの中で`finished`を待ったときに互いを待ち合って止まります。関係のないアクションが保留中のときも、ページの切り替えが遅れます。',
-  en: 'It is not a transition because React holds every transition while an async action is pending, until that action ends. As a transition, an action awaiting `finished` would wait on itself, and a page change would also wait for any unrelated action.',
+export const backgroundNotTransition = message({
+  ja: 'この描画はトランジションにしません。そのため、アクションの中で`finished`を待っても止まらず、ほかのアクションが保留中でもページの切り替えは遅れません。',
+  en: 'It is not a transition, so an action can await `finished` without stalling, and a pending action elsewhere does not delay a page change.',
 });
 
-export const backgroundTypes = message({
-  ja: 'この描画には、`navigation`と`navigation-push`などの種類を付けます。`<ViewTransition>`がページの切り替えだけをアニメーションできるのは、この種類があるからです。',
-  en: 'The render is tagged `navigation` and a kind such as `navigation-push`, which is what lets a `<ViewTransition>` animate page changes and nothing else.',
+export const backgroundTypesBefore = message({
+  ja: 'この描画には、`navigation`と`navigation-push`のようなトランジションの種類を付けます。`<ViewTransition>`での使い方は',
+  en: 'The render carries the transition types `navigation` and a kind such as `navigation-push`. For using them with `<ViewTransition>`, see ',
+});
+
+export const see = message({
+  ja: 'を見てください。',
+  en: '.',
 });
 
 export const scrollTitle = message({
-  ja: '新しいページはどこから始まるか',
-  en: 'Where a new page starts',
+  ja: 'スクロールとフォーカス',
+  en: 'Scroll and focus',
 });
 
-export const scrollDescription = message({
-  ja: '新しいページが画面に出ると、ルーターはスクロールの位置を、ページを読み込んだときと同じ場所に動かします。URLにフラグメントがあればその要素へ、無ければページの先頭へ移ります。',
-  en: 'Once the new page is on screen, the router scrolls to where a page load would have: to the element the fragment names, or to the top when there is none.',
+export const scrollTop = message({
+  ja: '新しいページが画面に出ると、フォーカスはページを読み込んだときと同じ場所に移ります。`autofocus`の要素があればその要素へ、無ければ`<body>`へ移ります。スクロール位置も、URLにフラグメントがあればその要素へ、無ければページの先頭へ移ります。',
+  en: 'Once the new page is on screen, focus goes where a page load would put it: to the element with `autofocus`, or to `<body>` when there is none. Scroll goes the same way, to the element the fragment names, or to the top when there is no fragment.',
 });
 
 export const scrollFragment = message({
   ja: 'フラグメントの要素は、`id`か`name`属性が一致するもので探します。デコードしてから探すので、`#%E5%B0%8E%E5%85%A5`は`id="導入"`の要素を指します。見つからなければ先頭へ移ります。',
-  en: 'The fragment’s element is the one whose `id` or `name` attribute matches. The fragment is decoded first, so `#%E5%B0%8E%E5%85%A5` finds `id="導入"`, and the page goes to the top when nothing matches.',
+  en: 'The fragment’s element is the one whose `id` or `name` attribute matches. The fragment is decoded first, so `#%E5%B0%8E%E5%85%A5` finds `id="導入"`. When nothing matches, the page goes to the top.',
 });
 
 export const scrollTraverse = message({
-  ja: 'ブラウザの戻ると進むでは、ルーターはスクロールに触れず、ブラウザが覚えていた位置に任せます。',
-  en: 'On the browser’s back and forward, the router leaves scrolling alone, and the browser restores the position it saved.',
-});
-
-export const scrollFocus = message({
-  ja: 'フォーカスも、ページを読み込んだときと同じく`<body>`に戻ります。状態の更新では、スクロールと同じくフォーカスも動きません。',
-  en: 'Focus also goes back to `<body>`, as on a page load. A state update moves focus no more than it moves the scroll position.',
+  ja: 'ただし、ブラウザの戻ると進むでは、ルーターはスクロールに触れません。ブラウザが保存していた位置に戻ります。読み込みの間に訪問者がスクロールしていると、ブラウザは位置を戻しません。',
+  en: 'On the browser’s back and forward, though, the router leaves scrolling alone, and the browser restores the position it saved. If the visitor scrolls while the page loads, the browser does not restore it.',
 });
 
 export const abortTitle = message({
-  ja: '追い越されたナビゲーションは中断される',
-  en: 'A superseded navigation is abandoned',
+  ja: 'ナビゲーションの追い越し',
+  en: 'Superseded navigations',
 });
 
-export const abortDescription = message({
-  ja: '読み込みの途中で次のナビゲーションが始まると、前のナビゲーションは中断されます。中断には、ブラウザ自身の`AbortSignal`を使います。',
-  en: 'When the next navigation starts while one is still loading, the earlier one is abandoned, through the browser’s own `AbortSignal`.',
-});
-
-export const abortRejects = message({
-  ja: '追い越された側の`finished`は、中断の理由でrejectします。読み込みがすでに終わっていても、そのページは画面に出ません。',
-  en: 'The overtaken navigation’s `finished` rejects with the abort reason, and its page never reaches the screen, even when its load had already come back.',
+export const abortSignal = message({
+  ja: '読み込みの途中で次のナビゲーションが始まると、前のナビゲーションは中断されます。中断にはブラウザの`AbortSignal`を使います。追い越された側の`finished`は、中断の理由でrejectします。そのページは、あとから読み込みが終わっても画面に出ません。',
+  en: 'When the next navigation starts while one is still loading, the earlier one is aborted through the browser’s own `AbortSignal`. The overtaken navigation’s `finished` rejects with the abort reason. Its page never reaches the screen, even if its load completes afterwards.',
 });
 
 export const abortLazy = message({
-  ja: '`React.lazy`のコードの読み込みは、動的importが`AbortSignal`を受け取らないので取り消せません。読み込みはそのまま終わり、次に開いたときのために残りますが、追い越されたページは表示されません。フレームワークの下では、次のページのデータの取得ごと取り消されます。',
-  en: 'A `React.lazy` chunk cannot be cancelled, since a dynamic import takes no `AbortSignal`: it finishes and is kept for the next visit, while the overtaken page is never shown. Under the framework, the fetch for the next page’s data is cancelled outright.',
+  ja: '`React.lazy`のコードの読み込みは取り消せません。動的importは`AbortSignal`を受け取らないので、読み込みは最後まで進み、次に開いたときに使われます。',
+  en: 'A `React.lazy` chunk cannot be cancelled. A dynamic import takes no `AbortSignal`, so the load runs to the end and is reused on the next visit.',
 });
 
-export const hookTitle = message({
-  ja: '`useInterceptedNavigation`で自分の仕組みを作る',
-  en: 'Build your own host with `useInterceptedNavigation`',
+export const guaranteesTitle = message({
+  ja: '保証すること',
+  en: 'Guarantees',
 });
 
-export const hookDescription = message({
-  ja: 'ここまでの動きは、すべて`useInterceptedNavigation`というフックが受け持っています。`<Router>`はこのフックにルート表をつないだもので、フレームワークのランタイムは、同じフックにサーバーから届くページをつないでいます。',
-  en: 'Everything above is the work of one hook, `useInterceptedNavigation`. `<Router>` is that hook wired to a route table, and the framework’s runtime is the same hook wired to pages arriving from the server.',
+export const guarantees = [
+  message({
+    ja: '再読み込みとダウンロード、本文を持つフォームの送信とフラグメントだけの変更は、インターセプトしません。',
+    en: 'A reload, a download, a form submitted with a body and a change to the fragment alone are never intercepted.',
+  }),
+  message({
+    ja: '`finished`は、Reactが新しいページをコミットしたあと、ブラウザが画面に描く前に解決します。',
+    en: '`finished` resolves after React commits the new page and before the browser paints it.',
+  }),
+  message({
+    ja: 'ページの切り替えは、保留中のアクションに待たされません。アクションの中で`finished`を待っても止まりません。',
+    en: 'A page change is never held back by a pending action, and an action that awaits `finished` does not stall.',
+  }),
+  message({
+    ja: 'クエリや履歴エントリの状態だけが変わるナビゲーションでは、スクロール位置とフォーカスを動かしません。',
+    en: 'A navigation that changes only the query or the entry’s state moves neither scroll nor focus.',
+  }),
+  message({
+    ja: 'ページを切り替えると、戻ると進むを除いて、フラグメントの要素かページの先頭へスクロールします。新しいページが前のスクロール位置で描かれることはありません。',
+    en: 'A page change other than back and forward scrolls to the fragment’s element or to the top. The new page is never painted at the old scroll position.',
+  }),
+  message({
+    ja: '読み込みの途中で追い越されたナビゲーションは、`finished`が中断の理由でrejectし、そのページは画面に出ません。',
+    en: 'A navigation overtaken while loading has its `finished` reject with the abort reason, and its page never reaches the screen.',
+  }),
+  message({
+    ja: 'ページを切り替える描画には、`navigation`と`navigation-push`のような種類を付けます。同じパスでの更新には付けません。',
+    en: 'The render of a page change carries `navigation` and a kind such as `navigation-push`. An update at the same path carries none.',
+  }),
+] as const;
+
+export const nonGuaranteesTitle = message({
+  ja: '保証しないこと',
+  en: 'Not guaranteed',
 });
 
-export const hookHandler = message({
-  ja: 'フックには、次の関数をまとめたオブジェクトを渡します。',
-  en: 'The hook takes an object with these functions.',
-});
-
-export const hookClaim = message({
-  ja: '`claim(url)`：このナビゲーションを引き受けるかどうか。インターセプトできるのはイベントの間だけなので、同期的に答えます。',
-  en: '`claim(url)`: whether to take this navigation. Interception is only possible during the event, so it answers synchronously.',
-});
-
-export const hookLoad = message({
-  ja: '`load(url, signal)`：そのURLで描くものを作ります。値かPromiseを返し、追い越されると`signal`が中断されます。',
-  en: '`load(url, signal)`: produces what to render for the URL, as a value or a promise. `signal` aborts when the navigation is overtaken.',
-});
-
-export const hookApply = message({
-  ja: '`apply(value)`：作ったものを反映します。transitionの外で、ふつうの更新として呼ばれます。',
-  en: '`apply(value)`: applies it, as an ordinary update outside any transition.',
-});
-
-export const hookRefresh = message({
-  ja: '`refresh(url)`：省略できます。パスが変わらないナビゲーションでも、読み込み直すかどうかを答えます。',
-  en: '`refresh(url)`: optional. Whether a navigation that keeps the path should still load.',
-});
-
-export const hookDeferred = message({
-  ja: '`apply`で入れた値は、フックを呼んだのと同じコンポーネントの中で、`useDeferredValue`を通して描きます。こうすると新しいページが背景で描かれ、`generation`と`finished`も同じ反映で進みます。',
-  en: 'Render what `apply` set through `useDeferredValue`, in the same component that calls the hook. The new page then renders in the background, and `generation` and `finished` move in that same commit.',
-});
-
-export const hookGeneration = message({
-  ja: '`generation`は、新しいページが画面に出たときにだけ変わる番号です。`<NavigationGeneration>`で配ると、ルート表の`error`がエラーの表示を消す時を知ります。`<PathnameProvider>`は、サーバーでの描画とハイドレーションの間に、`usePathname`が返すパスを渡します。',
-  en: '`generation` is a number that changes only when a new page is on screen. Provided through `<NavigationGeneration>`, it tells the route table’s `error` when to let a failure go. `<PathnameProvider>` gives `usePathname` its path during a server render and hydration.',
-});
-
-export const hookWho = message({
-  ja: 'どちらも`<Router>`とフレームワークのランタイムが自分で置くので、アプリが書くのは、自分でこのフックを使うときだけです。',
-  en: '`<Router>` and the framework’s runtime both provide them themselves, so an app writes them only when it uses this hook directly.',
-});
-
-export const hookRefreshDetail = message({
-  ja: '`refresh`が`true`を返すと、パスが同じでもページの切り替えと同じように読み込んで反映します。ただし、スクロールとフォーカスは動かさず、ナビゲーションの種類も付けません。フレームワークは、`search`をexportしたページでクエリ文字列が変わったときに`true`を返します。',
-  en: 'When `refresh` returns `true`, a navigation that keeps the path loads and applies like a page change, but moves neither scroll nor focus and carries no navigation types. The framework returns `true` for a page that exports `search` when the query string changes.',
-});
+export const nonGuarantees = [
+  message({
+    ja: 'URLと画面のページは、読み込みの間は一致しません。URLが先に書き換わり、前のページが画面に残ります。',
+    en: 'The URL and the page on screen do not agree while the next page loads. The URL changes first, and the previous page stays on screen.',
+  }),
+  message({
+    ja: '`finished`は、`React.lazy`のページのコードの読み込みを待ちません。',
+    en: '`finished` does not wait for a `React.lazy` page’s code to load.',
+  }),
+  message({
+    ja: '戻ると進むでは、ルーターはスクロール位置を戻しません。',
+    en: 'On back and forward, the router does not restore the scroll position.',
+  }),
+  message({
+    ja: '追い越されたナビゲーションでも、`React.lazy`のコードの読み込みは止めません。',
+    en: 'An overtaken navigation does not stop the load of its `React.lazy` chunk.',
+  }),
+] as const;

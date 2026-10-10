@@ -2,6 +2,7 @@ import { CodeBlock } from '@k8ordo/ui/code-block';
 
 import { Note } from '../../../../components/callout';
 import { DocPage, DocSection } from '../../../../components/doc-page';
+import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Rich } from '../../../../components/rich';
 import * as m from '../../../../messages';
 
@@ -57,26 +58,36 @@ const DOWNLOAD = `<a download href="/report.pdf">
 export default function RouterLinksPage() {
   return (
     <DocPage introduction={t.introduction} path="/:locale/router/links">
-      <DocSection description={t.hrefDescription} id="href" title={t.hrefTitle}>
+      <DocSection id="href" title={t.hrefTitle}>
         <CodeBlock code={HREF} lang="ts" />
+        <p>
+          <Rich>{t.hrefArguments()}</Rich>
+        </p>
         <p>
           <Rich>{t.hrefValues()}</Rich>
         </p>
         <p>
           <Rich>{t.hrefReturn()}</Rich>
+          <LocaleAnchor path="/:locale/router/base">
+            {m.router.navBase()}
+          </LocaleAnchor>
+          <Rich>{t.see()}</Rich>
         </p>
         <Note>
           <p>
             <Rich>{t.hrefErrors()}</Rich>
           </p>
+          <ul>
+            {t.hrefErrorList.map((item) => (
+              <li key={item()}>
+                <Rich>{item()}</Rich>
+              </li>
+            ))}
+          </ul>
         </Note>
       </DocSection>
 
-      <DocSection
-        description={t.anchorDescription}
-        id="anchor"
-        title={t.anchorTitle}
-      >
+      <DocSection id="anchor" title={t.anchorTitle}>
         <CodeBlock
           code={ANCHOR}
           lang="tsx"
@@ -84,44 +95,51 @@ export default function RouterLinksPage() {
           title="src/product-card.tsx"
         />
         <p>
-          <Rich>{t.anchorWhy()}</Rich>
+          <Rich>{t.anchorNoLink()}</Rich>
         </p>
         <p>
           <Rich>{t.anchorOthers()}</Rich>
+          <LocaleAnchor path="/:locale/router/how-it-works">
+            {m.router.navHowItWorks()}
+          </LocaleAnchor>
+          <Rich>{t.anchorOthersAfter()}</Rich>
         </p>
         <p>
           <Rich>{t.anchorCurrent()}</Rich>
+          <LocaleAnchor path="/:locale/router/location">
+            {m.router.navLocation()}
+          </LocaleAnchor>
+          <Rich>{t.see()}</Rich>
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.navigateDescription}
-        id="navigate"
-        title={t.navigateTitle}
-      >
+      <DocSection id="navigate" title={t.navigateTitle}>
         <CodeBlock code={NAVIGATE} lang="ts" />
+        <p>
+          <Rich>{t.navigateArguments()}</Rich>
+        </p>
         <p>
           <Rich>{t.navigateReplace()}</Rich>
         </p>
         <p>
-          <Rich>{t.navigatePush()}</Rich>
-        </p>
-        <p>
           <Rich>{t.navigateSplit()}</Rich>
+          <LocaleAnchor path="/:locale/state/url">
+            {m.state.navUrl()}
+          </LocaleAnchor>
+          <Rich>{t.see()}</Rich>
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.finishedDescription}
-        id="finished"
-        title={t.finishedTitle}
-      >
+      <DocSection id="finished" title={t.finishedTitle}>
         <CodeBlock
           code={FINISHED}
           lang="tsx"
           marks={{ 12: 'highlight' }}
           title="src/open-button.tsx"
         />
+        <p>
+          <Rich>{t.finishedReturn()}</Rich>
+        </p>
         <p>
           <Rich>{t.finishedAction()}</Rich>
         </p>
@@ -130,18 +148,21 @@ export default function RouterLinksPage() {
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.downloadDescription}
-        id="download"
-        title={t.downloadTitle}
-      >
+      <DocSection id="download" title={t.downloadTitle}>
         <CodeBlock code={DOWNLOAD} lang="tsx" />
+        <p>
+          <Rich>{t.downloadProblem()}</Rich>
+        </p>
         <p>
           <Rich>{t.downloadFix()}</Rich>
         </p>
         <Note>
           <p>
             <Rich>{t.downloadFramework()}</Rich>
+            <LocaleAnchor path="/:locale/framework/deploy">
+              {m.framework.navDeploy()}
+            </LocaleAnchor>
+            <Rich>{t.see()}</Rich>
           </p>
         </Note>
       </DocSection>

@@ -2,6 +2,7 @@ import { CodeBlock } from '@k8ordo/ui/code-block';
 
 import { Note } from '../../../../components/callout';
 import { DocPage, DocSection } from '../../../../components/doc-page';
+import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Rich } from '../../../../components/rich';
 import * as m from '../../../../messages';
 
@@ -29,23 +30,6 @@ export type SitePath = Exclude<
   \`/:locale\${string}:\${string}\`
 >;`;
 
-const STATE_REGISTER = `import type { routes } from './routes';
-
-declare module '@k8ordo/router' {
-  interface Register {
-    routes: typeof routes;
-  }
-}
-
-declare module '@k8ordo/state' {
-  interface Register {
-    routes: typeof routes;
-  }
-}`;
-
-const STATE_HREF = `listState.href('/products', { q: 'lamp' }); // '/products?q=lamp'
-listState.href('/prodcuts', { q: 'lamp' });`;
-
 const NAVIGABLE_PATH = `import type { NavigablePath } from '@k8ordo/router';
 
 type A = NavigablePath<typeof routes, '/products/42'>;
@@ -58,23 +42,18 @@ type C = NavigablePath<typeof routes, '/products/'>;
 export default function RouterTypedPathsPage() {
   return (
     <DocPage introduction={t.introduction} path="/:locale/router/typed-paths">
-      <DocSection
-        description={t.paramsDescription}
-        id="params"
-        title={t.paramsTitle}
-      >
+      <DocSection id="params" title={t.paramsTitle}>
         <CodeBlock
           callouts={{ 2: t.paramsMissing(), 3: t.paramsMisspelled() }}
           code={PARAMS}
           lang="ts"
         />
+        <p>
+          <Rich>{t.paramsInferred()}</Rich>
+        </p>
       </DocSection>
 
-      <DocSection
-        description={t.registerDescription}
-        id="register"
-        title={t.registerTitle}
-      >
+      <DocSection id="register" title={t.registerTitle}>
         <CodeBlock code={REGISTER} lang="ts" title="src/k8ordo-router.d.ts" />
         <CodeBlock
           callouts={{ 2: t.registerTypo() }}
@@ -82,23 +61,44 @@ export default function RouterTypedPathsPage() {
           lang="ts"
         />
         <p>
+          <Rich>{t.registerWhy()}</Rich>
+        </p>
+        <p>
           <Rich>{t.registerEffect()}</Rich>
         </p>
+        <ul>
+          {[
+            t.registerEffectLink,
+            t.registerEffectParams,
+            t.registerEffectMatch,
+          ].map((item) => (
+            <li key={item()}>
+              <Rich>{item()}</Rich>
+            </li>
+          ))}
+        </ul>
         <p>
           <Rich>{t.registerOnce()}</Rich>
         </p>
+        <p>
+          <Rich>{t.stateRegisterBefore()}</Rich>
+          <LocaleAnchor path="/:locale/state/links">
+            {m.state.navLinks()}
+          </LocaleAnchor>
+          <Rich>{t.stateRegisterAfter()}</Rich>
+        </p>
         <Note>
           <p>
-            <Rich>{t.registerFramework()}</Rich>
+            <Rich>{t.registerFrameworkBefore()}</Rich>
+            <LocaleAnchor path="/:locale/framework/routing">
+              {m.framework.navRouting()}
+            </LocaleAnchor>
+            <Rich>{t.registerFrameworkAfter()}</Rich>
           </p>
         </Note>
       </DocSection>
 
-      <DocSection
-        description={t.typesDescription}
-        id="types"
-        title={t.typesTitle}
-      >
+      <DocSection id="types" title={t.typesTitle}>
         <CodeBlock code={SITE_PATH} lang="ts" title="src/links.ts" />
         <p>
           <Rich>{t.typesSite()}</Rich>
@@ -123,41 +123,22 @@ export default function RouterTypedPathsPage() {
         </p>
         <Note>
           <p>
-            <Rich>{t.typesSchema()}</Rich>
+            <Rich>{t.typesSchemaBefore()}</Rich>
+            <LocaleAnchor path="/:locale/framework/params">
+              {m.framework.navParams()}
+            </LocaleAnchor>
+            <Rich>{t.typesSchemaAfter()}</Rich>
           </p>
         </Note>
       </DocSection>
 
-      <DocSection
-        description={t.stateDescription}
-        id="state"
-        title={t.stateTitle}
-      >
-        <CodeBlock code={STATE_REGISTER} lang="ts" title="src/k8ordo.d.ts" />
-        <CodeBlock
-          callouts={{ 2: t.stateNoMatch() }}
-          code={STATE_HREF}
-          lang="ts"
-        />
-        <p>
-          <Rich>{t.statePath()}</Rich>
-        </p>
-      </DocSection>
-
-      <DocSection
-        description={t.navigablePathDescription}
-        id="navigable-path"
-        title={t.navigablePathTitle}
-      >
+      <DocSection id="navigable-path" title={t.navigablePathTitle}>
         <CodeBlock code={NAVIGABLE_PATH} lang="ts" />
         <p>
           <Rich>{t.navigablePathRule()}</Rich>
         </p>
         <p>
           <Rich>{t.navigablePathSlash()}</Rich>
-        </p>
-        <p>
-          <Rich>{t.navigablePathWhy()}</Rich>
         </p>
       </DocSection>
     </DocPage>

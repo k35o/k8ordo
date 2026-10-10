@@ -1,7 +1,7 @@
 import { CodeBlock } from '@k8ordo/ui/code-block';
 
-import { Note } from '../../../../components/callout';
 import { DocPage, DocSection } from '../../../../components/doc-page';
+import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Rich } from '../../../../components/rich';
 import * as m from '../../../../messages';
 
@@ -66,94 +66,65 @@ const REDUCED_MOTION = `@media (prefers-reduced-motion: reduce) {
   }
 }`;
 
-const FRAMEWORK = `import type { LayoutProps } from '@k8ordo/framework';
-import { ViewTransition } from 'react';
-
-export default function RootLayout({ children }: LayoutProps<'/'>) {
-  return (
-    <html lang="en">
-      <body>
-        <ViewTransition
-          default="none"
-          update={{ navigation: 'auto', default: 'none' }}
-        >
-          {children}
-        </ViewTransition>
-      </body>
-    </html>
-  );
-}`;
-
 export default function RouterAnimatePage() {
   return (
     <DocPage introduction={t.introduction} path="/:locale/router/animate">
-      <DocSection description={t.fadeDescription} id="fade" title={t.fadeTitle}>
+      <DocSection id="fade" title={t.fadeTitle}>
         <CodeBlock
+          callouts={{ 10: t.fadeUpdateCallout() }}
           code={FADE}
           lang="tsx"
           marks={{ 8: 'highlight', 9: 'highlight', 10: 'highlight' }}
           title="src/shell.tsx"
         />
         <p>
-          <Rich>{t.fadeUpdate()}</Rich>
+          <Rich>{t.fadeWrap()}</Rich>
         </p>
         <p>
           <Rich>{t.fadeSite()}</Rich>
         </p>
+        <p>
+          <Rich>{t.fadeFramework()}</Rich>
+          <LocaleAnchor path="/:locale/framework/routing">
+            {m.framework.navRouting()}
+          </LocaleAnchor>
+          <Rich>{t.fadeFrameworkAfter()}</Rich>
+        </p>
       </DocSection>
 
-      <DocSection
-        description={t.typesDescription}
-        id="types"
-        title={t.typesTitle}
-      >
+      <DocSection id="types" title={t.typesTitle}>
         <p>
-          <Rich>{t.typesWhy()}</Rich>
+          <Rich>{t.typesNavigation()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.typesOther()}</Rich>
         </p>
         <p>
           <Rich>{t.typesState()}</Rich>
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.directionDescription}
-        id="direction"
-        title={t.directionTitle}
-      >
+      <DocSection id="direction" title={t.directionTitle}>
+        <CodeBlock
+          code={DIRECTION}
+          lang="tsx"
+          marks={{ 4: 'highlight', 5: 'highlight', 6: 'highlight' }}
+          title="src/shell.tsx"
+        />
         <p>
           <Rich>{t.directionKinds()}</Rich>
         </p>
-        <CodeBlock code={DIRECTION} lang="tsx" title="src/shell.tsx" />
+        <CodeBlock code={DIRECTION_CSS} lang="css" title="src/app.css" />
         <p>
           <Rich>{t.directionCss()}</Rich>
         </p>
-        <CodeBlock code={DIRECTION_CSS} lang="css" title="src/app.css" />
       </DocSection>
 
-      <DocSection
-        description={t.motionDescription}
-        id="reduced-motion"
-        title={t.motionTitle}
-      >
+      <DocSection id="reduced-motion" title={t.motionTitle}>
         <CodeBlock code={REDUCED_MOTION} lang="css" title="src/app.css" />
-      </DocSection>
-
-      <DocSection
-        description={t.frameworkDescription}
-        id="framework"
-        title={t.frameworkTitle}
-      >
-        <CodeBlock
-          code={FRAMEWORK}
-          lang="tsx"
-          marks={{ 8: 'highlight', 12: 'highlight' }}
-          title="src/routes/layout.tsx"
-        />
-        <Note>
-          <p>
-            <Rich>{t.frameworkServer()}</Rich>
-          </p>
-        </Note>
+        <p>
+          <Rich>{t.motionRule()}</Rich>
+        </p>
       </DocSection>
     </DocPage>
   );

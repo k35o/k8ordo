@@ -5,6 +5,7 @@ import { Button, Code } from '@k8ordo/ui';
 import { useEffect, useId, useRef, useState } from 'react';
 import * as z from 'zod/mini';
 
+import { jsLiteral } from '../../../components/js-literal';
 import * as m from '../../../messages';
 
 const t = m.stateUpdates;
@@ -148,7 +149,7 @@ function Subscription({ call, state }: SubscriptionProps) {
       <span className="flex flex-col gap-1">
         <Code>{call}</Code>
         <span className="text-fg-mute text-xs break-all">
-          {JSON.stringify(state)}
+          {jsLiteral(state)}
         </span>
       </span>
       <span className="text-fg-mute text-sm">

@@ -38,34 +38,6 @@ createRoot(root).render(
   </StrictMode>,
 );`;
 
-const ROUTES_WITH_LAYOUT = `export const routes = defineRoutes({
-  '/': {
-    layout: Shell,
-    children: {
-      '/': Home,
-      '/products': ProductList,
-      '/products/:id': ProductPage,
-      '/*': NotFound,
-    },
-  },
-});`;
-
-const SHELL = `import { Outlet } from '@k8ordo/router';
-
-export function Shell() {
-  return (
-    <>
-      <header>
-        <a href="/">Shop</a>
-        <a href="/products">Products</a>
-      </header>
-      <main>
-        <Outlet />
-      </main>
-    </>
-  );
-}`;
-
 const PRODUCT_LIST = `import { href } from '@k8ordo/router';
 
 const products = [
@@ -100,79 +72,43 @@ export function ProductPage() {
   );
 }`;
 
-const REGISTER = `import type { routes } from './routes';
-
-declare module '@k8ordo/router' {
-  interface Register {
-    routes: typeof routes;
-  }
-}`;
-
-const CHECKED = `href('/products/:id', { id: '42' });
-href('/prodcuts/:id', { id: '42' });
-href('/products/:id');`;
-
-const NEXT = [
-  {
-    path: '/:locale/router/routes',
-    label: m.router.navRoutes,
-    description: t.nextRoutes,
-  },
-  {
-    path: '/:locale/router/links',
-    label: m.router.navLinks,
-    description: t.nextLinks,
-  },
-  {
-    path: '/:locale/router/location',
-    label: m.router.navLocation,
-    description: t.nextLocation,
-  },
-] as const;
-
 export default function RouterGetStartedPage() {
   return (
     <DocPage introduction={t.introduction} path="/:locale/router/get-started">
-      <DocSection
-        description={t.installDescription}
-        id="install"
-        title={t.installTitle}
-      >
+      <DocSection id="install" title={t.installTitle}>
         <PackageInstall name="@k8ordo/router" />
-        <Note>
-          <p>
-            <Rich>{t.platform()}</Rich>
-          </p>
-        </Note>
+        <p>
+          <Rich>{t.platform()}</Rich>
+        </p>
       </DocSection>
 
-      <DocSection
-        description={t.tableDescription}
-        id="table"
-        title={t.tableTitle}
-      >
+      <DocSection id="table" title={t.tableTitle}>
         <CodeBlock
+          callouts={{
+            11: t.tableParamCallout(),
+            12: t.tableWildcardCallout(),
+          }}
           code={ROUTES}
           lang="ts"
           marks={{ 11: 'highlight', 12: 'highlight' }}
           title="src/routes.ts"
         />
         <p>
-          <Rich>{t.tableParam()}</Rich>
+          <Rich>{t.tableShape()}</Rich>
         </p>
         <p>
-          <Rich>{t.tableWildcard()}</Rich>
+          <Rich>{t.tableMatch()}</Rich>
         </p>
         <p>
-          <Rich>{t.tablePages()}</Rich>
+          <Rich>{t.tableMoreBefore()}</Rich>
+          <LocaleAnchor path="/:locale/router/routes">
+            {m.router.navRoutes()}
+          </LocaleAnchor>
+          <Rich>{t.tableMoreAfter()}</Rich>
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.mountDescription}
-        id="mount"
-        title={t.mountTitle}
-      >
+      <DocSection id="mount" title={t.mountTitle}>
         <CodeBlock
           code={MAIN}
           lang="tsx"
@@ -180,90 +116,53 @@ export default function RouterGetStartedPage() {
           title="src/main.tsx"
         />
         <p>
-          <Rich>{t.mountResult()}</Rich>
+          <Rich>{t.mountRouter()}</Rich>
         </p>
         <Note>
           <p>
-            <Rich>{t.mountBrowserOnly()}</Rich>
+            <Rich>{t.mountBrowserOnlyBefore()}</Rich>
+            <LocaleAnchor path="/:locale/framework/get-started">
+              <code>@k8ordo/framework</code>
+            </LocaleAnchor>
+            <Rich>{t.mountBrowserOnlyAfter()}</Rich>
           </p>
         </Note>
       </DocSection>
 
-      <DocSection
-        description={t.layoutDescription}
-        id="layout"
-        title={t.layoutTitle}
-      >
+      <DocSection id="link" title={t.linkTitle}>
         <CodeBlock
-          code={ROUTES_WITH_LAYOUT}
-          lang="ts"
-          marks={{ 3: 'highlight' }}
-          title="src/routes.ts"
-        />
-        <CodeBlock
-          code={SHELL}
-          lang="tsx"
-          marks={{ 11: 'highlight' }}
-          title="src/shell.tsx"
-        />
-        <p>
-          <Rich>{t.layoutOutlet()}</Rich>
-        </p>
-        <p>
-          <Rich>{t.layoutRoot()}</Rich>
-        </p>
-        <p>
-          <Rich>{t.layoutAnchor()}</Rich>
-        </p>
-      </DocSection>
-
-      <DocSection description={t.linkDescription} id="link" title={t.linkTitle}>
-        <CodeBlock
+          callouts={{ 13: t.linkHrefCallout() }}
           code={PRODUCT_LIST}
           lang="tsx"
           marks={{ 13: 'highlight' }}
           title="src/pages/product-list.tsx"
         />
         <p>
-          <Rich>{t.linkParams()}</Rich>
+          <Rich>{t.linkHref()}</Rich>
         </p>
+        <p>
+          <Rich>{t.linkAnchor()}</Rich>
+        </p>
+      </DocSection>
+
+      <DocSection id="params" title={t.paramsTitle}>
         <CodeBlock
+          callouts={{ 4: t.linkParamsCallout() }}
           code={PRODUCT_PAGE}
           lang="tsx"
           marks={{ 4: 'highlight' }}
           title="src/pages/product-page.tsx"
         />
         <p>
-          <Rich>{t.linkNoImport()}</Rich>
+          <Rich>{t.linkParams()}</Rich>
         </p>
-      </DocSection>
-
-      <DocSection
-        description={t.registerDescription}
-        id="register"
-        title={t.registerTitle}
-      >
-        <CodeBlock code={REGISTER} lang="ts" title="src/k8ordo-router.d.ts" />
-        <CodeBlock
-          callouts={{ 2: t.registerTypo(), 3: t.registerMissing() }}
-          code={CHECKED}
-          lang="ts"
-        />
         <p>
-          <Rich>{t.registerOnce()}</Rich>
+          <Rich>{t.linkRegisterBefore()}</Rich>
+          <LocaleAnchor path="/:locale/router/typed-paths">
+            {m.router.navTypedPaths()}
+          </LocaleAnchor>
+          <Rich>{t.linkRegisterAfter()}</Rich>
         </p>
-      </DocSection>
-
-      <DocSection id="next" title={t.nextTitle}>
-        <ul>
-          {NEXT.map((step) => (
-            <li key={step.path}>
-              <LocaleAnchor path={step.path}>{step.label()}</LocaleAnchor>
-              {' — '}
-              <Rich>{step.description()}</Rich>
-            </li>
-          ))}
-        </ul>
       </DocSection>
     </DocPage>
   );

@@ -3,6 +3,7 @@
 import { useAppState } from '@k8ordo/state';
 import { Button, Code, IconButton, MinusIcon, PlusIcon } from '@k8ordo/ui';
 
+import { jsLiteral } from '../../components/js-literal';
 import * as m from '../../messages';
 import { TABS, demoState } from './demo-state';
 
@@ -67,7 +68,7 @@ export function StateDemo() {
         </dd>
         <dt className="text-fg-mute">state</dt>
         <dd className="break-all">
-          <Code>{JSON.stringify(current)}</Code>
+          <Code>{jsLiteral(current)}</Code>
         </dd>
       </dl>
     </div>

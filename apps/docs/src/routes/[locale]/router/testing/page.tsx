@@ -62,28 +62,27 @@ afterEach(async () => {
 export default function RouterTestingPage() {
   return (
     <DocPage introduction={t.introduction} path="/:locale/router/testing">
-      <DocSection
-        description={t.matchDescription}
-        id="match"
-        title={t.matchTitle}
-      >
+      <DocSection id="match" title={t.matchTitle}>
         <CodeBlock code={MATCH} lang="ts" title="src/routes.test.ts" />
         <p>
           <Rich>{t.matchPure()}</Rich>
         </p>
+        <p>
+          <Rich>{t.matchPath()}</Rich>
+        </p>
       </DocSection>
 
-      <DocSection
-        description={t.browserDescription}
-        id="browser"
-        title={t.browserTitle}
-      >
+      <DocSection id="browser" title={t.browserTitle}>
         <CodeBlock
+          callouts={{ 10: t.browserFinishedCallout() }}
           code={BROWSER}
           lang="tsx"
           marks={{ 10: 'highlight' }}
           title="src/app.browser.test.tsx"
         />
+        <p>
+          <Rich>{t.browserRuns()}</Rich>
+        </p>
         <p>
           <Rich>{t.browserFinished()}</Rich>
         </p>
@@ -92,20 +91,19 @@ export default function RouterTestingPage() {
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.interceptDescription}
-        id="intercept"
-        title={t.interceptTitle}
-      >
-        <p>
-          <Rich>{t.interceptWhen()}</Rich>
-        </p>
+      <DocSection id="intercept" title={t.interceptTitle}>
         <CodeBlock
           code={INTERCEPT}
           lang="ts"
           marks={{ 6: 'highlight', 10: 'highlight' }}
           title="src/app.browser.test.tsx"
         />
+        <p>
+          <Rich>{t.interceptLoad()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.interceptWhen()}</Rich>
+        </p>
         <Note>
           <p>
             <Rich>{t.interceptRouter()}</Rich>
@@ -113,11 +111,10 @@ export default function RouterTestingPage() {
         </Note>
       </DocSection>
 
-      <DocSection
-        description={t.traverseDescription}
-        id="traverse"
-        title={t.traverseTitle}
-      >
+      <DocSection id="traverse" title={t.traverseTitle}>
+        <p>
+          <Rich>{t.traverseIframe()}</Rich>
+        </p>
         <p>
           <Rich>{t.traversePlaywright()}</Rich>
         </p>

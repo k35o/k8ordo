@@ -1,91 +1,96 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: 'アプリをオリジンの直下ではなく、`https://example.com/docs/`のようなサブパスの下で配信することがあります。そのときもルート表はアプリの根から書いたままにして、サブパスの付け外しはルーターに任せます。',
-  en: 'Sometimes an app is served below a path of its origin, such as `https://example.com/docs/`, rather than at its root. The route table stays written from the app’s root even then, and the router adds and removes that base path.',
+  ja: '`https://example.com/docs/`のように、アプリをベースパスの下で配信するときの書き方です。ルート表は`/`から書いたままで、ベースパスの付け外しはルーターが行います。',
+  en: 'How to serve the app below a base path, such as `https://example.com/docs/`. The route table stays written from `/`, and the router adds and removes the base path.',
 });
 
 export const configTitle = message({
-  ja: 'Viteの`base`を設定する',
-  en: 'Set Vite’s `base`',
+  ja: 'Viteの`base`',
+  en: 'Vite’s `base`',
 });
 
-export const configDescription = message({
-  ja: 'サブパスはViteの`base`で指定します。ルーターは`import.meta.env.BASE_URL`からその値を読みます。',
-  en: 'The base path is Vite’s `base`, and the router reads it from `import.meta.env.BASE_URL`.',
+export const configRead = message({
+  ja: 'ベースパスはViteの`base`で指定します。ルーターは`import.meta.env.BASE_URL`からその値を読みます。',
+  en: 'Set the base path with Vite’s `base`. The router reads it from `import.meta.env.BASE_URL`.',
 });
 
 export const configTable = message({
-  ja: 'ルート表は書き換えません。`/products`のページは、表の中では`/products`のままで、ブラウザのアドレスバーでは`/docs/products`になります。',
-  en: 'The route table does not change. The `/products` page is still `/products` in the table, and `/docs/products` in the browser’s address bar.',
+  ja: 'ルート表は変えません。`/products`のページは、表では`/products`のままで、アドレスバーでは`/docs/products`になります。',
+  en: 'The route table does not change. The `/products` page stays `/products` in the table and is `/docs/products` in the address bar.',
 });
 
 export const linksTitle = message({
-  ja: 'リンクにはサブパスが付く',
-  en: 'Links carry the base path',
+  ja: 'リンク先のURL',
+  en: 'Link URLs',
 });
 
-export const linksDescription = message({
-  ja: '`href`と`navigateTo`は、作ったURLの前にサブパスを付けます。',
-  en: '`href` and `navigateTo` put the base path in front of the URL they build.',
+export const linksPrefix = message({
+  ja: '`href`と`navigateTo`は、作るURLの先頭にベースパスを付けます。そのため、`href`の戻り値の型はルート表のパスでなく`string`です。',
+  en: '`href` and `navigateTo` put the base path in front of the URL they build. So `href` returns a `string`, not a path in the route table.',
 });
 
-export const linksString = message({
-  ja: '`href`の戻り値の型が、表のパスではなく`string`になっているのはこのためです。返すのは、サブパスの付いたURLです。',
-  en: 'This is why `href` returns a `string` rather than a path in the table: what it returns is a URL, base path included.',
+export const frameworkBefore = message({
+  ja: '`@k8ordo/framework`でベースパスが付くURLは、',
+  en: 'Which URLs get the base path under `@k8ordo/framework` is covered in ',
+});
+
+export const frameworkAfter = message({
+  ja: 'で説明しています。',
+  en: '.',
+});
+
+export const statePitfall = message({
+  ja: '`href`が返したURLを`@k8ordo/state`の`href`に渡すと、ベースパスが2重に付きます。詳しくは`@k8ordo/state`の',
+  en: 'Passing the URL `href` returned to `@k8ordo/state`’s `href` adds the base path twice. See ',
+});
+
+export const statePitfallAfter = message({
+  ja: 'を見てください。',
+  en: ' in the `@k8ordo/state` guide.',
 });
 
 export const readTitle = message({
-  ja: '読み取るパスからはサブパスが外れる',
-  en: 'Paths you read leave the base path out',
+  ja: '読み取るパス',
+  en: 'Paths you read',
 });
 
-export const readDescription = message({
-  ja: '`usePathname`は、サブパスを外したパスを返します。`/docs/products`を開いているとき、値は`/products`です。',
-  en: '`usePathname` returns the path without the base path: at `/docs/products`, it is `/products`.',
+export const readPathname = message({
+  ja: '`usePathname`は、ベースパスを外したパスを返します。`/docs/products`を開いているとき、値は`/products`です。返ってきたパスは、ルート表のパターンとそのまま比べられます。',
+  en: '`usePathname` returns the path without the base path: `/products` at `/docs/products`. What comes back compares directly with the route table’s patterns.',
 });
 
-export const readCompare = message({
-  ja: 'そのため、返ってきたパスはルート表のパターンとそのまま比べられます。`useMatch`もサブパスを外したパスで判定し、`<Router>`もサブパスより下のパスで表を照合します。',
-  en: 'What comes back therefore compares directly with the route table’s patterns. `useMatch` checks the path without the base path too, and `<Router>` matches the table against the path below it.',
+export const readMatch = message({
+  ja: '`useMatch`と`<Router>`も、ベースパスを外したパスでルート表と照合します。',
+  en: '`useMatch` and `<Router>` also match the route table against the path without the base path.',
 });
 
 export const readOutside = message({
-  ja: 'サブパスの外のURLはアプリのものではないので、ルート表に何が書いてあっても、`<Router>`は引き受けずにブラウザに任せます。',
-  en: 'A URL outside the base path is not the app’s, so `<Router>` leaves it to the browser whatever the route table says.',
+  ja: 'ベースパスの外のURLは、ルート表に何が書いてあっても`<Router>`は照合しません。ブラウザの通常の遷移になります。',
+  en: '`<Router>` does not match a URL outside the base path, whatever the route table says. The browser navigates to it as usual.',
 });
 
 export const helpersTitle = message({
-  ja: '自分のコードで付け外しする',
-  en: 'Add and remove it in your own code',
+  ja: '`withBase`と`withoutBase`',
+  en: '`withBase` and `withoutBase`',
 });
 
-export const helpersDescription = message({
-  ja: '`withBase`と`withoutBase`は、ルーターが行う付け外しを自分のコードで使うための関数です。',
-  en: '`withBase` and `withoutBase` are the router’s own two steps, for code of your own.',
+export const helpersExplicitCallout = message({
+  ja: 'Viteを通らないコードでは、2つ目の引数でベースパスを渡す',
+  en: 'Code Vite does not process passes the base path as the second argument',
 });
 
-export const helpersNull = message({
-  ja: '`withoutBase`は、サブパスの外のパスに`null`を返します。サブパスそのもの（`/docs`）は、末尾のスラッシュが無くても`/`になります。',
-  en: '`withoutBase` returns `null` for a path outside the base path. The base path itself, `/docs`, becomes `/` with or without its trailing slash.',
+export const helpersSteps = message({
+  ja: '`withBase`と`withoutBase`は、ルーターが行う付け外しを自分のコードで使うための関数です。`withoutBase`は、ベースパスの外のパスに`null`を返します。ベースパスそのもの（`/docs`）は、末尾のスラッシュが無くても`/`になります。',
+  en: '`withBase` and `withoutBase` let your own code add and remove the base path the way the router does. `withoutBase` returns `null` for a path outside the base path. The base path itself, `/docs`, becomes `/` with or without its trailing slash.',
 });
 
 export const helpersExplicit = message({
-  ja: 'Viteを通らないコードには`import.meta.env`が無いので、2つ目の引数でサブパスを渡します。',
-  en: 'Code that Vite does not process has no `import.meta.env`, so it passes the base path as the second argument.',
+  ja: 'Viteを通らないコードには`import.meta.env`が無いので、ルーターはベースパスを読めません。',
+  en: 'Code that Vite does not process has no `import.meta.env` to read the base path from.',
 });
 
 export const helpersRelative = message({
   ja: '`./`のような相対の`base`はパスを指していないので、どちらの関数も何も付け外ししません。',
   en: 'A relative `base` such as `./` names no path, so neither function adds or removes anything.',
-});
-
-export const statePitfall = message({
-  ja: '`href`が返したURLを、`@k8ordo/state`の`href`に渡さないでください。`@k8ordo/state`の`href`もサブパスを付けるので、`/docs/docs/products`のように2重になります。渡すのは、`/products`のような表のパスです。',
-  en: 'Do not hand what `href` returned to `@k8ordo/state`’s `href`. It adds the base path as well, which doubles it into `/docs/docs/products`. Hand it a path in the table’s terms, such as `/products`.',
-});
-
-export const frameworkNote = message({
-  ja: '`@k8ordo/framework`の下でも同じです。Server Actionの`redirect()`に渡すURLも、`href`で作るとサブパスが付きます。',
-  en: 'The same holds under `@k8ordo/framework`. A URL handed to a Server Action’s `redirect()` gets its base path when `href` builds it, too.',
 });

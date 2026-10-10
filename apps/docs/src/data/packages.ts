@@ -139,7 +139,8 @@ export const PACKAGES: PackageEntry[] = [
           { path: '/:locale/state/storage', label: m.state.navStorage },
           { path: '/:locale/state/cookie', label: m.state.navCookie },
           { path: '/:locale/state/updates', label: m.state.navUpdates },
-          { path: '/:locale/state/reading', label: m.state.navReading },
+          { path: '/:locale/state/links', label: m.state.navLinks },
+          { path: '/:locale/state/nextjs', label: m.state.navNextjs },
           { path: '/:locale/state/migrate', label: m.state.navMigrate },
           {
             path: '/:locale/state/before-hydration',
@@ -198,7 +199,6 @@ export const PACKAGES: PackageEntry[] = [
           },
           { path: '/:locale/router/base', label: m.router.navBase },
           { path: '/:locale/router/animate', label: m.router.navAnimate },
-          { path: '/:locale/router/framework', label: m.router.navFramework },
           { path: '/:locale/router/testing', label: m.router.navTesting },
         ],
       },

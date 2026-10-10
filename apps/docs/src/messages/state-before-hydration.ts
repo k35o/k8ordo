@@ -1,57 +1,62 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: 'テーマのクラスのように、最初の描画より前に`<html>`へ反映したい値があります。`useAppState`はハイドレーションのあとに動くので、それでは間に合いません。このページでは、localStorageやsessionStorageの状態を、インラインスクリプトで先に読む方法を説明します。',
-  en: 'Some values have to reach `<html>` before the first paint, such as a theme class. `useAppState` runs after hydration, which is too late for them. This page covers reading a local or session state ahead of time, from an inline script.',
+  ja: 'テーマのクラスのように、最初の描画より前に`<html>`へ反映したい値を、インラインスクリプトで読めるようになります。`useAppState`はハイドレーションのあとに動くので、それでは間に合いません。',
+  en: 'You will be able to read a value from an inline script before the first paint, such as a theme class that has to be on `<html>`. `useAppState` runs after hydration, which is too late for that.',
 });
 
 export const whyTitle = message({
-  ja: 'キーを手で書かない',
-  en: 'Never spell the key by hand',
+  ja: '`storageKey`と`inlineRead()`',
+  en: '`storageKey` and `inlineRead()`',
 });
 
-export const whyDescription = message({
-  ja: 'よくあるのは、保存キーとJSONの形をスクリプトの文字列に直接書く方法です。しかしそれでは、キーや保存の形が変わった瞬間に、定義と食い違ってしまいます。',
-  en: 'The usual way is an inline script with the storage key and the JSON shape written into a string. That drifts from the definition the moment either one changes.',
+export const whyKey = message({
+  ja: '1行目の`storageKey`は、ストアがlocalStorageやsessionStorageに書き込むキーです。4行目の`inlineRead()`は、インラインの`<script>`に埋め込むJavaScriptの式を返します。この式をブラウザで評価すると、その置き場所に保存されたオブジェクトになります。',
+  en: 'Line 1, `storageKey`, is the key the store writes under in localStorage or sessionStorage. Line 4, `inlineRead()`, returns a JavaScript expression for an inline `<script>`. Evaluated in the browser, it becomes the object stored in that place.',
 });
 
-export const whyHalves = message({
-  ja: '`defineLocalState`と`defineSessionState`の定義は、そのどちらも持っています。`storageKey`はストアが書き込むキーで、`inlineRead()`はインラインの`<script>`に埋め込むJavaScriptの式を返します。この式は、ブラウザで評価されると、その定義の置き場所に保存されたオブジェクトになります。',
-  en: 'A `defineLocalState` or `defineSessionState` definition carries both. `storageKey` is the key the store writes under, and `inlineRead()` returns a JavaScript expression for an inline `<script>`, which evaluates in the browser to the object stored in that definition’s own storage area.',
+export const whyDrift = message({
+  ja: 'キーとJSONの形をスクリプトに直接書くと、どちらかを変えた時点で定義と食い違います。`inlineRead()`の式は定義から作られるので、変更に追従します。',
+  en: 'A script with the key and the JSON shape written into it drifts the moment either changes. The expression from `inlineRead()` is built from the definition, so it follows every change.',
 });
 
 export const whyCookie = message({
-  ja: '`inlineRead()`があるのは、localStorageとsessionStorageの定義だけです。Cookieの状態なら、リクエストを受け取るページでサーバーが`parseCookies`で読み、最初の描画から本当の値で描けます。',
-  en: 'Only local and session definitions have `inlineRead()`. A cookie state is read on the server instead: where the page receives the request, `parseCookies` gives the real value from the first render.',
+  ja: '`inlineRead()`があるのは、localStorageとsessionStorageの定義だけです。Cookieの状態は、`@k8ordo/framework`のserverモードならサーバーが`parseCookies`で読み、最初の描画から保存した値を表示できます。',
+  en: 'Only local and session definitions have `inlineRead()`. In `@k8ordo/framework`’s server mode, the server reads a cookie state with `parseCookies`, so the stored value shows from the first render.',
+});
+
+export const whyCookieSee = message({
+  ja: '書き方は',
+  en: ' For the setup, see ',
+});
+
+export const see = message({
+  ja: 'を見てください。',
+  en: '.',
 });
 
 export const embedTitle = message({
-  ja: 'inlineReadを埋め込む',
-  en: 'Embed inlineRead',
+  ja: '`<script>`への埋め込み',
+  en: 'Embedding in a `<script>`',
 });
 
-export const embedDescription = message({
-  ja: '`inlineRead()`が返すのは式なので、スクリプトの中で値として使います。',
-  en: '`inlineRead()` returns an expression, so use it as a value inside the script.',
+export const embedValue = message({
+  ja: '6行目で、式を値として埋め込みます。式は即時実行の関数です。代入の右辺にも関数の引数にも三項演算子の中にも書けます。キーは`<`も含めてエスケープされるので、どんなキーでも埋め込めます。',
+  en: 'Line 6 embeds the expression as a value. The expression is a self-invoking function. It fits on the right side of an assignment, as an argument or inside a ternary. The key is escaped, `<` included, so any key can be embedded.',
 });
 
 export const embedSuppress = message({
-  ja: 'スクリプトはReactより先に`<html>`のクラスを変えるので、`<html>`には`suppressHydrationWarning`を付けます。ハイドレーションのあとは、ストアの値を正として扱ってください。',
-  en: 'The script changes `<html>` before React hydrates it, so render that element with `suppressHydrationWarning`. From hydration on, treat the store as the source of truth.',
-});
-
-export const embedAnywhere = message({
-  ja: '式は即時実行の関数なので、代入の右辺でも、関数の引数でも、三項演算子の中でも使えます。キーは`<`も含めてスクリプトの中で安全な形にエスケープされるので、どんなキーでも埋め込めます。',
-  en: 'The expression is a self-invoking function, so it fits anywhere a value does: the right side of an assignment, an argument, a ternary. The key is escaped for a script context, `<` included, so any key is safe to emit.',
+  ja: 'スクリプトはReactより先に`<html>`のクラスを変えるので、18行目で`<html>`に`suppressHydrationWarning`を付けます。ハイドレーションのあとは、ストアの値を正として扱います。',
+  en: 'The script changes the class of `<html>` before React hydrates it, so line 18 puts `suppressHydrationWarning` on `<html>`. After hydration, the store is the source of truth.',
 });
 
 export const nullTitle = message({
-  ja: 'nullになるとき',
-  en: 'When it is null',
+  ja: '`null`になるとき',
+  en: 'When it is `null`',
 });
 
-export const nullDescription = message({
-  ja: '式は投げません。次のときは、`null`になります。',
+export const nullLead = message({
+  ja: '式がエラーになることはありません。次のときは`null`になります。',
   en: 'The expression never throws. It evaluates to `null` when:',
 });
 
@@ -71,31 +76,31 @@ export const nullNotObject = message({
 });
 
 export const nullUnreadable = message({
-  ja: 'ストレージそのものが読めない',
-  en: 'storage cannot be read at all',
+  ja: 'ストレージが読めない',
+  en: 'storage cannot be read',
 });
 
 export const nullVersion = message({
-  ja: '`version`を持つlocalStorageの状態で、行がほかの版で書かれている',
-  en: 'for a local state with a `version`, the row was written by another version',
+  ja: '`version`を持つlocalStorageの状態で、ほかのバージョンが書いた値が保存されている',
+  en: 'for a local state with a `version`, the stored value was written by another version',
 });
 
 export const rawTitle = message({
-  ja: '返ってくるのは生の行',
-  en: 'What comes back is the raw row',
+  ja: 'スキーマを通る前の値',
+  en: 'Value before the schema runs',
 });
 
-export const rawDescription = message({
-  ja: 'スクリプトが動く時点では、まだどのモジュールも読み込まれていません。そのためスキーマは走らず、返ってくるのはフィールドごとに拾った状態ではなく、保存されていた生の行です。',
-  en: 'When the script runs, no module has loaded yet, so the schema does not run: what comes back is the raw row as stored, not the salvaged state `useAppState` will show.',
+export const rawSchema = message({
+  ja: 'スクリプトが動く時点では、まだモジュールが読み込まれていません。スキーマも`migrate`も走らず、保存された値がそのまま返ってきます。`useAppState`が返す、スキーマに合わないフィールドだけを既定値に戻した値とは違います。',
+  en: 'When the script runs, no module has loaded yet. Neither the schema nor `migrate` runs, and what comes back is the stored value as it is. It is not the value `useAppState` returns, where only a field the schema rejects falls back to its default.',
 });
 
 export const rawFields = message({
-  ja: "中身を信頼せず、必要なフィールドだけを、それぞれ自分で確かめて読んでください。上の例が`s && s.mode === 'dark'`と書いているのは、そのためです。",
-  en: "Treat it as untrusted: read only the fields you need, each with its own check and fallback. That is why the example above writes `s && s.mode === 'dark'`.",
+  ja: "中身を信頼せず、必要なフィールドだけをそれぞれ確かめて読みます。「`<script>`への埋め込み」の例では、`s && s.mode === 'dark'`で確かめています。",
+  en: "Treat it as untrusted and read only the fields you need, each with its own check. The example under Embedding in a `<script>` checks with `s && s.mode === 'dark'`.",
 });
 
 export const rawColorScheme = message({
-  ja: 'は、この`inlineRead()`を使って、最初の描画の前に`<html>`へクラスを付けています。カラースキームを切り替えるなら、自分で書かずにこのパッケージを使ってください。',
-  en: ' builds its pre-paint script on this `inlineRead()` to put a class on `<html>`. For a colour scheme, use it rather than writing your own.',
+  ja: 'は、`inlineRead()`で最初の描画の前に`<html>`へクラスを付けています。カラースキームの切り替えなら、このパッケージを使ってください。',
+  en: ' puts a class on `<html>` before the first paint with `inlineRead()`. For a colour scheme switch, use that package.',
 });

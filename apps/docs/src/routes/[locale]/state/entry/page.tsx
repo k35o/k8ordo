@@ -36,30 +36,29 @@ update({ expanded: ['A-102'] });`;
 export default function StateEntryPage() {
   return (
     <DocPage introduction={t.introduction} path="/:locale/state/entry">
-      <DocSection
-        description={t.defineDescription}
-        id="define"
-        title={t.defineTitle}
-      >
+      <DocSection id="define" title={t.defineTitle}>
         <CodeBlock
           code={ENTRY}
           lang="ts"
-          marks={{ 7: 'highlight' }}
+          marks={{ 5: 'highlight', 7: 'highlight' }}
           title="orders-state.ts"
         />
         <p>
-          <Rich>{t.defineTyped()}</Rich>
+          <Rich>{t.defineWhere()}</Rich>
         </p>
         <p>
-          <Rich>{t.defineOwnOutput()}</Rich>
+          <Rich>{t.defineTyped()}</Rich>
         </p>
         <p>
           <Rich>{t.defineServer()}</Rich>
         </p>
       </DocSection>
 
-      <DocSection description={t.bothDescription} id="both" title={t.bothTitle}>
+      <DocSection id="both" title={t.bothTitle}>
         <CodeBlock code={BOTH} lang="tsx" marks={{ 10: 'highlight' }} />
+        <p>
+          <Rich>{t.bothFlat()}</Rich>
+        </p>
         <p>
           <Rich>{t.bothMove()}</Rich>
         </p>
@@ -68,11 +67,7 @@ export default function StateEntryPage() {
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.atomicDescription}
-        id="atomic"
-        title={t.atomicTitle}
-      >
+      <DocSection id="atomic" title={t.atomicTitle}>
         <CodeBlock
           callouts={{
             1: t.atomicNavigateCallout(),
@@ -81,6 +76,9 @@ export default function StateEntryPage() {
           code={WRITES}
           lang="ts"
         />
+        <p>
+          <Rich>{t.atomicIntro()}</Rich>
+        </p>
         <ul>
           {[t.atomicUrl, t.atomicEntryOnly].map((item) => (
             <li key={item()}>
@@ -93,11 +91,10 @@ export default function StateEntryPage() {
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.restoreDescription}
-        id="restore"
-        title={t.restoreTitle}
-      >
+      <DocSection id="restore" title={t.restoreTitle}>
+        <p>
+          <Rich>{t.restoreIntro()}</Rich>
+        </p>
         <ul>
           {[
             t.restoreTraverse,

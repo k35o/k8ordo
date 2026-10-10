@@ -1,44 +1,44 @@
 import { message } from '@k8ordo/i18n';
 
 export const description = message({
-  ja: 'URLのpathnameを受け持つルーターです。アプリが答えるpathnameをルート表に1度書けば、型もマッチングもリンクもナビゲーションも、そこから決まります。search paramsと履歴エントリの状態は@k8ordo/stateの受け持ちで、両者の境目はURLの`?`です。',
-  en: "The URL's pathname axis, owned. The route table is the application's pathname schema, and from it come the types, the matching, the links and the navigation. Search params and history-entry state belong to @k8ordo/state — the division is the URL's own \"?\".",
+  ja: 'Navigation APIでページを切り替えるReactのルーターです。`href`と`navigateTo`はルート表の型で検査され、リンクは`<a>`のまま書けます。',
+  en: 'A React router that switches pages through the Navigation API. `href` and `navigateTo` are typed by the route table, and links stay plain `<a>` elements.',
 });
 
 export const tagline = message({
-  ja: 'ルート表を1つ書くだけで、型の付いたリンクと画面遷移がそろう、Navigation APIのルーター。',
-  en: 'A router on the Navigation API that derives typed links and navigation from one route table.',
+  ja: 'Navigation APIと`<a>`で画面を切り替える、型の付いたReactのルーター',
+  en: 'A typed React router that switches pages through the Navigation API and plain `<a>` links',
 });
 
 export const claimAnchorTitle = message({
-  ja: 'リンクは`<a>`のまま書く',
-  en: 'Links stay plain `<a>` elements',
+  ja: '`<a>`のままのリンク',
+  en: 'Links as plain `<a>`',
 });
 
 export const claimAnchorBody = [
   message({
-    ja: '`<a>`がクリックされるとNavigation APIがそれを知らせ、ルート表にあるパスならブラウザの中で画面を切り替えます。そのため、`<Link>`のような専用のコンポーネントはありません。',
-    en: 'The Navigation API hands the router every `<a>` click, and a path in the route table changes the page in the browser. There is no `<Link>` component.',
+    ja: '`<Router>`は`<a>`のクリックをNavigation APIで受け取り、ルート表にあるパスならページを読み込み直さずに画面を切り替えます。`<Link>`のような専用のコンポーネントはありません。',
+    en: '`<Router>` receives clicks on `<a>` through the Navigation API. For a path in the route table, it changes the page without a full reload. There is no `<Link>` component.',
   }),
   message({
-    ja: '表に無いパスへの移動は、ブラウザに任せます。再読み込みやPOSTの送信、ダウンロード、ページ内リンクも同じです。いまどのページにいるかは、`useMatch`で調べます。',
-    en: 'Reloads, POST submissions, downloads, in-page links and paths outside the table are left to the browser. Where you are is a question for `useMatch`.',
+    ja: '表に無いパスや再読み込み、POSTの送信、ダウンロードはブラウザに任せます。今どのページにいるかは`useMatch`で調べます。',
+    en: 'A path outside the table, a reload, a POST submission and a download are left to the browser. `useMatch` tells you which page is showing.',
   }),
 ] as const;
 
 export const claimTypesTitle = message({
-  ja: 'パスの書き間違いは型エラーになる',
-  en: 'A mistyped path does not compile',
+  ja: 'ルート表で検査されるパス',
+  en: 'Paths checked against the table',
 });
 
 export const claimTypesBody = [
   message({
-    ja: '`href`と`navigateTo`は、ルート表のパターンを文字列で受け取ります。`Register`にルート表を登録しておくと、表に無いパターンや足りないparamが型エラーになります。',
-    en: '`href` and `navigateTo` take a pattern from the route table as a string. Register the table once, and a pattern it lacks or a missing param fails to compile.',
+    ja: '`href`と`navigateTo`は、ルート表のパターンを文字列で受け取ります。足りないparamは設定なしでも型エラーになり、`Register`にルート表を登録すると表に無いパターンも型エラーになります。',
+    en: '`href` and `navigateTo` take a pattern from the route table as a string. A missing param is a type error with no setup, and once the table is registered in `Register`, so is a pattern the table lacks.',
   }),
   message({
-    ja: 'ページの側はルート表をimportせず、パターンの文字列だけで書きます。そのため、ルート表とページが互いを読み込み合う循環も起きません。',
-    en: 'Pages never import the table. They work from the pattern string alone, so the table and its pages never import each other.',
+    ja: 'ページはルート表をimportせず、リンク先をパターンの文字列だけで書きます。ルート表とページが互いにimportし合う循環は起きません。',
+    en: 'A page never imports the table. It names its links by pattern string alone, so the table and its pages never import each other.',
   }),
 ] as const;
 
@@ -53,98 +53,63 @@ export const claimTypesMissing = message({
 });
 
 export const claimNavigationTitle = message({
-  ja: '新しいページが表示されるまで待てる',
-  en: 'Wait until the new page is on screen',
+  ja: 'ページの切り替えの待機とアニメーション',
+  en: 'Awaiting and animating page changes',
 });
 
 export const claimNavigationBody = [
   message({
-    ja: '`navigateTo`が返す`finished`は、新しいページが画面に表示されたときに解決します。`useTransition`の中でこれを待てば、`isPending`がちょうど切り替わっている間だけ`true`になります。',
-    en: 'The `finished` promise from `navigateTo` resolves once the new page is on screen. Await it inside `useTransition`, and `isPending` covers exactly the switch.',
+    ja: '`navigateTo`が返す`finished`は、新しいページが画面に表示されたときに解決します。`useTransition`の中で待てば、`isPending`は切り替えの間だけ`true`になります。',
+    en: 'The `finished` promise from `navigateTo` resolves once the new page is on screen. Await it inside `useTransition`, and `isPending` is `true` only while the page changes.',
   }),
   message({
-    ja: 'ページの切り替えには、`navigation`という種類が付きます。`<ViewTransition>`をこの種類に結びつければ、ページの切り替えだけにアニメーションを付けられます。',
-    en: 'Every page change is tagged `navigation`. Key a `<ViewTransition>` on it, and only page changes animate.',
+    ja: "ページの切り替えには、Reactのトランジションの種類として`navigation`が付きます。`<ViewTransition>`の`update`で`navigation`だけを`'auto'`にすると、ページを切り替えるときだけアニメーションします。",
+    en: "Every page change carries the React transition type `navigation`. Set `navigation` to `'auto'` in the `update` prop of `<ViewTransition>`, and only page changes animate.",
   }),
 ] as const;
 
-export const nextGetStarted = message({
-  ja: 'ルート表を書いてから、型で確かめたリンクを張るまでを、一通り作ります。',
-  en: 'Build an app end to end, from the route table to links checked by the types.',
-});
-
-export const nextRoutes = message({
-  ja: 'パターンの書き方と照合の順序、ページのまとめ方です。',
-  en: 'How patterns are written, the order they match in, and how pages are grouped.',
-});
-
-export const nextLinks = message({
-  ja: '`href`でリンクを作り、`navigateTo`でページを移ります。',
-  en: 'Build links with `href`, and change pages with `navigateTo`.',
-});
-
-export const nextLocation = message({
-  ja: '`useMatch`や`usePathname`で、いま開いているページを調べます。',
-  en: 'Find the page you are on with `useMatch` and `usePathname`.',
-});
-
-export const nextFramework = message({
-  ja: '`@k8ordo/framework`の下で使う部分と、propsの型です。',
-  en: 'What you use under `@k8ordo/framework`, and the props types.',
-});
-
-export const nextReference = message({
-  ja: 'すべての関数とコンポーネント、型の一覧です。',
-  en: 'Every function, component and type.',
-});
-
 export const navRoutes = message({
-  ja: 'ルート表を書く',
-  en: 'Write the route table',
+  ja: 'ルート表',
+  en: 'Route table',
 });
 
 export const navBoundaries = message({
-  ja: 'エラーと読み込み中の表示を出す',
-  en: 'Errors and loading states',
+  ja: 'エラーと読み込み中',
+  en: 'Errors and loading',
 });
 
 export const navLinks = message({
-  ja: 'リンクを張り、移動する',
-  en: 'Link and navigate',
+  ja: 'リンクと遷移',
+  en: 'Links and navigation',
 });
 
 export const navLocation = message({
-  ja: 'いまいる場所を調べる',
-  en: 'Find where you are',
+  ja: '現在地',
+  en: 'Location',
 });
 
 export const navBindParams = message({
-  ja: 'すべてのリンクに共通のparamを束ねる',
-  en: 'Bind a param every link shares',
+  ja: '共通のparam',
+  en: 'Bound params',
 });
 
 export const navTypedPaths = message({
-  ja: 'パスを型で確かめる',
-  en: 'Check paths with types',
+  ja: 'パスの型検査',
+  en: 'Typed paths',
 });
 
 export const navBase = message({
-  ja: 'サブパスの下で配信する',
-  en: 'Serve under a base path',
+  ja: 'ベースパス',
+  en: 'Base path',
 });
 
 export const navAnimate = message({
-  ja: 'ページの切り替えをアニメーションする',
-  en: 'Animate page changes',
-});
-
-export const navFramework = message({
-  ja: 'フレームワークの下で使う',
-  en: 'Use it under the framework',
+  ja: '切り替えのアニメーション',
+  en: 'Transitions',
 });
 
 export const navTesting = message({
-  ja: 'テストする',
+  ja: 'テスト',
   en: 'Testing',
 });
 
@@ -159,6 +124,6 @@ export const navReference = message({
 });
 
 export const navTroubleshooting = message({
-  ja: 'うまく動かないとき',
+  ja: 'トラブルシューティング',
   en: 'Troubleshooting',
 });

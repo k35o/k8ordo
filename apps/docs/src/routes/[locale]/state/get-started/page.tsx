@@ -54,109 +54,45 @@ export function Filters() {
   );
 }`;
 
-const PAGE = `import type { PageProps } from '@k8ordo/framework';
-
-import { Filters } from '../../components/filters';
-import { ProductList } from '../../components/product-list';
-import { listState } from '../../state';
-
-export const search = listState.url;
-
-export default async function ProductsPage({
-  search,
-}: PageProps<'/products'>) {
-  const products = await findProducts(search);
-
-  return (
-    <>
-      <Filters initialUrl={search} />
-      <ProductList products={products} />
-    </>
-  );
-}`;
-
-const SEED = `import { useAppState } from '@k8ordo/state';
-import type { OutputOf } from '@k8ordo/state';
-
-type Props = {
-  initialUrl: OutputOf<typeof listState.url>;
-};
-
-export function Filters({ initialUrl }: Props) {
-  const [{ inStock, page }, update] = useAppState(listState, {
-    initialUrl,
-  });`;
-
-const LINKS = `listState.href('/products', { inStock: true });
-// '/products?inStock=true'
-
-listState.href('/products', { inStock: false, page: 1 });
-// '/products'`;
-
-const NEXT = [
-  {
-    path: '/:locale/state/places',
-    label: m.state.navPlaces,
-    description: t.nextPlaces,
-  },
-  {
-    path: '/:locale/state/updates',
-    label: m.state.navUpdates,
-    description: t.nextUpdates,
-  },
-  {
-    path: '/:locale/state/reading',
-    label: m.state.navReading,
-    description: t.nextReading,
-  },
-] as const;
-
 export default function StateGetStartedPage() {
   return (
     <DocPage introduction={t.introduction} path="/:locale/state/get-started">
-      <DocSection
-        description={t.installDescription}
-        id="install"
-        title={t.installTitle}
-      >
+      <DocSection id="install" title={t.installTitle}>
         <PackageInstall name="@k8ordo/state" />
         <p>
           <Rich>{t.navigationApi()}</Rich>
         </p>
         <Note>
           <p>
-            <Rich>{t.zodMini()}</Rich>
+            <Rich>{t.zodMiniBefore()}</Rich>
+            <LocaleAnchor path="/:locale/state/places">
+              {m.state.navPlaces()}
+            </LocaleAnchor>
+            <Rich>{t.zodMiniAfter()}</Rich>
           </p>
         </Note>
       </DocSection>
 
-      <DocSection
-        description={t.defineDescription}
-        id="define"
-        title={t.defineTitle}
-      >
+      <DocSection id="define" title={t.defineTitle}>
         <CodeBlock
+          callouts={{ 4: t.defineKeyCallout() }}
           code={STATE}
           lang="ts"
-          marks={{ 6: 'highlight', 7: 'highlight' }}
+          marks={{ 4: 'highlight', 6: 'highlight', 7: 'highlight' }}
           title="src/state.ts"
         />
+        <p>
+          <Rich>{t.definePlace()}</Rich>
+        </p>
         <p>
           <Rich>{t.defineFields()}</Rich>
         </p>
         <p>
           <Rich>{t.defineModule()}</Rich>
         </p>
-        <p>
-          <Rich>{t.defineKey()}</Rich>
-        </p>
       </DocSection>
 
-      <DocSection
-        description={t.componentDescription}
-        id="component"
-        title={t.componentTitle}
-      >
+      <DocSection id="component" title={t.componentTitle}>
         <CodeBlock
           callouts={{
             16: t.componentReplaceCallout(),
@@ -168,54 +104,17 @@ export default function StateGetStartedPage() {
           title="src/components/filters.tsx"
         />
         <p>
+          <Rich>{t.componentHook()}</Rich>
+        </p>
+        <p>
           <Rich>{t.componentSync()}</Rich>
+          <LocaleAnchor path="/:locale/state/updates">
+            {m.state.navUpdates()}
+          </LocaleAnchor>
+          <Rich>{t.see()}</Rich>
         </p>
         <p>
           <Rich>{t.componentHistory()}</Rich>
-        </p>
-      </DocSection>
-
-      <DocSection
-        description={t.serverDescription}
-        id="server"
-        title={t.serverTitle}
-      >
-        <CodeBlock
-          code={PAGE}
-          lang="tsx"
-          marks={{ 7: 'highlight', 10: 'highlight', 16: 'highlight' }}
-          title="src/routes/products/page.tsx"
-        />
-        <p>
-          <Rich>{t.serverParsed()}</Rich>
-        </p>
-        <p>
-          <Rich>{t.serverReload()}</Rich>
-        </p>
-        <p>
-          <Rich>{t.serverSeed()}</Rich>
-        </p>
-        <CodeBlock
-          code={SEED}
-          lang="tsx"
-          marks={{ 5: 'highlight', 10: 'highlight' }}
-          title="src/components/filters.tsx"
-        />
-        <Note>
-          <p>
-            <Rich>{t.serverStatic()}</Rich>
-          </p>
-        </Note>
-      </DocSection>
-
-      <DocSection
-        description={t.linksDescription}
-        id="links"
-        title={t.linksTitle}
-      >
-        <CodeBlock code={LINKS} lang="ts" title="src/lib/links.ts" />
-        <p>
-          <Rich>{t.linksCanonical()}</Rich>
         </p>
       </DocSection>
 
@@ -227,18 +126,6 @@ export default function StateGetStartedPage() {
       >
         <ProductsDemo />
       </Playground>
-
-      <DocSection id="next" title={t.nextTitle}>
-        <ul>
-          {NEXT.map((step) => (
-            <li key={step.path}>
-              <LocaleAnchor path={step.path}>{step.label()}</LocaleAnchor>
-              {' — '}
-              <Rich>{step.description()}</Rich>
-            </li>
-          ))}
-        </ul>
-      </DocSection>
     </DocPage>
   );
 }

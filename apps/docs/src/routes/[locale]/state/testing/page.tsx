@@ -2,6 +2,7 @@ import { CodeBlock } from '@k8ordo/ui/code-block';
 
 import { Pitfall } from '../../../../components/callout';
 import { DocPage, DocSection } from '../../../../components/doc-page';
+import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Rich } from '../../../../components/rich';
 import * as m from '../../../../messages';
 
@@ -72,31 +73,36 @@ const COOKIE_CHANGE = `await cookieStore.set(
 export default function StateTestingPage() {
   return (
     <DocPage introduction={t.introduction} path="/:locale/state/testing">
-      <DocSection description={t.pureDescription} id="pure" title={t.pureTitle}>
-        <CodeBlock code={PURE} lang="ts" title="state.test.ts" />
+      <DocSection id="pure" title={t.pureTitle}>
+        <CodeBlock code={PURE} lang="ts" title="src/state.test.ts" />
+        <p>
+          <Rich>{t.pureRuns()}</Rich>
+        </p>
         <p>
           <Rich>{t.pureInput()}</Rich>
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.browserDescription}
-        id="browser"
-        title={t.browserTitle}
-      >
+      <DocSection id="browser" title={t.browserTitle}>
+        <p>
+          <Rich>{t.browserApis()}</Rich>
+        </p>
         <p>
           <Rich>{t.browserHttps()}</Rich>
+          <LocaleAnchor path="/:locale/state/cookie">
+            {m.state.navCookie()}
+          </LocaleAnchor>
+          <Rich>{t.browserHttpsSee()}</Rich>
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.resetDescription}
-        id="reset"
-        title={t.resetTitle}
-      >
+      <DocSection id="reset" title={t.resetTitle}>
         <CodeBlock code={RESET} lang="ts" marks={{ 7: 'highlight' }} />
         <p>
-          <Rich>{t.resetRows()}</Rich>
+          <Rich>{t.resetRegistry()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.resetStored()}</Rich>
         </p>
         <Pitfall>
           <p>
@@ -105,26 +111,29 @@ export default function StateTestingPage() {
         </Pitfall>
       </DocSection>
 
-      <DocSection
-        description={t.routerDescription}
-        id="router"
-        title={t.routerTitle}
-      >
-        <CodeBlock code={ROUTER} lang="ts" marks={{ 2: 'highlight' }} />
+      <DocSection id="router" title={t.routerTitle}>
+        <CodeBlock
+          code={ROUTER}
+          lang="ts"
+          marks={{ 2: 'highlight', 13: 'highlight', 14: 'highlight' }}
+        />
+        <p>
+          <Rich>{t.routerIntercept()}</Rich>
+        </p>
         <p>
           <Rich>{t.routerHome()}</Rich>
         </p>
       </DocSection>
 
-      <DocSection description={t.tabsDescription} id="tabs" title={t.tabsTitle}>
+      <DocSection id="tabs" title={t.tabsTitle}>
+        <CodeBlock code={STORAGE_EVENT} lang="ts" />
         <p>
           <Rich>{t.tabsStorage()}</Rich>
         </p>
-        <CodeBlock code={STORAGE_EVENT} lang="ts" />
+        <CodeBlock code={COOKIE_CHANGE} lang="ts" />
         <p>
           <Rich>{t.tabsCookie()}</Rich>
         </p>
-        <CodeBlock code={COOKIE_CHANGE} lang="ts" />
       </DocSection>
     </DocPage>
   );
