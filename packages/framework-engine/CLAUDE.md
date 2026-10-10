@@ -11,8 +11,8 @@ entries — beside it, then tells the engine where they landed
 The framework's job is to make the application's structure a checkable form:
 `routes/` is the pathname space and holds nothing else, execution boundaries
 are declared with React's own `'use client'` and enforced, and the type wiring
-between the app and `@k8ordo/router` / `@k8ordo/state` is generated rather
-than hand-written. The shared discipline (React 19 / RSC assumed, Baseline
+between the app and `@k8ordo/router` / `@k8ordo/state` / `@k8ordo/i18n` is
+generated rather than hand-written. The shared discipline (React 19 / RSC assumed, Baseline
 newly available only) is in the repository root's [`CLAUDE.md`](../../CLAUDE.md).
 
 ## Commands
@@ -51,6 +51,28 @@ pnpm check         # check:write to auto-fix
   `fixtures/build.ts` aliases `@k8ordo/framework/generated` to
   `@k8ordo/router`, since this package cannot depend on the one that
   bundles it.
+- **The locale set's `Register` is generated from `src/i18n.ts`.**
+  `localeSetOf` (`generate/write.ts`) looks for it only in an application
+  whose `package.json` lists `@k8ordo/i18n` and from whose root the package
+  resolves: the manifest, because `@k8ordo/ui` makes it a peer that npm
+  hoists into applications that never use it — whose own `locales` would
+  then make every locale `never`; the resolution, because the augmentation
+  names the package and TypeScript refuses one it cannot find. When
+  `src/i18n.ts` exports `locales`, read with `exportsOf` as a route file's
+  exports are (nothing is imported; a type-only export and `export *` do
+  not count; the file is parsed as `.ts`, not TSX), `register.gen.ts`
+  imports `locales` type-only from it, extensionless like the table's
+  imports, and augments `@k8ordo/i18n`'s `Register` with
+  `locale: LocaleOf<typeof locales>`. When the file is there without that
+  export, nothing is generated for i18n and `generate` returns a warning
+  the plugin logs once, since every message would otherwise compile
+  unchecked without a word. An application with no `src/i18n.ts` gets
+  neither and writes the augmentation by hand, as one outside the framework
+  does. `watchChange` regenerates on every change to `<root>/src/i18n.ts`
+  (Vite already watches the root) and leaves the route table's modules
+  alone then, since only the type-only `register.gen.ts` can change. A
+  hand-written augmentation left in an application still compiles:
+  TypeScript accepts a property declared twice with one type.
 - **Declaration order is load-bearing.** `not-found.tsx` is emitted last in
   its branch because the router matches in declaration order; every route the
   app actually declared has to out-rank the catch-all. Literal directories are

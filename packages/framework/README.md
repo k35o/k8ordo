@@ -154,7 +154,10 @@ error.tsx, loading.tsx, fallback.tsx, redirect.ts, guard.ts and route.ts;
 components go in `src/components/` and every other module (Server Actions,
 schemas, state definitions, data, helpers) in `src/lib/`, since a
 `_`-prefixed directory there is a URL segment, not a private one. Never
-edit `.k8ordo/` — it is generated. Import from `@k8ordo/framework` (never
+edit `.k8ordo/` — it is generated, with the `Register` augmentations: the
+route table's, and `@k8ordo/i18n`'s when `src/i18n.ts` exports the locale
+set by the name `locales` (write that one by hand only when the set lives
+elsewhere). Import from `@k8ordo/framework` (never
 `@k8ordo/router`), and the request API from `@k8ordo/framework/server`,
 which `mode: 'static'` refuses. Build links with `href()`; search params
 are `@k8ordo/state`'s.

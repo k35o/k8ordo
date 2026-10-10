@@ -1,4 +1,13 @@
-import { glob, readFile } from 'node:fs/promises';
+import {
+  glob,
+  mkdir,
+  mkdtemp,
+  readFile,
+  rm,
+  stat,
+  writeFile,
+} from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import path from 'node:path';
 
 import { createFilter, parseSync } from 'vite';
@@ -29,6 +38,62 @@ const resolveWith = (base: string): void => {
     | ((config: ResolvedConfig) => void)
     | undefined;
   hook?.({ base, root: '/app' } as ResolvedConfig);
+};
+
+type Watching = {
+  /** Tells the plugin that `file` changed, as vite dev does. */
+  readonly changed: (file: string) => Promise<void>;
+  /** What the plugin has warned so far. */
+  readonly warnings: readonly string[];
+};
+
+// vite dev と同じく、root を解いたプラグインにファイルの変更を知らせる
+const watching = (root: string): Watching => {
+  const plugin = enginePlugin();
+  const warnings: string[] = [];
+  const configResolved = plugin?.configResolved as
+    | ((config: ResolvedConfig) => void)
+    | undefined;
+  configResolved?.({
+    base: '/',
+    root,
+    logger: {
+      error: () => undefined,
+      warnOnce: (message: string) => {
+        warnings.push(message);
+      },
+    },
+  } as unknown as ResolvedConfig);
+  const watchChange = plugin?.watchChange as
+    | ((file: string) => Promise<void>)
+    | undefined;
+  return {
+    changed: async (file) => {
+      await watchChange?.(file);
+    },
+    warnings,
+  };
+};
+
+// routes/ にページが 1 枚あり、@k8ordo/i18n に依存していて root から解決できるアプリ
+const appWithI18n = async (): Promise<string> => {
+  const root = await mkdtemp(path.join(tmpdir(), 'k8ordo-watch-'));
+  await mkdir(path.join(root, 'src/routes'), { recursive: true });
+  await writeFile(
+    path.join(root, 'package.json'),
+    JSON.stringify({ dependencies: { '@k8ordo/i18n': '*' } }),
+  );
+  await writeFile(
+    path.join(root, 'src/routes/page.tsx'),
+    'export default function Page() { return null; }\n',
+  );
+  const i18n = path.join(root, 'node_modules/@k8ordo/i18n');
+  await mkdir(i18n, { recursive: true });
+  await writeFile(
+    path.join(i18n, 'package.json'),
+    JSON.stringify({ name: '@k8ordo/i18n' }),
+  );
+  return root;
 };
 
 // vite dev のときに、エンジンが client 環境の事前バンドルへ渡す設定
@@ -166,4 +231,64 @@ describe('the engine plugin', () => {
       expect(kept).toStrictEqual([]);
     },
   );
+});
+
+describe('the engine plugin under vite dev', () => {
+  it('regenerates the register as src/i18n.ts gains and loses its locale set', async () => {
+    const root = await appWithI18n();
+    try {
+      const { changed } = watching(root);
+      const i18n = path.join(root, 'src/i18n.ts');
+      const register = (): Promise<string> =>
+        readFile(path.join(root, '.k8ordo/register.gen.ts'), 'utf8');
+
+      await writeFile(
+        i18n,
+        "export const locales = defineLocales({ en: { timeZone: 'UTC', dir: 'ltr' } });\n",
+      );
+      await changed(i18n);
+      expect(await register()).toContain("declare module '@k8ordo/i18n' {");
+
+      await writeFile(i18n, 'export const other = 1;\n');
+      await changed(i18n);
+      expect(await register()).not.toContain('@k8ordo/i18n');
+
+      await writeFile(i18n, "export { locales } from './locales';\n");
+      await changed(i18n);
+      expect(await register()).toContain("declare module '@k8ordo/i18n' {");
+
+      await rm(i18n);
+      await changed(i18n);
+      expect(await register()).not.toContain('@k8ordo/i18n');
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it('warns when src/i18n.ts exports no locale set by name', async () => {
+    const root = await appWithI18n();
+    try {
+      const { changed, warnings } = watching(root);
+      const i18n = path.join(root, 'src/i18n.ts');
+      await writeFile(i18n, "export * from './locales';\n");
+      await changed(i18n);
+      expect(warnings).toStrictEqual([
+        expect.stringMatching(
+          /^k8ordo: src\/i18n\.ts does not export `locales` by name/u,
+        ),
+      ]);
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it('generates nothing for a change outside routes/ and src/i18n.ts', async () => {
+    const root = await appWithI18n();
+    try {
+      await watching(root).changed(path.join(root, 'src/lib/i18n.ts'));
+      await expect(stat(path.join(root, '.k8ordo'))).rejects.toThrow(/ENOENT/u);
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
 });

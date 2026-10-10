@@ -7,6 +7,7 @@ import {
   declaresParams,
   exportsOf,
   generate,
+  localeSetOf,
   pagesReadingSearch,
   REEXPORTS_ALL,
   silentRoutes,
@@ -88,14 +89,15 @@ describe('exportsOf', () => {
           'export type PUT = string;',
           '// export function PATCH() {}',
         ].join('\n'),
+        'route.ts',
       ),
     ]).toStrictEqual(['GET', 'POST', 'DELETE']);
   });
 
   it('names a default export default', () => {
-    expect(exportsOf('export default function Page() {}').has('default')).toBe(
-      true,
-    );
+    expect(
+      exportsOf('export default function Page() {}', 'page.tsx').has('default'),
+    ).toBe(true);
   });
 
   it('says that export * brings names it cannot list, rather than a default', () => {
@@ -106,8 +108,15 @@ describe('exportsOf', () => {
           "export * from './more';",
           "export * as helpers from './helpers';",
         ].join('\n'),
+        'route.ts',
       ),
     ]).toStrictEqual(['GET', REEXPORTS_ALL, 'helpers']);
+  });
+
+  it('reads a .ts module as TypeScript, where an angle-bracket assertion is no JSX', () => {
+    const source = 'const set = 1;\nexport const locales = <number>set;';
+    expect([...exportsOf(source, 'i18n.ts')]).toStrictEqual(['locales']);
+    expect([...exportsOf(source, 'page.tsx')]).toStrictEqual([]);
   });
 });
 
@@ -232,5 +241,175 @@ describe('generate, for a page with a fallback.tsx', () => {
     const source = await generatedTableIn('server');
     expect(source).toContain('export const fallbacks = {} as const;');
     expect(source).not.toContain('posts/[id]/fallback');
+  });
+});
+
+type App = {
+  /** The text of src/i18n.ts, or no such file. */
+  readonly i18n?: string;
+  /** Whether package.json lists @k8ordo/i18n. */
+  readonly depends?: boolean;
+  /** Whether @k8ordo/i18n resolves from the root. */
+  readonly installed?: boolean;
+};
+
+// アプリを一時ディレクトリに作る。routes/ にはページを 1 枚だけ置く
+const inApp = async <T>(
+  { i18n, depends = true, installed = true }: App,
+  run: (root: string) => Promise<T>,
+): Promise<T> => {
+  const root = await mkdtemp(path.join(tmpdir(), 'k8ordo-locales-'));
+  try {
+    await mkdir(path.join(root, 'src/routes'), { recursive: true });
+    await writeFile(
+      path.join(root, 'package.json'),
+      JSON.stringify(depends ? { dependencies: { '@k8ordo/i18n': '*' } } : {}),
+    );
+    await writeFile(
+      path.join(root, 'src/routes/page.tsx'),
+      'export default function Page() { return null; }\n',
+    );
+    if (installed) {
+      const dir = path.join(root, 'node_modules/@k8ordo/i18n');
+      await mkdir(dir, { recursive: true });
+      await writeFile(
+        path.join(dir, 'package.json'),
+        JSON.stringify({ name: '@k8ordo/i18n' }),
+      );
+    }
+    if (i18n !== undefined) {
+      await writeFile(path.join(root, 'src/i18n.ts'), i18n);
+    }
+    return await run(root);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+};
+
+// 見つけた src/i18n.ts は root からの相対で返す
+const localeSetIn = (
+  app: App,
+): Promise<{ module: string; exportsLocales: boolean } | null> =>
+  inApp(app, async (root) => {
+    const found = await localeSetOf(root);
+    return found === null
+      ? null
+      : { ...found, module: path.relative(root, found.module) };
+  });
+
+const exporting = (exportsLocales: boolean) => ({
+  module: 'src/i18n.ts',
+  exportsLocales,
+});
+
+const DEFINED = [
+  "import { defineLocales } from '@k8ordo/i18n';",
+  "export const locales = defineLocales({ en: { timeZone: 'UTC', dir: 'ltr' } });",
+].join('\n');
+
+describe('localeSetOf', () => {
+  it('finds the locale set src/i18n.ts exports', async () => {
+    expect(await localeSetIn({ i18n: DEFINED })).toStrictEqual(exporting(true));
+  });
+
+  it('finds a locale set the module re-exports by name', async () => {
+    expect(
+      await localeSetIn({ i18n: "export { locales } from './locales';" }),
+    ).toStrictEqual(exporting(true));
+    expect(
+      await localeSetIn({
+        i18n: "import { set } from './locales';\nexport { set as locales };",
+      }),
+    ).toStrictEqual(exporting(true));
+  });
+
+  it('finds nothing without src/i18n.ts', async () => {
+    expect(await localeSetIn({})).toBeNull();
+  });
+
+  it('sees src/i18n.ts without a locales export', async () => {
+    expect(
+      await localeSetIn({
+        i18n: [
+          "import { defineLocales } from '@k8ordo/i18n';",
+          "const locales = defineLocales({ en: { timeZone: 'UTC', dir: 'ltr' } });",
+          'export const { getLocale } = locales;',
+        ].join('\n'),
+      }),
+    ).toStrictEqual(exporting(false));
+    // `export *` brings another module's names, which this one cannot list.
+    expect(
+      await localeSetIn({ i18n: "export * from './locales';" }),
+    ).toStrictEqual(exporting(false));
+  });
+
+  it('does not count a type-only export, which has no value to take the type of', async () => {
+    expect(
+      await localeSetIn({ i18n: "export type { locales } from './locales';" }),
+    ).toStrictEqual(exporting(false));
+    expect(
+      await localeSetIn({ i18n: "export type locales = 'en' | 'ja';" }),
+    ).toStrictEqual(exporting(false));
+  });
+
+  it('finds nothing when @k8ordo/i18n does not resolve from the root', async () => {
+    expect(await localeSetIn({ i18n: DEFINED, installed: false })).toBeNull();
+  });
+
+  // @k8ordo/ui の peer として hoist されると、依存に挙げていなくても解決できる
+  it('finds nothing when the application resolves @k8ordo/i18n without depending on it', async () => {
+    expect(await localeSetIn({ i18n: DEFINED, depends: false })).toBeNull();
+  });
+});
+
+const generatedIn = (
+  app: App,
+): Promise<{ register: string; warnings: readonly string[] }> =>
+  inApp(app, async (root) => {
+    const outDir = path.join(root, '.k8ordo');
+    const { problems, warnings } = await generate({
+      root,
+      routesDir: path.join(root, 'src/routes'),
+      outDir,
+      mode: 'static',
+    });
+    expect(problems).toStrictEqual([]);
+    return {
+      register: await readFile(path.join(outDir, 'register.gen.ts'), 'utf8'),
+      warnings,
+    };
+  });
+
+describe('generate, for an application with a locale set', () => {
+  it('registers it with @k8ordo/i18n, imported without an extension as the table imports routes', async () => {
+    const { register, warnings } = await generatedIn({ i18n: DEFINED });
+    expect(register).toContain("import type { locales } from '../src/i18n';");
+    expect(register).toContain("declare module '@k8ordo/i18n' {");
+    expect(register).toContain('locale: LocaleOf<typeof locales>;');
+    expect(warnings).toStrictEqual([]);
+  });
+
+  it('registers nothing with @k8ordo/i18n when there is no set to read', async () => {
+    const generated = await Promise.all(
+      [
+        {},
+        { i18n: DEFINED, installed: false },
+        { i18n: DEFINED, depends: false },
+      ].map((app) => generatedIn(app)),
+    );
+    for (const { register, warnings } of generated) {
+      expect(register).not.toContain('@k8ordo/i18n');
+      expect(warnings).toStrictEqual([]);
+    }
+  });
+
+  it('warns when src/i18n.ts is there without a locales export, rather than leaving every message unchecked', async () => {
+    const { register, warnings } = await generatedIn({
+      i18n: "export * from './locales';",
+    });
+    expect(register).not.toContain('@k8ordo/i18n');
+    expect(warnings).toStrictEqual([
+      "src/i18n.ts does not export `locales` by name (`export *` and a type-only export do not count), so @k8ordo/i18n's Register is not generated and a message missing a locale compiles — export the locale set from it as `locales`",
+    ]);
   });
 });

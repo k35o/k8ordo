@@ -133,10 +133,13 @@ export default defineConfig({ plugins: [framework({ mode: 'static' })] });
 // or framework({ mode: 'server' })
 ```
 
-The framework writes the route table and its types into `.k8ordo/`. Add it
-to `include` in `tsconfig.json` as a glob, `.k8ordo/**/*.ts` (an entry
-naming only the dot-directory leaves its files out), and `href()`'s paths
-and a page's `params` are typed. The generated files import without file
+The framework writes the route table and its types into `.k8ordo/`,
+including the `Register` augmentations an application would otherwise write
+by hand — the table's, and `@k8ordo/i18n`'s when `src/i18n.ts` exports the
+locale set by the name `locales`. Add it to `include` in `tsconfig.json` as
+a glob, `.k8ordo/**/*.ts` (an entry naming only the dot-directory leaves its
+files out), and `href()`'s paths and a page's `params` are typed, and with
+that export every message's locales. The generated files import without file
 extensions, so they resolve under `moduleResolution: "bundler"`, as Vite
 does. A fresh clone has no `.k8ordo/` until `vite build` or `vite dev`
 writes it, so CI runs the build before `tsc`

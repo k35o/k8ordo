@@ -49,18 +49,26 @@ does.
 ## Quick Start
 
 The locale set in its own module — each locale with the time zone its dates
-are shown in and the direction its text runs in — registered once so every
-message is held to it:
+are shown in and the direction its text runs in:
 
 ```ts
 // src/i18n.ts
 import { defineLocales } from '@k8ordo/i18n';
-import type { LocaleOf } from '@k8ordo/i18n';
 
 export const locales = defineLocales({
   ja: { timeZone: 'Asia/Tokyo', dir: 'ltr' },
   en: { timeZone: 'UTC', dir: 'ltr' },
 });
+```
+
+Every message is held to the set through `Register`. Under
+`@k8ordo/framework` that is generated from the `locales` export of
+`src/i18n.ts`, and there is nothing to write. Anywhere else, register it
+once, beside the set:
+
+```ts
+// src/i18n.ts, outside @k8ordo/framework
+import type { LocaleOf } from '@k8ordo/i18n';
 
 declare module '@k8ordo/i18n' {
   interface Register {
@@ -132,8 +140,10 @@ Point your agent at them once by pasting this into your project's `CLAUDE.md` /
 ```markdown
 Use `@k8ordo/i18n` for locales and translated text. Before adding a message
 or touching a `[locale]` route, read `node_modules/@k8ordo/i18n/docs/GUIDE.md`.
-The locale set is declared once with `defineLocales` and registered through
-`Register`; each message is a `message({ ja, en })` export, called where it
+The locale set is declared once with `defineLocales` as the `locales` export
+of `src/i18n.ts`, and registered through `Register` — generated under
+`@k8ordo/framework`, so never write it there; written once beside the set
+elsewhere. Each message is a `message({ ja, en })` export, called where it
 renders — the same call in a Server and a Client Component. There is no
 provider, no hook and no message grammar: never pass the locale down as a
 prop, interpolate inside the message's own function, format dates and numbers

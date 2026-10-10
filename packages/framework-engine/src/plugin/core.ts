@@ -5,6 +5,7 @@ import react from '@vitejs/plugin-react';
 import rsc from '@vitejs/plugin-rsc';
 import type { Logger, Plugin, PluginOption, ViteDevServer } from 'vite';
 
+import { LOCALES_MODULE } from '../generate/emit';
 import { generate } from '../generate/write';
 import { FRAMEWORK } from '../host';
 import type { EngineOptions, Mode } from '../host';
@@ -92,6 +93,7 @@ export const engine = (
 ): PluginOption[] => {
   let root = '';
   let routesDir = '';
+  let localesModule = '';
   let outDir = '';
   let logger: Logger;
   let devServer: ViteDevServer | undefined;
@@ -202,6 +204,7 @@ export const engine = (
       }
       ({ root, logger } = config);
       routesDir = path.resolve(root, options.routesDir ?? 'src/routes');
+      localesModule = path.resolve(root, LOCALES_MODULE);
       outDir = path.resolve(root, OUT_DIR);
     },
 
@@ -239,7 +242,9 @@ export const engine = (
     },
 
     async buildStart() {
-      const { problems } = await generate(generateOptions());
+      const { problems, warnings } = await generate(generateOptions());
+      // 環境ごとに呼ばれるので、同じ警告を 1 度だけ出す
+      for (const warning of warnings) logger.warnOnce(`k8ordo: ${warning}`);
       // this.error は投げるので、1 件ずつ渡すと最初の 1 件しか出ない。文法は
       // 全部集めて返してくるのだから、全部見せる。
       if (problems.length > 0) {
@@ -261,10 +266,18 @@ export const engine = (
     // otherwise be re-imported from that table, and fail, before the table
     // caught up. A file gaining or losing its `paramsSchema` export changes
     // the table too; writeIfChanged keeps an edit that changed nothing from
-    // restarting HMR.
+    // restarting HMR. The locale set's module is read for `@k8ordo/i18n`'s
+    // `Register`, so its gaining or losing `locales` regenerates as well —
+    // Vite watches it with the rest of the root.
     async watchChange(file) {
+      const changed = path.resolve(file);
       // `routes` と `routes-x` を取り違えないよう、区切りまで含めて見る
-      if (!path.resolve(file).startsWith(`${routesDir}${path.sep}`)) return;
+      if (
+        !changed.startsWith(`${routesDir}${path.sep}`) &&
+        changed !== localesModule
+      ) {
+        return;
+      }
       // One at a time: Vite does not wait for one change before the next, and
       // a run that read the directory before a deletion would otherwise write
       // its table after the deletion's own.
@@ -273,10 +286,13 @@ export const engine = (
         () => undefined,
         () => undefined,
       );
-      const { problems } = await run;
+      const { problems, warnings } = await run;
       for (const problem of problems) {
         logger.error(`routes/${problem.path}: ${problem.message}`);
       }
+      for (const warning of warnings) logger.warnOnce(`k8ordo: ${warning}`);
+      // src/i18n.ts で変わりうるのは型だけの register.gen.ts で、表は変わらない
+      if (changed === localesModule) return;
       // The update that follows only soft-invalidates the table, as an
       // importer of the file that changed: it keeps the code it compiled
       // from the old table, imports of a deleted file included.

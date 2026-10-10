@@ -671,7 +671,7 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
           throw new Error(guardRefusal([path.relative(root, module)]));
         }
         const names = READ_BY_NAME.has(slot ?? '')
-          ? exportsOf(await readFile(module, 'utf8'))
+          ? exportsOf(await readFile(module, 'utf8'), file)
           : new Set<string>();
         if (names.has(REEXPORTS_ALL)) {
           throw new Error(reexportRefusal([path.relative(root, module)]));

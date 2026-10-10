@@ -11,7 +11,9 @@
 > accepted, in the browser the URL. The same call renders in a Server
 > Component and in a Client Component; there is no provider and no hook; a
 > bundler keeps only the messages a client module names. `Register` carries
-> the app's locale union so a message missing a locale does not compile.
+> the app's locale union so a message missing a locale does not compile;
+> `@k8ordo/framework` generates it from the `locales` export of
+> `src/i18n.ts`, and any other app writes it by hand.
 >
 > Like every k8ordo package it assumes React 19 and Server Components, uses
 > only what has reached Baseline newly available, and ships no polyfills or
@@ -23,7 +25,8 @@ When installed via npm, these docs live under `node_modules/@k8ordo/i18n/docs/`.
 
 - [Design Guide](GUIDE.md): what the package owns and does not (the locale
   segment, not the pathname; no message grammar; no loader), the locale set
-  and negotiation, messages as functions and `Register`, formatting (`Intl`
+  and negotiation, messages as functions and `Register` (generated under
+  `@k8ordo/framework`, hand-written elsewhere), formatting (`Intl`
   drawn for the current locale, dates in its time zone), the Server
   Component boundary (a message is called before it is passed to a
   `'use client'` component), what reaches the browser, where the locale comes
