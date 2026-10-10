@@ -6,6 +6,6 @@ export const searchPlaceholder = message({
 });
 
 export const noResults = message({
-  ja: '一致する項目はありませんでした。',
-  en: 'No matching items.',
+  ja: '一致するコンポーネントはありません。',
+  en: 'No matching components.',
 });

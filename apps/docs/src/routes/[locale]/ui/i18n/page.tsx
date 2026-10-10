@@ -3,8 +3,9 @@ import { CodeBlock } from '@k8ordo/ui/code-block';
 import { en, ja, messageUsage } from '@k8ordo/ui/i18n';
 import type { Messages } from '@k8ordo/ui/i18n';
 
-import { Note } from '../../../../components/callout';
+import { Pitfall } from '../../../../components/callout';
 import { DocPage, DocSection } from '../../../../components/doc-page';
+import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Rich } from '../../../../components/rich';
 import * as m from '../../../../messages';
 
@@ -76,41 +77,43 @@ export function DismissButton({ onDismiss }) {
   );
 }`;
 
+const PROPS = `import { Button } from '@k8ordo/ui';
+
+import * as m from '../messages';
+
+export function AddToCart() {
+  return <Button>{m.cart.add()}</Button>;
+}`;
+
 export default function UiI18nPage() {
   return (
     <DocPage introduction={t.introduction} path="/:locale/ui/i18n">
-      <DocSection
-        description={t.localeDescription}
-        id="locale"
-        title={t.localeTitle}
-      >
+      <DocSection id="locale" title={t.localeTitle}>
         <CodeBlock code={LOCALES} lang="ts" title="src/i18n.ts" />
-        <Note>
+        <p>
+          <Rich>{t.localeSet()}</Rich>
+        </p>
+        <Pitfall>
           <p>
             <Rich>{t.clientGraph()}</Rich>
           </p>
-        </Note>
+        </Pitfall>
       </DocSection>
 
-      <DocSection
-        description={t.englishDescription}
-        id="english"
-        title={t.englishTitle}
-      >
+      <DocSection id="english" title={t.englishTitle}>
+        <CodeBlock code={JAPANESE_ONLY} lang="ts" title="src/i18n.ts" />
         <p>
           <Rich>{t.englishJapanese()}</Rich>
         </p>
-        <CodeBlock code={JAPANESE_ONLY} lang="ts" title="src/i18n.ts" />
+        <p>
+          <Rich>{t.englishFallback()}</Rich>
+        </p>
       </DocSection>
 
-      <DocSection
-        description={t.registerDescription}
-        id="register"
-        title={t.registerTitle}
-      >
+      <DocSection id="register" title={t.registerTitle}>
         <CodeBlock code={FRENCH} lang="ts" title="src/messages/ui-fr.ts" />
         <p>
-          <Rich>{t.registerTyped()}</Rich>
+          <Rich>{t.registerDictionary()}</Rich>
         </p>
         <CodeBlock
           code={REGISTER}
@@ -119,23 +122,24 @@ export default function UiI18nPage() {
           title="src/i18n.ts"
         />
         <p>
+          <Rich>{t.registerWhere()}</Rich>
+        </p>
+        <p>
           <Rich>{t.regional()}</Rich>
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.overrideDescription}
-        id="override"
-        title={t.overrideTitle}
-      >
+      <DocSection id="override" title={t.overrideTitle}>
         <CodeBlock code={OVERRIDE} lang="ts" title="src/i18n.ts" />
+        <p>
+          <Rich>{t.overrideSpread()}</Rich>
+        </p>
       </DocSection>
 
-      <DocSection
-        description={t.priorityDescription}
-        id="priority"
-        title={t.priorityTitle}
-      >
+      <DocSection id="priority" title={t.priorityTitle}>
+        <p>
+          <Rich>{t.priorityOrder()}</Rich>
+        </p>
         <ol>
           <li>
             <Rich>{t.priorityProp()}</Rich>
@@ -152,14 +156,36 @@ export default function UiI18nPage() {
         </p>
       </DocSection>
 
-      <DocSection description={t.readDescription} id="read" title={t.readTitle}>
+      <DocSection id="read" title={t.readTitle}>
         <CodeBlock code={READ} lang="tsx" title="dismiss-button.tsx" />
         <p>
-          <Rich>{t.readWhy()}</Rich>
+          <Rich>{t.readFunction()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.readAligned()}</Rich>
         </p>
       </DocSection>
 
-      <DocSection description={t.keysDescription} id="keys" title={t.keysTitle}>
+      <DocSection id="props" title={t.propsTitle}>
+        <CodeBlock
+          code={PROPS}
+          lang="tsx"
+          marks={{ 6: 'highlight' }}
+          title="src/components/add-to-cart.tsx"
+        />
+        <p>
+          <Rich>{t.propsString()}</Rich>
+          <LocaleAnchor path="/:locale/i18n/messages">
+            {m.i18n.navMessages()}
+          </LocaleAnchor>
+          <Rich>{t.see()}</Rich>
+        </p>
+      </DocSection>
+
+      <DocSection id="keys" title={t.keysTitle}>
+        <p>
+          <Rich>{t.keysAll()}</Rich>
+        </p>
         <dl className="flex flex-col gap-4 md:hidden">
           {MESSAGE_ROWS.map((row) => (
             <div

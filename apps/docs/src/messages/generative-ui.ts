@@ -1,98 +1,108 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: 'LLMにUIを作らせると、ブランドから外れた色や存在しない部品が混ざりがちです。`@k8ordo/ui`には、LLMがこのライブラリの部品だけでUIを組み立てるためのアダプタがあり、json-renderとOpenUIの2つに対応しています。プロンプトはサーバーで作り、返ってきた出力を確かめてから、ブラウザで描きます。',
-  en: 'A model left to build UI tends to reach for off-brand colours and components that do not exist. `@k8ordo/ui` ships adapters that let it build UI out of this library’s components only, for json-render and for OpenUI. Generate the prompt on the server, check what comes back, then render it in the browser.',
+  ja: 'LLMに`@k8ordo/ui`のコンポーネントだけでUIを組み立てさせます。json-renderとOpenUIのどちらでも、プロンプトの生成から描画までをこのライブラリのアダプタで行えます。',
+  en: 'Have an LLM build UI out of `@k8ordo/ui` components only. With json-render or OpenUI, the adapters in this library cover everything from the prompt to the rendering.',
 });
 
 export const installTitle = message({
-  ja: 'インストールする',
+  ja: 'インストール',
   en: 'Install',
 });
 
 export const installDescription = message({
-  ja: 'json-renderとOpenUIのうち、使うほうのパッケージをzodと一緒に入れます。両方を入れる必要はありません。',
-  en: 'Install the packages of whichever you use, json-render or OpenUI, together with zod. There is no need for both.',
-});
-
-export const installJsonRender = message({
-  ja: 'json-renderを使うとき',
-  en: 'For json-render',
-});
-
-export const installOpenUi = message({
-  ja: 'OpenUIを使うとき',
-  en: 'For OpenUI',
+  ja: 'json-renderとOpenUIのうち、使うほうのパッケージをzodと一緒に入れます。',
+  en: 'Install zod and the packages for whichever you use, json-render or OpenUI.',
 });
 
 export const installSeries = message({
   ja: (jsonRender: string, openUi: string) =>
-    `どちらも0.x系で、マイナーバージョンが上がると互換性が変わります。そのため、対応している版はjson-renderが${jsonRender}、OpenUIが${openUi}に限られます。`,
+    `どちらも0.x系で、マイナーバージョンが上がると互換性が変わります。対応するバージョンはjson-renderが${jsonRender}、OpenUIが${openUi}です。`,
   en: (jsonRender, openUi) =>
-    `Both are 0.x, where a minor release can break compatibility, so the versions supported are json-render ${jsonRender} and OpenUI ${openUi}.`,
+    `Both are 0.x, where a minor release can break compatibility. The supported versions are json-render ${jsonRender} and OpenUI ${openUi}.`,
 });
 
 export const installOneCopy = message({
-  ja: 'アダプタはフレームワーク自身のReactのコンテキストを読みます。アプリと`@k8ordo/ui`で別の版が解決されると、型もビルドも通るのに、フォームの部品が描画のときに例外を投げます。版はアプリの中で1つにそろえてください。',
-  en: 'The adapters read the framework’s own React context. If your app and `@k8ordo/ui` resolve two different copies, the types and the build pass, and the form parts throw at render time. Keep one version in the app.',
+  ja: 'アダプタはjson-renderやOpenUIが持つReactのコンテキストを読みます。アプリと`@k8ordo/ui`がそれぞれ別のバージョンを解決しても、型とビルドは通ります。それでも描画のときに、フォームのコンポーネントがエラーになります。OpenUIなら`useOpenUI must be used within a <Renderer /> component.`、json-renderなら`useStateStore must be used within a StateProvider`です。バージョンはアプリの中で1つにそろえます。',
+  en: 'The adapters read the React context that json-render or OpenUI itself provides. If your app and `@k8ordo/ui` resolve different versions of it, the types and the build still pass. At render time, though, the form components fail: OpenUI with `useOpenUI must be used within a <Renderer /> component.`, json-render with `useStateStore must be used within a StateProvider`. Keep one version in the app.',
 });
 
 export const promptTitle = message({
-  ja: 'プロンプトをサーバーで作る',
-  en: 'Generate the prompt on the server',
+  ja: 'プロンプトの生成',
+  en: 'Prompt generation',
 });
 
-export const promptDescription = message({
-  ja: '`@k8ordo/ui/json-render`はサーバーで読み込んでよい入口なので、Server Componentやサーバーの処理から`catalog`を呼べます。`uiRules`は、表の列とセルの数をそろえるといった、LLMが破りやすい約束事をまとめたものです。`customRules`に渡すと、プロンプトに書き足されます。',
-  en: '`@k8ordo/ui/json-render` is safe to load on the server, so a Server Component or any server code can call `catalog`. `uiRules` collects the conventions a model most often breaks, such as giving a table row as many cells as it has columns. Pass them as `customRules` and they are written into the prompt.',
+export const promptServer = message({
+  ja: '`@k8ordo/ui/json-render`はサーバーで読み込めます。Server Componentやサーバーの処理から`catalog.prompt()`を呼べます。',
+  en: '`@k8ordo/ui/json-render` loads on the server. A Server Component or any server code can call `catalog.prompt()`.',
+});
+
+export const promptRules = message({
+  ja: '`uiRules`は、表の各行にセルを列の数だけ置くといった、LLMが破りやすい約束事の一覧です。`customRules`に渡すと、プロンプトに書き足されます。',
+  en: '`uiRules` lists the rules a model most often breaks, such as giving a table row as many cells as there are columns. Pass them as `customRules` and they are added to the prompt.',
 });
 
 export const promptLanguage = message({
-  ja: 'アダプタがLLMに渡す説明は、アプリのロケールに関係なくすべて英語です。読むのはLLMで、利用者の目には触れないからです。UIに書かれる文の言語を決めたいときは、`Write all UI text in Japanese.`のような約束事を自分で足します。',
-  en: 'Everything the adapters hand the model is English, whatever your application’s locale: the model reads it and your users never see it. To pin the language of the text the model writes into the UI, add a rule of your own such as `Write all UI text in Japanese.`',
+  ja: 'アダプタがLLMに渡す説明は、アプリのロケールに関係なくすべて英語です。UIに書かれる文の言語を決めたいときは、約束事を自分で足します。',
+  en: 'Everything the adapters hand the model is English, whatever the application’s locale. To set the language of the text written into the UI, add a rule of your own.',
+});
+
+export const promptLanguageCallout = message({
+  ja: 'UIの文の言語を決める約束事',
+  en: 'A rule that sets the language of the UI text',
 });
 
 export const renderTitle = message({
-  ja: 'ブラウザで描く',
-  en: 'Render in the browser',
+  ja: 'ブラウザでの描画',
+  en: 'Rendering in the browser',
 });
 
 export const renderDescription = message({
-  ja: '`JsonRenderUI`は、json-renderのプロバイダと描画の仕組み、部品の登録をまとめたものです。そのため、specを渡すだけで描けます。',
-  en: '`JsonRenderUI` bundles json-render’s provider, its renderer and the component registry, so passing the spec is all it takes.',
+  ja: '`JsonRenderUI`はjson-renderのプロバイダ、レンダラー、コンポーネントの登録を1つにまとめたコンポーネントです。`spec`を渡すだけで描けます。',
+  en: '`JsonRenderUI` bundles json-render’s provider, its renderer and the component registry. Passing the `spec` is all it takes.',
+});
+
+export const renderStateChange = message({
+  ja: 'フォームの値を集めるときは`onStateChange`を渡します。変わった`path`と`value`の配列を受け取ります。',
+  en: 'To collect form values, pass `onStateChange`. It receives an array of the changed `path` and `value` pairs.',
 });
 
 export const validateTitle = message({
-  ja: 'LLMの出力を確かめて直させる',
-  en: 'Check the model’s output and have it repaired',
+  ja: '出力の検証',
+  en: 'Validating the output',
 });
 
 export const validateDescription = message({
-  ja: '`validateGeneratedSpec`は、機械的に直せる誤りを直してから、specの構造と部品ごとのpropsを確かめます。通れば`spec`を返し、通らなければ、見つけた誤りから作った`repairPrompt`を返します。これはLLMにそのまま送り返せる文章です。',
-  en: '`validateGeneratedSpec` fixes what can be fixed mechanically, then checks the spec’s structure and each component’s props. It returns the `spec` when it passes, and otherwise a `repairPrompt` built from what it found, ready to send straight back to the model.',
+  ja: '`validateGeneratedSpec`は、機械的に直せる誤りを直してから、specの構造とコンポーネントごとのpropsを確かめます。通れば`spec`を返します。',
+  en: '`validateGeneratedSpec` fixes what can be fixed mechanically, then checks the spec’s structure and each component’s props. When the spec passes, it returns the `spec`.',
+});
+
+export const validateRepair = message({
+  ja: '通らなければ、見つけた誤りの一覧`issues`と、それをもとに作った`repairPrompt`を返します。`repairPrompt`はLLMにそのまま送り返せる文章です。',
+  en: 'When it does not, it returns the `issues` it found and a `repairPrompt` built from them. The `repairPrompt` can be sent straight back to the model.',
 });
 
 export const typedTitle = message({
-  ja: 'specを型で確かめる',
-  en: 'Type-check a spec',
+  ja: 'specの型',
+  en: 'Typed specs',
 });
 
 export const typedDescription = message({
-  ja: '自分でspecを書くときは、`satisfies UISpec`を付けます。部品の名前やpropsを打ち間違えると、型エラーになります。',
-  en: 'When you write a spec by hand, add `satisfies UISpec`, and a misspelt component name or prop fails to compile.',
+  ja: '自分でspecを書くときは、`satisfies UISpec`を付けます。コンポーネントの名前やpropsを打ち間違えると、型エラーになります。',
+  en: 'When you write a spec by hand, add `satisfies UISpec`. A misspelt component name or prop becomes a type error.',
 });
 
 export const openuiTitle = message({
-  ja: 'OpenUIで使う',
-  en: 'Use OpenUI',
+  ja: 'OpenUI',
+  en: 'OpenUI',
 });
 
 export const openuiDescription = message({
   ja: 'OpenUIは、LLMが書いた文字列を`library`で描きます。描画はClient Componentで行います。',
-  en: 'OpenUI renders the string the model wrote with `library`, in a Client Component.',
+  en: 'OpenUI renders the model’s output string with `library`. Rendering happens in a Client Component.',
 });
 
 export const openuiPrompt = message({
-  ja: 'プロンプトは`@k8ordo/ui/openui/prompt`の`prompt()`で作ります。この入口はReactに依存しないので、json-renderの`catalog.prompt()`と同じくサーバーで呼べます。',
-  en: 'The prompt comes from `prompt()` in `@k8ordo/ui/openui/prompt`. That entry does not depend on React, so like json-render’s `catalog.prompt()` it runs on the server.',
+  ja: 'プロンプトは`@k8ordo/ui/openui/prompt`の`prompt()`で作ります。この入口はReactに依存しないので、サーバーで呼べます。UIの文の言語を決める約束事は`additionalRules`に渡します。',
+  en: 'The prompt comes from `prompt()` in `@k8ordo/ui/openui/prompt`. That entry does not depend on React, so it runs on the server. A rule that sets the language of the UI text goes in `additionalRules`.',
 });

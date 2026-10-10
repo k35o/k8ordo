@@ -26,7 +26,7 @@ const SURFACES: Array<{
     description: m.aiAgents.surfaceReference,
   },
   {
-    path: 'llms.txt',
+    path: 'docs/llms.txt',
     href: '/llms.txt',
     description: m.aiAgents.surfaceIndex,
   },
@@ -77,9 +77,6 @@ export default function AiAgents() {
         <Heading level="h2">
           <Rich>{m.aiAgents.setupTitle()}</Rich>
         </Heading>
-        <p className="text-fg-mute">
-          <Rich>{m.aiAgents.setupDescription()}</Rich>
-        </p>
         <CodeBlock
           code={`Use \`@k8ordo/ui\` for UI. Before writing or changing UI, read
 \`node_modules/@k8ordo/ui/docs/GUIDE.md\`, then follow only the
@@ -92,6 +89,9 @@ components in \`docs/references/ai-chat.md\`, the generative UI adapters in
 a component that is listed in none of them does not exist.`}
           lang="md"
         />
+        <p className="text-fg-mute">
+          <Rich>{m.aiAgents.setupDescription()}</Rich>
+        </p>
       </section>
       <Separator color="mute" />
 
@@ -99,9 +99,6 @@ a component that is listed in none of them does not exist.`}
         <Heading level="h2">
           <Rich>{m.aiAgents.surfacesTitle()}</Rich>
         </Heading>
-        <p className="text-fg-mute">
-          <Rich>{m.aiAgents.surfacesDescription()}</Rich>
-        </p>
         <dl className="flex flex-col gap-4">
           {SURFACES.map((surface) => (
             <Surface key={surface.path} {...surface} />
@@ -117,6 +114,9 @@ a component that is listed in none of them does not exist.`}
             </dd>
           </div>
         </dl>
+        <p className="text-fg-mute">
+          <Rich>{m.aiAgents.surfacesDescription()}</Rich>
+        </p>
       </section>
       <Separator color="mute" />
 
@@ -124,9 +124,6 @@ a component that is listed in none of them does not exist.`}
         <Heading level="h2">
           <Rich>{m.aiAgents.mcpTitle()}</Rich>
         </Heading>
-        <p className="text-fg-mute">
-          <Rich>{m.aiAgents.mcpDescription()}</Rich>
-        </p>
         <CodeBlock
           code={`{
   "mcpServers": {
@@ -138,6 +135,9 @@ a component that is listed in none of them does not exist.`}
 }`}
           lang="json"
         />
+        <p className="text-fg-mute">
+          <Rich>{m.aiAgents.mcpDescription()}</Rich>
+        </p>
       </section>
       <Separator color="mute" />
 
