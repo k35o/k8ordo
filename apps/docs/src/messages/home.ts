@@ -16,18 +16,18 @@ export const membersTitle = message({
 });
 
 export const memberUiDescription = message({
-  ja: 'セマンティックなデザイントークンと国際化、生成UIのアダプタを備えたReactのコンポーネント集です。',
-  en: 'React components with semantic design tokens, i18n, and generative-UI adapters.',
+  ja: 'ボタンもダイアログもServer Componentに置けるReactのコンポーネント集です。メニューやツールチップはPopover APIで最前面に開くので、`z-index`を調整する必要はありません。',
+  en: 'React components, buttons and dialogs included, that you can place in a Server Component. Menus and tooltips open in the top layer through the Popover API, with no `z-index` to tune.',
 });
 
 export const memberFormDescription = message({
-  ja: 'スキーマを1つ書けば、HTMLの制約属性とエラーの文言、サーバーでの検証がそこから決まります。値はDOMが持つので、JavaScriptが無くても動きます。',
-  en: 'Derives HTML constraint attributes, messages, and server-side validation from one zod schema. The DOM holds the values, so it works without JavaScript.',
+  ja: 'zodのスキーマから、HTMLの制約属性とサーバーの検証を作るReactのフォームライブラリです。制約はHTMLの属性に入るので、JavaScriptの読み込み前からブラウザが入力を確かめます。',
+  en: 'A React form library that derives HTML constraint attributes and server-side validation from a zod schema. The constraints are HTML attributes, so the browser checks input before JavaScript loads.',
 });
 
 export const memberStateDescription = message({
-  ja: '状態を「どこに置くか」で宣言します。URLや履歴エントリ、Web Storage、Cookieに置く状態はスキーマで型付けし、メモリに置く状態は型の付いた箱として扱います。',
-  en: 'Declares state by where it lives — URL, history entry, localStorage, sessionStorage, a cookie, memory — with one zod schema for each boundary place and a typed box for memory, riding the Navigation API.',
+  ja: 'URLや履歴エントリ、localStorage、Cookieの値を`useState`のように読み書きします。どこに置いた値もzodのスキーマで型付けし、同じフックで扱えます。',
+  en: 'Reads and writes values in the URL, the history entry, localStorage and cookies like `useState`. Wherever a value lives, a zod schema types it and one hook handles it.',
 });
 
 export const disciplineTitle = message({
@@ -41,8 +41,8 @@ export const disciplinePlatform = message({
 });
 
 export const disciplinePlatformDescription = message({
-  ja: '主要な4つのブラウザがそろった時点（Baseline newly available）で、新しい機能を使います。そこから30か月後のwidely availableは待ちません。ポリフィルもフォールバックも持たないので、古いブラウザでは動きません。古いブラウザを切り捨てたのではなく、最初からそこで動くように作っていないのです。',
-  en: 'A feature is fair game the moment it reaches Baseline newly available — shipped in all four core browsers — rather than 30 months later at widely available. With no polyfills and no fallbacks it runs only on current browsers — it did not drop the old ones, it never ran on them.',
+  ja: '主要な4つのブラウザがすべて対応した時点（Baseline newly available）で、新しい機能を使います。その30か月後のwidely availableは待ちません。ポリフィルとフォールバックは持たないので、古いブラウザでは動きません。',
+  en: 'A feature is used as soon as all four core browsers ship it (Baseline newly available). We do not wait the further 30 months for widely available. There are no polyfills or fallbacks, so old browsers are not supported.',
 });
 
 export const disciplineReact = message({
@@ -51,8 +51,8 @@ export const disciplineReact = message({
 });
 
 export const disciplineReactDescription = message({
-  ja: 'React 19とServer Componentsを前提にし、新しい書き方が出れば取り入れます。互換性のための古い書き方は残さないので、どのパッケージでも書き方が1つに保たれます。',
-  en: 'React 19 and Server Components are assumed, and each new idiom is adopted as it lands. No compatibility path is kept around, so there is only ever one way to write it.',
+  ja: 'React 19とServer Componentsを前提にし、新しい書き方が出れば取り入れます。互換性のために古い書き方は残しません。どのパッケージも書き方は1つです。',
+  en: 'React 19 and Server Components are assumed, and new idioms are adopted as they arrive. No old idioms are kept for compatibility. Every package has one way to write each thing.',
 });
 
 export const disciplineTypes = message({
@@ -61,8 +61,8 @@ export const disciplineTypes = message({
 });
 
 export const disciplineTypesDescription = message({
-  ja: '型は、書いたものを後から確かめるためではなく、間違ったものを書けなくするために使います。ドキュメントや生成物も型から作るので、実装とずれることがありません。',
-  en: 'Types are not there to check what you wrote after the fact — they are there to make the mistake unwritable. Docs and generated artifacts are derived from the types, so they cannot drift from the implementation.',
+  ja: '間違った使い方は、書いた時点で型エラーになるように作っています。ドキュメントや生成物も型から作るので、実装と食い違いません。',
+  en: 'Wrong usage is a type error as soon as you write it. Docs and generated files are built from the types, so they match the implementation.',
 });
 
 export const disciplineAgents = message({
@@ -71,6 +71,6 @@ export const disciplineAgents = message({
 });
 
 export const disciplineAgentsDescription = message({
-  ja: 'どのパッケージも、自分のドキュメントをnpmパッケージに同梱しています。AIはインストールした版のドキュメントをそのまま読むので、別の場所へ写して同期させる手間も、版が食い違う心配もありません。',
-  en: 'Every package ships its own documentation inside its npm package, so an agent reads the exact version you installed — nothing to copy, nothing to re-sync, no version drift.',
+  ja: 'どのパッケージも、自分のドキュメントをnpmパッケージに同梱しています。エージェントは`node_modules/@k8ordo/<name>/docs/`から、インストールしたバージョンのドキュメントを読めます。',
+  en: 'Every package ships its own documentation inside the npm package. An agent reads the docs for the installed version from `node_modules/@k8ordo/<name>/docs/`.',
 });

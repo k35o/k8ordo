@@ -45,6 +45,7 @@ export const PACKAGES: PackageEntry[] = [
         sections: [
           { path: '/:locale/ui/theming', label: m.nav.theming },
           { path: '/:locale/ui/i18n', label: m.nav.i18n },
+          { path: '/:locale/ui/form', label: m.nav.uiForm },
         ],
       },
       {
@@ -86,7 +87,6 @@ export const PACKAGES: PackageEntry[] = [
           },
           { path: '/:locale/form/multi-step', label: m.form.navMultiStep },
           { path: '/:locale/form/search', label: m.form.navSearch },
-          { path: '/:locale/form/with-ui', label: m.form.navWithUi },
         ],
       },
       {
