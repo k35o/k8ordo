@@ -27,28 +27,27 @@ export function StoredPreference() {
   return <output>{preference ?? 'nothing chosen'}</output>;
 }`;
 
-const BESIDE = `import { defineLocalState } from '@k8ordo/state';
-import * as z from 'zod/mini';
-
-export const writingModeState = defineLocalState(
-  'writing-mode',
-  z.object({ mode: z.optional(z.enum(['horizontal', 'vertical'])) }),
-);`;
-
 export default function ColorSchemeStoragePage() {
   return (
     <DocPage introduction={t.introduction} path="/:locale/color-scheme/storage">
-      <DocSection
-        description={t.definitionDescription}
-        id="definition"
-        title={t.definitionTitle}
-      >
+      <DocSection id="definition" title={t.definitionTitle}>
         <CodeBlock
+          callouts={{
+            5: t.definitionKeyCallout(),
+            6: t.definitionOptionalCallout(),
+          }}
           code={DEFINITION}
           lang="ts"
           marks={{ 5: 'highlight', 6: 'highlight' }}
           title="scheme.ts"
         />
+        <p>
+          <Rich>{t.definitionStateBefore()}</Rich>
+          <LocaleAnchor path="/:locale/state/storage">
+            {m.state.navStorage()}
+          </LocaleAnchor>
+          <Rich>{t.definitionStateAfter()}</Rich>
+        </p>
         <p>
           <Rich>{t.definitionKey()}</Rich>
         </p>
@@ -57,7 +56,10 @@ export default function ColorSchemeStoragePage() {
         </p>
       </DocSection>
 
-      <DocSection description={t.rowsDescription} id="rows" title={t.rowsTitle}>
+      <DocSection id="rows" title={t.rowsTitle}>
+        <p>
+          <Rich>{t.rowsWhen()}</Rich>
+        </p>
         <ul>
           {[t.rowsNever, t.rowsDark, t.rowsLight, t.rowsSystem].map((item) => (
             <li key={item()}>
@@ -69,14 +71,15 @@ export default function ColorSchemeStoragePage() {
           <Rich>{t.rowsSame()}</Rich>
         </p>
         <p>
-          <Rich>{t.rowsDefault()}</Rich>
-        </p>
-        <p>
-          <Rich>{t.rowsTiming()}</Rich>
+          <Rich>{t.rowsDefaultBefore()}</Rich>
+          <LocaleAnchor path="/:locale/color-scheme/switcher">
+            {m.colorScheme.navSwitcher()}
+          </LocaleAnchor>
+          <Rich>{t.rowsDefaultAfter()}</Rich>
         </p>
       </DocSection>
 
-      <DocSection description={t.readDescription} id="read" title={t.readTitle}>
+      <DocSection id="read" title={t.readTitle}>
         <CodeBlock
           code={READ}
           lang="tsx"
@@ -84,19 +87,24 @@ export default function ColorSchemeStoragePage() {
           title="stored-preference.tsx"
         />
         <p>
-          <Rich>{t.readCaveat()}</Rich>
+          <Rich>{t.readHook()}</Rich>
         </p>
         <p>
-          <Rich>{t.readInline()}</Rich>
+          <Rich>{t.readScheme()}</Rich>
         </p>
         <p>
+          <Rich>{t.readInlineBefore()}</Rich>
           <LocaleAnchor path="/:locale/state/before-hydration">
-            {t.readInlineLink()}
+            {m.state.navBeforeHydration()}
           </LocaleAnchor>
+          <Rich>{t.readInlineAfter()}</Rich>
         </p>
       </DocSection>
 
-      <DocSection description={t.tabsDescription} id="tabs" title={t.tabsTitle}>
+      <DocSection id="tabs" title={t.tabsTitle}>
+        <p>
+          <Rich>{t.tabsSync()}</Rich>
+        </p>
         <Pitfall>
           <p>
             <Rich>{t.tabsSameTab()}</Rich>
@@ -104,25 +112,19 @@ export default function ColorSchemeStoragePage() {
         </Pitfall>
       </DocSection>
 
-      <DocSection
-        description={t.besideDescription}
-        id="beside"
-        title={t.besideTitle}
-      >
-        <CodeBlock code={BESIDE} lang="ts" title="src/state.ts" />
+      <DocSection id="beside" title={t.besideTitle}>
         <p>
-          <Rich>{t.besideModule()}</Rich>
+          <Rich>{t.besideOwnBefore()}</Rich>
+          <LocaleAnchor path="/:locale/state/storage">
+            {m.state.navStorage()}
+          </LocaleAnchor>
+          <Rich>{t.besideOwnAfter()}</Rich>
         </p>
         <Pitfall>
           <p>
             <Rich>{t.besideCollision()}</Rich>
           </p>
         </Pitfall>
-        <p>
-          <LocaleAnchor path="/:locale/state/places">
-            {t.besideLink()}
-          </LocaleAnchor>
-        </p>
       </DocSection>
     </DocPage>
   );

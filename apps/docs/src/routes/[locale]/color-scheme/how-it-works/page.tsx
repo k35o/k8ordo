@@ -1,11 +1,6 @@
 import { CodeBlock } from '@k8ordo/ui/code-block';
 
-import { Pitfall } from '../../../../components/callout';
-import {
-  DocPage,
-  DocSection,
-  DocSubsection,
-} from '../../../../components/doc-page';
+import { DocPage, DocSection } from '../../../../components/doc-page';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Playground } from '../../../../components/playground';
 import { Rich } from '../../../../components/rich';
@@ -76,7 +71,16 @@ export default function ColorSchemeHowItWorksPage() {
       introduction={t.introduction}
       path="/:locale/color-scheme/how-it-works"
     >
-      <DocSection description={t.ruleDescription} id="rule" title={t.ruleTitle}>
+      <DocSection id="rule" title={t.ruleTitle}>
+        <CodeBlock
+          code={RULE}
+          lang="ts"
+          marks={{ 7: 'highlight', 8: 'highlight', 9: 'highlight' }}
+          title="scheme.ts"
+        />
+        <p>
+          <Rich>{t.ruleOrder()}</Rich>
+        </p>
         <ol>
           {[t.ruleChoice, t.ruleDefault, t.ruleSystem].map((item) => (
             <li key={item()}>
@@ -84,7 +88,6 @@ export default function ColorSchemeHowItWorksPage() {
             </li>
           ))}
         </ol>
-        <CodeBlock code={RULE} lang="ts" title="scheme.ts" />
         <p>
           <Rich>{t.ruleNone()}</Rich>
         </p>
@@ -93,17 +96,7 @@ export default function ColorSchemeHowItWorksPage() {
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.readersDescription}
-        id="readers"
-        title={t.readersTitle}
-      >
-        <p>
-          <Rich>{t.readersWhy()}</Rich>
-        </p>
-        <p>
-          <Rich>{t.readersScript()}</Rich>
-        </p>
+      <DocSection id="readers" title={t.readersTitle}>
         <CodeBlock
           callouts={{ 15: t.readersScriptDefault() }}
           code={SCRIPT}
@@ -111,24 +104,26 @@ export default function ColorSchemeHowItWorksPage() {
           marks={{ 15: 'highlight' }}
         />
         <p>
-          <Rich>{t.readersHand()}</Rich>
+          <Rich>{t.readersScript()}</Rich>
         </p>
         <p>
-          <Rich>{t.readersRow()}</Rich>
+          <Rich>{t.readersWhy()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.readersHand()}</Rich>
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.firstChildDescription}
-        id="first-child"
-        title={t.firstChildTitle}
-      >
+      <DocSection id="first-child" title={t.firstChildTitle}>
         <CodeBlock
           code={FIRST_CHILD}
           lang="tsx"
           marks={{ 3: 'highlight' }}
           title="provider.tsx"
         />
+        <p>
+          <Rich>{t.firstChildOrder()}</Rich>
+        </p>
         <p>
           <Rich>{t.firstChildBody()}</Rich>
         </p>
@@ -137,14 +132,7 @@ export default function ColorSchemeHowItWorksPage() {
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.hydrationDescription}
-        id="hydration"
-        title={t.hydrationTitle}
-      >
-        <p>
-          <Rich>{t.hydrationGuess()}</Rich>
-        </p>
+      <DocSection id="hydration" title={t.hydrationTitle}>
         <CodeBlock
           code={READS_STORE}
           lang="tsx"
@@ -152,24 +140,24 @@ export default function ColorSchemeHowItWorksPage() {
           title="provider.tsx"
         />
         <p>
-          <Rich>{t.hydrationNext()}</Rich>
+          <Rich>{t.hydrationGuess()}</Rich>
         </p>
         <p>
-          <Rich>{t.hydrationSuppress()}</Rich>
+          <Rich>{t.hydrationReadsStore()}</Rich>
         </p>
         <p>
-          <Rich>{t.hydrationNoGuess()}</Rich>{' '}
+          <Rich>{t.hydrationMarkup()}</Rich>
           <LocaleAnchor path="/:locale/color-scheme/switcher">
-            {t.hydrationLink()}
+            {m.colorScheme.navSwitcher()}
           </LocaleAnchor>
+          <Rich>{t.see()}</Rich>
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.afterDescription}
-        id="after"
-        title={t.afterTitle}
-      >
+      <DocSection id="after" title={t.afterTitle}>
+        <p>
+          <Rich>{t.afterProvider()}</Rich>
+        </p>
         <ul>
           {[t.afterChoice, t.afterSystem, t.afterTabs].map((item) => (
             <li key={item()}>
@@ -177,11 +165,6 @@ export default function ColorSchemeHowItWorksPage() {
             </li>
           ))}
         </ul>
-        <Pitfall>
-          <p>
-            <Rich>{t.afterOne()}</Rich>
-          </p>
-        </Pitfall>
       </DocSection>
 
       <Playground
@@ -193,16 +176,14 @@ export default function ColorSchemeHowItWorksPage() {
         <SchemeInspector />
       </Playground>
 
-      <DocSection
-        description={t.guaranteesDescription}
-        id="guarantees"
-        title={t.guaranteesTitle}
-      >
+      <DocSection id="guarantees" title={t.guaranteesTitle}>
         <ul>
           {[
-            t.guaranteeNoFlash,
+            t.guaranteeFirstPaint,
+            t.guaranteeSameRule,
+            t.guaranteeHydration,
             t.guaranteeDefault,
-            t.guaranteeServer,
+            t.guaranteeWrite,
             t.guaranteeTabs,
           ].map((item) => (
             <li key={item()}>
@@ -210,21 +191,23 @@ export default function ColorSchemeHowItWorksPage() {
             </li>
           ))}
         </ul>
-        <DocSubsection id="limits" title={t.limitsTitle}>
-          <ul>
-            {[
-              t.limitGuess,
-              t.limitClass,
-              t.limitProperty,
-              t.limitContrast,
-              t.limitPolicy,
-            ].map((item) => (
-              <li key={item()}>
-                <Rich>{item()}</Rich>
-              </li>
-            ))}
-          </ul>
-        </DocSubsection>
+      </DocSection>
+
+      <DocSection id="non-guarantees" title={t.nonGuaranteesTitle}>
+        <ul>
+          {[
+            t.nonGuaranteeServer,
+            t.nonGuaranteeMarkup,
+            t.nonGuaranteeCsp,
+            t.nonGuaranteeTwoProviders,
+            t.nonGuaranteeSameTab,
+            t.nonGuaranteeStyles,
+          ].map((item) => (
+            <li key={item()}>
+              <Rich>{item()}</Rich>
+            </li>
+          ))}
+        </ul>
       </DocSection>
     </DocPage>
   );

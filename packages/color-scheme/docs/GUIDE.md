@@ -84,8 +84,9 @@ so once: `<ColorSchemeProvider defaultPreference="dark">`.
 The script is inline, so a policy that restricts scripts has to allow it,
 by nonce or by hash. Blocked, it costs the first paint and nothing else: the
 provider's effect still writes the class after hydration, but until then
-the page shows the default, and a visitor who chose dark sees the flash the
-script exists to prevent. Do not reach for `'unsafe-inline'`, which allows
+`<html>` has no `dark` class and the page is painted light, so a visitor who
+gets dark — by choice or by a `'dark'` default — sees the flash the script
+exists to prevent. Do not reach for `'unsafe-inline'`, which allows
 every inline script that reaches the page; name this one.
 
 `nonce` puts the answer's nonce on it — in `@k8ordo/framework`'s server

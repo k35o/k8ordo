@@ -6,6 +6,7 @@ import { Button, Code } from '@k8ordo/ui';
 import { Suspense, use, useSyncExternalStore } from 'react';
 import { browser } from 'react-dom';
 
+import { jsLiteral } from '../../../components/js-literal';
 import * as m from '../../../messages';
 
 const DARK_QUERY = '(prefers-color-scheme: dark)';
@@ -120,7 +121,7 @@ function LivePanel() {
         inputs={[
           String(systemDark),
           row === null ? 'null' : `'${row}'`,
-          JSON.stringify(stored),
+          jsLiteral(stored),
         ]}
         result={[preference, scheme, String(rootDark)]}
       />

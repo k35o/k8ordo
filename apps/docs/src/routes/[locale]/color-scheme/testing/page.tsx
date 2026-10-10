@@ -2,6 +2,7 @@ import { CodeBlock } from '@k8ordo/ui/code-block';
 
 import { Note } from '../../../../components/callout';
 import { DocPage, DocSection } from '../../../../components/doc-page';
+import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Rich } from '../../../../components/rich';
 import * as m from '../../../../messages';
 
@@ -88,19 +89,20 @@ export default defineConfig({
 export default function ColorSchemeTestingPage() {
   return (
     <DocPage introduction={t.introduction} path="/:locale/color-scheme/testing">
-      <DocSection
-        description={t.resetDescription}
-        id="reset"
-        title={t.resetTitle}
-      >
-        <CodeBlock code={RESET} lang="ts" title="color-scheme.test.tsx" />
-        <ul>
-          {[t.resetStorage, t.resetClass, t.resetRegistry].map((item) => (
-            <li key={item()}>
-              <Rich>{item()}</Rich>
-            </li>
-          ))}
-        </ul>
+      <DocSection id="reset" title={t.resetTitle}>
+        <CodeBlock
+          callouts={{
+            5: t.resetStorageCallout(),
+            6: t.resetClassCallout(),
+            7: t.resetRegistryCallout(),
+          }}
+          code={RESET}
+          lang="ts"
+          title="color-scheme.test.tsx"
+        />
+        <p>
+          <Rich>{t.resetWhy()}</Rich>
+        </p>
         <Note>
           <p>
             <Rich>{t.resetUnmount()}</Rich>
@@ -108,11 +110,7 @@ export default function ColorSchemeTestingPage() {
         </Note>
       </DocSection>
 
-      <DocSection
-        description={t.renderDescription}
-        id="render"
-        title={t.renderTitle}
-      >
+      <DocSection id="render" title={t.renderTitle}>
         <CodeBlock
           code={RENDER}
           lang="tsx"
@@ -120,15 +118,14 @@ export default function ColorSchemeTestingPage() {
           title="color-scheme.test.tsx"
         />
         <p>
+          <Rich>{t.renderWrapper()}</Rich>
+        </p>
+        <p>
           <Rich>{t.renderStorageKey()}</Rich>
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.changeDescription}
-        id="change"
-        title={t.changeTitle}
-      >
+      <DocSection id="change" title={t.changeTitle}>
         <CodeBlock
           code={CHANGE}
           lang="tsx"
@@ -136,21 +133,21 @@ export default function ColorSchemeTestingPage() {
           title="color-scheme.test.tsx"
         />
         <p>
-          <Rich>{t.changeWhy()}</Rich>
+          <Rich>{t.changeWait()}</Rich>
         </p>
         <p>
-          <Rich>{t.changeSystem()}</Rich>
+          <Rich>{t.changeCheck()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.changeSystemBefore()}</Rich>
+          <LocaleAnchor path="/:locale/color-scheme/storage">
+            {m.colorScheme.navStorage()}
+          </LocaleAnchor>
+          <Rich>{t.changeSystemAfter()}</Rich>
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.systemDescription}
-        id="system"
-        title={t.systemTitle}
-      >
-        <p>
-          <Rich>{t.systemDefault()}</Rich>
-        </p>
+      <DocSection id="system" title={t.systemTitle}>
         <CodeBlock
           code={SYSTEM_DARK}
           lang="ts"
@@ -158,15 +155,17 @@ export default function ColorSchemeTestingPage() {
           title="vite.config.ts"
         />
         <p>
+          <Rich>{t.systemResolve()}</Rich>
+        </p>
+        <p>
           <Rich>{t.systemScope()}</Rich>
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.scriptDescription}
-        id="script"
-        title={t.scriptTitle}
-      >
+      <DocSection id="script" title={t.scriptTitle}>
+        <p>
+          <Rich>{t.scriptNotRun()}</Rich>
+        </p>
         <p>
           <Rich>{t.scriptConsole()}</Rich>
         </p>

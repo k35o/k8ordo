@@ -14,6 +14,8 @@ import * as m from '../../../../messages';
 
 const t = m.colorSchemeSwitcher;
 
+const HOOK = `const { scheme, preference, setPreference } = useColorScheme();`;
+
 const TOGGLE = `'use client';
 
 import { useColorScheme } from '@k8ordo/color-scheme';
@@ -97,7 +99,7 @@ export function SchemeToggle() {
 
   return (
     <button
-      aria-label="Toggle colour scheme"
+      aria-label="Toggle color scheme"
       onClick={() => {
         setPreference(scheme === 'dark' ? 'light' : 'dark');
       }}
@@ -116,7 +118,11 @@ export default function ColorSchemeSwitcherPage() {
       introduction={t.introduction}
       path="/:locale/color-scheme/switcher"
     >
-      <DocSection description={t.hookDescription} id="hook" title={t.hookTitle}>
+      <DocSection id="hook" title={t.hookTitle}>
+        <CodeBlock code={HOOK} lang="tsx" />
+        <p>
+          <Rich>{t.hookThree()}</Rich>
+        </p>
         <ul>
           {[t.hookScheme, t.hookPreference, t.hookSetPreference].map((item) => (
             <li key={item()}>
@@ -129,36 +135,35 @@ export default function ColorSchemeSwitcherPage() {
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.toggleDescription}
-        id="toggle"
-        title={t.toggleTitle}
-      >
+      <DocSection id="toggle" title={t.toggleTitle}>
         <CodeBlock
+          callouts={{ 7: t.toggleNextCallout() }}
           code={TOGGLE}
           lang="tsx"
           marks={{ 7: 'highlight' }}
           title="scheme-toggle.tsx"
         />
         <p>
-          <Rich>{t.toggleWhyScheme()}</Rich>
+          <Rich>{t.toggleScheme()}</Rich>
         </p>
         <p>
           <Rich>{t.toggleStores()}</Rich>
         </p>
+        <p>
+          <Rich>{t.toggleHeader()}</Rich>
+        </p>
       </DocSection>
 
-      <DocSection
-        description={t.choiceDescription}
-        id="choice"
-        title={t.choiceTitle}
-      >
+      <DocSection id="choice" title={t.choiceTitle}>
         <CodeBlock
           code={CHOICE}
           lang="tsx"
           marks={{ 16: 'highlight', 18: 'highlight' }}
           title="scheme-select.tsx"
         />
+        <p>
+          <Rich>{t.choicePreference()}</Rich>
+        </p>
         <p>
           <Rich>{t.choiceSystem()}</Rich>
         </p>
@@ -167,12 +172,11 @@ export default function ColorSchemeSwitcherPage() {
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.defaultDescription}
-        id="default"
-        title={t.defaultTitle}
-      >
+      <DocSection id="default" title={t.defaultTitle}>
         <CodeBlock code={DEFAULT} lang="tsx" title="layout.tsx" />
+        <p>
+          <Rich>{t.defaultProp()}</Rich>
+        </p>
         <p>
           <Rich>{t.defaultNotStored()}</Rich>
         </p>
@@ -182,41 +186,42 @@ export default function ColorSchemeSwitcherPage() {
         <Pitfall>
           <p>
             <Rich>{t.defaultCsp()}</Rich>
+            <LocaleAnchor path="/:locale/color-scheme/csp">
+              {m.colorScheme.navCsp()}
+            </LocaleAnchor>
+            <Rich>{t.see()}</Rich>
           </p>
         </Pitfall>
       </DocSection>
 
-      <DocSection
-        description={t.beforeDescription}
-        id="before-hydration"
-        title={t.beforeTitle}
-      >
+      <DocSection id="before-hydration" title={t.beforeTitle}>
+        <p>
+          <Rich>{t.beforeGuess()}</Rich>
+        </p>
         <p>
           <Rich>{t.beforeClass()}</Rich>
         </p>
         <DocSubsection id="both" title={t.bothTitle}>
-          <p>
-            <Rich>{t.bothText()}</Rich>
-          </p>
           <CodeBlock
             code={BOTH}
             lang="tsx"
             marks={{ 11: 'highlight', 12: 'highlight' }}
             title="scheme-toggle.tsx"
           />
+          <p>
+            <Rich>{t.bothText()}</Rich>
+          </p>
           <Note>
             <p>
-              <Rich>{t.bothVariant()}</Rich>{' '}
+              <Rich>{t.bothVariant()}</Rich>
               <LocaleAnchor path="/:locale/color-scheme/styling">
-                {t.bothVariantLink()}
+                {m.colorScheme.navStyling()}
               </LocaleAnchor>
+              <Rich>{t.bothVariantAfter()}</Rich>
             </p>
           </Note>
         </DocSubsection>
         <DocSubsection id="browser" title={t.browserTitle}>
-          <p>
-            <Rich>{t.browserText()}</Rich>
-          </p>
           <CodeBlock
             code={BROWSER}
             lang="tsx"
@@ -228,6 +233,9 @@ export default function ColorSchemeSwitcherPage() {
             }}
             title="scheme-toggle.tsx"
           />
+          <p>
+            <Rich>{t.browserText()}</Rich>
+          </p>
           <p>
             <Rich>{t.browserFallback()}</Rich>
           </p>

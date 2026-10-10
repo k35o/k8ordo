@@ -7,9 +7,7 @@ import * as m from '../../../../messages';
 
 const t = m.colorSchemeStyling;
 
-const UI_CSS = `@import '@k8ordo/ui/tailwind.css';`;
-
-const UI_MARKUP = `<img alt="k8ordo" className="dark:invert" src="/logo.svg" />`;
+const HTML_CLASS = `<html class="dark">`;
 
 const TAILWIND_CSS = `@import 'tailwindcss';
 
@@ -54,49 +52,39 @@ const CONTRAST = `@media (prefers-contrast: more) {
 export default function ColorSchemeStylingPage() {
   return (
     <DocPage introduction={t.introduction} path="/:locale/color-scheme/styling">
-      <DocSection
-        description={t.classDescription}
-        id="class"
-        title={t.classTitle}
-      >
+      <DocSection id="class" title={t.classTitle}>
+        <CodeBlock code={HTML_CLASS} lang="html" />
+        <p>
+          <Rich>{t.classWhen()}</Rich>
+        </p>
         <p>
           <Rich>{t.classTiming()}</Rich>
         </p>
+        <p>
+          <Rich>{t.classUi()}</Rich>
+          <LocaleAnchor path="/:locale/ui/theming">
+            {t.uiThemingLink()}
+          </LocaleAnchor>
+          <Rich>{t.classUiAfter()}</Rich>
+        </p>
       </DocSection>
 
-      <DocSection description={t.uiDescription} id="ui" title={t.uiTitle}>
-        <CodeBlock code={UI_CSS} lang="css" title="globals.css" />
-        <p>
-          <Rich>{t.uiBoth()}</Rich>
-        </p>
-        <p>
-          <Rich>{t.uiVariants()}</Rich>
-        </p>
-        <CodeBlock code={UI_MARKUP} lang="tsx" title="logo.tsx" />
-      </DocSection>
-
-      <DocSection
-        description={t.tailwindDescription}
-        id="tailwind"
-        title={t.tailwindTitle}
-      >
+      <DocSection id="tailwind" title={t.tailwindTitle}>
         <CodeBlock
+          callouts={{ 3: t.tailwindCallout() }}
           code={TAILWIND_CSS}
           lang="css"
           marks={{ 3: 'add' }}
           title="globals.css"
         />
         <p>
-          <Rich>{t.tailwindSame()}</Rich>
+          <Rich>{t.tailwindVariant()}</Rich>
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.plainDescription}
-        id="plain"
-        title={t.plainTitle}
-      >
+      <DocSection id="plain" title={t.plainTitle}>
         <CodeBlock
+          callouts={{ 7: t.plainCallout() }}
           code={PLAIN_CSS}
           lang="css"
           marks={{ 7: 'highlight' }}
@@ -107,20 +95,16 @@ export default function ColorSchemeStylingPage() {
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.propertyDescription}
-        id="property"
-        title={t.propertyTitle}
-      >
-        <p>
-          <Rich>{t.propertyUi()}</Rich>
-        </p>
+      <DocSection id="property" title={t.propertyTitle}>
         <CodeBlock
           code={PROPERTY}
           lang="css"
           marks={{ 2: 'remove', 3: 'add', 6: 'add', 7: 'add', 8: 'add' }}
           title="globals.css"
         />
+        <p>
+          <Rich>{t.propertyWhat()}</Rich>
+        </p>
         <p>
           <Rich>{t.propertyWhy()}</Rich>
         </p>
@@ -129,22 +113,17 @@ export default function ColorSchemeStylingPage() {
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.contrastDescription}
-        id="contrast"
-        title={t.contrastTitle}
-      >
-        <p>
-          <Rich>{t.contrastUi()}</Rich>
-        </p>
+      <DocSection id="contrast" title={t.contrastTitle}>
+        <CodeBlock code={CONTRAST} lang="css" title="globals.css" />
         <p>
           <Rich>{t.contrastOwn()}</Rich>
         </p>
-        <CodeBlock code={CONTRAST} lang="css" title="globals.css" />
         <p>
+          <Rich>{t.contrastUi()}</Rich>
           <LocaleAnchor path="/:locale/ui/theming">
-            {t.contrastLink()}
+            {t.uiThemingLink()}
           </LocaleAnchor>
+          <Rich>{t.contrastAfter()}</Rich>
         </p>
       </DocSection>
     </DocPage>

@@ -2,6 +2,7 @@ import { CodeBlock } from '@k8ordo/ui/code-block';
 
 import { ApiEntry } from '../../../../components/api-entry';
 import { DocPage } from '../../../../components/doc-page';
+import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Rich } from '../../../../components/rich';
 import * as m from '../../../../messages';
 
@@ -110,7 +111,11 @@ export default function ColorSchemeReferencePage() {
       >
         <CodeBlock code={HOOK_EXAMPLE} lang="tsx" title="scheme-toggle.tsx" />
         <p className="leading-relaxed">
-          <Rich>{t.hookExample()}</Rich>
+          <Rich>{t.hookExampleBefore()}</Rich>
+          <LocaleAnchor path="/:locale/color-scheme/switcher">
+            {m.colorScheme.navSwitcher()}
+          </LocaleAnchor>
+          <Rich>{t.hookExampleAfter()}</Rich>
         </p>
       </ApiEntry>
 
@@ -166,6 +171,13 @@ export default function ColorSchemeReferencePage() {
         summary={t.hashSummary}
       >
         <CodeBlock code={HASH_EXAMPLE} lang="ts" title="vite.config.ts" />
+        <p className="leading-relaxed">
+          <Rich>{t.hashExampleBefore()}</Rich>
+          <LocaleAnchor path="/:locale/color-scheme/csp">
+            {m.colorScheme.navCsp()}
+          </LocaleAnchor>
+          <Rich>{t.hashExampleAfter()}</Rich>
+        </p>
       </ApiEntry>
 
       <ApiEntry
