@@ -23,7 +23,7 @@ catalog:
   '@openuidev/react-lang': 0.3.0
   '@tailwindcss/postcss': 4.3.3
   '@tailwindcss/vite': 4.3.3
-  '@types/node': 24.13.6
+  '@types/node': 24.19.1
   '@types/react': 19.3.0
   '@types/react-dom': 19.3.0
   '@vitejs/plugin-basic-ssl': 2.3.0
@@ -41,10 +41,10 @@ catalog:
   '@vitest/utils': 5.0.2
   # @k8ordo/ui/ai-sdk の peer。example が使う @ai-sdk/react は ai を exact で
   # 持つので、上げるときは同じ ai を持つ @ai-sdk/react と揃えて 1 コピーに保つ。
-  ai: 7.0.112
+  ai: 7.0.127
   playwright: 1.63.0
   postcss: 8.5.28
-  publint: 0.3.24
+  publint: 0.3.25
   react: 19.3.0
   react-dom: 19.3.0
   server-only: 0.0.1
@@ -69,7 +69,7 @@ minimumReleaseAge: 10080
 # tsc が "Excessive stack depth" を起こして typecheck が落ちる。単一バージョンに
 # 強制して型グラフのコピーを 1 つに保つ (types のみのパッケージでランタイム影響なし)。
 overrides:
-  '@oxc-project/types': 0.151.0
+  '@oxc-project/types': 0.152.0
 
   # vitest は vite-plus が exact pin (0.3.2 時点でも 4.1.11) で連れてくる依存で、
   # `vp test` が起動するのは常に vite-plus 側の 1 本。catalog だけを 5 に上げても
