@@ -1,108 +1,118 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: 'アプリが扱うロケールは、`defineLocales`で1か所に書きます。URLの区間や`[locale]`のスキーマ、静的に書き出すパス、文言の型は、どれもこの値から決まります。このページでは、ロケールごとに書く`timeZone`と`dir`、既定のロケールの選び方、定義が返すものを説明します。',
-  en: 'The locales an app supports are written once, with `defineLocales`. The URL segment, the `[locale]` schema, the paths a static build writes and the type of every message all come from that value. This page covers the `timeZone` and `dir` each locale states, choosing the default, and what the definition returns.',
+  ja: 'アプリが扱うロケールを、`defineLocales`で1か所に定義できるようになります。ロケールごとに`timeZone`と`dir`を書き、既定のロケールを1つ選びます。',
+  en: 'You will be able to define the locales an app supports in one place, with `defineLocales`. Each locale states a `timeZone` and a `dir`, and one of them is the default.',
 });
 
 export const defineTitle = message({
-  ja: 'ロケールの一覧を書く',
-  en: 'List the locales',
+  ja: 'ロケールの一覧',
+  en: 'Locale list',
 });
 
-export const defineDescription = message({
-  ja: '`defineLocales`には、ロケールのタグをキーにしたオブジェクトを渡します。キーはリテラル型のまま推論されるので、`as const`は要りません。',
-  en: 'Hand `defineLocales` an object keyed by locale tag. The keys are inferred as literal types, so no `as const` is needed.',
+export const defineDefaultCallout = message({
+  ja: '既定のロケール',
+  en: 'The default locale',
 });
 
-export const defineTag = message({
-  ja: 'タグはBCP 47で書きます。書いた綴りがそのままURLの区間になるので、`en-US`と書けば`/en-US/…`です。URLに出したい綴りで書いてください。',
-  en: 'Tags are BCP 47, and the spelling you write is the URL segment: `en-US` gives `/en-US/…`. Spell each tag the way it should appear in URLs.',
+export const defineRegisterCallout = message({
+  ja: 'タグの和集合を`Register`に登録する',
+  en: 'Registers the tag union',
 });
 
-export const defineLocaleType = message({
-  ja: '`LocaleOf<typeof locales>`で、タグの和集合を型として取り出せます。`Register`に登録するのも、この型です。',
-  en: '`LocaleOf<typeof locales>` is the union of the tags as a type, and it is what goes into `Register`.',
+export const defineObject = message({
+  ja: '`defineLocales`には、ロケールのタグをキーにしたオブジェクトを渡します。タグはBCP 47で書きます。書いた綴りがそのままURLの区間になり、`en-US`なら`/en-US/…`です。',
+  en: 'Pass `defineLocales` an object keyed by locale tag. Tags are BCP 47, and the spelling you write is the URL segment: `en-US` gives `/en-US/…`.',
+});
+
+export const defineType = message({
+  ja: 'キーはリテラル型のまま推論されるので、`as const`は要りません。`LocaleOf<typeof locales>`はタグの和集合の型です。',
+  en: 'Keys are inferred as literal types, so no `as const` is needed. `LocaleOf<typeof locales>` is the union of the tags.',
+});
+
+export const defineRegister = message({
+  ja: '`@k8ordo/framework`のアプリでは、この`locales`のexportからフレームワークが`Register`を生成するので、宣言は書きません。詳しくは`@k8ordo/framework`の',
+  en: 'An `@k8ordo/framework` app leaves the declaration out: the framework generates `Register` from this `locales` export. See `@k8ordo/framework`’s ',
 });
 
 export const definePitfall = message({
-  ja: '`defineLocales`は、アプリで1回だけ呼びます。後から定義した集合が、それ以降のすべての文言が読む集合になるためです。集合は1つのモジュールで定義してexportし、ほかの場所ではimportしてください。',
-  en: 'Call `defineLocales` once per app: the last set defined is the one every message reads from then on. Define the set in one module, export it, and import it everywhere else.',
+  ja: '`defineLocales`はアプリで1回だけ呼びます。2回呼ぶと、後から定義した一覧で前の一覧が置き換わります。1つのモジュールで定義してexportし、ほかの場所ではimportしてください。',
+  en: 'Call `defineLocales` once per app. A second call replaces the list defined before it. Define it in one module, export it, and import it everywhere else.',
 });
 
 export const defaultTitle = message({
-  ja: '既定のロケールを決める',
-  en: 'Choose the default',
+  ja: '既定のロケール',
+  en: 'Default locale',
 });
 
-export const defaultDescription = message({
-  ja: '既定のロケールは、何もロケールを指名していないときに使うロケールです。第2引数の`default`で選び、省くと先頭に書いたロケールになります。',
-  en: 'The default locale is the one used when nothing names a locale. Pick it with `default` in the second argument; without it, the locale written first is the default.',
+export const defaultChoose = message({
+  ja: '既定のロケールは、第2引数の`default`で選びます。省くと先頭に書いたロケールになり、`locales.default`の型はタグの和集合になります。',
+  en: 'The default locale is chosen with `default` in the second argument. Without it, the locale written first is the default, and `locales.default` is typed as the whole union.',
 });
 
-export const defaultWhen = message({
-  ja: '既定のロケールが使われるのは、URLにロケールの区間が無いときと、交渉でどのロケールも一致しなかったときです。サーバーで、`[locale]`の描画の外から文言を呼んだときも、既定のロケールになります。',
-  en: 'The default is used when the URL has no locale segment and when negotiation matches no locale. A message called on the server outside a `[locale]` render is in the default too.',
+export const defaultUsedLead = message({
+  ja: '既定のロケールは、次のときに使われます。',
+  en: 'The default is used when:',
 });
 
-export const defaultType = message({
-  ja: '`default`の型は一覧のタグの和集合なので、一覧に無いタグを書くと型エラーになります。',
-  en: '`default` is typed as the union of the listed tags, so a tag outside the list does not compile.',
-});
+export const defaultUsedList = [
+  message({
+    ja: 'ブラウザで、URLの先頭の区間がロケールでないとき',
+    en: 'in the browser, the first segment of the URL is not a locale',
+  }),
+  message({
+    ja: '言語の選択でどのロケールも一致しなかったとき',
+    en: 'negotiation matches no locale',
+  }),
+  message({
+    ja: 'サーバーで、`run`も`paramsSchema`もロケールを設定していないとき',
+    en: 'on the server, neither `run` nor `paramsSchema` has set a locale',
+  }),
+] as const;
 
 export const timeZoneTitle = message({
-  ja: '日付のタイムゾーンを決める',
-  en: 'Choose the time zone for dates',
+  ja: 'タイムゾーン',
+  en: 'Time zone',
 });
 
-export const timeZoneDescription = message({
-  ja: '`timeZone`は、そのロケールで日付を表示するIANAのタイムゾーンです。実行環境のタイムゾーンには任せず、ロケールごとに必ず書きます。',
-  en: '`timeZone` is the IANA time zone the locale’s dates are shown in. It is never left to the runtime: every locale states one.',
+export const timeZoneWhat = message({
+  ja: '`timeZone`は、そのロケールの日付を表示するIANAのタイムゾーンです。日付の書き方は',
+  en: '`timeZone` is the IANA time zone the locale’s dates are shown in. How dates are written is covered in ',
 });
 
 export const timeZoneWhy = message({
-  ja: '実行環境のタイムゾーンは、サーバーではサーバーのもの、ブラウザでは訪問者のものです。それに任せると、サーバーが書いたHTMLとブラウザでの描画で時刻がずれ、日付の変わり目では日付まで変わってしまいます。ロケールに1つ決めておけば、両側が同じタイムゾーンで書きます。',
-  en: 'The runtime’s own time zone is the server’s on the server and the visitor’s in the browser. Left to it, a time reads differently in the server’s HTML and in the browser, and near midnight even the date changes. With one zone per locale, both sides write in the same one.',
+  ja: '実行環境のタイムゾーンは、サーバーではサーバーの設定、ブラウザでは訪問者の設定に従います。これに任せると、サーバーが書いたHTMLとハイドレーション時の描画とで時刻が食い違います。ロケールごとに書いておけば、サーバーとブラウザが同じタイムゾーンで日付を書きます。',
+  en: 'The runtime’s zone is the server’s on the server and the visitor’s in the browser. Using it, the server’s HTML and the hydrating render can show different times. With a zone per locale, the server and the browser write dates in the same zone.',
 });
 
 export const timeZoneChoose = message({
-  ja: 'どのタイムゾーンにするかは、プロダクトが決めることです。東京で開くイベントのサイトなら、英語のページでも`Asia/Tokyo`がふさわしいかもしれません。訪問者ごとのタイムゾーンで見せたいものは、ブラウザだけで描く部分に置きます。',
-  en: 'Which zone is a product decision: a site about events in Tokyo may well want `Asia/Tokyo` on its English pages too. Anything that should follow each visitor’s own zone belongs in a part that renders in the browser only.',
-});
-
-export const timeZoneMore = message({
-  ja: '日付の書き方は、「日付や数値を書式化する」で説明します。',
-  en: '“Format dates and numbers” shows how dates are written.',
+  ja: 'タイムゾーンは、サイトの内容に合わせて選びます。東京のイベントのサイトなら、英語のページでも`Asia/Tokyo`でかまいません。',
+  en: 'Pick the zone that fits what the site is about. A site about events in Tokyo may show its English pages in `Asia/Tokyo` too.',
 });
 
 export const dirTitle = message({
-  ja: '文字の向きを決める',
-  en: 'Choose the text direction',
+  ja: '文字の向き',
+  en: 'Text direction',
 });
 
-export const dirDescription = message({
-  ja: '`dir`は、そのロケールの文字が流れる向きです。`ltr`か`rtl`のどちらかを書き、`<html dir>`に使います。',
-  en: '`dir` is the direction the locale’s text runs in, `ltr` or `rtl`, for `<html dir>`.',
-});
-
-export const dirWhy = message({
-  ja: '`Intl.Locale`の`getTextInfo()`を使えば導けそうですが、まだすべてのブラウザにはありません。そのため、導かずに書く形にしています。',
-  en: '`Intl.Locale`’s `getTextInfo()` could derive it, but it has not reached every browser, so it is declared instead.',
+export const dirWhat = message({
+  ja: '`dir`は、そのロケールの文字の向きで、`ltr`か`rtl`を書きます。`Intl.Locale`の`getTextInfo()`はまだすべてのブラウザでは使えないので、タグから自動では求めません。',
+  en: '`dir` is the direction the locale’s text runs in: `ltr` or `rtl`. `Intl.Locale`’s `getTextInfo()` has not reached every browser, so the direction is not derived from the tag.',
 });
 
 export const dirHtml = message({
-  ja: 'ルートレイアウトは、URLから読んだロケールの`dir`を`<html>`に書きます。書き方は「URLにロケールを置く」で説明します。',
-  en: 'The root layout writes the `dir` of the URL’s locale onto `<html>`; “Put the locale in the URL” shows how.',
+  ja: '`<html>`には、今のロケールの`dir`を書きます。書き方は',
+  en: 'Write the current locale’s `dir` onto `<html>`. See ',
 });
 
 export const errorsTitle = message({
-  ja: '定義の誤りを見つける',
-  en: 'Catch a wrong definition',
+  ja: '拒まれる定義',
+  en: 'Rejected definitions',
 });
 
-export const errorsDescription = message({
-  ja: '定義に誤りがあると、使われたときではなく、`defineLocales`を呼んだ時点で`TypeError`を投げます。文面は、どれも`defineLocales:`で始まります。',
-  en: 'A wrong definition throws a `TypeError` where `defineLocales` is called, not later where the set is used. Every message starts with `defineLocales:`.',
+export const errorsWhen = message({
+  ja: '定義に誤りがあると、`defineLocales`を呼んだ時点で`TypeError`になります。エラー文はどれも`defineLocales:`で始まります。',
+  en: 'A wrong definition throws a `TypeError` as soon as `defineLocales` is called. Every message starts with `defineLocales:`.',
 });
 
 export const errorsList = [
@@ -129,8 +139,8 @@ export const errorsList = [
 ] as const;
 
 export const errorsTypes = message({
-  ja: '一覧に無い`default`と、欠けた`timeZone`、`ltr`と`rtl`以外の`dir`は、型エラーにもなります。BCP 47ではないタグと、実行環境が知らないタイムゾーンは型では見つからないので、この検査だけが見つけます。',
-  en: 'A `default` outside the list, a missing `timeZone` and a `dir` other than `ltr` and `rtl` are type errors as well. A tag that is not BCP 47 and a time zone the runtime does not know pass the types, so this check is the only thing that catches them.',
+  ja: '一覧に無い`default`、欠けた`timeZone`、`ltr`と`rtl`以外の`dir`は型エラーにもなります。BCP 47ではないタグと実行環境が知らないタイムゾーンは型では見つからず、この検査だけが見つけます。',
+  en: 'A `default` outside the list, a missing `timeZone` and a `dir` other than `ltr` and `rtl` are type errors as well. A tag that is not BCP 47 and a time zone the runtime does not know pass the types; only this check catches them.',
 });
 
 export const membersTitle = message({
@@ -138,51 +148,62 @@ export const membersTitle = message({
   en: 'What the definition returns',
 });
 
-export const membersDescription = message({
-  ja: '`defineLocales`が返す値には、一覧そのものと、一覧から作った道具がまとまっています。使う場所では、この`locales`をimportするだけです。',
-  en: 'What `defineLocales` returns holds the list itself and everything made from it. Wherever it is needed, import `locales`.',
+export const membersLead = message({
+  ja: '`defineLocales`が返す値には、一覧と、一覧から作った関数がまとまっています。使う場所では、この`locales`をimportします。',
+  en: 'The value `defineLocales` returns holds the list and the functions made from it. Wherever one is needed, import `locales`.',
 });
 
-export const membersList = [
-  message({
-    ja: '`all`：書いた順に並んだタグの配列',
-    en: '`all`: the tags, in the order written',
-  }),
-  message({
-    ja: '`definitions`：ロケールごとの`{ timeZone, dir }`。渡したオブジェクトそのもの',
-    en: '`definitions`: each locale’s `{ timeZone, dir }`, the object as given',
-  }),
-  message({
-    ja: '`default`：既定のロケール',
-    en: '`default`: the default locale',
-  }),
-  message({
-    ja: '`is(value)`：一覧に含まれるかを確かめる型ガード。大文字と小文字を区別する',
-    en: '`is(value)`: membership, as a type guard; case-sensitive',
-  }),
-  message({
-    ja: '`negotiate`と`negotiateRequest`：訪問者の希望からロケールを選ぶ（「最初の言語を選ぶ」）',
-    en: '`negotiate` and `negotiateRequest`: pick a locale from what the visitor asks for (“Choose the first language”)',
-  }),
-  message({
-    ja: '`localize`と`delocalize`：pathnameにロケールの区間を付け外しする（「言語を切り替える」）',
-    en: '`localize` and `delocalize`: put the locale segment on a pathname and take it off (“Switch languages”)',
-  }),
-  message({
-    ja: '`paramsSchema`と`getLocale`、`run`：描画中のロケールを決めて読む（「URLにロケールを置く」）',
-    en: '`paramsSchema`, `getLocale` and `run`: set and read the locale of the render (“Put the locale in the URL”)',
-  }),
-  message({
-    ja: '`paths`：静的に書き出すpathnameを作る（「静的に書き出す」）',
-    en: '`paths`: the pathnames a static build writes (“Static builds”)',
-  }),
-  message({
-    ja: '`dateTimeFormat`などの5つ：今のロケールの`Intl`を返す（「日付や数値を書式化する」）',
-    en: '`dateTimeFormat` and four more: `Intl` for the current locale (“Format dates and numbers”)',
-  }),
-] as const;
+export const membersAll = message({
+  ja: '`all`：書いた順に並んだタグの配列',
+  en: '`all`: the tags, in the order written',
+});
+
+export const membersDefinitions = message({
+  ja: '`definitions`：ロケールごとの`{ timeZone, dir }`を持つ、渡したオブジェクトそのもの',
+  en: '`definitions`: each locale’s `{ timeZone, dir }`, the object as given',
+});
+
+export const membersDefault = message({
+  ja: '`default`：既定のロケール',
+  en: '`default`: the default locale',
+});
+
+export const membersIs = message({
+  ja: '`is(value)`：一覧に含まれるかを確かめる型ガード（大文字と小文字を区別）',
+  en: '`is(value)`: membership as a type guard; case-sensitive',
+});
+
+export const membersNegotiate = message({
+  ja: '`negotiate`と`negotiateRequest`：訪問者の希望からロケールを選ぶ関数。詳しくは',
+  en: '`negotiate` and `negotiateRequest`: functions that pick a locale from the visitor’s preferences. See ',
+});
+
+export const membersLocalize = message({
+  ja: '`localize`と`delocalize`：pathnameにロケールの区間を付け外しする関数。詳しくは',
+  en: '`localize` and `delocalize`: functions that put the locale segment on a pathname and take it off. See ',
+});
+
+export const membersParams = message({
+  ja: '`paramsSchema`と`run`、`getLocale`：今のロケールを設定して読むためのもの。詳しくは',
+  en: '`paramsSchema`, `run` and `getLocale`: set the current locale and read it. See ',
+});
+
+export const membersPaths = message({
+  ja: '`paths`：`/:locale`を含むパターンを、ロケールごとのpathnameに展開する関数。`@k8ordo/framework`での使い方は',
+  en: '`paths`: expands each pattern with `/:locale` into one pathname per locale. For its use in `@k8ordo/framework`, see ',
+});
+
+export const membersFormat = message({
+  ja: '`dateTimeFormat`など5つ：今のロケールで作った`Intl`のフォーマッタ。詳しくは',
+  en: '`dateTimeFormat` and four more: `Intl` formatters for the current locale. See ',
+});
 
 export const membersMore = message({
-  ja: '引数と戻り値の型は、「API」にまとめています。',
-  en: 'The argument and return types are listed under “API”.',
+  ja: '引数と戻り値の型は',
+  en: 'The argument and return types are listed under ',
+});
+
+export const see = message({
+  ja: 'を見てください。',
+  en: '.',
 });

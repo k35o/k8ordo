@@ -1,103 +1,108 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: 'よくつまずく症状と、その原因、直し方をまとめています。',
-  en: 'Common symptoms, what causes them, and how to fix them.',
+  ja: 'よくある症状の原因と直し方です。エラー文で探すときは、ページの中を検索してください。',
+  en: 'Common symptoms, their causes and their fixes. To look up an error, search this page for its wording.',
+});
+
+export const see = message({
+  ja: 'を見てください。',
+  en: '.',
 });
 
 export const missingTitle = message({
-  ja: '「no text for "en"」というエラーが出る',
-  en: 'A “no text for "en"” error is thrown',
+  ja: '`no text for "en"`',
+  en: '`no text for "en"`',
 });
 
 export const missingCause = message({
-  ja: '型をすり抜けて、そのロケールの文が無い文言を読んでいます。JavaScriptで書いた文言や、`as`で型を通した文言、`Register`を登録する前に書いた文言で起こります。',
-  en: 'A message with no text for that locale got past the types and was read. It happens to a message written in JavaScript, forced through with `as`, or written before `Register` was merged.',
+  ja: '文言に、そのロケールの文がありません。ロケールの型が`Register`に登録される前に書いた文言や、`as`で型を通した文言、JavaScriptで書いた文言で起こります。',
+  en: 'A message has no text for that locale. It happens to a message written before `Register` carried the locale type, forced through with `as`, or written in JavaScript.',
 });
 
 export const missingFix = message({
-  ja: 'エラーの文面に、欠けているロケールと、文言が持っているロケールが出ています。欠けたロケールの文を足してください。`Register`を登録しておけば、同じ欠けは宣言の時点で型エラーになります。',
-  en: 'The error names the missing locale and the ones the message has. Add the missing text. With `Register` merged, the same gap is a type error at the declaration.',
+  ja: 'エラー文に、欠けているロケールと文言が持つロケールが出ています。欠けているロケールの文を足します。ロケールの型が`Register`に登録されていれば、宣言の時点で型エラーになります。',
+  en: 'The error names the missing locale and the ones the message has. Add the missing text. With the locale type in `Register`, this is a type error at the declaration.',
 });
 
 export const untypedTitle = message({
-  ja: 'ロケールが欠けても型エラーにならない',
-  en: 'A missing locale is not a type error',
+  ja: '型エラーにならない文の不足',
+  en: 'A missing locale that is not a type error',
 });
 
 export const untypedCause = message({
-  ja: '`Register`にロケールの型が登録されていません。登録する前は`RegisteredLocale`が`string`なので、どのロケールの組み合わせでも通ります。',
-  en: '`Register` does not carry the locales’ type. Until it does, `RegisteredLocale` is `string`, and any set of locales passes.',
+  ja: '`Register`にロケールの型が登録されていません。登録されるまで`RegisteredLocale`は`string`なので、どのロケールの組み合わせでも通ります。',
+  en: '`Register` does not carry the locale type. Until it does, `RegisteredLocale` is `string`, and any combination of locales passes.',
 });
 
 export const untypedFix = message({
-  ja: "集合を定義するモジュールに、`declare module '@k8ordo/i18n'`で`Register`を書きます。そのモジュールがTypeScriptのプロジェクトに含まれているかも確かめてください。",
-  en: "Write `Register` with `declare module '@k8ordo/i18n'` in the module that defines the set, and check that the module is part of the TypeScript project.",
+  ja: "ロケールの一覧を定義するモジュールに、`declare module '@k8ordo/i18n'`で`Register`を書きます。そのモジュールがTypeScriptのプロジェクトに含まれているかも確かめます。`@k8ordo/framework`のアプリでは`Register`が生成されます。生成される条件は`@k8ordo/framework`の",
+  en: "Write `Register` with `declare module '@k8ordo/i18n'` in the module that defines the locale set, and check that the module is part of the TypeScript project. In an `@k8ordo/framework` app `Register` is generated; for when, see `@k8ordo/framework`’s ",
 });
 
 export const frozenTitle = message({
-  ja: '言語を切り替えても、一部の文言だけが変わらない',
-  en: 'Some text does not change with the language',
+  ja: '言語を切り替えても変わらない文言',
+  en: 'Text that does not change with the language',
 });
 
 export const frozenCause = message({
-  ja: 'モジュールのトップレベルで文言を呼び、文字列にしています。文言は呼ばれた瞬間のロケールを読むので、モジュールを読み込んだときのロケールのまま固定されます。',
-  en: 'The message is called at the top of a module and kept as a string. A message reads the locale at the moment it is called, so the string stays in whatever locale was current when the module loaded.',
+  ja: 'モジュールのトップレベルで文言を呼び、文字列にしています。文言は呼ばれた時点のロケールを読むので、モジュールを読み込んだときのロケールで固定されます。',
+  en: 'The message is called at module scope and kept as a string. A message reads the locale at the moment it is called, so the string stays in the locale current when the module loaded.',
 });
 
 export const frozenFix = message({
-  ja: '文言を`Message`のまま持ち、描くコンポーネントの中で呼びます。',
+  ja: '文言は`Message`のまま持ち、描画するコンポーネントの中で呼びます。',
   en: 'Keep the `Message` itself, and call it in the component that renders it.',
 });
 
 export const dateTitle = message({
-  ja: '日付がサーバーとブラウザで食い違う',
-  en: 'A date differs between the server and the browser',
+  ja: 'サーバーとブラウザで食い違う日付',
+  en: 'A date that differs between the server and the browser',
 });
 
 export const dateCause = message({
-  ja: '`timeZone`を指定しない`new Intl.DateTimeFormat`は、実行環境のタイムゾーンで書きます。サーバーとブラウザでタイムゾーンが違うと、日付や時刻がずれて、ハイドレーションで食い違います。',
-  en: 'A `new Intl.DateTimeFormat` without a `timeZone` writes in the runtime’s own zone. When the server’s zone and the browser’s differ, the date or time shifts, and hydration disagrees.',
+  ja: '`timeZone`を指定しない`new Intl.DateTimeFormat`は、実行環境のタイムゾーンで日付を整形します。サーバーとブラウザのタイムゾーンが違うと、日付がずれてハイドレーションで食い違います。',
+  en: 'A `new Intl.DateTimeFormat` without a `timeZone` formats in the runtime’s own time zone. When the server and the browser are in different time zones, the date shifts and hydration disagrees.',
 });
 
 export const dateFix = message({
-  ja: '`locales.dateTimeFormat`で書きます。ロケールの`timeZone`で書くので、両側で同じ日付になります。訪問者のタイムゾーンで見せたいものは、ブラウザだけで描く部分に置きます。',
-  en: 'Write it with `locales.dateTimeFormat`, which uses the locale’s `timeZone`, so both sides agree. Anything that should follow the visitor’s own zone belongs in a part that renders in the browser only.',
+  ja: '`locales.dateTimeFormat`で整形します。ロケールの`timeZone`を使うので、サーバーとブラウザで同じ日付になります。訪問者のタイムゾーンで見せたいものは、ブラウザだけで描画する部分に置きます。',
+  en: 'Format it with `locales.dateTimeFormat`. It uses the locale’s `timeZone`, so the server and the browser agree. Anything that should follow the visitor’s own zone belongs in a part that renders only in the browser.',
 });
 
 export const schemaTitle = message({
-  ja: 'ページが既定のロケールで描かれる',
-  en: 'Pages render in the default locale',
+  ja: '既定のロケールで描画されるページ',
+  en: 'Pages rendered in the default locale',
 });
 
 export const schemaCause = message({
-  ja: '`[locale]`のレイアウトが`paramsSchema`をexportしていません。サーバーはスキーマが受け付けたロケールしか読まないので、`/en/…`でも既定のロケールで描かれます。一覧に無い`/fr/…`も、404になりません。',
-  en: 'The `[locale]` layout does not export `paramsSchema`. The server reads only a locale a schema accepted, so even `/en/…` renders in the default, and `/fr/…`, outside the list, is no 404.',
+  ja: 'サーバーで、`run`も`paramsSchema`もロケールを設定していません。サーバーの文言はURLを読まないので、`/en/…`でも既定のロケールで描画されます。',
+  en: 'On the server, neither `run` nor `paramsSchema` has set a locale. Messages on the server do not read the URL, so even `/en/…` renders in the default locale.',
 });
 
 export const schemaFix = message({
-  ja: "Server Componentのレイアウトに`export const { paramsSchema } = locales`と書きます。`'use client'`を付けたモジュールからexportしても、スキーマとしては届きません。",
-  en: "Write `export const { paramsSchema } = locales` in a Server Component layout. Exported from a `'use client'` module, it does not reach the framework as a schema.",
+  ja: '文言を呼ぶ処理を`locales.run`で囲むか、その前に`paramsSchema`でロケールを検証します。`@k8ordo/framework`では、`[locale]`のレイアウトから`paramsSchema`をexportします。詳しくは`@k8ordo/framework`の',
+  en: 'Wrap the code that calls messages in `locales.run`, or validate the locale with `paramsSchema` before it. In `@k8ordo/framework`, export `paramsSchema` from the `[locale]` layout. See `@k8ordo/framework`’s ',
 });
 
 export const storageTitle = message({
-  ja: '「no AsyncLocalStorage to scope a locale to」というエラーが出る',
-  en: 'A “no AsyncLocalStorage to scope a locale to” error is thrown',
+  ja: '`no AsyncLocalStorage to scope a locale to`',
+  en: '`no AsyncLocalStorage to scope a locale to`',
 });
 
 export const storageCause = message({
-  ja: 'サーバーのランタイムが、`process.getBuiltinModule`で`AsyncLocalStorage`を渡せません。受け付けたロケールを描画に結び付けられないので、既定のロケールで描く代わりにエラーを投げています。',
-  en: 'The server runtime cannot hand out `AsyncLocalStorage` through `process.getBuiltinModule`. With nowhere to tie an accepted locale to the render, it throws rather than render in the default.',
+  ja: 'サーバーのランタイムに`process.getBuiltinModule`が無く、`AsyncLocalStorage`を取れません。ロケールを非同期コンテキストに設定できないので、既定のロケールで描画する代わりにエラーになります。',
+  en: 'The server runtime has no `process.getBuiltinModule`, so `AsyncLocalStorage` cannot be reached. Without it, the locale cannot be scoped to an async context, so `run` and `paramsSchema` fail with this error instead of going on in the default locale.',
 });
 
 export const storageFix = message({
-  ja: "`process.getBuiltinModule('node:async_hooks')`を持つランタイムで動かします。`@k8ordo/framework`が求めるNode 24は、これを持っています。",
-  en: "Run on a runtime with `process.getBuiltinModule('node:async_hooks')`. Node 24, which `@k8ordo/framework` requires, has it.",
+  ja: "`process.getBuiltinModule('node:async_hooks')`を持つランタイムで動かします。Node 24にはあります。",
+  en: "Run on a runtime with `process.getBuiltinModule('node:async_hooks')`. Node 24 has it.",
 });
 
 export const runTitle = message({
-  ja: '「in the browser the URL is the locale」というエラーが出る',
-  en: 'An “in the browser the URL is the locale” error is thrown',
+  ja: '`in the browser the URL is the locale`',
+  en: '`in the browser the URL is the locale`',
 });
 
 export const runCause = message({
@@ -106,88 +111,73 @@ export const runCause = message({
 });
 
 export const runFix = message({
-  ja: 'ブラウザでロケールを変えるには、そのロケールのURLへ移動します。テストでは、`history.replaceState`でpathnameを変えます。',
-  en: 'In a browser, change the locale by navigating to that locale’s URL. In a test, change the pathname with `history.replaceState`.',
+  ja: 'ブラウザでロケールを変えるには、そのロケールのURLへ移動します。テストでは`history.replaceState`でpathnameを変えます。書き方は',
+  en: 'In a browser, change the locale by navigating to that locale’s URL. In a test, change the pathname with `history.replaceState`. See ',
 });
 
 export const uiEnglishTitle = message({
-  ja: '@k8ordo/uiのコンポーネントだけが英語になる',
-  en: 'Only @k8ordo/ui’s components speak English',
+  ja: '英語のままの`@k8ordo/ui`のコンポーネント',
+  en: '`@k8ordo/ui` components left in English',
 });
 
 export const uiEnglishCause = message({
-  ja: '集合を定義するモジュールが、ブラウザで読み込まれていません。集合が無い環境では、`@k8ordo/ui`は英語で描くので、サーバーのHTMLとも食い違います。',
-  en: 'The module that defines the set is not loaded in the browser. Where no set is defined, `@k8ordo/ui` speaks English, which also disagrees with the server’s HTML.',
+  ja: 'ロケールの一覧を定義するモジュールが、ブラウザで読み込まれていません。',
+  en: 'The module that defines the locale set is not loaded in the browser.',
 });
 
 export const uiEnglishFix = message({
-  ja: 'リンクの`bindParams`や言語の切り替えのように、Client Componentから`locales`をimportします。',
-  en: 'Import `locales` from a Client Component, as the `bindParams` links or the language switcher do.',
+  ja: 'Client Componentから`locales`をimportします。詳しくは`@k8ordo/ui`の',
+  en: 'Import `locales` from a Client Component. See the `@k8ordo/ui` guide to ',
 });
 
 export const uiMissingTitle = message({
-  ja: '「@k8ordo/ui: no built-in text for "fr"」というエラーが出る',
-  en: 'A “@k8ordo/ui: no built-in text for "fr"” error is thrown',
+  ja: '`@k8ordo/ui: no built-in text for "fr"`',
+  en: '`@k8ordo/ui: no built-in text for "fr"`',
 });
 
 export const uiMissingCause = message({
-  ja: '`@k8ordo/ui`には、`ja`と`en`の文言しか入っていません。登録の無いロケールで描くと、エラーを投げます。`fr-CA`のような地域の付いたタグは、登録が無ければ言語の`fr`を探します。',
-  en: '`@k8ordo/ui` ships text for `ja` and `en` only, and throws when it renders in a locale nothing registered. A regional tag such as `fr-CA` without a registration of its own looks for its language, `fr`.',
+  ja: '`@k8ordo/ui`に、`ja`と`en`以外の辞書を登録していません。',
+  en: 'No dictionary other than `ja` and `en` is registered with `@k8ordo/ui`.',
 });
 
 export const uiMissingFix = message({
-  ja: "集合を定義するモジュールで、`@k8ordo/ui/i18n`の`registerMessages('fr', fr)`を呼びます。",
-  en: "Call `registerMessages('fr', fr)` from `@k8ordo/ui/i18n` in the module that defines the set.",
-});
-
-export const pathsTitle = message({
-  ja: '静的ビルドが「static build needs pathnames for」で止まる',
-  en: 'The static build stops with “static build needs pathnames for”',
-});
-
-export const pathsCause = message({
-  ja: '`/:locale/blog/:slug`のように、ロケールのほかにもパラメータを持つパターンがあります。`locales.paths`はロケールしか展開しないので、`:slug`が残ります。',
-  en: 'A pattern has a parameter besides the locale, such as `/:locale/blog/:slug`. `locales.paths` expands only the locale, so `:slug` is left.',
-});
-
-export const pathsFix = message({
-  ja: '`paths`に渡す関数の中で、`locales.paths`の結果に残ったパラメータを展開します。書き方は「静的に書き出す」にあります。',
-  en: 'In the function passed as `paths`, expand what is left in `locales.paths`’ result. “Static builds” shows how.',
+  ja: "ロケールの一覧を定義するモジュールで、`@k8ordo/ui/i18n`の`registerMessages('fr', fr)`を呼びます。登録の仕方は`@k8ordo/ui`の",
+  en: "Call `registerMessages('fr', fr)` from `@k8ordo/ui/i18n` in the module that defines the locale set. See the `@k8ordo/ui` guide to ",
 });
 
 export const doubleTitle = message({
-  ja: '切り替え先のURLにロケールが2つ並ぶ',
-  en: 'The switcher’s URL has two locales in it',
+  ja: 'ロケールが2つ並ぶ切り替え先のURL',
+  en: 'A switcher URL with two locales',
 });
 
 export const doubleCause = message({
-  ja: 'ロケールの区間が付いたままのpathnameを、`localize`に渡しています。`localize`は、区間がすでにあるかを確かめません。',
-  en: 'A pathname still holding its locale segment went to `localize`, which does not check for one.',
+  ja: 'ロケールの区間が付いたままのpathnameを`localize`に渡しています。`localize`は、区間がすでにあるかを確かめません。',
+  en: 'A pathname that still has its locale segment was passed to `localize`. `localize` does not check whether one is already there.',
 });
 
 export const doubleFix = message({
   ja: '先に`delocalize`で区間を外し、その`pathname`を`localize`に渡します。',
-  en: 'Take the segment off with `delocalize` first, and hand its `pathname` to `localize`.',
+  en: 'Take the segment off with `delocalize` first, and pass its `pathname` to `localize`.',
 });
 
 export const notFoundTitle = message({
-  ja: '404ページが既定の言語のまま変わらない',
-  en: 'The 404 page stays in the default language',
+  ja: '既定の言語のままの404ページ',
+  en: 'A 404 page left in the default language',
 });
 
 export const notFoundCause = message({
-  ja: '静的なホストが返す`404.html`は、ビルドで1回だけ、既定のロケールで描かれます。Server Componentが描いた文は、既定のロケールのまま残ります。',
-  en: 'The `404.html` a static host serves is rendered once at build time, in the default locale, and text a Server Component rendered stays that way.',
+  ja: '静的なホストの`404.html`のように、1回だけ描画したHTMLをどのURLにも返しています。Server Componentが描画した文は、描画したときのロケールのまま変わりません。',
+  en: 'HTML rendered once, such as the `404.html` a static host serves, is returned for every URL. Text a Server Component rendered stays in the locale it was rendered in.',
 });
 
 export const notFoundFix = message({
-  ja: '`not-found.tsx`をClient Componentにして文言を描きます。ブラウザが訪問者のURLで描き直すときに、訪問者のロケールになります。',
-  en: 'Make `not-found.tsx` a Client Component that renders the text. When the browser renders it afresh at the visitor’s URL, it comes out in their locale.',
+  ja: '訪問者のロケールで出したい文は、ハイドレーションが終わってからブラウザで描画します。HTMLの文のままハイドレーションすると、ブラウザが描画する文と食い違います。`@k8ordo/framework`は`404.html`をハイドレーションせずに描画し直すので、Client Componentの文言が訪問者のロケールになります。詳しくは`@k8ordo/framework`の',
+  en: 'Render text that should follow the visitor’s locale in the browser, after hydration. Hydrated as it is, the HTML’s text disagrees with what the browser renders. `@k8ordo/framework` renders `404.html` again instead of hydrating it, so a Client Component’s messages come out in the visitor’s locale. See `@k8ordo/framework`’s ',
 });
 
 export const boundaryTitle = message({
-  ja: 'Server ComponentからClient Componentに文言を渡すと描画に失敗する',
-  en: 'Passing a message to a Client Component fails',
+  ja: 'Client Componentに渡せない文言',
+  en: 'A message that cannot be passed to a Client Component',
 });
 
 export const boundaryCause = message({
@@ -201,18 +191,18 @@ export const boundaryFix = message({
 });
 
 export const formTitle = message({
-  ja: 'フォームのエラー文言がページの言語にならない',
-  en: 'Form errors are not in the page’s language',
+  ja: 'ページの言語にならないフォームのエラー',
+  en: 'Form errors in the wrong language',
 });
 
 export const formCause = message({
-  ja: 'zodに文言を呼んだ結果の文字列を渡しているか、`formFields`をモジュールのトップレベルで呼んでいます。どちらも、その時点のロケールで文字列が固定されます。',
-  en: 'zod was given the string a message returned, or `formFields` is called at the top of a module. Either way the string is fixed in the locale current at that moment.',
+  ja: 'zodに文言を文字列で渡しているか、`formFields`をモジュールのトップレベルで呼んでいます。',
+  en: 'zod was given a string instead of the message, or `formFields` is called at module scope.',
 });
 
 export const formFix = message({
-  ja: 'zodには`{ error: m.talk.titleRequired }`のように文言を関数のまま渡し、`formFields`はページの描画の中で呼びます。',
-  en: 'Give zod the message itself, as in `{ error: m.talk.titleRequired }`, and call `formFields` inside the page’s render.',
+  ja: '直し方は、`@k8ordo/form`の',
+  en: 'For the fix, see the `@k8ordo/form` guide to ',
 });
 
 export const causeLabel = message({

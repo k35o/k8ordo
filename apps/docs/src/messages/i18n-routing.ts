@@ -1,141 +1,111 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: 'ロケールは、URLの先頭の区間に置きます。サーバーもブラウザもURLからロケールを読むので、ロケールを状態として持ち、同期させる必要がありません。このページでは、両側がどこからロケールを読むかと、`<html lang>`の書き方、Viteの`base`の下に置くときの扱いを説明します。',
-  en: 'The locale lives in the first segment of the URL. The server and the browser both read it from there, so no state holds the locale and nothing has to keep it in sync. This page covers where each side reads it, writing `<html lang>`, and serving the app under Vite’s `base`.',
-});
-
-export const serverTitle = message({
-  ja: 'サーバーでは受け付けたロケールを読む',
-  en: 'The server reads the accepted locale',
-});
-
-export const serverDescription = message({
-  ja: '`[locale]`のレイアウトがexportした`paramsSchema`がロケールを受け付けると、それがそのページの描画のロケールになります。Server Componentも、HTMLを作るためにサーバーで動くClient Componentも、このロケールで文言を読みます。',
-  en: 'When the `paramsSchema` the `[locale]` layout exports accepts a locale, it becomes the locale of that page’s render. Server Components, and the Client Components that run on the server to make the HTML, read their messages in it.',
-});
-
-export const serverScope = message({
-  ja: '受け付けたロケールは、そのページの描画にだけ届きます。同時に描いているほかのリクエストにも、そのあとに描く404にも届きません。',
-  en: 'The accepted locale reaches that page’s render and nothing else: not other requests rendering at the same time, and not a 404 rendered after it.',
-});
-
-export const serverRefused = message({
-  ja: '`/en/blog/nope`のように、`[locale]`より後ろのスキーマが拒んだときは、ロケールの受け付けもそのパターンと一緒に捨てられます。代わりに答える404は、自分の上にあるスキーマを走らせ直すので、URLが名指す`en`で描かれます。一覧に無い`/fr/nothing`の404は、既定のロケールです。',
-  en: 'When a schema after `[locale]` refuses, as on `/en/blog/nope`, the acceptance is dropped along with that pattern. The 404 that answers instead runs the schemas above it again, so it renders in the `en` its URL names. A 404 on `/fr/nothing`, outside the list, is in the default locale.',
-});
-
-export const serverParams = message({
-  ja: 'レイアウトが受け取る`params.locale`は、スキーマをexportしていても`string`型のままです。`not-found.tsx`はスキーマが拒んだURLでもレイアウトの下に描かれるので、届く値が検証済みとは限らないからです。',
-  en: 'The layout still receives `params.locale` as a `string`, schema or not: `not-found.tsx` renders under the layout even where the schema refused, so the value is not always a checked one.',
-});
-
-export const serverRuntime = message({
-  ja: '`AsyncLocalStorage`を取り出せないランタイムでは、`paramsSchema`がロケールを受け付けた時点でエラーを投げます。受け付けたのに既定のロケールで描いてしまうことを、黙って見過ごさないためです。',
-  en: 'On a runtime with no `AsyncLocalStorage` to offer, `paramsSchema` throws as it accepts a locale, rather than silently accept one and render the page in the default.',
-});
-
-export const runTitle = message({
-  ja: '描画の外でロケールを決める',
-  en: 'Set the locale outside a render',
-});
-
-export const runDescription = message({
-  ja: 'バッチ処理やメールの本文のように、`[locale]`の描画の外で文言を呼ぶときは、`locales.run(locale, fn)`で囲みます。`fn`と、そこから始まる処理がそのロケールで動きます。',
-  en: 'To call messages outside a `[locale]` render, such as in a batch job or an email body, wrap the call in `locales.run(locale, fn)`. `fn`, and everything it starts, runs in that locale.',
-});
-
-export const runReturns = message({
-  ja: '`run`は、`fn`の戻り値をそのまま返します。`fn`がasyncでも、`await`をまたいでロケールが保たれます。',
-  en: '`run` returns what `fn` returns, and when `fn` is async the locale holds across its awaits.',
-});
-
-export const runAction = message({
-  ja: '`[locale]`のページから送ったServer Actionは、`@k8ordo/framework`のserverモードではそのページのロケールで動きます。そのため、`run`で囲む必要はありません。',
-  en: 'A Server Action posted from a `[locale]` page already runs in that page’s locale in `@k8ordo/framework`’s server mode, so it needs no `run`.',
-});
-
-export const runBrowser = message({
-  ja: '`run`はブラウザで呼ぶとエラーを投げます。ブラウザではURLがロケールなので、変えたいときは、そのロケールのURLへ移動します。',
-  en: '`run` throws in the browser. There the URL is the locale, so changing it means navigating to that locale’s URL.',
+  ja: 'ブラウザではURLの先頭の区間が、サーバーでは`locales.run`か`paramsSchema`が設定したロケールが、今のロケールになります。`getLocale()`でそのタグを読み、`<html lang>`に書けるようになります。',
+  en: 'In the browser the first segment of the URL is the current locale; on the server it is the one `locales.run` or `paramsSchema` set. You will be able to read its tag with `getLocale()` and write it into `<html lang>`.',
 });
 
 export const browserTitle = message({
-  ja: 'ブラウザではURLを読む',
-  en: 'The browser reads the URL',
+  ja: 'ブラウザのロケール',
+  en: 'Locale in the browser',
 });
 
-export const browserDescription = message({
-  ja: 'ブラウザでは、`location.pathname`の先頭の区間がロケールです。文言を呼ぶたびにURLを読むので、ロケールを持つ状態はどこにもありません。',
-  en: 'In the browser, the first segment of `location.pathname` is the locale. Messages read the URL each time they are called, so no state anywhere holds the locale.',
+export const browserUrl = message({
+  ja: 'ブラウザでは、`location.pathname`の先頭の区間がロケールです。文言は呼ぶたびにURLを読みます。先頭の区間が集合のロケールでないときは、既定のロケールを使います。',
+  en: 'In the browser, the first segment of `location.pathname` is the locale. Messages read the URL each time they are called. When the first segment is not a locale of the set, the default locale is used.',
 });
 
-export const browserDefault = message({
-  ja: '先頭の区間が集合のロケールでないときは、既定のロケールを使います。',
-  en: 'When the first segment is not a locale of the set, the default locale is used.',
+export const browserRun = message({
+  ja: 'ロケールを持つ状態が無いので、ブラウザでは`locales.run`を使えません。呼ぶと、`locales.run: in the browser the URL is the locale — navigate instead`というエラーになります。',
+  en: 'With no state to hold a locale, `locales.run` has no use in the browser. Calling it there fails with `locales.run: in the browser the URL is the locale — navigate instead`.',
 });
 
 export const browserSwitch = message({
-  ja: 'ロケールを変えるには、同じpathnameのまま、別のロケールの区間の下へ移動します。移動すればページが描き直され、文言は新しいURLのロケールで読まれます。書き方は「言語を切り替える」で説明します。',
-  en: 'Changing the locale is navigating to the same pathname under another locale’s segment. The page renders again, and its messages read the new URL’s locale. “Switch languages” shows how.',
+  ja: 'ロケールを変えるには、同じpathnameのまま別のロケールの区間へ移動します。移動すればページが再描画され、文言は新しいURLのロケールで読まれます。書き方は',
+  en: 'To change the locale, navigate to the same pathname under another locale’s segment. The page renders again, and its messages read the new URL’s locale. How to write it is covered in ',
+});
+
+export const see = message({
+  ja: 'を見てください。',
+  en: '.',
+});
+
+export const serverTitle = message({
+  ja: 'サーバーのロケール',
+  en: 'Locale on the server',
+});
+
+export const serverRun = message({
+  ja: 'サーバーの文言は、今の非同期コンテキストに設定されたロケールを読みます。メールの件名やバッチ処理で文言を呼ぶときは、`locales.run(locale, fn)`で囲みます。`fn`とそこから始まる処理がそのロケールで動き、`fn`がasyncでも`await`をまたいでロケールが保たれます。`run`は`fn`の戻り値をそのまま返します。',
+  en: 'On the server, a message reads the locale set for the current async context. To call messages for an email subject or a batch job, wrap the call in `locales.run(locale, fn)`. `fn`, and everything it starts, runs in that locale, and the locale is kept across awaits when `fn` is async. `run` returns what `fn` returns.',
+});
+
+export const serverSchema = message({
+  ja: '`locales.paramsSchema`は、`{ locale }`を検証するStandard Schemaです。ロケールを受け付けると、検証を呼んだ非同期コンテキストの残りにそのロケールを設定します。`@k8ordo/framework`では、`[locale]`のレイアウトからexportすると、ページの描画とそのページから送ったServer Actionにロケールが設定されます。詳しくは`@k8ordo/framework`の',
+  en: '`locales.paramsSchema` is a Standard Schema that validates `{ locale }`. When it accepts a locale, it sets that locale for the rest of the async context that called it. In `@k8ordo/framework`, exporting it from the `[locale]` layout sets the locale for the page’s render and for the Server Actions posted from that page. See `@k8ordo/framework`’s ',
+});
+
+export const serverDefault = message({
+  ja: 'どちらもロケールを設定していないときは、既定のロケールを使います。文言がリクエストのURLやヘッダーを読むことはありません。ページをサーバーで描画するときは、リクエストのURLの先頭の区間と同じロケールを設定します。違うと、Client Componentがサーバーで書いた文と、ハイドレーションでブラウザが描画する文が食い違います。',
+  en: 'When neither has set a locale, the default locale is used; a message never reads the request’s URL or headers. When a page renders on the server, set the locale named by the first segment of the request’s URL. Otherwise the text a Client Component writes on the server disagrees with what the browser renders when it hydrates.',
+});
+
+export const serverRuntime = message({
+  ja: '`AsyncLocalStorage`の無いランタイムでは、`run`と`paramsSchema`がエラーになります。エラー文は`locales.run: this runtime has no AsyncLocalStorage to scope a locale to`のように、呼んだ関数の名前で始まります。既定のロケールで描画を続けることはありません。',
+  en: 'On a runtime without `AsyncLocalStorage`, `run` and `paramsSchema` throw, with a message that starts with the caller’s name, such as `locales.run: this runtime has no AsyncLocalStorage to scope a locale to`. Neither goes on in the default locale.',
 });
 
 export const getLocaleTitle = message({
-  ja: '今のロケールのタグを読む',
-  en: 'Read the current locale’s tag',
+  ja: 'ロケールのタグ',
+  en: 'The locale tag',
 });
 
-export const getLocaleDescription = message({
-  ja: '文言ではなくタグそのものが要るときは、`locales.getLocale()`を呼びます。文言と同じところからロケールを読み、フックではないのでどこからでも呼べます。',
-  en: 'When you need the tag itself rather than a message, call `locales.getLocale()`. It reads the locale from the same place messages do, and it is not a hook, so call it anywhere.',
+export const getLocaleCall = message({
+  ja: 'ロケールのタグそのものが要るときは、`locales.getLocale()`を呼びます。ブラウザではURLの先頭の区間を、サーバーでは`run`か`paramsSchema`が設定したロケールを返します。フックではないので、どこからでも呼べます。',
+  en: 'When you need the locale tag itself, call `locales.getLocale()`. In the browser it returns the first segment of the URL; on the server, the locale `run` or `paramsSchema` set. It is not a hook, so it can be called anywhere.',
 });
 
 export const getLocaleDestructure = message({
-  ja: '`getLocale`は`this`を使わないので、`export const { getLocale } = locales`のように集合から取り出してexportできます。',
-  en: '`getLocale` does not use `this`, so it can be taken out of the set and exported: `export const { getLocale } = locales`.',
+  ja: '`getLocale`は、`export const { getLocale } = locales`のように取り出してexportできます。',
+  en: '`getLocale` can be destructured and exported: `export const { getLocale } = locales`.',
 });
 
 export const getLocaleNoSubscribe = message({
-  ja: '`getLocale()`は、URLの変化を購読しません。Client Componentで呼ぶと、その瞬間のURLを読むだけです。ロケールはページの移動で変わり、移動すればページが描き直されるので、ふつうはこれで足ります。URLの変化に合わせて自分から描き直したいコンポーネントは、`@k8ordo/framework`の`usePathname()`を読みます。',
-  en: '`getLocale()` does not subscribe to the URL; in a Client Component it reads the URL at that moment. The locale changes by navigating, which renders the page again, so that is usually enough. A component that has to render again on its own when the URL changes reads `usePathname()` from `@k8ordo/framework`.',
+  ja: '`getLocale()`はURLの変化を購読しません。Client Componentでは、呼んだ時点のURLを読むだけです。URLの変化に合わせて再描画したいコンポーネントは、`@k8ordo/router`の`usePathname()`を使います。詳しくは`@k8ordo/router`の',
+  en: '`getLocale()` does not subscribe to the URL. In a Client Component it reads the URL at the moment it is called. A component that must re-render when the URL changes uses `usePathname()` from `@k8ordo/router`. See `@k8ordo/router`’s ',
 });
 
 export const htmlTitle = message({
-  ja: '`<html lang>`と`dir`を書く',
-  en: 'Write `<html lang>` and `dir`',
+  ja: '`<html lang>`と`dir`',
+  en: '`<html lang>` and `dir`',
 });
 
-export const htmlDescription = message({
-  ja: '`lang`と`dir`は、サーバーが書いたHTMLの時点で正しくなければなりません。クローラーやスクリーンリーダーは、ハイドレーションを待たずに読むからです。ルートレイアウトは`[locale]`より上にありますが、`pathname`を受け取れます。',
-  en: '`lang` and `dir` have to be right in the HTML the server writes, because crawlers and screen readers read it without waiting for hydration. The root layout sits above `[locale]`, but it receives `pathname`.',
+export const htmlServer = message({
+  ja: '`lang`と`dir`は、サーバーが書いたHTMLの時点で正しくなければなりません。クローラーやスクリーンリーダーは、ハイドレーションを待たずに読むからです。',
+  en: '`lang` and `dir` have to be right in the HTML the server writes, because crawlers and screen readers read it without waiting for hydration.',
 });
 
 export const htmlNull = message({
-  ja: '`delocalize`は、先頭の区間がロケールでないときに`null`を返します。既定のロケールを推測しないので、何に落とすかは呼ぶ側が書きます。',
-  en: '`delocalize` returns `null` when the first segment is no locale. It does not guess the default, so the caller writes the fallback.',
-});
-
-export const htmlSame = message({
-  ja: 'ページではスキーマが先に走っているので、`locales.getLocale()`も同じ値を返します。404でも、URLがロケールを名指せばそのロケール、そうでなければ既定のロケールになり、どちらの書き方でも一致します。',
-  en: 'On a page the schema has already run, so `locales.getLocale()` returns the same value. On a 404 the two agree as well: the URL’s locale where it names one, the default where it does not.',
+  ja: 'ロケールが設定されていない描画で使うときは、`locales.delocalize(pathname).locale ?? locales.default`でpathnameから読みます。`delocalize`は先頭の区間がロケールでないときに`null`を返すので、既定のロケールは呼ぶ側で補います。',
+  en: 'In a render where no locale is set, read it from the pathname instead: `locales.delocalize(pathname).locale ?? locales.default`. `delocalize` returns `null` when the first segment is not a locale, so the caller supplies the default.',
 });
 
 export const baseTitle = message({
-  ja: 'Viteの`base`の下に置く',
-  en: 'Serve under Vite’s `base`',
+  ja: 'Viteの`base`',
+  en: 'Vite’s `base`',
 });
 
-export const baseDescription = message({
-  ja: 'アプリをオリジンの根ではなく`/docs/`のようなサブパスに置くときも、ロケールは`base`より下の最初の区間です。`/docs/en/ui`のロケールは`en`です。',
-  en: 'When the app is served below the origin’s root, under a path such as `/docs/`, the locale is the first segment below the `base`: `/docs/en/ui` is in `en`.',
+export const baseSegment = message({
+  ja: 'アプリを`/docs/`のようなサブパスに置くときも、ロケールは`base`より下の最初の区間です。`/docs/en/ui`のロケールは`en`です。',
+  en: 'When the app is served under a path such as `/docs/`, the locale is still the first segment below the `base`. `/docs/en/ui` is in `en`.',
 });
 
 export const baseTerms = message({
-  ja: '`localize`と`delocalize`が扱うのは、`base`を除いたpathnameです。`usePathname()`が返すのもこの形なので、そのまま渡せます。',
-  en: '`localize` and `delocalize` deal in pathnames without the `base`, which is what `usePathname()` returns, so it goes in as it is.',
+  ja: '`localize`と`delocalize`が扱うのは、`base`を除いたpathnameです。移動する前に、`base`を付け直します。',
+  en: '`localize` and `delocalize` take and return pathnames without the `base`. Put the `base` back before navigating.',
 });
 
 export const baseLinks = message({
-  ja: '移動先のURLにするときは、`@k8ordo/framework`の`withBase`で`base`を付け直します。`bindParams`で作った`href`には、最初から`base`が付いています。',
-  en: 'To turn one into a URL to navigate to, put the `base` back with `withBase` from `@k8ordo/framework`. An `href` made with `bindParams` already carries it.',
+  ja: '`@k8ordo/router`の`usePathname()`は`base`を除いたpathnameを返し、`withBase`が`base`を付け直します。詳しくは`@k8ordo/router`の',
+  en: '`usePathname()` from `@k8ordo/router` returns the pathname without the `base`, and its `withBase` adds the `base` back. See `@k8ordo/router`’s ',
 });

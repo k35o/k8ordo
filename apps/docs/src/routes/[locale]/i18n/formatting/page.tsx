@@ -2,6 +2,7 @@ import { CodeBlock } from '@k8ordo/ui/code-block';
 
 import { Note } from '../../../../components/callout';
 import { DocPage, DocSection } from '../../../../components/doc-page';
+import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Playground } from '../../../../components/playground';
 import { Rich } from '../../../../components/rich';
 import { TimeZoneDemo } from '../../../../demos/i18n/formatting/time-zone-demo';
@@ -51,11 +52,17 @@ export const updated = message({
 export default function I18nFormattingPage() {
   return (
     <DocPage introduction={t.introduction} path="/:locale/i18n/formatting">
-      <DocSection
-        description={t.membersDescription}
-        id="intl"
-        title={t.membersTitle}
-      >
+      <DocSection id="intl" title={t.membersTitle}>
+        <CodeBlock
+          callouts={{ 4: t.priceCallout() }}
+          code={PRICE}
+          lang="tsx"
+          marks={{ 4: 'highlight' }}
+          title="src/components/price.tsx"
+        />
+        <p>
+          <Rich>{t.membersIntro()}</Rich>
+        </p>
         <ul>
           {t.membersList.map((item) => (
             <li key={item()}>
@@ -63,12 +70,6 @@ export default function I18nFormattingPage() {
             </li>
           ))}
         </ul>
-        <CodeBlock
-          code={PRICE}
-          lang="tsx"
-          marks={{ 4: 'highlight' }}
-          title="src/components/price.tsx"
-        />
         <p>
           <Rich>{t.membersItself()}</Rich>
         </p>
@@ -77,17 +78,22 @@ export default function I18nFormattingPage() {
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.datesDescription}
-        id="dates"
-        title={t.datesTitle}
-      >
+      <DocSection id="dates" title={t.datesTitle}>
         <CodeBlock
+          callouts={{ 6: t.publishedAtCallout() }}
           code={PUBLISHED_AT}
           lang="tsx"
           marks={{ 6: 'highlight' }}
           title="src/components/published-at.tsx"
         />
+        <p>
+          <Rich>{t.datesZone()}</Rich>
+          <Rich>{t.datesChooseBefore()}</Rich>
+          <LocaleAnchor path="/:locale/i18n/locales">
+            {m.i18n.navLocales()}
+          </LocaleAnchor>
+          <Rich>{t.see()}</Rich>
+        </p>
         <p>
           <Rich>{t.datesRefuse()}</Rich>
         </p>
@@ -107,27 +113,26 @@ export default function I18nFormattingPage() {
         <TimeZoneDemo />
       </Playground>
 
-      <DocSection
-        description={t.inMessagesDescription}
-        id="in-messages"
-        title={t.inMessagesTitle}
-      >
+      <DocSection id="in-messages" title={t.inMessagesTitle}>
         <CodeBlock
+          callouts={{ 10: t.cartCallout() }}
           code={CART}
           lang="ts"
           marks={{ 10: 'highlight', 16: 'highlight', 17: 'highlight' }}
           title="src/messages/cart.ts"
         />
         <p>
+          <Rich>{t.inMessagesCall()}</Rich>
+        </p>
+        <p>
           <Rich>{t.inMessagesPlural()}</Rich>
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.cacheDescription}
-        id="cache"
-        title={t.cacheTitle}
-      >
+      <DocSection id="cache" title={t.cacheTitle}>
+        <p>
+          <Rich>{t.cacheOnce()}</Rich>
+        </p>
         <p>
           <Rich>{t.cacheKey()}</Rich>
         </p>
