@@ -293,6 +293,21 @@ export default function FrameworkParamsPage() {
         <p>
           <Rich>{t.refusedCatchAll()}</Rich>
         </p>
+        <DocSubsection id="refused-locale" title={t.refusedLocaleTitle}>
+          <p>
+            <Rich>{t.refusedLocaleScope()}</Rich>
+          </p>
+          <p>
+            <Rich>{t.refusedLocaleServer()}</Rich>
+          </p>
+          <p>
+            <Rich>{t.refusedLocaleStatic()}</Rich>
+            <LocaleAnchor path="/:locale/framework/deploy">
+              {m.framework.navDeploy()}
+            </LocaleAnchor>
+            <Rich>{t.see()}</Rich>
+          </p>
+        </DocSubsection>
       </DocSection>
 
       <DocSection id="exist" title={t.existTitle}>

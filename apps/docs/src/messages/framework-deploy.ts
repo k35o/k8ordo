@@ -118,18 +118,18 @@ export const notFoundTitle = message({
 });
 
 export const notFoundOnce = message({
-  ja: '`404.html`は、サイトに無いURLのために1度だけ描画されます。`not-found.tsx`より上の階層にパラメータを受け取る区間があると、そのパラメータにはどのルートも宣言していない値が入ります。',
-  en: '`404.html` is rendered once, for a URL the site does not have. A dynamic segment above `not-found.tsx` gets a value no route declared.',
+  ja: '`404.html`は、サイトに無いURLのために1度だけ描画されます。そのURLは、どのルートも宣言しない`__k8ordo-not-found__`という区間でビルドが作ります。`not-found.tsx`より上にパラメータを受け取る区間があれば、その値もこの区間になります。',
+  en: '`404.html` is rendered once, for a URL the site does not have. The build makes that URL from `__k8ordo-not-found__`, a segment no route declares. A parameter above `not-found.tsx` receives that segment as its value too.',
+});
+
+export const notFoundLocale = message({
+  ja: '`[locale]`の下の`not-found.tsx`では、ロケールの`paramsSchema`がこの区間を拒むので、ロケールは設定されません。`404.html`の文言は、既定のロケールで書かれます。JavaScriptが動かない訪問者には、どのURLでもこの文言が出ます。',
+  en: 'For a `not-found.tsx` under `[locale]`, the locale’s `paramsSchema` refuses that segment, so no locale is set. The messages in `404.html` are written in the default locale, and that is what a visitor without JavaScript sees at any URL.',
 });
 
 export const notFoundHydrate = message({
-  ja: 'ブラウザはこのファイルをハイドレーションしません。訪問者が開いたURLで描画し直します。Client Componentは、`usePathname()`で最初の描画から訪問者のURLを読めます。',
-  en: 'The browser does not hydrate this file. It renders the page again at the URL the visitor opened. A Client Component reads the visitor’s URL with `usePathname()` from its first render.',
-});
-
-export const notFoundSite = message({
-  ja: 'このサイトの`404.html`もそうなっています。ファイルは日本語で書かれていて、`/en/…`のURLで開くと、ブラウザが描画し直した時点で英語になります。JavaScriptが動かない環境では、ビルドで描画した日本語のまま残ります。',
-  en: 'This site’s `404.html` works that way. The file is written in Japanese, and opened at an `/en/…` URL it turns English once the browser renders it again. Without JavaScript, the Japanese the build wrote stays.',
+  ja: 'ブラウザはこのファイルをハイドレーションせず、訪問者が開いたURLで描画し直します。Client Componentは、`usePathname()`で最初の描画から訪問者のURLを読めます。このサイトの`404.html`は日本語で書かれていて、`/en/…`で開くと描画し直した時点で英語になります。',
+  en: 'The browser does not hydrate this file. It renders the page again at the URL the visitor opened, and a Client Component reads that URL with `usePathname()` from its first render. This site’s `404.html` is written in Japanese, and opened at an `/en/…` URL it turns English once the browser renders it again.',
 });
 
 export const sitemapTitle = message({

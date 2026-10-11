@@ -203,10 +203,10 @@ export default function FrameworkDeployPage() {
             <Rich>{t.notFoundOnce()}</Rich>
           </p>
           <p>
-            <Rich>{t.notFoundHydrate()}</Rich>
+            <Rich>{t.notFoundLocale()}</Rich>
           </p>
           <p>
-            <Rich>{t.notFoundSite()}</Rich>
+            <Rich>{t.notFoundHydrate()}</Rich>
           </p>
         </DocSubsection>
         <DocSubsection id="sitemap" title={t.sitemapTitle}>

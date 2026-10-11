@@ -480,6 +480,36 @@ export const freshFix = message({
   en: 'Run `vite dev` or `vite build` once before `tsc`, so `.k8ordo/` is generated.',
 });
 
+export const localesUnexportedTitle = message({
+  ja: '`src/i18n.ts does not export …`',
+  en: '`src/i18n.ts does not export …`',
+});
+
+export const localesUnexportedCause = message({
+  ja: '`@k8ordo/i18n`に依存するアプリで、`src/i18n.ts`がロケールの集合を`locales`という名前でexportしていません。`export *`と、型だけのexportは数えません。このとき`@k8ordo/i18n`の`Register`は生成されず、ロケールが欠けた文言も型エラーになりません。',
+  en: 'In an application that depends on `@k8ordo/i18n`, `src/i18n.ts` does not export the locale set by the name `locales`. `export *` and a type-only export do not count. `@k8ordo/i18n`’s `Register` is then not generated, and a message missing a locale compiles.',
+});
+
+export const localesUnexportedFix = message({
+  ja: "`src/i18n.ts`から、`export const locales = defineLocales(…)`のように名前を付けてexportします。別のモジュールで定義しているなら、`export { locales } from './lib/locales'`でも構いません。",
+  en: "Export it from `src/i18n.ts` by name, as in `export const locales = defineLocales(…)`. A set defined in another module can be re-exported with `export { locales } from './lib/locales'`.",
+});
+
+export const registerMissingTitle = message({
+  ja: '生成されない`Register`',
+  en: '`Register` not generated',
+});
+
+export const registerMissingCause = message({
+  ja: 'アプリの`package.json`の`dependencies`と`devDependencies`のどちらにも、`@k8ordo/i18n`がありません。ほかのパッケージの依存として入っていても、アプリの依存に無ければ`Register`は生成されません。`src/i18n.ts`が無いときも生成されません。どちらも警告は出ません。',
+  en: 'The application’s `package.json` lists `@k8ordo/i18n` in neither `dependencies` nor `devDependencies`. Installed only as another package’s dependency, it does not count, and `Register` is not generated. Nor is it without a `src/i18n.ts`. Neither case warns.',
+});
+
+export const registerMissingFix = message({
+  ja: '`@k8ordo/i18n`をアプリの依存に足します。ロケールの集合は、`src/i18n.ts`から`locales`という名前でexportします。',
+  en: 'Add `@k8ordo/i18n` to the application’s dependencies, and export the locale set from `src/i18n.ts` as `locales`.',
+});
+
 export const grammarTitle = message({
   ja: '`routes/ holds only page.tsx, …`',
   en: '`routes/ holds only page.tsx, …`',
