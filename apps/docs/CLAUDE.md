@@ -300,9 +300,7 @@ export default function RouterLinksPage() {
   the `get-started` button) and two or three `LandingClaim`s, one of which
   may hold the `Playground`: what the package alone promises its user, never
   what it does with another package of the family. It has no 次に読む list
-  and no link to the agent guide. `NextSteps` (`src/components/landing.tsx`)
-  is still there only for the landings not yet rewritten to this shape; a
-  new or rewritten landing does not use it, and it goes once none does.
+  and no link to the agent guide.
 - Its words live in `src/messages/<package>-<section>.ts` (namespace
   `m.<package><Section>`), with `introduction` as the page's lead.
 - Code samples carry no natural-language comments — both locales see the same
@@ -317,7 +315,8 @@ export default function RouterLinksPage() {
   both flat. Two files that would collide in one sample are named by their
   feature (`talk-actions.ts`). What a package's docs give a place of its own
   keeps it: `src/i18n.ts` and `src/state.ts` at the root, and messages in
-  `src/messages/`, a file per area behind an `index.ts` barrel. A title
+  `src/messages/`, a file per area, imported by name
+  (`import { home } from '../messages/nav'`). A title
   names a file by its path from the project root (`src/routes/page.tsx`,
   `src/i18n.ts`, `vite.config.ts`); a bare name (`talk-form.tsx`) is for a
   file whose place the sample does not depend on. The site's own `src/` —
@@ -421,7 +420,6 @@ for word translation of the Japanese, nor the other way round.
 | `PageTitle`        | The page's `<title>` (`… · k8ordo`)  |
 | `LandingHero`      | A package landing's opening          |
 | `LandingClaim`     | A landing's claim with its example   |
-| `NextSteps`        | Only for landings not yet rewritten  |
 | `DocPage`          | A package guide page, with its pager |
 | `DocSection`       | A guide page's h2 section            |
 | `DocSubsection`    | An h3 inside a `DocSection`          |
