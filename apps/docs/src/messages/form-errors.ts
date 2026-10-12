@@ -51,8 +51,8 @@ export const translationTitle = message({
 });
 
 export const translationFunction = message({
-  ja: '文言は、文字列にせず関数のままzodに渡します。zodはエラーを報告するときに関数を呼ぶので、そのときのロケールの文言になります。`m.talk.titleMissing`のような文言の書き方は',
-  en: 'Hand zod the message as a function, not as the string it returns. zod calls it when it reports the error, so the wording follows the locale at that moment. Writing a message such as `m.talk.titleMissing` is covered in ',
+  ja: '文言は、文字列にせず関数のままzodに渡します。zodはエラーを報告するときに関数を呼ぶので、そのときのロケールの文言になります。`titleMissing`のような文言の書き方は',
+  en: 'Hand zod the message as a function, not as the string it returns. zod calls it when it reports the error, so the wording follows the locale at that moment. Writing a message such as `titleMissing` is covered in ',
 });
 
 export const see = message({
@@ -61,8 +61,8 @@ export const see = message({
 });
 
 export const translationRule = message({
-  ja: "`defineForm`のルールにも、`requiredWhen('reason', 'status', 'rejected', m.talk.reasonRequired)`のように関数を渡せます。",
-  en: "`defineForm` rules take a function too, as in `requiredWhen('reason', 'status', 'rejected', m.talk.reasonRequired)`.",
+  ja: "`defineForm`のルールにも、`requiredWhen('reason', 'status', 'rejected', reasonRequired)`のように関数を渡せます。",
+  en: "`defineForm` rules take a function too, as in `requiredWhen('reason', 'status', 'rejected', reasonRequired)`.",
 });
 
 export const translationTop = message({
