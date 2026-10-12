@@ -29,9 +29,11 @@ const KINDS = `defineForm(schema, [
   requiredWhen('reason', 'status', 'rejected', 'Give a reason'),
 ]);`;
 
-const LOCALE = `export const signup = defineForm(schema, [
-  sameAs('confirm', 'password', m.signup.mismatch),
-  minChecked('topics', 2, () => m.signup.pickAtLeast(2)),
+const LOCALE = `import { mismatch, pickAtLeast } from '../messages/signup';
+
+export const signup = defineForm(schema, [
+  sameAs('confirm', 'password', mismatch),
+  minChecked('topics', 2, () => pickAtLeast(2)),
 ]);`;
 
 const REFINE = `z.object({
@@ -105,8 +107,8 @@ export default function FormRulesPage() {
         <CodeBlock
           code={LOCALE}
           lang="ts"
-          marks={{ 2: 'highlight', 3: 'highlight' }}
-          title="schema.ts"
+          marks={{ 4: 'highlight', 5: 'highlight' }}
+          title="src/lib/signup-form.ts"
         />
         <p>
           <Rich>{t.localeFunction()}</Rich>

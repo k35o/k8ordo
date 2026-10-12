@@ -79,10 +79,10 @@ export function DismissButton({ onDismiss }) {
 
 const PROPS = `import { Button } from '@k8ordo/ui';
 
-import * as m from '../messages';
+import { add } from '../messages/cart';
 
 export function AddToCart() {
-  return <Button>{m.cart.add()}</Button>;
+  return <Button>{add()}</Button>;
 }`;
 
 export default function UiI18nPage() {

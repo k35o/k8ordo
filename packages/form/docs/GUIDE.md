@@ -522,9 +522,12 @@ scope therefore reports in whichever locale is current in the request that
 reads it:
 
 ```ts
+// src/lib/signup-form.ts
+import { mismatch, pickAtLeast } from '../messages/signup'; // @k8ordo/i18n
+
 export const signup = defineForm(schema, [
-  sameAs('confirm', 'password', m.signup.mismatch), // @k8ordo/i18n
-  minChecked('topics', 2, () => m.signup.pickAtLeast(2)),
+  sameAs('confirm', 'password', mismatch),
+  minChecked('topics', 2, () => pickAtLeast(2)),
 ]);
 ```
 
