@@ -81,13 +81,13 @@ beforeAll(async () => {
   origin = `http://127.0.0.1:${String((server.address() as AddressInfo).port)}`;
 }, 120_000);
 
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
 afterAll(async () => {
   server.close();
   await built?.dispose();
-});
-
-afterEach(() => {
-  vi.restoreAllMocks();
 });
 
 const wait = (ms: number): Promise<void> =>

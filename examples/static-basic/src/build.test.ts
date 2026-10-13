@@ -769,17 +769,17 @@ describe.each(browserTypes)('a written page in $name', ({ type }) => {
     browser = await type.launch();
   }, 60_000);
 
-  afterAll(async () => {
-    await browser.close();
-    server.close();
-  });
-
   afterEach(() => {
     deployed = client;
     mountedAt = '/';
     cloudflare = false;
     withoutPayloadRules = false;
     requested = [];
+  });
+
+  afterAll(async () => {
+    await browser.close();
+    server.close();
   });
 
   // hydrate するまでのリンクは、JS なしのただの文書の読み込みになって

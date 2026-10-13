@@ -25,7 +25,7 @@ export const Card: FC<CardProps> = ({
       width === 'full' && 'w-full',
       width === 'fit' && 'w-fit',
       interactive &&
-        'motion-safe:transition-transform hover:motion-safe:scale-[1.02] active:motion-safe:scale-[0.98]',
+        'motion-safe:transition-transform motion-safe:hover:scale-[1.02] motion-safe:active:scale-[0.98]',
       'bg-bg-base',
     )}
   >
