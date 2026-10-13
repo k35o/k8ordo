@@ -1,4 +1,5 @@
 import { UIProvider } from '@k8ordo/ui';
+import { expect, it } from 'vite-plus/test';
 import { render } from 'vitest-browser-react';
 import { userEvent } from 'vitest/browser';
 

@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vite-plus/test';
+
 import { fileRequest, routeRequestOf } from './request';
 
 describe('routeRequestOf', () => {

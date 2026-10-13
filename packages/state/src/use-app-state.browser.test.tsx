@@ -2,6 +2,7 @@ import type { FC, ReactElement } from 'react';
 import { useEffect, useLayoutEffect, useState } from 'react';
 import { hydrateRoot } from 'react-dom/client';
 import { renderToString } from 'react-dom/server';
+import { afterEach, beforeEach, expect, it, vi } from 'vite-plus/test';
 import { render } from 'vitest-browser-react';
 import { z } from 'zod';
 

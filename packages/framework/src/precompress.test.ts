@@ -10,6 +10,8 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { brotliDecompressSync, gunzipSync } from 'node:zlib';
 
+import { afterEach, beforeEach, describe, expect, it } from 'vite-plus/test';
+
 import { precompress } from './precompress';
 
 // 圧縮が効くだけの長さがある、よくある形のスクリプト

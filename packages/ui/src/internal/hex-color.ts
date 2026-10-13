@@ -68,6 +68,8 @@ export const hslToHex = ({ h, s, l }: Hsl): string => {
 };
 
 if (import.meta.vitest) {
+  const { describe, expect, it } = import.meta.vitest;
+
   describe('parseHex', () => {
     it('#rrggbb の小文字にそろえる', () => {
       expect(parseHex('#0D9488')).toBe('#0d9488');

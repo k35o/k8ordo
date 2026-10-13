@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vite-plus/test';
+
 import { defineLocales } from './locales';
 
 // ja と en でタイムゾーンの日付が分かれる瞬間（東京は 3/6 0:30、ニューヨーク

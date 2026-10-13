@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 import { z } from 'zod';
 
 import { defineCookieState } from '../cookie-state';

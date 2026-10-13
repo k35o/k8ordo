@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vite-plus/test';
+
 import { catalog } from './json-render/catalog';
 import { library } from './openui/library';
 

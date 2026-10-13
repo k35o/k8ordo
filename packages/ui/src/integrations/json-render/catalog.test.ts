@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vite-plus/test';
+
 import { catalog, validateGeneratedSpec } from './catalog';
 
 const specWithTarget = (element: Record<string, unknown>) => ({

@@ -1,6 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 
+import { expect, test } from 'vite-plus/test';
+
 // アプリ（main.tsx）と同じ exports サブパスで配布物を解決する。
 // import や ?raw だと vitest の CSS スタブに潰されて中身が届かないため、
 // createRequire で実ファイルパスに解決してから読む。

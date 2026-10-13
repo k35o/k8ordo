@@ -1,4 +1,5 @@
 import { validateGeneratedSpec } from '@k8ordo/ui/json-render';
+import { expect, test } from 'vite-plus/test';
 
 import { jsonRenderSpec } from './demo';
 

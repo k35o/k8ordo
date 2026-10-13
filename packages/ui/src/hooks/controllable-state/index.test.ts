@@ -1,3 +1,4 @@
+import { describe, expect, it, vi } from 'vite-plus/test';
 import { renderHook } from 'vitest-browser-react';
 
 import { useControllableState } from '.';

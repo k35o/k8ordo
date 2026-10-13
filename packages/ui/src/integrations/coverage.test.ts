@@ -1,6 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
+import { describe, expect, it, vi } from 'vite-plus/test';
+
 import * as root from '../components';
 import * as ai from '../components/ai';
 import * as response from '../components/ai/response';

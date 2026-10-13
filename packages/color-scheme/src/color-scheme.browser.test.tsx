@@ -2,6 +2,14 @@ import { resetStateRegistry } from '@k8ordo/state';
 import type { ReactNode } from 'react';
 import { hydrateRoot } from 'react-dom/client';
 import { renderToString } from 'react-dom/server';
+import {
+  beforeEach,
+  describe,
+  expect,
+  it,
+  onTestFinished,
+  vi,
+} from 'vite-plus/test';
 import { renderHook } from 'vitest-browser-react';
 
 import { ColorSchemeProvider, useColorScheme } from './provider';

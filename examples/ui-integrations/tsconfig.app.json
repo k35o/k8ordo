@@ -5,7 +5,7 @@
     "useDefineForClassFields": true,
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "module": "ESNext",
-    "types": ["vite-plus/test/globals"],
+    "types": [],
     "skipLibCheck": true,
 
     /* Bundler mode */

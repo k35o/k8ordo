@@ -5,6 +5,7 @@ import { chromium, firefox, webkit } from 'playwright';
 import type { Browser, Page } from 'playwright';
 import { createServer } from 'vite';
 import type { ViteDevServer } from 'vite';
+import { afterAll, beforeAll, describe, expect, it } from 'vite-plus/test';
 
 // 戻る・進むの主張はトップレベルの文書で確かめる。vitest のブラウザモードは
 // テストを iframe の中で動かし、Firefox と WebKit の Navigation API は

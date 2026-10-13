@@ -1,5 +1,6 @@
 import { lazy } from 'react';
 import type { FC } from 'react';
+import { describe, expect, expectTypeOf, it } from 'vite-plus/test';
 
 import { defineRoutes } from './define-routes';
 import type { NavigablePath, PatternOf } from './define-routes';

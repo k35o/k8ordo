@@ -1,5 +1,6 @@
 import { library } from '@k8ordo/ui/openui';
 import { createParser } from '@openuidev/react-lang';
+import { expect, test } from 'vite-plus/test';
 
 import { openUiResponse } from './demo';
 

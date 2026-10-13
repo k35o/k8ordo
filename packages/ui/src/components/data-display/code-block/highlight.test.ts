@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vite-plus/test';
+
 import { highlight } from './highlight';
 
 const linesOf = (html: string): string[] =>

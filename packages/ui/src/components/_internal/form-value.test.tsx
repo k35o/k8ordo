@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import type { FC } from 'react';
+import { beforeEach, describe, expect, it } from 'vite-plus/test';
 import { render } from 'vitest-browser-react';
 import { userEvent } from 'vitest/browser';
 

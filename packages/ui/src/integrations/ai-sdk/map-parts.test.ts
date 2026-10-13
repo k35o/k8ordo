@@ -1,4 +1,5 @@
 import type { UIMessage } from 'ai';
+import { describe, expect, it } from 'vite-plus/test';
 
 import { mapMessageParts } from './map-parts';
 

@@ -13,7 +13,6 @@ const browsers = (['chromium', 'firefox', 'webkit'] as const).filter(
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   test: {
-    globals: true,
     fsModuleCache: true,
     projects: [
       {

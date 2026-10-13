@@ -29,6 +29,8 @@ export const mergeRefs =
   };
 
 if (import.meta.vitest) {
+  const { describe, expect, it, vi } = import.meta.vitest;
+
   describe('mergeRefs', () => {
     it('オブジェクトrefと関数refの両方に値を設定する', () => {
       const objectRef = { current: null as HTMLElement | null };

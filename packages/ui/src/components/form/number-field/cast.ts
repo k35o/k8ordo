@@ -25,6 +25,8 @@ export const cast = (
 };
 
 if (import.meta.vitest) {
+  const { expect, it } = import.meta.vitest;
+
   it('文字を数値に変換する', () => {
     expect(cast('1', 0)).toBe(1);
     expect(cast('1.1', 1)).toBe(1.1);

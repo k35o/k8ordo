@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import type { FC, ReactNode } from 'react';
 import { renderToReadableStream } from 'react-dom/server';
+import { describe, expect, it } from 'vite-plus/test';
 import { render } from 'vitest-browser-react';
 
 import {

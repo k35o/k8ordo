@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vite-plus/test';
+
 import { asFile, policyProblems, redirectPage, sitemap } from './documents';
 
 describe('sitemap', () => {

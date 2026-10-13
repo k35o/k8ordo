@@ -136,6 +136,8 @@ export const localToday = (now: Date): IsoDate =>
   `${pad(now.getFullYear(), 4)}-${pad(now.getMonth() + 1, 2)}-${pad(now.getDate(), 2)}`;
 
 if (import.meta.vitest) {
+  const { describe, expect, it } = import.meta.vitest;
+
   describe('toUtcDate', () => {
     it('実在しない日付は受け付けない', () => {
       expect(toUtcDate('2023-02-29')).toBeNull();

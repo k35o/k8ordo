@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { parseSync } from 'vite';
+import { describe, expect, it } from 'vite-plus/test';
 
 const dist = fileURLToPath(new URL('../dist/', import.meta.url));
 

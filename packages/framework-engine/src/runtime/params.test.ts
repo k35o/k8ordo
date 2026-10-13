@@ -1,5 +1,7 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
 
+import { describe, expect, it } from 'vite-plus/test';
+
 import { parseCatchAllParams, parseParams } from './params';
 import type { ParamsSchema } from './params';
 

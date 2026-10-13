@@ -1,6 +1,8 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
+import { describe, expect, it } from 'vite-plus/test';
+
 // 複合コンポーネント（`X.Root` の形）を `'use client'` モジュールの中で
 // オブジェクトとして組み立てて export すると、RSC の server 環境では
 // export が参照プロキシになり `X.Root` が undefined になる。

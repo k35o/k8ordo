@@ -1,6 +1,14 @@
 import { notFound, usePathname } from '@k8ordo/router';
 import { Component, Suspense, use, useLayoutEffect } from 'react';
 import type { ReactNode } from 'react';
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vite-plus/test';
 import { cleanup, render } from 'vitest-browser-react';
 
 import { AppRouter, setDocumentClient } from './app-router';

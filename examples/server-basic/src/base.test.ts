@@ -4,6 +4,7 @@ import { serve } from '@k8ordo/framework/serve';
 import type { Server } from '@k8ordo/framework/serve';
 import { chromium, firefox, webkit } from 'playwright';
 import type { Browser } from 'playwright';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vite-plus/test';
 
 // CI はエンジンごとにジョブを分けて並べるので、TEST_BROWSER で 1 つに絞れる
 const browserTypes = [chromium, firefox, webkit]

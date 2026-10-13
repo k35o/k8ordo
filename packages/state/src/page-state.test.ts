@@ -1,4 +1,13 @@
 import type { RouteComponent, Routes } from '@k8ordo/router';
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  expectTypeOf,
+  it,
+  vi,
+} from 'vite-plus/test';
 import { z } from 'zod';
 import * as zm from 'zod/mini';
 

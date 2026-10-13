@@ -1,6 +1,7 @@
 import { parseRouteTree, buildTable } from '@k8ordo/framework-engine';
 import { defineRoutes } from '@k8ordo/router';
 import type { FC } from 'react';
+import { describe, expect, it } from 'vite-plus/test';
 
 import {
   answeredByRoute,

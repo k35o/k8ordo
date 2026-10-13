@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vite-plus/test';
+
 import { toTree } from './renderers';
 
 describe('toTree（生成 UI の Tree の平らな一覧を木に組む）', () => {

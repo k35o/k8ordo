@@ -4,6 +4,8 @@ export const toPrecision = (value: number, precision?: number): number => {
 };
 
 if (import.meta.vitest) {
+  const { expect, it } = import.meta.vitest;
+
   it('数値を指定した桁数に丸める', () => {
     expect(toPrecision(1.2345, 0)).toBe(1);
     expect(toPrecision(1.2345, 1)).toBe(1.2);

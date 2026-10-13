@@ -1,3 +1,12 @@
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vite-plus/test';
+
 import { currentLocale } from './current';
 import { defineLocales } from './locales';
 import { message } from './message';

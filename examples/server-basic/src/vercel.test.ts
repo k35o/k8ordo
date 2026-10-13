@@ -5,6 +5,7 @@ import path from 'node:path';
 
 import { vercel } from '@k8ordo/framework/vercel';
 import { createBuilder } from 'vite';
+import { beforeAll, describe, expect, it } from 'vite-plus/test';
 
 const root = path.resolve(import.meta.dirname, '..');
 const output = path.join(root, '.vercel', 'output');

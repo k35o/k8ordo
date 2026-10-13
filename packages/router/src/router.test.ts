@@ -1,5 +1,6 @@
 import { createElement } from 'react';
 import { renderToString } from 'react-dom/server';
+import { describe, expect, it } from 'vite-plus/test';
 
 import { useParams, useRoute } from './router';
 

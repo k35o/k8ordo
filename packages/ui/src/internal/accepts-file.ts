@@ -26,6 +26,8 @@ export const acceptsFile = (file: File, accept: string): boolean => {
 };
 
 if (import.meta.vitest) {
+  const { describe, expect, it } = import.meta.vitest;
+
   describe('acceptsFile', () => {
     it('MIME タイプの完全一致で受け取る', () => {
       expect(

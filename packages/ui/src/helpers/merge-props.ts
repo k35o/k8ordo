@@ -50,6 +50,8 @@ export const mergeProps = <A extends Props, B extends Props>(
 };
 
 if (import.meta.vitest) {
+  const { describe, expect, it } = import.meta.vitest;
+
   describe('mergeProps', () => {
     it('classNameをcnでマージする', () => {
       const merged = mergeProps(

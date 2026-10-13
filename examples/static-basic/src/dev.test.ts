@@ -5,6 +5,7 @@ import { chromium, firefox, webkit } from 'playwright';
 import type { Browser } from 'playwright';
 import { createLogger, createServer } from 'vite';
 import type { ViteDevServer } from 'vite';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vite-plus/test';
 
 const root = path.resolve(import.meta.dirname, '..');
 

@@ -1,4 +1,5 @@
 import { defineLocales } from '@k8ordo/i18n';
+import { afterEach, beforeEach, describe, expect, it } from 'vite-plus/test';
 
 import { getLocale, getMessages, registerMessages } from './current';
 import { en } from './en';

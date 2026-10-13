@@ -2,6 +2,7 @@ import { mapMessageParts } from '@k8ordo/ui/ai-sdk';
 import { validateGeneratedSpec } from '@k8ordo/ui/json-render';
 import { readUIMessageStream } from 'ai';
 import type { UIMessage, UIMessageChunk } from 'ai';
+import { expect, test } from 'vite-plus/test';
 
 import { answerSpec, scriptedTransport } from './scripted-transport';
 

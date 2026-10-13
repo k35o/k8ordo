@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vite-plus/test';
+
 import { isOurs, scrollPlanFor, transitionTypesFor } from './navigation';
 import type { NavigationFacts } from './navigation';
 

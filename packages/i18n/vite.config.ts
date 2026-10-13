@@ -26,7 +26,6 @@ export default defineConfig({
     unbundle: true,
   },
   test: {
-    globals: true,
     coverage: { all: false, provider: 'v8' },
     projects: [
       {

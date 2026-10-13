@@ -8,6 +8,14 @@ import {
   useState,
   ViewTransition,
 } from 'react';
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vite-plus/test';
 import { render } from 'vitest-browser-react';
 
 import { defineRoutes } from './define-routes';
