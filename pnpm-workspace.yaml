@@ -19,15 +19,15 @@ catalog:
   # 使う版を同じ 1 コピーに保つ (scripts/check-peer-copies.mjs が検査する)。
   '@json-render/core': 0.21.0
   '@json-render/react': 0.21.0
-  '@openuidev/lang-core': 0.3.0
-  '@openuidev/react-lang': 0.3.0
+  '@openuidev/lang-core': 0.3.1
+  '@openuidev/react-lang': 0.3.1
   '@tailwindcss/postcss': 4.3.3
   '@tailwindcss/vite': 4.3.3
-  '@types/node': 24.13.6
+  '@types/node': 24.19.1
   '@types/react': 19.3.0
   '@types/react-dom': 19.3.0
   '@vitejs/plugin-basic-ssl': 2.3.0
-  '@vitejs/plugin-react': 6.1.1
+  '@vitejs/plugin-react': 6.1.2
   '@vitest/browser': 5.0.3
   '@vitest/browser-playwright': 5.0.3
   '@vitest/browser-preview': 5.0.3
@@ -41,10 +41,10 @@ catalog:
   '@vitest/utils': 5.0.3
   # @k8ordo/ui/ai-sdk の peer。example が使う @ai-sdk/react は ai を exact で
   # 持つので、上げるときは同じ ai を持つ @ai-sdk/react と揃えて 1 コピーに保つ。
-  ai: 7.0.112
+  ai: 7.0.128
   playwright: 1.63.0
-  postcss: 8.5.28
-  publint: 0.3.24
+  postcss: 8.5.29
+  publint: 0.3.25
   react: 19.3.0
   react-dom: 19.3.0
   server-only: 0.0.1
@@ -69,7 +69,7 @@ minimumReleaseAge: 10080
 # tsc が "Excessive stack depth" を起こして typecheck が落ちる。単一バージョンに
 # 強制して型グラフのコピーを 1 つに保つ (types のみのパッケージでランタイム影響なし)。
 overrides:
-  '@oxc-project/types': 0.151.0
+  '@oxc-project/types': 0.153.0
 
   # vitest は vite-plus が exact pin (1.0.0 は 5.0.1) で連れてくる依存で、
   # `vp test` が起動するのは常に vite-plus 側の 1 本。catalog の vitest が
