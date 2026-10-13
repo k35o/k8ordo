@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import type { ComponentProps, FC, PropsWithChildren, ReactNode } from 'react';
 
 import type { Placement } from '../../../types/variables';
@@ -10,7 +10,7 @@ import { ChevronIcon } from '../../icons';
 import { useListNavigation } from '../_internal';
 import { Popover, useOpenContext } from '../popover';
 import { MenuContextProvider, useMenuContent, useMenuItem } from './hooks';
-import { cloneWithIndex, itemClass, panelClass } from './shared';
+import { itemClass, panelClass } from './shared';
 
 export const Root: FC<
   PropsWithChildren<{
@@ -39,12 +39,12 @@ export const Root: FC<
 
 const MenuProvider: FC<PropsWithChildren> = ({ children }) => {
   const { isOpen, onClose } = useOpenContext();
-  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const [activeId, setActiveId] = useState<string | null>(null);
 
   const nav = useListNavigation({
     open: isOpen,
-    activeIndex,
-    setActiveIndex,
+    activeId,
+    setActiveId,
     loop: true,
   });
 
@@ -62,7 +62,7 @@ export const Content: FC<PropsWithChildren> = ({ children }) => {
     <Popover.Content
       renderItem={(props) => (
         <div {...props} {...contentProps} className={panelClass}>
-          {cloneWithIndex(children)}
+          {children}
         </div>
       )}
     />
@@ -74,12 +74,9 @@ export type ItemProps = {
   label: string;
 };
 
-export const Item: FC<ItemProps & { index?: number }> = ({
-  label,
-  onAction,
-  index = 0,
-}) => {
-  const props = useMenuItem({ onAction, index });
+export const Item: FC<ItemProps> = ({ label, onAction }) => {
+  const id = useId();
+  const props = useMenuItem({ onAction, id });
 
   return (
     <button className={itemClass} type="button" {...props}>

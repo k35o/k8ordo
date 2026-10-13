@@ -43,11 +43,11 @@ const MenuRoot: FC<PropsWithChildren> = ({ children }) => {
   const { setTriggerRef } = usePopoverContext();
   const [point, setPoint] = useState<Point>({ x: 0, y: 0 });
   const returnFocusRef = useRef<HTMLElement | null>(null);
-  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const [activeId, setActiveId] = useState<string | null>(null);
   const nav = useListNavigation({
     open: isOpen,
-    activeIndex,
-    setActiveIndex,
+    activeId,
+    setActiveId,
     loop: true,
   });
 

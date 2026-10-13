@@ -94,6 +94,7 @@ export const { registry } = defineRegistry(catalog, {
     EmptyState: ({ props }) => ui.renderEmptyState(props),
     // json-render は子を 1 つの ReactNode で渡すので、スライドごとに分ける
     Carousel: ({ props, children }) =>
+      // oxlint-disable-next-line react/no-react-children
       ui.renderCarousel(props, Children.toArray(children)),
     Progress: ({ props }) => ui.renderProgress(props),
     Skeleton: ({ props }) => ui.renderSkeleton(props),

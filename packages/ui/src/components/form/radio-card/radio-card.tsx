@@ -86,7 +86,7 @@ export const RadioCard: FC<Props> = ({
               'has-[input:focus-visible]:outline-hidden has-[input:focus-visible]:ring-2 has-[input:focus-visible]:ring-border-info',
               // 非制御のとき、form の reset は change を飛ばさずに checked を戻すので、
               // 見た目は state ではなく input の :checked から引く
-              'has-checked:border-primary-border has-checked:bg-primary-bg-subtle hover:has-checked:bg-primary-bg-mute',
+              'has-checked:border-primary-border has-checked:bg-primary-bg-subtle has-checked:hover:bg-primary-bg-mute',
               invalid
                 ? 'border-border-error has-checked:border-border-error'
                 : 'border-border-mute hover:bg-bg-subtle',

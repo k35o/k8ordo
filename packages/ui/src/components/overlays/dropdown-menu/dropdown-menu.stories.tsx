@@ -154,6 +154,60 @@ export const WithSubMenu: Story = {
   },
 };
 
+// 項目を自前の部品にまとめても、矢印キーは描かれた並びのとおりに移る
+const ClipboardItems = () => (
+  <>
+    <DropdownMenu.Item
+      label="コピー"
+      onAction={() => {
+        console.warn('コピー');
+      }}
+    />
+    <DropdownMenu.Item
+      label="貼り付け"
+      onAction={() => {
+        console.warn('貼り付け');
+      }}
+    />
+  </>
+);
+
+export const ItemsInOwnComponent: Story = {
+  render: () => (
+    <DropdownMenu.Root>
+      <DropdownMenu.Trigger label="操作" />
+      <DropdownMenu.Content>
+        <DropdownMenu.Item
+          label="切り取り"
+          onAction={() => {
+            console.warn('切り取り');
+          }}
+        />
+        <ClipboardItems />
+        <DropdownMenu.Item
+          label="削除"
+          onAction={() => {
+            console.warn('削除');
+          }}
+        />
+      </DropdownMenu.Content>
+    </DropdownMenu.Root>
+  ),
+  play: async ({ canvas, userEvent }) => {
+    canvas.getByRole('button', { name: '操作' }).focus();
+    await userEvent.keyboard('{Enter}');
+    await waitFor(() => {
+      expect(screen.getByRole('menuitem', { name: '切り取り' })).toHaveFocus();
+    });
+    for (const name of ['コピー', '貼り付け', '削除', '切り取り']) {
+      await userEvent.keyboard('{ArrowDown}');
+      await waitFor(() => {
+        expect(screen.getByRole('menuitem', { name })).toHaveFocus();
+      });
+    }
+  },
+};
+
 /**
  * safe triangle の可視化。サブメニューを hover で開いてトリガーの上で
  * ポインタを動かすと、サブメニューへの斜め移動を許す三角形が着色される。

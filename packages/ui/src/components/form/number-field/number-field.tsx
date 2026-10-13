@@ -256,7 +256,7 @@ export const NumberField: FC<Props> = ({
         'relative flex h-12 w-full items-center justify-between gap-2 rounded-xl border border-border-base bg-bg-base vertical:h-auto vertical:w-12',
         FOCUS_RING_WITHIN,
         'has-aria-invalid:border-border-error',
-        'has-disabled:cursor-not-allowed has-disabled:border-border-mute has-disabled:bg-bg-mute hover:has-disabled:has-hover:bg-bg-mute',
+        'has-disabled:cursor-not-allowed has-disabled:border-border-mute has-disabled:bg-bg-mute has-disabled:has-hover:hover:bg-bg-mute',
       )}
     >
       <input

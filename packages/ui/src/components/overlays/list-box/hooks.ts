@@ -33,7 +33,7 @@ export const useMenuContent = () => {
   );
 };
 
-export const useMenuItem = (index: number) => {
+export const useMenuItem = (index: number, id: string) => {
   const menu = useMenuContext();
   const { onClose } = useOpenContext();
   return useMemo(
@@ -42,14 +42,14 @@ export const useMenuItem = (index: number) => {
       props: {
         role: 'option' as const,
         'aria-selected': menu.selectedIndex === index,
-        ...menu.getItemProps(index),
+        ...menu.getItemProps(id),
         onClick: () => {
           menu.handleSelect(index);
           onClose();
         },
       },
     }),
-    [index, menu, onClose],
+    [id, index, menu, onClose],
   );
 };
 

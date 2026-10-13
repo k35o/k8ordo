@@ -46,6 +46,7 @@ const isSection = (
  * an h3, so the contents cannot list a heading the page does not have.
  */
 const outlineOf = (children: ReactNode): TableOfContentsItem[] =>
+  // oxlint-disable-next-line react/no-react-children
   Children.toArray(children).flatMap((child): TableOfContentsItem[] => {
     if (
       isValidElement<{ children?: ReactNode }>(child) &&
@@ -54,6 +55,7 @@ const outlineOf = (children: ReactNode): TableOfContentsItem[] =>
       return outlineOf(child.props.children);
     }
     if (!isSection(child, [DocSection, Playground, ApiEntry])) return [];
+    // oxlint-disable-next-line react/no-react-children
     const subsections = Children.toArray(child.props.children)
       .filter((node) => isSection(node, [DocSubsection]))
       .map((node) => ({ id: node.props.id, label: labelOf(node.props) }));
