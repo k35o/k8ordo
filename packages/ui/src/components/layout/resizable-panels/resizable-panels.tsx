@@ -1,21 +1,15 @@
 'use client';
 
-import {
-  Children,
-  cloneElement,
-  isValidElement,
-  useId,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { useCallback, useId, useMemo, useRef, useState } from 'react';
 import type {
   CSSProperties,
+  Dispatch,
   FC,
   HTMLAttributes,
   KeyboardEvent,
   PointerEvent,
   Ref,
+  SetStateAction,
 } from 'react';
 
 import { cn } from '../../../helpers/cn';
@@ -36,7 +30,9 @@ type PanelsContext = {
   step: number;
   /** 1 枚目と 2 枚目が見た目で左右に並ぶか。縦書きでは向きが入れ替わる */
   visualOrientation: Orientation;
-  primaryId: string;
+  /** 仕切りの aria-controls が指す 1 枚目の id。描いた後に 1 枚目が伝える */
+  primaryId: string | null;
+  setPrimaryId: Dispatch<SetStateAction<string | null>>;
   root: HTMLDivElement | null;
 };
 
@@ -98,8 +94,8 @@ export const Root: FC<
   ref,
   ...rest
 }) => {
-  const generatedId = useId();
   const [root, setRoot] = useState<HTMLDivElement | null>(null);
+  const [primaryId, setPrimaryId] = useState<string | null>(null);
   const mergedRef = useMemo(() => mergeRefs(setRoot, ref), [ref]);
   const [size, setSize] = useControllableState({
     value,
@@ -113,15 +109,6 @@ export const Root: FC<
         ? 'vertical'
         : 'horizontal'
       : orientation;
-
-  // 仕切りの aria-controls が指す 1 枚目に id が要る
-  const [first, ...others] = Children.toArray(children);
-  const primaryId = isValidElement<{ id?: string }>(first)
-    ? (first.props.id ?? generatedId)
-    : generatedId;
-  const primary = isValidElement<{ id?: string }>(first)
-    ? cloneElement(first, { id: primaryId })
-    : first;
   const clamped = clamp(size, min, max);
 
   return (
@@ -136,6 +123,7 @@ export const Root: FC<
         step,
         visualOrientation,
         primaryId,
+        setPrimaryId,
         root,
       }}
     >
@@ -150,8 +138,7 @@ export const Root: FC<
         ref={mergedRef}
         style={{ '--panels-size': `${String(clamped)}%` } as CSSProperties}
       >
-        {primary}
-        {others}
+        {children}
       </div>
     </PanelsProvider>
   );
@@ -162,9 +149,38 @@ export const Panel: FC<
     HTMLAttributes<HTMLDivElement>,
     'className' | 'style'
   >
-> = ({ ref, ...rest }) => (
-  <div {...rest} className="overflow-auto min-block-0 min-inline-0" ref={ref} />
-);
+> = ({ id, ref, ...rest }) => {
+  const generatedId = useId();
+  const panelId = id ?? generatedId;
+  const { setPrimaryId } = usePanels();
+  // どれが 1 枚目かは描いた後の並びでしか分からないので、並びの先頭に付いた
+  // パネルが自分の id を根に伝える
+  const claimPrimary = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (node?.previousElementSibling !== null) {
+        return;
+      }
+      setPrimaryId(panelId);
+      return () => {
+        setPrimaryId((current) => (current === panelId ? null : current));
+      };
+    },
+    [panelId, setPrimaryId],
+  );
+  const mergedRef = useMemo(
+    () => mergeRefs(claimPrimary, ref),
+    [claimPrimary, ref],
+  );
+
+  return (
+    <div
+      {...rest}
+      className="overflow-auto min-block-0 min-inline-0"
+      id={panelId}
+      ref={mergedRef}
+    />
+  );
+};
 
 export const Handle: FC<
   Omit<
@@ -236,7 +252,7 @@ export const Handle: FC<
   return (
     <div
       {...rest}
-      aria-controls={primaryId}
+      aria-controls={primaryId ?? undefined}
       aria-label={
         ariaLabel ??
         (rest['aria-labelledby'] === undefined
