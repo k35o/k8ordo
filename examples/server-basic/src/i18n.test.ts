@@ -1,5 +1,6 @@
 import { message } from '@k8ordo/i18n';
 import type { RegisteredLocale } from '@k8ordo/i18n';
+import { expectTypeOf, it } from 'vite-plus/test';
 
 // src/i18n.ts は Register を書かない。フレームワークが .k8ordo/register.gen.ts に
 // 生成したものが効いていることを、型チェック（pnpm typecheck）で確かめる

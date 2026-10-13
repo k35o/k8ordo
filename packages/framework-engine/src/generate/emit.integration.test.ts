@@ -1,5 +1,6 @@
 import { defineRoutes } from '@k8ordo/router';
 import type { FC } from 'react';
+import { describe, expect, it } from 'vite-plus/test';
 
 import { parseRouteTree } from '../grammar/tree';
 import { buildTable } from './emit';

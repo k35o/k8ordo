@@ -1,3 +1,12 @@
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vite-plus/test';
+
 import { bindParams, href } from './links';
 import type { NavigateToOptions } from './links';
 

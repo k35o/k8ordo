@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vite-plus/test';
+
 import { catalog, uiRules, validateGeneratedSpec } from './json-render/catalog';
 import { prompt } from './openui/prompt';
 

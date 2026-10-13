@@ -9,6 +9,8 @@ export const chain =
   };
 
 if (import.meta.vitest) {
+  const { describe, expect, it, vi } = import.meta.vitest;
+
   describe('chain', () => {
     it('渡されたコールバックを順番に呼び出す', () => {
       const calls: number[] = [];

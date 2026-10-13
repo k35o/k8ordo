@@ -4,6 +4,8 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { brotliCompressSync, gzipSync } from 'node:zlib';
 
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vite-plus/test';
+
 import { serve } from './serve';
 import type { Server } from './serve';
 

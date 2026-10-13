@@ -5,6 +5,8 @@ import { twMerge } from 'tailwind-merge';
 export const cn = (...inputs: ClassValue[]) => twMerge(clsx(inputs));
 
 if (import.meta.vitest) {
+  const { describe, expect, it } = import.meta.vitest;
+
   describe('cn', () => {
     it('複数のクラス名を空白区切りで結合する', () => {
       expect(cn('flex', 'items-center')).toBe('flex items-center');

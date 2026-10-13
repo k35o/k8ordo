@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vite-plus/test';
+
 import { resolveRedirects } from './redirect-file';
 
 // ハンドラが渡すのは URL が綴った pathname なので、テストも URL に綴らせる

@@ -38,7 +38,6 @@
     // (エラーは型だけに出る)。catalog で 1 本に揃えているのはそのため。
     "types": [
       "node",
-      "vite-plus/test/globals",
       "vite-plus/test/importMeta",
       "@vitest/browser/matchers"
     ]

@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vite-plus/test';
 import * as zm from 'zod/mini';
 import { globalRegistry } from 'zod/v4/core';
 

@@ -1,3 +1,5 @@
+import { afterAll, beforeAll, describe, expect, it } from 'vite-plus/test';
+
 import { buildFixture } from '../../fixtures/build';
 import type { BuiltFixture } from '../../fixtures/build';
 

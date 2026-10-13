@@ -1,4 +1,5 @@
 import { renderToString } from 'react-dom/server';
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { mount } from './mount';
 

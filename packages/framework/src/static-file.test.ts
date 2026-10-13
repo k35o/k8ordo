@@ -1,5 +1,7 @@
 import path from 'node:path';
 
+import { describe, expect, it } from 'vite-plus/test';
+
 import { safeJoin } from './static-file';
 
 const ROOT = path.resolve('/srv/app/dist/client');

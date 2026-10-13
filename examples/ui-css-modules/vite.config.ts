@@ -7,7 +7,6 @@ import { defineConfig } from 'vite-plus';
 export default defineConfig({
   plugins: [react()],
   test: {
-    globals: true,
     fsModuleCache: true,
   },
 });

@@ -5,7 +5,6 @@ import { defineConfig } from 'vite-plus';
 // node テストなので、フレームワークのプラグインもここでは要らない
 export default defineConfig({
   test: {
-    globals: true,
     fsModuleCache: true,
     include: ['src/**/*.test.ts'],
     globalSetup: ['./global-setup.ts'],

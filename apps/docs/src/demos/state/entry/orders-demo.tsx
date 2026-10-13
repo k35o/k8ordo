@@ -27,8 +27,6 @@ const ORDERS = [
 
 // 絞り込みは URL（共有される面）、開いている注文は履歴エントリ（隠れた面）。
 // クライアントだけが読むので、定義はこのモジュールに置いている
-/* oxlint-disable no-underscore-dangle -- `_default` は zod/mini における
-   `.default()` の綴り */
 const ordersState = definePageState('state-entry-demo', {
   url: z.object({
     status: z._default(z.enum(STATUSES), 'all'),
@@ -37,7 +35,6 @@ const ordersState = definePageState('state-entry-demo', {
     expanded: z._default(z.array(z.string()), []),
   }),
 });
-/* oxlint-enable no-underscore-dangle */
 
 export function OrdersDemo() {
   const [{ status, expanded }, update] = useAppState(ordersState);

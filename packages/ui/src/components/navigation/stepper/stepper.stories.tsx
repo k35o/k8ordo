@@ -97,7 +97,6 @@ export const AllDone: Story = {
   },
   play: async ({ canvas }) => {
     for (const item of canvas.getAllByRole('listitem')) {
-      // eslint-disable-next-line no-await-in-loop -- 3 つの段を順に確かめるだけ
       await expect(item).toHaveTextContent('完了');
     }
   },
@@ -130,7 +129,6 @@ export const InteractiveTarget: Story = {
     await expect((marker?.left ?? 0) - target.left).toBeGreaterThanOrEqual(8);
     await expect((marker?.top ?? 0) - target.top).toBeGreaterThanOrEqual(8);
     for (const connector of connectorsOf(canvasElement)) {
-      // eslint-disable-next-line no-await-in-loop -- 線を順に確かめるだけ
       await expect(button).not.toContainElement(connector);
     }
   },
@@ -168,7 +166,6 @@ export const NarrowWithLongLabels: Story = {
     for (const [index, step] of args.steps.entries()) {
       const { top } = canvas.getByText(step.label).getBoundingClientRect();
       const { bottom } = markers[index]?.getBoundingClientRect() ?? {};
-      // eslint-disable-next-line no-await-in-loop -- 3 つの段を順に確かめるだけ
       await expect(top).toBeGreaterThanOrEqual(bottom ?? Infinity);
     }
   },
@@ -219,9 +216,7 @@ export const VerticalWritingMode: Story = {
     await expect(connectors).toHaveLength(2);
     for (const connector of connectors) {
       const { width, height } = connector.getBoundingClientRect();
-      // eslint-disable-next-line no-await-in-loop -- 2 本の線を順に確かめるだけ
       await expect(width).toBeGreaterThanOrEqual(1);
-      // eslint-disable-next-line no-await-in-loop -- 同上
       await expect(height).toBeGreaterThan(width);
     }
   },
@@ -239,9 +234,7 @@ export const VerticalOrientationInVerticalWritingMode: Story = {
     await expect(connectors).toHaveLength(2);
     for (const connector of connectors) {
       const { width, height } = connector.getBoundingClientRect();
-      // eslint-disable-next-line no-await-in-loop -- 2 本の線を順に確かめるだけ
       await expect(height).toBeGreaterThanOrEqual(1);
-      // eslint-disable-next-line no-await-in-loop -- 同上
       await expect(width).toBeGreaterThan(height);
     }
   },

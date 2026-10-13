@@ -37,7 +37,7 @@ const ESM_ENTRY = '[name].js';
 
 /** Vite's own answer, so nothing downstream can disagree with it. */
 const isProduction = (mode: string): boolean =>
-  (process.env['NODE_ENV'] ?? process.env['VITE_USER_NODE_ENV'] ?? mode) ===
+  (process.env.NODE_ENV ?? process.env.VITE_USER_NODE_ENV ?? mode) ===
   'production';
 
 /**

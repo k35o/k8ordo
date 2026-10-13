@@ -115,8 +115,8 @@ const lines = regroupSections(source, CATEGORIES, (name) =>
 const out: string[] = [];
 
 let heading: string | null = null;
-/** A `##` has started since the current `###`, so the block below belongs elsewhere. */
-let headingLeftBehind = false;
+/** The `###` a `##` has since closed, so the block below belongs elsewhere. */
+let headingLeftBehind: string | null = null;
 const rewritten = new Set<string>();
 const unknown: string[] = [];
 const misplaced: string[] = [];
@@ -128,12 +128,12 @@ for (let i = 0; i < lines.length; i++) {
   // next one. Only the contents of a block are generated, never its position,
   // so a marker parked past the boundary would otherwise be filled in silently
   // and read as if it documented a component from the following section.
-  if (line.startsWith('## ')) headingLeftBehind = heading !== null;
+  if (line.startsWith('## ')) headingLeftBehind = heading;
 
   const headingMatch = /^### (\S+)/u.exec(line);
   if (headingMatch) {
     heading = headingMatch[1] ?? null;
-    headingLeftBehind = false;
+    headingLeftBehind = null;
   }
 
   const propsMatch = /^Props(?: \(([\w.]+)\))?:\s*$/u.exec(line);
@@ -142,8 +142,10 @@ for (let i = 0; i < lines.length; i++) {
     continue;
   }
 
-  if (headingLeftBehind) {
-    misplaced.push(`${line.trim()} (${i + 1} 行目、### ${heading} の節の外)`);
+  if (headingLeftBehind !== null) {
+    misplaced.push(
+      `${line.trim()} (${i + 1} 行目、### ${headingLeftBehind} の節の外)`,
+    );
   }
 
   // `Props (Root):` inside `### Tabs` means `Tabs.Root`.

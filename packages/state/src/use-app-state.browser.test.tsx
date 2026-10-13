@@ -2,6 +2,7 @@ import type { FC, ReactElement } from 'react';
 import { useEffect, useLayoutEffect, useState } from 'react';
 import { hydrateRoot } from 'react-dom/client';
 import { renderToString } from 'react-dom/server';
+import { afterEach, beforeEach, expect, it, vi } from 'vite-plus/test';
 import { render } from 'vitest-browser-react';
 import { z } from 'zod';
 
@@ -35,8 +36,8 @@ const countNavigations = () => {
 beforeEach(() => {
   home = location.href;
   navigations = 0;
-  renders['pager'] = 0;
-  renders['query'] = 0;
+  renders.pager = 0;
+  renders.query = 0;
   lastHandle = undefined;
   navigation.addEventListener('navigate', interceptAsRouter);
   navigation.addEventListener('navigate', countNavigations);
@@ -63,7 +64,7 @@ let lastHandle: UpdateHandle | undefined;
 const Pager: FC = () => {
   const [{ page }, update] = useAppState(listState, ['page']);
   useEffect(() => {
-    renders['pager'] = (renders['pager'] ?? 0) + 1;
+    renders.pager = (renders.pager ?? 0) + 1;
   });
   return (
     <>
@@ -88,7 +89,7 @@ const Pager: FC = () => {
         type="button"
         onClick={() => {
           update({ q: 'shoes' });
-          update((current) => ({ page: current['page'] + 1 }));
+          update((current) => ({ page: current.page + 1 }));
         }}
       >
         both
@@ -116,7 +117,7 @@ const Pager: FC = () => {
 const QueryViewer: FC = () => {
   const [{ q }] = useAppState(listState, ['q']);
   useEffect(() => {
-    renders['query'] = (renders['query'] ?? 0) + 1;
+    renders.query = (renders.query ?? 0) + 1;
   });
   return <p data-testid="q">{q}</p>;
 };
@@ -253,13 +254,13 @@ it('does not re-render a component subscribed to other keys', async () => {
       <QueryViewer />
     </>,
   );
-  const queryRenders = renders['query'];
+  const queryRenders = renders.query;
 
   await screen.getByRole('button', { name: 'next', exact: true }).click();
   await expect.element(screen.getByTestId('page')).toHaveTextContent('2');
   await (lastHandle as UpdateHandle).finished;
 
-  expect(renders['query']).toBe(queryRenders);
+  expect(renders.query).toBe(queryRenders);
 });
 
 it('collapses several updates in one handler into one navigation', async () => {
@@ -1226,7 +1227,7 @@ const versionedSchema = z.object({
 const versioning = {
   version: 2,
   migrate: (old: Readonly<Record<string, unknown>>) => ({
-    view: old['layout'] === 'list' ? 'table' : 'grid',
+    view: old.layout === 'list' ? 'table' : 'grid',
   }),
 };
 

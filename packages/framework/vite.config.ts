@@ -23,7 +23,6 @@ export default defineConfig({
     copy: [{ from: '../framework-engine/dist/runtime', to: 'dist' }],
   },
   test: {
-    globals: true,
     fsModuleCache: true,
     coverage: { all: false, provider: 'v8' },
     include: ['src/**/*.test.ts'],

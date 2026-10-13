@@ -100,7 +100,7 @@ export const serverMode = (): Plugin => ({
     order: 'post',
     async handler(builder) {
       const { root, logger } = builder.config;
-      const clientOut = builder.environments['client']?.config.build.outDir;
+      const clientOut = builder.environments.client?.config.build.outDir;
       if (clientOut === undefined) {
         throw new Error('server build ran without the client build');
       }

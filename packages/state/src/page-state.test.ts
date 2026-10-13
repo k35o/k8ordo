@@ -1,4 +1,13 @@
 import type { RouteComponent, Routes } from '@k8ordo/router';
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  expectTypeOf,
+  it,
+  vi,
+} from 'vite-plus/test';
 import { z } from 'zod';
 import * as zm from 'zod/mini';
 
@@ -191,7 +200,6 @@ describe('definePageState', () => {
     expect(() =>
       definePageState('flag-list-mini', {
         url: zm.object({
-          // oxlint-disable-next-line no-underscore-dangle -- `_default` is zod/mini's own spelling of `.default()`
           flags: zm._default(zm.array(zm.boolean()), []),
         }),
       }),
@@ -402,15 +410,12 @@ describe('the entry slot', () => {
 });
 
 describe('a schema written with zod/mini', () => {
-  /* oxlint-disable no-underscore-dangle -- `_default` is zod/mini's own
-     spelling of `.default()` */
   const miniState = definePageState('mini', {
     url: zm.object({
       q: zm._default(zm.string(), ''),
       page: zm._default(zm.coerce.number().check(zm.int(), zm.gte(1)), 1),
     }),
   });
-  /* oxlint-enable no-underscore-dangle */
 
   it('parses and serializes the same way', () => {
     expect(miniState.parseUrl(new URLSearchParams('page=4'))).toStrictEqual({

@@ -12,8 +12,6 @@ const t = m.stateUrl;
 
 // ページに載せる catalogState と同じ形。parseUrl と search は純粋なので、
 // ストアは作らず、このページの URL にも触れない
-/* oxlint-disable no-underscore-dangle -- `_default` は zod/mini における
-   `.default()` の綴り */
 const catalogState = definePageState('state-url-demo', {
   url: z.object({
     q: z._default(z.string(), ''),
@@ -22,7 +20,6 @@ const catalogState = definePageState('state-url-demo', {
     tags: z._default(z.array(z.enum(['sale', 'new'])), []),
   }),
 });
-/* oxlint-enable no-underscore-dangle */
 
 export function QueryDemo() {
   const [query, setQuery] = useState('q=lamp&page=2');

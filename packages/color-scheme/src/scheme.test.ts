@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vite-plus/test';
+
 import { colorSchemeState, resolve, scriptFor } from './scheme';
 
 describe('resolve', () => {

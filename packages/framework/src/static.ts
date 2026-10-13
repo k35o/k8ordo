@@ -561,7 +561,7 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
       const { config } = server;
       const client = path.resolve(
         config.root,
-        config.environments['client']?.build.outDir ?? 'dist/client',
+        config.environments.client?.build.outDir ?? 'dist/client',
       );
       const rules = await readRules(client);
       const answeredHere = async (
@@ -726,8 +726,8 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
           throw new Error(unanswerable.join('\n\n'));
         }
 
-        const rscOut = builder.environments['rsc']?.config.build.outDir;
-        const client = builder.environments['client']?.config;
+        const rscOut = builder.environments.rsc?.config.build.outDir;
+        const client = builder.environments.client?.config;
         if (rscOut === undefined || client === undefined) {
           throw new Error('static build ran without the rsc/client builds');
         }
@@ -1007,7 +1007,7 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
           });
         } else if (
           vercel === undefined &&
-          process.env['VERCEL'] !== undefined &&
+          process.env.VERCEL !== undefined &&
           plan.shells.length > 0
         ) {
           builder.config.logger.warn(
@@ -1084,7 +1084,6 @@ const inParallel = async (
   const worker = async (): Promise<void> => {
     for (let task = tasks[next++]; task !== undefined; task = tasks[next++]) {
       // A worker is sequential on purpose — that is what bounds the width.
-      // oxlint-disable-next-line eslint/no-await-in-loop
       await task();
     }
   };

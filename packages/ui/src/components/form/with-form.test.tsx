@@ -9,6 +9,7 @@ import {
 import type { ParseResult } from '@k8ordo/form/server';
 import { useActionState } from 'react';
 import type { ReactNode } from 'react';
+import { beforeEach, describe, expect, it } from 'vite-plus/test';
 import { render } from 'vitest-browser-react';
 import { page, userEvent } from 'vitest/browser';
 import { z } from 'zod';
@@ -720,7 +721,7 @@ describe('CheckboxGroup', () => {
                 <CheckboxGroup.Root
                   {...props}
                   {...tags.input}
-                  defaultValue={listOf(state.values?.['tags'])}
+                  defaultValue={listOf(state.values?.tags)}
                 >
                   {tagOptions.map((option) => (
                     <CheckboxGroup.Item
@@ -798,7 +799,7 @@ describe('CheckboxCard', () => {
                 <CheckboxCard
                   {...props}
                   {...tags.input}
-                  defaultValue={listOf(state.values?.['tags'])}
+                  defaultValue={listOf(state.values?.tags)}
                   options={tagOptions}
                 />
               )}
@@ -872,7 +873,7 @@ describe('Autocomplete', () => {
                 <Autocomplete
                   {...props}
                   {...tags.input}
-                  defaultValue={listOf(state.values?.['tags'])}
+                  defaultValue={listOf(state.values?.tags)}
                   options={tagOptions}
                 />
               )}

@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vite-plus/test';
+
 import { fallbackShapes, parseRouteTree, slotOf } from './tree';
 import type { RouteDir } from './tree';
 

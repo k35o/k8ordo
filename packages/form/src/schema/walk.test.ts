@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vite-plus/test';
 import { z } from 'zod';
 
 import { formFields } from '../derive/form-fields';

@@ -14,6 +14,7 @@ import path from 'node:path';
 
 import { framework } from '@k8ordo/framework/vite';
 import { createBuilder } from 'vite';
+import { afterAll, beforeAll, describe, expect, it } from 'vite-plus/test';
 
 import { formDataOf } from './form-data';
 

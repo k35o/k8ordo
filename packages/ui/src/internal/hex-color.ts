@@ -12,7 +12,7 @@ export const parseHex = (
   text: string,
   { shorthand = false }: { shorthand?: boolean } = {},
 ): string | null => {
-  const digits = HEX.exec(text.trim())?.groups?.['digits'];
+  const digits = HEX.exec(text.trim())?.groups?.digits;
   if (digits === undefined || (digits.length === 3 && !shorthand)) {
     return null;
   }
@@ -68,6 +68,8 @@ export const hslToHex = ({ h, s, l }: Hsl): string => {
 };
 
 if (import.meta.vitest) {
+  const { describe, expect, it } = import.meta.vitest;
+
   describe('parseHex', () => {
     it('#rrggbb の小文字にそろえる', () => {
       expect(parseHex('#0D9488')).toBe('#0d9488');

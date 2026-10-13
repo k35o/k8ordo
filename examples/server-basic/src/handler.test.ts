@@ -7,6 +7,7 @@ import { pathToFileURL } from 'node:url';
 import { serve } from '@k8ordo/framework/serve';
 import type { Server } from '@k8ordo/framework/serve';
 import { parseSync } from 'vite';
+import { afterAll, beforeAll, describe, expect, it } from 'vite-plus/test';
 
 import { formDataOf } from './form-data';
 

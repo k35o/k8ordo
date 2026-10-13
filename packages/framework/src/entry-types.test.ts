@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { parseSync } from 'vite';
+import { describe, expect, it } from 'vite-plus/test';
 
 const dist = fileURLToPath(new URL('../dist/', import.meta.url));
 
@@ -28,7 +29,6 @@ const packagesReachedBy = async (entry: string): Promise<readonly string[]> => {
     for (const specifier of specifiers) {
       if (specifier.startsWith('.')) {
         // チャンクは .mjs の名前で読まれ、型はその隣の .d.mts にある
-        // oxlint-disable-next-line eslint/no-await-in-loop
         await visit(
           path.resolve(
             path.dirname(file),

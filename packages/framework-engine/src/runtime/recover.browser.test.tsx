@@ -1,5 +1,6 @@
 import { Component } from 'react';
 import type { ReactNode } from 'react';
+import { beforeEach, expect, it, vi } from 'vite-plus/test';
 import { render } from 'vitest-browser-react';
 
 import { markNavigated, Recover, reloadInstead } from './recover';

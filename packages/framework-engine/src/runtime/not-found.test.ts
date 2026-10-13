@@ -6,6 +6,7 @@ import path from 'node:path';
 
 import { chromium, firefox, webkit } from 'playwright';
 import type { Browser, Page } from 'playwright';
+import { afterAll, beforeAll, describe, expect, it } from 'vite-plus/test';
 
 import { buildFixture } from '../../fixtures/build';
 import type { BuiltFixture } from '../../fixtures/build';

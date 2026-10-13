@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vite-plus/test';
+
 import { fillGenerated, regroupSections, wrap } from './component-docs.ts';
 
 const TITLES = new Map([

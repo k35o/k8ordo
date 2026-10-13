@@ -25,11 +25,10 @@ type Def = {
   element?: $ZodType;
 };
 
-/* oxlint-disable no-underscore-dangle -- `_zod` is where the shared core
-   keeps the def; there is no public spelling of it */
+/* `_zod` is where the shared core keeps the def; there is no public spelling of
+   it */
 const defOf = (schema: $ZodType): Def =>
   (schema as unknown as { _zod: { def: Def } })._zod.def;
-/* oxlint-enable no-underscore-dangle */
 
 /**
  * Peels wrappers (`default`, `optional`, `catch`, …) and pipes down to the

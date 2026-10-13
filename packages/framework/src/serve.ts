@@ -215,7 +215,7 @@ const sendAnswer = async (
     : null;
   if (compressible) {
     const vary = result.headers.get('vary');
-    headers['vary'] =
+    headers.vary =
       vary === null ? 'Accept-Encoding' : `${vary}, Accept-Encoding`;
   }
   if (encoding !== null) {

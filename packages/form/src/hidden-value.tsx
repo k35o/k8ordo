@@ -30,7 +30,7 @@ export const HiddenValue: FC<{ name: string; value: string }> = ({
   const attach = useCallback((element: HTMLInputElement | null) => {
     node.current = element;
     if (element !== null) {
-      element.dataset['initial'] = element.value;
+      element.dataset.initial = element.value;
     }
   }, []);
 

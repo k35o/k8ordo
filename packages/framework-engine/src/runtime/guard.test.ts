@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vite-plus/test';
+
 import { runGuards } from './guard';
 import { responseHeaders, withRequest } from './request-scope';
 

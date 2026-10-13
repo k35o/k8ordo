@@ -1,5 +1,6 @@
 import type { RouteComponent } from '@k8ordo/router';
 import { createElement, Fragment } from 'react';
+import { describe, expect, it } from 'vite-plus/test';
 
 import { watchPage } from './page-watch';
 

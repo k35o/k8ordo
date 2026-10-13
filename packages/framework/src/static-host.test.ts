@@ -2,6 +2,8 @@ import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
+import { afterEach, beforeEach, describe, expect, it } from 'vite-plus/test';
+
 import { readRules, resolveStatic } from './static-host';
 
 let client: string;

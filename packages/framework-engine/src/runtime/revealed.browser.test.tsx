@@ -1,3 +1,5 @@
+import { afterEach, describe, expect, it } from 'vite-plus/test';
+
 import { whenRevealed } from './revealed';
 
 const placed: Comment[] = [];

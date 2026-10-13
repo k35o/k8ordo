@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vite-plus/test';
+
 import { cookies, withRequest } from './request-scope';
 import { methodNotAllowed, methodsOf, routeAnswerFor, runRoute } from './route';
 

@@ -18,6 +18,7 @@ import type {
   ResolvedConfig,
   UserConfig,
 } from 'vite';
+import { describe, expect, it } from 'vite-plus/test';
 
 import { engine } from './core';
 

@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vite-plus/test';
+
 import { withBase, withoutBase } from './base';
 
 describe('withBase', () => {

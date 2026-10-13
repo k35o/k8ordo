@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vite-plus/test';
+
 import { isPayloadPath, pagePathFor, payloadPathFor } from './payload-path';
 
 describe('the payload path convention', () => {

@@ -24,7 +24,7 @@ export default function SectionLayout({
   return (
     <section
       data-keys={Object.keys(params).join(',')}
-      data-section={params['section']}
+      data-section={params.section}
     >
       {children}
     </section>

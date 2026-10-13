@@ -98,7 +98,6 @@ export default defineConfig({
     define: { 'import.meta.vitest': 'undefined' },
   },
   test: {
-    globals: true,
     fsModuleCache: true,
     // vitest はブラウザのプロジェクトごとに（コア数 - 1）枚のページを開く。
     // 自分だけが走っている前提の数なので、6 つが同時に走る 4 コアの CI では

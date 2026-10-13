@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vite-plus/test';
+
 import { createPrefetchCache, PREFETCH_LIFETIME } from './prefetch';
 
 // 時計はテストが進める。読み込みは呼ばれた key と signal を記録して、

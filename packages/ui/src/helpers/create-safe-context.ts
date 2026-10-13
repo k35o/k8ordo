@@ -20,6 +20,8 @@ export const createSafeContext = <T>(
 };
 
 if (import.meta.vitest) {
+  const { describe, expect, it } = import.meta.vitest;
+
   describe('createSafeContext', () => {
     it('Provider配下ではコンテキストの値を返す', async () => {
       const { createElement } = await import('react');

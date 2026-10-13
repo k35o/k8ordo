@@ -5,6 +5,8 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { describe, expect, it } from 'vite-plus/test';
+
 const tsc = path.join(
   path.dirname(
     createRequire(import.meta.url).resolve('typescript/package.json'),

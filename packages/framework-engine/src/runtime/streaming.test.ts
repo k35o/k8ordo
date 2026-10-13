@@ -9,6 +9,15 @@ import type { ReadableStream as NodeReadableStream } from 'node:stream/web';
 
 import { chromium, firefox, webkit } from 'playwright';
 import type { Browser, Page } from 'playwright';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vite-plus/test';
 
 import { buildFixture } from '../../fixtures/build';
 import type { BuiltFixture } from '../../fixtures/build';

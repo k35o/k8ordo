@@ -27,12 +27,11 @@ import { messagesFor } from './messages';
  * the internal check list can, and knowing is the whole point: a check the
  * client never runs has to be reported, not silently skipped.
  */
-/* oxlint-disable no-underscore-dangle -- zod exposes no public route to its
-   check list or to the source RegExp behind a JSON Schema pattern string, and
-   reporting what the client will not verify is worth the coupling. If zod
-   moves them the report goes quiet, the control falls back to whatever
-   `format` the JSON Schema kept, and a regex whose flags can no longer be read
-   reaches `pattern` as if it had none. */
+/* Zod exposes no public route to its check list or to the source RegExp behind
+   a JSON Schema pattern string, and reporting what the client will not verify
+   is worth the coupling. If zod moves them the report goes quiet, the control
+   falls back to whatever `format` the JSON Schema kept, and a regex whose flags
+   can no longer be read reaches `pattern` as if it had none. */
 type StringFormat = { format: string; pattern?: RegExp };
 
 type ZodInternals = {
@@ -60,7 +59,6 @@ const stringFormatsOf = (schema: $ZodType): StringFormat[] => {
     (entry): entry is StringFormat => entry?.format !== undefined,
   );
 };
-/* oxlint-enable no-underscore-dangle */
 
 /** zod's own name for a format is not always the JSON Schema one. */
 const ZOD_FORMAT_TO_JSON_FORMAT: Record<string, string> = {

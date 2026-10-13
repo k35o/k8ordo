@@ -94,8 +94,6 @@ const PAGE_SIZE = 3;
 
 // 並べ替えとページは URL（共有される面）に置く。リンクを渡した相手にも
 // 同じ並びの同じページが見え、戻るで前の並びに戻る
-/* oxlint-disable no-underscore-dangle -- `_default` は zod/mini における
-   `.default()` の綴り */
 const membersState = definePageState('ui-data-table-demo', {
   url: z.object({
     sort: z._default(z.enum(['', 'name', 'projects']), ''),
@@ -103,7 +101,6 @@ const membersState = definePageState('ui-data-table-demo', {
     page: z._default(z.coerce.number().check(z.int(), z.gte(1)), 1),
   }),
 });
-/* oxlint-enable no-underscore-dangle */
 
 export function DataTableUrlStatePreview() {
   const [{ sort, dir, page }, update] = useAppState(membersState);

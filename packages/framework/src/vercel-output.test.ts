@@ -10,6 +10,16 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+} from 'vite-plus/test';
+
 import { writeStaticVercelOutput, writeVercelOutput } from './vercel-output';
 
 type Entry = {

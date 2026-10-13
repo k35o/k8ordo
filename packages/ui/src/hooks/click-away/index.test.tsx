@@ -1,5 +1,6 @@
 import { useRef } from 'react';
 import type { FC } from 'react';
+import { describe, expect, it, vi } from 'vite-plus/test';
 import { render } from 'vitest-browser-react';
 import { userEvent } from 'vitest/browser';
 

@@ -12,7 +12,7 @@ const sanitize = (value: string): string =>
     .join('');
 
 const parse = (value: string | number): number =>
-  // eslint-disable-next-line unicorn/prefer-number-coercion -- 入力途中の "1.1.1" や "1e" を NaN にせず先頭の数値として解釈する（下の test が保証する仕様）
+  // 入力途中の "1.1.1" や "1e" を NaN にせず先頭の数値として解釈する（下の test が保証する仕様）
   Number.parseFloat(value.toString().replaceAll(/[^\w.-]+/gu, ''));
 
 export const cast = (
@@ -25,6 +25,8 @@ export const cast = (
 };
 
 if (import.meta.vitest) {
+  const { expect, it } = import.meta.vitest;
+
   it('文字を数値に変換する', () => {
     expect(cast('1', 0)).toBe(1);
     expect(cast('1.1', 1)).toBe(1.1);

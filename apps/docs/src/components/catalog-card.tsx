@@ -25,7 +25,7 @@ export const CatalogCard: FC<{
       // the card's stretched link as the interactive target.
       <div
         aria-hidden
-        className={`border-border-mute pointer-events-none flex h-36 items-center justify-center overflow-hidden border-b px-5${stage === 'article' ? ' bg-bg-base' : ''}`}
+        className={`border-border-mute pointer-events-none flex h-36 items-center justify-center overflow-hidden border-b px-5 ${stage === 'article' ? 'bg-bg-base' : ''}`}
         inert
       >
         {preview}

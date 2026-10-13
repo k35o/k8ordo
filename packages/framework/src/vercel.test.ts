@@ -4,6 +4,7 @@ import path from 'node:path';
 
 import { resolveConfig } from 'vite';
 import type { PluginOption, ResolvedConfig } from 'vite';
+import { afterAll, beforeAll, describe, expect, it } from 'vite-plus/test';
 
 import { vercel } from './vercel';
 import { framework } from './vite';

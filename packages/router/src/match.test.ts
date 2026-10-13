@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vite-plus/test';
+
 import { matchPath } from './match';
 
 describe('matchPath', () => {

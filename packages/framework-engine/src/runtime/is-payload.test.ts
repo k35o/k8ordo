@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vite-plus/test';
+
 import { isPayload } from './is-payload';
 
 const answer = (status: number, type: string): Response =>

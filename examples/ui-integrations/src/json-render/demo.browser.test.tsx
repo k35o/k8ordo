@@ -1,4 +1,5 @@
 import { UIProvider } from '@k8ordo/ui';
+import { beforeEach, expect, it, vi } from 'vite-plus/test';
 import { render } from 'vitest-browser-react';
 
 import { JsonRenderDemo } from './demo';

@@ -57,11 +57,10 @@ type Node = {
   anyOf?: Node[];
 } & LeafSchema & { input?: string };
 
-/* oxlint-disable no-underscore-dangle -- wrappers (`optional`, `nullable`,
-   `default`, …) and `zod/mini` arrays expose neither `shape` nor `element`
-   publicly; the shared core definition is the only route that works for both
-   entries, and it is the same internal surface the check list already
-   requires. */
+/* Wrappers (`optional`, `nullable`, `default`, …) and `zod/mini` arrays expose
+   neither `shape` nor `element` publicly; the shared core definition is the
+   only route that works for both entries, and it is the same internal surface
+   the check list already requires. */
 type Wrapped = {
   _zod?: {
     def?: { type?: string; innerType?: $ZodType; element?: $ZodType };
@@ -107,7 +106,6 @@ const kindOf = (json: Node, $schema: $ZodType): ControlKind => {
     ? 'number'
     : kind;
 };
-/* oxlint-enable no-underscore-dangle */
 
 /**
  * 文字列を読むスキーマのチェックボックスが、チェック時に送る文字列。スキーマ

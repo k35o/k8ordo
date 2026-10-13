@@ -41,7 +41,6 @@ export const runGuards = async (
   for (const guard of guards) {
     // 外の guard が通してから内の guard を走らせる。並べて走らせると、外が
     // 断ったリクエストでも内の guard の副作用が起きる
-    // oxlint-disable-next-line eslint/no-await-in-loop
     const answer = await inPhase('guard', () => guard(context));
     if (answer === undefined) continue;
     if (!(answer instanceof Response)) {

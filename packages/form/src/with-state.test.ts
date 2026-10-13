@@ -1,4 +1,5 @@
 import { definePageState } from '@k8ordo/state';
+import { describe, expect, it } from 'vite-plus/test';
 import * as z from 'zod/mini';
 
 import { formFields } from './derive/form-fields';
@@ -6,8 +7,6 @@ import { parseForm } from './parse/parse-form';
 
 // @k8ordo/state の GUIDE にある定義そのもの。GET フォームの節は
 // `formFields(listState.url)` と書き、1 つのスキーマで両方をまかなう。
-/* oxlint-disable no-underscore-dangle -- `_default` は zod/mini における
-   `.default()` の綴り */
 const listState = definePageState('product-list', {
   url: z.object({
     q: z._default(z.string(), ''),
@@ -24,7 +23,6 @@ const spelled = definePageState('spelled', {
     gift: z._default(z.stringbool({ truthy: ['yes'], falsy: ['no'] }), false),
   }),
 });
-/* oxlint-enable no-underscore-dangle */
 
 /** What a GET form puts in the URL: every entry, as a query string. */
 const submitted = (query: string): FormData => {

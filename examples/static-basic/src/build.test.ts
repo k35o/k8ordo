@@ -22,6 +22,14 @@ import { chromium, firefox, webkit } from 'playwright';
 import type { Browser, Page } from 'playwright';
 import { preview } from 'vite';
 import type { PreviewServer } from 'vite';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  describe,
+  expect,
+  it,
+} from 'vite-plus/test';
 
 const root = path.resolve(import.meta.dirname, '..');
 const client = path.join(root, 'dist', 'client');

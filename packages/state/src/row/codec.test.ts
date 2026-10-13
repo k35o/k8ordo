@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 import { z } from 'zod';
 
 import { defineCookieState } from '../cookie-state';
@@ -11,8 +12,8 @@ const viewSchema = z.object({
 });
 
 const migrateView = vi.fn<Versioning<typeof viewSchema>['migrate']>((old) => ({
-  view: old['layout'] === 'list' ? 'table' : 'grid',
-  pageSize: old['pageSize'],
+  view: old.layout === 'list' ? 'table' : 'grid',
+  pageSize: old.pageSize,
 }));
 
 const viewCookie = defineCookieState('view', viewSchema, {
@@ -115,7 +116,7 @@ const MigrateKeysCheckedByTypes = (): void => {
   defineLocalState('typed', viewSchema, {
     version: 2,
     // @ts-expect-error `layout` is not a key of the schema any more
-    migrate: (old) => ({ layout: old['layout'] }),
+    migrate: (old) => ({ layout: old.layout }),
   });
 };
 

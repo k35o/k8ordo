@@ -57,7 +57,6 @@ const resolveActive = (ids: readonly string[]): string | null => {
     if (rect.width === 0 && rect.height === 0) continue;
     present.push(id);
     // 計算値は '32px' のような長さなので、Number() では読めない
-    // oxlint-disable-next-line eslint-plugin-unicorn/prefer-number-coercion
     const margin = Number.parseFloat(
       getComputedStyle(heading).scrollMarginBlockStart,
     );
