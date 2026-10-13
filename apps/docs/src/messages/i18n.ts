@@ -1,140 +1,100 @@
 import { message } from '@k8ordo/i18n';
 
 export const description = message({
-  ja: 'アプリのロケールを受け持ちます。ロケールの一覧を1か所に書けば、URLの区間や言語の交渉、`[locale]`のparamsSchema、静的化するパスの一覧がそこから決まります。文言は1つずつ関数として書き、呼ばれた場所でロケールを読むので、サーバーでもブラウザでも同じ1行で呼べます。',
-  en: 'Owns the locale axis of an application. One locale set derives the URL segment, negotiation, the params schema, and the static paths; each message is a function that reads the locale where it is called, so the same line renders on the server and in the browser, and only the messages a page names reach its bundle.',
+  ja: '文言を関数として書き、Server ComponentでもClient Componentでも同じ1行で呼ぶReactの国際化です。`defineLocales`に書いたロケールの一覧で、訳し忘れを型で検査します。言語の選択とURLのロケールの付け外しも、この一覧を使います。',
+  en: 'React i18n with messages written as functions, called the same way in Server and Client Components. The locale list in `defineLocales` lets the types catch a missing translation. Choosing a language, and adding or removing the locale in a URL, use the same list.',
 });
 
 export const tagline = message({
-  ja: '文言を関数として書き、Server ComponentでもClient Componentでも同じ1行で呼べる国際化のライブラリ。',
-  en: 'Write each message as a function, and call it the same way in Server and Client Components.',
+  ja: 'Server ComponentでもClient Componentでも使えるReactの多言語対応',
+  en: 'Internationalization for React that works in both Server and Client Components',
 });
 
 export const claimServerTitle = message({
-  ja: 'プロバイダもフックもいらない',
-  en: 'No provider, no hook',
+  ja: 'プロバイダもフックも無い呼び出し',
+  en: 'Calls without a provider or a hook',
 });
 
 export const claimServerBody = [
   message({
-    ja: '文言はただの関数で、呼ばれた場所でロケールを読みます。サーバーでは`[locale]`の`paramsSchema`が受け付けたロケールを、ブラウザではURLの先頭の区間を読みます。',
-    en: 'A message is a plain function that reads the locale where it is called: on the server, the one the `[locale]` segment’s `paramsSchema` accepted; in the browser, the first segment of the URL.',
+    ja: '文言はただの関数で、呼ばれた場所でロケールを読みます。ブラウザではURLの先頭にあるロケール（`/en/…`の`en`）を、サーバーでは`locales.run`か`locales.paramsSchema`が設定したロケールを読みます。',
+    en: 'A message is a plain function that reads the locale where it is called. In the browser that is the locale at the start of the URL, such as `en` in `/en/…`; on the server it is the one `locales.run` or `locales.paramsSchema` set.',
   }),
   message({
-    ja: 'そのため、Server ComponentでもClient Componentでも、同じ1行で呼べます。言語を切り替えるときは、別の区間のURLへ移動するだけです。',
-    en: 'So the same line works in a Server Component and in a Client Component, and switching locale is a navigation to the other segment.',
+    ja: '言語を切り替えるときは、別のロケールのURL（`/ja/…`から`/en/…`）へ移動するだけです。',
+    en: 'To switch language, navigate to the same page under another locale, such as from `/ja/…` to `/en/…`.',
   }),
 ] as const;
 
 export const claimTypesTitle = message({
-  ja: '訳し忘れは型エラーになる',
-  en: 'A missing translation does not compile',
+  ja: '訳し忘れの型エラー',
+  en: 'Type errors for missing translations',
 });
 
 export const claimTypesBody = [
   message({
-    ja: '`Register`にロケールの一覧を登録すると、`message`はすべてのロケールの文を求めるようになります。1つでも欠けていれば、その宣言が型エラーになります。',
-    en: 'Register the locale set, and `message` asks for text in every locale. Leave one out, and the declaration fails to compile.',
+    ja: 'ロケールの型が`Register`に登録されていれば、`message`はすべてのロケールの文を求めます。1つでも欠けていれば、その宣言が型エラーになります。',
+    en: 'Once `Register` carries the locale type, `message` requires text in every locale. Leave one out, and the declaration is a type error.',
   }),
   message({
-    ja: '値を差し込む文言は、ロケールごとの関数として書きます。引数の型を1つのロケールに書いておけば、ほかのロケールも同じ型で書くよう求められます。',
-    en: 'A message with values is a function in each locale. Annotate the arguments once, and every other locale is held to the same types.',
+    ja: '値を差し込む文言は、ロケールごとの関数として書きます。引数の型を1つのロケールに書いておけば、ほかのロケールも同じ型で検査されます。',
+    en: 'A message with values is a function in each locale. Annotate the arguments in one locale, and every other locale is checked against the same types.',
   }),
 ] as const;
 
 export const claimTypesMissing = message({
-  ja: 'enが無いので型エラーになる',
-  en: 'No en: a type error',
+  ja: '`en`が無いので型エラーになる',
+  en: 'No `en`: a type error',
 });
 
 export const claimBundleTitle = message({
-  ja: 'ブラウザに届くのは、使っている文言だけ',
-  en: 'Only the messages you use reach the browser',
+  ja: '使った文言だけのバンドル',
+  en: 'Bundles with only the messages used',
 });
 
 export const claimBundleBody = [
   message({
-    ja: '`message`は宣言しただけでは何もしない関数なので、使われていない文言はバンドラーが取り除きます。ブラウザに届くのは、Client Componentが使っている文言だけです。',
-    en: '`message` has no side effect, so a bundler drops every message nothing uses. Only the messages a Client Component names reach the browser.',
+    ja: '`message`の呼び出しには副作用が無いので、使われていない文言はバンドラが取り除きます。ブラウザに送られるのは、Client Componentが使っている文言だけです。',
+    en: '`message` has no side effects, so a bundler drops every message nothing imports. Only the messages Client Components use reach the browser.',
   }),
   message({
-    ja: 'Server Componentが描いた文言は、ブラウザに送るコードを増やしません。辞書を名前空間に分けて読み込むような設定もいりません。',
-    en: 'Text a Server Component renders adds nothing to the browser, and there is no namespace list to split dictionaries by.',
+    ja: 'Server Componentが描画した文言は、ブラウザに送るコードを増やしません。辞書を名前空間に分けて読み込む設定もいりません。',
+    en: 'Text rendered by a Server Component adds nothing to the client bundle. There is no namespace list to split dictionaries by.',
   }),
 ] as const;
 
-export const nextGetStarted = message({
-  ja: 'ロケールの一覧を定義し、最初の文言をサーバーとブラウザで描くところまで作ります。',
-  en: 'Define the locale set, and render a first message on the server and in the browser.',
-});
-
-export const nextMessages = message({
-  ja: '値を差し込む文言の書き方と置き場所、Server Componentからの渡し方です。',
-  en: 'Messages that take values, where they live, and passing them from a Server Component.',
-});
-
-export const nextFormatting = message({
-  ja: '複数形や日付、数値を、ロケールに合った`Intl`で書きます。',
-  en: 'Plurals, dates and numbers with the locale’s `Intl`.',
-});
-
-export const nextSwitch = message({
-  ja: '`localize`と`delocalize`で言語の切り替えを作り、選んだ言語をCookieに覚えます。',
-  en: 'Build a language switcher with `localize` and `delocalize`, and remember the choice in a cookie.',
-});
-
-export const nextNegotiate = message({
-  ja: '`/`を開いた人を、ブラウザやリクエストの希望から選んだ言語のページへ送ります。',
-  en: 'Send whoever opens `/` to the language their browser or request asks for.',
-});
-
-export const nextReference = message({
-  ja: '`defineLocales`と`message`をはじめ、exportする関数と型の一覧です。',
-  en: 'Every function and type it exports, from `defineLocales` and `message` on.',
-});
-
 export const navLocales = message({
-  ja: 'ロケールを定義する',
-  en: 'Define locales',
+  ja: 'ロケール',
+  en: 'Locales',
 });
 
 export const navMessages = message({
-  ja: '文言を書く',
-  en: 'Write messages',
+  ja: '文言',
+  en: 'Messages',
 });
 
 export const navFormatting = message({
-  ja: '日付や数値を書式化する',
-  en: 'Format dates and numbers',
+  ja: '日付と数値の書式',
+  en: 'Formatting',
 });
 
 export const navRouting = message({
-  ja: 'URLにロケールを置く',
-  en: 'Put the locale in the URL',
+  ja: '今のロケール',
+  en: 'Current locale',
 });
 
 export const navSwitch = message({
-  ja: '言語を切り替える',
-  en: 'Switch languages',
+  ja: '言語の切り替え',
+  en: 'Switching',
 });
 
 export const navNegotiate = message({
-  ja: '最初の言語を選ぶ',
-  en: 'Choose the first language',
-});
-
-export const navStatic = message({
-  ja: '静的に書き出す',
-  en: 'Static builds',
-});
-
-export const navIntegrations = message({
-  ja: 'ほかのパッケージと組み合わせる',
-  en: 'Use with other packages',
+  ja: '最初の言語',
+  en: 'Negotiation',
 });
 
 export const navTesting = message({
-  ja: 'テストする',
+  ja: 'テスト',
   en: 'Testing',
 });
 
@@ -149,6 +109,6 @@ export const navReference = message({
 });
 
 export const navTroubleshooting = message({
-  ja: 'うまく動かないとき',
+  ja: 'トラブルシューティング',
   en: 'Troubleshooting',
 });

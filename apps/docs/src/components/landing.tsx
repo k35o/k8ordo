@@ -4,13 +4,10 @@ import { CodeBlock } from '@k8ordo/ui/code-block';
 import type { ReactNode } from 'react';
 
 import { PACKAGES } from '../data/packages';
-import { docsPathOf } from '../data/shipped-docs';
 import { href } from '../links';
-import type { SitePath } from '../links';
 import * as m from '../messages';
 import { InstallTabs } from './install-tabs';
 import { LinkButton } from './link-button';
-import { LocaleAnchor } from './locale-anchor';
 import { PageTitle } from './page-title';
 import { Rich } from './rich';
 
@@ -101,50 +98,6 @@ export function LandingClaim({ title, body, children }: LandingClaimProps) {
         ))}
       </div>
       <div className="min-w-0">{children}</div>
-    </section>
-  );
-}
-
-type NextStep = { path: SitePath; label: Message; description: Message };
-
-type NextStepsProps = {
-  steps: readonly NextStep[];
-  /** The published name, for where the site serves its shipped GUIDE.md. */
-  name: string;
-};
-
-/** Where to go from the landing: a plain list, one line each. */
-export function NextSteps({ steps, name }: NextStepsProps) {
-  return (
-    <section className="pt-14 pb-24">
-      <Heading level="h2">{m.landing.nextTitle()}</Heading>
-      <ul className="border-border-mute mt-6 flex flex-col border-t">
-        {steps.map((step) => (
-          <li className="border-border-mute border-b" key={step.path}>
-            <LocaleAnchor
-              className="hover:bg-bg-mute focus-visible:ring-border-info flex flex-col gap-1 px-2 py-4 transition-colors duration-150 ease-out focus-visible:ring-2 focus-visible:outline-hidden sm:flex-row sm:items-baseline sm:gap-6"
-              path={step.path}
-              unstyled
-            >
-              <span className="text-fg-base font-bold sm:w-56 sm:shrink-0">
-                {step.label()}
-              </span>
-              <span className="text-fg-mute text-sm">
-                <Rich>{step.description()}</Rich>
-              </span>
-            </LocaleAnchor>
-          </li>
-        ))}
-      </ul>
-      <p className="text-fg-mute mt-6 text-sm leading-relaxed">
-        {m.landing.agents()}{' '}
-        <a
-          className="text-fg-base underline underline-offset-4"
-          href={`${docsPathOf(name)}GUIDE.md`}
-        >
-          GUIDE.md
-        </a>
-      </p>
     </section>
   );
 }

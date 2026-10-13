@@ -69,6 +69,88 @@ export default function LocaleLayout({
   return children;
 }`;
 
+const HOME_TREE = `src/routes/
+  layout.tsx
+  (home)/
+    guard.ts
+    page.tsx
+  [locale]/
+    layout.tsx
+    page.tsx`;
+
+const HOME_GUARD = `import { withBase } from '@k8ordo/framework';
+import type { Guard } from '@k8ordo/framework/server';
+
+import { locales } from '../../i18n';
+
+const guard: Guard<'/'> = ({ request }) => {
+  const locale = locales.negotiateRequest(request, {
+    cookie: 'locale',
+  });
+  return new Response(null, {
+    status: 307,
+    headers: { location: withBase(locales.localize('/', locale)) },
+  });
+};
+
+export default guard;`;
+
+const HOME_PAGE = `export default function HomePage() {
+  return null;
+}`;
+
+const HOME_STATIC = `'use client';
+
+import { navigateTo } from '@k8ordo/framework';
+import { useEffect } from 'react';
+
+import { locales } from '../i18n';
+
+export default function HomePage() {
+  useEffect(() => {
+    navigateTo(
+      '/:locale',
+      { locale: locales.negotiate(navigator.languages) },
+      { history: 'replace' },
+    );
+  }, []);
+
+  return null;
+}`;
+
+const HOME_COOKIE = `useEffect(() => {
+  void cookieStore.get('locale').then((saved) => {
+    navigateTo(
+      '/:locale',
+      {
+        locale: locales.negotiate([
+          ...(saved?.value === undefined ? [] : [saved.value]),
+          ...navigator.languages,
+        ]),
+      },
+      { history: 'replace' },
+    );
+  });
+}, []);`;
+
+const HTML_LANG = `import type { LayoutProps } from '@k8ordo/framework';
+
+import { locales } from '../i18n';
+
+export default function RootLayout({
+  children,
+  pathname,
+}: LayoutProps<'/'>) {
+  const locale =
+    locales.delocalize(pathname).locale ?? locales.default;
+
+  return (
+    <html dir={locales.definitions[locale].dir} lang={locale}>
+      <body>{children}</body>
+    </html>
+  );
+}`;
+
 const SHADOW_TREE = `src/routes/
   about/
     page.tsx
@@ -248,6 +330,80 @@ export default function FrameworkRoutingPage() {
             {m.framework.navParams()}
           </LocaleAnchor>
           <Rich>{t.see()}</Rich>
+        </p>
+      </DocSection>
+
+      <DocSection id="root-server" title={t.rootServerTitle}>
+        <CodeBlock code={HOME_TREE} lang="text" />
+        <CodeBlock
+          callouts={{
+            7: t.rootServerChooseCallout(),
+            11: t.rootServerStatusCallout(),
+          }}
+          code={HOME_GUARD}
+          lang="ts"
+          marks={{ 7: 'highlight', 11: 'highlight', 12: 'highlight' }}
+          title="src/routes/(home)/guard.ts"
+        />
+        <CodeBlock
+          code={HOME_PAGE}
+          lang="tsx"
+          title="src/routes/(home)/page.tsx"
+        />
+        <p>
+          <Rich>{t.rootServerGuard()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.rootServerGroup()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.rootServerAnswers()}</Rich>
+        </p>
+      </DocSection>
+
+      <DocSection id="root-static" title={t.rootStaticTitle}>
+        <CodeBlock
+          code={HOME_STATIC}
+          lang="tsx"
+          marks={{ 12: 'highlight', 13: 'highlight' }}
+          title="src/routes/page.tsx"
+        />
+        <p>
+          <Rich>{t.rootStaticPage()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.rootStaticEffect()}</Rich>
+        </p>
+        <Note>
+          <p>
+            <Rich>{t.rootStaticNoJs()}</Rich>
+          </p>
+        </Note>
+        <DocSubsection id="root-static-cookie" title={t.rootCookieTitle}>
+          <CodeBlock
+            code={HOME_COOKIE}
+            lang="tsx"
+            marks={{ 2: 'highlight', 6: 'highlight', 7: 'highlight' }}
+            title="src/routes/page.tsx"
+          />
+          <p>
+            <Rich>{t.rootCookie()}</Rich>
+          </p>
+        </DocSubsection>
+      </DocSection>
+
+      <DocSection id="html-lang" title={t.htmlTitle}>
+        <CodeBlock
+          code={HTML_LANG}
+          lang="tsx"
+          marks={{ 7: 'highlight', 10: 'highlight', 13: 'highlight' }}
+          title="src/routes/layout.tsx"
+        />
+        <p>
+          <Rich>{t.htmlPathname()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.htmlGetLocale()}</Rich>
         </p>
       </DocSection>
 

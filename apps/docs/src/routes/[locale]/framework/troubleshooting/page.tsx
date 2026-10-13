@@ -182,6 +182,18 @@ const SYMPTOMS: readonly Symptom[] = [
     fix: t.freshFix,
   },
   {
+    id: 'locales-unexported',
+    title: t.localesUnexportedTitle,
+    cause: t.localesUnexportedCause,
+    fix: t.localesUnexportedFix,
+  },
+  {
+    id: 'register-missing',
+    title: t.registerMissingTitle,
+    cause: t.registerMissingCause,
+    fix: t.registerMissingFix,
+  },
+  {
     id: 'grammar',
     title: t.grammarTitle,
     cause: t.grammarCause,

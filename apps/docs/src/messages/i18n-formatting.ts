@@ -1,24 +1,29 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: '複数形や日付、数値の書式には、`Intl`をそのまま使います。ロケールの集合は、今のロケールに合わせた`Intl`のオブジェクトを作って返すだけで、独自の書式の記法はありません。日付だけは、そのロケールの`timeZone`で書きます。',
-  en: 'Plurals, dates and numbers are `Intl` itself. The locale set only makes the `Intl` object for the current locale and hands it back; there is no format syntax of its own. Dates alone are written in the locale’s `timeZone`.',
+  ja: '複数形や日付、数値の書式には`Intl`をそのまま使います。ロケールの集合が、今のロケールに合わせた`Intl`のオブジェクトを返します。',
+  en: 'Plurals, dates and numbers are formatted with `Intl` itself. The locale set returns the `Intl` object for the current locale.',
 });
 
 export const membersTitle = message({
-  ja: '今のロケールの`Intl`を使う',
-  en: 'Use `Intl` for the current locale',
+  ja: '`Intl`を返すメンバー',
+  en: '`Intl` members',
 });
 
-export const membersDescription = message({
-  ja: '集合の次の5つのメンバーが、今のロケールの`Intl`のオブジェクトを返します。どれもフックではないので、Server ComponentでもClient Componentでも、文言の関数の中でも呼べます。',
-  en: 'These five members of the set return an `Intl` object for the current locale. None is a hook, so each can be called in a Server Component, in a Client Component, or inside a message’s function.',
+export const priceCallout = message({
+  ja: '今のロケールの`Intl.NumberFormat`',
+  en: '`Intl.NumberFormat` for the current locale',
+});
+
+export const membersIntro = message({
+  ja: 'そのメンバーは次の5つです。どれもフックではないので、Server ComponentでもClient Componentでも呼べます。',
+  en: 'There are five such members. None is a hook, so they work in both Server Components and Client Components.',
 });
 
 export const membersList = [
   message({
-    ja: '`dateTimeFormat(options?)`：`Intl.DateTimeFormat`。ロケールの`timeZone`で書く',
-    en: '`dateTimeFormat(options?)`: `Intl.DateTimeFormat`, in the locale’s `timeZone`',
+    ja: '`dateTimeFormat(options?)`：`Intl.DateTimeFormat`',
+    en: '`dateTimeFormat(options?)`: `Intl.DateTimeFormat`',
   }),
   message({
     ja: '`numberFormat(options?)`：`Intl.NumberFormat`',
@@ -39,91 +44,111 @@ export const membersList = [
 ] as const;
 
 export const membersItself = message({
-  ja: '返すのは`Intl`のオブジェクトそのものなので、`format`や`formatToParts`、`formatRange`もそのまま使えます。オプションも`Intl`のものです。',
-  en: 'What comes back is the `Intl` object itself, so `format`, `formatToParts` and `formatRange` are all there, and the options are `Intl`’s own.',
+  ja: '`Intl`のオブジェクトをそのまま返すので、`format`や`formatToParts`、`formatRange`も使えます。オプションも`Intl`のものを渡します。',
+  en: 'Each returns the `Intl` object itself, so `format`, `formatToParts` and `formatRange` are all available. The options are `Intl`’s own, too.',
 });
 
 export const membersOthers = message({
   ja: 'ここに無い`Intl.Collator`や`Intl.DisplayNames`は、`locales.getLocale()`のタグを渡して自分で作ります。',
-  en: 'For an `Intl` API not listed here, such as `Intl.Collator` or `Intl.DisplayNames`, make it yourself with the tag from `locales.getLocale()`.',
+  en: 'For an `Intl` API not listed here, such as `Intl.Collator` or `Intl.DisplayNames`, pass the tag from `locales.getLocale()` and make it yourself.',
 });
 
 export const datesTitle = message({
-  ja: '日付を書く',
-  en: 'Write a date',
+  ja: '日付',
+  en: 'Dates',
 });
 
-export const datesDescription = message({
-  ja: '`dateTimeFormat`は、ロケールに書いた`timeZone`でしか日付を書きません。サーバーが書いたHTMLとブラウザでの描画で、日付がずれないようにするためです。',
-  en: '`dateTimeFormat` writes a date only in the `timeZone` the locale states, so the date does not shift between the server’s HTML and the browser’s render.',
+export const publishedAtCallout = message({
+  ja: 'ロケールの`timeZone`で表示する',
+  en: 'Shown in the locale’s `timeZone`',
+});
+
+export const datesZone = message({
+  ja: '`dateTimeFormat`は、ロケールに定義した`timeZone`で日付を表示します。実行環境のタイムゾーンは使いません。サーバーのHTMLとブラウザでの描画で、日付をそろえるためです。',
+  en: '`dateTimeFormat` shows a date in the `timeZone` the locale defines, never in the runtime’s own zone. That keeps the date the same in the server’s HTML and in the browser’s render.',
+});
+
+export const datesChooseBefore = message({
+  ja: 'ロケールごとのタイムゾーンの決め方は、',
+  en: ' Choosing each locale’s time zone is covered under “Time zone” on the ',
+});
+
+export const see = message({
+  ja: 'のページの「タイムゾーン」を見てください。',
+  en: ' page.',
 });
 
 export const datesRefuse = message({
-  ja: 'オプションの型は`timeZone`を受け付けません。`as`で型を通しても、ロケールの`timeZone`で上書きします。',
-  en: 'Its options type refuses a `timeZone`, and one forced through with `as` is overridden by the locale’s.',
+  ja: 'オプションの型は`timeZone`を受け付けません。`as`で型を通しても、ロケールの`timeZone`で上書きされます。',
+  en: 'The options type does not accept `timeZone`. One forced through with `as` is overridden by the locale’s `timeZone`.',
 });
 
 export const datesVisitor = message({
-  ja: '訪問者の手元の時計や、今からの相対時間は、サーバーとブラウザで必ず違う表示です。こうしたものは`Intl`を直接使い、ブラウザだけで描く部分に置きます。',
-  en: 'A clock in the visitor’s zone, or a time relative to now, always differs between the server and the browser. Use `Intl` directly for those, in a part that renders in the browser only.',
+  ja: '訪問者のタイムゾーンでの時刻や、今からの相対時間は、サーバーとブラウザで表示が食い違うことがあります。こうした表示は`Intl`を直接使い、ブラウザだけで描画する部分に置きます。',
+  en: 'A time in the visitor’s own zone, or a time relative to now, can differ between the server and the browser. Use `Intl` directly for those, in a part that renders only in the browser.',
 });
 
 export const demoTitle = message({
-  ja: 'ロケールのタイムゾーンで書く',
-  en: 'Write in the locale’s time zone',
+  ja: 'タイムゾーンのデモ',
+  en: 'Time zone demo',
 });
 
 export const demoDescription = message({
-  ja: '同じ瞬間（協定世界時の2026年3月5日15時30分）を、2つの方法で書いています。このサイトの`locales`は、`ja`を`Asia/Tokyo`、`en`を`UTC`で定義しています。下の行は、ブラウザで描いたあとに表示します。',
-  en: 'One instant, 15:30 UTC on 5 March 2026, written two ways. This site’s `locales` defines `ja` in `Asia/Tokyo` and `en` in `UTC`. The second row appears once the browser has rendered.',
+  ja: '同じ瞬間（協定世界時の2026年3月5日15時30分）を、ロケールの`timeZone`とブラウザのタイムゾーンで表示して比べます。',
+  en: 'One instant, 15:30 UTC on 5 March 2026, shown in the locale’s `timeZone` and in the browser’s time zone.',
 });
 
 export const demoSteps = [
   message({
-    ja: '上の行は、このページのロケールのタイムゾーンで書かれます。日本語のページは`Asia/Tokyo`なので3月6日、英語のページは`UTC`なので3月5日です。',
-    en: 'The first row is written in the page locale’s time zone: `Asia/Tokyo` on the Japanese page, so 6 March, and `UTC` on the English page, so 5 March.',
+    ja: '上の行は、このページのロケールの`timeZone`で表示します。このサイトの`locales`は、`ja`を`Asia/Tokyo`、`en`を`UTC`で定義しています。日本語のページは3月6日、英語のページは3月5日になります。',
+    en: 'The first row is shown in the page locale’s `timeZone`. This site defines `ja` as `Asia/Tokyo` and `en` as `UTC`, so the Japanese page shows 6 March and the English page 5 March.',
   }),
   message({
-    ja: '下の行は、このブラウザのタイムゾーンで書かれます。ページのタイムゾーンと違えば、時刻や日付が上の行と食い違います。',
-    en: 'The second row is written in this browser’s time zone. If it differs from the page’s, the time or the date disagrees with the first row.',
+    ja: '下の行は、ブラウザで描画したあとに、このブラウザのタイムゾーンで表示します。ページのタイムゾーンと違えば、時刻や日付が上の行と食い違います。',
+    en: 'The second row appears once the browser has rendered, in this browser’s time zone. If that differs from the page’s, the time or the date disagrees with the first row.',
   }),
   message({
     ja: 'ヘッダーの言語の切り替えで別の言語を選ぶと、上の行のタイムゾーンと日付が変わります。下の行のタイムゾーンは変わりません。',
-    en: 'Pick the other language in the header’s language switcher. The first row’s time zone and date change; the second row’s time zone does not.',
+    en: 'Pick the other language in the header. The first row’s time zone and date change; the second row’s do not.',
   }),
 ] as const;
 
 export const demoPending = message({
-  ja: 'ブラウザで描いたあとに表示します',
+  ja: 'ブラウザで描画したあとに表示します',
   en: 'Shown once the browser renders',
 });
 
 export const inMessagesTitle = message({
-  ja: '文言の中で使う',
-  en: 'Use it inside a message',
+  ja: '文言の中の複数形と日付',
+  en: 'Plurals and dates in messages',
 });
 
-export const inMessagesDescription = message({
-  ja: '値を差し込む文言の関数の中で呼べば、複数形や日付も文言の一部になります。関数が呼ばれるのはそのロケールが今のロケールのときなので、`Intl`もそのロケールのものになります。',
-  en: 'Called inside a message’s function, plurals and dates become part of the message. The function runs while its locale is the current one, so the `Intl` object is that locale’s too.',
+export const cartCallout = message({
+  ja: '英語の複数形を`Intl.PluralRules`で選ぶ',
+  en: 'Picks the English plural with `Intl.PluralRules`',
+});
+
+export const inMessagesCall = message({
+  ja: '値を差し込む文言の関数の中で呼ぶと、複数形や日付も文言の一部にできます。関数は自分のロケールを今のロケールにした状態で呼ばれるので、`Intl`もそのロケールのものになります。',
+  en: 'Call these members inside a message function that takes values, and plurals and dates become part of the message. The function runs with its own locale as the current one, so the `Intl` object is that locale’s too.',
 });
 
 export const inMessagesPlural = message({
-  ja: '英語の`pluralRules().select(1)`は`one`を返し、日本語では数にかかわらず`other`を返します。そのため、日本語の文は1つで済みます。',
-  en: 'In English `pluralRules().select(1)` is `one`; in Japanese it is `other` whatever the number, so Japanese needs one form only.',
+  ja: '英語の`pluralRules().select(1)`は`one`を返します。日本語では数にかかわらず`other`を返すので、日本語の文は1つで済みます。',
+  en: 'In English, `pluralRules().select(1)` returns `one`. In Japanese it returns `other` for every number, so one Japanese form is enough.',
 });
 
 export const cacheTitle = message({
-  ja: '作ったオブジェクトを使い回す',
-  en: 'Made once, reused',
+  ja: 'オブジェクトの再利用',
+  en: 'Object reuse',
 });
 
-export const cacheDescription = message({
-  ja: '`Intl`のオブジェクトは作るのに手間がかかるので、ロケールとオプションの組ごとに1つだけ作り、次からは同じものを返します。描画のたびに呼んでも、作り直しにはなりません。',
-  en: 'An `Intl` object is costly to make, so one is made per locale and options and the same one is returned after that. Calling it on every render does not make a new one.',
+export const cacheOnce = message({
+  ja: '`Intl`のオブジェクトは、ロケールとオプションの組ごとに1つだけ作られ、2回目からは同じものを返します。描画のたびに呼んでかまいません。',
+  en: 'One `Intl` object is made per locale and options, and the same one is returned after that, so calling it on every render is fine.',
 });
 
 export const cacheKey = message({
-  ja: 'オプションは、JSONにして見分けます。同じオプションを違う順に書くと2つ作られますが、答えが変わることはありません。',
-  en: 'Options are told apart by their JSON: the same options in another order make a second object, never a different answer.',
+  ja: 'オプションはJSONの文字列にして、キャッシュのキーにします。同じオプションを違う順に書くと2つ作られますが、結果は変わりません。',
+  en: 'Options are keyed by their JSON string. The same options in another order make a second object, but never a different result.',
 });

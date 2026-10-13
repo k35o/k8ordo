@@ -85,6 +85,26 @@ export const refusedCatchAll = message({
   en: 'A `not-found.tsx` rejects nothing. The `params.locale` that the one at `/:locale/*` receives can be a string such as `fr` that names no locale. Check it before using it.',
 });
 
+export const refusedLocaleTitle = message({
+  ja: '404のロケール',
+  en: 'The 404’s locale',
+});
+
+export const refusedLocaleScope = message({
+  ja: '`@k8ordo/i18n`の`paramsSchema`が受け付けたロケールは、そのパターンが答えたときだけ描画に使われます。後に走るスキーマが拒むと、前のスキーマが受け付けたロケールも捨てられます。',
+  en: 'A locale `@k8ordo/i18n`’s `paramsSchema` accepted is used for the render only when its pattern answers. When a schema after it refuses, the locale the earlier one accepted is dropped too.',
+});
+
+export const refusedLocaleServer = message({
+  ja: 'serverモードと`vite dev`では、`/en/products/shoes`の`shoes`を`id`のスキーマが拒むと、`not-found.tsx`が404を描画します。このとき`not-found.tsx`より上のスキーマが走り直すので、404はURLの`en`で描画されます。`fr`がロケールの一覧に無いので、`/fr/nothing`では`[locale]`のスキーマが拒み、404は既定のロケールで描画されます。',
+  en: 'Under server mode and `vite dev`, when the `id` schema refuses the `shoes` of `/en/products/shoes`, `not-found.tsx` renders the 404. The schemas above `not-found.tsx` run again for it, so the 404 renders in the `en` its URL names. On `/fr/nothing`, where `fr` is not in the locale set, the `[locale]` schema refuses, and the 404 renders in the default locale.',
+});
+
+export const refusedLocaleStatic = message({
+  ja: 'staticモードでは、どのURLの404も既定のロケールで書かれた`404.html`です。ブラウザでの描画のされ方は',
+  en: 'Under static mode every 404 is `404.html`, written in the default locale. How it renders in the browser is covered in ',
+});
+
 export const existTitle = message({
   ja: 'データに無い値',
   en: 'Values not in your data',

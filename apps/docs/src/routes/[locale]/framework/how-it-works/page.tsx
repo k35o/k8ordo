@@ -38,15 +38,6 @@ export default function FrameworkHowItWorksPage() {
       introduction={t.introduction}
       path="/:locale/framework/how-it-works"
     >
-      <DocSection id="mode" title={t.modeTitle}>
-        <p>
-          <Rich>{t.modeDependency()}</Rich>
-        </p>
-        <p>
-          <Rich>{t.modeSame()}</Rich>
-        </p>
-      </DocSection>
-
       <DocSection id="handler" title={t.handlerTitle}>
         <CodeBlock code={SHAPE} lang="text" />
         <p>
@@ -80,10 +71,10 @@ export default function FrameworkHowItWorksPage() {
           <Rich>{t.staticNoRequest()}</Rich>
         </p>
         <p>
-          <Rich>{t.staticWhen()}</Rich>
+          <Rich>{t.staticDev()}</Rich>
         </p>
         <p>
-          <Rich>{t.staticWants()}</Rich>
+          <Rich>{t.staticList()}</Rich>
           <LocaleAnchor path="/:locale/framework/modes">
             {m.framework.navModes()}
           </LocaleAnchor>
@@ -95,14 +86,17 @@ export default function FrameworkHowItWorksPage() {
         <p>
           <Rich>{t.serverAnywhere()}</Rich>
         </p>
-        <Items items={t.serverList} />
+        <p>
+          <Rich>{t.serverOrigin()}</Rich>
+        </p>
       </DocSection>
 
-      <DocSection id="both" title={t.bothTitle}>
-        <p>
-          <Rich>{t.bothIntro()}</Rich>
-        </p>
-        <Items items={t.bothList} />
+      <DocSection id="guarantees" title={t.guaranteesTitle}>
+        <Items items={t.guaranteesList} />
+      </DocSection>
+
+      <DocSection id="non-guarantees" title={t.nonGuaranteesTitle}>
+        <Items items={t.nonGuaranteesList} />
       </DocSection>
     </DocPage>
   );

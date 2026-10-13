@@ -179,6 +179,81 @@ export const localeStatic = message({
   en: 'Under static mode a page is written per locale, so `paths` takes `locales.paths`. Passing it is covered in ',
 });
 
+export const rootServerTitle = message({
+  ja: 'serverモードの`/`',
+  en: '`/` under server mode',
+});
+
+export const rootServerChooseCallout = message({
+  ja: 'Cookie、次にAccept-Languageの順で選ぶ',
+  en: 'The cookie first, then Accept-Language',
+});
+
+export const rootServerStatusCallout = message({
+  ja: '訪問者ごとに答えが変わるので、308でなく307',
+  en: '307, not 308: the answer depends on who asks',
+});
+
+export const rootServerGuard = message({
+  ja: 'serverモードだけで使えます。`/`へのリクエストには、ページを描画する前に`(home)/guard.ts`が応答します。`negotiateRequest`でロケールを選び、そのロケールのURLへの`307`を返します。`localize`の結果にはViteの`base`が付かないので、`withBase`で付けます。',
+  en: 'Server mode only. Requests for `/` are answered by `(home)/guard.ts` before any page renders. It picks a locale with `negotiateRequest` and returns a `307` to that locale’s URL. `localize` leaves out Vite’s `base`, so `withBase` adds it.',
+});
+
+export const rootServerGroup = message({
+  ja: 'guardとページは、`(home)/`のようなグループに入れます。`src/routes/`の直下に置いた`guard.ts`は、`/en/…`へのリクエストもリダイレクトしてしまいます。`page.tsx`は描画されませんが、省けません。ページの無い`(home)/`は、ビルドがエラーにします。',
+  en: 'Put the guard and the page in a group such as `(home)/`. A `guard.ts` directly in `src/routes/` would redirect requests for `/en/…` as well. The `page.tsx` never renders, but it cannot be left out: the build refuses a `(home)/` with no page.',
+});
+
+export const rootServerAnswers = message({
+  ja: 'JavaScriptが動かない訪問者も、同じようにリダイレクトされます。クライアント側の遷移で`/`へ移るときも、guardがペイロードのリクエストに応答するので、ロケールのURLへ移ります。',
+  en: 'A visitor without JavaScript is redirected all the same. A client navigation to `/` ends at the locale’s URL too, since the guard answers its payload request as well.',
+});
+
+export const rootStaticTitle = message({
+  ja: 'staticモードの`/`',
+  en: '`/` under static mode',
+});
+
+export const rootStaticPage = message({
+  ja: 'staticモードでは`guard.ts`を置けないので、`/`のページがブラウザで移動します。`navigator.languages`からロケールを選び、`navigateTo`でそのロケールのURLへ移ります。ページ自体は何も描画しません。',
+  en: 'Static mode refuses a `guard.ts`, so the `/` page moves the visitor in the browser: it picks a locale from `navigator.languages` and goes to that locale’s URL with `navigateTo`. The page itself renders nothing.',
+});
+
+export const rootStaticEffect = message({
+  ja: "移動は`useEffect`の中で行います。ビルドはこのページもブラウザの外で描画するので、そこにはNavigation APIも訪問者の`navigator.languages`もありません。`history: 'replace'`にすると、戻るボタンで`/`に戻ってまた移動することがありません。",
+  en: "The move happens in a `useEffect`: the build renders this page outside a browser too, where there is neither a Navigation API nor a visitor’s `navigator.languages`. With `history: 'replace'`, the back button never returns to `/` only to be sent on again.",
+});
+
+export const rootStaticNoJs = message({
+  ja: 'JavaScriptが動かない訪問者は、`/`から先へ進めません。',
+  en: 'A visitor without JavaScript stays on `/`.',
+});
+
+export const rootCookieTitle = message({
+  ja: 'Cookieの読み取り',
+  en: 'Reading the cookie',
+});
+
+export const rootCookie = message({
+  ja: '言語の切り替えで選んだロケールをCookieに保存しているなら、その値を`navigator.languages`の前に並べて`negotiate`に渡します。serverモードの`negotiateRequest`が読むのと同じ順番です。',
+  en: 'When the locale chosen in a language switcher is saved in a cookie, put its value in front of `navigator.languages` and pass both to `negotiate`. That is the order `negotiateRequest` reads them in under server mode.',
+});
+
+export const htmlTitle = message({
+  ja: '`<html lang>`と`dir`',
+  en: '`<html lang>` and `dir`',
+});
+
+export const htmlPathname = message({
+  ja: 'ルートレイアウトは`[locale]`より上にありますが、描画しているURLを`pathname`で受け取ります。`delocalize`でその先頭の区間を読み、`<html>`の`lang`と`dir`に書きます。先頭の区間がロケールでないときは`null`が返るので、既定のロケールを補います。',
+  en: 'The root layout sits above `[locale]`, but it receives the URL being rendered as `pathname`. Read its first segment with `delocalize`, and write it into `lang` and `dir` on `<html>`. When that segment is not a locale, `delocalize` returns `null`, and the default locale fills in.',
+});
+
+export const htmlGetLocale = message({
+  ja: '描画は、スキーマがパラメータを検証したあとに始まります。`[locale]`のレイアウトが`paramsSchema`をexportしていれば、ルートレイアウトで`locales.getLocale()`を呼んでも同じロケールが返ります。`not-found.tsx`を`[locale]`の下に置いていれば、404でも同じです。',
+  en: 'Rendering starts after the schemas have validated the params. With `paramsSchema` exported from the `[locale]` layout, `locales.getLocale()` called in the root layout returns the same locale. So does a 404, as long as `not-found.tsx` sits under `[locale]`.',
+});
+
 export const orderTitle = message({
   ja: 'ルートの順番',
   en: 'Route order',
@@ -370,8 +445,8 @@ export const generatedTitle = message({
 });
 
 export const generatedWhen = message({
-  ja: 'フレームワークは、`routes/`から作ったルート表と型を`.k8ordo/`に書き出します。書くのは`vite dev`の起動時と`vite build`の開始時です。開発中は、`routes/`の下のファイルが変わるたびに書き直します。',
-  en: 'The framework writes a route table and its types, made from `routes/`, into `.k8ordo/`. It writes when `vite dev` starts and when `vite build` begins, and during development whenever a file under `routes/` changes.',
+  ja: 'フレームワークは、`routes/`から作ったルート表と型を`.k8ordo/`に書き出します。書くのは`vite dev`の起動時と`vite build`の開始時です。開発中は、`routes/`の下のファイルか`src/i18n.ts`が変わるたびに書き直します。',
+  en: 'The framework writes a route table and its types, made from `routes/`, into `.k8ordo/`. It writes when `vite dev` starts and when `vite build` begins, and during development whenever a file under `routes/` or `src/i18n.ts` changes.',
 });
 
 export const generatedFiles = [
@@ -380,8 +455,8 @@ export const generatedFiles = [
     en: '`routes.gen.ts`: the route table itself. It checks each route file against its directory’s pattern with `satisfies`.',
   }),
   message({
-    ja: '`register.gen.ts`：ルート表をフレームワークに登録します。これで`href()`や`useMatch()`のパターンに型が付きます。serverモードでは、`PageProps`と`LayoutProps`に`request`も足します。アプリが`@k8ordo/state`に依存していれば、そちらにも登録します。',
-    en: '`register.gen.ts`: registers the table with the framework, which types the patterns `href()` and `useMatch()` take. Under server mode it also adds `request` to `PageProps` and `LayoutProps`. When the application depends on `@k8ordo/state`, it registers the table there too.',
+    ja: '`register.gen.ts`：ルート表をフレームワークに登録します。これで`href()`や`useMatch()`のパターンに型が付きます。serverモードでは、`PageProps`と`LayoutProps`に`request`も足します。アプリが`@k8ordo/state`に依存していれば、そちらにも登録します。アプリが`@k8ordo/i18n`に依存し、`src/i18n.ts`が`locales`をexportしていれば、`@k8ordo/i18n`の`Register`も書きます。',
+    en: '`register.gen.ts`: registers the table with the framework, which types the patterns `href()` and `useMatch()` take. Under server mode it also adds `request` to `PageProps` and `LayoutProps`. When the application depends on `@k8ordo/state`, it registers the table there too. When the application depends on `@k8ordo/i18n` and `src/i18n.ts` exports `locales`, it writes `@k8ordo/i18n`’s `Register` too.',
   }),
   message({
     ja: '`.gitignore`：`*`で中身をすべて無視します。`.k8ordo/`はこれでgitの管理から外れるので、アプリの`.gitignore`に足すものはありません。',

@@ -1,36 +1,46 @@
 import { CodeBlock } from '@k8ordo/ui/code-block';
 
-import {
-  LandingClaim,
-  LandingHero,
-  NextSteps,
-} from '../../../components/landing';
+import { LandingClaim, LandingHero } from '../../../components/landing';
 import * as m from '../../../messages';
 
-const HERO_LOCALES = `export const locales = defineLocales({
+const HERO_LOCALES = `import { defineLocales } from '@k8ordo/i18n';
+
+export const locales = defineLocales({
   ja: { timeZone: 'Asia/Tokyo', dir: 'ltr' },
   en: { timeZone: 'UTC', dir: 'ltr' },
 });`;
 
-const HERO_MESSAGE = `export const home = message({ ja: 'ホーム', en: 'Home' });`;
+const HERO_MESSAGE = `import { message } from '@k8ordo/i18n';
 
-const HERO_USE = `<a href="/">{nav.home()}</a>`;
+export const home = message({ ja: 'ホーム', en: 'Home' });`;
 
-// コード例の中の `export const { paramsSchema }` は文字列なので、生成器
-// （ファイルをパースして export を読む）はこのページの export と取り違えない
-const CLAIM_SERVER_LAYOUT = `export const { paramsSchema } = locales;`;
+const HERO_USE = `import { home } from '../messages/nav';
 
-const CLAIM_SERVER_PAGE = `export default function Page() {
-  return <h1>{nav.home()}</h1>;
+export function Header() {
+  return (
+    <header>
+      <a href="/">{home()}</a>
+    </header>
+  );
 }`;
 
-const CLAIM_TYPES_REGISTER = `declare module '@k8ordo/i18n' {
-  interface Register {
-    locale: LocaleOf<typeof locales>;
-  }
+const CLAIM_SERVER_TITLE = `import { home } from '../messages/nav';
+
+export function PageTitle() {
+  return <h1>{home()}</h1>;
 }`;
 
-const CLAIM_TYPES_MESSAGES = `export const greeting = message({
+const CLAIM_SERVER_LINK = `'use client';
+
+import { home } from '../messages/nav';
+
+export function HomeLink() {
+  return <a href="/">{home()}</a>;
+}`;
+
+const CLAIM_TYPES_MESSAGES = `import { message } from '@k8ordo/i18n';
+
+export const greeting = message({
   ja: (name: string) => \`こんにちは、\${name}さん\`,
   en: (name) => \`Hello, \${name}\`,
 });
@@ -75,31 +85,24 @@ export default function I18nPage() {
       >
         <div className="flex flex-col gap-3">
           <CodeBlock
-            code={CLAIM_SERVER_LAYOUT}
+            code={CLAIM_SERVER_TITLE}
             lang="tsx"
-            title="src/routes/[locale]/layout.tsx"
+            title="src/components/page-title.tsx"
           />
           <CodeBlock
-            code={CLAIM_SERVER_PAGE}
+            code={CLAIM_SERVER_LINK}
             lang="tsx"
-            title="src/routes/[locale]/page.tsx"
+            title="src/components/home-link.tsx"
           />
         </div>
       </LandingClaim>
       <LandingClaim body={m.i18n.claimTypesBody} title={m.i18n.claimTypesTitle}>
-        <div className="flex flex-col gap-3">
-          <CodeBlock
-            code={CLAIM_TYPES_REGISTER}
-            lang="ts"
-            title="src/i18n.ts"
-          />
-          <CodeBlock
-            callouts={{ 6: m.i18n.claimTypesMissing() }}
-            code={CLAIM_TYPES_MESSAGES}
-            lang="ts"
-            title="src/messages/nav.ts"
-          />
-        </div>
+        <CodeBlock
+          callouts={{ 8: m.i18n.claimTypesMissing() }}
+          code={CLAIM_TYPES_MESSAGES}
+          lang="ts"
+          title="src/messages/nav.ts"
+        />
       </LandingClaim>
       <LandingClaim
         body={m.i18n.claimBundleBody}
@@ -111,41 +114,6 @@ export default function I18nPage() {
           title="src/components/greeting.tsx"
         />
       </LandingClaim>
-      <NextSteps
-        name="@k8ordo/i18n"
-        steps={[
-          {
-            path: '/:locale/i18n/get-started',
-            label: m.nav.getStarted,
-            description: m.i18n.nextGetStarted,
-          },
-          {
-            path: '/:locale/i18n/messages',
-            label: m.i18n.navMessages,
-            description: m.i18n.nextMessages,
-          },
-          {
-            path: '/:locale/i18n/formatting',
-            label: m.i18n.navFormatting,
-            description: m.i18n.nextFormatting,
-          },
-          {
-            path: '/:locale/i18n/switch',
-            label: m.i18n.navSwitch,
-            description: m.i18n.nextSwitch,
-          },
-          {
-            path: '/:locale/i18n/negotiate',
-            label: m.i18n.navNegotiate,
-            description: m.i18n.nextNegotiate,
-          },
-          {
-            path: '/:locale/i18n/reference',
-            label: m.i18n.navReference,
-            description: m.i18n.nextReference,
-          },
-        ]}
-      />
     </div>
   );
 }

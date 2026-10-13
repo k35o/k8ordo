@@ -20,6 +20,16 @@ export const placeTree = message({
   en: 'Opening `/admin/42` with this layout runs the root `guard.ts`, then `admin/guard.ts`. The page renders only when both let the request through.',
 });
 
+export const placeGroup = message({
+  ja: 'グループに置いた`guard.ts`は、そのグループの中のルートでだけ実行されます。`/`だけをロケールのURLへリダイレクトする例は',
+  en: 'A `guard.ts` in a group runs only for the routes inside that group. For one that redirects `/` alone to a locale’s URL, see ',
+});
+
+export const see = message({
+  ja: 'を見てください。',
+  en: '.',
+});
+
 export const endTitle = message({
   ja: '戻り値',
   en: 'Return value',
@@ -140,6 +150,6 @@ export const orderTitle = message({
 });
 
 export const orderWhen = message({
-  ja: 'guardは、`paramsSchema`がURLを照合したあと、Server Actionと描画の前に実行されます。`redirect.ts`はどのguardよりも先に応答を返します。`[locale]`の下のguardでは、URLが示すロケールがすでに決まっています。guardが書いたCookieは、そのあとのServer Actionで読めます。',
-  en: 'A guard runs after the `paramsSchema` exports have matched the URL, and before the Server Action and the render. A `redirect.ts` answers before any guard. A guard under `[locale]` already has the locale the URL names, and a Server Action after it can read the cookies the guard wrote.',
+  ja: 'guardは、`paramsSchema`がパラメータを検証したあと、Server Actionと描画の前に実行されます。`redirect.ts`はどのguardよりも先に応答を返します。`[locale]`の下のguardでは、URLが示すロケールがすでに決まっています。guardが書いたCookieは、そのあとのServer Actionで読めます。',
+  en: 'A guard runs after the `paramsSchema` exports have validated the params, and before the Server Action and the render. A `redirect.ts` answers before any guard. A guard under `[locale]` already has the locale the URL names, and a Server Action after it can read the cookies the guard wrote.',
 });

@@ -167,17 +167,8 @@ export function DocPage({ path, introduction, children }: DocPageProps) {
   );
 }
 
-type DocSectionProps = SectionProps & {
-  description?: Message;
-};
-
 /** A top-level section of a page: a rule, an h2, then its text. */
-export function DocSection({
-  id,
-  title,
-  description,
-  children,
-}: DocSectionProps) {
+export function DocSection({ id, title, children }: SectionProps) {
   return (
     <section
       aria-labelledby={id}
@@ -186,14 +177,7 @@ export function DocSection({
       <Heading id={id} level="h2">
         <Rich>{title()}</Rich>
       </Heading>
-      <Prose>
-        {description !== undefined && (
-          <p>
-            <Rich>{description()}</Rich>
-          </p>
-        )}
-        {children}
-      </Prose>
+      <Prose>{children}</Prose>
     </section>
   );
 }

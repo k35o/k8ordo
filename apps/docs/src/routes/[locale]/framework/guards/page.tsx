@@ -49,6 +49,13 @@ export default function FrameworkGuardsPage() {
         <p>
           <Rich>{t.placeTree()}</Rich>
         </p>
+        <p>
+          <Rich>{t.placeGroup()}</Rich>
+          <LocaleAnchor path="/:locale/framework/routing">
+            {m.framework.navRouting()}
+          </LocaleAnchor>
+          <Rich>{t.see()}</Rich>
+        </p>
       </DocSection>
 
       <DocSection id="end" title={t.endTitle}>

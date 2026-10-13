@@ -1,6 +1,5 @@
 import { CodeBlock } from '@k8ordo/ui/code-block';
 
-import { Note, Pitfall } from '../../../../components/callout';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { PackageInstall } from '../../../../components/install';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
@@ -23,22 +22,6 @@ declare module '@k8ordo/i18n' {
   }
 }`;
 
-// コード例の中の `export const { paramsSchema }` は文字列なので、生成器
-// （ファイルをパースして export を読む）はこのページの export と取り違えない
-const LAYOUT = `import type { ReactNode } from 'react';
-
-import { locales } from '../../i18n';
-
-export const { paramsSchema } = locales;
-
-export default function LocaleLayout({
-  children,
-}: {
-  children: ReactNode;
-}) {
-  return children;
-}`;
-
 const MESSAGES = `import { message } from '@k8ordo/i18n';
 
 export const title = message({ ja: 'ようこそ', en: 'Welcome' });
@@ -50,13 +33,13 @@ export const greeting = message({
   en: (name) => \`Hello, \${name}\`,
 });`;
 
-const PAGE = `import { Greeting } from '../../components/greeting';
-import * as home from '../../messages/home';
+const WELCOME = `import { title } from '../messages/home';
+import { Greeting } from './greeting';
 
-export default function HomePage() {
+export function Welcome() {
   return (
     <main>
-      <h1>{home.title()}</h1>
+      <h1>{title()}</h1>
       <Greeting />
     </main>
   );
@@ -66,7 +49,7 @@ const GREETING = `'use client';
 
 import { useState } from 'react';
 
-import * as home from '../messages/home';
+import { greeting, nameLabel } from '../messages/home';
 
 export function Greeting() {
   const [name, setName] = useState('k8o');
@@ -74,7 +57,7 @@ export function Greeting() {
   return (
     <div>
       <label>
-        {home.nameLabel()}
+        {nameLabel()}
         <input
           onChange={(event) => {
             setName(event.currentTarget.value);
@@ -82,140 +65,109 @@ export function Greeting() {
           value={name}
         />
       </label>
-      <p>{home.greeting(name)}</p>
+      <p>{greeting(name)}</p>
     </div>
   );
 }`;
 
-const NEXT = [
-  {
-    path: '/:locale/i18n/messages',
-    label: m.i18n.navMessages,
-    description: t.nextMessages,
-  },
-  {
-    path: '/:locale/i18n/switch',
-    label: m.i18n.navSwitch,
-    description: t.nextSwitch,
-  },
-  {
-    path: '/:locale/i18n/negotiate',
-    label: m.i18n.navNegotiate,
-    description: t.nextNegotiate,
-  },
-] as const;
-
 export default function I18nGetStartedPage() {
   return (
     <DocPage introduction={t.introduction} path="/:locale/i18n/get-started">
-      <DocSection
-        description={t.installDescription}
-        id="install"
-        title={t.installTitle}
-      >
+      <DocSection id="install" title={t.installTitle}>
         <PackageInstall name="@k8ordo/i18n" />
-        <Note>
-          <p>
-            <Rich>{t.runtimeNote()}</Rich>
-          </p>
-        </Note>
+        <p>
+          <Rich>{t.runtime()}</Rich>
+        </p>
       </DocSection>
 
-      <DocSection
-        description={t.localesDescription}
-        id="locales"
-        title={t.localesTitle}
-      >
+      <DocSection id="locales" title={t.localesTitle}>
         <CodeBlock
+          callouts={{ 5: t.localesDefaultCallout() }}
           code={LOCALES}
           lang="ts"
-          marks={{ 5: 'highlight', 6: 'highlight' }}
+          marks={{ 5: 'highlight', 6: 'highlight', 11: 'highlight' }}
           title="src/i18n.ts"
         />
         <p>
-          <Rich>{t.localesDefault()}</Rich>
+          <Rich>{t.localesDefine()}</Rich>
         </p>
         <p>
           <Rich>{t.localesRegister()}</Rich>
+          <LocaleAnchor path="/:locale/framework/routing">
+            {m.framework.navRouting()}
+          </LocaleAnchor>
+          <Rich>{t.see()}</Rich>
         </p>
-      </DocSection>
-
-      <DocSection
-        description={t.segmentDescription}
-        id="segment"
-        title={t.segmentTitle}
-      >
-        <CodeBlock
-          code={LAYOUT}
-          lang="tsx"
-          marks={{ 5: 'highlight' }}
-          title="src/routes/[locale]/layout.tsx"
-        />
         <p>
-          <Rich>{t.segmentRefuse()}</Rich>
+          <Rich>{t.localesMore()}</Rich>
+          <LocaleAnchor path="/:locale/i18n/locales">
+            {m.i18n.navLocales()}
+          </LocaleAnchor>
+          <Rich>{t.see()}</Rich>
         </p>
-        <Pitfall>
-          <p>
-            <Rich>{t.segmentPitfall()}</Rich>
-          </p>
-        </Pitfall>
       </DocSection>
 
-      <DocSection
-        description={t.messagesDescription}
-        id="messages"
-        title={t.messagesTitle}
-      >
+      <DocSection id="messages" title={t.messagesTitle}>
         <CodeBlock
+          callouts={{ 8: t.messagesCallout() }}
           code={MESSAGES}
           lang="ts"
           marks={{ 8: 'highlight', 9: 'highlight' }}
           title="src/messages/home.ts"
         />
         <p>
+          <Rich>{t.messagesDefine()}</Rich>
+        </p>
+        <p>
           <Rich>{t.messagesTypes()}</Rich>
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.serverDescription}
-        id="server"
-        title={t.serverTitle}
-      >
+      <DocSection id="server" title={t.serverTitle}>
         <CodeBlock
-          code={PAGE}
+          callouts={{ 7: t.serverCallout() }}
+          code={WELCOME}
           lang="tsx"
           marks={{ 7: 'highlight' }}
-          title="src/routes/[locale]/page.tsx"
+          title="src/components/welcome.tsx"
         />
+        <p>
+          <Rich>{t.serverCall()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.serverSet()}</Rich>
+          <LocaleAnchor path="/:locale/i18n/routing">
+            {m.i18n.navRouting()}
+          </LocaleAnchor>
+          <Rich>{t.see()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.serverFramework()}</Rich>
+          <LocaleAnchor path="/:locale/framework/routing">
+            {m.framework.navRouting()}
+          </LocaleAnchor>
+          <Rich>{t.see()}</Rich>
+        </p>
       </DocSection>
 
-      <DocSection
-        description={t.clientDescription}
-        id="client"
-        title={t.clientTitle}
-      >
+      <DocSection id="client" title={t.clientTitle}>
         <CodeBlock
+          callouts={{ 21: t.clientCallout() }}
           code={GREETING}
           lang="tsx"
           marks={{ 13: 'highlight', 21: 'highlight' }}
           title="src/components/greeting.tsx"
         />
         <p>
-          <Rich>{t.clientBoundary()}</Rich>
+          <Rich>{t.clientSame()}</Rich>
         </p>
-      </DocSection>
-
-      <DocSection id="next" title={t.nextTitle}>
-        <ul>
-          {NEXT.map((step) => (
-            <li key={step.path}>
-              <LocaleAnchor path={step.path}>{step.label()}</LocaleAnchor>
-              {' — '}
-              <Rich>{step.description()}</Rich>
-            </li>
-          ))}
-        </ul>
+        <p>
+          <Rich>{t.clientBoundary()}</Rich>
+          <LocaleAnchor path="/:locale/i18n/messages">
+            {m.i18n.navMessages()}
+          </LocaleAnchor>
+          <Rich>{t.see()}</Rich>
+        </p>
       </DocSection>
     </DocPage>
   );

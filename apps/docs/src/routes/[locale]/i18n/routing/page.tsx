@@ -2,23 +2,18 @@ import { CodeBlock } from '@k8ordo/ui/code-block';
 
 import { Note, Pitfall } from '../../../../components/callout';
 import { DocPage, DocSection } from '../../../../components/doc-page';
+import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Rich } from '../../../../components/rich';
 import * as m from '../../../../messages';
 
 const t = m.i18nRouting;
 
-// コード例の中の `export const { paramsSchema }` は文字列なので、生成器
-// （ファイルをパースして export を読む）はこのページの export と取り違えない
-const LAYOUT = `import { locales } from '../../i18n';
-
-export const { paramsSchema } = locales;`;
-
 const RUN = `import { locales } from '../i18n';
 import type { Locale } from '../i18n';
-import * as m from '../messages';
+import { welcomeSubject } from '../messages/email';
 
-export const welcomeSubject = (locale: Locale) =>
-  locales.run(locale, () => m.email.welcomeSubject());`;
+export const subjectIn = (locale: Locale) =>
+  locales.run(locale, () => welcomeSubject());`;
 
 const REGION = `import { locales } from '../i18n';
 
@@ -29,19 +24,12 @@ export function RegionName({ code }: { code: string }) {
   return <>{names.of(code)}</>;
 }`;
 
-const ROOT_LAYOUT = `import type { ReactNode } from 'react';
+const DOCUMENT = `import type { ReactNode } from 'react';
 
 import { locales } from '../i18n';
 
-export default function RootLayout({
-  children,
-  pathname,
-}: {
-  children: ReactNode;
-  pathname: string;
-}) {
-  const locale =
-    locales.delocalize(pathname).locale ?? locales.default;
+export function Document({ children }: { children: ReactNode }) {
+  const locale = locales.getLocale();
 
   return (
     <html dir={locales.definitions[locale].dir} lang={locale}>
@@ -50,44 +38,34 @@ export default function RootLayout({
   );
 }`;
 
-const BASE = `import { withBase } from '@k8ordo/framework';
+const BASE = `import { locales } from '../i18n';
 
-withBase(locales.localize('/ui', 'en'));
-// '/docs/en/ui'`;
+// base: '/docs/', URL: '/docs/en/ui'
+locales.delocalize('/en/ui');
+// { locale: 'en', pathname: '/ui' }
+locales.localize('/ui', 'ja');
+// '/ja/ui'`;
 
 export default function I18nRoutingPage() {
   return (
     <DocPage introduction={t.introduction} path="/:locale/i18n/routing">
-      <DocSection
-        description={t.serverDescription}
-        id="server"
-        title={t.serverTitle}
-      >
-        <CodeBlock
-          code={LAYOUT}
-          lang="tsx"
-          marks={{ 3: 'highlight' }}
-          title="src/routes/[locale]/layout.tsx"
-        />
+      <DocSection id="browser" title={t.browserTitle}>
         <p>
-          <Rich>{t.serverScope()}</Rich>
+          <Rich>{t.browserUrl()}</Rich>
         </p>
         <p>
-          <Rich>{t.serverRefused()}</Rich>
+          <Rich>{t.browserRun()}</Rich>
         </p>
-        <Note>
-          <p>
-            <Rich>{t.serverParams()}</Rich>
-          </p>
-        </Note>
-        <Pitfall>
-          <p>
-            <Rich>{t.serverRuntime()}</Rich>
-          </p>
-        </Pitfall>
+        <p>
+          <Rich>{t.browserSwitch()}</Rich>
+          <LocaleAnchor path="/:locale/i18n/switch">
+            {m.i18n.navSwitch()}
+          </LocaleAnchor>
+          <Rich>{t.see()}</Rich>
+        </p>
       </DocSection>
 
-      <DocSection description={t.runDescription} id="run" title={t.runTitle}>
+      <DocSection id="server" title={t.serverTitle}>
         <CodeBlock
           code={RUN}
           lang="ts"
@@ -95,36 +73,26 @@ export default function I18nRoutingPage() {
           title="src/lib/welcome.ts"
         />
         <p>
-          <Rich>{t.runReturns()}</Rich>
+          <Rich>{t.serverRun()}</Rich>
         </p>
         <p>
-          <Rich>{t.runAction()}</Rich>
+          <Rich>{t.serverSchema()}</Rich>
+          <LocaleAnchor path="/:locale/framework/routing">
+            {m.framework.navRouting()}
+          </LocaleAnchor>
+          <Rich>{t.see()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.serverDefault()}</Rich>
         </p>
         <Pitfall>
           <p>
-            <Rich>{t.runBrowser()}</Rich>
+            <Rich>{t.serverRuntime()}</Rich>
           </p>
         </Pitfall>
       </DocSection>
 
-      <DocSection
-        description={t.browserDescription}
-        id="browser"
-        title={t.browserTitle}
-      >
-        <p>
-          <Rich>{t.browserDefault()}</Rich>
-        </p>
-        <p>
-          <Rich>{t.browserSwitch()}</Rich>
-        </p>
-      </DocSection>
-
-      <DocSection
-        description={t.getLocaleDescription}
-        id="get-locale"
-        title={t.getLocaleTitle}
-      >
+      <DocSection id="get-locale" title={t.getLocaleTitle}>
         <CodeBlock
           code={REGION}
           lang="tsx"
@@ -132,41 +100,51 @@ export default function I18nRoutingPage() {
           title="src/components/region-name.tsx"
         />
         <p>
+          <Rich>{t.getLocaleCall()}</Rich>
+        </p>
+        <p>
           <Rich>{t.getLocaleDestructure()}</Rich>
         </p>
         <Note>
           <p>
             <Rich>{t.getLocaleNoSubscribe()}</Rich>
+            <LocaleAnchor path="/:locale/router/location">
+              {m.router.navLocation()}
+            </LocaleAnchor>
+            <Rich>{t.see()}</Rich>
           </p>
         </Note>
       </DocSection>
 
-      <DocSection
-        description={t.htmlDescription}
-        id="html-lang"
-        title={t.htmlTitle}
-      >
+      <DocSection id="html-lang" title={t.htmlTitle}>
         <CodeBlock
-          code={ROOT_LAYOUT}
+          code={DOCUMENT}
           lang="tsx"
-          marks={{ 12: 'highlight', 13: 'highlight', 16: 'highlight' }}
-          title="src/routes/layout.tsx"
+          marks={{ 6: 'highlight', 9: 'highlight' }}
+          title="src/components/document.tsx"
         />
+        <p>
+          <Rich>{t.htmlServer()}</Rich>
+        </p>
         <p>
           <Rich>{t.htmlNull()}</Rich>
         </p>
-        <p>
-          <Rich>{t.htmlSame()}</Rich>
-        </p>
       </DocSection>
 
-      <DocSection description={t.baseDescription} id="base" title={t.baseTitle}>
+      <DocSection id="base" title={t.baseTitle}>
+        <CodeBlock code={BASE} lang="ts" />
+        <p>
+          <Rich>{t.baseSegment()}</Rich>
+        </p>
         <p>
           <Rich>{t.baseTerms()}</Rich>
         </p>
-        <CodeBlock code={BASE} lang="ts" />
         <p>
           <Rich>{t.baseLinks()}</Rich>
+          <LocaleAnchor path="/:locale/router/base">
+            {m.router.navBase()}
+          </LocaleAnchor>
+          <Rich>{t.see()}</Rich>
         </p>
       </DocSection>
     </DocPage>

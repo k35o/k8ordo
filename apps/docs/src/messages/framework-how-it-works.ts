@@ -1,23 +1,8 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: 'staticモードとserverモードの主な違いは、同じリクエストハンドラをビルドのときに呼ぶか、リクエストのたびに呼ぶかです。モードごとにエラーになるものも、この違いで変わります。',
-  en: 'Static mode calls the request handler at build time, and server mode calls it per request. That is the chief difference between them, and it changes what each mode rejects.',
-});
-
-export const modeTitle = message({
-  ja: 'モードの指定',
-  en: 'Setting the mode',
-});
-
-export const modeDependency = message({
-  ja: 'モードは`framework()`の`mode`で決まります。どちらのモードでも、インストールするのは同じ`@k8ordo/framework`です。',
-  en: "`framework()`'s `mode` option picks the mode. Either way, the package installed is the same `@k8ordo/framework`.",
-});
-
-export const modeSame = message({
-  ja: "`routes/`の書き方と`'use client'`の境界は、どちらのモードでも同じです。",
-  en: "The `routes/` conventions and the `'use client'` boundary are the same in both modes.",
+  ja: '`@k8ordo/framework`がページの描画とリクエストへの応答をいつ、どこで行うかと、保証することとしないことが分かります。',
+  en: 'When and where `@k8ordo/framework` renders pages and answers requests, and what it does and does not guarantee.',
 });
 
 export const handlerTitle = message({
@@ -36,8 +21,8 @@ export const handlerModes = message({
 });
 
 export const handlerDev = message({
-  ja: '`vite dev`は、どちらのモードでもリクエストのたびにハンドラを呼びます。そのためstaticモードでも、`paths`に無い値のページが開発中は表示されます。`fallback.tsx`のあるページでは、その値にシェルが答えます。開発中とビルドのほかの違いは',
-  en: '`vite dev` calls the handler for every request under either mode. So under static mode too, a page for a value `paths` does not list still renders in development, or its shell does, for a page with a `fallback.tsx`. For the other ways development differs from the build, see ',
+  ja: '`vite dev`は、どちらのモードでもリクエストのたびにハンドラを呼び、ファイルを書きません。開発中とビルドの違いは',
+  en: '`vite dev` calls the handler for every request under either mode, and writes no files. For how development differs from the build, see ',
 });
 
 export const see = message({
@@ -51,13 +36,13 @@ export const payloadTitle = message({
 });
 
 export const payloadPath = message({
-  ja: 'どちらのモードでも、ページにはHTMLとRSCペイロードの2つの形があります。ペイロードは、ページのパスに`/index.rsc`を付けたURLにあります。クライアント側の遷移では、このペイロードを取得します。',
-  en: 'Under either mode a page has two forms: HTML and an RSC payload. The payload’s URL is the page’s path with `/index.rsc` appended. A client navigation fetches that payload.',
+  ja: 'どちらのモードでも、ページにはHTMLとRSCペイロードの2つの形があります。ペイロードは、ページのパスに`/index.rsc`を付けたURLにあります。ヘッダーやクエリでなくパスに置くのは、静的ホスティングがそのどちらでも応答を変えないためです。',
+  en: 'Under either mode a page has two forms: HTML and an RSC payload. The payload’s URL is the page’s path with `/index.rsc` appended. It sits at a path rather than behind a header or a query because a static host varies its answer on neither.',
 });
 
 export const payloadEmbed = message({
-  ja: '最初に開いたページでは、描画に使ったペイロードがHTMLに埋め込まれています。ハイドレーションはそれを読むので、同じページを2回取得しません。',
-  en: 'The first page opened carries the payload it was rendered from inside its HTML. Hydration reads that, so the same page is never fetched twice.',
+  ja: 'クライアント側の遷移では、このペイロードを取得します。最初に開いたページでは、描画に使ったペイロードがHTMLに埋め込まれています。ハイドレーションはそれを読むので、同じページを2回取得しません。',
+  en: 'A client navigation fetches that payload. The first page opened carries the payload it was rendered from inside its HTML. Hydration reads that, so the same page is never fetched twice.',
 });
 
 export const staticTitle = message({
@@ -66,18 +51,18 @@ export const staticTitle = message({
 });
 
 export const staticNoRequest = message({
-  ja: 'staticモードでも、`@k8ordo/framework`にはサーバー用の機能が含まれています。staticモードでそれを使うと、ビルドがエラーになります。',
-  en: 'A static mode application still has the server features installed. Using one under static mode fails the build.',
+  ja: 'staticモードでも、`@k8ordo/framework`にはサーバー用の機能が含まれています。ビルドで書くファイルにはリクエストが無いので、staticモードでそれを使うとビルドがエラーになります。',
+  en: 'A static mode application still has the server features installed. A file the build writes has no request behind it, so using one under static mode fails the build.',
 });
 
-export const staticWhen = message({
-  ja: "`guard.ts`と`search`をexportするページ、`GET`以外をexportする`route.ts`は、ビルドを始める前にエラーになります。`@k8ordo/framework/server`のimportと`'use server'`は、各環境をコンパイルしたあとにエラーになります。どちらも、ページを1つも書き出す前にエラーになります。",
-  en: "A `guard.ts`, a page that exports `search` and a `route.ts` that exports anything but `GET` fail before the build starts. An import of `@k8ordo/framework/server` or `'use server'` fails once the environments are compiled. Both stop the build before any page is written.",
+export const staticDev = message({
+  ja: '`vite dev`はリクエストを受け取るサーバーで、`guard.ts`もServer Actionも動かせます。それでもビルドと同じエラーにするのは、開発中だけ動いて本番で何もしないコードを残さないためです。',
+  en: '`vite dev` is a server that receives requests, and could run a `guard.ts` or a Server Action. It reports the same error as the build anyway, so that no code works in development and does nothing in production.',
 });
 
-export const staticWants = message({
-  ja: '`vite dev`でも、これらを使うモジュールをコンパイルした時点で同じエラーになります。開発中だけ動いて本番で何もしないコードは残りません。拒まれるものの一覧と理由は',
-  en: '`vite dev` reports the same error the moment it compiles the module, so no code works in development and does nothing in production. What is refused, and why, is listed on ',
+export const staticList = message({
+  ja: '拒まれるものの一覧と、エラーになる時点は',
+  en: 'What is refused, and when the build reports it, is listed on ',
 });
 
 export const serverTitle = message({
@@ -86,50 +71,83 @@ export const serverTitle = message({
 });
 
 export const serverAnywhere = message({
-  ja: '動いているサーバーは、どこからでもリクエストを受け取ります。ハンドラは、アプリが応答すべきでないリクエストを描画の前に拒みます。',
-  en: 'A running server takes requests from anywhere. The handler turns away the ones the application should not answer before anything renders.',
+  ja: 'serverモードのサーバーは、どこからでもリクエストを受け取ります。ハンドラは、アプリが応答すべきでないリクエストを`guard.ts`より前に拒みます。拒んだリクエストでは、guardもServer Actionも実行されません。',
+  en: 'Under server mode, the server takes requests from anywhere. The handler turns away the ones the application should not answer before any `guard.ts` runs, so neither a guard nor a Server Action runs for them.',
 });
 
-export const serverList = [
+export const serverOrigin = message({
+  ja: 'Server Actionは、`POST`を送れるなら別のサイトのフォームからも呼べます。`Origin`が別のホストを指す`POST`を拒むのは、訪問者のCookie付きでアクションを呼ばせないためです。',
+  en: 'A Server Action can be called by anything that can send a `POST`, another site’s form included. A `POST` whose `Origin` names another host is turned away so that no such form calls an action with the visitor’s cookies.',
+});
+
+export const guaranteesTitle = message({
+  ja: '保証すること',
+  en: 'Guarantees',
+});
+
+export const guaranteesList = [
   message({
-    ja: '別のオリジンからの`POST`：ページとServer Actionへの`POST`は、`Origin`が無いか別のホストを指すと`403`になります。別のサイトのフォームから、訪問者のCookie付きでServer Actionを呼ばせないためです。',
-    en: 'A `POST` from another origin: a `POST` to a page or a Server Action gets a `403` when it has no `Origin` header, or when that header names a host other than the request’s. This keeps another site’s form from calling a Server Action with the visitor’s cookies.',
+    ja: "どちらのモードでも、同じハンドラが同じ`routes/`を描画します。`routes/`の書き方と`'use client'`の境界は、モードを切り替えても変わりません。",
+    en: "Under either mode the same handler renders the same `routes/`. The `routes/` conventions and the `'use client'` boundary do not change with the mode.",
   }),
   message({
-    ja: '`GET`と`HEAD`と`POST`以外のメソッド：ページへのリクエストなら、その3つを`Allow`に並べた`405`になります。',
-    en: 'A method other than `GET`, `HEAD` and `POST`: a request to a page gets a `405` whose `Allow` lists those three.',
+    ja: 'ペイロードが今のタブのスクリプトと合わないときは描画せず、そのURLを文書として読み込み直します。',
+    en: 'A payload that does not match the script the tab is running is not rendered: the URL is loaded again as a document.',
   }),
   message({
-    ja: 'Viteの`base`の外のURL：アプリのURLには含まれないので、`404`になります。',
-    en: 'A URL outside Vite’s `base`: it is not one of the application’s, and gets a `404`.',
+    ja: "staticモードのビルドは、ページを1つも書き出す前に`guard.ts`と`'use server'`を拒みます。アプリ自身のモジュールにある`@k8ordo/framework/server`のimportも同じです。",
+    en: "Under static mode, the build refuses a `guard.ts`, a `'use server'` module and an import of `@k8ordo/framework/server` in the application’s own modules before any page is written.",
+  }),
+  message({
+    ja: 'staticモードでは、Server Componentがエラーになったページを書き出さず、そのURLを挙げてビルドを止めます。',
+    en: 'Under static mode, a page whose Server Component throws is not written, and the build stops, naming its URL.',
+  }),
+  message({
+    ja: 'serverモードでは、ページのURLへの`POST`のうち、`Origin`が無いものと別のホストを指すものは`403`になります。',
+    en: 'Under server mode, a `POST` to a page’s URL gets a `403` when it has no `Origin` header, or when that header names another host.',
+  }),
+  message({
+    ja: 'serverモードでは、ページへの`GET`と`HEAD`と`POST`以外のメソッドは、その3つを`Allow`に並べた`405`になります。Viteの`base`の外のURLは`404`になります。',
+    en: 'Under server mode, a method other than `GET`, `HEAD` and `POST` gets a `405` whose `Allow` lists those three. A URL outside Vite’s `base` gets a `404`.',
+  }),
+  message({
+    ja: '`src/routes/[locale]/layout.tsx`が`@k8ordo/i18n`の`paramsSchema`をexportし、`not-found.tsx`も`[locale]`の下にあれば、同じURLのページはサーバーでもブラウザでも同じロケールで描画されます。',
+    en: 'With `@k8ordo/i18n`’s `paramsSchema` exported from `src/routes/[locale]/layout.tsx`, and `not-found.tsx` placed under `[locale]` too, a URL renders in the same locale on the server and in the browser.',
+  }),
+  message({
+    ja: '描画に設定するロケールは、そのURLから`paramsSchema`が受け付けたものだけです。拒まれたパターンで受け付けたロケールも、同じビルドで先に描画したページのロケールも引き継ぎません。',
+    en: 'The only locale a render is given is the one `paramsSchema` accepted from its URL. A locale accepted for a pattern that was then refused does not carry over, and neither does the locale of a page the same build rendered earlier.',
   }),
 ] as const;
 
-export const bothTitle = message({
-  ja: '共通のエラー',
-  en: 'Errors in both modes',
+export const nonGuaranteesTitle = message({
+  ja: '保証しないこと',
+  en: 'Not guaranteed',
 });
 
-export const bothIntro = message({
-  ja: '次のものは、どちらのモードでもエラーになります。',
-  en: 'These are errors under either mode.',
-});
-
-export const bothList = [
+export const nonGuaranteesList = [
   message({
-    ja: '`routes/`の決まりに合わないファイルやディレクトリと、どのURLにも答えないルート',
-    en: 'A file or directory that breaks the `routes/` conventions, and a route that answers no URL',
+    ja: 'staticモードでも、`vite dev`の結果はビルドと同じではありません。`fallback.tsx`の無いページは`paths`に無い値でも描画し、Server Componentのエラーには`500`を返します。',
+    en: 'Under static mode too, `vite dev` does not give what the build gives. A page without a `fallback.tsx` renders for a value `paths` does not list, and a Server Component that throws gets a `500`.',
   }),
   message({
-    ja: '非同期に検証する`paramsSchema`（`a params schema must validate synchronously`）',
-    en: 'A `paramsSchema` that validates asynchronously (`a params schema must validate synchronously`)',
+    ja: '`node_modules`の依存が`@k8ordo/framework/server`をimportしていても、staticモードのビルドはその名前を挙げません。依存が`cookies()`などを呼んだ時点でエラーになります。',
+    en: 'A dependency in `node_modules` that imports `@k8ordo/framework/server` is not named by a static build. It fails once the dependency calls `cookies()` or the like.',
   }),
   message({
-    ja: 'Client Componentから読み込まれた`server-only`のモジュール',
-    en: 'A `server-only` module imported from a Client Component',
+    ja: 'staticモードのビルドは、応答のステータスを書けません。`404.html`に404を付けるかはホスティングの設定で決まり、`redirect.ts`は行き先へ送るページになります。',
+    en: 'A static build cannot write a status. Whether `404.html` is served with a 404 is the host’s setting, and a `redirect.ts` becomes a page that sends the visitor on.',
   }),
   message({
-    ja: 'ルートから始まらないViteの`base`（`./`など）',
-    en: 'A Vite `base` that does not start from the root (`./`, for example)',
+    ja: '`route.ts`への`POST`は、`Origin`を確かめません。必要な確認は`route.ts`の中で行います。',
+    en: 'A `POST` to a `route.ts` has its `Origin` unchecked. Whatever it needs checked, the `route.ts` checks itself.',
+  }),
+  message({
+    ja: 'ハンドラは、`X-Forwarded-Host`のような転送用のヘッダーを読みません。`Origin`と比べるのは、受け取った`Request`のURLのホストです。',
+    en: 'The handler reads no forwarding header such as `X-Forwarded-Host`. It compares `Origin` with the host of the URL of the `Request` it is handed.',
+  }),
+  message({
+    ja: 'staticモードの`404.html`は、`not-found.tsx`を`[locale]`の下に置いても既定のロケールで書かれます。JavaScriptが動かない訪問者には、URLのロケールに関係なくその文言が出ます。',
+    en: 'Under static mode, `404.html` is written in the default locale even when `not-found.tsx` sits under `[locale]`. A visitor without JavaScript sees that text whatever locale the URL names.',
   }),
 ] as const;

@@ -1,121 +1,111 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: '日本語と英語のページを持つ小さなアプリを作りながら、`@k8ordo/i18n`の使い方を最初から最後までたどります。ロケールの一覧は1か所に書き、`[locale]`の区間で受け取ります。最初の文言は、Server ComponentとClient Componentの両方で描きます。',
-  en: 'Build a small app with Japanese and English pages, from start to finish. You list the locales in one place, accept them on the `[locale]` segment, and render a first message from a Server Component and from a Client Component.',
+  ja: '日本語と英語の文言を持つアプリを作ります。ロケールを定義し、文言をServer ComponentとClient Componentに表示します。',
+  en: 'Build an app with Japanese and English messages: define the locales, then render messages from a Server Component and a Client Component.',
 });
 
 export const installTitle = message({
-  ja: 'インストールする',
+  ja: 'インストール',
   en: 'Install',
 });
 
-export const installDescription = message({
-  ja: '`@k8ordo/i18n`をインストールします。実行時に読み込むパッケージはほかにありません。Reactもスキーマのライブラリもimportしないためです。',
-  en: 'Install `@k8ordo/i18n`. Nothing else is loaded at run time: it imports neither React nor a schema library.',
-});
-
-export const runtimeNote = message({
-  ja: 'サーバーでは、描画中のロケールを`AsyncLocalStorage`に置きます。`process.getBuiltinModule`でこれを取り出せるランタイムが必要です。`@k8ordo/framework`が求めるNode 24は、この条件を満たします。',
-  en: 'On a server the locale of the render in progress lives in `AsyncLocalStorage`, so the runtime has to hand it out through `process.getBuiltinModule`. Node 24, which `@k8ordo/framework` requires, does.',
+export const runtime = message({
+  ja: 'サーバーでは、`process.getBuiltinModule`で`AsyncLocalStorage`を取り出せるランタイムが必要です。Node 24はこの条件を満たします。',
+  en: 'On the server, the runtime must provide `AsyncLocalStorage` through `process.getBuiltinModule`. Node 24 does.',
 });
 
 export const localesTitle = message({
-  ja: 'ロケールの一覧を書く',
-  en: 'List the locales',
+  ja: 'ロケールの定義',
+  en: 'Defining the locales',
 });
 
-export const localesDescription = message({
-  ja: 'まず、アプリが扱うロケールを`defineLocales`で書きます。ロケールごとに、日付を表示するタイムゾーン（`timeZone`）と文字の向き（`dir`）を添えます。',
-  en: 'First, list the locales the app supports with `defineLocales`. Each one states the time zone its dates are shown in (`timeZone`) and the direction its text runs in (`dir`).',
+export const localesDefaultCallout = message({
+  ja: '先頭に書いたロケールが既定のロケール',
+  en: 'The first locale is the default',
 });
 
-export const localesDefault = message({
-  ja: '先頭に書いた`ja`が既定のロケールです。URLにロケールが無いときなど、何もロケールを指名していないときは、既定のロケールで文言を描きます。',
-  en: 'The `ja` written first is the default locale. When nothing names a locale, such as a URL without one, messages render in the default.',
+export const localesDefine = message({
+  ja: 'アプリが扱うロケールを`defineLocales`で書きます。ロケールごとに、日付を表示するタイムゾーン（`timeZone`）と文字の向き（`dir`）を添えます。',
+  en: 'List the locales the app supports with `defineLocales`. Each one declares the time zone its dates are shown in (`timeZone`) and the direction its text runs in (`dir`).',
 });
 
 export const localesRegister = message({
-  ja: '後半の`Register`は、ロケールの型をパッケージに伝える宣言です。これを書くと、このあと書く文言がすべてのロケールの文を求めるようになります。`Register`はマージされるための型なので、`interface`で書きます。',
-  en: 'The `Register` block at the end tells the package your locales’ type. With it, every message you write next has to carry text for every locale. `Register` exists to be merged, so it is an `interface`.',
+  ja: '`Register`は、ロケールの型をパッケージに伝える宣言です。これを書くと、`message`がすべてのロケールの文を求めるようになります。`@k8ordo/framework`のアプリでは、`src/i18n.ts`がexportする`locales`から`Register`が生成されるので、この宣言は書きません。詳しくは`@k8ordo/framework`の',
+  en: 'The `Register` block tells the package the type of your locales. With it, `message` requires text for every locale. An `@k8ordo/framework` app does not write it: the framework generates `Register` from the `locales` that `src/i18n.ts` exports. See `@k8ordo/framework`’s ',
 });
 
-export const segmentTitle = message({
-  ja: '`[locale]`の区間で受け取る',
-  en: 'Accept the locale on the `[locale]` segment',
+export const localesMore = message({
+  ja: '既定のロケールの選び方やタイムゾーンの決め方は',
+  en: 'How to choose the default locale and each time zone is covered in ',
 });
 
-export const segmentDescription = message({
-  ja: '次に、すべてのページを`src/routes/[locale]/`の下に置き、その区間のレイアウトから`paramsSchema`をexportします。`/ja/…`と`/en/…`だけが受け付けられ、受け付けたロケールがそのページの描画のロケールになります。',
-  en: 'Next, put every page under `src/routes/[locale]/` and export `paramsSchema` from that segment’s layout. Only `/ja/…` and `/en/…` are accepted, and the accepted locale becomes the locale that page renders in.',
-});
-
-export const segmentRefuse = message({
-  ja: '一覧に無い`/fr/…`は、このパターンが答えないURLになり、最後は`not-found.tsx`が404で答えます。スキーマはロケールの一覧が自分で作るので、スキーマのライブラリは要りません。',
-  en: 'A URL such as `/fr/…`, outside the list, is one this pattern does not answer, and in the end `not-found.tsx` answers it with a 404. The locale set builds the schema itself, so no schema library is needed.',
-});
-
-export const segmentPitfall = message({
-  ja: "このレイアウトに`'use client'`を付けてはいけません。付けると、exportしたスキーマはclient referenceとしてフレームワークに渡り、スキーマとして読めなくなります。フックを使う枠が要るときは、`src/components/`のClient Componentに分けて、レイアウトから描きます。",
-  en: "Do not mark this layout `'use client'`: the schema it exports would then reach the framework as a client reference, which cannot be read as a schema. If the frame needs hooks, move it into a Client Component under `src/components/` and render that from the layout.",
+export const see = message({
+  ja: 'を見てください。',
+  en: '.',
 });
 
 export const messagesTitle = message({
-  ja: '文言を書く',
-  en: 'Write the messages',
+  ja: '文言の定義',
+  en: 'Defining messages',
 });
 
-export const messagesDescription = message({
+export const messagesCallout = message({
+  ja: '`en`の`name`の型は`ja`の注釈から推論される',
+  en: '`name` in `en` is inferred from the annotation on `ja`',
+});
+
+export const messagesDefine = message({
   ja: '文言は`message`で1つずつ書き、ロケールごとの文を並べます。値を差し込む文言は、ロケールごとの関数にします。',
-  en: 'Write each message with `message`, giving its text for every locale. A message that takes a value is a function in every locale.',
+  en: 'Write each message with `message`, giving its text in every locale. A message that takes a value is a function in every locale.',
 });
 
 export const messagesTypes = message({
-  ja: '`greeting`の引数の型は、`ja`に書いた注釈から決まります。`en`も同じ型で書くよう求められ、どちらかのロケールを書き忘れると、その宣言が型エラーになります。',
-  en: 'The type of `greeting`’s argument comes from the annotation on `ja`, and `en` is held to it. Leave out either locale, and the declaration fails to compile.',
+  ja: '`en`の関数は、`ja`と同じ引数の型で書きます。',
+  en: 'The `en` function takes the same argument types as `ja`.',
 });
 
 export const serverTitle = message({
-  ja: 'Server Componentで描く',
-  en: 'Render from a Server Component',
+  ja: 'Server Componentでの描画',
+  en: 'Rendering in a Server Component',
 });
 
-export const serverDescription = message({
-  ja: '文言は呼ぶだけで、そのページのロケールの文を返します。サーバーでは、`[locale]`のスキーマが受け付けたロケールを読むので、`/en/`の下では英語の文になります。',
-  en: 'Call a message and it returns the text in the page’s locale. On the server it reads the locale the `[locale]` schema accepted, so under `/en/` the text is English.',
+export const serverCallout = message({
+  ja: '呼ぶだけで、今のロケールの文が返る',
+  en: 'Calling it returns the text in the current locale',
+});
+
+export const serverCall = message({
+  ja: 'サーバーでは、今の非同期コンテキストに設定されたロケールの文を返します。何も設定されていなければ、既定のロケールの文（`ようこそ`）を返します。',
+  en: 'On the server it returns the text in the locale set for the current async context. With none set, it returns the default locale’s text, `ようこそ`.',
+});
+
+export const serverSet = message({
+  ja: 'ロケールを設定するのは`locales.run`と`locales.paramsSchema`です。使い方は',
+  en: '`locales.run` and `locales.paramsSchema` set it. How to use them is covered in ',
+});
+
+export const serverFramework = message({
+  ja: '`@k8ordo/framework`では、`[locale]`のレイアウトから`paramsSchema`をexportすると、`/en/…`のページが英語で描画されます。詳しくは`@k8ordo/framework`の',
+  en: 'Under `@k8ordo/framework`, exporting `paramsSchema` from the `[locale]` layout renders the pages under `/en/…` in English. See `@k8ordo/framework`’s ',
 });
 
 export const clientTitle = message({
-  ja: 'Client Componentで描く',
-  en: 'Render from a Client Component',
+  ja: 'Client Componentでの描画',
+  en: 'Rendering in a Client Component',
 });
 
-export const clientDescription = message({
+export const clientCallout = message({
+  ja: '値を差し込む文言は、引数を付けて呼ぶ',
+  en: 'A message with a value is called with the argument',
+});
+
+export const clientSame = message({
   ja: 'Client Componentでも書き方は同じです。ブラウザではURLの先頭の区間を読むので、プロバイダでロケールを渡す必要も、フックで読み出す必要もありません。',
-  en: 'A Client Component calls it the same way. In the browser it reads the first segment of the URL, so there is no provider to pass the locale down and no hook to read it with.',
+  en: 'A Client Component calls it the same way. In the browser a message reads the first segment of the URL, so there is no provider to pass the locale down and no hook to read it with.',
 });
 
 export const clientBoundary = message({
-  ja: 'Server ComponentからClient Componentへpropsで文言を渡すときは、呼んだ結果の文字列を渡します。関数はpropsとしてClient Componentに渡せないためです。詳しくは「文言を書く」で説明します。',
-  en: 'To hand text from a Server Component to a Client Component as a prop, pass the string you get by calling the message: a function cannot be passed to a Client Component as a prop. “Write messages” covers this.',
-});
-
-export const nextTitle = message({
-  ja: '次のステップ',
-  en: 'Next steps',
-});
-
-export const nextMessages = message({
-  ja: '値を差し込む文言の書き方と、文言をpropsで渡す方法を知る。',
-  en: 'Write messages that take values, and pass them around as props.',
-});
-
-export const nextSwitch = message({
-  ja: '言語を切り替えるリンクを作り、選んだ言語を覚えておく。',
-  en: 'Build a language switcher, and remember the choice.',
-});
-
-export const nextNegotiate = message({
-  ja: '`/`を開いた人を、その人の言語のページへ送る。',
-  en: 'Send whoever opens `/` to the page in their language.',
+  ja: 'Server ComponentからClient Componentへ文言をpropsで渡すときは、呼んだ結果の文字列を渡します。関数はClient Componentへのpropsとして渡せません。詳しくは',
+  en: 'To pass a message from a Server Component to a Client Component as a prop, pass the string you get by calling it. A Server Component cannot pass a function to a Client Component as a prop. See ',
 });

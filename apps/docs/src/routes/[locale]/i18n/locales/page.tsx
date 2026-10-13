@@ -2,6 +2,7 @@ import { CodeBlock } from '@k8ordo/ui/code-block';
 
 import { Pitfall } from '../../../../components/callout';
 import { DocPage, DocSection } from '../../../../components/doc-page';
+import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Rich } from '../../../../components/rich';
 import * as m from '../../../../messages';
 
@@ -27,31 +28,40 @@ declare module '@k8ordo/i18n' {
   }
 }`;
 
-const DEFAULT = `locales.all; // ['ja', 'en-US', 'ar']
-locales.default; // 'en-US'`;
+const DEFAULT = `locales.default; // 'en-US'`;
 
 const DIR = `locales.definitions.ar;
 // { timeZone: 'Africa/Cairo', dir: 'rtl' }`;
 
+const ERROR = `defineLocales({ ja: { timeZone: 'Asia/Tokio', dir: 'ltr' } });
+// TypeError: defineLocales: the timeZone of "ja", "Asia/Tokio", is not a time zone`;
+
 export default function I18nLocalesPage() {
   return (
     <DocPage introduction={t.introduction} path="/:locale/i18n/locales">
-      <DocSection
-        description={t.defineDescription}
-        id="define"
-        title={t.defineTitle}
-      >
+      <DocSection id="define" title={t.defineTitle}>
         <CodeBlock
+          callouts={{
+            10: t.defineDefaultCallout(),
+            17: t.defineRegisterCallout(),
+          }}
           code={DEFINE}
           lang="ts"
           marks={{ 6: 'highlight', 7: 'highlight', 8: 'highlight' }}
           title="src/i18n.ts"
         />
         <p>
-          <Rich>{t.defineTag()}</Rich>
+          <Rich>{t.defineObject()}</Rich>
         </p>
         <p>
-          <Rich>{t.defineLocaleType()}</Rich>
+          <Rich>{t.defineType()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.defineRegister()}</Rich>
+          <LocaleAnchor path="/:locale/framework/routing">
+            {m.framework.navRouting()}
+          </LocaleAnchor>
+          <Rich>{t.see()}</Rich>
         </p>
         <Pitfall>
           <p>
@@ -60,51 +70,58 @@ export default function I18nLocalesPage() {
         </Pitfall>
       </DocSection>
 
-      <DocSection
-        description={t.defaultDescription}
-        id="default"
-        title={t.defaultTitle}
-      >
+      <DocSection id="default" title={t.defaultTitle}>
         <CodeBlock code={DEFAULT} lang="ts" />
         <p>
-          <Rich>{t.defaultWhen()}</Rich>
+          <Rich>{t.defaultChoose()}</Rich>
         </p>
         <p>
-          <Rich>{t.defaultType()}</Rich>
+          <Rich>{t.defaultUsedLead()}</Rich>
         </p>
+        <ul>
+          {t.defaultUsedList.map((item) => (
+            <li key={item()}>
+              <Rich>{item()}</Rich>
+            </li>
+          ))}
+        </ul>
       </DocSection>
 
-      <DocSection
-        description={t.timeZoneDescription}
-        id="time-zone"
-        title={t.timeZoneTitle}
-      >
+      <DocSection id="time-zone" title={t.timeZoneTitle}>
+        <p>
+          <Rich>{t.timeZoneWhat()}</Rich>
+          <LocaleAnchor path="/:locale/i18n/formatting">
+            {m.i18n.navFormatting()}
+          </LocaleAnchor>
+          <Rich>{t.see()}</Rich>
+        </p>
         <p>
           <Rich>{t.timeZoneWhy()}</Rich>
         </p>
         <p>
           <Rich>{t.timeZoneChoose()}</Rich>
         </p>
-        <p>
-          <Rich>{t.timeZoneMore()}</Rich>
-        </p>
       </DocSection>
 
-      <DocSection description={t.dirDescription} id="dir" title={t.dirTitle}>
+      <DocSection id="dir" title={t.dirTitle}>
         <CodeBlock code={DIR} lang="ts" />
         <p>
-          <Rich>{t.dirWhy()}</Rich>
+          <Rich>{t.dirWhat()}</Rich>
         </p>
         <p>
           <Rich>{t.dirHtml()}</Rich>
+          <LocaleAnchor path="/:locale/i18n/routing">
+            {m.i18n.navRouting()}
+          </LocaleAnchor>
+          <Rich>{t.see()}</Rich>
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.errorsDescription}
-        id="errors"
-        title={t.errorsTitle}
-      >
+      <DocSection id="errors" title={t.errorsTitle}>
+        <CodeBlock code={ERROR} lang="ts" />
+        <p>
+          <Rich>{t.errorsWhen()}</Rich>
+        </p>
         <ul>
           {t.errorsList.map((item) => (
             <li key={item()}>
@@ -117,20 +134,63 @@ export default function I18nLocalesPage() {
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.membersDescription}
-        id="members"
-        title={t.membersTitle}
-      >
+      <DocSection id="members" title={t.membersTitle}>
+        <p>
+          <Rich>{t.membersLead()}</Rich>
+        </p>
         <ul>
-          {t.membersList.map((item) => (
+          {[
+            t.membersAll,
+            t.membersDefinitions,
+            t.membersDefault,
+            t.membersIs,
+          ].map((item) => (
             <li key={item()}>
               <Rich>{item()}</Rich>
             </li>
           ))}
+          <li>
+            <Rich>{t.membersNegotiate()}</Rich>
+            <LocaleAnchor path="/:locale/i18n/negotiate">
+              {m.i18n.navNegotiate()}
+            </LocaleAnchor>
+            <Rich>{t.see()}</Rich>
+          </li>
+          <li>
+            <Rich>{t.membersLocalize()}</Rich>
+            <LocaleAnchor path="/:locale/i18n/switch">
+              {m.i18n.navSwitch()}
+            </LocaleAnchor>
+            <Rich>{t.see()}</Rich>
+          </li>
+          <li>
+            <Rich>{t.membersParams()}</Rich>
+            <LocaleAnchor path="/:locale/i18n/routing">
+              {m.i18n.navRouting()}
+            </LocaleAnchor>
+            <Rich>{t.see()}</Rich>
+          </li>
+          <li>
+            <Rich>{t.membersPaths()}</Rich>
+            <LocaleAnchor path="/:locale/framework/params">
+              {m.framework.navParams()}
+            </LocaleAnchor>
+            <Rich>{t.see()}</Rich>
+          </li>
+          <li>
+            <Rich>{t.membersFormat()}</Rich>
+            <LocaleAnchor path="/:locale/i18n/formatting">
+              {m.i18n.navFormatting()}
+            </LocaleAnchor>
+            <Rich>{t.see()}</Rich>
+          </li>
         </ul>
         <p>
           <Rich>{t.membersMore()}</Rich>
+          <LocaleAnchor path="/:locale/i18n/reference">
+            {m.i18n.navReference()}
+          </LocaleAnchor>
+          <Rich>{t.see()}</Rich>
         </p>
       </DocSection>
     </DocPage>

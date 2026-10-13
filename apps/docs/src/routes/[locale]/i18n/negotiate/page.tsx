@@ -1,7 +1,12 @@
 import { CodeBlock } from '@k8ordo/ui/code-block';
 
 import { Note } from '../../../../components/callout';
-import { DocPage, DocSection } from '../../../../components/doc-page';
+import {
+  DocPage,
+  DocSection,
+  DocSubsection,
+} from '../../../../components/doc-page';
+import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Playground } from '../../../../components/playground';
 import { Rich } from '../../../../components/rich';
 import { NegotiationDemo } from '../../../../demos/i18n/negotiate/negotiation-demo';
@@ -26,78 +31,51 @@ parseAcceptLanguage('en-US;q=0.8, ja, en;q=0.9');
 
 const REQUEST = `locales.negotiateRequest(request, { cookie: 'locale' });`;
 
-const GUARD = `import { withBase } from '@k8ordo/framework';
-import type { Guard } from '@k8ordo/framework/server';
+const REDIRECT = `import { locales } from '../i18n';
 
-import { locales } from '../../i18n';
-
-const guard: Guard<'/'> = ({ request }) => {
+export function redirectToLocale(request: Request): Response {
   const locale = locales.negotiateRequest(request, {
     cookie: 'locale',
   });
   return new Response(null, {
     status: 307,
-    headers: { location: withBase(locales.localize('/', locale)) },
+    headers: { location: locales.localize('/', locale) },
   });
-};
-
-export default guard;`;
-
-const HOME_PAGE = `export default function RootPage() {
-  return null;
 }`;
 
-const TREE = `routes/
-  layout.tsx
-  (home)/
-    page.tsx
-    guard.ts
-  [locale]/
-    layout.tsx`;
-
-const STATIC_PAGE = `'use client';
+const ROOT_REDIRECT = `'use client';
 
 import { useEffect } from 'react';
 
 import { locales } from '../i18n';
-import { navigateTo } from '../lib/links';
 
-export default function RootRedirect() {
+export function RootRedirect() {
   useEffect(() => {
-    navigateTo(
-      '/:locale',
-      { locale: locales.negotiate(navigator.languages) },
-      { history: 'replace' },
-    );
+    const locale = locales.negotiate(navigator.languages);
+    location.replace(locales.localize('/', locale));
   }, []);
 
   return null;
 }`;
 
-const STATIC_COOKIE = `useEffect(() => {
+const ROOT_REDIRECT_COOKIE = `useEffect(() => {
   void cookieStore.get('locale').then((saved) => {
-    navigateTo(
-      '/:locale',
-      {
-        locale: locales.negotiate([
-          ...(saved?.value === undefined ? [] : [saved.value]),
-          ...navigator.languages,
-        ]),
-      },
-      { history: 'replace' },
-    );
+    const locale = locales.negotiate([
+      ...(saved?.value === undefined ? [] : [saved.value]),
+      ...navigator.languages,
+    ]);
+    location.replace(locales.localize('/', locale));
   });
 }, []);`;
 
 export default function I18nNegotiatePage() {
   return (
     <DocPage introduction={t.introduction} path="/:locale/i18n/negotiate">
-      <DocSection
-        description={t.negotiateDescription}
-        id="negotiate"
-        title={t.negotiateTitle}
-      >
+      <DocSection id="negotiate" title={t.negotiateTitle}>
         <CodeBlock code={NEGOTIATE} lang="ts" marks={{ 3: 'highlight' }} />
+        <p>
+          <Rich>{t.negotiateIntro()}</Rich>
+        </p>
         <ol>
           {t.negotiateSteps.map((step) => (
             <li key={step()}>
@@ -124,12 +102,11 @@ export default function I18nNegotiatePage() {
         <NegotiationDemo />
       </Playground>
 
-      <DocSection
-        description={t.headerDescription}
-        id="accept-language"
-        title={t.headerTitle}
-      >
+      <DocSection id="accept-language" title={t.headerTitle}>
         <CodeBlock code={HEADER} lang="ts" />
+        <p>
+          <Rich>{t.headerIntro()}</Rich>
+        </p>
         <ul>
           {t.headerRules.map((rule) => (
             <li key={rule()}>
@@ -142,88 +119,82 @@ export default function I18nNegotiatePage() {
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.requestDescription}
-        id="request"
-        title={t.requestTitle}
-      >
+      <DocSection id="request" title={t.requestTitle}>
         <CodeBlock code={REQUEST} lang="ts" />
+        <p>
+          <Rich>{t.requestIntro()}</Rich>
+        </p>
         <p>
           <Rich>{t.requestCookie()}</Rich>
         </p>
         <p>
-          <Rich>{t.requestWriter()}</Rich>
+          <Rich>{t.requestWriterBefore()}</Rich>
+          <LocaleAnchor path="/:locale/i18n/switch">
+            {m.i18n.navSwitch()}
+          </LocaleAnchor>
+          <Rich>{t.requestWriterAfter(m.i18nSwitch.rememberTitle())}</Rich>
         </p>
       </DocSection>
 
-      <DocSection
-        description={t.serverDescription}
-        id="server"
-        title={t.serverTitle}
-      >
+      <DocSection id="server" title={t.serverTitle}>
         <CodeBlock
-          code={GUARD}
+          callouts={{
+            4: t.serverGuardCallout(),
+            8: t.serverStatusCallout(),
+          }}
+          code={REDIRECT}
           lang="ts"
-          marks={{ 7: 'highlight', 11: 'highlight', 12: 'highlight' }}
-          title="src/routes/(home)/guard.ts"
-        />
-        <CodeBlock
-          code={HOME_PAGE}
-          lang="tsx"
-          title="src/routes/(home)/page.tsx"
+          marks={{ 4: 'highlight', 8: 'highlight', 9: 'highlight' }}
+          title="src/lib/redirect-to-locale.ts"
         />
         <p>
-          <Rich>{t.serverTree()}</Rich>
+          <Rich>{t.serverIntro()}</Rich>
         </p>
-        <CodeBlock code={TREE} lang="text" />
-        <ul>
-          {[t.serverGroup, t.serverPage, t.serverStatus, t.serverPayload].map(
-            (item) => (
-              <li key={item()}>
-                <Rich>{item()}</Rich>
-              </li>
-            ),
-          )}
-        </ul>
+        <p>
+          <Rich>{t.serverBase()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.serverFramework()}</Rich>
+          <LocaleAnchor path="/:locale/framework/routing">
+            {m.framework.navRouting()}
+          </LocaleAnchor>
+          <Rich>{t.see()}</Rich>
+        </p>
       </DocSection>
 
-      <DocSection
-        description={t.staticDescription}
-        id="static"
-        title={t.staticTitle}
-      >
+      <DocSection id="static" title={t.staticTitle}>
         <CodeBlock
-          code={STATIC_PAGE}
+          code={ROOT_REDIRECT}
           lang="tsx"
-          marks={{ 12: 'highlight' }}
-          title="src/routes/page.tsx"
+          marks={{ 9: 'highlight', 10: 'highlight' }}
+          title="src/components/root-redirect.tsx"
         />
         <p>
-          <Rich>{t.staticLinks()}</Rich>
+          <Rich>{t.staticIntro()}</Rich>
         </p>
         <ul>
-          {[t.staticEffect, t.staticReplace, t.staticWithoutRouter].map(
-            (item) => (
-              <li key={item()}>
-                <Rich>{item()}</Rich>
-              </li>
-            ),
-          )}
+          {[t.staticEffect, t.staticReplace].map((item) => (
+            <li key={item()}>
+              <Rich>{item()}</Rich>
+            </li>
+          ))}
         </ul>
         <Note>
           <p>
             <Rich>{t.staticNoJs()}</Rich>
           </p>
         </Note>
-        <p>
-          <Rich>{t.staticCookie()}</Rich>
-        </p>
-        <CodeBlock
-          code={STATIC_COOKIE}
-          lang="tsx"
-          marks={{ 2: 'highlight', 7: 'highlight', 8: 'highlight' }}
-          title="src/routes/page.tsx"
-        />
+        <DocSubsection id="static-cookie" title={t.staticCookieTitle}>
+          <CodeBlock
+            code={ROOT_REDIRECT_COOKIE}
+            lang="tsx"
+            marks={{ 2: 'highlight', 4: 'highlight' }}
+            title="src/components/root-redirect.tsx"
+          />
+          <p>
+            <Rich>{t.staticCookie()}</Rich>
+          </p>
+        </DocSubsection>
       </DocSection>
     </DocPage>
   );
