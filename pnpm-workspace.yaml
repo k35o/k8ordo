@@ -56,8 +56,8 @@ catalog:
   # 宣言を消して vite-plus 任せにしないのは、消すと plugin-react や vitest の
   # peer に pnpm が本家 vite を自動で入れ、vitest の実体が割れて
   # expect.element の型が消えるため。
-  vite: npm:@voidzero-dev/vite-plus-core@0.3.2
-  vite-plus: 0.3.2
+  vite: npm:@voidzero-dev/vite-plus-core@1.0.0
+  vite-plus: 1.0.0
   vitest: 5.0.3
   vitest-browser-react: 2.3.0
   zod: 4.6.5
@@ -71,15 +71,14 @@ minimumReleaseAge: 10080
 overrides:
   '@oxc-project/types': 0.151.0
 
-  # vitest は vite-plus が exact pin (0.3.2 時点でも 4.1.11) で連れてくる依存で、
-  # `vp test` が起動するのは常に vite-plus 側の 1 本。catalog だけを 5 に上げても
-  # 走るのは 4 のままで、そこへ @vitest/browser-playwright 5 が刺さり、
-  # ブラウザモードが `_parentBrowser.spawn is not a function` で落ちる。
+  # vitest は vite-plus が exact pin (1.0.0 は 5.0.1) で連れてくる依存で、
+  # `vp test` が起動するのは常に vite-plus 側の 1 本。catalog の vitest が
+  # その pin とずれると、そこへ catalog 版の @vitest/browser-playwright が刺さり、
+  # ブラウザモードが `_parentBrowser.spawn is not a function` で落ちる
+  # (0.3.x の vitest 4 に 5 を刺したときに起きた)。
   # 木全体を catalog の 1 バージョンに寄せて、vitest のコピーを 1 つに保つ。
   # 版は書かず catalog を指す。overrides に数字を置くと catalog だけが更新された
   # ときに overrides が黙って巻き戻す pin になり、上げたつもりで上がらない。
-  # vite-plus が vitest 5 を同梱したら、このブロックごと消して catalog だけで
-  # 足りる状態に戻すこと。
   # @vitest/runner は v5 で vitest 本体に取り込まれ公開が止まったので 5 系が無い。
   # vite-plus は再エクスポートのため (dist/test/plugins/runner.js、32 バイト) に
   # 参照しているだけで実行時には読まれないため、4.1.11 のまま残す。
@@ -96,7 +95,7 @@ overrides:
   '@vitest/ui': 'catalog:'
   '@vitest/utils': 'catalog:'
 
-# catalog の vite は vite-plus-core の別名なので、版は vite-plus のもの (0.3.x) に
+# catalog の vite は vite-plus-core の別名なので、版は vite-plus のもの (1.x) に
 # なり、vite を peer に持つパッケージ (vitest・plugin-react・@k8ordo/framework など)
 # の範囲をどれも満たさない。中身は vite-plus が同梱する vite で、別名の版で互換を
 # 確かめても意味がないため、vite の peer だけ版を問わない (Vite+ の移行ツールが
@@ -105,10 +104,10 @@ peerDependencyRules:
   allowAny:
     - vite
   # storybook (10.6.1 時点の最新でも) の vite-plus の peer は ^0.1.15 || ^0.2.0 のまま。
-  # ここの Storybook (VRT・Chromatic) は 0.3 で動いているので 0.3 だけ足す。
+  # ここの Storybook (VRT・Chromatic) は 1.0 で動いているので 1.0 だけ足す。
   # vite-plus を上げて警告が戻ったら、その版で Storybook が動くか確かめてから広げる。
   allowedVersions:
-    storybook>vite-plus: '0.3'
+    storybook>vite-plus: '1.0'
 
 minimumReleaseAgeExclude:
   - '@k8o/*'
