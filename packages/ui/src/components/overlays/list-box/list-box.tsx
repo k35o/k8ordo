@@ -75,12 +75,12 @@ const MenuProvider: FC<
 > = ({ children, options, onChange, value }) => {
   const { isOpen } = useOpenContext();
   const selectedIndex = options.findIndex((option) => option.value === value);
-  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const [activeId, setActiveId] = useState<string | null>(null);
 
   const nav = useListNavigation({
     open: isOpen,
-    activeIndex,
-    setActiveIndex,
+    activeId,
+    setActiveId,
     selectedIndex,
     loop: true,
   });
@@ -141,7 +141,8 @@ const Item: FC<{
   label: Option['label'];
   index: number;
 }> = ({ label, index }) => {
-  const { props, selected } = useMenuItem(index);
+  const id = useId();
+  const { props, selected } = useMenuItem(index, id);
 
   return (
     <button

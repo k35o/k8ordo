@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import type { FC, KeyboardEvent, PropsWithChildren } from 'react';
 
 import { cn, mergeRefs } from '../../../helpers';
@@ -9,7 +9,7 @@ import { useCanHover, useHoverIntent, useListNavigation } from '../_internal';
 import { Popover } from '../popover';
 import { useOpenContext, usePopoverContext } from '../popover/hooks';
 import { MenuContextProvider, useMenuContext } from './hooks';
-import { cloneWithIndex, itemClass, panelClass } from './shared';
+import { itemClass, panelClass } from './shared';
 import { useSafeTriangle } from './use-safe-triangle';
 
 const SUBMENU_CLOSE_DELAY = 150;
@@ -35,15 +35,11 @@ export type SubMenuProps = PropsWithChildren<{
   label: string;
 }>;
 
-export const SubMenu: FC<SubMenuProps & { index?: number }> = ({
-  label,
-  children,
-  index = 0,
-}) => {
+export const SubMenu: FC<SubMenuProps> = ({ label, children }) => {
   const { isOpen: isParentOpen } = useOpenContext();
   return (
     <Popover.Root placement="right-start" trapFocus={false} role="menu">
-      <SubMenuInner index={index} isParentOpen={isParentOpen} label={label}>
+      <SubMenuInner isParentOpen={isParentOpen} label={label}>
         {children}
       </SubMenuInner>
     </Popover.Root>
@@ -53,10 +49,10 @@ export const SubMenu: FC<SubMenuProps & { index?: number }> = ({
 const SubMenuInner: FC<
   PropsWithChildren<{
     label: string;
-    index: number;
     isParentOpen: boolean;
   }>
-> = ({ label, index, isParentOpen, children }) => {
+> = ({ label, isParentOpen, children }) => {
+  const id = useId();
   const parentMenu = useMenuContext();
   const popover = usePopoverContext();
   const canHover = useCanHover('(hover: hover) and (pointer: fine)');
@@ -70,11 +66,11 @@ const SubMenuInner: FC<
     enabled: canHover,
   });
 
-  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const [activeId, setActiveId] = useState<string | null>(null);
   const nav = useListNavigation({
     open: popover.isOpen,
-    activeIndex,
-    setActiveIndex,
+    activeId,
+    setActiveId,
     loop: true,
     // hover で開いたときにフォーカスを奪わない。キーボード開時のみ下で明示する。
     autoActivateOnOpen: false,
@@ -121,7 +117,7 @@ const SubMenuInner: FC<
   const openByKeyboard = () => {
     openedByKeyboardRef.current = true;
     popover.onOpen();
-    setActiveIndex(0);
+    nav.activateFirst();
   };
 
   const handleTriggerKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
@@ -155,7 +151,7 @@ const SubMenuInner: FC<
     popover.isOpen && canHover,
   );
 
-  const parentItemProps = parentMenu.getItemProps(index);
+  const parentItemProps = parentMenu.getItemProps(id);
 
   return (
     <>
@@ -198,7 +194,7 @@ const SubMenuInner: FC<
               role="menu"
               tabIndex={-1}
             >
-              {cloneWithIndex(children)}
+              {children}
             </div>
           )}
         />

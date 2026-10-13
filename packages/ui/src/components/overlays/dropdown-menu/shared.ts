@@ -1,6 +1,3 @@
-import { Children, cloneElement, isValidElement } from 'react';
-import type { ReactElement, ReactNode } from 'react';
-
 import { cn } from '../../../helpers/cn';
 
 export const panelClass =
@@ -15,13 +12,3 @@ export const itemClass = cn(
   // 線まで消してしまうため使わない（透明の線は強制カラーでは塗られて見える）
   'outline-transparent -outline-offset-2 focus-visible:outline-2 contrast-more:outline-border-base',
 );
-
-// Content が roving tabindex 用の index を子項目へ注入するためのヘルパー。
-export const cloneWithIndex = (children: ReactNode): ReactNode =>
-  Children.toArray(children).map((child, index) =>
-    isValidElement(child)
-      ? cloneElement(child as ReactElement<{ index?: number }>, {
-          index,
-        })
-      : child,
-  );

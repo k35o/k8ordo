@@ -29,21 +29,21 @@ export const useMenuContent = () => {
 
 export const useMenuItem = ({
   onAction,
-  index,
+  id,
 }: {
   onAction: () => void;
-  index: number;
+  id: string;
 }) => {
   const menu = useMenuContext();
   return useMemo(
     () => ({
       role: 'menuitem' as const,
-      ...menu.getItemProps(index),
+      ...menu.getItemProps(id),
       onClick: () => {
         onAction();
         menu.closeRoot();
       },
     }),
-    [index, menu, onAction],
+    [id, menu, onAction],
   );
 };
