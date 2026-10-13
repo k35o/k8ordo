@@ -97,7 +97,7 @@ const answerWith = (payload: Payload, status = 200): void => {
       return passThrough(input, init);
     }
     return Promise.resolve(
-      new Response(JSON.stringify(payload), {
+      Response.json(payload, {
         status,
         headers: { 'content-type': 'text/x-component;charset=utf-8' },
       }),
@@ -379,7 +379,7 @@ describe("a Server Action's answer", () => {
 const NEXT: Payload = { tree: 'next page', pathname: '/next', client: RUNNING };
 
 const payloadResponse = (payload: Payload): Response =>
-  new Response(JSON.stringify(payload), {
+  Response.json(payload, {
     headers: { 'content-type': 'text/x-component;charset=utf-8' },
   });
 
@@ -655,12 +655,12 @@ const recordPayloadRequests = (): string[] => {
     if (!url.pathname.endsWith('/index.rsc')) return passThrough(input, init);
     requested.push(url.pathname);
     return Promise.resolve(
-      new Response(
-        JSON.stringify({
+      Response.json(
+        {
           tree: 'next page',
           pathname: '/next',
           client: RUNNING,
-        }),
+        },
         { headers: { 'content-type': 'text/x-component;charset=utf-8' } },
       ),
     );
@@ -826,7 +826,7 @@ const shellPayload = (notFoundTree: ReactNode = 'nothing here'): Payload => ({
 });
 
 const jsonResponse = (body: unknown): Response =>
-  new Response(JSON.stringify(body), {
+  Response.json(body, {
     headers: { 'content-type': 'text/x-component;charset=utf-8' },
   });
 
