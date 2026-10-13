@@ -168,9 +168,7 @@ export const SplitGroups: Story = {
     ]);
 
     for (const option of [...options.slice(1), options[0]]) {
-      // eslint-disable-next-line no-await-in-loop -- 1 回ずつ押して、行を順に確かめる
       await userEvent.keyboard('{ArrowDown}');
-      // eslint-disable-next-line no-await-in-loop -- 同上
       await expect(option).toHaveAttribute('aria-selected', 'true');
     }
   },

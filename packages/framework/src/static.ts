@@ -1084,7 +1084,6 @@ const inParallel = async (
   const worker = async (): Promise<void> => {
     for (let task = tasks[next++]; task !== undefined; task = tasks[next++]) {
       // A worker is sequential on purpose — that is what bounds the width.
-      // oxlint-disable-next-line eslint/no-await-in-loop
       await task();
     }
   };

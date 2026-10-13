@@ -6,7 +6,6 @@ import * as z from 'zod/mini';
 export const prefsState = defineCookieState(
   'prefs',
   z.object({
-    // oxlint-disable-next-line no-underscore-dangle -- `_default` は zod/mini における `.default()` の綴り
     density: z._default(z.enum(['comfortable', 'compact']), 'comfortable'),
   }),
 );

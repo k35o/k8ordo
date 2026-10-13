@@ -12,8 +12,6 @@ const t = m.stateUpdates;
 
 // a と b は URL、c は履歴エントリ。どのボタンがどの書き込みになるかを、
 // ブラウザが受け取ったイベントそのもので見せる
-/* oxlint-disable no-underscore-dangle -- `_default` は zod/mini における
-   `.default()` の綴り */
 const demoState = definePageState('state-updates-demo', {
   url: z.object({
     a: z._default(z.coerce.number().check(z.int(), z.gte(0)), 0),
@@ -23,7 +21,6 @@ const demoState = definePageState('state-updates-demo', {
     c: z._default(z.number().check(z.int(), z.gte(0)), 0),
   }),
 });
-/* oxlint-enable no-underscore-dangle */
 
 /**
  * このコンポーネントが commit された回数を、返した ref の要素に書く。

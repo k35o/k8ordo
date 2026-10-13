@@ -239,7 +239,7 @@ const CalendarBody: FC<Props> = ({
               {week.map((date) => {
                 if (!isSameMonth(date, focused)) {
                   return (
-                    // eslint-disable-next-line jsx-a11y/control-has-associated-label -- 月の外の日は空欄にする。押せる日が隣の月にもあると、どの月を見ているのかが曖昧になる
+                    // 月の外の日は空欄にする。押せる日が隣の月にもあると、どの月を見ているのかが曖昧になる
                     <td className="size-10 p-0" key={date} role="gridcell" />
                   );
                 }

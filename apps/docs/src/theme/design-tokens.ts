@@ -160,7 +160,7 @@ export const INSET_SHADOWS: readonly NamedScale[] = namedScale(
   THEME['inset-shadow'],
 );
 
-// eslint-disable-next-line unicorn/prefer-number-coercion -- "64rem" のような単位付き文字列から数値部を取り出すため Number では NaN になる
+// "64rem" のような単位付き文字列から数値部を取り出すため Number では NaN になる
 const remToPx = (rem: string): string => `${Number.parseFloat(rem) * 16}px`;
 export const BREAKPOINTS: readonly Breakpoint[] = Object.entries(
   THEME['breakpoint'] ?? {},

@@ -13,12 +13,9 @@ import * as m from '../../../messages';
 
 const t = m.stateStorage;
 
-/* oxlint-disable no-underscore-dangle -- `_default` は zod/mini における
-   `.default()` の綴り */
 const count = z.object({
   count: z._default(z.number().check(z.int(), z.gte(0)), 0),
 });
-/* oxlint-enable no-underscore-dangle */
 
 // 3 つとも同じ形にして、違いが置き場所だけになるようにする
 const localCount = defineLocalState('storage-demo-local', count);
