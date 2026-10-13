@@ -11,6 +11,7 @@
     "managerFilePatterns": ["/^mise\\.toml$/"]
   },
   "prConcurrentLimit": 10,
+  "ignorePaths": ["**/node_modules/**"],
   "packageRules": [
     {
       "matchPackageNames": ["/^@storybook/", "/^storybook$/"],
@@ -21,8 +22,17 @@
       "groupName": "vitest dependencies"
     },
     {
-      "matchPackageNames": ["vite-plus", "@voidzero-dev/vite-plus-core"],
-      "groupName": "vite-plus dependencies"
+      "description": "@k8o/oxc-config は vite-plus が同梱する oxlint に合わせて規則を決め、minor でも規則を厳しくする。一部だけ上げても Lint が通らないので、major も含めて 1 本の PR にまとめ、コードを直してから手でマージする",
+      "matchPackageNames": [
+        "vite-plus",
+        "@voidzero-dev/vite-plus-core",
+        "vite-plus-inspector",
+        "@k8o/oxc-config",
+        "oxlint-tailwindcss"
+      ],
+      "groupName": "vite-plus toolchain",
+      "separateMajorMinor": false,
+      "automerge": false
     },
     {
       "matchPackageNames": ["/^react$/", "/^react-dom$/"],
