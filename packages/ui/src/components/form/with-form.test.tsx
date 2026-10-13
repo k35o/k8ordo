@@ -721,7 +721,7 @@ describe('CheckboxGroup', () => {
                 <CheckboxGroup.Root
                   {...props}
                   {...tags.input}
-                  defaultValue={listOf(state.values?.['tags'])}
+                  defaultValue={listOf(state.values?.tags)}
                 >
                   {tagOptions.map((option) => (
                     <CheckboxGroup.Item
@@ -799,7 +799,7 @@ describe('CheckboxCard', () => {
                 <CheckboxCard
                   {...props}
                   {...tags.input}
-                  defaultValue={listOf(state.values?.['tags'])}
+                  defaultValue={listOf(state.values?.tags)}
                   options={tagOptions}
                 />
               )}
@@ -873,7 +873,7 @@ describe('Autocomplete', () => {
                 <Autocomplete
                   {...props}
                   {...tags.input}
-                  defaultValue={listOf(state.values?.['tags'])}
+                  defaultValue={listOf(state.values?.tags)}
                   options={tagOptions}
                 />
               )}

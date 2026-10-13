@@ -31,9 +31,9 @@ export const toUtcDate = (value: string): Date | null => {
   if (groups === undefined) {
     return null;
   }
-  const year = Number(groups['year']);
-  const month = Number(groups['month']);
-  const day = Number(groups['day']);
+  const year = Number(groups.year);
+  const month = Number(groups.month);
+  const day = Number(groups.day);
   const date = utc(year, month - 1, day);
   return date.getUTCMonth() === month - 1 && date.getUTCDate() === day
     ? date

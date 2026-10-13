@@ -18,11 +18,11 @@ const schema = (
 });
 
 const numericId = schema((value) =>
-  /^\d+$/u.test(String(value['id'])) ? { id: Number(value['id']) } : null,
+  /^\d+$/u.test(String(value.id)) ? { id: Number(value.id) } : null,
 );
 const knownLocale = schema((value) =>
-  value['locale'] === 'ja' || value['locale'] === 'en'
-    ? { locale: value['locale'] }
+  value.locale === 'ja' || value.locale === 'en'
+    ? { locale: value.locale }
     : null,
 );
 
@@ -60,8 +60,8 @@ describe('parseParams', () => {
   it('keeps what the schemas write to the async context for the render of the stack that answered, and from the caller', async () => {
     const store = new AsyncLocalStorage<string>();
     const recordsLocale = schema((value) => {
-      store.enterWith(String(value['locale']));
-      return { locale: value['locale'] };
+      store.enterWith(String(value.locale));
+      return { locale: value.locale };
     });
 
     expect(
@@ -103,8 +103,8 @@ describe('parseCatchAllParams', () => {
   it('renders in what the schemas wrote when they all accept, and in nothing when one refuses', async () => {
     const store = new AsyncLocalStorage<string>();
     const recordsLocale = schema((value) => {
-      store.enterWith(String(value['locale']));
-      return { locale: value['locale'] };
+      store.enterWith(String(value.locale));
+      return { locale: value.locale };
     });
     const readLater = async (): Promise<string | undefined> => {
       await new Promise<void>((resolve) => {

@@ -151,11 +151,11 @@ export const FONT_WEIGHTS: readonly NamedScale[] = namedScale(
   THEME['font-weight'],
 );
 export const LETTER_SPACINGS: readonly NamedScale[] = namedScale(
-  THEME['tracking'],
+  THEME.tracking,
 );
-export const LINE_HEIGHTS: readonly NamedScale[] = namedScale(THEME['leading']);
-export const RADII: readonly NamedScale[] = namedScale(THEME['radius']);
-export const SHADOWS: readonly NamedScale[] = namedScale(THEME['shadow']);
+export const LINE_HEIGHTS: readonly NamedScale[] = namedScale(THEME.leading);
+export const RADII: readonly NamedScale[] = namedScale(THEME.radius);
+export const SHADOWS: readonly NamedScale[] = namedScale(THEME.shadow);
 export const INSET_SHADOWS: readonly NamedScale[] = namedScale(
   THEME['inset-shadow'],
 );
@@ -163,7 +163,7 @@ export const INSET_SHADOWS: readonly NamedScale[] = namedScale(
 // "64rem" のような単位付き文字列から数値部を取り出すため Number では NaN になる
 const remToPx = (rem: string): string => `${Number.parseFloat(rem) * 16}px`;
 export const BREAKPOINTS: readonly Breakpoint[] = Object.entries(
-  THEME['breakpoint'] ?? {},
+  THEME.breakpoint ?? {},
 ).map(([name, rem]) => ({ name, rem: String(rem), px: remToPx(String(rem)) }));
 
 export const Z_INDICES: readonly NamedScale[] = Object.keys(tokens.vars)

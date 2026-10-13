@@ -71,7 +71,7 @@ describe('match', () => {
   });
 
   it('decodes param values from the pathname', () => {
-    expect(routes.match('/ja/products/a%2Fb')?.params['id']).toBe('a/b');
+    expect(routes.match('/ja/products/a%2Fb')?.params.id).toBe('a/b');
   });
 
   it('honours declaration order, not specificity', () => {
@@ -293,7 +293,7 @@ const onlyNumericIds = (found: {
   params: Readonly<Record<string, string>>;
 }) =>
   found.pattern !== '/:locale/products/:id' ||
-  /^\d+$/u.test(found.params['id'] ?? '');
+  /^\d+$/u.test(found.params.id ?? '');
 
 describe('match with accept', () => {
   it('walks on to the next pattern when the caller declines a match', () => {

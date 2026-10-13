@@ -12,7 +12,7 @@ export const parseHex = (
   text: string,
   { shorthand = false }: { shorthand?: boolean } = {},
 ): string | null => {
-  const digits = HEX.exec(text.trim())?.groups?.['digits'];
+  const digits = HEX.exec(text.trim())?.groups?.digits;
   if (digits === undefined || (digits.length === 3 && !shorthand)) {
     return null;
   }

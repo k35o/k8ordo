@@ -4,5 +4,5 @@ export default function PostNotFound({
 }: {
   params: Readonly<Record<string, string>>;
 }) {
-  return <h1>no post {params['id']}</h1>;
+  return <h1>no post {params.id}</h1>;
 }
