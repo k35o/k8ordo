@@ -18,7 +18,7 @@ describe('useControllableState', () => {
         useControllableState({ defaultValue: 0 }),
       );
 
-      act(() => {
+      await act(() => {
         result.current[1](42);
       });
 
@@ -30,7 +30,7 @@ describe('useControllableState', () => {
         useControllableState({ defaultValue: 10 }),
       );
 
-      act(() => {
+      await act(() => {
         result.current[1]((prev) => prev + 5);
       });
 
@@ -43,7 +43,7 @@ describe('useControllableState', () => {
         useControllableState({ defaultValue: 0, onChange }),
       );
 
-      act(() => {
+      await act(() => {
         result.current[1](42);
       });
 
@@ -65,7 +65,7 @@ describe('useControllableState', () => {
         useControllableState({ value: 'controlled', defaultValue: 'default' }),
       );
 
-      act(() => {
+      await act(() => {
         result.current[1]('new value');
       });
 
@@ -82,7 +82,7 @@ describe('useControllableState', () => {
         }),
       );
 
-      act(() => {
+      await act(() => {
         result.current[1]('new value');
       });
 
@@ -96,7 +96,7 @@ describe('useControllableState', () => {
         useControllableState<string[]>({ defaultValue: [] }),
       );
 
-      act(() => {
+      await act(() => {
         result.current[1](['a', 'b']);
       });
 

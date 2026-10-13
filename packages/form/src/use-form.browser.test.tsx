@@ -726,7 +726,7 @@ describe('useForm in a browser', () => {
     await screen.getByRole('button', { name: 'add' }).click();
     await screen.getByRole('button', { name: 'add' }).click();
 
-    screen.rerender(
+    await screen.rerender(
       <List
         state={{
           errors: { 'items[1].name': '品名は必須です' },
@@ -874,7 +874,7 @@ describe('useForm in a browser', () => {
       .toHaveTextContent('');
 
     // Same content, new token: the server did answer again.
-    screen.rerender(
+    await screen.rerender(
       <Signup
         state={{ errors: { email: 'すでに登録されています' }, token: '2' }}
       />,
@@ -887,7 +887,7 @@ describe('useForm in a browser', () => {
   it('moves focus to the first failed field on the page, not the first one zod reported', async () => {
     const screen = await render(<Signup />);
 
-    screen.rerender(
+    await screen.rerender(
       <Signup
         state={{
           errors: {
@@ -905,7 +905,7 @@ describe('useForm in a browser', () => {
   it('moves focus to the form-level message when no field failed', async () => {
     const screen = await render(<Signup />);
 
-    screen.rerender(
+    await screen.rerender(
       <Signup state={{ formError: '登録を受け付けていません', token: '1' }} />,
     );
 
@@ -917,7 +917,7 @@ describe('useForm in a browser', () => {
   it('moves focus to the form-level message when it comes before the failed fields', async () => {
     const screen = await render(<Signup />);
 
-    screen.rerender(
+    await screen.rerender(
       <Signup
         state={{
           errors: { email: 'すでに登録されています' },
@@ -935,7 +935,7 @@ describe('useForm in a browser', () => {
   it('moves focus to the first failed field when the form-level message comes after it', async () => {
     const screen = await render(<Signup formErrorAt="bottom" />);
 
-    screen.rerender(
+    await screen.rerender(
       <Signup
         formErrorAt="bottom"
         state={{
@@ -952,7 +952,7 @@ describe('useForm in a browser', () => {
   it("moves focus to an array's own message when no row failed", async () => {
     const screen = await render(<List state={TWO_ROWS} />);
 
-    screen.rerender(
+    await screen.rerender(
       <List
         state={{
           errors: { items: '品名が重複しています' },
@@ -970,7 +970,7 @@ describe('useForm in a browser', () => {
   it("moves focus to an array's own message when it comes before the failed rows", async () => {
     const screen = await render(<List state={TWO_ROWS} />);
 
-    screen.rerender(
+    await screen.rerender(
       <List
         state={{
           errors: {
@@ -993,7 +993,7 @@ describe('useForm in a browser', () => {
       <List itemsErrorAt="bottom" state={TWO_ROWS} />,
     );
 
-    screen.rerender(
+    await screen.rerender(
       <List
         itemsErrorAt="bottom"
         state={{
