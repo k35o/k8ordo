@@ -10,10 +10,10 @@ export type GridProps = PropsWithChildren<
   {
     /**
      * 列数。`1`〜`6` の固定列、`'auto-fill'` / `'auto-fit'` の自動列を選べる。
-     * 自動列の場合は `minItemSize` で各セルの最小幅（Tailwind spacing 単位）を指定する。
+     * 自動列の場合は `minItemSize` で各セルの最小幅（`--spacing` の段数）を指定する。
      */
     cols?: 1 | 2 | 3 | 4 | 5 | 6 | 'auto-fill' | 'auto-fit';
-    /** `cols` が `auto-fill` / `auto-fit` のときの各セルの最小サイズ（Tailwind spacing）。 */
+    /** `cols` が `auto-fill` / `auto-fit` のときの各セルの最小サイズ（`--spacing` の段数。`24` は 6rem）。 */
     minItemSize?: 24 | 32 | 40 | 48 | 64 | 80;
     gap?: GapSize;
   } & Omit<HTMLAttributes<HTMLDivElement>, 'className' | 'style'>
