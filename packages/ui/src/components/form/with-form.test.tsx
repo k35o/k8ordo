@@ -73,6 +73,11 @@ function Harness<F extends string, A extends string>({
 const labelled = (label: string) =>
   page.getByLabelText(label, { exact: false });
 
+// Radio・RadioCard・Switch の input は見えないよう隠してあり、上に選択肢の文字が
+// 重なる。input を直に押すとその文字が受け止めるので、利用者と同じく文字を押す
+const pressLabel = (text: string) =>
+  page.getByText(text, { exact: true }).click();
+
 // ボタンをクリックすると、blur で現れたエラーの分だけボタンがずれてクリックが
 // 外れることがある。送信そのものを主張したいので、DOM から送る
 const submit = () => {
@@ -484,7 +489,7 @@ describe('Radio', () => {
   it('送信に失敗しても、選んだ値を描き直す', async () => {
     const screen = await render(<Plan />);
 
-    await screen.getByRole('radio', { name: 'プロ' }).click();
+    await pressLabel('プロ');
     await refuseOnServer();
     submit();
 
@@ -497,7 +502,7 @@ describe('Radio', () => {
   it('reset で選択を外し、isDirty も下りる', async () => {
     const screen = await render(<Plan />);
 
-    await screen.getByRole('radio', { name: 'プロ' }).click();
+    await pressLabel('プロ');
     await expect.poll(isDirty).toBe('true');
     reset();
 
@@ -555,7 +560,7 @@ describe('RadioCard', () => {
   it('送信に失敗しても、選んだ値を描き直す', async () => {
     const screen = await render(<Plan />);
 
-    await screen.getByRole('radio', { name: 'プロ' }).click();
+    await pressLabel('プロ');
     await refuseOnServer();
     submit();
 
@@ -568,7 +573,7 @@ describe('RadioCard', () => {
   it('reset で選択を外し、次に選んだ値だけを送る', async () => {
     const screen = await render(<Plan />);
 
-    await screen.getByRole('radio', { name: 'プロ' }).click();
+    await pressLabel('プロ');
     await expect.poll(isDirty).toBe('true');
     reset();
 
@@ -656,7 +661,7 @@ describe('Switch', () => {
   it('送信に失敗しても、オンにした状態を描き直す', async () => {
     const screen = await render(<Settings />);
 
-    await screen.getByRole('switch').click();
+    await pressLabel('通知を受け取る');
     await refuseOnServer();
     submit();
 
@@ -665,9 +670,9 @@ describe('Switch', () => {
   });
 
   it('オンにして送ると true が届く', async () => {
-    const screen = await render(<Settings />);
+    await render(<Settings />);
 
-    await screen.getByRole('switch').click();
+    await pressLabel('通知を受け取る');
     await userEvent.fill(labelled('メモ'), 'よろしく');
     submit();
 
@@ -679,7 +684,7 @@ describe('Switch', () => {
   it('reset でオフに戻り、isDirty も下りる', async () => {
     const screen = await render(<Settings />);
 
-    await screen.getByRole('switch').click();
+    await pressLabel('通知を受け取る');
     await expect.poll(isDirty).toBe('true');
     reset();
 

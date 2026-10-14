@@ -1,13 +1,15 @@
 'use client';
 
+import { clsx } from 'clsx';
 import type { ChangeEvent, FC, InputHTMLAttributes, Ref } from 'react';
 import { useId } from 'react';
 import { useFormStatus } from 'react-dom';
 
-import { cn } from '../../../helpers/cn';
-import { FOCUS_RING_PEER_NO_BORDER } from '../../_internal/focus-ring';
-import { HIGH_CONTRAST_EDGE } from '../../_internal/high-contrast';
 import { ignoreClick } from '../../_internal/ignore-changes';
+
+import highContrast from '../../_internal/high-contrast.module.css';
+import srOnly from '../../_internal/sr-only.module.css';
+import styles from './switch.module.css';
 
 type BaseProps = {
   invalid?: boolean;
@@ -59,21 +61,18 @@ export const Switch: FC<Props> = ({
 
   return (
     <label
-      className={cn(
-        'inline-flex w-fit items-center gap-3',
-        disabledResolved ? 'cursor-not-allowed text-fg-mute' : 'cursor-pointer',
-      )}
+      className={clsx(styles.root, disabledResolved && styles.disabled)}
       htmlFor={inputId}
       onClickCapture={pending ? ignoreClick : undefined}
     >
-      <span className="relative inline-flex shrink-0">
+      <span className={styles.control}>
         <input
           {...rest}
           {...(checked === undefined ? { defaultChecked } : { checked })}
           aria-disabled={pending || undefined}
           aria-invalid={invalid}
           aria-required={required}
-          className="peer sr-only"
+          className={clsx(srOnly.srOnly, styles.input)}
           disabled={disabled}
           id={inputId}
           onChange={(event) => {
@@ -87,26 +86,18 @@ export const Switch: FC<Props> = ({
         />
         <span
           aria-hidden
-          className={cn(
-            'inline-flex items-center rounded-full transition-colors duration-150 ease-out',
-            'h-7 w-12 vertical:h-12 vertical:w-7',
-            invalid && 'ring-2 ring-border-error',
-            // 非制御のとき、form の reset は change を飛ばさずに checked を戻すので、
-            // 見た目は state ではなく input の :checked から引く
-            disabledResolved
-              ? 'bg-bg-subtle'
-              : 'bg-bg-mute peer-checked:bg-primary-bg forced-colors:peer-checked:bg-[Highlight] forced-colors:peer-checked:*:bg-[HighlightText]',
-            'peer-checked:*:translate-x-5 peer-checked:*:vertical:translate-x-0 peer-checked:*:vertical:translate-y-5',
-            HIGH_CONTRAST_EDGE,
-            FOCUS_RING_PEER_NO_BORDER,
-            'peer-focus-visible:ring-offset-2',
+          className={clsx(
+            styles.track,
+            disabledResolved ? styles.trackDisabled : styles.trackEnabled,
+            invalid && styles.invalid,
+            highContrast.edge,
           )}
         >
           <span
-            className={cn(
-              'ms-0.5 size-5 rounded-full bg-bg-base shadow-xs transition-transform forced-colors:bg-[CanvasText]',
-              HIGH_CONTRAST_EDGE,
-              disabledResolved && 'bg-bg-emphasize forced-colors:bg-[GrayText]',
+            className={clsx(
+              styles.thumb,
+              highContrast.edge,
+              disabledResolved && styles.thumbDisabled,
             )}
           />
         </span>

@@ -1,0 +1,104 @@
+.root {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: calc(var(--spacing) * 3);
+  cursor: pointer;
+}
+
+.disabled {
+  cursor: not-allowed;
+  color: var(--color-fg-mute);
+}
+
+.control {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.track {
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--radius-full);
+  block-size: calc(var(--spacing) * 7);
+  inline-size: calc(var(--spacing) * 12);
+  transition-property:
+    color, background-color, border-color, outline-color, text-decoration-color,
+    fill, stroke;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--easing-out);
+}
+
+.trackEnabled {
+  background-color: var(--color-bg-mute);
+}
+
+.trackDisabled {
+  background-color: var(--color-bg-subtle);
+}
+
+.invalid {
+  box-shadow: var(--shadow-ring-error);
+}
+
+/* 非制御のとき、form の reset は change を飛ばさずに checked を戻すので、
+   見た目は state ではなく input の :checked から引く */
+.input:checked ~ .trackEnabled {
+  background-color: var(--color-primary-bg);
+
+  @media (forced-colors: active) {
+    background-color: var(--color-system-highlight);
+  }
+}
+
+.input:focus-visible ~ .track {
+  outline-style: none;
+  /* better-css-modules-disable-next-line tokens/shadow -- the ring stands 2px off the track over a white gap (Tailwind's ring-offset-2 with its default #fff), which no ring token draws */
+  box-shadow:
+    0 0 0 2px #fff,
+    0 0 0 4px var(--color-border-info);
+
+  @media (forced-colors: active) {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+}
+
+.thumb {
+  margin-inline-start: calc(var(--spacing) * 0.5);
+  width: calc(var(--spacing) * 5);
+  height: calc(var(--spacing) * 5);
+  border-radius: var(--radius-full);
+  background-color: var(--color-bg-base);
+  box-shadow: var(--shadow-xs);
+  transition-property: transform, translate, scale, rotate;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--easing-in-out);
+
+  @media (forced-colors: active) {
+    background-color: var(--color-system-canvas-text);
+  }
+}
+
+.thumbDisabled {
+  background-color: var(--color-bg-emphasize);
+
+  @media (forced-colors: active) {
+    background-color: var(--color-system-gray-text);
+  }
+}
+
+.input:checked ~ .track > .thumb {
+  translate: calc(var(--spacing) * 5) 0;
+
+  @container style(--writing: vertical) {
+    translate: 0 calc(var(--spacing) * 5);
+  }
+}
+
+@media (forced-colors: active) {
+  .input:checked ~ .trackEnabled > .thumb {
+    background-color: var(--color-system-highlight-text);
+  }
+}

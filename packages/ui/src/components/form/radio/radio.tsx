@@ -1,12 +1,14 @@
 'use client';
 
+import { clsx } from 'clsx';
 import type { ChangeEvent, FC, HTMLAttributes, Ref } from 'react';
 import { useFormStatus } from 'react-dom';
 
 import type { Option } from '../../../types/variables';
-import { FOCUS_RING_PEER } from '../../_internal/focus-ring';
 import { ignoreClick } from '../../_internal/ignore-changes';
-import { cn } from './../../../helpers/cn';
+
+import srOnly from '../../_internal/sr-only.module.css';
+import styles from './radio.module.css';
 
 type BaseProps = {
   'aria-labelledby': string;
@@ -57,18 +59,15 @@ export const Radio: FC<Props> = ({
       {...rest}
       aria-invalid={invalid}
       aria-labelledby={labelledbyId}
-      className={cn(
-        'flex cursor-pointer flex-col gap-2',
-        disabledResolved && 'cursor-not-allowed',
-      )}
+      className={clsx(styles.root, disabledResolved && styles.disabled)}
       ref={ref}
       role="radiogroup"
     >
       {options.map((option) => (
         <label
-          className={cn(
-            'flex items-center gap-2 text-left',
-            disabledResolved ? 'cursor-not-allowed' : 'cursor-pointer',
+          className={clsx(
+            styles.option,
+            disabledResolved && styles.optionDisabled,
           )}
           key={option.value}
           onClickCapture={pending ? ignoreClick : undefined}
@@ -78,7 +77,7 @@ export const Radio: FC<Props> = ({
               ? { checked: value === option.value }
               : { defaultChecked: defaultValue === option.value })}
             aria-disabled={pending || undefined}
-            className="peer sr-only"
+            className={clsx(srOnly.srOnly, styles.input)}
             disabled={disabled}
             name={name ?? labelledbyId}
             onChange={(event) => {
@@ -90,19 +89,13 @@ export const Radio: FC<Props> = ({
           />
           <span
             aria-hidden
-            className={cn(
-              'inline-flex size-5 items-center justify-center rounded-full border-2 transition-colors duration-150 ease-out',
-              FOCUS_RING_PEER,
-              // 非制御のとき、form の reset は change を飛ばさずに checked を戻すので、
-              // 見た目は state ではなく input の :checked から引く
-              disabledResolved
-                ? 'border-border-mute bg-bg-mute'
-                : 'border-border-mute bg-bg-base peer-checked:border-border-base peer-checked:bg-primary-bg',
-              'peer-checked:*:opacity-100',
-              invalid && 'border-border-error peer-checked:border-border-error',
+            className={clsx(
+              styles.circle,
+              disabledResolved ? styles.circleDisabled : styles.circleEnabled,
+              invalid && styles.invalid,
             )}
           >
-            <span className="bg-primary-border size-2 rounded-full opacity-0 transition-opacity forced-colors:bg-[CanvasText]" />
+            <span className={styles.dot} />
           </span>
           <span>{option.label}</span>
         </label>
