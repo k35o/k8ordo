@@ -9,6 +9,8 @@ import { jsLiteral } from '../../components/js-literal';
 import * as m from '../../messages';
 import { demoState } from './demo-state';
 
+import styles from './form-demo.module.css';
+
 type Props = {
   /** `formFields(demoState.url)` の結果。Server Component で導かれ、props で渡る。 */
   fields: FormFields<'q' | 'min' | 'inStock', never>;
@@ -25,8 +27,8 @@ export function FormDemo({ fields }: Props) {
   const search = demoState.search(current);
 
   return (
-    <div className="flex flex-col gap-6">
-      <form className="flex flex-col gap-4" method="get" {...form.props}>
+    <div className={styles.root}>
+      <form className={styles.form} method="get" {...form.props}>
         <FormControl
           errorText={q.error}
           invalid={q.invalid}
@@ -41,8 +43,8 @@ export function FormDemo({ fields }: Props) {
           )}
           required={q.required}
         />
-        <div className="flex flex-wrap items-end gap-4">
-          <div className="w-40">
+        <div className={styles.row}>
+          <div className={styles.min}>
             <FormControl
               errorText={min.error}
               invalid={min.invalid}
@@ -62,10 +64,10 @@ export function FormDemo({ fields }: Props) {
           {/* @k8ordo/ui の Checkbox はグループの外では value 属性を出さず、
             ブラウザ既定の on を送る。state が書く "true" と同じ文字列を
             送るため、value まで広げられる素の <input> にする */}
-          <label className="flex items-center gap-2 pb-2.5">
+          <label className={styles.inStock}>
             <input
               {...inStock.input}
-              className="accent-primary-border size-4"
+              className={styles.checkbox}
               defaultChecked={current.inStock}
             />
             {m.form.demoLabelInStock()}
@@ -75,13 +77,13 @@ export function FormDemo({ fields }: Props) {
           </Button>
         </div>
       </form>
-      <dl className="bg-bg-surface grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-2 rounded-lg px-4 py-3 text-sm">
-        <dt className="text-fg-mute">URL</dt>
-        <dd className="break-all">
+      <dl className={styles.values}>
+        <dt className={styles.term}>URL</dt>
+        <dd className={styles.value}>
           <Code>{search === '' ? m.form.demoUrlEmpty() : `?${search}`}</Code>
         </dd>
-        <dt className="text-fg-mute">state</dt>
-        <dd className="break-all">
+        <dt className={styles.term}>state</dt>
+        <dd className={styles.value}>
           <Code>{jsLiteral(current)}</Code>
         </dd>
       </dl>

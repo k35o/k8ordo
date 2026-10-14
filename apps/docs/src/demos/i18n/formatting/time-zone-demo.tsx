@@ -7,6 +7,8 @@ import { browser } from 'react-dom';
 import { locales } from '../../../i18n';
 import * as m from '../../../messages';
 
+import styles from './time-zone-demo.module.css';
+
 // 協定世界時の 15:30。東京では翌日の 0:30 になり、タイムゾーンで日付が分かれる
 const INSTANT = new Date('2026-03-05T15:30:00Z');
 const OPTIONS = { dateStyle: 'long', timeStyle: 'short' } as const;
@@ -21,13 +23,13 @@ function Row({
   zone: string;
 }) {
   return (
-    <div className="flex flex-col gap-1">
-      <dt className="text-fg-mute text-sm break-all">
+    <div className={styles.row}>
+      <dt className={styles.call}>
         <Code>{call}</Code>
       </dt>
-      <dd className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-        <span className="text-fg-base text-lg">{value}</span>
-        <span className="text-fg-mute text-sm">{zone}</span>
+      <dd className={styles.result}>
+        <span className={styles.value}>{value}</span>
+        <span className={styles.zone}>{zone}</span>
       </dd>
     </div>
   );
@@ -53,7 +55,7 @@ export function TimeZoneDemo() {
   const format = locales.dateTimeFormat(OPTIONS);
 
   return (
-    <dl className="flex flex-col gap-5">
+    <dl className={styles.root}>
       <Row
         call="locales.dateTimeFormat(…)"
         value={format.format(INSTANT)}

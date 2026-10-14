@@ -6,6 +6,8 @@ import { Button, Checkbox, Code } from '@k8ordo/ui';
 import * as m from '../../../messages';
 import { listState } from './list-state';
 
+import styles from './products-demo.module.css';
+
 const t = m.stateGetStarted;
 
 const PAGE_SIZE = 2;
@@ -31,7 +33,7 @@ export function ProductsDemo() {
   const search = listState.search(current);
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className={styles.root}>
       <Checkbox
         checked={current.inStock}
         label={t.tryInStock()}
@@ -39,20 +41,17 @@ export function ProductsDemo() {
           update({ inStock: checked, page: 1 });
         }}
       />
-      <ul className="flex flex-col gap-2">
+      <ul className={styles.list}>
         {visible.map((product) => (
-          <li
-            className="border-border-mute flex items-center justify-between rounded-lg border px-4 py-3"
-            key={product.id}
-          >
+          <li className={styles.product} key={product.id}>
             <span>{product.name()}</span>
-            <span className="text-fg-mute text-sm">
+            <span className={styles.stock}>
               {product.inStock ? t.tryAvailable() : t.trySoldOut()}
             </span>
           </li>
         ))}
       </ul>
-      <div className="flex flex-wrap items-center gap-3">
+      <div className={styles.pager}>
         <Button
           color="base"
           disabled={page <= 1}
@@ -64,7 +63,7 @@ export function ProductsDemo() {
         >
           {t.tryPrevious()}
         </Button>
-        <span className="text-sm tabular-nums">
+        <span className={styles.page}>
           {page} / {pages}
         </span>
         <Button
@@ -79,9 +78,9 @@ export function ProductsDemo() {
           {t.tryNext()}
         </Button>
       </div>
-      <dl className="bg-bg-surface grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 rounded-lg px-4 py-3 text-sm">
-        <dt className="text-fg-mute">{t.tryQuery()}</dt>
-        <dd className="break-all">
+      <dl className={styles.values}>
+        <dt className={styles.term}>{t.tryQuery()}</dt>
+        <dd className={styles.value}>
           <Code>{search === '' ? t.tryQueryEmpty() : `?${search}`}</Code>
         </dd>
       </dl>

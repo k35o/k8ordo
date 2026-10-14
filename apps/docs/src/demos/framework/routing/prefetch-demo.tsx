@@ -6,6 +6,8 @@ import { useEffect, useState } from 'react';
 import { LocaleAnchor } from '../../../components/locale-anchor';
 import * as m from '../../../messages';
 
+import styles from './prefetch-demo.module.css';
+
 type Fetched = { pathname: string; at: number };
 
 /**
@@ -36,27 +38,24 @@ export function PrefetchDemo() {
 
   const t = m.frameworkRouting;
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-center gap-4">
+    <div className={styles.root}>
+      <div className={styles.links}>
         <LocaleAnchor path="/:locale/framework/params">
           {t.demoLinkFetched()}
         </LocaleAnchor>
-        <div
-          className="border-border-mute flex flex-col gap-1 rounded-lg border border-dashed px-4 py-3"
-          data-k8ordo-prefetch={false}
-        >
-          <span className="text-fg-mute text-xs">{t.demoOptedOut()}</span>
+        <div className={styles.optedOut} data-k8ordo-prefetch={false}>
+          <span className={styles.optedOutLabel}>{t.demoOptedOut()}</span>
           <LocaleAnchor path="/:locale/framework/deploy">
             {t.demoLinkSkipped()}
           </LocaleAnchor>
         </div>
       </div>
-      <div className="flex flex-col gap-2">
-        <p className="text-fg-base text-sm font-bold">{t.demoFetched()}</p>
+      <div className={styles.fetched}>
+        <p className={styles.fetchedLabel}>{t.demoFetched()}</p>
         {fetched.length === 0 ? (
-          <p className="text-fg-mute text-sm">{t.demoNone()}</p>
+          <p className={styles.none}>{t.demoNone()}</p>
         ) : (
-          <ol className="flex list-decimal flex-col gap-1 ps-5 text-sm">
+          <ol className={styles.fetchedList}>
             {fetched.map((entry) => (
               <li key={`${entry.pathname}@${String(entry.at)}`}>
                 <Code>{entry.pathname}</Code>

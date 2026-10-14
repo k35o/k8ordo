@@ -11,6 +11,8 @@ import * as z from 'zod/mini';
 
 import * as m from '../../../messages';
 
+import styles from './counts-demo.module.css';
+
 const t = m.stateStorage;
 
 const count = z.object({
@@ -31,15 +33,15 @@ type RowProps = {
 
 function Row({ place, storageKey, value, onIncrement }: RowProps) {
   return (
-    <li className="border-border-mute flex flex-wrap items-center justify-between gap-3 rounded-lg border px-4 py-3">
-      <div className="flex flex-col gap-1">
-        <span className="font-bold">{place}</span>
-        <span className="text-fg-mute text-xs break-all">
+    <li className={styles.row}>
+      <div className={styles.place}>
+        <span className={styles.placeName}>{place}</span>
+        <span className={styles.key}>
           {storageKey === undefined ? t.demoNoKey() : <Code>{storageKey}</Code>}
         </span>
       </div>
-      <div className="flex items-center gap-3">
-        <span className="min-w-8 text-end text-lg tabular-nums">{value}</span>
+      <div className={styles.counter}>
+        <span className={styles.count}>{value}</span>
         <Button
           aria-label={t.demoIncrement(place)}
           color="base"
@@ -60,8 +62,8 @@ export function CountsDemo() {
   const [memory, updateMemory] = useAppState(memoryCount);
 
   return (
-    <div className="flex flex-col gap-4">
-      <ul className="flex flex-col gap-2">
+    <div className={styles.root}>
+      <ul className={styles.list}>
         <Row
           onIncrement={() => {
             updateLocal((current) => ({ count: current.count + 1 }));

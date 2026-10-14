@@ -7,6 +7,8 @@ import { useState } from 'react';
 
 import * as m from '../../../messages';
 
+import styles from './handle-demo.module.css';
+
 type Props = {
   /** ページの Server Component が `formFields(handleSchema)` で導いたもの。 */
   fields: FormFields<'handle', never>;
@@ -32,7 +34,7 @@ export function HandleDemo({ fields }: Props) {
   return (
     <form
       {...form.props}
-      className="flex flex-col gap-5"
+      className={styles.form}
       onSubmit={(event) => {
         form.props.onSubmit(event);
         if (event.defaultPrevented) {
@@ -60,11 +62,11 @@ export function HandleDemo({ fields }: Props) {
         )}
         required={handle.required}
       />
-      <div className="flex flex-wrap items-center gap-4">
+      <div className={styles.actions}>
         <Button disabled={taken.isChecking} type="submit" variant="solid">
           {m.formAsyncCheck.demoSubmit()}
         </Button>
-        <p aria-live="polite" className="text-fg-success text-sm">
+        <p aria-live="polite" className={styles.sent}>
           {sent ? m.formAsyncCheck.demoSent() : ''}
         </p>
       </div>

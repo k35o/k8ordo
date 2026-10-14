@@ -8,6 +8,8 @@ import * as z from 'zod/mini';
 import { jsLiteral } from '../../../components/js-literal';
 import * as m from '../../../messages';
 
+import styles from './writes-demo.module.css';
+
 const t = m.stateUpdates;
 
 // a と b は URL、c は履歴エントリ。どのボタンがどの書き込みになるかを、
@@ -118,7 +120,7 @@ function Controls() {
   ];
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className={styles.controls}>
       {buttons.map((button) => (
         <Button
           color="base"
@@ -142,15 +144,13 @@ type SubscriptionProps = {
 function Subscription({ call, state }: SubscriptionProps) {
   const renders = useCommitCount();
   return (
-    <li className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-      <span className="flex flex-col gap-1">
+    <li className={styles.subscription}>
+      <span className={styles.call}>
         <Code>{call}</Code>
-        <span className="text-fg-mute text-xs break-all">
-          {jsLiteral(state)}
-        </span>
+        <span className={styles.state}>{jsLiteral(state)}</span>
       </span>
-      <span className="text-fg-mute text-sm">
-        {t.demoRenders()} <span className="tabular-nums" ref={renders} />
+      <span className={styles.renders}>
+        {t.demoRenders()} <span className={styles.count} ref={renders} />
       </span>
     </li>
   );
@@ -176,17 +176,17 @@ function WriteLog() {
   const label = useId();
 
   return (
-    <div className="flex flex-col gap-2">
-      <span className="text-fg-mute text-sm" id={label}>
+    <div className={styles.log}>
+      <span className={styles.logLabel} id={label}>
         {t.demoLog()}
       </span>
       <div aria-labelledby={label} aria-live="polite" role="log">
         {entries.length === 0 ? (
-          <span className="text-fg-subtle text-sm">{t.demoLogEmpty()}</span>
+          <span className={styles.logEmpty}>{t.demoLogEmpty()}</span>
         ) : (
-          <ol className="flex flex-col gap-1 text-sm">
+          <ol className={styles.logList}>
             {entries.map((entry) => (
-              <li className="break-all" key={entry.id}>
+              <li className={styles.logEntry} key={entry.id}>
                 <Code>{entry.text}</Code>
               </li>
             ))}
@@ -199,9 +199,9 @@ function WriteLog() {
 
 export function WritesDemo() {
   return (
-    <div className="flex flex-col gap-6">
+    <div className={styles.root}>
       <Controls />
-      <ul className="bg-bg-surface flex flex-col gap-3 rounded-lg px-4 py-3">
+      <ul className={styles.subscriptions}>
         <WatchAll />
         <WatchA />
         <WatchB />

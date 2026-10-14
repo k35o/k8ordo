@@ -7,6 +7,8 @@ import { useRef, useState, useSyncExternalStore } from 'react';
 
 import * as m from '../../../messages';
 
+import styles from './entry-demo.module.css';
+
 type Props = {
   /** ページの Server Component が `formFields(entrySchema)` で導いたもの。 */
   fields: FormFields<'name' | 'email' | 'title' | 'minutes', never>;
@@ -40,7 +42,7 @@ export function EntryDemo({ fields }: Props) {
   return (
     <form
       {...form.props}
-      className="flex flex-col gap-5"
+      className={styles.form}
       onSubmit={(event) => {
         form.props.onSubmit(event);
         if (event.defaultPrevented) {
@@ -51,15 +53,15 @@ export function EntryDemo({ fields }: Props) {
         setSent(true);
       }}
     >
-      <p className="text-fg-mute text-sm">
+      <p className={styles.progress}>
         {m.formMultiStep.demoProgress(step + 1)}
       </p>
       <fieldset
-        className="flex flex-col gap-4"
+        className={styles.step}
         hidden={hydrated && step !== 0}
         ref={stepOne}
       >
-        <legend className="mb-2 font-bold">
+        <legend className={styles.legend}>
           {m.formMultiStep.demoStepOne()}
         </legend>
         <FormControl
@@ -98,8 +100,8 @@ export function EntryDemo({ fields }: Props) {
           </div>
         )}
       </fieldset>
-      <fieldset className="flex flex-col gap-4" hidden={hydrated && step !== 1}>
-        <legend className="mb-2 font-bold">
+      <fieldset className={styles.step} hidden={hydrated && step !== 1}>
+        <legend className={styles.legend}>
           {m.formMultiStep.demoStepTwo()}
         </legend>
         <FormControl
@@ -118,7 +120,7 @@ export function EntryDemo({ fields }: Props) {
           renderInput={(props) => <TextField {...props} {...minutes.input} />}
           required={minutes.required}
         />
-        <div className="flex flex-wrap items-center gap-3">
+        <div className={styles.actions}>
           {hydrated && (
             <Button
               color="base"
@@ -135,7 +137,7 @@ export function EntryDemo({ fields }: Props) {
               {m.formMultiStep.demoSubmit()}
             </Button>
           )}
-          <p aria-live="polite" className="text-fg-success text-sm">
+          <p aria-live="polite" className={styles.sent}>
             {sent ? m.formMultiStep.demoSent() : ''}
           </p>
         </div>

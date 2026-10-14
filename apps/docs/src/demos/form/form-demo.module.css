@@ -1,0 +1,56 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 6);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 4);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: calc(var(--spacing) * 4);
+}
+
+.min {
+  width: calc(var(--spacing) * 40);
+}
+
+.inStock {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--spacing) * 2);
+  padding-bottom: calc(var(--spacing) * 2.5);
+}
+
+.checkbox {
+  width: calc(var(--spacing) * 4);
+  height: calc(var(--spacing) * 4);
+  accent-color: var(--color-primary-border);
+}
+
+.values {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: calc(var(--spacing) * 4);
+  row-gap: calc(var(--spacing) * 2);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-bg-surface);
+  padding-inline: calc(var(--spacing) * 4);
+  padding-block: calc(var(--spacing) * 3);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+}
+
+.term {
+  color: var(--color-fg-mute);
+}
+
+.value {
+  word-break: break-all;
+}

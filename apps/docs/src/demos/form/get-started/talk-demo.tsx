@@ -7,6 +7,8 @@ import { useState } from 'react';
 
 import * as m from '../../../messages';
 
+import styles from './talk-demo.module.css';
+
 type Props = {
   /** ページの Server Component が `formFields(talkSchema)` で導いたもの。 */
   fields: FormFields<'title' | 'eventUrl' | 'minutes', never>;
@@ -23,7 +25,7 @@ export function TalkDemo({ fields }: Props) {
   return (
     <form
       {...form.props}
-      className="flex flex-col gap-4"
+      className={styles.form}
       onSubmit={(event) => {
         form.props.onSubmit(event);
         if (event.defaultPrevented) {
@@ -59,11 +61,11 @@ export function TalkDemo({ fields }: Props) {
         renderInput={(props) => <TextField {...props} {...minutes.input} />}
         required={minutes.required}
       />
-      <div className="flex flex-wrap items-center gap-4">
+      <div className={styles.actions}>
         <Button type="submit" variant="solid">
           {m.formGetStarted.trySubmit()}
         </Button>
-        <p aria-live="polite" className="text-fg-success text-sm">
+        <p aria-live="polite" className={styles.sent}>
           {sent ? m.formGetStarted.trySent() : ''}
         </p>
       </div>

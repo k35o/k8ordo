@@ -8,6 +8,8 @@ import * as z from 'zod/mini';
 import { jsLiteral } from '../../../components/js-literal';
 import * as m from '../../../messages';
 
+import styles from './query-demo.module.css';
+
 const t = m.stateUrl;
 
 // ページに載せる catalogState と同じ形。parseUrl と search は純粋なので、
@@ -27,7 +29,7 @@ export function QueryDemo() {
   const canonical = catalogState.search(values);
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className={styles.root}>
       <FormControl
         label={t.demoLabel()}
         renderInput={(props) => (
@@ -42,21 +44,21 @@ export function QueryDemo() {
           />
         )}
       />
-      <dl className="bg-bg-surface grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-2 rounded-lg px-4 py-3 text-sm">
+      <dl className={styles.values}>
         {Object.entries(values).map(([key, value]) => (
-          <div className="contents" key={key}>
-            <dt className="text-fg-mute">
+          <div className={styles.entry} key={key}>
+            <dt className={styles.term}>
               <Code>{key}</Code>
             </dt>
-            <dd className="break-all">
+            <dd className={styles.value}>
               <Code>{jsLiteral(value)}</Code>
             </dd>
           </div>
         ))}
       </dl>
-      <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 text-sm">
-        <dt className="text-fg-mute">{t.demoCanonical()}</dt>
-        <dd className="break-all">
+      <dl className={styles.canonical}>
+        <dt className={styles.term}>{t.demoCanonical()}</dt>
+        <dd className={styles.value}>
           <Code>{canonical === '' ? t.demoEmpty() : canonical}</Code>
         </dd>
       </dl>

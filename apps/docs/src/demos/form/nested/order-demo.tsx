@@ -7,6 +7,8 @@ import { useState } from 'react';
 
 import * as m from '../../../messages';
 
+import styles from './order-demo.module.css';
+
 type Props = {
   /** ページの Server Component が `formFields(orderSchema)` で導いたもの。 */
   fields: FormFields<never, 'items'>;
@@ -22,7 +24,7 @@ export function OrderDemo({ fields }: Props) {
   return (
     <form
       {...form.props}
-      className="flex flex-col gap-4"
+      className={styles.form}
       onSubmit={(event) => {
         form.props.onSubmit(event);
         if (event.defaultPrevented) {
@@ -42,14 +44,11 @@ export function OrderDemo({ fields }: Props) {
         const name = row.field('name');
         const quantity = row.field('quantity');
         return (
-          <fieldset
-            className="border-border-mute flex flex-wrap items-end gap-3 rounded-lg border p-4"
-            key={row.key}
-          >
-            <legend className="px-1 text-sm">
+          <fieldset className={styles.row} key={row.key}>
+            <legend className={styles.legend}>
               {m.formNested.demoRow(row.index + 1)}
             </legend>
-            <div className="min-w-40 flex-1">
+            <div className={styles.name}>
               <FormControl
                 errorText={name.error}
                 invalid={name.invalid}
@@ -60,7 +59,7 @@ export function OrderDemo({ fields }: Props) {
                 required={name.required}
               />
             </div>
-            <div className="w-28">
+            <div className={styles.quantity}>
               <FormControl
                 errorText={quantity.error}
                 invalid={quantity.invalid}
@@ -79,7 +78,7 @@ export function OrderDemo({ fields }: Props) {
           </fieldset>
         );
       })}
-      <div className="flex flex-wrap items-center gap-3">
+      <div className={styles.actions}>
         {items.canAdd && (
           <Button color="base" onAction={items.add} variant="outline">
             {m.formNested.demoAdd()}
@@ -90,13 +89,13 @@ export function OrderDemo({ fields }: Props) {
         </Button>
       </div>
       {sent !== null && (
-        <dl className="bg-bg-surface grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-2 rounded-lg px-4 py-3 text-sm">
+        <dl className={styles.values}>
           {sent.map(([name, value]) => (
-            <div className="contents" key={name}>
+            <div className={styles.entry} key={name}>
               <dt>
                 <Code>{name}</Code>
               </dt>
-              <dd className="break-all">{value}</dd>
+              <dd className={styles.value}>{value}</dd>
             </div>
           ))}
         </dl>

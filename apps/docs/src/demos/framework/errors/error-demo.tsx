@@ -3,6 +3,8 @@
 import { Button } from '@k8ordo/ui';
 import { useState } from 'react';
 
+import styles from './error-demo.module.css';
+
 function Thrower({ armed }: { armed: boolean }) {
   if (armed) {
     throw new Error('thrown on purpose by the error.tsx demo');
@@ -18,7 +20,7 @@ function Thrower({ armed }: { armed: boolean }) {
 export function ErrorDemo({ label }: { label: string }) {
   const [armed, setArmed] = useState(false);
   return (
-    <div className="flex">
+    <div className={styles.root}>
       <Button
         color="base"
         onClick={() => {

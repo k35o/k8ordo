@@ -7,6 +7,8 @@ import { useState } from 'react';
 
 import * as m from '../../../messages';
 
+import styles from './edit-demo.module.css';
+
 type Props = {
   /** ページの Server Component が `formFields(talkSchema)` で導いたもの。 */
   fields: FormFields<'title' | 'public', never>;
@@ -24,7 +26,7 @@ export function EditDemo({ fields }: Props) {
   return (
     <form
       {...form.props}
-      className="flex flex-col gap-5"
+      className={styles.form}
       onSubmit={(event) => {
         form.props.onSubmit(event);
         if (event.defaultPrevented) {
@@ -35,8 +37,8 @@ export function EditDemo({ fields }: Props) {
         setSaved(true);
       }}
     >
-      <div className="flex items-center gap-3">
-        <span className="text-fg-mute text-sm">{m.formEdit.demoState()}</span>
+      <div className={styles.status}>
+        <span className={styles.statusLabel}>{m.formEdit.demoState()}</span>
         {form.isDirty ? (
           <Badge label={m.formEdit.demoDirty()} tone="warning" />
         ) : (
@@ -57,7 +59,7 @@ export function EditDemo({ fields }: Props) {
         {...isPublic.input}
         label={m.formEdit.demoLabelPublic()}
       />
-      <div className="flex flex-wrap items-center gap-3">
+      <div className={styles.actions}>
         <Button type="submit" variant="solid">
           {m.formEdit.demoSave()}
         </Button>
@@ -73,7 +75,7 @@ export function EditDemo({ fields }: Props) {
         >
           {m.formEdit.demoReset()}
         </Button>
-        <p aria-live="polite" className="text-fg-success text-sm">
+        <p aria-live="polite" className={styles.saved}>
           {saved ? m.formEdit.demoSaved() : ''}
         </p>
       </div>

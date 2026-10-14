@@ -1,0 +1,83 @@
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(var(--spacing) * 2);
+}
+
+.subscription {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  column-gap: calc(var(--spacing) * 4);
+  row-gap: calc(var(--spacing) * 1);
+}
+
+.call {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 1);
+}
+
+.state {
+  color: var(--color-fg-mute);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-xs);
+  word-break: break-all;
+}
+
+.renders {
+  color: var(--color-fg-mute);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+}
+
+.count {
+  font-variant-numeric: tabular-nums;
+}
+
+.log {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 2);
+}
+
+.logLabel {
+  color: var(--color-fg-mute);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+}
+
+.logEmpty {
+  color: var(--color-fg-subtle);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+}
+
+.logList {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 1);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+}
+
+.logEntry {
+  word-break: break-all;
+}
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 6);
+}
+
+.subscriptions {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 3);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-bg-surface);
+  padding-inline: calc(var(--spacing) * 4);
+  padding-block: calc(var(--spacing) * 3);
+}

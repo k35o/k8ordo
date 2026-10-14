@@ -8,6 +8,8 @@ import { useState } from 'react';
 import { jsLiteral } from '../../../components/js-literal';
 import * as m from '../../../messages';
 
+import styles from './match-demo.module.css';
+
 type Outcome =
   | { kind: 'match'; params: string }
   | { kind: 'miss' }
@@ -48,12 +50,14 @@ export function MatchDemo() {
   const outcome = evaluate(input);
 
   return (
-    <div className="flex flex-col gap-6">
-      <p className="flex flex-wrap items-baseline gap-2 text-sm">
-        <span className="text-fg-mute">{m.routerLocation.demoCurrent()}</span>
+    <div className={styles.root}>
+      <p className={styles.current}>
+        <span className={styles.currentLabel}>
+          {m.routerLocation.demoCurrent()}
+        </span>
         <Code>{current}</Code>
       </p>
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className={styles.inputs}>
         <FormControl
           label={m.routerLocation.demoPattern()}
           renderInput={(props) => (
@@ -83,7 +87,7 @@ export function MatchDemo() {
           )}
         />
       </div>
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      <div className={styles.options}>
         <Switch
           checked={input.inclusive}
           label={m.routerLocation.demoInclusive()}
@@ -102,27 +106,27 @@ export function MatchDemo() {
           {m.routerLocation.demoReset()}
         </Button>
       </div>
-      <dl className="flex flex-col gap-3 text-sm">
-        <div className="flex flex-col gap-1">
-          <dt className="text-fg-mute">{m.routerLocation.demoCall()}</dt>
-          <dd className="break-all">
+      <dl className={styles.result}>
+        <div className={styles.resultRow}>
+          <dt className={styles.term}>{m.routerLocation.demoCall()}</dt>
+          <dd className={styles.value}>
             <Code>{callOf(input)}</Code>
           </dd>
         </div>
-        <div className="flex flex-col gap-1">
-          <dt className="text-fg-mute">{m.routerLocation.demoResult()}</dt>
-          <dd aria-live="polite" className="break-all">
+        <div className={styles.resultRow}>
+          <dt className={styles.term}>{m.routerLocation.demoResult()}</dt>
+          <dd aria-live="polite" className={styles.value}>
             {outcome.kind === 'match' && <Code>{outcome.params}</Code>}
             {outcome.kind === 'miss' && (
               <>
                 <Code>null</Code>{' '}
-                <span className="text-fg-mute">
+                <span className={styles.miss}>
                   {m.routerLocation.demoMiss()}
                 </span>
               </>
             )}
             {outcome.kind === 'invalid' && (
-              <span className="text-fg-error">
+              <span className={styles.invalid}>
                 {m.routerLocation.demoInvalid()}
               </span>
             )}

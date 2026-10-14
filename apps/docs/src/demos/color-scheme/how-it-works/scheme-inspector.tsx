@@ -9,6 +9,8 @@ import { browser } from 'react-dom';
 import { jsLiteral } from '../../../components/js-literal';
 import * as m from '../../../messages';
 
+import styles from './scheme-inspector.module.css';
+
 const DARK_QUERY = '(prefers-color-scheme: dark)';
 
 const subscribeSystem = (onChange: () => void) => {
@@ -63,15 +65,12 @@ function Group({
   values: readonly string[];
 }) {
   return (
-    <div className="flex flex-col gap-2">
-      <h4 className="text-fg-subtle text-xs font-medium">{title}</h4>
-      <dl className="flex flex-col gap-2 text-sm">
+    <div className={styles.group}>
+      <h4 className={styles.title}>{title}</h4>
+      <dl className={styles.list}>
         {labels.map((label, index) => (
-          <div
-            className="flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-baseline sm:gap-3"
-            key={label}
-          >
-            <dt className="text-fg-mute break-all">{label}</dt>
+          <div className={styles.item} key={label}>
+            <dt className={styles.term}>{label}</dt>
             <dd>
               <Code>{values.at(index) ?? ''}</Code>
             </dd>
@@ -145,7 +144,7 @@ export function SchemeInspector() {
   const unknown = m.colorSchemeHowItWorks.inspectorUnknown();
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className={styles.root}>
       <Suspense
         fallback={
           <Panel
