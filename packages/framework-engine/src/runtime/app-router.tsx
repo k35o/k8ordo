@@ -7,13 +7,6 @@ import {
   withoutBase,
 } from '@k8ordo/router';
 import {
-  createFromFetch,
-  createFromReadableStream,
-  createTemporaryReferenceSet,
-  encodeReply,
-  setServerCallback,
-} from '@vitejs/plugin-rsc/browser';
-import {
   startTransition,
   useDeferredValue,
   useEffect,
@@ -24,7 +17,6 @@ import type { ReactNode, RefObject } from 'react';
 
 import { ShowNotFound } from './fallback-boundary';
 import { isPayload } from './is-payload';
-import { ACTION_ID_HEADER } from './payload';
 import type { Payload } from './payload';
 import { payloadPathFor } from './payload-path';
 import { createPrefetchCache, prefetchTargetOf } from './prefetch';
@@ -34,9 +26,9 @@ import { markNavigated, Recover, reloadInstead } from './recover';
 /**
  * Where a Server Action's answer lands. The callback has to be registered
  * before any client component can call one, which is earlier than a component
- * can offer its own setter — so the wiring is here and the mounted router
- * lends it a way to apply what comes back, and to drop the pages it fetched
- * ahead, which the action may have changed.
+ * can offer its own setter — so `answerAction` is module-level and the
+ * mounted router lends it a way to apply what comes back, and to drop the
+ * pages it fetched ahead, which the action may have changed.
  */
 let mounted: {
   readonly apply: (payload: Payload) => void;
@@ -65,16 +57,8 @@ export const setDocumentClient = (client: string): void => {
 const canRender = (payload: Payload): boolean =>
   payload.client === documentClient;
 
-setServerCallback(async (id: string, args: unknown[]) => {
-  const temporaryReferences = createTemporaryReferenceSet();
-  const payload = await createFromFetch<Payload>(
-    fetch(location.href, {
-      method: 'POST',
-      headers: { [ACTION_ID_HEADER]: id },
-      body: await encodeReply(args, { temporaryReferences }),
-    }),
-    { temporaryReferences },
-  );
+/** What a Server Action's answer does to the document, once it is read. */
+export const answerAction = async (payload: Payload): Promise<unknown> => {
   mounted?.forgetPrefetched();
   // An action that redirected has no page to apply: the visitor is going
   // somewhere else, and the router takes them there.
@@ -87,7 +71,22 @@ setServerCallback(async (id: string, args: unknown[]) => {
   // is up to date by the time the caller has its value.
   mounted?.apply(payload);
   return payload.returnValue;
-});
+};
+
+// ペイロードの読み方はブラウザの入口から受け取る。このモジュールは SSR でも
+// 描かれ、@vitejs/plugin-rsc/browser は読み込まれただけで client 参照の
+// 読み込み口を自分のものに差し替える。SSR に入ると、client コンポーネントの
+// CSS と JS を HTML に <link> する SSR の読み込み口が上書きされる
+let readPayload: (
+  stream: ReadableStream<Uint8Array>,
+) => Promise<Payload> = () =>
+  Promise.reject(new Error('k8ordo: payloads are read in the browser only'));
+
+export const setPayloadReader = (
+  read: (stream: ReadableStream<Uint8Array>) => Promise<Payload>,
+): void => {
+  readPayload = read;
+};
 
 type Stream = {
   /** Stops the request: nothing will render what is still to come. */
@@ -125,7 +124,7 @@ const fetchPage = async (
   signal.addEventListener('abort', cancel, { once: true });
   const response = await fetch(payloadPath, { signal: request.signal });
   if (!isPayload(response)) return null;
-  const payload = await createFromReadableStream<Payload>(
+  const payload = await readPayload(
     response.body as ReadableStream<Uint8Array>,
   );
   streams.set(payload, {

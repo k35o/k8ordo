@@ -12,6 +12,7 @@ import {
 import { cleanup, render } from 'vitest-browser-react';
 
 import { AppRouter, setDocumentClient } from './app-router';
+import { connectAppRouter } from './browser-payloads';
 import { FallbackBoundary, ShowNotFound } from './fallback-boundary';
 import { reportCaught } from './page-boundary';
 import type { Payload } from './payload';
@@ -20,7 +21,7 @@ import { reloadDocument } from './reload';
 type ServerCallback = (id: string, args: unknown[]) => Promise<unknown>;
 
 const rsc = vi.hoisted(() => ({
-  // app-router が読み込まれた時点で登録する、アクションの呼び出し口
+  // connectAppRouter が登録する、アクションの呼び出し口
   serverCallback: undefined as ServerCallback | undefined,
   // 本文を受け取ってから、読み解き終えるまでに待つもの。ペイロードが
   // 名指しするクライアントコンポーネントの読み込みにあたる
@@ -75,6 +76,8 @@ vi.mock('@vitejs/plugin-rsc/browser', () => ({
 // location.reload は差し替えられない(Location は unforgeable)。
 // 名前を付けた唯一の継ぎ目をここで見張る
 vi.mock('./reload', () => ({ reloadDocument: vi.fn<() => void>() }));
+
+connectAppRouter();
 
 // このタブが読み込んだスクリプトと、タブを開いた後のデプロイが配るスクリプト
 const RUNNING = '/assets/index-running.js';

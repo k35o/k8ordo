@@ -154,6 +154,17 @@ pnpm check         # check:write to auto-fix
   `runtime/entry.ssr.tsx` injects the RSC stream into the HTML and
   `runtime/entry.browser.tsx` reads it back; nothing refetches on load, which
   is what lets a prerendered `404.html` come alive.
+- **The SSR graph holds no browser Flight client.** `@vitejs/plugin-rsc/browser`
+  installs its own loader for client references the moment it is imported,
+  and the SSR one it replaces is what puts a client component's stylesheet
+  (`preinit`) and script (`modulepreload`) into the HTML. `app-router.tsx` is
+  rendered by the SSR entry too, so it imports nothing from there: the
+  browser entry imports `runtime/browser-payloads.ts`, which hands it how a
+  payload is read (`setPayloadReader`) and registers the Server Action
+  callback that ends in `answerAction`. Whether the browser's loader won
+  depended on the order the bundle evaluated the two; an application whose
+  SSR entry evaluated `app-router.tsx` last shipped HTML with no client
+  stylesheet at all. `runtime/client-css.test.ts` builds such an application.
 - **Only HTML rendered for the browser's pathname is hydrated.**
   `runtime/mount.ts` compares the payload's `pathname` with `location`
   (normalized as `usePathname` normalizes) and renders anything else afresh
@@ -424,6 +435,7 @@ src/
   plugin/server-actions.ts   which modules declared 'use server'
   runtime/entry.{rsc,ssr,browser}.tsx  the three environments
   runtime/app-router.tsx     the client half: navigation + payloads, and whether this document can render one
+  runtime/browser-payloads.ts  the browser's Flight client, wired into app-router: payloads read, Server Actions called
   runtime/payload.ts         what a page is on the wire (tree, pathname, client, action result)
   runtime/payload-path.ts    where a payload lives: /x → /x/index.rsc
   runtime/is-payload.ts      whether an answer is a payload or a document load
@@ -471,6 +483,8 @@ fixtures/
   streaming/routes/          pages that await their data, with and without a
                              loading.tsx, which runtime/streaming.test.ts streams
                              to each engine; state.ts stands in for @k8ordo/state
+  client-css/routes/         a layout rendering a client component that imports
+                             CSS, whose HTML runtime/client-css.test.ts reads
 ```
 
 ## Conventions
