@@ -1,0 +1,24 @@
+.frame {
+  block-size: calc(var(--spacing) * 32);
+  inline-size: 100%;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 6);
+  block-size: calc(var(--spacing) * 32);
+  inline-size: 100%;
+}
+
+.slot {
+  flex: 1;
+  inline-size: 100%;
+}
+
+.verticalSlot {
+  display: flex;
+  align-items: center;
+  block-size: calc(var(--spacing) * 16);
+  inline-size: 100%;
+}

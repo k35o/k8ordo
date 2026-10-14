@@ -16,13 +16,15 @@ import {
 } from '../../../../../demos/ui/components/form-control-previews';
 import * as m from '../../../../../messages';
 
+import page from '../../../../../styles/page.module.css';
+
 export default function FormControlPage() {
   return (
-    <div className="flex flex-col gap-8 py-12">
+    <div className={page.page}>
       <PageTitle name="FormControl" />
-      <div className="flex flex-col gap-4">
+      <div className={page.stack}>
         <Heading level="h1">FormControl</Heading>
-        <p className="text-fg-mute text-lg">
+        <p className={page.lead}>
           <Rich>{m.components.formControl.description()}</Rich>
         </p>
         <div>
@@ -36,7 +38,7 @@ export default function FormControlPage() {
       </div>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
@@ -44,8 +46,8 @@ export default function FormControlPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-8">
-        <div className="flex flex-col gap-4">
+      <section className={page.stackLg}>
+        <div className={page.stack}>
           <Heading level="h2">
             <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
@@ -64,7 +66,7 @@ export default function FormControlPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.formControl.helpTextTitle()}</Rich>
           </Heading>
@@ -84,7 +86,7 @@ export default function FormControlPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.formControl.errorTextTitle()}</Rich>
           </Heading>
@@ -102,7 +104,7 @@ export default function FormControlPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.formControl.requiredTitle()}</Rich>
           </Heading>
@@ -122,7 +124,7 @@ export default function FormControlPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.formControl.disabledTitle()}</Rich>
           </Heading>
@@ -144,7 +146,7 @@ export default function FormControlPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>

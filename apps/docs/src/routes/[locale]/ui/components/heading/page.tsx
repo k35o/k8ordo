@@ -9,13 +9,16 @@ import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
 import * as m from '../../../../../messages';
 
+import page from '../../../../../styles/page.module.css';
+import styles from '../../../../../styles/pages/ui/components/heading.module.css';
+
 export default function HeadingPage() {
   return (
-    <div className="flex flex-col gap-8 py-12">
+    <div className={page.page}>
       <PageTitle name="Heading" />
-      <div className="flex flex-col gap-4">
+      <div className={page.stack}>
         <Heading level="h1">Heading</Heading>
-        <p className="text-fg-mute text-lg">
+        <p className={page.lead}>
           <Rich>{m.components.heading.description()}</Rich>
         </p>
         <div>
@@ -29,7 +32,7 @@ export default function HeadingPage() {
       </div>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
@@ -37,8 +40,8 @@ export default function HeadingPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-8">
-        <div className="flex flex-col gap-4">
+      <section className={page.stackLg}>
+        <div className={page.stack}>
           <Heading level="h2">
             <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
@@ -47,7 +50,7 @@ export default function HeadingPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.heading.typesTitle()}</Rich>
           </Heading>
@@ -59,7 +62,7 @@ export default function HeadingPage() {
 <Heading level="h5">Heading 5</Heading>
 <Heading level="h6">Heading 6</Heading>`}
           >
-            <div className="flex flex-col gap-4">
+            <div className={page.stack}>
               <Heading level="h1">Heading 1</Heading>
               <Heading level="h2">Heading 2</Heading>
               <Heading level="h3">Heading 3</Heading>
@@ -70,7 +73,7 @@ export default function HeadingPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.heading.lineClampTitle()}</Rich>
           </Heading>
@@ -80,7 +83,7 @@ export default function HeadingPage() {
   truncated to a single line using line clamp
 </Heading>`}
           >
-            <div className="max-w-sm">
+            <div className={styles.frame}>
               <Heading lineClamp={1} level="h3">
                 This is a very long heading text that will be truncated to a
                 single line using line clamp
@@ -91,7 +94,7 @@ export default function HeadingPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>

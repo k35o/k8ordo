@@ -10,6 +10,8 @@ import { inheritsOf, propsOf } from '../../../../../data/component-props';
 import { StepperInteractivePreview } from '../../../../../demos/ui/components/stepper-previews';
 import * as m from '../../../../../messages';
 
+import page from '../../../../../styles/page.module.css';
+
 const STEPS = [
   { label: 'Plan', description: 'Pick what fits' },
   { label: 'Payment', description: 'Card or invoice' },
@@ -24,11 +26,11 @@ const STEPS_CODE = `const steps = [
 
 export default function StepperPage() {
   return (
-    <div className="flex flex-col gap-8 py-12">
+    <div className={page.page}>
       <PageTitle name="Stepper" />
-      <div className="flex flex-col gap-4">
+      <div className={page.stack}>
         <Heading level="h1">Stepper</Heading>
-        <p className="text-fg-mute text-lg">
+        <p className={page.lead}>
           <Rich>{m.components.stepper.description()}</Rich>
         </p>
         <div>
@@ -42,7 +44,7 @@ export default function StepperPage() {
       </div>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
@@ -50,12 +52,12 @@ export default function StepperPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-8">
-        <div className="flex flex-col gap-4">
+      <section className={page.stackLg}>
+        <div className={page.stack}>
           <Heading level="h2">
             <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
-          <p className="text-fg-mute">
+          <p className={page.mute}>
             <Rich>{m.components.stepper.usageDescription()}</Rich>
           </p>
           <ComponentPreview
@@ -67,11 +69,11 @@ export default function StepperPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.stepper.interactiveTitle()}</Rich>
           </Heading>
-          <p className="text-fg-mute">
+          <p className={page.mute}>
             <Rich>{m.components.stepper.interactiveDescription()}</Rich>
           </p>
           <ComponentPreview
@@ -89,7 +91,7 @@ export default function StepperPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.stepper.verticalTitle()}</Rich>
           </Heading>
@@ -112,7 +114,7 @@ export default function StepperPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>

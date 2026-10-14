@@ -10,6 +10,9 @@ import { inheritsOf, propsOf } from '../../../../../data/component-props';
 import { RangeSliderControlledPreview } from '../../../../../demos/ui/components/range-slider-previews';
 import * as m from '../../../../../messages';
 
+import page from '../../../../../styles/page.module.css';
+import styles from '../../../../../styles/pages/ui/components/range-slider.module.css';
+
 const FORM_EXAMPLE = `// schema.ts
 export const filterSchema = z.object({
   priceMin: z.coerce.number().int().min(0).max(100),
@@ -35,11 +38,11 @@ const priceMax = form.field('priceMax');
 
 export default function RangeSliderPage() {
   return (
-    <div className="flex flex-col gap-8 py-12">
+    <div className={page.page}>
       <PageTitle name="RangeSlider" />
-      <div className="flex flex-col gap-4">
+      <div className={page.stack}>
         <Heading level="h1">RangeSlider</Heading>
-        <p className="text-fg-mute text-lg">
+        <p className={page.lead}>
           <Rich>{m.components.rangeSlider.description()}</Rich>
         </p>
         <div>
@@ -53,7 +56,7 @@ export default function RangeSliderPage() {
       </div>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
@@ -61,19 +64,19 @@ export default function RangeSliderPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-8">
-        <div className="flex flex-col gap-4">
+      <section className={page.stackLg}>
+        <div className={page.stack}>
           <Heading level="h2">
             <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
           <ComponentPreview code='<RangeSlider aria-label="Price" defaultValue={[20, 80]} />'>
-            <div className="w-full">
+            <div className={styles.frame}>
               <RangeSlider aria-label="Price" defaultValue={[20, 80]} />
             </div>
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.rangeSlider.controlledTitle()}</Rich>
           </Heading>
@@ -92,12 +95,12 @@ export default function RangeSliderPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.rangeSlider.disabledTitle()}</Rich>
           </Heading>
           <ComponentPreview code='<RangeSlider aria-label="Price" defaultValue={[20, 80]} disabled />'>
-            <div className="w-full">
+            <div className={styles.frame}>
               <RangeSlider
                 aria-label="Price"
                 defaultValue={[20, 80]}
@@ -107,11 +110,11 @@ export default function RangeSliderPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.rangeSlider.formTitle()}</Rich>
           </Heading>
-          <p className="text-fg-mute">
+          <p className={page.mute}>
             <Rich>{m.components.rangeSlider.formDescription()}</Rich>
           </p>
           <CodeBlock code={FORM_EXAMPLE} lang="tsx" />
@@ -119,7 +122,7 @@ export default function RangeSliderPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>

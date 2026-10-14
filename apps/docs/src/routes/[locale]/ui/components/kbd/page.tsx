@@ -9,13 +9,16 @@ import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
 import * as m from '../../../../../messages';
 
+import page from '../../../../../styles/page.module.css';
+import styles from '../../../../../styles/pages/ui/components/kbd.module.css';
+
 export default function KbdPage() {
   return (
-    <div className="flex flex-col gap-8 py-12">
+    <div className={page.page}>
       <PageTitle name="Kbd" />
-      <div className="flex flex-col gap-4">
+      <div className={page.stack}>
         <Heading level="h1">Kbd</Heading>
-        <p className="text-fg-mute text-lg">
+        <p className={page.lead}>
           <Rich>{m.components.kbd.description()}</Rich>
         </p>
         <div>
@@ -29,7 +32,7 @@ export default function KbdPage() {
       </div>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
@@ -37,8 +40,8 @@ export default function KbdPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-8">
-        <div className="flex flex-col gap-4">
+      <section className={page.stackLg}>
+        <div className={page.stack}>
           <Heading level="h2">
             <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
@@ -47,11 +50,11 @@ export default function KbdPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.kbd.combinationTitle()}</Rich>
           </Heading>
-          <p className="text-fg-mute">
+          <p className={page.mute}>
             <Rich>{m.components.kbd.combinationDescription()}</Rich>
           </p>
           <ComponentPreview
@@ -59,7 +62,7 @@ export default function KbdPage() {
 <Kbd>Shift</Kbd>
 <Kbd>P</Kbd>`}
           >
-            <span className="inline-flex items-center gap-1">
+            <span className={styles.keys}>
               <Kbd>Ctrl</Kbd>
               <Kbd>Shift</Kbd>
               <Kbd>P</Kbd>
@@ -67,18 +70,18 @@ export default function KbdPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.kbd.labelTitle()}</Rich>
           </Heading>
-          <p className="text-fg-mute">
+          <p className={page.mute}>
             <Rich>{m.components.kbd.labelDescription()}</Rich>
           </p>
           <ComponentPreview
             code={`<Kbd label="Command">⌘</Kbd>
 <Kbd>K</Kbd>`}
           >
-            <span className="inline-flex items-center gap-1">
+            <span className={styles.keys}>
               <Kbd label="Command">⌘</Kbd>
               <Kbd>K</Kbd>
             </span>
@@ -87,7 +90,7 @@ export default function KbdPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>

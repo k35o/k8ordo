@@ -13,6 +13,9 @@ import {
 } from '../../../../../demos/ui/components/radio-card-previews';
 import * as m from '../../../../../messages';
 
+import page from '../../../../../styles/page.module.css';
+import styles from '../../../../../styles/pages/ui/components/radio-card.module.css';
+
 const options = [
   {
     value: 'starter',
@@ -33,11 +36,11 @@ const options = [
 
 export default function RadioCardPage() {
   return (
-    <div className="flex flex-col gap-8 py-12">
+    <div className={page.page}>
       <PageTitle name="RadioCard" />
-      <div className="flex flex-col gap-4">
+      <div className={page.stack}>
         <Heading level="h1">RadioCard</Heading>
-        <p className="text-fg-mute text-lg">
+        <p className={page.lead}>
           <Rich>{m.components.radioCard.description()}</Rich>
         </p>
         <div>
@@ -51,7 +54,7 @@ export default function RadioCardPage() {
       </div>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
@@ -59,8 +62,8 @@ export default function RadioCardPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-8">
-        <div className="flex flex-col gap-4">
+      <section className={page.stackLg}>
+        <div className={page.stack}>
           <Heading level="h2">
             <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
@@ -90,7 +93,7 @@ const [value, setValue] = useState('pro');
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.radioCard.defaultValueTitle()}</Rich>
           </Heading>
@@ -110,11 +113,8 @@ const [value, setValue] = useState('pro');
   options={options}
 />`}
           >
-            <div className="w-full max-w-2xl">
-              <p
-                className="text-fg-base mb-3 font-medium"
-                id="plan-default-label"
-              >
+            <div className={styles.frame}>
+              <p className={styles.groupLabel} id="plan-default-label">
                 Choose a plan
               </p>
               <RadioCard
@@ -128,11 +128,11 @@ const [value, setValue] = useState('pro');
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.radioCard.formTitle()}</Rich>
           </Heading>
-          <p className="text-fg-mute text-sm">
+          <p className={styles.note}>
             <Rich>{m.components.radioCard.formDescription()}</Rich>
           </p>
           <ComponentPreview
@@ -162,7 +162,7 @@ const [value, setValue] = useState('pro');
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>

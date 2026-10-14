@@ -9,13 +9,16 @@ import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
 import * as m from '../../../../../messages';
 
+import page from '../../../../../styles/page.module.css';
+import styles from '../../../../../styles/pages/ui/components/progress.module.css';
+
 export default function ProgressPage() {
   return (
-    <div className="flex flex-col gap-8 py-12">
+    <div className={page.page}>
       <PageTitle name="Progress" />
-      <div className="flex flex-col gap-4">
+      <div className={page.stack}>
         <Heading level="h1">Progress</Heading>
-        <p className="text-fg-mute text-lg">
+        <p className={page.lead}>
           <Rich>{m.components.progress.description()}</Rich>
         </p>
         <div>
@@ -29,7 +32,7 @@ export default function ProgressPage() {
       </div>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
@@ -37,19 +40,19 @@ export default function ProgressPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-8">
-        <div className="flex flex-col gap-4">
+      <section className={page.stackLg}>
+        <div className={page.stack}>
           <Heading level="h2">
             <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
           <ComponentPreview code="<Progress max={100} value={60} />">
-            <div className="w-full">
+            <div className={styles.frame}>
               <Progress max={100} value={60} />
             </div>
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.progress.differentValuesTitle()}</Rich>
           </Heading>
@@ -59,7 +62,7 @@ export default function ProgressPage() {
 <Progress max={100} value={80} />
 <Progress max={100} value={100} />`}
           >
-            <div className="flex w-full flex-col gap-4">
+            <div className={styles.column}>
               <Progress max={100} value={20} />
               <Progress max={100} value={50} />
               <Progress max={100} value={80} />
@@ -68,7 +71,7 @@ export default function ProgressPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.progress.withLabelTitle()}</Rich>
           </Heading>
@@ -79,21 +82,21 @@ export default function ProgressPage() {
   value={75}
 />`}
           >
-            <div className="w-full">
+            <div className={styles.frame}>
               <Progress label="Upload progress" max={100} value={75} />
             </div>
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.progress.indeterminateTitle()}</Rich>
           </Heading>
-          <p className="text-fg-mute">
+          <p className={page.mute}>
             <Rich>{m.components.progress.indeterminateDescription()}</Rich>
           </p>
           <ComponentPreview code='<Progress label="Uploading" />'>
-            <div className="w-full">
+            <div className={styles.frame}>
               <Progress label="Uploading" />
             </div>
           </ComponentPreview>
@@ -101,7 +104,7 @@ export default function ProgressPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>
