@@ -1,5 +1,5 @@
 ---
-'@k8ordo/ui': major
+'@k8ordo/ui': minor
 ---
 
 React 19.3 を前提にしました（peer は `react` / `react-dom` / `@types/react` / `@types/react-dom` とも `>=19.3.0`）。

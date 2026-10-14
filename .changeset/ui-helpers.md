@@ -1,5 +1,5 @@
 ---
-'@k8ordo/ui': major
+'@k8ordo/ui': minor
 ---
 
 ルートのエントリから helpers（`cn` / `chain` / `mergeProps` / `mergeRefs` / `createSafeContext`）を公開しなくなりました。いずれも UI コンポーネントライブラリ固有の理由を持たない汎用ユーティリティで、コンポーネントの内部実装として残します。

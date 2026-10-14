@@ -1,5 +1,5 @@
 ---
-'@k8ordo/ui': major
+'@k8ordo/ui': minor
 ---
 
 要素の観測を、ref を受け渡す hook から、子を包むコンポーネントに置き換えました。

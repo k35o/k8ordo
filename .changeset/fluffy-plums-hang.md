@@ -1,5 +1,5 @@
 ---
-"@k8ordo/ui": major
+"@k8ordo/ui": minor
 ---
 
 組み込みの文言を `@k8ordo/i18n` の今のロケールから読むようにした（破壊的変更）。

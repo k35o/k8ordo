@@ -1,5 +1,5 @@
 ---
-"@k8ordo/ui": major
+"@k8ordo/ui": minor
 ---
 
 `ScrollLinked` を削除しました。
