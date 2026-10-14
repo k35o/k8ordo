@@ -9,7 +9,7 @@ URL の構成とパッケージの増やし方は [`CLAUDE.md`](CLAUDE.md) に�
 
 - [@k8ordo/framework](../../packages/framework) - このリポジトリのフレームワーク。static モードで全ページを事前描画してファイルにする
 - [@k8ordo/router](../../packages/router) - Navigation API と URLPattern の上に立つルーター
-- [Tailwind CSS](https://tailwindcss.com/) - ユーティリティファーストの CSS フレームワーク
+- CSS Modules - `@k8ordo/ui` のトークンで書き、[better-css-modules](https://github.com/k35o/better-css-modules) で検査する
 
 ## 開発
 
