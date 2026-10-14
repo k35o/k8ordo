@@ -1,0 +1,76 @@
+.root {
+  display: grid;
+  block-size: 100%;
+  inline-size: 100%;
+}
+
+/* 1 枚目の割合は、描画のたびに JS が --panels-size に書く */
+.horizontal {
+  grid-template-columns: var(--panels-size) auto minmax(0, 1fr);
+}
+
+.vertical {
+  grid-template-rows: var(--panels-size) auto minmax(0, 1fr);
+}
+
+.panel {
+  overflow: auto;
+  min-block-size: 0;
+  min-inline-size: 0;
+}
+
+.handle {
+  display: flex;
+  touch-action: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+}
+
+/* 軸は見た目の向きなので、つかむ幅も論理でなく物理の幅・高さで取る */
+.handleX {
+  cursor: col-resize;
+  width: calc(var(--spacing) * 3);
+}
+
+.handleY {
+  cursor: row-resize;
+  height: calc(var(--spacing) * 3);
+}
+
+.line {
+  border-radius: var(--radius-full);
+  background-color: var(--color-border-base);
+  transition-property:
+    color, background-color, border-color, outline-color, text-decoration-color,
+    fill, stroke;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--easing-out);
+}
+
+.lineX {
+  width: 1px;
+  height: 100%;
+}
+
+.lineY {
+  width: 100%;
+  height: 1px;
+}
+
+/* 仕切りの状態は詳細度を上げずに書き、後に書く強制カラーの色を勝たせる */
+@media (hover: hover) {
+  :where(.handle:hover) .line {
+    background-color: var(--color-border-emphasize);
+  }
+}
+
+:where(.handle[data-dragging]) .line {
+  background-color: var(--color-primary-border);
+}
+
+@media (forced-colors: active) {
+  .line {
+    background-color: var(--color-system-canvas-text);
+  }
+}

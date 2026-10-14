@@ -1,5 +1,6 @@
 'use client';
 
+import { clsx } from 'clsx';
 import { useCallback, useId, useMemo, useRef, useState } from 'react';
 import type {
   CSSProperties,
@@ -12,13 +13,14 @@ import type {
   SetStateAction,
 } from 'react';
 
-import { cn } from '../../../helpers/cn';
 import { createSafeContext } from '../../../helpers/create-safe-context';
 import { mergeRefs } from '../../../helpers/merge-refs';
 import { useControllableState } from '../../../hooks/controllable-state';
 import { useWritingMode } from '../../../hooks/writing-mode';
 import { getMessages } from '../../../i18n/current';
-import { FOCUS_RING_NO_BORDER } from '../../_internal/focus-ring';
+
+import focusRing from '../../_internal/focus-ring.module.css';
+import styles from './resizable-panels.module.css';
 
 type Orientation = 'horizontal' | 'vertical';
 
@@ -129,11 +131,9 @@ export const Root: FC<
     >
       <div
         {...rest}
-        className={cn(
-          'grid block-full inline-full',
-          orientation === 'horizontal'
-            ? 'grid-cols-[var(--panels-size)_auto_minmax(0,1fr)]'
-            : 'grid-rows-[var(--panels-size)_auto_minmax(0,1fr)]',
+        className={clsx(
+          styles.root,
+          orientation === 'horizontal' ? styles.horizontal : styles.vertical,
         )}
         ref={mergedRef}
         style={{ '--panels-size': `${String(clamped)}%` } as CSSProperties}
@@ -173,12 +173,7 @@ export const Panel: FC<
   );
 
   return (
-    <div
-      {...rest}
-      className="overflow-auto min-block-0 min-inline-0"
-      id={panelId}
-      ref={mergedRef}
-    />
+    <div {...rest} className={styles.panel} id={panelId} ref={mergedRef} />
   );
 };
 
@@ -263,11 +258,10 @@ export const Handle: FC<
       aria-valuemax={max}
       aria-valuemin={min}
       aria-valuenow={Math.round(size)}
-      className={cn(
-        'group flex touch-none items-center justify-center rounded-full',
-        // 軸は見た目の向きなので、つかむ幅も物理の幅・高さで取る（px / py は論理）
-        axis === 'x' ? 'cursor-col-resize w-3' : 'cursor-row-resize h-3',
-        FOCUS_RING_NO_BORDER,
+      className={clsx(
+        styles.handle,
+        axis === 'x' ? styles.handleX : styles.handleY,
+        focusRing.ringNoBorder,
       )}
       data-dragging={dragging ? '' : undefined}
       onKeyDown={handleKeyDown}
@@ -307,10 +301,9 @@ export const Handle: FC<
     >
       <span
         aria-hidden
-        className={cn(
-          'bg-border-base rounded-full transition-colors duration-150 ease-out forced-colors:bg-[CanvasText]',
-          'group-hover:bg-border-emphasize group-data-dragging:bg-primary-border',
-          axis === 'x' ? 'h-full w-px' : 'h-px w-full',
+        className={clsx(
+          styles.line,
+          axis === 'x' ? styles.lineX : styles.lineY,
         )}
       />
     </div>

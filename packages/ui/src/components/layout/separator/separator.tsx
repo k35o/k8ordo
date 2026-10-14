@@ -1,6 +1,7 @@
+import { clsx } from 'clsx';
 import type { FC, HTMLAttributes } from 'react';
 
-import { cn } from './../../../helpers/cn';
+import styles from './separator.module.css';
 
 type Props = {
   orientation?: 'horizontal' | 'vertical';
@@ -10,25 +11,25 @@ type Props = {
   'children' | 'role' | 'aria-orientation' | 'className' | 'style'
 >;
 
+const COLOR = {
+  base: styles.base,
+  mute: styles.mute,
+  subtle: styles.subtle,
+} as const;
+
 export const Separator: FC<Props> = ({
   orientation = 'horizontal',
   color = 'base',
   ...rest
-}) => {
-  const isVertical = orientation === 'vertical';
-  return (
-    <span
-      {...rest}
-      aria-orientation={orientation}
-      className={cn(
-        'block',
-        isVertical ? 'block-full inline-px' : 'block-px inline-full',
-        color === 'base' && 'bg-border-base',
-        color === 'mute' && 'bg-border-mute',
-        color === 'subtle' && 'bg-border-subtle',
-        'forced-colors:bg-[CanvasText]',
-      )}
-      role="separator"
-    />
-  );
-};
+}) => (
+  <span
+    {...rest}
+    aria-orientation={orientation}
+    className={clsx(
+      styles.root,
+      orientation === 'vertical' ? styles.vertical : styles.horizontal,
+      COLOR[color],
+    )}
+    role="separator"
+  />
+);
