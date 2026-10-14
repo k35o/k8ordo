@@ -94,9 +94,10 @@ export const DisabledWithValues: Story = {
       ]}
     />
   ),
-  play: async ({ canvas }) => {
+  play: async ({ canvas, canvasElement }) => {
     const chip = canvas.getByText('16進数').closest('div');
-    const box = chip?.parentElement?.closest('div.rounded-xl');
+    // 値を運ぶ隠した select の親が Autocomplete のルート（枠）
+    const box = canvasElement.querySelector('select')?.parentElement;
     await expect(getComputedStyle(chip as Element).backgroundColor).not.toBe(
       getComputedStyle(box as Element).backgroundColor,
     );

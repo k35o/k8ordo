@@ -1,5 +1,6 @@
 'use client';
 
+import { clsx } from 'clsx';
 import {
   useCallback,
   useId,
@@ -17,14 +18,16 @@ import type {
 } from 'react';
 import { useFormStatus } from 'react-dom';
 
-import { cn } from '../../../helpers/cn';
 import { mergeRefs } from '../../../helpers/merge-refs';
 import { useControllableState, useWritingMode } from '../../../hooks';
 import { getMessages } from '../../../i18n/current';
 import type { Option } from '../../../types/variables';
-import { FOCUS_RING_WITHIN } from '../../_internal/focus-ring';
 import { FormValue } from '../../_internal/form-value';
 import { ChevronIcon } from '../../icons';
+
+import focusRing from '../../_internal/focus-ring.module.css';
+import srOnly from '../../_internal/sr-only.module.css';
+import styles from './combobox.module.css';
 
 export type ComboboxSearch = (
   query: string,
@@ -306,13 +309,11 @@ export const Combobox: FC<Props> = ({
 
   return (
     <div
-      className={cn(
-        'relative flex items-center rounded-xl border border-border-base bg-bg-base inline-full',
-        FOCUS_RING_WITHIN,
-        'has-aria-invalid:border-border-error',
-        (disabled || pending) &&
-          'cursor-not-allowed border-border-mute bg-bg-mute',
-        readOnly && 'bg-bg-subtle',
+      className={clsx(
+        styles.root,
+        focusRing.ringWithin,
+        (disabled || pending) && styles.disabled,
+        readOnly && styles.readOnly,
       )}
       ref={anchorRef}
     >
@@ -351,10 +352,7 @@ export const Combobox: FC<Props> = ({
         aria-invalid={invalid}
         aria-required={required}
         autoComplete="off"
-        className={cn(
-          'min-w-0 grow bg-transparent py-2 ps-3 focus-visible:outline-hidden',
-          'disabled:cursor-not-allowed read-only:cursor-not-allowed',
-        )}
+        className={styles.input}
         disabled={disabled}
         id={id}
         onBlur={(event) => {
@@ -389,7 +387,7 @@ export const Combobox: FC<Props> = ({
         aria-controls={listboxId}
         aria-expanded={expanded}
         aria-label={messages.comboboxToggle}
-        className="text-fg-mute me-2 grid size-8 shrink-0 place-items-center rounded-md disabled:cursor-not-allowed"
+        className={styles.toggle}
         disabled={disabled || locked}
         onClick={() => {
           inputRef.current?.focus();
@@ -408,14 +406,11 @@ export const Combobox: FC<Props> = ({
       >
         <ChevronIcon direction={expanded ? 'up' : 'down'} size="sm" />
       </button>
-      <span className="sr-only" role="status">
+      <span className={srOnly.srOnly} role="status">
         {expanded ? status : null}
       </span>
       <div
-        className={cn(
-          'bg-bg-raised border-border-subtle z-10 rounded-xl border shadow-md',
-          !expanded && 'hidden',
-        )}
+        className={clsx(styles.popup, !expanded && styles.collapsed)}
         // 候補を押しても欄からフォーカスを移さない。離れた扱いになると選ぶ前に閉じる
         onMouseDown={(event) => {
           event.preventDefault();
@@ -423,15 +418,10 @@ export const Combobox: FC<Props> = ({
         role="presentation"
         style={listStyle}
       >
-        {status === null ? null : (
-          <p className="text-fg-mute px-3 py-2">{status}</p>
-        )}
+        {status === null ? null : <p className={styles.status}>{status}</p>}
         <ul
           aria-busy={isSearching || undefined}
-          className={cn(
-            'max-h-80 overflow-y-auto py-2 transition-opacity vertical:max-h-none vertical:max-w-80 vertical:overflow-x-auto vertical:overflow-y-visible',
-            isSearching && 'opacity-60',
-          )}
+          className={clsx(styles.list, isSearching && styles.searching)}
           // 候補の無い listbox は役割を満たさないので隠す。aria-controls の参照先は残す
           hidden={candidates.length === 0}
           id={listboxId}
@@ -443,15 +433,12 @@ export const Combobox: FC<Props> = ({
               // eslint-disable-next-line jsx-a11y/click-events-have-key-events -- キーボードでは combobox の欄が aria-activedescendant で候補を選ぶ
               <li
                 aria-selected={selected}
-                className={cn(
-                  'cursor-pointer px-3 py-2 transition-colors duration-150 ease-out outline-border-base -outline-offset-2',
-                  selected &&
-                    'bg-primary-bg-subtle text-primary-fg forced-colors:bg-[Highlight] forced-colors:text-[HighlightText]',
-                  active === index &&
-                    'contrast-more:outline-2 forced-colors:outline-2',
-                  active === index && !selected && 'bg-bg-subtle',
-                  active === index && selected && 'bg-primary-bg-mute',
+                className={clsx(
+                  styles.option,
+                  selected && styles.selected,
+                  active === index && styles.active,
                 )}
+
                 id={`${baseId}-option-${String(index)}`}
                 key={option.value}
                 onClick={() => {

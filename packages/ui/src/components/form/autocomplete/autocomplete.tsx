@@ -1,5 +1,6 @@
 'use client';
 
+import { clsx } from 'clsx';
 import {
   useCallback,
   useDeferredValue,
@@ -26,13 +27,14 @@ import {
 } from '../../../hooks';
 import { getMessages } from '../../../i18n/current';
 import type { Option } from '../../../types/variables';
-import { FOCUS_RING_WITHIN } from '../../_internal/focus-ring';
 import { FormValue } from '../../_internal/form-value';
 import { IconButton } from '../../buttons/icon-button';
 import { CloseIcon } from '../../icons';
 import { chain } from './../../../helpers/chain';
-import { cn } from './../../../helpers/cn';
 import { mergeRefs } from './../../../helpers/merge-refs';
+
+import focusRing from '../../_internal/focus-ring.module.css';
+import styles from './autocomplete.module.css';
 
 type BaseProps = {
   id: string;
@@ -251,13 +253,11 @@ export const Autocomplete: FC<Props> = ({
 
   return (
     <div
-      className={cn(
-        'relative rounded-xl border border-border-base bg-bg-base inline-full',
-        FOCUS_RING_WITHIN,
-        'has-aria-invalid:border-border-error',
-        (disabled || pending) &&
-          'cursor-not-allowed border-border-mute bg-bg-mute',
-        readOnly && 'bg-bg-subtle',
+      className={clsx(
+        styles.root,
+        focusRing.ringWithin,
+        (disabled || pending) && styles.disabled,
+        readOnly && styles.readOnly,
       )}
       ref={setReferenceRef}
     >
@@ -276,18 +276,17 @@ export const Autocomplete: FC<Props> = ({
         required={required}
         values={currentValue}
       />
-      <div className="flex min-h-12 items-center justify-between gap-2 px-3 py-2">
-        <div className="flex w-full min-w-0 flex-wrap gap-1">
+      <div className={styles.body}>
+        <div className={styles.tags}>
           {currentValue.map((selectedValue) => {
             const label = options.find(
               (option) => option.value === selectedValue,
             )?.label;
             return (
               <div
-                className={cn(
-                  'inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium',
-                  // 無効のあいだは枠が bg-mute になるので、チップは枠と同じ色を避ける
-                  disabled || pending ? 'bg-bg-base' : 'bg-bg-mute',
+                className={clsx(
+                  styles.tag,
+                  (disabled || pending) && styles.tagOnDisabled,
                 )}
                 key={selectedValue}
                 tabIndex={-1}
@@ -323,10 +322,7 @@ export const Autocomplete: FC<Props> = ({
             aria-invalid={invalid}
             aria-required={required}
             autoComplete="off"
-            className={cn(
-              'grow bg-transparent focus-visible:outline-hidden',
-              'disabled:cursor-not-allowed read-only:cursor-not-allowed',
-            )}
+            className={styles.input}
             disabled={disabled}
             id={id}
             onBlur={chain(handleBlur, onBlur)}
@@ -360,23 +356,16 @@ export const Autocomplete: FC<Props> = ({
         )}
       </div>
       {expanded && (
-        <div
-          className="bg-bg-raised border-border-subtle z-10 rounded-xl border shadow-md"
-          role="presentation"
-          style={listboxStyle}
-        >
+        <div className={styles.popup} role="presentation" style={listboxStyle}>
           <ul
             aria-busy={isPending || undefined}
             aria-multiselectable="true"
-            className={cn(
-              'max-h-96 overflow-y-auto py-2 transition-opacity vertical:max-h-none vertical:max-w-96 vertical:overflow-x-auto vertical:overflow-y-visible',
-              isPending && 'opacity-60',
-            )}
+            className={clsx(styles.list, isPending && styles.pending)}
             id={listboxId}
             role="listbox"
           >
             {filteredOptions.length === 0 && (
-              <li className="text-fg-mute px-3 py-2" role="presentation">
+              <li className={styles.empty} role="presentation">
                 {messages.autocompleteEmpty}
               </li>
             )}
@@ -385,16 +374,10 @@ export const Autocomplete: FC<Props> = ({
               return (
                 <li
                   aria-selected={selected}
-                  className={cn(
-                    'cursor-pointer px-3 py-2 transition-colors duration-150 ease-out outline-border-base -outline-offset-2',
-                    selected &&
-                      'bg-primary-bg-subtle text-primary-fg forced-colors:bg-[Highlight] forced-colors:text-[HighlightText]',
-                    activeIndex === idx &&
-                      'contrast-more:outline-2 forced-colors:outline-2',
-                    activeIndex === idx && !selected && 'bg-bg-subtle',
-                    activeIndex === idx &&
-                      selected &&
-                      'bg-primary-bg-mute text-primary-fg',
+                  className={clsx(
+                    styles.option,
+                    selected && styles.selected,
+                    activeIndex === idx && styles.active,
                   )}
                   id={optionId(idx)}
                   key={option.value}
