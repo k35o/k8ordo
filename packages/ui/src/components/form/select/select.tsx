@@ -1,16 +1,18 @@
 'use client';
 
+import { clsx } from 'clsx';
 import { useLayoutEffect, useMemo, useRef } from 'react';
 import type { FC, Ref, SelectHTMLAttributes } from 'react';
 import { useFormStatus } from 'react-dom';
 
 import type { Option } from '../../../types/variables';
-import { FOCUS_RING_WITHIN } from '../../_internal/focus-ring';
 import { ignoreSelectKeys } from '../../_internal/ignore-changes';
 import { ChevronIcon } from '../../icons';
 import { chain } from './../../../helpers/chain';
-import { cn } from './../../../helpers/cn';
 import { mergeRefs } from './../../../helpers/merge-refs';
+
+import focusRing from '../../_internal/focus-ring.module.css';
+import styles from './select.module.css';
 
 type Props = {
   invalid?: boolean;
@@ -52,22 +54,17 @@ export const Select: FC<Props> = ({
 
   return (
     <div
-      className={cn(
-        'relative flex h-fit w-full items-center rounded-xl border border-border-base bg-bg-base vertical:h-full vertical:w-fit',
-        invalid && 'border-border-error',
-        (disabled || pending) &&
-          'cursor-not-allowed border-border-mute bg-bg-mute',
-        FOCUS_RING_WITHIN,
+      className={clsx(
+        styles.root,
+        invalid && styles.invalid,
+        (disabled || pending) && styles.disabled,
+        focusRing.ringWithin,
       )}
     >
       <select
         aria-disabled={pending || undefined}
         aria-invalid={invalid}
-        className={cn(
-          'w-full grow appearance-none bg-transparent px-3 py-2 text-fg-base focus-visible:outline-hidden vertical:h-full vertical:w-auto',
-          'disabled:cursor-not-allowed',
-          pending && 'pointer-events-none',
-        )}
+        className={clsx(styles.select, pending && styles.pending)}
         defaultValue={defaultValue}
         disabled={disabled}
         onKeyDown={chain(onKeyDown, pending ? ignoreSelectKeys : undefined)}
@@ -80,10 +77,7 @@ export const Select: FC<Props> = ({
           </option>
         ))}
       </select>
-      <span
-        aria-hidden
-        className="vertical:-rotate-90 pointer-events-none me-3 shrink-0"
-      >
+      <span aria-hidden className={styles.chevron}>
         <ChevronIcon direction="down" size="sm" />
       </span>
     </div>

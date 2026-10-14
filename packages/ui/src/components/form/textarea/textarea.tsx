@@ -1,10 +1,10 @@
 'use client';
 
+import { clsx } from 'clsx';
 import type { FC, Ref, TextareaHTMLAttributes } from 'react';
 import { useFormStatus } from 'react-dom';
 
-import { FOCUS_RING } from '../../_internal/focus-ring';
-import { cn } from './../../../helpers/cn';
+import styles from './textarea.module.css';
 
 type Props = {
   invalid?: boolean;
@@ -33,16 +33,10 @@ export const Textarea: FC<Props> = ({
   return (
     <textarea
       aria-invalid={invalid}
-      className={cn(
-        'resize-none rounded-xl border border-border-base bg-bg-base px-3 py-2 inline-full',
-        'aria-invalid:border-border-error',
-        'disabled:cursor-not-allowed disabled:border-border-mute disabled:bg-bg-mute hover:disabled:bg-bg-mute',
-        'read-only:cursor-not-allowed read-only:bg-bg-subtle',
-        FOCUS_RING,
-        fullHeight && 'h-full',
-        // 中身に合わせた高さはブラウザが持っている。scrollHeight を測って
-        // style.height を書く JS は、この CSS が無かった頃の代用だった
-        autoResize && 'field-sizing-content',
+      className={clsx(
+        styles.root,
+        fullHeight && styles.fullHeight,
+        autoResize && styles.autoResize,
       )}
       onInput={onInput}
       onKeyDown={(e) => {

@@ -1,0 +1,121 @@
+.root {
+  position: relative;
+  display: flex;
+  height: calc(var(--spacing) * 12);
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(var(--spacing) * 2);
+  border-radius: var(--radius-xl);
+  border-width: 1px;
+  border-color: var(--color-border-base);
+  background-color: var(--color-bg-base);
+
+  @container style(--writing: vertical) {
+    height: auto;
+    width: calc(var(--spacing) * 12);
+  }
+}
+
+/* 共有の輪（.ringWithin）ではなくここに書くのは、無効と不正な値の枠線を
+   フォーカス中も残すため。後に書いた規則が輪の透明な枠線に勝つ */
+.root:focus-within {
+  border-color: transparent;
+  outline-style: none;
+  box-shadow: var(--shadow-ring-info);
+
+  @media (forced-colors: active) {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+}
+
+.root:has(:disabled) {
+  cursor: not-allowed;
+  border-color: var(--color-border-mute);
+  background-color: var(--color-bg-mute);
+}
+
+.root:has([aria-invalid='true']) {
+  border-color: var(--color-border-error);
+}
+
+.input {
+  flex-grow: 1;
+  background-color: transparent;
+  padding-inline-end: calc(var(--spacing) * 8);
+  padding-inline-start: calc(var(--spacing) * 3);
+  width: 100%;
+  height: 100%;
+}
+
+.input:focus-visible {
+  outline-style: none;
+
+  @media (forced-colors: active) {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+}
+
+.input:disabled,
+.input:read-only {
+  cursor: not-allowed;
+}
+
+.steppers {
+  position: absolute;
+  inset-inline-end: var(--spacing);
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  padding-block: var(--spacing);
+
+  @container style(--writing: vertical) {
+    inset-inline-end: auto;
+    bottom: var(--spacing);
+    height: auto;
+    width: 100%;
+    flex-direction: row;
+    padding-inline: var(--spacing);
+    padding-block: 0;
+  }
+}
+
+.step {
+  display: flex;
+  width: calc(var(--spacing) * 6);
+  flex-grow: 1;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  color: var(--color-fg-mute);
+  transition-property:
+    color, background-color, border-color, outline-color, text-decoration-color,
+    fill, stroke;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--easing-out);
+
+  @container style(--writing: vertical) {
+    height: calc(var(--spacing) * 6);
+    width: auto;
+  }
+}
+
+@media (hover: hover) {
+  .step:hover {
+    background-color: var(--color-bg-mute);
+    color: var(--color-fg-base);
+  }
+}
+
+.step:disabled {
+  cursor: not-allowed;
+  color: var(--color-fg-mute);
+}
+
+@media (hover: hover) {
+  .step:hover:disabled {
+    background-color: transparent;
+  }
+}
