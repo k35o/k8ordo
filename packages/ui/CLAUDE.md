@@ -224,7 +224,10 @@ wrapped into `@layer components` by its plugin, in Vite and in `vp pack` alike.
   not write (Markdown, shiki, streamdown) is styled inside
   `.root { @scope (&) { … } }`, where its own class names are `:global(...)`.
   Write `& >`, never `:scope >`, and no `composes` (it does not work in a
-  layer; join classes in JS).
+  layer; join classes in JS). `&` gives a rule inside `@scope` no
+  specificity, so `svg` there is (0,0,1) and loses to any class on the
+  element: the icons' size classes are `:where()` for that reason, so a
+  component that sizes the icons inside it wins.
 - **Hover** is `@media (hover: hover) { .x:hover { … } }`, as Tailwind wrote it.
 - **Vertical writing**: prefer logical properties; where an element must
   change in vertical text, use `@container style(--writing: vertical) { … }`,

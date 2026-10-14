@@ -1,34 +1,37 @@
-.xs {
+/* 大きさは詳細度を持たせない。Avatar のように中のアイコンの大きさを決める
+   部品の @scope (&) の svg に譲る（@scope の & は詳細度を持たないので、
+   クラス 1 つにも負ける） */
+:where(.xs) {
   width: calc(var(--spacing) * 3);
   height: calc(var(--spacing) * 3);
 }
 
-.sm {
+:where(.sm) {
   width: calc(var(--spacing) * 4);
   height: calc(var(--spacing) * 4);
 }
 
-.md {
+:where(.md) {
   width: calc(var(--spacing) * 6);
   height: calc(var(--spacing) * 6);
 }
 
-.lg {
+:where(.lg) {
   width: calc(var(--spacing) * 8);
   height: calc(var(--spacing) * 8);
 }
 
-.xl {
+:where(.xl) {
   width: calc(var(--spacing) * 10);
   height: calc(var(--spacing) * 10);
 }
 
-.xxl {
+:where(.xxl) {
   width: calc(var(--spacing) * 12);
   height: calc(var(--spacing) * 12);
 }
 
-.xxxl {
+:where(.xxxl) {
   width: calc(var(--spacing) * 14);
   height: calc(var(--spacing) * 14);
 }
