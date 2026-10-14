@@ -308,6 +308,8 @@
 
 - `Tabs` の選択インジケータから、anchor positioning 未対応ブラウザ向けのフォールバック（選択中のタブに描く静的な下線）を削除しました。anchor positioning は Chrome 125・Safari 26・Firefox 147 で出そろって Baseline newly available になったため、対応ブラウザでの見た目と挙動は変わりません。
 
+- `Calendar`（`DatePicker`が開くものも）を開いたまま日付が変わったら、今日の印を次の日へ移すようにしました。これまでは描き直しのたびに時計を読んでいたので、日付が変わっても何か操作するまで前の日が今日のままでした。
+
 - `light:` バリアントが `.light` クラスの下で効く定義になっており、`<html>` に `dark` しか付けない `@k8ordo/color-scheme` と組み合わせると一度も効かなかったのを直しました。`light:` は `.dark` の下ではないところで効きます。`.light` クラスはもう読みません。
 
 - `CheckboxGroup` の外で使う `Checkbox` でも、`itemValue` を input の `value` 属性として出すようにしました。

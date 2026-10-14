@@ -82,6 +82,7 @@
     - router-boundary-keeps-subtree
     - router-browser-pathname
     - router-errors-name-patterns
+    - router-params-of-object
     - router-testing-engines
     - sour-pens-remember
     - typescript-7-peer-floor
@@ -120,6 +121,7 @@
     - breezy-crabs-thank
     - bright-hues-mix
     - button-render-item-passthrough
+    - calendar-today-follows-date
     - calm-pigs-visit
     - checkbox-standalone-item-value
     - cool-walls-bake

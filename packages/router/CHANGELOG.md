@@ -69,6 +69,8 @@
   - 表に無いパターンを `href` / `navigateTo` / `PageProps` などに渡したときの型エラーが、型の名前でなく、表のパターンの和集合を並べるようになった（`parameter of type '"/" | "/members" | "/posts/:id"'`）。`RegisteredPattern` と `RegisteredNavigablePattern` が表す型は変わらない。
   - `useRoute` / `useParams` を `<Router>` の外で呼んだときのエラー文に、`@k8ordo/framework` のページは `params` を props で受け取り、その下では `useMatch` で読めることを足した。
 
+- paramを持たないパターンの`ParamsOf`と`ParsedParams`、`PageProps`の`request`と`search`が無いときに足す型を、`{}`に解決される`Record<never, never>`から`object`にしました。`{}`は数値や文字列も受け取ってしまいます。
+
 - GUIDE の「Testing」を直す。パッケージ自身のテストは Chromium だけでなく Firefox と WebKit でも回っている。Vitest の browser mode はテストを iframe の中で動かし、Firefox と WebKit はそこで戻る・進むのスクロール位置を正しく戻さない（Firefox は戻る遷移の handler も 2 回走らせる）ので、戻る・進むはトップレベルのページで確かめる、と書き足す。
 
 - 任意の peer の `typescript` の下限を `>=7.0.2` から `>=7.0.0` にする。TypeScript 7 の正式版は 7.0.2 が最初なので、受け付ける版は変わらない。ドキュメントで「TypeScript 7以上」と書けるようにするため。
