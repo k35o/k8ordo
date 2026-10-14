@@ -1,0 +1,46 @@
+/* 素の Card は余白を持たず、生成 UI のカタログには className の逃げ道もない
+   ので、size を中の余白に写す（既定は md） */
+.cardSm {
+  padding: calc(var(--spacing) * 4);
+}
+
+.cardMd {
+  padding: calc(var(--spacing) * 6);
+}
+
+.cardLg {
+  padding: calc(var(--spacing) * 8);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 1);
+}
+
+.fieldLabel {
+  color: var(--color-fg-base);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-sm);
+}
+
+.keys {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(var(--spacing) * 1);
+}
+
+.popover {
+  padding: calc(var(--spacing) * 4);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-bg-raised);
+  color: var(--color-fg-base);
+  box-shadow: var(--shadow-md);
+}
+
+.dropHint {
+  color: var(--color-fg-mute);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+}
