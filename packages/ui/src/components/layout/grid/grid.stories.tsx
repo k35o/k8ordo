@@ -2,6 +2,8 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { Grid } from './grid';
 
+import styles from './grid.stories.module.css';
+
 const meta: Meta<typeof Grid> = {
   title: 'components/layout/grid',
   component: Grid,
@@ -11,10 +13,7 @@ export default meta;
 type Story = StoryObj<typeof Grid>;
 
 const items = Array.from({ length: 8 }, (_, i) => (
-  <div
-    className="bg-bg-mute rounded-md p-4 text-center text-sm"
-    key={`item-${i}`}
-  >
+  <div className={styles.item} key={`item-${i}`}>
     {i + 1}
   </div>
 ));

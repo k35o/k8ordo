@@ -1,0 +1,39 @@
+.sizes {
+  display: flex;
+  align-items: flex-end;
+  gap: calc(var(--spacing) * 6);
+}
+
+.size {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(var(--spacing) * 2);
+}
+
+.sizeLabel {
+  color: var(--color-fg-mute);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+}
+
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(min(calc(var(--spacing) * 36), 100%), 1fr)
+  );
+  place-items: center;
+  gap: calc(var(--spacing) * 4);
+}
+
+.icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.name {
+  text-align: center;
+}

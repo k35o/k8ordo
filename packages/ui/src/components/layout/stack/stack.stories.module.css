@@ -1,0 +1,28 @@
+.item {
+  padding: calc(var(--spacing) * 4);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+  text-align: center;
+  background-color: var(--color-bg-mute);
+  border-radius: var(--radius-md);
+}
+
+.small {
+  padding: calc(var(--spacing) * 4);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+  background-color: var(--color-bg-mute);
+  border-radius: var(--radius-md);
+}
+
+.large {
+  padding: calc(var(--spacing) * 8);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+  background-color: var(--color-bg-mute);
+  border-radius: var(--radius-md);
+}
+
+.frame {
+  width: 100%;
+}

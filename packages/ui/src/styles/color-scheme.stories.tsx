@@ -1,12 +1,15 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { clsx } from 'clsx';
 import { expect } from 'storybook/test';
+
+import styles from './color-scheme.stories.module.css';
 
 const meta: Meta = {
   title: 'styles/color-scheme',
   render: () => (
-    <div className="flex flex-col gap-4">
+    <div className={styles.column}>
       <p className="light:underline">ページの配色に従う</p>
-      <div className="dark bg-bg-base text-fg-base rounded-xl p-4">
+      <div className={clsx('dark', styles.island)}>
         <p className="light:underline">.dark を付けた領域</p>
       </div>
     </div>

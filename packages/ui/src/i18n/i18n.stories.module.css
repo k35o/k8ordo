@@ -1,0 +1,6 @@
+.sample {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: calc(var(--spacing) * 4);
+}

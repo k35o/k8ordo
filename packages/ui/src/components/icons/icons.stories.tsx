@@ -58,6 +58,8 @@ import { QiitaIcon } from './qiita';
 import { TwitterIcon } from './twitter';
 import { VerticalWritingIcon } from './vertical-writing';
 
+import styles from './icons.stories.module.css';
+
 const meta: Meta<typeof SVGAElement> = {
   title: 'components/icons',
 };
@@ -69,11 +71,11 @@ const sizes = ['xs', 'sm', 'md', 'lg', 'xl', '2xl', '3xl'] as const;
 
 export const Sizes: Story = {
   render: () => (
-    <div className="flex items-end gap-6">
+    <div className={styles.sizes}>
       {sizes.map((size) => (
-        <div key={size} className="flex flex-col items-center gap-2">
+        <div key={size} className={styles.size}>
           <CheckIcon size={size} />
-          <p className="text-fg-mute text-sm">{size}</p>
+          <p className={styles.sizeLabel}>{size}</p>
         </div>
       ))}
     </div>
@@ -92,242 +94,242 @@ export const Sizes: Story = {
 
 export const Primary: Story = {
   render: () => (
-    <div className="grid-cols-auto-fit-36 grid place-items-center gap-4">
-      <div className="flex flex-col items-center justify-center">
+    <div className={styles.gallery}>
+      <div className={styles.icon}>
         <LogoIcon />
-        <p className="text-center">Logo</p>
+        <p className={styles.name}>Logo</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <CloseIcon />
-        <p className="text-center">Close</p>
+        <p className={styles.name}>Close</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <CodeXmlIcon />
-        <p className="text-center">CodeXml</p>
+        <p className={styles.name}>CodeXml</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <ChevronIcon direction="left" />
-        <p className="text-center">Chevron Left</p>
+        <p className={styles.name}>Chevron Left</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <ChevronIcon direction="up" />
-        <p className="text-center">Chevron Up</p>
+        <p className={styles.name}>Chevron Up</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <ChevronIcon direction="right" />
-        <p className="text-center">Chevron Right</p>
+        <p className={styles.name}>Chevron Right</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <ChevronIcon direction="down" />
-        <p className="text-center">Chevron Down</p>
+        <p className={styles.name}>Chevron Down</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <CheckIcon />
-        <p className="text-center">Check</p>
+        <p className={styles.name}>Check</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <AlertIcon status="info" />
-        <p className="text-center">Info</p>
+        <p className={styles.name}>Info</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <AlertIcon status="success" />
-        <p className="text-center">Success</p>
+        <p className={styles.name}>Success</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <AlertIcon status="warning" />
-        <p className="text-center">Warning</p>
+        <p className={styles.name}>Warning</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <AlertIcon status="error" />
-        <p className="text-center">Error</p>
+        <p className={styles.name}>Error</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <LinkIcon />
-        <p className="text-center">Link</p>
+        <p className={styles.name}>Link</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <ExternalLinkIcon />
-        <p className="text-center">External Link</p>
+        <p className={styles.name}>External Link</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <BlogIcon />
-        <p className="text-center">Blog</p>
+        <p className={styles.name}>Blog</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <HorizontalWritingIcon />
-        <p className="text-center">横書き</p>
+        <p className={styles.name}>横書き</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <VerticalWritingIcon />
-        <p className="text-center">縦書き</p>
+        <p className={styles.name}>縦書き</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <SlideIcon />
-        <p className="text-center">Slide</p>
+        <p className={styles.name}>Slide</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <TagIcon />
-        <p className="text-center">Tag</p>
+        <p className={styles.name}>Tag</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <LocationIcon />
-        <p className="text-center">Location</p>
+        <p className={styles.name}>Location</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <FormIcon />
-        <p className="text-center">Form</p>
+        <p className={styles.name}>Form</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <TableIcon />
-        <p className="text-center">Table</p>
+        <p className={styles.name}>Table</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <ListIcon />
-        <p className="text-center">List</p>
+        <p className={styles.name}>List</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <SquircleIcon />
-        <p className="text-center">Squircle</p>
+        <p className={styles.name}>Squircle</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <FlaskIcon />
-        <p className="text-center">Flask</p>
+        <p className={styles.name}>Flask</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <PackageIcon />
-        <p className="text-center">Package</p>
+        <p className={styles.name}>Package</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <NavigationMenuIcon />
-        <p className="text-center">Navigation Menu</p>
+        <p className={styles.name}>Navigation Menu</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <CopyIcon />
-        <p className="text-center">Copy</p>
+        <p className={styles.name}>Copy</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <PublishDateIcon />
-        <p className="text-center">公開日時</p>
+        <p className={styles.name}>公開日時</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <UpdateDateIcon />
-        <p className="text-center">更新日時</p>
+        <p className={styles.name}>更新日時</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <SendIcon />
-        <p className="text-center">送信</p>
+        <p className={styles.name}>送信</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <HistoryIcon />
-        <p className="text-center">履歴</p>
+        <p className={styles.name}>履歴</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <RefreshIcon />
-        <p className="text-center">再読み込み</p>
+        <p className={styles.name}>再読み込み</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <MailIcon />
-        <p className="text-center">メール</p>
+        <p className={styles.name}>メール</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <PlusIcon />
-        <p className="text-center">プラス</p>
+        <p className={styles.name}>プラス</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <MinusIcon />
-        <p className="text-center">マイナス</p>
+        <p className={styles.name}>マイナス</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <GoodIcon />
-        <p className="text-center">良い</p>
+        <p className={styles.name}>良い</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <BadIcon />
-        <p className="text-center">悪い</p>
+        <p className={styles.name}>悪い</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <InformativeIcon />
-        <p className="text-center">有益</p>
+        <p className={styles.name}>有益</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <ShallowIcon />
-        <p className="text-center">浅い</p>
+        <p className={styles.name}>浅い</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <InterestingIcon />
-        <p className="text-center">面白い</p>
+        <p className={styles.name}>面白い</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <BoringIcon />
-        <p className="text-center">退屈</p>
+        <p className={styles.name}>退屈</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <EasyIcon />
-        <p className="text-center">簡単</p>
+        <p className={styles.name}>簡単</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <DifficultIcon />
-        <p className="text-center">難解</p>
+        <p className={styles.name}>難解</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <LightModeIcon />
-        <p className="text-center">ライトモード</p>
+        <p className={styles.name}>ライトモード</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <DarkModeIcon />
-        <p className="text-center">ダークモード</p>
+        <p className={styles.name}>ダークモード</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <ViewIcon />
-        <p className="text-center">閲覧数</p>
+        <p className={styles.name}>閲覧数</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <NewsIcon />
-        <p className="text-center">お知らせ</p>
+        <p className={styles.name}>お知らせ</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <SubscribeIcon />
-        <p className="text-center">メールの購読</p>
+        <p className={styles.name}>メールの購読</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <ColorInfoIcon />
-        <p className="text-center">色についての情報</p>
+        <p className={styles.name}>色についての情報</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <ColorContrastIcon />
-        <p className="text-center">コントラスト</p>
+        <p className={styles.name}>コントラスト</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <ColorScaleIcon />
-        <p className="text-center">色の段階</p>
+        <p className={styles.name}>色の段階</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <MixedColorIcon />
-        <p className="text-center">混ざり合った色</p>
+        <p className={styles.name}>混ざり合った色</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <PrepareIcon />
-        <p className="text-center">準備中</p>
+        <p className={styles.name}>準備中</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <AIIcon />
-        <p className="text-center">AI</p>
+        <p className={styles.name}>AI</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <RSSIcon />
-        <p className="text-center">RSS</p>
+        <p className={styles.name}>RSS</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <GitHubIcon />
-        <p className="text-center">GitHub</p>
+        <p className={styles.name}>GitHub</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <TwitterIcon />
-        <p className="text-center">Twitter</p>
+        <p className={styles.name}>Twitter</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      <div className={styles.icon}>
         <QiitaIcon />
-        <p className="text-center">Qiita</p>
+        <p className={styles.name}>Qiita</p>
       </div>
     </div>
   ),

@@ -1,55 +1,95 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { clsx } from 'clsx';
+
+import styles from './contrast.stories.module.css';
 
 // docs/references/color.md の「Contrast」の表にある組み合わせ。
 // components（ライト）と components-dark の両方で axe に確かめさせる。
-// Tailwind が拾えるよう、クラスはそのままの文字列で書く
 
-type Pair = { text: string; ground: string };
+const TEXT = {
+  'fg-base': styles.fgBase,
+  'fg-mute': styles.fgMute,
+  'fg-subtle': styles.fgSubtle,
+  'fg-info': styles.fgInfo,
+  'fg-success': styles.fgSuccess,
+  'fg-warning': styles.fgWarning,
+  'fg-error': styles.fgError,
+  'primary-fg': styles.primaryFg,
+  'secondary-fg': styles.secondaryFg,
+} as const;
+
+const GROUND = {
+  'bg-base': styles.bgBase,
+  'bg-raised': styles.bgRaised,
+  'bg-surface': styles.bgSurface,
+  'bg-subtle': styles.bgSubtle,
+  'bg-mute': styles.bgMute,
+  'bg-emphasize': styles.bgEmphasize,
+  'bg-info': styles.bgInfo,
+  'bg-success': styles.bgSuccess,
+  'bg-warning': styles.bgWarning,
+  'bg-error': styles.bgError,
+  'primary-bg': styles.primaryBg,
+  'primary-bg-subtle': styles.primaryBgSubtle,
+  'primary-bg-mute': styles.primaryBgMute,
+  'primary-bg-emphasize': styles.primaryBgEmphasize,
+  'secondary-bg': styles.secondaryBg,
+  'secondary-bg-subtle': styles.secondaryBgSubtle,
+  'secondary-bg-mute': styles.secondaryBgMute,
+  'secondary-bg-emphasize': styles.secondaryBgEmphasize,
+} as const;
+
+type Pair = { text: keyof typeof TEXT; ground: keyof typeof GROUND };
 
 const AAA_PAIRS: readonly Pair[] = [
-  ...[
-    'text-fg-base',
-    'text-fg-mute',
-    'text-fg-info',
-    'text-fg-success',
-    'text-fg-warning',
-    'text-fg-error',
-    'text-primary-fg',
-    'text-secondary-fg',
-  ].flatMap((text) =>
-    ['bg-bg-base', 'bg-bg-raised', 'bg-bg-surface', 'bg-bg-subtle'].map(
+  ...(
+    [
+      'fg-base',
+      'fg-mute',
+      'fg-info',
+      'fg-success',
+      'fg-warning',
+      'fg-error',
+      'primary-fg',
+      'secondary-fg',
+    ] as const
+  ).flatMap((text) =>
+    (['bg-base', 'bg-raised', 'bg-surface', 'bg-subtle'] as const).map(
       (ground) => ({ text, ground }),
     ),
   ),
-  { text: 'text-fg-info', ground: 'bg-bg-info' },
-  { text: 'text-fg-warning', ground: 'bg-bg-warning' },
-  { text: 'text-fg-error', ground: 'bg-bg-error' },
-  { text: 'text-primary-fg', ground: 'bg-primary-bg-subtle' },
-  { text: 'text-secondary-fg', ground: 'bg-secondary-bg-subtle' },
-  { text: 'text-fg-base', ground: 'bg-bg-mute' },
+  { text: 'fg-info', ground: 'bg-info' },
+  { text: 'fg-warning', ground: 'bg-warning' },
+  { text: 'fg-error', ground: 'bg-error' },
+  { text: 'primary-fg', ground: 'primary-bg-subtle' },
+  { text: 'secondary-fg', ground: 'secondary-bg-subtle' },
+  { text: 'fg-base', ground: 'bg-mute' },
 ];
 
 const AA_PAIRS: readonly Pair[] = [
   // ライトでは 6.9:1 で、ほかのステータスと違って AAA に届かない
-  { text: 'text-fg-success', ground: 'bg-bg-success' },
-  { text: 'text-fg-mute', ground: 'bg-bg-mute' },
-  { text: 'text-fg-base', ground: 'bg-bg-emphasize' },
-  ...['bg-bg-base', 'bg-bg-raised', 'bg-bg-surface', 'bg-bg-subtle'].map(
-    (ground) => ({ text: 'text-fg-subtle', ground }),
+  { text: 'fg-success', ground: 'bg-success' },
+  { text: 'fg-mute', ground: 'bg-mute' },
+  { text: 'fg-base', ground: 'bg-emphasize' },
+  ...(['bg-base', 'bg-raised', 'bg-surface', 'bg-subtle'] as const).map(
+    (ground) => ({ text: 'fg-subtle' as const, ground }),
   ),
-  { text: 'text-primary-fg', ground: 'bg-primary-bg' },
-  { text: 'text-primary-fg', ground: 'bg-primary-bg-mute' },
-  { text: 'text-primary-fg', ground: 'bg-primary-bg-emphasize' },
-  { text: 'text-secondary-fg', ground: 'bg-secondary-bg' },
-  { text: 'text-secondary-fg', ground: 'bg-secondary-bg-mute' },
-  { text: 'text-secondary-fg', ground: 'bg-secondary-bg-emphasize' },
+  { text: 'primary-fg', ground: 'primary-bg' },
+  { text: 'primary-fg', ground: 'primary-bg-mute' },
+  { text: 'primary-fg', ground: 'primary-bg-emphasize' },
+  { text: 'secondary-fg', ground: 'secondary-bg' },
+  { text: 'secondary-fg', ground: 'secondary-bg-mute' },
+  { text: 'secondary-fg', ground: 'secondary-bg-emphasize' },
 ];
 
 const Pairs = ({ pairs }: { pairs: readonly Pair[] }) => (
-  <div className="flex flex-col gap-1">
+  <div className={styles.pairs}>
     {pairs.map(({ text, ground }) => (
-      <p className={`${text} ${ground} px-3 py-1`} key={`${text} ${ground}`}>
-        {text.replace('text-', '')} on {ground.replace('bg-', '')}
+      <p
+        className={clsx(styles.pair, TEXT[text], GROUND[ground])}
+        key={`${text} ${ground}`}
+      >
+        {text} on {ground}
       </p>
     ))}
   </div>

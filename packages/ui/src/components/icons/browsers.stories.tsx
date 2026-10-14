@@ -4,6 +4,8 @@ import { expect } from 'storybook/test';
 
 import { ChromeIcon, EdgeIcon, FirefoxIcon, SafariIcon } from './browsers';
 
+import styles from './browsers.stories.module.css';
+
 const meta: Meta<FC> = {
   title: 'components/icons/browsers',
 };
@@ -13,22 +15,22 @@ type Story = StoryObj<FC>;
 
 export const Primary: Story = {
   render: () => (
-    <div className="flex items-end gap-6">
-      <div className="flex flex-col items-center gap-2">
+    <div className={styles.row}>
+      <div className={styles.browser}>
         <ChromeIcon />
-        <p className="text-fg-mute text-sm">Chrome</p>
+        <p className={styles.name}>Chrome</p>
       </div>
-      <div className="flex flex-col items-center gap-2">
+      <div className={styles.browser}>
         <EdgeIcon />
-        <p className="text-fg-mute text-sm">Edge</p>
+        <p className={styles.name}>Edge</p>
       </div>
-      <div className="flex flex-col items-center gap-2">
+      <div className={styles.browser}>
         <FirefoxIcon />
-        <p className="text-fg-mute text-sm">Firefox</p>
+        <p className={styles.name}>Firefox</p>
       </div>
-      <div className="flex flex-col items-center gap-2">
+      <div className={styles.browser}>
         <SafariIcon />
-        <p className="text-fg-mute text-sm">Safari</p>
+        <p className={styles.name}>Safari</p>
       </div>
     </div>
   ),
@@ -48,7 +50,7 @@ export const Primary: Story = {
 // グラデーションの DOM id がインスタンスごとに一意になり、重複しないことを検証する。
 export const UniqueIds: Story = {
   render: () => (
-    <div className="flex gap-6">
+    <div className={styles.icons}>
       <ChromeIcon />
       <ChromeIcon />
       <EdgeIcon />

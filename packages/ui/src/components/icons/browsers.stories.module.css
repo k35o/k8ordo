@@ -1,0 +1,23 @@
+.row {
+  display: flex;
+  align-items: flex-end;
+  gap: calc(var(--spacing) * 6);
+}
+
+.browser {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(var(--spacing) * 2);
+}
+
+.name {
+  color: var(--color-fg-mute);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+}
+
+.icons {
+  display: flex;
+  gap: calc(var(--spacing) * 6);
+}
