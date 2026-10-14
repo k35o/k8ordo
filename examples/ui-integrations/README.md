@@ -151,9 +151,13 @@ The project uses the Vite+ (`vite-plus`) toolchain and `@vitejs/plugin-react`.
 
 ### Tailwind CSS
 
-Tailwind CSS 4 is configured via the `@tailwindcss/vite` plugin. k8ordo UI's tokens
-are loaded by importing `@k8ordo/ui/tailwind.css` — the Tailwind source entry,
-so the design tokens stay usable in this app's own markup. (Projects without
+Tailwind CSS 4 is configured via the `@tailwindcss/vite` plugin.
+`src/styles.css` imports Tailwind, then k8ordo UI's bridge
+(`@k8ordo/ui/tailwind.css`), which maps the design tokens onto Tailwind's
+theme so they stay usable in this app's own markup. The bridge does not import
+Tailwind itself: `@k8ordo/ui` does not depend on `tailwindcss`, the app does.
+`src/tailwind.test.ts` compiles that entry with Tailwind and checks that the
+utilities read the tokens. (Projects without
 Tailwind import the prebuilt `@k8ordo/ui/styles.css` instead — see
 `examples/ui-css-modules`.)
 

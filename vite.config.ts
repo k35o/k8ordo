@@ -55,8 +55,8 @@ export default defineConfig({
     settings: {
       react: { version: '19.3.0' },
       // oxlint-tailwindcss v1 は明示的な Tailwind エントリポイントが必須。
-      // Tailwind で書くのは examples だけで、@k8ordo/ui の tailwind.css（橋）を
-      // そのまま、または取り込んだ globals.css を使う。
+      // Tailwind で書くのは examples だけで、どちらも tailwindcss の後に
+      // @k8ordo/ui の tailwind.css（橋）を読む自分の CSS を入口にする。
       tailwindcss: {
         entryPoint: [
           {
@@ -65,7 +65,7 @@ export default defineConfig({
           },
           {
             files: '**',
-            use: cssEntry('./packages/ui/src/styles/tailwind.css'),
+            use: cssEntry('./examples/ui-integrations/src/styles.css'),
           },
         ],
       },

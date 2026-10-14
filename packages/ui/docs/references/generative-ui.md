@@ -237,5 +237,5 @@ container among their children, so a `Card` can sit inside a `Stack` and a
 | `@k8ordo/ui/openui/prompt`        | server-safe    | `prompt(options?)` (prompt generation)                             |
 
 > All of them assume you have loaded `@k8ordo/ui/styles.css` (or
-> `@k8ordo/ui/tailwind.css` in a Tailwind CSS 4 project) and wrapped the tree in
-> `UIProvider`.
+> `@k8ordo/ui/tailwind.css` after Tailwind, in a Tailwind CSS 4 project) and
+> wrapped the tree in `UIProvider`.

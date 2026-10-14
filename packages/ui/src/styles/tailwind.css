@@ -1,9 +1,14 @@
 /**
  * The bridge for a Tailwind CSS 4 project, published as
- * `@k8ordo/ui/tailwind.css`. One `@import` of it brings in Tailwind, the
- * global stylesheet (`styles.css`), and a theme whose utilities read the tokens:
- * `bg-bg-base` is `var(--color-bg-base)`, `text-md` is `var(--font-size-md)`
- * with `var(--line-height-md)`.
+ * `@k8ordo/ui/tailwind.css`. It is imported after the project's own Tailwind:
+ *
+ *   @import 'tailwindcss';
+ *   @import '@k8ordo/ui/tailwind.css';
+ *
+ * It brings in the global stylesheet (`styles.css`) and a theme whose
+ * utilities read the tokens: `bg-bg-base` is `var(--color-bg-base)`, `text-md`
+ * is `var(--font-size-md)` with `var(--line-height-md)`. It does not import
+ * Tailwind itself, so this package does not depend on it.
  *
  * The theme is `reference`, so it declares no variables of its own: the
  * tokens come from `styles.css`, and a utility reads them where it applies,
@@ -11,7 +16,6 @@
  * cannot read a custom property.
  */
 
-@import 'tailwindcss';
 @import './index.css';
 
 @theme inline reference {

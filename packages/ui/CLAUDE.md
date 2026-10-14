@@ -379,7 +379,7 @@ The stylesheet follows `prefers-contrast: more` and `forced-colors: active`; `@k
 
 ### The Tailwind bridge
 
-`src/styles/tailwind.css` (published as `./tailwind.css`) is for consumers using Tailwind CSS 4: it imports `tailwindcss` and `index.css`, maps Tailwind's theme namespaces onto the tokens with `@theme inline reference` (so `bg-bg-base` reads `var(--color-bg-base)` and the theme declares no variables of its own), and keeps the `dark:` / `light:` / `vertical:` variants and the `grid-cols-auto-fill-*`, `writing-*`, `z-overlay|modal|toast` utilities. `src/styles/tailwind.test.ts` compiles it. Add a token to `tokens.css`, and a color token also needs its line in the bridge (the test fails until it has one).
+`src/styles/tailwind.css` (published as `./tailwind.css`) is for consumers using Tailwind CSS 4, who import it after their own `@import 'tailwindcss'`: it imports `index.css`, maps Tailwind's theme namespaces onto the tokens with `@theme inline reference` (so `bg-bg-base` reads `var(--color-bg-base)` and the theme declares no variables of its own), and keeps the `dark:` / `light:` / `vertical:` variants and the `grid-cols-auto-fill-*`, `writing-*`, `z-overlay|modal|toast` utilities. It never imports `tailwindcss`, and the package does not depend on it, not even as a dev dependency: the bridge is compiled and checked where Tailwind is, by `examples/ui-integrations/src/tailwind.test.ts`, against the built `dist/` and the DTCG `./tokens`. Add a token to `tokens.css`, and a color token also needs its line in the bridge (that test fails until it has one).
 
 ## Testing
 
@@ -423,5 +423,5 @@ The authoritative list is the `exports` map in `package.json`.
 @k8ordo/ui/tokens              design tokens as a DTCG resolver document
 @k8ordo/ui/props.json          machine-readable component props (docs/props.generated.json)
 @k8ordo/ui/styles.css          layer order, tokens, reset and base (each component imports its own CSS)
-@k8ordo/ui/tailwind.css        Tailwind CSS 4 bridge (tailwindcss + styles.css + utilities for the tokens)
+@k8ordo/ui/tailwind.css        Tailwind CSS 4 bridge, imported after tailwindcss (styles.css + utilities for the tokens)
 ```

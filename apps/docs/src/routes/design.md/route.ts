@@ -335,7 +335,7 @@ OS の \`prefers-contrast: more\` と \`forced-colors: active\` にはライブ�
     `## コンポーネント
 
 \`@k8ordo/ui\` から名前付きエクスポート。スタイルシートとプロバイダーが必要。
-\`styles.css\` を 1 回読み込む（部品の CSS は部品が自分で読み込む）。Tailwind CSS 4 のプロジェクトは代わりに \`tailwind.css\` を読み込むと、トークンを自分のマークアップのクラスとしても使える:
+\`styles.css\` を 1 回読み込む（部品の CSS は部品が自分で読み込む）。Tailwind CSS 4 のプロジェクトは代わりに \`tailwindcss\` の後に \`tailwind.css\` を読み込むと、トークンを自分のマークアップのクラスとしても使える（\`@k8ordo/ui\` は Tailwind に依存しない）:
 
 \`\`\`tsx
 import '@k8ordo/ui/styles.css';
@@ -447,8 +447,8 @@ npm install @k8ordo/ui
 \`\`\`tsx
 // トークン、リセット、レイヤーの順。部品の CSS は部品が自分で読み込む
 import '@k8ordo/ui/styles.css';
-// Tailwind CSS 4 のプロジェクトは代わりにこちら（トークンを自分のマークアップのクラスとしても使える）
-// import '@k8ordo/ui/tailwind.css';
+// Tailwind CSS 4 のプロジェクトは代わりに、CSS で @import 'tailwindcss'; の後に
+// @import '@k8ordo/ui/tailwind.css'; を書く（トークンを自分のマークアップのクラスとしても使える）
 import { UIProvider } from '@k8ordo/ui';
 \`\`\`
 

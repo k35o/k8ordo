@@ -2,18 +2,17 @@ import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 
+import { tokens } from '@k8ordo/ui/tokens';
 import { compile } from 'tailwindcss';
 import { beforeAll, describe, expect, it } from 'vite-plus/test';
 
-const stylesDir = import.meta.dirname;
 const require = createRequire(import.meta.url);
 
-// 利用者の Tailwind と同じく、橋の @import をたどってから候補のクラスを組む
+// @tailwindcss/vite と同じく、入口の @import をたどってから候補のクラスを組む
 const loadStylesheet = async (id: string, base: string) => {
-  const file =
-    id === 'tailwindcss'
-      ? require.resolve('tailwindcss/index.css')
-      : path.resolve(base, id);
+  const file = id.startsWith('.')
+    ? path.resolve(base, id)
+    : require.resolve(id === 'tailwindcss' ? 'tailwindcss/index.css' : id);
   return {
     path: file,
     base: path.dirname(file),
@@ -24,27 +23,23 @@ const loadStylesheet = async (id: string, base: string) => {
 let build: (candidates: string[]) => string;
 
 beforeAll(async () => {
-  const entry = path.join(stylesDir, 'tailwind.css');
+  const entry = path.join(import.meta.dirname, 'styles.css');
   const compiler = await compile(readFileSync(entry, 'utf8'), {
-    base: stylesDir,
+    base: import.meta.dirname,
     from: entry,
     loadStylesheet,
   });
   build = (candidates) => compiler.build(candidates);
 });
 
-// tokens.css の :root で宣言した、接頭辞が prefix のトークンの名前と値
-const rootTokens = (prefix: string): Array<{ name: string; value: string }> => {
-  const tokens = readFileSync(path.join(stylesDir, 'tokens.css'), 'utf8');
-  const root = tokens.slice(tokens.indexOf(':root {'));
-  return [
-    ...root
-      .slice(0, root.indexOf('\n}'))
-      .matchAll(/^ {2}--([a-z0-9-]+): ([^;]+);/gmu),
-  ].flatMap(([, name = '', value = '']) =>
-    name.startsWith(prefix) ? [{ name: name.slice(prefix.length), value }] : [],
+// :root のトークンのうち、名前が prefix で始まるもの
+const rootTokens = (prefix: string) =>
+  Object.entries(tokens.resolutionOrder[0].sources[0]).flatMap(
+    ([name, token]) =>
+      name.startsWith(prefix)
+        ? [{ name: name.slice(prefix.length), token }]
+        : [],
   );
-};
 
 // 1 つのクラスが出す規則の中身（宣言の並び）を返す
 const ruleOf = (css: string, selector: string): string => {
@@ -53,7 +48,7 @@ const ruleOf = (css: string, selector: string): string => {
   return css.slice(start, css.indexOf('}', start) + 1);
 };
 
-describe('tailwind.css', () => {
+describe('@k8ordo/ui/tailwind.css', () => {
   it('色のユーティリティは --color-* のトークンを読む', () => {
     const css = build(['bg-bg-base', 'text-fg-mute', 'border-primary-border']);
 
@@ -68,7 +63,7 @@ describe('tailwind.css', () => {
     );
   });
 
-  it('tokens.css のすべての色にユーティリティがある', () => {
+  it('すべての色のトークンにユーティリティがある', () => {
     const names = rootTokens('color-').map(({ name }) => name);
     const css = build(names.map((name) => `bg-${name}`));
 
@@ -148,14 +143,17 @@ describe('tailwind.css', () => {
     expect(css).not.toContain('--radius-lg: var(--radius-lg)');
   });
 
-  it('ブレークポイントは tokens.css と同じ幅で書き出す', () => {
-    const breakpoints = rootTokens('breakpoint-');
+  it('ブレークポイントはトークンと同じ幅で書き出す', () => {
+    const breakpoints = rootTokens('breakpoint-').map(({ name, token }) => {
+      const { value, unit } = token.$value as { value: number; unit: string };
+      return { name, width: `${String(value)}${unit}` };
+    });
     const css = build(breakpoints.map(({ name }) => `${name}:flex`));
 
     expect(breakpoints).toHaveLength(5);
     expect(
       breakpoints.filter(
-        ({ value }) => !css.includes(`@media (width >= ${value})`),
+        ({ width }) => !css.includes(`@media (width >= ${width})`),
       ),
     ).toStrictEqual([]);
   });

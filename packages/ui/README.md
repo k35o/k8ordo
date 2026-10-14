@@ -33,22 +33,21 @@ it. Install one when you import the entry it belongs to.
 
 <!-- peers -->
 
-| Package                 | Version         | Required | Needed for                                                                    |
-| ----------------------- | --------------- | -------- | ----------------------------------------------------------------------------- |
-| `react`                 | ≥19.3.0         | yes      | the components and hooks                                                      |
-| `react-dom`             | ≥19.3.0         | yes      | portals and `useFormStatus`                                                   |
-| `@k8ordo/i18n`          | ^1.0.0          | yes      | the locale the components' own wording is read in                             |
-| `typescript`            | ≥7.0.0          | optional | the shipped type declarations                                                 |
-| `@types/react`          | ≥19.3.0         | optional | the shipped type declarations                                                 |
-| `@types/react-dom`      | ≥19.3.0         | optional | the shipped type declarations                                                 |
-| `tailwindcss`           | ≥4.3.3          | optional | the `tailwind.css` entry (see [Imports & Bundle Size](#imports--bundle-size)) |
-| `zod`                   | ^4.4.3          | optional | generative-UI schemas                                                         |
-| `@json-render/core`     | ≥0.21.0 <0.22.0 | optional | `@k8ordo/ui/json-render`                                                      |
-| `@json-render/react`    | ≥0.21.0 <0.22.0 | optional | `@k8ordo/ui/json-render`                                                      |
-| `@openuidev/lang-core`  | ≥0.3.0 <0.4.0   | optional | `@k8ordo/ui/openui`, `@k8ordo/ui/openui/prompt`                               |
-| `@openuidev/react-lang` | ≥0.3.0 <0.4.0   | optional | `@k8ordo/ui/openui`                                                           |
-| `ai`                    | ≥7.0.51         | optional | `@k8ordo/ui/ai-sdk`                                                           |
-| `streamdown`            | ≥2.5.0          | optional | `@k8ordo/ui/ai/response`                                                      |
+| Package                 | Version         | Required | Needed for                                        |
+| ----------------------- | --------------- | -------- | ------------------------------------------------- |
+| `react`                 | ≥19.3.0         | yes      | the components and hooks                          |
+| `react-dom`             | ≥19.3.0         | yes      | portals and `useFormStatus`                       |
+| `@k8ordo/i18n`          | ^1.0.0          | yes      | the locale the components' own wording is read in |
+| `typescript`            | ≥7.0.0          | optional | the shipped type declarations                     |
+| `@types/react`          | ≥19.3.0         | optional | the shipped type declarations                     |
+| `@types/react-dom`      | ≥19.3.0         | optional | the shipped type declarations                     |
+| `zod`                   | ^4.4.3          | optional | generative-UI schemas                             |
+| `@json-render/core`     | ≥0.21.0 <0.22.0 | optional | `@k8ordo/ui/json-render`                          |
+| `@json-render/react`    | ≥0.21.0 <0.22.0 | optional | `@k8ordo/ui/json-render`                          |
+| `@openuidev/lang-core`  | ≥0.3.0 <0.4.0   | optional | `@k8ordo/ui/openui`, `@k8ordo/ui/openui/prompt`   |
+| `@openuidev/react-lang` | ≥0.3.0 <0.4.0   | optional | `@k8ordo/ui/openui`                               |
+| `ai`                    | ≥7.0.51         | optional | `@k8ordo/ui/ai-sdk`                               |
+| `streamdown`            | ≥2.5.0          | optional | `@k8ordo/ui/ai/response`                          |
 
 <!-- /peers -->
 
@@ -59,8 +58,9 @@ framework's own React context, so two copies let every schema check and the
 build pass while the form views throw at render time.
 
 The components need no CSS tooling of their own: they are written in CSS Modules
-and ship compiled CSS, which each component imports. `tailwindcss` is only for
-the optional `tailwind.css` entry.
+and ship compiled CSS, which each component imports. The package does not
+depend on `tailwindcss`, not even for the optional `tailwind.css` entry, which
+reads the Tailwind your project already has.
 
 ## Quick Start
 
@@ -77,12 +77,13 @@ custom properties (`var(--color-fg-mute)`, `calc(var(--spacing) * 6)`, …).
 @import '@k8ordo/ui/styles.css';
 ```
 
-**Using Tailwind CSS 4?** Import the bridge instead. It includes
-`@import 'tailwindcss'` and `styles.css`, and its theme makes the design tokens
+**Using Tailwind CSS 4?** Import the bridge after Tailwind, instead of
+`styles.css`. It includes `styles.css`, and its theme makes the design tokens
 usable as Tailwind classes (`bg-bg-base`, `text-md`, `p-6`, …) in your own
 markup:
 
 ```css
+@import 'tailwindcss';
 @import '@k8ordo/ui/tailwind.css';
 ```
 
@@ -380,22 +381,22 @@ import { Button, Card, Stack } from '@k8ordo/ui';
 
 Optional features live behind dedicated subpath exports:
 
-| Subpath                           | Contents                                                                                |
-| --------------------------------- | --------------------------------------------------------------------------------------- |
-| `@k8ordo/ui`                      | Core UI components, their types, and provider hooks                                     |
-| `@k8ordo/ui/tokens`               | Design tokens as a DTCG resolver document                                               |
-| `@k8ordo/ui/props.json`           | Every component's props as JSON, generated from the types                               |
-| `@k8ordo/ui/i18n`                 | `ja` / `en`, `registerMessages`, `getMessages`, `messageUsage`, and the `Messages` type |
-| `@k8ordo/ui/ai`                   | AI chat components                                                                      |
-| `@k8ordo/ui/ai/response`          | `Response` Markdown renderer (needs optional peer `streamdown`)                         |
-| `@k8ordo/ui/ai-sdk`               | AI SDK adapter (needs optional peer `ai`)                                               |
-| `@k8ordo/ui/code-block`           | `CodeBlock`, highlighted on the server with shiki (Server Component)                    |
-| `@k8ordo/ui/json-render`          | json-render catalog (server-safe)                                                       |
-| `@k8ordo/ui/json-render/registry` | json-render registry (`'use client'`)                                                   |
-| `@k8ordo/ui/openui`               | OpenUI library (`'use client'`)                                                         |
-| `@k8ordo/ui/openui/prompt`        | OpenUI prompt generation (server-safe)                                                  |
-| `@k8ordo/ui/styles.css`           | Layer order, tokens, reset and base (required)                                          |
-| `@k8ordo/ui/tailwind.css`         | Tailwind CSS 4 bridge: Tailwind, `styles.css`, and utilities for the tokens             |
+| Subpath                           | Contents                                                                                  |
+| --------------------------------- | ----------------------------------------------------------------------------------------- |
+| `@k8ordo/ui`                      | Core UI components, their types, and provider hooks                                       |
+| `@k8ordo/ui/tokens`               | Design tokens as a DTCG resolver document                                                 |
+| `@k8ordo/ui/props.json`           | Every component's props as JSON, generated from the types                                 |
+| `@k8ordo/ui/i18n`                 | `ja` / `en`, `registerMessages`, `getMessages`, `messageUsage`, and the `Messages` type   |
+| `@k8ordo/ui/ai`                   | AI chat components                                                                        |
+| `@k8ordo/ui/ai/response`          | `Response` Markdown renderer (needs optional peer `streamdown`)                           |
+| `@k8ordo/ui/ai-sdk`               | AI SDK adapter (needs optional peer `ai`)                                                 |
+| `@k8ordo/ui/code-block`           | `CodeBlock`, highlighted on the server with shiki (Server Component)                      |
+| `@k8ordo/ui/json-render`          | json-render catalog (server-safe)                                                         |
+| `@k8ordo/ui/json-render/registry` | json-render registry (`'use client'`)                                                     |
+| `@k8ordo/ui/openui`               | OpenUI library (`'use client'`)                                                           |
+| `@k8ordo/ui/openui/prompt`        | OpenUI prompt generation (server-safe)                                                    |
+| `@k8ordo/ui/styles.css`           | Layer order, tokens, reset and base (required)                                            |
+| `@k8ordo/ui/tailwind.css`         | Tailwind CSS 4 bridge, imported after Tailwind: `styles.css` and utilities for the tokens |
 
 ## AI Chat Components
 

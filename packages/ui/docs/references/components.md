@@ -3,8 +3,8 @@
 ## Importing
 
 ```tsx
-// The stylesheet (required). In a Tailwind CSS 4 project,
-// import '@k8ordo/ui/tailwind.css' instead
+// The stylesheet (required). In a Tailwind CSS 4 project, a CSS file
+// imports 'tailwindcss' and then '@k8ordo/ui/tailwind.css' instead
 import '@k8ordo/ui/styles.css';
 
 // The provider (once, at the app root)

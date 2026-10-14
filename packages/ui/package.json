@@ -141,7 +141,6 @@
     "storybook-addon-mock-date": "3.2.1",
     "storybook-addon-vrt": "0.4.0",
     "streamdown": "2.7.0",
-    "tailwindcss": "catalog:",
     "typescript": "catalog:",
     "vite": "catalog:",
     "vite-plus": "catalog:",
@@ -161,7 +160,6 @@
     "react": ">=19.3.0",
     "react-dom": ">=19.3.0",
     "streamdown": ">=2.5.0",
-    "tailwindcss": ">=4.3.3",
     "typescript": ">=7.0.0",
     "zod": "^4.4.3"
   },
@@ -188,9 +186,6 @@
       "optional": true
     },
     "streamdown": {
-      "optional": true
-    },
-    "tailwindcss": {
       "optional": true
     },
     "typescript": {

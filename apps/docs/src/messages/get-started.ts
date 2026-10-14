@@ -31,10 +31,8 @@ export const stylesEntry = message({
 });
 
 export const stylesTailwind = message({
-  ja: (version: string) =>
-    `Tailwind CSS ${version}以上のプロジェクトでは、代わりに\`tailwind.css\`を読み込みます。デザイントークンが\`bg-bg-base\`のようなTailwindのクラスになり、自分のマークアップでも使えます。`,
-  en: (version) =>
-    `A project on Tailwind CSS ${version} or later imports \`tailwind.css\` instead. The design tokens then become Tailwind classes such as \`bg-bg-base\`, usable in your own markup too.`,
+  ja: 'Tailwind CSS 4のプロジェクトでは、代わりに`tailwindcss`の後に`tailwind.css`を読み込みます。デザイントークンが`bg-bg-base`のようなTailwindのクラスになり、自分のマークアップでも使えます。`tailwind.css`はプロジェクトのTailwindの上で働くので、`@k8ordo/ui`はTailwindに依存しません。',
+  en: 'A project on Tailwind CSS 4 imports `tailwind.css` after `tailwindcss` instead. The design tokens then become Tailwind classes such as `bg-bg-base`, usable in your own markup too. `tailwind.css` works on top of your project’s own Tailwind, so `@k8ordo/ui` does not depend on it.',
 });
 
 export const stylesDarkBefore = message({

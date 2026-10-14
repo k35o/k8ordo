@@ -85,13 +85,15 @@ own modules.
 
 ### Tailwind CSS 4
 
-In a Tailwind CSS 4 project, import `tailwind.css` instead of `styles.css`. It
-brings in Tailwind and `styles.css`, and a theme whose utilities read the
+In a Tailwind CSS 4 project, import `tailwind.css` after Tailwind, instead of
+`styles.css`. It brings in `styles.css` and a theme whose utilities read the
 tokens: `bg-bg-base` is `var(--color-bg-base)`, `text-md` is
 `var(--font-size-md)` with its line height, `p-6` is `calc(var(--spacing) * 6)`.
-One line is enough for your project's CSS:
+It does not import Tailwind itself, so `@k8ordo/ui` does not depend on
+`tailwindcss`; your project's own Tailwind comes first:
 
 ```css
+@import 'tailwindcss';
 @import '@k8ordo/ui/tailwind.css';
 ```
 

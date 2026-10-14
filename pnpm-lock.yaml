@@ -519,6 +519,9 @@ importers:
         specifier: 'catalog:'
         version: 4.6.5
     devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.19.1
       '@types/react':
         specifier: 'catalog:'
         version: 19.3.0
@@ -1036,9 +1039,6 @@ importers:
       streamdown:
         specifier: 2.7.0
         version: 2.7.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(supports-color@10.2.2)
-      tailwindcss:
-        specifier: 'catalog:'
-        version: 4.3.3
       typescript:
         specifier: 'catalog:'
         version: 7.0.2
