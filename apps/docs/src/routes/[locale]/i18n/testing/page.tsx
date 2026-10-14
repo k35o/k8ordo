@@ -1,5 +1,5 @@
-import { CodeBlock } from '@k8ordo/ui/code-block';
 
+import { CodeBlock } from '../../../../components/code-block';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { Rich } from '../../../../components/rich';
 import * as m from '../../../../messages';

@@ -7,9 +7,9 @@
     "dev": "pnpm generate:docs && vp dev",
     "build": "pnpm generate:docs && vp build",
     "generate:docs": "node scripts/copy-reference-docs.ts",
-    "typecheck": "tsc -b",
-    "check": "vp check",
-    "check:write": "vp check --fix"
+    "typecheck": "better-css-modules generate && tsc -b",
+    "check": "better-css-modules generate && vp check && better-css-modules check",
+    "check:write": "better-css-modules generate && vp check --fix"
   },
   "dependencies": {
     "@fontsource-variable/m-plus-2": "5.3.0",

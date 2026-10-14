@@ -1,6 +1,6 @@
 import { formFields } from '@k8ordo/form/server';
-import { CodeBlock } from '@k8ordo/ui/code-block';
 
+import { CodeBlock } from '../../../components/code-block';
 import { LandingClaim, LandingHero } from '../../../components/landing';
 import { Playground } from '../../../components/playground';
 import { demoState } from '../../../demos/form/demo-state';

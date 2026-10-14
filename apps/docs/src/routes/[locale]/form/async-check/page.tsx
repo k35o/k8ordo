@@ -1,6 +1,6 @@
 import { formFields } from '@k8ordo/form/server';
-import { CodeBlock } from '@k8ordo/ui/code-block';
 
+import { CodeBlock } from '../../../../components/code-block';
 import { Note } from '../../../../components/callout';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { Playground } from '../../../../components/playground';

@@ -1,9 +1,9 @@
 import type { Message } from '@k8ordo/i18n';
 import { Code, Prose } from '@k8ordo/ui';
-import { CodeBlock } from '@k8ordo/ui/code-block';
 import type { ReactNode } from 'react';
 
 import * as m from '../messages';
+import { CodeBlock } from './code-block';
 import { Rich } from './rich';
 
 type Param = { name: string; type: string; description: Message };

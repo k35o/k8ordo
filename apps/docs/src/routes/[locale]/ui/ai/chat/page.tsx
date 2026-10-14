@@ -1,6 +1,6 @@
 import { Heading, Separator } from '@k8ordo/ui';
-import { CodeBlock } from '@k8ordo/ui/code-block';
 
+import { CodeBlock } from '../../../../../components/code-block';
 import { Note } from '../../../../../components/callout';
 import { ComponentPreview } from '../../../../../components/component-preview';
 import {

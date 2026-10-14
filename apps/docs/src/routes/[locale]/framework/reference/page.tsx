@@ -1,6 +1,6 @@
 import type { Message } from '@k8ordo/i18n';
-import { CodeBlock } from '@k8ordo/ui/code-block';
 
+import { CodeBlock } from '../../../../components/code-block';
 import { ApiEntry } from '../../../../components/api-entry';
 import {
   DocPage,

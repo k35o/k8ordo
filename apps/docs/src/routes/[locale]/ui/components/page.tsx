@@ -1,6 +1,6 @@
 import { Heading } from '@k8ordo/ui';
-import { CodeBlock } from '@k8ordo/ui/code-block';
 
+import { CodeBlock } from '../../../../components/code-block';
 import { ComponentCatalog } from '../../../../components/component-catalog';
 import { PageTitle } from '../../../../components/page-title';
 import { Rich } from '../../../../components/rich';

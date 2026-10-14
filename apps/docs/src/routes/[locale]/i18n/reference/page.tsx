@@ -1,5 +1,5 @@
-import { CodeBlock } from '@k8ordo/ui/code-block';
 
+import { CodeBlock } from '../../../../components/code-block';
 import { ApiEntry } from '../../../../components/api-entry';
 import { DocPage } from '../../../../components/doc-page';
 import * as m from '../../../../messages';

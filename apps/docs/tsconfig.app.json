@@ -22,7 +22,10 @@
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+
+    /* better-css-modules generate が __generated__ に書く .module.css の型 */
+    "rootDirs": [".", "./__generated__"]
   },
-  "include": ["src", ".k8ordo/**/*.ts"]
+  "include": ["src", ".k8ordo/**/*.ts", "__generated__"]
 }

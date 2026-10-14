@@ -1,7 +1,6 @@
-import { CodeBlock } from '@k8ordo/ui/code-block';
-
 import { nodeOf, peersOf } from '../data/peers';
 import * as m from '../messages';
+import { CodeBlock } from './code-block';
 import { InstallTabs } from './install-tabs';
 import { Rich } from './rich';
 

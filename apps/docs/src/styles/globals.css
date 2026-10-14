@@ -35,14 +35,6 @@
   --color-page: light-dark(var(--color-bg-base), var(--color-bg-surface));
 }
 
-/*
- * CodeBlock の面は bg-surface で、ダークではページの地と同じ色になる。サイト
- * では部品を見せるほかの面と同じく、枠線で区切る。
- */
-.ao-code-block {
-  border: 1px solid var(--color-border-mute);
-}
-
 @layer base {
   body {
     font-family: var(--font-family-noto-sans-jp);

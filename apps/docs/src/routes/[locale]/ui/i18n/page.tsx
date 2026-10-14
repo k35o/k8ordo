@@ -1,8 +1,8 @@
 import { Code } from '@k8ordo/ui';
-import { CodeBlock } from '@k8ordo/ui/code-block';
 import { en, ja, messageUsage } from '@k8ordo/ui/i18n';
 import type { Messages } from '@k8ordo/ui/i18n';
 
+import { CodeBlock } from '../../../../components/code-block';
 import { Pitfall } from '../../../../components/callout';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
