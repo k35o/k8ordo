@@ -35,8 +35,9 @@ its own.
   the catalog in `references/components.md`. Never conclude a component is
   missing without reading that list.
 - **Never write raw values**: colors, spacing, radii, and font weights all go
-  through semantic tokens. Non-token values such as `bg-teal-500` or
-  `font-semibold` are out.
+  through the semantic tokens (`var(--color-fg-mute)`,
+  `calc(var(--spacing) * 6)`). Raw values and the palette (`--teal-500`) are
+  out; `better-css-modules check` reports them in CSS Modules.
 - **Verify in Storybook**: real behavior is at
   <https://main--687a213c85e2e4589d8db1bb.chromatic.com> (its MCP endpoint is
   the same URL plus `/mcp`). Do not write props from memory.
