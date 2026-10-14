@@ -8,7 +8,7 @@
 
 type SegParam<Segment extends string> = Segment extends `:${infer Name}`
   ? Record<Name, string>
-  : Record<never, never>;
+  : object;
 
 type SegListParams<Rest extends string> =
   Rest extends `${infer Segment}/${infer Tail}`
@@ -18,7 +18,7 @@ type SegListParams<Rest extends string> =
 /** `'/:locale/products/:id'` → `{ locale: string; id: string }` */
 export type ParamsOf<Pattern extends string> = Pattern extends `/${infer Rest}`
   ? SegListParams<Rest>
-  : Record<never, never>;
+  : object;
 
 /**
  * The shape every validation library agrees on (Standard Schema): a value
@@ -48,7 +48,7 @@ export type ParamsSchemaFor<Pattern extends string> = StandardSchemaLike<
 type MergedOutput<Schemas extends readonly unknown[]> =
   Schemas extends readonly [infer Head, ...infer Tail]
     ? Omit<MergedOutput<Tail>, keyof SchemaOutput<Head>> & SchemaOutput<Head>
-    : Record<never, never>;
+    : object;
 
 /**
  * A pattern's params after the schemas along its stack have run — outer

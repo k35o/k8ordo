@@ -102,7 +102,7 @@ export type RegisteredPageParams<P extends string> = Register extends {
  */
 type RequestProps = Register extends { request: infer R }
   ? { readonly request: R }
-  : Record<never, never>;
+  : object;
 
 /**
  * The search a page receives — only a page that declared what it reads, by
@@ -111,11 +111,9 @@ type RequestProps = Register extends { request: infer R }
  */
 type SearchProps<P extends string> = P extends keyof RegisteredSearch
   ? { readonly search: RegisteredSearch[P] }
-  : Record<never, never>;
+  : object;
 
-type RegisteredSearch = Register extends { search: infer M }
-  ? M
-  : Record<never, never>;
+type RegisteredSearch = Register extends { search: infer M } ? M : object;
 
 /**
  * The props a `page.tsx` receives under the framework, by the pattern its
