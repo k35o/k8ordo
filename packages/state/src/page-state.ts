@@ -10,7 +10,8 @@ import type { UrlCodec, UrlInput } from './url/codec';
 
 export type OutputOf<Schema> = Schema extends StateSchema
   ? output<Schema>
-  : Record<never, never>;
+  : // oxlint-disable-next-line typescript/no-generated-empty-object-type -- スキーマの無い側は交差で消え、Record<string, unknown> を受ける実装にも渡せるキーの無い型が要る。object では後者が通らない
+    Record<never, never>;
 
 export type PageState<
   Url extends StateSchema | undefined = StateSchema | undefined,

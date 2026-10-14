@@ -122,7 +122,7 @@ What it sets, tuned for Japanese:
 - Headings in `--font-weight-bold`, `--line-height-snug`, with
   `text-wrap: balance` and proportional kana (`font-feature-settings: 'palt'`).
 - `strong` in `--font-weight-bold`. `em` as emphasis dots (傍点, `text-emphasis: filled
-sesame`) where the text is Japanese (`:lang(ja)`), and italic elsewhere.
+  sesame`) where the text is Japanese (`:lang(ja)`), and italic elsewhere.
 - Links, inline code, `kbd`, and `pre` drawn like `Anchor`, `Code`, `Kbd`, and a
   code block; lists with their markers back; quotes, tables, rules, images,
   and GFM footnotes and task lists (the footnotes' `sr-only` heading is

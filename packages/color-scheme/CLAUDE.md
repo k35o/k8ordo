@@ -33,7 +33,7 @@ pnpm check         # check:write to auto-fix
   told otherwise — so a visitor who never chose is never pinned to what the
   system said on their first visit.
 - **One rule, two readers.** `resolve(preference, defaultPreference,
-systemDark)` is the rule; the provider reads it after hydration and
+  systemDark)` is the rule; the provider reads it after hydration and
   `scriptFor(defaultPreference)` restates it in the inline script for the
   first paint. The script cannot run the schema, so it checks the value by
   hand and reads anything else as nothing chosen — keep the two in step.

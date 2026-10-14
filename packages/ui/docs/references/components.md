@@ -6,13 +6,10 @@
 // The stylesheet (required). In a Tailwind CSS 4 project, a CSS file
 // imports 'tailwindcss' and then '@k8ordo/ui/tailwind.css' instead
 import '@k8ordo/ui/styles.css';
-
 // The provider (once, at the app root)
 import { UIProvider } from '@k8ordo/ui';
-
 // Components (all from the root entry)
 import { Button, Card, TextField } from '@k8ordo/ui';
-
 // Except CodeBlock, which highlights on the server and has its own entry
 import { CodeBlock } from '@k8ordo/ui/code-block';
 ```

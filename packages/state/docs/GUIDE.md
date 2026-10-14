@@ -305,6 +305,7 @@ them, so the default never flashes.
 ```tsx
 // src/routes/layout.tsx — server mode
 import type { LayoutProps } from '@k8ordo/framework';
+
 import { Shell } from '../components/shell';
 import { density } from '../state';
 
@@ -320,9 +321,10 @@ export default function Layout({ request, children }: LayoutProps<'/'>) {
 ```tsx
 // src/components/shell.tsx
 'use client';
-import type { ReactNode } from 'react';
 import { useAppState } from '@k8ordo/state';
 import type { OutputOf } from '@k8ordo/state';
+import type { ReactNode } from 'react';
+
 import { density } from '../state';
 
 type ShellProps = {
@@ -387,6 +389,7 @@ values in through the `change` event.
 // src/lib/actions.ts
 'use server';
 import { cookies } from '@k8ordo/framework/server';
+
 import { density } from '../state';
 
 export async function compact() {
@@ -409,6 +412,7 @@ the value through `encodeURIComponent` yourself — once.
 // src/components/filters.tsx
 'use client';
 import { useAppState } from '@k8ordo/state';
+
 import { listState, prefs } from '../state';
 
 export function Filters({ initialUrl }: FiltersProps) {

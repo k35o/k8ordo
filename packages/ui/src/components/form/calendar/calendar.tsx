@@ -9,6 +9,7 @@ import {
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
 } from 'react';
 import type { FC, KeyboardEvent } from 'react';
 import { browser } from 'react-dom';
@@ -28,6 +29,7 @@ import {
   monthWeeks,
   startOfMonth,
   startOfWeek,
+  subscribeToDateChange,
 } from '../../../internal/iso-date';
 import { IconButton } from '../../buttons/icon-button';
 import { ChevronIcon } from '../../icons';
@@ -58,6 +60,8 @@ export const Calendar: FC<Props> = (props) => (
 
 const orUndefined = (value: string | undefined): string | undefined =>
   value !== undefined && isIsoDate(value) ? value : undefined;
+
+const readToday = () => localToday(new Date());
 
 const CalendarBody: FC<Props> = ({
   value,
@@ -111,7 +115,8 @@ const CalendarBody: FC<Props> = ({
 
   const min = orUndefined(minProp);
   const max = orUndefined(maxProp);
-  const today = localToday(new Date());
+  // 今日は時計という外部の値なので、描画の中で読み捨てずに購読し、日付が変わったら描き直す
+  const today = useSyncExternalStore(subscribeToDateChange, readToday);
   const [selected, setSelected] = useControllableState<string | null>({
     value,
     defaultValue: defaultValue ?? null,
