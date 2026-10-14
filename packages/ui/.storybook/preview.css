@@ -1,0 +1,16 @@
+/* Storybook の地。ストーリーを描く面と、その余白 */
+@layer utilities {
+  body {
+    color: var(--color-fg-base);
+    letter-spacing: var(--letter-spacing-none);
+    background-color: var(--color-bg-base);
+    font-weight: var(--font-weight-medium);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .story {
+    min-height: 100svh;
+    padding: calc(var(--spacing) * 6);
+  }
+}
