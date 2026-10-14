@@ -9,6 +9,11 @@ import { playwright } from '@vitest/browser-playwright';
 import { vrt } from 'storybook-addon-vrt/vitest-plugin';
 import { defineConfig } from 'vite-plus';
 
+// Lightning CSS が下げて書き換えないよう、新しいブラウザを target にする。
+// 既定の target では :dir() が :lang() の並びに、入れ子が平らに書き換わる。
+// Baseline の newly available をそのまま使う方針なので、下げる先は持たない
+const CSS_TARGET = ['chrome146', 'edge146', 'firefox151', 'safari26'];
+
 // CI はエンジンごとにジョブを分けて並べるので、TEST_BROWSER で 1 つに絞れる
 const browsers = (['chromium', 'firefox', 'webkit'] as const).filter(
   (browser) =>
@@ -87,6 +92,7 @@ export default defineConfig({
   // 部品の CSS Modules は @scope (&) で書く。Vite 既定の postcss-modules は
   // @scope の前置きの & で落ちるので、pack（tsdown）と同じ Lightning CSS で組む
   css: { transformer: 'lightningcss' },
+  build: { cssTarget: CSS_TARGET },
   pack: {
     entry: [
       // styles.css。@import をたどって 1 枚にまとめる
@@ -108,6 +114,7 @@ export default defineConfig({
     copy: [{ from: 'src/styles/tailwind.css', to: 'dist/styles' }],
     plugins: [betterCssModules()],
     css: {
+      target: CSS_TARGET,
       // 各部品の .module.mjs が自分の CSS を import する。利用者は部品を
       // import するだけで、使う部品の CSS だけを読み込む
       inject: true,
