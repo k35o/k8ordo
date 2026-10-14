@@ -4,7 +4,6 @@ import { expect } from 'storybook/test';
 import { Alert } from '../../feedback/alert';
 import { Prose } from './prose';
 
-import srOnly from '../../_internal/sr-only.module.css';
 import styles from './prose.stories.module.css';
 
 const meta: Meta<typeof Prose> = {
@@ -190,7 +189,7 @@ export const GitHubFlavored: Story = {
           。
         </p>
         <section className="footnotes" data-footnotes>
-          <h2 className={srOnly.srOnly} id="footnote-label">
+          <h2 className="sr-only" id="footnote-label">
             脚注
           </h2>
           <ol>

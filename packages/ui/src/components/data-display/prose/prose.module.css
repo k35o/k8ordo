@@ -31,6 +31,21 @@
       margin-block-start: 0;
     }
 
+    /* remark-rehype が脚注の見出しに付けるクラス。画面には出さず、支援技術にだけ
+       読ませる */
+    :global(.sr-only) {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      /* better-css-modules-disable-next-line tokens/spacing -- the 1px box is pulled back by its own size, which is not a step of the scale */
+      margin: -1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+      border-width: 0;
+    }
+
     /* 縦書きの本文は、段落の頭を 1 字下げる（本の組み方） */
     @container style(--writing: vertical) {
       & > p:not([class]) {
