@@ -1,7 +1,8 @@
-
 import { CodeBlock } from '../../../components/code-block';
 import { LandingClaim, LandingHero } from '../../../components/landing';
 import * as m from '../../../messages';
+
+import styles from '../../../styles/pages/i18n.module.css';
 
 const HERO_LOCALES = `import { defineLocales } from '@k8ordo/i18n';
 
@@ -57,7 +58,7 @@ export function Greeting({ name }: { name: string }) {
 
 export default function I18nPage() {
   return (
-    <div className="flex flex-1 flex-col">
+    <div className={styles.root}>
       <LandingHero
         code={
           <>
@@ -83,7 +84,7 @@ export default function I18nPage() {
         body={m.i18n.claimServerBody}
         title={m.i18n.claimServerTitle}
       >
-        <div className="flex flex-col gap-3">
+        <div className={styles.codes}>
           <CodeBlock
             code={CLAIM_SERVER_TITLE}
             lang="tsx"

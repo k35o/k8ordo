@@ -7,6 +7,8 @@ import { demoState } from '../../../demos/form/demo-state';
 import { FormDemo } from '../../../demos/form/form-demo';
 import * as m from '../../../messages';
 
+import styles from '../../../styles/pages/form.module.css';
+
 const HERO_SCHEMA = `export const talkSchema = z.object({
   title: z.string().min(1).max(120),
 });`;
@@ -45,7 +47,7 @@ const demoFields = formFields(demoState.url);
 
 export default function FormPage() {
   return (
-    <div className="flex flex-1 flex-col">
+    <div className={styles.root}>
       <LandingHero
         code={
           <>

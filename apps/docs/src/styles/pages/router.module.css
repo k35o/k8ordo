@@ -1,0 +1,11 @@
+.root {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.codes {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 3);
+}

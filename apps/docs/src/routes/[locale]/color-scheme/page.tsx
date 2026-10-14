@@ -1,9 +1,10 @@
-
 import { CodeBlock } from '../../../components/code-block';
 import { LandingClaim, LandingHero } from '../../../components/landing';
 import { Playground } from '../../../components/playground';
 import { SchemeDemo } from '../../../demos/color-scheme/scheme-demo';
 import * as m from '../../../messages';
+
+import styles from '../../../styles/pages/color-scheme.module.css';
 
 const HERO_LAYOUT = `<html lang="ja" suppressHydrationWarning>
   <body>
@@ -31,7 +32,7 @@ const [{ preference }] = useAppState(colorSchemeState);`;
 
 export default function ColorSchemePage() {
   return (
-    <div className="flex flex-1 flex-col">
+    <div className={styles.root}>
       <LandingHero
         code={
           <>
@@ -65,7 +66,7 @@ export default function ColorSchemePage() {
         body={m.colorScheme.claimCspBody}
         title={m.colorScheme.claimCspTitle}
       >
-        <div className="flex flex-col gap-3">
+        <div className={styles.codes}>
           <CodeBlock
             code={CLAIM_CSP_NONCE}
             lang="tsx"
