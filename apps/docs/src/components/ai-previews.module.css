@@ -1,0 +1,25 @@
+.chat {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 2);
+  width: 100%;
+}
+
+.generative {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--spacing) * 3);
+  width: 100%;
+}
+
+.arrow {
+  color: var(--color-fg-subtle);
+}
+
+.agents {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: calc(var(--spacing) * 1.5);
+}

@@ -1,0 +1,33 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--spacing) * 6);
+  padding: calc(var(--spacing) * 8);
+}
+
+.fill {
+  height: 100%;
+}
+
+.fullScreen {
+  height: 100dvh;
+}
+
+.icon {
+  color: var(--color-fg-error);
+}
+
+.message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(var(--spacing) * 2);
+}
+
+.description {
+  color: var(--color-fg-mute);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+}

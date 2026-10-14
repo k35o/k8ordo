@@ -4,9 +4,11 @@ import { Button, ChevronIcon, Code } from '@k8ordo/ui';
 import { Message } from '@k8ordo/ui/ai';
 import type { ReactNode } from 'react';
 
+import styles from './ai-previews.module.css';
+
 export const aiPreviews: Record<string, ReactNode> = {
   'AI Chat': (
-    <div className="flex w-full flex-col gap-2">
+    <div className={styles.chat}>
       <Message.Root from="user">
         <Message.Content>縦書き対応はある？</Message.Content>
       </Message.Root>
@@ -16,9 +18,9 @@ export const aiPreviews: Record<string, ReactNode> = {
     </div>
   ),
   'Generative UI': (
-    <div className="flex w-full items-center justify-center gap-3">
+    <div className={styles.generative}>
       <Code>{`{ type: 'Button' }`}</Code>
-      <span aria-hidden className="text-fg-subtle">
+      <span aria-hidden className={styles.arrow}>
         <ChevronIcon direction="right" size="sm" />
       </span>
       <Button size="sm" variant="solid">
@@ -27,7 +29,7 @@ export const aiPreviews: Record<string, ReactNode> = {
     </div>
   ),
   'AI Agents': (
-    <div className="flex flex-col items-start gap-1.5">
+    <div className={styles.agents}>
       <Code>docs/GUIDE.md</Code>
       <Code>docs/references/*.md</Code>
       <Code>llms.txt</Code>

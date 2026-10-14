@@ -9,6 +9,8 @@ import * as m from '../messages';
 import { CatalogCard } from './catalog-card';
 import { Rich } from './rich';
 
+import styles from './catalog-sections.module.css';
+
 // 記事の中に置く前提の部品。ページの地の上では溶けるので、白い台で見せる
 const ARTICLE_STAGE: ReadonlySet<string> = new Set(['CodeBlock']);
 
@@ -35,7 +37,7 @@ export function CatalogSections({ categories, previews }: Props) {
 
   return (
     <>
-      <search className="max-w-sm">
+      <search className={styles.search}>
         <TextField
           aria-label={m.catalog.searchPlaceholder()}
           onChange={(e) => {
@@ -46,14 +48,14 @@ export function CatalogSections({ categories, previews }: Props) {
         />
       </search>
       {filtered.length === 0 ? (
-        <p className="text-fg-mute">{m.catalog.noResults()}</p>
+        <p className={styles.empty}>{m.catalog.noResults()}</p>
       ) : (
         filtered.map((category) => (
-          <section className="flex flex-col gap-6" key={category.title()}>
+          <section className={styles.category} key={category.title()}>
             <Heading level="h2">
               <Rich>{category.title()}</Rich>
             </Heading>
-            <div className="grid grid-cols-1 items-start gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className={styles.cards}>
               {category.items.map((item) => (
                 <CatalogCard
                   item={item}

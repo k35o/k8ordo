@@ -1,0 +1,65 @@
+.hero {
+  display: grid;
+  align-items: center;
+  gap: calc(var(--spacing) * 12);
+  padding-top: calc(var(--spacing) * 16);
+  padding-bottom: calc(var(--spacing) * 20);
+
+  @media (width >= 64rem) {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    padding-top: calc(var(--spacing) * 24);
+  }
+}
+
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 6);
+}
+
+.tagline {
+  color: var(--color-fg-base);
+  font-size: var(--font-size-xl);
+  line-height: var(--line-height-relaxed);
+  word-break: auto-phrase;
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(var(--spacing) * 4);
+}
+
+.code {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 3);
+  min-width: 0;
+}
+
+.claim {
+  display: grid;
+  gap: calc(var(--spacing) * 8);
+  padding-block: calc(var(--spacing) * 14);
+
+  @media (width >= 64rem) {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    gap: calc(var(--spacing) * 12);
+  }
+}
+
+.claimText {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 4);
+}
+
+.sentence {
+  color: var(--color-fg-base);
+  line-height: var(--line-height-loose);
+}
+
+.proof {
+  min-width: 0;
+}

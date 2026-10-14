@@ -20,6 +20,8 @@ import { Navigation } from './navigation';
 import { PackageSidebar } from './package-sidebar';
 import type { Catalogs } from './package-sidebar';
 
+import styles from './locale-shell.module.css';
+
 /**
  * 開いているパッケージのドキュメントのページ。ランディング（`/:locale/form`
  * そのもの）は `/*` に合わないので、サイドバーを持たない全幅のページのまま。
@@ -81,14 +83,14 @@ function LayoutContent({
   // ErrorBoundary は無い。
   return (
     <div
-      className="flex flex-1 flex-col"
+      className={styles.layout}
       style={{ '--header-h': `${String(headerHeight)}px` } as CSSProperties}
     >
-      <div className="bg-page sticky top-0 z-30 shrink-0" ref={headerRef}>
+      <div className={styles.header} ref={headerRef}>
         <Navigation />
         {pkg !== undefined && (
-          <div className="border-border-mute bg-page border-b lg:hidden">
-            <div className={`${FRAME} flex items-center gap-2 py-2`}>
+          <div className={styles.drawerBar}>
+            <div className={`${FRAME} ${styles.drawerBarInner}`}>
               <IconButton
                 label={m.sideNav.openNavigation()}
                 onClick={() => {
@@ -97,7 +99,7 @@ function LayoutContent({
               >
                 <ListIcon />
               </IconButton>
-              <span className="text-fg-mute text-sm">{pkg.name}</span>
+              <span className={styles.packageName}>{pkg.name}</span>
             </div>
           </div>
         )}
@@ -106,8 +108,8 @@ function LayoutContent({
         <>
           {/* ホームとランディングの本文は、枠の中でさらに狭い幅に置く。ヘッダーは
               どのページでも同じ枠なので、ページを移っても位置が変わらない */}
-          <main className={`${FRAME} flex-1`}>
-            <div className="mx-auto w-full max-w-6xl">
+          <main className={`${FRAME} ${styles.main}`}>
+            <div className={styles.narrow}>
               <PageTransition>{children}</PageTransition>
             </div>
           </main>
@@ -115,10 +117,10 @@ function LayoutContent({
         </>
       ) : (
         <>
-          <div className={`${FRAME} flex flex-1 gap-8`}>
+          <div className={`${FRAME} ${styles.docs}`}>
             <aside
               aria-label={m.nav.packageNavigation()}
-              className="border-border-mute sticky hidden w-64 shrink-0 self-start overflow-y-auto border-e py-8 pe-4 lg:block"
+              className={styles.sidebar}
               style={{
                 top: `${String(headerHeight)}px`,
                 height: `calc(100dvh - ${String(headerHeight)}px)`,
@@ -126,7 +128,7 @@ function LayoutContent({
             >
               <PackageSidebar catalogs={catalogs} pkg={pkg} />
             </aside>
-            <main className="min-w-0 flex-1">
+            <main className={styles.article}>
               <PageTransition>{children}</PageTransition>
             </main>
           </div>
@@ -191,7 +193,7 @@ export function LocaleShell({
   return (
     <UIProvider>
       <WritingModeProvider>
-        <div className="flex min-h-dvh flex-col">
+        <div className={styles.shell}>
           <LayoutContent componentGroups={componentGroups}>
             {children}
           </LayoutContent>

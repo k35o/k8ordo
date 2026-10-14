@@ -33,6 +33,19 @@
   --color-page: light-dark(var(--color-bg-base), var(--color-bg-surface));
 }
 
+/*
+ * ダークかどうかの目印。モジュールは .dark に届かないので、色ではない出し分け
+ * （どちらか一方の要素だけを描く）は @container style(--scheme: dark) で読む。
+ * --writing と同じく、子へ継ぐカスタムプロパティで伝える。
+ */
+:root {
+  --scheme: light;
+}
+
+.dark {
+  --scheme: dark;
+}
+
 /* 移行中だけ: まだ Tailwind のクラスで描くページのための bg-page */
 @theme inline reference {
   --color-page: var(--color-page);

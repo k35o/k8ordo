@@ -14,6 +14,8 @@ import { PageTitle } from './page-title';
 import { Playground } from './playground';
 import { Rich } from './rich';
 
+import styles from './doc-page.module.css';
+
 type SectionProps = {
   id: string;
   title: Message;
@@ -80,14 +82,14 @@ const PagerCard = ({
   section: PackageSection;
 }) => (
   <a
-    className="border-border-mute hover:bg-bg-mute focus-visible:ring-border-info flex flex-1 flex-col gap-1 rounded-lg border px-5 py-4 transition-colors duration-150 ease-out focus-visible:ring-2 focus-visible:outline-hidden data-[direction=next]:items-end data-[direction=next]:text-end"
+    className={styles.pager}
     data-direction={direction}
     href={href(section.path)}
   >
-    <span className="text-fg-mute text-sm">
+    <span className={styles.pagerDirection}>
       {direction === 'previous' ? m.docPage.previous() : m.docPage.next()}
     </span>
-    <span className="text-fg-base font-bold">{section.label()}</span>
+    <span className={styles.pagerLabel}>{section.label()}</span>
   </a>
 );
 
@@ -109,10 +111,10 @@ export function DocPage({ path, introduction, children }: DocPageProps) {
   const outline = outlineOf(children);
 
   return (
-    <div className="flex gap-10 py-12">
-      <article className="max-w-[46rem] min-w-0 flex-1 [&_[id]]:scroll-mt-[calc(var(--header-h)+1.5rem)]">
+    <div className={styles.page}>
+      <article className={styles.article}>
         <PageTitle name={`${section.label()} — ${pkg.name}`} />
-        <header className="flex flex-col gap-4">
+        <header className={styles.header}>
           <Breadcrumb.List size="sm">
             <Breadcrumb.Item>
               <Breadcrumb.Link href={href(pkg.path)}>
@@ -121,37 +123,34 @@ export function DocPage({ path, introduction, children }: DocPageProps) {
             </Breadcrumb.Item>
             <Breadcrumb.Separator />
             <Breadcrumb.Item>
-              <span className="text-fg-mute">{group.label()}</span>
+              <span className={styles.group}>{group.label()}</span>
             </Breadcrumb.Item>
           </Breadcrumb.List>
           <Heading level="h1">{section.label()}</Heading>
-          <p className="text-fg-base text-lg leading-relaxed">
+          <p className={styles.introduction}>
             <Rich>{introduction()}</Rich>
           </p>
         </header>
         {outline.length > 0 && (
-          <details className="border-border-mute mt-8 rounded-lg border px-4 py-3 xl:hidden">
-            <summary className="text-fg-base cursor-pointer text-sm font-bold">
+          <details className={styles.outline}>
+            <summary className={styles.outlineSummary}>
               {m.docPage.onThisPage()}
             </summary>
-            <div className="mt-3">
+            <div className={styles.outlineBody}>
               <TableOfContents items={outline} label={m.docPage.onThisPage()} />
             </div>
           </details>
         )}
-        <div className="mt-12 flex flex-col gap-12">{children}</div>
-        <footer className="mt-16 flex flex-col gap-6">
-          <nav
-            aria-label={m.docPage.pager()}
-            className="flex flex-col gap-4 sm:flex-row"
-          >
+        <div className={styles.sections}>{children}</div>
+        <footer className={styles.footer}>
+          <nav aria-label={m.docPage.pager()} className={styles.pagers}>
             <PagerCard direction="previous" section={previous} />
             {next !== undefined && (
               <PagerCard direction="next" section={next} />
             )}
           </nav>
           <a
-            className="text-fg-mute hover:text-fg-base text-sm underline-offset-4 hover:underline"
+            className={styles.edit}
             href={sourceOf(path)}
             rel="noopener noreferrer"
             target="_blank"
@@ -161,7 +160,7 @@ export function DocPage({ path, introduction, children }: DocPageProps) {
         </footer>
       </article>
       {outline.length > 0 && (
-        <aside className="sticky top-[calc(var(--header-h)+2.5rem)] hidden max-h-[calc(100dvh-var(--header-h)-5rem)] w-56 shrink-0 self-start overflow-y-auto xl:block">
+        <aside className={styles.toc}>
           <TableOfContents items={outline} label={m.docPage.onThisPage()} />
         </aside>
       )}
@@ -172,10 +171,7 @@ export function DocPage({ path, introduction, children }: DocPageProps) {
 /** A top-level section of a page: a rule, an h2, then its text. */
 export function DocSection({ id, title, children }: SectionProps) {
   return (
-    <section
-      aria-labelledby={id}
-      className="border-border-mute flex flex-col gap-4 border-t pt-10"
-    >
+    <section aria-labelledby={id} className={styles.section}>
       <Heading id={id} level="h2">
         <Rich>{title()}</Rich>
       </Heading>
@@ -187,7 +183,7 @@ export function DocSection({ id, title, children }: SectionProps) {
 /** A subsection inside a `DocSection`: an h3 the contents list under it. */
 export function DocSubsection({ id, title, children }: SectionProps) {
   return (
-    <section aria-labelledby={id} className="mt-8 flex flex-col gap-3">
+    <section aria-labelledby={id} className={styles.subsection}>
       <Heading id={id} level="h3">
         <Rich>{title()}</Rich>
       </Heading>

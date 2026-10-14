@@ -1,0 +1,15 @@
+.toDark {
+  display: contents;
+
+  @container style(--scheme: dark) {
+    display: none;
+  }
+}
+
+.toLight {
+  display: none;
+
+  @container style(--scheme: dark) {
+    display: contents;
+  }
+}

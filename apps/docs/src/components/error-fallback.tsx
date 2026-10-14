@@ -5,6 +5,8 @@ import type { FC } from 'react';
 
 import * as m from '../messages';
 
+import styles from './error-fallback.module.css';
+
 type ErrorFallbackProps = {
   resetErrorBoundary: () => void;
   fullScreen?: boolean;
@@ -19,14 +21,14 @@ export const ErrorFallback: FC<ErrorFallbackProps> = ({
   fullScreen = false,
 }) => (
   <div
-    className={`flex flex-col items-center justify-center gap-6 p-8 ${fullScreen ? 'h-dvh' : 'h-full'}`}
+    className={`${styles.root} ${fullScreen ? styles.fullScreen : styles.fill}`}
   >
-    <div className="text-fg-error">
+    <div className={styles.icon}>
       <AlertIcon size="lg" status="error" />
     </div>
-    <div className="flex flex-col items-center gap-2">
+    <div className={styles.message}>
       <Heading level="h2">{m.error.title()}</Heading>
-      <p className="text-fg-mute text-sm">{m.error.description()}</p>
+      <p className={styles.description}>{m.error.description()}</p>
     </div>
     <Button onClick={resetErrorBoundary} variant="outline">
       {m.error.retry()}

@@ -1,0 +1,177 @@
+.pager {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 1);
+  border: 1px solid var(--color-border-mute);
+  border-radius: var(--radius-lg);
+  padding-inline: calc(var(--spacing) * 5);
+  padding-block: calc(var(--spacing) * 4);
+  transition-property:
+    color, background-color, border-color, outline-color, text-decoration-color,
+    fill, stroke;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--easing-out);
+
+  &[data-direction='next'] {
+    align-items: flex-end;
+    text-align: end;
+  }
+}
+
+@media (hover: hover) {
+  .pager:hover {
+    background-color: var(--color-bg-mute);
+  }
+}
+
+.pager:focus-visible {
+  outline-style: none;
+  box-shadow: var(--shadow-ring-info);
+
+  @media (forced-colors: active) {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+}
+
+.pagerDirection {
+  color: var(--color-fg-mute);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+}
+
+.pagerLabel {
+  color: var(--color-fg-base);
+  font-weight: var(--font-weight-bold);
+}
+
+.page {
+  display: flex;
+  gap: calc(var(--spacing) * 10);
+  padding-block: calc(var(--spacing) * 12);
+}
+
+/* 見出しへ飛んだとき、固定したヘッダーの下に隠れないようにする。見出しは
+   Heading が描くので、id を持つ要素に当てる */
+.article {
+  flex: 1;
+  min-width: 0;
+  max-width: 46rem;
+
+  @scope (&) {
+    [id] {
+      /* better-css-modules-disable-next-line tokens/spacing -- --header-h is the header's height, measured by the shell at run time */
+      scroll-margin-top: calc(var(--header-h) + calc(var(--spacing) * 6));
+    }
+  }
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 4);
+}
+
+.group {
+  color: var(--color-fg-mute);
+}
+
+.introduction {
+  color: var(--color-fg-base);
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-relaxed);
+}
+
+.outline {
+  margin-top: calc(var(--spacing) * 8);
+  border: 1px solid var(--color-border-mute);
+  border-radius: var(--radius-lg);
+  padding-inline: calc(var(--spacing) * 4);
+  padding-block: calc(var(--spacing) * 3);
+
+  @media (width >= 80rem) {
+    display: none;
+  }
+}
+
+.outlineSummary {
+  cursor: pointer;
+  color: var(--color-fg-base);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+  font-weight: var(--font-weight-bold);
+}
+
+.outlineBody {
+  margin-top: calc(var(--spacing) * 3);
+}
+
+.sections {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 12);
+  margin-top: calc(var(--spacing) * 12);
+}
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 6);
+  margin-top: calc(var(--spacing) * 16);
+}
+
+.pagers {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 4);
+
+  @media (width >= 40rem) {
+    flex-direction: row;
+  }
+}
+
+.edit {
+  color: var(--color-fg-mute);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+  text-underline-offset: 4px;
+}
+
+@media (hover: hover) {
+  .edit:hover {
+    color: var(--color-fg-base);
+    text-decoration-line: underline;
+  }
+}
+
+.toc {
+  display: none;
+  position: sticky;
+  /* better-css-modules-disable-next-line tokens/spacing -- --header-h is the header's height, measured by the shell at run time */
+  top: calc(var(--header-h) + calc(var(--spacing) * 10));
+  flex-shrink: 0;
+  align-self: flex-start;
+  width: calc(var(--spacing) * 56);
+  max-height: calc(100dvh - var(--header-h) - 5rem);
+  overflow-y: auto;
+
+  @media (width >= 80rem) {
+    display: block;
+  }
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 4);
+  border-top: 1px solid var(--color-border-mute);
+  padding-top: calc(var(--spacing) * 10);
+}
+
+.subsection {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 3);
+  margin-top: calc(var(--spacing) * 8);
+}
