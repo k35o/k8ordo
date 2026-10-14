@@ -87,8 +87,7 @@
     "registry": "https://registry.npmjs.org"
   },
   "scripts": {
-    "build": "vp pack && pnpm build:css",
-    "build:css": "node scripts/build-css.ts",
+    "build": "vp pack",
     "generate:tokens": "tailwind-token-extractor src/styles/index.css -o src/styles/tokens.generated.ts",
     "check:tokens": "tailwind-token-extractor check src/styles/index.css -o src/styles/tokens.generated.ts",
     "generate:props": "node scripts/extract-props.ts && node scripts/generate-component-docs.ts",
@@ -101,9 +100,9 @@
     "test": "vitest run",
     "test:ui": "TEST_BROWSER=chromium vitest --ui --coverage",
     "test:coverage": "TEST_BROWSER=chromium vitest run --coverage",
-    "typecheck": "tsc --noEmit",
-    "check": "vp check",
-    "check:write": "vp check --fix"
+    "typecheck": "better-css-modules generate && tsc --noEmit",
+    "check": "better-css-modules generate && vp check && better-css-modules check",
+    "check:write": "better-css-modules generate && vp check --fix"
   },
   "dependencies": {
     "clsx": "2.1.1",
@@ -114,6 +113,9 @@
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "catalog:",
+    "@better-css-modules/cli": "catalog:",
+    "@better-css-modules/core": "catalog:",
+    "@better-css-modules/vite": "catalog:",
     "@chromatic-com/storybook": "5.4.0",
     "@json-render/core": "catalog:",
     "@json-render/react": "catalog:",
@@ -126,7 +128,7 @@
     "@storybook/addon-mcp": "10.6.1",
     "@storybook/addon-vitest": "10.6.1",
     "@storybook/react-vite": "10.6.1",
-    "@tailwindcss/postcss": "catalog:",
+    "@tailwindcss/vite": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "@vitejs/plugin-react": "catalog:",

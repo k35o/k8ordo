@@ -18,7 +18,7 @@ import '@k8ordo/ui/styles.css';
   なので、カスタム UI は自分のマークアップ側に書く。
 - **デザイントークンはそのまま使える** — トークンは `:root` / `.dark` の
   CSS カスタムプロパティとして配布されるので、CSS Modules から
-  `var(--fg-mute)` のように参照でき、ダークモードにも自動で追従する。
+  `var(--color-fg-mute)` のように参照でき、ダークモードにも自動で追従する。
 - **カスケードは利用側が勝つ** — ライブラリのルールはすべて
   `@layer theme, base, components, utilities` 内にあり、レイヤー外の
   CSS Modules はレイヤー内のルールより優先される（唯一の例外は preflight の

@@ -25,6 +25,9 @@
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@better-css-modules/cli": "catalog:",
+    "@better-css-modules/core": "catalog:",
+    "@better-css-modules/vite": "catalog:",
     "@k8ordo/framework": "workspace:^",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",

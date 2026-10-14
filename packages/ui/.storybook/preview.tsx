@@ -6,7 +6,7 @@ import type { FC } from 'react';
 import { UIProvider } from '../src/components/providers';
 import { definitions } from './locales';
 
-import '../src/styles/index.css';
+import '../src/styles/legacy.css';
 
 // Storybook は日本語のアプリとして描く（デザインは日本語の組版に合わせてある）。
 // ロケール集合を定義しないと、組み込みの文言は英語になる。

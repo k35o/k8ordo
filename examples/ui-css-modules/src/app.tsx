@@ -58,7 +58,7 @@ function App() {
               このページのレイアウトと文字色はすべて app.module.css
               にあります。デザイントークンはただの CSS
               カスタムプロパティとして配布されるので、
-              <code className={styles.token}>var(--fg-mute)</code>
+              <code className={styles.token}>var(--color-fg-mute)</code>
               のように参照でき、ダークモードにも自動で追従します。
             </p>
           </div>

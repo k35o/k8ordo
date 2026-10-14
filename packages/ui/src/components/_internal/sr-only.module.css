@@ -1,0 +1,13 @@
+/* 画面には出さず、支援技術にだけ読ませる */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  /* better-css-modules-disable-next-line tokens/spacing -- the 1px box is pulled back by its own size, which is not a step of the scale */
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border-width: 0;
+}

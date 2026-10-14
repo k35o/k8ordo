@@ -66,7 +66,7 @@ test('スタイルルールはすべてカスケードレイヤーに載って�
 });
 
 test('セマンティックトークンが CSS カスタムプロパティとして配布される', () => {
-  // app.module.css が var(--fg-mute) 等を参照できることの担保。
+  // app.module.css が var(--color-fg-mute) 等を参照できることの担保。
   expect(css).toContain('--fg-mute:');
   expect(css).toContain('--bg-subtle:');
   expect(css).toContain('--primary-bg:');

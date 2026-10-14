@@ -1,9 +1,10 @@
 /*
- * tailwindcss は ui の index.css（配布物の tailwind.css）が中で読み込む。
- * ここでも @import すると、テーマとユーティリティは 1 つにまとまるが
- * プリフライトだけが 2 回出力される。
+ * tailwindcss は ui の tailwind.css が中で読み込む。ここでも @import すると、
+ * テーマとユーティリティは 1 つにまとまるがプリフライトだけが 2 回出力される。
+ * legacy.css は ui の部品を CSS Modules へ移すあいだだけの入口で、まだ
+ * Tailwind で描く部品のクラスも生成する。
  */
-@import '../../../../packages/ui/src/styles/index.css';
+@import '../../../../packages/ui/src/styles/legacy.css';
 /*
  * フォントは自前で配る。外部への <link> を置くと、HTML を書き換える経路
  * （Cloudflare Fonts など）が <head> を差し替えてしまい、document 全体を
@@ -14,14 +15,15 @@
 @import '@fontsource-variable/noto-sans-jp';
 
 /*
- * tokens.css の @theme inline は --font-noto-sans-jp / --font-m-plus-2 を参照
- * するが、フォント変数自体の定義は利用側の責務。ここで定義することで
- * font-noto-sans-jp / font-m-plus-2 ユーティリティが有効になる。
+ * ui の tailwind.css は font-noto-sans-jp / font-m-plus-2 ユーティリティに
+ * --font-family-noto-sans-jp / --font-family-m-plus-2 を読ませるが、フォント
+ * 自体を読み込むのは利用側なので、変数もここで定義する。
  * 名前に Variable が付くのは fontsource の可変フォントの family 名。
  */
 :root {
-  --font-noto-sans-jp: 'Noto Sans JP Variable', sans-serif;
-  --font-m-plus-2: 'M PLUS 2 Variable', 'Noto Sans JP Variable', sans-serif;
+  --font-family-noto-sans-jp: 'Noto Sans JP Variable', sans-serif;
+  --font-family-m-plus-2:
+    'M PLUS 2 Variable', 'Noto Sans JP Variable', sans-serif;
 }
 
 /*
@@ -30,7 +32,7 @@
  * どちらのモードでも枠線で区切る。
  */
 @theme inline {
-  --color-page: light-dark(var(--bg-base), var(--bg-surface));
+  --color-page: light-dark(var(--color-bg-base), var(--color-bg-surface));
 }
 
 /*
@@ -38,12 +40,12 @@
  * では部品を見せるほかの面と同じく、枠線で区切る。
  */
 .ao-code-block {
-  border: 1px solid var(--border-mute);
+  border: 1px solid var(--color-border-mute);
 }
 
 @layer base {
   body {
-    font-family: var(--font-noto-sans-jp);
+    font-family: var(--font-family-noto-sans-jp);
   }
 
   h1,

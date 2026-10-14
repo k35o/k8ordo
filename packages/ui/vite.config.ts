@@ -1,7 +1,9 @@
 import { globSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
+import betterCssModules from '@better-css-modules/vite';
 import { storybookTest } from '@storybook/addon-vitest/vitest-plugin';
+import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import { playwright } from '@vitest/browser-playwright';
 import { vrt } from 'storybook-addon-vrt/vitest-plugin';
@@ -81,9 +83,14 @@ export default defineConfig({
   staged: {
     '*': 'vp check --fix',
   },
-  plugins: [react()],
+  plugins: [react(), betterCssModules(), tailwindcss()],
+  // 部品の CSS Modules は @scope (&) で書く。Vite 既定の postcss-modules は
+  // @scope の前置きの & で落ちるので、pack（tsdown）と同じ Lightning CSS で組む
+  css: { transformer: 'lightningcss' },
   pack: {
     entry: [
+      // styles.css。@import をたどって 1 枚にまとめる
+      'src/styles/index.css',
       'src/**/*.{ts,tsx}',
       '!src/**/*.stories.tsx',
       '!src/**/*.test.{ts,tsx}',
@@ -96,6 +103,18 @@ export default defineConfig({
     // define なしに `import.meta.vitest` を畳めないため、テスト本体が利用者の
     // バンドルに残ってしまう。
     define: { 'import.meta.vitest': 'undefined' },
+    // tailwind.css は Tailwind の構文で書いた入口なので、組まずに利用者の
+    // Tailwind に渡す。中の `@import './index.css'` は隣の styles.css を指す
+    copy: [{ from: 'src/styles/tailwind.css', to: 'dist/styles' }],
+    plugins: [betterCssModules()],
+    css: {
+      // 各部品の .module.mjs が自分の CSS を import する。利用者は部品を
+      // import するだけで、使う部品の CSS だけを読み込む
+      inject: true,
+      // クラス名のハッシュをこのディレクトリからの相対パスで作る。無いと
+      // 絶対パスで作られ、ビルドする場所ごとにクラス名が変わる
+      lightningcss: { projectRoot: import.meta.dirname },
+    },
   },
   test: {
     fsModuleCache: true,
@@ -186,6 +205,7 @@ export default defineConfig({
             'src/components/**/*.test.ts',
             'src/integrations/**/*.test.{ts,tsx}',
             'src/i18n/**/*.test.ts',
+            'src/styles/**/*.test.ts',
             'scripts/**/*.test.ts',
           ],
           includeSource: [

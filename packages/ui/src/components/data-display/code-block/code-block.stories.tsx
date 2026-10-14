@@ -64,7 +64,7 @@ const colorsOf = (canvasElement: HTMLElement) => {
   ) as HTMLElement;
   // 面の色は bg-surface のトークンそのもの。計算済みの値で比べる
   const probe = document.createElement('div');
-  probe.style.backgroundColor = 'var(--bg-surface)';
+  probe.style.backgroundColor = 'var(--color-bg-surface)';
   figure.append(probe);
   const surface = getComputedStyle(probe).backgroundColor;
   probe.remove();

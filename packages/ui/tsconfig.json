@@ -1,5 +1,10 @@
 {
   "extends": "../../tsconfig.json",
-  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "compilerOptions": {
+    // better-css-modules generate が __generated__ に書く .module.css の型を、
+    // CSS の隣にあるものとして解決する
+    "rootDirs": [".", "./__generated__"]
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx", "__generated__"],
   "exclude": ["node_modules", "dist"]
 }

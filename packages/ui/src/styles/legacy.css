@@ -1,0 +1,7 @@
+/* 移行中だけの Tailwind の入口。まだ Tailwind のクラスで描く部品のために、部品と
+   integrations のクラスを走査する。すべての部品を移したら消す */
+
+@import './tailwind.css';
+@import './legacy-components.css';
+@source '../components';
+@source '../integrations';

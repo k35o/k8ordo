@@ -1,22 +1,15 @@
 /**
- * Entry stylesheet for `@k8ordo/ui`.
+ * The global stylesheet of `@k8ordo/ui`, published as `@k8ordo/ui/styles.css`:
+ * the layer order, the tokens, the reset, and the page-wide defaults. Each
+ * component brings its own stylesheet, in the `components` layer.
  *
- * Composes the design system from focused partials:
- *   - base.css       静的なベースレイヤーとカスタムバリアント
- *   - tokens.css     デザイントークン（:root / .dark / @theme inline）
- *   - utilities.css  カスタムユーティリティ
- *
- * This file together with its imports is the single source of truth for
- * design tokens. `tailwind-token-extractor` reads it and writes
- * `tokens.generated.ts` — run `pnpm generate:tokens` after editing any partial.
+ * The layers are Tailwind CSS 4's, in its order, so that a page using
+ * Tailwind's utilities overrides the components whichever stylesheet loads
+ * first.
  */
 
-@import 'tailwindcss';
-@import './base.css';
+@layer properties, theme, base, components, utilities;
+
 @import './tokens.css';
-@import './utilities.css';
-@source '../components';
-/* The json-render / openui integrations' renderers emit utility classes too
-   (e.g. card padding), so they must be scanned alongside components — else a
-   class only used in a renderer (not in any component) is never generated. */
-@source '../integrations';
+@import './reset.css';
+@import './base.css';

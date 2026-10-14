@@ -76,7 +76,7 @@ export default defineConfig({
           },
           {
             files: '**',
-            use: cssEntry('./packages/ui/src/styles/index.css'),
+            use: cssEntry('./packages/ui/src/styles/legacy.css'),
           },
         ],
       },
