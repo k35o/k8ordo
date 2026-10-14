@@ -15,3 +15,25 @@
     outline-offset: 2px;
   }
 }
+
+.ringNoBorder:focus-visible {
+  outline-style: none;
+  box-shadow: var(--shadow-ring-info);
+
+  @media (forced-colors: active) {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+}
+
+/* 中の入力欄がフォーカスを持つあいだ、枠ごと輪で囲む */
+.ringWithin:focus-within {
+  border-color: transparent;
+  outline-style: none;
+  box-shadow: var(--shadow-ring-info);
+
+  @media (forced-colors: active) {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+}

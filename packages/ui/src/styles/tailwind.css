@@ -68,6 +68,9 @@
   --color-group-tertiary: var(--color-group-tertiary);
   --color-group-quaternary: var(--color-group-quaternary);
 
+  --color-logo-primary: var(--color-logo-primary);
+  --color-logo-secondary: var(--color-logo-secondary);
+
   --color-system-canvas-text: var(--color-system-canvas-text);
   --color-system-gray-text: var(--color-system-gray-text);
   --color-system-highlight: var(--color-system-highlight);

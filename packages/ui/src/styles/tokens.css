@@ -199,6 +199,10 @@
   --color-group-tertiary: var(--pink-800);
   --color-group-quaternary: var(--purple-800);
 
+  /* k8o のロゴの 2 色 */
+  --color-logo-primary: var(--teal-700);
+  --color-logo-secondary: var(--teal-600);
+
   /* 強制カラーで塗るシステムの色。@media (forced-colors: active) の中で使う */
   --color-system-canvas-text: CanvasText;
   --color-system-gray-text: GrayText;
@@ -283,6 +287,8 @@
   --shadow-ring-error: 0 0 0 2px var(--color-border-error);
   --shadow-ring-inset-info: inset 0 0 0 2px var(--color-border-info);
 
+  /* 部品の中で、兄弟より上に重ねる要素（開いたリスト、つまみ） */
+  --z-index-raised: 10;
   --z-index-overlay: 1000;
   --z-index-modal: 1300;
   --z-index-toast: 1500;
@@ -357,6 +363,9 @@
   --color-group-secondary: var(--cyan-200);
   --color-group-tertiary: var(--pink-200);
   --color-group-quaternary: var(--purple-200);
+
+  --color-logo-primary: var(--teal-400);
+  --color-logo-secondary: var(--teal-500);
 
   /* 別の変数を読む変数は、宣言した要素で値が決まる。:root の宣言だけだと、
      html より下に付いた .dark の中でも輪がライトの色のままになる */
