@@ -41,179 +41,179 @@ export const brandColorsIntro = message({
 });
 
 export const token = {
-  'fg-base': message({
+  'color-fg-base': message({
     ja: '本文の文字',
     en: 'Body text',
   }),
-  'fg-subtle': message({
+  'color-fg-subtle': message({
     ja: 'プレースホルダーなど、最も薄い文字',
     en: 'The faintest text, such as placeholders',
   }),
-  'fg-mute': message({
+  'color-fg-mute': message({
     ja: '説明やキャプションなど、補足の文字',
     en: 'Supporting text, such as descriptions and captions',
   }),
-  'fg-inverse': message({
+  'color-fg-inverse': message({
     ja: 'bg-inverseの上に置く文字',
     en: 'Text on bg-inverse',
   }),
-  'fg-info': message({
+  'color-fg-info': message({
     ja: '情報メッセージの文字',
     en: 'Informational message text',
   }),
-  'fg-success': message({
+  'color-fg-success': message({
     ja: '成功メッセージの文字',
     en: 'Success message text',
   }),
-  'fg-warning': message({
+  'color-fg-warning': message({
     ja: '警告メッセージの文字',
     en: 'Warning message text',
   }),
-  'fg-error': message({
+  'color-fg-error': message({
     ja: 'エラーメッセージの文字',
     en: 'Error message text',
   }),
-  'bg-base': message({
+  'color-bg-base': message({
     ja: 'カードの背景',
     en: 'Card background',
   }),
-  'bg-raised': message({
+  'color-bg-raised': message({
     ja: 'モーダルやメニューなど、重ねて開く要素の背景',
     en: 'Background of overlays such as modals and menus',
   }),
-  'bg-surface': message({
+  'color-bg-surface': message({
     ja: '最も外側の背景。ライトではbg-subtleより明るく、ダークでは暗い',
     en: 'The outermost background: lighter than bg-subtle in light mode, darker in dark mode',
   }),
-  'bg-subtle': message({
+  'color-bg-subtle': message({
     ja: 'ページの背景',
     en: 'Page background',
   }),
-  'bg-mute': message({
+  'color-bg-mute': message({
     ja: 'ホバー状態の背景',
     en: 'Hover-state background',
   }),
-  'bg-emphasize': message({
+  'color-bg-emphasize': message({
     ja: 'アクティブ状態の背景',
     en: 'Active-state background',
   }),
-  'bg-inverse': message({
+  'color-bg-inverse': message({
     ja: '反転した背景。fg-inverseと組み合わせる',
     en: 'Inverted background, paired with fg-inverse',
   }),
-  'bg-info': message({
+  'color-bg-info': message({
     ja: '情報メッセージの背景',
     en: 'Informational message background',
   }),
-  'bg-success': message({
+  'color-bg-success': message({
     ja: '成功メッセージの背景',
     en: 'Success message background',
   }),
-  'bg-warning': message({
+  'color-bg-warning': message({
     ja: '警告メッセージの背景',
     en: 'Warning message background',
   }),
-  'bg-error': message({
+  'color-bg-error': message({
     ja: 'エラーメッセージの背景',
     en: 'Error message background',
   }),
-  'border-base': message({
+  'color-border-base': message({
     ja: '入力欄など、標準の線',
     en: 'Standard borders, such as form fields',
   }),
-  'border-subtle': message({
+  'color-border-subtle': message({
     ja: '最も薄い線',
     en: 'The faintest borders',
   }),
-  'border-mute': message({
+  'color-border-mute': message({
     ja: '区切りなど、控えめな線',
     en: 'Restrained borders, such as separators',
   }),
-  'border-emphasize': message({
+  'color-border-emphasize': message({
     ja: 'ホバー時など、強調する線',
     en: 'Emphasized borders, as on hover',
   }),
-  'border-inverse': message({
+  'color-border-inverse': message({
     ja: 'bg-inverseの上に引く線',
     en: 'Borders on bg-inverse',
   }),
-  'border-info': message({
+  'color-border-info': message({
     ja: '情報の線。フォーカスリングにも使う',
     en: 'Information borders, also the focus ring',
   }),
-  'border-success': message({
+  'color-border-success': message({
     ja: '成功状態の線',
     en: 'Success-state borders',
   }),
-  'border-warning': message({
+  'color-border-warning': message({
     ja: '警告状態の線',
     en: 'Warning-state borders',
   }),
-  'border-error': message({
+  'color-border-error': message({
     ja: 'エラー状態の線',
     en: 'Error-state borders',
   }),
-  'primary-fg': message({
+  'color-primary-fg': message({
     ja: 'primaryの文字とアイコン',
     en: 'Primary text and icons',
   }),
-  'primary-bg': message({
+  'color-primary-bg': message({
     ja: 'primaryの塗り。solidのボタンなど',
     en: 'Primary fill, as in a solid button',
   }),
-  'primary-bg-subtle': message({
+  'color-primary-bg-subtle': message({
     ja: '最も薄いprimaryの背景。選択状態など',
     en: 'The faintest primary background, as in a selected state',
   }),
-  'primary-bg-mute': message({
+  'color-primary-bg-mute': message({
     ja: '控えめなprimaryの背景',
     en: 'Restrained primary background',
   }),
-  'primary-bg-emphasize': message({
+  'color-primary-bg-emphasize': message({
     ja: 'ホバー時など、強いprimaryの背景',
     en: 'Emphasized primary background, as on hover',
   }),
-  'primary-border': message({
+  'color-primary-border': message({
     ja: 'primaryの線',
     en: 'Primary borders',
   }),
-  'secondary-fg': message({
+  'color-secondary-fg': message({
     ja: 'secondaryの文字とアイコン',
     en: 'Secondary text and icons',
   }),
-  'secondary-bg': message({
+  'color-secondary-bg': message({
     ja: 'secondaryの塗り',
     en: 'Secondary fill',
   }),
-  'secondary-bg-subtle': message({
+  'color-secondary-bg-subtle': message({
     ja: '最も薄いsecondaryの背景',
     en: 'The faintest secondary background',
   }),
-  'secondary-bg-mute': message({
+  'color-secondary-bg-mute': message({
     ja: '控えめなsecondaryの背景',
     en: 'Restrained secondary background',
   }),
-  'secondary-bg-emphasize': message({
+  'color-secondary-bg-emphasize': message({
     ja: 'ホバー時など、強いsecondaryの背景',
     en: 'Emphasized secondary background, as on hover',
   }),
-  'secondary-border': message({
+  'color-secondary-border': message({
     ja: 'secondaryの線',
     en: 'Secondary borders',
   }),
-  'group-primary': message({
+  'color-group-primary': message({
     ja: '1つ目の系列',
     en: 'First data series',
   }),
-  'group-secondary': message({
+  'color-group-secondary': message({
     ja: '2つ目の系列',
     en: 'Second data series',
   }),
-  'group-tertiary': message({
+  'color-group-tertiary': message({
     ja: '3つ目の系列',
     en: 'Third data series',
   }),
-  'group-quaternary': message({
+  'color-group-quaternary': message({
     ja: '4つ目の系列',
     en: 'Fourth data series',
   }),

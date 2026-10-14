@@ -106,6 +106,35 @@ describe('dist', () => {
     expect(modulesWithoutCss(modules)).toStrictEqual([]);
   });
 
+  it('tokens は styles.css のトークンとモードを DTCG の resolver 文書で出す', () => {
+    const source = readFileSync(
+      path.join(dist, 'styles', 'tokens.mjs'),
+      'utf8',
+    );
+    const { version, resolutionOrder } = JSON.parse(
+      source.slice(source.indexOf('{'), source.lastIndexOf('}') + 1),
+    ) as {
+      version: string;
+      resolutionOrder: Array<{
+        name: string;
+        sources?: Array<Record<string, unknown>>;
+        contexts?: { on: Array<Record<string, unknown>> };
+      }>;
+    };
+    const [root, ...modes] = resolutionOrder;
+
+    expect(version).toBe('2025.10');
+    expect(root?.sources?.[0]?.['color-fg-base']).toStrictEqual({
+      $type: 'color',
+      $value: '{gray-900}',
+    });
+    expect(
+      modes.find(({ name }) => name === '.dark')?.contexts?.on[0]?.[
+        'color-fg-base'
+      ],
+    ).toStrictEqual({ $type: 'color', $value: '{gray-50}' });
+  });
+
   it('styles.css はトークンのほかをどれかのレイヤーに入れる', () => {
     // ほかの規則がレイヤーの外にあると、利用者がレイヤーに入れた CSS に勝ってしまう
     const root = parse(styles);

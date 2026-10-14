@@ -119,7 +119,6 @@ minimumReleaseAgeExclude:
   - '@k8o/*'
   - 'storybook-addon-determinism'
   - 'storybook-addon-vrt'
-  - 'tailwind-token-extractor'
   - 'vite-plus-inspector'
   # Renovate security update: next@16.3.8
   - next@16.3.8

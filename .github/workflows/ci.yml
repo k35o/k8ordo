@@ -210,17 +210,12 @@ jobs:
         with:
           persist-credentials: false
 
-      # どちらのチェックも packages/ui の src と docs しか読まないので dist は要らない。
+      # このチェックは packages/ui の src と docs しか読まないので dist は要らない。
+      # トークンは CSS から組むときに書き出すので、ここで突き合わせるものは無い。
       - name: Install
         uses: ./.github/composite-actions/install
         with:
           build: none
-
-      # Re-extract tokens from index.css and fail if the committed
-      # tokens.generated.ts is stale (CSS edit, Tailwind bump, or tool update).
-      # Fix with: pnpm --filter @k8ordo/ui generate:tokens
-      - name: Check design tokens are in sync with CSS
-        run: pnpm --filter @k8ordo/ui check:tokens
 
       # Re-extract component props from the types and fail if the committed
       # props.generated.json is stale (a prop added, renamed, or retyped).

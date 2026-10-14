@@ -1,4 +1,3 @@
 # 生成物。差分は生成器の変更を見れば足りるので、レビューでは既定で畳む。
-# 追跡はする（CI の check:tokens / check:props が実装とのずれを検出するため）。
-packages/ui/src/styles/tokens.generated.ts linguist-generated=true
-packages/ui/docs/props.generated.json      linguist-generated=true
+# 追跡はする（CI の check:props が実装とのずれを検出するため）。
+packages/ui/docs/props.generated.json linguist-generated=true

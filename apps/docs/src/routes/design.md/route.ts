@@ -1,5 +1,4 @@
 import type { RouteContext } from '@k8ordo/framework';
-import { tokens } from '@k8ordo/ui/tokens';
 
 import {
   BG_TOKENS,
@@ -17,8 +16,11 @@ import {
   SECONDARY_TOKENS,
   SHADES,
   SHADOWS,
+  SPACING,
   TEXT_SIZES,
+  WHITE,
   Z_INDICES,
+  cssValueOf,
 } from '../../theme/design-tokens';
 import type { NamedScale, SemanticToken } from '../../theme/design-tokens';
 
@@ -170,7 +172,7 @@ const build = (): string => {
 
     `### 生パレット（OKLCH）
 
-各セルは \`L C\`（H は色相表の通り）。\`--white: ${tokens.vars.white}\`。`,
+各セルは \`L C\`（H は色相表の通り）。\`--white: ${WHITE}\`。`,
     paletteMatrix(),
 
     `### セマンティックトークン
@@ -190,7 +192,7 @@ UI では必ず以下のトークンを使う（\`{prefix}-{token}\`、例: \`te
     `#### Group（データ可視化）`,
     semanticTable(GROUP_TOKENS),
 
-    `その他: \`back-drop\`（\`${tokens.vars['back-drop']}\` オーバーレイ）, \`transparent\`。`,
+    `その他: \`back-drop\`（\`${cssValueOf('color-back-drop')}\` オーバーレイ）, \`transparent\`。`,
 
     `### ダークモード
 
@@ -234,7 +236,7 @@ font-family: 'Noto Sans JP', 'M PLUS 2', sans-serif;
 
     `## スペーシング・レイアウト
 
-4px ベース（\`--spacing: ${tokens.theme.spacing}\`）。Tailwind 標準スケールを使用。`,
+4px ベース（\`--spacing: ${SPACING}\`）。Tailwind 標準スケールを使用。`,
 
     `### パディング・余白の目安`,
     table(

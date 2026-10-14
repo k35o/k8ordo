@@ -87,9 +87,7 @@
     "registry": "https://registry.npmjs.org"
   },
   "scripts": {
-    "build": "vp pack",
-    "generate:tokens": "tailwind-token-extractor src/styles/index.css -o src/styles/tokens.generated.ts",
-    "check:tokens": "tailwind-token-extractor check src/styles/index.css -o src/styles/tokens.generated.ts",
+    "build": "vp pack && node scripts/build-tokens.ts",
     "generate:props": "node scripts/extract-props.ts && node scripts/generate-component-docs.ts",
     "check:props": "node scripts/extract-props.ts --check && node scripts/generate-component-docs.ts --check",
     "check:dist": "node scripts/check-dist-tests.ts",
@@ -145,7 +143,6 @@
     "storybook-addon-mock-date": "3.2.1",
     "storybook-addon-vrt": "0.4.0",
     "streamdown": "2.7.0",
-    "tailwind-token-extractor": "0.2.1",
     "tailwindcss": "catalog:",
     "typescript": "catalog:",
     "vite": "catalog:",
