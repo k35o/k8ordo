@@ -5,6 +5,8 @@ import { expect, screen, waitFor } from 'storybook/test';
 import { Tooltip } from '.';
 import { Button } from '../../buttons/button';
 
+import styles from './tooltip.stories.module.css';
+
 const meta: Meta<typeof Tooltip.Root> = {
   title: 'components/overlays/tooltip',
   component: Tooltip.Root,
@@ -50,7 +52,7 @@ const ComparisonRow: FC<{
   triggerText: string;
   delays: Pick<ComponentProps<typeof Tooltip.Root>, 'openDelay' | 'closeDelay'>;
 }> = ({ caption, description, triggerText, delays }) => (
-  <section className="flex items-center gap-8">
+  <section className={styles.row}>
     <Tooltip.Root placement="bottom-start" {...delays}>
       <Tooltip.Trigger
         renderItem={(props) => (
@@ -64,8 +66,8 @@ const ComparisonRow: FC<{
       </Tooltip.Content>
     </Tooltip.Root>
     <div>
-      <p className="font-bold">{caption}</p>
-      <p className="text-fg-mute text-sm">{description}</p>
+      <p className={styles.caption}>{caption}</p>
+      <p className={styles.description}>{description}</p>
     </div>
   </section>
 );
@@ -76,7 +78,7 @@ const ComparisonRow: FC<{
  */
 export const HoverForgivenessComparison: Story = {
   render: () => (
-    <div className="flex flex-col gap-12 p-4 pb-40">
+    <div className={styles.comparison}>
       <ComparisonRow
         caption="① ブリッジのみ（closeDelay: 0 を明示）"
         delays={{ closeDelay: 0 }}
@@ -112,7 +114,7 @@ export const BridgeDebug: Story = {
       [role='tooltip']::after {
         background: color-mix(in oklch, var(--color-secondary-bg) 40%, transparent);
       }`}</style>
-      <div className="flex flex-col items-center gap-32 p-32">
+      <div className={styles.bridges}>
         {(['bottom-start', 'top-start', 'right', 'left'] as const).map(
           (placement) => (
             <Tooltip.Root defaultOpen key={placement} placement={placement}>

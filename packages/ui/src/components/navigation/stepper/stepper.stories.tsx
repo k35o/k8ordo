@@ -1,7 +1,10 @@
 import type { Decorator, Meta, StoryObj } from '@storybook/react-vite';
+import { clsx } from 'clsx';
 import { expect, fn, within } from 'storybook/test';
 
 import { Stepper } from '.';
+
+import styles from './stepper.stories.module.css';
 
 const STEPS = [
   { label: 'プラン', description: '使い方に合わせて選ぶ' },
@@ -18,7 +21,7 @@ const meta: Meta<typeof Stepper> = {
   },
   decorators: [
     (Story) => (
-      <div className="w-full max-w-2xl p-6">
+      <div className={styles.frame}>
         <Story />
       </div>
     ),
@@ -148,7 +151,7 @@ export const NarrowWithLongLabels: Story = {
   },
   decorators: [
     (Story) => (
-      <div className="w-80">
+      <div className={styles.narrow}>
         <Story />
       </div>
     ),
@@ -183,10 +186,7 @@ export const InFlexRow: Story = {
   },
   decorators: [
     (Story) => (
-      <div
-        className="flex w-160 flex-wrap items-center gap-4"
-        data-testid="row"
-      >
+      <div className={styles.row} data-testid="row">
         <Story />
       </div>
     ),
@@ -198,9 +198,9 @@ export const InFlexRow: Story = {
   },
 };
 
-// 横書きの例（max-w-2xl）と同じだけの長さを、縦書きの行の向きに取る
+// 横書きの例の最大幅（42rem）と同じだけの長さを、縦書きの行の向きに取る
 const writingVertical: Decorator = (Story) => (
-  <div className="writing-v h-168">
+  <div className={clsx('writing-v', styles.verticalFrame)}>
     <Story />
   </div>
 );

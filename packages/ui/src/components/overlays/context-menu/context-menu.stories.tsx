@@ -3,6 +3,8 @@ import { expect, fireEvent, fn, waitFor } from 'storybook/test';
 
 import { ContextMenu } from '.';
 
+import styles from './context-menu.stories.module.css';
+
 const copy = fn();
 const remove = fn();
 const sortByName = fn();
@@ -14,7 +16,7 @@ const FileArea = () => (
         // キーボードからも Shift+F10 で開けるよう、フォーカスを受けられる領域にする
         <div
           {...props}
-          className="border-border-base text-fg-mute grid h-40 w-80 place-items-center rounded-xl border border-dashed"
+          className={styles.area}
           // oxlint-disable-next-line eslint-plugin-jsx-a11y/no-noninteractive-tabindex
           tabIndex={0}
         >
@@ -39,7 +41,7 @@ const meta: Meta<typeof ContextMenu.Root> = {
   render: () => <FileArea />,
   decorators: [
     (Story) => (
-      <div className="p-6">
+      <div className={styles.frame}>
         <Story />
       </div>
     ),

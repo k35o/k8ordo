@@ -6,6 +6,8 @@ import { Button } from '../../buttons/button';
 import { Dialog } from '../dialog';
 import { Modal } from './modal';
 
+import styles from './modal.stories.module.css';
+
 const meta: Meta<typeof Modal> = {
   title: 'components/overlays/modal',
   component: Modal,
@@ -51,7 +53,9 @@ export const Labelled: Story = {
   args: {
     defaultOpen: true,
     'aria-label': 'お知らせ',
-    children: <p className="p-4">Modal 自身に付けた名前が使われます</p>,
+    children: (
+      <p className={styles.message}>Modal 自身に付けた名前が使われます</p>
+    ),
   },
   play: async ({ canvas }) => {
     await expect(
@@ -66,7 +70,9 @@ export const FocusRingOnDialog: Story = {
   args: {
     defaultOpen: true,
     'aria-label': 'お知らせ',
-    children: <p className="p-4">フォーカスできるものが無いモーダル</p>,
+    children: (
+      <p className={styles.message}>フォーカスできるものが無いモーダル</p>
+    ),
   },
   play: async ({ canvas }) => {
     const dialog = canvas.getByRole('dialog', { name: 'お知らせ' });
@@ -85,7 +91,7 @@ export const BottomSide: Story = {
     defaultOpen: true,
     side: 'bottom',
     'aria-label': 'ボトムシート',
-    children: <p className="p-4">下から出るモーダル</p>,
+    children: <p className={styles.message}>下から出るモーダル</p>,
   },
   play: async ({ canvas }) => {
     const dialog = canvas.getByRole('dialog', { name: 'ボトムシート' });
@@ -98,7 +104,7 @@ export const LeftSide: Story = {
     defaultOpen: true,
     side: 'left',
     'aria-label': '左サイドシート',
-    children: <p className="p-4">左から出るモーダル</p>,
+    children: <p className={styles.message}>左から出るモーダル</p>,
   },
   play: async ({ canvas }) => {
     const dialog = canvas.getByRole('dialog', { name: '左サイドシート' });
@@ -159,7 +165,7 @@ export const UncontrolledCloses: Story = {
   args: {
     defaultOpen: true,
     'aria-label': 'お知らせ',
-    children: <p className="p-4">枠外を押すと閉じるモーダル</p>,
+    children: <p className={styles.message}>枠外を押すと閉じるモーダル</p>,
     onClose: fn(),
   },
   play: async ({ args, canvas, userEvent }) => {
@@ -196,7 +202,7 @@ const ControlledRender = () => {
           setIsOpen(false);
         }}
       >
-        <p className="p-4">isOpen で開け閉めするモーダル</p>
+        <p className={styles.message}>isOpen で開け閉めするモーダル</p>
       </Modal>
     </>
   );

@@ -3,6 +3,8 @@ import { expect, fn } from 'storybook/test';
 
 import { SideNav } from '.';
 
+import styles from './side-nav.stories.module.css';
+
 const meta: Meta<typeof SideNav.Root> = {
   title: 'components/navigation/side-nav',
   component: SideNav.Root,
@@ -16,7 +18,7 @@ type Story = StoryObj<typeof SideNav.Root>;
 
 export const Default: Story = {
   render: () => (
-    <div className="w-60">
+    <div className={styles.sidebar}>
       <SideNav.Root label="コンポーネント">
         <SideNav.Group title="ボタン">
           <SideNav.Link href="/button">Button</SideNav.Link>
@@ -54,7 +56,7 @@ const navigate = fn();
 // 利用側が渡した onClick も束に入っている
 export const RenderAnchor: Story = {
   render: () => (
-    <div className="w-60">
+    <div className={styles.sidebar}>
       <SideNav.Root label="ガイド">
         <SideNav.Group title="はじめに">
           <SideNav.Link
@@ -90,7 +92,7 @@ export const RenderAnchor: Story = {
 // 開閉できる段で木にする。今のページを含む段だけを開いておく
 export const Nested: Story = {
   render: () => (
-    <div className="w-60">
+    <div className={styles.sidebar}>
       <SideNav.Root label="UI">
         <SideNav.Group title="コンポーネント">
           <SideNav.Link href="/components">一覧</SideNav.Link>

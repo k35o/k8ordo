@@ -8,6 +8,8 @@ import { CopyIcon, LinkIcon, ListIcon, TableIcon } from '../../icons';
 import { Button } from '../button';
 import { IconButton } from '../icon-button';
 
+import styles from './toolbar.stories.module.css';
+
 const EditorToolbar = ({
   orientation,
   onSave,
@@ -70,7 +72,7 @@ const meta: Meta<typeof Toolbar.Root> = {
   component: Toolbar.Root,
   decorators: [
     (Story) => (
-      <div className="flex flex-col items-start gap-4 p-6">
+      <div className={styles.frame}>
         <button type="button">前のボタン</button>
         <Story />
         <button type="button">次のボタン</button>

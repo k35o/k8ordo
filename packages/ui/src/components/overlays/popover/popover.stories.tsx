@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { clsx } from 'clsx';
 import { useState } from 'react';
 import type { FC } from 'react';
 import { expect, fn, waitFor } from 'storybook/test';
@@ -7,6 +8,8 @@ import { Popover } from '.';
 import type { Placement } from '../../../types/variables';
 import { Button } from '../../buttons/button';
 import { Modal } from '../modal';
+
+import styles from './popover.stories.module.css';
 
 const meta: Meta<typeof Popover.Root> = {
   title: 'components/overlays/popover',
@@ -28,7 +31,7 @@ export const Default: Story = {
       />
       <Popover.Content
         renderItem={(props) => (
-          <div className="bg-bg-raised rounded-lg p-4 shadow-md" {...props}>
+          <div className={styles.panel} {...props}>
             <div role="menuitem">ポップオーバーのコンテンツ</div>
           </div>
         )}
@@ -48,7 +51,7 @@ export const Default: Story = {
 // trigger の aria-expanded を false に戻し、フォーカスは次のタブ順要素へ進む。
 export const CloseOnTabOut: Story = {
   render: () => (
-    <div className="flex flex-col items-start gap-4">
+    <div className={styles.controls}>
       <Popover.Root>
         <Popover.Trigger
           renderItem={(props) => (
@@ -59,7 +62,7 @@ export const CloseOnTabOut: Story = {
         />
         <Popover.Content
           renderItem={(props) => (
-            <div className="bg-bg-raised rounded-lg p-4 shadow-md" {...props}>
+            <div className={styles.panel} {...props}>
               <button role="menuitem" type="button">
                 項目1
               </button>
@@ -100,7 +103,7 @@ const ControllableRender = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   return (
-    <div className="flex flex-col items-start gap-4">
+    <div className={styles.controls}>
       <Button
         onClick={() => {
           setIsOpen(true);
@@ -137,7 +140,7 @@ const ControllableRender = ({
         />
         <Popover.Content
           renderItem={(props) => (
-            <div className="bg-bg-raised rounded-lg p-4 shadow-md" {...props}>
+            <div className={styles.panel} {...props}>
               <button role="menuitem" type="button">
                 項目1
               </button>
@@ -215,7 +218,7 @@ export const DefaultOpen: Story = {
       />
       <Popover.Content
         renderItem={(props) => (
-          <div className="bg-bg-raised rounded-lg p-4 shadow-md" {...props}>
+          <div className={styles.panel} {...props}>
             <button role="menuitem" type="button">
               項目1
             </button>
@@ -245,11 +248,7 @@ const layerPopover = (name: string) => (
     />
     <Popover.Content
       renderItem={(props) => (
-        <div
-          aria-label={`${name}の中身`}
-          className="bg-bg-raised rounded-lg p-4 shadow-md"
-          {...props}
-        >
+        <div aria-label={`${name}の中身`} className={styles.panel} {...props}>
           <p>{name}</p>
         </div>
       )}
@@ -260,7 +259,7 @@ const layerPopover = (name: string) => (
 // APG: Escape は最も内側（最後に開いた）レイヤーだけを閉じる。
 export const EscapeClosesOnlyTopLayer: Story = {
   render: () => (
-    <div className="flex gap-4">
+    <div className={styles.layers}>
       {layerPopover('下の層')}
       {layerPopover('上の層')}
     </div>
@@ -291,7 +290,7 @@ export const EscapeClosesOnlyTopLayer: Story = {
 
 const EscapeInModalRender = () => (
   <Modal aria-label="モーダル" defaultOpen>
-    <div className="p-4">
+    <div className={styles.modalBody}>
       <Popover.Root>
         <Popover.Trigger
           renderItem={(props) => (
@@ -302,7 +301,7 @@ const EscapeInModalRender = () => (
         />
         <Popover.Content
           renderItem={(props) => (
-            <div className="bg-bg-raised rounded-lg p-4 shadow-md" {...props}>
+            <div className={styles.panel} {...props}>
               <button role="menuitem" type="button">
                 項目1
               </button>
@@ -364,38 +363,22 @@ export const EscapeInModal: Story = {
 // 画面の四隅・上下左右の端・中央にトリガーを並べ、各 Popover をクリックで開いて
 // 配置と flip（端で入りきらないと反対側へ反転）を目視確認するためのストーリー。
 const PLACEMENT_POSITIONS = [
-  { key: 'top-left', label: '左上', className: 'top-2 left-2' },
-  { key: 'top', label: '上中央', className: 'top-2 left-1/2 -translate-x-1/2' },
-  { key: 'top-right', label: '右上', className: 'top-2 right-2' },
-  {
-    key: 'left',
-    label: '左中央',
-    className: 'top-1/2 left-2 -translate-y-1/2',
-  },
-  {
-    key: 'center',
-    label: '中央',
-    className: 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2',
-  },
-  {
-    key: 'right',
-    label: '右中央',
-    className: 'top-1/2 right-2 -translate-y-1/2',
-  },
-  { key: 'bottom-left', label: '左下', className: 'bottom-2 left-2' },
-  {
-    key: 'bottom',
-    label: '下中央',
-    className: 'bottom-2 left-1/2 -translate-x-1/2',
-  },
-  { key: 'bottom-right', label: '右下', className: 'bottom-2 right-2' },
+  { key: 'top-left', label: '左上', className: styles.topLeft },
+  { key: 'top', label: '上中央', className: styles.top },
+  { key: 'top-right', label: '右上', className: styles.topRight },
+  { key: 'left', label: '左中央', className: styles.left },
+  { key: 'center', label: '中央', className: styles.center },
+  { key: 'right', label: '右中央', className: styles.right },
+  { key: 'bottom-left', label: '左下', className: styles.bottomLeft },
+  { key: 'bottom', label: '下中央', className: styles.bottom },
+  { key: 'bottom-right', label: '右下', className: styles.bottomRight },
 ] as const;
 
 export const Placements: Story = {
   render: () => (
-    <div className="fixed inset-0">
+    <div className={styles.viewport}>
       {PLACEMENT_POSITIONS.map(({ key, label, className }) => (
-        <div className={`absolute ${className}`} key={key}>
+        <div className={clsx(styles.spot, className)} key={key}>
           <Popover.Root>
             <Popover.Trigger
               renderItem={(props) => (
@@ -406,10 +389,7 @@ export const Placements: Story = {
             />
             <Popover.Content
               renderItem={(props) => (
-                <div
-                  className="bg-bg-raised rounded-lg p-4 shadow-md"
-                  {...props}
-                >
+                <div className={styles.panel} {...props}>
                   <div role="menuitem">{label}のポップオーバー</div>
                 </div>
               )}
@@ -457,9 +437,9 @@ const assertPlacement = (
 
 const placementStory = (placement: Placement): Story => ({
   render: () => (
-    // 縦横ともビューポートを埋めてトリガーを中央に置く（min-h-svh だけだと
+    // 縦横ともビューポートを埋めてトリガーを中央に置く（min-height: 100svh だけだと
     // 縦書きで block 軸=横となり幅が埋まらずトリガーが左端に寄ってしまう）。
-    <div className="fixed inset-0 flex items-center justify-center">
+    <div className={styles.centered}>
       <Popover.Root placement={placement}>
         <Popover.Trigger
           renderItem={(props) => (
@@ -470,7 +450,7 @@ const placementStory = (placement: Placement): Story => ({
         />
         <Popover.Content
           renderItem={(props) => (
-            <div className="bg-bg-raised rounded-lg p-4 shadow-md" {...props}>
+            <div className={styles.panel} {...props}>
               <div role="menuitem">{placement}</div>
             </div>
           )}
@@ -529,7 +509,7 @@ const settle = async (): Promise<void> => {
 const SwitchableWritingModePopover: FC = () => {
   const [isVertical, setIsVertical] = useState(false);
   return (
-    <div className="flex flex-col gap-2">
+    <div className={styles.switchable}>
       <button
         onClick={() => {
           setIsVertical(true);
@@ -538,7 +518,7 @@ const SwitchableWritingModePopover: FC = () => {
       >
         縦書きにする
       </button>
-      <div className={isVertical ? 'writing-v h-60' : 'h-60'}>
+      <div className={clsx(isVertical && 'writing-v', styles.area)}>
         <Popover.Root>
           <Popover.Trigger
             renderItem={(props) => (
@@ -549,7 +529,7 @@ const SwitchableWritingModePopover: FC = () => {
           />
           <Popover.Content
             renderItem={(props) => (
-              <div className="bg-bg-raised rounded-lg p-4 shadow-md" {...props}>
+              <div className={styles.panel} {...props}>
                 <div role="menuitem">縦書きの内容</div>
               </div>
             )}
