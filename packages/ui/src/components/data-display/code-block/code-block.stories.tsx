@@ -5,6 +5,8 @@ import { expect, spyOn, waitFor } from 'storybook/test';
 import { CodeBlock } from '.';
 import { blurActiveElement } from '../../../../.storybook/focus';
 
+import styles from './code-block.stories.module.css';
+
 // CodeBlock はサーバーでハイライトする async の Server Component で、
 // ブラウザの React は async の部品を描かない。RSC の描画と同じく関数として
 // 呼んで待ち、できた要素を描く
@@ -132,7 +134,7 @@ export const StretchedByParent: Story = {
       long: ReactElement;
     };
     return (
-      <div className="grid grid-cols-2 gap-4 *:min-w-0">
+      <div className={styles.pair}>
         {short}
         {long}
       </div>

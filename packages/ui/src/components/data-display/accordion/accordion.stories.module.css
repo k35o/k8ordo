@@ -1,0 +1,10 @@
+.title {
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-lg);
+}
+
+.stanzas {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 4);
+}

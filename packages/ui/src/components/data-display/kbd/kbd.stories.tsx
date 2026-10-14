@@ -3,6 +3,8 @@ import { expect } from 'storybook/test';
 
 import { Kbd } from './kbd';
 
+import styles from './kbd.stories.module.css';
+
 const meta: Meta<typeof Kbd> = {
   title: 'components/data-display/kbd',
   component: Kbd,
@@ -23,10 +25,10 @@ export const Default: Story = {
 // 組み合わせは 1 キーずつ並べる
 export const Combination: Story = {
   render: () => (
-    <p className="flex items-center gap-1 text-sm">
+    <p className={styles.combination}>
       <Kbd label="Command">⌘</Kbd>
       <Kbd>K</Kbd>
-      <span className="text-fg-mute ml-2">でコマンドパレットを開く</span>
+      <span className={styles.caption}>でコマンドパレットを開く</span>
     </p>
   ),
   play: async ({ canvasElement }) => {
@@ -48,7 +50,7 @@ export const SymbolWithLabel: Story = {
 
 export const InSentence: Story = {
   render: () => (
-    <p className="leading-relaxed">
+    <p className={styles.sentence}>
       保存するには <Kbd>Ctrl</Kbd> と <Kbd>S</Kbd> を同時に押します。
     </p>
   ),

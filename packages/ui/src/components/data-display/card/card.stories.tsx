@@ -3,6 +3,8 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Button } from '../../buttons/button';
 import { Card } from './card';
 
+import styles from './card.stories.module.css';
+
 const meta: Meta<typeof Card> = {
   title: 'components/data-display/card',
   component: Card,
@@ -14,9 +16,9 @@ type Story = StoryObj<typeof Card>;
 export const Primary: Story = {
   render: () => (
     <Card>
-      <div className="p-4">
-        <h3 className="text-lg font-bold">記事タイトル</h3>
-        <p className="text-fg-mute mt-2">
+      <div className={styles.body}>
+        <h3 className={styles.title}>記事タイトル</h3>
+        <p className={styles.description}>
           これはカードコンポーネントの説明文です。コンテンツを囲んで視覚的にグループ化します。
         </p>
       </div>
@@ -26,22 +28,22 @@ export const Primary: Story = {
 
 export const Interactive: Story = {
   render: () => (
-    <div className="flex flex-col gap-4">
+    <div className={styles.list}>
       <Card interactive>
-        <a className="block p-4" href="https://example.com">
-          <h3 className="font-bold">カード全体がリンク</h3>
-          <p className="text-fg-mute mt-2 text-sm">
+        <a className={styles.link} href="https://example.com">
+          <h3 className={styles.compactTitle}>カード全体がリンク</h3>
+          <p className={styles.linkDescription}>
             カード全体をクリックして遷移します。
           </p>
         </a>
       </Card>
       <Card interactive>
-        <div className="flex flex-col gap-3 p-4">
-          <h3 className="font-bold">カード内にボタンとリンク</h3>
-          <p className="text-fg-mute text-sm">
+        <div className={styles.actionsBody}>
+          <h3 className={styles.compactTitle}>カード内にボタンとリンク</h3>
+          <p className={styles.note}>
             カード内にインタラクティブ要素を配置できます。
           </p>
-          <nav className="flex gap-2">
+          <nav className={styles.actions}>
             <Button
               renderItem={({ className, children }) => (
                 <a className={className} href="https://example.com">
@@ -65,9 +67,9 @@ export const Interactive: Story = {
 export const Bordered: Story = {
   render: () => (
     <Card variant="outline">
-      <div className="p-4">
-        <h3 className="text-lg font-bold">ボーダースタイル</h3>
-        <p className="text-fg-mute mt-2">
+      <div className={styles.body}>
+        <h3 className={styles.title}>ボーダースタイル</h3>
+        <p className={styles.description}>
           シャドウの代わりにボーダーで区切るスタイルです。
         </p>
       </div>
@@ -78,7 +80,7 @@ export const Bordered: Story = {
 export const FitWidth: Story = {
   render: () => (
     <Card width="fit">
-      <div className="p-4">
+      <div className={styles.body}>
         <p>幅がコンテンツに合わせて調整されます。</p>
       </div>
     </Card>

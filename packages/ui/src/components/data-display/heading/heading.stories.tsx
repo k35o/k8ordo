@@ -3,6 +3,8 @@ import { expect } from 'storybook/test';
 
 import { Heading } from './heading';
 
+import styles from './heading.stories.module.css';
+
 const meta: Meta<typeof Heading> = {
   title: 'components/data-display/heading',
   component: Heading,
@@ -59,7 +61,7 @@ export const LineClamp: Story = {
     lineClamp: 2,
   },
   render: (args) => (
-    <div className="w-48">
+    <div className={styles.frame}>
       <Heading {...args}>
         k8oの見出しはとても長くなることがあるため、行数を制限して折り返しを2行までに抑えられることを確認する。
       </Heading>

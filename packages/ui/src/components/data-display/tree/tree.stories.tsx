@@ -5,6 +5,8 @@ import { expect, fn } from 'storybook/test';
 import { Tree } from '.';
 import type { TreeItem } from '.';
 
+import styles from './tree.stories.module.css';
+
 const meta: Meta<typeof Tree> = {
   title: 'components/data-display/tree',
   component: Tree,
@@ -126,7 +128,7 @@ const ControlledTree = () => {
   ]);
   const [selectedId, setSelectedId] = useState<string | null>('card');
   return (
-    <div className="flex flex-col gap-4">
+    <div className={styles.controlled}>
       <Tree
         expandedIds={expandedIds}
         items={FILES}

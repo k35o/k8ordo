@@ -8,6 +8,8 @@ import { AssistantIcon } from '../../icons';
 import { Attachment } from '../attachment';
 import { Source } from '../source';
 
+import styles from './message.stories.module.css';
+
 const meta: Meta<typeof Message.Root> = {
   title: 'components/ai/message',
   component: Message.Root,
@@ -52,7 +54,7 @@ export const Streaming: Story = {
 
 export const Conversation: Story = {
   render: () => (
-    <div className="flex flex-col gap-6">
+    <div className={styles.thread}>
       <Message.Root from="user">
         <Message.Content>
           長い URL も折り返せる？

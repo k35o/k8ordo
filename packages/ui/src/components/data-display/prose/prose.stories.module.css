@@ -1,0 +1,7 @@
+.article {
+  max-width: 42rem;
+}
+
+.verticalArticle {
+  height: calc(var(--spacing) * 80);
+}

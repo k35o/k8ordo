@@ -3,6 +3,8 @@ import { expect } from 'storybook/test';
 
 import { Badge } from './badge';
 
+import styles from './badge.stories.module.css';
+
 const meta: Meta<typeof Badge> = {
   title: 'components/data-display/badge',
   component: Badge,
@@ -22,7 +24,7 @@ export const Default: Story = {
 
 export const Sizes: Story = {
   render: () => (
-    <div className="flex flex-wrap items-center gap-3">
+    <div className={styles.sizes}>
       <Badge label="Small" size="sm" />
       <Badge label="Medium" size="md" />
       <Badge label="Large" size="lg" />
@@ -32,7 +34,7 @@ export const Sizes: Story = {
 
 export const Tones: Story = {
   render: () => (
-    <div className="flex flex-wrap gap-3">
+    <div className={styles.tones}>
       <Badge label="Neutral" />
       <Badge label="Info" tone="info" />
       <Badge label="Success" tone="success" />

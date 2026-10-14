@@ -1,0 +1,14 @@
+.frame {
+  width: calc(var(--spacing) * 96);
+  height: calc(var(--spacing) * 100);
+  border-width: 1px;
+  border-style: solid;
+  border-color: var(--color-border-base);
+  border-radius: var(--radius-xl);
+}
+
+.growing {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 2);
+}

@@ -9,6 +9,8 @@ import { useToast } from './context';
 import type { ToastOptions } from './context';
 import { ToastProvider } from './provider';
 
+import styles from './toast.stories.module.css';
+
 const ToastTrigger = ({
   label = 'トーストを呼ぶ',
   message = 'トーストを呼びました',
@@ -76,7 +78,7 @@ export const Primary: Story = {
 
 export const Tones: Story = {
   render: () => (
-    <div className="flex gap-2">
+    <div className={styles.triggers}>
       <ToastTrigger label="success" message="成功しました" tone="success" />
       <ToastTrigger label="info" message="情報です" tone="info" />
       <ToastTrigger label="warning" message="警告です" tone="warning" />
@@ -169,7 +171,7 @@ const CloseByIdRender = () => {
   const { open, close } = useToast();
   const pendingIdRef = useRef('');
   return (
-    <div className="flex gap-2">
+    <div className={styles.triggers}>
       <Button
         onClick={() => {
           pendingIdRef.current = open('info', '同期しています', {
@@ -356,7 +358,7 @@ export const FocusReturnToOpener: Story = {
 
 export const FocusMovesToNextToast: Story = {
   render: () => (
-    <div className="flex gap-2">
+    <div className={styles.triggers}>
       <ToastTrigger
         label="先に開く"
         message="先に開いたトースト"
@@ -397,7 +399,7 @@ const OverflowRender = () => {
     open('success', message, { duration: Number.POSITIVE_INFINITY });
   };
   return (
-    <div className="flex gap-2">
+    <div className={styles.triggers}>
       <Button
         onClick={() => {
           for (const index of [1, 2, 3, 4, 5]) {
@@ -454,7 +456,7 @@ export const OverflowHeldWhileFocused: Story = {
 
 export const LiveRegionStructure: Story = {
   render: () => (
-    <div className="flex gap-2">
+    <div className={styles.triggers}>
       <ToastTrigger label="success" message="成功しました" tone="success" />
       <ToastTrigger label="error" message="失敗しました" tone="error" />
     </div>

@@ -6,6 +6,8 @@ import { expect, waitFor } from 'storybook/test';
 import { Conversation } from '.';
 import { Message } from '../message';
 
+import styles from './conversation.stories.module.css';
+
 const meta: Meta<typeof Conversation.Root> = {
   title: 'components/ai/conversation',
   component: Conversation.Root,
@@ -18,7 +20,7 @@ const items = Array.from({ length: 20 }, (_, i) => i);
 
 export const Default: Story = {
   render: () => (
-    <div className="border-border-base h-100 w-96 rounded-xl border">
+    <div className={styles.frame}>
       <Conversation.Root>
         <Conversation.Messages>
           <Message.Root from="assistant">
@@ -42,7 +44,7 @@ export const Default: Story = {
 export const StickToBottom: Story = {
   parameters: { vrt: { skip: true } },
   render: () => (
-    <div className="border-border-base h-100 w-96 rounded-xl border">
+    <div className={styles.frame}>
       <Conversation.Root>
         <Conversation.Messages>
           {items.map((i) => (
@@ -87,7 +89,7 @@ const isAtBottom = (log: HTMLElement): boolean =>
 const Growing: FC = () => {
   const [count, setCount] = useState(items.length);
   return (
-    <div className="flex flex-col gap-2">
+    <div className={styles.growing}>
       <button
         onClick={() => {
           setCount((current) => current + 1);
@@ -96,7 +98,7 @@ const Growing: FC = () => {
       >
         追加する
       </button>
-      <div className="border-border-base h-100 w-96 rounded-xl border">
+      <div className={styles.frame}>
         <Conversation.Root>
           <Conversation.Messages>
             {Array.from({ length: count }, (_, i) => (

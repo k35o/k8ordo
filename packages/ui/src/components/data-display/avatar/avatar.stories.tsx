@@ -3,6 +3,8 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { AssistantIcon } from '../../icons';
 import { Avatar } from './avatar';
 
+import styles from './avatar.stories.module.css';
+
 const meta: Meta<typeof Avatar> = {
   title: 'components/data-display/avatar',
   component: Avatar,
@@ -47,7 +49,7 @@ export const WithIcon: Story = {
 
 export const AccentColors: Story = {
   render: () => (
-    <div className="flex items-center gap-3">
+    <div className={styles.row}>
       <Avatar icon={<AssistantIcon />} name="AI" />
       <Avatar color="primary" icon={<AssistantIcon />} name="AI" />
       <Avatar color="secondary" icon={<AssistantIcon />} name="AI" />

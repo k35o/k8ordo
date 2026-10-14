@@ -1,0 +1,4 @@
+.triggers {
+  display: flex;
+  gap: calc(var(--spacing) * 2);
+}
