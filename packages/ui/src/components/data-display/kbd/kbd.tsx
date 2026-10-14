@@ -1,15 +1,15 @@
 import type { FC, HTMLAttributes } from 'react';
 
+import srOnly from '../../_internal/sr-only.module.css';
+import styles from './kbd.module.css';
+
 type Props = {
   children: string;
   label?: string;
 } & Omit<HTMLAttributes<HTMLElement>, 'children' | 'className' | 'style'>;
 
 export const Kbd: FC<Props> = ({ children, label, ...rest }) => (
-  <kbd
-    {...rest}
-    className="border-border-mute bg-bg-subtle text-fg-mute inline-flex min-w-6 items-center justify-center rounded-md border border-b-2 px-1.5 py-0.5 text-xs leading-none"
-  >
+  <kbd {...rest} className={styles.root}>
     {label === undefined ? (
       children
     ) : (
@@ -17,7 +17,7 @@ export const Kbd: FC<Props> = ({ children, label, ...rest }) => (
       // 記号のまま、読み上げには label を渡す
       <>
         <span aria-hidden="true">{children}</span>
-        <span className="sr-only">{label}</span>
+        <span className={srOnly.srOnly}>{label}</span>
       </>
     )}
   </kbd>

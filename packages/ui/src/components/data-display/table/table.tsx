@@ -1,3 +1,4 @@
+import { clsx } from 'clsx';
 import type {
   ComponentProps,
   FC,
@@ -8,8 +9,9 @@ import type {
   ThHTMLAttributes,
 } from 'react';
 
-import { cn } from '../../../helpers/cn';
 import { EmptyState } from '../../feedback/empty-state';
+
+import styles from './table.module.css';
 
 type RootProps = PropsWithChildren<
   Omit<TableHTMLAttributes<HTMLTableElement>, 'className' | 'style'>
@@ -56,25 +58,30 @@ type EmptyRowProps = {
   colSpan: number;
 } & ComponentProps<typeof EmptyState>;
 
+const ALIGN = {
+  left: undefined,
+  center: styles.center,
+  right: styles.right,
+} as const;
+
+const COLOR = { base: styles.base, mute: styles.mute } as const;
+
 const Root: FC<RootProps> = ({ children, ...rest }) => (
-  <div className="border-border-mute bg-bg-base vertical:writing-sideways-rl vertical:size-fit w-full overflow-x-auto rounded-lg border">
-    <table {...rest} className="min-w-full border-collapse text-left text-sm">
+  <div className={styles.root}>
+    <table {...rest} className={styles.table}>
       {children}
     </table>
   </div>
 );
 
 const Head: FC<SectionProps> = ({ children, ...rest }) => (
-  <thead {...rest} className="bg-bg-subtle">
+  <thead {...rest} className={styles.head}>
     {children}
   </thead>
 );
 
 const Body: FC<SectionProps> = ({ children, ...rest }) => (
-  <tbody
-    {...rest}
-    className="vertical:[&_tr:last-child]:border-l-0 [&_tr:last-child]:border-b-0"
-  >
+  <tbody {...rest} className={styles.body}>
     {children}
   </tbody>
 );
@@ -87,11 +94,10 @@ const Row: FC<RowProps> = ({
 }) => (
   <tr
     {...rest}
-    className={cn(
-      'border-border-mute border-b transition-colors duration-150 ease-out vertical:border-b-0 vertical:border-l',
-      interactive && 'hover:bg-bg-mute',
-      selected &&
-        'bg-primary-bg-subtle forced-colors:bg-[Highlight] forced-colors:text-[HighlightText]',
+    className={clsx(
+      styles.row,
+      interactive && styles.interactive,
+      selected && styles.selected,
     )}
   >
     {children}
@@ -104,15 +110,7 @@ const HeaderCell: FC<HeaderCellProps> = ({
   scope = 'col',
   ...rest
 }) => (
-  <th
-    {...rest}
-    className={cn(
-      'px-4 py-3 font-medium text-fg-base',
-      align === 'center' && 'text-center',
-      align === 'right' && 'text-right',
-    )}
-    scope={scope}
-  >
+  <th {...rest} className={clsx(styles.headerCell, ALIGN[align])} scope={scope}>
     {children}
   </th>
 );
@@ -123,29 +121,21 @@ const Cell: FC<CellProps> = ({
   color = 'base',
   ...rest
 }) => (
-  <td
-    {...rest}
-    className={cn(
-      'px-4 py-3 align-middle',
-      color === 'mute' ? 'text-fg-mute' : 'text-fg-base',
-      align === 'center' && 'text-center',
-      align === 'right' && 'text-right',
-    )}
-  >
+  <td {...rest} className={clsx(styles.cell, COLOR[color], ALIGN[align])}>
     {children}
   </td>
 );
 
 const Caption: FC<CaptionProps> = ({ children, ...rest }) => (
-  <caption {...rest} className="text-fg-mute caption-bottom px-4 py-3 text-sm">
+  <caption {...rest} className={styles.caption}>
     {children}
   </caption>
 );
 
 // 空の見た目は EmptyState が持つ。ここは表の中に置くための行とセルだけ
 const EmptyRow: FC<EmptyRowProps> = ({ colSpan, ...rest }) => (
-  <tr className="border-border-mute border-b">
-    <td className="align-middle" colSpan={colSpan}>
+  <tr className={styles.emptyRow}>
+    <td className={styles.emptyCell} colSpan={colSpan}>
       <EmptyState {...rest} />
     </td>
   </tr>

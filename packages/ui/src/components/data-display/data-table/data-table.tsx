@@ -1,11 +1,10 @@
 'use client';
 
+import { clsx } from 'clsx';
 import { useId } from 'react';
 import type { ReactNode } from 'react';
 
-import { cn } from '../../../helpers/cn';
 import { getMessages } from '../../../i18n/current';
-import { FOCUS_RING_NO_BORDER } from '../../_internal/focus-ring';
 import { Button } from '../../buttons/button';
 import { Checkbox } from '../../form/checkbox';
 import { CheckboxGroup } from '../../form/checkbox-group';
@@ -13,6 +12,9 @@ import { ChevronIcon } from '../../icons';
 import { Popover } from '../../overlays/popover';
 import { Table } from '../table';
 import type { CellAlign } from '../table';
+
+import focusRing from '../../_internal/focus-ring.module.css';
+import styles from './data-table.module.css';
 
 export type DataTableColumn<Row> = {
   id: string;
@@ -70,10 +72,10 @@ const SortButton = <Row,>({
   const direction = sort?.columnId === column.id ? sort.direction : null;
   return (
     <button
-      className={cn(
-        'group -mx-2 inline-flex items-center gap-1 rounded-md px-2 py-1 font-medium transition-colors duration-150 ease-out hover:bg-bg-mute',
-        column.align === 'right' && 'flex-row-reverse',
-        FOCUS_RING_NO_BORDER,
+      className={clsx(
+        styles.sortButton,
+        column.align === 'right' && styles.alignRight,
+        focusRing.ringNoBorder,
       )}
       onClick={() => {
         onSortChange(nextSort(column.id, sort));
@@ -83,10 +85,7 @@ const SortButton = <Row,>({
       {column.header}
       <span
         aria-hidden="true"
-        className={cn(
-          'inline-flex transition-opacity',
-          direction === null && 'opacity-0 group-hover:opacity-60',
-        )}
+        className={clsx(styles.sortIcon, direction === null && styles.unsorted)}
       >
         <ChevronIcon
           direction={direction === 'descending' ? 'down' : 'up'}
@@ -133,9 +132,9 @@ const ColumnMenu = <Row,>({
           <div
             {...props}
             aria-labelledby={titleId}
-            className="bg-bg-raised flex flex-col gap-3 rounded-lg p-4 shadow-md"
+            className={styles.columnMenu}
           >
-            <p className="text-fg-mute text-xs font-bold" id={titleId}>
+            <p className={styles.columnMenuTitle} id={titleId}>
               {messages.dataTableColumns}
             </p>
             <CheckboxGroup.Root
@@ -189,9 +188,9 @@ export const DataTable = <Row,>({
   const columnCount = visibleColumns.length + (isSelectable ? 1 : 0);
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className={styles.root}>
       {onHiddenColumnIdsChange === undefined ? null : (
-        <div className="flex justify-end">
+        <div className={styles.toolbar}>
           <ColumnMenu
             columns={columns}
             hiddenColumnIds={hiddenColumnIds}

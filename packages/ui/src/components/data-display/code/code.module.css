@@ -1,0 +1,32 @@
+.root {
+  margin: calc(var(--spacing) * 0.5);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg-mute);
+  padding-inline: calc(var(--spacing) * 1.5);
+
+  @media (width >= 40rem) {
+    padding-block: calc(var(--spacing) * 0.5);
+  }
+}
+
+/* 色の見本を文字と並べる。縦書きでは地の文と同じ行の流れに戻す */
+.withColors {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(var(--spacing) * 1);
+
+  @container style(--writing: vertical) {
+    display: inline;
+    gap: 0;
+  }
+}
+
+.swatch {
+  display: inline-block;
+  width: calc(var(--spacing) * 3);
+  height: calc(var(--spacing) * 3);
+  flex-shrink: 0;
+  border: 1px solid var(--color-border-base);
+  border-radius: var(--radius-sm);
+  forced-color-adjust: none;
+}

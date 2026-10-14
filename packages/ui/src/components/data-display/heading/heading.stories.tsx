@@ -68,8 +68,10 @@ export const LineClamp: Story = {
     </div>
   ),
   play: async ({ canvas }) => {
-    await expect(canvas.getByRole('heading', { level: 1 })).toHaveClass(
-      'line-clamp-2',
-    );
+    await expect(
+      getComputedStyle(
+        canvas.getByRole('heading', { level: 1 }),
+      ).getPropertyValue('-webkit-line-clamp'),
+    ).toBe('2');
   },
 };

@@ -1,10 +1,12 @@
 'use client';
 
+import { clsx } from 'clsx';
 import type { FC, HTMLAttributes, ReactNode } from 'react';
 import { useState } from 'react';
 
-import { cn } from '../../../helpers/cn';
 import { getMessages } from '../../../i18n/current';
+
+import styles from './avatar.module.css';
 
 type Props = {
   alt?: string;
@@ -18,6 +20,20 @@ type Props = {
   HTMLAttributes<HTMLSpanElement>,
   'role' | 'aria-label' | 'className' | 'style'
 >;
+
+const COLOR = {
+  base: styles.base,
+  primary: styles.primary,
+  secondary: styles.secondary,
+} as const;
+
+const SIZE = { sm: styles.sm, md: styles.md, lg: styles.lg } as const;
+
+const ICON_SIZE = {
+  sm: styles.iconSm,
+  md: styles.iconMd,
+  lg: styles.iconLg,
+} as const;
 
 const getInitials = (name?: string) => {
   if (name === undefined || name === '') {
@@ -54,23 +70,13 @@ export const Avatar: FC<Props> = ({
     <span
       {...rest}
       aria-label={label}
-      className={cn(
-        'inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full border font-medium',
-        color === 'base' && 'border-border-base bg-bg-mute text-fg-base',
-        color === 'primary' &&
-          'border-transparent bg-primary-bg text-primary-fg',
-        color === 'secondary' &&
-          'border-transparent bg-secondary-bg text-secondary-fg',
-        size === 'sm' && 'size-8 text-xs',
-        size === 'md' && 'size-10 text-sm',
-        size === 'lg' && 'size-14 text-lg',
-      )}
+      className={clsx(styles.root, COLOR[color], SIZE[size])}
       role="img"
     >
       {showImage ? (
         <img
           alt={alt ?? ''}
-          className="size-full object-cover"
+          className={styles.image}
           height={imageSize}
           onError={() => {
             setFailedSrc(src ?? null);
@@ -81,16 +87,7 @@ export const Avatar: FC<Props> = ({
       ) : icon === undefined ? (
         <span aria-hidden>{fallback ?? getInitials(name)}</span>
       ) : (
-        <span
-          aria-hidden
-          className={cn(
-            'flex items-center justify-center',
-            // アイコンをアバターより一回り小さく揃え、常に程よい余白を確保する。
-            size === 'sm' && '[&_svg]:size-5',
-            size === 'md' && '[&_svg]:size-6',
-            size === 'lg' && '[&_svg]:size-8',
-          )}
-        >
+        <span aria-hidden className={clsx(styles.icon, ICON_SIZE[size])}>
           {icon}
         </span>
       )}

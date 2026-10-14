@@ -1,7 +1,8 @@
+import { clsx } from 'clsx';
 import type { ButtonHTMLAttributes, FC, HTMLAttributes } from 'react';
 
-import { cn } from '../../../helpers/cn';
-import { FOCUS_RING_NO_BORDER } from '../../_internal/focus-ring';
+import focusRing from '../../_internal/focus-ring.module.css';
+import styles from './badge.module.css';
 
 type Size = 'sm' | 'md' | 'lg';
 type Tone = 'neutral' | 'info' | 'success' | 'warning' | 'error';
@@ -27,82 +28,28 @@ type StaticProps = {
 
 type Props = BaseProps & (InteractiveProps | StaticProps);
 
+const SIZE = { sm: styles.sm, md: styles.md, lg: styles.lg } as const;
+
+const TONE = {
+  neutral: { solid: styles.neutralSolid, outline: styles.neutralOutline },
+  info: { solid: styles.infoSolid, outline: styles.infoOutline },
+  success: { solid: styles.successSolid, outline: styles.successOutline },
+  warning: { solid: styles.warningSolid, outline: styles.warningOutline },
+  error: { solid: styles.errorSolid, outline: styles.errorOutline },
+} as const;
+
 const badgeClassName = (
   size: Size,
   tone: Tone,
   variant: Variant,
   interactive: boolean,
-): string => {
-  const interactiveClassName = cn(
-    interactive && `cursor-pointer ${FOCUS_RING_NO_BORDER}`,
-    interactive &&
-      tone === 'neutral' &&
-      variant === 'solid' &&
-      'hover:bg-bg-emphasize active:bg-bg-base',
-    interactive &&
-      tone === 'neutral' &&
-      variant === 'outline' &&
-      'hover:bg-bg-subtle active:bg-bg-mute',
-    interactive &&
-      tone !== 'neutral' &&
-      variant === 'solid' &&
-      'hover:bg-bg-base active:bg-bg-base',
-    interactive &&
-      tone === 'info' &&
-      variant === 'outline' &&
-      'hover:bg-bg-info active:bg-bg-info',
-    interactive &&
-      tone === 'success' &&
-      variant === 'outline' &&
-      'hover:bg-bg-success active:bg-bg-success',
-    interactive &&
-      tone === 'warning' &&
-      variant === 'outline' &&
-      'hover:bg-bg-warning active:bg-bg-warning',
-    interactive &&
-      tone === 'error' &&
-      variant === 'outline' &&
-      'hover:bg-bg-error active:bg-bg-error',
+): string =>
+  clsx(
+    styles.root,
+    SIZE[size],
+    TONE[tone][variant],
+    interactive && [styles.interactive, focusRing.ringNoBorder],
   );
-
-  return cn(
-    'inline-flex items-center rounded-full border font-medium transition-colors duration-150 ease-out',
-    size === 'sm' && 'px-2 py-0.5 text-xs',
-    size === 'md' && 'px-2.5 py-1 text-xs',
-    size === 'lg' && 'px-3 py-1.5 text-sm',
-    tone === 'neutral' &&
-      variant === 'solid' &&
-      'border-border-mute bg-bg-mute text-fg-base',
-    tone === 'neutral' &&
-      variant === 'outline' &&
-      'border-border-base bg-bg-base text-fg-base',
-    tone === 'info' &&
-      variant === 'solid' &&
-      'border-border-info bg-bg-info text-fg-info',
-    tone === 'info' &&
-      variant === 'outline' &&
-      'border-border-info bg-bg-base text-fg-info',
-    tone === 'success' &&
-      variant === 'solid' &&
-      'border-border-success bg-bg-success text-fg-success',
-    tone === 'success' &&
-      variant === 'outline' &&
-      'border-border-success bg-bg-base text-fg-success',
-    tone === 'warning' &&
-      variant === 'solid' &&
-      'border-border-warning bg-bg-warning text-fg-warning',
-    tone === 'warning' &&
-      variant === 'outline' &&
-      'border-border-warning bg-bg-base text-fg-warning',
-    tone === 'error' &&
-      variant === 'solid' &&
-      'border-border-error bg-bg-error text-fg-error',
-    tone === 'error' &&
-      variant === 'outline' &&
-      'border-border-error bg-bg-base text-fg-error',
-    interactiveClassName,
-  );
-};
 
 export const Badge: FC<Props> = (props) => {
   if (props.interactive === true) {

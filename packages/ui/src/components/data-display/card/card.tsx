@@ -1,13 +1,21 @@
+import { clsx } from 'clsx';
 import type { FC, HTMLAttributes } from 'react';
 
-import { HIGH_CONTRAST_EDGE } from '../../_internal/high-contrast';
-import { cn } from './../../../helpers/cn';
+import highContrast from '../../_internal/high-contrast.module.css';
+import styles from './card.module.css';
 
 type CardProps = {
   width?: 'full' | 'fit';
   variant?: 'shadow' | 'outline';
   interactive?: boolean;
 } & Omit<HTMLAttributes<HTMLDivElement>, 'className' | 'style'>;
+
+const VARIANT = {
+  shadow: [styles.shadow, highContrast.edge],
+  outline: styles.outline,
+} as const;
+
+const WIDTH = { full: styles.full, fit: styles.fit } as const;
 
 export const Card: FC<CardProps> = ({
   children,
@@ -18,15 +26,11 @@ export const Card: FC<CardProps> = ({
 }) => (
   <div
     {...rest}
-    className={cn(
-      'rounded-xl',
-      variant === 'shadow' && ['shadow-sm', HIGH_CONTRAST_EDGE],
-      variant === 'outline' && 'border border-border-mute',
-      width === 'full' && 'w-full',
-      width === 'fit' && 'w-fit',
-      interactive &&
-        'motion-safe:transition-transform motion-safe:hover:scale-[1.02] motion-safe:active:scale-[0.98]',
-      'bg-bg-base',
+    className={clsx(
+      styles.root,
+      VARIANT[variant],
+      WIDTH[width],
+      interactive && styles.interactive,
     )}
   >
     {children}

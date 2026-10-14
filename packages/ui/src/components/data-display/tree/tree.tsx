@@ -1,12 +1,14 @@
 'use client';
 
+import { clsx } from 'clsx';
 import { useId, useRef, useState } from 'react';
 import type { FC, HTMLAttributes, KeyboardEvent, ReactNode } from 'react';
 
-import { cn } from '../../../helpers/cn';
 import { useControllableState } from '../../../hooks/controllable-state';
 import { readWritingMode } from '../../../hooks/writing-mode';
 import { ChevronIcon } from '../../icons';
+
+import styles from './tree.module.css';
 
 export type TreeItem = {
   id: string;
@@ -191,7 +193,7 @@ export const Tree: FC<Props> = ({
           aria-expanded={isParent ? isExpanded : undefined}
           aria-labelledby={labelId}
           aria-selected={isSelected}
-          className="[&:focus-visible>div]:ring-border-info focus-visible:outline-none [&:focus-visible>div]:ring-2 [&:focus-visible>div]:outline-hidden"
+          className={styles.item}
           key={item.id}
           onClick={(event) => {
             // 入れ子の項目のクリックが、親の項目まで泡立たないようにする
@@ -219,26 +221,24 @@ export const Tree: FC<Props> = ({
           tabIndex={item.id === tabbableId ? 0 : -1}
         >
           <div
-            className={cn(
-              'flex cursor-pointer items-center gap-1.5 rounded-md py-1.5 pe-3 text-sm transition-colors duration-150 ease-out',
-              isSelected
-                ? 'bg-primary-bg-subtle text-fg-base font-medium forced-colors:bg-[Highlight] forced-colors:text-[HighlightText]'
-                : 'text-fg-mute hover:bg-bg-mute hover:text-fg-base',
+            className={clsx(
+              styles.row,
+              isSelected ? styles.selected : styles.unselected,
             )}
             style={{ paddingInlineStart: `${String(depth * 0.75 + 0.25)}rem` }}
           >
             <span
               aria-hidden="true"
-              className={cn(
-                'inline-flex size-4 shrink-0 transition-transform',
-                !isParent && 'invisible',
-                isExpanded && 'rotate-90',
+              className={clsx(
+                styles.chevron,
+                !isParent && styles.leaf,
+                isExpanded && styles.expanded,
               )}
             >
               <ChevronIcon direction="right" size="sm" />
             </span>
             {item.icon === undefined ? null : (
-              <span aria-hidden="true" className="inline-flex shrink-0">
+              <span aria-hidden="true" className={styles.icon}>
                 {item.icon}
               </span>
             )}
@@ -252,7 +252,7 @@ export const Tree: FC<Props> = ({
     });
 
   return (
-    <ul {...rest} aria-label={label} className="flex flex-col" role="tree">
+    <ul {...rest} aria-label={label} className={styles.root} role="tree">
       {renderItems(items, 0)}
     </ul>
   );

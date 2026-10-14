@@ -1,0 +1,3 @@
+.root {
+  padding-bottom: calc(var(--spacing) * 4);
+}

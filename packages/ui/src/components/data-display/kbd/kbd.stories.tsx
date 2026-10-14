@@ -44,7 +44,12 @@ export const SymbolWithLabel: Story = {
   },
   play: async ({ canvas }) => {
     await expect(canvas.getByText('⇧')).toHaveAttribute('aria-hidden', 'true');
-    await expect(canvas.getByText('Shift')).toHaveClass('sr-only');
+    await expect(canvas.getByText('Shift')).toHaveStyle({
+      position: 'absolute',
+      width: '1px',
+      height: '1px',
+      overflow: 'hidden',
+    });
   },
 };
 

@@ -1,0 +1,81 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 3);
+}
+
+.track {
+  display: flex;
+  gap: calc(var(--spacing) * 4);
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  border-radius: var(--radius-lg);
+  padding: calc(var(--spacing) * 1);
+  scroll-snap-type: inline mandatory;
+  scrollbar-width: none;
+  scroll-padding-inline-start: calc(var(--spacing) * 1);
+
+  @media (prefers-reduced-motion: no-preference) {
+    scroll-behavior: smooth;
+  }
+
+  @container style(--writing: vertical) {
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+  }
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--spacing) * 3);
+}
+
+/* 左右の矢印。縦書きではスライドが上から下へ並ぶので、上下を向かせる */
+.arrow {
+  display: inline-flex;
+
+  @container style(--writing: vertical) {
+    rotate: 90deg;
+  }
+}
+
+.position {
+  color: var(--color-fg-mute);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.current {
+  color: var(--color-fg-base);
+}
+
+.divider {
+  margin-inline: calc(var(--spacing) * 1);
+}
+
+.slide {
+  flex-shrink: 0;
+  scroll-snap-align: start;
+}
+
+.full {
+  flex-basis: 100%;
+}
+
+.lg {
+  flex-basis: calc(4 / 5 * 100%);
+}
+
+/* 2 枚、3 枚で、間（トラックの gap）を除いた幅を分け合う */
+.md {
+  flex-basis: calc((100% - 1rem) / 2);
+}
+
+.sm {
+  flex-basis: calc((100% - 2rem) / 3);
+}

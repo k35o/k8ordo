@@ -1,0 +1,14 @@
+.root {
+  /* 項目の間の線。ブロックの終わりに引くので、縦書きでは左に来る */
+  @scope (&) {
+    :where(& > :not(:last-child)) {
+      border-block-end: 1px solid var(--color-border-mute);
+    }
+  }
+
+  @container style(--writing: vertical) {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+}
