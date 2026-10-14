@@ -1,5 +1,6 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
+import path from 'node:path';
 
 import { expect, test } from 'vite-plus/test';
 
@@ -37,6 +38,15 @@ const collectUnlayeredSelectors = (source: string): string[] => {
   );
 };
 
+// @layer の宣言文とブロックに、レイヤーの名前が初めて現れた順
+const layerOrder = (source: string): string[] => [
+  ...new Set(
+    [...source.matchAll(/@layer ([^{;]+)[{;]/gu)].flatMap(([, names = '']) =>
+      names.split(',').map((name) => name.trim()),
+    ),
+  ),
+];
+
 test('styles.css は Tailwind のビルドを要求するディレクティブを含まない', () => {
   // これが1つでも残っていたら「Tailwind を持たないプロジェクトでは使えない」
   // に逆戻りする。この example の存在理由そのものを固定するテスト。
@@ -47,27 +57,39 @@ test('styles.css は Tailwind のビルドを要求するディレクティブ�
   expect(css).not.toContain('@custom-variant');
 });
 
-test('コンポーネントが参照するユーティリティが実際に生成されている', () => {
-  // ディレクティブ不在・レイヤー・トークンはクラス走査が全滅していても
-  // 成立してしまう。走査（@source）由来のクラスが最低限あることを固定する。
-  // 順に: 汎用 / Button の基底 / トークン由来 / フォーカスリング。
-  expect(css).toContain('.sr-only');
-  expect(css).toContain('.rounded-full');
-  expect(css).toContain('.bg-primary-bg');
-  expect(css).toContain('focus-visible\\:ring-2');
-});
-
 test('スタイルルールはすべてカスケードレイヤーに載っている', () => {
   // ライブラリ側が @layer 内にいる限り、レイヤー外にある利用側の CSS Modules
-  // はカスケードで優先される。宣言文の存在だけでなく、トップレベルに
+  // はカスケードで優先される。順序の宣言だけでなく、トップレベルに
   // 非レイヤーのスタイルルールが残っていないことまで確認する。
-  expect(css).toContain('@layer theme, base, components, utilities;');
+  expect(layerOrder(css)).toStrictEqual([
+    'properties',
+    'theme',
+    'base',
+    'components',
+    'utilities',
+  ]);
   expect(collectUnlayeredSelectors(css)).toStrictEqual([]);
 });
 
 test('セマンティックトークンが CSS カスタムプロパティとして配布される', () => {
   // app.module.css が var(--color-fg-mute) 等を参照できることの担保。
-  expect(css).toContain('--fg-mute:');
-  expect(css).toContain('--bg-subtle:');
-  expect(css).toContain('--primary-bg:');
+  expect(css).toContain('--color-fg-mute:');
+  expect(css).toContain('--color-bg-subtle:');
+  expect(css).toContain('--color-primary-bg:');
+});
+
+test('部品の CSS は部品の import と一緒にアプリへ届く', () => {
+  // styles.css は部品の見た目を持たない。部品の CSS は部品の JS が import
+  // するので、アプリのビルドに components レイヤーとして入る。
+  // ビルド済みの dist を読むので、先に `pnpm build` を実行しておく。
+  const assets = path.resolve(import.meta.dirname, '../dist/assets');
+  expect(existsSync(assets)).toBe(true);
+  const built = readdirSync(assets)
+    .filter((file) => file.endsWith('.css'))
+    .map((file) => readFileSync(path.join(assets, file), 'utf8'))
+    .join('\n');
+
+  expect(built).toMatch(/@layer components\s*\{/u);
+  // Button（solid / primary）の地の色
+  expect(built).toContain('background-color:var(--color-primary-bg)');
 });

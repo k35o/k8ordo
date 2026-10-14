@@ -20,7 +20,7 @@ function App() {
         </header>
 
         <p className={styles.lead}>
-          この example の依存に Tailwind CSS は存在しません。ビルド済みの
+          この example の依存に Tailwind CSS は存在しません。
           <code className={styles.token}>@k8ordo/ui/styles.css</code>
           を1回読み込むだけで、コンポーネントはそのまま動きます。
         </p>
@@ -29,8 +29,7 @@ function App() {
           <div className={styles.cardBody}>
             <Heading level="h2">コンポーネントはそのまま使える</Heading>
             <p className={styles.note}>
-              Button も Switch
-              もライブラリに同梱されたクラスだけで描画されます。
+              Button も Switch も、部品が自分で読み込む CSS だけで描画されます。
               ダークモードの切り替えも{' '}
               <code className={styles.token}>.dark</code>
               クラスの付け外しだけです。
