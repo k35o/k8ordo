@@ -37,32 +37,35 @@ const t = m.theming;
 
 const DARK = `document.documentElement.classList.add('dark');`;
 
-const CONTRAST = `const pressedStyles = [
-  'aria-pressed:bg-primary-bg-emphasize',
-  'forced-colors:aria-pressed:bg-[Highlight]',
-  'forced-colors:aria-pressed:text-[HighlightText]',
-].join(' ');`;
+const CONTRAST = `.button[aria-pressed='true'] {
+  background-color: var(--color-primary-bg-emphasize);
+
+  @media (forced-colors: active) {
+    background-color: var(--color-system-highlight);
+    color: var(--color-system-highlight-text);
+  }
+}`;
 
 const OVERRIDE = `:root {
-  --primary-fg: var(--purple-800);
-  --primary-bg: var(--purple-200);
-  --primary-bg-subtle: var(--purple-50);
-  --primary-bg-mute: var(--purple-100);
-  --primary-bg-emphasize: var(--purple-300);
-  --primary-border: var(--purple-500);
+  --color-primary-fg: var(--purple-800);
+  --color-primary-bg: var(--purple-200);
+  --color-primary-bg-subtle: var(--purple-50);
+  --color-primary-bg-mute: var(--purple-100);
+  --color-primary-bg-emphasize: var(--purple-300);
+  --color-primary-border: var(--purple-500);
 }
 
 .dark {
-  --primary-fg: var(--purple-300);
-  --primary-bg: var(--purple-800);
-  --primary-bg-subtle: var(--purple-950);
-  --primary-bg-mute: var(--purple-900);
-  --primary-bg-emphasize: var(--purple-700);
-  --primary-border: var(--purple-500);
+  --color-primary-fg: var(--purple-300);
+  --color-primary-bg: var(--purple-800);
+  --color-primary-bg-subtle: var(--purple-950);
+  --color-primary-bg-mute: var(--purple-900);
+  --color-primary-bg-emphasize: var(--purple-700);
+  --color-primary-border: var(--purple-500);
 }`;
 
 const OVERRIDE_VALUE = `:root {
-  --primary-border: oklch(0.55 0.15 300);
+  --color-primary-border: oklch(0.55 0.15 300);
 }`;
 
 const Z_INDEX_USAGE = {
@@ -385,7 +388,11 @@ export default function Theming() {
       </DocSection>
 
       <DocSection id="high-contrast" title={t.highContrastTitle}>
-        <CodeBlock code={CONTRAST} lang="ts" title="toggle-button.tsx" />
+        <CodeBlock
+          code={CONTRAST}
+          lang="css"
+          title="toggle-button.module.css"
+        />
         <p>
           <Rich>{t.highContrastOwnUi()}</Rich>
         </p>

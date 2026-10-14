@@ -34,7 +34,7 @@ const avatar = (
 
 export function Chat({ messages, send }: Props) {
   return (
-    <div className="flex h-full flex-col gap-3">
+    <div className={styles.chat}>
       <Conversation.Root>
         <Conversation.Messages>
           {messages.map((m) => (
@@ -83,7 +83,7 @@ export function Chat() {
   const { messages, sendMessage, status, stop } = useChat();
 
   return (
-    <div className="flex h-full flex-col gap-3">
+    <div className={styles.chat}>
       <Conversation.Root>
         <Conversation.Messages isStreaming={status === 'streaming'}>
           {messages.map((m) => (
@@ -148,7 +148,6 @@ const SUGGESTION = `import { Suggestion } from '@k8ordo/ui/ai';
 </Suggestion.List>`;
 
 const RESPONSE = `import { Response } from '@k8ordo/ui/ai/response';
-import 'streamdown/styles.css';
 
 <Message.Content>
   <Response isStreaming={isStreaming}>{markdown}</Response>

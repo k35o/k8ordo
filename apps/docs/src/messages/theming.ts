@@ -385,8 +385,8 @@ export const highContrastTitle = message({
 });
 
 export const highContrastOwnUi = message({
-  ja: '自分で作るUIでは、`contrast-more:`と`forced-colors:`のバリアントを使います。強制カラーではシステムカラーだけが残るので、選択状態は`Highlight`のようなシステムカラーで塗ります。',
-  en: 'In your own UI, use the `contrast-more:` and `forced-colors:` variants. Under forced colors only system colors apply, so paint a selected state with one such as `Highlight`.',
+  ja: '自分で作るUIでは、`@media (prefers-contrast: more)`と`@media (forced-colors: active)`で書き分けます。強制カラーではシステムカラーだけが残るので、選択状態は`--color-system-highlight`のようなシステムカラーのトークンで塗ります。`tailwind.css`では`contrast-more:`と`forced-colors:`のバリアントです。',
+  en: 'In your own UI, write the two cases as `@media (prefers-contrast: more)` and `@media (forced-colors: active)`. Under forced colors only system colors apply, so paint a selected state with a system color token such as `--color-system-highlight`. With `tailwind.css`, they are the `contrast-more:` and `forced-colors:` variants.',
 });
 
 export const highContrastStylesheet = message({
@@ -395,6 +395,6 @@ export const highContrastStylesheet = message({
 });
 
 export const highContrastAvoid = message({
-  ja: '境界やフォーカスリングを`box-shadow`だけで描かないでください。強制カラーでは影が消えます。要素を隠すときは`invisible`を使い、`text-transparent`は使わないでください。強制カラーでは透明の色も塗られて見えます。',
-  en: 'Do not draw a border or a focus ring with `box-shadow` alone, since forced colors remove shadows. To hide an element, use `invisible`, not `text-transparent`. Under forced colors, a transparent color is painted too and shows.',
+  ja: '境界やフォーカスリングを`box-shadow`だけで描かないでください。強制カラーでは影が消えます。要素を隠すときは`visibility: hidden`を使い、透明な文字色は使わないでください。強制カラーでは透明の色も塗られて見えます。',
+  en: 'Do not draw a border or a focus ring with `box-shadow` alone, since forced colors remove shadows. To hide an element, use `visibility: hidden`, not a transparent text color. Under forced colors, a transparent color is painted too and shows.',
 });
