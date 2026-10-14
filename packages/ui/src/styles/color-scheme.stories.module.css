@@ -10,3 +10,7 @@
   background-color: var(--color-bg-base);
   border-radius: var(--radius-xl);
 }
+
+.text {
+  color: var(--color-fg-base);
+}
