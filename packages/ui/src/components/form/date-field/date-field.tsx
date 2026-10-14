@@ -1,10 +1,11 @@
 'use client';
 
+import { clsx } from 'clsx';
 import type { FC, InputHTMLAttributes, Ref } from 'react';
 import { useFormStatus } from 'react-dom';
 
-import { cn } from '../../../helpers/cn';
-import { FOCUS_RING } from '../../_internal/focus-ring';
+import focusRing from '../../_internal/focus-ring.module.css';
+import styles from './date-field.module.css';
 
 type Props = {
   invalid?: boolean;
@@ -24,13 +25,8 @@ export const DateField: FC<Props> = ({
   return (
     <input
       aria-invalid={invalid}
-      className={cn(
-        'rounded-xl border border-border-base bg-bg-base px-3 py-2 tabular-nums inline-full',
-        'aria-invalid:border-border-error',
-        'disabled:cursor-not-allowed disabled:border-border-mute disabled:bg-bg-mute hover:disabled:bg-bg-mute',
-        'read-only:cursor-not-allowed read-only:bg-bg-subtle',
-        FOCUS_RING,
-      )}
+      className={clsx(styles.root, focusRing.ring)}
+
       readOnly={pending || readOnly}
       ref={ref}
       {...rest}

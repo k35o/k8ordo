@@ -1,0 +1,97 @@
+/* サーバーの HTML に描く代わりの箱。本体と同じ寸法にして、ブラウザで
+   描き直したときに周りが動かないようにする */
+.fallback {
+  block-size: calc(var(--spacing) * 76);
+  inline-size: calc(var(--spacing) * 70);
+}
+
+.root {
+  display: inline-flex;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 2);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(var(--spacing) * 2);
+}
+
+.month {
+  font-weight: var(--font-weight-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+.grid {
+  border-collapse: collapse;
+}
+
+.weekday {
+  block-size: calc(var(--spacing) * 8);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-fg-mute);
+}
+
+.cell {
+  padding: 0;
+}
+
+.blank {
+  width: calc(var(--spacing) * 10);
+  height: calc(var(--spacing) * 10);
+  padding: 0;
+}
+
+.day {
+  display: inline-flex;
+  width: calc(var(--spacing) * 10);
+  height: calc(var(--spacing) * 10);
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+  font-variant-numeric: tabular-nums;
+  transition-property:
+    color, background-color, border-color, outline-color, text-decoration-color,
+    fill, stroke;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--easing-out);
+}
+
+@media (hover: hover) {
+  .day:hover {
+    background-color: var(--color-bg-mute);
+  }
+}
+
+.today {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary-fg);
+}
+
+.selected {
+  background-color: var(--color-primary-bg);
+  color: var(--color-primary-fg);
+}
+
+@media (hover: hover) {
+  .selected:hover {
+    background-color: var(--color-primary-bg-emphasize);
+  }
+}
+
+/* 選べない日は、今日でも選んだ日でも薄い字にし、乗っても地を塗らない */
+.unselectable {
+  cursor: not-allowed;
+  color: var(--color-fg-subtle);
+}
+
+@media (hover: hover) {
+  .unselectable:hover {
+    background-color: transparent;
+  }
+}

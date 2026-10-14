@@ -1,0 +1,89 @@
+.root {
+  position: relative;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  border-radius: var(--radius-xl);
+  border-width: 1px;
+  border-color: var(--color-border-base);
+  background-color: var(--color-bg-base);
+}
+
+.invalid {
+  border-color: var(--color-border-error);
+}
+
+.disabled {
+  cursor: not-allowed;
+  border-color: var(--color-border-mute);
+  background-color: var(--color-bg-mute);
+}
+
+.readOnly {
+  background-color: var(--color-bg-subtle);
+}
+
+.input {
+  width: 100%;
+  flex-grow: 1;
+  background-color: transparent;
+  padding-inline: calc(var(--spacing) * 3);
+  padding-block: calc(var(--spacing) * 2);
+  font-variant-numeric: tabular-nums;
+
+  &:focus-visible {
+    outline-style: none;
+
+    @media (forced-colors: active) {
+      outline: 2px solid transparent;
+      outline-offset: 2px;
+    }
+  }
+
+  &:read-only,
+  &:disabled {
+    cursor: not-allowed;
+  }
+
+  /* 日付はこの部品のカレンダーから選ぶので、ブラウザ自身のピッカーの
+     ボタンは出さない */
+  &::-webkit-calendar-picker-indicator {
+    display: none;
+  }
+}
+
+.trigger {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  margin-inline-end: calc(var(--spacing) * 2);
+  border-radius: var(--radius-md);
+  padding: calc(var(--spacing) * 1);
+  color: var(--color-fg-mute);
+  transition-property:
+    color, background-color, border-color, outline-color, text-decoration-color,
+    fill, stroke;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--easing-out);
+}
+
+@media (hover: hover) {
+  .trigger:not(.locked):hover {
+    background-color: var(--color-bg-mute);
+    color: var(--color-fg-base);
+  }
+}
+
+.locked {
+  cursor: not-allowed;
+}
+
+.dialog {
+  border-radius: var(--radius-xl);
+  border-width: 1px;
+  border-color: var(--color-border-subtle);
+  background-color: var(--color-bg-raised);
+  padding: calc(var(--spacing) * 3);
+  box-shadow: var(--shadow-md);
+}

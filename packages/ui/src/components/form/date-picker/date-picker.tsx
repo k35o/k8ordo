@@ -1,20 +1,19 @@
 'use client';
 
+import { clsx } from 'clsx';
 import { useMemo, useRef, useState } from 'react';
 import type { FC, InputHTMLAttributes, Ref } from 'react';
 import { useFormStatus } from 'react-dom';
 
-import { cn } from '../../../helpers/cn';
 import { mergeRefs } from '../../../helpers/merge-refs';
 import { getMessages } from '../../../i18n/current';
 import { commitInputValue } from '../../../internal/commit-input-value';
-import {
-  FOCUS_RING_NO_BORDER,
-  FOCUS_RING_WITHIN,
-} from '../../_internal/focus-ring';
 import { PublishDateIcon } from '../../icons';
 import { Popover } from '../../overlays/popover';
 import { Calendar } from '../calendar';
+
+import focusRing from '../../_internal/focus-ring.module.css';
+import styles from './date-picker.module.css';
 
 type Props = {
   invalid?: boolean;
@@ -60,24 +59,17 @@ export const DatePicker: FC<Props> = ({
 
   return (
     <div
-      className={cn(
-        'relative flex w-full items-center rounded-xl border border-border-base bg-bg-base',
-        invalid && 'border-border-error',
-        (disabled || pending) &&
-          'cursor-not-allowed border-border-mute bg-bg-mute',
-        readOnly && 'bg-bg-subtle',
-        FOCUS_RING_WITHIN,
+      className={clsx(
+        styles.root,
+        invalid && styles.invalid,
+        (disabled || pending) && styles.disabled,
+        readOnly && styles.readOnly,
+        focusRing.ringWithin,
       )}
     >
       <input
         aria-invalid={invalid}
-        className={cn(
-          'w-full grow bg-transparent px-3 py-2 tabular-nums focus-visible:outline-hidden',
-          'disabled:cursor-not-allowed read-only:cursor-not-allowed',
-          // 日付はこの部品のカレンダーから選ぶので、ブラウザ自身のピッカーの
-          // ボタンは出さない
-          '[&::-webkit-calendar-picker-indicator]:hidden',
-        )}
+        className={styles.input}
         defaultValue={defaultValue}
         disabled={disabled}
         max={max}
@@ -107,11 +99,10 @@ export const DatePicker: FC<Props> = ({
             <button
               {...props}
               aria-label={messages.datePickerOpen}
-              className={cn(
-                'me-2 inline-flex shrink-0 items-center justify-center rounded-md p-1 text-fg-mute transition-colors duration-150 ease-out',
-                FOCUS_RING_NO_BORDER,
-                !locked && 'hover:bg-bg-mute hover:text-fg-base',
-                locked && 'cursor-not-allowed',
+              className={clsx(
+                styles.trigger,
+                focusRing.ringNoBorder,
+                locked && styles.locked,
               )}
               disabled={locked}
               type="button"
@@ -125,7 +116,8 @@ export const DatePicker: FC<Props> = ({
             <div
               {...props}
               aria-label={messages.datePickerDialog}
-              className="bg-bg-raised border-border-subtle rounded-xl border p-3 shadow-md"
+              className={styles.dialog}
+
               ref={contentRef}
             >
               {isOpen ? (

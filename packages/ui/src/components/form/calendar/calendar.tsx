@@ -1,5 +1,6 @@
 'use client';
 
+import { clsx } from 'clsx';
 import {
   Suspense,
   use,
@@ -12,7 +13,6 @@ import {
 import type { FC, KeyboardEvent } from 'react';
 import { browser } from 'react-dom';
 
-import { cn } from '../../../helpers/cn';
 import { useControllableState } from '../../../hooks/controllable-state';
 import { getLocale, getMessages } from '../../../i18n/current';
 import {
@@ -29,9 +29,11 @@ import {
   startOfMonth,
   startOfWeek,
 } from '../../../internal/iso-date';
-import { FOCUS_RING_NO_BORDER } from '../../_internal/focus-ring';
 import { IconButton } from '../../buttons/icon-button';
 import { ChevronIcon } from '../../icons';
+
+import focusRing from '../../_internal/focus-ring.module.css';
+import styles from './calendar.module.css';
 
 type Props = {
   /** `YYYY-MM-DD`。制御モードで未選択を表すときは `null`。 */
@@ -44,13 +46,11 @@ type Props = {
   max?: string;
 };
 
-// サーバーの HTML に描く代わりの箱。本体と同じ寸法にして、ブラウザで
-// 描き直したときに周りが動かないようにする
-const FALLBACK_SIZE = 'block-76 inline-70';
-
 export const Calendar: FC<Props> = (props) => (
   <Suspense
-    fallback={<div aria-hidden className={cn('writing-h', FALLBACK_SIZE)} />}
+    fallback={
+      <div aria-hidden className={clsx('writing-h', styles.fallback)} />
+    }
   >
     <CalendarBody {...props} />
   </Suspense>
@@ -182,8 +182,8 @@ const CalendarBody: FC<Props> = ({
   };
 
   return (
-    <div className="writing-h inline-flex flex-col gap-2">
-      <div className="flex items-center justify-between gap-2">
+    <div className={clsx('writing-h', styles.root)}>
+      <div className={styles.header}>
         <IconButton
           color="transparent"
           disabled={!canGoPrevious}
@@ -196,7 +196,7 @@ const CalendarBody: FC<Props> = ({
         >
           <ChevronIcon direction="left" size="sm" />
         </IconButton>
-        <p aria-live="polite" className="font-bold tabular-nums" id={labelId}>
+        <p aria-live="polite" className={styles.month} id={labelId}>
           {monthFormat.format(formatDate(focused))}
         </p>
         <IconButton
@@ -214,7 +214,7 @@ const CalendarBody: FC<Props> = ({
       </div>
       <table
         aria-labelledby={labelId}
-        className="border-collapse"
+        className={styles.grid}
         onKeyDown={handleKeyDown}
         ref={gridRef}
         role="grid"
@@ -224,7 +224,7 @@ const CalendarBody: FC<Props> = ({
             {weekdays.map((weekday) => (
               <th
                 abbr={weekdayLong.format(weekday)}
-                className="text-fg-mute text-xs font-medium block-8"
+                className={styles.weekday}
                 key={weekday.getTime()}
                 scope="col"
               >
@@ -240,7 +240,7 @@ const CalendarBody: FC<Props> = ({
                 if (!isSameMonth(date, focused)) {
                   return (
                     // 月の外の日は空欄にする。押せる日が隣の月にもあると、どの月を見ているのかが曖昧になる
-                    <td className="size-10 p-0" key={date} role="gridcell" />
+                    <td className={styles.blank} key={date} role="gridcell" />
                   );
                 }
                 const isSelected = date === selectedDate;
@@ -249,7 +249,7 @@ const CalendarBody: FC<Props> = ({
                 return (
                   <td
                     aria-selected={isSelected}
-                    className="p-0"
+                    className={styles.cell}
                     key={date}
                     role="gridcell"
                   >
@@ -257,16 +257,14 @@ const CalendarBody: FC<Props> = ({
                       aria-current={date === today ? 'date' : undefined}
                       aria-disabled={selectable ? undefined : true}
                       aria-label={dayFormat.format(formatDate(date))}
-                      className={cn(
-                        'inline-flex size-10 items-center justify-center rounded-full text-sm tabular-nums transition-colors duration-150 ease-out',
-                        FOCUS_RING_NO_BORDER,
-                        'hover:bg-bg-mute',
-                        date === today && 'font-bold text-primary-fg',
-                        isSelected &&
-                          'bg-primary-bg text-primary-fg hover:bg-primary-bg-emphasize',
-                        !selectable &&
-                          'cursor-not-allowed text-fg-subtle hover:bg-transparent',
+                      className={clsx(
+                        styles.day,
+                        focusRing.ringNoBorder,
+                        date === today && styles.today,
+                        isSelected && styles.selected,
+                        !selectable && styles.unselectable,
                       )}
+
                       data-autofocus={isFocused ? '' : undefined}
                       data-date={date}
                       onClick={() => {

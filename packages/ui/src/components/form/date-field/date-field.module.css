@@ -1,0 +1,25 @@
+.root {
+  inline-size: 100%;
+  border-radius: var(--radius-xl);
+  border-width: 1px;
+  border-color: var(--color-border-base);
+  background-color: var(--color-bg-base);
+  padding-inline: calc(var(--spacing) * 3);
+  padding-block: calc(var(--spacing) * 2);
+  font-variant-numeric: tabular-nums;
+
+  &:read-only {
+    cursor: not-allowed;
+    background-color: var(--color-bg-subtle);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    border-color: var(--color-border-mute);
+    background-color: var(--color-bg-mute);
+  }
+
+  &[aria-invalid='true'] {
+    border-color: var(--color-border-error);
+  }
+}
