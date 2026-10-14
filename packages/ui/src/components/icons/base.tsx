@@ -1,20 +1,20 @@
 import type { FC, ReactNode } from 'react';
 
-import { cn } from './../../helpers/cn';
+import styles from './base.module.css';
 
 export type BaseIconProps = {
   size: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl';
 };
 
-const sizeClass: Record<BaseIconProps['size'], string> = {
-  xs: 'size-3',
-  sm: 'size-4',
-  md: 'size-6',
-  lg: 'size-8',
-  xl: 'size-10',
-  '2xl': 'size-12',
-  '3xl': 'size-14',
-};
+const SIZE = {
+  xs: styles.xs,
+  sm: styles.sm,
+  md: styles.md,
+  lg: styles.lg,
+  xl: styles.xl,
+  '2xl': styles.xxl,
+  '3xl': styles.xxxl,
+} as const;
 
 export type IconRenderProps = {
   className: string;
@@ -28,7 +28,7 @@ export const BaseIcon: FC<
   }
 > = ({ size, renderItem }) =>
   renderItem({
-    className: cn(sizeClass[size]),
+    className: SIZE[size],
     // アイコンは装飾扱い(意味を持たせる場合は利用側が sr-only テキストで名前を付ける)
     'aria-hidden': true,
     focusable: 'false',
