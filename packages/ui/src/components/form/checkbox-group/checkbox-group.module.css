@@ -1,0 +1,9 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 2);
+}
+
+.disabled {
+  cursor: not-allowed;
+}

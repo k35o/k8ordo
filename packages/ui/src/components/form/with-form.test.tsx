@@ -613,7 +613,7 @@ describe('Checkbox', () => {
   it('チェックして送ると true が届く', async () => {
     const screen = await render(<Consent />);
 
-    await screen.getByRole('checkbox').click();
+    await screen.getByText('規約に同意する').click();
     submit();
 
     await expect.poll(() => received).toStrictEqual({ agree: true });
@@ -622,7 +622,7 @@ describe('Checkbox', () => {
   it('reset でチェックが外れ、isDirty も下りる', async () => {
     const screen = await render(<Consent />);
 
-    await screen.getByRole('checkbox').click();
+    await screen.getByText('規約に同意する').click();
     await expect.poll(isDirty).toBe('true');
     reset();
 
@@ -744,8 +744,8 @@ describe('CheckboxGroup', () => {
   it('1 つもチェックせずに離れると minChecked の文言を出す', async () => {
     const screen = await render(<Tags />);
 
-    await screen.getByRole('checkbox', { name: 'React' }).click();
-    await screen.getByRole('checkbox', { name: 'React' }).click();
+    await screen.getByText('React').click();
+    await screen.getByText('React').click();
     await userEvent.tab();
 
     await expect.poll(() => errorShown('1つ以上選んでください')).toBe(true);
@@ -754,7 +754,7 @@ describe('CheckboxGroup', () => {
   it('送信に失敗しても、チェックした値を描き直す', async () => {
     const screen = await render(<Tags />);
 
-    await screen.getByRole('checkbox', { name: 'Vue' }).click();
+    await screen.getByText('Vue').click();
     await refuseOnServer();
     submit();
 
@@ -767,10 +767,10 @@ describe('CheckboxGroup', () => {
   it('reset のあとも、次の操作は既定値から数える', async () => {
     const screen = await render(<Tags />);
 
-    await screen.getByRole('checkbox', { name: 'React' }).click();
+    await screen.getByText('React').click();
     reset();
     await expect.poll(isDirty).toBe('false');
-    await screen.getByRole('checkbox', { name: 'Svelte' }).click();
+    await screen.getByText('Svelte').click();
     await userEvent.fill(labelled('メモ'), 'よろしく');
     submit();
 
@@ -827,7 +827,7 @@ describe('CheckboxCard', () => {
   it('送信に失敗しても、チェックした値を描き直す', async () => {
     const screen = await render(<Tags />);
 
-    await screen.getByRole('checkbox', { name: 'Vue' }).click();
+    await screen.getByText('Vue').click();
     await refuseOnServer();
     submit();
 
@@ -840,12 +840,12 @@ describe('CheckboxCard', () => {
   it('reset のあとも、次の操作は既定値から数える', async () => {
     const screen = await render(<Tags />);
 
-    await screen.getByRole('checkbox', { name: 'React' }).click();
+    await screen.getByText('React').click();
     reset();
     await expect
       .element(screen.getByRole('checkbox', { name: 'React' }))
       .not.toBeChecked();
-    await screen.getByRole('checkbox', { name: 'Svelte' }).click();
+    await screen.getByText('Svelte').click();
     await userEvent.fill(labelled('メモ'), 'よろしく');
     submit();
 

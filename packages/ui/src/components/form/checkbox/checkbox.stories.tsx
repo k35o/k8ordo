@@ -260,6 +260,12 @@ export const LabelHidden: Story = {
     await expect(
       canvas.getByRole('checkbox', { name: '行を選択' }),
     ).toBeInTheDocument();
-    await expect(canvas.getByText('行を選択')).toHaveClass('sr-only');
+    await expect(canvas.getByText('行を選択')).toHaveStyle({
+      position: 'absolute',
+      width: '1px',
+      height: '1px',
+      overflow: 'hidden',
+      clipPath: 'inset(50%)',
+    });
   },
 };

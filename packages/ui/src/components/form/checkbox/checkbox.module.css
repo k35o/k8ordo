@@ -1,0 +1,91 @@
+.root {
+  display: inline-flex;
+  align-items: center;
+  text-align: left;
+  cursor: pointer;
+}
+
+.withLabel {
+  gap: calc(var(--spacing) * 2);
+}
+
+.disabled {
+  cursor: not-allowed;
+  color: var(--color-fg-mute);
+}
+
+/*
+ * 非制御のとき、form の reset は change を飛ばさずに checked を戻すので、
+ * 見た目は state ではなく input の :checked から引く。
+ */
+.box {
+  display: inline-flex;
+  width: calc(var(--spacing) * 5);
+  height: calc(var(--spacing) * 5);
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  border-width: 2px;
+  border-color: var(--color-border-mute);
+  background-color: var(--color-bg-base);
+  transition-property:
+    color, background-color, border-color, outline-color, text-decoration-color,
+    fill, stroke;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--easing-out);
+
+  @scope (&) {
+    & > * {
+      visibility: hidden;
+    }
+  }
+}
+
+.invalid {
+  border-color: var(--color-border-error);
+}
+
+.input:checked ~ .box {
+  border-color: var(--color-border-base);
+  background-color: var(--color-primary-bg);
+  color: var(--color-fg-base);
+
+  @scope (&) {
+    & > * {
+      visibility: visible;
+    }
+  }
+}
+
+.input:checked ~ .invalid {
+  border-color: var(--color-border-error);
+}
+
+/* 未確定は不正な値でも地の枠線にする */
+.input:indeterminate ~ .box {
+  border-color: var(--color-border-base);
+  background-color: var(--color-primary-bg);
+  color: var(--color-fg-base);
+
+  @scope (&) {
+    & > * {
+      visibility: visible;
+    }
+  }
+}
+
+.input:focus-visible ~ .box {
+  border-color: transparent;
+  outline-style: none;
+  box-shadow: var(--shadow-ring-info);
+
+  @media (forced-colors: active) {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+}
+
+.label {
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-lg);
+}

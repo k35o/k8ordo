@@ -1,5 +1,6 @@
 'use client';
 
+import { clsx } from 'clsx';
 import type {
   ChangeEvent,
   FC,
@@ -9,8 +10,10 @@ import type {
 } from 'react';
 import { useId } from 'react';
 
-import { cn } from '../../../helpers/cn';
 import { CheckIcon } from '../../icons';
+
+import srOnly from '../../_internal/sr-only.module.css';
+import styles from './checkbox-card.module.css';
 
 export type CheckboxCardOption = Readonly<{
   value: string;
@@ -82,11 +85,7 @@ export const CheckboxCard: FC<Props> = ({
     <fieldset
       {...rest}
       aria-labelledby={labelledbyId}
-      className={cn(
-        'm-0 min-w-0 border-0 p-0 inline-full',
-        'grid gap-3',
-        disabled && 'opacity-70',
-      )}
+      className={clsx(styles.root, disabled && styles.rootDisabled)}
       ref={ref}
       role="group"
     >
@@ -99,17 +98,10 @@ export const CheckboxCard: FC<Props> = ({
 
         return (
           <label
-            className={cn(
-              'flex min-w-0 rounded-xl border bg-bg-base p-4 text-left transition-colors duration-150 ease-out inline-full',
-              'has-[input:focus-visible]:outline-hidden has-[input:focus-visible]:ring-2 has-[input:focus-visible]:ring-border-info',
-              // 非制御のとき、form の reset は change を飛ばさずに checked を戻すので、
-              // 見た目は state ではなく input の :checked から引く
-              'has-checked:border-primary-border has-checked:bg-primary-bg-subtle has-checked:hover:bg-primary-bg-mute',
-              invalid
-                ? 'border-border-error has-checked:border-border-error'
-                : 'border-border-mute hover:bg-bg-subtle',
-              optionDisabled &&
-                'cursor-not-allowed border-border-mute bg-bg-subtle text-fg-mute has-checked:border-border-mute has-checked:bg-bg-subtle',
+            className={clsx(
+              styles.card,
+              invalid && styles.invalid,
+              optionDisabled && styles.disabled,
             )}
             id={optionId}
             key={option.value}
@@ -122,7 +114,7 @@ export const CheckboxCard: FC<Props> = ({
               {...(isControlled
                 ? { checked: value.includes(option.value) }
                 : { defaultChecked: defaultValue?.includes(option.value) })}
-              className="peer sr-only"
+              className={clsx(srOnly.srOnly, styles.input)}
               disabled={optionDisabled}
               name={name}
               onChange={handleChange}
@@ -130,30 +122,24 @@ export const CheckboxCard: FC<Props> = ({
               value={option.value}
             />
             {hasVisual ? (
-              <span aria-hidden className="mr-4 shrink-0">
+              <span aria-hidden className={styles.visual}>
                 {option.visual}
               </span>
             ) : null}
-            <span className="flex min-w-0 flex-1 flex-col gap-1">
-              <span
-                className="text-fg-base font-medium"
-                id={`${optionId}-label`}
-              >
+            <span className={styles.text}>
+              <span className={styles.label} id={`${optionId}-label`}>
                 {option.label}
               </span>
               {hasDescription ? (
                 <span
-                  className="text-fg-mute text-sm"
+                  className={styles.description}
                   id={`${optionId}-description`}
                 >
                   {option.description}
                 </span>
               ) : null}
             </span>
-            <span
-              aria-hidden
-              className="border-border-mute bg-bg-base peer-checked:border-border-base peer-checked:bg-primary-bg peer-checked:text-fg-base mt-0.5 ml-4 inline-flex size-5 shrink-0 items-center justify-center rounded-md border *:invisible peer-checked:*:visible"
-            >
+            <span aria-hidden className={styles.box}>
               <CheckIcon size="sm" />
             </span>
           </label>
