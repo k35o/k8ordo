@@ -1,0 +1,16 @@
+.frame {
+  width: calc(var(--spacing) * 64);
+}
+
+.root {
+  display: flex;
+  width: calc(var(--spacing) * 64);
+  flex-direction: column;
+  gap: calc(var(--spacing) * 4);
+}
+
+.selection {
+  color: var(--color-fg-mute);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+}

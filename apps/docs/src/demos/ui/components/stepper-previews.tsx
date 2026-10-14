@@ -3,6 +3,8 @@
 import { Button, Stepper } from '@k8ordo/ui';
 import { useState } from 'react';
 
+import styles from './stepper-previews.module.css';
+
 const STEPS = [
   { label: 'Plan', description: 'Pick what fits' },
   { label: 'Payment', description: 'Card or invoice' },
@@ -12,7 +14,7 @@ const STEPS = [
 export function StepperInteractivePreview() {
   const [step, setStep] = useState(2);
   return (
-    <div className="flex w-full flex-col gap-4">
+    <div className={styles.root}>
       <Stepper
         aria-label="Sign-up"
         interactive
@@ -20,7 +22,7 @@ export function StepperInteractivePreview() {
         steps={STEPS}
         value={step}
       />
-      <div className="flex gap-2">
+      <div className={styles.actions}>
         <Button
           disabled={step >= STEPS.length}
           onClick={() => {

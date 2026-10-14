@@ -2,9 +2,11 @@
 
 import { Tabs } from '@k8ordo/ui';
 
+import styles from './tabs-previews.module.css';
+
 export function TabsBasicPreview() {
   return (
-    <div className="w-full">
+    <div className={styles.frame}>
       <Tabs.Root ids={['overview', 'settings', 'history']}>
         <Tabs.List label="Navigation">
           <Tabs.Tab id="overview">Overview</Tabs.Tab>
@@ -27,7 +29,7 @@ export function TabsBasicPreview() {
 
 export function TabsDefaultSelectedPreview() {
   return (
-    <div className="w-full">
+    <div className={styles.frame}>
       <Tabs.Root
         defaultSelectedId="settings"
         ids={['overview', 'settings', 'history']}

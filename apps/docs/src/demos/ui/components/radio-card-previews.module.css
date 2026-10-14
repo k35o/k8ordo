@@ -1,0 +1,29 @@
+.frame {
+  width: 100%;
+  max-width: 42rem;
+}
+
+.groupLabel {
+  color: var(--color-fg-base);
+  margin-bottom: calc(var(--spacing) * 3);
+  font-weight: var(--font-weight-medium);
+}
+
+.form {
+  display: flex;
+  width: 100%;
+  max-width: 42rem;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 4);
+}
+
+.label {
+  color: var(--color-fg-base);
+  font-weight: var(--font-weight-medium);
+}
+
+.result {
+  color: var(--color-fg-base);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+}

@@ -3,11 +3,13 @@
 import { Button, Resize } from '@k8ordo/ui';
 import { useState } from 'react';
 
+import styles from './resize-previews.module.css';
+
 export function ResizeBasicPreview() {
   const [isWide, setIsWide] = useState(false);
   const [count, setCount] = useState(0);
   return (
-    <div className="flex w-full flex-col items-start gap-3">
+    <div className={styles.root}>
       <Button
         onAction={() => {
           setIsWide((current) => !current);
@@ -21,13 +23,7 @@ export function ResizeBasicPreview() {
           setCount((current) => current + 1);
         }}
       >
-        <div
-          className={
-            isWide
-              ? 'bg-primary-bg-subtle w-full rounded-lg p-4 whitespace-nowrap'
-              : 'bg-primary-bg-subtle w-1/2 rounded-lg p-4 whitespace-nowrap'
-          }
-        >
+        <div className={isWide ? styles.wide : styles.narrow}>
           Notified {count} times
         </div>
       </Resize>

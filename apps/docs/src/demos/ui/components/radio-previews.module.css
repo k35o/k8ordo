@@ -1,0 +1,10 @@
+.frame {
+  width: 100%;
+  max-width: 28rem;
+}
+
+.groupLabel {
+  color: var(--color-fg-base);
+  margin-bottom: calc(var(--spacing) * 3);
+  font-weight: var(--font-weight-medium);
+}

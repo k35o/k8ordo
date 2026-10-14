@@ -3,10 +3,12 @@
 import { RangeSlider } from '@k8ordo/ui';
 import { useState } from 'react';
 
+import styles from './range-slider-previews.module.css';
+
 export function RangeSliderControlledPreview() {
   const [value, setValue] = useState<readonly [number, number]>([18, 26]);
   return (
-    <div className="flex w-full flex-col gap-2">
+    <div className={styles.root}>
       <RangeSlider
         aria-label="Temperature"
         max={40}
@@ -14,7 +16,7 @@ export function RangeSliderControlledPreview() {
         onChange={setValue}
         value={value}
       />
-      <p className="text-fg-mute text-sm tabular-nums">
+      <p className={styles.value}>
         {value[0]}–{value[1]} °C
       </p>
     </div>

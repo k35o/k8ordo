@@ -1,0 +1,22 @@
+.frame {
+  width: calc(var(--spacing) * 56);
+}
+
+.sizes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: calc(var(--spacing) * 4);
+}
+
+.sm {
+  width: calc(var(--spacing) * 44);
+}
+
+.md {
+  width: calc(var(--spacing) * 48);
+}
+
+.lg {
+  width: calc(var(--spacing) * 56);
+}
