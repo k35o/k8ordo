@@ -1,6 +1,5 @@
-
-import { CodeBlock } from '../../../../components/code-block';
 import { Note } from '../../../../components/callout';
+import { CodeBlock } from '../../../../components/code-block';
 import {
   DocPage,
   DocSection,

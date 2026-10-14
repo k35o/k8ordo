@@ -55,14 +55,10 @@ export default defineConfig({
     settings: {
       react: { version: '19.3.0' },
       // oxlint-tailwindcss v1 は明示的な Tailwind エントリポイントが必須。
-      // Tailwind で書くのは examples と、移行中の docs だけ。どちらも
-      // @k8ordo/ui の tailwind.css（橋）を取り込んだ各自の globals.css を使う。
+      // Tailwind で書くのは examples だけで、@k8ordo/ui の tailwind.css（橋）を
+      // そのまま、または取り込んだ globals.css を使う。
       tailwindcss: {
         entryPoint: [
-          {
-            files: '**/apps/docs/**',
-            use: cssEntry('./apps/docs/src/styles/globals.css'),
-          },
           {
             files: '**/examples/ui-nextjs/**',
             use: cssEntry('./examples/ui-nextjs/src/app/globals.css'),
@@ -76,26 +72,10 @@ export default defineConfig({
     },
     overrides: [
       {
-        // 上の settings.tailwindcss.entryPoint のグロブは oxlint の実行 CWD
-        // からの相対パスにマッチするため、`vp run -r check` (CWD=各パッケージ)
-        // では docs のファイルが `src/...` となりマッピングに一致せず、
-        // fallback の @k8ordo/ui index.css で検証されて docs 固有の
-        // ユーティリティ (font-palt / break-phrase / bg-preview-bg) が誤検知
-        // される。ルールオプションの entryPoint は settings より優先されるので
-        // ここで明示する (vp の overrides グロブはルート相対で解決される)。
-        files: ['apps/docs/**'],
-        rules: {
-          'tailwindcss/no-unknown-classes': [
-            'warn',
-            { entryPoint: cssEntry('./apps/docs/src/styles/globals.css') },
-          ],
-        },
-      },
-      {
-        // ui は CSS Modules で書き、Tailwind のクラスを持たない。残る文字列の
-        // クラス（writing-v、Markdown の task-list-item など）は Tailwind の
-        // ものではないので、Tailwind の規則を当てない
-        files: ['packages/ui/**'],
+        // ui と docs は CSS Modules で書き、Tailwind のクラスを持たない。残る
+        // 文字列のクラス（writing-v、Markdown の task-list-item、コードの例の
+        // 中のクラスなど）は Tailwind のものではないので、Tailwind の規則を当てない
+        files: ['packages/ui/**', 'apps/docs/**'],
         rules: Object.fromEntries(
           Object.keys(tailwind.rules ?? {}).map((rule) => [rule, 'off']),
         ),

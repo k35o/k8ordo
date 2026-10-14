@@ -1,6 +1,5 @@
 import betterCssModules from '@better-css-modules/vite';
 import { framework } from '@k8ordo/framework/vite';
-import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite';
 
 import { locales } from './src/i18n';
@@ -19,7 +18,6 @@ export default defineConfig({
       paths: locales.paths,
     }),
     betterCssModules(),
-    tailwindcss(),
   ],
   // CSS Modules の @scope (&) は Lightning CSS でしか組めない。target は
   // @k8ordo/ui と同じく新しいブラウザにして、:dir() などを書き換えさせない

@@ -1,6 +1,5 @@
-
-import { CodeBlock } from '../../../../components/code-block';
 import { Pitfall } from '../../../../components/callout';
+import { CodeBlock } from '../../../../components/code-block';
 import {
   DocPage,
   DocSection,

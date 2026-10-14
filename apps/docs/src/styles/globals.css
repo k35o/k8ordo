@@ -1,8 +1,8 @@
 /*
- * 移行中だけ: サイトのページはまだ Tailwind のクラスで描くので、ui の
- * tailwind.css（tailwindcss と styles.css を読み込む橋）を入口にする。
+ * @k8ordo/ui のレイヤーの順、トークン、リセット。部品の CSS は部品が自分で
+ * 読み込むので、サイトはこれと自分のトークンだけを持つ。
  */
-@import '../../../../packages/ui/src/styles/tailwind.css';
+@import '@k8ordo/ui/styles.css';
 /*
  * フォントは自前で配る。外部への <link> を置くと、HTML を書き換える経路
  * （Cloudflare Fonts など）が <head> を差し替えてしまい、document 全体を
@@ -13,9 +13,7 @@
 @import '@fontsource-variable/noto-sans-jp';
 
 /*
- * ui の tailwind.css は font-noto-sans-jp / font-m-plus-2 ユーティリティに
- * --font-family-noto-sans-jp / --font-family-m-plus-2 を読ませるが、フォント
- * 自体を読み込むのは利用側なので、変数もここで定義する。
+ * フォントを読み込むのは利用側なので、そのトークンもここで定義する。
  * 名前に Variable が付くのは fontsource の可変フォントの family 名。
  */
 :root {
@@ -46,11 +44,6 @@
   --scheme: dark;
 }
 
-/* 移行中だけ: まだ Tailwind のクラスで描くページのための bg-page */
-@theme inline reference {
-  --color-page: var(--color-page);
-}
-
 @layer base {
   body {
     font-family: var(--font-family-noto-sans-jp);
@@ -66,21 +59,4 @@
   p {
     text-wrap: pretty;
   }
-}
-
-/*
- * 表示用文字組（プロポーショナルメトリクス）。ワードマーク・ヒーロー・短冊・
- * 柱の表示文字にのみ使う。本文には掛けずベタ組みを維持する。
- */
-@utility font-palt {
-  font-feature-settings: 'palt' 1;
-}
-
-/*
- * 日本語の文節改行（BudouX）。「ライブラリ」の「ブラリ」だけが次行に落ちる
- * ような不自然な折り返しを防ぐ。見出し・リード文など短い表示テキスト専用。
- * 非対応ブラウザでは通常の改行にフォールバックする。
- */
-@utility break-phrase {
-  word-break: auto-phrase;
 }

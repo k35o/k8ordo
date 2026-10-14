@@ -1,7 +1,7 @@
 import type { Message } from '@k8ordo/i18n';
 
-import { CodeBlock } from '../../../../components/code-block';
 import { Note, Pitfall } from '../../../../components/callout';
+import { CodeBlock } from '../../../../components/code-block';
 import {
   DocPage,
   DocSection,

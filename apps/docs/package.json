@@ -20,8 +20,6 @@
     "@k8ordo/router": "workspace:^",
     "@k8ordo/state": "workspace:^",
     "@k8ordo/ui": "workspace:^",
-    "@tailwindcss/vite": "catalog:",
-    "tailwindcss": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
