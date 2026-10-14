@@ -465,8 +465,8 @@ on evil.test would pass the check.
 
 ```ts
 // vite.config.ts
-import { framework } from '@k8ordo/framework/vite';
 import { vercel } from '@k8ordo/framework/vercel';
+import { framework } from '@k8ordo/framework/vite';
 import { defineConfig } from 'vite';
 
 export default defineConfig({

@@ -311,10 +311,10 @@ import { defineRoutes } from '@k8ordo/framework/generated';
 import type { ParamsOf, ParsedParams } from '@k8ordo/framework/generated';
 import type { ComponentType, ReactNode } from 'react';
 
-import page from '../src/routes/page';
-import products_page from '../src/routes/products/page';
-import products_id_page from '../src/routes/products/[id]/page';
 import layout from '../src/routes/layout';
+import page from '../src/routes/page';
+import products_id_page from '../src/routes/products/[id]/page';
+import products_page from '../src/routes/products/page';
 
 type Page<P extends string, S extends readonly unknown[] = []> = ComponentType<{
   params: ParsedParams<P, S>;
@@ -393,6 +393,7 @@ it writes none, and a message missing a locale does not compile:
 ```ts
 // .k8ordo/register.gen.ts (the part for @k8ordo/i18n)
 import type { LocaleOf } from '@k8ordo/i18n';
+
 import type { locales } from '../src/i18n';
 
 declare module '@k8ordo/i18n' {

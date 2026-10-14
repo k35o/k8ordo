@@ -16,12 +16,10 @@ import {
   Suggestion,
   ToolInvocation,
 } from '@k8ordo/ui/ai';
-
-// Streaming-aware Markdown rendering (optional peer: streamdown)
-import { Response } from '@k8ordo/ui/ai/response';
-
 // AI SDK integration (optional peer: ai)
 import { mapMessageParts } from '@k8ordo/ui/ai-sdk';
+// Streaming-aware Markdown rendering (optional peer: streamdown)
+import { Response } from '@k8ordo/ui/ai/response';
 ```
 
 The types are exported from `@k8ordo/ui/ai` too:
@@ -62,9 +60,9 @@ The "default" shown for `label`, `sendLabel`, and similar props below is the bui
 
 ```tsx
 'use client';
+import { useChat } from '@ai-sdk/react';
 import { Avatar, AssistantIcon } from '@k8ordo/ui';
 import { Conversation, Message, PromptInput } from '@k8ordo/ui/ai';
-import { useChat } from '@ai-sdk/react';
 import type { UIMessage } from 'ai';
 
 const textOf = (m: UIMessage) =>
@@ -496,8 +494,6 @@ Render each part as its own row under `Message.Root` — the children stack in a
 ```tsx
 'use client';
 import { useChat } from '@ai-sdk/react';
-import { lastAssistantMessageIsCompleteWithApprovalResponses } from 'ai';
-import type { UIMessage } from 'ai';
 import { Avatar, AssistantIcon } from '@k8ordo/ui';
 import {
   Attachment,
@@ -506,10 +502,12 @@ import {
   Source,
   ToolInvocation,
 } from '@k8ordo/ui/ai';
-import { Response } from '@k8ordo/ui/ai/response';
 import { mapMessageParts } from '@k8ordo/ui/ai-sdk';
+import { Response } from '@k8ordo/ui/ai/response';
 import { validateGeneratedSpec } from '@k8ordo/ui/json-render';
 import { JsonRenderUI } from '@k8ordo/ui/json-render/registry';
+import { lastAssistantMessageIsCompleteWithApprovalResponses } from 'ai';
+import type { UIMessage } from 'ai';
 
 type Chat = ReturnType<typeof useChat>;
 

@@ -87,6 +87,7 @@ export default async function Page({ searchParams }: PageProps<'/products'>) {
 // filters.tsx
 'use client';
 import { useAppState } from '@k8ordo/state';
+
 import { listState, prefs } from './state';
 
 export function Filters({ initialUrl }: FiltersProps) {

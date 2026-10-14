@@ -200,7 +200,7 @@ pnpm check         # check:write to auto-fix
   the page before anything is compiled, and a regex over the text mistook a
   code sample for the export and missed a destructured one; `emit.ts`
   imports it beside the component, checks it with `satisfies
-ParamsSchemaFor<pattern>`, lists per page pattern the schemas along its
+  ParamsSchemaFor<pattern>`, lists per page pattern the schemas along its
   stack in `paramSchemas`, and types the page by them. `runtime/params.ts`
   runs them synchronously inside `routes.match`'s `accept`, so a refused
   value is a pattern that did not match and the catch-all answers under 404.

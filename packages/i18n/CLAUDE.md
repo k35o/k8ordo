@@ -116,7 +116,7 @@ src/
 - `type`, not `interface` — except `Register`, which exists to be merged
   (`declare module '@k8ordo/i18n' { interface Register { locale: … } }`).
   Augmentations in tests need the same `oxlint-disable-next-line
-typescript/consistent-type-definitions` the state package uses, or
+  typescript/consistent-type-definitions` the state package uses, or
   `vp check --fix` rewrites them into a `type` and breaks the merge.
 - The Standard Schema object is hand-written (`LocaleParamsSchema`) so the
   package has no zod peer; keep `version: 1`, `vendor`, and the sync
