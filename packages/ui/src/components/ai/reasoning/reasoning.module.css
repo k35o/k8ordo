@@ -1,0 +1,10 @@
+.icon {
+  color: var(--color-fg-subtle);
+}
+
+.text {
+  white-space: pre-wrap;
+  color: var(--color-fg-mute);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-relaxed);
+}

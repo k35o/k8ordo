@@ -1,10 +1,12 @@
 'use client';
 
+import { clsx } from 'clsx';
 import type { FC, ReactNode } from 'react';
 
-import { cn } from '../../../helpers/cn';
 import { getMessages } from '../../../i18n/current';
-import { FOCUS_RING } from '../../_internal/focus-ring';
+
+import focusRing from '../../_internal/focus-ring.module.css';
+import styles from './suggestion.module.css';
 
 type ListProps = {
   label?: string;
@@ -17,7 +19,7 @@ export const List: FC<ListProps> = ({ label, children }) => {
   return (
     <div
       aria-label={label ?? messages.suggestions}
-      className="flex flex-wrap gap-2"
+      className={styles.list}
       role="group"
     >
       {children}
@@ -33,10 +35,7 @@ type ItemProps = {
 
 export const Item: FC<ItemProps> = ({ value, onSelect, children }) => (
   <button
-    className={cn(
-      'rounded-full border border-border-base bg-bg-subtle px-3 py-1.5 text-sm text-fg-base transition-colors duration-150 ease-out hover:bg-bg-mute',
-      FOCUS_RING,
-    )}
+    className={clsx(styles.item, focusRing.ring)}
     onClick={() => {
       onSelect?.(value);
     }}

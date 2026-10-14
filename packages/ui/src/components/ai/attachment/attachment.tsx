@@ -6,6 +6,8 @@ import {
   isImageMediaType,
 } from '../_internal/attachment-preview';
 
+import styles from './attachment.module.css';
+
 type ListProps = {
   label?: string;
   children: ReactNode;
@@ -15,10 +17,7 @@ export const List: FC<ListProps> = ({ label, children }) => {
   const messages = getMessages();
 
   return (
-    <ul
-      aria-label={label ?? messages.attachments}
-      className="flex flex-wrap gap-2"
-    >
+    <ul aria-label={label ?? messages.attachments} className={styles.list}>
       {children}
     </ul>
   );
@@ -37,12 +36,7 @@ export const Item: FC<ItemProps> = ({ url, mediaType, filename }) => (
     renderImage={
       isImageMediaType(mediaType)
         ? ({ id, alt }) => (
-            <img
-              alt={alt}
-              className="size-full object-cover"
-              id={id}
-              src={url}
-            />
+            <img alt={alt} className={styles.image} id={id} src={url} />
           )
         : undefined
     }

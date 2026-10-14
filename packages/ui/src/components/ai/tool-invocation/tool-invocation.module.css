@@ -1,0 +1,49 @@
+.info {
+  color: var(--color-fg-info);
+}
+
+.success {
+  color: var(--color-fg-success);
+}
+
+.error {
+  color: var(--color-fg-error);
+}
+
+.warning {
+  color: var(--color-fg-warning);
+}
+
+.name {
+  color: var(--color-fg-base);
+  font-weight: var(--font-weight-medium);
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 3);
+}
+
+.caption {
+  margin-bottom: calc(var(--spacing) * 1);
+  color: var(--color-fg-mute);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-xs);
+  font-weight: var(--font-weight-medium);
+}
+
+.code {
+  overflow-x: auto;
+  border-radius: var(--radius-lg);
+  background-color: var(--color-bg-mute);
+  padding: calc(var(--spacing) * 2);
+  color: var(--color-fg-base);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-xs);
+}
+
+.message {
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+}
