@@ -27,12 +27,17 @@
 }
 
 /*
- * サイトのページの地（bg-page）。ライトは bg-base（白）、ダークはいちばん暗い
- * bg-surface。部品を見せる面（bg-surface）はダークで地と同じ色になるので、
+ * サイトのページの地（--color-page）。ライトは bg-base（白）、ダークはいちばん
+ * 暗い bg-surface。部品を見せる面（bg-surface）はダークで地と同じ色になるので、
  * どちらのモードでも枠線で区切る。
  */
-@theme inline {
+:root {
   --color-page: light-dark(var(--color-bg-base), var(--color-bg-surface));
+}
+
+/* 移行中だけ: まだ Tailwind のクラスで描くページのための bg-page */
+@theme inline reference {
+  --color-page: var(--color-page);
 }
 
 @layer base {
