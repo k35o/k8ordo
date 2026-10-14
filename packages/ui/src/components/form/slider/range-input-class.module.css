@@ -1,0 +1,91 @@
+.input {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-index-raised);
+  appearance: none;
+  background-color: transparent;
+  height: calc(var(--spacing) * 8);
+  width: 100%;
+
+  @container style(--writing: vertical) {
+    height: auto;
+    width: calc(var(--spacing) * 8);
+    writing-mode: vertical-lr;
+  }
+}
+
+.input:focus {
+  outline-style: none;
+}
+
+.input:disabled {
+  cursor: not-allowed;
+}
+
+.input::-webkit-slider-runnable-track {
+  height: calc(var(--spacing) * 2);
+  border-radius: var(--radius-full);
+  background-color: transparent;
+}
+
+.input::-webkit-slider-thumb {
+  margin-top: calc(var(--spacing) * -1);
+  width: calc(var(--spacing) * 4);
+  height: calc(var(--spacing) * 4);
+  appearance: none;
+  border-radius: var(--radius-full);
+  border-style: solid;
+  border-width: 1px;
+  border-color: var(--color-border-base);
+  background-color: var(--color-bg-base);
+  box-shadow: var(--shadow-xs);
+}
+
+.input::-moz-range-track {
+  height: calc(var(--spacing) * 2);
+  border-radius: var(--radius-full);
+  background-color: transparent;
+}
+
+.input::-moz-range-progress {
+  height: calc(var(--spacing) * 2);
+  border-radius: var(--radius-full);
+  background-color: transparent;
+}
+
+.input::-moz-range-thumb {
+  width: calc(var(--spacing) * 4);
+  height: calc(var(--spacing) * 4);
+  border-radius: var(--radius-full);
+  border-style: solid;
+  border-width: 1px;
+  border-color: var(--color-border-base);
+  background-color: var(--color-bg-base);
+  box-shadow: var(--shadow-xs);
+}
+
+.invalid::-webkit-slider-thumb {
+  border-color: var(--color-border-error);
+}
+
+.invalid::-moz-range-thumb {
+  border-color: var(--color-border-error);
+}
+
+.input:focus-visible::-webkit-slider-thumb {
+  border-color: transparent;
+  box-shadow: var(--shadow-ring-info), var(--shadow-xs);
+}
+
+.input:focus-visible::-moz-range-thumb {
+  border-color: transparent;
+  box-shadow: var(--shadow-ring-info), var(--shadow-xs);
+}
+
+.invalid:focus-visible::-webkit-slider-thumb {
+  box-shadow: var(--shadow-ring-error), var(--shadow-xs);
+}
+
+.invalid:focus-visible::-moz-range-thumb {
+  box-shadow: var(--shadow-ring-error), var(--shadow-xs);
+}

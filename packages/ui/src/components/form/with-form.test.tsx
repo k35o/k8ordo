@@ -1104,10 +1104,14 @@ describe('Slider', () => {
     </Harness>
   );
 
+  // このプロジェクトは styles.css を読まず、トークンの無い溝は高さを持たないので、
+  // つまみの input も見えない。値を入れることだけを確かめたいので、見えるまで待たない
+  const slide = () => userEvent.fill(labelled('音量'), '30', { force: true });
+
   it('動かした値が届く', async () => {
     await render(<Volume />);
 
-    await userEvent.fill(labelled('音量'), '30');
+    await slide();
     await userEvent.fill(labelled('メモ'), 'よろしく');
     submit();
 
@@ -1119,7 +1123,7 @@ describe('Slider', () => {
   it('送信に失敗しても、動かした値を描き直す', async () => {
     await render(<Volume />);
 
-    await userEvent.fill(labelled('音量'), '30');
+    await slide();
     await refuseOnServer();
     submit();
 
@@ -1130,7 +1134,7 @@ describe('Slider', () => {
   it('reset で描画時の値に戻り、isDirty も下りる', async () => {
     await render(<Volume />);
 
-    await userEvent.fill(labelled('音量'), '30');
+    await slide();
     await expect.poll(isDirty).toBe('true');
     reset();
 

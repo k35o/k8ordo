@@ -1,5 +1,6 @@
 'use client';
 
+import { clsx } from 'clsx';
 import { useEffect, useId, useRef, useState } from 'react';
 import type {
   ChangeEvent,
@@ -10,11 +11,12 @@ import type {
 } from 'react';
 import { useFormStatus } from 'react-dom';
 
-import { cn } from '../../../helpers/cn';
 import { getMessages } from '../../../i18n/current';
-import { HIGH_CONTRAST_EDGE } from '../../_internal/high-contrast';
 import { ignoreStepKeys } from '../../_internal/ignore-changes';
 import { rangeInputClass } from '../slider/range-input-class';
+
+import highContrast from '../../_internal/high-contrast.module.css';
+import styles from './range-slider.module.css';
 
 type BaseProps = {
   min?: number;
@@ -139,12 +141,11 @@ export const RangeSlider: FC<Props> = ({
   const startOnTop = start > min + (max - min) / 2;
 
   const thumbClass = (onTop: boolean) =>
-    cn(
+    clsx(
       rangeInputClass(invalid),
-      'pointer-events-none',
-      !pending &&
-        '[&::-moz-range-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:pointer-events-auto',
-      onTop ? 'z-20' : 'z-10',
+      styles.thumb,
+      !pending && styles.interactive,
+      onTop && styles.onTop,
     );
   const thumbValue = (edge: 0 | 1) =>
     isControlled
@@ -156,11 +157,7 @@ export const RangeSlider: FC<Props> = ({
       {...rest}
       aria-label={ariaLabel}
       aria-labelledby={ariaLabelledBy}
-      className={cn(
-        'relative flex items-center justify-center',
-        'block-8 inline-full vertical:inline-48',
-        disabledResolved && 'cursor-not-allowed opacity-50',
-      )}
+      className={clsx(styles.root, disabledResolved && styles.disabled)}
       ref={ref}
       role="group"
       style={
@@ -181,19 +178,10 @@ export const RangeSlider: FC<Props> = ({
       <span hidden id={endNameId}>
         {messages.rangeSliderEnd}
       </span>
-      <span
-        aria-hidden
-        className={cn(
-          'bg-bg-mute relative rounded-full block-2 inline-full',
-          HIGH_CONTRAST_EDGE,
-        )}
-      >
+      <span aria-hidden className={clsx(styles.track, highContrast.edge)}>
         <span
           aria-hidden
-          className={cn(
-            'bg-primary-bg absolute inset-be-0 inset-s-(--range-start) block-full inline-[calc(var(--range-end)-var(--range-start))] rounded-full forced-colors:bg-[Highlight]',
-            invalid && 'bg-bg-error',
-          )}
+          className={clsx(styles.fill, invalid && styles.fillInvalid)}
         />
       </span>
       <input
