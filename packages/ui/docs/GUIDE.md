@@ -53,6 +53,11 @@ is not in a layer wins, and so does a layer you declare after `components`. The
 one rule that does not yield is the reset's
 `[hidden] { display: none !important }`.
 
+The CSS is written for what browsers ship today: `@scope`, container style
+queries, `light-dark()`, `:dir()`, nesting. Keep your bundler's CSS target
+recent (in Vite, `build.cssTarget`): an older target makes Lightning CSS
+rewrite `:dir(rtl)` into `:lang()` selectors, which no longer follow `dir`.
+
 Components take no `className`. To change how one looks, change the tokens, or
 render your own element through its `renderItem` / `renderAnchor`, which hands
 you the component's `className` to keep or to add to.
