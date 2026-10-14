@@ -1,15 +1,24 @@
 'use client';
 
+import { clsx } from 'clsx';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { FC, PropsWithChildren, Ref } from 'react';
 
 import type { ModalSide } from '../../../types/variables';
-import { HIGH_CONTRAST_EDGE } from '../../_internal/high-contrast';
 import { ToastProvider } from '../../feedback/toast';
 import { PortalRootProvider } from '../../providers';
 import { ModalDialogProvider } from '../_internal/modal-dialog-context';
-import { cn } from './../../../helpers/cn';
 import { mergeRefs } from './../../../helpers/merge-refs';
+
+import highContrast from '../../_internal/high-contrast.module.css';
+import styles from './modal.module.css';
+
+const SIDE = {
+  center: styles.center,
+  bottom: styles.bottom,
+  right: styles.right,
+  left: styles.left,
+} as const;
 
 export const Modal: FC<
   PropsWithChildren<{
@@ -89,18 +98,7 @@ export const Modal: FC<
       aria-describedby={describedBy}
       aria-label={ariaLabel}
       aria-labelledby={labelledBy}
-      className={cn(
-        'ao-modal bg-bg-raised text-fg-base z-modal shadow-md backdrop:bg-back-drop',
-        HIGH_CONTRAST_EDGE,
-        side === 'center' &&
-          'ao-modal-center m-auto max-h-128 w-5/6 max-w-2xl rounded-lg vertical:h-5/6 vertical:max-h-168 vertical:w-auto vertical:max-w-lg',
-        side === 'bottom' &&
-          'ao-modal-bottom mt-auto w-screen max-w-screen rounded-t-lg',
-        side === 'right' &&
-          'ao-modal-right ml-auto h-svh max-h-none w-screen max-w-sm rounded-l-lg',
-        side === 'left' &&
-          'ao-modal-left mr-auto h-svh max-h-none w-screen max-w-sm rounded-r-lg',
-      )}
+      className={clsx(styles.root, highContrast.edge, SIDE[side])}
       onClick={(e) => {
         if (e.target === e.currentTarget && dialogRef.current) {
           dialogRef.current.close();

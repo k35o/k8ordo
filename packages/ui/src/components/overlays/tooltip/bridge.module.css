@@ -1,0 +1,76 @@
+/*
+ * trigger との 8px の隙間（anchor-positioning の offset 相当）を覆う透明ブリッジ。
+ *
+ * 隙間を渡る途中で mouseleave 扱いにならないよう、当たり判定を「trigger と
+ * content の幅の合併」に広げる。1 枚では表現できないため 2 枚の帯を重ねる:
+ * - ::before … content の幅の帯（通常の absolute 配置）
+ * - ::after … trigger の幅の帯。anchor() は containing block が initial
+ *   containing block でないと trigger を参照できない（acceptable anchor 制約）
+ *   ため、fixed 配置で CB を ICB に切り替えた上で 4 辺を anchor() で
+ *   trigger に張り付ける。anchor 名は popover が配る --ao-anchor を使う。
+ *
+ * ブリッジが守るのは「まっすぐ渡る」「content 上に留まる」経路だけで、
+ * content 中央へ斜めに向かう軌跡は Tooltip の closeDelay（時間側）が守る。
+ */
+.bridge::before {
+  content: '';
+  position: absolute;
+}
+
+.bridge::after {
+  content: '';
+  position: fixed;
+  position-anchor: var(--ao-anchor);
+}
+
+.top::before {
+  inset-inline: 0;
+  bottom: calc(var(--spacing) * -2);
+  height: calc(var(--spacing) * 2);
+}
+
+.top::after {
+  bottom: anchor(top);
+  left: anchor(left);
+  right: anchor(right);
+  height: calc(var(--spacing) * 2);
+}
+
+.bottom::before {
+  inset-inline: 0;
+  top: calc(var(--spacing) * -2);
+  height: calc(var(--spacing) * 2);
+}
+
+.bottom::after {
+  top: anchor(bottom);
+  left: anchor(left);
+  right: anchor(right);
+  height: calc(var(--spacing) * 2);
+}
+
+.left::before {
+  inset-block: 0;
+  right: calc(var(--spacing) * -2);
+  width: calc(var(--spacing) * 2);
+}
+
+.left::after {
+  top: anchor(top);
+  right: anchor(left);
+  bottom: anchor(bottom);
+  width: calc(var(--spacing) * 2);
+}
+
+.right::before {
+  inset-block: 0;
+  left: calc(var(--spacing) * -2);
+  width: calc(var(--spacing) * 2);
+}
+
+.right::after {
+  top: anchor(top);
+  bottom: anchor(bottom);
+  left: anchor(right);
+  width: calc(var(--spacing) * 2);
+}

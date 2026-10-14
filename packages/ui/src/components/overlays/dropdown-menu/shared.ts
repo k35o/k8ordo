@@ -1,14 +1,5 @@
-import { cn } from '../../../helpers/cn';
+import styles from './shared.module.css';
 
-export const panelClass =
-  'bg-bg-raised border-border-subtle vertical:min-w-0 vertical:min-h-40 flex min-w-40 flex-col rounded-lg border py-2 shadow-md';
+export const panelClass = styles.panel;
 
-export const itemClass = cn(
-  'w-full px-2 py-1 text-left transition-colors duration-150 ease-out',
-  'hover:bg-bg-subtle',
-  'focus-visible:bg-bg-subtle',
-  // 地の色だけのフォーカスは高コントラストでは見分けにくいので、そのときだけ線に
-  // 色を付ける。outline-hidden は --tw-outline-style を none にし、後から足した
-  // 線まで消してしまうため使わない（透明の線は強制カラーでは塗られて見える）
-  'outline-transparent -outline-offset-2 focus-visible:outline-2 contrast-more:outline-border-base',
-);
+export const itemClass = styles.item;

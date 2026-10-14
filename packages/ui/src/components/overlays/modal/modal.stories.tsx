@@ -95,7 +95,11 @@ export const BottomSide: Story = {
   },
   play: async ({ canvas }) => {
     const dialog = canvas.getByRole('dialog', { name: 'ボトムシート' });
-    await expect(dialog).toHaveClass('ao-modal-bottom');
+    await waitFor(() => {
+      const rect = dialog.getBoundingClientRect();
+      expect(rect.bottom).toBe(document.documentElement.clientHeight);
+      expect(rect.top).toBeGreaterThan(0);
+    });
   },
 };
 
@@ -108,7 +112,11 @@ export const LeftSide: Story = {
   },
   play: async ({ canvas }) => {
     const dialog = canvas.getByRole('dialog', { name: '左サイドシート' });
-    await expect(dialog).toHaveClass('ao-modal-left');
+    await waitFor(() => {
+      const rect = dialog.getBoundingClientRect();
+      expect(rect.left).toBe(0);
+      expect(rect.right).toBeLessThan(document.documentElement.clientWidth);
+    });
   },
 };
 

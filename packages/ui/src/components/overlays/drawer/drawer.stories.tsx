@@ -60,7 +60,9 @@ export const Left: Story = {
       }
       return el;
     });
-    await expect(dialog).toHaveClass('ao-modal-left');
+    const rect = dialog.getBoundingClientRect();
+    await expect(rect.left).toBe(0);
+    await expect(rect.right).toBeLessThan(document.documentElement.clientWidth);
   },
   args: {
     isOpen: true,
