@@ -1,14 +1,23 @@
 'use client';
 
+import { clsx } from 'clsx';
 import { useRef } from 'react';
 import type { FC, OlHTMLAttributes, Ref } from 'react';
 import { flushSync } from 'react-dom';
 
-import { cn } from '../../../helpers/cn';
 import { useControllableState } from '../../../hooks/controllable-state';
 import { getMessages } from '../../../i18n/current';
-import { FOCUS_RING } from '../../_internal/focus-ring';
 import { CheckIcon } from '../../icons';
+
+import focusRing from '../../_internal/focus-ring.module.css';
+import srOnly from '../../_internal/sr-only.module.css';
+import styles from './stepper.module.css';
+
+const MARKER = {
+  complete: styles.markerComplete,
+  current: styles.markerCurrent,
+  upcoming: styles.markerUpcoming,
+} as const;
 
 export type StepperStep = Readonly<{
   label: string;
@@ -54,11 +63,9 @@ export const Stepper: FC<Props> = ({
   return (
     <ol
       {...rest}
-      className={cn(
-        'flex gap-2',
-        // 横並びは段を等分するので、置かれた先が flex の行でも幅いっぱいに取る。
-        // 取らないと中身の最小幅まで縮み、文言が 1 語ずつ折り返す
-        vertical ? 'flex-col' : 'items-start inline-full',
+      className={clsx(
+        styles.root,
+        vertical ? styles.rootVertical : styles.rootHorizontal,
       )}
       ref={ref}
     >
@@ -73,15 +80,11 @@ export const Stepper: FC<Props> = ({
         const marker = (
           <span
             aria-hidden
-            className={cn(
+            className={clsx(
               // 縦書きの中でも段の番号を横倒しにしない
-              'writing-h grid size-8 shrink-0 place-items-center rounded-full border-2 text-sm font-bold tabular-nums',
-              // 済んだ段は primary-bg だとダークでページに沈むので、ページの地から
-              // はっきり離れる primary-fg で塗り、チェックを反転色で抜く
-              status === 'complete' &&
-                'border-transparent bg-primary-fg text-fg-inverse forced-colors:bg-[Highlight] forced-colors:text-[HighlightText]',
-              status === 'current' && 'border-primary-border text-primary-fg',
-              status === 'upcoming' && 'border-border-base text-fg-mute',
+              'writing-h',
+              styles.marker,
+              MARKER[status],
             )}
           >
             {status === 'complete' ? <CheckIcon size="sm" /> : index + 1}
@@ -90,34 +93,28 @@ export const Stepper: FC<Props> = ({
         const connector = isLast ? null : (
           <span
             aria-hidden
-            className={cn(
-              'rounded-full',
-              // 縦に並べるときは、段の印（size-8）の中心に 2px の線を通す
-              // 横に並べるときは押せる範囲の外に置き、印の中心の高さに、印の
-              // 後ろから段の終わりまで引く
-              vertical
-                ? 'ms-3.75 min-block-4 inline-0.5 self-stretch'
-                : 'absolute inset-s-10 inset-e-0 block-0.5 [inset-block-start:calc(1rem-1px)]',
-              status === 'complete' ? 'bg-primary-fg' : 'bg-border-base',
-              'forced-colors:bg-[CanvasText]',
+            className={clsx(
+              styles.connector,
+              vertical ? styles.connectorVertical : styles.connectorHorizontal,
+              status === 'complete' && styles.connectorComplete,
             )}
           />
         );
         const text = (
-          <span className="flex flex-col text-start">
+          <span className={styles.text}>
             <span
-              className={cn(
-                'font-medium',
-                status === 'upcoming' && 'text-fg-mute',
+              className={clsx(
+                styles.label,
+                status === 'upcoming' && styles.labelUpcoming,
               )}
             >
               {step.label}
             </span>
             {step.description === undefined ? null : (
-              <span className="text-fg-mute text-sm">{step.description}</span>
+              <span className={styles.description}>{step.description}</span>
             )}
             {status === 'complete' ? (
-              <span className="sr-only">{messages.stepperComplete}</span>
+              <span className={srOnly.srOnly}>{messages.stepperComplete}</span>
             ) : null}
           </span>
         );
@@ -129,20 +126,17 @@ export const Stepper: FC<Props> = ({
             {text}
           </>
         );
-        // 押せる段は、負のマージンで位置を変えずに周りへ余白を取る
-        const bodyLayout = cn(
-          vertical
-            ? 'flex items-center gap-2'
-            : 'flex flex-col items-start gap-2',
-          interactive && '-m-2 self-start rounded-lg p-2',
+        const bodyLayout = clsx(
+          styles.body,
+          vertical ? styles.bodyVertical : styles.bodyHorizontal,
+          interactive && styles.interactive,
         );
         return (
           <li
             aria-current={status === 'current' ? 'step' : undefined}
-            className={cn(
-              'flex flex-col',
-              // 段ごとに同じ幅の列を取り、線の長さを文言の長さから切り離す
-              vertical ? 'gap-2' : 'relative flex-1',
+            className={clsx(
+              styles.item,
+              vertical ? styles.itemVertical : styles.itemHorizontal,
             )}
             // 段は並びの位置そのものなので、位置を key にする
             // eslint-disable-next-line react/no-array-index-key
@@ -150,11 +144,7 @@ export const Stepper: FC<Props> = ({
           >
             {interactive && status === 'complete' ? (
               <button
-                className={cn(
-                  bodyLayout,
-                  'transition-colors duration-150 ease-out hover:bg-bg-subtle',
-                  FOCUS_RING,
-                )}
+                className={clsx(bodyLayout, styles.button, focusRing.ring)}
                 onClick={(event) => {
                   const button = event.currentTarget;
                   flushSync(() => {
@@ -172,7 +162,7 @@ export const Stepper: FC<Props> = ({
               </button>
             ) : (
               <span
-                className={cn(bodyLayout, interactive && FOCUS_RING)}
+                className={clsx(bodyLayout, interactive && focusRing.ring)}
                 ref={status === 'current' ? currentRef : undefined}
                 tabIndex={interactive && status === 'current' ? -1 : undefined}
               >

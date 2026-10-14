@@ -148,27 +148,6 @@
     }
   }
 
-  /*
- * Tabs の選択インジケータ。選択中のタブを anchor にした単一要素を
- * inset の transition でスライドさせる（旧 motion layoutId の置き換え）。
- * position-area は transition できないため inset + anchor() を使う。
- * self-* キーワードは論理プロパティと合わせて縦書きでも正しい辺に解決される。
- */
-  .ao-tab-indicator {
-    position: absolute;
-    inset-inline-start: anchor(self-start);
-    inset-inline-end: anchor(self-end);
-    inset-block-start: calc(anchor(self-end) - 0.125rem);
-    block-size: 0.25rem;
-    /* 純装飾。タブ下端やスライド通過中のクリックを横取りしない */
-    pointer-events: none;
-  }
-  @media (prefers-reduced-motion: no-preference) {
-    .ao-tab-indicator {
-      transition: inset 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-  }
-
   @media (prefers-reduced-motion: reduce) {
     .ao-toast-enter {
       animation: none;

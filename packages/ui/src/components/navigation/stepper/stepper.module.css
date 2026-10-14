@@ -1,0 +1,157 @@
+.root {
+  display: flex;
+  gap: calc(var(--spacing) * 2);
+}
+
+.rootVertical {
+  flex-direction: column;
+}
+
+/* 横並びは段を等分するので、置かれた先が flex の行でも幅いっぱいに取る。
+   取らないと中身の最小幅まで縮み、文言が 1 語ずつ折り返す */
+.rootHorizontal {
+  align-items: flex-start;
+  inline-size: 100%;
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+}
+
+.itemVertical {
+  gap: calc(var(--spacing) * 2);
+}
+
+/* 段ごとに同じ幅の列を取り、線の長さを文言の長さから切り離す */
+.itemHorizontal {
+  position: relative;
+  flex: 1;
+}
+
+.marker {
+  display: grid;
+  width: calc(var(--spacing) * 8);
+  height: calc(var(--spacing) * 8);
+  flex-shrink: 0;
+  place-items: center;
+  border-radius: var(--radius-full);
+  border-width: 2px;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+  font-weight: var(--font-weight-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 済んだ段は primary-bg だとダークでページに沈むので、ページの地から
+   はっきり離れる primary-fg で塗り、チェックを反転色で抜く */
+.markerComplete {
+  border-color: transparent;
+  background-color: var(--color-primary-fg);
+  color: var(--color-fg-inverse);
+
+  @media (forced-colors: active) {
+    background-color: var(--color-system-highlight);
+    color: var(--color-system-highlight-text);
+  }
+}
+
+.markerCurrent {
+  border-color: var(--color-primary-border);
+  color: var(--color-primary-fg);
+}
+
+.markerUpcoming {
+  border-color: var(--color-border-base);
+  color: var(--color-fg-mute);
+}
+
+.connector {
+  border-radius: var(--radius-full);
+  background-color: var(--color-border-base);
+}
+
+.connectorComplete {
+  background-color: var(--color-primary-fg);
+}
+
+@media (forced-colors: active) {
+  .connector {
+    background-color: var(--color-system-canvas-text);
+  }
+}
+
+/* 縦に並べるときは、段の印（.marker）の中心に 2px の線を通す */
+.connectorVertical {
+  margin-inline-start: calc(var(--spacing) * 3.75);
+  min-block-size: calc(var(--spacing) * 4);
+  inline-size: calc(var(--spacing) * 0.5);
+  align-self: stretch;
+}
+
+/* 横に並べるときは押せる範囲の外に置き、印の中心の高さに、印の
+   後ろから段の終わりまで引く */
+.connectorHorizontal {
+  position: absolute;
+  inset-inline-start: calc(var(--spacing) * 10);
+  inset-inline-end: 0;
+  /* better-css-modules-disable-next-line tokens/spacing -- the 2px line is centred on the marker, half its block size less half the line's 1px, which is not a step of the scale */
+  inset-block-start: calc(var(--spacing) * 4 - 1px);
+  block-size: calc(var(--spacing) * 0.5);
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  text-align: start;
+}
+
+.label {
+  font-weight: var(--font-weight-medium);
+}
+
+.labelUpcoming {
+  color: var(--color-fg-mute);
+}
+
+.description {
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+  color: var(--color-fg-mute);
+}
+
+.body {
+  display: flex;
+  gap: calc(var(--spacing) * 2);
+}
+
+.bodyVertical {
+  align-items: center;
+}
+
+.bodyHorizontal {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+/* 押せる段は、負のマージンで位置を変えずに周りへ余白を取る */
+.interactive {
+  margin: calc(var(--spacing) * -2);
+  align-self: flex-start;
+  border-radius: var(--radius-lg);
+  padding: calc(var(--spacing) * 2);
+}
+
+.button {
+  transition-property:
+    color, background-color, border-color, outline-color, text-decoration-color,
+    fill, stroke;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--easing-out);
+}
+
+@media (hover: hover) {
+  .button:hover {
+    background-color: var(--color-bg-subtle);
+  }
+}

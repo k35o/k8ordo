@@ -104,7 +104,7 @@ export const ForcedColors: Story = {
       <Separator />
     </div>
   ),
-  play: async ({ canvas, canvasElement, userEvent }) => {
+  play: async ({ canvas, userEvent }) => {
     await expect(matchMedia('(forced-colors: active)').matches).toBe(true);
 
     // 境界線: 影と地の色は消えるので、線で縁取られている
@@ -126,7 +126,8 @@ export const ForcedColors: Story = {
 
     // 選択状態
     await expect(
-      isPainted(partOf(canvasElement.querySelector('.ao-tab-indicator'))),
+      // インジケータは tablist の最後の子
+      isPainted(partOf(canvas.getByRole('tablist').lastElementChild)),
     ).toBe(true);
 
     const on = canvas.getByRole('switch', { name: 'オンのスイッチ' });

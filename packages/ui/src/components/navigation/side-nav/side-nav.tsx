@@ -14,6 +14,8 @@ import {
 } from '../../_internal/nav-link';
 import { ChevronIcon } from '../../icons';
 
+import styles from './side-nav.module.css';
+
 type RestProps = Omit<
   AnchorHTMLAttributes<HTMLAnchorElement>,
   'href' | 'children' | 'className' | 'style' | 'aria-current'
@@ -40,7 +42,7 @@ export const Root: FC<
     >
   >
 > = ({ label, children, ...rest }) => (
-  <nav {...rest} aria-label={label} className="flex flex-col gap-6">
+  <nav {...rest} aria-label={label} className={styles.root}>
     {children}
   </nav>
 );
@@ -51,7 +53,7 @@ export const Group: FC<PropsWithChildren<{ title: string }>> = ({
 }) => {
   const titleId = useId();
   return (
-    <div className="flex flex-col gap-1">
+    <div className={styles.group}>
       <span className={NAV_TITLE_CLASS_NAME} id={titleId}>
         {title}
       </span>
@@ -94,10 +96,10 @@ export const Sub: FC<
   PropsWithChildren<{ title: string; defaultOpen?: boolean }>
 > = ({ title, defaultOpen = false, children }) => (
   <li>
-    <details className="group/sub" open={defaultOpen}>
-      <summary className="text-fg-mute hover:border-border-emphasize hover:text-fg-base focus-visible:ring-border-info -ms-px flex cursor-pointer list-none items-center gap-1.5 border-s-2 border-transparent py-1.5 ps-4 pe-3 text-sm transition-colors duration-150 ease-out focus-visible:ring-2 focus-visible:outline-hidden focus-visible:ring-inset [&::-webkit-details-marker]:hidden">
+    <details className={styles.sub} open={defaultOpen}>
+      <summary className={styles.summary}>
         {/* 三角の印を消した代わりの向きの印。開くと下を向く */}
-        <span className="flex transition-transform duration-150 ease-out group-open/sub:rotate-90 rtl:-scale-x-100 rtl:group-open/sub:rotate-90">
+        <span className={styles.chevron}>
           <ChevronIcon direction="right" size="sm" />
         </span>
         {title}

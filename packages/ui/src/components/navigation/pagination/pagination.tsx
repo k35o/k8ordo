@@ -6,6 +6,8 @@ import { getMessages } from '../../../i18n/current';
 import { Button } from '../../buttons/button';
 import { ChevronIcon } from '../../icons';
 
+import styles from './pagination.module.css';
+
 type Props = {
   totalPages: number;
   currentPage: number;
@@ -39,7 +41,7 @@ export const Pagination: FC<Props> = ({
 
   return (
     <nav {...rest} aria-label={ariaLabel ?? messages.paginationLabel} ref={ref}>
-      <div className="flex items-center justify-center gap-2">
+      <div className={styles.row}>
         <Button
           color="base"
           disabled={disabled || isFirst}
@@ -48,7 +50,7 @@ export const Pagination: FC<Props> = ({
           }}
           size="sm"
           startIcon={
-            <span className="vertical:rotate-90 inline-flex">
+            <span className={styles.chevron}>
               <ChevronIcon direction="left" size="sm" />
             </span>
           }
@@ -56,19 +58,16 @@ export const Pagination: FC<Props> = ({
         >
           {prevLabel ?? messages.paginationPrevious}
         </Button>
-        <p
-          aria-live="polite"
-          className="text-fg-mute px-3 text-sm tabular-nums"
-        >
-          <span className="text-fg-base">{safeCurrent}</span>
-          <span className="mx-1">/</span>
+        <p aria-live="polite" className={styles.status}>
+          <span className={styles.current}>{safeCurrent}</span>
+          <span className={styles.slash}>/</span>
           <span>{safeTotal}</span>
         </p>
         <Button
           color="base"
           disabled={disabled || isLast}
           endIcon={
-            <span className="vertical:rotate-90 inline-flex">
+            <span className={styles.chevron}>
               <ChevronIcon direction="right" size="sm" />
             </span>
           }

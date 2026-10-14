@@ -1,0 +1,71 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 6);
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 1);
+}
+
+.summary {
+  /* better-css-modules-disable-next-line tokens/spacing -- the item's rule is pulled onto the list's 1px rule, which is not a step of the scale */
+  margin-inline-start: -1px;
+  display: flex;
+  cursor: pointer;
+  list-style-type: none;
+  align-items: center;
+  gap: calc(var(--spacing) * 1.5);
+  border-inline-start-width: 2px;
+  border-color: transparent;
+  padding-block: calc(var(--spacing) * 1.5);
+  padding-inline-start: calc(var(--spacing) * 4);
+  padding-inline-end: calc(var(--spacing) * 3);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+  color: var(--color-fg-mute);
+  transition-property:
+    color, background-color, border-color, outline-color, text-decoration-color,
+    fill, stroke;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--easing-out);
+}
+
+.summary::-webkit-details-marker {
+  display: none;
+}
+
+@media (hover: hover) {
+  .summary:hover {
+    border-color: var(--color-border-emphasize);
+    color: var(--color-fg-base);
+  }
+}
+
+.summary:focus-visible {
+  outline-style: none;
+  box-shadow: var(--shadow-ring-inset-info);
+
+  @media (forced-colors: active) {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+}
+
+.chevron {
+  display: flex;
+  transition-property: transform, translate, scale, rotate;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--easing-out);
+}
+
+/* :dir() はビルドで :lang() の一覧に置き換わり、dir 属性を見なくなる */
+.chevron:where(:dir(rtl), [dir='rtl'], [dir='rtl'] *) {
+  scale: -1 1;
+}
+
+.sub[open] .chevron {
+  rotate: 90deg;
+}

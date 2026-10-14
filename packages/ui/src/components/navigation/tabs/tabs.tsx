@@ -1,5 +1,6 @@
 'use client';
 
+import { clsx } from 'clsx';
 import {
   startTransition,
   useCallback,
@@ -17,12 +18,13 @@ import type {
   RefObject,
 } from 'react';
 
-import { FOCUS_RING } from '../../_internal/focus-ring';
-import { cn } from './../../../helpers/cn';
 import { createSafeContext } from './../../../helpers/create-safe-context';
 import { useControllableState } from './../../../hooks/controllable-state';
 import { useWritingMode } from './../../../hooks/writing-mode';
 import type { WritingMode } from './../../../hooks/writing-mode';
+
+import focusRing from '../../_internal/focus-ring.module.css';
+import styles from './tabs.module.css';
 
 type TabsContext = {
   rootId: string;
@@ -87,9 +89,7 @@ export const Root: FC<
 
   return (
     <TabsProvider value={contextValue}>
-      <div className="flex flex-col gap-1 overflow-x-auto p-0.5">
-        {children}
-      </div>
+      <div className={styles.root}>{children}</div>
     </TabsProvider>
   );
 };
@@ -116,7 +116,7 @@ export const List: FC<
     <div
       aria-label={label}
       aria-orientation={writingMode === 'vertical' ? 'vertical' : 'horizontal'}
-      className="border-border-base vertical:border-b-0 vertical:border-l vertical:overflow-x-hidden vertical:overflow-y-auto relative flex overflow-x-auto overflow-y-hidden border-b p-0.5 wrap-normal"
+      className={styles.list}
       id={`${rootId}-tablist`}
       ref={setTablist}
       role="tablist"
@@ -129,7 +129,7 @@ export const List: FC<
       <TabsListProvider value={listContextValue}>{children}</TabsListProvider>
       <div
         aria-hidden="true"
-        className="ao-tab-indicator bg-primary-border forced-colors:bg-[Highlight]"
+        className={styles.indicator}
         style={
           {
             positionAnchor: toAnchorName(rootId),
@@ -183,10 +183,10 @@ export const Tab: FC<PropsWithChildren<{ id: string }>> = ({
     <div
       aria-controls={selectedId === id ? `${rootId}-panel-${id}` : undefined}
       aria-selected={selectedId === id}
-      className={cn(
-        'relative cursor-pointer rounded-lg p-2 transition-colors duration-150 ease-out',
-        selectedId !== id && 'hover:bg-primary-bg-subtle hover:text-primary-fg',
-        FOCUS_RING,
+      className={clsx(
+        styles.tab,
+        selectedId !== id && styles.unselected,
+        focusRing.ring,
       )}
       id={`${rootId}-tab-${id}`}
       onClick={() => {
@@ -202,7 +202,7 @@ export const Tab: FC<PropsWithChildren<{ id: string }>> = ({
       }}
       role="tab"
       style={
-        // 選択中のタブをインジケータ(ao-tab-indicator)のアンカーにする
+        // 選択中のタブをインジケータのアンカーにする
         (selectedId === id
           ? { anchorName: toAnchorName(rootId) }
           : undefined) satisfies AnchorCSSProperties | undefined
@@ -231,7 +231,7 @@ export const Panel: FC<PropsWithChildren<{ id: string }>> = ({
     <ViewTransition default="none" enter="auto" exit="auto">
       <div
         aria-labelledby={`${rootId}-tab-${id}`}
-        className={cn('grow rounded-lg p-2', FOCUS_RING)}
+        className={clsx(styles.panel, focusRing.ring)}
         id={`${rootId}-panel-${id}`}
         role="tabpanel"
       >

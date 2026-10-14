@@ -10,6 +10,8 @@ import {
   navLinkClassName,
 } from '../../_internal/nav-link';
 
+import styles from './table-of-contents.module.css';
+
 export type TableOfContentsItem = {
   id: string;
   label: string;
@@ -105,7 +107,7 @@ const Items: FC<{
   activeId: string | null;
   depth: number;
 }> = ({ items, activeId, depth }) => (
-  <ul className={depth === 0 ? NAV_LIST_CLASS_NAME : 'flex flex-col gap-0.5'}>
+  <ul className={depth === 0 ? NAV_LIST_CLASS_NAME : styles.nested}>
     {items.map((item) => (
       <li key={item.id}>
         <a
@@ -137,7 +139,7 @@ export const TableOfContents: FC<
   const activeId = useActiveHeading(idsOf(items));
 
   return (
-    <nav {...rest} aria-labelledby={titleId} className="flex flex-col gap-1">
+    <nav {...rest} aria-labelledby={titleId} className={styles.root}>
       <span className={NAV_TITLE_CLASS_NAME} id={titleId}>
         {label ?? messages.tableOfContents}
       </span>
