@@ -9,19 +9,22 @@ import { Rich } from '../../../../components/rich';
 import { aiCategories } from '../../../../data/ai-nav';
 import * as m from '../../../../messages';
 
+import page from '../../../../styles/page.module.css';
+import styles from '../../../../styles/pages/ui/ai.module.css';
+
 export default function Ai() {
   const items = aiCategories.flatMap((category) => category.items);
 
   return (
-    <div className="flex flex-col gap-12 py-12">
+    <div className={styles.root}>
       <PageTitle title={m.nav.ai} />
-      <header className="flex flex-col gap-4">
+      <header className={page.stack}>
         <Heading level="h1">{m.nav.ai()}</Heading>
-        <p className="text-fg-mute max-w-2xl text-lg leading-relaxed">
+        <p className={styles.description}>
           <Rich>{m.ai.description()}</Rich>
         </p>
       </header>
-      <div className="grid grid-cols-1 items-start gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className={styles.cards}>
         {items.map((item) => (
           <CatalogCard
             item={item}

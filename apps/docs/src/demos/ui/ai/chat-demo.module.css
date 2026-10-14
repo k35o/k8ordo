@@ -1,0 +1,12 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 3);
+  width: 100%;
+  height: calc(var(--spacing) * 140);
+  padding: calc(var(--spacing) * 3);
+  border: 1px solid var(--color-border-mute);
+  border-radius: var(--radius-2xl);
+  background-color: var(--color-bg-base);
+  box-shadow: var(--shadow-sm);
+}

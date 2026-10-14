@@ -1,0 +1,13 @@
+.surface {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing);
+  padding-bottom: calc(var(--spacing) * 4);
+  border-bottom: 1px solid var(--color-border-mute);
+}
+
+.description {
+  color: var(--color-fg-mute);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+}

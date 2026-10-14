@@ -1,7 +1,7 @@
 import { Heading, Separator } from '@k8ordo/ui';
 
-import { CodeBlock } from '../../../../../components/code-block';
 import { Note } from '../../../../../components/callout';
+import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';
 import {
   InstallCommand,
@@ -14,6 +14,8 @@ import { Rich } from '../../../../../components/rich';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
 import { ChatDemo } from '../../../../../demos/ui/ai/chat-demo';
 import * as m from '../../../../../messages';
+
+import page from '../../../../../styles/page.module.css';
 
 const t = m.aiChat;
 
@@ -278,32 +280,32 @@ import { JsonRenderUI } from '@k8ordo/ui/json-render/registry';
 
 export default function AiChat() {
   return (
-    <div className="flex flex-col gap-8 py-12">
+    <div className={page.page}>
       <PageTitle title={m.nav.aiChat} />
-      <div className="flex flex-col gap-4">
+      <div className={page.stack}>
         <Heading level="h1">
           <Rich>{m.nav.aiChat()}</Rich>
         </Heading>
-        <p className="text-fg-mute text-lg">
+        <p className={page.lead}>
           <Rich>{t.introduction()}</Rich>
         </p>
       </div>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{t.demoTitle()}</Rich>
         </Heading>
         <ComponentPreview code={DEMO}>
           <ChatDemo />
         </ComponentPreview>
-        <p className="text-fg-mute">
+        <p className={page.mute}>
           <Rich>{t.demoDescription()}</Rich>
         </p>
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{t.overviewTitle()}</Rich>
         </Heading>
@@ -312,33 +314,33 @@ export default function AiChat() {
           lang="tsx"
           marks={{ 15: 'highlight', 18: 'highlight', 39: 'highlight' }}
         />
-        <p className="text-fg-mute">
+        <p className={page.mute}>
           <Rich>{t.overviewConversation()}</Rich>
         </p>
-        <p className="text-fg-mute">
+        <p className={page.mute}>
           <Rich>{t.overviewMessage()}</Rich>
         </p>
-        <p className="text-fg-mute">
+        <p className={page.mute}>
           <Rich>{t.overviewInput()}</Rich>
         </p>
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{t.inputTitle()}</Rich>
         </Heading>
         <CodeBlock code={INPUT} lang="tsx" />
-        <p className="text-fg-mute">
+        <p className={page.mute}>
           <Rich>{t.inputKeys()}</Rich>
         </p>
-        <p className="text-fg-mute">
+        <p className={page.mute}>
           <Rich>{t.inputStatus()}</Rich>
         </p>
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{t.attachmentsTitle()}</Rich>
         </Heading>
@@ -347,38 +349,38 @@ export default function AiChat() {
           lang="tsx"
           marks={{ 2: 'highlight', 4: 'highlight', 5: 'highlight' }}
         />
-        <p className="text-fg-mute">
+        <p className={page.mute}>
           <Rich>{t.attachmentsAccept()}</Rich>
         </p>
-        <p className="text-fg-mute">
+        <p className={page.mute}>
           <Rich>{t.attachmentsList()}</Rich>
         </p>
-        <p className="text-fg-mute">
+        <p className={page.mute}>
           <Rich>{t.attachmentsSubmit()}</Rich>
         </p>
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{t.suggestionTitle()}</Rich>
         </Heading>
         <CodeBlock code={SUGGESTION} lang="tsx" />
-        <p className="text-fg-mute">
+        <p className={page.mute}>
           <Rich>{t.suggestionDescription()}</Rich>
         </p>
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{t.responseTitle()}</Rich>
         </Heading>
         <CodeBlock code={RESPONSE} lang="tsx" />
-        <p className="text-fg-mute">
+        <p className={page.mute}>
           <Rich>{t.responseDescription()}</Rich>
         </p>
-        <p className="text-fg-mute">
+        <p className={page.mute}>
           <Rich>
             {t.responseInstall(peerVersionOf('@k8ordo/ui', 'streamdown'))}
           </Rich>
@@ -392,21 +394,21 @@ export default function AiChat() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{t.toolTitle()}</Rich>
         </Heading>
         <CodeBlock code={TOOL} lang="tsx" />
-        <p className="text-fg-mute">
+        <p className={page.mute}>
           <Rich>{t.toolInvocation()}</Rich>
         </p>
-        <p className="text-fg-mute">
+        <p className={page.mute}>
           <Rich>{t.toolIo()}</Rich>
         </p>
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{t.approvalTitle()}</Rich>
         </Heading>
@@ -415,47 +417,47 @@ export default function AiChat() {
           lang="tsx"
           marks={{ 5: 'highlight', 12: 'highlight', 13: 'highlight' }}
         />
-        <p className="text-fg-mute">
+        <p className={page.mute}>
           <Rich>{t.approvalButtons()}</Rich>
         </p>
-        <p className="text-fg-mute">
+        <p className={page.mute}>
           <Rich>{t.approvalSdk()}</Rich>
         </p>
-        <p className="text-fg-mute">
+        <p className={page.mute}>
           <Rich>{t.approvalCases()}</Rich>
         </p>
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{t.partsTitle()}</Rich>
         </Heading>
         <CodeBlock code={PARTS} lang="tsx" />
-        <p className="text-fg-mute">
+        <p className={page.mute}>
           <Rich>{t.partsAttachment()}</Rich>
         </p>
-        <p className="text-fg-mute">
+        <p className={page.mute}>
           <Rich>{t.partsSource()}</Rich>
         </p>
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{t.actionsTitle()}</Rich>
         </Heading>
         <CodeBlock code={ACTIONS} lang="tsx" />
-        <p className="text-fg-mute">
+        <p className={page.mute}>
           <Rich>{t.actionsRow()}</Rich>
         </p>
-        <p className="text-fg-mute">
+        <p className={page.mute}>
           <Rich>{t.actionsBehavior()}</Rich>
         </p>
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{t.aiSdkTitle()}</Rich>
         </Heading>
@@ -464,27 +466,27 @@ export default function AiChat() {
           lang="tsx"
           marks={{ 7: 'highlight', 8: 'highlight', 9: 'highlight' }}
         />
-        <p className="text-fg-mute">
+        <p className={page.mute}>
           <Rich>{t.aiSdkMap()}</Rich>
         </p>
-        <p className="text-fg-mute">
+        <p className={page.mute}>
           <Rich>{t.aiSdkRender()}</Rich>
         </p>
-        <p className="text-fg-mute">
+        <p className={page.mute}>
           <Rich>{t.aiSdkVersion(peerVersionOf('@k8ordo/ui', 'ai'))}</Rich>
         </p>
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{t.jsonRenderTitle()}</Rich>
         </Heading>
         <CodeBlock code={JSON_RENDER} lang="tsx" />
-        <p className="text-fg-mute">
+        <p className={page.mute}>
           <Rich>{t.jsonRenderDescription()}</Rich>
         </p>
-        <p className="text-fg-mute">
+        <p className={page.mute}>
           <Rich>{t.jsonRenderAdapter()}</Rich>
           <LocaleAnchor path="/:locale/ui/ai/generative-ui">
             Generative UI
@@ -494,11 +496,11 @@ export default function AiChat() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>
-        <p className="text-fg-mute">
+        <p className={page.mute}>
           <Rich>{t.propsDescription()}</Rich>
         </p>
         {(
@@ -529,7 +531,7 @@ export default function AiChat() {
             'Source.Item',
           ] as const
         ).map((name) => (
-          <div className="flex flex-col gap-4" key={name}>
+          <div className={page.stack} key={name}>
             <Heading level="h3">{name}</Heading>
             <PropsTable inherits={inheritsOf(name)} items={propsOf(name)} />
           </div>

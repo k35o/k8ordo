@@ -8,6 +8,9 @@ import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import * as m from '../../../../../messages';
 
+import page from '../../../../../styles/page.module.css';
+import styles from '../../../../../styles/pages/ui/ai/agents.module.css';
+
 const MCP_URL = `${STORYBOOK_URL}/mcp`;
 
 const SURFACES: Array<{
@@ -47,13 +50,13 @@ const Surface: FC<{ path: string; href: string; description: Message }> = ({
   href,
   description,
 }) => (
-  <div className="border-border-mute flex flex-col gap-1 border-b pb-4">
+  <div className={styles.surface}>
     <dt>
       <Anchor href={href}>
         <Code>{path}</Code>
       </Anchor>
     </dt>
-    <dd className="text-fg-mute text-sm">
+    <dd className={styles.description}>
       <Rich>{description()}</Rich>
     </dd>
   </div>
@@ -61,19 +64,19 @@ const Surface: FC<{ path: string; href: string; description: Message }> = ({
 
 export default function AiAgents() {
   return (
-    <div className="flex flex-col gap-8 py-12">
+    <div className={page.page}>
       <PageTitle title={m.nav.aiAgents} />
-      <div className="flex flex-col gap-4">
+      <div className={page.stack}>
         <Heading level="h1">
           <Rich>{m.nav.aiAgents()}</Rich>
         </Heading>
-        <p className="text-fg-mute text-lg">
+        <p className={page.lead}>
           <Rich>{m.aiAgents.introduction()}</Rich>
         </p>
       </div>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.aiAgents.setupTitle()}</Rich>
         </Heading>
@@ -89,38 +92,38 @@ components in \`docs/references/ai-chat.md\`, the generative UI adapters in
 a component that is listed in none of them does not exist.`}
           lang="md"
         />
-        <p className="text-fg-mute">
+        <p className={page.mute}>
           <Rich>{m.aiAgents.setupDescription()}</Rich>
         </p>
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.aiAgents.surfacesTitle()}</Rich>
         </Heading>
-        <dl className="flex flex-col gap-4">
+        <dl className={page.stack}>
           {SURFACES.map((surface) => (
             <Surface key={surface.path} {...surface} />
           ))}
-          <div className="border-border-mute flex flex-col gap-1 border-b pb-4">
+          <div className={styles.surface}>
             <dt>
               <Anchor href={MCP_URL} openInNewTab>
                 <Code>{MCP_URL}</Code>
               </Anchor>
             </dt>
-            <dd className="text-fg-mute text-sm">
+            <dd className={styles.description}>
               <Rich>{m.aiAgents.surfaceMcp()}</Rich>
             </dd>
           </div>
         </dl>
-        <p className="text-fg-mute">
+        <p className={page.mute}>
           <Rich>{m.aiAgents.surfacesDescription()}</Rich>
         </p>
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.aiAgents.mcpTitle()}</Rich>
         </Heading>
@@ -135,17 +138,17 @@ a component that is listed in none of them does not exist.`}
 }`}
           lang="json"
         />
-        <p className="text-fg-mute">
+        <p className={page.mute}>
           <Rich>{m.aiAgents.mcpDescription()}</Rich>
         </p>
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.aiAgents.generatedTitle()}</Rich>
         </Heading>
-        <p className="text-fg-mute">
+        <p className={page.mute}>
           <Rich>{m.aiAgents.generatedDescription()}</Rich>
         </p>
       </section>
