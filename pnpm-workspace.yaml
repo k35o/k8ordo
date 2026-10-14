@@ -126,5 +126,14 @@ minimumReleaseAgeExclude:
 verifyDepsBeforeRun: install
 
 versioning:
+  # ui だけ外すのは、npm に 1.0.0 と 2.0.0 があるため。fixed はグループの最高版に
+  # 最大の bump を足すので、ui を入れると全部が 3.0.0 になる。
+  fixed:
+    - - '@k8ordo/color-scheme'
+      - '@k8ordo/form'
+      - '@k8ordo/framework'
+      - '@k8ordo/i18n'
+      - '@k8ordo/router'
+      - '@k8ordo/state'
   changelog:
     storage: repository
