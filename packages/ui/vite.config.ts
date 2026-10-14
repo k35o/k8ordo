@@ -190,6 +190,11 @@ export default defineConfig({
             'src/components/form/**/*.test.tsx',
             'src/components/_internal/**/*.test.tsx',
           ],
+          // このプロジェクトは Playwright の本物の入力で欄を操作する。Firefox は
+          // ファイルごとのページを並べると、押されたページが前に出るたびに
+          // ほかのページのフォーカスを奪い、欄に blur が届く（Combobox の一覧が
+          // 選ぶ前に閉じる）。1 ページずつ流せば奪い合いが起きない
+          fileParallelism: false,
           browser: {
             enabled: true,
             instances: browsers.map((browser) => ({ browser })),
