@@ -67,6 +67,11 @@
   --color-group-secondary: var(--color-group-secondary);
   --color-group-tertiary: var(--color-group-tertiary);
   --color-group-quaternary: var(--color-group-quaternary);
+
+  --color-system-canvas-text: var(--color-system-canvas-text);
+  --color-system-gray-text: var(--color-system-gray-text);
+  --color-system-highlight: var(--color-system-highlight);
+  --color-system-highlight-text: var(--color-system-highlight-text);
   --color-transparent: transparent;
 
   --radius-*: initial;

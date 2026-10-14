@@ -21,6 +21,11 @@ const annotate = (
 ): ShikiTransformer => ({
   name: 'k8ordo-ui:annotate',
   pre(node) {
+    // テーマの地は使わず、CodeBlock の面の色を通す
+    const { style } = node.properties;
+    if (typeof style === 'string') {
+      node.properties.style = style.replace(/background-color:[^;]*;?/u, '');
+    }
     // 印と注記の指す行は頭に帯を引くので、どちらかがあれば全行に帯の幅を取る
     const annotated = [marks, callouts].some(
       (entries) => entries !== undefined && Object.keys(entries).length > 0,
@@ -59,7 +64,7 @@ const annotate = (
             tagName: 'span',
             properties: {
               'data-callout': '',
-              style: `--ao-callout-indent:${String(indent)}ch`,
+              style: `--callout-indent:${String(indent)}ch`,
             },
             children: [{ type: 'text' as const, value: text }],
           },

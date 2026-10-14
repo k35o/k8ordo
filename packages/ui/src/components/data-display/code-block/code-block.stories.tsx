@@ -18,9 +18,7 @@ const meta: Meta<typeof CodeBlock> = {
     // 外し、見出しの行の文字は検査する
     a11y: {
       config: {
-        rules: [
-          { id: 'color-contrast', selector: '*:not(.ao-code-block pre *)' },
-        ],
+        rules: [{ id: 'color-contrast', selector: '*:not(pre.shiki *)' }],
       },
     },
   },

@@ -3,6 +3,7 @@ import type { FC, MouseEvent, MouseEventHandler } from 'react';
 import { useRef, useState } from 'react';
 import { expect, fn, waitFor } from 'storybook/test';
 
+import { tokenColor } from '../../../../.storybook/tokens';
 import { CopyIcon } from '../../icons';
 import { Button } from './button';
 
@@ -53,7 +54,9 @@ export const Base: Story = {
     color: 'base',
   },
   play: async ({ canvas }) => {
-    await expect(canvas.getByRole('button')).toHaveClass('bg-bg-subtle');
+    await expect(
+      getComputedStyle(canvas.getByRole('button')).backgroundColor,
+    ).toBe(tokenColor('--color-bg-subtle'));
   },
 };
 
@@ -63,7 +66,9 @@ export const OutlineBase: Story = {
     variant: 'outline',
   },
   play: async ({ canvas }) => {
-    await expect(canvas.getByRole('button')).toHaveClass('border-border-base');
+    await expect(getComputedStyle(canvas.getByRole('button')).borderColor).toBe(
+      tokenColor('--color-border-base'),
+    );
   },
 };
 
@@ -311,7 +316,8 @@ export const RenderItemLink: Story = {
 
     await expect(link).toHaveAttribute('id', 'render-item-link');
     await expect(link).not.toHaveAttribute('aria-disabled');
-    await expect(link).toHaveClass('rounded-full');
+    // ボタンの className が <a> に渡り、ボタンの枠線で描かれる
+    await expect(link).toHaveStyle({ borderTopWidth: '2px' });
 
     await userEvent.click(link);
 
@@ -339,7 +345,7 @@ export const RenderItemDisabled: Story = {
     const link = canvas.getByRole('link');
 
     await expect(link).toHaveAttribute('aria-disabled', 'true');
-    await expect(link).toHaveClass('cursor-not-allowed');
+    await expect(link).toHaveStyle({ cursor: 'not-allowed' });
 
     await userEvent.click(link);
 

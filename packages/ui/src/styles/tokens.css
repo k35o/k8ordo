@@ -199,7 +199,15 @@
   --color-group-tertiary: var(--pink-800);
   --color-group-quaternary: var(--purple-800);
 
+  /* 強制カラーで塗るシステムの色。@media (forced-colors: active) の中で使う */
+  --color-system-canvas-text: CanvasText;
+  --color-system-gray-text: GrayText;
+  --color-system-highlight: Highlight;
+  --color-system-highlight-text: HighlightText;
+
   --spacing: 0.25rem;
+  /* 文字の大きさに比例する余白の 1 段。地の文の中のコードや、本文の組み */
+  --spacing-em: 0.25em;
 
   --radius-xs: 0.125rem;
   --radius-sm: 0.375rem;
@@ -208,6 +216,7 @@
   --radius-xl: 1rem;
   --radius-2xl: 1.25rem;
   --radius-full: calc(infinity * 1px);
+  --radius-em: 0.5em;
 
   --font-family-sans:
     -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
@@ -226,6 +235,10 @@
   --font-size-3xl: 1.875rem;
   --font-size-emphasize: 3rem;
   --font-size-highlight: 6rem;
+  /* 地の文に混ぜる小さな字。まわりの文字の大きさに比例する */
+  --font-size-code: 0.875em;
+  --font-size-kbd: 0.8125em;
+  --font-size-callout: 0.9em;
 
   --font-weight-medium: 450;
   --font-weight-bold: 700;
@@ -247,6 +260,7 @@
   --line-height-normal: 1.5;
   --line-height-relaxed: 1.625;
   --line-height-loose: 2;
+  --line-height-callout: 1.4;
 
   --letter-spacing-none: 0em;
   --letter-spacing-normal: 0.025em;
