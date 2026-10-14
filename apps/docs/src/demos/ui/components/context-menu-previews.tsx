@@ -2,6 +2,8 @@
 
 import { ContextMenu } from '@k8ordo/ui';
 
+import styles from './context-menu-previews.module.css';
+
 export function ContextMenuPreview() {
   return (
     <ContextMenu.Root>
@@ -9,7 +11,7 @@ export function ContextMenuPreview() {
         renderItem={(props) => (
           <div
             {...props}
-            className="border-border-base text-fg-mute grid h-40 w-full place-items-center rounded-xl border border-dashed"
+            className={styles.trigger}
             // oxlint-disable-next-line eslint-plugin-jsx-a11y/no-noninteractive-tabindex
             tabIndex={0}
           >

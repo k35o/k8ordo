@@ -9,6 +9,9 @@ import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
 import * as m from '../../../../../messages';
 
+import page from '../../../../../styles/page.module.css';
+import styles from '../../../../../styles/pages/ui/components/date-field.module.css';
+
 const FORM_EXAMPLE = `// schema.ts
 export const eventSchema = z.object({ eventDate: z.iso.date() });
 
@@ -25,11 +28,11 @@ const eventDate = form.field('eventDate');
 
 export default function DateFieldPage() {
   return (
-    <div className="flex flex-col gap-8 py-12">
+    <div className={page.page}>
       <PageTitle name="DateField" />
-      <div className="flex flex-col gap-4">
+      <div className={page.stack}>
         <Heading level="h1">DateField</Heading>
-        <p className="text-fg-mute text-lg">
+        <p className={page.lead}>
           <Rich>{m.components.dateField.description()}</Rich>
         </p>
         <div>
@@ -43,7 +46,7 @@ export default function DateFieldPage() {
       </div>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
@@ -51,13 +54,13 @@ export default function DateFieldPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-8">
-        <div className="flex flex-col gap-4">
+      <section className={page.stackLg}>
+        <div className={page.stack}>
           <Heading level="h2">
             <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
           <ComponentPreview code='<DateField aria-label="Date" defaultValue="2026-09-25" name="eventDate" />'>
-            <div className="w-full max-w-xs">
+            <div className={styles.frame}>
               <DateField
                 aria-label="Date"
                 defaultValue="2026-09-25"
@@ -67,11 +70,11 @@ export default function DateFieldPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.dateField.minMaxTitle()}</Rich>
           </Heading>
-          <p className="text-fg-mute">
+          <p className={page.mute}>
             <Rich>{m.components.dateField.minMaxDescription()}</Rich>
           </p>
           <ComponentPreview
@@ -82,7 +85,7 @@ export default function DateFieldPage() {
   min="2026-09-01"
 />`}
           >
-            <div className="w-full max-w-xs">
+            <div className={styles.frame}>
               <DateField
                 aria-label="Date"
                 defaultValue="2026-09-25"
@@ -93,33 +96,33 @@ export default function DateFieldPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.dateField.disabledTitle()}</Rich>
           </Heading>
           <ComponentPreview code='<DateField aria-label="Date" defaultValue="2026-09-25" disabled />'>
-            <div className="w-full max-w-xs">
+            <div className={styles.frame}>
               <DateField aria-label="Date" defaultValue="2026-09-25" disabled />
             </div>
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.dateField.invalidTitle()}</Rich>
           </Heading>
           <ComponentPreview code='<DateField aria-label="Date" invalid />'>
-            <div className="w-full max-w-xs">
+            <div className={styles.frame}>
               <DateField aria-label="Date" invalid />
             </div>
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.dateField.formTitle()}</Rich>
           </Heading>
-          <p className="text-fg-mute">
+          <p className={page.mute}>
             <Rich>{m.components.dateField.formDescription()}</Rich>
           </p>
           <CodeBlock code={FORM_EXAMPLE} lang="tsx" />
@@ -127,7 +130,7 @@ export default function DateFieldPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>

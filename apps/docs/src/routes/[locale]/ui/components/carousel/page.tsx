@@ -9,24 +9,27 @@ import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
 import * as m from '../../../../../messages';
 
+import page from '../../../../../styles/page.module.css';
+import styles from '../../../../../styles/pages/ui/components/carousel.module.css';
+
 const SEASONS = ['Spring', 'Summer', 'Autumn', 'Winter'] as const;
 
 const SeasonSlides = () =>
   SEASONS.map((season) => (
     <Carousel.Slide key={season} label={season}>
-      <div className="bg-bg-base flex h-40 items-end rounded-xl p-6 shadow-sm">
-        <p className="text-fg-base text-xl font-bold">{season}</p>
+      <div className={styles.slide}>
+        <p className={styles.season}>{season}</p>
       </div>
     </Carousel.Slide>
   ));
 
 export default function CarouselPage() {
   return (
-    <div className="flex flex-col gap-8 py-12">
+    <div className={page.page}>
       <PageTitle name="Carousel" />
-      <div className="flex flex-col gap-4">
+      <div className={page.stack}>
         <Heading level="h1">Carousel</Heading>
-        <p className="text-fg-mute text-lg">
+        <p className={page.lead}>
           <Rich>{m.components.carousel.description()}</Rich>
         </p>
         <div>
@@ -40,7 +43,7 @@ export default function CarouselPage() {
       </div>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
@@ -48,12 +51,12 @@ export default function CarouselPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-8">
-        <div className="flex flex-col gap-4">
+      <section className={page.stackLg}>
+        <div className={page.stack}>
           <Heading level="h2">
             <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
-          <p className="text-fg-mute">
+          <p className={page.mute}>
             <Rich>{m.components.carousel.basicDescription()}</Rich>
           </p>
           <ComponentPreview
@@ -65,7 +68,7 @@ export default function CarouselPage() {
   ))}
 </Carousel.Root>`}
           >
-            <div className="w-full">
+            <div className={styles.frame}>
               <Carousel.Root label="Seasons">
                 <SeasonSlides />
               </Carousel.Root>
@@ -73,11 +76,11 @@ export default function CarouselPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.carousel.slideSizeTitle()}</Rich>
           </Heading>
-          <p className="text-fg-mute">
+          <p className={page.mute}>
             <Rich>{m.components.carousel.slideSizeDescription()}</Rich>
           </p>
           <ComponentPreview
@@ -85,7 +88,7 @@ export default function CarouselPage() {
   …
 </Carousel.Root>`}
           >
-            <div className="w-full">
+            <div className={styles.frame}>
               <Carousel.Root label="Seasons" slideSize="md">
                 <SeasonSlides />
               </Carousel.Root>
@@ -95,7 +98,7 @@ export default function CarouselPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>

@@ -1,0 +1,19 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(var(--spacing) * 3);
+}
+
+.shortcut {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing);
+  color: var(--color-fg-mute);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+}
+
+.last {
+  margin-inline-start: calc(var(--spacing) * 2);
+}

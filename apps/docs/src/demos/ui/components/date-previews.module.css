@@ -1,0 +1,14 @@
+.root {
+  display: flex;
+  width: 100%;
+  max-width: 20rem;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 2);
+}
+
+.value {
+  color: var(--color-fg-mute);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+  font-variant-numeric: tabular-nums;
+}

@@ -1,0 +1,36 @@
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 2);
+}
+
+.navigation {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing);
+}
+
+/* 開いているページのリンクは .link の見た目に太字を足したもの。サイトは clsx を
+   持たないので、2 つのクラスを並べずに 1 つのクラスで表す */
+.link,
+.current {
+  border-radius: var(--radius-md);
+  padding-inline: calc(var(--spacing) * 3);
+  padding-block: calc(var(--spacing) * 2);
+}
+
+.current {
+  font-weight: var(--font-weight-bold);
+}
+
+@media (hover: hover) {
+  .link:hover,
+  .current:hover {
+    background-color: var(--color-bg-mute);
+  }
+}
+
+.separator {
+  margin-block: calc(var(--spacing) * 2);
+  border-color: var(--color-border-mute);
+}

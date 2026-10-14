@@ -1,0 +1,5 @@
+.groupLabel {
+  margin-bottom: calc(var(--spacing) * 2);
+  color: var(--color-fg-base);
+  font-weight: var(--font-weight-medium);
+}

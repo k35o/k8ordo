@@ -14,13 +14,15 @@ import {
 } from '../../../../../demos/ui/components/checkbox-previews';
 import * as m from '../../../../../messages';
 
+import page from '../../../../../styles/page.module.css';
+
 export default function CheckboxPage() {
   return (
-    <div className="flex flex-col gap-8 py-12">
+    <div className={page.page}>
       <PageTitle name="Checkbox" />
-      <div className="flex flex-col gap-4">
+      <div className={page.stack}>
         <Heading level="h1">Checkbox</Heading>
-        <p className="text-fg-mute text-lg">
+        <p className={page.lead}>
           <Rich>{m.components.checkbox.description()}</Rich>
         </p>
         <div>
@@ -34,7 +36,7 @@ export default function CheckboxPage() {
       </div>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
@@ -42,8 +44,8 @@ export default function CheckboxPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-8">
-        <div className="flex flex-col gap-4">
+      <section className={page.stackLg}>
+        <div className={page.stack}>
           <Heading level="h2">
             <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
@@ -52,7 +54,7 @@ export default function CheckboxPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.checkbox.defaultCheckedTitle()}</Rich>
           </Heading>
@@ -61,7 +63,7 @@ export default function CheckboxPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.checkbox.controlledTitle()}</Rich>
           </Heading>
@@ -78,7 +80,7 @@ export default function CheckboxPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.checkbox.disabledTitle()}</Rich>
           </Heading>
@@ -91,7 +93,7 @@ export default function CheckboxPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">Group</Heading>
           <ComponentPreview
             code={`<p id="checkbox-group-label">Frameworks</p>
@@ -110,7 +112,7 @@ export default function CheckboxPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">Group Disabled</Heading>
           <ComponentPreview
             code={`<p id="checkbox-group-disabled-label">Frameworks</p>
@@ -131,7 +133,7 @@ export default function CheckboxPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>
@@ -142,7 +144,7 @@ export default function CheckboxPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">CheckboxGroup.Root Props</Heading>
         <PropsTable
           inherits={inheritsOf('CheckboxGroup.Root')}

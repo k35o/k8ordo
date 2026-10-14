@@ -10,6 +10,9 @@ import { inheritsOf, propsOf } from '../../../../../data/component-props';
 import { CheckboxCardControlledPreview } from '../../../../../demos/ui/components/checkbox-card-previews';
 import * as m from '../../../../../messages';
 
+import page from '../../../../../styles/page.module.css';
+import styles from '../../../../../styles/pages/ui/components/checkbox-card.module.css';
+
 const options = [
   {
     value: 'history',
@@ -30,11 +33,11 @@ const options = [
 
 export default function CheckboxCardPage() {
   return (
-    <div className="flex flex-col gap-8 py-12">
+    <div className={page.page}>
       <PageTitle name="CheckboxCard" />
-      <div className="flex flex-col gap-4">
+      <div className={page.stack}>
         <Heading level="h1">CheckboxCard</Heading>
-        <p className="text-fg-mute text-lg">
+        <p className={page.lead}>
           <Rich>{m.components.checkboxCard.description()}</Rich>
         </p>
         <div>
@@ -48,7 +51,7 @@ export default function CheckboxCardPage() {
       </div>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
@@ -59,8 +62,8 @@ export default function CheckboxCardPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-8">
-        <div className="flex flex-col gap-4">
+      <section className={page.stackLg}>
+        <div className={page.stack}>
           <Heading level="h2">
             <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
@@ -102,7 +105,7 @@ const [value, setValue] = useState(['comments']);
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.checkboxCard.defaultValueTitle()}</Rich>
           </Heading>
@@ -134,11 +137,8 @@ const [value, setValue] = useState(['comments']);
   options={options}
 />`}
           >
-            <div className="w-full max-w-2xl">
-              <p
-                className="text-fg-base mb-3 font-medium"
-                id="features-default-label"
-              >
+            <div className={styles.frame}>
+              <p className={styles.groupLabel} id="features-default-label">
                 Choose features to enable
               </p>
               <CheckboxCard
@@ -154,7 +154,7 @@ const [value, setValue] = useState(['comments']);
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>

@@ -1,0 +1,9 @@
+.trigger {
+  display: grid;
+  height: calc(var(--spacing) * 40);
+  width: 100%;
+  place-items: center;
+  border: 1px dashed var(--color-border-base);
+  border-radius: var(--radius-xl);
+  color: var(--color-fg-mute);
+}

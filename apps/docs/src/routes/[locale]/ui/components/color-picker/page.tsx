@@ -13,6 +13,9 @@ import {
 } from '../../../../../demos/ui/components/color-picker-previews';
 import * as m from '../../../../../messages';
 
+import page from '../../../../../styles/page.module.css';
+import styles from '../../../../../styles/pages/ui/components/color-picker.module.css';
+
 const SWATCHES_CODE = `const swatches = [
   { value: '#0d9488', label: 'Teal' },
   { value: '#2563eb', label: 'Blue' },
@@ -39,11 +42,11 @@ const accent = form.field('accent');
 
 export default function ColorPickerPage() {
   return (
-    <div className="flex flex-col gap-8 py-12">
+    <div className={page.page}>
       <PageTitle name="ColorPicker" />
-      <div className="flex flex-col gap-4">
+      <div className={page.stack}>
         <Heading level="h1">ColorPicker</Heading>
-        <p className="text-fg-mute text-lg">
+        <p className={page.lead}>
           <Rich>{m.components.colorPicker.description()}</Rich>
         </p>
         <div>
@@ -57,7 +60,7 @@ export default function ColorPickerPage() {
       </div>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
@@ -65,16 +68,16 @@ export default function ColorPickerPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-8">
-        <div className="flex flex-col gap-4">
+      <section className={page.stackLg}>
+        <div className={page.stack}>
           <Heading level="h2">
             <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
-          <p className="text-fg-mute">
+          <p className={page.mute}>
             <Rich>{m.components.colorPicker.usageDescription()}</Rich>
           </p>
           <ComponentPreview code='<ColorPicker aria-label="Accent color" defaultValue="#0d9488" name="accent" />'>
-            <div className="w-full max-w-xs">
+            <div className={styles.frame}>
               <ColorPicker
                 aria-label="Accent color"
                 defaultValue="#0d9488"
@@ -84,11 +87,11 @@ export default function ColorPickerPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.colorPicker.swatchesTitle()}</Rich>
           </Heading>
-          <p className="text-fg-mute">
+          <p className={page.mute}>
             <Rich>{m.components.colorPicker.swatchesDescription()}</Rich>
           </p>
           <ComponentPreview
@@ -100,7 +103,7 @@ export default function ColorPickerPage() {
   swatches={swatches}
 />`}
           >
-            <div className="w-full max-w-xs">
+            <div className={styles.frame}>
               <ColorPicker
                 aria-label="Accent color"
                 defaultValue="#f97316"
@@ -110,11 +113,11 @@ export default function ColorPickerPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.colorPicker.controlledTitle()}</Rich>
           </Heading>
-          <p className="text-fg-mute">
+          <p className={page.mute}>
             <Rich>{m.components.colorPicker.controlledDescription()}</Rich>
           </p>
           <ComponentPreview
@@ -131,12 +134,12 @@ export default function ColorPickerPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.colorPicker.disabledTitle()}</Rich>
           </Heading>
           <ComponentPreview code='<ColorPicker aria-label="Accent color" defaultValue="#0d9488" disabled />'>
-            <div className="w-full max-w-xs">
+            <div className={styles.frame}>
               <ColorPicker
                 aria-label="Accent color"
                 defaultValue="#0d9488"
@@ -146,11 +149,11 @@ export default function ColorPickerPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.colorPicker.formTitle()}</Rich>
           </Heading>
-          <p className="text-fg-mute">
+          <p className={page.mute}>
             <Rich>{m.components.colorPicker.formDescription()}</Rich>
           </p>
           <CodeBlock code={FORM_EXAMPLE} lang="tsx" />
@@ -158,7 +161,7 @@ export default function ColorPickerPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>

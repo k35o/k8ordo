@@ -16,13 +16,16 @@ import { propsOf } from '../../../../../data/component-props';
 import { CheckboxGroupControlledPreview } from '../../../../../demos/ui/components/checkbox-group-previews';
 import * as m from '../../../../../messages';
 
+import page from '../../../../../styles/page.module.css';
+import styles from '../../../../../styles/pages/ui/components/checkbox-group.module.css';
+
 export default function CheckboxGroupPage() {
   return (
-    <div className="flex flex-col gap-8 py-12">
+    <div className={page.page}>
       <PageTitle name="CheckboxGroup" />
-      <div className="flex flex-col gap-4">
+      <div className={page.stack}>
         <Heading level="h1">CheckboxGroup</Heading>
-        <p className="text-fg-mute text-lg">
+        <p className={page.lead}>
           <Rich>{m.components.checkboxGroup.description()}</Rich>
         </p>
         <div>
@@ -36,7 +39,7 @@ export default function CheckboxGroupPage() {
       </div>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
@@ -47,8 +50,8 @@ export default function CheckboxGroupPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-8">
-        <div className="flex flex-col gap-4">
+      <section className={page.stackLg}>
+        <div className={page.stack}>
           <Heading level="h2">
             <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
@@ -71,7 +74,7 @@ export default function CheckboxGroupPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.checkboxGroup.defaultValueTitle()}</Rich>
           </Heading>
@@ -88,10 +91,7 @@ export default function CheckboxGroupPage() {
 </CheckboxGroup.Root>`}
           >
             <div>
-              <p
-                className="text-fg-base mb-2 font-medium"
-                id="frameworks-default-label"
-              >
+              <p className={styles.groupLabel} id="frameworks-default-label">
                 Frameworks
               </p>
               <CheckboxGroup.Root
@@ -107,7 +107,7 @@ export default function CheckboxGroupPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.checkboxGroup.disabledTitle()}</Rich>
           </Heading>
@@ -125,10 +125,7 @@ export default function CheckboxGroupPage() {
 </CheckboxGroup.Root>`}
           >
             <div>
-              <p
-                className="text-fg-base mb-2 font-medium"
-                id="frameworks-disabled-label"
-              >
+              <p className={styles.groupLabel} id="frameworks-disabled-label">
                 Frameworks
               </p>
               <CheckboxGroup.Root
@@ -147,7 +144,7 @@ export default function CheckboxGroupPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>

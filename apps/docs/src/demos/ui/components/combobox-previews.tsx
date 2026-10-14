@@ -3,6 +3,8 @@
 import { Combobox } from '@k8ordo/ui';
 import type { ComboboxSearch } from '@k8ordo/ui';
 
+import styles from './combobox-previews.module.css';
+
 const CITIES = [
   'Sapporo',
   'Sendai',
@@ -39,7 +41,7 @@ const searchCities: ComboboxSearch = (query, { signal }) =>
 
 export function ComboboxAsyncPreview() {
   return (
-    <div className="w-full max-w-xs">
+    <div className={styles.frame}>
       <Combobox aria-label="City" name="city" search={searchCities} />
     </div>
   );

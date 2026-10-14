@@ -3,6 +3,8 @@
 import { ColorPicker } from '@k8ordo/ui';
 import { useState } from 'react';
 
+import styles from './color-picker-previews.module.css';
+
 export const SWATCHES = [
   { value: '#0d9488', label: 'Teal' },
   { value: '#2563eb', label: 'Blue' },
@@ -14,16 +16,14 @@ export const SWATCHES = [
 export function ColorPickerControlledPreview() {
   const [color, setColor] = useState('#2563eb');
   return (
-    <div className="flex w-full max-w-xs flex-col gap-2">
+    <div className={styles.root}>
       <ColorPicker
         aria-label="Accent color"
         onChange={setColor}
         swatches={SWATCHES}
         value={color}
       />
-      <p className="text-fg-mute text-sm tabular-nums">
-        value: {color === '' ? "''" : color}
-      </p>
+      <p className={styles.value}>value: {color === '' ? "''" : color}</p>
     </div>
   );
 }

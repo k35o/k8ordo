@@ -6,6 +6,8 @@ import type { DataTableColumn, DataTableSort } from '@k8ordo/ui';
 import { useState } from 'react';
 import * as z from 'zod/mini';
 
+import styles from './data-table-previews.module.css';
+
 type Member = {
   id: string;
   name: string;
@@ -59,7 +61,7 @@ export function DataTablePreview() {
   const [hiddenColumnIds, setHiddenColumnIds] = useState<string[]>([]);
 
   return (
-    <div className="w-full">
+    <div className={styles.frame}>
       <DataTable
         columns={COLUMNS}
         getRowId={(member) => member.id}
@@ -78,7 +80,7 @@ export function DataTablePreview() {
 
 export function DataTableEmptyPreview() {
   return (
-    <div className="w-full">
+    <div className={styles.frame}>
       <DataTable
         columns={COLUMNS}
         emptyState={<EmptyState title="No members yet" />}
@@ -110,7 +112,7 @@ export function DataTableUrlStatePreview() {
   const totalPages = Math.ceil(rows.length / PAGE_SIZE);
 
   return (
-    <div className="flex w-full flex-col gap-4">
+    <div className={styles.paged}>
       <DataTable
         columns={COLUMNS}
         getRowId={(member) => member.id}

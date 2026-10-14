@@ -9,13 +9,15 @@ import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
 import * as m from '../../../../../messages';
 
+import page from '../../../../../styles/page.module.css';
+
 export default function CalendarPage() {
   return (
-    <div className="flex flex-col gap-8 py-12">
+    <div className={page.page}>
       <PageTitle name="Calendar" />
-      <div className="flex flex-col gap-4">
+      <div className={page.stack}>
         <Heading level="h1">Calendar</Heading>
-        <p className="text-fg-mute text-lg">
+        <p className={page.lead}>
           <Rich>{m.components.calendar.description()}</Rich>
         </p>
         <div>
@@ -29,7 +31,7 @@ export default function CalendarPage() {
       </div>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
@@ -37,8 +39,8 @@ export default function CalendarPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-8">
-        <div className="flex flex-col gap-4">
+      <section className={page.stackLg}>
+        <div className={page.stack}>
           <Heading level="h2">
             <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
@@ -47,7 +49,7 @@ export default function CalendarPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.calendar.minMaxTitle()}</Rich>
           </Heading>
@@ -66,27 +68,27 @@ export default function CalendarPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.calendar.keyboardTitle()}</Rich>
           </Heading>
-          <p className="text-fg-mute">
+          <p className={page.mute}>
             <Rich>{m.components.calendar.keyboardDescription()}</Rich>
           </p>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.calendar.localeTitle()}</Rich>
           </Heading>
-          <p className="text-fg-mute">
+          <p className={page.mute}>
             <Rich>{m.components.calendar.localeDescription()}</Rich>
           </p>
         </div>
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>

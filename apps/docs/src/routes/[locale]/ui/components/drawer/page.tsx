@@ -13,13 +13,15 @@ import {
 } from '../../../../../demos/ui/components/drawer-previews';
 import * as m from '../../../../../messages';
 
+import page from '../../../../../styles/page.module.css';
+
 export default function DrawerPage() {
   return (
-    <div className="flex flex-col gap-8 py-12">
+    <div className={page.page}>
       <PageTitle name="Drawer" />
-      <div className="flex flex-col gap-4">
+      <div className={page.stack}>
         <Heading level="h1">Drawer</Heading>
-        <p className="text-fg-mute text-lg">
+        <p className={page.lead}>
           <Rich>{m.components.drawer.description()}</Rich>
         </p>
         <div>
@@ -33,7 +35,7 @@ export default function DrawerPage() {
       </div>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
@@ -41,14 +43,14 @@ export default function DrawerPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-8">
-        <div className="flex flex-col gap-4">
+      <section className={page.stackLg}>
+        <div className={page.stack}>
           <Heading level="h2">
             <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.common.basicUsageTitle()}</Rich>
           </Heading>
@@ -74,7 +76,7 @@ export default function DrawerPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.drawer.customContentTitle()}</Rich>
           </Heading>
@@ -115,7 +117,7 @@ export default function DrawerPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>

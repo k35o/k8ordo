@@ -4,6 +4,8 @@ import { Button, CommandPalette, Kbd } from '@k8ordo/ui';
 import type { CommandPaletteItem } from '@k8ordo/ui';
 import { useEffect, useState } from 'react';
 
+import styles from './command-palette-previews.module.css';
+
 export function CommandPalettePreview() {
   const [isOpen, setIsOpen] = useState(false);
   const [last, setLast] = useState<string>();
@@ -52,7 +54,7 @@ export function CommandPalettePreview() {
   ];
 
   return (
-    <div className="flex flex-col items-center gap-3">
+    <div className={styles.root}>
       <Button
         onClick={() => {
           setIsOpen(true);
@@ -61,10 +63,12 @@ export function CommandPalettePreview() {
       >
         Open commands
       </Button>
-      <p className="text-fg-mute flex items-center gap-1 text-sm">
+      <p className={styles.shortcut}>
         <Kbd label="Command">⌘</Kbd>
         <Kbd>K</Kbd>
-        {last === undefined ? null : <span className="ms-2">Ran: {last}</span>}
+        {last === undefined ? null : (
+          <span className={styles.last}>Ran: {last}</span>
+        )}
       </p>
       <CommandPalette
         isOpen={isOpen}

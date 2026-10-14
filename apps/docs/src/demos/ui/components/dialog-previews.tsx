@@ -3,6 +3,8 @@
 import { Button, Dialog, Modal } from '@k8ordo/ui';
 import { useState } from 'react';
 
+import styles from './dialog-previews.module.css';
+
 export function DialogBasicPreview() {
   return (
     <Dialog.Root>
@@ -72,12 +74,12 @@ export function AlertDialogPreview() {
             title="Delete Confirmation"
           />
           <Dialog.Content>
-            <div className="flex flex-col gap-4">
+            <div className={styles.body}>
               <p>
                 Are you sure you want to delete this item? This action cannot be
                 undone.
               </p>
-              <div className="flex justify-end gap-2">
+              <div className={styles.actions}>
                 <Button
                   color="base"
                   onClick={() => {
