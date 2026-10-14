@@ -26,8 +26,8 @@ export const stylesTitle = message({
 });
 
 export const stylesEntry = message({
-  ja: 'アプリのエントリーポイントで、ビルド済みのスタイルシートを1回だけ読み込みます。Tailwind CSSを使っていないプロジェクトでも、これだけで動きます。',
-  en: 'Import the prebuilt stylesheet once, at the application’s entry point. It works on its own, with no Tailwind CSS setup.',
+  ja: 'アプリのエントリーポイントで、トークンとリセットを持つスタイルシートを1回だけ読み込みます。部品のCSSは、部品が自分で読み込みます。Tailwind CSSは要りません。',
+  en: 'Import the stylesheet with the tokens and the reset once, at the application’s entry point. Each component loads its own CSS. No Tailwind CSS is needed.',
 });
 
 export const stylesTailwind = message({

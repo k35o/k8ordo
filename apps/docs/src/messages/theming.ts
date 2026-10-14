@@ -260,8 +260,8 @@ export const customizeHow = message({
 });
 
 export const customizePalette = message({
-  ja: '基本の色も`--purple-200`のような変数で定義されています。参照先を差し替えると、ブランドの色がまとめて変わります。参照の代わりに値をそのまま書いても構いません。',
-  en: 'The base palette is defined as variables too, such as `--purple-200`. Point the tokens at another hue and the brand color changes as a whole. A literal value works as well as a reference.',
+  ja: 'トークンは、`--purple-200`のような名前の基本の色を参照しています。参照先を差し替えると、ブランドの色がまとめて変わります。参照の代わりに値をそのまま書いても構いません。',
+  en: 'The tokens point at the base palette, named like `--purple-200`. Point them at another hue and the brand color changes as a whole. A literal value works as well as a reference.',
 });
 
 export const customizeContrast = message({
@@ -285,8 +285,8 @@ export const fontWeightsTitle = message({
 });
 
 export const fontWeightsNote = message({
-  ja: 'テーマが定義する太さは`font-medium`と`font-bold`の2つです。`font-medium`は450で、一般的な500より細くしています。',
-  en: 'The theme defines two weights, `font-medium` and `font-bold`. `font-medium` is 450, lighter than the usual 500.',
+  ja: '太さのトークンは`--font-weight-medium`と`--font-weight-bold`の2つです。`--font-weight-medium`は450で、一般的な500より細くしています。',
+  en: 'There are two weight tokens, `--font-weight-medium` and `--font-weight-bold`. `--font-weight-medium` is 450, lighter than the usual 500.',
 });
 
 export const letterSpacingTitle = message({
@@ -305,8 +305,8 @@ export const borderRadiusTitle = message({
 });
 
 export const borderRadiusRoles = message({
-  ja: '角丸は要素の役割で変えます。ボタンは`rounded-full`、入力欄とカードは`rounded-xl`、チェックボックスは`rounded-md`です。',
-  en: 'The radius follows the element’s role: `rounded-full` for buttons, `rounded-xl` for inputs and cards, `rounded-md` for checkboxes.',
+  ja: '角丸は要素の役割で変えます。ボタンは`--radius-full`、入力欄とカードは`--radius-xl`、チェックボックスは`--radius-md`です。',
+  en: 'The radius follows the element’s role: `--radius-full` for buttons, `--radius-xl` for inputs and cards, `--radius-md` for checkboxes.',
 });
 
 export const shadowTitle = message({
@@ -315,8 +315,8 @@ export const shadowTitle = message({
 });
 
 export const shadowUsage = message({
-  ja: 'カードやポップオーバーに付ける影です。カードは`shadow-sm`、モーダルとメニューは`shadow-md`を使います。`shadow-xl`以上の強い影は使いません。',
-  en: 'Shadows for cards and popovers. Cards use `shadow-sm`, and modals and menus use `shadow-md`. `shadow-xl` and anything heavier are never used.',
+  ja: 'カードやポップオーバーに付ける影です。カードは`--shadow-sm`、モーダルとメニューは`--shadow-md`を使います。`--shadow-xl`以上の強い影は使いません。',
+  en: 'Shadows for cards and popovers. Cards use `--shadow-sm`, and modals and menus use `--shadow-md`. `--shadow-xl` and anything heavier are never used.',
 });
 
 export const spacingTitle = message({
@@ -325,8 +325,8 @@ export const spacingTitle = message({
 });
 
 export const spacingUnit = message({
-  ja: '余白の単位は0.25rem（4px）です。`p-4`や`gap-6`のようなクラスは、数字×0.25remの大きさになります。',
-  en: 'The spacing unit is 0.25rem (4px). A class such as `p-4` or `gap-6` is that number times 0.25rem.',
+  ja: '余白の単位は`--spacing`の0.25rem（4px）です。`calc(var(--spacing) * 4)`のように段数を掛けて使います。`tailwind.css`では`p-4`や`gap-6`のクラスが、数字×0.25remの大きさになります。',
+  en: 'The spacing unit is `--spacing`, 0.25rem (4px). Multiply it by the step you want, as in `calc(var(--spacing) * 4)`. With `tailwind.css`, a class such as `p-4` or `gap-6` is that number times 0.25rem.',
 });
 
 export const breakpointsTitle = message({
@@ -335,8 +335,8 @@ export const breakpointsTitle = message({
 });
 
 export const breakpointsUsage = message({
-  ja: '画面の幅でレイアウトを切り替える境目です。`sm:`のようなバリアントで、その幅以上に当てるスタイルを書きます。',
-  en: 'The widths at which a layout changes. A variant such as `sm:` applies a style from that width up.',
+  ja: '画面の幅でレイアウトを切り替える境目です。メディアクエリは変数を読めないので、`@media (width >= 40rem)`のように値を書きます。`tailwind.css`では`sm:`のようなバリアントになります。',
+  en: 'The widths at which a layout changes. A media query cannot read a variable, so write the value, as in `@media (width >= 40rem)`. With `tailwind.css` they are variants such as `sm:`.',
 });
 
 export const zIndexTitle = message({
