@@ -88,7 +88,7 @@ function ToastDemo() {
   const { open } = useToast();
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className={styles.actions}>
       <Button onClick={() => open('success', 'Operation completed')}>
         Success
       </Button>
@@ -140,7 +140,7 @@ closeAll();`}
   const { open, closeAll } = useToast();
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className={styles.actions}>
       <Button onClick={() => open('info', 'Notification 1')}>
         Add Toast
       </Button>

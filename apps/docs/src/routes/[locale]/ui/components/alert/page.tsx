@@ -126,7 +126,7 @@ export default function AlertPage() {
     label: 'Open settings',
     renderItem: ({ children }) => (
       <button
-        className="text-fg-info underline"
+        className={styles.link}
         type="button"
         onClick={() => {}}
       >
@@ -160,7 +160,7 @@ export default function AlertPage() {
   action={{
     label: 'Learn more',
     renderItem: ({ children }) => (
-      <button className="text-primary-fg underline" type="button" onClick={openHelp}>
+      <button className={styles.link} type="button" onClick={openHelp}>
         {children}
       </button>
     ),

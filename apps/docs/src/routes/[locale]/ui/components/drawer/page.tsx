@@ -65,7 +65,7 @@ export default function DrawerPage() {
   onClose={() => setIsOpen(false)}
   title="Menu"
 >
-  <nav className="flex flex-col gap-2">
+  <nav className={styles.nav}>
     <a href="/">Home</a>
     <a href="/about">About</a>
     <a href="/contact">Contact</a>
@@ -91,21 +91,21 @@ export default function DrawerPage() {
   onClose={() => setIsOpen(false)}
   title="Navigation"
 >
-  <nav className="flex flex-col gap-1">
-    <a className="rounded-md px-3 py-2 font-bold hover:bg-bg-mute" href="/">
+  <nav className={styles.nav}>
+    <a className={styles.current} href="/">
       Dashboard
     </a>
-    <a className="rounded-md px-3 py-2 hover:bg-bg-mute" href="/profile">
+    <a className={styles.link} href="/profile">
       Profile
     </a>
-    <a className="rounded-md px-3 py-2 hover:bg-bg-mute" href="/settings">
+    <a className={styles.link} href="/settings">
       Settings
     </a>
-    <hr className="border-border-mute my-2" />
-    <a className="rounded-md px-3 py-2 hover:bg-bg-mute" href="/help">
+    <hr className={styles.divider} />
+    <a className={styles.link} href="/help">
       Help
     </a>
-    <a className="rounded-md px-3 py-2 hover:bg-bg-mute" href="/logout">
+    <a className={styles.link} href="/logout">
       Sign Out
     </a>
   </nav>

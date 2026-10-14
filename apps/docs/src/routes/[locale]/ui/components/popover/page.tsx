@@ -60,7 +60,7 @@ export default function PopoverPage() {
   <Popover.Content
     renderItem={(props) => (
       <div
-        className="rounded-lg bg-bg-raised p-4 shadow-md"
+        className={styles.panel}
         {...props}
       >
         <div role="menuitem">Popover content goes here.</div>
@@ -86,7 +86,7 @@ export default function PopoverPage() {
   />
   <Popover.Content
     renderItem={(props) => (
-      <div className="rounded-lg bg-bg-raised p-4 shadow-md" {...props}>
+      <div className={styles.panel} {...props}>
         <div role="menuitem">Top placement</div>
       </div>
     )}
@@ -101,7 +101,7 @@ export default function PopoverPage() {
   />
   <Popover.Content
     renderItem={(props) => (
-      <div className="rounded-lg bg-bg-raised p-4 shadow-md" {...props}>
+      <div className={styles.panel} {...props}>
         <div role="menuitem">Right placement</div>
       </div>
     )}
@@ -116,7 +116,7 @@ export default function PopoverPage() {
   />
   <Popover.Content
     renderItem={(props) => (
-      <div className="rounded-lg bg-bg-raised p-4 shadow-md" {...props}>
+      <div className={styles.panel} {...props}>
         <div role="menuitem">Bottom placement</div>
       </div>
     )}
@@ -131,7 +131,7 @@ export default function PopoverPage() {
   />
   <Popover.Content
     renderItem={(props) => (
-      <div className="rounded-lg bg-bg-raised p-4 shadow-md" {...props}>
+      <div className={styles.panel} {...props}>
         <div role="menuitem">Left placement</div>
       </div>
     )}

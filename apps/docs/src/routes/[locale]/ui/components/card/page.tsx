@@ -47,7 +47,7 @@ export default function CardPage() {
           </Heading>
           <ComponentPreview
             code={`<Card>
-  <div className="p-6">Card content</div>
+  <div className={styles.body}>Card content</div>
 </Card>`}
           >
             <Card>
@@ -62,10 +62,10 @@ export default function CardPage() {
           </Heading>
           <ComponentPreview
             code={`<Card width="full">
-  <div className="p-6">Full width</div>
+  <div className={styles.body}>Full width</div>
 </Card>
 <Card width="fit">
-  <div className="p-6">Fit content</div>
+  <div className={styles.body}>Fit content</div>
 </Card>`}
           >
             <div className={styles.frame}>
@@ -86,7 +86,7 @@ export default function CardPage() {
           </p>
           <ComponentPreview
             code={`<Card interactive>
-  <a className="block p-6" href="https://example.com">
+  <a className={styles.body} href="https://example.com">
     Hover to scale up
   </a>
 </Card>`}
@@ -103,10 +103,10 @@ export default function CardPage() {
           <Heading level="h3">Appearance</Heading>
           <ComponentPreview
             code={`<Card variant="shadow">
-  <div className="p-6">Shadow</div>
+  <div className={styles.body}>Shadow</div>
 </Card>
 <Card variant="outline">
-  <div className="p-6">Bordered</div>
+  <div className={styles.body}>Bordered</div>
 </Card>`}
           >
             <Card variant="shadow">

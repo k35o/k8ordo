@@ -58,7 +58,7 @@ export default function InViewPage() {
             code={`const [container, setContainer] = useState<HTMLElement | null>(null);
 const [isInView, setIsInView] = useState(false);
 
-<div ref={setContainer} className="h-48 overflow-y-auto">
+<div ref={setContainer} className={styles.scroller}>
   <InView onChange={setIsInView} root={container}>
     <p>Target</p>
   </InView>

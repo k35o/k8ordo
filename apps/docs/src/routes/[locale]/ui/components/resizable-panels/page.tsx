@@ -53,7 +53,7 @@ export default function ResizablePanelsPage() {
             <Rich>{m.components.resizablePanels.usageDescription()}</Rich>
           </p>
           <ComponentPreview
-            code={`<div className="h-48">
+            code={`<div className={styles.frame}>
   <ResizablePanels.Root defaultValue={30}>
     <ResizablePanels.Panel>Sidebar</ResizablePanels.Panel>
     <ResizablePanels.Handle />
@@ -83,7 +83,7 @@ export default function ResizablePanelsPage() {
             <Rich>{m.components.resizablePanels.verticalDescription()}</Rich>
           </p>
           <ComponentPreview
-            code={`<div className="h-48">
+            code={`<div className={styles.frame}>
   <ResizablePanels.Root orientation="vertical">
     <ResizablePanels.Panel>Editor</ResizablePanels.Panel>
     <ResizablePanels.Handle />
