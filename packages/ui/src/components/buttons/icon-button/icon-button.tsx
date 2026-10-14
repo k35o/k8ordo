@@ -1,5 +1,6 @@
 'use client';
 
+import { clsx } from 'clsx';
 import type {
   ButtonHTMLAttributes,
   ComponentPropsWithRef,
@@ -13,12 +14,13 @@ import { useMemo, useTransition } from 'react';
 import { useFormStatus } from 'react-dom';
 
 import type { Placement } from '../../../types/variables';
-import { FOCUS_RING } from '../../_internal/focus-ring';
 import { Tooltip } from '../../overlays/tooltip';
 import type { TooltipTriggerProps } from '../../overlays/tooltip';
 import { chain } from './../../../helpers/chain';
-import { cn } from './../../../helpers/cn';
 import { mergeRefs } from './../../../helpers/merge-refs';
+
+import focusRing from '../../_internal/focus-ring.module.css';
+import styles from './icon-button.module.css';
 
 export type IconButtonTriggerProps = Partial<TooltipTriggerProps>;
 
@@ -72,6 +74,15 @@ export type IconButtonRenderItemProps = Omit<
    */
   triggerProps: IconButtonTriggerProps;
 };
+
+const COLOR = {
+  transparent: styles.transparent,
+  base: styles.base,
+  primary: styles.primary,
+  secondary: styles.secondary,
+} as const;
+
+const SIZE = { sm: styles.sm, md: styles.md, lg: styles.lg } as const;
 
 type Props = {
   size?: 'sm' | 'md' | 'lg';
@@ -174,22 +185,12 @@ export const IconButton: FC<Props> = ({
         }
       : undefined;
 
-  const className = cn(
-    'inline-flex cursor-pointer rounded-full transition-colors duration-150 ease-out',
-    FOCUS_RING,
-    (color === 'transparent' || color === 'base') &&
-      'hover:bg-bg-subtle active:bg-bg-mute',
-    color === 'base' && 'bg-bg-base',
-    color === 'transparent' && 'bg-transparent',
-    color === 'primary' &&
-      'bg-primary-bg hover:bg-primary-bg-emphasize active:bg-primary-bg-emphasize',
-    color === 'secondary' &&
-      'bg-secondary-bg hover:bg-secondary-bg-emphasize active:bg-secondary-bg-emphasize',
-    size === 'sm' && 'p-1',
-    size === 'md' && 'p-2',
-    size === 'lg' && 'p-3',
-    isDisabled &&
-      'cursor-not-allowed opacity-50 hover:bg-transparent active:bg-transparent',
+  const className = clsx(
+    styles.root,
+    focusRing.ring,
+    COLOR[color],
+    SIZE[size],
+    isDisabled && styles.disabled,
   );
 
   const buildItemProps = (

@@ -8,6 +8,9 @@ import { AlertIcon, CheckIcon, CopyIcon } from '../../icons';
 import { Button } from '../button';
 import { IconButton } from '../icon-button';
 
+import srOnly from '../../_internal/sr-only.module.css';
+import styles from './copy-button.module.css';
+
 type Result = { status: 'copied' | 'failed'; count: number };
 
 // 結果を見せておく時間。過ぎたら元のアイコンに戻し、もう一度押せることを示す
@@ -57,11 +60,11 @@ export const CopyButton: FC<{
   const iconSize = iconOnly ? size : size === 'lg' ? 'md' : 'sm';
   const icon =
     result?.status === 'copied' ? (
-      <span className="text-fg-success contents">
+      <span className={styles.copied}>
         <CheckIcon size={iconSize} />
       </span>
     ) : result?.status === 'failed' ? (
-      <span className="text-fg-error contents">
+      <span className={styles.failed}>
         <AlertIcon size={iconSize} status="error" />
       </span>
     ) : (
@@ -93,7 +96,7 @@ export const CopyButton: FC<{
       )}
       {/* ボタンの名前は変えずに、結果だけを読み上げる。押し直したときも
           読み上げ直すよう、結果ごとに要素を作り直す */}
-      <span className="sr-only" role="status">
+      <span className={srOnly.srOnly} role="status">
         {result === null ? null : (
           <span key={result.count}>
             {result.status === 'copied' ? messages.copied : messages.copyFailed}

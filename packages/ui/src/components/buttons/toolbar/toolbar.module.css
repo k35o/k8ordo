@@ -1,0 +1,28 @@
+.root {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--spacing) * 1);
+  border-radius: var(--radius-xl);
+  background-color: var(--color-bg-subtle);
+  padding: calc(var(--spacing) * 1);
+
+  /* 項目自身のホバーと押下の地（Button は :not(.disabled):hover の詳細度）にも
+     勝つよう、その状態まで書く。詳細度が並べば、近いスコープのこちらが勝つ */
+  @scope (&) {
+    & > [aria-pressed='true'],
+    & > [aria-pressed='true']:hover,
+    & > [aria-pressed='true']:active {
+      background-color: var(--color-bg-emphasize);
+    }
+  }
+}
+
+.vertical {
+  flex-direction: column;
+}
+
+.separator {
+  display: flex;
+  align-self: stretch;
+  margin: calc(var(--spacing) * 1);
+}

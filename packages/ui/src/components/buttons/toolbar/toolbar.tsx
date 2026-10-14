@@ -1,5 +1,6 @@
 'use client';
 
+import { clsx } from 'clsx';
 import {
   useCallback,
   useEffect,
@@ -18,11 +19,12 @@ import type {
   RefCallback,
 } from 'react';
 
-import { cn } from '../../../helpers/cn';
 import { createSafeContext } from '../../../helpers/create-safe-context';
 import { mergeRefs } from '../../../helpers/merge-refs';
 import { readWritingMode, useWritingMode } from '../../../hooks/writing-mode';
 import { Separator as BaseSeparator } from '../../layout/separator';
+
+import styles from './toolbar.module.css';
 
 type Orientation = 'horizontal' | 'vertical';
 
@@ -163,12 +165,11 @@ export const Root: FC<
       <div
         {...rest}
         aria-orientation={visualOrientation}
-        className={cn(
-          'flex items-center gap-1 rounded-xl bg-bg-subtle p-1',
+        className={clsx(
           // 押した状態のトグル（aria-pressed）は地を濃くして見せる。IconButton や
           // Button 自身は押した状態の見た目を持たない
-          '*:aria-pressed:bg-bg-emphasize',
-          orientation === 'vertical' && 'flex-col',
+          styles.root,
+          orientation === 'vertical' && styles.vertical,
         )}
         onKeyDown={handleKeyDown}
         ref={mergedRef}
@@ -212,7 +213,7 @@ export const Separator: FC = () => {
   const { orientation } = useToolbar();
   return (
     // 線は並びと直交する向きに伸ばす。項目の高さに合わせるため、包んで引き伸ばす
-    <span className="m-1 flex self-stretch">
+    <span className={styles.separator}>
       <BaseSeparator
         color="base"
         orientation={orientation === 'horizontal' ? 'vertical' : 'horizontal'}
