@@ -29,5 +29,5 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
 
 ## Data exports
 
-- `@k8ordo/ui/tokens`: the design tokens resolved to JS values — `tokens` (`theme` / `vars` / `refs`), `meta`, and key unions such as `ColorToken`.
+- `@k8ordo/ui/tokens`: the design tokens as data — `tokens`, a DTCG resolver document (Resolver Module 2025.10) whose set is the `:root` tokens and whose modifiers are the modes (`.dark`, `prefers-contrast: more`).
 - `@k8ordo/ui/props.json`: every component's props as JSON (`docs/props.generated.json`), generated from the types — the same data as the Props blocks in components.md.

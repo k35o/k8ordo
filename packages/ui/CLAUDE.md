@@ -20,23 +20,26 @@ pnpm test --project=components-contrast-more # Stories tagged contrast-more, und
 pnpm test --project=form                     # Fields with @k8ordo/form's derived attributes, and FormValue (Playwright)
 pnpm test --project=hooks src/internal/focus-trap.test.tsx # Single test file (needs its project)
 TEST_BROWSER=webkit pnpm test --project=hooks # One engine only (chromium / firefox / webkit)
-pnpm build                                   # vp pack + CSS copy
+pnpm build                                   # vp pack + the DTCG tokens
 pnpm typecheck                               # Type check (no emit)
-pnpm check                                   # Oxlint/Oxfmt lint/format check
+pnpm check                                   # Oxlint/Oxfmt lint/format check + better-css-modules check
 pnpm check:write                             # Oxlint/Oxfmt lint/format auto-fix
 pnpm storybook                               # Storybook dev server (port 6006)
 ```
 
 ## Adding a New Component
 
-1. Create directory `src/components/<category>/<name>/` (`buttons`, `form`, `overlays`, …) with 3 files:
+1. Create directory `src/components/<category>/<name>/` (`buttons`, `form`, `overlays`, …) with 4 files:
 
 ```
 src/components/<category>/<name>/
   <name>.tsx            # Implementation
+  <name>.module.css     # Its styles (see Styling)
   <name>.stories.tsx    # Storybook stories (also used as component tests)
   index.ts              # Re-export: export { ComponentName } from './<name>';
 ```
+
+A story that needs layout of its own puts it in `<name>.stories.module.css`.
 
 2. Add a re-export in `src/components/index.ts` if the component should be available from the root entry point (`src/index.ts` re-exports everything from there).
 
@@ -154,23 +157,83 @@ can keep taking one argument.
 ### Standard Component
 
 ```tsx
+// my-component.tsx
+import { clsx } from 'clsx';
 import type { FC, HTMLAttributes, Ref } from 'react';
-import { cn } from '../../../helpers/cn';
+
+import styles from './my-component.module.css';
+
+const SIZE = { sm: styles.sm, md: styles.md } as const;
 
 export const MyComponent: FC<
-  { customProp?: string; ref?: Ref<HTMLDivElement> } & Omit<
+  { size?: 'sm' | 'md'; ref?: Ref<HTMLDivElement> } & Omit<
     HTMLAttributes<HTMLDivElement>,
     'className' | 'style'
   >
-> = ({ customProp, ...rest }) => {
-  return <div className={cn('base-classes')} {...rest} />;
-};
+> = ({ size = 'md', ...rest }) => (
+  <div className={clsx(styles.root, SIZE[size])} {...rest} />
+);
+```
+
+```css
+/* my-component.module.css */
+.root {
+  border-radius: var(--radius-lg);
+  background-color: var(--color-bg-base);
+}
+
+.sm {
+  padding: calc(var(--spacing) * 2);
+}
+
+.md {
+  padding: calc(var(--spacing) * 4);
+}
 ```
 
 Base the props on the element-specific `*HTMLAttributes`. `HTMLProps` extends
 `AllHTMLAttributes`, so it type-checks attributes the element does not even have,
 such as `href` or `src` (`Button` and `IconButton` were moved for this reason).
 `*HTMLAttributes` does not include `ref`, so add it explicitly when needed.
+
+### Styling
+
+Each component has a CSS module next to it (`foo.tsx` + `foo.module.css`),
+checked by `better-css-modules check` (`better-css-modules.config.ts`) and
+wrapped into `@layer components` by its plugin, in Vite and in `vp pack` alike.
+
+- **Join classes with `clsx`.** There is no `cn` and no tailwind-merge: two
+  classes never fight over a property, because the module decides the order.
+  Where a state must cancel a variant (a disabled solid `Button` does not darken
+  on hover), say so in the selector (`.solidPrimary:not(.disabled):hover`) or
+  with a compound class. `button.module.css` is the worked example.
+- **Variants are modifier classes** on the element itself
+  (`styles.solidPrimary`, `styles.sm`), never data attributes: a caller who
+  copies only `className` from a `renderItem` bag must get the whole look.
+  States the component already exposes as ARIA or native attributes are styled
+  from those (`&[aria-pressed='true']`, `&:disabled`, `&:checked`).
+- **Map a prop to a class with an object** (`const SIZE = { … } as const`).
+  `styles[prop]` hides which classes are used, and `check` reports it
+  (`usage/unanalyzable`).
+- **Every value is a token.** `check` reports raw colors, lengths, font
+  values, durations and easings, the palette (`--gray-500`), and misspelt
+  tokens. A disable comment needs a reason
+  (`/* better-css-modules-disable-next-line tokens/spacing -- … */`) and is for
+  values that are not a step of any scale.
+- **Selectors style the component's own classes.** Markup the component does
+  not write (Markdown, shiki, streamdown) is styled inside
+  `.root { @scope (&) { … } }`, where its own class names are `:global(...)`.
+  Write `& >`, never `:scope >`, and no `composes` (it does not work in a
+  layer; join classes in JS).
+- **Hover** is `@media (hover: hover) { .x:hover { … } }`, as Tailwind wrote it.
+- **Vertical writing**: prefer logical properties; where an element must
+  change in vertical text, use `@container style(--writing: vertical) { … }`,
+  which reads the parent's `--writing` (set by the `writing-v` / `writing-h`
+  classes in `base.css`). An element that puts `writing-v` on itself takes a
+  modifier class instead, since the query does not see its own class.
+- Shared looks are shared modules in `src/components/_internal/`:
+  `focus-ring.module.css` (`ring`, `ringNoBorder`, `ringWithin`),
+  `high-contrast.module.css` (`edge`), `sr-only.module.css` (`srOnly`).
 
 ### Compound Component (Dialog, Tabs, FileField pattern)
 
@@ -270,45 +333,50 @@ animating it. `base.css` turns every view transition off under
 
 ## Design Token System
 
-No raw color values — always use semantic tokens in Tailwind classes. The tokens are defined in `src/styles/tokens.css` (imported by `src/styles/index.css`) via CSS custom properties and mapped to Tailwind's `@theme inline`.
+No raw values — always the semantic tokens. They are custom properties declared
+at `:root` in `src/styles/tokens.css`, named by the category better-css-modules
+checks: `--color-*`, `--spacing` / `--spacing-em`, `--radius-*`, `--shadow-*`
+(including the focus rings `--shadow-ring-*`), `--font-family-*`,
+`--font-size-*`, `--font-weight-*`, `--line-height-*`, `--letter-spacing-*`,
+`--z-index-*`, `--duration-*`, `--easing-*`, `--breakpoint-*`. A name without a
+category (`--teal-500`) is the palette, internal to `tokens.css`.
 
-### Token Categories
+### Token Categories (color)
 
-| Category   | Tokens                                                                                     | Usage              |
-| ---------- | ------------------------------------------------------------------------------------------ | ------------------ |
-| Foreground | `fg-base`, `fg-mute`, `fg-subtle`, `fg-inverse`                                            | Text colors        |
-| Background | `bg-base`, `bg-raised`, `bg-surface`, `bg-subtle`, `bg-mute`, `bg-emphasize`, `bg-inverse` | Surfaces           |
-| Border     | `border-base`, `border-subtle`, `border-mute`, `border-emphasize`, `border-inverse`        | Borders            |
-| Status     | `{fg,bg,border}-{info,success,warning,error}`                                              | Semantic status    |
-| Primary    | `primary-{fg,bg,bg-subtle,bg-mute,bg-emphasize,border}`                                    | Teal accent        |
-| Secondary  | `secondary-{fg,bg,bg-subtle,bg-mute,bg-emphasize,border}`                                  | Cyan accent        |
-| Group      | `group-{primary,secondary,tertiary,quaternary}`                                            | Data visualization |
-| Other      | `back-drop` (`backdrop:bg-back-drop`), `transparent`                                       | Modal backdrop     |
+| Category   | Tokens                                                                                                          | Usage              |
+| ---------- | --------------------------------------------------------------------------------------------------------------- | ------------------ |
+| Foreground | `--color-fg-base`, `-mute`, `-subtle`, `-inverse`                                                               | Text colors        |
+| Background | `--color-bg-base`, `-raised`, `-surface`, `-subtle`, `-mute`, `-emphasize`, `-inverse`                          | Surfaces           |
+| Border     | `--color-border-base`, `-subtle`, `-mute`, `-emphasize`, `-inverse`                                             | Borders            |
+| Status     | `--color-{fg,bg,border}-{info,success,warning,error}`                                                           | Semantic status    |
+| Primary    | `--color-primary-{fg,bg,bg-subtle,bg-mute,bg-emphasize,border}`                                                 | Teal accent        |
+| Secondary  | `--color-secondary-{fg,bg,bg-subtle,bg-mute,bg-emphasize,border}`                                               | Cyan accent        |
+| Group      | `--color-group-{primary,secondary,tertiary,quaternary}`                                                         | Data visualization |
+| Other      | `--color-back-drop`, `--color-logo-{primary,secondary}`, `--color-system-*` (system colors under forced colors) |                    |
+
+A token that reads another one (`--shadow-ring-info` reads
+`--color-border-info`) is declared again under `.dark`, because a custom
+property resolves where it is declared.
 
 ### Dark Mode
 
-Dark mode is class-based (`.dark` on `html`, put there by `@k8ordo/color-scheme`; the library never adds it). All semantic tokens automatically remap — no manual `dark:` prefixes needed for tokens. Custom variant defined via `@custom-variant dark (&:where(.dark, .dark *))`. `base.css` sets `color-scheme` to follow the same class (`light` on `:root`, `dark` on `.dark`), not `light dark`, since the tokens do not follow `prefers-color-scheme`.
+Dark mode is class-based (`.dark` on `html`, put there by `@k8ordo/color-scheme`; the library never adds it). All semantic tokens remap under `.dark`, so components never branch on it. `base.css` sets `color-scheme` to follow the same class (`light` on `:root`, `dark` on `.dark`), not `light dark`, since the tokens do not follow `prefers-color-scheme`; `light-dark()` therefore follows `.dark` too.
 
 ### High Contrast and Forced Colors
 
 The stylesheet follows `prefers-contrast: more` and `forced-colors: active`; `@k8ordo/color-scheme` is not involved, since the OS owns both settings.
 
 - `tokens.css` redefines text and border tokens inside `@media (prefers-contrast: more)` on `:root:where(:not(.dark))` and `.dark`. `:where` keeps the specificity of `:root`, so a consumer's later `:root` override still wins.
-- A surface outlined only by a shadow or a ground takes `HIGH_CONTRAST_EDGE` (`src/components/_internal/high-contrast.ts`): an inset `border-base` outline under either setting. Every part of it, color and offset included, sits behind those media queries and `not-focus-visible:`, so a surface that takes focus itself (`Modal`'s `<dialog>`) keeps the browser's own focus ring untouched.
-- Under forced colors only system colors survive and shadows are dropped. Paint selected state with `forced-colors:bg-[Highlight]` / `forced-colors:bg-[CanvasText]`, never rely on `box-shadow` for a boundary or focus, and hide with `invisible`, not `text-transparent` (a transparent color is repainted).
+- A surface outlined only by a shadow or a ground takes `highContrast.edge` (`src/components/_internal/high-contrast.module.css`): an inset `--color-border-base` outline under either setting. Every part of it, color and offset included, sits behind those media queries and `:not(:focus-visible)`, so a surface that takes focus itself (`Modal`'s `<dialog>`) keeps the browser's own focus ring untouched.
+- Under forced colors only system colors survive and shadows are dropped. Paint selected state with `var(--color-system-highlight)` / `var(--color-system-canvas-text)` inside `@media (forced-colors: active)`, never rely on `box-shadow` for a boundary or focus, and hide with `visibility: hidden`, not a transparent color (a transparent color is repainted).
 
 ### Focus Style
 
-Standard pattern: `focus-visible:border-transparent focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-border-info`. The ring is a `box-shadow` and vanishes under forced colors; `outline-hidden` is what keeps focus visible there (Tailwind gives it a transparent outline, which forced colors paints). An item that shows focus with a ground instead (`DropdownMenu`, `ListBox`) keeps a transparent 2px outline and colors it under `contrast-more:`; `outline-hidden` would set `--tw-outline-style: none` and erase any outline added on top.
+`focusRing.ring` (`src/components/_internal/focus-ring.module.css`): on `:focus-visible`, a transparent border, no outline, and `box-shadow: var(--shadow-ring-info)`; under forced colors a transparent 2px outline, which the browser paints, since the ring is a shadow. Where the component has a shadow of its own, write the focus rule locally with both, ring first (`var(--shadow-ring-info), var(--shadow-xs)`). An item that shows focus with a ground instead (`DropdownMenu`, `ListBox`) keeps a transparent 2px outline and colors it under `prefers-contrast: more`.
 
-### Custom Utilities
+### The Tailwind bridge
 
-- `grid-cols-auto-fill-*` / `grid-cols-auto-fit-*` — responsive grid columns
-- `grid-rows-auto-fill-*` / `grid-rows-auto-fit-*` — responsive grid rows
-- `writing-h` / `writing-v` / `writing-sideways-rl` — writing mode
-- `z-overlay` / `z-modal` / `z-toast` — stacking order
-
-Custom variants besides `dark:`: `light:` (anywhere not under `.dark`) and `vertical:` (under `.writing-v`, switched off again inside `.writing-h`).
+`src/styles/tailwind.css` (published as `./tailwind.css`) is for consumers using Tailwind CSS 4: it imports `tailwindcss` and `index.css`, maps Tailwind's theme namespaces onto the tokens with `@theme inline reference` (so `bg-bg-base` reads `var(--color-bg-base)` and the theme declares no variables of its own), and keeps the `dark:` / `light:` / `vertical:` variants and the `grid-cols-auto-fill-*`, `writing-*`, `z-overlay|modal|toast` utilities. `src/styles/tailwind.test.ts` compiles it. Add a token to `tokens.css`, and a color token also needs its line in the bridge (the test fails until it has one).
 
 ## Testing
 
@@ -327,8 +395,12 @@ Custom variants besides `dark:`: `light:` (anywhere not under `.dark`) and `vert
 
 ## Build Pipeline
 
-1. `vp pack` — tsdown emits every `src/**/*.{ts,tsx}` except stories and tests file by file (`unbundle`) → ESM with `.d.mts` type declarations, keeping the directory layout under `dist/`; in-source tests are dropped by defining `import.meta.vitest` as `undefined`
-2. `build:css` (`scripts/build-css.ts`) — copies `src/styles/*.css` → `dist/styles/` (`index.css` is renamed to `tailwind.css`), then compiles the `dist` entry with Tailwind to produce `dist/styles/index.css`, the prebuilt stylesheet
+1. `vp pack` — tsdown emits every `src/**/*.{ts,tsx}` except stories and tests file by file (`unbundle`) → ESM with `.d.mts` type declarations, keeping the directory layout under `dist/`; in-source tests are dropped by defining `import.meta.vitest` as `undefined`. Each `*.module.css` becomes `*.module.mjs` plus a compiled `.css` it imports (`pack.css.inject`), wrapped in `@layer components` by the better-css-modules plugin; class names are hashed from the path under this directory (`css.lightningcss.projectRoot`). `src/styles/index.css` is an entry too and becomes `dist/styles/index.css` (`./styles.css`) with its `@import`s inlined; `src/styles/tailwind.css` is copied as is.
+2. `node scripts/build-tokens.ts` — writes `dist/styles/tokens.mjs` / `.d.mts` (`./tokens`) from `exportTokens(await loadConfig())`.
+
+`src/styles/dist.test.ts` holds the output to the contract: every component CSS file is in `@layer components` after the full layer statement, every `.module.mjs` imports its CSS, `styles.css` puts nothing but tokens outside a layer, and `tokens.mjs` is the DTCG document. It reads `dist/`, so build first.
+
+The types of the CSS modules are written by `better-css-modules generate` into `__generated__/` (git-ignored; `rootDirs` in `tsconfig.json`). `typecheck` and `check` run it first; the Vite plugin writes them when Storybook, vitest or `vp pack` start.
 
 ## Export Structure
 
@@ -345,8 +417,8 @@ The authoritative list is the `exports` map in `package.json`.
 @k8ordo/ui/json-render/registry
 @k8ordo/ui/openui              OpenUI component library
 @k8ordo/ui/openui/prompt
-@k8ordo/ui/tokens              design tokens as JS values
+@k8ordo/ui/tokens              design tokens as a DTCG resolver document
 @k8ordo/ui/props.json          machine-readable component props (docs/props.generated.json)
-@k8ordo/ui/styles.css          prebuilt CSS (no Tailwind needed — for CSS Modules and plain CSS)
-@k8ordo/ui/tailwind.css        Tailwind source entry (for Tailwind 4 projects; exposes the @theme tokens)
+@k8ordo/ui/styles.css          layer order, tokens, reset and base (each component imports its own CSS)
+@k8ordo/ui/tailwind.css        Tailwind CSS 4 bridge (tailwindcss + styles.css + utilities for the tokens)
 ```

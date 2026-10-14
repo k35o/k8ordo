@@ -1916,14 +1916,14 @@ A card that groups content.
 ```tsx
 import { Card } from '@k8ordo/ui';
 
-// Static card
+// Static card. The card has no padding of its own
 <Card width="full" variant="shadow">
-  <div className="p-6">Content</div>
+  <div style={{ padding: 'calc(var(--spacing) * 6)' }}>Content</div>
 </Card>
 
-// Clickable card (hover:scale-[1.02], active:scale-[0.98])
+// Clickable card (scales to 1.02 on hover and to 0.98 while pressed)
 <Card variant="outline" interactive>
-  <div className="p-6">Content</div>
+  <div style={{ padding: 'calc(var(--spacing) * 6)' }}>Content</div>
 </Card>
 ```
 
@@ -2585,7 +2585,7 @@ heading; otherwise it falls back to `resizablePanelsHandle` from the dictionary.
 ```tsx
 import { ResizablePanels } from '@k8ordo/ui';
 
-<div className="h-96">
+<div style={{ height: '24rem' }}>
   <ResizablePanels.Root defaultValue={25}>
     <ResizablePanels.Panel>
       <h2 id="files">Files</h2>

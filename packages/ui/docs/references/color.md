@@ -36,86 +36,94 @@ the browser maps them to what the display can show.
 
 ## Semantic colors (foreground)
 
-| Tailwind class    | Light      | Dark       | Use             |
-| ----------------- | ---------- | ---------- | --------------- |
-| `text-fg-base`    | gray-900   | gray-50    | Body text       |
-| `text-fg-subtle`  | gray-600   | gray-400   | Placeholders    |
-| `text-fg-mute`    | gray-700   | gray-300   | Supporting text |
-| `text-fg-inverse` | gray-50    | gray-900   | Inverted text   |
-| `text-fg-info`    | blue-800   | blue-200   | Information     |
-| `text-fg-success` | green-800  | green-200  | Success         |
-| `text-fg-warning` | yellow-800 | yellow-200 | Warning         |
-| `text-fg-error`   | red-800    | red-200    | Error           |
+| Token                | Light      | Dark       | Use             |
+| -------------------- | ---------- | ---------- | --------------- |
+| `--color-fg-base`    | gray-900   | gray-50    | Body text       |
+| `--color-fg-subtle`  | gray-600   | gray-400   | Placeholders    |
+| `--color-fg-mute`    | gray-700   | gray-300   | Supporting text |
+| `--color-fg-inverse` | gray-50    | gray-900   | Inverted text   |
+| `--color-fg-info`    | blue-800   | blue-200   | Information     |
+| `--color-fg-success` | green-800  | green-200  | Success         |
+| `--color-fg-warning` | yellow-800 | yellow-200 | Warning         |
+| `--color-fg-error`   | red-800    | red-200    | Error           |
 
 ## Semantic colors (background)
 
-| Tailwind class    | Light      | Dark       | Use                                                                         |
-| ----------------- | ---------- | ---------- | --------------------------------------------------------------------------- |
-| `bg-bg-base`      | white      | gray-800   | Card background                                                             |
-| `bg-bg-raised`    | white      | gray-800   | Overlays (Modal, Dialog, DropdownMenu, ListBox, Autocomplete's option list) |
-| `bg-bg-surface`   | gray-50    | gray-950   | Outermost ground: lighter than `bg-subtle` in light, darker in dark         |
-| `bg-bg-subtle`    | gray-100   | gray-900   | Page background                                                             |
-| `bg-bg-mute`      | gray-200   | gray-700   | For the hover state                                                         |
-| `bg-bg-emphasize` | gray-300   | gray-600   | For the active state                                                        |
-| `bg-bg-inverse`   | gray-900   | white      | Inverted background                                                         |
-| `bg-bg-info`      | blue-100   | blue-900   | Information ground                                                          |
-| `bg-bg-success`   | green-100  | green-900  | Success ground                                                              |
-| `bg-bg-warning`   | yellow-100 | yellow-900 | Warning ground                                                              |
-| `bg-bg-error`     | red-100    | red-900    | Error ground                                                                |
+| Token                  | Light      | Dark       | Use                                                                         |
+| ---------------------- | ---------- | ---------- | --------------------------------------------------------------------------- |
+| `--color-bg-base`      | white      | gray-800   | Card background                                                             |
+| `--color-bg-raised`    | white      | gray-800   | Overlays (Modal, Dialog, DropdownMenu, ListBox, Autocomplete's option list) |
+| `--color-bg-surface`   | gray-50    | gray-950   | Outermost ground: lighter than `bg-subtle` in light, darker in dark         |
+| `--color-bg-subtle`    | gray-100   | gray-900   | Page background                                                             |
+| `--color-bg-mute`      | gray-200   | gray-700   | For the hover state                                                         |
+| `--color-bg-emphasize` | gray-300   | gray-600   | For the active state                                                        |
+| `--color-bg-inverse`   | gray-900   | white      | Inverted background                                                         |
+| `--color-bg-info`      | blue-100   | blue-900   | Information ground                                                          |
+| `--color-bg-success`   | green-100  | green-900  | Success ground                                                              |
+| `--color-bg-warning`   | yellow-100 | yellow-900 | Warning ground                                                              |
+| `--color-bg-error`     | red-100    | red-900    | Error ground                                                                |
 
 ## Semantic colors (border)
 
-| Tailwind class            | Light      | Dark       | Use                |
-| ------------------------- | ---------- | ---------- | ------------------ |
-| `border-border-base`      | gray-400   | gray-600   | Standard border    |
-| `border-border-subtle`    | gray-100   | gray-700   | Light border       |
-| `border-border-mute`      | gray-200   | gray-600   | Restrained border  |
-| `border-border-emphasize` | gray-500   | gray-500   | Emphasized border  |
-| `border-border-inverse`   | gray-700   | gray-300   | Inverted border    |
-| `border-border-info`      | blue-500   | blue-400   | Information border |
-| `border-border-success`   | green-500  | green-400  | Success border     |
-| `border-border-warning`   | yellow-500 | yellow-400 | Warning border     |
-| `border-border-error`     | red-500    | red-400    | Error border       |
+| Token                      | Light      | Dark       | Use                |
+| -------------------------- | ---------- | ---------- | ------------------ |
+| `--color-border-base`      | gray-400   | gray-600   | Standard border    |
+| `--color-border-subtle`    | gray-100   | gray-700   | Light border       |
+| `--color-border-mute`      | gray-200   | gray-600   | Restrained border  |
+| `--color-border-emphasize` | gray-500   | gray-500   | Emphasized border  |
+| `--color-border-inverse`   | gray-700   | gray-300   | Inverted border    |
+| `--color-border-info`      | blue-500   | blue-400   | Information border |
+| `--color-border-success`   | green-500  | green-400  | Success border     |
+| `--color-border-warning`   | yellow-500 | yellow-400 | Warning border     |
+| `--color-border-error`     | red-500    | red-400    | Error border       |
 
 ## Brand color (primary: teal H:180)
 
-| Tailwind class            | Light    | Dark     | Use                       |
-| ------------------------- | -------- | -------- | ------------------------- |
-| `text-primary-fg`         | teal-800 | teal-300 | Primary text              |
-| `bg-primary-bg`           | teal-200 | teal-900 | Primary background        |
-| `bg-primary-bg-subtle`    | teal-50  | teal-950 | Light primary background  |
-| `bg-primary-bg-mute`      | teal-100 | teal-900 | Restrained primary ground |
-| `bg-primary-bg-emphasize` | teal-300 | teal-800 | Emphasized primary ground |
-| `border-primary-border`   | teal-500 | teal-500 | Primary border            |
+| Token                          | Light    | Dark     | Use                       |
+| ------------------------------ | -------- | -------- | ------------------------- |
+| `--color-primary-fg`           | teal-800 | teal-300 | Primary text              |
+| `--color-primary-bg`           | teal-200 | teal-900 | Primary background        |
+| `--color-primary-bg-subtle`    | teal-50  | teal-950 | Light primary background  |
+| `--color-primary-bg-mute`      | teal-100 | teal-900 | Restrained primary ground |
+| `--color-primary-bg-emphasize` | teal-300 | teal-800 | Emphasized primary ground |
+| `--color-primary-border`       | teal-500 | teal-500 | Primary border            |
 
 ## Brand color (secondary: cyan H:210)
 
-| Tailwind class              | Light    | Dark     | Use                         |
-| --------------------------- | -------- | -------- | --------------------------- |
-| `text-secondary-fg`         | cyan-800 | cyan-300 | Secondary text              |
-| `bg-secondary-bg`           | cyan-200 | cyan-900 | Secondary background        |
-| `bg-secondary-bg-subtle`    | cyan-50  | cyan-950 | Light secondary background  |
-| `bg-secondary-bg-mute`      | cyan-100 | cyan-900 | Restrained secondary ground |
-| `bg-secondary-bg-emphasize` | cyan-300 | cyan-800 | Emphasized secondary ground |
-| `border-secondary-border`   | cyan-500 | cyan-500 | Secondary border            |
+| Token                            | Light    | Dark     | Use                         |
+| -------------------------------- | -------- | -------- | --------------------------- |
+| `--color-secondary-fg`           | cyan-800 | cyan-300 | Secondary text              |
+| `--color-secondary-bg`           | cyan-200 | cyan-900 | Secondary background        |
+| `--color-secondary-bg-subtle`    | cyan-50  | cyan-950 | Light secondary background  |
+| `--color-secondary-bg-mute`      | cyan-100 | cyan-900 | Restrained secondary ground |
+| `--color-secondary-bg-emphasize` | cyan-300 | cyan-800 | Emphasized secondary ground |
+| `--color-secondary-border`       | cyan-500 | cyan-500 | Secondary border            |
 
 ## Data visualization and backdrop
 
-| Tailwind class (`bg-` shown) | Light              | Dark       | Use                     |
-| ---------------------------- | ------------------ | ---------- | ----------------------- |
-| `bg-group-primary`           | teal-800           | teal-200   | First data series       |
-| `bg-group-secondary`         | cyan-800           | cyan-200   | Second data series      |
-| `bg-group-tertiary`          | pink-800           | pink-200   | Third data series       |
-| `bg-group-quaternary`        | purple-800         | purple-200 | Fourth data series      |
-| `backdrop:bg-back-drop`      | `rgb(0 0 0 / 0.5)` | (same)     | The backdrop of a modal |
+| Token                      | Light              | Dark       | Use                     |
+| -------------------------- | ------------------ | ---------- | ----------------------- |
+| `--color-group-primary`    | teal-800           | teal-200   | First data series       |
+| `--color-group-secondary`  | cyan-800           | cyan-200   | Second data series      |
+| `--color-group-tertiary`   | pink-800           | pink-200   | Third data series       |
+| `--color-group-quaternary` | purple-800         | purple-200 | Fourth data series      |
+| `--color-back-drop`        | `rgb(0 0 0 / 0.5)` | (same)     | The backdrop of a modal |
 
-Like every color token, these work with any color utility (`text-`, `fill-`,
-`stroke-`, …). `transparent` is the one other color the theme defines.
+Every color is a custom property, so it goes into any CSS property that takes a
+color: `color: var(--color-fg-mute)`, `fill: var(--color-group-primary)`. With
+`tailwind.css`, each one is also a color utility without its `--color-` prefix
+(`bg-bg-base`, `text-fg-mute`, `fill-group-primary`, …).
+
+Under forced colors, paint with the system colors through
+`--color-system-canvas-text`, `--color-system-gray-text`,
+`--color-system-highlight` and `--color-system-highlight-text` (see
+[forced colors](#forced-colors-active)).
 
 ## Contrast
 
-WCAG 2 contrast ratios of the values in `tokens.css`, as axe measures them, for
-the lowest pair in each row (rounded down). Every pair holds at least AA for
+WCAG 2 contrast ratios of the color tokens, as axe measures them, for the
+lowest pair in each row (rounded down). The tokens drop their `--color-` prefix
+in this table and the next. Every pair holds at least AA for
 normal text in light and in dark. The story `styles/contrast` renders each pair,
 and the test suite runs axe over it in both color schemes — AAA where the table
 says AAA — so a token change that breaks a row fails the build:
@@ -145,7 +153,7 @@ alone: there is nothing to toggle or persist.
 
 ### `prefers-contrast: more`
 
-`tokens.css` moves the text and border tokens further from the ground, in light
+`styles.css` moves the text and border tokens further from the ground, in light
 and in dark. Text then holds AAA on the page, card, and status grounds, and
 borders hold 3:1 against the grounds they sit on.
 
@@ -180,43 +188,79 @@ drops shadows, and flattens grounds to one color. The components keep their
 boundaries, focus rings, and selected states visible:
 
 - **Boundaries**: the same outline as under `prefers-contrast: more`; controls with a border keep it
-- **Focus rings**: the `box-shadow` ring disappears and a 2px outline shows instead (`outline-hidden` draws a transparent outline that forced colors paints)
+- **Focus rings**: the `box-shadow` ring disappears and a 2px outline shows instead (the components draw a transparent outline under forced colors, which the browser paints)
 - **Selected states** are painted with system colors: `Highlight` for the selected tab's indicator, a checked `Switch` track, the `Progress` and `Slider` fill, and a selected `Autocomplete` option; `CanvasText` for the dot of a checked `Radio` / `RadioCard` and the thumb of a `Switch`
 - `Separator` is painted `CanvasText` and `Skeleton` `GrayText`
 - A color swatch in `Code` keeps its real color (`forced-color-adjust: none`), because the color is the content
 
 ### In your own UI
 
-- Reach for the `contrast-more:` and `forced-colors:` variants. Under forced colors only system colors survive, so paint state with them (`forced-colors:bg-[Highlight]`)
+- Write the two settings as media queries: `@media (prefers-contrast: more)` and `@media (forced-colors: active)` (with `tailwind.css`, the `contrast-more:` and `forced-colors:` variants). Under forced colors only system colors survive, so paint state with them (`background-color: var(--color-system-highlight)`)
 - Do not draw a boundary or a focus ring with `box-shadow` alone
-- Do not hide something with a transparent color (`text-transparent`): forced colors paints it. Use `invisible`
+- Do not hide something with a transparent color: forced colors paints it. Use `visibility: hidden`
 - To tune the high-contrast values, redefine the tokens inside `@media (prefers-contrast: more)`, on `:root` and on `.dark`, in CSS loaded after the library stylesheet
 
 ## Usage examples
 
+```css
+/* page.module.css: float a card on the page background */
+.page {
+  min-height: 100vh;
+  background-color: var(--color-bg-subtle);
+}
+
+.body {
+  padding: calc(var(--spacing) * 6);
+}
+
+.title {
+  color: var(--color-fg-base);
+  font-weight: var(--font-weight-bold);
+}
+
+.lead {
+  margin-top: calc(var(--spacing) * 2);
+  color: var(--color-fg-mute);
+}
+
+.accent {
+  color: var(--color-primary-fg);
+}
+
+/* the hover state */
+.row {
+  background-color: var(--color-bg-base);
+  transition: background-color var(--duration-fast) var(--easing-out);
+}
+
+@media (hover: hover) {
+  .row:hover {
+    background-color: var(--color-bg-mute);
+  }
+}
+```
+
 ```tsx
-// Float a card on the page background
-<div className="bg-bg-subtle min-h-screen">
+<div className={styles.page}>
   <Card variant="shadow">
-    <div className="p-6">
-      <h2 className="text-fg-base font-bold">Title</h2>
-      <p className="text-fg-mute mt-2">Supporting text</p>
-      <span className="text-primary-fg">Accent text</span>
+    <div className={styles.body}>
+      <h2 className={styles.title}>Title</h2>
+      <p className={styles.lead}>Supporting text</p>
+      <span className={styles.accent}>Accent text</span>
     </div>
   </Card>
 </div>
-
-// Hover state
-<button className="bg-bg-base hover:bg-bg-mute transition-colors duration-150 ease-out">
-  Button
-</button>
 ```
+
+With `tailwind.css` the same reads `bg-bg-subtle`, `p-6`, `text-fg-base
+font-bold`, `mt-2 text-fg-mute`, `text-primary-fg`, and `bg-bg-base
+hover:bg-bg-mute transition-colors duration-150 ease-out`.
 
 ## What not to do
 
-- Gradient backgrounds (`bg-gradient-to-*`)
+- Gradient backgrounds
 - Saturated color over large areas (keep accents small)
-- Expressing state with opacity (`/90`, `/80`, …) — use the dedicated semantic color
-- Using `bg-primary-bg` on hover — prefer `bg-bg-mute`
-- Using a raw palette color (`bg-teal-500`) directly — use a semantic token
+- Expressing state with opacity (`color-mix(… 90%, transparent)`, `/90`) — use the dedicated semantic color
+- Using `--color-primary-bg` on hover — prefer `--color-bg-mute`
+- Using a palette color (`--teal-500`) directly — use a semantic token. The palette is what the tokens are built from, not part of the API
 - Simply inverting the colors for dark mode
