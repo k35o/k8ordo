@@ -1,8 +1,13 @@
+import { clsx } from 'clsx';
 import type { FC, PropsWithChildren, ReactNode } from 'react';
 
 import { getMessages } from '../../../i18n/current';
 import { ChevronIcon } from '../../icons';
-import { cn } from './../../../helpers/cn';
+
+import focusRing from '../../_internal/focus-ring.module.css';
+import styles from './breadcrumb.module.css';
+
+const SIZE = { sm: styles.sm, md: styles.md, lg: styles.lg } as const;
 
 export const List: FC<
   PropsWithChildren<{
@@ -13,26 +18,17 @@ export const List: FC<
 
   return (
     <nav aria-label={messages.breadcrumb}>
-      <ol
-        className={cn(
-          'flex list-none items-center gap-1 text-fg-mute',
-          size === 'sm' && 'text-xs',
-          size === 'md' && 'text-xs md:text-md',
-          size === 'lg' && 'text-xl md:text-2xl',
-        )}
-      >
-        {children}
-      </ol>
+      <ol className={clsx(styles.list, SIZE[size])}>{children}</ol>
     </nav>
   );
 };
 
 export const Item: FC<PropsWithChildren> = ({ children }) => (
-  <li className="inline-flex items-center">{children}</li>
+  <li className={styles.item}>{children}</li>
 );
 
 export const Separator: FC = () => (
-  <li aria-hidden="true" className="text-fg-mute vertical:rotate-90">
+  <li aria-hidden="true" className={styles.separator}>
     <ChevronIcon direction="right" size="sm" />
   </li>
 );
@@ -61,14 +57,13 @@ export const Link = <T extends string>({
   renderAnchor?: (props: RenderBreadcrumbAnchorProps<T>) => ReactNode;
 }>) =>
   current ? (
-    <span aria-current="page" className="text-fg-base">
+    <span aria-current="page" className={styles.current}>
       {children}
     </span>
   ) : (
     renderAnchor({
       href,
-      className:
-        'hover:text-fg-base focus-visible:ring-border-info underline transition-colors duration-150 ease-out focus-visible:rounded-sm focus-visible:ring-2 focus-visible:outline-hidden',
+      className: clsx(styles.link, focusRing.ringNoBorder),
       children,
     })
   );

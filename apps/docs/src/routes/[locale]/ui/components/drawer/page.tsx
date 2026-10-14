@@ -1,6 +1,6 @@
 import { Anchor, Heading, Separator } from '@k8ordo/ui';
-import { CodeBlock } from '@k8ordo/ui/code-block';
 
+import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';
 import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
@@ -13,13 +13,15 @@ import {
 } from '../../../../../demos/ui/components/drawer-previews';
 import * as m from '../../../../../messages';
 
+import page from '../../../../../styles/page.module.css';
+
 export default function DrawerPage() {
   return (
-    <div className="flex flex-col gap-8 py-12">
+    <div className={page.page}>
       <PageTitle name="Drawer" />
-      <div className="flex flex-col gap-4">
+      <div className={page.stack}>
         <Heading level="h1">Drawer</Heading>
-        <p className="text-fg-mute text-lg">
+        <p className={page.lead}>
           <Rich>{m.components.drawer.description()}</Rich>
         </p>
         <div>
@@ -33,7 +35,7 @@ export default function DrawerPage() {
       </div>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
@@ -41,14 +43,14 @@ export default function DrawerPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-8">
-        <div className="flex flex-col gap-4">
+      <section className={page.stackLg}>
+        <div className={page.stack}>
           <Heading level="h2">
             <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.common.basicUsageTitle()}</Rich>
           </Heading>
@@ -63,7 +65,7 @@ export default function DrawerPage() {
   onClose={() => setIsOpen(false)}
   title="Menu"
 >
-  <nav className="flex flex-col gap-2">
+  <nav className={styles.nav}>
     <a href="/">Home</a>
     <a href="/about">About</a>
     <a href="/contact">Contact</a>
@@ -74,7 +76,7 @@ export default function DrawerPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.drawer.customContentTitle()}</Rich>
           </Heading>
@@ -89,21 +91,21 @@ export default function DrawerPage() {
   onClose={() => setIsOpen(false)}
   title="Navigation"
 >
-  <nav className="flex flex-col gap-1">
-    <a className="rounded-md px-3 py-2 font-bold hover:bg-bg-mute" href="/">
+  <nav className={styles.nav}>
+    <a className={styles.current} href="/">
       Dashboard
     </a>
-    <a className="rounded-md px-3 py-2 hover:bg-bg-mute" href="/profile">
+    <a className={styles.link} href="/profile">
       Profile
     </a>
-    <a className="rounded-md px-3 py-2 hover:bg-bg-mute" href="/settings">
+    <a className={styles.link} href="/settings">
       Settings
     </a>
-    <hr className="border-border-mute my-2" />
-    <a className="rounded-md px-3 py-2 hover:bg-bg-mute" href="/help">
+    <hr className={styles.divider} />
+    <a className={styles.link} href="/help">
       Help
     </a>
-    <a className="rounded-md px-3 py-2 hover:bg-bg-mute" href="/logout">
+    <a className={styles.link} href="/logout">
       Sign Out
     </a>
   </nav>
@@ -115,7 +117,7 @@ export default function DrawerPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>

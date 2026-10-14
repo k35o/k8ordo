@@ -1,5 +1,6 @@
 'use client';
 
+import { clsx } from 'clsx';
 import {
   useEffect,
   useEffectEvent,
@@ -17,19 +18,16 @@ import type {
 } from 'react';
 import { useFormStatus } from 'react-dom';
 
-import { cn } from '../../../helpers/cn';
 import { mergeRefs } from '../../../helpers/merge-refs';
 import { getMessages } from '../../../i18n/current';
 import { commitInputValue } from '../../../internal/commit-input-value';
 import { hexToHsl, hslToHex, parseHex } from '../../../internal/hex-color';
 import type { Hsl } from '../../../internal/hex-color';
-import {
-  FOCUS_RING,
-  FOCUS_RING_NO_BORDER,
-  FOCUS_RING_PEER,
-} from '../../_internal/focus-ring';
-import { HIGH_CONTRAST_EDGE } from '../../_internal/high-contrast';
 import { rangeInputClass } from '../slider/range-input-class';
+
+import focusRing from '../../_internal/focus-ring.module.css';
+import highContrast from '../../_internal/high-contrast.module.css';
+import styles from './color-picker.module.css';
 
 export type ColorPickerSwatch = Readonly<{
   /** `#rrggbb` */
@@ -90,23 +88,13 @@ const Channel: FC<{
   const id = useId();
   return (
     <>
-      <label className="text-fg-mute text-sm" htmlFor={id}>
+      <label className={styles.channelLabel} htmlFor={id}>
         {label}
       </label>
-      <div
-        className={cn(
-          'relative flex items-center block-8 inline-full',
-          disabled && 'opacity-50',
-        )}
-      >
+      <div className={clsx(styles.channel, disabled && styles.channelDisabled)}>
         <span
           aria-hidden
-          className={cn(
-            'rounded-full block-3 inline-full forced-color-adjust-none',
-            '[--track-direction:to_right] rtl:[--track-direction:to_left]',
-            HIGH_CONTRAST_EDGE,
-            'forced-colors:outline-[CanvasText]',
-          )}
+          className={clsx(styles.track, highContrast.edge)}
           style={{
             backgroundImage: `linear-gradient(var(--track-direction), ${stops})`,
           }}
@@ -252,15 +240,15 @@ export const ColorPicker: FC<Props> = ({
   };
 
   return (
-    <div className="writing-h flex flex-col gap-3 inline-full">
-      <div className="flex items-center gap-3">
-        <span className="relative size-10 shrink-0">
+    <div className={clsx('writing-h', styles.root)}>
+      <div className={styles.row}>
+        <span className={styles.well}>
           {/* color の input は常に何かの色を持ち「まだ色が無い」を描けないので、
               透明にして見本の上に重ね、見た目は下の span に任せる。ボタンから
               showPicker() で開かないのは、iOS の Safari が color に対応しないため */}
           <input
             aria-label={messages.colorPickerOpen}
-            className="peer absolute inset-0 size-full cursor-pointer opacity-0 disabled:cursor-not-allowed"
+            className={styles.picker}
             disabled={locked}
             onChange={(event) => {
               const hex = parseHex(event.currentTarget.value);
@@ -273,10 +261,9 @@ export const ColorPicker: FC<Props> = ({
           />
           <span
             aria-hidden
-            className={cn(
-              'block rounded-lg border border-border-base forced-color-adjust-none size-full forced-colors:border-[CanvasText]',
-              shown === null && 'border-dashed',
-              FOCUS_RING_PEER,
+            className={clsx(
+              styles.preview,
+              shown === null && styles.previewEmpty,
             )}
             style={shown === null ? undefined : { backgroundColor: shown }}
           />
@@ -291,13 +278,7 @@ export const ColorPicker: FC<Props> = ({
             ? { value: draft }
             : { defaultValue: defaultValue ?? '' })}
           aria-invalid={invalid}
-          className={cn(
-            'rounded-xl border border-border-base bg-bg-base px-3 py-2 inline-full',
-            'aria-invalid:border-border-error',
-            'disabled:cursor-not-allowed disabled:border-border-mute disabled:bg-bg-mute hover:disabled:bg-bg-mute',
-            'read-only:cursor-not-allowed read-only:bg-bg-subtle',
-            FOCUS_RING,
-          )}
+          className={clsx(styles.field, focusRing.ring)}
           disabled={disabled}
           onBlur={(event) => {
             normalize(event.currentTarget);
@@ -315,7 +296,7 @@ export const ColorPicker: FC<Props> = ({
           type="text"
         />
       </div>
-      <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3">
+      <div className={styles.channels}>
         <Channel
           disabled={locked}
           label={messages.colorPickerHue}
@@ -353,7 +334,7 @@ export const ColorPicker: FC<Props> = ({
       {swatches === undefined || swatches.length === 0 ? null : (
         <div
           aria-label={messages.colorPickerSwatches}
-          className="flex flex-wrap gap-2"
+          className={styles.swatches}
           role="group"
         >
           {swatches.map((swatch) => {
@@ -362,12 +343,8 @@ export const ColorPicker: FC<Props> = ({
               <button
                 aria-label={swatch.label}
                 aria-pressed={hex === shown}
-                className={cn(
-                  'size-7 rounded-md border border-border-base forced-color-adjust-none forced-colors:border-[CanvasText]',
-                  'aria-pressed:outline-2 aria-pressed:outline-offset-2 aria-pressed:outline-fg-base forced-colors:aria-pressed:outline-[CanvasText]',
-                  'disabled:cursor-not-allowed disabled:opacity-50',
-                  FOCUS_RING_NO_BORDER,
-                )}
+                className={clsx(styles.swatch, focusRing.ringNoBorder)}
+
                 disabled={locked}
                 key={swatch.value}
                 onClick={() => {

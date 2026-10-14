@@ -1,0 +1,57 @@
+.toDark {
+  display: inline;
+
+  @container style(--scheme: dark) {
+    display: none;
+  }
+}
+
+.toLight {
+  display: none;
+
+  @container style(--scheme: dark) {
+    display: inline;
+  }
+}
+
+.choice {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 6);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 3);
+}
+
+.fieldLabel {
+  color: var(--color-fg-base);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+  font-weight: var(--font-weight-bold);
+}
+
+.values {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: calc(var(--spacing) * 4);
+  row-gap: calc(var(--spacing) * 2);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-bg-surface);
+  padding-inline: calc(var(--spacing) * 4);
+  padding-block: calc(var(--spacing) * 3);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+}
+
+.term {
+  color: var(--color-fg-mute);
+}
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 8);
+}

@@ -9,6 +9,8 @@ import { locales } from '../../../i18n';
 import type { Locale } from '../../../i18n';
 import * as m from '../../../messages';
 
+import styles from './negotiation-demo.module.css';
+
 const PRESETS = [
   'fr-CH, fr;q=0.9, en-US;q=0.8, ja;q=0.7',
   'en-US, ja',
@@ -79,7 +81,7 @@ export function NegotiationDemo() {
   const answer = locales.negotiate(requested);
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className={styles.root}>
       <FormControl
         label="Accept-Language"
         renderInput={(props) => (
@@ -94,13 +96,13 @@ export function NegotiationDemo() {
           />
         )}
       />
-      <div className="flex flex-col gap-2">
-        <span className="text-fg-mute text-sm" id={presetsId}>
+      <div className={styles.group}>
+        <span className={styles.label} id={presetsId}>
           {text.demoPresets()}
         </span>
         <div
           aria-labelledby={presetsId}
-          className="flex flex-wrap gap-2"
+          className={styles.presets}
           role="group"
         >
           {PRESETS.map((preset) => (
@@ -128,21 +130,21 @@ export function NegotiationDemo() {
           </Button>
         </div>
       </div>
-      <div className="flex flex-col gap-2">
-        <span className="text-fg-mute text-sm">
+      <div className={styles.group}>
+        <span className={styles.label}>
           <Rich>{text.demoParsed()}</Rich>
         </span>
         {steps.length === 0 ? (
-          <p className="text-fg-mute text-sm">{text.demoEmpty()}</p>
+          <p className={styles.empty}>{text.demoEmpty()}</p>
         ) : (
-          <ol className="flex flex-col gap-2 pl-6 text-sm">
+          <ol className={styles.steps}>
             {steps.map(({ tag, step }, index) => (
               <li
-                className="list-decimal"
+                className={styles.step}
                 // ヘッダーは同じタグを何度でも並べられるので、位置が同一性になる
                 key={`${String(index)}:${tag}`}
               >
-                <span className="flex flex-wrap items-center gap-2">
+                <span className={styles.stepBody}>
                   <Code>{tag}</Code>
                   <StepBadge
                     consulted={decidedAt === -1 || index <= decidedAt}
@@ -154,14 +156,14 @@ export function NegotiationDemo() {
           </ol>
         )}
       </div>
-      <div aria-live="polite" className="flex flex-col gap-1">
-        <span className="text-fg-mute text-sm">
+      <div aria-live="polite" className={styles.answer}>
+        <span className={styles.label}>
           <Rich>{text.demoAnswer()}</Rich>
         </span>
-        <p className="flex flex-wrap items-center gap-2 text-lg">
+        <p className={styles.answerValue}>
           <Code>{answer}</Code>
           {decidedAt === -1 && (
-            <span className="text-fg-mute text-sm">{text.demoFellBack()}</span>
+            <span className={styles.fellBack}>{text.demoFellBack()}</span>
           )}
         </p>
       </div>

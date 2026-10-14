@@ -1,9 +1,10 @@
 'use client';
 
+import { clsx } from 'clsx';
 import { useEffect, useId, useRef, useState } from 'react';
 import type { FC, KeyboardEvent, PropsWithChildren } from 'react';
 
-import { cn, mergeRefs } from '../../../helpers';
+import { mergeRefs } from '../../../helpers';
 import { ChevronIcon } from '../../icons';
 import { useCanHover, useHoverIntent, useListNavigation } from '../_internal';
 import { Popover } from '../popover';
@@ -12,16 +13,9 @@ import { MenuContextProvider, useMenuContext } from './hooks';
 import { itemClass, panelClass } from './shared';
 import { useSafeTriangle } from './use-safe-triangle';
 
-const SUBMENU_CLOSE_DELAY = 150;
+import styles from './sub-menu.module.css';
 
-// safe triangle の描画面。座標は useSafeTriangle が pointermove ごとに
-// CSS 変数へ書き込む。開いている間だけ className に含める。
-const safeTriangleClass = cn(
-  'after:absolute after:z-10',
-  'after:top-(--safe-top) after:left-(--safe-left)',
-  'after:h-(--safe-height) after:w-(--safe-width)',
-  'after:[clip-path:var(--safe-clip)]',
-);
+const SUBMENU_CLOSE_DELAY = 150;
 
 const NAVIGATION_KEYS = new Set([
   'ArrowDown',
@@ -159,11 +153,11 @@ const SubMenuInner: FC<
         aria-controls={popover.isOpen ? `${popover.rootId}_list` : undefined}
         aria-expanded={popover.isOpen}
         aria-haspopup="menu"
-        className={cn(
+        className={clsx(
           itemClass,
-          'relative flex items-center justify-between gap-2',
-          popover.isOpen && 'bg-bg-subtle',
-          popover.isOpen && canHover && safeTriangleClass,
+          styles.trigger,
+          popover.isOpen && styles.open,
+          popover.isOpen && canHover && styles.safeTriangle,
         )}
         data-submenu-trigger=""
         // hover で開いた直後のクリックで閉じてしまわないよう、クリックは開く専用。

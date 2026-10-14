@@ -8,8 +8,8 @@
 .page {
   min-block-size: 100dvh;
   padding: 3rem 1.5rem;
-  background-color: var(--bg-subtle);
-  color: var(--fg-base);
+  background-color: var(--color-bg-subtle);
+  color: var(--color-fg-base);
 }
 
 .content {
@@ -30,7 +30,7 @@
 
 .lead,
 .note {
-  color: var(--fg-mute);
+  color: var(--color-fg-mute);
   line-height: 1.8;
 }
 
@@ -52,7 +52,7 @@
   padding: 0.125rem 0.375rem;
   border-radius: 0.375rem;
   margin-inline: 0.125rem;
-  background-color: var(--bg-mute);
+  background-color: var(--color-bg-mute);
   font-family: ui-monospace, monospace;
   font-size: 0.875em;
 }

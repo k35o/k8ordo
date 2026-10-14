@@ -1,5 +1,6 @@
 'use client';
 
+import { clsx } from 'clsx';
 import type {
   ChangeEvent,
   FC,
@@ -20,7 +21,6 @@ import {
 } from 'react';
 import { useFormStatus } from 'react-dom';
 
-import { cn } from '../../../helpers/cn';
 import { getMessages } from '../../../i18n/current';
 import { acceptsFile } from '../../../internal/accepts-file';
 import { carriesFiles } from '../../../internal/carries-files';
@@ -30,6 +30,9 @@ import { IconButton } from '../../buttons/icon-button';
 import { CloseIcon } from '../../icons';
 import { createSafeContext } from './../../../helpers/create-safe-context';
 import { mergeRefs } from './../../../helpers/merge-refs';
+
+import srOnly from '../../_internal/sr-only.module.css';
+import styles from './file-field.module.css';
 
 type AcceptedFile = {
   file: File;
@@ -253,12 +256,12 @@ export const Root = ({
 
   return (
     <FileFieldProvider value={contextValue}>
-      <div className="w-full">
+      <div className={styles.root}>
         <input
           {...rest}
           accept={accept}
           aria-invalid={invalid}
-          className="sr-only"
+          className={srOnly.srOnly}
           disabled={disabledResolved}
           id={rest.id ?? generatedId}
           multiple={multiple}
@@ -301,11 +304,11 @@ export const Dropzone: FC<{ children?: ReactNode }> = ({ children }) => {
 
   return (
     <div
-      className={cn(
-        'flex w-full flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-border-base bg-bg-base p-6 text-center transition-colors duration-150 ease-out',
-        invalid && 'border-border-error',
-        isDragging && 'border-primary-border bg-primary-bg-subtle',
-        disabled && 'cursor-not-allowed border-border-mute bg-bg-mute',
+      className={clsx(
+        styles.dropzone,
+        invalid && styles.invalid,
+        isDragging && styles.dragging,
+        disabled && styles.disabled,
       )}
       data-dragging={isDragging ? '' : undefined}
       onDragEnter={(event) => {
@@ -342,7 +345,7 @@ export const Dropzone: FC<{ children?: ReactNode }> = ({ children }) => {
     >
       {children ?? (
         <>
-          <p className="text-fg-mute text-sm">{messages.fileFieldDrop}</p>
+          <p className={styles.hint}>{messages.fileFieldDrop}</p>
           <Button
             disabled={disabled}
             onClick={openFilePicker}
@@ -369,7 +372,7 @@ export const ItemList: FC<{
   }
 
   return (
-    <ul className="mt-2 space-y-2">
+    <ul className={styles.list}>
       {acceptedFiles.map((acceptedFile) => {
         const { file, id } = acceptedFile;
         const onDelete = () => {
@@ -379,17 +382,14 @@ export const ItemList: FC<{
         const sizeInKB = (file.size / 1024).toFixed(2);
 
         return (
-          <li
-            className="border-border-base bg-bg-base flex items-center justify-between rounded-xl border px-3 py-2"
-            key={id}
-          >
-            <div className="flex flex-col gap-1">
-              <span className="text-fg-base text-sm font-medium">
+          <li className={styles.item} key={id}>
+            <div className={styles.meta}>
+              <span className={styles.name}>
                 {showWebkitRelativePath === true
                   ? file.webkitRelativePath
                   : file.name}
               </span>
-              <span className="text-fg-mute text-xs">{sizeInKB} KB</span>
+              <span className={styles.size}>{sizeInKB} KB</span>
             </div>
             {clearable === true && (
               <IconButton label={messages.fileFieldRemove} onClick={onDelete}>

@@ -1,0 +1,26 @@
+.trigger {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(var(--spacing) * 2);
+}
+
+.open {
+  background-color: var(--color-bg-subtle);
+}
+
+/* safe triangle の描画面。座標は useSafeTriangle が pointermove ごとに
+   CSS 変数へ書き込む */
+.safeTriangle::after {
+  content: '';
+  position: absolute;
+  /* better-css-modules-disable-next-line tokens/spacing -- --safe-top is the submenu panel's offset from the trigger, which useSafeTriangle measures on each pointer move, not a step of the scale */
+  top: var(--safe-top);
+  /* better-css-modules-disable-next-line tokens/spacing -- --safe-left is where the triangle starts (the pointer or the panel's edge), which useSafeTriangle measures on each pointer move, not a step of the scale */
+  left: var(--safe-left);
+  z-index: var(--z-index-raised);
+  height: var(--safe-height);
+  width: var(--safe-width);
+  clip-path: var(--safe-clip);
+}

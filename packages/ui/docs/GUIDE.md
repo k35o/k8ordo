@@ -27,30 +27,89 @@ function App() {
 import { Button, Card } from '@k8ordo/ui';
 ```
 
-### Choosing a stylesheet
+### How the styles arrive
 
-There are two CSS entries. Pick the one that matches your project:
+`@k8ordo/ui` is written in CSS Modules, and its styles come in two parts:
 
-- **`styles.css` (default)** — prebuilt CSS. Use it if your project has no Tailwind (CSS Modules, plain CSS). A single import is all it takes, and no Tailwind setup is needed. Every library style rule except the token declarations sits inside `@layer`, so your own unlayered CSS wins the cascade (the one exception is preflight's `[hidden] { display: none !important }`). Design tokens are CSS custom properties on `:root` / `.dark` (`var(--fg-mute)`, …), declared outside any layer: to override one, declare it after the stylesheet is loaded, since source order decides between unlayered rules of equal specificity.
-- **`tailwind.css`** — the Tailwind source entry. Import this in a Tailwind CSS 4 project and the design tokens become usable as Tailwind classes (`bg-bg-base`, …) in your own markup too. It contains `@import 'tailwindcss'` internally, so one line is enough for your project's CSS:
+- **`styles.css`** — import it once. It declares the cascade layers, the design
+  tokens (custom properties on `:root` and their modes), a reset (the same
+  rules as Tailwind CSS 4's preflight), and the page-wide defaults.
+- **Each component's own CSS** — imported by the component's JavaScript, so a
+  page loads the CSS of the components it uses and nothing else. Any bundler
+  that handles a CSS import from a package does this for you (Vite, Next.js,
+  webpack, Rspack, …).
+
+Every rule of the library sits in a cascade layer. `styles.css` declares the
+order first:
 
 ```css
+@layer properties, theme, base, components, utilities;
+```
+
+The reset and the defaults are in `base` and the components in `components`.
+These are Tailwind CSS 4's layers in Tailwind's order, so in a Tailwind project
+your utilities win over the components; without Tailwind, any CSS of yours that
+is not in a layer wins, and so does a layer you declare after `components`. The
+one rule that does not yield is the reset's
+`[hidden] { display: none !important }`.
+
+The CSS is written for what browsers ship today: `@scope`, container style
+queries, `light-dark()`, `:dir()`, nesting. Keep your bundler's CSS target
+recent (in Vite, `build.cssTarget`): an older target makes Lightning CSS
+rewrite `:dir(rtl)` into `:lang()` selectors, which no longer follow `dir`.
+
+Components take no `className`. To change how one looks, change the tokens, or
+render your own element through its `renderItem` / `renderAnchor`, which hands
+you the component's `className` to keep or to add to.
+
+### Tokens
+
+The tokens are custom properties declared at `:root`, named by category:
+`--color-*`, `--spacing` (and `--spacing-em`), `--radius-*`, `--shadow-*`,
+`--font-family-*`, `--font-size-*`, `--font-weight-*`, `--line-height-*`,
+`--letter-spacing-*`, `--z-index-*`, `--duration-*`, `--easing-*` and
+`--breakpoint-*`. Read them in your own CSS (`color: var(--color-fg-mute)`,
+`padding: calc(var(--spacing) * 6)`). The palette they are built from
+(`--gray-500`, …) is not part of the API.
+
+They are declared outside any layer, so to override one, declare it after
+`styles.css` is loaded: between unlayered rules of equal specificity, source
+order decides. `@k8ordo/ui/tokens` exports the same tokens as data, a DTCG
+resolver document (Resolver Module 2025.10), with each mode (`.dark`,
+`prefers-contrast: more`) as a modifier.
+
+[better-css-modules](https://github.com/k35o/better-css-modules) holds CSS
+Modules to these tokens: list `@k8ordo/ui/styles.css` in its `globalCss`, and
+its `check` reports a raw value, a misspelt token, or a palette color in your
+own modules.
+
+### Tailwind CSS 4
+
+In a Tailwind CSS 4 project, import `tailwind.css` after Tailwind, instead of
+`styles.css`. It brings in `styles.css` and a theme whose utilities read the
+tokens: `bg-bg-base` is `var(--color-bg-base)`, `text-md` is
+`var(--font-size-md)` with its line height, `p-6` is `calc(var(--spacing) * 6)`.
+It does not import Tailwind itself, so `@k8ordo/ui` does not depend on
+`tailwindcss`; your project's own Tailwind comes first:
+
+```css
+@import 'tailwindcss';
 @import '@k8ordo/ui/tailwind.css';
 ```
 
-Note that either entry applies base styles document-wide. On top of Tailwind's
-preflight (resets for headings, lists, and margins), the library's base layer
-unsets bold on `b` / `strong` and italics on `i` / `em`, and sets `body`
-typography defaults (`font-size`, `overflow-wrap: anywhere`,
-`scrollbar-gutter: stable`, …). Adding it to an existing app restyles more than
-the library's own components. Wrap rendered Markdown or MDX in `Prose` to get
-the typesetting of body text back inside it — see
-[Typography](references/typography.md#long-form-text-prose).
+It also defines the `dark:`, `light:` and `vertical:` variants and the
+`grid-cols-auto-fill-*`, `writing-*` and `z-overlay` / `z-modal` / `z-toast`
+utilities. The components do not need Tailwind; it is only for your own markup.
 
-One more exception: `@k8ordo/ui/ai/response` (`Response`) needs streamdown's
-classes to be generated by _your_ Tailwind build, so the prebuilt `styles.css`
-alone will not render it completely. Using `Response` requires `tailwind.css`
-plus a `@source` entry — see [ai-chat](references/ai-chat.md).
+### Page-wide styles
+
+Note that `styles.css` applies base styles document-wide. On top of the reset
+(headings, lists, and margins), it unsets bold on `b` / `strong` and italics on
+`i` / `em`, and sets `body` typography defaults (`font-size`,
+`overflow-wrap: anywhere`, `scrollbar-gutter: stable`, …). Adding it to an
+existing app restyles more than the library's own components. Wrap rendered
+Markdown or MDX in `Prose` to get the typesetting of body text back inside it —
+see [Typography](references/typography.md#long-form-text-prose).
 
 ### Dark mode
 
@@ -64,7 +123,8 @@ toggles the class works the same.
 The base layer sets the CSS `color-scheme` property to match — `light` on
 `:root`, `dark` under `.dark` — so the browser's own rendering (scrollbars, form
 controls, a `<dialog>`'s default colors) follows the tokens rather than the OS.
-With `tailwind.css`, the `dark:` variant applies under `.dark` and `light:`
+Your own CSS follows the same way when it reads the tokens. With
+`tailwind.css`, the `dark:` variant applies under `.dark` and `light:`
 everywhere else.
 
 ### Wording language (i18n)
@@ -142,7 +202,7 @@ Do not give everything the same tone. Soften in proportion to the element's role
 | Element                             | Direction                                            |
 | ----------------------------------- | ---------------------------------------------------- |
 | Forms (TextField, Textarea, Button) | Soft (large radii, pill buttons, generous padding)   |
-| Cards and containers                | Soft (`rounded-xl`–`rounded-2xl`, gentle shadow)     |
+| Cards and containers                | Soft (`--radius-xl`–`--radius-2xl`, gentle shadow)   |
 | Alert, Badge                        | Precise (clarity of information comes first)         |
 | Tabs, Breadcrumb                    | Sharp (elements that express structure stay precise) |
 
@@ -156,9 +216,9 @@ Soft spacing and quiet refinement. The appeal is in space and shape.
 
 **DO:**
 
-- Use `bg-bg-subtle` (a light grey) for the page background
+- Use `--color-bg-subtle` (a light grey) for the page background
 - Float content on white cards
-- Leave enough room between cards (`gap-6`–`gap-10`)
+- Leave enough room between cards (6–10 steps of `--spacing`)
 
 **DON'T:**
 
@@ -170,9 +230,9 @@ Soft spacing and quiet refinement. The appeal is in space and shape.
 
 **DO:**
 
-- Use the Japanese fonts (Noto Sans JP, M PLUS 2), which your app loads and sets — the library sets no font of its own, so text stays on preflight's system stack until your app sets one
-- Keep to three weights: 400 (the inherited default, no class), `font-medium`, `font-bold`
-- Lean on `font-medium` being 450 — lighter than the usual 500 — for delicate emphasis
+- Use the Japanese fonts (Noto Sans JP, M PLUS 2), which your app loads and sets — the library sets no font of its own, so text stays on the reset's system stack until your app sets one
+- Keep to three weights: 400 (the inherited default), `--font-weight-medium`, `--font-weight-bold`
+- Lean on `--font-weight-medium` being 450 — lighter than the usual 500 — for delicate emphasis
 
 **DON'T:**
 
@@ -187,17 +247,17 @@ Soft spacing and quiet refinement. The appeal is in space and shape.
 **DO:**
 
 - Follow the 60-30-10 rule (60% neutral, 30% supporting, 10% accent)
-- Use semantic color tokens (`bg-bg-subtle`, `text-fg-mute`, …)
+- Use semantic color tokens (`--color-bg-subtle`, `--color-fg-mute`, …)
 - Design dark mode as its own tone, not a derivative
 - Keep color calm; let space and shape carry the design
 
 **DON'T:**
 
 - Use gradient backgrounds
-- Use `bg-primary-bg` on hover — use `bg-bg-mute`
-- Express state with opacity (`/90`) — use the dedicated token
+- Use `--color-primary-bg` on hover — use `--color-bg-mute`
+- Express state with opacity — use the dedicated token
 - Spread vivid color over large areas
-- Use raw palette colors (`bg-teal-500`) — use semantic tokens (`bg-primary-bg`)
+- Use raw palette colors (`--teal-500`) — use semantic tokens (`--color-primary-bg`)
 
 > [Color details](references/color.md)
 
@@ -205,15 +265,15 @@ Soft spacing and quiet refinement. The appeal is in space and shape.
 
 **DO:**
 
-- Treat `p-6` as the standard padding (inside forms and cards), `p-4` when compact and `p-8` when generous
-- Express relatedness through the size of the gap (`mt-2` close, `mt-4` standard, `mt-8` between sections)
+- Treat 6 steps of `--spacing` (`calc(var(--spacing) * 6)`) as the standard padding (inside forms and cards), 4 when compact and 8 when generous
+- Express relatedness through the size of the gap (2 steps close, 4 standard, 8 between sections)
 - Separate sections with Separator
 
 **DON'T:**
 
 - Put everything in a Card
 - Nest cards (Card in Card)
-- Use extremely tight spacing such as `gap-1`
+- Use extremely tight spacing such as one step
 
 > [Spacing details](references/spatial-design.md)
 
@@ -221,9 +281,9 @@ Soft spacing and quiet refinement. The appeal is in space and shape.
 
 **DO:**
 
-- Start from `transition-colors duration-150 ease-out`
-- Express focus with `focus-visible:ring-2 focus-visible:ring-border-info`
-- Keep hover gentle with `hover:bg-bg-mute`
+- Start from a color transition over `--duration-fast` with `--easing-out`
+- Express focus with `box-shadow: var(--shadow-ring-info)` on `:focus-visible`
+- Keep hover gentle with `--color-bg-mute`
 
 **DON'T:**
 
@@ -237,7 +297,7 @@ Soft spacing and quiet refinement. The appeal is in space and shape.
 
 ### Button
 
-Styling is unified through `color` and `variant`. Pill-shaped (`rounded-full`).
+Styling is unified through `color` and `variant`. Pill-shaped (`--radius-full`).
 
 ```tsx
 import { Button } from '@k8ordo/ui';
@@ -305,19 +365,27 @@ import { CopyButton } from '@k8ordo/ui';
 
 ### Card
 
-Floating on a shadow is the default: a white card over a `bg-subtle` page.
+Floating on a shadow is the default: a white card over a `--color-bg-subtle`
+page. The card has no padding of its own.
+
+```css
+/* card.module.css */
+.body {
+  padding: calc(var(--spacing) * 6);
+}
+```
 
 ```tsx
 import { Card } from '@k8ordo/ui';
 
 // Static card (floated with a shadow)
 <Card variant="shadow">
-  <div className="p-6">Card content</div>
+  <div className={styles.body}>Card content</div>
 </Card>
 
 // Clickable card (interactive scales it up on hover)
 <Card variant="shadow" interactive>
-  <div className="p-6">Content</div>
+  <div className={styles.body}>Content</div>
 </Card>
 ```
 
@@ -381,15 +449,15 @@ const title = form.field('title');
 
 Avoid the traits that make a UI recognizably AI-generated at a glance.
 
-| Anti-pattern               | The @k8ordo/ui alternative                         |
-| -------------------------- | -------------------------------------------------- |
-| Purple gradients           | Flat teal/cyan color                               |
-| Card in Card               | A Separator and spacing instead                    |
-| Grey text on a grey ground | Hold contrast with `text-fg-base` / `text-fg-mute` |
-| Bounce / spring animation  | `transition-colors duration-150 ease-out`          |
-| The Inter typeface         | Noto Sans JP / M PLUS 2                            |
-| Heavy glassmorphism        | A border plus a subtle background color            |
-| Cramming information in    | Sparse placement that lets the space breathe       |
+| Anti-pattern               | The @k8ordo/ui alternative                                |
+| -------------------------- | --------------------------------------------------------- |
+| Purple gradients           | Flat teal/cyan color                                      |
+| Card in Card               | A Separator and spacing instead                           |
+| Grey text on a grey ground | Hold contrast with `--color-fg-base` / `--color-fg-mute`  |
+| Bounce / spring animation  | A color transition over `--duration-fast`, `--easing-out` |
+| The Inter typeface         | Noto Sans JP / M PLUS 2                                   |
+| Heavy glassmorphism        | A border plus a subtle background color                   |
+| Cramming information in    | Sparse placement that lets the space breathe              |
 
 ### The AI slop test
 
@@ -402,7 +470,7 @@ Avoid the traits that make a UI recognizably AI-generated at a glance.
 - **Render from Server Components**: every component, compound ones included (`Dialog.Root`, `Tabs.Root`, …), can be placed in a Server Component; only the interactive parts are client modules
 - **Keep placed state in `@k8ordo/state`**: state that lives in the URL, a history entry, localStorage, or memory is `defineLocalState` and friends, not a hook from this package
 - **Browser-only rendering is React's**: a component that can only render in a browser calls `use(browser())` (`browser` from `react-dom`) under a `<Suspense>`; there is no `useClient` here and no "mounted" flag
-- **Use semantic tokens**: tokens (`bg-primary-bg`), never raw color values (`bg-teal-500`)
+- **Use semantic tokens**: tokens (`--color-primary-bg`), never raw color values or the palette (`--teal-500`)
 - **Let space and shape carry it**: character comes from spacing and soft radii, not from vivid color
 - **Do not forget dark mode**: semantic tokens handle it for you
 - **High contrast is handled too**: the tokens follow `prefers-contrast: more` and the components stay legible under `forced-colors: active`; for your own UI, see [High contrast and forced colors](references/color.md#high-contrast-and-forced-colors)

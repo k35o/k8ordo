@@ -1,6 +1,6 @@
 import { Alert, Anchor, Heading, Prose, Separator } from '@k8ordo/ui';
-import { CodeBlock } from '@k8ordo/ui/code-block';
 
+import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';
 import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
@@ -9,13 +9,16 @@ import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
 import * as m from '../../../../../messages';
 
+import page from '../../../../../styles/page.module.css';
+import styles from '../../../../../styles/pages/ui/components/prose.module.css';
+
 export default function ProsePage() {
   return (
-    <div className="flex flex-col gap-8 py-12">
+    <div className={page.page}>
       <PageTitle name="Prose" />
-      <div className="flex flex-col gap-4">
+      <div className={page.stack}>
         <Heading level="h1">Prose</Heading>
-        <p className="text-fg-mute text-lg">
+        <p className={page.lead}>
           <Rich>{m.components.prose.description()}</Rich>
         </p>
         <div>
@@ -29,7 +32,7 @@ export default function ProsePage() {
       </div>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
@@ -37,12 +40,12 @@ export default function ProsePage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-8">
-        <div className="flex flex-col gap-4">
+      <section className={page.stackLg}>
+        <div className={page.stack}>
           <Heading level="h2">
             <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
-          <p className="text-fg-mute">
+          <p className={page.mute}>
             <Rich>{m.components.prose.basicDescription()}</Rich>
           </p>
           <ComponentPreview
@@ -52,7 +55,7 @@ export default function ProsePage() {
   </Prose>
 </article>`}
           >
-            <div className="w-full" lang="ja">
+            <div className={styles.frame} lang="ja">
               <Prose>
                 <h2>はじめに</h2>
                 <p>
@@ -72,11 +75,11 @@ export default function ProsePage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.prose.componentsTitle()}</Rich>
           </Heading>
-          <p className="text-fg-mute">
+          <p className={page.mute}>
             <Rich>{m.components.prose.componentsDescription()}</Rich>
           </p>
           <ComponentPreview
@@ -86,7 +89,7 @@ export default function ProsePage() {
   <p>A paragraph after it.</p>
 </Prose>`}
           >
-            <div className="w-full">
+            <div className={styles.frame}>
               <Prose>
                 <p>A paragraph before the component.</p>
                 <Alert message={['First note', 'Second note']} tone="info" />
@@ -96,11 +99,11 @@ export default function ProsePage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.prose.verticalTitle()}</Rich>
           </Heading>
-          <p className="text-fg-mute">
+          <p className={page.mute}>
             <Rich>{m.components.prose.verticalDescription()}</Rich>
           </p>
           <ComponentPreview
@@ -110,7 +113,7 @@ export default function ProsePage() {
   </Prose>
 </div>`}
           >
-            <div className="writing-v h-56" lang="ja">
+            <div className={`writing-v ${styles.vertical}`} lang="ja">
               <Prose>
                 <h2>縦書き</h2>
                 <p>縦書きでは、段落の頭を一字下げて組む。</p>
@@ -122,7 +125,7 @@ export default function ProsePage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>

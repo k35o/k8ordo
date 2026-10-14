@@ -1,0 +1,58 @@
+.root {
+  background-color: var(--color-bg-mute);
+
+  @media (forced-colors: active) {
+    background-color: var(--color-system-gray-text);
+  }
+}
+
+.animate {
+  animation-name: pulse;
+  animation-duration: var(--duration-pulse);
+  animation-timing-function: var(--easing-pulse);
+  animation-iteration-count: infinite;
+}
+
+.rect {
+  border-radius: var(--radius-lg);
+}
+
+.rectSm {
+  width: calc(var(--spacing) * 24);
+  height: calc(var(--spacing) * 3);
+}
+
+.rectMd {
+  width: calc(var(--spacing) * 40);
+  height: calc(var(--spacing) * 4);
+}
+
+.rectLg {
+  width: calc(var(--spacing) * 56);
+  height: calc(var(--spacing) * 5);
+}
+
+.circle {
+  border-radius: var(--radius-full);
+}
+
+.circleSm {
+  width: calc(var(--spacing) * 8);
+  height: calc(var(--spacing) * 8);
+}
+
+.circleMd {
+  width: calc(var(--spacing) * 12);
+  height: calc(var(--spacing) * 12);
+}
+
+.circleLg {
+  width: calc(var(--spacing) * 16);
+  height: calc(var(--spacing) * 16);
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.5;
+  }
+}

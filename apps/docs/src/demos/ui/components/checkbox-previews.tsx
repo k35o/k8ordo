@@ -3,6 +3,8 @@
 import { Checkbox, CheckboxGroup } from '@k8ordo/ui';
 import { useState } from 'react';
 
+import styles from './checkbox-previews.module.css';
+
 export function CheckboxControlledPreview() {
   const [checked, setChecked] = useState(false);
   return (
@@ -21,7 +23,7 @@ export function CheckboxGroupControlledPreview() {
 
   return (
     <div>
-      <p className="text-fg-base mb-2 font-medium" id="checkbox-group-label">
+      <p className={styles.groupLabel} id="checkbox-group-label">
         Frameworks
       </p>
       <CheckboxGroup.Root
@@ -41,10 +43,7 @@ export function CheckboxGroupControlledPreview() {
 export function CheckboxGroupDisabledPreview() {
   return (
     <div>
-      <p
-        className="text-fg-base mb-2 font-medium"
-        id="checkbox-group-disabled-label"
-      >
+      <p className={styles.groupLabel} id="checkbox-group-disabled-label">
         Frameworks
       </p>
       <CheckboxGroup.Root

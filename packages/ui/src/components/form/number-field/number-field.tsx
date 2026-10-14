@@ -13,13 +13,15 @@ import { useFormStatus } from 'react-dom';
 
 import { getMessages } from '../../../i18n/current';
 import type { Messages } from '../../../i18n/messages';
-import { FOCUS_RING_WITHIN } from '../../_internal/focus-ring';
 import { ChevronIcon } from '../../icons';
-import { chain, cn, mergeRefs } from './../../../helpers';
+import { chain, mergeRefs } from './../../../helpers';
 import { useControllableState } from './../../../hooks/controllable-state';
 import { clamp } from './../../../internal/clamp';
 import { toPrecision } from './../../../internal/to-precision';
 import { cast } from './cast';
+
+import srOnly from '../../_internal/sr-only.module.css';
+import styles from './number-field.module.css';
 
 type BaseProps = {
   invalid?: boolean;
@@ -251,14 +253,7 @@ export const NumberField: FC<Props> = ({
   };
 
   return (
-    <div
-      className={cn(
-        'relative flex h-12 w-full items-center justify-between gap-2 rounded-xl border border-border-base bg-bg-base vertical:h-auto vertical:w-12',
-        FOCUS_RING_WITHIN,
-        'has-aria-invalid:border-border-error',
-        'has-disabled:cursor-not-allowed has-disabled:border-border-mute has-disabled:bg-bg-mute has-disabled:has-hover:hover:bg-bg-mute',
-      )}
-    >
+    <div className={styles.root}>
       <input
         autoComplete="off"
         autoCorrect="off"
@@ -283,11 +278,7 @@ export const NumberField: FC<Props> = ({
         aria-valuemax={max}
         aria-valuemin={min}
         aria-valuenow={currentValue ?? undefined}
-        className={cn(
-          'grow bg-transparent pe-8 ps-3 focus-visible:outline-hidden size-full',
-          'disabled:cursor-not-allowed',
-          'read-only:cursor-not-allowed',
-        )}
+        className={styles.input}
         disabled={disabled}
         readOnly={readOnlyResolved}
         required={required}
@@ -313,16 +304,9 @@ export const NumberField: FC<Props> = ({
         role="spinbutton"
         type="text"
       />
-      <div
-        aria-hidden="true"
-        className="vertical:inset-e-auto vertical:bottom-1 vertical:h-auto vertical:w-full vertical:flex-row vertical:px-1 vertical:py-0 absolute inset-e-1 flex h-full flex-col py-1"
-      >
+      <div aria-hidden="true" className={styles.steppers}>
         <button
-          className={cn(
-            'flex w-6 grow items-center justify-center rounded-md text-fg-mute transition-colors duration-150 ease-out vertical:h-6 vertical:w-auto',
-            'hover:bg-bg-mute hover:text-fg-base',
-            'disabled:cursor-not-allowed disabled:text-fg-mute hover:disabled:bg-transparent',
-          )}
+          className={styles.step}
           disabled={disabled || readOnlyResolved}
           onClick={() => {
             if (inputRef.current) {
@@ -332,15 +316,11 @@ export const NumberField: FC<Props> = ({
           tabIndex={-1}
           type="button"
         >
-          <span className="sr-only">{messages.numberFieldIncrement}</span>
+          <span className={srOnly.srOnly}>{messages.numberFieldIncrement}</span>
           <ChevronIcon direction="up" size="sm" />
         </button>
         <button
-          className={cn(
-            'flex w-6 grow items-center justify-center rounded-md text-fg-mute transition-colors duration-150 ease-out vertical:h-6 vertical:w-auto',
-            'hover:bg-bg-mute hover:text-fg-base',
-            'disabled:cursor-not-allowed disabled:text-fg-mute hover:disabled:bg-transparent',
-          )}
+          className={styles.step}
           disabled={disabled || readOnlyResolved}
           onClick={() => {
             if (inputRef.current) {
@@ -350,7 +330,7 @@ export const NumberField: FC<Props> = ({
           tabIndex={-1}
           type="button"
         >
-          <span className="sr-only">{messages.numberFieldDecrement}</span>
+          <span className={srOnly.srOnly}>{messages.numberFieldDecrement}</span>
           <ChevronIcon direction="down" size="sm" />
         </button>
       </div>

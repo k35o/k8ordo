@@ -1,6 +1,6 @@
 import { Anchor, Heading, Radio, Separator } from '@k8ordo/ui';
-import { CodeBlock } from '@k8ordo/ui/code-block';
 
+import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';
 import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
@@ -10,6 +10,9 @@ import { inheritsOf, propsOf } from '../../../../../data/component-props';
 import { RadioControlledPreview } from '../../../../../demos/ui/components/radio-previews';
 import * as m from '../../../../../messages';
 
+import page from '../../../../../styles/page.module.css';
+import styles from '../../../../../styles/pages/ui/components/radio.module.css';
+
 const options = [
   { label: 'React', value: 'react' },
   { label: 'Vue', value: 'vue' },
@@ -18,11 +21,11 @@ const options = [
 
 export default function RadioPage() {
   return (
-    <div className="flex flex-col gap-8 py-12">
+    <div className={page.page}>
       <PageTitle name="Radio" />
-      <div className="flex flex-col gap-4">
+      <div className={page.stack}>
         <Heading level="h1">Radio</Heading>
-        <p className="text-fg-mute text-lg">
+        <p className={page.lead}>
           <Rich>{m.components.radio.description()}</Rich>
         </p>
         <div>
@@ -36,7 +39,7 @@ export default function RadioPage() {
       </div>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
@@ -44,8 +47,8 @@ export default function RadioPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-8">
-        <div className="flex flex-col gap-4">
+      <section className={page.stackLg}>
+        <div className={page.stack}>
           <Heading level="h2">
             <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
@@ -66,8 +69,8 @@ const options = [
   options={options}
 />`}
           >
-            <div className="w-full max-w-md">
-              <p className="text-fg-base mb-3 font-medium" id="radio-label">
+            <div className={styles.frame}>
+              <p className={styles.groupLabel} id="radio-label">
                 Framework
               </p>
               <Radio
@@ -80,7 +83,7 @@ const options = [
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.radio.controlledTitle()}</Rich>
           </Heading>
@@ -100,7 +103,7 @@ const options = [
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.radio.disabledTitle()}</Rich>
           </Heading>
@@ -113,11 +116,8 @@ const options = [
   options={options}
 />`}
           >
-            <div className="w-full max-w-md">
-              <p
-                className="text-fg-base mb-3 font-medium"
-                id="radio-disabled-label"
-              >
+            <div className={styles.frame}>
+              <p className={styles.groupLabel} id="radio-disabled-label">
                 Framework
               </p>
               <Radio
@@ -132,7 +132,7 @@ const options = [
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>

@@ -1,15 +1,17 @@
 'use client';
 
+import { clsx } from 'clsx';
 import { useId, useRef } from 'react';
 import type { FC, PropsWithChildren, ReactNode } from 'react';
 
-import { cn } from '../../../helpers/cn';
 import { getMessages } from '../../../i18n/current';
 import type { DrawerSide } from '../../../types/variables';
 import { IconButton } from '../../buttons/icon-button';
 import { Heading } from '../../data-display/heading';
 import { CloseIcon } from '../../icons';
 import { Modal } from '../modal';
+
+import styles from './drawer.module.css';
 
 export const Drawer: FC<
   PropsWithChildren<{
@@ -36,22 +38,22 @@ export const Drawer: FC<
     >
       {/* section にすると名前付き region ランドマークになるため div。
           名前は外側の <dialog> が aria-labelledby で受け持つ */}
-      <div className="vertical:flex-row flex h-full flex-col" id={rootId}>
-        <div className="flex shrink-0 items-center justify-center p-4 pb-2">
+      <div className={styles.root} id={rootId}>
+        <div className={styles.header}>
           {typeof title === 'string' ? (
             <Heading id={`${rootId}-title`} level="h3">
               {title}
             </Heading>
           ) : (
             // labelledby の参照先 id を持たせつつ flex レイアウトに影響させないための contents ラッパー
-            <div className="contents" id={`${rootId}-title`}>
+            <div className={styles.title} id={`${rootId}-title`}>
               {title}
             </div>
           )}
           <div
-            className={cn(
-              'absolute top-2',
-              side === 'left' ? 'left-2' : 'right-2',
+            className={clsx(
+              styles.close,
+              side === 'left' ? styles.closeLeft : styles.closeRight,
             )}
           >
             <IconButton
@@ -72,7 +74,7 @@ export const Drawer: FC<
         {/* (キーボード操作は Drawer の Escape ハンドラが担う) */}
         {/* oxlint-disable eslint-plugin-jsx-a11y/click-events-have-key-events, eslint-plugin-jsx-a11y/no-static-element-interactions */}
         <div
-          className="flex-1 overflow-y-auto overscroll-contain p-4"
+          className={styles.content}
           id={`${rootId}-content`}
           onClick={(e) => {
             e.stopPropagation();

@@ -1,9 +1,10 @@
-import { CodeBlock } from '@k8ordo/ui/code-block';
-
+import { CodeBlock } from '../../../components/code-block';
 import { LandingClaim, LandingHero } from '../../../components/landing';
 import { Playground } from '../../../components/playground';
 import { StateDemo } from '../../../demos/state/state-demo';
 import * as m from '../../../messages';
+
+import styles from '../../../styles/pages/state.module.css';
 
 const HERO_DEFINE = `export const listState = definePageState('product-list', {
   url: z.object({
@@ -44,7 +45,7 @@ export const density = defineCookieState(
 
 export default function StatePage() {
   return (
-    <div className="flex flex-1 flex-col">
+    <div className={styles.root}>
       <LandingHero
         code={
           <>

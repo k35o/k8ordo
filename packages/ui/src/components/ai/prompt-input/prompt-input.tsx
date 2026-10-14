@@ -1,5 +1,6 @@
 'use client';
 
+import { clsx } from 'clsx';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import type {
   FC,
@@ -9,14 +10,12 @@ import type {
   TextareaHTMLAttributes,
 } from 'react';
 
-import { cn } from '../../../helpers/cn';
 import { createSafeContext } from '../../../helpers/create-safe-context';
 import { useControllableState } from '../../../hooks/controllable-state';
 import { getMessages } from '../../../i18n/current';
 import { acceptsFile } from '../../../internal/accepts-file';
 import { carriesFiles } from '../../../internal/carries-files';
 import { droppedFiles } from '../../../internal/dropped-files';
-import { FOCUS_RING, FOCUS_RING_WITHIN } from '../../_internal/focus-ring';
 import { SendIcon } from '../../icons';
 import {
   AttachmentPreview,
@@ -25,6 +24,9 @@ import {
 import { AttachIcon } from '../_internal/icons';
 import { List as AttachmentList } from '../attachment/attachment';
 import type { ChatStatus } from '../types';
+
+import focusRing from '../../_internal/focus-ring.module.css';
+import styles from './prompt-input.module.css';
 
 type AttachedFile = {
   id: string;
@@ -134,11 +136,10 @@ export const Root: FC<RootProps> = ({
       {/* ドロップはポインタ操作の近道で、キーボードからは Attach で同じことができる */}
       {/* oxlint-disable-next-line eslint-plugin-jsx-a11y/no-noninteractive-element-interactions */}
       <form
-        className={cn(
-          'flex flex-wrap items-end gap-2 rounded-2xl border border-border-base bg-bg-base p-2 transition-colors duration-150 ease-out',
-          FOCUS_RING_WITHIN,
-          isDragging &&
-            'border-dashed border-primary-border bg-primary-bg-subtle',
+        className={clsx(
+          styles.root,
+          focusRing.ringWithin,
+          isDragging && styles.dragging,
         )}
         data-dragging={isDragging || undefined}
         onDragEnter={(event) => {
@@ -236,11 +237,7 @@ export const Textarea: FC<TextareaProps> = ({
   return (
     <textarea
       {...rest}
-      className={cn(
-        // 高さは中身に合わせてブラウザが決める（min/max で行数を挟む）
-        'max-h-48 min-h-10 min-w-0 flex-1 resize-none field-sizing-content bg-transparent text-fg-base outline-hidden p-2',
-        'placeholder:text-fg-subtle',
-      )}
+      className={styles.textarea}
       onChange={(event) => {
         setValue(event.target.value);
       }}
@@ -283,12 +280,7 @@ const FileImage: FC<{ file: File; id: string; alt: string }> = ({
   );
 
   return (
-    <img
-      alt={alt}
-      className="size-full object-cover"
-      id={id}
-      ref={attachObjectUrl}
-    />
+    <img alt={alt} className={styles.image} id={id} ref={attachObjectUrl} />
   );
 };
 
@@ -304,8 +296,7 @@ export const Attachments: FC<AttachmentsProps> = ({ label }) => {
   }
 
   return (
-    // 削除ボタンが右上へはみ出すぶんの余白を取る
-    <div className="w-full px-1 pe-2 pt-2">
+    <div className={styles.attachments}>
       <AttachmentList label={label}>
         {files.map(({ id, file }) => (
           <AttachmentPreview
@@ -359,10 +350,7 @@ export const Attach: FC<AttachProps> = ({ label }) => {
       />
       <button
         aria-label={label ?? messages.attach}
-        className={cn(
-          'flex size-9 shrink-0 items-center justify-center rounded-full text-fg-mute transition-colors duration-150 ease-out hover:bg-bg-subtle',
-          FOCUS_RING,
-        )}
+        className={clsx(styles.button, styles.attach, focusRing.ring)}
         onClick={() => {
           inputRef.current?.click();
         }}
@@ -387,14 +375,11 @@ export const Submit: FC<SubmitProps> = ({ sendLabel, stopLabel }) => {
     return (
       <button
         aria-label={stopLabel ?? messages.stop}
-        className={cn(
-          'flex size-9 shrink-0 items-center justify-center rounded-full bg-primary-bg text-primary-fg transition-colors duration-150 ease-out',
-          FOCUS_RING,
-        )}
+        className={clsx(styles.button, styles.primary, focusRing.ring)}
         onClick={stop}
         type="button"
       >
-        <span aria-hidden className="size-3 rounded-xs bg-current" />
+        <span aria-hidden className={styles.stopMark} />
       </button>
     );
   }
@@ -402,11 +387,7 @@ export const Submit: FC<SubmitProps> = ({ sendLabel, stopLabel }) => {
   return (
     <button
       aria-label={sendLabel ?? messages.send}
-      className={cn(
-        'flex size-9 shrink-0 items-center justify-center rounded-full bg-primary-bg text-primary-fg transition-colors duration-150 ease-out',
-        'disabled:cursor-not-allowed disabled:opacity-50',
-        FOCUS_RING,
-      )}
+      className={clsx(styles.button, styles.primary, focusRing.ring)}
       disabled={value.trim() === '' && files.length === 0}
       type="submit"
     >

@@ -3,6 +3,8 @@
 import { Radio } from '@k8ordo/ui';
 import { useState } from 'react';
 
+import styles from './radio-previews.module.css';
+
 const options = [
   { label: 'React', value: 'react' },
   { label: 'Vue', value: 'vue' },
@@ -13,8 +15,8 @@ export function RadioControlledPreview() {
   const [value, setValue] = useState('react');
 
   return (
-    <div className="w-full max-w-md">
-      <p className="text-fg-base mb-3 font-medium" id="radio-controlled-label">
+    <div className={styles.frame}>
+      <p className={styles.groupLabel} id="radio-controlled-label">
         Framework
       </p>
       <Radio

@@ -188,6 +188,8 @@ import type {
   TooltipProps,
 } from './schemas';
 
+import styles from './renderers.module.css';
+
 // 生成 UI で使えるアイコン（schemas.ts の iconName と対応）。
 const iconMap = {
   plus: PlusIcon,
@@ -322,13 +324,10 @@ export function renderSeparator(props: SeparatorProps): ReactNode {
   );
 }
 
-// The bare Card has no padding and the generative catalog has no className
-// escape hatch, so map the integration `size` to a sensible inner padding
-// (default md).
 const CARD_PADDING_CLASS = {
-  sm: 'p-4',
-  md: 'p-6',
-  lg: 'p-8',
+  sm: styles.cardSm,
+  md: styles.cardMd,
+  lg: styles.cardLg,
 } as const satisfies Record<'sm' | 'md' | 'lg', string>;
 
 export function renderCard(props: CardProps, children: ReactNode): ReactNode {
@@ -583,8 +582,8 @@ const LabeledField: FC<{
 }> = ({ label, children }) => {
   const labelId = useId();
   return (
-    <div className="flex flex-col gap-1">
-      <span className="text-fg-base text-sm font-medium" id={labelId}>
+    <div className={styles.field}>
+      <span className={styles.fieldLabel} id={labelId}>
         {label}
       </span>
       {children(labelId)}
@@ -860,7 +859,7 @@ export function renderCode(props: CodeProps): ReactNode {
 
 export function renderKbd(props: KbdProps): ReactNode {
   return (
-    <span className="inline-flex items-center gap-1">
+    <span className={styles.keys}>
       {props.keys.map((key, index) => (
         // eslint-disable-next-line react/no-array-index-key -- 同じキーが並びうる静的な列
         <Kbd key={`${key}-${index}`}>{key}</Kbd>
@@ -1169,11 +1168,7 @@ export function renderPopover(
       />
       <Popover.Content
         renderItem={({ id, ref }) => (
-          <div
-            className="bg-bg-raised text-fg-base rounded-lg p-4 shadow-md"
-            id={id}
-            ref={ref}
-          >
+          <div className={styles.popover} id={id} ref={ref}>
             {children}
           </div>
         )}
@@ -1423,7 +1418,7 @@ export const FileFieldWidget: FC<{ props: FileFieldProps }> = ({ props }) => {
     <FileField.Root maxFiles={u(props.maxFiles)} multiple={u(props.multiple)}>
       {u(props.dropzone) === true ? (
         <FileField.Dropzone>
-          <p className="text-fg-mute text-sm">{messages.fileFieldDrop}</p>
+          <p className={styles.dropHint}>{messages.fileFieldDrop}</p>
           {trigger}
         </FileField.Dropzone>
       ) : (

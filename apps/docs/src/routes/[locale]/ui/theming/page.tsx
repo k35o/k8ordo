@@ -1,6 +1,5 @@
-import { CodeBlock } from '@k8ordo/ui/code-block';
-
 import { Pitfall } from '../../../../components/callout';
+import { CodeBlock } from '../../../../components/code-block';
 import {
   DocPage,
   DocSection,
@@ -31,39 +30,46 @@ import {
   lineHeightToNumber,
 } from '../../../../theme/design-tokens';
 
+import page from '../../../../styles/page.module.css';
+import styles from '../../../../styles/pages/ui/theming.module.css';
+
 const t = m.theming;
 
 const DARK = `document.documentElement.classList.add('dark');`;
 
-const CONTRAST = `const pressedStyles = [
-  'aria-pressed:bg-primary-bg-emphasize',
-  'forced-colors:aria-pressed:bg-[Highlight]',
-  'forced-colors:aria-pressed:text-[HighlightText]',
-].join(' ');`;
+const CONTRAST = `.button[aria-pressed='true'] {
+  background-color: var(--color-primary-bg-emphasize);
+
+  @media (forced-colors: active) {
+    background-color: var(--color-system-highlight);
+    color: var(--color-system-highlight-text);
+  }
+}`;
 
 const OVERRIDE = `:root {
-  --primary-fg: var(--purple-800);
-  --primary-bg: var(--purple-200);
-  --primary-bg-subtle: var(--purple-50);
-  --primary-bg-mute: var(--purple-100);
-  --primary-bg-emphasize: var(--purple-300);
-  --primary-border: var(--purple-500);
+  --color-primary-fg: var(--purple-800);
+  --color-primary-bg: var(--purple-200);
+  --color-primary-bg-subtle: var(--purple-50);
+  --color-primary-bg-mute: var(--purple-100);
+  --color-primary-bg-emphasize: var(--purple-300);
+  --color-primary-border: var(--purple-500);
 }
 
 .dark {
-  --primary-fg: var(--purple-300);
-  --primary-bg: var(--purple-800);
-  --primary-bg-subtle: var(--purple-950);
-  --primary-bg-mute: var(--purple-900);
-  --primary-bg-emphasize: var(--purple-700);
-  --primary-border: var(--purple-500);
+  --color-primary-fg: var(--purple-300);
+  --color-primary-bg: var(--purple-800);
+  --color-primary-bg-subtle: var(--purple-950);
+  --color-primary-bg-mute: var(--purple-900);
+  --color-primary-bg-emphasize: var(--purple-700);
+  --color-primary-border: var(--purple-500);
 }`;
 
 const OVERRIDE_VALUE = `:root {
-  --primary-border: oklch(0.55 0.15 300);
+  --color-primary-border: oklch(0.55 0.15 300);
 }`;
 
 const Z_INDEX_USAGE = {
+  raised: 'Autocomplete, Combobox, RangeSlider',
   overlay: 'Popover, DropdownMenu, ListBox, Tooltip',
   modal: 'Modal, Drawer',
   toast: 'Toast',
@@ -77,21 +83,21 @@ export default function Theming() {
           <Rich>{t.semanticColorsIntro()}</Rich>
         </p>
         <DocSubsection id="foreground" title={t.foregroundTitle}>
-          <div className="grid gap-2 sm:grid-cols-2">
+          <div className={styles.tokens}>
             {FG_TOKENS.map((token) => (
               <TokenCard key={token.name} token={token} />
             ))}
           </div>
         </DocSubsection>
         <DocSubsection id="background" title={t.backgroundTitle}>
-          <div className="grid gap-2 sm:grid-cols-2">
+          <div className={styles.tokens}>
             {BG_TOKENS.map((token) => (
               <TokenCard key={token.name} token={token} />
             ))}
           </div>
         </DocSubsection>
         <DocSubsection id="border" title={t.borderTitle}>
-          <div className="grid gap-2 sm:grid-cols-2">
+          <div className={styles.tokens}>
             {BORDER_TOKENS.map((token) => (
               <TokenCard key={token.name} token={token} type="border" />
             ))}
@@ -104,7 +110,7 @@ export default function Theming() {
           <Rich>{t.brandColorsIntro()}</Rich>
         </p>
         <DocSubsection id="primary" title={t.primaryTitle}>
-          <div className="grid gap-2 sm:grid-cols-2">
+          <div className={styles.tokens}>
             {PRIMARY_TOKENS.map((token) => (
               <TokenCard
                 key={token.name}
@@ -115,7 +121,7 @@ export default function Theming() {
           </div>
         </DocSubsection>
         <DocSubsection id="secondary" title={t.secondaryTitle}>
-          <div className="grid gap-2 sm:grid-cols-2">
+          <div className={styles.tokens}>
             {SECONDARY_TOKENS.map((token) => (
               <TokenCard
                 key={token.name}
@@ -126,7 +132,7 @@ export default function Theming() {
           </div>
         </DocSubsection>
         <DocSubsection id="group" title={t.groupTitle}>
-          <div className="grid gap-2 sm:grid-cols-2">
+          <div className={styles.tokens}>
             {GROUP_TOKENS.map((token) => (
               <TokenCard key={token.name} token={token} />
             ))}
@@ -135,22 +141,22 @@ export default function Theming() {
       </DocSection>
 
       <DocSection id="palette" title={t.colorPaletteTitle}>
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           {PALETTE.map((family) => (
-            <div className="flex flex-col gap-1" key={family.prefix}>
-              <span className="text-sm font-medium">{family.name}</span>
-              <div className="grid grid-cols-6 gap-1.5 sm:grid-cols-11">
+            <div className={styles.family} key={family.prefix}>
+              <span className={styles.name}>{family.name}</span>
+              <div className={styles.shades}>
                 {SHADES.map((shade) => (
                   <div
-                    className="flex flex-col items-center gap-1"
+                    className={styles.shade}
                     key={shade}
                     title={family.shades[shade]}
                   >
                     <div
-                      className="border-border-mute aspect-square w-full rounded-md border"
+                      className={styles.swatch}
                       style={{ backgroundColor: family.shades[shade] }}
                     />
-                    <span className="text-xs font-medium">{shade}</span>
+                    <span className={styles.shadeName}>{shade}</span>
                   </div>
                 ))}
               </div>
@@ -181,24 +187,22 @@ export default function Theming() {
 
       <DocSection id="typography" title={t.typographyTitle}>
         <DocSubsection id="text-sizes" title={t.textSizesTitle}>
-          <div className="border-border-mute bg-bg-surface rounded-xl border">
-            <div className="flex flex-col gap-3 p-4">
+          <div className={styles.panel}>
+            <div className={styles.samples}>
               {TEXT_SIZES.map((size) => {
                 const ratio = lineHeightToNumber(size.lineHeight);
                 return (
-                  <div className="flex items-baseline gap-4" key={size.name}>
-                    <code className="text-fg-subtle w-20 shrink-0 text-sm">
-                      {size.name}
-                    </code>
+                  <div className={styles.baselineRow} key={size.name}>
+                    <code className={styles.tokenName}>{size.name}</code>
                     {/* min-w-0 がないと flex item の min-width:auto により
                         text-highlight(6rem) の見本幅がページ全体を押し広げる */}
                     <span
-                      className="min-w-0 truncate"
+                      className={styles.sizeSample}
                       style={{ fontSize: size.fontSize, lineHeight: ratio }}
                     >
                       k8ordo
                     </span>
-                    <span className="text-fg-subtle ml-auto shrink-0 text-xs">
+                    <span className={styles.endValue}>
                       {size.fontSize} / {Number(ratio.toFixed(3))}
                     </span>
                   </div>
@@ -208,22 +212,18 @@ export default function Theming() {
           </div>
         </DocSubsection>
         <DocSubsection id="font-weights" title={t.fontWeightsTitle}>
-          <div className="border-border-mute bg-bg-surface rounded-xl border">
-            <div className="flex flex-col gap-3 p-4">
+          <div className={styles.panel}>
+            <div className={styles.samples}>
               {FONT_WEIGHTS.map((weight) => (
-                <div className="flex items-baseline gap-4" key={weight.name}>
-                  <code className="text-fg-subtle w-20 shrink-0 text-sm">
-                    {weight.name}
-                  </code>
+                <div className={styles.baselineRow} key={weight.name}>
+                  <code className={styles.tokenName}>{weight.name}</code>
                   <span
-                    className="text-lg"
+                    className={styles.sample}
                     style={{ fontWeight: weight.value }}
                   >
                     k8ordo
                   </span>
-                  <span className="text-fg-subtle ml-auto shrink-0 text-xs">
-                    {weight.value}
-                  </span>
+                  <span className={styles.endValue}>{weight.value}</span>
                 </div>
               ))}
             </div>
@@ -233,42 +233,37 @@ export default function Theming() {
           </p>
         </DocSubsection>
         <DocSubsection id="letter-spacing" title={t.letterSpacingTitle}>
-          <div className="border-border-mute bg-bg-surface rounded-xl border">
-            <div className="flex flex-col gap-3 p-4">
+          <div className={styles.panel}>
+            <div className={styles.samples}>
               {LETTER_SPACINGS.map((ls) => (
-                <div className="flex items-baseline gap-4" key={ls.name}>
-                  <code className="text-fg-subtle w-20 shrink-0 text-sm">
-                    {ls.name}
-                  </code>
-                  <span className="text-lg" style={{ letterSpacing: ls.value }}>
+                <div className={styles.baselineRow} key={ls.name}>
+                  <code className={styles.tokenName}>{ls.name}</code>
+                  <span
+                    className={styles.sample}
+                    style={{ letterSpacing: ls.value }}
+                  >
                     k8ordo
                   </span>
-                  <span className="text-fg-subtle ml-auto shrink-0 text-xs">
-                    {ls.value}
-                  </span>
+                  <span className={styles.endValue}>{ls.value}</span>
                 </div>
               ))}
             </div>
           </div>
         </DocSubsection>
         <DocSubsection id="line-height" title={t.lineHeightTitle}>
-          <div className="border-border-mute bg-bg-surface rounded-xl border">
-            <div className="flex flex-col gap-3 p-4">
+          <div className={styles.panel}>
+            <div className={styles.samples}>
               {LINE_HEIGHTS.map((lh) => (
-                <div className="flex items-center gap-4" key={lh.name}>
-                  <code className="text-fg-subtle w-20 shrink-0 text-sm">
-                    {lh.name}
-                  </code>
+                <div className={styles.row} key={lh.name}>
+                  <code className={styles.tokenName}>{lh.name}</code>
                   <div
-                    className="flex-1 text-sm"
+                    className={styles.paragraph}
                     style={{ lineHeight: lh.value }}
                   >
                     The quick brown fox jumps over the lazy dog. The quick brown
                     fox jumps over the lazy dog.
                   </div>
-                  <span className="text-fg-subtle shrink-0 text-xs">
-                    {lh.value}
-                  </span>
+                  <span className={styles.value}>{lh.value}</span>
                 </div>
               ))}
             </div>
@@ -277,16 +272,16 @@ export default function Theming() {
       </DocSection>
 
       <DocSection id="radius" title={t.borderRadiusTitle}>
-        <div className="grid grid-cols-3 gap-4 sm:grid-cols-5 sm:gap-6">
+        <div className={styles.radii}>
           {RADII.map((radius) => (
-            <div className="flex flex-col items-center gap-2" key={radius.name}>
+            <div className={styles.specimen} key={radius.name}>
               <div
-                className="border-border-base bg-bg-subtle size-16 border-2"
+                className={styles.radiusBox}
                 style={{ borderRadius: radius.value }}
               />
-              <div className="flex flex-col items-center">
-                <code className="text-sm font-medium">{radius.name}</code>
-                <span className="text-fg-subtle text-xs">{radius.value}</span>
+              <div className={styles.caption}>
+                <code className={styles.name}>{radius.name}</code>
+                <span className={styles.meta}>{radius.value}</span>
               </div>
             </div>
           ))}
@@ -297,16 +292,16 @@ export default function Theming() {
       </DocSection>
 
       <DocSection id="shadow" title={t.shadowTitle}>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className={styles.shadows}>
           {SHADOWS.map((shadow) => (
-            <div className="flex flex-col items-center gap-2" key={shadow.name}>
+            <div className={styles.specimen} key={shadow.name}>
               <div
-                className="border-border-mute bg-bg-base h-16 w-full rounded-lg border"
+                className={styles.shadowBox}
                 style={{ boxShadow: shadow.value }}
               />
-              <div className="flex flex-col items-center">
-                <code className="text-sm font-medium">{shadow.name}</code>
-                <span className="text-fg-subtle text-xs">{shadow.value}</span>
+              <div className={styles.caption}>
+                <code className={styles.name}>{shadow.name}</code>
+                <span className={styles.meta}>{shadow.value}</span>
               </div>
             </div>
           ))}
@@ -317,18 +312,13 @@ export default function Theming() {
       </DocSection>
 
       <DocSection id="spacing" title={t.spacingTitle}>
-        <div className="border-border-mute bg-bg-surface rounded-xl border">
-          <div className="flex flex-col gap-2 p-4">
+        <div className={styles.panel}>
+          <div className={styles.entries}>
             {SPACING_SCALE.map((space) => (
-              <div className="flex items-center gap-3" key={space.step}>
-                <code className="text-fg-subtle w-8 shrink-0 text-right text-sm">
-                  {space.step}
-                </code>
-                <div
-                  className="bg-primary-bg h-4 rounded-sm"
-                  style={{ width: space.px }}
-                />
-                <span className="text-fg-subtle text-xs">
+              <div className={styles.spacingRow} key={space.step}>
+                <code className={styles.step}>{space.step}</code>
+                <div className={styles.bar} style={{ width: space.px }} />
+                <span className={styles.meta}>
                   {space.rem} ({space.px})
                 </span>
               </div>
@@ -341,14 +331,12 @@ export default function Theming() {
       </DocSection>
 
       <DocSection id="breakpoints" title={t.breakpointsTitle}>
-        <div className="border-border-mute bg-bg-surface rounded-xl border">
-          <div className="flex flex-col gap-2 p-4">
+        <div className={styles.panel}>
+          <div className={styles.entries}>
             {BREAKPOINTS.map((bp) => (
-              <div className="flex items-center gap-4" key={bp.name}>
-                <code className="w-10 shrink-0 text-sm font-medium">
-                  {bp.name}
-                </code>
-                <span className="text-fg-subtle text-xs">
+              <div className={styles.row} key={bp.name}>
+                <code className={styles.breakpointName}>{bp.name}</code>
+                <span className={styles.meta}>
                   ≥ {bp.px} ({bp.rem})
                 </span>
               </div>
@@ -361,19 +349,15 @@ export default function Theming() {
       </DocSection>
 
       <DocSection id="z-index" title={t.zIndexTitle}>
-        <div className="border-border-mute bg-bg-surface rounded-xl border">
-          <div className="flex flex-col gap-2 p-4">
+        <div className={styles.panel}>
+          <div className={styles.entries}>
             {Z_INDICES.map((z) => (
-              <div className="flex items-center gap-4" key={z.name}>
-                <code className="w-24 shrink-0 text-sm font-medium">
-                  z-{z.name}
-                </code>
-                <span className="text-fg-mute flex-1 text-sm">
+              <div className={styles.row} key={z.name}>
+                <code className={styles.zIndexName}>z-{z.name}</code>
+                <span className={styles.usage}>
                   {Z_INDEX_USAGE[z.name as keyof typeof Z_INDEX_USAGE]}
                 </span>
-                <span className="text-fg-subtle shrink-0 text-xs">
-                  {z.value}
-                </span>
+                <span className={styles.value}>{z.value}</span>
               </div>
             ))}
           </div>
@@ -404,7 +388,11 @@ export default function Theming() {
       </DocSection>
 
       <DocSection id="high-contrast" title={t.highContrastTitle}>
-        <CodeBlock code={CONTRAST} lang="ts" title="toggle-button.tsx" />
+        <CodeBlock
+          code={CONTRAST}
+          lang="css"
+          title="toggle-button.module.css"
+        />
         <p>
           <Rich>{t.highContrastOwnUi()}</Rich>
         </p>

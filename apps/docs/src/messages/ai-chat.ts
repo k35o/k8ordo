@@ -91,15 +91,13 @@ export const responseDescription = message({
 });
 
 export const responseInstall = message({
-  ja: (version: string) =>
-    `\`streamdown\`の${version}以上を入れ、そのスタイルシートを読み込みます。`,
-  en: (version) =>
-    `Install \`streamdown\` ${version} or later, and load its stylesheet.`,
+  ja: (version: string) => `\`streamdown\`の${version}以上を入れます。`,
+  en: (version) => `Install \`streamdown\` ${version} or later.`,
 });
 
 export const responseTailwind = message({
-  ja: "`streamdown`のスタイルは`styles.css`に含まれません。`Response`を使うアプリでは、`@k8ordo/ui/tailwind.css`を読み込むTailwindのビルドが必要です。アプリのCSSに`@source '../node_modules/streamdown/dist/*.js';`を足します。パスはそのCSSファイルから`node_modules`への相対パスです。",
-  en: "`streamdown`’s styles are not part of `styles.css`. An app that uses `Response` needs a Tailwind build that loads `@k8ordo/ui/tailwind.css`. Add `@source '../node_modules/streamdown/dist/*.js';` to the app’s CSS; the path is relative from that CSS file to `node_modules`.",
+  ja: '`Response`のスタイルは、`streamdown`が要素に付ける`data-streamdown`属性に合わせて書いてあります。Tailwind CSSは要りません。`streamdown/styles.css`が要るのは、`streamdown`の`animated`を使うときだけです。',
+  en: '`Response` styles what `streamdown` renders through the `data-streamdown` attribute on each element, so no Tailwind CSS is needed. `streamdown/styles.css` is needed only when you turn on `streamdown`’s `animated`.',
 });
 
 export const toolTitle = message({

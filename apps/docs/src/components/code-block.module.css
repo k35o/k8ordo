@@ -1,0 +1,12 @@
+/*
+ * CodeBlock の面は bg-surface で、ダークではページの地と同じ色になる。サイト
+ * では部品を見せるほかの面と同じく、枠線で区切る。CodeBlock は className を
+ * 受け取らないので、包みの中の figure に当てる
+ */
+.root {
+  @scope (&) {
+    & > figure {
+      border: 1px solid var(--color-border-mute);
+    }
+  }
+}

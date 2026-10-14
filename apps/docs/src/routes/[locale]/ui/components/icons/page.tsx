@@ -72,15 +72,18 @@ import {
   SafariIcon,
   Logo,
 } from '@k8ordo/ui';
-import { CodeBlock } from '@k8ordo/ui/code-block';
 import type { ReactNode } from 'react';
 
+import { CodeBlock } from '../../../../../components/code-block';
 import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
 import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { propsOf } from '../../../../../data/component-props';
 import * as m from '../../../../../messages';
+
+import page from '../../../../../styles/page.module.css';
+import styles from '../../../../../styles/pages/ui/components/icons.module.css';
 
 const IconCard = ({
   name,
@@ -89,19 +92,19 @@ const IconCard = ({
   name: string;
   children: ReactNode;
 }) => (
-  <div className="border-border-base flex flex-col items-center justify-center gap-2 rounded-lg border p-4">
+  <div className={styles.card}>
     {children}
-    <p className="text-fg-mute text-xs">{name}</p>
+    <p className={styles.name}>{name}</p>
   </div>
 );
 
 export default function IconsPage() {
   return (
-    <div className="flex flex-col gap-8 py-12">
+    <div className={page.page}>
       <PageTitle name="Icons" />
-      <div className="flex flex-col gap-4">
+      <div className={page.stack}>
         <Heading level="h1">Icons</Heading>
-        <p className="text-fg-mute text-lg">
+        <p className={page.lead}>
           <Rich>{m.components.icons.description()}</Rich>
         </p>
         <div>
@@ -115,7 +118,7 @@ export default function IconsPage() {
       </div>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
@@ -126,16 +129,16 @@ export default function IconsPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.icons.sizesTitle()}</Rich>
         </Heading>
-        <div className="flex flex-wrap items-end gap-6">
+        <div className={styles.sizes}>
           {(['xs', 'sm', 'md', 'lg', 'xl', '2xl', '3xl'] as const).map(
             (size) => (
-              <div key={size} className="flex flex-col items-center gap-2">
+              <div key={size} className={styles.size}>
                 <CheckIcon size={size} />
-                <p className="text-fg-mute text-sm">{size}</p>
+                <p className={styles.note}>{size}</p>
               </div>
             ),
           )}
@@ -153,16 +156,16 @@ export default function IconsPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.usageTitle()}</Rich>
         </Heading>
-        <div className="grid-cols-auto-fit-28 grid gap-4">
+        <div className={styles.grid}>
           <IconCard name="LogoIcon">
             <LogoIcon />
           </IconCard>
           <IconCard name="Logo">
-            <Logo className="size-6" />
+            <Logo className={styles.logo} />
           </IconCard>
           <IconCard name="CloseIcon">
             <CloseIcon />
@@ -378,11 +381,11 @@ export default function IconsPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>
-        <p className="text-fg-mute text-sm">
+        <p className={styles.note}>
           <Rich>{m.components.icons.propsDescription()}</Rich>
         </p>
         <PropsTable items={propsOf('CheckIcon')} />

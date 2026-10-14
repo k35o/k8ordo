@@ -1,6 +1,6 @@
 import { Anchor, Heading, Separator, Slider } from '@k8ordo/ui';
-import { CodeBlock } from '@k8ordo/ui/code-block';
 
+import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';
 import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
@@ -9,13 +9,16 @@ import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
 import * as m from '../../../../../messages';
 
+import page from '../../../../../styles/page.module.css';
+import styles from '../../../../../styles/pages/ui/components/slider.module.css';
+
 export default function SliderPage() {
   return (
-    <div className="flex flex-col gap-8 py-12">
+    <div className={page.page}>
       <PageTitle name="Slider" />
-      <div className="flex flex-col gap-4">
+      <div className={page.stack}>
         <Heading level="h1">Slider</Heading>
-        <p className="text-fg-mute text-lg">
+        <p className={page.lead}>
           <Rich>{m.components.slider.description()}</Rich>
         </p>
         <div>
@@ -29,7 +32,7 @@ export default function SliderPage() {
       </div>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
@@ -37,8 +40,8 @@ export default function SliderPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-8">
-        <div className="flex flex-col gap-4">
+      <section className={page.stackLg}>
+        <div className={page.stack}>
           <Heading level="h2">
             <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
@@ -50,7 +53,7 @@ export default function SliderPage() {
   required={false}
 />`}
           >
-            <div className="w-full">
+            <div className={styles.frame}>
               <Slider
                 defaultValue={50}
                 disabled={false}
@@ -61,7 +64,7 @@ export default function SliderPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.slider.minMaxStepTitle()}</Rich>
           </Heading>
@@ -76,7 +79,7 @@ export default function SliderPage() {
   step={5}
 />`}
           >
-            <div className="w-full">
+            <div className={styles.frame}>
               <Slider
                 defaultValue={20}
                 disabled={false}
@@ -90,7 +93,7 @@ export default function SliderPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.slider.disabledTitle()}</Rich>
           </Heading>
@@ -102,7 +105,7 @@ export default function SliderPage() {
   required={false}
 />`}
           >
-            <div className="w-full">
+            <div className={styles.frame}>
               <Slider
                 defaultValue={30}
                 disabled
@@ -115,7 +118,7 @@ export default function SliderPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>

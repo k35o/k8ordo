@@ -1,9 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { clsx } from 'clsx';
 import { useState } from 'react';
 import type { FC } from 'react';
 import { expect, waitFor } from 'storybook/test';
 
 import { Tabs } from '.';
+
+import styles from './tabs.stories.module.css';
 
 const meta: Meta<typeof Tabs.Root> = {
   title: 'components/navigation/tabs',
@@ -96,7 +99,7 @@ const settle = async (): Promise<void> => {
 const SwitchableWritingModeTabs: FC = () => {
   const [isVertical, setIsVertical] = useState(false);
   return (
-    <div className="flex flex-col gap-2">
+    <div className={styles.switchable}>
       <button
         onClick={() => {
           setIsVertical(true);
@@ -105,7 +108,7 @@ const SwitchableWritingModeTabs: FC = () => {
       >
         縦書きにする
       </button>
-      <div className={isVertical ? 'writing-v h-60' : 'h-60'}>
+      <div className={clsx(isVertical && 'writing-v', styles.area)}>
         <Tabs.Root ids={['first', 'second']}>
           <Tabs.List label="縦書きのタブ">
             <Tabs.Tab id="first">一</Tabs.Tab>

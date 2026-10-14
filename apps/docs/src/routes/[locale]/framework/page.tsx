@@ -1,7 +1,8 @@
-import { CodeBlock } from '@k8ordo/ui/code-block';
-
+import { CodeBlock } from '../../../components/code-block';
 import { LandingClaim, LandingHero } from '../../../components/landing';
 import * as m from '../../../messages';
+
+import styles from '../../../styles/pages/framework.module.css';
 
 const HERO_CONFIG = `import { framework } from '@k8ordo/framework/vite';
 import { defineConfig } from 'vite';
@@ -36,7 +37,7 @@ node dist/server.js`;
 
 export default function FrameworkPage() {
   return (
-    <div className="flex flex-1 flex-col">
+    <div className={styles.root}>
       <LandingHero
         code={
           <>
@@ -64,7 +65,7 @@ export default function FrameworkPage() {
         body={m.framework.claimModeBody}
         title={m.framework.claimModeTitle}
       >
-        <div className="flex flex-col gap-3">
+        <div className={styles.codes}>
           <CodeBlock code={CLAIM_STATIC} lang="ts" title="vite.config.ts" />
           <CodeBlock code={CLAIM_STATIC_RUN} lang="bash" title="Terminal" />
           <CodeBlock code={CLAIM_SERVER} lang="ts" title="vite.config.ts" />

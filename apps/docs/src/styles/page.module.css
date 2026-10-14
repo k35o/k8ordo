@@ -1,0 +1,34 @@
+/* サイトのページが共通して使う組み。ページ固有のものは src/styles/pages/ に置く */
+
+/* ページの縦の流れ（見出し、説明、節） */
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 8);
+  padding-block: calc(var(--spacing) * 12);
+}
+
+/* 節の中の縦の並び */
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 4);
+}
+
+/* 節どうしの、広めの縦の並び */
+.stackLg {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 8);
+}
+
+/* ページの見出しの下の説明 */
+.lead {
+  color: var(--color-fg-mute);
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-lg);
+}
+
+.mute {
+  color: var(--color-fg-mute);
+}

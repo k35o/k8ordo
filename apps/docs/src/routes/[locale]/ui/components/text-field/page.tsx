@@ -1,6 +1,6 @@
 import { Anchor, Heading, Separator, TextField } from '@k8ordo/ui';
-import { CodeBlock } from '@k8ordo/ui/code-block';
 
+import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';
 import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
@@ -9,13 +9,15 @@ import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
 import * as m from '../../../../../messages';
 
+import page from '../../../../../styles/page.module.css';
+
 export default function TextFieldPage() {
   return (
-    <div className="flex flex-col gap-8 py-12">
+    <div className={page.page}>
       <PageTitle name="TextField" />
-      <div className="flex flex-col gap-4">
+      <div className={page.stack}>
         <Heading level="h1">TextField</Heading>
-        <p className="text-fg-mute text-lg">
+        <p className={page.lead}>
           <Rich>{m.components.textField.description()}</Rich>
         </p>
         <div>
@@ -29,7 +31,7 @@ export default function TextFieldPage() {
       </div>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
@@ -37,8 +39,8 @@ export default function TextFieldPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-8">
-        <div className="flex flex-col gap-4">
+      <section className={page.stackLg}>
+        <div className={page.stack}>
           <Heading level="h2">
             <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
@@ -53,7 +55,7 @@ export default function TextFieldPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.textField.placeholderTitle()}</Rich>
           </Heading>
@@ -74,7 +76,7 @@ export default function TextFieldPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">Type</Heading>
           <ComponentPreview
             code={`<TextField placeholder="you@example.com" type="email" />
@@ -85,7 +87,7 @@ export default function TextFieldPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.textField.disabledTitle()}</Rich>
           </Heading>
@@ -106,7 +108,7 @@ export default function TextFieldPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.textField.invalidTitle()}</Rich>
           </Heading>
@@ -129,7 +131,7 @@ export default function TextFieldPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>

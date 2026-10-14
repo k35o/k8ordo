@@ -6,15 +6,18 @@ import { PageTitle } from '../../components/page-title';
 import { href } from '../../links';
 import * as m from '../../messages';
 
+import page from '../../styles/page.module.css';
+import styles from '../../styles/pages/not-found.module.css';
+
 export default function NotFound() {
   return (
-    <div className="flex flex-col items-start gap-8 py-12">
+    <div className={styles.root}>
       <PageTitle title={m.notFound.title} />
-      <div className="flex flex-col gap-4">
+      <div className={page.stack}>
         <Heading level="h1">{m.notFound.title()}</Heading>
-        <p className="text-fg-mute">{m.notFound.description()}</p>
+        <p className={page.mute}>{m.notFound.description()}</p>
       </div>
-      <div className="flex flex-wrap items-center gap-4">
+      <div className={styles.actions}>
         <Button
           renderItem={({ className, children }) => (
             <a className={className} href={href('/:locale')}>

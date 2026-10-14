@@ -22,7 +22,13 @@ describe('highlight', () => {
       light: '#A626A4',
       dark: '#61AFEF',
     });
-    expect(html).toContain('background-color:light-dark(#FAFAFA, #21252B)');
+  });
+
+  it('テーマの地を出さず、CodeBlock の面の色を通す', async () => {
+    const html = await highlight('const a = 1;', { lang: 'ts' });
+
+    expect(html).not.toContain('background-color');
+    expect(html).toContain('<pre class="shiki shiki-themes one-light plastic"');
   });
 
   it('トークンの色は k8o のブログと同じ one-light と plastic のまま使う', async () => {
@@ -120,7 +126,7 @@ describe('highlight', () => {
       callouts: { 2: '字下げに揃う' },
     });
 
-    expect(html).toContain('style="--ao-callout-indent:4ch"');
+    expect(html).toContain('style="--callout-indent:4ch"');
   });
 
   it('同じ行に印と注記を両方付けられる', async () => {

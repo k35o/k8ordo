@@ -5,6 +5,8 @@ import type { FC, PropsWithChildren } from 'react';
 
 import { AccordionItemProvider } from './context';
 
+import styles from './accordion-item.module.css';
+
 export const AccordionItem: FC<
   PropsWithChildren<{
     isOpen?: boolean;
@@ -20,7 +22,7 @@ export const AccordionItem: FC<
       isOpen={isOpen}
       onChange={onChange}
     >
-      <div className="vertical:h-full">{children}</div>
+      <div className={styles.root}>{children}</div>
     </AccordionItemProvider>
   );
 };

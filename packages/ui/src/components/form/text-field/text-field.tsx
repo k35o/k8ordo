@@ -8,8 +8,7 @@ import type {
 } from 'react';
 import { useFormStatus } from 'react-dom';
 
-import { FOCUS_RING } from '../../_internal/focus-ring';
-import { cn } from './../../../helpers/cn';
+import styles from './text-field.module.css';
 
 // 1 行の入力欄として描けるものを並べる。number は NumberField、password は
 // PasswordInput、file は FileField が別途あり、checkbox / radio / color 等は
@@ -47,13 +46,7 @@ export const TextField: FC<Props> = ({
   return (
     <input
       aria-invalid={invalid}
-      className={cn(
-        'rounded-xl border border-border-base bg-bg-base px-3 py-2 inline-full',
-        'aria-invalid:border-border-error',
-        'disabled:cursor-not-allowed disabled:border-border-mute disabled:bg-bg-mute hover:disabled:bg-bg-mute',
-        'read-only:cursor-not-allowed read-only:bg-bg-subtle',
-        FOCUS_RING,
-      )}
+      className={styles.root}
       readOnly={pending || readOnly}
       ref={ref}
       type={type}

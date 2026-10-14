@@ -6,6 +6,8 @@ import { Autocomplete } from '../autocomplete';
 import { TextField } from '../text-field';
 import { FormControl } from './form-control';
 
+import styles from './form-control.stories.module.css';
+
 type RenderInputProps = {
   id: string;
   'aria-describedby': string | undefined;
@@ -140,7 +142,7 @@ export const NarrowContainer: Story = {
   },
   decorators: [
     (Story) => (
-      <div className="w-56">
+      <div className={styles.frame}>
         <Story />
       </div>
     ),

@@ -5,12 +5,15 @@ import { useState } from 'react';
 
 import * as m from '../../messages';
 
+import page from '../../styles/page.module.css';
+import styles from './overlay-demo.module.css';
+
 export function OverlayDemo() {
   const [last, setLast] = useState<string | null>(null);
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-center gap-3">
+    <div className={styles.root}>
+      <div className={styles.actions}>
         <DropdownMenu.Root>
           <DropdownMenu.Trigger label={m.ui.demoMenu()} />
           <DropdownMenu.Content>
@@ -44,8 +47,8 @@ export function OverlayDemo() {
           <MailIcon />
         </IconButton>
       </div>
-      <dl className="bg-bg-surface grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-2 rounded-lg px-4 py-3 text-sm">
-        <dt className="text-fg-mute">{m.ui.demoLast()}</dt>
+      <dl className={styles.result}>
+        <dt className={page.mute}>{m.ui.demoLast()}</dt>
         <dd>
           <Code>{last ?? '—'}</Code>
         </dd>

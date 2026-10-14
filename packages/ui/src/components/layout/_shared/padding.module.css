@@ -1,0 +1,19 @@
+.none {
+  padding: 0;
+}
+
+.sm {
+  padding: calc(var(--spacing) * 2);
+}
+
+.md {
+  padding: calc(var(--spacing) * 4);
+}
+
+.lg {
+  padding: calc(var(--spacing) * 6);
+}
+
+.xl {
+  padding: calc(var(--spacing) * 8);
+}

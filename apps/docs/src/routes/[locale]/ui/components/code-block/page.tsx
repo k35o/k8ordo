@@ -1,6 +1,6 @@
 import { Anchor, Heading, Separator } from '@k8ordo/ui';
-import { CodeBlock } from '@k8ordo/ui/code-block';
 
+import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';
 import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
@@ -8,6 +8,9 @@ import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
 import * as m from '../../../../../messages';
+
+import page from '../../../../../styles/page.module.css';
+import styles from '../../../../../styles/pages/ui/components/code-block.module.css';
 
 const SAMPLE = `export function Total({ items }: { items: Item[] }) {
   const done = items.filter((item) => item.done).length;
@@ -20,11 +23,11 @@ const rate = items.length === 0 ? 0 : done / items.length;`;
 
 export default function CodeBlockPage() {
   return (
-    <div className="flex flex-col gap-8 py-12">
+    <div className={page.page}>
       <PageTitle name="CodeBlock" />
-      <div className="flex flex-col gap-4">
+      <div className={page.stack}>
         <Heading level="h1">CodeBlock</Heading>
-        <p className="text-fg-mute text-lg">
+        <p className={page.lead}>
           <Rich>{m.components.codeBlock.description()}</Rich>
         </p>
         <div>
@@ -38,11 +41,11 @@ export default function CodeBlockPage() {
       </div>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
-        <p className="text-fg-mute">
+        <p className={page.mute}>
           <Rich>{m.components.codeBlock.importDescription()}</Rich>
         </p>
         <CodeBlock
@@ -52,8 +55,8 @@ export default function CodeBlockPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-8">
-        <div className="flex flex-col gap-4">
+      <section className={page.stackLg}>
+        <div className={page.stack}>
           <Heading level="h2">
             <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
@@ -61,34 +64,34 @@ export default function CodeBlockPage() {
             stage="article"
             code='<CodeBlock code={source} lang="tsx" />'
           >
-            <div className="w-full">
+            <div className={styles.frame}>
               <CodeBlock code={SAMPLE} lang="tsx" />
             </div>
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.codeBlock.titleTitle()}</Rich>
           </Heading>
-          <p className="text-fg-mute">
+          <p className={page.mute}>
             <Rich>{m.components.codeBlock.titleDescription()}</Rich>
           </p>
           <ComponentPreview
             stage="article"
             code='<CodeBlock code={source} lang="tsx" title="total.tsx" />'
           >
-            <div className="w-full">
+            <div className={styles.frame}>
               <CodeBlock code={SAMPLE} lang="tsx" title="total.tsx" />
             </div>
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.codeBlock.marksTitle()}</Rich>
           </Heading>
-          <p className="text-fg-mute">
+          <p className={page.mute}>
             <Rich>{m.components.codeBlock.marksDescription()}</Rich>
           </p>
           <ComponentPreview
@@ -99,7 +102,7 @@ export default function CodeBlockPage() {
   marks={{ 1: 'highlight', 2: 'remove', 3: 'add' }}
 />`}
           >
-            <div className="w-full">
+            <div className={styles.frame}>
               <CodeBlock
                 code={RATE}
                 lang="ts"
@@ -109,11 +112,11 @@ export default function CodeBlockPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.codeBlock.calloutsTitle()}</Rich>
           </Heading>
-          <p className="text-fg-mute">
+          <p className={page.mute}>
             <Rich>{m.components.codeBlock.calloutsDescription()}</Rich>
           </p>
           <ComponentPreview
@@ -124,7 +127,7 @@ export default function CodeBlockPage() {
   lang="ts"
 />`}
           >
-            <div className="w-full">
+            <div className={styles.frame}>
               <CodeBlock
                 callouts={{ 3: 'Guard the division when the list is empty' }}
                 code={RATE}
@@ -134,18 +137,18 @@ export default function CodeBlockPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.codeBlock.colorsTitle()}</Rich>
           </Heading>
-          <p className="text-fg-mute">
+          <p className={page.mute}>
             <Rich>{m.components.codeBlock.colorsDescription()}</Rich>
           </p>
         </div>
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>

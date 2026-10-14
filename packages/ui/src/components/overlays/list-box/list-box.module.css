@@ -1,0 +1,72 @@
+.panel {
+  display: flex;
+  max-height: calc(var(--spacing) * 48);
+  min-width: calc(var(--spacing) * 40);
+  flex-direction: column;
+  border-radius: var(--radius-lg);
+  border-style: solid;
+  border-width: 1px;
+  border-color: var(--color-border-subtle);
+  background-color: var(--color-bg-raised);
+  padding-block: calc(var(--spacing) * 2);
+  box-shadow: var(--shadow-md);
+
+  @container style(--writing: vertical) {
+    max-height: none;
+    min-width: 0;
+    max-width: calc(var(--spacing) * 48);
+    min-height: calc(var(--spacing) * 40);
+  }
+}
+
+.list {
+  display: flex;
+  min-height: 0;
+  min-width: 0;
+  flex-direction: column;
+  overflow-y: auto;
+
+  @container style(--writing: vertical) {
+    overflow-x: auto;
+    overflow-y: visible;
+  }
+}
+
+/* dropdown-menu の項目と同じく、線の色は高コントラストでだけ付ける */
+.item {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  padding-inline: calc(var(--spacing) * 3);
+  padding-block: calc(var(--spacing) * 2);
+  text-align: left;
+  outline-color: transparent;
+  outline-offset: -2px;
+  transition-property:
+    color, background-color, border-color, outline-color, text-decoration-color,
+    fill, stroke;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--easing-out);
+
+  &:focus-visible {
+    border-color: transparent;
+    background-color: var(--color-bg-subtle);
+    outline-style: solid;
+    outline-width: 2px;
+  }
+
+  @media (prefers-contrast: more) {
+    outline-color: var(--color-border-base);
+  }
+}
+
+@media (hover: hover) {
+  .item:hover {
+    background-color: var(--color-bg-subtle);
+  }
+}
+
+.check {
+  color: var(--color-fg-success);
+}

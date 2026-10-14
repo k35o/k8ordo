@@ -1,16 +1,18 @@
 'use client';
 
+import { clsx } from 'clsx';
 import { useEffect, useId, useMemo } from 'react';
 import type { FC, PropsWithChildren, Ref, ReactNode } from 'react';
 
 import { getMessages } from '../../../i18n/current';
-import { HIGH_CONTRAST_EDGE } from '../../_internal/high-contrast';
 import { IconButton } from '../../buttons/icon-button';
 import { Heading } from '../../data-display/heading';
 import { CloseIcon } from '../../icons';
 import { useModalDialogContext } from '../_internal/modal-dialog-context';
-import { cn } from './../../../helpers/cn';
 import { createSafeContext } from './../../../helpers/create-safe-context';
+
+import highContrast from '../../_internal/high-contrast.module.css';
+import styles from './dialog.module.css';
 
 const [DialogContext, useDialogContext] = createSafeContext<{
   rootId: string;
@@ -56,10 +58,7 @@ export const Root: FC<
     <section
       aria-describedby={describedBy}
       aria-labelledby={labelledBy}
-      className={cn(
-        'bg-bg-raised relative w-full rounded-lg shadow-md',
-        HIGH_CONTRAST_EDGE,
-      )}
+      className={clsx(styles.root, highContrast.edge)}
       id={id}
       ref={ref}
       role={resolvedRole}
@@ -77,11 +76,11 @@ export const Header: FC<{
   const messages = getMessages();
   const { rootId } = useDialogContext();
   return (
-    <div className="flex items-center justify-center p-4 pb-2">
+    <div className={styles.header}>
       <Heading id={`${rootId}-title`} level="h3">
         {title}
       </Heading>
-      <div className="absolute top-2 right-2">
+      <div className={styles.close}>
         <IconButton
           label={messages.close}
           onClick={(e) => {
@@ -104,7 +103,7 @@ export const Content: FC<PropsWithChildren> = ({ children }) => {
     // (キーボード操作は Modal の Escape ハンドラが担う)
     /* oxlint-disable eslint-plugin-jsx-a11y/click-events-have-key-events, eslint-plugin-jsx-a11y/no-static-element-interactions */
     <div
-      className="p-4"
+      className={styles.content}
       id={`${rootId}-content`}
       onClick={(e) => {
         e.stopPropagation();

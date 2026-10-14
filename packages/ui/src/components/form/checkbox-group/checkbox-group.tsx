@@ -1,5 +1,6 @@
 'use client';
 
+import { clsx } from 'clsx';
 import { createContext, use, useMemo } from 'react';
 import type {
   ChangeEvent,
@@ -9,7 +10,7 @@ import type {
   Ref,
 } from 'react';
 
-import { cn } from '../../../helpers/cn';
+import styles from './checkbox-group.module.css';
 
 type CheckboxGroupContextValue = {
   /** 制御モードの値。非制御では undefined で、各項目は defaultValue から始める */
@@ -100,7 +101,8 @@ const Root: FC<RootProps> = ({
       {...rest}
       aria-invalid={invalid}
       aria-labelledby={labelledbyId}
-      className={cn('flex flex-col gap-2', disabled && 'cursor-not-allowed')}
+      className={clsx(styles.root, disabled && styles.disabled)}
+
       ref={ref}
     >
       <CheckboxGroupContext value={contextValue}>

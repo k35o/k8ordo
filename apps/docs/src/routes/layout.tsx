@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { locales } from '../i18n';
 
 import '../styles/globals.css';
+import styles from '../styles/pages/layout.module.css';
 
 export default function Root({
   children,
@@ -35,7 +36,7 @@ export default function Root({
       </head>
       {/* Provider が hydrate 前に dark を付けるスクリプトを先頭に描くので、
           body の中で全部を包む */}
-      <body className="bg-page text-fg-base antialiased">
+      <body className={styles.body}>
         <ColorSchemeProvider>{children}</ColorSchemeProvider>
       </body>
     </html>

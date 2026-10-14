@@ -11,6 +11,8 @@ import { Switch } from '../components/form/switch';
 import { Separator } from '../components/layout/separator';
 import { Tabs } from '../components/navigation/tabs';
 
+import styles from './high-contrast.stories.module.css';
+
 // OS の設定を再現できるのは Vitest の専用プロジェクト（Playwright の
 // forcedColors / contrast）だけなので、ふだんの一覧とスナップショットからは外す
 const meta: Meta = {
@@ -67,9 +69,9 @@ const CARD_OPTIONS = [
 export const ForcedColors: Story = {
   tags: ['forced-colors'],
   render: () => (
-    <div className="flex flex-col items-start gap-6">
+    <div className={styles.parts}>
       <Card data-testid="card">
-        <p className="p-4">影だけで縁取るカード</p>
+        <p className={styles.cardBody}>影だけで縁取るカード</p>
       </Card>
       <Alert message="お知らせ" tone="info" />
       <Button>フォーカスを受けるボタン</Button>
@@ -102,7 +104,7 @@ export const ForcedColors: Story = {
       <Separator />
     </div>
   ),
-  play: async ({ canvas, canvasElement, userEvent }) => {
+  play: async ({ canvas, userEvent }) => {
     await expect(matchMedia('(forced-colors: active)').matches).toBe(true);
 
     // 境界線: 影と地の色は消えるので、線で縁取られている
@@ -124,7 +126,8 @@ export const ForcedColors: Story = {
 
     // 選択状態
     await expect(
-      isPainted(partOf(canvasElement.querySelector('.ao-tab-indicator'))),
+      // インジケータは tablist の最後の子
+      isPainted(partOf(canvas.getByRole('tablist').lastElementChild)),
     ).toBe(true);
 
     const on = canvas.getByRole('switch', { name: 'オンのスイッチ' });
@@ -162,29 +165,25 @@ export const ForcedColors: Story = {
 };
 
 const TEXT_TOKENS = [
-  'text-fg-base',
-  'text-fg-mute',
-  'text-fg-subtle',
-  'text-primary-fg',
-  'text-secondary-fg',
+  { token: 'text-fg-base', className: styles.fgBase },
+  { token: 'text-fg-mute', className: styles.fgMute },
+  { token: 'text-fg-subtle', className: styles.fgSubtle },
+  { token: 'text-primary-fg', className: styles.primaryFg },
+  { token: 'text-secondary-fg', className: styles.secondaryFg },
 ] as const;
 
 const Samples = () => (
-  <div className="bg-bg-base flex flex-col gap-2 p-4">
-    {TEXT_TOKENS.map((token) => (
-      <p className={token} key={token}>
+  <div className={styles.samples}>
+    {TEXT_TOKENS.map(({ token, className }) => (
+      <p className={className} key={token}>
         {token}
       </p>
     ))}
-    <p className="bg-bg-subtle text-fg-subtle">text-fg-subtle on bg-subtle</p>
-    <p className="bg-bg-info text-fg-info">text-fg-info on bg-info</p>
-    <p className="bg-bg-success text-fg-success">
-      text-fg-success on bg-success
-    </p>
-    <p className="bg-bg-warning text-fg-warning">
-      text-fg-warning on bg-warning
-    </p>
-    <p className="bg-bg-error text-fg-error">text-fg-error on bg-error</p>
+    <p className={styles.subtle}>text-fg-subtle on bg-subtle</p>
+    <p className={styles.info}>text-fg-info on bg-info</p>
+    <p className={styles.success}>text-fg-success on bg-success</p>
+    <p className={styles.warning}>text-fg-warning on bg-warning</p>
+    <p className={styles.error}>text-fg-error on bg-error</p>
   </div>
 );
 
@@ -197,13 +196,13 @@ export const ContrastMore: Story = {
     },
   },
   render: () => (
-    <div className="flex flex-col gap-6">
+    <div className={styles.column}>
       <Samples />
       <div className="dark">
         <Samples />
       </div>
       <Card data-testid="card">
-        <p className="p-4">影だけで縁取るカード</p>
+        <p className={styles.cardBody}>影だけで縁取るカード</p>
       </Card>
     </div>
   ),

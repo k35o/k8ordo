@@ -77,6 +77,8 @@ import { useRef, useState } from 'react';
 
 import type { ComponentNavName } from '../data/components-nav';
 
+import styles from './component-previews.module.css';
+
 const selectOptions = [
   { label: 'Apple', value: 'apple' },
   { label: 'Banana', value: 'banana' },
@@ -166,7 +168,7 @@ export const componentPreviews = {
     </Anchor>
   ),
   Tabs: (
-    <div className="w-full">
+    <div className={styles.tabs}>
       <Tabs.Root ids={['overview', 'settings']}>
         <Tabs.List label="Navigation">
           <Tabs.Tab id="overview">Overview</Tabs.Tab>
@@ -196,7 +198,7 @@ export const componentPreviews = {
   ),
   Pagination: <PaginationPreview />,
   Stepper: (
-    <div className="w-full">
+    <div className={styles.stepper}>
       <Stepper
         aria-label="Sign-up"
         defaultValue={1}
@@ -205,7 +207,7 @@ export const componentPreviews = {
     </div>
   ),
   SideNav: (
-    <div className="w-40">
+    <div className={styles.sideNav}>
       <SideNav.Root label="SideNav">
         <SideNav.Group title="Guide">
           <SideNav.Link current href="/">
@@ -217,7 +219,7 @@ export const componentPreviews = {
     </div>
   ),
   TableOfContents: (
-    <div className="w-40">
+    <div className={styles.tableOfContents}>
       <TableOfContents
         items={[
           { id: 'preview-install', label: 'Install' },
@@ -230,17 +232,17 @@ export const componentPreviews = {
   Textarea: <Textarea placeholder="Enter text" rows={3} />,
   NumberField: <NumberField placeholder="0" />,
   DateField: (
-    <div className="w-56">
+    <div className={styles.dateField}>
       <DateField aria-label="Date" defaultValue="2026-09-30" />
     </div>
   ),
   DatePicker: (
-    <div className="w-56">
+    <div className={styles.datePicker}>
       <DatePicker aria-label="Check-in" defaultValue="2026-09-30" />
     </div>
   ),
   Calendar: (
-    <div className="zoom-[0.5]">
+    <div className={styles.calendar}>
       <Calendar defaultValue="2026-09-30" />
     </div>
   ),
@@ -253,8 +255,8 @@ export const componentPreviews = {
   ),
   Checkbox: <Checkbox defaultChecked label="Checkbox" />,
   CheckboxCard: (
-    <div className="w-full max-w-xs">
-      <p className="sr-only" id="preview-checkbox-card">
+    <div className={styles.checkboxCard}>
+      <p className={styles.srOnly} id="preview-checkbox-card">
         Features
       </p>
       <CheckboxCard
@@ -265,8 +267,8 @@ export const componentPreviews = {
     </div>
   ),
   CheckboxGroup: (
-    <div className="w-full max-w-xs">
-      <p className="text-fg-base mb-2 font-medium" id="preview-checkbox-group">
+    <div className={styles.checkboxGroup}>
+      <p className={styles.groupLabel} id="preview-checkbox-group">
         Frameworks
       </p>
       <CheckboxGroup.Root
@@ -282,8 +284,8 @@ export const componentPreviews = {
   Switch: <Switch defaultChecked label="Switch" />,
   PasswordInput: <PasswordInputPreview />,
   Radio: (
-    <div className="w-full max-w-xs">
-      <p className="text-fg-base mb-2 font-medium" id="preview-radio">
+    <div className={styles.radio}>
+      <p className={styles.groupLabel} id="preview-radio">
         Framework
       </p>
       <Radio
@@ -294,8 +296,8 @@ export const componentPreviews = {
     </div>
   ),
   RadioCard: (
-    <div className="w-full max-w-xs">
-      <p className="sr-only" id="preview-radio-card">
+    <div className={styles.radioCard}>
+      <p className={styles.srOnly} id="preview-radio-card">
         Plan
       </p>
       <RadioCard
@@ -306,7 +308,7 @@ export const componentPreviews = {
     </div>
   ),
   Autocomplete: (
-    <div className="w-full max-w-xs">
+    <div className={styles.autocomplete}>
       <Autocomplete
         aria-describedby={undefined}
         defaultValue={[]}
@@ -316,12 +318,12 @@ export const componentPreviews = {
     </div>
   ),
   Slider: (
-    <div className="w-40">
+    <div className={styles.slider}>
       <Slider defaultValue={60} />
     </div>
   ),
   RangeSlider: (
-    <div className="w-40">
+    <div className={styles.rangeSlider}>
       <RangeSlider aria-label="Price" defaultValue={[20, 70]} />
     </div>
   ),
@@ -337,7 +339,7 @@ export const componentPreviews = {
     </FileField.Root>
   ),
   FormControl: (
-    <div className="w-full max-w-xs">
+    <div className={styles.formControl}>
       <FormControl
         label="Name"
         renderInput={(props) => (
@@ -356,7 +358,7 @@ export const componentPreviews = {
     </Form>
   ),
   Accordion: (
-    <div className="w-full">
+    <div className={styles.accordion}>
       <Accordion.Root>
         <Accordion.Item>
           <h3>
@@ -371,31 +373,29 @@ export const componentPreviews = {
   ),
   Avatar: <Avatar name="k8ordo UI" />,
   Badge: (
-    <div className="flex gap-2">
+    <div className={styles.badges}>
       <Badge label="New" tone="info" />
       <Badge label="Stable" tone="success" />
     </div>
   ),
   Card: (
     <Card>
-      <div className="p-6">Card content</div>
+      <div className={styles.cardContent}>Card content</div>
     </Card>
   ),
   Code: <Code>console.log()</Code>,
   Kbd: (
-    <span className="inline-flex items-center gap-1">
+    <span className={styles.kbd}>
       <Kbd label="Command">⌘</Kbd>
       <Kbd>K</Kbd>
     </span>
   ),
   Carousel: (
-    <div className="w-full max-w-60">
+    <div className={styles.carousel}>
       <Carousel.Root label="Carousel" slideSize="lg">
         {['1', '2', '3'].map((slide) => (
           <Carousel.Slide key={slide}>
-            <div className="bg-bg-base flex h-12 items-center justify-center rounded-lg shadow-sm">
-              {slide}
-            </div>
+            <div className={styles.slide}>{slide}</div>
           </Carousel.Slide>
         ))}
       </Carousel.Root>
@@ -418,7 +418,7 @@ export const componentPreviews = {
     </Table.Root>
   ),
   DataTable: (
-    <div className="w-full">
+    <div className={styles.dataTable}>
       <DataTable
         columns={[
           {
@@ -442,7 +442,7 @@ export const componentPreviews = {
     </div>
   ),
   Tree: (
-    <div className="w-44">
+    <div className={styles.tree}>
       <Tree
         defaultExpandedIds={['src']}
         defaultSelectedId="index"
@@ -460,7 +460,7 @@ export const componentPreviews = {
   ),
   Heading: <Heading level="h2">Section Title</Heading>,
   Prose: (
-    <div className="w-full max-w-56">
+    <div className={styles.prose}>
       <Prose>
         <h3>Heading</h3>
         <p>
@@ -479,19 +479,19 @@ export const componentPreviews = {
     <EmptyState icon={<TableIcon size="md" />} title="Nothing here yet" />
   ),
   Skeleton: (
-    <div className="w-40">
+    <div className={styles.skeleton}>
       <Skeleton />
     </div>
   ),
   Spinner: <Spinner />,
   Toast: <Button>Show Toast</Button>,
   Progress: (
-    <div className="w-40">
+    <div className={styles.progress}>
       <Progress max={100} value={60} />
     </div>
   ),
   Dialog: (
-    <div className="w-full max-w-xs">
+    <div className={styles.dialog}>
       <Dialog.Root>
         <Dialog.Header onClose={() => undefined} title="Dialog Title" />
         <Dialog.Content>Dialog content here</Dialog.Content>
@@ -515,10 +515,7 @@ export const componentPreviews = {
     <ContextMenu.Root>
       <ContextMenu.Trigger
         renderItem={(props) => (
-          <div
-            {...props}
-            className="border-border-base text-fg-mute grid h-20 w-40 place-items-center rounded-lg border border-dashed text-sm"
-          >
+          <div {...props} className={styles.contextTrigger}>
             report.pdf
           </div>
         )}
@@ -545,7 +542,7 @@ export const componentPreviews = {
     </Tooltip.Root>
   ),
   ListBox: (
-    <div className="w-56">
+    <div className={styles.listBox}>
       <ListBox.Root
         onChange={() => undefined}
         options={listBoxOptions}
@@ -556,12 +553,12 @@ export const componentPreviews = {
     </div>
   ),
   ColorPicker: (
-    <div className="w-56">
+    <div className={styles.colorPicker}>
       <ColorPicker aria-label="Accent color" defaultValue="#0d9488" />
     </div>
   ),
   Combobox: (
-    <div className="w-56">
+    <div className={styles.combobox}>
       <Combobox
         aria-label="Prefecture"
         defaultValue="kyoto"
@@ -573,43 +570,43 @@ export const componentPreviews = {
     </div>
   ),
   CommandPalette: (
-    <span className="flex gap-1">
+    <span className={styles.commandPalette}>
       <Kbd label="Command">⌘</Kbd>
       <Kbd>K</Kbd>
     </span>
   ),
   Stack: (
-    <div className="w-40">
+    <div className={styles.stack}>
       <Stack gap="sm">
         {['1', '2', '3'].map((item) => (
-          <div className="bg-bg-base h-6 rounded-md shadow-sm" key={item} />
+          <div className={styles.stackItem} key={item} />
         ))}
       </Stack>
     </div>
   ),
   Grid: (
-    <div className="w-40">
+    <div className={styles.grid}>
       <Grid cols={3} gap="sm">
         {['1', '2', '3', '4', '5', '6'].map((item) => (
-          <div className="bg-bg-base h-8 rounded-md shadow-sm" key={item} />
+          <div className={styles.gridItem} key={item} />
         ))}
       </Grid>
     </div>
   ),
   Separator: (
-    <div className="w-40">
+    <div className={styles.separator}>
       <Separator color="mute" />
     </div>
   ),
   ResizablePanels: (
-    <div className="border-border-base h-20 w-40 overflow-hidden rounded-md border">
+    <div className={styles.resizablePanels}>
       <ResizablePanels.Root defaultValue={40}>
         <ResizablePanels.Panel>
-          <div className="bg-bg-subtle size-full" />
+          <div className={styles.filledPanel} />
         </ResizablePanels.Panel>
         <ResizablePanels.Handle />
         <ResizablePanels.Panel>
-          <div className="size-full" />
+          <div className={styles.panel} />
         </ResizablePanels.Panel>
       </ResizablePanels.Root>
     </div>
@@ -617,7 +614,7 @@ export const componentPreviews = {
   InView: <InViewPreview />,
   Resize: <ResizePreview />,
   Icons: (
-    <div className="text-fg-base flex gap-3">
+    <div className={styles.icons}>
       <SparklesIcon size="lg" />
       <PaletteIcon size="lg" />
       <AtomIcon size="lg" />
@@ -628,7 +625,7 @@ export const componentPreviews = {
 function PaginationPreview(): ReactNode {
   const [page, setPage] = useState(1);
   return (
-    <div className="-mx-3 [&_button]:whitespace-nowrap">
+    <div className={styles.pagination}>
       <Pagination
         currentPage={page}
         nextLabel="Next"
@@ -660,16 +657,13 @@ function ResizePreview(): ReactNode {
   const box = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState<number | null>(null);
   return (
-    <div className="w-full">
+    <div className={styles.resize}>
       <Resize
         onChange={() => {
           setWidth(box.current?.offsetWidth ?? null);
         }}
       >
-        <div
-          className="bg-bg-base text-fg-mute rounded-lg p-4 text-center text-sm tabular-nums shadow-sm"
-          ref={box}
-        >
+        <div className={styles.resizeBox} ref={box}>
           {width === null ? '—' : `${String(width)}px wide`}
         </div>
       </Resize>

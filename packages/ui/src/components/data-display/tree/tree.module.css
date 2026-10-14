@@ -1,0 +1,82 @@
+.root {
+  display: flex;
+  flex-direction: column;
+}
+
+/* フォーカスは項目（li）が受けるが、li は子の枝まで含むので、輪は見出しの行に描く */
+.item:focus-visible {
+  outline-style: none;
+}
+
+.item:focus-visible > .row {
+  outline-style: none;
+  box-shadow: var(--shadow-ring-info);
+
+  @media (forced-colors: active) {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+}
+
+.row {
+  display: flex;
+  cursor: pointer;
+  align-items: center;
+  gap: calc(var(--spacing) * 1.5);
+  border-radius: var(--radius-md);
+  padding-block: calc(var(--spacing) * 1.5);
+  padding-inline-end: calc(var(--spacing) * 3);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+  transition-property:
+    color, background-color, border-color, outline-color, text-decoration-color,
+    fill, stroke;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--easing-out);
+}
+
+.selected {
+  background-color: var(--color-primary-bg-subtle);
+  color: var(--color-fg-base);
+  font-weight: var(--font-weight-medium);
+
+  @media (forced-colors: active) {
+    background-color: var(--color-system-highlight);
+    color: var(--color-system-highlight-text);
+  }
+}
+
+.unselected {
+  color: var(--color-fg-mute);
+}
+
+@media (hover: hover) {
+  .unselected:hover {
+    background-color: var(--color-bg-mute);
+    color: var(--color-fg-base);
+  }
+}
+
+.chevron {
+  display: inline-flex;
+  width: calc(var(--spacing) * 4);
+  height: calc(var(--spacing) * 4);
+  flex-shrink: 0;
+  transition-property: transform, translate, scale, rotate;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--easing-in-out);
+}
+
+/* 子のない項目も矢印の幅だけ空けて、ラベルの頭を揃える */
+.leaf {
+  visibility: hidden;
+}
+
+.expanded {
+  rotate: 90deg;
+}
+
+.icon {
+  display: inline-flex;
+  flex-shrink: 0;
+}

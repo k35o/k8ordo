@@ -5,12 +5,14 @@ import { expect, fn, waitFor } from 'storybook/test';
 import { inEnglish } from '../../../../.storybook/locales';
 import { DatePicker } from './date-picker';
 
+import styles from './date-picker.stories.module.css';
+
 const meta: Meta<typeof DatePicker> = {
   title: 'components/form/date-picker',
   component: DatePicker,
   decorators: [
     (Story) => (
-      <div className="w-80 p-6">
+      <div className={styles.frame}>
         <Story />
       </div>
     ),
@@ -168,7 +170,7 @@ export const Invalid: Story = {
 const ControlledRender = () => {
   const [value, setValue] = useState('');
   return (
-    <div className="flex flex-col gap-4">
+    <div className={styles.column}>
       <DatePicker aria-label="開催日" onChange={setValue} value={value} />
       <p data-testid="value">{value === '' ? '未入力' : value}</p>
     </div>

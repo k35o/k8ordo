@@ -1,0 +1,35 @@
+.slide {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: var(--spacing);
+  height: calc(var(--spacing) * 48);
+  padding: calc(var(--spacing) * 6);
+  border-radius: var(--radius-xl);
+  background-color: var(--color-bg-subtle);
+}
+
+.season {
+  font-size: var(--font-size-2xl);
+  line-height: var(--line-height-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-fg-base);
+}
+
+.note {
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+  color: var(--color-fg-mute);
+}
+
+.frame {
+  max-width: 28rem;
+}
+
+.wideFrame {
+  max-width: 42rem;
+}
+
+.verticalFrame {
+  height: calc(var(--spacing) * 96);
+}

@@ -1,6 +1,6 @@
 import { Anchor, Badge, Heading, Separator, Stack } from '@k8ordo/ui';
-import { CodeBlock } from '@k8ordo/ui/code-block';
 
+import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';
 import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
@@ -9,16 +9,19 @@ import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
 import * as m from '../../../../../messages';
 
+import page from '../../../../../styles/page.module.css';
+import styles from '../../../../../styles/pages/ui/components/stack.module.css';
+
 const sampleItems = ['Active', 'Pending', 'Error'] as const;
 const SAMPLE_TONE = ['success', 'warning', 'error'] as const;
 
 export default function StackPage() {
   return (
-    <div className="flex flex-col gap-8 py-12">
+    <div className={page.page}>
       <PageTitle name="Stack" />
-      <div className="flex flex-col gap-4">
+      <div className={page.stack}>
         <Heading level="h1">Stack</Heading>
-        <p className="text-fg-mute text-lg">
+        <p className={page.lead}>
           <Rich>{m.components.stack.description()}</Rich>
         </p>
         <div>
@@ -32,7 +35,7 @@ export default function StackPage() {
       </div>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
@@ -40,8 +43,8 @@ export default function StackPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-8">
-        <div className="flex flex-col gap-4">
+      <section className={page.stackLg}>
+        <div className={page.stack}>
           <Heading level="h2">
             <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
@@ -60,7 +63,7 @@ export default function StackPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.stack.directionTitle()}</Rich>
           </Heading>
@@ -83,7 +86,7 @@ export default function StackPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.stack.gapTitle()}</Rich>
           </Heading>
@@ -101,12 +104,12 @@ export default function StackPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.stack.alignTitle()}</Rich>
           </Heading>
           <ComponentPreview code='<Stack direction="row" align="center" justify="between">…</Stack>'>
-            <div className="bg-bg-mute rounded-lg p-3">
+            <div className={styles.surface}>
               <Stack align="center" direction="row" gap="md" justify="between">
                 <Badge label="L" tone="info" />
                 <Badge label="C" tone="success" />
@@ -118,7 +121,7 @@ export default function StackPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>

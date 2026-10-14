@@ -1,3 +1,4 @@
+import { clsx } from 'clsx';
 import { useId } from 'react';
 import type { FC, ReactNode } from 'react';
 
@@ -7,6 +8,8 @@ import { AlertIcon, CheckIcon } from '../../icons';
 import { Collapsible } from '../_internal/collapsible';
 import type { ToolApproval, ToolApprovalResponse, ToolState } from '../types';
 import { ApprovalBar } from './approval-bar';
+
+import styles from './tool-invocation.module.css';
 
 type Props = {
   name: string;
@@ -28,28 +31,28 @@ type Props = {
 const stateIcon = (state: ToolState, awaitsUser: boolean): ReactNode => {
   if (awaitsUser) {
     return (
-      <span className="text-fg-info">
+      <span className={styles.info}>
         <AlertIcon size="sm" status="info" />
       </span>
     );
   }
   if (state === 'output-available') {
     return (
-      <span className="text-fg-success">
+      <span className={styles.success}>
         <CheckIcon size="sm" />
       </span>
     );
   }
   if (state === 'output-error') {
     return (
-      <span className="text-fg-error">
+      <span className={styles.error}>
         <AlertIcon size="sm" status="error" />
       </span>
     );
   }
   if (state === 'output-denied') {
     return (
-      <span className="text-fg-warning">
+      <span className={styles.warning}>
         <AlertIcon size="sm" status="warning" />
       </span>
     );
@@ -94,7 +97,7 @@ export const ToolInvocation: FC<Props> = ({
       icon={stateIcon(state, pendingApproval !== undefined)}
       isOpen={isOpen}
       label={
-        <span className="text-fg-base font-medium" id={nameId}>
+        <span className={styles.name} id={nameId}>
           {name}
         </span>
       }
@@ -111,34 +114,26 @@ export const ToolInvocation: FC<Props> = ({
         )
       }
     >
-      <div className="flex flex-col gap-3">
+      <div className={styles.body}>
         {input !== undefined && (
           <div>
-            <p className="text-fg-mute mb-1 text-xs font-medium">
-              {messages.toolInput}
-            </p>
-            <pre className="bg-bg-mute text-fg-base overflow-x-auto rounded-lg p-2 text-xs">
-              {stringify(input)}
-            </pre>
+            <p className={styles.caption}>{messages.toolInput}</p>
+            <pre className={styles.code}>{stringify(input)}</pre>
           </div>
         )}
         {state === 'output-error' ? (
-          <p className="text-fg-error text-sm">
+          <p className={clsx(styles.message, styles.error)}>
             {errorText ?? messages.toolError}
           </p>
         ) : state === 'output-denied' ? (
-          <p className="text-fg-warning text-sm">
+          <p className={clsx(styles.message, styles.warning)}>
             {approval?.reason ?? messages.toolDenied}
           </p>
         ) : output === undefined ? null : (
           <div>
-            <p className="text-fg-mute mb-1 text-xs font-medium">
-              {messages.toolOutput}
-            </p>
+            <p className={styles.caption}>{messages.toolOutput}</p>
             {typeof output === 'string' ? (
-              <pre className="bg-bg-mute text-fg-base overflow-x-auto rounded-lg p-2 text-xs">
-                {output}
-              </pre>
+              <pre className={styles.code}>{output}</pre>
             ) : (
               output
             )}

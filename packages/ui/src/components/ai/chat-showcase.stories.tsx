@@ -15,6 +15,8 @@ import { Suggestion } from './suggestion';
 import { ToolInvocation } from './tool-invocation';
 import type { ToolState } from './types';
 
+import styles from './chat-showcase.stories.module.css';
+
 const meta: Meta = {
   title: 'components/ai/chat',
   parameters: { layout: 'fullscreen' },
@@ -88,8 +90,8 @@ const ChatDemo: FC = () => {
   };
 
   return (
-    <div className="bg-bg-subtle flex h-svh justify-center p-4 sm:p-8">
-      <div className="border-border-base bg-bg-base flex size-full max-w-2xl flex-col gap-3 rounded-2xl border p-3 shadow-md">
+    <div className={styles.page}>
+      <div className={styles.window}>
         <Conversation.Root>
           <Conversation.Messages>
             <AssistantRow>

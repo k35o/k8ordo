@@ -1,0 +1,88 @@
+.root {
+  display: flex;
+  cursor: pointer;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 2);
+}
+
+.disabled {
+  cursor: not-allowed;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--spacing) * 2);
+  text-align: left;
+  cursor: pointer;
+}
+
+.optionDisabled {
+  cursor: not-allowed;
+}
+
+.circle {
+  display: inline-flex;
+  width: calc(var(--spacing) * 5);
+  height: calc(var(--spacing) * 5);
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  border-width: 2px;
+  border-color: var(--color-border-mute);
+  transition-property:
+    color, background-color, border-color, outline-color, text-decoration-color,
+    fill, stroke;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--easing-out);
+}
+
+.circleEnabled {
+  background-color: var(--color-bg-base);
+}
+
+.circleDisabled {
+  background-color: var(--color-bg-mute);
+}
+
+/* 非制御のとき、form の reset は change を飛ばさずに checked を戻すので、
+   見た目は state ではなく input の :checked から引く */
+.input:checked ~ .circleEnabled {
+  border-color: var(--color-border-base);
+  background-color: var(--color-primary-bg);
+}
+
+.invalid,
+.input:checked ~ .invalid {
+  border-color: var(--color-border-error);
+}
+
+.input:focus-visible ~ .circle {
+  border-color: transparent;
+  outline-style: none;
+  box-shadow: var(--shadow-ring-info);
+
+  @media (forced-colors: active) {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+}
+
+.dot {
+  width: calc(var(--spacing) * 2);
+  height: calc(var(--spacing) * 2);
+  border-radius: var(--radius-full);
+  background-color: var(--color-primary-border);
+  opacity: 0%;
+  transition-property: opacity;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--easing-in-out);
+
+  @media (forced-colors: active) {
+    background-color: var(--color-system-canvas-text);
+  }
+}
+
+.input:checked ~ .circle > .dot {
+  opacity: 100%;
+}

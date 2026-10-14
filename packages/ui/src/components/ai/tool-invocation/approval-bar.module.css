@@ -1,0 +1,20 @@
+.root {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(var(--spacing) * 2);
+}
+
+.request {
+  min-width: 0;
+  flex: 1;
+  color: var(--color-fg-base);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+}
+
+.buttons {
+  display: flex;
+  flex-shrink: 0;
+  gap: calc(var(--spacing) * 2);
+}

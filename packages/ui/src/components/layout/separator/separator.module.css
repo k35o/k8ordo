@@ -1,0 +1,33 @@
+.root {
+  display: block;
+}
+
+.horizontal {
+  block-size: 1px;
+  inline-size: 100%;
+}
+
+.vertical {
+  block-size: 100%;
+  inline-size: 1px;
+}
+
+.base {
+  background-color: var(--color-border-base);
+}
+
+.mute {
+  background-color: var(--color-border-mute);
+}
+
+.subtle {
+  background-color: var(--color-border-subtle);
+}
+
+/* 強制カラーでは地の色が背景に揃えられて線が消えるので、文字の色で引く。
+   色の指定より後に書いて勝たせる */
+@media (forced-colors: active) {
+  .root {
+    background-color: var(--color-system-canvas-text);
+  }
+}

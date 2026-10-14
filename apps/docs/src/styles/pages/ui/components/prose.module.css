@@ -1,0 +1,7 @@
+.frame {
+  width: 100%;
+}
+
+.vertical {
+  height: calc(var(--spacing) * 56);
+}

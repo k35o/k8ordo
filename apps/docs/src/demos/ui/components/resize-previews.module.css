@@ -1,0 +1,23 @@
+.root {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: calc(var(--spacing) * 3);
+}
+
+.narrow,
+.wide {
+  padding: calc(var(--spacing) * 4);
+  white-space: nowrap;
+  background-color: var(--color-primary-bg-subtle);
+  border-radius: var(--radius-lg);
+}
+
+.narrow {
+  width: 50%;
+}
+
+.wide {
+  width: 100%;
+}

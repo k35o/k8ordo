@@ -1,6 +1,5 @@
-import { CodeBlock } from '@k8ordo/ui/code-block';
-
 import { Note } from '../../../../components/callout';
+import { CodeBlock } from '../../../../components/code-block';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { InstallCommand, Requirements } from '../../../../components/install';
 import { LocaleAnchor } from '../../../../components/locale-anchor';

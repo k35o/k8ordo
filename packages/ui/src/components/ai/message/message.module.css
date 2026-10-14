@@ -1,0 +1,66 @@
+.root {
+  display: flex;
+  width: 100%;
+  align-items: flex-start;
+  gap: calc(var(--spacing) * 3);
+}
+
+.rootUser {
+  flex-direction: row-reverse;
+}
+
+.rootAssistant {
+  flex-direction: row;
+}
+
+.body {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 2);
+}
+
+.bodyUser {
+  align-items: flex-end;
+}
+
+.content {
+  min-width: 0;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+  color: var(--color-fg-base);
+}
+
+.contentUser {
+  width: fit-content;
+  max-width: 80%;
+  border-radius: var(--radius-2xl);
+  background-color: var(--color-bg-subtle);
+  padding-inline: calc(var(--spacing) * 4);
+  padding-block: calc(var(--spacing) * 2.5);
+}
+
+.contentAssistant {
+  line-height: var(--line-height-relaxed);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--spacing) * 0.5);
+  color: var(--color-fg-mute);
+}
+
+/* ボタンの内側の余白ぶん外へ出し、アイコンの縁を本文の縁に揃える */
+.actionsUser {
+  margin-inline-end: calc(var(--spacing) * -1);
+}
+
+.actionsAssistant {
+  margin-inline-start: calc(var(--spacing) * -1);
+}
+
+.selected {
+  color: var(--color-primary-fg);
+}

@@ -1,8 +1,11 @@
+import { clsx } from 'clsx';
 import { Fragment } from 'react';
 import type { FC, HTMLAttributes, ReactNode } from 'react';
 
 import { getMessages } from '../../../i18n/current';
 import { findAllColors } from './find-all-colors';
+
+import styles from './code.module.css';
 
 type Props = {
   children: string;
@@ -14,7 +17,7 @@ export const Code: FC<Props> = ({ children, ...rest }) => {
 
   if (colors.length === 0) {
     return (
-      <code {...rest} className="bg-bg-mute m-0.5 rounded-md px-1.5 sm:py-0.5">
+      <code {...rest} className={styles.root}>
         {children}
       </code>
     );
@@ -32,7 +35,7 @@ export const Code: FC<Props> = ({ children, ...rest }) => {
       <Fragment key={`color-${String(index)}`}>
         <span
           aria-label={`${messages.color}: ${colorInfo.color}`}
-          className="border-border-base inline-block size-3 shrink-0 rounded-sm border forced-color-adjust-none"
+          className={styles.swatch}
           role="img"
           style={{ backgroundColor: colorInfo.color }}
         />
@@ -48,10 +51,7 @@ export const Code: FC<Props> = ({ children, ...rest }) => {
   }
 
   return (
-    <code
-      {...rest}
-      className="bg-bg-mute vertical:inline vertical:gap-0 m-0.5 inline-flex items-center gap-1 rounded-md px-1.5 sm:py-0.5"
-    >
+    <code {...rest} className={clsx(styles.root, styles.withColors)}>
       {parts}
     </code>
   );

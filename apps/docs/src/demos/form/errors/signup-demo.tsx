@@ -7,6 +7,8 @@ import { useState } from 'react';
 
 import * as m from '../../../messages';
 
+import styles from './signup-demo.module.css';
+
 type Props = {
   /** ページの Server Component が `formFields(signupDefinition)` で導いたもの。 */
   fields: FormFields<'handle' | 'password' | 'confirm', never>;
@@ -24,7 +26,7 @@ export function SignupDemo({ fields }: Props) {
   return (
     <form
       {...form.props}
-      className="flex flex-col gap-4"
+      className={styles.form}
       onSubmit={(event) => {
         form.props.onSubmit(event);
         if (event.defaultPrevented) {
@@ -70,11 +72,11 @@ export function SignupDemo({ fields }: Props) {
         )}
         required={confirm.required}
       />
-      <div className="flex flex-wrap items-center gap-4">
+      <div className={styles.actions}>
         <Button type="submit" variant="solid">
           {m.formErrors.demoSubmit()}
         </Button>
-        <p aria-live="polite" className="text-fg-success text-sm">
+        <p aria-live="polite" className={styles.sent}>
           {sent ? m.formErrors.demoSent() : ''}
         </p>
       </div>

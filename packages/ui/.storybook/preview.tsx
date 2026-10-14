@@ -1,12 +1,13 @@
 import { defineLocales } from '@k8ordo/i18n';
 import type { Preview } from '@storybook/react-vite';
-import { memo, useEffect, useState } from 'react';
+import { memo, useState } from 'react';
 import type { FC } from 'react';
 
 import { UIProvider } from '../src/components/providers';
 import { definitions } from './locales';
 
 import '../src/styles/index.css';
+import './preview.css';
 
 // Storybook は日本語のアプリとして描く（デザインは日本語の組版に合わせてある）。
 // ロケール集合を定義しないと、組み込みの文言は英語になる。
@@ -77,24 +78,11 @@ const preview: Preview = {
         parameters.writingMode ??
         globals.writingMode ??
         ('horizontal' as 'horizontal' | 'vertical');
-      useEffect(() => {
-        document.body.classList.add(
-          'text-fg-base',
-          'tracking-none',
-          'bg-bg-base',
-          'font-medium',
-          'antialiased',
-        );
-      }, []);
       return (
         <UIProvider>
           <ApplayThemeByStorybook theme={theme} />
           <div
-            className={
-              writingMode === 'vertical'
-                ? 'writing-v min-h-svh p-6'
-                : 'min-h-svh p-6'
-            }
+            className={writingMode === 'vertical' ? 'writing-v story' : 'story'}
           >
             <Story />
           </div>

@@ -1,15 +1,17 @@
 import type { Message } from '@k8ordo/i18n';
 import { GitHubIcon, Heading } from '@k8ordo/ui';
-import { CodeBlock } from '@k8ordo/ui/code-block';
 import type { ReactNode } from 'react';
 
 import { PACKAGES } from '../data/packages';
 import { href } from '../links';
 import * as m from '../messages';
+import { CodeBlock } from './code-block';
 import { InstallTabs } from './install-tabs';
 import { LinkButton } from './link-button';
 import { PageTitle } from './page-title';
 import { Rich } from './rich';
+
+import styles from './landing.module.css';
 
 type LandingHeroProps = {
   /** The published name, e.g. `@k8ordo/form`. */
@@ -37,11 +39,11 @@ export function LandingHero({
   const [start] = pkg.groups[0].sections;
 
   return (
-    <section className="grid items-center gap-12 pt-16 pb-20 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:pt-24">
+    <section className={styles.hero}>
       <PageTitle name={name} />
-      <div className="flex flex-col gap-6">
+      <div className={styles.intro}>
         <Heading level="h1">{name}</Heading>
-        <p className="text-fg-base break-phrase text-xl leading-relaxed">
+        <p className={styles.tagline}>
           <Rich>{tagline()}</Rich>
         </p>
         <InstallTabs
@@ -49,7 +51,7 @@ export function LandingHero({
           pnpm={<CodeBlock code={`pnpm add ${install}`} lang="bash" />}
           yarn={<CodeBlock code={`yarn add ${install}`} lang="bash" />}
         />
-        <div className="flex flex-wrap items-center gap-4">
+        <div className={styles.links}>
           <LinkButton href={href(start.path)} variant="solid">
             {start.label()}
           </LinkButton>
@@ -70,7 +72,7 @@ export function LandingHero({
           </LinkButton>
         </div>
       </div>
-      <div className="flex min-w-0 flex-col gap-3">{code}</div>
+      <div className={styles.code}>{code}</div>
     </section>
   );
 }
@@ -86,18 +88,18 @@ type LandingClaimProps = {
 /** One thing the package promises: the claim, a few sentences, and the proof beside them. */
 export function LandingClaim({ title, body, children }: LandingClaimProps) {
   return (
-    <section className="grid gap-8 py-14 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:gap-12">
-      <div className="flex flex-col gap-4">
+    <section className={styles.claim}>
+      <div className={styles.claimText}>
         <Heading level="h2">
           <Rich>{title()}</Rich>
         </Heading>
         {body.map((sentence) => (
-          <p className="text-fg-base leading-loose" key={sentence()}>
+          <p className={styles.sentence} key={sentence()}>
             <Rich>{sentence()}</Rich>
           </p>
         ))}
       </div>
-      <div className="min-w-0">{children}</div>
+      <div className={styles.proof}>{children}</div>
     </section>
   );
 }

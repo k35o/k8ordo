@@ -1,0 +1,123 @@
+/*
+ * 入場は @starting-style からの transition で表現する。退場のアニメーションは
+ * 持たない。閉じた瞬間に top layer に留めるには overlay の transition が要り、
+ * それが Baseline に無いため。scale / translate は transform ではなく個別
+ * プロパティを使う（Popover 同様）。
+ */
+.root {
+  z-index: var(--z-index-modal);
+  background-color: var(--color-bg-raised);
+  color: var(--color-fg-base);
+  box-shadow: var(--shadow-md);
+  opacity: 0;
+  transition-property: opacity, scale, translate;
+  transition-duration: var(--duration-moderate);
+  transition-timing-function: var(--easing-in-out);
+
+  &[open] {
+    opacity: 1;
+  }
+
+  &::backdrop {
+    background-color: var(--color-back-drop);
+    opacity: 0;
+    transition-property: opacity;
+    transition-duration: var(--duration-moderate);
+    transition-timing-function: var(--easing-in-out);
+  }
+
+  &[open]::backdrop {
+    opacity: 1;
+  }
+}
+
+@starting-style {
+  .root[open],
+  .root[open]::backdrop {
+    opacity: 0;
+  }
+}
+
+.center {
+  margin: auto;
+  max-height: calc(var(--spacing) * 128);
+  width: calc(5 / 6 * 100%);
+  max-width: 42rem;
+  border-radius: var(--radius-lg);
+  scale: 0.9;
+
+  &[open] {
+    scale: 1;
+  }
+
+  @container style(--writing: vertical) {
+    height: calc(5 / 6 * 100%);
+    max-height: calc(var(--spacing) * 168);
+    width: auto;
+    max-width: 32rem;
+  }
+}
+
+.bottom {
+  margin-top: auto;
+  width: 100vw;
+  max-width: 100vw;
+  border-top-left-radius: var(--radius-lg);
+  border-top-right-radius: var(--radius-lg);
+  translate: 0 100%;
+}
+
+.right {
+  margin-left: auto;
+  height: 100svh;
+  max-height: none;
+  width: 100vw;
+  max-width: 24rem;
+  border-top-left-radius: var(--radius-lg);
+  border-bottom-left-radius: var(--radius-lg);
+  translate: 100% 0;
+  transition-duration: var(--duration-slow);
+}
+
+.left {
+  margin-right: auto;
+  height: 100svh;
+  max-height: none;
+  width: 100vw;
+  max-width: 24rem;
+  border-top-right-radius: var(--radius-lg);
+  border-bottom-right-radius: var(--radius-lg);
+  translate: -100% 0;
+  transition-duration: var(--duration-slow);
+}
+
+.bottom[open],
+.right[open],
+.left[open] {
+  translate: 0 0;
+}
+
+@starting-style {
+  .center[open] {
+    scale: 0.9;
+  }
+
+  .bottom[open] {
+    translate: 0 100%;
+  }
+
+  .right[open] {
+    translate: 100% 0;
+  }
+
+  .left[open] {
+    translate: -100% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .root,
+  .root::backdrop {
+    transition: none;
+  }
+}

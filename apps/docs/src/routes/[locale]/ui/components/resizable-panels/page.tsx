@@ -1,6 +1,6 @@
 import { Anchor, Heading, ResizablePanels, Separator } from '@k8ordo/ui';
-import { CodeBlock } from '@k8ordo/ui/code-block';
 
+import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';
 import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
@@ -10,16 +10,16 @@ import { inheritsOf, propsOf } from '../../../../../data/component-props';
 import { ResizablePanelsControlledPreview } from '../../../../../demos/ui/components/resizable-panels-previews';
 import * as m from '../../../../../messages';
 
-const FRAME =
-  'border-border-base h-48 w-full overflow-hidden rounded-lg border';
+import page from '../../../../../styles/page.module.css';
+import styles from '../../../../../styles/pages/ui/components/resizable-panels.module.css';
 
 export default function ResizablePanelsPage() {
   return (
-    <div className="flex flex-col gap-8 py-12">
+    <div className={page.page}>
       <PageTitle name="ResizablePanels" />
-      <div className="flex flex-col gap-4">
+      <div className={page.stack}>
         <Heading level="h1">ResizablePanels</Heading>
-        <p className="text-fg-mute text-lg">
+        <p className={page.lead}>
           <Rich>{m.components.resizablePanels.description()}</Rich>
         </p>
         <div>
@@ -33,7 +33,7 @@ export default function ResizablePanelsPage() {
       </div>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
@@ -44,16 +44,16 @@ export default function ResizablePanelsPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-8">
-        <div className="flex flex-col gap-4">
+      <section className={page.stackLg}>
+        <div className={page.stack}>
           <Heading level="h2">
             <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
-          <p className="text-fg-mute">
+          <p className={page.mute}>
             <Rich>{m.components.resizablePanels.usageDescription()}</Rich>
           </p>
           <ComponentPreview
-            code={`<div className="h-48">
+            code={`<div className={styles.frame}>
   <ResizablePanels.Root defaultValue={30}>
     <ResizablePanels.Panel>Sidebar</ResizablePanels.Panel>
     <ResizablePanels.Handle />
@@ -61,29 +61,29 @@ export default function ResizablePanelsPage() {
   </ResizablePanels.Root>
 </div>`}
           >
-            <div className={FRAME}>
+            <div className={styles.frame}>
               <ResizablePanels.Root defaultValue={30}>
                 <ResizablePanels.Panel>
-                  <p className="p-4 text-sm">Sidebar</p>
+                  <p className={styles.panelText}>Sidebar</p>
                 </ResizablePanels.Panel>
                 <ResizablePanels.Handle />
                 <ResizablePanels.Panel>
-                  <p className="p-4 text-sm">Content</p>
+                  <p className={styles.panelText}>Content</p>
                 </ResizablePanels.Panel>
               </ResizablePanels.Root>
             </div>
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.resizablePanels.verticalTitle()}</Rich>
           </Heading>
-          <p className="text-fg-mute">
+          <p className={page.mute}>
             <Rich>{m.components.resizablePanels.verticalDescription()}</Rich>
           </p>
           <ComponentPreview
-            code={`<div className="h-48">
+            code={`<div className={styles.frame}>
   <ResizablePanels.Root orientation="vertical">
     <ResizablePanels.Panel>Editor</ResizablePanels.Panel>
     <ResizablePanels.Handle />
@@ -91,25 +91,25 @@ export default function ResizablePanelsPage() {
   </ResizablePanels.Root>
 </div>`}
           >
-            <div className={FRAME}>
+            <div className={styles.frame}>
               <ResizablePanels.Root orientation="vertical">
                 <ResizablePanels.Panel>
-                  <p className="p-4 text-sm">Editor</p>
+                  <p className={styles.panelText}>Editor</p>
                 </ResizablePanels.Panel>
                 <ResizablePanels.Handle />
                 <ResizablePanels.Panel>
-                  <p className="p-4 text-sm">Terminal</p>
+                  <p className={styles.panelText}>Terminal</p>
                 </ResizablePanels.Panel>
               </ResizablePanels.Root>
             </div>
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.resizablePanels.labelTitle()}</Rich>
           </Heading>
-          <p className="text-fg-mute">
+          <p className={page.mute}>
             <Rich>{m.components.resizablePanels.labelDescription()}</Rich>
           </p>
           <ComponentPreview
@@ -121,27 +121,27 @@ export default function ResizablePanelsPage() {
   <ResizablePanels.Panel>Preview</ResizablePanels.Panel>
 </ResizablePanels.Root>`}
           >
-            <div className={FRAME}>
+            <div className={styles.frame}>
               <ResizablePanels.Root defaultValue={30}>
                 <ResizablePanels.Panel>
-                  <p className="p-4 font-bold" id="resizable-panels-files">
+                  <p className={styles.panelTitle} id="resizable-panels-files">
                     Files
                   </p>
                 </ResizablePanels.Panel>
                 <ResizablePanels.Handle aria-labelledby="resizable-panels-files" />
                 <ResizablePanels.Panel>
-                  <p className="p-4 text-sm">Preview</p>
+                  <p className={styles.panelText}>Preview</p>
                 </ResizablePanels.Panel>
               </ResizablePanels.Root>
             </div>
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.resizablePanels.controlledTitle()}</Rich>
           </Heading>
-          <p className="text-fg-mute">
+          <p className={page.mute}>
             <Rich>{m.components.resizablePanels.controlledDescription()}</Rich>
           </p>
           <ComponentPreview
@@ -157,7 +157,7 @@ export default function ResizablePanelsPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>

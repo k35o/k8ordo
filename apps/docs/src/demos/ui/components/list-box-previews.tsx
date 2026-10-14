@@ -4,6 +4,8 @@ import { ListBox, ListIcon } from '@k8ordo/ui';
 import type { Option } from '@k8ordo/ui';
 import { useState } from 'react';
 
+import styles from './list-box-previews.module.css';
+
 const OPTIONS: readonly Option[] = [
   { value: 'apple', label: 'Apple' },
   { value: 'banana', label: 'Banana' },
@@ -15,7 +17,7 @@ const OPTIONS: readonly Option[] = [
 export function ListBoxBasicPreview() {
   const [selected, setSelected] = useState<string>();
   return (
-    <div className="w-56">
+    <div className={styles.frame}>
       <ListBox.Root
         onChange={(value: string) => {
           setSelected(value);
@@ -35,8 +37,8 @@ export function ListBoxSizesPreview() {
   const [md, setMd] = useState<string>();
   const [lg, setLg] = useState<string>();
   return (
-    <div className="flex flex-wrap items-start gap-4">
-      <div className="w-44">
+    <div className={styles.sizes}>
+      <div className={styles.sm}>
         <ListBox.Root
           onChange={(value: string) => {
             setSm(value);
@@ -48,7 +50,7 @@ export function ListBoxSizesPreview() {
           <ListBox.Content />
         </ListBox.Root>
       </div>
-      <div className="w-48">
+      <div className={styles.md}>
         <ListBox.Root
           onChange={(value: string) => {
             setMd(value);
@@ -60,7 +62,7 @@ export function ListBoxSizesPreview() {
           <ListBox.Content />
         </ListBox.Root>
       </div>
-      <div className="w-56">
+      <div className={styles.lg}>
         <ListBox.Root
           onChange={(value: string) => {
             setLg(value);

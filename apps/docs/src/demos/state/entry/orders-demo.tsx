@@ -9,6 +9,8 @@ import * as z from 'zod/mini';
 import { jsLiteral } from '../../../components/js-literal';
 import * as m from '../../../messages';
 
+import styles from './orders-demo.module.css';
+
 const t = m.stateEntry;
 
 const STATUSES = ['all', 'pending', 'shipped'] as const;
@@ -45,13 +47,9 @@ export function OrdersDemo() {
   );
 
   return (
-    <div className="flex flex-col gap-6">
-      <div
-        aria-labelledby={filterLabel}
-        className="flex flex-wrap items-center gap-2"
-        role="group"
-      >
-        <span className="text-fg-mute me-2 text-sm" id={filterLabel}>
+    <div className={styles.root}>
+      <div aria-labelledby={filterLabel} className={styles.filter} role="group">
+        <span className={styles.filterLabel} id={filterLabel}>
           {t.demoFilter()}
         </span>
         {STATUSES.map((value) => (
@@ -69,15 +67,12 @@ export function OrdersDemo() {
           </Button>
         ))}
       </div>
-      <ul className="flex flex-col gap-2">
+      <ul className={styles.list}>
         {visible.map((order) => {
           const open = expanded.includes(order.id);
           return (
-            <li
-              className="border-border-mute flex flex-col gap-2 rounded-lg border px-3 py-2"
-              key={order.id}
-            >
-              <div className="flex items-center justify-between gap-3">
+            <li className={styles.order} key={order.id}>
+              <div className={styles.orderHeader}>
                 <Button
                   aria-expanded={open}
                   color="base"
@@ -101,20 +96,18 @@ export function OrdersDemo() {
                   tone={order.status === 'pending' ? 'warning' : 'success'}
                 />
               </div>
-              {open && (
-                <p className="text-fg-mute ps-9 text-sm">{order.detail()}</p>
-              )}
+              {open && <p className={styles.detail}>{order.detail()}</p>}
             </li>
           );
         })}
       </ul>
-      <dl className="bg-bg-surface grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-2 rounded-lg px-4 py-3 text-sm">
-        <dt className="text-fg-mute">url</dt>
-        <dd className="break-all">
+      <dl className={styles.values}>
+        <dt className={styles.term}>url</dt>
+        <dd className={styles.value}>
           <Code>{search === '' ? t.demoQueryEmpty() : `?${search}`}</Code>
         </dd>
-        <dt className="text-fg-mute">entry</dt>
-        <dd className="break-all">
+        <dt className={styles.term}>entry</dt>
+        <dd className={styles.value}>
           <Code>{jsLiteral({ expanded })}</Code>
         </dd>
       </dl>

@@ -7,15 +7,17 @@ import { jsLiteral } from '../../components/js-literal';
 import * as m from '../../messages';
 import { TABS, demoState } from './demo-state';
 
+import styles from './state-demo.module.css';
+
 export function StateDemo() {
   const [current, update] = useAppState(demoState);
   const search = demoState.search(current);
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="w-14 text-sm">
+    <div className={styles.root}>
+      <div className={styles.controls}>
+        <div className={styles.tabs}>
+          <span className={styles.label}>
             <Code>tab</Code>
           </span>
           {TABS.map((value) => (
@@ -32,8 +34,8 @@ export function StateDemo() {
             </Button>
           ))}
         </div>
-        <div className="flex items-center gap-2">
-          <span className="w-14 text-sm">
+        <div className={styles.pager}>
+          <span className={styles.label}>
             <Code>page</Code>
           </span>
           <IconButton
@@ -46,9 +48,7 @@ export function StateDemo() {
           >
             <MinusIcon />
           </IconButton>
-          <span className="min-w-8 text-center text-sm tabular-nums">
-            {current.page}
-          </span>
+          <span className={styles.page}>{current.page}</span>
           <IconButton
             color="base"
             label={m.state.demoNext()}
@@ -61,13 +61,13 @@ export function StateDemo() {
           </IconButton>
         </div>
       </div>
-      <dl className="bg-bg-surface grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-2 rounded-lg px-4 py-3 text-sm">
-        <dt className="text-fg-mute">URL</dt>
-        <dd className="break-all">
+      <dl className={styles.values}>
+        <dt className={styles.term}>URL</dt>
+        <dd className={styles.value}>
           <Code>{search === '' ? m.state.demoUrlEmpty() : `?${search}`}</Code>
         </dd>
-        <dt className="text-fg-mute">state</dt>
-        <dd className="break-all">
+        <dt className={styles.term}>state</dt>
+        <dd className={styles.value}>
           <Code>{jsLiteral(current)}</Code>
         </dd>
       </dl>

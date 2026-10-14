@@ -1,0 +1,17 @@
+.root {
+  overflow: hidden;
+  border: 1px solid var(--color-border-mute);
+  border-radius: var(--radius-lg);
+}
+
+/* 下のコードは、角丸を外して上の線だけでプレビューと区切る。CodeBlock は
+   className を受け取らないので、包みの中の figure に当てる。サイトの
+   CodeBlock の包み（枠線）は使わない */
+.code {
+  @scope (&) {
+    & > figure {
+      border-top: 1px solid var(--color-border-mute);
+      border-radius: 0;
+    }
+  }
+}

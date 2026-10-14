@@ -1,5 +1,6 @@
 'use client';
 
+import { clsx } from 'clsx';
 import {
   useCallback,
   useEffect,
@@ -10,7 +11,6 @@ import {
 } from 'react';
 import type { FC, FocusEvent, PropsWithChildren, ReactElement } from 'react';
 
-import { cn } from '../../../helpers';
 import { readWritingMode, useControllableState } from '../../../hooks';
 import type { WritingMode } from '../../../hooks';
 import { useFocusTrap } from '../../../internal/focus-trap';
@@ -24,6 +24,8 @@ import {
   usePopoverTrigger,
 } from './hooks';
 import type { PopoverContentProps, PopoverTriggerProps } from './hooks';
+
+import styles from './popover.module.css';
 
 export {
   useOpenContext,
@@ -123,9 +125,9 @@ export const Content: FC<{
     usePopoverContent();
   const { triggerRef, onClose } = usePopoverContext();
 
-  // content は popover で top-layer に出すためインライン描画になり、trigger 側の
-  // writing-mode を継承する。`vertical:` variant は `.writing-v` 祖先を要求するので、
-  // 縦書きなら class を付与する。trigger は中身に合わせて縮むことが多く、書字方向が
+  // content は popover で top-layer に出すため、trigger 側の writing-mode を
+  // 継承しない。中の部品は親の --writing を style クエリで読むので、縦書きなら
+  // .writing-v を付けて writing-mode と --writing を渡す。trigger は中身に合わせて縮むことが多く、書字方向が
   // 切り替わってもサイズの変化では検出できないので、開く瞬間に読む。
   const [writingMode, setWritingMode] = useState<WritingMode>('horizontal');
   useLayoutEffect(() => {
@@ -177,12 +179,10 @@ export const Content: FC<{
   };
 
   return (
-    // outline-hidden: フォーカス管理で当てる tabindex=-1 の管理用フォーカスでは
-    // ブラウザ既定の outline を出さない（中の項目・ボタンは各自の focus リングを持つ）。
     <div
-      className={cn(
-        'z-overlay outline-hidden',
-        animation === 'fade' ? 'ao-anim-fade' : 'ao-anim-scale',
+      className={clsx(
+        styles.root,
+        animation === 'fade' ? styles.fade : styles.scale,
         writingClass,
       )}
       onBlur={handleFocusOut}

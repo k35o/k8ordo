@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import type { FC } from 'react';
 import { Streamdown } from 'streamdown';
 import type {
@@ -10,6 +10,8 @@ import type {
 } from 'streamdown';
 
 import { getMessages } from '../../../i18n/current';
+
+import styles from './response.module.css';
 
 type Props = {
   children: string;
@@ -25,9 +27,8 @@ const defaultLinkSafety: LinkSafetyConfig = { enabled: false };
  * ストリーミング対応の Markdown レンダラ。未クローズのコードブロックなど
  * 途中の Markdown も streamdown が破綻なく描画する。
  *
- * このコンポーネントは streamdown（optional peer）に依存する。利用側は
- * `pnpm add streamdown` に加え、`streamdown/styles.css` の読み込みと
- * Tailwind の `@source` 設定が必要。詳細は docs を参照。
+ * このコンポーネントは streamdown（optional peer）に依存する。見た目は
+ * Response の CSS が持つので、Tailwind は要らない。
  *
  * `children` / `isStreaming` 以外の props は streamdown にそのまま渡る。
  */
@@ -70,16 +71,24 @@ export const Response: FC<Props> = ({
     [messages, translations],
   );
 
+  // 確認ダイアログや表の全画面は、streamdown が既定で document.body へ出す。
+  // Response の中に出して、見た目を当てる @scope の中に収める
+  const overlayRef = useRef<HTMLDivElement>(null);
+
   return (
-    <Streamdown
-      className="text-fg-base"
-      linkSafety={linkSafety}
-      mode={isStreaming ? 'streaming' : 'static'}
-      parseIncompleteMarkdown
-      translations={mergedTranslations}
-      {...rest}
-    >
-      {children}
-    </Streamdown>
+    <div className={styles.root}>
+      <Streamdown
+        className={styles.markdown}
+        linkSafety={linkSafety}
+        mode={isStreaming ? 'streaming' : 'static'}
+        parseIncompleteMarkdown
+        portal={() => overlayRef.current}
+        translations={mergedTranslations}
+        {...rest}
+      >
+        {children}
+      </Streamdown>
+      <div ref={overlayRef} />
+    </div>
   );
 };

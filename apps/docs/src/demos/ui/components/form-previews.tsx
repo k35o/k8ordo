@@ -3,6 +3,8 @@
 import { Button, Form, FormControl, TextField } from '@k8ordo/ui';
 import { useActionState, useState } from 'react';
 
+import styles from './form-previews.module.css';
+
 const sleep = (ms: number) =>
   new Promise<void>((resolve) => {
     setTimeout(resolve, ms);
@@ -11,7 +13,7 @@ const sleep = (ms: number) =>
 export function FormBasicPreview() {
   const [submitted, setSubmitted] = useState<string | null>(null);
   return (
-    <div className="flex flex-col gap-4">
+    <div className={styles.root}>
       <Form
         action={async (formData) => {
           await sleep(1000);
@@ -26,7 +28,7 @@ export function FormBasicPreview() {
         <Button type="submit">Submit</Button>
       </Form>
       {submitted !== null && (
-        <p className="text-fg-base text-sm">Submitted name: {submitted}</p>
+        <p className={styles.result}>Submitted name: {submitted}</p>
       )}
     </div>
   );
@@ -51,7 +53,7 @@ export function FormActionStatePreview() {
         renderInput={(props) => <TextField {...props} name="name" />}
       />
       <Button type="submit">Submit</Button>
-      {message && <p className="text-fg-base text-sm">{message}</p>}
+      {message && <p className={styles.result}>{message}</p>}
     </Form>
   );
 }

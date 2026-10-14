@@ -1,0 +1,16 @@
+.combination {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+}
+
+.caption {
+  margin-left: calc(var(--spacing) * 2);
+  color: var(--color-fg-mute);
+}
+
+.sentence {
+  line-height: var(--line-height-relaxed);
+}

@@ -1,7 +1,8 @@
-import { CodeBlock } from '@k8ordo/ui/code-block';
-
+import { CodeBlock } from '../../../components/code-block';
 import { LandingClaim, LandingHero } from '../../../components/landing';
 import * as m from '../../../messages';
+
+import styles from '../../../styles/pages/router.module.css';
 
 const HERO_ROUTES = `export const routes = defineRoutes({
   '/': Home,
@@ -55,7 +56,7 @@ const CLAIM_NAVIGATION_ANIMATE = `<ViewTransition
 
 export default function RouterPage() {
   return (
-    <div className="flex flex-1 flex-col">
+    <div className={styles.root}>
       <LandingHero
         code={
           <>
@@ -79,7 +80,7 @@ export default function RouterPage() {
         body={m.router.claimTypesBody}
         title={m.router.claimTypesTitle}
       >
-        <div className="flex flex-col gap-3">
+        <div className={styles.codes}>
           <CodeBlock
             code={CLAIM_TYPES_REGISTER}
             lang="ts"
@@ -100,7 +101,7 @@ export default function RouterPage() {
         body={m.router.claimNavigationBody}
         title={m.router.claimNavigationTitle}
       >
-        <div className="flex flex-col gap-3">
+        <div className={styles.codes}>
           <CodeBlock
             code={CLAIM_NAVIGATION_WAIT}
             lang="tsx"

@@ -41,179 +41,179 @@ export const brandColorsIntro = message({
 });
 
 export const token = {
-  'fg-base': message({
+  'color-fg-base': message({
     ja: '本文の文字',
     en: 'Body text',
   }),
-  'fg-subtle': message({
+  'color-fg-subtle': message({
     ja: 'プレースホルダーなど、最も薄い文字',
     en: 'The faintest text, such as placeholders',
   }),
-  'fg-mute': message({
+  'color-fg-mute': message({
     ja: '説明やキャプションなど、補足の文字',
     en: 'Supporting text, such as descriptions and captions',
   }),
-  'fg-inverse': message({
+  'color-fg-inverse': message({
     ja: 'bg-inverseの上に置く文字',
     en: 'Text on bg-inverse',
   }),
-  'fg-info': message({
+  'color-fg-info': message({
     ja: '情報メッセージの文字',
     en: 'Informational message text',
   }),
-  'fg-success': message({
+  'color-fg-success': message({
     ja: '成功メッセージの文字',
     en: 'Success message text',
   }),
-  'fg-warning': message({
+  'color-fg-warning': message({
     ja: '警告メッセージの文字',
     en: 'Warning message text',
   }),
-  'fg-error': message({
+  'color-fg-error': message({
     ja: 'エラーメッセージの文字',
     en: 'Error message text',
   }),
-  'bg-base': message({
+  'color-bg-base': message({
     ja: 'カードの背景',
     en: 'Card background',
   }),
-  'bg-raised': message({
+  'color-bg-raised': message({
     ja: 'モーダルやメニューなど、重ねて開く要素の背景',
     en: 'Background of overlays such as modals and menus',
   }),
-  'bg-surface': message({
+  'color-bg-surface': message({
     ja: '最も外側の背景。ライトではbg-subtleより明るく、ダークでは暗い',
     en: 'The outermost background: lighter than bg-subtle in light mode, darker in dark mode',
   }),
-  'bg-subtle': message({
+  'color-bg-subtle': message({
     ja: 'ページの背景',
     en: 'Page background',
   }),
-  'bg-mute': message({
+  'color-bg-mute': message({
     ja: 'ホバー状態の背景',
     en: 'Hover-state background',
   }),
-  'bg-emphasize': message({
+  'color-bg-emphasize': message({
     ja: 'アクティブ状態の背景',
     en: 'Active-state background',
   }),
-  'bg-inverse': message({
+  'color-bg-inverse': message({
     ja: '反転した背景。fg-inverseと組み合わせる',
     en: 'Inverted background, paired with fg-inverse',
   }),
-  'bg-info': message({
+  'color-bg-info': message({
     ja: '情報メッセージの背景',
     en: 'Informational message background',
   }),
-  'bg-success': message({
+  'color-bg-success': message({
     ja: '成功メッセージの背景',
     en: 'Success message background',
   }),
-  'bg-warning': message({
+  'color-bg-warning': message({
     ja: '警告メッセージの背景',
     en: 'Warning message background',
   }),
-  'bg-error': message({
+  'color-bg-error': message({
     ja: 'エラーメッセージの背景',
     en: 'Error message background',
   }),
-  'border-base': message({
+  'color-border-base': message({
     ja: '入力欄など、標準の線',
     en: 'Standard borders, such as form fields',
   }),
-  'border-subtle': message({
+  'color-border-subtle': message({
     ja: '最も薄い線',
     en: 'The faintest borders',
   }),
-  'border-mute': message({
+  'color-border-mute': message({
     ja: '区切りなど、控えめな線',
     en: 'Restrained borders, such as separators',
   }),
-  'border-emphasize': message({
+  'color-border-emphasize': message({
     ja: 'ホバー時など、強調する線',
     en: 'Emphasized borders, as on hover',
   }),
-  'border-inverse': message({
+  'color-border-inverse': message({
     ja: 'bg-inverseの上に引く線',
     en: 'Borders on bg-inverse',
   }),
-  'border-info': message({
+  'color-border-info': message({
     ja: '情報の線。フォーカスリングにも使う',
     en: 'Information borders, also the focus ring',
   }),
-  'border-success': message({
+  'color-border-success': message({
     ja: '成功状態の線',
     en: 'Success-state borders',
   }),
-  'border-warning': message({
+  'color-border-warning': message({
     ja: '警告状態の線',
     en: 'Warning-state borders',
   }),
-  'border-error': message({
+  'color-border-error': message({
     ja: 'エラー状態の線',
     en: 'Error-state borders',
   }),
-  'primary-fg': message({
+  'color-primary-fg': message({
     ja: 'primaryの文字とアイコン',
     en: 'Primary text and icons',
   }),
-  'primary-bg': message({
+  'color-primary-bg': message({
     ja: 'primaryの塗り。solidのボタンなど',
     en: 'Primary fill, as in a solid button',
   }),
-  'primary-bg-subtle': message({
+  'color-primary-bg-subtle': message({
     ja: '最も薄いprimaryの背景。選択状態など',
     en: 'The faintest primary background, as in a selected state',
   }),
-  'primary-bg-mute': message({
+  'color-primary-bg-mute': message({
     ja: '控えめなprimaryの背景',
     en: 'Restrained primary background',
   }),
-  'primary-bg-emphasize': message({
+  'color-primary-bg-emphasize': message({
     ja: 'ホバー時など、強いprimaryの背景',
     en: 'Emphasized primary background, as on hover',
   }),
-  'primary-border': message({
+  'color-primary-border': message({
     ja: 'primaryの線',
     en: 'Primary borders',
   }),
-  'secondary-fg': message({
+  'color-secondary-fg': message({
     ja: 'secondaryの文字とアイコン',
     en: 'Secondary text and icons',
   }),
-  'secondary-bg': message({
+  'color-secondary-bg': message({
     ja: 'secondaryの塗り',
     en: 'Secondary fill',
   }),
-  'secondary-bg-subtle': message({
+  'color-secondary-bg-subtle': message({
     ja: '最も薄いsecondaryの背景',
     en: 'The faintest secondary background',
   }),
-  'secondary-bg-mute': message({
+  'color-secondary-bg-mute': message({
     ja: '控えめなsecondaryの背景',
     en: 'Restrained secondary background',
   }),
-  'secondary-bg-emphasize': message({
+  'color-secondary-bg-emphasize': message({
     ja: 'ホバー時など、強いsecondaryの背景',
     en: 'Emphasized secondary background, as on hover',
   }),
-  'secondary-border': message({
+  'color-secondary-border': message({
     ja: 'secondaryの線',
     en: 'Secondary borders',
   }),
-  'group-primary': message({
+  'color-group-primary': message({
     ja: '1つ目の系列',
     en: 'First data series',
   }),
-  'group-secondary': message({
+  'color-group-secondary': message({
     ja: '2つ目の系列',
     en: 'Second data series',
   }),
-  'group-tertiary': message({
+  'color-group-tertiary': message({
     ja: '3つ目の系列',
     en: 'Third data series',
   }),
-  'group-quaternary': message({
+  'color-group-quaternary': message({
     ja: '4つ目の系列',
     en: 'Fourth data series',
   }),
@@ -260,8 +260,8 @@ export const customizeHow = message({
 });
 
 export const customizePalette = message({
-  ja: '基本の色も`--purple-200`のような変数で定義されています。参照先を差し替えると、ブランドの色がまとめて変わります。参照の代わりに値をそのまま書いても構いません。',
-  en: 'The base palette is defined as variables too, such as `--purple-200`. Point the tokens at another hue and the brand color changes as a whole. A literal value works as well as a reference.',
+  ja: 'トークンは、`--purple-200`のような名前の基本の色を参照しています。参照先を差し替えると、ブランドの色がまとめて変わります。参照の代わりに値をそのまま書いても構いません。',
+  en: 'The tokens point at the base palette, named like `--purple-200`. Point them at another hue and the brand color changes as a whole. A literal value works as well as a reference.',
 });
 
 export const customizeContrast = message({
@@ -285,8 +285,8 @@ export const fontWeightsTitle = message({
 });
 
 export const fontWeightsNote = message({
-  ja: 'テーマが定義する太さは`font-medium`と`font-bold`の2つです。`font-medium`は450で、一般的な500より細くしています。',
-  en: 'The theme defines two weights, `font-medium` and `font-bold`. `font-medium` is 450, lighter than the usual 500.',
+  ja: '太さのトークンは`--font-weight-medium`と`--font-weight-bold`の2つです。`--font-weight-medium`は450で、一般的な500より細くしています。',
+  en: 'There are two weight tokens, `--font-weight-medium` and `--font-weight-bold`. `--font-weight-medium` is 450, lighter than the usual 500.',
 });
 
 export const letterSpacingTitle = message({
@@ -305,8 +305,8 @@ export const borderRadiusTitle = message({
 });
 
 export const borderRadiusRoles = message({
-  ja: '角丸は要素の役割で変えます。ボタンは`rounded-full`、入力欄とカードは`rounded-xl`、チェックボックスは`rounded-md`です。',
-  en: 'The radius follows the element’s role: `rounded-full` for buttons, `rounded-xl` for inputs and cards, `rounded-md` for checkboxes.',
+  ja: '角丸は要素の役割で変えます。ボタンは`--radius-full`、入力欄とカードは`--radius-xl`、チェックボックスは`--radius-md`です。',
+  en: 'The radius follows the element’s role: `--radius-full` for buttons, `--radius-xl` for inputs and cards, `--radius-md` for checkboxes.',
 });
 
 export const shadowTitle = message({
@@ -315,8 +315,8 @@ export const shadowTitle = message({
 });
 
 export const shadowUsage = message({
-  ja: 'カードやポップオーバーに付ける影です。カードは`shadow-sm`、モーダルとメニューは`shadow-md`を使います。`shadow-xl`以上の強い影は使いません。',
-  en: 'Shadows for cards and popovers. Cards use `shadow-sm`, and modals and menus use `shadow-md`. `shadow-xl` and anything heavier are never used.',
+  ja: 'カードやポップオーバーに付ける影です。カードは`--shadow-sm`、モーダルとメニューは`--shadow-md`を使います。`--shadow-xl`以上の強い影は使いません。',
+  en: 'Shadows for cards and popovers. Cards use `--shadow-sm`, and modals and menus use `--shadow-md`. `--shadow-xl` and anything heavier are never used.',
 });
 
 export const spacingTitle = message({
@@ -325,8 +325,8 @@ export const spacingTitle = message({
 });
 
 export const spacingUnit = message({
-  ja: '余白の単位は0.25rem（4px）です。`p-4`や`gap-6`のようなクラスは、数字×0.25remの大きさになります。',
-  en: 'The spacing unit is 0.25rem (4px). A class such as `p-4` or `gap-6` is that number times 0.25rem.',
+  ja: '余白の単位は`--spacing`の0.25rem（4px）です。`calc(var(--spacing) * 4)`のように段数を掛けて使います。`tailwind.css`では`p-4`や`gap-6`のクラスが、数字×0.25remの大きさになります。',
+  en: 'The spacing unit is `--spacing`, 0.25rem (4px). Multiply it by the step you want, as in `calc(var(--spacing) * 4)`. With `tailwind.css`, a class such as `p-4` or `gap-6` is that number times 0.25rem.',
 });
 
 export const breakpointsTitle = message({
@@ -335,8 +335,8 @@ export const breakpointsTitle = message({
 });
 
 export const breakpointsUsage = message({
-  ja: '画面の幅でレイアウトを切り替える境目です。`sm:`のようなバリアントで、その幅以上に当てるスタイルを書きます。',
-  en: 'The widths at which a layout changes. A variant such as `sm:` applies a style from that width up.',
+  ja: '画面の幅でレイアウトを切り替える境目です。メディアクエリは変数を読めないので、`@media (width >= 40rem)`のように値を書きます。`tailwind.css`では`sm:`のようなバリアントになります。',
+  en: 'The widths at which a layout changes. A media query cannot read a variable, so write the value, as in `@media (width >= 40rem)`. With `tailwind.css` they are variants such as `sm:`.',
 });
 
 export const zIndexTitle = message({
@@ -385,8 +385,8 @@ export const highContrastTitle = message({
 });
 
 export const highContrastOwnUi = message({
-  ja: '自分で作るUIでは、`contrast-more:`と`forced-colors:`のバリアントを使います。強制カラーではシステムカラーだけが残るので、選択状態は`Highlight`のようなシステムカラーで塗ります。',
-  en: 'In your own UI, use the `contrast-more:` and `forced-colors:` variants. Under forced colors only system colors apply, so paint a selected state with one such as `Highlight`.',
+  ja: '自分で作るUIでは、`@media (prefers-contrast: more)`と`@media (forced-colors: active)`で書き分けます。強制カラーではシステムカラーだけが残るので、選択状態は`--color-system-highlight`のようなシステムカラーのトークンで塗ります。`tailwind.css`では`contrast-more:`と`forced-colors:`のバリアントです。',
+  en: 'In your own UI, write the two cases as `@media (prefers-contrast: more)` and `@media (forced-colors: active)`. Under forced colors only system colors apply, so paint a selected state with a system color token such as `--color-system-highlight`. With `tailwind.css`, they are the `contrast-more:` and `forced-colors:` variants.',
 });
 
 export const highContrastStylesheet = message({
@@ -395,6 +395,6 @@ export const highContrastStylesheet = message({
 });
 
 export const highContrastAvoid = message({
-  ja: '境界やフォーカスリングを`box-shadow`だけで描かないでください。強制カラーでは影が消えます。要素を隠すときは`invisible`を使い、`text-transparent`は使わないでください。強制カラーでは透明の色も塗られて見えます。',
-  en: 'Do not draw a border or a focus ring with `box-shadow` alone, since forced colors remove shadows. To hide an element, use `invisible`, not `text-transparent`. Under forced colors, a transparent color is painted too and shows.',
+  ja: '境界やフォーカスリングを`box-shadow`だけで描かないでください。強制カラーでは影が消えます。要素を隠すときは`visibility: hidden`を使い、透明な文字色は使わないでください。強制カラーでは透明の色も塗られて見えます。',
+  en: 'Do not draw a border or a focus ring with `box-shadow` alone, since forced colors remove shadows. To hide an element, use `visibility: hidden`, not a transparent text color. Under forced colors, a transparent color is painted too and shows.',
 });

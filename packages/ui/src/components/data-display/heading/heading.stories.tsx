@@ -3,6 +3,8 @@ import { expect } from 'storybook/test';
 
 import { Heading } from './heading';
 
+import styles from './heading.stories.module.css';
+
 const meta: Meta<typeof Heading> = {
   title: 'components/data-display/heading',
   component: Heading,
@@ -59,15 +61,17 @@ export const LineClamp: Story = {
     lineClamp: 2,
   },
   render: (args) => (
-    <div className="w-48">
+    <div className={styles.frame}>
       <Heading {...args}>
         k8oの見出しはとても長くなることがあるため、行数を制限して折り返しを2行までに抑えられることを確認する。
       </Heading>
     </div>
   ),
   play: async ({ canvas }) => {
-    await expect(canvas.getByRole('heading', { level: 1 })).toHaveClass(
-      'line-clamp-2',
-    );
+    await expect(
+      getComputedStyle(
+        canvas.getByRole('heading', { level: 1 }),
+      ).getPropertyValue('-webkit-line-clamp'),
+    ).toBe('2');
   },
 };

@@ -1,12 +1,14 @@
 'use client';
 
+import { clsx } from 'clsx';
 import { useId } from 'react';
 import type { FC, ReactNode } from 'react';
 
-import { cn } from '../../../helpers/cn';
 import { useControllableState } from '../../../hooks/controllable-state';
-import { FOCUS_RING_NO_BORDER } from '../../_internal/focus-ring';
 import { ChevronIcon } from '../../icons';
+
+import focusRing from '../../_internal/focus-ring.module.css';
+import styles from './collapsible.module.css';
 
 type Props = {
   icon?: ReactNode;
@@ -37,32 +39,25 @@ export const Collapsible: FC<Props> = ({
   const panelId = useId();
 
   return (
-    <div className="border-border-mute bg-bg-subtle overflow-hidden rounded-xl border text-sm">
+    <div className={styles.root}>
       <button
         aria-controls={panelId}
         aria-expanded={open}
-        className={cn(
-          'flex w-full items-center gap-2 px-3 py-2 text-left text-fg-mute transition-colors duration-150 ease-out hover:bg-bg-mute',
-          FOCUS_RING_NO_BORDER,
-        )}
+        className={clsx(styles.trigger, focusRing.ringNoBorder)}
         id={triggerId}
         onClick={() => {
           setOpen(!open);
         }}
         type="button"
       >
-        {icon !== undefined && (
-          <span className="flex shrink-0 items-center">{icon}</span>
-        )}
-        <span className="min-w-0 flex-1 truncate">{label}</span>
+        {icon !== undefined && <span className={styles.icon}>{icon}</span>}
+        <span className={styles.label}>{label}</span>
         <ChevronIcon direction={open ? 'up' : 'down'} size="sm" />
       </button>
-      <div className="px-3 pt-2 pb-3" hidden={!open} id={panelId}>
+      <div className={styles.panel} hidden={!open} id={panelId}>
         {children}
       </div>
-      {footer !== undefined && (
-        <div className="border-border-mute border-t px-3 py-2">{footer}</div>
-      )}
+      {footer !== undefined && <div className={styles.footer}>{footer}</div>}
     </div>
   );
 };

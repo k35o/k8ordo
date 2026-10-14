@@ -1,0 +1,11 @@
+.infoAction {
+  color: var(--color-fg-info);
+  text-decoration-line: underline;
+}
+
+.primaryAction {
+  cursor: pointer;
+  color: var(--color-primary-fg);
+  text-decoration-line: underline;
+  text-underline-offset: 2px;
+}

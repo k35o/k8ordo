@@ -1,0 +1,54 @@
+/* フォーカス管理で当てる tabindex=-1 の管理用フォーカスでは、ブラウザ既定の
+   outline を出さない（中の項目・ボタンは各自の輪を持つ）。強制カラーでは透明な
+   outline をシステムの色で塗らせる */
+.root {
+  z-index: var(--z-index-overlay);
+  outline-style: none;
+
+  @media (forced-colors: active) {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+}
+
+/*
+ * :popover-open になった瞬間に keyframe を再生する。安静時の値は上書きしない
+ * （natural=opacity:1）ため固着しない。閉じる時は display:none で即時。
+ * scale は transform ではなく `scale` プロパティを使い、CSS Anchor Positioning
+ * （inset で配置）と干渉させない。
+ */
+.scale:popover-open {
+  animation-name: pop-in;
+  /* better-css-modules-disable-next-line tokens/duration -- the pop runs a little longer than the fade so that the scale reads, which is no step of the motion scale */
+  animation-duration: 0.18s;
+}
+
+.fade:popover-open {
+  animation-name: fade-in;
+  animation-duration: var(--duration-fast);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scale:popover-open,
+  .fade:popover-open {
+    animation: none;
+  }
+}
+
+@keyframes pop-in {
+  from {
+    scale: 0.92;
+  }
+  to {
+    scale: 1;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

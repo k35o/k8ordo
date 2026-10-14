@@ -1,11 +1,13 @@
 'use client';
 
+import { clsx } from 'clsx';
 import type { FC, PropsWithChildren } from 'react';
 
-import { FOCUS_RING_NO_BORDER } from '../../_internal/focus-ring';
 import { ChevronIcon } from '../../icons';
-import { cn } from './../../../helpers/cn';
 import { useItemId, useOpen, useToggleOpen } from './context';
+
+import focusRing from '../../_internal/focus-ring.module.css';
+import styles from './accordion-button.module.css';
 
 export const AccordionButton: FC<PropsWithChildren> = ({ children }) => {
   const id = useItemId();
@@ -16,23 +18,13 @@ export const AccordionButton: FC<PropsWithChildren> = ({ children }) => {
     <button
       aria-controls={`${id}-panel`}
       aria-expanded={open}
-      className={cn(
-        'flex w-full cursor-pointer items-center justify-between rounded-md p-4 text-fg-base transition-colors duration-150 ease-out vertical:h-full',
-        'hover:bg-primary-bg-subtle hover:text-primary-fg',
-        FOCUS_RING_NO_BORDER,
-      )}
+      className={clsx(styles.root, focusRing.ringNoBorder)}
       id={`${id}-button`}
       onClick={toggleOpen}
       type="button"
     >
       {children}
-      <span
-        className={cn(
-          'transition-transform duration-150',
-          !open && 'vertical:rotate-90',
-          open && 'rotate-180 vertical:-rotate-90',
-        )}
-      >
+      <span className={clsx(styles.chevron, open && styles.open)}>
         <ChevronIcon direction="down" />
       </span>
     </button>

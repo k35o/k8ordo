@@ -1,6 +1,6 @@
 import { Alert, Anchor, Heading, Separator } from '@k8ordo/ui';
-import { CodeBlock } from '@k8ordo/ui/code-block';
 
+import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';
 import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
@@ -15,13 +15,15 @@ import {
 } from '../../../../../demos/ui/components/alert-previews';
 import * as m from '../../../../../messages';
 
+import page from '../../../../../styles/page.module.css';
+
 export default function AlertPage() {
   return (
-    <div className="flex flex-col gap-8 py-12">
+    <div className={page.page}>
       <PageTitle name="Alert" />
-      <div className="flex flex-col gap-4">
+      <div className={page.stack}>
         <Heading level="h1">Alert</Heading>
-        <p className="text-fg-mute text-lg">
+        <p className={page.lead}>
           <Rich>{m.components.alert.description()}</Rich>
         </p>
         <div>
@@ -35,7 +37,7 @@ export default function AlertPage() {
       </div>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
@@ -43,8 +45,8 @@ export default function AlertPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-8">
-        <div className="flex flex-col gap-4">
+      <section className={page.stackLg}>
+        <div className={page.stack}>
           <Heading level="h2">
             <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
@@ -53,7 +55,7 @@ export default function AlertPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.alert.statusesTitle()}</Rich>
           </Heading>
@@ -70,7 +72,7 @@ export default function AlertPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.alert.multipleMessagesTitle()}</Rich>
           </Heading>
@@ -95,7 +97,7 @@ export default function AlertPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.alert.actionTitle()}</Rich>
           </Heading>
@@ -124,7 +126,7 @@ export default function AlertPage() {
     label: 'Open settings',
     renderItem: ({ children }) => (
       <button
-        className="text-fg-info underline"
+        className={styles.link}
         type="button"
         onClick={() => {}}
       >
@@ -139,7 +141,7 @@ export default function AlertPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.alert.dismissibleTitle()}</Rich>
           </Heading>
@@ -158,7 +160,7 @@ export default function AlertPage() {
   action={{
     label: 'Learn more',
     renderItem: ({ children }) => (
-      <button className="text-primary-fg underline" type="button" onClick={openHelp}>
+      <button className={styles.link} type="button" onClick={openHelp}>
         {children}
       </button>
     ),
@@ -175,7 +177,7 @@ export default function AlertPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>

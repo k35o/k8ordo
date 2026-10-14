@@ -1,7 +1,7 @@
 import { Anchor, Heading, Separator, TableOfContents } from '@k8ordo/ui';
-import { CodeBlock } from '@k8ordo/ui/code-block';
 import type { ReactNode } from 'react';
 
+import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';
 import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
@@ -9,6 +9,9 @@ import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
 import * as m from '../../../../../messages';
+
+import page from '../../../../../styles/page.module.css';
+import styles from '../../../../../styles/pages/ui/components/table-of-contents.module.css';
 
 const USAGE = `<TableOfContents
   items={[
@@ -25,7 +28,7 @@ const USAGE = `<TableOfContents
 // 目次はこのページ自身の見出しを指す。Heading はクラスを受けないので、
 // id と scroll-margin は包む要素に付ける
 const Section = ({ id, children }: { id: string; children: ReactNode }) => (
-  <div className="scroll-mt-32" id={id}>
+  <div className={styles.section} id={id}>
     {children}
   </div>
 );
@@ -44,11 +47,11 @@ const ITEMS = () => [
 
 export default function TableOfContentsPage() {
   return (
-    <div className="flex flex-col gap-8 py-12">
+    <div className={page.page}>
       <PageTitle name="TableOfContents" />
-      <div className="flex flex-col gap-4">
+      <div className={page.stack}>
         <Heading level="h1">TableOfContents</Heading>
-        <p className="text-fg-mute text-lg">
+        <p className={page.lead}>
           <Rich>{m.components.tableOfContents.description()}</Rich>
         </p>
         <div>
@@ -62,7 +65,7 @@ export default function TableOfContentsPage() {
       </div>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Section id="import">
           <Heading level="h2">
             <Rich>{m.components.common.importTitle()}</Rich>
@@ -75,37 +78,37 @@ export default function TableOfContentsPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-8">
-        <div className="flex flex-col gap-4">
+      <section className={page.stackLg}>
+        <div className={page.stack}>
           <Section id="usage">
             <Heading level="h2">
               <Rich>{m.components.common.usageTitle()}</Rich>
             </Heading>
           </Section>
-          <p className="text-fg-mute">
+          <p className={page.mute}>
             <Rich>{m.components.tableOfContents.basicDescription()}</Rich>
           </p>
           <ComponentPreview code={USAGE}>
-            <div className="w-64">
+            <div className={styles.frame}>
               <TableOfContents items={ITEMS()} />
             </div>
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Section id="active">
             <Heading level="h3">
               <Rich>{m.components.tableOfContents.activeTitle()}</Rich>
             </Heading>
           </Section>
-          <p className="text-fg-mute">
+          <p className={page.mute}>
             <Rich>{m.components.tableOfContents.activeDescription()}</Rich>
           </p>
         </div>
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Section id="props">
           <Heading level="h2">
             <Rich>{m.components.common.propsTitle()}</Rich>

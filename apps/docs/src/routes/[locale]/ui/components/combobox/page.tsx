@@ -1,6 +1,6 @@
 import { Anchor, Combobox, Heading, Separator } from '@k8ordo/ui';
-import { CodeBlock } from '@k8ordo/ui/code-block';
 
+import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';
 import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
@@ -9,6 +9,9 @@ import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
 import { ComboboxAsyncPreview } from '../../../../../demos/ui/components/combobox-previews';
 import * as m from '../../../../../messages';
+
+import page from '../../../../../styles/page.module.css';
+import styles from '../../../../../styles/pages/ui/components/combobox.module.css';
 
 const PREFECTURES = [
   { value: 'hokkaido', label: 'Hokkaido' },
@@ -52,11 +55,11 @@ const prefecture = form.field('prefecture');
 
 export default function ComboboxPage() {
   return (
-    <div className="flex flex-col gap-8 py-12">
+    <div className={page.page}>
       <PageTitle name="Combobox" />
-      <div className="flex flex-col gap-4">
+      <div className={page.stack}>
         <Heading level="h1">Combobox</Heading>
-        <p className="text-fg-mute text-lg">
+        <p className={page.lead}>
           <Rich>{m.components.combobox.description()}</Rich>
         </p>
         <div>
@@ -70,7 +73,7 @@ export default function ComboboxPage() {
       </div>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
@@ -78,16 +81,16 @@ export default function ComboboxPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-8">
-        <div className="flex flex-col gap-4">
+      <section className={page.stackLg}>
+        <div className={page.stack}>
           <Heading level="h2">
             <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
-          <p className="text-fg-mute">
+          <p className={page.mute}>
             <Rich>{m.components.combobox.usageDescription()}</Rich>
           </p>
           <ComponentPreview code='<Combobox aria-label="Prefecture" name="prefecture" options={prefectures} />'>
-            <div className="w-full max-w-xs">
+            <div className={styles.frame}>
               <Combobox
                 aria-label="Prefecture"
                 name="prefecture"
@@ -97,11 +100,11 @@ export default function ComboboxPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.combobox.asyncTitle()}</Rich>
           </Heading>
-          <p className="text-fg-mute">
+          <p className={page.mute}>
             <Rich>{m.components.combobox.asyncDescription()}</Rich>
           </p>
           <ComponentPreview code={ASYNC_EXAMPLE}>
@@ -109,11 +112,11 @@ export default function ComboboxPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.combobox.formTitle()}</Rich>
           </Heading>
-          <p className="text-fg-mute">
+          <p className={page.mute}>
             <Rich>{m.components.combobox.formDescription()}</Rich>
           </p>
           <CodeBlock code={FORM_EXAMPLE} lang="tsx" />
@@ -121,7 +124,7 @@ export default function ComboboxPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>

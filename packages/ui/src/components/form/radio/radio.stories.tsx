@@ -10,6 +10,8 @@ import {
 } from '../../../../.storybook/pending-form';
 import { Radio } from './radio';
 
+import styles from './radio.stories.module.css';
+
 const options = [
   { label: 'React', value: 'react' },
   { label: 'Vue', value: 'vue' },
@@ -34,11 +36,8 @@ const DefaultRender = (props: ComponentProps<typeof Radio>) => {
   const { defaultValue: _defaultValue, ...radioProps } = props;
 
   return (
-    <div className="w-full max-w-md">
-      <p
-        className="text-fg-base mb-3 font-medium"
-        id={props['aria-labelledby']}
-      >
+    <div className={styles.frame}>
+      <p className={styles.groupLabel} id={props['aria-labelledby']}>
         Framework
       </p>
       <Radio
@@ -136,7 +135,7 @@ const selectionDotOf = (radio: HTMLElement) =>
 // 点は opacity でフェードするので、切り替わり切るのを待つ
 export const SelectionFollowsReset: Story = {
   render: () => (
-    <form className="flex flex-col items-start gap-2">
+    <form className={styles.column}>
       <Radio
         aria-labelledby="radio-story-label"
         defaultValue="react"

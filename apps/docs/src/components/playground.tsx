@@ -5,6 +5,8 @@ import type { ReactNode } from 'react';
 import * as m from '../messages';
 import { Rich } from './rich';
 
+import styles from './playground.module.css';
+
 export type PlaygroundProps = {
   /** The anchor, the same in every locale. */
   id: string;
@@ -30,32 +32,28 @@ export function Playground({
 }: PlaygroundProps) {
   return (
     <section aria-labelledby={id}>
-      <div className="writing-h border-border-mute bg-bg-surface rounded-xl border p-2">
-        <header className="flex flex-col gap-1.5 px-3 pt-2 pb-3">
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-            <span className="text-primary-fg bg-primary-bg-subtle inline-flex items-center gap-1 rounded-full py-1 ps-2 pe-2.5 text-xs font-bold">
+      <div className={`writing-h ${styles.panel}`}>
+        <header className={styles.header}>
+          <div className={styles.titleRow}>
+            <span className={styles.pill}>
               <FlaskIcon size="sm" />
               Playground
             </span>
-            <h2 className="text-fg-base text-md font-bold sm:text-lg" id={id}>
+            <h2 className={styles.title} id={id}>
               <Rich>{title()}</Rich>
             </h2>
           </div>
           {description !== undefined && (
-            <p className="text-fg-mute text-sm leading-relaxed">
+            <p className={styles.description}>
               <Rich>{description()}</Rich>
             </p>
           )}
         </header>
-        <div className="bg-bg-base dark:bg-bg-subtle min-w-0 rounded-lg p-6 sm:p-8">
-          {children}
-        </div>
+        <div className={styles.stage}>{children}</div>
         {steps !== undefined && steps.length > 0 && (
-          <div className="flex flex-col gap-2 px-3 pt-4 pb-2">
-            <p className="text-fg-base text-sm font-bold">
-              {m.docPage.tryIt()}
-            </p>
-            <ol className="text-fg-mute flex list-decimal flex-col gap-1 ps-5 text-sm leading-relaxed">
+          <div className={styles.steps}>
+            <p className={styles.stepsLabel}>{m.docPage.tryIt()}</p>
+            <ol className={styles.stepList}>
               {steps.map((step) => (
                 <li key={step()}>
                   <Rich>{step()}</Rich>

@@ -1,0 +1,19 @@
+.none {
+  gap: 0;
+}
+
+.sm {
+  gap: calc(var(--spacing) * 2);
+}
+
+.md {
+  gap: calc(var(--spacing) * 4);
+}
+
+.lg {
+  gap: calc(var(--spacing) * 6);
+}
+
+.xl {
+  gap: calc(var(--spacing) * 8);
+}

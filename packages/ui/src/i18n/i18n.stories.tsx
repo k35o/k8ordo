@@ -9,13 +9,15 @@ import { Pagination } from '../components/navigation/pagination';
 import { registerMessages } from './current';
 import { ja } from './ja';
 
+import styles from './i18n.stories.module.css';
+
 const noop = () => undefined;
 
 const Sample: FC<{ closeLabel?: string; prevLabel?: string }> = ({
   closeLabel,
   prevLabel,
 }) => (
-  <div className="flex flex-col items-start gap-4">
+  <div className={styles.sample}>
     <Spinner />
     <Alert
       closeLabel={closeLabel}

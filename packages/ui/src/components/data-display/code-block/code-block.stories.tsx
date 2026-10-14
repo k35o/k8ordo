@@ -5,6 +5,8 @@ import { expect, spyOn, waitFor } from 'storybook/test';
 import { CodeBlock } from '.';
 import { blurActiveElement } from '../../../../.storybook/focus';
 
+import styles from './code-block.stories.module.css';
+
 // CodeBlock はサーバーでハイライトする async の Server Component で、
 // ブラウザの React は async の部品を描かない。RSC の描画と同じく関数として
 // 呼んで待ち、できた要素を描く
@@ -18,9 +20,7 @@ const meta: Meta<typeof CodeBlock> = {
     // 外し、見出しの行の文字は検査する
     a11y: {
       config: {
-        rules: [
-          { id: 'color-contrast', selector: '*:not(.ao-code-block pre *)' },
-        ],
+        rules: [{ id: 'color-contrast', selector: '*:not(pre.shiki *)' }],
       },
     },
   },
@@ -64,7 +64,7 @@ const colorsOf = (canvasElement: HTMLElement) => {
   ) as HTMLElement;
   // 面の色は bg-surface のトークンそのもの。計算済みの値で比べる
   const probe = document.createElement('div');
-  probe.style.backgroundColor = 'var(--bg-surface)';
+  probe.style.backgroundColor = 'var(--color-bg-surface)';
   figure.append(probe);
   const surface = getComputedStyle(probe).backgroundColor;
   probe.remove();
@@ -134,7 +134,7 @@ export const StretchedByParent: Story = {
       long: ReactElement;
     };
     return (
-      <div className="grid grid-cols-2 gap-4 *:min-w-0">
+      <div className={styles.pair}>
         {short}
         {long}
       </div>

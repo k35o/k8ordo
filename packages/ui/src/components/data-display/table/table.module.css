@@ -1,0 +1,106 @@
+.root {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--color-border-mute);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-bg-base);
+
+  /* 縦書きでは表を横倒しにして、行を右から左へ並べる */
+  @container style(--writing: vertical) {
+    writing-mode: sideways-rl;
+    width: fit-content;
+    height: fit-content;
+  }
+}
+
+.table {
+  min-width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+}
+
+.head {
+  background-color: var(--color-bg-subtle);
+}
+
+/* 行の区切りはブロックの終わりに引くので、横倒しの縦書きでは左に来る。最後の
+   行には引かず、外枠と重ねない */
+.body {
+  @scope (&) {
+    & tr:last-child {
+      border-block-end-width: 0;
+    }
+  }
+}
+
+.row {
+  border-block-end: 1px solid var(--color-border-mute);
+  transition-property:
+    color, background-color, border-color, outline-color, text-decoration-color,
+    fill, stroke;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--easing-out);
+}
+
+.selected {
+  background-color: var(--color-primary-bg-subtle);
+
+  @media (forced-colors: active) {
+    background-color: var(--color-system-highlight);
+    color: var(--color-system-highlight-text);
+  }
+}
+
+@media (hover: hover) {
+  .interactive:hover {
+    background-color: var(--color-bg-mute);
+  }
+}
+
+.headerCell {
+  padding-inline: calc(var(--spacing) * 4);
+  padding-block: calc(var(--spacing) * 3);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-fg-base);
+}
+
+.cell {
+  padding-inline: calc(var(--spacing) * 4);
+  padding-block: calc(var(--spacing) * 3);
+  vertical-align: middle;
+}
+
+.base {
+  color: var(--color-fg-base);
+}
+
+.mute {
+  color: var(--color-fg-mute);
+}
+
+.center {
+  text-align: center;
+}
+
+.right {
+  text-align: right;
+}
+
+.caption {
+  caption-side: bottom;
+  padding-inline: calc(var(--spacing) * 4);
+  padding-block: calc(var(--spacing) * 3);
+  color: var(--color-fg-mute);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+}
+
+.emptyRow {
+  border-block-end: 1px solid var(--color-border-mute);
+}
+
+.emptyCell {
+  vertical-align: middle;
+}

@@ -17,6 +17,8 @@ import type { FC, ReactNode } from 'react';
 
 import * as m from '../../../messages';
 
+import styles from './chat-demo.module.css';
+
 const AssistantRow: FC<{ answer?: string; children: ReactNode }> = ({
   answer,
   children,
@@ -81,7 +83,7 @@ export function ChatDemo() {
   };
 
   return (
-    <div className="border-border-mute bg-bg-base flex h-140 w-full flex-col gap-3 rounded-2xl border p-3 shadow-sm">
+    <div className={styles.root}>
       <Conversation.Root>
         <Conversation.Messages>
           <AssistantRow>

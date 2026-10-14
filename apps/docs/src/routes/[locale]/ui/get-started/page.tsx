@@ -1,8 +1,7 @@
-import { CodeBlock } from '@k8ordo/ui/code-block';
-
 import { Note } from '../../../../components/callout';
+import { CodeBlock } from '../../../../components/code-block';
 import { DocPage, DocSection } from '../../../../components/doc-page';
-import { PackageInstall, peerVersionOf } from '../../../../components/install';
+import { PackageInstall } from '../../../../components/install';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Rich } from '../../../../components/rich';
 import * as m from '../../../../messages';
@@ -11,7 +10,8 @@ const t = m.getStarted;
 
 const STYLES = `import '@k8ordo/ui/styles.css';`;
 
-const TAILWIND = `@import '@k8ordo/ui/tailwind.css';`;
+const TAILWIND = `@import 'tailwindcss';
+@import '@k8ordo/ui/tailwind.css';`;
 
 const PROVIDER = `import { UIProvider } from '@k8ordo/ui';
 
@@ -58,9 +58,7 @@ export default function UiGetStartedPage() {
         </p>
         <CodeBlock code={TAILWIND} lang="css" title="app.css" />
         <p>
-          <Rich>
-            {t.stylesTailwind(peerVersionOf('@k8ordo/ui', 'tailwindcss'))}
-          </Rich>
+          <Rich>{t.stylesTailwind()}</Rich>
         </p>
         <p>
           <Rich>{t.stylesDarkBefore()}</Rich>

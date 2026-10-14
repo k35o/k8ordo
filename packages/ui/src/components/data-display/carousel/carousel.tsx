@@ -1,18 +1,27 @@
 'use client';
 
+import { clsx } from 'clsx';
 import { createContext, use, useEffect, useId, useRef, useState } from 'react';
 import type { FC, PropsWithChildren } from 'react';
 
-import { cn } from '../../../helpers/cn';
 import { readWritingMode } from '../../../hooks/writing-mode';
 import { getMessages } from '../../../i18n/current';
-import { FOCUS_RING_NO_BORDER } from '../../_internal/focus-ring';
 import { IconButton } from '../../buttons/icon-button';
 import { ChevronIcon } from '../../icons';
+
+import focusRing from '../../_internal/focus-ring.module.css';
+import styles from './carousel.module.css';
 
 type SlideSize = 'full' | 'lg' | 'md' | 'sm';
 
 const SlideSizeContext = createContext<SlideSize>('full');
+
+const SLIDE_SIZE = {
+  full: styles.full,
+  lg: styles.lg,
+  md: styles.md,
+  sm: styles.sm,
+} as const;
 
 type Position = {
   current: number;
@@ -135,15 +144,11 @@ export const Root: FC<
     <section
       aria-label={label}
       aria-roledescription={messages.carousel}
-      className="flex flex-col gap-3"
+      className={styles.root}
     >
       <SlideSizeContext value={slideSize}>
         <div
-          className={cn(
-            'flex gap-4 overflow-x-auto overflow-y-hidden overscroll-x-contain rounded-lg p-1 [scroll-snap-type:inline_mandatory] scrollbar-none scroll-ps-1 motion-safe:scroll-smooth',
-            'vertical:overflow-x-hidden vertical:overflow-y-auto vertical:overscroll-y-contain',
-            FOCUS_RING_NO_BORDER,
-          )}
+          className={clsx(styles.track, focusRing.ringNoBorder)}
           id={trackId}
           ref={setTrack}
           // スクロール領域そのものにフォーカスを置けるようにし、矢印キーでも送れるようにする
@@ -153,7 +158,7 @@ export const Root: FC<
           {children}
         </div>
       </SlideSizeContext>
-      <div className="flex items-center justify-center gap-3">
+      <div className={styles.controls}>
         <IconButton
           aria-controls={trackId}
           disabled={isAtStart}
@@ -163,14 +168,14 @@ export const Root: FC<
           }}
           size="sm"
         >
-          <span className="vertical:rotate-90 inline-flex">
+          <span className={styles.arrow}>
             <ChevronIcon direction="left" size="sm" />
           </span>
         </IconButton>
         {showsPosition ? (
-          <p aria-live="polite" className="text-fg-mute text-sm tabular-nums">
-            <span className="text-fg-base">{current + 1}</span>
-            <span className="mx-1">/</span>
+          <p aria-live="polite" className={styles.position}>
+            <span className={styles.current}>{current + 1}</span>
+            <span className={styles.divider}>/</span>
             <span>{count}</span>
           </p>
         ) : null}
@@ -183,7 +188,7 @@ export const Root: FC<
           }}
           size="sm"
         >
-          <span className="vertical:rotate-90 inline-flex">
+          <span className={styles.arrow}>
             <ChevronIcon direction="right" size="sm" />
           </span>
         </IconButton>
@@ -203,13 +208,7 @@ export const Slide: FC<PropsWithChildren<{ label?: string }>> = ({
     <div
       aria-label={label}
       aria-roledescription={messages.carouselSlide}
-      className={cn(
-        'shrink-0 snap-start',
-        slideSize === 'full' && 'basis-full',
-        slideSize === 'lg' && 'basis-4/5',
-        slideSize === 'md' && 'basis-[calc((100%-1rem)/2)]',
-        slideSize === 'sm' && 'basis-[calc((100%-2rem)/3)]',
-      )}
+      className={clsx(styles.slide, SLIDE_SIZE[slideSize])}
       role="group"
     >
       {children}

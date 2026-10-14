@@ -1,5 +1,6 @@
 'use client';
 
+import { clsx } from 'clsx';
 import type {
   ButtonHTMLAttributes,
   ComponentPropsWithRef,
@@ -12,10 +13,11 @@ import type {
 import { useMemo, useTransition } from 'react';
 import { useFormStatus } from 'react-dom';
 
-import { FOCUS_RING } from '../../_internal/focus-ring';
 import { Spinner } from '../../feedback/spinner/spinner';
-import { cn } from './../../../helpers/cn';
 import { mergeRefs } from './../../../helpers/merge-refs';
+
+import focusRing from '../../_internal/focus-ring.module.css';
+import styles from './button.module.css';
 
 /**
  * `renderItem` が受け取る props。既定の `<button>` に渡すものと同じ
@@ -55,6 +57,21 @@ export type ButtonRenderItemProps = Omit<
   'aria-disabled': true | undefined;
   onClick: MouseEventHandler<HTMLElement> | undefined;
 };
+
+const VARIANT = {
+  solid: {
+    primary: styles.solidPrimary,
+    secondary: styles.solidSecondary,
+    base: styles.solidBase,
+  },
+  outline: {
+    primary: styles.outlinePrimary,
+    secondary: styles.outlineSecondary,
+    base: styles.outlineBase,
+  },
+} as const;
+
+const SIZE = { sm: styles.sm, md: styles.md, lg: styles.lg } as const;
 
 type Props = {
   type?: 'button' | 'submit';
@@ -134,48 +151,18 @@ export const Button: FC<Props> = ({
   const hasStartIcon = resolvedStartIcon !== undefined;
   const hasEndIcon = endIcon !== undefined;
 
-  const className = cn(
-    'cursor-pointer rounded-full border-2 text-center font-bold transition-colors duration-150 ease-out',
-    {
-      'border-transparent bg-primary-bg text-primary-fg hover:bg-primary-bg-emphasize active:bg-primary-bg-emphasize':
-        variant === 'solid' && color === 'primary',
-      'border-transparent bg-secondary-bg text-secondary-fg hover:bg-secondary-bg-emphasize active:bg-secondary-bg-emphasize':
-        variant === 'solid' && color === 'secondary',
-      'border-transparent bg-bg-subtle text-fg-base hover:bg-bg-mute active:bg-bg-emphasize':
-        variant === 'solid' && color === 'base',
-      'border-primary-border bg-bg-base text-primary-fg hover:bg-bg-subtle active:bg-bg-mute':
-        variant === 'outline' && color === 'primary',
-      'border-secondary-border bg-bg-base text-secondary-fg hover:bg-bg-subtle active:bg-bg-mute':
-        variant === 'outline' && color === 'secondary',
-      'border-border-base bg-bg-base text-fg-base hover:bg-bg-subtle active:bg-bg-mute':
-        variant === 'outline' && color === 'base',
-      'border-transparent bg-transparent text-fg-mute hover:bg-bg-subtle hover:text-fg-base active:bg-bg-mute active:text-fg-base':
-        variant === 'skeleton',
-    },
-    FOCUS_RING,
-    size === 'sm' && 'px-3 py-1 text-sm',
-    size === 'md' && 'px-4 py-2 text-md',
-    size === 'lg' && 'px-6 py-3 text-lg',
-    fullWidth && 'w-full vertical:w-auto',
-    (hasStartIcon || hasEndIcon) && 'flex items-center gap-2',
-    hasStartIcon && hasEndIcon
-      ? 'justify-between'
-      : hasStartIcon && variant !== 'skeleton'
-        ? 'justify-center'
-        : hasEndIcon && 'justify-between',
-    isActive && 'text-fg-info',
-    {
-      'cursor-not-allowed opacity-35 hover:bg-primary-bg active:bg-primary-bg':
-        isDisabled && variant === 'solid' && color === 'primary',
-      'cursor-not-allowed opacity-35 hover:bg-secondary-bg active:bg-secondary-bg':
-        isDisabled && variant === 'solid' && color === 'secondary',
-      'cursor-not-allowed opacity-35 hover:bg-bg-subtle active:bg-bg-subtle':
-        isDisabled && variant === 'solid' && color === 'base',
-      'cursor-not-allowed bg-bg-base opacity-35':
-        isDisabled && variant === 'outline',
-      'cursor-not-allowed bg-transparent text-fg-mute opacity-35':
-        isDisabled && variant === 'skeleton',
-    },
+  const className = clsx(
+    styles.root,
+    variant === 'skeleton' ? styles.skeleton : VARIANT[variant][color],
+    focusRing.ring,
+    SIZE[size],
+    fullWidth && styles.fullWidth,
+    (hasStartIcon || hasEndIcon) && styles.withIcons,
+    hasStartIcon && !hasEndIcon && variant !== 'skeleton'
+      ? styles.iconsCentered
+      : hasEndIcon && styles.iconsApart,
+    isActive && styles.active,
+    isDisabled && styles.disabled,
   );
 
   const itemProps: ButtonRenderItemProps = {

@@ -1,0 +1,11 @@
+.field {
+  width: calc(var(--spacing) * 56);
+}
+
+.help {
+  padding-inline: calc(var(--spacing) * 3);
+  padding-bottom: calc(var(--spacing) * 2);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+  color: var(--color-fg-mute);
+}

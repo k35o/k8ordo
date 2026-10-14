@@ -3,6 +3,8 @@ import { expect, waitFor } from 'storybook/test';
 
 import { Carousel } from '.';
 
+import styles from './carousel.stories.module.css';
+
 const meta: Meta<typeof Carousel.Root> = {
   title: 'components/data-display/carousel',
   component: Carousel.Root,
@@ -28,16 +30,16 @@ const positionOf = (canvasElement: HTMLElement) =>
 const SeasonSlides = () =>
   SEASONS.map((season) => (
     <Carousel.Slide key={season.name} label={season.name}>
-      <div className="bg-bg-subtle flex h-48 flex-col justify-end gap-1 rounded-xl p-6">
-        <p className="text-fg-base text-2xl font-bold">{season.name}</p>
-        <p className="text-fg-mute text-sm">{season.note}</p>
+      <div className={styles.slide}>
+        <p className={styles.season}>{season.name}</p>
+        <p className={styles.note}>{season.note}</p>
       </div>
     </Carousel.Slide>
   ));
 
 export const Default: Story = {
   render: () => (
-    <div className="max-w-md">
+    <div className={styles.frame}>
       <Carousel.Root label="四季">
         <SeasonSlides />
       </Carousel.Root>
@@ -75,7 +77,7 @@ export const Default: Story = {
 // region とスライドは、読み上げでカルーセルとスライドだと分かる
 export const Semantics: Story = {
   render: () => (
-    <div className="max-w-md">
+    <div className={styles.frame}>
       <Carousel.Root label="四季">
         <SeasonSlides />
       </Carousel.Root>
@@ -97,7 +99,7 @@ export const Semantics: Story = {
 // 複数枚を並べるときは「何枚目か」を出さず、送り終えたら次へを止める
 export const SeveralPerView: Story = {
   render: () => (
-    <div className="max-w-2xl">
+    <div className={styles.wideFrame}>
       <Carousel.Root label="四季" slideSize="sm">
         <SeasonSlides />
       </Carousel.Root>
@@ -122,7 +124,7 @@ export const SeveralPerView: Story = {
 // （play の userEvent は合成イベントでスクロールを起こせないので、フォーカスまでを見る）
 export const FocusableTrack: Story = {
   render: () => (
-    <div className="max-w-md">
+    <div className={styles.frame}>
       <Carousel.Root label="四季" slideSize="lg">
         <SeasonSlides />
       </Carousel.Root>
@@ -138,7 +140,7 @@ export const FocusableTrack: Story = {
 // 続けて押しても、押した回数だけ送れる
 export const RapidClicks: Story = {
   render: () => (
-    <div className="max-w-md">
+    <div className={styles.frame}>
       <Carousel.Root label="四季">
         <SeasonSlides />
       </Carousel.Root>
@@ -163,7 +165,7 @@ export const Vertical: Story = {
     writingMode: 'vertical',
   },
   render: () => (
-    <div className="h-96">
+    <div className={styles.verticalFrame}>
       <Carousel.Root label="四季">
         <SeasonSlides />
       </Carousel.Root>

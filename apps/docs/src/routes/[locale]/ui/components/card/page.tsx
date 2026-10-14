@@ -1,6 +1,6 @@
 import { Anchor, Card, Heading, Separator } from '@k8ordo/ui';
-import { CodeBlock } from '@k8ordo/ui/code-block';
 
+import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';
 import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
@@ -9,13 +9,16 @@ import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
 import * as m from '../../../../../messages';
 
+import page from '../../../../../styles/page.module.css';
+import styles from '../../../../../styles/pages/ui/components/card.module.css';
+
 export default function CardPage() {
   return (
-    <div className="flex flex-col gap-8 py-12">
+    <div className={page.page}>
       <PageTitle name="Card" />
-      <div className="flex flex-col gap-4">
+      <div className={page.stack}>
         <Heading level="h1">Card</Heading>
-        <p className="text-fg-mute text-lg">
+        <p className={page.lead}>
           <Rich>{m.components.card.description()}</Rich>
         </p>
         <div>
@@ -29,7 +32,7 @@ export default function CardPage() {
       </div>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
@@ -37,87 +40,87 @@ export default function CardPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-8">
-        <div className="flex flex-col gap-4">
+      <section className={page.stackLg}>
+        <div className={page.stack}>
           <Heading level="h2">
             <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<Card>
-  <div className="p-6">Card content</div>
+  <div className={styles.body}>Card content</div>
 </Card>`}
           >
             <Card>
-              <div className="p-6">Card content</div>
+              <div className={styles.body}>Card content</div>
             </Card>
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.card.widthTitle()}</Rich>
           </Heading>
           <ComponentPreview
             code={`<Card width="full">
-  <div className="p-6">Full width</div>
+  <div className={styles.body}>Full width</div>
 </Card>
 <Card width="fit">
-  <div className="p-6">Fit content</div>
+  <div className={styles.body}>Fit content</div>
 </Card>`}
           >
-            <div className="w-full">
+            <div className={styles.frame}>
               <Card width="full">
-                <div className="p-6">Full width</div>
+                <div className={styles.body}>Full width</div>
               </Card>
             </div>
             <Card width="fit">
-              <div className="p-6">Fit content</div>
+              <div className={styles.body}>Fit content</div>
             </Card>
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">Interactive</Heading>
-          <p className="text-fg-mute">
+          <p className={page.mute}>
             <Rich>{m.components.card.interactiveDescription()}</Rich>
           </p>
           <ComponentPreview
             code={`<Card interactive>
-  <a className="block p-6" href="https://example.com">
+  <a className={styles.body} href="https://example.com">
     Hover to scale up
   </a>
 </Card>`}
           >
             <Card interactive>
-              <a className="block p-6" href="https://example.com">
+              <a className={styles.link} href="https://example.com">
                 Hover to scale up
               </a>
             </Card>
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">Appearance</Heading>
           <ComponentPreview
             code={`<Card variant="shadow">
-  <div className="p-6">Shadow</div>
+  <div className={styles.body}>Shadow</div>
 </Card>
 <Card variant="outline">
-  <div className="p-6">Bordered</div>
+  <div className={styles.body}>Bordered</div>
 </Card>`}
           >
             <Card variant="shadow">
-              <div className="p-6">Shadow</div>
+              <div className={styles.body}>Shadow</div>
             </Card>
             <Card variant="outline">
-              <div className="p-6">Bordered</div>
+              <div className={styles.body}>Bordered</div>
             </Card>
           </ComponentPreview>
         </div>
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>

@@ -237,7 +237,7 @@ export const RenderItemDisabled: Story = {
     const link = canvas.getByRole('link', { name: 'コピー' });
 
     await expect(link).toHaveAttribute('aria-disabled', 'true');
-    await expect(link).toHaveClass('cursor-not-allowed');
+    await expect(link).toHaveStyle({ cursor: 'not-allowed' });
 
     await userEvent.click(link);
 

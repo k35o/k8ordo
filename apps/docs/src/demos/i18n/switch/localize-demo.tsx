@@ -7,6 +7,8 @@ import type { ReactNode } from 'react';
 import { locales } from '../../../i18n';
 import type { Locale } from '../../../i18n';
 
+import styles from './localize-demo.module.css';
+
 const quote = (value: string | null): string =>
   value === null ? 'null' : `'${value}'`;
 
@@ -27,11 +29,11 @@ const localizeTo = (pathname: string, locale: Locale): Outcome => {
 
 function Row({ call, children }: { call: string; children: ReactNode }) {
   return (
-    <div className="flex flex-col gap-1">
-      <dt className="text-fg-mute break-all">
+    <div className={styles.row}>
+      <dt className={styles.call}>
         <Code>{call}</Code>
       </dt>
-      <dd className="break-all">{children}</dd>
+      <dd className={styles.value}>{children}</dd>
     </div>
   );
 }
@@ -41,7 +43,7 @@ export function LocalizeDemo() {
   const { locale, pathname } = locales.delocalize(input);
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className={styles.root}>
       <FormControl
         label="pathname"
         renderInput={(props) => (
@@ -56,7 +58,7 @@ export function LocalizeDemo() {
           />
         )}
       />
-      <dl className="flex flex-col gap-4 text-sm">
+      <dl className={styles.rows}>
         <Row call={`delocalize(${quote(input)})`}>
           <Code>
             {`{ locale: ${quote(locale)}, pathname: ${quote(pathname)} }`}
@@ -72,7 +74,7 @@ export function LocalizeDemo() {
               {outcome.ok ? (
                 <Code>{quote(outcome.value)}</Code>
               ) : (
-                <span className="text-fg-error">{outcome.error}</span>
+                <span className={styles.error}>{outcome.error}</span>
               )}
             </Row>
           );

@@ -43,15 +43,13 @@ pnpm add streamdown
 pnpm add ai
 ```
 
-Using `Response` also means loading streamdown's stylesheet and adding a Tailwind `@source` entry. streamdown's styles are not part of the prebuilt `styles.css`, so `Response` alone requires a Tailwind CSS 4 build (the `@k8ordo/ui/tailwind.css` entry):
+`Response` styles what streamdown renders itself, through the
+`data-streamdown` attribute streamdown puts on every element, so it needs no
+Tailwind. Load streamdown's own stylesheet only when you turn on its `animated`
+option, which keeps its keyframes there:
 
 ```tsx
 import 'streamdown/styles.css';
-```
-
-```css
-/* Add to your app's CSS entry (the path is relative from the CSS file to node_modules) */
-@source '../node_modules/streamdown/dist/*.js';
 ```
 
 The `useChat` used in the examples below comes from the AI SDK's React bindings (`pnpm add @ai-sdk/react`).
@@ -76,7 +74,14 @@ export function Chat() {
   const { messages, sendMessage, status, stop } = useChat();
 
   return (
-    <div className="flex h-full flex-col gap-3">
+    <div
+      style={{
+        display: 'flex',
+        height: '100%',
+        flexDirection: 'column',
+        gap: 'calc(var(--spacing) * 3)',
+      }}
+    >
       <Conversation.Root>
         <Conversation.Messages isStreaming={status === 'streaming'}>
           {messages.map((m) => (
@@ -361,7 +366,6 @@ A streaming-aware Markdown renderer. It renders half-finished Markdown — an un
 
 ```tsx
 import { Response } from '@k8ordo/ui/ai/response';
-import 'streamdown/styles.css';
 
 <Message.Content>
   <Response isStreaming={isStreaming}>{markdown}</Response>
@@ -372,7 +376,7 @@ Props:
 
 - `children`: string (the Markdown, required)
 - `isStreaming`: boolean
-- Every other streamdown prop (`translations`, `controls`, `linkSafety`, `plugins`, `components`, `urlTransform`, `dir`, …) passes straight through. The library owns `className` and `mode` (`mode` is derived from `isStreaming`)
+- Every other streamdown prop (`translations`, `controls`, `linkSafety`, `plugins`, `components`, `urlTransform`, `dir`, …) passes straight through. The library owns `className`, `mode` (`mode` is derived from `isStreaming`) and `portal`: the confirmation dialog and a table's full screen open inside the `Response`, where its styles reach them
 
 The wording comes from the i18n dictionary of the current locale, so strings such as `responseCopyCode` and `responseDownloadTable` follow the rest of the components. Pass `translations` to change individual strings (prop > dictionary > streamdown's own default).
 

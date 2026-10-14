@@ -9,6 +9,8 @@ import {
 } from 'react';
 import type { FC, RefObject } from 'react';
 
+import srOnly from './sr-only.module.css';
+
 type Props = {
   name: string | undefined;
   /** What the visible control holds now. */
@@ -148,7 +150,8 @@ export const FormValue: FC<Props> = ({
     <select
       aria-hidden
       autoComplete="off"
-      className="sr-only"
+      className={srOnly.srOnly}
+
       defaultValue={
         multiple ? (defaultValues ?? values) : (defaultValues ?? values)[0]
       }

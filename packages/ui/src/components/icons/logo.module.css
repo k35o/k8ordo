@@ -1,0 +1,11 @@
+.glyph {
+  fill: var(--color-primary-fg);
+}
+
+.primary {
+  fill: var(--color-logo-primary);
+}
+
+.secondary {
+  fill: var(--color-logo-secondary);
+}

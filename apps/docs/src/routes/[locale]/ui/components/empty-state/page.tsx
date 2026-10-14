@@ -7,8 +7,8 @@ import {
   Table,
   TableIcon,
 } from '@k8ordo/ui';
-import { CodeBlock } from '@k8ordo/ui/code-block';
 
+import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';
 import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
@@ -17,13 +17,16 @@ import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
 import * as m from '../../../../../messages';
 
+import page from '../../../../../styles/page.module.css';
+import styles from '../../../../../styles/pages/ui/components/empty-state.module.css';
+
 export default function EmptyStatePage() {
   return (
-    <div className="flex flex-col gap-8 py-12">
+    <div className={page.page}>
       <PageTitle name="EmptyState" />
-      <div className="flex flex-col gap-4">
+      <div className={page.stack}>
         <Heading level="h1">EmptyState</Heading>
-        <p className="text-fg-mute text-lg">
+        <p className={page.lead}>
           <Rich>{m.components.emptyState.description()}</Rich>
         </p>
         <div>
@@ -37,7 +40,7 @@ export default function EmptyStatePage() {
       </div>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
@@ -45,19 +48,19 @@ export default function EmptyStatePage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-8">
-        <div className="flex flex-col gap-4">
+      <section className={page.stackLg}>
+        <div className={page.stack}>
           <Heading level="h2">
             <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
           <ComponentPreview code='<EmptyState title="No posts yet" />'>
-            <div className="w-full">
+            <div className={styles.frame}>
               <EmptyState title="No posts yet" />
             </div>
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.emptyState.withActionTitle()}</Rich>
           </Heading>
@@ -73,7 +76,7 @@ export default function EmptyStatePage() {
   title="No matching posts"
 />`}
           >
-            <div className="w-full">
+            <div className={styles.frame}>
               <EmptyState
                 action={
                   <Button color="base" size="sm" variant="outline">
@@ -88,9 +91,9 @@ export default function EmptyStatePage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">Table.EmptyState</Heading>
-          <p className="text-fg-mute">
+          <p className={page.mute}>
             <Rich>{m.components.emptyState.inTableDescription()}</Rich>
           </p>
           <ComponentPreview
@@ -122,7 +125,7 @@ export default function EmptyStatePage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>

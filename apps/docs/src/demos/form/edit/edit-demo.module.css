@@ -1,0 +1,30 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 5);
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--spacing) * 3);
+}
+
+.statusLabel {
+  color: var(--color-fg-mute);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(var(--spacing) * 3);
+}
+
+.saved {
+  color: var(--color-fg-success);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+}

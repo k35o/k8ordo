@@ -1,12 +1,14 @@
 import type { Message } from '@k8ordo/i18n';
 import { Code } from '@k8ordo/ui';
-import { CodeBlock } from '@k8ordo/ui/code-block';
 
 import { Note, Pitfall } from '../../../../components/callout';
+import { CodeBlock } from '../../../../components/code-block';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Rich } from '../../../../components/rich';
 import * as m from '../../../../messages';
+
+import styles from '../../../../styles/pages/router/routes.module.css';
 
 const t = m.routerRoutes;
 
@@ -194,7 +196,7 @@ export default function RouterRoutesPage() {
             <li key={item.label()}>
               <Rich>{item.label()}</Rich>
               {item.error !== undefined && (
-                <span className="block break-all">
+                <span className={styles.error}>
                   <Code>{item.error}</Code>
                 </span>
               )}

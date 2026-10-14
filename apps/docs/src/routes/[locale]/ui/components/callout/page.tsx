@@ -1,6 +1,6 @@
 import { Anchor, Callout, Code, Heading, Separator } from '@k8ordo/ui';
-import { CodeBlock } from '@k8ordo/ui/code-block';
 
+import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';
 import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
@@ -9,13 +9,16 @@ import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
 import * as m from '../../../../../messages';
 
+import page from '../../../../../styles/page.module.css';
+import styles from '../../../../../styles/pages/ui/components/callout.module.css';
+
 export default function CalloutPage() {
   return (
-    <div className="flex flex-col gap-8 py-12">
+    <div className={page.page}>
       <PageTitle name="Callout" />
-      <div className="flex flex-col gap-4">
+      <div className={page.stack}>
         <Heading level="h1">Callout</Heading>
-        <p className="text-fg-mute text-lg">
+        <p className={page.lead}>
           <Rich>{m.components.callout.description()}</Rich>
         </p>
         <div>
@@ -29,7 +32,7 @@ export default function CalloutPage() {
       </div>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
@@ -37,8 +40,8 @@ export default function CalloutPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-8">
-        <div className="flex flex-col gap-4">
+      <section className={page.stackLg}>
+        <div className={page.stack}>
           <Heading level="h2">
             <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
@@ -53,7 +56,7 @@ export default function CalloutPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.callout.tonesTitle()}</Rich>
           </Heading>
@@ -63,7 +66,7 @@ export default function CalloutPage() {
 <Callout label="Pitfall" tone="warning">…</Callout>
 <Callout label="Deprecated" tone="error">…</Callout>`}
           >
-            <div className="flex w-full flex-col gap-3">
+            <div className={styles.list}>
               <Callout label="Supported" tone="success">
                 <p>Works in every core browser.</p>
               </Callout>
@@ -80,11 +83,11 @@ export default function CalloutPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.callout.richTitle()}</Rich>
           </Heading>
-          <p className="text-fg-mute">
+          <p className={page.mute}>
             <Rich>{m.components.callout.richDescription()}</Rich>
           </p>
           <ComponentPreview
@@ -106,7 +109,7 @@ export default function CalloutPage() {
   <p>This article reflects the API as of July 2023.</p>
 </Callout>`}
           >
-            <div className="flex w-full flex-col gap-3">
+            <div className={styles.list}>
               <Callout label="Pitfall" tone="warning">
                 <p>
                   Passing <Code>value</Code> makes the field controlled, and a
@@ -127,18 +130,18 @@ export default function CalloutPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.callout.versusAlertTitle()}</Rich>
           </Heading>
-          <p className="text-fg-mute">
+          <p className={page.mute}>
             <Rich>{m.components.callout.versusAlertDescription()}</Rich>
           </p>
         </div>
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>

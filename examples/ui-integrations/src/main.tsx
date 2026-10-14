@@ -4,7 +4,7 @@ import { createRoot } from 'react-dom/client';
 
 import App from './app';
 
-import '@k8ordo/ui/tailwind.css';
+import './styles.css';
 
 const rootElement = document.querySelector('#root');
 if (!rootElement) {

@@ -1,0 +1,27 @@
+.root {
+  inline-size: 100%;
+  border-radius: var(--radius-xl);
+  border-width: 1px;
+  border-color: var(--color-border-base);
+  background-color: var(--color-bg-base);
+  padding-inline: calc(var(--spacing) * 3);
+  padding-block: calc(var(--spacing) * 2);
+  font-variant-numeric: tabular-nums;
+
+  &:read-only {
+    cursor: not-allowed;
+    background-color: var(--color-bg-subtle);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    border-color: var(--color-border-mute);
+    background-color: var(--color-bg-mute);
+  }
+
+  /* 共有の輪の枠線（透明）より詳細度を上げ、CSS の読み込み順に頼らない */
+  &[aria-invalid='true'],
+  &[aria-invalid='true']:focus-visible {
+    border-color: var(--color-border-error);
+  }
+}

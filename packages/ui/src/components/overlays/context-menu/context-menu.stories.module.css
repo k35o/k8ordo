@@ -1,0 +1,15 @@
+.area {
+  display: grid;
+  place-items: center;
+  width: calc(var(--spacing) * 80);
+  height: calc(var(--spacing) * 40);
+  color: var(--color-fg-mute);
+  border-width: 1px;
+  border-style: dashed;
+  border-color: var(--color-border-base);
+  border-radius: var(--radius-xl);
+}
+
+.frame {
+  padding: calc(var(--spacing) * 6);
+}

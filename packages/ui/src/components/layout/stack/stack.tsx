@@ -1,10 +1,12 @@
+import { clsx } from 'clsx';
 import type { FC, HTMLAttributes, PropsWithChildren } from 'react';
 
 import { GAP_CLASS } from '../_shared/gap';
 import type { GapSize } from '../_shared/gap';
 import { PADDING_CLASS } from '../_shared/padding';
 import type { PaddingSize } from '../_shared/padding';
-import { cn } from './../../../helpers/cn';
+
+import styles from './stack.module.css';
 
 export type StackProps = PropsWithChildren<
   {
@@ -18,17 +20,17 @@ export type StackProps = PropsWithChildren<
 >;
 
 const ALIGN_CLASS = {
-  start: 'items-start',
-  center: 'items-center',
-  end: 'items-end',
-  stretch: 'items-stretch',
+  start: styles.alignStart,
+  center: styles.alignCenter,
+  end: styles.alignEnd,
+  stretch: styles.alignStretch,
 } as const;
 
 const JUSTIFY_CLASS = {
-  start: 'justify-start',
-  center: 'justify-center',
-  end: 'justify-end',
-  between: 'justify-between',
+  start: styles.justifyStart,
+  center: styles.justifyCenter,
+  end: styles.justifyEnd,
+  between: styles.justifyBetween,
 } as const;
 
 export const Stack: FC<StackProps> = ({
@@ -42,9 +44,9 @@ export const Stack: FC<StackProps> = ({
 }) => (
   <div
     {...rest}
-    className={cn(
-      'flex',
-      direction === 'row' ? 'flex-row' : 'flex-col',
+    className={clsx(
+      styles.root,
+      direction === 'row' ? styles.row : styles.column,
       GAP_CLASS[gap],
       padding && PADDING_CLASS[padding],
       align && ALIGN_CLASS[align],

@@ -1,10 +1,11 @@
-import { CodeBlock } from '@k8ordo/ui/code-block';
-
 import { ApiEntry } from '../../../../../components/api-entry';
+import { CodeBlock } from '../../../../../components/code-block';
 import { DocPage } from '../../../../../components/doc-page';
 import { LocaleAnchor } from '../../../../../components/locale-anchor';
 import { Rich } from '../../../../../components/rich';
 import * as m from '../../../../../messages';
+
+import styles from '../../../../../styles/pages/form/reference/client.module.css';
 
 const t = m.formReferenceClient;
 const FROM = '@k8ordo/form';
@@ -88,7 +89,7 @@ export default function FormReferenceClientPage() {
         summary={t.formHookSummary}
       >
         <CodeBlock code={USE_FORM_EXAMPLE} lang="tsx" title="talk-form.tsx" />
-        <p className="leading-relaxed">
+        <p className={styles.example}>
           <Rich>{t.formHookExampleFlow()}</Rich>
           <LocaleAnchor path="/:locale/form/get-started">
             {m.nav.getStarted()}

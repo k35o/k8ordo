@@ -43,6 +43,8 @@ lerna-debug.log*
 
 # TypeScript
 *.tsbuildinfo
+# better-css-modules generate が書く CSS Modules の型
+__generated__
 next-env.d.ts
 
 # Editor directories and files

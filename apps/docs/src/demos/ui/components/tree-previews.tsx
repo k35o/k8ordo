@@ -4,6 +4,8 @@ import { Tree } from '@k8ordo/ui';
 import type { TreeItem } from '@k8ordo/ui';
 import { useState } from 'react';
 
+import styles from './tree-previews.module.css';
+
 const FILES: TreeItem[] = [
   {
     id: 'src',
@@ -26,7 +28,7 @@ const FILES: TreeItem[] = [
 
 export function TreePreview() {
   return (
-    <div className="w-64">
+    <div className={styles.frame}>
       <Tree defaultExpandedIds={['src']} items={FILES} label="Files" />
     </div>
   );
@@ -39,7 +41,7 @@ export function TreeControlledPreview() {
   ]);
   const [selectedId, setSelectedId] = useState<string | null>('card');
   return (
-    <div className="flex w-64 flex-col gap-4">
+    <div className={styles.root}>
       <Tree
         expandedIds={expandedIds}
         items={FILES}
@@ -48,7 +50,7 @@ export function TreeControlledPreview() {
         onExpandedChange={setExpandedIds}
         selectedId={selectedId}
       />
-      <p className="text-fg-mute text-sm">Selected: {selectedId}</p>
+      <p className={styles.selection}>Selected: {selectedId}</p>
     </div>
   );
 }

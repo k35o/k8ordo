@@ -1,0 +1,11 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 1);
+}
+
+.nested {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 0.5);
+}

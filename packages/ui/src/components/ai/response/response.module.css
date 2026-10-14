@@ -1,0 +1,465 @@
+/* streamdown の根。段落やブロックの間を空ける */
+.markdown {
+  white-space: normal;
+
+  @scope (&) {
+    :where(& > :not(:last-child)) {
+      margin-block-end: calc(var(--spacing) * 4);
+    }
+    :where(& > :first-child) {
+      margin-block-start: 0;
+    }
+    :where(& > :last-child) {
+      margin-block-end: 0;
+    }
+  }
+}
+
+/*
+ * streamdown が描く Markdown。streamdown は要素に Tailwind のクラスを付けるが、
+ * 利用側の Tailwind は node_modules を走査しないので、それには頼らない。
+ * streamdown がどの要素にも付ける data-streamdown で見た目を当てる。
+ * 確認ダイアログや表の全画面も、Response の中の portal 先に出すので、この
+ * @scope の中に収まる。
+ */
+.root {
+  color: var(--color-fg-base);
+
+  @scope (&) {
+    [data-streamdown^='heading-'] {
+      margin-block: calc(var(--spacing) * 6) calc(var(--spacing) * 2);
+      font-weight: var(--font-weight-bold);
+    }
+    [data-streamdown='heading-1'] {
+      font-size: var(--font-size-3xl);
+      line-height: var(--line-height-3xl);
+    }
+    [data-streamdown='heading-2'] {
+      font-size: var(--font-size-2xl);
+      line-height: var(--line-height-2xl);
+    }
+    [data-streamdown='heading-3'] {
+      font-size: var(--font-size-xl);
+      line-height: var(--line-height-xl);
+    }
+    [data-streamdown='heading-4'] {
+      font-size: var(--font-size-lg);
+      line-height: var(--line-height-lg);
+    }
+    [data-streamdown='heading-5'] {
+      font-size: var(--font-size-md);
+      line-height: var(--line-height-md);
+    }
+    [data-streamdown='heading-6'] {
+      font-size: var(--font-size-sm);
+      line-height: var(--line-height-sm);
+    }
+
+    [data-streamdown='strong'] {
+      font-weight: var(--font-weight-bold);
+    }
+
+    /* linkSafety を有効にすると <a> でなく <button> になる */
+    [data-streamdown='link'] {
+      overflow-wrap: anywhere;
+      color: var(--color-fg-info);
+      font-weight: var(--font-weight-medium);
+      text-align: start;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    [data-streamdown='inline-code'] {
+      padding: calc(var(--spacing) * 0.5) calc(var(--spacing) * 1.5);
+      border-radius: var(--radius-sm);
+      background-color: var(--color-bg-mute);
+      font-family: var(--font-family-mono);
+      font-size: var(--font-size-sm);
+      line-height: var(--line-height-sm);
+    }
+
+    [data-streamdown='unordered-list'],
+    [data-streamdown='ordered-list'] {
+      white-space: normal;
+      list-style-position: inside;
+    }
+    [data-streamdown='unordered-list'] {
+      list-style-type: disc;
+    }
+    [data-streamdown='ordered-list'] {
+      list-style-type: decimal;
+    }
+    [data-streamdown='list-item']
+      :is(
+        [data-streamdown='unordered-list'],
+        [data-streamdown='ordered-list']
+      ) {
+      padding-inline-start: calc(var(--spacing) * 6);
+    }
+    [data-streamdown='list-item'] {
+      padding-block: calc(var(--spacing) * 1);
+    }
+    [data-streamdown='list-item'] > p {
+      display: inline;
+    }
+
+    [data-streamdown='blockquote'] {
+      margin-block: calc(var(--spacing) * 4);
+      padding-inline-start: calc(var(--spacing) * 4);
+      border-inline-start: 4px solid
+        color-mix(in oklab, var(--color-fg-mute) 30%, transparent);
+      color: var(--color-fg-mute);
+      font-style: italic;
+    }
+
+    [data-streamdown='horizontal-rule'] {
+      margin-block: calc(var(--spacing) * 6);
+      border-color: var(--color-border-mute);
+    }
+
+    [data-streamdown='superscript'],
+    [data-streamdown='subscript'] {
+      font-size: var(--font-size-xs);
+    }
+
+    [data-streamdown='image-wrapper'] {
+      position: relative;
+      display: inline-block;
+      margin-block: calc(var(--spacing) * 4);
+    }
+    [data-streamdown='image'] {
+      max-width: 100%;
+      border-radius: var(--radius-lg);
+    }
+    [data-streamdown='image-placeholder'] {
+      width: calc(var(--spacing) * 48);
+      height: calc(var(--spacing) * 24);
+      border-radius: var(--radius-lg);
+      background-color: var(--color-bg-mute);
+    }
+    [data-streamdown='image-fallback'] {
+      color: var(--color-fg-mute);
+      font-size: var(--font-size-xs);
+      line-height: var(--line-height-xs);
+      font-style: italic;
+    }
+
+    /* コードブロック。色を付けるのは code の plugins を渡したときだけで、
+       shiki の色は streamdown が --sdm-c などに書く */
+    [data-streamdown='code-block'] {
+      position: relative;
+      display: flex;
+      width: 100%;
+      flex-direction: column;
+      gap: calc(var(--spacing) * 2);
+      margin-block: calc(var(--spacing) * 4);
+      padding: calc(var(--spacing) * 2);
+      border: 1px solid var(--color-border-mute);
+      border-radius: var(--radius-xl);
+      background-color: var(--color-bg-subtle);
+    }
+    [data-streamdown='code-block-header'] {
+      display: flex;
+      height: calc(var(--spacing) * 8);
+      align-items: center;
+      color: var(--color-fg-mute);
+      font-size: var(--font-size-xs);
+      line-height: var(--line-height-xs);
+    }
+    [data-streamdown='code-block-header'] > span {
+      margin-inline-start: calc(var(--spacing) * 1);
+      font-family: var(--font-family-mono);
+      text-transform: lowercase;
+    }
+    [data-streamdown='code-block']
+      > div:has(> [data-streamdown='code-block-actions']) {
+      pointer-events: none;
+      position: absolute;
+      top: calc(var(--spacing) * 2);
+      right: calc(var(--spacing) * 2);
+      z-index: var(--z-index-raised);
+      display: flex;
+      align-items: center;
+    }
+    [data-streamdown='code-block-actions'] {
+      pointer-events: auto;
+      display: flex;
+      flex-shrink: 0;
+      align-items: center;
+      gap: calc(var(--spacing) * 2);
+      padding: calc(var(--spacing) * 1) calc(var(--spacing) * 1.5);
+      border: 1px solid var(--color-bg-subtle);
+      border-radius: var(--radius-md);
+      background-color: color-mix(
+        in oklab,
+        var(--color-bg-subtle) 70%,
+        transparent
+      );
+      backdrop-filter: blur(8px);
+    }
+    [data-streamdown='code-block-body'] {
+      overflow-x: auto;
+      padding: calc(var(--spacing) * 4);
+      border: 1px solid var(--color-border-mute);
+      border-radius: var(--radius-md);
+      background-color: var(--color-bg-base);
+      font-size: var(--font-size-sm);
+      line-height: var(--line-height-sm);
+    }
+    [data-streamdown='code-block-body'] > pre {
+      /* better-css-modules-disable-next-line tokens/color -- streamdown writes the colors of the highlighted code as custom properties, which no token can carry */
+      background-color: light-dark(
+        var(--sdm-bg, transparent),
+        var(--shiki-dark-bg, var(--sdm-bg, transparent))
+      );
+    }
+    [data-streamdown='code-block-body'] code > span {
+      display: block;
+    }
+    [data-streamdown='code-block-body'] code > span > span {
+      /* better-css-modules-disable-next-line tokens/color -- streamdown writes the colors of the highlighted code as custom properties, which no token can carry */
+      color: light-dark(
+        var(--sdm-c, currentcolor),
+        var(--shiki-dark, var(--sdm-c, currentcolor))
+      );
+    }
+
+    /* 行番号。lineNumbers を切ると code にクラスが付かない */
+    [data-streamdown='code-block-body'] code[class] {
+      counter-reset: line;
+    }
+    [data-streamdown='code-block-body'] code[class] > span::before {
+      content: counter(line);
+      counter-increment: line;
+      display: inline-block;
+      width: calc(var(--spacing) * 6);
+      margin-inline-end: calc(var(--spacing) * 4);
+      color: color-mix(in oklab, var(--color-fg-mute) 50%, transparent);
+      font-family: var(--font-family-mono);
+      font-size: var(--font-size-xs);
+      text-align: right;
+      user-select: none;
+    }
+
+    /* 表 */
+    [data-streamdown='table-wrapper'] {
+      display: flex;
+      flex-direction: column;
+      gap: calc(var(--spacing) * 2);
+      margin-block: calc(var(--spacing) * 4);
+      padding: calc(var(--spacing) * 2);
+      border: 1px solid var(--color-border-mute);
+      border-radius: var(--radius-lg);
+      background-color: var(--color-bg-subtle);
+    }
+    [data-streamdown='table-wrapper'] > div:not(:has(table)) {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: calc(var(--spacing) * 1);
+    }
+    [data-streamdown='table-wrapper'] > div:has(table) {
+      overflow: auto;
+      border: 1px solid var(--color-border-mute);
+      border-radius: var(--radius-md);
+      background-color: var(--color-bg-base);
+    }
+    [data-streamdown='table'] {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    [data-streamdown='table-header'] {
+      background-color: color-mix(
+        in oklab,
+        var(--color-bg-mute) 80%,
+        transparent
+      );
+    }
+    [data-streamdown='table-body']
+      > [data-streamdown='table-row']
+      + [data-streamdown='table-row'] {
+      border-top: 1px solid var(--color-border-mute);
+    }
+    [data-streamdown='table-header-cell'],
+    [data-streamdown='table-cell'] {
+      padding: calc(var(--spacing) * 2) calc(var(--spacing) * 4);
+      font-size: var(--font-size-sm);
+      line-height: var(--line-height-sm);
+      text-align: start;
+    }
+    [data-streamdown='table-header-cell'] {
+      white-space: nowrap;
+      font-weight: var(--font-weight-bold);
+    }
+
+    /* コードと表の操作ボタン（コピー、ダウンロード、全画面） */
+    :is(
+        [data-streamdown='code-block-actions'],
+        [data-streamdown='table-wrapper'],
+        [data-streamdown='mermaid-block-actions']
+      )
+      button {
+      padding: calc(var(--spacing) * 1);
+      color: var(--color-fg-mute);
+      cursor: pointer;
+      transition-property: color, background-color;
+      transition-duration: var(--duration-fast);
+      transition-timing-function: var(--easing-in-out);
+    }
+    @media (hover: hover) {
+      :is(
+          [data-streamdown='code-block-actions'],
+          [data-streamdown='table-wrapper'],
+          [data-streamdown='mermaid-block-actions']
+        )
+        button:hover {
+        color: var(--color-fg-base);
+      }
+    }
+    :is(
+        [data-streamdown='code-block-actions'],
+        [data-streamdown='table-wrapper'],
+        [data-streamdown='mermaid-block-actions']
+      )
+      button:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+
+    /* 表の全画面。Response の中の portal 先に出る */
+    [data-streamdown='table-fullscreen'] {
+      position: fixed;
+      inset: 0;
+      z-index: var(--z-index-modal);
+      display: flex;
+      flex-direction: column;
+      background-color: var(--color-bg-base);
+    }
+    [data-streamdown='table-fullscreen'] > [data-streamdown='table-wrapper'] {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      border: 0;
+      background-color: transparent;
+    }
+    [data-streamdown='table-fullscreen']
+      > [data-streamdown='table-wrapper']
+      > div:not(:has(table)) {
+      padding: calc(var(--spacing) * 4);
+    }
+    [data-streamdown='table-fullscreen']
+      > [data-streamdown='table-wrapper']
+      > div:has(table) {
+      flex: 1;
+      padding: 0 calc(var(--spacing) * 4) calc(var(--spacing) * 4);
+      border: 0;
+    }
+
+    /* linkSafety を有効にしたときの確認ダイアログ */
+    [data-streamdown='link-safety-modal'] {
+      position: fixed;
+      inset: 0;
+      z-index: var(--z-index-modal);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--color-back-drop);
+    }
+    [data-streamdown='link-safety-modal'] > div {
+      position: relative;
+      display: flex;
+      width: 100%;
+      max-width: 28rem;
+      flex-direction: column;
+      gap: calc(var(--spacing) * 4);
+      margin-inline: calc(var(--spacing) * 4);
+      padding: calc(var(--spacing) * 6);
+      border: 1px solid var(--color-border-mute);
+      border-radius: var(--radius-xl);
+      background-color: var(--color-bg-raised);
+      box-shadow: var(--shadow-lg);
+    }
+    [data-streamdown='link-safety-modal'] > div > button:first-child {
+      position: absolute;
+      top: calc(var(--spacing) * 4);
+      right: calc(var(--spacing) * 4);
+      padding: calc(var(--spacing) * 1);
+      border-radius: var(--radius-md);
+      color: var(--color-fg-mute);
+      cursor: pointer;
+    }
+    [data-streamdown='link-safety-modal'] > div > div:nth-child(2) {
+      display: flex;
+      flex-direction: column;
+      gap: calc(var(--spacing) * 2);
+    }
+    [data-streamdown='link-safety-modal'] > div > div:nth-child(2) > div {
+      display: flex;
+      align-items: center;
+      gap: calc(var(--spacing) * 2);
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-bold);
+      line-height: var(--line-height-lg);
+    }
+    [data-streamdown='link-safety-modal'] > div > div:nth-child(2) > p {
+      color: var(--color-fg-mute);
+      font-size: var(--font-size-sm);
+      line-height: var(--line-height-sm);
+    }
+    [data-streamdown='link-safety-modal'] > div > div:nth-child(3) {
+      overflow-wrap: anywhere;
+      max-height: calc(var(--spacing) * 32);
+      overflow-y: auto;
+      padding: calc(var(--spacing) * 3);
+      border-radius: var(--radius-md);
+      background-color: var(--color-bg-mute);
+      font-family: var(--font-family-mono);
+      font-size: var(--font-size-sm);
+      line-height: var(--line-height-sm);
+    }
+    [data-streamdown='link-safety-modal'] > div > div:last-child {
+      display: flex;
+      gap: calc(var(--spacing) * 2);
+    }
+    [data-streamdown='link-safety-modal'] > div > div:last-child > button {
+      display: flex;
+      flex: 1;
+      align-items: center;
+      justify-content: center;
+      gap: calc(var(--spacing) * 2);
+      padding: calc(var(--spacing) * 2) calc(var(--spacing) * 4);
+      border: 1px solid var(--color-border-mute);
+      border-radius: var(--radius-md);
+      background-color: var(--color-bg-base);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+      line-height: var(--line-height-sm);
+      cursor: pointer;
+    }
+    [data-streamdown='link-safety-modal']
+      > div
+      > div:last-child
+      > button:last-child {
+      border-color: transparent;
+      background-color: var(--color-primary-bg);
+      color: var(--color-primary-fg);
+    }
+    @media (hover: hover) {
+      [data-streamdown='link-safety-modal'] > div > button:first-child:hover,
+      [data-streamdown='link-safety-modal']
+        > div
+        > div:last-child
+        > button:hover {
+        background-color: var(--color-bg-mute);
+        color: var(--color-fg-base);
+      }
+      [data-streamdown='link-safety-modal']
+        > div
+        > div:last-child
+        > button:last-child:hover {
+        background-color: var(--color-primary-bg-emphasize);
+        color: var(--color-primary-fg);
+      }
+    }
+  }
+}

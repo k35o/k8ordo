@@ -1,11 +1,17 @@
 import { globSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
+import betterCssModules from '@better-css-modules/vite';
 import { storybookTest } from '@storybook/addon-vitest/vitest-plugin';
 import react from '@vitejs/plugin-react';
 import { playwright } from '@vitest/browser-playwright';
 import { vrt } from 'storybook-addon-vrt/vitest-plugin';
 import { defineConfig } from 'vite-plus';
+
+// Lightning CSS が下げて書き換えないよう、新しいブラウザを target にする。
+// 既定の target では :dir() が :lang() の並びに、入れ子が平らに書き換わる。
+// Baseline の newly available をそのまま使う方針なので、下げる先は持たない
+const CSS_TARGET = ['chrome146', 'edge146', 'firefox151', 'safari26'];
 
 // CI はエンジンごとにジョブを分けて並べるので、TEST_BROWSER で 1 つに絞れる
 const browsers = (['chromium', 'firefox', 'webkit'] as const).filter(
@@ -81,9 +87,15 @@ export default defineConfig({
   staged: {
     '*': 'vp check --fix',
   },
-  plugins: [react()],
+  plugins: [react(), betterCssModules()],
+  // 部品の CSS Modules は @scope (&) で書く。Vite 既定の postcss-modules は
+  // @scope の前置きの & で落ちるので、pack（tsdown）と同じ Lightning CSS で組む
+  css: { transformer: 'lightningcss' },
+  build: { cssTarget: CSS_TARGET },
   pack: {
     entry: [
+      // styles.css。@import をたどって 1 枚にまとめる
+      'src/styles/index.css',
       'src/**/*.{ts,tsx}',
       '!src/**/*.stories.tsx',
       '!src/**/*.test.{ts,tsx}',
@@ -96,6 +108,19 @@ export default defineConfig({
     // define なしに `import.meta.vitest` を畳めないため、テスト本体が利用者の
     // バンドルに残ってしまう。
     define: { 'import.meta.vitest': 'undefined' },
+    // tailwind.css は Tailwind の構文で書いた入口なので、組まずに利用者の
+    // Tailwind に渡す。中の `@import './index.css'` は隣の styles.css を指す
+    copy: [{ from: 'src/styles/tailwind.css', to: 'dist/styles' }],
+    plugins: [betterCssModules()],
+    css: {
+      target: CSS_TARGET,
+      // 各部品の .module.mjs が自分の CSS を import する。利用者は部品を
+      // import するだけで、使う部品の CSS だけを読み込む
+      inject: true,
+      // クラス名のハッシュをこのディレクトリからの相対パスで作る。無いと
+      // 絶対パスで作られ、ビルドする場所ごとにクラス名が変わる
+      lightningcss: { projectRoot: import.meta.dirname },
+    },
   },
   test: {
     fsModuleCache: true,
@@ -165,6 +190,11 @@ export default defineConfig({
             'src/components/form/**/*.test.tsx',
             'src/components/_internal/**/*.test.tsx',
           ],
+          // このプロジェクトは Playwright の本物の入力で欄を操作する。Firefox は
+          // ファイルごとのページを並べると、押されたページが前に出るたびに
+          // ほかのページのフォーカスを奪い、欄に blur が届く（Combobox の一覧が
+          // 選ぶ前に閉じる）。1 ページずつ流せば奪い合いが起きない
+          fileParallelism: false,
           browser: {
             enabled: true,
             instances: browsers.map((browser) => ({ browser })),
@@ -186,6 +216,7 @@ export default defineConfig({
             'src/components/**/*.test.ts',
             'src/integrations/**/*.test.{ts,tsx}',
             'src/i18n/**/*.test.ts',
+            'src/styles/**/*.test.ts',
             'scripts/**/*.test.ts',
           ],
           includeSource: [

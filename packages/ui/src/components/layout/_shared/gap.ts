@@ -1,9 +1,11 @@
+import styles from './gap.module.css';
+
 export type GapSize = 'none' | 'sm' | 'md' | 'lg' | 'xl';
 
 export const GAP_CLASS = {
-  none: 'gap-0',
-  sm: 'gap-2',
-  md: 'gap-4',
-  lg: 'gap-6',
-  xl: 'gap-8',
+  none: styles.none,
+  sm: styles.sm,
+  md: styles.md,
+  lg: styles.lg,
+  xl: styles.xl,
 } as const satisfies Record<GapSize, string>;

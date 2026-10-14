@@ -1,0 +1,75 @@
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 4);
+
+  @media (width >= 48rem) {
+    display: none;
+  }
+}
+
+.entry {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing);
+  padding-bottom: calc(var(--spacing) * 4);
+  border-bottom: 1px solid var(--color-border-mute);
+}
+
+.term {
+  font-weight: var(--font-weight-medium);
+}
+
+.detail {
+  color: var(--color-fg-mute);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+}
+
+.tableScroll {
+  display: none;
+  overflow-x: auto;
+
+  @media (width >= 48rem) {
+    display: block;
+  }
+}
+
+.table {
+  width: 100%;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+  text-align: left;
+}
+
+.row {
+  border-bottom: 1px solid var(--color-border-mute);
+}
+
+.columnHeader {
+  padding-block: calc(var(--spacing) * 3);
+  padding-right: calc(var(--spacing) * 6);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+}
+
+.lastColumnHeader {
+  padding-block: calc(var(--spacing) * 3);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+}
+
+.keyCell {
+  padding-block: calc(var(--spacing) * 3);
+  padding-right: calc(var(--spacing) * 6);
+  white-space: nowrap;
+}
+
+.cell {
+  padding-block: calc(var(--spacing) * 3);
+  padding-right: calc(var(--spacing) * 6);
+}
+
+.lastCell {
+  padding-block: calc(var(--spacing) * 3);
+}

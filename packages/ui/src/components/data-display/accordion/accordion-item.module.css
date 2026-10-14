@@ -1,0 +1,5 @@
+.root {
+  @container style(--writing: vertical) {
+    height: 100%;
+  }
+}

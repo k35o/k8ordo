@@ -10,6 +10,8 @@ import {
 } from '../../../../.storybook/pending-form';
 import { Checkbox } from './checkbox';
 
+import styles from './checkbox.stories.module.css';
+
 const meta: Meta<typeof Checkbox> = {
   title: 'components/form/checkbox',
   component: Checkbox,
@@ -124,7 +126,7 @@ const RefRender = () => {
   const ref = useRef<HTMLInputElement>(null);
 
   return (
-    <div className="flex flex-col items-start gap-2">
+    <div className={styles.column}>
       <Checkbox label="checkbox with ref" ref={ref} />
       <button
         onClick={() => {
@@ -154,7 +156,7 @@ const checkMarkOf = (checkbox: HTMLElement) =>
 
 export const CheckMarkFollowsReset: Story = {
   render: () => (
-    <form className="flex flex-col items-start gap-2">
+    <form className={styles.column}>
       <Checkbox label="unchecked by default" />
       <Checkbox defaultChecked label="checked by default" />
       <button type="reset">reset</button>
@@ -258,6 +260,12 @@ export const LabelHidden: Story = {
     await expect(
       canvas.getByRole('checkbox', { name: '行を選択' }),
     ).toBeInTheDocument();
-    await expect(canvas.getByText('行を選択')).toHaveClass('sr-only');
+    await expect(canvas.getByText('行を選択')).toHaveStyle({
+      position: 'absolute',
+      width: '1px',
+      height: '1px',
+      overflow: 'hidden',
+      clipPath: 'inset(50%)',
+    });
   },
 };

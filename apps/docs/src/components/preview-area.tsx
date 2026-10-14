@@ -6,7 +6,11 @@ import { getLocale } from '../i18n';
 import { useWritingMode } from '../theme/writing-mode-context';
 import { WritingModeSwitcher } from './writing-mode-switcher';
 
+import styles from './preview-area.module.css';
+
 export type Stage = 'page' | 'article';
+
+const STAGE = { page: styles.page, article: styles.article } as const;
 
 type Props = {
   children: ReactNode;
@@ -23,21 +27,17 @@ export const PreviewArea: FC<Props> = ({ children, stage = 'page' }) => {
   const locale = getLocale();
   const isVertical = locale === 'ja' && writingMode === 'vertical';
   return (
-    <div
-      className={
-        stage === 'page' ? 'bg-bg-surface relative' : 'bg-bg-base relative'
-      }
-    >
+    <div className={STAGE[stage]}>
       {locale === 'ja' && (
-        <div className="absolute top-2 right-2 z-10">
+        <div className={styles.switcher}>
           <WritingModeSwitcher />
         </div>
       )}
       <div
         className={
           isVertical
-            ? 'writing-v flex flex-wrap items-center gap-4 p-6 pt-14 min-inline-96'
-            : 'flex flex-wrap items-center gap-4 p-6 pt-14'
+            ? `writing-v ${styles.stage} ${styles.vertical}`
+            : styles.stage
         }
       >
         {children}

@@ -6,8 +6,8 @@ import {
   MailIcon,
   Separator,
 } from '@k8ordo/ui';
-import { CodeBlock } from '@k8ordo/ui/code-block';
 
+import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';
 import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
@@ -17,13 +17,16 @@ import { inheritsOf, propsOf } from '../../../../../data/component-props';
 import { ButtonAsLinkPreview } from '../../../../../demos/ui/components/button-previews';
 import * as m from '../../../../../messages';
 
+import page from '../../../../../styles/page.module.css';
+import styles from '../../../../../styles/pages/ui/components/button.module.css';
+
 export default function ButtonPage() {
   return (
-    <div className="flex flex-col gap-8 py-12">
+    <div className={page.page}>
       <PageTitle name="Button" />
-      <div className="flex flex-col gap-4">
+      <div className={page.stack}>
         <Heading level="h1">Button</Heading>
-        <p className="text-fg-mute text-lg">
+        <p className={page.lead}>
           <Rich>{m.components.button.description()}</Rich>
         </p>
         <div>
@@ -37,7 +40,7 @@ export default function ButtonPage() {
       </div>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
@@ -45,8 +48,8 @@ export default function ButtonPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-8">
-        <div className="flex flex-col gap-4">
+      <section className={page.stackLg}>
+        <div className={page.stack}>
           <Heading level="h2">
             <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
@@ -61,7 +64,7 @@ export default function ButtonPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.button.variantsTitle()}</Rich>
           </Heading>
@@ -76,7 +79,7 @@ export default function ButtonPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.button.colorsTitle()}</Rich>
           </Heading>
@@ -91,7 +94,7 @@ export default function ButtonPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.button.sizesTitle()}</Rich>
           </Heading>
@@ -106,7 +109,7 @@ export default function ButtonPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.button.iconsTitle()}</Rich>
           </Heading>
@@ -127,18 +130,18 @@ export default function ButtonPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.button.fullWidthTitle()}</Rich>
           </Heading>
           <ComponentPreview code="<Button fullWidth>Full Width Button</Button>">
-            <div className="w-full">
+            <div className={styles.frame}>
               <Button fullWidth>Full Width Button</Button>
             </div>
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.button.disabledTitle()}</Rich>
           </Heading>
@@ -147,7 +150,7 @@ export default function ButtonPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.button.renderItemTitle()}</Rich>
           </Heading>
@@ -168,7 +171,7 @@ export default function ButtonPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>

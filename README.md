@@ -11,15 +11,15 @@ Every package here commits to the same four things:
 
 ## Members
 
-| Package | What it is |
-| --- | --- |
-| [`@k8ordo/ui`](packages/ui) | React UI components with semantic design tokens, i18n, and generative-UI adapters |
-| [`@k8ordo/form`](packages/form) | HTML constraint attributes, messages, and server-side validation from one zod schema |
-| [`@k8ordo/state`](packages/state) | State declared by where it lives — URL, history entry, localStorage, sessionStorage, a cookie (one zod schema each), memory (a typed box) |
-| [`@k8ordo/router`](packages/router) | The URL's pathname axis: one route table, typed paths, over the Navigation API |
-| [`@k8ordo/framework`](packages/framework) | The application framework: routes from `src/routes/`, rendered at build time to run with no server (`mode: 'static'`) or per request on a server with Server Actions (`mode: 'server'`) |
-| [`@k8ordo/i18n`](packages/i18n) | The locale axis: one locale set for the URL segment, negotiation, and the params schema; each message a function that reads the locale where it is called, on either side of the network |
-| [`@k8ordo/color-scheme`](packages/color-scheme) | The colour-scheme axis: the visitor's light / dark / system preference, stored through `@k8ordo/state`, on `<html>` before the first paint |
+| Package                                         | What it is                                                                                                                                                                               |
+| ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`@k8ordo/ui`](packages/ui)                     | React UI components with semantic design tokens, i18n, and generative-UI adapters                                                                                                        |
+| [`@k8ordo/form`](packages/form)                 | HTML constraint attributes, messages, and server-side validation from one zod schema                                                                                                     |
+| [`@k8ordo/state`](packages/state)               | State declared by where it lives — URL, history entry, localStorage, sessionStorage, a cookie (one zod schema each), memory (a typed box)                                                |
+| [`@k8ordo/router`](packages/router)             | The URL's pathname axis: one route table, typed paths, over the Navigation API                                                                                                           |
+| [`@k8ordo/framework`](packages/framework)       | The application framework: routes from `src/routes/`, rendered at build time to run with no server (`mode: 'static'`) or per request on a server with Server Actions (`mode: 'server'`)  |
+| [`@k8ordo/i18n`](packages/i18n)                 | The locale axis: one locale set for the URL segment, negotiation, and the params schema; each message a function that reads the locale where it is called, on either side of the network |
+| [`@k8ordo/color-scheme`](packages/color-scheme) | The colour-scheme axis: the visitor's light / dark / system preference, stored through `@k8ordo/state`, on `<html>` before the first paint                                               |
 
 `@k8ordo/*` holds **primary libraries only** — the ones an application imports
 and builds on. Tools that plug into someone else's ecosystem (lint configs,
@@ -68,7 +68,7 @@ packages/
 examples/
   ui-integrations/       # @k8ordo/ui × generative UI adapters (Vite)
   ui-nextjs/             # @k8ordo/ui × Next.js
-  ui-css-modules/        # @k8ordo/ui with prebuilt CSS, no Tailwind
+  ui-css-modules/        # @k8ordo/ui with CSS Modules, no Tailwind
   static-basic/          # an application on @k8ordo/framework, mode: 'static'
   server-basic/          # an application on @k8ordo/framework, mode: 'server', with @k8ordo/form
 ```
@@ -79,17 +79,17 @@ in either mode, plus whichever `@k8ordo/*` packages they need. Only
 Vite), since a component library is what people add to an application they
 already have.
 
-| Command | |
-| --- | --- |
-| `pnpm build` | Build every package and app |
-| `pnpm build:examples` | Build every example |
-| `pnpm test` | Run every test; browser tests run in Chromium, Firefox, and WebKit (`TEST_BROWSER=<engine>` for one) |
-| `pnpm test:examples` | Run the examples' tests, which read their builds (`build:examples` first) |
-| `pnpm typecheck` | Type check every workspace |
-| `pnpm check` | Lint and format check (`check:write` to auto-fix) |
-| `pnpm check:no-polyfills` | Fail if a polyfill dependency has crept in |
-| `pnpm check:peer-copies` | Fail if a peer shared with `@k8ordo/*` resolves to two copies |
-| `pnpm change` | Record a release intent for the changed packages |
+| Command                   |                                                                                                      |
+| ------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `pnpm build`              | Build every package and app                                                                          |
+| `pnpm build:examples`     | Build every example                                                                                  |
+| `pnpm test`               | Run every test; browser tests run in Chromium, Firefox, and WebKit (`TEST_BROWSER=<engine>` for one) |
+| `pnpm test:examples`      | Run the examples' tests, which read their builds (`build:examples` first)                            |
+| `pnpm typecheck`          | Type check every workspace                                                                           |
+| `pnpm check`              | Lint and format check (`check:write` to auto-fix)                                                    |
+| `pnpm check:no-polyfills` | Fail if a polyfill dependency has crept in                                                           |
+| `pnpm check:peer-copies`  | Fail if a peer shared with `@k8ordo/*` resolves to two copies                                        |
+| `pnpm change`             | Record a release intent for the changed packages                                                     |
 
 CI runs the same checks on every pull request into `main` and again on every
 push to `main`, where they gate the release: nothing is published from a commit

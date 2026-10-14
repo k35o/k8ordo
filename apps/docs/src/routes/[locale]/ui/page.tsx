@@ -1,10 +1,11 @@
-import { CodeBlock } from '@k8ordo/ui/code-block';
-
+import { CodeBlock } from '../../../components/code-block';
 import { LandingClaim, LandingHero } from '../../../components/landing';
 import { Playground } from '../../../components/playground';
 import { OverlayDemo } from '../../../demos/ui/overlay-demo';
 import { VerticalDemo } from '../../../demos/ui/vertical-demo';
 import * as m from '../../../messages';
+
+import styles from '../../../styles/pages/ui.module.css';
 
 const HERO_STYLES = `import '@k8ordo/ui/styles.css';`;
 
@@ -27,7 +28,7 @@ if (result.ok) return <JsonRenderUI spec={result.spec} />;`;
 
 export default function UiPage() {
   return (
-    <div className="flex flex-1 flex-col">
+    <div className={styles.root}>
       <LandingHero
         code={
           <>

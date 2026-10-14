@@ -7,6 +7,8 @@ import { useState } from 'react';
 
 import * as m from '../../../messages';
 
+import styles from './rating-demo.module.css';
+
 type Props = {
   /** ページの Server Component が `formFields(ratingSchema)` で導いたもの。 */
   fields: FormFields<'rating', never>;
@@ -24,7 +26,7 @@ export function RatingDemo({ fields }: Props) {
   return (
     <form
       {...form.props}
-      className="flex flex-col gap-5"
+      className={styles.form}
       onReset={() => {
         form.props.onReset();
         setRating(0);
@@ -40,11 +42,11 @@ export function RatingDemo({ fields }: Props) {
         setSent(typeof value === 'string' ? value : '');
       }}
     >
-      <fieldset className="flex flex-col gap-2">
-        <legend className="text-sm font-bold">
+      <fieldset className={styles.field}>
+        <legend className={styles.legend}>
           {m.formCustomInputs.demoLabelRating()}
         </legend>
-        <div className="flex gap-1">
+        <div className={styles.stars}>
           {STARS.map((star) => (
             <Button
               aria-label={m.formCustomInputs.demoStar(star)}
@@ -63,14 +65,14 @@ export function RatingDemo({ fields }: Props) {
         </div>
       </fieldset>
       <HiddenValue name="rating" value={String(rating)} />
-      <div className="flex items-center gap-3">
-        <span className="text-fg-mute text-sm">isDirty</span>
+      <div className={styles.dirty}>
+        <span className={styles.dirtyLabel}>isDirty</span>
         <Badge
           label={String(form.isDirty)}
           tone={form.isDirty ? 'warning' : 'neutral'}
         />
       </div>
-      <div className="flex flex-wrap items-center gap-3">
+      <div className={styles.actions}>
         <Button type="submit" variant="solid">
           {m.formCustomInputs.demoSubmit()}
         </Button>
@@ -87,7 +89,7 @@ export function RatingDemo({ fields }: Props) {
         </Button>
       </div>
       {sent !== null && (
-        <p className="text-sm">
+        <p className={styles.sent}>
           <Code>{`rating=${sent}`}</Code>
         </p>
       )}

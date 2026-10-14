@@ -4,6 +4,8 @@ import { expect } from 'storybook/test';
 import { Alert } from '../../feedback/alert';
 import { Prose } from './prose';
 
+import styles from './prose.stories.module.css';
+
 const meta: Meta<typeof Prose> = {
   title: 'components/data-display/prose',
   component: Prose,
@@ -69,7 +71,7 @@ const Article = () => (
 
 export const Default: Story = {
   render: () => (
-    <div className="max-w-2xl" lang="ja">
+    <div className={styles.article} lang="ja">
       <Prose>
         <Article />
       </Prose>
@@ -106,7 +108,7 @@ export const Default: Story = {
 // 段落の間は空くが、最初の子の上には余白を足さない
 export const Flow: Story = {
   render: () => (
-    <div className="max-w-2xl" lang="ja">
+    <div className={styles.article} lang="ja">
       <Prose>
         <p>1 つ目の段落</p>
         <p>2 つ目の段落</p>
@@ -132,7 +134,7 @@ export const Flow: Story = {
 // リストや段落は Prose の組版を受けない
 export const ComponentsInside: Story = {
   render: () => (
-    <div className="max-w-2xl" lang="ja">
+    <div className={styles.article} lang="ja">
       <Prose>
         <p>部品の前の段落</p>
         <Alert message={['1 つ目の注意', '2 つ目の注意']} tone="warning" />
@@ -154,7 +156,7 @@ export const ComponentsInside: Story = {
 // remark-gfm のチェックボックスには名前が無いので、ここでは aria-label を足している
 export const GitHubFlavored: Story = {
   render: () => (
-    <div className="max-w-2xl" lang="ja">
+    <div className={styles.article} lang="ja">
       <Prose>
         <ul className="contains-task-list">
           <li className="task-list-item">
@@ -227,7 +229,7 @@ export const GitHubFlavored: Story = {
 // 日本語でない本文の強調は、傍点ではなく斜体にする
 export const English: Story = {
   render: () => (
-    <div className="max-w-2xl" lang="en">
+    <div className={styles.article} lang="en">
       <Prose>
         <p>
           Emphasis in <em>English</em> is italic, and <strong>strong</strong> is
@@ -250,7 +252,7 @@ export const Vertical: Story = {
     writingMode: 'vertical',
   },
   render: () => (
-    <div className="h-80" lang="ja">
+    <div className={styles.verticalArticle} lang="ja">
       <Prose>
         <h2>縦書きの見出し</h2>
         <p>縦書きでは、段落の頭を一字下げて組みます。</p>

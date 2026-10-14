@@ -3,6 +3,8 @@
 import * as m from '../messages';
 import { FRAME } from './frame';
 
+import styles from './footer.module.css';
+
 const RESOURCE_LINKS = [
   { href: 'https://github.com/k35o/k8ordo', label: 'GitHub' },
   { href: 'https://www.npmjs.com/search?q=%40k8ordo', label: 'npm' },
@@ -10,30 +12,21 @@ const RESOURCE_LINKS = [
 
 export function Footer() {
   return (
-    <footer className="border-border-mute bg-page border-t">
-      <div
-        className={`${FRAME} flex flex-col gap-6 py-10 md:flex-row md:items-end md:justify-between`}
-      >
-        <div className="flex flex-col gap-2">
-          <span className="flex items-baseline gap-1">
-            <span className="font-m-plus-2 font-palt text-fg-base font-bold">
-              k8ordo
-            </span>
-            <span
-              aria-hidden
-              className="bg-primary-border inline-block size-1.5 rounded-full"
-            />
+    <footer className={styles.footer}>
+      <div className={`${FRAME} ${styles.main}`}>
+        <div className={styles.brand}>
+          <span className={styles.mark}>
+            <span className={styles.wordmark}>k8ordo</span>
+            <span aria-hidden className={styles.dot} />
           </span>
-          <p className="text-fg-mute break-phrase text-sm">
-            {m.footer.tagline()}
-          </p>
+          <p className={styles.tagline}>{m.footer.tagline()}</p>
         </div>
         <nav aria-label={m.footer.resources()}>
-          <ul className="flex gap-6">
+          <ul className={styles.links}>
             {RESOURCE_LINKS.map((link) => (
               <li key={link.href}>
                 <a
-                  className="text-fg-mute hover:text-fg-base text-sm transition-colors duration-150 ease-out"
+                  className={styles.link}
                   href={link.href}
                   rel="noopener noreferrer"
                   target="_blank"
@@ -45,15 +38,11 @@ export function Footer() {
           </ul>
         </nav>
       </div>
-      <div
-        className={`${FRAME} border-border-subtle flex flex-wrap items-baseline justify-between gap-4 border-t py-4`}
-      >
-        <p className="text-fg-subtle text-xs">
-          <span className="tabular-nums">© 2026</span> k8o — MIT License
+      <div className={`${FRAME} ${styles.legal}`}>
+        <p className={styles.note}>
+          <span className={styles.year}>© 2026</span> k8o — MIT License
         </p>
-        <p className="text-fg-subtle text-xs tracking-normal">
-          {m.footer.typesetting()}
-        </p>
+        <p className={styles.typesetting}>{m.footer.typesetting()}</p>
       </div>
     </footer>
   );

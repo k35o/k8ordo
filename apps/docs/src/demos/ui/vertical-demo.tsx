@@ -5,22 +5,25 @@ import { useState } from 'react';
 
 import * as m from '../../messages';
 
+import page from '../../styles/page.module.css';
+import styles from './vertical-demo.module.css';
+
 export function VerticalDemo() {
   const [vertical, setVertical] = useState(true);
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className={styles.root}>
       <Switch
         checked={vertical}
         label={m.ui.demoVertical()}
         onChange={setVertical}
       />
-      <div className={vertical ? 'writing-v h-72 self-start' : 'writing-h'}>
+      <div className={vertical ? `writing-v ${styles.vertical}` : 'writing-h'}>
         <Card width="fit">
-          <div className="flex flex-col items-start gap-3 p-6">
+          <div className={styles.body}>
             <Badge label={m.ui.demoBadge()} tone="info" />
             <Heading level="h3">{m.ui.demoHeading()}</Heading>
-            <p className="text-fg-mute">{m.ui.demoBody()}</p>
+            <p className={page.mute}>{m.ui.demoBody()}</p>
             <Button variant="solid">{m.ui.demoButton()}</Button>
           </div>
         </Card>

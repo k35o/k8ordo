@@ -1,9 +1,11 @@
+import styles from './padding.module.css';
+
 export type PaddingSize = 'none' | 'sm' | 'md' | 'lg' | 'xl';
 
 export const PADDING_CLASS = {
-  none: 'p-0',
-  sm: 'p-2',
-  md: 'p-4',
-  lg: 'p-6',
-  xl: 'p-8',
+  none: styles.none,
+  sm: styles.sm,
+  md: styles.md,
+  lg: styles.lg,
+  xl: styles.xl,
 } as const satisfies Record<PaddingSize, string>;

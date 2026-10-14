@@ -45,7 +45,7 @@ The application will be available at `http://localhost:3000`.
 examples/ui-nextjs/
 ├── src/
 │   └── app/
-│       ├── globals.css        # Imports @k8ordo/ui/tailwind.css
+│       ├── globals.css        # Imports Tailwind, then @k8ordo/ui/tailwind.css
 │       ├── layout.tsx         # Root layout component
 │       ├── page.tsx           # Server Component: generates the prompt with catalog.prompt()
 │       └── gen-ui-client.tsx  # Client Component: renders the spec with <JsonRenderUI />
@@ -115,15 +115,17 @@ The project uses Next.js 16.3.3 with Turbopack, the App Router, and Next.js type
 
 ### Tailwind CSS
 
-Tailwind CSS 4 is configured with PostCSS. k8ordo UI's tokens are loaded in
-`src/app/globals.css` with a single import (no `@tailwind` directives needed):
+Tailwind CSS 4 is configured with PostCSS. `src/app/globals.css` imports
+Tailwind, then k8ordo UI's bridge:
 
 ```css
+@import 'tailwindcss';
 @import '@k8ordo/ui/tailwind.css';
 ```
 
-This is the Tailwind source entry, so the design tokens stay usable in this
-app's own markup. Projects without Tailwind import the prebuilt
+The bridge maps the design tokens onto Tailwind's theme, so they stay usable
+in this app's own markup (`bg-bg-base`, `text-fg-mute`). It does not import
+Tailwind itself: `@k8ordo/ui` does not depend on `tailwindcss`, the app does. Projects without Tailwind import the prebuilt
 `@k8ordo/ui/styles.css` instead — see `examples/ui-css-modules`.
 
 ### Client vs Server Components

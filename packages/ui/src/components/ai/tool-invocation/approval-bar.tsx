@@ -8,6 +8,8 @@ import { Button } from '../../buttons/button';
 import type { ButtonRenderItemProps } from '../../buttons/button';
 import type { ToolApproval, ToolApprovalResponse } from '../types';
 
+import styles from './approval-bar.module.css';
+
 // 答えている間も、押したボタンにフォーカスを残す。disabled にすると
 // Chromium は描画の更新のあとでフォーカスを body へ外し、バーが消えるときに
 // 見出しへ移せなくなる。無効は Button が添える aria-disabled で示し、
@@ -58,15 +60,15 @@ export const ApprovalBar: FC<Props> = ({
   return (
     <div
       aria-labelledby={nameId}
-      className="flex flex-wrap items-center gap-2"
+      className={styles.root}
       ref={keepFocusOnAnswer}
       role="group"
     >
-      <p className="text-fg-base min-w-0 flex-1 text-sm">
+      <p className={styles.request}>
         {approval.requestReason ?? messages.toolApprovalRequest}
       </p>
       {onApprovalResponse !== undefined && (
-        <div className="flex shrink-0 gap-2">
+        <div className={styles.buttons}>
           <Button
             color="base"
             disabled={isResponding}

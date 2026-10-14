@@ -1,6 +1,6 @@
 import { Anchor, Heading, Separator } from '@k8ordo/ui';
-import { CodeBlock } from '@k8ordo/ui/code-block';
 
+import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';
 import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
@@ -14,13 +14,15 @@ import {
 } from '../../../../../demos/ui/components/dialog-previews';
 import * as m from '../../../../../messages';
 
+import page from '../../../../../styles/page.module.css';
+
 export default function DialogPage() {
   return (
-    <div className="flex flex-col gap-8 py-12">
+    <div className={page.page}>
       <PageTitle name="Dialog" />
-      <div className="flex flex-col gap-4">
+      <div className={page.stack}>
         <Heading level="h1">Dialog</Heading>
-        <p className="text-fg-mute text-lg">
+        <p className={page.lead}>
           <Rich>{m.components.dialog.description()}</Rich>
         </p>
         <div>
@@ -34,7 +36,7 @@ export default function DialogPage() {
       </div>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
@@ -46,8 +48,8 @@ import { Modal } from '@k8ordo/ui';`}
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-8">
-        <div className="flex flex-col gap-4">
+      <section className={page.stackLg}>
+        <div className={page.stack}>
           <Heading level="h2">
             <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
@@ -61,7 +63,7 @@ import { Modal } from '@k8ordo/ui';`}
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.common.basicUsageTitle()}</Rich>
           </Heading>
@@ -91,7 +93,7 @@ import { Modal } from '@k8ordo/ui';`}
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.dialog.alertDialogTitle()}</Rich>
           </Heading>
@@ -110,12 +112,12 @@ import { Modal } from '@k8ordo/ui';`}
       title="Delete Confirmation"
     />
     <Dialog.Content>
-      <div className="flex flex-col gap-4">
+      <div className={styles.body}>
         <p>
           Are you sure you want to delete this item?
           This action cannot be undone.
         </p>
-        <div className="flex justify-end gap-2">
+        <div className={styles.actions}>
           <Button
             color="base"
             onClick={() => setIsOpen(false)}
@@ -138,7 +140,7 @@ import { Modal } from '@k8ordo/ui';`}
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>

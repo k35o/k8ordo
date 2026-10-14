@@ -1,15 +1,17 @@
 'use client';
 
+import { clsx } from 'clsx';
 import { useCallback, useMemo } from 'react';
 import type { ChangeEvent, FC, InputHTMLAttributes, Ref } from 'react';
 import { useFormStatus } from 'react-dom';
 
 import { mergeRefs } from '../../../helpers/merge-refs';
-import { FOCUS_RING_PEER } from '../../_internal/focus-ring';
 import { ignoreClick } from '../../_internal/ignore-changes';
 import { CheckIcon, MinusIcon } from '../../icons';
 import { useCheckboxGroupContext } from '../checkbox-group/checkbox-group';
-import { cn } from './../../../helpers/cn';
+
+import srOnly from '../../_internal/sr-only.module.css';
+import styles from './checkbox.module.css';
 
 type BaseProps = {
   indeterminate?: boolean;
@@ -89,10 +91,10 @@ export const Checkbox: FC<Props> = ({
 
   return (
     <label
-      className={cn(
-        'inline-flex items-center text-left',
-        !labelHidden && 'gap-2',
-        disabledResolved ? 'cursor-not-allowed text-fg-mute' : 'cursor-pointer',
+      className={clsx(
+        styles.root,
+        !labelHidden && styles.withLabel,
+        disabledResolved && styles.disabled,
       )}
       onClickCapture={pending ? ignoreClick : undefined}
     >
@@ -103,7 +105,7 @@ export const Checkbox: FC<Props> = ({
           : { checked: isChecked })}
         aria-disabled={pending || undefined}
         aria-invalid={invalid}
-        className="peer sr-only"
+        className={clsx(srOnly.srOnly, styles.input)}
         disabled={disabledNative}
         name={groupContext?.name ?? name}
         onChange={(event) => {
@@ -118,23 +120,12 @@ export const Checkbox: FC<Props> = ({
         type="checkbox"
         value={itemValue}
       />
-      <span
-        aria-hidden
-        className={cn(
-          'inline-flex size-5 items-center justify-center rounded-md border-2 transition-colors duration-150 ease-out',
-          FOCUS_RING_PEER,
-          disabledResolved && 'border-border-mute bg-bg-mute',
-          // 非制御のとき、form の reset は change を飛ばさずに checked を戻すので、
-          // 見た目は state ではなく input の :checked から引く
-          'border-border-mute bg-bg-base *:invisible',
-          'peer-checked:border-border-base peer-checked:bg-primary-bg peer-checked:text-fg-base peer-checked:*:visible',
-          'peer-indeterminate:border-border-base peer-indeterminate:bg-primary-bg peer-indeterminate:text-fg-base peer-indeterminate:*:visible',
-          invalid && 'border-border-error peer-checked:border-border-error',
-        )}
-      >
+      <span aria-hidden className={clsx(styles.box, invalid && styles.invalid)}>
         {indeterminate ? <MinusIcon size="sm" /> : <CheckIcon size="sm" />}
       </span>
-      <span className={labelHidden ? 'sr-only' : 'text-lg'}>{label}</span>
+      <span className={labelHidden ? srOnly.srOnly : styles.label}>
+        {label}
+      </span>
     </label>
   );
 };

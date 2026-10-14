@@ -1,0 +1,112 @@
+.root {
+  display: grid;
+}
+
+.cols1 {
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+.cols2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.cols3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.cols4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.cols5 {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.cols6 {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+/* 自動列。セルは minItemSize より細くならず、器がそれより狭いときは器に収める */
+.autoFill24 {
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(min(calc(var(--spacing) * 24), 100%), 1fr)
+  );
+}
+
+.autoFill32 {
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(min(calc(var(--spacing) * 32), 100%), 1fr)
+  );
+}
+
+.autoFill40 {
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(min(calc(var(--spacing) * 40), 100%), 1fr)
+  );
+}
+
+.autoFill48 {
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(min(calc(var(--spacing) * 48), 100%), 1fr)
+  );
+}
+
+.autoFill64 {
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(min(calc(var(--spacing) * 64), 100%), 1fr)
+  );
+}
+
+.autoFill80 {
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(min(calc(var(--spacing) * 80), 100%), 1fr)
+  );
+}
+
+.autoFit24 {
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(min(calc(var(--spacing) * 24), 100%), 1fr)
+  );
+}
+
+.autoFit32 {
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(min(calc(var(--spacing) * 32), 100%), 1fr)
+  );
+}
+
+.autoFit40 {
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(min(calc(var(--spacing) * 40), 100%), 1fr)
+  );
+}
+
+.autoFit48 {
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(min(calc(var(--spacing) * 48), 100%), 1fr)
+  );
+}
+
+.autoFit64 {
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(min(calc(var(--spacing) * 64), 100%), 1fr)
+  );
+}
+
+.autoFit80 {
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(min(calc(var(--spacing) * 80), 100%), 1fr)
+  );
+}

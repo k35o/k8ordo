@@ -1,0 +1,179 @@
+/*
+ * k8o のブログのコードブロックと同じ見た目にする。面は bg-surface の 1 枚で、
+ * ラベルとコピーボタンはその上に置き、帯も線も引かない。トークンの色は shiki
+ * の one-light（ライト）と plastic（ダーク）で、light-dark() で書くので .dark
+ * が切り替える color-scheme に従う。
+ */
+.root {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  border-radius: var(--radius-lg);
+  background-color: var(--color-bg-surface);
+}
+
+.label {
+  display: block;
+  padding-block: calc(var(--spacing) * 3) 0;
+  padding-inline: calc(var(--spacing) * 5) calc(var(--spacing) * 12);
+  /* better-css-modules-disable-next-line tokens/font-family -- the label keeps the stack of k8o's blog, whose fallbacks differ from --font-family-mono */
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-none);
+  color: var(--color-fg-mute);
+}
+
+.language {
+  user-select: none;
+}
+
+/* 長い 1 行目の右端と重なったときに文字を隠せるよう、面と同じ色を敷く */
+.copy {
+  position: absolute;
+  inset-inline-end: calc(var(--spacing) * 1.5);
+  top: calc(var(--spacing) * 1.5);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg-surface);
+}
+
+/*
+ * shiki が組んだ HTML。行の印（data-mark）と注記（data-callout）は、
+ * CodeBlock の変換器が付ける。
+ */
+.code {
+  min-width: 0;
+
+  @scope (&) {
+    pre {
+      overflow-x: auto;
+      padding: calc(var(--spacing) * 1.5) calc(var(--spacing) * 5)
+        calc(var(--spacing) * 4);
+      font-size: var(--font-size-sm);
+      line-height: var(--line-height-loose);
+      tab-size: 2;
+    }
+
+    /* 強制カラーでは box-shadow が消えるので、フォーカスは outline で描く */
+    pre:focus-visible {
+      outline: 2px solid var(--color-border-info);
+      outline-offset: -2px;
+    }
+
+    :global(.line) {
+      display: inline-block;
+      min-inline-size: 100%;
+    }
+
+    /* 印か注記が 1 つでもあれば、全行に印の幅だけ余白を取って桁を揃える */
+    pre[data-marked] :global(.line) {
+      position: relative;
+      padding-inline-start: calc(var(--spacing-em) * 4.8);
+    }
+
+    /* 行の頭の帯は疑似要素の border で描く。強制カラーでは影と地の色が
+       消えるが、border はシステムの色で塗り直されて残る */
+    :is([data-mark], [data-has-callout])::after {
+      content: '';
+      position: absolute;
+      inset-block: 0;
+      inset-inline-start: 0;
+      border-inline-start: 6px solid;
+    }
+
+    [data-mark='highlight'] {
+      background-color: color-mix(
+        in oklab,
+        var(--color-border-warning) 16%,
+        transparent
+      );
+    }
+    [data-mark='highlight']::after {
+      border-inline-start-color: var(--color-border-warning);
+    }
+
+    [data-mark='add'] {
+      background-color: color-mix(
+        in oklab,
+        var(--color-border-success) 14%,
+        transparent
+      );
+    }
+    [data-mark='add']::after {
+      border-inline-start-color: var(--color-border-success);
+    }
+
+    [data-mark='remove'] {
+      background-color: color-mix(
+        in oklab,
+        var(--color-border-error) 12%,
+        transparent
+      );
+    }
+    [data-mark='remove']::after {
+      border-inline-start-color: var(--color-border-error);
+    }
+
+    /* 注記の指す行。印と重なったら注記の色にする */
+    [data-has-callout] {
+      background-color: color-mix(
+        in oklab,
+        var(--color-border-info) 18%,
+        transparent
+      );
+    }
+    [data-has-callout]::after {
+      border-inline-start-color: var(--color-border-info);
+    }
+
+    [data-mark='add']::before,
+    [data-mark='remove']::before {
+      position: absolute;
+      inset-inline-start: calc(var(--spacing-em) * 1.6);
+      font-weight: var(--font-weight-bold);
+    }
+    [data-mark='add']::before {
+      content: '＋';
+      color: var(--color-fg-success);
+    }
+    [data-mark='remove']::before {
+      content: '－';
+      color: var(--color-fg-error);
+    }
+
+    /* 注記は、指す行の下に置く吹き出し。上向きの三角でその行を指す。字は
+       --font-size-callout（0.9em）なので、行の桁（印の余白と字下げ）に合わせる
+       位置も 0.9 で割る */
+    [data-callout] {
+      position: relative;
+      display: inline-block;
+      margin-block: calc(var(--spacing-em) * 2.4) calc(var(--spacing-em) * 1.2);
+      /* better-css-modules-disable-next-line tokens/spacing -- --callout-indent is the indent of the annotated line, which the highlighter writes in ch for each callout */
+      margin-inline-start: calc(
+        (calc(var(--spacing-em) * 4.8) + var(--callout-indent)) / 0.9
+      );
+      padding: calc(var(--spacing-em) * 2) calc(var(--spacing-em) * 4);
+      /* 強制カラーでは地が消えるので、透明な枠をシステムの色で残す */
+      border: 1px solid transparent;
+      border-radius: var(--radius-em);
+      background-color: var(--color-fg-info);
+      color: var(--color-fg-inverse);
+      font-size: var(--font-size-callout);
+      font-weight: var(--font-weight-medium);
+      line-height: var(--line-height-callout);
+      white-space: normal;
+    }
+    [data-callout]::before {
+      content: '';
+      position: absolute;
+      inset-block-start: calc(var(--spacing-em) * -2);
+      inset-inline-start: calc(var(--spacing-em) * 4);
+      border-inline: 0.5em solid transparent;
+      border-block-end: 0.5em solid var(--color-fg-info);
+    }
+    @media (forced-colors: active) {
+      [data-callout]::before {
+        display: none;
+      }
+    }
+  }
+}

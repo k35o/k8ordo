@@ -1,0 +1,39 @@
+/*
+ * フォーカスの輪。輪は box-shadow なので強制カラーでは消える。outline を
+ * 消したまま残すと強制カラーでフォーカスが見えなくなるので、そこでだけ
+ * 透明な outline を引き、システムの色で塗らせる。
+ */
+
+/* 枠線のある部品。輪と重ならないよう、フォーカス中は枠線を消す */
+.ring:focus-visible {
+  border-color: transparent;
+  outline-style: none;
+  box-shadow: var(--shadow-ring-info);
+
+  @media (forced-colors: active) {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+}
+
+.ringNoBorder:focus-visible {
+  outline-style: none;
+  box-shadow: var(--shadow-ring-info);
+
+  @media (forced-colors: active) {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+}
+
+/* 中の入力欄がフォーカスを持つあいだ、枠ごと輪で囲む */
+.ringWithin:focus-within {
+  border-color: transparent;
+  outline-style: none;
+  box-shadow: var(--shadow-ring-info);
+
+  @media (forced-colors: active) {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+}

@@ -2,11 +2,13 @@
 
 import { Button, ToastProvider, useToast } from '@k8ordo/ui';
 
+import styles from './toast-previews.module.css';
+
 function ToastDemo() {
   const { open } = useToast();
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className={styles.actions}>
       <Button
         color="primary"
         onClick={() => {
@@ -47,7 +49,7 @@ function CloseAllDemo() {
   const { open, closeAll } = useToast();
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className={styles.actions}>
       <Button
         color="base"
         onClick={() => {

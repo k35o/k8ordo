@@ -9,6 +9,8 @@ import {
 } from '../../../../.storybook/pending-form';
 import { Select } from './select';
 
+import styles from './select.stories.module.css';
+
 const meta: Meta<typeof Select> = {
   title: 'components/form/select',
   component: Select,
@@ -94,7 +96,7 @@ const RefRender = () => {
   const ref = useRef<HTMLSelectElement>(null);
 
   return (
-    <div className="flex flex-col items-start gap-2">
+    <div className={styles.column}>
       <Select
         aria-label="基数"
         id="select-ref"

@@ -2,8 +2,9 @@
 
 import type { FC, PropsWithChildren } from 'react';
 
-import { cn } from './../../../helpers/cn';
 import { useItemId, useOpen } from './context';
+
+import styles from './accordion-panel.module.css';
 
 export const AccordionPanel: FC<PropsWithChildren> = ({ children }) => {
   const id = useItemId();
@@ -11,7 +12,7 @@ export const AccordionPanel: FC<PropsWithChildren> = ({ children }) => {
   return (
     <section
       aria-labelledby={`${id}-button`}
-      className={cn({ hidden: !open }, 'pb-4')}
+      className={styles.root}
       hidden={!open}
       id={`${id}-panel`}
     >

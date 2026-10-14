@@ -13,6 +13,8 @@ import { LanguageSwitcher } from './language-switcher';
 import { LocaleAnchor } from './locale-anchor';
 import { ThemeSwitcher } from './theme-switcher';
 
+import styles from './navigation.module.css';
+
 // パッケージの区画にいるか: そのランディングか、その下のどこか
 const packageOf = (pathname: string): PackageEntry | undefined =>
   PACKAGES.find(
@@ -20,9 +22,7 @@ const packageOf = (pathname: string): PackageEntry | undefined =>
   );
 
 const itemClass = (isActive: boolean) =>
-  isActive
-    ? 'text-fg-base decoration-primary-border rounded-md px-3 py-1.5 text-sm font-medium whitespace-nowrap underline decoration-2 underline-offset-8'
-    : 'text-fg-mute hover:bg-bg-mute hover:text-fg-base rounded-md px-3 py-1.5 text-sm whitespace-nowrap transition-colors duration-150 ease-out';
+  isActive ? styles.current : styles.item;
 
 export function Navigation() {
   const pathname = usePathname();
@@ -35,22 +35,13 @@ export function Navigation() {
   );
 
   return (
-    <header className="border-border-mute bg-page border-b">
-      <nav className={`${FRAME} flex items-center gap-3 py-3 md:gap-6`}>
-        <LocaleAnchor
-          className="focus-visible:ring-border-info flex shrink-0 items-baseline gap-1 rounded-md focus-visible:ring-2 focus-visible:outline-hidden"
-          path="/:locale"
-          unstyled
-        >
-          <span className="font-m-plus-2 font-palt text-fg-base text-lg font-bold whitespace-nowrap">
-            k8ordo
-          </span>
-          <span
-            aria-hidden
-            className="bg-primary-border inline-block size-1.5 rounded-full"
-          />
+    <header className={styles.header}>
+      <nav className={`${FRAME} ${styles.nav}`}>
+        <LocaleAnchor className={styles.logo} path="/:locale" unstyled>
+          <span className={styles.wordmark}>k8ordo</span>
+          <span aria-hidden className={styles.dot} />
         </LocaleAnchor>
-        <ul className="hidden items-center gap-1 md:flex">
+        <ul className={styles.packages}>
           {PACKAGES.map((pkg) => {
             const isHere = pkg === current;
             return (
@@ -68,10 +59,10 @@ export function Navigation() {
             );
           })}
         </ul>
-        <div className="ml-auto flex shrink-0 items-center gap-2">
+        <div className={styles.tools}>
           <ThemeSwitcher />
           <LanguageSwitcher />
-          <div className="md:hidden">
+          <div className={styles.menu}>
             <DropdownMenu.Root>
               <DropdownMenu.IconTrigger
                 icon={<NavigationMenuIcon />}

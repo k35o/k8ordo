@@ -6,6 +6,8 @@ import { FormControl } from '../form-control';
 import { TextField } from '../text-field';
 import { Form } from './form';
 
+import styles from './form.stories.module.css';
+
 const meta: Meta<typeof Form> = {
   title: 'components/form/form',
   component: Form,
@@ -55,7 +57,7 @@ function GreetingForm() {
         renderInput={(props) => <TextField {...props} name="name" />}
       />
       <Button type="submit">送信</Button>
-      {message && <p className="text-fg-base text-sm">{message}</p>}
+      {message && <p className={styles.message}>{message}</p>}
     </Form>
   );
 }

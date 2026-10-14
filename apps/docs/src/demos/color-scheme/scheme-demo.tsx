@@ -6,6 +6,8 @@ import { Button, Code } from '@k8ordo/ui';
 
 import * as m from '../../messages';
 
+import styles from './scheme-demo.module.css';
+
 const CHOICES: ReadonlyArray<{
   value: ColorSchemePreference;
   label: () => string;
@@ -19,8 +21,8 @@ export function SchemeDemo() {
   const { scheme, preference, setPreference } = useColorScheme();
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap gap-3">
+    <div className={styles.root}>
+      <div className={styles.choices}>
         {CHOICES.map((choice) => (
           <Button
             aria-pressed={preference === choice.value}
@@ -35,12 +37,12 @@ export function SchemeDemo() {
           </Button>
         ))}
       </div>
-      <dl className="bg-bg-surface grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-2 rounded-lg px-4 py-3 text-sm">
-        <dt className="text-fg-mute">scheme</dt>
+      <dl className={styles.values}>
+        <dt className={styles.term}>scheme</dt>
         <dd>
           <Code>{scheme}</Code>
         </dd>
-        <dt className="text-fg-mute">preference</dt>
+        <dt className={styles.term}>preference</dt>
         <dd>
           <Code>{preference}</Code>
         </dd>

@@ -1,0 +1,25 @@
+.root {
+  color: var(--color-fg-info);
+  text-decoration-line: underline;
+  transition-property:
+    color, background-color, border-color, outline-color, text-decoration-color,
+    fill, stroke;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--easing-out);
+}
+
+@media (hover: hover) {
+  .root:hover {
+    color: var(--color-fg-base);
+  }
+}
+
+.root:focus-visible {
+  border-radius: var(--radius-sm);
+}
+
+.external {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(var(--spacing) * 0.5);
+}

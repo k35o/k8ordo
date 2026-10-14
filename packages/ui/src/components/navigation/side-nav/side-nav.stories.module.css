@@ -1,0 +1,3 @@
+.sidebar {
+  width: calc(var(--spacing) * 60);
+}

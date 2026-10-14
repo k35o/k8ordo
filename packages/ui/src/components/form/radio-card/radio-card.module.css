@@ -1,0 +1,146 @@
+.root {
+  margin: 0;
+  min-width: 0;
+  border-width: 0;
+  padding: 0;
+  inline-size: 100%;
+  display: grid;
+  gap: calc(var(--spacing) * 3);
+}
+
+.disabled {
+  opacity: 70%;
+}
+
+.card {
+  display: flex;
+  min-width: 0;
+  border-radius: var(--radius-xl);
+  border-width: 1px;
+  background-color: var(--color-bg-base);
+  padding: calc(var(--spacing) * 4);
+  text-align: left;
+  transition-property:
+    color, background-color, border-color, outline-color, text-decoration-color,
+    fill, stroke;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--easing-out);
+  inline-size: 100%;
+}
+
+.valid {
+  border-color: var(--color-border-mute);
+}
+
+.invalid {
+  border-color: var(--color-border-error);
+}
+
+.optionDisabled {
+  cursor: not-allowed;
+  border-color: var(--color-border-mute);
+  background-color: var(--color-bg-subtle);
+  color: var(--color-fg-mute);
+}
+
+@media (hover: hover) {
+  .valid:hover {
+    background-color: var(--color-bg-subtle);
+  }
+}
+
+/* 非制御のとき、form の reset は change を飛ばさずに checked を戻すので、
+   見た目は state ではなく input の :checked から引く。ホバーより後に置き、
+   選ばれた地をホバーの地に勝たせる */
+.card:has(:checked) {
+  border-color: var(--color-primary-border);
+  background-color: var(--color-primary-bg-subtle);
+}
+
+.invalid:has(:checked) {
+  border-color: var(--color-border-error);
+}
+
+.optionDisabled:has(:checked) {
+  border-color: var(--color-border-mute);
+  background-color: var(--color-bg-subtle);
+}
+
+@media (hover: hover) {
+  .card:has(:checked):hover {
+    background-color: var(--color-primary-bg-mute);
+  }
+}
+
+.card:has(.input:focus-visible) {
+  outline-style: none;
+  box-shadow: var(--shadow-ring-info);
+
+  @media (forced-colors: active) {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+}
+
+.visual {
+  margin-right: calc(var(--spacing) * 4);
+  flex-shrink: 0;
+}
+
+.text {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--spacing);
+}
+
+.label {
+  color: var(--color-fg-base);
+  font-weight: var(--font-weight-medium);
+}
+
+.description {
+  color: var(--color-fg-mute);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+}
+
+.indicator {
+  margin-top: calc(var(--spacing) * 0.5);
+  margin-left: calc(var(--spacing) * 4);
+  display: inline-flex;
+  width: calc(var(--spacing) * 5);
+  height: calc(var(--spacing) * 5);
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  border-width: 1px;
+  border-color: var(--color-border-mute);
+  background-color: var(--color-bg-base);
+}
+
+.input:checked ~ .indicator {
+  border-color: var(--color-border-base);
+  background-color: var(--color-primary-bg);
+}
+
+.dot {
+  width: calc(var(--spacing) * 2);
+  height: calc(var(--spacing) * 2);
+  border-radius: var(--radius-full);
+  background-color: var(--color-primary-border);
+  opacity: 0%;
+  transition-property: opacity;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--easing-in-out);
+
+  @media (forced-colors: active) {
+    background-color: var(--color-system-canvas-text);
+  }
+}
+
+.input:checked ~ .indicator > .dot {
+  opacity: 100%;
+}

@@ -1,0 +1,118 @@
+.pairs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing);
+}
+
+.pair {
+  padding-block: var(--spacing);
+  padding-inline: calc(var(--spacing) * 3);
+}
+
+.fgBase {
+  color: var(--color-fg-base);
+}
+
+.fgMute {
+  color: var(--color-fg-mute);
+}
+
+.fgSubtle {
+  color: var(--color-fg-subtle);
+}
+
+.fgInfo {
+  color: var(--color-fg-info);
+}
+
+.fgSuccess {
+  color: var(--color-fg-success);
+}
+
+.fgWarning {
+  color: var(--color-fg-warning);
+}
+
+.fgError {
+  color: var(--color-fg-error);
+}
+
+.primaryFg {
+  color: var(--color-primary-fg);
+}
+
+.secondaryFg {
+  color: var(--color-secondary-fg);
+}
+
+.bgBase {
+  background-color: var(--color-bg-base);
+}
+
+.bgRaised {
+  background-color: var(--color-bg-raised);
+}
+
+.bgSurface {
+  background-color: var(--color-bg-surface);
+}
+
+.bgSubtle {
+  background-color: var(--color-bg-subtle);
+}
+
+.bgMute {
+  background-color: var(--color-bg-mute);
+}
+
+.bgEmphasize {
+  background-color: var(--color-bg-emphasize);
+}
+
+.bgInfo {
+  background-color: var(--color-bg-info);
+}
+
+.bgSuccess {
+  background-color: var(--color-bg-success);
+}
+
+.bgWarning {
+  background-color: var(--color-bg-warning);
+}
+
+.bgError {
+  background-color: var(--color-bg-error);
+}
+
+.primaryBg {
+  background-color: var(--color-primary-bg);
+}
+
+.primaryBgSubtle {
+  background-color: var(--color-primary-bg-subtle);
+}
+
+.primaryBgMute {
+  background-color: var(--color-primary-bg-mute);
+}
+
+.primaryBgEmphasize {
+  background-color: var(--color-primary-bg-emphasize);
+}
+
+.secondaryBg {
+  background-color: var(--color-secondary-bg);
+}
+
+.secondaryBgSubtle {
+  background-color: var(--color-secondary-bg-subtle);
+}
+
+.secondaryBgMute {
+  background-color: var(--color-secondary-bg-mute);
+}
+
+.secondaryBgEmphasize {
+  background-color: var(--color-secondary-bg-emphasize);
+}

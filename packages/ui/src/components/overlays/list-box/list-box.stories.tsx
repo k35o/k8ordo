@@ -6,6 +6,8 @@ import { ListBox } from '.';
 import { ListIcon } from '../../icons';
 import type { Option } from './../../../types/variables';
 
+import styles from './list-box.stories.module.css';
+
 const meta: Meta<typeof ListBox.Root> = {
   title: 'components/overlays/list-box',
   component: ListBox.Root,
@@ -30,7 +32,7 @@ const OPTIONS: readonly Option[] = [
 const DefaultRender = () => {
   const [selected, setSelected] = useState<string>();
   return (
-    <div className="w-56">
+    <div className={styles.field}>
       <ListBox.Root
         onChange={(value: string) => {
           setSelected(value);
@@ -59,7 +61,7 @@ export const Default: Story = {
 const WithLabelRender = () => {
   const [selected, setSelected] = useState<string>();
   return (
-    <div className="w-56">
+    <div className={styles.field}>
       <ListBox.Root
         onChange={(value: string) => {
           setSelected(value);
@@ -100,7 +102,7 @@ export const WithLabel: Story = {
 const WithHelpContentRender = () => {
   const [selected, setSelected] = useState<string>('1');
   return (
-    <div className="w-56">
+    <div className={styles.field}>
       <ListBox.Root
         onChange={(value: string) => {
           setSelected(value);
@@ -110,9 +112,7 @@ const WithHelpContentRender = () => {
       >
         <ListBox.Trigger label="果物" />
         <ListBox.Content
-          helpContent={
-            <p className="text-fg-mute px-3 pb-2 text-sm">ひとつだけ選べます</p>
-          }
+          helpContent={<p className={styles.help}>ひとつだけ選べます</p>}
         />
       </ListBox.Root>
     </div>

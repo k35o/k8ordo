@@ -1,0 +1,18 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 12);
+  padding-block: calc(var(--spacing) * 12);
+}
+
+.lead {
+  max-width: 42rem;
+  color: var(--color-fg-mute);
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-relaxed);
+}
+
+.codeBlock {
+  width: 100%;
+  max-width: calc(var(--spacing) * 64);
+}

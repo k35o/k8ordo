@@ -1,0 +1,31 @@
+.surfaceSuccess {
+  background-color: var(--color-bg-success);
+}
+
+.surfaceInfo {
+  background-color: var(--color-bg-info);
+}
+
+.surfaceWarning {
+  background-color: var(--color-bg-warning);
+}
+
+.surfaceError {
+  background-color: var(--color-bg-error);
+}
+
+.iconSuccess {
+  color: var(--color-fg-success);
+}
+
+.iconInfo {
+  color: var(--color-fg-info);
+}
+
+.iconWarning {
+  color: var(--color-fg-warning);
+}
+
+.iconError {
+  color: var(--color-fg-error);
+}

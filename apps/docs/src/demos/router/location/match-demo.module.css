@@ -1,0 +1,65 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 6);
+}
+
+.current {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: calc(var(--spacing) * 2);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+}
+
+.currentLabel {
+  color: var(--color-fg-mute);
+}
+
+.inputs {
+  display: grid;
+  gap: calc(var(--spacing) * 4);
+
+  @media (width >= 40rem) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.options {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(var(--spacing) * 4);
+}
+
+.result {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 3);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+}
+
+.resultRow {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 1);
+}
+
+.term {
+  color: var(--color-fg-mute);
+}
+
+.value {
+  word-break: break-all;
+}
+
+.miss {
+  color: var(--color-fg-mute);
+}
+
+.invalid {
+  color: var(--color-fg-error);
+}

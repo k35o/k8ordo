@@ -1,6 +1,6 @@
 import { Anchor, Heading, Separator } from '@k8ordo/ui';
-import { CodeBlock } from '@k8ordo/ui/code-block';
 
+import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';
 import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
@@ -9,6 +9,8 @@ import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
 import { ContextMenuPreview } from '../../../../../demos/ui/components/context-menu-previews';
 import * as m from '../../../../../messages';
+
+import page from '../../../../../styles/page.module.css';
 
 const CODE = `<ContextMenu.Root>
   <ContextMenu.Trigger
@@ -30,11 +32,11 @@ const CODE = `<ContextMenu.Root>
 
 export default function ContextMenuPage() {
   return (
-    <div className="flex flex-col gap-8 py-12">
+    <div className={page.page}>
       <PageTitle name="ContextMenu" />
-      <div className="flex flex-col gap-4">
+      <div className={page.stack}>
         <Heading level="h1">ContextMenu</Heading>
-        <p className="text-fg-mute text-lg">
+        <p className={page.lead}>
           <Rich>{m.components.contextMenu.description()}</Rich>
         </p>
         <div>
@@ -48,7 +50,7 @@ export default function ContextMenuPage() {
       </div>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
@@ -56,11 +58,11 @@ export default function ContextMenuPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.usageTitle()}</Rich>
         </Heading>
-        <p className="text-fg-mute">
+        <p className={page.mute}>
           <Rich>{m.components.contextMenu.usageDescription()}</Rich>
         </p>
         <ComponentPreview code={CODE}>
@@ -69,7 +71,7 @@ export default function ContextMenuPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>

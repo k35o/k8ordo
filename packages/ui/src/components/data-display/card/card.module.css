@@ -1,0 +1,38 @@
+.root {
+  border-radius: var(--radius-xl);
+  background-color: var(--color-bg-base);
+}
+
+.shadow {
+  box-shadow: var(--shadow-sm);
+}
+
+.outline {
+  border: 1px solid var(--color-border-mute);
+}
+
+.full {
+  width: 100%;
+}
+
+.fit {
+  width: fit-content;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .interactive {
+    transition-property: transform, translate, scale, rotate;
+    transition-duration: var(--duration-fast);
+    transition-timing-function: var(--easing-in-out);
+  }
+
+  @media (hover: hover) {
+    .interactive:hover {
+      scale: 1.02;
+    }
+  }
+
+  .interactive:active {
+    scale: 0.98;
+  }
+}

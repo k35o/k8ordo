@@ -1,0 +1,76 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 1);
+  overflow-x: auto;
+  padding: calc(var(--spacing) * 0.5);
+}
+
+/* 罫は block 軸の終わり（横書きは下、縦書きは左）に引く */
+.list {
+  position: relative;
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  border-block-end-width: 1px;
+  border-color: var(--color-border-base);
+  padding: calc(var(--spacing) * 0.5);
+  overflow-wrap: normal;
+
+  @container style(--writing: vertical) {
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+}
+
+/*
+ * 選択インジケータ。選択中のタブを anchor にした単一要素を inset の
+ * transition でスライドさせる。position-area は transition できないため
+ * inset + anchor() を使う。self-* キーワードは論理プロパティと合わせて
+ * 縦書きでも正しい辺に解決される。
+ */
+.indicator {
+  position: absolute;
+  inset-inline-start: anchor(self-start);
+  inset-inline-end: anchor(self-end);
+  inset-block-start: calc(anchor(self-end) - var(--spacing) * 0.5);
+  block-size: calc(var(--spacing) * 1);
+  /* 純装飾。タブ下端やスライド通過中のクリックを横取りしない */
+  pointer-events: none;
+  background-color: var(--color-primary-border);
+
+  @media (forced-colors: active) {
+    background-color: var(--color-system-highlight);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    transition-property: inset;
+    transition-duration: var(--duration-moderate);
+    transition-timing-function: var(--easing-in-out);
+  }
+}
+
+.tab {
+  position: relative;
+  cursor: pointer;
+  border-radius: var(--radius-lg);
+  padding: calc(var(--spacing) * 2);
+  transition-property:
+    color, background-color, border-color, outline-color, text-decoration-color,
+    fill, stroke;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--easing-out);
+}
+
+@media (hover: hover) {
+  .unselected:hover {
+    background-color: var(--color-primary-bg-subtle);
+    color: var(--color-primary-fg);
+  }
+}
+
+.panel {
+  flex-grow: 1;
+  border-radius: var(--radius-lg);
+  padding: calc(var(--spacing) * 2);
+}

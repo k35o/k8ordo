@@ -1,0 +1,80 @@
+.root {
+  display: inline-flex;
+  cursor: pointer;
+  border-radius: var(--radius-full);
+  transition-property:
+    color, background-color, border-color, outline-color, text-decoration-color,
+    fill, stroke;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--easing-out);
+}
+
+.transparent {
+  background-color: transparent;
+}
+
+.base {
+  background-color: var(--color-bg-base);
+}
+
+.primary {
+  background-color: var(--color-primary-bg);
+}
+
+.secondary {
+  background-color: var(--color-secondary-bg);
+}
+
+@media (hover: hover) {
+  .transparent:hover,
+  .base:hover {
+    background-color: var(--color-bg-subtle);
+  }
+
+  .primary:hover {
+    background-color: var(--color-primary-bg-emphasize);
+  }
+
+  .secondary:hover {
+    background-color: var(--color-secondary-bg-emphasize);
+  }
+
+  /* 無効なあいだは、どの配色でもホバーで地を消す */
+  .disabled:hover {
+    background-color: transparent;
+  }
+}
+
+.transparent:active,
+.base:active {
+  background-color: var(--color-bg-mute);
+}
+
+.primary:active {
+  background-color: var(--color-primary-bg-emphasize);
+}
+
+.secondary:active {
+  background-color: var(--color-secondary-bg-emphasize);
+}
+
+.disabled:active {
+  background-color: transparent;
+}
+
+.sm {
+  padding: calc(var(--spacing) * 1);
+}
+
+.md {
+  padding: calc(var(--spacing) * 2);
+}
+
+.lg {
+  padding: calc(var(--spacing) * 3);
+}
+
+.disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}

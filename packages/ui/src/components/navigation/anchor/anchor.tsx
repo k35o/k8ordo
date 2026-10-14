@@ -1,6 +1,10 @@
+import { clsx } from 'clsx';
 import type { AnchorHTMLAttributes, ReactNode } from 'react';
 
 import { ExternalLinkIcon } from '../../icons';
+
+import focusRing from '../../_internal/focus-ring.module.css';
+import styles from './anchor.module.css';
 
 type RestProps = Omit<
   AnchorHTMLAttributes<HTMLAnchorElement>,
@@ -39,8 +43,7 @@ export const Anchor = <T extends string>({
 }: Props<T>) => {
   const isExternal = href.startsWith('http');
   const kind = !isExternal && !openInNewTab ? 'internal' : 'external';
-  const baseClassName =
-    'text-fg-info underline transition-colors duration-150 ease-out hover:text-fg-base focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-border-info focus-visible:rounded-sm';
+  const baseClassName = clsx(styles.root, focusRing.ringNoBorder);
   const props =
     kind === 'internal'
       ? {
@@ -48,7 +51,7 @@ export const Anchor = <T extends string>({
           children,
         }
       : {
-          className: `${baseClassName} inline-flex items-center gap-0.5`,
+          className: clsx(baseClassName, styles.external),
           target: '_blank',
           rel: 'noopener noreferrer',
           children: (

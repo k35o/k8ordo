@@ -1,0 +1,12 @@
+.sizes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(var(--spacing) * 3);
+}
+
+.tones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(var(--spacing) * 3);
+}

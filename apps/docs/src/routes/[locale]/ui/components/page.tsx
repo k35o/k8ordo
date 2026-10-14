@@ -1,19 +1,22 @@
 import { Heading } from '@k8ordo/ui';
-import { CodeBlock } from '@k8ordo/ui/code-block';
 
+import { CodeBlock } from '../../../../components/code-block';
 import { ComponentCatalog } from '../../../../components/component-catalog';
 import { PageTitle } from '../../../../components/page-title';
 import { Rich } from '../../../../components/rich';
 import { componentGroups } from '../../../../data/component-groups';
 import * as m from '../../../../messages';
 
+import page from '../../../../styles/page.module.css';
+import styles from '../../../../styles/pages/ui/components.module.css';
+
 export default function Components() {
   return (
-    <div className="flex flex-col gap-12 py-12">
+    <div className={styles.root}>
       <PageTitle title={m.nav.components} />
-      <header className="flex flex-col gap-4">
+      <header className={page.stack}>
         <Heading level="h1">{m.nav.components()}</Heading>
-        <p className="text-fg-mute max-w-2xl text-lg leading-relaxed">
+        <p className={styles.lead}>
           <Rich>{m.components.description()}</Rich>
         </p>
       </header>
@@ -21,7 +24,7 @@ export default function Components() {
         groups={componentGroups}
         serverPreviews={{
           CodeBlock: (
-            <div className="w-full max-w-64">
+            <div className={styles.codeBlock}>
               <CodeBlock code="const sum = a + b;" lang="ts" />
             </div>
           ),

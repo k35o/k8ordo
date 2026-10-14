@@ -1,0 +1,12 @@
+.body {
+  padding: calc(var(--spacing) * 6);
+}
+
+.link {
+  display: block;
+  padding: calc(var(--spacing) * 6);
+}
+
+.frame {
+  width: 100%;
+}

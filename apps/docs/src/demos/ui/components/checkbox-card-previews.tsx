@@ -3,6 +3,8 @@
 import { CheckboxCard } from '@k8ordo/ui';
 import { useState } from 'react';
 
+import styles from './checkbox-card-previews.module.css';
+
 const options = [
   {
     value: 'history',
@@ -25,11 +27,8 @@ export function CheckboxCardControlledPreview() {
   const [value, setValue] = useState<string[]>(['comments']);
 
   return (
-    <div className="w-full max-w-2xl">
-      <p
-        className="text-fg-base mb-3 font-medium"
-        id="checkbox-card-preview-label"
-      >
+    <div className={styles.frame}>
+      <p className={styles.groupLabel} id="checkbox-card-preview-label">
         Choose features to enable
       </p>
       <CheckboxCard

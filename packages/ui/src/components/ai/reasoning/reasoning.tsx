@@ -4,6 +4,8 @@ import { getMessages } from '../../../i18n/current';
 import { SparklesIcon } from '../../icons';
 import { Collapsible } from '../_internal/collapsible';
 
+import styles from './reasoning.module.css';
+
 type Props = {
   children: ReactNode;
   isStreaming?: boolean;
@@ -27,15 +29,13 @@ export const Reasoning: FC<Props> = ({
       isOpen={isOpen}
       onChange={onChange}
       icon={
-        <span className="text-fg-subtle">
+        <span className={styles.icon}>
           <SparklesIcon size="sm" />
         </span>
       }
       label={isStreaming ? messages.reasoningStreaming : messages.reasoning}
     >
-      <div className="text-fg-mute text-sm leading-relaxed whitespace-pre-wrap">
-        {children}
-      </div>
+      <div className={styles.text}>{children}</div>
     </Collapsible>
   );
 };

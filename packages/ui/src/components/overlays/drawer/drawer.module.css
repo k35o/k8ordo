@@ -1,0 +1,42 @@
+.root {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+
+  @container style(--writing: vertical) {
+    flex-direction: row;
+  }
+}
+
+.header {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  padding: calc(var(--spacing) * 4);
+  padding-bottom: calc(var(--spacing) * 2);
+}
+
+.title {
+  display: contents;
+}
+
+.close {
+  position: absolute;
+  top: calc(var(--spacing) * 2);
+}
+
+.closeLeft {
+  left: calc(var(--spacing) * 2);
+}
+
+.closeRight {
+  right: calc(var(--spacing) * 2);
+}
+
+.content {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: calc(var(--spacing) * 4);
+}

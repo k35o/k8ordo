@@ -1,0 +1,7 @@
+.section {
+  scroll-margin-top: calc(var(--spacing) * 32);
+}
+
+.frame {
+  width: calc(var(--spacing) * 64);
+}

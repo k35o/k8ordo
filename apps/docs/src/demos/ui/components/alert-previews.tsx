@@ -3,6 +3,8 @@
 import { Alert, Anchor, Button } from '@k8ordo/ui';
 import { useState } from 'react';
 
+import styles from './alert-previews.module.css';
+
 export function AlertActionLinkPreview() {
   return (
     <Alert
@@ -27,7 +29,7 @@ export function AlertActionButtonPreview() {
         label: 'Open settings',
         renderItem: ({ children }) => (
           <button
-            className="text-fg-info underline"
+            className={styles.infoAction}
             onClick={() => {}}
             type="button"
           >
@@ -71,7 +73,7 @@ export function AlertWithActionPreview() {
         label: 'Learn more',
         renderItem: ({ children }) => (
           <button
-            className="text-primary-fg cursor-pointer underline underline-offset-2"
+            className={styles.primaryAction}
             onClick={() => {}}
             type="button"
           >

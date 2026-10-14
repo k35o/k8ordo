@@ -1,6 +1,6 @@
 import { Anchor, DatePicker, Heading, Separator } from '@k8ordo/ui';
-import { CodeBlock } from '@k8ordo/ui/code-block';
 
+import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';
 import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
@@ -9,6 +9,9 @@ import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
 import { DatePickerControlledPreview } from '../../../../../demos/ui/components/date-previews';
 import * as m from '../../../../../messages';
+
+import page from '../../../../../styles/page.module.css';
+import styles from '../../../../../styles/pages/ui/components/date-picker.module.css';
 
 const FORM_EXAMPLE = `// schema.ts
 export const bookingSchema = z.object({ checkIn: z.iso.date() });
@@ -26,11 +29,11 @@ const checkIn = form.field('checkIn');
 
 export default function DatePickerPage() {
   return (
-    <div className="flex flex-col gap-8 py-12">
+    <div className={page.page}>
       <PageTitle name="DatePicker" />
-      <div className="flex flex-col gap-4">
+      <div className={page.stack}>
         <Heading level="h1">DatePicker</Heading>
-        <p className="text-fg-mute text-lg">
+        <p className={page.lead}>
           <Rich>{m.components.datePicker.description()}</Rich>
         </p>
         <div>
@@ -44,7 +47,7 @@ export default function DatePickerPage() {
       </div>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
@@ -52,13 +55,13 @@ export default function DatePickerPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-8">
-        <div className="flex flex-col gap-4">
+      <section className={page.stackLg}>
+        <div className={page.stack}>
           <Heading level="h2">
             <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
           <ComponentPreview code='<DatePicker aria-label="Check-in" defaultValue="2026-09-25" name="checkIn" />'>
-            <div className="w-full max-w-xs">
+            <div className={styles.frame}>
               <DatePicker
                 aria-label="Check-in"
                 defaultValue="2026-09-25"
@@ -66,16 +69,16 @@ export default function DatePickerPage() {
               />
             </div>
           </ComponentPreview>
-          <p className="text-fg-mute text-sm">
+          <p className={styles.note}>
             <Rich>{m.components.datePicker.firefoxNote()}</Rich>
           </p>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.datePicker.controlledTitle()}</Rich>
           </Heading>
-          <p className="text-fg-mute">
+          <p className={page.mute}>
             <Rich>{m.components.datePicker.controlledDescription()}</Rich>
           </p>
           <ComponentPreview
@@ -87,7 +90,7 @@ export default function DatePickerPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.datePicker.minMaxTitle()}</Rich>
           </Heading>
@@ -99,7 +102,7 @@ export default function DatePickerPage() {
   min="2026-09-20"
 />`}
           >
-            <div className="w-full max-w-xs">
+            <div className={styles.frame}>
               <DatePicker
                 aria-label="Check-in"
                 defaultValue="2026-09-25"
@@ -110,12 +113,12 @@ export default function DatePickerPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.datePicker.disabledTitle()}</Rich>
           </Heading>
           <ComponentPreview code='<DatePicker aria-label="Check-in" defaultValue="2026-09-25" disabled />'>
-            <div className="w-full max-w-xs">
+            <div className={styles.frame}>
               <DatePicker
                 aria-label="Check-in"
                 defaultValue="2026-09-25"
@@ -125,11 +128,11 @@ export default function DatePickerPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.datePicker.formTitle()}</Rich>
           </Heading>
-          <p className="text-fg-mute">
+          <p className={page.mute}>
             <Rich>{m.components.datePicker.formDescription()}</Rich>
           </p>
           <CodeBlock code={FORM_EXAMPLE} lang="tsx" />
@@ -137,7 +140,7 @@ export default function DatePickerPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>

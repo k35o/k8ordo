@@ -73,6 +73,11 @@ function Harness<F extends string, A extends string>({
 const labelled = (label: string) =>
   page.getByLabelText(label, { exact: false });
 
+// Radio・RadioCard・Switch の input は見えないよう隠してあり、上に選択肢の文字が
+// 重なる。input を直に押すとその文字が受け止めるので、利用者と同じく文字を押す
+const pressLabel = (text: string) =>
+  page.getByText(text, { exact: true }).click();
+
 // ボタンをクリックすると、blur で現れたエラーの分だけボタンがずれてクリックが
 // 外れることがある。送信そのものを主張したいので、DOM から送る
 const submit = () => {
@@ -484,7 +489,7 @@ describe('Radio', () => {
   it('送信に失敗しても、選んだ値を描き直す', async () => {
     const screen = await render(<Plan />);
 
-    await screen.getByRole('radio', { name: 'プロ' }).click();
+    await pressLabel('プロ');
     await refuseOnServer();
     submit();
 
@@ -497,7 +502,7 @@ describe('Radio', () => {
   it('reset で選択を外し、isDirty も下りる', async () => {
     const screen = await render(<Plan />);
 
-    await screen.getByRole('radio', { name: 'プロ' }).click();
+    await pressLabel('プロ');
     await expect.poll(isDirty).toBe('true');
     reset();
 
@@ -555,7 +560,7 @@ describe('RadioCard', () => {
   it('送信に失敗しても、選んだ値を描き直す', async () => {
     const screen = await render(<Plan />);
 
-    await screen.getByRole('radio', { name: 'プロ' }).click();
+    await pressLabel('プロ');
     await refuseOnServer();
     submit();
 
@@ -568,7 +573,7 @@ describe('RadioCard', () => {
   it('reset で選択を外し、次に選んだ値だけを送る', async () => {
     const screen = await render(<Plan />);
 
-    await screen.getByRole('radio', { name: 'プロ' }).click();
+    await pressLabel('プロ');
     await expect.poll(isDirty).toBe('true');
     reset();
 
@@ -613,7 +618,7 @@ describe('Checkbox', () => {
   it('チェックして送ると true が届く', async () => {
     const screen = await render(<Consent />);
 
-    await screen.getByRole('checkbox').click();
+    await screen.getByText('規約に同意する').click();
     submit();
 
     await expect.poll(() => received).toStrictEqual({ agree: true });
@@ -622,7 +627,7 @@ describe('Checkbox', () => {
   it('reset でチェックが外れ、isDirty も下りる', async () => {
     const screen = await render(<Consent />);
 
-    await screen.getByRole('checkbox').click();
+    await screen.getByText('規約に同意する').click();
     await expect.poll(isDirty).toBe('true');
     reset();
 
@@ -656,7 +661,7 @@ describe('Switch', () => {
   it('送信に失敗しても、オンにした状態を描き直す', async () => {
     const screen = await render(<Settings />);
 
-    await screen.getByRole('switch').click();
+    await pressLabel('通知を受け取る');
     await refuseOnServer();
     submit();
 
@@ -665,9 +670,9 @@ describe('Switch', () => {
   });
 
   it('オンにして送ると true が届く', async () => {
-    const screen = await render(<Settings />);
+    await render(<Settings />);
 
-    await screen.getByRole('switch').click();
+    await pressLabel('通知を受け取る');
     await userEvent.fill(labelled('メモ'), 'よろしく');
     submit();
 
@@ -679,7 +684,7 @@ describe('Switch', () => {
   it('reset でオフに戻り、isDirty も下りる', async () => {
     const screen = await render(<Settings />);
 
-    await screen.getByRole('switch').click();
+    await pressLabel('通知を受け取る');
     await expect.poll(isDirty).toBe('true');
     reset();
 
@@ -744,8 +749,8 @@ describe('CheckboxGroup', () => {
   it('1 つもチェックせずに離れると minChecked の文言を出す', async () => {
     const screen = await render(<Tags />);
 
-    await screen.getByRole('checkbox', { name: 'React' }).click();
-    await screen.getByRole('checkbox', { name: 'React' }).click();
+    await screen.getByText('React').click();
+    await screen.getByText('React').click();
     await userEvent.tab();
 
     await expect.poll(() => errorShown('1つ以上選んでください')).toBe(true);
@@ -754,7 +759,7 @@ describe('CheckboxGroup', () => {
   it('送信に失敗しても、チェックした値を描き直す', async () => {
     const screen = await render(<Tags />);
 
-    await screen.getByRole('checkbox', { name: 'Vue' }).click();
+    await screen.getByText('Vue').click();
     await refuseOnServer();
     submit();
 
@@ -767,10 +772,10 @@ describe('CheckboxGroup', () => {
   it('reset のあとも、次の操作は既定値から数える', async () => {
     const screen = await render(<Tags />);
 
-    await screen.getByRole('checkbox', { name: 'React' }).click();
+    await screen.getByText('React').click();
     reset();
     await expect.poll(isDirty).toBe('false');
-    await screen.getByRole('checkbox', { name: 'Svelte' }).click();
+    await screen.getByText('Svelte').click();
     await userEvent.fill(labelled('メモ'), 'よろしく');
     submit();
 
@@ -827,7 +832,7 @@ describe('CheckboxCard', () => {
   it('送信に失敗しても、チェックした値を描き直す', async () => {
     const screen = await render(<Tags />);
 
-    await screen.getByRole('checkbox', { name: 'Vue' }).click();
+    await screen.getByText('Vue').click();
     await refuseOnServer();
     submit();
 
@@ -840,12 +845,12 @@ describe('CheckboxCard', () => {
   it('reset のあとも、次の操作は既定値から数える', async () => {
     const screen = await render(<Tags />);
 
-    await screen.getByRole('checkbox', { name: 'React' }).click();
+    await screen.getByText('React').click();
     reset();
     await expect
       .element(screen.getByRole('checkbox', { name: 'React' }))
       .not.toBeChecked();
-    await screen.getByRole('checkbox', { name: 'Svelte' }).click();
+    await screen.getByText('Svelte').click();
     await userEvent.fill(labelled('メモ'), 'よろしく');
     submit();
 
@@ -1099,10 +1104,14 @@ describe('Slider', () => {
     </Harness>
   );
 
+  // このプロジェクトは styles.css を読まず、トークンの無い溝は高さを持たないので、
+  // つまみの input も見えない。値を入れることだけを確かめたいので、見えるまで待たない
+  const slide = () => userEvent.fill(labelled('音量'), '30', { force: true });
+
   it('動かした値が届く', async () => {
     await render(<Volume />);
 
-    await userEvent.fill(labelled('音量'), '30');
+    await slide();
     await userEvent.fill(labelled('メモ'), 'よろしく');
     submit();
 
@@ -1114,7 +1123,7 @@ describe('Slider', () => {
   it('送信に失敗しても、動かした値を描き直す', async () => {
     await render(<Volume />);
 
-    await userEvent.fill(labelled('音量'), '30');
+    await slide();
     await refuseOnServer();
     submit();
 
@@ -1125,7 +1134,7 @@ describe('Slider', () => {
   it('reset で描画時の値に戻り、isDirty も下りる', async () => {
     await render(<Volume />);
 
-    await userEvent.fill(labelled('音量'), '30');
+    await slide();
     await expect.poll(isDirty).toBe('true');
     reset();
 

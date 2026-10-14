@@ -1,6 +1,6 @@
 import { Anchor, Heading, Separator } from '@k8ordo/ui';
-import { CodeBlock } from '@k8ordo/ui/code-block';
 
+import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';
 import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
@@ -13,13 +13,15 @@ import {
 } from '../../../../../demos/ui/components/popover-previews';
 import * as m from '../../../../../messages';
 
+import page from '../../../../../styles/page.module.css';
+
 export default function PopoverPage() {
   return (
-    <div className="flex flex-col gap-8 py-12">
+    <div className={page.page}>
       <PageTitle name="Popover" />
-      <div className="flex flex-col gap-4">
+      <div className={page.stack}>
         <Heading level="h1">Popover</Heading>
-        <p className="text-fg-mute text-lg">
+        <p className={page.lead}>
           <Rich>{m.components.popover.description()}</Rich>
         </p>
         <div>
@@ -33,7 +35,7 @@ export default function PopoverPage() {
       </div>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
@@ -41,8 +43,8 @@ export default function PopoverPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-8">
-        <div className="flex flex-col gap-4">
+      <section className={page.stackLg}>
+        <div className={page.stack}>
           <Heading level="h2">
             <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
@@ -58,7 +60,7 @@ export default function PopoverPage() {
   <Popover.Content
     renderItem={(props) => (
       <div
-        className="rounded-lg bg-bg-raised p-4 shadow-md"
+        className={styles.panel}
         {...props}
       >
         <div role="menuitem">Popover content goes here.</div>
@@ -71,7 +73,7 @@ export default function PopoverPage() {
           </ComponentPreview>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className={page.stack}>
           <Heading level="h3">
             <Rich>{m.components.popover.placementTitle()}</Rich>
           </Heading>
@@ -84,7 +86,7 @@ export default function PopoverPage() {
   />
   <Popover.Content
     renderItem={(props) => (
-      <div className="rounded-lg bg-bg-raised p-4 shadow-md" {...props}>
+      <div className={styles.panel} {...props}>
         <div role="menuitem">Top placement</div>
       </div>
     )}
@@ -99,7 +101,7 @@ export default function PopoverPage() {
   />
   <Popover.Content
     renderItem={(props) => (
-      <div className="rounded-lg bg-bg-raised p-4 shadow-md" {...props}>
+      <div className={styles.panel} {...props}>
         <div role="menuitem">Right placement</div>
       </div>
     )}
@@ -114,7 +116,7 @@ export default function PopoverPage() {
   />
   <Popover.Content
     renderItem={(props) => (
-      <div className="rounded-lg bg-bg-raised p-4 shadow-md" {...props}>
+      <div className={styles.panel} {...props}>
         <div role="menuitem">Bottom placement</div>
       </div>
     )}
@@ -129,7 +131,7 @@ export default function PopoverPage() {
   />
   <Popover.Content
     renderItem={(props) => (
-      <div className="rounded-lg bg-bg-raised p-4 shadow-md" {...props}>
+      <div className={styles.panel} {...props}>
         <div role="menuitem">Left placement</div>
       </div>
     )}
@@ -142,7 +144,7 @@ export default function PopoverPage() {
       </section>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>

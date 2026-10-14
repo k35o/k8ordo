@@ -1,0 +1,7 @@
+.frame {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 4);
+  align-items: flex-start;
+  padding: calc(var(--spacing) * 6);
+}

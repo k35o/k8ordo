@@ -1,0 +1,17 @@
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 2);
+}
+
+.link {
+  padding-inline: calc(var(--spacing) * 3);
+  padding-block: calc(var(--spacing) * 2);
+  border-radius: var(--radius-md);
+
+  @media (hover: hover) {
+    &:hover {
+      background-color: var(--color-bg-mute);
+    }
+  }
+}

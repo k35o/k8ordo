@@ -3,6 +3,8 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Anchor } from '../../navigation/anchor';
 import { Alert } from './alert';
 
+import styles from './alert.stories.module.css';
+
 const meta: Meta<typeof Alert> = {
   title: 'components/feedback/alert',
   component: Alert,
@@ -65,7 +67,7 @@ export const ActionLink: Story = {
     action: {
       label: '詳しくはこちら',
       renderItem: ({ children }) => (
-        <a className="text-fg-info underline" href="https://example.com">
+        <a className={styles.action} href="https://example.com">
           {children}
         </a>
       ),
@@ -95,11 +97,7 @@ export const ActionButton: Story = {
     action: {
       label: '詳しく',
       renderItem: ({ children }) => (
-        <button
-          className="text-fg-info underline"
-          onClick={() => {}}
-          type="button"
-        >
+        <button className={styles.action} onClick={() => {}} type="button">
           {children}
         </button>
       ),
@@ -143,7 +141,7 @@ export const WithActionAndClose: Story = {
       label: '詳しくはこちら',
       renderItem: ({ children }) => (
         <button
-          className="text-primary-fg cursor-pointer underline underline-offset-2"
+          className={styles.primaryAction}
           onClick={() => {}}
           type="button"
         >

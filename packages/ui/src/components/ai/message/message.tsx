@@ -1,20 +1,37 @@
 'use client';
 
+import { clsx } from 'clsx';
 import { useMemo } from 'react';
 import type { FC, HTMLAttributes, ReactNode } from 'react';
 
-import { cn } from '../../../helpers/cn';
 import { createSafeContext } from '../../../helpers/create-safe-context';
 import { useControllableState } from '../../../hooks/controllable-state';
 import { getMessages } from '../../../i18n/current';
-import { HIGH_CONTRAST_EDGE } from '../../_internal/high-contrast';
 import { CopyButton } from '../../buttons/copy-button';
 import { IconButton } from '../../buttons/icon-button';
 import { BadIcon, GoodIcon, RefreshIcon } from '../../icons';
 import { StreamingCursor } from '../_internal/streaming-cursor';
 import type { MessageFeedback } from '../types';
 
+import highContrast from '../../_internal/high-contrast.module.css';
+import styles from './message.module.css';
+
 type MessageRole = 'user' | 'assistant';
+
+const ROOT = {
+  user: styles.rootUser,
+  assistant: styles.rootAssistant,
+} as const;
+
+const CONTENT = {
+  user: clsx(styles.contentUser, highContrast.edge),
+  assistant: styles.contentAssistant,
+} as const;
+
+const ACTIONS = {
+  user: styles.actionsUser,
+  assistant: styles.actionsAssistant,
+} as const;
 
 const [MessageProvider, useMessageContext] = createSafeContext<{
   from: MessageRole;
@@ -31,21 +48,9 @@ export const Root: FC<RootProps> = ({ from, avatar, children, ...rest }) => {
 
   return (
     <MessageProvider value={contextValue}>
-      <div
-        {...rest}
-        className={cn(
-          'flex w-full items-start gap-3',
-          from === 'user' ? 'flex-row-reverse' : 'flex-row',
-        )}
-        data-from={from}
-      >
+      <div {...rest} className={clsx(styles.root, ROOT[from])} data-from={from}>
         {avatar}
-        <div
-          className={cn(
-            'flex min-w-0 flex-1 flex-col gap-2',
-            from === 'user' && 'items-end',
-          )}
-        >
+        <div className={clsx(styles.body, from === 'user' && styles.bodyUser)}>
           {children}
         </div>
       </div>
@@ -66,18 +71,7 @@ export const Content: FC<ContentProps> = ({
   const { from } = useMessageContext();
 
   return (
-    <div
-      {...rest}
-      className={cn(
-        'min-w-0 wrap-break-word whitespace-pre-wrap text-fg-base',
-        from === 'user'
-          ? [
-              'w-fit max-w-[80%] rounded-2xl bg-bg-subtle px-4 py-2.5',
-              HIGH_CONTRAST_EDGE,
-            ]
-          : 'leading-relaxed',
-      )}
-    >
+    <div {...rest} className={clsx(styles.content, CONTENT[from])}>
       {children}
       {isStreaming ? <StreamingCursor /> : null}
     </div>
@@ -96,11 +90,7 @@ export const Actions: FC<ActionsProps> = ({ label, children }) => {
   return (
     <div
       aria-label={label ?? messages.messageActions}
-      className={cn(
-        // ボタンの内側の余白ぶん外へ出し、アイコンの縁を本文の縁に揃える
-        'flex items-center gap-0.5 text-fg-mute',
-        from === 'user' ? '-me-1' : '-ms-1',
-      )}
+      className={clsx(styles.actions, ACTIONS[from])}
       role="group"
     >
       {children}
@@ -192,7 +182,7 @@ export const Feedback: FC<FeedbackProps> = ({
         }}
         size="sm"
       >
-        <span className={cn(feedback === 'positive' && 'text-primary-fg')}>
+        <span className={clsx(feedback === 'positive' && styles.selected)}>
           <GoodIcon size="sm" />
         </span>
       </IconButton>
@@ -205,7 +195,7 @@ export const Feedback: FC<FeedbackProps> = ({
         }}
         size="sm"
       >
-        <span className={cn(feedback === 'negative' && 'text-primary-fg')}>
+        <span className={clsx(feedback === 'negative' && styles.selected)}>
           <BadIcon size="sm" />
         </span>
       </IconButton>

@@ -1,16 +1,15 @@
 'use client';
 
+import { clsx } from 'clsx';
 import { useState } from 'react';
 import type { FC, InputHTMLAttributes, Ref } from 'react';
 import { useFormStatus } from 'react-dom';
 
-import { cn } from '../../../helpers/cn';
 import { getMessages } from '../../../i18n/current';
-import {
-  FOCUS_RING_NO_BORDER,
-  FOCUS_RING_WITHIN,
-} from '../../_internal/focus-ring';
 import { ViewIcon, ViewOffIcon } from '../../icons';
+
+import focusRing from '../../_internal/focus-ring.module.css';
+import styles from './password-input.module.css';
 
 type Props = {
   invalid?: boolean;
@@ -35,22 +34,17 @@ export const PasswordInput: FC<Props> = ({
 
   return (
     <div
-      className={cn(
-        'relative flex w-full items-center rounded-xl border border-border-base bg-bg-base vertical:h-full vertical:w-auto',
-        invalid && 'border-border-error',
-        (disabled || pending) &&
-          'cursor-not-allowed border-border-mute bg-bg-mute',
-        FOCUS_RING_WITHIN,
+      className={clsx(
+        styles.root,
+        invalid && styles.invalid,
+        (disabled || pending) && styles.disabled,
+        focusRing.ringWithin,
       )}
     >
       <input
         aria-invalid={invalid}
         autoComplete={autoComplete}
-        className={cn(
-          'w-full grow bg-transparent px-3 py-2 focus-visible:outline-hidden vertical:h-full vertical:w-auto',
-          'disabled:cursor-not-allowed',
-          'read-only:cursor-not-allowed read-only:bg-bg-subtle',
-        )}
+        className={styles.input}
         disabled={disabled}
         readOnly={pending || readOnly}
         ref={ref}
@@ -65,11 +59,10 @@ export const PasswordInput: FC<Props> = ({
             ? (hideLabel ?? messages.passwordHide)
             : (showLabel ?? messages.passwordShow)
         }
-        className={cn(
-          'me-2 inline-flex shrink-0 items-center justify-center rounded-md p-1 text-fg-mute transition-colors duration-150 ease-out',
-          FOCUS_RING_NO_BORDER,
-          !disabled && !pending && 'hover:bg-bg-mute hover:text-fg-base',
-          (disabled || pending) && 'cursor-not-allowed text-fg-subtle',
+        className={clsx(
+          styles.toggle,
+          focusRing.ringNoBorder,
+          (disabled || pending) && styles.toggleDisabled,
         )}
         disabled={disabled || pending}
         onClick={() => {

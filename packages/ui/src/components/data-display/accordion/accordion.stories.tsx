@@ -3,6 +3,8 @@ import { useState } from 'react';
 
 import { Accordion } from '.';
 
+import styles from './accordion.stories.module.css';
+
 const ControlledAccordion = () => {
   const [openId, setOpenId] = useState<string | null>('first');
   const items = [
@@ -29,7 +31,7 @@ const ControlledAccordion = () => {
         >
           <h3>
             <Accordion.Button>
-              <p className="text-lg">{item.title}</p>
+              <p className={styles.title}>{item.title}</p>
             </Accordion.Button>
           </h3>
           <Accordion.Panel>
@@ -56,7 +58,7 @@ export const Primary: Story = {
       <Accordion.Item>
         <h3>
           <Accordion.Button>
-            <p className="text-lg">雨ニモマケズ</p>
+            <p className={styles.title}>雨ニモマケズ</p>
           </Accordion.Button>
         </h3>
         <Accordion.Panel>
@@ -95,7 +97,7 @@ export const Primary: Story = {
       <Accordion.Item>
         <h3>
           <Accordion.Button>
-            <p className="text-lg">あどけない話</p>
+            <p className={styles.title}>あどけない話</p>
           </Accordion.Button>
         </h3>
         <Accordion.Panel>
@@ -117,11 +119,11 @@ export const Primary: Story = {
       <Accordion.Item>
         <h3>
           <Accordion.Button>
-            <p className="text-lg">かなしみ</p>
+            <p className={styles.title}>かなしみ</p>
           </Accordion.Button>
         </h3>
         <Accordion.Panel>
-          <div className="space-y-4">
+          <div className={styles.stanzas}>
             <div>
               <p>あの青い空の波の音が聞えるあたりに</p>
               <p>何かとんでもないおとし物を</p>

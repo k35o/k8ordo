@@ -1,0 +1,50 @@
+.root {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  block-size: calc(var(--spacing) * 8);
+  inline-size: 100%;
+
+  @container style(--writing: vertical) {
+    inline-size: calc(var(--spacing) * 48);
+  }
+}
+
+.disabled {
+  cursor: not-allowed;
+  opacity: 50%;
+}
+
+.track {
+  position: relative;
+  border-radius: var(--radius-full);
+  block-size: calc(var(--spacing) * 2);
+  inline-size: 100%;
+  background-color: var(--color-bg-mute);
+}
+
+.fill {
+  position: absolute;
+  inset-inline-start: 0;
+  inset-block-end: 0;
+  block-size: 100%;
+  inline-size: var(--slider-progress);
+  border-radius: var(--radius-full);
+  background-color: var(--color-primary-bg);
+}
+
+.fillInvalid {
+  background-color: var(--color-bg-error);
+}
+
+/* 不正な値の塗りよりも後に置き、強制カラーでは不正でもシステムの色で塗る */
+@media (forced-colors: active) {
+  .fill {
+    background-color: var(--color-system-highlight);
+  }
+}
+
+.pending {
+  pointer-events: none;
+}

@@ -1,0 +1,222 @@
+/**
+ * The bridge for a Tailwind CSS 4 project, published as
+ * `@k8ordo/ui/tailwind.css`. It is imported after the project's own Tailwind:
+ *
+ *   @import 'tailwindcss';
+ *   @import '@k8ordo/ui/tailwind.css';
+ *
+ * It brings in the global stylesheet (`styles.css`) and a theme whose
+ * utilities read the tokens: `bg-bg-base` is `var(--color-bg-base)`, `text-md`
+ * is `var(--font-size-md)` with `var(--line-height-md)`. It does not import
+ * Tailwind itself, so this package does not depend on it.
+ *
+ * The theme is `reference`, so it declares no variables of its own: the
+ * tokens come from `styles.css`, and a utility reads them where it applies,
+ * under `.dark` included. Breakpoints are written out, since a media query
+ * cannot read a custom property.
+ */
+
+@import './index.css';
+
+@theme inline reference {
+  --color-*: initial;
+  --color-fg-base: var(--color-fg-base);
+  --color-fg-subtle: var(--color-fg-subtle);
+  --color-fg-mute: var(--color-fg-mute);
+  --color-fg-inverse: var(--color-fg-inverse);
+  --color-fg-info: var(--color-fg-info);
+  --color-fg-success: var(--color-fg-success);
+  --color-fg-warning: var(--color-fg-warning);
+  --color-fg-error: var(--color-fg-error);
+
+  --color-bg-base: var(--color-bg-base);
+  --color-bg-raised: var(--color-bg-raised);
+  --color-bg-surface: var(--color-bg-surface);
+  --color-bg-subtle: var(--color-bg-subtle);
+  --color-bg-mute: var(--color-bg-mute);
+  --color-bg-emphasize: var(--color-bg-emphasize);
+  --color-bg-inverse: var(--color-bg-inverse);
+  --color-bg-info: var(--color-bg-info);
+  --color-bg-success: var(--color-bg-success);
+  --color-bg-warning: var(--color-bg-warning);
+  --color-bg-error: var(--color-bg-error);
+
+  --color-border-base: var(--color-border-base);
+  --color-border-subtle: var(--color-border-subtle);
+  --color-border-mute: var(--color-border-mute);
+  --color-border-emphasize: var(--color-border-emphasize);
+  --color-border-inverse: var(--color-border-inverse);
+  --color-border-info: var(--color-border-info);
+  --color-border-success: var(--color-border-success);
+  --color-border-warning: var(--color-border-warning);
+  --color-border-error: var(--color-border-error);
+
+  --color-primary-fg: var(--color-primary-fg);
+  --color-primary-bg: var(--color-primary-bg);
+  --color-primary-bg-subtle: var(--color-primary-bg-subtle);
+  --color-primary-bg-mute: var(--color-primary-bg-mute);
+  --color-primary-bg-emphasize: var(--color-primary-bg-emphasize);
+  --color-primary-border: var(--color-primary-border);
+
+  --color-secondary-fg: var(--color-secondary-fg);
+  --color-secondary-bg: var(--color-secondary-bg);
+  --color-secondary-bg-subtle: var(--color-secondary-bg-subtle);
+  --color-secondary-bg-mute: var(--color-secondary-bg-mute);
+  --color-secondary-bg-emphasize: var(--color-secondary-bg-emphasize);
+  --color-secondary-border: var(--color-secondary-border);
+
+  --color-back-drop: var(--color-back-drop);
+
+  --color-group-primary: var(--color-group-primary);
+  --color-group-secondary: var(--color-group-secondary);
+  --color-group-tertiary: var(--color-group-tertiary);
+  --color-group-quaternary: var(--color-group-quaternary);
+
+  --color-logo-primary: var(--color-logo-primary);
+  --color-logo-secondary: var(--color-logo-secondary);
+
+  --color-system-canvas-text: var(--color-system-canvas-text);
+  --color-system-gray-text: var(--color-system-gray-text);
+  --color-system-highlight: var(--color-system-highlight);
+  --color-system-highlight-text: var(--color-system-highlight-text);
+  --color-transparent: transparent;
+
+  --radius-*: initial;
+  --radius-xs: var(--radius-xs);
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+  --radius-2xl: var(--radius-2xl);
+
+  --font-*: initial;
+  --font-noto-sans-jp: var(--font-family-noto-sans-jp);
+  --font-m-plus-2: var(--font-family-m-plus-2);
+
+  --text-*: initial;
+  --text-xs: var(--font-size-xs);
+  --text-xs--line-height: var(--line-height-xs);
+  --text-sm: var(--font-size-sm);
+  --text-sm--line-height: var(--line-height-sm);
+  --text-md: var(--font-size-md);
+  --text-md--line-height: var(--line-height-md);
+  --text-lg: var(--font-size-lg);
+  --text-lg--line-height: var(--line-height-lg);
+  --text-xl: var(--font-size-xl);
+  --text-xl--line-height: var(--line-height-xl);
+  --text-2xl: var(--font-size-2xl);
+  --text-2xl--line-height: var(--line-height-2xl);
+  --text-3xl: var(--font-size-3xl);
+  --text-3xl--line-height: var(--line-height-3xl);
+  --text-emphasize: var(--font-size-emphasize);
+  --text-emphasize--line-height: var(--line-height-emphasize);
+  --text-highlight: var(--font-size-highlight);
+  --text-highlight--line-height: var(--line-height-highlight);
+
+  --font-weight-*: initial;
+  --font-weight-medium: var(--font-weight-medium);
+  --font-weight-bold: var(--font-weight-bold);
+
+  --tracking-*: initial;
+  --tracking-none: var(--letter-spacing-none);
+  --tracking-normal: var(--letter-spacing-normal);
+
+  --leading-*: initial;
+  --leading-none: var(--line-height-none);
+  --leading-tight: var(--line-height-tight);
+  --leading-snug: var(--line-height-snug);
+  --leading-normal: var(--line-height-normal);
+  --leading-relaxed: var(--line-height-relaxed);
+  --leading-loose: var(--line-height-loose);
+
+  --shadow-*: initial;
+  --shadow-2xs: var(--shadow-2xs);
+  --shadow-xs: var(--shadow-xs);
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+  --shadow-xl: var(--shadow-xl);
+  --shadow-2xl: var(--shadow-2xl);
+
+  --inset-shadow-*: initial;
+  --inset-shadow-2xs: var(--shadow-inset-2xs);
+  --inset-shadow-xs: var(--shadow-inset-xs);
+  --inset-shadow-sm: var(--shadow-inset-sm);
+
+  --spacing: var(--spacing);
+
+  --breakpoint-*: initial;
+  --breakpoint-sm: 40rem;
+  --breakpoint-md: 48rem;
+  --breakpoint-lg: 64rem;
+  --breakpoint-xl: 80rem;
+  --breakpoint-2xl: 96rem;
+}
+
+@custom-variant dark (&:where(.dark, .dark *));
+@custom-variant light (&:where(:not(.dark, .dark *)));
+
+/* 縦書き。`.writing-v` 配下に適用し、`.writing-h` 配下の島では無効化する */
+@custom-variant vertical (
+  &:where(.writing-v, .writing-v *):not(.writing-h, .writing-h *)
+);
+
+@utility grid-cols-auto-fill-* {
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(min(calc(var(--spacing) * --value(integer)), 100%), 1fr)
+  );
+}
+
+@utility grid-cols-auto-fit-* {
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(min(calc(var(--spacing) * --value(integer)), 100%), 1fr)
+  );
+}
+
+@utility grid-rows-auto-fill-* {
+  grid-template-rows: repeat(
+    auto-fill,
+    minmax(min(calc(var(--spacing) * --value(integer)), 100%), 1fr)
+  );
+}
+
+@utility grid-rows-auto-fit-* {
+  grid-template-rows: repeat(
+    auto-fit,
+    minmax(min(calc(var(--spacing) * --value(integer)), 100%), 1fr)
+  );
+}
+
+/* styles.css の同名のクラスと同じもの。ユーティリティにもしておくと md:writing-v
+   のように変種と組める */
+@utility writing-h {
+  --writing: horizontal;
+  writing-mode: horizontal-tb;
+}
+
+@utility writing-v {
+  --writing: vertical;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  text-underline-position: under left;
+  line-break: strict;
+  word-break: normal;
+}
+
+@utility writing-sideways-rl {
+  writing-mode: sideways-rl;
+}
+
+@utility z-overlay {
+  z-index: var(--z-index-overlay);
+}
+
+@utility z-modal {
+  z-index: var(--z-index-modal);
+}
+
+@utility z-toast {
+  z-index: var(--z-index-toast);
+}

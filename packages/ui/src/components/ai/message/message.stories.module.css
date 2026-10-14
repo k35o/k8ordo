@@ -1,0 +1,5 @@
+.thread {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 6);
+}

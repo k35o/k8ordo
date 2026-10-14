@@ -1,0 +1,65 @@
+.root {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  block-size: calc(var(--spacing) * 8);
+  inline-size: 100%;
+
+  @container style(--writing: vertical) {
+    inline-size: calc(var(--spacing) * 48);
+  }
+}
+
+.disabled {
+  cursor: not-allowed;
+  opacity: 50%;
+}
+
+.track {
+  position: relative;
+  border-radius: var(--radius-full);
+  block-size: calc(var(--spacing) * 2);
+  inline-size: 100%;
+  background-color: var(--color-bg-mute);
+}
+
+.fill {
+  position: absolute;
+  inset-block-end: 0;
+  /* better-css-modules-disable-next-line tokens/spacing -- the fill starts where the lower thumb is, a percentage the component computes from the value */
+  inset-inline-start: var(--range-start);
+  block-size: 100%;
+  inline-size: calc(var(--range-end) - var(--range-start));
+  border-radius: var(--radius-full);
+  background-color: var(--color-primary-bg);
+}
+
+.fillInvalid {
+  background-color: var(--color-bg-error);
+}
+
+/* 不正な値の塗りよりも後に置き、強制カラーでは不正でもシステムの色で塗る */
+@media (forced-colors: active) {
+  .fill {
+    background-color: var(--color-system-highlight);
+  }
+}
+
+/* 重なった 2 本の input は、つまみだけが押せる */
+.thumb {
+  pointer-events: none;
+}
+
+.interactive::-webkit-slider-thumb {
+  pointer-events: auto;
+}
+
+.interactive::-moz-range-thumb {
+  pointer-events: auto;
+}
+
+/* 共有の .input の z-index に、読み込みの順によらず勝つよう 2 クラスで書く */
+.thumb.onTop {
+  z-index: calc(var(--z-index-raised) * 2);
+}

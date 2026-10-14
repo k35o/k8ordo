@@ -15,13 +15,15 @@ import { IconButton } from '../../buttons/icon-button';
 import { CheckIcon, ChevronIcon } from '../../icons';
 import { useListNavigation } from '../_internal/use-list-navigation';
 import { Popover, useOpenContext } from '../popover';
-import { cn } from './../../../helpers/cn';
 import {
   MenuContextProvider,
   useMenuContent,
   useMenuItem,
   useMenuTrigger,
 } from './hooks';
+
+import srOnly from '../../_internal/sr-only.module.css';
+import styles from './list-box.module.css';
 
 export const Root: FC<
   PropsWithChildren<{
@@ -112,10 +114,7 @@ export const Content: FC<{
       // helpContent は role="listbox" の直下に置くと aria-required-children 違反に
       // なるため listbox の外へ出す。ref（外側クリック判定）は最外周に置く。
       renderItem={({ ref, ...listProps }) => (
-        <div
-          className="bg-bg-raised border-border-subtle vertical:max-h-none vertical:min-w-0 vertical:max-w-48 vertical:min-h-40 flex max-h-48 min-w-40 flex-col rounded-lg border py-2 shadow-md"
-          ref={ref}
-        >
+        <div className={styles.panel} ref={ref}>
           {helpContent === undefined ? null : (
             <div id={helpId}>{helpContent}</div>
           )}
@@ -125,7 +124,7 @@ export const Content: FC<{
             // listbox の外に出した helpContent を読み上げに繋ぎ直す。
             // トリガー側から参照すると閉じている間は空参照になるため listbox に付ける
             aria-describedby={helpContent === undefined ? undefined : helpId}
-            className="vertical:overflow-x-auto vertical:overflow-y-visible flex min-h-0 min-w-0 flex-col overflow-y-auto"
+            className={styles.list}
           >
             {options.map(({ value, label }, idx) => (
               <Item index={idx} key={value} label={label} />
@@ -145,20 +144,10 @@ const Item: FC<{
   const { props, selected } = useMenuItem(index, id);
 
   return (
-    <button
-      className={cn(
-        'flex w-full items-center justify-between px-3 py-2 text-left transition-colors duration-150 ease-out',
-        'hover:bg-bg-subtle',
-        'focus-visible:border-transparent focus-visible:bg-bg-subtle',
-        // dropdown-menu の itemClass と同じく、線の色は高コントラストでだけ付ける
-        'outline-transparent -outline-offset-2 focus-visible:outline-2 contrast-more:outline-border-base',
-      )}
-      type="button"
-      {...props}
-    >
+    <button className={styles.item} type="button" {...props}>
       {label}
       {selected && (
-        <span className="text-fg-success">
+        <span className={styles.check}>
           <CheckIcon />
         </span>
       )}
@@ -193,7 +182,7 @@ export const Trigger: FC<{
       renderItem={(props) => (
         <>
           {label !== undefined && (
-            <span className="sr-only" id={labelId}>
+            <span className={srOnly.srOnly} id={labelId}>
               {label}
             </span>
           )}
@@ -227,7 +216,7 @@ export const IconTrigger: FC<{
       renderItem={(props) => (
         <>
           {label !== undefined && (
-            <span className="sr-only" id={labelId}>
+            <span className={srOnly.srOnly} id={labelId}>
               {label}
             </span>
           )}
@@ -240,7 +229,7 @@ export const IconTrigger: FC<{
           >
             {icon}
             {/* アイコンには可視テキストが無いので、現在値は読み上げ専用テキストで持つ */}
-            <span className="sr-only" id={valueId}>
+            <span className={srOnly.srOnly} id={valueId}>
               {valueLabel}
             </span>
           </IconButton>

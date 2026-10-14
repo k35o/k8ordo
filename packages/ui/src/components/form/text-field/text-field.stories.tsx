@@ -4,6 +4,8 @@ import { expect } from 'storybook/test';
 
 import { TextField } from './text-field';
 
+import styles from './text-field.stories.module.css';
+
 const meta: Meta<typeof TextField> = {
   title: 'components/form/text-field',
   component: TextField,
@@ -45,7 +47,7 @@ const RefRender = () => {
   const ref = useRef<HTMLInputElement>(null);
 
   return (
-    <div className="flex flex-col items-start gap-2">
+    <div className={styles.column}>
       <TextField aria-label="名前" id="text-field-ref" ref={ref} />
       <button
         onClick={() => {

@@ -1,9 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { clsx } from 'clsx';
 import type { ComponentProps, FC } from 'react';
 import { expect, waitFor } from 'storybook/test';
 
 import { TableOfContents } from '.';
 import type { TableOfContentsItem } from '.';
+
+import styles from './table-of-contents.stories.module.css';
 
 const ITEMS: TableOfContentsItem[] = [
   { id: 'install', label: 'インストール' },
@@ -30,19 +33,20 @@ const SECTIONS = [
 const Article: FC<{ shortLastSection?: boolean }> = ({
   shortLastSection = false,
 }) => (
-  <article className="flex flex-col gap-4">
+  <article className={styles.article}>
     {SECTIONS.map((section, index) => {
       const Heading = section.level;
       const isLast = index === SECTIONS.length - 1;
       return (
         <section key={section.id}>
-          <Heading className="scroll-mt-8 text-xl font-bold" id={section.id}>
+          <Heading className={styles.heading} id={section.id}>
             {section.title}
           </Heading>
           <p
-            className={
-              isLast && shortLastSection ? 'mt-2' : 'mt-2 min-block-[80vh]'
-            }
+            className={clsx(
+              styles.body,
+              !(isLast && shortLastSection) && styles.long,
+            )}
           >
             {section.title}の本文。
           </p>
@@ -57,11 +61,11 @@ const Article: FC<{ shortLastSection?: boolean }> = ({
 const Layout: FC<
   ComponentProps<typeof TableOfContents> & { shortLastSection?: boolean }
 > = ({ shortLastSection, ...props }) => (
-  <div className="flex gap-10">
-    <div className="flex-1">
+  <div className={styles.layout}>
+    <div className={styles.main}>
       <Article shortLastSection={shortLastSection} />
     </div>
-    <aside className="sticky top-6 w-56 self-start">
+    <aside className={styles.aside}>
       <TableOfContents {...props} />
     </aside>
   </div>

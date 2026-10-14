@@ -1,5 +1,4 @@
 import type { RouteContext } from '@k8ordo/framework';
-import { tokens } from '@k8ordo/ui/tokens';
 
 import {
   BG_TOKENS,
@@ -17,8 +16,11 @@ import {
   SECONDARY_TOKENS,
   SHADES,
   SHADOWS,
+  SPACING,
   TEXT_SIZES,
+  WHITE,
   Z_INDICES,
+  cssValueOf,
 } from '../../theme/design-tokens';
 import type { NamedScale, SemanticToken } from '../../theme/design-tokens';
 
@@ -121,11 +123,14 @@ const scaleTable = (
 
 const build = (): string => {
   const textRows = TEXT_SIZES.map(({ name, fontSize, lineHeight }) => [
-    `\`text-${name}\``,
+    `\`--font-size-${name}\``,
     fontSize,
     String(lineHeight),
   ]);
-  const zRows = Z_INDICES.map(({ name, value }) => [`\`z-${name}\``, value]);
+  const zRows = Z_INDICES.map(({ name, value }) => [
+    `\`--z-index-${name}\``,
+    value,
+  ]);
 
   return `${[
     `# k8ordo UI Design System`,
@@ -133,10 +138,10 @@ const build = (): string => {
     `\`@k8ordo/ui\` のデザインシステム仕様。デザイントークン・タイポグラフィ・コンポーネントの単一の参照元です。人間にも LLM／エージェントにも読めるよう、\`https://ordo.k8o.me/design.md\` として配信しています（人向けのトークン一覧は \`https://ordo.k8o.me/ja/ui/theming\`）。
 
 - パッケージ: \`@k8ordo/ui\`（npm, public）
-- スタック: React + Tailwind CSS 4 + OKLCH カラー
-- トークン定義の実体: \`packages/ui/src/styles/{tokens,base,utilities}.css\`
+- スタック: React + CSS Modules（better-css-modules で検査）+ OKLCH カラー
+- トークン定義の実体: \`packages/ui/src/styles/tokens.css\`（\`:root\` の CSS カスタムプロパティ）。データとしては \`@k8ordo/ui/tokens\`（DTCG の resolver 文書）
 
-> 生のカラー値（\`bg-teal-500\` 等）は使わず、常にセマンティックトークン（\`bg-primary-bg\` 等）を使います。トークンはダークモードで自動的に再マッピングされます。`,
+> 生の値やパレット（\`--teal-500\` 等）は使わず、常にセマンティックトークン（\`--color-primary-bg\` 等）を使います。トークンはダークモードで自動的に再マッピングされます。`,
 
     `## 原則`,
 
@@ -149,7 +154,7 @@ const build = (): string => {
 
 中核となる規範:
 
-- **60-30-10** — 60% ニュートラル（グレー系）、30% サポート（\`bg-subtle\` 等）、10% アクセント（primary）
+- **60-30-10** — 60% ニュートラル（グレー系）、30% サポート（\`--color-bg-subtle\` 等）、10% アクセント（primary）
 - **穏やかな色** — パレットは OKLCH で鮮やかに保ちつつ、UI に出るトークンは抑えたトーンへマッピング
 - **WCAG AAA** — fg / bg の組み合わせで 7:1 以上のコントラストを確保
 - **静かな変化** — トランジションは 150–200ms、bounce / spring 系は使わない
@@ -170,12 +175,12 @@ const build = (): string => {
 
     `### 生パレット（OKLCH）
 
-各セルは \`L C\`（H は色相表の通り）。\`--white: ${tokens.vars.white}\`。`,
+各セルは \`L C\`（H は色相表の通り）。\`--white: ${WHITE}\`。`,
     paletteMatrix(),
 
     `### セマンティックトークン
 
-UI では必ず以下のトークンを使う（\`{prefix}-{token}\`、例: \`text-fg-base\`, \`bg-bg-subtle\`, \`border-border-mute\`）。Light / Dark はそのモードでエイリアスするパレット段階。
+UI では必ず以下のトークンを使う（\`var(--color-fg-base)\` のように読む。\`tailwind.css\` では \`text-fg-base\`, \`bg-bg-subtle\`, \`border-border-mute\` のクラス）。Light / Dark はそのモードでエイリアスするパレット段階。
 
 #### Foreground（テキスト）`,
     semanticTable(FG_TOKENS),
@@ -190,18 +195,18 @@ UI では必ず以下のトークンを使う（\`{prefix}-{token}\`、例: \`te
     `#### Group（データ可視化）`,
     semanticTable(GROUP_TOKENS),
 
-    `その他: \`back-drop\`（\`${tokens.vars['back-drop']}\` オーバーレイ）, \`transparent\`。`,
+    `その他: \`--color-back-drop\`（\`${cssValueOf('color-back-drop')}\` オーバーレイ）, \`--color-logo-*\`（ロゴ）, \`--color-system-*\`（強制カラーで塗るシステムの色）。`,
 
     `### ダークモード
 
-クラスベース（\`html\` に \`.dark\`）。すべてのセマンティックトークンが自動で再マッピングされるため、トークン利用時に \`dark:\` プレフィックスは不要。ダークモードは「ライトの反転」ではなく独立したトーンで設計する。`,
+クラスベース（\`html\` に \`.dark\`）。すべてのセマンティックトークンが \`.dark\` で再マッピングされるため、トークンを読む CSS はダークを書き分けなくてよい。ダークモードは「ライトの反転」ではなく独立したトーンで設計する。`,
 
     `### やってはいけないこと
 
-- グラデーション背景（\`bg-gradient-to-*\`）
-- 生のパレット色を直接使う（\`bg-teal-500\`）— セマンティックトークンを使う
-- 透明度で状態表現（\`/90\`, \`/80\`）— 専用トークンを使う
-- ホバーに \`bg-primary-bg\` — \`bg-bg-mute\` を使う
+- グラデーション背景
+- パレット色を直接使う（\`--teal-500\`）— セマンティックトークンを使う
+- 透明度で状態表現 — 専用トークンを使う
+- ホバーに \`--color-primary-bg\` — \`--color-bg-mute\` を使う
 - 鮮やかな色を広範囲に使う（アクセントは小面積で）`,
 
     `## タイポグラフィ`,
@@ -212,81 +217,87 @@ UI では必ず以下のトークンを使う（\`{prefix}-{token}\`、例: \`te
 font-family: 'Noto Sans JP', 'M PLUS 2', sans-serif;
 \`\`\`
 
-トークン: \`--font-noto-sans-jp\`, \`--font-m-plus-2\`。日本語テキストが主体のため和文フォントを優先する。**Inter / Roboto / Open Sans は使わない。**`,
+トークン: \`--font-family-noto-sans-jp\`, \`--font-family-m-plus-2\`（読み込むアプリが定義する）。リセットの既定は \`--font-family-sans\` / \`--font-family-mono\`。日本語テキストが主体のため和文フォントを優先する。**Inter / Roboto / Open Sans は使わない。**`,
 
-    `### サイズスケール`,
+    `### サイズスケール
+
+各サイズには対になる \`--line-height-<size>\` がある。地の文に混ぜる字は em の \`--font-size-code\` / \`--font-size-kbd\` / \`--font-size-callout\`。`,
     table(['Token', 'size', 'line-height'], textRows),
 
     `### ウェイト`,
-    scaleTable(['Token', '値'], FONT_WEIGHTS, (n, v) => [`\`font-${n}\``, v]),
-    `\`font-normal\` (400) も使用。\`font-semibold\` (600) / \`font-extrabold\` (800) は使わない。\`font-medium\` は **450**（一般の 500 より軽い）。1 画面で 3 種類を超えて使わない。`,
+    scaleTable(['Token', '値'], FONT_WEIGHTS, (n, v) => [
+      `\`--font-weight-${n}\``,
+      v,
+    ]),
+    `継承の既定 (400) も使用。600 や 800 は使わない。\`--font-weight-medium\` は **450**（一般の 500 より軽い）。1 画面で 3 種類を超えて使わない。`,
 
     `### 行間 / 字間`,
-    scaleTable(['leading', '値'], LINE_HEIGHTS, (n, v) => [
-      `\`leading-${n}\``,
+    scaleTable(['Token', '値'], LINE_HEIGHTS, (n, v) => [
+      `\`--line-height-${n}\``,
       v,
     ]),
-    scaleTable(['tracking', '値'], LETTER_SPACINGS, (n, v) => [
-      `\`tracking-${n}\``,
+    scaleTable(['Token', '値'], LETTER_SPACINGS, (n, v) => [
+      `\`--letter-spacing-${n}\``,
       v,
     ]),
-    `本文は \`leading-relaxed\` 推奨。日本語に \`uppercase\` / \`tracking-widest\` は使わない。テキストにグラデーションをかけない。`,
+    `本文は \`--line-height-relaxed\` 推奨。日本語を大文字にしたり字間を大きく広げたりしない。テキストにグラデーションをかけない。`,
 
     `## スペーシング・レイアウト
 
-4px ベース（\`--spacing: ${tokens.theme.spacing}\`）。Tailwind 標準スケールを使用。`,
+4px ベース（\`--spacing: ${SPACING}\`）。段数を掛けて使う（\`calc(var(--spacing) * 6)\`。\`tailwind.css\` では \`p-6\`）。em 基準の \`--spacing-em\`（0.25em）もある。`,
 
     `### パディング・余白の目安`,
     table(
       ['step', 'rem', 'px', '用途'],
       [
         ['1', '0.25rem', '4px', '最小単位'],
-        ['2', '0.5rem', '8px', '近い要素（`mt-2`）'],
+        ['2', '0.5rem', '8px', '近い要素'],
         ['4', '1rem', '16px', '標準余白 / コンパクトな padding'],
-        ['6', '1.5rem', '24px', '標準 padding（`p-6`）'],
-        ['8', '2rem', '32px', 'ゆったり padding（`p-8`）/ セクション間'],
-        ['10', '2.5rem', '40px', '大きなカード内（`p-10`）'],
-        ['12', '3rem', '48px', 'ページレベルの区切り（`mt-12`）'],
+        ['6', '1.5rem', '24px', '標準 padding'],
+        ['8', '2rem', '32px', 'ゆったり padding / セクション間'],
+        ['10', '2.5rem', '40px', '大きなカード内'],
+        ['12', '3rem', '48px', 'ページレベルの区切り'],
       ],
     ),
-    `余白の差で関連度を表す（近い \`mt-2\` / 標準 \`mt-4\` / セクション間 \`mt-8\` / ページ間 \`mt-12\`）。カード間は \`gap-6\`、縦セクションは \`gap-8\`〜\`gap-10\`。`,
+    `余白の差で関連度を表す（近い 2 段 / 標準 4 段 / セクション間 8 段 / ページ間 12 段）。カード間は 6 段、縦セクションは 8〜10 段。`,
 
     `### ブレークポイント`,
     scaleTable(
       ['Token', '値'],
       BREAKPOINTS.map(({ name, rem }) => ({ name, value: rem })),
-      (n, v) => [`\`${n}\``, v],
+      (n, v) => [`\`--breakpoint-${n}\``, v],
     ),
+    `メディアクエリは変数を読めないので値を書く（\`@media (width >= 48rem)\`）。`,
 
     `### ページ構造
 
-ページ背景を \`bg-bg-subtle\`（薄いグレー）にし、コンテンツを白カード（\`bg-bg-base\`）で浮かせる。すべてをカードに入れない — 余白と \`Separator\` で十分なことが多い。カードのネスト（Card in Card）はしない。
+ページ背景を \`--color-bg-subtle\`（薄いグレー）にし、コンテンツを白カード（\`--color-bg-base\`）で浮かせる。すべてをカードに入れない — 余白と \`Separator\` で十分なことが多い。カードのネスト（Card in Card）はしない。
 
-カスタムユーティリティ: \`grid-cols-auto-fill-*\` / \`grid-cols-auto-fit-*\`（レスポンシブ列）, \`writing-h\` / \`writing-v\`（縦書き）, \`z-overlay\` / \`z-modal\` / \`z-toast\`。`,
+縦書きは \`writing-v\` / \`writing-h\` のクラス（\`styles.css\`）。どちらも \`--writing\` を設定し、自分の CSS は \`@container style(--writing: vertical)\` で読む。\`tailwind.css\` には \`grid-cols-auto-fill-*\` / \`grid-cols-auto-fit-*\`（レスポンシブ列）と \`vertical:\` の変種もある。`,
 
     `## 角丸`,
-    scaleTable(['Token', '値'], RADII, (n, v) => [`\`rounded-${n}\``, v]),
+    scaleTable(['Token', '値'], RADII, (n, v) => [`\`--radius-${n}\``, v]),
     `要素の性格で使い分ける（「触れるものは柔らかく、読むものは端正に」）:
 
 | 用途 | 角丸 |
 | --- | --- |
-| Button / Avatar / IconButton / Badge / Progress | \`rounded-full\`（ピル型） |
-| Input / Textarea / Select / Card / CheckboxCard / RadioCard | \`rounded-xl\` |
-| Alert / Dialog / Modal | \`rounded-lg\` |
-| Checkbox | \`rounded-md\` |`,
+| Button / Avatar / IconButton / Badge / Progress | \`--radius-full\`（ピル型） |
+| Input / Textarea / Select / Card / CheckboxCard / RadioCard | \`--radius-xl\` |
+| Alert / Dialog / Modal | \`--radius-lg\` |
+| Checkbox | \`--radius-md\` |`,
 
     `## エレベーション（シャドウ）
 
-ふんわり柔らかい影で奥行きを表現する。\`shadow-xl\` 以上は使わない。`,
+ふんわり柔らかい影で奥行きを表現する。\`--shadow-xl\` 以上は使わない。`,
     scaleTable(['Token', '値'], SHADOWS, (n, v) => [
-      `\`shadow-${n}\``,
+      `\`--shadow-${n}\``,
       `\`${v}\``,
     ]),
-    scaleTable(['inset', '値'], INSET_SHADOWS, (n, v) => [
-      `\`inset-shadow-${n}\``,
+    scaleTable(['Token', '値'], INSET_SHADOWS, (n, v) => [
+      `\`--shadow-inset-${n}\``,
       `\`${v}\``,
     ]),
-    `利用指針: Card（\`variant="shadow"\`）= \`shadow-sm\` / Modal・Dialog・Tooltip・Dropdown・ListBox = \`shadow-md\` / Button = なし / Card（\`variant="outline"\`）= \`border border-border-mute\`。`,
+    `利用指針: Card（\`variant="shadow"\`）= \`--shadow-sm\` / Modal・Dialog・Tooltip・Dropdown・ListBox = \`--shadow-md\` / Button = なし / Card（\`variant="outline"\`）= 1px の \`--color-border-mute\` の線。フォーカスの輪も影のトークン（\`--shadow-ring-info\`）で、面の影と重ねるときは輪を先に書く。`,
 
     `## モーション
 
@@ -298,25 +309,25 @@ font-family: 'Noto Sans JP', 'M PLUS 2', sans-serif;
 | 150–200ms | 標準トランジション（ホバー、フォーカス） |
 | 300ms | 開閉アニメーション（限度） |
 
-- 基本は \`transition-colors duration-150 ease-out\`
+- 基本は色のトランジションを \`--duration-fast\`（150ms）、\`--easing-out\` で（\`tailwind.css\` では \`transition-colors duration-150 ease-out\`）
+- 長さは \`--duration-fast\` / \`--duration-moderate\`（200ms）/ \`--duration-slow\`（300ms）。\`--easing-out\` / \`--easing-in-out\` は Tailwind の曲線で、同名の CSS のキーワードとは違う
 - **300ms を超えない。bounce / spring 系のイージングは使わない。**
-- \`prefers-reduced-motion: reduce\` を尊重（アニメーションはすべて CSS で、\`base.css\` の \`@media (prefers-reduced-motion)\` が止める。Conversation の最下部へのスクロールは JS 側で instant に切り替える）
-- 組み込み: \`ao-anim-scale\`（\`:popover-open\` で 0.18s scale）/ \`ao-anim-fade\`（0.15s opacity）
+- \`prefers-reduced-motion: reduce\` を尊重（アニメーションはすべて CSS で、各部品の CSS が \`@media (prefers-reduced-motion)\` で止める。Conversation の最下部へのスクロールは JS 側で instant に切り替える）
 
 ### インタラクティブ状態
 
 | 状態 | スタイル |
 | --- | --- |
-| Hover | \`hover:bg-bg-mute\` |
-| Focus | \`focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-border-info\` |
-| Active | \`active:bg-bg-emphasize\` |
-| Disabled | \`opacity-50 cursor-not-allowed\` |
-| Selected | \`bg-primary-bg-subtle\` |
-| Error | \`border-border-error\` + \`text-fg-error\` |
+| Hover | \`--color-bg-mute\` |
+| Focus | \`:focus-visible\` で \`box-shadow: var(--shadow-ring-info)\` |
+| Active | \`--color-bg-emphasize\` |
+| Disabled | \`opacity: 0.5; cursor: not-allowed\` |
+| Selected | \`--color-primary-bg-subtle\` |
+| Error | \`--color-border-error\` + \`--color-fg-error\` |
 
-フォーカスは必ず \`focus-visible\`（\`focus\` ではない）を使い、リングは \`ring-border-info\` で統一。
+フォーカスは必ず \`:focus-visible\`（\`:focus\` ではない）を使い、輪は \`--shadow-ring-info\` で統一。
 
-OS の \`prefers-contrast: more\` と \`forced-colors: active\` にはライブラリの CSS が従う。高コントラストでは文字と線のトークンが一段強くなり、影だけで縁取る面に線が付く。強制カラーでは境界線・フォーカスリング・選択状態をシステムカラー（\`Highlight\` / \`CanvasText\`）で描く。自前の UI では、境界やフォーカスを \`box-shadow\` だけで描かず、\`text-transparent\` で隠さない（強制カラーで塗られる。\`invisible\` を使う）。`,
+OS の \`prefers-contrast: more\` と \`forced-colors: active\` にはライブラリの CSS が従う。高コントラストでは文字と線のトークンが一段強くなり、影だけで縁取る面に線が付く。強制カラーでは境界線・フォーカスリング・選択状態をシステムカラー（\`--color-system-highlight\` / \`--color-system-canvas-text\`）で描く。自前の UI では、境界やフォーカスを \`box-shadow\` だけで描かず、透明な色で隠さない（強制カラーで塗られる。\`visibility: hidden\` を使う）。`,
 
     `## z-index`,
     table(['Token', '値'], zRows),
@@ -324,11 +335,10 @@ OS の \`prefers-contrast: more\` と \`forced-colors: active\` にはライブ�
     `## コンポーネント
 
 \`@k8ordo/ui\` から名前付きエクスポート。スタイルシートとプロバイダーが必要。
-このガイドのトークンを自分のマークアップで使うには Tailwind ソース版の \`tailwind.css\` を
-import する（Tailwind を持たないプロジェクトはビルド済みの \`styles.css\`）:
+\`styles.css\` を 1 回読み込む（部品の CSS は部品が自分で読み込む）。Tailwind CSS 4 のプロジェクトは代わりに \`tailwindcss\` の後に \`tailwind.css\` を読み込むと、トークンを自分のマークアップのクラスとしても使える（\`@k8ordo/ui\` は Tailwind に依存しない）:
 
 \`\`\`tsx
-import '@k8ordo/ui/tailwind.css';
+import '@k8ordo/ui/styles.css';
 import { UIProvider, Button, Card } from '@k8ordo/ui';
 
 <UIProvider>
@@ -369,7 +379,7 @@ import { UIProvider, Button, Card } from '@k8ordo/ui';
 
 ### Form
 
-ラベルは入力の上に配置。エラーは入力直下に \`text-fg-error text-sm\`。バリデーションは送信時が基本。
+ラベルは入力の上に配置。エラーは入力直下に \`--color-fg-error\`、\`--font-size-sm\` で。バリデーションは送信時が基本。
 
 - **FormControl** — フィールドのラッパー。\`label\`（必須）, \`helpText?\`, \`errorText?\`, \`required?\`, \`renderInput\`
 - **TextField** / **Textarea** / **PasswordInput** / **NumberField** — テキスト系入力
@@ -435,10 +445,10 @@ npm install @k8ordo/ui
 \`\`\`
 
 \`\`\`tsx
-// Tailwind CSS 4 のプロジェクト（トークンを自分のマークアップでも使える）
-import '@k8ordo/ui/tailwind.css';
-// Tailwind を持たないプロジェクトはビルド済み CSS を使う
-// import '@k8ordo/ui/styles.css';
+// トークン、リセット、レイヤーの順。部品の CSS は部品が自分で読み込む
+import '@k8ordo/ui/styles.css';
+// Tailwind CSS 4 のプロジェクトは代わりに、CSS で @import 'tailwindcss'; の後に
+// @import '@k8ordo/ui/tailwind.css'; を書く（トークンを自分のマークアップのクラスとしても使える）
 import { UIProvider } from '@k8ordo/ui';
 \`\`\`
 

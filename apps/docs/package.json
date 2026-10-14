@@ -7,9 +7,9 @@
     "dev": "pnpm generate:docs && vp dev",
     "build": "pnpm generate:docs && vp build",
     "generate:docs": "node scripts/copy-reference-docs.ts",
-    "typecheck": "tsc -b",
-    "check": "vp check",
-    "check:write": "vp check --fix"
+    "typecheck": "better-css-modules generate && tsc -b",
+    "check": "better-css-modules generate && vp check && better-css-modules check",
+    "check:write": "better-css-modules generate && vp check --fix"
   },
   "dependencies": {
     "@fontsource-variable/m-plus-2": "5.3.0",
@@ -20,11 +20,12 @@
     "@k8ordo/router": "workspace:^",
     "@k8ordo/state": "workspace:^",
     "@k8ordo/ui": "workspace:^",
-    "@tailwindcss/vite": "catalog:",
-    "tailwindcss": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@better-css-modules/cli": "catalog:",
+    "@better-css-modules/core": "catalog:",
+    "@better-css-modules/vite": "catalog:",
     "@k8ordo/framework": "workspace:^",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",

@@ -159,7 +159,21 @@ pnpm check:write       # Oxlint/Oxfmt lint/format auto-fix
   is in hand — the root layout's `<html lang>` and the 404 shell. The `/` page negotiates with
   `locales.negotiate(navigator.languages)` and `navigateTo('/:locale', …)`; `switch` is a reserved word, so
   that one component's group is `switchInput`.
-- **Styling**: Tailwind CSS 4, uses `@k8ordo/ui` design tokens
+- **Styling**: CSS Modules on `@k8ordo/ui`'s tokens, checked by
+  `better-css-modules check` (`better-css-modules.config.ts`; the modules go in
+  the `components` layer, like ui's). `src/styles/globals.css` imports
+  `@k8ordo/ui/styles.css` and declares the site's own tokens: `--color-page`
+  (the page ground) and the two font families. A component or a demo keeps its
+  module next to it (`foo.tsx` + `foo.module.css`). A route file cannot —
+  `routes/` holds only route files — so a page's module is
+  `src/styles/pages/<URL path without [locale]>.module.css`
+  (`ui/theming.module.css`, `home.module.css`), and the layout most pages share
+  is `src/styles/page.module.css` (`page`, `stack`, `stackLg`, `lead`, `mute`).
+  `@k8ordo/ui` components take no `className`: style the element around them,
+  or reach their markup from `.x { @scope (&) { … } }` as
+  `src/components/code-block.module.css` does to frame every `CodeBlock`
+  (import `CodeBlock` from `src/components/code-block`, not from
+  `@k8ordo/ui/code-block`, to get the frame)
 - **Root provider**: `UIProvider` wraps each locale subtree in
   `src/components/locale-shell.tsx`, for toasts. Component
   built-in strings follow the site locale on their own: `@k8ordo/ui` reads
@@ -198,7 +212,7 @@ src/
   i18n.ts              # defineLocales — the locale set (its Register is generated)
   links.ts             # href / navigateTo with the locale bound; SitePath
   messages/            # message() per export, one file per area, index.ts re-exports namespaces
-  styles/              # CSS entry
+  styles/              # globals.css (the CSS entry), page.module.css, pages/<path>.module.css
   theme/               # state.ts (writing-mode defineLocalState) + its context, design-tokens.ts (/ui/theming and /design.md)
 scripts/
   copy-reference-docs.ts  # the markdown twins, into public/ (git-ignored)
@@ -213,14 +227,16 @@ whose `page.tsx` default-exports the page, following this structure:
 
 1. **Title**: `<PageTitle name="Button" />` as the first child (see Titles above)
 2. **Header**: `Heading` + description via `<Rich>{m.components.x.description()}</Rich>` + Storybook link
-3. **Import section**: `CodeBlock` (from `@k8ordo/ui/code-block`) showing the import statement
+3. **Import section**: `CodeBlock` (the site's, from `src/components/code-block`) showing the import statement
 4. **Usage section**: Multiple `ComponentPreview` blocks demonstrating variants, sizes, states, etc.
 5. **Props table**: `<PropsTable items={propsOf('Button')} inherits={inheritsOf('Button')} />` — read from the generated `@k8ordo/ui/props.json` through `src/data/component-props.ts`, never written by hand
 
 ```tsx
+import page from '../../../../../styles/page.module.css';
+
 export default function ButtonPage() {
   return (
-    <div className="mx-auto flex max-w-4xl flex-col gap-8 px-6 py-12 md:px-8">
+    <div className={page.page}>
       <PageTitle name="Button" />
       {/* Header */}
       {/* Import */}
@@ -435,7 +451,9 @@ for word translation of the Japanese, nor the other way round.
 | `TokenCard`        | Design token display card            |
 
 Code samples are `@k8ordo/ui`'s own `CodeBlock` (`@k8ordo/ui/code-block`),
-highlighted on the server; the site keeps no highlighter of its own.
+highlighted on the server; the site keeps no highlighter of its own. Pages
+import it through `src/components/code-block`, which frames it with the
+site's border.
 
 ## The framework it runs on
 

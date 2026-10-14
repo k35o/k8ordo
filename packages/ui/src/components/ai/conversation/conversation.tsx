@@ -1,15 +1,17 @@
 'use client';
 
+import { clsx } from 'clsx';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { FC, ReactNode } from 'react';
 
-import { cn } from '../../../helpers/cn';
 import { createSafeContext } from '../../../helpers/create-safe-context';
 import { getMessages } from '../../../i18n/current';
-import { FOCUS_RING, FOCUS_RING_NO_BORDER } from '../../_internal/focus-ring';
 import { ChevronIcon } from '../../icons';
 import { InView } from '../../observers/in-view';
 import { Resize } from '../../observers/resize';
+
+import focusRing from '../../_internal/focus-ring.module.css';
+import styles from './conversation.module.css';
 
 const prefersReducedMotion = () =>
   window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -72,7 +74,7 @@ export const Root: FC<{ children: ReactNode }> = ({ children }) => {
 
   return (
     <ConversationProvider value={contextValue}>
-      <div className="relative flex h-full min-h-0 flex-col">{children}</div>
+      <div className={styles.root}>{children}</div>
     </ConversationProvider>
   );
 };
@@ -97,10 +99,7 @@ export const Messages: FC<MessagesProps> = ({
       aria-busy={isStreaming}
       aria-label={label ?? messages.chat}
       aria-live="polite"
-      className={cn(
-        'min-h-0 flex-1 overflow-y-auto overscroll-contain',
-        FOCUS_RING_NO_BORDER,
-      )}
+      className={clsx(styles.messages, focusRing.ringNoBorder)}
       ref={setViewport}
       role="log"
       // スクロール領域をキーボードでも操作できるようフォーカスを許可する
@@ -108,14 +107,14 @@ export const Messages: FC<MessagesProps> = ({
       tabIndex={0}
     >
       <Resize onChange={followContent}>
-        <div className="flex flex-col gap-6 p-4">
+        <div className={styles.list}>
           {children}
           <InView
             onChange={updateAtBottom}
             root={viewport}
             rootMargin="0px 0px 24px 0px"
           >
-            <div aria-hidden className="h-px w-full shrink-0" />
+            <div aria-hidden className={styles.sentinel} />
           </InView>
         </div>
       </Resize>
@@ -134,10 +133,7 @@ export const ScrollButton: FC<{ label?: string }> = ({ label }) => {
   return (
     <button
       aria-label={label ?? messages.scrollToLatest}
-      className={cn(
-        'absolute bottom-4 left-1/2 flex size-9 -translate-x-1/2 items-center justify-center rounded-full border border-border-base bg-bg-base text-fg-mute shadow-md transition-colors duration-150 ease-out hover:bg-bg-subtle',
-        FOCUS_RING,
-      )}
+      className={styles.scrollButton}
       onClick={() => {
         scrollToBottom('smooth');
       }}

@@ -1,0 +1,181 @@
+.tabs,
+.stepper,
+.accordion,
+.dataTable,
+.resize {
+  width: 100%;
+}
+
+.sideNav,
+.tableOfContents,
+.slider,
+.rangeSlider,
+.skeleton,
+.progress,
+.stack,
+.grid,
+.separator {
+  width: calc(var(--spacing) * 40);
+}
+
+.dateField,
+.datePicker,
+.listBox,
+.colorPicker,
+.combobox {
+  width: calc(var(--spacing) * 56);
+}
+
+.checkboxCard,
+.checkboxGroup,
+.radio,
+.radioCard,
+.autocomplete,
+.formControl,
+.dialog {
+  width: 100%;
+  max-width: 20rem;
+}
+
+.tree {
+  width: calc(var(--spacing) * 44);
+}
+
+.carousel {
+  width: 100%;
+  max-width: calc(var(--spacing) * 60);
+}
+
+.prose {
+  width: 100%;
+  max-width: calc(var(--spacing) * 56);
+}
+
+/* 月の表は台に収まらないので、半分に縮めて見せる */
+.calendar {
+  zoom: 0.5;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  /* better-css-modules-disable-next-line tokens/spacing -- the 1px box is pulled back by its own size, which is not a step of the scale */
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.groupLabel {
+  margin-bottom: calc(var(--spacing) * 2);
+  color: var(--color-fg-base);
+  font-weight: var(--font-weight-medium);
+}
+
+.badges {
+  display: flex;
+  gap: calc(var(--spacing) * 2);
+}
+
+.cardContent {
+  padding: calc(var(--spacing) * 6);
+}
+
+.kbd {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(var(--spacing) * 1);
+}
+
+.commandPalette {
+  display: flex;
+  gap: calc(var(--spacing) * 1);
+}
+
+.slide {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: calc(var(--spacing) * 12);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-bg-base);
+  box-shadow: var(--shadow-sm);
+}
+
+.contextTrigger {
+  display: grid;
+  place-items: center;
+  width: calc(var(--spacing) * 40);
+  height: calc(var(--spacing) * 20);
+  border: 1px dashed var(--color-border-base);
+  border-radius: var(--radius-lg);
+  color: var(--color-fg-mute);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+}
+
+.stackItem,
+.gridItem {
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg-base);
+  box-shadow: var(--shadow-sm);
+}
+
+.stackItem {
+  height: calc(var(--spacing) * 6);
+}
+
+.gridItem {
+  height: calc(var(--spacing) * 8);
+}
+
+.resizablePanels {
+  width: calc(var(--spacing) * 40);
+  height: calc(var(--spacing) * 20);
+  overflow: hidden;
+  border: 1px solid var(--color-border-base);
+  border-radius: var(--radius-md);
+}
+
+.panel {
+  width: 100%;
+  height: 100%;
+}
+
+.filledPanel {
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-bg-subtle);
+}
+
+.icons {
+  display: flex;
+  gap: calc(var(--spacing) * 3);
+  color: var(--color-fg-base);
+}
+
+/* 狭い台でも前後のボタンの文字を折り返さない。ボタンは Pagination が描く */
+.pagination {
+  margin-inline: calc(var(--spacing) * -3);
+
+  @scope (&) {
+    button {
+      white-space: nowrap;
+    }
+  }
+}
+
+.resizeBox {
+  border-radius: var(--radius-lg);
+  background-color: var(--color-bg-base);
+  padding: calc(var(--spacing) * 4);
+  color: var(--color-fg-mute);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+}

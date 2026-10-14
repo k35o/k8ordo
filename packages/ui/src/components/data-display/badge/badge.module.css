@@ -1,0 +1,156 @@
+.root {
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--radius-full);
+  border-width: 1px;
+  border-style: solid;
+  font-weight: var(--font-weight-medium);
+  transition-property:
+    color, background-color, border-color, outline-color, text-decoration-color,
+    fill, stroke;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--easing-out);
+}
+
+.sm {
+  padding-inline: calc(var(--spacing) * 2);
+  padding-block: calc(var(--spacing) * 0.5);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-xs);
+}
+
+.md {
+  padding-inline: calc(var(--spacing) * 2.5);
+  padding-block: calc(var(--spacing) * 1);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-xs);
+}
+
+.lg {
+  padding-inline: calc(var(--spacing) * 3);
+  padding-block: calc(var(--spacing) * 1.5);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+}
+
+.neutralSolid {
+  border-color: var(--color-border-mute);
+  background-color: var(--color-bg-mute);
+  color: var(--color-fg-base);
+}
+
+.neutralOutline {
+  border-color: var(--color-border-base);
+  background-color: var(--color-bg-base);
+  color: var(--color-fg-base);
+}
+
+.infoSolid {
+  border-color: var(--color-border-info);
+  background-color: var(--color-bg-info);
+  color: var(--color-fg-info);
+}
+
+.infoOutline {
+  border-color: var(--color-border-info);
+  background-color: var(--color-bg-base);
+  color: var(--color-fg-info);
+}
+
+.successSolid {
+  border-color: var(--color-border-success);
+  background-color: var(--color-bg-success);
+  color: var(--color-fg-success);
+}
+
+.successOutline {
+  border-color: var(--color-border-success);
+  background-color: var(--color-bg-base);
+  color: var(--color-fg-success);
+}
+
+.warningSolid {
+  border-color: var(--color-border-warning);
+  background-color: var(--color-bg-warning);
+  color: var(--color-fg-warning);
+}
+
+.warningOutline {
+  border-color: var(--color-border-warning);
+  background-color: var(--color-bg-base);
+  color: var(--color-fg-warning);
+}
+
+.errorSolid {
+  border-color: var(--color-border-error);
+  background-color: var(--color-bg-error);
+  color: var(--color-fg-error);
+}
+
+.errorOutline {
+  border-color: var(--color-border-error);
+  background-color: var(--color-bg-base);
+  color: var(--color-fg-error);
+}
+
+.interactive {
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .interactive.neutralSolid:hover {
+    background-color: var(--color-bg-emphasize);
+  }
+
+  .interactive.neutralOutline:hover {
+    background-color: var(--color-bg-subtle);
+  }
+
+  .interactive:is(.infoSolid, .successSolid, .warningSolid, .errorSolid):hover {
+    background-color: var(--color-bg-base);
+  }
+
+  .interactive.infoOutline:hover {
+    background-color: var(--color-bg-info);
+  }
+
+  .interactive.successOutline:hover {
+    background-color: var(--color-bg-success);
+  }
+
+  .interactive.warningOutline:hover {
+    background-color: var(--color-bg-warning);
+  }
+
+  .interactive.errorOutline:hover {
+    background-color: var(--color-bg-error);
+  }
+}
+
+.interactive.neutralSolid:active {
+  background-color: var(--color-bg-base);
+}
+
+.interactive.neutralOutline:active {
+  background-color: var(--color-bg-mute);
+}
+
+.interactive:is(.infoSolid, .successSolid, .warningSolid, .errorSolid):active {
+  background-color: var(--color-bg-base);
+}
+
+.interactive.infoOutline:active {
+  background-color: var(--color-bg-info);
+}
+
+.interactive.successOutline:active {
+  background-color: var(--color-bg-success);
+}
+
+.interactive.warningOutline:active {
+  background-color: var(--color-bg-warning);
+}
+
+.interactive.errorOutline:active {
+  background-color: var(--color-bg-error);
+}

@@ -1,0 +1,9 @@
+.copied {
+  display: contents;
+  color: var(--color-fg-success);
+}
+
+.failed {
+  display: contents;
+  color: var(--color-fg-error);
+}

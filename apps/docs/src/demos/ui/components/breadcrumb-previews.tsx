@@ -4,6 +4,8 @@ import { Breadcrumb } from '@k8ordo/ui';
 
 import { href } from '../../../links';
 
+import styles from './breadcrumb-previews.module.css';
+
 export function BreadcrumbBasicPreview() {
   return (
     <Breadcrumb.List>
@@ -53,7 +55,7 @@ export function BreadcrumbCurrentPagePreview() {
 
 export function BreadcrumbSizesPreview() {
   return (
-    <div className="flex w-full flex-col gap-4">
+    <div className={styles.sizes}>
       <Breadcrumb.List size="sm">
         <Breadcrumb.Item>
           <Breadcrumb.Link href="/">Home</Breadcrumb.Link>

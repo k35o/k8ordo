@@ -1,13 +1,16 @@
 import { Code } from '@k8ordo/ui';
-import { CodeBlock } from '@k8ordo/ui/code-block';
 import { en, ja, messageUsage } from '@k8ordo/ui/i18n';
 import type { Messages } from '@k8ordo/ui/i18n';
 
 import { Pitfall } from '../../../../components/callout';
+import { CodeBlock } from '../../../../components/code-block';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
 import { Rich } from '../../../../components/rich';
 import * as m from '../../../../messages';
+
+import page from '../../../../styles/page.module.css';
+import styles from '../../../../styles/pages/ui/i18n.module.css';
 
 const t = m.uiI18n;
 
@@ -186,26 +189,23 @@ export default function UiI18nPage() {
         <p>
           <Rich>{t.keysAll()}</Rich>
         </p>
-        <dl className="flex flex-col gap-4 md:hidden">
+        <dl className={styles.list}>
           {MESSAGE_ROWS.map((row) => (
-            <div
-              className="border-border-mute flex flex-col gap-1 border-b pb-4"
-              key={row.key}
-            >
-              <dt className="font-medium">
+            <div className={styles.entry} key={row.key}>
+              <dt className={styles.term}>
                 <Code>{row.key}</Code>
               </dt>
-              <dd className="text-fg-mute text-sm">
+              <dd className={styles.detail}>
                 {t.usedByColumn()}
                 {m.docPage.termSeparator()}
                 {row.usedBy}
               </dd>
-              <dd className="text-fg-mute text-sm">
+              <dd className={styles.detail}>
                 {t.jaColumn()}
                 {m.docPage.termSeparator()}
                 {row.jaValue}
               </dd>
-              <dd className="text-fg-mute text-sm">
+              <dd className={styles.detail}>
                 {t.enColumn()}
                 {m.docPage.termSeparator()}
                 {row.enValue}
@@ -213,33 +213,25 @@ export default function UiI18nPage() {
             </div>
           ))}
         </dl>
-        <div className="hidden overflow-x-auto md:block">
-          <table className="w-full text-left text-sm">
+        <div className={styles.tableScroll}>
+          <table className={styles.table}>
             <thead>
-              <tr className="border-border-mute border-b">
-                <th className="py-3 pr-6 font-medium whitespace-nowrap">
-                  {t.keyColumn()}
-                </th>
-                <th className="py-3 pr-6 font-medium whitespace-nowrap">
-                  {t.usedByColumn()}
-                </th>
-                <th className="py-3 pr-6 font-medium whitespace-nowrap">
-                  {t.jaColumn()}
-                </th>
-                <th className="py-3 font-medium whitespace-nowrap">
-                  {t.enColumn()}
-                </th>
+              <tr className={styles.row}>
+                <th className={styles.columnHeader}>{t.keyColumn()}</th>
+                <th className={styles.columnHeader}>{t.usedByColumn()}</th>
+                <th className={styles.columnHeader}>{t.jaColumn()}</th>
+                <th className={styles.lastColumnHeader}>{t.enColumn()}</th>
               </tr>
             </thead>
-            <tbody className="text-fg-mute">
+            <tbody className={page.mute}>
               {MESSAGE_ROWS.map((row) => (
-                <tr className="border-border-mute border-b" key={row.key}>
-                  <td className="py-3 pr-6 whitespace-nowrap">
+                <tr className={styles.row} key={row.key}>
+                  <td className={styles.keyCell}>
                     <Code>{row.key}</Code>
                   </td>
-                  <td className="py-3 pr-6">{row.usedBy}</td>
-                  <td className="py-3 pr-6">{row.jaValue}</td>
-                  <td className="py-3">{row.enValue}</td>
+                  <td className={styles.cell}>{row.usedBy}</td>
+                  <td className={styles.cell}>{row.jaValue}</td>
+                  <td className={styles.lastCell}>{row.enValue}</td>
                 </tr>
               ))}
             </tbody>

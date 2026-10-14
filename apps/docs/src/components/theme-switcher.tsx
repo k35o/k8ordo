@@ -5,6 +5,8 @@ import { DarkModeIcon, IconButton, LightModeIcon } from '@k8ordo/ui';
 
 import * as m from '../messages';
 
+import styles from './theme-switcher.module.css';
+
 export function ThemeSwitcher() {
   const { scheme, setPreference } = useColorScheme();
 
@@ -17,10 +19,10 @@ export function ThemeSwitcher() {
         setPreference(scheme === 'light' ? 'dark' : 'light');
       }}
     >
-      <span className="contents dark:hidden">
+      <span className={styles.toDark}>
         <DarkModeIcon />
       </span>
-      <span className="hidden dark:contents">
+      <span className={styles.toLight}>
         <LightModeIcon />
       </span>
     </IconButton>

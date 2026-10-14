@@ -1,13 +1,15 @@
 'use client';
 
+import { clsx } from 'clsx';
 import { useCallback, useId, useMemo, useRef, useState } from 'react';
 import type { FC, KeyboardEvent, Ref } from 'react';
 
-import { cn } from '../../../helpers/cn';
 import { mergeRefs } from '../../../helpers/merge-refs';
 import { getMessages } from '../../../i18n/current';
 import { Kbd } from '../../data-display/kbd';
 import { Modal } from '../modal';
+
+import styles from './command-palette.module.css';
 
 export type CommandPaletteItem = Readonly<{
   id: string;
@@ -131,11 +133,7 @@ export const CommandPalette: FC<Props> = ({
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/interactive-supports-focus -- フォーカスは検索欄に置いたまま、aria-activedescendant で項目を指す
     <div
       aria-selected={active === index}
-      className={cn(
-        'flex cursor-pointer items-center justify-between gap-4 rounded-md px-3 py-2 outline-border-base -outline-offset-2',
-        active === index &&
-          'bg-bg-subtle contrast-more:outline-2 forced-colors:bg-[Highlight] forced-colors:text-[HighlightText]',
-      )}
+      className={clsx(styles.option, active === index && styles.active)}
       id={optionId(index)}
       key={item.id}
       onClick={() => {
@@ -151,7 +149,7 @@ export const CommandPalette: FC<Props> = ({
     >
       <span>{item.label}</span>
       {item.shortcut === undefined ? null : (
-        <span className="flex shrink-0 gap-1">
+        <span className={styles.shortcut}>
           {item.shortcut.map((key) => (
             <Kbd key={key}>{key}</Kbd>
           ))}
@@ -173,7 +171,7 @@ export const CommandPalette: FC<Props> = ({
       }}
       ref={mergedRef}
     >
-      <div className="flex max-h-[inherit] flex-col">
+      <div className={styles.root}>
         <input
           aria-activedescendant={
             active === undefined ? undefined : optionId(active)
@@ -183,7 +181,7 @@ export const CommandPalette: FC<Props> = ({
           aria-expanded
           aria-label={messages.commandPaletteSearch}
           autoComplete="off"
-          className="border-border-mute placeholder:text-fg-mute border-b bg-transparent px-4 py-3 focus-visible:outline-hidden"
+          className={styles.search}
           onChange={(event) => {
             setQuery(event.currentTarget.value);
             setActiveIndex(0);
@@ -195,12 +193,9 @@ export const CommandPalette: FC<Props> = ({
           type="text"
           value={query}
         />
-        <div className="min-h-0 overflow-y-auto p-2">
+        <div className={styles.results}>
           {ordered.length === 0 ? (
-            <p
-              className="text-fg-mute px-3 py-6 text-center text-sm"
-              role="status"
-            >
+            <p className={styles.empty} role="status">
               {messages.commandPaletteEmpty}
             </p>
           ) : null}
@@ -221,7 +216,7 @@ export const CommandPalette: FC<Props> = ({
                   role="group"
                 >
                   <div
-                    className="text-fg-mute px-3 pt-3 pb-1 text-xs font-bold"
+                    className={styles.groupLabel}
                     id={`${baseId}-group-${String(sectionIndex)}`}
                     role="presentation"
                   >

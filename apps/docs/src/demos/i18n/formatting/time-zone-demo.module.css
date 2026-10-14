@@ -1,0 +1,38 @@
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 1);
+}
+
+.call {
+  color: var(--color-fg-mute);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+  word-break: break-all;
+}
+
+.result {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: calc(var(--spacing) * 3);
+  row-gap: calc(var(--spacing) * 1);
+}
+
+.value {
+  color: var(--color-fg-base);
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-lg);
+}
+
+.zone {
+  color: var(--color-fg-mute);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+}
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 5);
+}

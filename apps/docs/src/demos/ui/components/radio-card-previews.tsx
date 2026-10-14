@@ -3,6 +3,8 @@
 import { Button, Form, RadioCard } from '@k8ordo/ui';
 import { useState } from 'react';
 
+import styles from './radio-card-previews.module.css';
+
 const options = [
   {
     value: 'starter',
@@ -25,11 +27,8 @@ export function RadioCardControlledPreview() {
   const [value, setValue] = useState('pro');
 
   return (
-    <div className="w-full max-w-2xl">
-      <p
-        className="text-fg-base mb-3 font-medium"
-        id="radio-card-preview-label"
-      >
+    <div className={styles.frame}>
+      <p className={styles.groupLabel} id="radio-card-preview-label">
         Choose a plan
       </p>
       <RadioCard
@@ -50,14 +49,14 @@ export function RadioCardFormPreview() {
   const [submitted, setSubmitted] = useState<string | null>(null);
 
   return (
-    <div className="flex w-full max-w-2xl flex-col gap-4">
+    <div className={styles.form}>
       <Form
         action={(formData) => {
           const plan = formData.get('plan');
           setSubmitted(typeof plan === 'string' ? plan : null);
         }}
       >
-        <p className="text-fg-base font-medium" id="radio-card-form-label">
+        <p className={styles.label} id="radio-card-form-label">
           Choose a plan
         </p>
         <RadioCard
@@ -71,7 +70,7 @@ export function RadioCardFormPreview() {
         <Button type="submit">Submit</Button>
       </Form>
       {submitted !== null && (
-        <p className="text-fg-base text-sm">Submitted plan: {submitted}</p>
+        <p className={styles.result}>Submitted plan: {submitted}</p>
       )}
     </div>
   );

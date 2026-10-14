@@ -1,15 +1,18 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { clsx } from 'clsx';
 import { useState } from 'react';
 import type { ComponentProps } from 'react';
 import { expect, fireEvent, fn, spyOn, waitFor } from 'storybook/test';
 
 import { ResizablePanels } from '.';
 
+import styles from './resizable-panels.stories.module.css';
+
 const Workspace = (props: ComponentProps<typeof ResizablePanels.Root>) => (
-  <div className="border-border-base overflow-hidden rounded-lg border block-64 inline-full">
+  <div className={styles.workspace}>
     <ResizablePanels.Root {...props}>
       <ResizablePanels.Panel>
-        <ul className="flex flex-col gap-2 p-4 text-sm">
+        <ul className={styles.toc}>
           <li>はじめに</li>
           <li>インストール</li>
           <li>使い方</li>
@@ -17,7 +20,7 @@ const Workspace = (props: ComponentProps<typeof ResizablePanels.Root>) => (
       </ResizablePanels.Panel>
       <ResizablePanels.Handle />
       <ResizablePanels.Panel>
-        <p className="p-4 text-sm">
+        <p className={styles.content}>
           仕切りをドラッグするか、フォーカスして矢印キーを押すと、2
           枚の大きさが変わります。
         </p>
@@ -156,7 +159,7 @@ export const RightToLeft: Story = {
 export const VerticalWriting: Story = {
   decorators: [
     (Story) => (
-      <div className="writing-v inline-64">
+      <div className={clsx('writing-v', styles.verticalFrame)}>
         <Story />
       </div>
     ),
@@ -178,16 +181,16 @@ export const VerticalWriting: Story = {
 // 1 枚目に見出しがあれば、仕切りの名前はそれを指す
 export const LabelledByPrimary: Story = {
   render: () => (
-    <div className="border-border-base overflow-hidden rounded-lg border block-64 inline-full">
+    <div className={styles.workspace}>
       <ResizablePanels.Root defaultValue={30}>
         <ResizablePanels.Panel>
-          <h2 className="p-4 font-bold" id="files-heading">
+          <h2 className={styles.heading} id="files-heading">
             ファイル
           </h2>
         </ResizablePanels.Panel>
         <ResizablePanels.Handle aria-labelledby="files-heading" />
         <ResizablePanels.Panel>
-          <p className="p-4 text-sm">プレビュー</p>
+          <p className={styles.content}>プレビュー</p>
         </ResizablePanels.Panel>
       </ResizablePanels.Root>
     </div>
@@ -202,8 +205,8 @@ export const LabelledByPrimary: Story = {
 const ControlledWorkspace = () => {
   const [size, setSize] = useState(25);
   return (
-    <div className="flex flex-col gap-2">
-      <p className="text-sm">目次の幅: {Math.round(size)}%</p>
+    <div className={styles.controlled}>
+      <p className={styles.caption}>目次の幅: {Math.round(size)}%</p>
       <Workspace onChange={setSize} value={size} />
     </div>
   );

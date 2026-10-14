@@ -12,6 +12,8 @@ import type { Option } from '../../../types/variables';
 import { Combobox } from './combobox';
 import type { ComboboxSearch } from './combobox';
 
+import styles from './combobox.stories.module.css';
+
 const PREFECTURES: readonly Option[] = [
   { value: 'hokkaido', label: '北海道' },
   { value: 'tokyo', label: '東京都' },
@@ -36,7 +38,7 @@ const meta: Meta<typeof Combobox> = {
   component: Combobox,
   decorators: [
     (Story) => (
-      <div className="w-80 p-6 block-96">
+      <div className={styles.frame}>
         <Story />
       </div>
     ),
@@ -236,14 +238,14 @@ export const SearchFailed: Story = {
 const ControlledCombobox = () => {
   const [prefecture, setPrefecture] = useState('tokyo');
   return (
-    <div className="flex flex-col gap-3">
+    <div className={styles.column}>
       <Combobox
         aria-label="都道府県"
         onChange={setPrefecture}
         options={PREFECTURES}
         value={prefecture}
       />
-      <p className="text-sm">選んだ値: {prefecture || '（なし）'}</p>
+      <p className={styles.selection}>選んだ値: {prefecture || '（なし）'}</p>
     </div>
   );
 };

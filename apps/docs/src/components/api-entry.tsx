@@ -1,23 +1,25 @@
 import type { Message } from '@k8ordo/i18n';
 import { Code, Prose } from '@k8ordo/ui';
-import { CodeBlock } from '@k8ordo/ui/code-block';
 import type { ReactNode } from 'react';
 
 import * as m from '../messages';
+import { CodeBlock } from './code-block';
 import { Rich } from './rich';
+
+import styles from './api-entry.module.css';
 
 type Param = { name: string; type: string; description: Message };
 
 /** One named thing with a type: a parameter, or a field of what is returned. */
 const NamedList = ({ items }: { items: readonly Param[] }) => (
-  <dl className="flex flex-col gap-3">
+  <dl className={styles.list}>
     {items.map((item) => (
-      <div className="flex flex-col gap-1" key={item.name}>
-        <dt className="flex flex-wrap items-baseline gap-2">
+      <div className={styles.item} key={item.name}>
+        <dt className={styles.term}>
           <Code>{item.name}</Code>
-          <span className="text-fg-mute text-sm">{item.type}</span>
+          <span className={styles.type}>{item.type}</span>
         </dt>
-        <dd className="text-fg-base leading-relaxed">
+        <dd className={styles.description}>
           <Rich>{item.description()}</Rich>
         </dd>
       </div>
@@ -44,7 +46,7 @@ export type ApiEntryProps = {
 };
 
 const Label = ({ children }: { children: string }) => (
-  <h3 className="text-fg-base text-sm font-bold">{children}</h3>
+  <h3 className={styles.label}>{children}</h3>
 );
 
 /**
@@ -64,15 +66,12 @@ export function ApiEntry({
   children,
 }: ApiEntryProps) {
   return (
-    <section
-      aria-labelledby={id}
-      className="border-border-mute flex flex-col gap-5 border-t pt-10"
-    >
-      <div className="flex flex-col gap-2">
-        <h2 className="text-xl font-bold md:text-2xl" id={id}>
+    <section aria-labelledby={id} className={styles.entry}>
+      <div className={styles.heading}>
+        <h2 className={styles.name} id={id}>
           {name}
         </h2>
-        <p className="text-fg-mute text-sm">
+        <p className={styles.from}>
           {m.reference.importFrom()} <Code>{from}</Code>
         </p>
       </div>
@@ -83,29 +82,29 @@ export function ApiEntry({
       </Prose>
       <CodeBlock code={signature} lang="ts" />
       {params !== undefined && params.length > 0 && (
-        <div className="flex flex-col gap-3">
+        <div className={styles.block}>
           <Label>{m.reference.parameters()}</Label>
           <NamedList items={params} />
         </div>
       )}
       {returns !== undefined && (
-        <div className="flex flex-col gap-3">
+        <div className={styles.block}>
           <Label>{m.reference.returns()}</Label>
-          <p className="leading-relaxed">
+          <p className={styles.returns}>
             <Code>{returns.type}</Code> — <Rich>{returns.description()}</Rich>
           </p>
         </div>
       )}
       {fields !== undefined && fields.length > 0 && (
-        <div className="flex flex-col gap-3">
+        <div className={styles.block}>
           <Label>{m.reference.fields()}</Label>
           <NamedList items={fields} />
         </div>
       )}
       {caveats !== undefined && caveats.length > 0 && (
-        <div className="flex flex-col gap-3">
+        <div className={styles.block}>
           <Label>{m.reference.caveats()}</Label>
-          <ul className="text-fg-base flex list-disc flex-col gap-2 ps-5 leading-relaxed">
+          <ul className={styles.caveats}>
             {caveats.map((caveat) => (
               <li key={caveat()}>
                 <Rich>{caveat()}</Rich>

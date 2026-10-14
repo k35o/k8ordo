@@ -3,12 +3,14 @@ import { expect } from 'storybook/test';
 
 import { DateField } from './date-field';
 
+import styles from './date-field.stories.module.css';
+
 const meta: Meta<typeof DateField> = {
   title: 'components/form/date-field',
   component: DateField,
   decorators: [
     (Story) => (
-      <div className="w-72 p-6">
+      <div className={styles.frame}>
         <Story />
       </div>
     ),

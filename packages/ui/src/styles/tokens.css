@@ -1,8 +1,16 @@
 /**
- * Design tokens — raw palette, semantic mappings, and Tailwind theme.
+ * Design tokens: the raw palette, the semantic tokens, and their modes.
  *
- * Imported by `index.css`. This file is the source of truth consumed by
- * `tailwind-token-extractor` — run `pnpm generate:tokens` after editing.
+ * A token is a custom property declared at `:root` whose prefix names its
+ * category (`--color-*`, `--spacing`, `--radius-*`, `--shadow-*`,
+ * `--font-family-*`, `--font-size-*`, `--font-weight-*`, `--line-height-*`,
+ * `--letter-spacing-*`, `--z-index-*`, `--duration-*`, `--easing-*`,
+ * `--breakpoint-*`). A name without a category (`--gray-500`) is the palette,
+ * internal to this file. `.dark` and `@media (prefers-contrast: more)` are
+ * modes: they only override names declared at `:root`.
+ *
+ * `better-css-modules check` holds every CSS module to these tokens, and
+ * `@k8ordo/ui/tokens` is generated from them.
  */
 
 :root {
@@ -139,280 +147,128 @@
   --orange-900: oklch(0.37 0.128 55);
   --orange-950: oklch(0.18 0.09 55);
 
-  --fg-base: var(--gray-900);
-  --fg-subtle: var(--gray-600);
-  --fg-mute: var(--gray-700);
-  --fg-inverse: var(--gray-50);
-  --fg-info: var(--blue-800);
-  --fg-success: var(--green-800);
-  --fg-warning: var(--yellow-800);
-  --fg-error: var(--red-800);
+  --color-fg-base: var(--gray-900);
+  --color-fg-subtle: var(--gray-600);
+  --color-fg-mute: var(--gray-700);
+  --color-fg-inverse: var(--gray-50);
+  --color-fg-info: var(--blue-800);
+  --color-fg-success: var(--green-800);
+  --color-fg-warning: var(--yellow-800);
+  --color-fg-error: var(--red-800);
 
-  --bg-base: var(--white);
-  --bg-raised: var(--white);
-  --bg-surface: var(--gray-50);
-  --bg-subtle: var(--gray-100);
-  --bg-mute: var(--gray-200);
-  --bg-emphasize: var(--gray-300);
-  --bg-inverse: var(--gray-900);
-  --bg-info: var(--blue-100);
-  --bg-success: var(--green-100);
-  --bg-warning: var(--yellow-100);
-  --bg-error: var(--red-100);
+  --color-bg-base: var(--white);
+  --color-bg-raised: var(--white);
+  --color-bg-surface: var(--gray-50);
+  --color-bg-subtle: var(--gray-100);
+  --color-bg-mute: var(--gray-200);
+  --color-bg-emphasize: var(--gray-300);
+  --color-bg-inverse: var(--gray-900);
+  --color-bg-info: var(--blue-100);
+  --color-bg-success: var(--green-100);
+  --color-bg-warning: var(--yellow-100);
+  --color-bg-error: var(--red-100);
 
-  --border-base: var(--gray-400);
-  --border-subtle: var(--gray-100);
-  --border-mute: var(--gray-200);
-  --border-emphasize: var(--gray-500);
-  --border-inverse: var(--gray-700);
-  --border-info: var(--blue-500);
-  --border-success: var(--green-500);
-  --border-warning: var(--yellow-500);
-  --border-error: var(--red-500);
+  --color-border-base: var(--gray-400);
+  --color-border-subtle: var(--gray-100);
+  --color-border-mute: var(--gray-200);
+  --color-border-emphasize: var(--gray-500);
+  --color-border-inverse: var(--gray-700);
+  --color-border-info: var(--blue-500);
+  --color-border-success: var(--green-500);
+  --color-border-warning: var(--yellow-500);
+  --color-border-error: var(--red-500);
 
-  --primary-fg: var(--teal-800);
-  --primary-bg: var(--teal-200);
-  --primary-bg-subtle: var(--teal-50);
-  --primary-bg-mute: var(--teal-100);
-  --primary-bg-emphasize: var(--teal-300);
-  --primary-border: var(--teal-500);
+  --color-primary-fg: var(--teal-800);
+  --color-primary-bg: var(--teal-200);
+  --color-primary-bg-subtle: var(--teal-50);
+  --color-primary-bg-mute: var(--teal-100);
+  --color-primary-bg-emphasize: var(--teal-300);
+  --color-primary-border: var(--teal-500);
 
-  --secondary-fg: var(--cyan-800);
-  --secondary-bg: var(--cyan-200);
-  --secondary-bg-subtle: var(--cyan-50);
-  --secondary-bg-mute: var(--cyan-100);
-  --secondary-bg-emphasize: var(--cyan-300);
-  --secondary-border: var(--cyan-500);
+  --color-secondary-fg: var(--cyan-800);
+  --color-secondary-bg: var(--cyan-200);
+  --color-secondary-bg-subtle: var(--cyan-50);
+  --color-secondary-bg-mute: var(--cyan-100);
+  --color-secondary-bg-emphasize: var(--cyan-300);
+  --color-secondary-border: var(--cyan-500);
 
-  --back-drop: rgb(0, 0, 0, 0.5);
+  --color-back-drop: rgb(0 0 0 / 0.5);
 
-  --z-overlay: 1000;
-  --z-modal: 1300;
-  --z-toast: 1500;
+  --color-group-primary: var(--teal-800);
+  --color-group-secondary: var(--cyan-800);
+  --color-group-tertiary: var(--pink-800);
+  --color-group-quaternary: var(--purple-800);
 
-  /* TODO: 上の変数の一環として使えるようにする */
-  --group-primary: var(--teal-800);
-  --group-secondary: var(--cyan-800);
-  --group-tertiary: var(--pink-800);
-  --group-quaternary: var(--purple-800);
-}
+  /* k8o のロゴの 2 色 */
+  --color-logo-primary: var(--teal-700);
+  --color-logo-secondary: var(--teal-600);
 
-.dark {
-  --fg-base: var(--gray-50);
-  --fg-subtle: var(--gray-400);
-  --fg-mute: var(--gray-300);
-  --fg-inverse: var(--gray-900);
-  --fg-info: var(--blue-200);
-  --fg-success: var(--green-200);
-  --fg-warning: var(--yellow-200);
-  --fg-error: var(--red-200);
+  /* 強制カラーで塗るシステムの色。@media (forced-colors: active) の中で使う */
+  --color-system-canvas-text: CanvasText;
+  --color-system-gray-text: GrayText;
+  --color-system-highlight: Highlight;
+  --color-system-highlight-text: HighlightText;
 
-  --bg-base: var(--gray-800);
-  --bg-raised: var(--gray-800);
-  --bg-surface: var(--gray-950);
-  --bg-subtle: var(--gray-900);
-  --bg-mute: var(--gray-700);
-  --bg-emphasize: var(--gray-600);
-  --bg-inverse: var(--white);
-  --bg-info: var(--blue-900);
-  --bg-success: var(--green-900);
-  --bg-warning: var(--yellow-900);
-  --bg-error: var(--red-900);
+  --spacing: 0.25rem;
+  /* 文字の大きさに比例する余白の 1 段。地の文の中のコードや、本文の組み */
+  --spacing-em: 0.25em;
 
-  --border-base: var(--gray-600);
-  --border-subtle: var(--gray-700);
-  --border-mute: var(--gray-600);
-  --border-emphasize: var(--gray-500);
-  --border-inverse: var(--gray-300);
-  --border-info: var(--blue-400);
-  --border-success: var(--green-400);
-  --border-warning: var(--yellow-400);
-  --border-error: var(--red-400);
-
-  /* bg と emphasize を 1 段暗くしているのは、hover / active の emphasize の上でも
-     *-fg を通常の文字で AA にするため。700 だと 3.7:1 にしかならない */
-  --primary-fg: var(--teal-300);
-  --primary-bg: var(--teal-900);
-  --primary-bg-subtle: var(--teal-950);
-  --primary-bg-mute: var(--teal-900);
-  --primary-bg-emphasize: var(--teal-800);
-  --primary-border: var(--teal-500);
-
-  --secondary-fg: var(--cyan-300);
-  --secondary-bg: var(--cyan-900);
-  --secondary-bg-subtle: var(--cyan-950);
-  --secondary-bg-mute: var(--cyan-900);
-  --secondary-bg-emphasize: var(--cyan-800);
-  --secondary-border: var(--cyan-500);
-
-  /* TODO: 上の変数の一環として使えるようにする */
-  --group-primary: var(--teal-200);
-  --group-secondary: var(--cyan-200);
-  --group-tertiary: var(--pink-200);
-  --group-quaternary: var(--purple-200);
-}
-
-@media (prefers-contrast: more) {
-  /* :root だけにすると、後に書いたこちらが html.dark のダークの値を上書きする。
-     :not(.dark) を :where で包むのは、詳細度を :root のままにして、利用側が
-     後から :root で上書きしたトークンに勝たないようにするため */
-  :root:where(:not(.dark)) {
-    --fg-base: var(--gray-950);
-    --fg-subtle: var(--gray-800);
-    --fg-mute: var(--gray-900);
-    --fg-info: var(--blue-900);
-    --fg-success: var(--green-900);
-    --fg-warning: var(--yellow-900);
-    --fg-error: var(--red-900);
-
-    --border-base: var(--gray-600);
-    --border-subtle: var(--gray-500);
-    --border-mute: var(--gray-500);
-    --border-emphasize: var(--gray-800);
-    --border-info: var(--blue-700);
-    --border-success: var(--green-700);
-    --border-warning: var(--yellow-700);
-    --border-error: var(--red-700);
-
-    --primary-fg: var(--teal-900);
-    --primary-border: var(--teal-700);
-
-    --secondary-fg: var(--cyan-900);
-    --secondary-border: var(--cyan-700);
-  }
-
-  .dark {
-    --fg-base: var(--white);
-    --fg-subtle: var(--gray-200);
-    --fg-mute: var(--gray-100);
-    --fg-info: var(--blue-100);
-    --fg-success: var(--green-100);
-    --fg-warning: var(--yellow-100);
-    --fg-error: var(--red-100);
-
-    --bg-emphasize: var(--gray-700);
-
-    --border-base: var(--gray-400);
-    --border-subtle: var(--gray-500);
-    --border-mute: var(--gray-400);
-    --border-emphasize: var(--gray-200);
-    --border-info: var(--blue-300);
-    --border-success: var(--green-300);
-    --border-warning: var(--yellow-300);
-    --border-error: var(--red-300);
-
-    --primary-fg: var(--teal-100);
-    --primary-border: var(--teal-300);
-
-    --secondary-fg: var(--cyan-100);
-    --secondary-border: var(--cyan-300);
-  }
-}
-
-@theme inline {
-  --color-*: initial;
-  --color-fg-base: var(--fg-base);
-  --color-fg-subtle: var(--fg-subtle);
-  --color-fg-mute: var(--fg-mute);
-  --color-fg-inverse: var(--fg-inverse);
-  --color-fg-info: var(--fg-info);
-  --color-fg-success: var(--fg-success);
-  --color-fg-warning: var(--fg-warning);
-  --color-fg-error: var(--fg-error);
-
-  --color-bg-base: var(--bg-base);
-  --color-bg-raised: var(--bg-raised);
-  --color-bg-surface: var(--bg-surface);
-  --color-bg-subtle: var(--bg-subtle);
-  --color-bg-mute: var(--bg-mute);
-  --color-bg-emphasize: var(--bg-emphasize);
-  --color-bg-inverse: var(--bg-inverse);
-  --color-bg-info: var(--bg-info);
-  --color-bg-success: var(--bg-success);
-  --color-bg-warning: var(--bg-warning);
-  --color-bg-error: var(--bg-error);
-
-  --color-border-base: var(--border-base);
-  --color-border-subtle: var(--border-subtle);
-  --color-border-mute: var(--border-mute);
-  --color-border-emphasize: var(--border-emphasize);
-  --color-border-inverse: var(--border-inverse);
-  --color-border-info: var(--border-info);
-  --color-border-success: var(--border-success);
-  --color-border-warning: var(--border-warning);
-  --color-border-error: var(--border-error);
-
-  --color-primary-fg: var(--primary-fg);
-  --color-primary-bg: var(--primary-bg);
-  --color-primary-bg-subtle: var(--primary-bg-subtle);
-  --color-primary-bg-mute: var(--primary-bg-mute);
-  --color-primary-bg-emphasize: var(--primary-bg-emphasize);
-  --color-primary-border: var(--primary-border);
-
-  --color-secondary-fg: var(--secondary-fg);
-  --color-secondary-bg: var(--secondary-bg);
-  --color-secondary-bg-subtle: var(--secondary-bg-subtle);
-  --color-secondary-bg-mute: var(--secondary-bg-mute);
-  --color-secondary-bg-emphasize: var(--secondary-bg-emphasize);
-  --color-secondary-border: var(--secondary-border);
-
-  --color-transparent: transparent;
-  --color-back-drop: var(--back-drop);
-
-  --color-group-primary: var(--group-primary);
-  --color-group-secondary: var(--group-secondary);
-  --color-group-tertiary: var(--group-tertiary);
-  --color-group-quaternary: var(--group-quaternary);
-
-  --radius-*: initial;
   --radius-xs: 0.125rem;
   --radius-sm: 0.375rem;
   --radius-md: 0.5rem;
   --radius-lg: 0.75rem;
   --radius-xl: 1rem;
   --radius-2xl: 1.25rem;
+  --radius-full: calc(infinity * 1px);
+  --radius-em: 0.5em;
 
-  --font-*: initial;
-  --font-noto-sans-jp: var(--font-noto-sans-jp);
-  --font-m-plus-2: var(--font-m-plus-2);
+  --font-family-sans:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
+    'Noto Sans', Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+    'Segoe UI Symbol', 'Noto Color Emoji';
+  --font-family-mono:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
+    'Courier New', monospace;
 
-  --text-*: initial;
-  --text-xs: 0.75rem;
-  --text-xs--line-height: calc(1 / 0.75);
-  --text-sm: 0.875rem;
-  --text-sm--line-height: calc(1.25 / 0.875);
-  --text-md: 1rem;
-  --text-md--line-height: calc(1.5 / 1);
-  --text-lg: 1.125rem;
-  --text-lg--line-height: calc(1.75 / 1.125);
-  --text-xl: 1.25rem;
-  --text-xl--line-height: calc(1.75 / 1.25);
-  --text-2xl: 1.5rem;
-  --text-2xl--line-height: calc(2 / 1.5);
-  --text-3xl: 1.875rem;
-  --text-3xl--line-height: calc(2.25 / 1.875);
-  --text-emphasize: 3rem;
-  --text-emphasize--line-height: 1;
-  --text-highlight: 6rem;
-  --text-highlight--line-height: 1;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+  --font-size-emphasize: 3rem;
+  --font-size-highlight: 6rem;
+  /* 地の文に混ぜる小さな字。まわりの文字の大きさに比例する */
+  --font-size-code: 0.875em;
+  --font-size-kbd: 0.8125em;
+  --font-size-callout: 0.9em;
 
-  --font-weight-*: initial;
   --font-weight-medium: 450;
   --font-weight-bold: 700;
 
-  --tracking-*: initial;
-  --tracking-none: 0em;
-  --tracking-normal: 0.025em;
+  /* 文字の大きさごとの行の高さ */
+  --line-height-xs: calc(1 / 0.75);
+  --line-height-sm: calc(1.25 / 0.875);
+  --line-height-md: 1.5;
+  --line-height-lg: calc(1.75 / 1.125);
+  --line-height-xl: calc(1.75 / 1.25);
+  --line-height-2xl: calc(2 / 1.5);
+  --line-height-3xl: calc(2.25 / 1.875);
+  --line-height-emphasize: 1;
+  --line-height-highlight: 1;
+  /* 文字の大きさによらず、文章の組みで選ぶ行の高さ */
+  --line-height-none: 1;
+  --line-height-tight: 1.25;
+  --line-height-snug: 1.375;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.625;
+  --line-height-loose: 2;
+  --line-height-callout: 1.4;
 
-  --leading-*: initial;
-  --leading-none: 1;
-  --leading-tight: 1.25;
-  --leading-snug: 1.375;
-  --leading-normal: 1.5;
-  --leading-relaxed: 1.625;
-  --leading-loose: 2;
+  --letter-spacing-none: 0em;
+  --letter-spacing-normal: 0.025em;
 
-  --shadow-*: initial;
   --shadow-2xs: 0 1px rgb(0 0 0 / 0.05);
   --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
@@ -422,18 +278,160 @@
   --shadow-xl:
     0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
   --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  --shadow-inset-2xs: inset 0 1px rgb(0 0 0 / 0.05);
+  --shadow-inset-xs: inset 0 1px 1px rgb(0 0 0 / 0.05);
+  --shadow-inset-sm: inset 0 2px 4px rgb(0 0 0 / 0.05);
+  /* フォーカスと不正な値の輪。面の影と重ねるときは輪を先に書き、影の上に
+     描く（var(--shadow-ring-info), var(--shadow-xs)） */
+  --shadow-ring-info: 0 0 0 2px var(--color-border-info);
+  --shadow-ring-error: 0 0 0 2px var(--color-border-error);
+  --shadow-ring-inset-info: inset 0 0 0 2px var(--color-border-info);
+  /* 白い隙間を 2px 空けて外に引く輪。Switch のように面の縁を残したいとき */
+  --shadow-ring-offset-info:
+    0 0 0 2px var(--white), 0 0 0 4px var(--color-border-info);
 
-  --inset-shadow-*: initial;
-  --inset-shadow-2xs: inset 0 1px rgb(0 0 0 / 0.05);
-  --inset-shadow-xs: inset 0 1px 1px rgb(0 0 0 / 0.05);
-  --inset-shadow-sm: inset 0 2px 4px rgb(0 0 0 / 0.05);
+  /* 部品の中で、兄弟より上に重ねる要素（開いたリスト、つまみ） */
+  --z-index-raised: 10;
+  --z-index-overlay: 1000;
+  --z-index-modal: 1300;
+  --z-index-toast: 1500;
 
-  --spacing: 0.25rem;
+  --duration-fast: 150ms;
+  --duration-moderate: 200ms;
+  --duration-slow: 300ms;
+  /* 繰り返す動きの 1 周 */
+  --duration-spin: 1s;
+  --duration-pulse: 2s;
 
-  --breakpoint-*: initial;
+  --easing-out: cubic-bezier(0, 0, 0.2, 1);
+  --easing-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --easing-pulse: cubic-bezier(0.4, 0, 0.6, 1);
+
   --breakpoint-sm: 40rem;
   --breakpoint-md: 48rem;
   --breakpoint-lg: 64rem;
   --breakpoint-xl: 80rem;
   --breakpoint-2xl: 96rem;
+}
+
+.dark {
+  --color-fg-base: var(--gray-50);
+  --color-fg-subtle: var(--gray-400);
+  --color-fg-mute: var(--gray-300);
+  --color-fg-inverse: var(--gray-900);
+  --color-fg-info: var(--blue-200);
+  --color-fg-success: var(--green-200);
+  --color-fg-warning: var(--yellow-200);
+  --color-fg-error: var(--red-200);
+
+  --color-bg-base: var(--gray-800);
+  --color-bg-raised: var(--gray-800);
+  --color-bg-surface: var(--gray-950);
+  --color-bg-subtle: var(--gray-900);
+  --color-bg-mute: var(--gray-700);
+  --color-bg-emphasize: var(--gray-600);
+  --color-bg-inverse: var(--white);
+  --color-bg-info: var(--blue-900);
+  --color-bg-success: var(--green-900);
+  --color-bg-warning: var(--yellow-900);
+  --color-bg-error: var(--red-900);
+
+  --color-border-base: var(--gray-600);
+  --color-border-subtle: var(--gray-700);
+  --color-border-mute: var(--gray-600);
+  --color-border-emphasize: var(--gray-500);
+  --color-border-inverse: var(--gray-300);
+  --color-border-info: var(--blue-400);
+  --color-border-success: var(--green-400);
+  --color-border-warning: var(--yellow-400);
+  --color-border-error: var(--red-400);
+
+  /* bg と emphasize を 1 段暗くしているのは、hover / active の emphasize の上でも
+     *-fg を通常の文字で AA にするため。700 だと 3.7:1 にしかならない */
+  --color-primary-fg: var(--teal-300);
+  --color-primary-bg: var(--teal-900);
+  --color-primary-bg-subtle: var(--teal-950);
+  --color-primary-bg-mute: var(--teal-900);
+  --color-primary-bg-emphasize: var(--teal-800);
+  --color-primary-border: var(--teal-500);
+
+  --color-secondary-fg: var(--cyan-300);
+  --color-secondary-bg: var(--cyan-900);
+  --color-secondary-bg-subtle: var(--cyan-950);
+  --color-secondary-bg-mute: var(--cyan-900);
+  --color-secondary-bg-emphasize: var(--cyan-800);
+  --color-secondary-border: var(--cyan-500);
+
+  --color-group-primary: var(--teal-200);
+  --color-group-secondary: var(--cyan-200);
+  --color-group-tertiary: var(--pink-200);
+  --color-group-quaternary: var(--purple-200);
+
+  --color-logo-primary: var(--teal-400);
+  --color-logo-secondary: var(--teal-500);
+
+  /* 別の変数を読む変数は、宣言した要素で値が決まる。:root の宣言だけだと、
+     html より下に付いた .dark の中でも輪がライトの色のままになる */
+  --shadow-ring-info: 0 0 0 2px var(--color-border-info);
+  --shadow-ring-error: 0 0 0 2px var(--color-border-error);
+  --shadow-ring-inset-info: inset 0 0 0 2px var(--color-border-info);
+  --shadow-ring-offset-info:
+    0 0 0 2px var(--white), 0 0 0 4px var(--color-border-info);
+}
+
+@media (prefers-contrast: more) {
+  /* :root だけにすると、後に書いたこちらが html.dark のダークの値を上書きする。
+     :not(.dark) を :where で包むのは、詳細度を :root のままにして、利用側が
+     後から :root で上書きしたトークンに勝たないようにするため */
+  :root:where(:not(.dark)) {
+    --color-fg-base: var(--gray-950);
+    --color-fg-subtle: var(--gray-800);
+    --color-fg-mute: var(--gray-900);
+    --color-fg-info: var(--blue-900);
+    --color-fg-success: var(--green-900);
+    --color-fg-warning: var(--yellow-900);
+    --color-fg-error: var(--red-900);
+
+    --color-border-base: var(--gray-600);
+    --color-border-subtle: var(--gray-500);
+    --color-border-mute: var(--gray-500);
+    --color-border-emphasize: var(--gray-800);
+    --color-border-info: var(--blue-700);
+    --color-border-success: var(--green-700);
+    --color-border-warning: var(--yellow-700);
+    --color-border-error: var(--red-700);
+
+    --color-primary-fg: var(--teal-900);
+    --color-primary-border: var(--teal-700);
+
+    --color-secondary-fg: var(--cyan-900);
+    --color-secondary-border: var(--cyan-700);
+  }
+
+  .dark {
+    --color-fg-base: var(--white);
+    --color-fg-subtle: var(--gray-200);
+    --color-fg-mute: var(--gray-100);
+    --color-fg-info: var(--blue-100);
+    --color-fg-success: var(--green-100);
+    --color-fg-warning: var(--yellow-100);
+    --color-fg-error: var(--red-100);
+
+    --color-bg-emphasize: var(--gray-700);
+
+    --color-border-base: var(--gray-400);
+    --color-border-subtle: var(--gray-500);
+    --color-border-mute: var(--gray-400);
+    --color-border-emphasize: var(--gray-200);
+    --color-border-info: var(--blue-300);
+    --color-border-success: var(--green-300);
+    --color-border-warning: var(--yellow-300);
+    --color-border-error: var(--red-300);
+
+    --color-primary-fg: var(--teal-100);
+    --color-primary-border: var(--teal-300);
+
+    --color-secondary-fg: var(--cyan-100);
+    --color-secondary-border: var(--cyan-300);
+  }
 }

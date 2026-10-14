@@ -1,0 +1,3 @@
+.message {
+  padding: calc(var(--spacing) * 4);
+}

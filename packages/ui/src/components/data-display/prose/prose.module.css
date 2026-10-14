@@ -1,0 +1,236 @@
+/*
+ * Markdown や MDX が描いた本文の組版を、base のリセットの上に戻す。
+ *
+ * 段落や見出しの間隔（流れ）は、クラスの有無にかかわらず直下の子に効かせる。
+ * 部品（Alert、CodeBlock、ui の Heading…）を本文に置いても、前後の間は本文と
+ * 同じに空く。部品の見た目そのものは部品が持つので、要素の組版はクラスの
+ * 無い要素（Markdown が出す素の HTML）にだけ効かせる。GFM が付けるクラス
+ * （脚注とタスクリスト）は素の HTML の一部として扱う。
+ */
+.root {
+  color: var(--color-fg-base);
+  line-height: var(--line-height-loose);
+  letter-spacing: var(--letter-spacing-normal);
+
+  /* 流れの間隔は詳細度を持たせず、要素ごとの指定（hr の上下など）や、本文に
+     置いた部品の指定に譲る */
+  @scope (&) {
+    :where(& > * + *) {
+      margin-block-start: calc(var(--spacing) * 4);
+    }
+    :where(& > :is(h1, h2)) {
+      margin-block-start: calc(var(--spacing) * 12);
+    }
+    :where(& > :is(h3, h4, h5, h6)) {
+      margin-block-start: calc(var(--spacing) * 8);
+    }
+    :where(& > :is(h1, h2, h3, h4, h5, h6) + *) {
+      margin-block-start: calc(var(--spacing) * 3);
+    }
+    :where(& > :first-child) {
+      margin-block-start: 0;
+    }
+
+    /* remark-rehype が脚注の見出しに付けるクラス。画面には出さず、支援技術にだけ
+       読ませる */
+    :global(.sr-only) {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      /* better-css-modules-disable-next-line tokens/spacing -- the 1px box is pulled back by its own size, which is not a step of the scale */
+      margin: -1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+      border-width: 0;
+    }
+
+    /* 縦書きの本文は、段落の頭を 1 字下げる（本の組み方） */
+    @container style(--writing: vertical) {
+      & > p:not([class]) {
+        text-indent: 1em;
+      }
+    }
+  }
+
+  /* 組版はクラスのある要素（部品）の手前で止める。GFM が付けるクラスは素の
+     HTML の一部なので止めない。クラスの名前は CSS Modules が書き換えない
+     属性セレクタで見る */
+  @scope (&) to ([class]:not(&, [class~='footnotes'], [class~='contains-task-list'], [class~='task-list-item'], [class~='data-footnote-backref'])) {
+    :is(h1, h2, h3, h4, h5, h6) {
+      font-weight: var(--font-weight-bold);
+      line-height: var(--line-height-snug);
+      letter-spacing: 0;
+      font-feature-settings: 'palt';
+      text-wrap: balance;
+    }
+    h1 {
+      font-size: var(--font-size-3xl);
+    }
+    h2 {
+      font-size: var(--font-size-2xl);
+    }
+    h3 {
+      font-size: var(--font-size-xl);
+    }
+    h4 {
+      font-size: var(--font-size-lg);
+    }
+    :is(h5, h6) {
+      font-size: var(--font-size-md);
+    }
+
+    strong,
+    b {
+      font-weight: var(--font-weight-bold);
+    }
+    em:lang(ja) {
+      text-emphasis: filled sesame;
+    }
+    em:not(:lang(ja)),
+    i,
+    cite {
+      font-style: italic;
+    }
+
+    a {
+      color: var(--color-fg-info);
+      text-decoration: underline;
+      text-underline-offset: 0.2em;
+      transition-property: color;
+      transition-duration: var(--duration-fast);
+      transition-timing-function: var(--easing-out);
+    }
+    a:hover {
+      color: var(--color-fg-base);
+    }
+    a:focus-visible {
+      outline: none;
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-ring-info);
+    }
+
+    :not(pre) > code {
+      padding: calc(var(--spacing-em) * 0.5) calc(var(--spacing-em) * 1.5);
+      border-radius: var(--radius-md);
+      background-color: var(--color-bg-mute);
+      font-size: var(--font-size-code);
+    }
+    pre {
+      overflow-x: auto;
+      padding: calc(var(--spacing) * 4);
+      border: 1px solid var(--color-border-mute);
+      border-radius: var(--radius-lg);
+      background-color: var(--color-bg-subtle);
+      font-size: var(--font-size-sm);
+      line-height: var(--line-height-relaxed);
+    }
+    kbd {
+      padding: calc(var(--spacing-em) * 0.5) calc(var(--spacing-em) * 1.5);
+      border: 1px solid var(--color-border-mute);
+      border-block-end-width: 2px;
+      border-radius: var(--radius-md);
+      background-color: var(--color-bg-subtle);
+      font-size: var(--font-size-kbd);
+    }
+    mark {
+      background-color: var(--color-bg-warning);
+      color: inherit;
+    }
+
+    :is(ul, ol) {
+      padding-inline-start: calc(var(--spacing-em) * 6);
+    }
+    ul {
+      list-style-type: disc;
+    }
+    ol {
+      list-style-type: decimal;
+    }
+    li > :is(ul, ol) {
+      margin-block-start: var(--spacing-em);
+    }
+    ul ul {
+      list-style-type: circle;
+    }
+    li + li {
+      margin-block-start: var(--spacing-em);
+    }
+    li::marker {
+      color: var(--color-fg-subtle);
+    }
+    li > :is(p, ul, ol) + :is(p, ul, ol) {
+      margin-block-start: calc(var(--spacing-em) * 2);
+    }
+    :global(.task-list-item) {
+      list-style-type: none;
+    }
+    :global(.task-list-item) > input {
+      margin-inline: calc(var(--spacing-em) * -5) calc(var(--spacing-em) * 2);
+    }
+
+    blockquote {
+      padding-inline-start: calc(var(--spacing-em) * 4);
+      border-inline-start: 3px solid var(--color-border-mute);
+      color: var(--color-fg-mute);
+    }
+    blockquote > * + * {
+      margin-block-start: calc(var(--spacing-em) * 3);
+    }
+
+    hr {
+      margin-block: calc(var(--spacing-em) * 12);
+      border-color: var(--color-border-mute);
+    }
+
+    table {
+      inline-size: 100%;
+      border-collapse: collapse;
+      font-size: var(--font-size-sm);
+      line-height: var(--line-height-normal);
+    }
+    :is(th, td) {
+      padding: calc(var(--spacing-em) * 2) calc(var(--spacing-em) * 3);
+      border-block-end: 1px solid var(--color-border-mute);
+      text-align: start;
+    }
+    th {
+      font-weight: var(--font-weight-medium);
+      background-color: var(--color-bg-subtle);
+    }
+
+    :is(img, video) {
+      max-inline-size: 100%;
+      block-size: auto;
+      border-radius: var(--radius-lg);
+    }
+    figcaption {
+      margin-block-start: calc(var(--spacing-em) * 2);
+      color: var(--color-fg-mute);
+      font-size: var(--font-size-sm);
+      text-align: center;
+    }
+
+    dt {
+      font-weight: var(--font-weight-bold);
+    }
+    dd {
+      padding-inline-start: calc(var(--spacing-em) * 6);
+    }
+    dd + dt {
+      margin-block-start: calc(var(--spacing-em) * 3);
+    }
+
+    :global(.footnotes) {
+      margin-block-start: calc(var(--spacing-em) * 12);
+      padding-block-start: calc(var(--spacing-em) * 6);
+      border-block-start: 1px solid var(--color-border-mute);
+      color: var(--color-fg-mute);
+      font-size: var(--font-size-sm);
+    }
+    sup > a {
+      text-decoration: none;
+    }
+  }
+}

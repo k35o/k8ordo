@@ -1,10 +1,12 @@
+import { clsx } from 'clsx';
 import type { FC, ReactNode } from 'react';
 
-import { cn } from '../../../helpers/cn';
 import { getMessages } from '../../../i18n/current';
-import { FOCUS_RING } from '../../_internal/focus-ring';
 import { ExternalLinkIcon } from '../../icons';
 import { FileIcon } from '../_internal/icons';
+
+import focusRing from '../../_internal/focus-ring.module.css';
+import styles from './source.module.css';
 
 type ListProps = {
   label?: string;
@@ -15,7 +17,7 @@ export const List: FC<ListProps> = ({ label, children }) => {
   const messages = getMessages();
 
   return (
-    <ul aria-label={label ?? messages.sources} className="flex flex-wrap gap-2">
+    <ul aria-label={label ?? messages.sources} className={styles.list}>
       {children}
     </ul>
   );
@@ -30,9 +32,6 @@ const webUrl = (href: string | undefined): URL | undefined => {
     : undefined;
 };
 
-const CHIP =
-  'inline-flex max-w-64 items-center gap-1.5 rounded-full border border-border-mute bg-bg-subtle px-2.5 py-1 text-xs text-fg-mute';
-
 type ItemProps = {
   href?: string;
   title?: string;
@@ -43,27 +42,23 @@ export const Item: FC<ItemProps> = ({ href, title }) => {
   const label = title ?? url?.hostname ?? href;
 
   return (
-    <li className="min-w-0">
+    <li className={styles.item}>
       {url === undefined ? (
-        <span className={CHIP}>
-          <span className="shrink-0">
+        <span className={styles.chip}>
+          <span className={styles.icon}>
             <FileIcon size="xs" />
           </span>
-          <span className="truncate">{label}</span>
+          <span className={styles.label}>{label}</span>
         </span>
       ) : (
         <a
-          className={cn(
-            CHIP,
-            'transition-colors duration-150 ease-out hover:bg-bg-mute hover:text-fg-base',
-            FOCUS_RING,
-          )}
+          className={clsx(styles.chip, styles.link, focusRing.ring)}
           href={url.href}
           rel="noopener noreferrer"
           target="_blank"
         >
-          <span className="truncate">{label}</span>
-          <span className="shrink-0">
+          <span className={styles.label}>{label}</span>
+          <span className={styles.icon}>
             <ExternalLinkIcon size="xs" />
           </span>
         </a>

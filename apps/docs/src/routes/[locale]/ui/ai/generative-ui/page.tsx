@@ -1,7 +1,7 @@
 import { Heading, Separator } from '@k8ordo/ui';
-import { CodeBlock } from '@k8ordo/ui/code-block';
 
 import { Pitfall } from '../../../../../components/callout';
+import { CodeBlock } from '../../../../../components/code-block';
 import {
   InstallCommand,
   peerSeriesOf,
@@ -9,6 +9,8 @@ import {
 import { PageTitle } from '../../../../../components/page-title';
 import { Rich } from '../../../../../components/rich';
 import * as m from '../../../../../messages';
+
+import page from '../../../../../styles/page.module.css';
 
 const t = m.generativeUi;
 
@@ -71,30 +73,30 @@ const systemPrompt = prompt();`;
 
 export default function GenerativeUi() {
   return (
-    <div className="flex flex-col gap-8 py-12">
+    <div className={page.page}>
       <PageTitle title={m.nav.generativeUi} />
-      <div className="flex flex-col gap-4">
+      <div className={page.stack}>
         <Heading level="h1">
           <Rich>{m.nav.generativeUi()}</Rich>
         </Heading>
-        <p className="text-fg-mute text-lg">
+        <p className={page.lead}>
           <Rich>{t.introduction()}</Rich>
         </p>
       </div>
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{t.installTitle()}</Rich>
         </Heading>
-        <p className="text-fg-mute">
+        <p className={page.mute}>
           <Rich>{t.installDescription()}</Rich>
         </p>
         <Heading level="h3">json-render</Heading>
         <InstallCommand packages="@json-render/core @json-render/react zod" />
         <Heading level="h3">OpenUI</Heading>
         <InstallCommand packages="@openuidev/react-lang @openuidev/lang-core zod" />
-        <p className="text-fg-mute">
+        <p className={page.mute}>
           <Rich>
             {t.installSeries(
               peerSeriesOf('@k8ordo/ui', '@json-render/core'),
@@ -111,7 +113,7 @@ export default function GenerativeUi() {
 
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{t.promptTitle()}</Rich>
         </Heading>
@@ -121,10 +123,10 @@ export default function GenerativeUi() {
           marks={{ 3: 'highlight' }}
           title="system-prompt.ts"
         />
-        <p className="text-fg-mute">
+        <p className={page.mute}>
           <Rich>{t.promptServer()}</Rich>
         </p>
-        <p className="text-fg-mute">
+        <p className={page.mute}>
           <Rich>{t.promptRules()}</Rich>
         </p>
         <CodeBlock
@@ -134,14 +136,14 @@ export default function GenerativeUi() {
           marks={{ 2: 'highlight' }}
           title="system-prompt.ts"
         />
-        <p className="text-fg-mute">
+        <p className={page.mute}>
           <Rich>{t.promptLanguage()}</Rich>
         </p>
       </section>
 
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{t.renderTitle()}</Rich>
         </Heading>
@@ -151,17 +153,17 @@ export default function GenerativeUi() {
           marks={{ 8: 'highlight', 9: 'highlight' }}
           title="gen-ui.tsx"
         />
-        <p className="text-fg-mute">
+        <p className={page.mute}>
           <Rich>{t.renderDescription()}</Rich>
         </p>
-        <p className="text-fg-mute">
+        <p className={page.mute}>
           <Rich>{t.renderStateChange()}</Rich>
         </p>
       </section>
 
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{t.validateTitle()}</Rich>
         </Heading>
@@ -170,29 +172,29 @@ export default function GenerativeUi() {
           lang="ts"
           marks={{ 7: 'highlight', 10: 'highlight' }}
         />
-        <p className="text-fg-mute">
+        <p className={page.mute}>
           <Rich>{t.validateDescription()}</Rich>
         </p>
-        <p className="text-fg-mute">
+        <p className={page.mute}>
           <Rich>{t.validateRepair()}</Rich>
         </p>
       </section>
 
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{t.typedTitle()}</Rich>
         </Heading>
         <CodeBlock code={TYPED} lang="tsx" marks={{ 9: 'highlight' }} />
-        <p className="text-fg-mute">
+        <p className={page.mute}>
           <Rich>{t.typedDescription()}</Rich>
         </p>
       </section>
 
       <Separator color="mute" />
 
-      <section className="flex flex-col gap-4">
+      <section className={page.stack}>
         <Heading level="h2">
           <Rich>{t.openuiTitle()}</Rich>
         </Heading>
@@ -202,7 +204,7 @@ export default function GenerativeUi() {
           marks={{ 6: 'highlight' }}
           title="gen-ui.tsx"
         />
-        <p className="text-fg-mute">
+        <p className={page.mute}>
           <Rich>{t.openuiDescription()}</Rich>
         </p>
         <CodeBlock
@@ -211,7 +213,7 @@ export default function GenerativeUi() {
           marks={{ 3: 'highlight' }}
           title="system-prompt.ts"
         />
-        <p className="text-fg-mute">
+        <p className={page.mute}>
           <Rich>{t.openuiPrompt()}</Rich>
         </p>
       </section>

@@ -1,9 +1,12 @@
 'use client';
 
+import { clsx } from 'clsx';
 import { useId } from 'react';
 import type { FC, HTMLAttributes, ReactElement, Ref } from 'react';
 
 import { getMessages } from '../../../i18n/current';
+
+import styles from './form-control.module.css';
 
 type FormControlProps = {
   disabled?: boolean;
@@ -23,8 +26,6 @@ type FormControlProps = {
   }) => ReactElement;
   ref?: Ref<HTMLElement>;
 } & Omit<HTMLAttributes<HTMLElement>, 'className' | 'style' | 'children'>;
-
-const LABEL_CLASS = 'text-fg-base text-md mb-1 flex gap-2 pl-0.5 font-bold';
 
 export const FormControl: FC<FormControlProps> = ({
   disabled = false,
@@ -52,19 +53,17 @@ export const FormControl: FC<FormControlProps> = ({
   const labelContent = (
     <>
       {label}
-      {required && (
-        <span className="text-fg-error font-medium">{messages.required}</span>
-      )}
+      {required && <span className={styles.required}>{messages.required}</span>}
     </>
   );
   const content = (
     <>
       {labelAs === 'label' ? (
-        <label className={LABEL_CLASS} htmlFor={id} id={labelId}>
+        <label className={styles.label} htmlFor={id} id={labelId}>
           {labelContent}
         </label>
       ) : (
-        <legend className={LABEL_CLASS} id={labelId}>
+        <legend className={styles.label} id={labelId}>
           {labelContent}
         </legend>
       )}
@@ -79,13 +78,13 @@ export const FormControl: FC<FormControlProps> = ({
       {invalid && hasErrorText ? (
         <p
           aria-live="polite"
-          className="text-fg-error mt-1 pl-0.5 text-sm"
+          className={clsx(styles.message, styles.error)}
           id={`${id}-feedback`}
         >
           {errorText}
         </p>
       ) : hasHelpText ? (
-        <p className="text-fg-mute mt-1 pl-0.5 text-sm" id={`${id}-helptext`}>
+        <p className={clsx(styles.message, styles.help)} id={`${id}-helptext`}>
           {helpText}
         </p>
       ) : null}
@@ -99,7 +98,7 @@ export const FormControl: FC<FormControlProps> = ({
   return labelAs === 'legend' ? (
     <fieldset
       {...rest}
-      className="flex w-full min-w-0 flex-col"
+      className={styles.root}
       ref={ref as Ref<HTMLFieldSetElement>}
     >
       {content}
@@ -107,7 +106,8 @@ export const FormControl: FC<FormControlProps> = ({
   ) : (
     <div
       {...rest}
-      className="flex w-full min-w-0 flex-col"
+      className={styles.root}
+
       ref={ref as Ref<HTMLDivElement>}
     >
       {content}
