@@ -1,0 +1,79 @@
+.track {
+  border-radius: var(--radius-full);
+  background-color: var(--color-bg-emphasize);
+  block-size: calc(var(--spacing) * 4);
+  inline-size: 100%;
+
+  @container style(--writing: vertical) {
+    inline-size: calc(var(--spacing) * 48);
+  }
+}
+
+.indeterminateTrack {
+  position: relative;
+  overflow: hidden;
+}
+
+.fill {
+  border-radius: var(--radius-full);
+  background-color: var(--color-primary-bg);
+  block-size: 100%;
+  inline-size: var(--progress-fill);
+  transition-property: inline-size;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--easing-in-out);
+
+  @media (forced-colors: active) {
+    background-color: var(--color-system-highlight);
+  }
+}
+
+/*
+ * 帯が溝の中を行き来する。縦書きでも溝に沿うよう、動かすのは transform では
+ * なく論理プロパティの inset-inline-start にする。動きを減らす設定では、
+ * 移動をやめて溝いっぱいの帯を明滅させる。
+ */
+.indeterminate {
+  position: absolute;
+  inset-block: 0;
+  border-radius: var(--radius-full);
+  background-color: var(--color-primary-bg);
+
+  @media (prefers-reduced-motion: no-preference) {
+    inline-size: 40%;
+    animation-name: slide;
+    /* better-css-modules-disable-next-line tokens/duration -- one pass across the track is a slow loop of its own, which is no step of the motion scale */
+    animation-duration: 1.4s;
+    /* better-css-modules-disable-next-line tokens/easing -- the loop eases with CSS's own ease-in-out, which is not Tailwind's --easing-in-out curve */
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    inset-inline: 0;
+    animation-name: pulse;
+    animation-duration: var(--duration-pulse);
+    /* better-css-modules-disable-next-line tokens/easing -- the blink eases with CSS's own ease-in-out, which is not --easing-pulse */
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+  }
+
+  @media (forced-colors: active) {
+    background-color: var(--color-system-highlight);
+  }
+}
+
+@keyframes slide {
+  from {
+    inset-inline-start: -40%;
+  }
+  to {
+    inset-inline-start: 100%;
+  }
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.4;
+  }
+}

@@ -1,5 +1,6 @@
 'use client';
 
+import { clsx } from 'clsx';
 import {
   useEffect,
   useMemo,
@@ -11,17 +12,21 @@ import type { FC, PropsWithChildren, RefObject } from 'react';
 import { createPortal } from 'react-dom';
 
 import { getMessages } from '../../../i18n/current';
-import { cn } from './../../../helpers/cn';
 import type { Status } from './../../../types/variables';
 import { ToastStoreContext } from './context';
 import type { ToastOptions, ToastType } from './context';
 import { Toast } from './toast';
 
+import styles from './provider.module.css';
+
 const MAX_TOAST_COUNT = 5;
 const DEFAULT_DURATION_MS = 5000;
-// base.css の .ao-toast-item の transition と同じ長さ。transitionend には
-// 依存しない(reduced motion で transition が無効でも確実に取り除くため)
+// provider.module.css の .item の transition（--duration-moderate）と同じ長さ。
+// transitionend には依存しない(reduced motion で transition が無効でも確実に
+// 取り除くため)
 const EXIT_MS = 200;
+
+const POSITION = { fixed: styles.fixed, absolute: styles.absolute } as const;
 
 /** 差し替えを通知する相手がいない外部値のための、何もしない購読。 */
 const subscribeNever = (): (() => void) => () => {
@@ -233,11 +238,7 @@ export const ToastProvider: FC<
               aria-label={
                 state.toasts.length > 0 ? messages.toastRegion : undefined
               }
-              className={cn(
-                'bottom-3 z-toast flex w-full flex-col items-center justify-center',
-                position === 'fixed' && 'fixed',
-                position === 'absolute' && 'absolute',
-              )}
+              className={clsx(styles.viewport, POSITION[position])}
               onBlur={(event) => {
                 if (event.currentTarget.contains(event.relatedTarget)) {
                   return;
@@ -269,16 +270,16 @@ export const ToastProvider: FC<
                 const isClosing = state.closingIds.includes(toast.id);
                 return (
                   <div
-                    className="ao-toast-item w-full justify-items-center"
+                    className={styles.item}
                     data-closing={isClosing || undefined}
                     data-toast-id={toast.id}
                     // 閉じ演出中は不可視のままフォーカス可能な要素が残らないようにする
                     inert={isClosing || undefined}
                     key={toast.id}
                   >
-                    <div className="min-h-0">
+                    <div className={styles.itemContent}>
                       {/* 読み上げは Alert 自身の role(status / alert)に一本化する */}
-                      <div className="ao-toast-enter shadow-lg">
+                      <div className={styles.enter}>
                         <Toast
                           action={toast.action}
                           duration={toast.duration}

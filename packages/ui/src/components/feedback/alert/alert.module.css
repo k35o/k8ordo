@@ -1,0 +1,36 @@
+.root {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--spacing) * 3);
+  border-radius: var(--radius-lg);
+  padding: calc(var(--spacing) * 4);
+}
+
+.icon {
+  flex-shrink: 0;
+}
+
+.body {
+  min-width: 0;
+  flex: 1;
+}
+
+.message {
+  font-weight: var(--font-weight-bold);
+}
+
+.inlineAction {
+  margin-left: calc(var(--spacing) * 1);
+}
+
+.listItem:not(:last-child) {
+  margin-block-end: calc(var(--spacing) * 1);
+}
+
+.listAction {
+  margin-top: calc(var(--spacing) * 1);
+}
+
+.close {
+  flex-shrink: 0;
+}

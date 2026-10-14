@@ -1,0 +1,69 @@
+.viewport {
+  bottom: calc(var(--spacing) * 3);
+  z-index: var(--z-index-toast);
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.fixed {
+  position: fixed;
+}
+
+.absolute {
+  position: absolute;
+}
+
+/*
+ * 退出は data-closing で高さ(0fr)・間隔(padding)・不透明度を同時に畳み、
+ * 後続トーストの詰めも 1 つの transition で表現する（JS 側は EXIT_MS 経過後に
+ * DOM から除去）。
+ */
+.item {
+  display: grid;
+  width: 100%;
+  grid-template-rows: 1fr;
+  justify-items: center;
+  padding-block-start: calc(var(--spacing) * 4);
+  transition-property: grid-template-rows, opacity, padding-block-start;
+  transition-duration: var(--duration-moderate);
+
+  &[data-closing] {
+    grid-template-rows: 0fr;
+    opacity: 0;
+    padding-block-start: 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+}
+
+.itemContent {
+  min-height: 0;
+  min-block-size: 0;
+}
+
+/* 安静時は影(shadow-lg)を切り抜かないよう、畳む間だけ overflow を隠す */
+.item[data-closing] > .itemContent {
+  overflow: hidden;
+}
+
+.enter {
+  box-shadow: var(--shadow-lg);
+  animation-name: enter;
+  animation-duration: var(--duration-moderate);
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+@keyframes enter {
+  from {
+    opacity: 0;
+    translate: 0 calc(var(--spacing) * 6);
+  }
+}

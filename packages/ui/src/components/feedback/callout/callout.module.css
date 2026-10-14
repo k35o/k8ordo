@@ -1,0 +1,32 @@
+.root {
+  display: flex;
+  align-items: flex-start;
+  gap: calc(var(--spacing) * 3);
+  border-radius: var(--radius-lg);
+  padding: calc(var(--spacing) * 4);
+}
+
+.icon {
+  display: flex;
+  height: 1lh;
+  flex-shrink: 0;
+  align-items: center;
+}
+
+.body {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 1);
+}
+
+.label {
+  font-weight: var(--font-weight-bold);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 2);
+}

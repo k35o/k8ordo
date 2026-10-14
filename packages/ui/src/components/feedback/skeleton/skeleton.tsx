@@ -1,6 +1,14 @@
+import { clsx } from 'clsx';
 import type { FC, HTMLAttributes } from 'react';
 
-import { cn } from '../../../helpers/cn';
+import styles from './skeleton.module.css';
+
+const SHAPE = { rect: styles.rect, circle: styles.circle } as const;
+
+const SIZE = {
+  rect: { sm: styles.rectSm, md: styles.rectMd, lg: styles.rectLg },
+  circle: { sm: styles.circleSm, md: styles.circleMd, lg: styles.circleLg },
+} as const;
 
 type Props = {
   animate?: boolean;
@@ -17,17 +25,11 @@ export const Skeleton: FC<Props> = ({
   <div
     {...rest}
     aria-hidden
-    className={cn(
-      'bg-bg-mute forced-colors:bg-[GrayText]',
-      animate && 'animate-pulse',
-      shape === 'rect' && 'rounded-lg',
-      shape === 'rect' && size === 'sm' && 'h-3 w-24',
-      shape === 'rect' && size === 'md' && 'h-4 w-40',
-      shape === 'rect' && size === 'lg' && 'h-5 w-56',
-      shape === 'circle' && 'rounded-full',
-      shape === 'circle' && size === 'sm' && 'size-8',
-      shape === 'circle' && size === 'md' && 'size-12',
-      shape === 'circle' && size === 'lg' && 'size-16',
+    className={clsx(
+      styles.root,
+      animate && styles.animate,
+      SHAPE[shape],
+      SIZE[shape][size],
     )}
   />
 );

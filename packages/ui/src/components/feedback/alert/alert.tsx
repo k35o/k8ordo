@@ -1,7 +1,7 @@
+import { clsx } from 'clsx';
 import type { FC, HTMLAttributes, ReactNode } from 'react';
 
 import { getMessages } from '../../../i18n/current';
-import { HIGH_CONTRAST_EDGE } from '../../_internal/high-contrast';
 import {
   STATUS_ICON,
   STATUS_MESSAGE_KEY,
@@ -9,8 +9,11 @@ import {
 } from '../../_internal/status-tone';
 import { IconButton } from '../../buttons/icon-button';
 import { AlertIcon, CloseIcon } from '../../icons';
-import { cn } from './../../../helpers/cn';
 import type { Status } from './../../../types/variables';
+
+import highContrast from '../../_internal/high-contrast.module.css';
+import srOnly from '../../_internal/sr-only.module.css';
+import styles from './alert.module.css';
 
 export type AlertAction = {
   label: string;
@@ -41,22 +44,24 @@ export const Alert: FC<Props> = ({
     ? action.renderItem({ children: action.label })
     : null;
   const inlineAction = action ? (
-    <span className="ml-1">{actionNode}</span>
+    <span className={styles.inlineAction}>{actionNode}</span>
   ) : null;
 
   let messageContent: ReactNode;
   if (Array.isArray(message) && message.length > 1) {
     const list = (
-      <ul className="space-y-1">
+      <ul>
         {message.map((msg) => (
-          <li key={msg}>{msg}</li>
+          <li className={styles.listItem} key={msg}>
+            {msg}
+          </li>
         ))}
       </ul>
     );
     messageContent = action ? (
       <div>
         {list}
-        <div className="mt-1">{actionNode}</div>
+        <div className={styles.listAction}>{actionNode}</div>
       </div>
     ) : (
       list
@@ -64,7 +69,7 @@ export const Alert: FC<Props> = ({
   } else {
     const text = Array.isArray(message) ? message[0] : message;
     messageContent = (
-      <p className="font-bold">
+      <p className={styles.message}>
         {text}
         {inlineAction}
       </p>
@@ -74,20 +79,18 @@ export const Alert: FC<Props> = ({
   return (
     <div
       {...rest}
-      className={cn(
-        'flex items-center gap-3 rounded-lg p-4',
-        HIGH_CONTRAST_EDGE,
-        STATUS_SURFACE[tone],
-      )}
+      className={clsx(styles.root, highContrast.edge, STATUS_SURFACE[tone])}
       role={tone === 'error' || tone === 'warning' ? 'alert' : 'status'}
     >
-      <span className={cn('shrink-0', STATUS_ICON[tone])}>
+      <span className={clsx(styles.icon, STATUS_ICON[tone])}>
         <AlertIcon size="md" status={tone} />
-        <span className="sr-only">{messages[STATUS_MESSAGE_KEY[tone]]}</span>
+        <span className={srOnly.srOnly}>
+          {messages[STATUS_MESSAGE_KEY[tone]]}
+        </span>
       </span>
-      <div className="min-w-0 flex-1">{messageContent}</div>
+      <div className={styles.body}>{messageContent}</div>
       {onClose ? (
-        <span className="shrink-0">
+        <span className={styles.close}>
           <IconButton
             label={closeLabel ?? messages.close}
             onClick={onClose}
