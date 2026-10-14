@@ -1,5 +1,5 @@
 ---
-"@k8ordo/ui": major
+"@k8ordo/ui": minor
 ---
 
 `NumberField` に空の状態ができました。`value` と `onChange` の型は `number | null` になり、`null` が空欄を表します。

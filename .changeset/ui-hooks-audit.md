@@ -1,5 +1,5 @@
 ---
-'@k8ordo/ui': major
+'@k8ordo/ui': minor
 ---
 
 ルートのエントリから hooks を公開しなくなりました。残る hook は、Provider と対になる `useToast` / `usePortalRoot` だけです（`@k8ordo/ui/i18n` の `useMessages` は、hook ではない `getMessages()` に置き換えました。別の changeset を参照）。
