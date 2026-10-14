@@ -5,6 +5,8 @@ import { expect } from 'storybook/test';
 import { CheckboxGroup } from '.';
 import { Checkbox } from '../checkbox';
 
+import styles from './checkbox-group.stories.module.css';
+
 const meta: Meta<typeof CheckboxGroup.Root> = {
   title: 'components/form/checkbox-group',
   component: CheckboxGroup.Root,
@@ -18,7 +20,7 @@ const DefaultRender = () => {
 
   return (
     <div>
-      <p className="text-fg-base mb-2 font-medium" id="frameworks-label">
+      <p className={styles.groupLabel} id="frameworks-label">
         フレームワーク
       </p>
       <CheckboxGroup.Root
@@ -58,12 +60,9 @@ export const Default: Story = {
 export const Required: Story = {
   render: () => (
     <div>
-      <p
-        className="text-fg-base mb-2 flex gap-2 font-medium"
-        id="frameworks-required-label"
-      >
+      <p className={styles.requiredGroupLabel} id="frameworks-required-label">
         フレームワーク
-        <span className="text-fg-error">必須</span>
+        <span className={styles.requiredMark}>必須</span>
       </p>
       <CheckboxGroup.Root
         aria-labelledby="frameworks-required-label"
@@ -87,10 +86,7 @@ export const Required: Story = {
 export const Disabled: Story = {
   render: () => (
     <div>
-      <p
-        className="text-fg-base mb-2 font-medium"
-        id="frameworks-disabled-label"
-      >
+      <p className={styles.groupLabel} id="frameworks-disabled-label">
         フレームワーク
       </p>
       <CheckboxGroup.Root
@@ -111,8 +107,8 @@ const RefRender = () => {
   const ref = useRef<HTMLFieldSetElement>(null);
 
   return (
-    <div className="flex flex-col items-start gap-2">
-      <p className="text-fg-base font-medium" id="frameworks-ref-label">
+    <div className={styles.column}>
+      <p className={styles.label} id="frameworks-ref-label">
         フレームワーク
       </p>
       <CheckboxGroup.Root

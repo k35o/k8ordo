@@ -4,6 +4,8 @@ import { expect, fireEvent, fn } from 'storybook/test';
 
 import { ColorPicker } from './color-picker';
 
+import styles from './color-picker.stories.module.css';
+
 const SWATCHES = [
   { value: '#0d9488', label: 'ティール' },
   { value: '#2563eb', label: '青' },
@@ -17,7 +19,7 @@ const meta: Meta<typeof ColorPicker> = {
   component: ColorPicker,
   decorators: [
     (Story) => (
-      <div className="w-80 p-6">
+      <div className={styles.frame}>
         <Story />
       </div>
     ),
@@ -157,14 +159,14 @@ export const Typing: Story = {
 const ControlledPicker = () => {
   const [color, setColor] = useState('#e11d48');
   return (
-    <div className="flex flex-col gap-3">
+    <div className={styles.column}>
       <ColorPicker
         aria-label="テーマの色"
         onChange={setColor}
         swatches={SWATCHES}
         value={color}
       />
-      <p className="text-sm">選んだ色: {color || '（なし）'}</p>
+      <p className={styles.selection}>選んだ色: {color || '（なし）'}</p>
     </div>
   );
 };

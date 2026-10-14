@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { clsx } from 'clsx';
 import { useRef, useState } from 'react';
 import type { ComponentProps, FC } from 'react';
 import { expect, fireEvent, waitFor } from 'storybook/test';
@@ -9,6 +10,8 @@ import {
   PendingForm,
 } from '../../../../.storybook/pending-form';
 import { Autocomplete } from './autocomplete';
+
+import styles from './autocomplete.stories.module.css';
 
 const AutocompleteRender = ({
   id,
@@ -115,7 +118,7 @@ export const NarrowContainer: Story = {
   ),
   decorators: [
     (Story) => (
-      <div className="w-56" data-testid="narrow-container">
+      <div className={styles.narrowContainer} data-testid="narrow-container">
         <Story />
       </div>
     ),
@@ -199,7 +202,7 @@ const RefRender = () => {
   const ref = useRef<HTMLInputElement>(null);
 
   return (
-    <div className="flex flex-col items-start gap-2">
+    <div className={styles.column}>
       <Autocomplete
         id="autocomplete-ref"
         options={[
@@ -429,7 +432,7 @@ export const VerticalWritingMode: Story = {
   parameters: { vrt: { skip: true } },
   decorators: [
     (Story) => (
-      <div className="writing-v h-80">
+      <div className={clsx('writing-v', styles.verticalFrame)}>
         <Story />
       </div>
     ),

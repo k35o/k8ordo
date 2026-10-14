@@ -1,0 +1,17 @@
+.frame {
+  width: 100%;
+  max-width: 28rem;
+}
+
+.groupLabel {
+  color: var(--color-fg-base);
+  margin-bottom: calc(var(--spacing) * 3);
+  font-weight: var(--font-weight-medium);
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: calc(var(--spacing) * 2);
+}

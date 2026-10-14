@@ -9,12 +9,14 @@ import {
 } from '../../../../.storybook/pending-form';
 import { RangeSlider } from './range-slider';
 
+import styles from './range-slider.stories.module.css';
+
 const meta: Meta<typeof RangeSlider> = {
   title: 'components/form/range-slider',
   component: RangeSlider,
   decorators: [
     (Story) => (
-      <div className="w-80 p-6">
+      <div className={styles.frame}>
         <Story />
       </div>
     ),
@@ -78,7 +80,7 @@ export const ThumbsDoNotCross: Story = {
 const ControlledRender = () => {
   const [value, setValue] = useState<readonly [number, number]>([10, 40]);
   return (
-    <div className="flex flex-col gap-4">
+    <div className={styles.column}>
       <RangeSlider aria-label="気温" onChange={setValue} value={value} />
       <p data-testid="value">{value.join('〜')}</p>
     </div>

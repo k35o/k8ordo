@@ -1,0 +1,14 @@
+.narrowContainer {
+  width: calc(var(--spacing) * 56);
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: calc(var(--spacing) * 2);
+}
+
+.verticalFrame {
+  height: calc(var(--spacing) * 80);
+}

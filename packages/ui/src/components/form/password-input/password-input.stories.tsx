@@ -4,6 +4,8 @@ import { expect } from 'storybook/test';
 
 import { PasswordInput } from './password-input';
 
+import styles from './password-input.stories.module.css';
+
 const meta: Meta<typeof PasswordInput> = {
   title: 'components/form/password-input',
   component: PasswordInput,
@@ -12,7 +14,7 @@ const meta: Meta<typeof PasswordInput> = {
   },
   decorators: [
     (Story) => (
-      <div className="w-80">
+      <div className={styles.frame}>
         <Story />
       </div>
     ),
@@ -73,7 +75,7 @@ const RefRender = () => {
   const ref = useRef<HTMLInputElement>(null);
 
   return (
-    <div className="flex flex-col items-start gap-2">
+    <div className={styles.column}>
       <PasswordInput placeholder="password" ref={ref} />
       <button
         onClick={() => {

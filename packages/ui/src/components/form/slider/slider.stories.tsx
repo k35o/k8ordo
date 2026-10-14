@@ -9,6 +9,8 @@ import {
 } from '../../../../.storybook/pending-form';
 import { Slider } from './slider';
 
+import styles from './slider.stories.module.css';
+
 const meta: Meta<typeof Slider> = {
   title: 'components/form/slider',
   component: Slider,
@@ -17,7 +19,7 @@ const meta: Meta<typeof Slider> = {
   },
   decorators: [
     (Story) => (
-      <div className="w-80">
+      <div className={styles.frame}>
         <Story />
       </div>
     ),
@@ -113,7 +115,7 @@ const RefRender = () => {
   const ref = useRef<HTMLInputElement>(null);
 
   return (
-    <div className="flex flex-col items-start gap-2">
+    <div className={styles.column}>
       <Slider aria-label="音量" defaultValue={50} ref={ref} />
       <button
         onClick={() => {

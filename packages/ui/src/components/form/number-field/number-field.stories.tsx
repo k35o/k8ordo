@@ -4,6 +4,8 @@ import { expect, fn, waitFor } from 'storybook/test';
 
 import { NumberField } from './number-field';
 
+import styles from './number-field.stories.module.css';
+
 const meta: Meta<typeof NumberField> = {
   title: 'components/form/number-field',
   component: NumberField,
@@ -241,7 +243,7 @@ const RefRender = () => {
   const ref = useRef<HTMLInputElement>(null);
 
   return (
-    <div className="flex flex-col items-start gap-2">
+    <div className={styles.column}>
       <NumberField
         aria-label="数量"
         defaultValue={0}
@@ -452,7 +454,7 @@ const ControlledRender = () => {
   const [value, setValue] = useState<number | null>(3);
 
   return (
-    <div className="flex flex-col items-start gap-2">
+    <div className={styles.column}>
       <NumberField
         aria-label="数量"
         id="number-field-controlled"

@@ -6,12 +6,14 @@ import { expect, fn, waitFor, within } from 'storybook/test';
 import { definitions, inEnglish } from '../../../../.storybook/locales';
 import { Calendar } from './calendar';
 
+import styles from './calendar.stories.module.css';
+
 const meta: Meta<typeof Calendar> = {
   title: 'components/form/calendar',
   component: Calendar,
   decorators: [
     (Story) => (
-      <div className="p-6">
+      <div className={styles.frame}>
         <Story />
       </div>
     ),
@@ -213,7 +215,7 @@ export const WeekStartFollowsTheLocale: Story = {
 const ControlledRender = () => {
   const [value, setValue] = useState<string | null>(null);
   return (
-    <div className="flex flex-col gap-4">
+    <div className={styles.column}>
       <Calendar onChange={setValue} value={value} />
       <p data-testid="value">{value ?? '未選択'}</p>
       <button

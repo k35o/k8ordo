@@ -5,6 +5,8 @@ import { expect } from 'storybook/test';
 
 import { CheckboxCard } from './checkbox-card';
 
+import styles from './checkbox-card.stories.module.css';
+
 const OPTIONS = [
   {
     value: 'history',
@@ -31,7 +33,7 @@ const meta: Meta<typeof CheckboxCard> = {
   },
   decorators: [
     (Story) => (
-      <div className="w-lg max-w-full">
+      <div className={styles.frame}>
         <Story />
       </div>
     ),
@@ -53,7 +55,7 @@ const DefaultRender = (props: StoryArgs) => {
 
   return (
     <div>
-      <p className="text-fg-base mb-3 font-medium" id="checkbox-card-label">
+      <p className={styles.groupLabel} id="checkbox-card-label">
         Enable collaboration features
       </p>
       <CheckboxCard
@@ -78,7 +80,7 @@ export const DefaultValue: Story = {
   },
   render: (props) => (
     <div>
-      <p className="text-fg-base mb-3 font-medium" id="checkbox-card-label">
+      <p className={styles.groupLabel} id="checkbox-card-label">
         Enable collaboration features
       </p>
       <CheckboxCard
@@ -104,8 +106,8 @@ const RefRender = () => {
   const ref = useRef<HTMLFieldSetElement>(null);
 
   return (
-    <div className="flex flex-col items-start gap-2">
-      <p className="text-fg-base font-medium" id="checkbox-card-ref-label">
+    <div className={styles.column}>
+      <p className={styles.label} id="checkbox-card-ref-label">
         Enable collaboration features
       </p>
       <CheckboxCard
@@ -142,8 +144,8 @@ const checkMarkOf = (checkbox: HTMLElement) =>
 // 非制御の選択は input の :checked から描くので、change を飛ばさない reset にも追従する
 export const CheckMarkFollowsReset: Story = {
   render: (props) => (
-    <form className="flex flex-col items-start gap-2">
-      <p className="text-fg-base font-medium" id="checkbox-card-reset-label">
+    <form className={styles.column}>
+      <p className={styles.label} id="checkbox-card-reset-label">
         Enable collaboration features
       </p>
       <CheckboxCard

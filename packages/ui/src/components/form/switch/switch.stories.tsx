@@ -10,6 +10,8 @@ import {
 } from '../../../../.storybook/pending-form';
 import { Switch } from './switch';
 
+import styles from './switch.stories.module.css';
+
 const meta: Meta<typeof Switch> = {
   title: 'components/form/switch',
   component: Switch,
@@ -134,7 +136,7 @@ const appearanceOf = (switchElement: HTMLElement) => {
 // トラックの色もつまみの位置も transition するので、切り替わり切るのを待つ
 export const AppearanceFollowsReset: Story = {
   render: () => (
-    <form className="flex flex-col items-start gap-2">
+    <form className={styles.column}>
       <Switch label="off by default" />
       <Switch defaultChecked label="on by default" />
       <button type="reset">reset</button>
@@ -176,7 +178,7 @@ const RefRender = () => {
   const ref = useRef<HTMLInputElement>(null);
 
   return (
-    <div className="flex flex-col items-start gap-2">
+    <div className={styles.column}>
       <Switch label="switch with ref" ref={ref} />
       <button
         onClick={() => {

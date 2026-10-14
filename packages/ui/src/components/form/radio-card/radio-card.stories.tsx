@@ -5,6 +5,8 @@ import { expect, waitFor } from 'storybook/test';
 
 import { RadioCard } from './radio-card';
 
+import styles from './radio-card.stories.module.css';
+
 const OPTIONS = [
   {
     value: 'starter',
@@ -31,7 +33,7 @@ const meta: Meta<typeof RadioCard> = {
   },
   decorators: [
     (Story) => (
-      <div className="w-lg max-w-full">
+      <div className={styles.frame}>
         <Story />
       </div>
     ),
@@ -53,7 +55,7 @@ const DefaultRender = (props: StoryArgs) => {
 
   return (
     <div>
-      <p className="text-fg-base mb-3 font-medium" id="radio-card-label">
+      <p className={styles.groupLabel} id="radio-card-label">
         Choose a plan
       </p>
       <RadioCard
@@ -107,10 +109,7 @@ const UnmatchedValueRender = (props: StoryArgs) => {
 
   return (
     <div>
-      <p
-        className="text-fg-base mb-3 font-medium"
-        id="radio-card-unmatched-label"
-      >
+      <p className={styles.groupLabel} id="radio-card-unmatched-label">
         Choose a plan
       </p>
       <RadioCard
@@ -155,7 +154,7 @@ export const DefaultValue: Story = {
   },
   render: (props) => (
     <div>
-      <p className="text-fg-base mb-3 font-medium" id="radio-card-label">
+      <p className={styles.groupLabel} id="radio-card-label">
         Choose a plan
       </p>
       <RadioCard
@@ -204,8 +203,8 @@ const selectionDotOf = (radio: HTMLElement) =>
 // 点は opacity でフェードするので、切り替わり切るのを待つ
 export const SelectionFollowsReset: Story = {
   render: (props) => (
-    <form className="flex flex-col items-start gap-2">
-      <p className="text-fg-base font-medium" id="radio-card-reset-label">
+    <form className={styles.column}>
+      <p className={styles.label} id="radio-card-reset-label">
         Choose a plan
       </p>
       <RadioCard

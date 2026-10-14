@@ -4,12 +4,14 @@ import { expect, waitFor } from 'storybook/test';
 
 import { Textarea } from './textarea';
 
+import styles from './textarea.stories.module.css';
+
 const meta: Meta<typeof Textarea> = {
   title: 'components/form/textarea',
   component: Textarea,
   decorators: [
     (Story) => (
-      <div className="h-screen">
+      <div className={styles.frame}>
         <Story />
       </div>
     ),
@@ -89,7 +91,7 @@ const AutoResizeWithRefRender = () => {
   const [value, setValue] = useState('1行だけ');
 
   return (
-    <div className="flex flex-col items-start gap-2">
+    <div className={styles.column}>
       <Textarea
         aria-label="本文"
         autoResize
