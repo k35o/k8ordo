@@ -3,7 +3,6 @@ import { fileURLToPath } from 'node:url';
 
 import betterCssModules from '@better-css-modules/vite';
 import { storybookTest } from '@storybook/addon-vitest/vitest-plugin';
-import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import { playwright } from '@vitest/browser-playwright';
 import { vrt } from 'storybook-addon-vrt/vitest-plugin';
@@ -88,7 +87,7 @@ export default defineConfig({
   staged: {
     '*': 'vp check --fix',
   },
-  plugins: [react(), betterCssModules(), tailwindcss()],
+  plugins: [react(), betterCssModules()],
   // 部品の CSS Modules は @scope (&) で書く。Vite 既定の postcss-modules は
   // @scope の前置きの & で落ちるので、pack（tsdown）と同じ Lightning CSS で組む
   css: { transformer: 'lightningcss' },

@@ -106,8 +106,7 @@
     "clsx": "2.1.1",
     "lucide-react": "1.52.0",
     "server-only": "catalog:",
-    "shiki": "4.5.0",
-    "tailwind-merge": "3.7.0"
+    "shiki": "4.5.0"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "catalog:",
@@ -126,7 +125,6 @@
     "@storybook/addon-mcp": "10.6.1",
     "@storybook/addon-vitest": "10.6.1",
     "@storybook/react-vite": "10.6.1",
-    "@tailwindcss/vite": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "@vitejs/plugin-react": "catalog:",

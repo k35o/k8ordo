@@ -1,10 +1,8 @@
 /*
- * tailwindcss は ui の tailwind.css が中で読み込む。ここでも @import すると、
- * テーマとユーティリティは 1 つにまとまるがプリフライトだけが 2 回出力される。
- * legacy.css は ui の部品を CSS Modules へ移すあいだだけの入口で、まだ
- * Tailwind で描く部品のクラスも生成する。
+ * 移行中だけ: サイトのページはまだ Tailwind のクラスで描くので、ui の
+ * tailwind.css（tailwindcss と styles.css を読み込む橋）を入口にする。
  */
-@import '../../../../packages/ui/src/styles/legacy.css';
+@import '../../../../packages/ui/src/styles/tailwind.css';
 /*
  * フォントは自前で配る。外部への <link> を置くと、HTML を書き換える経路
  * （Cloudflare Fonts など）が <head> を差し替えてしまい、document 全体を

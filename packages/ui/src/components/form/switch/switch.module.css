@@ -54,10 +54,7 @@
 
 .input:focus-visible ~ .track {
   outline-style: none;
-  /* better-css-modules-disable-next-line tokens/shadow -- the ring stands 2px off the track over a white gap (Tailwind's ring-offset-2 with its default #fff), which no ring token draws */
-  box-shadow:
-    0 0 0 2px #fff,
-    0 0 0 4px var(--color-border-info);
+  box-shadow: var(--shadow-ring-offset-info);
 
   @media (forced-colors: active) {
     outline: 2px solid transparent;

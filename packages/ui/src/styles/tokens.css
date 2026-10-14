@@ -286,6 +286,9 @@
   --shadow-ring-info: 0 0 0 2px var(--color-border-info);
   --shadow-ring-error: 0 0 0 2px var(--color-border-error);
   --shadow-ring-inset-info: inset 0 0 0 2px var(--color-border-info);
+  /* 白い隙間を 2px 空けて外に引く輪。Switch のように面の縁を残したいとき */
+  --shadow-ring-offset-info:
+    0 0 0 2px var(--white), 0 0 0 4px var(--color-border-info);
 
   /* 部品の中で、兄弟より上に重ねる要素（開いたリスト、つまみ） */
   --z-index-raised: 10;
@@ -372,6 +375,8 @@
   --shadow-ring-info: 0 0 0 2px var(--color-border-info);
   --shadow-ring-error: 0 0 0 2px var(--color-border-error);
   --shadow-ring-inset-info: inset 0 0 0 2px var(--color-border-info);
+  --shadow-ring-offset-info:
+    0 0 0 2px var(--white), 0 0 0 4px var(--color-border-info);
 }
 
 @media (prefers-contrast: more) {

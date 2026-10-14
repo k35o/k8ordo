@@ -1,7 +1,7 @@
+import { clsx } from 'clsx';
 import type { CSSProperties } from 'react';
 
 import { chain } from './chain';
-import { cn } from './cn';
 
 type Props = Record<string, unknown>;
 
@@ -27,7 +27,7 @@ export const mergeProps = <A extends Props, B extends Props>(
     const overrideValue = override[key];
 
     if (key === 'className') {
-      result[key] = cn(
+      result[key] = clsx(
         baseValue as string | undefined,
         overrideValue as string | undefined,
       );
@@ -53,13 +53,10 @@ if (import.meta.vitest) {
   const { describe, expect, it } = import.meta.vitest;
 
   describe('mergeProps', () => {
-    it('classNameをcnでマージする', () => {
-      const merged = mergeProps(
-        { className: 'p-2 text-fg-base' },
-        { className: 'text-fg-mute' },
-      );
+    it('classNameをつなげる', () => {
+      const merged = mergeProps({ className: 'root' }, { className: 'active' });
 
-      expect(merged.className).toBe('p-2 text-fg-mute');
+      expect(merged.className).toBe('root active');
     });
 
     it('styleを浅くマージする', () => {

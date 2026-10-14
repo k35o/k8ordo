@@ -1,5 +1,0 @@
-/* 移行中だけの置き場。部品を CSS Modules へ移すたびに、その部品の規則をここから消す */
-
-@custom-variant vertical (
-  &:where(.writing-v, .writing-v *):not(.writing-h, .writing-h *)
-);

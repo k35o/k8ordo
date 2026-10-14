@@ -945,9 +945,6 @@ importers:
       shiki:
         specifier: 4.5.0
         version: 4.5.0
-      tailwind-merge:
-        specifier: 3.7.0
-        version: 3.7.0
     devDependencies:
       '@arethetypeswrong/cli':
         specifier: 'catalog:'
@@ -997,9 +994,6 @@ importers:
       '@storybook/react-vite':
         specifier: 10.6.1
         version: 10.6.1(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(@voidzero-dev/vite-plus-core@1.0.0(@arethetypeswrong/core@0.18.5)(@types/node@24.19.1)(esbuild@0.28.2)(jiti@2.7.0)(publint@0.3.25)(typescript@7.0.2))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(storybook@10.6.1(@types/react@19.3.0)(react@19.3.0)(vite-plus@1.0.0(@arethetypeswrong/core@0.18.5)(@types/node@24.19.1)(@vitest/browser-playwright@5.0.3)(@vitest/coverage-v8@5.0.3)(@vitest/ui@5.0.3)(esbuild@0.28.2)(jiti@2.7.0)(publint@0.3.25)(typescript@7.0.2)))(supports-color@10.2.2)(typescript@7.0.2)
-      '@tailwindcss/vite':
-        specifier: 'catalog:'
-        version: 4.3.3(@voidzero-dev/vite-plus-core@1.0.0(@arethetypeswrong/core@0.18.5)(@types/node@24.19.1)(esbuild@0.28.2)(jiti@2.7.0)(publint@0.3.25)(typescript@7.0.2))
       '@types/react':
         specifier: 'catalog:'
         version: 19.3.0

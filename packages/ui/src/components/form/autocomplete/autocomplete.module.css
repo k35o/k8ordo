@@ -17,8 +17,10 @@
   background-color: var(--color-bg-subtle);
 }
 
-/* 無効のときも、フォーカスの輪の中でも、不正な値の枠線を出す */
-.root:has([aria-invalid='true']) {
+/* 無効のときも、フォーカスの輪の中でも、不正な値の枠線を出す。共有の輪の
+   枠線（透明）より詳細度を上げ、CSS の読み込み順に頼らない */
+.root:has([aria-invalid='true']),
+.root:has([aria-invalid='true']):focus-within {
   border-color: var(--color-border-error);
 }
 

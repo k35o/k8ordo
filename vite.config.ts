@@ -55,8 +55,8 @@ export default defineConfig({
     settings: {
       react: { version: '19.3.0' },
       // oxlint-tailwindcss v1 は明示的な Tailwind エントリポイントが必須。
-      // @k8ordo/ui は src/styles/index.css が単一ソース。docs / examples は
-      // それを取り込んだ各自の globals.css を使う。
+      // Tailwind で書くのは examples と、移行中の docs だけ。どちらも
+      // @k8ordo/ui の tailwind.css（橋）を取り込んだ各自の globals.css を使う。
       tailwindcss: {
         entryPoint: [
           {
@@ -69,7 +69,7 @@ export default defineConfig({
           },
           {
             files: '**',
-            use: cssEntry('./packages/ui/src/styles/legacy.css'),
+            use: cssEntry('./packages/ui/src/styles/tailwind.css'),
           },
         ],
       },
@@ -90,6 +90,15 @@ export default defineConfig({
             { entryPoint: cssEntry('./apps/docs/src/styles/globals.css') },
           ],
         },
+      },
+      {
+        // ui は CSS Modules で書き、Tailwind のクラスを持たない。残る文字列の
+        // クラス（writing-v、Markdown の task-list-item など）は Tailwind の
+        // ものではないので、Tailwind の規則を当てない
+        files: ['packages/ui/**'],
+        rules: Object.fromEntries(
+          Object.keys(tailwind.rules ?? {}).map((rule) => [rule, 'off']),
+        ),
       },
       {
         files: ['**/*.test.ts', '**/*.test.tsx'],
