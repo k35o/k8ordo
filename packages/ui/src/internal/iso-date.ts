@@ -135,8 +135,29 @@ export const formatDate = (value: IsoDate): Date => {
 export const localToday = (now: Date): IsoDate =>
   `${pad(now.getFullYear(), 4)}-${pad(now.getMonth() + 1, 2)}-${pad(now.getDate(), 2)}`;
 
+/** 閲覧者のタイムゾーンで日付が変わるたびに `onChange` を呼ぶ。返す関数で購読をやめる。 */
+export const subscribeToDateChange = (onChange: () => void): (() => void) => {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const schedule = () => {
+    const now = new Date();
+    const tomorrow = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate() + 1,
+    );
+    timer = setTimeout(() => {
+      onChange();
+      schedule();
+    }, tomorrow.getTime() - now.getTime());
+  };
+  schedule();
+  return () => {
+    clearTimeout(timer);
+  };
+};
+
 if (import.meta.vitest) {
-  const { describe, expect, it } = import.meta.vitest;
+  const { afterEach, describe, expect, it, vi } = import.meta.vitest;
 
   describe('toUtcDate', () => {
     it('実在しない日付は受け付けない', () => {
@@ -198,6 +219,35 @@ if (import.meta.vitest) {
 
     it('月曜始まりでは列がずれる', () => {
       expect(monthWeeks('2023-02-14', 1)[0]?.[0]).toBe('2023-01-30');
+    });
+  });
+
+  describe('subscribeToDateChange', () => {
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('閲覧者のタイムゾーンで日付が変わるたびに知らせる', () => {
+      vi.useFakeTimers({ now: new Date(2023, 0, 2, 23, 59, 59) });
+      const onChange = vi.fn<() => void>();
+      subscribeToDateChange(onChange);
+
+      vi.advanceTimersByTime(999);
+      expect(onChange).not.toHaveBeenCalled();
+      vi.advanceTimersByTime(1);
+      expect(onChange).toHaveBeenCalledTimes(1);
+      vi.advanceTimersByTime(24 * 60 * 60 * 1000);
+      expect(onChange).toHaveBeenCalledTimes(2);
+    });
+
+    it('購読をやめたら知らせない', () => {
+      vi.useFakeTimers({ now: new Date(2023, 0, 2, 23, 59, 59) });
+      const onChange = vi.fn<() => void>();
+      const unsubscribe = subscribeToDateChange(onChange);
+
+      unsubscribe();
+      vi.advanceTimersByTime(24 * 60 * 60 * 1000);
+      expect(onChange).not.toHaveBeenCalled();
     });
   });
 
