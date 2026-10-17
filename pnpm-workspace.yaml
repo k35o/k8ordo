@@ -24,8 +24,8 @@ catalog:
   # 使う版を同じ 1 コピーに保つ (scripts/check-peer-copies.mjs が検査する)。
   '@json-render/core': 0.21.0
   '@json-render/react': 0.21.0
-  '@openuidev/lang-core': 0.3.1
-  '@openuidev/react-lang': 0.3.1
+  '@openuidev/lang-core': 0.4.1
+  '@openuidev/react-lang': 0.4.1
   '@tailwindcss/postcss': 4.3.3
   '@tailwindcss/vite': 4.3.3
   '@types/node': 24.19.1
