@@ -270,7 +270,7 @@ importers:
     devDependencies:
       '@k8o/oxc-config':
         specifier: 1.1.0
-        version: 1.1.0(oxlint-tailwindcss@1.14.0)(vite-plus@1.1.0(@arethetypeswrong/core@0.18.5)(@types/node@24.19.1)(@vitest/browser-playwright@5.0.3)(@vitest/coverage-v8@5.0.3)(@vitest/ui@5.0.3)(esbuild@0.28.2)(jiti@2.7.0)(playwright@1.63.0)(publint@0.3.25)(typescript@7.0.2))
+        version: 1.1.0(oxlint-tailwindcss@1.16.0)(vite-plus@1.1.0(@arethetypeswrong/core@0.18.5)(@types/node@24.19.1)(@vitest/browser-playwright@5.0.3)(@vitest/coverage-v8@5.0.3)(@vitest/ui@5.0.3)(esbuild@0.28.2)(jiti@2.7.0)(playwright@1.63.0)(publint@0.3.25)(typescript@7.0.2))
       '@types/node':
         specifier: 'catalog:'
         version: 24.19.1
@@ -278,8 +278,8 @@ importers:
         specifier: 5.0.3
         version: 5.0.3(@voidzero-dev/vite-plus-core@1.1.0(@arethetypeswrong/core@0.18.5)(@types/node@24.19.1)(esbuild@0.28.2)(jiti@2.7.0)(publint@0.3.25)(typescript@7.0.2))(vitest@5.0.3)
       oxlint-tailwindcss:
-        specifier: 1.14.0
-        version: 1.14.0
+        specifier: 1.16.0
+        version: 1.16.0
       playwright:
         specifier: 'catalog:'
         version: 1.63.0
@@ -4782,8 +4782,8 @@ packages:
       vite-plus:
         optional: true
 
-  oxlint-tailwindcss@1.14.0:
-    resolution: {integrity: sha512-b3U7damRkkLtL4MSZ+jp+3JWuc53CfI66xLhYgJqFjFkERmtY42JlgGY6fyq6g/MaXAEEoGYyv3diftcdnOceQ==}
+  oxlint-tailwindcss@1.16.0:
+    resolution: {integrity: sha512-qwkw3gahMiLOVkZAInULbvnFaFceanEnk+GxpMyNZU4bq2nRmZd3xD4En0EhIakEBiIt15RiGwQ7AuhrllNoNw==}
     engines: {node: ^20.19.0 || >=22.12.0}
 
   oxlint-tsgolint@7.0.2003:
@@ -6257,11 +6257,11 @@ snapshots:
     transitivePeerDependencies:
       - zod
 
-  '@k8o/oxc-config@1.1.0(oxlint-tailwindcss@1.14.0)(vite-plus@1.1.0(@arethetypeswrong/core@0.18.5)(@types/node@24.19.1)(@vitest/browser-playwright@5.0.3)(@vitest/coverage-v8@5.0.3)(@vitest/ui@5.0.3)(esbuild@0.28.2)(jiti@2.7.0)(playwright@1.63.0)(publint@0.3.25)(typescript@7.0.2))':
+  '@k8o/oxc-config@1.1.0(oxlint-tailwindcss@1.16.0)(vite-plus@1.1.0(@arethetypeswrong/core@0.18.5)(@types/node@24.19.1)(@vitest/browser-playwright@5.0.3)(@vitest/coverage-v8@5.0.3)(@vitest/ui@5.0.3)(esbuild@0.28.2)(jiti@2.7.0)(playwright@1.63.0)(publint@0.3.25)(typescript@7.0.2))':
     dependencies:
       vite-plus: 1.1.0(@arethetypeswrong/core@0.18.5)(@types/node@24.19.1)(@vitest/browser-playwright@5.0.3)(@vitest/coverage-v8@5.0.3)(@vitest/ui@5.0.3)(esbuild@0.28.2)(jiti@2.7.0)(playwright@1.63.0)(publint@0.3.25)(typescript@7.0.2)
     optionalDependencies:
-      oxlint-tailwindcss: 1.14.0
+      oxlint-tailwindcss: 1.16.0
 
   '@loaderkit/resolve@1.0.6':
     dependencies:
@@ -6941,7 +6941,7 @@ snapshots:
       jiti: 2.7.0
       lightningcss: 1.32.0
       magic-string: 0.30.21
-      source-map-js: 1.2.1
+      source-map-js: 1.2.2
       tailwindcss: 4.3.3
 
   '@tailwindcss/oxide-android-arm64@4.3.3':
@@ -8738,7 +8738,7 @@ snapshots:
       '@oxfmt/binding-win32-x64-msvc': 0.72.0
       vite-plus: 1.1.0(@arethetypeswrong/core@0.18.5)(@types/node@24.19.1)(@vitest/browser-playwright@5.0.3)(@vitest/coverage-v8@5.0.3)(@vitest/ui@5.0.3)(esbuild@0.28.2)(jiti@2.7.0)(playwright@1.63.0)(publint@0.3.25)(typescript@7.0.2)
 
-  oxlint-tailwindcss@1.14.0:
+  oxlint-tailwindcss@1.16.0:
     dependencies:
       '@tailwindcss/node': 4.3.3
       tailwindcss: 4.3.3
