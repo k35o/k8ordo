@@ -53,9 +53,6 @@ catalog:
   react: 19.3.0
   react-dom: 19.3.0
   server-only: 0.0.1
-  # postcss と一緒に @better-css-modules/core が exact pin する依存。overrides で
-  # catalog を指させて脆弱版 (<1.2.2) を木から外す。
-  source-map-js: 1.2.2
   tailwindcss: 4.3.3
   typescript: 7.0.2
   # vite-plus 0.3.1 以降の `vp pack` / `vp dev` は、実行するパッケージが vite を
@@ -103,15 +100,6 @@ overrides:
   '@vitest/ui': 'catalog:'
   '@vitest/utils': 'catalog:'
 
-  # @better-css-modules/core (0.4.0) は postcss を 8.5.8、source-map-js を 1.2.1 に
-  # exact pin しており、どちらも脆弱性のある版 (postcss: GHSA-qx2v-qp2m-jg93 /
-  # GHSA-6g55-p6wh-862q / GHSA-r28c-9q8g-f849 / GHSA-fxqj-rqcc-2cmp、
-  # source-map-js: event-loop DoS)。pin なので pnpm update では上がらず、
-  # catalog の版に寄せて木全体でコピーを 1 つに保つ。better-css-modules が pin を
-  # 緩めたら外してよい。
-  postcss: 'catalog:'
-  source-map-js: 'catalog:'
-
 # catalog の vite は vite-plus-core の別名なので、版は vite-plus のもの (1.x) に
 # なり、vite を peer に持つパッケージ (vitest・plugin-react・@k8ordo/framework など)
 # の範囲をどれも満たさない。中身は vite-plus が同梱する vite で、別名の版で互換を
@@ -136,14 +124,6 @@ minimumReleaseAgeExclude:
   - next@16.3.8
 
 verifyDepsBeforeRun: install
-
-auditConfig:
-  ignoreGhsas:
-    # braces <=3.0.3 の深いネストによる stack exhaustion DoS。修正版が無い。
-    # 経路は @better-css-modules/core > fast-glob > micromatch > braces で、
-    # 入力はこのリポジトリの better-css-modules.config.ts に書いた glob だけ
-    # (攻撃者の入力は届かない)。修正版が出たら外す。
-    - GHSA-vfj7-8cjw-p6xm
 
 versioning:
   # ui だけ外すのは、npm に 1.0.0 と 2.0.0 があるため。fixed はグループの最高版に
