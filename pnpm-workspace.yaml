@@ -17,9 +17,9 @@ catalog:
   '@arethetypeswrong/cli': 0.18.5
   # ui と docs の CSS Modules の型生成と検査 (better-css-modules check)。
   # 3 つは同じ版で出るので、上げるときは揃える。
-  '@better-css-modules/cli': 0.4.0
-  '@better-css-modules/core': 0.4.0
-  '@better-css-modules/vite': 0.4.0
+  '@better-css-modules/cli': 0.4.1
+  '@better-css-modules/core': 0.4.1
+  '@better-css-modules/vite': 0.4.1
   # generative-UI アダプタの peer。@k8ordo/ui が開発対象にする版と examples が
   # 使う版を同じ 1 コピーに保つ (scripts/check-peer-copies.mjs が検査する)。
   '@json-render/core': 0.21.0
@@ -122,6 +122,8 @@ minimumReleaseAgeExclude:
   - 'vite-plus-inspector'
   # Renovate security update: next@16.3.8
   - next@16.3.8
+  # better-css-modules 0.4.1 の security update が exact pin する版
+  - postcss@8.5.31
 
 verifyDepsBeforeRun: install
 
