@@ -124,6 +124,8 @@ minimumReleaseAgeExclude:
   - next@16.3.8
   # better-css-modules 0.4.1 の security update が exact pin する版
   - postcss@8.5.31
+  # Renovate security update: @storybook/addon-vitest@10.6.2
+  - "@storybook/addon-vitest@10.6.2"
 
 verifyDepsBeforeRun: install
 
