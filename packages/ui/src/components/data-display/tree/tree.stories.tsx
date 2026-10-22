@@ -67,6 +67,10 @@ export const Keyboard: Story = {
     await expect(byName('src')).toHaveAttribute('aria-expanded', 'true');
     await userEvent.keyboard('{ArrowRight}');
     await expect(byName('components')).toHaveFocus();
+    // 項目は入れ子にせず並べるので、階層と兄弟の中の位置は属性で伝える
+    await expect(byName('components')).toHaveAttribute('aria-level', '2');
+    await expect(byName('components')).toHaveAttribute('aria-posinset', '1');
+    await expect(byName('components')).toHaveAttribute('aria-setsize', '2');
 
     // 下: 見えている次の項目へ（閉じた枝の中は飛ばす）
     await userEvent.keyboard('{ArrowDown}');

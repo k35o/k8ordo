@@ -3,22 +3,7 @@
   flex-direction: column;
 }
 
-/* フォーカスは項目（li）が受けるが、li は子の枝まで含むので、輪は見出しの行に描く */
-.item:focus-visible {
-  outline-style: none;
-}
-
-.item:focus-visible > .row {
-  outline-style: none;
-  box-shadow: var(--shadow-ring-info);
-
-  @media (forced-colors: active) {
-    outline: 2px solid transparent;
-    outline-offset: 2px;
-  }
-}
-
-.row {
+.item {
   display: flex;
   cursor: pointer;
   align-items: center;

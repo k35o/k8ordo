@@ -1,13 +1,14 @@
 'use client';
 
 import { clsx } from 'clsx';
-import { useId, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import type { FC, HTMLAttributes, KeyboardEvent, ReactNode } from 'react';
 
 import { useControllableState } from '../../../hooks/controllable-state';
 import { readWritingMode } from '../../../hooks/writing-mode';
 import { ChevronIcon } from '../../icons';
 
+import focusRing from '../../_internal/focus-ring.module.css';
 import styles from './tree.module.css';
 
 export type TreeItem = {
@@ -20,6 +21,9 @@ export type TreeItem = {
 type VisibleItem = {
   item: TreeItem;
   parentId: string | null;
+  level: number;
+  setSize: number;
+  posInSet: number;
 };
 
 // 開いている枝だけをたどった、画面に見えている順の一覧。矢印キーの
@@ -28,11 +32,12 @@ const visibleItemsOf = (
   items: readonly TreeItem[],
   expandedIds: readonly string[],
   parentId: string | null = null,
+  level = 1,
 ): VisibleItem[] =>
-  items.flatMap((item) => [
-    { item, parentId },
+  items.flatMap((item, index) => [
+    { item, parentId, level, setSize: items.length, posInSet: index + 1 },
     ...(item.children !== undefined && expandedIds.includes(item.id)
-      ? visibleItemsOf(item.children, expandedIds, item.id)
+      ? visibleItemsOf(item.children, expandedIds, item.id, level + 1)
       : []),
   ]);
 
@@ -90,7 +95,6 @@ export const Tree: FC<Props> = ({
   onChange,
   ...rest
 }) => {
-  const baseId = useId();
   const [expanded, setExpanded] = useControllableState<readonly string[]>({
     value: expandedIds,
     defaultValue: defaultExpandedIds ?? NONE,
@@ -181,51 +185,51 @@ export const Tree: FC<Props> = ({
     event.stopPropagation();
   };
 
-  const renderItems = (level: readonly TreeItem[], depth: number): ReactNode =>
-    level.map((item) => {
-      const entry = entryById.get(item.id);
-      const isParent = hasChildren(item);
-      const isExpanded = isParent && expanded.includes(item.id);
-      const isSelected = selected === item.id;
-      const labelId = `${baseId}-${item.id}`;
-      return (
-        <li
-          aria-expanded={isParent ? isExpanded : undefined}
-          aria-labelledby={labelId}
-          aria-selected={isSelected}
-          className={styles.item}
-          key={item.id}
-          onClick={(event) => {
-            // 入れ子の項目のクリックが、親の項目まで泡立たないようにする
-            event.stopPropagation();
-            setSelected(item.id);
-            focus(item.id);
-            if (isParent) toggle(item.id);
-          }}
-          onFocus={(event) => {
-            if (event.target === event.currentTarget) setFocusedId(item.id);
-          }}
-          onKeyDown={(event) => {
-            if (entry !== undefined && event.target === event.currentTarget) {
-              onKeyDown(event, entry);
-            }
-          }}
-          ref={(element) => {
-            if (element === null) {
-              elements.current.delete(item.id);
-              return;
-            }
-            elements.current.set(item.id, element);
-          }}
-          role="treeitem"
-          tabIndex={item.id === tabbableId ? 0 : -1}
-        >
-          <div
+  return (
+    // 項目は入れ子にせず、階層は aria-level で伝える。li が子の枝まで含むと、
+    // 子の項目の文字も親の見えているラベルに数えられ、名前と食い違う
+    <ul {...rest} aria-label={label} className={styles.root} role="tree">
+      {visible.map((entry) => {
+        const { item, level, setSize, posInSet } = entry;
+        const isParent = hasChildren(item);
+        const isExpanded = isParent && expanded.includes(item.id);
+        const isSelected = selected === item.id;
+        return (
+          <li
+            aria-expanded={isParent ? isExpanded : undefined}
+            aria-level={level}
+            aria-posinset={posInSet}
+            aria-selected={isSelected}
+            aria-setsize={setSize}
             className={clsx(
-              styles.row,
+              styles.item,
+              focusRing.ringNoBorder,
               isSelected ? styles.selected : styles.unselected,
             )}
-            style={{ paddingInlineStart: `${String(depth * 0.75 + 0.25)}rem` }}
+            key={item.id}
+            onClick={() => {
+              setSelected(item.id);
+              focus(item.id);
+              if (isParent) toggle(item.id);
+            }}
+            onFocus={() => {
+              setFocusedId(item.id);
+            }}
+            onKeyDown={(event) => {
+              onKeyDown(event, entry);
+            }}
+            ref={(element) => {
+              if (element === null) {
+                elements.current.delete(item.id);
+                return;
+              }
+              elements.current.set(item.id, element);
+            }}
+            role="treeitem"
+            style={{
+              paddingInlineStart: `${String((level - 1) * 0.75 + 0.25)}rem`,
+            }}
+            tabIndex={item.id === tabbableId ? 0 : -1}
           >
             <span
               aria-hidden="true"
@@ -242,18 +246,10 @@ export const Tree: FC<Props> = ({
                 {item.icon}
               </span>
             )}
-            <span id={labelId}>{item.label}</span>
-          </div>
-          {isExpanded && item.children !== undefined ? (
-            <ul role="group">{renderItems(item.children, depth + 1)}</ul>
-          ) : null}
-        </li>
-      );
-    });
-
-  return (
-    <ul {...rest} aria-label={label} className={styles.root} role="tree">
-      {renderItems(items, 0)}
+            {item.label}
+          </li>
+        );
+      })}
     </ul>
   );
 };
