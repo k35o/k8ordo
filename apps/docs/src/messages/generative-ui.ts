@@ -17,9 +17,9 @@ export const installDescription = message({
 
 export const installSeries = message({
   ja: (jsonRender: string, openUi: string) =>
-    `どちらも0.x系で、マイナーバージョンが上がると互換性が変わります。対応するバージョンはjson-renderが${jsonRender}、OpenUIが${openUi}です。`,
+    `対応するバージョンはjson-renderが${jsonRender}、OpenUIが${openUi}です。json-renderは0.x系なので、マイナーバージョンが上がると互換性が変わります。`,
   en: (jsonRender, openUi) =>
-    `Both are 0.x, where a minor release can break compatibility. The supported versions are json-render ${jsonRender} and OpenUI ${openUi}.`,
+    `The supported versions are json-render ${jsonRender} and OpenUI ${openUi}. json-render is still 0.x, where a minor release can break compatibility.`,
 });
 
 export const installOneCopy = message({
