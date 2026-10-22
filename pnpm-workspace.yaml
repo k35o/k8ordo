@@ -33,17 +33,17 @@ catalog:
   '@types/react-dom': 19.3.0
   '@vitejs/plugin-basic-ssl': 2.3.0
   '@vitejs/plugin-react': 6.1.2
-  '@vitest/browser': 5.0.3
-  '@vitest/browser-playwright': 5.0.3
-  '@vitest/browser-preview': 5.0.3
-  '@vitest/coverage-v8': 5.0.3
-  '@vitest/expect': 5.0.3
-  '@vitest/mocker': 5.0.3
-  '@vitest/pretty-format': 5.0.3
-  '@vitest/snapshot': 5.0.3
-  '@vitest/spy': 5.0.3
-  '@vitest/ui': 5.0.3
-  '@vitest/utils': 5.0.3
+  '@vitest/browser': 5.0.5
+  '@vitest/browser-playwright': 5.0.5
+  '@vitest/browser-preview': 5.0.5
+  '@vitest/coverage-v8': 5.0.5
+  '@vitest/expect': 5.0.5
+  '@vitest/mocker': 5.0.5
+  '@vitest/pretty-format': 5.0.5
+  '@vitest/snapshot': 5.0.5
+  '@vitest/spy': 5.0.5
+  '@vitest/ui': 5.0.5
+  '@vitest/utils': 5.0.5
   # @k8ordo/ui/ai-sdk の peer。example が使う @ai-sdk/react は ai を exact で
   # 持つので、上げるときは同じ ai を持つ @ai-sdk/react と揃えて 1 コピーに保つ。
   ai: 7.0.130
@@ -61,9 +61,9 @@ catalog:
   # 宣言を消して vite-plus 任せにしないのは、消すと plugin-react や vitest の
   # peer に pnpm が本家 vite を自動で入れ、vitest の実体が割れて
   # expect.element の型が消えるため。
-  vite: npm:@voidzero-dev/vite-plus-core@1.1.0
-  vite-plus: 1.1.0
-  vitest: 5.0.3
+  vite: npm:@voidzero-dev/vite-plus-core@1.3.0
+  vite-plus: 1.3.0
+  vitest: 5.0.5
   vitest-browser-react: 2.3.0
   zod: 4.6.5
 
@@ -74,7 +74,7 @@ minimumReleaseAge: 10080
 # tsc が "Excessive stack depth" を起こして typecheck が落ちる。単一バージョンに
 # 強制して型グラフのコピーを 1 つに保つ (types のみのパッケージでランタイム影響なし)。
 overrides:
-  '@oxc-project/types': 0.153.0
+  '@oxc-project/types': 0.154.0
 
   # vitest は vite-plus が exact pin (1.0.0 は 5.0.1) で連れてくる依存で、
   # `vp test` が起動するのは常に vite-plus 側の 1 本。catalog の vitest が
@@ -109,10 +109,10 @@ peerDependencyRules:
   allowAny:
     - vite
   # storybook (10.6.2 時点の最新でも) の vite-plus の peer は ^0.1.15 || ^0.2.0 のまま。
-  # ここの Storybook (VRT・Chromatic) は 1.0 で動いているので 1.0 だけ足す。
+  # ここの Storybook (VRT・Chromatic) は 1.3 で動いているので 1.3 だけ足す。
   # vite-plus を上げて警告が戻ったら、その版で Storybook が動くか確かめてから広げる。
   allowedVersions:
-    storybook>vite-plus: '1.0'
+    storybook>vite-plus: '1.3'
 
 minimumReleaseAgeExclude:
   - '@better-css-modules/*'
@@ -124,6 +124,30 @@ minimumReleaseAgeExclude:
   - next@16.3.8
   # better-css-modules 0.4.1 の security update が exact pin する版
   - postcss@8.5.31
+  # Renovate security update: vitest@5.0.5 と、それを exact pin する vite-plus@1.3.0。
+  # 名前のパターンには版を付けられないので 1 つずつ並べる
+  - vitest@5.0.5
+  - '@vitest/browser@5.0.5'
+  - '@vitest/browser-playwright@5.0.5'
+  - '@vitest/browser-preview@5.0.5'
+  - '@vitest/coverage-v8@5.0.5'
+  - '@vitest/expect@5.0.5'
+  - '@vitest/mocker@5.0.5'
+  - '@vitest/pretty-format@5.0.5'
+  - '@vitest/snapshot@5.0.5'
+  - '@vitest/spy@5.0.5'
+  - '@vitest/ui@5.0.5'
+  - '@vitest/utils@5.0.5'
+  - vite-plus@1.3.0
+  - '@voidzero-dev/vite-plus-core@1.3.0'
+  - '@voidzero-dev/vite-plus-darwin-arm64@1.3.0'
+  - '@voidzero-dev/vite-plus-darwin-x64@1.3.0'
+  - '@voidzero-dev/vite-plus-linux-arm64-gnu@1.3.0'
+  - '@voidzero-dev/vite-plus-linux-arm64-musl@1.3.0'
+  - '@voidzero-dev/vite-plus-linux-x64-gnu@1.3.0'
+  - '@voidzero-dev/vite-plus-linux-x64-musl@1.3.0'
+  - '@voidzero-dev/vite-plus-win32-arm64-msvc@1.3.0'
+  - '@voidzero-dev/vite-plus-win32-x64-msvc@1.3.0'
 
 verifyDepsBeforeRun: install
 
