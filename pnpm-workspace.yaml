@@ -62,7 +62,7 @@ catalog:
   # peer に pnpm が本家 vite を自動で入れ、vitest の実体が割れて
   # expect.element の型が消えるため。
   vite: npm:@voidzero-dev/vite-plus-core@1.1.0
-  vite-plus: 1.1.0
+  vite-plus: 1.3.0
   vitest: 5.0.3
   vitest-browser-react: 2.3.0
   zod: 4.6.5
@@ -124,6 +124,8 @@ minimumReleaseAgeExclude:
   - next@16.3.8
   # better-css-modules 0.4.1 の security update が exact pin する版
   - postcss@8.5.31
+  # Renovate security update: vite-plus@1.3.0
+  - vite-plus@1.3.0
 
 verifyDepsBeforeRun: install
 
