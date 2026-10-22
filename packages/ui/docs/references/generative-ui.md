@@ -19,10 +19,11 @@ component library with it and `@k8ordo/ui/openui/prompt` is the React-free entry
 on top of it. `@openuidev/react-lang` depends on it as well, but pnpm will not
 let your app resolve a dependency of a dependency — declare it yourself.
 
-Both frameworks are 0.x, where a minor bump is a breaking release, so
-`@k8ordo/ui` declares a range that stops at the next minor. The peer table in
-the package's README (`node_modules/@k8ordo/ui/README.md` when installed via
-npm) lists the current range for each package. Pick a version inside it.
+json-render is 0.x, where a minor bump is a breaking release, so `@k8ordo/ui`
+declares a range that stops at the next minor; OpenUI is 1.x, and the range
+stops at the next major. The peer table in the package's README
+(`node_modules/@k8ordo/ui/README.md` when installed via npm) lists the current
+range for each package. Pick a version inside it.
 
 Within that range, resolve exactly **one copy** of each framework. The adapters
 read the framework's own React context — `useStateField` for OpenUI,

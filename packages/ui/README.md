@@ -44,8 +44,8 @@ it. Install one when you import the entry it belongs to.
 | `zod`                   | ^4.4.3          | optional | generative-UI schemas                             |
 | `@json-render/core`     | ≥0.21.0 <0.22.0 | optional | `@k8ordo/ui/json-render`                          |
 | `@json-render/react`    | ≥0.21.0 <0.22.0 | optional | `@k8ordo/ui/json-render`                          |
-| `@openuidev/lang-core`  | ≥0.3.0 <0.4.0   | optional | `@k8ordo/ui/openui`, `@k8ordo/ui/openui/prompt`   |
-| `@openuidev/react-lang` | ≥0.3.0 <0.4.0   | optional | `@k8ordo/ui/openui`                               |
+| `@openuidev/lang-core`  | ^1.0.0          | optional | `@k8ordo/ui/openui`, `@k8ordo/ui/openui/prompt`   |
+| `@openuidev/react-lang` | ^1.0.0          | optional | `@k8ordo/ui/openui`                               |
 | `ai`                    | ≥7.0.51         | optional | `@k8ordo/ui/ai-sdk`                               |
 | `streamdown`            | ≥2.5.0          | optional | `@k8ordo/ui/ai/response`                          |
 

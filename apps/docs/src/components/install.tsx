@@ -42,19 +42,23 @@ export const peerVersionOf = (name: string, peer: string): string => {
 };
 
 /**
- * The minor series a 0.x peer is pinned to, e.g. `0.21.x` for
- * `≥0.21.0 <0.22.0`. Any other shape of range fails the build.
+ * The series a peer is pinned to: the minor of a 0.x peer (`0.21.x` for
+ * `≥0.21.0 <0.22.0`), or the major of a caret range (`1.x` for `^1.0.0`).
+ * Any other shape of range fails the build.
  */
 export const peerSeriesOf = (name: string, peer: string): string => {
   const range = peersOf(name).find((entry) => entry.name === peer)?.version;
-  const series = /^≥(?<minor>0\.\d+)\.\d+ <0\.\d+\.0$/u.exec(range ?? '')
-    ?.groups?.minor;
-  if (series === undefined) {
+  const series =
+    /^(?:≥(?<minor>0\.\d+)\.\d+ <0\.\d+\.0|\^(?<major>[1-9]\d*)\.\d+\.\d+)$/u.exec(
+      range ?? '',
+    )?.groups;
+  const pinned = series?.minor ?? series?.major;
+  if (pinned === undefined) {
     throw new Error(
-      `${name}: ${peer}'s range ${String(range)} is not one 0.x minor series`,
+      `${name}: ${peer}'s range ${String(range)} is neither one 0.x minor series nor one major`,
     );
   }
-  return `${series}.x`;
+  return `${pinned}.x`;
 };
 
 /**
