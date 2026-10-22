@@ -53,10 +53,14 @@ export const Default: Story = {
   args: { onChange: fn() },
   render: ({ onChange }) => <Growable onChange={onChange} />,
   play: async ({ args, canvas, userEvent }) => {
-    // ResizeObserver は観測を始めた時点で 1 回通知する
-    await waitFor(() => {
-      expect(args.onChange).toHaveBeenCalledTimes(1);
-    });
+    // ResizeObserver は観測を始めた時点で 1 回通知する。CI の WebKit では、
+    // ファイルの最初のストーリーでこの通知が届くまで 1 秒を超えたことがある
+    await waitFor(
+      () => {
+        expect(args.onChange).toHaveBeenCalledTimes(1);
+      },
+      { timeout: 5000 },
+    );
     await settle();
     await expect(args.onChange).toHaveBeenCalledTimes(1);
 
