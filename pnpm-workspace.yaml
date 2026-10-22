@@ -51,8 +51,8 @@ catalog:
   playwright: 1.63.0
   postcss: 8.5.29
   publint: 0.3.25
-  react: 19.3.0
-  react-dom: 19.3.0
+  react: 19.3.1
+  react-dom: 19.3.1
   server-only: 0.0.1
   tailwindcss: 4.3.3
   typescript: 7.0.2
