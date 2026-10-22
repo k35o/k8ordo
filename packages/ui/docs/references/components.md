@@ -1857,6 +1857,9 @@ import { Tree } from '@k8ordo/ui';
 - Clicking a node selects it and, on a parent, opens or closes it.
 - One node takes Tab at a time (roving tabindex): the focused one, else the
   selected one, else the first.
+- The visible nodes render as one flat list of `treeitem`s, with no nested
+  `group`: the depth is `aria-level`, and the place among siblings is
+  `aria-posinset` / `aria-setsize`. A node's accessible name is its own label.
 - Under `.writing-v` the nodes run right to left, so Left / Right move between
   them and Down / Up open and close.
 
