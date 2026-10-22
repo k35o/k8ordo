@@ -47,6 +47,7 @@ catalog:
   # @k8ordo/ui/ai-sdk の peer。example が使う @ai-sdk/react は ai を exact で
   # 持つので、上げるときは同じ ai を持つ @ai-sdk/react と揃えて 1 コピーに保つ。
   ai: 7.0.130
+  # 1.64 は Firefox が iframe をまたぐフォーカスを壊すので飛ばす (renovate.json)
   playwright: 1.63.0
   postcss: 8.5.29
   publint: 0.3.25
