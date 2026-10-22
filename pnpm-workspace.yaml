@@ -108,7 +108,7 @@ overrides:
 peerDependencyRules:
   allowAny:
     - vite
-  # storybook (10.6.1 時点の最新でも) の vite-plus の peer は ^0.1.15 || ^0.2.0 のまま。
+  # storybook (10.6.2 時点の最新でも) の vite-plus の peer は ^0.1.15 || ^0.2.0 のまま。
   # ここの Storybook (VRT・Chromatic) は 1.0 で動いているので 1.0 だけ足す。
   # vite-plus を上げて警告が戻ったら、その版で Storybook が動くか確かめてから広げる。
   allowedVersions:
