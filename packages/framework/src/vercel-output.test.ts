@@ -208,11 +208,11 @@ type Route = {
   readonly caseSensitive?: boolean;
 };
 
-/** 書き換えの経路のうち、最初に合うものの宛先 */
+/** ファイルの後の書き換えの経路のうち、最初に合うものの宛先 */
 const destOf = (routes: readonly Route[], pathname: string) =>
   routes
     .slice(
-      1,
+      routes.findIndex((route) => route.handle === 'filesystem') + 1,
       routes.findIndex((route) => route.handle === 'hit'),
     )
     .find((route) =>
