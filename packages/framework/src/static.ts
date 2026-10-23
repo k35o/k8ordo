@@ -120,6 +120,12 @@ export type StaticOutput = {
   readonly rewrites: readonly Rewrite[];
   /** Whether `404.html` was written. */
   readonly notFound: boolean;
+  /**
+   * The `Content-Type` each route.ts's `GET` answered with, by the file it
+   * wrote: its path inside `client`, `/`-separated. A `GET` that named none
+   * is not here.
+   */
+  readonly types: ReadonlyMap<string, string>;
 };
 
 /** What the plugin `vercel()` adds lends the static build. */
@@ -788,18 +794,26 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
         const redirected = new Set<string>();
         // A route.ts whose GET did not answer with something to write.
         const unanswered: string[] = [];
+        // The type each route.ts's GET answered with, by the file it wrote.
+        const types = new Map<string, string>();
         await inParallel(
           plan.paths.flatMap((pathname) => {
             if (byRoute.has(pathname)) {
               return [
                 async () => {
-                  const status = await writeRoute(
-                    path.join(clientDir, dirFor(pathname)),
+                  const file = path.join(clientDir, dirFor(pathname));
+                  const { status, type } = await writeRoute(
+                    file,
                     handler,
                     urlFor(pathname),
                   );
                   if (status !== 200) {
                     unanswered.push(`${pathname} (${String(status)})`);
+                  } else if (type !== null) {
+                    types.set(
+                      path.relative(clientDir, file).split(path.sep).join('/'),
+                      type,
+                    );
                   }
                 },
               ];
@@ -1004,6 +1018,7 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
             base,
             rewrites,
             notFound: unmatched !== null,
+            types,
           });
         } else if (
           vercel === undefined &&
@@ -1153,23 +1168,28 @@ const write = async (
 };
 
 /**
- * Writes what a route.ts's GET answered, as the file at its pathname — a
- * static host then serves it with the type its extension says. Anything but a
- * 200 is not a file the site has, and nothing is written.
+ * Writes what a route.ts's GET answered, as the file at its pathname, and
+ * says the type it answered with — a file keeps none, so a static host serves
+ * it with the type its extension says, and only an adapter that can name a
+ * file's type (`vercel()`) serves the GET's. Anything but a 200 is not a file
+ * the site has, and nothing is written.
  */
 const writeRoute = async (
   file: string,
   handler: Handler,
   url: string,
-): Promise<number> => {
+): Promise<{ readonly status: number; readonly type: string | null }> => {
   const response = await handler(new Request(url));
   if (response.status !== 200) {
     if (response.status === 500) {
       console.error(`k8ordo: ${url} — ${await response.text()}`);
     }
-    return response.status;
+    return { status: response.status, type: null };
   }
   await mkdir(path.dirname(file), { recursive: true });
   await writeFile(file, Buffer.from(await response.arrayBuffer()));
-  return response.status;
+  return {
+    status: response.status,
+    type: response.headers.get('content-type'),
+  };
 };

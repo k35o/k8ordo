@@ -19,7 +19,8 @@ export type { VercelOptions, VercelRoute } from './vercel-output';
  * no function, only the rewrites that answer a value the build did not write
  * with its shell — Vercel never reads `_redirects` — and the application's
  * own routes around them, written as given: `beforeFiles` ahead of every
- * file, `beforeNotFound` ahead of `404.html`.
+ * file, `beforeNotFound` ahead of `404.html`. A file a `route.ts` wrote is
+ * served with the `Content-Type` its `GET` answered.
  */
 export const vercel = (options: VercelOptions = {}): Plugin => {
   const { beforeFiles, beforeNotFound } = options;

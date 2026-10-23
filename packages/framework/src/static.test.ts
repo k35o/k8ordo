@@ -289,7 +289,7 @@ export default async function handler(request) {
   const { pathname } = new URL(request.url);
   const answer = answers[pathname];
   if (answer === undefined) return new Response('not found', { status: 404 });
-  return new Response(answer.body ?? '', {
+  return new Response(answer.body ?? null, {
     status: answer.status ?? 200,
     headers: answer.headers ?? {},
   });
@@ -670,9 +670,56 @@ describe('a build for Vercel', () => {
           { from: '/posts/:p1/index.rsc', to: '/posts/!fallback/index.rsc' },
         ],
         notFound: false,
+        types: new Map(),
       },
     ]);
     expect(said.warn).toStrictEqual([]);
+  });
+
+  it('hands vercel() the type each route.ts’s GET answered, by the file it wrote', async () => {
+    await routeFiles([
+      'feed/route.ts',
+      'notes.txt/route.ts',
+      'raw/route.ts',
+      'docs/[slug]/article.md/route.ts',
+    ]);
+    await handlerAnswering({
+      '/': { body: '<p>home</p>' },
+      '/index.rsc': { body: 'home payload' },
+      '/feed': {
+        headers: { 'content-type': 'application/rss+xml;charset=utf-8' },
+        body: '<rss/>',
+      },
+      // 文字列の本文には Response が text/plain を付ける
+      '/notes.txt': { body: 'notes' },
+      // 本文の無い Response は型を持たない
+      '/raw': {},
+      '/docs/a%20b/article.md': {
+        headers: { 'content-type': 'text/markdown; charset=utf-8' },
+        body: '# a b',
+      },
+    });
+    const written: StaticOutput[] = [];
+    const { build } = hooks({ paths: () => ['/docs/a%20b/article.md'] });
+
+    await build([
+      {
+        name: 'k8ordo:vercel',
+        api: {
+          writeStatic: (output: StaticOutput) => {
+            written.push(output);
+          },
+        },
+      },
+    ]);
+
+    expect(written.map((output) => output.types)).toStrictEqual([
+      new Map([
+        ['feed', 'application/rss+xml;charset=utf-8'],
+        ['notes.txt', 'text/plain;charset=UTF-8'],
+        ['docs/a b/article.md', 'text/markdown; charset=utf-8'],
+      ]),
+    ]);
   });
 });
 
