@@ -42,8 +42,19 @@ export const redirectPage = (to: string): string => {
  */
 export type ContentSecurityPolicy = Readonly<Record<string, readonly string[]>>;
 
-// <meta> で書いたポリシーでは効かない。ホストのヘッダーで書くもの
-const HEADER_ONLY = new Set(['frame-ancestors', 'report-uri', 'sandbox']);
+// <meta> で書いたポリシーでは効かない。ホストのヘッダーで書くもの。report-to は
+// <meta> から取り除かれないので ignored とは言えないが、送り先を決める
+// Reporting-Endpoints をレスポンスヘッダーでしか書けないので効かない
+const IGNORED = 'is ignored in a <meta> — set it as a header at the host';
+const HEADER_ONLY = new Map([
+  ['frame-ancestors', IGNORED],
+  ['report-uri', IGNORED],
+  ['sandbox', IGNORED],
+  [
+    'report-to',
+    'names an endpoint only a Reporting-Endpoints response header defines — set the policy as a header at the host',
+  ],
+]);
 
 /** What decides scripts: `script-src`, or `default-src` without it. */
 const scriptDirectiveOf = (
@@ -74,19 +85,18 @@ const elementDirectivesOf = (
 
 /**
  * What would make a policy wrong to write into every page, named at once:
- * a directive a `<meta>` ignores, a source that is not one, and
+ * a directive that works only from a header, a source that is not one, and
  * `'strict-dynamic'`, under which the framework's module script — allowed by
  * where it comes from, since a file cannot sign it — would never load.
  */
 export const policyProblems = (policy: ContentSecurityPolicy): string[] => {
   const problems: string[] = [];
   for (const [name, sources] of Object.entries(policy)) {
+    const headerOnly = HEADER_ONLY.get(name);
     if (!/^[a-z][a-z-]*$/u.test(name)) {
       problems.push(`"${name}" is not a directive name`);
-    } else if (HEADER_ONLY.has(name)) {
-      problems.push(
-        `${name} is ignored in a <meta> — set it as a header at the host`,
-      );
+    } else if (headerOnly !== undefined) {
+      problems.push(`${name} ${headerOnly}`);
     }
     for (const source of sources) {
       if (source === '' || /[\s;,]/u.test(source)) {

@@ -366,13 +366,13 @@ export const cspTitle = message({
 });
 
 export const cspCause = message({
-  ja: "staticモードの`csp`オプションに、`<meta>`では効かないディレクティブか`'strict-dynamic'`などが入っています。`<meta>`で効かないのは`frame-ancestors`、`report-uri`、`sandbox`の3つです。1つのエントリに複数のソースを空白区切りで書いた場合も、同じエラーになります。",
-  en: "Under static mode, the `csp` option holds something a `<meta>` cannot carry, such as a directive a `<meta>` ignores or `'strict-dynamic'`. The directives a `<meta>` ignores are `frame-ancestors`, `report-uri` and `sandbox`. An entry with several sources separated by spaces gets the same error.",
+  ja: "staticモードの`csp`オプションに、`<meta>`では効かないディレクティブか`'strict-dynamic'`などが入っています。`<meta>`で効かないのは`frame-ancestors`、`report-uri`、`sandbox`と`report-to`の4つです。1つのエントリに複数のソースを空白区切りで書いた場合も、同じエラーになります。",
+  en: "Under static mode, the `csp` option holds something a `<meta>` cannot carry, such as a directive that works only from a header or `'strict-dynamic'`. Those directives are `frame-ancestors`, `report-uri`, `sandbox` and `report-to`. An entry with several sources separated by spaces gets the same error.",
 });
 
 export const cspFix = message({
-  ja: "`<meta>`で効かないディレクティブは、ホスティングのヘッダーで設定します。`'strict-dynamic'`は外します。フレームワークのモジュールのスクリプトは、`'self'`で許可されます。ソースは1つずつ配列の要素にします。",
-  en: "Set the directives a `<meta>` ignores as headers at the host. Drop `'strict-dynamic'`: the framework’s module script is allowed by `'self'`. Give each source its own array entry.",
+  ja: "`<meta>`で効かないディレクティブは、ホスティングのヘッダーで設定します。`report-to`で違反のレポートを受け取るポリシーも、ヘッダーで設定します。ヘッダーにはページごとのハッシュが入らないので、その`script-src`にはハッシュを並べずに`'self'`と`'unsafe-inline'`を書きます。`'strict-dynamic'`は外します。フレームワークのモジュールのスクリプトは、`'self'`で許可されます。ソースは1つずつ配列の要素にします。",
+  en: "Set the directives a `<meta>` ignores as headers at the host, and a policy that reports with `report-to` as a header there too. That header cannot carry the hashes the build adds page by page, so let its `script-src` allow `'self'` and `'unsafe-inline'`, with no hash beside them. Drop `'strict-dynamic'`: the framework’s module script is allowed by `'self'`. Give each source its own array entry.",
 });
 
 export const forbiddenTitle = message({

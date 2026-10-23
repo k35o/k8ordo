@@ -236,10 +236,11 @@ pnpm check         # check:write to auto-fix
   content stays refused, and the application allows its own by hash in the
   policy (`colorSchemeScriptHash`). `nonce()` lives on `./server`, which
   static mode refuses, for the same reason. A policy the `<meta>` cannot
-  carry (`frame-ancestors`, `report-uri`, `sandbox`) or one with
-  `'strict-dynamic'` — under which the module script, allowed only by
-  `'self'`, never loads — is refused when the plugin is created
-  (`policyProblems`).
+  carry (`frame-ancestors`, `report-uri`, `sandbox`, which it ignores, and
+  `report-to`, whose endpoint only a `Reporting-Endpoints` response header
+  defines) or one with `'strict-dynamic'` — under which the module script,
+  allowed only by `'self'`, never loads — is refused when the plugin is
+  created (`policyProblems`).
 - **`site` is the only reason a sitemap exists.** Without the origin a
   sitemap would list relative URLs, which is not a sitemap; with it every
   page the build wrote is listed, redirects and the not-found excluded.

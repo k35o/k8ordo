@@ -91,9 +91,18 @@ page — one that reached it from content — is refused. The framework's module
 script is allowed by where it comes from (`'self'`), since nothing in a file
 can sign it, which is why the build refuses a policy with `'strict-dynamic'`.
 It refuses `frame-ancestors`, `report-uri` and `sandbox` too, which a
-`<meta>` ignores: set those as headers at the host. Without `csp`, no policy
-is written. There is no `nonce()` for this mode: what an application signed
-with it would land in the file, and make every build differ.
+`<meta>` ignores: set those as headers at the host. It refuses `report-to`
+as well: the endpoint it names is defined only by a `Reporting-Endpoints`
+response header, so set a policy that reports as a header at the host.
+That header cannot carry the hashes the build adds page by page, and a
+script runs only where every policy allows it: wherever the header decides
+a script element — `script-src` (`default-src` without it) and
+`script-src-elem` — allow `'self'` and `'unsafe-inline'` with no hash or
+nonce beside them (either turns `'unsafe-inline'` off), and keep `csp`,
+without `report-to`, for the `<meta>`, which allows inline scripts only by
+hash. Without `csp`, no policy is written. There is no `nonce()` for this
+mode: what an application signed with it would land in the file, and make
+every build differ.
 
 A `fallback.tsx`'s shell draws its page in the browser from data the
 browser fetches

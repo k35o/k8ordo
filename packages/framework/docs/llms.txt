@@ -133,7 +133,7 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
   `<head>`, with the hashes of the framework's own inline scripts on that
   page added to `script-src` (or `default-src` made into it) and
   `script-src-elem`; a policy with `'strict-dynamic'`, `frame-ancestors`,
-  `report-uri` or `sandbox` is refused. `FrameworkOptions` is
+  `report-uri`, `report-to` or `sandbox` is refused. `FrameworkOptions` is
   `StaticOptions | ServerOptions`. This entry loads Vite and is for
   `vite.config.ts` only.
 - `@k8ordo/framework/server` — server mode only; a static build refuses any

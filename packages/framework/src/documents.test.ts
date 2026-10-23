@@ -180,6 +180,12 @@ describe('policyProblems', () => {
     ]);
   });
 
+  it('refuses report-to, whose endpoint only a response header can define', () => {
+    expect(policyProblems({ 'report-to': ['csp-endpoint'] })).toStrictEqual([
+      'report-to names an endpoint only a Reporting-Endpoints response header defines — set the policy as a header at the host',
+    ]);
+  });
+
   it('names a source that is several, or none', () => {
     expect(
       policyProblems({ 'img-src': ["'self' data:", '', 'a;b'] }),
