@@ -57,6 +57,11 @@ export const frameworkRoutesDir = message({
   en: 'The route directory, relative to the project root. `src/routes` by default. The generated files go to `.k8ordo/` either way.',
 });
 
+export const frameworkReactCompiler = message({
+  ja: '両モードで使えます。`true`にすると、クライアントコンポーネントをReact Compiler（Rust版。`@vitejs/plugin-react`の`compiler`）で変換します。アプリに`oxc-transform-react`を入れておく必要があります。Server Componentと、クライアントコンポーネントをサーバーで描くHTMLには掛かりません。既定は`false`です。',
+  en: 'Either mode. With `true`, client components are compiled with React Compiler (the Rust one, through `@vitejs/plugin-react`’s `compiler`). The application needs `oxc-transform-react` installed. Server Components, and the HTML a client component renders on the server, are left as written. `false` by default.',
+});
+
 export const frameworkPaths = message({
   ja: 'staticモードだけ。パラメータを持つルートのパス名を返す関数です。値の要るパターンの一覧を受け取り、パス名の配列かそのPromiseを返します。パス名にViteの`base`は含めません。`fallback.tsx`のあるページには、`/ja/posts/:id`のように値を残したシェルの場所も返せます。',
   en: 'Static mode only. A function that returns the pathnames of routes with parameters. It receives the patterns that need values and returns an array of pathnames, or a promise of one. The pathnames carry no Vite `base`. For a page with a `fallback.tsx`, it may also return shell locations that leave a value open, such as `/ja/posts/:id`.',
@@ -81,6 +86,10 @@ export const frameworkCaveats = [
   message({
     ja: "`paths`と`site`、`csp`は、どれか1つでも`mode: 'server'`と一緒に書くと型エラーになります。",
     en: "`paths`, `site` or `csp` written beside `mode: 'server'` is a type error.",
+  }),
+  message({
+    ja: '`reactCompiler: true`で`oxc-transform-react`が入っていないと、`vite dev`も`vite build`も設定を読んだ時点で、Reactのプラグインのエラー`React Compiler requires the optional …`で止まります。エラーが名指す`react({ compiler: true })`は、`framework()`が代わりに渡しているオプションです。',
+    en: 'With `reactCompiler: true` and no `oxc-transform-react` installed, `vite dev` and `vite build` stop as soon as they read the config, with React’s plugin’s error `React Compiler requires the optional …`. The `react({ compiler: true })` it names is the option `framework()` passes for you.',
   }),
   message({
     ja: "`csp`に`<meta>`では効かないディレクティブか`'strict-dynamic'`を渡すと、`framework()`を呼んだ時点で`the \"csp\" option cannot go into a page's <meta> as it is`のエラーになります。",
