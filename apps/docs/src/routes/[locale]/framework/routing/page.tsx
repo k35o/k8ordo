@@ -485,6 +485,14 @@ export default function FrameworkRoutingPage() {
             </p>
             <Items items={t.routeRefused} />
           </Pitfall>
+          <p>
+            <Rich>{t.routeStaticType()}</Rich>
+          </p>
+          <Pitfall>
+            <p>
+              <Rich>{t.routeStaticPlainText()}</Rich>
+            </p>
+          </Pitfall>
         </DocSubsection>
         <DocSubsection id="route-server" title={t.routeServerTitle}>
           <p>

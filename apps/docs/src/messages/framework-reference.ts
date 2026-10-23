@@ -483,8 +483,8 @@ export const vercelCaveats = [
     en: 'Under server mode the function is the handler, with every dependency bundled in. A dependency left out with `resolve.external` is not in the function, and does not work on Vercel.',
   }),
   message({
-    ja: 'staticモードでは関数を作りません。書き出したファイルと、ビルドしていない値をシェルに書き換えるルートだけを書きます。Vercelは`_redirects`を読みません。',
-    en: 'Under static mode there is no function: only the written files, and routes that rewrite a value the build did not write to its shell. Vercel does not read `_redirects`.',
+    ja: 'staticモードでは関数を作りません。書き出したファイルと、ビルドしていない値をシェルに書き換えるルートだけを書きます。Vercelは`_redirects`を読みません。`route.ts`が書いたファイルは、`GET`が返した`Content-Type`で配ります。',
+    en: 'Under static mode there is no function: only the written files, and routes that rewrite a value the build did not write to its shell. Vercel does not read `_redirects`. A file a `route.ts` wrote is served with the `Content-Type` its `GET` returned.',
   }),
   message({
     ja: '`beforeFiles`と`beforeNotFound`のルートを当てるのはVercelだけです。`vite dev`と`vite preview`、`serve()`には当てません。serverモードで渡すと、ビルドがエラーになります。',

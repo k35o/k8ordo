@@ -419,6 +419,16 @@ export const routeRefused = [
   }),
 ] as const;
 
+export const routeStaticType = message({
+  ja: '書き出したファイルは型を持たないので、静的ホスティングは拡張子で型を決めます。`vite preview`と`serve`も同じで、拡張子の無いファイルは`application/octet-stream`で返します。Vercelでは、`vercel()`が`GET`の返した`Content-Type`で配ります。`vite dev`が返す型と同じです。',
+  en: 'A written file keeps no type, so a static host picks one from its extension. So do `vite preview` and `serve`, which send a file without one as `application/octet-stream`. On Vercel, `vercel()` serves it with the `Content-Type` its `GET` returned — the type `vite dev` sends.',
+});
+
+export const routeStaticPlainText = message({
+  ja: '`Response`に文字列の本文を渡すと、型を書かなくても`text/plain;charset=UTF-8`が付きます。型を書かずに返した`sitemap.xml`は、Vercelと`vite dev`ではテキストとして配られます。`route.ts`では型を書きます。',
+  en: 'A `Response` given a string body gets `text/plain;charset=UTF-8` when no type is written, so a `sitemap.xml` returned that way is sent as plain text on Vercel and in `vite dev`. Write the type in a `route.ts`.',
+});
+
 export const routeServerTitle = message({
   ja: 'serverモード',
   en: 'Server mode',
