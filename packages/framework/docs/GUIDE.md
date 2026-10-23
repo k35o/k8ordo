@@ -234,7 +234,9 @@ The package is split by where the code runs.
   `dist/server.js` runs, for a server of your own to import. A static build
   it serves as a static host does, its `_redirects` applied.
 - `@k8ordo/framework/vercel` — `vercel()`, the plugin that writes a build
-  of either mode for Vercel.
+  of either mode for Vercel, and the types `VercelOptions` and
+  `VercelRoute`. Under static mode it also takes routes of your own,
+  `beforeFiles` and `beforeNotFound`.
 - `@k8ordo/framework/generated` — what the generated `.k8ordo/` files
   import. Not for code written by hand.
 

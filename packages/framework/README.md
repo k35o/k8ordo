@@ -35,7 +35,7 @@ dependencies in either mode: the build bundles what the application runs.
 
 | Package          | Version | Required | Needed for                                 |
 | ---------------- | ------- | -------- | ------------------------------------------ |
-| `@k8ordo/router` | ^1.0.0  | yes      | routing, re-exported by the framework      |
+| `@k8ordo/router` | ^1.1.0  | yes      | routing, re-exported by the framework      |
 | `react`          | ≥19.3.0 | yes      | rendering                                  |
 | `react-dom`      | ≥19.3.0 | yes      | rendering                                  |
 | `vite`           | ≥8.0.0  | yes      | the build (`framework()` is a Vite plugin) |
@@ -134,7 +134,9 @@ A value `paths` does not list — a product added after the build — is
 answered by a `fallback.tsx` beside the page: the build writes it once as a
 shell, the layouts in HTML, and the browser draws the page from the URL.
 The build also writes the `_redirects` through which Netlify and Cloudflare
-reach the shell, and `vercel()` the same rewrites for Vercel.
+reach the shell, and `vercel()` the same rewrites for Vercel — around them,
+routes of your own: headers on every page, redirects, a rewrite decided by
+`Accept`, a proxy to another origin.
 
 ## AI Agent Documentation
 

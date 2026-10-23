@@ -103,7 +103,8 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
   `node dist/server.js` (`PORT`, `HOST`, every dependency bundled in, and
   `resolve.external` for one that cannot be), `serve` (compression, `ETag`,
   `Range`), the request handler under Node.js, Bun, Deno and Cloudflare
-  Workers, the same-origin rule for a `POST`, and `vercel()` in either mode;
+  Workers, the same-origin rule for a `POST`, and `vercel()` in either mode,
+  with routes of your own under static mode;
   a tab opened before a deploy, and Vite's `base`.
 
 ## Entry points
@@ -181,5 +182,11 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
   `base` (`assets/` immutable), and under server mode the request handler
   as one streaming Node.js function; under static mode no function, and the
   shells' rewrites as routes tried after the files, then `404.html`.
+  Under static mode `vercel({ beforeFiles, beforeNotFound })` also takes
+  routes of the application's own (`VercelRoute`: `src`, `dest`, `status`,
+  `headers`, `continue`, `check`, `caseSensitive`, `has`), written as given
+  before the files and before `404.html`; Vercel alone applies them,
+  matching `src` against the whole pathname (`^/posts/.+$`, not
+  `^/posts/`).
 - `@k8ordo/framework/generated` — what the generated `.k8ordo/` files
   import (`defineRoutes`, `Register`, …). Not for code written by hand.
