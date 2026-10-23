@@ -319,5 +319,5 @@ export const engine = (
   // React 自身のプラグインはフレームワークが持つ。無くてもビルドは通るが、
   // クライアントコンポーネントの編集が Fast Refresh ではなくページ再読み込みに
   // なる。アプリごとに書き忘れても気づけない類の配線なので、ここに置く。
-  return [react(), rsc(), plugin];
+  return [react({ compiler: options.reactCompiler === true }), rsc(), plugin];
 };

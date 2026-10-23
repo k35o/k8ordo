@@ -79,6 +79,15 @@ pnpm check         # check:write to auto-fix
   own: a mode other than `'static'` would build no files, and a `csp` under
   `mode: 'server'` would be a policy nobody serves. `vite.test.ts` holds each
   case as both a `@ts-expect-error` and the error it throws.
+- **React's plugin is the framework's, and `reactCompiler` is all of it an
+  application sets.** The engine returns `@vitejs/plugin-react`, and
+  `reactCompiler: true`, in either mode, turns on its `compiler` (see the
+  engine's `CLAUDE.md`). That loads `oxc-transform-react` from the
+  application, so it is an optional peer here, in the range the plugin's
+  own optional peer asks; `vite.test.ts` fails when the two drift, as when
+  the plugin is bumped. Without it the plugin fails while Vite resolves the
+  config, with its own error, which names `react({ compiler: true })`; the
+  framework does not restate it, and the guide quotes it.
 - **The root re-exports the router by name.** `src/index.ts` lists what an
   application's code imports and never `export *`: the router also exports
   what only a hand-written table or the framework's own runtime uses.

@@ -476,6 +476,61 @@ describe('the static build under a base', () => {
   });
 });
 
+// 出力に入ったモジュール。ソースマップの sources が名指すもの
+const modulesIn = (dir: string): string[] =>
+  readdirSync(dir, { recursive: true, withFileTypes: true })
+    .filter((entry) => entry.isFile() && entry.name.endsWith('.map'))
+    .flatMap(
+      (entry) =>
+        (
+          JSON.parse(
+            readFileSync(path.join(entry.parentPath, entry.name), 'utf8'),
+          ) as { sources: string[] }
+        ).sources,
+    );
+
+// React Compiler が変換したモジュールの import する先
+const COMPILER_RUNTIME = /\/react-compiler-runtime\.production\.js$/u;
+
+describe('the static build with reactCompiler', () => {
+  // vite.compiler.config.ts が書く、環境ごとの出力
+  const built = (name: string): string =>
+    path.join(root, 'dist', 'compiler', name);
+
+  beforeAll(() => {
+    execFileSync(
+      'pnpm',
+      ['exec', 'vp', 'build', '--config', 'vite.compiler.config.ts'],
+      BUILD,
+    );
+  }, 120_000);
+
+  it('compiles the client components the browser runs', () => {
+    expect(modulesIn(built('client'))).toStrictEqual(
+      expect.arrayContaining([
+        expect.stringMatching(/\/src\/components\/counter\.tsx$/u),
+        expect.stringMatching(COMPILER_RUNTIME),
+      ]),
+    );
+  });
+
+  it('renders the client components into HTML as they are written', () => {
+    const modules = modulesIn(built('ssr'));
+    expect(modules).toContainEqual(
+      expect.stringMatching(/\/src\/components\/counter\.tsx$/u),
+    );
+    expect(modules).not.toContainEqual(expect.stringMatching(COMPILER_RUNTIME));
+  });
+
+  it('leaves the server components as they are written', () => {
+    const modules = modulesIn(built('rsc'));
+    expect(modules).toContainEqual(
+      expect.stringMatching(/\/src\/routes\/page\.tsx$/u),
+    );
+    expect(modules).not.toContainEqual(expect.stringMatching(COMPILER_RUNTIME));
+  });
+});
+
 // 書かれたファイルごとの中身のハッシュ
 const filesIn = (dir: string): Map<string, string> =>
   new Map(

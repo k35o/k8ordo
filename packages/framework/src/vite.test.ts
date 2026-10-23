@@ -1,3 +1,5 @@
+import { readFile } from 'node:fs/promises';
+
 import { describe, expect, it } from 'vite-plus/test';
 
 import { framework } from './vite';
@@ -65,6 +67,44 @@ describe('framework', () => {
     // @ts-expect-error a mode is one of the two names, spelt as they are
     expect(() => framework({ mode: 'Static' })).toThrow(
       "framework() needs mode: 'static' or 'server', and got 'Static'",
+    );
+  });
+});
+
+type Manifest = {
+  readonly peerDependencies?: Readonly<Record<string, string>>;
+  readonly peerDependenciesMeta?: Readonly<
+    Record<string, { readonly optional?: boolean }>
+  >;
+};
+
+const manifestAt = async (url: URL): Promise<Manifest> =>
+  JSON.parse(await readFile(url, 'utf8')) as Manifest;
+
+// peer の宣言のうち、名前の 1 つ分
+const peerOf = (manifest: Manifest, name: string): unknown => ({
+  range: manifest.peerDependencies?.[name],
+  meta: manifest.peerDependenciesMeta?.[name],
+});
+
+describe('reactCompiler', () => {
+  it.each(['static', 'server'] as const)(
+    'turns React Compiler on under mode: %s',
+    (mode) => {
+      expect(pluginNames({ mode, reactCompiler: true })).toContain(
+        'vite:react-compiler',
+      );
+    },
+  );
+
+  it('declares oxc-transform-react with the range @vitejs/plugin-react asks', async () => {
+    const ours = await manifestAt(new URL('../package.json', import.meta.url));
+    // ./package.json は exports に無いので、入口から辿る
+    const pluginReact = await manifestAt(
+      new URL('../package.json', import.meta.resolve('@vitejs/plugin-react')),
+    );
+    expect(peerOf(ours, 'oxc-transform-react')).toStrictEqual(
+      peerOf(pluginReact, 'oxc-transform-react'),
     );
   });
 });

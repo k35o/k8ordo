@@ -58,6 +58,12 @@
       "automerge": false
     },
     {
+      "description": "oxc-transform-react の 0.x の minor は @vitejs/plugin-react の peer の範囲を越える。plugin-react は patch でもその peer を動かす (6.1.2 で ^0.145.0 から ^0.152.0)。片方だけが上がって自動マージされないよう、patch も含めて 1 本の PR にまとめ、@k8ordo/framework の peer と changeset を手で直す",
+      "matchPackageNames": ["oxc-transform-react", "@vitejs/plugin-react"],
+      "groupName": "React Compiler peer dependencies",
+      "automerge": false
+    },
+    {
       "description": "Playwright 1.64 の Firefox (r1553〜r1560) は子フレームの文書にもフォーカスのエミュレーションを広げ、iframe から親へフォーカスが移らない (microsoft/playwright#43280)。フォーカスを持った iframe を外すと、次の iframe での最初の focus() も届かない。vitest はテストファイルごとに iframe を作り直すので ui の Firefox のテストが落ちる。r1562 で元に戻されたので、1.64 だけを飛ばして次の minor を待つ",
       "matchPackageNames": ["playwright"],
       "allowedVersions": "!/^1\\.64\\./"
