@@ -33,8 +33,8 @@ export const entriesList = [
     en: '`@k8ordo/framework/serve`: `serve()`, which runs a build on Node.js. A server mode build’s `dist/server.js` calls it, and a server of your own can too. A static mode build it serves the way a static host does.',
   }),
   message({
-    ja: '`@k8ordo/framework/vercel`：ビルドをVercel向けに書き出すプラグイン`vercel()`です。どちらのモードでも使えます。',
-    en: '`@k8ordo/framework/vercel`: `vercel()`, the plugin that writes the build for Vercel, in either mode.',
+    ja: '`@k8ordo/framework/vercel`：ビルドをVercel向けに書き出すプラグイン`vercel()`と、そのオプションの型`VercelOptions`と`VercelRoute`です。どちらのモードでも使えます。',
+    en: '`@k8ordo/framework/vercel`: `vercel()`, the plugin that writes the build for Vercel, in either mode, and the types of its options, `VercelOptions` and `VercelRoute`.',
   }),
   message({
     ja: '`@k8ordo/framework/generated`：生成される`.k8ordo/`のファイルだけがimportする型と関数です。手で書くコードからはimportしません。',
@@ -462,6 +462,16 @@ export const vercelSummary = message({
   en: 'A plugin that has `vite build` also write `.vercel/output/` in the shape of Vercel’s Build Output API (v3). Put it beside `framework()`, in either mode.',
 });
 
+export const vercelBeforeFiles = message({
+  ja: 'staticモードだけ。どのファイルよりも先に当てる、アプリのルートです。VercelのBuild Output APIのルートを渡したまま書きます。使えるのは`src`と`dest`、`status`、`headers`、`continue`、`check`、`caseSensitive`、`has`です。全ページのヘッダーや、ファイルより先に当てたいリダイレクトと書き換えに使います。',
+  en: 'Static mode only. Routes of the application’s own, tried before any file: routes of Vercel’s Build Output API (`src`, `dest`, `status`, `headers`, `continue`, `check`, `caseSensitive`, `has`), written as given. For headers on every page, and a redirect or a rewrite that has to win over a file.',
+});
+
+export const vercelBeforeNotFound = message({
+  ja: 'staticモードだけ。ファイルにもシェルにも当たらなかったURLに、`404.html`より先に当てるアプリのルートです。形は`beforeFiles`と同じです。外のオリジンへの中継や、本文の違う404に使います。',
+  en: 'Static mode only. Routes of the application’s own, tried once neither a file nor a shell answered, before `404.html`, in the same shape as `beforeFiles`. For a proxy to another origin, or a 404 of another body.',
+});
+
 export const vercelReturns = message({
   ja: 'Viteのプラグイン。',
   en: 'A Vite plugin.',
@@ -475,5 +485,17 @@ export const vercelCaveats = [
   message({
     ja: 'staticモードでは関数を作りません。書き出したファイルと、ビルドしていない値をシェルに書き換えるルートだけを書きます。Vercelは`_redirects`を読みません。',
     en: 'Under static mode there is no function: only the written files, and routes that rewrite a value the build did not write to its shell. Vercel does not read `_redirects`.',
+  }),
+  message({
+    ja: '`beforeFiles`と`beforeNotFound`のルートを当てるのはVercelだけです。`vite dev`と`vite preview`、`serve()`には当てません。serverモードで渡すと、ビルドがエラーになります。',
+    en: 'Only Vercel applies the routes in `beforeFiles` and `beforeNotFound`: `vite dev`, `vite preview` and `serve()` do not. Under server mode, the build refuses them.',
+  }),
+  message({
+    ja: 'Vercelは`src`をパス名の全体に当てます。`^/posts/`は`/posts/first`に当たらないので、`^/posts/.+$`と書きます。',
+    en: 'Vercel matches `src` against the whole pathname: `^/posts/` does not match `/posts/first`, so write `^/posts/.+$`.',
+  }),
+  message({
+    ja: '`has`のヘッダーの`key`は小文字で書きます。Vercelは小文字で比べるので、ほかの書き方は`vercel()`を呼んだ時点でエラーになります。ほかは検査しないので、間違いはデプロイして初めて分かります。',
+    en: 'Write a `has` header’s `key` in lowercase, as Vercel compares it; another spelling is refused when `vercel()` is called. Nothing else is checked, so a mistake shows once deployed.',
   }),
 ] as const;

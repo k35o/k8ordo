@@ -315,6 +315,36 @@ export const vercelRedirectsFix = message({
   en: 'Add `vercel()` from `@k8ordo/framework/vercel` beside `framework()`.',
 });
 
+export const vercelRoutesServerTitle = message({
+  ja: "`vercel() takes beforeFiles and beforeNotFound under mode: 'static' only`",
+  en: "`vercel() takes beforeFiles and beforeNotFound under mode: 'static' only`",
+});
+
+export const vercelRoutesServerCause = message({
+  ja: 'serverモードのアプリが、`vercel()`に`beforeFiles`か`beforeNotFound`を渡しました。serverモードでは、ファイルの無いURLにはどれもハンドラが答えるので、ルートを置く場所がありません。',
+  en: 'A server mode application handed `vercel()` `beforeFiles` or `beforeNotFound`. Under server mode the handler answers every URL no file names, so there is nowhere for the routes to go.',
+});
+
+export const vercelRoutesServerFix = message({
+  ja: 'オプションを外し、返すものを`guard.ts`や`route.ts`で決めます。',
+  en: 'Remove the options, and decide what is sent in a `guard.ts` or a `route.ts`.',
+});
+
+export const vercelHeaderKeyTitle = message({
+  ja: '`vercel() route … has the header key "…" — write it lowercase`',
+  en: '`vercel() route … has the header key "…" — write it lowercase`',
+});
+
+export const vercelHeaderKeyCause = message({
+  ja: '`vercel()`に渡したルートの`has`が、大文字を含むヘッダーの`key`（`Accept`など）を持っています。Vercelはヘッダーの名前を小文字で比べるので、そのままでは当たらないおそれがあります。',
+  en: 'A route handed to `vercel()` has a `has` header whose `key` holds a capital letter, such as `Accept`. Vercel compares header names in lowercase, so it may never match.',
+});
+
+export const vercelHeaderKeyFix = message({
+  ja: '`key`を小文字（`accept`）で書きます。',
+  en: 'Write the `key` in lowercase: `accept`.',
+});
+
 export const shellHtmlTitle = message({
   ja: '`… has "!fallback" in its HTML`',
   en: '`… has "!fallback" in its HTML`',

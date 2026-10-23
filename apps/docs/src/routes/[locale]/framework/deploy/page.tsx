@@ -73,6 +73,68 @@ export default defineConfig({
   plugins: [framework({ mode: 'static' }), vercel()],
 });`;
 
+const VERCEL_ROUTES = `import { framework } from '@k8ordo/framework/vite';
+import { vercel } from '@k8ordo/framework/vercel';
+import { defineConfig } from 'vite';
+
+const acceptsMarkdown = [
+  { type: 'header', key: 'accept', value: '.*text/markdown.*' },
+] as const;
+
+export default defineConfig({
+  plugins: [
+    framework({ mode: 'static' }),
+    vercel({
+      beforeFiles: [
+        {
+          src: '^/.*$',
+          headers: { 'X-Content-Type-Options': 'nosniff' },
+          continue: true,
+        },
+        {
+          src: '^/((?:[^/]+/)*[^/]+)/$',
+          status: 308,
+          headers: { Location: '/$1' },
+        },
+        {
+          src: '^/posts/([a-z0-9-]+)$',
+          has: acceptsMarkdown,
+          dest: '/posts/$1/article.md',
+          check: true,
+          caseSensitive: true,
+        },
+        {
+          src: '^/feed$',
+          headers: { 'Vercel-CDN-Cache-Control': 'max-age=3600' },
+          continue: true,
+          caseSensitive: true,
+        },
+      ],
+      beforeNotFound: [
+        {
+          src: '^/feed$',
+          dest: 'https://api.example.com/feed',
+          caseSensitive: true,
+        },
+        {
+          src: '^/.*$',
+          has: acceptsMarkdown,
+          dest: '/not-found.md',
+          status: 404,
+        },
+      ],
+    }),
+  ],
+});`;
+
+const VERCEL_ROUTES_ORDER = `...beforeFiles
+{ handle: 'filesystem' }
+...rewrites
+...beforeNotFound
+{ src: '^/.*$', dest: '/404.html', status: 404 }
+{ handle: 'hit' }
+{ src: …, headers: { … }, continue: true }`;
+
 const PREVIEW = `vite build
 vite preview`;
 
@@ -275,6 +337,30 @@ export default function FrameworkDeployPage() {
           <p>
             <Rich>{t.staticVercelWarn()}</Rich>
           </p>
+        </DocSubsection>
+        <DocSubsection id="vercel-routes" title={t.vercelRoutesTitle}>
+          <p>
+            <Rich>{t.vercelRoutesLead()}</Rich>
+          </p>
+          <CodeBlock
+            callouts={{
+              2: t.vercelRoutesFilesCallout(),
+              3: t.vercelRoutesRewritesCallout(),
+              5: t.vercelRoutesNotFoundCallout(),
+              7: t.vercelRoutesAssetsCallout(),
+            }}
+            code={VERCEL_ROUTES_ORDER}
+            lang="text"
+          />
+          <Items items={t.vercelRoutesPlaces} />
+          <CodeBlock code={VERCEL_ROUTES} lang="ts" title="vite.config.ts" />
+          <Items items={t.vercelRoutesExample} />
+          <Pitfall>
+            <p>
+              <Rich>{t.vercelRoutesLocal()}</Rich>
+            </p>
+          </Pitfall>
+          <Items items={t.vercelRoutesMind} />
         </DocSubsection>
         <DocSubsection id="other-hosts" title={t.otherHostsTitle}>
           <p>
