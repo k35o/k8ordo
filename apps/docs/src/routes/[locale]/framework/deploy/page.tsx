@@ -133,7 +133,7 @@ const VERCEL_ROUTES_ORDER = `...beforeFiles
 ...beforeNotFound
 { src: '^/.*$', dest: '/404.html', status: 404 }
 { handle: 'hit' }
-{ src: …, headers: { … }, continue: true }`;
+{ src: '^/assets/.+$', headers: { … }, continue: true }`;
 
 const PREVIEW = `vite build
 vite preview`;

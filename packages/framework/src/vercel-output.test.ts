@@ -27,6 +27,21 @@ type Entry = {
   readonly default: { readonly fetch: (request: Request) => Promise<Response> };
 };
 
+type Route = {
+  readonly src?: string;
+  readonly dest?: string;
+  readonly status?: number;
+  readonly handle?: string;
+  readonly caseSensitive?: boolean;
+};
+
+/** Vercel は src をパスの全体に当て、caseSensitive が無ければ大文字と小文字を区別しない */
+const matches = (route: Route | undefined, pathname: string): boolean =>
+  new RegExp(
+    `^(?:${route?.src ?? ''})$`,
+    route?.caseSensitive === true ? '' : 'i',
+  ).test(pathname);
+
 let root: string;
 let output: string;
 
@@ -111,9 +126,10 @@ describe('writeVercelOutput', () => {
         { src: '^/.*$', dest: '/handler' },
         { handle: 'hit' },
         {
-          src: '^\\/assets\\/',
+          src: '^\\/assets\\/.+$',
           headers: { 'cache-control': 'public, max-age=31536000, immutable' },
           continue: true,
+          important: true,
         },
       ],
     });
@@ -155,6 +171,7 @@ describe('writeVercelOutput', () => {
 
 describe('writeVercelOutput under a base', () => {
   let under: string;
+  let routes: readonly Route[];
 
   // base を '/site/' にしたビルド。client/ の中身はその下で配られる
   beforeAll(async () => {
@@ -177,6 +194,12 @@ describe('writeVercelOutput under a base', () => {
       },
       '/site.v2/',
     );
+    ({ routes } = JSON.parse(
+      await readFile(
+        path.join(under, '.vercel', 'output', 'config.json'),
+        'utf8',
+      ),
+    ) as { routes: readonly Route[] });
   });
 
   afterAll(async () => {
@@ -190,24 +213,19 @@ describe('writeVercelOutput under a base', () => {
     expect(files).toStrictEqual(['app-abc123.js']);
   });
 
-  it('marks the hashed files under the base immutable, reading the base literally', async () => {
-    const config = JSON.parse(
-      await readFile(
-        path.join(under, '.vercel', 'output', 'config.json'),
-        'utf8',
-      ),
-    ) as { routes: Array<{ src?: string }> };
-    expect(config.routes.at(-1)?.src).toBe('^\\/site\\.v2\\/assets\\/');
+  it('marks a file under assets/ below the base immutable, matching its whole path as Vercel does', () => {
+    expect(matches(routes.at(-1), '/site.v2/assets/app-abc123.js')).toBe(true);
+  });
+
+  it.each([
+    '/site.v2/assets/',
+    '/site.v2/en/assets/app-abc123.js',
+    '/siteXv2/assets/app-abc123.js',
+    '/assets/app-abc123.js',
+  ])('never marks %s immutable', (pathname) => {
+    expect(matches(routes.at(-1), pathname)).toBe(false);
   });
 });
-
-type Route = {
-  readonly src?: string;
-  readonly dest?: string;
-  readonly status?: number;
-  readonly handle?: string;
-  readonly caseSensitive?: boolean;
-};
 
 /** ファイルの後の書き換えの経路のうち、最初に合うものの宛先 */
 const destOf = (routes: readonly Route[], pathname: string) =>
@@ -216,11 +234,7 @@ const destOf = (routes: readonly Route[], pathname: string) =>
       routes.findIndex((route) => route.handle === 'filesystem') + 1,
       routes.findIndex((route) => route.handle === 'hit'),
     )
-    .find((route) =>
-      new RegExp(route.src ?? '', route.caseSensitive === true ? '' : 'i').test(
-        pathname,
-      ),
-    ) ?? null;
+    .find((route) => matches(route, pathname)) ?? null;
 
 describe('writeStaticVercelOutput', () => {
   let built: string;
@@ -373,9 +387,10 @@ describe('writeStaticVercelOutput', () => {
 
     expect(routes.at(-2)).toStrictEqual({ handle: 'hit' });
     expect(routes.at(-1)).toStrictEqual({
-      src: '^\\/assets\\/',
+      src: '^\\/assets\\/.+$',
       headers: { 'cache-control': 'public, max-age=31536000, immutable' },
       continue: true,
+      important: true,
     });
   });
 
@@ -454,12 +469,28 @@ describe('writeStaticVercelOutput', () => {
       { src: '^/.*$', dest: '/404.html', status: 404 },
       { handle: 'hit' },
       {
-        src: '^\\/assets\\/',
+        src: '^\\/assets\\/.+$',
         headers: { 'cache-control': 'public, max-age=31536000, immutable' },
         continue: true,
+        important: true,
       },
     ]);
   });
+
+  it('marks a file under assets/ immutable, matching its whole path as Vercel does', async () => {
+    const routes = await writeStatic('/', true);
+
+    expect(matches(routes.at(-1), '/assets/app-abc123.js')).toBe(true);
+  });
+
+  it.each(['/assets/', '/en/assets/app-abc123.js', '/index.html'])(
+    'never marks %s immutable',
+    async (pathname) => {
+      const routes = await writeStatic('/', true);
+
+      expect(matches(routes.at(-1), pathname)).toBe(false);
+    },
+  );
 
   it('puts the client build, the rewrites and 404.html under the base', async () => {
     const routes = await writeStatic('/site/', true);
@@ -516,4 +547,19 @@ describe('writeStaticVercelOutput', () => {
 
     expect(config).not.toHaveProperty('overrides');
   });
+
+  it('marks a file under assets/ below the base immutable, matching its whole path as Vercel does', async () => {
+    const routes = await writeStatic('/site/', true);
+
+    expect(matches(routes.at(-1), '/site/assets/app-abc123.js')).toBe(true);
+  });
+
+  it.each(['/site/assets/', '/assets/app-abc123.js'])(
+    'never marks %s immutable below the base',
+    async (pathname) => {
+      const routes = await writeStatic('/site/', true);
+
+      expect(matches(routes.at(-1), pathname)).toBe(false);
+    },
+  );
 });

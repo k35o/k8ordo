@@ -118,9 +118,10 @@ describe('vercel', () => {
       },
       { handle: 'hit' },
       {
-        src: '^\\/assets\\/',
+        src: '^\\/assets\\/.+$',
         headers: { 'cache-control': 'public, max-age=31536000, immutable' },
         continue: true,
+        important: true,
       },
     ]);
   });
