@@ -40,6 +40,14 @@
     - framework-client-reference-hints
     - framework-i18n-register
     - release-1-0-framework
+"@k8ordo/framework@1.1.0":
+  dir: packages/framework
+  intents:
+    - framework-csp-report-to
+    - framework-react-compiler
+    - framework-vercel-content-types
+    - framework-vercel-immutable-assets
+    - framework-vercel-routes
 "@k8ordo/i18n@1.0.0":
   dir: packages/i18n
   intents:
@@ -200,6 +208,11 @@
     - wide-panes-split
     - wide-tools-shop
     - writing-mode-first-render
+"@k8ordo/ui@2.2.0":
+  dir: packages/ui
+  intents:
+    - openui-1
+    - tree-flat-items
 docs@0.0.11:
   dir: apps/docs
   intents:
