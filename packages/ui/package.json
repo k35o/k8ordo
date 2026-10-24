@@ -104,7 +104,7 @@
   },
   "dependencies": {
     "clsx": "2.1.1",
-    "lucide-react": "1.52.0",
+    "lucide-react": "1.58.0",
     "server-only": "catalog:",
     "shiki": "4.5.0"
   },
@@ -113,7 +113,7 @@
     "@better-css-modules/cli": "catalog:",
     "@better-css-modules/core": "catalog:",
     "@better-css-modules/vite": "catalog:",
-    "@chromatic-com/storybook": "5.4.0",
+    "@chromatic-com/storybook": "5.5.1",
     "@json-render/core": "catalog:",
     "@json-render/react": "catalog:",
     "@k8ordo/form": "workspace:^",

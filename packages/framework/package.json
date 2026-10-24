@@ -70,7 +70,7 @@
   },
   "dependencies": {
     "@vitejs/plugin-react": "catalog:",
-    "@vitejs/plugin-rsc": "0.5.36",
+    "@vitejs/plugin-rsc": "0.5.38",
     "compressible": "2.0.18",
     "fresh": "2.0.0",
     "mime-types": "3.0.2",
