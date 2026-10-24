@@ -93,7 +93,7 @@ export const frameworkCaveats = [
   }),
   message({
     ja: "`csp`に`<meta>`では効かないディレクティブか`'strict-dynamic'`を渡すと、`framework()`を呼んだ時点で`the \"csp\" option cannot go into a page's <meta> as it is`のエラーになります。",
-    en: "When `csp` holds a directive a `<meta>` ignores, or `'strict-dynamic'`, `framework()` fails as soon as it is called, with the error `the \"csp\" option cannot go into a page's <meta> as it is`.",
+    en: "When `csp` holds a directive that works only from a header, or `'strict-dynamic'`, `framework()` fails as soon as it is called, with the error `the \"csp\" option cannot go into a page's <meta> as it is`.",
   }),
 ] as const;
 

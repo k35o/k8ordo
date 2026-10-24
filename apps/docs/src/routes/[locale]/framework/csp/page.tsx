@@ -136,6 +136,12 @@ export default function FrameworkCspPage() {
           <p>
             <Rich>{t.refusedMeta()}</Rich>
           </p>
+          <p>
+            <Rich>{t.refusedReportTo()}</Rich>
+          </p>
+          <p>
+            <Rich>{t.refusedHeaderScripts()}</Rich>
+          </p>
           <Pitfall>
             <p>
               <Rich>{t.refusedWhen()}</Rich>
