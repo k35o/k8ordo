@@ -60,12 +60,17 @@ const FUNCTION = 'handler';
 
 /**
  * The hashed assets are marked immutable in the `hit` phase — only once a
- * file answered — so a missing one is never cached for a year.
+ * file answered — so a missing one is never cached for a year. `src` spells
+ * out the rest of the path, since Vercel matches it against the whole path
+ * and a prefix alone matches no file; `important`, as `@vercel/next` marks
+ * its own hashed files, keeps another route's `Cache-Control` from taking
+ * its place.
  */
 const immutableAssets = (base: string) => ({
-  src: `^${RegExp.escape(`${base}assets/`)}`,
+  src: `^${RegExp.escape(`${base}assets/`)}.+$`,
   headers: { 'cache-control': 'public, max-age=31536000, immutable' },
   continue: true,
+  important: true,
 });
 
 /** Files first, and whatever names none goes to the handler. */
