@@ -1,5 +1,13 @@
 # @k8ordo/ui
 
+## 2.2.0
+
+### Minor Changes
+
+- `@openuidev/lang-core`と`@openuidev/react-lang`のpeerの範囲を、0.3系から1系（`^1.0.0`）に移しました。OpenUI Lang 1.0は1つのアクションを`Action([...])`で包まずに書くなど、プロンプトと描画の両方が0.x系と食い違うので、2つのパッケージを一緒に1系へ上げ、プロンプトを生成するサーバー側もそろえてください。`@k8ordo/ui/openui`と`@k8ordo/ui/openui/prompt`の使い方は変わりません。
+
+- `Tree`の項目を入れ子にせず、見えている項目を1つの平らな一覧で描くようにしました。階層は`aria-level`、兄弟の中の位置は`aria-posinset`と`aria-setsize`で伝えます。これまでは開いた親の`treeitem`が子の`group`まで含んでいたので、axe-core 4.14から既定で有効になった`label-content-name-mismatch`が、子の項目の文字も親のラベルに数えて違反にしていました。`role="group"`は描かなくなったので、テストで`group`を引いている場合は`aria-level`で確かめてください。
+
 ## 2.1.0
 
 ### Minor Changes
